@@ -1,4 +1,4 @@
-import type { RefObject } from 'react';
+import type { ElementRef } from '../lib/teact/teact';
 import { useEffect } from '../lib/teact/teact';
 
 import { requestMutation } from '../lib/fasterdom/fasterdom';
@@ -9,7 +9,7 @@ const FOCUS_DELAY_MS = 500;
 const MODAL_HIDE_DELAY_MS = 300;
 
 export default function useInputFocusOnOpen(
-  inputRef: RefObject<HTMLInputElement | HTMLTextAreaElement>,
+  inputRef: ElementRef<HTMLInputElement | HTMLTextAreaElement>,
   isOpen?: boolean,
   onClose?: NoneToVoidFunction,
 ) {

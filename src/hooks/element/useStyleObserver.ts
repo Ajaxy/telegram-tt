@@ -1,3 +1,4 @@
+import type { ElementRef } from '../../lib/teact/teact';
 import { useEffect, useLayoutEffect, useState } from '../../lib/teact/teact';
 
 import useLastCallback from '../useLastCallback';
@@ -9,7 +10,7 @@ const UPDATE_DEBOUNCE = 50; // ms
  * @param property animateable property
  */
 export default function useStyleObserver(
-  ref: React.RefObject<HTMLElement>,
+  ref: ElementRef<HTMLElement>,
   property: string,
   debounce = UPDATE_DEBOUNCE,
   isDisabled?: boolean,

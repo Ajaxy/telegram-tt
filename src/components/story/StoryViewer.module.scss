@@ -538,7 +538,7 @@
 
 .captionInner {
   position: relative;
-  word-break: break-word;
+  overflow-wrap: anywhere;
   white-space: pre-wrap;
   line-height: 1.25rem;
   text-align: initial;

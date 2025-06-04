@@ -21,7 +21,6 @@ import { StoryViewerOrigin } from '../../../types';
 
 import {
   groupStatefulContent,
-  isUserId,
   isUserOnline,
 } from '../../../global/helpers';
 import { getIsChatMuted } from '../../../global/helpers/notifications';
@@ -51,6 +50,7 @@ import {
 } from '../../../global/selectors';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
+import { isUserId } from '../../../util/entities/ids';
 import { createLocationHash } from '../../../util/routing';
 
 import useSelectorSignal from '../../../hooks/data/useSelectorSignal';

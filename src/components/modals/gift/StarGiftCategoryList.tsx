@@ -28,8 +28,7 @@ const StarGiftCategoryList = ({
   onCategoryChanged,
   areLimitedStarGiftsDisallowed,
 }: StateProps & OwnProps) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const lang = useLang();
   const starCategories: number[] | undefined = useMemo(() => idsByCategory && Object.keys(idsByCategory)

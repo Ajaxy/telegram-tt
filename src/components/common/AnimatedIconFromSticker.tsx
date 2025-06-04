@@ -33,7 +33,7 @@ function AnimatedIconFromSticker(props: OwnProps) {
       tgsUrl={tgsUrl}
       previewUrl={previewBlobUrl}
       thumbDataUri={thumbDataUri}
-      // eslint-disable-next-line react/jsx-props-no-spreading
+
       {...otherProps}
     />
   );

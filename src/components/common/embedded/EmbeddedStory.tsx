@@ -47,8 +47,7 @@ const EmbeddedStory: FC<OwnProps> = ({
 
   const lang = useOldLang();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
   const isIntersecting = useIsIntersecting(ref, observeIntersectionForLoading);
   const isFullStory = story && 'content' in story;
   const isExpiredStory = story && 'isDeleted' in story;

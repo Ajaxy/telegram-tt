@@ -4,9 +4,9 @@ import { getActions } from '../../global';
 import type { ApiPeer } from '../../api/types';
 import { StoryViewerOrigin } from '../../types';
 
-import { isUserId } from '../../global/helpers';
 import { getPeerTitle } from '../../global/helpers/peers';
 import buildClassName from '../../util/buildClassName';
+import { isUserId } from '../../util/entities/ids';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
@@ -34,8 +34,7 @@ function StoryRibbonButton({ peer, isArchived }: OwnProps) {
   } = getActions();
 
   const lang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const isSelf = 'isSelf' in peer && peer.isSelf;
   const isChannel = !isUserId(peer.id);

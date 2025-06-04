@@ -11,7 +11,6 @@ const GiftRecipientPickerAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const GiftRecipientPicker = useModuleLoader(Bundles.Stars, 'GiftRecipientPicker', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return GiftRecipientPicker ? <GiftRecipientPicker {...props} /> : undefined;
 };
 

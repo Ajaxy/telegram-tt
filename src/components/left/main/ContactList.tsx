@@ -76,7 +76,7 @@ const ContactList: FC<OwnProps & StateProps> = ({
           <ListItem
             key={id}
             className="chat-item-clickable contact-list-item"
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => handleClick(id)}
           >
             <PrivateChatInfo

@@ -13,7 +13,7 @@
     "stylelint-high-performance-animation",
     "stylelint-group-selectors",
     "stylelint-selector-tag-no-without-class",
-    "./dev/wholePixel.js"
+    "./dev/wholePixel.mjs"
   ],
   "rules": {
     "property-no-unknown": [

@@ -46,8 +46,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
     openChatWithInfo,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const lang = useOldLang();
 
@@ -119,7 +118,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
             })}
           </div>
         )}
-        {canRenderContents && filteredFoundIds?.length && (
+        {canRenderContents && Boolean(filteredFoundIds?.length) && (
           <div className="search-section">
             <h3 className="section-heading">{lang('SearchAppsPopular')}</h3>
             {filteredFoundIds.map((id) => {

@@ -12,7 +12,6 @@ import Loading from '../ui/Loading';
 const ArchivedChatsAsync: FC<OwnProps> = (props) => {
   const ArchivedChats = useModuleLoader(Bundles.Extra, 'ArchivedChats');
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return ArchivedChats ? <ArchivedChats {...props} /> : <Loading />;
 };
 

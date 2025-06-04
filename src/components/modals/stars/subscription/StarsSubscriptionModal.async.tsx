@@ -11,7 +11,6 @@ const StarsSubscriptionModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const StarsSubscriptionModal = useModuleLoader(Bundles.Stars, 'StarsSubscriptionModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return StarsSubscriptionModal ? <StarsSubscriptionModal {...props} /> : undefined;
 };
 

@@ -65,7 +65,7 @@ function AnimatedIconWithPreview(props: OwnProps) {
           onLoad={handlePreviewLoad}
         />
       )}
-      {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+      { }
       <AnimatedIcon {...otherProps} onLoad={handleAnimationReady} />
     </div>
   );

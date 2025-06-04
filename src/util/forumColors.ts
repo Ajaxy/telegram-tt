@@ -6,7 +6,6 @@ import rose from '../assets/icons/forumTopic/rose.svg';
 import violet from '../assets/icons/forumTopic/violet.svg';
 import yellow from '../assets/icons/forumTopic/yellow.svg';
 
-// eslint-disable-next-line max-len
 // https://github.com/telegramdesktop/tdesktop/blob/1aece79a471d99a8b63d826b1bce1f36a04d7293/Telegram/SourceFiles/data/data_forum_topic.cpp#L50
 const TOPIC_MAPPING: Record<number, [string, string]> = {
   0x6FB9F0: [blue, 'blue'],
@@ -22,10 +21,10 @@ export function getTopicColors() {
 }
 
 export function getTopicDefaultIcon(iconColor?: number) {
-  return (iconColor && TOPIC_MAPPING[iconColor as keyof typeof TOPIC_MAPPING][0]) || grey;
+  return (iconColor && TOPIC_MAPPING[iconColor][0]) || grey;
 }
 
 export function getTopicColorCssVariable(iconColor?: number) {
-  const color = (iconColor && TOPIC_MAPPING[iconColor as keyof typeof TOPIC_MAPPING][1]) || 'grey';
+  const color = (iconColor && TOPIC_MAPPING[iconColor][1]) || 'grey';
   return `--color-topic-${color}`;
 }

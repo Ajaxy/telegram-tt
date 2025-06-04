@@ -303,7 +303,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
               leftElement={<Icon name="link" className={`link-status-icon ${getInviteIconClass(invite)}`} />}
               secondaryIcon="more"
               multiline
-              // eslint-disable-next-line react/jsx-no-bind
+
               onClick={() => showInviteInfo(invite)}
               contextActions={prepareContextActions(invite)}
               key={invite.link}
@@ -332,7 +332,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
                 leftElement={<Icon name="link" className={`link-status-icon ${getInviteIconClass(invite)}`} />}
                 secondaryIcon="more"
                 multiline
-                // eslint-disable-next-line react/jsx-no-bind
+
                 onClick={() => showInviteInfo(invite)}
                 contextActions={prepareContextActions(invite)}
                 key={invite.link}

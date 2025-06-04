@@ -41,10 +41,8 @@ const RadialPatternBackground = ({
   clearBottomSector,
   className,
 }: OwnProps) => {
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
+  const canvasRef = useRef<HTMLCanvasElement>();
 
   const [getContainerSize, setContainerSize] = useSignal({ width: 0, height: 0 });
 

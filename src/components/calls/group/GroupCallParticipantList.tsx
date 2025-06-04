@@ -75,9 +75,9 @@ const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
 
 function compareParticipants(a: TypeGroupCallParticipant, b: TypeGroupCallParticipant) {
   return compareFields(!a.isMuted, !b.isMuted)
-        || compareFields(a.presentation, b.presentation)
-        || compareFields(a.video, b.video)
-        || compareFields(a.raiseHandRating, b.raiseHandRating);
+    || compareFields(a.presentation, b.presentation)
+    || compareFields(a.video, b.video)
+    || compareFields(a.raiseHandRating, b.raiseHandRating);
 }
 
 export default memo(withGlobal<OwnProps>(

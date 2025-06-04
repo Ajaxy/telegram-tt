@@ -69,7 +69,7 @@ function StoryViewModal({
   const lang = useOldLang();
 
   const isOpen = Boolean(story);
-  const isExpired = Boolean(story?.date) && (story!.date + viewersExpirePeriod) < getServerTime();
+  const isExpired = Boolean(story?.date) && (story.date + viewersExpirePeriod) < getServerTime();
   const { viewsCount = 0, reactionsCount = 0 } = story?.views || {};
 
   const shouldShowJustContacts = story?.isPublic && viewsCount > STORY_VIEWS_MIN_CONTACTS_FILTER;
@@ -99,7 +99,7 @@ function StoryViewModal({
 
   const placeholderCount = !sortedViews?.length ? Math.min(viewsCount, 8) : 1;
 
-  const notAllAvailable = Boolean(sortedViews?.length) && sortedViews!.length < viewsCount && isExpired;
+  const notAllAvailable = Boolean(sortedViews?.length) && sortedViews.length < viewsCount && isExpired;
 
   const handleLoadMore = useLastCallback(() => {
     if (!story?.id || nextOffset === undefined) return;
@@ -223,7 +223,7 @@ function StoryViewModal({
           })}
           {isLoading && Array.from({ length: placeholderCount }).map((_, i) => (
             <ListItem
-              // eslint-disable-next-line react/no-array-index-key
+
               key={`placeholder-${i}`}
               className="chat-item-clickable contact-list-item scroll-item small-icon"
               disabled

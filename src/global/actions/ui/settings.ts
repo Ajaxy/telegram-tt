@@ -23,7 +23,6 @@ import { selectSharedSettings } from '../../selectors/sharedState';
 let prevGlobal: GlobalState | undefined;
 
 addCallback((global: GlobalState) => {
-  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   const { updatePageTitle, updateShouldDebugExportedSenders, updateShouldEnableDebugLog } = getActions();
 
   const oldGlobal = prevGlobal;

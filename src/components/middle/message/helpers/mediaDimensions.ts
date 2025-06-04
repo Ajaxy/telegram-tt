@@ -27,7 +27,7 @@ export function calculateMediaDimensions({
   asForwarded,
   noAvatars,
   isMobile,
-} : {
+}: {
   media: ApiPhoto | ApiVideo | ApiMediaExtendedPreview;
   messageText?: string;
   isOwn?: boolean;

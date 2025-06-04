@@ -28,7 +28,7 @@ import { selectActiveGroupCall, selectChatGroupCall, selectGroupCall } from '../
 import { fetchChatByUsername, loadFullChat } from '../api/chats';
 
 // This is a tiny MP3 file that is silent - retrieved from https://bigsoundbank.com and then modified
-// eslint-disable-next-line max-len
+// eslint-disable-next-line @stylistic/max-len
 const silentSound = 'data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
 
 let audioElement: HTMLAudioElement | undefined;
@@ -134,7 +134,7 @@ addActionHandler('toggleGroupCallPanel', (global, actions, payload): ActionRetur
 addActionHandler('subscribeToGroupCallUpdates', async (global, actions, payload): Promise<void> => {
   if (selectIsCurrentUserFrozen(global)) return;
 
-  const { subscribed, id } = payload!;
+  const { subscribed, id } = payload;
   const groupCall = selectGroupCall(global, id);
 
   if (!groupCall) return;
@@ -257,7 +257,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload): Promise<void
 
   if (!ARE_CALLS_SUPPORTED) {
     actions.showNotification({
-      message: "Sorry, your browser doesn't support group calls",
+      message: 'Sorry, your browser doesn\'t support group calls',
       tabId,
     });
     return;
@@ -339,7 +339,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload): Promise<void
 });
 
 addActionHandler('playGroupCallSound', (global, actions, payload): ActionReturnType => {
-  const { sound } = payload!;
+  const { sound } = payload;
 
   if (!sounds[sound]) {
     return;

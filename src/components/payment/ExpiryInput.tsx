@@ -15,7 +15,7 @@ export type OwnProps = {
   onChange: (value: string) => void;
 };
 
-const ExpiryInput : FC<OwnProps> = ({ value, error, onChange }) => {
+const ExpiryInput: FC<OwnProps> = ({ value, error, onChange }) => {
   const lang = useOldLang();
 
   const handleChange = useCallback((e) => {

@@ -23,8 +23,7 @@ type OwnProps = {
 const MAX_LINES = 4;
 
 const Blockquote = ({ canBeCollapsible, isToggleDisabled, children }: OwnProps) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLQuoteElement>(null);
+  const ref = useRef<HTMLQuoteElement>();
   const {
     isCollapsed, isCollapsible, setIsCollapsed,
   } = useCollapsibleLines(ref, MAX_LINES, undefined, !canBeCollapsible);

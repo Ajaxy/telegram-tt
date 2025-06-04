@@ -80,7 +80,7 @@ addActionHandler('initApi', (global, actions): ActionReturnType => {
 });
 
 addActionHandler('setAuthPhoneNumber', (global, actions, payload): ActionReturnType => {
-  const { phoneNumber } = payload!;
+  const { phoneNumber } = payload;
 
   void callApi('provideAuthPhoneNumber', phoneNumber.replace(/[^\d]/g, ''));
 
@@ -92,7 +92,7 @@ addActionHandler('setAuthPhoneNumber', (global, actions, payload): ActionReturnT
 });
 
 addActionHandler('setAuthCode', (global, actions, payload): ActionReturnType => {
-  const { code } = payload!;
+  const { code } = payload;
 
   void callApi('provideAuthCode', code);
 
@@ -104,7 +104,7 @@ addActionHandler('setAuthCode', (global, actions, payload): ActionReturnType => 
 });
 
 addActionHandler('setAuthPassword', (global, actions, payload): ActionReturnType => {
-  const { password } = payload!;
+  const { password } = payload;
 
   void callApi('provideAuthPassword', password);
 
@@ -119,7 +119,7 @@ addActionHandler('uploadProfilePhoto', async (global, actions, payload): Promise
   const {
     file, isFallback, isVideo, videoTs, bot,
     tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
   global = updateManagementProgress(global, ManagementProgress.InProgress, tabId);
   setGlobal(global);
@@ -135,7 +135,7 @@ addActionHandler('uploadProfilePhoto', async (global, actions, payload): Promise
 });
 
 addActionHandler('signUp', (global, actions, payload): ActionReturnType => {
-  const { firstName, lastName } = payload!;
+  const { firstName, lastName } = payload;
 
   void callApi('provideAuthRegistration', { firstName, lastName });
 
@@ -261,11 +261,12 @@ addActionHandler('loadNearestCountry', async (global): Promise<void> => {
   setGlobal(global);
 });
 
-addActionHandler('setDeviceToken', (global, actions, deviceToken): ActionReturnType => {
+addActionHandler('setDeviceToken', (global, actions, payload): ActionReturnType => {
+  const { token } = payload;
   return {
     ...global,
     push: {
-      deviceToken,
+      deviceToken: token,
       subscribedAt: Date.now(),
     },
   };
@@ -280,7 +281,7 @@ addActionHandler('deleteDeviceToken', (global): ActionReturnType => {
 
 addActionHandler('lockScreen', async (global): Promise<void> => {
   const sessionJson = JSON.stringify({ ...loadStoredSession(), userId: global.currentUserId });
-  const globalJson = await serializeGlobal(global);
+  const globalJson = serializeGlobal(global);
 
   await encryptSession(sessionJson, globalJson);
   forgetPasscode();

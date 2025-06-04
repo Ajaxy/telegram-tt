@@ -35,8 +35,7 @@ const ReportAdModal = ({
   const lang = useOldLang();
   const isOpen = Boolean(modal);
 
-  // eslint-disable-next-line no-null/no-null
-  const transitionRef = useRef<HTMLDivElement>(null);
+  const transitionRef = useRef<HTMLDivElement>();
 
   const handleOptionClick = useLastCallback((e, option: string) => {
     const { chatId, randomId } = modal!;

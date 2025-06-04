@@ -18,13 +18,13 @@ import {
   STICKER_PICKER_MAX_SHARED_COVERS,
   STICKER_SIZE_PICKER_HEADER,
 } from '../../../config';
-import { isUserId } from '../../../global/helpers';
 import {
   selectChat, selectChatFullInfo, selectIsChatWithSelf, selectIsCurrentUserPremium, selectShouldLoopStickers,
 } from '../../../global/selectors';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
+import { isUserId } from '../../../util/entities/ids';
 import { pickTruthy } from '../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { REM } from '../../common/helpers/mediaDimensions';
@@ -110,12 +110,9 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     removeRecentSticker,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const headerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
+  const headerRef = useRef<HTMLDivElement>();
+  const sharedCanvasRef = useRef<HTMLCanvasElement>();
 
   const {
     handleScroll: handleContentScroll,
@@ -226,7 +223,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
 
   const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
   const shouldRenderContents = areAddedLoaded && canRenderContents
-  && !noPopulatedSets && (canSendStickers || isForEffects);
+    && !noPopulatedSets && (canSendStickers || isForEffects);
 
   useHorizontalScroll(headerRef, !shouldRenderContents || !headerRef.current);
 
@@ -289,7 +286,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           round
           faded={stickerSet.id === RECENT_SYMBOL_SET_ID || stickerSet.id === FAVORITE_SYMBOL_SET_ID}
           color="translucent"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => selectStickerSet(index)}
         >
           {stickerSet.id === RECENT_SYMBOL_SET_ID ? (

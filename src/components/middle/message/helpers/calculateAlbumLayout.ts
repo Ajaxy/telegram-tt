@@ -1,4 +1,3 @@
-/* eslint-disable no-bitwise */
 // Based on
 // https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/ui/grouped_layout.cpp
 // https://github.com/overtake/TelegramSwift/blob/master/Telegram-Mac/GroupedLayout.swift#L83

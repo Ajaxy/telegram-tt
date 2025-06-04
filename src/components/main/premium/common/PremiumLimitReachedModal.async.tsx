@@ -11,7 +11,6 @@ const PremiumLimitReachedModalAsync: FC<OwnProps> = (props) => {
   const { limit } = props;
   const PremiumLimitReachedModal = useModuleLoader(Bundles.Extra, 'PremiumLimitReachedModal', !limit);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return PremiumLimitReachedModal ? <PremiumLimitReachedModal {...props} /> : undefined;
 };
 

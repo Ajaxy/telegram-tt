@@ -79,7 +79,7 @@ const CommentButton: FC<OwnProps> = ({
     return (
       Boolean(recentRepliers?.length) && (
         <div className="recent-repliers" dir={oldLang.isRtl ? 'rtl' : 'ltr'}>
-          {recentRepliers!.map((peer) => (
+          {recentRepliers.map((peer) => (
             <Avatar
               key={peer.id}
               size="small"

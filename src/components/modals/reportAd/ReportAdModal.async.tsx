@@ -11,7 +11,6 @@ const ReportAdModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const ReportAdModal = useModuleLoader(Bundles.Extra, 'ReportAdModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return ReportAdModal ? <ReportAdModal {...props} /> : undefined;
 };
 

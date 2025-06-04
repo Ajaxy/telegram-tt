@@ -22,9 +22,9 @@ import type { IAnchorPosition } from '../../../types';
 import {
   getUserFullName,
   groupStatefulContent,
-  isUserId,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import { isUserId } from '../../../util/entities/ids';
 import { disableScrolling } from '../../../util/scrollLock';
 import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
@@ -226,10 +226,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   const {
     showNotification, openStickerSet, openCustomEmojiSets, loadStickers, openGiftModal,
   } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const menuRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const scrollableRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>();
+  const scrollableRef = useRef<HTMLDivElement>();
   const lang = useOldLang();
   const noReactions = !isPrivate && !enabledReactions;
   const areReactionsPossible = message.areReactionsPossible;
@@ -417,7 +415,7 @@ const MessageContextMenu: FC<OwnProps> = ({
         )}
         {!noReplies && Boolean(repliesThreadInfo?.messagesCount) && (
           <MenuItem icon="replies" onClick={onOpenThread}>
-            {lang('Conversation.ContextViewReplies', repliesThreadInfo!.messagesCount, 'i')}
+            {lang('Conversation.ContextViewReplies', repliesThreadInfo.messagesCount, 'i')}
           </MenuItem>
         )}
         {canEdit && <MenuItem icon="edit" onClick={onEdit}>{lang('Edit')}</MenuItem>}
@@ -438,7 +436,8 @@ const MessageContextMenu: FC<OwnProps> = ({
             icon={option.icon}
             onClick={option.handler}
             withPreventDefaultOnMouseDown
-          >{lang(option.label)}
+          >
+            {lang(option.label)}
           </MenuItem>
         ))}
         {canPin && <MenuItem icon="pin" onClick={onPin}>{lang('DialogPin')}</MenuItem>}

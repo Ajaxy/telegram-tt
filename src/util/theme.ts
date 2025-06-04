@@ -98,7 +98,8 @@ function setPeerColor(n: string, colors: string[], darkColors?: string[]) {
     ));
 
     const lightGradient = `repeating-linear-gradient(-45deg, ${lightGradientColors.join(', ')})`;
-    const darkGradient = darkGradientColors ? `repeating-linear-gradient(-45deg, ${darkGradientColors.join(', ')})`
+    const darkGradient = darkGradientColors
+      ? `repeating-linear-gradient(-45deg, ${darkGradientColors.join(', ')})`
       : undefined;
     setVariable(`color-peer-gradient-${n}`, lightGradient, darkGradient);
   }

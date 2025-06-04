@@ -314,7 +314,7 @@ const BoostModal = ({
           {renderText(
             oldLang(
               'ChannelBoost.Error.BoostTooOftenText',
-              formatShortDuration(lang, boost!.cooldownUntil - getServerTime()),
+              formatShortDuration(lang, boost.cooldownUntil - getServerTime()),
             ),
             ['simple_markdown', 'emoji'],
           )}

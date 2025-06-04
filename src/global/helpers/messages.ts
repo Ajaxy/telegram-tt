@@ -25,13 +25,11 @@ import {
   VERIFICATION_CODES_USER_ID,
   VIDEO_STICKER_MIME_TYPE,
 } from '../../config';
+import { getCleanPeerId, isUserId } from '../../util/entities/ids';
 import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
 import { isLocalMessageId } from '../../util/keys/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { getGlobal } from '../index';
-import {
-  getCleanPeerId, isUserId,
-} from './chats';
 import { getMainUsername } from './users';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
@@ -47,7 +45,6 @@ export function getMessageOriginalId(message: ApiMessage) {
 
 export function getMessageTranscription(message: ApiMessage) {
   const { transcriptionId } = message;
-  // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
   const global = getGlobal();
 
   return transcriptionId && global.transcriptions[transcriptionId]?.text;
@@ -77,7 +74,7 @@ export function getMessageStatefulContent(global: GlobalState, message: ApiMessa
 export function groupStatefulContent({
   poll,
   story,
-} : {
+}: {
   poll?: ApiPoll;
   story?: ApiTypeStory;
 }) {

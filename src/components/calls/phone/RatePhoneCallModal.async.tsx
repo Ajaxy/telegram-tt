@@ -11,7 +11,6 @@ const RatePhoneCallModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const RatePhoneCallModal = useModuleLoader(Bundles.Calls, 'RatePhoneCallModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return RatePhoneCallModal ? <RatePhoneCallModal {...props} /> : undefined;
 };
 

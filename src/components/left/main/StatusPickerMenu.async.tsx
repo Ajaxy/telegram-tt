@@ -11,7 +11,6 @@ const StatusPickerMenuAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const StatusPickerMenu = useModuleLoader(Bundles.Extra, 'StatusPickerMenu', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return StatusPickerMenu ? <StatusPickerMenu {...props} /> : undefined;
 };
 

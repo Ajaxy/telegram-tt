@@ -15,7 +15,7 @@ export default function useEnsureMessage(
   useEffect(() => {
     if (isDisabled) return;
     if (messageId && !message) {
-      loadMessage({ chatId, messageId: messageId!, replyOriginForId: replyOriginForId! });
+      loadMessage({ chatId, messageId: messageId, replyOriginForId: replyOriginForId! });
     }
   }, [isDisabled, chatId, message, messageId, replyOriginForId]);
 }

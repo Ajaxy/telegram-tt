@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import { parseTl } from '../generationHelpers';
 import templateFn from './template';
@@ -10,10 +11,10 @@ export type GenerationType = {
     constructors: Array<string>;
 };
 
-const INPUT_FILE = path.resolve(__dirname, '../static/api.tl');
-const SCHEMA_FILE = path.resolve(__dirname, '../static/schema.tl');
-
-const OUTPUT_FILE = path.resolve(__dirname, '../api.d.ts');
+const DIR_NAME = import.meta.dirname;
+const INPUT_FILE = path.resolve(DIR_NAME, '../static/api.tl');
+const SCHEMA_FILE = path.resolve(DIR_NAME, '../static/schema.tl');
+const OUTPUT_FILE = path.resolve(DIR_NAME, '../api.d.ts');
 
 function main() {
     const tlContent = fs.readFileSync(INPUT_FILE, 'utf-8');

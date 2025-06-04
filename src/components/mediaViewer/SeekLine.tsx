@@ -39,7 +39,7 @@ type OwnProps = {
 };
 
 const LOCK_TIMEOUT = 250;
-let cancelAnimation: Function | undefined;
+let cancelAnimation: ReturnType<typeof animateNumber> | undefined;
 
 const SeekLine: FC<OwnProps> = ({
   duration,
@@ -54,8 +54,7 @@ const SeekLine: FC<OwnProps> = ({
   onSeek,
   onSeekStart,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const seekerRef = useRef<HTMLDivElement>(null);
+  const seekerRef = useRef<HTMLDivElement>();
   const [getCurrentTimeSignal] = useCurrentTimeSignal();
   const [getIsWaiting] = useVideoWaitingSignal();
   const getCurrentTime = useThrottledSignal(getCurrentTimeSignal, LOCK_TIMEOUT);
@@ -65,14 +64,10 @@ const SeekLine: FC<OwnProps> = ({
   const isLockedRef = useRef<boolean>(false);
   const [isPreviewVisible, setPreviewVisible] = useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
-  // eslint-disable-next-line no-null/no-null
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const previewRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const progressRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const previewTimeRef = useRef<HTMLDivElement>(null);
+  const previewCanvasRef = useRef<HTMLCanvasElement>();
+  const previewRef = useRef<HTMLDivElement>();
+  const progressRef = useRef<HTMLDivElement>();
+  const previewTimeRef = useRef<HTMLDivElement>();
 
   const previewSize = useMemo(() => {
     return getPreviewDimensions(posterSize?.width || 0, posterSize?.height || 0);

@@ -1,4 +1,4 @@
-import type { RefObject } from 'react';
+import type { ElementRef } from '../../../../lib/teact/teact';
 import { useEffect, useState } from '../../../../lib/teact/teact';
 import { getGlobal } from '../../../../global';
 
@@ -35,7 +35,7 @@ export default function useMentionTooltip(
   getHtml: Signal<string>,
   setHtml: (html: string) => void,
   getSelectionRange: Signal<Range | undefined>,
-  inputRef: RefObject<HTMLDivElement>,
+  inputRef: ElementRef<HTMLDivElement>,
   groupChatMembers?: ApiChatMember[],
   topInlineBotIds?: string[],
   currentUserId?: string,
@@ -48,7 +48,7 @@ export default function useMentionTooltip(
     const html = getHtml();
     if (!isEnabled || !getSelectionRange()?.collapsed || !html.includes('@')) return undefined;
 
-    const htmlBeforeSelection = getHtmlBeforeSelection(inputRef.current!);
+    const htmlBeforeSelection = getHtmlBeforeSelection(inputRef.current);
 
     return prepareForRegExp(htmlBeforeSelection).match(RE_USERNAME_SEARCH)?.[0].trim();
   }, [isEnabled, getHtml, getSelectionRange, inputRef], THROTTLE);

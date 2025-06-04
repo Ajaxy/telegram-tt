@@ -32,7 +32,7 @@ addActionHandler('setGlobalSearchClosing', (global, actions, payload): ActionRet
 });
 
 addActionHandler('addRecentlyFoundChatId', (global, actions, payload): ActionReturnType => {
-  const { id } = payload!;
+  const { id } = payload;
   const { recentlyFoundChatIds } = global;
 
   if (!recentlyFoundChatIds) {

@@ -15,7 +15,6 @@ export function deepMerge<T extends object>(value1: T, value2: DiffObject<T>): T
     return reduceDiff(value2) as T;
   }
 
-  // eslint-disable-next-line no-underscore-dangle
   if ('__deleteAllChildren' in value2) {
     return {} as T;
   }
@@ -28,8 +27,8 @@ export function deepMerge<T extends object>(value1: T, value2: DiffObject<T>): T
     if (!value2.hasOwnProperty(key)) {
       acc[key] = oldValue;
     } else {
-      const newValue = (value2 as AnyLiteral)[key];
-      // eslint-disable-next-line no-underscore-dangle
+      const newValue = value2[key];
+
       if (!newValue?.__delete) {
         acc[key] = deepMerge(oldValue, newValue);
       }
@@ -40,15 +39,12 @@ export function deepMerge<T extends object>(value1: T, value2: DiffObject<T>): T
 }
 
 function reduceDiff(diff: AnyLiteral) {
-  // eslint-disable-next-line no-underscore-dangle
   if (diff.__deleteAllChildren) {
     return {};
   }
 
   return Object.entries(diff).reduce((acc: AnyLiteral, [key, value]) => {
-    // eslint-disable-next-line no-underscore-dangle
     if (!value?.__delete) {
-      // eslint-disable-next-line no-null/no-null
       acc[key] = isLiteralObject(value) ? reduceDiff(value) : value;
     }
 

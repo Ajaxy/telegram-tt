@@ -1,4 +1,4 @@
-import type { FC } from '../../../lib/teact/teact';
+import type { ElementRef, FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
@@ -29,8 +29,8 @@ type OwnProps = {
   isSelected?: boolean;
   loadAndPlay?: boolean;
   observeIntersection?: ObserveFn;
-  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
-  sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
+  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
+  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   forcePlayback?: boolean;
   onClick: (reaction: ApiReactionWithPaid) => void;
   onContextMenu?: (reaction: ApiReactionWithPaid) => void;
@@ -48,8 +48,7 @@ const ReactionEmoji: FC<OwnProps> = ({
   onClick,
   onContextMenu,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
   const isCustom = reaction.type === 'custom';
   const availableReaction = useMemo(() => (
     availableReactions?.find((available) => isSameReaction(available.reaction, reaction))

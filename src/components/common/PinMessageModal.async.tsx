@@ -11,7 +11,6 @@ const PinMessageModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const PinMessageModal = useModuleLoader(Bundles.Extra, 'PinMessageModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return PinMessageModal ? <PinMessageModal {...props} /> : undefined;
 };
 

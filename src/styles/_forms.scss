@@ -115,7 +115,7 @@
   background-color: var(--color-background);
   outline: none;
   transition: border-color 0.15s ease;
-  word-break: break-word;
+  overflow-wrap: anywhere;
   -webkit-appearance: none;
 
   font-size: 1rem;

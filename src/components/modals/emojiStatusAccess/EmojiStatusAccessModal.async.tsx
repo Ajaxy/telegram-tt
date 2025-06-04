@@ -11,7 +11,6 @@ const EmojiStatusAccessModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const EmojiStatusAccessModal = useModuleLoader(Bundles.Extra, 'EmojiStatusAccessModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return EmojiStatusAccessModal ? <EmojiStatusAccessModal {...props} /> : undefined;
 };
 

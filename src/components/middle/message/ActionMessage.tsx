@@ -138,8 +138,7 @@ const ActionMessage = ({
     markMentionsRead,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const { id, chatId } = message;
   const action = message.content.action!;
@@ -446,7 +445,7 @@ const ActionMessage = ({
       {withServiceReactions && (
         <Reactions
           isOutside
-          message={message!}
+          message={message}
           threadId={threadId}
           observeIntersection={observeIntersectionForPlaying}
           isCurrentUserPremium={isCurrentUserPremium}

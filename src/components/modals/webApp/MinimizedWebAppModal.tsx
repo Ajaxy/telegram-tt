@@ -37,8 +37,7 @@ const MinimizedWebAppModal = ({
 
   const oldLang = useOldLang();
   const lang = useLang();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const openedWebAppsValues = useMemo(() => {
     return openedWebApps && Object.values(openedWebApps);

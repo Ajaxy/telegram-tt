@@ -8,56 +8,56 @@ export type CallableRequest = Api.AnyRequest | Api.MsgsAck | Api.MsgsStateInfo |
 type RequestResponse<T> = T extends { __response: infer R } ? R : void;
 
 export default class RequestState<T extends CallableRequest = CallableRequest> {
-    public containerId?: BigInt.BigInteger;
+  public containerId?: BigInt.BigInteger;
 
-    public msgId?: BigInt.BigInteger;
+  public msgId?: BigInt.BigInteger;
 
-    public request: any;
+  public request: any;
 
-    public data: Buffer;
+  public data: Buffer;
 
-    public after: any;
+  public after: any;
 
-    public result: undefined;
+  public result: undefined;
 
-    public finished: Deferred;
+  public finished: Deferred;
 
-    public promise: Promise<RequestResponse<T> | undefined> | undefined;
+  public promise: Promise<RequestResponse<T> | undefined> | undefined;
 
-    public abortSignal: AbortSignal | undefined;
+  public abortSignal: AbortSignal | undefined;
 
-    public resolve?: (value?: RequestResponse<T>) => void;
+  public resolve?: (value?: RequestResponse<T>) => void;
 
-    public reject?: (reason?: Error) => void;
+  public reject?: (reason?: Error) => void;
 
-    constructor(request: T, abortSignal?: AbortSignal) {
-        this.containerId = undefined;
-        this.msgId = undefined;
-        this.request = request;
-        this.data = request.getBytes();
-        this.after = undefined;
-        this.result = undefined;
-        this.abortSignal = abortSignal;
-        this.finished = new Deferred();
+  constructor(request: T, abortSignal?: AbortSignal) {
+    this.containerId = undefined;
+    this.msgId = undefined;
+    this.request = request;
+    this.data = request.getBytes();
+    this.after = undefined;
+    this.result = undefined;
+    this.abortSignal = abortSignal;
+    this.finished = new Deferred();
 
-        this.resetPromise();
+    this.resetPromise();
+  }
+
+  isReady() {
+    if (!this.after) {
+      return true;
     }
 
-    isReady() {
-        if (!this.after) {
-            return true;
-        }
+    return this.after.finished.promise;
+  }
 
-        return this.after.finished.promise;
-    }
+  resetPromise() {
+    // Prevent stuck await
+    this.reject?.();
 
-    resetPromise() {
-        // Prevent stuck await
-        this.reject?.();
-
-        this.promise = new Promise<RequestResponse<T> | undefined>((resolve, reject) => {
-            this.resolve = resolve;
-            this.reject = reject;
-        });
-    }
+    this.promise = new Promise<RequestResponse<T> | undefined>((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
+    });
+  }
 }

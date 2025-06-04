@@ -1,3 +1,5 @@
+import type {
+  ElementRef } from '../lib/teact/teact';
 import {
   useEffect, useMemo, useRef, useState,
 } from '../lib/teact/teact';
@@ -38,8 +40,7 @@ const useAudioPlayer = (
   noReset = false,
   noHandleEvents = false,
 ) => {
-  // eslint-disable-next-line no-null/no-null
-  const controllerRef = useRef<ReturnType<typeof register>>(null);
+  const controllerRef = useRef<ReturnType<typeof register>>();
 
   const [isPlaying, setIsPlaying] = useState(false);
   let isPlayingSync = isPlaying;
@@ -114,7 +115,7 @@ const useAudioPlayer = (
       handlers?.[eventName]?.(e);
     }, onForcePlay, handleTrackChange);
 
-    const { proxy } = controllerRef.current!;
+    const { proxy } = controllerRef.current;
 
     if (!isPlaying && !proxy.paused) {
       setIsPlaying(true);
@@ -227,7 +228,7 @@ const useAudioPlayer = (
   };
 };
 
-function makeMediaHandlers(controllerRef: React.RefObject<ReturnType<typeof register>>) {
+function makeMediaHandlers(controllerRef: ElementRef<ReturnType<typeof register>>) {
   let mediaHandlers: MediaSessionHandlers = {};
   if (controllerRef && controllerRef.current) {
     const {

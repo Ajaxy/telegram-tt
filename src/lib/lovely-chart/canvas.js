@@ -1,5 +1,5 @@
-import { DPR } from './constants';
-import { createElement } from './minifiers';
+import { DPR } from './constants.js';
+import { createElement } from './minifiers.js';
 
 export function setupCanvas(container, { width, height }) {
   const canvas = createElement('canvas');

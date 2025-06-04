@@ -49,21 +49,21 @@ const SettingsTwoFaEnabled: FC<OwnProps> = ({
       <div className="settings-item">
         <ListItem
           icon="edit"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.TwoFaChangePasswordCurrent })}
         >
           {lang('ChangePassword')}
         </ListItem>
         <ListItem
           icon="password-off"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.TwoFaTurnOff })}
         >
           {lang('TurnPasswordOff')}
         </ListItem>
         <ListItem
           icon="email"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.TwoFaRecoveryEmailCurrentPassword })}
         >
           {lang('SetRecoveryEmail')}

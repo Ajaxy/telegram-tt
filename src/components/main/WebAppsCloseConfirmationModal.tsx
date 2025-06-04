@@ -27,8 +27,7 @@ const WebAppsCloseConfirmationModal: FC<OwnProps> = ({
 
   const [shouldSkipInFuture, setShouldSkipInFuture] = useState(false);
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const onClose = useCallback(() => {
     closeWebAppsCloseConfirmationModal({ shouldSkipInFuture });

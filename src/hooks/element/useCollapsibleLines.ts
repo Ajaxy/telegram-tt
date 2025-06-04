@@ -1,4 +1,5 @@
-import type { RefObject } from 'react';
+import type {
+  ElementRef } from '../../lib/teact/teact';
 import {
   useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
@@ -12,9 +13,9 @@ import useWindowSize from '../window/useWindowSize';
 const WINDOW_RESIZE_LINE_RECALC_DEBOUNCE = 200;
 
 export default function useCollapsibleLines<T extends HTMLElement, C extends HTMLElement>(
-  ref: RefObject<T>,
+  ref: ElementRef<T>,
   maxLinesBeforeCollapse: number,
-  cutoutRef?: RefObject<C>,
+  cutoutRef?: ElementRef<C>,
   isDisabled?: boolean,
 ) {
   const isFirstRenderRef = useRef(true);

@@ -42,8 +42,7 @@ function StoryRibbon({
     'no-scrollbar',
   );
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   useHorizontalScroll(ref, getIsMobile());
 

@@ -1,9 +1,4 @@
-/* eslint-disable eqeqeq */
-/* eslint-disable prefer-template */
 /* eslint-disable prefer-const */
-/* eslint-disable prefer-destructuring */
-/* eslint-disable one-var */
-/* eslint-disable one-var-declaration-per-line */
 
 import { preloadImage } from './files';
 
@@ -171,7 +166,6 @@ export async function getAverageColor(url: string): Promise<[number, number, num
 
   length = data.data.length;
 
-  // eslint-disable-next-line no-cond-assign
   while ((i += blockSize * 4) < length) {
     if (data.data[i + 3] === 0) continue; // Ignore fully transparent pixels
     ++count;
@@ -213,7 +207,6 @@ export function getPatternColor(rgbColor: [number, number, number]) {
   return `#${hex}66`;
 }
 
-/* eslint-disable no-bitwise */
 export const convertToRGBA = (color: number): string => {
   const alpha = (color >> 24) & 0xff;
   const red = (color >> 16) & 0xff;

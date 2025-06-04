@@ -58,10 +58,8 @@ const StarGiftAction = ({
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
 }: OwnProps & StateProps) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const stickerRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
+  const stickerRef = useRef<HTMLDivElement>();
   const lang = useLang();
 
   const { isOutgoing } = message;
@@ -142,7 +140,7 @@ const StarGiftAction = ({
           />
         )}
       </div>
-      {action.gift.availabilityTotal && (
+      {Boolean(action.gift.availabilityTotal) && (
         <GiftRibbon
           color={backgroundColor || 'blue'}
           text={lang('ActionStarGiftLimitedRibbon', {

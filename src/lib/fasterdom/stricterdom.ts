@@ -107,7 +107,6 @@ function setupLayoutDetectors() {
         const nativeMethod = (prototype as any)[method]!;
         nativeMethods.set(`${name}#${method}`, nativeMethod);
 
-        // eslint-disable-next-line func-names
         (prototype as any)[method] = function (...args: any[]) {
           onMeasure(method);
 
@@ -165,7 +164,6 @@ function setupMutationObserver() {
           return;
         }
 
-        // eslint-disable-next-line no-console
         onError(new Error(`Unexpected mutation detected: \`${type === 'attributes' ? attributeName : type}\``));
       });
     }

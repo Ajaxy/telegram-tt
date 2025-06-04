@@ -85,7 +85,7 @@ addActionHandler('loadAuthorizations', async (global): Promise<void> => {
 });
 
 addActionHandler('terminateAuthorization', async (global, actions, payload): Promise<void> => {
-  const { hash } = payload!;
+  const { hash } = payload;
 
   const result = await callApi('terminateAuthorization', hash);
   if (!result) {
@@ -205,7 +205,7 @@ addActionHandler('loadWebAuthorizations', async (global): Promise<void> => {
 });
 
 addActionHandler('terminateWebAuthorization', async (global, actions, payload): Promise<void> => {
-  const { hash } = payload!;
+  const { hash } = payload;
 
   const result = await callApi('terminateWebAuthorization', hash);
   if (!result) {

@@ -21,8 +21,8 @@ export default class PopupManager {
 
   open(url: string) {
     if (this.preOpened) {
-      this.preOpened!.location.href = url;
-      this.preOpened!.focus();
+      this.preOpened.location.href = url;
+      this.preOpened.focus();
       this.preOpened = undefined;
 
       return;

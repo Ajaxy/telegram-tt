@@ -8,11 +8,11 @@
   transition: opacity 350ms !important;
   color: #fff;
 
+  margin-bottom: env(safe-area-inset-bottom);
+
   @media (max-width: 600px) {
     padding: 0 0.5rem 0.5rem;
   }
-
-  margin-bottom: env(safe-area-inset-bottom);
 }
 
 .viewInfo {

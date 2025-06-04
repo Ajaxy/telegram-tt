@@ -1,3 +1,4 @@
+import type { ElementRef } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiPeer, ApiPeerColor } from '../../api/types';
@@ -10,7 +11,7 @@ import EmojiIconBackground from './embedded/EmojiIconBackground';
 import styles from './PeerColorWrapper.module.scss';
 
 interface OwnProps extends React.HTMLAttributes<HTMLDivElement> {
-  ref?: React.RefObject<HTMLDivElement>;
+  ref?: ElementRef<HTMLDivElement>;
   peer?: ApiPeer;
   peerColor?: ApiPeerColor;
   noUserColors?: boolean;
@@ -36,7 +37,7 @@ function PeerColorWrapper({
         peerColor && getApiPeerColorClass(peerColor),
         className,
       )}
-      // eslint-disable-next-line react/jsx-props-no-spreading
+
       {...otherProps}
     >
       {color?.backgroundEmojiId && (

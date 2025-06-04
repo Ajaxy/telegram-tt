@@ -101,7 +101,8 @@ const LockScreen: FC<OwnProps & StateProps> = ({
     return (
       <div className={styles.help}>
         <p>
-          <Link onClick={openSignOutConfirmation}>Log out</Link>{' '}
+          <Link onClick={openSignOutConfirmation}>Log out</Link>
+          {' '}
           if you don&apos;t remember your passcode.
         </p>
         <p>

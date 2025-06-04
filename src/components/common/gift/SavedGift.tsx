@@ -56,8 +56,7 @@ const SavedGift = ({
 }: OwnProps & StateProps) => {
   const { openGiftInfoModal } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const [shouldPlay, play] = useFlag();
 

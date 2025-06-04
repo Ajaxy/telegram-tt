@@ -305,7 +305,6 @@ function renderVideoPreview(blobUrl?: string, imageSize?: ApiDimensions, canDrag
         <div
           style={wrapperStyle}
         >
-          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video
             style={videoStyle}
             className={buildClassName(isProtected && 'is-protected')}

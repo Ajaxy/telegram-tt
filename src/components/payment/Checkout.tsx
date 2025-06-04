@@ -274,7 +274,7 @@ function renderCheckoutItem({
   customIcon,
   onClick,
 }: {
-  title : string | undefined;
+  title: string | undefined;
   label: string | undefined;
   icon?: IconName;
   onClick?: NoneToVoidFunction;

@@ -69,8 +69,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
     requestSimpleWebView,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
   const renderedIsGallery = useCurrentOrPrev(isGallery, shouldRender);
   const {

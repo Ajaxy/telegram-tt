@@ -3,8 +3,7 @@ import { useCallback, useEffect, useRef } from '../lib/teact/teact';
 const useSendWithEnter = (
   onSelect: NoneToVoidFunction,
 ) => {
-  // eslint-disable-next-line no-null/no-null
-  const buttonRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>();
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key !== 'Enter') return;

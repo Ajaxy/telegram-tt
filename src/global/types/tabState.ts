@@ -536,7 +536,7 @@ export type TabState = {
     openedOrderedKeys: string[];
     sessionKeys: string[];
     openedWebApps: Record<string, WebApp>;
-    modalState : WebAppModalStateType;
+    modalState: WebAppModalStateType;
     isModalOpen: boolean;
     isMoreAppsTabActive: boolean;
   };

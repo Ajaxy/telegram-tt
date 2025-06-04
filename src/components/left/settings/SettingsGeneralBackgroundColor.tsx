@@ -1,4 +1,4 @@
-import type { ChangeEvent, MutableRefObject, RefObject } from 'react';
+import type { ChangeEvent } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useRef, useState,
@@ -62,12 +62,9 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
 
   const themeRef = useRef<ThemeKey>();
   themeRef.current = theme;
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const colorPickerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const huePickerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
+  const colorPickerRef = useRef<HTMLDivElement>();
+  const huePickerRef = useRef<HTMLDivElement>();
   const isFirstRunRef = useRef(true);
 
   const [hsb, setHsb] = useState(getInitialHsb(backgroundColor));
@@ -277,8 +274,8 @@ function positions2hsb(
 function drawColor(
   canvas: HTMLCanvasElement,
   hue: number,
-  colorCtxRef: MutableRefObject<CanvasRenderingContext2D | undefined>,
-  rectsRef: RefObject<CanvasRects | undefined>,
+  colorCtxRef: React.RefObject<CanvasRenderingContext2D | undefined>,
+  rectsRef: React.RefObject<CanvasRects | undefined>,
 ) {
   let w: number;
   let h: number;
@@ -337,11 +334,11 @@ function drawHue(canvas: HTMLCanvasElement) {
   for (let x = 0; x < w; x++) {
     const hue = x / (w - 1);
     const rgb = hsb2rgb([hue, 1, 1]);
-    /* eslint-disable prefer-destructuring */
+
     pixels[index++] = rgb[0];
     pixels[index++] = rgb[1];
     pixels[index++] = rgb[2];
-    /* eslint-enable prefer-destructuring */
+
     pixels[index++] = 255;
   }
 

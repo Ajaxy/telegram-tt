@@ -1,18 +1,18 @@
-import { createStateManager } from './StateManager';
-import { createHeader } from './Header';
-import { createAxes } from './Axes';
-import { createMinimap } from './Minimap';
-import { createTooltip } from './Tooltip';
-import { createTools } from './Tools';
-import { createZoomer } from './Zoomer';
-import { createColors } from './skin';
-import { analyzeData } from './data';
-import { setupCanvas, clearCanvas } from './canvas';
-import { preparePoints } from './preparePoints';
-import { createProjection } from './Projection';
-import { drawDatasets } from './drawDatasets';
-import { createElement } from './minifiers';
-import { getFullLabelDate, getLabelDate } from './format';
+import { createStateManager } from './StateManager.js';
+import { createHeader } from './Header.js';
+import { createAxes } from './Axes.js';
+import { createMinimap } from './Minimap.js';
+import { createTooltip } from './Tooltip.js';
+import { createTools } from './Tools.js';
+import { createZoomer } from './Zoomer.js';
+import { createColors } from './skin.js';
+import { analyzeData } from './data.js';
+import { setupCanvas, clearCanvas } from './canvas.js';
+import { preparePoints } from './preparePoints.js';
+import { createProjection } from './Projection.js';
+import { drawDatasets } from './drawDatasets.js';
+import { createElement } from './minifiers.js';
+import { getFullLabelDate, getLabelDate } from './format.js';
 import {
   X_AXIS_HEIGHT,
   GUTTER,
@@ -20,9 +20,9 @@ import {
   PLOT_HEIGHT,
   PLOT_LINE_WIDTH,
   SIMPLIFIER_PLOT_FACTOR,
-} from './constants';
-import { getSimplificationDelta, isDataRange } from './formulas';
-import { debounce } from './utils';
+} from './constants.js';
+import { getSimplificationDelta, isDataRange } from './formulas.js';
+import { debounce } from './utils.js';
 import './styles/index.scss';
 
 function create(container, originalData) {

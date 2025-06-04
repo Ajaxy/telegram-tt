@@ -11,7 +11,6 @@ const SafeLinkModalAsync: FC<OwnProps> = (props) => {
   const { url } = props;
   const SafeLinkModal = useModuleLoader(Bundles.Extra, 'SafeLinkModal', !url);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return SafeLinkModal ? <SafeLinkModal {...props} /> : undefined;
 };
 

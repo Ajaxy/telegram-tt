@@ -103,8 +103,8 @@ export function groupMessages(
             || (lastMessageInSenderGroup
               && 'mainMessage' in lastMessageInSenderGroup
               && lastMessageInSenderGroup.mainMessage?.id === topMessageId))
-          && nextMessage.id !== topMessageId)
-        || (isChatWithSelf && message.forwardInfo?.fromId !== nextMessage.forwardInfo?.fromId)
+            && nextMessage.id !== topMessageId)
+          || (isChatWithSelf && message.forwardInfo?.fromId !== nextMessage.forwardInfo?.fromId)
       ) {
         currentDateGroup.senderGroups.push([]);
       }

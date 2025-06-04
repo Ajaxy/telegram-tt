@@ -22,7 +22,7 @@ import TableAboutModal from '../common/TableAboutModal';
 import styles from './AboutAdsModal.module.scss';
 
 export type OwnProps = {
-  // eslint-disable-next-line react/no-unused-prop-types
+
   modal: TabState['aboutAdsModal'];
 };
 
@@ -33,8 +33,7 @@ type StateProps = {
 const AboutAdsModal = ({ modal, minLevelToRestrictAds }: OwnProps & StateProps) => {
   const { closeAboutAdsModal } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const moreMenuRef = useRef<HTMLButtonElement>(null);
+  const moreMenuRef = useRef<HTMLButtonElement>();
 
   const isOpen = Boolean(modal);
   const renderingModal = useCurrentOrPrev(modal);

@@ -1,4 +1,4 @@
-import type { FC } from '../../../lib/teact/teact';
+import type { ElementRef, FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -16,7 +16,7 @@ export type OwnProps = {
   additionalInfo?: string;
   canReport?: boolean;
   anchor: IAnchorPosition;
-  triggerRef: React.RefObject<HTMLElement>;
+  triggerRef: ElementRef<HTMLElement>;
   shouldSkipAbout?: boolean;
   onItemClick?: NoneToVoidFunction;
   onClose: NoneToVoidFunction;

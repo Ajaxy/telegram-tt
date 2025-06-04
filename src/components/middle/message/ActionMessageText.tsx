@@ -225,7 +225,7 @@ const ActionMessageText = ({
         const topicLink = (
           <Link
             className={styles.topicLink}
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => openThread({ chatId, threadId: topicId })}
           >
             {iconEmojiId ? <CustomEmoji documentId={iconEmojiId} isSelectable />
@@ -247,7 +247,7 @@ const ActionMessageText = ({
         const topicLink = (
           <Link
             className={styles.topicLink}
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => openThread({ chatId, threadId: topicId })}
           >
             {iconEmojiId && iconEmojiId !== DEFAULT_TOPIC_ICON_ID
@@ -267,7 +267,7 @@ const ActionMessageText = ({
         const topicPlaceholderLink = (
           <Link
             className={styles.topicLink}
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => openThread({ chatId, threadId: topicId })}
           >
             {lang('ActionTopicPlaceholder')}
@@ -389,7 +389,7 @@ const ActionMessageText = ({
           const link = sender?.usernames?.length
             && `${TME_LINK_PREFIX + sender.usernames[0].username}/${app.shortName}`;
           const appLink = link
-            // eslint-disable-next-line react/jsx-no-bind
+
             ? <Link onClick={() => openTelegramLink({ url: link })}>{app.title}</Link>
             : lang('ActionBotAppPlaceholder');
           return lang('ActionBotAllowedFromApp', { app: appLink }, { withNodes: true });
@@ -397,8 +397,8 @@ const ActionMessageText = ({
 
         if (!domain) return lang(UNSUPPORTED_LANG_KEY);
 
-        const url = ensureProtocol(domain)!;
-        // eslint-disable-next-line react/jsx-no-bind
+        const url = ensureProtocol(domain);
+
         const link = <Link onClick={() => openUrl({ url })}>{domain}</Link>;
         return lang('ActionBotAllowedFromDomain', { domain: link }, { withNodes: true });
       }

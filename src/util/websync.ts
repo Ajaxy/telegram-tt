@@ -45,7 +45,7 @@ export const forceWebsync = (authed: boolean) => {
         script.src = url + new URLSearchParams({
           authed: Number(authed).toString(),
           version: WEBSYNC_VERSION,
-        });
+        }).toString();
 
         document.body.appendChild(script);
 

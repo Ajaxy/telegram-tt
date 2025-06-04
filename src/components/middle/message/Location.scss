@@ -10,6 +10,8 @@
     transform: translate(-50%, -50%);
     border-radius: 50%;
 
+    animation: accuracy-wave 5s ease-out infinite forwards;
+
     @keyframes accuracy-wave {
       0% {
         transform: translate(-50%, -50%) scale(0);
@@ -20,8 +22,6 @@
         background-color: transparent;
       }
     }
-
-    animation: accuracy-wave 5s ease-out infinite forwards;
   }
 
   @keyframes fade-in {

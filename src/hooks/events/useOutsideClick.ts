@@ -1,9 +1,11 @@
+import type { ElementRef } from '../../lib/teact/teact';
 import { useEffect } from '../../lib/teact/teact';
 
 import useLastCallback from '../useLastCallback';
 
+// Fragile
 export function useClickOutside(
-  refs: React.RefObject<HTMLElement>[], callback: (event: MouseEvent) => void,
+  refs: ElementRef<HTMLElement>[], callback: (event: MouseEvent) => void,
 ) {
   const handleClickOutside = useLastCallback((event: MouseEvent) => {
     const clickedOutside = refs.every((ref) => {

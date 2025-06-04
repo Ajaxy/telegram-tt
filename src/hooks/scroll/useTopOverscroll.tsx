@@ -1,3 +1,4 @@
+import type { ElementRef } from '../../lib/teact/teact';
 import React, { useEffect, useRef } from '../../lib/teact/teact';
 
 import { forceMutation, requestMutation } from '../../lib/fasterdom/fasterdom';
@@ -11,13 +12,12 @@ const TRIGGER_HEIGHT = 1;
 const INERTIA_THRESHOLD = 100;
 
 export default function useTopOverscroll(
-  containerRef: React.RefObject<HTMLDivElement>,
+  containerRef: ElementRef<HTMLDivElement>,
   onOverscroll?: AnyToVoidFunction,
   onReset?: AnyToVoidFunction,
   isDisabled?: boolean,
 ) {
-  // eslint-disable-next-line no-null/no-null
-  const overscrollTriggerRef = useRef<HTMLDivElement>(null);
+  const overscrollTriggerRef = useRef<HTMLDivElement>();
 
   const isTriggerJustEnabled = useRef(false);
   const lastScrollTopRef = useRef(0);

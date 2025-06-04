@@ -13,13 +13,11 @@ export function renderMessageSummaryHtml(
   const global = getGlobal();
   const emoji = getMessageSummaryEmoji(message);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
-  const text = renderMessageText(
-    { message, shouldRenderAsHtml: true },
-  )?.join('');
+  const text = (renderMessageText({ message, shouldRenderAsHtml: true }) as string[])?.join('');
 
   const statefulContent = getMessageStatefulContent(global, message);
 
-  const description = getMessageSummaryDescription(lang, message, statefulContent, text, true);
+  const description = getMessageSummaryDescription(lang, message, statefulContent, text, true) as string;
 
   return `${emojiWithSpace}${description}`;
 }

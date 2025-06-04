@@ -37,8 +37,7 @@ const PaymentInfo: FC<OwnProps> = ({
   countryList,
   dispatch,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const selectCountryRef = useRef<HTMLSelectElement>(null);
+  const selectCountryRef = useRef<HTMLSelectElement>();
 
   useEffect(() => {
     if (selectCountryRef.current

@@ -1,4 +1,4 @@
-import type { RefObject } from 'react';
+import type { ElementRef } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { MessageListType } from '../../../types';
@@ -15,7 +15,7 @@ const INTERSECTION_THROTTLE_FOR_MEDIA = IS_ANDROID ? 1000 : 350;
 
 export default function useMessageObservers(
   type: MessageListType,
-  containerRef: RefObject<HTMLDivElement>,
+  containerRef: ElementRef<HTMLDivElement>,
   memoFirstUnreadIdRef: { current: number | undefined },
   onIntersectPinnedMessage: OnIntersectPinnedMessage,
   chatId: string,

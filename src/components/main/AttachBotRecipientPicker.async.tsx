@@ -13,7 +13,6 @@ const AttachBotRecipientPickerAsync: FC<OwnProps> = (props) => {
     Bundles.Extra, 'AttachBotRecipientPicker', !requestedAttachBotInChat,
   );
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return AttachBotRecipientPicker ? <AttachBotRecipientPicker {...props} /> : undefined;
 };
 

@@ -135,8 +135,7 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
     return optionalProps.selectedId ? [optionalProps.selectedId] : MEMO_EMPTY_ARRAY;
   }, [allowMultiple, optionalProps.selectedId, optionalProps.selectedIds]);
 
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>();
   const shouldMinimize = selectedIds.length > MAX_FULL_ITEMS;
 
   useEffect(() => {
@@ -246,7 +245,12 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
 
     const peerOrCategory = peer || category;
     if (!peerOrCategory) {
-      if (DEBUG) return <div key={id}>No peer or category with ID {id}</div>;
+      if (DEBUG) return (
+        <div key={id}>
+          No peer or category with ID
+          {id}
+        </div>
+      );
       return undefined;
     }
 
@@ -320,9 +324,9 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
         ripple
         inputElement={getInputElement()}
         inputPosition="end"
-        // eslint-disable-next-line react/jsx-no-bind
+
         onClick={() => handleItemClick(id)}
-        // eslint-disable-next-line react/jsx-no-bind
+
         onDisabledClick={onDisabledClick && (() => onDisabledClick(id, isAlwaysSelected))}
       />
     );

@@ -15,7 +15,7 @@ import type {
 import type { IAnchorPosition } from '../../../../types';
 import { MAIN_THREAD_ID } from '../../../../api/types';
 
-import { getReactionKey, getStoryKey, isUserId } from '../../../../global/helpers';
+import { getReactionKey, getStoryKey } from '../../../../global/helpers';
 import {
   selectChat,
   selectChatFullInfo,
@@ -26,6 +26,7 @@ import {
   selectTabState,
 } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
+import { isUserId } from '../../../../util/entities/ids';
 import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
 import { REM } from '../../../common/helpers/mediaDimensions';
 import { buildCustomEmojiHtml } from '../../composer/helpers/customEmoji';
@@ -88,8 +89,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
   const renderedStoryPeerId = useCurrentOrPrev(story?.peerId, true);
   const renderedStoryId = useCurrentOrPrev(story?.id);
   const storedPosition = useCurrentOrPrev(position, true);
-  // eslint-disable-next-line no-null/no-null
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>();
   const renderingPosition = useMemo((): IAnchorPosition | undefined => {
     if (!storedPosition) {
       return undefined;

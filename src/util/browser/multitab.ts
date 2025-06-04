@@ -1,4 +1,3 @@
-/* eslint-disable eslint-multitab-tt/set-global-only-variable */
 import { onFullyIdle } from '../../lib/teact/teact';
 import { addCallback } from '../../lib/teact/teactn';
 import { getActions, getGlobal, setGlobal } from '../../global';
@@ -233,6 +232,7 @@ export function handleMessage({ data }: { data: BroadcastChannelMessage }) {
       // @ts-ignore
       data.global.DEBUG_randomId = oldGlobal.DEBUG_randomId;
       currentGlobal = data.global;
+      // eslint-disable-next-line tt-multitab/set-global-only-variable
       setGlobal(data.global);
       if (resolveGlobalPromise) {
         resolveGlobalPromise();

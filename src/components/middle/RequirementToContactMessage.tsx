@@ -19,7 +19,7 @@ import Button from '../ui/Button';
 import styles from './RequirementToContactMessage.module.scss';
 
 type OwnProps = {
-  // eslint-disable-next-line react/no-unused-prop-types
+
   userId: string;
   paidMessagesStars?: number;
 };
@@ -36,7 +36,9 @@ function RequirementToContactMessage({ patternColor, userName, paidMessagesStars
 
   const handleOpenPremiumModal = useLastCallback(() => openPremiumModal());
 
-  const handleGetMoreStars = useLastCallback(() => { openStarsBalanceModal({}); });
+  const handleGetMoreStars = useLastCallback(() => {
+    openStarsBalanceModal({});
+  });
 
   return (
     <div className={styles.root}>

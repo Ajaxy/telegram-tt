@@ -64,8 +64,7 @@ const SimilarChannels = ({
   const [isShowing, markShowing, markNotShowing] = useFlag(false);
   const [isHiding, markHiding, markNotHiding] = useFlag(false);
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const ignoreAutoScrollRef = useRef(false);
   const similarChannels = useMemo(() => {
@@ -84,8 +83,8 @@ const SimilarChannels = ({
   const isAnimating = isHiding || isShowing;
   const shouldRenderChannels = Boolean(
     !shouldRenderSkeleton
-      && (isExpanded || isAnimating)
-      && areSimilarChannelsPresent,
+    && (isExpanded || isAnimating)
+    && areSimilarChannelsPresent,
   );
 
   useHorizontalScroll(ref, !shouldRenderChannels, true);
@@ -211,7 +210,8 @@ function SimilarChannel({ channel }: { channel: ApiChat }) {
       <Avatar className={styles.avatar} key={channel.id} size="large" peer={channel} />
       <div style={`background: ${color}`} className={styles.badge}>
         <Icon name="user-filled" className={styles.icon} />
-        <span className={styles.membersCount}>{formatIntegerCompact(lang, channel?.membersCount || 0)}
+        <span className={styles.membersCount}>
+          {formatIntegerCompact(lang, channel?.membersCount || 0)}
         </span>
       </div>
       <span className={styles.channelTitle}>{channel.title}</span>

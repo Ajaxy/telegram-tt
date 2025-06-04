@@ -27,7 +27,7 @@ export function getMessageSummaryText(
   const emoji = !noEmoji && getMessageSummaryEmoji(message);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
   const text = trimText(getMessageTextWithSpoilers(message, statefulContent), truncateLength);
-  const description = getMessageSummaryDescription(lang, message, statefulContent, text, isExtended);
+  const description = getMessageSummaryDescription(lang, message, statefulContent, text, isExtended) as string;
 
   return `${emojiWithSpace}${description}`;
 }
@@ -209,9 +209,9 @@ function getSummaryDescription(
 
   if (text) {
     if (isExtended && summary && !hasUsedTruncatedText) {
-      summary += `\n${truncatedText}`;
+      (summary as string) += `\n${truncatedText as string}`;
     } else {
-      summary = truncatedText;
+      summary = truncatedText as string;
     }
   }
 

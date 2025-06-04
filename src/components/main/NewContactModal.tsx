@@ -51,8 +51,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
   const lang = useOldLang();
   const renderingUser = useCurrentOrPrev(user);
   const renderingIsByPhoneNumber = useCurrentOrPrev(isByPhoneNumber);
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>();
 
   const [isShown, markIsShown, unmarkIsShown] = useFlag();
   const [firstName, setFirstName] = useState<string>(renderingUser?.firstName ?? '');
@@ -73,7 +72,9 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (!IS_TOUCH_ENV && isShown) {
-      setTimeout(() => { inputRef.current?.focus(); }, ANIMATION_DURATION);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, ANIMATION_DURATION);
     }
   }, [isShown]);
 

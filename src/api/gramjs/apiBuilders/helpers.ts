@@ -16,7 +16,7 @@ export function bytesToDataUri(bytes: Buffer, shouldOmitPrefix = false, mimeType
   return `${prefix}${btoa(String.fromCharCode(...bytes))}`;
 }
 
-export function omitVirtualClassFields<T extends GramJs.VirtualClass<T> & { flags?: any }>(
+export function omitVirtualClassFields<T extends GramJs.VirtualClass<T> & { flags?: unknown }>(
   instance: T,
 ): OmitVirtualFields<T> {
   const {

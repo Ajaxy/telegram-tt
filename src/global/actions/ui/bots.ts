@@ -100,7 +100,7 @@ addActionHandler('closeWebAppModal', (global, actions, payload): ActionReturnTyp
   const { shouldSkipConfirmation, tabId = getCurrentTabId() } = payload || {};
 
   const shouldShowConfirmation = !shouldSkipConfirmation
-  && !selectSharedSettings(global).shouldSkipWebAppCloseConfirmation && hasOpenedMoreThanOneWebApps(global, tabId);
+    && !selectSharedSettings(global).shouldSkipWebAppCloseConfirmation && hasOpenedMoreThanOneWebApps(global, tabId);
 
   if (shouldShowConfirmation) {
     actions.openWebAppsCloseConfirmationModal({ tabId });
@@ -170,9 +170,9 @@ addActionHandler('markBotTrusted', (global, actions, payload): ActionReturnType 
   const tabState = selectTabState(global, tabId);
   if (tabState.botTrustRequest?.onConfirm) {
     const { action, payload: callbackPayload } = tabState.botTrustRequest.onConfirm;
-    // @ts-ignore
+    // @ts-expect-error -- No idea how to type this properly
     actions[action]({
-      ...(callbackPayload as {}),
+      ...(callbackPayload),
       isWriteAllowed,
     });
   }

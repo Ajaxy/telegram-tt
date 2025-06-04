@@ -54,8 +54,7 @@ const UserBirthday = ({
   isInSettings,
 }: OwnProps & StateProps) => {
   const { openGiftModal, requestConfetti } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
   const animationPlayedRef = useRef(false);
   const [isPlayingAnimation, playAnimation, stopAnimation] = useFlag();
 

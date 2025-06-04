@@ -7,7 +7,7 @@ import { getTranslationFn, type LangFn } from '../../util/localization';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { selectChat, selectPeer, selectUser } from '../selectors';
 import { getGlobal } from '..';
-import { getChatTitle, isUserId } from './chats';
+import { getChatTitle } from './chats';
 import { getUserFirstOrLastName, getUserFullName } from './users';
 
 export function isApiPeerChat(peer: ApiPeer): peer is ApiChat {
@@ -22,7 +22,7 @@ export function filterPeersByQuery({
   ids,
   query,
   type = 'peer',
-} : {
+}: {
   ids: string[];
   query: string | undefined;
   type?: 'chat' | 'user' | 'peer';
@@ -111,7 +111,7 @@ export function getPeerFullTitle(lang: OldLangFn | LangFn, peer: ApiPeer | Custo
 }
 
 export function getMessageSenderName(lang: OldLangFn, chatId: string, sender?: ApiPeer) {
-  if (!sender || isUserId(chatId)) {
+  if (!sender) {
     return undefined;
   }
 

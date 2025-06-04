@@ -1,5 +1,4 @@
-import type { RefObject } from 'react';
-import type { FC } from '../../../lib/teact/teact';
+import type { ElementRef, FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
@@ -19,7 +18,7 @@ import styles from './StatusPickerMenu.module.scss';
 
 export type OwnProps = {
   isOpen: boolean;
-  statusButtonRef: RefObject<HTMLButtonElement>;
+  statusButtonRef: ElementRef<HTMLButtonElement>;
   onEmojiStatusSelect: (emojiStatus: ApiSticker) => void;
   onClose: () => void;
 };

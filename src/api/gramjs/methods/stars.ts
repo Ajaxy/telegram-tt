@@ -57,7 +57,7 @@ export async function fetchSavedStarGifts({
 }) {
   type GetSavedStarGiftsParams = ConstructorParameters<typeof GramJs.payments.GetSavedStarGifts>[0];
 
-  const params : GetSavedStarGiftsParams = {
+  const params: GetSavedStarGiftsParams = {
     peer: buildInputPeer(peer.id, peer.accessHash),
     offset,
     limit,

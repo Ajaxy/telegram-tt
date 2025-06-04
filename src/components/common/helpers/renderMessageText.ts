@@ -32,7 +32,7 @@ export function renderMessageText({
   isForMediaViewer,
   threadId,
   maxTimestamp,
-} : {
+}: {
   message: ApiMessage | ApiSponsoredMessage;
   highlight?: string;
   emojiSize?: number;

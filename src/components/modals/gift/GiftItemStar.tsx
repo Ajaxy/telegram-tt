@@ -30,8 +30,7 @@ const GIFT_STICKER_SIZE = 90;
 function GiftItemStar({ gift, observeIntersection, onClick }: OwnProps) {
   const { openGiftInfoModal } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const lang = useLang();
   const [shouldPlay, play] = useFlag();

@@ -3,7 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiStory, ApiTypeStory } from '../../api/types';
+import type { ApiTypeStory } from '../../api/types';
 
 import { getStoryMediaHash } from '../../global/helpers';
 import { selectChat, selectPinnedStories } from '../../global/selectors';
@@ -47,8 +47,7 @@ function MediaStory({
   } = getActions();
 
   const lang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const getTriggerElement = useLastCallback(() => containerRef.current);
   const getRootElement = useLastCallback(() => document.body);
@@ -59,9 +58,9 @@ function MediaStory({
   const isFullyLoaded = story && 'content' in story;
   const isOwn = isFullyLoaded && story.isOut;
   const isDeleted = story && 'isDeleted' in story;
-  const video = isFullyLoaded ? (story as ApiStory).content.video : undefined;
+  const video = isFullyLoaded ? (story).content.video : undefined;
   const duration = video && formatMediaDuration(video.duration);
-  const imageHash = isFullyLoaded ? getStoryMediaHash(story as ApiStory) : undefined;
+  const imageHash = isFullyLoaded ? getStoryMediaHash(story) : undefined;
   const imgBlobUrl = useMedia(imageHash);
   const thumbUrl = imgBlobUrl || video?.thumbnail?.dataUri;
 

@@ -123,12 +123,9 @@ const MiddleSearch: FC<StateProps> = ({
     loadSavedReactionTags,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLInputElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
+  const inputRef = useRef<HTMLInputElement>();
+  const containerRef = useRef<HTMLDivElement>();
   const shouldCancelSearchRef = useRef(false);
 
   const { isMobile } = useAppLayout();
@@ -697,7 +694,7 @@ const MiddleSearch: FC<StateProps> = ({
               round
               size="smaller"
               color="translucent"
-              // eslint-disable-next-line react/jsx-no-bind
+
               onClick={() => openHistoryCalendar({ selectedAt: getDayStartAt(Date.now()) })}
               ariaLabel={oldLang('JumpToDate')}
             >
@@ -713,7 +710,7 @@ const MiddleSearch: FC<StateProps> = ({
             round
             size="smaller"
             color="translucent"
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => openHistoryCalendar({ selectedAt: getDayStartAt(Date.now()) })}
             ariaLabel={oldLang('JumpToDate')}
           >

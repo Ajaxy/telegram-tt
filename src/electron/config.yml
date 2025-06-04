@@ -2,7 +2,7 @@ productName: Telegram A
 artifactName: ${productName}-${arch}.${ext}
 appId: org.telegram.TelegramA
 extraMetadata:
-  main: ./dist/electron.js
+  main: ./dist/electron.cjs
   productName: Telegram A
 files:
   - "dist"
@@ -44,10 +44,7 @@ mac:
       - arm64
   entitlements: public/electron-entitlements.mac.plist
   icon: public/icon-electron-macos.icns
-  notarize:
-    teamId: Y54Z4K69Z9
 dmg:
-  title: Telegram A installer
   background: public/background-electron-dmg.tiff
   iconSize: 100
   contents:

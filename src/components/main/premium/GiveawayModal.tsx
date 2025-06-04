@@ -124,8 +124,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   isStarsGiftEnabled,
   starsGiftOptions,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>();
   const {
     closeGiveawayModal, openInvoice, openPremiumModal,
     launchPrepaidGiveaway, launchPrepaidStarsGiveaway,
@@ -182,7 +181,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   const isPremiumGiveaway = selectedGiveawayOption === 'premium_giveaway';
   const isStarsGiveaway = selectedGiveawayOption === 'stars_giveaway';
   const selectedUserCount = isPremiumGiveaway
-  && !selectedUserIds.length ? selectedRandomUserCount : selectedUserIds.length;
+    && !selectedUserIds.length ? selectedRandomUserCount : selectedUserIds.length;
   const boostQuantity = selectedUserCount * giveawayBoostPerPremiumLimit;
   const boostStarsQuantity = selectedStarOption?.yearlyBoosts;
 
@@ -490,7 +489,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
             isGiveaway
             key={gift.months}
             option={gift}
-            fullMonthlyAmount={fullMonthlyAmount!}
+            fullMonthlyAmount={fullMonthlyAmount}
             checked={gift.months === selectedMonthOption}
             onChange={setSelectedMonthOption}
           />
@@ -558,7 +557,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
                 ripple
                 key={channelId}
                 className="chat-item-clickable contact-list-item"
-                /* eslint-disable-next-line react/jsx-no-bind */
+
                 onClick={() => deleteParticipantsHandler(channelId)}
                 rightElement={(<Icon name="close" className={styles.removeChannel} />)}
               >

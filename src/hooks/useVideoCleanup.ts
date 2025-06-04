@@ -1,12 +1,14 @@
-import type { RefObject } from 'react';
 import { resolveEventType } from '../lib/teact/dom-events';
+import type { ElementRef } from '../lib/teact/teact';
 import { onFullyIdle, useLayoutEffect } from '../lib/teact/teact';
 
 import unloadVideo from '../util/browser/unloadVideo';
 import { useStateRef } from './useStateRef';
 
 // Fix memory leak when unmounting video element
-export default function useVideoCleanup(videoRef: RefObject<HTMLVideoElement>, handlers?: Record<string, AnyFunction>) {
+export default function useVideoCleanup(
+  videoRef: ElementRef<HTMLVideoElement>, handlers?: Record<string, AnyFunction>,
+) {
   const handlersRef = useStateRef(handlers);
 
   useLayoutEffect(() => {

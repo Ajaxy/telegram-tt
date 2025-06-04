@@ -15,7 +15,7 @@ import type { Signal } from '../../util/signals';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { EDITABLE_STORY_INPUT_CSS_SELECTOR, EDITABLE_STORY_INPUT_ID } from '../../config';
-import { isChatChannel, isUserId } from '../../global/helpers';
+import { isChatChannel } from '../../global/helpers';
 import { getPeerTitle } from '../../global/helpers/peers';
 import {
   selectChat,
@@ -34,6 +34,7 @@ import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { formatMediaDuration, formatRelativePastTime } from '../../util/dates/dateFormat';
 import download from '../../util/download';
+import { isUserId } from '../../util/entities/ids';
 import { formatStarsAsIcon } from '../../util/localization/format';
 import { round } from '../../util/math';
 import { getServerTime } from '../../util/serverTime';
@@ -78,7 +79,7 @@ interface OwnProps {
   peerId: string;
   storyId: number;
   dimensions: IDimensions;
-  // eslint-disable-next-line react/no-unused-prop-types
+
   isDeleteModalOpen?: boolean;
   isPrivateStories?: boolean;
   isArchivedStories?: boolean;
@@ -171,8 +172,7 @@ function Story({
   const [isPausedBySpacebar, setIsPausedBySpacebar] = useState(false);
   const [isPausedByLongPress, markIsPausedByLongPress, unmarkIsPausedByLongPress] = useFlag(false);
   const [isDropdownMenuOpen, markDropdownMenuOpen, unmarkDropdownMenuOpen] = useFlag(false);
-  // eslint-disable-next-line no-null/no-null
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement>();
   const {
     isDeletedStory,
     hasText,
@@ -206,7 +206,7 @@ function Story({
     true,
   );
   const areViewsExpired = Boolean(
-    isOut && (story!.date + viewersExpirePeriod) < getServerTime(),
+    isOut && (story.date + viewersExpirePeriod) < getServerTime(),
   );
 
   const forwardSenderTitle = forwardSender ? getPeerTitle(oldLang, forwardSender)
@@ -751,7 +751,8 @@ function Story({
                 icon="delete"
                 destructive
                 onClick={handleDeleteStoryClick}
-              >{oldLang('Delete')}
+              >
+                {oldLang('Delete')}
               </MenuItem>
             )}
           </DropdownMenu>

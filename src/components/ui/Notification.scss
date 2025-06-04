@@ -31,7 +31,7 @@
 
   .content {
     line-height: 1.25;
-    word-break: break-word;
+    overflow-wrap: anywhere;
     font-size: 0.9375rem;
     flex-grow: 1;
   }

@@ -1,5 +1,5 @@
-import { getMaxMin } from './utils';
-import { statsFormatDay, statsFormatDayHour, statsFormatText, statsFormatMin } from './format';
+import { getMaxMin } from './utils.js';
+import { statsFormatDay, statsFormatDayHour, statsFormatText, statsFormatMin } from './format.js';
 
 export function analyzeData(data) {
   const { title, labelFormatter, tooltipFormatter, isStacked, isPercentage, isCurrency, currencyRate, hasSecondYAxis, onZoom, minimapRange, hideCaption, zoomOutLabel } = data;

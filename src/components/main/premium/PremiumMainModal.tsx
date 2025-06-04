@@ -132,8 +132,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   monthsAmount,
   premiumPromoOrder,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>();
   const {
     closePremiumModal, openInvoice, requestConfetti, openTelegramLink, loadStickers, openStickerSet,
   } = getActions();
@@ -291,7 +290,8 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
       ) : undefined;
       const link = (
         <span className={styles.stickerSetLink} onClick={handleOpenStatusSet}>
-          {emoji}{renderText(fromUserStatusSet.title)}
+          {emoji}
+          {renderText(fromUserStatusSet.title)}
         </span>
       );
       return [renderText(first), link, renderText(second)];
@@ -369,7 +369,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
               size="smaller"
               className={styles.closeButton}
               color="translucent"
-              // eslint-disable-next-line react/jsx-no-bind
+
               onClick={() => closePremiumModal()}
               ariaLabel={oldLang('Close')}
             >

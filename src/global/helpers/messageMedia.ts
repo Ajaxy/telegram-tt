@@ -59,7 +59,7 @@ export function hasMessageMedia(message: MediaContainer) {
 
 export function canEditMedia(message: MediaContainer) {
   const {
-    photo, video, altVideos, audio, document, text, webPage, ...otherMedia
+    video, ...otherMedia
   } = message.content;
 
   return !video?.isRound && !Object.keys(otherMedia).length;
@@ -223,7 +223,7 @@ export function buildStaticMapHash(
     long, lat, accessHash, accuracyRadius,
   } = geo;
 
-  // eslint-disable-next-line max-len
+  // eslint-disable-next-line @stylistic/max-len
   return `staticMap:${accessHash}?lat=${lat}&long=${long}&w=${width}&h=${height}&zoom=${zoom}&scale=${scale}&accuracyRadius=${accuracyRadius}`;
 }
 
@@ -549,7 +549,7 @@ export function getMediaTransferState(
 export function getMessageContentIds(
   messages: Record<number, ApiMessage>, messageIds: number[], contentType: ApiMessageSearchType | 'inlineMedia',
 ) {
-  let validator: Function;
+  let validator: (message: ApiMessage) => unknown;
 
   switch (contentType) {
     case 'media':

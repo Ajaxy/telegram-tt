@@ -13,12 +13,12 @@ import useSyncEffect from '../useSyncEffect';
   b) Return a signal instead of forcing a component update right away.
  */
 
-type Selector<T extends unknown> = (global: GlobalState) => T;
+type Selector<T> = (global: GlobalState) => T;
 
-interface State<T extends unknown> {
+interface State<T> {
   clientsCount: number;
   getter: Signal<T>;
-  setter: SignalSetter;
+  setter: SignalSetter<T>;
 }
 
 const bySelector = new Map<Selector<unknown>, State<unknown>>();
@@ -29,12 +29,12 @@ addCallback((global: GlobalState) => {
   }
 });
 
-function useSelectorSignal<T extends unknown>(selector: Selector<T>): Signal<T> {
-  let state = bySelector.get(selector);
+function useSelectorSignal<T>(selector: Selector<T>): Signal<T> {
+  let state = bySelector.get(selector) as State<T> | undefined;
   if (!state) {
     const [getter, setter] = createSignal(selector(getGlobal()));
     state = { clientsCount: 0, getter, setter };
-    bySelector.set(selector, state);
+    bySelector.set(selector, state as State<unknown>);
   }
 
   useSyncEffect(() => {
@@ -51,7 +51,7 @@ function useSelectorSignal<T extends unknown>(selector: Selector<T>): Signal<T> 
     };
   }, [selector]);
 
-  return state.getter as Signal<T>;
+  return state.getter;
 }
 
 export default useSelectorSignal;

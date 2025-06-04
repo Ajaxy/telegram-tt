@@ -159,7 +159,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
     }
 
     return renderText(
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       `Do you want to make **${linkedGroup.title}** the discussion board for **${chat!.title}**?\n\nAnyone from the channel will be able to see messages in this group.`,
       ['br', 'simple_markdown'],
     );
@@ -219,7 +219,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
                 key={id}
                 teactOrderKey={i + 1}
                 className="chat-item-clickable scroll-item"
-                // eslint-disable-next-line react/jsx-no-bind
+
                 onClick={() => {
                   onDiscussionClick(id);
                 }}

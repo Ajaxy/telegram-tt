@@ -47,8 +47,7 @@ const Draggable: FC<OwnProps> = ({
   isDisabled,
 }) => {
   const lang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const [state, setState] = useState<DraggableState>({
     isDragging: false,

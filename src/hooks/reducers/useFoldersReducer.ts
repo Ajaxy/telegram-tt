@@ -206,7 +206,7 @@ const foldersReducer: StateReducer<FoldersState, FoldersActions> = (
         return state;
       }
     case 'editFolder': {
-      const { id: folderId, description, ...folder } = action.payload;
+      const { id: folderId, ...folder } = action.payload;
 
       return {
         mode: 'edit',

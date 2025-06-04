@@ -98,7 +98,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   addRecentCustomEmoji,
   ...menuPositionOptions
 }) => {
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<SymbolMenuTabs>(SymbolMenuTabs.Emoji);
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
   const [recentCustomEmojis, setRecentCustomEmojis] = useState<string[]>([]);
   const { isMobile } = useAppLayout();
@@ -327,7 +327,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCloseOnBackdrop={!IS_TOUCH_ENV}
       noCompact
-      // eslint-disable-next-line react/jsx-props-no-spreading
+
       {...(isAttachmentModal ? menuPositionOptions : {
         positionX: 'left',
         positionY: 'bottom',

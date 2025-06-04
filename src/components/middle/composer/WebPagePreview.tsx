@@ -73,8 +73,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
 
   const formattedTextWithLinkRef = useRef<ApiFormattedText>();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const isInvertedMedia = attachmentSettings.isInvertedMedia;
   const isSmallerMedia = attachmentSettings.webPageMediaSize === 'small';
@@ -180,12 +179,12 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
         <>
           {
             isInvertedMedia ? (
-              // eslint-disable-next-line react/jsx-no-bind
+
               <MenuItem icon="move-caption-up" onClick={() => updateIsInvertedMedia(undefined)}>
                 {lang('PreviewSender.MoveTextUp')}
               </MenuItem>
             ) : (
-            // eslint-disable-next-line react/jsx-no-bind
+
               <MenuItem icon="move-caption-down" onClick={() => updateIsInvertedMedia(true)}>
                 {lang(('PreviewSender.MoveTextDown'))}
               </MenuItem>
@@ -193,12 +192,12 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
           }
           {hasMediaSizeOptions && (
             isSmallerMedia ? (
-            // eslint-disable-next-line react/jsx-no-bind
+
               <MenuItem icon="expand" onClick={() => updateIsLargerMedia('large')}>
                 {lang('ChatInput.EditLink.LargerMedia')}
               </MenuItem>
             ) : (
-            // eslint-disable-next-line react/jsx-no-bind
+
               <MenuItem icon="collapse" onClick={() => updateIsLargerMedia('small')}>
                 {lang(('ChatInput.EditLink.SmallerMedia'))}
               </MenuItem>
@@ -206,7 +205,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
           )}
           <MenuItem
             icon="delete"
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={handleClearWebpagePreview}
           >
             {lang('ChatInput.EditLink.RemovePreview')}

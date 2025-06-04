@@ -11,7 +11,6 @@ const ReactorListModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const ReactorListModal = useModuleLoader(Bundles.Extra, 'ReactorListModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return ReactorListModal ? <ReactorListModal {...props} /> : undefined;
 };
 

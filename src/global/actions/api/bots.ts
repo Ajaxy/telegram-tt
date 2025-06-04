@@ -337,7 +337,7 @@ addActionHandler('queryInlineBot', async (global, actions, payload): Promise<voi
   void runDebouncedForSearch(() => {
     searchInlineBot(global, {
       username,
-      inlineBotData: inlineBotData as InlineBotSettings,
+      inlineBotData: inlineBotData,
       chatId,
       query,
       offset,
@@ -438,10 +438,8 @@ addActionHandler('sendInlineBotResult', async (global, actions, payload): Promis
     return;
   }
 
-  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   actions.sendInlineBotApiResult({ ...params });
 
-  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   actions.showNotification({
     localId: queryId,
     title: { key: 'MessageSentPaidToastTitle', variables: { count: 1 }, options: { pluralValue: 1 } },
@@ -878,7 +876,7 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
 
   global = getGlobal();
 
-  const peerId = (peer ? peer.id : bot!.id);
+  const peerId = (peer ? peer.id : bot.id);
 
   const newActiveApp: WebApp = {
     url,
@@ -1038,8 +1036,8 @@ addActionHandler('callAttachBot', (global, actions, payload): ActionReturnType =
     actions.openThread({ chatId, threadId, tabId });
     actions.requestWebView({
       url,
-      peerId: chatId!,
-      botId: (isFromBotMenu ? chatId : bot.id)!,
+      peerId: chatId,
+      botId: (isFromBotMenu ? chatId : bot.id),
       theme,
       buttonText: '',
       isFromBotMenu,

@@ -199,7 +199,7 @@ const StarsBalanceModal = ({
           size="smaller"
           className={styles.closeButton}
           color="translucent"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => closeStarsBalanceModal()}
           ariaLabel={lang('Close')}
         >

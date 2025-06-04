@@ -1,5 +1,5 @@
-import type { ChangeEvent, RefObject } from 'react';
-import type { FC } from '../../../lib/teact/teact';
+import type { ChangeEvent } from 'react';
+import type { ElementRef, FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -40,10 +40,8 @@ const MAX_SOLUTION_LENGTH = 200;
 const PollModal: FC<OwnProps> = ({
   isOpen, isQuiz, shouldBeAnonymous, onSend, onClear,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const questionInputRef = useRef<HTMLInputElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const optionsListRef = useRef<HTMLDivElement>(null);
+  const questionInputRef = useRef<HTMLInputElement>();
+  const optionsListRef = useRef<HTMLDivElement>();
 
   const [question, setQuestion] = useState<string>('');
   const [options, setOptions] = useState<string[]>(['']);
@@ -60,7 +58,7 @@ const PollModal: FC<OwnProps> = ({
     setSolution(e.target.value);
   });
 
-  const focusInput = useLastCallback((ref: RefObject<HTMLInputElement>) => {
+  const focusInput = useLastCallback((ref: ElementRef<HTMLInputElement>) => {
     if (isOpen && ref.current) {
       ref.current.focus();
     }
@@ -271,7 +269,7 @@ const PollModal: FC<OwnProps> = ({
             : lang('CreatePoll.AddOption')}
           error={getOptionsError(index)}
           value={option}
-          // eslint-disable-next-line react/jsx-no-bind
+
           onChange={(e) => updateOption(index, e.currentTarget.value)}
           onKeyPress={handleKeyPress}
         />
@@ -282,7 +280,7 @@ const PollModal: FC<OwnProps> = ({
             color="translucent"
             size="smaller"
             ariaLabel={lang('Delete')}
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => removeOption(index)}
           >
             <Icon name="close" />

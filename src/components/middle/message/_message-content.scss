@@ -13,11 +13,11 @@
   background-color: var(--pattern-color);
   max-width: 10rem;
 
+  box-shadow: 0 1px 2px var(--color-default-shadow);
+
   @media (max-width: 600px) {
     max-width: calc(90vw - 13rem);
   }
-
-  box-shadow: 0 1px 2px var(--color-default-shadow);
 }
 
 .message-content {
@@ -72,7 +72,7 @@
   .text-content,
   .transcription {
     margin: 0;
-    word-break: break-word;
+    overflow-wrap: anywhere;
     white-space: pre-wrap;
     line-height: 1.3125;
     text-align: initial;
@@ -431,7 +431,11 @@
 
   .message-subheader .forward-custom-shape-subheader {
     @include subheader-styles();
-    min-width: 8rem;
+    /* stylelint-disable-next-line no-duplicate-selectors */
+    & {
+      min-width: 8rem;
+    }
+
     .message-title {
       color: white;
     }
@@ -600,17 +604,20 @@
 
       & > .message-title {
         @include subheader-styles();
-        top: 0.125rem;
+        /* stylelint-disable-next-line no-duplicate-selectors */
+        & {
+          position: absolute;
+          top: 0.125rem;
+          left: 100%;
 
-        position: absolute;
-        left: 100%;
+          color: white;
+        }
 
         .Message.own & {
           left: initial;
           right: 100%;
         }
 
-        color: white;
         .admin-title {
           color: white;
         }

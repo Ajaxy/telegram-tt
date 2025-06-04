@@ -65,7 +65,6 @@ import {
   isChatSuperGroup,
   isSameReaction,
   isSystemBot,
-  isUserId,
 } from '../../global/helpers';
 import { getChatNotifySettings } from '../../global/helpers/notifications';
 import { getPeerTitle } from '../../global/helpers/peers';
@@ -114,6 +113,7 @@ import { processDeepLink } from '../../util/deeplink';
 import { tryParseDeepLink } from '../../util/deepLinkParser';
 import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterOutsideSelection';
 import { processMessageInputForCustomEmoji } from '../../util/emoji/customEmojiManager';
+import { isUserId } from '../../util/entities/ids';
 import focusEditableElement from '../../util/focusEditableElement';
 import { formatStarsAsIcon } from '../../util/localization/format';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
@@ -457,13 +457,10 @@ const Composer: FC<OwnProps & StateProps> = ({
   const oldLang = useOldLang();
   const lang = useLang();
 
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const counterRef = useRef<HTMLSpanElement>(null);
+  const inputRef = useRef<HTMLDivElement>();
+  const counterRef = useRef<HTMLSpanElement>();
 
-  // eslint-disable-next-line no-null/no-null
-  const storyReactionRef = useRef<HTMLButtonElement>(null);
+  const storyReactionRef = useRef<HTMLButtonElement>();
 
   const [getHtml, setHtml] = useSignal('');
   const [isMounted, setIsMounted] = useState(false);
@@ -607,7 +604,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const insertTextAndUpdateCursor = useLastCallback((
     text: string, inInputId: string = editableInputId,
   ) => {
-    const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
+    const newHtml = (renderText(text, ['escape_html', 'emoji_html', 'br_html']) as string[])
       .join('')
       .replace(/\u200b+/g, '\u200b');
     insertHtmlAndUpdateCursor(newHtml, inInputId);
@@ -1162,7 +1159,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           isInvertedMedia,
           effectId,
           webPageMediaSize: attachmentSettings.webPageMediaSize,
-          webPageUrl: hasWebPagePreview ? webPagePreview!.url : undefined,
+          webPageUrl: hasWebPagePreview ? webPagePreview.url : undefined,
           isForwarding,
         });
       }
@@ -1570,7 +1567,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const isComposerHasFocus = isBotKeyboardOpen || isSymbolMenuOpen || isEmojiTooltipOpen || isSendAsMenuOpen
     || isMentionTooltipOpen || isInlineBotTooltipOpen || isBotCommandMenuOpen || isAttachMenuOpen
     || isStickerTooltipOpen || isChatCommandTooltipOpen || isCustomEmojiTooltipOpen || isBotMenuButtonOpen
-  || isCustomSendMenuOpen || Boolean(activeVoiceRecording) || attachments.length > 0 || isInputHasFocus;
+    || isCustomSendMenuOpen || Boolean(activeVoiceRecording) || attachments.length > 0 || isInputHasFocus;
   const isReactionSelectorOpen = isComposerHasFocus && !isReactionPickerOpen && isInStoryViewer && !isAttachMenuOpen
     && !isSymbolMenuOpen;
 
@@ -1779,9 +1776,13 @@ const Composer: FC<OwnProps & StateProps> = ({
     },
   );
 
-  const handleRemoveEffect = useLastCallback(() => { saveEffectInDraft({ chatId, threadId, effectId: undefined }); });
+  const handleRemoveEffect = useLastCallback(() => {
+    saveEffectInDraft({ chatId, threadId, effectId: undefined });
+  });
 
-  const handleStopEffect = useLastCallback(() => { hideEffectInComposer({ }); });
+  const handleStopEffect = useLastCallback(() => {
+    hideEffectInComposer({ });
+  });
 
   const onSend = useMemo(() => {
     switch (mainButtonState) {
@@ -2410,7 +2411,7 @@ export default memo(withGlobal<OwnProps>(
     )?.isSilentPosting;
 
     const areEffectsSupported = isChatWithUser && !isChatWithBot
-    && !isInScheduledList && !isChatWithSelf && type !== 'story' && chatId !== SERVICE_NOTIFICATIONS_USER_ID;
+      && !isInScheduledList && !isChatWithSelf && type !== 'story' && chatId !== SERVICE_NOTIFICATIONS_USER_ID;
     const canPlayEffect = selectPerformanceSettingsValue(global, 'stickerEffects');
     const shouldPlayEffect = tabState.shouldPlayEffectInComposer;
     const effectId = areEffectsSupported && draft?.effectId;

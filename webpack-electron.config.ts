@@ -1,7 +1,7 @@
 import path from 'path';
 import { EnvironmentPlugin } from 'webpack';
 
-import { PRODUCTION_URL } from './src/config';
+import { PRODUCTION_URL } from './src/config.ts';
 
 // GitHub workflow uses an empty string as the default value if it's not in repository variables, so we cannot define a default value here
 process.env.BASE_URL = process.env.BASE_URL || PRODUCTION_URL;
@@ -22,12 +22,12 @@ export default {
   },
 
   output: {
-    filename: '[name].js',
+    filename: '[name].cjs',
     path: path.resolve(__dirname, 'dist'),
   },
 
   resolve: {
-    extensions: ['.ts', '.js'],
+    extensions: ['.js', '.cjs', '.mjs', '.ts', '.tsx'],
   },
 
   plugins: [
@@ -40,12 +40,11 @@ export default {
 
   module: {
     rules: [{
-      test: /\.(ts|tsx|js)$/,
+      test: /\.(ts|tsx|js|mjs|cjs)$/,
       loader: 'babel-loader',
       exclude: /node_modules/,
     }],
   },
-
   externals: {
     electron: 'require("electron")',
   },

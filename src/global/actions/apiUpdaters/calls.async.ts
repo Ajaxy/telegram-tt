@@ -128,7 +128,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }, getCurrentTabId());
       } else if (state === 'accepted' && accessHash && gB) {
         (async () => {
-          const { gA, keyFingerprint, emojis } = await callApi('confirmPhoneCall', [gB, EMOJI_DATA, EMOJI_OFFSETS])!;
+          const { gA, keyFingerprint, emojis } = await callApi('confirmPhoneCall', [gB, EMOJI_DATA, EMOJI_OFFSETS]);
 
           global = getGlobal();
           const newCall = {
@@ -150,7 +150,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         if (!isOutgoing) {
           callApi('receivedCall', { call });
           (async () => {
-            const { emojis } = await callApi('confirmPhoneCall', [call!.gAOrB!, EMOJI_DATA, EMOJI_OFFSETS])!;
+            const { emojis } = await callApi('confirmPhoneCall', [call.gAOrB!, EMOJI_DATA, EMOJI_OFFSETS]);
 
             global = getGlobal();
             const newCall = {

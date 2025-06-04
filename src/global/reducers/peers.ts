@@ -3,8 +3,9 @@ import type {
 } from '../../api/types';
 import type { GlobalState } from '../types';
 
+import { isUserId } from '../../util/entities/ids';
 import { omit, uniqueByField } from '../../util/iteratees';
-import { isChatChannel, isUserId } from '../helpers';
+import { isChatChannel } from '../helpers';
 import {
   selectChatFullInfo,
   selectPeer,

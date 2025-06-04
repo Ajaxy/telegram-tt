@@ -1,7 +1,7 @@
 import 'webpack-dev-server';
+import 'dotenv/config';
 
 import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
-import dotenv from 'dotenv';
 import { GitRevisionPlugin } from 'git-revision-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -15,8 +15,8 @@ import {
   ProvidePlugin,
 } from 'webpack';
 
-import { PRODUCTION_URL } from './src/config';
-import { version as appVersion } from './package.json';
+import { PRODUCTION_URL } from './src/config.ts';
+import { version as appVersion } from './package.json' with { type: 'json' };
 
 const {
   HEAD,
@@ -24,8 +24,6 @@ const {
   APP_MOCKED_CLIENT = '',
   IS_PACKAGED_ELECTRON,
 } = process.env;
-
-dotenv.config();
 
 const DEFAULT_APP_TITLE = `Telegram${APP_ENV !== 'production' ? ' Beta' : ''}`;
 
@@ -164,7 +162,7 @@ export default function createConfig(
     },
 
     resolve: {
-      extensions: ['.js', '.ts', '.tsx'],
+      extensions: ['.js', '.cjs', '.mjs', '.ts', '.tsx'],
       fallback: {
         path: require.resolve('path-browserify'),
         os: require.resolve('os-browserify/browser'),
@@ -180,10 +178,12 @@ export default function createConfig(
         /highlight\.js[\\/]lib[\\/]languages/,
         /^((?!\.js\.js).)*$/,
       ),
-      ...(APP_MOCKED_CLIENT === '1' ? [new NormalModuleReplacementPlugin(
-        /src[\\/]lib[\\/]gramjs[\\/]client[\\/]TelegramClient\.js/,
-        './MockClient.ts',
-      )] : []),
+      ...(APP_MOCKED_CLIENT === '1'
+        ? [new NormalModuleReplacementPlugin(
+          /src[\\/]lib[\\/]gramjs[\\/]client[\\/]TelegramClient\.js/,
+          './MockClient.ts',
+        )]
+        : []),
       new HtmlWebpackPlugin({
         appTitle: APP_TITLE,
         appleIcon: APP_ENV === 'production' ? 'apple-touch-icon' : 'apple-touch-icon-dev',
@@ -233,7 +233,7 @@ export default function createConfig(
         saveStatsTo: path.resolve('./public/build-stats.json'),
         normalizeStats: true,
         open: 'file',
-        extensions: [new WebpackContextExtension()], // eslint-disable-line @typescript-eslint/no-use-before-define
+        extensions: [new WebpackContextExtension()],
       }),
     ],
 

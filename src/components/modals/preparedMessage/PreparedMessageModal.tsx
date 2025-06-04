@@ -55,8 +55,7 @@ const PreparedMessageModal: FC<OwnProps & StateProps> = ({
 
   const { webAppKey, message, botId } = modal || {};
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const customBackgroundValue = useCustomBackground(theme, customBackground);
 

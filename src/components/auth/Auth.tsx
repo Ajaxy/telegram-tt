@@ -46,8 +46,7 @@ const Auth: FC<StateProps> = ({
     onBack: handleChangeAuthorizationMethod,
   });
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   useElectronDrag(containerRef);
 
   // For animation purposes

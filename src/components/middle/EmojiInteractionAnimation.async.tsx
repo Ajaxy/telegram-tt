@@ -13,7 +13,6 @@ const EmojiInteractionAnimationAsync: FC<OwnProps> = (props) => {
     Bundles.Extra, 'EmojiInteractionAnimation', !activeEmojiInteraction,
   );
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return EmojiInteractionAnimation ? <EmojiInteractionAnimation {...props} /> : undefined;
 };
 

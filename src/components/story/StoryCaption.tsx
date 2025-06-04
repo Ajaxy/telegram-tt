@@ -34,14 +34,10 @@ function StoryCaption({
   story, isExpanded, className, onExpand, onFold,
 }: OwnProps) {
   const lang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const contentRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const textRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const showMoreButtonRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
+  const contentRef = useRef<HTMLDivElement>();
+  const textRef = useRef<HTMLDivElement>();
+  const showMoreButtonRef = useRef<HTMLDivElement>();
   const renderingStory = useCurrentOrPrev(story, true);
 
   const caption = renderingStory?.content.text;

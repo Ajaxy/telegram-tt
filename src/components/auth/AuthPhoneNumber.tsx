@@ -73,8 +73,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
   } = getActions();
 
   const lang = useLang();
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>();
   const suggestedLanguage = getSuggestedLanguage();
 
   const isConnected = connectionState === 'connectionStateReady';
@@ -132,8 +131,8 @@ const AuthPhoneNumber: FC<StateProps> = ({
 
     // Any phone numbers should be allowed, in some cases ignoring formatting
     const selectedCountry = !country
-    || (suggestedCountry && suggestedCountry.iso2 !== country.iso2)
-    || (!suggestedCountry && newFullNumber.length)
+      || (suggestedCountry && suggestedCountry.iso2 !== country.iso2)
+      || (!suggestedCountry && newFullNumber.length)
       ? suggestedCountry
       : country;
 
@@ -207,11 +206,11 @@ const AuthPhoneNumber: FC<StateProps> = ({
       IS_SAFARI && country && fullNumber !== undefined
       && value.length - fullNumber.length > 1 && !isJustPastedRef.current
     );
-    parseFullNumber(shouldFixSafariAutoComplete ? `${country!.countryCode} ${value}` : value);
+    parseFullNumber(shouldFixSafariAutoComplete ? `${country.countryCode} ${value}` : value);
   });
 
   const handleKeepSessionChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setAuthRememberMe(e.target.checked);
+    setAuthRememberMe({ value: e.target.checked });
   });
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

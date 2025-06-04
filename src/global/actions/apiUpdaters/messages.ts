@@ -11,6 +11,7 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { areDeepEqual } from '../../../util/areDeepEqual';
+import { isUserId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
   buildCollectionByKey, omit, pickTruthy, unique,
@@ -22,7 +23,7 @@ import { getServerTime } from '../../../util/serverTime';
 import {
   addPaidReaction,
   checkIfHasUnreadReactions, getIsSavedDialog, getMessageContent, getMessageText, isActionMessage,
-  isMessageLocal, isUserId,
+  isMessageLocal,
 } from '../../helpers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../helpers/replies';
 import {
@@ -423,7 +424,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         chatId, localId, message, poll,
       } = update;
 
-      global = updateListedAndViewportIds(global, actions, message as ApiMessage);
+      global = updateListedAndViewportIds(global, actions, message);
 
       const currentMessage = selectChatMessage(global, chatId, localId);
 

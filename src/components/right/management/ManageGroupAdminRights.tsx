@@ -170,7 +170,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
       return false;
     }
 
-    return !chat.adminRights![key];
+    return !chat.adminRights[key];
   }, [chat, isFormFullyDisabled]);
 
   const memberStatus = useMemo(() => {

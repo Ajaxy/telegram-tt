@@ -718,7 +718,7 @@ addActionHandler('toggleMessageSelection', (global, actions, payload): ActionRet
   if (global.shouldShowContextMenuHint) {
     actions.disableContextMenuHint();
     actions.showNotification({
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       message: `To **edit** or **reply**, close this menu. Then ${IS_TOUCH_ENV ? 'long tap' : 'right click'} on a message.`,
       tabId,
     });

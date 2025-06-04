@@ -101,7 +101,7 @@ const GiftResalePriceComposerModal = ({
 
       <div className={styles.descriptionContainer}>
         <span>
-          {!isPriceCorrect && commission && lang('DescriptionComposerGiftMinimumPrice', {
+          {!isPriceCorrect && Boolean(commission) && lang('DescriptionComposerGiftMinimumPrice', {
             stars: formatStarsAsText(lang, starsStargiftResaleAmountMin),
           }, {
             withMarkdown: true,
@@ -117,7 +117,7 @@ const GiftResalePriceComposerModal = ({
             })}
         </span>
 
-        {isPriceCorrect && starsUsdWithdrawRate && (
+        {isPriceCorrect && Boolean(starsUsdWithdrawRate) && (
           <span className={styles.descriptionPrice}>
             {`≈ ${formatCurrencyAsString(
               price * starsUsdWithdrawRate,

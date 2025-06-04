@@ -441,7 +441,7 @@ export function buildLocalMessage(
 
   const emojiOnlyCount = getEmojiOnlyCountForMessage(message.content, message.groupedId);
 
-  const finalMessage : ApiMessage = {
+  const finalMessage: ApiMessage = {
     ...message,
     ...(emojiOnlyCount && { emojiOnlyCount }),
   };

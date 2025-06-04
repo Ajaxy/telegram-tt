@@ -1,11 +1,12 @@
-/* eslint-disable max-len */
-const Telegraph = require('telegraph-node');
-const { JSDOM } = require('jsdom');
-const { gitlogPromise } = require('gitlog');
+/* eslint-disable @stylistic/max-len */
+import gitlog from 'gitlog';
+import { JSDOM } from 'jsdom';
+import Telegraph from 'telegraph-node';
+
+import packageJson from '../package.json' with { type: 'json' };
 
 // CONSTANTS
 const AUTH_TOKEN = process.env.TELEGRAPH_TOKEN;
-const version = require('../package.json').version;
 
 const gitOptions = {
   repo: '.',
@@ -17,7 +18,7 @@ const gitOptions = {
 const pageTemplate = `
 <body>\
     <aside><img src="https://tga.dev/icon-dev-512x512.png" /></aside>
-    <h3>Commits since ${version}</h3>\
+    <h3>Commits since ${packageJson.version}</h3>\
     <p><i>This list is automatically updated when a new commit pushed to the beta repo</i></p>\
     <ul id="list"></ul>\
     <aside><a href="https://t.me/webatalks">Web A Discussion</a> <b>|</b> <a href="https://t.me/webatalksru">Web A Обсуждение</a> <b>|</b> <a href="https://t.me/webatalksuk">Web A Обговорення</a></aside>\
@@ -51,7 +52,7 @@ async function updateTelegraph(dom) {
 async function preparePage() {
   const dom = new JSDOM(pageTemplate);
 
-  const commits = await getCommitsSince(version);
+  const commits = await getCommitsSince(packageJson.version);
 
   commits.forEach((commit) => (
     dom.window.document.getElementById('list').appendChild(renderCommit(dom, commit))
@@ -59,7 +60,7 @@ async function preparePage() {
 
   if (!commits?.length) {
     const li = dom.window.document.createElement('li');
-    li.innerHTML = `<p>Nothing changed since ${version}</p>`;
+    li.innerHTML = `<p>Nothing changed since ${packageJson.version}</p>`;
     dom.window.document.getElementById('list').appendChild(li);
   }
 
@@ -74,7 +75,7 @@ function renderCommit(dom, commit) {
 }
 
 function getCommits() {
-  return gitlogPromise(gitOptions).then((log) => {
+  return gitlog(gitOptions).then((log) => {
     return log.map((commit) => {
       return {
         hash: commit.hash,

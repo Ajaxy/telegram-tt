@@ -84,8 +84,8 @@ if (IS_IOS) {
 }
 
 function applyDeferredHistoryOperations() {
-  const goOperations = deferredHistoryOperations.filter((op) => op.type === 'go') as HistoryOperationGo[];
-  const stateOperations = deferredHistoryOperations.filter((op) => op.type !== 'go') as HistoryOperationState[];
+  const goOperations = deferredHistoryOperations.filter((op) => op.type === 'go');
+  const stateOperations = deferredHistoryOperations.filter((op) => op.type !== 'go');
   const goCount = goOperations.reduce((acc, op) => acc + op.delta, 0);
 
   deferredHistoryOperations = [];

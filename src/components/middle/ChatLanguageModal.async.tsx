@@ -11,7 +11,6 @@ const ChatLanguageModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const ChatLanguageModal = useModuleLoader(Bundles.Extra, 'ChatLanguageModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return ChatLanguageModal ? <ChatLanguageModal {...props} /> : undefined;
 };
 

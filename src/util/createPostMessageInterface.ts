@@ -15,8 +15,9 @@ declare const self: WorkerGlobalScope;
 const callbackState = new Map<string, CancellableCallback>();
 
 type ApiConfig =
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   ((name: string, ...args: any[]) => any | [any, ArrayBuffer[]])
-  | Record<string, Function>;
+  | Record<string, AnyFunction>;
 type SendToOrigin = (data: WorkerPayload, transferables?: Transferable[]) => void;
 
 const messageHandlers = createCallbackManager();

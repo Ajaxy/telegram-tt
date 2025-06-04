@@ -11,7 +11,6 @@ const UnpinAllMessagesModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const UnpinAllMessagesModal = useModuleLoader(Bundles.Extra, 'UnpinAllMessagesModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return UnpinAllMessagesModal ? <UnpinAllMessagesModal {...props} /> : undefined;
 };
 

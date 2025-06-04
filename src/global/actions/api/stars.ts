@@ -108,11 +108,11 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
   const allStarGifts = Object.values(byId);
 
   const limitedStarGiftIds = allStarGifts.map((gift) => (gift.isLimited ? gift.id : undefined))
-    .filter(Boolean) as string[];
+    .filter(Boolean);
 
   const stockedStarGiftIds = allStarGifts.map((gift) => (
     gift.availabilityRemains || !gift.availabilityTotal ? gift.id : undefined
-  )).filter(Boolean) as string[];
+  )).filter(Boolean);
 
   idsByCategoryName.all = allStarGiftIds;
   idsByCategoryName.limited = limitedStarGiftIds;

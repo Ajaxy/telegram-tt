@@ -9,7 +9,7 @@ export default function requestActionTimeout(action: CallbackAction, timeout: nu
   const name = action.action;
   clearTimeout(callbacks.get(name));
   const timerId = window.setTimeout(() => {
-    // @ts-ignore
+    // @ts-expect-error -- No idea how to properly type this
     getActions()[name](action.payload);
   }, timeout);
   callbacks.set(name, timerId);

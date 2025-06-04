@@ -1,6 +1,6 @@
 import usePreviousDeprecated from './usePreviousDeprecated';
 
-export default function useCurrentOrPrev<T extends any>(
+export default function useCurrentOrPrev<T>(
   current: T, shouldSkipUndefined = false, shouldForceCurrent = false,
 ): T | undefined {
   const prev = usePreviousDeprecated(current, shouldSkipUndefined);

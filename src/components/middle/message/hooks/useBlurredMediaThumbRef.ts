@@ -7,7 +7,7 @@ type CanvasBlurReturnType = ReturnType<typeof useOffscreenCanvasBlur>;
 export default function useBlurredMediaThumbRef(
   forcedUri: string | undefined, isDisabled: boolean,
 ): CanvasBlurReturnType;
-export default function useBlurredMediaThumbRef(media: MediaWithThumbs, isDisabled?: boolean) : CanvasBlurReturnType;
+export default function useBlurredMediaThumbRef(media: MediaWithThumbs, isDisabled?: boolean): CanvasBlurReturnType;
 export default function useBlurredMediaThumbRef(
   media: MediaWithThumbs | string | undefined,
   isDisabled?: boolean,

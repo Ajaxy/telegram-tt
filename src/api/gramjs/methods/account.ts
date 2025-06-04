@@ -73,7 +73,7 @@ export async function changeSessionTtl({
   return result;
 }
 
-export async function resolveBusinessChatLink({ slug } : { slug: string }) {
+export async function resolveBusinessChatLink({ slug }: { slug: string }) {
   const result = await invokeRequest(new GramJs.account.ResolveBusinessChatLink({
     slug,
   }), {

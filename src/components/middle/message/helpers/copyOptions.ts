@@ -55,7 +55,7 @@ export function getMessageCopyOptions(
       label: 'lng_context_copy_image',
       icon: 'copy-media',
       handler: () => {
-        Promise.resolve(mediaHash ? mediaLoader.fetch(mediaHash, ApiMediaFormat.BlobUrl) : photo!.blobUrl)
+        Promise.resolve(mediaHash ? mediaLoader.fetch(mediaHash, ApiMediaFormat.BlobUrl) : photo.blobUrl)
           .then(copyImageToClipboard);
 
         afterEffect?.();
@@ -94,7 +94,7 @@ export function getMessageCopyOptions(
         } else {
           const clipboardText = renderMessageText(
             { message, shouldRenderAsHtml: true },
-          );
+          ) as string[];
           if (clipboardText) {
             copyHtmlToClipboard(
               clipboardText.join(''),
@@ -132,7 +132,7 @@ export function getMessageCopyOptions(
 }
 function checkMessageHasSelection(message: ApiMessage): boolean {
   const selection = window.getSelection();
-  const selectionParentNode = (selection?.anchorNode?.parentNode as HTMLElement);
+  const selectionParentNode = selection?.anchorNode?.parentNode as HTMLElement;
   const selectedMessageElement = selectionParentNode?.closest<HTMLDivElement>('.Message.message-list-item');
   return getMessageHtmlId(message.id) === selectedMessageElement?.id;
 }

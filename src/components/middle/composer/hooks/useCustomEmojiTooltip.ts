@@ -1,4 +1,4 @@
-import type { RefObject } from 'react';
+import type { ElementRef } from '../../../../lib/teact/teact';
 import { useEffect } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
@@ -28,7 +28,7 @@ export default function useCustomEmojiTooltip(
   getHtml: Signal<string>,
   setHtml: (html: string) => void,
   getSelectionRange: Signal<Range | undefined>,
-  inputRef: RefObject<HTMLDivElement>,
+  inputRef: ElementRef<HTMLDivElement>,
   customEmojis?: ApiSticker[],
 ) {
   const { loadCustomEmojiForEmoji, clearCustomEmojiForEmoji } = getActions();
@@ -42,7 +42,7 @@ export default function useCustomEmojiTooltip(
     const hasEmoji = html.match(IS_EMOJI_SUPPORTED ? twemojiRegex : EMOJI_IMG_REGEX);
     if (!hasEmoji) return undefined;
 
-    const htmlBeforeSelection = getHtmlBeforeSelection(inputRef.current!);
+    const htmlBeforeSelection = getHtmlBeforeSelection(inputRef.current);
 
     return htmlBeforeSelection.match(IS_EMOJI_SUPPORTED ? RE_ENDS_ON_EMOJI : RE_ENDS_ON_EMOJI_IMG)?.[0];
   }, [getHtml, getSelectionRange, inputRef, isEnabled], THROTTLE);
@@ -60,9 +60,12 @@ export default function useCustomEmojiTooltip(
     const lastEmoji = getLastEmoji();
     if (lastEmoji) {
       if (!hasCustomEmojis) {
-        loadCustomEmojiForEmoji({
-          emoji: IS_EMOJI_SUPPORTED ? lastEmoji : lastEmoji.match(/.+alt="(.+)"/)?.[1]!,
-        });
+        const emoji = IS_EMOJI_SUPPORTED ? lastEmoji : lastEmoji.match(/.+alt="(.+)"/)?.[1];
+        if (emoji) {
+          loadCustomEmojiForEmoji({
+            emoji,
+          });
+        }
       }
     } else {
       clearCustomEmojiForEmoji();

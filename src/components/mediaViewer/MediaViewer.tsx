@@ -17,7 +17,7 @@ import { type MediaViewerMedia, MediaViewerOrigin, type ThreadId } from '../../t
 import { ANIMATION_END_DELAY } from '../../config';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
-  getChatMediaMessageIds, getMessagePaidMedia, isChatAdmin, isUserId,
+  getChatMediaMessageIds, getMessagePaidMedia, isChatAdmin,
 } from '../../global/helpers';
 import {
   selectChatMessage,
@@ -37,6 +37,7 @@ import {
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
+import { isUserId } from '../../util/entities/ids';
 import { MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
 import getViewableMedia, { getMediaViewerItem, type MediaViewerItem } from './helpers/getViewableMedia';
@@ -205,8 +206,7 @@ const MediaViewer = ({
     }
   }, [isMobile, isOpen]);
 
-  // eslint-disable-next-line no-null/no-null
-  const headerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>();
   useElectronDrag(headerRef);
 
   const forceUpdate = useForceUpdate();
@@ -266,7 +266,7 @@ const MediaViewer = ({
     if (!sponsoredMessage || !chatId) return;
 
     clickSponsored({ isMedia: isFromMedia, isFullscreen: true, randomId: sponsoredMessage.randomId });
-    openUrl({ url: sponsoredMessage!.url });
+    openUrl({ url: sponsoredMessage.url });
     closeMediaViewer();
   });
 

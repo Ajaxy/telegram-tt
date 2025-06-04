@@ -7,9 +7,9 @@ import type { MenuItemContextAction } from '../components/ui/ListItem';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import {
   getCanDeleteChat, isChatArchived, isChatChannel, isChatGroup,
-  isUserId,
 } from '../global/helpers';
 import { IS_ELECTRON, IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/browser/windowEnvironment';
+import { isUserId } from '../util/entities/ids';
 import { compact } from '../util/iteratees';
 import useLang from './useLang';
 

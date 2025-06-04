@@ -66,7 +66,6 @@ import {
   isOwnMessage,
   isReplyToMessage,
   isSystemBot,
-  isUserId,
 } from '../../../global/helpers';
 import { getPeerFullTitle } from '../../../global/helpers/peers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../../global/helpers/replies';
@@ -117,6 +116,7 @@ import {
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import { IS_ANDROID, IS_ELECTRON, IS_TRANSLATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
+import { isUserId } from '../../../util/entities/ids';
 import { getMessageKey } from '../../../util/keys/messageKey';
 import stopEvent from '../../../util/stopEvent';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
@@ -441,12 +441,9 @@ const Message: FC<OwnProps & StateProps> = ({
     markMentionsRead,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const bottomMarkerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const quickReactionRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
+  const bottomMarkerRef = useRef<HTMLDivElement>();
+  const quickReactionRef = useRef<HTMLDivElement>();
 
   const lang = useOldLang();
 
@@ -560,7 +557,7 @@ const Message: FC<OwnProps & StateProps> = ({
     && !((sticker || hasAnimatedEmoji) && asForwarded)
   );
   const canForward = isChannel && !isScheduled && message.isForwardingAllowed
-  && !isChatProtected;
+    && !isChatProtected;
   const canFocus = Boolean(isPinnedList
     || (forwardInfo
       && (forwardInfo.isChannelPost || isChatWithSelf || isRepliesChat || isAnonymousForwards)
@@ -578,7 +575,7 @@ const Message: FC<OwnProps & StateProps> = ({
       messageId,
       groupedId,
       ...(e?.shiftKey && { withShift: true }),
-      ...(isAlbum && { childMessageIds: album!.messages.map(({ id }) => id) }),
+      ...(isAlbum && { childMessageIds: album.messages.map(({ id }) => id) }),
     });
   });
 
@@ -890,7 +887,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const albumLayout = useMemo(() => {
     return isAlbum
-      ? calculateAlbumLayout(isOwn, Boolean(noAvatars), album!, isMobile)
+      ? calculateAlbumLayout(isOwn, Boolean(noAvatars), album, isMobile)
       : undefined;
   }, [isAlbum, isOwn, noAvatars, album, isMobile]);
 
@@ -1403,7 +1400,7 @@ const Message: FC<OwnProps & StateProps> = ({
       <>
         {isAlbum && observeIntersectionForLoading && (
           <Album
-            album={album!}
+            album={album}
             albumLayout={albumLayout!}
             observeIntersection={observeIntersectionForLoading}
             isOwn={isOwn}
@@ -1486,7 +1483,9 @@ const Message: FC<OwnProps & StateProps> = ({
     );
   }
 
-  function renderSenderName(shouldSkipRenderForwardTitle:boolean = false, shouldSkipRenderAdminTitle: boolean = false) {
+  function renderSenderName(
+    shouldSkipRenderForwardTitle: boolean = false, shouldSkipRenderAdminTitle: boolean = false,
+  ) {
     let senderTitle;
     let senderColor;
     if (senderPeer && !(isCustomShape && viaBotId)) {
@@ -1494,7 +1493,7 @@ const Message: FC<OwnProps & StateProps> = ({
     } else if (forwardInfo?.hiddenUserName) {
       senderTitle = forwardInfo.hiddenUserName;
     } else if (storyData && originSender) {
-      senderTitle = getPeerFullTitle(lang, originSender!);
+      senderTitle = getPeerFullTitle(lang, originSender);
     }
     const senderEmojiStatus = senderPeer && 'emojiStatus' in senderPeer && senderPeer.emojiStatus;
     const senderIsPremium = senderPeer && 'isPremium' in senderPeer && senderPeer.isPremium;
@@ -1544,7 +1543,7 @@ const Message: FC<OwnProps & StateProps> = ({
         ) : !botSender ? (
           NBSP
         ) : undefined}
-        {botSender?.usernames?.length && (
+        {Boolean(botSender?.usernames?.length) && (
           <span className="interactive">
             <span className="via">{lang('ViaBot')}</span>
             <span

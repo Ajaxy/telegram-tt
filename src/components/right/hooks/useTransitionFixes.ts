@@ -1,3 +1,4 @@
+import type { ElementRef } from '../../../lib/teact/teact';
 import { useEffect } from '../../../lib/teact/teact';
 
 import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
@@ -8,7 +9,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 const ROUNDING_COMPENSATION_PX = 1;
 
 export default function useTransitionFixes(
-  containerRef: { current: HTMLDivElement | null },
+  containerRef: ElementRef<HTMLDivElement>,
   transitionElSelector = '.Transition.shared-media-transition',
 ) {
   // Set `min-height` for shared media container to prevent jumping when switching tabs

@@ -96,6 +96,7 @@ interface WebAppInboundEventMap {
   web_app_device_storage_save_key: {
     req_id: string;
     key: string;
+    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     value: unknown | null;
   };
   web_app_device_storage_get_key: {
@@ -108,6 +109,7 @@ interface WebAppInboundEventMap {
   web_app_secure_storage_save_key: {
     req_id: string;
     key: string;
+    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     value: unknown | null;
   };
   web_app_secure_storage_get_key: {
@@ -197,7 +199,7 @@ interface WebAppOutboundEventMap {
     is_visible: boolean;
   };
   fullscreen_failed: {
-    error: 'UNSUPPORTED' | string;
+    error: 'UNSUPPORTED' | (string & {});
   };
   qr_text_received: {
     data: string;
@@ -216,42 +218,42 @@ interface WebAppOutboundEventMap {
     { error: string }
   );
   biometry_info_received:
-  | { available: false }
-  | {
-    available: true;
-    type: 'finger' | 'face' | 'unknown';
-    access_requested: boolean;
-    access_granted: boolean;
-    token_saved: boolean;
-    device_id: string;
-  };
+    | { available: false }
+    | {
+      available: true;
+      type: 'finger' | 'face' | 'unknown';
+      access_requested: boolean;
+      access_granted: boolean;
+      token_saved: boolean;
+      device_id: string;
+    };
   biometry_auth_requested:
-  | { status: 'authorized'; token: string }
-  | { status: 'failed' };
+    | { status: 'authorized'; token: string }
+    | { status: 'failed' };
   biometry_token_updated: {
     status: 'updated' | 'removed' | 'failed';
   };
   location_checked:
-  | { available: false }
-  | {
-    available: boolean;
-    access_requested: boolean;
-    access_granted?: boolean;
-  };
+    | { available: false }
+    | {
+      available: boolean;
+      access_requested: boolean;
+      access_granted?: boolean;
+    };
   location_requested:
-  | { available: boolean }
-  | {
-    available: boolean;
-    latitude: number;
-    longitude: number;
-    altitude: number | null;
-    course: number | null;
-    speed: number | null;
-    horizontal_accuracy: number | null;
-    vertical_accuracy: number | null;
-    course_accuracy: number | null;
-    speed_accuracy: number | null;
-  };
+    | { available: boolean }
+    | {
+      available: boolean;
+      latitude: number;
+      longitude: number;
+      altitude: number | null;
+      course: number | null;
+      speed: number | null;
+      horizontal_accuracy: number | null;
+      vertical_accuracy: number | null;
+      course_accuracy: number | null;
+      speed_accuracy: number | null;
+    };
   emoji_status_access_requested: {
     status: 'allowed' | 'cancelled';
   };
@@ -260,44 +262,44 @@ interface WebAppOutboundEventMap {
   };
   emoji_status_failed: {
     error:
-    | 'UNSUPPORTED'
-    | 'USER_DECLINED'
-    | 'SUGGESTED_EMOJI_INVALID'
-    | 'DURATION_INVALID'
-    | 'SERVER_ERROR'
-    | 'UNKNOWN_ERROR';
+      | 'UNSUPPORTED'
+      | 'USER_DECLINED'
+      | 'SUGGESTED_EMOJI_INVALID'
+      | 'DURATION_INVALID'
+      | 'SERVER_ERROR'
+      | 'UNKNOWN_ERROR';
   };
   file_download_requested: {
     status: 'cancelled' | 'downloading';
   };
   prepared_message_failed: {
     error:
-    | 'UNSUPPORTED'
-    | 'MESSAGE_EXPIRED'
-    | 'MESSAGE_SEND_FAILED'
-    | 'USER_DECLINED'
-    | 'UNKNOWN_ERROR';
+      | 'UNSUPPORTED'
+      | 'MESSAGE_EXPIRED'
+      | 'MESSAGE_SEND_FAILED'
+      | 'USER_DECLINED'
+      | 'UNKNOWN_ERROR';
   };
   device_storage_failed: {
     req_id: string;
     error:
-    | 'UNSUPPORTED'
-    | 'KEY_INVALID'
-    | 'VALUE_INVALID'
-    | 'QUOTA_EXCEEDED'
-    | 'UNKNOWN_ERROR';
+      | 'UNSUPPORTED'
+      | 'KEY_INVALID'
+      | 'VALUE_INVALID'
+      | 'QUOTA_EXCEEDED'
+      | 'UNKNOWN_ERROR';
   };
   secure_storage_failed: {
     req_id: string;
     error:
-    | 'UNSUPPORTED'
-    | 'KEY_INVALID'
-    | 'VALUE_INVALID'
-    | 'QUOTA_EXCEEDED'
-    | 'STORAGE_NOT_EMPTY'
-    | 'RESTORE_UNAVAILABLE'
-    | 'RESTORE_CANCELLED'
-    | 'UNKNOWN_ERROR';
+      | 'UNSUPPORTED'
+      | 'KEY_INVALID'
+      | 'VALUE_INVALID'
+      | 'QUOTA_EXCEEDED'
+      | 'STORAGE_NOT_EMPTY'
+      | 'RESTORE_UNAVAILABLE'
+      | 'RESTORE_CANCELLED'
+      | 'UNKNOWN_ERROR';
   };
   accelerometer_failed: {
     error: 'UNSUPPORTED';

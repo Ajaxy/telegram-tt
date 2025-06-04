@@ -5,10 +5,10 @@ import React, {
 import { getActions } from '../../global';
 
 import { TME_LINK_PREFIX } from '../../config';
-import { debounce } from '../../util/schedulers';
 import {
   isUsernameValid, MAX_USERNAME_LENGTH, MIN_UPDATE_USERNAME_LENGTH, USERNAME_REGEX,
-} from '../../util/username';
+} from '../../util/entities/username';
+import { debounce } from '../../util/schedulers';
 
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';

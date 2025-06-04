@@ -1,3 +1,5 @@
+import type {
+  ElementRef } from '../lib/teact/teact';
 import {
   useEffect, useMemo, useState,
 } from '../lib/teact/teact';
@@ -11,8 +13,8 @@ import useThrottledCallback from './useThrottledCallback';
 const THROTTLE_MS = 150;
 
 export default function useCoordsInSharedCanvas(
-  containerRef: React.RefObject<HTMLDivElement>,
-  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>,
+  containerRef: ElementRef<HTMLDivElement>,
+  sharedCanvasRef?: ElementRef<HTMLCanvasElement>,
 ) {
   const [x, setX] = useState<number>();
   const [y, setY] = useState<number>();

@@ -9,15 +9,15 @@ interface SignalState<T> {
 
 const SIGNAL_MARK = Symbol('SIGNAL_MARK');
 
-export type Signal<T = any> = ((() => T) & {
+export type Signal<T = unknown> = ((() => T) & {
   readonly [SIGNAL_MARK]: symbol;
   subscribe: (cb: AnyToVoidFunction) => NoneToVoidFunction;
   once: (cb: AnyToVoidFunction) => NoneToVoidFunction;
 });
 
-export type SignalSetter = (newValue: any) => void;
+export type SignalSetter<T = unknown> = (newValue: T) => void;
 
-export function isSignal(obj: any): obj is Signal {
+export function isSignal(obj: unknown): obj is Signal {
   return typeof obj === 'function' && SIGNAL_MARK in obj;
 }
 

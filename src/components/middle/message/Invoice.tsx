@@ -39,8 +39,7 @@ const Invoice: FC<OwnProps> = ({
   theme,
   forcedWidth,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const oldLang = useOldLang();
   const lang = useLang();

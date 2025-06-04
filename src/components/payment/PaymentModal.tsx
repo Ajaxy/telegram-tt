@@ -330,7 +330,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
             needCardholderName={needCardholderName}
             needCountry={needCountry}
             needZip={needZip}
-            countryList={countryList!}
+            countryList={countryList}
           />
         );
       case PaymentStep.ShippingInfo:
@@ -342,7 +342,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
             needEmail={Boolean(invoice?.isEmailRequested || invoice?.isEmailSentToProvider)}
             needPhone={Boolean(invoice?.isPhoneRequested || invoice?.isPhoneSentToProvider)}
             needName={Boolean(invoice?.isNameRequested)}
-            countryList={countryList!}
+            countryList={countryList}
           />
         );
       case PaymentStep.Shipping:
@@ -540,7 +540,9 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
         onCloseAnimationEnd={handleModalClose}
       >
         <p>
-          Sorry, Telegram Web A doesn&apos;t support payments with this provider yet. <br />
+          Sorry, Telegram Web A doesn&apos;t support payments with this provider yet.
+          {' '}
+          <br />
           Please use one of our mobile apps to do this.
         </p>
         <div className="dialog-buttons mt-2">
@@ -636,7 +638,7 @@ export default memo(withGlobal<OwnProps>(
       providerName = url.startsWith(DONATE_PROVIDER_URL) ? DONATE_PROVIDER : undefined;
     }
 
-    const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId!) : undefined;
+    const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId) : undefined;
     const isProviderError = Boolean(invoice && (!providerName || !SUPPORTED_PROVIDERS.has(providerName)));
     const { needCardholderName, needCountry, needZip } = (nativeParams || {});
     const bot = form?.botId ? selectUser(global, form.botId) : undefined;

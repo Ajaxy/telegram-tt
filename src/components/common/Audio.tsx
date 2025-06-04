@@ -1,4 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
+import type { ElementRef, FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
@@ -123,8 +123,7 @@ const Audio: FC<OwnProps> = ({
   const mediaSource = (voice || video);
   const isVoice = Boolean(voice || video);
   const isSeeking = useRef<boolean>(false);
-  // eslint-disable-next-line no-null/no-null
-  const seekerRef = useRef<HTMLDivElement>(null);
+  const seekerRef = useRef<HTMLDivElement>();
   const lang = useOldLang();
   const { isRtl } = lang;
 
@@ -504,7 +503,7 @@ function renderAudio(
   isPlaying: boolean,
   playProgress: number,
   bufferedRanges: BufferedRange[],
-  seekerRef: React.Ref<HTMLElement>,
+  seekerRef: ElementRef<HTMLDivElement>,
   showProgress?: boolean,
   date?: number,
   progress?: number,
@@ -529,7 +528,8 @@ function renderAudio(
       )}
       {!showSeekline && showProgress && (
         <div className="meta" dir={isRtl ? 'rtl' : undefined}>
-          {progress ? `${getFileSizeString(audio!.size * progress)} / ` : undefined}{getFileSizeString(audio!.size)}
+          {progress ? `${getFileSizeString(audio.size * progress)} / ` : undefined}
+          {getFileSizeString(audio.size)}
         </div>
       )}
       {!showSeekline && !showProgress && (
@@ -557,8 +557,8 @@ function renderAudio(
 
 function renderVoice(
   media: ApiVoice | ApiVideo,
-  seekerRef: React.Ref<HTMLDivElement>,
-  waveformCanvasRef: React.Ref<HTMLCanvasElement>,
+  seekerRef: ElementRef<HTMLDivElement>,
+  waveformCanvasRef: ElementRef<HTMLCanvasElement>,
   playProgress: number,
   isMediaUnread?: boolean,
   isTranscribing?: boolean,
@@ -580,7 +580,7 @@ function renderVoice(
           <canvas ref={waveformCanvasRef} />
         </div>
         {onClickTranscribe && (
-          // eslint-disable-next-line react/jsx-no-bind
+
           <Button onClick={() => {
             if ((isTranscribed || isTranscriptionError) && onHideTranscription) {
               onHideTranscription(!isTranscriptionHidden);
@@ -621,7 +621,7 @@ function renderVoice(
         dir="auto"
       >
         {playProgress === 0 || playProgress === 1
-          ? formatMediaDuration(media!.duration) : formatMediaDuration(media!.duration * playProgress)}
+          ? formatMediaDuration(media.duration) : formatMediaDuration(media.duration * playProgress)}
       </p>
     </div>
   );
@@ -636,8 +636,7 @@ function useWaveformCanvas(
   isMobile = false,
   isReverse = false,
 ) {
-  // eslint-disable-next-line no-null/no-null
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>();
 
   const { data: spikes, peak } = useMemo(() => {
     if (!media) {
@@ -688,12 +687,12 @@ function useWaveformCanvas(
 function renderSeekline(
   playProgress: number,
   bufferedRanges: BufferedRange[],
-  seekerRef: React.Ref<HTMLElement>,
+  seekerRef: ElementRef<HTMLDivElement>,
 ) {
   return (
     <div
       className="seekline"
-      ref={seekerRef as React.Ref<HTMLDivElement>}
+      ref={seekerRef}
     >
       {bufferedRanges.map(({ start, end }) => (
         <div

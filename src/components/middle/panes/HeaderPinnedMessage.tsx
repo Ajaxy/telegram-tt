@@ -62,7 +62,7 @@ const EMOJI_SIZE = 1.125 * REM;
 type OwnProps = {
   chatId: string;
   threadId: ThreadId;
-  // eslint-disable-next-line react/no-unused-prop-types
+
   messageListType: MessageListType;
   className?: string;
   isFullWidth?: boolean;

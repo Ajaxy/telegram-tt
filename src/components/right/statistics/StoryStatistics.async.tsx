@@ -12,7 +12,6 @@ import Loading from '../../ui/Loading';
 const StoryStatisticsAsync: FC<OwnProps> = (props) => {
   const StoryStatistics = useModuleLoader(Bundles.Extra, 'StoryStatistics');
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return StoryStatistics ? <StoryStatistics {...props} /> : <Loading />;
 };
 

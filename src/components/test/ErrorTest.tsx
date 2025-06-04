@@ -24,8 +24,14 @@ const ErrorTest: FC<OwnProps & StateProps> = ({ parentRand, globalRand }) => {
         THIS IS `ErrorTest` Component
       </h3>
       <div>
-        <div>parent: {parentRand}</div>
-        <div>global: {globalRand}</div>
+        <div>
+          parent:
+          {parentRand}
+        </div>
+        <div>
+          global:
+          {globalRand}
+        </div>
       </div>
     </div>
   );

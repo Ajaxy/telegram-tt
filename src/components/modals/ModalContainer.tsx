@@ -46,44 +46,43 @@ import WebAppModal from './webApp/WebAppModal.async';
 
 // `Pick` used only to provide tab completion
 type ModalKey = keyof Pick<TabState,
-'giftCodeModal' |
-'boostModal' |
-'chatlistModal' |
-'urlAuth' |
-'mapModal' |
-'oneTimeMediaModal' |
-'inviteViaLinkModal' |
-'requestedAttachBotInstall' |
-'collectibleInfoModal' |
-'reportAdModal' |
-'reportModal' |
-'starsBalanceModal' |
-'starsPayment' |
-'starsTransactionModal' |
-'paidReactionModal' |
-'webApps' |
-'starsTransactionModal' |
-'chatInviteModal' |
-'starsSubscriptionModal' |
-'starsGiftModal' |
-'giftModal' |
-'isGiftRecipientPickerOpen' |
-'isWebAppsCloseConfirmationModalOpen' |
-'giftInfoModal' |
-'giftResalePriceComposerModal' |
-'suggestedStatusModal' |
-'emojiStatusAccessModal' |
-'locationAccessModal' |
-'aboutAdsModal' |
-'giftUpgradeModal' |
-'monetizationVerificationModal' |
-'giftWithdrawModal' |
-'preparedMessageModal' |
-'sharePreparedMessageModal' |
-'giftStatusInfoModal' |
-'giftTransferModal' |
-'chatRefundModal' |
-'isFrozenAccountModalOpen'
+  'giftCodeModal' |
+  'boostModal' |
+  'chatlistModal' |
+  'urlAuth' |
+  'mapModal' |
+  'oneTimeMediaModal' |
+  'inviteViaLinkModal' |
+  'requestedAttachBotInstall' |
+  'collectibleInfoModal' |
+  'reportAdModal' |
+  'reportModal' |
+  'starsBalanceModal' |
+  'starsPayment' |
+  'starsTransactionModal' |
+  'paidReactionModal' |
+  'webApps' |
+  'chatInviteModal' |
+  'starsSubscriptionModal' |
+  'starsGiftModal' |
+  'giftModal' |
+  'isGiftRecipientPickerOpen' |
+  'isWebAppsCloseConfirmationModalOpen' |
+  'giftInfoModal' |
+  'giftResalePriceComposerModal' |
+  'suggestedStatusModal' |
+  'emojiStatusAccessModal' |
+  'locationAccessModal' |
+  'aboutAdsModal' |
+  'giftUpgradeModal' |
+  'monetizationVerificationModal' |
+  'giftWithdrawModal' |
+  'preparedMessageModal' |
+  'sharePreparedMessageModal' |
+  'giftStatusInfoModal' |
+  'giftTransferModal' |
+  'chatRefundModal' |
+  'isFrozenAccountModalOpen'
 >;
 
 type StateProps = {

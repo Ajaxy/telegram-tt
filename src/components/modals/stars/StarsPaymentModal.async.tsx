@@ -11,7 +11,6 @@ const StarPaymentModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const StarPaymentModal = useModuleLoader(Bundles.Stars, 'StarPaymentModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return StarPaymentModal ? <StarPaymentModal {...props} /> : undefined;
 };
 

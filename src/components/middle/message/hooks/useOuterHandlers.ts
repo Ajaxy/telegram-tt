@@ -1,5 +1,5 @@
-import type { RefObject } from 'react';
 import type React from '../../../../lib/teact/teact';
+import type { ElementRef } from '../../../../lib/teact/teact';
 import { useEffect, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
@@ -25,7 +25,7 @@ const GROUP_MESSAGE_HOVER_ATTRIBUTE = 'data-is-document-group-hover';
 
 export default function useOuterHandlers(
   selectMessage: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void,
-  containerRef: RefObject<HTMLDivElement>,
+  containerRef: ElementRef<HTMLDivElement>,
   messageId: number,
   isInSelectMode: boolean,
   canReply: boolean,
@@ -34,7 +34,7 @@ export default function useOuterHandlers(
   handleBeforeContextMenu: (e: React.MouseEvent) => void,
   chatId: string,
   isContextMenuShown: boolean,
-  quickReactionRef: RefObject<HTMLDivElement>,
+  quickReactionRef: ElementRef<HTMLDivElement>,
   shouldHandleMouseLeave: boolean,
   getIsMessageListReady?: Signal<boolean>,
 ) {
@@ -156,7 +156,7 @@ export default function useOuterHandlers(
     return captureEvents(containerRef.current!, {
       selectorToPreventScroll: '.MessageList',
       excludedClosestSelector: '.no-word-wrap',
-      onSwipe: ((e, direction) => {
+      onSwipe: (e, direction) => {
         if (direction === SwipeDirection.Left) {
           if (!startedAt) {
             startedAt = Date.now();
@@ -168,7 +168,7 @@ export default function useOuterHandlers(
         }
 
         return false;
-      }),
+      },
       onRelease: () => {
         if (!startedAt || !canReply) {
           return;

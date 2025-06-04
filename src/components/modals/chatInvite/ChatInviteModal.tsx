@@ -26,8 +26,7 @@ export type OwnProps = {
 
 const ChatInviteModal = ({ modal }: OwnProps) => {
   const { acceptChatInvite, closeChatInviteModal, showNotification } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const participantsRef = useRef<HTMLDivElement>(null);
+  const participantsRef = useRef<HTMLDivElement>();
 
   const lang = useOldLang();
 

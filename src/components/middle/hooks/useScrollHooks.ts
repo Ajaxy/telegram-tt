@@ -1,4 +1,4 @@
-import type { RefObject } from 'react';
+import type { ElementRef } from '../../../lib/teact/teact';
 import { useEffect, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -23,7 +23,7 @@ const TOOLS_FREEZE_TIMEOUT = 350; // Approximate message sending animation durat
 
 export default function useScrollHooks(
   type: MessageListType,
-  containerRef: RefObject<HTMLDivElement>,
+  containerRef: ElementRef<HTMLDivElement>,
   messageIds: number[],
   getContainerHeight: Signal<number | undefined>,
   isViewportNewest: boolean,
@@ -43,12 +43,9 @@ export default function useScrollHooks(
     [loadViewportMessages, messageIds],
   );
 
-  // eslint-disable-next-line no-null/no-null
-  const backwardsTriggerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const forwardsTriggerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const fabTriggerRef = useRef<HTMLDivElement>(null);
+  const backwardsTriggerRef = useRef<HTMLDivElement>();
+  const forwardsTriggerRef = useRef<HTMLDivElement>();
+  const fabTriggerRef = useRef<HTMLDivElement>();
 
   const toggleScrollTools = useLastCallback(() => {
     if (!isReady) return;

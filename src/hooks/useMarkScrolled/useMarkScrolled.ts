@@ -1,4 +1,4 @@
-import type { RefObject } from '../../lib/teact/teact';
+import type { ElementRef } from '../../lib/teact/teact';
 import { useEffect } from '../../lib/teact/teact';
 
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
@@ -9,7 +9,7 @@ const THROTTLE_DELAY = 100;
 const useMarkScrolled = ({
   containerRef, selector,
 }: {
-  containerRef: RefObject<HTMLDivElement | null>;
+  containerRef: ElementRef<HTMLDivElement>;
   selector: string;
 }, deps: unknown[]) => {
   useEffect(() => {

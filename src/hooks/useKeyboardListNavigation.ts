@@ -1,11 +1,11 @@
-import type { RefObject } from 'react';
+import type { ElementRef } from '../lib/teact/teact';
 import { useEffect, useState } from '../lib/teact/teact';
 
 import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 import useLastCallback from './useLastCallback';
 
 const useKeyboardListNavigation = (
-  elementRef: RefObject<HTMLElement>,
+  elementRef: ElementRef<HTMLElement>,
   isOpen: boolean,
   onSelectWithEnter?: (index: number) => void,
   itemSelector?: string,
@@ -18,7 +18,9 @@ const useKeyboardListNavigation = (
 
     const element = elementRef.current;
     if (isOpen && element && !noCaptureFocus) {
-      requestMutation(() => { element.tabIndex = -1; });
+      requestMutation(() => {
+        element.tabIndex = -1;
+      });
       requestMeasure(() => element.focus());
     }
   }, [elementRef, isOpen, noCaptureFocus]);

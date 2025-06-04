@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable @stylistic/max-len */
 /* eslint-disable @typescript-eslint/indent */
 /* eslint-disable indent */
 

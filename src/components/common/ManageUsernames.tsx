@@ -184,12 +184,15 @@ const ManageUsernames: FC<OwnProps> = ({
                       icon: 'copy',
                     },
                   ]}
-                  // eslint-disable-next-line react/jsx-no-bind
+
                   onClick={() => {
                     handleUsernameClick(usernameData);
                   }}
                 >
-                  <span className="title">@{usernameData.username}</span>
+                  <span className="title">
+                    @
+                    {usernameData.username}
+                  </span>
                   <span className="subtitle">{lang(subtitle)}</span>
                 </ListItem>
               </Draggable>

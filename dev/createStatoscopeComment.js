@@ -1,11 +1,10 @@
-/* eslint-env node */
+import { readFileSync } from 'fs';
 
-const fs = require('fs');
-const createPRComment = require('./createPRComment');
-const template = require('../.github/workflows/statoscope-comment');
+import template from '../.github/workflows/statoscope-comment.js';
+import createPRComment from './createPRComment.js';
 
-module.exports = async ({ github, context }) => {
-  const data = JSON.parse(fs.readFileSync('result.json', 'utf8'));
+export default async ({ github, context }) => {
+  const data = JSON.parse(readFileSync('result.json', 'utf8'));
   data.prNumber = context.issue.number;
   const body = template(data);
 

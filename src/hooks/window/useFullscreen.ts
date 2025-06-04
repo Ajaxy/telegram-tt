@@ -1,20 +1,16 @@
+import type { ElementRef } from '../../lib/teact/teact';
 import { useEffect, useLayoutEffect, useState } from '../../lib/teact/teact';
 
 import { ElectronEvent } from '../../types/electron';
 
 import { IS_IOS } from '../../util/browser/windowEnvironment';
 
-type ElementType = HTMLElement;
-type RefType = {
-  current: ElementType | null;
-};
-
 type ReturnType = [boolean, () => void, () => void] | [false];
 type CallbackType = (isPlayed: boolean) => void;
 
 const prop = getBrowserFullscreenElementProp();
 
-export default function useFullscreen(elRef: RefType, exitCallback?: CallbackType,
+export default function useFullscreen<T extends HTMLElement>(elRef: ElementRef<T>, exitCallback?: CallbackType,
   enterCallback?: CallbackType): ReturnType {
   const [isFullscreen, setIsFullscreen] = useState(Boolean(prop && document[prop]));
 
@@ -129,7 +125,7 @@ export function checkIfFullscreen() {
   return Boolean(fullscreenProp && document[fullscreenProp]);
 }
 
-export function safeRequestFullscreen(element: ElementType) {
+export function safeRequestFullscreen(element: HTMLElement) {
   if (element.requestFullscreen) {
     element.requestFullscreen();
   } else if (element.webkitRequestFullscreen) {

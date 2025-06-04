@@ -165,7 +165,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}
-        // eslint-disable-next-line react/jsx-no-bind
+
         onClick={hasMenu ? onTrigger : () => onReset()}
         ariaLabel={hasMenu ? oldLang('AccDescrOpenMenu2') : 'Return to chat list'}
       >
@@ -215,8 +215,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     handleDropdownMenuTransitionEnd,
   } = useLeftHeaderButtonRtlForumTransition(shouldHideSearch);
 
-  // eslint-disable-next-line no-null/no-null
-  const headerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>();
   useElectronDrag(headerRef);
 
   const withStoryToggler = !isSearchFocused

@@ -17,7 +17,7 @@ export function useThrottledResolver<T>(
   }, deps, msOrSchedulerFn, noFirst);
 }
 
-export function useThrottledSignal<T extends any>(
+export function useThrottledSignal<T>(
   getValue: Signal<T>,
   ms: number,
   noFirst = false,
@@ -42,7 +42,7 @@ export function useDebouncedResolver<T>(
   }, deps, ms, noFirst, noLast);
 }
 
-export function useDebouncedSignal<T extends any>(
+export function useDebouncedSignal<T>(
   getValue: Signal<T>,
   ms: number,
   noFirst = false,

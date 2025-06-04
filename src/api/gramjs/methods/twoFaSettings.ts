@@ -7,8 +7,8 @@ import {
 } from './client';
 
 const emailCodeController: {
-  resolve?: Function;
-  reject?: Function;
+  resolve?: (code: string) => void;
+  reject?: (error: Error) => void;
 } = {};
 
 export async function getPasswordInfo() {

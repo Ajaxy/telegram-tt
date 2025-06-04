@@ -1,4 +1,5 @@
-import type { RefObject } from 'react';
+import type {
+  ElementRef } from '../../lib/teact/teact';
 import React, {
   beginHeavyAnimation, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
@@ -27,7 +28,7 @@ type AnimationName = (
   );
 export type ChildrenFn = (isActive: boolean, isFrom: boolean, currentKey: number, activeKey: number) => React.ReactNode;
 export type TransitionProps = {
-  ref?: RefObject<HTMLDivElement>;
+  ref?: ElementRef<HTMLDivElement>;
   activeKey: number;
   nextKey?: number;
   name: AnimationName;
@@ -94,8 +95,7 @@ function Transition({
   const shouldDisableAnimation = DISABLEABLE_ANIMATIONS.has(name)
     && !selectCanAnimateInterface(getGlobal());
 
-  // eslint-disable-next-line no-null/no-null
-  let containerRef = useRef<HTMLDivElement>(null);
+  let containerRef = useRef<HTMLDivElement>();
   if (ref) {
     containerRef = ref;
   }

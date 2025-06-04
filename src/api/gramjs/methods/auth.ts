@@ -9,8 +9,8 @@ import { wrapError } from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 
 const authController: {
-  resolve?: Function;
-  reject?: Function;
+  resolve?: AnyToVoidFunction;
+  reject?: (error: Error) => void;
 } = {};
 
 export function onWebAuthTokenFailed() {

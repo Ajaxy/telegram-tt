@@ -1,3 +1,4 @@
+import type { ElementRef } from '../../../../lib/teact/teact';
 import { getIsHeavyAnimating, useEffect, useRef } from '../../../../lib/teact/teact';
 
 import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
@@ -8,7 +9,7 @@ import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../../../
 import useBackgroundMode, { isBackgroundModeActive } from '../../../../hooks/window/useBackgroundMode';
 
 export default function useVideoAutoPause(
-  playerRef: { current: HTMLVideoElement | null }, canPlay: boolean, isPriority?: boolean,
+  playerRef: ElementRef<HTMLVideoElement>, canPlay: boolean, isPriority?: boolean,
 ) {
   const canPlayRef = useRef();
   canPlayRef.current = canPlay;
@@ -48,7 +49,7 @@ export default function useVideoAutoPause(
   return { handlePlaying };
 }
 
-function usePlayPause(mediaRef: React.RefObject<HTMLMediaElement>) {
+function usePlayPause(mediaRef: ElementRef<HTMLMediaElement>) {
   const shouldPauseRef = useRef(false);
   const isLoadingPlayRef = useRef(false);
 

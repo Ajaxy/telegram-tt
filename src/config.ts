@@ -156,7 +156,7 @@ export const GENERAL_REFETCH_INTERVAL = 60 * 60 * 1000; // 1h
 export const EDITABLE_INPUT_ID = 'editable-message-text';
 export const EDITABLE_INPUT_MODAL_ID = 'editable-message-text-modal';
 export const EDITABLE_STORY_INPUT_ID = 'editable-story-input-text';
-// eslint-disable-next-line max-len
+// eslint-disable-next-line @stylistic/max-len
 export const EDITABLE_INPUT_CSS_SELECTOR = `.messages-layout .Transition_slide-active #${EDITABLE_INPUT_ID}, .messages-layout .Transition > .Transition_slide-to #${EDITABLE_INPUT_ID}`;
 export const EDITABLE_INPUT_MODAL_CSS_SELECTOR = `#${EDITABLE_INPUT_MODAL_ID}`;
 export const EDITABLE_STORY_INPUT_CSS_SELECTOR = `#${EDITABLE_STORY_INPUT_ID}`;
@@ -305,7 +305,7 @@ export const SUPPORTED_TRANSLATION_LANGUAGES = [
   'cy', 'xh', 'yi', 'yo', 'zu',
 ];
 
-// eslint-disable-next-line max-len
+// eslint-disable-next-line @stylistic/max-len
 export const RE_LINK_TEMPLATE = '((ftp|https?):\\/\\/)?((www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z][-a-zA-Z0-9]{1,62})\\b([-a-zA-Z0-9()@:%_+.,~#?&/=]*)';
 export const RE_MENTION_TEMPLATE = '(@[\\w\\d_-]+)';
 export const RE_TG_LINK = /^tg:(\/\/)?/i;
@@ -321,7 +321,7 @@ export const TME_WEB_DOMAINS = new Set(['t.me', 'web.t.me', 'a.t.me', 'k.t.me', 
 export const WEB_APP_PLATFORM = 'weba';
 export const LANG_PACK = 'weba';
 
-// eslint-disable-next-line max-len
+// eslint-disable-next-line @stylistic/max-len
 export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', 'EG', 'HN', 'IE', 'IN', 'JO', 'MX', 'MY', 'NI', 'NZ', 'PH', 'PK', 'SA', 'SV', 'US']);
 
 export const API_CHAT_TYPES = ['bots', 'channels', 'chats', 'users', 'groups'] as const;
@@ -454,7 +454,7 @@ export const PREMIUM_LIMITS_ORDER: ApiLimitTypeForPromo[] = [
   'recommendedChannels',
 ];
 
-export const DEFAULT_GIFT_PROFILE_FILTER_OPTIONS : GiftProfileFilterOptions = {
+export const DEFAULT_GIFT_PROFILE_FILTER_OPTIONS: GiftProfileFilterOptions = {
   sortType: 'byDate',
   shouldIncludeUnlimited: true,
   shouldIncludeLimited: true,

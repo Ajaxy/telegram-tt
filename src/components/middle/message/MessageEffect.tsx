@@ -36,10 +36,8 @@ const MessageEffect = ({
   observeIntersectionForPlaying,
   onStop,
 }: OwnProps) => {
-  // eslint-disable-next-line no-null/no-null
-  const anchorRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const anchorRef = useRef<HTMLDivElement>();
+  const ref = useRef<HTMLDivElement>();
   const canLoad = useIsIntersecting(anchorRef, observeIntersectionForLoading);
   const canPlay = useIsIntersecting(anchorRef, observeIntersectionForPlaying);
 

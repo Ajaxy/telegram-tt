@@ -11,7 +11,6 @@ const GiftResalePriceComposerModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const GiftResalePriceComposerModal = useModuleLoader(Bundles.Stars, 'GiftResalePriceComposerModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return GiftResalePriceComposerModal ? <GiftResalePriceComposerModal {...props} /> : undefined;
 };
 

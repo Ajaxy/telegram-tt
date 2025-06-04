@@ -20,14 +20,16 @@ const ContextConsumer = ({ children, debugKey }: { children?: any; debugKey?: st
   );
 };
 
-const MemoizedWrapper = memo(({ children } : { children: any }) => {
+const MemoizedWrapper = memo(({ children }: { children: any }) => {
   return <div style="background-color: aquamarine">{children}</div>;
 });
 
-const ContextSwapper = ({ value, children } : { value: string; children: any }) => {
+const ContextSwapper = ({ value, children }: { value: string; children: any }) => {
   return (
     <div style="border: 1px solid red">
-      Swapped {value}
+      Swapped
+      {' '}
+      {value}
       {children}
     </div>
   );

@@ -75,7 +75,7 @@ export type OwnProps = {
   registerReloadFrameCallback: (callback: (url: string) => void) => void;
   onContextMenuButtonClick: (e: React.MouseEvent) => void;
   isTransforming?: boolean;
-  isMultiTabSupported? : boolean;
+  isMultiTabSupported?: boolean;
   modalHeight: number;
 };
 
@@ -164,24 +164,22 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     unlockPopupsAt, handlePopupOpened, handlePopupClosed,
   } = usePopupLimit(POPUP_SEQUENTIAL_LIMIT, POPUP_RESET_DELAY);
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
-  // eslint-disable-next-line no-null/no-null
-  const headerButtonRef = useRef<HTMLDivElement>(null);
+  const headerButtonRef = useRef<HTMLDivElement>();
 
-  // eslint-disable-next-line no-null/no-null
-  const headerButtonCaptionRef = useRef<HTMLDivElement>(null);
+  const headerButtonCaptionRef = useRef<HTMLDivElement>();
 
   const isFullscreen = modalState === 'fullScreen';
   const isMinimizedState = modalState === 'minimized';
 
   const exitFullScreenCallback = useLastCallback(() => {
-    setTimeout(() => { changeWebAppModalState({ state: 'maximized' }); }, COLLAPSING_WAIT);
+    setTimeout(() => {
+      changeWebAppModalState({ state: 'maximized' });
+    }, COLLAPSING_WAIT);
   });
 
-  // eslint-disable-next-line no-null/no-null
-  const fullscreenElementRef = useRef<HTMLElement | null>(null);
+  const fullscreenElementRef = useRef<HTMLElement>();
 
   useEffect(() => {
     fullscreenElementRef.current = document.querySelector('#portals') as HTMLElement;
@@ -247,8 +245,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     updateCurrentWebApp({ headerColor: color });
   }, [themeHeaderColor, headerColorFromEvent, headerColorFromSettings]);
 
-  // eslint-disable-next-line no-null/no-null
-  const frameRef = useRef<HTMLIFrameElement>(null);
+  const frameRef = useRef<HTMLIFrameElement>();
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -747,7 +744,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
             sendEvent({
               eventType: 'location_requested',
               eventData: {
-                available: botAppPermissions?.geolocation!,
+                available: Boolean(botAppPermissions?.geolocation),
                 latitude: geolocation?.latitude,
                 longitude: geolocation?.longitude,
                 altitude: geolocation?.altitude,
@@ -1132,7 +1129,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
                 color={button.type === 'destructive' ? 'danger' : 'primary'}
                 isText
                 size="smaller"
-                // eslint-disable-next-line react/jsx-no-bind
+
                 onClick={() => handleAppPopupClose(button.id)}
               >
                 {button.text || oldLang(DEFAULT_BUTTON_TEXT[button.type])}

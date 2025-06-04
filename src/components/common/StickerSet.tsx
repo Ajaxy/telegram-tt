@@ -132,13 +132,10 @@ const StickerSet: FC<OwnProps & StateProps> = ({
     loadStickers,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
-  // eslint-disable-next-line no-null/no-null
-  const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
+  const sharedCanvasRef = useRef<HTMLCanvasElement>();
+  const sharedCanvasHqRef = useRef<HTMLCanvasElement>();
 
   const lang = useOldLang();
   const { width: windowWidth } = useWindowSize();
@@ -268,7 +265,7 @@ const StickerSet: FC<OwnProps & StateProps> = ({
     collectibleStatuses ? new Set(collectibleStatuses.map(({ documentId }) => documentId)) : undefined
   ), [collectibleStatuses]);
   const withAddSetButton = !shouldHideHeader && !isRecent && !isStatusCollectible
-   && isEmoji && !isPopular && !isChatEmojiSet
+    && isEmoji && !isPopular && !isChatEmojiSet
     && (!isInstalled || (!isCurrentUserPremium && !isSavedMessages));
   const addSetButtonText = useMemo(() => {
     if (isLocked) {
@@ -384,7 +381,7 @@ const StickerSet: FC<OwnProps & StateProps> = ({
             const isSelected = reactionId ? selectedReactionIds?.includes(reactionId) : undefined;
 
             const withSparkles = sticker.id === COLLECTIBLE_STATUS_SET_ID
-            || collectibleEmojiIdsSet?.has(sticker.id);
+              || collectibleEmojiIdsSet?.has(sticker.id);
 
             return (
               <StickerButton
@@ -427,7 +424,8 @@ const StickerSet: FC<OwnProps & StateProps> = ({
             onClick={expand}
             key="more"
           >
-            +{totalItemsCount - itemsBeforeCutout}
+            +
+            {totalItemsCount - itemsBeforeCutout}
           </Button>
         )}
       </div>

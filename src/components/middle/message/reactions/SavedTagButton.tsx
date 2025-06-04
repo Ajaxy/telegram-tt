@@ -59,10 +59,8 @@ const SavedTagButton = ({
   onRemove,
 }: OwnProps) => {
   const { editSavedReactionTag } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLButtonElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const menuRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLButtonElement>();
+  const menuRef = useRef<HTMLDivElement>();
 
   const lang = useOldLang();
   const [isRenamePromptOpen, openRenamePrompt, closeRenamePrompt] = useFlag();

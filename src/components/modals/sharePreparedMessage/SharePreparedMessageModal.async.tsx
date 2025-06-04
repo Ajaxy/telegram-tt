@@ -11,7 +11,6 @@ const SharePreparedMessageModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const SharePreparedMessageModal = useModuleLoader(Bundles.Extra, 'SharePreparedMessageModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return SharePreparedMessageModal ? <SharePreparedMessageModal {...props} /> : undefined;
 };
 

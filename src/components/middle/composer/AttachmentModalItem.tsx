@@ -61,7 +61,7 @@ const AttachmentModalItem: FC<OwnProps> = ({
         return (
           <>
             {Boolean(attachment.quick?.duration) && (
-              <div className={styles.duration}>{formatMediaDuration(attachment.quick!.duration)}</div>
+              <div className={styles.duration}>{formatMediaDuration(attachment.quick.duration)}</div>
             )}
             <video
               className={styles.preview}
@@ -88,7 +88,7 @@ const AttachmentModalItem: FC<OwnProps> = ({
               <Icon
                 name="delete"
                 className={buildClassName(styles.actionItem, styles.deleteFile)}
-                // eslint-disable-next-line react/jsx-no-bind
+
                 onClick={() => onDelete(index)}
               />
             )}
@@ -122,7 +122,7 @@ const AttachmentModalItem: FC<OwnProps> = ({
             onClick={handleSpoilerClick}
           />
           {onDelete && (
-            // eslint-disable-next-line react/jsx-no-bind
+
             <Icon name="delete" className={styles.actionItem} onClick={() => onDelete(index)} />
           )}
         </div>

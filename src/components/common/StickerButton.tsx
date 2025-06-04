@@ -1,4 +1,6 @@
 import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
+import type {
+  ElementRef } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
@@ -40,7 +42,7 @@ type OwnProps<T> = {
   isSelected?: boolean;
   isCurrentUserPremium?: boolean;
   shouldIgnorePremium?: boolean;
-  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
+  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
   withTranslucentThumb?: boolean;
   forcePlayback?: boolean;
   observeIntersection: ObserveFn;
@@ -97,10 +99,8 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   withSparkles,
 }: OwnProps<T>) => {
   const { openStickerSet, openPremiumModal, setEmojiStatus } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const menuRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
+  const menuRef = useRef<HTMLDivElement>();
   const lang = useOldLang();
   const hasCustomColor = sticker.shouldUseTextColor;
   const customColor = useDynamicColorListener(ref, undefined, !hasCustomColor);

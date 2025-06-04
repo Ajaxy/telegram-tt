@@ -11,7 +11,6 @@ const CollectibleInfoModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const CollectibleInfoModal = useModuleLoader(Bundles.Extra, 'CollectibleInfoModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return CollectibleInfoModal ? <CollectibleInfoModal {...props} /> : undefined;
 };
 

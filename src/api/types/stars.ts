@@ -71,7 +71,7 @@ export interface ApiStarGiftAttributeOriginalDetails {
 }
 
 export type ApiStarGiftAttribute = ApiStarGiftAttributeModel | ApiStarGiftAttributePattern
-| ApiStarGiftAttributeBackdrop | ApiStarGiftAttributeOriginalDetails;
+  | ApiStarGiftAttributeBackdrop | ApiStarGiftAttributeOriginalDetails;
 
 export interface ApiSavedStarGift {
   isNameHidden?: boolean;
@@ -155,14 +155,14 @@ export interface ApiStarsTransactionPeerPeer {
 }
 
 export type ApiStarsTransactionPeer =
-| ApiStarsTransactionPeerUnsupported
-| ApiStarsTransactionPeerAppStore
-| ApiStarsTransactionPeerPlayMarket
-| ApiStarsTransactionPeerPremiumBot
-| ApiStarsTransactionPeerFragment
-| ApiStarsTransactionPeerAds
-| ApiStarsTransactionApi
-| ApiStarsTransactionPeerPeer;
+  | ApiStarsTransactionPeerUnsupported
+  | ApiStarsTransactionPeerAppStore
+  | ApiStarsTransactionPeerPlayMarket
+  | ApiStarsTransactionPeerPremiumBot
+  | ApiStarsTransactionPeerFragment
+  | ApiStarsTransactionPeerAds
+  | ApiStarsTransactionApi
+  | ApiStarsTransactionPeerPeer;
 
 export interface ApiStarsTransaction {
   id?: string;

@@ -1,18 +1,21 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import './types-generator/generate';
 
+const DIR_NAME = import.meta.dirname;
+
 function generateSchema(input: string, output: string, reducedMethods?: string) {
     let apiTl = fs.readFileSync(
-        path.resolve(__dirname, input),
+        path.resolve(DIR_NAME, input),
         'utf-8',
     );
 
     if (reducedMethods) {
         apiTl = stripTl(apiTl);
         const methodList: string[] = JSON.parse(fs.readFileSync(
-            path.resolve(__dirname, reducedMethods),
+            path.resolve(DIR_NAME, reducedMethods),
             'utf-8',
         ));
         let isFunction = false;
@@ -42,7 +45,7 @@ function generateSchema(input: string, output: string, reducedMethods?: string) 
     }
 
     fs.writeFileSync(
-        path.resolve(__dirname, output),
+        path.resolve(DIR_NAME, output),
         `export default \`${stripTl(apiTl)}\`;`,
     );
 }

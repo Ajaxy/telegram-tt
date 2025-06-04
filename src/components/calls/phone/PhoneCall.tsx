@@ -55,8 +55,7 @@ const PhoneCall: FC<StateProps> = ({
   const {
     hangUp, requestMasterAndAcceptCall, playGroupCallSound, toggleGroupCallPanel, connectToActivePhoneCall,
   } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const [isFullscreen, openFullscreen, closeFullscreen] = useFlag();
   const { isMobile } = useAppLayout();

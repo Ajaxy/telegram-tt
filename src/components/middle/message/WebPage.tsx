@@ -99,8 +99,7 @@ const WebPage: FC<OwnProps & StateProps> = ({
   const { openUrl, openTelegramLink } = getActions();
   const webPage = getMessageWebPage(message);
   const { isMobile } = useAppLayout();
-  // eslint-disable-next-line no-null/no-null
-  const stickersRef = useRef<HTMLDivElement>(null);
+  const stickersRef = useRef<HTMLDivElement>();
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -270,7 +269,7 @@ const WebPage: FC<OwnProps & StateProps> = ({
             video={video}
             isOwn={message.isOutgoing}
             isInWebPage
-            observeIntersectionForLoading={observeIntersectionForLoading!}
+            observeIntersectionForLoading={observeIntersectionForLoading}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoad}
             canAutoPlay={canAutoPlay}

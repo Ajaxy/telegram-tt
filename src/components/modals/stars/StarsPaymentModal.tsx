@@ -205,7 +205,7 @@ const StarPaymentModal = ({
           withNodes: true,
         })}
       </Button>
-      {disclaimerText && (
+      {Boolean(disclaimerText) && (
         <div className={buildClassName(styles.disclaimer, styles.smallerText)}>
           {disclaimerText}
         </div>

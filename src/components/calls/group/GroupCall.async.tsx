@@ -11,7 +11,6 @@ const GroupCallAsync: FC<OwnProps> = (props) => {
   const { groupCallId } = props;
   const GroupCall = useModuleLoader(Bundles.Calls, 'GroupCall', !groupCallId);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return GroupCall ? <GroupCall {...props} /> : undefined;
 };
 

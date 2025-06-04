@@ -11,7 +11,6 @@ const VerificationMonetizationModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const VerificationMonetizationModal = useModuleLoader(Bundles.Extra, 'VerificationMonetizationModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return VerificationMonetizationModal ? <VerificationMonetizationModal {...props} /> : undefined;
 };
 

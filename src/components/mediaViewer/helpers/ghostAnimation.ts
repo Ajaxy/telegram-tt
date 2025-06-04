@@ -295,7 +295,7 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
   switch (origin) {
     case MediaViewerOrigin.Album:
     case MediaViewerOrigin.ScheduledAlbum:
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       containerSelector = `.Transition_slide-active > .MessageList #album-media-${getMessageHtmlId(message!.id, index)}`;
       mediaSelector = '.full-media';
       break;

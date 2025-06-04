@@ -12,7 +12,6 @@ import Loading from '../../ui/Loading';
 const ManagementAsync: FC<OwnProps> = (props) => {
   const Management = useModuleLoader(Bundles.Extra, 'Management');
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return Management ? <Management {...props} /> : <Loading />;
 };
 

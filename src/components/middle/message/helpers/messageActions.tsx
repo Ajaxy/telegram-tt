@@ -83,7 +83,7 @@ export function renderPeerLink(peerId: string | undefined, text: string, asPrevi
   return (
     <Link
       className={buildClassName(styles.peerLink, styles.strong)}
-      // eslint-disable-next-line react/jsx-no-bind
+
       onClick={(e) => {
         e.stopPropagation();
         getActions().openChat({ id: peerId });
@@ -101,7 +101,7 @@ export function renderMessageLink(targetMessage: ApiMessage, text: TeactNode, as
   return (
     <Link
       className={styles.messageLink}
-      // eslint-disable-next-line react/jsx-no-bind
+
       onClick={(e) => {
         e.stopPropagation();
         getActions().focusMessage({ chatId: targetMessage.chatId, messageId: targetMessage.id });

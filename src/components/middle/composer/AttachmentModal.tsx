@@ -19,7 +19,7 @@ import {
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { getAttachmentMediaType, isUserId } from '../../../global/helpers';
+import { getAttachmentMediaType } from '../../../global/helpers';
 import { selectChatFullInfo, selectIsChatWithSelf } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
@@ -153,19 +153,15 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   onSendWhenOnline,
   paidMessagesStars,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const svgRef = useRef<SVGSVGElement>(null);
+  const ref = useRef<HTMLDivElement>();
+  const svgRef = useRef<SVGSVGElement>();
   const { addRecentCustomEmoji, addRecentEmoji, updateAttachmentSettings } = getActions();
 
   const oldLang = useOldLang();
   const lang = useLang();
 
-  // eslint-disable-next-line no-null/no-null
-  const mainButtonRef = useRef<HTMLButtonElement | null>(null);
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLDivElement>(null);
+  const mainButtonRef = useRef<HTMLButtonElement>();
+  const inputRef = useRef<HTMLDivElement>();
 
   const hideTimeoutRef = useRef<number>();
   const prevAttachments = usePreviousDeprecated(attachments);
@@ -525,12 +521,12 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                 <>
                   {
                     canInvertMedia && (!isInvertedMedia ? (
-                      // eslint-disable-next-line react/jsx-no-bind
+
                       <MenuItem icon="move-caption-up" onClick={() => setIsInvertedMedia(true)}>
                         {oldLang('PreviewSender.MoveTextUp')}
                       </MenuItem>
                     ) : (
-                      // eslint-disable-next-line react/jsx-no-bind
+
                       <MenuItem icon="move-caption-down" onClick={() => setIsInvertedMedia(undefined)}>
                         {oldLang(('PreviewSender.MoveTextDown'))}
                       </MenuItem>
@@ -538,12 +534,12 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                   }
                   {
                     !shouldForceAsFile && !shouldForceCompression && (isSendingCompressed ? (
-                      // eslint-disable-next-line react/jsx-no-bind
+
                       <MenuItem icon="document" onClick={() => setShouldSendCompressed(false)}>
                         {oldLang(isMultiple ? 'Attachment.SendAsFiles' : 'Attachment.SendAsFile')}
                       </MenuItem>
                     ) : (
-                      // eslint-disable-next-line react/jsx-no-bind
+
                       <MenuItem icon="photo" onClick={() => setShouldSendCompressed(true)}>
                         {isMultiple ? 'Send All as Media' : 'Send as Media'}
                       </MenuItem>
@@ -566,13 +562,13 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                 shouldSendGrouped ? (
                   <MenuItem
                     icon="grouped-disable"
-                    // eslint-disable-next-line react/jsx-no-bind
+
                     onClick={() => setShouldSendGrouped(false)}
                   >
                     Ungroup All Media
                   </MenuItem>
                 ) : (
-                  // eslint-disable-next-line react/jsx-no-bind
+
                   <MenuItem icon="grouped" onClick={() => setShouldSendGrouped(true)}>
                     Group All Media
                   </MenuItem>
@@ -749,7 +745,7 @@ export default memo(withGlobal<OwnProps>(
       attachmentSettings,
     } = global;
 
-    const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
+    const chatFullInfo = selectChatFullInfo(global, chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const { shouldSuggestCustomEmoji } = global.settings.byKey;
     const { language } = selectSharedSettings(global);

@@ -1,4 +1,4 @@
-import { buildApiFromTlSchema } from './apiHelpers';
+import { buildApiFromTlSchema } from './apiHelpers.ts';
 
 const Api = buildApiFromTlSchema();
 

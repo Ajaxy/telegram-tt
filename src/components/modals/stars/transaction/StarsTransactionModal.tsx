@@ -95,7 +95,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     const giftAttributes = isUniqueGift ? getGiftAttributes(gift) : undefined;
 
     const customPeer = (transaction.peer && transaction.peer.type !== 'peer'
-        && buildStarsTransactionCustomPeer(transaction.peer)) || undefined;
+      && buildStarsTransactionCustomPeer(transaction.peer)) || undefined;
 
     const peerId = transaction.peer?.type === 'peer' ? transaction.peer.id : undefined;
     const toName = transaction.peer && oldLang(getStarsPeerTitleKey(transaction.peer));
@@ -104,7 +104,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
 
     const messageLink = peer && transaction.messageId && !isGiftUpgrade
       ? getMessageLink(peer, undefined, transaction.messageId) : undefined;
-    const giveawayMessageLink = peer && giveawayPostId && getMessageLink(peer, undefined, giveawayPostId);
+    const giveawayMessageLink = peer && giveawayPostId ? getMessageLink(peer, undefined, giveawayPostId) : undefined;
 
     const media = transaction.extendedMedia;
 
@@ -164,7 +164,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
             draggable={false}
           />
         )}
-        {title && <h1 className={styles.title}>{title}</h1>}
+        {Boolean(title) && <h1 className={styles.title}>{title}</h1>}
         <p className={styles.description}>{description}</p>
         <p className={styles.amount}>
           <span
@@ -177,12 +177,11 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
             <p className={styles.refunded}>{lang('Refunded')}</p>
           )}
         </p>
-        {transaction.paidMessages && transaction.starRefCommision && paidMessageCommission
-        && (
+        {Boolean(transaction.paidMessages && transaction.starRefCommision && paidMessageCommission) && (
           <p className={styles.description}>
             {lang(
               'PaidMessageTransactionDescription',
-              { percent: formatPercent(paidMessageCommission / 10) },
+              { percent: formatPercent(paidMessageCommission! / 10) },
               {
                 withNodes: true,
                 withMarkdown: true,

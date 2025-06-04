@@ -135,12 +135,9 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const isFullScreen = modal?.modalState === 'fullScreen';
 
   const supportMultiTabMode = !isMobile;
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const headerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const menuRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
+  const headerRef = useRef<HTMLDivElement>();
+  const menuRef = useRef<HTMLDivElement>();
 
   const getTriggerElement = useLastCallback(() => ref.current!);
 
@@ -198,7 +195,9 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   }, [isDragging, x, y]);
 
   useEffect(() => {
-    if (!isDragging && size && isMaximizedState) { updateMiniAppCachedSize({ size }); }
+    if (!isDragging && size && isMaximizedState) {
+      updateMiniAppCachedSize({ size });
+    }
   }, [isDragging, isMaximizedState, size]);
 
   const currentSize = size || getSize();
@@ -539,8 +538,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     );
   }
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   useHorizontalScroll(containerRef, !isOpen || isMinimizedState || !(containerRef.current));
 
   function renderTabs() {
@@ -557,7 +555,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
               className={styles.tabAvatar}
               size="mini"
               peer={tab.bot}
-              // eslint-disable-next-line react/jsx-no-bind
+
               onClick={() => handleTabClick(tab)}
             />
           )

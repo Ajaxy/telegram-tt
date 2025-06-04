@@ -1,3 +1,4 @@
+import type { ElementRef } from '../../../../lib/teact/teact';
 import { useLayoutEffect, useRef } from '../../../../lib/teact/teact';
 import { addExtraClass } from '../../../../lib/teact/teact-dom';
 
@@ -25,7 +26,7 @@ export default function useFocusMessage({
   isQuote,
   scrollTargetPosition,
 }: {
-  elementRef: { current: HTMLDivElement | null };
+  elementRef: ElementRef<HTMLDivElement>;
   chatId: string;
   isFocused?: boolean;
   focusDirection?: FocusDirection;

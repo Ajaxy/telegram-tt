@@ -33,5 +33,5 @@ export function detectCardType(cardNumber: string): number {
 
 export function detectCardTypeText(cardNumber: string): string {
   const cardType = detectCardType(cardNumber);
-  return cards[cardType as number] || '';
+  return cards[cardType] || '';
 }

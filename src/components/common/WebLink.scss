@@ -41,7 +41,7 @@
   .site-name,
   .site-description,
   .site-title {
-    word-break: break-word;
+    overflow-wrap: anywhere;
     text-align: initial;
   }
 

@@ -398,12 +398,13 @@ function renderPlaybackRateMenuItem(
   return (
     <MenuItem
       key={rate}
-      // eslint-disable-next-line react/jsx-no-bind
+
       onClick={() => onClick(rate)}
       icon={isSelected ? 'check' : undefined}
       customIcon={!isSelected ? <Icon name="placeholder" /> : undefined}
     >
-      {rate}X
+      {rate}
+      X
     </MenuItem>
   );
 }

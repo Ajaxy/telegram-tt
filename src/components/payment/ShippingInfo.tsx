@@ -36,12 +36,9 @@ const ShippingInfo: FC<OwnProps> = ({
   countryList,
   dispatch,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLInputElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const phoneRef = useRef<HTMLInputElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const selectCountryRef = useRef<HTMLSelectElement>(null);
+  const inputRef = useRef<HTMLInputElement>();
+  const phoneRef = useRef<HTMLInputElement>();
+  const selectCountryRef = useRef<HTMLSelectElement>();
 
   useEffect(() => {
     if (selectCountryRef.current

@@ -38,7 +38,7 @@ const MediaViewerFooter: FC<OwnProps> = ({
   const isHidden = useDerivedState(() => (IS_TOUCH_ENV ? !getIsVisible() : false), [getIsVisible]);
 
   useEffect(() => {
-    const footerContent = document.querySelector('.MediaViewerFooter .media-text') as HTMLDivElement | null;
+    const footerContent = document.querySelector('.MediaViewerFooter .media-text');
 
     const checkIsMultiline = () => {
       const height = footerContent ? footerContent.clientHeight : 0;

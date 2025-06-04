@@ -1,8 +1,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type {
-  ApiChat, ApiEmojiStatusType, ApiPeer, ApiUser,
+import type { ApiEmojiStatusType, ApiPeer, ApiUser,
 } from '../../types';
 
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
@@ -147,7 +146,7 @@ export async function fetchContactList() {
     return undefined;
   }
 
-  const users = result.users.map(buildApiUser).filter(Boolean) as ApiUser[];
+  const users = result.users.map(buildApiUser).filter(Boolean);
   const userStatusesById = buildApiUserStatuses(result.users);
 
   return {
@@ -164,7 +163,7 @@ export async function fetchUsers({ users }: { users: ApiUser[] }) {
     return undefined;
   }
 
-  const apiUsers = result.map(buildApiUser).filter(Boolean) as ApiUser[];
+  const apiUsers = result.map(buildApiUser).filter(Boolean);
   const userStatusesById = buildApiUserStatuses(result);
 
   return {
@@ -278,7 +277,7 @@ export async function fetchProfilePhotos({
   offset?: number;
   limit?: number;
 }) {
-  const chat = 'title' in peer ? peer as ApiChat : undefined;
+  const chat = 'title' in peer ? peer : undefined;
   const user = !chat ? peer as ApiUser : undefined;
   if (user) {
     const { id, accessHash } = user;

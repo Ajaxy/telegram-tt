@@ -106,11 +106,11 @@ export type OwnProps = {
   className?: string;
   isToncoin?: boolean;
   statistics:
-  ApiChannelStatistics |
-  ApiGroupStatistics |
-  ApiPostStatistics |
-  ApiBoostStatistics |
-  ApiChannelMonetizationStatistics;
+    ApiChannelStatistics |
+    ApiGroupStatistics |
+    ApiPostStatistics |
+    ApiBoostStatistics |
+    ApiChannelMonetizationStatistics;
   subtitle?: ReactNode;
 };
 
@@ -140,7 +140,9 @@ const StatisticsOverview: FC<OwnProps> = ({
         {percentage && (
           <>
             {' '}
-            ({percentage}%)
+            (
+            {percentage}
+            %)
           </>
         )}
       </span>
@@ -154,19 +156,28 @@ const StatisticsOverview: FC<OwnProps> = ({
       <div>
         <Icon className={styles.toncoin} name="toncoin" />
         <b className={styles.tableValue}>
-          {integerTonPart}<span className={styles.decimalPart}>.{decimalTonPart}</span>
+          {integerTonPart}
+          <span className={styles.decimalPart}>
+            .
+            {decimalTonPart}
+          </span>
         </b>
         {' '}
         <span className={styles.tableHeading}>
-          ≈ ${integerUsdPart}<span className={styles.decimalUsdPart}>.{decimalUsdPart}</span>
+          ≈ $
+          {integerUsdPart}
+          <span className={styles.decimalUsdPart}>
+            .
+            {decimalUsdPart}
+          </span>
         </span>
         <h3 className={styles.tableHeading}>{oldLang(text)}</h3>
       </div>
     );
   };
 
-  const { period } = (statistics as ApiGroupStatistics);
-  const { balances, usdRate } = (statistics as ApiChannelMonetizationStatistics);
+  const { period } = statistics as ApiGroupStatistics;
+  const { balances, usdRate } = statistics as ApiChannelMonetizationStatistics;
 
   const schema = getSchemaByType(type);
 
@@ -181,7 +192,10 @@ const StatisticsOverview: FC<OwnProps> = ({
 
         {period && (
           <div className={styles.caption}>
-            {formatFullDate(oldLang, period.minDate * 1000)} — {formatFullDate(oldLang, period.maxDate * 1000)}
+            {formatFullDate(oldLang, period.minDate * 1000)}
+            {' '}
+            —
+            {formatFullDate(oldLang, period.maxDate * 1000)}
           </div>
         )}
       </div>
@@ -220,7 +234,8 @@ const StatisticsOverview: FC<OwnProps> = ({
                       </span>
                     )}
                     <span className={cell.withAbsoluteValue ? styles.tableSecondaryValue : styles.tableValue}>
-                      {field.percentage}%
+                      {field.percentage}
+                      %
                     </span>
                     <h3 className={styles.tableHeading}>{oldLang(cell.title)}</h3>
                   </td>

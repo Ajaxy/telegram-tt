@@ -42,7 +42,7 @@ export default async function downloadMedia(
     return undefined;
   }
 
-  const parsed = await parseMedia(data, mediaFormat, mimeType);
+  const parsed = parseMedia(data, mediaFormat, mimeType);
   if (!parsed) {
     return undefined;
   }
@@ -184,10 +184,9 @@ async function download(
   }
 }
 
-// eslint-disable-next-line no-async-without-await/no-async-without-await
-async function parseMedia(
+function parseMedia(
   data: Buffer | File, mediaFormat: ApiMediaFormat, mimeType?: string,
-): Promise<ApiParsedMedia | undefined> {
+): ApiParsedMedia | undefined {
   if (data instanceof File) {
     return data;
   }
@@ -243,7 +242,7 @@ export function parseMediaUrl(url: string) {
     : url.startsWith('webDocument')
       ? url.match(/(webDocument):(.+)/)
       : url.match(
-        // eslint-disable-next-line max-len
+
         /(avatar|profile|photo|stickerSet|sticker|wallpaper|document)([-\d\w./]+)(?::\d+)?(\?size=\w+)?/,
       );
   if (!mediaMatch) {

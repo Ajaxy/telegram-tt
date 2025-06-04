@@ -149,7 +149,6 @@ type StateProps = {
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
 const CALL_BUNDLE_LOADING_DELAY_MS = 5000; // 5 sec
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_isLogged = false;
 
 const Main = ({
@@ -272,10 +271,8 @@ const Main = ({
     void loadBundle(Bundles.Calls);
   }, CALL_BUNDLE_LOADING_DELAY_MS);
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const leftColumnRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
+  const leftColumnRef = useRef<HTMLDivElement>();
 
   const { isDesktop } = useAppLayout();
   useEffect(() => {
@@ -296,11 +293,11 @@ const Main = ({
     }
 
     const removeUpdateAvailableListener = window.electron!.on(ElectronEvent.UPDATE_AVAILABLE, () => {
-      setIsElectronUpdateAvailable(true);
+      setIsElectronUpdateAvailable({ isAvailable: true });
     });
 
     const removeUpdateErrorListener = window.electron!.on(ElectronEvent.UPDATE_ERROR, () => {
-      setIsElectronUpdateAvailable(false);
+      setIsElectronUpdateAvailable({ isAvailable: false });
       removeUpdateAvailableListener?.();
     });
 
@@ -313,7 +310,7 @@ const Main = ({
   // Initial API calls
   useEffect(() => {
     if (isMasterTab && isSynced) {
-      updateIsOnline(true);
+      updateIsOnline({ isOnline: true });
       loadConfig();
       loadAppConfig();
       loadPeerColors();
@@ -653,7 +650,7 @@ export default memo(withGlobal<OwnProps>(
     const gameTitle = gameMessage?.content.game?.title;
     const { chatId } = selectCurrentMessageList(global) || {};
     const noRightColumnAnimation = !selectPerformanceSettingsValue(global, 'rightColumnAnimations')
-        || !selectCanAnimateInterface(global);
+      || !selectCanAnimateInterface(global);
 
     const deleteFolderDialog = deleteFolderDialogModal ? selectChatFolder(global, deleteFolderDialogModal) : undefined;
     const isAccountFrozen = selectIsCurrentUserFrozen(global);

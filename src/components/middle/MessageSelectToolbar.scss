@@ -7,6 +7,7 @@
   z-index: 20;
   justify-content: center;
   margin: 0;
+  opacity: 1;
 
   @media (max-width: 600px) {
     bottom: calc(0.5rem + env(safe-area-inset-bottom));
@@ -34,8 +35,6 @@
       top: -4.75rem;
     }
   }
-
-  opacity: 1;
 
   & .MessageSelectToolbar-inner {
     transform: scaleX(1) translateX(0);

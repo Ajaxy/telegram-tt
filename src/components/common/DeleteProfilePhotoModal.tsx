@@ -4,7 +4,7 @@ import { getActions } from '../../global';
 
 import type { ApiPhoto } from '../../api/types';
 
-import { isUserId } from '../../global/helpers';
+import { isUserId } from '../../util/entities/ids';
 
 import useOldLang from '../../hooks/useOldLang';
 

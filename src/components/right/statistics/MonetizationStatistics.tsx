@@ -26,8 +26,8 @@ import StatisticsOverview from './StatisticsOverview';
 
 import styles from './MonetizationStatistics.module.scss';
 
-type ILovelyChart = { create: Function };
-let lovelyChartPromise: Promise<ILovelyChart>;
+type ILovelyChart = { create: (el: HTMLElement, params: AnyLiteral) => void };
+let lovelyChartPromise: Promise<ILovelyChart> | undefined;
 let LovelyChart: ILovelyChart;
 
 async function ensureLovelyChart() {
@@ -66,8 +66,7 @@ const MonetizationStatistics = ({
   const oldLang = useOldLang();
   const lang = useLang();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   const [isReady, setIsReady] = useState(false);
   const loadedCharts = useRef<string[]>([]);
   const forceUpdate = useForceUpdate();
@@ -108,7 +107,7 @@ const MonetizationStatistics = ({
       }
 
       MONETIZATION_GRAPHS.forEach((name, index: number) => {
-        const graph = statistics[name as keyof typeof statistics];
+        const graph = statistics[name];
         const isAsync = typeof graph === 'string';
 
         if (isAsync || loadedCharts.current.includes(name)) {
@@ -121,7 +120,7 @@ const MonetizationStatistics = ({
           return;
         }
 
-        LovelyChart.create(containerRef.current!.children[index], {
+        LovelyChart.create(containerRef.current!.children[index] as HTMLElement, {
           title: oldLang((MONETIZATION_GRAPHS_TITLES as Record<string, string>)[name]),
           ...graph as StatisticsGraph,
         });
@@ -138,7 +137,7 @@ const MonetizationStatistics = ({
   function renderAvailableReward() {
     const [integerTonPart, decimalTonPart] = availableBalance ? availableBalance.toFixed(4).split('.') : [0];
     const [integerUsdPart, decimalUsdPart] = availableBalance
-    && statistics?.usdRate ? (availableBalance * statistics.usdRate).toFixed(2).split('.') : [0];
+      && statistics?.usdRate ? (availableBalance * statistics.usdRate).toFixed(2).split('.') : [0];
 
     return (
       <div className={styles.availableReward}>
@@ -146,13 +145,24 @@ const MonetizationStatistics = ({
           <Icon className={styles.toncoinIcon} name="toncoin" />
           <b className={styles.rewardValue}>
             {integerTonPart}
-            {decimalTonPart ? <span className={styles.decimalPart}>.{decimalTonPart}</span> : undefined}
+            {decimalTonPart ? (
+              <span className={styles.decimalPart}>
+                .
+                {decimalTonPart}
+              </span>
+            ) : undefined}
           </b>
         </div>
         {' '}
         <span className={styles.integer}>
-          ≈ ${integerUsdPart}
-          {decimalUsdPart ? <span className={styles.decimalUsdPart}>.{decimalUsdPart}</span> : undefined}
+          ≈ $
+          {integerUsdPart}
+          {decimalUsdPart ? (
+            <span className={styles.decimalUsdPart}>
+              .
+              {decimalUsdPart}
+            </span>
+          ) : undefined}
         </span>
       </div>
     );

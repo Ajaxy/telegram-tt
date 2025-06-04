@@ -15,7 +15,7 @@
 
 .value {
   background-color: var(--color-background);
-  word-break: break-word;
+  overflow-wrap: anywhere;
   min-width: 2rem;
 }
 

@@ -45,8 +45,7 @@ const SendAsMenu: FC<OwnProps> = ({
   const chatsById = getGlobal().chats.byId;
 
   const lang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const [handleMouseEnter, handleMouseLeave, markMouseInside] = useMouseInside(isOpen, onClose, undefined);
 
@@ -120,7 +119,7 @@ const SendAsMenu: FC<OwnProps> = ({
           <ListItem
             key={id}
             className="SendAsItem chat-item-clickable scroll-item with-avatar"
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={handleClick}
             focus={selectedSendAsIndex === index}
             rightElement={!isCurrentUserPremium && isPremium
@@ -133,9 +132,10 @@ const SendAsMenu: FC<OwnProps> = ({
             />
             <div className="info">
               {peer && <FullNameTitle peer={peer} noFake />}
-              <span className="subtitle">{user
-                ? lang('VoipGroupPersonalAccount')
-                : lang('Subscribers', chat?.membersCount, 'i')}
+              <span className="subtitle">
+                {user
+                  ? lang('VoipGroupPersonalAccount')
+                  : lang('Subscribers', chat?.membersCount, 'i')}
               </span>
             </div>
           </ListItem>

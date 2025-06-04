@@ -1,7 +1,7 @@
-import { analyzeData } from './data';
-import { getFullLabelDate } from './format';
-import { ZOOM_RANGE_DELTA, ZOOM_RANGE_MIDDLE, ZOOM_TIMEOUT } from './constants';
-import { createColors } from './skin';
+import { analyzeData } from './data.js';
+import { getFullLabelDate } from './format.js';
+import { ZOOM_RANGE_DELTA, ZOOM_RANGE_MIDDLE, ZOOM_TIMEOUT } from './constants.js';
+import { createColors } from './skin.js';
 
 export function createZoomer(data, overviewData, colors, stateManager, container, header, minimap, tooltip, tools) {
   let _isZoomed = false;

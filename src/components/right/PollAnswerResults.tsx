@@ -12,8 +12,8 @@ import type {
   ApiPollResult,
 } from '../../api/types';
 
-import { isUserId } from '../../global/helpers';
 import { selectTabState } from '../../global/selectors';
+import { isUserId } from '../../util/entities/ids';
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
 import useOldLang from '../../hooks/useOldLang';
@@ -111,7 +111,7 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
             <ListItem
               key={id}
               className="chat-item-clickable"
-              // eslint-disable-next-line react/jsx-no-bind
+
               onClick={() => handleMemberClick(id)}
             >
               {isUserId(id) ? (
@@ -141,7 +141,8 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
           })}
         </span>
         <span className="answer-percent" dir={lang.isRtl ? 'auto' : undefined}>
-          {getPercentage(answerVote.votersCount, totalVoters)}%
+          {getPercentage(answerVote.votersCount, totalVoters)}
+          %
         </span>
       </div>
     </div>

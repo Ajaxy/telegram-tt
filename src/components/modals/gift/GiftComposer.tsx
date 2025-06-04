@@ -256,7 +256,7 @@ function GiftComposer({
           </div>
         )}
 
-        {isStarGift && gift.upgradeStars && !areUniqueStarGiftsDisallowed && (
+        {isStarGift && Boolean(gift.upgradeStars) && !areUniqueStarGiftsDisallowed && (
           <ListItem
             className={styles.switcher}
             narrow
@@ -276,7 +276,7 @@ function GiftComposer({
             />
           </ListItem>
         )}
-        {isStarGift && gift.upgradeStars && !areUniqueStarGiftsDisallowed && (
+        {isStarGift && Boolean(gift.upgradeStars) && !areUniqueStarGiftsDisallowed && (
           <div className={styles.description}>
             {isPeerUser
               ? lang('GiftMakeUniqueDescription', {
@@ -324,7 +324,7 @@ function GiftComposer({
 
     return (
       <div className={styles.footer}>
-        {isStarGift && gift.availabilityRemains && (
+        {isStarGift && Boolean(gift.availabilityRemains) && (
           <PremiumProgress
             isPrimary
             progress={gift.availabilityRemains / gift.availabilityTotal!}

@@ -1,8 +1,8 @@
-import { GUTTER, AXES_FONT, X_AXIS_HEIGHT, X_AXIS_SHIFT_START, PLOT_TOP_PADDING } from './constants';
-import { formatCryptoValue, humanize } from './format';
-import { getCssColor } from './skin';
-import { applyXEdgeOpacity, applyYEdgeOpacity, xScaleLevelToStep, yScaleLevelToStep } from './formulas';
-import { toPixels } from './Projection';
+import { GUTTER, AXES_FONT, X_AXIS_HEIGHT, X_AXIS_SHIFT_START, PLOT_TOP_PADDING } from './constants.js';
+import { formatCryptoValue, humanize } from './format.js';
+import { getCssColor } from './skin.js';
+import { applyXEdgeOpacity, applyYEdgeOpacity, xScaleLevelToStep, yScaleLevelToStep } from './formulas.js';
+import { toPixels } from './Projection.js';
 
 export function createAxes(context, data, plotSize, colors) {
   function drawXAxis(state, projection) {

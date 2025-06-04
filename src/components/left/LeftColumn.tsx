@@ -1,4 +1,5 @@
-import type { RefObject } from 'react';
+import type {
+  ElementRef } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
@@ -34,7 +35,7 @@ import Settings from './settings/Settings.async';
 import './LeftColumn.scss';
 
 interface OwnProps {
-  ref: RefObject<HTMLDivElement>;
+  ref: ElementRef<HTMLDivElement>;
 }
 
 type StateProps = {
@@ -60,12 +61,12 @@ type StateProps = {
 
 enum ContentType {
   Main,
-  // eslint-disable-next-line @typescript-eslint/no-shadow
+
   Settings,
   Archived,
-  // eslint-disable-next-line no-shadow
+
   NewGroup,
-  // eslint-disable-next-line no-shadow
+
   NewChannel,
 }
 

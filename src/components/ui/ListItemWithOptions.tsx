@@ -72,7 +72,7 @@ const ListItemWithOptions: FC<OwnProps> = ({
       inactive={inactive}
       allowDisabledClick={allowDisabledClick}
       secondaryIcon={shouldRenderLockIcon ? 'lock-badge' : undefined}
-      // eslint-disable-next-line react/jsx-no-bind
+
       onClick={() => handleItemClick(key)}
       ripple={ripple}
     >

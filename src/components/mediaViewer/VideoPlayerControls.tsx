@@ -2,6 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect,
   useMemo,
+  useRef,
   useSignal,
 } from '../../lib/teact/teact';
 
@@ -102,22 +103,23 @@ const VideoPlayerControls: FC<OwnProps> = ({
   const currentTime = useDerivedState(() => Math.trunc(getCurrentTime()), [getCurrentTime]);
   const [getIsSeeking, setIsSeeking] = useSignal(false);
 
+  const closeTimeoutRef = useRef<number | undefined>();
+
   const { isMobile } = useAppLayout();
   const [getIsVisible, setVisibility] = useControlsSignal();
   const isVisible = useDerivedState(getIsVisible);
 
   useEffect(() => {
     if (!IS_TOUCH_ENV && !isForceMobileVersion) return undefined;
-    let timeout: number | undefined;
     if (!isVisible || !isPlaying || isPlaybackMenuOpen || getIsSeeking()) {
-      if (timeout) window.clearTimeout(timeout);
+      if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
       return undefined;
     }
-    timeout = window.setTimeout(() => {
+    closeTimeoutRef.current = window.setTimeout(() => {
       setVisibility(false);
     }, HIDE_CONTROLS_TIMEOUT_MS);
     return () => {
-      if (timeout) window.clearTimeout(timeout);
+      if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
     };
   }, [isPlaying, isVisible, setVisibility, isPlaybackMenuOpen, getIsSeeking, isForceMobileVersion]);
 
@@ -254,7 +256,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
         onClose={closePlaybackMenu}
       >
         {PLAYBACK_RATES.map((rate) => (
-          // eslint-disable-next-line react/jsx-no-bind
+
           <MenuItem disabled={playbackRate === rate} onClick={() => onPlaybackRateChange(rate)}>
             {`${rate}x`}
           </MenuItem>

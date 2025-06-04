@@ -48,8 +48,7 @@ const LinkResults: FC<OwnProps & StateProps> = ({
     focusMessage,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const lang = useOldLang();
 

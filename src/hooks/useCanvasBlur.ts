@@ -16,8 +16,7 @@ export default function useCanvasBlur(
   preferredWidth?: number,
   preferredHeight?: number,
 ) {
-  // eslint-disable-next-line no-null/no-null
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>();
   const isStarted = useRef();
 
   useSyncEffect(() => {

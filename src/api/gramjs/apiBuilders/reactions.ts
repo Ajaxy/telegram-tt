@@ -166,7 +166,7 @@ export function buildApiAvailableEffect(availableEffect: GramJs.AvailableEffect)
   };
 }
 
-export function buildApiPaidReactionPrivacy(privacy: GramJs.TypePaidReactionPrivacy) : ApiPaidReactionPrivacyType {
+export function buildApiPaidReactionPrivacy(privacy: GramJs.TypePaidReactionPrivacy): ApiPaidReactionPrivacyType {
   if (privacy instanceof GramJs.PaidReactionPrivacyAnonymous) {
     return { type: 'anonymous' };
   }

@@ -1,11 +1,11 @@
-import type { RefObject } from 'react';
+import type { ElementRef } from '../lib/teact/teact';
 import { useEffect, useRef } from '../lib/teact/teact';
 
 import { IS_ELECTRON, IS_MAC_OS } from '../util/browser/windowEnvironment';
 
 const DRAG_DISTANCE_THRESHOLD = 5;
 
-const useElectronDrag = (ref: RefObject<HTMLDivElement>) => {
+const useElectronDrag = (ref: ElementRef<HTMLDivElement>) => {
   const isDragging = useRef(false);
 
   const x = useRef(window.screenX);
@@ -13,7 +13,7 @@ const useElectronDrag = (ref: RefObject<HTMLDivElement>) => {
   const distance = useRef(0);
 
   useEffect(() => {
-    const element: HTMLDivElement | null = ref.current;
+    const element = ref.current;
     if (!element || !(IS_ELECTRON && IS_MAC_OS)) return undefined;
 
     const handleClick = (event: MouseEvent) => {

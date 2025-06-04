@@ -41,8 +41,7 @@ const GiftAction = ({
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
 }: OwnProps & StateProps) => {
-  // eslint-disable-next-line no-null/no-null
-  const stickerRef = useRef<HTMLDivElement>(null);
+  const stickerRef = useRef<HTMLDivElement>();
   const lang = useLang();
   const message = action.type === 'giftPremium' ? action.message : undefined;
 

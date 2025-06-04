@@ -39,7 +39,6 @@ import {
   isChatGroup,
   isMessageLocal,
   isOwnMessage,
-  isUserId,
   isUserRightBanned,
 } from '../../../global/helpers';
 import {
@@ -74,6 +73,7 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
+import { isUserId } from '../../../util/entities/ids';
 import { getSelectionAsFormattedText } from './helpers/getSelectionAsFormattedText';
 import { isSelectionRangeInsideMessage } from './helpers/isSelectionRangeInsideMessage';
 
@@ -366,7 +366,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
     const selectionText = getSelectionAsFormattedText(selectionRange);
 
-    const messageText = message.content.text!.text!.replace(/\u00A0/g, ' ');
+    const messageText = message.content.text!.text.replace(/\u00A0/g, ' ');
 
     const canQuote = selectionText.text.trim().length > 0
       && messageText.includes(selectionText.text);
@@ -807,7 +807,7 @@ export default memo(withGlobal<OwnProps>(
     const canSendText = chat && !isUserRightBanned(chat, 'sendPlain', chatFullInfo);
 
     const canReplyInChat = chat && threadId ? getCanPostInChat(chat, topic, isMessageThread, chatFullInfo)
-     && canSendText : false;
+      && canSendText : false;
 
     const isLocal = isMessageLocal(message);
     const hasTtl = hasMessageTtl(message);

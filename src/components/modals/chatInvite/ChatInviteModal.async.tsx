@@ -11,7 +11,6 @@ const ChatInviteModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const ChatInviteModal = useModuleLoader(Bundles.Extra, 'ChatInviteModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return ChatInviteModal ? <ChatInviteModal {...props} /> : undefined;
 };
 

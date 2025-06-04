@@ -115,8 +115,8 @@ export async function fetchAvailableEffects() {
 
   const effects = result.effects.map(buildApiAvailableEffect);
 
-  const stickers : ApiSticker[] = [];
-  const emojis : ApiSticker[] = [];
+  const stickers: ApiSticker[] = [];
+  const emojis: ApiSticker[] = [];
 
   for (const effect of effects) {
     if (effect.effectAnimationId) {
@@ -126,7 +126,9 @@ export async function fetchAvailableEffects() {
     } else {
       const document = localDb.documents[effect.effectStickerId];
       const sticker = buildStickerFromDocument(document);
-      if (sticker) { stickers.push(sticker); }
+      if (sticker) {
+        stickers.push(sticker);
+      }
     }
   }
 

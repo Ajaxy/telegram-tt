@@ -1,3 +1,5 @@
+import type {
+  ElementRef } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo,
   useState,
@@ -35,7 +37,6 @@ import {
   isChatChannel,
   isChatGroup,
   isChatSuperGroup,
-  isUserId,
   isUserRightBanned,
 } from '../../global/helpers';
 import {
@@ -67,6 +68,7 @@ import {
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { isUserId } from '../../util/entities/ids';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 
 import useAppLayout from '../../hooks/useAppLayout';
@@ -107,7 +109,7 @@ import './MiddleColumn.scss';
 import styles from './MiddleColumn.module.scss';
 
 interface OwnProps {
-  leftColumnRef: React.RefObject<HTMLDivElement>;
+  leftColumnRef: ElementRef<HTMLDivElement>;
   isMobile?: boolean;
 }
 
@@ -808,7 +810,7 @@ export default memo(withGlobal<OwnProps>(
     const canUnpin = chat && (
       isPrivate || (
         chat?.isCreator || (!isChannel && !isUserRightBanned(chat, 'pinMessages'))
-          || getHasAdminRight(chat, 'pinMessages')
+        || getHasAdminRight(chat, 'pinMessages')
       )
     );
 

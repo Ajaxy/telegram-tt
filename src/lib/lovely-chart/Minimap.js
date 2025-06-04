@@ -1,8 +1,8 @@
-import { setupCanvas, clearCanvas } from './canvas';
-import { preparePoints } from './preparePoints';
-import { createProjection } from './Projection';
-import { drawDatasets } from './drawDatasets';
-import { captureEvents } from './captureEvents';
+import { setupCanvas, clearCanvas } from './canvas.js';
+import { preparePoints } from './preparePoints.js';
+import { createProjection } from './Projection.js';
+import { drawDatasets } from './drawDatasets.js';
+import { captureEvents } from './captureEvents.js';
 import {
   DEFAULT_RANGE,
   MINIMAP_HEIGHT,
@@ -11,10 +11,10 @@ import {
   MINIMAP_LINE_WIDTH,
   MINIMAP_MAX_ANIMATED_DATASETS,
   SIMPLIFIER_MINIMAP_FACTOR,
-} from './constants';
-import { proxyMerge, throttleWithRaf } from './utils';
-import { createElement } from './minifiers';
-import { getSimplificationDelta } from './formulas';
+} from './constants.js';
+import { proxyMerge, throttleWithRaf } from './utils.js';
+import { createElement } from './minifiers.js';
+import { getSimplificationDelta } from './formulas.js';
 
 export function createMinimap(container, data, colors, rangeCallback) {
   let _element;

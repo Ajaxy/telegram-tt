@@ -66,10 +66,8 @@ const EmojiIconBackground = ({
   emojiDocumentId,
   className,
 }: OwnProps) => {
-  // eslint-disable-next-line no-null/no-null
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>();
+  const containerRef = useRef<HTMLDivElement>();
 
   const [emojiImage, setEmojiImage] = useState<HTMLImageElement | undefined>();
 

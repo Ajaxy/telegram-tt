@@ -56,7 +56,7 @@ const ResponsiveHoverButton: FC<OwnProps> = ({ onActivate, ...buttonProps }) => 
 
   return (
     <Button
-      // eslint-disable-next-line react/jsx-props-no-spreading
+
       {...buttonProps}
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}

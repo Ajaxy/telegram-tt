@@ -70,7 +70,7 @@ export function deserializeBytes(value: string) {
 }
 
 export function log(suffix: keyof typeof LOG_SUFFIX, ...data: any) {
-  /* eslint-disable max-len */
+  /* eslint-disable @stylistic/max-len */
   /* eslint-disable no-console */
   const func = suffix === 'UNEXPECTED RESPONSE' ? console.error
     : suffix === 'INVOKE ERROR' || suffix === 'UNEXPECTED UPDATE' ? console.warn : console.log;
@@ -81,7 +81,7 @@ export function log(suffix: keyof typeof LOG_SUFFIX, ...data: any) {
     `color: ${LOG_SUFFIX[suffix]}; background: ${LOG_BACKGROUND}; padding: 0.25rem; border-radius: 0.25rem; margin-left: 0.25rem;`,
     ...data,
   );
-  /* eslint-enable max-len */
+  /* eslint-enable @stylistic/max-len */
 }
 
 export function isResponseUpdate<T extends GramJs.AnyRequest>(result: T['__response']): result is GramJs.TypeUpdate {

@@ -1,4 +1,4 @@
-import type { RefObject } from 'react';
+import type { ElementRef } from '../lib/teact/teact';
 import { useEffect, useState } from '../lib/teact/teact';
 import { addExtraClass, removeExtraClass } from '../lib/teact/teact-dom';
 
@@ -19,7 +19,7 @@ function stopEvent(e: Event) {
 }
 
 const useContextMenuHandlers = (
-  elementRef: RefObject<HTMLElement>,
+  elementRef: ElementRef<HTMLElement>,
   isMenuDisabled?: boolean,
   shouldDisableOnLink?: boolean,
   shouldDisableOnLongTap?: boolean,

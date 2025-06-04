@@ -1304,6 +1304,9 @@ export interface LangPair {
   'PrivacyEnablePremiumGifts': undefined;
   'DisplayGiftsButton': undefined;
   'HideGiftsButton': undefined;
+  'Review': undefined;
+  'CheckPrivacyCallsText': undefined;
+  'CheckPrivacyInviteText': undefined;
   'CustomShareGiftsInfo': undefined;
   'AllChatsSearchContext': undefined;
   'PrivateChatsSearchContext': undefined;
@@ -1513,7 +1516,7 @@ export interface LangPair {
   'ContextMenuItemMention': undefined;
 }
 
-export interface LangPairWithVariables<V extends unknown = LangVariable> {
+export interface LangPairWithVariables<V = LangVariable> {
   'UserTyping': {
     'user': V;
   };
@@ -2472,7 +2475,7 @@ export interface LangPairPlural {
   'PreviewDraggingAddItems': undefined;
 }
 
-export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
+export interface LangPairPluralWithVariables<V = LangVariable> {
   'Participants': {
     'count': V;
   };

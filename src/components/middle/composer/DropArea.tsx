@@ -41,8 +41,7 @@ const DropArea: FC<OwnProps> = ({
 }) => {
   const lang = useOldLang();
   const { showNotification } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const hideTimeoutRef = useRef<number>(null);
+  const hideTimeoutRef = useRef<number>();
   const prevWithQuick = usePreviousDeprecated(withQuick);
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen);
   const isInAlbum = editingMessage && editingMessage?.groupedId;
@@ -90,7 +89,7 @@ const DropArea: FC<OwnProps> = ({
     // Esc button pressed during drag event
     if (
       (fromTarget as HTMLDivElement).matches('.DropTarget, .DropArea') && (
-        !toTarget || !(toTarget as HTMLDivElement)!.matches('.DropTarget, .DropArea')
+        !toTarget || !(toTarget as HTMLDivElement).matches('.DropTarget, .DropArea')
       )
     ) {
       hideTimeoutRef.current = window.setTimeout(() => {

@@ -26,9 +26,6 @@ import styles from './MoreAppsTabContent.module.scss';
 
 const POPULAR_APPS_SLICE = 30;
 
-export type OwnProps = {
-};
-
 type StateProps = {
   isLoading?: boolean;
   foundIds?: string[];
@@ -37,7 +34,7 @@ type StateProps = {
 const LESS_GRID_ITEMS_AMOUNT = 5;
 const runThrottled = throttle((cb) => cb(), 500, true);
 
-const MoreAppsTabContent: FC<OwnProps & StateProps> = ({
+const MoreAppsTabContent: FC<StateProps> = ({
   foundIds,
   recentBotIds,
 }) => {
@@ -130,7 +127,7 @@ const MoreAppsTabContent: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global) => {
+export default memo(withGlobal((global) => {
   const globalSearch = selectTabState(global).globalSearch;
   const foundIds = globalSearch.popularBotApps?.peerIds;
 

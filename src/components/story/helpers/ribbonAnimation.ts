@@ -51,7 +51,7 @@ export function animateOpening(isArchived?: boolean) {
     if (!toggleAvatar) return;
 
     let {
-      // eslint-disable-next-line prefer-const
+
       top: fromTop,
       left: fromLeft,
       width: fromWidth,
@@ -87,7 +87,7 @@ export function animateOpening(isArchived?: boolean) {
 
       // If this is a toogle avatar we create a second ghost and do crossfade animation
       if (zIndex > RIBBON_Z_INDEX) {
-        ghost2 = createGhost(toggleAvatar!);
+        ghost2 = createGhost(toggleAvatar);
         if (isLast) {
           ghost2.classList.add(togglerStyles.ghostLast);
         }
@@ -226,7 +226,7 @@ export function animateClosing(isArchived?: boolean) {
       let ghost2: HTMLElement | undefined;
 
       if (zIndex > RIBBON_Z_INDEX) {
-        ghost2 = createGhost(toggleAvatar!);
+        ghost2 = createGhost(toggleAvatar);
         if (isLast) {
           ghost2.classList.add(togglerStyles.ghostLast);
         }
@@ -252,7 +252,7 @@ export function animateClosing(isArchived?: boolean) {
       }
 
       peer.classList.add('animating');
-      toggleAvatar!.classList.add('animating');
+      toggleAvatar.classList.add('animating');
 
       container.appendChild(ghost);
       if (ghost2) {
@@ -266,7 +266,7 @@ export function animateClosing(isArchived?: boolean) {
         });
 
         if (ghost2) {
-          applyStyles(ghost2!, {
+          applyStyles(ghost2, {
             opacity: '',
             transform: '',
           });
@@ -283,7 +283,7 @@ export function animateClosing(isArchived?: boolean) {
               container.removeChild(ghost2);
             }
             peer.classList.remove('animating');
-            toggleAvatar!.classList.remove('animating');
+            toggleAvatar.classList.remove('animating');
           });
 
           callbacks.delete(cb);

@@ -76,15 +76,11 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   const {
     closeGiftModal,
   } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const dialogRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const transitionRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const giftHeaderRef = useRef<HTMLHeadingElement>(null);
+  const dialogRef = useRef<HTMLDivElement>();
+  const transitionRef = useRef<HTMLDivElement>();
+  const giftHeaderRef = useRef<HTMLHeadingElement>();
 
-  // eslint-disable-next-line no-null/no-null
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>();
 
   const isOpen = Boolean(modal);
   const renderingModal = useCurrentOrPrev(modal);
@@ -129,7 +125,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
     filteredGifts.forEach((gift) => {
       const giftByStars = allGifts?.find(
         (starsGift) => starsGift.currency === STARS_CURRENCY_CODE
-        && starsGift.months === gift.months,
+          && starsGift.months === gift.months,
       );
       if (giftByStars) {
         mapGifts.set(gift, giftByStars);

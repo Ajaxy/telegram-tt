@@ -67,5 +67,5 @@ function formatKeyWithVariables(isPlural: boolean, keysWithVars: Record<string, 
   const typeName = isPlural ? 'LangPairPlural' : 'LangPair';
 
   return `export interface ${typeName} {\n${entries}}\n
-export interface ${typeName}WithVariables<V extends unknown = LangVariable> {\n${variableEntries}}\n`;
+export interface ${typeName}WithVariables<V = LangVariable> {\n${variableEntries}}\n`;
 }

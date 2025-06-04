@@ -1,10 +1,10 @@
-import type { RefObject } from 'react';
+import type { ElementRef } from '../../../lib/teact/teact';
 import { useEffect, useRef, useSignal } from '../../../lib/teact/teact';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useResizeObserver from '../../../hooks/useResizeObserver';
 
-export default function useContainerHeight(containerRef: RefObject<HTMLDivElement>, isComposerVisible: boolean) {
+export default function useContainerHeight(containerRef: ElementRef<HTMLDivElement>, isComposerVisible: boolean) {
   const [getContainerHeight, setContainerHeight] = useSignal<number | undefined>();
 
   // Container resize observer (caused by Composer reply/webpage panels)

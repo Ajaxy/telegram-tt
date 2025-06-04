@@ -1,16 +1,16 @@
 import type { ThreadId } from '../types';
 
 import { RE_TG_LINK, RE_TME_LINK } from '../config';
-import { toChannelId } from '../global/helpers';
 import { IS_BAD_URL_PARSER } from './browser/globalEnvironment';
 import { ensureProtocol } from './browser/url';
 import { parseTimestampDuration } from './dates/timestamp';
-import { isUsernameValid } from './username';
+import { toChannelId } from './entities/ids';
+import { isUsernameValid } from './entities/username';
 
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
-'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
-'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message' | 'premium_offer' | 'premium_multigift' | 'stars_topup'
-| 'nft' | 'stars' | 'settings';
+  'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
+  'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message' | 'premium_offer' | 'premium_multigift' | 'stars_topup'
+  | 'nft' | 'stars';
 
 interface PublicMessageLink {
   type: 'publicMessageLink';
@@ -427,7 +427,7 @@ function getTgDeepLinkType(
   switch (method) {
     case 'resolve': {
       const {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         domain, post, bot_id, scope, public_key, nonce,
       } = queryParams;
       if (domain === 'telegrampassport' && bot_id && scope && public_key && nonce) {

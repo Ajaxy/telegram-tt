@@ -51,8 +51,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
   const {
     closeStarsGiftModal, openInvoice, requestConfetti,
   } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>();
 
   const isOpen = Boolean(modal?.isOpen);
 
@@ -162,7 +161,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
           size="smaller"
           className={styles.closeButton}
           color="translucent"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => closeStarsGiftModal()}
           ariaLabel={oldLang('Close')}
         >

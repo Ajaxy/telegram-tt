@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+import type { ElementRef } from '../../../../lib/teact/teact';
 import { useCallback, useEffect, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
@@ -35,7 +35,7 @@ const RELOAD_TIMEOUT = 500;
 const FULLSCREEN_BUTTONS_AREA_HEIGHT = 3.675 * REM;
 
 const useWebAppFrame = (
-  ref: React.RefObject<HTMLIFrameElement>,
+  ref: ElementRef<HTMLIFrameElement>,
   isOpen: boolean,
   isFullscreen: boolean,
   isSimpleView: boolean,

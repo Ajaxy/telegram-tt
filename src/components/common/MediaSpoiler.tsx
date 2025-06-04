@@ -30,8 +30,7 @@ const MediaSpoiler: FC<OwnProps> = ({
   width,
   height,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(
     isVisible, undefined, true, withAnimation ? false : undefined, undefined, ANIMATION_DURATION,

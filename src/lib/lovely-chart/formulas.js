@@ -1,4 +1,4 @@
-import { GUTTER, PLOT_PIE_RADIUS_FACTOR, MILISECONDS_IN_DAY, SIMPLIFIER_MIN_POINTS } from './constants';
+import { GUTTER, PLOT_PIE_RADIUS_FACTOR, MILISECONDS_IN_DAY, SIMPLIFIER_MIN_POINTS } from './constants.js';
 
 export function xScaleLevelToStep(scaleLevel) {
   return Math.pow(2, scaleLevel);

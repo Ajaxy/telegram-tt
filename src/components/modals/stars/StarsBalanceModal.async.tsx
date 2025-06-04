@@ -11,7 +11,6 @@ const StarsBalanceModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const StarsBalanceModal = useModuleLoader(Bundles.Stars, 'StarsBalanceModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return StarsBalanceModal ? <StarsBalanceModal {...props} /> : undefined;
 };
 

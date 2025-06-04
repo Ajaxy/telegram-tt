@@ -11,7 +11,6 @@ const PremiumMainModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const PremiumMainModal = useModuleLoader(Bundles.Extra, 'PremiumMainModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return PremiumMainModal ? <PremiumMainModal {...props} /> : undefined;
 };
 

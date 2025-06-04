@@ -10,7 +10,7 @@
     font-weight: var(--font-weight-medium);
     line-height: 1.25rem;
     margin: 0.125rem 0;
-    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
   .poll-type,

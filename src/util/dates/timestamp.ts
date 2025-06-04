@@ -9,7 +9,7 @@ import { getSeconds } from './units';
 const TIMESTAMP_RE = /\b(?:(\d{1,2}):)?([0-5]?\d):([0-5]\d)\b/g;
 
 export function addTimestampEntities(apiText: ApiFormattedText): ApiFormattedText {
-  const resultText = {
+  const resultText: Required<ApiFormattedText> = {
     text: apiText.text,
     entities: apiText.entities?.filter((e) => e.type !== ApiMessageEntityTypes.Timestamp) || [],
   };

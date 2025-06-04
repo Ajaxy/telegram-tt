@@ -106,8 +106,7 @@ const AnimatedCircleSticker: FC<{
 const PremiumFeaturePreviewStickers: FC<OwnProps & StateProps> = ({
   stickers, isActive,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   const [offset, setOffset] = useState(0);
   const [size, setSize] = useState(0);
 

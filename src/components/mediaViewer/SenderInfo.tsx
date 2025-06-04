@@ -6,13 +6,14 @@ import type { ApiChat, ApiPeer } from '../../api/types';
 import type { MediaViewerItem } from './helpers/getViewableMedia';
 
 import {
-  isChatChannel, isChatGroup, isUserId,
+  isChatChannel, isChatGroup,
 } from '../../global/helpers';
 import { getPeerTitle } from '../../global/helpers/peers';
 import {
   selectSender,
 } from '../../global/selectors';
 import { formatMediaDateTime } from '../../util/dates/dateFormat';
+import { isUserId } from '../../util/entities/ids';
 import renderText from '../common/helpers/renderText';
 
 import useAppLayout from '../../hooks/useAppLayout';

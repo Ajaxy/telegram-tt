@@ -27,7 +27,9 @@ function Child() {
 
   return (
     <div>
-      This number should never change: {idRef.current}
+      This number should never change:
+      {' '}
+      {idRef.current}
     </div>
   );
 }

@@ -5,9 +5,10 @@ import type {
   ApiPeerNotifySettings,
 } from '../../api/types';
 
+import { isUserId } from '../../util/entities/ids';
 import { omitUndefined } from '../../util/iteratees';
 import { getServerTime } from '../../util/serverTime';
-import { isChatChannel, isUserId } from './chats';
+import { isChatChannel } from './chats';
 
 export function getIsChatMuted(
   chat: ApiChat,

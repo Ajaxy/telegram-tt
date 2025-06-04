@@ -32,7 +32,7 @@ const PickerModal = ({
 
   return (
     <Modal
-      // eslint-disable-next-line react/jsx-props-no-spreading
+
       {...modalProps}
       isSlim
       className={buildClassName(

@@ -1,10 +1,11 @@
 import type { GlobalState, TabArgs } from '../types';
 
+import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   getCanAddContact,
   isAnonymousForwardsChat,
-  isChatAdmin, isChatGroup, isUserBot, isUserId,
+  isChatAdmin, isChatGroup, isUserBot,
 } from '../helpers';
 import { selectChat, selectIsChatWithSelf } from './chats';
 import { selectCurrentMessageList } from './messages';

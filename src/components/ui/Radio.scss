@@ -101,7 +101,7 @@
 
     .label {
       display: block;
-      word-break: break-word;
+      overflow-wrap: anywhere;
       unicode-bidi: plaintext;
       text-align: left;
       line-height: 1.5rem;

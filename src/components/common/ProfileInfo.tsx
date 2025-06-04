@@ -287,11 +287,12 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     }
 
     return (
-      <span className={buildClassName(styles.status, 'status')} dir="auto">{
-        isChatChannel(chat!)
-          ? lang('Subscribers', chat!.membersCount ?? 0, 'i')
-          : lang('Members', chat!.membersCount ?? 0, 'i')
-      }
+      <span className={buildClassName(styles.status, 'status')} dir="auto">
+        {
+          isChatChannel(chat!)
+            ? lang('Subscribers', chat!.membersCount ?? 0, 'i')
+            : lang('Members', chat!.membersCount ?? 0, 'i')
+        }
       </span>
     );
   }

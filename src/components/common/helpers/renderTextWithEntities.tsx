@@ -1,3 +1,4 @@
+import type { ElementRef } from '../../../lib/teact/teact';
 import React from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -63,8 +64,8 @@ export function renderTextWithEntities({
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   withTranslucentThumbs?: boolean;
-  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
-  sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
+  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
+  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   cacheBuster?: string;
   forcePlayback?: boolean;
   noCustomEmojiPlayback?: boolean;
@@ -115,7 +116,7 @@ export function renderTextWithEntities({
           emojiSize,
           shouldRenderAsHtml,
           asPreview,
-        }) as TextPart[]);
+        }));
       }
     }
 
@@ -201,7 +202,7 @@ export function renderTextWithEntities({
           emojiSize,
           shouldRenderAsHtml,
           asPreview,
-        }) as TextPart[]);
+        }));
       }
     }
 
@@ -239,7 +240,7 @@ export function getTextWithEntitiesAsHtml(formattedText?: ApiFormattedText) {
     text,
     entities,
     shouldRenderAsHtml: true,
-  });
+  }) as string[];
 
   if (Array.isArray(result)) {
     return result.join('');
@@ -255,7 +256,7 @@ function renderMessagePart({
   emojiSize,
   shouldRenderAsHtml,
   asPreview,
-} : {
+}: {
   content: TextPart | TextPart[];
   highlight?: string;
   focusedQuote?: string;
@@ -441,7 +442,7 @@ function processEntity({
   messageId,
   threadId,
   maxTimestamp,
-} : {
+}: {
   entity: ApiMessageEntity;
   entityContent: TextPart;
   nestedEntityContent: TextPart[];
@@ -454,8 +455,8 @@ function processEntity({
   observeIntersectionForPlaying?: ObserveFn;
   withTranslucentThumbs?: boolean;
   emojiSize?: number;
-  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
-  sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
+  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
+  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   cacheBuster?: string;
   forcePlayback?: boolean;
   noCustomEmojiPlayback?: boolean;
@@ -674,8 +675,8 @@ function processEntityAsHtml(
   const content = entity.type === ApiMessageEntityTypes.Pre ? (entityContent as string).trimEnd() : entityContent;
 
   const renderedContent = nestedEntityContent.length
-    ? nestedEntityContent.join('')
-    : renderText(content, ['escape_html', 'emoji_html', 'br_html']).join('');
+    ? (nestedEntityContent as string[]).join('')
+    : (renderText(content, ['escape_html', 'emoji_html', 'br_html']) as string[]).join('');
 
   if (!rawEntityText) {
     return renderedContent;
@@ -691,7 +692,8 @@ function processEntityAsHtml(
     case ApiMessageEntityTypes.Code:
       return `<code class="text-entity-code">${renderedContent}</code>`;
     case ApiMessageEntityTypes.Pre:
-      return `\`\`\`${renderText(entity.language || '', ['escape_html'])}<br/>${renderedContent}<br/>\`\`\`<br/>`;
+      // eslint-disable-next-line @stylistic/max-len
+      return `\`\`\`${renderText(entity.language || '', ['escape_html'])[0] as string}<br/>${renderedContent}<br/>\`\`\`<br/>`;
     case ApiMessageEntityTypes.Strike:
       return `<del>${renderedContent}</del>`;
     case ApiMessageEntityTypes.MentionName:

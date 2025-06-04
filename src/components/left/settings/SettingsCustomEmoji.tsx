@@ -42,8 +42,7 @@ const SettingsCustomEmoji: FC<OwnProps & StateProps> = ({
   const { openStickerSet, setSettingOption } = getActions();
   const lang = useOldLang();
 
-  // eslint-disable-next-line no-null/no-null
-  const stickerSettingsRef = useRef<HTMLDivElement>(null);
+  const stickerSettingsRef = useRef<HTMLDivElement>();
   const { observe: observeIntersectionForCovers } = useIntersectionObserver({ rootRef: stickerSettingsRef });
 
   useHistoryBack({

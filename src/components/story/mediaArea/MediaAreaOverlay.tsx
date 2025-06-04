@@ -36,8 +36,7 @@ const MediaAreaOverlay = ({
     openMapModal, openUniqueGiftBySlug, focusMessage, closeStoryViewer, openUrl,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
   const [mediaWidth, setMediaWidth] = useState(0);
 
   const windowSize = useWindowSize();
@@ -45,7 +44,7 @@ const MediaAreaOverlay = ({
   useEffect(() => {
     if (!ref.current) return;
     const element = ref.current;
-    setMediaWidth(element!.clientWidth!);
+    setMediaWidth(element.clientWidth);
 
     if (windowSize.width > MOBILE_SCREEN_MAX_WIDTH) {
       requestMutation(() => {
@@ -120,7 +119,7 @@ const MediaAreaOverlay = ({
           case 'suggestedReaction':
             return (
               <MediaAreaSuggestedReaction
-                // eslint-disable-next-line react/no-array-index-key
+
                 key={`${mediaArea.type}-${i}`}
                 story={story}
                 mediaArea={mediaArea}
@@ -133,7 +132,7 @@ const MediaAreaOverlay = ({
           case 'weather': {
             return (
               <MediaAreaWeather
-                // eslint-disable-next-line react/no-array-index-key
+
                 key={`${mediaArea.type}-${i}`}
                 mediaArea={mediaArea}
                 className={styles.mediaArea}

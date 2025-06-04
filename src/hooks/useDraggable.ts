@@ -1,4 +1,5 @@
-import type { RefObject } from 'react';
+import type {
+  ElementRef } from '../lib/teact/teact';
 import {
   useEffect, useSignal, useState,
 } from '../lib/teact/teact';
@@ -23,7 +24,7 @@ export enum ResizeHandleType {
 }
 
 type ResizeHandleSelectorType = 'top' | 'bottom' | 'left'
-| 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+  | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
 
 const resizeHandleSelectorsMap: Record<ResizeHandleSelectorType, ResizeHandleType> = {
   top: ResizeHandleType.Top,
@@ -42,8 +43,8 @@ let resizeTimeout: number | undefined;
 const FULLSCREEN_POSITION = { x: 0, y: 0 };
 
 export default function useDraggable(
-  ref: RefObject<HTMLElement>,
-  dragHandleElementRef: RefObject<HTMLElement>,
+  ref: ElementRef<HTMLElement>,
+  dragHandleElementRef: ElementRef<HTMLElement>,
   isDragEnabled: boolean = true,
   originalSize: Size,
   isFullscreen: boolean = false,
@@ -137,7 +138,9 @@ export default function useDraggable(
 
     if (!closest(RESIZE_HANDLE_SELECTOR)) return undefined;
     for (const selector of resizeHandleSelectors) {
-      if (closest(`.${selector}`)) { return resizeHandleSelectorsMap[selector]; }
+      if (closest(`.${selector}`)) {
+        return resizeHandleSelectorsMap[selector];
+      }
     }
     return undefined;
   }
@@ -301,31 +304,31 @@ export default function useDraggable(
     const newBounds = { ...originalBounds };
 
     if (hitResizeHandle === ResizeHandleType.Left
-    || hitResizeHandle === ResizeHandleType.TopLeft
-    || hitResizeHandle === ResizeHandleType.BottomLeft
+      || hitResizeHandle === ResizeHandleType.TopLeft
+      || hitResizeHandle === ResizeHandleType.BottomLeft
     ) {
       newBounds.width = Math.max(sizeOnStartTransform.width - offsetX, minimumSize.width);
       newBounds.x = Math.min(newBounds.x + offsetX, maxX);
     }
 
     if (hitResizeHandle === ResizeHandleType.Right
-    || hitResizeHandle === ResizeHandleType.TopRight
-    || hitResizeHandle === ResizeHandleType.BottomRight
+      || hitResizeHandle === ResizeHandleType.TopRight
+      || hitResizeHandle === ResizeHandleType.BottomRight
     ) {
       newBounds.width = Math.max(sizeOnStartTransform.width + offsetX, minimumSize.width);
     }
 
     if (hitResizeHandle === ResizeHandleType.Top
-    || hitResizeHandle === ResizeHandleType.TopLeft
-    || hitResizeHandle === ResizeHandleType.TopRight
+      || hitResizeHandle === ResizeHandleType.TopLeft
+      || hitResizeHandle === ResizeHandleType.TopRight
     ) {
       newBounds.height = Math.max(sizeOnStartTransform.height - offsetY, minimumSize.height);
       newBounds.y = Math.min(newBounds.y + offsetY, maxY);
     }
 
     if (hitResizeHandle === ResizeHandleType.Bottom
-    || hitResizeHandle === ResizeHandleType.BottomLeft
-    || hitResizeHandle === ResizeHandleType.BottomRight
+      || hitResizeHandle === ResizeHandleType.BottomLeft
+      || hitResizeHandle === ResizeHandleType.BottomRight
     ) {
       newBounds.height = Math.max(sizeOnStartTransform.height + offsetY, minimumSize.height);
     }

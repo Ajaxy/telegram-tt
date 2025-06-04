@@ -11,7 +11,6 @@ const GiveawayModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const GiveawayModal = useModuleLoader(Bundles.Extra, 'GiveawayModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return GiveawayModal ? <GiveawayModal {...props} /> : undefined;
 };
 

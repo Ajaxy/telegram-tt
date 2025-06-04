@@ -53,7 +53,6 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument,
     (s): s is GramJs.PhotoCachedSize => s instanceof GramJs.PhotoCachedSize,
   );
 
-  // eslint-disable-next-line no-restricted-globals
   if (mimeType === VIDEO_STICKER_MIME_TYPE && !(self as any).isWebmSupported && !cachedThumb) {
     const staticThumb = document.thumbs && document.thumbs.find(
       (s): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize,
@@ -78,7 +77,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument,
   const { w: width, h: height } = cachedThumb as GramJs.PhotoCachedSize || sizeAttribute || {};
 
   const hasEffect = !isNoPremium && videoThumbs && compact(videoThumbs
-    ?.filter((thumb) => thumb instanceof GramJs.VideoSize) as GramJs.VideoSize[])
+    ?.filter((thumb) => thumb instanceof GramJs.VideoSize))
     .some(({ type }) => type === 'f');
 
   return {

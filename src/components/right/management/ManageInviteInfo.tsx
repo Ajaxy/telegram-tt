@@ -83,7 +83,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
             return (
               <ListItem
                 className="chat-item-clickable scroll-item small-icon"
-                // eslint-disable-next-line react/jsx-no-bind
+
                 onClick={() => openChat({ id: importer.userId })}
               >
                 <PrivateChatInfo
@@ -110,7 +110,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
           {requesters.map((requester) => (
             <ListItem
               className="chat-item-clickable scroll-item small-icon"
-              // eslint-disable-next-line react/jsx-no-bind
+
               onClick={() => openChat({ id: requester.userId })}
             >
               <PrivateChatInfo
@@ -148,7 +148,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
                 <p className="section-heading">{lang('LinkCreatedeBy')}</p>
                 <ListItem
                   className="chat-item-clickable scroll-item small-icon"
-                  // eslint-disable-next-line react/jsx-no-bind
+
                   onClick={() => openChat({ id: adminId })}
                 >
                   <PrivateChatInfo

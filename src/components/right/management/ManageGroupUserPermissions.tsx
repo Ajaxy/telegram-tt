@@ -133,7 +133,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
     <div
       className="Management with-shifted-dropdown"
       style={`--shift-height: ${ITEMS_COUNT * ITEM_HEIGHT - SHIFT_HEIGHT_MINUS}px;`
-           + `--before-shift-height: ${BEFORE_ITEMS_COUNT * ITEM_HEIGHT + BEFORE_USER_INFO_HEIGHT}px;`}
+        + `--before-shift-height: ${BEFORE_ITEMS_COUNT * ITEM_HEIGHT + BEFORE_USER_INFO_HEIGHT}px;`}
     >
       <div className="custom-scroll">
         <div className="section without-bottom-shadow">

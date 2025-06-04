@@ -1,4 +1,3 @@
-/* eslint-disable eslint-multitab-tt/no-immediate-global */
 import { getIsHeavyAnimating, onFullyIdle } from '../lib/teact/teact';
 import { addCallback, removeCallback } from '../lib/teact/teactn';
 
@@ -25,6 +24,7 @@ import {
   SHARED_STATE_CACHE_KEY,
 } from '../config';
 import { MAIN_IDB_STORE } from '../util/browser/idb';
+import { isUserId } from '../util/entities/ids';
 import { getOrderedIds } from '../util/folderManager';
 import {
   compact, pick, pickTruthy, unique,
@@ -33,7 +33,6 @@ import { GLOBAL_STATE_CACHE_KEY } from '../util/multiaccount';
 import { encryptSession } from '../util/passcode';
 import { onBeforeUnload, throttle } from '../util/schedulers';
 import { hasStoredSession } from '../util/sessions';
-import { isUserId } from './helpers';
 import { addActionHandler, getGlobal } from './index';
 import { INITIAL_GLOBAL_STATE } from './initialState';
 import { clearGlobalForLockScreen, clearSharedStateForLockScreen } from './reducers';

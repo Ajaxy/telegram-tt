@@ -5,8 +5,9 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiChat, ApiCountryCode, ApiUser } from '../../../api/types';
 
 import { CHAT_HEIGHT_PX } from '../../../config';
-import { getMainUsername, isUserId } from '../../../global/helpers';
+import { getMainUsername } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import { isUserId } from '../../../util/entities/ids';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 
 import useFlag from '../../../hooks/useFlag';
@@ -105,7 +106,12 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
           {user?.phoneNumber && (
             <div className="contact-phone" dir="auto">{formatPhoneNumberWithCode(phoneCodeList, user.phoneNumber)}</div>
           )}
-          {userMainUsername && (<div className="contact-username" dir="auto">@{userMainUsername}</div>)}
+          {userMainUsername && (
+            <div className="contact-username" dir="auto">
+              @
+              {userMainUsername}
+            </div>
+          )}
         </div>
       </ListItem>
     );
@@ -123,7 +129,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
         <div className="chat-list custom-scroll">
           {blockedIds?.length ? (
             <div className="scroll-container settings-item">
-              {blockedIds!.map((contactId, i) => renderContact(contactId, i, 0))}
+              {blockedIds.map((contactId, i) => renderContact(contactId, i, 0))}
             </div>
           ) : blockedIds && !blockedIds.length ? (
             <div className="no-results" dir="auto">{lang('NoBlocked')}</div>

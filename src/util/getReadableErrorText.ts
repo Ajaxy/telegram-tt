@@ -9,7 +9,7 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   CHAT_SEND_GIFS_FORBIDDEN: 'You can\'t send gifs in this chat',
   CHAT_SEND_MEDIA_FORBIDDEN: 'You can\'t send media in this chat',
   CHAT_LINK_EXISTS: 'The chat is public, you can\'t hide the history to new users',
-  // eslint-disable-next-line max-len
+  // eslint-disable-next-line @stylistic/max-len
   SLOWMODE_WAIT_X: 'Slowmode is enabled in this chat: you must wait for the specified number of seconds before sending another message to the chat.',
   USER_BANNED_IN_CHANNEL: 'You\'re banned from sending messages in supergroups / channels',
   USER_IS_BLOCKED: 'You were blocked by this user',
@@ -24,7 +24,7 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   PHOTO_EXT_INVALID: 'The extension of the photo is invalid',
   PHOTO_INVALID_DIMENSIONS: 'The photo dimensions are invalid',
   PHOTO_SAVE_FILE_INVALID: 'Internal issues, try again later',
-  // eslint-disable-next-line max-len
+  // eslint-disable-next-line @stylistic/max-len
   MESSAGE_DELETE_FORBIDDEN: 'You can\'t delete one of the messages you tried to delete, most likely because it is a service message.',
   MESSAGE_POLL_CLOSED: 'Poll closed',
   MESSAGE_EDIT_TIME_EXPIRED: 'You can\'t edit this message anymore.',
@@ -46,11 +46,11 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   MESSAGE_TOO_LONG: 'Message is too long',
 
   // Non-API errors
-  // eslint-disable-next-line max-len
+  // eslint-disable-next-line @stylistic/max-len
   SERVICE_WORKER_DISABLED: 'Service Worker is disabled. Streaming media may not be supported. Try reloading the page without holding <Shift> key',
-  // eslint-disable-next-line max-len
+  // eslint-disable-next-line @stylistic/max-len
   MESSAGE_TOO_LONG_PLEASE_REMOVE_CHARACTERS: 'The provided message is too long. Please remove {EXTRA_CHARS_COUNT} character{PLURAL_S}.',
-  // eslint-disable-next-line max-len
+  // eslint-disable-next-line @stylistic/max-len
   FRESH_RESET_AUTHORISATION_FORBIDDEN: 'You can’t logout other sessions if less than 24 hours have passed since you logged on the current session',
 
   BOTS_TOO_MUCH: 'There are too many bots in this chat/channel',
@@ -145,7 +145,7 @@ export default function getReadableErrorText(error: ApiError) {
   if (errorMessage && textParams) {
     errorMessage = Object.keys(textParams).reduce((acc, current) => {
       return acc.replace(current, textParams[current]);
-    }, errorMessage as string);
+    }, errorMessage);
   }
   return errorMessage;
 }

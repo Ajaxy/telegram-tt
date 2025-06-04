@@ -1,4 +1,4 @@
-import { debounce } from './utils';
+import { debounce } from './utils.js';
 
 export const hideOnScroll = (() => {
   const chartEls = [];

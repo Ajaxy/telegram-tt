@@ -1,7 +1,3 @@
-/* eslint-disable no-nested-ternary */
-/* eslint-disable no-bitwise */
-/* eslint-disable @typescript-eslint/naming-convention */
-
 const utf16 = {
   // The utf16-class is necessary to convert from javascripts internal character representation to unicode and back.
   decode: (input) => {
@@ -84,7 +80,19 @@ function decode(input, preserveCase) {
   const case_flags = [];
   const input_length = input.length;
 
-  let n; let out; let i; let bias; let basic; let j; let ic; let oldi; let w; let k; let digit; let t; let len;
+  let n;
+  let out;
+  let i;
+  let bias;
+  let basic;
+  let j;
+  let ic;
+  let oldi;
+  let w;
+  let k;
+  let digit;
+  let t;
+  let len;
 
   // Initialize the state:
 

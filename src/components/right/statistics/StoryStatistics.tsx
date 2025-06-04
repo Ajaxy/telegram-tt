@@ -27,8 +27,8 @@ import StatisticsStoryPublicForward from './StatisticsStoryPublicForward';
 
 import styles from './Statistics.module.scss';
 
-type ILovelyChart = { create: Function };
-let lovelyChartPromise: Promise<ILovelyChart>;
+type ILovelyChart = { create: (el: HTMLElement, params: AnyLiteral) => void };
+let lovelyChartPromise: Promise<ILovelyChart> | undefined;
 let LovelyChart: ILovelyChart;
 
 async function ensureLovelyChart() {
@@ -69,8 +69,7 @@ function StoryStatistics({
   usersById,
 }: OwnProps & StateProps) {
   const lang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   const [isReady, setIsReady] = useState(false);
   const loadedCharts = useRef<string[]>([]);
 
@@ -97,7 +96,7 @@ function StoryStatistics({
     }
 
     GRAPHS.forEach((name) => {
-      const graph = statistics[name as keyof typeof statistics];
+      const graph = statistics[name];
       const isAsync = typeof graph === 'string';
 
       if (isAsync) {
@@ -120,7 +119,7 @@ function StoryStatistics({
       }
 
       GRAPHS.forEach((name, index: number) => {
-        const graph = statistics[name as keyof typeof statistics];
+        const graph = statistics[name];
         const isAsync = typeof graph === 'string';
 
         if (isAsync || loadedCharts.current.includes(name)) {
@@ -136,7 +135,7 @@ function StoryStatistics({
         const { zoomToken } = graph as StatisticsGraph;
 
         LovelyChart.create(
-          containerRef.current!.children[index],
+          containerRef.current!.children[index] as HTMLElement,
           {
             title: lang((GRAPH_TITLES as Record<string, string>)[name]),
             ...zoomToken ? {

@@ -87,7 +87,7 @@ addActionHandler('loadAvailableEffects', async (global): Promise<void> => {
   }
 
   const { effects, emojis, stickers } = result;
-  const reactions:ApiReactionEmoji[] = [];
+  const reactions: ApiReactionEmoji[] = [];
 
   const effectById = buildCollectionByKey(effects, 'id');
 
@@ -123,13 +123,13 @@ addActionHandler('loadAvailableEffects', async (global): Promise<void> => {
 addActionHandler('interactWithAnimatedEmoji', (global, actions, payload): ActionReturnType => {
   const {
     emoji, x, y, startSize, isReversed, tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
   const activeEmojiInteraction = {
     id: interactionLocalId++,
     animatedEffect: emoji,
     x: subtractXForEmojiInteraction(global, x) + Math.random()
-      * INTERACTION_RANDOM_OFFSET - INTERACTION_RANDOM_OFFSET / 2,
+    * INTERACTION_RANDOM_OFFSET - INTERACTION_RANDOM_OFFSET / 2,
     y: y + Math.random() * INTERACTION_RANDOM_OFFSET - INTERACTION_RANDOM_OFFSET / 2,
     startSize,
     isReversed,
@@ -143,7 +143,7 @@ addActionHandler('interactWithAnimatedEmoji', (global, actions, payload): Action
 addActionHandler('sendEmojiInteraction', (global, actions, payload): ActionReturnType => {
   const {
     messageId, chatId, emoji, interactions,
-  } = payload!;
+  } = payload;
   if (global.connectionState !== 'connectionStateReady') return;
 
   const chat = selectChat(global, chatId);

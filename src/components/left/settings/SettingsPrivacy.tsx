@@ -110,7 +110,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   }, []);
 
   const handleUpdateContentSettings = useCallback((isChecked: boolean) => {
-    updateContentSettings(isChecked);
+    updateContentSettings({ isSensitiveEnabled: isChecked });
   }, [updateContentSettings]);
 
   function getVisibilityValue(setting?: ApiPrivacySettings) {
@@ -158,7 +158,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="delete-user"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyBlockedUsers })}
         >
           {oldLang('BlockedUsers')}
@@ -168,7 +168,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <ListItem
             icon="key"
             narrow
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => openSettingsScreen({
               screen: hasPasscode ? SettingsScreens.PasscodeEnabled : SettingsScreens.PasscodeDisabled,
             })}
@@ -184,7 +184,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="lock"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({
             screen: hasPassword ? SettingsScreens.TwoFaEnabled : SettingsScreens.TwoFaDisabled,
           })}
@@ -200,7 +200,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <ListItem
             icon="web"
             narrow
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => openSettingsScreen({ screen: SettingsScreens.ActiveWebsites })}
           >
             {oldLang('PrivacySettings.WebSessions')}
@@ -215,7 +215,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyPhoneNumber })}
         >
           <div className="multiline-item">
@@ -228,7 +228,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyLastSeen })}
         >
           <div className="multiline-item">
@@ -241,7 +241,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyProfilePhoto })}
         >
           <div className="multiline-item">
@@ -254,7 +254,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyBio })}
         >
           <div className="multiline-item">
@@ -267,7 +267,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyBirthday })}
         >
           <div className="multiline-item">
@@ -280,7 +280,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyGifts })}
         >
           <div className="multiline-item">
@@ -293,7 +293,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyForwarding })}
         >
           <div className="multiline-item">
@@ -306,7 +306,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyPhoneCall })}
         >
           <div className="multiline-item">
@@ -321,7 +321,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           allowDisabledClick
           rightElement={isCurrentUserPremium && <StarIcon size="big" type="premium" />}
           className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyVoiceMessages })}
         >
           <div className="multiline-item">
@@ -335,7 +335,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           narrow
           rightElement={isCurrentUserPremium && <StarIcon size="big" type="premium" />}
           className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyMessages })}
         >
           <div className="multiline-item">
@@ -351,7 +351,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyGroupChats })}
         >
           <div className="multiline-item">

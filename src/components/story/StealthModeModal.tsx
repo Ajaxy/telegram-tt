@@ -24,7 +24,7 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
 };
 
-const StealthModeModal = ({ isOpen, stealthMode, isCurrentUserPremium } : StateProps) => {
+const StealthModeModal = ({ isOpen, stealthMode, isCurrentUserPremium }: StateProps) => {
   const {
     toggleStealthModal,
     activateStealthMode,

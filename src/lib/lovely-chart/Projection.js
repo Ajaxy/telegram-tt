@@ -1,4 +1,4 @@
-import { proxyMerge } from './utils';
+import { proxyMerge } from './utils.js';
 
 export function createProjection(params) {
   const {

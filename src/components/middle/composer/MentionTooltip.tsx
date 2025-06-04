@@ -30,8 +30,7 @@ const MentionTooltip: FC<OwnProps> = ({
   onInsertUserName,
   filteredUsers,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
 
   const handleUserSelect = useLastCallback((userId: string, forceFocus = false) => {

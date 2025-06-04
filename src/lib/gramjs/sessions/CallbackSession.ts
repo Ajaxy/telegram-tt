@@ -5,96 +5,96 @@ import { getDC } from '../Utils';
 import MemorySession from './Memory';
 
 export default class CallbackSession extends MemorySession {
-    private _sessionData?: SessionData;
+  private _sessionData?: SessionData;
 
-    private _callback: (session?: SessionData) => void;
+  private _callback: (session?: SessionData) => void;
 
-    private _authKeys: Record<number, AuthKey>;
+  private _authKeys: Record<number, AuthKey>;
 
-    constructor(sessionData: SessionData | undefined, callback: (session?: SessionData) => void) {
-        super();
+  constructor(sessionData: SessionData | undefined, callback: (session?: SessionData) => void) {
+    super();
 
-        this._sessionData = sessionData;
-        this._callback = callback;
+    this._sessionData = sessionData;
+    this._callback = callback;
 
-        this._authKeys = {};
+    this._authKeys = {};
+  }
+
+  async load() {
+    if (!this._sessionData) {
+      return;
     }
 
-    async load() {
-        if (!this._sessionData) {
-            return;
-        }
+    const {
+      mainDcId,
+      keys,
+      isTest,
+    } = this._sessionData;
+    const {
+      ipAddress,
+      port,
+    } = getDC(mainDcId);
 
-        const {
-            mainDcId,
-            keys,
-            isTest,
-        } = this._sessionData;
-        const {
-            ipAddress,
-            port,
-        } = getDC(mainDcId);
+    this.setDC(mainDcId, ipAddress, port, isTest, true);
 
-        this.setDC(mainDcId, ipAddress, port, isTest, true);
+    await Promise.all(Object.keys(keys)
+      .map(async (dcIdStr) => {
+        const dcId = Number(dcIdStr);
+        const key = Buffer.from(keys[dcId], 'hex');
 
-        await Promise.all(Object.keys(keys)
-            .map(async (dcIdStr) => {
-                const dcId = Number(dcIdStr);
-                const key = Buffer.from(keys[dcId], 'hex');
+        this._authKeys[dcId] = new AuthKey();
+        await this._authKeys[dcId].setKey(key);
+      }));
+  }
 
-                this._authKeys[dcId] = new AuthKey();
-                await this._authKeys[dcId].setKey(key);
-            }));
+  setDC(dcId: number, serverAddress: string, port: number, isTestServer?: boolean, skipOnUpdate = false) {
+    this._dcId = dcId;
+    this._serverAddress = serverAddress;
+    this._port = port;
+    this._isTestServer = isTestServer;
+
+    delete this._authKeys[dcId];
+
+    if (!skipOnUpdate) {
+      void this._onUpdate();
     }
+  }
 
-    setDC(dcId: number, serverAddress: string, port: number, isTestServer?: boolean, skipOnUpdate = false) {
-        this._dcId = dcId;
-        this._serverAddress = serverAddress;
-        this._port = port;
-        this._isTestServer = isTestServer;
+  getAuthKey(dcId = this._dcId) {
+    return this._authKeys[dcId];
+  }
 
-        delete this._authKeys[dcId];
+  setAuthKey(authKey: AuthKey, dcId = this._dcId) {
+    this._authKeys[dcId] = authKey;
 
-        if (!skipOnUpdate) {
-            void this._onUpdate();
-        }
-    }
+    void this._onUpdate();
+  }
 
-    getAuthKey(dcId = this._dcId) {
-        return this._authKeys[dcId];
-    }
+  getSessionData() {
+    const sessionData: SessionData = {
+      mainDcId: this._dcId,
+      keys: {},
+      isTest: this._isTestServer || undefined,
+    };
 
-    setAuthKey(authKey: AuthKey, dcId = this._dcId) {
-        this._authKeys[dcId] = authKey;
+    Object
+      .keys(this._authKeys)
+      .forEach((dcIdStr) => {
+        const dcId = Number(dcIdStr);
+        const authKey = this._authKeys[dcId];
+        if (!authKey?._key) return;
 
-        void this._onUpdate();
-    }
+        sessionData.keys[dcId] = authKey._key.toString('hex');
+      });
 
-    getSessionData() {
-        const sessionData: SessionData = {
-            mainDcId: this._dcId,
-            keys: {},
-            isTest: this._isTestServer || undefined,
-        };
+    return sessionData;
+  }
 
-        Object
-            .keys(this._authKeys)
-            .forEach((dcIdStr) => {
-                const dcId = Number(dcIdStr);
-                const authKey = this._authKeys[dcId];
-                if (!authKey?._key) return;
+  _onUpdate() {
+    this._callback(this.getSessionData());
+  }
 
-                sessionData.keys[dcId] = authKey._key.toString('hex');
-            });
-
-        return sessionData;
-    }
-
-    _onUpdate() {
-        this._callback(this.getSessionData());
-    }
-
-    delete() {
-        this._callback(undefined);
-    }
+  delete() {
+    this._callback(undefined);
+  }
 }

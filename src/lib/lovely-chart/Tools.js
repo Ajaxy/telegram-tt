@@ -1,5 +1,5 @@
-import { createElement } from './minifiers';
-import { captureEvents } from './captureEvents';
+import { createElement } from './minifiers.js';
+import { captureEvents } from './captureEvents.js';
 
 export function createTools(container, data, filterCallback) {
   let _element;

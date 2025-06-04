@@ -94,8 +94,7 @@ const ItemPicker = ({
   ...optionalProps
 }: OwnProps) => {
   const lang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>();
 
   const allowMultiple = optionalProps.allowMultiple;
   const lockedSelectedValues = allowMultiple ? optionalProps.lockedSelectedValues : undefined;
@@ -204,9 +203,9 @@ const ItemPicker = ({
         inactive={isViewOnly}
         ripple
         inputElement={getInputElement()}
-        // eslint-disable-next-line react/jsx-no-bind
+
         onClick={() => handleItemClick(value)}
-        // eslint-disable-next-line react/jsx-no-bind
+
         onDisabledClick={onDisabledClick && (() => onDisabledClick(value, isAlwaysSelected))}
       />
     );

@@ -1,3 +1,4 @@
+import type { ElementRef } from '../../../lib/teact/teact';
 import { useEffect } from '../../../lib/teact/teact';
 
 import { ProfileState, type ProfileTabType } from '../../../types';
@@ -16,7 +17,7 @@ const runThrottledForScroll = throttle((cb) => cb(), 250, false);
 let isScrollingProgrammatically = false;
 
 export default function useProfileState(
-  containerRef: { current: HTMLDivElement | null },
+  containerRef: ElementRef<HTMLDivElement>,
   tabType: ProfileTabType,
   profileState: ProfileState,
   onProfileStateChange: (state: ProfileState) => void,

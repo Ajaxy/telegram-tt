@@ -46,8 +46,7 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
   isSavedMessages,
   isCurrentUserPremium,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
   const prevStickers = usePreviousDeprecated(stickers, true);
   const displayedStickers = stickers || prevStickers;

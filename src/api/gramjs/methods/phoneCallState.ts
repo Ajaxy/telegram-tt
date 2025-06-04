@@ -117,7 +117,7 @@ class PhoneCallState {
       });
     }
 
-    const message = await this.state.decryptMessageData(Buffer.from(data));
+    const message = await this.state.decryptMessageData(Buffer.from(data)) as Buffer;
 
     return JSON.parse(message.toString());
   }
@@ -161,7 +161,7 @@ export function destroyPhoneCallState() {
 }
 
 type FunctionPropertyOf<T> = {
-  [P in keyof T]: T[P] extends Function
+  [P in keyof T]: T[P] extends AnyFunction
     ? P
     : never
 }[keyof T];

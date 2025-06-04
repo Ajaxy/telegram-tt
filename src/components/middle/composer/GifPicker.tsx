@@ -44,8 +44,7 @@ const GifPicker: FC<OwnProps & StateProps> = ({
 }) => {
   const { loadSavedGifs, saveGif } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const {
     observe: observeIntersection,

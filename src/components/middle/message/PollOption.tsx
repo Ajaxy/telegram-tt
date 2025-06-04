@@ -56,7 +56,8 @@ const PollOption: FC<OwnProps> = ({
   return (
     <div className="PollOption" dir={lang.isRtl ? 'rtl' : undefined}>
       <div className={`poll-option-share ${answerPercent === '100' ? 'limit-width' : ''}`}>
-        {answerPercent}%
+        {answerPercent}
+        %
         {showIcon && (
           <span className={buildClassName(
             'poll-option-chosen',

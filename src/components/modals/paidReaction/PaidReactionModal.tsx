@@ -178,7 +178,7 @@ const PaidReactionModal = ({
 
     return (
       <MenuItem
-        // eslint-disable-next-line react/jsx-no-bind
+
         onClick={() => handleSendAsPeerChange(peerId)}
       >
         <Avatar

@@ -209,7 +209,7 @@ export function formatTimeDuration(lang: OldLangFn, duration: number, showLast =
       return;
     }
 
-    const modulus = labels[idx === (labels.length - 1) ? idx : idx + 1].multiplier!;
+    const modulus = labels[idx === (labels.length - 1) ? idx : idx + 1].multiplier;
     durationRecords.push({
       duration: Math.floor((duration / t) % modulus),
       type: label.type,

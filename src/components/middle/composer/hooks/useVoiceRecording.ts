@@ -12,8 +12,7 @@ type ActiveVoiceRecording =
   | undefined;
 
 const useVoiceRecording = () => {
-  // eslint-disable-next-line no-null/no-null
-  const recordButtonRef = useRef<HTMLButtonElement>(null);
+  const recordButtonRef = useRef<HTMLButtonElement>();
   const [activeVoiceRecording, setActiveVoiceRecording] = useState<ActiveVoiceRecording>();
   const startRecordTimeRef = useRef<number>();
   const [currentRecordTime, setCurrentRecordTime] = useState<number | undefined>();
@@ -56,12 +55,12 @@ const useVoiceRecording = () => {
 
     requestMutation(() => {
       if (recordButtonRef.current) {
-        recordButtonRef.current!.style.boxShadow = 'none';
+        recordButtonRef.current.style.boxShadow = 'none';
       }
     });
 
     try {
-      return activeVoiceRecording!.pause();
+      return activeVoiceRecording.pause();
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
@@ -85,7 +84,7 @@ const useVoiceRecording = () => {
     });
 
     try {
-      return activeVoiceRecording!.stop();
+      return activeVoiceRecording.stop();
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);

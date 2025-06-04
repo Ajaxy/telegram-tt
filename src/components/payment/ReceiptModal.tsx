@@ -69,7 +69,11 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
             >
               <Icon name="close" />
             </Button>
-            <h3> {lang('PaymentReceipt')} </h3>
+            <h3>
+              {' '}
+              {lang('PaymentReceipt')}
+              {' '}
+            </h3>
           </div>
           <div className="receipt-content custom-scroll">
             <Checkout

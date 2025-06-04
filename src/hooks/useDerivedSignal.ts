@@ -35,7 +35,6 @@ function useDerivedSignal<T>(resolverOrDependency: Resolver<T> | T, dependencies
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   useSyncEffect(runCurrentResolver, dependencies);
 
-  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   useSignalEffect(runCurrentResolver, dependencies);
 
   return getValue as Signal<T>;

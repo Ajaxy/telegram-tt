@@ -38,10 +38,8 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
   participant,
   peer,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const menuRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
+  const menuRef = useRef<HTMLDivElement>();
   const lang = useOldLang();
 
   const {

@@ -22,7 +22,7 @@ const ChannelPhotoAction = ({
   action,
   onClick,
   observeIntersection,
-} : OwnProps) => {
+}: OwnProps) => {
   return (
     <Avatar
       className={styles.channelPhoto}

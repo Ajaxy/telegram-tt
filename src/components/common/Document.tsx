@@ -76,8 +76,7 @@ const Document = ({
 }: OwnProps) => {
   const { cancelMediaDownload, downloadMedia, setSharedSettingOption } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const lang = useOldLang();
   const [isSvgDialogOpen, openSvgDialog, closeSvgDialog] = useFlag();
@@ -145,7 +144,7 @@ const Document = ({
     }
 
     if (withMediaViewer) {
-      onMediaClick!();
+      onMediaClick();
       return;
     }
 

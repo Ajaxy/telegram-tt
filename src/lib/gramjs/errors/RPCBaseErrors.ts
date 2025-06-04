@@ -4,40 +4,40 @@ import type { Api } from '../tl';
  * Base class for all Remote Procedure Call errors.
  */
 export class RPCError extends Error {
-    public code: number | undefined;
+  public code: number | undefined;
 
-    public errorMessage: string;
+  public errorMessage: string;
 
-    constructor(message: string, request: Api.AnyRequest, code?: number) {
-        super(
-            'RPCError {0}: {1}{2}'
-                .replace('{0}', code?.toString() || '')
-                .replace('{1}', message)
-                .replace('{2}', RPCError._fmtRequest(request)),
-        );
-        this.code = code;
-        this.errorMessage = message;
+  constructor(message: string, request: Api.AnyRequest, code?: number) {
+    super(
+      'RPCError {0}: {1}{2}'
+        .replace('{0}', code?.toString() || '')
+        .replace('{1}', message)
+        .replace('{2}', RPCError._fmtRequest(request)),
+    );
+    this.code = code;
+    this.errorMessage = message;
+  }
+
+  static _fmtRequest(request: Api.AnyRequest) {
+    // TODO fix this
+    if (request) {
+      return ` (caused by ${request.className})`;
+    } else {
+      return '';
     }
-
-    static _fmtRequest(request: Api.AnyRequest) {
-        // TODO fix this
-        if (request) {
-            return ` (caused by ${request.className})`;
-        } else {
-            return '';
-        }
-    }
+  }
 }
 
 /**
  * The request must be repeated, but directed to a different data center.
  */
 export class InvalidDCError extends RPCError {
-    constructor(message: string, request: Api.AnyRequest, code?: number) {
-        super(message, request, code);
-        this.code = code || 303;
-        this.errorMessage = message || 'ERROR_SEE_OTHER';
-    }
+  constructor(message: string, request: Api.AnyRequest, code?: number) {
+    super(message, request, code);
+    this.code = code || 303;
+    this.errorMessage = message || 'ERROR_SEE_OTHER';
+  }
 }
 
 /**
@@ -46,9 +46,9 @@ export class InvalidDCError extends RPCError {
  * notified that the data must be corrected before the query is repeated.
  */
 export class BadRequestError extends RPCError {
-    code = 400;
+  code = 400;
 
-    errorMessage = 'BAD_REQUEST';
+  errorMessage = 'BAD_REQUEST';
 }
 
 /**
@@ -56,9 +56,9 @@ export class BadRequestError extends RPCError {
  * to authorized users.
  */
 export class UnauthorizedError extends RPCError {
-    code = 401;
+  code = 401;
 
-    errorMessage = 'UNAUTHORIZED';
+  errorMessage = 'UNAUTHORIZED';
 }
 
 /**
@@ -66,18 +66,18 @@ export class UnauthorizedError extends RPCError {
  * someone who has blacklisted the current user.
  */
 export class ForbiddenError extends RPCError {
-    code = 403;
+  code = 403;
 
-    errorMessage = 'FORBIDDEN';
+  errorMessage = 'FORBIDDEN';
 }
 
 /**
  * An attempt to invoke a non-existent object, such as a method.
  */
 export class NotFoundError extends RPCError {
-    code = 404;
+  code = 404;
 
-    errorMessage = 'NOT_FOUND';
+  errorMessage = 'NOT_FOUND';
 }
 
 /**
@@ -85,9 +85,9 @@ export class NotFoundError extends RPCError {
  * AUTH_KEY_DUPLICATED which can cause the connection to fail.
  */
 export class AuthKeyError extends RPCError {
-    code = 406;
+  code = 406;
 
-    errorMessage = 'AUTH_KEY';
+  errorMessage = 'AUTH_KEY';
 }
 
 /**
@@ -97,9 +97,9 @@ export class AuthKeyError extends RPCError {
  * phone number.
  */
 export class FloodError extends RPCError {
-    code = 420;
+  code = 420;
 
-    errorMessage = 'FLOOD';
+  errorMessage = 'FLOOD';
 }
 
 /**
@@ -108,9 +108,9 @@ export class FloodError extends RPCError {
  * storage
  */
 export class ServerError extends RPCError {
-    code = 500; // Also witnessed as -500
+  code = 500; // Also witnessed as -500
 
-    errorMessage = 'INTERNAL';
+  errorMessage = 'INTERNAL';
 }
 
 /**
@@ -118,7 +118,7 @@ export class ServerError extends RPCError {
  * call ``answerCallbackQuery`` will result in this "special" RPCError.
  */
 export class TimedOutError extends RPCError {
-    code = 503; // Only witnessed as -503
+  code = 503; // Only witnessed as -503
 
-    errorMessage = 'Timeout';
+  errorMessage = 'Timeout';
 }

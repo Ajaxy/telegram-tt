@@ -69,7 +69,7 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleCopy = useLastCallback(() => {
-    const text = isUsername ? formatUsername(modal!.collectible)
+    const text = isUsername ? formatUsername(modal.collectible)
       : formatPhoneNumberWithCode(phoneCodeList, modal!.collectible);
     copyTextToClipboard(text);
     showNotification({

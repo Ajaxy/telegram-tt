@@ -13,7 +13,7 @@ import {
   getHasAdminRight,
   getIsSavedDialog,
   isAnonymousForwardsChat,
-  isChatBasicGroup, isChatChannel, isChatSuperGroup, isUserId,
+  isChatBasicGroup, isChatChannel, isChatSuperGroup,
 } from '../../global/helpers';
 import {
   selectBot,
@@ -33,6 +33,7 @@ import {
   selectUserFullInfo,
 } from '../../global/selectors';
 import { ARE_CALLS_SUPPORTED, IS_APP } from '../../util/browser/windowEnvironment';
+import { isUserId } from '../../util/entities/ids';
 
 import { useHotkeys } from '../../hooks/useHotkeys';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -142,8 +143,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     setViewForumAsMessages,
     openFrozenAccountModal,
   } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>();
   const lang = useOldLang();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<IAnchorPosition | undefined>(undefined);

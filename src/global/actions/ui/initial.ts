@@ -36,7 +36,6 @@ import { destroySharedStatePort, initSharedState } from '../../shared/sharedStat
 const HISTORY_ANIMATION_DURATION = 450;
 
 setSystemThemeChangeCallback((theme) => {
-  // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
   let global = getGlobal();
 
   if (!global.isInited || !selectSharedSettings(global).shouldUseSystemTheme) return;
@@ -198,7 +197,7 @@ addActionHandler('setInstallPrompt', (global, actions, payload): ActionReturnTyp
 });
 
 addActionHandler('setIsUiReady', (global, actions, payload): ActionReturnType => {
-  const { uiReadyState, tabId = getCurrentTabId() } = payload!;
+  const { uiReadyState, tabId = getCurrentTabId() } = payload;
 
   if (uiReadyState === 2) {
     requestMutation(() => {
@@ -212,7 +211,7 @@ addActionHandler('setIsUiReady', (global, actions, payload): ActionReturnType =>
 });
 
 addActionHandler('setAuthPhoneNumber', (global, actions, payload): ActionReturnType => {
-  const { phoneNumber } = payload!;
+  const { phoneNumber } = payload;
 
   return {
     ...global,
@@ -223,7 +222,7 @@ addActionHandler('setAuthPhoneNumber', (global, actions, payload): ActionReturnT
 addActionHandler('setAuthRememberMe', (global, actions, payload): ActionReturnType => {
   return {
     ...global,
-    authRememberMe: Boolean(payload),
+    authRememberMe: Boolean(payload.value),
   };
 });
 

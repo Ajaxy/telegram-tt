@@ -33,7 +33,7 @@ export default function useAsyncRendering<T extends any[]>(dependencies: T, dela
       forceUpdate();
     };
 
-    if (delay! > 0) {
+    if (delay > 0) {
       timeoutRef.current = window.setTimeout(exec, delay);
     } else {
       exec();

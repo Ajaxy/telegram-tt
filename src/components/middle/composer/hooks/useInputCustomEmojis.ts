@@ -1,3 +1,5 @@
+import type {
+  ElementRef } from '../../../../lib/teact/teact';
 import {
   useEffect, useLayoutEffect, useRef,
 } from '../../../../lib/teact/teact';
@@ -39,10 +41,10 @@ type CustomEmojiPlayer = {
 
 export default function useInputCustomEmojis(
   getHtml: Signal<string>,
-  inputRef: React.RefObject<HTMLDivElement>,
-  sharedCanvasRef: React.RefObject<HTMLCanvasElement>,
-  sharedCanvasHqRef: React.RefObject<HTMLCanvasElement>,
-  absoluteContainerRef: React.RefObject<HTMLElement>,
+  inputRef: ElementRef<HTMLDivElement>,
+  sharedCanvasRef: ElementRef<HTMLCanvasElement>,
+  sharedCanvasHqRef: ElementRef<HTMLCanvasElement>,
+  absoluteContainerRef: ElementRef<HTMLElement>,
   prefixId: string,
   canPlayAnimatedEmojis: boolean,
   isReady?: boolean,
@@ -216,9 +218,9 @@ async function createPlayer({
   colorFilter,
 }: {
   customEmoji: ApiSticker;
-  sharedCanvasRef: React.RefObject<HTMLCanvasElement>;
-  sharedCanvasHqRef: React.RefObject<HTMLCanvasElement>;
-  absoluteContainerRef: React.RefObject<HTMLElement>;
+  sharedCanvasRef: ElementRef<HTMLCanvasElement>;
+  sharedCanvasHqRef: ElementRef<HTMLCanvasElement>;
+  absoluteContainerRef: ElementRef<HTMLElement>;
   renderId: string;
   viewId: string;
   mediaUrl: string;

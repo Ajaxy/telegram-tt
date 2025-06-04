@@ -19,28 +19,17 @@ import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   ANONYMOUS_USER_ID,
-  ARCHIVED_FOLDER_ID, CHANNEL_ID_LENGTH, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
+  ARCHIVED_FOLDER_ID, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
   VERIFICATION_CODES_USER_ID,
 } from '../../config';
 import { formatDateToString, formatTime } from '../../util/dates/dateFormat';
+import { getPeerIdDividend, isUserId } from '../../util/entities/ids';
 import { getServerTime } from '../../util/serverTime';
 import { getGlobal } from '..';
 import { isSystemBot } from './bots';
 import { getMainUsername } from './users';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
-
-export function isUserId(entityId: string) {
-  return !entityId.startsWith('-');
-}
-
-export function isChannelId(entityId: string) {
-  return entityId.length === CHANNEL_ID_LENGTH && entityId.startsWith('-1');
-}
-
-export function toChannelId(mtpId: string) {
-  return `-1${mtpId.padStart(CHANNEL_ID_LENGTH - 2, '0')}`;
-}
 
 export function isChatGroup(chat: ApiChat) {
   return isChatBasicGroup(chat) || isChatSuperGroup(chat);
@@ -362,17 +351,6 @@ export function getOrderedTopics(
   }
 }
 
-export function getCleanPeerId(peerId: string) {
-  return isChannelId(peerId)
-    // Remove -1 and leading zeros
-    ? peerId.replace(/^-10+/, '')
-    : peerId.replace('-', '');
-}
-
-export function getPeerIdDividend(peerId: string) {
-  return Math.abs(Number(getCleanPeerId(peerId)));
-}
-
 export function getPeerColorKey(peer: ApiPeer | undefined) {
   if (peer?.color?.color) return peer.color.color;
 
@@ -381,8 +359,8 @@ export function getPeerColorKey(peer: ApiPeer | undefined) {
 
 export function getPeerColorCount(peer: ApiPeer) {
   const key = getPeerColorKey(peer);
-  // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
-  return getGlobal().peerColors?.general[key].colors?.length || 1;
+  const global = getGlobal();
+  return global.peerColors?.general[key].colors?.length || 1;
 }
 
 export function getIsSavedDialog(chatId: string, threadId: ThreadId | undefined, currentUserId: string | undefined) {

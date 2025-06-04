@@ -21,7 +21,7 @@ type ColorKey = keyof typeof COLORS;
 const COLOR_KEYS = new Set(Object.keys(COLORS) as ColorKey[]);
 
 type OwnProps = {
-  color: ColorKey | string;
+  color: ColorKey | (string & {});
   text: string;
   className?: string;
 };

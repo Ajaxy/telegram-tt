@@ -20,9 +20,9 @@ import Icon from './icons/Icon';
 import styles from './PeerChip.module.scss';
 
 type OwnProps<T = undefined> = {
-  // eslint-disable-next-line react/no-unused-prop-types
+
   peerId?: string;
-  // eslint-disable-next-line react/no-unused-prop-types
+
   forceShowSelf?: boolean;
   customPeer?: CustomPeer;
   mockPeer?: ApiPeer;
@@ -44,7 +44,6 @@ type StateProps = {
   isSavedMessages?: boolean;
 };
 
-// eslint-disable-next-line @typescript-eslint/comma-dangle
 const PeerChip = <T,>({
   icon,
   title,

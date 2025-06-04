@@ -52,13 +52,12 @@ const Tab: FC<OwnProps> = ({
   contextActions,
   contextRootElementSelector,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const tabRef = useRef<HTMLDivElement>(null);
+  const tabRef = useRef<HTMLDivElement>();
 
   useLayoutEffect(() => {
     // Set initial active state
     if (isActive && previousActiveTab === undefined && tabRef.current) {
-      tabRef.current!.classList.add(classNames.active);
+      tabRef.current.classList.add(classNames.active);
     }
   }, [isActive, previousActiveTab]);
 

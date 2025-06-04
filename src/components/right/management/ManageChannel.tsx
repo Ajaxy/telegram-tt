@@ -275,7 +275,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
             >
               <span className="title">{lang('SubscribeRequests')}</span>
               <span className="subtitle">
-                {formatInteger(chat.joinRequests!.length)}
+                {formatInteger(chat.joinRequests.length)}
               </span>
             </ListItem>
           )}

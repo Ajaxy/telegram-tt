@@ -15,8 +15,7 @@ export type OwnProps = {
 };
 
 const RangeSliderWithMarks: FC<OwnProps> = ({ marks, onChange, rangeCount }) => {
-  // eslint-disable-next-line no-null/no-null
-  const sliderRef = useRef<HTMLInputElement | null>(null);
+  const sliderRef = useRef<HTMLInputElement>();
 
   const rangeCountIndex = useMemo(() => marks.indexOf(rangeCount), [marks, rangeCount]);
 

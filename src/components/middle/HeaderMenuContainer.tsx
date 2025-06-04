@@ -20,7 +20,6 @@ import {
   isChatChannel,
   isChatGroup,
   isSystemBot,
-  isUserId,
   isUserRightBanned,
 } from '../../global/helpers';
 import { getIsChatMuted } from '../../global/helpers/notifications';
@@ -42,6 +41,7 @@ import {
   selectUser,
   selectUserFullInfo,
 } from '../../global/selectors';
+import { isUserId } from '../../util/entities/ids';
 import { disableScrolling } from '../../util/scrollLock';
 
 import useAppLayout from '../../hooks/useAppLayout';
@@ -504,7 +504,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
         <MenuItem
           key={command}
           icon={cmd.icon}
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={handleClick}
         >
           {oldLang(cmd.label)}
@@ -517,7 +517,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     const privacyButton = isBot && (
       <MenuItem
         icon="privacy-policy"
-        // eslint-disable-next-line react/jsx-no-bind
+
         onClick={() => {
           if (hasPrivacyCommand && !botPrivacyPolicyUrl) {
             sendBotCommand({ command: '/privacy' });
@@ -695,7 +695,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
                 icon="mute"
                 onClick={handleMuteClick}
               >
-                {oldLang('ChatsMute')}...
+                {oldLang('ChatsMute')}
+                ...
               </MenuItem>
             )
           )}

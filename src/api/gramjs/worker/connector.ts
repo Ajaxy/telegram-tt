@@ -15,11 +15,13 @@ import { pause, throttleWithTickEnd } from '../../../util/schedulers';
 
 type RequestState = {
   messageId: string;
-  resolve: Function;
-  reject: Function;
+  resolve: AnyToVoidFunction;
+  reject: AnyToVoidFunction;
   callback?: AnyToVoidFunction;
   DEBUG_payload?: any;
 };
+
+type EnsurePromise<T> = Promise<Awaited<T>>;
 
 const HEALTH_CHECK_TIMEOUT = 150;
 const HEALTH_CHECK_MIN_DELAY = 5 * 1000; // 5 sec
@@ -153,16 +155,18 @@ export function setShouldEnableDebugLog(value: boolean) {
  * Call a worker method on this tab's worker, without transferring to master tab
  * Mostly needed to disconnect worker when re-electing master
  */
-export function callApiLocal<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>) {
+export function callApiLocal<T extends keyof Methods>(
+  fnName: T, ...args: MethodArgs<T>
+): EnsurePromise<MethodResponse<T>> {
   if (!isInited) {
     if (NO_QUEUE_BEFORE_INIT.has(fnName)) {
-      return Promise.resolve(undefined) as MethodResponse<T>;
+      return Promise.resolve(undefined) as EnsurePromise<MethodResponse<T>>;
     }
 
     const deferred = new Deferred();
     localApiRequestsQueue.push({ fnName, args, deferred });
 
-    return deferred.promise as MethodResponse<T>;
+    return deferred.promise as EnsurePromise<MethodResponse<T>>;
   }
 
   const promise = makeRequest({
@@ -194,19 +198,19 @@ export function callApiLocal<T extends keyof Methods>(fnName: T, ...args: Method
     })();
   }
 
-  return promise as MethodResponse<T>;
+  return promise as EnsurePromise<MethodResponse<T>>;
 }
 
-export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>) {
+export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>): EnsurePromise<MethodResponse<T>> {
   if (!isInited && isMasterTab) {
     if (NO_QUEUE_BEFORE_INIT.has(fnName)) {
-      return Promise.resolve(undefined) as MethodResponse<T>;
+      return Promise.resolve(undefined) as EnsurePromise<MethodResponse<T>>;
     }
 
     const deferred = new Deferred();
     apiRequestsQueue.push({ fnName, args, deferred });
 
-    return deferred.promise as MethodResponse<T>;
+    return deferred.promise as EnsurePromise<MethodResponse<T>>;
   }
 
   const promise = isMasterTab ? makeRequest({
@@ -241,7 +245,7 @@ export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<
     })();
   }
 
-  return promise as MethodResponse<T>;
+  return promise as EnsurePromise<MethodResponse<T>>;
 }
 
 export function cancelApiProgress(progressCallback: ApiOnProgress) {
@@ -274,7 +278,6 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
   worker?.addEventListener('message', ({ data }: WorkerMessageEvent) => {
     data?.payloads.forEach((payload) => {
       if (payload.type === 'updates') {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         let DEBUG_startAt: number | undefined;
         if (DEBUG) {
           DEBUG_startAt = performance.now();

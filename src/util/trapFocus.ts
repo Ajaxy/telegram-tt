@@ -8,8 +8,8 @@ export default function trapFocus(element: HTMLElement) {
     e.stopPropagation();
 
     const focusableElements = Array.from(
-      element.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
-    ) as HTMLElement[];
+      element.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+    );
     if (!focusableElements.length) {
       return;
     }

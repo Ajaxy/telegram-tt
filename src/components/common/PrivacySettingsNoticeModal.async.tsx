@@ -11,7 +11,6 @@ const PrivacySettingsNoticeModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const PrivacySettingsNoticeModal = useModuleLoader(Bundles.Extra, 'PrivacySettingsNoticeModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return PrivacySettingsNoticeModal ? <PrivacySettingsNoticeModal {...props} /> : undefined;
 };
 

@@ -45,8 +45,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
     openMediaViewer,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const lang = useOldLang();
 

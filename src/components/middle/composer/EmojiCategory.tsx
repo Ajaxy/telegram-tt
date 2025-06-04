@@ -33,8 +33,7 @@ type OwnProps = {
 const EmojiCategory: FC<OwnProps> = ({
   category, index, allEmojis, observeIntersection, shouldRender, onEmojiSelect,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   useOnIntersect(ref, observeIntersection);
 

@@ -132,7 +132,7 @@ addActionHandler('deleteProfilePhoto', async (global, actions, payload): Promise
 });
 
 addActionHandler('checkUsername', async (global, actions, payload): Promise<void> => {
-  const { username, tabId = getCurrentTabId() } = payload!;
+  const { username, tabId = getCurrentTabId() } = payload;
 
   let tabState = selectTabState(global, tabId);
   // No need to check the username if profile update is already in progress
@@ -150,7 +150,7 @@ addActionHandler('checkUsername', async (global, actions, payload): Promise<void
   }, tabId);
   setGlobal(global);
 
-  const { result, error } = (await callApi('checkUsername', username))!;
+  const { result, error } = (await callApi('checkUsername', username));
 
   global = getGlobal();
   tabState = selectTabState(global, tabId);
@@ -330,7 +330,7 @@ addActionHandler('loadNotificationSettings', async (global): Promise<void> => {
 });
 
 addActionHandler('updateNotificationSettings', async (global, actions, payload): Promise<void> => {
-  const { peerType, isMuted, shouldShowPreviews } = payload!;
+  const { peerType, isMuted, shouldShowPreviews } = payload;
 
   const result = await callApi('updateNotificationSettings', peerType, { isMuted, shouldShowPreviews });
   if (!result) {
@@ -458,7 +458,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
 });
 
 addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promise<void> => {
-  const { privacyKey, visibility, onSuccess } = payload!;
+  const { privacyKey, visibility, onSuccess } = payload;
 
   if (!global.settings.privacy[privacyKey]) {
     const result = await callApi('fetchPrivacySettings', privacyKey);
@@ -519,7 +519,7 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promi
 addActionHandler('setPrivacySettings', async (global, actions, payload): Promise<void> => {
   const {
     privacyKey, isAllowList, updatedIds, isPremiumAllowed, botsPrivacy,
-  } = payload!;
+  } = payload;
   const {
     privacy: { [privacyKey]: settings },
   } = global.settings;
@@ -573,7 +573,7 @@ addActionHandler('setPrivacySettings', async (global, actions, payload): Promise
 
 addActionHandler('updateIsOnline', (global, actions, payload): ActionReturnType => {
   if (global.connectionState !== 'connectionStateReady') return;
-  callApi('updateIsOnline', payload);
+  callApi('updateIsOnline', payload.isOnline);
 });
 
 addActionHandler('loadContentSettings', async (global): Promise<void> => {
@@ -588,13 +588,13 @@ addActionHandler('loadContentSettings', async (global): Promise<void> => {
 });
 
 addActionHandler('updateContentSettings', async (global, actions, payload): Promise<void> => {
-  global = replaceSettings(global, { isSensitiveEnabled: payload });
+  global = replaceSettings(global, { isSensitiveEnabled: payload.isSensitiveEnabled });
   setGlobal(global);
 
-  const result = await callApi('updateContentSettings', payload);
+  const result = await callApi('updateContentSettings', payload.isSensitiveEnabled);
   if (!result) {
     global = getGlobal();
-    global = replaceSettings(global, { isSensitiveEnabled: !payload });
+    global = replaceSettings(global, { isSensitiveEnabled: !payload.isSensitiveEnabled });
     setGlobal(global);
   }
 });
@@ -732,7 +732,7 @@ addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload)
 
   // eslint-disable-next-line no-null/no-null
   const shouldUpdateUsersSettings = (payload.nonContactPeersPaidStars === null)
-  || payload.nonContactPeersPaidStars;
+    || payload.nonContactPeersPaidStars;
 
   global = getGlobal();
   global = replaceSettings(global, {

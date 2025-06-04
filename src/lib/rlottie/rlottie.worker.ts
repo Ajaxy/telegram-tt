@@ -10,9 +10,9 @@ declare const Module: any;
 
 declare function allocate(...args: any[]): string;
 
-declare function intArrayFromString(str: String): string;
+declare function intArrayFromString(str: string): string;
 
-let rLottieApi: Record<string, Function>;
+let rLottieApi: Record<string, AnyFunction>;
 const rLottieApiPromise = new Promise<void>((resolve) => {
   Module.onRuntimeInitialized = () => {
     rLottieApi = {

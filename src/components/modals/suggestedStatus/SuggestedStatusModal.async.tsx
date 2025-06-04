@@ -11,7 +11,6 @@ const SuggestedStatusModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const SuggestedStatusModal = useModuleLoader(Bundles.Extra, 'SuggestedStatusModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return SuggestedStatusModal ? <SuggestedStatusModal {...props} /> : undefined;
 };
 

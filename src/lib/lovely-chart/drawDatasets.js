@@ -1,9 +1,9 @@
-import { getCssColor } from './skin';
-import { mergeArrays } from './utils';
-import { getPieRadius, getPieTextShift, getPieTextSize } from './formulas';
-import { PLOT_BARS_WIDTH_SHIFT, PLOT_PIE_SHIFT, PIE_MINIMUM_VISIBLE_PERCENT } from './constants';
-import { simplify } from './simplify';
-import { toPixels } from './Projection';
+import { getCssColor } from './skin.js';
+import { mergeArrays } from './utils.js';
+import { getPieRadius, getPieTextShift, getPieTextSize } from './formulas.js';
+import { PLOT_BARS_WIDTH_SHIFT, PLOT_PIE_SHIFT, PIE_MINIMUM_VISIBLE_PERCENT } from './constants.js';
+import { simplify } from './simplify.js';
+import { toPixels } from './Projection.js';
 
 export function drawDatasets(
   context, state, data,

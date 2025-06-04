@@ -144,7 +144,7 @@ export function buildPhoneCall(call: GramJs.TypePhoneCall): ApiPhoneCall {
       keyFingerprint: keyFingerprint.toString(),
       startDate,
       isP2pAllowed: Boolean(p2pAllowed),
-      connections: connections.map(buildApiCallConnection).filter(Boolean) as ApiPhoneCallConnection[],
+      connections: connections.map(buildApiCallConnection).filter(Boolean),
     };
   }
 

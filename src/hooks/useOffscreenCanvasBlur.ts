@@ -14,8 +14,7 @@ export default function useOffscreenCanvasBlur(
   thumbData?: string, // data URI or blob URL
   isDisabled = false,
 ) {
-  // eslint-disable-next-line no-null/no-null
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>();
   const workerIndex = useMemo(() => cycleRestrict(MAX_WORKERS, ++lastWorkerIndex), []);
   const offscreenRef = useRef<OffscreenCanvas>();
 

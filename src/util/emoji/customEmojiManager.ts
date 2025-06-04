@@ -103,7 +103,7 @@ export function getCustomEmojiMediaDataForInput(emojiId: string, isPreview?: boo
     return data;
   }
 
-  fetchAndProcess(mediaHash);
+  void fetchAndProcess(mediaHash);
   return undefined;
 }
 
@@ -114,15 +114,15 @@ function fetchAndProcess(mediaHash: string) {
 }
 
 export function getInputCustomEmojiParams(customEmoji?: ApiSticker) {
-  if (!customEmoji) return [true, placeholderSrc, undefined];
+  if (!customEmoji) return [true, placeholderSrc, undefined] as const;
   const shouldUseStaticFallback = !IS_WEBM_SUPPORTED && customEmoji.isVideo;
   const isUsingSharedCanvas = customEmoji.isLottie || (customEmoji.isVideo && !shouldUseStaticFallback);
   if (isUsingSharedCanvas) {
-    fetchAndProcess(`sticker${customEmoji.id}`);
-    return [false, blankSrc, generateUniqueId()];
+    void fetchAndProcess(`sticker${customEmoji.id}`);
+    return [false, blankSrc, generateUniqueId()] as const;
   }
 
   const mediaData = getCustomEmojiMediaDataForInput(customEmoji.id, shouldUseStaticFallback);
 
-  return [!mediaData, mediaData || placeholderSrc, undefined];
+  return [!mediaData, mediaData || placeholderSrc, undefined] as const;
 }

@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-no-bind */
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useMemo, useState,
@@ -51,7 +50,6 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   const [isModalOpen, openModal, closeModal] = useFlag();
 
   const autoTerminateValue = useMemo(() => {
-    // eslint-disable-next-line max-len
     // https://github.com/DrKLO/Telegram/blob/96dce2c9aabc33b87db61d830aa087b6b03fe397/TMessagesProj/src/main/java/org/telegram/ui/SessionsActivity.java#L195
     if (ttlDays === undefined) {
       return undefined;
@@ -153,9 +151,22 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
           <div className="multiline-item full-size" dir="auto">
             <span className="title" dir="auto">{session.deviceModel}</span>
             <span className="subtitle black tight">
-              {session.appName} {session.appVersion}, {session.platform} {session.systemVersion}
+              {session.appName}
+              {' '}
+              {session.appVersion}
+              ,
+              {' '}
+              {session.platform}
+              {' '}
+              {session.systemVersion}
             </span>
-            <span className="subtitle">{session.ip} - {getLocation(session)}</span>
+            <span className="subtitle">
+              {session.ip}
+              {' '}
+              -
+              {' '}
+              {getLocation(session)}
+            </span>
           </div>
         </ListItem>
 
@@ -228,9 +239,20 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
           <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
           <span className="title">{session.deviceModel}</span>
           <span className="subtitle black tight">
-            {session.appName} {session.appVersion}, {session.platform} {session.systemVersion}
+            {session.appName}
+            {' '}
+            {session.appVersion}
+            ,
+            {' '}
+            {session.platform}
+            {' '}
+            {session.systemVersion}
           </span>
-          <span className="subtitle">{session.ip} {getLocation(session)}</span>
+          <span className="subtitle">
+            {session.ip}
+            {' '}
+            {getLocation(session)}
+          </span>
         </div>
       </ListItem>
     );

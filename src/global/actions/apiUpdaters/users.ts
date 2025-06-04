@@ -1,7 +1,7 @@
 import { throttleWithFullyIdle } from '../../../lib/teact/heavyAnimation';
 
 import type { ApiUserStatus } from '../../../api/types';
-import type { ActionReturnType, RequiredGlobalState } from '../../types';
+import type { ActionReturnType } from '../../types';
 
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
@@ -20,8 +20,7 @@ const updateStatusesOnFullyIdle = throttleWithFullyIdle(flushStatusUpdates);
 let pendingStatusUpdates: Record<string, ApiUserStatus> = {};
 
 function flushStatusUpdates() {
-  // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
-  let global = getGlobal() as RequiredGlobalState;
+  let global = getGlobal();
 
   global = replaceUserStatuses(global, {
     ...global.users.statusesById,

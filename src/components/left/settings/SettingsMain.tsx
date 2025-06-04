@@ -96,7 +96,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="settings"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.General })}
         >
           {lang('TelegramGeneralSettingsViewController')}
@@ -104,7 +104,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="animations"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.Performance })}
         >
           {lang('MenuAnimations')}
@@ -112,7 +112,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="unmute"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.Notifications })}
         >
           {lang('Notifications')}
@@ -120,7 +120,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="data"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.DataStorage })}
         >
           {lang('DataSettings')}
@@ -128,7 +128,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="lock"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.Privacy })}
         >
           {lang('PrivacySettings')}
@@ -136,7 +136,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="folder"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.Folders })}
         >
           {lang('Filters')}
@@ -144,7 +144,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="active-sessions"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.ActiveSessions })}
         >
           {lang('SessionsTitle')}
@@ -153,7 +153,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="language"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.Language })}
         >
           {lang('Language')}
@@ -162,7 +162,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="stickers"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.Stickers })}
         >
           {lang('MenuStickers')}
@@ -173,7 +173,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           <ListItem
             leftElement={<StarIcon className="icon ListItem-main-icon" type="premium" size="big" />}
             narrow
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => openPremiumModal()}
           >
             {lang('TelegramPremium')}
@@ -182,7 +182,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         <ListItem
           leftElement={<StarIcon className="icon ListItem-main-icon" type="gold" size="big" />}
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openStarsBalanceModal({})}
         >
           {lang('MenuStars')}
@@ -196,7 +196,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           <ListItem
             icon="gift"
             narrow
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => openGiftRecipientPicker()}
           >
             {lang('MenuSendGift')}
@@ -214,7 +214,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="help"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openUrl({ url: FAQ_URL })}
         >
           {lang('MenuTelegramFaq')}
@@ -222,7 +222,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="privacy-policy"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openUrl({ url: PRIVACY_URL })}
         >
           {lang('MenuPrivacyPolicy')}

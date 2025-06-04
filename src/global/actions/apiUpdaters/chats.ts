@@ -68,7 +68,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       const updatedChat = selectChat(global, update.id);
       if (!update.noTopChatsRequest && !selectIsChatListed(global, update.id)
-          && !updatedChat?.isNotJoined) {
+        && !updatedChat?.isNotJoined) {
         // Reload top chats to update chat listing
         actions.loadTopChats();
       }
@@ -207,7 +207,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const chat = selectChat(global, chatId);
 
         if (messageUpdate.reactions && chat?.unreadReactionsCount
-            && !checkIfHasUnreadReactions(global, messageUpdate.reactions)) {
+          && !checkIfHasUnreadReactions(global, messageUpdate.reactions)) {
           global = updateUnreadReactions(global, chatId, {
             unreadReactionsCount: Math.max(chat.unreadReactionsCount - 1, 0) || undefined,
             unreadReactions: chat.unreadReactions?.filter((i) => i !== id),

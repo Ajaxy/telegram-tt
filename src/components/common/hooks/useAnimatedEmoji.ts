@@ -29,11 +29,9 @@ export default function useAnimatedEmoji(
     interactWithAnimatedEmoji, sendEmojiInteraction, sendWatchingEmojiInteraction,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
-  // eslint-disable-next-line no-null/no-null
-  const audioRef = useRef<HTMLAudioElement | undefined>(null);
+  const audioRef = useRef<HTMLAudioElement | undefined>();
 
   const soundMediaData = useMedia(soundId ? `document${soundId}` : undefined, !soundId);
 
@@ -85,7 +83,7 @@ export default function useAnimatedEmoji(
     const { x, y } = container.getBoundingClientRect();
 
     interactWithAnimatedEmoji({
-      emoji: emoji!,
+      emoji: emoji,
       x,
       y,
       startSize: size,

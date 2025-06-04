@@ -72,8 +72,7 @@ export default function useChatListEntry({
   withInterfaceAnimations?: boolean;
 }) {
   const oldLang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const storyData = lastMessage?.content.storyData;
   const shouldTryLoadingStory = statefulMediaContent && !statefulMediaContent.story;
@@ -89,7 +88,7 @@ export default function useChatListEntry({
 
   const renderLastMessageOrTyping = useCallback(() => {
     if (!isSavedDialog && !isPreview
-        && typingStatus && lastMessage && typingStatus.timestamp > lastMessage.date * 1000) {
+      && typingStatus && lastMessage && typingStatus.timestamp > lastMessage.date * 1000) {
       return <TypingStatus typingStatus={typingStatus} />;
     }
 

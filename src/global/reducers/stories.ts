@@ -11,10 +11,11 @@ import type {
 } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
 
+import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { compareFields, unique } from '../../util/iteratees';
 import { getServerTime } from '../../util/serverTime';
-import { isUserId, updateReactionCount } from '../helpers';
+import { updateReactionCount } from '../helpers';
 import {
   selectIsChatWithSelf,
   selectPeer, selectPeerStories, selectPeerStory, selectTabState, selectUser,

@@ -1,3 +1,4 @@
+import type { ElementRef } from '../lib/teact/teact';
 import { beginHeavyAnimation, useRef } from '../lib/teact/teact';
 import { getActions } from '../global';
 
@@ -11,7 +12,7 @@ const THROTTLE_MS = 300;
 const RESIZE_ANIMATION_DURATION = 400;
 
 function useMessageResizeObserver(
-  ref: React.RefObject<HTMLElement> | undefined,
+  ref: ElementRef<HTMLElement> | undefined,
   shouldFocusOnResize = false,
 ) {
   const {

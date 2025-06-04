@@ -106,20 +106,22 @@ const MessageListAccountInfo: FC<OwnProps & StateProps> = ({
 
   const securityNameInfo = nameChangeDate && chat ? (
     <div className="local-action-message" key="security-name-message">
-      <span>{lang('UserUpdatedName', {
-        user: chat.title,
-        time: formatPastDatetime(lang, nameChangeDate),
-      }, { withNodes: true, withMarkdown: true })}
+      <span>
+        {lang('UserUpdatedName', {
+          user: chat.title,
+          time: formatPastDatetime(lang, nameChangeDate),
+        }, { withNodes: true, withMarkdown: true })}
       </span>
     </div>
   ) : undefined;
 
   const securityPhotoInfo = photoChangeDate && chat ? (
     <div className="local-action-message" key="security-photo-message">
-      <span>{lang('UserUpdatedPhoto', {
-        user: chat.title,
-        time: formatPastDatetime(lang, photoChangeDate),
-      }, { withNodes: true, withMarkdown: true })}
+      <span>
+        {lang('UserUpdatedPhoto', {
+          user: chat.title,
+          time: formatPastDatetime(lang, photoChangeDate),
+        }, { withNodes: true, withMarkdown: true })}
       </span>
     </div>
   ) : undefined;

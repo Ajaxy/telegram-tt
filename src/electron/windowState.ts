@@ -123,7 +123,7 @@ function windowStateKeeper(options: Options): WindowState {
       state.isMaximized = winRef.isMaximized();
       state.isFullScreen = winRef.isFullScreen();
       state.displayBounds = screen.getDisplayMatching(winBounds).bounds;
-    } catch (err) {
+    } catch (err: unknown) {
       // Handler not supported, ignoring
     }
   }

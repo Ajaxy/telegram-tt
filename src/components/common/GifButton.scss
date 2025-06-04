@@ -61,13 +61,12 @@
     padding: 0.125rem;
     border-radius: 0.25rem;
     transition: 0.15s opacity ease-in-out;
+    opacity: 0;
+    z-index: 1;
 
     &-icon {
       font-size: 0.75rem;
     }
-
-    opacity: 0;
-    z-index: 1;
   }
 
   .gif-context-menu {

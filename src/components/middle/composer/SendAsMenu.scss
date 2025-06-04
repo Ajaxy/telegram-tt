@@ -2,7 +2,7 @@
   .send-as-title {
     font-weight: var(--font-weight-medium);
     line-height: 1.25rem;
-    word-break: break-word;
+    overflow-wrap: anywhere;
     margin-inline-start: 1rem;
     margin-block: 0.5rem;
   }

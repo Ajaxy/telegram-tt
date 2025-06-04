@@ -164,7 +164,7 @@ const MessageMeta: FC<OwnProps> = ({
       {Boolean(message.viewsCount) && (
         <>
           <span className="message-views" title={viewsTitle}>
-            {formatIntegerCompact(lang, message.viewsCount!)}
+            {formatIntegerCompact(lang, message.viewsCount)}
           </span>
           <Icon name="channelviews" />
         </>
@@ -172,7 +172,7 @@ const MessageMeta: FC<OwnProps> = ({
       {!noReplies && Boolean(repliesThreadInfo?.messagesCount) && (
         <span onClick={handleOpenThread} className="message-replies-wrapper" title={repliesTitle}>
           <span className="message-replies">
-            <AnimatedCounter text={formatIntegerCompact(lang, repliesThreadInfo!.messagesCount!)} />
+            <AnimatedCounter text={formatIntegerCompact(lang, repliesThreadInfo.messagesCount)} />
           </span>
           <Icon name="reply-filled" />
         </span>
@@ -183,14 +183,15 @@ const MessageMeta: FC<OwnProps> = ({
       {signature && (
         <span className="message-signature">{renderText(signature)}</span>
       )}
-      {paidMessageStars && (
-        <span className="message-price">{
-          formatStarsAsIcon(lang, paidMessageStars, {
-            asFont: true,
-            className: 'message-price-star-icon',
-            containerClassName: 'message-price-stars-container',
-          })
-        }
+      {Boolean(paidMessageStars) && (
+        <span className="message-price">
+          {
+            formatStarsAsIcon(lang, paidMessageStars, {
+              asFont: true,
+              className: 'message-price-star-icon',
+              containerClassName: 'message-price-stars-container',
+            })
+          }
         </span>
       )}
       <span className="message-time" title={dateTitle} onMouseEnter={markActivated}>

@@ -4,7 +4,7 @@ import {
 } from 'electron';
 import path from 'path';
 
-import type { TrafficLightPosition } from '../types/electron';
+import type { WindowButtonsPosition } from '../types/electron';
 import { ElectronAction, ElectronEvent } from '../types/electron';
 
 import setupAutoUpdates, { AUTO_UPDATE_SETTING_KEY, getIsAutoUpdateEnabled } from './autoUpdates';
@@ -14,7 +14,7 @@ import tray from './tray';
 import {
   checkIsWebContentsUrlAllowed, forceQuit, getAppTitle, getCurrentWindow, getLastWindow,
   hasExtraWindows, IS_FIRST_RUN, IS_MAC_OS, IS_PREVIEW, IS_PRODUCTION, IS_WINDOWS,
-  reloadWindows, store, TRAFFIC_LIGHT_POSITION, windows,
+  reloadWindows, store, WINDOW_BUTTONS_POSITION, windows,
 } from './utils';
 import windowStateKeeper from './windowState';
 
@@ -61,12 +61,12 @@ export function createWindow(url?: string) {
     height,
     title: getAppTitle(),
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.cjs'),
       devTools: !IS_PRODUCTION,
     },
     ...(IS_MAC_OS && {
       titleBarStyle: 'hidden',
-      trafficLightPosition: TRAFFIC_LIGHT_POSITION.standard,
+      windowButtonPosition: WINDOW_BUTTONS_POSITION.standard,
     }),
   });
 
@@ -87,7 +87,7 @@ export function createWindow(url?: string) {
     }
   });
 
-  window.on('page-title-updated', (event: Event) => {
+  window.on('page-title-updated', (event: Electron.Event) => {
     event.preventDefault();
   });
 
@@ -189,12 +189,12 @@ export function setupElectronActionHandlers() {
     }
   });
 
-  ipcMain.handle(ElectronAction.SET_TRAFFIC_LIGHT_POSITION, (_, position: TrafficLightPosition) => {
+  ipcMain.handle(ElectronAction.SET_WINDOW_BUTTONS_POSITION, (_, position: WindowButtonsPosition) => {
     if (!IS_MAC_OS) {
       return;
     }
 
-    getCurrentWindow()?.setTrafficLightPosition(TRAFFIC_LIGHT_POSITION[position]);
+    getCurrentWindow()?.setWindowButtonPosition(WINDOW_BUTTONS_POSITION[position]);
   });
 
   ipcMain.handle(ElectronAction.SET_IS_AUTO_UPDATE_ENABLED, async (_, isAutoUpdateEnabled: boolean) => {

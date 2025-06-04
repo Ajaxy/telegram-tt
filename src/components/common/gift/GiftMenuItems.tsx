@@ -174,7 +174,7 @@ const GiftMenuItems = ({
           {lang('Sell')}
         </MenuItem>
       )}
-      {canManage && isGiftUnique && giftResalePrice && (
+      {canManage && isGiftUnique && Boolean(giftResalePrice) && (
         <MenuItem icon="unlist-outline" onClick={handleUnsell}>
           {lang('GiftInfoUnlist')}
         </MenuItem>

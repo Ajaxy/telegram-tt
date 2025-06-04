@@ -1,13 +1,13 @@
-import { createTransitionManager } from './TransitionManager';
-import { throttleWithRaf, getMaxMin, mergeArrays, proxyMerge, sumArrays } from './utils';
+import { createTransitionManager } from './TransitionManager.js';
+import { throttleWithRaf, getMaxMin, mergeArrays, proxyMerge, sumArrays } from './utils.js';
 import {
   AXES_MAX_COLUMN_WIDTH,
   AXES_MAX_ROW_HEIGHT,
   X_AXIS_HEIGHT,
   ANIMATE_PROPS,
   Y_AXIS_ZERO_BASED_THRESHOLD,
-} from './constants';
-import { xStepToScaleLevel, yScaleLevelToStep, yStepToScaleLevel } from './formulas';
+} from './constants.js';
+import { xStepToScaleLevel, yScaleLevelToStep, yStepToScaleLevel } from './formulas.js';
 
 export function createStateManager(data, viewportSize, callback) {
   const _range = { begin: 0, end: 1 };

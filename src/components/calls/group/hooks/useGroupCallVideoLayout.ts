@@ -1,4 +1,5 @@
-import type { RefObject } from 'react';
+import type {
+  ElementRef } from '../../../../lib/teact/teact';
 import {
   useEffect, useMemo, useState,
 } from '../../../../lib/teact/teact';
@@ -37,8 +38,8 @@ export default function useGroupCallVideoLayout({
   isLandscapeLayout,
   pinnedVideo,
 }: {
-  primaryContainerRef: RefObject<HTMLDivElement>;
-  secondaryContainerRef: RefObject<HTMLDivElement>;
+  primaryContainerRef: ElementRef<HTMLDivElement>;
+  secondaryContainerRef: ElementRef<HTMLDivElement>;
   videoParticipants: VideoParticipant[];
   isLandscapeLayout: boolean;
   pinnedVideo: VideoParticipant | undefined;

@@ -14,7 +14,6 @@ export { getIsHeavyAnimating, beginHeavyAnimation, onFullyIdle } from './heavyAn
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export type FC_withDebug =
   FC
   & { DEBUG_contentComponentName?: string };
@@ -61,10 +60,12 @@ export interface VirtualElementFragment {
 
 export type StateHookSetter<T> = (newValue: ((current: T) => T) | T) => void;
 
-export interface RefObject<T = any> {
+export interface RefObject<T = unknown> {
   current: T;
   onChange?: NoneToVoidFunction;
 }
+
+export type ElementRef<T = HTMLElement> = RefObject<T | undefined>;
 
 export enum MountState {
   Mounting,
@@ -93,7 +94,7 @@ interface ComponentInstance {
     effects?: {
       cursor: number;
       byCursor: {
-        dependencies?: readonly any[];
+        dependencies?: readonly unknown[];
         schedule?: NoneToVoidFunction;
         cleanup?: NoneToVoidFunction;
         releaseSignals?: NoneToVoidFunction;
@@ -103,7 +104,7 @@ interface ComponentInstance {
       cursor: number;
       byCursor: {
         value: any;
-        dependencies: any[];
+        dependencies: readonly unknown[];
       }[];
     };
     refs?: {
@@ -280,9 +281,7 @@ function buildChildElement(child: any): VirtualElement {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 const DEBUG_components: AnyLiteral = { TOTAL: { name: 'TOTAL', renders: 0 } };
-// eslint-disable-next-line @typescript-eslint/naming-convention
 const DEBUG_memos: Record<string, { key: string; calls: number; misses: number; hitRate: number }> = {};
 const DEBUG_MEMOS_CALLS_THRESHOLD = 20;
 
@@ -355,7 +354,7 @@ const runUpdatePassOnRaf = throttleWith(requestMeasure, () => {
   requestMutation(() => {
     instancesToUpdate.forEach(prepareComponentForFrame);
     instancesToUpdate.forEach((instance) => {
-      if (idsToExcludeFromUpdate!.has(instance.id)) {
+      if (idsToExcludeFromUpdate.has(instance.id)) {
         return;
       }
 
@@ -391,7 +390,7 @@ export function renderComponent(componentInstance: ComponentInstance) {
   idsToExcludeFromUpdate.add(componentInstance.id);
 
   const { Component, props } = componentInstance;
-  let newRenderedValue: any;
+  let newRenderedValue: unknown;
 
   safeExec(() => {
     renderingInstance = componentInstance;
@@ -410,7 +409,6 @@ export function renderComponent(componentInstance: ComponentInstance) {
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     let DEBUG_startAt: number | undefined;
     if (DEBUG) {
       const componentName = DEBUG_resolveComponentName(Component);
@@ -531,9 +529,9 @@ function helpGc(componentInstance: ComponentInstance) {
 
   if (effects) {
     for (const hook of effects.byCursor) {
-      hook.schedule = undefined as any;
-      hook.cleanup = undefined as any;
-      hook.releaseSignals = undefined as any;
+      hook.schedule = undefined;
+      hook.cleanup = undefined;
+      hook.releaseSignals = undefined;
       hook.dependencies = undefined;
     }
   }
@@ -542,25 +540,28 @@ function helpGc(componentInstance: ComponentInstance) {
     for (const hook of state.byCursor) {
       hook.value = undefined;
       hook.nextValue = undefined;
+
       hook.setter = undefined as any;
     }
   }
 
   if (memos) {
     for (const hook of memos.byCursor) {
-      hook.value = undefined as any;
+      hook.value = undefined;
+
       hook.dependencies = undefined as any;
     }
   }
 
   if (refs) {
     for (const hook of refs.byCursor) {
-      hook.current = undefined as any;
-      hook.onChange = undefined as any;
+      hook.current = undefined;
+      hook.onChange = undefined;
     }
   }
 
-  componentInstance.hooks = undefined as any;
+  componentInstance.hooks = undefined;
+
   componentInstance.$element = undefined as any;
   componentInstance.renderedValue = undefined;
   componentInstance.onUpdate = undefined;
@@ -651,7 +652,7 @@ export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter
 function useEffectBase(
   isLayout: boolean,
   effect: Effect,
-  dependencies?: readonly any[],
+  dependencies?: readonly unknown[],
   debugKey?: string,
 ) {
   if (!renderingInstance.hooks) {
@@ -673,10 +674,10 @@ function useEffectBase(
   if (dependencies && effectConfig?.dependencies) {
     if (dependencies.some((dependency, i) => dependency !== effectConfig.dependencies![i])) {
       if (DEBUG && debugKey) {
-        const causedBy = dependencies.reduce((res, newValue, i) => {
+        const causedBy = dependencies.reduce<string[]>((res, newValue, i) => {
           const prevValue = effectConfig.dependencies![i];
           if (newValue !== prevValue) {
-            res.push(`${i}: ${prevValue} => ${newValue}`);
+            res.push(`${i}: ${String(prevValue)} => ${String(newValue)}`);
           }
 
           return res;
@@ -751,7 +752,6 @@ function scheduleEffect(
         return;
       }
 
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       let DEBUG_startAt: number | undefined;
       if (DEBUG) {
         DEBUG_startAt = performance.now();
@@ -771,7 +771,7 @@ function scheduleEffect(
       }
     }, {
       rescue: () => {
-        // eslint-disable-next-line no-console, max-len
+        // eslint-disable-next-line no-console
         console.error(`[Teact] Error in effect cleanup at cursor #${cursor} in ${componentInstance.name}`,
           componentInstance);
       },
@@ -788,7 +788,6 @@ function scheduleEffect(
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     let DEBUG_startAt: number | undefined;
     if (DEBUG) {
       DEBUG_startAt = performance.now();
@@ -819,11 +818,11 @@ function scheduleEffect(
   runUpdatePassOnRaf();
 }
 
-export function useEffect(effect: Effect, dependencies?: readonly any[], debugKey?: string) {
+export function useEffect(effect: Effect, dependencies?: readonly unknown[], debugKey?: string) {
   return useEffectBase(false, effect, dependencies, debugKey);
 }
 
-export function useLayoutEffect(effect: Effect, dependencies?: readonly any[], debugKey?: string) {
+export function useLayoutEffect(effect: Effect, dependencies?: readonly unknown[], debugKey?: string) {
   return useEffectBase(true, effect, dependencies, debugKey);
 }
 
@@ -847,9 +846,9 @@ export function useUnmountCleanup(cleanup: NoneToVoidFunction) {
   renderingInstance.hooks.effects.cursor++;
 }
 
-export function useMemo<T extends any>(
+export function useMemo<T>(
   resolver: () => T,
-  dependencies: any[],
+  dependencies: readonly unknown[],
   debugKey?: string,
   debugHitRateKey?: string,
 ): T {
@@ -863,7 +862,6 @@ export function useMemo<T extends any>(
   const { cursor, byCursor } = renderingInstance.hooks.memos;
   let { value } = byCursor[cursor] || {};
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   let DEBUG_state: typeof DEBUG_memos[string] | undefined;
   if (DEBUG && debugHitRateKey) {
     const instanceKey = `${debugHitRateKey}#${renderingInstance.id}`;
@@ -907,7 +905,7 @@ export function useMemo<T extends any>(
         ) {
           // eslint-disable-next-line no-console
           console.warn(
-            // eslint-disable-next-line max-len
+
             `[Teact] ${DEBUG_state.key}: Hit rate is ${DEBUG_state.hitRate.toFixed(2)} for ${DEBUG_state.calls} calls`,
           );
         }
@@ -927,16 +925,14 @@ export function useMemo<T extends any>(
   return value;
 }
 
-export function useCallback<F extends AnyFunction>(newCallback: F, dependencies: any[], debugKey?: string): F {
+export function useCallback<F extends AnyFunction>(newCallback: F, dependencies: unknown[], debugKey?: string): F {
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   return useMemo(() => newCallback, dependencies, debugKey);
 }
 
 export function useRef<T>(initial: T): RefObject<T>;
 export function useRef<T>(): RefObject<T | undefined>; // TT way (empty is `undefined`)
-export function useRef<T>(initial: null): RefObject<T | null>; // React way (empty is `null`)
-// eslint-disable-next-line no-null/no-null
-export function useRef<T>(initial?: T | null) {
+export function useRef<T>(initial?: T) {
   if (!renderingInstance.hooks) {
     renderingInstance.hooks = {};
   }
@@ -983,7 +979,7 @@ export function createContext<T>(defaultValue?: T): Context<T> {
 export function useContextSignal<T>(context: Context<T>) {
   const [getDefaultValue] = useSignal(context.defaultValue);
 
-  return renderingInstance.context?.[context.contextId] || getDefaultValue;
+  return renderingInstance.context?.[context.contextId] as Signal<T> || getDefaultValue;
 }
 
 export function useSignal<T>(initial?: T) {
@@ -1008,9 +1004,7 @@ export function memo<T extends FC_withDebug>(Component: T, debugKey?: string) {
   return TeactMemoWrapper as T;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function DEBUG_resolveComponentName(Component: FC_withDebug) {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { name, DEBUG_contentComponentName } = Component;
 
   if (name === 'TeactNContainer') {

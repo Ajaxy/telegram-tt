@@ -107,7 +107,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
             handleTerminateAuthClick(session.hash);
           },
         }]}
-        // eslint-disable-next-line react/jsx-no-bind
+
         onClick={() => handleOpenSessionModal(session.hash)}
       >
         <Avatar className={styles.avatar} peer={bot} size="tiny" />
@@ -115,9 +115,17 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
           <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
           {bot && <FullNameTitle className={styles.title} peer={bot} />}
           <span className={buildClassName('subtitle', 'black', 'tight', styles.platform)}>
-            {session.domain}, {session.browser}, {session.platform}
+            {session.domain}
+            ,
+            {session.browser}
+            ,
+            {session.platform}
           </span>
-          <span className={buildClassName('subtitle', styles.subtitle)}>{session.ip} {session.region}</span>
+          <span className={buildClassName('subtitle', styles.subtitle)}>
+            {session.ip}
+            {' '}
+            {session.region}
+          </span>
         </div>
       </ListItem>
     );

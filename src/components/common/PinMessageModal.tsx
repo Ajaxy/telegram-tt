@@ -8,9 +8,9 @@ import {
   isChatBasicGroup,
   isChatChannel,
   isChatSuperGroup,
-  isUserId,
 } from '../../global/helpers';
 import { selectChat, selectIsChatWithSelf, selectUser } from '../../global/selectors';
+import { isUserId } from '../../util/entities/ids';
 import renderText from './helpers/renderText';
 
 import useOldLang from '../../hooks/useOldLang';

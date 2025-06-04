@@ -24,7 +24,7 @@ import {
 
 import { DEBUG, LANG_PACK } from '../../config';
 import { callApi } from '../../api/gramjs';
-import renderText, { type TextFilter } from '../../components/common/helpers/renderText';
+import renderText from '../../components/common/helpers/renderText';
 import { IS_INTL_LIST_FORMAT_SUPPORTED } from '../browser/globalEnvironment';
 import { MAIN_IDB_STORE } from '../browser/idb';
 import { getBasicListFormat } from '../browser/intlListFormat';
@@ -309,18 +309,18 @@ function createTranslationFn(): LangFn {
   fn.rawCode = language?.langCode || FORMATTERS_FALLBACK_LANG;
   fn.isRtl = language?.isRtl;
   fn.code = language?.pluralCode || FORMATTERS_FALLBACK_LANG;
-  fn.with = (({ key, variables, options }: LangFnParameters) => {
+  fn.with = ({ key, variables, options }: LangFnParameters) => {
     if (options && areAdvancedLangFnOptions(options)) {
       return processTranslationAdvanced(key, variables as Record<string, TeactNode | undefined>, options);
     }
     return processTranslation(key, variables as Record<string, LangVariable>, options);
-  });
-  fn.withRegular = (({ key, variables, options }: RegularLangFnParameters) => {
+  };
+  fn.withRegular = ({ key, variables, options }: RegularLangFnParameters) => {
     return processTranslation(key, variables, options);
-  });
-  fn.withAdvanced = (({ key, variables, options }: AdvancedLangFnParameters) => {
+  };
+  fn.withAdvanced = ({ key, variables, options }: AdvancedLangFnParameters) => {
     return processTranslationAdvanced(key, variables, options);
-  });
+  };
   fn.region = (code: string) => formatters?.region.of(code);
   fn.conjunction = (list: string[]) => formatters?.conjunction.format(list) || list.join(', ');
   fn.disjunction = (list: string[]) => formatters?.disjunction.format(list) || list.join(', ');
@@ -409,7 +409,7 @@ function processTranslationAdvanced(
 
   if (withRenderText) {
     const filters = options?.withMarkdown
-      ? unique((options.renderTextFilters || []).concat(['simple_markdown', 'emoji']) as TextFilter[])
+      ? unique((options.renderTextFilters || []).concat(['simple_markdown', 'emoji']))
       : options.renderTextFilters;
 
     return tempResult.flatMap((curr: TeactNode) => {

@@ -1,5 +1,4 @@
-import type { RefObject } from 'react';
-import type { FC } from '../../lib/teact/teact';
+import type { ElementRef, FC } from '../../lib/teact/teact';
 import React, { memo, useCallback, useState } from '../../lib/teact/teact';
 
 import { openSystemFilesDialog } from '../../util/systemFilesDialog';
@@ -10,7 +9,7 @@ import styles from './SelectAvatar.module.scss';
 
 type OwnProps = {
   onChange: (file: File) => void;
-  inputRef: RefObject<HTMLInputElement>;
+  inputRef: ElementRef<HTMLInputElement>;
 };
 
 const SelectAvatar: FC<OwnProps> = ({
@@ -29,13 +28,13 @@ const SelectAvatar: FC<OwnProps> = ({
   }, []);
 
   const handleClick = useCallback(() => {
-    openSystemFilesDialog('image/png, image/jpeg', ((event) => {
+    openSystemFilesDialog('image/png, image/jpeg', (event) => {
       const target = event.target as HTMLInputElement;
       if (!target?.files?.[0]) {
         return;
       }
       setSelectedFile(target.files[0]);
-    }), true);
+    }, true);
   }, []);
 
   return (

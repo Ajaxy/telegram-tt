@@ -9,12 +9,10 @@ import type {
 } from '../../../api/types';
 import type { IconName } from '../../../types/icons';
 
-import {
-  isUserId,
-} from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import { selectPeer, selectPeerStory } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { isUserId } from '../../../util/entities/ids';
 import { getPeerColorClass } from '../helpers/peerColor';
 import renderText from '../helpers/renderText';
 import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
@@ -46,8 +44,7 @@ const EmbeddedStoryForward: FC<OwnProps & StateProps> = ({
   story,
 }) => {
   const { openStoryViewer, loadPeerStoriesByIds, openChat } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const lang = useOldLang();
 

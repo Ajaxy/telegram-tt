@@ -45,8 +45,7 @@ const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
   onReset,
   recoveryEmail,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>();
   const { isMobile } = useAppLayout();
   const focusDelayTimeoutMs = isMobile ? 550 : 400;
 

@@ -65,17 +65,15 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
   onReactionSelect,
   onReactionContext,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
+  const sharedCanvasRef = useRef<HTMLCanvasElement>();
+  const sharedCanvasHqRef = useRef<HTMLCanvasElement>();
   const { width: windowWidth } = useWindowSize();
   const { isTouchScreen } = useAppLayout();
 
   const currentReactions = message?.reactions?.results;
 
   const shouldUseCurrentReactions = reactionsLimit && currentReactions
-   && currentReactions.length >= reactionsLimit;
+    && currentReactions.length >= reactionsLimit;
 
   const allAvailableReactions = useMemo(() => {
     if (shouldUseCurrentReactions) {
@@ -138,7 +136,7 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
                 isSelected={isSelected}
                 loadAndPlay={loadAndPlay}
                 availableReactions={availableReactions}
-                onClick={onReactionSelect!}
+                onClick={onReactionSelect}
                 onContextMenu={onReactionContext}
                 sharedCanvasRef={sharedCanvasRef}
                 sharedCanvasHqRef={sharedCanvasHqRef}

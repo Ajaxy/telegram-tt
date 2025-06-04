@@ -214,7 +214,6 @@ export function buildVideoFromDocument(document: GramJs.Document, params?: {
     id, mimeType, thumbs, size, videoThumbs, attributes,
   } = document;
 
-  // eslint-disable-next-line no-restricted-globals
   if (mimeType === VIDEO_WEBM_TYPE && !(self as any).isWebmSupported) {
     return undefined;
   }

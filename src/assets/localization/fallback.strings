@@ -1588,6 +1588,9 @@
 "PrivacyEnablePremiumGifts" = "Enable Premium Gifts";
 "DisplayGiftsButton" = "Display Gifts Button";
 "HideGiftsButton" = "Hide Gifts Button";
+"Review" = "Review";
+"CheckPrivacyCallsText" = "You've restricted who can message you, but anyone can still call you. Would you like to review these settings?";
+"CheckPrivacyInviteText" = "You've restricted who can message you, but anyone can still invite you to groups and channels. Would you like to review these settings?";
 "CustomShareGiftsInfo" = "You can add users or entire groups as exceptions that will override the settings above.";
 "StarsSubscribeBotText_one" = "Do you want to subscribe to **{name}** in **{bot}** for **{amount}** star per month?";
 "StarsSubscribeBotText_other" = "Do you want to subscribe to **{name}** in **{bot}** for **{amount}** stars per month?";

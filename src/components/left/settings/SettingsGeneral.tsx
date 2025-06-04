@@ -143,7 +143,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
         <ListItem
           icon="photo"
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.GeneralChatBackground })}
         >
           {lang('ChatBackground')}

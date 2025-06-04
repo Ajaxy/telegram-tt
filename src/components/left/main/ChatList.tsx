@@ -80,8 +80,7 @@ const ChatList: FC<OwnProps> = ({
     openFrozenAccountModal,
     openLeftColumnContent,
   } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   const shouldIgnoreDragRef = useRef(false);
   const [unconfirmedSessionHeight, setUnconfirmedSessionHeight] = useState(0);
 
@@ -223,7 +222,7 @@ const ChatList: FC<OwnProps> = ({
     return viewportIds!.map((id, i) => {
       const isPinned = viewportOffset + i < pinnedCount;
       const offsetTop = unconfirmedSessionHeight + archiveHeight + frozenNotificationHeight
-      + (viewportOffset + i) * CHAT_HEIGHT_PX;
+        + (viewportOffset + i) * CHAT_HEIGHT_PX;
 
       return (
         <Chat

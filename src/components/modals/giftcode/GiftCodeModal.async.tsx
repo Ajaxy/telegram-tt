@@ -11,7 +11,6 @@ const GiftCodeModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const GiftCodeModal = useModuleLoader(Bundles.Extra, 'GiftCodeModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return GiftCodeModal ? <GiftCodeModal {...props} /> : undefined;
 };
 

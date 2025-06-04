@@ -47,8 +47,7 @@ const GifButton: FC<OwnProps> = ({
   onUnsaveClick,
   isSavedMessages,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const lang = useOldLang();
 
@@ -169,7 +168,7 @@ const GifButton: FC<OwnProps> = ({
           disablePictureInPicture
           playsInline
           preload="none"
-          // eslint-disable-next-line react/jsx-props-no-spreading
+
           {...bufferingHandlers}
         />
       )}

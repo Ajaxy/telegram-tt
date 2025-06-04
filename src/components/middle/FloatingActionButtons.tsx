@@ -52,8 +52,7 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
     readAllMentions, readAllReactions, fetchUnreadMentions,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const elementRef = useRef<HTMLDivElement>(null);
+  const elementRef = useRef<HTMLDivElement>();
 
   const hasUnreadReactions = Boolean(reactionsCount);
   const hasUnreadMentions = Boolean(mentionsCount);

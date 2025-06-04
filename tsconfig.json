@@ -14,6 +14,7 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
@@ -29,5 +30,10 @@
     "webpack.config.ts",
     "webpack-electron.config.ts",
     "babel.config.js",
+    "eslint.config.mjs",
+    ".fantasticonrc.js",
+    "playwright.config.ts",
+    "jest.config.js",
+    ".github/workflows/*.js"
   ]
 }

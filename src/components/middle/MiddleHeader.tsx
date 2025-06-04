@@ -18,7 +18,6 @@ import {
 } from '../../config';
 import {
   getIsSavedDialog,
-  isUserId,
 } from '../../global/helpers';
 import {
   selectChat,
@@ -33,6 +32,7 @@ import {
   selectThreadParam,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { isUserId } from '../../util/entities/ids';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useConnectionStatus from '../../hooks/useConnectionStatus';
@@ -136,8 +136,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const isLeftColumnHideable = windowWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN;
   const shouldShowCloseButton = isTablet && isLeftColumnShown;
 
-  // eslint-disable-next-line no-null/no-null
-  const componentRef = useRef<HTMLDivElement>(null);
+  const componentRef = useRef<HTMLDivElement>();
 
   const handleOpenSearch = useLastCallback(() => {
     updateMiddleSearch({ chatId, threadId, update: {} });

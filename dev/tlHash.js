@@ -1,10 +1,10 @@
-const fs = require('fs');
-const path = require('path');
+import { readFileSync, writeFileSync } from 'fs';
+import { resolve } from 'path';
 
-const API_TL_PATH = path.resolve('./src/lib/gramjs/tl/static/api.tl');
+const API_TL_PATH = resolve('./src/lib/gramjs/tl/static/api.tl');
 
 function rehash() {
-  const data = fs.readFileSync(API_TL_PATH, 'utf8');
+  const data = readFileSync(API_TL_PATH, 'utf8');
 
   const lines = data.split('\n');
   // eslint-disable-next-line no-console
@@ -30,7 +30,7 @@ function rehash() {
   // eslint-disable-next-line no-console
   console.log(`Writing ${resultLines.length} lines`);
 
-  fs.writeFileSync(API_TL_PATH, resultLines.join('\n'));
+  writeFileSync(API_TL_PATH, resultLines.join('\n'));
 }
 
 function getHash(line) {

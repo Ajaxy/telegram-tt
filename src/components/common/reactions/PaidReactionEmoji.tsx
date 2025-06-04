@@ -56,10 +56,8 @@ const PaidReactionEmoji = ({
 }: OwnProps & StateProps) => {
   const { stopActiveReaction } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const effectRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
+  const effectRef = useRef<HTMLDivElement>();
 
   const [effectsIds, setEffectsIds] = useState<number[]>([]);
 

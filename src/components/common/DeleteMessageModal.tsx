@@ -17,7 +17,6 @@ import {
   isChatChannel,
   isChatSuperGroup,
   isSystemBot,
-  isUserId,
 } from '../../global/helpers';
 import { getPeerTitle } from '../../global/helpers/peers';
 import {
@@ -31,6 +30,7 @@ import {
   selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { isUserId } from '../../util/entities/ids';
 import { buildCollectionByCallback, unique } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import renderText from './helpers/renderText';
@@ -282,7 +282,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
       if (peerIdsToReportSpam) {
         const global = getGlobal();
         const peerIdList = peerIdsToReportSpam.filter((option) => !Number.isNaN(Number(option)));
-        const messageList = messageIds!.reduce<Record<string, number[]>>((acc, msgId) => {
+        const messageList = messageIds.reduce<Record<string, number[]>>((acc, msgId) => {
           const peer = selectSenderFromMessage(global, chat.id, msgId);
           if (peer && peerIdList.includes(peer.id)) {
             if (!acc[peer.id]) {
@@ -304,7 +304,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
       if (peerIdsToBan && !havePermissionChanged) {
         const peerIdList = peerIdsToBan.filter((option) => !Number.isNaN(Number(option)));
         handleDeleteMember(peerIdList);
-        const filteredMessageIdList = filterMessageIdByPeerId(peerIdList, messageIds!);
+        const filteredMessageIdList = filterMessageIdByPeerId(peerIdList, messageIds);
         handleDeleteMessages(filteredMessageIdList);
       }
 
@@ -445,8 +445,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         )}
         {(canDeleteForAll || chatBot || !shouldShowOption) && (
           <>
-            <p>{messageIds && messageIds.length > 1
-              ? lang('AreYouSureDeleteFewMessages') : lang('AreYouSureDeleteSingleMessage')}
+            <p>
+              {messageIds && messageIds.length > 1
+                ? lang('AreYouSureDeleteFewMessages') : lang('AreYouSureDeleteSingleMessage')}
             </p>
             {willDeleteForCurrentUserOnly && (
               <p>{oldLang('lng_delete_for_me_chat_hint', 1, 'i')}</p>

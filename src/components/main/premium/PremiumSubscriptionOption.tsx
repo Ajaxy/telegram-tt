@@ -68,7 +68,11 @@ const PremiumSubscriptionOption: FC<OwnProps> = ({
             <span
               className={buildClassName(styles.giveawayDiscount, styles.discount)}
               title={oldLang('GiftDiscount')}
-            > &minus;{discount}%
+            >
+              {' '}
+              &minus;
+              {discount}
+              %
             </span>
           )}
           {oldLang('Months', months)}

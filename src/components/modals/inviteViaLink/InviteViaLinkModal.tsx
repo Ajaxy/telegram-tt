@@ -74,7 +74,7 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
   const handleClose = useLastCallback(() => closeInviteViaLinkModal());
 
   const handleSendInviteLink = useCallback(() => {
-    sendInviteMessages({ chatId: chat!.id, userIds: selectedMemberIds! });
+    sendInviteMessages({ chatId: chat!.id, userIds: selectedMemberIds });
     closeInviteViaLinkModal();
   }, [selectedMemberIds, chat]);
 
@@ -109,7 +109,7 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
       params = [
         getUserFullName(topListPeers[0]),
         getUserFullName(topListPeers[1]),
-        (invitableWithPremiumIds!.length - 2).toString(),
+        (invitableWithPremiumIds.length - 2).toString(),
       ];
     }
 

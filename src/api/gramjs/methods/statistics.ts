@@ -110,10 +110,10 @@ export async function fetchMessagePublicForwards({
   dcId?: number;
   offset?: string;
 }): Promise<{
-    forwards?: ApiMessagePublicForward[];
-    count?: number;
-    nextOffset?: string;
-  } | undefined> {
+  forwards?: ApiMessagePublicForward[];
+  count?: number;
+  nextOffset?: string;
+} | undefined> {
   const result = await invokeRequest(new GramJs.stats.GetMessagePublicForwards({
     channel: buildInputChannel(chat.id, chat.accessHash),
     msgId: messageId,
@@ -193,10 +193,10 @@ export async function fetchStoryPublicForwards({
   dcId?: number;
   offset?: string;
 }): Promise<{
-    publicForwards: (ApiMessagePublicForward | ApiStoryPublicForward)[] | undefined;
-    count?: number;
-    nextOffset?: string;
-  } | undefined> {
+  publicForwards: (ApiMessagePublicForward | ApiStoryPublicForward)[] | undefined;
+  count?: number;
+  nextOffset?: string;
+} | undefined> {
   const result = await invokeRequest(new GramJs.stats.GetStoryPublicForwards({
     peer: buildInputPeer(chat.id, chat.accessHash),
     id: storyId,

@@ -530,13 +530,13 @@ export async function acceptLinkUrlAuth({ url, isWriteAllowed }: { url: string; 
   return authResult;
 }
 
-export function fetchBotCanSendMessage({ bot } : { bot: ApiUser }) {
+export function fetchBotCanSendMessage({ bot }: { bot: ApiUser }) {
   return invokeRequest(new GramJs.bots.CanSendMessage({
     bot: buildInputUser(bot.id, bot.accessHash),
   }));
 }
 
-export function allowBotSendMessages({ bot } : { bot: ApiUser }) {
+export function allowBotSendMessages({ bot }: { bot: ApiUser }) {
   return invokeRequest(new GramJs.bots.AllowSendMessage({
     bot: buildInputUser(bot.id, bot.accessHash),
   }), {
@@ -553,10 +553,10 @@ export async function invokeWebViewCustomMethod({
   customMethod: string;
   parameters: string;
 }): Promise<{
-    result: object;
-  } | {
-    error: string;
-  }> {
+  result: object;
+} | {
+  error: string;
+}> {
   try {
     const result = await invokeRequest(new GramJs.bots.InvokeWebViewCustomMethod({
       bot: buildInputUser(bot.id, bot.accessHash),
@@ -579,7 +579,7 @@ export async function invokeWebViewCustomMethod({
   }
 }
 
-export async function fetchPreviewMedias({ bot } : { bot: ApiUser }) {
+export async function fetchPreviewMedias({ bot }: { bot: ApiUser }) {
   const result = await invokeRequest(new GramJs.bots.GetPreviewMedias({
     bot: buildInputUser(bot.id, bot.accessHash),
   }));
@@ -613,7 +613,7 @@ export function checkBotDownloadFileParams({
   });
 }
 
-export function toggleUserEmojiStatusPermission({ bot, isEnabled } : { bot: ApiUser; isEnabled: boolean }) {
+export function toggleUserEmojiStatusPermission({ bot, isEnabled }: { bot: ApiUser; isEnabled: boolean }) {
   return invokeRequest(new GramJs.bots.ToggleUserEmojiStatusPermission({
     bot: buildInputUser(bot.id, bot.accessHash),
     enabled: isEnabled,

@@ -527,7 +527,7 @@ export type InlineBotSettings = {
 };
 
 export type CustomPeerType = 'premium' | 'toBeDistributed' | 'contacts' | 'nonContacts'
-| 'groups' | 'channels' | 'bots' | 'excludeMuted' | 'excludeArchived' | 'excludeRead' | 'stars';
+  | 'groups' | 'channels' | 'bots' | 'excludeMuted' | 'excludeArchived' | 'excludeRead' | 'stars';
 
 export type CustomPeer = {
   isCustomPeer: true;
@@ -673,11 +673,11 @@ export type ConfettiParams = OptionalCombine<{
   style?: ConfettiStyle;
   withStars?: boolean;
 }, {
-  top?: number;
-  left?: number;
-  width?: number;
-  height?: number;
-}>;
+    top?: number;
+    left?: number;
+    width?: number;
+    height?: number;
+  }>;
 
 export interface Size {
   width: number;

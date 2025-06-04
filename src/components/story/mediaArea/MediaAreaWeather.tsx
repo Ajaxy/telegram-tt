@@ -43,8 +43,7 @@ const MediaAreaWeather: FC<OwnProps & StateProps> = ({
   restrictedEmoji,
   isPreview,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
   const [customEmojiSize, setCustomEmojiSize] = useState(0);
 
   const { temperatureC, color } = mediaArea;

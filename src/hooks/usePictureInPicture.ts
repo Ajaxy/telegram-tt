@@ -1,13 +1,10 @@
+import type { ElementRef } from '../lib/teact/teact';
 import { useCallback, useLayoutEffect, useState } from '../lib/teact/teact';
 
 import { DEBUG } from '../config';
 import { IS_IOS, IS_PWA } from '../util/browser/windowEnvironment';
 import safePlay, { getIsVideoPlaying } from '../util/safePlay';
 import { createSignal } from '../util/signals';
-
-type RefType = {
-  current: HTMLVideoElement | null;
-};
 
 type ReturnType = [boolean, () => void, boolean] | [false];
 type CallbackType = () => void;
@@ -20,7 +17,7 @@ export function usePictureInPictureSignal() {
 }
 
 export default function usePictureInPicture(
-  elRef: RefType,
+  elRef: ElementRef<HTMLVideoElement>,
   onEnter: CallbackType,
   onLeave: CallbackType,
 ): ReturnType {

@@ -5,7 +5,7 @@ import { addActionHandler } from '../../index';
 import { updateTabState } from '../../reducers/tabs';
 
 addActionHandler('setStickerSearchQuery', (global, actions, payload): ActionReturnType => {
-  const { query, tabId = getCurrentTabId() } = payload!;
+  const { query, tabId = getCurrentTabId() } = payload;
 
   return updateTabState(global, {
     stickerSearch: {
@@ -16,7 +16,7 @@ addActionHandler('setStickerSearchQuery', (global, actions, payload): ActionRetu
 });
 
 addActionHandler('setGifSearchQuery', (global, actions, payload): ActionReturnType => {
-  const { query, tabId = getCurrentTabId() } = payload!;
+  const { query, tabId = getCurrentTabId() } = payload;
 
   return updateTabState(global, {
     gifSearch: {

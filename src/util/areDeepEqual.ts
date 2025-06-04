@@ -1,4 +1,4 @@
-export function areDeepEqual<T extends any>(value1: T, value2: T): boolean {
+export function areDeepEqual<T>(value1: T, value2: T): boolean {
   const type1 = typeof value1;
   const type2 = typeof value2;
   if (type1 !== type2) {

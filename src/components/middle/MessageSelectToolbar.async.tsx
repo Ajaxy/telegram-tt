@@ -11,7 +11,6 @@ const MessageSelectToolbarAsync: FC<OwnProps> = (props) => {
   const { isActive } = props;
   const MessageSelectToolbar = useModuleLoader(Bundles.Extra, 'MessageSelectToolbar', !isActive);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return MessageSelectToolbar ? <MessageSelectToolbar {...props} /> : undefined;
 };
 

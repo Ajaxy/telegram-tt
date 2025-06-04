@@ -11,7 +11,6 @@ const InlineBotTooltipAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const InlineBotTooltip = useModuleLoader(Bundles.Extra, 'InlineBotTooltip', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return InlineBotTooltip ? <InlineBotTooltip {...props} /> : undefined;
 };
 

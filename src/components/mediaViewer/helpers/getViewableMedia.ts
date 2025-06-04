@@ -51,7 +51,7 @@ export function getMediaViewerItem({
   if (standaloneMedia) {
     return {
       type: 'standalone',
-      media: standaloneMedia!,
+      media: standaloneMedia,
       mediaIndex: mediaIndex!,
     };
   }

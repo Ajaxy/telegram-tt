@@ -170,8 +170,7 @@ const ManageBot: FC<OwnProps & StateProps> = ({
     startBotFatherConversation({ param: `${username}` });
   });
 
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>();
   const isSuggestRef = useRef(false);
 
   const handleSelectAvatar = useLastCallback((file: File) => {

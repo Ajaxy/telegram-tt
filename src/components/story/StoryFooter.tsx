@@ -5,9 +5,10 @@ import type { ApiStory } from '../../api/types';
 
 import { HEART_REACTION } from '../../config';
 import {
-  getReactionKey, getStoryKey, isSameReaction, isUserId,
+  getReactionKey, getStoryKey, isSameReaction,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
+import { isUserId } from '../../util/entities/ids';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
@@ -102,7 +103,10 @@ const StoryFooter = ({
         )}
 
         {isChannel ? (
-          <span className={styles.views}><Icon name="channelviews" className={styles.viewIcon} />{viewsCount}</span>
+          <span className={styles.views}>
+            <Icon name="channelviews" className={styles.viewIcon} />
+            {viewsCount}
+          </span>
         ) : (
           <span className={styles.views}>{lang('Views', viewsCount, 'i')}</span>
         )}

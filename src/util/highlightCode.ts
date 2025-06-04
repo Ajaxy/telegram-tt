@@ -1,15 +1,21 @@
 import type { Element, Root } from 'hast';
-import { lowlight } from 'lowlight/lib/core';
+import { createLowlight } from 'lowlight';
 import type { TeactNode } from '../lib/teact/teact';
 import Teact from '../lib/teact/teact';
 
 const SUPPORTED_LANGUAGES: Record<string, string[]> = {
   '1c': ['1с'], // Allow cyrillic
+  ada: [],
+  arduino: ['ino'],
+  arm: [],
   bash: ['sh'],
+  basic: [],
   c: ['h'],
   cpp: ['cc', 'c++', 'h++', 'hpp', 'hh', 'hxx', 'cxx'],
   csharp: ['cs', 'c#'],
   css: [],
+  dart: [],
+  dockerfile: ['docker'],
   erlang: ['erl'],
   elixir: ['ex', 'exs'],
   go: ['golang'],
@@ -17,7 +23,7 @@ const SUPPORTED_LANGUAGES: Record<string, string[]> = {
   haskell: ['hs'],
   ini: ['toml'],
   java: ['jsp'],
-  javascript: ['js', 'jsx', 'mjs', 'cjs'],
+  javascript: ['js', 'jsx', 'mjs', 'cjs', 'mjsx', 'cjsx'],
   json: [],
   kotlin: ['kt', 'kts'],
   lisp: [],
@@ -25,21 +31,24 @@ const SUPPORTED_LANGUAGES: Record<string, string[]> = {
   makefile: ['mk', 'mak', 'make'],
   markdown: ['md', 'mkdown', 'mkd'],
   matlab: [],
+  nginx: ['nginxconf'],
   objectivec: ['mm', 'objc', 'obj-c', 'obj-c++', 'objective-c++'],
   perl: ['pl', 'pm'],
   php: [],
+  powershell: ['ps1', 'ps'],
   python: ['py', 'gyp', 'ipython'],
   r: [],
   ruby: ['rb', 'gemspec', 'podspec', 'thor', 'irb'],
   rust: ['rs'],
   scheme: [],
   scss: [],
+  shell: [],
   smalltalk: ['st'],
   sql: [],
   swift: [],
   twig: ['craftcms'],
   typelanguage: ['tl'],
-  typescript: ['ts', 'tsx'],
+  typescript: ['ts', 'tsx', 'mts', 'cts', 'mtsx', 'ctsx'],
   xml: ['html', 'xhtml', 'rss', 'atom', 'xjb', 'xsd', 'xsl', 'plist', 'wsf', 'svg'],
   yaml: [],
 };
@@ -47,6 +56,7 @@ const SUPPORTED_LANGUAGES: Record<string, string[]> = {
 const THIRD_PARTY_LANGUAGES = ['typelanguage'];
 
 const languagePromises = new Map<string, Promise<any>>();
+const lowlight = createLowlight({});
 
 export default async function highlightCode(text: string, language: string) {
   const lowLang = language.toLowerCase();
@@ -81,7 +91,7 @@ async function ensureLanguage(language: string) {
   if (!languagePromise) return false;
 
   const syntax = await languagePromise;
-  lowlight.registerLanguage(langCode, syntax.default);
+  lowlight.register(langCode, syntax.default);
   if (langCode === '1c') {
     lowlight.registerAlias('1c', '1с'); // Allow cyrillic
   }
@@ -92,7 +102,7 @@ function loadFirstPartyLanguage(langCode: string) {
   // Funky webpack bug https://github.com/webpack/webpack/issues/13865
   const languagePromise = import(
     /* webpackChunkName: "Highlight for [request]" */
-    `../../node_modules/highlight.js/lib/languages/${langCode}`
+    `../../node_modules/highlight.js/lib/languages/${langCode}`,
   );
   languagePromises.set(langCode, languagePromise);
   return languagePromise;

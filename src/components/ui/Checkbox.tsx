@@ -72,14 +72,13 @@ const Checkbox: FC<OwnProps> = ({
   nestedCheckboxCount,
   nestedOptionList,
   leftElement,
-  values = [],
+  values,
   onChange,
   onCheck,
   onClickLabel,
 }) => {
   const lang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const labelRef = useRef<HTMLLabelElement>(null);
+  const labelRef = useRef<HTMLLabelElement>();
   const [showNested, setShowNested] = useState(false);
 
   const handleChange = useLastCallback((event: ChangeEvent<HTMLInputElement>) => {
@@ -154,7 +153,7 @@ const Checkbox: FC<OwnProps> = ({
           <span className="label" dir="auto">
             {leftElement}
             {typeof label === 'string' ? renderText(label) : label}
-            {labelText && <span className="ml-1">{renderText(labelText)}</span>}
+            {Boolean(labelText) && <span className="ml-1">{renderText(labelText)}</span>}
           </span>
           {subLabel && <span className="subLabel" dir="auto">{renderText(subLabel)}</span>}
           {rightIcon && <Icon name={rightIcon} className="right-icon" />}
@@ -179,9 +178,9 @@ const Checkbox: FC<OwnProps> = ({
               key={nestedOption.value}
               leftElement={leftElement}
               onChange={handleChange}
-              checked={values.indexOf(nestedOption.value) !== -1}
+              checked={values?.indexOf(nestedOption.value) !== -1}
               values={values}
-              /* eslint-disable-next-line react/jsx-props-no-spreading */
+
               {...nestedOption}
             />
           ))}

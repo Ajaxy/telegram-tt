@@ -35,8 +35,7 @@ const AuthCode: FC<StateProps> = ({
   } = getActions();
 
   const lang = useLang();
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>();
 
   const [code, setCode] = useState<string>('');
   const [isTracking, setIsTracking] = useState(false);

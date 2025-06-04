@@ -113,8 +113,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     exitForwardMode,
     setShouldPreventComposerAnimation,
   } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
   const oldLang = useOldLang();
   const lang = useLang();
 
@@ -320,7 +319,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                 <MenuItem
                   icon={!noAuthors ? 'message-succeeded' : undefined}
                   customIcon={noAuthors ? <Icon name="placeholder" /> : undefined}
-                  // eslint-disable-next-line react/jsx-no-bind
+
                   onClick={() => setForwardNoAuthors({
                     noAuthors: false,
                   })}
@@ -330,7 +329,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                 <MenuItem
                   icon={noAuthors ? 'message-succeeded' : undefined}
                   customIcon={!noAuthors ? <Icon name="placeholder" /> : undefined}
-                  // eslint-disable-next-line react/jsx-no-bind
+
                   onClick={() => setForwardNoAuthors({
                     noAuthors: true,
                   })}
@@ -343,7 +342,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                     <MenuItem
                       icon={!noCaptions ? 'message-succeeded' : undefined}
                       customIcon={noCaptions ? <Icon name="placeholder" /> : undefined}
-                      // eslint-disable-next-line react/jsx-no-bind
+
                       onClick={() => setForwardNoCaptions({
                         noCaptions: false,
                       })}
@@ -353,7 +352,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                     <MenuItem
                       icon={noCaptions ? 'message-succeeded' : undefined}
                       customIcon={!noCaptions ? <Icon name="placeholder" /> : undefined}
-                      // eslint-disable-next-line react/jsx-no-bind
+
                       onClick={() => setForwardNoCaptions({
                         noCaptions: true,
                       })}

@@ -18,7 +18,7 @@
   .title {
     font-size: 1.25rem;
     margin-bottom: 0.125rem;
-    word-break: break-word;
+    overflow-wrap: anywhere;
     text-align: center;
     max-width: 100%;
   }

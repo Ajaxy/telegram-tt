@@ -1,7 +1,6 @@
 import { ELECTRON_HOST_URL, IS_PACKAGED_ELECTRON } from '../config';
 import { ACCOUNT_SLOT } from './multiaccount';
 
-// eslint-disable-next-line no-restricted-globals
 const cacheApi = self.caches;
 
 const SUFFIX = ACCOUNT_SLOT ? `_${ACCOUNT_SLOT}` : '';

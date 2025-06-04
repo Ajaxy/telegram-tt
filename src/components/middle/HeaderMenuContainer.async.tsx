@@ -11,7 +11,6 @@ const HeaderMenuContainerAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const HeaderMenuContainer = useModuleLoader(Bundles.Extra, 'HeaderMenuContainer', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return HeaderMenuContainer ? <HeaderMenuContainer {...props} /> : undefined;
 };
 

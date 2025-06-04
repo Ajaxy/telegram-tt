@@ -187,7 +187,7 @@
   .site-name,
   .site-description,
   .site-title {
-    word-break: break-word;
+    overflow-wrap: anywhere;
     max-width: 100%;
   }
 

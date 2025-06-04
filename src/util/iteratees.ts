@@ -16,7 +16,7 @@ export function buildCollectionByKey<T extends AnyLiteral>(collection: T[], key:
   }, {});
 }
 
-export function buildCollectionByCallback<T extends AnyLiteral, K extends number | string, R extends unknown>(
+export function buildCollectionByCallback<T extends AnyLiteral, K extends number | string, R>(
   collection: T[],
   callback: (member: T) => [K, R],
 ) {
@@ -28,7 +28,7 @@ export function buildCollectionByCallback<T extends AnyLiteral, K extends number
   }, {} as Record<K, R>);
 }
 
-export function mapValues<R extends any, M extends any>(
+export function mapValues<R, M>(
   byKey: CollectionByKey<M>,
   callback: (member: M, key: string, index: number, originalByKey: CollectionByKey<M>) => R,
 ): CollectionByKey<R> {
@@ -67,7 +67,7 @@ export function omitUndefined<T extends object>(object: T): T {
   return Object.keys(object).reduce((result, stringKey) => {
     const key = stringKey as keyof T;
     if (object[key] !== undefined) {
-      result[key as keyof T] = object[key];
+      result[key] = object[key];
     }
     return result;
   }, {} as T);
@@ -102,15 +102,15 @@ export function orderBy<T>(
   });
 }
 
-export function unique<T extends any>(array: T[]): T[] {
+export function unique<T>(array: T[]): T[] {
   return Array.from(new Set(array));
 }
 
-export function uniqueByField<T extends any>(array: T[], field: keyof T): T[] {
+export function uniqueByField<T>(array: T[], field: keyof T): T[] {
   return [...new Map(array.map((item) => [item[field], item])).values()];
 }
 
-export function compact<T extends any>(array: T[]) {
+export function compact<T>(array: T[]) {
   return array.filter(Boolean);
 }
 
@@ -125,7 +125,7 @@ export function areSortedArraysEqual(array1: any[], array2: any[]) {
 export function areSortedArraysIntersecting(array1: any[], array2: any[]) {
   return array1[0] <= array2[array2.length - 1] && array1[array1.length - 1] >= array2[0];
 }
-export function isInsideSortedArrayRange(value:any, array: any[]) {
+export function isInsideSortedArrayRange(value: any, array: any[]) {
   return array[0] <= value && value <= array[array.length - 1];
 }
 
@@ -138,7 +138,7 @@ export function findIntersectionWithSet<T>(array: T[], set: Set<T>): T[] {
  * @param toExclude
  * @returns New array without excluded elements
  */
-export function excludeSortedArray<T extends any>(base: T[], toExclude: T[]) {
+export function excludeSortedArray<T>(base: T[], toExclude: T[]) {
   if (!base?.length) return base;
 
   const result: T[] = [];
@@ -156,7 +156,7 @@ export function excludeSortedArray<T extends any>(base: T[], toExclude: T[]) {
   return result;
 }
 
-export function split<T extends any>(array: T[], chunkSize: number) {
+export function split<T>(array: T[], chunkSize: number) {
   const result: T[][] = [];
   for (let i = 0; i < array.length; i += chunkSize) {
     result.push(array.slice(i, i + chunkSize));
@@ -165,7 +165,7 @@ export function split<T extends any>(array: T[], chunkSize: number) {
   return result;
 }
 
-export function partition<T extends unknown>(
+export function partition<T>(
   array: T[], filter: (value: T, index: number, array: T[]) => boolean | undefined,
 ): [T[], T[]] {
   const pass: T[] = [];

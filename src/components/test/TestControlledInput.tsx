@@ -32,23 +32,31 @@ const Test: FC = () => {
       </div>
 
       <div>
-        <div>Input value: {inputValue}</div>
+        <div>
+          Input value:
+          {inputValue}
+        </div>
         <input value={inputValue} onChange={removeVowels} teactExperimentControlled />
       </div>
 
       <div>—</div>
 
-      <div>Checkbox value: {String(isChecked)}</div>
+      <div>
+        Checkbox value:
+        {String(isChecked)}
+      </div>
       <div>
         <label>
           <input type="checkbox" defaultChecked={isCheckboxAllowed} onChange={handleAllowCheckbox} />
-          {' '}— Is allowed?
+          {' '}
+          — Is allowed?
         </label>
       </div>
       <div>
         <label>
           <input type="checkbox" checked={isChecked} onChange={handleCheck} />
-          {' '}— Is checked?
+          {' '}
+          — Is checked?
         </label>
       </div>
     </>

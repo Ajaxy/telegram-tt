@@ -11,7 +11,6 @@ const MuteChatModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const MuteChatModal = useModuleLoader(Bundles.Extra, 'MuteChatModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return MuteChatModal ? <MuteChatModal {...props} /> : undefined;
 };
 

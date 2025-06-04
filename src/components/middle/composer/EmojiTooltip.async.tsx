@@ -11,7 +11,6 @@ const EmojiTooltipAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const EmojiTooltip = useModuleLoader(Bundles.Extra, 'EmojiTooltip', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return EmojiTooltip ? <EmojiTooltip {...props} /> : undefined;
 };
 

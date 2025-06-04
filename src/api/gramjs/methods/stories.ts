@@ -67,11 +67,11 @@ export async function fetchAllStories({
     const peerId = getApiChatIdFromMtpPeer(peerStories.peer);
     const stories = buildApiPeerStories(peerStories);
     const { profileIds, orderedIds, lastUpdatedAt } = Object.values(stories).reduce<
-    {
-      profileIds: number[];
-      orderedIds: number[];
-      lastUpdatedAt?: number;
-    }
+      {
+        profileIds: number[];
+        orderedIds: number[];
+        lastUpdatedAt?: number;
+      }
     >((dataAcc, story) => {
       if ('isInProfile' in story && story.isInProfile) {
         dataAcc.profileIds.push(story.id);
@@ -317,7 +317,7 @@ export async function fetchStoriesViews({
   };
 }
 
-export async function fetchStoryLink({ peer, storyId }: { peer: ApiPeer ; storyId: number }) {
+export async function fetchStoryLink({ peer, storyId }: { peer: ApiPeer; storyId: number }) {
   const result = await invokeRequest(new GramJs.stories.ExportStoryLink({
     peer: buildInputPeer(peer.id, peer.accessHash),
     id: storyId,

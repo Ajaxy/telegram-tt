@@ -11,7 +11,6 @@ const SeenByModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const SeenByModal = useModuleLoader(Bundles.Extra, 'SeenByModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return SeenByModal ? <SeenByModal {...props} /> : undefined;
 };
 

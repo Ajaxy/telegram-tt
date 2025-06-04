@@ -58,8 +58,7 @@ const EmojiStatusAccessModal: FC<OwnProps & StateProps> = ({
   const oldLang = useOldLang();
   const lang = useLang();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const [currentStatusIndex, setCurrentStatusIndex] = useState<number>(0);
 
@@ -152,7 +151,7 @@ const EmojiStatusAccessModal: FC<OwnProps & StateProps> = ({
   const renderStatusText = useLastCallback(() => {
     if (!modal?.bot) return undefined;
     return lang('EmojiStatusAccessText', {
-      name: getUserFullName(modal?.bot!),
+      name: getUserFullName(modal?.bot),
     }, {
       withNodes: true,
       withMarkdown: true,

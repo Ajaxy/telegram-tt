@@ -77,9 +77,9 @@ export function selectStoryListForViewer<T extends GlobalState>(
   isPrivate?: boolean,
   isArchive?: boolean,
 ): {
-    peerIds: string[];
-    storyIdsByPeerId: Record<string, number[]>;
-  } | undefined {
+  peerIds: string[];
+  storyIdsByPeerId: Record<string, number[]>;
+} | undefined {
   const currentStoryId = storyId
     || selectPeerFirstUnreadStoryId(global, peerId)
     || selectPeerFirstStoryId(global, peerId);

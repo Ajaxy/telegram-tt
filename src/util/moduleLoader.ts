@@ -53,7 +53,7 @@ export async function loadBundle<B extends Bundles>(bundleName: B) {
         break;
     }
 
-    (LOAD_PROMISES[bundleName] as Promise<ImportedBundles[B]>).then(runCallbacks);
+    (LOAD_PROMISES[bundleName]!).then(runCallbacks);
   }
 
   const bundle = (await LOAD_PROMISES[bundleName]) as unknown as ImportedBundles[B];

@@ -37,7 +37,7 @@ type StateProps = {
 
 const MAX_MEMBERS_FOR_GENERATE_CHAT_NAME = 4;
 
-const NewChatStep2: FC<OwnProps & StateProps > = ({
+const NewChatStep2: FC<OwnProps & StateProps> = ({
   isChannel,
   isActive,
   memberIds,
@@ -154,7 +154,7 @@ const NewChatStep2: FC<OwnProps & StateProps > = ({
           round
           size="smaller"
           color="translucent"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => onReset()}
           ariaLabel="Return to member selection"
         >

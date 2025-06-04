@@ -39,8 +39,7 @@ const ReportModal = ({
   const lang = useOldLang();
   const isOpen = Boolean(modal);
 
-  // eslint-disable-next-line no-null/no-null
-  const transitionRef = useRef<HTMLDivElement>(null);
+  const transitionRef = useRef<HTMLDivElement>();
 
   const [text, setText] = useState('');
 
@@ -223,7 +222,8 @@ const ReportModal = ({
                 size="smaller"
                 onClick={sendMessageReportHandler}
                 disabled={!renderingSection.isOptional ? !text.length : undefined}
-              >{lang('ReportSend')}
+              >
+                {lang('ReportSend')}
               </Button>
             </div>
           ) : undefined}

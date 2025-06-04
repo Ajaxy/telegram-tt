@@ -12,9 +12,9 @@ import {
   isChatChannel,
   isChatSuperGroup,
   isUserBot,
-  isUserId,
 } from '../../global/helpers';
 import { selectIsChatWithSelf, selectUser } from '../../global/selectors';
+import { isUserId } from '../../util/entities/ids';
 import renderText from './helpers/renderText';
 
 import useLastCallback from '../../hooks/useLastCallback';

@@ -122,7 +122,7 @@ export interface ActionPayloads {
     lastName: string;
   };
   returnToAuthPhoneNumber: undefined;
-  setAuthRememberMe: boolean;
+  setAuthRememberMe: { value: boolean };
   clearAuthErrorKey: undefined;
   uploadProfilePhoto: {
     file: File;
@@ -252,10 +252,10 @@ export interface ActionPayloads {
   };
   loadNotificationExceptions: undefined;
   setThemeSettings: { theme: ThemeKey } & Partial<IThemeSettings>;
-  updateIsOnline: boolean;
+  updateIsOnline: { isOnline: boolean };
 
   loadContentSettings: undefined;
-  updateContentSettings: boolean;
+  updateContentSettings: { isSensitiveEnabled: boolean };
 
   loadCountryList: {
     langCode?: string;
@@ -269,7 +269,7 @@ export interface ActionPayloads {
   clearWebPagePreview: WithTabId | undefined;
   loadWallpapers: undefined;
   uploadWallpaper: File;
-  setDeviceToken: string;
+  setDeviceToken: { token: string };
   deleteDeviceToken: undefined;
   checkVersionNotification: undefined;
   createServiceNotification: {
@@ -308,7 +308,7 @@ export interface ActionPayloads {
     currentMediaMessageId: number;
     direction?: LoadMoreDirection;
     chatId?: string;
-    threadId? : ThreadId;
+    threadId?: ThreadId;
     limit?: number;
   } & WithTabId;
   searchMessagesByDate: {
@@ -1005,7 +1005,7 @@ export interface ActionPayloads {
   openLimitReachedModal: { limit: ApiLimitTypeWithModal } & WithTabId;
   closeLimitReachedModal: WithTabId | undefined;
   checkAppVersion: undefined;
-  setIsElectronUpdateAvailable: boolean;
+  setIsElectronUpdateAvailable: { isAvailable: boolean };
   setGlobalSearchClosing: ({
     isClosing?: boolean;
   } & WithTabId) | undefined;
@@ -1583,7 +1583,7 @@ export interface ActionPayloads {
     privacy: ApiPrivacySettings;
   };
   toggleStoriesHidden: {
-    peerId : string;
+    peerId: string;
     isHidden: boolean;
   };
   loadStoriesMaxIds: {
@@ -2221,7 +2221,7 @@ export interface ActionPayloads {
 
   requestCollectibleInfo: {
     peerId: string;
-    type : 'phone' | 'username';
+    type: 'phone' | 'username';
     collectible: string;
   } & WithTabId;
   closeCollectibleInfoModal: WithTabId | undefined;

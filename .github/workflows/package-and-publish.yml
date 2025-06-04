@@ -11,7 +11,8 @@ name: Package and publish
 on:
   workflow_dispatch:
   push:
-    branches: master
+    branches:
+      - master
 
 env:
   APP_NAME: Telegram A
@@ -67,6 +68,7 @@ jobs:
           TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
 
           APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
 
           GH_TOKEN: ${{ secrets.GH_TOKEN }}

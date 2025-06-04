@@ -134,7 +134,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
             <ListItem
               key={member.userId}
               className="chat-item-clickable"
-              // eslint-disable-next-line react/jsx-no-bind
+
               onClick={() => handleAdminMemberClick(member)}
             >
               <PrivateChatInfo

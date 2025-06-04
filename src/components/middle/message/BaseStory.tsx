@@ -106,7 +106,7 @@ function BaseStory({
       )}
       {Boolean(video?.duration) && (
         <div className="message-media-duration">
-          {formatMediaDuration(video!.duration)}
+          {formatMediaDuration(video.duration)}
         </div>
       )}
       {isProtected && <span className="protector" />}

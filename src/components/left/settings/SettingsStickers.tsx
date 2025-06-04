@@ -65,8 +65,7 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
   } = getActions();
   const lang = useOldLang();
 
-  // eslint-disable-next-line no-null/no-null
-  const stickerSettingsRef = useRef<HTMLDivElement>(null);
+  const stickerSettingsRef = useRef<HTMLDivElement>();
   const { observe: observeIntersectionForCovers } = useIntersectionObserver({ rootRef: stickerSettingsRef });
 
   const handleStickerSetClick = useCallback((sticker: ApiSticker) => {
@@ -102,7 +101,7 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
         />
         <ListItem
           narrow
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.CustomEmoji })}
           icon="smile"
         >
@@ -113,7 +112,7 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
           <ListItem
             className="SettingsDefaultReaction"
             narrow
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => openSettingsScreen({ screen: SettingsScreens.QuickReaction })}
           >
             <ReactionStaticEmoji

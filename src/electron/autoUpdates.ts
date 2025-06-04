@@ -60,7 +60,7 @@ export function getIsAutoUpdateEnabled() {
 }
 
 async function checkForUpdates(): Promise<void> {
-  while (true) { // eslint-disable-line no-constant-condition
+  while (true) {
     if (await shouldPerformAutoUpdate()) {
       if (getIsAutoUpdateEnabled()) {
         autoUpdater.checkForUpdates();

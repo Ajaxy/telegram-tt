@@ -40,7 +40,7 @@ const QR_SIZE = 280;
 const QR_PLANE_SIZE = 54;
 const QR_CODE_MUTATION_DURATION = 50; // The library is asynchronous and we need to wait for its mutation code
 
-let qrCodeStylingPromise: Promise<typeof import('qr-code-styling')>;
+let qrCodeStylingPromise: Promise<typeof import('qr-code-styling')> | undefined;
 
 function ensureQrCodeStyling() {
   if (!qrCodeStylingPromise) {
@@ -62,8 +62,7 @@ const AuthCode = ({
 
   const suggestedLanguage = getSuggestedLanguage();
   const lang = useLang();
-  // eslint-disable-next-line no-null/no-null
-  const qrCodeRef = useRef<HTMLDivElement>(null);
+  const qrCodeRef = useRef<HTMLDivElement>();
 
   const isConnected = connectionState === 'connectionStateReady';
   const continueText = useLangString('AuthContinueOnThisLanguage', suggestedLanguage);
@@ -133,7 +132,7 @@ const AuthCode = ({
     }
 
     return undefined;
-  }, [isConnected, authQrCode, isQrMounted, markQrMounted, unmarkQrMounted, qrCode]);
+  }, [isConnected, authQrCode, isQrMounted, qrCode]);
 
   const handleBackNavigation = useLastCallback(() => {
     navigateBack();

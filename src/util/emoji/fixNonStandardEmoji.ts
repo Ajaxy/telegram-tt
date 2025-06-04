@@ -11,7 +11,7 @@ const EMOJI_EXCEPTIONS: [string | RegExp, string][] = [
 export default function fixNonStandardEmoji(text: string) {
   // Non-standard sequences typically parsed as separate emojis, so no need to fix text without any
   if (!text.match(EMOJI_REGEX)) return text;
-  // eslint-disable-next-line no-restricted-syntax
+
   for (const [regex, replacement] of EMOJI_EXCEPTIONS) {
     text = text.replace(regex, replacement);
   }

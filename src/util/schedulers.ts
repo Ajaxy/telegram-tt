@@ -16,7 +16,6 @@ export function debounce<F extends AnyToVoidFunction>(
       fn(...args);
     }
 
-    // eslint-disable-next-line no-restricted-globals
     waitingTimeout = self.setTimeout(() => {
       if (shouldRunLast) {
         fn(...args);
@@ -46,11 +45,9 @@ export function throttle<F extends AnyToVoidFunction>(
         fn(...args);
       }
 
-      // eslint-disable-next-line no-restricted-globals
       interval = self.setInterval(() => {
         if (!isPending) {
-          // eslint-disable-next-line no-restricted-globals
-          self.clearInterval(interval!);
+          self.clearInterval(interval);
           interval = undefined;
           return;
         }
@@ -135,7 +132,8 @@ export function fastRaf(callback: NoneToVoidFunction, withTimeoutFallback = fals
         const currentTimeoutCallbacks = fastRafFallbackCallbacks!;
 
         if (fastRafCallbacks) {
-          currentTimeoutCallbacks.forEach(fastRafCallbacks.delete, fastRafCallbacks);
+          const currentCallbacks = fastRafCallbacks;
+          currentTimeoutCallbacks.forEach((callback) => currentCallbacks.delete(callback));
         }
         fastRafFallbackCallbacks = undefined;
 
@@ -171,7 +169,6 @@ const IDLE_TIMEOUT = 500;
 let onIdleCallbacks: NoneToVoidFunction[] | undefined;
 
 export function onIdle(callback: NoneToVoidFunction) {
-  // eslint-disable-next-line no-restricted-globals
   if (!self.requestIdleCallback) {
     onTickEnd(callback);
     return;
@@ -210,7 +207,7 @@ let beforeUnloadCallbacks: NoneToVoidFunction[] | undefined;
 export function onBeforeUnload(callback: NoneToVoidFunction, isLast = false) {
   if (!beforeUnloadCallbacks) {
     beforeUnloadCallbacks = [];
-    // eslint-disable-next-line no-restricted-globals
+
     self.addEventListener('beforeunload', () => {
       beforeUnloadCallbacks!.forEach((cb) => cb());
     });

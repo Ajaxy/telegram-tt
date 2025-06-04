@@ -1,4 +1,4 @@
-import { type RefObject } from 'react';
+import type { ElementRef } from '../../../../lib/teact/teact';
 import { useEffect } from '../../../../lib/teact/teact';
 
 import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
@@ -15,9 +15,9 @@ export default function useOverlayPosition({
   isForMessageEffect,
   isDisabled,
   id,
-} : {
-  anchorRef: RefObject<HTMLDivElement>;
-  overlayRef: RefObject<HTMLDivElement>;
+}: {
+  anchorRef: ElementRef<HTMLDivElement>;
+  overlayRef: ElementRef<HTMLDivElement>;
   isMirrored?: boolean;
   isForMessageEffect?: boolean;
   isDisabled?: boolean;

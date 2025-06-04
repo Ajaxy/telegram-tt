@@ -41,8 +41,7 @@ const TabList: FC<OwnProps> = ({
   tabs, activeTab, onSwitchTab,
   contextRootElementSelector, className, tabClassName,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   const previousActiveTab = usePreviousDeprecated(activeTab);
 
   useHorizontalScroll(containerRef, undefined, true);

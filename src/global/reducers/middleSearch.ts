@@ -224,7 +224,7 @@ export function updateSharedMediaSearchResults<T extends GlobalState>(
   const chatThreadKey = buildChatThreadKey(chatId, threadId);
 
   const { resultsByType } = selectTabState(global, tabId).sharedMediaSearch.byChatThreadKey[chatThreadKey] || {};
-  const prevFoundIds = resultsByType?.[type] ? resultsByType[type]!.foundIds : [];
+  const prevFoundIds = resultsByType?.[type] ? resultsByType[type].foundIds : [];
   const foundIds = orderFoundIdsByDescending(unique(Array.prototype.concat(prevFoundIds, newFoundIds)));
   const foundOrPrevFoundIds = areSortedArraysEqual(prevFoundIds, foundIds) ? prevFoundIds : foundIds;
 
@@ -252,8 +252,7 @@ export function mergeWithChatMediaSearchSegment(
   foundIds: number[],
   loadingState: LoadingState,
   segment?: ChatMediaSearchSegment,
-)
-  : ChatMediaSearchSegment {
+): ChatMediaSearchSegment {
   if (!segment) {
     return {
       foundIds,
@@ -264,11 +263,11 @@ export function mergeWithChatMediaSearchSegment(
   if (!areSortedArraysEqual(segment.foundIds, foundIds)) {
     segment.foundIds = mergedFoundIds;
   }
-  const mergedLoadingState : LoadingState = {
+  const mergedLoadingState: LoadingState = {
     areAllItemsLoadedForwards: loadingState.areAllItemsLoadedForwards
-    || segment.loadingState.areAllItemsLoadedForwards,
+      || segment.loadingState.areAllItemsLoadedForwards,
     areAllItemsLoadedBackwards: loadingState.areAllItemsLoadedBackwards
-    || segment.loadingState.areAllItemsLoadedBackwards,
+      || segment.loadingState.areAllItemsLoadedBackwards,
   };
   segment.loadingState = mergedLoadingState;
   return segment;

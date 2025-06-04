@@ -73,7 +73,7 @@ function SeenByModal({
           <ListItem
             key={userId}
             className="chat-item-clickable scroll-item small-icon"
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => handleClick(userId)}
           >
             <PrivateChatInfo

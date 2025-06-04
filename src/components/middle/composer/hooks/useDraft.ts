@@ -38,7 +38,7 @@ const useDraft = ({
   setHtml,
   editedMessage,
   isDisabled,
-} : {
+}: {
   draft?: ApiDraft;
   chatId: string;
   threadId: ThreadId;

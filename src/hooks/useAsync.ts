@@ -1,6 +1,16 @@
 import { useEffect, useState } from '../lib/teact/teact';
 
-const useAsync = <T>(fn: () => Promise<T>, deps: any[], defaultValue?: T) => {
+function useAsync<T>(fn: () => Promise<T>, deps: unknown[], defaultValue: T): {
+  isLoading: boolean;
+  error: Error | undefined;
+  result: T;
+};
+function useAsync<T>(fn: () => Promise<T>, deps: unknown[]): {
+  isLoading: boolean;
+  error: Error | undefined;
+  result: T | undefined;
+};
+function useAsync<T>(fn: () => Promise<T>, deps: unknown[], defaultValue?: T) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | undefined>();
   const [result, setResult] = useState<T | undefined>(defaultValue);

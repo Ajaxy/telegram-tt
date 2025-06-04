@@ -76,16 +76,15 @@ const Radio: FC<OwnProps> = ({
       />
       <div className="Radio-main">
         <span className="label" dir={lang.isRtl ? 'auto' : undefined}>{label}</span>
-        {subLabel
-          && (
-            <span
-              className={buildClassName(subLabelClassName, 'subLabel', isLink ? 'subLabelLink' : undefined)}
-              dir={lang.isRtl ? 'auto' : undefined}
-              onClick={isLink ? onSubLabelClick : undefined}
-            >
-              {subLabel}
-            </span>
-          )}
+        {Boolean(subLabel) && (
+          <span
+            className={buildClassName(subLabelClassName, 'subLabel', isLink ? 'subLabelLink' : undefined)}
+            dir={lang.isRtl ? 'auto' : undefined}
+            onClick={isLink ? onSubLabelClick : undefined}
+          >
+            {subLabel}
+          </span>
+        )}
       </div>
       {isLoading && <Spinner />}
     </label>

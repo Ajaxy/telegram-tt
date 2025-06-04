@@ -1,21 +1,21 @@
 export class UpdateConnectionState {
-    static disconnected = -1;
+  static disconnected = -1;
 
-    static connected = 1;
+  static connected = 1;
 
-    static broken = 0;
+  static broken = 0;
 
-    state: number;
+  state: number;
 
-    constructor(state: number) {
-        this.state = state;
-    }
+  constructor(state: number) {
+    this.state = state;
+  }
 }
 
 export class UpdateServerTimeOffset {
-    timeOffset: number;
+  timeOffset: number;
 
-    constructor(timeOffset: number) {
-        this.timeOffset = timeOffset;
-    }
+  constructor(timeOffset: number) {
+    this.timeOffset = timeOffset;
+  }
 }

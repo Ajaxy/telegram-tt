@@ -85,8 +85,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
     addRecentCustomEmoji,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const triggerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>();
 
   const [isSymbolMenuLoaded, onSymbolMenuLoadingComplete] = useFlag();
   const [contextMenuAnchor, setContextMenuAnchor] = useState<IAnchorPosition | undefined>(undefined);

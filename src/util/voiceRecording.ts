@@ -16,6 +16,7 @@ let OpusRecorder: IOpusRecorder;
 let mediaRecorder: IOpusRecorder;
 
 export async function init() {
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   if (!opusRecorderPromise) {
     opusRecorderPromise = import('opus-recorder');
     OpusRecorder = (await opusRecorderPromise).default;
@@ -25,7 +26,7 @@ export async function init() {
   return opusRecorderPromise;
 }
 
-export async function start(analyzerCallback: Function) {
+export async function start(analyzerCallback: (volume: number) => void) {
   await startMediaRecorder();
 
   const startedAt = Date.now();
@@ -72,10 +73,10 @@ export async function start(analyzerCallback: Function) {
 
 async function startMediaRecorder() {
   await init();
-  await mediaRecorder.start();
+  mediaRecorder.start();
 }
 
-function subscribeToAnalyzer(recorder: IOpusRecorder, cb: Function) {
+function subscribeToAnalyzer(recorder: IOpusRecorder, cb: (volume: number) => void) {
   const source = recorder.sourceNode;
   const analyser = source.context.createAnalyser();
   analyser.fftSize = FFT_SIZE;

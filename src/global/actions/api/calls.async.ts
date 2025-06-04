@@ -115,7 +115,7 @@ addActionHandler('requestToSpeak', (global, actions, payload): ActionReturnType 
 });
 
 addActionHandler('setGroupCallParticipantVolume', (global, actions, payload): ActionReturnType => {
-  const { participantId, volume } = payload!;
+  const { participantId, volume } = payload;
 
   const groupCall = selectActiveGroupCall(global);
   const user = selectUser(global, participantId);
@@ -255,7 +255,7 @@ addActionHandler('connectToActivePhoneCall', async (global, actions): Promise<vo
 
   await callApi('createPhoneCallState', [true]);
 
-  const gAHash = await callApi('requestPhoneCall', [dhConfig])!;
+  const gAHash = await callApi('requestPhoneCall', [dhConfig]);
 
   const result = await callApi('requestCall', { user, gAHash, isVideo: phoneCall.isVideo });
 
@@ -274,7 +274,7 @@ addActionHandler('acceptCall', async (global): Promise<void> => {
 
   await callApi('createPhoneCallState', [false]);
 
-  const gB = await callApi('acceptPhoneCall', [dhConfig])!;
+  const gB = await callApi('acceptPhoneCall', [dhConfig]);
   await callApi('acceptCall', { call: phoneCall, gB });
 });
 

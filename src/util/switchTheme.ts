@@ -113,7 +113,7 @@ export function lerpRgb(start: RGBAColor, end: RGBAColor, interpolationRatio: nu
   const g = Math.round(lerp(start.g, end.g, interpolationRatio));
   const b = Math.round(lerp(start.b, end.b, interpolationRatio));
   const a = start.a !== undefined
-    ? Math.round(lerp(start.a!, end.a!, interpolationRatio))
+    ? Math.round(lerp(start.a, end.a!, interpolationRatio))
     : undefined;
 
   return {

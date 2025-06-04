@@ -69,7 +69,7 @@ export default function parseHtmlAsFormattedText(
 export function fixImageContent(fragment: HTMLDivElement) {
   fragment.querySelectorAll('img').forEach((node) => {
     if (node.dataset.documentId) { // Custom Emoji
-      node.textContent = (node as HTMLImageElement).alt || '';
+      node.textContent = (node).alt || '';
     } else { // Regular emoji with image fallback
       node.replaceWith(node.alt || '');
     }

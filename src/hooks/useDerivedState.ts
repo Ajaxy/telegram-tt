@@ -51,7 +51,6 @@ function useDerivedState<T>(resolverOrSignal: Resolver<T> | T, dependencies?: re
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, dependencies);
 
-  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   useSignalEffect(runCurrentResolver, dependencies);
 
   return valueRef.current as T;

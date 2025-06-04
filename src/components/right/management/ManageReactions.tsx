@@ -124,11 +124,11 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
       const enabledAllowedReactions = enabledReactions?.allowed;
 
       if (localAllowedReactions.length !== enabledAllowedReactions.length
-      || localAllowedReactions.reverse().some(
-        (localReaction) => !enabledAllowedReactions.find(
-          (enabledReaction) => isSameReaction(localReaction, enabledReaction),
-        ),
-      )) {
+        || localAllowedReactions.reverse().some(
+          (localReaction) => !enabledAllowedReactions.find(
+            (enabledReaction) => isSameReaction(localReaction, enabledReaction),
+          ),
+        )) {
         setIsTouched(true);
         return;
       }
@@ -187,12 +187,12 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
   }, [lang]);
 
   const shouldShowReactionsLimit = isChannel
-  && (localEnabledReactions?.type === 'all' || localEnabledReactions?.type === 'some');
+    && (localEnabledReactions?.type === 'all' || localEnabledReactions?.type === 'some');
 
   return (
     <div className="Management">
       <div className="panel-content custom-scroll">
-        { localReactionsLimit && shouldShowReactionsLimit && (
+        { Boolean(localReactionsLimit && shouldShowReactionsLimit) && (
           <div className="section">
             <h3 className="section-heading">
               {lang('MaximumReactionsHeader')}
@@ -200,7 +200,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
             <RangeSlider
               min={1}
               max={maxUniqueReactions}
-              value={localReactionsLimit}
+              value={localReactionsLimit!}
               onChange={handleReactionsLimitChange}
               renderValue={renderReactionsMaxCountValue}
               isCenteredLayout

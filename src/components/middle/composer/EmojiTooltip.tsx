@@ -77,8 +77,7 @@ const EmojiTooltip: FC<OwnProps> = ({
   addRecentEmoji,
   addRecentCustomEmoji,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
   const listEmojis: (Emoji | ApiSticker)[] = usePrevDuringAnimation(
     emojis.length ? [...customEmojis, ...emojis] : undefined, CLOSE_DURATION,

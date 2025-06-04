@@ -58,10 +58,8 @@ const Location: FC<OwnProps> = ({
   peer,
 }) => {
   const { openMapModal } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const countdownRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
+  const countdownRef = useRef<HTMLDivElement>();
   const lang = useOldLang();
   const forceUpdate = useForceUpdate();
 

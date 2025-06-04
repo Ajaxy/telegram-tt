@@ -360,7 +360,7 @@ function calcChatMediaSearchOffsetId(
   direction: LoadMoreDirection,
   currentMessageId: number,
   segment?: ChatMediaSearchSegment,
-) : number {
+): number {
   if (!segment) return currentMessageId;
   if (direction === LoadMoreDirection.Backwards) return segment.foundIds[0];
   if (direction === LoadMoreDirection.Forwards) return segment.foundIds[segment.foundIds.length - 1];
@@ -396,10 +396,10 @@ function calcLoadMoreDirection(currentMessageId: number, currentSegment?: ChatMe
 }
 
 function calcLoadingState(
-  direction : LoadMoreDirection,
-  limit : number, newFoundIdsCount : number,
+  direction: LoadMoreDirection,
+  limit: number, newFoundIdsCount: number,
   currentSegment?: ChatMediaSearchSegment,
-) : LoadingState {
+): LoadingState {
   let areAllItemsLoadedForwards = Boolean(currentSegment?.loadingState.areAllItemsLoadedForwards);
   let areAllItemsLoadedBackwards = Boolean(currentSegment?.loadingState.areAllItemsLoadedBackwards);
 

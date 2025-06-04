@@ -86,8 +86,7 @@ const VideoPlayer: FC<OwnProps> = ({
     setMediaViewerPlaybackRate,
     setMediaViewerHidden,
   } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement>();
   const [isPlaying, setIsPlaying] = useState(!IS_TOUCH_ENV || !IS_IOS);
   const [isFullscreen, setFullscreen, exitFullscreen] = useFullscreen(videoRef, setIsPlaying);
   const { isMobile } = useAppLayout();
@@ -292,7 +291,6 @@ const VideoPlayer: FC<OwnProps> = ({
   const shouldToggleControls = !IS_TOUCH_ENV && !isForceMobileVersion;
 
   return (
-    // eslint-disable-next-line jsx-a11y/mouse-events-have-key-events
     <div
       className="VideoPlayer"
       onMouseMove={shouldToggleControls ? handleVideoMove : undefined}
@@ -301,7 +299,6 @@ const VideoPlayer: FC<OwnProps> = ({
       <div
         style={wrapperStyle}
       >
-        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
         {isProtected && (
           <div
             onContextMenu={stopEvent}
@@ -325,7 +322,7 @@ const VideoPlayer: FC<OwnProps> = ({
           onEnded={handleEnded}
           onClick={!isMobile && !isFullscreen ? handleClick : undefined}
           onDoubleClick={!IS_TOUCH_ENV ? handleFullscreenChange : undefined}
-          // eslint-disable-next-line react/jsx-props-no-spreading
+
           {...bufferingHandlers}
           onPause={(e) => {
             setIsPlaying(false);

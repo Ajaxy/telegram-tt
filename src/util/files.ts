@@ -3,7 +3,6 @@ import { pause } from './schedulers';
 
 // Polyfill for Safari: `File` is not available in web worker
 if (typeof File === 'undefined') {
-  // eslint-disable-next-line no-global-assign, no-restricted-globals, func-names
   self.File = class extends Blob {
     name: string;
 

@@ -11,7 +11,6 @@ const ChatRefundModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const ChatRefundModal = useModuleLoader(Bundles.Stars, 'ChatRefundModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return ChatRefundModal ? <ChatRefundModal {...props} /> : undefined;
 };
 

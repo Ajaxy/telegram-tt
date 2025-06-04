@@ -18,7 +18,7 @@ interface Container {
   stuckTo?: any;
   ownProps: Props;
   mappedProps?: Props;
-  forceUpdate: Function;
+  forceUpdate: VoidFunction;
   DEBUG_updates: number;
   DEBUG_componentName: string;
 }
@@ -49,20 +49,21 @@ type StickToFirstFn = (value: any) => boolean;
 type ActivationFn<OwnProps = undefined> = (
   global: GlobalState, ownProps: OwnProps, stickToFirst: StickToFirstFn,
 ) => boolean;
+// TODO: Add callback to typify
+type GlobalCallback = (global: any) => void;
 
 let currentGlobal = {
   isInited: false,
 } as GlobalState;
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_currentRandomId: number | undefined;
-// eslint-disable-next-line @typescript-eslint/naming-convention
+
 const DEBUG_invalidateGlobalOnTickEnd = throttleWithTickEnd(() => {
   DEBUG_currentRandomId = Math.random();
 });
 
 const actionHandlers: Record<string, ActionHandler[]> = {};
-const callbacks: Function[] = [updateContainers];
+const callbacks: GlobalCallback[] = [updateContainers];
 const actions = {} as Actions;
 const containers = new Map<string, Container>();
 
@@ -139,7 +140,6 @@ function handleAction(name: string, payload?: ActionPayload, options?: ActionOpt
         return;
       }
 
-      // eslint-disable-next-line eslint-multitab-tt/set-global-only-variable
       setUntypedGlobal(response as GlobalState, options);
     });
   });
@@ -157,13 +157,11 @@ function handleAction(name: string, payload?: ActionPayload, options?: ActionOpt
 }
 
 function updateContainers() {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   let DEBUG_startAt: number | undefined;
   if (DEBUG) {
     DEBUG_startAt = performance.now();
   }
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const container of containers.values()) {
     const {
       mapStateToProps, ownProps, mappedProps, forceUpdate,
@@ -187,7 +185,7 @@ function updateContainers() {
       if (Object.values(newMappedProps).some(Number.isNaN)) {
         // eslint-disable-next-line no-console
         console.warn(
-          // eslint-disable-next-line max-len
+          // eslint-disable-next-line @stylistic/max-len
           `[TeactN] Some of \`${container.DEBUG_componentName}\` mappers contain NaN values. This may cause redundant updates because of incorrect equality check.`,
         );
       }
@@ -230,11 +228,11 @@ export function addUntypedActionHandler(name: ActionNames, handler: ActionHandle
   actionHandlers[name].push(handler);
 }
 
-export function addCallback(cb: Function) {
+export function addCallback(cb: GlobalCallback) {
   callbacks.push(cb);
 }
 
-export function removeCallback(cb: Function) {
+export function removeCallback(cb: GlobalCallback) {
   const index = callbacks.indexOf(cb);
   if (index !== -1) {
     callbacks.splice(index, 1);
@@ -280,7 +278,6 @@ export function withUntypedGlobal<OwnProps extends AnyLiteral>(
 
       container.ownProps = props;
 
-      // eslint-disable-next-line react/jsx-props-no-spreading
       return <Component {...container.mappedProps} {...props} />;
     }
 

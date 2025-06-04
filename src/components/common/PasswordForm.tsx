@@ -52,8 +52,7 @@ const PasswordForm: FC<OwnProps> = ({
   onInputChange,
   onSubmit,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>();
   const lang = useOldLang();
 
   const { isMobile } = useAppLayout();

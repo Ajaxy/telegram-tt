@@ -79,12 +79,9 @@ const RoundVideo: FC<OwnProps> = ({
   isTranscriptionHidden,
   isTranscribing,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const playerRef = useRef<HTMLVideoElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const circleRef = useRef<SVGCircleElement>(null);
+  const ref = useRef<HTMLDivElement>();
+  const playerRef = useRef<HTMLVideoElement>();
+  const circleRef = useRef<SVGCircleElement>();
 
   const { cancelMediaDownload, openOneTimeMediaModal, transcribeAudio } = getActions();
 

@@ -47,18 +47,16 @@ const Sticker: FC<OwnProps> = ({
   const lang = useOldLang();
   const { isMobile } = useAppLayout();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
-  // eslint-disable-next-line no-null/no-null
-  const effectRef = useRef<HTMLDivElement>(null);
+  const effectRef = useRef<HTMLDivElement>();
 
   const sticker = message.content.sticker!;
   const { stickerSetInfo, isVideo, hasEffect } = sticker;
   const isMirrored = !message.isOutgoing;
 
   const mediaHash = sticker.isPreloadedGlobally ? undefined : (
-    getStickerMediaHash(sticker, isVideo && !IS_WEBM_SUPPORTED ? 'pictogram' : 'inline')!
+    getStickerMediaHash(sticker, isVideo && !IS_WEBM_SUPPORTED ? 'pictogram' : 'inline')
   );
 
   const canLoad = useIsIntersecting(ref, observeIntersection);

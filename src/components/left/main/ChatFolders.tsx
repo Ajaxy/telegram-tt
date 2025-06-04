@@ -95,8 +95,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     openSettingsScreen,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const transitionRef = useRef<HTMLDivElement>(null);
+  const transitionRef = useRef<HTMLDivElement>();
 
   const lang = useLang();
 
@@ -284,7 +283,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
     return captureEvents(transitionRef.current!, {
       selectorToPreventScroll: '.chat-list',
-      onSwipe: ((e, direction) => {
+      onSwipe: (e, direction) => {
         if (direction === SwipeDirection.Left) {
           setActiveChatFolder(
             { activeChatFolder: Math.min(activeChatFolder + 1, folderTabs.length - 1) },
@@ -297,7 +296,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         }
 
         return false;
-      }),
+      },
     });
   }, [activeChatFolder, folderTabs, isForumPanelOpen, setActiveChatFolder]);
 

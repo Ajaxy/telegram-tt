@@ -50,8 +50,7 @@ const CustomEmojiTooltip: FC<OwnProps & StateProps> = ({
 }) => {
   const { clearCustomEmojiForEmoji } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
   const prevStickers = usePreviousDeprecated(customEmoji, true);
   const displayedStickers = customEmoji || prevStickers;

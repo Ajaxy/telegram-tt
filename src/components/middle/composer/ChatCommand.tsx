@@ -22,7 +22,6 @@ type OwnProps<T = undefined> = {
   onClick: (arg: T) => void;
 };
 
-// eslint-disable-next-line @typescript-eslint/comma-dangle
 const ChatCommand = <T,>({
   withAvatar,
   focus,
@@ -48,7 +47,10 @@ const ChatCommand = <T,>({
         <Avatar size="small" peer={peer} />
       )}
       <div className="content-inner">
-        <span className="title">/{command}</span>
+        <span className="title">
+          /
+          {command}
+        </span>
         <span className="subtitle">{renderText(description)}</span>
       </div>
     </ListItem>

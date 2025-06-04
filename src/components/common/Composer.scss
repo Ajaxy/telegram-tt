@@ -610,6 +610,9 @@
   max-height: 26rem;
   overflow: hidden;
 
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: height 100ms ease;
+
   &.overflown {
     overflow-y: auto;
   }
@@ -622,9 +625,6 @@
   & > .input-scroller-content {
     position: relative;
   }
-
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: height 100ms ease;
 
   body.no-message-composer-animations & {
     transition: none !important;
@@ -884,6 +884,7 @@
 
 #story-input-text .placeholder-text {
   top: calc((var(--base-height, 3.5rem) - var(--composer-text-size, 1rem) * 1.3125) / 2);
+  left: 0.875rem;
 
   @media (max-width: 600px) {
     top: calc((2.875rem - var(--composer-text-size, 1rem) * 1.3125) / 2);
@@ -892,8 +893,6 @@
   &.is-need-premium {
     pointer-events: auto;
   }
-
-  left: 0.875rem;
 }
 
 .composer-tooltip {

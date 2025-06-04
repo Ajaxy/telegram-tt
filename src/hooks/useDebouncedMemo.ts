@@ -7,7 +7,7 @@ import useHeavyAnimation from './useHeavyAnimation';
 import useRunDebounced from './useRunDebounced';
 import useSyncEffect from './useSyncEffect';
 
-export default function useDebouncedMemo<R extends any, D extends any[]>(
+export default function useDebouncedMemo<R, D extends unknown[]>(
   resolverFn: () => R, ms: number, dependencies: D,
 ): R | undefined {
   const [value, setValue] = useState<R>();

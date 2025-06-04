@@ -153,7 +153,6 @@ export async function requestPermission() {
 }
 
 async function unsubscribeFromPush(subscription: PushSubscription | null) {
-  const global = getGlobal();
   const { deleteDeviceToken } = getActions();
   if (subscription) {
     try {
@@ -169,6 +168,7 @@ async function unsubscribeFromPush(subscription: PushSubscription | null) {
       }
     }
   }
+  const global = getGlobal();
   if (global.push) {
     await callApi('unregisterDevice', global.push.deviceToken);
     deleteDeviceToken();
@@ -237,7 +237,7 @@ export async function subscribe() {
       console.log('[PUSH] Received push subscription: ', deviceToken);
     }
     await callApi('registerDevice', deviceToken);
-    setDeviceToken(deviceToken);
+    setDeviceToken({ token: deviceToken });
     hasPushNotifications = true;
     hasWebNotifications = true;
   } catch (error: any) {
@@ -282,7 +282,7 @@ function checkIfShouldNotify(chat: ApiChat, message: Partial<ApiMessage>) {
 
   const shouldNotifyAboutMessage = message.content?.action?.type !== 'phoneCall';
   if ((isMuted && !shouldIgnoreMute) || !shouldNotifyAboutMessage
-     || chat.isNotJoined || !chat.isListed || selectIsChatWithSelf(global, chat.id)) {
+    || chat.isNotJoined || !chat.isListed || selectIsChatWithSelf(global, chat.id)) {
     return false;
   }
   // On touch devices show notifications when chat is not active
@@ -359,7 +359,6 @@ function getReactionEmoji(reaction: ApiPeerReaction) {
   }
 
   if (reaction.reaction.type === 'custom') {
-    // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
     emoji = getGlobal().customEmojis.byId[reaction.reaction.documentId]?.emoji;
   }
   return emoji || '❤️';

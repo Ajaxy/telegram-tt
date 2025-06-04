@@ -11,7 +11,6 @@ const SymbolMenuAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const SymbolMenu = useModuleLoader(Bundles.Extra, 'SymbolMenu', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return SymbolMenu ? <SymbolMenu {...props} /> : undefined;
 };
 

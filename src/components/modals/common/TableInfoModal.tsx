@@ -80,7 +80,7 @@ const TableInfoModal = ({
       <div className={styles.table}>
         {tableData?.map(([label, value]) => (
           <>
-            {label && <div className={buildClassName(styles.cell, styles.title)}>{label}</div>}
+            {Boolean(label) && <div className={buildClassName(styles.cell, styles.title)}>{label}</div>}
             <div className={buildClassName(styles.cell, styles.value, !label && styles.fullWidth)}>
               {typeof value === 'object' && 'chatId' in value ? (
                 <PeerChip
@@ -102,7 +102,8 @@ const TableInfoModal = ({
           className={!footer ? styles.noFooter : undefined}
           size="smaller"
           onClick={onButtonClick || onClose}
-        >{buttonText}
+        >
+          {buttonText}
         </Button>
       )}
     </Modal>

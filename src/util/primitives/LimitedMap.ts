@@ -48,7 +48,7 @@ export default class LimitedMap<K, V> {
     this.insertionQueue.clear();
   }
 
-  public forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void {
+  public forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: unknown): void {
     this.map.forEach(callbackfn, thisArg);
   }
 

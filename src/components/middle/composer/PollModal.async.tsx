@@ -11,7 +11,6 @@ const PollModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const PollModal = useModuleLoader(Bundles.Extra, 'PollModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return PollModal ? <PollModal {...props} /> : undefined;
 };
 

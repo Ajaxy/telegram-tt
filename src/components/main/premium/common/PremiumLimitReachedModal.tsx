@@ -170,9 +170,10 @@ const PremiumLimitReachedModal: FC<OwnProps & StateProps> = ({
       {!canUpgrade && (
         <div className={styles.limitBadge}>
           <i className={buildClassName(styles.limitIcon, icon, 'icon')} />
-          <div className={styles.limitValue}>{valueFormatter?.(
-            lang, isPremium ? premiumValue : defaultValue,
-          ) || (isPremium ? premiumValue : defaultValue)}
+          <div className={styles.limitValue}>
+            {valueFormatter?.(
+              lang, isPremium ? premiumValue : defaultValue,
+            ) || (isPremium ? premiumValue : defaultValue)}
           </div>
         </div>
       )}
@@ -200,17 +201,17 @@ const PremiumLimitReachedModal: FC<OwnProps & StateProps> = ({
           {lang(canUpgrade ? 'Cancel' : 'OK')}
         </Button>
         {canUpgrade
-      && (
-        <Button
-          className="confirm-dialog-button"
-          isText
-          onClick={handleClick}
-          color="primary"
-        >
-          {lang('IncreaseLimit')}
-          <Icon name="double-badge" className={styles.x2} />
-        </Button>
-      )}
+          && (
+            <Button
+              className="confirm-dialog-button"
+              isText
+              onClick={handleClick}
+              color="primary"
+            >
+              {lang('IncreaseLimit')}
+              <Icon name="double-badge" className={styles.x2} />
+            </Button>
+          )}
       </div>
     </Modal>
   );

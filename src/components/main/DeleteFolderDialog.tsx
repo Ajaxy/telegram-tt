@@ -27,7 +27,7 @@ const DeleteFolderDialog: FC<OwnProps> = ({
   const handleDeleteFolderMessage = useCallback(() => {
     closeDeleteChatFolderModal();
     if (isMyChatlist) {
-      openDeleteChatFolderModal({ folderId: renderingFolder!.id, isConfirmedForChatlist: true });
+      openDeleteChatFolderModal({ folderId: renderingFolder.id, isConfirmedForChatlist: true });
     } else {
       deleteChatFolder({ id: renderingFolder!.id });
     }

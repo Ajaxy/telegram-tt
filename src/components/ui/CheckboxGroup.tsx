@@ -34,7 +34,7 @@ type OwnProps = {
 const CheckboxGroup: FC<OwnProps> = ({
   id,
   options,
-  selected = [],
+  selected,
   disabled,
   nestedCheckbox,
   loadingOptions,
@@ -91,7 +91,7 @@ const CheckboxGroup: FC<OwnProps> = ({
             label={option.label}
             subLabel={option.subLabel}
             value={option.value}
-            checked={selected.indexOf(option.value) !== -1}
+            checked={selected?.indexOf(option.value) !== -1}
             disabled={option.disabled || disabled}
             isLoading={loadingOptions ? loadingOptions.indexOf(option.value) !== -1 : undefined}
             onChange={handleChange}

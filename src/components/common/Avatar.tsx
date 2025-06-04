@@ -21,11 +21,11 @@ import {
   isAnonymousForwardsChat,
   isChatWithRepliesBot,
   isDeletedUser,
-  isUserId,
 } from '../../global/helpers';
 import { isApiPeerChat, isApiPeerUser } from '../../global/helpers/peers';
 import buildClassName, { createClassNameBuilder } from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
+import { isUserId } from '../../util/entities/ids';
 import { getFirstLetters } from '../../util/textFormat';
 import { REM } from './helpers/mediaDimensions';
 import { getPeerColorClass } from './helpers/peerColor';
@@ -115,8 +115,7 @@ const Avatar: FC<OwnProps> = ({
 }) => {
   const { openStoryViewer } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
   const videoLoopCountRef = useRef(0);
   const isCustomPeer = peer && 'isCustomPeer' in peer;
   const realPeer = peer && !isCustomPeer ? peer : undefined;
@@ -246,7 +245,7 @@ const Avatar: FC<OwnProps> = ({
   }
 
   const isRoundedRect = (isCustomPeer && peer.isAvatarSquare)
-  || (isForum && !((withStory || withStorySolid) && realPeer?.hasStories));
+    || (isForum && !((withStory || withStorySolid) && realPeer?.hasStories));
   const isPremiumGradient = isCustomPeer && peer.withPremiumGradient;
   const customColor = isCustomPeer && peer.customPeerAvatarColor;
 

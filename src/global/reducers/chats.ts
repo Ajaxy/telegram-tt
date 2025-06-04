@@ -126,7 +126,7 @@ export function addUnreadMentions<T extends GlobalState>(
 
   if (shouldUpdateCount) {
     const updatedUnreadMentionsCount = (chat.unreadMentionsCount || 0)
-    + Math.max(0, updatedUnreadMentions.length - prevChatUnreadMentions.length);
+      + Math.max(0, updatedUnreadMentions.length - prevChatUnreadMentions.length);
 
     global = updateChat(global, chatId, {
       unreadMentionsCount: updatedUnreadMentionsCount,
@@ -254,7 +254,7 @@ export function addChats<T extends GlobalState>(global: T, newById: Record<strin
     const membersCountChanged = !existingChat?.membersCount && newChat.membersCount;
 
     if (existingChat && !existingChat.isMin && !membersCountChanged
-        && (newChat.isMin || existingChat.accessHash === newChat.accessHash)) {
+      && (newChat.isMin || existingChat.accessHash === newChat.accessHash)) {
       return acc;
     }
 

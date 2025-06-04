@@ -80,10 +80,10 @@ type RegularLangFnPluralParametersWithVariables<T = LangPairPluralWithVariables>
 }[keyof T];
 
 export type RegularLangFnParameters =
-| RegularLangFnParametersWithoutVariables
-| RegularLangFnParametersWithVariables
-| RegularLangFnPluralParameters
-| RegularLangFnPluralParametersWithVariables;
+  | RegularLangFnParametersWithoutVariables
+  | RegularLangFnParametersWithVariables
+  | RegularLangFnPluralParameters
+  | RegularLangFnPluralParametersWithVariables;
 
 type AdvancedLangFnParametersWithoutVariables = {
   key: RegularLangKey;
@@ -114,10 +114,10 @@ type AdvancedLangFnPluralParametersWithVariables<T = LangPairPluralWithNodes> = 
 }[keyof T];
 
 export type AdvancedLangFnParameters =
-| AdvancedLangFnParametersWithoutVariables
-| AdvancedLangFnParametersWithVariables
-| AdvancedLangFnPluralParameters
-| AdvancedLangFnPluralParametersWithVariables;
+  | AdvancedLangFnParametersWithoutVariables
+  | AdvancedLangFnParametersWithVariables
+  | AdvancedLangFnPluralParameters
+  | AdvancedLangFnPluralParametersWithVariables;
 
 export type LangFnParameters = RegularLangFnParameters | AdvancedLangFnParameters;
 

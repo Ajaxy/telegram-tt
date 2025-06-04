@@ -11,7 +11,6 @@ const ReceiptModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const ReceiptModal = useModuleLoader(Bundles.Extra, 'ReceiptModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return ReceiptModal ? <ReceiptModal {...props} /> : undefined;
 };
 

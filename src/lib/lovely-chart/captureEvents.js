@@ -1,5 +1,5 @@
-import { addEventListener, removeEventListener } from './minifiers';
-import { LONG_PRESS_TIMEOUT } from './constants';
+import { addEventListener, removeEventListener } from './minifiers.js';
+import { LONG_PRESS_TIMEOUT } from './constants.js';
 
 export function captureEvents(element, options) {
   let captureEvent = null;

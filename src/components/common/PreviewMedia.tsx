@@ -35,8 +35,7 @@ const PreviewMedia: FC<OwnProps> = ({
   onClick,
   index,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const thumbDataUri = getMessageMediaThumbDataUri(media);

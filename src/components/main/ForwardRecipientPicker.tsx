@@ -6,12 +6,13 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ThreadId } from '../../types';
 
-import { getChatTitle, getUserFirstOrLastName, isUserId } from '../../global/helpers';
+import { getChatTitle, getUserFirstOrLastName } from '../../global/helpers';
 import {
   selectChat,
   selectTabState,
   selectUser,
 } from '../../global/selectors';
+import { isUserId } from '../../util/entities/ids';
 
 import useFlag from '../../hooks/useFlag';
 import useOldLang from '../../hooks/useOldLang';

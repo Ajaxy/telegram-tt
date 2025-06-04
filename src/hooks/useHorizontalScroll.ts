@@ -1,7 +1,8 @@
+import type { ElementRef } from '../lib/teact/teact';
 import { useEffect } from '../lib/teact/teact';
 
 const useHorizontalScroll = (
-  containerRef: React.RefObject<HTMLDivElement>,
+  containerRef: ElementRef<HTMLDivElement>,
   isDisabled?: boolean,
   shouldPreventDefault = false,
 ) => {

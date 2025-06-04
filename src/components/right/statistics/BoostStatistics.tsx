@@ -80,8 +80,7 @@ const BoostStatistics = ({
     openChat, loadMoreBoosters, closeBoostStatistics, openGiveawayModal, showNotification,
   } = getActions();
   const lang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const transitionRef = useRef<HTMLDivElement>(null);
+  const transitionRef = useRef<HTMLDivElement>();
 
   const isLoaded = boostStatistics?.boostStatus;
   const status = isLoaded ? boostStatistics.boostStatus : undefined;
@@ -190,8 +189,9 @@ const BoostStatistics = ({
           styles.floatingBadgeButton)}
         >
           <Icon name="gift" className={styles.floatingBadgeIcon} />
-          <div className={styles.floatingBadgeValue}>{lang(boost.isFromGiveaway
-            ? 'BoostingGiveaway' : 'BoostingGift')}
+          <div className={styles.floatingBadgeValue}>
+            {lang(boost.isFromGiveaway
+              ? 'BoostingGiveaway' : 'BoostingGift')}
           </div>
         </div>
       </div>
@@ -227,7 +227,7 @@ const BoostStatistics = ({
     return (
       <ListItem
         className="chat-item-clickable"
-        // eslint-disable-next-line react/jsx-no-bind
+
         onClick={() => handleBoosterClick(boost.userId)}
       >
         <PrivateChatInfo
@@ -285,8 +285,8 @@ const BoostStatistics = ({
         <>
           <div className={styles.section}>
             <PremiumProgress
-              leftText={lang('BoostsLevel', currentLevel!)}
-              rightText={hasNextLevel ? lang('BoostsLevel', currentLevel! + 1) : undefined}
+              leftText={lang('BoostsLevel', currentLevel)}
+              rightText={hasNextLevel ? lang('BoostsLevel', currentLevel + 1) : undefined}
               progress={levelProgress}
               floatingBadgeText={formatInteger(boosts)}
               floatingBadgeIcon="boost"
@@ -305,7 +305,7 @@ const BoostStatistics = ({
                   <ListItem
                     key={prepaidGiveaway.id}
                     className="chat-item-clickable"
-                    // eslint-disable-next-line react/jsx-no-bind
+
                     onClick={() => launchPrepaidGiveawayHandler(prepaidGiveaway)}
                   >
                     <div className={buildClassName(styles.status, 'status-clickable')}>
@@ -331,10 +331,11 @@ const BoostStatistics = ({
                             ? lang('Giveaway.Stars.Prepaid.Title', prepaidGiveaway.stars)
                             : lang('BoostingTelegramPremiumCountPlural', prepaidGiveaway.quantity)}
                         </h3>
-                        <p className={styles.month}>{
-                          isStarsGiveaway ? lang('Giveaway.Stars.Prepaid.Desc', prepaidGiveaway.quantity)
-                            : lang('PrepaidGiveawayMonths', prepaidGiveaway.months)
-                        }
+                        <p className={styles.month}>
+                          {
+                            isStarsGiveaway ? lang('Giveaway.Stars.Prepaid.Desc', prepaidGiveaway.quantity)
+                              : lang('PrepaidGiveawayMonths', prepaidGiveaway.months)
+                          }
                         </p>
                       </div>
                       <div className={styles.quantity}>
@@ -378,7 +379,8 @@ const BoostStatistics = ({
                   {lang('BoostingBoostsCount', boostStatistics?.boosts?.count)}
                 </h4>
                 {!boostStatistics?.boosts?.list?.length && (
-                  <div className={styles.noResults}>{lang(isChannel ? 'NoBoostersHint' : 'NoBoostersGroupHint')}
+                  <div className={styles.noResults}>
+                    {lang(isChannel ? 'NoBoostersHint' : 'NoBoostersGroupHint')}
                   </div>
                 )}
                 {boostStatistics?.boosts?.list?.map((boost) => renderBoostList(boost))}
@@ -411,9 +413,10 @@ const BoostStatistics = ({
               >
                 {lang('BoostingGetBoostsViaGifts')}
               </ListItem>
-              <p className="text-muted hint" key="links-hint">{lang(
-                isChannel ? 'BoostingGetMoreBoosts' : 'BoostingGetMoreBoostsGroup',
-              )}
+              <p className="text-muted hint" key="links-hint">
+                {lang(
+                  isChannel ? 'BoostingGetMoreBoosts' : 'BoostingGetMoreBoostsGroup',
+                )}
               </p>
             </div>
           )}

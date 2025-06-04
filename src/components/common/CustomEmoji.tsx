@@ -1,4 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
+import type { ElementRef, FC } from '../../lib/teact/teact';
 import React, { memo, useRef, useState } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
@@ -21,7 +21,7 @@ import styles from './CustomEmoji.module.scss';
 import blankImg from '../../assets/blank.png';
 
 type OwnProps = {
-  ref?: React.RefObject<HTMLDivElement>;
+  ref?: ElementRef<HTMLDivElement>;
   documentId: string;
   className?: string;
   style?: string;
@@ -32,8 +32,8 @@ type OwnProps = {
   loopLimit?: number;
   isSelectable?: boolean;
   withSharedAnimation?: boolean;
-  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
-  sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
+  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
+  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   withTranslucentThumb?: boolean;
   shouldPreloadPreview?: boolean;
   forceOnHeavyAnimation?: boolean;
@@ -75,8 +75,7 @@ const CustomEmoji: FC<OwnProps> = ({
   sparklesStyle,
   sparklesClassName,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  let containerRef = useRef<HTMLDivElement>(null);
+  let containerRef = useRef<HTMLDivElement>();
   if (ref) {
     containerRef = ref;
   }

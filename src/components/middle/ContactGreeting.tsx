@@ -54,8 +54,7 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
 
   const lang = useOldLang();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const sticker = useMemo(() => {
     if (businessIntro?.sticker) return businessIntro.sticker;
@@ -115,7 +114,7 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
       </div>
       {businessIntro && (
         <div className={styles.explainer}>
-          {lang('Chat.EmptyStateIntroFooter', getUserFullName(user!))}
+          {lang('Chat.EmptyStateIntroFooter', getUserFullName(user))}
         </div>
       )}
     </div>

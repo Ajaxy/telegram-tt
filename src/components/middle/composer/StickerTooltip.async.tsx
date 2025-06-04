@@ -11,7 +11,6 @@ const StickerTooltipAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const StickerTooltip = useModuleLoader(Bundles.Extra, 'StickerTooltip', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return StickerTooltip ? <StickerTooltip {...props} /> : undefined;
 };
 

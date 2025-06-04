@@ -474,8 +474,8 @@ export type ApiMessageEntityQuoteFocus = {
 };
 
 export type ApiMessageEntity = ApiMessageEntityDefault | ApiMessageEntityPre | ApiMessageEntityTextUrl |
-ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji | ApiMessageEntityBlockquote | ApiMessageEntityTimestamp |
-ApiMessageEntityQuoteFocus;
+  ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji | ApiMessageEntityBlockquote | ApiMessageEntityTimestamp |
+  ApiMessageEntityQuoteFocus;
 
 export enum ApiMessageEntityTypes {
   Bold = 'MessageEntityBold',
@@ -695,7 +695,7 @@ export type ApiSavedReactionTag = {
 };
 
 export type ApiPaidReactionPrivacyType = ApiPaidReactionPrivacyDefault |
-ApiPaidReactionPrivacyAnonymous | PaidReactionPrivacyPeer;
+  ApiPaidReactionPrivacyAnonymous | PaidReactionPrivacyPeer;
 
 export type ApiPaidReactionPrivacyDefault = {
   type: 'default';
@@ -870,7 +870,7 @@ export type ApiGlobalMessageSearchType = 'text' | 'channels' | 'media' | 'docume
 export type ApiMessageSearchContext = 'all' | 'users' | 'groups' | 'channels';
 
 export type ApiReportReason = 'spam' | 'violence' | 'pornography' | 'childAbuse'
-| 'copyright' | 'geoIrrelevant' | 'fake' | 'illegalDrugs' | 'personalDetails' | 'other';
+  | 'copyright' | 'geoIrrelevant' | 'fake' | 'illegalDrugs' | 'personalDetails' | 'other';
 
 export type ApiSendMessageAction = {
   type: 'cancel' | 'typing' | 'recordAudio' | 'chooseSticker' | 'playingGame';

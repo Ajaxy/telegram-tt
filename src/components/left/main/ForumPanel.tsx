@@ -81,13 +81,10 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
     closeForumPanel, openChatWithInfo, loadTopics,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const scrollTopHandlerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
+  const scrollTopHandlerRef = useRef<HTMLDivElement>();
   const { isMobile } = useAppLayout();
   const chatId = chat?.id;
 
@@ -168,10 +165,10 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
 
         if (isVisible) {
           shouldRenderRef.current = true;
-          ref.current!.style.transform = 'none';
+          ref.current.style.transform = 'none';
         } else {
           shouldRenderRef.current = false;
-          ref.current!.style.transform = '';
+          ref.current.style.transform = '';
         }
       });
     }
@@ -184,7 +181,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
 
     return captureEvents(ref.current!, {
       selectorToPreventScroll: '.chat-list',
-      onSwipe: ((e, direction) => {
+      onSwipe: (e, direction) => {
         const closeDirection = lang.isRtl ? SwipeDirection.Left : SwipeDirection.Right;
 
         if (direction === closeDirection) {
@@ -193,12 +190,12 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
         }
 
         return false;
-      }),
+      },
     });
   }, [closeForumPanel, lang.isRtl]);
 
   function renderTopics() {
-    const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
+    const viewportOffset = orderedIds.indexOf(viewportIds![0]);
 
     return viewportIds?.map((id, i) => (
       <Topic

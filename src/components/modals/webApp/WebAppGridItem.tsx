@@ -20,7 +20,7 @@ import PeerBadge from '../../common/PeerBadge';
 import styles from './WebAppGridItem.module.scss';
 
 export type OwnProps = {
-  // eslint-disable-next-line react/no-unused-prop-types
+
   chatId: string;
   isPopularApp?: boolean;
 };
@@ -53,8 +53,6 @@ function WebAppGridItem({ user, isPopularApp }: OwnProps & StateProps) {
   });
 
   if (!user) return undefined;
-
-  // eslint-disable-next-line no-null/no-null
 
   const title = user?.firstName;
   const activeUserCount = user?.botActiveUsers;

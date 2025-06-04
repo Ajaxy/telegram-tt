@@ -133,7 +133,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
       {screen === SettingsScreens.PrivacyGifts && (
         <SettingsAcceptedGift />
       )}
-      {secondaryScreen && (
+      {Boolean(secondaryScreen) && (
         <PrivacySubsection
           screen={secondaryScreen}
           privacy={secondaryPrivacy}
@@ -368,7 +368,7 @@ function PrivacySubsection({
             <ListItem
               narrow
               icon="add-user"
-              // eslint-disable-next-line react/jsx-no-bind
+
               onClick={() => {
                 openSettingsScreen({ screen: allowedContactsScreen });
               }}
@@ -383,7 +383,7 @@ function PrivacySubsection({
             <ListItem
               narrow
               icon="delete-user"
-              // eslint-disable-next-line react/jsx-no-bind
+
               onClick={() => {
                 openSettingsScreen({ screen: deniedContactsScreen });
               }}

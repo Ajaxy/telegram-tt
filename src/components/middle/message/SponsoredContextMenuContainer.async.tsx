@@ -13,7 +13,6 @@ const SponsoredContextMenuContainerAsync: FC<OwnProps> = (props) => {
     Bundles.Extra, 'SponsoredContextMenuContainer', !isOpen,
   );
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return SponsoredContextMenuContainer ? <SponsoredContextMenuContainer {...props} /> : undefined;
 };
 

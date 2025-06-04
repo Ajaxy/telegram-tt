@@ -1,6 +1,6 @@
 type RLottieClass = typeof import('./RLottie').default;
 
-let promise: Promise<RLottieClass>;
+let promise: Promise<RLottieClass> | undefined;
 let RLottie: RLottieClass;
 
 // Time for the main interface to completely load

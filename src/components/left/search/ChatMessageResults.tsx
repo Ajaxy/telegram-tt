@@ -141,7 +141,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
             <h3 className="section-heading topic-search-heading" dir={lang.isRtl ? 'auto' : undefined}>
               {lang('Topics')}
             </h3>
-            {foundTopicIds!.map((id) => {
+            {foundTopicIds.map((id) => {
               return (
                 <LeftSearchResultTopic
                   chatId={searchChatId!}

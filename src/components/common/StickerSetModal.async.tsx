@@ -11,7 +11,6 @@ const StickerSetModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const StickerSetModal = useModuleLoader(Bundles.Extra, 'StickerSetModal', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return StickerSetModal ? <StickerSetModal {...props} /> : undefined;
 };
 

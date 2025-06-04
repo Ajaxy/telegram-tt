@@ -35,7 +35,7 @@ export default function useProfileViewportIds({
   archiveStoryIds,
   similarChannels,
   similarBots,
-} : {
+}: {
   loadMoreMembers: AnyToVoidFunction;
   loadCommonChats: AnyToVoidFunction;
   searchMessages: AnyToVoidFunction;

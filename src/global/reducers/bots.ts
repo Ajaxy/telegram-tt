@@ -37,7 +37,7 @@ export function replaceInlineBotsIsLoading<T extends GlobalState>(
   }, tabId);
 }
 
-export function updateWebApp <T extends GlobalState>(
+export function updateWebApp<T extends GlobalState>(
   global: T, key: string, webAppUpdate: Partial<WebApp>,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {

@@ -1,4 +1,3 @@
-import type BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import type { Entity } from '../../../lib/gramjs/types';
 
@@ -298,11 +297,11 @@ export function getApiChatTypeFromPeerEntity(peerEntity: GramJs.TypeChat | GramJ
 
 export function getPeerKey(peer: GramJs.TypePeer) {
   if (isMtpPeerUser(peer)) {
-    return `user${peer.userId}`;
+    return `user${peer.userId.toString()}`;
   } else if (isMtpPeerChat(peer)) {
-    return `chat${peer.chatId}`;
+    return `chat${peer.chatId.toString()}`;
   } else {
-    return `chat${peer.channelId}`;
+    return `chat${peer.channelId.toString()}`;
   }
 }
 
@@ -330,7 +329,7 @@ export function buildChatMember(
   return {
     userId,
     inviterId: 'inviterId' in member && member.inviterId
-      ? buildApiPeerId(member.inviterId as BigInt.BigInteger, 'user')
+      ? buildApiPeerId(member.inviterId, 'user')
       : undefined,
     joinedDate: 'date' in member ? member.date : undefined,
     kickedByUserId: 'kickedBy' in member && member.kickedBy ? buildApiPeerId(member.kickedBy, 'user') : undefined,

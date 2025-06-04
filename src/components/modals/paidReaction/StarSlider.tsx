@@ -31,8 +31,7 @@ const StarSlider = ({
   className,
   onChange,
 }: OwnProps) => {
-  // eslint-disable-next-line no-null/no-null
-  const floatingBadgeRef = useRef<HTMLDivElement>(null);
+  const floatingBadgeRef = useRef<HTMLDivElement>();
 
   const points = useMemo(() => {
     const result = [];

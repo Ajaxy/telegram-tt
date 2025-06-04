@@ -151,7 +151,7 @@ addActionHandler('preloadTopChatMessages', async (global, actions): Promise<void
 
     global = getGlobal();
     const currentChatIds = Object.values(global.byTabId)
-      // eslint-disable-next-line @typescript-eslint/no-loop-func
+
       .map(({ id: tabId }) => selectCurrentMessageList(global, tabId)?.chatId)
       .filter(Boolean);
 
@@ -344,7 +344,6 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
   setGlobal(global);
 
   const openPreviousChat = () => {
-    // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
     const currentGlobal = getGlobal();
     if (isComments
       || selectCurrentMessageList(currentGlobal, tabId)?.chatId !== loadingChatId
@@ -428,7 +427,7 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
   if (focusMessageId) {
     actions.focusMessage({
       chatId,
-      threadId: threadId!,
+      threadId: threadId,
       messageId: focusMessageId,
       tabId,
     });
@@ -465,7 +464,7 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
       actions.processOpenChatOrThread({
         chatId,
         type,
-        threadId: threadId!,
+        threadId: threadId,
         tabId,
         isComments,
         noForumTopicPanel,
@@ -678,7 +677,7 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
     title, about, photo, memberIds, tabId = getCurrentTabId(),
   } = payload;
 
-  const users = (memberIds as string[])
+  const users = (memberIds)
     .map((id) => selectUser(global, id))
     .filter(Boolean);
 
@@ -851,7 +850,7 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
   const {
     title, memberIds, photo, tabId = getCurrentTabId(),
   } = payload;
-  const users = (memberIds as string[])
+  const users = (memberIds)
     .map((id) => selectUser(global, id))
     .filter(Boolean);
 
@@ -1054,16 +1053,16 @@ addActionHandler('editChatFolders', (global, actions, payload): ActionReturnType
   const limit = selectCurrentLimit(global, 'dialogFiltersChats');
 
   const isLimitReached = idsToAdd
-    .some((id) => selectChatFolder(global, id)!.includedChatIds.length >= limit);
+    .some((id) => selectChatFolder(global, id).includedChatIds.length >= limit);
   if (isLimitReached) {
     actions.openLimitReachedModal({ limit: 'dialogFiltersChats', tabId });
     return;
   }
 
-  idsToRemove.forEach(async (id) => {
+  idsToRemove.forEach((id) => {
     const folder = selectChatFolder(global, id);
     if (folder) {
-      await callApi('editChatFolder', {
+      callApi('editChatFolder', {
         id,
         folderUpdate: {
           ...folder,
@@ -1074,10 +1073,10 @@ addActionHandler('editChatFolders', (global, actions, payload): ActionReturnType
     }
   });
 
-  idsToAdd.forEach(async (id) => {
+  idsToAdd.forEach((id) => {
     const folder = selectChatFolder(global, id);
     if (folder) {
-      await callApi('editChatFolder', {
+      callApi('editChatFolder', {
         id,
         folderUpdate: {
           ...folder,
@@ -1684,7 +1683,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
   if (timestamp) {
     actions.openMediaFromTimestamp({
       chatId: chatByUsername.id,
-      messageId: commentId || messageId!,
+      messageId: commentId || messageId,
       timestamp,
       tabId,
     });
@@ -2003,7 +2002,7 @@ addActionHandler('linkDiscussionGroup', async (global, actions, payload): Promis
     fullInfo = fullChat.fullInfo;
   }
 
-  if (fullInfo!.isPreHistoryHidden) {
+  if (fullInfo.isPreHistoryHidden) {
     global = getGlobal();
     global = updateChatFullInfo(global, chat.id, { isPreHistoryHidden: false });
     setGlobal(global);
@@ -2974,7 +2973,6 @@ async function loadChats(
   isFullDraftSync?: boolean,
   shouldIgnorePagination?: boolean,
 ) {
-  // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
   let global = getGlobal();
   let lastLocalServiceMessageId = selectLastServiceNotification(global)?.id;
 

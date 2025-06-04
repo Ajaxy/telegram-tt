@@ -38,7 +38,7 @@ const SuggestedPhotoAction = ({
   action,
   peer,
   observeIntersection,
-} : OwnProps & StateProps) => {
+}: OwnProps & StateProps) => {
   const { openMediaViewer, uploadProfilePhoto, showNotification } = getActions();
   const { isOutgoing } = message;
   const photo = action.photo;

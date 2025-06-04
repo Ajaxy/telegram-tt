@@ -132,8 +132,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
   const isPublicGroup = useMemo(() => isChatPublic(chat), [chat]);
   const lang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const isPreHistoryHiddenCheckboxRef = useRef<HTMLDivElement>(null);
+  const isPreHistoryHiddenCheckboxRef = useRef<HTMLDivElement>();
 
   useHistoryBack({
     isActive,
@@ -282,7 +281,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     let totalCount = ALL_PERMISSIONS.filter(
       (key) => {
         if (key === 'manageTopics' && !isForumEnabled) return false;
-        return !chat.defaultBannedRights![key as keyof ApiChatBannedRights];
+        return !chat.defaultBannedRights![key];
       },
     ).length;
 
@@ -373,7 +372,9 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
           >
             <span className="title">{lang('ChannelPermissions')}</span>
             <span className="subtitle" dir="auto">
-              {enabledPermissionsCount}/{TOTAL_PERMISSIONS_COUNT - (isForumEnabled ? 0 : 1)}
+              {enabledPermissionsCount}
+              /
+              {TOTAL_PERMISSIONS_COUNT - (isForumEnabled ? 0 : 1)}
             </span>
           </ListItem>
           <ListItem
@@ -416,7 +417,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
             >
               <span className="title">{lang('MemberRequests')}</span>
               <span className="subtitle">
-                {formatInteger(chat.joinRequests!.length)}
+                {formatInteger(chat.joinRequests.length)}
               </span>
             </ListItem>
           )}

@@ -20,8 +20,7 @@ const BotMenuButton: FC<OwnProps> = ({
   text,
   isDisabled,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const textRef = useRef<HTMLSpanElement>(null);
+  const textRef = useRef<HTMLSpanElement>();
 
   useEffect(() => {
     const textEl = textRef.current;

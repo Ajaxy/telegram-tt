@@ -58,7 +58,6 @@ const headsByElement = new WeakMap<Element, VirtualDomHead>();
 const extraClasses = new WeakMap<Element, Set<string>>();
 const extraStyles = new WeakMap<Element, Record<string, string>>();
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_virtualTreeSize = 1;
 
 function render($element: VirtualElement | undefined, parentEl: HTMLElement) {
@@ -116,7 +115,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   if (
     !skipComponentUpdate
     && isCurrentComponent && isNewComponent
-    && !hasElementChanged($current!, $new!)
+    && !hasElementChanged($current, $new!)
   ) {
     $new = updateComponent($current, $new as VirtualElementComponent) as typeof $new;
   }
@@ -306,7 +305,7 @@ function mountChildren(
 
   // Add a placeholder comment node for empty fragments to maintain position
   if ($element.type === VirtualType.Fragment && children.length === 0) {
-    const fragmentEl = $element as VirtualElementFragment;
+    const fragmentEl = $element;
     fragmentEl.placeholderTarget = document.createComment('empty-fragment');
     insertBefore(options.fragment || parentEl, fragmentEl.placeholderTarget, options.nextSibling);
     return;
@@ -343,7 +342,6 @@ function createNode($element: VirtualElementReal, currentContext: CurrentContext
 
   processControlled(tag, props);
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const key in props) {
     if (!props.hasOwnProperty(key)) continue;
 
@@ -401,7 +399,7 @@ function unmountRealTree($element: VirtualElement) {
     unmountComponent($element.componentInstance);
   } else if ($element.type === VirtualType.Fragment) {
     // Remove placeholder for empty fragments
-    const fragment = $element as VirtualElementFragment;
+    const fragment = $element;
     if (fragment.placeholderTarget && fragment.children.length === 0) {
       fragment.placeholderTarget.parentNode?.removeChild(fragment.placeholderTarget);
       fragment.placeholderTarget = undefined;
@@ -471,8 +469,8 @@ function renderChildren(
 
   // Handle transitions between empty and non-empty fragments
   if ($current.type === VirtualType.Fragment && $new.type === VirtualType.Fragment) {
-    const currentFragment = $current as VirtualElementFragment;
-    const newFragment = $new as VirtualElementFragment;
+    const currentFragment = $current;
+    const newFragment = $new;
 
     // If transitioning from empty to non-empty, use the placeholder's position
     if (currentFragment.children.length === 0 && newFragment.children.length > 0 && currentFragment.placeholderTarget) {
@@ -722,7 +720,7 @@ function processControlled(tag: string, props: AnyLiteral) {
         e.currentTarget.setSelectionRange(selectionStart, selectionEnd);
 
         const selectionState: SelectionState = { selectionStart, selectionEnd, isCaretAtEnd };
-        // eslint-disable-next-line no-underscore-dangle
+
         e.currentTarget.dataset.__teactSelectionState = JSON.stringify(selectionState);
       }
     }
@@ -787,7 +785,6 @@ function setAttribute(element: DOMElement, key: string, value: any, namespace?: 
     if (inputEl.value !== value) {
       inputEl.value = value;
 
-      // eslint-disable-next-line no-underscore-dangle
       const selectionStateJson = inputEl.dataset.__teactSelectionState;
       if (selectionStateJson) {
         const { selectionStart, selectionEnd, isCaretAtEnd } = JSON.parse(selectionStateJson) as SelectionState;
@@ -803,7 +800,6 @@ function setAttribute(element: DOMElement, key: string, value: any, namespace?: 
   } else if (key === 'style') {
     updateStyle(element, value);
   } else if (key === 'dangerouslySetInnerHTML') {
-    // eslint-disable-next-line no-underscore-dangle
     element.innerHTML = value.__html;
   } else if (key.startsWith('on')) {
     addEventListener(element, key, value, key.endsWith('Capture'));
@@ -920,7 +916,6 @@ function applyExtraStyles(element: DOMElement) {
   Object.assign(element.style, standardStyles);
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 function DEBUG_addToVirtualTreeSize($current: VirtualElementParent | VirtualDomHead) {
   DEBUG_virtualTreeSize += $current.children.length;
 
@@ -931,7 +926,6 @@ function DEBUG_addToVirtualTreeSize($current: VirtualElementParent | VirtualDomH
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 function DEBUG_checkKeyUniqueness(children: VirtualElementChildren) {
   const firstChild = children[0];
   if (firstChild && 'props' in firstChild && firstChild.props.key !== undefined) {

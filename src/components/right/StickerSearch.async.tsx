@@ -10,7 +10,6 @@ import Loading from '../ui/Loading';
 const StickerSearchAsync: FC = () => {
   const StickerSearch = useModuleLoader(Bundles.Extra, 'StickerSearch');
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return StickerSearch ? <StickerSearch /> : <Loading />;
 };
 

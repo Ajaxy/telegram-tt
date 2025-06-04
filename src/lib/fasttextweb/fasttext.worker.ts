@@ -1,6 +1,6 @@
 import { DEBUG } from '../../config';
 import { createWorkerInterface } from '../../util/createPostMessageInterface';
-import fasttextInitializer from './fasttext-wasm';
+import fasttextInitializer from './fasttext-wasm.cjs';
 import fasttextWasmPath from './fasttext-wasm.wasm';
 
 type FastTextMethods = {

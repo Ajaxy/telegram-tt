@@ -6,12 +6,11 @@ import { useMemo, useRef } from '../../lib/teact/teact';
 */
 export function useTransitionActiveKey(deps: unknown[], noAnimation?: boolean): number {
   const activeKey = useRef(0);
-  let didUpdate = false;
 
+  useMemo(() => {
+    if (!noAnimation) activeKey.current += 1;
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  useMemo(() => { activeKey.current += 1; didUpdate = true; }, deps);
-
-  if (noAnimation && didUpdate) activeKey.current -= 1;
+  }, [...deps, noAnimation]);
 
   return activeKey.current;
 }

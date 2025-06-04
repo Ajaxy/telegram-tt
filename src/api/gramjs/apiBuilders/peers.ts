@@ -32,7 +32,7 @@ export function buildApiPeerId(id: BigInt.BigInteger, type: 'user' | 'chat' | 'c
     return `-1${id.toString().padStart(CHANNEL_ID_LENGTH - 2, '0')}`;
   }
 
-  return `-${id}`;
+  return `-${id.toString()}`;
 }
 
 export function getApiChatIdFromMtpPeer(peer: TypePeerOrInput) {

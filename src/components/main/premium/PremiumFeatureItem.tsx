@@ -32,7 +32,6 @@ const COLORS = [
   '#9873FF', '#768DFF', '#55A5FC', '#52B0C9', '#4FBC93', '#4CC663',
 ].map(hexToRgb);
 
-// eslint-disable-next-line @typescript-eslint/comma-dangle
 const PremiumFeatureItem = <T,>({
   icon,
   isFontIcon,

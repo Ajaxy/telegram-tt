@@ -25,6 +25,7 @@ import {
   ANONYMOUS_USER_ID, API_GENERAL_ID_LIMIT, GENERAL_TOPIC_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
+import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { findLast } from '../../util/iteratees';
 import { getMessageKey, isLocalMessageId } from '../../util/keys/messageKey';
@@ -62,7 +63,6 @@ import {
   isMessageTranslatable,
   isOwnMessage,
   isServiceNotificationMessage,
-  isUserId,
   isUserRightBanned,
 } from '../helpers';
 import { getMessageReplyInfo } from '../helpers/replies';
@@ -728,8 +728,8 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const canSelect = !isLocal && !isAction;
 
   const canDownload = Boolean(content.webPage?.document || content.webPage?.video || content.webPage?.photo
-      || content.audio || content.voice || content.photo || content.video || content.document || content.sticker)
-    && !hasTtl;
+    || content.audio || content.voice || content.photo || content.video || content.document || content.sticker)
+  && !hasTtl;
 
   const canSaveGif = message.content.video?.isGif;
 
@@ -1422,7 +1422,7 @@ export function selectReplyCanBeSentToChat<T extends GlobalState>(
   if (!replyInfo.replyToMsgId) return false;
   const fromRealChatId = replyInfo?.replyToPeerId ?? fromChatId;
   if (toChatId === fromRealChatId) return true;
-  const chatMessages = selectChatMessages(global, fromRealChatId!);
+  const chatMessages = selectChatMessages(global, fromRealChatId);
   const message = chatMessages[replyInfo.replyToMsgId];
 
   return !isExpiredMessage(message);

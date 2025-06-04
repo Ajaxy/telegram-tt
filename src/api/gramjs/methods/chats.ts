@@ -965,7 +965,7 @@ export async function editChatPhoto({
   return invokeRequest(
     chatType === 'channel'
       ? new GramJs.channels.EditPhoto({
-        channel: buildInputChannel(chatId, accessHash!),
+        channel: buildInputChannel(chatId, accessHash),
         photo: inputPhoto,
       })
       : new GramJs.messages.EditChatPhoto({
@@ -1319,7 +1319,7 @@ export async function fetchMembers({
   memberFilter = 'recent',
   offset,
   query = '',
-} : {
+}: {
   chat: ApiChat;
   memberFilter?: ChannelMembersFilter;
   offset?: number;
@@ -1571,13 +1571,13 @@ export function toggleJoinRequest(chat: ApiChat, isEnabled: boolean) {
 
 function preparePeers(
   result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice | GramJs.messages.PeerDialogs |
-  GramJs.messages.SavedDialogs | GramJs.messages.SavedDialogsSlice,
+    GramJs.messages.SavedDialogs | GramJs.messages.SavedDialogsSlice,
   currentStore?: Record<string, GramJs.TypeChat | GramJs.TypeUser>,
 ) {
   const store: Record<string, GramJs.TypeChat | GramJs.TypeUser> = {};
 
   result.chats?.forEach((chat) => {
-    const key = `chat${chat.id}`;
+    const key = `chat${chat.id.toString()}`;
 
     if (currentStore?.[key] && 'min' in chat && chat.min) {
       return;
@@ -1587,7 +1587,7 @@ function preparePeers(
   });
 
   result.users?.forEach((user) => {
-    const key = `user${user.id}`;
+    const key = `user${user.id.toString()}`;
 
     if (currentStore?.[key] && 'min' in user && user.min) {
       return;
@@ -1702,13 +1702,13 @@ export async function fetchTopics({
   offsetDate?: number;
   limit?: number;
 }): Promise<{
-    topics: ApiTopic[];
-    messages: ApiMessage[];
-    count: number;
-    shouldOrderByCreateDate?: boolean;
-    draftsById: Record<number, ReturnType<typeof buildMessageDraft>>;
-    readInboxMessageIdByTopicId: Record<number, number>;
-  } | undefined> {
+  topics: ApiTopic[];
+  messages: ApiMessage[];
+  count: number;
+  shouldOrderByCreateDate?: boolean;
+  draftsById: Record<number, ReturnType<typeof buildMessageDraft>>;
+  readInboxMessageIdByTopicId: Record<number, number>;
+} | undefined> {
   const { id, accessHash } = chat;
 
   const result = await invokeRequest(new GramJs.channels.GetForumTopics({
@@ -1756,9 +1756,9 @@ export async function fetchTopicById({
   chat: ApiChat;
   topicId: number;
 }): Promise<{
-    topic: ApiTopic;
-    messages: ApiMessage[];
-  } | undefined> {
+  topic: ApiTopic;
+  messages: ApiMessage[];
+} | undefined> {
   const { id, accessHash } = chat;
 
   const result = await invokeRequest(new GramJs.channels.GetForumTopicsByID({

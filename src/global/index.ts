@@ -13,7 +13,7 @@ type ProjectActionTypes =
 
 type ProjectActionNames = keyof ProjectActionTypes;
 
-type Helper<T, E> = Exclude<T, E> extends never ? {} : Exclude<T, E>;
+type Helper<T, E> = Exclude<T, E> extends never ? unknown : Exclude<T, E>;
 
 export type TabStateActionNames = {
   [ActionName in ProjectActionNames]:

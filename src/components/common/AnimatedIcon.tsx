@@ -54,7 +54,7 @@ function AnimatedIcon(props: OwnProps) {
       noLoop={noLoop}
       onClick={!nonInteractive ? handleClick : undefined}
       onLoad={handleLoad}
-      /* eslint-disable-next-line react/jsx-props-no-spreading */
+
       {...otherProps}
     />
   );

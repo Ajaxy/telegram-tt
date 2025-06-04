@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import type { BigInteger } from 'big-integer';
 
 export class LocalUpdatePts {

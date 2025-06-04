@@ -1,4 +1,4 @@
-import type { FC, TeactNode } from '../../lib/teact/teact';
+import type { ElementRef, FC, TeactNode } from '../../lib/teact/teact';
 import React, { beginHeavyAnimation, useEffect } from '../../lib/teact/teact';
 
 import type { TextPart } from '../../types';
@@ -40,14 +40,14 @@ export type OwnProps = {
   children: React.ReactNode;
   style?: string;
   dialogStyle?: string;
-  dialogRef?: React.RefObject<HTMLDivElement>;
+  dialogRef?: ElementRef<HTMLDivElement>;
   isLowStackPriority?: boolean;
   dialogContent?: React.ReactNode;
   ignoreFreeze?: boolean;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   onEnter?: () => void;
-  withBalanceBar?: Boolean;
+  withBalanceBar?: boolean;
 };
 
 const Modal: FC<OwnProps> = ({

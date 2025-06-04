@@ -152,8 +152,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
     closeManagement();
   }, [closeDeleteDialog, closeManagement, deleteContact, userId]);
 
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>();
   const isSuggestRef = useRef(false);
 
   const handleSuggestPhoto = useCallback(() => {

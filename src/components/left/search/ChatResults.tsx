@@ -98,10 +98,8 @@ const ChatResults: FC<OwnProps & StateProps> = ({
     setGlobalSearchChatId, loadChannelRecommendations,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const chatSelectionRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
+  const chatSelectionRef = useRef<HTMLDivElement>();
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -110,8 +108,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   const [shouldShowMoreLocal, setShouldShowMoreLocal] = useState<boolean>(false);
   const [shouldShowMoreGlobal, setShouldShowMoreGlobal] = useState<boolean>(false);
   const [searchContext, setSearchContext] = useState<ApiMessageSearchContext>('all');
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   useEffectOnce(() => {
     if (isChannelList) loadChannelRecommendations({});
@@ -187,7 +184,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
           <MenuItem
             icon={searchContext === 'all' ? 'check' : undefined}
             customIcon={searchContext !== 'all' ? <i className={itemPlaceholderClass} /> : undefined}
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => setSearchContext('all')}
           >
             {getSearchContextCaption('all')}
@@ -195,7 +192,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
           <MenuItem
             icon={searchContext === 'users' ? 'check' : undefined}
             customIcon={searchContext !== 'users' ? <i className={itemPlaceholderClass} /> : undefined}
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => setSearchContext('users')}
           >
             {getSearchContextCaption('users')}
@@ -203,7 +200,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
           <MenuItem
             icon={searchContext === 'groups' ? 'check' : undefined}
             customIcon={searchContext !== 'groups' ? <i className={itemPlaceholderClass} /> : undefined}
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => setSearchContext('groups')}
           >
             {getSearchContextCaption('groups')}
@@ -211,7 +208,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
           <MenuItem
             icon={searchContext === 'channels' ? 'check' : undefined}
             customIcon={searchContext !== 'channels' ? <i className={itemPlaceholderClass} /> : undefined}
-            // eslint-disable-next-line react/jsx-no-bind
+
             onClick={() => setSearchContext('channels')}
           >
             {getSearchContextCaption('channels')}

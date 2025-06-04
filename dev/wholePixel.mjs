@@ -1,6 +1,5 @@
-const stylelint = require('stylelint');
-// eslint-disable-next-line import/no-unresolved -- TS BUG
-const postcss = require('postcss');
+import { list } from 'postcss';
+import stylelint from 'stylelint';
 
 const ruleName = 'plugin/whole-pixel';
 
@@ -14,7 +13,7 @@ const PX_PER_REM = 16;
 const unitRegex = /(px|rem)$/;
 const numberRegex = /^([-0-9.]+)/;
 
-module.exports = stylelint.createPlugin(ruleName, (primaryOption, secondaryOptionObject, context) => {
+const plugin = stylelint.createPlugin(ruleName, (primaryOption, secondaryOptionObject, context) => {
   const secondaryOptions = secondaryOptionObject || {};
   return (root, result) => {
     const validOptions = stylelint.utils.validateOptions(
@@ -74,12 +73,12 @@ module.exports = stylelint.createPlugin(ruleName, (primaryOption, secondaryOptio
 
     root.walkDecls((decl) => {
       if (!decl.value || ignoreList.includes(decl.prop)) return;
-      const values = postcss.list.space(decl.value);
+      const values = list.space(decl.value);
       if (!values?.length) return;
       values.forEach((value) => handleValue(decl, value));
     });
   };
 });
 
-module.exports.ruleName = ruleName;
-module.exports.messages = messages;
+export { ruleName, messages };
+export default plugin;

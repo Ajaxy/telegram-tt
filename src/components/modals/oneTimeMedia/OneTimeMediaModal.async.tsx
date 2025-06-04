@@ -11,7 +11,6 @@ const OneTimeMediaModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const OneTimeMediaModal = useModuleLoader(Bundles.Extra, 'OneTimeMediaModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return OneTimeMediaModal ? <OneTimeMediaModal {...props} /> : undefined;
 };
 

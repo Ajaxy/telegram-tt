@@ -5,10 +5,11 @@ import { requestMeasure } from '../lib/fasterdom/fasterdom';
 interface AnimationInstance {
   isCancelled: boolean;
 }
+type TickFunction = () => boolean | undefined;
 
 let currentInstance: AnimationInstance | undefined;
 
-export function animateSingle(tick: Function, schedulerFn: Scheduler, instance?: AnimationInstance) {
+export function animateSingle(tick: TickFunction, schedulerFn: Scheduler, instance?: AnimationInstance) {
   if (!instance) {
     if (currentInstance && !currentInstance.isCancelled) {
       currentInstance.isCancelled = true;
@@ -18,7 +19,7 @@ export function animateSingle(tick: Function, schedulerFn: Scheduler, instance?:
     currentInstance = instance;
   }
 
-  if (!instance!.isCancelled && tick()) {
+  if (!instance.isCancelled && tick()) {
     schedulerFn(() => {
       animateSingle(tick, schedulerFn, instance);
     });
@@ -32,7 +33,7 @@ export function cancelSingleAnimation() {
   animateSingle(dumbCb, dumbScheduler);
 }
 
-export function animate(tick: Function, schedulerFn: Scheduler) {
+export function animate(tick: TickFunction, schedulerFn: Scheduler) {
   schedulerFn(() => {
     if (tick()) {
       animate(tick, schedulerFn);
@@ -40,7 +41,7 @@ export function animate(tick: Function, schedulerFn: Scheduler) {
   });
 }
 
-export function animateInstantly(tick: Function, schedulerFn: Scheduler) {
+export function animateInstantly(tick: TickFunction, schedulerFn: Scheduler) {
   if (tick()) {
     schedulerFn(() => {
       animateInstantly(tick, schedulerFn);

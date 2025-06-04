@@ -1,4 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
+import type { ElementRef, FC } from '../../lib/teact/teact';
 import React, { memo, useMemo, useRef } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
@@ -28,7 +28,7 @@ import AnimatedSticker from './AnimatedSticker';
 import styles from './StickerView.module.scss';
 
 type OwnProps = {
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: ElementRef<HTMLDivElement>;
   sticker: ApiSticker;
   thumbClassName?: string;
   fullMediaHash?: string;
@@ -47,7 +47,7 @@ type OwnProps = {
   noPlay?: boolean;
   noVideoOnMobile?: boolean;
   withSharedAnimation?: boolean;
-  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
+  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
   withTranslucentThumb?: boolean; // With shared canvas thumbs are opaque by default to provide better transition effect
   onVideoEnded?: AnyToVoidFunction;
   onAnimatedStickerLoop?: AnyToVoidFunction;
@@ -169,7 +169,7 @@ const StickerView: FC<OwnProps> = ({
       />
       {shouldRenderFullMedia && (isLottie ? (
         <AnimatedSticker
-          ref={fullMediaRef as React.RefObject<HTMLDivElement>}
+          ref={fullMediaRef as ElementRef<HTMLDivElement>}
           key={renderId}
           renderId={renderId}
           size={size}
@@ -193,7 +193,7 @@ const StickerView: FC<OwnProps> = ({
         />
       ) : isVideo ? (
         <OptimizedVideo
-          ref={fullMediaRef as React.RefObject<HTMLVideoElement>}
+          ref={fullMediaRef as ElementRef<HTMLVideoElement>}
           canPlay={shouldPlay}
           className={buildClassName(styles.media, fullMediaClassName, 'sticker-media')}
           src={fullMediaData}
@@ -209,7 +209,7 @@ const StickerView: FC<OwnProps> = ({
         />
       ) : (
         <img
-          ref={fullMediaRef as React.RefObject<HTMLImageElement>}
+          ref={fullMediaRef as ElementRef<HTMLImageElement>}
           className={buildClassName(styles.media, fullMediaClassName, 'sticker-media')}
           src={fullMediaData}
           alt={emoji}

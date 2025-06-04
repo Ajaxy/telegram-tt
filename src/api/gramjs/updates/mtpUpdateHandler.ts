@@ -217,7 +217,6 @@ export function updater(update: Update) {
           peerId: message.chatId,
         });
       } else if (action instanceof GramJs.MessageActionChatDeleteUser) {
-        // eslint-disable-next-line no-underscore-dangle
         if (update._entities && update._entities.some((e): e is GramJs.User => (
           e instanceof GramJs.User && Boolean(e.self) && e.id === action.userId
         ))) {
@@ -231,7 +230,6 @@ export function updater(update: Update) {
           });
         }
       } else if (action instanceof GramJs.MessageActionChatAddUser) {
-        // eslint-disable-next-line no-underscore-dangle
         if (update._entities && update._entities.some((e): e is GramJs.User => (
           e instanceof GramJs.User && Boolean(e.self) && action.users.includes(e.id)
         ))) {
@@ -263,13 +261,13 @@ export function updater(update: Update) {
 
         sendApiUpdate({
           '@type': 'updateTopic',
-          chatId: getApiChatIdFromMtpPeer(update.message.peerId!),
+          chatId: getApiChatIdFromMtpPeer(update.message.peerId),
           topicId,
         });
       } else if (action instanceof GramJs.MessageActionTopicCreate) {
         sendApiUpdate({
           '@type': 'updateTopics',
-          chatId: getApiChatIdFromMtpPeer(update.message.peerId!),
+          chatId: getApiChatIdFromMtpPeer(update.message.peerId),
         });
       }
     }
@@ -659,7 +657,6 @@ export function updater(update: Update) {
       typingStatus: buildChatTypingStatus(update),
     });
   } else if (update instanceof GramJs.UpdateChannel) {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { _entities } = update;
     if (!_entities) {
       return;

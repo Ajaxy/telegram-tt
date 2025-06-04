@@ -38,13 +38,13 @@ export const IS_FIREFOX = navigator.userAgent.toLowerCase().includes('firefox')
   || navigator.userAgent.toLowerCase().includes('icecat');
 export const IS_ELECTRON = Boolean(window.electron);
 
-export enum MouseButton {
-  Main = 0,
-  Auxiliary = 1,
-  Secondary = 2,
-  Fourth = 3,
-  Fifth = 4,
-}
+export const MouseButton = {
+  Main: 0,
+  Auxiliary: 1,
+  Secondary: 2,
+  Fourth: 3,
+  Fifth: 4,
+};
 
 export const IS_PWA = (
   window.matchMedia('(display-mode: standalone)').matches

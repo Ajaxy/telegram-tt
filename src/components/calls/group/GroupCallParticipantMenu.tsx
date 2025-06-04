@@ -1,4 +1,4 @@
-import type { FC } from '../../../lib/teact/teact';
+import type { ElementRef, FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -31,7 +31,7 @@ type OwnProps =
     onCloseAnimationEnd: VoidFunction;
     onClose: VoidFunction;
     isDropdownOpen: boolean;
-    menuRef?: React.RefObject<HTMLDivElement>;
+    menuRef?: ElementRef<HTMLDivElement>;
   }
   & MenuPositionOptions;
 
@@ -172,7 +172,7 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
         onClose={onClose}
         onCloseAnimationEnd={onCloseAnimationEnd}
         className="participant-menu with-menu-transitions"
-        // eslint-disable-next-line react/jsx-props-no-spreading
+
         {...menuPositionOptions}
       >
         {!isSelf && !shouldRaiseHand && (
@@ -199,7 +199,10 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
                   playSegment={speakerIconPlaySegment}
                   size={SPEAKER_ICON_SIZE}
                 />
-                <span>{localVolume}%</span>
+                <span>
+                  {localVolume}
+                  %
+                </span>
               </div>
             </div>
           </div>

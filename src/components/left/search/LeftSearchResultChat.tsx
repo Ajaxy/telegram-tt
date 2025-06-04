@@ -5,11 +5,11 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiChat, ApiUser } from '../../../api/types';
 import { StoryViewerOrigin } from '../../../types';
 
-import { isUserId } from '../../../global/helpers';
 import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
   selectChat, selectIsChatPinned, selectNotifyDefaults, selectNotifyException, selectUser,
 } from '../../../global/selectors';
+import { isUserId } from '../../../util/entities/ids';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 
 import useChatContextActions from '../../../hooks/useChatContextActions';

@@ -35,8 +35,7 @@ type OwnProps = {
 const BusinessHours = ({
   businessHours,
 }: OwnProps) => {
-  // eslint-disable-next-line no-null/no-null
-  const transitionRef = useRef<HTMLDivElement>(null);
+  const transitionRef = useRef<HTMLDivElement>();
   const [isExpanded, expand, collapse] = useFlag(false);
   const [isMyTime, showInMyTime, showInLocalTime] = useFlag(false);
   const lang = useOldLang();

@@ -1,4 +1,4 @@
-import type { FC } from '../../../lib/teact/teact';
+import type { ElementRef, FC } from '../../../lib/teact/teact';
 import React, {
   memo, useRef,
 } from '../../../lib/teact/teact';
@@ -19,7 +19,7 @@ type OwnProps = {
   anchor: IAnchorPosition;
   sponsorInfo?: string;
   canReport?: boolean;
-  triggerRef: React.RefObject<HTMLElement>;
+  triggerRef: ElementRef<HTMLElement>;
   shouldSkipAbout?: boolean;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
@@ -43,8 +43,7 @@ const SponsoredContextMenu: FC<OwnProps> = ({
   onSponsorInfo,
   onSponsoredReport,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>();
   const lang = useOldLang();
 
   const getTriggerElement = useLastCallback(() => triggerRef.current);

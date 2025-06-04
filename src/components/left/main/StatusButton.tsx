@@ -31,8 +31,7 @@ const EMOJI_STATUS_SIZE = 24;
 const StatusButton: FC<StateProps> = ({ emojiStatus, collectibleStatuses, isAccountFrozen }) => {
   const { setEmojiStatus, loadCurrentUser, openFrozenAccountModal } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>();
   const [shouldShowEffect, markShouldShowEffect, unmarkShouldShowEffect] = useFlag(false);
   const [isEffectShown, showEffect, hideEffect] = useFlag(false);
   const [isStatusPickerOpen, openStatusPicker, closeStatusPicker] = useFlag(false);
@@ -50,7 +49,7 @@ const StatusButton: FC<StateProps> = ({ emojiStatus, collectibleStatuses, isAcco
 
   const handleEmojiStatusSet = useCallback((sticker: ApiSticker) => {
     const collectibleStatus = collectibleStatuses?.find(
-      ((status) => 'collectibleId' in status && status.documentId === sticker.id),
+      (status) => 'collectibleId' in status && status.documentId === sticker.id,
     ) as ApiEmojiStatusCollectible | undefined;
     markShouldShowEffect();
     setEmojiStatus({

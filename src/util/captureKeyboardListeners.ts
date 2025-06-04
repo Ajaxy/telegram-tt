@@ -74,7 +74,7 @@ function handleKeyDown(e: KeyboardEvent) {
   }
 
   for (let i = length - 1; i >= 0; i--) {
-    const handler = handlers[handlerName][i]!;
+    const handler = handlers[handlerName][i];
     if (handler(e) !== false) {
       e.stopPropagation();
       break;

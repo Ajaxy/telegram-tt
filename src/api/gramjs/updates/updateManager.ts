@@ -76,7 +76,6 @@ export function processUpdate(update: Update, isFromDifference?: boolean, should
 
   if (update instanceof GramJs.Updates || update instanceof GramJs.UpdatesCombined) {
     if (isFromDifference) {
-      // eslint-disable-next-line no-underscore-dangle
       (update as SeqUpdate)._isFromDifference = true;
     }
 
@@ -90,7 +89,6 @@ export function processUpdate(update: Update, isFromDifference?: boolean, should
       return;
     }
     if (isFromDifference) {
-      // eslint-disable-next-line no-underscore-dangle
       (update as PtsUpdate)._isFromDifference = true;
     }
     savePtsUpdate(update, shouldOnlySave);
@@ -145,7 +143,6 @@ function applyUpdate(updateObject: SeqUpdate | PtsUpdate) {
 
     updateObject.updates.forEach((update) => {
       if (entities) {
-        // eslint-disable-next-line no-underscore-dangle
         (update as any)._entities = entities;
       }
 
@@ -180,7 +177,6 @@ function popSeqQueue() {
   const localSeq = localDb.commonBoxState.seq;
   const seqStart = 'seqStart' in update ? update.seqStart : update.seq;
 
-  // eslint-disable-next-line no-underscore-dangle
   if (seqStart === 0 || (update._isFromDifference && seqStart >= localSeq + 1)) {
     applyUpdate(update);
   } else if (seqStart === localSeq + 1) {
@@ -210,13 +206,12 @@ function popPtsQueue(channelId: string) {
   if (localPts === undefined) {
     if (DEBUG) {
       // Uncomment to debug missing updates
-      // eslint-disable-next-line no-console
+
       // console.error('[UpdateManager] Got pts update without local state', channelId);
     }
     return;
   }
 
-  // eslint-disable-next-line no-underscore-dangle
   if (update._isFromDifference && pts >= localPts + ptsCount) {
     applyUpdate(update);
   } else if (pts === localPts + ptsCount) {

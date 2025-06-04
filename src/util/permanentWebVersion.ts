@@ -3,12 +3,12 @@ import { getActions } from '../global';
 import { PRODUCTION_HOSTNAME, WEB_VERSION_BASE } from '../config';
 import { clearWebsync } from './websync';
 
+type AvailableVersions = 'Z' | 'K';
+
 const SEARCH_ENGINE_REGEX = /(^|\.)(google|bing|duckduckgo|ya|yandex)\./i;
 // Handled by the legacy version. Cannot be updated
 const PERMANENT_VERSION_KEY = 'kz_version';
-const AVAILABLE_VERSIONS = ['Z', 'K'] as const;
-const CLIENT_VERSION = 'Z';
-type AvailableVersions = typeof AVAILABLE_VERSIONS[number];
+const CLIENT_VERSION: AvailableVersions = 'Z';
 
 function setPermanentWebVersion(version: AvailableVersions) {
   localStorage.setItem(PERMANENT_VERSION_KEY, JSON.stringify(version));

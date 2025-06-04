@@ -1,4 +1,4 @@
-import type { RefObject } from '../lib/teact/teact';
+import type { ElementRef } from '../lib/teact/teact';
 import { useLayoutEffect, useRef, useSignal } from '../lib/teact/teact';
 import { addExtraClass, toggleExtraClass } from '../lib/teact/teact-dom';
 
@@ -16,7 +16,7 @@ const CLOSE_DURATION = 350;
 
 type BaseHookParams<RefType extends HTMLElement> = {
   isOpen: boolean | undefined;
-  ref?: RefObject<RefType | null>;
+  ref?: ElementRef<RefType>;
   noMountTransition?: boolean;
   noOpenTransition?: boolean;
   noCloseTransition?: boolean;
@@ -36,7 +36,7 @@ type HookParamsWithShouldRender<RefType extends HTMLElement> = BaseHookParams<Re
 };
 
 type HookResult<RefType extends HTMLElement> = {
-  ref: RefObject<RefType | null>;
+  ref: ElementRef<RefType>;
   getIsClosing: Signal<boolean>;
 };
 
@@ -71,8 +71,7 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
     onCloseAnimationEnd,
   } = params;
 
-  // eslint-disable-next-line no-null/no-null
-  const localRef = useRef<RefType>(null);
+  const localRef = useRef<RefType>();
   const ref = params.ref || localRef;
   const closingTimeoutRef = useRef<number>();
   const [getState, setState] = useSignal<State | undefined>();

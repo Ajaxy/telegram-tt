@@ -24,8 +24,7 @@ const Spoiler = ({
   children,
   containerId,
 }: OwnProps) => {
-  // eslint-disable-next-line no-null/no-null
-  const contentRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>();
 
   const [isRevealed, revealSpoiler] = useFlag();
 

@@ -29,7 +29,7 @@ export function initDeeplink() {
   }
 
   app.on('will-finish-launching', () => {
-    app.on('open-url', (event: Event, url: string) => {
+    app.on('open-url', (event: Electron.Event, url: string) => {
       event.preventDefault();
       deeplinkUrl = url;
       processDeeplink();

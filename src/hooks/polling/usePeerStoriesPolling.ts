@@ -3,8 +3,9 @@ import { getActions, getGlobal } from '../../global';
 
 import type { ApiChat, ApiUser } from '../../api/types';
 
-import { isChatChannel, isUserBot, isUserId } from '../../global/helpers';
+import { isChatChannel, isUserBot } from '../../global/helpers';
 import { selectPeer, selectUserStatus } from '../../global/selectors';
+import { isUserId } from '../../util/entities/ids';
 import { throttle } from '../../util/schedulers';
 
 const POLLING_INTERVAL = 60 * 60 * 1000;

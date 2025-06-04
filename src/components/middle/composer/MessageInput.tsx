@@ -1,5 +1,5 @@
-import type { ChangeEvent, RefObject } from 'react';
-import type { FC, TeactNode } from '../../../lib/teact/teact';
+import type { ChangeEvent } from 'react';
+import type { ElementRef, FC, TeactNode } from '../../../lib/teact/teact';
 import React, {
   getIsHeavyAnimating,
   memo, useEffect, useLayoutEffect,
@@ -50,7 +50,7 @@ const SCROLLER_CLASS = 'input-scroller';
 const INPUT_WRAPPER_CLASS = 'message-input-wrapper';
 
 type OwnProps = {
-  ref?: RefObject<HTMLDivElement>;
+  ref?: ElementRef<HTMLDivElement>;
   id: string;
   chatId: string;
   threadId: ThreadId;
@@ -154,24 +154,17 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     openPremiumModal,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  let inputRef = useRef<HTMLDivElement>(null);
+  let inputRef = useRef<HTMLDivElement>();
   if (ref) {
     inputRef = ref;
   }
 
-  // eslint-disable-next-line no-null/no-null
-  const selectionTimeoutRef = useRef<number>(null);
-  // eslint-disable-next-line no-null/no-null
-  const cloneRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const scrollerCloneRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const absoluteContainerRef = useRef<HTMLDivElement>(null);
+  const selectionTimeoutRef = useRef<number>();
+  const cloneRef = useRef<HTMLDivElement>();
+  const scrollerCloneRef = useRef<HTMLDivElement>();
+  const sharedCanvasRef = useRef<HTMLCanvasElement>();
+  const sharedCanvasHqRef = useRef<HTMLCanvasElement>();
+  const absoluteContainerRef = useRef<HTMLDivElement>();
 
   const oldLang = useOldLang();
   const isContextMenuOpenRef = useRef(false);
@@ -279,7 +272,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    focusEditableElement(inputRef.current!);
+    focusEditableElement(inputRef.current);
   });
 
   const handleCloseTextFormatter = useLastCallback(() => {
@@ -646,7 +639,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
         setSelectedRange={setSelectedRange}
         onClose={handleCloseTextFormatter}
       />
-      {forcedPlaceholder && <span className="forced-placeholder">{renderText(forcedPlaceholder!)}</span>}
+      {forcedPlaceholder && <span className="forced-placeholder">{renderText(forcedPlaceholder)}</span>}
     </div>
   );
 };

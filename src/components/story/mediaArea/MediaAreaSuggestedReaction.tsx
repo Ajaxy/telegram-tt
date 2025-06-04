@@ -5,9 +5,10 @@ import { getActions } from '../../../global';
 
 import type { ApiMediaAreaSuggestedReaction, ApiStory } from '../../../api/types';
 
-import { getStoryKey, isSameReaction, isUserId } from '../../../global/helpers';
+import { getStoryKey, isSameReaction } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
+import { isUserId } from '../../../util/entities/ids';
 import { REM } from '../../common/helpers/mediaDimensions';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
@@ -40,8 +41,7 @@ const MediaAreaSuggestedReaction = ({
 }: OwnProps) => {
   const { sendStoryReaction } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
   const [customEmojiSize, setCustomEmojiSize] = useState(1.5 * REM);
 
   const { peerId, id, views } = story;

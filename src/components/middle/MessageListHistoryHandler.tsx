@@ -34,9 +34,9 @@ const MessageListHistoryHandler: FC<StateProps> = ({ messageLists }) => {
     <div>
       {messageLists?.map((messageList, i) => (
         <MessageHistoryRecord
-          // eslint-disable-next-line react/no-array-index-key
+
           key={`${messageList.chatId}_${messageList.threadId}_${messageList.type}_${i}`}
-          // eslint-disable-next-line react/jsx-props-no-spreading
+
           {...messageList}
         />
       ))}

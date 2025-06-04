@@ -203,7 +203,6 @@ export function addUnreadCountersCallback(callback: (unreadCounters: typeof resu
 /* Global update handlers */
 
 function updateFolderManager(global: GlobalState) {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   let DEBUG_startedAt: number;
   if (DEBUG) {
     DEBUG_startedAt = performance.now();
@@ -672,7 +671,7 @@ function updateListsForChat(chatId: string, currentFolderIds: number[], newFolde
         prepared.chatIdsByFolderId[folderId] = new Set();
       }
 
-      prepared.chatIdsByFolderId[folderId]!.add(chatId);
+      prepared.chatIdsByFolderId[folderId].add(chatId);
 
       if (currentFolderOrderedIds) {
         currentFolderOrderedIds.push(chatId);

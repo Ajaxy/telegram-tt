@@ -43,8 +43,7 @@ const ProgressSpinner: FC<{
   withColor,
   onClick,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>();
   const width = SIZES[size];
   const progressRef = useStateRef(progress);
 

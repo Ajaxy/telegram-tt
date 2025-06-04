@@ -28,7 +28,6 @@ type StateProps = {
 };
 
 export default function withSelectControl(WrappedComponent: FC) {
-  // eslint-disable-next-line @typescript-eslint/comma-dangle
   const ComponentWithSelectControl = <T,>(props: OwnProps<T> & StateProps) => {
     const {
       isInSelectMode,
@@ -71,7 +70,7 @@ export default function withSelectControl(WrappedComponent: FC) {
             )}
           </div>
         )}
-        {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+        { }
         <WrappedComponent {...newProps} />
       </div>
     );

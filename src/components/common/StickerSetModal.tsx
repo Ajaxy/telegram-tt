@@ -84,10 +84,8 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     showNotification,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
+  const sharedCanvasRef = useRef<HTMLCanvasElement>();
 
   const lang = useOldLang();
 
@@ -269,7 +267,7 @@ export default memo(withGlobal<OwnProps>(
     const topic = chatId && threadId ? selectTopic(global, chatId, threadId) : undefined;
     const canSendStickers = Boolean(
       chat && threadId && getCanPostInChat(chat, topic, isMessageThread, chatFullInfo)
-        && sendOptions?.canSendStickers,
+      && sendOptions?.canSendStickers,
     );
     const isSavedMessages = Boolean(chatId) && selectIsChatWithSelf(global, chatId);
 

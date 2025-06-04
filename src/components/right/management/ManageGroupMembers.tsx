@@ -87,10 +87,8 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
     toggleParticipantsHidden, setNewChatMembersDialogState, toggleManagement,
   } = getActions();
   const lang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLInputElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>();
+  const containerRef = useRef<HTMLDivElement>();
 
   const [deletingUserId, setDeletingUserId] = useState<string | undefined>();
 
@@ -234,7 +232,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
                 <ListItem
                   key={id}
                   className="chat-item-clickable scroll-item"
-                  // eslint-disable-next-line react/jsx-no-bind
+
                   onClick={() => handleMemberClick(id)}
                   contextActions={getMemberContextAction(id)}
                   withPortalForMenu
@@ -286,11 +284,11 @@ export default memo(withGlobal<OwnProps>(
     const canDeleteMembers = chat && (chat.isCreator || getHasAdminRight(chat, 'banUsers'));
 
     const canHideParticipants = canDeleteMembers && !isChatBasicGroup(chat) && chat.membersCount !== undefined
-    && hiddenMembersMinCount !== undefined && chat.membersCount >= hiddenMembersMinCount;
+      && hiddenMembersMinCount !== undefined && chat.membersCount >= hiddenMembersMinCount;
 
     const canAddMembers = chat && ((getHasAdminRight(chat, 'inviteUsers')
-        || (!isChannel && !isUserRightBanned(chat, 'inviteUsers')))
-      || chat.isCreator
+      || (!isChannel && !isUserRightBanned(chat, 'inviteUsers')))
+    || chat.isCreator
     );
 
     const {

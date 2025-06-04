@@ -44,7 +44,7 @@ function flushUpdates(throttleId: number) {
     return;
   }
 
-  const currentUpdates = pendingUpdates!;
+  const currentUpdates = pendingUpdates;
   pendingUpdates = undefined;
   currentUpdates.forEach(onUpdate);
 }

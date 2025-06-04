@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   setupFilesAfterEnv: ['./tests/init.js'],
   moduleNameMapper: {
     '\\.(css|scss|wasm|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|tgs)$':
@@ -16,7 +16,7 @@ module.exports = {
     '\\.txt$': '@glen/jest-raw-loader',
   },
   globals: {
-    APP_REVISION: "jest-test",
-    APP_VERSION: "0.0.1",
+    APP_REVISION: 'jest-test',
+    APP_VERSION: '0.0.1',
   },
 };

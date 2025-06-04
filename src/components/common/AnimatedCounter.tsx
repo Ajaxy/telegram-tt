@@ -1,4 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
+import type { ElementRef, FC } from '../../lib/teact/teact';
 import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
@@ -16,7 +16,7 @@ type OwnProps = {
   text: string;
   className?: string;
   isDisabled?: boolean;
-  ref?: React.RefObject<HTMLSpanElement>;
+  ref?: ElementRef<HTMLSpanElement>;
 };
 
 const ANIMATION_TIME = 200;

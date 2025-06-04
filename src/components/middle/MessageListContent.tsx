@@ -1,5 +1,4 @@
-import type { RefObject } from 'react';
-import type { FC } from '../../lib/teact/teact';
+import type { ElementRef, FC } from '../../lib/teact/teact';
 import React, { getIsHeavyAnimating, memo } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
@@ -54,7 +53,7 @@ interface OwnProps {
   isEmptyThread?: boolean;
   isComments?: boolean;
   noAvatars: boolean;
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: ElementRef<HTMLDivElement>;
   anchorIdRef: { current: string | undefined };
   memoUnreadDividerBeforeIdRef: { current: number | undefined };
   memoFirstUnreadIdRef: { current: number | undefined };
@@ -154,20 +153,21 @@ const MessageListContent: FC<OwnProps> = ({
           className={buildClassName('local-action-message')}
           key={`paid-messages-action-${message.id}`}
         >
-          <span>{
-            message.isOutgoing
-              ? lang('ActionPaidOneMessageOutgoing', {
-                amount: formatStarsAsText(lang, amount),
-              })
-              : (() => {
-                const sender = selectSender(getGlobal(), message);
-                const userTitle = sender ? getPeerTitle(lang, sender) : '';
-                return lang('ActionPaidOneMessageIncoming', {
-                  user: userTitle,
+          <span>
+            {
+              message.isOutgoing
+                ? lang('ActionPaidOneMessageOutgoing', {
                   amount: formatStarsAsText(lang, amount),
-                });
-              })()
-          }
+                })
+                : (() => {
+                  const sender = selectSender(getGlobal(), message);
+                  const userTitle = sender ? getPeerTitle(lang, sender) : '';
+                  return lang('ActionPaidOneMessageIncoming', {
+                    user: userTitle,
+                    amount: formatStarsAsText(lang, amount),
+                  });
+                })()
+            }
           </span>
         </div>
       );
@@ -198,7 +198,7 @@ const MessageListContent: FC<OwnProps> = ({
         && isActionMessage(senderGroup[0])
         && senderGroup[0].content.action?.type !== 'phoneCall'
       ) {
-        const message = senderGroup[0]!;
+        const message = senderGroup[0];
         const isLastInList = (
           senderGroupIndex === senderGroupsArray.length - 1
           && dateGroupIndex === dateGroupsArray.length - 1
@@ -292,9 +292,11 @@ const MessageListContent: FC<OwnProps> = ({
             getIsMessageListReady={getIsReady}
           />,
           message.id === threadId && (
+            // eslint-disable-next-line react-x/no-duplicate-key
             <div className="local-action-message" key="discussion-started">
-              <span>{oldLang(isEmptyThread
-                ? (isComments ? 'NoComments' : 'NoReplies') : 'DiscussionStarted')}
+              <span>
+                {oldLang(isEmptyThread
+                  ? (isComments ? 'NoComments' : 'NoReplies') : 'DiscussionStarted')}
               </span>
             </div>
           ),
@@ -345,7 +347,7 @@ const MessageListContent: FC<OwnProps> = ({
     return (
       <div
         className={buildClassName('message-date-group', !(nameChangeDate || photoChangeDate)
-            && dateGroupIndex === 0 && 'first-message-date-group')}
+        && dateGroupIndex === 0 && 'first-message-date-group')}
         key={dateGroup.datetime}
         onMouseDown={preventMessageInputBlur}
         teactFastList

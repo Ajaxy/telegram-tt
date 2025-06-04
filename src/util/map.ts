@@ -70,6 +70,5 @@ export function getVenueColor(type?: string) {
 
 function stringToNumber(str: string) {
   return str.split('').reduce((prevHash, currVal) => (
-    // eslint-disable-next-line no-bitwise
     (((prevHash << 5) - prevHash) + currVal.charCodeAt(0)) | 0), 0);
 }

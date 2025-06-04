@@ -80,18 +80,13 @@ const GroupCall: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const lang = useOldLang();
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
-  // eslint-disable-next-line no-null/no-null
-  const primaryVideoContainerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const secondaryVideoContainerRef = useRef<HTMLDivElement>(null);
+  const primaryVideoContainerRef = useRef<HTMLDivElement>();
+  const secondaryVideoContainerRef = useRef<HTMLDivElement>();
 
-  // eslint-disable-next-line no-null/no-null
-  const panelScrollTriggerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelScrollTriggerRef = useRef<HTMLDivElement>();
+  const panelRef = useRef<HTMLDivElement>();
 
   const [isLeaving, setIsLeaving] = useState(false);
   const isOpen = !isCallPanelVisible && !isLeaving;
@@ -560,7 +555,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { groupCallId }): StateProps => {
     const {
       connectionState, title, participants, participantsCount, chatId,
-    } = selectGroupCall(global, groupCallId)! || {};
+    } = selectGroupCall(global, groupCallId) || {};
 
     const chat = chatId ? selectChat(global, chatId) : undefined;
 

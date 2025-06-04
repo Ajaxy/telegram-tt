@@ -63,8 +63,7 @@ const Notification: FC<OwnProps> = ({
   } = notification;
 
   const [isOpen, setIsOpen] = useState(true);
-  // eslint-disable-next-line no-null/no-null
-  const timerRef = useRef<number | undefined>(null);
+  const timerRef = useRef<number | undefined>();
   const { transitionClassNames } = useShowTransitionDeprecated(isOpen);
 
   const handleDismiss = useLastCallback(() => {
@@ -202,12 +201,12 @@ const Notification: FC<OwnProps> = ({
       >
         {renderedIcon}
         <div className="content">
-          {renderedTitle && (
+          {Boolean(renderedTitle) && (
             <div className="notification-title">{renderedTitle}</div>
           )}
           {renderedMessage}
         </div>
-        {renderedActionText && (
+        {Boolean(renderedActionText) && (
           <Button
             color="translucent-white"
             onClick={handleActionClick}

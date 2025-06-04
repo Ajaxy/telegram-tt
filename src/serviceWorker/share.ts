@@ -31,7 +31,7 @@ export function handleClientMessage(e: ExtendableMessageEvent) {
   if (!source) return;
 
   if (data.type === 'clientReady') {
-    const { id } = (source as Client);
+    const { id } = source as Client;
     const deferred = READY_CLIENT_DEFERREDS.get(id);
     if (deferred) {
       deferred.resolve();

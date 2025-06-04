@@ -128,7 +128,7 @@ const App: FC<StateProps> = ({
 
   // return <Test />;
 
-  let activeKey: number;
+  let activeKey: AppScreens;
   let page: UiLoaderPage | undefined;
 
   if (isInactive) {
@@ -200,7 +200,6 @@ const App: FC<StateProps> = ({
 
   const prevActiveKey = usePreviousDeprecated(activeKey);
 
-  // eslint-disable-next-line consistent-return
   function renderContent() {
     switch (activeKey) {
       case AppScreens.auth:

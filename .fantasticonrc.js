@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   inputDir: './src/assets/font-icons',
   outputDir: './src/styles',
   name: 'icons',
@@ -7,7 +7,7 @@ module.exports = {
   tag: '',
   // Use a custom Handlebars template
   templates: {
-    scss: './dev/icons.scss.hbs'
+    scss: './dev/icons.scss.hbs',
   },
   formatOptions: {
     ts: {

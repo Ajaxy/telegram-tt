@@ -68,7 +68,7 @@ export default async function buildAttachment(
       const { videoWidth: width, videoHeight: height, duration } = await preloadVideo(blobUrl);
       shouldSendAsFile = !validateAspectRatio(width, height);
       if (!shouldSendAsFile) {
-        quick = { width: width!, height: height!, duration: duration! };
+        quick = { width: width, height: height, duration: duration };
       }
     } catch (err) {
       shouldSendAsFile = true;

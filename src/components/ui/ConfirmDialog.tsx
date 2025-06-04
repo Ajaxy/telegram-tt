@@ -50,8 +50,7 @@ const ConfirmDialog: FC<OwnProps> = ({
 }) => {
   const lang = useOldLang();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const handleSelectWithEnter = useCallback((index: number) => {
     if (index === -1) confirmHandler();

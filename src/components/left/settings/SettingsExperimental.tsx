@@ -46,8 +46,7 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
 }) => {
   const { requestConfetti, setSharedSettingOption, requestWave } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const snapButtonRef = useRef<HTMLDivElement>(null);
+  const snapButtonRef = useRef<HTMLDivElement>();
   const [isSnapButtonAnimating, setIsSnapButtonAnimating] = useState(false);
 
   const lang = useOldLang();
@@ -132,7 +131,7 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
         <Checkbox
           label="Allow HTTP Transport"
           checked={Boolean(shouldAllowHttpTransport)}
-          // eslint-disable-next-line react/jsx-no-bind
+
           onCheck={() => setSharedSettingOption({ shouldAllowHttpTransport: !shouldAllowHttpTransport })}
         />
 
@@ -140,21 +139,21 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
           label="Force HTTP Transport"
           disabled={!shouldAllowHttpTransport}
           checked={Boolean(shouldForceHttpTransport)}
-          // eslint-disable-next-line react/jsx-no-bind
+
           onCheck={() => setSharedSettingOption({ shouldForceHttpTransport: !shouldForceHttpTransport })}
         />
 
         <Checkbox
           label={lang('DebugMenuEnableLogs')}
           checked={Boolean(shouldCollectDebugLogs)}
-          // eslint-disable-next-line react/jsx-no-bind
+
           onCheck={() => setSharedSettingOption({ shouldCollectDebugLogs: !shouldCollectDebugLogs })}
         />
 
         <Checkbox
           label="Enable exported senders debug"
           checked={Boolean(shouldDebugExportedSenders)}
-          // eslint-disable-next-line react/jsx-no-bind
+
           onCheck={() => setSharedSettingOption({ shouldDebugExportedSenders: !shouldDebugExportedSenders })}
         />
 

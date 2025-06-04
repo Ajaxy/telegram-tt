@@ -1,8 +1,7 @@
 import type { ChangeEvent } from 'react';
-import type { FC } from '../../lib/teact/teact';
 import React, { useRef, useState } from '../../lib/teact/teact';
 
-const TestOrdered: FC<{}> = () => {
+const TestOrdered = () => {
   const [items, setItems] = useState<Record<string, number>>({ a: 1, b: 5, c: 10 });
   const [value, setValue] = useState<number | undefined>();
   const [isDesc, setIsDesc] = useState(false);
@@ -54,7 +53,9 @@ const TestOrdered: FC<{}> = () => {
               type="checkbox"
               checked={isDesc}
               onChange={handleDescChange}
-            /> — DESC
+            />
+            {' '}
+            — DESC
           </label>
         </p>
         <p>
@@ -72,9 +73,9 @@ const TestOrdered: FC<{}> = () => {
             teactOrderKey={itemValue}
             key={key}
             value={itemValue}
-            // eslint-disable-next-line react/jsx-no-bind
+
             onChange={(newValue) => updateData(key, Number(newValue))}
-            // eslint-disable-next-line react/jsx-no-bind
+
             onDelete={() => deleteData(key)}
           />
         ))}
@@ -99,7 +100,6 @@ function MyComponent({
   };
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <li>
       <input type="text" value={value} size={3} onChange={handleChange} />
       <input type="button" value="x" onClick={onDelete} />

@@ -413,7 +413,7 @@ async function sendSmartGlocalCredentials<T extends GlobalState>(
   }
 
   if (tokenizeUrl?.startsWith('https://')
-      && tokenizeUrl.endsWith('.smart-glocal.com/cds/v1/tokenize/card')) {
+    && tokenizeUrl.endsWith('.smart-glocal.com/cds/v1/tokenize/card')) {
     url = tokenizeUrl;
   }
 
@@ -1080,7 +1080,6 @@ async function payInputStarInvoice<T extends GlobalState>(
   global: T, inputInvoice: ApiInputInvoice, price: number,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   const actions = getActions();
   const balance = global.stars?.balance;
 
@@ -1199,7 +1198,6 @@ addActionHandler('processStarGiftWithdrawal', async (global, actions, payload): 
 
 function handlePaymentFormError(error: string, tabId: number) {
   if (error === 'SLUG_INVALID') {
-    // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
     getActions().showNotification({
       message: {
         key: 'PaymentInvoiceNotFound',
@@ -1209,6 +1207,5 @@ function handlePaymentFormError(error: string, tabId: number) {
     return;
   }
 
-  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   getActions().showDialog({ data: { message: error, hasErrorKey: true }, tabId });
 }

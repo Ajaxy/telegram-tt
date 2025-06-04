@@ -1,9 +1,9 @@
 import type { Point } from 'electron';
 import { app, BrowserWindow } from 'electron';
-import Store from 'electron-store';
+import { Conf } from 'electron-conf/main';
 import fs from 'fs';
 
-import type { TrafficLightPosition } from '../types/electron';
+import type { WindowButtonsPosition } from '../types/electron';
 
 import { BASE_URL, PRODUCTION_URL } from '../config';
 
@@ -17,7 +17,7 @@ export const IS_FIRST_RUN = !fs.existsSync(`${app.getPath('userData')}/config.js
 export const IS_PRODUCTION = process.env.APP_ENV === 'production';
 
 export const windows = new Set<BrowserWindow>();
-export const store: Store = new Store();
+export const store = new Conf();
 
 export function getCurrentWindow(): BrowserWindow | null {
   return BrowserWindow.getFocusedWindow();
@@ -79,7 +79,7 @@ export function checkIsWebContentsUrlAllowed(url: string): boolean {
   return ALLOWED_URL_ORIGINS.includes(parsedUrl.origin);
 }
 
-export const TRAFFIC_LIGHT_POSITION: Record<TrafficLightPosition, Point> = {
+export const WINDOW_BUTTONS_POSITION: Record<WindowButtonsPosition, Point> = {
   standard: { x: 10, y: 20 },
   lowered: { x: 10, y: 52 },
 };

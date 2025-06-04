@@ -287,7 +287,7 @@
       font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
       padding: 0.75rem 0.5rem;
       border-radius: var(--border-radius-messages);
-      word-break: break-word;
+      overflow-wrap: anywhere;
       text-align: center;
       user-select: none;
       position: relative;

@@ -45,14 +45,14 @@ const SettingsPasscodeEnabled: FC<OwnProps> = ({
       <div className="settings-item">
         <ListItem
           icon="edit"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PasscodeChangePasscodeCurrent })}
         >
           {lang('Passcode.Change')}
         </ListItem>
         <ListItem
           icon="password-off"
-          // eslint-disable-next-line react/jsx-no-bind
+
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PasscodeTurnOff })}
         >
           {lang('Passcode.TurnOff')}

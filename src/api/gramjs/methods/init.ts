@@ -16,6 +16,7 @@ export function initApi(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs, ini
 
   if (initialLocalDb) updateFullLocalDb(initialLocalDb);
 
+  // IMPORTANT: Do not await this, or login will not work
   initClient(initialArgs);
 }
 

@@ -164,8 +164,7 @@ const Settings: FC<OwnProps> = ({
 }) => {
   const { closeShareChatFolderModal, openSettingsScreen } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   const [twoFaState, twoFaDispatch] = useTwoFaReducer();
   const [privacyPasscode, setPrivacyPasscode] = useState<string>('');

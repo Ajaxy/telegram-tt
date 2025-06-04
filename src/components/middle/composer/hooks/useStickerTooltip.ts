@@ -40,7 +40,7 @@ export default function useStickerTooltip(
     );
 
     return isSingleEmoji
-      ? (IS_EMOJI_SUPPORTED ? cleanHtml : cleanHtml.match(/alt="(.+)"/)?.[1]!)
+      ? (IS_EMOJI_SUPPORTED ? cleanHtml : cleanHtml.match(/alt="(.+)"/)?.[1])
       : undefined;
   }, [getHtml, isEnabled]);
 

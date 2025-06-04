@@ -1,17 +1,19 @@
 @use "sass:color";
 
 @function toRGB($color) {
-  @return color.red($color) + ", " + color.green($color) + ", " + color.blue($color);
+  @return color.channel($color, "red") + ", " + color.channel($color, "green") + ", " + color.channel($color, "blue");
 }
 
 @function blend-normal($foreground, $background) {
-  $opacity: opacity($foreground);
-  $background-opacity: opacity($background);
+  $opacity: color.opacity($foreground);
+  $background-opacity: color.opacity($background);
 
   // calculate opacity
-  $bm-red: color.red($foreground) * $opacity + color.red($background) * $background-opacity * (1 - $opacity);
-  $bm-green: color.green($foreground) * $opacity + color.green($background) * $background-opacity * (1 - $opacity);
-  $bm-blue: color.blue($foreground) * $opacity + color.blue($background) * $background-opacity * (1 - $opacity);
+  /* stylelint-disable @stylistic/max-line-length */
+  $bm-red: color.channel($foreground, "red") * $opacity + color.channel($background, "red") * $background-opacity * (1 - $opacity);
+  $bm-green: color.channel($foreground, "green") * $opacity + color.channel($background, "green") * $background-opacity * (1 - $opacity);
+  $bm-blue: color.channel($foreground, "blue") * $opacity + color.channel($background, "blue") * $background-opacity * (1 - $opacity);
+  /* stylelint-enable @stylistic/max-line-length */
 
   @return rgb($bm-red, $bm-green, $bm-blue);
 }
@@ -227,20 +229,6 @@ $color-message-story-mention-to: #74bcff;
 
   --scrollbar-width: 0;
 
-  @media (min-width: 1276px) and (max-width: 1920px) {
-    --right-column-width: 25vw;
-  }
-
-  @media (min-width: 1921px) {
-    --messages-container-width: 50vw;
-  }
-
-  @media (max-width: 600px) {
-    --right-column-width: 100vw;
-    --symbol-menu-width: 100vw;
-    --symbol-menu-height: 17.6875rem;
-  }
-
   --z-overlay-effects: 10001;
   --z-modal-confirm: 10000;
   --z-portal-menu: 10000;
@@ -317,6 +305,20 @@ $color-message-story-mention-to: #74bcff;
   --font-weight-medium: 500;
 
   --middle-header-panes-height: 0px;
+
+  @media (min-width: 1276px) and (max-width: 1920px) {
+    --right-column-width: 25vw;
+  }
+
+  @media (min-width: 1921px) {
+    --messages-container-width: 50vw;
+  }
+
+  @media (max-width: 600px) {
+    --right-column-width: 100vw;
+    --symbol-menu-width: 100vw;
+    --symbol-menu-height: 17.6875rem;
+  }
 
   body.is-ios {
     --layer-transition: 650ms cubic-bezier(0.22, 1, 0.36, 1);

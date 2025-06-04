@@ -28,10 +28,8 @@ const MAX_LINES = 4;
 const FactCheck = ({ factCheck, isToggleDisabled }: OwnProps) => {
   const lang = useOldLang();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const cutoutRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
+  const cutoutRef = useRef<HTMLDivElement>();
   const {
     isCollapsed, isCollapsible, setIsCollapsed,
   } = useCollapsibleLines(ref, MAX_LINES, cutoutRef);

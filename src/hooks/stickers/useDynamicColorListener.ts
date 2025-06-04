@@ -1,3 +1,4 @@
+import type { ElementRef } from '../../lib/teact/teact';
 import { useMemo } from '../../lib/teact/teact';
 
 import { prepareHexColor } from '../../util/themeStyle';
@@ -7,7 +8,7 @@ const DEBOUNCE = 50; // ms
 
 // Style observer that returns hex color value of the property
 export default function useDynamicColorListener(
-  ref: React.RefObject<HTMLElement>,
+  ref: ElementRef<HTMLElement>,
   property = 'color',
   isDisabled?: boolean,
 ) {

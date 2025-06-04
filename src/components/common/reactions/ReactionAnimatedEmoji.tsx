@@ -74,8 +74,7 @@ const ReactionAnimatedEmoji = ({
 }: OwnProps & StateProps) => {
   const { stopActiveReaction } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>();
 
   const isCustom = reaction.type === 'custom';
 

@@ -11,7 +11,6 @@ const AttachBotInstallModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
   const AttachBotInstallModal = useModuleLoader(Bundles.Extra, 'AttachBotInstallModal', !modal);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
   return AttachBotInstallModal ? <AttachBotInstallModal {...props} /> : undefined;
 };
 
