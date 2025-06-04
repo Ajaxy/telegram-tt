@@ -3,11 +3,12 @@
 }
 
 .lock-icon {
-  font-size: 0.875rem;
   position: absolute;
-  left: 1.3125rem;
   top: 50%;
+  left: 1.3125rem;
   transform: translateY(-50%);
+
+  font-size: 0.875rem;
   color: var(--color-gray);
 }
 

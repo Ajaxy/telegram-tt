@@ -24,34 +24,41 @@
 
 .root {
   position: absolute;
+  z-index: 1;
   right: 6px;
   bottom: 0;
+
+  overflow: hidden;
+
   width: 20px;
   height: 20px;
-  border-radius: 50%;
-  background-color: #0ac630;
   border: 2px solid var(--color-background);
-  overflow: hidden;
-  z-index: 1;
+  border-radius: 50%;
+
+  background-color: #0ac630;
 }
 
 .indicator {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
 }
 
 .indicatorInner {
+  will-change: transform;
+
+  transform: translateZ(0);
+
   width: 2px;
   height: 6px;
-  background: var(--color-background);
-  border-radius: 1px;
   margin: 1px;
-  will-change: transform;
-  transform: translateZ(0);
+  border-radius: 1px;
+
+  background: var(--color-background);
 }
 
 .indicatorInner:nth-child(odd) {
@@ -63,8 +70,8 @@
 }
 
 .selected {
-  background-color: var(--color-white);
   border-color: var(--color-chat-active);
+  background-color: var(--color-white);
 
   .indicatorInner {
     background-color: var(--color-chat-active);

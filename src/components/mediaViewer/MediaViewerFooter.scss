@@ -1,30 +1,28 @@
 .MediaViewerFooter {
   position: absolute;
   bottom: 0;
-  padding: 1rem 0;
-  width: 100%;
-  transition: opacity 0.15s;
 
-  @media (max-height: 640px) {
-    padding: 0.5rem 0 0;
-  }
+  width: 100%;
+  padding: 1rem 0;
+
+  transition: opacity 0.15s;
 
   &.mobile {
     background: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0) 100%);
 
     &.is-for-video {
-      opacity: 0;
       pointer-events: none;
       padding-bottom: 5rem;
+      opacity: 0;
 
       .video-controls-visible &:not(.is-hidden) {
-        opacity: 1;
         pointer-events: auto;
+        opacity: 1;
       }
     }
     .media-viewer-footer-content {
-      opacity: 1;
       z-index: 1;
+      opacity: 1;
     }
     .media-text.multiline::before {
       display: none;
@@ -37,11 +35,15 @@
   }
 
   .media-viewer-footer-content {
+    cursor: var(--custom-cursor, pointer);
+
     position: relative;
+
     max-width: var(--messages-container-width);
     margin: auto;
-    cursor: var(--custom-cursor, pointer);
+
     opacity: 0.5;
+
     transition: opacity 0.15s;
 
     &:hover {
@@ -54,18 +56,16 @@
   }
 
   .media-text {
-    margin-bottom: 0;
     overflow: auto;
-    padding: 0 0.5rem;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.9375rem;
-    letter-spacing: 0.025rem;
-    max-height: 4.25rem;
 
-    @media (max-height: 640px) {
-      max-height: 2.75rem;
-    }
+    max-height: 4.25rem;
+    margin-bottom: 0;
+    padding: 0 0.5rem;
+
+    font-size: 0.9375rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    letter-spacing: 0.025rem;
 
     .emoji:not(.custom-emoji) {
       width: 0.9375rem;
@@ -76,15 +76,22 @@
     &.multiline {
       &::before {
         content: "";
+
         position: absolute;
-        left: -0.75rem;
-        right: -0.75rem;
-        top: -0.25rem;
-        bottom: -0.25rem;
-        background: rgba(0, 0, 0, 0.75);
-        border-radius: var(--border-radius-default);
         z-index: var(--z-below);
+        top: -0.25rem;
+        right: -0.75rem;
+        bottom: -0.25rem;
+        left: -0.75rem;
+
+        border-radius: var(--border-radius-default);
+
+        background: rgba(0, 0, 0, 0.75);
       }
+    }
+
+    @media (max-height: 640px) {
+      max-height: 2.75rem;
     }
   }
 
@@ -99,8 +106,12 @@
 
   .media-viewer-button {
     max-width: 20rem;
-    margin-top: 0.5rem;
     height: 2.8125rem;
+    margin-top: 0.5rem;
     border-radius: 0.6875rem;
+  }
+
+  @media (max-height: 640px) {
+    padding: 0.5rem 0 0;
   }
 }

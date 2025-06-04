@@ -5,8 +5,9 @@
 .header {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 0.5rem;
+  align-items: center;
+
   margin-bottom: 1rem;
 }
 
@@ -19,30 +20,33 @@
 }
 
 .headerSplitButton {
-  display: flex;
-  flex-direction: row;
   position: absolute;
   right: 0.375rem;
+  display: flex;
+  flex-direction: row;
 }
 
 .headerButton,
 .giftResalePriceContainer {
-  height: 1.75rem;
-  width: fit-content;
-  font-size: 1rem;
-  font-weight: var(--font-weight-medium);
-
-  outline: none !important;
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  color: white;
-  border-radius: 1rem;
-  background-color: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(25px);
   pointer-events: auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+  height: 1.75rem;
   padding: 0.25rem;
   padding-inline: 0.625rem;
+  border-radius: 1rem;
+
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  color: white;
+
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(25px);
+  outline: none !important;
 }
 
 .giftResalePriceContainer {
@@ -54,10 +58,13 @@
 }
 
 .headerButton {
-  position: relative;
   cursor: var(--custom-cursor, pointer);
-  flex-shrink: 0;
+
+  position: relative;
+
   overflow: hidden;
+  flex-shrink: 0;
+
   transition: background-color 0.15s;
 
   &:hover {
@@ -66,18 +73,18 @@
 }
 
 .left {
-  border-bottom-right-radius: 0;
   border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .right {
-  border-bottom-left-radius: 0;
   border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 .description {
-  text-align: center;
   color: var(--_color-description, var(--color-text));
+  text-align: center;
 }
 
 .footer {
@@ -98,15 +105,15 @@
 
 .giftValue {
   display: flex;
-  align-items: center;
   gap: 0.125rem;
+  align-items: center;
   line-height: 1;
 }
 
 .uniqueAttribute {
   display: flex;
-  align-items: center;
   gap: 0.25rem;
+  align-items: center;
 }
 
 /* stylelint-disable-next-line plugin/stylelint-group-selectors */
@@ -119,11 +126,13 @@
 }
 
 .modalHeader {
+  position: absolute;
   z-index: 2;
+
+  display: flex;
+
   width: 100%;
   padding: 0.375rem;
-  position: absolute;
-  display: flex;
 
   .modalCloseButton {
     margin-right: auto;
@@ -131,15 +140,14 @@
 }
 
 .ownerAddress {
+  cursor: pointer;
+  overflow: hidden;
   font-family: var(--font-family-monospace);
   font-size: 0.875rem;
-  cursor: pointer;
-
-  overflow: hidden;
 }
 
 .copyIcon {
+  pointer-events: none;
   margin-inline-start: 0.25rem;
   color: var(--color-primary);
-  pointer-events: none;
 }

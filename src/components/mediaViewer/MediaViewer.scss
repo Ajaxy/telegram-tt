@@ -1,29 +1,28 @@
 #MediaViewer {
   position: fixed;
+  z-index: var(--z-media-viewer);
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.9);
-  color: #fff;
-  z-index: var(--z-media-viewer);
 
   display: grid;
-  grid-template-columns: auto;
-  grid-template-rows: auto 1fr;
   grid-column-gap: 0;
   grid-row-gap: 0;
-  justify-items: stretch;
+  grid-template-columns: auto;
+  grid-template-rows: auto 1fr;
   align-items: center;
+  justify-items: stretch;
 
-  @media (max-width: 600px) {
-    background: rgba(0, 0, 0, 1);
-  }
+  width: 100vw;
+  height: 100%;
+
+  color: #fff;
+
+  background: rgba(0, 0, 0, 0.9);
 
   // Potential perf improvement
   &:not(.shown) {
-    display: block !important;
     transform: scale(0);
+    display: block !important;
   }
 
   body.ghost-animating & {
@@ -58,35 +57,31 @@
 
     .MediaViewerSlide {
       position: fixed;
+      z-index: 1;
       top: 0;
       left: 0;
+
       width: 100vw;
       height: 100vh;
       padding: 0;
-      z-index: 1;
     }
   }
 
   .media-viewer-head {
-    display: flex;
-    grid-area: 1 / 1 / 2 / -2;
     position: relative;
     z-index: var(--z-media-viewer-head);
+
+    display: flex;
+    grid-area: 1 / 1 / 2 / -2;
+
     min-width: 0;
-    background: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 100%);
     padding: 0.5rem max(1.25rem, env(safe-area-inset-left));
+
+    background: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 100%);
 
     & > .Transition {
       width: 100%;
       min-width: 0;
-    }
-
-    @media (max-width: 600px) {
-      padding: 0.5rem max(0.5rem, env(safe-area-inset-left));
-
-      .media-viewer-close {
-        margin-right: 1.5rem;
-      }
     }
 
     body.is-electron.is-macos & {
@@ -95,6 +90,14 @@
 
     body.is-electron.is-macos #Main:not(.is-fullscreen) & {
       padding-left: 5rem;
+    }
+
+    @media (max-width: 600px) {
+      padding: 0.5rem max(0.5rem, env(safe-area-inset-left));
+
+      .media-viewer-close {
+        margin-right: 1.5rem;
+      }
     }
   }
 
@@ -106,35 +109,38 @@
   & > .Transition,
   & > .pan-wrapper .Transition {
     position: relative;
-    justify-self: center;
-    text-align: center;
-    width: 100%;
-    height: 100%;
+
+    overflow: hidden;
     display: flex;
     align-items: center;
-    overflow: hidden;
+    justify-self: center;
+
+    width: 100%;
+    height: 100%;
+
+    text-align: center;
   }
 
   .navigation {
+    cursor: var(--custom-cursor, pointer);
+
     position: fixed;
+    z-index: 1;
     top: 4rem;
-    width: 10vw;
     bottom: 0;
-    border: none;
-    padding: 0;
+
+    width: 10vw;
     margin: 0;
+    padding: 0;
+    border: none;
+
     appearance: none;
+    opacity: 0;
     background: transparent no-repeat;
     background-size: 1.25rem;
-    opacity: 0;
-    transition: opacity 0.15s;
     outline: none;
-    cursor: var(--custom-cursor, pointer);
-    z-index: 1;
 
-    @media (max-width: 600px) {
-      width: 20vw;
-    }
+    transition: opacity 0.15s;
 
     &:hover,
     .is-touch-env & {
@@ -142,14 +148,13 @@
     }
 
     &.prev {
+      left: env(safe-area-inset-left);
       background-image: url("../../assets/media_navigation_previous.svg");
       background-position: 1.25rem calc(50% - 2rem);
 
-      left: env(safe-area-inset-left);
-
       &[dir="rtl"] {
-        left: auto;
         right: env(safe-area-inset-right);
+        left: auto;
         transform: scaleX(-1);
       }
     }
@@ -173,31 +178,44 @@
       background-position-y: center;
 
       @media (max-width: 600px) {
+        pointer-events: none;
         opacity: 0;
         transition: opacity 0.15s ease-in;
-        pointer-events: none;
 
         .video-controls-visible & {
-          opacity: 1;
           pointer-events: auto;
+          opacity: 1;
         }
       }
+    }
+
+    @media (max-width: 600px) {
+      width: 20vw;
     }
   }
 
   .is-protected {
-    user-select: none;
-    -webkit-touch-callout: none;
     pointer-events: none;
+    user-select: none;
+
+    -webkit-touch-callout: none;
+  }
+
+  @media (max-width: 600px) {
+    background: rgba(0, 0, 0, 1);
   }
 }
 
 .ghost {
+  will-change: transform, opacity;
+
   position: absolute;
   z-index: var(--z-media-viewer);
-  will-change: transform, opacity;
+
   overflow: hidden;
+
   border-radius: 0;
+
   transition: transform 0.2s ease, opacity 0.2s ease;
 
   &.transition-circle {
@@ -218,10 +236,12 @@
 
   img,
   video {
+    -webkit-user-select: none;
+    user-select: none;
+
     width: 100%;
     height: 100%;
-    user-select: none;
-    -webkit-user-select: none;
+
     object-fit: cover;
   }
 }

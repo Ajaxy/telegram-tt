@@ -1,9 +1,8 @@
 .root {
-  position: fixed;
-  inset: 0;
   pointer-events: none;
-
+  position: fixed;
   z-index: var(--z-overlay-effects);
+  inset: 0;
 }
 
 .wave {
@@ -12,12 +11,11 @@
   --wave-pos-left: 0%;
 
   position: absolute;
-
   top: var(--wave-pos-top);
   left: var(--wave-pos-left);
-  width: var(--wave-width);
-  aspect-ratio: 1 / 1;
 
+  aspect-ratio: 1 / 1;
+  width: var(--wave-width);
   border-radius: 50%;
 
   background-image:
@@ -27,8 +25,8 @@
       #FFFFFF06 60%,
       transparent 68%
     );
-
   backdrop-filter: url(#wave-filter);
+
   animation: waveGrow 1.5s ease-in;
 }
 

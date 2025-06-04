@@ -1,9 +1,9 @@
 .container {
   position: fixed;
-  left: 0;
   top: 0;
   right: 0;
   bottom: 0;
+  left: 0;
 
   display: flex;
   align-items: center;
@@ -11,14 +11,18 @@
 }
 
 .wrapper {
+  z-index: 2;
+
   display: inline-flex;
   flex-direction: column;
-  background: var(--color-background);
-  color: var(--color-text);
+
   max-width: 20rem;
   padding: 1.5rem 1rem 0;
   border-radius: var(--border-radius-default);
-  z-index: 2;
+
+  color: var(--color-text);
+
+  background: var(--color-background);
 
   &[dir="rtl"] {
     text-align: right;

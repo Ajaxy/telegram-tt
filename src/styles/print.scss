@@ -32,28 +32,30 @@
   .messages-layout,
   .Transition,
   .Transition > .Transition_slide {
-    height: auto !important;
+    position: static !important;
+    transform: none !important;
+
     overflow: visible !important;
     display: block !important;
-    position: static !important;
-    margin: 0 !important;
-    padding: 0 !important;
+
     width: 100% !important;
     max-width: 100% !important;
-    transform: none !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .messages-container {
-    max-width: 100rem !important;
     width: 100% !important;
+    max-width: 100rem !important;
   }
 
   .MessageList .sticky-date > span,
   .MessageList .local-action-message > span,
   .MessageList .ActionMessage > span,
   .MessageList .empty > span {
-    background: var(--color-background-own) !important;
     color: var(--color-text) !important;
+    background: var(--color-background-own) !important;
   }
 
   .hide-on-print {

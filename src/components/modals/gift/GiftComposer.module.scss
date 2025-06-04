@@ -1,11 +1,12 @@
 @use "../../../styles/mixins";
 
 .root {
-  height: 100%;
+  overflow-x: hidden;
+  overflow-y: scroll;
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
-  overflow-x: hidden;
+
+  height: 100%;
   padding-top: 3.5rem;
   padding-inline: 0.75rem;
 
@@ -13,11 +14,12 @@
 }
 
 .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
   padding: 0.5rem;
   padding-left: 4rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .spacer {
@@ -31,10 +33,10 @@
 }
 
 .balance-container {
-  margin-left: auto;
-  align-items: flex-end;
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
 }
 
 .balance-caption {
@@ -47,9 +49,9 @@
 
 .balance {
   display: flex;
+  align-items: center;
   font-size: 1rem;
   font-weight: var(--font-weight-medium);
-  align-items: center;
 }
 
 .optionsSection {
@@ -59,47 +61,44 @@
 }
 
 .checkboxTitle {
-  color: var(--color-text);
-  font-size: 1rem;
-  text-transform: initial;
   margin: 0;
+  font-size: 1rem;
+  color: var(--color-text);
+  text-transform: initial;
 }
 
 .actionMessageView {
-  display: grid;
-  place-content: center;
-  height: 22.5rem;
-  margin-bottom: 0;
-  margin-top: 0.75rem;
-
-  padding: 0.5rem;
-
   position: relative;
-  overflow: hidden;
-  flex: 0 0 auto;
 
+  overflow: hidden;
+  display: grid;
+  flex: 0 0 auto;
+  place-content: center;
+
+  height: 22.5rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  padding: 0.5rem;
   border-radius: var(--border-radius-default);
 
   background-color: var(--theme-background-color);
-  background-position: center;
   background-repeat: no-repeat;
+  background-position: center;
   background-size: 100% 100%;
-
-  :global(html.theme-light) & {
-    background-image: url('../../../assets/chat-bg-br.png');
-  }
 
   &::before {
     content: "";
+
     position: absolute;
     top: 0;
-    left: 0;
-    bottom: 0;
     right: 0;
+    bottom: 0;
+    left: 0;
+
     background-image: url('../../../assets/chat-bg-pattern-light.png');
+    background-repeat: repeat;
     background-position: top right;
     background-size: 510px auto;
-    background-repeat: repeat;
     mix-blend-mode: overlay;
 
     :global(html.theme-dark) & {
@@ -112,6 +111,10 @@
       height: calc(var(--vh, 1vh) * 100);
     }
   }
+
+  :global(html.theme-light) & {
+    background-image: url('../../../assets/chat-bg-br.png');
+  }
 }
 
 .messageInput, .limited {
@@ -119,15 +122,17 @@
 }
 
 .footer {
-  display: flex;
-  justify-content: space-between;
-  padding: 1rem;
-  margin-inline: -0.75rem; // Account for padding
-  flex-direction: column;
-  background-color: var(--color-background-secondary);
-
   position: sticky;
   bottom: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  margin-inline: -0.75rem; // Account for padding
+  padding: 1rem;
+
+  background-color: var(--color-background-secondary);
 }
 
 .switcher {
@@ -140,20 +145,21 @@
 }
 
 .description {
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
   margin-bottom: 0.5rem;
   margin-left: 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
 }
 
 .main-button {
   display: flex;
-  font-weight: var(--font-weight-semibold);
   font-size: 1rem;
+  font-weight: var(--font-weight-semibold);
 }
 
 .star {
   --color-fill: var(--color-white);
+
   width: 1rem;
   height: 1rem;
   margin-right: 0.1875rem;
@@ -163,21 +169,25 @@
 .background {
   position: absolute;
   top: 0;
-  left: 0;
-  bottom: 0;
   right: 0;
+  bottom: 0;
+  left: 0;
+
   overflow: hidden;
+
   background-color: var(--theme-background-color);
 
   &::before {
     content: "";
+
     position: absolute;
     top: 0;
-    left: 0;
-    bottom: 0;
     right: 0;
-    background-position: center;
+    bottom: 0;
+    left: 0;
+
     background-repeat: no-repeat;
+    background-position: center;
     background-size: cover;
   }
 
@@ -190,8 +200,8 @@
   }
 
   &.customBgImage::before {
-    background-image: var(--custom-background) !important;
     transform: scale(1.1);
+    background-image: var(--custom-background) !important;
   }
 
   :global(body:not(.no-page-transitions)) &.withTransition {
@@ -204,14 +214,6 @@
 
   &.customBgImage.blurred::before {
     filter: blur(12px);
-  }
-
-  @media screen and (min-width: 1276px) {
-    :global(body:not(.no-page-transitions)) &:not(.customBgImage)::before {
-      overflow: hidden;
-      transform: scale(1);
-      transform-origin: left center;
-    }
   }
 
   :global(html.theme-light body:not(.no-page-transitions)) &:not(.customBgImage).withRightColumn::before {
@@ -235,20 +237,30 @@
 
   &:not(.customBgImage):not(.customBgColor)::after {
     content: "";
+
     position: absolute;
     top: 0;
-    left: 0;
-    bottom: 0;
     right: 0;
+    bottom: 0;
+    left: 0;
+
     background-image: url('../../../assets/chat-bg-pattern-light.png');
+    background-repeat: repeat;
     background-position: top right;
     background-size: 510px auto;
-    background-repeat: repeat;
     mix-blend-mode: overlay;
 
     :global(html.theme-dark) & {
       background-image: url('../../../assets/chat-bg-pattern-dark.png');
       mix-blend-mode: unset;
+    }
+  }
+
+  @media screen and (min-width: 1276px) {
+    :global(body:not(.no-page-transitions)) &:not(.customBgImage)::before {
+      transform-origin: left center;
+      transform: scale(1);
+      overflow: hidden;
     }
   }
 }

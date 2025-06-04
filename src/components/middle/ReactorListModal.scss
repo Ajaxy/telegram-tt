@@ -5,9 +5,10 @@
 
   .modal-content {
     overflow: hidden;
-    height: min(92vh, 32rem);
     display: flex;
     flex-direction: column;
+
+    height: min(92vh, 32rem);
     padding: 0.5rem 0 !important;
   }
 
@@ -22,9 +23,9 @@
   }
 
   .Reactions {
+    justify-content: space-between;
     margin-bottom: 0.5rem;
     padding: 0 1rem;
-    justify-content: space-between;
 
     &::after {
       content: '';
@@ -43,9 +44,9 @@
   }
 
   .reactor-list {
-    max-height: 100%;
     overflow: auto;
     overflow-x: hidden;
+    max-height: 100%;
     padding: 0 0.5rem;
   }
 
@@ -65,10 +66,11 @@
   }
 
   .status {
-    color: var(--color-text-secondary);
     display: flex;
     align-items: center;
+
     font-size: 0.875rem !important;
     line-height: 1.25rem;
+    color: var(--color-text-secondary);
   }
 }

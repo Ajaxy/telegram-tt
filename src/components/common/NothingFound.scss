@@ -13,10 +13,12 @@
   }
 
   .description {
-    color: var(--color-text-secondary);
-    font-size: 0.875rem;
-    text-align: center;
-    margin: 1rem 0 0;
     unicode-bidi: plaintext;
+
+    margin: 1rem 0 0;
+
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    text-align: center;
   }
 }

@@ -1,22 +1,26 @@
 .background {
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
   z-index: -1;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
   overflow: hidden;
+
   background-color: var(--theme-background-color);
 
   &::before {
     content: "";
+
     position: absolute;
     top: 0;
-    left: 0;
-    bottom: 0;
     right: 0;
-    background-position: center;
+    bottom: 0;
+    left: 0;
+
     background-repeat: no-repeat;
+    background-position: center;
     background-size: cover;
   }
 
@@ -29,8 +33,8 @@
   }
 
   &.customBgImage::before {
-    background-image: var(--custom-background) !important;
     transform: scale(1.1);
+    background-image: var(--custom-background) !important;
   }
 
   :global(body:not(.no-page-transitions)) &.withTransition {
@@ -47,14 +51,6 @@
 
   &.customBgImage.blurred::before {
     filter: blur(12px);
-  }
-
-  @media screen and (min-width: 1276px) {
-    :global(body:not(.no-page-transitions)) &:not(.customBgImage)::before {
-      overflow: hidden;
-      transform: scale(1);
-      transform-origin: left center;
-    }
   }
 
   :global(html.theme-light body:not(.no-page-transitions)) &:not(.customBgImage).withRightColumn::before {
@@ -78,20 +74,30 @@
 
   &:not(.customBgImage):not(.customBgColor)::after {
     content: "";
+
     position: absolute;
     top: 0;
-    left: 0;
-    bottom: 0;
     right: 0;
+    bottom: 0;
+    left: 0;
+
     background-image: url('../../assets/chat-bg-pattern-light.png');
+    background-repeat: repeat;
     background-position: top right;
     background-size: 510px auto;
-    background-repeat: repeat;
     mix-blend-mode: overlay;
 
     :global(html.theme-dark) & {
       background-image: url('../../assets/chat-bg-pattern-dark.png');
       mix-blend-mode: unset;
+    }
+  }
+
+  @media screen and (min-width: 1276px) {
+    :global(body:not(.no-page-transitions)) &:not(.customBgImage)::before {
+      transform-origin: left center;
+      transform: scale(1);
+      overflow: hidden;
     }
   }
 }

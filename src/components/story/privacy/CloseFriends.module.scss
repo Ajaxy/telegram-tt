@@ -1,11 +1,14 @@
 .buttonHolder {
-  position: absolute;
-  height: 6rem;
-  width: 6rem;
-  bottom: 0;
-  right: 0;
-  overflow: hidden;
   pointer-events: none;
+
+  position: absolute;
+  right: 0;
+  bottom: 0;
+
+  overflow: hidden;
+
+  width: 6rem;
+  height: 6rem;
 }
 
 .active {

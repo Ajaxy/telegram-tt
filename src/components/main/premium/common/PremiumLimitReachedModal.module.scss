@@ -1,7 +1,7 @@
 .root :global(.modal-content) {
-  align-items: flex-start;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
 }
 
 .root :global(.modal-dialog) {
@@ -9,19 +9,21 @@
 }
 
 .limit-compare {
-  margin: 2.5rem 0 1.25rem 0;
   width: 100%;
+  margin: 2.5rem 0 1.25rem 0;
 }
 
 .limit-badge {
-  background: var(--color-primary);
-  padding: 0.75rem 1.25rem;
-  border-radius: 1.5rem;
-  margin: 1.5rem 0 1.25rem 0;
-  align-self: center;
   display: flex;
   align-items: center;
+  align-self: center;
   justify-content: center;
+
+  margin: 1.5rem 0 1.25rem 0;
+  padding: 0.75rem 1.25rem;
+  border-radius: 1.5rem;
+
+  background: var(--color-primary);
 }
 
 .limit-value {
@@ -36,17 +38,18 @@
 }
 
 .dialog-buttons {
-  width: 100%;
   display: flex;
+  gap: 1rem;
   align-items: flex-end;
   justify-content: flex-end;
+
+  width: 100%;
   margin-top: 1rem;
-  gap: 1rem;
 }
 
 .x2 {
-  font-size: 1.25rem;
   margin-inline-start: 0.25rem;
+  font-size: 1.25rem;
 }
 
 .button-icon {

@@ -6,18 +6,18 @@
   &__new-contact {
     display: flex;
 
-    @media (max-width: 500px) {
-      flex-direction: column;
-    }
-
     &-fieldset {
       flex: 1;
       margin-inline-start: 1rem;
 
       @media (max-width: 500px) {
-        margin-inline-start: 0;
         margin-top: 1rem;
+        margin-inline-start: 0;
       }
+    }
+
+    @media (max-width: 500px) {
+      flex-direction: column;
     }
   }
 
@@ -36,8 +36,8 @@
   }
 
   &__phone-number {
-    font-size: 1.5rem;
     margin-bottom: 0;
+    font-size: 1.5rem;
   }
 
   &__help-text {

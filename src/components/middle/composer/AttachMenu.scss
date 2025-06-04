@@ -11,27 +11,28 @@
     position: relative;
     top: -3.5rem;
 
-    @media (max-width: 600px) {
-      top: -2.875rem;
-    }
-
     .bubble {
-      max-height: 20rem;
       overflow: auto;
+      max-height: 20rem;
     }
 
     .is-pointer-env & {
       > .backdrop {
         position: absolute;
         top: -1rem;
-        left: auto;
         right: 0;
+        left: auto;
+
         width: 3.5rem;
       }
     }
 
     .media-disabled > button {
       white-space: normal;
+    }
+
+    @media (max-width: 600px) {
+      top: -2.875rem;
     }
   }
 }

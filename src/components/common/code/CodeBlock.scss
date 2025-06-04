@@ -1,27 +1,33 @@
 .CodeBlock {
-  background-color: var(--color-code-bg);
-  color: var(--color-text);
-  margin: 0;
-  padding-block: 0.1875rem;
-  margin-block: 0.25rem;
-  border-radius: 0.25rem;
   position: relative;
+
   overflow: hidden;
 
+  margin: 0;
+  margin-block: 0.25rem;
+  padding-block: 0.1875rem;
+  border-radius: 0.25rem;
+
+  color: var(--color-text);
+
+  background-color: var(--color-code-bg);
+
   .code-title {
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
-    font-weight: var(--font-weight-medium);
+
     margin-bottom: 0.5rem;
-    color: var(--accent-color);
+
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
+    font-weight: var(--font-weight-medium);
+    color: var(--accent-color);
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .code-block {
+    overflow: hidden;
     margin: 0;
     white-space: pre-wrap;
-    overflow: hidden;
 
     &:hover {
       .code-overlay {
@@ -30,8 +36,8 @@
     }
 
     &.no-word-wrap {
-      white-space: pre;
       padding-bottom: 0.25rem;
+      white-space: pre;
     }
 
     html.theme-light & {
@@ -83,8 +89,8 @@
     }
 
     .hljs {
-      display: block;
       overflow-x: auto;
+      display: block;
       color: var(--color-text);
     }
   }
@@ -132,8 +138,8 @@
 
 .hljs-comment,
 .hljs-quote {
-  color: var(--color-comment);
   font-style: italic;
+  color: var(--color-comment);
 }
 
 .hljs-meta,

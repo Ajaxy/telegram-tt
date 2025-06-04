@@ -1,9 +1,9 @@
 .root {
   position: absolute;
+  z-index: var(--z-modal);
   top: 0rem;
   left: 50%;
-  background-color: var(--color-background);
-  color: var(--color-text);
+  transform: translate(-50%, -1rem);
 
   display: flex;
   flex-direction: column;
@@ -11,9 +11,14 @@
 
   padding: 0.5rem 1.25rem;
   border-radius: 2rem;
+
   font-size: 0.875rem;
+  color: var(--color-text);
   white-space: nowrap;
-  z-index: var(--z-modal);
+
+  background-color: var(--color-background);
+
+  transition: transform 0.2s ease, opacity 0.2s ease;
 
   :global(.confirm) & {
     z-index: var(--z-modal-confirm);
@@ -23,13 +28,9 @@
     z-index: var(--z-modal-low-priority);
   }
 
-  transform: translate(-50%, -1rem);
-
-  transition: transform 0.2s ease, opacity 0.2s ease;
-
   :global(body:not(.no-page-transitions)) .dots {
-    transition: none;
     transform: none !important;
+    transition: none;
   }
 
   &:not(:global(.open)) {

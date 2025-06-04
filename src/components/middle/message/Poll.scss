@@ -2,28 +2,24 @@
   min-width: 15rem;
   text-align: initial;
 
-  @media (max-width: 600px) {
-    min-width: 50vw;
-  }
-
   .poll-question {
+    margin: 0.125rem 0;
     font-weight: var(--font-weight-medium);
     line-height: 1.25rem;
-    margin: 0.125rem 0;
     overflow-wrap: anywhere;
   }
 
   .poll-type,
   .poll-voters-count {
-    color: var(--secondary-color);
     font-size: 0.875rem;
+    color: var(--secondary-color);
   }
 
   .poll-type {
-    margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
     min-height: 1.375rem;
+    margin-bottom: 0.5rem;
   }
 
   .poll-voters-count {
@@ -34,12 +30,12 @@
   .Checkbox,
   .Radio {
     min-height: 2.5rem;
-    padding-left: 2.25rem;
     padding-bottom: 1.25rem;
+    padding-left: 2.25rem;
 
     &.disabled {
-      opacity: 1 !important;
       cursor: var(--custom-cursor, not-allowed);
+      opacity: 1 !important;
     }
 
     &:hover {
@@ -48,21 +44,22 @@
 
     .Checkbox-main,
     .Radio-main {
-      .label {
-        line-height: 1.3125rem;
-      }
 
       &::before {
+        --color-borders-input: var(--secondary-color);
+
         top: 0.6875rem;
         left: 0.125rem;
         background-color: var(--background-color);
-        --color-borders-input: var(--secondary-color);
       }
 
       &::after {
         top: 0.6875rem;
         left: 0.4375rem;
         background-color: var(--accent-color);
+      }
+      .label {
+        line-height: 1.3125rem;
       }
     }
 
@@ -137,10 +134,11 @@
   }
 
   .poll-countdown-progress {
-    stroke: var(--color-primary);
     fill: transparent;
-    stroke-width: 2;
+    stroke: var(--color-primary);
     stroke-linecap: round;
+    stroke-width: 2;
+
     transition: stroke-dashoffset 2s, stroke 0.2s;
   }
 
@@ -152,16 +150,21 @@
   }
 
   .Button {
-    text-transform: none;
     font-size: 1rem;
+    text-transform: none;
 
     .Message.own & {
-      color: var(--accent-color);
       --color-primary-shade-rgb: var(--color-accent-own);
+
+      color: var(--accent-color);
     }
   }
 
   > .Button {
     margin-bottom: 0.1875rem;
+  }
+
+  @media (max-width: 600px) {
+    min-width: 50vw;
   }
 }

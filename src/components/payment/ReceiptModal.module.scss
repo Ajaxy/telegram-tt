@@ -11,17 +11,20 @@
 }
 
 .header {
+  position: relative;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 0.5rem;
+  align-items: center;
+
   margin-bottom: 1rem;
-  position: relative;
 }
 
 .amount {
   display: flex;
   gap: 0.25rem;
+
   font-size: 1.25rem;
   font-weight: var(--font-weight-medium);
   line-height: 1.325;
@@ -32,9 +35,9 @@
 }
 
 .tid {
+  cursor: pointer;
   font-family: var(--font-family-monospace);
   font-size: 0.875rem;
-  cursor: pointer;
 }
 
 .description {
@@ -42,16 +45,17 @@
 }
 
 .footer {
-  text-align: center;
   margin-block: 0.5rem;
+  text-align: center;
 }
 
 .starsBackground {
   position: absolute;
-  height: 8rem;
   top: -8.5rem;
   left: 50%;
   transform: translateX(-50%);
+
+  height: 8rem;
 }
 
 .mediaShift {
@@ -64,6 +68,6 @@
 }
 
 .mediaPreview {
-  margin-bottom: 2rem;
   cursor: var(--custom-cursor, pointer);
+  margin-bottom: 2rem;
 }

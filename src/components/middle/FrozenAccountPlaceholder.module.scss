@@ -7,15 +7,15 @@
 }
 
 .title {
-  color: var(--color-error);
-  font-weight: var(--font-weight-medium);
   font-size: 1rem;
+  font-weight: var(--font-weight-medium);
   line-height: 1rem;
+  color: var(--color-error);
 }
 
 .subtitle {
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
   margin-top: 0.25rem;
+  font-size: 0.875rem;
   line-height: 1rem;
+  color: var(--color-text-secondary);
 }

@@ -5,22 +5,20 @@
   }
 
   &.gallery {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-auto-flow: dense;
-    grid-gap: 1px;
-    padding: 0;
     scrollbar-gutter: stable both-edges;
 
-    @media (max-width: 600px) {
-      grid-template-columns: repeat(4, 1fr);
-    }
+    display: grid;
+    grid-auto-flow: dense;
+    grid-gap: 1px;
+    grid-template-columns: repeat(8, 1fr);
+
+    padding: 0;
 
     .switch-pm {
       grid-column: 1 / -1;
       .ListItem-button {
-        border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
       }
     }
 
@@ -37,6 +35,7 @@
         position: absolute;
         top: 0;
         left: 0;
+
         width: 100% !important;
         height: 100% !important;
 
@@ -47,6 +46,10 @@
           height: calc(100% - 0.5rem) !important;
         }
       }
+    }
+
+    @media (max-width: 600px) {
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 

@@ -2,6 +2,7 @@
   --spinner-size: 2rem;
 
   position: relative;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,11 +13,13 @@
   &.with-background {
     &::before {
       content: '';
+
       position: absolute;
-      left: -0.125rem;
       top: -0.125rem;
-      bottom: -0.125rem;
       right: -0.125rem;
+      bottom: -0.125rem;
+      left: -0.125rem;
+
       border-radius: 50%;
     }
 
@@ -79,17 +82,17 @@
 .Spinner__inner {
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
   bottom: 0;
+  left: 0;
 
   background-repeat: no-repeat;
   background-size: 100%;
 
   animation-name: spin;
   animation-duration: 1s;
-  animation-iteration-count: infinite;
   animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
 @keyframes spin {

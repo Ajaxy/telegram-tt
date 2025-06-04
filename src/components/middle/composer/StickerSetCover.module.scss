@@ -2,11 +2,12 @@
   --_size: 2rem;
   --custom-emoji-size: var(--_size);
 
-  width: var(--_size);
-  height: var(--_size);
   display: flex;
   align-items: center;
   justify-content: center;
+
+  width: var(--_size);
+  height: var(--_size);
   border-radius: var(--border-radius-messages-small) !important;
 
   :global(.AnimatedSticker) {

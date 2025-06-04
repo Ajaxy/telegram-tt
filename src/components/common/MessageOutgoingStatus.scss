@@ -1,10 +1,12 @@
 .MessageOutgoingStatus {
-  width: 1.1875rem;
-  height: 1.1875rem;
   overflow: hidden;
   display: inline-block;
-  line-height: 1;
+
+  width: 1.1875rem;
+  height: 1.1875rem;
+
   font-size: 1.1875rem;
+  line-height: 1;
 
   .icon-message-succeeded {
     padding-left: 0.125rem;
@@ -17,17 +19,21 @@
 
   .MessageOutgoingStatus--failed::before {
     content: "";
-    display: block;
+
     position: absolute;
     inset: 0.25rem;
+
+    display: block;
+
     border-radius: 50%;
+
     background: white;
   }
 
   .icon-message-failed {
-    background: none;
-    color: var(--color-error);
-    z-index: 1;
     position: relative;
+    z-index: 1;
+    color: var(--color-error);
+    background: none;
   }
 }

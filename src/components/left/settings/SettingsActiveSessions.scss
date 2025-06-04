@@ -9,12 +9,14 @@ $icons: "android", "apple", "brave", "chrome", "edge", "firefox", "linux", "oper
 
 .SettingsActiveSessions {
   .icon-device {
+    flex: 0 0 2rem;
+
     width: 2rem;
     height: 2rem;
+    margin-inline-end: 1.25rem !important;
+
     background-repeat: no-repeat;
     background-size: 2rem;
-    flex: 0 0 2rem;
-    margin-inline-end: 1.25rem !important;
   }
 
   .icon-stop {

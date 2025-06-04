@@ -4,8 +4,8 @@
   --spacing: calc(var(--_size) * 0.4);
   --spacing-gap: calc(var(--_size) * 0.04);
 
-  display: flex;
   position: relative;
+  display: flex;
 }
 
 .avatar {
@@ -30,18 +30,17 @@
 
 .badge {
   position: absolute;
-  bottom: -1px;
   right: -1px;
+  bottom: -1px;
 
-  background-color: var(--color-primary);
-  color: var(--color-white);
-
+  padding: 0rem 0.25rem;
   border: 1px solid var(--color-background);
   border-radius: 1rem;
 
   font-size: 0.75rem;
-  line-height: 1rem;
   font-weight: var(--font-weight-medium);
+  line-height: 1rem;
+  color: var(--color-white);
 
-  padding: 0rem 0.25rem;
+  background-color: var(--color-primary);
 }

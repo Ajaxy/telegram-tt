@@ -5,22 +5,25 @@
 
 .particle {
   --custom-emoji-size: var(--particle-size, 1rem);
-  color: var(--color-primary);
 
   position: absolute;
+  offset-path: var(--offset-path);
+  offset-rotate: 0deg;
+
   width: var(--particle-size, 1rem);
   height: var(--particle-size, 1rem);
   border-radius: 0.25rem;
-  offset-path: var(--offset-path);
-  offset-rotate: 0deg;
+
+  color: var(--color-primary);
+
   animation: 1.5s particle ease-out;
   animation-fill-mode: forwards;
 }
 
 @keyframes particle {
   0% {
-    offset-distance: 0%;
     transform: scale(1);
+    offset-distance: 0%;
   }
 
   50% {
@@ -32,8 +35,8 @@
   }
 
   100% {
+    transform: scale(1);
     offset-distance: 100%;
     opacity: 0;
-    transform: scale(1);
   }
 }

@@ -1,9 +1,8 @@
 .EmojiTooltip {
-  display: flex;
-  padding: 0;
-
   overflow-x: scroll;
   overflow-y: hidden;
+  display: flex;
+  padding: 0;
 
   .EmojiButton {
     flex: 0 0 2.25rem;

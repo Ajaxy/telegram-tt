@@ -1,5 +1,6 @@
 .File {
   --secondary-color: var(--color-text-secondary);
+
   display: flex;
   align-items: center;
 
@@ -23,13 +24,15 @@
   .file-progress,
   .file-icon,
   .file-preview {
-    width: 3.375rem;
-    height: 3.375rem;
-    border-radius: var(--border-radius-messages-small);
-    background: var(--color-primary);
     display: flex;
     align-items: center;
     justify-content: center;
+
+    width: 3.375rem;
+    height: 3.375rem;
+    border-radius: var(--border-radius-messages-small);
+
+    background: var(--color-primary);
   }
 
   .file-progress {
@@ -39,44 +42,51 @@
   }
 
   .file-icon {
-    padding: 1rem 0.75rem 0.5rem;
-    align-items: flex-end;
-    flex-shrink: 0;
     position: relative;
+
+    flex-shrink: 0;
+    align-items: flex-end;
+
+    padding: 1rem 0.75rem 0.5rem;
+
     color: white;
+
     clip-path: polygon(0 0, calc(100% - 1.125rem) 0, 100% 1.125rem, 100% 100%, 0 100%);
 
     transition: clip-path 0.15s ease-in;
+
+    &::after {
+      content: "";
+
+      position: absolute;
+      top: 0;
+      right: 0;
+
+      display: block;
+
+      border-color: rgba(black, 0.25);
+      border-style: solid;
+      border-width: 0.5625rem;
+      border-bottom-left-radius: 0.25rem;
+      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+      transition: border-width 0.15s ease-in;
+    }
 
     .file-ext {
       font-size: 1rem;
       font-weight: var(--font-weight-medium);
       transition: opacity 0.15s;
     }
-
-    &::after {
-      content: "";
-      display: block;
-      position: absolute;
-      top: 0;
-      right: 0;
-      border-bottom-left-radius: 0.25rem;
-      border-color: rgba(black, 0.25);
-      border-width: 0.5625rem;
-      border-style: solid;
-      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-      transition: border-width 0.15s ease-in;
-    }
   }
 
   .file-preview {
-    background: transparent;
     overflow: hidden;
+    background: transparent;
 
     & + .action-icon,
     & + .file-progress {
-      background: rgba(black, 0.5);
       border-radius: var(--border-radius-messages-small);
+      background: rgba(black, 0.5);
     }
 
     img {
@@ -85,16 +95,21 @@
   }
 
   .action-icon {
-    color: #fff;
-    font-size: 1.5rem;
     position: absolute;
     top: 0;
-    width: 3.375rem;
-    height: 3.375rem;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    width: 3.375rem;
+    height: 3.375rem;
+
+    font-size: 1.5rem;
+    color: #fff;
+
     opacity: 0;
+
     transition: opacity 0.25s;
   }
 
@@ -126,25 +141,28 @@
   }
 
   .file-info {
-    margin-top: 0.1875rem;
-    margin-right: 0.125rem;
-    white-space: nowrap;
     overflow: hidden;
     flex-grow: 1;
 
+    margin-top: 0.1875rem;
+    margin-right: 0.125rem;
+
+    white-space: nowrap;
+
     & + .Link {
+      padding-left: 1rem;
       font-size: 0.75rem;
       color: var(--color-text-secondary);
-      padding-left: 1rem;
       white-space: nowrap;
     }
   }
 
   .file-title {
-    font-size: 1rem;
-    line-height: 1.5rem;
-    font-weight: var(--font-weight-medium);
     overflow: hidden;
+
+    font-size: 1rem;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5rem;
     text-overflow: ellipsis;
 
     .emoji {
@@ -153,11 +171,13 @@
   }
 
   .file-subtitle {
+    overflow: hidden;
+
+    max-width: 100%;
+
     font-size: 0.875rem;
     line-height: 0.9375rem;
     color: var(--secondary-color);
-    max-width: 100%;
-    overflow: hidden;
     text-overflow: ellipsis;
 
     span + span {
@@ -205,22 +225,22 @@
     .file-progress,
     .file-icon,
     .file-preview {
-      margin-left: 0.75rem;
       margin-right: 0;
+      margin-left: 0.75rem;
     }
 
     .file-info {
       text-align: right;
 
       & + .Link {
-        padding-left: 0;
         padding-right: 1rem;
+        padding-left: 0;
       }
     }
 
     .action-icon {
-      left: auto;
       right: 0;
+      left: auto;
     }
   }
 }

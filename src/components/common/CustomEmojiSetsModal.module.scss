@@ -1,8 +1,8 @@
 .root {
   :global {
     .modal-dialog {
-      height: 70%;
       max-width: 25rem;
+      height: 70%;
 
       @media (max-width: 600px) {
         height: 90%;
@@ -39,8 +39,11 @@
 
 .sets {
   position: relative;
-  width: 100%;
+
   overflow-y: auto;
+
+  width: 100%;
   padding: 0 0.5rem;
+
   text-align: left;
 }

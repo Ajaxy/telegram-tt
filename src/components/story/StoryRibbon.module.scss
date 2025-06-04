@@ -1,16 +1,18 @@
 .root {
-  display: flex;
-  justify-content: space-between;
-  column-gap: 0.625rem;
-  padding: 0.25rem 0.5rem 0.5rem 1rem;
-  overflow-x: auto;
-  white-space: nowrap;
-  max-height: 5.5rem;
   position: relative;
   z-index: var(--z-story-ribbon);
 
-  transition: opacity 0.2s ease-in-out;
+  overflow-x: auto;
+  display: flex;
+  column-gap: 0.625rem;
+  justify-content: space-between;
 
+  max-height: 5.5rem;
+  padding: 0.25rem 0.5rem 0.5rem 1rem;
+
+  white-space: nowrap;
+
+  transition: opacity 0.2s ease-in-out;
   animation: fadeIn 0.2s ease-in-out;
 }
 
@@ -19,19 +21,23 @@
 }
 
 .peer {
-  flex: 0 0 3.75rem;
-  width: 3.75rem;
+  cursor: var(--custom-cursor, pointer);
+
   display: flex;
+  flex: 0 0 3.75rem;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  font-size: 0.75rem;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: var(--custom-cursor, pointer);
-  color: var(--color-text-secondary);
+
+  width: 3.75rem;
   margin-inline: auto;
+  padding: 0;
+  border: none;
+
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+
+  background: none;
 
   &:focus {
     outline: none;
@@ -43,12 +49,14 @@
 }
 
 .name {
-  margin-top: 0.25rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
   unicode-bidi: plaintext;
-  white-space: nowrap;
+  overflow: hidden;
+
   max-width: 110%;
+  margin-top: 0.25rem;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   &_hasUnreadStory {
     color: var(--color-text);

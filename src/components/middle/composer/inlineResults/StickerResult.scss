@@ -1,12 +1,17 @@
 .StickerResult {
+  cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+
+  overflow: hidden;
+
   height: 0;
   padding-bottom: 100%;
-  overflow: hidden;
+
   background: transparent no-repeat center;
   background-size: contain;
-  cursor: var(--custom-cursor, pointer);
+
   transition: background-color 0.15s ease, opacity 0.3s ease !important;
-  position: relative;
 
   .AnimatedSticker,
   img,
@@ -14,6 +19,7 @@
     position: absolute;
     top: 0;
     left: 0;
+
     width: 100% !important;
     height: 100% !important;
   }

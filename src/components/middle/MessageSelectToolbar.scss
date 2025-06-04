@@ -1,21 +1,29 @@
 .MessageSelectToolbar {
   position: absolute;
+  z-index: 20;
+  right: 0.5rem;
   bottom: 0.5rem;
   left: 0.5rem;
-  right: 0.5rem;
-  width: auto;
-  z-index: 20;
+
   justify-content: center;
+
+  width: auto;
   margin: 0;
+
   opacity: 1;
 
-  @media (max-width: 600px) {
-    bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  &::before {
+    z-index: -1;
+    right: auto;
+    left: auto;
+
+    width: 100%;
+    max-width: calc(100% * var(--composer-hidden-scale));
   }
 
   .mask-image-disabled &::before {
-    left: auto !important;
     right: auto !important;
+    left: auto !important;
   }
 
   .no-composer & {
@@ -23,16 +31,6 @@
 
     @media (max-width: 600px) {
       width: calc(100% - 1rem);
-    }
-  }
-
-  @media (min-width: 601px) {
-    left: 1rem;
-    right: 1rem;
-    bottom: 1.25rem;
-
-    .no-composer & {
-      top: -4.75rem;
     }
   }
 
@@ -50,8 +48,8 @@
   }
 
   &:not(.shown) {
-    opacity: 0;
     pointer-events: none;
+    opacity: 0;
 
     .shown-inner {
       transform: scaleX(var(--toolbar-hidden-scale, 1));
@@ -66,33 +64,23 @@
     }
   }
 
-  &::before {
-    z-index: -1;
-    max-width: calc(100% * var(--composer-hidden-scale));
-    width: 100%;
-    left: auto;
-    right: auto;
-  }
-
   &-inner {
-    width: 100%;
-    max-width: calc(100% * var(--composer-hidden-scale));
+    transform: scaleX(1);
+
     display: flex;
     align-items: center;
-    padding: 0.25rem;
 
-    background: var(--color-background);
+    width: 100%;
+    max-width: calc(100% * var(--composer-hidden-scale));
+    padding: 0.25rem;
     border-radius: var(--border-radius-messages);
-    box-shadow: 0 1px 2px var(--color-default-shadow);
+
     font-weight: var(--font-weight-medium);
 
-    transform: scaleX(1);
-    transition: transform var(--select-transition), opacity var(--select-transition);
+    background: var(--color-background);
+    box-shadow: 0 1px 2px var(--color-default-shadow);
 
-    @media (max-width: 600px) {
-      padding: 0;
-      max-width: none;
-    }
+    transition: transform var(--select-transition), opacity var(--select-transition);
 
     > .Button {
       width: 3rem;
@@ -103,14 +91,21 @@
         height: 2.875rem;
       }
     }
+
+    @media (max-width: 600px) {
+      max-width: none;
+      padding: 0;
+    }
   }
 
   &-count {
-    margin-left: 1rem;
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
     flex-grow: 1;
+
+    margin-left: 1rem;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     @media (max-width: 600px) {
       margin-right: 0.5rem;
@@ -118,27 +113,32 @@
   }
 
   &-actions {
-    margin-left: auto;
     display: flex;
+    margin-left: auto;
 
     .item {
-      width: 100%;
-      background: none;
-      border: none !important;
-      box-shadow: none !important;
-      outline: none !important;
-      display: flex;
-      position: relative;
-      overflow: hidden;
-      line-height: 1.5rem;
-      white-space: nowrap;
-      color: var(--color-text);
       --ripple-color: rgba(0, 0, 0, 0.08);
-      cursor: var(--custom-cursor, pointer);
-      unicode-bidi: plaintext;
 
+      cursor: var(--custom-cursor, pointer);
+
+      position: relative;
+
+      unicode-bidi: plaintext;
+      overflow: hidden;
+      display: flex;
+
+      width: 100%;
       padding: 0.6875rem;
+      border: none !important;
       border-radius: 50%;
+
+      line-height: 1.5rem;
+      color: var(--color-text);
+      white-space: nowrap;
+
+      background: none;
+      outline: none !important;
+      box-shadow: none !important;
 
       .icon {
         font-size: 1.5rem;
@@ -153,9 +153,9 @@
       }
 
       &.disabled {
-        opacity: 0.5;
-        cursor: var(--custom-cursor, default);
         pointer-events: none;
+        cursor: var(--custom-cursor, default);
+        opacity: 0.5;
       }
 
       &:not(.disabled):active {
@@ -165,10 +165,24 @@
 
       @media (hover: hover) {
         &:hover, &:focus {
-          background-color: var(--color-chat-hover);
           text-decoration: none;
+          background-color: var(--color-chat-hover);
         }
       }
+    }
+  }
+
+  @media (max-width: 600px) {
+    bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
+
+  @media (min-width: 601px) {
+    right: 1rem;
+    bottom: 1.25rem;
+    left: 1rem;
+
+    .no-composer & {
+      top: -4.75rem;
     }
   }
 }

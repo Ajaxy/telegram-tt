@@ -1,10 +1,10 @@
 .root {
   --custom-emoji-size: 2rem;
 
-  margin-inline-start: 0.25rem;
   position: relative;
   min-width: 2rem;
   min-height: 2rem;
+  margin-inline-start: 0.25rem;
 
   &:first-child {
     margin-inline-start: 0;
@@ -32,13 +32,16 @@
 
 .chosen::before {
   content: '';
+
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
+
   background-color: var(--color-background-compact-menu-hover);
 }
 
@@ -46,19 +49,22 @@
   position: absolute;
   top: 5%;
   left: 5%;
+
   width: 90%;
   height: 90%;
 }
 
 .lock {
-  font-size: 0.875rem;
-  padding: 0.125rem;
-
   position: absolute;
   right: 0;
   bottom: 0;
-  background-color: var(--color-background-compact-menu);
+
+  padding: 0.125rem;
   border-radius: 50%;
+
+  font-size: 0.875rem;
+
+  background-color: var(--color-background-compact-menu);
 }
 
 @keyframes custom-fade-in {

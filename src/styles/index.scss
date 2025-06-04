@@ -12,22 +12,6 @@
 
 html,
 body {
-  width: 100%;
-  height: 100%;
-  background-color: var(--color-background);
-  font-family: var(--font-family);
-  margin: 0;
-  padding: 0;
-  font-size: 16px;
-  color: var(--color-text);
-  font-weight: var(--font-weight-normal);
-  line-height: 1.5;
-  text-align: left;
-  overflow: hidden;
-  overscroll-behavior: none;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  user-select: none;
 
   --font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu,
   Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
@@ -37,17 +21,39 @@ body {
   --font-family-condensed: "Roboto Condensed", "Roboto", "Helvetica Neue", sans-serif;
   --font-weight-semibold: 500; // Note: Roboto is naturally quite bold, so 500 works well as default
 
+  user-select: none;
+
+  overflow: hidden;
+  overscroll-behavior: none;
+
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: var(--font-weight-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  color: var(--color-text);
+  text-align: left;
+
+  background-color: var(--color-background);
+
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
   }
 }
 
 noscript {
-  width: 100%;
-  height: 100%;
   display: grid;
   align-content: center;
   justify-items: center;
+
+  width: 100%;
+  height: 100%;
   .nojs-video {
     pointer-events: none;
     &::-webkit-media-controls {
@@ -90,11 +96,13 @@ body.is-electron {
 
 body.cursor-grabbing {
   --custom-cursor: grabbing;
+
   cursor: grabbing !important;
 }
 
 body.cursor-ew-resize {
   --custom-cursor: ew-resize;
+
   cursor: ew-resize !important;
 }
 
@@ -102,12 +110,12 @@ body.cursor-ew-resize {
 .full-height {
   height: 100%;
 
-  @media (max-width: 600px) {
-    height: calc(var(--vh, 1vh) * 100);
-  }
-
   &.is-auth {
     background: var(--color-background);
+  }
+
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100);
   }
 }
 
@@ -115,8 +123,9 @@ body.cursor-ew-resize {
 #portals {
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
+  left: 0;
+
   height: 0;
 }
 
@@ -153,26 +162,30 @@ body.cursor-ew-resize {
 */
 .visually-hidden {
   position: absolute !important;
+  z-index: -1;
+
+  overflow: hidden;
+
   width: 0;
   height: 0;
-  overflow: hidden;
+
   clip: rect(0, 0, 0, 0);
-  z-index: -1;
 }
 
 .custom-scroll,
 .custom-scroll-x {
-  scrollbar-width: thin;
+  // Fix scroll lock on iOS
+  pointer-events: auto;
   scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
+
   transition: scrollbar-color 0.3s ease;
 
   -webkit-overflow-scrolling: touch;
-  // Fix scroll lock on iOS
-  pointer-events: auto;
 
   &::-webkit-scrollbar-thumb {
-    background-color: transparent;
     border-radius: 0.375rem;
+    background-color: transparent;
     // `box-shadow` prevents repaint on macOS when hovering out of scrollable container
     box-shadow: 0 0 1px rgba(255, 255, 255, 0.01);
   }
@@ -211,25 +224,28 @@ body:not(.is-ios) {
 }
 
 .emoji-small {
-  background: no-repeat;
-  background-size: var(--emoji-size);
-  color: transparent;
+  overflow: hidden;
   display: inline-block;
+  flex-shrink: 0;
+
   width: var(--emoji-size);
   height: var(--emoji-size);
   margin-inline-end: 1px;
-  overflow: hidden;
-  flex-shrink: 0;
+
+  color: transparent;
+
+  background: no-repeat;
+  background-size: var(--emoji-size);
 
   &::selection {
-    background-color: var(--color-selection-highlight-emoji);
     color: transparent;
+    background-color: var(--color-selection-highlight-emoji);
   }
 }
 
 .div-button {
-  outline: none !important;
   cursor: var(--custom-cursor, pointer);
+  outline: none !important;
 }
 
 .opacity-transition {
@@ -262,31 +278,38 @@ body:not(.is-ios) {
 }
 
 .protector {
+  user-select: none;
+
   position: absolute;
-  left: 0;
+  z-index: 2;
   top: 0;
   right: 0;
   bottom: 0;
-  z-index: 2;
-  user-select: none;
+  left: 0;
+
   -webkit-touch-callout: none;
 }
 
 .for-ios-autocapitalization-fix {
   position: fixed;
-  font-size: 16px;
-  opacity: 0;
-  bottom: 1rem;
   z-index: -1;
+  bottom: 1rem;
+
+  font-size: 16px;
+
+  opacity: 0;
 }
 
 .emoji-test-element {
-  opacity: 0;
-  display: inline;
-  white-space: nowrap;
   position: absolute;
   bottom: 0;
   left: 0;
+
+  display: inline;
+
+  white-space: nowrap;
+
+  opacity: 0;
 }
 
 .star-currency-icon {
@@ -296,9 +319,9 @@ body:not(.is-ios) {
 
 // Increase specificity to override the default icon style
 .star-amount-icon.star-amount-icon {
-  line-height: inherit; // Vertical centring
   margin-inline-start: 0.375em; // Prevent sticking to the text without using `white-space: pre`
   margin-inline-end: 0.2em; // Prevent sticking to the text without using `white-space: pre`
+  line-height: inherit; // Vertical centring
 }
 
 .shared-canvas-container {
@@ -307,13 +330,15 @@ body:not(.is-ios) {
 
 .shared-canvas,
 .absolute-video-container {
+  pointer-events: none;
+
   position: absolute;
+  z-index: 1;
   top: 0;
   left: 0;
-  z-index: 1;
+
   width: 100%;
   height: 100%;
-  pointer-events: none;
 }
 
 @keyframes grow-icon {

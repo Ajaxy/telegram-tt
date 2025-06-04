@@ -1,14 +1,17 @@
 .root {
   position: absolute;
+  right: 0;
   bottom: 0;
   left: 0;
-  right: 0;
+
   display: flex;
   align-items: center;
-  transition: opacity 350ms !important;
-  color: #fff;
 
   margin-bottom: env(safe-area-inset-bottom);
+
+  color: #fff;
+
+  transition: opacity 350ms !important;
 
   @media (max-width: 600px) {
     padding: 0 0.5rem 0.5rem;
@@ -18,8 +21,10 @@
 .viewInfo {
   display: flex;
   align-items: center;
+
   padding: 0.25rem 0.5rem;
   border-radius: var(--border-radius-default);
+
   transition: background-color 200ms;
 }
 
@@ -40,15 +45,15 @@
 }
 
 .reactionCount {
-  margin-inline-start: 0.5rem;
   display: flex;
   gap: 0.125rem;
   align-items: center;
+  margin-inline-start: 0.5rem;
 }
 
 .reactionCountHeart {
-  color: var(--color-heart);
   font-size: 1.25rem;
+  color: var(--color-heart);
 }
 
 .footerItem {
@@ -66,8 +71,8 @@
 
 .views {
   display: flex;
-  align-items: center;
   gap: 0.25rem;
+  align-items: center;
 }
 
 .viewIcon {

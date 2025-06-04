@@ -1,14 +1,16 @@
 #RightColumn {
   position: absolute;
+  z-index: var(--z-right-column);
   top: 0;
   right: 0;
+  transform: translate3d(var(--right-column-width), 0, 0);
+
   width: var(--right-column-width);
   height: 100%;
   padding-right: env(safe-area-inset-right);
-  transform: translate3d(var(--right-column-width), 0, 0);
-  background: var(--color-background);
   border-left: 1px solid var(--color-borders);
-  z-index: var(--z-right-column);
+
+  background: var(--color-background);
 
   transition: transform var(--layer-transition);
 
@@ -17,19 +19,9 @@
     transition: none !important;
   }
 
-  @media (max-width: 1275px) {
-    box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
-    border-left: none;
-  }
-
-  @media (max-width: 600px) {
-    width: 100vw;
-    transform: translate3d(110vw, 0, 0);
-  }
-
   > .Transition {
-    height: calc(100% - var(--header-height));
     overflow: hidden;
+    height: calc(100% - var(--header-height));
   }
 
   .panel-content {
@@ -42,8 +34,8 @@
   }
 
   .Management .section > .ChatInfo {
-    padding: 0 1.5rem;
     margin: 1rem 0;
+    padding: 0 1.5rem;
     text-align: center;
 
     .Avatar {
@@ -56,15 +48,15 @@
 
     .title {
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
 
       h3 {
-        font-weight: var(--font-weight-medium);
         font-size: 1.25rem;
+        font-weight: var(--font-weight-medium);
         line-height: 2rem;
-        white-space: pre-wrap;
         overflow-wrap: anywhere;
+        white-space: pre-wrap;
       }
 
       .emoji {
@@ -79,22 +71,31 @@
       color: #868e96;
     }
   }
+
+  @media (max-width: 1275px) {
+    border-left: none;
+    box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
+  }
+
+  @media (max-width: 600px) {
+    transform: translate3d(110vw, 0, 0);
+    width: 100vw;
+  }
 }
 
 #RightColumn-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: var(--z-right-column);
-  overflow: hidden;
-  visibility: hidden;
   pointer-events: none;
 
-  @media (max-width: 1275px) {
-    position: fixed;
-  }
+  position: absolute;
+  z-index: var(--z-right-column);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  overflow: hidden;
+
+  visibility: hidden;
 
   &.is-hidden {
     display: none;
@@ -102,13 +103,14 @@
 
   .overlay-backdrop {
     position: absolute;
+    z-index: -1;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: -1;
-    background: black;
+
     opacity: 0;
+    background: black;
 
     @media (max-width: 600px) {
       transition: opacity var(--layer-transition);
@@ -125,15 +127,20 @@
   }
 
   #Main.right-column-open & {
-    @media (max-width: 600px) {
-      .overlay-backdrop {
-        opacity: var(--layer-blackout-opacity);
-      }
-    }
 
     #RightColumn {
       pointer-events: auto;
       transform: translate3d(0, 0, 0);
     }
+
+    @media (max-width: 600px) {
+      .overlay-backdrop {
+        opacity: var(--layer-blackout-opacity);
+      }
+    }
+  }
+
+  @media (max-width: 1275px) {
+    position: fixed;
   }
 }

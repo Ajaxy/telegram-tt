@@ -21,17 +21,19 @@
 }
 
 .filter {
-  padding: 0.375rem 1rem 0.25rem 0.75rem;
-  margin-bottom: 0.625rem;
-  background-color: var(--color-background);
-  box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
-  border-bottom: 0.625rem solid var(--color-background-secondary);
+  overflow-y: auto;
   display: flex;
   flex-flow: row wrap;
-  align-items: center;
   flex-shrink: 0;
-  overflow-y: auto;
+  align-items: center;
+
   max-height: 20rem;
+  margin-bottom: 0.625rem;
+  padding: 0.375rem 1rem 0.25rem 0.75rem;
+  border-bottom: 0.625rem solid var(--color-background-secondary);
+
+  background-color: var(--color-background);
+  box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
 }
 
 .title {
@@ -39,12 +41,14 @@
 }
 
 .buttons {
-  width: 100%;
-  background: var(--color-background);
   position: absolute;
-  bottom: 0;
   z-index: 1;
+  bottom: 0;
+
+  width: 100%;
   padding: 0.75rem;
+
+  background: var(--color-background);
 }
 
 .picker {
@@ -54,9 +58,10 @@
 .avatars {
   display: flex;
   flex-direction: row;
-  justify-content: center;
-  align-items: center;
   gap: 1rem;
+  align-items: center;
+  justify-content: center;
+
   margin: 1rem;
 }
 
@@ -66,9 +71,9 @@
 
 .description,
 .premiumFeatures {
-  text-align: center;
-  margin: 0 auto 2rem;
   max-width: 25rem;
+  margin: 0 auto 2rem;
+  text-align: center;
 }
 
 .premiumFeatures {

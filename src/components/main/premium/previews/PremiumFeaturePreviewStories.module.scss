@@ -1,13 +1,13 @@
 .root {
   display: flex;
   flex-direction: column;
-  padding-top: 1.5rem;
   height: 100%;
+  padding-top: 1.5rem;
 }
 
 .header {
-  align-self: center;
   position: relative;
+  align-self: center;
 }
 
 .circle {
@@ -18,25 +18,29 @@
 }
 
 .title {
-  font-size: 1.25rem;
-  font-weight: var(--font-weight-medium);
   align-self: center;
+
   margin-top: 1rem;
   margin-bottom: 1rem;
+
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-medium);
 }
 
 .features {
-  min-height: 5rem;
   overflow-y: scroll;
-  border-top: 0.0625rem solid transparent;
-  transition: 0.2s ease-in-out border-color;
+
+  min-height: 5rem;
   margin-inline: 1rem;
+  border-top: 0.0625rem solid transparent;
+
+  transition: 0.2s ease-in-out border-color;
 }
 
 .mobile {
   padding: 1rem 0rem 1rem 1rem;
-  color: var(--color-text-secondary);
   font-size: 0.875rem;
+  color: var(--color-text-secondary);
 }
 
 .scrolled {

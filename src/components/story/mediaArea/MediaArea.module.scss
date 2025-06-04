@@ -1,29 +1,32 @@
 .overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: auto;
-  height: auto;
-  aspect-ratio: 9 / 16;
   pointer-events: none;
 
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  aspect-ratio: 9 / 16;
+  width: auto;
+  height: auto;
+
   @media (max-width: 600px) {
+    top: 50%;
     right: auto;
     left: 50%;
-    top: 50%;
+    transform: translate(-50%, -50%);
+
     width: var(--media-width, 100%);
     height: var(--media-height, 100%);
-    transform: translate(-50%, -50%);
   }
 }
 
 .mediaArea {
-  position: absolute;
-  transform-origin: top left;
   pointer-events: all;
   cursor: var(--custom-cursor, pointer);
+  position: absolute;
+  transform-origin: top left;
 }
 
 .preview .mediaArea {
@@ -37,14 +40,19 @@
 
 .shiny::before {
   --color-shine: rgb(255, 255, 255, 0.5);
+
   content: "";
+
   position: absolute;
   top: 0;
 
   display: block;
+
   width: 100%;
   height: 100%;
+
   background: linear-gradient(to right, transparent 0%, var(--color-shine) 50%, transparent 100%);
+
   animation: wave 1s cubic-bezier(0.4, 0, 0.6, 1) forwards;
 
   @keyframes wave {
@@ -59,40 +67,44 @@
 
 .light {
   --background-color: white;
+
   color: black;
 }
 
 .dark {
   --background-color: black;
+
   color: white;
 }
 
 .reactionBackground {
+  cursor: var(--custom-cursor, pointer);
+
   width: 100%;
   height: 100%;
-  background-color: var(--background-color);
   border-radius: 50%;
+
+  background-color: var(--background-color);
   filter: drop-shadow(0 0.125rem 0.25rem var(--color-default-shadow));
-  cursor: var(--custom-cursor, pointer);
 
   &::before,
   &::after {
-    position: absolute;
     content: "";
-    background-color: var(--background-color);
+    position: absolute;
     border-radius: 50%;
+    background-color: var(--background-color);
   }
 
   &::before {
-    bottom: 5%;
     right: 5%;
+    bottom: 5%;
     width: 30%;
     height: 30%;
   }
 
   &::after {
-    bottom: 0;
     right: -5%;
+    bottom: 0;
     width: 10%;
     height: 10%;
   }
@@ -119,6 +131,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+
   transition: transform 200ms ease-out;
 
   &.withCount {
@@ -131,6 +144,7 @@
   bottom: 8%;
   left: 50%;
   transform: translateX(-50%);
+
   font-weight: var(--font-weight-medium);
 }
 
@@ -140,21 +154,23 @@
 }
 
 .weatherInner {
-  width: auto !important;
-  height: auto !important;
-
   display: flex;
+  gap: 0.2em;
   align-items: center;
   justify-content: center;
-  gap: 0.2em;
-  white-space: nowrap;
+
+  width: auto !important;
+  height: auto !important;
   padding: 0 0.2em;
-  background-color: var(--custom-background-color);
   border-radius: 0.25em;
+
+  white-space: nowrap;
+
+  background-color: var(--custom-background-color);
 }
 
 .temperature {
+  margin: 0;
   font-family: var(--font-family-condensed);
   font-weight: var(--font-weight-semibold);
-  margin: 0;
 }

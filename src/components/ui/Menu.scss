@@ -1,34 +1,42 @@
 .Menu {
   &.fluid .bubble {
-    min-width: 13.5rem;
     width: auto;
+    min-width: 13.5rem;
   }
 
   .backdrop {
     position: fixed;
-    left: -100vw;
-    right: -100vw;
-    top: -100vh;
-    bottom: -100vh;
     z-index: var(--z-menu-backdrop);
+    top: -100vh;
+    right: -100vw;
+    bottom: -100vh;
+    left: -100vw;
   }
 
   .bubble {
-    overflow: hidden;
-    display: block;
-    list-style: none;
-    padding: 0.5rem 0;
-    margin: 0;
+
+    --offset-y: calc(100% + 0.5rem);
+    --offset-x: 0;
+
     position: absolute;
+    z-index: var(--z-menu-bubble);
+    transform: scale(0.85);
+
+    overflow: hidden;
+    overscroll-behavior: contain;
+    display: block;
+
+    min-width: 13.5rem;
+    margin: 0;
+    padding: 0.5rem 0;
+    border-radius: var(--border-radius-default);
+
+    color: var(--color-text);
+    list-style: none;
+
     background-color: var(--color-background);
     box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
-    border-radius: var(--border-radius-default);
-    min-width: 13.5rem;
-    z-index: var(--z-menu-bubble);
-    overscroll-behavior: contain;
-    color: var(--color-text);
 
-    transform: scale(0.85);
     transition: opacity 150ms cubic-bezier(0.2, 0, 0.2, 1), transform 150ms cubic-bezier(0.2, 0, 0.2, 1) !important;
 
     &.open {
@@ -51,9 +59,6 @@
       transform: none !important;
       transition: opacity 0.15s !important;
     }
-
-    --offset-y: calc(100% + 0.5rem);
-    --offset-x: 0;
 
     &.top {
       top: var(--offset-y);
@@ -82,17 +87,19 @@
 
   .footer {
     padding: 0.5rem 0;
-    background: var(--color-chat-hover);
-    color: var(--color-text-secondary);
+
     font-size: 0.8125rem;
+    color: var(--color-text-secondary);
     text-align: center;
+
+    background: var(--color-chat-hover);
   }
 
   &.compact {
     .bubble {
+      padding: 0.25rem 0;
       background: var(--color-background-compact-menu);
       backdrop-filter: blur(10px);
-      padding: 0.25rem 0;
 
       body.no-menu-blur & {
         background: var(--color-background);
@@ -110,13 +117,13 @@
   }
 
   .menu-loading-row {
-    margin: 0.125rem 1rem;
     width: calc(100% - 2rem);
+    margin: 0.125rem 1rem;
   }
 
   &.in-portal {
-    z-index: var(--z-portal-menu);
     position: absolute;
+    z-index: var(--z-portal-menu);
   }
 }
 

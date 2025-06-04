@@ -5,9 +5,9 @@
 }
 
 .icon {
+  margin-bottom: 0.25rem;
   border-radius: 50%;
   background-color: var(--color-primary);
-  margin-bottom: 0.25rem;
 }
 
 .header {
@@ -20,20 +20,20 @@
   text-align: center;
 
   @media (min-width: 600px) {
-    margin-left: 0.75rem;
     margin-right: 0.75rem;
+    margin-left: 0.75rem;
   }
 }
 
 .separator {
+  width: 80%;
   margin-top: 1.25rem;
   margin-bottom: 0.25rem;
-  width: 80%;
 }
 
 .button {
-  text-transform: none;
   border-radius: var(--border-radius-default-tiny);
+  text-transform: none;
 }
 
 .closeButton {

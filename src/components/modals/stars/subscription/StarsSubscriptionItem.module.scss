@@ -1,11 +1,14 @@
 @use '../../../../styles/mixins';
 
 .root {
+  cursor: var(--custom-cursor, pointer);
+
   display: flex;
   gap: 0.75rem;
+
   padding: 0.25rem 0.75rem 0.25rem 0.25rem;
   border-radius: 0.5rem;
-  cursor: var(--custom-cursor, pointer);
+
   transition: background-color 0.25s ease-out;
 
   &:hover {
@@ -28,9 +31,9 @@
 
 .statusPricing {
   display: flex;
-  align-items: center;
   flex-shrink: 0;
   gap: 0.25rem;
+  align-items: center;
 }
 
 .amount {
@@ -48,8 +51,8 @@
 
 .subtitle {
   display: flex;
-  align-items: center;
   gap: 0.125rem;
+  align-items: center;
   font-size: 0.8125rem;
 }
 
@@ -69,9 +72,9 @@
 
 .subscriptionStar {
   position: absolute;
+  z-index: 1;
   right: 0;
   bottom: 0;
-  z-index: 1;
 
   @include mixins.filter-outline(1px, var(--color-background));
 }

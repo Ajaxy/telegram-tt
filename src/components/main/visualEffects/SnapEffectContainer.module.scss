@@ -1,17 +1,15 @@
 .root {
-  position: fixed;
-  inset: 0;
   pointer-events: none;
-
+  position: fixed;
   z-index: var(--z-overlay-effects);
+  inset: 0;
 }
 
 .ghost {
   position: absolute;
-  overflow: visible !important;
-
-  animation: scale 1s ease-in forwards !important;
   transform-origin: bottom;
+  overflow: visible !important;
+  animation: scale 1s ease-in forwards !important;
 }
 
 .elementContainer {

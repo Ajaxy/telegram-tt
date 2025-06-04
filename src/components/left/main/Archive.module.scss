@@ -7,16 +7,20 @@
 }
 
 .minimized {
-  background-color: var(--color-background-secondary);
   margin: -0.5rem -0.5rem 0 -0.5rem !important;
+  background-color: var(--color-background-secondary);
+
+  &::after {
+    display: none;
+  }
 
   &:hover {
     opacity: 0.85;
   }
 
   .button {
-    border-radius: 0;
     padding: 0.375rem !important;
+    border-radius: 0;
     background-color: transparent;
   }
 
@@ -35,9 +39,11 @@
   .unread-count {
     position: absolute;
     right: 0.75rem;
-    background-color: transparent;
-    color: var(--color-text-secondary);
+
     font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+
+    background-color: transparent;
   }
 
   .info {
@@ -45,12 +51,8 @@
   }
 
   .name {
-    line-height: 1.25rem !important;
     font-size: 0.8125rem !important;
-  }
-
-  &::after {
-    display: none;
+    line-height: 1.25rem !important;
   }
 }
 
@@ -72,9 +74,9 @@
 }
 
 .avatarWrapper {
+  z-index: 1;
   flex-shrink: 0;
   background-color: var(--background-color);
-  z-index: 1;
 }
 
 .avatar {
@@ -87,9 +89,9 @@
 }
 
 .chatsPreview {
-  color: var(--color-text-secondary);
-  flex-grow: 1;
   overflow: hidden;
+  flex-grow: 1;
+  color: var(--color-text-secondary);
   text-overflow: ellipsis;
 }
 

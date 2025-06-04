@@ -1,19 +1,28 @@
 .root {
   position: absolute;
+  z-index: var(--z-middle-header);
   top: 3.5rem;
   left: 0;
 
   width: 100%;
 
-  z-index: var(--z-middle-header);
-
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: width var(--layer-transition);
 
-  @media (min-width: 1276px) {
-    :global(#Main.right-column-open) & {
-      width: calc(100% - var(--right-column-width));
-    }
+  // In case if there are no children, we need to have a shadow
+  &::before {
+    pointer-events: none;
+    content: '';
+
+    position: absolute;
+    z-index: -100; // Hide behind the children
+    top: -2px;
+    right: 0;
+    left: 0;
+
+    height: 2px;
+
+    box-shadow: 0 2px 2px var(--color-light-shadow);
   }
 
   /* stylelint-disable-next-line plugin/selector-tag-no-without-class */
@@ -21,16 +30,9 @@
     box-shadow: 0 2px 2px var(--color-light-shadow);
   }
 
-  // In case if there are no children, we need to have a shadow
-  &::before {
-    content: '';
-    position: absolute;
-    pointer-events: none;
-    top: -2px;
-    height: 2px;
-    left: 0;
-    right: 0;
-    box-shadow: 0 2px 2px var(--color-light-shadow);
-    z-index: -100; // Hide behind the children
+  @media (min-width: 1276px) {
+    :global(#Main.right-column-open) & {
+      width: calc(100% - var(--right-column-width));
+    }
   }
 }

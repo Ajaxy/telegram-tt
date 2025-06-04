@@ -8,17 +8,19 @@
 
   &.mobile-menu {
     position: fixed;
-    left: 0;
+    z-index: var(--z-symbol-menu-mobile);
     right: 0;
     bottom: 0;
-    background: var(--color-background);
-    z-index: var(--z-symbol-menu-mobile);
+    left: 0;
+    transform: translate3d(0, calc(var(--symbol-menu-height)), 0);
 
-    transition: transform var(--layer-transition);
     padding-right: env(safe-area-inset-right);
     padding-bottom: 0;
     padding-left: env(safe-area-inset-left);
-    transform: translate3d(0, calc(var(--symbol-menu-height)), 0);
+
+    background: var(--color-background);
+
+    transition: transform var(--layer-transition);
 
     &.open:not(.in-attachment-modal) {
       transform: translate3d(0, 0, 0);
@@ -52,16 +54,19 @@
   }
 
   &-footer {
-    height: var(--symbol-menu-footer-height);
+    position: relative;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    height: var(--symbol-menu-footer-height);
     /* stylelint-disable-next-line plugin/whole-pixel */
     box-shadow: 0 -0.5px var(--color-borders-alternate);
-    position: relative;
 
     .Button {
       flex-shrink: 0;
+
       width: 2.125rem !important;
       height: 2.125rem;
       margin: 0 0.25rem;
@@ -100,15 +105,16 @@
     > .backdrop {
       position: absolute;
       top: -1rem;
-      left: 0;
       right: auto;
+      left: 0;
+
       width: 3.5rem;
       height: 4.5rem;
     }
 
     &.attachment-modal-symbol-menu > .backdrop {
-      bottom: 0;
       top: auto;
+      bottom: 0;
     }
   }
 
@@ -131,10 +137,13 @@
   .bubble {
     --offset-y: 4rem;
 
-    border-radius: 1.25rem;
+    overflow: hidden;
+
     width: calc(var(--symbol-menu-width) + var(--scrollbar-width));
     padding: 0;
-    overflow: hidden;
+    border-radius: 1.25rem;
+
+    transition-duration: 200ms !important;
 
     body:not(.no-menu-blur) & {
       background: var(--color-background-compact-menu);
@@ -144,8 +153,6 @@
     &:not(.open) {
       transform: scale(0.85) !important;
     }
-
-    transition-duration: 200ms !important;
   }
 
   .StickerButton.custom-emoji, .sticker-set-cover {
@@ -153,18 +160,20 @@
   }
 
   .picker-disabled {
-    height: var(--symbol-menu-height);
     display: flex;
     align-items: center;
     justify-content: center;
+
+    height: var(--symbol-menu-height);
+
     color: var(--color-text-secondary);
   }
 
   .symbol-close-button {
-    display: none;
     position: absolute;
-    right: max(0.25rem, env(safe-area-inset-right));
     top: max(0.25rem, env(safe-area-inset-top));
+    right: max(0.25rem, env(safe-area-inset-right));
+    display: none;
   }
 
   @media (orientation: landscape) {
@@ -175,10 +184,10 @@
 }
 
 .symbol-set {
-  margin-bottom: 0.75rem;
   position: relative;
   display: flex;
   flex-direction: column;
+  margin-bottom: 0.75rem;
 
   &-header {
     display: flex;
@@ -188,48 +197,53 @@
   }
 
   &-title {
+    z-index: 1;
+
+    unicode-bidi: plaintext;
+    overflow: hidden;
     display: flex;
     gap: 0.5rem;
     align-items: center;
 
-    font-size: 1rem;
-    line-height: 1.6875rem;
-    font-weight: var(--font-weight-medium);
     margin: 0;
     padding: 0 0.25rem 0.125rem;
-    overflow: hidden;
-    unicode-bidi: plaintext;
-    z-index: 1;
+
+    font-size: 1rem;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.6875rem;
 
     &-external {
+      margin-right: 0.5rem;
       color: var(--color-text);
       text-align: start;
-      margin-right: 0.5rem;
     }
   }
 
   &-name {
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
     text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &-amount {
+    unicode-bidi: plaintext;
+
     font-size: 0.875rem;
     font-weight: normal;
-    text-align: left;
     color: rgba(var(--color-text-secondary-rgb), 0.75);
-    unicode-bidi: plaintext;
+    text-align: left;
     white-space: nowrap;
   }
 
   &-chat {
-    background-color: var(--color-text-secondary);
-    color: var(--color-background);
-    border-radius: 1rem;
     padding-inline: 0.25rem;
+    border-radius: 1rem;
+
+    color: var(--color-background);
     white-space: nowrap;
+
+    background-color: var(--color-text-secondary);
   }
 
   &-add-button {
@@ -237,12 +251,16 @@
   }
 
   &-remove {
-    right: 0;
-    position: absolute;
-    font-size: 1rem;
     cursor: var(--custom-cursor, pointer);
-    border-radius: 50%;
+
+    position: absolute;
+    right: 0;
+
     padding: 0.25rem;
+    border-radius: 50%;
+
+    font-size: 1rem;
+
     transition: background-color 0.15s;
 
     &:active,
@@ -259,6 +277,7 @@
 
   &-button {
     flex-shrink: 0;
+
     width: 2.125rem !important;
     height: 2.125rem;
     margin: 0 0.25rem;
@@ -276,15 +295,12 @@
 
 .symbol-set-container {
   display: grid !important;
-  justify-content: space-between;
   grid-template-columns: repeat(auto-fill, var(--emoji-size, 4.5rem));
   row-gap: 0.25rem;
   column-gap: var(--symbol-set-gap-size, 0.625rem);
-  text-align: initial;
+  justify-content: space-between;
 
-  @media (max-width: 600px) {
-    grid-gap: 0.5rem;
-  }
+  text-align: initial;
 
   &:not(.shown) {
     display: block;
@@ -297,5 +313,9 @@
   > .EmojiButton,
   > .StickerButton {
     margin: 0;
+  }
+
+  @media (max-width: 600px) {
+    grid-gap: 0.5rem;
   }
 }

@@ -1,7 +1,7 @@
 .Switcher {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  position: relative;
   margin: 0;
 
   &.disabled {
@@ -26,37 +26,49 @@
   }
 
   input {
-    height: 0;
-    width: 0;
-    visibility: hidden;
     position: absolute;
     z-index: var(--z-below);
+
+    width: 0;
+    height: 0;
+
+    visibility: hidden;
     opacity: 0;
   }
 
   .widget {
     cursor: var(--custom-cursor, pointer);
-    text-indent: -999px;
+
+    position: relative;
+
+    display: inline-block;
+
     width: 2.125rem;
     height: 0.875rem;
-    background-color: var(--color-gray);
-    display: inline-block;
     border-radius: 0.5rem;
-    position: relative;
+
+    text-indent: -999px;
+
+    background-color: var(--color-gray);
+
     transition: background-color 150ms;
   }
 
   .widget:after {
     content: "";
+
     position: absolute;
     top: -0.125rem;
     left: 0;
+
     width: 1.125rem;
     height: 1.125rem;
-    background-color: var(--color-background);
-    border-radius: 0.75rem;
-    transition: transform 200ms;
     border: 0.125rem solid var(--color-gray);
+    border-radius: 0.75rem;
+
+    background-color: var(--color-background);
+
+    transition: transform 200ms;
   }
 
   input:checked + .widget {

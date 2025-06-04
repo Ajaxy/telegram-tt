@@ -4,12 +4,6 @@
     max-width: 100%;
   }
 
-  @media (max-width: 600px) {
-    .modal-dialog {
-      width: 20.375rem;
-    }
-  }
-
   .modal-header {
     padding: 0.5rem;
     border-bottom: 1px solid transparent;
@@ -23,8 +17,8 @@
   .modal-content {
     --emoji-size: 4.5rem;
 
-    text-align: center;
     padding: 0 !important;
+    text-align: center;
   }
 
   &.custom-emoji .modal-content {
@@ -37,22 +31,27 @@
 
   .stickers {
     position: relative;
+
+    overflow-y: auto;
+
     width: 100%;
     height: 19rem;
     max-height: 50vh;
-    overflow-y: auto;
     padding: 0 0.25rem;
+
     text-align: left;
   }
 
   .stickers-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, var(--emoji-size, 4.5rem));
-    justify-content: space-between;
     row-gap: 0.25rem;
     column-gap: var(--symbol-set-gap-size, 0.625rem);
-    text-align: initial;
+    justify-content: space-between;
+
     padding-bottom: 0.25rem;
+
+    text-align: initial;
 
     @media (max-width: 600px) {
       grid-gap: 0.5rem;
@@ -74,5 +73,11 @@
     width: 100%;
     height: 22.8125rem;
     max-height: calc(50vh + 3.8125rem);
+  }
+
+  @media (max-width: 600px) {
+    .modal-dialog {
+      width: 20.375rem;
+    }
   }
 }

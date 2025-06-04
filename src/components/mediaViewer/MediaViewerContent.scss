@@ -1,17 +1,19 @@
 .MediaViewerContent {
   position: absolute;
+  z-index: 1;
   top: 0;
-  left: 0;
   right: 0;
   bottom: 0;
+  left: 0;
   transform: none;
+
   overflow: hidden;
-  z-index: 1;
-  padding: 3.25rem 0;
-  height: 100%;
   display: inline-flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+
+  height: 100%;
+  padding: 3.25rem 0;
 
   .thumbnail {
     position: relative;

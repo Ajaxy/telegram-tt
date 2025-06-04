@@ -1,15 +1,14 @@
 @use '../../../styles/mixins';
 
 .root {
-  height: 100%;
   overflow-x: hidden;
   overflow-y: hidden;
+  height: 100%;
 }
 
 .graph {
   margin-bottom: 1rem;
   border-bottom: 0.0625rem solid var(--color-borders);
-
   opacity: 1;
   transition: opacity 0.3s ease;
 
@@ -19,8 +18,8 @@
   }
 
   &.hidden {
-    opacity: 0;
     margin: 0;
+    opacity: 0;
   }
 }
 
@@ -32,6 +31,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+
   padding: 1rem 0.75rem;
   border-bottom: 0.0625rem solid var(--color-borders);
 }
@@ -44,7 +44,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+
   margin-bottom: 0.5rem;
+
   line-height: 1.6875rem;
 }
 
@@ -65,8 +67,8 @@
 }
 
 .toncoinIcon {
-  font-size: 1.5rem;
   margin-inline: 0 0.5rem;
+  font-size: 1.5rem;
   color: var(--color-primary);
 }
 

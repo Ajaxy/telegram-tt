@@ -1,13 +1,17 @@
 @use "../../styles/mixins";
 
 @mixin thumb-styles() {
-  background: var(--slider-color);
-  border: none;
-  height: 0.75rem;
-  width: 0.75rem;
-  border-radius: 50%;
   cursor: var(--custom-cursor, pointer);
+
   transform: scale(1);
+
+  width: 0.75rem;
+  height: 0.75rem;
+  border: none;
+  border-radius: 50%;
+
+  background: var(--slider-color);
+
   transition: transform 0.25s ease-in-out;
 
   &:hover {
@@ -23,8 +27,9 @@
   margin-inline-end: 1rem;
 
   &.disabled {
-    pointer-events: none;
     --slider-color: var(--color-text-secondary);
+
+    pointer-events: none;
   }
 
   &.readOnly {
@@ -51,8 +56,8 @@
 
     &[dir="rtl"] {
       .value {
-        margin-left: 0;
         margin-right: 1rem;
+        margin-left: 0;
       }
     }
   }
@@ -63,27 +68,33 @@
 
     &::before {
       content: "";
+
       position: absolute;
-      width: 100%;
-      left: 0;
-      top: 0.3125rem;
-      height: 0.125rem;
-      background-color: var(--color-borders);
-      border-radius: 0.125rem;
-      opacity: 0.5;
       z-index: -1;
+      top: 0.3125rem;
+      left: 0;
+
+      width: 100%;
+      height: 0.125rem;
+      border-radius: 0.125rem;
+
+      opacity: 0.5;
+      background-color: var(--color-borders);
     }
   }
 
   .slider-fill-track {
-    position: absolute;
-    width: 100%;
-    left: 0;
-    top: 0.3125rem;
-    height: 0.125rem;
-    background-color: var(--slider-color);
-    border-radius: 0.125rem;
     pointer-events: none;
+
+    position: absolute;
+    top: 0.3125rem;
+    left: 0;
+
+    width: 100%;
+    height: 0.125rem;
+    border-radius: 0.125rem;
+
+    background-color: var(--slider-color);
   }
 
   &.bold {
@@ -121,16 +132,18 @@
 
   .slider-options {
     display: grid;
-    grid-template-rows: auto;
     grid-auto-columns: 1fr;
     grid-auto-flow: column;
+    grid-template-rows: auto;
   }
 
   .slider-option {
-    font-size: 0.8125rem;
-    text-align: center;
     cursor: var(--custom-cursor, pointer);
+
+    font-size: 0.8125rem;
     color: var(--color-text-secondary);
+    text-align: center;
+
     transition: color 0.2s ease;
 
     &:hover,

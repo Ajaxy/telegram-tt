@@ -9,19 +9,21 @@
 
 .option {
   --_background-color: var(--color-background-secondary);
+
+  cursor: var(--custom-cursor, pointer);
+
   display: flex;
   flex-direction: column;
+  gap: 0.125rem;
   align-items: center;
   justify-content: center;
-  gap: 0.125rem;
 
   padding: 1rem;
   border-radius: 0.625rem;
 
   background-color: var(--_background-color);
-  transition: background-color 0.25s ease-out;
 
-  cursor: var(--custom-cursor, pointer);
+  transition: background-color 0.25s ease-out;
 
   &:hover {
     --_background-color: var(--color-background-secondary-accent);
@@ -38,11 +40,11 @@
 
 .optionTop {
   display: flex;
-  align-items: center;
   gap: 0.25rem;
+  align-items: center;
 
-  font-weight: var(--font-weight-medium);
   font-size: 1.5rem;
+  font-weight: var(--font-weight-medium);
   line-height: 1;
 }
 
@@ -55,6 +57,7 @@
 
 .stackedStar {
   @include mixins.filter-outline(0.0625rem, var(--_background-color));
+
   transition: filter 0.25s ease-out;
 }
 

@@ -1,19 +1,24 @@
 .root {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
   color: var(--color-white);
 
   .button {
-    background: var(--pattern-color);
     width: auto;
-    margin-top: 1.0625rem;
-    text-transform: none;
-    color: var(--color-white);
     height: 2.25rem;
+    margin-top: 1.0625rem;
+
     line-height: 2.25rem;
+    color: var(--color-white);
+    text-transform: none;
+
+    background: var(--pattern-color);
+
     transition: filter 150ms ease-in-out;
 
     &:not(.disabled):not(:disabled):hover {
@@ -27,10 +32,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: var(--pattern-color);
+
   max-width: 13.5rem;
   padding: 1.0625rem 0;
   border-radius: 1.5rem;
+
+  background: var(--pattern-color);
 
   &[dir="rtl"] {
     text-align: right;
@@ -38,13 +45,16 @@
 }
 
 .icons-container {
-  border-radius: 50%;
-  width: 8rem;
-  height: 8rem;
+  position: relative;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+
   background: var(--pattern-color);
 }
 
@@ -53,27 +63,29 @@
 }
 
 .comments-icon {
-  font-size: 5rem;
   position: absolute;
   top: 0;
   transform: translateY(1.75rem);
+  font-size: 5rem;
 }
 
 .description {
-  white-space: pre;
-  text-align: center;
   display: inline-flex;
-  align-items: center;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
-  padding: 0 1rem;
+
   margin-top: 0.5rem;
+  padding: 0 1rem;
+
+  text-align: center;
+  white-space: pre;
 }
 
 .starIconContainer {
-  font-weight: var(--font-weight-medium);
   display: inline-flex;
   align-items: center;
+  font-weight: var(--font-weight-medium);
 }
 
 .starIcon {

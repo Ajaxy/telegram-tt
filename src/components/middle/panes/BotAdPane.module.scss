@@ -3,17 +3,19 @@
 .root {
   @include mixins.header-pane;
 
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  height: auto;
-
-  line-height: 1.25;
-
   cursor: var(--custom-cursor, pointer);
+
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  height: auto;
 
   // Slight variation from mixins.header-pane
   padding-left: max(1rem, env(safe-area-inset-left));
+
+  line-height: 1.25;
+
   transition: background-color 0.2s, transform var(--slide-transition);
 
   &:hover {
@@ -27,8 +29,8 @@
 
 .info {
   display: flex;
-  align-items: center;
   gap: 0.25rem;
+  align-items: center;
   color: var(--accent-color);
 }
 

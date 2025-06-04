@@ -2,8 +2,8 @@
 
 .root {
   margin-top: 0.5rem;
-  font-size: 0.875rem;
   padding-block: 0.25rem;
+  font-size: 0.875rem;
 }
 
 .title {
@@ -35,15 +35,15 @@
 
 .collapseIcon {
   position: absolute;
+  right: 0;
+  bottom: 0;
+
   display: grid;
   place-items: center;
 
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 50%;
-
-  bottom: 0;
-  right: 0;
 }
 
 .clickable {

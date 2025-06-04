@@ -14,8 +14,8 @@
 }
 
 .optionText {
-  width: 100%;
   overflow: hidden;
+  width: 100%;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -29,15 +29,15 @@
 }
 
 .sectionTitle {
-  color: var(--color-primary);
   padding-inline: 1rem;
+  color: var(--color-primary);
 }
 
 .description {
   margin-top: 0.75rem;
   margin-bottom: 0;
-  color: var(--color-text-secondary);
   padding-inline: 1rem;
+  color: var(--color-text-secondary);
 }
 
 .title {
@@ -54,7 +54,7 @@
 }
 
 .transition {
+  overflow: hidden;
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: height 0.25s ease-in-out;
-  overflow: hidden;
 }

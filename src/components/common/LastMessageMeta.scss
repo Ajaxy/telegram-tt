@@ -1,14 +1,16 @@
 .LastMessageMeta {
-  margin-right: 0.1875rem;
-  flex-shrink: 0;
-  font-size: 0.75rem;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
 
+  margin-right: 0.1875rem;
+
+  font-size: 0.75rem;
+
   .MessageOutgoingStatus {
-    color: var(--color-text-meta-colored);
     margin-right: 0.125rem;
     font-size: 1.125rem;
+    color: var(--color-text-meta-colored);
 
     body.is-ios & {
       margin-bottom: -0.125rem;

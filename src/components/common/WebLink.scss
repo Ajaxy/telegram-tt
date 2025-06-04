@@ -1,9 +1,11 @@
 .WebLink {
+  position: relative;
+
   min-height: 3rem;
   padding: 0.25rem 0 0 3.75rem;
+
   font-size: 0.875rem;
   line-height: 1.125rem;
-  position: relative;
 
   & + & {
     margin-top: 1.5rem;
@@ -11,29 +13,36 @@
 
   &.without-media::before {
     content: attr(data-initial);
-    width: 3rem;
-    height: 3rem;
+
     position: absolute;
-    left: 0;
     top: 0;
-    background-color: var(--color-webpage-initial-background);
-    color: #fff;
+    left: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    width: 3rem;
+    height: 3rem;
     border-radius: var(--border-radius-messages-small);
-    text-transform: uppercase;
-    font-weight: var(--font-weight-medium);
+
     font-size: 1.5rem;
+    font-weight: var(--font-weight-medium);
+    color: #fff;
+    text-transform: uppercase;
+
+    background-color: var(--color-webpage-initial-background);
   }
 
   .Media {
+    cursor: var(--custom-cursor, default) !important;
+
     position: absolute;
-    left: 0;
     top: 0;
+    left: 0;
+
     width: 3rem;
     height: 3rem;
-    cursor: var(--custom-cursor, default) !important;
     padding-bottom: unset !important;
     border-radius: var(--border-radius-messages-small) !important;
   }
@@ -41,36 +50,39 @@
   .site-name,
   .site-description,
   .site-title {
-    overflow-wrap: anywhere;
     text-align: initial;
+    overflow-wrap: anywhere;
   }
 
   .site-name {
-    display: block;
-    color: var(--color-links);
-    font-weight: var(--font-weight-normal);
-    white-space: nowrap;
     overflow: hidden;
+    display: block;
+
+    font-weight: var(--font-weight-normal);
+    color: var(--color-links);
     text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .site-title {
+    margin-bottom: 0.0625rem;
     font-size: 1rem;
     font-weight: var(--font-weight-medium);
-    margin-bottom: 0.0625rem;
     line-height: 1.3125rem;
   }
 
   .sender-name,
   .site-description {
-    margin-bottom: 0;
-    color: var(--color-text-secondary);
-    line-height: 1.125rem;
-    max-height: 2.25rem;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
     overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+
+    max-height: 2.25rem;
+    margin-bottom: 0;
+
+    line-height: 1.125rem;
+    color: var(--color-text-secondary);
   }
 
   .sender-name {
@@ -87,8 +99,8 @@
 
     .Media,
     &.without-media::before {
-      left: auto;
       right: 0;
+      left: auto;
     }
 
     .content {

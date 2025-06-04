@@ -2,17 +2,17 @@
 @use "../../../styles/icons";
 
 @mixin subheader-styles() {
-  font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
-  margin-inline-end: 0.5rem;
   overflow: hidden;
 
-  padding-inline: 0.4375rem;
+  max-width: 10rem;
+  margin-inline-end: 0.5rem;
   padding-block: 0.1875rem;
+  padding-inline: 0.4375rem;
   border-radius: var(--border-radius-messages-small);
 
-  background-color: var(--pattern-color);
-  max-width: 10rem;
+  font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
 
+  background-color: var(--pattern-color);
   box-shadow: 0 1px 2px var(--color-default-shadow);
 
   @media (max-width: 600px) {
@@ -21,43 +21,22 @@
 }
 
 .message-content {
+  position: relative;
+  max-width: var(--max-width);
   &.gift {
     --max-width: 18rem;
   }
 
-  position: relative;
-  max-width: var(--max-width);
-
-  @media (max-width: 600px) {
-    max-width: min(29rem, calc(100vw - 6.25rem));
-    .MessageList.no-avatars & {
-      max-width: min(29rem, calc(100vw - 3.75rem));
-    }
-    .Message.own & {
-      max-width: min(30rem, calc(100vw - 3.75rem));
-    }
-
-    &.has-action-button {
-      max-width: min(29rem, calc(100vw - 7rem));
-
-      .MessageList.no-avatars & {
-        max-width: min(29rem, calc(100vw - 4.5rem));
-      }
-
-      .Message.own & {
-        max-width: min(30rem, calc(100vw - 4.5rem));
-      }
-    }
-  }
-
   img {
-    -webkit-touch-callout: none;
     user-select: none;
+
+    -webkit-touch-callout: none;
   }
 
   .emoji {
-    -webkit-user-drag: none;
     user-select: text;
+
+    -webkit-user-drag: none;
   }
 
   .content-unsupported {
@@ -71,18 +50,20 @@
 
   .text-content,
   .transcription {
-    margin: 0;
-    overflow-wrap: anywhere;
-    white-space: pre-wrap;
-    line-height: 1.3125;
-    text-align: initial;
-    display: block;
-    unicode-bidi: plaintext;
-    border-radius: 0.25rem;
     position: relative;
 
+    unicode-bidi: plaintext;
     overflow: clip;
     overflow-clip-margin: 0.5rem;
+    display: block;
+
+    margin: 0;
+    border-radius: 0.25rem;
+
+    line-height: 1.3125;
+    text-align: initial;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
   }
 
   .transcription {
@@ -99,8 +80,8 @@
     }
 
     &.transcription-error {
-      color: var(--color-text-meta);
       font-size: 0.875rem;
+      color: var(--color-text-meta);
     }
 
     .own &.transcription-error {
@@ -109,27 +90,28 @@
   }
 
   .translation-animation {
+    pointer-events: none;
+
     position: absolute;
     top: 0;
-    left: 0;
     right: 0;
     bottom: 0;
-
-    pointer-events: none;
+    left: 0;
   }
 
   .text-loading {
     --background-gradient-size: 20rem;
     --animation-color: var(--color-skeleton-background);
 
-    background-image: linear-gradient(to right, transparent 10%, var(--animation-color) 50%, transparent 90%);
-    background-size: var(--background-gradient-size);
-
     display: inline;
-    box-decoration-break: clone;
-    color: transparent;
 
     border-radius: 0.25rem;
+
+    color: transparent;
+
+    background-image: linear-gradient(to right, transparent 10%, var(--animation-color) 50%, transparent 90%);
+    background-size: var(--background-gradient-size);
+    box-decoration-break: clone;
 
     animation: text-loading 1.5s linear infinite;
 
@@ -153,15 +135,18 @@
       position: relative;
       top: 0.375rem;
       bottom: auto !important;
+
       float: right;
-      line-height: 1.35;
+
       height: calc(var(--message-meta-height, 1rem));
-      margin-left: 0.4375rem;
       margin-right: -0.375rem;
+      margin-left: 0.4375rem;
+
+      line-height: 1.35;
 
       .MessageOutgoingStatus .Transition {
-        max-height: calc(var(--message-meta-height, 1rem));
         overflow: hidden;
+        max-height: calc(var(--message-meta-height, 1rem));
       }
 
       html[data-message-text-size="12"] & {
@@ -185,8 +170,8 @@
     &:dir(rtl) {
       & > .MessageMeta {
         float: left;
-        margin-left: -0.25rem;
         margin-right: 0.4375rem;
+        margin-left: -0.25rem;
       }
     }
   }
@@ -195,17 +180,20 @@
     position: relative;
     top: 0.375rem;
     bottom: auto !important;
+
     float: right;
-    line-height: 1;
-    height: calc(var(--message-meta-height, 1rem));
-    margin-left: auto;
-    margin-top: -0.5rem;
-    margin-right: -0.5rem;
     align-self: flex-end;
 
+    height: calc(var(--message-meta-height, 1rem));
+    margin-top: -0.5rem;
+    margin-right: -0.5rem;
+    margin-left: auto;
+
+    line-height: 1;
+
     .MessageOutgoingStatus .Transition {
-      max-height: calc(var(--message-meta-height, 1rem));
       overflow: hidden;
+      max-height: calc(var(--message-meta-height, 1rem));
     }
 
     html[data-message-text-size="12"] & {
@@ -230,8 +218,8 @@
   &.document:not(.text) {
     &::after {
       content: "";
-      display: block;
       clear: both;
+      display: block;
     }
   }
 
@@ -274,10 +262,10 @@
   }
 
   .matching-text-highlight:not(.is-quote) {
+    padding: 0 0.125rem;
+    border-radius: 0.25rem;
     color: var(--color-text);
     background: #cae3f7;
-    border-radius: 0.25rem;
-    padding: 0 0.125rem;
 
     .theme-dark & {
       --color-text: #000;
@@ -285,33 +273,35 @@
   }
 
   .matching-text-highlight.is-quote {
-    background: transparent;
     border-radius: 0.25rem;
+    background: transparent;
 
     &.animate {
       color: var(--color-text);
+      background-color: #cae3f7;
       animation: quote-highlight 0.5s;
       animation-delay: 1.5s;
-      background-color: #cae3f7;
 
       .theme-dark & {
-        animation-name: quote-highlight-dark;
         color: #000;
+        animation-name: quote-highlight-dark;
       }
     }
   }
 
   .message-title {
-    white-space: nowrap;
+    user-select: none;
+
+    unicode-bidi: plaintext;
     overflow: hidden;
-    text-overflow: ellipsis;
+    display: flex;
+
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
     font-weight: var(--font-weight-medium);
     line-height: 1.25rem;
     color: var(--accent-color);
-    unicode-bidi: plaintext;
-    display: flex;
-    user-select: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     .forward-title-container,
     .message-title-name-container,
@@ -340,8 +330,8 @@
     }
 
     .forward-title {
-      font-weight: normal;
       margin-right: 0.25rem;
+      font-weight: normal;
     }
 
     .forward-avatar {
@@ -349,9 +339,9 @@
     }
 
     & > .interactive {
+      unicode-bidi: plaintext;
       overflow: hidden;
       text-overflow: ellipsis;
-      unicode-bidi: plaintext;
     }
 
     .sender-hidden {
@@ -389,9 +379,10 @@
 
     .StarIcon {
       --color-fill: var(--accent-color);
+
+      margin-left: 0.25rem;
       vertical-align: middle;
       opacity: 0.5;
-      margin-left: 0.25rem;
     }
 
     .title-spacer {
@@ -399,12 +390,14 @@
     }
 
     .admin-title {
-      margin-left: 1rem;
-      text-align: right;
-      font-weight: var(--font-weight-normal);
-      font-size: 0.75rem;
-      color: rgba(var(--color-text-meta-rgb), 0.75);
       user-select: none;
+
+      margin-left: 1rem;
+
+      font-size: 0.75rem;
+      font-weight: var(--font-weight-normal);
+      color: rgba(var(--color-text-meta-rgb), 0.75);
+      text-align: right;
 
       .Message.own & {
         color: var(--accent-color);
@@ -412,20 +405,24 @@
     }
 
     .sender-boosts {
+      user-select: none;
+
       display: flex;
       align-items: center;
-      font-size: 0.75rem;
+
       margin-top: -0.125rem;
       margin-inline-start: 0.125rem;
-      user-select: none;
+
+      font-size: 0.75rem;
     }
   }
 
   .message-subheader {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     gap: 0.25rem;
+    justify-content: flex-start;
+
     padding: 0.125rem 0;
   }
 
@@ -472,11 +469,14 @@
   }
 
   .svg-appendix {
-    overflow: hidden;
     position: absolute;
     bottom: -0.0625rem;
+
+    overflow: hidden;
+
     width: 0.5625rem;
     height: 1.125rem;
+
     font-size: 1rem !important;
 
     .corner {
@@ -504,6 +504,7 @@
     .Message & {
       .svg-appendix {
         --background-color: #ccc;
+
         opacity: 1;
         transition: opacity 500ms ease;
       }
@@ -556,16 +557,19 @@
 
   &:not(.custom-shape) .emoji:not(.custom-emoji) {
     display: inline-block;
+
     width: 1.25em;
     height: 1.25em;
-    background-size: 1.25em;
-    color: transparent;
     margin-inline-end: 1px;
+
+    color: transparent;
     vertical-align: text-bottom;
 
+    background-size: 1.25em;
+
     &::selection {
-      background-color: var(--color-selection-highlight-emoji);
       color: transparent;
+      background-color: var(--color-selection-highlight-emoji);
     }
   }
 
@@ -578,6 +582,7 @@
 
     .custom-emoji {
       --custom-emoji-size: max(calc(1.25 * var(--message-text-size, 1rem)), 20px);
+
       width: var(--custom-emoji-size);
       height: var(--custom-emoji-size);
     }
@@ -596,11 +601,11 @@
     font-size: inherit !important;
 
     .content-inner {
-      display: flex;
-      align-items: flex-start;
-      flex-direction: row-reverse;
       direction: ltr;
+      display: flex;
+      flex-direction: row-reverse;
       gap: 0.5rem;
+      align-items: flex-start;
 
       & > .message-title {
         @include subheader-styles();
@@ -609,13 +614,12 @@
           position: absolute;
           top: 0.125rem;
           left: 100%;
-
           color: white;
         }
 
         .Message.own & {
-          left: initial;
           right: 100%;
+          left: initial;
         }
 
         .admin-title {
@@ -630,6 +634,28 @@
 
     .media-inner {
       margin-top: 0.375rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    max-width: min(29rem, calc(100vw - 6.25rem));
+    .MessageList.no-avatars & {
+      max-width: min(29rem, calc(100vw - 3.75rem));
+    }
+    .Message.own & {
+      max-width: min(30rem, calc(100vw - 3.75rem));
+    }
+
+    &.has-action-button {
+      max-width: min(29rem, calc(100vw - 7rem));
+
+      .MessageList.no-avatars & {
+        max-width: min(29rem, calc(100vw - 4.5rem));
+      }
+
+      .Message.own & {
+        max-width: min(30rem, calc(100vw - 4.5rem));
+      }
     }
   }
 }
@@ -652,8 +678,8 @@
 .WebPage:not(.with-document) {
   .media-inner {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 
     &.interactive {
       cursor: var(--custom-cursor, pointer);
@@ -678,8 +704,8 @@
   &.has-subheader .Album,
   &.is-forwarded .media-inner,
   &.is-forwarded .Album {
-    margin-left: -0.5rem;
     margin-right: -0.5rem;
+    margin-left: -0.5rem;
 
     body.is-ios .Message.own & {
       margin-left: -0.625rem;
@@ -732,8 +758,8 @@
     justify-content: center;
 
     &:not(.open) {
-      opacity: 0.5;
       transform: scale(0);
+      opacity: 0.5;
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
   }
@@ -741,11 +767,15 @@
   .icon-large-play,
   .icon-download {
     position: absolute;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     color: #fff;
+
     opacity: 0.7;
+
     transition: opacity 150ms;
 
     &:hover {
@@ -756,9 +786,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
+
       width: 3.375rem;
       height: 3.375rem;
       border-radius: 50%;
+
       background: rgba(black, 0.25);
     }
 
@@ -782,25 +814,30 @@
   .message-media-duration,
   .message-transfer-progress,
   .message-paid-media-status {
-    background: rgba(0, 0, 0, 0.25);
-    color: #fff;
-    font-size: 0.75rem;
-    position: absolute;
-    left: 0.1875rem;
-    top: 0.1875rem;
-    z-index: 1;
-    padding: 0 0.375rem;
-    border-radius: 0.75rem;
-    line-height: 1.125rem;
     user-select: none;
+
+    position: absolute;
+    z-index: 1;
+    top: 0.1875rem;
+    left: 0.1875rem;
+
     display: flex;
     align-items: center;
+
+    padding: 0 0.375rem;
+    border-radius: 0.75rem;
+
+    font-size: 0.75rem;
+    line-height: 1.125rem;
+    color: #fff;
+
+    background: rgba(0, 0, 0, 0.25);
   }
 
   .message-media-duration .icon-muted {
-    vertical-align: -0.1875rem;
     margin-left: 0.375rem;
     font-size: 1rem;
+    vertical-align: -0.1875rem;
   }
 
   .message-media-duration .playback-failed {
@@ -814,10 +851,10 @@
 }
 
 .message-content.custom-shape {
-  line-height: 1.2;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
+  line-height: 1.2;
 
   &.has-comment-counter {
     min-height: 5.25rem;
@@ -837,16 +874,16 @@
     left: 100%;
 
     .Message.own & {
-      left: initial;
       right: 100%;
+      left: initial;
     }
   }
 
   .with-subheader {
-    display: flex;
-    align-items: flex-start;
-    flex-direction: row-reverse;
     direction: ltr;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: flex-start;
 
     > p {
       margin-bottom: 0;
@@ -858,9 +895,9 @@
       }
 
       @media (max-width: 340px) {
-        margin-left: -1rem;
         z-index: 1;
         max-width: calc(90vw - 12rem);
+        margin-left: -1rem;
       }
     }
 
@@ -875,15 +912,15 @@
   }
 
   .media-inner {
-    line-height: 1;
-    font-size: 1rem;
     flex-shrink: 0;
+    font-size: 1rem;
+    line-height: 1;
 
     .full-media {
       top: 0;
-      left: 0;
-      bottom: 0;
       right: 0;
+      bottom: 0;
+      left: 0;
     }
   }
 
@@ -892,8 +929,8 @@
     color: transparent;
 
     &::selection {
-      background-color: var(--color-selection-highlight-emoji);
       color: transparent;
+      background-color: var(--color-selection-highlight-emoji);
     }
   }
 
@@ -918,8 +955,8 @@
     }
 
     .text-content {
-      word-break: normal;
       line-height: var(--emoji-only-size);
+      word-break: normal;
 
       .emoji {
         width: var(--emoji-only-size);
@@ -927,10 +964,10 @@
       }
 
       .MessageMeta {
-        text-shadow: none;
-        bottom: -1.25rem;
         right: 0;
+        bottom: -1.25rem;
         line-height: normal;
+        text-shadow: none;
       }
     }
   }
@@ -972,9 +1009,9 @@
         margin-right: 0.5rem;
 
         @media (max-width: 340px) {
-          margin-left: 0;
           z-index: 1;
           max-width: calc(90vw - 11.5rem);
+          margin-left: 0;
         }
       }
     }
@@ -997,11 +1034,13 @@
 }
 
 .text-entity-link {
+  cursor: var(--custom-cursor, pointer);
+
+  unicode-bidi: initial;
+
   color: var(--color-links) !important;
   text-decoration: none !important;
   overflow-wrap: break-word;
-  cursor: var(--custom-cursor, pointer);
-  unicode-bidi: initial;
 
   &:hover,
   &:active,
@@ -1015,12 +1054,14 @@
 }
 
 .text-entity-code {
-  color: var(--color-code);
-  background: var(--color-code-bg);
-  white-space: pre-wrap;
   margin: 0;
   padding: 1px 2px;
   border-radius: 4px;
+
+  color: var(--color-code);
+  white-space: pre-wrap;
+
+  background: var(--color-code-bg);
 
   &.clickable {
     cursor: var(--custom-cursor, pointer);
@@ -1029,14 +1070,18 @@
 
 // Keep this close to `CodeBlock` style to avoid jumps in height
 .text-entity-pre {
-  white-space: pre-wrap;
-  background-color: var(--color-code-bg);
-  margin: 0;
-  padding: 0.5rem;
-  margin-block: 0.25rem;
-  border-radius: 4px;
   position: relative;
+
   overflow: hidden;
+
+  margin: 0;
+  margin-block: 0.25rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+
+  white-space: pre-wrap;
+
+  background-color: var(--color-code-bg);
 
   &:hover {
     .code-overlay {
@@ -1045,8 +1090,8 @@
   }
 
   &.no-word-wrap {
-    white-space: pre;
     padding-bottom: 0.25rem;
+    white-space: pre;
   }
 
   .pre-code {
@@ -1059,41 +1104,50 @@
 .code-block,
 .hljs {
   --color-scrollbar: var(--color-scrollbar-code);
+
   font-family: var(--font-family-monospace);
   font-size: 0.875rem;
 }
 
 blockquote, .blockquote {
-  display: inline-block;
   position: relative;
-  padding-inline: 0.5rem 1rem;
-  margin-block: 0.125rem;
-  border-radius: 0.25rem;
+
   overflow: hidden;
-  background-color: var(--accent-background-color);
-  white-space: pre-wrap;
+  display: inline-block;
+
+  margin-block: 0.125rem;
+  padding-inline: 0.5rem 1rem;
+  border-radius: 0.25rem;
+
   font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
+  white-space: pre-wrap;
+
+  background-color: var(--accent-background-color);
 
   &::before {
     content: "";
+
     position: absolute;
     top: 0;
-    inset-inline-start: 0;
     bottom: 0;
+    inset-inline-start: 0;
+
     width: 3px;
+
     background: var(--bar-gradient, var(--accent-color));
   }
 
   &::after {
     @include icons.icon;
+
     content: map.get(icons.$icons-map, "quote");
 
-    color: var(--accent-color);
     position: absolute;
     top: 0.25rem;
     inset-inline-end: 0.25rem;
 
     font-size: 0.625rem;
+    color: var(--accent-color);
   }
 }
 
@@ -1105,8 +1159,8 @@ blockquote, .blockquote {
 
 @keyframes text-loading {
   0% {
-    background-position-x: 0;
     opacity: 1;
+    background-position-x: 0;
   }
 
   50% {
@@ -1114,8 +1168,8 @@ blockquote, .blockquote {
   }
 
   100% {
-    background-position-x: var(--background-gradient-size);
     opacity: 1;
+    background-position-x: var(--background-gradient-size);
   }
 }
 
@@ -1131,12 +1185,12 @@ blockquote, .blockquote {
 
 @keyframes quote-highlight-dark {
   0% {
-    background-color: #cae3f7;
     color: #000;
+    background-color: #cae3f7;
   }
 
   100% {
-    background-color: transparent;
     color: var(--color-text);
+    background-color: transparent;
   }
 }

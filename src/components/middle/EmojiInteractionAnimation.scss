@@ -2,13 +2,16 @@
   --start-x: 0;
   --start-y: 0;
   --scale: 0;
+
+  pointer-events: none;
+
   position: absolute;
+  z-index: var(--z-reaction-interaction-effect);
   top: 0;
   left: 0;
+
   width: 100%;
   height: 100%;
-  pointer-events: none;
-  z-index: var(--z-reaction-interaction-effect);
 
   @keyframes show-interaction {
     from {
@@ -34,8 +37,9 @@
     position: absolute;
     top: var(--start-y);
     left: var(--start-x);
-    transform: scale(var(--scale), 0);
     transform-origin: left top;
+    transform: scale(var(--scale), 0);
+
     transition: 0.25s cubic-bezier(0.29, 0.81, 0.27, 0.99) opacity;
   }
 

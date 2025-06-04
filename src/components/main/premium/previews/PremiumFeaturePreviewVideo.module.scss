@@ -1,9 +1,11 @@
 .root {
+  position: relative;
+
+  overflow: hidden;
   display: flex;
   justify-content: center;
+
   aspect-ratio: 1;
-  overflow: hidden;
-  position: relative;
 
   @supports not (aspect-ratio: 1) {
     height: 0;
@@ -12,16 +14,13 @@
 }
 
 .wrapper {
-  width: 70%;
-  position: absolute;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 
   --y-static: -40%;
   --y-dynamic: -10%;
   --scroll-progress-converted: var(--scroll-progress, 0);
   --abs-scroll-progress-converted: var(--abs-scroll-progress, 0);
+
+  position: absolute;
   transform:
     perspective(200px)
     translate3d(
@@ -30,6 +29,13 @@
       0
     )
     rotateY(calc(var(--scroll-progress-converted) * 40deg));
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 70%;
+
   opacity: calc(1 - var(--abs-scroll-progress-converted) * 0.4);
 
   @supports not (aspect-ratio: 1) {
@@ -51,14 +57,16 @@
   position: relative;
   z-index: 1;
   width: 100%;
+
   -webkit-user-drag: none;
 }
 
 .video {
-  width: 100%;
   position: absolute;
-  bottom: 0;
   z-index: 0;
+  bottom: 0;
+
+  width: 100%;
   padding: 4%;
   border-radius: 0 0 10% 10%;
 }

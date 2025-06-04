@@ -8,13 +8,14 @@
   --text-color-reaction-chosen: #FFFFFF;
   --hover-color-reaction-chosen: var(--color-primary-shade);
 
+  pointer-events: none;
+
   position: absolute;
+  z-index: var(--z-local-search);
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  pointer-events: none;
-  z-index: var(--z-local-search);
 
   @media (min-width: 1276px) {
     :global(#Main.right-column-open) & {
@@ -24,33 +25,36 @@
 }
 
 .header {
+  pointer-events: auto;
+
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 3.5rem;
-  background-color: var(--color-background);
+
   display: flex;
   align-items: center;
-  padding-left: max(1.5rem, env(safe-area-inset-left));
-  padding-right: max(0.875rem, env(safe-area-inset-right));
 
-  pointer-events: auto;
+  width: 100%;
+  height: 3.5rem;
+  padding-right: max(0.875rem, env(safe-area-inset-right));
+  padding-left: max(1.5rem, env(safe-area-inset-left));
 
   opacity: 0;
+  background-color: var(--color-background);
+
   transition: opacity 200ms ease-in-out;
 
   .active & {
     opacity: 1;
   }
 
-  @media (max-width: 600px) {
-    padding-left: max(0.5rem, env(safe-area-inset-left));
-    padding-right: max(0.5rem, env(safe-area-inset-right));
-  }
-
   :global(body.is-electron.is-macos) & {
     padding-left: 4.5rem;
+  }
+
+  @media (max-width: 600px) {
+    padding-right: max(0.5rem, env(safe-area-inset-right));
+    padding-left: max(0.5rem, env(safe-area-inset-left));
   }
 }
 
@@ -62,14 +66,15 @@
 }
 
 .input {
-  border: none;
-  margin-left: 0.25rem;
-  margin-right: 0.75rem;
   flex: 1;
 
-  transition-property: background-color, box-shadow, border-radius;
-  transition-duration: 200ms;
+  margin-right: 0.75rem;
+  margin-left: 0.25rem;
+  border: none;
+
   transition-timing-function: ease-in-out;
+  transition-duration: 200ms;
+  transition-property: background-color, box-shadow, border-radius;
 
   .mobile & {
     margin: 0;
@@ -86,35 +91,36 @@
 }
 
 .adaptSearchBorders {
-  border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 .dropdown {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  transform: translateY(100%);
-  max-height: min(24rem, 80vh);
   pointer-events: all;
 
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateY(100%);
+
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 
-  background-color: var(--color-background);
-
-  overflow: hidden;
-  box-shadow: 0 0 0.625rem 0 var(--color-default-shadow);
-  clip-path: inset(0 -0.625rem -0.625rem -0.625rem); // Hide top shadow
-
-  border-bottom-left-radius: 1.375rem;
+  max-height: min(24rem, 80vh);
   border-bottom-right-radius: 1.375rem;
+  border-bottom-left-radius: 1.375rem;
 
-  transition-behavior: allow-discrete;
+  background-color: var(--color-background);
+  clip-path: inset(0 -0.625rem -0.625rem -0.625rem); // Hide top shadow
+  box-shadow: 0 0 0.625rem 0 var(--color-default-shadow);
+
+  transition-duration: 200ms;
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition-property: display, opacity;
-  transition-duration: 200ms;
+
+  transition-behavior: allow-discrete;
 
   .mobile & {
     position: absolute;
@@ -122,11 +128,10 @@
     right: 0;
     bottom: 3.375rem;
     left: 0;
+    transform: none;
 
     max-height: none;
     padding: 0;
-
-    transform: none;
     border-radius: 0;
   }
 
@@ -141,18 +146,18 @@
 }
 
 .results {
+  overflow-y: scroll;
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
   padding: 0.5rem;
 
   @include mixins.adapt-padding-to-scrollbar(0.5rem);
 }
 
 .placeholder {
+  margin: 0.5rem;
   color: var(--color-text-secondary);
   text-align: center;
-  margin: 0.5rem;
 }
 
 .separator {
@@ -161,17 +166,15 @@
 }
 
 .savedTags {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  flex-shrink: 0;
-
-  padding-block: 1rem;
-  margin-inline: 1rem;
-
-  border-bottom: 1px solid var(--color-borders);
-
   overflow-x: scroll;
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.375rem;
+  align-items: center;
+
+  margin-inline: 1rem;
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--color-borders);
 }
 
 .wrap {
@@ -189,25 +192,24 @@
 }
 
 .hash {
-  margin-inline-end: -0.5rem;
-  margin-inline-start: 0.5rem;
-
   display: grid;
   place-items: center;
+
+  margin-inline-start: 0.5rem;
+  margin-inline-end: -0.5rem;
+
   font-size: 1.5rem;
   color: var(--color-text-secondary);
 }
 
 .searchTypes {
+  overflow-x: scroll;
   display: flex;
   flex-shrink: 0;
 
-  padding-block: 1rem;
   margin-inline: 1rem;
-
+  padding-block: 1rem;
   border-bottom: 1px solid var(--color-borders);
-
-  overflow-x: scroll;
 }
 
 .searchType {
@@ -216,16 +218,17 @@
   flex-grow: 0 !important;
   flex-shrink: 0;
 
-  color: var(--color-text-secondary);
-  background-color: var(--color-item-active);
-  font-weight: var(--font-weight-medium);
-
   margin-bottom: 0;
+
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+
+  background-color: var(--color-item-active);
 }
 
 .selectedType {
-  background-color: var(--color-primary);
   color: var(--color-white) !important;
+  background-color: var(--color-primary);
 
   &:hover {
     background-color: var(--color-primary-shade);
@@ -233,22 +236,24 @@
 }
 
 .footer {
+  pointer-events: auto;
+
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 100%;
-  height: 3.5rem;
-  background-color: var(--color-background);
+  transform: translateY(100%);
+
   display: flex;
   align-items: center;
-  padding-left: max(1rem, env(safe-area-inset-left));
+
+  width: 100%;
+  height: 3.5rem;
   padding-right: max(0.5rem, env(safe-area-inset-right));
+  padding-left: max(1rem, env(safe-area-inset-left));
 
-  pointer-events: auto;
-
+  background-color: var(--color-background);
   box-shadow: 0 -2px 2px var(--color-light-shadow);
 
-  transform: translateY(100%);
   transition: transform 200ms ease-in-out;
 
   .active & {
@@ -257,14 +262,14 @@
 
   :global {
     body:not(.keyboard-visible) & {
-      padding-bottom: 0;
       height: 3.5rem;
+      padding-bottom: 0;
     }
 
     @media (max-width: 600px) {
       body:not(.keyboard-visible) & {
-        padding-bottom: env(safe-area-inset-bottom);
         height: calc(3.5rem + env(safe-area-inset-bottom));
+        padding-bottom: env(safe-area-inset-bottom);
       }
     }
   }
@@ -279,6 +284,7 @@
   position: absolute;
   right: 0.5rem;
   bottom: 4rem;
+
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

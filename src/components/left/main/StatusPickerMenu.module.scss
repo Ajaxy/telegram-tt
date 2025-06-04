@@ -5,6 +5,7 @@
   --border-radius-default: 1.25rem;
 
   left: 0.5rem;
+
   width: 100%;
   max-width: calc(var(--symbol-menu-width) + var(--scrollbar-width));
   height: var(--symbol-menu-height);
@@ -16,13 +17,13 @@
     backdrop-filter: blur(25px);
   }
 
-  @media (max-width: 26rem) {
-    left: 0.5rem !important;
-    right: 0.5rem !important;
-    width: calc(100vw - 1rem);
-  }
-
   :global(.sticker-set-cover), :global(.custom-emoji) {
     color: var(--color-primary);
+  }
+
+  @media (max-width: 26rem) {
+    right: 0.5rem !important;
+    left: 0.5rem !important;
+    width: calc(100vw - 1rem);
   }
 }

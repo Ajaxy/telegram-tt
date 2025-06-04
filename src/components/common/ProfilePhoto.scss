@@ -1,13 +1,13 @@
 .ProfilePhoto {
-  width: 100%;
-  height: 100%;
   cursor: var(--custom-cursor, pointer);
   position: relative;
+  width: 100%;
+  height: 100%;
 
   .avatar-media {
+    position: relative;
     width: 100%;
     object-fit: cover;
-    position: relative;
   }
 
   .spinner-wrapper {
@@ -20,12 +20,15 @@
   &.replies-bot-account,
   &.no-photo,
   &.saved-messages {
+    cursor: var(--custom-cursor, default);
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     color: var(--color-white);
+
     background: linear-gradient(var(--color-white) -125%, var(--color-user));
-    cursor: var(--custom-cursor, default);
   }
 
   &.no-photo {
@@ -43,6 +46,7 @@
     position: absolute;
     top: 0;
     left: 0;
+
     width: 100%;
     height: 100%;
   }

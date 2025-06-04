@@ -5,12 +5,14 @@
 }
 
 .header {
+  position: relative;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 0.25rem;
+  align-items: center;
+
   margin-block: 1rem;
-  position: relative;
 }
 
 .title, .amount {
@@ -18,35 +20,37 @@
 }
 
 .title {
-  text-align: center;
-  text-wrap: balance;
+  margin-top: 1rem;
+
   font-size: 1.5rem;
   font-weight: var(--font-weight-semibold);
-  margin-top: 1rem;
   line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
 }
 
 .amount {
   display: flex;
   align-items: center;
-  text-align: center;
   color: var(--color-text-secondary);
+  text-align: center;
 }
 
 .footer {
-  text-align: center;
   margin-block: 0.5rem;
-  color: var(--color-text-secondary);
   font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-align: center;
 }
 
 .starsBackground {
   position: absolute;
-  height: 7rem;
+  z-index: -1;
   top: -0.75rem;
   left: 50%;
   transform: translateX(-50%);
-  z-index: -1;
+
+  height: 7rem;
 }
 
 .avatarWrapper {
@@ -55,11 +59,11 @@
 
 .subscriptionStar {
   position: absolute;
-  bottom: 0;
+  z-index: 1;
   right: 0;
+  bottom: 0;
 
   font-size: 1.75rem;
-  z-index: 1;
 
   @include mixins.filter-outline(1px, var(--color-background));
 }

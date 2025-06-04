@@ -1,15 +1,15 @@
 @use '../../../styles/mixins';
 
 .root {
-  overflow-y: scroll;
   overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .noResults {
+  padding: 0.75rem 0 0 0;
+  font-size: 0.9375rem;
   color: var(--color-text-secondary);
   text-align: center;
-  font-size: 0.9375rem;
-  padding: 0.75rem 0 0 0;
 }
 
 .section-header {
@@ -30,13 +30,13 @@
 
 .stats {
   margin-bottom: 0;
-  border: none;
   padding: 0.75rem 0 0 0;
+  border: none;
 }
 
 .down {
-  font-size: 1.5rem;
   margin-right: 0.5rem;
+  font-size: 1.5rem;
 }
 
 .loadMoreSpinner {
@@ -45,9 +45,10 @@
 
 .status {
   display: flex;
-  align-items: center;
   gap: 0.5rem;
+  align-items: center;
   justify-content: space-between;
+
   width: 100%;
 }
 
@@ -56,30 +57,32 @@
 }
 
 .month {
-  color: var(--color-text-secondary);
   margin: 0;
+  color: var(--color-text-secondary);
 }
 
 .quantity {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
 .floatingBadge {
+  position: relative;
+  z-index: 1;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   color: var(--color-links);
-  position: relative;
-  z-index: 1;
 }
 
 .floatingBadgeButtonColor {
+  margin-left: 0.5rem;
   padding: 0 0.5rem 0 0.375rem;
   border-radius: 1rem;
   background-color: var(--color-primary-opacity);
-  margin-left: 0.5rem;
 }
 
 .floatingBadgeWarning {
@@ -92,8 +95,8 @@
 }
 
 .floatingBadgeIcon {
-  font-size: 0.875rem;
   margin-right: 0.125rem;
+  font-size: 0.875rem;
 }
 
 .floatingBadgeValue {
@@ -126,8 +129,8 @@
 
 .copy {
   position: absolute;
-  right: 0.5rem;
-  top: 50%;
-  transform: translate(0, -50%);
   z-index: 1;
+  top: 50%;
+  right: 0.5rem;
+  transform: translate(0, -50%);
 }

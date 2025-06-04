@@ -1,21 +1,24 @@
 #LeftColumn-main {
-  height: 100%;
   position: relative;
+
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+
+  height: 100%;
+
   background: var(--color-background);
 
   > .Transition {
-    flex: 1;
     overflow: hidden;
+    flex: 1;
   }
 
   .ChatFolders {
-    height: 100%;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    height: 100%;
 
     .tabs-placeholder {
       height: 2.625rem;
@@ -28,11 +31,14 @@
     }
 
     .TabList {
-      justify-content: flex-start;
-      border-bottom: 0;
       z-index: 1;
 
+      justify-content: flex-start;
+
+      border-bottom: 0;
+
       opacity: 1;
+
       transition: opacity var(--layer-transition);
     }
 
@@ -46,24 +52,25 @@
     }
 
     > .Transition {
-      flex: 1;
       overflow: hidden;
+      flex: 1;
     }
   }
 
   .RecentContacts,
   .LeftSearch,
   .search-content {
-    height: 100%;
     overflow-y: auto;
+    height: 100%;
   }
 
   .btn-update {
     position: absolute;
     bottom: 1rem;
     left: 50%;
-    margin: 0 auto;
     transform: translateX(-50%);
+
+    margin: 0 auto;
 
     white-space: nowrap;
   }

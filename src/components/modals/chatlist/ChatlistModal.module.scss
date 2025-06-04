@@ -1,7 +1,7 @@
 .description {
-  text-align: center;
-  color: var(--color-text-secondary);
   margin-bottom: 1rem;
+  color: var(--color-text-secondary);
+  text-align: center;
 }
 
 .picker-wrapper {
@@ -20,8 +20,8 @@
 }
 
 .selection-toggle {
-  color: var(--color-links);
   cursor: var(--custom-cursor, pointer);
+  color: var(--color-links);
 }
 
 .foldersWrapper {
@@ -30,18 +30,21 @@
 }
 
 .folders {
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-
   position: relative;
+
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+
   margin-bottom: 1rem;
 
   &::after {
     content: '';
+
     position: absolute;
     top: 0;
     left: 0;
+
     width: 100%;
     height: 100%;
 
@@ -66,7 +69,7 @@
 
 .button-badge {
   position: absolute;
-  right: -0.25rem;
   top: 50%;
+  right: -0.25rem;
   transform: translate(100%, -50%);
 }

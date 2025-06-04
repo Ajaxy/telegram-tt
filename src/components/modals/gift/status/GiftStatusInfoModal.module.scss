@@ -18,16 +18,17 @@
 
 .radialPattern {
   position: absolute;
-  inset-inline-start: -1.5rem;
-  height: calc(100% + 2rem);
-  top: -3rem;
-  width: calc(100% + 3rem);
   z-index: -1;
+  top: -3rem;
+  inset-inline-start: -1.5rem;
+
+  width: calc(100% + 3rem);
+  height: calc(100% + 2rem);
 }
 
 .lockIcon {
-  font-size: 1rem;
   margin-left: 0.25rem;
+  font-size: 1rem;
 }
 
 .avatar {
@@ -35,30 +36,32 @@
 }
 
 .userTitle {
+  justify-content: center;
+
+  width: 100%;
+  margin-top: auto;
+  padding-top: 1rem;
+
   font-size: 1.25rem;
   color: white;
-  margin-top: auto;
-  width: 100%;
-  justify-content: center;
-  padding-top: 1rem;
 }
 
 .status {
+  padding-bottom: 1rem;
   font-size: 0.875rem;
   text-align: center;
-  padding-bottom: 1rem;
 }
 
 .userTitle, .status {
-  margin-bottom: 0;
   z-index: 1;
+  margin-bottom: 0;
 }
 
 .giftTitle {
-  font-weight: var(--font-weight-medium);
-  font-size: 1.5rem;
-  text-align: center;
   padding-bottom: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
 }
 
 .infoDescription {
@@ -66,7 +69,7 @@
 }
 
 .footer {
-  margin-top: 0.5rem;
   display: flex;
   align-self: stretch;
+  margin-top: 0.5rem;
 }

@@ -11,12 +11,16 @@
 
   .Button {
     flex: 1;
+
     width: auto;
     margin: 0.125rem;
-    background: var(--pattern-color);
     border-radius: var(--border-radius-messages-small);
+
     font-weight: var(--font-weight-medium);
     text-transform: none;
+
+    background: var(--pattern-color);
+
     transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms;
 
     &:hover,
@@ -38,17 +42,19 @@
     }
 
     .corner-icon {
-      font-size: 0.875rem;
       position: absolute;
-      right: 0.1875rem;
       top: 0.1875rem;
+      right: 0.1875rem;
+
       display: block;
 
+      font-size: 0.875rem;
+
       &.icon-arrow-right {
-        font-size: 0.75rem;
         top: 0.125rem;
         right: 0.125rem;
         transform: rotate(-45deg);
+        font-size: 0.75rem;
       }
     }
   }

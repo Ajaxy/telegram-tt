@@ -10,7 +10,7 @@ export function useTransitionActiveKey(deps: unknown[], noAnimation?: boolean): 
   useMemo(() => {
     if (!noAnimation) activeKey.current += 1;
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  }, [...deps, noAnimation]);
+  }, [...deps]);
 
   return activeKey.current;
 }

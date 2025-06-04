@@ -2,16 +2,16 @@
 
 // Common styles for all media-type components across the app.
 .media-inner {
-  position: relative;
   user-select: none;
+  position: relative;
 
   video.full-media,
   img.full-media,
   img.thumbnail,
   canvas.thumbnail {
+    display: block;
     width: 100%;
     height: 100%;
-    display: block;
     object-fit: cover;
   }
 
@@ -31,9 +31,9 @@
     left: 0;
 
     &.with-blurred-bg {
-      border-radius: 0 !important;
       left: 50%;
       transform: translateX(-50%);
+      border-radius: 0 !important;
     }
   }
 
@@ -50,26 +50,31 @@
     --_color: var(--color-primary);
 
     position: absolute;
+    right: 0;
     bottom: 0;
     left: 0;
-    right: 0;
-    height: 0.25rem;
-    background-color: rgba(255 255 255 / 0.3);
 
-    .theme-dark & {
-      --_color: white;
-    }
+    height: 0.25rem;
+
+    background-color: rgba(255 255 255 / 0.3);
 
     &::before {
       content: "";
+
       position: absolute;
       top: 0;
       left: 0;
+
       width: var(--_progress);
       height: 100%;
-      background-color: var(--_color);
       border-top-right-radius: 0.125rem;
       border-bottom-right-radius: 0.125;
+
+      background-color: var(--_color);
+    }
+
+    .theme-dark & {
+      --_color: white;
     }
   }
 }
@@ -78,26 +83,28 @@
   position: absolute;
   transform: rotate(-45deg);
 
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  &::before {
+    transform: rotate(90deg);
+  }
+
   &,
   &::before,
   &::after {
     width: 1.125rem;
     height: 0.125rem;
     border-radius: 0.125rem;
+
     background-color: var(--color-text-secondary);
+
     transition: transform var(--slide-transition);
-  }
-
-  &::before,
-  &::after {
-    position: absolute;
-    left: 0;
-    top: 0;
-    content: "";
-  }
-
-  &::before {
-    transform: rotate(90deg);
   }
 
   &.no-transition {
@@ -128,19 +135,23 @@
 
 // Used by ChatList and ContactList components
 .chat-list {
-  background: var(--color-background);
-  height: 100%;
-  padding: 0.5rem;
-
-  @include mixins.adapt-padding-to-scrollbar(0.5rem);
-
   overflow-x: hidden;
   overflow-y: scroll;
 
+  height: 100%;
+  padding: 0.5rem;
+
+  background: var(--color-background);
+
+  /* stylelint-disable-next-line no-duplicate-selectors */
+  & {
+    @include mixins.adapt-padding-to-scrollbar(0.5rem);
+  }
+
   &.forum-panel-open {
     .info {
-      opacity: 0;
       transform: translateX(-20%);
+      opacity: 0;
     }
 
     .Chat[dir="rtl"] .info {
@@ -152,19 +163,13 @@
     }
   }
 
-  @media (min-width: 600px) {
-    &.forum-panel-open .selected-forum .Avatar {
-      transform: none;
-    }
-  }
-
   .scroll-container {
     position: relative;
   }
 
   .no-results {
-    color: var(--color-text-meta);
     margin-top: 2rem;
+    color: var(--color-text-meta);
     text-align: center;
   }
 
@@ -182,15 +187,10 @@
     }
   }
 
-  @media (max-width: 600px) {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
   body.is-ios &,
   body.is-android & {
-    padding-left: 0;
     padding-right: 0;
+    padding-left: 0;
 
     .ListItem::after {
       opacity: 1;
@@ -202,6 +202,17 @@
         opacity: 0;
       }
     }
+  }
+
+  @media (min-width: 600px) {
+    &.forum-panel-open .selected-forum .Avatar {
+      transform: none;
+    }
+  }
+
+  @media (max-width: 600px) {
+    padding-right: 0;
+    padding-left: 0;
   }
 }
 
@@ -227,8 +238,8 @@
 .with-story-ribbon {
   --story-ribbon-height: 5.5rem;
 
-  height: calc(100% - var(--extra-height, 0px) + var(--story-ribbon-height)) !important;
   transform: translateY(calc(var(--story-ribbon-height) * -1));
+  height: calc(100% - var(--extra-height, 0px) + var(--story-ribbon-height)) !important;
 
   &.open, &.closing {
     transition: transform 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);

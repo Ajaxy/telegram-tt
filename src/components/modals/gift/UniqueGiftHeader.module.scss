@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+
   width: 100%;
   height: var(--_height);
   margin-bottom: 0.5rem;
@@ -12,21 +13,21 @@
 
 .radialPattern {
   position: absolute;
-  inset: -5%;
-  top: -5rem;
-  height: calc(var(--height) * 1.05);
-
   z-index: -1;
+  inset: -5rem -5% -5% -5%;
+  height: calc(var(--height) * 1.05);
 }
 
 .amount {
   display: flex;
   gap: 0.25rem;
+  align-items: center;
+
+  margin-bottom: 0.125rem;
+
   font-size: 1.125rem;
   font-weight: var(--font-weight-medium);
   line-height: 1.325;
-  margin-bottom: 0.125rem;
-  align-items: center;
   color: white;
 }
 
@@ -37,8 +38,8 @@
 .transition {
   position: absolute;
   top: 0;
-  height: calc(var(--_height) + 1rem); // Account for top modal padding
   overflow: hidden;
+  height: calc(var(--_height) + 1rem); // Account for top modal padding
 }
 
 .transitionSlide {
@@ -48,20 +49,22 @@
 }
 
 .title {
+  margin-top: auto;
   font-size: 1.25rem;
   color: white;
-  margin-top: auto;
 }
 
 .subtitle {
   max-width: 75%;
+
   font-size: 0.875rem;
-  transition: color 150ms ease-in;
   text-align: center;
   text-wrap: balance;
+
+  transition: color 150ms ease-in;
 }
 
 .title, .subtitle {
-  margin-bottom: 0;
   z-index: 1;
+  margin-bottom: 0;
 }

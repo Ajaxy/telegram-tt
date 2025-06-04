@@ -1,14 +1,14 @@
 @use "../../../styles/mixins";
 
 .LeftSearch {
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
 
   & > .Transition {
-    flex: 1;
     overflow: hidden;
+    flex: 1;
   }
 
   .TabList {
@@ -16,9 +16,9 @@
   }
 
   &--content {
-    padding-top: 0.5rem;
     overflow-y: auto;
     height: 100%;
+    padding-top: 0.5rem;
   }
 
   &--media {
@@ -40,12 +40,13 @@
 
   .section-heading {
     position: relative;
+
+    margin-bottom: 1rem;
     padding-top: 0.625rem;
     padding-left: 0.5rem;
-    margin-bottom: 1rem;
 
-    font-weight: var(--font-weight-medium);
     font-size: 1rem;
+    font-weight: var(--font-weight-medium);
     color: var(--color-text-secondary);
 
     &-first {
@@ -54,14 +55,14 @@
 
     &[dir="rtl"],
     &[dir="auto"] {
-      padding-left: 0;
-      padding-right: 1.25rem;
       margin: 0 -1.25rem 0 1rem !important;
+      padding-right: 1.25rem;
+      padding-left: 0;
       text-align: initial;
 
       &::before {
-        left: auto;
         right: 0.625rem;
+        left: auto;
       }
     }
 
@@ -87,30 +88,32 @@
   }
 
   .content:not(.with-seekline) {
-    align-self: center;
-    min-width: 0;
-    flex-grow: 1;
     overflow: hidden;
+    flex-grow: 1;
+    align-self: center;
+
+    min-width: 0;
+
     text-overflow: ellipsis;
     overflow-wrap: anywhere;
   }
 
   .message-date {
+    padding-left: 1rem;
     font-size: 0.75rem;
     color: var(--color-text-secondary);
-    padding-left: 1rem;
     white-space: nowrap;
   }
 
   .media-list {
     display: grid;
+    grid-auto-rows: 1fr;
+    grid-gap: 0.25rem;
+    grid-template-columns: repeat(3, 1fr);
+
     padding: 0.5rem;
 
     @include mixins.adapt-padding-to-scrollbar(0.5rem);
-
-    grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: 1fr;
-    grid-gap: 0.25rem;
   }
 
   .Audio {
@@ -125,9 +128,9 @@
     }
 
     .ChatInfo {
+      margin: -0.0625rem;
       // Fix for overflow hidden and stories indicator
       padding: 0.0625rem;
-      margin: -0.0625rem;
 
       .handle {
         unicode-bidi: plaintext;
@@ -163,18 +166,20 @@
     }
 
     .topic-item {
+      overflow: hidden;
       display: flex;
       align-items: center;
+
       font-size: 1rem;
-      line-height: 1.6875rem;
       font-weight: var(--font-weight-medium);
-      overflow: hidden;
+      line-height: 1.6875rem;
 
       .topic-icon {
         --custom-emoji-size: 2rem;
-        margin-inline-end: 0.25rem !important;
+
         width: 2rem;
         height: 2rem;
+        margin-inline-end: 0.25rem !important;
         font-size: 2rem !important;
       }
 
@@ -204,9 +209,12 @@
 
       .Link {
         float: right;
-        color: var(--color-links);
-        font-weight: var(--font-weight-medium);
+
         margin-right: 0.5rem;
+
+        font-weight: var(--font-weight-medium);
+        color: var(--color-links);
+
         transition: opacity 0.15s ease-in;
 
         &:active,
@@ -220,8 +228,8 @@
       &[dir="auto"] {
         .Link {
           float: left;
-          margin-left: 1rem;
           margin-right: 0;
+          margin-left: 1rem;
         }
       }
     }
@@ -233,28 +241,29 @@
   }
 
   .chat-selection {
+    overflow-x: auto;
+    overflow-y: hidden;
     display: flex;
     flex-shrink: 0;
     flex-wrap: nowrap;
-    justify-content: space-between;
     align-items: flex-end;
+    justify-content: space-between;
 
     padding-bottom: 0.5rem;
     padding-inline: 0.25rem;
 
-    box-shadow: inset 0 -1px 0 0 var(--color-borders);
     background-color: var(--color-background);
-    -webkit-overflow-scrolling: touch;
-    overflow-x: auto;
-    overflow-y: hidden;
+    box-shadow: inset 0 -1px 0 0 var(--color-borders);
 
-    .left-search-local-suggestion {
-      flex-shrink: 0;
-    }
+    -webkit-overflow-scrolling: touch;
 
     &::after {
       content: "";
       flex-grow: 1;
+    }
+
+    .left-search-local-suggestion {
+      flex-shrink: 0;
     }
   }
 
@@ -264,8 +273,8 @@
 
   [dir="rtl"] {
     .message-date {
-      padding-left: 0;
       padding-right: 1rem;
+      padding-left: 0;
     }
   }
 }

@@ -1,7 +1,7 @@
 .container {
   position: absolute;
-  width: 100%;
   z-index: 1;
+  width: 100%;
 
   &:has(:global(.ListItem-context-menu)) {
     z-index: 2;
@@ -17,36 +17,39 @@
 }
 
 .knob {
+  cursor: grab !important;
+
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 2rem;
-  height: 2rem;
 
   display: grid;
   place-items: center;
 
-  color: var(--color-text-secondary);
+  width: 2rem;
+  height: 2rem;
+
   font-size: 1.25rem;
   line-height: 1.75;
+  color: var(--color-text-secondary);
   text-align: center;
-  opacity: 0;
-  transition: opacity 150ms;
 
-  cursor: grab !important;
+  opacity: 0;
+
+  transition: opacity 150ms;
 
   .container:hover & {
     opacity: 1;
   }
 
   .isDragging & {
-    opacity: 1;
     cursor: grabbing !important;
+    opacity: 1;
   }
 
   @media (pointer: coarse) {
-    opacity: 1 !important;
     touch-action: none;
+    opacity: 1 !important;
   }
 }
 

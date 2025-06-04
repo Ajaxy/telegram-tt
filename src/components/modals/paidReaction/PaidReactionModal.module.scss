@@ -6,14 +6,14 @@
 }
 
 .title {
-  font-size: 1.5rem;
-  margin-bottom: 0;
   margin-top: 1.25rem;
+  margin-bottom: 0;
+  font-size: 1.5rem;
 }
 
 .slider {
-  margin-top: 2rem;
   flex-shrink: 0;
+  margin-top: 2rem;
 }
 
 .description {
@@ -25,28 +25,29 @@
 }
 
 .itemInfo {
-  flex-grow: 1;
   overflow: hidden;
-  height: auto;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
+
+  height: auto;
   margin-left: 0.5rem;
 }
 
 .itemTitle {
-  line-height: 1rem;
   margin-bottom: 0.125rem;
+  line-height: 1rem;
 }
 
 .itemSubtitle {
   font-size: 0.9375rem;
-  color: var(--color-text-secondary);
   line-height: 1rem;
+  color: var(--color-text-secondary);
 }
 
 .itemIcon {
-  margin-left: 0.5rem;
   margin-right: 0 !important;
+  margin-left: 0.5rem;
 }
 
 .sendAsPeerButtonAvatar {
@@ -54,13 +55,15 @@
 }
 
 .sendAsPeerMenuButton {
-  transition: background-color 0.15s;
-  margin-right: 0.25rem;
-  border-radius: 1.5rem;
-  padding: 0.25rem !important;
   width: auto;
   height: auto !important;
+  margin-right: 0.25rem;
+  padding: 0.25rem !important;
+  border-radius: 1.5rem;
+
   background-color: var(--color-background-secondary) !important;
+
+  transition: background-color 0.15s;
 
   &:global(.active),
   &:active,
@@ -70,18 +73,20 @@
 }
 
 .buttonDownIcon {
-  margin-left: 0.25rem;
   margin-right: 0.125rem;
+  margin-left: 0.25rem;
 }
 
 .sendAsPeerMenuBubble {
-  max-height: 15rem;
-  overflow-y: auto !important;
   right: auto !important;
   left: 50%;
-  transform: translateX(-50%) scale(0.85) !important;
   transform-origin: center !important;
+  transform: translateX(-50%) scale(0.85) !important;
+
+  overflow-y: auto !important;
+
   max-width: 16rem;
+  max-height: 15rem;
 
   &:global(.open) {
     transform: translateX(-50%) scale(1) !important;
@@ -93,20 +98,22 @@
 }
 
 .sendAsPeersMenuContainer {
-  z-index: 3;
-  display: flex;
   position: absolute;
+  z-index: 3;
   left: 50%;
   transform: translateX(-50%);
+
+  display: flex;
 }
 
 .headerControlPanel {
-  display: flex;
-  align-items: center;
   position: absolute;
+  z-index: 3;
   top: 0.75rem;
   right: 1.25rem;
-  z-index: 3;
+
+  display: flex;
+  align-items: center;
 }
 
 .separator {
@@ -118,10 +125,10 @@
 }
 
 .topLabel {
-  background-image: var(--stars-gradient);
-  color: var(--color-white);
-  border-radius: 1rem;
   padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  color: var(--color-white);
+  background-image: var(--stars-gradient);
 }
 
 .top {
@@ -145,9 +152,11 @@
 }
 
 .disclaimer {
-  font-size: 0.875rem;
   align-self: center;
-  color: var(--color-text-secondary);
+
   margin-top: 0.5rem;
   margin-bottom: 0.125rem;
+
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
 }

@@ -1,7 +1,7 @@
 .StickerTooltip {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
   grid-auto-rows: auto;
+  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
   place-items: center;
 
   &.hidden {

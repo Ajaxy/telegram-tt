@@ -1,9 +1,8 @@
 .root {
+  z-index: -1;
+  flex-direction: column;
   width: calc(100% - 4rem);
   max-width: 26rem;
-  flex-direction: column;
-
-  z-index: -1;
 
   @media (max-width: 600px) {
     width: calc(100% - 3rem);

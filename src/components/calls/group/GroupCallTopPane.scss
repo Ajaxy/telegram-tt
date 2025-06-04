@@ -3,11 +3,12 @@
 .GroupCallTopPane {
   @include mixins.header-pane;
 
+  cursor: var(--custom-cursor, pointer);
+
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
   align-items: center;
-  cursor: var(--custom-cursor, pointer);
+  justify-content: space-between;
 
   .info {
     display: flex;
@@ -26,10 +27,11 @@
   }
 
   .join {
-    height: 1.875rem;
-    border-radius: 1rem;
-    font-weight: var(--font-weight-medium);
-    padding: 0 1rem;
     width: auto;
+    height: 1.875rem;
+    padding: 0 1rem;
+    border-radius: 1rem;
+
+    font-weight: var(--font-weight-medium);
   }
 }

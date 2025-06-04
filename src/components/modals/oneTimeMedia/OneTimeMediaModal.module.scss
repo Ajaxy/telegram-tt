@@ -1,18 +1,22 @@
 .root {
   position: absolute;
+  z-index: var(--z-modal-confirm);
   top: 0;
   left: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  backdrop-filter: blur(2rem);
-  animation: fade-in-opacity 0.3s ease;
+
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: var(--z-modal-confirm);
-  align-items: center;
+  backdrop-filter: blur(2rem);
+
   transition: opacity 0.3s ease;
+  animation: fade-in-opacity 0.3s ease;
 
   &.closing {
     opacity: 0;
@@ -33,13 +37,14 @@
   position: absolute;
   bottom: 0;
   left: 0;
+
   width: 100%;
   margin-bottom: 2rem;
 }
 
 .closeBtn {
-  margin: 0 auto;
   width: auto;
+  margin: 0 auto;
 }
 
 @keyframes fade-in-opacity {

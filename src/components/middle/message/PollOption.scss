@@ -13,12 +13,15 @@
 
   .poll-option-share {
     position: relative;
-    margin-top: 0.125rem;
-    width: 1.75rem;
-    margin-inline-end: 0.5rem;
+
     flex-shrink: 0;
-    font-weight: var(--font-weight-medium);
+
+    width: 1.75rem;
+    margin-top: 0.125rem;
+    margin-inline-end: 0.5rem;
+
     font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
     text-align: right;
 
     &.limit-width {
@@ -32,13 +35,16 @@
     position: absolute;
     right: 0;
     bottom: -5px;
+
     width: 1rem;
     height: 1rem;
-    background: var(--accent-color);
-    color: var(--background-color);
     border-radius: 0.5rem;
+
     font-size: 0.75rem;
+    color: var(--background-color);
     text-align: center;
+
+    background: var(--accent-color);
 
     &.wrong {
       background: var(--color-error);
@@ -50,10 +56,11 @@
 
     &.animate {
       opacity: 0;
+
       animation-name: PollOptionIconAnimate;
-      animation-delay: 0.09s;
       animation-duration: 0.3s;
       animation-fill-mode: forwards;
+      animation-delay: 0.09s;
     }
   }
 
@@ -68,34 +75,39 @@
 
   .poll-option-line {
     position: relative;
+    transform-origin: 0 0;
+
     width: 0;
-    height: 0.25rem;
     min-width: 0.5rem;
-    border-radius: 0.125rem;
+    height: 0.25rem;
     margin-top: 0.5rem;
+    border-radius: 0.125rem;
+
     background: var(--accent-color);
 
-    transform-origin: 0 0;
     transition: transform 0.3s;
     transition-delay: 0.09s;
   }
 
   .poll-line {
+    position: absolute;
+    bottom: -5px;
+    left: -27px;
+
     width: 30px;
     height: 35px;
-    position: absolute;
-    left: -27px;
-    bottom: -5px;
-    transition: stroke-dashoffset 0.3s, stroke-dasharray 0.3s;
-    stroke-dashoffset: 0;
+
     stroke-dasharray: 0, 200%;
+    stroke-dashoffset: 0;
+
+    transition: stroke-dashoffset 0.3s, stroke-dasharray 0.3s;
   }
 
   .poll-line path {
-    stroke-width: 4px;
-    stroke-linecap: round;
-    stroke: var(--accent-color);
     fill: none;
+    stroke: var(--accent-color);
+    stroke-linecap: round;
+    stroke-width: 4px;
   }
 
   .wrong {

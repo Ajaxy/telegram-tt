@@ -8,62 +8,67 @@
 }
 
 .root :global(.modal-content) {
-  padding: 0;
   overflow: hidden;
+  padding: 0;
 }
 
 .root :global(.modal-dialog) {
-  height: min(calc(55vh + 41px + 193px), 90vh);
-  max-width: 26.25rem;
   overflow: hidden;
+  max-width: 26.25rem;
+  height: min(calc(55vh + 41px + 193px), 90vh);
 }
 
 .button {
-  font-weight: var(--font-weight-medium);
-  font-size: 1rem;
   height: 3rem;
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
 }
 
 .main {
-  height: 100%;
   overflow-y: scroll;
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  height: 100%;
 }
 
 .logo {
-  margin: 1rem;
   width: 6.25rem;
   height: 6.25rem;
   min-height: 6.25rem;
+  margin: 1rem;
 }
 
 .header-text {
+  margin-inline: 0.5rem;
   font-size: 1.5rem;
   font-weight: var(--font-weight-medium);
   text-align: center;
-  margin-inline: 0.5rem;
 }
 
 .description {
-  text-align: center;
-  margin-inline: 2.5rem;
   margin-bottom: 2rem;
+  margin-inline: 2.5rem;
+  text-align: center;
 }
 
 .header {
+  position: absolute;
   z-index: 2;
+  top: 0;
+  left: 0;
+
   display: flex;
   align-items: center;
-  border-bottom: 0.0625rem solid var(--color-borders);
-  position: absolute;
+
   width: 100%;
-  left: 0;
-  top: 0;
   height: 3.5rem;
   padding: 0.5rem;
+  border-bottom: 0.0625rem solid var(--color-borders);
+
   background: var(--color-background);
+
   transition: 0.25s ease-out transform;
 }
 
@@ -73,16 +78,16 @@
 
 .close-button {
   position: absolute;
+  z-index: 3;
   top: 0.5rem;
   left: 0.5rem;
-  z-index: 3;
 }
 
 .premium-header-text {
+  unicode-bidi: plaintext;
+  margin: 0 0 0 3rem;
   font-size: 1.25rem;
   font-weight: var(--font-weight-medium);
-  margin: 0 0 0 3rem;
-  unicode-bidi: plaintext;
 }
 
 .primary-footer-text {
@@ -90,10 +95,11 @@
 }
 
 .section {
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+
+  width: 100%;
   padding: 0 0.375rem;
   border-top: 0.0625rem solid var(--color-borders);
 }
@@ -104,13 +110,15 @@
 
 .footer {
   position: absolute;
-  width: 100%;
-  background: var(--color-background);
-  border-top: 0.0625rem solid var(--color-borders);
-  left: 0;
-  bottom: 0;
-  padding: 1rem;
   z-index: 1;
+  bottom: 0;
+  left: 0;
+
+  width: 100%;
+  padding: 1rem;
+  border-top: 0.0625rem solid var(--color-borders);
+
+  background: var(--color-background);
 }
 
 .options {
@@ -147,12 +155,13 @@
 
 .status {
   display: flex;
-  align-items: center;
   gap: 0.8125rem;
+  align-items: center;
   justify-content: space-between;
+
   width: 100%;
-  padding: 0 0.375rem 0 1rem;
   margin-bottom: 1.3125rem;
+  padding: 0 0.375rem 0 1rem;
 }
 
 .info {
@@ -164,24 +173,27 @@
 }
 
 .month {
-  color: var(--color-text-secondary);
   margin: 0;
+  color: var(--color-text-secondary);
 }
 
 .quantity {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
 .floatingBadge {
+  position: relative;
+  z-index: 1;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   color: var(--color-links);
+
   background-color: rgba(78, 142, 229, 0.1);
-  position: relative;
-  z-index: 1;
 }
 
 .floatingBadgeColor {
@@ -194,15 +206,15 @@
 }
 
 .floatingBadgeButtonColor {
+  margin-left: 0.5rem;
   padding: 0.25rem 0.375rem 0.25rem 0.1875rem;
   border-radius: 0.375rem;
   background-color: white;
-  margin-left: 0.5rem;
 }
 
 .floatingBadgeIcon {
-  font-size: 1.125rem;
   margin-right: 0.1875rem;
+  font-size: 1.125rem;
 }
 
 .floatingBadgeValue {
@@ -221,19 +233,20 @@
 }
 
 .dateButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
   margin-bottom: 1rem;
   padding-right: 1.1875rem;
-  display: flex;
   padding-left: 1rem;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .title {
-  color: var(--color-text);
-  font-size: 1rem;
-  text-transform: initial;
   margin: 0;
+  font-size: 1rem;
+  color: var(--color-text);
+  text-transform: initial;
 }
 
 .checkboxSection {
@@ -250,8 +263,8 @@
 
 .prizesInput {
   flex-grow: 1;
-  margin-left: 1rem;
   margin-bottom: 0;
+  margin-left: 1rem;
 }
 
 .subLabelClassName {
@@ -269,14 +282,14 @@
 }
 
 .addChannel {
-  margin-inline-end: 1.375rem !important;
   margin-inline-start: 0.3125rem !important;
+  margin-inline-end: 1.375rem !important;
 }
 
 .removeChannel {
+  padding: 0.5rem;
   font-size: 1.5rem;
   color: var(--color-text-secondary);
-  padding: 0.5rem;
 }
 
 .starOptions {
@@ -286,8 +299,8 @@
 @media (max-width: 600px) {
   .root :global(.modal-dialog) {
     width: 100%;
-    height: 100%;
     max-width: 100% !important;
+    height: 100%;
     border-radius: 0;
   }
 

@@ -1,5 +1,6 @@
 .ComposerEmbeddedMessage {
   --accent-color: var(--color-primary);
+
   height: 3.125rem;
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: height 150ms ease-out, opacity 150ms ease-out;
@@ -24,14 +25,18 @@
 
   & .embedded-left-icon {
     position: relative;
+
+    display: grid;
     flex-shrink: 0;
-    background: none !important;
+    place-content: center;
+
     height: 2.625rem;
     padding: 0.5625rem 0.75rem 0.5625rem 1rem;
-    display: grid;
-    place-content: center;
+
     font-size: 1.5rem;
     color: var(--accent-color);
+
+    background: none !important;
 
     @media (max-width: 600px) {
       width: 2.875rem;
@@ -40,13 +45,16 @@
 
   & .embedded-cancel {
     flex-shrink: 0;
-    background: none !important;
+    align-self: center;
+
     width: auto;
     height: 1.5rem;
-    padding: 0;
     margin: 0.5625rem 1rem 0.5625rem 0.75rem;
-    align-self: center;
+    padding: 0;
+
     color: var(--accent-color, var(--color-primary));
+
+    background: none !important;
 
     @media (max-width: 600px) {
       margin: 0.5625rem 0.75rem 0.5625rem 0.5rem;
@@ -63,8 +71,8 @@
 
   .quote-reply {
     position: absolute;
-    right: 0.75rem;
     top: 0.5rem;
+    right: 0.75rem;
     font-size: 0.5rem;
 
     @media (max-width: 600px) {

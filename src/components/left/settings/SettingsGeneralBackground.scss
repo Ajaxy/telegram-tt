@@ -3,9 +3,9 @@
 .SettingsGeneralBackground {
   .settings-wallpapers {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
     grid-auto-rows: 1fr;
     grid-gap: 0.0625rem;
+    grid-template-columns: repeat(3, 1fr);
 
     @include mixins.side-panel-section;
   }

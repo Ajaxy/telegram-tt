@@ -1,13 +1,11 @@
 .RightHeader {
-  display: flex;
-  align-items: center;
-  height: var(--header-height);
-  padding: 0.5rem 0.8125rem;
   pointer-events: auto;
 
-  @media (max-width: 600px) {
-    padding: 0.5rem;
-  }
+  display: flex;
+  align-items: center;
+
+  height: var(--header-height);
+  padding: 0.5rem 0.8125rem;
 
   .close-button {
     flex-shrink: 0;
@@ -25,22 +23,22 @@
 
   .title {
     margin-bottom: 0;
+    margin-left: 1.375rem;
     font-size: 1.25rem;
     font-weight: var(--font-weight-medium);
-    margin-left: 1.375rem;
   }
 
   .header {
     margin-left: 1.375rem;
 
     .title {
-      font-size: 1rem;
       margin-left: 0;
+      font-size: 1rem;
     }
 
     .subtitle {
-      color: var(--color-text-secondary);
       font-size: 0.875rem;
+      color: var(--color-text-secondary);
     }
   }
 
@@ -73,5 +71,9 @@
     @media (max-width: 600px) {
       padding-left: 5rem;
     }
+  }
+
+  @media (max-width: 600px) {
+    padding: 0.5rem;
   }
 }

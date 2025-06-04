@@ -1,17 +1,20 @@
 .Tab {
   display: flex;
-  justify-content: center;
   flex: 1 1 auto;
-  appearance: none;
-  background: none;
+  justify-content: center;
+
   width: auto;
   margin: 0;
-  border: none;
   padding: 0.625rem 1.125rem;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
+  border: none;
   border-top-left-radius: var(--border-radius-messages-small);
   border-top-right-radius: var(--border-radius-messages-small);
+
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+
+  appearance: none;
+  background: none;
 
   &,
   &:active,
@@ -46,26 +49,32 @@
 
   .Tab_inner {
     position: relative;
+
     display: flex;
-    align-items: center;
-    white-space: nowrap;
-    height: 1.5rem; // Emoji-only titles ignore line-height on Windows
     gap: 1px; // Prevent custom emoji sticking to the text
+    align-items: center;
+
+    height: 1.5rem; // Emoji-only titles ignore line-height on Windows
+
+    white-space: nowrap;
   }
 
   .badge {
+    flex-shrink: 0;
+
     min-width: 1.25rem;
     height: 1.25rem;
     margin-inline-start: 0.3125rem;
-    background: var(--color-gray);
-    border-radius: 0.75rem;
     padding: 0 0.3125rem;
-    color: white;
+    border-radius: 0.75rem;
+
     font-size: 0.875rem;
-    line-height: 1.3125rem;
     font-weight: var(--font-weight-medium);
+    line-height: 1.3125rem;
+    color: white;
     text-align: center;
-    flex-shrink: 0;
+
+    background: var(--color-gray);
 
     body.is-ios &,
     body.is-macos & {
@@ -82,21 +91,25 @@
     bottom: -0.625rem;
     left: 50%;
     transform: translateX(-50%);
+
     font-size: 0.75rem;
   }
 
   .platform {
+    pointer-events: none;
+
     position: absolute;
+    right: -0.5rem;
     bottom: -0.625rem;
     left: -0.5rem;
-    right: -0.5rem;
-    opacity: 0;
-    background-color: var(--color-primary);
+    transform-origin: left;
+
+    box-sizing: content-box;
     height: 0.1875rem;
     border-radius: 0.1875rem 0.1875rem 0 0;
-    pointer-events: none;
-    box-sizing: content-box;
-    transform-origin: left;
+
+    opacity: 0;
+    background-color: var(--color-primary);
 
     &.animate {
       transition: transform var(--slide-transition);

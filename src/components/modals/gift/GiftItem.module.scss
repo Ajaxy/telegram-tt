@@ -1,30 +1,37 @@
 .container {
+  cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+
   display: flex;
+  flex-basis: 0;
   flex-direction: column;
+  flex-grow: 1;
   align-items: center;
   justify-content: center;
-  flex-grow: 1;
-  flex-basis: 0;
+
   min-width: 0;
   padding: 0.625rem;
   padding-top: 0;
   border-radius: 0.625rem;
+
   background-color: var(--color-background-secondary);
-  position: relative;
-  cursor: var(--custom-cursor, pointer);
+
+  &::before {
+    pointer-events: none;
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    border-radius: 0.625rem;
+
+    opacity: 0;
+    background-color: var(--color-hover-overlay);
+  }
 
   :global(html.theme-dark) & {
     background-color: var(--color-background);
-  }
-
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    border-radius: 0.625rem;
-    background-color: var(--color-hover-overlay);
-    pointer-events: none;
   }
 
   &:hover::before {
@@ -43,20 +50,21 @@
 }
 
 .description {
-  font-size: 0.875rem;
-  line-height: 1;
+  overflow: hidden;
 
   max-width: 100%;
+
+  font-size: 0.875rem;
+  line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
-  overflow: hidden;
 }
 
 .buy {
-  font-size: 0.6875rem !important;
   margin-top: 0.625rem;
-  line-height: 1;
+  font-size: 0.6875rem !important;
   font-weight: var(--font-weight-semibold) !important;
+  line-height: 1;
 }
 
 .star {
@@ -69,9 +77,9 @@
 }
 
 .starsPriceBlock {
-  color: var(--color-stars);
   margin-top: 0.5rem;
   font-size: 0.75rem;
+  color: var(--color-stars);
 }
 
 .starsPriceIcon {

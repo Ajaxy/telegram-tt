@@ -7,9 +7,10 @@
 .avatar {
   width: 5rem;
   height: 5rem;
-  font-size: 3.5rem;
   margin: 0 auto 1rem;
   border-radius: 1rem;
+
+  font-size: 3.5rem;
 
   :global(.Avatar__media) {
     border-radius: 1rem;
@@ -21,16 +22,16 @@
 }
 
 .note {
-  color: var(--color-text-secondary);
   font-size: 0.875rem;
+  color: var(--color-text-secondary);
   text-align: center;
 }
 
 .box {
-  background: var(--color-background-secondary);
+  margin: 1rem 0;
   padding: 1rem 1rem 0.5rem;
   border-radius: var(--border-radius-default);
-  margin: 1rem 0;
+  background: var(--color-background-secondary);
 }
 
 .action-header {

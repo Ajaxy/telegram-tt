@@ -5,6 +5,30 @@
   --reaction-background-hover: var(--hover-color-reaction);
   --reaction-text-color: var(--text-color-reaction);
 
+  position: relative;
+  z-index: 1;
+
+  overflow: visible;
+  display: flex;
+  flex-direction: row;
+  gap: 0.125rem;
+
+  width: auto;
+  height: 1.875rem;
+  padding: 0 0.375rem 0 0.25rem;
+  border-radius: 1.75rem;
+
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.75rem;
+  color: var(--reaction-text-color);
+  text-transform: none;
+  white-space: nowrap;
+
+  background-color: var(--reaction-background) !important;
+
+  transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms !important;
+
   &.chosen {
     --reaction-background: var(--color-reaction-chosen);
     --reaction-background-hover: var(--hover-color-reaction-chosen);
@@ -15,6 +39,7 @@
     --reaction-background: #FFBC2E33 !important;
     --reaction-background-hover: #FFBC2E55 !important;
     --reaction-text-color: #E98111 !important;
+
     z-index: 2;
 
     &.outside {
@@ -29,27 +54,6 @@
     --reaction-background-hover: #FFB727CC !important;
     --reaction-text-color: #FFFFFF !important;
   }
-
-  display: flex;
-  flex-direction: row;
-  height: 1.875rem;
-  white-space: nowrap;
-  width: auto;
-  padding: 0 0.375rem 0 0.25rem;
-  background-color: var(--reaction-background) !important;
-  border-radius: 1.75rem;
-  font-weight: var(--font-weight-medium);
-  font-variant-numeric: tabular-nums;
-  text-transform: none;
-  color: var(--reaction-text-color);
-  overflow: visible;
-  position: relative;
-  line-height: 1.75rem;
-  z-index: 1;
-
-  gap: 0.125rem;
-
-  transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms !important;
 
   &:hover {
     --reaction-background: var(--reaction-background-hover) !important;
@@ -68,32 +72,35 @@
 
 .tag.tag {
   position: relative;
-  margin-right: 1rem;
-  padding-inline: 0;
+
   justify-content: start;
 
+  margin-right: 1rem;
+  padding-inline: 0;
   border-radius: 0.375rem;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 
-  // SVG has problems with backdrop-filter
-  &:hover {
-    backdrop-filter: unset;
-    filter: var(--reaction-background-hover-filter);
-  }
-
   &::after {
     content: '';
+
     position: absolute;
-    right: -0.5rem;
     top: 50%;
+    right: -0.5rem;
     transform: translateY(-50%);
 
     width: 0.375rem;
     height: 0.375rem;
     border-radius: 50%;
-    background-color: var(--text-color-reaction-chosen);
+
     opacity: 0.4;
+    background-color: var(--text-color-reaction-chosen);
+  }
+
+  // SVG has problems with backdrop-filter
+  &:hover {
+    filter: var(--reaction-background-hover-filter);
+    backdrop-filter: unset;
   }
 
   .animated-emoji {
@@ -102,10 +109,10 @@
 }
 
 .tail {
-  height: 100%;
   position: absolute;
-  right: -0.9375rem;
   z-index: -1;
+  right: -0.9375rem;
+  height: 100%;
 
   .is-safari & {
     // Safari subpixel rendering be damned. May cause slight overlap, but it's better than a gap.
@@ -122,8 +129,8 @@
 .tag-text {
   display: flex;
   gap: 0.25rem;
-  font-size: 1rem;
   margin-inline-end: 0.375rem;
+  font-size: 1rem;
 }
 
 .counter {
@@ -136,15 +143,16 @@
 }
 
 .paidCounter {
+  position: absolute;
+  z-index: 1;
+  top: -150%;
+  right: 50%;
+  transform: translateX(50%);
+
   font-family: var(--font-family-rounded);
   font-size: 2.5rem;
   font-variant-numeric: tabular-nums;
   color: #FFBC2E;
 
-  position: absolute;
-  top: -150%;
-  right: 50%;
-  transform: translateX(50%);
   -webkit-text-stroke: 1px #E58E0D;
-  z-index: 1;
 }

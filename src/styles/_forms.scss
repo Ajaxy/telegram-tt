@@ -2,10 +2,13 @@
   position: absolute;
   right: 0.75rem;
   bottom: -0.5625rem;
+
   padding: 0 0.25rem;
   border-radius: 0.25rem;
-  color: var(--color-text-secondary);
+
   font-size: 0.75rem;
+  color: var(--color-text-secondary);
+
   background: var(--color-background);
 }
 
@@ -14,33 +17,41 @@
   margin-bottom: 1.125rem;
 
   label {
-    display: block;
+    pointer-events: none;
+    cursor: var(--custom-cursor, text);
+
     position: absolute;
-    left: 1rem;
     top: 0.6875rem;
+    left: 1rem;
+    transform-origin: left center;
+
+    display: block;
+
     padding: 0 0.3125rem;
-    background-color: var(--color-background);
+
     font-size: 1rem;
     font-weight: var(--font-weight-normal);
     color: var(--color-placeholders);
-    transition: transform 0.15s ease-out, color 0.15s ease-out;
-    cursor: var(--custom-cursor, text);
-    pointer-events: none;
-    transform-origin: left center;
     white-space: nowrap;
+
+    background-color: var(--color-background);
+
+    transition: transform 0.15s ease-out, color 0.15s ease-out;
   }
 
   &.with-arrow {
     &::after {
       content: "";
+
       position: absolute;
-      height: 0.75rem;
-      width: 0.75rem;
-      border-left: 1px var(--color-text-secondary) solid;
-      border-bottom: 1px var(--color-text-secondary) solid;
-      transform: rotate(-45deg);
-      right: 2rem;
       top: 1rem;
+      right: 2rem;
+      transform: rotate(-45deg);
+
+      width: 0.75rem;
+      height: 0.75rem;
+      border-bottom: 1px var(--color-text-secondary) solid;
+      border-left: 1px var(--color-text-secondary) solid;
     }
   }
 
@@ -70,8 +81,8 @@
   }
 
   &.disabled {
-    opacity: 0.5;
     pointer-events: none;
+    opacity: 0.5;
   }
 
   &[dir="rtl"] {
@@ -80,16 +91,16 @@
     }
 
     label {
-      left: auto;
       right: 0.75rem;
+      left: auto;
     }
 
     &.with-arrow {
       &::after {
-        border-left: none;
-        border-right: 1px var(--color-text-secondary) solid;
         right: auto;
         left: 2rem;
+        border-right: 1px var(--color-text-secondary) solid;
+        border-left: none;
       }
     }
 
@@ -105,21 +116,44 @@
 
 .form-control {
   --border-width: 1px;
+
   display: block;
+
   width: 100%;
   height: 3rem;
   padding: calc(0.75rem - var(--border-width)) calc(1.1875rem - var(--border-width)) 0.6875rem;
   border: var(--border-width) solid var(--color-borders-input);
   border-radius: var(--border-radius-default);
-  color: var(--color-text);
-  background-color: var(--color-background);
-  outline: none;
-  transition: border-color 0.15s ease;
-  overflow-wrap: anywhere;
-  -webkit-appearance: none;
 
   font-size: 1rem;
   line-height: 1.25rem;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+
+  -webkit-appearance: none;
+  background-color: var(--color-background);
+  outline: none;
+
+  transition: border-color 0.15s ease;
+
+  // Hide hint for Safari password strength meter
+  &::-webkit-strong-password-auto-fill-button {
+    position: absolute;
+
+    overflow: hidden !important;
+
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+
+    opacity: 0;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  &::-ms-clear,
+  &::-ms-reveal {
+    display: none;
+  }
 
   &[dir] {
     text-align: initial;
@@ -166,23 +200,8 @@
   &:-webkit-autofill-strong-password-viewable,
   &:-webkit-autofill-and-obscured {
     box-shadow: inset 0 0 0 10rem var(--color-background);
+
     -webkit-text-fill-color: var(--color-text);
-  }
-
-  // Hide hint for Safari password strength meter
-  &::-webkit-strong-password-auto-fill-button {
-    opacity: 0;
-    width: 0 !important;
-    overflow: hidden !important;
-    max-width: 0 !important;
-    min-width: 0 !important;
-    clip: rect(0, 0, 0, 0);
-    position: absolute;
-  }
-
-  &::-ms-clear,
-  &::-ms-reveal {
-    display: none;
   }
 }
 
@@ -194,10 +213,13 @@ select.form-control {
 
 textarea.form-control {
   resize: none;
+
   overflow: hidden;
-  line-height: 1.3125rem;
+
   padding-top: calc(0.8125rem - var(--border-width));
   padding-bottom: calc(1rem - var(--border-width));
+
+  line-height: 1.3125rem;
 }
 
 .input-group.password-input {
@@ -208,20 +230,24 @@ textarea.form-control {
   }
 
   .toggle-password {
+    cursor: var(--custom-cursor, pointer);
+
     position: absolute;
     top: 0;
     right: 0;
-    width: 3rem;
-    height: 3rem;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: var(--custom-cursor, pointer);
-    outline: none !important;
 
-    color: var(--color-text-secondary);
-    opacity: 0.7;
+    width: 3rem;
+    height: 3rem;
+
     font-size: 1.5rem;
+    color: var(--color-text-secondary);
+
+    opacity: 0.7;
+    outline: none !important;
 
     &:hover,
     &:focus {
@@ -231,13 +257,13 @@ textarea.form-control {
 
   &[dir="rtl"] {
     .form-control {
-      padding-left: 3.375rem;
       padding-right: calc(0.9rem - var(--border-width));
+      padding-left: 3.375rem;
     }
 
     .toggle-password {
-      left: 0;
       right: auto;
+      left: 0;
     }
   }
 }

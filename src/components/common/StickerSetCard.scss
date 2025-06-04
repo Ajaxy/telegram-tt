@@ -1,11 +1,12 @@
 .StickerSetCard {
   .StickerButton,
   .Button {
+    flex: 0 0 2.5rem;
+
     width: 2.5rem;
     height: 2.5rem;
     margin: 0 0.5rem 0 0;
     padding: 0;
-    flex: 0 0 2.5rem;
   }
 
   .install-button {

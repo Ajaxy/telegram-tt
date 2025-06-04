@@ -1,22 +1,25 @@
 .root {
-  padding: 1rem 1.5rem;
   margin-bottom: 1rem;
+  padding: 1rem 1.5rem;
   border-bottom: 0.0625rem solid var(--color-borders);
 }
 
 .header {
-  margin-bottom: 0.5rem;
-  font-weight: var(--font-weight-medium);
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  margin-bottom: 0.5rem;
+
+  font-weight: var(--font-weight-medium);
 }
 
 .title {
   margin-right: 2rem;
+
   font-size: 1rem;
-  color: var(--text-color);
   line-height: 1.875rem;
+  color: var(--text-color);
   text-transform: lowercase;
 
   &:first-letter {
@@ -43,14 +46,14 @@
 }
 
 .tableValue {
-  font-weight: var(--font-weight-medium);
   font-size: 1.25rem;
+  font-weight: var(--font-weight-medium);
 }
 
 .tableSecondaryValue {
+  margin-inline-start: 0.25rem;
   font-size: 0.875rem;
   color: var(--color-text-secondary);
-  margin-inline-start: 0.25rem;
 }
 
 .value {

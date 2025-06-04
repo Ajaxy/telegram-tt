@@ -1,13 +1,8 @@
 .MentionTooltip {
+  z-index: -1;
+  flex-direction: column;
   width: calc(100% - 4rem);
   max-width: 20rem;
-  flex-direction: column;
-
-  z-index: -1;
-
-  @media (max-width: 600px) {
-    width: calc(100% - 3rem);
-  }
 
   .ListItem.chat-item-clickable {
     margin: 0;
@@ -19,8 +14,8 @@
     }
 
     .title {
-      margin-inline-end: 0.625rem;
       max-width: 70%;
+      margin-inline-end: 0.625rem;
     }
 
     .handle {
@@ -52,5 +47,9 @@
     .user-status {
       display: none !important;
     }
+  }
+
+  @media (max-width: 600px) {
+    width: calc(100% - 3rem);
   }
 }

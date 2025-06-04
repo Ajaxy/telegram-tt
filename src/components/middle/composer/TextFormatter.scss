@@ -1,37 +1,44 @@
 .TextFormatter {
-  transform: translate(-50%, -3.25rem);
   z-index: 1;
+  transform: translate(-50%, -3.25rem);
 
   &,
   &-link-control {
     position: absolute;
-    background: var(--color-background);
-    border-radius: var(--border-radius-messages);
+
     padding: 0.5rem 0.375rem;
+    border-radius: var(--border-radius-messages);
+
+    background: var(--color-background);
     box-shadow: 0 1px 2px var(--color-default-shadow);
   }
 
   &-link-control {
-    left: 0;
-    top: 0;
-    opacity: 0;
     pointer-events: none;
+
+    top: 0;
+    left: 0;
+
+    opacity: 0;
+
     transition: opacity 0.3s ease;
 
     .Modal & {
       max-width: 100%;
     }
 
-    @media (max-width: 600px) {
-      max-width: calc(100vw - var(--text-formatter-left) + 3rem);
+    input {
+      width: 100%;
+      border: none !important;
+
+      color: var(--color-text);
+
+      background-color: var(--color-background);
+      outline: none !important;
     }
 
-    input {
-      border: none !important;
-      outline: none !important;
-      width: 100%;
-      color: var(--color-text);
-      background-color: var(--color-background);
+    @media (max-width: 600px) {
+      max-width: calc(100vw - var(--text-formatter-left) + 3rem);
     }
   }
 
@@ -50,24 +57,25 @@
   }
 
   &-link-url-input-wrapper {
-    width: 20rem;
     position: relative;
+    width: 20rem;
     max-width: 100%;
-
-    @media (max-width: 600px) {
-      max-width: 90vw;
-    }
 
     &::before,
     &::after {
       content: "";
-      display: block;
+
       position: absolute;
+      z-index: 2;
       top: 0;
       bottom: 0;
+
+      display: block;
+
       width: 1rem;
-      z-index: 2;
+
       opacity: 0;
+
       transition: opacity 0.2s ease;
     }
 
@@ -92,6 +100,10 @@
         opacity: 1;
       }
     }
+
+    @media (max-width: 600px) {
+      max-width: 90vw;
+    }
   }
 
   &-link-url-confirm {
@@ -106,29 +118,32 @@
 
   &.link-control-shown {
     .TextFormatter-link-control {
-      opacity: 1;
       pointer-events: auto;
+      opacity: 1;
     }
   }
 
   .Button {
-    width: 2rem;
-    height: 2rem;
-    padding: 0.25rem;
-    font-size: 1.5rem;
-    margin: 0 0.125rem;
-    border-radius: var(--border-radius-messages-small);
-    flex-shrink: 0;
     cursor: var(--custom-cursor, pointer);
 
+    flex-shrink: 0;
+
+    width: 2rem;
+    height: 2rem;
+    margin: 0 0.125rem;
+    padding: 0.25rem;
+    border-radius: var(--border-radius-messages-small);
+
+    font-size: 1.5rem;
+
     &.active {
-      background-color: var(--color-primary) !important;
       color: white;
+      background-color: var(--color-primary) !important;
     }
 
     &.disabled {
-      opacity: 0.5;
       pointer-events: none;
+      opacity: 0.5;
     }
   }
 }

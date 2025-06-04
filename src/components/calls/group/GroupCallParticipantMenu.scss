@@ -11,22 +11,27 @@
   z-index: var(--z-modal-menu);
 
   .bubble {
-    backdrop-filter: none !important;
-    background: none !important;
-    border-radius: 0;
+    overflow: visible;
+
     padding: 0;
     border: none !important;
-    box-shadow: none !important;
-    overflow: visible;
+    border-radius: 0;
+
     color: var(--color-text);
 
+    background: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+
     .group {
-      box-shadow: 0 0.25rem 0.5rem 0.125rem rgba(16, 16, 16, 0.3);
       overflow: hidden;
-      background: var(--color-background);
-      border-radius: var(--border-radius-default);
+
       margin-bottom: 0.5rem;
+      border-radius: var(--border-radius-default);
+
+      background: var(--color-background);
       backdrop-filter: blur(10px);
+      box-shadow: 0 0.25rem 0.5rem 0.125rem rgba(16, 16, 16, 0.3);
     }
   }
 
@@ -37,16 +42,35 @@
   }
 
   .volume-control {
+
+    @mixin thumb-styles() {
+      width: 1.5rem;
+      height: 3rem;
+      border: none;
+      border-radius: var(--border-radius-default);
+
+      background: var(--range-color);
+      box-shadow: -13.5rem 0 0 12.75rem var(--range-color);
+
+      transition: 0.25s ease-in-out background-color, 0.25s ease-in-out box-shadow;
+    }
+
+    cursor: var(--custom-cursor, pointer);
+    position: relative;
+    overflow: hidden;
     height: 3rem;
 
     .info {
       pointer-events: none;
+
       position: relative;
       z-index: 1;
-      height: 100%;
+
       display: flex;
       flex-direction: row;
       align-items: center;
+
+      height: 100%;
       padding: 0.75rem 1rem;
 
       .AnimatedSticker {
@@ -70,31 +94,16 @@
       --range-color: #CB5757;
     }
 
-    position: relative;
-    overflow: hidden;
-    cursor: var(--custom-cursor, pointer);
-
-    @mixin thumb-styles() {
-      border: none;
-      height: 3rem;
-      width: 1.5rem;
-      background: var(--range-color);
-      border-radius: var(--border-radius-default);
-      box-shadow: -13.5rem 0 0 12.75rem var(--range-color);
-      transition: 0.25s ease-in-out background-color, 0.25s ease-in-out box-shadow;
-    }
-
-    @include mixins.reset-range();
-
     // Apply custom styles
     input[type="range"] {
-      height: 3rem;
       position: absolute;
-      left: -1.5rem;
-      top: 0;
-      width: calc(100% + 1.5rem);
-      margin: 0;
       z-index: 0;
+      top: 0;
+      left: -1.5rem;
+
+      width: calc(100% + 1.5rem);
+      height: 3rem;
+      margin: 0;
 
       // Note that while we're repeating code here,
       // that's necessary as you can't comma-separate these type of selectors.
@@ -111,5 +120,7 @@
         @include thumb-styles();
       }
     }
+
+    @include mixins.reset-range();
   }
 }

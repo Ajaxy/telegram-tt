@@ -1,29 +1,34 @@
 @use "../../../styles/mixins";
 
 .root {
-  height: 100%;
-  width: 100%;
   position: relative;
+  z-index: 0;
+
   display: flex;
   flex-direction: column;
+
+  width: 100%;
+  height: 100%;
   padding: 0;
-  z-index: 0;
 }
 
 .multi-tab {
   position: relative;
+  z-index: 0;
+
   display: flex;
   flex-direction: column;
+
   padding: 0;
-  z-index: 0;
 }
 
 .loadingPlaceholder {
-  width: 4rem;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+
+  width: 4rem;
 
   transition: opacity 0.25s ease-in-out;
 }
@@ -47,19 +52,21 @@
 }
 
 .defaultPlaceholderGrid {
-  width: 4.5rem;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.25rem;
+
+  width: 4.5rem;
   margin: 0 auto;
+
   animation: 2s linear -0.8s infinite fadeOpacityBreath;
 }
 
 .placeholderSquare {
-  width: 100%;
   aspect-ratio: 1;
-  background-color: black;
+  width: 100%;
   border-radius: 0.375rem;
+  background-color: black;
 }
 
 .hide {
@@ -67,12 +74,15 @@
 }
 
 .frame {
-  transition: opacity 0.25s ease-in-out;
-  opacity: 1;
+  z-index: 1;
+
   width: 100%;
   height: 100%;
   border: 0;
-  z-index: 1;
+
+  opacity: 1;
+
+  transition: opacity 0.25s ease-in-out;
 
   &.with-button {
     height: calc(100% - 3.5rem);
@@ -92,10 +102,14 @@
   --color-transition: 0.15s;
   --transform-transition: 0.25s ease-in-out;
 
-  flex-grow: 1;
-  margin: 0.5rem;
   transform: translateY(100%);
+
+  flex-grow: 1;
+
+  margin: 0.5rem;
+
   opacity: 0;
+
   transition:
   background-color var(--color-transition),
   color var(--color-transition),
@@ -126,16 +140,18 @@
 }
 
 .buttons-container {
+  position: relative;
+
   display: flex;
   justify-content: space-between;
-  position: relative;
+
+  height: 0rem;
+
+  transition-timing-function: ease-in-out;
+  transition-duration: 0.25s;
 
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition-property: height;
-  transition-duration: 0.25s;
-  transition-timing-function: ease-in-out;
-
-  height: 0rem;
 
   &.one-row {
     align-items: center;
@@ -181,8 +197,8 @@
     .secondary-button,
     .main-button {
       position: absolute;
-      left: 0rem;
       right: 0rem;
+      left: 0rem;
     }
   }
 
@@ -210,16 +226,19 @@
   .secondary-button,
   .main-button {
     transform: translateY(0);
+
+    overflow: hidden;
     flex-grow: 0;
+
+    width: 0;
     margin-inline: 0;
     padding-inline: 0;
-    width: 0;
+
     white-space: nowrap;
-    overflow: hidden;
 
     &.visible {
-      margin-inline: 0.5rem;
       flex-grow: 1;
+      margin-inline: 0.5rem;
     }
   }
 }
@@ -245,8 +264,21 @@
 
 .closeIcon {
   --color-header-text: white;
+
   position: relative;
   transform: rotate(-45deg);
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  &::before {
+    transform: rotate(90deg);
+  }
 
   &,
   &::before,
@@ -254,20 +286,10 @@
     width: 0.875rem;
     height: 0.125rem;
     border-radius: 0.125rem;
+
     background-color: var(--color-header-text);
+
     transition: var(--slide-transition) transform, var(--color-transition) background-color;
-  }
-
-  &::before,
-  &::after {
-    position: absolute;
-    left: 0;
-    top: 0;
-    content: "";
-  }
-
-  &::before {
-    transform: rotate(90deg);
   }
 
   &.state-back {
@@ -292,17 +314,20 @@
 }
 
 .headerPanel {
+  pointer-events: none;
+
+  position: absolute;
+  z-index: 100;
+  top: 0;
+  right: 0;
+  left: 0;
+
   display: flex;
   flex-direction: row;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
+  justify-content: space-between;
+
   padding: 1rem;
   padding-inline-end: calc(1rem + var(--scrollbar-width));
-  justify-content: space-between;
-  pointer-events: none;
 }
 
 .icon {
@@ -315,53 +340,58 @@
 }
 
 .headerButton {
-  height: 1.75rem;
+  pointer-events: auto;
+  cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+
+  overflow: hidden;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
   width: fit-content;
+  height: 1.75rem;
+  padding: 0.25rem;
+  padding-inline: 0.625rem;
+  border-radius: 1rem;
+
   font-size: 0.875rem;
   font-weight: var(--font-weight-medium);
-  position: relative;
-  cursor: var(--custom-cursor, pointer);
-  flex-shrink: 0;
-  overflow: hidden;
-
-  outline: none !important;
-  align-items: center;
-  display: flex;
-  justify-content: center;
   color: white;
-  border-radius: 1rem;
+
   background-color: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(25px);
-  pointer-events: auto;
+  outline: none !important;
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);
   }
-
-  padding: 0.25rem;
-  padding-inline: 0.625rem;
 }
 
 .left {
-  border-bottom-right-radius: 0;
   border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .right {
-  border-bottom-left-radius: 0;
   border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 .buttonCaptionContainer {
+  height: 100%;
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: width 0.25s ease-in-out;
-  height: 100%;
 }
 
 .backButtonCaption {
+  overflow: hidden;
+
   width: fit-content;
   max-width: 20rem;
-  overflow: hidden;
-  white-space: nowrap;
+
   text-overflow: ellipsis;
+  white-space: nowrap;
 }

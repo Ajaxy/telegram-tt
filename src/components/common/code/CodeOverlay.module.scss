@@ -1,22 +1,29 @@
 .overlay {
+  pointer-events: none;
+
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  pointer-events: none;
+
   opacity: 0;
+
   transition: opacity 0.15s ease-in-out;
 }
 
 .copy, .wrap {
+  cursor: var(--custom-cursor, pointer);
+
   display: flex;
-  font-size: 1.25rem;
+
+  margin: 0.125rem;
   padding: 0.125rem;
   border-radius: 0.125rem;
-  margin: 0.125rem;
+
+  font-size: 1.25rem;
+
   transition: background-color 0.15s ease-in-out;
-  cursor: var(--custom-cursor, pointer);
 
   &:hover, &.wrapOn {
     background-color: var(--color-background-compact-menu-hover);
@@ -24,18 +31,20 @@
 }
 
 .content {
+  pointer-events: auto;
+
   position: absolute;
   top: 0;
   right: 0;
 
   display: flex;
   align-items: center;
+
   padding: 0.125rem;
+  border-bottom-left-radius: 0.25rem;
 
   background-color: var(--color-background-compact-menu);
   backdrop-filter: blur(1px);
-  border-bottom-left-radius: 0.25rem;
-  pointer-events: auto;
 
   &.hidden {
     display: none;

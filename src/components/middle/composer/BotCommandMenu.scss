@@ -1,10 +1,11 @@
 .BotCommandMenu {
   .menu-container {
+    overflow: auto;
+    flex-direction: column;
+
     width: calc(100% - 4rem);
     max-width: 20rem;
     max-height: 40vh;
-    overflow: auto;
-    flex-direction: column;
 
     @media (max-width: 600px) {
       width: calc(100% - 3rem);
@@ -15,8 +16,9 @@
     > .backdrop {
       position: absolute;
       top: -1rem;
-      left: 0;
       right: auto;
+      left: 0;
+
       width: 3.5rem;
       height: 4.5rem;
     }

@@ -1,8 +1,8 @@
 .Invoice {
   .title {
-    color: var(--accent-color);
-    font-weight: var(--font-weight-medium);
     margin-bottom: 0;
+    font-weight: var(--font-weight-medium);
+    color: var(--accent-color);
   }
 
   .info {
@@ -30,12 +30,14 @@
 
       .invoice-image {
         position: relative;
+
         width: 100%;
         max-width: 100%;
         max-height: 30rem;
-        object-fit: cover;
-        border-bottom-left-radius: var(--border-bottom-left-radius);
         border-bottom-right-radius: var(--border-bottom-right-radius);
+        border-bottom-left-radius: var(--border-bottom-left-radius);
+
+        object-fit: cover;
 
         .forwarded-message & {
           border-top-left-radius: var(--border-top-left-radius);
@@ -46,12 +48,15 @@
       .description-text {
         position: absolute;
         top: 0;
-        padding: 0.25rem 0.5rem;
+
         margin: 0.25rem;
-        background-color: rgba(0, 0, 0, 0.4);
+        padding: 0.25rem 0.5rem;
         border-radius: var(--border-radius-messages-small);
-        color: var(--color-white);
+
         font-weight: var(--font-weight-medium);
+        color: var(--color-white);
+
+        background-color: rgba(0, 0, 0, 0.4);
       }
     }
 
@@ -76,8 +81,10 @@
     position: absolute;
     top: 0;
     left: 0;
+
     width: 100%;
     height: 100%;
+
     object-fit: cover;
   }
 }

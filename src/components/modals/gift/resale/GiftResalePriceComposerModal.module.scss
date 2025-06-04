@@ -1,9 +1,11 @@
 .descriptionContainer {
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
+  display: flex;
+
   margin-bottom: 2rem;
   margin-inline: 1rem;
-  display: flex;
+
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
 }
 
 .descriptionPrice {

@@ -18,19 +18,22 @@ $modalHeaderAndFooterHeight: 8.375rem;
 
   .header {
     position: relative;
-    border-top-left-radius: var(--border-radius-modal);
-    border-top-right-radius: var(--border-radius-modal);
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
     width: 100%;
     padding: 0.5rem 1rem 0.25rem;
-    display: flex;
-    align-items: center;
-    flex-direction: row;
+    border-top-left-radius: var(--border-radius-modal);
+    border-top-right-radius: var(--border-radius-modal);
+
     background: var(--color-background);
 
     h3 {
+      unicode-bidi: plaintext;
       margin-bottom: 0;
       margin-left: 1.5rem;
-      unicode-bidi: plaintext;
       text-align: initial;
     }
   }
@@ -40,38 +43,43 @@ $modalHeaderAndFooterHeight: 8.375rem;
   }
 
   .empty-content {
-    height: 25rem;
-    max-height: 90%;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    height: 25rem;
+    max-height: 90%;
   }
 
   .receipt-content {
-    height: 25rem;
     overflow-y: auto;
+    height: 25rem;
   }
 
   .content {
+    position: relative;
+
     overflow: auto;
     overflow-x: hidden;
+
     width: 100%;
     height: 100%;
-    position: relative;
   }
 
   .footer {
     position: relative;
     bottom: 0;
-    border-bottom-left-radius: var(--border-radius-modal);
-    border-bottom-right-radius: var(--border-radius-modal);
+
     width: 100%;
     padding: 0.75rem 1rem;
+    border-bottom-right-radius: var(--border-radius-modal);
+    border-bottom-left-radius: var(--border-radius-modal);
+
     background: var(--color-background);
 
     button {
-      text-transform: none;
       font-weight: var(--font-weight-medium);
+      text-transform: none;
     }
 
     .button-text {
@@ -84,8 +92,8 @@ $modalHeaderAndFooterHeight: 8.375rem;
   }
 
   .modal-content {
-    padding: 0;
     overflow: hidden;
+    padding: 0;
   }
 
   .ListItem-main-icon {

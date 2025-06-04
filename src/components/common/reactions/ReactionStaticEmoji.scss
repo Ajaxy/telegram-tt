@@ -1,6 +1,6 @@
 .ReactionStaticEmoji {
-  width: 1rem;
   display: block;
+  width: 1rem;
 
   // Unicorn reaction preview is too small
   &.with-unicorn-fix {
@@ -8,7 +8,7 @@
   }
 
   &.icon-heart {
-    color: var(--color-heart) !important;
     margin: 0 !important;
+    color: var(--color-heart) !important;
   }
 }

@@ -7,29 +7,34 @@
     opacity: 1;
   }
   to {
-    opacity: 0;
     transform: scale(2);
+    opacity: 0;
   }
 }
 
 .ripple-container {
   position: absolute;
   top: 0;
-  left: 0;
-  bottom: 0;
   right: 0;
+  bottom: 0;
+  left: 0;
 
   body.no-page-transitions & {
     display: none;
   }
 
   .ripple-wave {
-    position: absolute;
-    display: block;
-    background-color: var(--ripple-color, rgba(0, 0, 0, 0.08));
-    border-radius: 50%;
-    transform: scale(0);
-    animation: ripple-animation 700ms;
     pointer-events: none;
+
+    position: absolute;
+    transform: scale(0);
+
+    display: block;
+
+    border-radius: 50%;
+
+    background-color: var(--ripple-color, rgba(0, 0, 0, 0.08));
+
+    animation: ripple-animation 700ms;
   }
 }

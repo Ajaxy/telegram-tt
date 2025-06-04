@@ -1,7 +1,8 @@
 {
   "extends": [
     "stylelint-config-recommended-scss",
-    "@stylistic/stylelint-config"
+    "@stylistic/stylelint-config",
+    "stylelint-config-clean-order/error"
   ],
   "ignoreFiles": [
     "dist/*.css",

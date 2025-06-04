@@ -2,77 +2,86 @@
   --custom-emoji-size: 2.25rem;
   --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
 
+  position: relative;
+
   display: inline-block;
+  flex-shrink: 0;
+
   width: 4.5rem;
   height: 4.5rem;
   border-radius: var(--border-radius-messages-small);
+
   background: transparent no-repeat center;
   background-size: contain;
+
   transition: background-color 0.15s ease, opacity 0.3s ease !important;
-  position: relative;
-  flex-shrink: 0;
 
   &.custom-emoji {
-    color: var(--color-primary);
-
     width: var(--custom-emoji-size);
     height: var(--custom-emoji-size);
     margin: 0.3125rem;
+    color: var(--color-primary);
 
     &.status-default {
-      font-size: 2rem;
-
       padding: 0.125rem;
+      font-size: 2rem;
       color: var(--color-text);
     }
   }
 
   &.effect-emoji .sticker-locked {
-    font-size: 0.75rem;
     width: 0.875rem;
     height: 0.875rem;
+    font-size: 0.75rem;
   }
 
   &.set-expand {
-    padding: 0;
-    vertical-align: bottom;
     align-self: center;
     justify-self: center;
+
+    padding: 0;
+
     font-weight: var(--font-weight-medium);
+    vertical-align: bottom;
   }
 
   .sticker-locked {
     position: absolute;
-    bottom: 0;
+    z-index: 2;
     right: 0;
+    bottom: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     width: 1.25rem;
     height: 1.25rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     border-radius: 50%;
+
     color: white;
-    z-index: 2;
+
     opacity: 0.75;
     background: var(--premium-gradient);
   }
 
   .sticker-premium {
     position: absolute;
-    bottom: 0;
+    z-index: 1;
     right: 0;
-    width: 1.25rem;
-    height: 1.25rem;
+    bottom: 0;
 
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 
+    width: 1.25rem;
+    height: 1.25rem;
     border-radius: 50%;
-    color: white;
-    background: var(--premium-gradient);
 
-    z-index: 1;
+    color: white;
+
+    background: var(--premium-gradient);
   }
 
   &.selected {
@@ -88,12 +97,6 @@
       .sticker-remove-button {
         opacity: 1;
       }
-    }
-  }
-
-  @media (max-width: 600px) {
-    &, &.custom-emoji {
-      margin: 0.25rem;
     }
   }
 
@@ -114,38 +117,47 @@
     position: absolute;
     top: 0;
     left: 0;
+
     width: 100%;
     height: 100%;
   }
 
   .sticker-media {
-    object-fit: contain;
-    -webkit-touch-callout: none;
     user-select: none;
+    object-fit: contain;
+
+    -webkit-touch-callout: none;
   }
 
   .sticker-remove-button {
     position: absolute;
+    z-index: 2;
     top: -0.125rem;
     right: -0.125rem;
+
     width: 1.25rem;
     height: 1.25rem;
     padding: 0.125rem;
-    z-index: 2;
-
-    .icon {
-      font-size: 1rem;
-    }
 
     opacity: 0;
 
     transition: opacity 0.15s ease;
+
+    .icon {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    &, &.custom-emoji {
+      margin: 0.25rem;
+    }
   }
 }
 
 .sticker-context-menu {
-  position: absolute;
   cursor: var(--custom-cursor, default);
+  position: absolute;
   z-index: var(--z-header-menu);
 
   .bubble {

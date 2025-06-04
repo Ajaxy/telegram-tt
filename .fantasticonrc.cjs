@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   inputDir: './src/assets/font-icons',
   outputDir: './src/styles',
   name: 'icons',

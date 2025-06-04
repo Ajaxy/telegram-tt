@@ -7,9 +7,9 @@
 
   .right-addon {
     position: absolute;
+    z-index: 8;
     top: 0.625rem;
     right: 1rem;
-    z-index: 8;
 
     img {
       max-width: 2rem;

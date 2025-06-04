@@ -1,4 +1,8 @@
 .root {
+
+  &::after {
+    left: 0.75rem !important;
+  }
   :global(.ListItem-button) {
     padding: 0.5rem 0.75rem !important;
 
@@ -9,10 +13,9 @@
     }
 
     :global(.LastMessageMeta) {
-      padding-top: 0;
-
       margin-top: -0.5rem;
       margin-right: 0 !important;
+      padding-top: 0;
     }
   }
 
@@ -24,17 +27,13 @@
   :global(body.is-ios) &::after {
     left: 0.75rem !important;
   }
-
-  &::after {
-    left: 0.75rem !important;
-  }
 }
 
 .closed-icon {
-  color: var(--color-list-icon);
-  font-size: 0.75rem;
   margin-top: -0.5rem;
   margin-right: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--color-list-icon);
 }
 
 .topic-icon {

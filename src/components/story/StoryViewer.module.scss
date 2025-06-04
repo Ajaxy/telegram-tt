@@ -4,17 +4,17 @@
   --color-story-meta: rgb(242, 242, 242);
 
   position: fixed;
+  z-index: var(--z-story-viewer);
   top: 0;
-  left: 0;
   right: 0;
   bottom: 0;
-  z-index: var(--z-story-viewer);
+  left: 0;
   transform-origin: 50% 50%;
 
   // Potential perf improvement
   &:not(:global(.shown)) {
-    display: block !important;
     transform: scale(0);
+    display: block !important;
   }
 
   &:global(.opacity-transition) {
@@ -35,9 +35,9 @@
 .fullSize, .backdrop, .captionBackdrop {
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
   bottom: 0;
+  left: 0;
 }
 
 .captionBackdrop {
@@ -45,8 +45,8 @@
 }
 
 .backdrop {
-  background-color: rgba(0, 0, 0, 0.9);
   z-index: 0;
+  background-color: rgba(0, 0, 0, 0.9);
 
   @media (max-width: 600px) {
     background: rgba(0, 0, 0, 1);
@@ -56,17 +56,16 @@
 .backdropNonInteractive {
   position: absolute;
   top: 50%;
-  left: 0;
   right: 0;
-
+  left: 0;
   transform: translateY(-50%);
 }
 
 .close {
   position: absolute;
-  right: 1rem;
-  top: 1rem;
   z-index: 3;
+  top: 1rem;
+  right: 1rem;
 
   @media (max-width: 600px) {
     display: none;
@@ -75,14 +74,16 @@
 
 .wrapper {
   position: absolute;
+  z-index: 2;
   top: 0;
   left: 50%;
-  width: 100vw;
-  height: 100%;
-  overflow: hidden;
   transform: translateX(-50%);
+
+  overflow: hidden;
+
+  width: 100vw;
   max-width: calc(73.5rem * var(--story-viewer-scale));
-  z-index: 2;
+  height: 100%;
 
   @media (max-width: 600px) {
     max-width: 100%;
@@ -100,13 +101,16 @@
   &::before {
     pointer-events: none;
     content: "";
+
     position: absolute;
-    left: 0;
+    z-index: 1;
     top: 0;
     right: 0;
+    left: 0;
+
     height: 4.5rem;
+
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
-    z-index: 1;
   }
 
   .content {
@@ -120,8 +124,8 @@
   .caption,
   .captionGradient,
   .captionBackdrop {
-    transition: opacity 250ms ease-in-out;
     opacity: 0;
+    transition: opacity 250ms ease-in-out;
   }
   .media:not(.mediaPreview) {
     opacity: 0 !important;
@@ -131,8 +135,8 @@
   }
 
   .content {
-    opacity: 1 !important;
     visibility: visible;
+    opacity: 1 !important;
   }
 
   .contentInner {
@@ -148,6 +152,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
+  transform-origin: 0 50%;
   transform:
     translate3d(
       calc(var(--slide-x, -50%) - var(--slide-translate-x, 0px)),
@@ -155,7 +160,6 @@
       0
     )
     scale(var(--slide-translate-scale, 1));
-  transform-origin: 0 50%;
 
   border-radius: var(--border-radius-default-small);
 
@@ -176,9 +180,9 @@
 }
 
 .mobileSlide {
+  transform: translateY(var(--slide-translate-y, 0px));
   width: 100%;
   height: 100%;
-  transform: translateY(var(--slide-translate-y, 0px));
 }
 
 .slidePreview {
@@ -186,8 +190,8 @@
   transition: opacity 200ms ease-in-out;
 
   &.slideAnimationToActive::before {
-    transition: opacity 350ms ease-in-out !important;
     opacity: 0;
+    transition: opacity 350ms ease-in-out !important;
   }
 
   .root:global(.not-open) &,
@@ -197,20 +201,22 @@
 }
 
 .activeSlide {
-  height: calc(var(--slide-media-height) + 3.5rem);
   z-index: 1;
+  height: calc(var(--slide-media-height) + 3.5rem);
 
   &::before {
     pointer-events: none;
     content: "";
+
     position: absolute;
-    left: 0;
+    z-index: 3;
     top: 0;
     right: 0;
     bottom: 3.5rem;
-    background: rgba(0, 0, 0, 0.5);
+    left: 0;
+
     opacity: 0;
-    z-index: 3;
+    background: rgba(0, 0, 0, 0.5);
   }
 
   .content {
@@ -221,99 +227,114 @@
 
 .slideInner {
   position: absolute;
-  left: 0;
   top: 0;
+  left: 0;
+
   width: 100%;
   height: 100%;
 }
 
 .mediaWrapper {
   position: absolute;
-  left: 0;
   top: 0;
-  width: 100%;
-  height: 100%;
-  background: #000;
-  border-radius: var(--border-radius-default-small);
+  left: 0;
+
   overflow: hidden;
 
-  @media (max-width: 600px) {
-    width: calc(100% - 1rem) !important;
-    height: auto !important;
-    margin: 0.5rem;
-    bottom: calc(3.5rem + env(safe-area-inset-bottom));
-  }
+  width: 100%;
+  height: 100%;
+  border-radius: var(--border-radius-default-small);
+
+  background: #000;
 
   :global(body.ghost-animating) & {
     visibility: hidden;
+  }
+
+  @media (max-width: 600px) {
+    bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    width: calc(100% - 1rem) !important;
+    height: auto !important;
+    margin: 0.5rem;
   }
 }
 
 .media {
   position: absolute;
-  left: 0;
   top: 0;
+  left: 0;
 
-  object-fit: cover;
   width: inherit;
   height: inherit;
   border-radius: var(--border-radius-default-small);
 
+  object-fit: cover;
+
   transition: opacity 300ms;
+
+  :global(body.ghost-animating) .activeSlide & {
+    visibility: hidden;
+  }
 
   @media (max-width: 600px) {
     bottom: 0;
     width: 100%;
     height: 100%;
   }
-
-  :global(body.ghost-animating) .activeSlide & {
-    visibility: hidden;
-  }
 }
 
 .content {
   pointer-events: none;
+
   position: absolute;
-  left: 0;
+  z-index: 1;
   top: 0;
   right: 0;
+  left: 0;
+
   height: 100%;
+
   background: rgba(0, 0, 0, 0.5);
+
   transition: opacity 250ms ease-in-out;
-  z-index: 1;
 }
 
 .contentInner {
   position: absolute;
+  z-index: 2;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 2;
-  text-align: center;
+
   display: flex;
   flex-direction: column;
   align-items: center;
+
   max-width: 90%;
+
+  text-align: center;
 }
 
 .name {
+  overflow: hidden;
+
+  max-width: 100%;
   margin-top: 0.25rem;
-  color: var(--color-white);
+
   font-size: 1rem;
   font-weight: var(--font-weight-medium);
-  max-width: 100%;
-  overflow: hidden;
+  color: var(--color-white);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .forward {
   position: absolute;
+  z-index: 2;
   right: 0.75rem;
   bottom: 4.25rem;
+
   opacity: 0.5;
-  z-index: 2;
 
   transition: opacity 300ms;
 
@@ -329,55 +350,60 @@
 // Shared styles for the header that are also used in ghost animation
 
 @mixin story-header {
-  position: absolute;
-  width: 100%;
   content: "";
-  left: 0;
+
+  position: absolute;
+  z-index: 1;
   top: 0;
   right: 0;
+  left: 0;
+
+  width: 100%;
   height: 5rem;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
-  z-index: 1;
   border-radius: var(--border-radius-default-small) var(--border-radius-default-small) 0 0;
+
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
 }
 
 .storyHeader {
   @include story-header;
 
-  @media (max-width: 600px) {
-    width: auto;
-    left: 0.5rem;
-    top: 0.5rem;
-    right: 0.5rem;
-  }
-
   :global(body.ghost-animating) & {
     background: none;
+  }
+
+  @media (max-width: 600px) {
+    top: 0.5rem;
+    right: 0.5rem;
+    left: 0.5rem;
+    width: auto;
   }
 }
 
 .storyIndicators {
   position: absolute;
+  z-index: 2;
+  top: 0.5rem;
+  left: 0;
+
+  display: flex;
+
   width: 100%;
   height: 0.125rem;
   padding: 0 0.375rem;
-  z-index: 2;
-
-  display: flex;
-  top: 0.5rem;
-  left: 0;
 }
 
 .sender {
   position: absolute;
   z-index: 2;
+  top: 1.25rem;
   right: 0.5rem;
   left: 1rem;
-  top: 1.25rem;
-  display: flex;
-  color: var(--color-white);
 
+  display: flex;
   align-items: center;
+
+  color: var(--color-white);
 }
 
 .senderInfoTransition {
@@ -390,49 +416,59 @@
 }
 
 .senderMeta {
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+
   margin-left: 0.75rem;
+
   line-height: 1.25rem;
-  overflow: hidden;
 }
 
 .senderName {
+  cursor: var(--custom-cursor, pointer);
+
+  overflow: hidden;
+
+  min-width: 0;
+
   font-size: 1rem;
   font-weight: var(--font-weight-medium);
-  overflow: hidden;
   text-overflow: ellipsis;
-  min-width: 0;
   white-space: nowrap;
-  cursor: var(--custom-cursor, pointer);
 }
 
 .storyMetaRow {
+  overflow: hidden;
   display: flex;
   align-items: center;
-  overflow: hidden;
 }
 
 .storyMeta {
-  font-size: 0.875rem;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+
+  font-size: 0.875rem;
   color: var(--color-story-meta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   & + & {
     margin-left: 0.375rem;
 
     &::before {
       content: "";
-      width: 0.25rem;
-      height: 0.25rem;
-      border-radius: 50%;
-      background-color: var(--color-white);
-      display: inline-block;
-      margin-inline-end: 0.375rem;
+
       position: relative;
       top: -0.125rem;
+
+      display: inline-block;
+
+      width: 0.25rem;
+      height: 0.25rem;
+      margin-inline-end: 0.375rem;
+      border-radius: 50%;
+
+      background-color: var(--color-white);
     }
   }
 }
@@ -446,9 +482,9 @@
 }
 
 .actions {
-  margin-inline-start: auto;
   display: flex;
   align-items: center;
+  margin-inline-start: auto;
 
   :global(.Button) {
     color: white;
@@ -466,17 +502,21 @@
 }
 
 .visibilityButton {
-  min-width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 1.5rem;
+  cursor: var(--custom-cursor, pointer);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, var(--color-from) 0%, var(--color-to) 100%);
-  color: #fff;
-  font-size: 0.75rem;
-  cursor: var(--custom-cursor, pointer);
+
+  min-width: 1.5rem;
+  height: 1.5rem;
   margin: 0 0.375rem;
+  border-radius: 1.5rem;
+
+  font-size: 0.75rem;
+  color: #fff;
+
+  background: linear-gradient(180deg, var(--color-from) 0%, var(--color-to) 100%);
 
   > :global(.icon + .icon) {
     margin-left: 0.125rem;
@@ -500,10 +540,10 @@
 }
 
 .buttonMenu > :global(.Button.translucent) {
-  color: var(--color-white);
-  opacity: 0.5;
   width: 2.25rem;
   height: 2.25rem;
+  color: var(--color-white);
+  opacity: 0.5;
 
   &:hover {
     opacity: 1;
@@ -511,54 +551,68 @@
 }
 
 .captionGradient {
+  pointer-events: none;
+
   position: absolute;
+  right: 0;
   bottom: 3.5rem;
   left: 0;
-  right: 0;
-  height: 7rem;
+
   overflow: hidden;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 100%);
+
+  height: 7rem;
   border-radius: 0 0 var(--border-radius-default-small) var(--border-radius-default-small);
-  pointer-events: none;
+
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 100%);
 }
 
 .caption {
+  pointer-events: none;
+
   position: absolute;
-  left: 0;
-  width: 100%;
   top: 4rem;
   bottom: calc(4.25rem + env(safe-area-inset-bottom));
+  left: 0;
+
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+
+  width: 100%;
   border-radius: 0 0 var(--border-radius-default-small) var(--border-radius-default-small);
-  overflow: hidden;
-  pointer-events: none;
 }
 
 .captionInner {
+  scrollbar-gutter: stable;
+
   position: relative;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-  line-height: 1.25rem;
-  text-align: initial;
+
   unicode-bidi: plaintext;
-  padding: 2rem 1rem 0;
   overflow-x: hidden;
   overflow-y: scroll;
-  scrollbar-gutter: stable;
+
+  padding: 2rem 1rem 0;
+
+  line-height: 1.25rem;
+  text-align: initial;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 
   @include mixins.adapt-padding-to-scrollbar(2rem);
 }
 
 .captionContent {
-  width: 100%;
-  color: var(--color-white);
-  font-size: var(--message-text-size, 1rem);
+  pointer-events: all;
+
   display: flex;
   flex-direction: column;
+
+  width: 100%;
   min-height: 0;
-  pointer-events: all;
+
+  font-size: var(--message-text-size, 1rem);
+  color: var(--color-white);
 }
 
 .captionText :global(.custom-emoji) {
@@ -567,6 +621,7 @@
 
 .hasOverflow {
   --_overflow-shift: 5.75rem;
+
   transform: translateY(calc(100% - var(--_overflow-shift)));
 }
 
@@ -590,22 +645,25 @@
   .captionInner {
     overflow-y: hidden;
 
-    mask-image: linear-gradient(to top, black 0%, black 0%), linear-gradient(to left, black 75%, transparent 100%);
-    mask-position: 100% 100%, 100% calc(var(--_overflow-shift) - 1.25rem);
-    mask-size: 100% 100%, calc(var(--expand-button-width, 0%) + 4rem) 1.25em;
-    mask-repeat: no-repeat;
     -webkit-mask-composite: xor;
     mask-composite: exclude;
+
+    mask-image: linear-gradient(to top, black 0%, black 0%), linear-gradient(to left, black 75%, transparent 100%);
+    mask-position: 100% 100%, 100% calc(var(--_overflow-shift) - 1.25rem);
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%, calc(var(--expand-button-width, 0%) + 4rem) 1.25em;
   }
 }
 
 .captionShowMore {
-  position: absolute;
-  bottom: -0.25rem;
-  right: 0.5rem;
-  color: var(--color-white);
-  font-weight: var(--font-weight-medium);
   cursor: var(--custom-cursor, pointer);
+
+  position: absolute;
+  right: 0.5rem;
+  bottom: -0.25rem;
+
+  font-weight: var(--font-weight-medium);
+  color: var(--color-white);
 }
 
 .composer {
@@ -614,19 +672,21 @@
   --color-composer-button: #707478;
 
   position: absolute;
-  height: 3rem;
+  z-index: 3;
   bottom: 0;
   left: 0;
+
+  height: 3rem;
   margin-bottom: 0;
-  z-index: 3;
+
   transition: transform var(--layer-transition), opacity 0.15s ease;
 
   &:global(.Composer) {
     --base-height: 3rem;
 
     @media (max-width: 600px) {
-      padding: 0 0.5rem 0.5rem;
       margin-bottom: env(safe-area-inset-bottom);
+      padding: 0 0.5rem 0.5rem;
     }
   }
 
@@ -667,16 +727,19 @@
 }
 
 .navigate {
+  cursor: var(--custom-cursor, pointer);
+
   position: absolute;
   top: 0;
   bottom: 0;
+
   width: 50%;
-  background: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
   border: none;
+
+  background: none;
   outline: none !important;
-  cursor: var(--custom-cursor, pointer);
 }
 
 .prev {
@@ -688,17 +751,20 @@
 }
 
 .modal :global(.modal-content) {
-  padding: 0.5rem !important;
   max-height: min(35rem, 80vh);
+  padding: 0.5rem !important;
 }
 
 .thumbnail {
   position: absolute;
   top: 0;
   left: 0;
+
+  display: block;
+
   width: 100%;
   height: 100%;
-  display: block;
+
   object-fit: cover;
 
   @media (max-width: 600px) {
@@ -709,9 +775,12 @@
 .ghost {
   position: absolute;
   z-index: 1;
+
   overflow: hidden;
-  transition: transform 200ms ease;
+
   border-radius: var(--border-radius-default-small);
+
+  transition: transform 200ms ease;
 
   &:before {
     @include story-header;
@@ -721,24 +790,30 @@
 .ghost2 {
   position: absolute;
   z-index: 1;
+
   overflow: hidden;
+
   border-radius: 50%;
+
   opacity: 0;
+
   transition: transform 200ms ease, opacity 200ms ease;
 }
 
 .ghostImage {
+  -webkit-user-select: none;
+  user-select: none;
+
   width: 100%;
   height: 100%;
-  user-select: none;
-  -webkit-user-select: none;
+
   object-fit: cover;
 }
 
 .forwardHeader {
   display: flex;
-  align-items: center;
   gap: 0.125rem;
+  align-items: center;
 
   &.clickable {
     cursor: var(--custom-cursor, pointer);
@@ -750,26 +825,26 @@
 }
 
 .headerTitle {
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .forwardInfo {
   --accent-color: var(--color-white);
   --accent-background-color: rgba(0, 0, 0, 0.5);
 
+  z-index: 1;
   width: fit-content;
   max-width: 100%;
   margin-bottom: 0.5rem;
-  z-index: 1;
 }
 
 .fromPeer {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
   cursor: var(--custom-cursor, pointer);
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
 
   &:hover {
     text-decoration: underline;

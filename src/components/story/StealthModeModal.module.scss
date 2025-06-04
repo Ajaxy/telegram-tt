@@ -1,8 +1,8 @@
 .root {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
 }
 
 .closeButton {
@@ -12,14 +12,16 @@
 }
 
 .stealthIcon {
-  width: 5rem;
-  height: 5rem;
-  font-size: 3rem;
-  background-color: var(--color-primary);
-  border-radius: 50%;
-
   display: grid;
   place-items: center;
+
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+
+  font-size: 3rem;
+
+  background-color: var(--color-primary);
 }
 
 .title {
@@ -29,10 +31,10 @@
 }
 
 .description {
-  font-size: 0.875rem;
   margin-top: 0.5rem;
-  text-align: center;
+  font-size: 0.875rem;
   color: var(--color-text-secondary);
+  text-align: center;
 }
 
 .listItem {
@@ -40,8 +42,8 @@
 }
 
 .icon {
-  color: var(--color-primary) !important;
   margin-right: 1rem !important;
+  color: var(--color-primary) !important;
 }
 
 .button {

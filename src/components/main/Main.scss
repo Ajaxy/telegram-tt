@@ -1,7 +1,7 @@
 #Main {
+  overflow: hidden;
   height: 100%;
   text-align: left;
-  overflow: hidden;
 
   @media (min-width: 1276px) {
     position: relative;
@@ -31,12 +31,14 @@
   --left-column-min-width: 16rem;
   --left-column-max-width: 26.5rem;
 
+  position: relative;
+
+  overflow: hidden;
+
   width: 33vw;
   min-width: var(--left-column-min-width);
   max-width: var(--left-column-max-width);
   height: 100%;
-  overflow: hidden;
-  position: relative;
 
   background-color: var(--color-background);
 
@@ -45,37 +47,39 @@
   }
 
   @media (min-width: 1276px) {
-    width: 25vw;
     --left-column-max-width: 33vw;
+
+    width: 25vw;
   }
 
   @media (max-width: 925px) {
     position: fixed;
-    left: 0;
     top: 0;
-    height: calc(var(--vh, 1vh) * 100);
-    width: 26.5rem !important;
-
+    left: 0;
     transform: translate3d(-5rem, 0, 0);
+
+    width: 26.5rem !important;
+    height: calc(var(--vh, 1vh) * 100);
+
     transition: transform var(--layer-transition);
 
-    body.no-page-transitions & {
-      transition: none;
-    }
-
     &::after {
+      pointer-events: none;
       content: '';
-      display: block;
+
       position: absolute;
-      left: 0;
+      z-index: 1;
       top: 0;
       right: 0;
       bottom: 0;
-      background: black;
+      left: 0;
+
+      display: block;
+
       opacity: 0;
+      background: black;
+
       transition: opacity var(--layer-transition);
-      z-index: 1;
-      pointer-events: none;
 
       body.no-page-transitions & {
         transition: none;
@@ -97,6 +101,10 @@
       }
     }
 
+    body.no-page-transitions & {
+      transition: none;
+    }
+
     #Main.left-column-open & {
       transform: translate3d(0, 0, 0);
     }
@@ -111,31 +119,32 @@
   }
 
   @media (max-width: 600px) {
-    height: calc(var(--vh, 1vh) * 100);
-    max-width: none;
     --left-column-max-width: calc(100vw - env(safe-area-inset-left));
-    transform: translate3d(-20vw, 0, 0);
+
     left: env(safe-area-inset-left) !important;
+    transform: translate3d(-20vw, 0, 0);
+
     width: calc(100vw - env(safe-area-inset-left)) !important;
+    max-width: none;
+    height: calc(var(--vh, 1vh) * 100);
 
     // Fix: when opening the SymbolMenu, the chat list flashes in the background
     body.is-symbol-menu-open &::before {
       content: '';
+
       position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      background: var(--color-background);
       z-index: 1;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+
+      background: var(--color-background);
     }
   }
 }
 
 #RightColumn {
-  @media (max-width: 600px) {
-    height: calc(var(--vh, 1vh) * 100 + 1px);
-  }
 
   #Main.history-animation-disabled & {
     transition: none;
@@ -143,6 +152,10 @@
     .overlay-backdrop {
       transition: none;
     }
+  }
+
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100 + 1px);
   }
 }
 
@@ -153,15 +166,24 @@
 #MiddleColumn {
   border-left: 1px solid var(--color-borders);
 
-  @media (max-width: 925px) {
-    max-width: none;
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    right: 0;
+  #Main.history-animation-disabled & {
+    transition: none;
 
+    &:after {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 925px) {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     transform: translate3d(0, 0, 0);
+
+    max-width: none;
+
     transition: transform var(--layer-transition);
 
     body.no-page-transitions & {
@@ -187,14 +209,6 @@
 
     #Main.right-column-open & {
       transform: translate3d(-20vw, 0, 0);
-    }
-  }
-
-  #Main.history-animation-disabled & {
-    transition: none;
-
-    &:after {
-      transition: none;
     }
   }
 }

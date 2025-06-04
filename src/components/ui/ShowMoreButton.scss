@@ -1,15 +1,18 @@
 .ShowMoreButton {
-  color: var(--color-text) !important;
   display: flex;
   align-items: center;
+
+  padding-left: 0.75rem !important;
+
+  color: var(--color-text) !important;
   text-align: left;
   text-transform: none;
-  padding-left: 0.75rem !important;
+
   opacity: 1 !important;
 
   .icon {
-    font-size: 1.5rem;
     margin-right: 2rem;
+    font-size: 1.5rem;
     color: var(--color-text-secondary);
   }
 

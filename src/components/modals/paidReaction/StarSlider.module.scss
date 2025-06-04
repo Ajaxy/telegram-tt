@@ -5,16 +5,16 @@
   --progress: 0;
 
   position: relative;
-  padding-top: 4rem;
   overflow-x: hidden;
+  padding-top: 4rem;
 
   @include mixins.reset-range();
 }
 
 .slider {
+  cursor: pointer;
   height: var(--_size) !important;
   margin-bottom: 0 !important;
-  cursor: pointer;
 
   &::-webkit-slider-runnable-track {
     height: var(--_size);
@@ -29,59 +29,69 @@
   }
 
   &::-webkit-slider-thumb {
-    height: var(--_size);
     width: var(--_size);
-    background-color: transparent;
+    height: var(--_size);
     border: none;
+
+    background-color: transparent;
     outline: none;
     box-shadow: none;
   }
 
   &::-moz-range-thumb {
-    height: var(--_size);
     width: var(--_size);
-    background-color: transparent;
+    height: var(--_size);
     border: none;
+
+    background-color: transparent;
     outline: none;
     box-shadow: none;
   }
 }
 
 .sparkles {
-  left: 0;
-  bottom: 0;
-  height: var(--_size);
-  pointer-events: none;
 
   --_width: calc(100% - 1rem);
-  mask-image: linear-gradient(to right, black var(--_width), transparent calc(var(--_width) + 0.5rem));
+
+  pointer-events: none;
+
+  bottom: 0;
+  left: 0;
+
+  height: var(--_size);
 
   color: white;
+
+  mask-image: linear-gradient(to right, black var(--_width), transparent calc(var(--_width) + 0.5rem));
 }
 
 .progress {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: var(--_size);
   pointer-events: none;
-  border-radius: 1rem;
 
-  min-width: var(--_size);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+
   width: calc(var(--_size) + (var(--progress) * (100% - var(--_size))));
+  min-width: var(--_size);
+  height: var(--_size);
+  border-radius: 1rem;
 
   background-image: var(--stars-gradient);
 
   &::after {
     content: "";
+
     position: absolute;
-    right: 0.125rem;
+    z-index: 1;
     top: 0.125rem;
+    right: 0.125rem;
+
     width: 1.625rem;
     height: 1.625rem;
     border-radius: 50%;
+
     background-color: white;
-    z-index: 1;
   }
 }
 
@@ -89,9 +99,11 @@
   --_min-x: 0;
   --_max-x: 100%;
 
+  pointer-events: none;
+
   position: absolute;
-  left: 0;
   right: 0;
+  left: 0;
   transform:
   translateX(
     clamp(
@@ -100,11 +112,11 @@
       var(--_max-x),
     )
   );
-  pointer-events: none;
 }
 
 .floatingBadge {
   --_speed: 0;
+
   position: absolute;
   top: -1rem;
   left: 0;
@@ -113,25 +125,25 @@
 
 .floatingBadgeText {
   display: flex;
-  align-items: center;
   gap: 0.125rem;
+  align-items: center;
 
   padding: 0.5rem 1rem;
   border-radius: 2rem;
 
-  background-image: var(--stars-gradient);
-
-  line-height: 1;
   font-size: 1.5rem;
   font-weight: var(--font-weight-medium);
+  line-height: 1;
   color: white;
   white-space: nowrap;
+
+  background-image: var(--stars-gradient);
 }
 
 .floatingBadgeTriangle {
   position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translate(-50%, 33%);
   z-index: -1;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 33%);
 }

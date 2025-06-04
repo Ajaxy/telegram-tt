@@ -6,8 +6,9 @@
     > .backdrop {
       position: absolute;
       top: -1rem;
-      left: auto;
       right: 0;
+      left: auto;
+
       width: 3.5rem;
     }
   }
@@ -22,22 +23,18 @@
 
   &.with-effects .bubble {
     overflow: initial;
-
     background: none !important;
     backdrop-filter: none !important;
     box-shadow: none;
   }
 
   &.with-effects &_items {
+    padding: 0.25rem 0;
+    border-radius: var(--border-radius-default);
+
     background: var(--color-background-compact-menu);
     backdrop-filter: blur(10px);
     box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
-    border-radius: var(--border-radius-default);
-    padding: 0.25rem 0;
-
-    @media (min-width: 600px) {
-      margin-inline-end: 2.75rem;
-    }
 
     body.no-menu-blur & {
       background: var(--color-background);
@@ -47,6 +44,10 @@
     &-hidden {
       opacity: 0;
       transition: 300ms opacity;
+    }
+
+    @media (min-width: 600px) {
+      margin-inline-end: 2.75rem;
     }
   }
 

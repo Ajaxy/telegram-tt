@@ -1,15 +1,20 @@
 .root {
+  cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+
   display: flex;
+  flex-shrink: 1;
   align-items: center;
-  background: var(--color-chat-hover);
+
+  min-width: 0;
   height: 2rem;
   margin-inline: 0.25rem;
   padding-right: 0.75rem;
   border-radius: 1rem;
-  cursor: var(--custom-cursor, pointer);
-  position: relative;
-  min-width: 0;
-  flex-shrink: 1;
+
+  background: var(--color-chat-hover);
+
   transition: background-color 0.15s ease;
 
   &.minimized {
@@ -44,10 +49,13 @@
 
   .avatar,
   .iconWrapper {
+    flex-shrink: 0;
+
     width: 2rem;
     height: 2rem;
+
     opacity: 1;
-    flex-shrink: 0;
+
     transition: opacity 0.15s ease;
   }
 
@@ -55,54 +63,63 @@
     display: flex;
     align-items: center;
     justify-content: center;
+
     padding: 0.375rem;
     border-radius: 50%;
-    background-color: var(--color-primary);
+
     color: white;
 
+    background-color: var(--color-primary);
+
     .icon {
-      font-size: 1.25rem;
       position: relative;
       top: -1px;
+      font-size: 1.25rem;
     }
   }
 
   .name {
-    margin-left: 0.5rem;
-    white-space: nowrap;
     min-width: 0;
+    margin-left: 0.5rem;
     text-overflow: ellipsis;
+    white-space: nowrap;
 
     :global(.emoji.emoji-small) {
       width: 1.125rem;
       height: 1.125rem;
-      background-size: 1.125rem;
       vertical-align: -4px;
+      background-size: 1.125rem;
     }
   }
 
   .remove {
     position: absolute;
-    left: 0;
+    z-index: 1;
     top: 0;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
+    left: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--color-error);
+
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+
     font-size: 1.5rem;
     color: white;
+
     opacity: 0;
+    background-color: var(--color-error);
+
     transition: opacity 0.15s ease;
-    z-index: 1;
   }
 
   &.squareAvatar {
+    --border-radius-forum-avatar: 0.625rem;
+
     border-start-start-radius: 0.625rem;
     border-end-start-radius: 0.625rem;
-    --border-radius-forum-avatar: 0.625rem;
 
     &.minimized, .remove {
       border-radius: 0.625rem;
@@ -110,8 +127,8 @@
   }
 
   &[dir="rtl"] {
-    padding-left: 1rem;
     padding-right: 0;
+    padding-left: 1rem;
 
     &.minimized {
       padding-right: 0;
@@ -119,13 +136,13 @@
     }
 
     .name {
-      margin-left: 0;
       margin-right: 0.5rem;
+      margin-left: 0;
     }
 
     .remove {
-      left: auto;
       right: 0;
+      left: auto;
     }
   }
 }

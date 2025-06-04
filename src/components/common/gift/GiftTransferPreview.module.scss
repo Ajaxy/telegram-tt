@@ -1,22 +1,22 @@
 .root {
   display: flex;
-  justify-content: center;
-  align-items: center;
   gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
 
   margin-top: 0.5rem;
   margin-bottom: 1rem;
 }
 
 .giftPreview {
-  width: 4rem;
-  height: 4rem;
   position: relative;
 
+  overflow: hidden;
   display: grid;
   place-items: center;
 
-  overflow: hidden;
+  width: 4rem;
+  height: 4rem;
   border-radius: 0.625rem;
 }
 

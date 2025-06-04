@@ -1,17 +1,17 @@
 .root {
+  pointer-events: none;
   position: absolute;
   inset: 0;
   line-height: 1;
-  pointer-events: none;
 }
 
 .progress {
   --_progress: 0;
 
   z-index: 0;
+  overflow: hidden;
   font-size: 0.75rem;
   opacity: 0.8;
-  overflow: hidden;
 }
 
 .button {
@@ -34,14 +34,14 @@
 
 @keyframes sparkle {
   0% {
-    opacity: 0;
     transform: translate(0, 0);
+    opacity: 0;
   }
   15% {
     opacity: 1;
   }
   100% {
-    opacity: 0;
     transform: translate(var(--_shift-x), var(--_shift-y));
+    opacity: 0;
   }
 }

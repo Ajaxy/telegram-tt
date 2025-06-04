@@ -1,9 +1,12 @@
 .Skeleton {
   position: relative;
-  background-color: var(--color-skeleton-background);
+
+  overflow: hidden;
+
   width: 100%;
   height: 100%;
-  overflow: hidden;
+
+  background-color: var(--color-skeleton-background);
 
   &.inline {
     display: inline-block;
@@ -21,10 +24,14 @@
 
   &.pulse::before {
     content: "";
+
     display: block;
+
     width: 100%;
     height: 100%;
+
     background-color: var(--color-skeleton-foreground);
+
     animation: skeleton-pulse 2s ease-in-out 0.5s infinite;
 
     @keyframes skeleton-pulse {
@@ -42,11 +49,16 @@
 
   &.wave::before {
     content: "";
-    display: block;
+
     position: absolute;
+
+    display: block;
+
     width: 100%;
     height: 100%;
+
     background: linear-gradient(to right, transparent 0%, var(--color-skeleton-foreground) 50%, transparent 100%);
+
     animation: skeleton-wave 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 
     @keyframes skeleton-wave {

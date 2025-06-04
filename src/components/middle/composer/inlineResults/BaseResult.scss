@@ -2,18 +2,21 @@
   padding-bottom: 0.5rem;
 
   .thumb {
-    background-color: var(--color-background-secondary);
-    flex: 0 0 3rem;
-    width: 3rem;
-    height: 3rem;
-    line-height: 3rem;
-    border-radius: var(--border-radius-default-tiny);
+    overflow: hidden;
     display: inline-flex;
+    flex: 0 0 3rem;
     align-content: center;
     justify-content: center;
+
+    width: 3rem;
+    height: 3rem;
     margin-inline-end: 0.5rem;
-    overflow: hidden;
+    border-radius: var(--border-radius-default-tiny);
+
     font-size: 1.5rem;
+    line-height: 3rem;
+
+    background-color: var(--color-background-secondary);
 
     img:not(.emoji) {
       width: 100%;
@@ -32,20 +35,21 @@
   }
 
   .title {
+    unicode-bidi: plaintext;
     font-weight: var(--font-weight-medium);
     text-align: left;
-    unicode-bidi: plaintext;
   }
 
   .description {
-    white-space: normal;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: left;
     unicode-bidi: plaintext;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: normal;
   }
   &[dir="rtl"] .title,
   &[dir="rtl"] .description {

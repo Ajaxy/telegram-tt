@@ -8,6 +8,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+
     border-radius: 50%;
 
     animation: accuracy-wave 5s ease-out infinite forwards;
@@ -34,8 +35,8 @@
   }
 
   .map-wrapper {
-    overflow: hidden;
     position: relative;
+    overflow: hidden;
   }
 
   .map {
@@ -43,30 +44,33 @@
   }
 
   .pin {
+
+    --pin-color: var(--color-primary);
+
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -100%);
-    animation: fade-in 0.3s forwards;
 
-    --pin-color: var(--color-primary);
+    animation: fade-in 0.3s forwards;
   }
 
   .geoLive {
     &::before {
       content: "";
+
       position: absolute;
+      z-index: 3;
       bottom: 0;
       left: 50%;
       transform: translate(-50%, 50%);
 
       width: 1rem;
       height: 1rem;
-
-      background: var(--color-primary);
       border: 2px solid white;
       border-radius: 50%;
-      z-index: 3;
+
+      background: var(--color-primary);
     }
 
     .round-pin {
@@ -76,37 +80,41 @@
 
   .direction {
     position: absolute;
+    z-index: 2;
     top: 50%;
     left: 50%;
-    transition: transform 0.3s ease-out;
-    transform: translate(-50%, 0.3125rem) rotate(var(--direction));
     transform-origin: bottom;
+    transform: translate(-50%, 0.3125rem) rotate(var(--direction));
+
     width: 1.5rem;
     height: 2rem;
-    clip-path: polygon(50% 100%, 0 0, 100% 0);
-    background: radial-gradient(circle, var(--color-primary) -100%, transparent 100%);
     border-radius: 40%;
-    z-index: 2;
+
+    background: radial-gradient(circle, var(--color-primary) -100%, transparent 100%);
+    clip-path: polygon(50% 100%, 0 0, 100% 0);
+
+    transition: transform 0.3s ease-out;
   }
 
   .location-avatar {
     position: relative;
+    z-index: 5;
+
     overflow: hidden;
+
     margin-right: 0;
     margin-bottom: 1.3125rem;
-
-    z-index: 5;
   }
 
   .venue-icon {
     position: absolute;
+    z-index: 5;
     bottom: -0.5rem;
     left: 50%;
     transform: translate(-50%, -50%);
+
     width: 3rem;
     height: 3rem;
-
-    z-index: 5;
   }
 
   .venue,
@@ -124,44 +132,48 @@
 
     .location-avatar::after {
       content: "";
+
       position: absolute;
       top: 0;
       left: 0;
+
       width: 100%;
       height: 100%;
+
       background-color: rgba(255, 255, 255, 0.3);
     }
   }
 
   .round-pin {
-    fill: var(--pin-color);
-
     position: absolute;
-    left: 50%;
+    z-index: 4;
     bottom: 0;
+    left: 50%;
     transform: translate(-50%, 0);
+
     width: 5rem;
 
-    z-index: 4;
+    fill: var(--pin-color);
   }
 
   .location-info {
     display: grid;
     grid-template-columns: 1fr auto;
     grid-template-rows: 1fr auto;
+
     width: 100%;
     padding: 0.3125rem 0.5rem 0.25rem;
 
     &-title {
-      font-weight: var(--font-weight-medium);
       grid-area: 1 / 1 / 2 / 2;
+      font-weight: var(--font-weight-medium);
     }
 
     &-subtitle {
-      color: var(--color-text-secondary);
-      line-height: 1.25;
-      font-size: 0.875rem;
       grid-area: 2 / 1 / 2 / 2;
+      font-size: 0.875rem;
+      line-height: 1.25;
+      color: var(--color-text-secondary);
 
       .Message.own & {
         color: var(--color-message-meta-own);
@@ -170,30 +182,33 @@
   }
 
   .geo-countdown {
-    grid-area: 1 / 2 / 3 / 3;
     position: relative;
+    grid-area: 1 / 2 / 3 / 3;
     width: 2rem;
     height: 2rem;
   }
 
   .geo-countdown-text {
-    color: var(--accent-color);
     position: absolute;
     top: 50%;
     left: 0;
     transform: translateY(-50%);
+
+    width: 100%;
+
     font-size: 0.875rem;
     font-weight: var(--font-weight-medium);
     line-height: 1;
-    width: 100%;
+    color: var(--accent-color);
     text-align: center;
   }
 
   .geo-countdown-progress {
-    stroke: var(--accent-color);
     fill: transparent;
-    stroke-width: 2;
+    stroke: var(--accent-color);
     stroke-linecap: round;
+    stroke-width: 2;
+
     transition: stroke-dashoffset 2s, stroke 0.2s;
   }
 }

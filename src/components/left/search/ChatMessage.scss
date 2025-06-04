@@ -13,19 +13,22 @@
     }
 
     h3 {
-      font-size: 1rem;
       width: auto;
+      font-size: 1rem;
     }
 
     .subtitle {
       color: var(--color-text-secondary);
 
       .matching-text-highlight {
-        color: var(--color-text);
-        background: #cae3f7;
-        border-radius: 0.25rem;
-        padding: 0 0.125rem;
         display: inline-block;
+
+        padding: 0 0.125rem;
+        border-radius: 0.25rem;
+
+        color: var(--color-text);
+
+        background: #cae3f7;
 
         .theme-dark & {
           --color-text: #000;
@@ -34,9 +37,9 @@
     }
 
     .message {
+      overflow: hidden;
       flex-grow: 1;
       color: var(--color-text-secondary);
-      overflow: hidden;
       text-overflow: ellipsis;
 
       .sender-name {
@@ -54,21 +57,26 @@
       .media-preview--image {
         width: 1.25rem;
         height: 1.25rem;
-        object-fit: cover;
-        border-radius: 0.125rem;
-        vertical-align: -0.25rem;
         margin-inline-start: 0.125rem;
         margin-inline-end: 0.25rem;
+        border-radius: 0.125rem;
+
+        vertical-align: -0.25rem;
+
+        object-fit: cover;
       }
 
       .icon-play {
         position: relative;
+        bottom: 0.0625rem;
+
         display: inline-block;
-        font-size: 0.75rem;
-        color: #fff;
+
         margin-inline-start: -1.25rem;
         margin-inline-end: 0.5rem;
-        bottom: 0.0625rem;
+
+        font-size: 0.75rem;
+        color: #fff;
       }
     }
   }

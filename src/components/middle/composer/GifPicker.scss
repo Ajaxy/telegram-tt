@@ -1,23 +1,25 @@
 .GifPicker {
+  position: relative;
+  top: 0.1875rem;
+
+  overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-auto-flow: dense;
   grid-auto-rows: 6.25rem;
   grid-gap: 0.125rem;
-  grid-auto-flow: dense;
+  grid-template-columns: repeat(6, 1fr);
+
   height: calc(100% - 0.1875rem);
-  overflow-y: auto;
   margin: 0 0.1875rem;
   padding-bottom: 0.1875rem;
   border-radius: 1.125rem 1.125rem 0 0;
-  position: relative;
-  top: 0.1875rem;
 
   .Loading, .picker-disabled {
     position: absolute;
     top: 0;
+    right: 0;
     bottom: 0;
     left: 0;
-    right: 0;
   }
 
   .SymbolMenu.mobile-menu & {

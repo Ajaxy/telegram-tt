@@ -1,28 +1,36 @@
 .fallbackPhoto {
+  pointer-events: none;
+
   position: absolute;
   z-index: 1;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
-  width: 100%;
+
   display: flex;
   justify-content: center;
+
+  width: 100%;
   padding-top: 1rem;
   padding-bottom: 0.5rem;
+
   opacity: 0;
-  pointer-events: none;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
 
   transition: 0.25s ease-in-out opacity;
 }
 
 .fallbackPhotoContents {
-  display: flex;
-  font-size: 0.75rem;
-  color: var(--color-white);
-  opacity: 0.5;
+  pointer-events: none;
   cursor: var(--custom-cursor, pointer);
   user-select: none;
+
+  display: flex;
   align-items: center;
+
   height: 1.5rem;
-  pointer-events: none;
+
+  font-size: 0.75rem;
+  color: var(--color-white);
+
+  opacity: 0.5;
 
   transition: 0.25s ease-in-out opacity;
 
@@ -44,13 +52,14 @@
 }
 
 .photoWrapper {
-  width: 100%;
   position: absolute;
-  left: 0;
   top: 0;
   bottom: 0;
+  left: 0;
 
   overflow: hidden;
+
+  width: 100%;
 
   > :global(.Transition) {
     width: 100%;
@@ -60,22 +69,26 @@
 
 .photoDashes {
   position: absolute;
+  z-index: 2;
+  top: 0.5rem;
+  left: 0;
+
+  display: flex;
+
   width: 100%;
   height: 0.125rem;
   padding: 0 0.375rem;
-  z-index: 2;
-
-  display: flex;
-  top: 0.5rem;
-  left: 0;
 }
 
 .photoDash {
   flex: 1 1 auto;
-  background-color: var(--color-white);
-  opacity: 0.25;
-  border-radius: 0.125rem;
+
   margin: 0 0.125rem;
+  border-radius: 0.125rem;
+
+  opacity: 0.25;
+  background-color: var(--color-white);
+
   transition: opacity 300ms ease;
 
   &_current {
@@ -84,21 +97,25 @@
 }
 
 .navigation {
+  cursor: var(--custom-cursor, pointer);
+
   position: absolute;
+  z-index: 1;
   top: 0;
   bottom: 0;
+
   width: 25%;
-  border: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
+  border: none;
+
   appearance: none;
+  opacity: 0.25;
   background: transparent no-repeat;
   background-size: 1.25rem;
-  opacity: 0.25;
-  transition: opacity 0.15s;
   outline: none !important;
-  cursor: var(--custom-cursor, pointer);
-  z-index: 1;
+
+  transition: opacity 0.15s;
 
   &:global(:hover),
   :global(.is-touch-env) & {
@@ -111,8 +128,8 @@
     background-position: 1.25rem 50%;
 
     &[dir="rtl"] {
-      left: auto;
       right: 0;
+      left: auto;
       transform: scaleX(-1);
     }
   }
@@ -123,26 +140,31 @@
     background-position: calc(100% - 1.25rem) 50%;
 
     &[dir="rtl"] {
-      left: 0;
       right: auto;
+      left: 0;
       transform: scaleX(-1);
     }
   }
 }
 
 .info {
+  pointer-events: none;
+
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 100%;
-  min-height: 100px;
-  padding: 0 1.5rem 0.5rem;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
-  color: var(--color-white);
+
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  pointer-events: none;
+
+  width: 100%;
+  min-height: 100px;
+  padding: 0 1.5rem 0.5rem;
+
+  color: var(--color-white);
+
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
 
   :global(.statusSparkles) {
     color: var(--color-white) !important;
@@ -150,23 +172,23 @@
 
   &:dir(rtl) {
     .status {
-      text-align: right;
       unicode-bidi: plaintext;
+      text-align: right;
     }
   }
 
   &[dir="rtl"] {
     .status {
-      text-align: right;
       unicode-bidi: plaintext;
+      text-align: right;
     }
   }
 }
 
 .status {
-  font-size: 0.875rem;
   display: flex;
   align-items: center;
+  font-size: 0.875rem;
 }
 
 .user-status {
@@ -175,17 +197,22 @@
 
 .get-status {
   --blured-background-color: #c4c9cc42;
-  cursor: var(--custom-cursor, pointer);
-  font-size: 0.75rem;
-  margin-inline-start: 0.375rem;
-  border-radius: 1rem;
-  padding: 0.1875rem 0.375rem;
+
   pointer-events: all;
+  cursor: var(--custom-cursor, pointer);
+
+  margin-inline-start: 0.375rem;
+  padding: 0.1875rem 0.375rem;
+  border-radius: 1rem;
+
+  font-size: 0.75rem;
   font-weight: var(--font-weight-medium);
-  transition: 150ms filter ease-in;
+
+  opacity: 0.8;
   background: var(--blured-background-color);
   backdrop-filter: blur(100px);
-  opacity: 0.8;
+
+  transition: 150ms filter ease-in;
 
   &:hover {
     filter: brightness(1.1);
@@ -199,17 +226,17 @@
 }
 
 .topicTitle {
+  margin: 0.5rem 0 0;
   font-size: 1.25rem;
   line-height: 1.5rem;
   text-align: center;
-  margin: 0.5rem 0 0;
 }
 
 .topicIcon {
-  margin: auto;
+  display: flex !important;
   width: 7.5rem !important;
   height: 7.5rem !important;
-  display: flex !important;
+  margin: auto;
 
   &:global(.general-forum-icon) {
     font-size: 7.5rem;
@@ -219,7 +246,6 @@
 
 .topicIconTitle {
   font-size: 3rem !important;
-
   font-weight: var(--font-weight-normal);
 
   :global(.emoji-small) {
@@ -229,9 +255,10 @@
 }
 
 .topicMessagesCounter {
+  margin: 0;
+
   font-size: 0.875rem;
   line-height: 1.25rem;
   color: var(--color-text-secondary);
-  margin: 0;
   text-align: center;
 }

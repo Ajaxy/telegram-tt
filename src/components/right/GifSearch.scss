@@ -3,21 +3,21 @@
   padding: 0.25rem;
 
   .gif-container {
-    height: 100%;
     overflow: auto;
+    height: 100%;
 
     &.grid {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-auto-flow: dense;
       grid-auto-rows: 6.25rem;
       grid-gap: 0.25rem;
-      grid-auto-flow: dense;
+      grid-template-columns: repeat(6, 1fr);
     }
   }
 
   .helper-text {
-    color: var(--color-text-meta);
     margin-top: 2rem;
+    color: var(--color-text-meta);
     text-align: center;
   }
 }

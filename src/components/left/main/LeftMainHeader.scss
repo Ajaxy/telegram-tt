@@ -9,9 +9,9 @@
   }
 
   .DropdownMenu.rtl {
-    transition: var(--slide-transition) transform;
     position: absolute;
     z-index: 2;
+    transition: var(--slide-transition) transform;
 
     &.right-aligned {
       transform:
@@ -34,22 +34,11 @@
   .animated-menu-icon {
     position: absolute;
 
-    &,
     &::before,
     &::after {
-      width: 1.125rem;
-      height: 0.125rem;
-      border-radius: 0.125rem;
-      background-color: var(--color-text-secondary);
-      transition: transform 0.25s;
-      transform: rotate(0);
-    }
-
-    &::before,
-    &::after {
+      content: "";
       position: absolute;
       left: 0;
-      content: "";
     }
 
     &::before {
@@ -58,6 +47,20 @@
 
     &::after {
       top: 0.3125rem;
+    }
+
+    &,
+    &::before,
+    &::after {
+      transform: rotate(0);
+
+      width: 1.125rem;
+      height: 0.125rem;
+      border-radius: 0.125rem;
+
+      background-color: var(--color-text-secondary);
+
+      transition: transform 0.25s;
     }
 
     &.state-back {
@@ -96,10 +99,9 @@
   }
 
   .Menu .bubble {
+    overflow-y: auto;
     min-width: 17rem;
     max-height: calc(100 * var(--vh) - 3.75rem);
-
-    overflow-y: auto;
   }
 
   .extra-spacing {
@@ -118,8 +120,9 @@
     }
 
     .emoji-status {
-      overflow: visible;
       --custom-emoji-size: 1.5rem;
+
+      overflow: visible;
       color: var(--color-primary);
     }
 
@@ -140,19 +143,19 @@
     transition: opacity var(--layer-transition);
 
     &--hidden {
-      opacity: 0;
       pointer-events: none;
+      opacity: 0;
     }
   }
 
   .left-search-picker-item {
-    color: var(--color-text-secondary);
-    font-weight: var(--font-weight-medium);
     padding-right: 0;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
 
     &[dir="rtl"] {
-      left: auto;
       right: -0.125rem;
+      left: auto;
     }
   }
 
@@ -161,12 +164,13 @@
 
     &-test {
       position: absolute;
-      left: 2.875rem;
+      z-index: 1;
       bottom: 0.0625rem;
-      color: var(--color-text-secondary);
+      left: 2.875rem;
+
       font-size: 0.5rem;
       font-weight: var(--font-weight-medium);
-      z-index: 1;
+      color: var(--color-text-secondary);
     }
 
     .account-avatar {
@@ -175,9 +179,9 @@
 
     .fullName {
       margin: 0;
+      padding-top: 0.1875rem;
       font-size: 1em;
       line-height: 1;
-      padding-top: 0.1875rem;
     }
   }
 }

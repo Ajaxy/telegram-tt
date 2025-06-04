@@ -1,7 +1,7 @@
 .root {
   position: relative;
-  color: var(--color-toast-action);
   font-weight: var(--font-weight-medium);
+  color: var(--color-toast-action);
 }
 
 .svg {
@@ -12,10 +12,11 @@
 }
 
 .circle {
-  stroke: var(--color-toast-action);
   fill: transparent;
-  stroke-width: 2;
+  stroke: var(--color-toast-action);
   stroke-linecap: round;
+  stroke-width: 2;
+
   transition: stroke-dashoffset 1s linear, stroke 0.2s;
 
   @starting-style {

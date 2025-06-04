@@ -10,6 +10,7 @@ html {
   line-height: 1.15;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
+
   -ms-overflow-style: scrollbar;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
@@ -41,9 +42,9 @@ body, blockquote {
 }
 
 hr {
+  overflow: visible;
   box-sizing: content-box;
   height: 0;
-  overflow: visible;
 }
 
 h1,
@@ -59,10 +60,10 @@ h6 {
 
 abbr[title],
 abbr[data-original-title] {
-  text-decoration: underline;
-  text-decoration: underline dotted;
   cursor: help;
   border-bottom: 0;
+  text-decoration: underline;
+  text-decoration: underline dotted;
 }
 
 address {
@@ -129,6 +130,7 @@ a {
   color: var(--color-links);
   text-decoration: none;
   background-color: transparent;
+
   -webkit-text-decoration-skip: objects;
 }
 
@@ -158,15 +160,16 @@ samp {
 }
 
 pre {
+  overflow: auto;
   margin-top: 0;
   margin-bottom: 1rem;
-  overflow: auto;
+
   -ms-overflow-style: scrollbar;
 }
 
 img {
-  vertical-align: middle;
   border-style: none;
+  vertical-align: middle;
 }
 
 svg:not(:root) {
@@ -190,11 +193,13 @@ table {
 }
 
 caption {
+  caption-side: bottom;
+
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
+
   color: #868e96;
   text-align: left;
-  caption-side: bottom;
 }
 
 th {
@@ -256,23 +261,25 @@ input[type="month"] {
 }
 
 textarea {
-  overflow: auto;
   resize: vertical;
+  overflow: auto;
 }
 
 fieldset {
   min-width: 0;
-  padding: 0;
   margin: 0;
+  padding: 0;
   border: 0;
 }
 
 legend {
   display: block;
+
   width: 100%;
   max-width: 100%;
-  padding: 0;
   margin-bottom: 0.5rem;
+  padding: 0;
+
   font-size: 1.5rem;
   line-height: inherit;
   color: inherit;
@@ -289,8 +296,8 @@ progress {
 }
 
 [type="search"] {
-  outline-offset: -2px;
   -webkit-appearance: none;
+  outline-offset: -2px;
 }
 
 [type="search"]::-webkit-search-cancel-button,

@@ -25,38 +25,39 @@
 
   :global {
     .modal-dialog {
+      overflow: hidden;
+
       max-width: var(--default-width);
-      max-height: min(var(--max-height), 100vh);
       height: 100%;
       min-height: min(80vh, var(--max-height));
-      overflow: hidden;
+      max-height: min(var(--max-height), 100vh);
+
       background: var(--group-call-background-color);
     }
 
     .modal-content {
-      min-height: 100%;
-
       display: flex;
-
+      min-height: 100%;
       padding: 0;
     }
   }
 }
 
 .panelWrapper {
-  max-width: var(--default-width);
   width: 100%;
+  max-width: var(--default-width);
 }
 
 .panel {
-  background: var(--group-call-panel-color);
-
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+  position: relative;
 
   overflow-y: scroll;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+
+  background: var(--group-call-panel-color);
 }
 
 .panelScrollTrigger {
@@ -66,22 +67,23 @@
 }
 
 .panelHeader {
-  display: flex;
-  align-items: center;
+  user-select: none;
+
   position: sticky;
+  z-index: 1;
   top: 0;
 
-  border-bottom: 0.0625rem solid transparent;
+  display: flex;
+  align-items: center;
 
   padding: 0.375rem 0.875rem;
+  border-bottom: 0.0625rem solid transparent;
 
-  @include mixins.adapt-padding-to-scrollbar(0.875rem);
-
-  user-select: none;
-  z-index: 1;
   background: var(--group-call-panel-color);
 
   transition: 0.25s ease-in-out border-bottom-color;
+
+  @include mixins.adapt-padding-to-scrollbar(0.875rem);
 
   &.scrolled {
     border-bottom-color: var(--group-call-panel-header-border-color);
@@ -105,21 +107,23 @@
 }
 
 .panelHeaderText {
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  overflow: hidden;
 }
 
 .title {
-  line-height: 1.375rem;
-  white-space: pre;
-  overflow: hidden;
-  text-overflow: ellipsis;
   unicode-bidi: plaintext;
+  overflow: hidden;
+
+  margin: 0;
+
   font-size: 1rem;
   font-weight: var(--font-weight-medium);
-  margin: 0;
+  line-height: 1.375rem;
+  text-overflow: ellipsis;
+  white-space: pre;
 }
 
 .bigger {
@@ -127,14 +131,16 @@
 }
 
 .subtitle {
+  overflow: hidden;
+  display: inline-block;
+
+  margin: 0;
+
   font-size: 0.875rem;
   line-height: 1.125rem;
-  margin: 0;
   color: var(--color-text-secondary);
-  overflow: hidden;
-  white-space: nowrap;
   text-overflow: ellipsis;
-  display: inline-block;
+  white-space: nowrap;
 }
 
 .participants {
@@ -145,8 +151,8 @@
 }
 
 .participantVideos {
-  width: 100%;
   position: relative;
+  width: 100%;
 }
 
 .addParticipantButton {
@@ -156,7 +162,6 @@
 .videos {
   display: flex;
   flex-direction: column;
-
   width: calc(100% - var(--default-width));
 }
 
@@ -185,23 +190,27 @@
 
 .actions {
   --actions-max-width: 0px;
+
   position: absolute;
+  z-index: 2;
+  bottom: 1.75rem;
   left: 50%;
   transform: translateX(calc(-50% - var(--actions-max-width) / 2));
-  bottom: 1.75rem;
 
   display: flex;
   gap: 1.25rem;
-  z-index: 2;
 }
 
 .actionButton {
   width: 3.375rem !important;
   height: 3.375rem !important;
+
   color: var(--color-text) !important;
+
   background-color: var(--green-button-color) !important;
-  transition: 0.15s filter, 0.25s ease-out background-color;
   backdrop-filter: blur(25px);
+
+  transition: 0.15s filter, 0.25s ease-out background-color;
 
   &:global(.disabled) {
     background: var(--disabled-button-color) !important;
@@ -245,10 +254,9 @@
 .landscape {
   .panelWrapper {
     position: absolute;
-    right: 0;
     top: 0;
+    right: 0;
     bottom: 0;
-
     transform: translateZ(0);
   }
 
@@ -256,13 +264,16 @@
     .actions {
       --actions-max-width: var(--default-width);
 
+      bottom: 2.5rem;
+
+      padding: 0.75rem;
+      border-radius: 1.25rem;
+
+      opacity: 0;
       background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(50px);
-      border-radius: 1.25rem;
-      padding: 0.75rem;
-      bottom: 2.5rem;
+
       transition: 250ms ease-in-out opacity;
-      opacity: 0;
     }
 
     .videos:hover ~ .actions, .mainVideoContainer:hover ~ .actions, .actions:hover {
@@ -272,11 +283,12 @@
 
   &.noVideoParticipants {
     .panelWrapper {
-      max-width: max(50vw, 30rem);
-      width: 100%;
-      transform: translateX(-50%);
-      left: 50%;
       right: 0;
+      left: 50%;
+      transform: translateX(-50%);
+
+      width: 100%;
+      max-width: max(50vw, 30rem);
     }
 
     :global(.modal-content) {
@@ -287,14 +299,17 @@
 
 .portrait {
   .panelWrapper::after {
-    display: block;
+    pointer-events: none;
     content: '';
+
     position: fixed;
+    bottom: 0;
+    left: 0;
+
+    display: block;
+
     width: 100%;
     height: 7.5rem;
-    left: 0;
-    bottom: 0;
-    pointer-events: none;
 
     background: linear-gradient(180deg, rgba(33, 33, 33, 0) 0%, rgba(33, 33, 33, 0.65) 48.54%, #212121 100%);
   }

@@ -5,14 +5,14 @@
   height: 100%;
 
   & > .custom-scroll {
-    height: 100%;
-    overflow-y: scroll;
     overflow-x: hidden;
+    overflow-y: scroll;
+    height: 100%;
   }
 
   .personal-photo {
-    margin-right: 2rem;
     transform: scale(1.25);
+    margin-right: 2rem;
   }
 
   .section {
@@ -75,11 +75,13 @@
     }
 
     .section-heading {
+      position: relative;
+
+      padding-inline-start: 1rem;
+
       font-size: 1rem;
       font-weight: var(--font-weight-semibold);
       color: var(--color-text-secondary);
-      padding-inline-start: 1rem;
-      position: relative;
 
       &[dir="auto"] {
         text-align: initial;
@@ -88,9 +90,8 @@
 
     .section-help {
       padding: 0 1rem;
-
-      color: var(--color-text-secondary);
       line-height: 1.375rem;
+      color: var(--color-text-secondary);
 
       &[dir="auto"] {
         text-align: initial;
@@ -98,9 +99,9 @@
     }
 
     .section-info {
-      color: var(--color-text-secondary);
-      font-size: 0.875rem;
       padding: 0 1rem;
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
     }
 
     .invite-link {
@@ -121,8 +122,8 @@
   }
 
   .group-link {
-    color: var(--color-text);
     padding-left: 1rem;
+    color: var(--color-text);
   }
 
   .RangeSlider {
@@ -134,29 +135,29 @@
   }
 
   &__filter {
-    padding: 0 1rem 0.25rem 0.75rem;
-    margin-bottom: 0.625rem;
-
-    @include mixins.side-panel-section;
-
+    overflow-y: auto;
     display: flex;
     flex-flow: row wrap;
     flex-shrink: 0;
 
-    overflow-y: auto;
     max-height: 20rem;
+    margin-bottom: 0.625rem;
+    padding: 0 1rem 0.25rem 0.75rem;
+
+    @include mixins.side-panel-section;
 
     .input-group {
+      flex-grow: 1;
       margin-bottom: 0.5rem;
       margin-left: 0.5rem;
-      flex-grow: 1;
     }
 
     .form-control {
       height: 2rem;
+      padding: 0;
       border: none;
       border-radius: 0;
-      padding: 0;
+
       box-shadow: none;
     }
   }
@@ -184,13 +185,16 @@
   }
 
   .link-status-icon {
-    display: block;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    padding: 0.5rem;
     position: static !important;
-    color: white !important;
+
+    display: block;
+
+    aspect-ratio: 1;
     margin-right: 1rem !important;
+    padding: 0.5rem;
+    border-radius: 50%;
+
+    color: white !important;
 
     &-gray {
       background-color: #707579;
@@ -216,8 +220,8 @@
 
 .ManageInvite {
   .link-name {
-    padding: 0 1rem;
     margin-bottom: 1rem;
+    padding: 0 1rem;
   }
 
   .expire-limit {
@@ -226,7 +230,6 @@
 
   .usage-limit {
     margin-top: 1rem;
-
     -moz-appearance: textfield;
     &::-webkit-outer-spin-button,
     &::-webkit-inner-spin-button {
@@ -265,20 +268,23 @@
 .ManageInvite,
 .ManageInvites {
   .hint {
-    font-size: 0.875rem;
-    margin-bottom: 0;
     margin-top: 0.5rem;
+    margin-bottom: 0;
+    font-size: 0.875rem;
   }
 }
 
 .DropdownList {
-  transition: 0.25s ease-in-out transform;
-  transform: translateY(calc(-100%));
   position: absolute;
-  width: 100%;
   left: 0;
+  transform: translateY(calc(-100%));
+
+  width: 100%;
   padding: 0 0.5rem 0 3.5rem;
+
   background: var(--color-background);
+
+  transition: 0.25s ease-in-out transform;
 
   &--open {
     transform: translateY(0.025rem);
@@ -286,18 +292,21 @@
 }
 
 .DropdownListTrap {
-  height: 0;
   width: 100%;
+  height: 0;
 
   &::before {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: calc(var(--before-shift-height) + 2.5rem);
-    background: var(--color-background);
     content: "";
+
+    position: absolute;
     z-index: 1;
+    top: 0;
+    right: 0;
+    left: 0;
+
+    height: calc(var(--before-shift-height) + 2.5rem);
+
+    background: var(--color-background);
   }
 }
 
@@ -308,8 +317,8 @@
   }
 
   .without-bottom-shadow {
-    box-shadow: none;
     padding-bottom: 0;
+    box-shadow: none;
   }
 
   .part {

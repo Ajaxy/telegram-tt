@@ -1,9 +1,11 @@
 .root {
-  color: var(--accent-color);
+  pointer-events: none;
+
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  pointer-events: none;
+
+  color: var(--accent-color);
 }

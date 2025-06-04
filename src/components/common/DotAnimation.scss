@@ -3,9 +3,9 @@
   align-items: center;
 
   .ellipsis {
+    overflow: hidden;
     display: flex;
     width: 1rem;
-    overflow: hidden;
 
     &::after {
       content: "...";

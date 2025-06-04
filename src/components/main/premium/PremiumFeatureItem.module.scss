@@ -15,24 +15,28 @@
 
 .description {
   font-size: 0.875rem;
+  line-height: 1.25rem;
   color: var(--color-text-secondary);
   white-space: pre-wrap;
-  line-height: 1.25rem;
 }
 
 .icon {
+  align-self: center;
+
   min-width: 2rem;
   height: 2rem;
-  align-self: center;
-  border-radius: 0.625rem;
-  background: var(--item-color, #000);
   margin-left: 1rem;
+  border-radius: 0.625rem;
+
+  background: var(--item-color, #000);
 }
 
 .font-icon {
-  font-size: 2rem !important;
   align-self: center;
+
   margin-right: 0 !important;
   margin-left: 1rem;
+
+  font-size: 2rem !important;
   color: var(--item-color, #000) !important;
 }

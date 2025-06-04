@@ -1,10 +1,11 @@
 .HeaderMenuContainer {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100vh;
   z-index: var(--z-header-menu);
+  top: 0;
+  right: 0;
+  left: 0;
+
+  height: 100vh;
 
   .Menu {
     position: absolute;
@@ -15,8 +16,9 @@
     }
 
     .bubble {
-      z-index: var(--z-header-menu);
       --offset-y: calc(100% + 1rem);
+
+      z-index: var(--z-header-menu);
     }
   }
 }

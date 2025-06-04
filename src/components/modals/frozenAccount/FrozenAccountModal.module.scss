@@ -1,24 +1,25 @@
 .header {
-  margin-top: 0.5rem;
-  margin-bottom: 0.75rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+
   width: 100%;
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .title {
-  font-weight: var(--font-weight-medium);
-  font-size: 1.25rem;
-  text-align: center;
   padding-top: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
 }
 
 .footer {
-  margin-top: 0.5rem;
   display: flex;
-  align-self: stretch;
   flex-direction: column;
+  align-self: stretch;
+  margin-top: 0.5rem;
 }
 
 .buttonAppeal {

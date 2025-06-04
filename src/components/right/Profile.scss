@@ -1,14 +1,14 @@
 @use '../../styles/mixins';
 
 .Profile {
-  height: 100%;
+  overflow-x: hidden;
+  overflow-y: scroll;
   display: flex;
   flex-direction: column;
 
-  overflow-x: hidden;
-  overflow-y: scroll;
-
+  height: 100%;
   border-top: 1px solid transparent;
+
   transition: border-top-color 0.2s ease-in-out;
 
   &.scrolled {
@@ -35,8 +35,8 @@
 
     [dir="rtl"] {
       .Switcher {
-        margin-left: 0;
         margin-right: auto;
+        margin-left: 0;
       }
     }
   }
@@ -55,23 +55,26 @@
 
 .nothing-found-gifts {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
+
   padding-top: 5rem;
 
   .description {
-    color: var(--color-text-secondary);
+    unicode-bidi: plaintext;
+
+    margin-block: 1rem;
+
     font-size: 1rem;
     font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
     text-align: center;
-    margin-block: 1rem;
-    unicode-bidi: plaintext;
   }
 
   .Link {
-    color: var(--color-links);
     font-weight: var(--font-weight-medium);
+    color: var(--color-links);
     transition: opacity 0.15s ease-in;
 
     &:active,
@@ -87,9 +90,9 @@
   flex-direction: column-reverse;
 
   .TabList {
-    background: var(--color-background);
-    top: -1px;
     z-index: 1;
+    top: -1px;
+    background: var(--color-background);
   }
 
   .info .Transition {
@@ -106,11 +109,12 @@
 
   .content {
     &.empty-list {
-      height: 100%;
-      padding-top: 5rem;
       display: flex;
       align-items: flex-start;
       justify-content: center;
+
+      height: 100%;
+      padding-top: 5rem;
 
       .Spinner {
         --spinner-size: 2.75rem;
@@ -123,8 +127,8 @@
     &.previewMedia-list,
     &.gifts-list {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
       grid-auto-rows: 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 0.0625rem;
     }
 
@@ -157,6 +161,7 @@
         .media-loading {
           top: 0;
           left: 0;
+
           display: flex;
           align-items: center;
           justify-content: center;
@@ -190,11 +195,13 @@
 
       .show-more-bots,
       .show-more-channels {
+        z-index: 1;
+
         width: calc(100% - 1rem);
         margin: 0 auto;
         margin-top: -1.8125rem;
-        z-index: 1;
         border-radius: var(--border-radius-default-small);
+
         box-shadow: -1rem 0 1rem 1rem var(--color-background), -1rem 0 1rem 0.3125rem var(--color-background);
 
         .icon {
@@ -203,9 +210,9 @@
       }
 
       .more-similar {
-        text-align: center;
         margin-top: 1rem;
         font-size: 0.8125rem;
+        text-align: center;
       }
     }
   }

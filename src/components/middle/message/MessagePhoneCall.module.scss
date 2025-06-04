@@ -12,10 +12,10 @@
 }
 
 .info {
-  margin-inline-end: 0.5rem;
+  user-select: none;
   display: flex;
   flex-direction: column;
-  user-select: none;
+  margin-inline-end: 0.5rem;
 }
 
 .reason {
@@ -23,9 +23,9 @@
 }
 
 .arrow {
-  font-size: 1.125rem;
-  display: inline-block;
   transform: rotateZ(-45deg);
+  display: inline-block;
+  font-size: 1.125rem;
   color: #4fae4e;
 
   &.incoming {

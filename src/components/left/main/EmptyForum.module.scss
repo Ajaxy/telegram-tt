@@ -4,24 +4,25 @@
   transform: translateY(-50%);
 
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
 
   padding: 1rem;
 
   :global(.Button.pill) {
-    max-width: 100%;
-    margin-top: 0.625rem;
-    font-weight: var(--font-weight-medium);
-    padding-inline-start: 0.75rem;
     unicode-bidi: plaintext;
-
     justify-content: start;
 
+    max-width: 100%;
+    margin-top: 0.625rem;
+    padding-inline-start: 0.75rem;
+
+    font-weight: var(--font-weight-medium);
+
     .button-text {
-      text-overflow: ellipsis;
       overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
     }
 
@@ -38,11 +39,12 @@
 }
 
 .title {
-  font-size: 1.25rem;
-  margin-bottom: 0.125rem;
-  overflow-wrap: anywhere;
-  text-align: center;
   max-width: 100%;
+  margin-bottom: 0.125rem;
+
+  font-size: 1.25rem;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .description {

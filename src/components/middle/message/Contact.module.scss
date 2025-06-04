@@ -5,9 +5,9 @@
 }
 
 .info-container {
+  cursor: var(--custom-cursor, pointer);
   display: flex;
   padding: 0.5rem 1.5rem 0.5rem 0.125rem;
-  cursor: var(--custom-cursor, pointer);
 }
 
 .info {
@@ -18,9 +18,9 @@
 }
 
 .name {
+  max-width: 12.5rem;
   font-size: 1rem;
   font-weight: var(--font-weight-medium);
-  max-width: 12.5rem;
 }
 
 .phone {
@@ -30,8 +30,8 @@
 .name,
 .phone {
   overflow: hidden;
-  white-space: nowrap;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .divider {
@@ -44,20 +44,25 @@
   display: flex;
 
   .button {
-    width: auto;
-    flex: 1;
-    height: 2rem;
-    font-weight: var(--font-weight-medium);
-    background-color: transparent;
-    color: var(--accent-color);
     --ripple-color: var(--accent-background-active-color);
+
+    flex: 1;
+
+    width: auto;
+    height: 2rem;
+
+    font-weight: var(--font-weight-medium);
+    color: var(--accent-color);
+
     opacity: 1;
+    background-color: transparent;
+
     transition: 0.25s ease-in-out opacity;
 
     &:not(.disabled):not(:disabled):hover {
       color: var(--accent-color);
-      background-color: transparent;
       opacity: 0.75;
+      background-color: transparent;
     }
   }
 }

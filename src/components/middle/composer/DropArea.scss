@@ -1,14 +1,15 @@
 .DropArea {
   position: absolute;
+  z-index: var(--z-drop-area);
   top: 0;
   right: 0;
   left: 0;
-  height: 100vh;
-  z-index: var(--z-drop-area);
-  padding: calc(80px + var(--call-header-height, 0rem)) 20px 20px;
 
   display: flex;
   flex-direction: column;
+
+  height: 100vh;
+  padding: calc(80px + var(--call-header-height, 0rem)) 20px 20px;
 
   #Main.right-column-open & {
     max-width: calc(100% - var(--right-column-width));

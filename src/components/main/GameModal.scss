@@ -1,12 +1,14 @@
 .GameModal {
   .modal-dialog {
+    justify-content: center;
+
     max-width: 80%;
     height: 100%;
-    justify-content: center;
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
     margin: 0;
+    border: none;
+
+    background-color: transparent;
+    box-shadow: none;
   }
 
   .modal-header {
@@ -26,9 +28,9 @@
 
   @media (max-width: 600px) {
     .modal-dialog {
-      background-color: var(--color-background);
       max-width: 100% !important;
       border-radius: 0;
+      background-color: var(--color-background);
     }
 
     .modal-header {

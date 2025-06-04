@@ -1,7 +1,7 @@
 .stars {
-  width: 100%;
   display: flex;
   justify-content: center;
+  width: 100%;
   font-size: 1.5rem;
 }
 
@@ -19,8 +19,8 @@
 }
 
 .comment {
-  margin-top: 1rem;
   overflow: hidden;
+  margin-top: 1rem;
 
   &:not(.visible) {
     display: none;

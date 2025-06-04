@@ -13,15 +13,15 @@
 }
 
 .participants {
-  display: flex;
   overflow-x: scroll;
+  display: flex;
   gap: 0.5rem;
   align-self: stretch;
 }
 
 .participant {
-  min-width: 4.5rem;
   width: 4.5rem;
+  min-width: 4.5rem;
   margin-inline: auto;
 }
 

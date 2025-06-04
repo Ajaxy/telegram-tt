@@ -4,8 +4,8 @@
 
 .top {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
 .icon {
@@ -35,15 +35,19 @@
 }
 
 .offset-trigger {
+  z-index: 1;
+
   display: inline-block;
+  align-self: flex-end;
+
+  margin-bottom: 0.25rem;
   padding: 0 0.5rem;
   border-radius: 0.75rem;
+
   font-size: 0.875rem;
   color: var(--color-primary);
+
   background-color: var(--color-primary-tint);
-  align-self: flex-end;
-  margin-bottom: 0.25rem;
-  z-index: 1;
 
   transition: background-color 0.2s ease-in-out;
 
@@ -53,32 +57,35 @@
 }
 
 .transition {
-  margin-bottom: 0.5rem;
   height: 0;
+  margin-bottom: 0.5rem;
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .timetable {
-  margin-bottom: 0;
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0.5rem;
+
   margin-top: 0.6875rem;
+  margin-bottom: 0;
 }
 
 .schedule {
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
-  margin-bottom: 0;
   justify-self: end;
+
+  margin-bottom: 0;
+
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
   text-align: end;
 }
 
 .weekday {
-  word-break: break-all;
-  line-height: 1.25;
   font-size: 0.875rem;
+  line-height: 1.25;
+  word-break: break-all;
 }
 
 .current-day {

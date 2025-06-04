@@ -5,16 +5,18 @@
 }
 
 .title {
+  unicode-bidi: plaintext;
+  margin-left: 0.75rem;
   font-weight: var(--font-weight-medium);
   color: var(--color-text);
-  margin-left: 0.75rem;
-  unicode-bidi: plaintext;
 }
 
 .description {
-  font-size: 14px;
-  color: var(--color-text-secondary);
+  unicode-bidi: plaintext;
+
   margin-bottom: 0.5rem;
   margin-left: 0.75rem;
-  unicode-bidi: plaintext;
+
+  font-size: 14px;
+  color: var(--color-text-secondary);
 }

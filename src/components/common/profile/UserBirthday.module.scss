@@ -6,19 +6,18 @@
   --digit-offset: 0;
   --digit-offset-x: calc(8rem * var(--digit-offset) * 0.75);
 
-  position: absolute;
-  width: 8rem;
-  height: 8rem;
-  z-index: 2;
+  pointer-events: none;
 
-  transform: scale(0);
+  position: absolute;
+  z-index: 2;
   top: 50%;
   left: calc(10% + var(--digit-offset-x));
+  transform: scale(0);
   offset-path: path('M 0 0 C 128 -46 99 -376 93 -529');
-  offset-anchor: center;
   offset-rotate: 0deg;
 
-  pointer-events: none;
+  width: 8rem;
+  height: 8rem;
 
   animation:
     2.75s float 0.25s,
@@ -26,6 +25,8 @@
     1s dissapear 2s;
   animation-timing-function: ease-in;
   animation-fill-mode: forwards;
+
+  offset-anchor: center;
 }
 
 .shiftOrigin {
@@ -33,13 +34,13 @@
 }
 
 .effect {
+  pointer-events: none;
+
   position: absolute;
+  z-index: 1;
   top: calc(50% - 1rem);
   left: 10rem;
   transform: translate(-50%, -50%) scaleX(-1);
-
-  z-index: 1;
-  pointer-events: none;
 
   width: 18rem;
   height: 18rem;

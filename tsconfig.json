@@ -31,7 +31,7 @@
     "webpack-electron.config.ts",
     "babel.config.js",
     "eslint.config.mjs",
-    ".fantasticonrc.js",
+    ".fantasticonrc.cjs",
     "playwright.config.ts",
     "jest.config.js",
     ".github/workflows/*.js"

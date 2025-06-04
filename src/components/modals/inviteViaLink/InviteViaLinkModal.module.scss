@@ -6,9 +6,9 @@
 
 .closeButton {
   position: absolute;
+  z-index: 1;
   top: 0.5rem;
   left: 0.5rem;
-  z-index: 1;
 }
 
 .contentText {
@@ -18,9 +18,9 @@
 }
 
 .title {
-  font-size: 1.25rem;
   margin-top: 1rem;
   margin-bottom: 0;
+  font-size: 1.25rem;
 }
 
 .separator {

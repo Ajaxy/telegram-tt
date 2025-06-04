@@ -2,18 +2,22 @@
 @value name from "./StoryRibbon.module.scss";
 
 .root {
+  cursor: var(--custom-cursor, pointer);
+
   position: absolute;
   top: 50%;
   right: 0.25rem;
   transform: translateY(-50%);
-  padding: 0;
-  margin: 0;
-  border: none;
-  background: none;
-  outline: none !important;
-  cursor: var(--custom-cursor, pointer);
+
   display: flex;
   flex-direction: row-reverse;
+
+  margin: 0;
+  padding: 0;
+  border: none;
+
+  background: none;
+  outline: none !important;
 
   &[dir="rtl"] {
     right: auto;
@@ -25,8 +29,8 @@
   z-index: 1;
 
   &:not(:first-child):before {
-    mask-image: linear-gradient(90deg, #fff 75%, transparent 0);
     mask-composite: exclude;
+    mask-image: linear-gradient(90deg, #fff 75%, transparent 0);
   }
 
   &:global(.animating) {
@@ -43,17 +47,18 @@
 }
 
 .ghost {
-  position: absolute;
-  transform-origin: top left;
   --transform-transition: transform 250ms ease;
   --opacity-transition: opacity 250ms ease;
+
+  position: absolute;
+  transform-origin: top left;
   transition: var(--transform-transition), var(--opacity-transition);
 }
 
 .ghostAnimateName {
   :global(.name) {
-    transition: var(--opacity-transition);
     opacity: 0;
+    transition: var(--opacity-transition);
   }
 }
 

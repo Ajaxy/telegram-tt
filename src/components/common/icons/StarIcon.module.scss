@@ -1,8 +1,8 @@
 .root {
   --color-fill: var(--color-primary);
 
-  flex-shrink: 0;
   display: flex;
+  flex-shrink: 0;
   width: 1rem;
   height: 1rem;
 }
@@ -19,8 +19,10 @@
 
 .adaptive {
   display: inline-block;
+
   width: 1em;
   height: 1em;
+
   line-height: 1;
   vertical-align: text-top;
 }
@@ -31,6 +33,6 @@
 }
 
 .clickable {
-  cursor: var(--custom-cursor, pointer);
   pointer-events: auto;
+  cursor: var(--custom-cursor, pointer);
 }

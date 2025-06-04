@@ -1,7 +1,7 @@
 .root {
-  overflow: visible !important;
-  contain: layout;
   position: relative;
+  contain: layout;
+  overflow: visible !important;
 
   &:not(.inactive) {
     cursor: var(--custom-cursor, pointer);
@@ -17,7 +17,7 @@
 }
 
 .effect {
+  pointer-events: none;
   position: fixed;
   z-index: var(--z-message-effect);
-  pointer-events: none;
 }

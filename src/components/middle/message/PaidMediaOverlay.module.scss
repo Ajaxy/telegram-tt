@@ -4,12 +4,12 @@
 
 .buyButton {
   position: absolute;
+  z-index: 2;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: max-content !important;
 
-  z-index: 2;
+  width: max-content !important;
 }
 
 .boughtStatus {
@@ -23,6 +23,6 @@
 
 .buttonText {
   display: flex;
-  align-items: center;
   flex-shrink: 0;
+  align-items: center;
 }

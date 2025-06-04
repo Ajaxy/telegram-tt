@@ -11,10 +11,10 @@
 
 .moreMenu, .copy {
   position: absolute;
-  right: 0.5rem;
-  top: 50%;
-  transform: translate(0, -50%);
   z-index: 1;
+  top: 50%;
+  right: 0.5rem;
+  transform: translate(0, -50%);
 }
 
 .title {

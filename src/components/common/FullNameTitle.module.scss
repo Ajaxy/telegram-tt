@@ -1,7 +1,7 @@
 .root {
   display: flex !important;
-  align-items: center;
   gap: 0.25rem;
+  align-items: center;
 
   :global(.custom-emoji) {
     color: var(--color-primary);
@@ -15,18 +15,19 @@
   }
 
   .statusTransition {
-    height: 1.5em !important;
     width: 1.5em !important;
+    height: 1.5em !important;
   }
 }
 
 .fullName {
-  font-size: 1em;
+  overflow: hidden;
+
   margin-bottom: 0;
 
+  font-size: 1em;
   text-overflow: ellipsis;
   white-space: nowrap;
-  overflow: hidden;
 
   &.canCopy {
     pointer-events: all;

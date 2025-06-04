@@ -1,35 +1,41 @@
 .pinned-message-border {
   position: relative;
-  height: 2.25rem;
-  margin: 0.125rem 0;
+
+  overflow: hidden;
+
   width: 0.125rem;
   min-width: 0.125rem;
-  overflow: hidden;
+  height: 2.25rem;
+  margin: 0.125rem 0;
 }
 
 .pinned-message-border-wrapper-1 {
-  height: 2.25rem;
   width: 0.125rem;
+  height: 2.25rem;
   border-radius: 0.0625rem;
   background: var(--color-primary);
 }
 
 .pinned-message-border-wrapper {
-  background-color: var(--color-primary-opacity-hover);
-  position: relative;
   will-change: transform;
+  position: relative;
+  background-color: var(--color-primary-opacity-hover);
   transition: transform 0.25s ease-in-out;
 }
 
 .pinned-message-border-mark {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 0.125rem;
-  background: var(--color-primary);
-  border-radius: 0.0625rem;
   will-change: transform;
-  transition: transform 0.25s ease-in-out;
+
+  position: absolute;
+  top: 0;
+  left: 0;
   transform: translateY(var(--translate-y));
+
+  width: 0.125rem;
   height: var(--height);
+  border-radius: 0.0625rem;
+
+  background: var(--color-primary);
+
+  transition: transform 0.25s ease-in-out;
 }

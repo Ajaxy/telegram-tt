@@ -51,34 +51,40 @@
 .starGiftsContainer,
 .premiumGiftsGallery {
   display: flex;
-  justify-content: center;
-  align-items: center;
   gap: 0.625rem;
+  align-items: center;
+  justify-content: center;
+
   margin-bottom: 0.75rem;
 }
 
 .starGiftsContainer {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+
   margin: 0rem;
   padding: 0.125rem;
   padding-top: 0.75rem;
 }
 
 .header {
+  position: absolute;
   z-index: 2;
+  top: 0;
+  left: 0;
+
+  overflow: hidden;
   display: flex;
   align-items: center;
-  border-bottom: 0.0625rem solid var(--color-borders);
-  position: absolute;
+
   width: 100%;
-  left: 0;
-  top: 0;
   height: 3.5rem;
   padding: 0.5rem;
+  border-bottom: 0.0625rem solid var(--color-borders);
+
   background: var(--color-background);
+
   transition: 0.25s ease-out transform;
-  overflow: hidden;
 }
 
 .headerSlide {
@@ -87,9 +93,9 @@
 }
 
 .headerText {
+  margin-bottom: 0;
   font-size: 1.5rem;
   font-weight: var(--font-weight-medium);
-  margin-bottom: 0;
 }
 
 .hiddenHeader {
@@ -97,36 +103,38 @@
 }
 
 .commonHeaderText {
+  unicode-bidi: plaintext;
+  margin: 0 0 0 4.5rem;
   font-size: 1.25rem;
   font-weight: var(--font-weight-medium);
-  margin: 0 0 0 4.5rem;
-  unicode-bidi: plaintext;
 }
 
 .closeButton {
   position: absolute;
+  z-index: 3;
   top: 0.375rem;
   left: 0.375rem;
-  z-index: 3;
 }
 
 .balance {
   position: absolute;
+  z-index: 3;
   top: 0.75rem;
   right: 1.25rem;
-  z-index: 3;
 }
 
 .avatars {
-  display: flex;
   position: relative;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  margin-top: 1rem;
   z-index: 1;
+
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 1rem;
+  padding: 1rem;
 }
 
 .logoBackground {
@@ -141,10 +149,10 @@
 }
 
 .description {
-  text-align: center;
-  line-height: 1.375;
-  margin: 0.25rem 1rem 1rem;
   max-width: 25rem;
+  margin: 0.25rem 1rem 1rem;
+  line-height: 1.375;
+  text-align: center;
 }
 
 .starGiftsDescription {
@@ -152,9 +160,9 @@
 }
 
 .boostIcon {
+  line-height: 1.5;
   color: var(--color-primary);
   vertical-align: middle;
-  line-height: 1.5;
 }
 
 .optionBottom {
@@ -163,10 +171,10 @@
 }
 
 .secondaryInfo {
-  text-align: center;
+  padding: 0.5rem 1rem;
   font-size: 0.875rem;
   color: var(--color-text-secondary);
-  padding: 0.5rem 1rem;
+  text-align: center;
 }
 
 .footer {
@@ -175,6 +183,6 @@
 
 .starGiftsTransition {
   overflow: hidden;
-  min-height: calc(100% - 3.5rem);
   height: auto;
+  min-height: calc(100% - 3.5rem);
 }

@@ -1,9 +1,10 @@
 .VerifiedIcon {
+
+  --color-fill: var(--color-primary);
+  --color-checkmark: #fff;
+
   display: inline-block;
   flex-shrink: 0;
   width: 1.5rem;
   height: 1.5rem;
-
-  --color-fill: var(--color-primary);
-  --color-checkmark: #fff;
 }

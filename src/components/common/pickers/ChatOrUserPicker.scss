@@ -2,9 +2,9 @@
 
 .ChatOrUserPicker {
   .modal-dialog {
-    height: 70%;
-    max-width: 25rem;
     overflow: hidden;
+    max-width: 25rem;
+    height: 70%;
 
     @media (max-width: 600px) {
       height: 90%;
@@ -26,37 +26,39 @@
     }
 
     .input-group {
-      margin: 0;
       flex: 1;
+      margin: 0;
     }
 
     .form-control {
-      border: none;
-      box-shadow: none !important;
+      unicode-bidi: plaintext;
 
       height: 2.75rem;
       padding: 0.5rem;
+      border: none;
+
       font-size: 1.25rem;
       line-height: 1.75rem;
-      unicode-bidi: plaintext;
+
+      box-shadow: none !important;
     }
   }
 
   .modal-content {
-    padding: 0 !important;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    padding: 0 !important;
 
     > .Transition {
-      height: 100%;
       overflow: hidden;
+      height: 100%;
     }
 
     .picker-list {
-      height: 100%;
       overflow-x: hidden;
       overflow-y: auto;
+      height: 100%;
       padding-inline: 0.5rem;
 
       @include mixins.adapt-padding-to-scrollbar(0.5rem);
@@ -73,12 +75,14 @@
   }
 
   .no-results {
-    height: 100%;
-    margin: 0;
-    padding: 1rem 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    height: 100%;
+    margin: 0;
+    padding: 1rem 1rem;
+
     color: var(--color-text-secondary);
   }
 
@@ -98,9 +102,9 @@
   .topic-icon {
     --custom-emoji-size: 2.75rem;
 
-    margin-inline-end: 0.25rem !important;
     width: 2.75rem;
     height: 2.75rem;
+    margin-inline-end: 0.25rem !important;
     font-size: 2.75rem !important;
   }
 
@@ -114,8 +118,8 @@
       align-items: center;
 
       font-size: 1rem;
-      line-height: 1.6875rem;
       font-weight: var(--font-weight-medium);
+      line-height: 1.6875rem;
     }
 
     .fullName {

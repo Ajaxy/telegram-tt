@@ -1,10 +1,14 @@
 .root {
   --percent: calc(var(--progress, 0.5) * 100%);
-  display: flex;
+
   position: relative;
+
+  display: flex;
+
   height: 2rem;
-  background: var(--color-background-menu-separator);
   border-radius: 0.625rem;
+
+  background: var(--color-background-menu-separator);
 }
 
 .withBadge {
@@ -12,13 +16,15 @@
 }
 
 .badgeContainer {
-  display: flex;
-  justify-content: center;
   position: absolute;
   top: -1.5rem;
-  left: 0;
   right: 0;
+  left: 0;
   transform: translate(calc(var(--shift-x) * 100% - 50%), -20px);
+
+  display: flex;
+  justify-content: center;
+
   transition: transform 0.2s ease-in-out;
   animation: slide-in 0.5s ease-in-out;
 }
@@ -34,11 +40,14 @@
 }
 
 .floating-badge-wrapper {
-  animation: rotate-in 0.5s ease-in-out;
-  border-radius: 0.5rem;
-  height: 2.6875rem;
   position: relative;
+
   overflow: hidden;
+
+  height: 2.6875rem;
+  border-radius: 0.5rem;
+
+  animation: rotate-in 0.5s ease-in-out;
 }
 
 @keyframes rotate-in {
@@ -57,28 +66,33 @@
 }
 
 .floating-badge {
+  position: relative;
+  z-index: 1;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
+
+  color: #ffffff;
+
   background-color: #7E85FF;
-  position: relative;
-  z-index: 1;
 }
 
 .floating-badge-triangle {
-  display: inline-block;
   position: absolute;
   bottom: -4px;
   left: calc(var(--tail-position, 0.5) * 100%);
   transform: translateX(-50%);
+
+  display: inline-block;
 }
 
 .floating-badge-icon {
-  font-size: 1.25rem;
   margin-right: 0.25rem;
+  font-size: 1.25rem;
 }
 
 .floating-badge-value {
@@ -90,8 +104,10 @@
   position: absolute;
   top: 0;
   bottom: 0;
+
   display: flex;
   align-items: center;
+
   font-weight: var(--font-weight-medium);
 }
 
@@ -105,14 +121,18 @@
 
 .progress {
   --multiplier: calc(1 / var(--progress) - 1);
-  overflow: hidden;
+
   position: absolute;
   top: 0;
-  left: 0;
   bottom: 0;
+  left: 0;
+
+  overflow: hidden;
+
   width: max(var(--percent), 0.625rem);
   border-top-left-radius: 0.625rem;
   border-bottom-left-radius: 0.625rem;
+
   background-image: var(--premium-gradient);
   background-size: calc(1 / var(--progress) * 100%) 100%;
 
@@ -132,8 +152,8 @@
 
 .primary {
   .progress {
-    background-image: none;
     background-color: var(--color-primary);
+    background-image: none;
   }
 
   .floating-badge {

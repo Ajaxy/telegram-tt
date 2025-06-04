@@ -1,8 +1,8 @@
 .root {
   :global(.modal-content) {
-    min-height: min(75vh, 32rem);
     display: flex;
     flex-direction: column;
+    min-height: min(75vh, 32rem);
   }
 
   :global(.matching-text-highlight) {

@@ -1,12 +1,12 @@
 .MessageList {
   --action-message-bg: var(--pattern-color);
 
+  overflow-x: hidden;
+  overflow-y: scroll;
   flex: 1;
+
   width: 100%;
   margin-bottom: 0.5rem;
-
-  overflow-y: scroll;
-  overflow-x: hidden;
 
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: bottom 150ms ease-out, transform var(--layer-transition);
@@ -19,26 +19,16 @@
     mask-image: linear-gradient(to top, transparent 0, #000 0.5rem);
   }
 
-  @media (pointer: coarse) {
-    user-select: none;
-    -webkit-touch-callout: none;
-
-    &.select-mode-active {
-      user-select: auto;
-      -webkit-touch-callout: default;
-    }
-  }
-
   body.keyboard-visible & {
     position: relative;
     bottom: 0;
 
-    @media (max-width: 600px) {
-      bottom: calc(0px - env(safe-area-inset-bottom));
-    }
-
     body.keyboard-visible.no-page-transitions & {
       transition: none !important;
+    }
+
+    @media (max-width: 600px) {
+      bottom: calc(0px - env(safe-area-inset-bottom));
     }
   }
 
@@ -47,13 +37,14 @@
   }
 
   .messages-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
     width: 100%;
     max-width: var(--messages-container-width);
     min-height: 100%;
     margin: 0 auto;
-    display: flex;
-    justify-content: flex-end;
-    flex-direction: column;
     padding: 1rem 1rem 0 1.125rem;
 
     .force-messages-scroll & {
@@ -62,9 +53,9 @@
 
     @media (max-width: 600px) {
       width: 100vw;
-      padding: 2.75rem 0.5rem 0;
       // Patch for an issue on Android when rotating device
       margin: 0;
+      padding: 2.75rem 0.5rem 0;
     }
   }
 
@@ -88,12 +79,12 @@
     .last-in-list {
       margin-bottom: 5.625rem;
 
-      @media (max-width: 600px) {
-        margin-bottom: 4.25rem;
-      }
-
       &.ActionMessage {
         padding-bottom: 0.125rem;
+      }
+
+      @media (max-width: 600px) {
+        margin-bottom: 4.25rem;
       }
     }
 
@@ -106,27 +97,32 @@
     }
   }
 
-  @media (max-width: 600px) {
-    &.with-bottom-shift {
-      margin-bottom: 0;
-
-      .last-in-list {
-        margin-bottom: 4.25rem;
-
-        body:not(.keyboard-visible) & {
-          margin-bottom: calc(4.25rem + env(safe-area-inset-bottom));
-        }
-      }
-    }
-  }
-
   .Message,
   .ActionMessage {
     position: relative;
-
-    opacity: 1;
     transform: scale(1);
+    opacity: 1;
     transition: opacity 0.2s ease, transform 0.2s ease;
+
+    &::before {
+      content: "";
+
+      position: absolute;
+      z-index: 0;
+      top: -0.1875rem;
+      right: -50vw;
+      bottom: -0.1875rem;
+      left: -50vw;
+
+      opacity: 0;
+      background: black;
+
+      transition: opacity var(--select-transition);
+
+      body.no-page-transitions & {
+        transition: none !important;
+      }
+    }
 
     &:not(.open) {
       transform: scale(0.8);
@@ -134,8 +130,8 @@
     }
 
     body.no-message-sending-animations & {
-      opacity: 1;
       transform: none;
+      opacity: 1;
       transition: none !important;
     }
 
@@ -147,24 +143,6 @@
     // https://developer.mozilla.org/ru/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context
     &.open.shown {
       transform: none;
-    }
-
-    &::before {
-      content: "";
-      position: absolute;
-      top: -0.1875rem;
-      bottom: -0.1875rem;
-      left: -50vw;
-      right: -50vw;
-      background: black;
-      z-index: 0;
-
-      opacity: 0;
-      transition: opacity var(--select-transition);
-
-      body.no-page-transitions & {
-        transition: none !important;
-      }
     }
 
     &:not(.last-in-group) {
@@ -217,11 +195,12 @@
   }
 
   .empty {
-    width: 100%;
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    width: 100%;
+    height: 100%;
 
     & > span {
       max-width: 80%;
@@ -232,21 +211,23 @@
   .local-action-message,
   .ActionMessage,
   .empty {
-    text-align: center;
-    user-select: none;
 
     --custom-emoji-size: calc(var(--message-text-size, 1rem) + 0.125rem);
+
+    user-select: none;
     font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
     line-height: 1.25;
+    text-align: center;
 
     > span {
-      background-color: var(--action-message-bg);
-      color: white;
-
       position: relative;
+      z-index: 0;
+
       border-radius: var(--border-radius-messages);
 
-      z-index: 0;
+      color: white;
+
+      background-color: var(--action-message-bg);
 
       body.is-ios &,
       body.is-macos & {
@@ -255,9 +236,9 @@
       }
 
       .emoji-small {
-        vertical-align: text-bottom;
         width: calc(1.25 * var(--message-text-size, 1rem));
         height: calc(1.25 * var(--message-text-size, 1rem));
+        vertical-align: text-bottom;
         background-size: calc(1.25 * var(--message-text-size, 1rem));
       }
     }
@@ -275,17 +256,16 @@
   }
 
   .sticky-date {
+    pointer-events: none;
+
+    z-index: var(--z-sticky-date);
+
     margin-top: 1rem;
     margin-bottom: 1rem;
-    z-index: var(--z-sticky-date);
-    pointer-events: none;
-    opacity: 1;
-    transition: opacity 0.3s ease;
 
-    @media (max-width: 600px) {
-      margin-top: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
+    opacity: 1;
+
+    transition: opacity 0.3s ease;
 
     body:not(.is-scrolling-messages) &.stuck {
       opacity: 0;
@@ -305,6 +285,11 @@
 
     span {
       pointer-events: auto;
+    }
+
+    @media (max-width: 600px) {
+      margin-top: 0.5rem;
+      margin-bottom: 0.75rem;
     }
   }
 
@@ -327,9 +312,44 @@
     margin-top: -0.375rem;
   }
 
+  .Transition_slide-from > &,
+  .Transition_slide-to > & {
+    scrollbar-color: transparent transparent !important;
+
+    &::-webkit-scrollbar-thumb {
+      background-color: transparent !important;
+    }
+  }
+
+  @media (pointer: coarse) {
+    user-select: none;
+
+    -webkit-touch-callout: none;
+
+    &.select-mode-active {
+      user-select: auto;
+
+      -webkit-touch-callout: default;
+    }
+  }
+
+  @media (max-width: 600px) {
+    &.with-bottom-shift {
+      margin-bottom: 0;
+
+      .last-in-list {
+        margin-bottom: 4.25rem;
+
+        body:not(.keyboard-visible) & {
+          margin-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+        }
+      }
+    }
+  }
+
   @media (min-width: 1276px) {
-    width: 100%;
     transform: translate3d(0, 0, 0);
+    width: 100%;
     transition: transform var(--layer-transition);
 
     .messages-container {
@@ -362,15 +382,6 @@
 
     body.is-symbol-menu-open & {
       transform: translate3d(0, calc(-1 * (var(--symbol-menu-height))), 0);
-    }
-  }
-
-  .Transition_slide-from > &,
-  .Transition_slide-to > & {
-    scrollbar-color: transparent transparent !important;
-
-    &::-webkit-scrollbar-thumb {
-      background-color: transparent !important;
     }
   }
 }

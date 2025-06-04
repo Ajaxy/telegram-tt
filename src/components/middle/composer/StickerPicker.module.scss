@@ -11,18 +11,18 @@
   --symbol-set-gap-size: 0.25rem;
 
   position: relative;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
   height: 100%;
+  padding: 0.5rem 0.25rem;
+
+  @include mixins.adapt-padding-to-scrollbar(0.25rem);
 
   &.hasHeader {
     height: calc(100% - 3rem);
   }
-
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  padding: 0.5rem 0.25rem;
-
-  @include mixins.adapt-padding-to-scrollbar(0.25rem);
 
   &_customEmoji {
     padding: 0.5rem 0.75rem;
@@ -36,14 +36,16 @@
 }
 
 .header {
-  height: 3rem;
+  scrollbar-color: rgba(0, 0, 0, 0);
+  scrollbar-width: none;
+
   overflow-x: auto;
   overflow-y: hidden;
-  white-space: nowrap;
+
+  height: 3rem;
   padding: 0 0.375rem;
 
-  scrollbar-width: none;
-  scrollbar-color: rgba(0, 0, 0, 0);
+  white-space: nowrap;
 
   &::-webkit-scrollbar {
     height: 0;
@@ -56,8 +58,10 @@
   // Spacer to counter last button margin not being accounted in scroll width
   &::after {
     content: "";
+
     display: block;
     flex-shrink: 0;
+
     width: 1px;
     height: 1rem;
   }
@@ -73,23 +77,24 @@
   }
 
   :global(.shared-canvas) {
-    max-width: 1280px; // STICKER_PICKER_MAX_SHARED_COVERS * (STICKER_SIZE_PICKER_HEADER + 10 * 2)
     z-index: 1;
+    max-width: 1280px; // STICKER_PICKER_MAX_SHARED_COVERS * (STICKER_SIZE_PICKER_HEADER + 10 * 2)
   }
 }
 
 .stickerCover {
   display: inline-grid;
-  vertical-align: middle;
   grid-template-areas: "cover";
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   width: 2.25rem !important;
   height: 2.25rem;
   margin: 0.375rem 0.125rem !important;
   padding: 0;
   border-radius: var(--border-radius-messages-small) !important;
+
+  vertical-align: middle;
 
   &:global(.StickerButton) {
     background-size: 1.875rem;
@@ -114,9 +119,10 @@
 }
 
 .pickerDisabled {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  width: 100%;
+  height: 100%;
 }

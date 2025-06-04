@@ -5,18 +5,19 @@
 }
 
 .content {
+  overflow: hidden !important;
   display: flex;
   flex-direction: column;
   padding: 0 !important;
-  overflow: hidden !important;
 }
 
 .main {
-  height: 100%;
   overflow-y: scroll;
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  height: 100%;
 }
 
 .headerInfo {
@@ -27,10 +28,10 @@
 }
 
 .logo {
-  margin: 1rem;
   width: 6.25rem;
   height: 6.25rem;
   min-height: 6.25rem;
+  margin: 1rem;
 }
 
 .logoBackground {
@@ -38,13 +39,14 @@
   top: 0.75rem;
   left: 50%;
   transform: translateX(-50%);
+
   height: 8rem;
 }
 
 .description {
-  text-align: center;
-  margin-inline: 0.5rem;
   margin-bottom: 1rem;
+  margin-inline: 0.5rem;
+  text-align: center;
   text-wrap: balance;
 }
 
@@ -58,25 +60,29 @@
 }
 
 .header {
+  position: absolute;
   z-index: 2;
+  top: 0;
+  left: 0;
+
   display: flex;
   align-items: center;
-  border-bottom: 0.0625rem solid var(--color-borders);
-  position: absolute;
+
   width: 100%;
-  left: 0;
-  top: 0;
   height: 3.5rem;
   padding: 0.5rem;
+  border-bottom: 0.0625rem solid var(--color-borders);
+
   background: var(--color-background);
+
   transition: 0.25s ease-out transform;
 }
 
 .starHeaderText {
+  unicode-bidi: plaintext;
+  margin: 0 0 0 3.5rem;
   font-size: 1.25rem;
   font-weight: var(--font-weight-medium);
-  margin: 0 0 0 3.5rem;
-  unicode-bidi: plaintext;
 }
 
 .hiddenHeader {
@@ -85,9 +91,9 @@
 
 .closeButton {
   position: absolute;
+  z-index: 3;
   top: 0.5rem;
   left: 0.5rem;
-  z-index: 3;
 }
 
 .avatar {
@@ -100,11 +106,12 @@
 }
 
 .secondaryInfo {
-  text-align: center;
+  margin-top: auto;
+  padding: 1rem;
+
   font-size: 0.875rem;
   color: var(--color-text-secondary);
-  padding: 1rem;
-  margin-top: auto;
+  text-align: center;
 }
 
 @media (max-width: 450px) {

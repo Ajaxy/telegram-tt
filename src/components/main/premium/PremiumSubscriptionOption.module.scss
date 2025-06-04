@@ -1,23 +1,28 @@
 .wrapper {
-  position: relative;
-  display: block;
-  padding-inline: 4.5rem 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: var(--border-radius-default);
-  background: var(--color-background);
-  box-shadow: 0 0 0 0.0625rem var(--color-borders-input);
-
   cursor: var(--custom-cursor, pointer);
 
+  position: relative;
+
+  display: block;
+
+  margin-bottom: 1.5rem;
+  padding-inline: 4.5rem 1rem;
+  border-radius: var(--border-radius-default);
+
   line-height: 1.5rem;
+
+  background: var(--color-background);
+  box-shadow: 0 0 0 0.0625rem var(--color-borders-input);
 }
 
 .giveawayWrapper {
-  position: relative;
-  display: block;
-  padding-inline: 3.5rem 1rem;
-
   cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+
+  display: block;
+
+  padding-inline: 3.5rem 1rem;
 
   line-height: 1.5rem;
 }
@@ -46,37 +51,46 @@
   display: grid;
   grid-template-areas: "left_top right" "left_bottom right";
   grid-template-columns: 1fr auto;
-  justify-content: start;
-  padding: 0.5rem 0;
   gap: 0.25rem;
+  justify-content: start;
+
+  padding: 0.5rem 0;
 
   &::before,
   &::after {
     content: "";
-    display: block;
+
     position: absolute;
-    inset-inline-start: 1rem;
     top: 50%;
+    inset-inline-start: 1rem;
+    transform: translateY(-50%);
+
+    display: block;
+
     width: 1.25rem;
     height: 1.25rem;
-    transform: translateY(-50%);
   }
 
   &::before {
     border: 2px solid var(--color-borders-input);
     border-radius: 50%;
-    background-color: var(--color-background);
+
     opacity: 1;
+    background-color: var(--color-background);
+
     transition: border-color 0.1s ease, opacity 0.1s ease;
   }
 
   &::after {
     inset-inline-start: 1.3125rem;
+
     width: 0.625rem;
     height: 0.625rem;
     border-radius: 50%;
-    background: var(--color-primary);
+
     opacity: 0;
+    background: var(--color-primary);
+
     transition: opacity 0.1s ease;
   }
 }
@@ -87,10 +101,11 @@
 }
 
 .perMonth {
-  grid-area: left_bottom;
-  align-self: end;
   display: flex;
+  grid-area: left_bottom;
   flex-direction: row-reverse;
+  align-self: end;
+
   margin-inline-end: auto;
 
   font-size: 0.875rem;
@@ -105,23 +120,28 @@
   grid-area: right;
   align-self: center;
   justify-self: end;
+
   padding-inline-start: 1.5rem;
+
   color: var(--color-text-secondary);
 }
 
 .discount {
-  color: var(--color-white);
-  background: var(--color-primary);
-  border-radius: var(--border-radius-default-small);
-  padding: 0 0.5rem;
   unicode-bidi: plaintext;
-  margin-inline-end: 0.5rem;
   align-self: baseline;
+
+  margin-inline-end: 0.5rem;
+  padding: 0 0.5rem;
+  border-radius: var(--border-radius-default-small);
+
+  color: var(--color-white);
+
+  background: var(--color-primary);
 }
 
 .giveawayDiscount {
+  padding: 0.1875rem;
+  border-radius: 0.375rem;
   font-size: 0.8125rem;
   font-weight: var(--font-weight-medium);
-  border-radius: 0.375rem;
-  padding: 0.1875rem;
 }

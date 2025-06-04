@@ -4,8 +4,8 @@
 
 .chatResultsContextMenu {
   position: absolute;
-  right: 0.75rem;
   top: 2.5rem !important;
+  right: 0.75rem;
 
   .bubble {
     width: auto;
@@ -13,8 +13,8 @@
 }
 
 .dropDownLink {
-  align-items: center;
   display: flex;
+  align-items: center;
 
   .Loading {
     height: 1rem !important;
@@ -26,8 +26,8 @@
   }
 
   .iconContainer {
-    width: 1rem;
     flex-shrink: 0;
+    width: 1rem;
     margin-inline-start: 0.25rem;
   }
 

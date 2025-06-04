@@ -1,9 +1,10 @@
 .Notification-container {
   position: relative;
+  z-index: var(--z-notification);
+
   width: 22rem;
   max-width: 100vw;
   margin: 4.25rem auto 0.25rem;
-  z-index: var(--z-notification);
 
   & ~ & {
     margin-top: 0.25rem;
@@ -13,14 +14,17 @@
 .Notification {
   --color-toast-action: var(--color-primary);
 
-  background-color: rgba(32, 32, 32, 0.8);
-  background-size: 1.5rem;
-  border-radius: var(--border-radius-default);
-  padding: 0.9375rem;
-  color: #fff;
-  margin: 0 0.5rem;
   display: flex;
   align-items: center;
+
+  margin: 0 0.5rem;
+  padding: 0.9375rem;
+  border-radius: var(--border-radius-default);
+
+  color: #fff;
+
+  background-color: rgba(32, 32, 32, 0.8);
+  background-size: 1.5rem;
 
   .text-entity-link,
   .text-entity-link:hover,
@@ -30,15 +34,15 @@
   }
 
   .content {
+    flex-grow: 1;
+    font-size: 0.9375rem;
     line-height: 1.25;
     overflow-wrap: anywhere;
-    font-size: 0.9375rem;
-    flex-grow: 1;
   }
 
   &.bold-link b {
-    color: var(--color-primary);
     cursor: var(--custom-cursor, pointer);
+    color: var(--color-primary);
   }
 
   .notification-title {
@@ -62,11 +66,12 @@
   }
 
   .notification-button {
-    color: var(--color-toast-action);
-    font-weight: var(--font-weight-medium);
-    text-transform: none;
-    margin-inline-start: 0.125rem;
-    height: 2rem;
     width: auto;
+    height: 2rem;
+    margin-inline-start: 0.125rem;
+
+    font-weight: var(--font-weight-medium);
+    color: var(--color-toast-action);
+    text-transform: none;
   }
 }

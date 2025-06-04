@@ -1,4 +1,5 @@
 .lovely-chart--tools {
+  padding: 0 10px 16px 10px;
   opacity: 1;
   transition: opacity 400ms ease;
 
@@ -9,6 +10,4 @@
   &.lovely-chart--state-transparent {
     opacity: 0;
   }
-
-  padding: 0 10px 16px 10px;
 }

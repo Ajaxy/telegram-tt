@@ -1,13 +1,14 @@
 .StickerSearch {
   container: stickers / inline-size;
+  overflow-x: hidden;
+  overflow-y: scroll;
+
   height: 100%;
   padding: 0 0.5rem;
-  overflow-y: scroll;
-  overflow-x: hidden;
 
   .helper-text {
-    padding: 1rem;
     margin-bottom: 0.125rem;
+    padding: 1rem;
     font-weight: var(--font-weight-medium);
     color: var(--color-text-secondary);
   }
@@ -25,17 +26,19 @@
       }
 
       .title {
+        overflow: hidden;
+
+        margin: 0;
+
         font-size: 1rem;
         line-height: 1.6875rem;
-        margin: 0;
-        overflow: hidden;
-        white-space: nowrap;
         text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .count {
-        color: var(--color-text-secondary);
         margin: 0;
+        color: var(--color-text-secondary);
       }
 
       .Button {
@@ -43,8 +46,8 @@
         margin-left: 1rem;
 
         &.is-added {
-          background: var(--color-chat-hover);
           color: var(--color-text-secondary);
+          background: var(--color-chat-hover);
 
           &:hover,
           &:active {
@@ -65,8 +68,8 @@
       }
 
       .Button {
-        margin-left: 0;
         margin-right: 1rem;
+        margin-left: 0;
       }
     }
   }

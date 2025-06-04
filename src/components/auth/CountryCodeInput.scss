@@ -1,15 +1,15 @@
 .CountryCodeInput {
   .input-group {
     cursor: var(--custom-cursor, pointer);
-
     z-index: var(--z-country-code-input-group);
 
     .Spinner {
+      --spinner-size: 1.5rem;
+
       position: absolute;
       top: 0.6875rem;
       right: 0.75rem;
       opacity: 0.5;
-      --spinner-size: 1.5rem;
     }
 
     // Prevent loading additional 10 kB of icomoon font on initial load.
@@ -17,29 +17,32 @@
       position: absolute;
       top: 1rem;
       right: 1rem;
+      transform: scaleY(1) rotate(45deg);
+
       width: 0.75rem;
       height: 0.75rem;
       border: 2px solid var(--color-text-secondary);
       border-top: 0;
       border-left: 0;
-      transform: scaleY(1) rotate(45deg);
       /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
       transition: color 0.2s ease, transform 0.2s ease, top 0.2s ease;
 
       &.open {
-        border-color: var(--color-primary);
-        transform: scaleY(-1) rotate(45deg);
         top: 1.3125rem;
+        transform: scaleY(-1) rotate(45deg);
+        border-color: var(--color-primary);
       }
     }
   }
 
   .bubble {
-    width: 100%;
-    max-height: 23.5rem;
-    overflow-y: auto;
     transform-origin: top center !important;
     transform: scale(0.95);
+
+    overflow-y: auto;
+
+    width: 100%;
+    max-height: 23.5rem;
 
     &.open {
       transform: scaleY(1);
@@ -63,29 +66,33 @@
   }
 
   .country-flag {
-    font-size: 2rem;
     margin-right: 1rem;
+    font-size: 2rem;
 
     .emoji {
+      display: inline-block;
+
       width: 2rem;
       height: 2rem;
-      display: inline-block;
-      vertical-align: 4px;
       margin: -0.5rem 0.125rem;
+
+      vertical-align: 4px;
     }
   }
 
   .country-name {
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+
     margin-right: 1rem;
+
     text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .country-code {
     margin-left: auto;
-    opacity: 0.5;
     padding-right: 0.25rem;
+    opacity: 0.5;
   }
 }

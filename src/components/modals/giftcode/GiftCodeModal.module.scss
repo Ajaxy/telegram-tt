@@ -1,6 +1,6 @@
 .clickable {
-  color: var(--color-primary);
   cursor: pointer;
+  color: var(--color-primary);
 }
 
 .centered {
@@ -8,8 +8,8 @@
 }
 
 .logo {
+  align-self: center;
   width: 7.5rem;
   height: 7.5rem;
   margin-bottom: 1rem;
-  align-self: center;
 }

@@ -2,19 +2,20 @@
   --radius: 0.75rem;
   --first-column-background-color: var(--color-background-selected);
 
-  display: flex;
-  min-width: 0;
-  overflow: hidden;
-  margin-inline-end: 0.5rem;
-  flex-grow: 1;
+  pointer-events: none;
 
-  flex-direction: column;
-  align-items: flex-start;
   z-index: 3;
 
-  transition: 0.25s ease-out background-color;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  align-items: flex-start;
 
-  pointer-events: none;
+  min-width: 0;
+  margin-inline-end: 0.5rem;
+
+  transition: 0.25s ease-out background-color;
 
   @media (hover: hover) {
     :global(.ListItem-button:hover) & {
@@ -43,13 +44,14 @@
 }
 
 .loading {
-  color: var(--color-text-secondary);
   line-height: 1.25rem;
+  color: var(--color-text-secondary);
 }
 
 .other-column, .main-column {
   display: flex;
   align-items: center;
+
   font-size: 0.9375rem;
   line-height: 1.25rem;
   color: var(--color-text-secondary);
@@ -68,44 +70,46 @@
 }
 
 .other-column {
-  margin-left: 0.25rem;
-  margin-right: 0.25rem;
-  display: inline;
   position: relative;
+  display: inline;
+  margin-right: 0.25rem;
+  margin-left: 0.25rem;
 }
 
 .main-column {
+  pointer-events: initial;
+
+  position: relative;
+
+  max-width: 100%;
   border-start-start-radius: var(--radius);
   border-start-end-radius: var(--radius);
   border-end-end-radius: var(--radius);
 
-  max-width: 100%;
-
-  position: relative;
-
-  pointer-events: initial;
-
   .after-wrapper {
+    position: absolute;
+    bottom: 0;
+    inset-inline-end: calc(var(--radius) * -1);
+
     width: var(--radius);
     height: var(--radius);
-    bottom: 0;
-    position: absolute;
-    inset-inline-end: calc(var(--radius) * -1);
   }
 
   .after {
-    border-end-start-radius: var(--radius);
-    background: var(--background-color);
     width: 100%;
     height: 100%;
+    border-end-start-radius: var(--radius);
+    background: var(--background-color);
   }
 }
 
 .title {
+  overflow: hidden;
+
   margin-left: 0.25rem;
+
   font-size: 0.9375rem;
   line-height: 1.25rem;
-  overflow: hidden;
   text-overflow: ellipsis;
 }
 
@@ -114,16 +118,18 @@
 }
 
 .other-column-title {
-  font-size: 0.9375rem;
   margin-inline-start: 1.5rem;
+  font-size: 0.9375rem;
 }
 
 .other-columns {
+  overflow: hidden;
+
+  height: 1.25rem;
+
+  line-height: 1.25rem;
   text-overflow: ellipsis;
   white-space: nowrap;
-  overflow: hidden;
-  line-height: 1.25rem;
-  height: 1.25rem;
 }
 
 .ellipsis {
@@ -131,28 +137,28 @@
 }
 
 .last-message {
-  border-end-start-radius: var(--radius);
-  border-end-end-radius: var(--radius);
-
-  max-width: 100%;
-
   pointer-events: initial;
 
   position: relative;
 
+  max-width: 100%;
+  border-end-start-radius: var(--radius);
+  border-end-end-radius: var(--radius);
+
   .after-wrapper {
+    position: absolute;
+    top: 0;
+    inset-inline-end: calc(var(--radius) * -1);
+
     width: var(--radius);
     height: var(--radius);
-    top: 0;
-    position: absolute;
-    inset-inline-end: calc(var(--radius) * -1);
   }
 
   .after {
-    border-start-start-radius: var(--radius);
-    background: var(--background-color);
     width: 100%;
     height: 100%;
+    border-start-start-radius: var(--radius);
+    background: var(--background-color);
   }
 
   :global(.last-message) {

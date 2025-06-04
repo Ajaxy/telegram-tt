@@ -11,32 +11,36 @@
   }
 
   .color-picker {
-    margin-top: 1rem;
     height: 12rem;
+    margin-top: 1rem;
   }
 
   .hue-picker {
-    margin: 2rem 0;
     height: 0.5rem;
+    margin: 2rem 0;
   }
 
   canvas {
+    cursor: var(--custom-cursor, pointer);
+
     display: block;
+
     width: 100%;
     height: 100%;
     border-radius: var(--border-radius-default);
-    cursor: var(--custom-cursor, pointer);
   }
 
   .handle {
+    cursor: var(--custom-cursor, grab);
+
     position: absolute;
     top: -0.75rem;
     left: -0.75rem;
+
     width: 1.5rem;
     height: 1.5rem;
     border: 0.125rem solid var(--color-white);
     border-radius: 0.75rem;
-    cursor: var(--custom-cursor, grab);
   }
 
   .hue-picker .handle {
@@ -44,8 +48,8 @@
   }
 
   .tools {
-    margin-bottom: 0.625rem;
     display: flex;
+    margin-bottom: 0.625rem;
 
     .input-group {
       margin-bottom: 0;
@@ -68,9 +72,9 @@
 
   .predefined-colors {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
     grid-auto-rows: 1fr;
     grid-gap: 0.0625rem;
+    grid-template-columns: repeat(3, 1fr);
 
     @include mixins.side-panel-section;
   }
@@ -87,11 +91,13 @@
 
     // A hack to make a square
     &:before {
-      display: block;
+      pointer-events: none;
       content: "";
+
+      display: block;
+
       width: 100%;
       padding-top: 100%;
-      pointer-events: none;
     }
   }
 }

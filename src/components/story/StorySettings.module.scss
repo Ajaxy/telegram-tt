@@ -3,19 +3,21 @@
 }
 
 .modal :global(.modal-content) {
-  padding: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  color: var(--color-text);
+
   height: min(38rem, 90vh);
+  padding: 0;
+
+  color: var(--color-text);
 }
 
 .header {
-  padding: 1rem 1rem 0.75rem;
   display: flex;
-  align-items: center;
   flex-shrink: 0;
+  align-items: center;
+  padding: 1rem 1rem 0.75rem;
 }
 
 .closeButton {
@@ -23,18 +25,20 @@
 }
 
 .headerTitle {
-  margin-bottom: 0;
-  height: 100%;
-  line-height: 1;
   display: flex;
   align-items: center;
+
+  height: 100%;
+  margin-bottom: 0;
+
+  line-height: 1;
 }
 
 .content {
-  min-height: 0;
-  border-radius: 0 0 var(--border-radius-default) var(--border-radius-default);
   overflow: hidden;
   overflow-y: auto;
+  min-height: 0;
+  border-radius: 0 0 var(--border-radius-default) var(--border-radius-default);
 }
 
 .section {
@@ -46,10 +50,10 @@
 }
 
 .title {
+  padding: 0 0.75rem 0.75rem;
   font-size: 1rem;
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
-  padding: 0 0.75rem 0.75rem;
 }
 
 .list {
@@ -58,48 +62,51 @@
 }
 
 .option {
+  position: relative;
+
+  overflow: hidden;
   display: flex;
   align-items: center;
-  position: relative;
-  overflow: hidden;
+
   margin-bottom: 0;
   padding: 0.4375rem 0 0.4375rem 3.5rem;
   border-radius: var(--border-radius-default);
 
-  @media (hover: hover) {
-    &:hover,
-    &:focus {
-      background-color: var(--color-chat-hover);
-    }
-  }
-
   &::before,
   &::after {
     content: "";
-    display: block;
+
     position: absolute;
-    left: 1rem;
     top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+
+    display: block;
+
     width: 1.25rem;
     height: 1.25rem;
-    transform: translateY(-50%);
   }
 
   &::before {
     border: 2px solid var(--color-borders-input);
     border-radius: 50%;
-    background-color: var(--color-background);
+
     opacity: 1;
+    background-color: var(--color-background);
+
     transition: border-color 0.1s ease, opacity 0.1s ease;
   }
 
   &::after {
     left: 1.3125rem;
+
     width: 0.625rem;
     height: 0.625rem;
     border-radius: 50%;
-    background: var(--color-primary);
+
     opacity: 0;
+    background: var(--color-primary);
+
     transition: opacity 0.1s ease;
   }
 
@@ -112,15 +119,24 @@
       opacity: 1;
     }
   }
+
+  @media (hover: hover) {
+    &:hover,
+    &:focus {
+      background-color: var(--color-chat-hover);
+    }
+  }
 }
 
 .input {
   position: absolute;
+  z-index: -1;
+  top: -1rem;
+
   width: 1px;
   height: 1px;
+
   opacity: 0;
-  top: -1rem;
-  z-index: -1;
 }
 
 .icon {
@@ -128,13 +144,16 @@
   flex: 0 0 2.625rem;
   align-items: center;
   justify-content: center;
+
   width: 2.625rem;
   height: 2.625rem;
-  border-radius: 50%;
-  background: linear-gradient(180deg, var(--color-from) 0%, var(--color-to) 100%);
-  color: #fff;
-  font-size: 1.5rem;
   margin-inline-end: 1rem;
+  border-radius: 50%;
+
+  font-size: 1.5rem;
+  color: #fff;
+
+  background: linear-gradient(180deg, var(--color-from) 0%, var(--color-to) 100%);
 
   > :global(.icon-group-filled) {
     font-size: 1.25rem;
@@ -142,15 +161,19 @@
 }
 
 .action {
-  width: 100%;
-  color: #8774E1;
   cursor: var(--custom-cursor, pointer);
-  opacity: 0.8;
-  transition: opacity 200ms;
 
   overflow: hidden;
+
+  width: 100%;
+
+  color: #8774E1;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  opacity: 0.8;
+
+  transition: opacity 200ms;
 
   > :global(.icon) {
     font-size: 0.875rem;
@@ -167,26 +190,26 @@
 }
 
 .optionContent {
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  overflow: hidden;
 }
 
 .footer {
-  background-color: #181818;
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
+  background-color: #181818;
 }
 
 .info {
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
   padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
 }
 
 .submit {
-  padding: 1rem;
   margin-top: auto;
+  padding: 1rem;
 }

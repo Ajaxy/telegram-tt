@@ -26,41 +26,44 @@
   left: 50%;
   transform: translateX(-50%);
 
-  background-color: var(--color-primary);
-  color: white;
-  border-radius: 1rem;
   padding: 0.0625rem 0.5rem;
   border: 1px solid var(--background-color);
+  border-radius: 1rem;
+
   line-height: 1.25;
+  color: white;
+
+  background-color: var(--color-primary);
 
   :global(.theme-dark .own) & {
-    background-color: var(--color-text);
     color: var(--background-color);
+    background-color: var(--color-text);
   }
 }
 
 .section {
-  margin-bottom: 1rem;
   max-width: 100%;
+  margin-bottom: 1rem;
 }
 
 .description {
-  line-height: 1.25;
   margin-bottom: 0;
+  line-height: 1.25;
 }
 
 .peers {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
   gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+
   margin-block: 0.25rem;
 }
 
 .peer {
-  background-color: var(--accent-background-color);
   color: var(--accent-color);
+  background-color: var(--accent-background-color);
 
   &:hover, &:active, &:focus {
     background-color: var(--accent-background-active-color);
@@ -78,8 +81,8 @@
 .separator {
   display: flex;
   align-items: center;
-  text-align: center;
   color: var(--color-text-secondary);
+  text-align: center;
 }
 
 .separator::before,

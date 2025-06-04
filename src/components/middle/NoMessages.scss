@@ -1,17 +1,19 @@
 .NoMessages {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 
+  width: 100%;
+  height: 100%;
+
   .no-messages-icon {
-    font-size: 5rem;
     margin: 0 auto 1rem;
+    font-size: 5rem;
   }
 
   .topic-icon {
     --custom-emoji-size: 3rem;
+
     width: 3rem;
     height: 3rem;
     font-size: 2rem;
@@ -20,11 +22,14 @@
   .wrapper {
     display: inline-flex;
     flex-direction: column;
-    background: var(--pattern-color);
+
     max-width: 20rem;
     padding: 0.75rem 1rem;
     border-radius: 1.5rem;
+
     color: #fff;
+
+    background: var(--pattern-color);
 
     &[dir="rtl"] {
       text-align: right;
@@ -32,33 +37,39 @@
   }
 
   .title {
-    font-weight: var(--font-weight-medium);
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
-    text-align: center;
     unicode-bidi: plaintext;
+
+    margin-bottom: 0.25rem;
+
+    font-size: 1rem;
+    font-weight: var(--font-weight-medium);
+    text-align: center;
   }
 
   .description {
-    font-size: 0.9375rem;
+    unicode-bidi: plaintext;
+
     margin: 0;
     padding: 0;
+
+    font-size: 0.9375rem;
     list-style: none;
-    unicode-bidi: plaintext;
   }
 
   .topic-description {
-    text-align: center;
     padding: 0 1rem;
+    text-align: center;
   }
 
   .list-checkmarks {
-    font-size: 0.9375rem;
+    unicode-bidi: plaintext;
+
     margin: 0.25rem 0 0;
     padding: 0;
-    list-style: none;
-    unicode-bidi: plaintext;
+
+    font-size: 0.9375rem;
     line-height: 1.8;
+    list-style: none;
 
     li::before {
       content: "✓";

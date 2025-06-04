@@ -4,9 +4,9 @@
   --border-top-left-radius: var(--border-radius-messages) !important;
   --border-bottom-left-radius: 0 !important;
 
+  z-index: calc(var(--z-sticky-date) + 1);
   margin-top: -0.5rem;
   margin-bottom: 0.5rem;
-  z-index: calc(var(--z-sticky-date) + 1);
 
   &::before {
     display: none;
@@ -24,15 +24,16 @@
     transition: opacity 0.2s ease-in;
 
     &:hover, &:active {
-      background-color: transparent !important;
       opacity: 0.85;
+      background-color: transparent !important;
     }
   }
 
   .message-type {
     display: flex;
-    align-items: center;
     gap: 0.25rem;
+    align-items: center;
+
     padding-inline-end: 0.25rem;
 
     text-transform: capitalize;
@@ -43,15 +44,16 @@
   }
 
   .message-action-buttons {
-    bottom: auto !important;
     top: 0;
+    bottom: auto !important;
   }
 
   .message-content {
-    padding: 0.5rem;
     --border-top-left-radius: var(--border-radius-messages);
     --border-top-right-radius: var(--border-radius-messages);
     --border-bottom-right-radius: var(--border-radius-messages);
+
+    padding: 0.5rem;
 
     @media (max-width: 600px) {
       max-width: min(29rem, calc(100vw - 4.5rem)) !important;
@@ -76,30 +78,36 @@
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
 
     > .Button {
-      border-radius: 0 0 0.375rem 0.375rem;
-      border: none;
-      background: none;
       margin-bottom: 0;
+      border: none;
+      border-radius: 0 0 0.375rem 0.375rem;
+
       line-height: 1;
+
+      background: none;
 
       &::before {
         content: '';
+
         position: absolute;
         top: 0;
         left: 0;
+
         width: 100%;
         height: 0.0625rem;
-        background: var(--accent-color);
+
         opacity: 0.25;
+        background: var(--accent-color);
       }
     }
 
     .sponsored-action-icon {
       position: absolute;
-      font-size: 0.75rem;
       top: 0.25rem;
       right: 0;
       transform: rotate(-45deg);
+
+      font-size: 0.75rem;
     }
   }
 

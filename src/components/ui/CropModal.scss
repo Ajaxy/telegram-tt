@@ -1,7 +1,7 @@
 @mixin thumb-styles() {
-  background: var(--color-primary);
   cursor: var(--custom-cursor, pointer);
   transform: scale(1);
+  background: var(--color-primary);
   transition: transform 0.25s ease-in-out;
 
   &:hover {
@@ -11,11 +11,12 @@
 
 .CropModal {
   .modal-dialog {
+    position: relative;
+
     width: calc(100% - 2rem);
     max-width: 35rem;
     height: calc(100% - 1rem);
     max-height: 35rem;
-    position: relative;
   }
 
   .modal-content,
@@ -25,15 +26,15 @@
 
   .confirm-button {
     position: absolute;
-    bottom: 1rem;
     right: 1rem;
+    bottom: 1rem;
     box-shadow: 0 1px 2px var(--color-default-shadow);
   }
 
   #avatar-crop {
+    position: relative;
     max-width: 25rem;
     margin: 0 auto;
-    position: relative;
 
     &::before {
       content: "";

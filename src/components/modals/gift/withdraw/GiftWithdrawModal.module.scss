@@ -1,21 +1,21 @@
 .header {
   display: flex;
-  justify-content: center;
-  align-items: center;
   gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
 
   margin-bottom: 1rem;
 }
 
 .giftPreview {
-  width: 5.625rem;
-  height: 5.625rem;
   position: relative;
 
+  overflow: hidden;
   display: grid;
   place-items: center;
 
-  overflow: hidden;
+  width: 5.625rem;
+  height: 5.625rem;
   border-radius: 0.625rem;
 }
 
@@ -25,8 +25,8 @@
 }
 
 .description {
-  text-wrap: pretty;
   margin-bottom: 1.5rem;
+  text-wrap: pretty;
 }
 
 .arrow {

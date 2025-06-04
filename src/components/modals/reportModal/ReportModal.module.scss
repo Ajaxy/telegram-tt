@@ -24,10 +24,10 @@
 }
 
 .optionText {
-  width: 100%;
   overflow: hidden;
-  white-space: normal;
+  width: 100%;
   word-wrap: break-word;
+  white-space: normal;
 }
 
 .option {
@@ -35,23 +35,24 @@
 }
 
 .optionButton {
-  padding-block: 0 !important;
   padding: 0 0 0 1rem !important;
+  padding-block: 0 !important;
 }
 
 .sectionTitle {
-  color: var(--color-primary);
-  padding-inline: 1rem;
   margin-top: 0.75rem;
-  font-weight: var(--font-weight-medium);
+  padding-inline: 1rem;
+
   font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
 }
 
 .description {
   margin-top: 0.75rem;
   margin-bottom: 0;
-  color: var(--color-text-secondary);
   padding-inline: 1rem;
+  color: var(--color-text-secondary);
 }
 
 .title {
@@ -73,9 +74,9 @@
 }
 
 .transition {
+  overflow: hidden;
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: height 0.25s ease-in-out;
-  overflow: hidden;
 }
 
 .block {
@@ -83,6 +84,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
   padding: 0 1rem;
 }
 

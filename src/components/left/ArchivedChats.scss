@@ -1,6 +1,6 @@
 .ArchivedChats {
-  height: 100%;
   overflow: hidden;
+  height: 100%;
   background: var(--color-background);
 
   .left-header {
@@ -18,9 +18,9 @@
   }
 
   .Button.rtl {
-    transition: var(--slide-transition) transform;
     position: absolute;
     z-index: 2;
+    transition: var(--slide-transition) transform;
 
     &.right-aligned {
       transform:
@@ -39,8 +39,8 @@
   }
 
   .story-toggler-wrapper {
-    flex-grow: 1;
     position: relative;
+    flex-grow: 1;
   }
 
   .chat-list-wrapper {

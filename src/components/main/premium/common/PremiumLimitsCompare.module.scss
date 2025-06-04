@@ -1,20 +1,24 @@
 .root {
-  display: flex;
   position: relative;
+  display: flex;
 }
 
 .floating-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  background: #7E85FF;
   position: absolute;
   top: -1.5rem;
   left: 50%;
   transform: translate(-50%, -20px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+
+  color: #ffffff;
+
+  background: #7E85FF;
 }
 
 .floating-badge-triangle {
@@ -55,15 +59,15 @@
 }
 
 .line {
-  padding: 0.375rem 0.75rem;
-  flex-basis: 50%;
   display: flex;
+  flex-basis: 50%;
+  padding: 0.375rem 0.75rem;
 }
 
 .left {
-  background: #F1F3F5;
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
+  background: #F1F3F5;
 }
 
 .right {

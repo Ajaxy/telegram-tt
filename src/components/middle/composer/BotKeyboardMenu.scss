@@ -8,11 +8,12 @@
   }
 
   .content {
+    overflow-y: scroll;
     display: flex;
     flex-direction: column;
-    padding: 0.1875rem 0.625rem;
+
     max-height: 75vh;
-    overflow-y: scroll;
+    padding: 0.1875rem 0.625rem;
 
     @include mixins.adapt-padding-to-scrollbar(0.625rem);
 
@@ -27,19 +28,22 @@
 
     .Button {
       flex: 1;
+
       width: auto;
       height: auto;
       min-height: 3.0625rem;
-      border-radius: var(--border-radius-messages-small);
       border: 2px solid var(--color-primary);
-      background: var(--color-background);
-      color: var(--color-primary);
+      border-radius: var(--border-radius-messages-small);
+
       font-weight: var(--font-weight-medium);
+      color: var(--color-primary);
       text-transform: none;
 
+      background: var(--color-background);
+
       &:hover {
-        color: #fff;
         border-color: var(--color-primary-shade);
+        color: #fff;
         background: var(--color-primary-shade);
       }
     }

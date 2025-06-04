@@ -1,11 +1,14 @@
 @use '../../../../styles/mixins';
 
 .root {
+  cursor: var(--custom-cursor, pointer);
+
   display: flex;
   gap: 0.75rem;
+
   padding: 0.25rem 0.75rem 0.25rem 0.25rem;
   border-radius: 0.5rem;
-  cursor: var(--custom-cursor, pointer);
+
   transition: background-color 0.25s ease-out;
 
   &:hover {
@@ -21,9 +24,9 @@
 
 .stars {
   display: flex;
-  align-items: center;
   flex-shrink: 0;
   gap: 0.25rem;
+  align-items: center;
 }
 
 .amount {
@@ -62,9 +65,9 @@
 
 .subscriptionStar {
   position: absolute;
+  z-index: 1;
   right: 0;
   bottom: 0;
-  z-index: 1;
 
   @include mixins.filter-outline(1px, var(--color-background));
 }
@@ -72,13 +75,14 @@
 .uniqueGiftBackground {
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
+  left: 0;
+
   aspect-ratio: 1 / 1;
   border-radius: 0.25rem;
 }
 
 .giftSticker {
-  margin-inline: 0.25rem;
   margin-top: 0.25rem;
+  margin-inline: 0.25rem;
 }

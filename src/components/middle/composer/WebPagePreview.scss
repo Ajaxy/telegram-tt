@@ -1,5 +1,6 @@
 .WebPagePreview {
   --accent-color: var(--color-primary);
+
   position: relative;
   height: 3.125rem;
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
@@ -19,9 +20,9 @@
 
   // TODO Remove duplication with `.ComposerEmbeddedMessage`
   &_inner {
-    padding-top: 0.5rem;
     display: flex;
     align-items: center;
+    padding-top: 0.5rem;
   }
 
   .ComposerEmbeddedMessage + & {
@@ -39,14 +40,17 @@
   }
 
   & &-left-icon {
+    display: grid;
     flex-shrink: 0;
-    background: none !important;
+    place-content: center;
+
     height: 2.625rem;
     padding: 0.5625rem 0.75rem 0.5625rem 1rem;
-    display: grid;
-    place-content: center;
+
     font-size: 1.5rem;
     color: var(--accent-color);
+
+    background: none !important;
 
     @media (max-width: 600px) {
       width: 2.875rem;
@@ -55,13 +59,16 @@
 
   & &-clear {
     flex-shrink: 0;
-    background: none !important;
+    align-self: center;
+
     width: auto;
     height: 1.5rem;
-    padding: 0;
     margin: 0.5625rem 1rem 0.5625rem 0.75rem;
-    align-self: center;
+    padding: 0;
+
     color: var(--accent-color);
+
+    background: none !important;
 
     @media (max-width: 600px) {
       margin: 0.5625rem 0.75rem 0.5625rem 0.5rem;
@@ -69,9 +76,9 @@
   }
 
   .WebPage {
+    overflow: hidden;
     flex-grow: 1;
     max-width: calc(100% - 3.375rem);
-    overflow: hidden;
 
     &.with-video .media-inner {
       display: none;
@@ -80,13 +87,14 @@
     .site-title,
     .site-name,
     .site-description {
+      overflow: hidden;
       flex: 1;
+
       max-width: 100%;
       max-height: 1rem;
 
-      overflow: hidden;
-      white-space: nowrap;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .site-title {

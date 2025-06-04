@@ -1,16 +1,16 @@
 @use "../../styles/mixins";
 
 .container {
-  padding: 1.5rem 1.5rem 0;
   margin-bottom: 0.625rem;
+  padding: 1.5rem 1.5rem 0;
 
   @include mixins.side-panel-section;
 }
 
 .header {
+  position: relative;
   font-size: 1rem;
   color: var(--color-text-secondary);
-  position: relative;
 
   &[dir="rtl"] {
     text-align: right;
@@ -18,12 +18,12 @@
 }
 
 .description {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-
   margin-bottom: 0;
   padding-top: 0.5rem;
   padding-bottom: 1.5rem;
+
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
 }
 
 .sortableContainer {
@@ -31,9 +31,9 @@
 }
 
 .item {
+  margin-right: -1rem;
   margin-bottom: 0;
   margin-left: -1rem;
-  margin-right: -1rem;
 
   :global(.multiline-item) {
     padding-inline-end: 3rem;

@@ -1,29 +1,30 @@
 // This class is used in `ghostAnimation`, so we need to keep it global
 .ProfileInfo {
-  aspect-ratio: 1 / 1;
   position: relative;
+  aspect-ratio: 1 / 1;
 
   @supports not (aspect-ratio: 1 / 1) {
     &::before {
+      content: "";
       float: left;
       padding-top: 100%;
-      content: "";
     }
 
     &::after {
-      display: block;
       content: "";
       clear: both;
+      display: block;
     }
   }
 
   .fullName {
-    font-weight: var(--font-weight-medium);
-    font-size: 1.25rem;
-    line-height: 1.375rem;
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
     margin-bottom: 0;
+
+    font-size: 1.25rem;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.375rem;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
   }
 
   .VerifiedIcon,
@@ -44,8 +45,8 @@
   .custom-emoji {
     --custom-emoji-size: 1.5rem;
 
-    color: var(--color-white) !important;
     pointer-events: auto;
     cursor: var(--custom-cursor, pointer);
+    color: var(--color-white) !important;
   }
 }

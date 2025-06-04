@@ -11,21 +11,21 @@
 }
 
 .icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+
   width: 5rem;
   height: 5rem;
   border-radius: 50%;
 
-  display: grid;
-  place-items: center;
-
-  flex-shrink: 0;
   background-color: var(--color-primary);
 }
 
 .title, .description {
+  padding: 0 1rem;
   text-align: center !important;
   text-wrap: pretty;
-  padding: 0 1rem;
 }
 
 .title {

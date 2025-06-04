@@ -1,22 +1,21 @@
 .DropTarget {
-  border-radius: var(--border-radius-default);
-  background: var(--color-background);
-  padding: 1.25rem;
+  position: relative;
+
+  display: flex;
   flex: 1 1 auto;
+
   width: 100%;
   max-width: 43.75rem;
-  margin-left: auto;
   margin-right: auto;
   margin-bottom: 0.3125rem;
+  margin-left: auto;
+  padding: 1.25rem;
+  border-radius: var(--border-radius-default);
 
-  position: relative;
-  display: flex;
   color: #a4acb3;
-  box-shadow: 0 1px 2px var(--color-default-shadow);
 
-  @media (max-height: 350px) {
-    padding: 0.75rem;
-  }
+  background: var(--color-background);
+  box-shadow: 0 1px 2px var(--color-default-shadow);
 
   &.hovered {
     .target-content {
@@ -46,12 +45,11 @@
 
   .target-outline {
     fill: none;
-
     stroke: var(--color-placeholders);
-    stroke-width: 2;
     stroke-dasharray: 11, 8;
-    stroke-linecap: round;
     stroke-dashoffset: 0;
+    stroke-linecap: round;
+    stroke-width: 2;
 
     transition: 0.2s stroke;
     animation: outline 0.5s linear infinite;
@@ -60,36 +58,39 @@
 
   .target-content {
     pointer-events: none;
-    border-radius: 0.5rem;
-    flex: 1 1 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: 0.2s color;
 
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+
+    display: flex;
+    flex: 1 1 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 0.5rem;
+
+    transition: 0.2s color;
   }
 
   .icon {
+    margin-bottom: 2.25rem;
     font-size: 6.25rem;
     line-height: 4.6875rem;
-    margin-bottom: 2.25rem;
 
     @media (max-height: 520px) {
+      margin-bottom: 1rem;
       font-size: 4.25rem;
       line-height: 3.5rem;
-      margin-bottom: 1rem;
     }
 
     @media (max-height: 450px) {
+      margin-top: 0.25rem;
+      margin-bottom: 0.5rem;
       font-size: 2rem;
       line-height: 1rem;
-      margin-bottom: 0.5rem;
-      margin-top: 0.25rem;
     }
   }
 
@@ -110,6 +111,10 @@
     @media (max-height: 450px) {
       font-size: 0.875rem;
     }
+  }
+
+  @media (max-height: 350px) {
+    padding: 0.75rem;
   }
 
   @keyframes outline {

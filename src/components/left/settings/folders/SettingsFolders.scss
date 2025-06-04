@@ -1,14 +1,15 @@
 .settings-folders-recommended-item {
-  width: 100%;
   display: flex;
+  gap: 1rem;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+
+  width: 100%;
 }
 
 .settings-folders-blocked-icon {
-  color: var(--color-text-secondary);
   margin-left: 0.25rem;
+  color: var(--color-text-secondary);
 }
 
 .settings-folders-list-item {
@@ -22,24 +23,26 @@
     width: 100%;
 
     .Avatar {
-      margin-left: -0.25rem;
       margin-right: 1.5rem;
+      margin-left: -0.25rem;
     }
 
     .title {
       display: flex;
-      justify-content: flex-start;
       align-items: center;
+      justify-content: flex-start;
 
       h3 {
+        overflow: hidden;
+
+        margin: 0;
+
         font-size: 1rem;
         font-weight: var(--font-weight-medium);
         line-height: 1.3125;
-        margin: 0;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
         text-align: left;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
 
@@ -68,22 +71,22 @@
     color: var(--color-primary);
 
     .icon {
-      opacity: 1;
       color: inherit;
+      opacity: 1;
     }
   }
 
   &[dir="rtl"] {
     .Avatar {
-      margin-left: 1.5rem;
       margin-right: -0.25rem;
+      margin-left: 1.5rem;
     }
   }
 }
 
 .settings-item .ShowMoreButton {
-  margin: 0 -1rem;
   width: calc(100% + 2rem);
+  margin: 0 -1rem;
   padding-left: 1rem !important;
 }
 
@@ -108,8 +111,8 @@
 }
 
 .Picker {
-  height: 100%;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  height: 100%;
 }

@@ -16,9 +16,10 @@ $icons: "android", "apple", "brave", "chrome", "edge", "firefox", "linux", "oper
 .iconDevice {
   width: 5rem;
   height: 5rem;
+  margin: 0 auto 1rem;
+
   background-repeat: no-repeat;
   background-size: 5rem;
-  margin: 0 auto 1rem;
 }
 
 @each $icon in $icons {
@@ -26,22 +27,22 @@ $icons: "android", "apple", "brave", "chrome", "edge", "firefox", "linux", "oper
 }
 
 .title {
-  text-align: center;
   margin-bottom: 0.25rem;
+  text-align: center;
 }
 
 .note,
 .date {
-  color: var(--color-text-secondary);
   font-size: 0.875rem;
+  color: var(--color-text-secondary);
   text-align: center;
 }
 
 .box {
-  background: var(--color-background-secondary);
+  margin: 1rem 0;
   padding: 1rem 1rem 0.5rem;
   border-radius: var(--border-radius-default);
-  margin: 1rem 0;
+  background: var(--color-background-secondary);
 }
 
 .actionHeader {

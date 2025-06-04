@@ -6,6 +6,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+
     height: 80vh;
     padding: 0;
   }
@@ -14,13 +15,14 @@
     --radius: 0;
 
     position: absolute;
+    z-index: -1;
     top: 0;
     left: 0;
+    transform: scale(1.1);
+
     width: 100%;
     height: 100%;
     border-radius: 0;
-    z-index: -1;
-    transform: scale(1.1);
 
     :global(.Avatar__media) {
       border-radius: 0;
@@ -36,8 +38,8 @@
 .single-column {
   :global(.modal-dialog) {
     max-width: 100% !important;
-    border-radius: 0;
     margin: 0;
+    border-radius: 0;
   }
 
   :global(.modal-content) {
@@ -47,12 +49,15 @@
 }
 
 .header {
-  width: 100%;
+  position: absolute;
+
   display: flex;
   align-items: center;
-  color: #fff;
-  position: absolute;
+
+  width: 100%;
   padding: 0.5rem;
+
+  color: #fff;
 
   :global(.Button) {
     color: #fff;
@@ -68,32 +73,40 @@
 }
 
 .emojis-backdrop {
+  pointer-events: none;
+
   position: absolute;
+  z-index: 2;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+
   display: flex;
   justify-content: center;
-  pointer-events: none;
+
+  width: 100%;
+  height: 100%;
+
   transition: 0.25s ease-in-out background-color;
-  z-index: 2;
 
   &.open {
-    background-color: rgba(0, 0, 0, 0.7);
     pointer-events: auto;
+    background-color: rgba(0, 0, 0, 0.7);
   }
 }
 
 .emojis {
-  user-select: none;
   pointer-events: auto;
   cursor: var(--custom-cursor, pointer);
-  margin-top: 1rem;
-  height: 3rem;
-  transition: 0.25s ease-in-out transform;
+  user-select: none;
+
   top: 0;
+
+  height: 3rem;
+  margin-top: 1rem;
+
   font-size: 1.5rem;
+
+  transition: 0.25s ease-in-out transform;
 
   &.open {
     transform: scale(2) translateY(3rem);
@@ -102,13 +115,18 @@
 
 .emoji-tooltip {
   user-select: none;
+
   position: absolute;
-  margin-top: 10rem;
-  color: white;
+
   max-width: 20rem;
-  text-align: center;
+  margin-top: 10rem;
+
   font-weight: var(--font-weight-medium);
+  color: white;
+  text-align: center;
+
   opacity: 0;
+
   transition: 0.25s ease-in-out opacity;
 
   &.open {
@@ -117,25 +135,29 @@
 }
 
 .user-info {
-  width: 100%;
+  pointer-events: none;
+  user-select: none;
+
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  width: 100%;
   margin-top: 0;
+  margin-bottom: auto;
   padding-top: 4rem;
   padding-bottom: 2rem;
-  margin-bottom: auto;
+
   color: #fff;
+
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, transparent 100%);
-  pointer-events: none;
-  user-select: none;
 }
 
 .buttons {
-  display: flex;
+  user-select: none;
   position: absolute;
   bottom: 1rem;
-  user-select: none;
+  display: flex;
 }
 
 .leave {
@@ -159,20 +181,22 @@
 }
 
 .main-video {
-  z-index: -1;
   position: absolute;
+  z-index: -1;
   width: 100%;
   height: 100%;
 }
 
 .second-video {
-  z-index: -1;
   position: absolute;
-  width: 9rem;
-  bottom: 1rem;
+  z-index: -1;
   right: 1rem;
-  border-radius: 0.5rem;
+  bottom: 1rem;
   transform: translateY(calc(100% + 1rem)) rotateY(180deg);
+
+  width: 9rem;
+  border-radius: 0.5rem;
+
   transition: 0.25s ease-in-out transform;
 
   &.visible {

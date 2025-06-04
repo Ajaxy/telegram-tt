@@ -1,22 +1,26 @@
 .PollResults {
-  height: 100%;
+  pointer-events: auto;
+
   position: relative;
+
   display: flex;
   flex-direction: column;
-  pointer-events: auto;
+
+  height: 100%;
 
   > .Loading {
     position: absolute;
     top: 0;
-    left: 0;
-    bottom: 0;
     right: 0;
+    bottom: 0;
+    left: 0;
+
     background: rgba(white, 0.75);
   }
 
   .poll-question {
-    padding: 0.75rem 1.5rem;
     flex-shrink: 0;
+    padding: 0.75rem 1.5rem;
     font-size: 1.25rem;
 
     @media (max-width: 600px) {
@@ -25,8 +29,8 @@
   }
 
   .poll-results-list {
-    border-top: 1px solid var(--color-borders);
-    flex-grow: 1;
     overflow: auto;
+    flex-grow: 1;
+    border-top: 1px solid var(--color-borders);
   }
 }

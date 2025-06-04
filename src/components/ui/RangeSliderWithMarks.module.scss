@@ -1,19 +1,23 @@
 @use '../../styles/mixins';
 
 @mixin thumb-styles() {
-  border: none;
-  width: 1rem;
-  height: 1rem;
-  background: var(--color-links);
-  border-radius: 50%;
   cursor: var(--custom-cursor, pointer);
+
   position: absolute;
+  z-index: 2;
   left: var(--fill-percentage);
   transform: scale(1) translate(-45%, -50%);
-  transition: transform 0.3s ease-in-out;
-  z-index: 2;
+
+  width: 1rem;
+  height: 1rem;
+  border: none;
+  border-radius: 50%;
+
   -webkit-appearance: none;
   appearance: none;
+  background: var(--color-links);
+
+  transition: transform 0.3s ease-in-out;
 
   @supports (-moz-appearance: none) {
     transform: scale(1) translate(calc(-10% + var(--thumb-offset)), 0);
@@ -36,25 +40,29 @@
 .sliderContainer {
   --thumb-offset: 0%;
   --fill-percentage: 0%;
+
   position: relative;
   width: 100%;
 }
 
 .marksContainer {
-  width: 100%;
   pointer-events: none;
   display: flex;
   justify-content: space-between;
+  width: 100%;
 }
 
 .mark {
+  position: relative;
+
+  display: flex;
+  justify-content: center;
+
+  width: 0.1875rem;
+
   font-size: 0.8125rem;
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
-  position: relative;
-  display: flex;
-  justify-content: center;
-  width: 0.1875rem;
 }
 
 .active {
@@ -63,13 +71,12 @@
 
 .slider {
   position: relative;
-  -webkit-appearance: none;
-  width: 100%;
-  height: 0.1875rem;
-  outline: none;
-  transition: opacity 0.2s;
   z-index: 1;
 
+  width: 100%;
+  height: 0.1875rem;
+
+  -webkit-appearance: none;
   background:
     linear-gradient(
       to right,
@@ -78,6 +85,9 @@
       var(--color-text-secondary) var(--fill-percentage),
       var(--color-text-secondary) 100%
     );
+  outline: none;
+
+  transition: opacity 0.2s;
 }
 
 .slider::-webkit-slider-thumb {
@@ -93,22 +103,26 @@
 }
 
 .tickMarks {
+  pointer-events: none;
+
   position: absolute;
+  z-index: 1;
+  right: 0;
   bottom: 0.25rem;
   left: 0;
-  right: 0;
+
   display: flex;
   justify-content: space-between;
-  pointer-events: none;
-  z-index: 1;
 }
 
 .tick {
   position: relative;
+
   width: 0.25rem;
   height: 0.5rem;
-  background-color: var(--color-text-secondary);
   border-radius: 0.1875rem;
+
+  background-color: var(--color-text-secondary);
 }
 
 .filled {

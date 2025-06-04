@@ -1,8 +1,11 @@
 .SenderInfo {
+  cursor: var(--custom-cursor, pointer);
+
   display: flex;
   align-content: center;
-  cursor: var(--custom-cursor, pointer);
+
   color: rgba(255, 255, 255, 0.5);
+
   transition: 0.15s color;
 
   &:hover {
@@ -25,16 +28,17 @@
   }
 
   .title {
-    line-height: 1.4375rem;
-    font-weight: var(--font-weight-medium);
-    white-space: pre;
     overflow: hidden;
+
+    font-weight: var(--font-weight-medium);
+    line-height: 1.4375rem;
     text-overflow: ellipsis;
+    white-space: pre;
   }
 
   .date {
-    line-height: 1.25rem;
     font-size: 0.875rem;
+    line-height: 1.25rem;
     letter-spacing: -0.01rem;
   }
 }

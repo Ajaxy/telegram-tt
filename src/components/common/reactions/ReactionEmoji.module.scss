@@ -2,14 +2,19 @@
   --custom-emoji-size: 2.25rem;
 
   cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+
   display: inline-block;
+
   width: var(--custom-emoji-size);
   height: var(--custom-emoji-size);
   border-radius: var(--border-radius-messages-small);
+
   background: transparent no-repeat center;
   background-size: contain;
+
   transition: background-color 0.15s ease, opacity 0.3s ease !important;
-  position: relative;
 
   &.selected,
   &:hover {

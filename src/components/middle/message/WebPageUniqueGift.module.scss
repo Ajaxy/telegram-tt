@@ -1,21 +1,20 @@
 .root {
+  cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  position: relative;
-  min-width: 12.5rem;
   width: 100%;
-
+  min-width: 12.5rem;
   margin-top: 0;
-  padding-block: 2rem !important;
   padding-bottom: 0.75rem;
-
+  padding-block: 2rem !important;
   border-radius: 0.25rem;
 
   font-weight: var(--font-weight-semibold);
-
-  cursor: var(--custom-cursor, pointer);
 }
 
 .backgroundWrapper {
@@ -27,14 +26,15 @@
 
 .background {
   position: absolute;
-  inset: 0;
-  top: -1rem;
+  inset: -1rem 0 0 0;
 }
 
 .stickerWrapper {
   position: relative;
+
+  overflow: hidden;
+
   width: 7.5rem;
   height: 7.5rem;
-  overflow: hidden;
   margin-block: 0.5rem;
 }

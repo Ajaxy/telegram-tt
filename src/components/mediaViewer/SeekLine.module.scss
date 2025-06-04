@@ -1,11 +1,13 @@
 .container {
-  position: absolute;
-  left: 1rem;
-  right: 1rem;
-  top: 1rem;
-  height: 1rem;
   touch-action: none;
   cursor: var(--custom-cursor, pointer);
+
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  left: 1rem;
+
+  height: 1rem;
 
   :global(body.is-electron) & {
     cursor: auto;
@@ -14,18 +16,21 @@
 
 .preview {
   position: absolute;
-  left: 0;
   z-index: 1;
   bottom: calc(100% + 0.5rem);
-  border-radius: 0.25rem;
+  left: 0;
+
   overflow: hidden;
+
+  border-radius: 0.25rem;
+
   background: #000;
 }
 
 .previewCanvas {
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
 }
 
 body:global(.is-touch-env) .preview {
@@ -34,58 +39,71 @@ body:global(.is-touch-env) .preview {
 
 .previewTime {
   position: absolute;
-  left: 0;
   right: 0;
   bottom: 0;
+  left: 0;
+
   text-align: center;
 }
 
 .previewTimeText {
+  padding: 0.25rem 0.5rem;
   border-top-left-radius: 0.125rem;
   border-top-right-radius: 0.125rem;
-  background: rgba(0, 0, 0, 0.5);
+
   color: rgba(255, 255, 255, 0.8);
-  padding: 0.25rem 0.5rem;
+
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .track {
   position: absolute;
   top: 50%;
-  height: 5px;
-  transform: translateY(-50%);
-  background-color: rgba(255, 255, 255, 0.16);
-  border-radius: var(--border-radius-default);
-  left: -0.25rem;
   right: -0.25rem;
+  left: -0.25rem;
+  transform: translateY(-50%);
+
+  height: 5px;
+  border-radius: var(--border-radius-default);
+
+  background-color: rgba(255, 255, 255, 0.16);
 }
 
 .buffered {
   position: absolute;
-  background-color: rgba(255, 255, 255, 0.5);
   top: 0;
   left: 0;
+
   height: 100%;
   border-radius: var(--border-radius-default);
+
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 .played {
-  background: var(--color-primary);
   position: absolute;
   top: 0;
   left: 0;
+
   height: 100%;
   border-radius: var(--border-radius-default);
 
+  background: var(--color-primary);
+
   &::after {
     content: "";
+
     position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(50%, -50%) scale(1);
+
     width: 0.75rem;
     height: 0.75rem;
     border-radius: 50%;
+
     background-color: var(--color-primary);
-    right: 0;
-    top: 50%;
-    transform: translate(50%, -50%) scale(1);
+
     transition: transform 0.2s ease;
   }
 }

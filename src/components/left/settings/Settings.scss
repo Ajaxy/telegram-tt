@@ -4,9 +4,9 @@
   height: 100%;
 
   > .Transition_slide {
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
   }
 
   .left-header {
@@ -22,8 +22,8 @@
 .settings-main-header {
   display: flex;
   flex-grow: 1;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
 .settings-more-menu {
@@ -31,18 +31,17 @@
     width: auto;
 
     .MenuItem button {
-      padding-left: 1rem !important;
       padding-right: 2rem !important;
+      padding-left: 1rem !important;
     }
   }
 }
 
 .settings-content {
+  overflow-y: scroll;
+  height: calc(100% - var(--header-height));
   border-top: 1px solid transparent;
   transition: border-top-color 0.2s ease-in-out;
-  height: calc(100% - var(--header-height));
-
-  overflow-y: scroll;
 
   &.scrolled {
     border-top-color: var(--color-borders);
@@ -53,9 +52,9 @@
   }
 
   &.infinite-scroll {
+    overflow-y: hidden;
     display: flex;
     flex-direction: column;
-    overflow-y: hidden;
 
     & > .custom-scroll {
       flex: 1 1 auto;
@@ -84,7 +83,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+
   padding: 0 1.5rem;
+
   text-align: center;
 
   &.no-border {
@@ -122,24 +123,24 @@
 }
 
 .settings-range-value {
-  color: var(--color-primary);
   display: inline-flex;
   align-items: center;
   margin-inline-start: 2rem;
+  color: var(--color-primary);
 }
 
 .settings-item-simple,
 .settings-item {
-  text-align: initial;
   padding: 0.5rem 0.5rem 1rem;
+  text-align: initial;
 
   @include mixins.adapt-padding-to-scrollbar(0.5rem);
   @include mixins.side-panel-section;
 }
 
 .settings-unlock-button {
-  margin-inline: 1rem;
   margin-top: 1rem;
+  margin-inline: 1rem;
 }
 
 .fluid-container {
@@ -148,8 +149,8 @@
 }
 
 .settings-unlock-button-title {
-  align-items: center;
   display: flex;
+  align-items: center;
 }
 
 .settings-unlock-button-icon {
@@ -159,16 +160,18 @@
 .settings-item {
   &.no-border {
     margin-bottom: 0;
-    box-shadow: none;
     border-bottom: none;
+    box-shadow: none;
   }
 
   &-header {
+    position: relative;
+
+    padding-inline-start: 1rem;
+
     font-size: 1rem;
     font-weight: var(--font-weight-semibold);
     color: var(--color-text-secondary);
-    padding-inline-start: 1rem;
-    position: relative;
   }
 
   &-slider {
@@ -176,10 +179,10 @@
   }
 
   &-description {
+    margin: -0.5rem 1rem 1rem;
     font-size: 0.875rem;
     line-height: 1.3125;
     color: var(--color-text-secondary);
-    margin: -0.5rem 1rem 1rem;
 
     .settings-content.two-fa &,
     .settings-content.password-form &,
@@ -188,18 +191,19 @@
     }
 
     &[dir="rtl"] {
-      text-align: right;
       unicode-bidi: plaintext;
+      text-align: right;
     }
   }
 
   &-description-larger {
-    font-size: 1rem;
-    line-height: 1.3125rem;
-    color: var(--color-text-secondary);
     margin-top: 1rem;
     margin-bottom: 0.75rem;
     padding-inline-start: 1rem;
+
+    font-size: 1rem;
+    line-height: 1.3125rem;
+    color: var(--color-text-secondary);
 
     &.premium-info {
       margin-top: 1rem;
@@ -226,8 +230,8 @@
 
       .date {
         float: right;
-        font-size: 0.75rem;
         margin-left: 1rem;
+        font-size: 0.75rem;
         color: var(--color-text-secondary);
       }
     }
@@ -247,8 +251,8 @@
 
       .ListItem-button {
         align-items: center;
-        text-align: left;
         padding: 0.5rem;
+        text-align: left;
       }
 
       .Avatar {
@@ -262,10 +266,10 @@
       }
 
       .contact-name {
-        font-size: 1rem;
-        line-height: 1rem;
         margin-bottom: 0.25rem;
+        font-size: 1rem;
         font-weight: var(--font-weight-medium);
+        line-height: 1rem;
       }
 
       .contact-phone {
@@ -278,8 +282,8 @@
     &[dir="rtl"] {
       .multiline-item .date {
         float: left;
-        margin-left: 0;
         margin-right: 1rem;
+        margin-left: 0;
       }
     }
   }
@@ -319,8 +323,8 @@
 }
 
 .settings-fab-wrapper {
-  height: calc(100% - var(--header-height));
   position: relative;
+  height: calc(100% - var(--header-height));
 
   .settings-content {
     height: 100%;
@@ -343,8 +347,8 @@
   }
 
   .ReactionStaticEmoji {
-    margin-inline-end: 1rem;
     width: 1.5rem;
+    margin-inline-end: 1rem;
   }
 }
 

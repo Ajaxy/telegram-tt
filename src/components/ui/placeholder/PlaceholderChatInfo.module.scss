@@ -5,10 +5,10 @@
 }
 
 .avatar {
+  flex-shrink: 0;
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 50%;
-  flex-shrink: 0;
 }
 
 .info {
@@ -39,8 +39,8 @@
       var(--color-skeleton-foreground),
       var(--color-skeleton-background)
     );
-  background-size: 100vw 100vh;
   background-attachment: fixed;
+  background-size: 100vw 100vh;
   animation: slide 3s infinite linear;
 }
 

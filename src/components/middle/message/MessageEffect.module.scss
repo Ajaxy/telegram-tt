@@ -1,7 +1,7 @@
 .anchor {
   position: absolute;
-  bottom: 0;
   right: 0;
+  bottom: 0;
 }
 
 .mirrorAnchor {
@@ -10,10 +10,9 @@
 }
 
 .root {
+  pointer-events: none;
   position: fixed;
   z-index: var(--z-message-effect);
-
-  pointer-events: none;
 }
 
 .mirror {

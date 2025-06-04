@@ -1,15 +1,17 @@
 .root {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+
   height: 2.5rem;
+  padding: 0;
+  padding-inline: 0.5rem;
+  border-radius: var(--border-radius-default);
+
   font-size: 0.875rem;
   font-weight: var(--font-weight-medium);
 
-  border-radius: var(--border-radius-default);
   background-color: transparent;
-  padding: 0;
-  padding-inline: 0.5rem;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
 }
 
 .window-state-button,
@@ -37,9 +39,11 @@
 }
 
 .title {
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
-  margin-left: 0.5rem;
+
   margin-right: 0.5rem;
+  margin-left: 0.5rem;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

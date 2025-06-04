@@ -30,8 +30,8 @@
 
 @keyframes lovely-chart--animation-fadeIn {
   from {
-    opacity: 0;
     transform: scale3d(0.5, 0.5, 1);
+    opacity: 0;
   }
 
   40% {
@@ -39,15 +39,15 @@
   }
 
   to {
-    opacity: 1;
     transform: scale3d(1, 1, 1);
+    opacity: 1;
   }
 }
 
 @keyframes lovely-chart--animation-fadeOut {
   from {
-    opacity: 1;
     transform: scale3d(1, 1, 1);
+    opacity: 1;
   }
 
   60% {
@@ -55,8 +55,8 @@
   }
 
   to {
-    opacity: 0;
     transform: scale3d(0.5, 0.5, 1);
+    opacity: 0;
   }
 }
 
@@ -109,9 +109,9 @@
 }
 
 .lovely-chart--state-animated {
-  animation-fill-mode: forwards;
-  animation-timing-function: ease-out;
   animation-duration: 200ms;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
 
   &.lovely-chart--state-hidden {
     animation-name: lovely-chart--animation-fadeOut;

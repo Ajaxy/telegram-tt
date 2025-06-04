@@ -15,19 +15,20 @@
   }
 
   .options-header {
-    color: var(--color-text-secondary);
+    margin-top: 0.5rem;
     font-size: 1rem;
     font-weight: var(--font-weight-medium);
-    margin-top: 0.5rem;
+    color: var(--color-text-secondary);
   }
 
   .options-list {
+    overflow: auto;
+    overflow-y: scroll;
+
+    max-height: 20rem;
     margin: 1rem -0.75rem -0.5rem;
     padding: 0 0.75rem;
     border-top: 1px solid var(--color-chat-hover);
-    max-height: 20rem;
-    overflow: auto;
-    overflow-y: scroll;
 
     @include mixins.adapt-padding-to-scrollbar(0.75rem);
 
@@ -73,9 +74,9 @@
   }
 
   .poll-error {
+    margin: -1rem 0 1rem 0.25rem;
     font-size: smaller;
     color: var(--color-error);
-    margin: -1rem 0 1rem 0.25rem;
   }
 
   .input-group:last-child {

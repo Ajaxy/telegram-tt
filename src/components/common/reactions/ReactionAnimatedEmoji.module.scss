@@ -2,14 +2,14 @@
   --custom-emoji-border-radius: 0.25rem;
 
   position: relative;
+  z-index: 1;
+
   display: flex;
   align-items: center;
   justify-content: center;
 
   width: var(--custom-emoji-size);
   height: var(--custom-emoji-size);
-
-  z-index: 1;
 }
 
 .animated-icon, .effect {
