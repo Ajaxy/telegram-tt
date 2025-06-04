@@ -66,7 +66,7 @@ export function createWindow(url?: string) {
     },
     ...(IS_MAC_OS && {
       titleBarStyle: 'hidden',
-      windowButtonPosition: WINDOW_BUTTONS_POSITION.standard,
+      trafficLightPosition: WINDOW_BUTTONS_POSITION.standard,
     }),
   });
 

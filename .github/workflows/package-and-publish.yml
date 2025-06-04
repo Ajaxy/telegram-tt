@@ -41,7 +41,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --include=dev # Hack: install `electron-drag-click` as a dev dependency, so build happens only on macOS
 
       - name: Import MacOS signing certificate
         env:

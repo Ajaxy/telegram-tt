@@ -1,3 +1,4 @@
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 import path from 'path';
 import { EnvironmentPlugin } from 'webpack';
 
@@ -35,6 +36,14 @@ export default {
       APP_ENV,
       BASE_URL,
       IS_PREVIEW: false,
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, 'node_modules/electron-drag-click/build/Release/electron_drag_click.node'),
+          to: path.resolve(__dirname, 'build/Release/electron_drag_click.node'),
+        },
+      ],
     }),
   ],
 

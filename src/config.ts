@@ -20,6 +20,9 @@ export const IS_TEST = process.env.APP_ENV === 'test';
 export const IS_PERF = process.env.APP_ENV === 'perf';
 export const IS_BETA = process.env.APP_ENV === 'staging';
 export const IS_PACKAGED_ELECTRON = process.env.IS_PACKAGED_ELECTRON;
+
+export const ELECTRON_WINDOW_DRAG_EVENT_START = 'tt-electron-window-drag-start';
+export const ELECTRON_WINDOW_DRAG_EVENT_END = 'tt-electron-window-drag-end';
 export const PAID_MESSAGES_PURPOSE = 'paid_messages';
 
 export const DEBUG = process.env.APP_ENV !== 'production';

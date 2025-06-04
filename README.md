@@ -43,7 +43,7 @@ Electron allows building a native application that can be installed on Windows, 
 
 #### NPM scripts
 
-- `npm run dev:electron`
+- `npm run electron:dev`
 
 Run Electron in development mode, concurrently starts 3 processes with watch for changes: main (main Electron process), renderer (FE code) and Webpack for Electron (compiles main Electron process from TypeScript).
 
