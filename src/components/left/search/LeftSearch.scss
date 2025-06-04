@@ -187,6 +187,10 @@
     .search-sponsored-badge {
       display: flex;
       align-self: flex-start;
+      cursor: pointer;
+      &:hover {
+        filter: brightness(1.1);
+      }
     }
   }
 
