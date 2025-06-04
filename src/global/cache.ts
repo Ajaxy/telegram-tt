@@ -281,6 +281,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.peers = initialState.peers;
   }
 
+  if (!cached.settings.accountDaysTtl) {
+    cached.settings.accountDaysTtl = initialState.settings.accountDaysTtl;
+  }
+
   if (!cached.cacheVersion) {
     cached.cacheVersion = initialState.cacheVersion;
     // Reset because of the new action message structure
@@ -708,7 +712,7 @@ function omitLocalMedia(message: ApiMessage): ApiMessage {
 
 function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings'] {
   const {
-    byKey, botVerificationShownPeerIds, notifyDefaults, lastPremiumBandwithNotificationDate, themes,
+    byKey, botVerificationShownPeerIds, notifyDefaults, lastPremiumBandwithNotificationDate, themes, accountDaysTtl,
   } = global.settings;
 
   return {
@@ -718,6 +722,7 @@ function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings
     lastPremiumBandwithNotificationDate,
     notifyDefaults,
     themes,
+    accountDaysTtl,
   };
 }
 

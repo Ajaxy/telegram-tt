@@ -1040,6 +1040,14 @@ export interface ActionPayloads {
   };
   openFrozenAccountModal: WithTabId | undefined;
   closeFrozenAccountModal: WithTabId | undefined;
+  openDeleteAccountModal: {
+    days: number;
+  } & WithTabId | undefined;
+  closeDeleteAccountModal: WithTabId | undefined;
+  setAccountTTL: {
+    days: number;
+  } & WithTabId | undefined;
+  loadAccountDaysTtl: undefined;
 
   // Chats
   loadPeerSettings: {

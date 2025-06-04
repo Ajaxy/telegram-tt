@@ -471,3 +471,5 @@ export const DEFAULT_GIFT_PROFILE_FILTER_OPTIONS: GiftProfileFilterOptions = {
 export const DEFAULT_RESALE_GIFTS_FILTER_OPTIONS: ResaleGiftsFilterOptions = {
   sortType: 'byDate',
 };
+
+export const ACCOUNT_TTL_OPTIONS = [1, 3, 6, 12, 18, 24];

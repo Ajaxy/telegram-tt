@@ -23,6 +23,7 @@ export { default as StatusPickerMenu } from '../components/left/main/StatusPicke
 export { default as SuggestedStatusModal } from '../components/modals/suggestedStatus/SuggestedStatusModal';
 export { default as BoostModal } from '../components/modals/boost/BoostModal';
 export { default as GiftCodeModal } from '../components/modals/giftcode/GiftCodeModal';
+export { default as DeleteAccountModal } from '../components/modals/deleteAccount/DeleteAccountModal';
 export { default as ChatlistModal } from '../components/modals/chatlist/ChatlistModal';
 export { default as ChatInviteModal } from '../components/modals/chatInvite/ChatInviteModal';
 

@@ -1272,6 +1272,10 @@ export interface LangPair {
   'CloseMiniApps': undefined;
   'DoNotAskAgain': undefined;
   'PaymentInfoDone': undefined;
+  'DeleteMyAccount': undefined;
+  'DeleteAccountIfAwayFor': undefined;
+  'SelfDestructTitle': undefined;
+  'SelfDestructSessionsDescription': undefined;
   'VideoConversionTitle': undefined;
   'VideoConversionText': undefined;
   'VideoConversionDone': undefined;

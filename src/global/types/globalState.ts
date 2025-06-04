@@ -415,6 +415,7 @@ export type GlobalState = {
     paidReactionPrivacy?: ApiPaidReactionPrivacyType;
     botVerificationShownPeerIds: string[];
     themes: Partial<Record<ThemeKey, IThemeSettings>>;
+    accountDaysTtl: number;
   };
 
   push?: {

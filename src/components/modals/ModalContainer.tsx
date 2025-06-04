@@ -14,6 +14,7 @@ import BoostModal from './boost/BoostModal.async';
 import ChatInviteModal from './chatInvite/ChatInviteModal.async';
 import ChatlistModal from './chatlist/ChatlistModal.async';
 import CollectibleInfoModal from './collectible/CollectibleInfoModal.async';
+import DeleteAccountModal from './deleteAccount/DeleteAccountModal.async';
 import EmojiStatusAccessModal from './emojiStatusAccess/EmojiStatusAccessModal.async';
 import FrozenAccountModal from './frozenAccount/FrozenAccountModal.async';
 import PremiumGiftModal from './gift/GiftModal.async';
@@ -82,7 +83,8 @@ type ModalKey = keyof Pick<TabState,
   'giftStatusInfoModal' |
   'giftTransferModal' |
   'chatRefundModal' |
-  'isFrozenAccountModalOpen'
+  'isFrozenAccountModalOpen' |
+  'deleteAccountModal'
 >;
 
 type StateProps = {
@@ -135,6 +137,7 @@ const MODALS: ModalRegistry = {
   giftTransferModal: GiftTransferModal,
   chatRefundModal: ChatRefundModal,
   isFrozenAccountModalOpen: FrozenAccountModal,
+  deleteAccountModal: DeleteAccountModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

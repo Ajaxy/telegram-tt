@@ -243,3 +243,37 @@ addActionHandler('terminateAllWebAuthorizations', async (global): Promise<void> 
   };
   setGlobal(global);
 });
+
+addActionHandler('loadAccountDaysTtl', async (global, actions, payload): Promise<void> => {
+  const result = await callApi('fetchAccountTTL');
+  if (!result) return;
+
+  global = getGlobal();
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      accountDaysTtl: result.days,
+    },
+  };
+  setGlobal(global);
+});
+
+addActionHandler('setAccountTTL', async (global, actions, payload): Promise<void> => {
+  const { days, tabId = getCurrentTabId() } = payload || {};
+  if (!days) return;
+
+  const result = await callApi('setAccountTTL', { days });
+  if (!result) return;
+
+  global = getGlobal();
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      accountDaysTtl: days,
+    },
+  };
+  setGlobal(global);
+  actions.closeDeleteAccountModal({ tabId });
+});

@@ -741,6 +741,10 @@ export type TabState = {
     info: ApiCheckedGiftCode;
   };
 
+  deleteAccountModal?: {
+    selfDestructAccountDays: number;
+  };
+
   paidReactionModal?: {
     chatId: string;
     messageId: number;

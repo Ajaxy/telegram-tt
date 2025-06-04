@@ -309,6 +309,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
         patternColor: DARK_THEME_PATTERN_COLOR,
       },
     },
+    accountDaysTtl: 365,
   },
 
   serviceNotifications: [],

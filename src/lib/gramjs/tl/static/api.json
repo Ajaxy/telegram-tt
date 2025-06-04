@@ -63,6 +63,8 @@
     "account.getCollectibleEmojiStatuses",
     "account.addNoPaidMessagesException",
     "account.getPaidMessagesRevenue",
+    "account.getAccountTTL",
+    "account.setAccountTTL",
     "users.getUsers",
     "users.getFullUser",
     "contacts.getContacts",

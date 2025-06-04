@@ -3212,9 +3212,10 @@ namespace Api {
     resaleStars?: long;
     canTransferAt?: int;
     canResellAt?: int;
-    CONSTRUCTOR_ID: 2900347777;
+    CONSTRUCTOR_ID: 775611918;
     SUBCLASS_OF_ID: 2256589094;
     className: 'MessageActionStarGiftUnique';
+
     static fromReader(reader: Reader): MessageActionStarGiftUnique;
   }
   export class MessageActionPaidMessagesRefunded extends VirtualClass<{
@@ -3255,6 +3256,10 @@ namespace Api {
     callId: long;
     duration?: int;
     otherParticipants?: Api.TypePeer[];
+    CONSTRUCTOR_ID: 805187450;
+    SUBCLASS_OF_ID: 2256589094;
+    className: 'MessageActionConferenceCall';
+
     static fromReader(reader: Reader): MessageActionConferenceCall;
   }
   export class Dialog extends VirtualClass<{
@@ -5951,6 +5956,10 @@ namespace Api {
     subChainId: int;
     blocks: bytes[];
     nextOffset: int;
+    CONSTRUCTOR_ID: 2759272591;
+    SUBCLASS_OF_ID: 2676568142;
+    className: 'UpdateGroupCallChainBlocks';
+
     static fromReader(reader: Reader): UpdateGroupCallChainBlocks;
   }
   export class UpdatesTooLong extends VirtualClass<void> {
@@ -9904,6 +9913,10 @@ namespace Api {
     slug: string;
   }> {
     slug: string;
+    CONSTRUCTOR_ID: 2679894519;
+    SUBCLASS_OF_ID: 3634081085;
+    className: 'PhoneCallDiscardReasonMigrateConferenceCall';
+
     static fromReader(reader: Reader): PhoneCallDiscardReasonMigrateConferenceCall;
   }
   export class DataJSON extends VirtualClass<{
@@ -10250,8 +10263,7 @@ namespace Api {
     participantId: long;
     protocol: Api.TypePhoneCallProtocol;
     receiveDate?: int;
-    conferenceCall?: Api.TypeInputGroupCall;
-    CONSTRUCTOR_ID: 4006881368;
+    CONSTRUCTOR_ID: 3307368215;
     SUBCLASS_OF_ID: 3296664529;
     className: 'PhoneCallWaiting';
 
@@ -10277,8 +10289,7 @@ namespace Api {
     participantId: long;
     gAHash: bytes;
     protocol: Api.TypePhoneCallProtocol;
-    conferenceCall?: Api.TypeInputGroupCall;
-    CONSTRUCTOR_ID: 1161174115;
+    CONSTRUCTOR_ID: 347139340;
     SUBCLASS_OF_ID: 3296664529;
     className: 'PhoneCallRequested';
 
@@ -10304,8 +10315,7 @@ namespace Api {
     participantId: long;
     gB: bytes;
     protocol: Api.TypePhoneCallProtocol;
-    conferenceCall?: Api.TypeInputGroupCall;
-    CONSTRUCTOR_ID: 587035009;
+    CONSTRUCTOR_ID: 912311057;
     SUBCLASS_OF_ID: 3296664529;
     className: 'PhoneCallAccepted';
 
@@ -10343,8 +10353,7 @@ namespace Api {
     connections: Api.TypePhoneConnection[];
     startDate: int;
     customParameters?: Api.TypeDataJSON;
-    conferenceCall?: Api.TypeInputGroupCall;
-    CONSTRUCTOR_ID: 1000707084;
+    CONSTRUCTOR_ID: 810769141;
     SUBCLASS_OF_ID: 3296664529;
     className: 'PhoneCall';
 
@@ -10366,8 +10375,7 @@ namespace Api {
     id: long;
     reason?: Api.TypePhoneCallDiscardReason;
     duration?: int;
-    conferenceCall?: Api.TypeInputGroupCall;
-    CONSTRUCTOR_ID: 4191311107;
+    CONSTRUCTOR_ID: 1355435489;
     SUBCLASS_OF_ID: 3296664529;
     className: 'PhoneCallDiscarded';
 
@@ -11111,6 +11119,10 @@ namespace Api {
     newValue: Bool;
   }> {
     newValue: Bool;
+    CONSTRUCTOR_ID: 3306682238;
+    SUBCLASS_OF_ID: 2998503411;
+    className: 'ChannelAdminLogEventActionToggleAutotranslation';
+
     static fromReader(reader: Reader): ChannelAdminLogEventActionToggleAutotranslation;
   }
   export class ChannelAdminLogEvent extends VirtualClass<{
@@ -13281,11 +13293,11 @@ namespace Api {
     unmutedVideoCount?: int;
     unmutedVideoLimit: int;
     version: int;
-    conferenceFromCall?: long;
     inviteLink?: string;
-    CONSTRUCTOR_ID: 3455636451;
+    CONSTRUCTOR_ID: 1429932961;
     SUBCLASS_OF_ID: 548729632;
     className: 'GroupCall';
+
     static fromReader(reader: Reader): GroupCall;
   }
   export class InputGroupCall extends VirtualClass<{
@@ -13304,12 +13316,20 @@ namespace Api {
     slug: string;
   }> {
     slug: string;
+    CONSTRUCTOR_ID: 4261839423;
+    SUBCLASS_OF_ID: 1482758833;
+    className: 'InputGroupCallSlug';
+
     static fromReader(reader: Reader): InputGroupCallSlug;
   }
   export class InputGroupCallInviteMessage extends VirtualClass<{
     msgId: int;
   }> {
     msgId: int;
+    CONSTRUCTOR_ID: 2349883455;
+    SUBCLASS_OF_ID: 1482758833;
+    className: 'InputGroupCallInviteMessage';
+
     static fromReader(reader: Reader): InputGroupCallInviteMessage;
   }
   export class GroupCallParticipant extends VirtualClass<{
@@ -14052,6 +14072,10 @@ namespace Api {
   }> {
     slug: string;
     toId: Api.TypeInputPeer;
+    CONSTRUCTOR_ID: 1674298252;
+    SUBCLASS_OF_ID: 1919851518;
+    className: 'InputInvoiceStarGiftResale';
+
     static fromReader(reader: Reader): InputInvoiceStarGiftResale;
   }
   export class InputStorePaymentPremiumSubscription extends VirtualClass<{
@@ -16601,9 +16625,10 @@ namespace Api {
     upgradeStars?: long;
     resellMinStars?: long;
     title?: string;
-    CONSTRUCTOR_ID: 46953416;
+    CONSTRUCTOR_ID: 3324693032;
     SUBCLASS_OF_ID: 3273414923;
     className: 'StarGift';
+
     static fromReader(reader: Reader): StarGift;
   }
   export class StarGiftUnique extends VirtualClass<{
@@ -16634,9 +16659,10 @@ namespace Api {
     availabilityTotal: int;
     giftAddress?: string;
     resellStars?: long;
-    CONSTRUCTOR_ID: 1549979985;
+    CONSTRUCTOR_ID: 1678891913;
     SUBCLASS_OF_ID: 3273414923;
     className: 'StarGiftUnique';
+
     static fromReader(reader: Reader): StarGiftUnique;
   }
   export class MessageReportOption extends VirtualClass<{
@@ -16838,7 +16864,7 @@ namespace Api {
     patternColor: int;
     textColor: int;
     rarityPermille: int;
-    CONSTRUCTOR_ID: 2485589858;
+    CONSTRUCTOR_ID: 3644687772;
     SUBCLASS_OF_ID: 2276819400;
     className: 'StarGiftAttributeBackdrop';
 
@@ -16900,9 +16926,10 @@ namespace Api {
     transferStars?: long;
     canTransferAt?: int;
     canResellAt?: int;
-    CONSTRUCTOR_ID: 1616305061;
+    CONSTRUCTOR_ID: 3755607193;
     SUBCLASS_OF_ID: 2385198100;
     className: 'SavedStarGift';
+
     static fromReader(reader: Reader): SavedStarGift;
   }
   export class InputSavedStarGiftUser extends VirtualClass<{
@@ -16931,6 +16958,10 @@ namespace Api {
     slug: string;
   }> {
     slug: string;
+    CONSTRUCTOR_ID: 545636920;
+    SUBCLASS_OF_ID: 2406848942;
+    className: 'InputSavedStarGiftSlug';
+
     static fromReader(reader: Reader): InputSavedStarGiftSlug;
   }
   export class PaidReactionPrivacyDefault extends VirtualClass<void> {
@@ -17059,18 +17090,30 @@ namespace Api {
     documentId: long;
   }> {
     documentId: long;
+    CONSTRUCTOR_ID: 1219145276;
+    SUBCLASS_OF_ID: 3005295287;
+    className: 'StarGiftAttributeIdModel';
+
     static fromReader(reader: Reader): StarGiftAttributeIdModel;
   }
   export class StarGiftAttributeIdPattern extends VirtualClass<{
     documentId: long;
   }> {
     documentId: long;
+    CONSTRUCTOR_ID: 1242965043;
+    SUBCLASS_OF_ID: 3005295287;
+    className: 'StarGiftAttributeIdPattern';
+
     static fromReader(reader: Reader): StarGiftAttributeIdPattern;
   }
   export class StarGiftAttributeIdBackdrop extends VirtualClass<{
     backdropId: int;
   }> {
     backdropId: int;
+    CONSTRUCTOR_ID: 520210263;
+    SUBCLASS_OF_ID: 3005295287;
+    className: 'StarGiftAttributeIdBackdrop';
+
     static fromReader(reader: Reader): StarGiftAttributeIdBackdrop;
   }
   export class StarGiftAttributeCounter extends VirtualClass<{
@@ -17079,6 +17122,10 @@ namespace Api {
   }> {
     attribute: Api.TypeStarGiftAttributeId;
     count: int;
+    CONSTRUCTOR_ID: 783398488;
+    SUBCLASS_OF_ID: 2351477395;
+    className: 'StarGiftAttributeCounter';
+
     static fromReader(reader: Reader): StarGiftAttributeCounter;
   }
   export class PendingSuggestion extends VirtualClass<{
@@ -17091,6 +17138,10 @@ namespace Api {
     title: Api.TypeTextWithEntities;
     description: Api.TypeTextWithEntities;
     url: string;
+    CONSTRUCTOR_ID: 3890753042;
+    SUBCLASS_OF_ID: 3126949031;
+    className: 'PendingSuggestion';
+
     static fromReader(reader: Reader): PendingSuggestion;
   }
   export class ResPQ extends VirtualClass<{
@@ -19899,9 +19950,10 @@ namespace Api {
       customPendingSuggestion?: Api.TypePendingSuggestion;
       chats: Api.TypeChat[];
       users: Api.TypeUser[];
-      CONSTRUCTOR_ID: 2352576831;
+      CONSTRUCTOR_ID: 145021050;
       SUBCLASS_OF_ID: 2639877442;
       className: 'PromoData';
+
       static fromReader(reader: Reader): PromoData;
     }
     export class CountryCode extends VirtualClass<{
@@ -21081,6 +21133,10 @@ namespace Api {
       chats: Api.TypeChat[];
       counters?: Api.TypeStarGiftAttributeCounter[];
       users: Api.TypeUser[];
+      CONSTRUCTOR_ID: 2491028191;
+      SUBCLASS_OF_ID: 3000743907;
+      className: 'ResaleStarGifts';
+
       static fromReader(reader: Reader): ResaleStarGifts;
     }
   }
@@ -21696,6 +21752,10 @@ namespace Api {
       countRemains: int;
     }> {
       countRemains: int;
+      CONSTRUCTOR_ID: 3280453710;
+      SUBCLASS_OF_ID: 3411255960;
+      className: 'CanSendStoryCount';
+
       static fromReader(reader: Reader): CanSendStoryCount;
     }
   }
