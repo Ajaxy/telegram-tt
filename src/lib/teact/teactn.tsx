@@ -295,11 +295,13 @@ function activateContainer(container: Container, global: GlobalState, props: Pro
   }
 
   return activationFn(global, props, (stickTo: any) => {
-    if (stickTo && !stuckTo) {
+    if (stuckTo) {
+      return stuckTo === stickTo;
+    } else if (stickTo !== undefined) {
       container.stuckTo = stickTo;
     }
 
-    return stickTo && (!stuckTo || stuckTo === stickTo);
+    return true;
   });
 }
 
