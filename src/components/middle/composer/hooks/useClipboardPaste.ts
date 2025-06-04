@@ -14,7 +14,7 @@ import buildAttachment from '../helpers/buildAttachment';
 import { preparePastedHtml } from '../helpers/cleanHtml';
 import getFilesFromDataTransferItems from '../helpers/getFilesFromDataTransferItems';
 
-import useOldLang from '../../../../hooks/useOldLang';
+import useLang from '../../../../hooks/useLang';
 
 const TYPE_HTML = 'text/html';
 const DOCUMENT_TYPE_WORD = 'urn:schemas-microsoft-com:office:word';
@@ -33,7 +33,7 @@ const useClipboardPaste = (
   onCustomEmojiStripped?: VoidFunction,
 ) => {
   const { showNotification } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   useEffect(() => {
     if (!isActive) {
@@ -104,15 +104,24 @@ const useClipboardPaste = (
       const isUploadingDocumentSticker = isUploadingFileSticker(newAttachments[0]);
       const isInAlbum = editedMessage && editedMessage?.groupedId;
 
+      if (editedMessage && newAttachments?.length > 1) {
+        showNotification({
+          message: lang('MediaReplaceInvalidError', undefined, { pluralValue: newAttachments.length }),
+        });
+        return;
+      }
+
       if (editedMessage && isUploadingDocumentSticker) {
-        showNotification({ message: lang(isInAlbum ? 'lng_edit_media_album_error' : 'lng_edit_media_invalid_file') });
+        showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: 1 }) });
         return;
       }
 
       if (isInAlbum) {
         shouldSetAttachments = canReplace;
         if (!shouldSetAttachments) {
-          showNotification({ message: lang('lng_edit_media_album_error') });
+          showNotification({
+            message: lang('MediaReplaceInvalidError', undefined, { pluralValue: newAttachments.length }),
+          });
           return;
         }
       }

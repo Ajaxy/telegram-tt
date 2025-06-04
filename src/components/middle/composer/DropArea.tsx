@@ -10,8 +10,8 @@ import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import buildAttachment from './helpers/buildAttachment';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
@@ -39,12 +39,11 @@ const DROP_LEAVE_TIMEOUT_MS = 150;
 const DropArea: FC<OwnProps> = ({
   isOpen, withQuick, onHide, onFileSelect, editingMessage,
 }) => {
-  const lang = useOldLang();
+  const lang = useLang();
   const { showNotification } = getActions();
   const hideTimeoutRef = useRef<number>();
   const prevWithQuick = usePreviousDeprecated(withQuick);
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen);
-  const isInAlbum = editingMessage && editingMessage?.groupedId;
 
   useEffect(() => (isOpen ? captureEscKeyListener(onHide) : undefined), [isOpen, onHide]);
 
@@ -56,15 +55,24 @@ const DropArea: FC<OwnProps> = ({
       files = files.concat(Array.from(dt.files));
     } else if (dt.items && dt.items.length > 0) {
       const folderFiles = await getFilesFromDataTransferItems(dt.items);
-      const newAttachment = folderFiles && await buildAttachment(folderFiles[0].name, folderFiles[0]);
-      const canReplace = editingMessage && newAttachment && canReplaceMessageMedia(editingMessage, newAttachment);
-
-      if (canReplace) {
-        showNotification({ message: lang(isInAlbum ? 'lng_edit_media_album_error' : 'lng_edit_media_invalid_file') });
-        return;
-      }
       if (folderFiles?.length) {
         files = files.concat(folderFiles);
+      }
+    }
+
+    if (editingMessage) {
+      if (files.length > 1) {
+        showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: files.length }) });
+        return;
+      }
+
+      if (files.length === 1) {
+        const newAttachment = await buildAttachment(files[0].name, files[0]);
+        const canReplace = editingMessage && newAttachment && canReplaceMessageMedia(editingMessage, newAttachment);
+        if (!canReplace) {
+          showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: files.length }) });
+          return;
+        }
       }
     }
 
@@ -72,12 +80,28 @@ const DropArea: FC<OwnProps> = ({
     onFileSelect(files, withQuick ? false : undefined);
   });
 
-  const handleQuickFilesDrop = useLastCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleQuickFilesDrop = useLastCallback(async (e: React.DragEvent<HTMLDivElement>) => {
     const { dataTransfer: dt } = e;
 
     if (dt.files && dt.files.length > 0) {
+      const files = Array.from(dt.files);
+      if (editingMessage) {
+        if (files.length > 1) {
+          showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: files.length }) });
+          return;
+        }
+        if (files.length === 1) {
+          const newAttachment = await buildAttachment(files[0].name, files[0]);
+          const canReplace = editingMessage && newAttachment && canReplaceMessageMedia(editingMessage, newAttachment);
+          if (!canReplace) {
+            showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: files.length }) });
+            return;
+          }
+        }
+      }
+
       onHide();
-      onFileSelect(Array.from(dt.files), true);
+      onFileSelect(files, true);
     }
   });
 

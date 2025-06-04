@@ -7,8 +7,8 @@ import { canReplaceMessageMedia, getAttachmentMediaType } from '../../../../glob
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import buildAttachment from '../helpers/buildAttachment';
 
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 export default function useAttachmentModal({
   attachments,
@@ -35,7 +35,7 @@ export default function useAttachmentModal({
   insertNextText: VoidFunction;
   editedMessage: ApiMessage | undefined;
 }) {
-  const lang = useOldLang();
+  const lang = useLang();
   const { openLimitReachedModal, showAllowedMessageTypesNotification, showNotification } = getActions();
   const [shouldForceAsFile, setShouldForceAsFile] = useState<boolean>(false);
   const [shouldForceCompression, setShouldForceCompression] = useState<boolean>(false);
@@ -92,7 +92,7 @@ export default function useAttachmentModal({
         if (canReplace) {
           handleSetAttachments([newAttachment]);
         } else {
-          showNotification({ message: lang('lng_edit_media_album_error') });
+          showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: files.length }) });
         }
       } else {
         handleSetAttachments([newAttachment]);
@@ -114,7 +114,7 @@ export default function useAttachmentModal({
         if (canReplace) {
           handleSetAttachments([newAttachment]);
         } else {
-          showNotification({ message: lang('lng_edit_media_album_error') });
+          showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: files.length }) });
         }
       } else {
         handleSetAttachments([newAttachment]);

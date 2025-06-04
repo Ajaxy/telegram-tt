@@ -2497,6 +2497,7 @@ export interface LangPairPlural {
   'DeleteForMeChatHint': undefined;
   'DeleteForEveryoneHint': undefined;
   'PreviewDraggingAddItems': undefined;
+  'MediaReplaceInvalidError': undefined;
 }
 
 export interface LangPairPluralWithVariables<V = LangVariable> {

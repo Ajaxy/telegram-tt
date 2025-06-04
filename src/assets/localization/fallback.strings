@@ -1318,6 +1318,8 @@
 "FileDropZoneTitle" = "Drop files here to send them";
 "FileDropZoneQuick" = "in a quick way";
 "FileDropZoneNoCompression" = "without compression";
+"MediaReplaceInvalidError_one" = "This media cannot be replaced with the selected file";
+"MediaReplaceInvalidError_other" = "This media cannot be replaced with the selected files";
 "GifPickerBlocked" = "Sending GIFs is not allowed in this chat";
 "GifPickerEmpty" = "No saved GIFs";
 "AriaCancelPollCreation" = "Cancel poll creation";
