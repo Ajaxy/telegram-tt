@@ -7,23 +7,22 @@ body {
   margin: 0;
 
   font-family: 'Arial', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   color: #222222;
 
   background-color: white;
-
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
   min-width: 200px;
   max-width: 330px;
   padding: 40px 40px 16px 40px;
+  border-radius: 10px;
 
   text-align: center;
 
   background-color: rgba(255, 255, 255, 0.95);
-  border-radius: 10px;
 }
 
 .logo-container {
@@ -55,21 +54,18 @@ body {
 
 .container h1 {
   margin-bottom: 10px;
-
   font-size: 24px;
 }
 
 .select-model {
   margin-top: 36px;
   margin-bottom: 16px;
-
   color: #444444;
 }
 
 .info {
   margin-top: 28px;
   margin-bottom: 36px;
-
   line-height: 1.25rem;
   color: #444444;
 }
@@ -100,13 +96,13 @@ body {
 
   margin: 10px;
   padding: 8px 20px;
+  border-radius: 5px;
 
   font-size: 16px;
   color: #FFF;
   text-decoration: none;
 
   background-color: #007BFF;
-  border-radius: 5px;
 
   transition: background-color 150ms;
 }
@@ -117,7 +113,6 @@ body {
 
 .download-btn.single {
   display: block;
-
   margin: 32px 0;
 }
 
@@ -128,7 +123,6 @@ body {
 
 .footer a {
   display: inline-block;
-
   color: #A9A9A9;
 }
 
