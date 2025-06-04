@@ -319,7 +319,8 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     const isChat = chat && (isChatChannel(chat) || message.senderId === message.chatId);
 
     // TODO[forums] Support ApiChat
-    const senderName = getMessageSenderName(oldTranslate, chat.id, isChat ? messageSenderChat : messageSenderUser);
+    const sender = isChat ? messageSenderChat : messageSenderUser;
+    const senderName = sender ? getMessageSenderName(oldTranslate, chat.id, sender) : undefined;
     let summary = jsxToHtml(<span><MessageSummary message={message} /></span>)[0].textContent || '';
 
     if (hasReaction) {

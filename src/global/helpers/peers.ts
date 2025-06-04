@@ -3,6 +3,7 @@ import type { OldLangFn } from '../../hooks/useOldLang';
 import type { CustomPeer } from '../../types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
+import { isUserId } from '../../util/entities/ids';
 import { getTranslationFn, type LangFn } from '../../util/localization';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { selectChat, selectPeer, selectUser } from '../selectors';
@@ -110,10 +111,9 @@ export function getPeerFullTitle(lang: OldLangFn | LangFn, peer: ApiPeer | Custo
   return isApiPeerUser(peer) ? getUserFullName(peer) : getChatTitle(lang, peer);
 }
 
-export function getMessageSenderName(lang: OldLangFn, chatId: string, sender?: ApiPeer) {
-  if (!sender) {
-    return undefined;
-  }
+export function getMessageSenderName(lang: OldLangFn, chatId: string, sender: ApiPeer) {
+  // Hide sender name for private chats
+  if (isUserId(chatId)) return undefined;
 
   if (isApiPeerChat(sender)) {
     if (chatId === sender.id) return undefined;
@@ -125,5 +125,5 @@ export function getMessageSenderName(lang: OldLangFn, chatId: string, sender?: A
     return lang('FromYou');
   }
 
-  return getUserFirstOrLastName(sender);
+  return getPeerTitle(lang, sender);
 }

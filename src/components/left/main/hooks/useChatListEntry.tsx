@@ -116,7 +116,9 @@ export default function useChatListEntry({
       return undefined;
     }
 
-    const senderName = getMessageSenderName(oldLang, chatId, lastMessageSender);
+    const senderName = lastMessageSender
+      ? getMessageSenderName(oldLang, chatId, lastMessageSender)
+      : undefined;
 
     return (
       <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>

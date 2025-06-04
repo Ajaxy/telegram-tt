@@ -44,7 +44,7 @@ const MiddleSearchResult = ({
 
   const peer = shouldShowChat ? messageChat : senderPeer;
 
-  const senderName = shouldShowChat ? getMessageSenderName(lang, message.chatId, senderPeer) : undefined;
+  const senderName = shouldShowChat && senderPeer ? getMessageSenderName(lang, message.chatId, senderPeer) : undefined;
 
   const handleClick = useLastCallback(() => {
     onClick(message);
