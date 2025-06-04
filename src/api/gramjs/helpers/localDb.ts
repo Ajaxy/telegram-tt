@@ -119,7 +119,7 @@ export function addDocumentToLocalDb(document: GramJs.TypeDocument) {
 export function addStoryRepairInfo<T extends GramJs.TypeDocument | GramJs.TypeWebDocument | GramJs.TypePhoto>(
   media: T, peerId: string, story: GramJs.TypeStoryItem,
 ): T & RepairInfo {
-  if (!(media instanceof GramJs.Document && media instanceof GramJs.Photo)) return media;
+  if (!(media instanceof GramJs.Document || media instanceof GramJs.Photo)) return media;
   const repairableMedia = media as T & RepairInfo;
   repairableMedia.localRepairInfo = {
     type: 'story',

@@ -97,7 +97,7 @@ function StoryPreview({
 export default memo(withGlobal<OwnProps>((global, { peer }): StateProps => {
   const {
     storyViewer: {
-      lastViewedByPeerIds,
+      lastViewedByPeerId: lastViewedByPeerIds,
       origin,
       storyList,
     },

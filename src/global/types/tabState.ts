@@ -303,7 +303,7 @@ export type TabState = {
     isArchive?: boolean;
     // Last viewed story id in current view session.
     // Used for better switch animation between peers.
-    lastViewedByPeerIds?: Record<string, number>;
+    lastViewedByPeerId?: Record<string, number>;
     isPrivacyModalOpen?: boolean;
     isPaymentConfirmDialogOpen?: boolean;
     isStealthModalOpen?: boolean;

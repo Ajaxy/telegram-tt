@@ -47,10 +47,9 @@ function checkStoryExpiration() {
   Object.values(global.stories.byPeerId).forEach((peerStories) => {
     const stories = Object.values(peerStories.byId);
     stories.forEach((story) => {
-      if (!('expireDate' in story)) return;
+      if (story['@type'] !== 'story') return;
       if (story.expireDate > serverTime) return;
-      if ('isInProfile' in story && story.isInProfile) return;
-      if ('isPublic' in story && !story.isPublic) return;
+      if (story.isInProfile) return;
 
       global = removePeerStory(global, story.peerId, story.id);
     });

@@ -200,8 +200,8 @@ export function updateLastViewedStoryForPeer<T extends GlobalState>(
   return updateTabState(global, {
     storyViewer: {
       ...storyViewer,
-      lastViewedByPeerIds: {
-        ...storyViewer.lastViewedByPeerIds,
+      lastViewedByPeerId: {
+        ...storyViewer.lastViewedByPeerId,
         [peerId]: lastViewedId,
       },
     },
@@ -313,7 +313,7 @@ export function removePeerStory<T extends GlobalState>(
   });
 
   Object.values(global.byTabId).forEach((tab) => {
-    if (tab.storyViewer.lastViewedByPeerIds?.[peerId] === storyId) {
+    if (tab.storyViewer.lastViewedByPeerId && tab.storyViewer.lastViewedByPeerId[peerId] === storyId) {
       global = updateLastViewedStoryForPeer(global, peerId, previousStoryId, tab.id);
     }
   });

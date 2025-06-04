@@ -97,7 +97,7 @@ addActionHandler('closeStoryViewer', (global, actions, payload): ActionReturnTyp
       isMuted,
       isRibbonShown,
       isArchivedRibbonShown,
-      lastViewedByPeerIds: undefined,
+      lastViewedByPeerId: undefined,
       storyList: undefined,
     },
   }, tabId);

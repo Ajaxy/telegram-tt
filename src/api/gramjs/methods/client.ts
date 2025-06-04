@@ -489,7 +489,6 @@ export async function repairFileReference({
   url: string;
 }) {
   const parsed = parseMediaUrl(url);
-
   if (!parsed) return undefined;
 
   const {

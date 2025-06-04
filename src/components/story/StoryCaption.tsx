@@ -65,21 +65,22 @@ function StoryCaption({
     canExpand, undefined, true, 'slow', true,
   );
 
+  // Setup gradient to clip caption before button
   useLayoutEffect(() => {
     requestMeasure(() => {
-      if (!showMoreButtonRef.current) {
+      const container = contentRef.current;
+      const button = showMoreButtonRef.current;
+      if (!container || !button) {
         return;
       }
-
-      const button = showMoreButtonRef.current;
 
       const { offsetWidth } = button;
 
       requestMutation(() => {
-        button.style.setProperty('--expand-button-width', `${offsetWidth}px`);
+        container.style.setProperty('--expand-button-width', `${offsetWidth}px`);
       });
     });
-  }, []);
+  }, [shouldRenderShowMore, lang]);
 
   useLayoutEffect(() => {
     requestForcedReflow(() => {
