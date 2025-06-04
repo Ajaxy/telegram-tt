@@ -28,6 +28,10 @@ export interface ElectronApi {
   openNewWindow: (url: string, title?: string) => Promise<void>;
   setWindowTitle: (title?: string) => Promise<void>;
   setWindowButtonsPosition: (position: WindowButtonsPosition) => Promise<void>;
+  /**
+   * @deprecated Use `setWindowButtonsPosition` instead
+   */
+  setTrafficLightPosition: (position: WindowButtonsPosition) => Promise<void>;
   setIsAutoUpdateEnabled: (value: boolean) => Promise<void>;
   getIsAutoUpdateEnabled: () => Promise<boolean>;
   setIsTrayIconEnabled: (value: boolean) => Promise<void>;

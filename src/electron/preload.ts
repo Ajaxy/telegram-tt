@@ -12,6 +12,11 @@ const electronApi: ElectronApi = {
   setWindowTitle: (title?: string) => ipcRenderer.invoke(ElectronAction.SET_WINDOW_TITLE, title),
   setWindowButtonsPosition:
     (position: WindowButtonsPosition) => ipcRenderer.invoke(ElectronAction.SET_WINDOW_BUTTONS_POSITION, position),
+  /**
+   * @deprecated Use `setWindowButtonsPosition` instead
+   */
+  setTrafficLightPosition:
+    (position: WindowButtonsPosition) => ipcRenderer.invoke(ElectronAction.SET_WINDOW_BUTTONS_POSITION, position),
   setIsAutoUpdateEnabled: (value: boolean) => ipcRenderer.invoke(ElectronAction.SET_IS_AUTO_UPDATE_ENABLED, value),
   getIsAutoUpdateEnabled: () => ipcRenderer.invoke(ElectronAction.GET_IS_AUTO_UPDATE_ENABLED),
   setIsTrayIconEnabled: (value: boolean) => ipcRenderer.invoke(ElectronAction.SET_IS_TRAY_ICON_ENABLED, value),
