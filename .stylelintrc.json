@@ -14,7 +14,7 @@
     "stylelint-high-performance-animation",
     "stylelint-group-selectors",
     "stylelint-selector-tag-no-without-class",
-    "./dev/wholePixel.mjs"
+    "@mytonwallet/stylelint-whole-pixel"
   ],
   "rules": {
     "property-no-unknown": [

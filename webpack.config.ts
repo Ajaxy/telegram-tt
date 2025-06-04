@@ -1,6 +1,7 @@
 import 'webpack-dev-server';
 import 'dotenv/config';
 
+import WatchFilePlugin from '@mytonwallet/webpack-watch-file-plugin';
 import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
 import { GitRevisionPlugin } from 'git-revision-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -73,9 +74,6 @@ export default function createConfig(
         },
         {
           directory: path.resolve(__dirname, 'node_modules/opus-recorder/dist'),
-        },
-        {
-          directory: path.resolve(__dirname, 'src/lib/webp'),
         },
         {
           directory: path.resolve(__dirname, 'src/lib/rlottie'),
@@ -236,8 +234,26 @@ export default function createConfig(
         saveReportTo: path.resolve('./public/statoscope-report.html'),
         saveStatsTo: path.resolve('./public/build-stats.json'),
         normalizeStats: true,
-        open: 'file',
+        open: false,
         extensions: [new WebpackContextExtension()],
+      }),
+      new WatchFilePlugin({
+        rules: [
+          {
+            files: 'src/assets/localization/fallback.strings',
+            action: 'npm run lang:ts',
+          },
+          {
+            files: 'src/lib/gramjs/tl/static/**/*',
+            action: 'npm run gramjs:tl',
+            sharedAction: true,
+          },
+          {
+            files: 'src/assets/font-icons/*.svg',
+            action: 'npm run icons:build',
+            sharedAction: true,
+          },
+        ],
       }),
     ],
 
