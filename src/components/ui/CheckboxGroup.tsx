@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import type { FC, TeactNode } from '../../lib/teact/teact';
-import React, { memo, useState } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiUser } from '../../api/types';
 
@@ -22,7 +22,7 @@ export type IRadioOption = {
 type OwnProps = {
   id?: string;
   options: IRadioOption[];
-  selected?: string[];
+  selected: string[];
   disabled?: boolean;
   nestedCheckbox?: boolean;
   loadingOptions?: string[];
@@ -42,14 +42,12 @@ const CheckboxGroup: FC<OwnProps> = ({
   onChange,
   className,
 }) => {
-  const [values, setValues] = useState<string[]>(selected || []);
-
   const handleChange = useLastCallback((event: ChangeEvent<HTMLInputElement>, nestedOptionList?: IRadioOption) => {
     const { value, checked } = event.currentTarget;
     let newValues: string[];
 
     if (checked) {
-      newValues = [...values, value];
+      newValues = [...selected, value];
       if (nestedOptionList && value) {
         newValues.push(nestedOptionList.value);
       }
@@ -61,7 +59,7 @@ const CheckboxGroup: FC<OwnProps> = ({
         });
       }
     } else {
-      newValues = values.filter((v) => v !== value);
+      newValues = selected.filter((v) => v !== value);
       if (nestedOptionList && value === nestedOptionList.value) {
         nestedOptionList.nestedOptions?.forEach((nestedOption) => {
           newValues = newValues.filter((v) => v !== nestedOption.value);
@@ -74,12 +72,10 @@ const CheckboxGroup: FC<OwnProps> = ({
         }
       }
     }
-
-    setValues(newValues);
     onChange(newValues);
   });
   const getCheckedNestedCount = useLastCallback((nestedOptions: IRadioOption[]) => {
-    const checkedCount = nestedOptions?.filter((nestedOption) => values.includes(nestedOption.value)).length;
+    const checkedCount = nestedOptions?.filter((nestedOption) => selected.includes(nestedOption.value)).length;
     return checkedCount > 0 ? checkedCount : nestedOptions.length;
   });
 
@@ -98,7 +94,7 @@ const CheckboxGroup: FC<OwnProps> = ({
             nestedCheckbox={nestedCheckbox}
             nestedCheckboxCount={getCheckedNestedCount(option.nestedOptions ?? [])}
             nestedOptionList={option}
-            values={values}
+            values={selected}
             isRound={isRound}
           />
         );

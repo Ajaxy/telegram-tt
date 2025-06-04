@@ -276,6 +276,7 @@ const Poll: FC<OwnProps> = ({
             ? (
               <CheckboxGroup
                 options={answers}
+                selected={chosenOptions}
                 onChange={handleCheckboxChange}
                 disabled={message.isScheduled || isSubmitting}
                 loadingOptions={isSubmitting ? chosenOptions : undefined}

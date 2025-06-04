@@ -116,9 +116,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     permissions, havePermissionChanged, handlePermissionChange, resetPermissions,
   } = useManagePermissions(chat?.defaultBannedRights);
 
-  const [peerIdsToDeleteAll, setPeerIdsToDeleteAll] = useState<string[] | undefined>(undefined);
-  const [peerIdsToBan, setPeerIdsToBan] = useState<string[] | undefined>(undefined);
-  const [peerIdsToReportSpam, setPeerIdsToReportSpam] = useState<string[] | undefined>(undefined);
+  const [peerIdsToDeleteAll, setPeerIdsToDeleteAll] = useState<string[]>([]);
+  const [peerIdsToBan, setPeerIdsToBan] = useState<string[]>([]);
+  const [peerIdsToReportSpam, setPeerIdsToReportSpam] = useState<string[]>([]);
   const [isMediaDropdownOpen, setIsMediaDropdownOpen] = useState(false);
   const [isAdditionalOptionsVisible, setIsAdditionalOptionsVisible] = useState(false);
   const [shouldDeleteForAll, setShouldDeleteForAll] = useState(true);
@@ -330,9 +330,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (!isOpen && prevIsOpen) {
-      setPeerIdsToReportSpam(undefined);
-      setPeerIdsToDeleteAll(undefined);
-      setPeerIdsToBan(undefined);
+      setPeerIdsToReportSpam([]);
+      setPeerIdsToDeleteAll([]);
+      setPeerIdsToBan([]);
       setShouldDeleteForAll(true);
       setIsMediaDropdownOpen(false);
       setIsAdditionalOptionsVisible(false);
