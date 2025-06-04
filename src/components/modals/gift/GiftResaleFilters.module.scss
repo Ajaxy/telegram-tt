@@ -99,15 +99,15 @@
   max-height: 20rem;
 }
 
-:global(.MenuItem) {
-  :global(.icon) {
-    color: var(--color-text);
-  }
-}
-
 .menu {
   :global(.bubble) {
     top: 2.25rem !important;
+  }
+
+  :global(.MenuItem) {
+    :global(.icon) {
+      color: var(--color-text);
+    }
   }
 
   &.left {
