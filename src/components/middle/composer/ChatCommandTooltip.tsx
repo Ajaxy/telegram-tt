@@ -9,6 +9,7 @@ import type {
 } from '../../../api/types';
 import type { Signal } from '../../../util/signals';
 
+import { getMainUsername } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import freezeWhenClosed from '../../../util/hoc/freezeWhenClosed';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
@@ -63,7 +64,7 @@ const ChatCommandTooltip: FC<OwnProps> = ({
     const bot = usersById[botId];
 
     sendBotCommand({
-      command: `/${command}${withUsername && bot ? `@${bot.usernames![0].username}` : ''}`,
+      command: `/${command}${withUsername && bot ? `@${getMainUsername(bot)}` : ''}`,
     });
     onClick();
   });

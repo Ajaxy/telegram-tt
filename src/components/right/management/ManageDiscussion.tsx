@@ -8,7 +8,7 @@ import type { ApiChat } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { STICKER_SIZE_DISCUSSION_GROUPS } from '../../../config';
-import { isChatChannel } from '../../../global/helpers';
+import { isChatChannel, isChatPublic } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import renderText from '../../common/helpers/renderText';
@@ -152,7 +152,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
     const linkedGroup = chatsByIds[linkedGroupId];
     if (!linkedGroup) return undefined;
 
-    if (linkedGroup.hasPrivateLink) {
+    if (isChatPublic(linkedGroup)) {
       return renderText(
         `Do you want to make **${linkedGroup.title}** the discussion board for **${chat!.title}**?`,
         ['br', 'simple_markdown'],

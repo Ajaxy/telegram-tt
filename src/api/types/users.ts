@@ -20,6 +20,7 @@ export interface ApiUser {
   lastName?: string;
   noStatus?: boolean;
   usernames?: ApiUsername[];
+  hasUsername?: boolean;
   phoneNumber: string;
   accessHash?: string;
   hasVideoAvatar?: boolean;

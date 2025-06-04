@@ -9,6 +9,7 @@ import {
   TME_LINK_PREFIX,
 } from '../../../config';
 import {
+  getMainUsername,
   getMessageInvoice, getMessageText, isChatChannel,
 } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
@@ -386,10 +387,9 @@ const ActionMessageText = ({
         if (isAttachMenu) return lang('ActionAttachMenuBotAllowed');
         if (isFromRequest) return lang('ActionWebappBotAllowed');
         if (app) {
-          const link = sender?.usernames?.length
-            && `${TME_LINK_PREFIX + sender.usernames[0].username}/${app.shortName}`;
+          const senderUsername = sender && getMainUsername(sender);
+          const link = senderUsername && `${TME_LINK_PREFIX + senderUsername}/${app.shortName}`;
           const appLink = link
-
             ? <Link onClick={() => openTelegramLink({ url: link })}>{app.title}</Link>
             : lang('ActionBotAppPlaceholder');
           return lang('ActionBotAllowedFromApp', { app: appLink }, { withNodes: true });

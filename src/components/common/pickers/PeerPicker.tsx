@@ -7,7 +7,7 @@ import type { CustomPeerType, UniqueCustomPeer } from '../../../types';
 
 import { DEBUG } from '../../../config';
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
-import { getGroupStatus, getUserStatus, isUserOnline } from '../../../global/helpers';
+import { getGroupStatus, getMainUsername, getUserStatus, isUserOnline } from '../../../global/helpers';
 import { getPeerTypeKey, isApiPeerChat } from '../../../global/helpers/peers';
 import { selectPeer, selectUserStatus } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
@@ -279,7 +279,7 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
       if (!peer) return undefined;
 
       if (withPeerUsernames) {
-        const username = peer.usernames?.[0]?.username;
+        const username = getMainUsername(peer);
         if (username) {
           return [`@${username}`];
         }

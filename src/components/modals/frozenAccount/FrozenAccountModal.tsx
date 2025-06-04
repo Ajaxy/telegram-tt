@@ -3,6 +3,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { TabState } from '../../../global/types';
 
+import { getMainUsername } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';
 import { formatDateToString } from '../../../util/dates/dateFormat';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
@@ -130,9 +131,8 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const freezeUntilDate = global.appConfig?.freezeUntilDate;
     const freezeAppealUrl = global.appConfig?.freezeAppealUrl;
-    const botFreezeAppealId = global.botFreezeAppealId;
-    const botFreezeAppealUsername = botFreezeAppealId
-      ? selectUser(global, botFreezeAppealId)?.usernames?.[0]?.username : undefined;
+    const botFreezeAppeal = global.botFreezeAppealId ? selectUser(global, global.botFreezeAppealId) : undefined;
+    const botFreezeAppealUsername = botFreezeAppeal && getMainUsername(botFreezeAppeal);
 
     return {
       freezeUntilDate,

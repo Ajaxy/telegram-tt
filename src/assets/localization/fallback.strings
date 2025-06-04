@@ -1304,6 +1304,7 @@
 "ComposerSilentPostingEnabledTootlip" = "Subscribers will receive a silent notification.";
 "ComposerSilentPostingDisabledTootlip" = "Subscribers will be notified when you post.";
 "ComposerPlaceholder" = "Message";
+"ComposerPlaceholderAnonymous" = "Send anonymously";
 "ComposerPlaceholderBroadcast" = "Broadcast";
 "ComposerPlaceholderBroadcastSilent" = "Silent Broadcast";
 "ComposerPlaceholderTopic" = "Message in {topic}";

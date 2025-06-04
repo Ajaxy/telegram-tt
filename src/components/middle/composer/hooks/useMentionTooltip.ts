@@ -102,7 +102,7 @@ export default function useMentionTooltip(
     forceFocus = false,
     insertAtEnd = false,
   ) => {
-    if (!peer.usernames && !getPeerTitle(lang, peer)) {
+    if (!peer.hasUsername && !getPeerTitle(lang, peer)) {
       return;
     }
 

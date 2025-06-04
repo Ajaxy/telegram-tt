@@ -52,67 +52,77 @@ function buildApiChatFieldsFromPeerEntity(
   peerEntity: Entity,
   isSupport = false,
 ): PeerEntityApiChatFields {
+  const user = peerEntity instanceof GramJs.User ? peerEntity : undefined;
+  const channel = peerEntity instanceof GramJs.Channel ? peerEntity : undefined;
+
+  const userOrChannel = user || channel;
+
+  // Shared fields
   const isMin = Boolean('min' in peerEntity && peerEntity.min);
   const accessHash = ('accessHash' in peerEntity) ? String(peerEntity.accessHash) : undefined;
   const hasVideoAvatar = 'photo' in peerEntity && peerEntity.photo && 'hasVideo' in peerEntity.photo
     && peerEntity.photo.hasVideo;
   const avatarPhotoId = ('photo' in peerEntity) && peerEntity.photo ? buildAvatarPhotoId(peerEntity.photo) : undefined;
-  const areSignaturesShown = Boolean('signatures' in peerEntity && peerEntity.signatures);
-  const hasPrivateLink = Boolean('hasLink' in peerEntity && peerEntity.hasLink);
-  const isScam = Boolean('scam' in peerEntity && peerEntity.scam);
-  const isFake = Boolean('fake' in peerEntity && peerEntity.fake);
-  const isJoinToSend = Boolean('joinToSend' in peerEntity && peerEntity.joinToSend);
-  const isJoinRequest = Boolean('joinRequest' in peerEntity && peerEntity.joinRequest);
+  const hasUsername = Boolean('username' in peerEntity && peerEntity.username);
+
   const usernames = buildApiUsernames(peerEntity);
-  const isForum = Boolean('forum' in peerEntity && peerEntity.forum);
-  const areStoriesHidden = Boolean('storiesHidden' in peerEntity && peerEntity.storiesHidden);
-  const maxStoryId = 'storiesMaxId' in peerEntity ? peerEntity.storiesMaxId : undefined;
-  const botVerificationIconId = 'botVerificationIcon' in peerEntity
-    ? peerEntity.botVerificationIcon?.toString() : undefined;
-  const storiesUnavailable = Boolean('storiesUnavailable' in peerEntity && peerEntity.storiesUnavailable);
-  const color = ('color' in peerEntity && peerEntity.color) ? buildApiPeerColor(peerEntity.color) : undefined;
-  const emojiStatus = ('emojiStatus' in peerEntity && peerEntity.emojiStatus)
-    ? buildApiEmojiStatus(peerEntity.emojiStatus) : undefined;
-  const boostLevel = ('level' in peerEntity) ? peerEntity.level : undefined;
-  const areProfilesShown = Boolean('signatureProfiles' in peerEntity && peerEntity.signatureProfiles);
-  const subscriptionUntil = 'subscriptionUntilDate' in peerEntity ? peerEntity.subscriptionUntilDate : undefined;
-  const paidMessagesStars = 'sendPaidMessagesStars' in peerEntity ? peerEntity.sendPaidMessagesStars : undefined;
+
+  // Chat and channel shared fields
+  const isCallActive = 'callActive' in peerEntity && peerEntity.callActive;
+  const isCallNotEmpty = 'callNotEmpty' in peerEntity && peerEntity.callNotEmpty;
+  const creationDate = 'date' in peerEntity ? peerEntity.date : undefined;
+  const membersCount = 'participantsCount' in peerEntity ? peerEntity.participantsCount : undefined;
+  const isProtected = 'noforwards' in peerEntity && peerEntity.noforwards;
+  const isCreator = 'creator' in peerEntity && peerEntity.creator;
+
+  // User and channel shared fields
+  const isScam = userOrChannel?.scam;
+  const isFake = userOrChannel?.fake;
+  const areStoriesHidden = userOrChannel?.storiesHidden;
+  const maxStoryId = userOrChannel?.storiesMaxId;
+  const botVerificationIconId = userOrChannel?.botVerificationIcon?.toString();
+  const storiesUnavailable = userOrChannel?.storiesUnavailable;
+  const color = userOrChannel?.color ? buildApiPeerColor(userOrChannel.color) : undefined;
+  const emojiStatus = userOrChannel?.emojiStatus ? buildApiEmojiStatus(userOrChannel.emojiStatus) : undefined;
+  const paidMessagesStars = userOrChannel?.sendPaidMessagesStars;
+  const isVerified = userOrChannel?.verified;
 
   return {
     isMin,
-    hasPrivateLink,
-    areSignaturesShown,
-    areProfilesShown,
+    isLinkedInDiscussion: channel?.hasLink,
+    areSignaturesShown: channel?.signatures,
+    areProfilesShown: channel?.signatureProfiles,
     usernames,
     accessHash,
     hasVideoAvatar,
     avatarPhotoId,
-    ...('verified' in peerEntity && { isVerified: peerEntity.verified }),
-    ...('callActive' in peerEntity && { isCallActive: peerEntity.callActive }),
-    ...('callNotEmpty' in peerEntity && { isCallNotEmpty: peerEntity.callNotEmpty }),
-    ...('date' in peerEntity && { creationDate: peerEntity.date }),
-    ...('participantsCount' in peerEntity && peerEntity.participantsCount !== undefined && {
-      membersCount: peerEntity.participantsCount,
-    }),
-    ...('noforwards' in peerEntity && { isProtected: Boolean(peerEntity.noforwards) }),
+    isVerified,
+    isCallActive,
+    isCallNotEmpty,
+    creationDate,
+    hasUsername,
+    ...(membersCount !== undefined && { membersCount }),
+    isProtected,
     isSupport: isSupport || undefined,
-    ...buildApiChatPermissions(peerEntity),
-    ...('creator' in peerEntity && { isCreator: peerEntity.creator }),
-    ...buildApiChatRestrictions(peerEntity),
-    ...buildApiChatMigrationInfo(peerEntity),
+    isCreator,
     fakeType: isScam ? 'scam' : (isFake ? 'fake' : undefined),
     color,
-    isJoinToSend,
-    isJoinRequest,
-    isForum,
+    isJoinToSend: channel?.joinToSend,
+    isJoinRequest: channel?.joinRequest,
+    isForum: channel?.forum,
     areStoriesHidden,
     maxStoryId,
     hasStories: Boolean(maxStoryId) && !storiesUnavailable,
     emojiStatus,
-    boostLevel,
+    boostLevel: channel?.level,
     botVerificationIconId,
-    subscriptionUntil,
+    hasGeo: channel?.hasGeo,
+    subscriptionUntil: channel?.subscriptionUntilDate,
     paidMessagesStars: paidMessagesStars?.toJSNumber(),
+
+    ...buildApiChatPermissions(peerEntity),
+    ...buildApiChatRestrictions(peerEntity),
+    ...buildApiChatMigrationInfo(peerEntity),
   };
 }
 

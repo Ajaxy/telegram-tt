@@ -36,6 +36,7 @@ import {
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatShareText, processDeepLink } from '../../../util/deeplink';
 import { isDeepLink } from '../../../util/deepLinkParser';
+import { isUserId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getOrderedIds } from '../../../util/folderManager';
 import {
@@ -562,6 +563,30 @@ addActionHandler('loadFullChat', (global, actions, payload): ActionReturnType =>
   } else {
     runDebouncedForLoadFullChat(loadChat);
   }
+});
+
+addActionHandler('invalidateFullInfo', (global, actions, payload): ActionReturnType => {
+  const { peerId } = payload;
+
+  const isUser = isUserId(peerId);
+
+  if (isUser) {
+    return {
+      ...global,
+      users: {
+        ...global.users,
+        fullInfoById: omit(global.users.fullInfoById, [peerId]),
+      },
+    };
+  }
+
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      fullInfoById: omit(global.chats.fullInfoById, [peerId]),
+    },
+  };
 });
 
 addActionHandler('loadTopChats', (): ActionReturnType => {

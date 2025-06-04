@@ -1112,6 +1112,7 @@ export interface LangPair {
   'ComposerSilentPostingEnabledTootlip': undefined;
   'ComposerSilentPostingDisabledTootlip': undefined;
   'ComposerPlaceholder': undefined;
+  'ComposerPlaceholderAnonymous': undefined;
   'ComposerPlaceholderBroadcast': undefined;
   'ComposerPlaceholderBroadcastSilent': undefined;
   'ComposerPlaceholderTopicGeneral': undefined;

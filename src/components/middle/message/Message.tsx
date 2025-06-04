@@ -47,6 +47,7 @@ import { EMOJI_STATUS_LOOP_LIMIT, MESSAGE_APPEARANCE_DELAY } from '../../../conf
 import {
   areReactionsEmpty,
   getIsDownloading,
+  getMainUsername,
   getMessageContent,
   getMessageCustomShape,
   getMessageDownloadableMedia,
@@ -1499,7 +1500,7 @@ const Message: FC<OwnProps & StateProps> = ({
     const senderIsPremium = senderPeer && 'isPremium' in senderPeer && senderPeer.isPremium;
 
     const shouldRenderForwardAvatar = asForwarded && senderPeer;
-    const hasBotSenderUsername = botSender?.usernames?.length;
+    const hasBotSenderUsername = botSender?.hasUsername;
     return (
       <div className="message-title" dir="ltr">
         {(senderTitle || asForwarded) ? (
@@ -1543,14 +1544,14 @@ const Message: FC<OwnProps & StateProps> = ({
         ) : !botSender ? (
           NBSP
         ) : undefined}
-        {Boolean(botSender?.usernames?.length) && (
+        {botSender?.hasUsername && (
           <span className="interactive">
             <span className="via">{lang('ViaBot')}</span>
             <span
               className="sender-title"
               onClick={handleViaBotClick}
             >
-              {renderText(`@${botSender.usernames[0].username}`)}
+              {renderText(`@${getMainUsername(botSender)}`)}
             </span>
           </span>
         )}

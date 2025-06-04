@@ -216,7 +216,7 @@ function Story({
     isLoadedStory
     && story.isPublic
     && !isChangelog
-    && peer?.usernames?.length,
+    && peer?.hasUsername,
   );
 
   const canShare = Boolean(

@@ -1,4 +1,4 @@
-import type { ApiMessage, ApiUpdateChat } from '../../../api/types';
+import type { ApiChat, ApiMessage, ApiUpdateChat } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
@@ -43,6 +43,10 @@ import {
 } from '../../selectors';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
+const INVALIDATE_FULL_CHAT_FIELDS = new Set<keyof ApiChat>([
+  'boostLevel', 'isForum', 'isLinkedInDiscussion', 'fakeType', 'restrictionReason', 'isJoinToSend', 'isJoinRequest',
+  'type',
+]);
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
@@ -92,6 +96,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           actions.openChat({ id: currentChatId, tabId });
         }
       });
+
+      if (localChat) {
+        const chatUpdate = update.chat;
+        const changedFields = (Object.keys(chatUpdate) as (keyof ApiChat)[])
+          .filter((key) => localChat[key] !== chatUpdate[key]);
+        if (changedFields.some((key) => INVALIDATE_FULL_CHAT_FIELDS.has(key))) {
+          actions.invalidateFullInfo({ peerId: update.id });
+        }
+      }
 
       return undefined;
     }

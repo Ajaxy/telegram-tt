@@ -27,6 +27,7 @@ import { debounce } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
+import { getMainUsername } from '../../helpers';
 import {
   getWebAppKey,
 } from '../../helpers/bots';
@@ -377,7 +378,7 @@ addActionHandler('switchBotInline', (global, actions, payload): ActionReturnType
 
   actions.openChatWithDraft({
     text: {
-      text: `@${botSender.usernames![0].username} ${query}`,
+      text: `@${getMainUsername(botSender)} ${query}`,
     },
     chatId: isSamePeer ? chat.id : undefined,
     filter,

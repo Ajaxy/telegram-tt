@@ -14,6 +14,7 @@ import {
   getHasAdminRight,
   getPrivateChatUserId,
   isChatChannel,
+  isChatPublic,
   isChatSuperGroup,
   isHistoryClearMessage,
   isUserBot,
@@ -256,7 +257,7 @@ export function selectCanInviteToChat<T extends GlobalState>(global: T, chatId: 
   // https://github.com/TelegramMessenger/Telegram-iOS/blob/5126be83b3b9578fb014eb52ca553da9e7a8b83a/submodules/TelegramCore/Sources/TelegramEngine/Peers/Communities.swift#L6
   return !chat.migratedTo && Boolean(!isUserId(chatId) && ((isChatChannel(chat) || isChatSuperGroup(chat)) ? (
     chat.isCreator || getHasAdminRight(chat, 'inviteUsers')
-    || (chat.usernames?.length && !chat.isJoinRequest)
+    || (isChatPublic(chat) && !chat.isJoinRequest)
   ) : (chat.isCreator || getHasAdminRight(chat, 'inviteUsers'))));
 }
 

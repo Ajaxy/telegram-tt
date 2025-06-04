@@ -29,12 +29,14 @@ export interface ApiChat {
   isVerified?: true;
   areSignaturesShown?: boolean;
   areProfilesShown?: boolean;
-  hasPrivateLink?: boolean;
+  isLinkedInDiscussion?: boolean;
+  hasGeo?: boolean;
   accessHash?: string;
   isMin?: boolean;
   hasVideoAvatar?: boolean;
   avatarPhotoId?: string;
   usernames?: ApiUsername[];
+  hasUsername?: boolean;
   membersCount?: number;
   creationDate?: number;
   isSupport?: true;

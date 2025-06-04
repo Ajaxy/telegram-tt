@@ -328,7 +328,7 @@ export function getFolderDescriptionText(lang: OldLangFn, folder: ApiChatFolder,
 }
 
 export function isChatPublic(chat: ApiChat) {
-  return chat.usernames?.some(({ isActive }) => isActive);
+  return chat.hasUsername;
 }
 
 export function getOrderedTopics(

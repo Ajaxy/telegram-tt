@@ -1154,6 +1154,9 @@ export interface ActionPayloads {
     withPhotos?: boolean;
     force?: boolean;
   };
+  invalidateFullInfo: {
+    peerId: string;
+  };
   updateChatPhoto: {
     chatId: string;
     photo: ApiPhoto;

@@ -100,9 +100,9 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   const primaryInvite = exportedInvites?.find(({ isPermanent }) => isPermanent);
   const primaryInviteLink = chatMainUsername ? `${TME_LINK_PREFIX}${chatMainUsername}` : primaryInvite?.link;
   const temporalInvites = useMemo(() => {
-    const invites = chat?.usernames ? exportedInvites : exportedInvites?.filter(({ isPermanent }) => !isPermanent);
+    const invites = chat?.hasUsername ? exportedInvites : exportedInvites?.filter(({ isPermanent }) => !isPermanent);
     return invites?.sort(inviteComparator);
-  }, [chat?.usernames, exportedInvites]);
+  }, [chat?.hasUsername, exportedInvites]);
 
   const editInvite = (invite: ApiExportedInvite) => {
     setEditingExportedInvite({ chatId, invite });
