@@ -140,6 +140,7 @@
     "idb-keyval": "^6.2.2",
     "lowlight": "^3.3.0",
     "mp4box": "^0.5.4",
+    "music-metadata": "^11.2.3",
     "opus-recorder": "github:Ajaxy/opus-recorder",
     "os-browserify": "^0.3.0",
     "pako": "^2.1.0",
