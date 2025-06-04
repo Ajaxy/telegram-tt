@@ -213,7 +213,29 @@ if (IS_PROGRESSIVE_SUPPORTED) {
       return;
     }
 
-    const result = await callApi('downloadMedia', { mediaFormat: ApiMediaFormat.Progressive, ...params });
+    async function downloadWithRetry(retryNumber = 0) {
+      const result = await callApi('downloadMedia', { mediaFormat: ApiMediaFormat.Progressive, ...params });
+      if (!result) {
+        if (retryNumber >= MAX_MEDIA_RETRIES) {
+          if (DEBUG) {
+            // eslint-disable-next-line no-console
+            console.warn(`Failed to download media part after ${MAX_MEDIA_RETRIES} retries:`, params.url);
+          }
+          return undefined;
+        }
+        await new Promise((resolve) => {
+          setTimeout(resolve, getRetryTimeout(retryNumber));
+        });
+        if (DEBUG) {
+          // eslint-disable-next-line no-console
+          console.debug(`Retrying to download media part ${params.url}, attempt ${retryNumber + 1}`);
+        }
+        return downloadWithRetry(retryNumber + 1);
+      }
+      return result;
+    }
+
+    const result = await downloadWithRetry();
     if (!result) {
       return;
     }
