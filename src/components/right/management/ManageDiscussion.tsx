@@ -15,7 +15,7 @@ import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLastCallback from '../../../hooks/useLastCallback.ts';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
@@ -154,14 +154,14 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
 
     if (isChatPublic(linkedGroup)) {
       return renderText(
-        `Do you want to make **${linkedGroup.title}** the discussion board for **${chat!.title}**?`,
+        `Do you want to make **${linkedGroup.title}** the discussion board for **${chat?.title}**?`,
         ['br', 'simple_markdown'],
       );
     }
 
     return renderText(
       // eslint-disable-next-line @stylistic/max-len
-      `Do you want to make **${linkedGroup.title}** the discussion board for **${chat!.title}**?\n\nAnyone from the channel will be able to see messages in this group.`,
+      `Do you want to make **${linkedGroup.title}** the discussion board for **${chat?.title}**?\n\nAnyone from the channel will be able to see messages in this group.`,
       ['br', 'simple_markdown'],
     );
   }
@@ -169,12 +169,14 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   function renderLinkedGroup() {
     return (
       <div>
-        <ListItem
-          className="chat-item-clickable"
-          inactive
-        >
-          <GroupChatInfo chatId={linkedChat!.id} />
-        </ListItem>
+        {linkedChat && (
+          <ListItem
+            className="chat-item-clickable"
+            inactive
+          >
+            <GroupChatInfo chatId={linkedChat.id} />
+          </ListItem>
+        )}
         <ListItem
           icon="delete"
           ripple
@@ -188,7 +190,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
           onClose={closeConfirmUnlinkGroupDialog}
           header={renderUnlinkGroupHeader()}
           textParts={renderText(
-            lang(isChannel ? 'DiscussionUnlinkChannelAlert' : 'DiscussionUnlinkGroupAlert', linkedChat!.title),
+            lang(isChannel ? 'DiscussionUnlinkChannelAlert' : 'DiscussionUnlinkGroupAlert', linkedChat?.title),
             ['br', 'simple_markdown'],
           )}
           confirmLabel={lang(isChannel ? 'DiscussionUnlinkGroup' : 'DiscussionUnlinkChannel')}

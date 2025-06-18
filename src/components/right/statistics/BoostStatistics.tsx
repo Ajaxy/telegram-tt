@@ -226,8 +226,7 @@ const BoostStatistics = ({
 
     return (
       <ListItem
-        className="chat-item-clickable"
-
+        className={buildClassName(styles.boostInfo, 'chat-item-clickable')}
         onClick={() => handleBoosterClick(boost.userId)}
       >
         <PrivateChatInfo

@@ -2984,6 +2984,19 @@ addActionHandler('updatePaidMessagesPrice', async (global, actions, payload): Pr
   setGlobal(global);
 });
 
+addActionHandler('toggleAutoTranslation', async (global, actions, payload): Promise<void> => {
+  const { chatId, isEnabled } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('toggleAutoTranslation', { chat, isEnabled });
+  if (!result) return;
+
+  global = getGlobal();
+  global = updateChat(global, chatId, { hasAutoTranslation: isEnabled || undefined });
+  setGlobal(global);
+});
+
 addActionHandler('resolveBusinessChatLink', async (global, actions, payload): Promise<void> => {
   const { slug, tabId = getCurrentTabId() } = payload;
   const result = await callApi('resolveBusinessChatLink', { slug });

@@ -283,6 +283,9 @@ export function selectShouldDetectChatLanguage<T extends GlobalState>(
 ) {
   const chat = selectChat(global, chatId);
   if (!chat) return false;
+
+  if (chat.hasAutoTranslation) return true;
+
   const { canTranslateChats } = global.settings.byKey;
 
   const isPremium = selectIsCurrentUserPremium(global);

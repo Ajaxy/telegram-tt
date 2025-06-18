@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import {
-  memo, useMemo, useRef, useState,
+  memo, useCallback, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -123,8 +123,8 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   language,
   detectedChatLanguage,
   doNotTranslate,
-  onTopicSearch,
   isAccountFrozen,
+  onTopicSearch,
 }) => {
   const {
     joinChannel,
@@ -239,7 +239,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     handleSearchClick();
   });
 
-  const getTextWithLanguage = useLastCallback((langKey: string, langCode: string) => {
+  const getTextWithLanguage = useCallback((langKey: string, langCode: string) => {
     const simplified = langCode.split('-')[0];
     const translationKey = `TranslateLanguage${simplified.toUpperCase()}`;
     const name = lang(translationKey);
@@ -250,7 +250,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     const translatedNames = new Intl.DisplayNames([language], { type: 'language' });
     const translatedName = translatedNames.of(langCode)!;
     return lang(`${langKey}Other`, translatedName);
-  });
+  }, [language, lang]);
 
   const buttonText = useMemo(() => {
     if (isTranslating) return lang('ShowOriginalButton');

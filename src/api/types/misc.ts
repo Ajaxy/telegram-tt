@@ -235,6 +235,7 @@ export interface ApiAppConfig {
   bandwidthPremiumUploadSpeedup?: number;
   bandwidthPremiumDownloadSpeedup?: number;
   channelRestrictAdsLevelMin?: number;
+  channelAutoTranslationLevelMin?: number;
   paidReactionMaxAmount?: number;
   isChannelRevenueWithdrawalEnabled?: boolean;
   isStarsGiftEnabled?: boolean;

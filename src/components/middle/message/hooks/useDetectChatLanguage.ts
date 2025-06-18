@@ -30,13 +30,25 @@ export default function useDetectChatLanguage(
     if (isDisabled || (getIsReady && !getIsReady())) return;
 
     const isTranslatable = Boolean(message.content.text?.text.length);
-    processMessageMetadata(message.chatId, message.id, isTranslatable, detectedLanguage);
+    processMessageMetadata({
+      chatId: message.chatId,
+      id: message.id,
+      isTranslatable,
+      detectedLanguage,
+    });
   }, [message, detectedLanguage, isDisabled, getIsReady]);
 }
 
 const throttledMakeChatDecision = throttle(makeChatDecision, THROTTLE_DELAY);
 
-function processMessageMetadata(chatId: string, id: number, isTranslatable: boolean, detectedLanguage?: string) {
+function processMessageMetadata({
+  chatId, id, isTranslatable, detectedLanguage,
+}: {
+  chatId: string;
+  id: number;
+  isTranslatable: boolean;
+  detectedLanguage?: string;
+}) {
   const chatStats = CHAT_STATS.get(chatId) || new LimitedMap<number, MessageMetadata>(MESSAGES_LIMIT);
 
   const previousMetadata = chatStats.get(id);
@@ -90,7 +102,7 @@ function makeChatDecision(chatId: string) {
   }
 
   const translatableRatio = translatableCount / messagesChecked;
-  const detectableRatio = detectableCount / messagesChecked;
+  const detectableRatio = detectableCount / translatableCount;
 
   if (translatableRatio < MIN_TRANSLATABLE_RATIO || detectableRatio < MIN_DETECTABLE_RATIO) {
     return;

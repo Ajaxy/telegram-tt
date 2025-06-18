@@ -1,7 +1,7 @@
 import type { ChangeEvent } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import {
-  memo, useCallback, useEffect, useMemo, useState,
+  memo, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -11,12 +11,13 @@ import type {
 import { ApiMediaFormat } from '../../../api/types';
 import { ManagementProgress, ManagementScreens } from '../../../types';
 
-import { getChatAvatarHash, getHasAdminRight, isChatPublic } from '../../../global/helpers';
+import { getChatAvatarHash, getHasAdminRight, isChatChannel, isChatPublic } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
 import { formatInteger } from '../../../util/textFormat';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -27,6 +28,7 @@ import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
 import ListItem from '../../ui/ListItem';
 import Spinner from '../../ui/Spinner';
+import Switcher from '../../ui/Switcher';
 import TextArea from '../../ui/TextArea';
 
 import './Management.scss';
@@ -46,6 +48,8 @@ type StateProps = {
   canInvite?: boolean;
   exportedInvites?: ApiExportedInvite[];
   availableReactions?: ApiAvailableReaction[];
+  hasAutoTranslation?: boolean;
+  canToggleAutoTranslation?: boolean;
 };
 
 const CHANNEL_TITLE_EMPTY = 'Channel title can\'t be empty';
@@ -63,6 +67,8 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   availableReactions,
   onScreenSelect,
   onClose,
+  hasAutoTranslation,
+  canToggleAutoTranslation,
 }) => {
   const {
     updateChat,
@@ -72,6 +78,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     openChat,
     loadExportedChatInvites,
     loadChatJoinRequests,
+    toggleAutoTranslation,
   } = getActions();
 
   const currentTitle = chat?.title || '';
@@ -87,6 +94,12 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   const imageHash = chat && getChatAvatarHash(chat);
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
   const lang = useOldLang();
+
+  const hasAutoTranslationAvailable = chat && isChatChannel(chat);
+
+  const handleAutoTranslationChange = useLastCallback(() => {
+    toggleAutoTranslation({ chatId, isEnabled: !hasAutoTranslation });
+  });
 
   useHistoryBack({
     isActive,
@@ -112,46 +125,46 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   }, [chatFullInfo?.adminMembersById]);
   const removedUsersCount = chatFullInfo?.kickedMembers?.length || 0;
 
-  const handleClickEditType = useCallback(() => {
+  const handleClickEditType = useLastCallback(() => {
     onScreenSelect(ManagementScreens.ChatPrivacyType);
-  }, [onScreenSelect]);
+  });
 
-  const handleClickDiscussion = useCallback(() => {
+  const handleClickDiscussion = useLastCallback(() => {
     onScreenSelect(ManagementScreens.Discussion);
-  }, [onScreenSelect]);
+  });
 
-  const handleClickReactions = useCallback(() => {
+  const handleClickReactions = useLastCallback(() => {
     onScreenSelect(ManagementScreens.Reactions);
-  }, [onScreenSelect]);
+  });
 
-  const handleClickAdministrators = useCallback(() => {
+  const handleClickAdministrators = useLastCallback(() => {
     onScreenSelect(ManagementScreens.ChatAdministrators);
-  }, [onScreenSelect]);
+  });
 
-  const handleClickInvites = useCallback(() => {
+  const handleClickInvites = useLastCallback(() => {
     onScreenSelect(ManagementScreens.Invites);
-  }, [onScreenSelect]);
+  });
 
-  const handleClickRequests = useCallback(() => {
+  const handleClickRequests = useLastCallback(() => {
     onScreenSelect(ManagementScreens.JoinRequests);
-  }, [onScreenSelect]);
+  });
 
-  const handleSetPhoto = useCallback((file: File) => {
+  const handleSetPhoto = useLastCallback((file: File) => {
     setPhoto(file);
     setIsProfileFieldsTouched(true);
-  }, []);
+  });
 
-  const handleTitleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleTitleChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
     setIsProfileFieldsTouched(true);
-  }, []);
+  });
 
-  const handleAboutChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleAboutChange = useLastCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setAbout(e.target.value);
     setIsProfileFieldsTouched(true);
-  }, []);
+  });
 
-  const handleUpdateChannel = useCallback(() => {
+  const handleUpdateChannel = useLastCallback(() => {
     const trimmedTitle = title.trim();
     const trimmedAbout = about.trim();
 
@@ -166,17 +179,17 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
       about: trimmedAbout,
       photo,
     });
-  }, [about, chatId, photo, title, updateChat]);
+  });
 
-  const handleClickSubscribers = useCallback(() => {
+  const handleClickSubscribers = useLastCallback(() => {
     onScreenSelect(ManagementScreens.ChannelSubscribers);
-  }, [onScreenSelect]);
+  });
 
-  const handleRemovedUsersClick = useCallback(() => {
+  const handleRemovedUsersClick = useLastCallback(() => {
     onScreenSelect(ManagementScreens.ChannelRemovedUsers);
-  }, [onScreenSelect]);
+  });
 
-  const handleDeleteChannel = useCallback(() => {
+  const handleDeleteChannel = useLastCallback(() => {
     if (chat.isCreator) {
       deleteChannel({ chatId: chat.id });
     } else {
@@ -186,7 +199,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     closeDeleteDialog();
     closeManagement();
     openChat({ id: undefined });
-  }, [chat.isCreator, chat.id, closeDeleteDialog, closeManagement, leaveChannel, deleteChannel, openChat]);
+  });
 
   const chatReactionsDescription = useMemo(() => {
     if (!chatFullInfo?.enabledReactions) {
@@ -290,6 +303,22 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
               {chatReactionsDescription}
             </span>
           </ListItem>
+          {hasAutoTranslationAvailable && (
+            <ListItem
+              icon="language"
+              narrow
+              ripple
+              disabled={!canToggleAutoTranslation}
+              onClick={handleAutoTranslationChange}
+            >
+              <span>{lang('AutomaticTranslation')}</span>
+              <Switcher
+                id="auto-translation"
+                label={lang('AutomaticTranslation')}
+                checked={hasAutoTranslation}
+              />
+            </ListItem>
+          )}
         </div>
         <div className="section">
           <ListItem
@@ -353,7 +382,11 @@ export default memo(withGlobal<OwnProps>(
     const { management } = selectTabState(global);
     const { progress } = management;
     const { invites } = management.byChatId[chatId] || {};
-
+    const minLevelToToggleAutoTranslation = global.appConfig?.channelAutoTranslationLevelMin;
+    const hasAutoTranslation = chat?.hasAutoTranslation;
+    const chatBoostLevel = chat?.level;
+    const canToggleAutoTranslation = chatBoostLevel && minLevelToToggleAutoTranslation
+      ? chatBoostLevel >= minLevelToToggleAutoTranslation : false;
     return {
       chat,
       chatFullInfo: selectChatFullInfo(global, chatId),
@@ -362,6 +395,8 @@ export default memo(withGlobal<OwnProps>(
       canInvite: getHasAdminRight(chat, 'inviteUsers'),
       exportedInvites: invites,
       availableReactions: global.reactions.availableReactions,
+      hasAutoTranslation,
+      canToggleAutoTranslation,
     };
   },
   (global, { chatId }) => {

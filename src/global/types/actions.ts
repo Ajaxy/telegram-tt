@@ -1081,6 +1081,10 @@ export interface ActionPayloads {
     chatId: string;
     paidMessagesStars: number;
   } & WithTabId;
+  toggleAutoTranslation: {
+    chatId: string;
+    isEnabled: boolean;
+  } & WithTabId;
 
   updateChat: {
     chatId: string;

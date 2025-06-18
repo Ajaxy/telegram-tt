@@ -747,7 +747,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const detectedLanguage = useTextLanguage(
     text?.text,
-    !(areTranslationsEnabled || shouldDetectChatLanguage),
+    !(areTranslationsEnabled && shouldDetectChatLanguage),
     getIsMessageListReady,
   );
   useDetectChatLanguage(message, detectedLanguage, !shouldDetectChatLanguage, getIsMessageListReady);

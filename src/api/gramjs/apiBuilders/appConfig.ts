@@ -94,6 +94,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   freeze_since_date?: number;
   freeze_until_date?: number;
   freeze_appeal_url?: string;
+  channel_autotranslation_level_min?: number;
   stars_stargift_resale_amount_max?: number;
   stars_stargift_resale_amount_min?: number;
   stars_stargift_resale_commission_permille?: number;
@@ -182,6 +183,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     bandwidthPremiumUploadSpeedup: appConfig.upload_premium_speedup_upload,
     bandwidthPremiumDownloadSpeedup: appConfig.upload_premium_speedup_download,
     channelRestrictAdsLevelMin: appConfig.channel_restrict_sponsored_level_min,
+    channelAutoTranslationLevelMin: appConfig.channel_autotranslation_level_min,
     paidReactionMaxAmount: appConfig.stars_paid_reaction_amount_max,
     isChannelRevenueWithdrawalEnabled: appConfig.channel_revenue_withdrawal_enabled,
     isStarsGiftEnabled: appConfig.stars_gifts_enabled,

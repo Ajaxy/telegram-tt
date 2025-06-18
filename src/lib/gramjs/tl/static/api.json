@@ -280,6 +280,7 @@
     "channels.searchPosts",
     "channels.reportSpam",
     "channels.updatePaidMessagesPrice",
+    "channels.toggleAutotranslation",
     "bots.getBotRecommendations",
     "bots.canSendMessage",
     "bots.allowSendMessage",

@@ -119,6 +119,8 @@ function buildApiChatFieldsFromPeerEntity(
     hasGeo: channel?.hasGeo,
     subscriptionUntil: channel?.subscriptionUntilDate,
     paidMessagesStars: paidMessagesStars?.toJSNumber(),
+    level: channel?.level,
+    hasAutoTranslation: channel?.autotranslation,
 
     ...buildApiChatPermissions(peerEntity),
     ...buildApiChatRestrictions(peerEntity),

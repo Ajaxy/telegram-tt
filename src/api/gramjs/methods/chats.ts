@@ -2087,3 +2087,16 @@ export async function fetchSponsoredPeer({ query }: { query: string }) {
   if (!result || result instanceof GramJs.contacts.SponsoredPeersEmpty) return undefined;
   return buildApiSponsoredPeer(result.peers[0]);
 }
+
+export function toggleAutoTranslation({
+  chat, isEnabled,
+}: {
+  chat: ApiChat; isEnabled: boolean;
+}) {
+  return invokeRequest(new GramJs.channels.ToggleAutotranslation({
+    channel: buildInputChannel(chat.id, chat.accessHash),
+    enabled: isEnabled,
+  }), {
+    shouldReturnTrue: true,
+  });
+}

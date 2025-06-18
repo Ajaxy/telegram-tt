@@ -1530,6 +1530,7 @@ export interface LangPair {
   'ValueGiftSortByNumber': undefined;
   'ResellGiftsNoFound': undefined;
   'ResellGiftsClearFilters': undefined;
+  'AutomaticTranslation': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -1772,6 +1773,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'VoipPeerIncompatible': {
     'user': V;
+  };
+  'NewDiscussionChatTitle': {
+    'name': V;
   };
   'LastSeenTodayAt': {
     'time': V;
@@ -2170,6 +2174,9 @@ export interface LangPairWithVariables<V = LangVariable> {
     'from': V;
     'title': V;
   };
+  'ActionCreatedChatYou': {
+    'title': V;
+  };
   'ActionPaymentDone': {
     'amount': V;
     'user': V;
@@ -2488,9 +2495,6 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ComposerTitleForwardFrom': {
     'users': V;
   };
-  'NewDiscussionChatTitle': {
-    'name': V;
-  }
 }
 
 export interface LangPairPlural {

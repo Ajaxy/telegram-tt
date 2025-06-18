@@ -49,6 +49,8 @@ export interface ApiChat {
   isForumAsMessages?: true;
   boostLevel?: number;
   botVerificationIconId?: string;
+  hasAutoTranslation?: true;
+  level?: number;
 
   // Calls
   isCallActive?: boolean;

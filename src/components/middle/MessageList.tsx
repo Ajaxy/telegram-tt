@@ -32,6 +32,7 @@ import {
 } from '../../global/helpers';
 import {
   selectBot,
+  selectCanTranslateChat,
   selectChat,
   selectChatFullInfo,
   selectChatLastMessage,
@@ -52,6 +53,7 @@ import {
   selectTabState,
   selectThreadInfo,
   selectTopic,
+  selectTranslationLanguage,
   selectUserFullInfo,
 } from '../../global/selectors';
 import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from '../../util/animateScroll';
@@ -92,13 +94,13 @@ type OwnProps = {
   isComments?: boolean;
   canPost: boolean;
   isReady: boolean;
-  onScrollDownToggle: BooleanToVoidFunction;
-  onNotchToggle: BooleanToVoidFunction;
   withBottomShift?: boolean;
   withDefaultBg: boolean;
-  onIntersectPinnedMessage: OnIntersectPinnedMessage;
   isContactRequirePremium?: boolean;
   paidMessagesStars?: number;
+  onScrollDownToggle: BooleanToVoidFunction;
+  onNotchToggle: BooleanToVoidFunction;
+  onIntersectPinnedMessage: OnIntersectPinnedMessage;
 };
 
 type StateProps = {
@@ -137,6 +139,9 @@ type StateProps = {
   isChatProtected?: boolean;
   hasCustomGreeting?: boolean;
   isAppConfigLoaded?: boolean;
+  canTranslate?: boolean;
+  translationLanguage?: string;
+  shouldAutoTranslate?: boolean;
 };
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 20 * 1000;
@@ -196,16 +201,19 @@ const MessageList: FC<OwnProps & StateProps> = ({
   areAdsEnabled,
   channelJoinInfo,
   isChatProtected,
-  onIntersectPinnedMessage,
-  onScrollDownToggle,
-  onNotchToggle,
   isAccountFrozen,
   hasCustomGreeting,
   isAppConfigLoaded,
+  canTranslate,
+  translationLanguage,
+  shouldAutoTranslate,
+  onIntersectPinnedMessage,
+  onScrollDownToggle,
+  onNotchToggle,
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
-    loadMessageViews, loadPeerStoriesByIds, loadFactChecks,
+    loadMessageViews, loadPeerStoriesByIds, loadFactChecks, requestChatTranslation,
   } = getActions();
 
   const containerRef = useRef<HTMLDivElement>();
@@ -267,6 +275,12 @@ const MessageList: FC<OwnProps & StateProps> = ({
   useSyncEffect(() => {
     memoFocusingIdRef.current = focusingId;
   }, [focusingId]);
+
+  // Enable auto translation for the chat if it's available
+  useEffect(() => {
+    if (!shouldAutoTranslate || !canTranslate) return;
+    requestChatTranslation({ chatId, toLanguageCode: translationLanguage });
+  }, [shouldAutoTranslate, canTranslate, translationLanguage, chatId]);
 
   useNativeCopySelectedMessages(copyMessagesByIds);
 
@@ -806,6 +820,10 @@ export default memo(withGlobal<OwnProps>(
     const hasCustomGreeting = Boolean(userFullInfo?.businessIntro);
     const isAppConfigLoaded = global.isAppConfigLoaded;
 
+    const canTranslate = selectCanTranslateChat(global, chatId) && !chatFullInfo?.isTranslationDisabled;
+    const shouldAutoTranslate = chat?.hasAutoTranslation;
+    const translationLanguage = selectTranslationLanguage(global);
+
     return {
       areAdsEnabled,
       isChatLoaded: true,
@@ -842,6 +860,9 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       hasCustomGreeting,
       isAppConfigLoaded,
+      canTranslate,
+      translationLanguage,
+      shouldAutoTranslate,
     };
   },
 )(MessageList));
