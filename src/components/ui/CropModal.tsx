@@ -1,75 +1,14 @@
-import type { FC } from '../../lib/teact/teact';
 import {
-  memo, useCallback, useEffect, useState,
+  memo,
 } from '../../lib/teact/teact';
 
-import { DEBUG } from '../../config';
-import { blobToDataUri, blobToFile } from '../../util/files';
-
+import useImageLoader from '../../hooks/useImageLoader';
 import useLang from '../../hooks/useLang';
 
-import Icon from '../common/icons/Icon';
-import Button from './Button';
-import Loading from './Loading';
+import ImageCropper from './ImageCropper';
 import Modal from './Modal';
 
 import './CropModal.scss';
-
-// Change to 'base64' to get base64-encoded string
-const cropperResultOptions: Croppie.ResultOptions & { type: 'blob' } = {
-  type: 'blob',
-  quality: 1,
-  format: 'jpeg',
-  circle: false,
-  size: { width: 1024, height: 1024 },
-};
-
-type ICroppie = typeof import('croppie');
-let Croppie: ICroppie;
-let croppiePromise: Promise<{ default: ICroppie }> | undefined;
-
-async function ensureCroppie() {
-  if (!croppiePromise) {
-    croppiePromise = import('../../lib/croppie') as unknown as Promise<{ default: ICroppie }>;
-    Croppie = (await croppiePromise).default;
-  }
-
-  return croppiePromise;
-}
-
-let cropper: Croppie;
-
-async function initCropper(imgFile: Blob) {
-  try {
-    const cropContainer = document.getElementById('avatar-crop');
-    if (!cropContainer) {
-      return;
-    }
-
-    const { offsetWidth, offsetHeight } = cropContainer;
-
-    cropper = new Croppie(cropContainer, {
-      enableZoom: true,
-      boundary: {
-        width: offsetWidth,
-        height: offsetHeight,
-      },
-      viewport: {
-        width: offsetWidth - 16,
-        height: offsetHeight - 16,
-        type: 'circle',
-      },
-    });
-
-    const dataUri = await blobToDataUri(imgFile);
-    await cropper.bind({ url: dataUri });
-  } catch (err) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-  }
-}
 
 type OwnProps = {
   file?: Blob;
@@ -77,58 +16,28 @@ type OwnProps = {
   onClose: () => void;
 };
 
-const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
-  const [isCroppieReady, setIsCroppieReady] = useState(false);
+const MAX_OUTPUT_SIZE = 1024;
+const MIN_OUTPUT_SIZE = 256;
 
+const CropModal = ({ file, onChange, onClose }: OwnProps) => {
   const lang = useLang();
-
-  useEffect(() => {
-    if (!file) {
-      return;
-    }
-
-    if (!isCroppieReady) {
-      ensureCroppie().then(() => setIsCroppieReady(true));
-
-      return;
-    }
-
-    initCropper(file);
-  }, [file, isCroppieReady]);
-
-  const handleCropClick = useCallback(async () => {
-    if (!cropper) {
-      return;
-    }
-
-    const result: Blob | string = await cropper.result(cropperResultOptions);
-    const croppedImg = typeof result === 'string' ? result : blobToFile(result, 'avatar.jpg');
-
-    onChange(croppedImg);
-  }, [onChange]);
-
+  const { image } = useImageLoader(file);
+  const isOpen = Boolean(file) && Boolean(image);
   return (
     <Modal
-      isOpen={Boolean(file)}
+      isOpen={isOpen}
       onClose={onClose}
       title={lang('CropperTitle')}
       className="CropModal"
       hasCloseButton
+      isCondensedHeader
     >
-      {isCroppieReady ? (
-        <div id="avatar-crop" />
-      ) : (
-        <Loading />
-      )}
-      <Button
-        className="confirm-button"
-        round
-        color="primary"
-        onClick={handleCropClick}
-        ariaLabel={lang('CropperApply')}
-      >
-        <Icon name="check" />
-      </Button>
+      <ImageCropper
+        onChange={onChange}
+        image={image}
+        maxOutputSize={MAX_OUTPUT_SIZE}
+        minOutputSize={MIN_OUTPUT_SIZE}
+      />
     </Modal>
   );
 };

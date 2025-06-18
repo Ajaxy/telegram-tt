@@ -49,6 +49,7 @@ export type OwnProps = {
   onCloseAnimationEnd?: () => void;
   onEnter?: () => void;
   withBalanceBar?: boolean;
+  isCondensedHeader?: boolean;
 };
 
 const Modal: FC<OwnProps> = ({
@@ -74,6 +75,7 @@ const Modal: FC<OwnProps> = ({
   onCloseAnimationEnd,
   onEnter,
   withBalanceBar,
+  isCondensedHeader,
 }) => {
   const {
     ref: modalRef,
@@ -158,7 +160,7 @@ const Modal: FC<OwnProps> = ({
     }
 
     return (
-      <div className={buildClassName('modal-header', headerClassName)}>
+      <div className={buildClassName('modal-header', headerClassName, isCondensedHeader && 'modal-header-condensed')}>
         {withCloseButton && closeButton}
         <div className="modal-title">{title}</div>
       </div>
