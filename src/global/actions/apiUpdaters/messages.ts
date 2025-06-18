@@ -1088,6 +1088,11 @@ function updateChatLastMessage<T extends GlobalState>(
     });
   }
 
+  const threadId = selectThreadIdFromMessage(global, message);
+  global = updateThreadInfo(global, chatId, threadId, {
+    lastMessageId: message.id,
+  });
+
   const savedDialogId = selectSavedDialogIdFromMessage(global, message);
   if (savedDialogId) {
     global = updateChatLastMessageId(global, savedDialogId, message.id, 'saved');

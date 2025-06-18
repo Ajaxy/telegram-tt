@@ -138,6 +138,7 @@ import {
   selectSendAs,
   selectTabState,
   selectThreadIdFromMessage,
+  selectThreadInfo,
   selectTopic,
   selectTranslationLanguage,
   selectUser,
@@ -344,7 +345,11 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
   const messageReplyInfo = selectMessageReplyInfo(global, chatId!, threadId!, draftReplyInfo);
 
   const replyInfo = storyReplyInfo || messageReplyInfo;
-  const lastMessageId = selectChatLastMessageId(global, chatId!);
+
+  const threadInfo = selectThreadInfo(global, chatId!, threadId!);
+  const lastMessageId = threadId === MAIN_THREAD_ID
+    ? selectChatLastMessageId(global, chatId!) : threadInfo?.lastMessageId;
+
   const messagePriceInStars = await getPeerStarsForMessage(global, chatId!);
 
   const params: SendMessageParams = {
