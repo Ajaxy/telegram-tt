@@ -77,7 +77,8 @@ const GifSearch: FC<OwnProps & StateProps> = ({
     observe: observeIntersection,
   } = useIntersectionObserver({ rootRef: containerRef, debounceMs: INTERSECTION_DEBOUNCE });
 
-  const canSendGifs = canPostInChat && getAllowedAttachmentOptions(chat, chatFullInfo, isChatWithBot).canSendGifs;
+  const canSendGifs = canPostInChat
+    && getAllowedAttachmentOptions(chat, chatFullInfo, isChatWithBot, isSavedMessages).canSendGifs;
 
   const handleGifClick = useCallback((gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => {
     if (canSendGifs) {

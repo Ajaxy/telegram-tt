@@ -19,6 +19,7 @@ import {
   selectChat,
   selectChatMessages,
   selectChatOnlineCount,
+  selectMonoforumChannel,
   selectThreadInfo,
   selectThreadMessagesCount,
   selectTopic,
@@ -28,6 +29,7 @@ import buildClassName from '../../util/buildClassName';
 import { REM } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
@@ -63,20 +65,21 @@ type OwnProps = {
   withStory?: boolean;
   storyViewerOrigin?: StoryViewerOrigin;
   isSavedDialog?: boolean;
+  withMonoforumStatus?: boolean;
   onClick?: VoidFunction;
   onEmojiStatusClick?: NoneToVoidFunction;
 };
 
-type StateProps =
-  {
-    chat?: ApiChat;
-    threadInfo?: ApiThreadInfo;
-    topic?: ApiTopic;
-    onlineCount?: number;
-    areMessagesLoaded: boolean;
-    messagesCount?: number;
-    self?: ApiUser;
-  };
+type StateProps = {
+  chat?: ApiChat;
+  threadInfo?: ApiThreadInfo;
+  topic?: ApiTopic;
+  onlineCount?: number;
+  areMessagesLoaded: boolean;
+  messagesCount?: number;
+  self?: ApiUser;
+  monoforumChannel?: ApiChat;
+};
 
 const GroupChatInfo: FC<OwnProps & StateProps> = ({
   typingStatus,
@@ -93,7 +96,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   withChatType,
   threadInfo,
   noRtl,
-  chat,
+  chat: realChat,
   onlineCount,
   areMessagesLoaded,
   topic,
@@ -105,6 +108,8 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   emojiStatusSize,
   isSavedDialog,
   self,
+  withMonoforumStatus,
+  monoforumChannel,
   onClick,
   onEmojiStatusClick,
 }) => {
@@ -114,7 +119,10 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
     loadMoreProfilePhotos,
   } = getActions();
 
-  const lang = useOldLang();
+  const chat = !withMonoforumStatus && monoforumChannel ? monoforumChannel : realChat;
+
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const isSuperGroup = chat && isChatSuperGroup(chat);
   const isTopic = Boolean(chat?.isForum && threadInfo && topic);
@@ -148,6 +156,24 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   }
 
   function renderStatusOrTyping() {
+    if (withUpdatingStatus && !areMessagesLoaded && !isRestricted) {
+      return (
+        <DotAnimation className="status" content={oldLang('Updating')} />
+      );
+    }
+
+    if (withMonoforumStatus) {
+      return (
+        <span className="status" dir="auto">
+          {lang('MonoforumStatus')}
+        </span>
+      );
+    }
+
+    if (realChat?.isMonoforum) {
+      return undefined;
+    }
+
     if (status) {
       return withDots ? (
         <DotAnimation className="status" content={status} />
@@ -156,12 +182,6 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
           {statusIcon && <Icon className="status-icon" name={statusIcon} />}
           {renderText(status)}
         </span>
-      );
-    }
-
-    if (withUpdatingStatus && !areMessagesLoaded && !isRestricted) {
-      return (
-        <DotAnimation className="status" content={lang('Updating')} />
       );
     }
 
@@ -182,7 +202,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
             activeKey={messagesCount !== undefined ? 1 : 2}
             className="message-count-transition"
           >
-            {messagesCount !== undefined && lang('messages', messagesCount, 'i')}
+            {messagesCount !== undefined && oldLang('messages', messagesCount, 'i')}
           </Transition>
         </span>
       );
@@ -190,12 +210,12 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
 
     if (withChatType) {
       return (
-        <span className="status" dir="auto">{lang(getChatTypeString(chat))}</span>
+        <span className="status" dir="auto">{oldLang(getChatTypeString(chat))}</span>
       );
     }
 
-    const groupStatus = getGroupStatus(lang, chat);
-    const onlineStatus = onlineCount ? `, ${lang('OnlineCount', onlineCount, 'i')}` : undefined;
+    const groupStatus = getGroupStatus(oldLang, chat);
+    const onlineStatus = onlineCount ? `, ${oldLang('OnlineCount', onlineCount, 'i')}` : undefined;
 
     return (
       <span className="status">
@@ -211,7 +231,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
       className={
         buildClassName('ChatInfo', className)
       }
-      dir={!noRtl && lang.isRtl ? 'rtl' : undefined}
+      dir={!noRtl && oldLang.isRtl ? 'rtl' : undefined}
       onClick={onClick}
     >
       {!noAvatar && !isTopic && (
@@ -231,6 +251,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
             size={avatarSize}
             peer={chat}
             withStory={withStory}
+            asMessageBubble={Boolean(monoforumChannel)}
             storyViewerOrigin={storyViewerOrigin}
             storyViewerMode="single-peer"
             isSavedDialog={isSavedDialog}
@@ -251,6 +272,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
           : (
             <FullNameTitle
               peer={chat}
+              isMonoforum={!withMonoforumStatus && Boolean(monoforumChannel)}
               emojiStatusSize={emojiStatusSize}
               withEmojiStatus={!noEmojiStatus}
               isSavedDialog={isSavedDialog}
@@ -272,6 +294,7 @@ export default memo(withGlobal<OwnProps>(
     const topic = threadId ? selectTopic(global, chatId, threadId) : undefined;
     const messagesCount = topic && selectThreadMessagesCount(global, chatId, threadId!);
     const self = selectUser(global, global.currentUserId!);
+    const monoforumChannel = selectMonoforumChannel(global, chatId);
 
     return {
       chat,
@@ -281,6 +304,7 @@ export default memo(withGlobal<OwnProps>(
       areMessagesLoaded,
       messagesCount,
       self,
+      monoforumChannel,
     };
   },
 )(GroupChatInfo));

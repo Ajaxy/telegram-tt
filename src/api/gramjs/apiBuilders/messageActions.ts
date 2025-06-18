@@ -426,11 +426,12 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
   }
   if (action instanceof GramJs.MessageActionPaidMessagesPrice) {
     const {
-      stars,
+      stars, broadcastMessagesAllowed,
     } = action;
     return {
       mediaType: 'action',
       type: 'paidMessagesPrice',
+      isAllowedInChannel: broadcastMessagesAllowed,
       stars: stars.toJSNumber(),
     };
   }

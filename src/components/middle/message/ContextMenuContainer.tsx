@@ -65,6 +65,7 @@ import {
   selectPollFromMessage,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
+  selectSavedDialogIdFromMessage,
   selectStickerSet,
   selectThreadInfo,
   selectTopic,
@@ -156,6 +157,7 @@ type StateProps = {
   isWithPaidReaction?: boolean;
   userFullName?: string;
   canGift?: boolean;
+  savedDialogId?: string;
 };
 
 const selection = window.getSelection();
@@ -223,6 +225,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   userFullName,
   canGift,
   className,
+  savedDialogId,
   onClose,
   onCloseAnimationEnd,
 }) => {
@@ -416,6 +419,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         replyToMsgId: message.id,
         quoteText,
         quoteOffset: selectionQuoteOffset,
+        monoforumPeerId: savedDialogId,
         replyToPeerId: undefined,
       });
     }
@@ -813,6 +817,7 @@ export default memo(withGlobal<OwnProps>(
     const hasTtl = hasMessageTtl(message);
     const canShowSeenBy = Boolean(!isLocal
       && chat
+      && !chat.isMonoforum
       && !isMessageUnread
       && seenByMaxChatMembers
       && seenByExpiresAt
@@ -848,6 +853,8 @@ export default memo(withGlobal<OwnProps>(
     const story = storyData ? selectPeerStory(global, storyData.peerId, storyData.id) : undefined;
 
     const canGift = selectCanGift(global, message.chatId);
+
+    const savedDialogId = selectSavedDialogIdFromMessage(global, message);
 
     return {
       threadId,
@@ -904,6 +911,7 @@ export default memo(withGlobal<OwnProps>(
       story,
       userFullName,
       canGift,
+      savedDialogId,
     };
   },
 )(ContextMenuContainer));

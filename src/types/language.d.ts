@@ -1509,7 +1509,7 @@ export interface LangPair {
   'FrozenAccountAppealTitle': undefined;
   'ButtonAppeal': undefined;
   'ButtonUnderstood': undefined;
-  'ActionPaidMessageGroupPriceFree': undefined;
+  'ActionPaidMessagePriceFreeYou': undefined;
   'NotificationTitleNotSupportedInFrozenAccount': undefined;
   'NotificationMessageNotSupportedInFrozenAccount': undefined;
   'GiftRibbonSale': undefined;
@@ -1530,6 +1530,10 @@ export interface LangPair {
   'ValueGiftSortByNumber': undefined;
   'ResellGiftsNoFound': undefined;
   'ResellGiftsClearFilters': undefined;
+  'MonoforumBadge': undefined;
+  'MonoforumStatus': undefined;
+  'MonoforumComposerPlaceholder': undefined;
+  'ChannelSendMessage': undefined;
   'AutomaticTranslation': undefined;
 }
 
@@ -2393,8 +2397,12 @@ export interface LangPairWithVariables<V = LangVariable> {
     'percent': V;
     'amount': V;
   };
-  'FirstMessageInPaidMessagesChat': {
-    'user': V;
+  'MessagesPlaceholderPaidUser': {
+    'peer': V;
+    'amount': V;
+  };
+  'MessagesPlaceholderPaidChannel': {
+    'peer': V;
     'amount': V;
   };
   'ComposerPlaceholderPaidMessage': {
@@ -2434,8 +2442,21 @@ export interface LangPairWithVariables<V = LangVariable> {
     'botLink': V;
     'date': V;
   };
-  'ActionPaidMessageGroupPrice': {
-    'stars': V;
+  'ActionPaidMessagePrice': {
+    'peer': V;
+    'amount': V;
+  };
+  'ActionPaidMessagePriceYou': {
+    'amount': V;
+  };
+  'ActionPaidMessagePriceFree': {
+    'peer': V;
+  };
+  'ActionMessageChannelFree': {
+    'peer': V;
+  };
+  'ActionMessageChannelDisabled': {
+    'peer': V;
   };
   'ApiMessageActionPaidMessagesRefundedOutgoing': {
     'stars': V;

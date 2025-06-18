@@ -980,8 +980,8 @@ export async function sendMessageAction({
 }: {
   peer: ApiPeer; threadId?: ThreadId; action: ApiSendMessageAction;
 }) {
-  const gramAction = buildSendMessageAction(action);
-  if (!gramAction) {
+  const mtpAction = buildSendMessageAction(action);
+  if (!mtpAction) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
       console.warn('Unsupported message action', action);
@@ -993,7 +993,7 @@ export async function sendMessageAction({
     const result = await invokeRequest(new GramJs.messages.SetTyping({
       peer: buildInputPeer(peer.id, peer.accessHash),
       topMsgId: Number(threadId),
-      action: gramAction,
+      action: mtpAction,
     }), {
       shouldThrow: true,
       abortControllerChatId: peer.id,

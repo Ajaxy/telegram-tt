@@ -1,6 +1,5 @@
 import type { ChangeEvent } from 'react';
-import type { ElementRef, FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
+import type { ElementRef } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -28,19 +27,25 @@ export type OwnProps = {
   isOpen: boolean;
   shouldBeAnonymous?: boolean;
   isQuiz?: boolean;
+  maxOptionsCount?: number;
   onSend: (pollSummary: ApiNewPoll) => void;
   onClear: () => void;
 };
 
 const MAX_LIST_HEIGHT = 320;
-const MAX_OPTIONS_COUNT = 10;
+const FALLBACK_MAX_OPTIONS_COUNT = 12;
 const MAX_OPTION_LENGTH = 100;
 const MAX_QUESTION_LENGTH = 255;
 const MAX_SOLUTION_LENGTH = 200;
 
-const PollModal: FC<OwnProps> = ({
-  isOpen, isQuiz, shouldBeAnonymous, onSend, onClear,
-}) => {
+const PollModal = ({
+  isOpen,
+  isQuiz,
+  shouldBeAnonymous,
+  maxOptionsCount = FALLBACK_MAX_OPTIONS_COUNT,
+  onSend,
+  onClear,
+}: OwnProps) => {
   const questionInputRef = useRef<HTMLInputElement>();
   const optionsListRef = useRef<HTMLDivElement>();
 
@@ -170,7 +175,7 @@ const PollModal: FC<OwnProps> = ({
   const updateOption = useLastCallback((index: number, text: string) => {
     const newOptions = [...options];
     newOptions[index] = text;
-    if (newOptions[newOptions.length - 1].trim().length && newOptions.length < MAX_OPTIONS_COUNT) {
+    if (newOptions[newOptions.length - 1].trim().length && newOptions.length < maxOptionsCount) {
       addNewOption(newOptions);
     } else {
       setOptions(newOptions);
@@ -265,7 +270,7 @@ const PollModal: FC<OwnProps> = ({
       <div className="option-wrapper">
         <InputText
           maxLength={MAX_OPTION_LENGTH}
-          label={index !== options.length - 1 || options.length === MAX_OPTIONS_COUNT
+          label={index !== options.length - 1 || options.length === maxOptionsCount
             ? lang('OptionHint')
             : lang('CreatePoll.AddOption')}
           error={getOptionsError(index)}

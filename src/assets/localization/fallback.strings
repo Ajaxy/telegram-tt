@@ -1918,7 +1918,8 @@
 "SectionDescriptionStarsForForMessages" = "You will receive {percent} of the selected fee (~{amount}) for each incoming message.";
 "SubtitlePrivacyAddUsers" = "Add Users";
 "PrivacyPaidMessagesValue" = "Paid";
-"FirstMessageInPaidMessagesChat" = "**{user}** charges {amount} for each message.";
+"MessagesPlaceholderPaidUser" = "**{peer}** charges {amount} for each message.";
+"MessagesPlaceholderPaidChannel" = "**{peer}** charges {amount} per message to its admin.";
 "ButtonBuyStars" = "Buy Stars";
 "ComposerPlaceholderPaidMessage" = "Message for {amount}";
 "ComposerPlaceholderPaidReply" = "Reply for {amount}";
@@ -1965,8 +1966,12 @@
 "FrozenAccountAppealSubtitle" = "Appeal via {botLink} before {date} or your account will be deleted.";
 "ButtonAppeal" = "Submit an Appeal";
 "ButtonUnderstood" = "Understood";
-"ActionPaidMessageGroupPrice" = "Messages now cost **{stars}** in this group";
-"ActionPaidMessageGroupPriceFree" = "Messages are now free in this group";
+"ActionPaidMessagePrice" = "{peer} changed price to **{amount}** per message";
+"ActionPaidMessagePriceYou" = "You changed price to **{amount}** per message";
+"ActionPaidMessagePriceFree" = "{peer} made messages free";
+"ActionPaidMessagePriceFreeYou" = "You made messages free";
+"ActionMessageChannelFree" = "{peer} now accepts private messages";
+"ActionMessageChannelDisabled" = "{peer} no longer accepts private messages";
 "ApiMessageActionPaidMessagesRefundedOutgoing" = "You refunded **{stars}** to {user}";
 "ApiMessageActionPaidMessagesRefundedIncoming" = "{user} refunded **{stars}** to you";
 "NotificationTitleNotSupportedInFrozenAccount" = "Your account is frozen";
@@ -2012,4 +2017,8 @@
 "ValueGiftSortByNumber" = "Number";
 "ResellGiftsNoFound" = "No gifts found";
 "ResellGiftsClearFilters" = "Clear Filters";
+"MonoforumBadge" = "DIRECT";
+"MonoforumStatus" = "Channel messages";
+"MonoforumComposerPlaceholder" = "Choose a message to reply";
+"ChannelSendMessage" = "Direct Messages";
 "AutomaticTranslation" = "Automatic Translation";

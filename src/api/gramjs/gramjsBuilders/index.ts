@@ -37,23 +37,22 @@ import {
   ApiMessageEntityTypes,
 } from '../../types';
 
-import { CHANNEL_ID_LENGTH, DEFAULT_STATUS_ICON_ID } from '../../../config';
+import { CHANNEL_ID_BASE, DEFAULT_STATUS_ICON_ID } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import { deserializeBytes } from '../helpers/misc';
 import localDb from '../localDb';
 
-function checkIfChannelId(id: string) {
-  return id.length === CHANNEL_ID_LENGTH && id.startsWith('-1');
-}
-
-export function getEntityTypeById(chatOrUserId: string) {
-  if (!chatOrUserId.startsWith('-')) {
+export function getEntityTypeById(peerId: string) {
+  const n = Number(peerId);
+  if (n > 0) {
     return 'user';
-  } else if (checkIfChannelId(chatOrUserId)) {
-    return 'channel';
-  } else {
-    return 'chat';
   }
+
+  if (n < -CHANNEL_ID_BASE) {
+    return 'channel';
+  }
+
+  return 'chat';
 }
 
 export function buildPeer(chatOrUserId: string): GramJs.TypePeer {
@@ -569,11 +568,13 @@ export function buildMtpPeerId(id: string, type: 'user' | 'chat' | 'channel') {
     return BigInt(id);
   }
 
+  const n = Number(id);
+
   if (type === 'channel') {
-    return BigInt(id.slice(2)); // Slice "-1", zeroes are trimmed when converting to BigInt
+    return BigInt(-n - CHANNEL_ID_BASE);
   }
 
-  return BigInt(id.slice(1));
+  return BigInt(n * -1);
 }
 
 export function buildInputGroupCall(groupCall: Partial<ApiGroupCall>) {
@@ -843,12 +844,13 @@ export function buildInputReplyTo(replyInfo: ApiInputReplyInfo) {
 
   if (replyInfo.type === 'message') {
     const {
-      replyToMsgId, replyToTopId, replyToPeerId, quoteText, quoteOffset,
+      replyToMsgId, replyToTopId, replyToPeerId, quoteText, quoteOffset, monoforumPeerId,
     } = replyInfo;
     return new GramJs.InputReplyToMessage({
       replyToMsgId,
       topMsgId: replyToTopId,
       replyToPeerId: replyToPeerId ? buildInputPeerFromLocalDb(replyToPeerId)! : undefined,
+      monoforumPeerId: monoforumPeerId ? buildInputPeerFromLocalDb(monoforumPeerId)! : undefined,
       quoteText: quoteText?.text,
       quoteEntities: quoteText?.entities?.map(buildMtpMessageEntity),
       quoteOffset,

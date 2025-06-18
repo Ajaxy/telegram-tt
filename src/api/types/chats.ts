@@ -47,6 +47,9 @@ export interface ApiChat {
   emojiStatus?: ApiEmojiStatusType;
   isForum?: boolean;
   isForumAsMessages?: true;
+  isMonoforum?: boolean;
+  linkedMonoforumId?: string;
+  areChannelMessagesAllowed?: boolean;
   boostLevel?: number;
   botVerificationIconId?: string;
   hasAutoTranslation?: true;

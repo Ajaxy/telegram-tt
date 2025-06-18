@@ -50,6 +50,7 @@ interface OwnProps {
   isUnread: boolean;
   withUsers: boolean;
   isChannelChat: boolean | undefined;
+  isChatMonoforum?: boolean;
   isEmptyThread?: boolean;
   isComments?: boolean;
   noAvatars: boolean;
@@ -87,6 +88,7 @@ const MessageListContent: FC<OwnProps> = ({
   isEmptyThread,
   withUsers,
   isChannelChat,
+  isChatMonoforum,
   noAvatars,
   containerRef,
   anchorIdRef,
@@ -261,7 +263,7 @@ const MessageListContent: FC<OwnProps> = ({
         // Service notifications saved in cache in previous versions may share the same `previousLocalId`
         const key = isServiceNotificationMessage(message) ? `${message.date}_${originalId}` : originalId;
 
-        const noComments = hasLinkedChat === false || !isChannelChat;
+        const noComments = hasLinkedChat === false || !isChannelChat || Boolean(isChatMonoforum);
 
         return compact([
           message.id === memoUnreadDividerBeforeIdRef.current && unreadDivider,
@@ -377,7 +379,7 @@ const MessageListContent: FC<OwnProps> = ({
     <div className="messages-container" teactFastList>
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {shouldRenderAccountInfo
-        && <MessageListAccountInfo key={`account_info_${chatId}`} chatId={chatId} />}
+        && <MessageListAccountInfo key={`account_info_${chatId}`} chatId={chatId} hasMessages />}
       {dateGroups.flat()}
       {withHistoryTriggers && (
         <div

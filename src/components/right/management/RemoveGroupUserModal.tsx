@@ -1,7 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import {
-  memo, useCallback,
-  useMemo, useState,
+  memo, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -10,6 +9,7 @@ import type { ApiChat, ApiChatMember } from '../../../api/types';
 import { filterPeersByQuery } from '../../../global/helpers/peers';
 import { selectChatFullInfo } from '../../../global/selectors';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import ChatOrUserPicker from '../../common/pickers/ChatOrUserPicker';
@@ -52,10 +52,14 @@ const RemoveGroupUserModal: FC<OwnProps & StateProps> = ({
     return filterPeersByQuery({ ids: availableMemberIds, query: search, type: 'user' });
   }, [chatMembers, currentUserId, search]);
 
-  const handleRemoveUser = useCallback((userId: string) => {
+  const handleLoadMore = useLastCallback(() => {
+    loadMoreMembers({ chatId: chat.id });
+  });
+
+  const handleRemoveUser = useLastCallback((userId: string) => {
     deleteChatMember({ chatId: chat.id, userId });
     onClose();
-  }, [chat.id, deleteChatMember, onClose]);
+  });
 
   return (
     <ChatOrUserPicker
@@ -64,7 +68,7 @@ const RemoveGroupUserModal: FC<OwnProps & StateProps> = ({
       searchPlaceholder={lang('ChannelBlockUser')}
       search={search}
       onSearchChange={setSearch}
-      loadMore={loadMoreMembers}
+      loadMore={handleLoadMore}
       onSelectChatOrUser={handleRemoveUser}
       onClose={onClose}
     />

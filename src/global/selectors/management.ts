@@ -72,7 +72,7 @@ export function selectCanManage<T extends GlobalState>(
   chatId: string,
 ) {
   const chat = selectChat(global, chatId);
-  if (!chat || chat.isRestricted) return false;
+  if (!chat || chat.isRestricted || chat.isMonoforum) return false;
 
   const isPrivate = isUserId(chat.id);
   const user = isPrivate ? selectUser(global, chatId) : undefined;

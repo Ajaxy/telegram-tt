@@ -47,6 +47,10 @@ export function isChatChannel(chat: ApiChat) {
   return chat.type === 'chatTypeChannel';
 }
 
+export function isChatMonoforum(chat: ApiChat) {
+  return chat.isMonoforum;
+}
+
 export function isCommonBoxChat(chat: ApiChat) {
   return chat.type === 'chatTypePrivate' || chat.type === 'chatTypeBasicGroup';
 }
@@ -152,7 +156,8 @@ export function getCanPostInChat(
   }
 
   if (chat.isRestricted || chat.isForbidden || chat.migratedTo
-    || (!isMessageThread && chat.isNotJoined) || isSystemBot(chat.id) || isAnonymousForwardsChat(chat.id)) {
+    || (chat.isNotJoined && !isChatMonoforum(chat) && !isMessageThread)
+    || isSystemBot(chat.id) || isAnonymousForwardsChat(chat.id)) {
     return false;
   }
 
@@ -190,6 +195,7 @@ export function getAllowedAttachmentOptions(
   chat?: ApiChat,
   chatFullInfo?: ApiChatFullInfo,
   isChatWithBot = false,
+  isSavedMessages = false,
   isStoryReply = false,
   paidMessagesStars?: number,
   isInScheduledList = false,
@@ -215,9 +221,9 @@ export function getAllowedAttachmentOptions(
 
   return {
     canAttachMedia: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendMedia', chatFullInfo),
-    canAttachPolls: !isStoryReply
+    canAttachPolls: !isStoryReply && !chat.isMonoforum
       && (isAdmin || !isUserRightBanned(chat, 'sendPolls', chatFullInfo))
-      && (!isUserId(chat.id) || isChatWithBot),
+      && (!isUserId(chat.id) || isChatWithBot || isSavedMessages),
     canSendStickers: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendStickers', chatFullInfo),
     canSendGifs: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendGifs', chatFullInfo),
     canAttachEmbedLinks: !isStoryReply && (isAdmin || !isUserRightBanned(chat, 'embedLinks', chatFullInfo)),

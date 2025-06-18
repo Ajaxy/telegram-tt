@@ -90,11 +90,11 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   contactName,
   willDeleteForCurrentUserOnly,
   willDeleteForAll,
-  onConfirm,
   chatBot,
   adminMembersById,
   canBanUsers,
   linkedChatId,
+  onConfirm,
 }) => {
   const {
     closeDeleteMessageModal,
@@ -130,7 +130,11 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     const global = getGlobal();
     const senderArray = getSendersFromSelectedMessages(global, chat.id, messageIds);
     return senderArray ? unique(senderArray)
-      .filter((peer) => peer?.id !== chat?.id && peer?.id !== linkedChatId) : MEMO_EMPTY_ARRAY;
+      .filter((peer) => (
+        peer?.id !== chat?.id
+        && peer?.id !== linkedChatId
+        && peer?.id !== chat?.linkedMonoforumId
+      )) : MEMO_EMPTY_ARRAY;
   }, [chat, isChannel, linkedChatId, messageIds]);
 
   const buildNestedOptionListWithAvatars = useLastCallback(() => {
@@ -144,16 +148,24 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   });
 
   const peerListToDeleteAll = useMemo(() => {
-    return peerList.filter((peer) => peer.id !== linkedChatId && peer.id !== currentUserId);
-  }, [peerList, currentUserId, linkedChatId]);
+    return peerList.filter((peer) => (
+      peer.id !== linkedChatId
+      && peer.id !== chat?.linkedMonoforumId
+      && peer.id !== currentUserId
+    ));
+  }, [peerList, currentUserId, linkedChatId, chat?.linkedMonoforumId]);
 
   const peerListToReportSpam = useMemo(() => {
-    return peerList.filter((peer) => peer.id !== currentUserId && peer.id !== linkedChatId);
-  }, [peerList, currentUserId, linkedChatId]);
+    return peerList.filter((peer) => (
+      peer.id !== currentUserId
+      && peer.id !== linkedChatId
+      && peer.id !== chat?.linkedMonoforumId
+    ));
+  }, [peerList, currentUserId, linkedChatId, chat?.linkedMonoforumId]);
 
   const peerListToBan = useMemo(() => {
     const isCurrentUserInList = peerList.some((peer) => peer.id === currentUserId);
-    const shouldReturnEmpty = !canBanUsers || isCurrentUserInList;
+    const shouldReturnEmpty = !canBanUsers || isCurrentUserInList || chat?.isMonoforum;
 
     if (shouldReturnEmpty) {
       return MEMO_EMPTY_ARRAY;
@@ -163,7 +175,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
       const isAdmin = adminMembersById?.[peer.id];
       return isCreator || !isAdmin;
     });
-  }, [peerList, isCreator, currentUserId, canBanUsers, adminMembersById]);
+  }, [peerList, isCreator, currentUserId, canBanUsers, adminMembersById, chat?.isMonoforum]);
 
   const shouldShowAdditionalOptions = useMemo(() => {
     return Boolean(peerListToDeleteAll.length || peerListToReportSpam.length || peerListToBan.length);
@@ -184,11 +196,12 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         label: oldLang('ReportSpamTitle'),
         nestedOptions: messageIds && peerList.length >= 2 ? [
           ...buildNestedOptionListWithAvatars().filter((opt) => opt.value !== linkedChatId
+            && opt.value !== chat?.linkedMonoforumId
             && opt.value !== currentUserId),
         ] : undefined,
       },
     ];
-  }, [messageIds, peerList, oldLang, linkedChatId, currentUserId]);
+  }, [messageIds, peerList, oldLang, linkedChatId, chat?.linkedMonoforumId, currentUserId]);
 
   const ACTION_DELETE_OPTION: IRadioOption[] = useMemo(() => {
     return [
@@ -199,11 +212,12 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
           : oldLang('DeleteAllFrom', Object.values(peerNames)[0]),
         nestedOptions: messageIds && peerList.length >= 2 ? [
           ...buildNestedOptionListWithAvatars().filter((opt) => opt.value !== linkedChatId
+            && opt.value !== chat?.linkedMonoforumId
             && opt.value !== currentUserId),
         ] : undefined,
       },
     ];
-  }, [messageIds, peerList, oldLang, peerNames, linkedChatId, currentUserId]);
+  }, [messageIds, peerList, oldLang, peerNames, linkedChatId, chat?.linkedMonoforumId, currentUserId]);
 
   const ACTION_BAN_OPTION: IRadioOption[] = useMemo(() => {
     return [
@@ -279,7 +293,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     if (isSchedule) {
       deleteScheduledMessages({ messageIds });
     } else if (shouldShowOption) {
-      if (peerIdsToReportSpam) {
+      if (peerIdsToReportSpam?.length) {
         const global = getGlobal();
         const peerIdList = peerIdsToReportSpam.filter((option) => !Number.isNaN(Number(option)));
         const messageList = messageIds.reduce<Record<string, number[]>>((acc, msgId) => {
@@ -296,24 +310,24 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         handleReportSpam(messageList);
       }
 
-      if (peerIdsToDeleteAll) {
+      if (peerIdsToDeleteAll?.length) {
         const peerIdList = peerIdsToDeleteAll.filter((option) => !Number.isNaN(Number(option)));
         handleDeleteAllPeerMessages(peerIdList);
       }
 
-      if (peerIdsToBan && !havePermissionChanged) {
+      if (peerIdsToBan?.length && !havePermissionChanged) {
         const peerIdList = peerIdsToBan.filter((option) => !Number.isNaN(Number(option)));
         handleDeleteMember(peerIdList);
         const filteredMessageIdList = filterMessageIdByPeerId(peerIdList, messageIds);
         handleDeleteMessages(filteredMessageIdList);
       }
 
-      if (peerIdsToBan && havePermissionChanged) {
+      if (peerIdsToBan?.length && havePermissionChanged) {
         const peerIdList = peerIdsToBan.filter((option) => !Number.isNaN(Number(option)));
         handleUpdateChatMemberBannedRights(peerIdList);
       }
 
-      if (!peerIdsToReportSpam || !peerIdsToDeleteAll || !peerIdsToBan) {
+      if (!peerIdsToReportSpam?.length || !peerIdsToDeleteAll?.length || !peerIdsToBan?.length) {
         deleteMessages({ messageIds, shouldDeleteForAll });
       }
     } else {
@@ -426,21 +440,19 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
             <p className={styles.actionTitle}>{oldLang('DeleteAdditionalActions')}</p>
             {renderAdditionalActionOptions()}
             {renderPartiallyRestrictedUser()}
-            {
-              peerIdsToBan && canBanUsers ? (
-                <ListItem
-                  narrow
-                  buttonClassName={styles.button}
-                  onClick={toggleAdditionalOptions}
-                >
-                  {oldLang(isAdditionalOptionsVisible ? 'DeleteToggleBanUsers' : 'DeleteToggleRestrictUsers')}
-                  <Icon
-                    name={isAdditionalOptionsVisible ? 'up' : 'down'}
-                    className={buildClassName(styles.button, 'ml-2')}
-                  />
-                </ListItem>
-              ) : setIsAdditionalOptionsVisible(false)
-            }
+            {peerIdsToBan?.length && canBanUsers ? (
+              <ListItem
+                narrow
+                buttonClassName={styles.button}
+                onClick={toggleAdditionalOptions}
+              >
+                {oldLang(isAdditionalOptionsVisible ? 'DeleteToggleBanUsers' : 'DeleteToggleRestrictUsers')}
+                <Icon
+                  name={isAdditionalOptionsVisible ? 'up' : 'down'}
+                  className={buildClassName(styles.button, 'ml-2')}
+                />
+              </ListItem>
+            ) : setIsAdditionalOptionsVisible(false)}
           </>
         )}
         {(canDeleteForAll || chatBot || !shouldShowOption) && (

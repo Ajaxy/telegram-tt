@@ -72,6 +72,7 @@ import {
   selectChat,
   selectChatFullInfo,
   selectChatLastMessageId,
+  selectIsChatWithBot,
   selectIsChatWithSelf,
   selectRequestedChatTranslationLanguage,
 } from './chats';
@@ -651,6 +652,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const { content } = message;
   const isDocumentSticker = isMessageDocumentSticker(message);
   const isBoostMessage = message.content.action?.type === 'boostApply';
+  const isMonoforum = chat.isMonoforum;
 
   const hasChatPinPermission = (chat.isCreator
     || (!isChannel && !isUserRightBanned(chat, 'pinMessages'))
@@ -726,7 +728,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const canFaveSticker = !isAction && hasSticker && !hasFavoriteSticker;
   const canUnfaveSticker = !isAction && hasFavoriteSticker;
   const canCopy = !isAction;
-  const canCopyLink = !isLocal && !isAction && (isChannel || isSuperGroup);
+  const canCopyLink = !isLocal && !isAction && (isChannel || isSuperGroup) && !isMonoforum;
   const canSelect = !isLocal && !isAction;
 
   const canDownload = Boolean(content.webPage?.document || content.webPage?.video || content.webPage?.photo
@@ -1462,7 +1464,10 @@ export function selectForwardsCanBeSentToChat<T extends GlobalState>(
 
   const chatFullInfo = selectChatFullInfo(global, toChatId);
   const chatMessages = selectChatMessages(global, fromChatId!);
-  const options = getAllowedAttachmentOptions(chat, chatFullInfo);
+
+  const isSavedMessages = toChatId ? selectIsChatWithSelf(global, toChatId) : undefined;
+  const isChatWithBot = toChatId ? selectIsChatWithBot(global, chat) : undefined;
+  const options = getAllowedAttachmentOptions(chat, chatFullInfo, isChatWithBot, isSavedMessages);
   return !messageIds!.some((messageId) => сheckMessageSendingDenied(chatMessages[messageId], options));
 }
 function сheckMessageSendingDenied(message: ApiMessage, options: IAllowedAttachmentOptions) {

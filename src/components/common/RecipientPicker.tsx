@@ -12,7 +12,7 @@ import {
 } from '../../global/helpers';
 import { filterPeersByQuery } from '../../global/helpers/peers';
 import {
-  filterChatIdsByType, selectChat, selectChatFullInfo, selectUser,
+  filterChatIdsByType, selectChat, selectChatFullInfo, selectIsMonoforumAdmin, selectUser,
 } from '../../global/selectors';
 import { unique } from '../../util/iteratees';
 import sortChatIds from './helpers/sortChatIds';
@@ -77,9 +77,15 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
       const user = selectUser(global, id);
       if (user && !isDeletedUser(user)) return true;
 
-      const chatFullInfo = selectChatFullInfo(global, id);
+      if (!chat) return false;
 
-      return chat && (!chatFullInfo || getCanPostInChat(chat, undefined, undefined, chatFullInfo));
+      if (chat.isMonoforum && selectIsMonoforumAdmin(global, id)) {
+        return false;
+      }
+
+      const chatFullInfo = selectChatFullInfo(global, id);
+      // TODO: Handle bulk check with API call
+      return !chatFullInfo || getCanPostInChat(chat, undefined, undefined, chatFullInfo);
     });
 
     const sorted = sortChatIds(

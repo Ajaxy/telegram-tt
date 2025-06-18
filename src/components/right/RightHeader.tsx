@@ -173,12 +173,12 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isInsideTopic,
   canEditTopic,
   isSavedMessages,
-  onClose,
-  onScreenSelect,
   canEditBot,
   giftProfileFilter,
   canUseGiftFilter,
   canUseGiftAdminFilter,
+  onClose,
+  onScreenSelect,
 }) => {
   const {
     setStickerSearchQuery,

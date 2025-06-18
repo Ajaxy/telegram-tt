@@ -17,6 +17,7 @@ import {
   getCanManageTopic,
   getHasAdminRight,
   getIsSavedDialog,
+  isChatAdmin,
   isChatChannel,
   isChatGroup,
   isSystemBot,
@@ -94,6 +95,7 @@ export type OwnProps = {
   canCreateVoiceChat?: boolean;
   pendingJoinRequests?: number;
   canTranslate?: boolean;
+  channelMonoforumId?: string;
   onSubscribeChannel: () => void;
   onSearchClick: () => void;
   onAsMessagesClick: () => void;
@@ -176,14 +178,15 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   isChatWithSelf,
   savedDialog,
   canShowBoostModal,
+  disallowedGifts,
+  isAccountFrozen,
+  channelMonoforumId,
   onJoinRequestsClick,
   onSubscribeChannel,
   onSearchClick,
   onAsMessagesClick,
   onClose,
   onCloseAnimationEnd,
-  disallowedGifts,
-  isAccountFrozen,
 }) => {
   const {
     updateChatMutedState,
@@ -488,6 +491,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   });
 
+  const handleSendChannelMessage = useLastCallback(() => {
+    openChat({ id: channelMonoforumId });
+    closeMenu();
+  });
+
   useEffect(disableScrolling, []);
 
   const botButtons = useMemo(() => {
@@ -584,6 +592,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               </MenuItem>
               <MenuSeparator />
             </>
+          )}
+          {channelMonoforumId && (
+            <MenuItem
+              icon="message"
+              onClick={handleSendChannelMessage}
+            >
+              {lang('ChannelSendMessage')}
+            </MenuItem>
           )}
           {isViewGroupInfoShown && (
             <MenuItem
@@ -835,7 +851,7 @@ export default memo(withGlobal<OwnProps>(
     const isMainThread = threadId === MAIN_THREAD_ID;
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
-    const canReportChat = isMainThread && !user && (isChatChannel(chat) || isChatGroup(chat));
+    const canReportChat = isMainThread && !user && (isChatChannel(chat) || isChatGroup(chat)) && !isChatAdmin(chat);
 
     const chatBot = !isSystemBot(chatId) ? selectBot(global, chatId) : undefined;
     const userFullInfo = isPrivate ? selectUserFullInfo(global, chatId) : undefined;

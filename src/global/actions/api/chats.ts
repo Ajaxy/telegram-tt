@@ -52,6 +52,7 @@ import {
   isChatArchived,
   isChatBasicGroup,
   isChatChannel,
+  isChatMonoforum,
   isChatSuperGroup,
   isUserBot,
 } from '../../helpers';
@@ -2130,11 +2131,11 @@ addActionHandler('resetOpenChatWithDraft', (global, actions, payload): ActionRet
 });
 
 addActionHandler('loadMoreMembers', async (global, actions, payload): Promise<void> => {
+  const { chatId } = payload || {};
+
   if (selectIsCurrentUserFrozen(global)) return;
-  const { tabId = getCurrentTabId() } = payload || {};
-  const { chatId } = selectCurrentMessageList(global, tabId) || {};
-  const chat = chatId ? selectChat(global, chatId) : undefined;
-  if (!chat || isChatBasicGroup(chat)) {
+  const chat = selectChat(global, chatId);
+  if (!chat || isChatBasicGroup(chat) || isChatMonoforum(chat)) {
     return;
   }
 

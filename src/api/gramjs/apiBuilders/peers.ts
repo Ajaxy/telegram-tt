@@ -3,7 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiEmojiStatusType, ApiPeerColor } from '../../types';
 
-import { CHANNEL_ID_LENGTH } from '../../../config';
+import { CHANNEL_ID_BASE } from '../../../config';
 import { numberToHexColor } from '../../../util/colors';
 
 type TypePeerOrInput = GramJs.TypePeer | GramJs.TypeInputPeer | GramJs.TypeInputUser | GramJs.TypeInputChannel;
@@ -26,13 +26,10 @@ export function buildApiPeerId(id: BigInt.BigInteger, type: 'user' | 'chat' | 'c
   }
 
   if (type === 'channel') {
-    // Simulates TDLib https://github.com/tdlib/td/blob/d7203eb719304866a7eb7033ef03d421459335b8/td/telegram/DialogId.cpp#L54
-    // But using only string operations. Should be fine until channel ids reach 10^12
-    // Example: 12345678 -> -1000012345678
-    return `-1${id.toString().padStart(CHANNEL_ID_LENGTH - 2, '0')}`;
+    return id.add(CHANNEL_ID_BASE).negate().toString();
   }
 
-  return `-${id.toString()}`;
+  return id.negate().toString();
 }
 
 export function getApiChatIdFromMtpPeer(peer: TypePeerOrInput) {

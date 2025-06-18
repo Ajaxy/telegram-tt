@@ -438,6 +438,11 @@
       .avatar-badge-wrapper .ChatBadge:not(.pinned).muted {
         background: var(--color-gray);
       }
+
+      .monoforum-badge {
+        color: var(--color-chat-active);
+        background-color: #fff;
+      }
     }
   }
 

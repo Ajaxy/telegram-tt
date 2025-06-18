@@ -38,11 +38,11 @@ export function translateWithYou<K extends LangKey>(
   options?: {
     pluralValue?: number;
     asText?: boolean;
-    isMarkdown?: boolean;
+    withMarkdown?: boolean;
     renderTextFilters?: string[];
   },
 ): TeactNode {
-  const { pluralValue, asText, isMarkdown, renderTextFilters } = options || {};
+  const { pluralValue, asText, withMarkdown, renderTextFilters } = options || {};
   const translationKey = isYou ? (`${key}You` as LangKey) : key;
 
   return lang(
@@ -50,7 +50,7 @@ export function translateWithYou<K extends LangKey>(
     translationKey,
     variables,
     {
-      withNodes: !asText, isMarkdown, pluralValue, renderTextFilters,
+      withNodes: !asText, withMarkdown, pluralValue, renderTextFilters,
     },
   );
 }

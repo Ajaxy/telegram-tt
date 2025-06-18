@@ -250,6 +250,7 @@ export interface ApiAppConfig {
   starsStargiftResaleAmountMin?: number;
   starsStargiftResaleAmountMax?: number;
   starsStargiftResaleCommissionPermille?: number;
+  pollMaxAnswers?: number;
 }
 
 export interface ApiConfig {

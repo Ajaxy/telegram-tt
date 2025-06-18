@@ -98,6 +98,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   stars_stargift_resale_amount_max?: number;
   stars_stargift_resale_amount_min?: number;
   stars_stargift_resale_commission_permille?: number;
+  poll_answers_max?: number;
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -198,5 +199,6 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     starsStargiftResaleAmountMin: appConfig.stars_stargift_resale_amount_min,
     starsStargiftResaleAmountMax: appConfig.stars_stargift_resale_amount_max,
     starsStargiftResaleCommissionPermille: appConfig.stars_stargift_resale_commission_permille,
+    pollMaxAnswers: appConfig.poll_answers_max,
   };
 }

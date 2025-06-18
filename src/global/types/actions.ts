@@ -354,7 +354,9 @@ export interface ActionPayloads {
   } & WithTabId;
   openThreadWithInfo: ActionPayloads['openThread'] & WithTabId;
   openLinkedChat: { id: string } & WithTabId;
-  loadMoreMembers: WithTabId | undefined;
+  loadMoreMembers: {
+    chatId: string;
+  };
   setActiveChatFolder: {
     activeChatFolder: number;
   } & WithTabId;

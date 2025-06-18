@@ -423,6 +423,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { isMobile }): StateProps => {
     const { chatId, threadId } = selectCurrentMessageList(global) || {};
+
     const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
     const {
       management, shouldSkipHistoryAnimations, nextProfileTab, shouldCloseRightColumn,

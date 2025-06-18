@@ -28,6 +28,7 @@ import {
   isAnonymousForwardsChat,
   isChatChannel,
   isChatGroup,
+  isChatMonoforum,
   isSystemBot,
 } from '../../global/helpers';
 import {
@@ -48,6 +49,7 @@ import {
   selectIsInSelectMode,
   selectIsViewportNewest,
   selectLastScrollOffset,
+  selectMonoforumChannel,
   selectPerformanceSettingsValue,
   selectScrollOffset,
   selectTabState,
@@ -107,6 +109,7 @@ type StateProps = {
   isChatLoaded?: boolean;
   isChannelChat?: boolean;
   isGroupChat?: boolean;
+  isChatMonoforum?: boolean;
   isChatWithSelf?: boolean;
   isSystemBotChat?: boolean;
   isAnonymousForwards?: boolean;
@@ -139,6 +142,7 @@ type StateProps = {
   isChatProtected?: boolean;
   hasCustomGreeting?: boolean;
   isAppConfigLoaded?: boolean;
+  monoforumChannelId?: string;
   canTranslate?: boolean;
   translationLanguage?: string;
   shouldAutoTranslate?: boolean;
@@ -169,6 +173,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   isChannelWithAvatars,
   canPost,
   isSynced,
+  isChatMonoforum,
   isReady,
   isChatWithSelf,
   isSystemBotChat,
@@ -203,6 +208,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   isChatProtected,
   isAccountFrozen,
   hasCustomGreeting,
+  monoforumChannelId,
   isAppConfigLoaded,
   canTranslate,
   translationLanguage,
@@ -695,7 +701,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     isChatProtected && 'hide-on-print',
   );
 
-  const hasMessages = (messageIds && messageGroups) || lastMessage;
+  const hasMessages = Boolean((messageIds && messageGroups) || lastMessage);
 
   useEffect(() => {
     if (hasMessages) return;
@@ -716,12 +722,12 @@ const MessageList: FC<OwnProps & StateProps> = ({
             {restrictionReason ? restrictionReason.text : `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
           </span>
         </div>
-      ) : paidMessagesStars && isPrivate && !hasMessages && !hasCustomGreeting ? (
-        <RequirementToContactMessage paidMessagesStars={paidMessagesStars} userId={chatId} />
+      ) : paidMessagesStars && !hasMessages && !hasCustomGreeting ? (
+        <RequirementToContactMessage paidMessagesStars={paidMessagesStars} peerId={monoforumChannelId || chatId} />
       ) : isContactRequirePremium && !hasMessages ? (
-        <RequirementToContactMessage userId={chatId} />
+        <RequirementToContactMessage peerId={chatId} />
       ) : (isBot || isNonContact) && !hasMessages ? (
-        <MessageListAccountInfo chatId={chatId} />
+        <MessageListAccountInfo chatId={chatId} hasMessages={hasMessages} />
       ) : shouldRenderGreeting ? (
         <ContactGreeting key={chatId} userId={chatId} />
       ) : messageIds && (!messageGroups || isGroupChatJustCreated || isEmptyTopic) ? (
@@ -738,6 +744,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           chatId={chatId}
           isComments={isComments}
           isChannelChat={isChannelChat}
+          isChatMonoforum={isChatMonoforum}
           isSavedDialog={isSavedDialog}
           messageIds={messageIds || [lastMessage!.id]}
           messageGroups={messageGroups || groupMessages([lastMessage!])}
@@ -820,6 +827,7 @@ export default memo(withGlobal<OwnProps>(
     const hasCustomGreeting = Boolean(userFullInfo?.businessIntro);
     const isAppConfigLoaded = global.isAppConfigLoaded;
 
+    const monoforumChannelId = selectMonoforumChannel(global, chatId)?.id;
     const canTranslate = selectCanTranslateChat(global, chatId) && !chatFullInfo?.isTranslationDisabled;
     const shouldAutoTranslate = chat?.hasAutoTranslation;
     const translationLanguage = selectTranslationLanguage(global);
@@ -830,6 +838,7 @@ export default memo(withGlobal<OwnProps>(
       isRestricted,
       restrictionReason,
       isChannelChat: isChatChannel(chat),
+      isChatMonoforum: isChatMonoforum(chat),
       isGroupChat: isChatGroup(chat),
       isChannelWithAvatars: chat.areProfilesShown,
       isCreator: chat.isCreator,
@@ -860,6 +869,7 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       hasCustomGreeting,
       isAppConfigLoaded,
+      monoforumChannelId,
       canTranslate,
       translationLanguage,
       shouldAutoTranslate,

@@ -150,4 +150,13 @@
   &.premium-gradient-bg > .inner {
     background-image: var(--premium-gradient);
   }
+
+  &.message-bubble {
+    --radius: 0;
+
+    mask-image: url("../../assets/icons/forumTopic/blue.svg");
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 100%;
+  }
 }

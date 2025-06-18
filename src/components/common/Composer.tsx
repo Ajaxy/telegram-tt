@@ -300,6 +300,7 @@ type StateProps =
     isAccountFrozen?: boolean;
     isAppConfigLoaded?: boolean;
     insertingPeerIdMention?: string;
+    pollMaxAnswers?: number;
   };
 
 enum MainButtonState {
@@ -413,10 +414,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   shouldPlayEffect,
   maxMessageLength,
   isSilentPosting,
-  onDropHide,
-  onFocus,
-  onBlur,
-  onForward,
   isPaymentMessageConfirmDialogOpen,
   starsBalance,
   isStarsBalanceModalOpen,
@@ -424,6 +421,11 @@ const Composer: FC<OwnProps & StateProps> = ({
   isAccountFrozen,
   isAppConfigLoaded,
   insertingPeerIdMention,
+  pollMaxAnswers,
+  onDropHide,
+  onFocus,
+  onBlur,
+  onForward,
 }) => {
   const {
     sendMessage,
@@ -481,8 +483,11 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const canMediaBeReplaced = editingMessage && canEditMedia(editingMessage);
 
+  const isMonoforum = chat?.isMonoforum;
   const { emojiSet, members: groupChatMembers, botCommands: chatBotCommands } = chatFullInfo || {};
   const chatEmojiSetId = emojiSet?.id;
+
+  const canSchedule = !paidMessagesStars && !isMonoforum;
 
   const isSentStoryReactionHeart = sentStoryReaction && isSameReaction(sentStoryReaction, HEART_REACTION);
 
@@ -510,10 +515,10 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [chatId]);
 
   useEffect(() => {
-    if (isAppConfigLoaded && chatId && isReady && !isInStoryViewer) {
+    if (isAppConfigLoaded && chatId && isReady && !isInStoryViewer && !isMonoforum) {
       loadScheduledHistory({ chatId });
     }
-  }, [isReady, chatId, threadId, isInStoryViewer, isAppConfigLoaded]);
+  }, [isReady, chatId, threadId, isInStoryViewer, isAppConfigLoaded, isMonoforum]);
 
   useEffect(() => {
     const isChannelWithProfiles = isChannel && chat?.areProfilesShown;
@@ -541,10 +546,11 @@ const Composer: FC<OwnProps & StateProps> = ({
     () => getAllowedAttachmentOptions(chat,
       chatFullInfo,
       isChatWithBot,
+      isChatWithSelf,
       isInStoryViewer,
       paidMessagesStars,
       isInScheduledList),
-    [chat, chatFullInfo, isChatWithBot, isInStoryViewer, paidMessagesStars, isInScheduledList],
+    [chat, chatFullInfo, isChatWithBot, isChatWithSelf, isInStoryViewer, paidMessagesStars, isInScheduledList],
   );
 
   const isNeedPremium = isContactRequirePremium && isInStoryViewer;
@@ -804,7 +810,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     getHtml,
     setHtml,
     editedMessage: editingMessage,
-    isDisabled: isInStoryViewer || Boolean(requestedDraft),
+    isDisabled: isInStoryViewer || Boolean(requestedDraft) || isMonoforum,
   });
 
   const resetComposer = useLastCallback((shouldPreserveInput = false) => {
@@ -1847,8 +1853,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         shouldForceAsFile={shouldForceAsFile}
         isForCurrentMessageList={isForCurrentMessageList}
         isForMessage={isInMessageList}
-        shouldSchedule={!paidMessagesStars && isInScheduledList}
-        canSchedule={!paidMessagesStars}
+        shouldSchedule={canSchedule && isInScheduledList}
+        canSchedule={canSchedule}
         forceDarkTheme={isInStoryViewer}
         onCaptionUpdate={onCaptionUpdate}
         onSendSilent={handleSendSilentAttachments}
@@ -1869,6 +1875,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         isOpen={pollModal.isOpen}
         isQuiz={pollModal.isQuiz}
         shouldBeAnonymous={isChannel}
+        maxOptionsCount={pollMaxAnswers}
         onClear={closePollModal}
         onSend={handlePollSend}
       />
@@ -2304,7 +2311,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       {canShowCustomSendMenu && (
         <CustomSendMenu
           isOpen={isCustomSendMenuOpen}
-          canSchedule={!paidMessagesStars && isInMessageList && !isViewOnceEnabled}
+          canSchedule={canSchedule && isInMessageList && !isViewOnceEnabled}
           canScheduleUntilOnline={canScheduleUntilOnline && !isViewOnceEnabled}
           onSendSilent={!isChatWithSelf ? handleSendSilent : undefined}
           onSendSchedule={!isInScheduledList ? handleSendScheduled : undefined}
@@ -2344,6 +2351,7 @@ export default memo(withGlobal<OwnProps>(
   (global, {
     chatId, threadId, storyId, messageListType, isMobile, type,
   }): StateProps => {
+    const appConfig = global.appConfig;
     const chat = selectChat(global, chatId);
     const chatBot = !isSystemBot(chatId) ? selectBot(global, chatId) : undefined;
     const isChatWithBot = Boolean(chatBot);
@@ -2514,6 +2522,7 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       isAppConfigLoaded,
       insertingPeerIdMention,
+      pollMaxAnswers: appConfig?.pollMaxAnswers,
     };
   },
 )(Composer));

@@ -1,15 +1,17 @@
-import { CHANNEL_ID_LENGTH } from '../../config';
+import { CHANNEL_ID_BASE } from '../../config';
 
 export function isUserId(entityId: string) {
   return !entityId.startsWith('-');
 }
 
 export function isChannelId(entityId: string) {
-  return entityId.length === CHANNEL_ID_LENGTH && entityId.startsWith('-1');
+  const n = Number(entityId);
+  return n < -CHANNEL_ID_BASE;
 }
 
 export function toChannelId(mtpId: string) {
-  return `-1${mtpId.padStart(CHANNEL_ID_LENGTH - 2, '0')}`;
+  const n = Number(mtpId);
+  return String(-CHANNEL_ID_BASE - n);
 }
 
 export function getCleanPeerId(peerId: string) {

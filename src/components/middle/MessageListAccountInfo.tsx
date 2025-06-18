@@ -46,7 +46,7 @@ import styles from './MessageListAccountInfo.module.scss';
 
 type OwnProps = {
   chatId: string;
-  isInMessageList?: boolean;
+  hasMessages?: boolean;
 };
 
 type StateProps = {
@@ -66,6 +66,7 @@ const MessageListAccountInfo: FC<OwnProps & StateProps> = ({
   phoneCodeList,
   commonChats,
   userFullInfo,
+  hasMessages,
 }) => {
   const { loadCommonChats, openChatWithInfo } = getActions();
   const oldLang = useOldLang();
@@ -170,7 +171,9 @@ const MessageListAccountInfo: FC<OwnProps & StateProps> = ({
   return (
     <div className={buildClassName(styles.root, 'empty')}>
       {isLoadingFullUser && isChatInfoEmpty && <span>{oldLang('Loading')}</span>}
-      {(isBotInfoEmpty && isChatInfoEmpty) && !isLoadingFullUser && <span>{oldLang('NoMessages')}</span>}
+      {(isBotInfoEmpty && isChatInfoEmpty) && !isLoadingFullUser && !hasMessages && (
+        <span>{oldLang('NoMessages')}</span>
+      )}
       {botInfo && (
         <div
           className={buildClassName(styles.chatInfo, styles.botBackground)}

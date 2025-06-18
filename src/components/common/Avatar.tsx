@@ -85,6 +85,7 @@ type OwnProps = {
   storyViewerMode?: 'full' | 'single-peer' | 'disabled';
   loopIndefinitely?: boolean;
   noPersonalPhoto?: boolean;
+  asMessageBubble?: boolean;
   observeIntersection?: ObserveFn;
   onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => void;
   onContextMenu?: (e: React.MouseEvent) => void;
@@ -111,6 +112,7 @@ const Avatar: FC<OwnProps> = ({
   storyViewerMode = 'single-peer',
   loopIndefinitely,
   noPersonalPhoto,
+  asMessageBubble,
   onClick,
   onContextMenu,
 }) => {
@@ -261,6 +263,7 @@ const Avatar: FC<OwnProps> = ({
     isReplies && 'replies-bot-account',
     isPremiumGradient && 'premium-gradient-bg',
     isRoundedRect && 'forum',
+    asMessageBubble && 'message-bubble',
     (photo || webPhoto) && 'force-fit',
     ((withStory && realPeer?.hasStories) || forPremiumPromo) && 'with-story-circle',
     withStorySolid && realPeer?.hasStories && 'with-story-solid',

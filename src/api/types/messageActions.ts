@@ -278,6 +278,7 @@ export interface ApiMessageActionPaidMessagesRefunded extends ActionMediaType {
 export interface ApiMessageActionPaidMessagesPrice extends ActionMediaType {
   type: 'paidMessagesPrice';
   stars: number;
+  isAllowedInChannel?: boolean;
 }
 
 export interface ApiMessageActionUnsupported extends ActionMediaType {

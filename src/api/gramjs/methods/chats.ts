@@ -299,6 +299,10 @@ export async function fetchSavedChats({
   const chats: ApiChat[] = [];
 
   dialogs.forEach((dialog) => {
+    if (dialog instanceof GramJs.MonoForumDialog) {
+      return;
+    }
+
     const peerEntity = peersByKey[getPeerKey(dialog.peer)];
     const chat = buildApiChatFromSavedDialog(dialog, peerEntity);
     const chatId = getApiChatIdFromMtpPeer(dialog.peer);
@@ -596,7 +600,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
 async function getFullChannelInfo(
   chat: ApiChat,
 ): Promise<FullChatData | undefined> {
-  const { id, adminRights } = chat;
+  const { id, adminRights, isMonoforum } = chat;
   const accessHash = chat.accessHash!;
   const result = await invokeRequest(new GramJs.channels.GetFullChannel({
     channel: buildInputChannel(id, accessHash),
@@ -653,12 +657,14 @@ async function getFullChannelInfo(
     ? exportedInvite.link
     : undefined;
 
-  const { members, userStatusesById } = (canViewParticipants && await fetchMembers({ chat })) || {};
+  const canLoadParticipants = canViewParticipants && !isMonoforum;
+
+  const { members, userStatusesById } = (canLoadParticipants && await fetchMembers({ chat })) || {};
   const { members: kickedMembers, userStatusesById: bannedStatusesById } = (
-    canViewParticipants && adminRights && await fetchMembers({ chat, memberFilter: 'kicked' })
+    canLoadParticipants && adminRights && await fetchMembers({ chat, memberFilter: 'kicked' })
   ) || {};
   const { members: adminMembers, userStatusesById: adminStatusesById } = (
-    canViewParticipants && await fetchMembers({ chat, memberFilter: 'admin' })
+    canLoadParticipants && await fetchMembers({ chat, memberFilter: 'admin' })
   ) || {};
   const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
   const memberInfoRequest = !chat.isNotJoined && chat.type === 'chatTypeChannel'
@@ -710,7 +716,7 @@ async function getFullChannelInfo(
         chatId: buildApiPeerId(migratedFromChatId, 'chat'),
         maxMessageId: migratedFromMaxId,
       } : undefined,
-      canViewMembers: canViewParticipants,
+      canViewMembers: canLoadParticipants,
       canViewStatistics: canViewStats,
       canViewMonetization,
       isPreHistoryHidden: hiddenPrehistory,

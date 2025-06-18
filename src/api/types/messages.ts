@@ -379,6 +379,7 @@ export interface ApiInputMessageReplyInfo {
   replyToMsgId: number;
   replyToTopId?: number;
   replyToPeerId?: string;
+  monoforumPeerId?: string;
   quoteText?: ApiFormattedText;
   quoteOffset?: number;
 }

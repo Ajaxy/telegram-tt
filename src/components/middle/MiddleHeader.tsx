@@ -261,6 +261,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     const savedMessagesStatus = isSavedDialog ? lang('SavedMessages') : undefined;
 
     const realChatId = isSavedDialog ? String(threadId) : chatId;
+
+    const displayChatId = chat?.isMonoforum ? chat.linkedMonoforumId! : realChatId;
     return (
       <>
         {(isLeftColumnHideable || currentTransitionKey > 0) && renderBackButton(shouldShowCloseButton, !isSavedDialog)}
@@ -272,10 +274,10 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
           onTouchStart={handleLongPressTouchStart}
           onTouchEnd={handleLongPressTouchEnd}
         >
-          {isUserId(realChatId) ? (
+          {isUserId(displayChatId) ? (
             <PrivateChatInfo
-              key={realChatId}
-              userId={realChatId}
+              key={displayChatId}
+              userId={displayChatId}
               typingStatus={typingStatus}
               status={connectionStatusText || savedMessagesStatus}
               withDots={Boolean(connectionStatusText)}
@@ -291,10 +293,11 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
             />
           ) : (
             <GroupChatInfo
-              key={realChatId}
-              chatId={realChatId}
+              key={displayChatId}
+              chatId={displayChatId}
               threadId={!isSavedDialog ? threadId : undefined}
               typingStatus={typingStatus}
+              withMonoforumStatus={chat?.isMonoforum}
               status={connectionStatusText || savedMessagesStatus}
               withDots={Boolean(connectionStatusText)}
               withMediaViewer={threadId === MAIN_THREAD_ID}

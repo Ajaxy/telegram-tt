@@ -49,6 +49,7 @@ import {
   selectCurrentSharedMediaSearch,
   selectIsCurrentUserPremium,
   selectIsRightColumnShown,
+  selectMonoforumChannel,
   selectPeerStories,
   selectSimilarBotsIds,
   selectSimilarChannelIds,
@@ -114,11 +115,12 @@ type OwnProps = {
   threadId?: ThreadId;
   profileState: ProfileState;
   isMobile?: boolean;
-  onProfileStateChange: (state: ProfileState) => void;
   isActive: boolean;
+  onProfileStateChange: (state: ProfileState) => void;
 };
 
 type StateProps = {
+  monoforumChannel?: ApiChat;
   theme: ThemeKey;
   isChannel?: boolean;
   isBot?: boolean;
@@ -183,6 +185,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   threadId,
   profileState,
   theme,
+  monoforumChannel,
   isChannel,
   isBot,
   currentUserId,
@@ -376,6 +379,9 @@ const Profile: FC<OwnProps & StateProps> = ({
   const handleLoadGifts = useCallback(() => {
     loadPeerSavedGifts({ peerId: chatId });
   }, [chatId]);
+  const handleLoadMoreMembers = useCallback(() => {
+    loadMoreMembers({ chatId });
+  }, [chatId, loadMoreMembers]);
 
   useEffectWithPrevDeps(([prevGifts]) => {
     if (!gifts || !prevGifts) {
@@ -397,7 +403,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   }, [gifts, startViewTransition]);
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds({
-    loadMoreMembers,
+    loadMoreMembers: handleLoadMoreMembers,
     searchMessages: searchSharedMediaMessages,
     loadStories: handleLoadPeerStories,
     loadStoriesArchive: handleLoadStoriesArchive,
@@ -872,7 +878,12 @@ const Profile: FC<OwnProps & StateProps> = ({
       onScroll={handleScroll}
     >
       {!noProfileInfo && !isSavedMessages && (
-        renderProfileInfo(profileId, isRightColumnShown && canRenderContent, isSavedDialog)
+        renderProfileInfo(
+          monoforumChannel?.id || profileId,
+          isRightColumnShown && canRenderContent,
+          isSavedDialog,
+          Boolean(monoforumChannel),
+        )
       )}
       {!isRestricted && (
         <div
@@ -915,10 +926,10 @@ const Profile: FC<OwnProps & StateProps> = ({
   );
 };
 
-function renderProfileInfo(profileId: string, isReady: boolean, isSavedDialog?: boolean) {
+function renderProfileInfo(profileId: string, isReady: boolean, isSavedDialog?: boolean, isForMonoforum?: boolean) {
   return (
     <div className="profile-info">
-      <ProfileInfo peerId={profileId} canPlayVideo={isReady} />
+      <ProfileInfo peerId={profileId} canPlayVideo={isReady} isForMonoforum={isForMonoforum} />
       <ChatExtra chatOrUserId={profileId} isSavedDialog={isSavedDialog} />
     </div>
   );
@@ -949,7 +960,8 @@ export default memo(withGlobal<OwnProps>(
     const isGroup = chat && isChatGroup(chat);
     const isChannel = chat && isChatChannel(chat);
     const isBot = user && isUserBot(user);
-    const hasMembersTab = !isTopicInfo && !isSavedDialog && (isGroup || (isChannel && isChatAdmin(chat)));
+    const hasMembersTab = !isTopicInfo && !isSavedDialog
+      && (isGroup || (isChannel && isChatAdmin(chat))) && !chat?.isMonoforum;
     const members = chatFullInfo?.members;
     const adminMembersById = chatFullInfo?.adminMembersById;
     const areMembersHidden = hasMembersTab && chat
@@ -983,6 +995,8 @@ export default memo(withGlobal<OwnProps>(
 
     const hasGiftsTab = Boolean(peerFullInfo?.starGiftCount) && !isSavedDialog;
     const peerGifts = selectTabState(global).savedGifts.giftsByPeerId[chatId];
+
+    const monoforumChannel = selectMonoforumChannel(global, chatId);
 
     return {
       theme: selectTheme(global),
@@ -1025,6 +1039,7 @@ export default memo(withGlobal<OwnProps>(
       limitSimilarPeers: selectPremiumLimit(global, 'recommendedChannels'),
       ...(hasMembersTab && members && { members, adminMembersById }),
       ...(hasCommonChatsTab && user && { commonChatIds: commonChats?.ids }),
+      monoforumChannel,
     };
   },
 )(Profile));

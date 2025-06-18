@@ -26,6 +26,7 @@ import {
   selectForwardedSender,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
+  selectMonoforumChannel,
   selectSender,
   selectTabState,
 } from '../../../global/selectors';
@@ -67,6 +68,7 @@ export type OwnProps = {
 type StateProps = {
   isActive?: boolean;
   chat?: ApiChat;
+  monoforumChat?: ApiChat;
   threadId?: ThreadId;
   requestedQuery?: string;
   savedTags?: Record<ApiReactionKey, ApiSavedReactionTag>;
@@ -97,6 +99,7 @@ const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 const MiddleSearch: FC<StateProps> = ({
   isActive,
   chat,
+  monoforumChat,
   threadId,
   requestedQuery,
   savedTags,
@@ -645,7 +648,7 @@ const MiddleSearch: FC<StateProps> = ({
         {!isMobile && (
           <Avatar
             className={styles.avatar}
-            peer={chat}
+            peer={monoforumChat || chat}
             size="medium"
             isSavedMessages={isSavedMessages}
           />
@@ -793,8 +796,11 @@ export default memo(withGlobal<OwnProps>(
 
     const savedTags = isSavedMessages && !isSavedDialog ? global.savedReactionTags?.byKey : undefined;
 
+    const monoforumChat = selectMonoforumChannel(global, chatId);
+
     return {
       chat,
+      monoforumChat,
       requestedQuery,
       totalCount,
       threadId,
