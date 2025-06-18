@@ -1779,6 +1779,7 @@
 "ActionBotAllowedFromApp" = "You allowed this bot to message you when you opened {app}.";
 "ActionBotAppPlaceholder" = "App";
 "ActionGiftTextUnknown" = "You've received a gift";
+"ActionGiftTextUnknownYou" = "You sent a gift";
 "ActionGiftTextCost" = "{from} sent you a gift for {cost}";
 "ActionGiftTextCostYou" = "You've sent a gift for {cost}";
 "ActionGiftTextCostAnonymous" = "Someone sent you a gift for {cost}";
@@ -1868,6 +1869,10 @@
 "ActionGiftCodePremiumText_other" = "You've received a gift from {channel}.\n\nYour gift is a **Telegram Premium** subscription for {months} months.";
 "ActionGiveawayResultStarsText_one" = "You won a prize in a giveaway organized by {channel}.\n\nYour prize is **{amount}** Star.";
 "ActionGiveawayResultStarsText_other" = "You won a prize in a giveaway organized by {channel}.\n\nYour prize is **{amount}** Stars.";
+"ActionGiftCodeSubscriptionText_one" = "You've received a gift from {peer}.\n\nYour gift is a Telegram Premium subscription for {months} month.";
+"ActionGiftCodeSubscriptionText_other" = "You've received a gift from {peer}.\n\nYour gift is a Telegram Premium subscription for {months} months.";
+"ActionGiftCodeSubscriptionTextYou_one" = "You've sent a gift to {peer}.\n\nTelegram Premium subscription giftcode for {months} month.";
+"ActionGiftCodeSubscriptionTextYou_other" = "You've sent a gift to {peer}.\n\nTelegram Premium subscription giftcode for {months} months.";
 "ActionGiftPremiumTitle_one" = "{months} Month Premium";
 "ActionGiftPremiumTitle_other" = "{months} Months Premium";
 "ActionGiftPremiumText" = "Subscription for exclusive Telegram features.";
@@ -1996,7 +2001,6 @@
 "GiftSortByPrice" = "Sort by Price";
 "GiftSortByNumber" = "Sort by Number";
 "ContextMenuItemSelectAll" = "Select All";
-"ButtonSort" = "Sort";
 "GiftAttributeModelPlural_one" = "{count} Model";
 "GiftAttributeModelPlural_other" = "{count} Models";
 "GiftAttributeBackdropPlural_one" = "{count} Backdrop";

@@ -456,7 +456,7 @@ const ActionMessageText = ({
 
       case 'prizeStars':
       case 'giftCode': {
-        return lang('ActionGiftTextUnknown');
+        return translateWithYou(lang, 'ActionGiftTextUnknown', isOutgoing, undefined);
       }
 
       case 'groupCall': {

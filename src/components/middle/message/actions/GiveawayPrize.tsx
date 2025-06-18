@@ -1,7 +1,7 @@
 import { memo, useMemo, useRef } from '../../../../lib/teact/teact';
 import { withGlobal } from '../../../../global';
 
-import type { ApiChat, ApiSticker } from '../../../../api/types';
+import type { ApiChat, ApiPeer, ApiSticker } from '../../../../api/types';
 import type { ApiMessageActionGiftCode, ApiMessageActionPrizeStars } from '../../../../api/types/messageActions';
 
 import { getPeerTitle } from '../../../../global/helpers/peers';
@@ -11,7 +11,7 @@ import {
   selectGiftStickerForDuration,
   selectGiftStickerForStars,
 } from '../../../../global/selectors';
-import { renderPeerLink } from '../helpers/messageActions';
+import { renderPeerLink, translateWithYou } from '../helpers/messageActions';
 
 import { type ObserveFn } from '../../../../hooks/useIntersectionObserver';
 import useLang from '../../../../hooks/useLang';
@@ -23,12 +23,14 @@ import styles from '../ActionMessage.module.scss';
 
 type OwnProps = {
   action: ApiMessageActionGiftCode | ApiMessageActionPrizeStars;
+  sender?: ApiPeer;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   onClick?: NoneToVoidFunction;
 };
 
 type StateProps = {
+  currentUserId: string;
   channel?: ApiChat;
   sticker?: ApiSticker;
   canPlayAnimatedEmojis: boolean;
@@ -37,7 +39,9 @@ type StateProps = {
 const STICKER_SIZE = 150;
 
 const GiveawayPrizeAction = ({
+  currentUserId,
   action,
+  sender,
   sticker,
   canPlayAnimatedEmojis,
   channel,
@@ -54,6 +58,14 @@ const GiveawayPrizeAction = ({
 
     return renderPeerLink(channel?.id, channelTitle || channelFallbackText);
   }, [channel, lang]);
+
+  const peerLink = useMemo(() => {
+    const peer = channel || sender;
+    const peerTitle = peer && getPeerTitle(lang, peer);
+    const peerFallbackText = lang('ActionFallbackChat');
+
+    return renderPeerLink(peer?.id, peerTitle || peerFallbackText);
+  }, [channel, sender, lang]);
 
   return (
     <div className={styles.contentBox} tabIndex={0} role="button" onClick={onClick}>
@@ -74,19 +86,30 @@ const GiveawayPrizeAction = ({
         )}
       </div>
       <div>
-        <h3 className={styles.title}>{lang('ActionGiveawayResultTitle')}</h3>
+        <h3 className={styles.title}>
+          {lang(action.type !== 'giftCode' || action.isViaGiveaway
+            ? 'ActionGiveawayResultTitle' : 'GiftInfoTitle')}
+        </h3>
         <div>
           {action.type === 'giftCode' && (
-            lang(
-              action.isViaGiveaway ? 'ActionGiveawayResultPremiumText' : 'ActionGiftCodePremiumText',
-              { months: action.months, channel: channelLink },
+            action.isViaGiveaway ? lang(
+              'ActionGiveawayResultPremiumText',
+              { channel: channelLink, months: action.months },
               {
                 withNodes: true,
                 withMarkdown: true,
                 pluralValue: action.months,
                 renderTextFilters: ['br'],
-              },
-            )
+              })
+              : translateWithYou(
+                lang,
+                'ActionGiftCodeSubscriptionText',
+                sender?.id === currentUserId,
+                { peer: peerLink, months: action.months },
+                {
+                  pluralValue: action.months,
+                  renderTextFilters: ['br'],
+                })
           )}
           {action.type === 'prizeStars' && (
             lang(
@@ -112,14 +135,16 @@ const GiveawayPrizeAction = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { action }): StateProps => {
+    const currentUserId = global.currentUserId!;
     const sticker = action.type === 'giftCode'
       ? selectGiftStickerForDuration(global, action.months)
       : selectGiftStickerForStars(global, action.stars);
     const canPlayAnimatedEmojis = selectCanPlayAnimatedEmojis(global);
 
-    const channel = selectChat(global, action.boostPeerId!);
+    const channel = action.boostPeerId ? selectChat(global, action.boostPeerId) : undefined;
 
     return {
+      currentUserId,
       sticker,
       canPlayAnimatedEmojis,
       channel,

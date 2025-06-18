@@ -49,7 +49,7 @@ import useFocusMessage from './hooks/useFocusMessage';
 import ActionMessageText from './ActionMessageText';
 import ChannelPhoto from './actions/ChannelPhoto';
 import Gift from './actions/Gift';
-import PremiumGiftCode from './actions/GiveawayPrize';
+import GiveawayPrize from './actions/GiveawayPrize';
 import StarGift from './actions/StarGift';
 import StarGiftUnique from './actions/StarGiftUnique';
 import SuggestedPhoto from './actions/SuggestedPhoto';
@@ -336,8 +336,9 @@ const ActionMessage = ({
       case 'prizeStars':
       case 'giftCode':
         return (
-          <PremiumGiftCode
+          <GiveawayPrize
             action={action}
+            sender={sender}
             observeIntersectionForLoading={observeIntersectionForLoading}
             observeIntersectionForPlaying={observeIntersectionForPlaying}
             onClick={handleClick}
@@ -387,7 +388,7 @@ const ActionMessage = ({
       default:
         return undefined;
     }
-  }, [action, observeIntersectionForLoading, message, observeIntersectionForPlaying]);
+  }, [action, message, observeIntersectionForLoading, sender, observeIntersectionForPlaying]);
 
   if ((isInsideTopic && action.type === 'topicCreate') || action.type === 'phoneCall') {
     return undefined;

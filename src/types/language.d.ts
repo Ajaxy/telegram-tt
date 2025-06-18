@@ -1419,6 +1419,7 @@ export interface LangPair {
   'ActionScreenshotTakenYou': undefined;
   'ActionBotAppPlaceholder': undefined;
   'ActionGiftTextUnknown': undefined;
+  'ActionGiftTextUnknownYou': undefined;
   'ActionGiftUniqueSent': undefined;
   'ActionStarGiftUpgradedSelf': undefined;
   'ActionStarGiftTransferredSelf': undefined;
@@ -1524,7 +1525,6 @@ export interface LangPair {
   'GiftSortByPrice': undefined;
   'GiftSortByNumber': undefined;
   'ContextMenuItemSelectAll': undefined;
-  'ButtonSort': undefined;
   'ValueGiftSortByDate': undefined;
   'ValueGiftSortByPrice': undefined;
   'ValueGiftSortByNumber': undefined;
@@ -2758,6 +2758,14 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   'ActionGiveawayResultStarsText': {
     'channel': V;
     'amount': V;
+  };
+  'ActionGiftCodeSubscriptionText': {
+    'peer': V;
+    'months': V;
+  };
+  'ActionGiftCodeSubscriptionTextYou': {
+    'peer': V;
+    'months': V;
   };
   'ActionGiftPremiumTitle': {
     'months': V;

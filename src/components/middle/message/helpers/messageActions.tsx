@@ -35,16 +35,23 @@ export function translateWithYou<K extends LangKey>(
   key: K,
   isYou: boolean,
   variables: VariablesForKey<K>,
-  options?: { pluralValue?: number; asText?: boolean; isMarkdown?: boolean },
+  options?: {
+    pluralValue?: number;
+    asText?: boolean;
+    isMarkdown?: boolean;
+    renderTextFilters?: string[];
+  },
 ): TeactNode {
-  const { pluralValue, asText, isMarkdown } = options || {};
+  const { pluralValue, asText, isMarkdown, renderTextFilters } = options || {};
   const translationKey = isYou ? (`${key}You` as LangKey) : key;
 
   return lang(
     // @ts-ignore -- I have no idea if this even possible to type correctly
     translationKey,
     variables,
-    { withNodes: !asText, isMarkdown, pluralValue },
+    {
+      withNodes: !asText, isMarkdown, pluralValue, renderTextFilters,
+    },
   );
 }
 
