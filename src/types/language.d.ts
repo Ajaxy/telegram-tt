@@ -1530,6 +1530,8 @@ export interface LangPair {
   'ValueGiftSortByNumber': undefined;
   'ResellGiftsNoFound': undefined;
   'ResellGiftsClearFilters': undefined;
+  'SendInStandardQuality': undefined;
+  'SendInHighQuality': undefined;
   'MonoforumBadge': undefined;
   'MonoforumStatus': undefined;
   'MonoforumComposerPlaceholder': undefined;

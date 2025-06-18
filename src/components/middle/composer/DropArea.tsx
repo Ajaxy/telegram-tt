@@ -25,7 +25,7 @@ export type OwnProps = {
   isOpen: boolean;
   withQuick?: boolean;
   onHide: NoneToVoidFunction;
-  onFileSelect: (files: File[], suggestCompression?: boolean) => void;
+  onFileSelect: (files: File[]) => void;
   editingMessage?: ApiMessage | undefined;
 };
 
@@ -41,7 +41,7 @@ const DropArea: FC<OwnProps> = ({
   isOpen, withQuick, onHide, onFileSelect, editingMessage,
 }) => {
   const lang = useLang();
-  const { showNotification } = getActions();
+  const { showNotification, updateAttachmentSettings } = getActions();
   const hideTimeoutRef = useRef<number>();
   const prevWithQuick = usePreviousDeprecated(withQuick);
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen);
@@ -78,7 +78,8 @@ const DropArea: FC<OwnProps> = ({
     }
 
     onHide();
-    onFileSelect(files, withQuick ? false : undefined);
+    updateAttachmentSettings({ shouldCompress: withQuick ? false : undefined });
+    onFileSelect(files);
   });
 
   const handleQuickFilesDrop = useLastCallback(async (e: React.DragEvent<HTMLDivElement>) => {
@@ -102,7 +103,8 @@ const DropArea: FC<OwnProps> = ({
       }
 
       onHide();
-      onFileSelect(files, true);
+      updateAttachmentSettings({ shouldCompress: true });
+      onFileSelect(files);
     }
   });
 

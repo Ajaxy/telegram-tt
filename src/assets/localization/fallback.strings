@@ -2017,6 +2017,8 @@
 "ValueGiftSortByNumber" = "Number";
 "ResellGiftsNoFound" = "No gifts found";
 "ResellGiftsClearFilters" = "Clear Filters";
+"SendInStandardQuality" = "Send In Standard Quality";
+"SendInHighQuality" = "Send In High Quality";
 "MonoforumBadge" = "DIRECT";
 "MonoforumStatus" = "Channel messages";
 "MonoforumComposerPlaceholder" = "Choose a message to reply";

@@ -75,7 +75,6 @@ export type OwnProps = {
   isReady: boolean;
   isForMessage?: boolean;
   shouldSchedule?: boolean;
-  shouldSuggestCompression?: boolean;
   shouldForceCompression?: boolean;
   shouldForceAsFile?: boolean;
   isForCurrentMessageList?: boolean;
@@ -113,6 +112,7 @@ type StateProps = {
 const ATTACHMENT_MODAL_INPUT_ID = 'caption-input-text';
 const DROP_LEAVE_TIMEOUT_MS = 150;
 const MAX_LEFT_CHARS_TO_SHOW = 100;
+const CLOSE_MENU_ANIMATION_DURATION = 200;
 
 const AttachmentModal: FC<OwnProps & StateProps> = ({
   chatId,
@@ -134,7 +134,6 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   shouldSuggestCustomEmoji,
   customEmojiForEmoji,
   attachmentSettings,
-  shouldSuggestCompression,
   shouldForceCompression,
   shouldForceAsFile,
   isForCurrentMessageList,
@@ -176,14 +175,16 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
 
-  const [shouldSendCompressed, setShouldSendCompressed] = useState(
-    shouldSuggestCompression ?? attachmentSettings.shouldCompress,
-  );
+  const shouldSendCompressed = attachmentSettings.shouldCompress;
   const isSendingCompressed = Boolean(
     (shouldSendCompressed || shouldForceCompression || isInAlbum) && !shouldForceAsFile,
   );
   const [shouldSendGrouped, setShouldSendGrouped] = useState(attachmentSettings.shouldSendGrouped);
   const isInvertedMedia = attachmentSettings.isInvertedMedia;
+  const [shouldSendInHighQuality, setShouldSendInHighQuality] = useState(
+    attachmentSettings.shouldSendInHighQuality,
+  );
+  const [renderingShouldSendInHighQuality, setRenderingShouldSendInHighQuality] = useState(shouldSendInHighQuality);
 
   const {
     handleScroll: handleAttachmentsScroll,
@@ -196,6 +197,8 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   const isOpen = Boolean(attachments.length);
   const renderingIsOpen = Boolean(renderingAttachments?.length);
   const [isHovered, markHovered, unmarkHovered] = useFlag();
+
+  const timerRef = useRef<number | undefined>();
 
   useEffect(() => {
     if (!isOpen) {
@@ -269,16 +272,16 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setShouldSendCompressed(shouldSuggestCompression ?? attachmentSettings.shouldCompress);
       setShouldSendGrouped(attachmentSettings.shouldSendGrouped);
+      setShouldSendInHighQuality(attachmentSettings.shouldSendInHighQuality);
     }
-  }, [attachmentSettings, isOpen, shouldSuggestCompression]);
+  }, [attachmentSettings, isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
       updateAttachmentSettings({ isInvertedMedia: undefined });
     }
-  }, [updateAttachmentSettings, isOpen, shouldSuggestCompression]);
+  }, [updateAttachmentSettings, isOpen]);
 
   function setIsInvertedMedia(value?: true) {
     updateAttachmentSettings({ isInvertedMedia: value });
@@ -303,9 +306,10 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         : isSilent ? onSendSilent : onSend;
       send(isSendingCompressed, shouldSendGrouped, isInvertedMedia);
       updateAttachmentSettings({
-        shouldCompress: shouldSuggestCompression === undefined ? isSendingCompressed : undefined,
+        shouldCompress: isSendingCompressed,
         shouldSendGrouped,
         isInvertedMedia,
+        shouldSendInHighQuality,
       });
     }
   });
@@ -387,6 +391,17 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     })));
   });
 
+  const handleToggleShouldCompress = useLastCallback(() => {
+    const newValue = !shouldSendCompressed;
+    updateAttachmentSettings({ shouldCompress: newValue });
+  });
+
+  const handleToggleQuality = useLastCallback(() => {
+    const newValue = !shouldSendInHighQuality;
+    setShouldSendInHighQuality(newValue);
+    updateAttachmentSettings({ shouldSendInHighQuality: newValue });
+  });
+
   const handleDisableSpoilers = useLastCallback(() => {
     onAttachmentsUpdate(attachments.map((a) => ({ ...a, shouldSendAsSpoiler: undefined })));
   });
@@ -458,18 +473,33 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 
   const isQuickGallery = isSendingCompressed && hasOnlyMedia;
 
-  const [areAllPhotos, areAllVideos, areAllAudios] = useMemo(() => {
+  const [areAllPhotos, areAllVideos, areAllAudios, hasAnyPhoto] = useMemo(() => {
     if (!isQuickGallery || !renderingAttachments) return [false, false, false];
     const everyPhoto = renderingAttachments.every((a) => SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType));
     const everyVideo = renderingAttachments.every((a) => SUPPORTED_VIDEO_CONTENT_TYPES.has(a.mimeType));
     const everyAudio = renderingAttachments.every((a) => SUPPORTED_AUDIO_CONTENT_TYPES.has(a.mimeType));
-    return [everyPhoto, everyVideo, everyAudio];
+    const hasAnyPhoto = renderingAttachments.some((a) => SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType));
+    return [everyPhoto, everyVideo, everyAudio, hasAnyPhoto];
   }, [renderingAttachments, isQuickGallery]);
 
   const hasAnySpoilerable = useMemo(() => {
     if (!renderingAttachments) return false;
     return renderingAttachments.some((a) => !SUPPORTED_AUDIO_CONTENT_TYPES.has(a.mimeType));
   }, [renderingAttachments]);
+
+  useEffect(() => {
+    if (shouldSendInHighQuality === renderingShouldSendInHighQuality) return;
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => {
+      setRenderingShouldSendInHighQuality(shouldSendInHighQuality);
+    }, CLOSE_MENU_ANIMATION_DURATION);
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = undefined;
+      }
+    };
+  }, [shouldSendInHighQuality, renderingShouldSendInHighQuality]);
 
   if (!renderingAttachments) {
     return undefined;
@@ -536,16 +566,24 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                   {
                     !shouldForceAsFile && !shouldForceCompression && (isSendingCompressed ? (
 
-                      <MenuItem icon="document" onClick={() => setShouldSendCompressed(false)}>
+                      <MenuItem icon="document" onClick={handleToggleShouldCompress}>
                         {oldLang(isMultiple ? 'Attachment.SendAsFiles' : 'Attachment.SendAsFile')}
                       </MenuItem>
                     ) : (
 
-                      <MenuItem icon="photo" onClick={() => setShouldSendCompressed(true)}>
+                      <MenuItem icon="photo" onClick={handleToggleShouldCompress}>
                         {isMultiple ? 'Send All as Media' : 'Send as Media'}
                       </MenuItem>
                     ))
                   }
+                  {isSendingCompressed && !editingMessage && hasAnyPhoto && (
+                    <MenuItem
+                      icon={renderingShouldSendInHighQuality ? 'sd-photo' : 'hd-photo'}
+                      onClick={handleToggleQuality}
+                    >
+                      {lang(renderingShouldSendInHighQuality ? 'SendInStandardQuality' : 'SendInHighQuality')}
+                    </MenuItem>
+                  )}
                   {isSendingCompressed && hasAnySpoilerable && Boolean(!editingMessage) && (
                     hasSpoiler ? (
                       <MenuItem icon="spoiler-disable" onClick={handleDisableSpoilers}>

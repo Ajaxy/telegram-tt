@@ -1,4 +1,4 @@
-import { useState } from '../../../../lib/teact/teact';
+import { useEffect, useState } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type { ApiAttachment, ApiMessage } from '../../../../api/types';
@@ -22,6 +22,7 @@ export default function useAttachmentModal({
   canSendDocuments,
   insertNextText,
   editedMessage,
+  shouldSendInHighQuality,
 }: {
   attachments: ApiAttachment[];
   fileSizeLimit: number;
@@ -34,12 +35,12 @@ export default function useAttachmentModal({
   canSendDocuments?: boolean;
   insertNextText: VoidFunction;
   editedMessage: ApiMessage | undefined;
+  shouldSendInHighQuality?: boolean;
 }) {
   const lang = useLang();
   const { openLimitReachedModal, showAllowedMessageTypesNotification, showNotification } = getActions();
   const [shouldForceAsFile, setShouldForceAsFile] = useState<boolean>(false);
   const [shouldForceCompression, setShouldForceCompression] = useState<boolean>(false);
-  const [shouldSuggestCompression, setShouldSuggestCompression] = useState<boolean | undefined>(undefined);
 
   const handleClearAttachments = useLastCallback(() => {
     setAttachments(MEMO_EMPTY_ARRAY);
@@ -99,13 +100,14 @@ export default function useAttachmentModal({
       }
     } else {
       const newAttachments = await Promise.all(files.map((file) => (
-        buildAttachment(file.name, file, { shouldSendAsSpoiler: isSpoiler || undefined })
+        buildAttachment(file.name, file,
+          { shouldSendAsSpoiler: isSpoiler || undefined, shouldSendInHighQuality })
       )));
       handleSetAttachments([...attachments, ...newAttachments]);
     }
   });
 
-  const handleFileSelect = useLastCallback(async (files: File[], suggestCompression?: boolean) => {
+  const handleFileSelect = useLastCallback(async (files: File[]) => {
     if (editedMessage) {
       const newAttachment = await buildAttachment(files[0].name, files[0]);
       const canReplace = editedMessage && canReplaceMessageMedia(editedMessage, newAttachment);
@@ -120,14 +122,23 @@ export default function useAttachmentModal({
         handleSetAttachments([newAttachment]);
       }
     } else {
-      const newAttachments = await Promise.all(files.map((file) => buildAttachment(file.name, file)));
+      const newAttachments = await Promise.all(files.map((file) =>
+        buildAttachment(file.name, file, { shouldSendInHighQuality })));
       handleSetAttachments(newAttachments);
     }
-    setShouldSuggestCompression(suggestCompression);
   });
 
+  const handleUpdateAttachmentsQuality = useLastCallback(async () => {
+    const newAttachments = await Promise.all(attachments.map((attachment) =>
+      buildAttachment(attachment.filename, attachment.blob, { shouldSendInHighQuality })));
+    handleSetAttachments(newAttachments);
+  });
+
+  useEffect(() => {
+    handleUpdateAttachmentsQuality();
+  }, [shouldSendInHighQuality]);
+
   return {
-    shouldSuggestCompression,
     handleAppendFiles,
     handleFileSelect,
     onCaptionUpdate: setHtml,

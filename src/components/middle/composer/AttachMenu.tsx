@@ -3,6 +3,7 @@ import {
   memo, useEffect,
   useMemo,
 } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import type { ApiAttachMenuPeerType, ApiMessage } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
@@ -55,7 +56,7 @@ export type OwnProps = {
   peerType?: ApiAttachMenuPeerType;
   shouldCollectDebugLogs?: boolean;
   theme: ThemeKey;
-  onFileSelect: (files: File[], shouldSuggestCompression?: boolean) => void;
+  onFileSelect: (files: File[]) => void;
   onPollCreate: NoneToVoidFunction;
   onMenuOpen: NoneToVoidFunction;
   onMenuClose: NoneToVoidFunction;
@@ -89,6 +90,9 @@ const AttachMenu: FC<OwnProps> = ({
   messageListType,
   paidMessagesStars,
 }) => {
+  const {
+    updateAttachmentSettings,
+  } = getActions();
   const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
   const [handleMouseEnter, handleMouseLeave, markMouseInside] = useMouseInside(isAttachMenuOpen, closeAttachMenu);
 
@@ -126,29 +130,31 @@ const AttachMenu: FC<OwnProps> = ({
     }
   });
 
-  const handleFileSelect = useLastCallback((e: Event, shouldSuggestCompression?: boolean) => {
+  const handleFileSelect = useLastCallback((e: Event) => {
     const { files } = e.target as HTMLInputElement;
     const validatedFiles = validateFiles(files);
 
     if (validatedFiles?.length) {
-      onFileSelect(validatedFiles, shouldSuggestCompression);
+      onFileSelect(validatedFiles);
     }
   });
 
   const handleQuickSelect = useLastCallback(() => {
+    updateAttachmentSettings({ shouldCompress: true });
     openSystemFilesDialog(
       Array.from(canSendVideoAndPhoto ? CONTENT_TYPES_WITH_PREVIEW : (
         canSendPhotos ? SUPPORTED_PHOTO_CONTENT_TYPES : SUPPORTED_VIDEO_CONTENT_TYPES
       )).join(','),
-      (e) => handleFileSelect(e, true),
+      (e) => handleFileSelect(e),
     );
   });
 
   const handleDocumentSelect = useLastCallback(() => {
+    updateAttachmentSettings({ shouldCompress: false });
     openSystemFilesDialog(!canSendDocuments && canSendAudios
       ? Array.from(SUPPORTED_AUDIO_CONTENT_TYPES).join(',') : (
         '*'
-      ), (e) => handleFileSelect(e, false));
+      ), (e) => handleFileSelect(e));
   });
 
   const handleSendLogs = useLastCallback(() => {

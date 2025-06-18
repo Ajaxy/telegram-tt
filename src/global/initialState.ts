@@ -180,6 +180,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     shouldSendGrouped: true,
     isInvertedMedia: undefined,
     webPageMediaSize: undefined,
+    shouldSendInHighQuality: false,
   },
 
   scheduledMessages: {

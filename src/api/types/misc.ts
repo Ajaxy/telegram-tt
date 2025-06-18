@@ -36,6 +36,7 @@ export interface ApiOnProgress {
 }
 
 export interface ApiAttachment {
+  blob: Blob;
   blobUrl: string;
   compressedBlobUrl?: string;
   filename: string;
@@ -62,6 +63,7 @@ export interface ApiAttachment {
 
   uniqueId?: string;
   ttlSeconds?: number;
+  shouldSendInHighQuality?: boolean;
 }
 
 export interface ApiWallpaper {

@@ -529,17 +529,11 @@ addActionHandler('requestWave', (global, actions, payload): ActionReturnType => 
 });
 
 addActionHandler('updateAttachmentSettings', (global, actions, payload): ActionReturnType => {
-  const {
-    shouldCompress, shouldSendGrouped, isInvertedMedia, webPageMediaSize,
-  } = payload;
-
   return {
     ...global,
     attachmentSettings: {
-      shouldCompress: shouldCompress ?? global.attachmentSettings.shouldCompress,
-      shouldSendGrouped: shouldSendGrouped ?? global.attachmentSettings.shouldSendGrouped,
-      isInvertedMedia,
-      webPageMediaSize,
+      ...global.attachmentSettings,
+      ...payload,
     },
   };
 });
