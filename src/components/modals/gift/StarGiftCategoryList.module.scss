@@ -42,6 +42,8 @@
   color: var(--color-text-secondary);
   white-space: nowrap;
 
+  transition: background-color 0.15s;
+
   &:hover {
     cursor: pointer;
     background-color: var(--color-background-secondary-accent);

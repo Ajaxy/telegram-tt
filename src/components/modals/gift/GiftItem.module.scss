@@ -28,6 +28,8 @@
 
     opacity: 0;
     background-color: var(--color-hover-overlay);
+
+    transition: opacity 0.15s;
   }
 
   :global(html.theme-dark) & {
