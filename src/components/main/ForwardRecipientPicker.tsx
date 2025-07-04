@@ -118,6 +118,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
       onSelectRecipient={handleSelectRecipient}
       onClose={handleClose}
       onCloseAnimationEnd={unmarkIsShown}
+      isForwarding={isForwarding}
     />
   );
 };

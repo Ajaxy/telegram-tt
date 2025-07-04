@@ -421,7 +421,7 @@ namespace Api {
   export type TypeAccessPointRule = AccessPointRule;
   export type TypeTlsClientHello = TlsClientHello;
   export type TypeTlsBlock = TlsBlockString | TlsBlockRandom | TlsBlockZero | TlsBlockDomain | TlsBlockGrease | TlsBlockScope;
-
+  
 
   export namespace storage {
     export type TypeFileType = storage.FileUnknown | storage.FilePartial | storage.FileJpeg | storage.FileGif | storage.FilePng | storage.FilePdf | storage.FileMp3 | storage.FileMov | storage.FileMp4 | storage.FileWebp;
@@ -17810,7 +17810,7 @@ namespace Api {
 
     static fromReader(reader: Reader): TlsBlockScope;
   }
-
+  
 
   export namespace storage {
     export class FileUnknown extends VirtualClass<void> {
@@ -22139,7 +22139,7 @@ namespace Api {
   }>, Api.TypeDestroySessionRes> {
     sessionId: long;
   }
-
+  
 
   export namespace auth {
     export class SendCode extends Request<Partial<{

@@ -8,6 +8,8 @@ import type { ThreadId } from '../../types';
 import { API_CHAT_TYPES } from '../../config';
 import {
   getCanPostInChat,
+  getHasAdminRight,
+  isChatChannel,
   isDeletedUser,
 } from '../../global/helpers';
 import { filterPeersByQuery } from '../../global/helpers/peers';
@@ -31,6 +33,7 @@ export type OwnProps = {
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
   isLowStackPriority?: boolean;
+  isForwarding?: boolean;
 };
 
 type StateProps = {
@@ -56,6 +59,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
   onClose,
   onCloseAnimationEnd,
   isLowStackPriority,
+  isForwarding,
 }) => {
   const [search, setSearch] = useState('');
   const ids = useMemo(() => {
@@ -75,6 +79,9 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
     ].filter((id) => {
       const chat = selectChat(global, id);
       const user = selectUser(global, id);
+      const hasAdminRights = chat && getHasAdminRight(chat, 'postMessages');
+      const isChannel = chat && isChatChannel(chat);
+      if (isForwarding && isChannel && !hasAdminRights) return false;
       if (user && !isDeletedUser(user)) return true;
 
       if (!chat) return false;
@@ -103,7 +110,17 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
     );
 
     return filterChatIdsByType(global, sorted, filter);
-  }, [pinnedIds, currentUserId, activeListIds, search, archivedListIds, contactIds, filter, isOpen]);
+  }, [
+    isOpen,
+    pinnedIds,
+    currentUserId,
+    activeListIds,
+    search,
+    archivedListIds,
+    contactIds,
+    filter,
+    isForwarding,
+  ]);
 
   const renderingIds = useCurrentOrPrev(ids, true)!;
 
