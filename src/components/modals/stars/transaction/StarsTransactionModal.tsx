@@ -86,6 +86,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
 
     const {
       giveawayPostId, photo, stars, isGiftUpgrade, starGift, isGiftResale,
+      starRefCommision,
     } = transaction;
 
     const gift = transaction?.starGift;
@@ -194,7 +195,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
 
     const tableData: TableData = [];
 
-    if (transaction && !transaction.paidMessages && !isGiftResale) {
+    if (transaction && starRefCommision && !transaction.paidMessages && !isGiftResale) {
       tableData.push([
         oldLang('StarsTransaction.StarRefReason.Title'),
         oldLang('StarsTransaction.StarRefReason.Program'),
