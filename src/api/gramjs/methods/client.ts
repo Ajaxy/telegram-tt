@@ -474,7 +474,11 @@ async function handleTerminatedSession() {
       shouldThrow: true,
     });
   } catch (err: any) {
-    if (err.errorMessage === 'AUTH_KEY_UNREGISTERED' || err.errorMessage === 'SESSION_REVOKED') {
+    if (
+      err.errorMessage === 'AUTH_KEY_UNREGISTERED'
+      || err.errorMessage === 'SESSION_REVOKED'
+      || err.errorMessage === 'USER_DEACTIVATED'
+    ) {
       sendApiUpdate({
         '@type': 'updateConnectionState',
         connectionState: 'connectionStateBroken',
