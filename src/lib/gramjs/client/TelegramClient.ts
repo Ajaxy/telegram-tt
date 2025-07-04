@@ -335,6 +335,7 @@ class TelegramClient {
     }
 
     this.session.setAuthKey(this._sender.authKey);
+    // `_initWith` is used to announce our API layer to the server
     await this._sender.send(this._initWith(
       new Api.help.GetConfig(),
     ));
@@ -686,7 +687,11 @@ class TelegramClient {
   ): Promise<MTProtoSender> {
     const i = index || 0;
 
-    if (!this._exportedSenderPromises[dcId]) this._exportedSenderPromises[dcId] = {};
+    let shouldAnnounceLayer = false;
+    if (!this._exportedSenderPromises[dcId]) {
+      this._exportedSenderPromises[dcId] = {};
+      shouldAnnounceLayer = true;
+    }
     if (!this._exportedSenderRefCounter[dcId]) this._exportedSenderRefCounter[dcId] = {};
 
     if (!this._exportedSenderPromises[dcId][i] || shouldReconnect) {
@@ -728,6 +733,11 @@ class TelegramClient {
     if (this._exportedSenderReleaseTimeouts[dcId][i]) {
       clearTimeout(this._exportedSenderReleaseTimeouts[dcId][i]);
       this._exportedSenderReleaseTimeouts[dcId][i] = undefined;
+    }
+
+    if (shouldAnnounceLayer) {
+      // Dummy request to let DC know about our API layer
+      sender.send(this._initWith(new Api.help.GetConfig()));
     }
 
     return sender;
