@@ -13,7 +13,7 @@ import {
   buildPhoneCall,
 } from '../apiBuilders/calls';
 import {
-  buildInputGroupCall, buildInputPeer, buildInputPhoneCall, buildInputUser, generateRandomInt,
+  buildInputGroupCall, buildInputPeer, buildInputPhoneCall, buildInputUser, DEFAULT_PRIMITIVES, generateRandomInt,
 } from '../gramjsBuilders';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest, invokeRequestBeacon } from './client';
@@ -25,6 +25,7 @@ export async function getGroupCall({
 }) {
   const result = await invokeRequest(new GramJs.phone.GetGroupCall({
     call: buildInputGroupCall(call),
+    limit: DEFAULT_PRIMITIVES.INT,
   }));
 
   if (!result) {
@@ -100,7 +101,8 @@ export async function exportGroupCallInvite({
 }
 
 export async function fetchGroupCallParticipants({
-  call, offset,
+  call,
+  offset = DEFAULT_PRIMITIVES.STRING,
 }: {
   call: ApiGroupCall; offset?: string;
 }) {
@@ -108,7 +110,7 @@ export async function fetchGroupCallParticipants({
     call: buildInputGroupCall(call),
     ids: [],
     sources: [],
-    offset: offset || '',
+    offset,
     limit: GROUP_CALL_PARTICIPANTS_LIMIT,
   }));
 
@@ -131,6 +133,7 @@ export function leaveGroupCall({
 }) {
   const request = new GramJs.phone.LeaveGroupCall({
     call: buildInputGroupCall(call),
+    source: DEFAULT_PRIMITIVES.INT,
   });
 
   if (isPageUnload) {
@@ -239,7 +242,10 @@ export function leaveGroupCallPresentation({
 }
 
 export async function getDhConfig() {
-  const dhConfig = await invokeRequest(new GramJs.messages.GetDhConfig({}));
+  const dhConfig = await invokeRequest(new GramJs.messages.GetDhConfig({
+    version: DEFAULT_PRIMITIVES.INT,
+    randomLength: DEFAULT_PRIMITIVES.INT,
+  }));
 
   if (!dhConfig || dhConfig instanceof GramJs.messages.DhConfigNotModified) return undefined;
 
@@ -258,6 +264,8 @@ export function discardCall({
   const request = new GramJs.phone.DiscardCall({
     peer: buildInputPhoneCall(call),
     reason: isBusy ? new GramJs.PhoneCallDiscardReasonBusy() : new GramJs.PhoneCallDiscardReasonHangup(),
+    duration: DEFAULT_PRIMITIVES.INT,
+    connectionId: DEFAULT_PRIMITIVES.BIGINT,
   });
 
   if (isPageUnload) {

@@ -47,6 +47,7 @@ import {
   buildInputPrivacyKey,
   buildInputPrivacyRules,
   buildInputUser,
+  DEFAULT_PRIMITIVES,
 } from '../gramjsBuilders';
 import { addPhotoToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
@@ -64,9 +65,9 @@ export function updateProfile({
   about?: string;
 }) {
   return invokeRequest(new GramJs.account.UpdateProfile({
-    firstName: firstName || '',
-    lastName: lastName || '',
-    about: about || '',
+    firstName,
+    lastName,
+    about,
   }), {
     shouldReturnTrue: true,
   });
@@ -100,9 +101,9 @@ export function updateUsername(username: string) {
 }
 
 export async function updateProfilePhoto(photo?: ApiPhoto, isFallback?: boolean) {
-  const photoId = photo ? buildInputPhoto(photo) : new GramJs.InputPhotoEmpty();
+  const photoId = photo && buildInputPhoto(photo);
   const result = await invokeRequest(new GramJs.photos.UpdateProfilePhoto({
-    id: photoId,
+    id: photoId || new GramJs.InputPhotoEmpty(),
     ...(isFallback ? { fallback: true } : undefined),
   }));
   if (!result) return undefined;
@@ -235,6 +236,7 @@ export async function fetchBlockedUsers({
 }) {
   const result = await invokeRequest(new GramJs.contacts.GetBlocked({
     myStoriesFrom: isOnlyStories,
+    offset: DEFAULT_PRIMITIVES.INT,
     limit: BLOCKED_LIST_LIMIT,
   }));
   if (!result) {
@@ -523,6 +525,8 @@ export async function oldFetchLangPack({ sourceLangPacks, langCode }: {
 
 export async function fetchPrivacySettings(privacyKey: ApiPrivacyKey) {
   const key = buildInputPrivacyKey(privacyKey);
+  if (!key) return undefined;
+
   const result = await invokeRequest(new GramJs.account.GetPrivacy({ key }));
 
   if (!result) {
@@ -536,7 +540,7 @@ export async function fetchPrivacySettings(privacyKey: ApiPrivacyKey) {
 
 export function registerDevice(token: string) {
   const client = getClient();
-  const secret = client.session.getAuthKey().getKey();
+  const secret = client.session.getAuthKey().getKey()!;
   return invokeRequest(new GramJs.account.RegisterDevice({
     tokenType: 10,
     secret,
@@ -559,6 +563,7 @@ export async function setPrivacySettings(
 ) {
   const key = buildInputPrivacyKey(privacyKey);
   const privacyRules = buildInputPrivacyRules(rules);
+  if (!key) return undefined;
 
   const result = await invokeRequest(new GramJs.account.SetPrivacy({ key, rules: privacyRules }));
 
@@ -594,7 +599,7 @@ export function updateContentSettings(isEnabled: boolean) {
 }
 
 export async function fetchAppConfig(hash?: number): Promise<ApiAppConfig | undefined> {
-  const result = await invokeRequest(new GramJs.help.GetAppConfig({ hash }));
+  const result = await invokeRequest(new GramJs.help.GetAppConfig({ hash: hash ?? DEFAULT_PRIMITIVES.INT }));
   if (!result || result instanceof GramJs.help.AppConfigNotModified) return undefined;
 
   const { config, hash: resultHash } = result;
@@ -610,7 +615,7 @@ export async function fetchConfig(): Promise<ApiConfig | undefined> {
 
 export async function fetchPeerColors(hash?: number) {
   const result = await invokeRequest(new GramJs.help.GetPeerColors({
-    hash,
+    hash: hash ?? DEFAULT_PRIMITIVES.INT,
   }));
   if (!result) return undefined;
 
@@ -627,7 +632,7 @@ export async function fetchPeerColors(hash?: number) {
 
 export async function fetchTimezones(hash?: number) {
   const result = await invokeRequest(new GramJs.help.GetTimezonesList({
-    hash,
+    hash: hash ?? DEFAULT_PRIMITIVES.INT,
   }));
   if (!result || result instanceof GramJs.help.TimezonesListNotModified) return undefined;
 
@@ -642,6 +647,7 @@ export async function fetchTimezones(hash?: number) {
 export async function fetchCountryList({ langCode = 'en' }: { langCode?: string }) {
   const countryList = await invokeRequest(new GramJs.help.GetCountriesList({
     langCode,
+    hash: DEFAULT_PRIMITIVES.INT,
   }));
 
   if (!(countryList instanceof GramJs.help.CountriesList)) {

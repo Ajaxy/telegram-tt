@@ -32,6 +32,7 @@ import {
   buildInputReplyTo,
   buildInputThemeParams,
   buildInputUser,
+  DEFAULT_PRIMITIVES,
   generateRandomBigInt,
 } from '../gramjsBuilders';
 import {
@@ -62,6 +63,9 @@ export async function answerCallbackButton({
 export async function fetchTopInlineBots() {
   const topPeers = await invokeRequest(new GramJs.contacts.GetTopPeers({
     botsInline: true,
+    limit: DEFAULT_PRIMITIVES.INT,
+    offset: DEFAULT_PRIMITIVES.INT,
+    hash: DEFAULT_PRIMITIVES.BIGINT,
   }));
 
   if (!(topPeers instanceof GramJs.contacts.TopPeers)) {
@@ -79,6 +83,9 @@ export async function fetchTopInlineBots() {
 export async function fetchTopBotApps() {
   const topPeers = await invokeRequest(new GramJs.contacts.GetTopPeers({
     botsApp: true,
+    limit: DEFAULT_PRIMITIVES.INT,
+    offset: DEFAULT_PRIMITIVES.INT,
+    hash: DEFAULT_PRIMITIVES.BIGINT,
   }));
 
   if (!(topPeers instanceof GramJs.contacts.TopPeers)) {
@@ -116,7 +123,7 @@ export async function fetchInlineBot({ username }: { username: string }) {
 }
 
 export async function fetchInlineBotResults({
-  bot, chat, query, offset = '',
+  bot, chat, query, offset = DEFAULT_PRIMITIVES.STRING,
 }: {
   bot: ApiUser; chat: ApiChat; query: string; offset?: string;
 }) {
@@ -182,7 +189,7 @@ export async function startBot({
     bot: buildInputUser(bot.id, bot.accessHash),
     peer: buildInputPeer(bot.id, bot.accessHash),
     randomId,
-    startParam,
+    startParam: startParam ?? DEFAULT_PRIMITIVES.STRING,
   }));
 }
 
@@ -307,6 +314,7 @@ export async function fetchBotApp({
       botId: buildInputUser(bot.id, bot.accessHash),
       shortName: appName,
     }),
+    hash: DEFAULT_PRIMITIVES.BIGINT,
   }));
 
   if (!result || result instanceof GramJs.BotAppNotModified) {
@@ -391,7 +399,7 @@ export async function loadAttachBots({
   hash?: string;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetAttachMenuBots({
-    hash: hash ? BigInt(hash) : undefined,
+    hash: hash ? BigInt(hash) : DEFAULT_PRIMITIVES.BIGINT,
   }));
 
   if (result instanceof GramJs.AttachMenuBots) {
@@ -664,23 +672,23 @@ export function setBotInfo({
   return invokeRequest(new GramJs.bots.SetBotInfo({
     bot: buildInputUser(bot.id, bot.accessHash),
     langCode,
-    name: name || '',
-    about: about || '',
-    description: description || '',
+    name,
+    about,
+    description,
   }), {
     shouldReturnTrue: true,
   });
 }
 
 export async function fetchPopularAppBots({
-  offset = '', limit,
+  offset = DEFAULT_PRIMITIVES.STRING, limit,
 }: {
   offset?: string;
   limit?: number;
 }) {
   const result = await invokeRequest(new GramJs.bots.GetPopularAppBots({
     offset,
-    limit,
+    limit: limit ?? DEFAULT_PRIMITIVES.INT,
   }));
 
   if (!result) {

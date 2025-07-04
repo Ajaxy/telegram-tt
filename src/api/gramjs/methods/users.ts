@@ -14,6 +14,7 @@ import {
   buildInputPeer,
   buildInputUser,
   buildMtpPeerId,
+  DEFAULT_PRIMITIVES,
   getEntityTypeById,
 } from '../gramjsBuilders';
 import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
@@ -88,7 +89,9 @@ export async function fetchFullUser({
 export async function fetchCommonChats(user: ApiUser, maxId?: string) {
   const result = await invokeRequest(new GramJs.messages.GetCommonChats({
     userId: buildInputUser(user.id, user.accessHash),
-    maxId: maxId ? buildMtpPeerId(maxId, getEntityTypeById(maxId)) : undefined,
+    maxId: maxId
+      ? buildMtpPeerId(maxId, getEntityTypeById(maxId)) : DEFAULT_PRIMITIVES.BIGINT,
+    limit: DEFAULT_PRIMITIVES.INT,
   }));
 
   if (!result) {
@@ -127,6 +130,9 @@ export async function fetchNearestCountry() {
 export async function fetchTopUsers() {
   const topPeers = await invokeRequest(new GramJs.contacts.GetTopPeers({
     correspondents: true,
+    offset: DEFAULT_PRIMITIVES.INT,
+    limit: DEFAULT_PRIMITIVES.INT,
+    hash: DEFAULT_PRIMITIVES.BIGINT,
   }));
   if (!(topPeers instanceof GramJs.contacts.TopPeers)) {
     return undefined;
@@ -173,9 +179,9 @@ export async function fetchUsers({ users }: { users: ApiUser[] }) {
 }
 
 export async function importContact({
-  phone,
-  firstName,
-  lastName,
+  phone = DEFAULT_PRIMITIVES.STRING,
+  firstName = DEFAULT_PRIMITIVES.STRING,
+  lastName = DEFAULT_PRIMITIVES.STRING,
 }: {
   phone?: string;
   firstName?: string;
@@ -183,9 +189,9 @@ export async function importContact({
 }) {
   const result = await invokeRequest(new GramJs.contacts.ImportContacts({
     contacts: [buildInputContact({
-      phone: phone || '',
-      firstName: firstName || '',
-      lastName: lastName || '',
+      phone,
+      firstName,
+      lastName,
     })],
   }));
 
@@ -199,9 +205,9 @@ export async function importContact({
 export function updateContact({
   id,
   accessHash,
-  phoneNumber = '',
-  firstName = '',
-  lastName = '',
+  phoneNumber = DEFAULT_PRIMITIVES.STRING,
+  firstName = DEFAULT_PRIMITIVES.STRING,
+  lastName = DEFAULT_PRIMITIVES.STRING,
   shouldSharePhoneNumber = false,
 }: {
   id: string;

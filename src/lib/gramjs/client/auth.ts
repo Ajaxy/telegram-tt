@@ -4,6 +4,7 @@ import type TelegramClient from './TelegramClient';
 import type { Update } from './TelegramClient';
 
 import { getServerTime } from '../../../util/serverTime';
+import { DEFAULT_PRIMITIVES } from '../../../api/gramjs/gramjsBuilders';
 import { RPCError } from '../errors';
 import Api from '../tl/api';
 
@@ -84,7 +85,7 @@ async function signInUserWithWebToken(
   try {
     const { apiId, apiHash } = apiCredentials;
     const sendResult = await client.invoke(new Api.auth.ImportWebTokenAuthorization({
-      webAuthToken: authParams.webAuthToken,
+      webAuthToken: authParams.webAuthToken!,
       apiId,
       apiHash,
     }));
@@ -208,7 +209,7 @@ async function signInUser(
           phoneNumber,
           phoneCodeHash,
           firstName,
-          lastName,
+          lastName: lastName || DEFAULT_PRIMITIVES.STRING,
         })) as Api.auth.Authorization;
 
         if (termsOfService) {
@@ -232,6 +233,8 @@ async function signInUserWithQrCode(
 ): Promise<Api.TypeUser> {
   let isScanningComplete = false;
 
+  const { apiId, apiHash } = apiCredentials;
+
   const inputPromise = (async () => {
     // eslint-disable-next-line no-constant-condition
     while (1) {
@@ -240,8 +243,8 @@ async function signInUserWithQrCode(
       }
 
       const result = await client.invoke(new Api.auth.ExportLoginToken({
-        apiId: Number(process.env.TELEGRAM_API_ID),
-        apiHash: process.env.TELEGRAM_API_HASH,
+        apiId,
+        apiHash,
         exceptIds: authParams.accountIds?.map((id) => bigInt(id)) || [],
       }));
       if (!(result instanceof Api.auth.LoginToken)) {
@@ -281,8 +284,8 @@ async function signInUserWithQrCode(
 
   try {
     const result2 = await client.invoke(new Api.auth.ExportLoginToken({
-      apiId: Number(process.env.TELEGRAM_API_ID),
-      apiHash: process.env.TELEGRAM_API_HASH,
+      apiId,
+      apiHash,
       exceptIds: authParams.accountIds?.map((id) => bigInt(id)) || [],
     }));
 

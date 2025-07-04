@@ -124,6 +124,7 @@ function buildApiChatFieldsFromPeerEntity(
     paidMessagesStars: paidMessagesStars?.toJSNumber(),
     level: channel?.level,
     hasAutoTranslation: channel?.autotranslation,
+    withForumTabs: channel?.forumTabs,
 
     ...buildApiChatPermissions(peerEntity),
     ...buildApiChatRestrictions(peerEntity),

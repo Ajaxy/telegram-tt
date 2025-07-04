@@ -88,12 +88,12 @@ ${indent}}`.trim();
             const hasRequiredArgs = argKeys.some((argName) => !isFlagArg(argName) && !argsConfig[argName].isFlag);
 
             return `
-      export class ${upperFirst(name)} extends Request<Partial<{
+      export class ${upperFirst(name)} extends Request<{
 ${indent}  ${argKeys.map((argName) => `
         ${renderArg(argName, argsConfig[argName])};
       `.trim())
             .join(`\n${indent}  `)}
-${indent}}${!hasRequiredArgs ? ' | void' : ''}>, ${renderedResult}> {
+${indent}}${!hasRequiredArgs ? ' | void' : ''}, ${renderedResult}> {
 ${indent}  ${argKeys.map((argName) => `
         ${renderArg(argName, argsConfig[argName])};
       `.trim())
@@ -200,7 +200,7 @@ namespace Api {
     constructor(args: Args);
   }
 
-  class Request<Args, Response> extends VirtualClass<Partial<Args>> {
+  class Request<Args, Response> extends VirtualClass<Args> {
     static readResult(reader: Reader): Buffer;
 
     __response: Response;

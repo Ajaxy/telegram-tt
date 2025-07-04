@@ -6,13 +6,13 @@ import type {
 } from '../../types';
 
 import { buildApiChatLink } from '../apiBuilders/misc';
-import { buildInputPeer, buildInputPhoto, buildInputReportReason } from '../gramjsBuilders';
+import { buildInputPeer, buildInputPhoto, buildInputReportReason, DEFAULT_PRIMITIVES } from '../gramjsBuilders';
 import { invokeRequest } from './client';
 
 export async function reportPeer({
   peer,
   reason,
-  description,
+  description = DEFAULT_PRIMITIVES.STRING,
 }: {
   peer: ApiPeer; reason: ApiReportReason; description?: string;
 }) {
@@ -29,7 +29,7 @@ export async function reportProfilePhoto({
   peer,
   photo,
   reason,
-  description,
+  description = DEFAULT_PRIMITIVES.STRING,
 }: {
   peer: ApiPeer; photo: ApiPhoto; reason: ApiReportReason; description?: string;
 }) {

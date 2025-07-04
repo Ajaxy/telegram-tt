@@ -42,6 +42,12 @@ import { pick } from '../../../util/iteratees';
 import { deserializeBytes } from '../helpers/misc';
 import localDb from '../localDb';
 
+export const DEFAULT_PRIMITIVES = {
+  INT: 0,
+  BIGINT: BigInt(0),
+  STRING: '',
+} as const;
+
 export function getEntityTypeById(peerId: string) {
   const n = Number(peerId);
   if (n > 0) {
@@ -514,7 +520,7 @@ export function buildInputPrivacyKey(privacyKey: ApiPrivacyKey) {
   return undefined;
 }
 
-export function buildInputReportReason(reason: ApiReportReason) {
+export function buildInputReportReason(reason: ApiReportReason): GramJs.TypeReportReason {
   switch (reason) {
     case 'spam':
       return new GramJs.InputReportReasonSpam();
@@ -535,10 +541,9 @@ export function buildInputReportReason(reason: ApiReportReason) {
     case 'personalDetails':
       return new GramJs.InputReportReasonPersonalDetails();
     case 'other':
+    default:
       return new GramJs.InputReportReasonOther();
   }
-
-  return undefined;
 }
 
 export function buildSendMessageAction(action: ApiSendMessageAction) {

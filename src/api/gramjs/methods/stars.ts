@@ -20,7 +20,7 @@ import {
   buildApiStarsTransaction,
   buildApiStarTopupOption,
 } from '../apiBuilders/payments';
-import { buildInputPeer, buildInputSavedStarGift, buildInputUser } from '../gramjsBuilders';
+import { buildInputPeer, buildInputSavedStarGift, buildInputUser, DEFAULT_PRIMITIVES } from '../gramjsBuilders';
 import { checkErrorType, wrapError } from '../helpers/misc';
 import { invokeRequest } from './client';
 import { getPassword } from './twoFaSettings';
@@ -36,7 +36,9 @@ export async function fetchStarsGiveawayOptions() {
 }
 
 export async function fetchStarGifts() {
-  const result = await invokeRequest(new GramJs.payments.GetStarGifts({}));
+  const result = await invokeRequest(new GramJs.payments.GetStarGifts({
+    hash: DEFAULT_PRIMITIVES.INT,
+  }));
 
   if (!result || result instanceof GramJs.payments.StarGiftsNotModified) {
     return undefined;
@@ -48,9 +50,9 @@ export async function fetchStarGifts() {
 
 export async function fetchResaleGifts({
   giftId,
-  offset = '',
-  limit,
-  attributesHash = '0',
+  offset = DEFAULT_PRIMITIVES.STRING,
+  limit = DEFAULT_PRIMITIVES.INT,
+  attributesHash,
   filter,
 }: {
   giftId: string;
@@ -71,12 +73,12 @@ export async function fetchResaleGifts({
      giftId: bigInt(giftId),
      offset,
      limit,
-     attributesHash: attributesHash ? bigInt(attributesHash) : undefined,
+     attributesHash: attributesHash ? bigInt(attributesHash) : DEFAULT_PRIMITIVES.BIGINT,
      attributes: buildInputResaleGiftsAttributes(attributes),
      ...(filter && {
        sortByPrice: filter.sortType === 'byPrice' || undefined,
        sortByNum: filter.sortType === 'byNumber' || undefined,
-     } satisfies GetResaleStarGifts),
+     } satisfies Partial<GetResaleStarGifts>),
    };
 
    const result = await invokeRequest(new GramJs.payments.GetResaleStarGifts(params));
@@ -90,8 +92,8 @@ export async function fetchResaleGifts({
 
 export async function fetchSavedStarGifts({
   peer,
-  offset = '',
-  limit,
+  offset = DEFAULT_PRIMITIVES.STRING,
+  limit = DEFAULT_PRIMITIVES.INT,
   filter,
 }: {
   peer: ApiPeer;
@@ -112,7 +114,7 @@ export async function fetchSavedStarGifts({
       excludeUnique: !filter.shouldIncludeUnique || undefined,
       excludeSaved: !filter.shouldIncludeDisplayed || undefined,
       excludeUnsaved: !filter.shouldIncludeHidden || undefined,
-    } satisfies GetSavedStarGiftsParams),
+    } satisfies Partial<GetSavedStarGiftsParams>),
   };
 
   const result = await invokeRequest(new GramJs.payments.GetSavedStarGifts(params));
@@ -188,12 +190,14 @@ export async function fetchStarsStatus() {
 
 export async function fetchStarsTransactions({
   peer,
-  offset,
+  offset = DEFAULT_PRIMITIVES.STRING,
+  limit = DEFAULT_PRIMITIVES.INT,
   isInbound,
   isOutbound,
 }: {
   peer?: ApiPeer;
   offset?: string;
+  limit?: number;
   isInbound?: true;
   isOutbound?: true;
 }) {
@@ -201,6 +205,7 @@ export async function fetchStarsTransactions({
   const result = await invokeRequest(new GramJs.payments.GetStarsTransactions({
     peer: inputPeer,
     offset,
+    limit,
     inbound: isInbound,
     outbound: isOutbound,
   }));
@@ -240,9 +245,10 @@ export async function fetchStarsTransactionById({
 }
 
 export async function fetchStarsSubscriptions({
-  offset, peer,
+  offset = DEFAULT_PRIMITIVES.STRING,
+  peer,
 }: {
-  offset?: string;
+  offset?: string; limit?: number;
   peer?: ApiPeer;
 }) {
   const inputPeer = peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf();

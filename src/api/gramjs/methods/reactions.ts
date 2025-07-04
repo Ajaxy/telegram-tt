@@ -21,7 +21,11 @@ import {
 } from '../apiBuilders/reactions';
 import { buildStickerFromDocument } from '../apiBuilders/symbols';
 import {
-  buildInputPaidReactionPrivacy, buildInputPeer, buildInputReaction, generateRandomTimestampedBigInt,
+  buildInputPaidReactionPrivacy,
+  buildInputPeer,
+  buildInputReaction,
+  DEFAULT_PRIMITIVES,
+  generateRandomTimestampedBigInt,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { invokeRequest } from './client';
@@ -71,7 +75,9 @@ export function sendEmojiInteraction({
 }
 
 export async function fetchAvailableReactions() {
-  const result = await invokeRequest(new GramJs.messages.GetAvailableReactions({}));
+  const result = await invokeRequest(new GramJs.messages.GetAvailableReactions({
+    hash: DEFAULT_PRIMITIVES.INT,
+  }));
 
   if (!result || result instanceof GramJs.messages.AvailableReactionsNotModified) {
     return undefined;
@@ -99,7 +105,9 @@ export async function fetchAvailableReactions() {
 }
 
 export async function fetchAvailableEffects() {
-  const result = await invokeRequest(new GramJs.messages.GetAvailableEffects({}));
+  const result = await invokeRequest(new GramJs.messages.GetAvailableEffects({
+    hash: DEFAULT_PRIMITIVES.INT,
+  }));
 
   if (!result || result instanceof GramJs.messages.AvailableEffectsNotModified) {
     return undefined;
@@ -232,10 +240,10 @@ export function setDefaultReaction({
   }));
 }
 
-export async function fetchTopReactions({ hash = '0' }: { hash?: string }) {
+export async function fetchTopReactions({ hash }: { hash?: string }) {
   const result = await invokeRequest(new GramJs.messages.GetTopReactions({
     limit: TOP_REACTIONS_LIMIT,
-    hash: BigInt(hash),
+    hash: hash ? BigInt(hash) : DEFAULT_PRIMITIVES.BIGINT,
   }));
 
   if (!result || result instanceof GramJs.messages.ReactionsNotModified) {
@@ -248,10 +256,10 @@ export async function fetchTopReactions({ hash = '0' }: { hash?: string }) {
   };
 }
 
-export async function fetchRecentReactions({ hash = '0' }: { hash?: string }) {
+export async function fetchRecentReactions({ hash }: { hash?: string }) {
   const result = await invokeRequest(new GramJs.messages.GetRecentReactions({
     limit: RECENT_REACTIONS_LIMIT,
-    hash: BigInt(hash),
+    hash: hash ? BigInt(hash) : DEFAULT_PRIMITIVES.BIGINT,
   }));
 
   if (!result || result instanceof GramJs.messages.ReactionsNotModified) {
@@ -268,9 +276,9 @@ export function clearRecentReactions() {
   return invokeRequest(new GramJs.messages.ClearRecentReactions());
 }
 
-export async function fetchDefaultTagReactions({ hash = '0' }: { hash?: string }) {
+export async function fetchDefaultTagReactions({ hash }: { hash?: string }) {
   const result = await invokeRequest(new GramJs.messages.GetDefaultTagReactions({
-    hash: BigInt(hash),
+    hash: hash ? BigInt(hash) : DEFAULT_PRIMITIVES.BIGINT,
   }));
 
   if (!result || result instanceof GramJs.messages.ReactionsNotModified) {
@@ -283,8 +291,10 @@ export async function fetchDefaultTagReactions({ hash = '0' }: { hash?: string }
   };
 }
 
-export async function fetchSavedReactionTags({ hash = '0' }: { hash?: string }) {
-  const result = await invokeRequest(new GramJs.messages.GetSavedReactionTags({ hash: BigInt(hash) }));
+export async function fetchSavedReactionTags({ hash }: { hash?: string }) {
+  const result = await invokeRequest(new GramJs.messages.GetSavedReactionTags({
+    hash: hash ? BigInt(hash) : DEFAULT_PRIMITIVES.BIGINT,
+  }));
 
   if (!result || result instanceof GramJs.messages.SavedReactionTagsNotModified) {
     return undefined;
