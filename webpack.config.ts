@@ -46,7 +46,7 @@ const CSP = `
   ${IS_PACKAGED_ELECTRON ? `${BASE_URL}/` : ''};
   media-src 'self' blob: data: ${IS_PACKAGED_ELECTRON ? [`${BASE_URL}/`, ELECTRON_HOST_URL].join(' ') : ''};
   object-src 'none';
-  frame-src http: https:;
+  frame-src http: https: mytonwallet-tc:;
   base-uri 'none';
   form-action 'none';`
   .replace(/\s+/g, ' ').trim();
