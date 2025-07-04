@@ -252,11 +252,11 @@ export async function deleteContact({
   });
 }
 
-export async function addNoPaidMessagesException({ user, shouldRefundCharged }: {
+export async function toggleNoPaidMessagesException({ user, shouldRefundCharged }: {
   user: ApiUser;
   shouldRefundCharged?: boolean;
 }) {
-  const result = await invokeRequest(new GramJs.account.AddNoPaidMessagesException({
+  const result = await invokeRequest(new GramJs.account.ToggleNoPaidMessagesException ({
     refundCharged: shouldRefundCharged ? true : undefined,
     userId: buildInputUser(user.id, user.accessHash),
   }));

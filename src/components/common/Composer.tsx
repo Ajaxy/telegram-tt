@@ -20,6 +20,7 @@ import type {
   ApiFormattedText,
   ApiMessage,
   ApiMessageEntity,
+  ApiNewMediaTodo,
   ApiNewPoll,
   ApiPeer,
   ApiQuickReply,
@@ -178,6 +179,7 @@ import PollModal from '../middle/composer/PollModal.async';
 import SendAsMenu from '../middle/composer/SendAsMenu.async';
 import StickerTooltip from '../middle/composer/StickerTooltip.async';
 import SymbolMenuButton from '../middle/composer/SymbolMenuButton';
+import ToDoListModal from '../middle/composer/ToDoListModal.async';
 import WebPagePreview from '../middle/composer/WebPagePreview';
 import MessageEffect from '../middle/message/MessageEffect';
 import ReactionSelector from '../middle/message/reactions/ReactionSelector';
@@ -235,6 +237,7 @@ type StateProps =
     isForwarding?: boolean;
     forwardedMessagesCount?: number;
     pollModal: TabState['pollModal'];
+    todoListModal: TabState['todoListModal'];
     botKeyboardMessageId?: number;
     botKeyboardPlaceholder?: string;
     withScheduledButton?: boolean;
@@ -357,6 +360,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   isForwarding,
   forwardedMessagesCount,
   pollModal,
+  todoListModal,
   botKeyboardMessageId,
   botKeyboardPlaceholder,
   inputPlaceholder,
@@ -433,6 +437,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     showDialog,
     openPollModal,
     closePollModal,
+    openTodoListModal,
+    closeTodoListModal,
     loadScheduledHistory,
     openThread,
     addRecentEmoji,
@@ -540,7 +546,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const [nextText, setNextText] = useState<ApiFormattedText | undefined>(undefined);
 
   const {
-    canSendStickers, canSendGifs, canAttachMedia, canAttachPolls, canAttachEmbedLinks,
+    canSendStickers, canSendGifs, canAttachMedia, canAttachPolls, canAttachEmbedLinks, canAttachToDoLists,
     canSendVoices, canSendPlainText, canSendAudios, canSendVideos, canSendPhotos, canSendDocuments,
   } = useMemo(
     () => getAllowedAttachmentOptions(chat,
@@ -1216,6 +1222,22 @@ const Composer: FC<OwnProps & StateProps> = ({
     handleActionWithPaymentConfirmation(handleSend, isSilent, scheduledAt);
   });
 
+  const handleTodoListCreate = useLastCallback(() => {
+    if (!isCurrentUserPremium) {
+      showNotification({
+        message: lang('SubscribeToTelegramPremiumForCreateToDo'),
+        action: {
+          action: 'openPremiumModal',
+          payload: { initialSection: 'todo' },
+        },
+        actionText: lang('PremiumMore'),
+      });
+      return;
+    }
+
+    openTodoListModal({ chatId });
+  });
+
   const handleClickBotMenu = useLastCallback(() => {
     if (botMenuButton?.type !== 'webApp') {
       return;
@@ -1452,6 +1474,28 @@ const Composer: FC<OwnProps & StateProps> = ({
         { messageList: currentMessageList, poll, isSilent: isSilentPosting },
       );
       closePollModal();
+    }
+  });
+
+  const handleToDoListSend = useLastCallback((todo: ApiNewMediaTodo) => {
+    if (!currentMessageList) {
+      return;
+    }
+
+    if (isInScheduledList) {
+      requestCalendar((scheduledAt) => {
+        handleActionWithPaymentConfirmation(
+          handleMessageSchedule,
+          { todo },
+          scheduledAt,
+          currentMessageList,
+        );
+      });
+    } else {
+      handleActionWithPaymentConfirmation(
+        sendMessage,
+        { messageList: currentMessageList, todo, isSilent: isSilentPosting },
+      );
     }
   });
 
@@ -1878,6 +1922,11 @@ const Composer: FC<OwnProps & StateProps> = ({
         onClear={closePollModal}
         onSend={handlePollSend}
       />
+      <ToDoListModal
+        modal={todoListModal}
+        onClear={closeTodoListModal}
+        onSend={handleToDoListSend}
+      />
       <SendAsMenu
         isOpen={isSendAsMenuOpen}
         onClose={closeSendAsMenu}
@@ -2147,12 +2196,14 @@ const Composer: FC<OwnProps & StateProps> = ({
               isButtonVisible={!activeVoiceRecording}
               canAttachMedia={canAttachMedia}
               canAttachPolls={canAttachPolls}
+              canAttachToDoLists={canAttachToDoLists}
               canSendPhotos={canSendPhotos}
               canSendVideos={canSendVideos}
               canSendDocuments={canSendDocuments}
               canSendAudios={canSendAudios}
               onFileSelect={handleFileSelect}
               onPollCreate={openPollModal}
+              onTodoListCreate={handleTodoListCreate}
               isScheduled={isInScheduledList}
               attachBots={isInMessageList ? attachBots : undefined}
               peerType={attachMenuPeerType}
@@ -2458,6 +2509,7 @@ export default memo(withGlobal<OwnProps>(
       isForwarding,
       forwardedMessagesCount: isForwarding ? forwardMessageIds!.length : undefined,
       pollModal: tabState.pollModal,
+      todoListModal: tabState.todoListModal,
       stickersForEmoji: global.stickers.forEmoji.stickers,
       customEmojiForEmoji: global.customEmojis.forEmoji.stickers,
       chatFullInfo,

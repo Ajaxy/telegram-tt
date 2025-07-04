@@ -191,14 +191,14 @@ addActionHandler('loadCommonChats', async (global, actions, payload): Promise<vo
   setGlobal(global);
 });
 
-addActionHandler('addNoPaidMessagesException', async (global, actions, payload): Promise<void> => {
+addActionHandler('toggleNoPaidMessagesException', async (global, actions, payload): Promise<void> => {
   const { userId, shouldRefundCharged } = payload;
   const user = selectUser(global, userId);
   if (!user) {
     return;
   }
 
-  const result = await callApi('addNoPaidMessagesException',
+  const result = await callApi('toggleNoPaidMessagesException',
     { user, shouldRefundCharged });
   if (!result) {
     return;

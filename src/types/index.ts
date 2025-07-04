@@ -21,6 +21,7 @@ import type {
   ApiMediaFormat,
   ApiMessage,
   ApiMessageEntity,
+  ApiNewMediaTodo,
   ApiNewPoll,
   ApiPeer,
   ApiPhoto,
@@ -730,6 +731,7 @@ export type SendMessageParams = {
   story?: ApiStory | ApiStorySkipped;
   gif?: ApiVideo;
   poll?: ApiNewPoll;
+  todo?: ApiNewMediaTodo;
   contact?: ApiContact;
   isSilent?: boolean;
   scheduledAt?: number;

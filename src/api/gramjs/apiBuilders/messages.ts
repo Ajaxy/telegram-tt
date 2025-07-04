@@ -8,10 +8,12 @@ import type {
   ApiFactCheck,
   ApiInputMessageReplyInfo,
   ApiInputReplyInfo,
+  ApiMediaTodo,
   ApiMessage,
   ApiMessageEntity,
   ApiMessageForwardInfo,
   ApiMessageReportResult,
+  ApiNewMediaTodo,
   ApiNewPoll,
   ApiPeer,
   ApiPhoto,
@@ -382,6 +384,13 @@ function buildNewPoll(poll: ApiNewPoll, localId: number): ApiPoll {
   };
 }
 
+function buildNewTodo(todo: ApiNewMediaTodo): ApiMediaTodo {
+  return {
+    mediaType: 'todo',
+    todo: todo.todo,
+  };
+}
+
 export function buildLocalMessage(
   chat: ApiChat,
   lastMessageId?: number,
@@ -392,6 +401,7 @@ export function buildLocalMessage(
   sticker?: ApiSticker,
   gif?: ApiVideo,
   poll?: ApiNewPoll,
+  todo?: ApiNewMediaTodo,
   contact?: ApiContact,
   groupedId?: string,
   scheduledAt?: number,
@@ -409,6 +419,7 @@ export function buildLocalMessage(
   const resultReplyInfo = replyInfo && buildReplyInfo(replyInfo, chat.isForum);
 
   const localPoll = poll && buildNewPoll(poll, localId);
+  const localTodo = todo && buildNewTodo(todo);
 
   const formattedText = text ? addTimestampEntities({ text, entities }) : undefined;
 
@@ -423,6 +434,7 @@ export function buildLocalMessage(
       contact,
       storyData: story && { mediaType: 'storyData', ...story },
       pollId: localPoll?.id,
+      todo: localTodo,
     }),
     date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
     isOutgoing: !isChannel,

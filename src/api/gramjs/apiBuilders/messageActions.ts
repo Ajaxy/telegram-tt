@@ -6,6 +6,7 @@ import type { ApiMessageAction } from '../../types/messageActions';
 import { buildApiBotApp } from './bots';
 import { buildApiFormattedText, buildApiPhoto } from './common';
 import { buildApiStarGift } from './gifts';
+import { buildTodoItem } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 
 const UNSUPPORTED_ACTION: ApiMessageAction = {
@@ -444,6 +445,25 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       type: 'paidMessagesRefunded',
       stars: stars.toJSNumber(),
       count,
+    };
+  }
+  if (action instanceof GramJs.MessageActionTodoCompletions) {
+    const {
+      completed, incompleted,
+    } = action;
+    return {
+      mediaType: 'action',
+      type: 'todoCompletions',
+      completedIds: completed,
+      incompletedIds: incompleted,
+    };
+  }
+  if (action instanceof GramJs.MessageActionTodoAppendTasks) {
+    const { list } = action;
+    return {
+      mediaType: 'action',
+      type: 'todoAppendTasks',
+      items: list.map(buildTodoItem),
     };
   }
 

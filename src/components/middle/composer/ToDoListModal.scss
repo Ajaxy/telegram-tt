@@ -1,6 +1,6 @@
 @use '../../../styles/mixins';
 
-.PollModal {
+.ToDoListModal {
   .modal-dialog {
     max-width: 26.25rem;
     max-height: calc(100vh - 5rem);
@@ -14,7 +14,13 @@
     margin-bottom: 1rem;
   }
 
-  .options-header {
+  .readonly-title {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .items-header {
     margin-top: 0.5rem;
     margin-bottom: 0.75rem;
 
@@ -23,7 +29,14 @@
     color: var(--color-text-secondary);
   }
 
-  .options-list {
+  .items-count-hint {
+    margin-bottom: 0.5rem;
+    margin-left: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  .items-list {
     overflow: auto;
     overflow-y: scroll;
 
@@ -40,21 +53,21 @@
     }
   }
 
-  .option-wrapper {
+  .item-wrapper {
     position: relative;
 
     .form-control {
       padding-right: 3rem;
     }
 
-    .option-remove-button {
+    .item-remove-button {
       position: absolute;
       top: 0.125rem;
       right: 0.3125rem;
     }
   }
 
-  .quiz-mode {
+  .options-footer {
     margin-top: 1.5rem;
 
     .dialog-checkbox-group {
@@ -64,21 +77,6 @@
     .options-header {
       margin-bottom: 0.5rem;
     }
-
-    .note {
-      margin-top: -1rem;
-    }
-  }
-
-  .note {
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-  }
-
-  .poll-error {
-    margin: -1rem 0 1rem 0.25rem;
-    font-size: 0.875rem;
-    color: var(--color-error);
   }
 
   .input-group:last-child {

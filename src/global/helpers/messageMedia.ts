@@ -51,6 +51,7 @@ export function hasMessageMedia(message: MediaContainer) {
     || getMessageSticker(message)
     || getMessageContact(message)
     || getMessagePollId(message)
+    || getMessageTodo(message)
     || getMessageAction(message)
     || getMessageAudio(message)
     || getMessageVoice(message)
@@ -126,6 +127,10 @@ export function getMessageContact(message: MediaContainer) {
 
 export function getMessagePollId(message: MediaContainer) {
   return message.content.pollId;
+}
+
+export function getMessageTodo(message: MediaContainer) {
+  return message.content.todo;
 }
 
 export function getMessageInvoice(message: MediaContainer) {

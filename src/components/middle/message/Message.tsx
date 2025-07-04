@@ -189,6 +189,7 @@ import RoundVideo from './RoundVideo';
 import Sticker from './Sticker';
 import Story from './Story';
 import StoryMention from './StoryMention';
+import TodoList from './TodoList';
 import Video from './Video';
 import WebPage from './WebPage';
 
@@ -520,7 +521,7 @@ const Message: FC<OwnProps & StateProps> = ({
     voice, document, sticker, contact,
     webPage, invoice, location,
     action, game, storyData, giveaway,
-    giveawayResults,
+    giveawayResults, todo,
   } = getMessageContent(message);
 
   const messageReplyInfo = getMessageReplyInfo(message);
@@ -1240,6 +1241,9 @@ const Message: FC<OwnProps & StateProps> = ({
         )}
         {poll && (
           <Poll message={message} poll={poll} onSendVote={handleVoteSend} />
+        )}
+        {todo && (
+          <TodoList message={message} todoList={todo} />
         )}
         {(giveaway || giveawayResults) && (
           <Giveaway message={message} />

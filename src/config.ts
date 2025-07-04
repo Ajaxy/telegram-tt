@@ -106,6 +106,9 @@ export const STORY_LIST_LIMIT = 100;
 export const API_GENERAL_ID_LIMIT = 100;
 export const STATISTICS_PUBLIC_FORWARDS_LIMIT = 50;
 export const RESALE_GIFTS_LIMIT = 50;
+export const TODO_ITEMS_LIMIT = 30;
+export const TODO_TITLE_LENGTH_LIMIT = 32;
+export const TODO_ITEM_LENGTH_LIMIT = 64;
 
 export const STORY_VIEWS_MIN_SEARCH = 15;
 export const STORY_MIN_REACTIONS_SORT = 10;
@@ -429,6 +432,7 @@ export const PREMIUM_FEATURE_SECTIONS = [
   'last_seen',
   'message_privacy',
   'effects',
+  'todo',
 ] as const;
 
 export const PREMIUM_BOTTOM_VIDEOS: ApiPremiumSection[] = [
@@ -444,6 +448,7 @@ export const PREMIUM_BOTTOM_VIDEOS: ApiPremiumSection[] = [
   'last_seen',
   'message_privacy',
   'effects',
+  'todo',
 ];
 
 export const PREMIUM_LIMITS_ORDER: ApiLimitTypeForPromo[] = [

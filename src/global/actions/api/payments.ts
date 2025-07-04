@@ -14,6 +14,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import * as langProvider from '../../../util/oldLangProvider';
 import { getStripeError } from '../../../util/payments/stripe';
 import { buildQueryString } from '../../../util/requestQuery';
+import { getServerTime } from '../../../util/serverTime';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
 import { isChatChannel, isChatSuperGroup } from '../../helpers';
@@ -827,7 +828,7 @@ addActionHandler('applyBoost', async (global, actions, payload): Promise<void> =
   const oldMyBoosts = tabState.boostModal?.myBoosts;
 
   if (oldMyBoosts) {
-    const unixNow = Math.floor(Date.now() / 1000);
+    const unixNow = getServerTime();
     const newMyBoosts = oldMyBoosts.map((boost) => {
       if (slots.includes(boost.slot)) {
         return {

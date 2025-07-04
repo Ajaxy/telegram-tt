@@ -253,6 +253,9 @@ export interface ApiAppConfig {
   starsStargiftResaleAmountMax?: number;
   starsStargiftResaleCommissionPermille?: number;
   pollMaxAnswers?: number;
+  todoItemsMax?: number;
+  todoTitleLengthMax?: number;
+  todoItemLengthMax?: number;
 }
 
 export interface ApiConfig {

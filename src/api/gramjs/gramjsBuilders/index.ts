@@ -16,6 +16,7 @@ import type {
   ApiInputReplyInfo,
   ApiInputStorePaymentPurpose,
   ApiMessageEntity,
+  ApiNewMediaTodo,
   ApiNewPoll,
   ApiPhoneCall,
   ApiPhoto,
@@ -260,6 +261,28 @@ export function buildInputPollFromExisting(poll: ApiPoll, shouldClose = false) {
     correctAnswers: poll.results.results?.filter((o) => o.isCorrect).map((o) => deserializeBytes(o.option)),
     solution: poll.results.solution,
     solutionEntities: poll.results.solutionEntities?.map(buildMtpMessageEntity),
+  });
+}
+
+export function buildInputTodo(todo: ApiNewMediaTodo) {
+  const { title, items } = todo.todo;
+
+  const todoItems = items.map((item) => {
+    return new GramJs.TodoItem({
+      id: item.id,
+      title: buildInputTextWithEntities(item.title),
+    });
+  });
+
+  const todoList = new GramJs.TodoList({
+    title: buildInputTextWithEntities(title),
+    list: todoItems,
+    othersCanAppend: todo.todo.othersCanAppend || undefined,
+    othersCanComplete: todo.todo.othersCanComplete || undefined,
+  });
+
+  return new GramJs.InputMediaTodo({
+    todo: todoList,
   });
 }
 

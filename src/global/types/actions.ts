@@ -23,6 +23,7 @@ import type {
   ApiMessage,
   ApiMessageEntity,
   ApiMessageSearchContext,
+  ApiNewMediaTodo,
   ApiNotification,
   ApiNotifyPeerType,
   ApiPaymentStatus,
@@ -45,6 +46,7 @@ import type {
   ApiStickerSet,
   ApiStickerSetInfo,
   ApiThemeParameters,
+  ApiTodoItem,
   ApiTypePrepaidGiveaway,
   ApiUpdate,
   ApiUser,
@@ -501,6 +503,11 @@ export interface ActionPayloads {
     text: string;
     attachments?: ApiAttachment[];
     entities?: ApiMessageEntity[];
+  } & WithTabId;
+  editTodo: {
+    chatId: string;
+    todo: ApiNewMediaTodo;
+    messageId: number;
   } & WithTabId;
   deleteHistory: {
     chatId: string;
@@ -1380,6 +1387,17 @@ export interface ActionPayloads {
     messageId: number;
     options: string[];
   };
+  toggleTodoCompleted: {
+    chatId: string;
+    messageId: number;
+    completedIds: number[];
+    incompletedIds: number[];
+  };
+  appendTodoList: {
+    chatId: string;
+    items: ApiTodoItem[];
+    messageId: number;
+  } & WithTabId;
   cancelPollVote: {
     chatId: string;
     messageId: number;
@@ -1779,7 +1797,7 @@ export interface ActionPayloads {
     isMuted?: boolean;
     shouldSharePhoneNumber?: boolean;
   } & WithTabId;
-  addNoPaidMessagesException: {
+  toggleNoPaidMessagesException: {
     userId: string;
     shouldRefundCharged: boolean;
   };
@@ -2182,6 +2200,12 @@ export interface ActionPayloads {
     isQuiz?: boolean;
   } & WithTabId) | undefined;
   closePollModal: WithTabId | undefined;
+  openTodoListModal: {
+    chatId: string;
+    messageId?: number;
+    isAddTaskMode?: boolean;
+  } & WithTabId;
+  closeTodoListModal: WithTabId | undefined;
   requestConfetti: (ConfettiParams & WithTabId) | WithTabId;
   requestWave: {
     startX: number;

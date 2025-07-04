@@ -32,6 +32,7 @@ import {
   isChatChannel,
 } from '../../helpers';
 import { getMessageSummaryText } from '../../helpers/messageSummary';
+import { addTabStateResetterAction } from '../../helpers/meta';
 import { getPeerTitle } from '../../helpers/peers';
 import { renderMessageSummaryHtml } from '../../helpers/renderMessageSummaryHtml';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
@@ -761,6 +762,22 @@ addActionHandler('closePollModal', (global, actions, payload): ActionReturnType 
     },
   }, tabId);
 });
+
+addActionHandler('openTodoListModal', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, messageId, isAddTaskMode, tabId = getCurrentTabId(),
+  } = payload;
+
+  return updateTabState(global, {
+    todoListModal: {
+      chatId,
+      messageId,
+      isAddTaskMode,
+    },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeTodoListModal', 'todoListModal');
 
 addActionHandler('checkVersionNotification', (global, actions): ActionReturnType => {
   if (RELEASE_DATETIME && Date.now() > Number(RELEASE_DATETIME) + VERSION_NOTIFICATION_DURATION) {

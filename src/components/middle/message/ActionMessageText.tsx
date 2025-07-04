@@ -12,6 +12,7 @@ import {
   getMainUsername,
   getMessageInvoice, getMessageText, isChatChannel,
 } from '../../../global/helpers';
+import { getMessageContent } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import { getMessageReplyInfo } from '../../../global/helpers/replies';
 import {
@@ -534,14 +535,14 @@ const ActionMessageText = ({
         if (isRecurringInit) {
           return lang(
             'ActionPaymentInitRecurringFor',
-            { amount: cost, user: chatLink, invoice: renderMessageLink(replyMessage!, invoiceTitle, asPreview) },
+            { amount: cost, user: chatLink, invoice: renderMessageLink(replyMessage, invoiceTitle, asPreview) },
             { withNodes: true },
           );
         }
 
         return lang(
           'ActionPaymentDoneFor',
-          { amount: cost, user: chatLink, invoice: renderMessageLink(replyMessage!, invoiceTitle, asPreview) },
+          { amount: cost, user: chatLink, invoice: renderMessageLink(replyMessage, invoiceTitle, asPreview) },
           { withNodes: true },
         );
       }
@@ -747,6 +748,146 @@ const ActionMessageText = ({
           stars: formatStarsAsText(lang, stars),
           user: renderPeerLink(user?.id, userTitle),
         }, { withNodes: true, withMarkdown: true });
+      }
+
+      case 'todoCompletions': {
+        const { completedIds, incompletedIds } = action;
+
+        let completedItem;
+        let incompletedItem;
+        const { todo } = replyMessage ? getMessageContent(replyMessage) : {};
+        if (todo) {
+          const todoItems = todo.todo.items;
+          completedItem = todoItems.find((item) => completedIds.includes(item.id));
+          incompletedItem = todoItems.find((item) => incompletedIds.includes(item.id));
+        }
+
+        if (incompletedItem) {
+          const incompletedTaskTitle = incompletedItem.title;
+
+          const incompletedTaskLink = renderMessageLink(
+            replyMessage,
+            renderTextWithEntities({
+              text: incompletedTaskTitle.text,
+              entities: incompletedTaskTitle.entities,
+              asPreview: true,
+            }),
+            asPreview,
+          );
+
+          return translateWithYou(lang, 'MessageActionTodoCompletionsAsNotDone', isOutgoing, {
+            peer: senderLink,
+            task: incompletedTaskLink,
+          });
+        }
+
+        if (completedItem) {
+          const completedTaskTitle = completedItem.title;
+          const completedTaskLink = renderMessageLink(
+            replyMessage,
+            renderTextWithEntities({
+              text: completedTaskTitle.text,
+              entities: completedTaskTitle.entities,
+              asPreview: true,
+            }),
+            asPreview,
+          );
+
+          return translateWithYou(lang, 'MessageActionTodoCompletionsAsDone', isOutgoing, {
+            peer: senderLink,
+            task: completedTaskLink,
+          });
+        }
+
+        if (completedIds) {
+          const completedText = lang('MessageActionTodoTaskCount', {
+            count: completedIds.length,
+          }, { pluralValue: completedIds.length });
+          const completedLink = renderMessageLink(
+            replyMessage,
+            renderTextWithEntities({
+              text: completedText,
+              asPreview: true,
+            }),
+            asPreview,
+            { noEllipsis: true },
+          );
+          return translateWithYou(lang, 'MessageActionTodoCompletionsAsDone', isOutgoing, {
+            peer: senderLink,
+            task: completedLink,
+          });
+        }
+
+        const incompletedText = lang('MessageActionTodoTaskCount', {
+          count: incompletedIds.length,
+        }, { pluralValue: incompletedIds.length });
+        const incompletedLink = renderMessageLink(
+          replyMessage,
+          renderTextWithEntities({
+            text: incompletedText,
+            asPreview: true,
+          }),
+          asPreview,
+          { noEllipsis: true },
+        );
+
+        return translateWithYou(lang, 'MessageActionTodoCompletionsAsNotDone', isOutgoing, {
+          peer: senderLink,
+          task: incompletedLink,
+        });
+      }
+
+      case 'todoAppendTasks': {
+        const { items } = action;
+        const { todo } = replyMessage ? getMessageContent(replyMessage) : {};
+
+        const listTitle = todo?.todo.title.text || '';
+        const listLink = renderMessageLink(
+          replyMessage,
+          renderTextWithEntities({
+            text: listTitle,
+            asPreview: true,
+          }),
+          asPreview,
+        );
+
+        if (items.length === 1) {
+          const taskTitle = items[0].title;
+          const taskLink = renderMessageLink(
+            replyMessage,
+            renderTextWithEntities({
+              text: taskTitle.text,
+              entities: taskTitle.entities,
+              asPreview: true,
+            }),
+            asPreview,
+          );
+
+          return translateWithYou(lang, 'MessageActionAppendTodo', isOutgoing, {
+            peer: senderLink,
+            task: taskLink,
+            list: listLink,
+          });
+        }
+
+        const tasksText = lang('MessageActionTodoTaskCount', {
+          count: items.length,
+        }, { pluralValue: items.length });
+        const tasksLink = renderMessageLink(
+          replyMessage,
+          renderTextWithEntities({
+            text: tasksText,
+            asPreview: true,
+          }),
+          asPreview,
+          { noEllipsis: true },
+        );
+
+        return translateWithYou(lang, 'MessageActionAppendTodoMultiple', isOutgoing, {
+          peer: senderLink,
+          tasks: tasksLink,
+          list: listLink,
+        });
       }
 
       case 'phoneCall': // Rendered as a regular message, but considered an action for the summary

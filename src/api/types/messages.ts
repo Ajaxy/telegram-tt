@@ -332,6 +332,34 @@ export type ApiNewPoll = {
   };
 };
 
+export interface ApiTodoItem {
+  id: number;
+  title: ApiFormattedText;
+}
+
+export interface ApiTodoList {
+  title: ApiFormattedText;
+  items: ApiTodoItem[];
+  othersCanAppend?: boolean;
+  othersCanComplete?: boolean;
+}
+
+export interface ApiTodoCompletion {
+  itemId: number;
+  completedBy: string;
+  completedAt: number;
+}
+
+export interface ApiMediaTodo {
+  mediaType: 'todo';
+  todo: ApiTodoList;
+  completions?: ApiTodoCompletion[];
+}
+
+export type ApiNewMediaTodo = {
+  todo: ApiTodoList;
+};
+
 export interface ApiWebPage {
   mediaType: 'webpage';
   id: number;
@@ -516,6 +544,7 @@ export type MediaContent = {
   sticker?: ApiSticker;
   contact?: ApiContact;
   pollId?: string;
+  todo?: ApiMediaTodo;
   action?: ApiMessageAction;
   webPage?: ApiWebPage;
   audio?: ApiAudio;

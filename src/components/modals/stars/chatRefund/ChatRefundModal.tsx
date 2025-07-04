@@ -24,7 +24,7 @@ type StateProps = {
 };
 
 const ChatRefundModal = ({ modal, user }: OwnProps & StateProps) => {
-  const { closeChatRefundModal, addNoPaidMessagesException } = getActions();
+  const { closeChatRefundModal, toggleNoPaidMessagesException } = getActions();
 
   const [shouldRefundStars, setShouldRefundStars] = useState(false);
 
@@ -40,7 +40,7 @@ const ChatRefundModal = ({ modal, user }: OwnProps & StateProps) => {
   const handleConfirmRemoveFee = useLastCallback(() => {
     closeChatRefundModal();
     if (!userId) return;
-    addNoPaidMessagesException({ userId, shouldRefundCharged: shouldRefundStars });
+    toggleNoPaidMessagesException ({ userId, shouldRefundCharged: shouldRefundStars });
   });
 
   return (

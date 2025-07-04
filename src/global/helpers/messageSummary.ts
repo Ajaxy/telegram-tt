@@ -72,6 +72,7 @@ export function getMessageSummaryEmoji(message: ApiMessage) {
     sticker,
     pollId,
     paidMedia,
+    todo,
   } = message.content;
 
   if (message.groupedId || photo || paidMedia) {
@@ -100,6 +101,10 @@ export function getMessageSummaryEmoji(message: ApiMessage) {
 
   if (pollId) {
     return '📊';
+  }
+
+  if (todo) {
+    return '📝';
   }
 
   return undefined;
@@ -143,6 +148,7 @@ function getSummaryDescription(
     giveaway,
     giveawayResults,
     paidMedia,
+    todo,
   } = mediaContent;
   const { poll } = statefulContent || {};
 
@@ -237,6 +243,10 @@ function getSummaryDescription(
 
   if (storyData) {
     summary = truncatedText || (message ? lang('ForwardedStory') : lang('Chat.ReplyStory'));
+  }
+
+  if (todo) {
+    summary = lang('Chat.Todo.Message.Title');
   }
 
   return summary || CONTENT_NOT_SUPPORTED;

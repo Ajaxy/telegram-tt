@@ -11,12 +11,14 @@ import type {
   ApiLocation,
   ApiMediaExtendedPreview,
   ApiMediaInvoice,
+  ApiMediaTodo,
   ApiMessageStoryData,
   ApiPaidMedia,
   ApiPhoto,
   ApiPoll,
   ApiStarGiftUnique,
   ApiSticker,
+  ApiTodoItem,
   ApiVideo,
   ApiVoice,
   ApiWebDocument,
@@ -64,7 +66,7 @@ export function buildMessageContent(
   const hasUnsupportedMedia = mtpMessage.media instanceof GramJs.MessageMediaUnsupported;
 
   if (mtpMessage.message && !hasUnsupportedMedia
-    && !content.sticker && !content.pollId && !content.contact && !content.video?.isRound) {
+    && !content.sticker && !content.pollId && !content.todo && !content.contact && !content.video?.isRound) {
     const text = buildMessageTextContent(mtpMessage.message, mtpMessage.entities);
     const textWithTimestamps = addTimestampEntities(text);
     content = {
@@ -152,6 +154,9 @@ export function buildMessageMediaContent(
 
   const pollId = buildPollIdFromMedia(media);
   if (pollId) return { pollId };
+
+  const todo = buildTodoFromMedia(media);
+  if (todo) return { todo };
 
   const webPage = buildWebPage(media);
   if (webPage) return { webPage };
@@ -513,6 +518,14 @@ export function buildPollFromMedia(media: GramJs.TypeMessageMedia): ApiPoll | un
   return buildPoll(media.poll, media.results);
 }
 
+function buildTodoFromMedia(media: GramJs.TypeMessageMedia): ApiMediaTodo | undefined {
+  if (!(media instanceof GramJs.MessageMediaToDo)) {
+    return undefined;
+  }
+
+  return buildTodo(media.todo, media.completions);
+}
+
 function buildInvoiceFromMedia(media: GramJs.TypeMessageMedia): ApiMediaInvoice | undefined {
   if (!(media instanceof GramJs.MessageMediaInvoice)) {
     return undefined;
@@ -708,6 +721,36 @@ export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): A
       answers,
     },
     results: buildPollResults(pollResults),
+  };
+}
+
+export function buildTodoItem(item: GramJs.TodoItem): ApiTodoItem {
+  return {
+    id: item.id,
+    title: buildApiFormattedText(item.title),
+  };
+}
+
+export function buildTodo(todo: GramJs.TodoList, completions?: GramJs.TodoCompletion[]): ApiMediaTodo {
+  const { title, list: items } = todo;
+
+  const todoItems = items.map(buildTodoItem);
+
+  const todoCompletions = completions?.map((completion) => ({
+    itemId: completion.id,
+    completedBy: completion.completedBy.toString(),
+    completedAt: completion.date,
+  }));
+
+  return {
+    mediaType: 'todo',
+    todo: {
+      title: buildApiFormattedText(title),
+      items: todoItems,
+      othersCanAppend: todo.othersCanAppend,
+      othersCanComplete: todo.othersCanComplete,
+    },
+    completions: todoCompletions,
   };
 }
 

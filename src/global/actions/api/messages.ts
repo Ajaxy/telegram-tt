@@ -53,6 +53,7 @@ import { getTranslationFn, type RegularLangFnParameters } from '../../../util/lo
 import { formatStarsAsText } from '../../../util/localization/format';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
+import { getServerTime } from '../../../util/serverTime';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
 import {
   getIsSavedDialog,
@@ -146,6 +147,7 @@ import {
   selectUserStatus,
   selectViewportIds,
 } from '../../selectors';
+import { updateWithLocalMedia } from '../apiUpdaters/messages';
 import { deleteMessages } from '../apiUpdaters/messages';
 
 const AUTOLOGIN_TOKEN_KEY = 'autologin_token';
@@ -555,6 +557,24 @@ addActionHandler('editMessage', (global, actions, payload): ActionReturnType => 
       uploadProgressCallbacks.delete(currentMessageKey);
     }
   })();
+});
+
+addActionHandler('editTodo', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, todo, messageId,
+  } = payload;
+
+  const chat = selectChat(global, chatId);
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!chat || !message) {
+    return;
+  }
+
+  callApi('editTodo', {
+    chat,
+    message,
+    todo,
+  });
 });
 
 addActionHandler('cancelUploadMedia', (global, actions, payload): ActionReturnType => {
@@ -1136,6 +1156,71 @@ addActionHandler('sendPollVote', (global, actions, payload): ActionReturnType =>
   if (chat) {
     void callApi('sendPollVote', { chat, messageId, options });
   }
+});
+
+addActionHandler('toggleTodoCompleted', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId, completedIds, incompletedIds } = payload;
+  const chat = selectChat(global, chatId);
+  const message = selectChatMessage(global, chatId, messageId);
+  const currentUserId = global.currentUserId;
+
+  const currentTodo = message?.content.todo;
+  if (!currentTodo || !currentUserId || !chat) {
+    return;
+  }
+
+  const currentCompletions = currentTodo.completions || [];
+  const currentCompletionIds = currentCompletions.map((c) => c.itemId);
+
+  const newCompletions = [...currentCompletions];
+  const now = getServerTime();
+
+  completedIds.forEach((itemId) => {
+    if (!currentCompletionIds.includes(itemId)) {
+      newCompletions.push({
+        itemId,
+        completedBy: currentUserId,
+        completedAt: now,
+      });
+    }
+  });
+
+  const finalCompletions = newCompletions.filter((c) => !incompletedIds.includes(c.itemId));
+
+  const newContent = {
+    ...message.content,
+    todo: {
+      ...currentTodo,
+      completions: finalCompletions,
+    },
+  };
+
+  const messageUpdate: Partial<ApiMessage> = {
+    ...message,
+    content: newContent,
+  };
+
+  global = updateWithLocalMedia(global, chatId, message.id, messageUpdate);
+  setGlobal(global);
+
+  callApi('toggleTodoCompleted', { chat, messageId: message.id, completedIds, incompletedIds });
+});
+addActionHandler('appendTodoList', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, items, messageId,
+  } = payload;
+
+  const chat = selectChat(global, chatId);
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!chat || !message) {
+    return;
+  }
+
+  callApi('appendTodoList', {
+    chat,
+    message,
+    items,
+  });
 });
 
 addActionHandler('cancelPollVote', (global, actions, payload): ActionReturnType => {

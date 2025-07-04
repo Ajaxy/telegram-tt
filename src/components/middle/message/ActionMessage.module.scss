@@ -64,7 +64,12 @@
 
 .messageLink {
   overflow: hidden;
-  min-width: 0;
+  min-width: 1ch;
+}
+
+.noEllipsis {
+  overflow: visible;
+  min-width: auto;
 }
 
 .singleLine, .messageLink {

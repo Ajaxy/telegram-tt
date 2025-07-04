@@ -47,6 +47,7 @@ export type OwnProps = {
   isButtonVisible: boolean;
   canAttachMedia: boolean;
   canAttachPolls: boolean;
+  canAttachToDoLists: boolean;
   canSendPhotos: boolean;
   canSendVideos: boolean;
   canSendDocuments: boolean;
@@ -58,6 +59,7 @@ export type OwnProps = {
   theme: ThemeKey;
   onFileSelect: (files: File[]) => void;
   onPollCreate: NoneToVoidFunction;
+  onTodoListCreate: NoneToVoidFunction;
   onMenuOpen: NoneToVoidFunction;
   onMenuClose: NoneToVoidFunction;
   canEditMedia?: boolean;
@@ -72,6 +74,7 @@ const AttachMenu: FC<OwnProps> = ({
   isButtonVisible,
   canAttachMedia,
   canAttachPolls,
+  canAttachToDoLists,
   canSendPhotos,
   canSendVideos,
   canSendDocuments,
@@ -85,6 +88,7 @@ const AttachMenu: FC<OwnProps> = ({
   onMenuOpen,
   onMenuClose,
   onPollCreate,
+  onTodoListCreate,
   canEditMedia,
   editingMessage,
   messageListType,
@@ -262,6 +266,9 @@ const AttachMenu: FC<OwnProps> = ({
         )}
         {canAttachPolls && !editingMessage && (
           <MenuItem icon="poll" onClick={onPollCreate}>{oldLang('Poll')}</MenuItem>
+        )}
+        {canAttachToDoLists && !editingMessage && (
+          <MenuItem icon="select" onClick={onTodoListCreate}>{lang('TitleToDoList')}</MenuItem>
         )}
 
         {!editingMessage && !canEditMedia && !isScheduled && bots?.map((bot) => (

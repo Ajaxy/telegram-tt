@@ -52,13 +52,14 @@ export function getMessageTranscription(message: ApiMessage) {
 
 export function hasMessageText(message: MediaContainer) {
   const {
-    action, text, sticker, photo, video, audio, voice, document, pollId, webPage, contact, invoice, location,
-    game, storyData, giveaway, giveawayResults, paidMedia,
+    action, text, sticker, photo, video, audio, voice, document, pollId, todo,
+    webPage, contact, invoice, location, game, storyData, giveaway, giveawayResults, paidMedia,
   } = message.content;
 
   return Boolean(text) || !(
-    sticker || photo || video || audio || voice || document || contact || pollId || webPage || invoice || location
-    || game || storyData || giveaway || giveawayResults || paidMedia || action?.type === 'phoneCall'
+    sticker || photo || video || audio || voice || document || contact || pollId || todo || webPage
+    || invoice || location || game || storyData || giveaway || giveawayResults
+    || paidMedia || action?.type === 'phoneCall'
   );
 }
 

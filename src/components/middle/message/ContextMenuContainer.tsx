@@ -25,6 +25,9 @@ import type {
 } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
+import {
+  TODO_ITEMS_LIMIT,
+} from '../../../config';
 import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
   areReactionsEmpty,
@@ -79,6 +82,7 @@ import { getSelectionAsFormattedText } from './helpers/getSelectionAsFormattedTe
 import { isSelectionRangeInsideMessage } from './helpers/isSelectionRangeInsideMessage';
 
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useSchedule from '../../../hooks/useSchedule';
@@ -125,6 +129,7 @@ type StateProps = {
   canDelete?: boolean;
   canReport?: boolean;
   canEdit?: boolean;
+  canAppendTodoList?: boolean;
   canForward?: boolean;
   canFaveSticker?: boolean;
   canUnfaveSticker?: boolean;
@@ -192,6 +197,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canReport,
   canShowReactionList,
   canEdit,
+  canAppendTodoList,
   enabledReactions,
   reactionsLimit,
   isPrivate,
@@ -265,9 +271,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     addLocalPaidReaction,
     openPaidReactionModal,
     reportMessages,
+    openTodoListModal,
+    showNotification,
   } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const { ref: containerRef } = useShowTransition({
     isOpen,
     onCloseAnimationEnd,
@@ -435,7 +444,34 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleEdit = useLastCallback(() => {
-    setEditingId({ messageId: message.id });
+    if (message.content.todo) {
+      openTodoListModal({
+        chatId: message.chatId,
+        messageId: message.id,
+      });
+    } else {
+      setEditingId({ messageId: message.id });
+    }
+    closeMenu();
+  });
+
+  const handleAppendTodoList = useLastCallback(() => {
+    if (!isCurrentUserPremium) {
+      showNotification({
+        message: lang('SubscribeToTelegramPremiumForAppendToDo'),
+        action: {
+          action: 'openPremiumModal',
+          payload: { initialSection: 'todo' },
+        },
+        actionText: oldLang('PremiumMore'),
+      });
+    } else {
+      openTodoListModal({
+        chatId: message.chatId,
+        messageId: message.id,
+        isAddTaskMode: true,
+      });
+    }
     closeMenu();
   });
 
@@ -667,6 +703,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         repliesThreadInfo={repliesThreadInfo}
         canUnpin={canUnpin}
         canEdit={canEdit}
+        canAppendTodoList={canAppendTodoList}
         canForward={canForward}
         canFaveSticker={canFaveSticker}
         canUnfaveSticker={canUnfaveSticker}
@@ -695,6 +732,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onOpenThread={handleOpenThread}
         onReply={handleReply}
         onEdit={handleEdit}
+        onAppendTodoList={handleAppendTodoList}
         onPin={handlePin}
         onUnpin={handleUnpin}
         onForward={handleForward}
@@ -734,8 +772,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       <ConfirmDialog
         isOpen={isClosePollDialogOpen}
         onClose={closeClosePollDialog}
-        text={lang('lng_polls_stop_warning')}
-        confirmLabel={lang('lng_polls_stop_sure')}
+        text={oldLang('lng_polls_stop_warning')}
+        confirmLabel={oldLang('lng_polls_stop_sure')}
         confirmHandler={handlePollClose}
       />
       {canReschedule && calendar}
@@ -855,6 +893,9 @@ export default memo(withGlobal<OwnProps>(
     const canGift = selectCanGift(global, message.chatId);
 
     const savedDialogId = selectSavedDialogIdFromMessage(global, message);
+    const todoItemsMax = global.appConfig?.todoItemsMax || TODO_ITEMS_LIMIT;
+    const canAppendTodoList = message.content.todo?.todo.othersCanAppend
+      && message.content.todo?.todo.items?.length < todoItemsMax;
 
     return {
       threadId,
@@ -871,6 +912,7 @@ export default memo(withGlobal<OwnProps>(
       canUnpin: !isScheduled && canUnpin,
       canDelete,
       canEdit: !isPinned && canEdit,
+      canAppendTodoList,
       canForward: !isScheduled && canForward,
       canFaveSticker: !isScheduled && canFaveSticker,
       canUnfaveSticker: !isScheduled && canUnfaveSticker,

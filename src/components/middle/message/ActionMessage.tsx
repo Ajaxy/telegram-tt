@@ -94,6 +94,8 @@ const SINGLE_LINE_ACTIONS = new Set<ApiMessageAction['type']>([
   'pinMessage',
   'chatEditPhoto',
   'chatDeletePhoto',
+  'todoCompletions',
+  'todoAppendTasks',
   'unsupported',
 ]);
 const HIDDEN_TEXT_ACTIONS = new Set<ApiMessageAction['type']>(['giftCode', 'prizeStars', 'suggestProfilePhoto']);

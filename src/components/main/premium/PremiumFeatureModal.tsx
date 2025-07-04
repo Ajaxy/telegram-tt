@@ -12,6 +12,7 @@ import type {
   ApiPremiumSubscriptionOption,
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
+import type { LangPair } from '../../../types/language';
 
 import { PREMIUM_BOTTOM_VIDEOS, PREMIUM_FEATURE_SECTIONS, PREMIUM_LIMITS_ORDER } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
@@ -55,6 +56,7 @@ export const PREMIUM_FEATURE_TITLES: Record<ApiPremiumSection, string> = {
   last_seen: 'PremiumPreviewLastSeen',
   message_privacy: 'PremiumPreviewMessagePrivacy',
   effects: 'Premium.MessageEffects',
+  todo: 'PremiumPreviewTodo',
 };
 
 export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
@@ -76,6 +78,7 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
   last_seen: 'PremiumPreviewLastSeenDescription',
   message_privacy: 'PremiumPreviewMessagePrivacyDescription',
   effects: 'Premium.MessageEffectsInfo',
+  todo: 'PremiumPreviewTodoDescription',
 };
 
 const LIMITS_TITLES: Record<ApiLimitTypeForPromo, string> = {
@@ -290,6 +293,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
 
           const i = promo.videoSections.indexOf(section);
           if (i === -1) return undefined;
+          const shouldUseNewLang = promo.videoSections[i] === 'todo';
           return (
             <div className={styles.slide}>
               <div className={styles.frame}>
@@ -303,10 +307,23 @@ const PremiumFeatureModal: FC<OwnProps> = ({
                 />
               </div>
               <h1 className={styles.title}>
-                {oldLang(PREMIUM_FEATURE_TITLES[promo.videoSections[i]])}
+                {shouldUseNewLang
+                  ? lang(
+                    PREMIUM_FEATURE_TITLES[promo.videoSections[i]] as keyof LangPair,
+                    undefined,
+                    { withNodes: true, renderTextFilters: ['br'] },
+                  )
+                  : oldLang(PREMIUM_FEATURE_TITLES[promo.videoSections[i]])}
               </h1>
               <div className={styles.description}>
-                {renderText(oldLang(PREMIUM_FEATURE_DESCRIPTIONS[promo.videoSections[i]]), ['br'])}
+                {renderText(shouldUseNewLang
+                  ? lang(
+                    PREMIUM_FEATURE_DESCRIPTIONS[promo.videoSections[i]] as keyof LangPair,
+                    undefined,
+                    { withNodes: true, renderTextFilters: ['br'] },
+                  )
+                  : oldLang(PREMIUM_FEATURE_DESCRIPTIONS[promo.videoSections[i]]), ['br'],
+                )}
               </div>
             </div>
           );

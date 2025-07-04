@@ -50,6 +50,7 @@ export interface LangPair {
   'PremiumPreviewVoiceToTextDescription': undefined;
   'PremiumPreviewProfileBadgeDescription': undefined;
   'PremiumPreviewDownloadSpeedDescription': undefined;
+  'PremiumPreviewTodoDescription': undefined;
   'PremiumPreviewUploadsDescription': undefined;
   'PremiumPreviewAdvancedChatManagementDescription': undefined;
   'PremiumPreviewAnimatedProfilesDescription': undefined;
@@ -1537,6 +1538,27 @@ export interface LangPair {
   'MonoforumComposerPlaceholder': undefined;
   'ChannelSendMessage': undefined;
   'AutomaticTranslation': undefined;
+  'TitleNewToDoList': undefined;
+  'TitleEditToDoList': undefined;
+  'TitleAppendToDoList': undefined;
+  'InputTitle': undefined;
+  'TitleToDoList': undefined;
+  'TitleTask': undefined;
+  'TitleAddTask': undefined;
+  'AllowOthersAddTasks': undefined;
+  'AllowOthersMarkAsDone': undefined;
+  'AriaToDoCancel': undefined;
+  'TitleGroupToDoList': undefined;
+  'TitleYourToDoList': undefined;
+  'ToDoListNewTasks': undefined;
+  'MenuButtonAppendTodoList': undefined;
+  'PremiumMore': undefined;
+  'SubscribeToTelegramPremiumForToggleTask': undefined;
+  'SubscribeToTelegramPremiumForCreateToDo': undefined;
+  'SubscribeToTelegramPremiumForAppendToDo': undefined;
+  'ToDoListErrorChooseTitle': undefined;
+  'ToDoListErrorChooseTasks': undefined;
+  'PremiumPreviewTodo': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -2518,6 +2540,62 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ComposerTitleForwardFrom': {
     'users': V;
   };
+  'TitleUserToDoList': {
+    'peer': V;
+  };
+  'DescriptionCompletedToDoTasks': {
+    'number': V;
+    'count': V;
+  };
+  'MessageActionTodoCompletionsAsDone': {
+    'peer': V;
+    'task': V;
+  };
+  'MessageActionTodoCompletionsAsDoneYou': {
+    'task': V;
+  };
+  'MessageActionTodoCompletionsAsDoneMultiple': {
+    'peer': V;
+    'tasks': V;
+  };
+  'MessageActionTodoCompletionsAsDoneMultipleYou': {
+    'tasks': V;
+  };
+  'MessageActionTodoCompletionsAsNotDone': {
+    'peer': V;
+    'task': V;
+  };
+  'MessageActionTodoCompletionsAsNotDoneYou': {
+    'task': V;
+  };
+  'MessageActionTodoCompletionsAsNotDoneMultiple': {
+    'peer': V;
+    'tasks': V;
+  };
+  'MessageActionTodoCompletionsAsNotDoneMultipleYou': {
+    'tasks': V;
+  };
+  'MessageActionAppendTodo': {
+    'peer': V;
+    'task': V;
+    'list': V;
+  };
+  'MessageActionAppendTodoYou': {
+    'task': V;
+    'list': V;
+  };
+  'MessageActionAppendTodoMultiple': {
+    'peer': V;
+    'tasks': V;
+    'list': V;
+  };
+  'MessageActionAppendTodoMultipleYou': {
+    'tasks': V;
+    'list': V;
+  };
+  'HintTodoListTasksCount': {
+    'count': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -2828,6 +2906,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'GiftAttributeSymbolPlural': {
+    'count': V;
+  };
+  'MessageActionTodoTaskCount': {
     'count': V;
   };
 }

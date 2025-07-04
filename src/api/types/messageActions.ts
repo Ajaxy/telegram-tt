@@ -1,5 +1,6 @@
 import type { ApiGroupCall, ApiPhoneCallDiscardReason } from './calls';
 import type { ApiBotApp, ApiFormattedText, ApiPhoto } from './messages';
+import type { ApiTodoItem } from './messages';
 import type { ApiStarGiftRegular, ApiStarGiftUnique } from './stars';
 
 interface ActionMediaType {
@@ -281,6 +282,17 @@ export interface ApiMessageActionPaidMessagesPrice extends ActionMediaType {
   isAllowedInChannel?: boolean;
 }
 
+export interface ApiMessageActionTodoCompletions extends ActionMediaType {
+  type: 'todoCompletions';
+  completedIds: number[];
+  incompletedIds: number[];
+}
+
+export interface ApiMessageActionTodoAppendTasks extends ActionMediaType {
+  type: 'todoAppendTasks';
+  items: ApiTodoItem[];
+}
+
 export interface ApiMessageActionUnsupported extends ActionMediaType {
   type: 'unsupported';
 }
@@ -298,4 +310,5 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionChannelJoined | ApiMessageActionGiftCode | ApiMessageActionGiveawayLaunch
   | ApiMessageActionGiveawayResults | ApiMessageActionPaymentRefunded | ApiMessageActionGiftStars
   | ApiMessageActionPrizeStars | ApiMessageActionStarGift | ApiMessageActionStarGiftUnique
-  | ApiMessageActionPaidMessagesRefunded | ApiMessageActionPaidMessagesPrice;
+  | ApiMessageActionPaidMessagesRefunded | ApiMessageActionPaidMessagesPrice | ApiMessageActionTodoCompletions
+  | ApiMessageActionTodoAppendTasks;

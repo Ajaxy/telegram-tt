@@ -28,6 +28,7 @@ type OwnProps = {
   loadingOptions?: string[];
   isRound?: boolean;
   onChange: (value: string[]) => void;
+  onClickLabel?: (e: React.MouseEvent, value?: string) => void;
   className?: string;
 };
 
@@ -40,6 +41,7 @@ const CheckboxGroup: FC<OwnProps> = ({
   loadingOptions,
   isRound,
   onChange,
+  onClickLabel,
   className,
 }) => {
   const handleChange = useLastCallback((event: ChangeEvent<HTMLInputElement>, nestedOptionList?: IRadioOption) => {
@@ -87,10 +89,12 @@ const CheckboxGroup: FC<OwnProps> = ({
             label={option.label}
             subLabel={option.subLabel}
             value={option.value}
+            user={option.user}
             checked={selected?.indexOf(option.value) !== -1}
             disabled={option.disabled || disabled}
             isLoading={loadingOptions ? loadingOptions.indexOf(option.value) !== -1 : undefined}
             onChange={handleChange}
+            onClickLabel={onClickLabel}
             nestedCheckbox={nestedCheckbox}
             nestedCheckboxCount={getCheckedNestedCount(option.nestedOptions ?? [])}
             nestedOptionList={option}

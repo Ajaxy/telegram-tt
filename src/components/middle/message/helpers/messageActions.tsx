@@ -103,12 +103,21 @@ export function renderPeerLink(peerId: string | undefined, text: string, asPrevi
   );
 }
 
-export function renderMessageLink(targetMessage: ApiMessage, text: TeactNode, asPreview?: boolean) {
-  if (asPreview) return text;
+export function renderMessageLink(
+  targetMessage: ApiMessage | undefined,
+  text: TeactNode,
+  asPreview: boolean | undefined,
+  params?: {
+    noEllipsis?: boolean;
+  },
+) {
+  const { noEllipsis } = params || {};
+
+  if (asPreview || !targetMessage) return text;
+
   return (
     <Link
-      className={styles.messageLink}
-
+      className={buildClassName(styles.messageLink, noEllipsis && styles.noEllipsis)}
       onClick={(e) => {
         e.stopPropagation();
         getActions().focusMessage({ chatId: targetMessage.chatId, messageId: targetMessage.id });

@@ -940,7 +940,7 @@ function updateReactions<T extends GlobalState>(
   return global;
 }
 
-function updateWithLocalMedia(
+export function updateWithLocalMedia(
   global: RequiredGlobalState,
   chatId: string,
   id: number,
