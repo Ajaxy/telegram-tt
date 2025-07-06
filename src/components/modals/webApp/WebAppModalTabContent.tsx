@@ -1,15 +1,8 @@
 import type { FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
-import {
-  memo, useEffect,
-  useMemo,
-  useRef, useState,
-} from '../../../lib/teact/teact';
+import { memo, useEffect, useMemo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type {
-  ApiAttachBot, ApiBotAppSettings, ApiUser,
-} from '../../../api/types';
+import type { ApiAttachBot, ApiBotAppSettings, ApiUser } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { BotAppPermissions, ThemeKey } from '../../../types';
 import type {
@@ -33,6 +26,7 @@ import {
 } from '../../../global/selectors';
 import { getGeolocationStatus, IS_GEOLOCATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
+import buildStyle from '../../../util/buildStyle.ts';
 import download from '../../../util/download';
 import { extractCurrentThemeParams, validateHexColor } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
@@ -189,7 +183,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const [, setFullscreen, exitFullscreen] = useFullscreen(fullscreenElementRef, exitFullScreenCallback);
 
   const activeWebApp = modal?.activeWebAppKey ? modal.openedWebApps[modal.activeWebAppKey] : undefined;
-  const activeWebAppName = activeWebApp?.appName;
+  const { appName: activeWebAppName, backgroundColor } = activeWebApp || {};
   const {
     url, buttonText, isBackButtonVisible,
   } = webApp || {};
@@ -333,7 +327,9 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   });
 
   const sendFullScreenChangedCallback = useLastCallback(
-    (value: boolean) => { if (isActive) sendFullScreenChanged(value); },
+    (value: boolean) => {
+      if (isActive) sendFullScreenChanged(value);
+    },
   );
 
   useEffect(() => {
@@ -897,7 +893,10 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     }
   }, [setShouldDecreaseWebFrameSize, shouldShowSecondaryButton, shouldShowMainButton]);
 
-  const frameStyle = isTransforming ? 'pointer-events: none;' : '';
+  const frameStyle = buildStyle(
+    `background-color: ${backgroundColor || 'var(--color-background)'}`,
+    isTransforming && 'pointer-events: none;',
+  );
 
   const handleBackClick = useLastCallback(() => {
     if (isBackButtonVisible) {
