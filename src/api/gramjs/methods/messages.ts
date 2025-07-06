@@ -2167,7 +2167,17 @@ export async function translateText(params: TranslateTextParams) {
     }));
   }
 
-  if (!result) return undefined;
+  if (!result) {
+    if (isMessageTranslation) {
+      sendApiUpdate({
+        '@type': 'failedMessageTranslations',
+        chatId: params.chat.id,
+        messageIds: params.messageIds,
+        toLanguageCode: params.toLanguageCode,
+      });
+    }
+    return undefined;
+  }
 
   const formattedText = result.result.map((r) => buildApiFormattedText(r));
 
