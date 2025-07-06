@@ -41,7 +41,7 @@ const TodoList = ({
   isCurrentUserPremium,
   isSynced,
 }: OwnProps & StateProps) => {
-  const { toggleTodoCompleted, showNotification } = getActions();
+  const { toggleTodoCompleted, showNotification, requestConfetti } = getActions();
   const { todo, completions } = todoList;
   const { title, items, othersCanComplete } = todo;
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
@@ -83,6 +83,10 @@ const TodoList = ({
       completedIds: newCompletedId ? [Number(newCompletedId)] : [],
       incompletedIds: newIncompletedId ? [Number(newIncompletedId)] : [],
     });
+
+    if (newCompletedTasks.length === items.length) {
+      requestConfetti({});
+    }
   });
   const isReadOnly = Boolean(message.forwardInfo) || (!othersCanComplete && !message.isOutgoing);
   const isOutgoing = message.isOutgoing;

@@ -1550,7 +1550,6 @@ export interface LangPair {
   'AriaToDoCancel': undefined;
   'TitleGroupToDoList': undefined;
   'TitleYourToDoList': undefined;
-  'ToDoListNewTasks': undefined;
   'MenuButtonAppendTodoList': undefined;
   'PremiumMore': undefined;
   'SubscribeToTelegramPremiumForToggleTask': undefined;

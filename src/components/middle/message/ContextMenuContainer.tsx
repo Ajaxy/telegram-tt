@@ -469,7 +469,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       openTodoListModal({
         chatId: message.chatId,
         messageId: message.id,
-        isAddTaskMode: true,
+        forNewTask: true,
       });
     }
     closeMenu();

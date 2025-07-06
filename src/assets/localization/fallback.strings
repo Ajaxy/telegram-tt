@@ -2049,7 +2049,6 @@
 "MessageActionTodoCompletionsAsNotDoneMultipleYou" = "You marked {tasks} as not done";
 "MessageActionTodoTaskCount_one" = "{count} task";
 "MessageActionTodoTaskCount_other" = "{count} tasks";
-"ToDoListNewTasks" = "New Tasks";
 "MenuButtonAppendTodoList" = "Add a Task";
 "MessageActionAppendTodo" = "{peer} added a new task \"{task}\" to {list}";
 "MessageActionAppendTodoYou" = "You added a new task \"{task}\" to {list}";

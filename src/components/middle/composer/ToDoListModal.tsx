@@ -1,7 +1,7 @@
 import type { ChangeEvent } from 'react';
 import type { ElementRef } from '../../../lib/teact/teact';
 import {
-  memo, useEffect, useRef, useState,
+  memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -18,6 +18,7 @@ import { requestMeasure, requestNextMutation } from '../../../lib/fasterdom/fast
 import { selectChatMessage } from '../../../global/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { generateUniqueNumberId } from '../../../util/generateUniqueId';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
@@ -47,6 +48,7 @@ export type StateProps = {
 type Item = {
   id: number;
   text: string;
+  isDisabled?: boolean;
 };
 
 const MAX_LIST_HEIGHT = 320;
@@ -72,12 +74,26 @@ const ToDoListModal = ({
   const [isOthersCanComplete, setIsOthersCanComplete] = useState(true);
   const [hasErrors, setHasErrors] = useState<boolean>(false);
 
+  const lang = useLang();
+
   const isOpen = Boolean(modal);
   const renderingModal = useCurrentOrPrev(modal);
-  const isAddTaskMode = renderingModal?.isAddTaskMode;
+  // Treat "Add task" as edit mode for own checklists
+  const isAddTaskMode = renderingModal?.forNewTask && !editingMessage?.isOutgoing;
 
-  const lang = useLang();
   const editingTodo = editingMessage?.content.todo?.todo;
+
+  const frozenTasks = useMemo(() => {
+    if (!isAddTaskMode || !editingTodo) {
+      return MEMO_EMPTY_ARRAY;
+    }
+
+    return editingTodo.items.map((item) => ({
+      id: item.id,
+      text: item.title.text,
+      isDisabled: true,
+    }));
+  }, [isAddTaskMode, editingTodo]);
 
   const focusInput = useLastCallback((ref: ElementRef<HTMLInputElement>) => {
     if (isOpen && ref.current) {
@@ -85,7 +101,7 @@ const ToDoListModal = ({
     }
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (editingTodo) {
       setTitle(editingTodo.title.text);
       setIsOthersCanAppend(editingTodo.othersCanAppend ?? false);
@@ -114,7 +130,20 @@ const ToDoListModal = ({
     }
   }, [isOpen]);
 
-  useEffect(() => focusInput(titleInputRef), [focusInput, isOpen]);
+  useEffect(() => {
+    if (isOpen) {
+      // Wait for the DOM to be updated
+      requestMeasure(() => {
+        if (renderingModal?.forNewTask) {
+          const inputs = itemsListRef.current?.querySelectorAll('input');
+          const lastInput = inputs?.[inputs.length - 1];
+          lastInput?.focus();
+        } else {
+          focusInput(titleInputRef);
+        }
+      });
+    }
+  }, [focusInput, isOpen, renderingModal?.forNewTask]);
 
   const addNewItem = useLastCallback((newItems: Item[]) => {
     const id = generateUniqueNumberId();
@@ -283,34 +312,37 @@ const ToDoListModal = ({
   }
 
   function renderItems() {
-    return items.map((item, index) => (
-      <div className="item-wrapper">
-        <InputText
-          maxLength={MAX_OPTION_LENGTH}
-          label={index !== items.length - 1 || items.length === maxItemsCount
-            ? lang('TitleTask')
-            : lang('TitleAddTask')}
-          error={getItemsError(index)}
-          value={item.text}
-
-          onChange={(e) => updateItem(index, e.currentTarget.value)}
-          onKeyPress={handleKeyPress}
-        />
-        {index !== items.length - 1 && (
-          <Button
-            className="item-remove-button"
-            round
-            color="translucent"
-            size="smaller"
-            ariaLabel={lang('Delete')}
-
-            onClick={() => removeItem(index)}
-          >
-            <Icon name="close" />
-          </Button>
-        )}
-      </div>
-    ));
+    const tasksToRender = [...frozenTasks, ...items];
+    return tasksToRender.map((item, index) => {
+      const stateIndex = index - frozenTasks.length;
+      return (
+        <div className="item-wrapper">
+          <InputText
+            maxLength={MAX_OPTION_LENGTH}
+            label={index !== tasksToRender.length - 1 || tasksToRender.length === maxItemsCount
+              ? lang('TitleTask')
+              : lang('TitleAddTask')}
+            error={getItemsError(stateIndex)}
+            value={item.text}
+            disabled={item.isDisabled}
+            onChange={(e) => updateItem(stateIndex, e.currentTarget.value)}
+            onKeyPress={handleKeyPress}
+          />
+          {index !== tasksToRender.length - 1 && !item.isDisabled && (
+            <Button
+              className="item-remove-button"
+              round
+              color="translucent"
+              size="smaller"
+              ariaLabel={lang('Delete')}
+              onClick={() => removeItem(stateIndex)}
+            >
+              <Icon name="close" />
+            </Button>
+          )}
+        </div>
+      );
+    });
   }
 
   return (
@@ -334,7 +366,7 @@ const ToDoListModal = ({
 
       <div className="options-list custom-scroll" ref={itemsListRef}>
         <h3 className="items-header">
-          {lang(isAddTaskMode ? 'ToDoListNewTasks' : 'TitleToDoList')}
+          {lang('TitleToDoList')}
         </h3>
 
         {renderItems()}

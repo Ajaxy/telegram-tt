@@ -93,6 +93,12 @@
       .label {
         line-height: 1.3125rem;
       }
+
+      .subLabel {
+        margin-top: 0;
+        font-size: 0.75rem;
+        color: var(--secondary-color);
+      }
     }
 
     input:checked ~ .Checkbox-main {

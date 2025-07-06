@@ -2203,7 +2203,7 @@ export interface ActionPayloads {
   openTodoListModal: {
     chatId: string;
     messageId?: number;
-    isAddTaskMode?: boolean;
+    forNewTask?: boolean;
   } & WithTabId;
   closeTodoListModal: WithTabId | undefined;
   requestConfetti: (ConfettiParams & WithTabId) | WithTabId;

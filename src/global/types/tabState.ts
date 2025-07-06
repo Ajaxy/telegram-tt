@@ -535,7 +535,7 @@ export type TabState = {
   todoListModal?: {
     chatId: string;
     messageId?: number;
-    isAddTaskMode?: boolean;
+    forNewTask?: boolean;
   };
 
   preparedMessageModal?: {

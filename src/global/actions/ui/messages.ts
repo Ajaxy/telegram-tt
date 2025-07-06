@@ -765,14 +765,14 @@ addActionHandler('closePollModal', (global, actions, payload): ActionReturnType 
 
 addActionHandler('openTodoListModal', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, messageId, isAddTaskMode, tabId = getCurrentTabId(),
+    chatId, messageId, forNewTask, tabId = getCurrentTabId(),
   } = payload;
 
   return updateTabState(global, {
     todoListModal: {
       chatId,
       messageId,
-      isAddTaskMode,
+      forNewTask,
     },
   }, tabId);
 });
