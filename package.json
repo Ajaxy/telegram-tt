@@ -1,6 +1,6 @@
 {
   "name": "telegram-t",
-  "version": "10.9.55",
+  "version": "10.9.56",
   "description": "",
   "type": "module",
   "main": "index.js",
