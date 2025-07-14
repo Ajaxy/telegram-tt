@@ -13,19 +13,18 @@ import {
   getMessageRecentReaction,
   getPrivateChatUserId,
   getUserFullName,
-  isChatChannel,
 } from '../global/helpers';
 import { getIsChatMuted, getIsChatSilent, getShouldShowMessagePreview } from '../global/helpers/notifications';
 import { getMessageSenderName } from '../global/helpers/peers';
 import {
-  selectChat,
   selectCurrentMessageList,
   selectIsChatWithSelf,
   selectNotifyDefaults,
   selectNotifyException,
+  selectPeer,
+  selectSender,
   selectSettingsKeys,
   selectTopicFromMessage,
-  selectUser,
 } from '../global/selectors';
 import { callApi } from '../api/gramjs';
 import { IS_ELECTRON, IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './browser/windowEnvironment';
@@ -298,15 +297,13 @@ function checkIfShouldNotify(chat: ApiChat, message: Partial<ApiMessage>) {
 
 function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: ApiPeerReaction) {
   const global = getGlobal();
-  let {
-    senderId,
-  } = message;
+  let sender = selectSender(global, message);
   const hasReaction = Boolean(reaction);
-  if (hasReaction) senderId = reaction.peerId;
+  if (hasReaction) {
+    sender = selectPeer(global, reaction.peerId);
+  }
 
   const { isScreenLocked } = global.passcode;
-  const messageSenderChat = senderId ? selectChat(global, senderId) : undefined;
-  const messageSenderUser = senderId ? selectUser(global, senderId) : undefined;
   const privateChatUserId = getPrivateChatUserId(chat);
   const isSelf = privateChatUserId === global.currentUserId;
 
@@ -315,10 +312,6 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     !isScreenLocked
     && getShouldShowMessagePreview(chat, selectNotifyDefaults(global), selectNotifyException(global, chat.id))
   ) {
-    const isChat = chat && (isChatChannel(chat) || message.senderId === message.chatId);
-
-    // TODO[forums] Support ApiChat
-    const sender = isChat ? messageSenderChat : messageSenderUser;
     const senderName = sender ? getMessageSenderName(oldTranslate, chat.id, sender) : undefined;
     let summary = jsxToHtml(<span><MessageSummary message={message} /></span>)[0].textContent || '';
 

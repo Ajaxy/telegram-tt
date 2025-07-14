@@ -171,7 +171,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'newMessage': {
       const { message } = update;
 
-      if (message.senderId === global.currentUserId && !message.isFromScheduled) {
+      const isOur = message.senderId ? message.senderId === global.currentUserId : message.isOutgoing;
+      if (isOur && !message.isFromScheduled) {
         return undefined;
       }
 

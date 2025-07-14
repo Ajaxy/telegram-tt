@@ -437,7 +437,7 @@ export function buildLocalMessage(
     }),
     date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
     isOutgoing: !isChannel,
-    senderId: sendAs?.id || currentUserId,
+    senderId: chat.type !== 'chatTypePrivate' ? (sendAs?.id || currentUserId) : undefined,
     replyInfo: resultReplyInfo,
     ...(groupedId && {
       groupedId,
@@ -529,7 +529,7 @@ export function buildLocalForwardedMessage({
     content: updatedContent,
     date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
     isOutgoing: !asIncomingInChatWithSelf && toChat.type !== 'chatTypeChannel',
-    senderId: sendAs?.id || currentUserId,
+    senderId: toChat.type !== 'chatTypePrivate' ? (sendAs?.id || currentUserId) : undefined,
     sendingState: 'messageSendingStatePending',
     groupedId,
     isInAlbum,
