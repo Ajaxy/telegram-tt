@@ -1,3 +1,6 @@
+@use "sass:map";
+@use "../../styles/icons";
+
 .Checkbox {
   cursor: var(--custom-cursor, pointer);
 
@@ -77,18 +80,23 @@
   }
 
   &.blocking {
+    .Checkbox-main {
+      &::before,
+      &::after {
+        transition: none;
+      }
+    }
+
     input:not(:checked) ~ .Checkbox-main {
       &::before {
         border-color: var(--color-error);
       }
 
       &::after {
+        content: map.get(icons.$icons-map, "remove");
+        border-radius: 0.25rem;
         opacity: 1;
-        background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KICA8ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPgogICAgPHBvbHlnb24gcG9pbnRzPSIwIDAgMjQgMCAyNCAyNCAwIDI0Ii8+CiAgICA8cGF0aCBmaWxsPSIjZTUzOTM1IiBmaWxsLXJ1bGU9Im5vbnplcm8iIGQ9Ik0xOCwzIEMxOS42NTY4NTQyLDMgMjEsNC4zNDMxNDU3NSAyMSw2IEwyMSwxOCBDMjEsMTkuNjU2ODU0MiAxOS42NTY4NTQyLDIxIDE4LDIxIEw2LDIxIEM0LjM0MzE0NTc1LDIxIDMsMTkuNjU2ODU0MiAzLDE4IEwzLDYgQzMsNC4zNDMxNDU3NSA0LjM0MzE0NTc1LDMgNiwzIEwxOCwzIFogTTE2LDExIEw4LDExIEM3LjQ0NzcxNTI1LDExIDcsMTEuNDQ3NzE1MyA3LDEyIEM3LDEyLjU1MjI4NDcgNy40NDc3MTUyNSwxMyA4LDEzIEwxNiwxMyBDMTYuNTUyMjg0NywxMyAxNywxMi41NTIyODQ3IDE3LDEyIEMxNywxMS40NDc3MTUzIDE2LjU1MjI4NDcsMTEgMTYsMTEgWiIvPgogIDwvZz4KPC9zdmc+Cg==);
-        background-position: -0.125rem -0.125rem;
-
-        // Compensate for svg having incorrect size
-        background-size: 1.5rem;
+        background-color: var(--color-error);
       }
     }
   }
@@ -125,10 +133,17 @@
     }
 
     &::after {
+      @include icons.icon;
+
+      content: map.get(icons.$icons-map, "check");
+
+      position: absolute;
+
+      font-size: 1.25rem;
+      color: var(--color-white);
+
       opacity: 0;
-      /* stylelint-disable-next-line scss/operator-no-unspaced */
-      background: center no-repeat url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEzLjkuOEw1LjggOC45IDIuMSA1LjJjLS40LS40LTEuMS0uNC0xLjYgMC0uNC40LS40IDEuMSAwIDEuNkw1IDExLjJjLjQuNCAxLjEuNCAxLjYgMGw4LjktOC45Yy40LS40LjQtMS4xIDAtMS42LS41LS40LTEuMi0uNC0xLjYuMXoiIGZpbGw9IiNGRkYiIGZpbGwtcnVsZT0ibm9uemVybyIvPjwvc3ZnPg==);
-      background-size: 0.875rem;
+
       transition: opacity 0.1s ease;
     }
 
