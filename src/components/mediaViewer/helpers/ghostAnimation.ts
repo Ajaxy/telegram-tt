@@ -371,7 +371,6 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
     case MediaViewerOrigin.ScheduledInline:
     case MediaViewerOrigin.StarsTransaction:
     case MediaViewerOrigin.PreviewMedia:
-    case MediaViewerOrigin.ChannelAvatar:
       ghost.classList.add('rounded-corners');
       break;
 
@@ -384,10 +383,8 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
 
     case MediaViewerOrigin.MiddleHeaderAvatar:
     case MediaViewerOrigin.SuggestedAvatar:
+    case MediaViewerOrigin.ChannelAvatar:
       ghost.classList.add('circle');
-      if (origin === MediaViewerOrigin.SuggestedAvatar) {
-        ghost.classList.add('transition-circle');
-      }
       break;
   }
 }

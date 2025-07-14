@@ -218,20 +218,13 @@
 
   transition: transform 0.2s ease, opacity 0.2s ease;
 
-  &.transition-circle {
-    transition: transform 0.2s ease, opacity 0.2s ease, border-radius 0.2s ease;
-  }
-
   &.rounded-corners {
     border-radius: var(--border-radius-messages);
   }
 
   &.circle {
     border-radius: 50%;
-  }
-
-  body.is-ios & {
-    transition: transform 0.2s ease, opacity 0.2s ease, border-radius 0.2s ease !important;
+    transition: transform 0.2s ease, opacity 0.2s ease, border-radius 0.2s ease;
   }
 
   img,

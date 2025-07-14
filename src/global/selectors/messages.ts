@@ -569,7 +569,7 @@ export function selectThreadIdFromMessage<T extends GlobalState>(global: T, mess
   const chat = selectChat(global, message.chatId);
   const { content } = message;
   const { replyToMsgId, replyToTopId, isForumTopic } = getMessageReplyInfo(message) || {};
-  if ('action' in content && content.action?.type === 'topicCreate') {
+  if (content.action?.type === 'topicCreate') {
     return message.id;
   }
 

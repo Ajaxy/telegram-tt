@@ -172,11 +172,13 @@ const MediaViewerContent = ({
     }
   }
 
-  const textParts = textMessage && (textMessage.content.action?.type === 'suggestProfilePhoto'
-    ? lang('Conversation.SuggestedPhotoTitle')
-    : renderMessageText({
-      message: textMessage, maxTimestamp, threadId, forcePlayback: true, isForMediaViewer: true,
-    }));
+  const textParts = textMessage && (
+    textMessage.content.action
+      ? (textMessage.content.action.type === 'suggestProfilePhoto'
+        ? lang('Conversation.SuggestedPhotoTitle') : undefined)
+      : renderMessageText({
+        message: textMessage, maxTimestamp, threadId, forcePlayback: true, isForMediaViewer: true,
+      }));
   const buttonText = textMessage && 'buttonText' in textMessage ? textMessage.buttonText : undefined;
   const hasFooter = Boolean(textParts);
   const posterSize = calculateMediaViewerDimensions(dimensions!, hasFooter, isVideo);
