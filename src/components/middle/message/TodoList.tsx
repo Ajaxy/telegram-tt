@@ -1,5 +1,5 @@
 import {
-  memo, useEffect, useMemo, useState,
+  memo, useLayoutEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -49,7 +49,7 @@ const TodoList = ({
 
   const canToggle = !message.isScheduled && isCurrentUserPremium && isSynced;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const completedIds = completions?.map((c) => c.itemId.toString()) || [];
     setCompletedTasks(completedIds);
   }, [completions]);

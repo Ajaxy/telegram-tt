@@ -662,6 +662,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
 
   // https://github.com/telegramdesktop/tdesktop/blob/335095a332607c41a8d20b47e61f5bbd66366d4b/Telegram/SourceFiles/data/data_peer.cpp#L653
   const canEditMessagesIndefinitely = (() => {
+    if (content.todo) return true;
     if (isPrivate) return isChatWithSelf;
     if (isBasicGroup) return false;
     if (isSuperGroup) return hasChatPinPermission;
