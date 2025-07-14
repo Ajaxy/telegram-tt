@@ -41,6 +41,7 @@ import {
   isUserBot,
   isUserRightBanned,
 } from '../../global/helpers';
+import { getSavedGiftKey } from '../../global/helpers/stars';
 import {
   selectActiveDownloads,
   selectChat,
@@ -360,10 +361,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   const [renderingGifts, setRenderingGifts] = useState(gifts);
   const { startViewTransition, shouldApplyVtn } = useViewTransition();
 
-  const getGiftId = useLastCallback((gift: ApiSavedStarGift) => (
-    `${gift.date}-${gift.fromId}-${gift.gift.id}`
-  ));
-  const giftIds = useMemo(() => renderingGifts?.map(getGiftId), [renderingGifts]);
+  const giftIds = useMemo(() => renderingGifts?.map((gift) => getSavedGiftKey(gift)), [renderingGifts]);
 
   const renderingActiveTab = activeTab > tabs.length - 1 ? tabs.length - 1 : activeTab;
   const tabType = tabs[renderingActiveTab].type;
@@ -389,8 +387,8 @@ const Profile: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    const prevGiftIds = prevGifts.map(getGiftId);
-    const newGiftIds = gifts.map(getGiftId);
+    const prevGiftIds = prevGifts.map((gift) => getSavedGiftKey(gift));
+    const newGiftIds = gifts.map((gift) => getSavedGiftKey(gift));
     const hasOrderChanged = prevGiftIds.some((id, index) => id !== newGiftIds[index]);
 
     if (hasOrderChanged) {
@@ -847,8 +845,8 @@ const Profile: FC<OwnProps & StateProps> = ({
             return (
               <SavedGift
                 peerId={chatId}
-                key={getGiftId(gift)}
-                style={shouldApplyVtn ? `view-transition-name: vt${getGiftId(gift)}` : undefined}
+                key={getSavedGiftKey(gift)}
+                style={shouldApplyVtn ? `view-transition-name: vt${getSavedGiftKey(gift)}` : undefined}
                 gift={gift}
                 observeIntersection={observeIntersectionForMedia}
               />

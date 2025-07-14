@@ -96,6 +96,7 @@ export interface ApiSavedStarGift {
   isPinned?: boolean;
   isConverted?: boolean; // Local field, used for Action Message
   upgradeMsgId?: number; // Local field, used for Action Message
+  localTag?: number; // Local field, used for key in list
 }
 
 export type StarGiftAttributeIdModel = {

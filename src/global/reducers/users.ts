@@ -13,6 +13,7 @@ import { areDeepEqual } from '../../util/areDeepEqual';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { omit, omitUndefined, unique } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import { getSavedGiftKey } from '../helpers/stars';
 import { selectTabState } from '../selectors';
 import { updateTabState } from './tabs';
 
@@ -331,6 +332,17 @@ export function replacePeerSavedGifts<T extends GlobalState>(
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   const tabState = selectTabState(global, tabId);
+
+  // Some non-unique gifts can be entirely identical and break `key`
+  const keyCounts = new Map<string, number>();
+  gifts.forEach((gift) => {
+    const id = getSavedGiftKey(gift, true);
+    const count = keyCounts.get(id) || 0;
+    if (count > 0) {
+      gift.localTag = count;
+    }
+    keyCounts.set(id, count + 1);
+  });
 
   return updateTabState(global, {
     savedGifts: {
