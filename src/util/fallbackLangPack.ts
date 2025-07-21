@@ -175,6 +175,8 @@ export default {
   FilterChannels: 'Channels',
   FilterBots: 'Bots',
   FilterChats: 'Chats',
+  FilterColorTitle: 'Folder Color',
+  FilterColorHint: 'This color will be used for the folder\'s tag in the chat list',
   AccDescrChannel: 'Channel',
   AccDescrGroup: 'Group',
   Bot: 'bot',

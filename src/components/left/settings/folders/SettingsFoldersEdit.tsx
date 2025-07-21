@@ -11,9 +11,10 @@ import type {
   FoldersState,
 } from '../../../../hooks/reducers/useFoldersReducer';
 
-import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
-import { selectCanShareFolder } from '../../../../global/selectors';
+import { FOLDER_COLORS, STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
+import { selectCanShareFolder, selectIsCurrentUserPremium } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
+import buildClassName from '../../../../util/buildClassName';
 import { isUserId } from '../../../../util/entities/ids';
 import { findIntersectionWithSet } from '../../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
@@ -116,6 +117,8 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     selectedChatIds: excludedChatIds,
     selectedChatTypes: excludedChatTypes,
   } = useMemo(() => selectChatFilters(state, 'excluded'), [state]);
+
+  const isCurrentUserPremium = selectIsCurrentUserPremium(getGlobal());
 
   useEffect(() => {
     setIsIncludedChatsListExpanded(false);
@@ -343,6 +346,49 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
             </ListItem>
 
             {renderChats('excluded')}
+          </div>
+        )}
+
+        {isCurrentUserPremium && (
+          <div className="settings-item pt-3">
+            <h4 className="settings-item-header mb-3 color-picker-title" dir={lang.isRtl ? 'rtl' : undefined}>
+              {lang('FilterColorTitle')}
+              <div className={buildClassName(
+                'color-picker-selected-color',
+                `color-picker-item-${state.folder.color}`,
+              )}
+              >
+                {state.folder.title.text}
+              </div>
+            </h4>
+            <div className="color-picker">
+              {FOLDER_COLORS.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => dispatch({ type: 'setColor', payload: color })}
+                  className={buildClassName(
+                    'color-picker-item',
+                    `color-picker-item-${color}`,
+                    color === state.folder.color && 'color-picker-item-active',
+                  )}
+                />
+              ))}
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'setColor', payload: -1 })}
+                className={buildClassName(
+                  'color-picker-item',
+                  'color-picker-item-none',
+                  (!state.folder.color || state.folder.color === -1) && 'color-picker-item-active',
+                )}
+              >
+                <Icon name="close" />
+              </button>
+            </div>
+            <p className="settings-item-description mb-0" dir={lang.isRtl ? 'rtl' : undefined}>
+              {lang('FilterColorHint')}
+            </p>
           </div>
         )}
 
