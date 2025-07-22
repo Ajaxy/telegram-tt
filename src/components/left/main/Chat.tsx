@@ -4,6 +4,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiChat,
+  ApiChatFolder,
   ApiDraft,
   ApiMessage,
   ApiMessageOutgoingStatus,
@@ -27,6 +28,7 @@ import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
   selectCanAnimateInterface,
   selectChat,
+  selectChatFolders,
   selectChatLastMessage,
   selectChatLastMessageId,
   selectChatMessage,
@@ -75,6 +77,7 @@ import ChatFolderModal from '../ChatFolderModal.async';
 import MuteChatModal from '../MuteChatModal.async';
 import ChatBadge from './ChatBadge';
 import ChatCallStatus from './ChatCallStatus';
+import ChatTags from './ChatTags';
 
 import './Chat.scss';
 
@@ -118,6 +121,7 @@ type StateProps = {
   currentUserId: string;
   isSynced?: boolean;
   isAccountFrozen?: boolean;
+  folders?: ApiChatFolder[];
 };
 
 const Chat: FC<OwnProps & StateProps> = ({
@@ -157,6 +161,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   isSynced,
   onDragEnter,
   isAccountFrozen,
+  folders,
 }) => {
   const {
     openChat,
@@ -411,6 +416,7 @@ const Chat: FC<OwnProps & StateProps> = ({
         </div>
         <div className="subtitle">
           {renderSubtitle()}
+          <ChatTags folders={folders} />
           {!isPreview && (
             <ChatBadge
               chat={chat}
@@ -464,6 +470,8 @@ export default memo(withGlobal<OwnProps>(
         currentUserId: global.currentUserId!,
       };
     }
+
+    const folders = selectChatFolders(global, chat, user);
 
     const lastMessageId = previewMessageId || selectChatLastMessageId(global, chatId, isSavedDialog ? 'saved' : 'all');
     const lastMessage = previewMessageId
@@ -524,6 +532,7 @@ export default memo(withGlobal<OwnProps>(
       lastMessageStory,
       isAccountFrozen,
       monoforumChannel,
+      folders,
     };
   },
 )(Chat));

@@ -116,3 +116,70 @@
   flex-direction: column;
   height: 100%;
 }
+
+.color-picker {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0 1rem 1rem;
+}
+
+.color-picker-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.color-picker-item {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.05s ease-in-out;
+  border: 2px solid transparent;
+  outline: none;
+  background-color: currentColor;
+}
+
+.color-picker-item-1 {
+  color: var(--color-topic-blue);
+}
+
+.color-picker-item-2 {
+  color: var(--color-topic-green);
+}
+
+.color-picker-item-3 {
+  color: var(--color-topic-yellow);
+}
+
+.color-picker-item-4 {
+  color: var(--color-topic-red);
+}
+
+.color-picker-item-5 {
+  color: var(--color-topic-violet);
+}
+
+.color-picker-item-6 {
+  color: var(--color-topic-rose);
+}
+
+.color-picker-item-none {
+  color: var(--color-topic-grey);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  i {
+    color: var(--color-background);
+  }
+}
+
+.color-picker-item-active, .color-picker-item:focus, .color-picker-item:hover, .color-picker-item:active {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--color-background);
+  outline: 2px solid currentColor;
+}

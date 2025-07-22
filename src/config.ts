@@ -2,6 +2,7 @@ import type {
   ApiLimitType, ApiLimitTypeForPromo, ApiPremiumSection, ApiReactionEmoji,
 } from './api/types';
 import type {
+  FolderColor,
   GiftProfileFilterOptions,
   ResaleGiftsFilterOptions,
 } from './types';
@@ -479,3 +480,5 @@ export const DEFAULT_RESALE_GIFTS_FILTER_OPTIONS: ResaleGiftsFilterOptions = {
 };
 
 export const ACCOUNT_TTL_OPTIONS = [1, 3, 6, 12, 18, 24];
+
+export const FOLDER_COLORS = [1, 2, 3, 4, 5, 6];

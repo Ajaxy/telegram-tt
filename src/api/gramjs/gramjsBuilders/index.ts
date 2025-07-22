@@ -294,6 +294,7 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
     groups,
     channels,
     bots,
+    color,
     excludeArchived,
     excludeMuted,
     excludeRead,
@@ -319,6 +320,7 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
     return new GramJs.DialogFilterChatlist({
       id: folder.id,
       title: buildInputTextWithEntities(folder.title),
+      color: color || undefined,
       emoticon: emoticon || undefined,
       pinnedPeers,
       includePeers,
@@ -335,6 +337,7 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
     nonContacts: nonContacts || undefined,
     groups: groups || undefined,
     bots: bots || undefined,
+    color: color || undefined,
     excludeArchived: excludeArchived || undefined,
     excludeMuted: excludeMuted || undefined,
     excludeRead: excludeRead || undefined,
