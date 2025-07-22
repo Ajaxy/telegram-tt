@@ -320,6 +320,7 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
     return new GramJs.DialogFilterChatlist({
       id: folder.id,
       title: buildInputTextWithEntities(folder.title),
+      color: color || undefined,
       emoticon: emoticon || undefined,
       pinnedPeers,
       includePeers,

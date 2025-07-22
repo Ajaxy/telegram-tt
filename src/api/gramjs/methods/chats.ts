@@ -1143,8 +1143,6 @@ export async function editChatFolder({
     filter,
   }));
 
-  console.log('FOLDERS EDIT:', folderUpdate);
-
   if (isActionSuccessful) {
     sendApiUpdate({
       '@type': 'updateChatFolder',
