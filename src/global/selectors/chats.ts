@@ -1,5 +1,6 @@
 import type {
   ApiChat, ApiChatFullInfo, ApiChatType,
+  ApiUser,
 } from '../../api/types';
 import type { ChatListType } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
@@ -157,6 +158,35 @@ export function selectChatListType<T extends GlobalState>(
 
 export function selectChatFolder<T extends GlobalState>(global: T, folderId: number) {
   return global.chatFolders.byId[folderId];
+}
+
+export function selectChatFolders<T extends GlobalState>(global: T, chat: ApiChat, user: ApiUser | undefined) {
+  const isChannel = chat.type === 'chatTypeChannel';
+  const isGroup = chat.type === 'chatTypeBasicGroup' || chat.type === 'chatTypeSuperGroup';
+  const isBot = user && user.type === 'userTypeBot';
+  const isContact = user && user.isContact;
+  const isUnread = chat.unreadCount || chat.unreadMentionsCount || chat.hasUnreadMark;
+
+  return Object.values(global.chatFolders.byId).filter(
+    (folder) => {
+      const isIncluded = folder.includedChatIds.includes(chat.id);
+      const isExcluded = folder.excludedChatIds.includes(chat.id);
+
+      return (
+        isIncluded
+        || (!isExcluded
+          && (
+            (folder.bots && isBot)
+            || (folder.channels && isChannel)
+            || (folder.groups && isGroup)
+            || (folder.contacts && isContact)
+            || (folder.nonContacts && !isContact)
+            || (folder.excludeRead && !isUnread)
+          )
+        )
+      );
+    },
+  );
 }
 
 export function selectTotalChatCount<T extends GlobalState>(global: T, listType: 'active' | 'archived'): number {
