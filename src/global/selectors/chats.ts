@@ -165,26 +165,46 @@ export function selectChatFolders<T extends GlobalState>(global: T, chat: ApiCha
   const isGroup = chat.type === 'chatTypeBasicGroup' || chat.type === 'chatTypeSuperGroup';
   const isBot = user && user.type === 'userTypeBot';
   const isContact = user && user.isContact;
-  const isUnread = chat.unreadCount || chat.unreadMentionsCount || chat.hasUnreadMark;
+  const isUnread = Boolean(chat.unreadCount || chat.unreadMentionsCount);
 
   return Object.values(global.chatFolders.byId).filter(
     (folder) => {
       const isIncluded = folder.includedChatIds.includes(chat.id);
       const isExcluded = folder.excludedChatIds.includes(chat.id);
 
-      return (
-        isIncluded
-        || (!isExcluded
-          && (
-            (folder.bots && isBot)
-            || (folder.channels && isChannel)
-            || (folder.groups && isGroup)
-            || (folder.contacts && isContact)
-            || (folder.nonContacts && !isContact)
-            || (folder.excludeRead && !isUnread)
-          )
-        )
-      );
+      if (isIncluded) {
+        return true;
+      }
+
+      if (isExcluded) {
+        return false;
+      }
+
+      if (folder.excludeRead && !isUnread) {
+        return false;
+      }
+
+      if (folder.bots && isBot) {
+        return true;
+      }
+
+      if (folder.channels && isChannel) {
+        return true;
+      }
+
+      if (folder.groups && isGroup) {
+        return true;
+      }
+
+      if (folder.contacts && isContact) {
+        return true;
+      }
+
+      if (folder.nonContacts && !isContact) {
+        return true;
+      }
+
+      return false;
     },
   );
 }
