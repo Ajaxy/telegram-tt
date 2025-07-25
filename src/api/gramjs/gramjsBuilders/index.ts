@@ -15,6 +15,7 @@ import type {
   ApiInputPrivacyRules,
   ApiInputReplyInfo,
   ApiInputStorePaymentPurpose,
+  ApiInputSuggestedPostInfo,
   ApiMessageEntity,
   ApiNewMediaTodo,
   ApiNewPoll,
@@ -40,6 +41,7 @@ import {
 
 import { CHANNEL_ID_BASE, DEFAULT_STATUS_ICON_ID } from '../../../config';
 import { pick } from '../../../util/iteratees';
+import { buildInputStarsAmount } from '../apiBuilders/payments';
 import { deserializeBytes } from '../helpers/misc';
 import localDb from '../localDb';
 
@@ -886,6 +888,16 @@ export function buildInputReplyTo(replyInfo: ApiInputReplyInfo) {
   }
 
   return undefined;
+}
+
+export function buildInputSuggestedPost(suggestedPostInfo: ApiInputSuggestedPostInfo): GramJs.SuggestedPost {
+  const isPaid = Boolean(suggestedPostInfo.price)
+    && Boolean((suggestedPostInfo.price.amount || suggestedPostInfo.price.nanos));
+
+  return new GramJs.SuggestedPost({
+    price: isPaid ? buildInputStarsAmount(suggestedPostInfo.price!) : undefined,
+    scheduleDate: suggestedPostInfo.scheduleDate,
+  });
 }
 
 export function buildInputPrivacyRules(

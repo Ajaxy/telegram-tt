@@ -78,6 +78,23 @@ const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 const runDebouncedForSearch = debounce((cb) => cb(), 500, false);
 let botFatherId: string | null;
 
+addActionHandler('clickSuggestedMessageButton', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, messageId, button, tabId = getCurrentTabId(),
+  } = payload;
+
+  const { buttonType } = button;
+  const message = selectChatMessage(global, chatId, messageId);
+
+  switch (buttonType) {
+    case 'suggestChanges':
+      if (!message) break;
+
+      actions.initDraftFromSuggestedMessage({ chatId, messageId, tabId });
+      break;
+  }
+});
+
 addActionHandler('clickBotInlineButton', (global, actions, payload): ActionReturnType => {
   const {
     chatId, messageId, button, tabId = getCurrentTabId(),

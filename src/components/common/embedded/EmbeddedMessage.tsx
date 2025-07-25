@@ -4,6 +4,7 @@ import { useMemo, useRef } from '../../../lib/teact/teact';
 
 import type {
   ApiChat,
+  ApiInputSuggestedPostInfo,
   ApiMessage, ApiPeer, ApiReplyInfo, MediaContainer,
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
@@ -22,8 +23,10 @@ import {
 import { getMediaContentTypeDescription } from '../../../global/helpers/messageSummary';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
+import { formatScheduledDateTime } from '../../../util/dates/dateFormat';
 import { isUserId } from '../../../util/entities/ids';
 import freezeWhenClosed from '../../../util/hoc/freezeWhenClosed';
+import { formatStarsAsIcon } from '../../../util/localization/format';
 import { getPictogramDimensions } from '../helpers/mediaDimensions';
 import renderText from '../helpers/renderText';
 import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
@@ -47,6 +50,7 @@ import './EmbeddedMessage.scss';
 type OwnProps = {
   className?: string;
   replyInfo?: ApiReplyInfo;
+  suggestedPostInfo?: ApiInputSuggestedPostInfo;
   message?: ApiMessage;
   sender?: ApiPeer;
   senderChat?: ApiChat;
@@ -72,6 +76,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   className,
   message,
   replyInfo,
+  suggestedPostInfo,
   sender,
   senderChat,
   forwardSender,
@@ -139,6 +144,35 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const { handleClick, handleMouseDown } = useFastClick(onClick);
 
   function renderTextContent() {
+    const isFree = !(suggestedPostInfo?.price?.amount);
+    if (suggestedPostInfo) {
+      if (isFree && !suggestedPostInfo.scheduleDate) {
+        return lang('ComposerEmbeddedMessageSuggestedPostDescription');
+      }
+      const priceText = suggestedPostInfo.price
+        ? formatStarsAsIcon(lang, suggestedPostInfo.price.amount, {
+          className: 'suggested-price-star-icon',
+        })
+        : '';
+      const scheduleText = suggestedPostInfo.scheduleDate
+        ? formatScheduledDateTime(suggestedPostInfo.scheduleDate, lang, oldLang)
+        : '';
+      if (priceText && !scheduleText) {
+        return lang('TitleSuggestedPostAmountForAnyTime',
+          { amount: priceText },
+          {
+            withNodes: true,
+            withMarkdown: true,
+          });
+      }
+      return (
+        <span>
+          {priceText}
+          {scheduleText ? ` • ${scheduleText}` : ''}
+        </span>
+      );
+    }
+
     if (replyInfo?.type === 'message' && replyInfo.quoteText) {
       return renderTextWithEntities({
         text: replyInfo.quoteText.text,
@@ -184,6 +218,14 @@ const EmbeddedMessage: FC<OwnProps> = ({
   function renderSender() {
     if (title) {
       return renderText(title);
+    }
+
+    if (suggestedPostInfo && replyInfo) {
+      return lang('TitleSuggestedChanges');
+    }
+
+    if (suggestedPostInfo) {
+      return lang('ComposerEmbeddedMessageSuggestedPostTitle');
     }
 
     if (!senderTitle && !forwardSendersTitle) {
@@ -252,6 +294,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
         mediaThumbnail && 'with-thumb',
         'no-selection',
         composerForwardSenders && 'is-input-forward',
+        suggestedPostInfo && 'is-suggested-post',
       )}
       dir={lang.isRtl ? 'rtl' : undefined}
       onClick={handleClick}

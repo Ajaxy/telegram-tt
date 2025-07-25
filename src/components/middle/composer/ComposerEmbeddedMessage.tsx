@@ -6,7 +6,7 @@ import {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiInputMessageReplyInfo, ApiMessage, ApiPeer,
+  ApiChat, ApiInputMessageReplyInfo, ApiInputSuggestedPostInfo, ApiMessage, ApiPeer,
 } from '../../../api/types';
 import type { MessageListType, ThreadId } from '../../../types/index';
 
@@ -48,6 +48,7 @@ import './ComposerEmbeddedMessage.scss';
 
 type StateProps = {
   replyInfo?: ApiInputMessageReplyInfo;
+  suggestedPostInfo?: ApiInputSuggestedPostInfo;
   editingId?: number;
   message?: ApiMessage;
   sender?: ApiPeer;
@@ -80,6 +81,7 @@ const CLOSE_DURATION = 350;
 
 const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   replyInfo,
+  suggestedPostInfo,
   editingId,
   message,
   sender,
@@ -104,6 +106,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     resetDraftReplyInfo,
+    resetDraftSuggestedPostInfo,
     updateDraftReplyInfo,
     setEditingId,
     focusMessage,
@@ -113,6 +116,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     setForwardNoCaptions,
     exitForwardMode,
     setShouldPreventComposerAnimation,
+    openSuggestMessageModal,
   } = getActions();
   const ref = useRef<HTMLDivElement>();
   const oldLang = useOldLang();
@@ -121,6 +125,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   const isReplyToTopicStart = message?.content.action?.type === 'topicCreate';
   const isShowingReply = replyInfo && !shouldForceShowEditing;
   const isReplyWithQuote = Boolean(replyInfo?.quoteText);
+  const isShowingSuggestedPost = Boolean(suggestedPostInfo) && !shouldForceShowEditing;
 
   const isForwarding = Boolean(forwardedMessagesCount);
 
@@ -145,6 +150,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     if (isInChangingRecipientMode) return false;
     if (message && (replyInfo || editingId)) return true;
     if (forwardSenders && isForwarding) return true;
+    if (isShowingSuggestedPost) return true;
     return false;
   })();
 
@@ -170,6 +176,9 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
       setEditingId({ messageId: undefined });
     } else if (forwardedMessagesCount) {
       exitForwardMode();
+    } else if (isShowingSuggestedPost) {
+      resetDraftSuggestedPostInfo();
+      resetDraftReplyInfo();
     } else if (replyInfo && !shouldForceShowEditing) {
       resetDraftReplyInfo();
     }
@@ -187,6 +196,10 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     focusMessage({ chatId: message!.chatId, messageId: message!.id, noForumTopicPanel: true });
   };
   const handleMessageClick = useLastCallback((e: React.MouseEvent): void => {
+    if (suggestedPostInfo) {
+      openSuggestMessageModal({ chatId });
+      return;
+    }
     handleContextMenu(e);
   });
 
@@ -236,6 +249,9 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     if (editingId) {
       return 'edit';
     }
+    if (isShowingSuggestedPost) {
+      return 'cash-circle';
+    }
     if (isForwarding) {
       return 'forward';
     }
@@ -244,7 +260,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     }
 
     return undefined;
-  }, [editingId, isForwarding, isShowingReply]);
+  }, [editingId, isForwarding, isShowingReply, isShowingSuggestedPost]);
 
   const customText = forwardedMessagesCount && forwardedMessagesCount > 1
     ? oldLang('ForwardedMessageCount', forwardedMessagesCount)
@@ -284,6 +300,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
           isOpen={isShown}
           className="inside-input"
           replyInfo={replyInfo}
+          suggestedPostInfo={suggestedPostInfo}
           isInComposer
           message={strippedMessage}
           sender={!noAuthors ? sender : undefined}
@@ -425,6 +442,7 @@ export default memo(withGlobal<OwnProps>(
 
     const draft = selectDraft(global, chatId, threadId);
     const replyInfo = draft?.replyInfo;
+    const suggestedPostInfo = draft?.suggestedPostInfo;
     const replyToPeerId = replyInfo?.replyToPeerId;
     const senderChat = replyToPeerId ? selectChat(global, replyToPeerId) : undefined;
 
@@ -479,6 +497,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       replyInfo,
+      suggestedPostInfo,
       editingId,
       message,
       sender,

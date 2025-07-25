@@ -758,6 +758,16 @@ export type TabState = {
     messageId: number;
   };
 
+  suggestMessageModal?: {
+    chatId: string;
+    messageId?: number;
+  };
+
+  suggestedPostApprovalModal?: {
+    chatId: string;
+    messageId: number;
+  };
+
   inviteViaLinkModal?: {
     missingUsers: ApiMissingInvitedUser[];
     chatId: string;

@@ -235,6 +235,8 @@ type StateProps =
     isReactionPickerOpen?: boolean;
     shouldDisplayGiftsButton?: boolean;
     isForwarding?: boolean;
+    isReplying?: boolean;
+    hasSuggestedPost?: boolean;
     forwardedMessagesCount?: number;
     pollModal: TabState['pollModal'];
     todoListModal: TabState['todoListModal'];
@@ -358,6 +360,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   isReactionPickerOpen,
   shouldDisplayGiftsButton,
   isForwarding,
+  isReplying,
+  hasSuggestedPost,
   forwardedMessagesCount,
   pollModal,
   todoListModal,
@@ -460,6 +464,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     hideEffectInComposer,
     updateChatSilentPosting,
     updateInsertingPeerIdMention,
+    updateDraftSuggestedPostInfo,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -816,7 +821,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     getHtml,
     setHtml,
     editedMessage: editingMessage,
-    isDisabled: isInStoryViewer || Boolean(requestedDraft) || isMonoforum,
+    isDisabled: isInStoryViewer || Boolean(requestedDraft) || (!hasSuggestedPost && isMonoforum),
   });
 
   const resetComposer = useLastCallback((shouldPreserveInput = false) => {
@@ -872,6 +877,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [disallowedGifts]);
 
   const shouldShowGiftButton = Boolean(!isChatWithSelf && shouldDisplayGiftsButton && !areAllGiftsDisallowed);
+  const shouldShowSuggestedPostButton = isMonoforum && !editingMessage
+    && !isForwarding && !isReplying && !draft?.suggestedPostInfo;
 
   const showCustomEmojiPremiumNotification = useLastCallback(() => {
     const notificationNumber = customEmojiNotificationNumber.current;
@@ -1567,6 +1574,11 @@ const Composer: FC<OwnProps & StateProps> = ({
   const handleGiftClick = useLastCallback(() => {
     openGiftModal({ forUserId: chatId });
   });
+  const handleSuggestPostClick = useLastCallback(() => {
+    updateDraftSuggestedPostInfo({
+      price: { amount: 0, nanos: 0 },
+    });
+  });
 
   const handleToggleSilentPosting = useLastCallback(() => {
     const newValue = !isSilentPosting;
@@ -1638,6 +1650,10 @@ const Composer: FC<OwnProps & StateProps> = ({
         });
       }
 
+      if (isReplying && hasSuggestedPost) {
+        return lang('ComposerPlaceholderCaption');
+      }
+
       if (chat?.adminRights?.anonymous) {
         return lang('ComposerPlaceholderAnonymous');
       }
@@ -1658,7 +1674,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     return lang('ComposerPlaceholderNoText');
   }, [
     activeVoiceRecording, botKeyboardPlaceholder, chat, inputPlaceholder, isChannel, isComposerBlocked,
-    isInStoryViewer, isSilentPosting, lang, replyToTopic, threadId, windowWidth, paidMessagesStars,
+    isInStoryViewer, isSilentPosting, lang, replyToTopic, isReplying, threadId, windowWidth, paidMessagesStars,
+    hasSuggestedPost,
   ]);
 
   useEffect(() => {
@@ -2166,6 +2183,17 @@ const Composer: FC<OwnProps & StateProps> = ({
                         <Icon name="gift" />
                       </Button>
                     )}
+                    {shouldShowSuggestedPostButton && (
+                      <Button
+                        round
+                        faded
+                        className="composer-action-button"
+                        color="translucent"
+                        onClick={handleSuggestPostClick}
+                      >
+                        <Icon name="cash-circle" />
+                      </Button>
+                    )}
                     {Boolean(botKeyboardMessageId) && !activeVoiceRecording && !editingMessage && (
                       <ResponsiveHoverButton
                         className={buildClassName('composer-action-button', isBotKeyboardOpen && 'activated')}
@@ -2479,6 +2507,8 @@ export default memo(withGlobal<OwnProps>(
 
     const maxMessageLength = global.config?.maxMessageLength || DEFAULT_MAX_MESSAGE_LENGTH;
     const isForwarding = chatId === tabState.forwardMessages.toChatId;
+    const isReplying = Boolean(draft?.replyInfo);
+    const hasSuggestedPost = Boolean(draft?.suggestedPostInfo);
     const starsBalance = global.stars?.balance.amount || 0;
     const isStarsBalanceModalOpen = Boolean(tabState.starsBalanceModal);
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
@@ -2507,6 +2537,8 @@ export default memo(withGlobal<OwnProps>(
       botKeyboardMessageId,
       botKeyboardPlaceholder: keyboardMessage?.keyboardPlaceholder,
       isForwarding,
+      isReplying,
+      hasSuggestedPost,
       forwardedMessagesCount: isForwarding ? forwardMessageIds!.length : undefined,
       pollModal: tabState.pollModal,
       todoListModal: tabState.todoListModal,

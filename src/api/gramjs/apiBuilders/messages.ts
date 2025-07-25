@@ -8,6 +8,7 @@ import type {
   ApiFactCheck,
   ApiInputMessageReplyInfo,
   ApiInputReplyInfo,
+  ApiInputSuggestedPostInfo,
   ApiMediaTodo,
   ApiMessage,
   ApiMessageEntity,
@@ -25,6 +26,7 @@ import type {
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
+  ApiSuggestedPost,
   ApiThreadInfo,
   ApiVideo,
   MediaContent,
@@ -44,6 +46,9 @@ import { addTimestampEntities } from '../../../util/dates/timestamp';
 import { omitUndefined, pick } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
+import {
+  buildApiStarsAmount,
+} from '../apiBuilders/payments';
 import { buildPeer } from '../gramjsBuilders';
 import {
   addDocumentToLocalDb,
@@ -241,6 +246,7 @@ export function buildApiMessageWithChatId(
     reactions: mtpMessage.reactions && buildMessageReactions(mtpMessage.reactions),
     emojiOnlyCount,
     ...(mtpMessage.replyTo && { replyInfo: buildApiReplyInfo(mtpMessage.replyTo, mtpMessage) }),
+    ...(mtpMessage.suggestedPost && { suggestedPostInfo: buildApiSuggestedPost(mtpMessage.suggestedPost) }),
     forwardInfo,
     isEdited,
     editDate: mtpMessage.editDate,
@@ -280,7 +286,7 @@ export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | un
   }
 
   const {
-    message, entities, replyTo, date, effect,
+    message, entities, replyTo, date, effect, suggestedPost,
   } = draft;
 
   const replyInfo = replyTo instanceof GramJs.InputReplyToMessage ? {
@@ -293,11 +299,28 @@ export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | un
     quoteOffset: replyTo.quoteOffset,
   } satisfies ApiInputMessageReplyInfo : undefined;
 
+  const suggestedPostInfo = suggestedPost instanceof GramJs.SuggestedPost ? {
+    isAccepted: suggestedPost.accepted,
+    isRejected: suggestedPost.rejected,
+    price: suggestedPost.price ? buildApiStarsAmount(suggestedPost.price) : undefined,
+    scheduleDate: suggestedPost.scheduleDate,
+  } satisfies ApiInputSuggestedPostInfo : undefined;
+
   return {
     text: message ? buildMessageTextContent(message, entities) : undefined,
     replyInfo,
+    suggestedPostInfo,
     date,
     effectId: effect?.toString(),
+  };
+}
+
+function buildApiSuggestedPost(suggestedPost: GramJs.SuggestedPost): ApiSuggestedPost {
+  return {
+    isAccepted: suggestedPost.accepted,
+    isRejected: suggestedPost.rejected,
+    price: suggestedPost.price ? buildApiStarsAmount(suggestedPost.price) : undefined,
+    scheduleDate: suggestedPost.scheduleDate,
   };
 }
 
@@ -396,6 +419,7 @@ export function buildLocalMessage(
   text?: string,
   entities?: ApiMessageEntity[],
   replyInfo?: ApiInputReplyInfo,
+  suggestedPostInfo?: ApiInputSuggestedPostInfo,
   attachment?: ApiAttachment,
   sticker?: ApiSticker,
   gif?: ApiVideo,
@@ -439,6 +463,7 @@ export function buildLocalMessage(
     isOutgoing: !isChannel,
     senderId: chat.type !== 'chatTypePrivate' ? (sendAs?.id || currentUserId) : undefined,
     replyInfo: resultReplyInfo,
+    suggestedPostInfo,
     ...(groupedId && {
       groupedId,
       ...(media && (media.photo || media.video) && { isInAlbum: true }),

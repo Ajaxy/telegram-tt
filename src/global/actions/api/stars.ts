@@ -99,7 +99,9 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
     return;
   }
 
-  const byId = buildCollectionByKey(result, 'id');
+  global = getGlobal();
+
+  const byId = buildCollectionByKey(result.gifts, 'id');
 
   const idsByCategoryName: Record<StarGiftCategory, string[]> = {
     all: [],
@@ -134,7 +136,6 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
     idsByCategoryName[starsCategory].push(gift.id);
   });
 
-  global = getGlobal();
   global = {
     ...global,
     starGifts: {

@@ -6,10 +6,11 @@ import type { ThreadId } from '../../../../types';
 import type { Signal } from '../../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
-import { DRAFT_DEBOUNCE } from '../../../../config';
+import { DRAFT_DEBOUNCE, EDITABLE_INPUT_CSS_SELECTOR } from '../../../../config';
 import {
-  requestMeasure,
+  requestMeasure, requestNextMutation,
 } from '../../../../lib/fasterdom/fasterdom';
+import focusEditableElement from '../../../../util/focusEditableElement';
 import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
 
@@ -84,6 +85,7 @@ const useDraft = ({
         chatId: prevState.chatId ?? chatId,
         threadId: prevState.threadId ?? threadId,
         shouldKeepReply: true,
+        shouldKeepSuggestedPost: true,
       });
     }
   });
@@ -96,6 +98,7 @@ const useDraft = ({
       return;
     }
     const isTouched = isTouchedRef.current;
+    const shouldUpdateSuggestedPost = draft?.suggestedPostInfo && !prevDraft?.suggestedPostInfo;
 
     if (chatId === prevChatId && threadId === prevThreadId) {
       if (isTouched && !draft) return; // Prevent reset from other client if we have local edits
@@ -103,7 +106,7 @@ const useDraft = ({
         setHtml('');
       }
 
-      if (isTouched) return;
+      if (isTouched && !shouldUpdateSuggestedPost) return;
     }
 
     if (editedMessage || !draft) {
@@ -111,6 +114,14 @@ const useDraft = ({
     }
 
     setHtml(getTextWithEntitiesAsHtml(draft.text));
+    if (shouldUpdateSuggestedPost) {
+      requestNextMutation(() => {
+        const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
+        if (messageInput) {
+          focusEditableElement(messageInput, true);
+        }
+      });
+    }
 
     const customEmojiIds = draft.text?.entities
       ?.map((entity) => entity.type === ApiMessageEntityTypes.CustomEmoji && entity.documentId)

@@ -1020,6 +1020,34 @@ addActionHandler('closePaidReactionModal', (global, actions, payload): ActionRet
   }, tabId);
 });
 
+addActionHandler('openSuggestMessageModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
+  return updateTabState(global, {
+    suggestMessageModal: { chatId, messageId },
+  }, tabId);
+});
+
+addActionHandler('closeSuggestMessageModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    suggestMessageModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('openSuggestedPostApprovalModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
+  return updateTabState(global, {
+    suggestedPostApprovalModal: { chatId, messageId },
+  }, tabId);
+});
+
+addActionHandler('closeSuggestedPostApprovalModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    suggestedPostApprovalModal: undefined,
+  }, tabId);
+});
+
 function copyTextForMessages(global: GlobalState, chatId: string, messageIds: number[]) {
   const { type: messageListType, threadId } = selectCurrentMessageList(global) || {};
   const lang = langProvider.oldTranslate;

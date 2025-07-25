@@ -13,18 +13,21 @@ import { SCHEDULED_WHEN_ONLINE } from '../../config';
 import {
   getMessageHtmlId,
   getMessageOriginalId,
+  getSuggestedChangesActionText,
+  getSuggestedChangesInfo,
   isActionMessage,
   isOwnMessage,
   isServiceNotificationMessage,
 } from '../../global/helpers';
 import { getPeerTitle } from '../../global/helpers/peers';
-import { selectSender } from '../../global/selectors';
+import { selectChatMessage, selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatHumanDate } from '../../util/dates/dateFormat';
+import { formatHumanDate, formatScheduledDateTime } from '../../util/dates/dateFormat';
 import { compact } from '../../util/iteratees';
 import { formatStarsAsText } from '../../util/localization/format';
 import { isAlbum } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
+import { renderPeerLink } from './message/helpers/messageActions';
 
 import useDerivedSignal from '../../hooks/useDerivedSignal';
 import useLang from '../../hooks/useLang';
@@ -33,11 +36,14 @@ import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useMessageObservers from './hooks/useMessageObservers';
 import useScrollHooks from './hooks/useScrollHooks';
 
+import MiniTable, { type TableEntry } from '../common/MiniTable';
 import ActionMessage from './message/ActionMessage';
 import Message from './message/Message';
 import SenderGroupContainer from './message/SenderGroupContainer';
 import SponsoredMessage from './message/SponsoredMessage';
 import MessageListAccountInfo from './MessageListAccountInfo';
+
+import actionMessageStyles from './message/ActionMessage.module.scss';
 
 interface OwnProps {
   canShowAds?: boolean;
@@ -176,6 +182,54 @@ const MessageListContent: FC<OwnProps> = ({
     }
     return undefined;
   };
+
+  const renderSuggestedPostInfoAction = (message: ApiMessage) => {
+    if (message.suggestedPostInfo) {
+      const { price, scheduleDate } = message.suggestedPostInfo;
+      const sender = selectSender(getGlobal(), message);
+      const userTitle = sender ? getPeerTitle(lang, sender) : '';
+      const userLink = renderPeerLink(sender?.id, userTitle || lang('ActionFallbackUser'));
+
+      const originalMessage = message.replyInfo?.type === 'message' && message.replyInfo.replyToMsgId
+        ? selectChatMessage(getGlobal(), message.chatId, message.replyInfo.replyToMsgId)
+        : undefined;
+      const changesInfo = getSuggestedChangesInfo(message, originalMessage);
+
+      const titleText = changesInfo
+        ? getSuggestedChangesActionText(lang, message, originalMessage, message.isOutgoing, userLink)
+        : message.isOutgoing
+          ? lang('ActionSuggestedPostOutgoing', undefined, { withNodes: true, withMarkdown: true })
+          : lang('ActionSuggestedPostIncoming', { user: userLink }, { withNodes: true, withMarkdown: true });
+
+      const tableData: TableEntry[] = compact([
+        price && [lang('TitlePrice'), formatStarsAsText(lang, price.amount)],
+        Boolean(scheduleDate) && [lang('TitleTime'), formatScheduledDateTime(scheduleDate, lang, oldLang)],
+      ]);
+
+      return (
+        <div
+          className={buildClassName('local-action-message')}
+          key={`suggested-post-action-${message.id}`}
+        >
+          <span className={actionMessageStyles.suggestedPostContainer}>
+            <div
+              className={actionMessageStyles.suggestedPostTitle}
+            >
+              {titleText}
+            </div>
+            {Boolean(tableData.length) && (
+              <MiniTable
+                className={actionMessageStyles.suggestedPostInfo}
+                data={tableData}
+              />
+            )}
+          </span>
+        </div>
+      );
+    }
+    return undefined;
+  };
+
   const messageCountToAnimate = noAppearanceAnimation ? 0 : messageGroups.reduce((acc, messageGroup) => {
     return acc + messageGroup.senderGroups.flat().length;
   }, 0);
@@ -268,6 +322,7 @@ const MessageListContent: FC<OwnProps> = ({
         return compact([
           message.id === memoUnreadDividerBeforeIdRef.current && unreadDivider,
           message.paidMessageStars && !withUsers && renderPaidMessageAction(message, album),
+          message.suggestedPostInfo && renderSuggestedPostInfoAction(message),
           <Message
             key={key}
             message={message}

@@ -18,7 +18,9 @@ import type {
   ApiInputInvoiceStarGift,
   ApiInputMessageReplyInfo,
   ApiInputSavedStarGift,
+  ApiInputSuggestedPostInfo,
   ApiKeyboardButton,
+  ApiKeyboardButtonSuggestedMessage,
   ApiLimitTypeWithModal,
   ApiMessage,
   ApiMessageEntity,
@@ -607,6 +609,21 @@ export interface ActionPayloads {
     description?: string;
     option?: string;
   } & WithTabId;
+  approveSuggestedPost: {
+    chatId: string;
+    messageId: number;
+    scheduleDate?: number;
+  } & WithTabId;
+
+  confirmApproveSuggestedPost: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
+  rejectSuggestedPost: {
+    chatId: string;
+    messageId: number;
+    rejectComment?: string;
+  } & WithTabId;
   sendMessageAction: {
     action: ApiSendMessageAction;
     chatId: string;
@@ -672,6 +689,7 @@ export interface ActionPayloads {
     threadId?: ThreadId;
     isLocalOnly?: boolean;
     shouldKeepReply?: boolean;
+    shouldKeepSuggestedPost?: boolean;
   };
   loadPinnedMessages: {
     chatId: string;
@@ -985,6 +1003,12 @@ export interface ActionPayloads {
   focusLastMessage: WithTabId | undefined;
   updateDraftReplyInfo: Partial<ApiInputMessageReplyInfo> & WithTabId;
   resetDraftReplyInfo: WithTabId | undefined;
+  updateDraftSuggestedPostInfo: Partial<ApiInputSuggestedPostInfo> & WithTabId;
+  resetDraftSuggestedPostInfo: WithTabId | undefined;
+  initDraftFromSuggestedMessage: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
   updateInsertingPeerIdMention: {
     peerId?: string;
   } & WithTabId;
@@ -1997,6 +2021,11 @@ export interface ActionPayloads {
     messageId: number;
     button: ApiKeyboardButton;
   } & WithTabId;
+  clickSuggestedMessageButton: {
+    chatId: string;
+    messageId: number;
+    button: ApiKeyboardButtonSuggestedMessage;
+  } & WithTabId;
 
   switchBotInline: {
     messageId?: number;
@@ -2427,6 +2456,18 @@ export interface ActionPayloads {
     messageId: number;
   } & WithTabId;
   closePaidReactionModal: WithTabId | undefined;
+
+  openSuggestMessageModal: {
+    chatId: string;
+    messageId?: number;
+  } & WithTabId;
+  closeSuggestMessageModal: WithTabId | undefined;
+
+  openSuggestedPostApprovalModal: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
+  closeSuggestedPostApprovalModal: WithTabId | undefined;
 
   openDeleteMessageModal: ({
     chatId: string;

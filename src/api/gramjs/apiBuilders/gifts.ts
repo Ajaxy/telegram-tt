@@ -24,7 +24,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
   if (starGift instanceof GramJs.StarGiftUnique) {
     const {
       id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal, slug, ownerAddress,
-      giftAddress, resellStars,
+      giftAddress, resellStars, releasedBy,
     } = starGift;
 
     return {
@@ -41,12 +41,13 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
       slug,
       giftAddress,
       resellPriceInStars: resellStars?.toJSNumber(),
+      releasedByPeerId: releasedBy && getApiChatIdFromMtpPeer(releasedBy),
     };
   }
 
   const {
     id, limited, stars, availabilityRemains, availabilityTotal, convertStars, firstSaleDate, lastSaleDate, soldOut,
-    birthday, upgradeStars, resellMinStars, title, availabilityResale,
+    birthday, upgradeStars, resellMinStars, title, availabilityResale, releasedBy,
   } = starGift;
 
   addDocumentToLocalDb(starGift.sticker);
@@ -69,6 +70,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
     upgradeStars: upgradeStars?.toJSNumber(),
     title,
     resellMinStars: resellMinStars?.toJSNumber(),
+    releasedByPeerId: releasedBy && getApiChatIdFromMtpPeer(releasedBy),
     availabilityResale: availabilityResale?.toJSNumber(),
   };
 }

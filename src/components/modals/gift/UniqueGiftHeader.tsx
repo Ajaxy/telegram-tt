@@ -1,9 +1,11 @@
+import type { TeactNode } from '../../../lib/teact/teact';
 import { memo, useMemo } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import type {
+  ApiPeer,
   ApiStarGiftAttributeBackdrop, ApiStarGiftAttributeModel, ApiStarGiftAttributePattern,
-  ApiStarsAmount,
-} from '../../../api/types';
+  ApiStarsAmount } from '../../../api/types';
 
 import {
   formatStarsTransactionAmount,
@@ -26,7 +28,8 @@ type OwnProps = {
   backdropAttribute: ApiStarGiftAttributeBackdrop;
   patternAttribute: ApiStarGiftAttributePattern;
   title?: string;
-  subtitle?: string;
+  subtitle?: TeactNode;
+  subtitlePeer?: ApiPeer;
   className?: string;
   resellPrice?: ApiStarsAmount;
 };
@@ -39,9 +42,14 @@ const UniqueGiftHeader = ({
   patternAttribute,
   title,
   subtitle,
+  subtitlePeer,
   className,
   resellPrice,
 }: OwnProps) => {
+  const {
+    openChat,
+  } = getActions();
+
   const lang = useLang();
   const activeKey = useTransitionActiveKey([modelAttribute, backdropAttribute, patternAttribute]);
   const subtitleColor = backdropAttribute?.textColor;
@@ -77,10 +85,18 @@ const UniqueGiftHeader = ({
         />
       </Transition>
       {title && <h1 className={styles.title}>{title}</h1>}
-      {subtitle && (
-        <p className={styles.subtitle} style={buildStyle(subtitleColor && `color: ${subtitleColor}`)}>
+      {Boolean(subtitle) && (
+        <div
+          className={buildClassName(styles.subtitle, subtitlePeer && styles.subtitleBadge)}
+          style={buildStyle(subtitleColor && `color: ${subtitleColor}`)}
+          onClick={() => {
+            if (subtitlePeer) {
+              openChat({ id: subtitlePeer.id });
+            }
+          }}
+        >
           {subtitle}
-        </p>
+        </div>
       )}
       {resellPrice && (
         <p className={styles.amount}>

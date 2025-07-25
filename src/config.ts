@@ -110,6 +110,15 @@ export const TODO_ITEMS_LIMIT = 30;
 export const TODO_TITLE_LENGTH_LIMIT = 32;
 export const TODO_ITEM_LENGTH_LIMIT = 64;
 
+// Suggested Posts defaults
+export const STARS_SUGGESTED_POST_AMOUNT_MAX = 100000;
+export const STARS_SUGGESTED_POST_AMOUNT_MIN = 5;
+export const STARS_SUGGESTED_POST_COMMISSION_PERMILLE = 850;
+export const STARS_SUGGESTED_POST_AGE_MIN = 86400; // 24 hours in seconds
+export const STARS_SUGGESTED_POST_FUTURE_MAX = 2678400; // 31 days in seconds
+export const STARS_SUGGESTED_POST_FUTURE_MIN = 300; // 5 minutes in seconds
+export const TON_SUGGESTED_POST_COMMISSION_PERMILLE = 850;
+
 export const STORY_VIEWS_MIN_SEARCH = 15;
 export const STORY_MIN_REACTIONS_SORT = 10;
 export const STORY_VIEWS_MIN_CONTACTS_FILTER = 20;

@@ -11,6 +11,23 @@
   padding-bottom: 1rem;
 }
 
+.subtitleBadge {
+  margin-top: 0.25rem;
+  padding: 0.75rem;
+  padding-block: 0.125rem;
+  border-radius: 1rem;
+
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(50px);
+
+  transition: color 150ms ease-in, background-color 0.15s !important;
+
+  &:hover {
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.15);
+  }
+}
+
 .radialPattern {
   position: absolute;
   z-index: -1;

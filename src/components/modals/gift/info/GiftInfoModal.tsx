@@ -10,7 +10,8 @@ import type {
 import type { TabState } from '../../../../global/types';
 
 import { getHasAdminRight } from '../../../../global/helpers';
-import { getPeerTitle, isApiPeerChat } from '../../../../global/helpers/peers';
+import { getPeerTitle, isApiPeerChat, isApiPeerUser } from '../../../../global/helpers/peers';
+import { getMainUsername } from '../../../../global/helpers/users';
 import { selectPeer, selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
@@ -51,6 +52,7 @@ export type OwnProps = {
 type StateProps = {
   fromPeer?: ApiPeer;
   targetPeer?: ApiPeer;
+  releasedByPeer?: ApiPeer;
   currentUserId?: string;
   starGiftMaxConvertPeriod?: number;
   hasAdminRights?: boolean;
@@ -67,6 +69,7 @@ const GiftInfoModal = ({
   modal,
   fromPeer,
   targetPeer,
+  releasedByPeer,
   currentUserId,
   starGiftMaxConvertPeriod,
   hasAdminRights,
@@ -116,6 +119,26 @@ const GiftInfoModal = ({
 
   const isGiftUnique = gift && gift.type === 'starGiftUnique';
   const uniqueGift = isGiftUnique ? gift : undefined;
+
+  const giftSubtitle = useMemo(() => {
+    if (!gift || gift.type !== 'starGiftUnique') return undefined;
+
+    if (releasedByPeer) {
+      const releasedByUsername = `@${getMainUsername(releasedByPeer)}`;
+      const ownerTitle = releasedByUsername || getPeerTitle(lang, releasedByPeer);
+      const fallbackText = isApiPeerUser(releasedByPeer)
+        ? lang('ActionFallbackUser')
+        : lang('ActionFallbackChannel');
+
+      return lang('GiftInfoCollectibleBy', {
+        number: gift.number, owner: ownerTitle || fallbackText }, {
+        withNodes: true,
+        withMarkdown: true,
+      });
+    }
+
+    return lang('GiftInfoCollectible', { number: gift.number });
+  }, [gift, releasedByPeer, lang]);
 
   const canFocusUpgrade = Boolean(savedGift?.upgradeMsgId);
   const canManage = !canFocusUpgrade && savedGift?.inputGift && (
@@ -406,7 +429,8 @@ const GiftInfoModal = ({
           patternAttribute={giftAttributes!.pattern!}
           modelAttribute={giftAttributes!.model!}
           title={gift.title}
-          subtitle={lang('GiftInfoCollectible', { number: gift.number })}
+          subtitle={giftSubtitle}
+          subtitlePeer={releasedByPeer}
         />
       </div>
     );
@@ -512,6 +536,7 @@ const GiftInfoModal = ({
 
     if (isGiftUnique) {
       const { ownerName, ownerAddress, ownerId } = gift;
+      const ownerPeer = ownerId ? selectPeer(getGlobal(), ownerId) : undefined;
       const {
         model, backdrop, pattern, originalDetails,
       } = giftAttributes || {};
@@ -533,7 +558,7 @@ const GiftInfoModal = ({
             <Icon className={styles.copyIcon} name="copy" />
           </span>,
         ]);
-      } else {
+      } else if (ownerPeer || ownerName) {
         tableData.push([
           lang('GiftInfoOwner'),
           ownerId ? { chatId: ownerId, withEmojiStatus: true } : ownerName || '',
@@ -702,7 +727,8 @@ const GiftInfoModal = ({
     gift, giftAttributes, renderFooterButton, isTargetChat,
     SettingsMenuButton, isGiftUnique, renderingModal,
     collectibleEmojiStatuses, currentUserEmojiStatus, saleDateInfo,
-    canBuyGift, giftOwnerTitle, isOpen, resellPriceInStars,
+    canBuyGift, giftOwnerTitle, isOpen, resellPriceInStars, giftSubtitle,
+    releasedByPeer,
   ]);
 
   return (
@@ -812,9 +838,14 @@ export default memo(withGlobal<OwnProps>(
     const currentUserEmojiStatus = currentUser?.emojiStatus;
     const collectibleEmojiStatuses = global.collectibleEmojiStatuses?.statuses;
 
+    const gift = isSavedGift ? typeGift.gift : typeGift;
+    const releasedByPeerId = gift?.type === 'starGiftUnique' && gift.releasedByPeerId;
+    const releasedByPeer = releasedByPeerId ? selectPeer(global, releasedByPeerId) : undefined;
+
     return {
       fromPeer,
       targetPeer,
+      releasedByPeer,
       currentUserId,
       starGiftMaxConvertPeriod: global.appConfig?.starGiftMaxConvertPeriod,
       tonExplorerUrl: global.appConfig?.tonExplorerUrl,

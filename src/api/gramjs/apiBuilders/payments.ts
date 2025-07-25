@@ -461,11 +461,26 @@ export function buildApiStarsGiftOptions(option: GramJs.StarsGiftOption): ApiSta
   };
 }
 
-export function buildApiStarsAmount(amount: GramJs.StarsAmount): ApiStarsAmount {
-  return {
-    amount: amount.amount.toJSNumber(),
+export function buildApiStarsAmount(amount: GramJs.TypeStarsAmount): ApiStarsAmount | undefined {
+  if (amount instanceof GramJs.StarsAmount) {
+    return {
+      amount: amount.amount.toJSNumber(),
+      nanos: amount.nanos,
+    };
+  }
+
+  if (amount instanceof GramJs.StarsTonAmount) {
+    return undefined;
+  }
+
+  return undefined;
+}
+
+export function buildInputStarsAmount(amount: ApiStarsAmount): GramJs.TypeStarsAmount {
+  return new GramJs.StarsAmount({
+    amount: bigInt(amount.amount),
     nanos: amount.nanos,
-  };
+  });
 }
 
 export function buildApiStarsGiveawayWinnersOption(
@@ -532,9 +547,9 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
   return { type: 'unsupported' };
 }
 
-export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction {
+export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction | undefined {
   const {
-    date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift, reaction,
+    date, id, peer, amount, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift, reaction,
     subscriptionPeriod, stargift, giveawayPostId, starrefCommissionPermille, stargiftUpgrade, paidMessages,
     stargiftResale,
   } = transaction;
@@ -548,11 +563,16 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
 
   const starRefCommision = starrefCommissionPermille ? starrefCommissionPermille / 10 : undefined;
 
+  const starsAmount = buildApiStarsAmount(amount);
+  if (!starsAmount) {
+    return undefined;
+  }
+
   return {
     id,
     date,
     peer: buildApiStarsTransactionPeer(peer),
-    stars: buildApiStarsAmount(stars),
+    stars: starsAmount,
     title,
     description,
     photo: photo && buildApiWebDocument(photo),

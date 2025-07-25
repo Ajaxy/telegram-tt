@@ -42,7 +42,9 @@ import StarsBalanceModal from './stars/StarsBalanceModal.async';
 import StarsPaymentModal from './stars/StarsPaymentModal.async';
 import StarsSubscriptionModal from './stars/subscription/StarsSubscriptionModal.async';
 import StarsTransactionInfoModal from './stars/transaction/StarsTransactionModal.async';
+import SuggestedPostApprovalModal from './suggestedPostApproval/SuggestedPostApprovalModal.async';
 import SuggestedStatusModal from './suggestedStatus/SuggestedStatusModal.async';
+import SuggestMessageModal from './suggestMessage/SuggestMessageModal.async';
 import UrlAuthModal from './urlAuth/UrlAuthModal.async';
 import WebAppModal from './webApp/WebAppModal.async';
 
@@ -63,6 +65,8 @@ type ModalKey = keyof Pick<TabState,
   'starsPayment' |
   'starsTransactionModal' |
   'paidReactionModal' |
+  'suggestMessageModal' |
+  'suggestedPostApprovalModal' |
   'webApps' |
   'chatInviteModal' |
   'starsSubscriptionModal' |
@@ -118,6 +122,8 @@ const MODALS: ModalRegistry = {
   starsTransactionModal: StarsTransactionInfoModal,
   chatInviteModal: ChatInviteModal,
   paidReactionModal: PaidReactionModal,
+  suggestMessageModal: SuggestMessageModal,
+  suggestedPostApprovalModal: SuggestedPostApprovalModal,
   starsSubscriptionModal: StarsSubscriptionModal,
   starsGiftModal: StarsGiftModal,
   giftModal: PremiumGiftModal,

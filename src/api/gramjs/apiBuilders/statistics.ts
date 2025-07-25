@@ -54,15 +54,15 @@ export function buildChannelStatistics(stats: GramJs.stats.BroadcastStats): ApiC
 }
 
 export function buildChannelMonetizationStatistics(
-  stats: GramJs.stats.BroadcastRevenueStats,
+  stats: GramJs.payments.StarsRevenueStats,
 ): ApiChannelMonetizationStatistics {
   return {
     // Graphs
-    topHoursGraph: buildGraph(stats.topHoursGraph),
+    topHoursGraph: stats.topHoursGraph ? buildGraph(stats.topHoursGraph) : undefined,
     revenueGraph: buildGraph(stats.revenueGraph, undefined, true, stats.usdRate),
 
     // Statistics overview
-    balances: buildChannelMonetizationBalances(stats.balances),
+    balances: buildChannelMonetizationBalances(stats.status),
     usdRate: stats.usdRate,
   };
 }
@@ -269,7 +269,7 @@ function buildChannelMonetizationBalances({
   availableBalance,
   overallRevenue,
   withdrawalEnabled,
-}: GramJs.BroadcastRevenueBalances): ChannelMonetizationBalances {
+}: GramJs.StarsRevenueStatus): ChannelMonetizationBalances {
   return {
     currentBalance: Number(currentBalance) / DECIMALS,
     availableBalance: Number(availableBalance) / DECIMALS,

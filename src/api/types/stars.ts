@@ -19,6 +19,7 @@ export interface ApiStarGiftRegular {
   isBirthday?: true;
   upgradeStars?: number;
   resellMinStars?: number;
+  releasedByPeerId?: string;
   title?: string;
 }
 
@@ -36,6 +37,7 @@ export interface ApiStarGiftUnique {
   slug: string;
   giftAddress?: string;
   resellPriceInStars?: number;
+  releasedByPeerId?: string;
 }
 
 export type ApiStarGift = ApiStarGiftRegular | ApiStarGiftUnique;

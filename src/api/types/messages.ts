@@ -9,7 +9,7 @@ import type { ApiMessageAction } from './messageActions';
 import type {
   ApiLabeledPrice,
 } from './payments';
-import type { ApiStarGiftUnique } from './stars';
+import type { ApiStarGiftUnique, ApiStarsAmount } from './stars';
 import type {
   ApiMessageStoryData, ApiStory, ApiWebPageStickerData, ApiWebPageStoryData,
 } from './stories';
@@ -412,10 +412,24 @@ export interface ApiInputMessageReplyInfo {
   quoteOffset?: number;
 }
 
+export interface ApiSuggestedPost {
+  isAccepted?: true;
+  isRejected?: true;
+  price?: ApiStarsAmount;
+  scheduleDate?: number;
+}
+
 export interface ApiInputStoryReplyInfo {
   type: 'story';
   peerId: string;
   storyId: number;
+}
+
+export interface ApiInputSuggestedPostInfo {
+  price?: ApiStarsAmount;
+  scheduleDate?: number;
+  isAccepted?: true;
+  isRejected?: true;
 }
 
 export type ApiInputReplyInfo = ApiInputMessageReplyInfo | ApiInputStoryReplyInfo;
@@ -577,6 +591,7 @@ export interface ApiMessage {
   isOutgoing: boolean;
   senderId?: string;
   replyInfo?: ApiReplyInfo;
+  suggestedPostInfo?: ApiInputSuggestedPostInfo;
   sendingState?: 'messageSendingStatePending' | 'messageSendingStateFailed';
   forwardInfo?: ApiMessageForwardInfo;
   isDeleting?: boolean;
@@ -866,6 +881,13 @@ interface ApiKeyboardButtonCopy {
   copyText: string;
 }
 
+export interface ApiKeyboardButtonSuggestedMessage {
+  type: 'suggestedMessage';
+  text: string;
+  buttonType: 'approve' | 'decline' | 'suggestChanges';
+  disabled?: boolean;
+}
+
 export type ApiKeyboardButton = (
   ApiKeyboardButtonSimple
   | ApiKeyboardButtonReceipt
@@ -878,6 +900,7 @@ export type ApiKeyboardButton = (
   | ApiKeyboardButtonSimpleWebView
   | ApiKeyboardButtonUrlAuth
   | ApiKeyboardButtonCopy
+  | ApiKeyboardButtonSuggestedMessage
 );
 
 export type ApiKeyboardButtons = ApiKeyboardButton[][];
