@@ -137,7 +137,7 @@ function StoryCaption({
               className={styles.forwardInfo}
             />
           )}
-          {renderingStory && (
+          {renderingStory && caption && (
             <div ref={textRef} className={styles.captionText}>
               <MessageText
                 messageOrStory={renderingStory}
