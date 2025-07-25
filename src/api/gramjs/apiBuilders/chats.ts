@@ -192,7 +192,7 @@ function buildApiChatPermissions(peerEntity: GramJs.TypeUser | GramJs.TypeChat):
   };
 }
 
-function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat): {
+function buildApiChatRestrictions(peerEntity: Entity): {
   isNotJoined?: boolean;
   isForbidden?: boolean;
   isRestricted?: boolean;
@@ -212,17 +212,13 @@ function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat)
 
   const restrictions = {};
 
-  if ('restricted' in peerEntity) {
-    const restrictionReason = peerEntity.restricted
-      ? buildApiChatRestrictionReason(peerEntity.restrictionReason)
-      : undefined;
+  if ('restricted' in peerEntity && !peerEntity.min) {
+    const restrictionReason = buildApiChatRestrictionReason(peerEntity.restrictionReason);
 
-    if (restrictionReason) {
-      Object.assign(restrictions, {
-        isRestricted: true,
-        restrictionReason,
-      });
-    }
+    Object.assign(restrictions, {
+      isRestricted: peerEntity.restricted,
+      restrictionReason,
+    });
   }
 
   if (peerEntity instanceof GramJs.Chat) {

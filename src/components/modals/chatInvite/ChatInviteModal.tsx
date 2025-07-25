@@ -43,9 +43,11 @@ const ChatInviteModal = ({ modal }: OwnProps) => {
   const handleAccept = useLastCallback(() => {
     acceptChatInvite({ hash: hash! });
 
-    showNotification({
-      message: isBroadcast ? lang('RequestToJoinChannelSentDescription') : lang('RequestToJoinGroupSentDescription'),
-    });
+    if (isRequestNeeded) {
+      showNotification({
+        message: isBroadcast ? lang('RequestToJoinChannelSentDescription') : lang('RequestToJoinGroupSentDescription'),
+      });
+    }
 
     handleClose();
   });
