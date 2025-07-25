@@ -105,7 +105,7 @@ declare module 'opus-recorder' {
     // eslint-disable-next-line @typescript-eslint/no-misused-new
     new(options: AnyLiteral): IOpusRecorder;
 
-    start(stream?: MediaStreamAudioSourceNode): void;
+    start(stream?: MediaStreamAudioSourceNode): Promise<void>;
 
     sourceNode: MediaStreamAudioSourceNode;
 
