@@ -174,7 +174,7 @@ const SearchInput: FC<OwnProps> = ({
         onFocus={handleFocus}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        teactExperimentControlled={teactExperimentControlled}
+        // teactExperimentControlled={teactExperimentControlled}
       />
       {hasUpButton && (
         <Button
