@@ -10,6 +10,8 @@ import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview.tsx';
 
 import styles from './SpeedingDiamond.module.scss';
 
+import diamondPreviewUrl from '../../../assets/diamond.png';
+
 interface OwnProps {
   onMouseMove: NoneToVoidFunction;
 }
@@ -65,6 +67,7 @@ function SpeedingDiamond({ onMouseMove }: OwnProps) {
           speed={speed}
           size={130}
           tgsUrl={LOCAL_TGS_URLS.Diamond}
+          previewUrl={diamondPreviewUrl}
           nonInteractive
           noLoop={false}
         />
