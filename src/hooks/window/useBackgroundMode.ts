@@ -1,26 +1,21 @@
-import { useEffect } from '../../lib/teact/teact';
+import { useEffect } from '@teact';
 
-import { createCallbackManager } from '../../util/callbacks';
+import { createSignal } from '../../util/signals';
 import useLastCallback from '../useLastCallback';
 
-const blurCallbacks = createCallbackManager();
-const focusCallbacks = createCallbackManager();
+const [getIsInBackgroundLocal, setIsInBackground] = createSignal(!document.hasFocus());
+export const getIsInBackground = getIsInBackgroundLocal;
 
-let isFocused = document.hasFocus();
+function handleBlur() {
+  setIsInBackground(true);
+}
 
-window.addEventListener('blur', () => {
-  if (!isFocused) {
-    return;
-  }
+function handleFocus() {
+  setIsInBackground(false);
+}
 
-  isFocused = false;
-  blurCallbacks.runCallbacks();
-});
-
-window.addEventListener('focus', () => {
-  isFocused = true;
-  focusCallbacks.runCallbacks();
-});
+window.addEventListener('blur', handleBlur);
+window.addEventListener('focus', handleFocus);
 
 export default function useBackgroundMode(
   onBlur?: AnyToVoidFunction,
@@ -35,20 +30,20 @@ export default function useBackgroundMode(
       return undefined;
     }
 
-    if (!isFocused) {
+    if (getIsInBackground()) {
       lastOnBlur();
     }
 
-    blurCallbacks.addCallback(lastOnBlur);
-    focusCallbacks.addCallback(lastOnFocus);
-
-    return () => {
-      focusCallbacks.removeCallback(lastOnFocus);
-      blurCallbacks.removeCallback(lastOnBlur);
-    };
+    return getIsInBackground.subscribe(() => {
+      if (getIsInBackground()) {
+        lastOnBlur();
+      } else {
+        lastOnFocus();
+      }
+    });
   }, [isDisabled, lastOnBlur, lastOnFocus]);
 }
 
 export function isBackgroundModeActive() {
-  return !isFocused;
+  return getIsInBackground();
 }
