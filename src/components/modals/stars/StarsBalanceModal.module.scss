@@ -67,13 +67,6 @@
   background-color: var(--color-background-secondary);
 }
 
-.logo {
-  width: 6.25rem;
-  height: 6.25rem;
-  min-height: 6.25rem;
-  margin: 1rem;
-}
-
 .topUpButton,
 .tonBalanceContainer {
   margin-bottom: 0.5rem;
@@ -103,22 +96,6 @@
   padding-bottom: 1rem;
   font-size: 5rem;
   color: var(--color-primary);
-}
-
-.logoBackground {
-  position: absolute;
-  top: 0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-
-  height: 8rem;
-}
-
-.headerHext {
-  margin-inline: 0.5rem;
-  font-size: 1.5rem;
-  font-weight: var(--font-weight-medium);
-  text-align: center;
 }
 
 .description {

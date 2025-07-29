@@ -62,7 +62,7 @@ import GiftBlueRound from '../../../assets/premium/GiftBlueRound.svg';
 import GiftGreenRound from '../../../assets/premium/GiftGreenRound.svg';
 import GiftRedRound from '../../../assets/premium/GiftRedRound.svg';
 import GiftStar from '../../../assets/premium/GiftStar.svg';
-import PremiumLogo from '../../../assets/premium/PremiumLogo.svg';
+import PremiumLogo from '../../../assets/premium/PremiumStar.svg';
 
 export type OwnProps = {
   isOpen?: boolean;

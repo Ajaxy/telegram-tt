@@ -1,7 +1,4 @@
-import type React from '../../../lib/teact/teact';
-import {
-  memo, useEffect, useMemo, useState,
-} from '../../../lib/teact/teact';
+import { memo, useEffect, useMemo, useState } from '@teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiStarTopupOption } from '../../../api/types';
@@ -20,7 +17,6 @@ import { getPeerTitle } from '../../../global/helpers/peers';
 import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { convertCurrencyFromBaseUnit, convertTonToUsd, formatCurrencyAsString } from '../../../util/formatCurrency';
-import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -28,7 +24,6 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
@@ -36,15 +31,13 @@ import InfiniteScroll from '../../ui/InfiniteScroll';
 import Modal from '../../ui/Modal';
 import TabList, { type TabWithProperties } from '../../ui/TabList';
 import Transition from '../../ui/Transition';
+import ParticlesHeader from '../common/ParticlesHeader.tsx';
 import BalanceBlock from './BalanceBlock';
 import StarTopupOptionList from './StarTopupOptionList';
 import StarsSubscriptionItem from './subscription/StarsSubscriptionItem';
 import StarsTransactionItem from './transaction/StarsTransactionItem';
 
 import styles from './StarsBalanceModal.module.scss';
-
-import StarLogo from '../../../assets/icons/StarLogo.svg';
-import StarsBackground from '../../../assets/stars-bg.png';
 
 const TRANSACTION_TYPES = ['all', 'inbound', 'outbound'] as const;
 const TRANSACTION_TABS_KEYS: RegularLangKey[] = [
@@ -178,17 +171,16 @@ const StarsBalanceModal = ({
   const renderStarsSection = () => {
     return (
       <>
-        <img className={styles.logo} src={StarLogo} alt="" draggable={false} />
-        <img className={styles.logoBackground} src={StarsBackground} alt="" draggable={false} />
-        <h2 className={styles.headerText}>
-          {starsNeeded ? oldLang('StarsNeededTitle', ongoingTransactionAmount) : oldLang('TelegramStars')}
-        </h2>
-        <div className={styles.description}>
-          {renderText(
+        <ParticlesHeader
+          model="swaying-star"
+          color="gold"
+          title={starsNeeded ? oldLang('StarsNeededTitle', ongoingTransactionAmount) : oldLang('TelegramStars')}
+          description={renderText(
             starsNeededText || oldLang('TelegramStarsInfo'),
             ['simple_markdown', 'emoji'],
           )}
-        </div>
+          isDisabled={!isOpen}
+        />
         {canBuyPremium && !areBuyOptionsShown && (
           <Button
             className={styles.starButton}
@@ -222,18 +214,13 @@ const StarsBalanceModal = ({
     const tonAmount = convertCurrencyFromBaseUnit(balance?.amount || 0, TON_CURRENCY_CODE);
     return (
       <>
-        <AnimatedIconWithPreview
-          size={160}
-          tgsUrl={LOCAL_TGS_URLS.Diamond}
-          nonInteractive
-          noLoop={false}
+        <ParticlesHeader
+          model="speeding-diamond"
+          color="blue"
+          title={lang('CurrencyTon')}
+          description={lang('DescriptionAboutTon')}
+          isDisabled={!isOpen}
         />
-        <h2 className={styles.headerText}>
-          {lang('CurrencyTon')}
-        </h2>
-        <div className={styles.description}>
-          {lang('DescriptionAboutTon')}
-        </div>
         <div className={styles.tonBalanceContainer}>
           <div className={styles.tonBalance}>
             <Icon name="toncoin" className={styles.tonIconBalance} />

@@ -179,10 +179,14 @@ const AnimatedSticker: FC<OwnProps> = ({
   useSharedIntersectionObserver(sharedCanvas, throttledInit);
 
   useEffect(() => {
-    if (!animation) return;
-
-    animation.setColor(rgbColor.current);
+    animation?.setColor(rgbColor.current);
   }, [color, animation]);
+
+  useEffect(() => {
+    if (typeof speed === 'number') {
+      animation?.setSpeed(speed);
+    }
+  }, [speed, animation]);
 
   useUnmountCleanup(() => {
     animationRef.current?.removeView(viewId);
