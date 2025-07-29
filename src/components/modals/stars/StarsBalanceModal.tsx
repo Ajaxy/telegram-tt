@@ -72,7 +72,7 @@ const StarsBalanceModal = ({
   const currency = modal?.currency || STARS_CURRENCY_CODE;
   const currentState = currency === TON_CURRENCY_CODE ? tonBalanceState : starsBalanceState;
   const { balance, history } = currentState || {};
-  const { subscriptions } = (currency === TON_CURRENCY_CODE && starsBalanceState) || {};
+  const { subscriptions } = (currency === STARS_CURRENCY_CODE && starsBalanceState) || {};
 
   const oldLang = useOldLang();
   const lang = useLang();
