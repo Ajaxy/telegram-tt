@@ -50,6 +50,7 @@ const useWebAppFrame = (
     closeWebApp,
     openSuggestedStatusModal,
     updateWebApp,
+    updateContentSettings,
   } = getActions();
 
   const isReloadSupported = useRef<boolean>(false);
@@ -380,6 +381,25 @@ const useWebAppFrame = (
           duration: Number(duration),
           botId: webApp.botId,
         });
+      }
+
+      if (eventType === 'web_app_verify_age') {
+        const { passed } = eventData;
+
+        if (passed) {
+          showNotification({
+            message: {
+              key: 'TitleAgeCheckSuccess',
+            },
+          });
+          updateContentSettings({ isSensitiveEnabled: true });
+        } else {
+          showNotification({
+            message: {
+              key: 'TitleAgeCheckFailed',
+            },
+          });
+        }
       }
 
       onEvent(data);

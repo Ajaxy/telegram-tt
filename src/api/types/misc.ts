@@ -267,6 +267,11 @@ export interface ApiAppConfig {
   todoItemsMax?: number;
   todoTitleLengthMax?: number;
   todoItemLengthMax?: number;
+  ignoreRestrictionReasons?: string[];
+  needAgeVideoVerification?: boolean;
+  verifyAgeBotUsername?: string;
+  verifyAgeCountry?: string;
+  verifyAgeMin?: number;
 }
 
 export interface ApiConfig {
@@ -385,3 +390,9 @@ export type ApiPeerNotifySettings = {
 };
 
 export type ApiNotifyPeerType = 'users' | 'groups' | 'channels';
+
+export interface ApiRestrictionReason {
+  reason: string;
+  text: string;
+  platform: string;
+}

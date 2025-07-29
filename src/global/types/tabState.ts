@@ -754,6 +754,8 @@ export type TabState = {
     selfDestructAccountDays: number;
   };
 
+  isAgeVerificationModalOpen?: boolean;
+
   paidReactionModal?: {
     chatId: string;
     messageId: number;

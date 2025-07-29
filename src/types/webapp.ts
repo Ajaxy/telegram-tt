@@ -91,6 +91,7 @@ interface WebAppInboundEventMap {
   web_app_biometry_request_auth: { reason: string };
   web_app_biometry_update_token: { token: string };
   web_app_set_emoji_status: { custom_emoji_id: string; duration?: number };
+  web_app_verify_age: { passed: boolean; age?: number };
   web_app_request_file_download: { url: string; file_name: string };
   web_app_send_prepared_message: { id: string };
   web_app_device_storage_save_key: {

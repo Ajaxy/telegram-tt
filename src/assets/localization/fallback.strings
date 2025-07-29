@@ -2141,3 +2141,15 @@
 "ButtonTopUpViaFragment" = "Top-Up Via Fragment";
 "TonModalHint" = "You can top-up your TON using Fragment.";
 "TonGiftReceived" = "TON Top-Up";
+"MediaSpoilerSensitive" = "18+";
+"TitleSensitiveModal" = "18+ content";
+"TextSensitiveModal" = "This media may contain sensitive content suitable only for adults. Do you still want to view it?";
+"ButtonSensitiveAlways" = "Always show 18+ media";
+"ButtonSensitiveView" = "View Anyway";
+"TitleAgeVerificationModal" = "Age Verification";
+"TextAgeVerificationModal_one" = "To access such content, you must confirm that you are at least **{count}** year old as required by UK law.";
+"TextAgeVerificationModal_other" = "To access such content, you must confirm that you are at least **{count}** years old as required by UK law.";
+"DescriptionAgeVerificationModal" = "This is a one-time process using your phone's camera. Your selfie will not be stored by Telegram.";
+"TitleAgeCheckFailed" = "Age Check Failed";
+"TitleAgeCheckSuccess" = "Age Check Success";
+"ButtonAgeVerification" = "Verify My Age";

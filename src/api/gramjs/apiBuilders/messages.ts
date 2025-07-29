@@ -70,6 +70,7 @@ import {
 import { type OmitVirtualFields } from './helpers';
 import { buildApiMessageAction } from './messageActions';
 import { buildMessageContent, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
+import { buildApiRestrictionReasons } from './misc';
 import { buildApiPeerColor, buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildMessageReactions } from './reactions';
 
@@ -230,6 +231,8 @@ export function buildApiMessageWithChatId(
 
   const savedPeerId = mtpMessage.savedPeerId && getApiChatIdFromMtpPeer(mtpMessage.savedPeerId);
 
+  const restrictionReasons = buildApiRestrictionReasons(mtpMessage.restrictionReason);
+
   return {
     id: mtpMessage.id,
     chatId,
@@ -277,6 +280,7 @@ export function buildApiMessageWithChatId(
     isVideoProcessingPending,
     reportDeliveryUntilDate: mtpMessage.reportDeliveryUntilDate,
     paidMessageStars: mtpMessage.paidMessageStars?.toJSNumber(),
+    restrictionReasons,
   };
 }
 

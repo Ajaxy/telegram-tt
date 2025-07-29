@@ -656,6 +656,7 @@ export interface ActionPayloads {
     startAttach?: string;
     attach?: string;
     startApp?: string;
+    shouldStartMainApp?: boolean;
     mode?: string;
     choose?: ApiChatType[];
     text?: string;
@@ -1081,6 +1082,8 @@ export interface ActionPayloads {
     days: number;
   } & WithTabId | undefined;
   closeDeleteAccountModal: WithTabId | undefined;
+  openAgeVerificationModal: WithTabId | undefined;
+  closeAgeVerificationModal: WithTabId | undefined;
   setAccountTTL: {
     days: number;
   } & WithTabId | undefined;

@@ -397,6 +397,8 @@ namespace Api {
   export type TypeTodoList = TodoList;
   export type TypeTodoCompletion = TodoCompletion;
   export type TypeSuggestedPost = SuggestedPost;
+  export type TypeStarsRating = StarsRating;
+  export type TypeStarGiftCollection = StarGiftCollection;
   export type TypeResPQ = ResPQ;
   export type TypeP_Q_inner_data = PQInnerData | PQInnerDataDc | PQInnerDataTemp | PQInnerDataTempDc;
   export type TypeServer_DH_Params = ServerDHParamsFail | ServerDHParamsOk;
@@ -612,6 +614,7 @@ namespace Api {
     export type TypeSavedStarGifts = payments.SavedStarGifts;
     export type TypeStarGiftWithdrawalUrl = payments.StarGiftWithdrawalUrl;
     export type TypeResaleStarGifts = payments.ResaleStarGifts;
+    export type TypeStarGiftCollections = payments.StarGiftCollectionsNotModified | payments.StarGiftCollections;
   }
 
   export namespace phone {
@@ -3918,6 +3921,7 @@ namespace Api {
     botVerification?: Api.TypeBotVerification;
     sendPaidMessagesStars?: long;
     disallowedGifts?: Api.TypeDisallowedGiftsSettings;
+    starsRating?: Api.TypeStarsRating;
   }> {
     // flags: Api.Type;
     blocked?: true;
@@ -3969,7 +3973,8 @@ namespace Api {
     botVerification?: Api.TypeBotVerification;
     sendPaidMessagesStars?: long;
     disallowedGifts?: Api.TypeDisallowedGiftsSettings;
-    CONSTRUCTOR_ID: 2582085701;
+    starsRating?: Api.TypeStarsRating;
+    CONSTRUCTOR_ID: 702447806;
     SUBCLASS_OF_ID: 524706233;
     className: 'UserFull';
 
@@ -13347,6 +13352,7 @@ namespace Api {
     quoteText?: string;
     quoteEntities?: Api.TypeMessageEntity[];
     quoteOffset?: int;
+    todoItemId?: int;
   } | void> {
     // flags: Api.Type;
     replyToScheduled?: true;
@@ -13360,7 +13366,8 @@ namespace Api {
     quoteText?: string;
     quoteEntities?: Api.TypeMessageEntity[];
     quoteOffset?: int;
-    CONSTRUCTOR_ID: 2948336091;
+    todoItemId?: int;
+    CONSTRUCTOR_ID: 1763137035;
     SUBCLASS_OF_ID: 1531810151;
     className: 'MessageReplyHeader';
 
@@ -15261,6 +15268,7 @@ namespace Api {
     quoteEntities?: Api.TypeMessageEntity[];
     quoteOffset?: int;
     monoforumPeerId?: Api.TypeInputPeer;
+    todoItemId?: int;
   }> {
     // flags: Api.Type;
     replyToMsgId: int;
@@ -15270,7 +15278,8 @@ namespace Api {
     quoteEntities?: Api.TypeMessageEntity[];
     quoteOffset?: int;
     monoforumPeerId?: Api.TypeInputPeer;
-    CONSTRUCTOR_ID: 2960144560;
+    todoItemId?: int;
+    CONSTRUCTOR_ID: 2258615824;
     SUBCLASS_OF_ID: 2356220701;
     className: 'InputReplyToMessage';
 
@@ -16754,6 +16763,8 @@ namespace Api {
     limited?: true;
     soldOut?: true;
     birthday?: true;
+    requirePremium?: true;
+    limitedPerUser?: true;
     id: long;
     sticker: Api.TypeDocument;
     stars: long;
@@ -16767,11 +16778,15 @@ namespace Api {
     resellMinStars?: long;
     title?: string;
     releasedBy?: Api.TypePeer;
+    perUserTotal?: int;
+    perUserRemains?: int;
   }> {
     // flags: Api.Type;
     limited?: true;
     soldOut?: true;
     birthday?: true;
+    requirePremium?: true;
+    limitedPerUser?: true;
     id: long;
     sticker: Api.TypeDocument;
     stars: long;
@@ -16785,7 +16800,9 @@ namespace Api {
     resellMinStars?: long;
     title?: string;
     releasedBy?: Api.TypePeer;
-    CONSTRUCTOR_ID: 2139438098;
+    perUserTotal?: int;
+    perUserRemains?: int;
+    CONSTRUCTOR_ID: 12386139;
     SUBCLASS_OF_ID: 3273414923;
     className: 'StarGift';
 
@@ -16793,6 +16810,7 @@ namespace Api {
   }
   export class StarGiftUnique extends VirtualClass<{
     // flags: Api.Type;
+    requirePremium?: true;
     id: long;
     title: string;
     slug: string;
@@ -16808,6 +16826,7 @@ namespace Api {
     releasedBy?: Api.TypePeer;
   }> {
     // flags: Api.Type;
+    requirePremium?: true;
     id: long;
     title: string;
     slug: string;
@@ -17079,6 +17098,7 @@ namespace Api {
     transferStars?: long;
     canTransferAt?: int;
     canResellAt?: int;
+    collectionId?: int[];
   }> {
     // flags: Api.Type;
     nameHidden?: true;
@@ -17098,7 +17118,8 @@ namespace Api {
     transferStars?: long;
     canTransferAt?: int;
     canResellAt?: int;
-    CONSTRUCTOR_ID: 3755607193;
+    collectionId?: int[];
+    CONSTRUCTOR_ID: 514213599;
     SUBCLASS_OF_ID: 2385198100;
     className: 'SavedStarGift';
 
@@ -17377,6 +17398,44 @@ namespace Api {
     className: 'SuggestedPost';
 
     static fromReader(reader: Reader): SuggestedPost;
+  }
+  export class StarsRating extends VirtualClass<{
+    // flags: Api.Type;
+    level: int;
+    currentLevelStars: long;
+    stars: long;
+    nextLevelStars?: long;
+  }> {
+    // flags: Api.Type;
+    level: int;
+    currentLevelStars: long;
+    stars: long;
+    nextLevelStars?: long;
+    CONSTRUCTOR_ID: 453922567;
+    SUBCLASS_OF_ID: 1668506656;
+    className: 'StarsRating';
+
+    static fromReader(reader: Reader): StarsRating;
+  }
+  export class StarGiftCollection extends VirtualClass<{
+    // flags: Api.Type;
+    collectionId: int;
+    title: string;
+    icon?: Api.TypeDocument;
+    giftsCount: int;
+    hash: long;
+  }> {
+    // flags: Api.Type;
+    collectionId: int;
+    title: string;
+    icon?: Api.TypeDocument;
+    giftsCount: int;
+    hash: long;
+    CONSTRUCTOR_ID: 2641040304;
+    SUBCLASS_OF_ID: 1138805578;
+    className: 'StarGiftCollection';
+
+    static fromReader(reader: Reader): StarGiftCollection;
   }
   export class ResPQ extends VirtualClass<{
     nonce: int128;
@@ -21384,6 +21443,23 @@ namespace Api {
       className: 'ResaleStarGifts';
 
       static fromReader(reader: Reader): ResaleStarGifts;
+    }
+    export class StarGiftCollectionsNotModified extends VirtualClass<void> {
+      CONSTRUCTOR_ID: 2696564503;
+      SUBCLASS_OF_ID: 4028047852;
+      className: 'StarGiftCollectionsNotModified';
+
+      static fromReader(reader: Reader): StarGiftCollectionsNotModified;
+    }
+    export class StarGiftCollections extends VirtualClass<{
+      collections: Api.TypeStarGiftCollection[];
+    }> {
+      collections: Api.TypeStarGiftCollection[];
+      CONSTRUCTOR_ID: 2317955827;
+      SUBCLASS_OF_ID: 4028047852;
+      className: 'StarGiftCollections';
+
+      static fromReader(reader: Reader): StarGiftCollections;
     }
   }
 
@@ -27128,6 +27204,7 @@ namespace Api {
       excludeUnique?: true;
       sortByValue?: true;
       peer: Api.TypeInputPeer;
+      collectionId?: int;
       offset: string;
       limit: int;
     }, payments.TypeSavedStarGifts> {
@@ -27139,6 +27216,7 @@ namespace Api {
       excludeUnique?: true;
       sortByValue?: true;
       peer: Api.TypeInputPeer;
+      collectionId?: int;
       offset: string;
       limit: int;
     }
@@ -27200,6 +27278,53 @@ namespace Api {
     }, Api.TypeUpdates> {
       stargift: Api.TypeInputSavedStarGift;
       resellStars: long;
+    }
+    export class CreateStarGiftCollection extends Request<{
+      peer: Api.TypeInputPeer;
+      title: string;
+      stargift: Api.TypeInputSavedStarGift[];
+    }, Api.TypeStarGiftCollection> {
+      peer: Api.TypeInputPeer;
+      title: string;
+      stargift: Api.TypeInputSavedStarGift[];
+    }
+    export class UpdateStarGiftCollection extends Request<{
+      // flags: Api.Type;
+      peer: Api.TypeInputPeer;
+      collectionId: int;
+      title?: string;
+      deleteStargift?: Api.TypeInputSavedStarGift[];
+      addStargift?: Api.TypeInputSavedStarGift[];
+      order?: Api.TypeInputSavedStarGift[];
+    }, Api.TypeStarGiftCollection> {
+      // flags: Api.Type;
+      peer: Api.TypeInputPeer;
+      collectionId: int;
+      title?: string;
+      deleteStargift?: Api.TypeInputSavedStarGift[];
+      addStargift?: Api.TypeInputSavedStarGift[];
+      order?: Api.TypeInputSavedStarGift[];
+    }
+    export class ReorderStarGiftCollections extends Request<{
+      peer: Api.TypeInputPeer;
+      order: int[];
+    }, Bool> {
+      peer: Api.TypeInputPeer;
+      order: int[];
+    }
+    export class DeleteStarGiftCollection extends Request<{
+      peer: Api.TypeInputPeer;
+      collectionId: int;
+    }, Bool> {
+      peer: Api.TypeInputPeer;
+      collectionId: int;
+    }
+    export class GetStarGiftCollections extends Request<{
+      peer: Api.TypeInputPeer;
+      hash: long;
+    }, payments.TypeStarGiftCollections> {
+      peer: Api.TypeInputPeer;
+      hash: long;
     }
   }
 
@@ -28196,7 +28321,7 @@ namespace Api {
     | help.GetConfig | help.GetNearestDc | help.GetAppUpdate | help.GetInviteText | help.GetSupport | help.SetBotUpdatesStatus | help.GetCdnConfig | help.GetRecentMeUrls | help.GetTermsOfServiceUpdate | help.AcceptTermsOfService | help.GetDeepLinkInfo | help.GetAppConfig | help.SaveAppLog | help.GetPassportConfig | help.GetSupportName | help.GetUserInfo | help.EditUserInfo | help.GetPromoData | help.HidePromoData | help.DismissSuggestion | help.GetCountriesList | help.GetPremiumPromo | help.GetPeerColors | help.GetPeerProfileColors | help.GetTimezonesList
     | channels.ReadHistory | channels.DeleteMessages | channels.ReportSpam | channels.GetMessages | channels.GetParticipants | channels.GetParticipant | channels.GetChannels | channels.GetFullChannel | channels.CreateChannel | channels.EditAdmin | channels.EditTitle | channels.EditPhoto | channels.CheckUsername | channels.UpdateUsername | channels.JoinChannel | channels.LeaveChannel | channels.InviteToChannel | channels.DeleteChannel | channels.ExportMessageLink | channels.ToggleSignatures | channels.GetAdminedPublicChannels | channels.EditBanned | channels.GetAdminLog | channels.SetStickers | channels.ReadMessageContents | channels.DeleteHistory | channels.TogglePreHistoryHidden | channels.GetLeftChannels | channels.GetGroupsForDiscussion | channels.SetDiscussionGroup | channels.EditCreator | channels.EditLocation | channels.ToggleSlowMode | channels.GetInactiveChannels | channels.ConvertToGigagroup | channels.GetSendAs | channels.DeleteParticipantHistory | channels.ToggleJoinToSend | channels.ToggleJoinRequest | channels.ReorderUsernames | channels.ToggleUsername | channels.DeactivateAllUsernames | channels.ToggleForum | channels.CreateForumTopic | channels.GetForumTopics | channels.GetForumTopicsByID | channels.EditForumTopic | channels.UpdatePinnedForumTopic | channels.DeleteTopicHistory | channels.ReorderPinnedForumTopics | channels.ToggleAntiSpam | channels.ReportAntiSpamFalsePositive | channels.ToggleParticipantsHidden | channels.UpdateColor | channels.ToggleViewForumAsMessages | channels.GetChannelRecommendations | channels.UpdateEmojiStatus | channels.SetBoostsToUnblockRestrictions | channels.SetEmojiStickers | channels.RestrictSponsoredMessages | channels.SearchPosts | channels.UpdatePaidMessagesPrice | channels.ToggleAutotranslation | channels.GetMessageAuthor
     | bots.SendCustomRequest | bots.AnswerWebhookJSONQuery | bots.SetBotCommands | bots.ResetBotCommands | bots.GetBotCommands | bots.SetBotMenuButton | bots.GetBotMenuButton | bots.SetBotBroadcastDefaultAdminRights | bots.SetBotGroupDefaultAdminRights | bots.SetBotInfo | bots.GetBotInfo | bots.ReorderUsernames | bots.ToggleUsername | bots.CanSendMessage | bots.AllowSendMessage | bots.InvokeWebViewCustomMethod | bots.GetPopularAppBots | bots.AddPreviewMedia | bots.EditPreviewMedia | bots.DeletePreviewMedia | bots.ReorderPreviewMedias | bots.GetPreviewInfo | bots.GetPreviewMedias | bots.UpdateUserEmojiStatus | bots.ToggleUserEmojiStatusPermission | bots.CheckDownloadFileParams | bots.GetAdminedBots | bots.UpdateStarRefProgram | bots.SetCustomVerification | bots.GetBotRecommendations
-    | payments.GetPaymentForm | payments.GetPaymentReceipt | payments.ValidateRequestedInfo | payments.SendPaymentForm | payments.GetSavedInfo | payments.ClearSavedInfo | payments.GetBankCardData | payments.ExportInvoice | payments.AssignAppStoreTransaction | payments.AssignPlayMarketTransaction | payments.GetPremiumGiftCodeOptions | payments.CheckGiftCode | payments.ApplyGiftCode | payments.GetGiveawayInfo | payments.LaunchPrepaidGiveaway | payments.GetStarsTopupOptions | payments.GetStarsStatus | payments.GetStarsTransactions | payments.SendStarsForm | payments.RefundStarsCharge | payments.GetStarsRevenueStats | payments.GetStarsRevenueWithdrawalUrl | payments.GetStarsRevenueAdsAccountUrl | payments.GetStarsTransactionsByID | payments.GetStarsGiftOptions | payments.GetStarsSubscriptions | payments.ChangeStarsSubscription | payments.FulfillStarsSubscription | payments.GetStarsGiveawayOptions | payments.GetStarGifts | payments.SaveStarGift | payments.ConvertStarGift | payments.BotCancelStarsSubscription | payments.GetConnectedStarRefBots | payments.GetConnectedStarRefBot | payments.GetSuggestedStarRefBots | payments.ConnectStarRefBot | payments.EditConnectedStarRefBot | payments.GetStarGiftUpgradePreview | payments.UpgradeStarGift | payments.TransferStarGift | payments.GetUniqueStarGift | payments.GetSavedStarGifts | payments.GetSavedStarGift | payments.GetStarGiftWithdrawalUrl | payments.ToggleChatStarGiftNotifications | payments.ToggleStarGiftsPinnedToTop | payments.CanPurchaseStore | payments.GetResaleStarGifts | payments.UpdateStarGiftPrice
+    | payments.GetPaymentForm | payments.GetPaymentReceipt | payments.ValidateRequestedInfo | payments.SendPaymentForm | payments.GetSavedInfo | payments.ClearSavedInfo | payments.GetBankCardData | payments.ExportInvoice | payments.AssignAppStoreTransaction | payments.AssignPlayMarketTransaction | payments.GetPremiumGiftCodeOptions | payments.CheckGiftCode | payments.ApplyGiftCode | payments.GetGiveawayInfo | payments.LaunchPrepaidGiveaway | payments.GetStarsTopupOptions | payments.GetStarsStatus | payments.GetStarsTransactions | payments.SendStarsForm | payments.RefundStarsCharge | payments.GetStarsRevenueStats | payments.GetStarsRevenueWithdrawalUrl | payments.GetStarsRevenueAdsAccountUrl | payments.GetStarsTransactionsByID | payments.GetStarsGiftOptions | payments.GetStarsSubscriptions | payments.ChangeStarsSubscription | payments.FulfillStarsSubscription | payments.GetStarsGiveawayOptions | payments.GetStarGifts | payments.SaveStarGift | payments.ConvertStarGift | payments.BotCancelStarsSubscription | payments.GetConnectedStarRefBots | payments.GetConnectedStarRefBot | payments.GetSuggestedStarRefBots | payments.ConnectStarRefBot | payments.EditConnectedStarRefBot | payments.GetStarGiftUpgradePreview | payments.UpgradeStarGift | payments.TransferStarGift | payments.GetUniqueStarGift | payments.GetSavedStarGifts | payments.GetSavedStarGift | payments.GetStarGiftWithdrawalUrl | payments.ToggleChatStarGiftNotifications | payments.ToggleStarGiftsPinnedToTop | payments.CanPurchaseStore | payments.GetResaleStarGifts | payments.UpdateStarGiftPrice | payments.CreateStarGiftCollection | payments.UpdateStarGiftCollection | payments.ReorderStarGiftCollections | payments.DeleteStarGiftCollection | payments.GetStarGiftCollections
     | stickers.CreateStickerSet | stickers.RemoveStickerFromSet | stickers.ChangeStickerPosition | stickers.AddStickerToSet | stickers.SetStickerSetThumb | stickers.CheckShortName | stickers.SuggestShortName | stickers.ChangeSticker | stickers.RenameStickerSet | stickers.DeleteStickerSet | stickers.ReplaceSticker
     | phone.GetCallConfig | phone.RequestCall | phone.AcceptCall | phone.ConfirmCall | phone.ReceivedCall | phone.DiscardCall | phone.SetCallRating | phone.SaveCallDebug | phone.SendSignalingData | phone.CreateGroupCall | phone.JoinGroupCall | phone.LeaveGroupCall | phone.InviteToGroupCall | phone.DiscardGroupCall | phone.ToggleGroupCallSettings | phone.GetGroupCall | phone.GetGroupParticipants | phone.CheckGroupCall | phone.ToggleGroupCallRecord | phone.EditGroupCallParticipant | phone.EditGroupCallTitle | phone.GetGroupCallJoinAs | phone.ExportGroupCallInvite | phone.ToggleGroupCallStartSubscription | phone.StartScheduledGroupCall | phone.SaveDefaultGroupCallJoinAs | phone.JoinGroupCallPresentation | phone.LeaveGroupCallPresentation | phone.GetGroupCallStreamChannels | phone.GetGroupCallStreamRtmpUrl | phone.SaveCallLog | phone.CreateConferenceCall | phone.DeleteConferenceCallParticipants | phone.SendConferenceCallBroadcast | phone.InviteConferenceCallParticipant | phone.DeclineConferenceCallInvite | phone.GetGroupCallChainBlocks
     | langpack.GetLangPack | langpack.GetStrings | langpack.GetDifference | langpack.GetLanguages | langpack.GetLanguage

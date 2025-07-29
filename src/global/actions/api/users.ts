@@ -31,6 +31,7 @@ import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat,
   selectChatFullInfo,
+  selectIsChatRestricted,
   selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectPeer,
@@ -309,6 +310,10 @@ addActionHandler('loadMoreProfilePhotos', async (global, actions, payload): Prom
   const user = isPrivate ? selectUser(global, peerId) : undefined;
   const chat = !isPrivate ? selectChat(global, peerId) : undefined;
   const peer = user || chat;
+
+  if (chat && selectIsChatRestricted(global, peerId)) {
+    return;
+  }
   const profilePhotos = selectPeerPhotos(global, peerId);
   if (!peer?.avatarPhotoId) {
     return;

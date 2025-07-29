@@ -64,6 +64,7 @@ type OwnProps = {
   chatTranslations?: ChatTranslatedMessages;
   requestedChatTranslationLanguage?: string;
   isOpen?: boolean;
+  isMediaNsfw?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   onClick: ((e: React.MouseEvent) => void);
@@ -88,6 +89,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   noUserColors,
   chatTranslations,
   requestedChatTranslationLanguage,
+  isMediaNsfw,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   onClick,
@@ -114,7 +116,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const mediaThumbnail = useThumbnail(containedMedia);
 
   const isRoundVideo = Boolean(containedMedia && getMessageRoundVideo(containedMedia));
-  const isSpoiler = Boolean(containedMedia && getMessageIsSpoiler(containedMedia));
+  const isSpoiler = Boolean(containedMedia && getMessageIsSpoiler(containedMedia)) || isMediaNsfw;
   const isQuote = Boolean(replyInfo?.type === 'message' && replyInfo.isQuote);
   const replyForwardInfo = replyInfo?.type === 'message' ? replyInfo.replyFrom : undefined;
 

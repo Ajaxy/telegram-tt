@@ -20,6 +20,7 @@ import useLastCallback from '../../../hooks/useLastCallback.ts';
 import useOldLang from '../../../hooks/useOldLang';
 
 import StarIcon from '../../common/icons/StarIcon';
+import Button from '../../ui/Button';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 
@@ -43,6 +44,7 @@ type StateProps = {
   shouldChargeForMessages: boolean;
   canDisplayChatInTitle?: boolean;
   isCurrentUserFrozen?: boolean;
+  needAgeVideoVerification?: boolean;
   privacy: GlobalState['settings']['privacy'];
   accountDaysTtl?: number;
 };
@@ -64,6 +66,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   shouldChargeForMessages,
   canDisplayChatInTitle,
   canSetPasscode,
+  needAgeVideoVerification,
   privacy,
   onReset,
   isCurrentUserFrozen,
@@ -73,7 +76,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     openDeleteAccountModal,
     loadPrivacySettings,
     loadBlockedUsers,
-    loadContentSettings,
     updateContentSettings,
     loadGlobalPrivacySettings,
     updateGlobalPrivacySettings,
@@ -81,13 +83,13 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     setSharedSettingOption,
     openSettingsScreen,
     loadAccountDaysTtl,
+    openAgeVerificationModal,
   } = getActions();
 
   useEffect(() => {
     if (!isCurrentUserFrozen) {
       loadBlockedUsers();
       loadPrivacySettings();
-      loadContentSettings();
       loadWebAuthorizations();
     }
   }, [isCurrentUserFrozen]);
@@ -122,6 +124,10 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   const handleUpdateContentSettings = useCallback((isChecked: boolean) => {
     updateContentSettings({ isSensitiveEnabled: isChecked });
   }, [updateContentSettings]);
+
+  const handleAgeVerification = useCallback(() => {
+    openAgeVerificationModal();
+  }, [openAgeVerificationModal]);
 
   const handleOpenDeleteAccountModal = useLastCallback(() => {
     if (!accountDaysTtl) return;
@@ -384,7 +390,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       </div>
 
       {canChangeSensitive && (
-        <div className="settings-item">
+        <div className="settings-item fluid-container">
           <h4 className="settings-item-header" dir={oldLang.isRtl ? 'rtl' : undefined}>
             {oldLang('lng_settings_sensitive_title')}
           </h4>
@@ -392,9 +398,23 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
             label={oldLang('lng_settings_sensitive_disable_filtering')}
             subLabel={oldLang('lng_settings_sensitive_about')}
             checked={Boolean(isSensitiveEnabled)}
-            disabled={!canChangeSensitive}
+            disabled={!canChangeSensitive || (!isSensitiveEnabled && needAgeVideoVerification)}
             onCheck={handleUpdateContentSettings}
           />
+          {!isSensitiveEnabled && needAgeVideoVerification && (
+            <Button
+              color="primary"
+              fluid
+              size="smaller"
+              noForcedUpperCase
+              className="settings-unlock-button"
+              onClick={handleAgeVerification}
+            >
+              <span className="settings-unlock-button-title">
+                {lang('ButtonAgeVerification')}
+              </span>
+            </Button>
+          )}
         </div>
       )}
 
@@ -475,6 +495,7 @@ export default memo(withGlobal<OwnProps>(
       canChangeSensitive,
       shouldNewNonContactPeersRequirePremium,
       shouldChargeForMessages,
+      needAgeVideoVerification: Boolean(appConfig?.needAgeVideoVerification),
       privacy,
       canDisplayChatInTitle,
       canSetPasscode: selectCanSetPasscode(global),

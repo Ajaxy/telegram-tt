@@ -48,6 +48,7 @@ import {
   selectChatFullInfo,
   selectChatMessages,
   selectCurrentSharedMediaSearch,
+  selectIsChatRestricted,
   selectIsCurrentUserPremium,
   selectIsRightColumnShown,
   selectMonoforumChannel,
@@ -995,6 +996,7 @@ export default memo(withGlobal<OwnProps>(
     const peerGifts = selectTabState(global).savedGifts.giftsByPeerId[chatId];
 
     const monoforumChannel = selectMonoforumChannel(global, chatId);
+    const isRestricted = chat && selectIsChatRestricted(global, chat.id);
 
     return {
       theme: selectTheme(global),
@@ -1012,7 +1014,7 @@ export default memo(withGlobal<OwnProps>(
       canDeleteMembers,
       currentUserId: global.currentUserId,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
-      isRestricted: chat?.isRestricted,
+      isRestricted,
       activeDownloads,
       usersById,
       userStatusesById,

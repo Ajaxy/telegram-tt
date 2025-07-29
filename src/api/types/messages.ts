@@ -6,6 +6,7 @@ import type {
 } from './bots';
 import type { ApiPeerColor } from './chats';
 import type { ApiMessageAction } from './messageActions';
+import type { ApiRestrictionReason } from './misc';
 import type {
   ApiLabeledPrice,
 } from './payments';
@@ -642,6 +643,7 @@ export interface ApiMessage {
   areReactionsPossible?: true;
   reportDeliveryUntilDate?: number;
   paidMessageStars?: number;
+  restrictionReasons?: ApiRestrictionReason[];
 }
 
 export interface ApiReactions {

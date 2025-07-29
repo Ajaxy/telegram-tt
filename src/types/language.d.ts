@@ -1600,6 +1600,16 @@ export interface LangPair {
   'ButtonTopUpViaFragment': undefined;
   'TonModalHint': undefined;
   'TonGiftReceived': undefined;
+  'MediaSpoilerSensitive': undefined;
+  'TitleSensitiveModal': undefined;
+  'TextSensitiveModal': undefined;
+  'ButtonSensitiveAlways': undefined;
+  'ButtonSensitiveView': undefined;
+  'TitleAgeVerificationModal': undefined;
+  'DescriptionAgeVerificationModal': undefined;
+  'TitleAgeCheckFailed': undefined;
+  'TitleAgeCheckSuccess': undefined;
+  'ButtonAgeVerification': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -3087,6 +3097,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'MessageActionTodoTaskCount': {
+    'count': V;
+  };
+  'TextAgeVerificationModal': {
     'count': V;
   };
 }

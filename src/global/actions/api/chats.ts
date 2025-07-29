@@ -1633,7 +1633,8 @@ addActionHandler('acceptChatInvite', async (global, actions, payload): Promise<v
 
 addActionHandler('openChatByUsername', async (global, actions, payload): Promise<void> => {
   const {
-    username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp, mode,
+    username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts,
+    startApp, shouldStartMainApp, mode,
     text, onChatChanged, choose, ref, timestamp,
     tabId = getCurrentTabId(),
   } = payload;
@@ -1661,7 +1662,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
       return;
     }
 
-    if (startApp !== undefined && !webAppName) {
+    if ((startApp !== undefined && !webAppName) || shouldStartMainApp) {
       const theme = extractCurrentThemeParams();
       const chatByUsername = await fetchChatByUsername(global, username);
       global = getGlobal();

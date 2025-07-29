@@ -5,7 +5,7 @@ import type {
   ApiMessageEntityCustomEmoji,
   ApiMessageForwardInfo,
   ApiMessageOutgoingStatus,
-  ApiPeer, ApiSponsoredMessage,
+  ApiPeer, ApiRestrictionReason, ApiSponsoredMessage,
   ApiStickerSetInfo,
 } from '../../api/types';
 import type {
@@ -22,8 +22,8 @@ import type {
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  ANONYMOUS_USER_ID, API_GENERAL_ID_LIMIT, GENERAL_TOPIC_ID, SERVICE_NOTIFICATIONS_USER_ID,
-  SVG_EXTENSIONS,
+  ANONYMOUS_USER_ID, API_GENERAL_ID_LIMIT, GENERAL_TOPIC_ID, NSFW_RESTRICTION_REASON, SERVICE_NOTIFICATIONS_USER_ID,
+  SVG_EXTENSIONS, WEB_APP_PLATFORM,
 } from '../../config';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { isUserId } from '../../util/entities/ids';
@@ -72,11 +72,13 @@ import {
   selectChat,
   selectChatFullInfo,
   selectChatLastMessageId,
+  selectIsChatRestricted,
   selectIsChatWithBot,
   selectIsChatWithSelf,
   selectRequestedChatTranslationLanguage,
 } from './chats';
 import { selectPeer, selectPeerPaidMessagesStars } from './peers';
+import { selectSettingsKeys } from './settings';
 import { selectPeerStory } from './stories';
 import { selectIsStickerFavorite } from './symbols';
 import { selectTabState } from './tabs';
@@ -587,7 +589,8 @@ export function selectThreadIdFromMessage<T extends GlobalState>(global: T, mess
 
 export function selectCanReplyToMessage<T extends GlobalState>(global: T, message: ApiMessage, threadId: ThreadId) {
   const chat = selectChat(global, message.chatId);
-  if (!chat || chat.isRestricted || chat.isForbidden) return false;
+  const isRestricted = selectIsChatRestricted(global, message.chatId);
+  if (!chat || isRestricted || chat.isForbidden) return false;
 
   const isLocal = isMessageLocal(message);
   const isServiceNotification = isServiceNotificationMessage(message);
@@ -632,7 +635,8 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   global: T, message: ApiMessage, threadId: ThreadId,
 ) {
   const chat = selectChat(global, message.chatId);
-  if (!chat || chat.isRestricted) {
+  const isRestricted = selectIsChatRestricted(global, message.chatId);
+  if (!chat || isRestricted) {
     return {};
   }
 
@@ -1562,4 +1566,32 @@ export function selectMessageLastPlaybackTimestamp<T extends GlobalState>(
   global: T, chatId: string, messageId: number,
 ) {
   return global.messages.playbackByChatId[chatId]?.byId[messageId];
+}
+
+export function selectActiveRestrictionReasons<T extends GlobalState>(
+  global: T, restrictionReasons?: ApiRestrictionReason[],
+): ApiRestrictionReason[] {
+  if (!restrictionReasons) return [];
+
+  const { ignoreRestrictionReasons } = global.appConfig || {};
+
+  return restrictionReasons.filter((reason) => {
+    const isForCurrentPlatform = reason.platform === 'all' || reason.platform === WEB_APP_PLATFORM;
+    if (!isForCurrentPlatform) return false;
+
+    const shouldIgnore = ignoreRestrictionReasons?.includes(reason.reason);
+    return !shouldIgnore;
+  });
+}
+
+export function selectIsMediaNsfw<T extends GlobalState>(global: T, message: ApiMessage) {
+  const { isSensitiveEnabled } = selectSettingsKeys(global);
+  const chat = selectChat(global, message.chatId);
+  if (isSensitiveEnabled) return false;
+
+  const chatActiveRestrictions = selectActiveRestrictionReasons(global, chat?.restrictionReasons);
+  const messageActiveRestrictions = selectActiveRestrictionReasons(global, message.restrictionReasons);
+
+  return chatActiveRestrictions.some((reason) => reason.reason === NSFW_RESTRICTION_REASON)
+    || messageActiveRestrictions.some((reason) => reason.reason === NSFW_RESTRICTION_REASON);
 }

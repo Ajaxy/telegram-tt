@@ -120,6 +120,11 @@ export interface GramJsAppConfig extends LimitsConfig {
   todo_items_max?: number;
   todo_title_length_max?: number;
   todo_item_length_max?: number;
+  ignore_restriction_reasons?: string[];
+  need_age_video_verification?: boolean;
+  verify_age_bot_username?: string;
+  verify_age_country?: string;
+  verify_age_min?: number;
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -235,5 +240,10 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     todoItemsMax: appConfig.todo_items_max ?? TODO_ITEMS_LIMIT,
     todoTitleLengthMax: appConfig.todo_title_length_max ?? TODO_TITLE_LENGTH_LIMIT,
     todoItemLengthMax: appConfig.todo_item_length_max ?? TODO_ITEM_LENGTH_LIMIT,
+    ignoreRestrictionReasons: appConfig.ignore_restriction_reasons,
+    needAgeVideoVerification: appConfig.need_age_video_verification,
+    verifyAgeBotUsername: appConfig.verify_age_bot_username,
+    verifyAgeCountry: appConfig.verify_age_country,
+    verifyAgeMin: appConfig.verify_age_min,
   };
 }

@@ -257,6 +257,7 @@ const Main = ({
     loadAllChats,
     loadAllStories,
     loadAllHiddenStories,
+    loadContentSettings,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -329,6 +330,7 @@ const Main = ({
       loadAllChats({ listType: 'saved' });
       loadAllStories();
       loadAllHiddenStories();
+      loadContentSettings();
       loadRecentReactions();
       loadDefaultTagReactions();
       loadAttachBots();

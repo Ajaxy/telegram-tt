@@ -126,6 +126,7 @@ import {
   selectForwardsCanBeSentToChat,
   selectForwardsContainVoiceMessages,
   selectIsChatBotNotStarted,
+  selectIsChatRestricted,
   selectIsChatWithSelf,
   selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
@@ -187,8 +188,9 @@ addActionHandler('loadViewportMessages', (global, actions, payload): ActionRetur
   }
 
   const chat = selectChat(global, chatId);
-  // TODO Revise if `chat.isRestricted` check is needed
-  if (!chat || chat.isRestricted) {
+  const isRestricted = selectIsChatRestricted(global, chatId);
+  // TODO Revise if `isRestricted` check is needed
+  if (!chat || isRestricted) {
     onError?.();
     return;
   }

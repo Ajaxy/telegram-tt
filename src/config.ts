@@ -344,6 +344,8 @@ export const TME_WEB_DOMAINS = new Set(['t.me', 'web.t.me', 'a.t.me', 'k.t.me', 
 export const WEB_APP_PLATFORM = 'weba';
 export const LANG_PACK = 'weba';
 
+export const NSFW_RESTRICTION_REASON = 'sensitive';
+
 // eslint-disable-next-line @stylistic/max-len
 export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', 'EG', 'HN', 'IE', 'IN', 'JO', 'MX', 'MY', 'NI', 'NZ', 'PH', 'PK', 'SA', 'SV', 'US']);
 

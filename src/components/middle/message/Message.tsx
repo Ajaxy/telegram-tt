@@ -86,11 +86,13 @@ import {
   selectDefaultReaction,
   selectForwardedSender,
   selectIsChatProtected,
+  selectIsChatRestricted,
   selectIsChatWithSelf,
   selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectIsDocumentGroupSelected,
   selectIsInSelectMode,
+  selectIsMediaNsfw,
   selectIsMessageFocused,
   selectIsMessageProtected,
   selectIsMessageSelected,
@@ -211,9 +213,6 @@ type MessagePositionProperties = {
 type OwnProps =
   {
     message: ApiMessage;
-    observeIntersectionForBottom?: ObserveFn;
-    observeIntersectionForLoading?: ObserveFn;
-    observeIntersectionForPlaying?: ObserveFn;
     album?: IAlbum;
     noAvatars?: boolean;
     withAvatar?: boolean;
@@ -226,6 +225,9 @@ type OwnProps =
     isJustAdded: boolean;
     memoFirstUnreadIdRef?: { current: number | undefined };
     getIsMessageListReady?: Signal<boolean>;
+    observeIntersectionForBottom?: ObserveFn;
+    observeIntersectionForLoading?: ObserveFn;
+    observeIntersectionForPlaying?: ObserveFn;
     onIntersectPinnedMessage?: OnIntersectPinnedMessage;
   }
   & MessagePositionProperties;
@@ -316,6 +318,8 @@ type StateProps = {
   isChatWithUser?: boolean;
   isAccountFrozen?: boolean;
   minFutureTime?: number;
+  isMediaNsfw?: boolean;
+  isReplyMediaNsfw?: boolean;
 };
 
 type MetaPosition =
@@ -437,11 +441,13 @@ const Message: FC<OwnProps & StateProps> = ({
   poll,
   maxTimestamp,
   lastPlaybackTimestamp,
-  onIntersectPinnedMessage,
+  isMediaNsfw,
+  isReplyMediaNsfw,
   paidMessageStars,
   isChatWithUser,
   isAccountFrozen,
   minFutureTime,
+  onIntersectPinnedMessage,
 }) => {
   const {
     toggleMessageSelection,
@@ -1119,6 +1125,7 @@ const Message: FC<OwnProps & StateProps> = ({
                 senderChat={replyMessageChat}
                 forwardSender={replyMessageForwardSender}
                 chatTranslations={chatTranslations}
+                isMediaNsfw={isReplyMediaNsfw}
                 requestedChatTranslationLanguage={requestedChatTranslationLanguage}
                 observeIntersectionForLoading={observeIntersectionForLoading}
                 observeIntersectionForPlaying={observeIntersectionForPlaying}
@@ -1145,6 +1152,7 @@ const Message: FC<OwnProps & StateProps> = ({
             shouldLoop={shouldLoopStickers}
             shouldPlayEffect={shouldPlayEffect}
             withEffect={withAnimatedEffects}
+            isMediaNsfw={isMediaNsfw}
             onStopEffect={hideEffect}
           />
         )}
@@ -1443,6 +1451,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isProtected={isProtected}
             asForwarded={asForwarded}
             theme={theme}
+            isMediaNsfw={isMediaNsfw}
             forcedWidth={contentWidth}
             onClick={handlePhotoMediaClick}
             onCancelUpload={handleCancelUpload}
@@ -1462,6 +1471,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isDownloading={isDownloading}
             isProtected={isProtected}
             asForwarded={asForwarded}
+            isMediaNsfw={isMediaNsfw}
             lastPlaybackTimestamp={lastPlaybackTimestamp}
             onClick={handleVideoMediaClick}
             onCancelUpload={handleCancelUpload}
@@ -1895,7 +1905,7 @@ export default memo(withGlobal<OwnProps>(
     const replyMessageChat = replyToPeerId ? selectChat(global, replyToPeerId) : undefined;
     const isReplyPrivate = !isSystemBotChat && !isAnonymousForwards && replyMessageChat
       && !isChatPublic(replyMessageChat)
-      && (replyMessageChat.isNotJoined || replyMessageChat.isRestricted);
+      && (replyMessageChat.isNotJoined || selectIsChatRestricted(global, replyMessageChat.id));
     const isReplyToTopicStart = replyMessage?.content.action?.type === 'topicCreate';
     const replyStory = storyReplyId && storyReplyPeerId
       ? selectPeerStory(global, storyReplyPeerId, storyReplyId)
@@ -1981,6 +1991,9 @@ export default memo(withGlobal<OwnProps>(
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     const minFutureTime = global.appConfig?.starsSuggestedPostFutureMin || STARS_SUGGESTED_POST_FUTURE_MIN;
+
+    const isMediaNsfw = selectIsMediaNsfw(global, message);
+    const isReplyMediaNsfw = replyMessage && selectIsMediaNsfw(global, replyMessage);
 
     return {
       theme: selectTheme(global),
@@ -2076,6 +2089,8 @@ export default memo(withGlobal<OwnProps>(
       paidMessageStars,
       isChatWithUser,
       isAccountFrozen,
+      isMediaNsfw,
+      isReplyMediaNsfw,
     };
   },
 )(Message));

@@ -10,6 +10,7 @@ import { pick } from '../../util/iteratees';
 import VerificationMonetizationModal from '../common/VerificationMonetizationModal.async';
 import WebAppsCloseConfirmationModal from '../main/WebAppsCloseConfirmationModal.async';
 import AboutAdsModal from './aboutAds/AboutAdsModal.async';
+import AgeVerificationModal from './ageVerification/AgeVerificationModal.async';
 import AttachBotInstallModal from './attachBotInstall/AttachBotInstallModal.async';
 import BoostModal from './boost/BoostModal.async';
 import ChatInviteModal from './chatInvite/ChatInviteModal.async';
@@ -89,7 +90,8 @@ type ModalKey = keyof Pick<TabState,
   'giftTransferModal' |
   'chatRefundModal' |
   'isFrozenAccountModalOpen' |
-  'deleteAccountModal'
+  'deleteAccountModal' |
+  'isAgeVerificationModalOpen'
 >;
 
 type StateProps = {
@@ -145,6 +147,7 @@ const MODALS: ModalRegistry = {
   chatRefundModal: ChatRefundModal,
   isFrozenAccountModalOpen: FrozenAccountModal,
   deleteAccountModal: DeleteAccountModal,
+  isAgeVerificationModalOpen: AgeVerificationModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

@@ -25,6 +25,7 @@ import {
 import { formatDateToString, formatTime } from '../../util/dates/dateFormat';
 import { getPeerIdDividend, isUserId } from '../../util/entities/ids';
 import { getServerTime } from '../../util/serverTime';
+import { selectIsChatRestricted } from '../selectors';
 import { getGlobal } from '..';
 import { isSystemBot } from './bots';
 import { getMainUsername } from './users';
@@ -155,7 +156,9 @@ export function getCanPostInChat(
     }
   }
 
-  if (chat.isRestricted || chat.isForbidden || chat.migratedTo
+  const global = getGlobal();
+  const isRestricted = selectIsChatRestricted(global, chat.id);
+  if (isRestricted || chat.isForbidden || chat.migratedTo
     || (chat.isNotJoined && !isChatMonoforum(chat) && !isMessageThread)
     || isSystemBot(chat.id) || isAnonymousForwardsChat(chat.id)) {
     return false;
@@ -380,7 +383,9 @@ export function getGroupStatus(lang: OldLangFn, chat: ApiChat) {
   const chatTypeString = lang(getChatTypeString(chat));
   const { membersCount } = chat;
 
-  if (chat.isRestricted) {
+  const global = getGlobal();
+  const isRestricted = selectIsChatRestricted(global, chat.id);
+  if (isRestricted) {
     return chatTypeString === 'Channel' ? 'channel is inaccessible' : 'group is inaccessible';
   }
 
