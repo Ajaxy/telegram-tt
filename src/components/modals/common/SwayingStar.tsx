@@ -54,7 +54,7 @@ function SwayingStar({
     >
       <div
         ref={starRef}
-        className={buildClassName(styles.star, `${styles.star}_${color}`)}
+        className={buildClassName(styles.star, styles[`star_${color}`])}
         role="img"
         aria-label="Telegram Stars"
       />
