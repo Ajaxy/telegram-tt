@@ -8,6 +8,7 @@ import VoiceAllowTalk from '../../../assets/tgs/calls/VoiceAllowTalk.tgs';
 import VoiceMini from '../../../assets/tgs/calls/VoiceMini.tgs';
 import VoiceMuted from '../../../assets/tgs/calls/VoiceMuted.tgs';
 import VoiceOutlined from '../../../assets/tgs/calls/VoiceOutlined.tgs';
+import Diamond from '../../../assets/tgs/Diamond.tgs';
 import Flame from '../../../assets/tgs/general/Flame.tgs';
 import Fragment from '../../../assets/tgs/general/Fragment.tgs';
 import Mention from '../../../assets/tgs/general/Mention.tgs';
@@ -68,4 +69,5 @@ export const LOCAL_TGS_URLS = {
   Report,
   SearchingDuck,
   BannedDuck,
+  Diamond,
 };

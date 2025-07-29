@@ -56,6 +56,7 @@
   color: var(--color-primary);
 }
 
+.hint,
 .tos {
   padding: 0.5rem 1rem;
   padding-top: 0;
@@ -71,6 +72,37 @@
   height: 6.25rem;
   min-height: 6.25rem;
   margin: 1rem;
+}
+
+.topUpButton,
+.tonBalanceContainer {
+  margin-bottom: 0.5rem;
+}
+
+.tonBalance {
+  unicode-bidi: plaintext;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.75rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.tonIconBalance {
+  color: var(--color-primary);
+}
+
+.tonInUsd {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.tonIconLogo {
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
+  font-size: 5rem;
+  color: var(--color-primary);
 }
 
 .logoBackground {
@@ -196,6 +228,7 @@
   right: 1.25rem;
 }
 
+.topUpButton,
 .starButton {
   grid-column: 1/-1;
   gap: 0.5rem;

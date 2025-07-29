@@ -657,6 +657,7 @@
 "MenuStickers" = "Stickers and Emoji";
 "MenuAnimations" = "Animations and Performance";
 "MenuStars" = "My Stars";
+"MenuTon" = "My TON";
 "MenuSendGift" = "Send a Gift";
 "MenuTelegramFaq" = "Telegram FAQ";
 "MenuPrivacyPolicy" = "Privacy Policy";
@@ -1880,6 +1881,10 @@
 "ActionGiftStarsTitle_one" = "{amount} Star";
 "ActionGiftStarsTitle_other" = "{amount} Stars";
 "ActionGiftStarsText" = "Use Stars to unlock content and services on Telegram.";
+"TonAmount" = "💎{amount}";
+"TonAmountText_one" = "{amount} TON";
+"TonAmountText_other" = "{amount} TON";
+"ActionGiftCostCrypto" = "{cryptoPrice} ({price})";
 "ActionBoostApplyYou_one" = "You boosted the group";
 "ActionBoostApplyYou_other" = "You boosted the group {count} times";
 "ActionBoostApply_one" = "{from} boosted the group";
@@ -2040,11 +2045,14 @@
 "TitleTime" = "Time";
 "TitleSuggestMessage" = "Suggest a Message";
 "TitleSuggestedChanges" = "Suggest Changes";
-"EnterPriceInStars" = "Enter Price In Stars";
-"SuggestMessagePriceDescription" = "Choose how many {currency} to pay to publish this post.";
+"SuggestMessageNoPrice" = "Free";
+"EnterPriceInStars" = "Enter Price in Stars";
+"EnterPriceInTon" = "Enter Price in TON";
+"SuggestMessagePriceDescriptionStars" = "Choose how many Stars to pay to publish this post.";
+"SuggestMessagePriceDescriptionTon" = "Choose how many TON to pay to publish this post.";
 "SuggestMessageDateTimeHint" = "Select the date and time you want the post to be published.";
 "SuggestMessageTimeDescription" = "{hint} The post will remain available for at least {duration} from this date.";
-"TitleAnytime" = "Anytime";
+"SuggestMessageAnytime" = "Anytime";
 "ButtonOfferAmount" = "Offer {amount}";
 "ButtonOfferFree" = "Offer Free";
 "ButtonUpdateTerms" = "Update Terms";
@@ -2070,6 +2078,7 @@
 "SuggestedPostRefundedByUser" = "{channel} will not receive {amount} because {user} requested a refund.";
 "SuggestedPostRefundedByChannel" = "{amount} was returned to {peer} because {channel} deleted the message.";
 "CurrencyStars" = "Stars";
+"CurrencyTon" = "TON";
 "DeclineReasonPlaceholder" = "Add a reason (optional)";
 "DeclinePostDialogQuestion" = "Do you want to decline this post from **{sender}**?";
 "SuggestedPostRejected" = "**{peer}** rejected this message.";
@@ -2127,3 +2136,8 @@
 "ToDoListErrorChooseTasks" = "Please enter at least one task.";
 "GiftInfoCollectibleBy" = "Collectible #{number} by **{owner}**";
 "PremiumPreviewTodo" = "Checklists";
+"MenuTon" = "My TON";
+"DescriptionAboutTon" = "Offer TON to submit post suggestions to channels on Telegram.";
+"ButtonTopUpViaFragment" = "Top-Up Via Fragment";
+"TonModalHint" = "You can top-up your TON using Fragment.";
+"TonGiftReceived" = "TON Top-Up";

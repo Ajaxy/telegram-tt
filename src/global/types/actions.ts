@@ -49,6 +49,7 @@ import type {
   ApiStickerSetInfo,
   ApiThemeParameters,
   ApiTodoItem,
+  ApiTypeCurrencyAmount,
   ApiTypePrepaidGiveaway,
   ApiUpdate,
   ApiUser,
@@ -1278,6 +1279,7 @@ export interface ActionPayloads {
   loadStarStatus: undefined;
   loadStarsTransactions: {
     type: StarsTransactionType;
+    isTon?: boolean;
   };
   loadStarsSubscriptions: undefined;
   changeStarsSubscription: {
@@ -1302,6 +1304,7 @@ export interface ActionPayloads {
       purpose?: string;
     };
     shouldIgnoreBalance?: boolean;
+    currency?: ApiTypeCurrencyAmount['currency'];
   } & WithTabId;
   closeStarsBalanceModal: WithTabId | undefined;
 
@@ -2483,6 +2486,7 @@ export interface ActionPayloads {
   };
 
   loadPremiumGifts: undefined;
+  loadTonGifts: undefined;
   loadStarGifts: undefined;
   updateResaleGiftsFilter: {
     filter: ResaleGiftsFilterOptions;

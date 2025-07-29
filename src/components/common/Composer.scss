@@ -156,9 +156,17 @@
       font-weight: var(--font-weight-semibold) !important;
       line-height: 1;
 
-      animation: hide-icon 0.4s forwards ease-out;
       &.visible {
         animation: grow-icon 0.4s ease-out;
+      }
+
+      &.hiding {
+        animation: hide-icon 0.4s forwards ease-out;
+      }
+
+      &.hidden {
+        pointer-events: none;
+        opacity: 0;
       }
 
       .icon {

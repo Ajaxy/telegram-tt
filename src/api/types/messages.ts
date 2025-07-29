@@ -9,7 +9,7 @@ import type { ApiMessageAction } from './messageActions';
 import type {
   ApiLabeledPrice,
 } from './payments';
-import type { ApiStarGiftUnique, ApiStarsAmount } from './stars';
+import type { ApiStarGiftUnique, ApiTypeCurrencyAmount } from './stars';
 import type {
   ApiMessageStoryData, ApiStory, ApiWebPageStickerData, ApiWebPageStoryData,
 } from './stories';
@@ -415,7 +415,7 @@ export interface ApiInputMessageReplyInfo {
 export interface ApiSuggestedPost {
   isAccepted?: true;
   isRejected?: true;
-  price?: ApiStarsAmount;
+  price?: ApiTypeCurrencyAmount;
   scheduleDate?: number;
 }
 
@@ -426,7 +426,7 @@ export interface ApiInputStoryReplyInfo {
 }
 
 export interface ApiInputSuggestedPostInfo {
-  price?: ApiStarsAmount;
+  price?: ApiTypeCurrencyAmount;
   scheduleDate?: number;
   isAccepted?: true;
   isRejected?: true;

@@ -576,6 +576,7 @@ export interface LangPair {
   'MenuStickers': undefined;
   'MenuAnimations': undefined;
   'MenuStars': undefined;
+  'MenuTon': undefined;
   'MenuSendGift': undefined;
   'MenuTelegramFaq': undefined;
   'MenuPrivacyPolicy': undefined;
@@ -1549,9 +1550,13 @@ export interface LangPair {
   'TitleTime': undefined;
   'TitleSuggestMessage': undefined;
   'TitleSuggestedChanges': undefined;
+  'SuggestMessageNoPrice': undefined;
   'EnterPriceInStars': undefined;
+  'EnterPriceInTon': undefined;
+  'SuggestMessagePriceDescriptionStars': undefined;
+  'SuggestMessagePriceDescriptionTon': undefined;
   'SuggestMessageDateTimeHint': undefined;
-  'TitleAnytime': undefined;
+  'SuggestMessageAnytime': undefined;
   'ButtonOfferFree': undefined;
   'ButtonUpdateTerms': undefined;
   'InputPlaceholderPrice': undefined;
@@ -1563,6 +1568,7 @@ export interface LangPair {
   'SuggestedPostRejectedNotification': undefined;
   'SuggestedPostAgreementReached': undefined;
   'CurrencyStars': undefined;
+  'CurrencyTon': undefined;
   'DeclineReasonPlaceholder': undefined;
   'SuggestedPostRejectedYou': undefined;
   'SuggestedPostRejectedWithReasonYou': undefined;
@@ -1590,6 +1596,10 @@ export interface LangPair {
   'ToDoListErrorChooseTitle': undefined;
   'ToDoListErrorChooseTasks': undefined;
   'PremiumPreviewTodo': undefined;
+  'DescriptionAboutTon': undefined;
+  'ButtonTopUpViaFragment': undefined;
+  'TonModalHint': undefined;
+  'TonGiftReceived': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -2425,6 +2435,13 @@ export interface LangPairWithVariables<V = LangVariable> {
     'from': V;
     'amount': V;
   };
+  'TonAmount': {
+    'amount': V;
+  };
+  'ActionGiftCostCrypto': {
+    'cryptoPrice': V;
+    'price': V;
+  };
   'ActionPaymentRefunded': {
     'peer': V;
     'amount': V;
@@ -2583,9 +2600,6 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ActionSuggestedChangesIncoming': {
     'user': V;
     'changes': V;
-  };
-  'SuggestMessagePriceDescription': {
-    'currency': V;
   };
   'SuggestMessageTimeDescription': {
     'hint': V;
@@ -3033,6 +3047,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'months': V;
   };
   'ActionGiftStarsTitle': {
+    'amount': V;
+  };
+  'TonAmountText': {
     'amount': V;
   };
   'ActionBoostApplyYou': {

@@ -318,10 +318,12 @@ body:not(.is-ios) {
 }
 
 // Increase specificity to override the default icon style
+.ton-amount-icon.ton-amount-icon,
 .star-amount-icon.star-amount-icon {
   margin-inline-start: 0.375em; // Prevent sticking to the text without using `white-space: pre`
   margin-inline-end: 0.2em; // Prevent sticking to the text without using `white-space: pre`
   line-height: inherit; // Vertical centring
+  vertical-align: text-bottom; // As regular text
 }
 
 .shared-canvas-container {

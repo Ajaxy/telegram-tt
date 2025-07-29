@@ -214,6 +214,7 @@ const Main = ({
     loadAvailableReactions,
     loadStickerSets,
     loadPremiumGifts,
+    loadTonGifts,
     loadStarGifts,
     loadDefaultTopicIcons,
     loadAddedStickers,
@@ -347,6 +348,7 @@ const Main = ({
       loadUserCollectibleStatuses();
       loadGenericEmojiEffects();
       loadPremiumGifts();
+      loadTonGifts();
       loadStarGifts();
       loadAvailableEffects();
       loadBirthdayNumbersStickers();

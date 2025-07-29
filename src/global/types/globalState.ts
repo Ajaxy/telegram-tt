@@ -37,6 +37,7 @@ import type {
   ApiSticker,
   ApiStickerSet,
   ApiTimezone,
+  ApiTonAmount,
   ApiTranscription,
   ApiUpdateAuthorizationStateType,
   ApiUpdateConnectionStateType,
@@ -367,6 +368,7 @@ export type GlobalState = {
   defaultTopicIconsId?: string;
   defaultStatusIconsId?: string;
   premiumGifts?: ApiStickerSet;
+  tonGifts?: ApiStickerSet;
   emojiKeywords: Record<string, EmojiKeywords | undefined>;
 
   collectibleEmojiStatuses?: {
@@ -451,6 +453,10 @@ export type GlobalState = {
     balance: ApiStarsAmount;
     history: StarsTransactionHistory;
     subscriptions?: StarsSubscriptions;
+  };
+  ton?: {
+    balance: ApiTonAmount;
+    history: StarsTransactionHistory;
   };
 };
 

@@ -1,3 +1,4 @@
+import type { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../config';
 import type { ApiWebDocument } from './bots';
 import type { ApiChat } from './chats';
 import type { ApiFormattedText, ApiSticker, BoughtPaidMedia } from './messages';
@@ -153,9 +154,17 @@ export type ApiRequestInputSavedStarGiftChat = {
 };
 export type ApiRequestInputSavedStarGift = ApiRequestInputSavedStarGiftUser | ApiRequestInputSavedStarGiftChat;
 
+export type ApiTypeCurrencyAmount = ApiStarsAmount | ApiTonAmount;
+
 export interface ApiStarsAmount {
+  currency: typeof STARS_CURRENCY_CODE;
   amount: number;
   nanos: number;
+}
+
+export interface ApiTonAmount {
+  currency: typeof TON_CURRENCY_CODE;
+  amount: number;
 }
 
 export interface ApiStarsTransactionPeerUnsupported {
@@ -205,7 +214,7 @@ export interface ApiStarsTransaction {
   id?: string;
   peer: ApiStarsTransactionPeer;
   messageId?: number;
-  stars: ApiStarsAmount;
+  amount: ApiTypeCurrencyAmount;
   isRefund?: true;
   isGift?: true;
   starGift?: ApiStarGift;

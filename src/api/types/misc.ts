@@ -259,6 +259,10 @@ export interface ApiAppConfig {
   starsSuggestedPostFutureMax?: number;
   starsSuggestedPostFutureMin?: number;
   tonSuggestedPostCommissionPermille?: number;
+  tonSuggestedPostAmountMax?: number;
+  tonSuggestedPostAmountMin?: number;
+  tonUsdRate?: number;
+  tonTopupUrl?: string;
   pollMaxAnswers?: number;
   todoItemsMax?: number;
   todoTitleLengthMax?: number;

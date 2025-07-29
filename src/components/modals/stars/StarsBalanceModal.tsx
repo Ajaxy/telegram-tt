@@ -8,11 +8,19 @@ import type { ApiStarTopupOption } from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
 import type { RegularLangKey } from '../../../types/language';
 
-import { PAID_MESSAGES_PURPOSE } from '../../../config';
+import {
+  PAID_MESSAGES_PURPOSE,
+  STARS_CURRENCY_CODE,
+  TON_CURRENCY_CODE,
+  TON_TOPUP_URL_DEFAULT,
+  TON_USD_RATE_DEFAULT,
+} from '../../../config';
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { convertCurrencyFromBaseUnit, convertTonToUsd, formatCurrencyAsString } from '../../../util/formatCurrency';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -20,6 +28,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
@@ -52,18 +61,25 @@ export type OwnProps = {
 
 type StateProps = {
   starsBalanceState?: GlobalState['stars'];
+  tonBalanceState?: GlobalState['ton'];
   canBuyPremium?: boolean;
   shouldForceHeight?: boolean;
+  tonUsdRate?: number;
+  tonTopupUrl: string;
 };
 
 const StarsBalanceModal = ({
-  modal, starsBalanceState, canBuyPremium, shouldForceHeight,
+  modal, starsBalanceState, tonBalanceState, canBuyPremium, shouldForceHeight, tonUsdRate, tonTopupUrl,
 }: OwnProps & StateProps) => {
   const {
     closeStarsBalanceModal, loadStarsTransactions, loadStarsSubscriptions, openStarsGiftingPickerModal, openInvoice,
+    openUrl,
   } = getActions();
 
-  const { balance, history, subscriptions } = starsBalanceState || {};
+  const currency = modal?.currency || STARS_CURRENCY_CODE;
+  const currentState = currency === TON_CURRENCY_CODE ? tonBalanceState : starsBalanceState;
+  const { balance, history } = currentState || {};
+  const { subscriptions } = starsBalanceState || {};
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -72,7 +88,7 @@ const StarsBalanceModal = ({
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [areBuyOptionsShown, showBuyOptions, hideBuyOptions] = useFlag();
 
-  const isOpen = Boolean(modal && starsBalanceState);
+  const isOpen = Boolean(modal && (starsBalanceState || tonBalanceState));
 
   const {
     originStarsPayment, originReaction, originGift, topup,
@@ -159,6 +175,90 @@ const StarsBalanceModal = ({
     ];
   }, [isOpen, oldLang]);
 
+  const renderStarsSection = () => {
+    return (
+      <>
+        <img className={styles.logo} src={StarLogo} alt="" draggable={false} />
+        <img className={styles.logoBackground} src={StarsBackground} alt="" draggable={false} />
+        <h2 className={styles.headerText}>
+          {starsNeeded ? oldLang('StarsNeededTitle', ongoingTransactionAmount) : oldLang('TelegramStars')}
+        </h2>
+        <div className={styles.description}>
+          {renderText(
+            starsNeededText || oldLang('TelegramStarsInfo'),
+            ['simple_markdown', 'emoji'],
+          )}
+        </div>
+        {canBuyPremium && !areBuyOptionsShown && (
+          <Button
+            className={styles.starButton}
+            onClick={showBuyOptions}
+          >
+            {oldLang('Star.List.BuyMoreStars')}
+          </Button>
+        )}
+        {canBuyPremium && !areBuyOptionsShown && shouldSuggestGifting && (
+          <Button
+            isText
+            noForcedUpperCase
+            className={styles.starButton}
+            onClick={openStarsGiftingPickerModalHandler}
+          >
+            {oldLang('TelegramStarsGift')}
+          </Button>
+        )}
+        {areBuyOptionsShown && starsBalanceState?.topupOptions && (
+          <StarTopupOptionList
+            starsNeeded={starsNeeded}
+            options={starsBalanceState.topupOptions}
+            onClick={handleBuyStars}
+          />
+        )}
+      </>
+    );
+  };
+
+  const renderTonSection = () => {
+    const tonAmount = convertCurrencyFromBaseUnit(balance?.amount || 0, TON_CURRENCY_CODE);
+    return (
+      <>
+        <AnimatedIconWithPreview
+          size={160}
+          tgsUrl={LOCAL_TGS_URLS.Diamond}
+          nonInteractive
+          noLoop={false}
+        />
+        <h2 className={styles.headerText}>
+          {lang('CurrencyTon')}
+        </h2>
+        <div className={styles.description}>
+          {lang('DescriptionAboutTon')}
+        </div>
+        <div className={styles.tonBalanceContainer}>
+          <div className={styles.tonBalance}>
+            <Icon name="toncoin" className={styles.tonIconBalance} />
+            {tonAmount}
+          </div>
+          {Boolean(tonUsdRate) && (
+            <span className={styles.tonInUsd}>
+              {`≈ ${formatCurrencyAsString(
+                convertTonToUsd(balance?.amount || 0, tonUsdRate),
+                'USD',
+                lang.code,
+              )}`}
+            </span>
+          )}
+        </div>
+        <Button
+          className={styles.topUpButton}
+          onClick={handleTonTopUp}
+        >
+          {lang('ButtonTopUpViaFragment')}
+        </Button>
+      </>
+    );
+  };
+
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop } = e.currentTarget;
 
@@ -168,6 +268,7 @@ const StarsBalanceModal = ({
   const handleLoadMoreTransactions = useLastCallback(() => {
     loadStarsTransactions({
       type: TRANSACTION_TYPES[selectedTabIndex],
+      isTon: currency === TON_CURRENCY_CODE,
     });
   });
 
@@ -188,6 +289,10 @@ const StarsBalanceModal = ({
     });
   });
 
+  const handleTonTopUp = useLastCallback(() => {
+    openUrl({ url: tonTopupUrl });
+  });
+
   return (
     <Modal
       className={buildClassName(styles.root, !shouldForceHeight && !areBuyOptionsShown && styles.minimal)}
@@ -206,53 +311,23 @@ const StarsBalanceModal = ({
         >
           <Icon name="close" />
         </Button>
-        <BalanceBlock balance={balance} className={styles.modalBalance} />
+        {currency !== TON_CURRENCY_CODE && <BalanceBlock balance={balance} className={styles.modalBalance} />}
         <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
           <h2 className={styles.starHeaderText}>
             {oldLang('TelegramStars')}
           </h2>
         </div>
         <div className={styles.section}>
-          <img className={styles.logo} src={StarLogo} alt="" draggable={false} />
-          <img className={styles.logoBackground} src={StarsBackground} alt="" draggable={false} />
-          <h2 className={styles.headerText}>
-            {starsNeeded ? oldLang('StarsNeededTitle', ongoingTransactionAmount) : oldLang('TelegramStars')}
-          </h2>
-          <div className={styles.description}>
-            {renderText(
-              starsNeededText || oldLang('TelegramStarsInfo'),
-              ['simple_markdown', 'emoji'],
-            )}
-          </div>
-          {canBuyPremium && !areBuyOptionsShown && (
-            <Button
-              className={styles.starButton}
-              onClick={showBuyOptions}
-            >
-              {oldLang('Star.List.BuyMoreStars')}
-            </Button>
-          )}
-          {canBuyPremium && !areBuyOptionsShown && shouldSuggestGifting && (
-            <Button
-              isText
-              noForcedUpperCase
-              className={styles.starButton}
-              onClick={openStarsGiftingPickerModalHandler}
-            >
-              {oldLang('TelegramStarsGift')}
-            </Button>
-          )}
-          {areBuyOptionsShown && starsBalanceState?.topupOptions && (
-            <StarTopupOptionList
-              starsNeeded={starsNeeded}
-              options={starsBalanceState.topupOptions}
-              onClick={handleBuyStars}
-            />
-          )}
+          {currency === TON_CURRENCY_CODE ? renderTonSection() : renderStarsSection()}
         </div>
         {areBuyOptionsShown && (
           <div className={styles.tos}>
             {tosText}
+          </div>
+        )}
+        {currency === TON_CURRENCY_CODE && (
+          <div className={styles.hint}>
+            {lang('TonModalHint')}
           </div>
         )}
         {shouldShowItems && Boolean(subscriptions?.list.length) && (
@@ -325,13 +400,18 @@ const StarsBalanceModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    const shouldForceHeight = Boolean(global.stars?.history?.all?.transactions.length);
+  (global, { modal }): StateProps => {
+    const shouldForceHeight = modal?.currency === TON_CURRENCY_CODE
+      ? Boolean(global.ton?.history?.all?.transactions.length)
+      : Boolean(global.stars?.history?.all?.transactions.length);
 
     return {
       shouldForceHeight,
       starsBalanceState: global.stars,
+      tonBalanceState: global.ton,
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
+      tonUsdRate: global.appConfig?.tonUsdRate || TON_USD_RATE_DEFAULT,
+      tonTopupUrl: global.appConfig?.tonTopupUrl || TON_TOPUP_URL_DEFAULT,
     };
   },
 )(StarsBalanceModal));

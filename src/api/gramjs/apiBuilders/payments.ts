@@ -20,15 +20,16 @@ import type {
   ApiPrepaidStarsGiveaway,
   ApiReceipt,
   ApiStarGiveawayOption,
-  ApiStarsAmount,
   ApiStarsGiveawayWinnerOption,
   ApiStarsSubscription,
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
   ApiStarTopupOption,
+  ApiTypeCurrencyAmount,
   BoughtPaidMedia,
 } from '../../types';
 
+import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
 import { addWebDocumentToLocalDb } from '../helpers/localDb';
 import { buildApiStarsSubscriptionPricing } from './chats';
 import { buildApiMessageEntity } from './common';
@@ -461,26 +462,23 @@ export function buildApiStarsGiftOptions(option: GramJs.StarsGiftOption): ApiSta
   };
 }
 
-export function buildApiStarsAmount(amount: GramJs.TypeStarsAmount): ApiStarsAmount | undefined {
+export function buildApiCurrencyAmount(amount: GramJs.TypeStarsAmount): ApiTypeCurrencyAmount | undefined {
   if (amount instanceof GramJs.StarsAmount) {
     return {
+      currency: STARS_CURRENCY_CODE,
       amount: amount.amount.toJSNumber(),
       nanos: amount.nanos,
     };
   }
 
   if (amount instanceof GramJs.StarsTonAmount) {
-    return undefined;
+    return {
+      currency: TON_CURRENCY_CODE,
+      amount: amount.amount.toJSNumber(),
+    };
   }
 
   return undefined;
-}
-
-export function buildInputStarsAmount(amount: ApiStarsAmount): GramJs.TypeStarsAmount {
-  return new GramJs.StarsAmount({
-    amount: bigInt(amount.amount),
-    nanos: amount.nanos,
-  });
 }
 
 export function buildApiStarsGiveawayWinnersOption(
@@ -563,7 +561,7 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
 
   const starRefCommision = starrefCommissionPermille ? starrefCommissionPermille / 10 : undefined;
 
-  const starsAmount = buildApiStarsAmount(amount);
+  const starsAmount = buildApiCurrencyAmount(amount);
   if (!starsAmount) {
     return undefined;
   }
@@ -572,7 +570,7 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     id,
     date,
     peer: buildApiStarsTransactionPeer(peer),
-    stars: starsAmount,
+    amount: starsAmount,
     title,
     description,
     photo: photo && buildApiWebDocument(photo),

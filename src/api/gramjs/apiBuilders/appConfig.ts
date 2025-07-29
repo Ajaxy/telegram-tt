@@ -12,6 +12,10 @@ import {
   TODO_ITEM_LENGTH_LIMIT,
   TODO_ITEMS_LIMIT,
   TODO_TITLE_LENGTH_LIMIT,
+  TON_SUGGESTED_POST_AMOUNT_MAX,
+  TON_SUGGESTED_POST_AMOUNT_MIN,
+  TON_TOPUP_URL_DEFAULT,
+  TON_USD_RATE_DEFAULT,
 } from '../../../config';
 import localDb from '../localDb';
 import { buildJson } from './misc';
@@ -108,6 +112,10 @@ export interface GramJsAppConfig extends LimitsConfig {
   stars_suggested_post_future_max?: number;
   stars_suggested_post_future_min?: number;
   ton_suggested_post_commission_permille?: number;
+  ton_suggested_post_amount_max?: number;
+  ton_suggested_post_amount_min?: number;
+  ton_usd_rate?: number;
+  ton_topup_url?: string;
   poll_answers_max?: number;
   todo_items_max?: number;
   todo_title_length_max?: number;
@@ -219,6 +227,10 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     starsSuggestedPostFutureMax: appConfig.stars_suggested_post_future_max,
     starsSuggestedPostFutureMin: appConfig.stars_suggested_post_future_min,
     tonSuggestedPostCommissionPermille: appConfig.ton_suggested_post_commission_permille,
+    tonSuggestedPostAmountMax: appConfig.ton_suggested_post_amount_max ?? TON_SUGGESTED_POST_AMOUNT_MAX,
+    tonSuggestedPostAmountMin: appConfig.ton_suggested_post_amount_min ?? TON_SUGGESTED_POST_AMOUNT_MIN,
+    tonUsdRate: appConfig.ton_usd_rate ?? TON_USD_RATE_DEFAULT,
+    tonTopupUrl: appConfig.ton_topup_url ?? TON_TOPUP_URL_DEFAULT,
     pollMaxAnswers: appConfig.poll_answers_max,
     todoItemsMax: appConfig.todo_items_max ?? TODO_ITEMS_LIMIT,
     todoTitleLengthMax: appConfig.todo_title_length_max ?? TODO_TITLE_LENGTH_LIMIT,

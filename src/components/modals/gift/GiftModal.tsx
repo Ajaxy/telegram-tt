@@ -124,7 +124,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   const allGifts = renderingModal?.gifts;
   const filteredGifts = useMemo(() => {
     return allGifts?.sort((prevGift, gift) => prevGift.months - gift.months)
-      .filter((gift) => gift.users === 1 && gift.currency !== 'XTR');
+      .filter((gift) => gift.users === 1 && gift.currency !== STARS_CURRENCY_CODE);
   }, [allGifts]);
 
   const giftsByStars = useMemo(() => {

@@ -4,6 +4,7 @@ import { getActions, withGlobal } from '../../../../global';
 import type { ApiMessage, ApiPeer } from '../../../../api/types';
 import type { ApiMessageActionSuggestedPostApproval } from '../../../../api/types/messageActions';
 
+import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../../config';
 import { getPeerFullTitle } from '../../../../global/helpers/peers';
 import { selectChatMessage, selectSender } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
@@ -25,6 +26,7 @@ type OwnProps = {
 type StateProps = {
   sender?: ApiPeer;
   replyMessageSender?: ApiPeer;
+  replyMessage?: ApiMessage;
 };
 
 const SuggestedPostBalanceTooLow = ({
@@ -32,6 +34,7 @@ const SuggestedPostBalanceTooLow = ({
   message,
   sender,
   replyMessageSender,
+  replyMessage,
 }: OwnProps & StateProps) => {
   const { openStarsBalanceModal } = getActions();
   const lang = useLang();
@@ -46,6 +49,10 @@ const SuggestedPostBalanceTooLow = ({
   const peerTitle = targetPeer && getPeerFullTitle(lang, targetPeer);
   const peerLink = renderPeerLink(targetPeer?.id, peerTitle || lang('ActionFallbackUser'));
 
+  const currency = replyMessage?.suggestedPostInfo?.price?.currency || STARS_CURRENCY_CODE;
+  const currencyName = currency === TON_CURRENCY_CODE ? lang('CurrencyTon') : lang('CurrencyStars');
+  const buyButtonText = currency === TON_CURRENCY_CODE ? lang('ButtonTopUpViaFragment') : lang('ButtonBuyStars');
+
   return (
     <div
       className={buildClassName(styles.contentBox, styles.suggestedPostBalanceTooLowBox)}
@@ -54,14 +61,14 @@ const SuggestedPostBalanceTooLow = ({
       <div className={styles.suggestedPostBalanceTooLowTitle}>
         {lang('SuggestedPostBalanceTooLow', {
           peer: peerLink,
-          currency: lang('CurrencyStars'),
+          currency: currencyName,
         }, { withNodes: true, withMarkdown: true })}
       </div>
 
       {!message.isOutgoing && (
         <div className={styles.actionButton} onClick={handleGetMoreStars}>
           <Sparkles preset="button" />
-          {lang('ButtonBuyStars')}
+          {buyButtonText}
         </div>
       )}
     </div>
@@ -81,6 +88,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       sender,
       replyMessageSender,
+      replyMessage,
     };
   },
 )(SuggestedPostBalanceTooLow));

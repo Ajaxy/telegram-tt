@@ -45,6 +45,7 @@ import type {
   ApiStarsTransaction,
   ApiStarTopupOption,
   ApiSticker,
+  ApiTypeCurrencyAmount,
   ApiTypePrepaidGiveaway,
   ApiTypeStoryView,
   ApiUser,
@@ -795,6 +796,7 @@ export type TabState = {
       balanceNeeded: number;
       purpose?: string;
     };
+    currency?: ApiTypeCurrencyAmount['currency'];
   };
 
   giftInfoModal?: {
