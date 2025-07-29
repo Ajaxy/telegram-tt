@@ -72,7 +72,7 @@ const StarsBalanceModal = ({
   const currency = modal?.currency || STARS_CURRENCY_CODE;
   const currentState = currency === TON_CURRENCY_CODE ? tonBalanceState : starsBalanceState;
   const { balance, history } = currentState || {};
-  const { subscriptions } = starsBalanceState || {};
+  const { subscriptions } = (currency === TON_CURRENCY_CODE && starsBalanceState) || {};
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -277,7 +277,7 @@ const StarsBalanceModal = ({
   });
 
   const handleTonTopUp = useLastCallback(() => {
-    openUrl({ url: tonTopupUrl });
+    openUrl({ url: tonTopupUrl, shouldSkipModal: true });
   });
 
   return (
