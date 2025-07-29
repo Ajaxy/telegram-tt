@@ -10,7 +10,7 @@ import { isUsernameValid } from './entities/username';
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
   'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
   'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message' | 'premium_offer' | 'premium_multigift' | 'stars_topup'
-  | 'nft' | 'stars';
+  | 'nft' | 'stars' | 'ton';
 
 interface PublicMessageLink {
   type: 'publicMessageLink';
@@ -107,6 +107,10 @@ interface StarsModalLink {
   type: 'stars';
 }
 
+interface TonModalLink {
+  type: 'ton';
+}
+
 interface SettingsScreenLink {
   type: 'settings';
   screen?: 'devices' | 'folders' | 'language' | 'privacy' | 'editProfile' | 'theme';
@@ -127,6 +131,7 @@ type DeepLink =
   ChatBoostLink |
   GiftUniqueLink |
   StarsModalLink |
+  TonModalLink |
   SettingsScreenLink;
 
 type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string | undefined>;
@@ -260,6 +265,8 @@ function parseTgLink(url: URL) {
       return buildGiftUniqueLink({ slug: queryParams.slug });
     case 'stars':
       return { type: 'stars' } satisfies StarsModalLink;
+    case 'ton':
+      return { type: 'ton' } satisfies TonModalLink;
     case 'settings':
       return buildSettingsScreenLink({ screen: pathParams.length === 1 ? pathParams[0] : undefined });
     default:
@@ -469,6 +476,8 @@ function getTgDeepLinkType(
       return 'giftUniqueLink';
     case 'stars':
       return 'stars';
+    case 'ton':
+      return 'ton';
     case 'settings': {
       return 'settings';
     }
