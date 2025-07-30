@@ -42,6 +42,15 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
     // ✅ GOOD - Full type checking
     { field: condition ? value : undefined }
     ```
+  - **IMPORTANT: Use string templates for inline styles** - Always use template literals for style prop:
+    ```typescript
+    // ✅ CORRECT
+    style={`transform: translateX(${value}%)`}
+    
+    // ❌ WRONG
+    style={{ transform: `translateX(${value}%)` }}
+    style={{ '--custom-prop': value } as React.CSSProperties}
+    ```
 
 - **Localization & Text Rules:**
   - **ALWAYS** use `lang()` for all text content - never hardcode strings.

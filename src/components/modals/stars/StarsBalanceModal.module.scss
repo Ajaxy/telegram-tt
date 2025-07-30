@@ -10,7 +10,7 @@
 
 .root :global(.modal-dialog) {
   max-width: 26.25rem;
-  height: min(45rem, 90vh);
+  height: min(var(--modal-height, 45rem), 90vh);
 }
 
 .minimal :global(.modal-dialog) {
@@ -34,6 +34,11 @@
 }
 
 .section {
+  @include mixins.side-panel-section;
+}
+
+.lastSection,
+.section {
   position: relative;
 
   display: flex;
@@ -43,7 +48,6 @@
   padding: 0.5rem;
 
   @include mixins.adapt-padding-to-scrollbar(0.5rem);
-  @include mixins.side-panel-section;
 }
 
 .sectionTitle {

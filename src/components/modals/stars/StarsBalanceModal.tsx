@@ -133,6 +133,20 @@ const StarsBalanceModal = ({
   const shouldShowItems = Boolean(history?.all?.transactions.length && !shouldOpenOnBuy);
   const shouldSuggestGifting = !shouldOpenOnBuy;
 
+  const modalHeight = useMemo(() => {
+    const transactionCount = history?.all?.transactions.length || 0;
+    if (transactionCount == 1) {
+      return '35.5rem';
+    }
+    if (transactionCount == 2) {
+      return '39.25rem';
+    }
+    if (transactionCount == 3) {
+      return '43rem';
+    }
+    return '45rem';
+  }, [history?.all?.transactions.length]);
+
   const transactionTabs: TabWithProperties[] = useMemo(() => {
     return TRANSACTION_TABS_KEYS.map((key) => ({
       title: lang(key),
@@ -168,7 +182,7 @@ const StarsBalanceModal = ({
     ];
   }, [isOpen, oldLang]);
 
-  const renderStarsSection = () => {
+  const renderStarsHeaderSection = () => {
     return (
       <>
         <ParticlesHeader
@@ -210,7 +224,7 @@ const StarsBalanceModal = ({
     );
   };
 
-  const renderTonSection = () => {
+  const renderTonHeaderSection = () => {
     const tonAmount = convertCurrencyFromBaseUnit(balance?.amount || 0, TON_CURRENCY_CODE);
     return (
       <>
@@ -285,6 +299,7 @@ const StarsBalanceModal = ({
       className={buildClassName(styles.root, !shouldForceHeight && !areBuyOptionsShown && styles.minimal)}
       isOpen={isOpen}
       onClose={closeStarsBalanceModal}
+      dialogStyle={`--modal-height: ${modalHeight}`}
     >
       <div className={buildClassName(styles.main, 'custom-scroll')} onScroll={handleScroll}>
         <Button
@@ -305,7 +320,7 @@ const StarsBalanceModal = ({
           </h2>
         </div>
         <div className={styles.section}>
-          {currency === TON_CURRENCY_CODE ? renderTonSection() : renderStarsSection()}
+          {currency === TON_CURRENCY_CODE ? renderTonHeaderSection() : renderStarsHeaderSection()}
         </div>
         {areBuyOptionsShown && (
           <div className={styles.tos}>
@@ -345,7 +360,7 @@ const StarsBalanceModal = ({
         )}
         {shouldShowItems && (
           <div className={styles.container}>
-            <div className={styles.section}>
+            <div className={styles.lastSection}>
               <Transition
                 name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
                 activeKey={selectedTabIndex}

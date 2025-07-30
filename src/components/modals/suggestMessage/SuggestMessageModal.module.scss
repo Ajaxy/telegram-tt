@@ -1,11 +1,15 @@
 .content {
   display: flex;
   flex-direction: column;
+
   max-height: min(92vh, 32rem) !important;
+  padding-bottom: 1.125rem !important;
+  padding-inline: 1.125rem !important;
 }
 
 .modalHeader {
   padding-top: 0.25rem !important;
+  padding-inline: 0.25rem !important;
 }
 
 .section,
@@ -26,7 +30,7 @@
 }
 
 .input {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem !important;
 }
 
 .description {

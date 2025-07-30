@@ -242,7 +242,7 @@ const SuggestMessageModal = ({
         </div>
 
         <div className={styles.section}>
-          <div className={buildClassName('input-group', 'touched')}>
+          <div className={buildClassName(styles.input, 'input-group', 'touched')}>
             <input
               type="text"
               className={buildClassName('form-control', isCalendarOpened && 'focus')}
