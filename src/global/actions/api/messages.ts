@@ -684,10 +684,11 @@ addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
 
   const currentReplyInfo = currentDraft.replyInfo;
 
-  const newDraft: ApiDraft | undefined = (shouldKeepReply || shouldKeepSuggestedPost) ? {
-    replyInfo: shouldKeepReply ? currentReplyInfo : undefined,
-    suggestedPostInfo: shouldKeepSuggestedPost ? currentDraft.suggestedPostInfo : undefined,
-  } : undefined;
+  const newDraft: ApiDraft | undefined = (shouldKeepReply && currentReplyInfo)
+    || (shouldKeepSuggestedPost && currentDraft.suggestedPostInfo) ? {
+      replyInfo: shouldKeepReply ? currentReplyInfo : undefined,
+      suggestedPostInfo: shouldKeepSuggestedPost ? currentDraft.suggestedPostInfo : undefined,
+    } : undefined;
 
   saveDraft({
     global, chatId, threadId, draft: newDraft, isLocalOnly,
