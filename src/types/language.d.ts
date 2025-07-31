@@ -320,6 +320,8 @@ export interface LangPair {
   'BlockedUsersBlockUser': undefined;
   'FilterChatTypes': undefined;
   'FilterChats': undefined;
+  'FilterColorTitle': undefined;
+  'FilterColorHint': undefined;
   'FilterIncludeInfo': undefined;
   'FilterNameHint': undefined;
   'FilterInclude': undefined;
