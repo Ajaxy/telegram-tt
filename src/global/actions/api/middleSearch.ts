@@ -1,3 +1,4 @@
+import type { ApiMessage } from '../../../api/types';
 import type {
   ChatMediaSearchParams, ChatMediaSearchSegment, LoadingState, SharedMediaType, ThreadId,
 } from '../../../types';
@@ -12,6 +13,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, isInsideSortedArrayRange } from '../../../util/iteratees';
 import { getSearchResultKey } from '../../../util/keys/searchResultKey';
 import { callApi } from '../../../api/gramjs';
+import { searchMessages } from '../../../api/search';
 import { getChatMediaMessageIds, getIsSavedDialog, isSameReaction } from '../../helpers';
 import {
   addActionHandler, getGlobal, setGlobal,
@@ -126,9 +128,46 @@ addActionHandler('performMiddleSearch', async (global, actions, payload): Promis
     return;
   }
 
+  const msgs = await searchMessages({
+    chatId: realChatId.startsWith('-100') ? realChatId.split('-100')[1] : realChatId,
+    content: query!,
+  }) as {
+    content: string;
+    chatId: string;
+    platformMessageId: string;
+    fromId: string;
+    fromName: string;
+    platformTimestamp: number;
+  }[];
+
+  console.log('>>> ', msgs);
+
+  const insertMsgs = []
+  for (const msg of msgs) {
+    const messageToInsert: ApiMessage = {
+      chatId: '-100' + msg.chatId,
+      id: Number(msg.platformMessageId),
+      senderId: msg.fromId,
+      content: {
+        text: { text: msg.content },
+      },
+      date: msg.platformTimestamp,
+      isOutgoing: msg.fromId === currentUserId,
+    };
+
+    console.log('>>>> ', messageToInsert);
+
+    insertMsgs.push(messageToInsert);
+  }
+
+  result.messages = [...insertMsgs, ...result.messages];
+  result.totalCount += insertMsgs.length;
+
   const {
     userStatusesById, messages, totalCount, nextOffsetId, nextOffsetRate, nextOffsetPeerId,
   } = result;
+
+  console.log('>>>> ', result);
 
   const newFoundIds = messages.map(getSearchResultKey);
 

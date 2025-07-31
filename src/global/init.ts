@@ -11,6 +11,7 @@ import { isLocalMessageId } from '../util/keys/messageKey';
 import { Bundles, loadBundle } from '../util/moduleLoader';
 import { parseLocationHash } from '../util/routing';
 import { updatePeerColors } from '../util/theme';
+import { initSearchWorker } from '../api/search';
 import { initializeChatMediaSearchResults } from './reducers/middleSearch';
 import { updateTabState } from './reducers/tabs';
 import { initSharedState } from './shared/sharedStateConnector';
@@ -23,6 +24,8 @@ import { replaceTabThreadParam, replaceThreadParam } from './reducers';
 import { selectTabState, selectThreadParam } from './selectors';
 
 initCache();
+
+initSearchWorker();
 
 addActionHandler('initShared', async (prevGlobal, actions, payload): Promise<void> => {
   const { force } = payload || {};
