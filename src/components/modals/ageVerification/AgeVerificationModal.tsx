@@ -4,6 +4,8 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { TabState } from '../../../global/types';
 
+import { VERIFY_AGE_MIN_DEFAULT } from '../../../config';
+
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
@@ -19,18 +21,17 @@ export type OwnProps = {
 
 type StateProps = {
   verifyAgeBotUsername?: string;
+  verifyAgeMin: number;
 };
-
-const AGE_REQUIRED = 18;
 
 const AgeVerificationModal: FC<OwnProps & StateProps> = ({
   modal,
   verifyAgeBotUsername,
+  verifyAgeMin,
 }) => {
   const { closeAgeVerificationModal, openChatByUsername } = getActions();
   const lang = useLang();
   const isOpen = Boolean(modal);
-  const ageRequired = AGE_REQUIRED;
 
   const handleVerifyAge = useLastCallback(() => {
     if (verifyAgeBotUsername) {
@@ -62,10 +63,10 @@ const AgeVerificationModal: FC<OwnProps & StateProps> = ({
           {lang('TitleAgeVerificationModal')}
         </h2>
         <p className={styles.mainText}>
-          {lang('TextAgeVerificationModal', { count: ageRequired }, {
+          {lang('TextAgeVerificationModal', { count: verifyAgeMin }, {
             withMarkdown: true,
             withNodes: true,
-            pluralValue: ageRequired,
+            pluralValue: verifyAgeMin,
           })}
         </p>
         <p className={styles.description}>
@@ -86,8 +87,10 @@ const AgeVerificationModal: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal((global): StateProps => {
   const appConfig = global.appConfig;
   const verifyAgeBotUsername = appConfig?.verifyAgeBotUsername;
+  const verifyAgeMin = appConfig?.verifyAgeMin || VERIFY_AGE_MIN_DEFAULT;
 
   return {
     verifyAgeBotUsername,
+    verifyAgeMin,
   };
 })(AgeVerificationModal));

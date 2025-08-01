@@ -1601,9 +1601,7 @@ export interface LangPair {
   'TonModalHint': undefined;
   'TonGiftReceived': undefined;
   'MediaSpoilerSensitive': undefined;
-  'TitleSensitiveModal': undefined;
   'TextSensitiveModal': undefined;
-  'ButtonSensitiveAlways': undefined;
   'ButtonSensitiveView': undefined;
   'TitleAgeVerificationModal': undefined;
   'DescriptionAgeVerificationModal': undefined;
@@ -2780,6 +2778,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   'GiftInfoCollectibleBy': {
     'number': V;
     'owner': V;
+  };
+  'TitleSensitiveModal': {
+    'years': V;
+  };
+  'ButtonSensitiveAlways': {
+    'years': V;
   };
 }
 

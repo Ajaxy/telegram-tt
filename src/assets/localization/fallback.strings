@@ -2142,9 +2142,9 @@
 "TonModalHint" = "You can top-up your TON using Fragment.";
 "TonGiftReceived" = "TON Top-Up";
 "MediaSpoilerSensitive" = "18+";
-"TitleSensitiveModal" = "18+ content";
+"TitleSensitiveModal" = "{years}+ content";
 "TextSensitiveModal" = "This media may contain sensitive content suitable only for adults. Do you still want to view it?";
-"ButtonSensitiveAlways" = "Always show 18+ media";
+"ButtonSensitiveAlways" = "Always show {years}+ media";
 "ButtonSensitiveView" = "View Anyway";
 "TitleAgeVerificationModal" = "Age Verification";
 "TextAgeVerificationModal_one" = "To access such content, you must confirm that you are at least **{count}** year old as required by UK law.";

@@ -1667,10 +1667,10 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
       const chatByUsername = await fetchChatByUsername(global, username);
       global = getGlobal();
       const user = chatByUsername && selectUser(global, chatByUsername.id);
-      if (!chatByUsername || !chat || !user?.hasMainMiniApp) return;
+      if (!chatByUsername || !user?.hasMainMiniApp) return;
       actions.requestMainWebView({
         botId: chatByUsername.id,
-        peerId: chat.id,
+        peerId: chat?.id || chatByUsername.id,
         theme,
         startParam: startApp,
         mode,

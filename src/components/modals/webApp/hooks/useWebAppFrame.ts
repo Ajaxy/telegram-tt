@@ -1,9 +1,10 @@
 import type { ElementRef } from '../../../../lib/teact/teact';
 import { useCallback, useEffect, useRef } from '../../../../lib/teact/teact';
-import { getActions } from '../../../../global';
+import { getActions, getGlobal } from '../../../../global';
 
 import type { WebApp, WebAppInboundEvent, WebAppOutboundEvent } from '../../../../types/webapp';
 
+import { VERIFY_AGE_MIN_DEFAULT } from '../../../../config';
 import { getWebAppKey } from '../../../../global/helpers';
 import { extractCurrentThemeParams } from '../../../../util/themeStyle';
 import { REM } from '../../../common/helpers/mediaDimensions';
@@ -385,8 +386,10 @@ const useWebAppFrame = (
 
       if (eventType === 'web_app_verify_age') {
         const { passed } = eventData;
+        const minAge = getGlobal().appConfig?.verifyAgeMin || VERIFY_AGE_MIN_DEFAULT;
+        const ageFromParam = eventData.age || 0;
 
-        if (passed) {
+        if (passed && ageFromParam >= minAge) {
           showNotification({
             message: {
               key: 'TitleAgeCheckSuccess',

@@ -120,6 +120,7 @@ export const STARS_SUGGESTED_POST_FUTURE_MIN = 300; // 5 minutes in seconds
 export const TON_CURRENCY_CODE = 'TON';
 export const TON_SUGGESTED_POST_COMMISSION_PERMILLE = 850;
 export const TON_USD_RATE_DEFAULT = 3;
+export const VERIFY_AGE_MIN_DEFAULT = 18;
 export const TON_TOPUP_URL_DEFAULT = 'https://fragment.com/ads/topup';
 export const TON_SUGGESTED_POST_AMOUNT_MIN = 10000000; // 0.01 TON in nanos
 export const TON_SUGGESTED_POST_AMOUNT_MAX = 10000000000000; // 10 000 TON in nanos

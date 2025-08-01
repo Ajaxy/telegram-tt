@@ -1,5 +1,7 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
+import { withGlobal } from '../../global';
+
+import { VERIFY_AGE_MIN_DEFAULT } from '../../config';
 
 import useLang from '../../hooks/useLang';
 
@@ -16,18 +18,23 @@ type OwnProps = {
   confirmHandler: NoneToVoidFunction;
 };
 
-const SensitiveContentConfirmModal: FC<OwnProps> = ({
+type StateProps = {
+  verifyAgeMin: number;
+};
+
+const SensitiveContentConfirmModal = ({
   isOpen,
   onClose,
   shouldAlwaysShow,
   onAlwaysShowChanged,
   confirmHandler,
-}) => {
+  verifyAgeMin,
+}: OwnProps & StateProps) => {
   const lang = useLang();
 
   return (
     <ConfirmDialog
-      title={lang('TitleSensitiveModal')}
+      title={lang('TitleSensitiveModal', { years: verifyAgeMin })}
       confirmLabel={lang('ButtonSensitiveView')}
       isOpen={isOpen}
       onClose={onClose}
@@ -36,7 +43,7 @@ const SensitiveContentConfirmModal: FC<OwnProps> = ({
       {lang('TextSensitiveModal')}
       <Checkbox
         className={styles.checkBox}
-        label={lang('ButtonSensitiveAlways')}
+        label={lang('ButtonSensitiveAlways', { years: verifyAgeMin })}
         checked={shouldAlwaysShow}
         onCheck={onAlwaysShowChanged}
       />
@@ -44,4 +51,11 @@ const SensitiveContentConfirmModal: FC<OwnProps> = ({
   );
 };
 
-export default memo(SensitiveContentConfirmModal);
+export default memo(withGlobal<OwnProps>((global): StateProps => {
+  const appConfig = global.appConfig;
+  const verifyAgeMin = appConfig?.verifyAgeMin;
+
+  return {
+    verifyAgeMin: verifyAgeMin || VERIFY_AGE_MIN_DEFAULT,
+  };
+})(SensitiveContentConfirmModal));
