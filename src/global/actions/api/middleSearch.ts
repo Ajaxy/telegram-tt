@@ -1,9 +1,8 @@
-import type { ApiMessage } from '../../../api/types';
+import { ApiMessage, ApiPeer, MAIN_THREAD_ID } from '../../../api/types';
 import type {
   ChatMediaSearchParams, ChatMediaSearchSegment, LoadingState, SharedMediaType, ThreadId,
 } from '../../../types';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
-import { type ApiPeer, MAIN_THREAD_ID } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import {
@@ -142,10 +141,10 @@ addActionHandler('performMiddleSearch', async (global, actions, payload): Promis
 
   console.log('>>> ', msgs);
 
-  const insertMsgs = []
+  const insertMsgs = [];
   for (const msg of msgs) {
     const messageToInsert: ApiMessage = {
-      chatId: '-100' + msg.chatId,
+      chatId: `-100${msg.chatId}`,
       id: Number(msg.platformMessageId),
       senderId: msg.fromId,
       content: {

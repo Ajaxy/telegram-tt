@@ -12,3 +12,4 @@ dev/perf/screenshot*
 .github/workflows/*
 !.github/workflows/package-and-publish.yml
 dist/
+.eslintcache
