@@ -667,7 +667,6 @@ const MiddleSearch: FC<StateProps> = ({
           hasUpButton={hasNavigationButtons && !isMobile}
           hasDownButton={hasNavigationButtons && !isMobile}
           placeholder={isHashtagQuery ? oldLang('SearchHashtagsHint') : oldLang('Search')}
-          teactExperimentControlled
           onChange={handleQueryChange}
           onStartBackspace={handleDeleteTag}
           onReset={handleReset}

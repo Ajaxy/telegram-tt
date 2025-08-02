@@ -38,7 +38,6 @@ type OwnProps = {
   autoFocusSearch?: boolean;
   hasUpButton?: boolean;
   hasDownButton?: boolean;
-  teactExperimentControlled?: boolean;
   withBackIcon?: boolean;
   onChange: (value: string) => void;
   onStartBackspace?: NoneToVoidFunction;
@@ -69,7 +68,6 @@ const SearchInput: FC<OwnProps> = ({
   autoFocusSearch,
   hasUpButton,
   hasDownButton,
-  teactExperimentControlled,
   withBackIcon,
   onChange,
   onStartBackspace,
@@ -174,7 +172,7 @@ const SearchInput: FC<OwnProps> = ({
         onFocus={handleFocus}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
-        teactExperimentControlled={teactExperimentControlled}
+        // teactExperimentControlled={teactExperimentControlled}
       />
       {hasUpButton && (
         <Button
