@@ -249,10 +249,22 @@
     }
 
     .last-message {
+      display: flex;
+      white-space: nowrap;
       .draft {
         &::after {
           content: ": ";
         }
+      }
+
+      .media-preview {
+        display: flex;
+        max-width: 100%;
+      }
+
+      .message-text {
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
 
       .colon, .chat-prefix-icon {

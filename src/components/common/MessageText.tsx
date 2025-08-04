@@ -110,7 +110,7 @@ function MessageText({
   }
 
   return (
-    <>
+    <span className="message-text" dir="auto">
       {[
         withSharedCanvas && <canvas ref={sharedCanvasRef} className="shared-canvas" />,
         withSharedCanvas && <canvas ref={sharedCanvasHqRef} className="shared-canvas" />,
@@ -137,7 +137,7 @@ function MessageText({
           threadId,
         }),
       ].flat().filter(Boolean)}
-    </>
+    </span>
   );
 }
 
