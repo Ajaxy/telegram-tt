@@ -3,8 +3,6 @@ import { memo } from '../../../lib/teact/teact';
 
 import type { ApiChatFolder } from '../../../api/types';
 
-import ShowTransition from '../../ui/ShowTransition';
-
 import './ChatTags.scss';
 
 type OwnProps = {
@@ -13,25 +11,15 @@ type OwnProps = {
 
 const ChatTags: FC<OwnProps> = ({
   folders,
-}) => {
-  function renderContent() {
-    return (
-      <div className="ChatTags-wrapper">
-        {folders?.map((folder) => (
-          <div key={folder.id} className={`ChatTags ChatTags-color-${folder.color}`}>
-            <div className="ChatTags-background" />
-            {folder.title.text}
-          </div>
-        ))}
+}) => (
+  <div className="ChatTags-wrapper">
+    {folders?.map((folder) => (
+      <div key={folder.id} className={`ChatTags ChatTags-color-${folder.color}`}>
+        <div className="ChatTags-background" />
+        {folder.title.text}
       </div>
-    );
-  }
-
-  return (
-    <ShowTransition isCustom className="ChatTags-transition" isOpen>
-      {renderContent()}
-    </ShowTransition>
-  );
-};
+    ))}
+  </div>
+);
 
 export default memo(ChatTags);
