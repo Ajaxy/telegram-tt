@@ -10,6 +10,7 @@ import { ALL_FOLDER_ID, STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config'
 import { getFolderDescriptionText } from '../../../../global/helpers';
 import { selectIsCurrentUserPremium } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
+import buildClassName from '../../../../util/buildClassName';
 import { isBetween } from '../../../../util/math';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { throttle } from '../../../../util/schedulers';
@@ -145,6 +146,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
         title: folder.title,
         subtitle: getFolderDescriptionText(lang, folder, chatsCountByFolderId[folder.id]),
         isChatList: folder.isChatList,
+        color: folder.color,
         noTitleAnimations: folder.noTitleAnimations,
       };
     });
@@ -304,7 +306,11 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                     }
                   }}
                 >
-                  <span className="title">
+                  <span className={buildClassName(
+                    'title',
+                    folder?.color !== undefined && `color-picker-item-${folder.color}`,
+                  )}
+                  >
                     {renderTextWithEntities({
                       text: folder.title.text,
                       entities: folder.title.entities,
