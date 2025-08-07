@@ -29,9 +29,9 @@
   flex-shrink: 0;
   min-width: 1.5rem;
   height: 0.8rem;
-  border-radius: var(--border-radius-default-tiny);
+  border-radius: 0.2375rem;
   padding: 0 0.2375rem;
-  font-size: 0.5375rem;
+  font-size: 0.6375rem;
   line-height: 0.8rem;
   text-align: center;
   position: relative;
@@ -40,7 +40,7 @@
   &-background {
     position: absolute;
     background-color: currentColor;
-    border-radius: var(--border-radius-default-tiny);
+    border-radius: 0.2375rem;
     top: 0;
     left: 0;
     width: 100%;
