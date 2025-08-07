@@ -176,7 +176,7 @@ export function getOrderKey(chatId: string, isForSaved?: boolean) {
   return isForSaved ? summary.orderInSaved : summary.orderInAll;
 }
 
-export function getChatFoldersIds(chatId: string) {
+export function getChatFolderIds(chatId: string) {
   return prepared.folderIdsByChatId[chatId];
 }
 

@@ -54,7 +54,7 @@ import {
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../util/entities/ids';
-import { getChatFoldersIds } from '../../../util/folderManager';
+import { getChatFolderIds } from '../../../util/folderManager';
 import { createLocationHash } from '../../../util/routing';
 
 import useSelectorSignal from '../../../hooks/data/useSelectorSignal';
@@ -471,7 +471,7 @@ export default memo(withGlobal<OwnProps>(
       };
     }
 
-    const folderIds = getChatFoldersIds(chatId);
+    const folderIds = getChatFolderIds(chatId);
 
     const lastMessageId = previewMessageId || selectChatLastMessageId(global, chatId, isSavedDialog ? 'saved' : 'all');
     const lastMessage = previewMessageId
