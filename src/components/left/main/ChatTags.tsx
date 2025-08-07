@@ -1,25 +1,33 @@
 import type { FC } from '../../../lib/teact/teact';
 import { memo } from '../../../lib/teact/teact';
+import { getGlobal } from '../../../global';
 
-import type { ApiChatFolder } from '../../../api/types';
+import { selectChatFolder } from '../../../global/selectors';
 
 import './ChatTags.scss';
 
 type OwnProps = {
-  folders?: ApiChatFolder[];
+  folderIds?: number[];
 };
 
 const ChatTags: FC<OwnProps> = ({
-  folders,
-}) => (
-  <div className="ChatTags-wrapper">
-    {folders?.map((folder) => folder?.color && (
-      <div key={folder.id} className={`ChatTags ChatTags-color-${folder.color}`}>
-        <div className="ChatTags-background" />
-        {folder.title.text}
-      </div>
-    ))}
-  </div>
-);
+  folderIds,
+}) => {
+  const global = getGlobal();
+
+  return (
+    <div className="ChatTags-wrapper">
+      {folderIds?.map((folderId) => {
+        const folder = selectChatFolder(global, folderId);
+        return folder && (
+          <div key={folder.id} className={`ChatTags ChatTags-color-${folder.color}`}>
+            <div className="ChatTags-background" />
+            {folder.title.text}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 export default memo(ChatTags);

@@ -54,7 +54,7 @@ import {
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../util/entities/ids';
-import { getChatFolders } from '../../../util/folderManager';
+import { getChatFoldersIds } from '../../../util/folderManager';
 import { createLocationHash } from '../../../util/routing';
 
 import useSelectorSignal from '../../../hooks/data/useSelectorSignal';
@@ -121,7 +121,7 @@ type StateProps = {
   currentUserId: string;
   isSynced?: boolean;
   isAccountFrozen?: boolean;
-  folders?: ApiChatFolder[];
+  folderIds?: number[];
 };
 
 const Chat: FC<OwnProps & StateProps> = ({
@@ -161,7 +161,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   isSynced,
   onDragEnter,
   isAccountFrozen,
-  folders,
+  folderIds,
 }) => {
   const {
     openChat,
@@ -428,7 +428,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             />
           )}
         </div>
-        <ChatTags folders={folders} />
+        <ChatTags folderIds={folderIds} />
       </div>
       {shouldRenderDeleteModal && (
         <DeleteChatModal
@@ -471,8 +471,7 @@ export default memo(withGlobal<OwnProps>(
       };
     }
 
-    const foldersIds = getChatFolders(chatId);
-    const folders = foldersIds?.map((id) => selectChatFolder(global, id));
+    const folderIds = getChatFoldersIds(chatId);
 
     const lastMessageId = previewMessageId || selectChatLastMessageId(global, chatId, isSavedDialog ? 'saved' : 'all');
     const lastMessage = previewMessageId
@@ -533,7 +532,7 @@ export default memo(withGlobal<OwnProps>(
       lastMessageStory,
       isAccountFrozen,
       monoforumChannel,
-      folders,
+      folderIds,
     };
   },
 )(Chat));
