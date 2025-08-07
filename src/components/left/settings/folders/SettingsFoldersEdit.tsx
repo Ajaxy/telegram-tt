@@ -56,6 +56,7 @@ type StateProps = {
   maxInviteLinks: number;
   maxChatLists: number;
   chatListCount: number;
+  isCurrentUserPremium: boolean;
 };
 
 const SUBMIT_TIMEOUT = 500;
@@ -84,6 +85,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   maxChatLists,
   chatListCount,
   onSaveFolder,
+  isCurrentUserPremium,
 }) => {
   const {
     loadChatlistInvites,
@@ -117,8 +119,6 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     selectedChatIds: excludedChatIds,
     selectedChatTypes: excludedChatTypes,
   } = useMemo(() => selectChatFilters(state, 'excluded'), [state]);
-
-  const isCurrentUserPremium = selectIsCurrentUserPremium(getGlobal());
 
   useEffect(() => {
     setIsIncludedChatsListExpanded(false);
@@ -447,6 +447,8 @@ export default memo(withGlobal<OwnProps>(
     const { byId, invites } = global.chatFolders;
     const chatListCount = Object.values(byId).reduce((acc, el) => acc + (el.isChatList ? 1 : 0), 0);
 
+    const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+
     return {
       loadedActiveChatIds: listIds.active,
       loadedArchivedChatIds: listIds.archived,
@@ -455,6 +457,7 @@ export default memo(withGlobal<OwnProps>(
       maxInviteLinks: selectCurrentLimit(global, 'chatlistInvites'),
       maxChatLists: selectCurrentLimit(global, 'chatlistJoined'),
       chatListCount,
+      isCurrentUserPremium,
     };
   },
 )(SettingsFoldersEdit));
