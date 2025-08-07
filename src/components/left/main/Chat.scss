@@ -259,6 +259,7 @@
 
       .media-preview {
         display: flex;
+        align-items: center;
         max-width: 100%;
       }
 
@@ -292,6 +293,7 @@
         vertical-align: -0.25rem;
 
         object-fit: cover;
+        flex-shrink: 0;
 
         body.is-ios & {
           width: 1.125rem;
