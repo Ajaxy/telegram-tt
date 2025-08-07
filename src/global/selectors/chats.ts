@@ -160,55 +160,6 @@ export function selectChatFolder<T extends GlobalState>(global: T, folderId: num
   return global.chatFolders.byId[folderId];
 }
 
-export function selectChatFolders<T extends GlobalState>(global: T, chat: ApiChat, user: ApiUser | undefined) {
-  const isChannel = chat.type === 'chatTypeChannel';
-  const isGroup = chat.type === 'chatTypeBasicGroup' || chat.type === 'chatTypeSuperGroup';
-  const isBot = user && user.type === 'userTypeBot';
-  const isContact = user && user.isContact;
-  const isUnread = Boolean(chat.unreadCount || chat.unreadMentionsCount);
-
-  return Object.values(global.chatFolders.byId).filter(
-    (folder) => {
-      const isIncluded = folder.includedChatIds.includes(chat.id);
-      const isExcluded = folder.excludedChatIds.includes(chat.id);
-
-      if (isIncluded) {
-        return true;
-      }
-
-      if (isExcluded) {
-        return false;
-      }
-
-      if (folder.excludeRead && !isUnread) {
-        return false;
-      }
-
-      if (folder.bots && isBot) {
-        return true;
-      }
-
-      if (folder.channels && isChannel) {
-        return true;
-      }
-
-      if (folder.groups && isGroup) {
-        return true;
-      }
-
-      if (folder.contacts && isContact) {
-        return true;
-      }
-
-      if (folder.nonContacts && !isContact) {
-        return true;
-      }
-
-      return false;
-    },
-  );
-}
-
 export function selectTotalChatCount<T extends GlobalState>(global: T, listType: 'active' | 'archived'): number {
   const { totalCount } = global.chats;
   const allChatsCount = totalCount.all;

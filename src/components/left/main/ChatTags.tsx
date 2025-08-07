@@ -13,7 +13,7 @@ const ChatTags: FC<OwnProps> = ({
   folders,
 }) => (
   <div className="ChatTags-wrapper">
-    {folders?.map((folder) => (
+    {folders?.map((folder) => folder?.color && (
       <div key={folder.id} className={`ChatTags ChatTags-color-${folder.color}`}>
         <div className="ChatTags-background" />
         {folder.title.text}

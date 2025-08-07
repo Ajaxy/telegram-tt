@@ -28,7 +28,7 @@ import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
   selectCanAnimateInterface,
   selectChat,
-  selectChatFolders,
+  selectChatFolder,
   selectChatLastMessage,
   selectChatLastMessageId,
   selectChatMessage,
@@ -54,6 +54,7 @@ import {
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../util/entities/ids';
+import { getChatFolders } from '../../../util/folderManager';
 import { createLocationHash } from '../../../util/routing';
 
 import useSelectorSignal from '../../../hooks/data/useSelectorSignal';
@@ -80,7 +81,6 @@ import ChatCallStatus from './ChatCallStatus';
 import ChatTags from './ChatTags';
 
 import './Chat.scss';
-
 type OwnProps = {
   chatId: string;
   folderId?: number;
@@ -471,7 +471,8 @@ export default memo(withGlobal<OwnProps>(
       };
     }
 
-    const folders = selectChatFolders(global, chat, user);
+    const foldersIds = getChatFolders(chatId);
+    const folders = foldersIds?.map((id) => selectChatFolder(global, id));
 
     const lastMessageId = previewMessageId || selectChatLastMessageId(global, chatId, isSavedDialog ? 'saved' : 'all');
     const lastMessage = previewMessageId
