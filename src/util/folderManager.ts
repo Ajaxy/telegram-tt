@@ -54,7 +54,6 @@ interface ChatSummary {
   orderInSaved: number;
   isUserBot?: boolean;
   isUserContact?: boolean;
-  folderIds?: number[];
 }
 
 const UPDATE_THROTTLE = 500;
@@ -177,9 +176,8 @@ export function getOrderKey(chatId: string, isForSaved?: boolean) {
   return isForSaved ? summary.orderInSaved : summary.orderInAll;
 }
 
-export function getChatFolders(chatId: string) {
-  const summary = prepared.chatSummariesById.get(chatId)!;
-  return summary.folderIds;
+export function getChatFoldersIds(chatId: string) {
+  return prepared.folderIdsByChatId[chatId];
 }
 
 /* Callback managers */
@@ -494,8 +492,6 @@ function updateChats(
       prepared.chatSummariesById.set(chatId, newSummary);
 
       newFolderIds = buildChatFolderIds(newSummary, folderSummaries);
-      // Add folderIds to the summary so getChatFolders can access them
-      newSummary.folderIds = newFolderIds;
       newFolderIds.forEach((folderId) => {
         affectedFolderIds.add(folderId);
       });
