@@ -16,50 +16,59 @@
   }
 
   body.is-macos & {
-    height: 1.375rem;
+    height: 1rem;
   }
 }
 
 .ChatTags-wrapper {
   display: flex;
-
-  .ChatTags {
-    margin-inline-start: 0.25rem;
-  }
+  gap: 0.25rem;
 }
 
 .ChatTags {
   flex-shrink: 0;
   min-width: 1.5rem;
-  height: 1.5rem;
+  height: 0.8rem;
   border-radius: var(--border-radius-default-tiny);
-  padding: 0 0.4375rem;
-  font-size: 0.8375rem;
-  line-height: 1.5625rem;
+  padding: 0 0.2375rem;
+  font-size: 0.5375rem;
+  line-height: 0.8rem;
   text-align: center;
-  color: var(--color-background);
+  position: relative;
+  text-transform: uppercase;
+
+  &-background {
+    position: absolute;
+    background-color: currentColor;
+    border-radius: var(--border-radius-default-tiny);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+  }
   
   &-color-1 {
-    background-color: var(--color-topic-blue);
+    color: var(--color-topic-blue);
   }
   
   &-color-2 {
-    background-color: var(--color-topic-green);
+    color: var(--color-topic-green);
   }
   
   &-color-3 {
-    background-color: var(--color-topic-yellow);
+    color: var(--color-topic-yellow);
   }
   
   &-color-4 {
-    background-color: var(--color-topic-red);
+    color: var(--color-topic-red);
   }
   
   &-color-5 {
-    background-color: var(--color-topic-violet);
+    color: var(--color-topic-violet);
   }
   
   &-color-6 {
-    background-color: var(--color-topic-rose);
+    color: var(--color-topic-rose);
   }
 }

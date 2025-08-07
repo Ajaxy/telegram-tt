@@ -416,7 +416,6 @@ const Chat: FC<OwnProps & StateProps> = ({
         </div>
         <div className="subtitle">
           {renderSubtitle()}
-          <ChatTags folders={folders} />
           {!isPreview && (
             <ChatBadge
               chat={chat}
@@ -429,6 +428,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             />
           )}
         </div>
+        <ChatTags folders={folders} />
       </div>
       {shouldRenderDeleteModal && (
         <DeleteChatModal
