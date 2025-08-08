@@ -195,6 +195,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   chatFolders: {
     byId: {},
     invites: {},
+    tagsEnabled: false,
   },
 
   fileUploads: {

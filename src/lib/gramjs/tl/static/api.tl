@@ -2300,6 +2300,7 @@ messages.getDialogFilters#efd48c89 = messages.DialogFilters;
 messages.getSuggestedDialogFilters#a29cd42c = Vector<DialogFilterSuggested>;
 messages.updateDialogFilter#1ad4a04a flags:# id:int filter:flags.0?DialogFilter = Bool;
 messages.updateDialogFiltersOrder#c563c1e4 order:Vector<int> = Bool;
+messages.toggleDialogFilterTags#fd2dda49 enabled:Bool = Bool;
 messages.getOldFeaturedStickers#7ed094a1 offset:int limit:int hash:long = messages.FeaturedStickers;
 messages.getReplies#22ddd30c peer:InputPeer msg_id:int offset_id:int offset_date:int add_offset:int limit:int max_id:int min_id:int hash:long = messages.Messages;
 messages.getDiscussionMessage#446972fd peer:InputPeer msg_id:int = messages.DiscussionMessage;

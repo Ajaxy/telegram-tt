@@ -25,6 +25,7 @@ import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
 import Icon from '../../../common/icons/Icon';
 import Button from '../../../ui/Button';
+import Checkbox from '../../../ui/Checkbox';
 import Draggable from '../../../ui/Draggable';
 import ListItem from '../../../ui/ListItem';
 import Loading from '../../../ui/Loading';
@@ -42,6 +43,7 @@ type StateProps = {
   recommendedChatFolders?: ApiChatFolder[];
   maxFolders: number;
   isPremium?: boolean;
+  tagsEnabled?: boolean;
 };
 
 type SortState = {
@@ -63,6 +65,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   isPremium,
   recommendedChatFolders,
   maxFolders,
+  tagsEnabled,
 }) => {
   const {
     loadRecommendedChatFolders,
@@ -70,6 +73,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     openLimitReachedModal,
     openDeleteChatFolderModal,
     sortChatFolders,
+    toggleDialogFilterTags,
   } = getActions();
 
   const [state, setState] = useState<SortState>({
@@ -163,6 +167,17 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
 
     addChatFolder({ folder });
   }, [foldersById, maxFolders, addChatFolder, openLimitReachedModal]);
+
+  const handleToggleTags = useCallback(() => {
+    if (!isPremium) {
+      openLimitReachedModal({
+        limit: 'dialogFilters',
+      });
+      return;
+    }
+
+    toggleDialogFilterTags({ enabled: !tagsEnabled });
+  }, [isPremium, tagsEnabled, toggleDialogFilterTags, openLimitReachedModal]);
 
   const handleDrag = useCallback((translation: { x: number; y: number }, id: string | number) => {
     const delta = Math.round(translation.y / FOLDER_HEIGHT_PX);
@@ -372,6 +387,16 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
           ))}
         </div>
       )}
+      {isPremium && (
+        <div className="settings-item pt-3">
+          <Checkbox
+            label={lang('ShowFolderTags')}
+            subLabel={lang('ShowFolderTagsHint')}
+            checked={tagsEnabled || false}
+            onChange={handleToggleTags}
+          />
+        </div>
+      )}
     </div>
   );
 };
@@ -382,6 +407,7 @@ export default memo(withGlobal<OwnProps>(
       orderedIds: folderIds,
       byId: foldersById,
       recommended: recommendedChatFolders,
+      tagsEnabled,
     } = global.chatFolders;
 
     return {
@@ -390,6 +416,7 @@ export default memo(withGlobal<OwnProps>(
       isPremium: selectIsCurrentUserPremium(global),
       recommendedChatFolders,
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),
+      tagsEnabled,
     };
   },
 )(SettingsFoldersMain));

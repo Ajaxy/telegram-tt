@@ -4,7 +4,6 @@ import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiChat,
-  ApiChatFolder,
   ApiDraft,
   ApiMessage,
   ApiMessageOutgoingStatus,
@@ -28,13 +27,13 @@ import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
   selectCanAnimateInterface,
   selectChat,
-  selectChatFolder,
   selectChatLastMessage,
   selectChatLastMessageId,
   selectChatMessage,
   selectCurrentMessageList,
   selectDraft,
   selectIsCurrentUserFrozen,
+  selectIsCurrentUserPremium,
   selectIsForumPanelClosed,
   selectIsForumPanelOpen,
   selectMonoforumChannel,
@@ -122,6 +121,7 @@ type StateProps = {
   isSynced?: boolean;
   isAccountFrozen?: boolean;
   folderIds?: number[];
+  tagsEnabled?: boolean;
 };
 
 const Chat: FC<OwnProps & StateProps> = ({
@@ -162,6 +162,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   onDragEnter,
   isAccountFrozen,
   folderIds,
+  tagsEnabled,
 }) => {
   const {
     openChat,
@@ -428,7 +429,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             />
           )}
         </div>
-        <ChatTags folderIds={folderIds} />
+        {tagsEnabled && <ChatTags folderIds={folderIds} />}
       </div>
       {shouldRenderDeleteModal && (
         <DeleteChatModal
@@ -472,6 +473,8 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const folderIds = getChatFolderIds(chatId);
+    const { tagsEnabled } = global.chatFolders;
+    const isPremium = selectIsCurrentUserPremium(global);
 
     const lastMessageId = previewMessageId || selectChatLastMessageId(global, chatId, isSavedDialog ? 'saved' : 'all');
     const lastMessage = previewMessageId
@@ -533,6 +536,7 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       monoforumChannel,
       folderIds,
+      tagsEnabled: tagsEnabled && isPremium,
     };
   },
 )(Chat));

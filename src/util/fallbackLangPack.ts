@@ -177,6 +177,8 @@ export default {
   FilterChats: 'Chats',
   FilterColorTitle: 'Folder Color',
   FilterColorHint: 'This color will be used for the folder\'s tag in the chat list',
+  ShowFolderTags: 'Show Folder Tags',
+  ShowFolderTagsHint: 'Display folder names for each chat in the chat list.',
   AccDescrChannel: 'Channel',
   AccDescrGroup: 'Group',
   Bot: 'bot',
