@@ -1,9 +1,9 @@
-.ChatTags-wrapper {
+.wrapper {
   display: flex;
   gap: 0.25rem;
 }
 
-.ChatTags {
+.tag {
   flex-shrink: 0;
   min-width: 1.5rem;
   height: 0.8rem;
@@ -15,7 +15,7 @@
   position: relative;
   text-transform: uppercase;
 
-  &-background {
+  &Background {
     position: absolute;
     background-color: currentColor;
     border-radius: 0.2375rem;
@@ -26,27 +26,27 @@
     opacity: 0.1;
   }
   
-  &-color-1 {
+  &Color1 {
     color: var(--color-topic-blue);
   }
   
-  &-color-2 {
+  &Color2 {
     color: var(--color-topic-green);
   }
   
-  &-color-3 {
+  &Color3 {
     color: var(--color-topic-yellow);
   }
   
-  &-color-4 {
+  &Color4 {
     color: var(--color-topic-red);
   }
   
-  &-color-5 {
+  &Color5 {
     color: var(--color-topic-violet);
   }
   
-  &-color-6 {
+  &Color6 {
     color: var(--color-topic-rose);
   }
 }

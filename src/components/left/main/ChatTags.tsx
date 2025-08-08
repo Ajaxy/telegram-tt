@@ -4,7 +4,7 @@ import { getGlobal } from '../../../global';
 
 import { selectChatFolder } from '../../../global/selectors';
 
-import './ChatTags.scss';
+import styles from './ChatTags.module.scss';
 
 type OwnProps = {
   folderIds?: number[];
@@ -16,12 +16,12 @@ const ChatTags: FC<OwnProps> = ({
   const global = getGlobal();
 
   return (
-    <div className="ChatTags-wrapper">
+    <div className={styles.wrapper}>
       {folderIds?.map((folderId) => {
         const folder = selectChatFolder(global, folderId);
         return folder && (
-          <div key={folder.id} className={`ChatTags ChatTags-color-${folder.color}`}>
-            <div className="ChatTags-background" />
+          <div key={folder.id} className={`${styles.tag} ${styles[`tagColor${folder.color}`]}`}>
+            <div className={styles.tagBackground} />
             {folder.title.text}
           </div>
         );
