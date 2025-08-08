@@ -132,13 +132,13 @@
 }
 
 .color-picker-item {
-  width: 24px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 50%;
   border: none;
   cursor: pointer;
   transition: all 0.05s ease-in-out;
-  border: 2px solid transparent;
+  border: 0.125rem solid transparent;
   outline: none;
   background-color: currentColor;
 }
@@ -178,8 +178,8 @@
 }
 
 .color-picker-item-active, .color-picker-item:focus, .color-picker-item:hover, .color-picker-item:active {
-  width: 24px;
-  height: 24px;
-  border: 2px solid var(--color-background);
-  outline: 2px solid currentColor;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0.125rem solid var(--color-background);
+  outline: 0.125rem solid currentColor;
 }
