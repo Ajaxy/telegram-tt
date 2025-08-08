@@ -11,7 +11,7 @@ import type {
   FoldersState,
 } from '../../../../hooks/reducers/useFoldersReducer';
 
-import { FOLDER_COLORS, STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
+import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { selectCanShareFolder, selectIsCurrentUserPremium } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import buildClassName from '../../../../util/buildClassName';
@@ -62,6 +62,8 @@ type StateProps = {
 const SUBMIT_TIMEOUT = 500;
 
 const INITIAL_CHATS_LIMIT = 5;
+
+const FOLDER_COLORS = [1, 2, 3, 4, 5, 6];
 
 export const ERROR_NO_TITLE = 'Please provide a title for this folder.';
 export const ERROR_NO_CHATS = 'ChatList.Filter.Error.Empty';
