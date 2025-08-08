@@ -5,7 +5,7 @@ import { getActions } from '../../../global';
 import type {
   ApiPeer,
   ApiStarGiftAttributeBackdrop, ApiStarGiftAttributeModel, ApiStarGiftAttributePattern,
-  ApiStarsAmount } from '../../../api/types';
+  ApiTypeCurrencyAmount } from '../../../api/types';
 
 import {
   formatStarsTransactionAmount,
@@ -31,7 +31,7 @@ type OwnProps = {
   subtitle?: TeactNode;
   subtitlePeer?: ApiPeer;
   className?: string;
-  resellPrice?: ApiStarsAmount;
+  resellPrice?: ApiTypeCurrencyAmount;
 };
 
 const STICKER_SIZE = 120;

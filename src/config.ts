@@ -117,7 +117,13 @@ export const STARS_SUGGESTED_POST_COMMISSION_PERMILLE = 850;
 export const STARS_SUGGESTED_POST_AGE_MIN = 86400; // 24 hours in seconds
 export const STARS_SUGGESTED_POST_FUTURE_MAX = 2678400; // 31 days in seconds
 export const STARS_SUGGESTED_POST_FUTURE_MIN = 300; // 5 minutes in seconds
+export const TON_CURRENCY_CODE = 'TON';
 export const TON_SUGGESTED_POST_COMMISSION_PERMILLE = 850;
+export const TON_USD_RATE_DEFAULT = 3;
+export const VERIFY_AGE_MIN_DEFAULT = 18;
+export const TON_TOPUP_URL_DEFAULT = 'https://fragment.com/ads/topup';
+export const TON_SUGGESTED_POST_AMOUNT_MIN = 10000000; // 0.01 TON in nanos
+export const TON_SUGGESTED_POST_AMOUNT_MAX = 10000000000000; // 10 000 TON in nanos
 
 export const STORY_VIEWS_MIN_SEARCH = 15;
 export const STORY_MIN_REACTIONS_SORT = 10;
@@ -338,6 +344,8 @@ export const ACCEPTABLE_USERNAME_ERRORS = new Set([USERNAME_PURCHASE_ERROR, 'USE
 export const TME_WEB_DOMAINS = new Set(['t.me', 'web.t.me', 'a.t.me', 'k.t.me', 'z.t.me']);
 export const WEB_APP_PLATFORM = 'weba';
 export const LANG_PACK = 'weba';
+
+export const NSFW_RESTRICTION_REASON = 'sensitive';
 
 // eslint-disable-next-line @stylistic/max-len
 export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', 'EG', 'HN', 'IE', 'IN', 'JO', 'MX', 'MY', 'NI', 'NZ', 'PH', 'PK', 'SA', 'SV', 'US']);

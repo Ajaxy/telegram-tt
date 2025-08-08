@@ -10,7 +10,7 @@
 
 .root :global(.modal-dialog) {
   max-width: 26.25rem;
-  height: min(45rem, 90vh);
+  height: min(var(--modal-height, 45rem), 90vh);
 }
 
 .minimal :global(.modal-dialog) {
@@ -34,6 +34,11 @@
 }
 
 .section {
+  @include mixins.side-panel-section;
+}
+
+.lastSection,
+.section {
   position: relative;
 
   display: flex;
@@ -43,7 +48,6 @@
   padding: 0.5rem;
 
   @include mixins.adapt-padding-to-scrollbar(0.5rem);
-  @include mixins.side-panel-section;
 }
 
 .sectionTitle {
@@ -56,6 +60,7 @@
   color: var(--color-primary);
 }
 
+.hint,
 .tos {
   padding: 0.5rem 1rem;
   padding-top: 0;
@@ -66,27 +71,35 @@
   background-color: var(--color-background-secondary);
 }
 
-.logo {
-  width: 6.25rem;
-  height: 6.25rem;
-  min-height: 6.25rem;
-  margin: 1rem;
+.topUpButton,
+.tonBalanceContainer {
+  margin-bottom: 0.5rem;
 }
 
-.logoBackground {
-  position: absolute;
-  top: 0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
+.tonBalance {
+  unicode-bidi: plaintext;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  height: 8rem;
-}
-
-.headerHext {
-  margin-inline: 0.5rem;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: var(--font-weight-medium);
-  text-align: center;
+}
+
+.tonIconBalance {
+  color: var(--color-primary);
+}
+
+.tonInUsd {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.tonIconLogo {
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
+  font-size: 5rem;
+  color: var(--color-primary);
 }
 
 .description {
@@ -196,6 +209,7 @@
   right: 1.25rem;
 }
 
+.topUpButton,
 .starButton {
   grid-column: 1/-1;
   gap: 0.5rem;

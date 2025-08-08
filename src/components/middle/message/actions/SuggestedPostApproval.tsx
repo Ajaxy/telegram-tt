@@ -4,7 +4,7 @@ import { withGlobal } from '../../../../global';
 import type { ApiMessage, ApiPeer } from '../../../../api/types';
 import type { ApiMessageActionSuggestedPostApproval } from '../../../../api/types/messageActions';
 
-import { STARS_SUGGESTED_POST_AGE_MIN } from '../../../../config';
+import { STARS_SUGGESTED_POST_AGE_MIN, TON_CURRENCY_CODE } from '../../../../config';
 import { getPeerFullTitle } from '../../../../global/helpers/peers';
 import { getMessageReplyInfo } from '../../../../global/helpers/replies';
 import { selectIsMonoforumAdmin, selectMonoforumChannel,
@@ -12,7 +12,8 @@ import { selectIsMonoforumAdmin, selectMonoforumChannel,
   selectSender } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { formatScheduledDateTime, formatShortDuration } from '../../../../util/dates/dateFormat';
-import { formatStarsAsText } from '../../../../util/localization/format';
+import { convertTonFromNanos } from '../../../../util/formatCurrency';
+import { formatStarsAsText, formatTonAsText } from '../../../../util/localization/format';
 import { getServerTime } from '../../../../util/serverTime';
 import renderText from '../../../common/helpers/renderText';
 import { renderPeerLink, translateWithYou } from '../helpers/messageActions';
@@ -58,11 +59,18 @@ const SuggestedPostApproval = ({
 
   const publishDate = scheduleDate
     ? formatScheduledDateTime(scheduleDate, lang, oldLang)
-    : lang('TitleAnytime');
+    : lang('SuggestMessageAnytime');
 
   const isPostPublished = scheduleDate ? scheduleDate <= getServerTime() : false;
 
-  const starsText = amount?.amount ? formatStarsAsText(lang, amount.amount) : undefined;
+  const currency = amount?.currency;
+  const amountValue = amount?.amount || 0;
+
+  const formattedAmount = amountValue > 0
+    ? (currency === TON_CURRENCY_CODE
+      ? formatTonAsText(lang, convertTonFromNanos(amountValue))
+      : formatStarsAsText(lang, amountValue))
+    : undefined;
 
   const duration = formatShortDuration(lang, ageMinSeconds, true);
 
@@ -85,31 +93,35 @@ const SuggestedPostApproval = ({
         )}
       </div>
 
-      {starsText && (
+      {formattedAmount && (
         <div className={styles.suggestedPostApprovalSection}>
           {translateWithYou(lang,
             'SuggestedPostCharged',
             !isAdmin,
             {
               user: originalSenderLink,
-              amount: starsText,
+              amount: formattedAmount,
             },
             { withMarkdown: true },
           )}
         </div>
       )}
 
-      {isPostPublished && starsText && (
+      {isPostPublished && formattedAmount && (
         <>
           <div className={styles.suggestedPostApprovalSection}>
             {translateWithYou(lang, 'SuggestedPostReceiveAmount', !isAdmin, {
-              peer: renderChatLink(), duration, currency: lang('CurrencyStars'),
+              peer: renderChatLink(),
+              duration,
+              currency: currency === TON_CURRENCY_CODE ? lang('CurrencyTon') : lang('CurrencyStars'),
             }, { withMarkdown: true })}
           </div>
 
           <div className={styles.suggestedPostApprovalSection}>
             {translateWithYou(lang, 'SuggestedPostRefund', !isAdmin, {
-              peer: renderChatLink(), duration, currency: lang('CurrencyStars'),
+              peer: renderChatLink(),
+              duration,
+              currency: currency === TON_CURRENCY_CODE ? lang('CurrencyTon') : lang('CurrencyStars'),
             }, { withMarkdown: true })}
           </div>
         </>

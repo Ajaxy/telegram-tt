@@ -4,7 +4,7 @@ import type { ApiChatType, ApiFormattedText } from '../api/types';
 import type { DeepLinkMethod } from './deepLinkParser';
 import { LeftColumnContent, SettingsScreens } from '../types';
 
-import { API_CHAT_TYPES, RE_TG_LINK } from '../config';
+import { API_CHAT_TYPES, RE_TG_LINK, TON_CURRENCY_CODE } from '../config';
 import { IS_BAD_URL_PARSER } from './browser/globalEnvironment';
 import { tryParseDeepLink } from './deepLinkParser';
 
@@ -104,6 +104,9 @@ export const processDeepLink = (url: string): boolean => {
         return true;
       case 'stars':
         actions.openStarsBalanceModal({});
+        break;
+      case 'ton':
+        actions.openStarsBalanceModal({ currency: TON_CURRENCY_CODE });
         break;
       default:
         break;

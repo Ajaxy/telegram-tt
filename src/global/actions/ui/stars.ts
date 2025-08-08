@@ -1,6 +1,7 @@
 import type { ApiInputSavedStarGift, ApiSavedStarGift } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
+import { STARS_CURRENCY_CODE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import * as langProvider from '../../../util/oldLangProvider';
 import { addTabStateResetterAction } from '../../helpers/meta';
@@ -110,6 +111,7 @@ addActionHandler('openStarsBalanceModal', (global, actions, payload): ActionRetu
     originGift,
     topup,
     shouldIgnoreBalance,
+    currency = STARS_CURRENCY_CODE,
     tabId = getCurrentTabId(),
   } = payload || {};
 
@@ -140,6 +142,7 @@ addActionHandler('openStarsBalanceModal', (global, actions, payload): ActionRetu
       originReaction,
       originGift,
       topup,
+      currency,
     },
   }, tabId);
 });

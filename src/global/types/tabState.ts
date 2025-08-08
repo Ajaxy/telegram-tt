@@ -45,6 +45,7 @@ import type {
   ApiStarsTransaction,
   ApiStarTopupOption,
   ApiSticker,
+  ApiTypeCurrencyAmount,
   ApiTypePrepaidGiveaway,
   ApiTypeStoryView,
   ApiUser,
@@ -753,6 +754,8 @@ export type TabState = {
     selfDestructAccountDays: number;
   };
 
+  isAgeVerificationModalOpen?: boolean;
+
   paidReactionModal?: {
     chatId: string;
     messageId: number;
@@ -795,6 +798,7 @@ export type TabState = {
       balanceNeeded: number;
       purpose?: string;
     };
+    currency?: ApiTypeCurrencyAmount['currency'];
   };
 
   giftInfoModal?: {

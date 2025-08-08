@@ -294,6 +294,7 @@ const ActionMessage = ({
         break;
       }
 
+      case 'giftTon':
       case 'giftStars': {
         openStarsTransactionFromGift({
           chatId: message.chatId,
@@ -377,6 +378,7 @@ const ActionMessage = ({
         );
 
       case 'giftPremium':
+      case 'giftTon':
       case 'giftStars':
         return (
           <Gift

@@ -169,6 +169,10 @@ function createFormatters() {
       conjunction: createListFormat(langCode, 'conjunction'),
       disjunction: createListFormat(langCode, 'disjunction'),
       number: new Intl.NumberFormat(langCode),
+      preciseNumber: new Intl.NumberFormat(langCode, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 10,
+      }),
     };
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -179,6 +183,10 @@ function createFormatters() {
       conjunction: createListFormat(FORMATTERS_FALLBACK_LANG, 'conjunction'),
       disjunction: createListFormat(FORMATTERS_FALLBACK_LANG, 'disjunction'),
       number: new Intl.NumberFormat(FORMATTERS_FALLBACK_LANG),
+      preciseNumber: new Intl.NumberFormat(FORMATTERS_FALLBACK_LANG, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 10,
+      }),
     };
   }
 }
@@ -325,6 +333,7 @@ function createTranslationFn(): LangFn {
   fn.conjunction = (list: string[]) => formatters?.conjunction.format(list) || list.join(', ');
   fn.disjunction = (list: string[]) => formatters?.disjunction.format(list) || list.join(', ');
   fn.number = (value: number) => formatters?.number.format(value) || String(value);
+  fn.preciseNumber = (value: number) => formatters?.preciseNumber.format(value) || String(value);
   fn.internalFormatters = formatters!;
   fn.languageInfo = language!;
   return fn;

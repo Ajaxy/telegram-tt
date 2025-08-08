@@ -8,12 +8,15 @@ import type {
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
   ApiStarsTransactionPeerPeer,
+  ApiTypeCurrencyAmount,
 } from '../../api/types';
 import type { CustomPeer } from '../../types';
 import type { LangFn } from '../../util/localization';
 import type { GlobalState } from '../types';
 
+import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../config';
 import arePropsShallowEqual from '../../util/arePropsShallowEqual';
+import { convertCurrencyFromBaseUnit } from '../../util/formatCurrency';
 import { selectChat, selectPeer, selectUser } from '../selectors';
 
 export function getRequestInputInvoice<T extends GlobalState>(
@@ -257,6 +260,7 @@ export function getRequestInputSavedStarGift<T extends GlobalState>(
 
 export function buildStarsTransactionCustomPeer(
   peer: Exclude<ApiStarsTransactionPeer, ApiStarsTransactionPeerPeer>,
+  isForTon?: boolean,
 ): CustomPeer {
   if (peer.type === 'appStore') {
     return {
@@ -279,8 +283,17 @@ export function buildStarsTransactionCustomPeer(
   }
 
   if (peer.type === 'fragment') {
+    if (isForTon) {
+      return {
+        avatarIcon: 'fragment',
+        isCustomPeer: true,
+        titleKey: 'Stars.Gift.Received.Title',
+        subtitleKey: 'Stars.Intro.Transaction.Gift.UnknownUser',
+        customPeerAvatarColor: '#000000',
+      };
+    }
     return {
-      avatarIcon: 'star',
+      avatarIcon: 'fragment',
       isCustomPeer: true,
       titleKey: 'Stars.Intro.Transaction.FragmentTopUp.Title',
       subtitleKey: 'Stars.Intro.Transaction.FragmentTopUp.Subtitle',
@@ -328,13 +341,29 @@ export function buildStarsTransactionCustomPeer(
   };
 }
 
-export function formatStarsTransactionAmount(lang: LangFn, starsAmount: ApiStarsAmount) {
-  const amount = starsAmount.amount + starsAmount.nanos / 1e9;
-  if (amount < 0) {
-    return `- ${lang.number(Math.abs(amount))}`;
+export function formatStarsTransactionAmount(lang: LangFn, currencyAmount: ApiTypeCurrencyAmount) {
+  if (currencyAmount.currency === STARS_CURRENCY_CODE) {
+    const amount = currencyAmount.amount + currencyAmount.nanos / 1e9;
+    if (amount < 0) {
+      return `- ${lang.number(Math.abs(amount))}`;
+    }
+
+    return `+ ${lang.number(amount)}`;
   }
 
-  return `+ ${lang.number(amount)}`;
+  if (currencyAmount.currency === TON_CURRENCY_CODE) {
+    const amount = convertCurrencyFromBaseUnit(currencyAmount.amount, currencyAmount.currency);
+    const absAmount = Math.abs(amount);
+    const tonText = lang('TonAmountText', { amount: absAmount }, { pluralValue: absAmount });
+
+    if (amount < 0) {
+      return `- ${tonText}`;
+    }
+
+    return `+ ${tonText}`;
+  }
+
+  return undefined;
 }
 
 export function formatStarsAmount(lang: LangFn, starsAmount: ApiStarsAmount) {
@@ -344,24 +373,45 @@ export function formatStarsAmount(lang: LangFn, starsAmount: ApiStarsAmount) {
 export function getStarsTransactionFromGift(message: ApiMessage): ApiStarsTransaction | undefined {
   const { action } = message.content;
 
-  if (action?.type !== 'giftStars') return undefined;
+  if (action?.type === 'giftStars') {
+    const { transactionId, stars } = action;
 
-  const { transactionId, stars } = action;
+    return {
+      id: transactionId,
+      amount: {
+        currency: STARS_CURRENCY_CODE,
+        amount: stars,
+        nanos: 0,
+      },
+      peer: {
+        type: 'peer',
+        id: message.isOutgoing ? message.chatId : (message.senderId || message.chatId),
+      },
+      date: message.date,
+      isGift: true,
+      isMyGift: message.isOutgoing || undefined,
+    };
+  }
 
-  return {
-    id: transactionId,
-    stars: {
-      amount: stars,
-      nanos: 0,
-    },
-    peer: {
-      type: 'peer',
-      id: message.isOutgoing ? message.chatId : (message.senderId || message.chatId),
-    },
-    date: message.date,
-    isGift: true,
-    isMyGift: message.isOutgoing || undefined,
-  };
+  if (action?.type === 'giftTon') {
+    const { transactionId, cryptoAmount } = action;
+
+    return {
+      id: transactionId,
+      amount: {
+        currency: TON_CURRENCY_CODE,
+        amount: cryptoAmount,
+      },
+      peer: {
+        type: 'fragment',
+      },
+      date: message.date,
+      isGift: true,
+      isMyGift: message.isOutgoing || undefined,
+    };
+  }
+
+  return undefined;
 }
 
 export function getPrizeStarsTransactionFromGiveaway(message: ApiMessage): ApiStarsTransaction | undefined {
@@ -373,7 +423,8 @@ export function getPrizeStarsTransactionFromGiveaway(message: ApiMessage): ApiSt
 
   return {
     id: transactionId,
-    stars: {
+    amount: {
+      currency: STARS_CURRENCY_CODE,
       amount: stars,
       nanos: 0,
     },

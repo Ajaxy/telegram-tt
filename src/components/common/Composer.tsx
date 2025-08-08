@@ -55,6 +55,7 @@ import {
   SCHEDULED_WHEN_ONLINE,
   SEND_MESSAGE_ACTION_INTERVAL,
   SERVICE_NOTIFICATIONS_USER_ID,
+  STARS_CURRENCY_CODE,
 } from '../../config';
 import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
@@ -142,6 +143,7 @@ import useGetSelectionRange from '../../hooks/useGetSelectionRange';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
+import usePrevious from '../../hooks/usePrevious';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useSchedule from '../../hooks/useSchedule';
 import useSendMessageAction from '../../hooks/useSendMessageAction';
@@ -1576,7 +1578,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
   const handleSuggestPostClick = useLastCallback(() => {
     updateDraftSuggestedPostInfo({
-      price: { amount: 0, nanos: 0 },
+      price: { currency: STARS_CURRENCY_CODE, amount: 0, nanos: 0 },
     });
   });
 
@@ -1874,6 +1876,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const effectEmoji = areEffectsSupported && effect?.emoticon;
 
   const shouldRenderPaidBadge = Boolean(paidMessagesStars && mainButtonState === MainButtonState.Send);
+  const prevShouldRenderPaidBadge = usePrevious(shouldRenderPaidBadge);
 
   return (
     <div className={fullClassName}>
@@ -2358,7 +2361,12 @@ const Composer: FC<OwnProps & StateProps> = ({
         {isInMessageList && <Icon name="schedule" />}
         {isInMessageList && <Icon name="check" />}
         <Button
-          className={buildClassName('paidStarsBadge', shouldRenderPaidBadge && 'visible')}
+          className={buildClassName(
+            'paidStarsBadge',
+            shouldRenderPaidBadge && 'visible',
+            prevShouldRenderPaidBadge && !shouldRenderPaidBadge && 'hiding',
+            !prevShouldRenderPaidBadge && !shouldRenderPaidBadge && 'hidden',
+          )}
           nonInteractive
           size="tiny"
           color="stars"

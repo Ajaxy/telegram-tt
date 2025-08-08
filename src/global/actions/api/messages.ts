@@ -33,10 +33,12 @@ import {
   MESSAGE_LIST_SLICE,
   RE_TELEGRAM_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
+  STARS_CURRENCY_CODE,
   STARS_SUGGESTED_POST_FUTURE_MIN,
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
+  TON_CURRENCY_CODE,
 } from '../../../config';
 import { ensureProtocol, isMixedScriptUrl } from '../../../util/browser/url';
 import { IS_IOS } from '../../../util/browser/windowEnvironment';
@@ -124,6 +126,7 @@ import {
   selectForwardsCanBeSentToChat,
   selectForwardsContainVoiceMessages,
   selectIsChatBotNotStarted,
+  selectIsChatRestricted,
   selectIsChatWithSelf,
   selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
@@ -185,8 +188,9 @@ addActionHandler('loadViewportMessages', (global, actions, payload): ActionRetur
   }
 
   const chat = selectChat(global, chatId);
-  // TODO Revise if `chat.isRestricted` check is needed
-  if (!chat || chat.isRestricted) {
+  const isRestricted = selectIsChatRestricted(global, chatId);
+  // TODO Revise if `isRestricted` check is needed
+  if (!chat || isRestricted) {
     onError?.();
     return;
   }
@@ -361,18 +365,31 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
 
   const messagePriceInStars = await getPeerStarsForMessage(global, chatId!);
 
-  const suggestedPostPrice = draftSuggestedPostInfo?.price?.amount || 0;
-  if (suggestedPostPrice && !draftReplyInfo) {
-    const currentBalance = global.stars?.balance?.amount || 0;
+  const suggestedPostPrice = draftSuggestedPostInfo?.price;
+  const suggestedPostCurrency = suggestedPostPrice?.currency || STARS_CURRENCY_CODE;
+  const suggestedPostAmount = suggestedPostPrice?.amount || 0;
+  if (suggestedPostAmount && !draftReplyInfo) {
+    if (suggestedPostCurrency === STARS_CURRENCY_CODE) {
+      const currentBalance = global.stars?.balance?.amount || 0;
 
-    if (suggestedPostPrice > currentBalance) {
-      actions.openStarsBalanceModal({
-        topup: {
-          balanceNeeded: suggestedPostPrice,
-        },
-        tabId,
-      });
-      return;
+      if (suggestedPostAmount > currentBalance) {
+        actions.openStarsBalanceModal({
+          topup: {
+            balanceNeeded: suggestedPostAmount,
+          },
+          tabId,
+        });
+        return;
+      }
+    } else if (suggestedPostCurrency === TON_CURRENCY_CODE) {
+      const currentTonBalance = global.ton?.balance?.amount || 0;
+      if (suggestedPostAmount > currentTonBalance) {
+        actions.openStarsBalanceModal({
+          currency: TON_CURRENCY_CODE,
+          tabId,
+        });
+        return;
+      }
     }
   }
 
@@ -667,10 +684,11 @@ addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
 
   const currentReplyInfo = currentDraft.replyInfo;
 
-  const newDraft: ApiDraft | undefined = (shouldKeepReply || shouldKeepSuggestedPost) ? {
-    replyInfo: shouldKeepReply ? currentReplyInfo : undefined,
-    suggestedPostInfo: shouldKeepSuggestedPost ? currentDraft.suggestedPostInfo : undefined,
-  } : undefined;
+  const newDraft: ApiDraft | undefined = (shouldKeepReply && currentReplyInfo)
+    || (shouldKeepSuggestedPost && currentDraft.suggestedPostInfo) ? {
+      replyInfo: shouldKeepReply ? currentReplyInfo : undefined,
+      suggestedPostInfo: shouldKeepSuggestedPost ? currentDraft.suggestedPostInfo : undefined,
+    } : undefined;
 
   saveDraft({
     global, chatId, threadId, draft: newDraft, isLocalOnly,
@@ -2203,16 +2221,28 @@ addActionHandler('approveSuggestedPost', async (global, actions, payload): Promi
 
   if (!isAdmin && message?.suggestedPostInfo?.price?.amount) {
     const neededAmount = message.suggestedPostInfo.price.amount;
-    const currentBalance = global.stars?.balance?.amount || 0;
+    const isCurrencyStars = message.suggestedPostInfo.price.currency === STARS_CURRENCY_CODE;
 
-    if (neededAmount > currentBalance) {
-      actions.openStarsBalanceModal({
-        topup: {
-          balanceNeeded: neededAmount,
-        },
-        tabId,
-      });
-      return;
+    if (isCurrencyStars) {
+      const currentBalance = global.stars?.balance?.amount || 0;
+      if (neededAmount > currentBalance) {
+        actions.openStarsBalanceModal({
+          topup: {
+            balanceNeeded: neededAmount,
+          },
+          tabId,
+        });
+        return;
+      }
+    } else {
+      const currentTonBalance = global.ton?.balance?.amount || 0;
+      if (neededAmount > currentTonBalance) {
+        actions.openStarsBalanceModal({
+          currency: TON_CURRENCY_CODE,
+          tabId,
+        });
+        return;
+      }
     }
   }
 

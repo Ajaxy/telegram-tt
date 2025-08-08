@@ -1,7 +1,7 @@
 import type { FC } from '../../lib/teact/teact';
 import type React from '../../lib/teact/teact';
 import { memo, useEffect, useMemo } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
   ApiChat, ApiThreadInfo, ApiTopic, ApiTypingStatus, ApiUser,
@@ -19,6 +19,7 @@ import {
   selectChat,
   selectChatMessages,
   selectChatOnlineCount,
+  selectIsChatRestricted,
   selectMonoforumChannel,
   selectThreadInfo,
   selectThreadMessagesCount,
@@ -126,7 +127,8 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
 
   const isSuperGroup = chat && isChatSuperGroup(chat);
   const isTopic = Boolean(chat?.isForum && threadInfo && topic);
-  const { id: chatId, isMin, isRestricted } = chat || {};
+  const { id: chatId, isMin } = chat || {};
+  const isRestricted = selectIsChatRestricted(getGlobal(), chatId!);
 
   useEffect(() => {
     if (chatId && !isMin) {

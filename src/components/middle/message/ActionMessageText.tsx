@@ -6,7 +6,9 @@ import type { ApiChat, ApiMessage, ApiPeer } from '../../../api/types';
 import {
   GENERAL_TOPIC_ID,
   SERVICE_NOTIFICATIONS_USER_ID,
+  STARS_CURRENCY_CODE,
   TME_LINK_PREFIX,
+  TON_CURRENCY_CODE,
 } from '../../../config';
 import {
   getMainUsername,
@@ -27,7 +29,8 @@ import {
 import { ensureProtocol } from '../../../util/browser/url';
 import { formatDateTimeToString, formatScheduledDateTime, formatShortDuration } from '../../../util/dates/dateFormat';
 import { formatCurrency } from '../../../util/formatCurrency';
-import { formatStarsAsText } from '../../../util/localization/format';
+import { convertTonFromNanos } from '../../../util/formatCurrency';
+import { formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
 import { conjuctionWithNodes } from '../../../util/localization/utils';
 import { getServerTime } from '../../../util/serverTime';
 import renderText from '../../common/helpers/renderText';
@@ -441,15 +444,17 @@ const ActionMessageText = ({
       }
 
       case 'giftStars':
-      case 'giftPremium': {
+      case 'giftPremium':
+      case 'giftTon': {
         const {
-          amount, currency, cryptoAmount, cryptoCurrency,
+          amount, currency, cryptoAmount, cryptoCurrency, type,
         } = action;
 
         const price = formatCurrency(lang, amount, currency, { asFontIcon: true });
-        const cryptoPrice = cryptoAmount ? formatCurrency(lang, cryptoAmount, cryptoCurrency!) : undefined;
+        const cryptoPrice = cryptoAmount && type !== 'giftTon'
+          ? formatCurrency(lang, cryptoAmount, cryptoCurrency!) : undefined;
 
-        const cost = cryptoPrice ? lang('ActionCostCrypto', { price, cryptoPrice }, { withNodes: true }) : price;
+        const cost = cryptoPrice ? lang('ActionGiftCostCrypto', { price, cryptoPrice }, { withNodes: true }) : price;
 
         if (isServiceNotificationsChat) {
           return lang('ActionGiftTextCostAnonymous', { cost }, { withNodes: true });
@@ -755,13 +760,21 @@ const ActionMessageText = ({
       }
 
       case 'suggestedPostSuccess': {
-        const { amount: stars } = action;
+        const { amount: price } = action;
+        const currency = price?.currency || STARS_CURRENCY_CODE;
+        const amount = price?.amount || 0;
+
         const channel = chat?.isMonoforum ? selectMonoforumChannel(global, chatId) : chat;
         const channelTitle = channel && getPeerTitle(lang, channel);
         const channelLink = renderPeerLink(channel?.id, channelTitle || channelFallbackText, asPreview);
+
+        const formattedAmount = currency === TON_CURRENCY_CODE
+          ? formatTonAsText(lang, convertTonFromNanos(amount))
+          : formatStarsAsText(lang, amount);
+
         return lang('ActionSuggestedPostSuccess', {
           channel: channelLink,
-          amount: formatStarsAsText(lang, stars?.amount || 0),
+          amount: formattedAmount,
         }, { withNodes: true });
       }
       case 'suggestedPostRefund': {
@@ -775,22 +788,28 @@ const ActionMessageText = ({
         const postSenderTitle = postSender && getPeerTitle(lang, postSender);
         const postSenderLink = renderPeerLink(postSender?.id, postSenderTitle || userFallbackText, asPreview);
 
-        const starsAmount = replyMessage?.suggestedPostInfo?.price?.amount || 0;
+        const price = replyMessage?.suggestedPostInfo?.price;
+        const currency = price?.currency || STARS_CURRENCY_CODE;
+        const amount = price?.amount || 0;
 
         const channel = chat?.isMonoforum ? selectMonoforumChannel(global, chatId) : chat;
         const channelTitle = channel && getPeerTitle(lang, channel);
         const channelLink = renderPeerLink(channel?.id, channelTitle || channelFallbackText, asPreview);
 
+        const formattedAmount = currency === TON_CURRENCY_CODE
+          ? formatTonAsText(lang, convertTonFromNanos(amount))
+          : formatStarsAsText(lang, amount);
+
         if (payerInitiated) {
           return lang('SuggestedPostRefundedByUser', {
-            amount: formatStarsAsText(lang, starsAmount),
+            amount: formattedAmount,
             user: postSenderLink,
             channel: channelLink,
           }, { withNodes: true, withMarkdown: true });
         }
 
         return lang('SuggestedPostRefundedByChannel', {
-          amount: formatStarsAsText(lang, starsAmount),
+          amount: formattedAmount,
           peer: postSenderLink,
           channel: channelLink,
         }, { withNodes: true, withMarkdown: true });
@@ -819,9 +838,13 @@ const ActionMessageText = ({
           const replyMessageSender = replyMessage ? selectSender(global, replyMessage) : sender;
           const replyPeerTitle = replyMessageSender && getPeerTitle(lang, replyMessageSender);
           const userLink = renderPeerLink(replyMessageSender?.id, replyPeerTitle || userFallbackText, asPreview);
+
+          const currency = replyMessage?.suggestedPostInfo?.price?.currency || STARS_CURRENCY_CODE;
+          const currencyName = currency === TON_CURRENCY_CODE ? lang('CurrencyTon') : lang('CurrencyStars');
+
           return lang('SuggestedPostBalanceTooLow', {
             peer: userLink,
-            currency: lang('CurrencyStars'),
+            currency: currencyName,
           }, { withNodes: true, withMarkdown: true });
         }
 

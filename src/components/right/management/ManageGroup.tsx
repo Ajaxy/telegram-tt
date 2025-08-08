@@ -3,7 +3,7 @@ import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
   ApiAvailableReaction, ApiChat, ApiChatBannedRights, ApiChatFullInfo, ApiExportedInvite,
@@ -17,7 +17,7 @@ import {
   isChatBasicGroup,
   isChatPublic,
 } from '../../../global/helpers';
-import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
+import { selectChat, selectChatFullInfo, selectIsChatRestricted, selectTabState } from '../../../global/selectors';
 import { debounce } from '../../../util/schedulers';
 import { formatInteger } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
@@ -312,7 +312,8 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     openChat({ id: undefined });
   });
 
-  if (chat.isRestricted || chat.isForbidden) {
+  const isRestricted = selectIsChatRestricted(getGlobal(), chatId);
+  if (isRestricted || chat.isForbidden) {
     return undefined;
   }
 

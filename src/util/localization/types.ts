@@ -155,6 +155,7 @@ export type LangFn = {
   conjunction: (list: string[]) => string;
   disjunction: (list: string[]) => string;
   number: (value: number) => string;
+  preciseNumber: (value: number) => string;
   internalFormatters: LangFormatters;
   isRtl?: boolean;
   rawCode: string;
@@ -171,6 +172,7 @@ export type LangFormatters = {
   conjunction: ListFormat;
   disjunction: ListFormat;
   number: Intl.NumberFormat;
+  preciseNumber: Intl.NumberFormat;
 };
 
 /* GUARDS */

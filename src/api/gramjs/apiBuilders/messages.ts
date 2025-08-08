@@ -47,7 +47,7 @@ import { omitUndefined, pick } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
 import {
-  buildApiStarsAmount,
+  buildApiCurrencyAmount,
 } from '../apiBuilders/payments';
 import { buildPeer } from '../gramjsBuilders';
 import {
@@ -70,6 +70,7 @@ import {
 import { type OmitVirtualFields } from './helpers';
 import { buildApiMessageAction } from './messageActions';
 import { buildMessageContent, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
+import { buildApiRestrictionReasons } from './misc';
 import { buildApiPeerColor, buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildMessageReactions } from './reactions';
 
@@ -230,6 +231,8 @@ export function buildApiMessageWithChatId(
 
   const savedPeerId = mtpMessage.savedPeerId && getApiChatIdFromMtpPeer(mtpMessage.savedPeerId);
 
+  const restrictionReasons = buildApiRestrictionReasons(mtpMessage.restrictionReason);
+
   return {
     id: mtpMessage.id,
     chatId,
@@ -277,6 +280,7 @@ export function buildApiMessageWithChatId(
     isVideoProcessingPending,
     reportDeliveryUntilDate: mtpMessage.reportDeliveryUntilDate,
     paidMessageStars: mtpMessage.paidMessageStars?.toJSNumber(),
+    restrictionReasons,
   };
 }
 
@@ -302,7 +306,7 @@ export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | un
   const suggestedPostInfo = suggestedPost instanceof GramJs.SuggestedPost ? {
     isAccepted: suggestedPost.accepted,
     isRejected: suggestedPost.rejected,
-    price: suggestedPost.price ? buildApiStarsAmount(suggestedPost.price) : undefined,
+    price: suggestedPost.price ? buildApiCurrencyAmount(suggestedPost.price) : undefined,
     scheduleDate: suggestedPost.scheduleDate,
   } satisfies ApiInputSuggestedPostInfo : undefined;
 
@@ -319,7 +323,7 @@ function buildApiSuggestedPost(suggestedPost: GramJs.SuggestedPost): ApiSuggeste
   return {
     isAccepted: suggestedPost.accepted,
     isRejected: suggestedPost.rejected,
-    price: suggestedPost.price ? buildApiStarsAmount(suggestedPost.price) : undefined,
+    price: suggestedPost.price ? buildApiCurrencyAmount(suggestedPost.price) : undefined,
     scheduleDate: suggestedPost.scheduleDate,
   };
 }

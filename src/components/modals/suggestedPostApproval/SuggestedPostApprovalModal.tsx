@@ -4,15 +4,18 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiMessage, ApiPeer } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
-import { STARS_SUGGESTED_POST_AGE_MIN,
+import { STARS_CURRENCY_CODE, STARS_SUGGESTED_POST_AGE_MIN,
   STARS_SUGGESTED_POST_COMMISSION_PERMILLE,
   STARS_SUGGESTED_POST_FUTURE_MAX,
   STARS_SUGGESTED_POST_FUTURE_MIN,
+  TON_CURRENCY_CODE,
+  TON_SUGGESTED_POST_COMMISSION_PERMILLE,
 } from '../../../config';
 import { getPeerFullTitle } from '../../../global/helpers/peers';
 import { selectChatMessage, selectIsMonoforumAdmin, selectSender } from '../../../global/selectors';
 import { formatScheduledDateTime, formatShortDuration } from '../../../util/dates/dateFormat';
-import { formatStarsAsText } from '../../../util/localization/format';
+import { convertTonFromNanos } from '../../../util/formatCurrency';
+import { formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -31,6 +34,7 @@ export type OwnProps = {
 
 type StateProps = {
   commissionPermille: number;
+  tonCommissionPermille: number;
   minAge: number;
   futureMin: number;
   futureMax: number;
@@ -46,6 +50,7 @@ const SuggestedPostApprovalModal = ({
   sender,
   isAdmin,
   commissionPermille,
+  tonCommissionPermille,
   minAge,
   futureMin,
   futureMax,
@@ -114,7 +119,10 @@ const SuggestedPostApprovalModal = ({
   const senderName = sender ? getPeerFullTitle(oldLang, sender) : '';
 
   const renderContent = () => {
-    const amount = message?.suggestedPostInfo?.price?.amount;
+    const price = message?.suggestedPostInfo?.price;
+    const amount = price?.amount;
+    const currency = price?.currency || STARS_CURRENCY_CODE;
+
     const question = lang(
       'SuggestedPostConfirmMessage',
       { peer: senderName },
@@ -125,10 +133,13 @@ const SuggestedPostApprovalModal = ({
       return questionText;
     }
 
-    const commission = (commissionPermille / 10);
+    const currentCommissionPermille = currency === TON_CURRENCY_CODE ? tonCommissionPermille : commissionPermille;
+    const commission = (currentCommissionPermille / 10);
     const amountWithCommission = amount / 100 * commission;
 
-    const starsText = formatStarsAsText(lang, amountWithCommission);
+    const formattedAmount = currency === TON_CURRENCY_CODE
+      ? formatTonAsText(lang, convertTonFromNanos(amountWithCommission))
+      : formatStarsAsText(lang, amountWithCommission);
 
     const ageMinSeconds = minAge;
     const duration = formatShortDuration(lang, ageMinSeconds, true);
@@ -146,7 +157,7 @@ const SuggestedPostApprovalModal = ({
           </div>
           <div className={styles.details}>
             {renderText(lang(key, {
-              amount: starsText,
+              amount: formattedAmount,
               commission,
               duration,
               time,
@@ -165,7 +176,7 @@ const SuggestedPostApprovalModal = ({
         </div>
         <div className={styles.details}>
           {renderText(lang(key, {
-            amount: starsText,
+            amount: formattedAmount,
             commission,
             duration,
           }, { withNodes: true, withMarkdown: true }))}
@@ -215,6 +226,8 @@ export default memo(withGlobal<OwnProps>(
     const { appConfig } = global;
     const commissionPermille = appConfig?.starsSuggestedPostCommissionPermille
       || STARS_SUGGESTED_POST_COMMISSION_PERMILLE;
+    const tonCommissionPermille = appConfig?.tonSuggestedPostCommissionPermille
+      || TON_SUGGESTED_POST_COMMISSION_PERMILLE;
     const minAge = appConfig?.starsSuggestedPostAgeMin || STARS_SUGGESTED_POST_AGE_MIN;
     const futureMin = (appConfig?.starsSuggestedPostFutureMin || STARS_SUGGESTED_POST_FUTURE_MIN) * 2;
     const futureMax = appConfig?.starsSuggestedPostFutureMax || STARS_SUGGESTED_POST_FUTURE_MAX;
@@ -228,6 +241,7 @@ export default memo(withGlobal<OwnProps>(
       sender,
       isAdmin,
       commissionPermille,
+      tonCommissionPermille,
       scheduleDate,
     };
   },

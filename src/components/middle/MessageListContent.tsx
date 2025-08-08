@@ -23,8 +23,9 @@ import { getPeerTitle } from '../../global/helpers/peers';
 import { selectChatMessage, selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatHumanDate, formatScheduledDateTime } from '../../util/dates/dateFormat';
+import { convertTonFromNanos } from '../../util/formatCurrency';
 import { compact } from '../../util/iteratees';
-import { formatStarsAsText } from '../../util/localization/format';
+import { formatStarsAsText, formatTonAsText } from '../../util/localization/format';
 import { isAlbum } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import { renderPeerLink } from './message/helpers/messageActions';
@@ -202,8 +203,14 @@ const MessageListContent: FC<OwnProps> = ({
           : lang('ActionSuggestedPostIncoming', { user: userLink }, { withNodes: true, withMarkdown: true });
 
       const tableData: TableEntry[] = compact([
-        price && [lang('TitlePrice'), formatStarsAsText(lang, price.amount)],
-        Boolean(scheduleDate) && [lang('TitleTime'), formatScheduledDateTime(scheduleDate, lang, oldLang)],
+        [lang('TitlePrice'), price ? (price.currency === 'TON'
+          ? formatTonAsText(lang, convertTonFromNanos(price.amount))
+          : formatStarsAsText(lang, price.amount)) : lang('SuggestMessageNoPrice')],
+        [lang('TitleTime'),
+          scheduleDate
+            ? formatScheduledDateTime(scheduleDate, lang, oldLang)
+            : lang('SuggestMessageAnytime'),
+        ],
       ]);
 
       return (

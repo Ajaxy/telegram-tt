@@ -1,6 +1,7 @@
-import type { ApiStarsAmount, ApiStarsTransaction } from '../../../../api/types';
+import type { ApiStarsAmount, ApiStarsTransaction, ApiTypeCurrencyAmount } from '../../../../api/types';
 import type { OldLangFn } from '../../../../hooks/useOldLang';
 
+import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../../config';
 import { buildStarsTransactionCustomPeer } from '../../../../global/helpers/payments';
 import {
   type LangFn,
@@ -20,7 +21,7 @@ export function getTransactionTitle(oldLang: OldLangFn, lang: LangFn, transactio
   }
 
   if (transaction.isGiftResale) {
-    return isNegativeStarsAmount(transaction.stars)
+    return isNegativeAmount(transaction.amount)
       ? lang('StarGiftSaleTransaction')
       : lang('StarGiftPurchaseTransaction');
   }
@@ -34,9 +35,14 @@ export function getTransactionTitle(oldLang: OldLangFn, lang: LangFn, transactio
   if (transaction.isReaction) return oldLang('StarsReactionsSent');
   if (transaction.giveawayPostId) return oldLang('StarsGiveawayPrizeReceived');
   if (transaction.isMyGift) return oldLang('StarsGiftSent');
-  if (transaction.isGift) return oldLang('StarsGiftReceived');
+  if (transaction.isGift) {
+    if (transaction.amount.currency === TON_CURRENCY_CODE) {
+      return lang('TonGiftReceived');
+    }
+    return oldLang('StarsGiftReceived');
+  }
   if (transaction.starGift) {
-    return isNegativeStarsAmount(transaction.stars) ? oldLang('Gift2TransactionSent') : oldLang('Gift2ConvertedTitle');
+    return isNegativeAmount(transaction.amount) ? oldLang('Gift2TransactionSent') : oldLang('Gift2ConvertedTitle');
   }
 
   const customPeer = (transaction.peer && transaction.peer.type !== 'peer'
@@ -50,4 +56,11 @@ export function getTransactionTitle(oldLang: OldLangFn, lang: LangFn, transactio
 export function isNegativeStarsAmount(starsAmount: ApiStarsAmount) {
   if (starsAmount.amount) return starsAmount.amount < 0;
   return starsAmount.nanos < 0;
+}
+
+export function isNegativeAmount(currencyAmount: ApiTypeCurrencyAmount) {
+  if (currencyAmount.currency === STARS_CURRENCY_CODE) {
+    return isNegativeStarsAmount(currencyAmount);
+  }
+  return currencyAmount.amount < 0;
 }

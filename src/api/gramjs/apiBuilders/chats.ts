@@ -23,7 +23,7 @@ import type {
   ApiTopic,
 } from '../../types';
 
-import { pick, pickTruthy } from '../../../util/iteratees';
+import { pickTruthy } from '../../../util/iteratees';
 import { getServerTimeOffset } from '../../../util/serverTime';
 import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
@@ -31,7 +31,7 @@ import {
   buildApiBotVerification, buildApiFormattedText, buildApiPhoto, buildApiUsernames, buildAvatarPhotoId,
 } from './common';
 import { omitVirtualClassFields } from './helpers';
-import { buildApiPeerNotifySettings } from './misc';
+import { buildApiPeerNotifySettings, buildApiRestrictionReasons } from './misc';
 import {
   buildApiEmojiStatus,
   buildApiPeerColor,
@@ -196,7 +196,7 @@ function buildApiChatRestrictions(peerEntity: Entity): {
   isNotJoined?: boolean;
   isForbidden?: boolean;
   isRestricted?: boolean;
-  restrictionReason?: ApiRestrictionReason;
+  restrictionReasons?: ApiRestrictionReason[];
 } {
   if (peerEntity instanceof GramJs.ChatForbidden) {
     return {
@@ -213,11 +213,10 @@ function buildApiChatRestrictions(peerEntity: Entity): {
   const restrictions = {};
 
   if ('restricted' in peerEntity && !peerEntity.min) {
-    const restrictionReason = buildApiChatRestrictionReason(peerEntity.restrictionReason);
+    const restrictionReasons = buildApiRestrictionReasons(peerEntity.restrictionReason);
 
     Object.assign(restrictions, {
-      isRestricted: peerEntity.restricted,
-      restrictionReason,
+      restrictionReasons,
     });
   }
 
@@ -259,17 +258,6 @@ function buildApiChatMigrationInfo(peerEntity: Entity): {
   }
 
   return {};
-}
-
-function buildApiChatRestrictionReason(
-  restrictionReasons?: GramJs.RestrictionReason[],
-): ApiRestrictionReason | undefined {
-  if (!restrictionReasons) {
-    return undefined;
-  }
-
-  const targetReason = restrictionReasons.find(({ platform }) => platform === 'all');
-  return targetReason ? pick(targetReason, ['reason', 'text']) : undefined;
 }
 
 export function buildApiChatFromPreview(

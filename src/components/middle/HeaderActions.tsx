@@ -22,6 +22,7 @@ import {
   selectChat,
   selectChatFullInfo,
   selectIsChatBotNotStarted,
+  selectIsChatRestricted,
   selectIsChatWithSelf,
   selectIsCurrentUserFrozen,
   selectIsInSelectMode,
@@ -477,7 +478,8 @@ export default memo(withGlobal<OwnProps>(
     const isPrivate = isUserId(chatId);
     const { doNotTranslate } = global.settings.byKey;
 
-    if (!chat || chat.isRestricted || selectIsInSelectMode(global)) {
+    const isRestricted = selectIsChatRestricted(global, chatId);
+    if (!chat || isRestricted || selectIsInSelectMode(global)) {
       return {
         noMenu: true,
         language,

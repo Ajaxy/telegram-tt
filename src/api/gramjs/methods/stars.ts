@@ -14,7 +14,7 @@ import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiResaleGifts, buildApiSavedStarGift, buildApiStarGift,
   buildApiStarGiftAttribute, buildInputResaleGiftsAttributes } from '../apiBuilders/gifts';
 import {
-  buildApiStarsAmount,
+  buildApiCurrencyAmount,
   buildApiStarsGiftOptions,
   buildApiStarsGiveawayOptions,
   buildApiStarsSubscription,
@@ -182,18 +182,22 @@ export async function getStarsGiftOptions({
   return result.map(buildApiStarsGiftOptions);
 }
 
-export async function fetchStarsStatus() {
+export async function fetchStarsStatus({
+  isTon,
+}: {
+  isTon?: boolean;
+} = {}) {
   const result = await invokeRequest(new GramJs.payments.GetStarsStatus({
     peer: new GramJs.InputPeerSelf(),
+    ton: isTon || undefined,
   }));
 
   if (!result) {
     return undefined;
   }
 
-  const balance = buildApiStarsAmount(result.balance);
+  const balance = buildApiCurrencyAmount(result.balance);
   if (!balance) {
-    // For now, skip if balance is in TON
     return undefined;
   }
 
@@ -212,29 +216,31 @@ export async function fetchStarsTransactions({
   limit = DEFAULT_PRIMITIVES.INT,
   isInbound,
   isOutbound,
+  isTon,
 }: {
   peer?: ApiPeer;
   offset?: string;
   limit?: number;
-  isInbound?: true;
-  isOutbound?: true;
+  isInbound?: boolean;
+  isOutbound?: boolean;
+  isTon?: boolean;
 }) {
   const inputPeer = peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf();
   const result = await invokeRequest(new GramJs.payments.GetStarsTransactions({
     peer: inputPeer,
     offset,
     limit,
-    inbound: isInbound,
-    outbound: isOutbound,
+    inbound: isInbound || undefined,
+    outbound: isOutbound || undefined,
+    ton: isTon || undefined,
   }));
 
   if (!result) {
     return undefined;
   }
 
-  const balance = buildApiStarsAmount(result.balance);
+  const balance = buildApiCurrencyAmount(result.balance);
   if (!balance) {
-    // For now, skip if balance is in TON
     return undefined;
   }
 
@@ -246,14 +252,16 @@ export async function fetchStarsTransactions({
 }
 
 export async function fetchStarsTransactionById({
-  id, peer,
+  id, peer, ton,
 }: {
   id: string;
   peer?: ApiPeer;
+  ton?: true;
 }) {
   const inputPeer = peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf();
   const result = await invokeRequest(new GramJs.payments.GetStarsTransactionsByID({
     peer: inputPeer,
+    ton,
     id: [new GramJs.InputStarsTransaction({
       id,
     })],
@@ -285,9 +293,8 @@ export async function fetchStarsSubscriptions({
     return undefined;
   }
 
-  const balance = buildApiStarsAmount(result.balance);
+  const balance = buildApiCurrencyAmount(result.balance);
   if (!balance) {
-    // For now, skip if balance is in TON
     return undefined;
   }
 

@@ -22,6 +22,7 @@ import {
   selectForwardedSender,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
+  selectIsMediaNsfw,
   selectSender,
   selectTabState,
 } from '../../../global/selectors';
@@ -67,14 +68,15 @@ type StateProps = {
   currentUserId?: string;
   forwardMessageIds?: number[];
   fromChatId?: string;
+  isMediaNsfw?: boolean;
 };
 
 type OwnProps = {
-  onClear?: () => void;
   shouldForceShowEditing?: boolean;
   chatId: string;
   threadId: ThreadId;
   messageListType: MessageListType;
+  onClear?: () => void;
 };
 
 const CLOSE_DURATION = 350;
@@ -94,7 +96,6 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   isCurrentUserPremium,
   isContextMenuDisabled,
   isReplyToDiscussion,
-  onClear,
   isInChangingRecipientMode,
   shouldPreventComposerAnimation,
   senderChat,
@@ -103,6 +104,8 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   isSenderChannel,
   forwardMessageIds,
   fromChatId,
+  isMediaNsfw,
+  onClear,
 }) => {
   const {
     resetDraftReplyInfo,
@@ -301,6 +304,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
           className="inside-input"
           replyInfo={replyInfo}
           suggestedPostInfo={suggestedPostInfo}
+          isMediaNsfw={isMediaNsfw}
           isInComposer
           message={strippedMessage}
           sender={!noAuthors ? sender : undefined}
@@ -495,6 +499,8 @@ export default memo(withGlobal<OwnProps>(
 
     const isReplyToDiscussion = replyInfo?.replyToMsgId === threadId && !replyInfo.replyToPeerId;
 
+    const isMediaNsfw = message && selectIsMediaNsfw(global, message);
+
     return {
       replyInfo,
       suggestedPostInfo,
@@ -516,6 +522,7 @@ export default memo(withGlobal<OwnProps>(
       isSenderChannel,
       forwardMessageIds,
       fromChatId,
+      isMediaNsfw,
     };
   },
 )(ComposerEmbeddedMessage));

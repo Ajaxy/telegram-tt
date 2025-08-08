@@ -2,7 +2,12 @@ import type { ApiSavedStarGift, ApiStarGiftUnique } from '../../../api/types';
 import type { StarGiftCategory } from '../../../types';
 import type { ActionReturnType } from '../../types';
 
-import { DEFAULT_RESALE_GIFTS_FILTER_OPTIONS, RESALE_GIFTS_LIMIT } from '../../../config';
+import {
+  DEFAULT_RESALE_GIFTS_FILTER_OPTIONS,
+  RESALE_GIFTS_LIMIT,
+  STARS_CURRENCY_CODE,
+  TON_CURRENCY_CODE,
+} from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { callApi } from '../../../api/gramjs';
@@ -26,57 +31,82 @@ import {
 } from '../../selectors';
 
 addActionHandler('loadStarStatus', async (global): Promise<void> => {
-  const currentStatus = global.stars;
-  const needsTopupOptions = !currentStatus?.topupOptions;
+  const currentStarsStatus = global.stars;
+  const needsTopupOptions = !currentStarsStatus?.topupOptions;
 
-  const [status, topupOptions] = await Promise.all([
+  const [starsStatus, tonStatus, topupOptions] = await Promise.all([
     callApi('fetchStarsStatus'),
+    callApi('fetchStarsStatus', { isTon: true }),
     needsTopupOptions ? callApi('fetchStarsTopupOptions') : undefined,
   ]);
 
-  if (!status || (needsTopupOptions && !topupOptions)) {
+  if (!(starsStatus || tonStatus) || (needsTopupOptions && !topupOptions)) {
     return;
   }
 
   global = getGlobal();
 
-  global = {
-    ...global,
-    stars: {
-      ...currentStatus,
-      balance: status.balance,
-      topupOptions: topupOptions || currentStatus!.topupOptions,
-      history: {
-        all: undefined,
-        inbound: undefined,
-        outbound: undefined,
+  if (starsStatus && starsStatus.balance.currency === STARS_CURRENCY_CODE) {
+    global = {
+      ...global,
+      stars: {
+        ...currentStarsStatus,
+        balance: starsStatus.balance,
+        topupOptions: topupOptions || currentStarsStatus!.topupOptions,
+        history: {
+          all: undefined,
+          inbound: undefined,
+          outbound: undefined,
+        },
+        subscriptions: undefined,
       },
-      subscriptions: undefined,
-    },
-  };
+    };
 
-  if (status.history) {
-    global = appendStarsTransactions(global, 'all', status.history, status.nextHistoryOffset);
+    if (starsStatus.history) {
+      global = appendStarsTransactions(global, 'all', starsStatus.history, starsStatus.nextHistoryOffset);
+    }
+
+    if (starsStatus.subscriptions) {
+      global = appendStarsSubscriptions(global, starsStatus.subscriptions, starsStatus.nextSubscriptionOffset);
+    }
   }
 
-  if (status.subscriptions) {
-    global = appendStarsSubscriptions(global, status.subscriptions, status.nextSubscriptionOffset);
+  if (tonStatus?.balance.currency === TON_CURRENCY_CODE) {
+    global = {
+      ...global,
+      ton: {
+        ...tonStatus,
+        balance: tonStatus.balance,
+        history: {
+          all: undefined,
+          inbound: undefined,
+          outbound: undefined,
+        },
+      },
+    };
+
+    global = updateStarsBalance(global, tonStatus.balance);
+
+    if (tonStatus.history) {
+      global = appendStarsTransactions(global, 'all', tonStatus.history, tonStatus.nextHistoryOffset, true);
+    }
   }
 
   setGlobal(global);
 });
 
 addActionHandler('loadStarsTransactions', async (global, actions, payload): Promise<void> => {
-  const { type } = payload;
+  const { type, isTon } = payload;
 
-  const history = global.stars?.history[type];
+  const history = isTon ? global.ton?.history[type] : global.stars?.history[type];
   const offset = history?.nextOffset;
   if (history && !offset) return; // Already loaded all
 
   const result = await callApi('fetchStarsTransactions', {
-    isInbound: type === 'inbound' || undefined,
-    isOutbound: type === 'outbound' || undefined,
+    isInbound: type === 'inbound',
+    isOutbound: type === 'outbound',
     offset: offset || '',
+    isTon,
   });
 
   if (!result) {
@@ -87,7 +117,7 @@ addActionHandler('loadStarsTransactions', async (global, actions, payload): Prom
 
   global = updateStarsBalance(global, result.balance);
   if (result.history) {
-    global = appendStarsTransactions(global, type, result.history, result.nextOffset);
+    global = appendStarsTransactions(global, type, result.history, result.nextOffset, isTon);
   }
   setGlobal(global);
 });
@@ -315,7 +345,7 @@ addActionHandler('loadStarsSubscriptions', async (global): Promise<void> => {
     offset: offset || '',
   });
 
-  if (!result) {
+  if (!result || result.balance.currency !== STARS_CURRENCY_CODE) {
     return;
   }
 

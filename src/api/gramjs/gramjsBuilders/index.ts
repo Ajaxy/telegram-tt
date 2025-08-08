@@ -33,15 +33,15 @@ import type {
   ApiStory,
   ApiStorySkipped,
   ApiThemeParameters,
+  ApiTypeCurrencyAmount,
   ApiVideo,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
 } from '../../types';
 
-import { CHANNEL_ID_BASE, DEFAULT_STATUS_ICON_ID } from '../../../config';
+import { CHANNEL_ID_BASE, DEFAULT_STATUS_ICON_ID, STARS_CURRENCY_CODE } from '../../../config';
 import { pick } from '../../../util/iteratees';
-import { buildInputStarsAmount } from '../apiBuilders/payments';
 import { deserializeBytes } from '../helpers/misc';
 import localDb from '../localDb';
 
@@ -890,12 +890,22 @@ export function buildInputReplyTo(replyInfo: ApiInputReplyInfo) {
   return undefined;
 }
 
-export function buildInputSuggestedPost(suggestedPostInfo: ApiInputSuggestedPostInfo): GramJs.SuggestedPost {
-  const isPaid = Boolean(suggestedPostInfo.price)
-    && Boolean((suggestedPostInfo.price.amount || suggestedPostInfo.price.nanos));
+export function buildInputStarsAmount(amount: ApiTypeCurrencyAmount): GramJs.TypeStarsAmount {
+  if (amount.currency === STARS_CURRENCY_CODE) {
+    return new GramJs.StarsAmount({
+      amount: BigInt(amount.amount),
+      nanos: amount.nanos,
+    });
+  }
 
+  return new GramJs.StarsTonAmount({
+    amount: BigInt(amount.amount),
+  });
+}
+
+export function buildInputSuggestedPost(suggestedPostInfo: ApiInputSuggestedPostInfo): GramJs.SuggestedPost {
   return new GramJs.SuggestedPost({
-    price: isPaid ? buildInputStarsAmount(suggestedPostInfo.price!) : undefined,
+    price: suggestedPostInfo.price && buildInputStarsAmount(suggestedPostInfo.price),
     scheduleDate: suggestedPostInfo.scheduleDate,
   });
 }

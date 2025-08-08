@@ -8,6 +8,7 @@ import type {
 import type { GlobalState } from '../../../../global/types';
 import type { CustomPeer } from '../../../../types';
 
+import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../../config';
 import { buildStarsTransactionCustomPeer, formatStarsTransactionAmount } from '../../../../global/helpers/payments';
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
@@ -16,7 +17,7 @@ import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
 import { CUSTOM_PEER_PREMIUM } from '../../../../util/objects/customPeer';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';
 import renderText from '../../../common/helpers/renderText';
-import { getTransactionTitle, isNegativeStarsAmount } from '../helpers/transaction';
+import { getTransactionTitle, isNegativeAmount } from '../helpers/transaction';
 
 import useSelector from '../../../../hooks/data/useSelector';
 import useLang from '../../../../hooks/useLang';
@@ -48,7 +49,7 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
   const { openStarsTransactionModal } = getActions();
   const {
     date,
-    stars,
+    amount,
     photo,
     peer: transactionPeer,
     extendedMedia,
@@ -73,7 +74,10 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
       description = peer && getPeerTitle(oldLang, peer);
       avatarPeer = peer || CUSTOM_PEER_PREMIUM;
     } else {
-      const customPeer = buildStarsTransactionCustomPeer(transaction.peer);
+      const customPeer = buildStarsTransactionCustomPeer(
+        transaction.peer,
+        transaction.amount.currency === TON_CURRENCY_CODE,
+      );
       title = customPeer.title || oldLang(customPeer.titleKey!);
       description = oldLang(customPeer.subtitleKey!);
       avatarPeer = customPeer;
@@ -178,11 +182,11 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
       </div>
       <div className={styles.stars}>
         <span
-          className={buildClassName(styles.amount, isNegativeStarsAmount(stars) ? styles.negative : styles.positive)}
+          className={buildClassName(styles.amount, isNegativeAmount(amount) ? styles.negative : styles.positive)}
         >
-          {formatStarsTransactionAmount(lang, stars)}
+          {formatStarsTransactionAmount(lang, amount)}
         </span>
-        <StarIcon className={styles.star} type="gold" size="adaptive" />
+        {amount.currency === STARS_CURRENCY_CODE && <StarIcon className={styles.star} type="gold" size="adaptive" />}
       </div>
     </div>
   );

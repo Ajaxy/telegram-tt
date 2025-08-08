@@ -18,7 +18,7 @@ import TableInfoModal, { type TableData } from '../common/TableInfoModal';
 
 import styles from './GiftCodeModal.module.scss';
 
-import PremiumLogo from '../../../assets/premium/PremiumLogo.svg';
+import PremiumLogo from '../../../assets/premium/PremiumStar.svg';
 
 export type OwnProps = {
   modal: TabState['giftCodeModal'];

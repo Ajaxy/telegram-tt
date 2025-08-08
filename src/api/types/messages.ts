@@ -6,10 +6,11 @@ import type {
 } from './bots';
 import type { ApiPeerColor } from './chats';
 import type { ApiMessageAction } from './messageActions';
+import type { ApiRestrictionReason } from './misc';
 import type {
   ApiLabeledPrice,
 } from './payments';
-import type { ApiStarGiftUnique, ApiStarsAmount } from './stars';
+import type { ApiStarGiftUnique, ApiTypeCurrencyAmount } from './stars';
 import type {
   ApiMessageStoryData, ApiStory, ApiWebPageStickerData, ApiWebPageStoryData,
 } from './stories';
@@ -415,7 +416,7 @@ export interface ApiInputMessageReplyInfo {
 export interface ApiSuggestedPost {
   isAccepted?: true;
   isRejected?: true;
-  price?: ApiStarsAmount;
+  price?: ApiTypeCurrencyAmount;
   scheduleDate?: number;
 }
 
@@ -426,7 +427,7 @@ export interface ApiInputStoryReplyInfo {
 }
 
 export interface ApiInputSuggestedPostInfo {
-  price?: ApiStarsAmount;
+  price?: ApiTypeCurrencyAmount;
   scheduleDate?: number;
   isAccepted?: true;
   isRejected?: true;
@@ -642,6 +643,7 @@ export interface ApiMessage {
   areReactionsPossible?: true;
   reportDeliveryUntilDate?: number;
   paidMessageStars?: number;
+  restrictionReasons?: ApiRestrictionReason[];
 }
 
 export interface ApiReactions {

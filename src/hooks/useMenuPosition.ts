@@ -1,6 +1,6 @@
 import type { ElementRef } from '../lib/teact/teact';
 import { useLayoutEffect } from '../lib/teact/teact';
-import { addExtraClass, setExtraStyles } from '../lib/teact/teact-dom';
+import { addExtraClass, removeExtraClass, setExtraStyles } from '../lib/teact/teact-dom';
 
 import type { IAnchorPosition } from '../types';
 
@@ -99,10 +99,12 @@ function applyStaticOptions(
   }
 
   if (positionX) {
+    removeExtraClass(bubbleEl, positionX === 'left' ? 'right' : 'left');
     addExtraClass(bubbleEl, positionX);
   }
 
   if (positionY) {
+    removeExtraClass(bubbleEl, positionY === 'top' ? 'bottom' : 'top');
     addExtraClass(bubbleEl, positionY);
   }
 
