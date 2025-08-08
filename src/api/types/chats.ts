@@ -1,8 +1,8 @@
 import type { ApiBotCommand } from './bots';
 import type {
-  ApiChatReactions, ApiFormattedText, ApiInputMessageReplyInfo, ApiPhoto, ApiStickerSet,
+  ApiChatReactions, ApiFormattedText, ApiInputMessageReplyInfo, ApiInputSuggestedPostInfo, ApiPhoto, ApiStickerSet,
 } from './messages';
-import type { ApiBotVerification, ApiChatInviteImporter, ApiPeerNotifySettings } from './misc';
+import type { ApiBotVerification, ApiChatInviteImporter, ApiPeerNotifySettings, ApiRestrictionReason } from './misc';
 import type {
   ApiEmojiStatusType, ApiFakeType, ApiUser, ApiUsername,
 } from './users';
@@ -66,7 +66,7 @@ export interface ApiChat {
   isCreator?: boolean;
   isForbidden?: boolean; // Forbidden - can't send messages (user was kicked, for example)
   isRestricted?: boolean; // Restricted - can't access the chat (user was banned or chat is violating rules)
-  restrictionReason?: ApiRestrictionReason;
+  restrictionReasons?: ApiRestrictionReason[];
   adminRights?: ApiChatAdminRights;
   currentUserBannedRights?: ApiChatBannedRights;
   defaultBannedRights?: ApiChatBannedRights;
@@ -212,11 +212,6 @@ export interface ApiChatBannedRights {
   untilDate?: number;
 }
 
-export interface ApiRestrictionReason {
-  reason: string;
-  text: string;
-}
-
 export interface ApiChatFolder {
   id: number;
   title: ApiFormattedText;
@@ -319,6 +314,7 @@ export interface ApiChatLink {
 export type ApiDraft = {
   text?: ApiFormattedText;
   replyInfo?: ApiInputMessageReplyInfo;
+  suggestedPostInfo?: ApiInputSuggestedPostInfo;
   date?: number;
   effectId?: string;
   isLocal?: boolean;

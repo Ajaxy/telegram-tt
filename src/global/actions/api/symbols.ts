@@ -215,6 +215,22 @@ addActionHandler('loadPremiumGifts', async (global): Promise<void> => {
   setGlobal(global);
 });
 
+addActionHandler('loadTonGifts', async (global): Promise<void> => {
+  const stickerSet = await callApi('fetchTonGifts');
+  if (!stickerSet) {
+    return;
+  }
+
+  const { set, stickers } = stickerSet;
+
+  global = getGlobal();
+  global = {
+    ...global,
+    tonGifts: { ...set, stickers },
+  };
+  setGlobal(global);
+});
+
 addActionHandler('loadDefaultTopicIcons', async (global): Promise<void> => {
   const stickerSet = await callApi('fetchDefaultTopicIcons');
   if (!stickerSet) {

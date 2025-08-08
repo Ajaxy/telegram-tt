@@ -33,8 +33,10 @@ export type OwnProps = {
   withTimePicker?: boolean;
   submitButtonLabel?: string;
   secondButtonLabel?: string;
+  description?: string;
   onClose: () => void;
   onSubmit: (date: Date) => void;
+  onDateChange?: (date: Date) => void;
   onSecondButtonClick?: NoneToVoidFunction;
 };
 
@@ -58,8 +60,10 @@ const CalendarModal: FC<OwnProps> = ({
   withTimePicker,
   submitButtonLabel,
   secondButtonLabel,
+  description,
   onClose,
   onSubmit,
+  onDateChange,
   onSecondButtonClick,
 }) => {
   const lang = useOldLang();
@@ -169,6 +173,7 @@ const CalendarModal: FC<OwnProps> = ({
       dateCopy.setMonth(currentMonth);
       dateCopy.setFullYear(currentYear);
 
+      onDateChange?.(dateCopy);
       return dateCopy;
     });
   }
@@ -196,11 +201,12 @@ const CalendarModal: FC<OwnProps> = ({
     const date = new Date(selectedDate.getTime());
     date.setHours(hours);
     setSelectedDate(date);
+    onDateChange?.(date);
 
     const hoursStr = formatInputTime(hours);
     setSelectedHours(hoursStr);
     e.target.value = hoursStr;
-  }, [selectedDate]);
+  }, [selectedDate, onDateChange]);
 
   const handleChangeMinutes = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^\d]+/g, '');
@@ -215,11 +221,12 @@ const CalendarModal: FC<OwnProps> = ({
     const date = new Date(selectedDate.getTime());
     date.setMinutes(minutes);
     setSelectedDate(date);
+    onDateChange?.(date);
 
     const minutesStr = formatInputTime(minutes);
     setSelectedMinutes(minutesStr);
     e.target.value = minutesStr;
-  }, [selectedDate]);
+  }, [selectedDate, onDateChange]);
 
   function renderTimePicker() {
     return (
@@ -331,6 +338,11 @@ const CalendarModal: FC<OwnProps> = ({
       {withTimePicker && renderTimePicker()}
 
       <div className="footer">
+        {description && (
+          <div className="description">
+            {description}
+          </div>
+        )}
         <div className="footer">
           <Button
             onClick={handleSubmit}

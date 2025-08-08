@@ -48,6 +48,7 @@ import {
   selectCurrentMessageList,
   selectCurrentMiddleSearch,
   selectDraft,
+  selectEditingId,
   selectIsChatBotNotStarted,
   selectIsCurrentUserFrozen,
   selectIsInSelectMode,
@@ -788,6 +789,8 @@ export default memo(withGlobal<OwnProps>(
     const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
     const userFullInfo = chatId ? selectUserFullInfo(global, chatId) : undefined;
 
+    const editingId = selectEditingId(global, chatId, threadId);
+
     const threadInfo = selectThreadInfo(global, chatId, threadId);
     const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
     const topic = selectTopic(global, chatId, threadId);
@@ -814,7 +817,7 @@ export default memo(withGlobal<OwnProps>(
       ? threadId === MAIN_THREAD_ID && !draftReplyInfo && (selectTopic(global, chatId, GENERAL_TOPIC_ID)?.isClosed)
       : false;
     const isMonoforumAdmin = selectIsMonoforumAdmin(global, chatId);
-    const shouldBlockSendInMonoforum = Boolean(chat?.isMonoforum && !draftReplyInfo && isMonoforumAdmin);
+    const shouldBlockSendInMonoforum = Boolean(chat?.isMonoforum && !draftReplyInfo && isMonoforumAdmin && !editingId);
     const topics = selectTopics(global, chatId);
 
     const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);

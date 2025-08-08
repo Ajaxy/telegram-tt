@@ -9,6 +9,7 @@ import type {
 import type { TabState } from '../../../../global/types';
 import { MediaViewerOrigin } from '../../../../types';
 
+import { STARS_CURRENCY_CODE } from '../../../../config';
 import { getMessageLink } from '../../../../global/helpers';
 import {
   buildStarsTransactionCustomPeer,
@@ -17,6 +18,7 @@ import {
 import {
   selectCanPlayAnimatedEmojis,
   selectGiftStickerForStars,
+  selectGiftStickerForTon,
   selectPeer,
 } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
@@ -25,7 +27,7 @@ import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
 import { formatStarsAsIcon } from '../../../../util/localization/format';
 import { formatPercent } from '../../../../util/textFormat';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';
-import { getTransactionTitle, isNegativeStarsAmount } from '../helpers/transaction';
+import { getTransactionTitle, isNegativeAmount } from '../helpers/transaction';
 
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
@@ -85,7 +87,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     }
 
     const {
-      giveawayPostId, photo, stars, isGiftUpgrade, starGift, isGiftResale,
+      giveawayPostId, photo, amount, isGiftUpgrade, starGift, isGiftResale,
       starRefCommision,
     } = transaction;
 
@@ -132,7 +134,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
           modelAttribute={giftAttributes!.model!}
           title={gift.title}
           subtitle={lang('GiftInfoCollectible', { number: gift.number })}
-          resellPrice={transaction.stars}
+          resellPrice={transaction.amount}
         />
       </div>
     );
@@ -169,11 +171,11 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
         <p className={styles.description}>{description}</p>
         <p className={styles.amount}>
           <span
-            className={buildClassName(styles.amount, isNegativeStarsAmount(stars) ? styles.negative : styles.positive)}
+            className={buildClassName(styles.amount, isNegativeAmount(amount) ? styles.negative : styles.positive)}
           >
-            {formatStarsTransactionAmount(lang, stars)}
+            {formatStarsTransactionAmount(lang, amount)}
           </span>
-          <StarIcon type="gold" size="middle" />
+          {amount.currency === STARS_CURRENCY_CODE && <StarIcon type="gold" size="middle" />}
           {transaction.isRefund && (
             <p className={styles.refunded}>{lang('Refunded')}</p>
           )}
@@ -212,7 +214,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     if (isGiftResale) {
       tableData.push([
         oldLang('StarGiftReason'),
-        isNegativeStarsAmount(transaction.stars)
+        isNegativeAmount(transaction.amount)
           ? lang('StarGiftSaleTransaction')
           : lang('StarGiftPurchaseTransaction'),
       ]);
@@ -221,7 +223,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     let peerLabel;
     if (isGiftUpgrade) {
       peerLabel = oldLang('Stars.Transaction.GiftFrom');
-    } else if (isNegativeStarsAmount(stars) || transaction.isMyGift) {
+    } else if (isNegativeAmount(amount) || transaction.isMyGift) {
       peerLabel = oldLang('Stars.Transaction.To');
     } else if (transaction.starRefCommision && !transaction.paidMessages && !isGiftResale) {
       peerLabel = oldLang('StarsTransaction.StarRefReason.Miniapp');
@@ -240,7 +242,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       tableData.push([
         lang('PaidMessageTransactionTotal'),
         formatStarsAsIcon(lang,
-          transaction.stars.amount / ((100 - transaction.starRefCommision) / 100),
+          transaction.amount.amount / ((100 - transaction.starRefCommision) / 100),
           { asFont: false, className: styles.starIcon, containerClassName: styles.totalStars }),
       ]);
     }
@@ -249,9 +251,9 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       tableData.push([oldLang('Stars.Transaction.Reaction.Post'), <SafeLink url={messageLink} text={messageLink} />]);
     }
 
-    if (giveawayMessageLink) {
+    if (giveawayMessageLink && transaction.amount.currency === STARS_CURRENCY_CODE) {
       tableData.push([oldLang('BoostReason'), <SafeLink url={giveawayMessageLink} text={oldLang('Giveaway')} />]);
-      tableData.push([oldLang('Gift'), oldLang('Stars', transaction.stars, 'i')]);
+      tableData.push([oldLang('Gift'), oldLang('Stars', transaction.amount, 'i')]);
     }
 
     if (transaction.id) {
@@ -322,8 +324,10 @@ export default memo(withGlobal<OwnProps>(
     const peer = peerId ? selectPeer(global, peerId) : undefined;
     const paidMessageCommission = global.appConfig?.starsPaidMessageCommissionPermille;
 
-    const starCount = modal?.transaction.stars;
-    const starsGiftSticker = modal?.transaction.isGift && selectGiftStickerForStars(global, starCount?.amount);
+    const currencyAmount = modal?.transaction.amount;
+    const starsGiftSticker = modal?.transaction.isGift
+      && currencyAmount?.currency === STARS_CURRENCY_CODE ? selectGiftStickerForStars(global, currencyAmount?.amount)
+      : selectGiftStickerForTon(global, currencyAmount?.amount);
 
     return {
       peer,

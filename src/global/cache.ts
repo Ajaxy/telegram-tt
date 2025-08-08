@@ -535,7 +535,7 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     });
   }));
 
-  const idsToSave = unique([
+  const unlinkedIdsToSave = [
     ...currentUserId ? [currentUserId] : [],
     ...currentChatIds,
     ...messagesChatIds,
@@ -544,19 +544,34 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     ...getOrderedIds(ALL_FOLDER_ID) || [],
     ...getOrderedIds(SAVED_FOLDER_ID) || [],
     ...Object.keys(byId),
-  ]).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT);
+  ];
+
+  let idsToSave: string[] = [];
+
+  for (const id of unlinkedIdsToSave) {
+    const chat = byId[id];
+    if (!chat) continue;
+
+    idsToSave.push(id);
+
+    if (chat.linkedMonoforumId) {
+      idsToSave.push(chat.linkedMonoforumId);
+    }
+  }
+
+  idsToSave = unique(idsToSave).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT);
 
   return {
     ...global.chats,
     similarChannelsById: {},
     similarBotsById: {},
     isFullyLoaded: {},
-    notifyExceptionById: pickTruthy(global.chats.notifyExceptionById, idsToSave),
+    notifyExceptionById: pickTruthy(global.chats.notifyExceptionById, unlinkedIdsToSave),
     loadingParameters: INITIAL_GLOBAL_STATE.chats.loadingParameters,
-    byId: pickTruthy(global.chats.byId, idsToSave),
-    fullInfoById: pickTruthy(global.chats.fullInfoById, idsToSave),
+    byId: pickTruthy(global.chats.byId, unlinkedIdsToSave),
+    fullInfoById: pickTruthy(global.chats.fullInfoById, unlinkedIdsToSave),
     lastMessageIds: {
-      all: pickTruthy(global.chats.lastMessageIds.all || {}, idsToSave),
+      all: pickTruthy(global.chats.lastMessageIds.all || {}, unlinkedIdsToSave),
       saved: global.chats.lastMessageIds.saved,
     },
     topicsInfoById: pickTruthy(global.chats.topicsInfoById, currentChatIds),

@@ -50,7 +50,7 @@ import {
   buildLangStrings,
   buildPrivacyKey,
 } from '../apiBuilders/misc';
-import { buildApiStarsAmount } from '../apiBuilders/payments';
+import { buildApiCurrencyAmount } from '../apiBuilders/payments';
 import { buildApiEmojiStatus, buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import {
   buildApiPaidReactionPrivacy,
@@ -1042,9 +1042,14 @@ export function updater(update: Update) {
       isEnabled: update.enabled ? true : undefined,
     });
   } else if (update instanceof GramJs.UpdateStarsBalance) {
+    const balance = buildApiCurrencyAmount(update.balance);
+    if (!balance) {
+      // Skip TON balance updates for now
+      return;
+    }
     sendApiUpdate({
       '@type': 'updateStarsBalance',
-      balance: buildApiStarsAmount(update.balance),
+      balance,
     });
   } else if (update instanceof GramJs.UpdatePaidReactionPrivacy) {
     sendApiUpdate({

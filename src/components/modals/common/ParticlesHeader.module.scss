@@ -1,0 +1,32 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 9rem;
+}
+
+.particles {
+  position: absolute;
+  top: 0;
+}
+
+.title {
+  z-index: 0;
+
+  margin-inline: 0.5rem;
+
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+.description {
+  z-index: 0;
+
+  margin-bottom: 1rem;
+  margin-inline: 0.5rem;
+
+  line-height: 1.375;
+  text-align: center;
+  text-wrap: balance;
+}

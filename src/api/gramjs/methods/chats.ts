@@ -68,6 +68,7 @@ import {
   buildInputPeer,
   buildInputPhoto,
   buildInputReplyTo,
+  buildInputSuggestedPost,
   buildInputUser,
   buildMtpMessageEntity,
   DEFAULT_PRIMITIVES,
@@ -526,6 +527,7 @@ export function saveDraft({
     message: draft?.text?.text || DEFAULT_PRIMITIVES.STRING,
     entities: draft?.text?.entities?.map(buildMtpMessageEntity),
     replyTo: draft?.replyInfo && buildInputReplyTo(draft.replyInfo),
+    suggestedPost: draft?.suggestedPostInfo && buildInputSuggestedPost(draft.suggestedPostInfo),
   }));
 }
 

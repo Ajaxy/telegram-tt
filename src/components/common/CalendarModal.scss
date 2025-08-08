@@ -30,6 +30,15 @@
     flex-direction: column;
     justify-content: flex-end;
 
+    .description {
+      min-height: 2.75rem;
+      margin-bottom: 1rem;
+      margin-left: 1rem;
+
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
     .Button {
       text-transform: none;
 

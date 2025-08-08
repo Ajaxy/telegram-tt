@@ -23,7 +23,7 @@ import type {
   ApiTopic,
 } from '../../types';
 
-import { pick, pickTruthy } from '../../../util/iteratees';
+import { pickTruthy } from '../../../util/iteratees';
 import { getServerTimeOffset } from '../../../util/serverTime';
 import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
@@ -31,7 +31,7 @@ import {
   buildApiBotVerification, buildApiFormattedText, buildApiPhoto, buildApiUsernames, buildAvatarPhotoId,
 } from './common';
 import { omitVirtualClassFields } from './helpers';
-import { buildApiPeerNotifySettings } from './misc';
+import { buildApiPeerNotifySettings, buildApiRestrictionReasons } from './misc';
 import {
   buildApiEmojiStatus,
   buildApiPeerColor,
@@ -192,11 +192,11 @@ function buildApiChatPermissions(peerEntity: GramJs.TypeUser | GramJs.TypeChat):
   };
 }
 
-function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat): {
+function buildApiChatRestrictions(peerEntity: Entity): {
   isNotJoined?: boolean;
   isForbidden?: boolean;
   isRestricted?: boolean;
-  restrictionReason?: ApiRestrictionReason;
+  restrictionReasons?: ApiRestrictionReason[];
 } {
   if (peerEntity instanceof GramJs.ChatForbidden) {
     return {
@@ -212,17 +212,12 @@ function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat)
 
   const restrictions = {};
 
-  if ('restricted' in peerEntity) {
-    const restrictionReason = peerEntity.restricted
-      ? buildApiChatRestrictionReason(peerEntity.restrictionReason)
-      : undefined;
+  if ('restricted' in peerEntity && !peerEntity.min) {
+    const restrictionReasons = buildApiRestrictionReasons(peerEntity.restrictionReason);
 
-    if (restrictionReason) {
-      Object.assign(restrictions, {
-        isRestricted: true,
-        restrictionReason,
-      });
-    }
+    Object.assign(restrictions, {
+      restrictionReasons,
+    });
   }
 
   if (peerEntity instanceof GramJs.Chat) {
@@ -263,17 +258,6 @@ function buildApiChatMigrationInfo(peerEntity: Entity): {
   }
 
   return {};
-}
-
-function buildApiChatRestrictionReason(
-  restrictionReasons?: GramJs.RestrictionReason[],
-): ApiRestrictionReason | undefined {
-  if (!restrictionReasons) {
-    return undefined;
-  }
-
-  const targetReason = restrictionReasons.find(({ platform }) => platform === 'all');
-  return targetReason ? pick(targetReason, ['reason', 'text']) : undefined;
 }
 
 export function buildApiChatFromPreview(

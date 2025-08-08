@@ -28,6 +28,7 @@ import type {
   ApiTypeStory,
   ApiUser,
 } from '../../../api/types';
+import type { ActionPayloads } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type {
   ActiveEmojiInteraction,
@@ -44,7 +45,7 @@ import type { OnIntersectPinnedMessage } from '../hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { AudioOrigin } from '../../../types';
 
-import { EMOJI_STATUS_LOOP_LIMIT, MESSAGE_APPEARANCE_DELAY } from '../../../config';
+import { EMOJI_STATUS_LOOP_LIMIT, MESSAGE_APPEARANCE_DELAY, STARS_SUGGESTED_POST_FUTURE_MIN } from '../../../config';
 import {
   areReactionsEmpty,
   getIsDownloading,
@@ -85,11 +86,13 @@ import {
   selectDefaultReaction,
   selectForwardedSender,
   selectIsChatProtected,
+  selectIsChatRestricted,
   selectIsChatWithSelf,
   selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectIsDocumentGroupSelected,
   selectIsInSelectMode,
+  selectIsMediaNsfw,
   selectIsMessageFocused,
   selectIsMessageProtected,
   selectIsMessageSelected,
@@ -120,6 +123,7 @@ import { IS_ANDROID, IS_ELECTRON, IS_TRANSLATION_SUPPORTED } from '../../../util
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../util/entities/ids';
 import { getMessageKey } from '../../../util/keys/messageKey';
+import { getServerTime } from '../../../util/serverTime';
 import stopEvent from '../../../util/stopEvent';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
 import { calculateDimensionsForMessageMedia, getStickerDimensions, REM } from '../../common/helpers/mediaDimensions';
@@ -137,6 +141,7 @@ import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useEnsureStory from '../../../hooks/useEnsureStory';
 import useFlag from '../../../hooks/useFlag';
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
@@ -164,6 +169,8 @@ import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import TopicChip from '../../common/TopicChip';
 import { animateSnap } from '../../main/visualEffects/SnapEffectContainer';
 import Button from '../../ui/Button';
+import ConfirmDialog from '../../ui/ConfirmDialog';
+import InputText from '../../ui/InputText';
 import Album from './Album';
 import AnimatedCustomEmoji from './AnimatedCustomEmoji';
 import AnimatedEmoji from './AnimatedEmoji';
@@ -206,9 +213,6 @@ type MessagePositionProperties = {
 type OwnProps =
   {
     message: ApiMessage;
-    observeIntersectionForBottom?: ObserveFn;
-    observeIntersectionForLoading?: ObserveFn;
-    observeIntersectionForPlaying?: ObserveFn;
     album?: IAlbum;
     noAvatars?: boolean;
     withAvatar?: boolean;
@@ -221,6 +225,9 @@ type OwnProps =
     isJustAdded: boolean;
     memoFirstUnreadIdRef?: { current: number | undefined };
     getIsMessageListReady?: Signal<boolean>;
+    observeIntersectionForBottom?: ObserveFn;
+    observeIntersectionForLoading?: ObserveFn;
+    observeIntersectionForPlaying?: ObserveFn;
     onIntersectPinnedMessage?: OnIntersectPinnedMessage;
   }
   & MessagePositionProperties;
@@ -310,6 +317,9 @@ type StateProps = {
   paidMessageStars?: number;
   isChatWithUser?: boolean;
   isAccountFrozen?: boolean;
+  minFutureTime?: number;
+  isMediaNsfw?: boolean;
+  isReplyMediaNsfw?: boolean;
 };
 
 type MetaPosition =
@@ -328,6 +338,7 @@ const NBSP = '\u00A0';
 const NO_MEDIA_CORNERS_THRESHOLD = 18;
 const QUICK_REACTION_SIZE = 1.75 * REM;
 const EXTRA_SPACE_FOR_REACTIONS = 2.25 * REM;
+const MAX_REASON_LENGTH = 200;
 
 const Message: FC<OwnProps & StateProps> = ({
   message,
@@ -430,14 +441,20 @@ const Message: FC<OwnProps & StateProps> = ({
   poll,
   maxTimestamp,
   lastPlaybackTimestamp,
-  onIntersectPinnedMessage,
+  isMediaNsfw,
+  isReplyMediaNsfw,
   paidMessageStars,
   isChatWithUser,
   isAccountFrozen,
+  minFutureTime,
+  onIntersectPinnedMessage,
 }) => {
   const {
     toggleMessageSelection,
     clickBotInlineButton,
+    clickSuggestedMessageButton,
+    rejectSuggestedPost,
+    openSuggestedPostApprovalModal,
     disableContextMenuHint,
     animateUnreadReaction,
     focusLastMessage,
@@ -448,12 +465,15 @@ const Message: FC<OwnProps & StateProps> = ({
   const bottomMarkerRef = useRef<HTMLDivElement>();
   const quickReactionRef = useRef<HTMLDivElement>();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const [isTranscriptionHidden, setTranscriptionHidden] = useState(false);
   const [isPlayingSnapAnimation, setIsPlayingSnapAnimation] = useState(false);
   const [isPlayingDeleteAnimation, setIsPlayingDeleteAnimation] = useState(false);
   const [shouldPlayEffect, requestEffect, hideEffect] = useFlag();
+  const [isDeclineDialogOpen, openDeclineDialog, closeDeclineDialog] = useFlag();
+  const [declineReason, setDeclineReason] = useState('');
   const { isMobile, isTouchScreen } = useAppLayout();
 
   useOnIntersect(bottomMarkerRef, observeIntersectionForBottom);
@@ -646,7 +666,7 @@ const Message: FC<OwnProps & StateProps> = ({
     handleTopicChipClick,
     handleStoryClick,
   } = useInnerHandlers({
-    lang,
+    lang: oldLang,
     selectMessage,
     message,
     chatId,
@@ -857,7 +877,7 @@ const Message: FC<OwnProps & StateProps> = ({
     scrollTargetPosition,
   });
 
-  const viaBusinessBotTitle = viaBusinessBot ? getPeerFullTitle(lang, viaBusinessBot) : undefined;
+  const viaBusinessBotTitle = viaBusinessBot ? getPeerFullTitle(oldLang, viaBusinessBot) : undefined;
 
   const canShowPostAuthor = !message.senderId;
   const signature = viaBusinessBotTitle || (canShowPostAuthor && message.postAuthorTitle)
@@ -1105,6 +1125,7 @@ const Message: FC<OwnProps & StateProps> = ({
                 senderChat={replyMessageChat}
                 forwardSender={replyMessageForwardSender}
                 chatTranslations={chatTranslations}
+                isMediaNsfw={isReplyMediaNsfw}
                 requestedChatTranslationLanguage={requestedChatTranslationLanguage}
                 observeIntersectionForLoading={observeIntersectionForLoading}
                 observeIntersectionForPlaying={observeIntersectionForPlaying}
@@ -1131,6 +1152,7 @@ const Message: FC<OwnProps & StateProps> = ({
             shouldLoop={shouldLoopStickers}
             shouldPlayEffect={shouldPlayEffect}
             withEffect={withAnimatedEffects}
+            isMediaNsfw={isMediaNsfw}
             onStopEffect={hideEffect}
           />
         )}
@@ -1269,7 +1291,7 @@ const Message: FC<OwnProps & StateProps> = ({
             )}
             dir="auto"
           >
-            {(isTranscriptionError ? lang('NoWordsRecognized') : (
+            {(isTranscriptionError ? oldLang('NoWordsRecognized') : (
               isTranscribing && transcribedText ? <DotAnimation content={transcribedText} /> : transcribedText
             ))}
           </p>
@@ -1429,6 +1451,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isProtected={isProtected}
             asForwarded={asForwarded}
             theme={theme}
+            isMediaNsfw={isMediaNsfw}
             forcedWidth={contentWidth}
             onClick={handlePhotoMediaClick}
             onCancelUpload={handleCancelUpload}
@@ -1448,6 +1471,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isDownloading={isDownloading}
             isProtected={isProtected}
             asForwarded={asForwarded}
+            isMediaNsfw={isMediaNsfw}
             lastPlaybackTimestamp={lastPlaybackTimestamp}
             onClick={handleVideoMediaClick}
             onCancelUpload={handleCancelUpload}
@@ -1482,12 +1506,47 @@ const Message: FC<OwnProps & StateProps> = ({
         )}
         {asForwarded && (
           <span className="forward-title">
-            {lang('ForwardedFrom')}
+            {oldLang('ForwardedFrom')}
           </span>
         )}
       </span>
     );
   }
+
+  const handleSuggestedMessageButton = useLastCallback((payload: ActionPayloads['clickBotInlineButton']) => {
+    if (payload.button.type !== 'suggestedMessage') return;
+    if (payload.button.buttonType === 'approve') {
+      openSuggestedPostApprovalModal({
+        chatId,
+        messageId: message.id,
+      });
+      return;
+    }
+
+    if (payload.button.buttonType === 'decline') {
+      openDeclineDialog();
+      return;
+    }
+
+    clickSuggestedMessageButton({
+      ...payload,
+      button: payload.button,
+    });
+  });
+
+  const handleDeclineReasonChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setDeclineReason(e.target.value);
+  });
+
+  const handleDeclineConfirm = useLastCallback(() => {
+    rejectSuggestedPost({
+      chatId,
+      messageId: message.id,
+      rejectComment: declineReason.trim() || undefined,
+    });
+    closeDeclineDialog();
+    setDeclineReason('');
+  });
 
   function renderSenderName(
     shouldSkipRenderForwardTitle: boolean = false, shouldSkipRenderAdminTitle: boolean = false,
@@ -1495,11 +1554,11 @@ const Message: FC<OwnProps & StateProps> = ({
     let senderTitle;
     let senderColor;
     if (senderPeer && !(isCustomShape && viaBotId)) {
-      senderTitle = getPeerFullTitle(lang, senderPeer);
+      senderTitle = getPeerFullTitle(oldLang, senderPeer);
     } else if (forwardInfo?.hiddenUserName) {
       senderTitle = forwardInfo.hiddenUserName;
     } else if (storyData && originSender) {
-      senderTitle = getPeerFullTitle(lang, originSender);
+      senderTitle = getPeerFullTitle(oldLang, originSender);
     }
     const senderEmojiStatus = senderPeer && 'emojiStatus' in senderPeer && senderPeer.emojiStatus;
     const senderIsPremium = senderPeer && 'isPremium' in senderPeer && senderPeer.isPremium;
@@ -1551,7 +1610,7 @@ const Message: FC<OwnProps & StateProps> = ({
         ) : undefined}
         {botSender?.hasUsername && (
           <span className="interactive">
-            <span className="via">{lang('ViaBot')}</span>
+            <span className="via">{oldLang('ViaBot')}</span>
             <span
               className="sender-title"
               onClick={handleViaBotClick}
@@ -1562,12 +1621,12 @@ const Message: FC<OwnProps & StateProps> = ({
         )}
         <div className="title-spacer" />
         {!shouldSkipRenderAdminTitle && !hasBotSenderUsername ? (forwardInfo?.isLinkedChannelPost ? (
-          <span className="admin-title" dir="auto">{lang('DiscussChannel')}</span>
+          <span className="admin-title" dir="auto">{oldLang('DiscussChannel')}</span>
         ) : message.postAuthorTitle && isGroup && !asForwarded ? (
           <span className="admin-title" dir="auto">{message.postAuthorTitle}</span>
         ) : senderAdminMember && !asForwarded && !viaBotId ? (
           <span className="admin-title" dir="auto">
-            {senderAdminMember.customTitle || lang(
+            {senderAdminMember.customTitle || oldLang(
               senderAdminMember.isOwner ? 'GroupInfo.LabelOwner' : 'GroupInfo.LabelAdmin',
             )}
           </span>
@@ -1583,6 +1642,14 @@ const Message: FC<OwnProps & StateProps> = ({
   }
 
   const forwardAuthor = isGroup && asForwarded ? message.postAuthorTitle : undefined;
+  const shouldRenderSuggestedPostButtons = message.suggestedPostInfo
+    && !message.isOutgoing && !message.suggestedPostInfo.isAccepted && !message.suggestedPostInfo.isRejected;
+
+  const isSuggestedPostExpired = useMemo(() => {
+    if (!message.suggestedPostInfo?.scheduleDate || !minFutureTime) return false;
+    const now = getServerTime();
+    return message.suggestedPostInfo.scheduleDate <= now + minFutureTime;
+  }, [message.suggestedPostInfo, minFutureTime]);
 
   return (
     <div
@@ -1666,7 +1733,7 @@ const Message: FC<OwnProps & StateProps> = ({
                   color="translucent-white"
                   round
                   size="tiny"
-                  ariaLabel={lang('lng_context_forward_msg')}
+                  ariaLabel={oldLang('lng_context_forward_msg')}
                   onClick={isLastInDocumentGroup ? handleGroupForward : handleForward}
                 >
                   <Icon name="share-filled" />
@@ -1699,6 +1766,36 @@ const Message: FC<OwnProps & StateProps> = ({
         {message.inlineButtons && (
           <InlineButtons message={message} onClick={clickBotInlineButton} />
         )}
+        {shouldRenderSuggestedPostButtons && (
+          <InlineButtons
+            message={{
+              ...message,
+              inlineButtons: [
+                [
+                  {
+                    type: 'suggestedMessage',
+                    buttonType: 'decline',
+                    text: lang('SuggestedPostDecline'),
+                  },
+                  {
+                    type: 'suggestedMessage',
+                    buttonType: 'approve',
+                    text: lang('SuggestedPostApprove'),
+                    disabled: isSuggestedPostExpired,
+                  },
+                ],
+                [
+                  {
+                    type: 'suggestedMessage',
+                    buttonType: 'suggestChanges',
+                    text: lang('SuggestedPostSuggestChanges'),
+                  },
+                ],
+              ],
+            }}
+            onClick={handleSuggestedMessageButton}
+          />
+        )}
         {reactionsPosition === 'outside' && !isStoryMention && (
           <Reactions
             message={reactionMessage!}
@@ -1727,6 +1824,28 @@ const Message: FC<OwnProps & StateProps> = ({
           noReplies={noReplies}
           detectedLanguage={detectedLanguage}
         />
+      )}
+      {isDeclineDialogOpen && (
+        <ConfirmDialog
+          isOpen={isDeclineDialogOpen}
+          onClose={closeDeclineDialog}
+          title={lang('SuggestedPostDecline')}
+          confirmLabel={lang('SuggestedPostDecline')}
+          confirmHandler={handleDeclineConfirm}
+          confirmIsDestructive
+        >
+          <div className="decline-dialog-question">
+            {renderText(lang('DeclinePostDialogQuestion', {
+              sender: sender ? getPeerFullTitle(oldLang, sender) : '',
+            }, { withNodes: true, withMarkdown: true }))}
+          </div>
+          <InputText
+            placeholder={lang('DeclineReasonPlaceholder')}
+            value={declineReason}
+            onChange={handleDeclineReasonChange}
+            maxLength={MAX_REASON_LENGTH}
+          />
+        </ConfirmDialog>
       )}
     </div>
   );
@@ -1786,7 +1905,7 @@ export default memo(withGlobal<OwnProps>(
     const replyMessageChat = replyToPeerId ? selectChat(global, replyToPeerId) : undefined;
     const isReplyPrivate = !isSystemBotChat && !isAnonymousForwards && replyMessageChat
       && !isChatPublic(replyMessageChat)
-      && (replyMessageChat.isNotJoined || replyMessageChat.isRestricted);
+      && (replyMessageChat.isNotJoined || selectIsChatRestricted(global, replyMessageChat.id));
     const isReplyToTopicStart = replyMessage?.content.action?.type === 'topicCreate';
     const replyStory = storyReplyId && storyReplyPeerId
       ? selectPeerStory(global, storyReplyPeerId, storyReplyId)
@@ -1870,6 +1989,11 @@ export default memo(withGlobal<OwnProps>(
 
     const lastPlaybackTimestamp = selectMessageLastPlaybackTimestamp(global, chatId, message.id);
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
+
+    const minFutureTime = global.appConfig?.starsSuggestedPostFutureMin || STARS_SUGGESTED_POST_FUTURE_MIN;
+
+    const isMediaNsfw = selectIsMediaNsfw(global, message);
+    const isReplyMediaNsfw = replyMessage && selectIsMediaNsfw(global, replyMessage);
 
     return {
       theme: selectTheme(global),
@@ -1957,6 +2081,7 @@ export default memo(withGlobal<OwnProps>(
       tags: global.savedReactionTags?.byKey,
       canTranscribeVoice,
       viaBusinessBot,
+      minFutureTime,
       effect,
       poll,
       maxTimestamp,
@@ -1964,6 +2089,8 @@ export default memo(withGlobal<OwnProps>(
       paidMessageStars,
       isChatWithUser,
       isAccountFrozen,
+      isMediaNsfw,
+      isReplyMediaNsfw,
     };
   },
 )(Message));

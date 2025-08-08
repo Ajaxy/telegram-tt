@@ -73,7 +73,7 @@ export async function start(analyzerCallback: (volume: number) => void) {
 
 async function startMediaRecorder() {
   await init();
-  mediaRecorder.start();
+  await mediaRecorder.start();
 }
 
 function subscribeToAnalyzer(recorder: IOpusRecorder, cb: (volume: number) => void) {

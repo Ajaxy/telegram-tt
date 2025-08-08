@@ -20,15 +20,16 @@ import type {
   ApiPrepaidStarsGiveaway,
   ApiReceipt,
   ApiStarGiveawayOption,
-  ApiStarsAmount,
   ApiStarsGiveawayWinnerOption,
   ApiStarsSubscription,
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
   ApiStarTopupOption,
+  ApiTypeCurrencyAmount,
   BoughtPaidMedia,
 } from '../../types';
 
+import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
 import { addWebDocumentToLocalDb } from '../helpers/localDb';
 import { buildApiStarsSubscriptionPricing } from './chats';
 import { buildApiMessageEntity } from './common';
@@ -461,11 +462,23 @@ export function buildApiStarsGiftOptions(option: GramJs.StarsGiftOption): ApiSta
   };
 }
 
-export function buildApiStarsAmount(amount: GramJs.StarsAmount): ApiStarsAmount {
-  return {
-    amount: amount.amount.toJSNumber(),
-    nanos: amount.nanos,
-  };
+export function buildApiCurrencyAmount(amount: GramJs.TypeStarsAmount): ApiTypeCurrencyAmount | undefined {
+  if (amount instanceof GramJs.StarsAmount) {
+    return {
+      currency: STARS_CURRENCY_CODE,
+      amount: amount.amount.toJSNumber(),
+      nanos: amount.nanos,
+    };
+  }
+
+  if (amount instanceof GramJs.StarsTonAmount) {
+    return {
+      currency: TON_CURRENCY_CODE,
+      amount: amount.amount.toJSNumber(),
+    };
+  }
+
+  return undefined;
 }
 
 export function buildApiStarsGiveawayWinnersOption(
@@ -532,9 +545,9 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
   return { type: 'unsupported' };
 }
 
-export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction {
+export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction | undefined {
   const {
-    date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift, reaction,
+    date, id, peer, amount, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift, reaction,
     subscriptionPeriod, stargift, giveawayPostId, starrefCommissionPermille, stargiftUpgrade, paidMessages,
     stargiftResale,
   } = transaction;
@@ -548,11 +561,16 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
 
   const starRefCommision = starrefCommissionPermille ? starrefCommissionPermille / 10 : undefined;
 
+  const starsAmount = buildApiCurrencyAmount(amount);
+  if (!starsAmount) {
+    return undefined;
+  }
+
   return {
     id,
     date,
     peer: buildApiStarsTransactionPeer(peer),
-    stars: buildApiStarsAmount(stars),
+    amount: starsAmount,
     title,
     description,
     photo: photo && buildApiWebDocument(photo),

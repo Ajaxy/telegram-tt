@@ -3,7 +3,7 @@ import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
   ApiAvailableReaction, ApiChat, ApiChatFullInfo, ApiExportedInvite,
@@ -12,7 +12,7 @@ import { ApiMediaFormat } from '../../../api/types';
 import { ManagementProgress, ManagementScreens } from '../../../types';
 
 import { getChatAvatarHash, getHasAdminRight, isChatChannel, isChatPublic } from '../../../global/helpers';
-import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
+import { selectChat, selectChatFullInfo, selectIsChatRestricted, selectTabState } from '../../../global/selectors';
 import { formatInteger } from '../../../util/textFormat';
 
 import useFlag from '../../../hooks/useFlag';
@@ -217,7 +217,8 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   }, [availableReactions, chatFullInfo?.enabledReactions, lang]);
   const isChannelPublic = useMemo(() => isChatPublic(chat), [chat]);
 
-  if (chat.isRestricted || chat.isForbidden) {
+  const isRestricted = selectIsChatRestricted(getGlobal(), chatId);
+  if (isRestricted || chat.isForbidden) {
     return undefined;
   }
 

@@ -40,6 +40,7 @@ const ChatRefundModal = ({ modal, user }: OwnProps & StateProps) => {
   const handleConfirmRemoveFee = useLastCallback(() => {
     closeChatRefundModal();
     if (!userId) return;
+
     toggleNoPaidMessagesException ({ userId, shouldRefundCharged: shouldRefundStars });
   });
 

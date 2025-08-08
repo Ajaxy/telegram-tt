@@ -227,6 +227,21 @@ export function formatTimeDuration(lang: OldLangFn, duration: number, showLast =
   return out.map((part) => lang(part.type, part.duration, 'i')).join(', ');
 }
 
+export function formatScheduledDateTime(
+  scheduleDateTimestamp: number,
+  lang: LangFn,
+  oldLang: OldLangFn,
+): string {
+  const scheduleDate = new Date(scheduleDateTimestamp * 1000);
+
+  return lang('FormatDateAtTime', {
+    date: isToday(scheduleDate)
+      ? lang('WeekdayToday')
+      : formatHumanDate(oldLang, scheduleDateTimestamp * 1000, true, false, true),
+    time: formatTime(oldLang, scheduleDateTimestamp * 1000),
+  });
+}
+
 export function formatHumanDate(
   lang: OldLangFn,
   datetime: number | Date,
@@ -407,7 +422,7 @@ export function formatDateAtTime(
   return lang('formatDateAtTime', [formattedDate, time]);
 }
 
-export function formatShortDuration(lang: LangFn, duration: number) {
+export function formatShortDuration(lang: LangFn, duration: number, hoursPriority?: boolean) {
   if (duration < 0) {
     return lang('RightNow');
   }
@@ -422,7 +437,7 @@ export function formatShortDuration(lang: LangFn, duration: number) {
     return lang('Minutes', { count }, { pluralValue: count });
   }
 
-  if (duration < 60 * 60 * 24) {
+  if (duration < 60 * 60 * 24 || (hoursPriority && duration <= 60 * 60 * 24 * 2)) {
     const count = Math.ceil(duration / (60 * 60));
     return lang('Hours', { count }, { pluralValue: count });
   }

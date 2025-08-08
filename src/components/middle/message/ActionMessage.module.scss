@@ -201,3 +201,84 @@
 .uniqueValue {
   color: white;
 }
+
+.suggestedPostContainer {
+  padding: 0.5rem 0.75rem !important;
+}
+
+.suggestedPostTitle {
+  width: 100%;
+  max-width: 10rem;
+  font-weight: var(--font-weight-normal);
+  text-align: center;
+}
+
+.suggestedPostInfo {
+  width: fit-content;
+  margin: 0.75rem auto 0;
+}
+
+.suggestedPostBalanceTooLowBox,
+.suggestedPostRejectedContentBox,
+.suggestedPostContentBox,
+.hoverable .textContent {
+  cursor: var(--custom-cursor, pointer);
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.suggestedPostContentBox {
+  max-width: 20rem !important;
+}
+
+.suggestedPostBalanceTooLowBox {
+  max-width: 20rem !important;
+  text-align: center;
+}
+
+.suggestedPostBalanceTooLowTitle {
+  margin-bottom: 0.25rem;
+}
+
+.suggestedPostRejectedContentBox {
+  max-width: 15rem !important;
+}
+
+.suggestedPostApprovalTitle {
+  display: flex;
+  justify-content: center;
+
+  width: 100%;
+  margin-bottom: 0.375rem;
+
+  font-weight: var(--font-weight-medium);
+}
+
+.suggestedPostApprovalSection {
+  width: 100%;
+  margin-bottom: 0.375rem;
+  text-align: left;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.suggestedPostRejectedComment {
+  width: 100%;
+  text-align: center;
+}
+
+.suggestedPostRejectedTitle {
+  display: inline-block;
+  text-align: center;
+}
+
+.rejectedIcon {
+  margin-right: 0.125rem;
+  font-size: 1rem;
+  vertical-align: middle;
+}

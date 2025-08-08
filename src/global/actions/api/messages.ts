@@ -6,10 +6,12 @@ import type {
   ApiError,
   ApiInputMessageReplyInfo,
   ApiInputStoryReplyInfo,
+  ApiInputSuggestedPostInfo,
   ApiMessage,
   ApiOnProgress,
   ApiStory,
   ApiUser,
+  MediaContent,
 } from '../../../api/types';
 import type {
   ForwardMessagesParams,
@@ -31,9 +33,12 @@ import {
   MESSAGE_LIST_SLICE,
   RE_TELEGRAM_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
+  STARS_CURRENCY_CODE,
+  STARS_SUGGESTED_POST_FUTURE_MIN,
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
+  TON_CURRENCY_CODE,
 } from '../../../config';
 import { ensureProtocol, isMixedScriptUrl } from '../../../util/browser/url';
 import { IS_IOS } from '../../../util/browser/windowEnvironment';
@@ -121,9 +126,11 @@ import {
   selectForwardsCanBeSentToChat,
   selectForwardsContainVoiceMessages,
   selectIsChatBotNotStarted,
+  selectIsChatRestricted,
   selectIsChatWithSelf,
   selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
+  selectIsMonoforumAdmin,
   selectLanguageCode,
   selectListedIds,
   selectMessageReplyInfo,
@@ -135,6 +142,7 @@ import {
   selectPollFromMessage,
   selectRealLastReadId,
   selectReplyCanBeSentToChat,
+  selectSavedDialogIdFromMessage,
   selectScheduledMessage,
   selectSendAs,
   selectTabState,
@@ -180,8 +188,9 @@ addActionHandler('loadViewportMessages', (global, actions, payload): ActionRetur
   }
 
   const chat = selectChat(global, chatId);
-  // TODO Revise if `chat.isRestricted` check is needed
-  if (!chat || chat.isRestricted) {
+  const isRestricted = selectIsChatRestricted(global, chatId);
+  // TODO Revise if `isRestricted` check is needed
+  if (!chat || isRestricted) {
     onError?.();
     return;
   }
@@ -337,6 +346,8 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
   const isForwarding = selectTabState(global, tabId).forwardMessages?.messageIds?.length;
 
   const draftReplyInfo = !isForwarding && !isStoryReply ? draft?.replyInfo : undefined;
+  const draftSuggestedPostInfo = !isForwarding && !isStoryReply
+    ? draft?.suggestedPostInfo : undefined;
 
   const storyReplyInfo = isStoryReply ? {
     type: 'story',
@@ -354,16 +365,54 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
 
   const messagePriceInStars = await getPeerStarsForMessage(global, chatId!);
 
+  const suggestedPostPrice = draftSuggestedPostInfo?.price;
+  const suggestedPostCurrency = suggestedPostPrice?.currency || STARS_CURRENCY_CODE;
+  const suggestedPostAmount = suggestedPostPrice?.amount || 0;
+  if (suggestedPostAmount && !draftReplyInfo) {
+    if (suggestedPostCurrency === STARS_CURRENCY_CODE) {
+      const currentBalance = global.stars?.balance?.amount || 0;
+
+      if (suggestedPostAmount > currentBalance) {
+        actions.openStarsBalanceModal({
+          topup: {
+            balanceNeeded: suggestedPostAmount,
+          },
+          tabId,
+        });
+        return;
+      }
+    } else if (suggestedPostCurrency === TON_CURRENCY_CODE) {
+      const currentTonBalance = global.ton?.balance?.amount || 0;
+      if (suggestedPostAmount > currentTonBalance) {
+        actions.openStarsBalanceModal({
+          currency: TON_CURRENCY_CODE,
+          tabId,
+        });
+        return;
+      }
+    }
+  }
+
+  const suggestedMessage = draftReplyInfo && draftSuggestedPostInfo
+    ? selectChatMessage(global, chatId!, draftReplyInfo.replyToMsgId) : undefined;
+  let suggestedMedia: MediaContent | undefined;
+  if (draftSuggestedPostInfo && suggestedMessage?.content) {
+    suggestedMedia = suggestedMessage.content;
+  }
+
   const params: SendMessageParams = {
     ...payload,
     chat,
     replyInfo,
+    suggestedPostInfo: draftSuggestedPostInfo,
+    suggestedMedia,
     noWebPage: selectNoWebPage(global, chatId!, threadId!),
     sendAs: selectSendAs(global, chatId!),
     lastMessageId,
     messagePriceInStars,
     isStoryReply,
     isPending: messagePriceInStars ? true : undefined,
+    ...suggestedMessage && { isInvertedMedia: suggestedMessage?.isInvertedMedia },
   };
 
   if (!isStoryReply) {
@@ -608,7 +657,7 @@ addActionHandler('saveDraft', (global, actions, payload): ActionReturnType => {
 
   const currentDraft = selectDraft(global, chatId, threadId);
 
-  if (chat.isMonoforum && !currentDraft?.replyInfo) {
+  if (chat.isMonoforum && !currentDraft?.replyInfo && !currentDraft?.suggestedPostInfo) {
     return; // Monoforum doesn't support drafts outside threads
   }
 
@@ -616,6 +665,7 @@ addActionHandler('saveDraft', (global, actions, payload): ActionReturnType => {
     text,
     replyInfo: currentDraft?.replyInfo,
     effectId: currentDraft?.effectId,
+    suggestedPostInfo: currentDraft?.suggestedPostInfo,
   };
 
   saveDraft({
@@ -625,7 +675,7 @@ addActionHandler('saveDraft', (global, actions, payload): ActionReturnType => {
 
 addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, threadId = MAIN_THREAD_ID, isLocalOnly, shouldKeepReply,
+    chatId, threadId = MAIN_THREAD_ID, isLocalOnly, shouldKeepReply, shouldKeepSuggestedPost,
   } = payload;
   const currentDraft = selectDraft(global, chatId, threadId);
   if (!currentDraft) {
@@ -634,9 +684,11 @@ addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
 
   const currentReplyInfo = currentDraft.replyInfo;
 
-  const newDraft: ApiDraft | undefined = shouldKeepReply && currentReplyInfo ? {
-    replyInfo: currentReplyInfo,
-  } : undefined;
+  const newDraft: ApiDraft | undefined = (shouldKeepReply && currentReplyInfo)
+    || (shouldKeepSuggestedPost && currentDraft.suggestedPostInfo) ? {
+      replyInfo: shouldKeepReply ? currentReplyInfo : undefined,
+      suggestedPostInfo: shouldKeepSuggestedPost ? currentDraft.suggestedPostInfo : undefined,
+    } : undefined;
 
   saveDraft({
     global, chatId, threadId, draft: newDraft, isLocalOnly,
@@ -665,6 +717,7 @@ addActionHandler('updateDraftReplyInfo', (global, actions, payload): ActionRetur
   const newDraft: ApiDraft = {
     ...currentDraft,
     replyInfo: updatedReplyInfo,
+    suggestedPostInfo: undefined,
   };
 
   saveDraft({
@@ -682,7 +735,7 @@ addActionHandler('resetDraftReplyInfo', (global, actions, payload): ActionReturn
   const chat = selectChat(global, chatId);
 
   const currentDraft = selectDraft(global, chatId, threadId);
-  if (chat?.isMonoforum && !currentDraft?.replyInfo) {
+  if (chat?.isMonoforum && !currentDraft?.replyInfo && !currentDraft?.suggestedPostInfo) {
     return; // Monoforum doesn't support drafts outside threads
   }
   const newDraft: ApiDraft | undefined = !currentDraft?.text ? undefined : {
@@ -695,6 +748,92 @@ addActionHandler('resetDraftReplyInfo', (global, actions, payload): ActionReturn
   });
 });
 
+addActionHandler('updateDraftSuggestedPostInfo', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId(), ...update } = payload;
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  if (!currentMessageList) {
+    return;
+  }
+
+  const { chatId, threadId } = currentMessageList;
+
+  const currentDraft = selectDraft(global, chatId, threadId);
+
+  const updatedSuggestedPostInfo = {
+    ...currentDraft?.suggestedPostInfo,
+    ...update,
+  } as ApiInputSuggestedPostInfo;
+
+  const newDraft: ApiDraft = {
+    ...currentDraft,
+    suggestedPostInfo: updatedSuggestedPostInfo,
+  };
+
+  saveDraft({
+    global, chatId, threadId, draft: newDraft, isLocalOnly: true, noLocalTimeUpdate: true,
+  });
+});
+
+addActionHandler('resetDraftSuggestedPostInfo', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  if (!currentMessageList) {
+    return;
+  }
+  const { chatId, threadId } = currentMessageList;
+
+  saveDraft({
+    global, chatId, threadId, draft: undefined, isLocalOnly: false,
+  });
+});
+
+addActionHandler('initDraftFromSuggestedMessage', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!message) {
+    return;
+  }
+
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  if (!currentMessageList) {
+    return;
+  }
+
+  const { threadId } = currentMessageList;
+
+  actions.clearDraft({
+    chatId,
+    threadId,
+    isLocalOnly: true,
+  });
+
+  actions.updateDraftReplyInfo({
+    replyToMsgId: messageId,
+    monoforumPeerId: selectSavedDialogIdFromMessage(global, message),
+    tabId,
+  });
+
+  if (message.suggestedPostInfo) {
+    const { scheduleDate, ...messageSuggestedPost } = message.suggestedPostInfo;
+    const now = getServerTime();
+    const futureMin = global.appConfig?.starsSuggestedPostFutureMin || STARS_SUGGESTED_POST_FUTURE_MIN;
+
+    const validScheduleDate = scheduleDate && scheduleDate > now + futureMin ? scheduleDate : undefined;
+
+    actions.updateDraftSuggestedPostInfo({
+      ...messageSuggestedPost,
+      scheduleDate: validScheduleDate,
+      tabId,
+    });
+  }
+
+  actions.saveDraft({
+    chatId,
+    threadId,
+    text: message.content.text,
+  });
+});
+
 addActionHandler('saveEffectInDraft', (global, actions, payload): ActionReturnType => {
   const {
     chatId, threadId, effectId,
@@ -702,7 +841,7 @@ addActionHandler('saveEffectInDraft', (global, actions, payload): ActionReturnTy
 
   const chat = selectChat(global, chatId);
   const currentDraft = selectDraft(global, chatId, threadId);
-  if (chat?.isMonoforum && !currentDraft?.replyInfo) {
+  if (chat?.isMonoforum && !currentDraft?.replyInfo && !currentDraft?.suggestedPostInfo) {
     return; // Monoforum doesn't support drafts outside threads
   }
 
@@ -1713,6 +1852,9 @@ export async function getPeerStarsForMessage<T extends GlobalState>(
   if (!peer) return undefined;
 
   if (isApiPeerChat(peer)) {
+    if (selectIsMonoforumAdmin(global, peerId)) {
+      return undefined;
+    }
     return peer.paidMessagesStars;
   }
 
@@ -2066,6 +2208,77 @@ addActionHandler('hideSponsored', async (global, actions, payload): Promise<void
 addActionHandler('fetchUnreadMentions', async (global, actions, payload): Promise<void> => {
   const { chatId, offsetId } = payload;
   await fetchUnreadMentions(global, chatId, offsetId);
+});
+
+addActionHandler('approveSuggestedPost', async (global, actions, payload): Promise<void> => {
+  const { chatId, messageId, scheduleDate, tabId = getCurrentTabId() } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const message = selectChatMessage(global, chatId, messageId);
+
+  const isAdmin = selectIsMonoforumAdmin(global, chatId);
+
+  if (!isAdmin && message?.suggestedPostInfo?.price?.amount) {
+    const neededAmount = message.suggestedPostInfo.price.amount;
+    const isCurrencyStars = message.suggestedPostInfo.price.currency === STARS_CURRENCY_CODE;
+
+    if (isCurrencyStars) {
+      const currentBalance = global.stars?.balance?.amount || 0;
+      if (neededAmount > currentBalance) {
+        actions.openStarsBalanceModal({
+          topup: {
+            balanceNeeded: neededAmount,
+          },
+          tabId,
+        });
+        return;
+      }
+    } else {
+      const currentTonBalance = global.ton?.balance?.amount || 0;
+      if (neededAmount > currentTonBalance) {
+        actions.openStarsBalanceModal({
+          currency: TON_CURRENCY_CODE,
+          tabId,
+        });
+        return;
+      }
+    }
+  }
+
+  const result = await callApi('toggleSuggestedPostApproval', {
+    chat,
+    messageId,
+    reject: false,
+    scheduleDate,
+  });
+
+  if (!result) return;
+
+  actions.showNotification({
+    message: { key: 'SuggestedPostApproved' },
+    tabId,
+  });
+});
+
+addActionHandler('rejectSuggestedPost', async (global, actions, payload): Promise<void> => {
+  const { chatId, messageId, rejectComment, tabId = getCurrentTabId() } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('toggleSuggestedPostApproval', {
+    chat,
+    messageId,
+    reject: true,
+    rejectComment,
+  });
+
+  if (!result) return;
+
+  actions.showNotification({
+    message: { key: 'SuggestedPostRejectedNotification' },
+    tabId,
+  });
 });
 
 async function fetchUnreadMentions<T extends GlobalState>(global: T, chatId: string, offsetId?: number) {

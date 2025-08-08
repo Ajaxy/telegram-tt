@@ -20,6 +20,7 @@ import {
   isUserBot,
   isUserOnline,
 } from '../helpers';
+import { selectActiveRestrictionReasons } from './messages';
 import { selectTabState } from './tabs';
 import {
   selectBot, selectIsCurrentUserPremium, selectUser, selectUserFullInfo,
@@ -373,4 +374,12 @@ export function selectMonoforumChannel<T extends GlobalState>(
   if (!chat) return;
 
   return chat.isMonoforum ? selectChat(global, chat.linkedMonoforumId!) : undefined;
+}
+
+export function selectIsChatRestricted<T extends GlobalState>(global: T, chatId: string): boolean {
+  const chat = selectChat(global, chatId);
+  if (!chat) return false;
+
+  const activeRestrictions = selectActiveRestrictionReasons(global, chat.restrictionReasons);
+  return activeRestrictions.length > 0;
 }

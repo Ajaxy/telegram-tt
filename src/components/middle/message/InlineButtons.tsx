@@ -43,6 +43,17 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
         return <Icon className="corner-icon" name="webapp" />;
       case 'copy':
         return <Icon className="corner-icon" name="copy" />;
+      case 'suggestedMessage':
+        if (button.buttonType === 'suggestChanges') {
+          return <Icon className="left-icon" name="edit" />;
+        }
+        if (button.buttonType === 'approve') {
+          return <Icon className="left-icon" name="check" />;
+        }
+        if (button.buttonType === 'decline') {
+          return <Icon className="left-icon" name="close" />;
+        }
+        break;
     }
     return undefined;
   };
@@ -63,14 +74,14 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
             <Button
               size="tiny"
               ripple
-              disabled={button.type === 'unsupported'}
+              disabled={button.type === 'unsupported' || (button.type === 'suggestedMessage' && button.disabled)}
 
               onClick={() => onClick({ chatId: message.chatId, messageId: message.id, button })}
             >
+              {renderIcon(button)}
               <span className="inline-button-text">
                 {buttonTexts[i][j]}
               </span>
-              {renderIcon(button)}
             </Button>
           ))}
         </div>

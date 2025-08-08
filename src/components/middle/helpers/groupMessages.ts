@@ -91,6 +91,7 @@ export function groupMessages(
         nextMessage.id === firstUnreadId
         || message.senderId !== nextMessage.senderId
         || (!withUsers && message.paidMessageStars)
+        || (nextMessage.suggestedPostInfo)
         || message.isOutgoing !== nextMessage.isOutgoing
         || message.postAuthorTitle !== nextMessage.postAuthorTitle
         || (isActionMessage(message) && message.content.action?.type !== 'phoneCall')

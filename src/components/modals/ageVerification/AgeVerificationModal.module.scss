@@ -1,0 +1,41 @@
+.root {
+  :global(.modal-dialog) {
+    max-width: 25rem;
+  }
+}
+
+.content {
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+
+  background-color: var(--accent-color);
+}
+
+.icon {
+  position: relative;
+  z-index: 1;
+  font-size: 2rem;
+  color: var(--color-white);
+}
+
+.mainText,
+.description {
+  font-size: 0.9375rem;
+  color: var(--color-text);
+}

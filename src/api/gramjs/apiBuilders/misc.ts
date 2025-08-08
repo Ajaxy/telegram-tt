@@ -10,6 +10,7 @@ import type {
   ApiPeerColors,
   ApiPeerNotifySettings,
   ApiPrivacyKey,
+  ApiRestrictionReason,
   ApiSession,
   ApiTimezone,
   ApiUrlAuthResult,
@@ -346,4 +347,16 @@ export function buildApiCollectibleInfo(info: GramJs.fragment.TypeCollectibleInf
     purchaseDate,
     url,
   };
+}
+
+export function buildApiRestrictionReasons(
+  restrictionReasons?: GramJs.RestrictionReason[],
+): ApiRestrictionReason[] | undefined {
+  if (!restrictionReasons) {
+    return undefined;
+  }
+
+  return restrictionReasons.map((
+    { reason, text, platform }) =>
+    ({ reason, text, platform }));
 }

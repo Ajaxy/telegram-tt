@@ -2,21 +2,23 @@ import type { FC } from '../../../lib/teact/teact';
 import { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiStarsAmount } from '../../../api/types';
+import type { ApiStarsAmount, ApiTonAmount } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
 
-import { FAQ_URL, PRIVACY_URL } from '../../../config';
+import { FAQ_URL, PRIVACY_URL, TON_CURRENCY_CODE } from '../../../config';
 import { formatStarsAmount } from '../../../global/helpers/payments';
 import {
   selectIsGiveawayGiftsPurchaseAvailable,
   selectIsPremiumPurchaseBlocked,
 } from '../../../global/selectors';
+import { convertCurrencyFromBaseUnit } from '../../../util/formatCurrency';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
 import ChatExtra from '../../common/profile/ChatExtra';
 import ProfileInfo from '../../common/ProfileInfo';
@@ -34,6 +36,7 @@ type StateProps = {
   canBuyPremium?: boolean;
   isGiveawayAvailable?: boolean;
   starsBalance?: ApiStarsAmount;
+  tonBalance?: ApiTonAmount;
 };
 
 const SettingsMain: FC<OwnProps & StateProps> = ({
@@ -43,6 +46,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   canBuyPremium,
   isGiveawayAvailable,
   starsBalance,
+  tonBalance,
   onReset,
 }) => {
   const {
@@ -192,6 +196,18 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
             </span>
           )}
         </ListItem>
+        <ListItem
+          leftElement={<Icon className="icon ListItem-main-icon" name="toncoin" />}
+          narrow
+          onClick={() => openStarsBalanceModal({ currency: TON_CURRENCY_CODE })}
+        >
+          {lang('MenuTon')}
+          {Boolean(tonBalance) && (
+            <span className="settings-item__current-value">
+              {convertCurrencyFromBaseUnit(tonBalance.amount, tonBalance.currency)}
+            </span>
+          )}
+        </ListItem>
         {isGiveawayAvailable && (
           <ListItem
             icon="gift"
@@ -245,6 +261,7 @@ export default memo(withGlobal<OwnProps>(
     const { currentUserId } = global;
     const isGiveawayAvailable = selectIsGiveawayGiftsPurchaseAvailable(global);
     const starsBalance = global.stars?.balance;
+    const tonBalance = global.ton?.balance;
 
     return {
       sessionCount: global.activeSessions.orderedHashes.length,
@@ -252,6 +269,7 @@ export default memo(withGlobal<OwnProps>(
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
       isGiveawayAvailable,
       starsBalance,
+      tonBalance,
     };
   },
 )(SettingsMain));

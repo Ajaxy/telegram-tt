@@ -32,6 +32,7 @@ import {
   selectChat,
   selectChatFullInfo,
   selectCurrentMessageList,
+  selectIsChatRestricted,
   selectIsChatWithSelf,
   selectIsCurrentUserFrozen,
   selectIsRightColumnShown,
@@ -842,7 +843,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId }): StateProps => {
     const chat = selectChat(global, chatId);
-    if (!chat || chat.isRestricted) {
+    const isRestricted = selectIsChatRestricted(global, chatId);
+    if (!chat || isRestricted) {
       return {};
     }
     const isPrivate = isUserId(chat.id);

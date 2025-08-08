@@ -45,12 +45,12 @@
   color: white;
 
   background-color: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(25px);
   outline: none !important;
 }
 
 .giftResalePriceContainer {
   font-size: 0.75rem;
+  backdrop-filter: blur(25px);
 }
 
 .starAmountIcon,

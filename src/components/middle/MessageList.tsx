@@ -58,6 +58,8 @@ import {
   selectTranslationLanguage,
   selectUserFullInfo,
 } from '../../global/selectors';
+import { selectIsChatRestricted } from '../../global/selectors/chats';
+import { selectActiveRestrictionReasons } from '../../global/selectors/messages';
 import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from '../../util/animateScroll';
 import buildClassName from '../../util/buildClassName';
 import { isUserId } from '../../util/entities/ids';
@@ -125,7 +127,7 @@ type StateProps = {
   firstUnreadId?: number;
   isViewportNewest?: boolean;
   isRestricted?: boolean;
-  restrictionReason?: ApiRestrictionReason;
+  restrictionReasons?: ApiRestrictionReason[];
   focusingId?: number;
   isSelectModeActive?: boolean;
   lastMessage?: ApiMessage;
@@ -189,7 +191,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   isComments,
   isViewportNewest,
   isRestricted,
-  restrictionReason,
+  restrictionReasons,
   isEmptyThread,
   focusingId,
   isSelectModeActive,
@@ -719,7 +721,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       {isRestricted ? (
         <div className="empty">
           <span>
-            {restrictionReason ? restrictionReason.text : `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
+            {restrictionReasons?.[0]?.text || `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
           </span>
         </div>
       ) : paidMessagesStars && !hasMessages && !hasCustomGreeting ? (
@@ -802,7 +804,8 @@ export default memo(withGlobal<OwnProps>(
       return { currentUserId };
     }
 
-    const { isRestricted, restrictionReason } = chat;
+    const isRestricted = selectIsChatRestricted(global, chatId);
+    const restrictionReasons = selectActiveRestrictionReasons(global, chat?.restrictionReasons);
     const lastMessage = selectChatLastMessage(global, chatId, isSavedDialog ? 'saved' : 'all');
     const focusingId = selectFocusedMessageId(global, chatId);
 
@@ -836,7 +839,7 @@ export default memo(withGlobal<OwnProps>(
       areAdsEnabled,
       isChatLoaded: true,
       isRestricted,
-      restrictionReason,
+      restrictionReasons,
       isChannelChat: isChatChannel(chat),
       isChatMonoforum: isChatMonoforum(chat),
       isGroupChat: isChatGroup(chat),

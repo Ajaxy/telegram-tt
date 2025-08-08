@@ -41,3 +41,19 @@ addActionHandler('closeDeleteAccountModal', (global, actions, payload): ActionRe
     deleteAccountModal: undefined,
   }, tabId);
 });
+
+addActionHandler('openAgeVerificationModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    isAgeVerificationModalOpen: true,
+  }, tabId);
+});
+
+addActionHandler('closeAgeVerificationModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    isAgeVerificationModalOpen: false,
+  }, tabId);
+});

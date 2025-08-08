@@ -1,9 +1,9 @@
 import type {
   ApiReceiptRegular,
   ApiReceiptStars,
-  ApiStarsAmount,
   ApiStarsSubscription,
   ApiStarsTransaction,
+  ApiTypeCurrencyAmount,
 } from '../../api/types';
 import type {
   PaymentStep,
@@ -15,6 +15,7 @@ import type {
   GlobalState, TabArgs, TabState,
 } from '../types';
 
+import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { selectStarsPayment, selectTabState } from '../selectors';
 import { updateTabState } from './tabs';
@@ -137,15 +138,29 @@ export function closeInvoice<T extends GlobalState>(
 }
 
 export function updateStarsBalance<T extends GlobalState>(
-  global: T, balance: ApiStarsAmount,
+  global: T, balance: ApiTypeCurrencyAmount,
 ): T {
-  return {
-    ...global,
-    stars: {
-      ...global.stars,
-      balance,
-    },
-  };
+  if (balance.currency === STARS_CURRENCY_CODE) {
+    return {
+      ...global,
+      stars: {
+        ...global.stars,
+        balance,
+      },
+    };
+  }
+
+  if (balance.currency === TON_CURRENCY_CODE) {
+    return {
+      ...global,
+      ton: {
+        ...global.ton,
+        balance,
+      },
+    };
+  }
+
+  return global;
 }
 
 export function appendStarsTransactions<T extends GlobalState>(
@@ -153,7 +168,31 @@ export function appendStarsTransactions<T extends GlobalState>(
   type: StarsTransactionType,
   transactions: ApiStarsTransaction[],
   nextOffset?: string,
+  isTon?: boolean,
 ): T {
+  if (isTon) {
+    const history = global.ton?.history;
+    if (!history) {
+      return global;
+    }
+
+    const newTypeObject = {
+      transactions: (history[type]?.transactions || []).concat(transactions),
+      nextOffset,
+    };
+
+    return {
+      ...global,
+      ton: {
+        ...global.ton,
+        history: {
+          ...history,
+          [type]: newTypeObject,
+        },
+      },
+    };
+  }
+
   const history = global.stars?.history;
   if (!history) {
     return global;
@@ -238,7 +277,8 @@ export function openStarsTransactionFromReceipt<T extends GlobalState>(
       type: 'peer',
       id: receipt.botId,
     },
-    stars: {
+    amount: {
+      currency: STARS_CURRENCY_CODE,
       amount: receipt.totalAmount,
       nanos: 0,
     },

@@ -18,7 +18,9 @@ import type {
   ApiInputInvoiceStarGift,
   ApiInputMessageReplyInfo,
   ApiInputSavedStarGift,
+  ApiInputSuggestedPostInfo,
   ApiKeyboardButton,
+  ApiKeyboardButtonSuggestedMessage,
   ApiLimitTypeWithModal,
   ApiMessage,
   ApiMessageEntity,
@@ -47,6 +49,7 @@ import type {
   ApiStickerSetInfo,
   ApiThemeParameters,
   ApiTodoItem,
+  ApiTypeCurrencyAmount,
   ApiTypePrepaidGiveaway,
   ApiUpdate,
   ApiUser,
@@ -610,6 +613,21 @@ export interface ActionPayloads {
     description?: string;
     option?: string;
   } & WithTabId;
+  approveSuggestedPost: {
+    chatId: string;
+    messageId: number;
+    scheduleDate?: number;
+  } & WithTabId;
+
+  confirmApproveSuggestedPost: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
+  rejectSuggestedPost: {
+    chatId: string;
+    messageId: number;
+    rejectComment?: string;
+  } & WithTabId;
   sendMessageAction: {
     action: ApiSendMessageAction;
     chatId: string;
@@ -641,6 +659,7 @@ export interface ActionPayloads {
     startAttach?: string;
     attach?: string;
     startApp?: string;
+    shouldStartMainApp?: boolean;
     mode?: string;
     choose?: ApiChatType[];
     text?: string;
@@ -675,6 +694,7 @@ export interface ActionPayloads {
     threadId?: ThreadId;
     isLocalOnly?: boolean;
     shouldKeepReply?: boolean;
+    shouldKeepSuggestedPost?: boolean;
   };
   loadPinnedMessages: {
     chatId: string;
@@ -988,6 +1008,12 @@ export interface ActionPayloads {
   focusLastMessage: WithTabId | undefined;
   updateDraftReplyInfo: Partial<ApiInputMessageReplyInfo> & WithTabId;
   resetDraftReplyInfo: WithTabId | undefined;
+  updateDraftSuggestedPostInfo: Partial<ApiInputSuggestedPostInfo> & WithTabId;
+  resetDraftSuggestedPostInfo: WithTabId | undefined;
+  initDraftFromSuggestedMessage: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
   updateInsertingPeerIdMention: {
     peerId?: string;
   } & WithTabId;
@@ -1059,6 +1085,8 @@ export interface ActionPayloads {
     days: number;
   } & WithTabId | undefined;
   closeDeleteAccountModal: WithTabId | undefined;
+  openAgeVerificationModal: WithTabId | undefined;
+  closeAgeVerificationModal: WithTabId | undefined;
   setAccountTTL: {
     days: number;
   } & WithTabId | undefined;
@@ -1257,6 +1285,7 @@ export interface ActionPayloads {
   loadStarStatus: undefined;
   loadStarsTransactions: {
     type: StarsTransactionType;
+    isTon?: boolean;
   };
   loadStarsSubscriptions: undefined;
   changeStarsSubscription: {
@@ -1281,6 +1310,7 @@ export interface ActionPayloads {
       purpose?: string;
     };
     shouldIgnoreBalance?: boolean;
+    currency?: ApiTypeCurrencyAmount['currency'];
   } & WithTabId;
   closeStarsBalanceModal: WithTabId | undefined;
 
@@ -2000,6 +2030,11 @@ export interface ActionPayloads {
     messageId: number;
     button: ApiKeyboardButton;
   } & WithTabId;
+  clickSuggestedMessageButton: {
+    chatId: string;
+    messageId: number;
+    button: ApiKeyboardButtonSuggestedMessage;
+  } & WithTabId;
 
   switchBotInline: {
     messageId?: number;
@@ -2431,6 +2466,18 @@ export interface ActionPayloads {
   } & WithTabId;
   closePaidReactionModal: WithTabId | undefined;
 
+  openSuggestMessageModal: {
+    chatId: string;
+    messageId?: number;
+  } & WithTabId;
+  closeSuggestMessageModal: WithTabId | undefined;
+
+  openSuggestedPostApprovalModal: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
+  closeSuggestedPostApprovalModal: WithTabId | undefined;
+
   openDeleteMessageModal: ({
     chatId: string;
     messageIds: number[];
@@ -2445,6 +2492,7 @@ export interface ActionPayloads {
   };
 
   loadPremiumGifts: undefined;
+  loadTonGifts: undefined;
   loadStarGifts: undefined;
   updateResaleGiftsFilter: {
     filter: ResaleGiftsFilterOptions;

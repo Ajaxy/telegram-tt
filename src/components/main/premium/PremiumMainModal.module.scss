@@ -43,13 +43,6 @@
   @include mixins.adapt-padding-to-scrollbar(0.5rem);
 }
 
-.logo {
-  width: 6.25rem;
-  height: 6.25rem;
-  min-height: 6.25rem;
-  margin: 1rem;
-}
-
 .status-emoji {
   --custom-emoji-size: 8rem;
 

@@ -43,7 +43,7 @@ import type {
   ApiSessionData,
 } from './misc';
 import type { ApiPrivacyKey, LangPackStringValue, PrivacyVisibility } from './settings';
-import type { ApiStarsAmount } from './stars';
+import type { ApiTypeCurrencyAmount } from './stars';
 import type { ApiStealthMode, ApiStory, ApiStorySkipped } from './stories';
 import type {
   ApiEmojiStatusType, ApiUser, ApiUserFullInfo, ApiUserStatus,
@@ -794,7 +794,7 @@ export type ApiUpdatePremiumFloodWait = {
 
 export type ApiUpdateStarsBalance = {
   '@type': 'updateStarsBalance';
-  balance: ApiStarsAmount;
+  balance: ApiTypeCurrencyAmount;
 };
 
 export type ApiUpdateDeleteProfilePhoto = {

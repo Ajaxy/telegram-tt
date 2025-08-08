@@ -1,0 +1,70 @@
+.content {
+  display: flex;
+  flex-direction: column;
+
+  max-height: min(92vh, 32rem) !important;
+  padding-bottom: 1.125rem !important;
+  padding-inline: 1.125rem !important;
+}
+
+.modalHeader {
+  padding-top: 0.25rem !important;
+  padding-inline: 0.25rem !important;
+}
+
+.section,
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.section {
+  margin-bottom: 1rem;
+}
+
+.label {
+  margin-block: 0.5rem;
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.input {
+  margin-bottom: 0.5rem !important;
+}
+
+.description {
+  min-height: 2.75rem;
+  margin-bottom: 0.5rem;
+  margin-left: 1rem;
+
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.timeInputIcon {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
+
+  transition: color 0.15s ease;
+}
+
+.offerButton {
+  font-weight: var(--font-weight-medium);
+}
+
+.currencySelector {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.currencyIcon {
+  margin-inline-end: 0.25rem;
+}
