@@ -326,6 +326,16 @@
       line-height: initial;
       vertical-align: text-top;
     }
+
+    &.has-tags {
+      line-height: 1.25rem;
+      .title h3 {
+        font-size: 0.9375rem;
+      }
+      .info-row {
+        height: 1.25rem;
+      }
+    }
   }
 
   &[dir="rtl"] {

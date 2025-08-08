@@ -20,7 +20,7 @@ const ChatTags: FC<OwnProps> = ({
       {folderIds?.map((folderId) => {
         const folder = selectChatFolder(global, folderId);
         return folder && (
-          <div key={folder.id} className={`${styles.tag} ${styles[`tagColor${folder.color}`]}`}>
+          <div key={folder.id} className={`ChatTags ${styles.tag} ${styles[`tagColor${folder.color}`]}`}>
             <div className={styles.tagBackground} />
             {folder.title.text}
           </div>
