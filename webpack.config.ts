@@ -40,14 +40,14 @@ const {
 const CSP = `
   default-src 'self';
   connect-src 'self' wss://*.web.telegram.org blob: http: https: ${APP_ENV === 'development' ? 'wss:' : ''};
-  script-src 'self' 'wasm-unsafe-eval' https://t.me/_websync_ https://telegram.me/_websync_;
+  script-src 'self' 'wasm-unsafe-eval' ${APP_ENV === 'development' ? "'unsafe-inline' blob:" : ''} https://t.me/_websync_ https://telegram.me/_websync_;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https://ss3.4sqi.net/img/categories_v2/
   ${IS_PACKAGED_ELECTRON ? `${BASE_URL}/` : ''};
   media-src 'self' blob: data: ${IS_PACKAGED_ELECTRON ? [`${BASE_URL}/`, ELECTRON_HOST_URL].join(' ') : ''};
   object-src 'none';
-  frame-src http: https: mytonwallet-tc:;
-  base-uri 'none';
+  frame-src http: https: blob: mytonwallet-tc:;
+  base-uri 'self';
   form-action 'none';`
   .replace(/\s+/g, ' ').trim();
 
