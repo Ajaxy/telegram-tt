@@ -316,7 +316,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                 >
                   <span className={buildClassName(
                     'title',
-                    folder?.color !== undefined && `color-picker-item-${folder.color}`,
+                    folder?.color !== undefined && isPremium && `color-picker-item-${folder.color}`,
                   )}
                   >
                     {renderTextWithEntities({
