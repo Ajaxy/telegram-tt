@@ -169,15 +169,8 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   }, [foldersById, maxFolders, addChatFolder, openLimitReachedModal]);
 
   const handleToggleTags = useCallback(() => {
-    if (!isPremium) {
-      openLimitReachedModal({
-        limit: 'dialogFilters',
-      });
-      return;
-    }
-
     toggleDialogFilterTags({ enabled: !tagsEnabled });
-  }, [isPremium, tagsEnabled, toggleDialogFilterTags, openLimitReachedModal]);
+  }, [tagsEnabled, toggleDialogFilterTags]);
 
   const handleDrag = useCallback((translation: { x: number; y: number }, id: string | number) => {
     const delta = Math.round(translation.y / FOLDER_HEIGHT_PX);
