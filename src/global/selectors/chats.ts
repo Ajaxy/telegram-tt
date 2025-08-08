@@ -1,6 +1,5 @@
 import type {
   ApiChat, ApiChatFullInfo, ApiChatType,
-  ApiUser,
 } from '../../api/types';
 import type { ChatListType } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
