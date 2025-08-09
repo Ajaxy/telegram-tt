@@ -125,7 +125,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   const minZoom = options.minZoom ?? 1;
   const maxZoom = options.maxZoom ?? 4;
 
-  let isNearEdge = false; // Add this flag
+  let isNearEdge = false;
 
   function onCapture(e: MouseEvent | RealTouchEvent) {
     const target = e.target as HTMLElement;
