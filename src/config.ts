@@ -2,7 +2,6 @@ import type {
   ApiLimitType, ApiLimitTypeForPromo, ApiPremiumSection, ApiReactionEmoji,
 } from './api/types';
 import type {
-  FolderColor,
   GiftProfileFilterOptions,
   ResaleGiftsFilterOptions,
 } from './types';
