@@ -177,6 +177,10 @@ export function getOrderKey(chatId: string, isForSaved?: boolean) {
   return isForSaved ? summary.orderInSaved : summary.orderInAll;
 }
 
+export function getChatFolderIds(chatId: string) {
+  return prepared.folderIdsByChatId[chatId];
+}
+
 /* Callback managers */
 
 export function addOrderedIdsCallback(folderId: number, callback: (orderedIds: string[]) => void) {

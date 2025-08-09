@@ -1,0 +1,52 @@
+.wrapper {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.tag {
+  flex-shrink: 0;
+  min-width: 1.5rem;
+  height: 0.75rem;
+  border-radius: 0.2375rem;
+  padding: 0 0.2375rem;
+  font-size: 0.6375rem;
+  line-height: 0.75rem;
+  text-align: center;
+  position: relative;
+  text-transform: uppercase;
+
+  &Background {
+    position: absolute;
+    background-color: currentColor;
+    border-radius: 0.2375rem;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+  }
+  
+  &Color1 {
+    color: var(--color-topic-blue);
+  }
+  
+  &Color2 {
+    color: var(--color-topic-green);
+  }
+  
+  &Color3 {
+    color: var(--color-topic-yellow);
+  }
+  
+  &Color4 {
+    color: var(--color-topic-red);
+  }
+  
+  &Color5 {
+    color: var(--color-topic-violet);
+  }
+  
+  &Color6 {
+    color: var(--color-topic-rose);
+  }
+}

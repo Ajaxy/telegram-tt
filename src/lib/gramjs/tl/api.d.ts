@@ -24743,6 +24743,11 @@ namespace Api {
     }, Bool> {
       order: int[];
     }
+    export class ToggleDialogFilterTags extends Request<{
+      enabled: Bool;
+    }, Bool> {
+      enabled: Bool;
+    }
     export class GetOldFeaturedStickers extends Request<{
       offset: int;
       limit: int;
