@@ -52,6 +52,7 @@ export default function useChatListEntry({
   isTopic,
   isSavedDialog,
   isPreview,
+  hideForumTitle,
 }: {
   chat?: ApiChat;
   topics?: Record<number, ApiTopic>;
@@ -70,6 +71,7 @@ export default function useChatListEntry({
   animationType: ChatAnimationTypes;
   orderDiff: number;
   withInterfaceAnimations?: boolean;
+  hideForumTitle?: boolean;
 }) {
   const oldLang = useOldLang();
   const ref = useRef<HTMLDivElement>();
@@ -146,6 +148,7 @@ export default function useChatListEntry({
           renderLastMessage={renderLastMessageOrTyping}
           observeIntersection={observeIntersection}
           topics={topics}
+          hideForumTitle={hideForumTitle}
         />
       );
     }
