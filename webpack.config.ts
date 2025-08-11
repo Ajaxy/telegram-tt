@@ -23,6 +23,7 @@ const {
   HEAD,
   APP_ENV = 'production',
   APP_MOCKED_CLIENT = '',
+  APP_BYPASS_AUTH = '',
   IS_PACKAGED_ELECTRON,
 } = process.env;
 
@@ -203,6 +204,7 @@ export default function createConfig(
       new EnvironmentPlugin({
         APP_ENV,
         APP_MOCKED_CLIENT,
+        APP_BYPASS_AUTH,
         // eslint-disable-next-line no-null/no-null
         APP_NAME: null,
         APP_TITLE,

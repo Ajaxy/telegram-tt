@@ -1,15 +1,15 @@
-import { DEBUG, DEBUG_ALERT_MSG } from '../config';
-import { isCurrentTabMaster } from './establishMultitabRole';
-import { throttle } from './schedulers';
+import { DEBUG, DEBUG_ALERT_MSG, IS_BYPASS_AUTH } from "../config";
+import { isCurrentTabMaster } from "./establishMultitabRole";
+import { throttle } from "./schedulers";
 
 let showError = true;
 let error: Error | undefined;
 
-window.addEventListener('error', handleErrorEvent);
-window.addEventListener('unhandledrejection', handleErrorEvent);
+window.addEventListener("error", handleErrorEvent);
+window.addEventListener("unhandledrejection", handleErrorEvent);
 
 if (DEBUG) {
-  window.addEventListener('focus', () => {
+  window.addEventListener("focus", () => {
     if (!isCurrentTabMaster()) {
       return;
     }
@@ -19,7 +19,7 @@ if (DEBUG) {
       error = undefined;
     }
   });
-  window.addEventListener('blur', () => {
+  window.addEventListener("blur", () => {
     if (!isCurrentTabMaster()) {
       return;
     }
@@ -36,6 +36,13 @@ const throttleError = throttle((err) => {
 }, 1500);
 
 export function handleError(err: Error) {
+  // Suppress errors in bypass auth mode (except for console logging)
+  if (IS_BYPASS_AUTH) {
+    // eslint-disable-next-line no-console
+    console.log(">>> SUPPRESSING ERROR - BYPASS AUTH MODE:", err);
+    return;
+  }
+
   // eslint-disable-next-line no-console
   console.error(err);
   if (DEBUG) {
@@ -45,14 +52,17 @@ export function handleError(err: Error) {
 
 function handleErrorEvent(e: ErrorEvent | PromiseRejectionEvent) {
   // https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
-  if (e instanceof ErrorEvent && e.message === 'ResizeObserver loop limit exceeded') {
+  if (
+    e instanceof ErrorEvent &&
+    e.message === "ResizeObserver loop limit exceeded"
+  ) {
     return;
   }
 
   e.preventDefault();
-  handleError(e instanceof ErrorEvent ? (e.error || e.message) : e.reason);
+  handleError(e instanceof ErrorEvent ? e.error || e.message : e.reason);
 }
 
 function getErrorMessage(err: Error) {
-  return `${DEBUG_ALERT_MSG}\n\n${(err?.message) || err}\n${err?.stack}`;
+  return `${DEBUG_ALERT_MSG}\n\n${err?.message || err}\n${err?.stack}`;
 }

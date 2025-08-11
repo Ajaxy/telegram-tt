@@ -6,6 +6,7 @@ import {
   useState,
 } from "../lib/teact/teact";
 import { withGlobal } from "../global";
+import { getGlobal, setGlobal } from "../global";
 
 import type { GlobalState } from "../global/types";
 import type { ThemeKey } from "../types";
@@ -14,6 +15,7 @@ import type { UiLoaderPage } from "./common/UiLoader";
 import {
   DARK_THEME_BG_COLOR,
   INACTIVE_MARKER,
+  IS_BYPASS_AUTH,
   LIGHT_THEME_BG_COLOR,
   PAGE_TITLE,
 } from "../config";
@@ -73,6 +75,61 @@ enum AppScreens {
 
 const TRANSITION_RENDER_COUNT = Object.keys(AppScreens).length / 2;
 const INACTIVE_PAGE_TITLE = `${PAGE_TITLE} ${INACTIVE_MARKER}`;
+
+// Mock data initialization for test mode
+function initMockData() {
+  const global = getGlobal();
+
+  // Set up a mock current user
+  const mockUserId = "mock_user_123";
+  const mockUser = {
+    id: mockUserId,
+    isMin: false,
+    isSelf: true as const,
+    isContact: true as const,
+    accessHash: "12345",
+    firstName: "Test",
+    lastName: "User",
+    phoneNumber: "+1234567890",
+    type: "userTypeRegular" as const,
+  };
+
+  // Set up basic mock state for main app functionality
+  const updatedGlobal: GlobalState = {
+    ...global,
+    currentUserId: mockUserId,
+    authState: "authorizationStateReady",
+    isSynced: true,
+    isInited: true,
+    users: {
+      ...global.users,
+      byId: {
+        ...global.users.byId,
+        [mockUserId]: mockUser,
+      },
+    },
+    chats: {
+      ...global.chats,
+      listIds: {
+        active: [],
+        archived: [],
+        saved: [],
+      },
+      isFullyLoaded: {
+        active: true,
+        archived: true,
+        saved: true,
+      },
+      totalCount: {
+        all: 0,
+        archived: 0,
+        saved: 0,
+      },
+    },
+  };
+
+  setGlobal(updatedGlobal);
+}
 
 const App: FC<StateProps> = ({
   authState,
@@ -186,7 +243,15 @@ const App: FC<StateProps> = ({
   let activeKey: AppScreens;
   let page: UiLoaderPage | undefined;
 
-  if (isInactive) {
+  // Bypass authentication in test mode
+  if (IS_BYPASS_AUTH) {
+    // Initialize mock data for test mode
+    if (!authState || authState !== "authorizationStateReady") {
+      initMockData();
+    }
+    page = "main";
+    activeKey = AppScreens.main;
+  } else if (isInactive) {
     activeKey = AppScreens.inactive;
   } else if (isScreenLocked) {
     page = "lock";
@@ -258,6 +323,7 @@ const App: FC<StateProps> = ({
   const prevActiveKey = usePreviousDeprecated(activeKey);
 
   function renderContent() {
+    console.log("activeKey", activeKey);
     switch (activeKey) {
       case AppScreens.auth:
         return <Auth />;

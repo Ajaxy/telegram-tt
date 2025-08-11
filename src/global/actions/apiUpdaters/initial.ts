@@ -5,83 +5,91 @@ import type {
   ApiUpdateCurrentUser,
   ApiUpdateServerTimeOffset,
   ApiUpdateSession,
-} from '../../../api/types';
-import type { LangCode } from '../../../types';
-import type { RequiredGlobalActions } from '../../index';
-import type { ActionReturnType, GlobalState } from '../../types';
+} from "../../../api/types";
+import type { LangCode } from "../../../types";
+import type { RequiredGlobalActions } from "../../index";
+import type { ActionReturnType, GlobalState } from "../../types";
 
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { getShippingError, shouldClosePaymentModal } from '../../../util/getReadableErrorText';
-import { unique } from '../../../util/iteratees';
-import { oldSetLanguage } from '../../../util/oldLangProvider';
-import { clearWebTokenAuth } from '../../../util/routing';
-import { setServerTimeOffset } from '../../../util/serverTime';
-import { updateSessionUserId } from '../../../util/sessions';
-import { forceWebsync } from '../../../util/websync';
-import { isChatChannel, isChatSuperGroup } from '../../helpers';
+import { IS_BYPASS_AUTH } from "../../../config";
+import { getCurrentTabId } from "../../../util/establishMultitabRole";
 import {
-  addActionHandler, getGlobal, setGlobal,
-} from '../../index';
-import { updateUser, updateUserFullInfo } from '../../reducers';
-import { updateTabState } from '../../reducers/tabs';
-import { selectTabState } from '../../selectors';
-import { selectSharedSettings } from '../../selectors/sharedState';
+  getShippingError,
+  shouldClosePaymentModal,
+} from "../../../util/getReadableErrorText";
+import { unique } from "../../../util/iteratees";
+import { oldSetLanguage } from "../../../util/oldLangProvider";
+import { clearWebTokenAuth } from "../../../util/routing";
+import { setServerTimeOffset } from "../../../util/serverTime";
+import { updateSessionUserId } from "../../../util/sessions";
+import { forceWebsync } from "../../../util/websync";
+import { isChatChannel, isChatSuperGroup } from "../../helpers";
+import { addActionHandler, getGlobal, setGlobal } from "../../index";
+import { updateUser, updateUserFullInfo } from "../../reducers";
+import { updateTabState } from "../../reducers/tabs";
+import { selectTabState } from "../../selectors";
+import { selectSharedSettings } from "../../selectors/sharedState";
 
-addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
-  switch (update['@type']) {
-    case 'updateApiReady':
+addActionHandler("apiUpdate", (global, actions, update): ActionReturnType => {
+  switch (update["@type"]) {
+    case "updateApiReady":
       onUpdateApiReady(global);
       break;
 
-    case 'updateAuthorizationState':
+    case "updateAuthorizationState":
       onUpdateAuthorizationState(global, update);
       break;
 
-    case 'updateAuthorizationError':
+    case "updateAuthorizationError":
       onUpdateAuthorizationError(global, update);
       break;
 
-    case 'updateWebAuthTokenFailed':
+    case "updateWebAuthTokenFailed":
       onUpdateWebAuthTokenFailed(global);
       break;
 
-    case 'updateConnectionState':
+    case "updateConnectionState":
       onUpdateConnectionState(global, actions, update);
       break;
 
-    case 'updateSession':
+    case "updateSession":
       onUpdateSession(global, actions, update);
       break;
 
-    case 'updateServerTimeOffset':
+    case "updateServerTimeOffset":
       onUpdateServerTimeOffset(update);
       break;
 
-    case 'updateCurrentUser':
+    case "updateCurrentUser":
       onUpdateCurrentUser(global, update);
       break;
 
-    case 'requestReconnectApi':
+    case "requestReconnectApi":
       global = { ...global, isSynced: false };
       setGlobal(global);
 
       onUpdateConnectionState(global, actions, {
-        '@type': 'updateConnectionState',
-        connectionState: 'connectionStateConnecting',
+        "@type": "updateConnectionState",
+        connectionState: "connectionStateConnecting",
       });
       actions.initApi();
       break;
 
-    case 'requestSync':
+    case "requestSync":
       actions.sync();
       break;
 
-    case 'updateFetchingDifference':
+    case "updateFetchingDifference":
       global = { ...global, isFetchingDifference: update.isFetching };
       setGlobal(global);
       break;
 
-    case 'error': {
+    case "error": {
+      // Suppress errors in bypass auth mode
+      if (IS_BYPASS_AUTH) {
+        console.log(">>> SUPPRESSING ERROR - BYPASS AUTH MODE:", update.error);
+        break;
+      }
+
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         const paymentShippingError = getShippingError(update.error);
         if (paymentShippingError) {
@@ -96,13 +104,13 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       break;
     }
 
-    case 'notSupportedInFrozenAccount': {
+    case "notSupportedInFrozenAccount": {
       actions.showNotification({
         title: {
-          key: 'NotificationTitleNotSupportedInFrozenAccount',
+          key: "NotificationTitleNotSupportedInFrozenAccount",
         },
         message: {
-          key: 'NotificationMessageNotSupportedInFrozenAccount',
+          key: "NotificationMessageNotSupportedInFrozenAccount",
         },
         tabId: getCurrentTabId(),
       });
@@ -115,10 +123,13 @@ function onUpdateApiReady<T extends GlobalState>(global: T) {
   void oldSetLanguage(selectSharedSettings(global).language as LangCode);
 }
 
-function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: ApiUpdateAuthorizationState) {
+function onUpdateAuthorizationState<T extends GlobalState>(
+  global: T,
+  update: ApiUpdateAuthorizationState
+) {
   global = getGlobal();
 
-  const wasAuthReady = global.authState === 'authorizationStateReady';
+  const wasAuthReady = global.authState === "authorizationStateReady";
   const authState = update.authorizationState;
 
   global = {
@@ -131,7 +142,7 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
   global = getGlobal();
 
   switch (authState) {
-    case 'authorizationStateLoggingOut':
+    case "authorizationStateLoggingOut":
       void forceWebsync(false);
 
       global = {
@@ -140,14 +151,14 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
       };
       setGlobal(global);
       break;
-    case 'authorizationStateWaitCode':
+    case "authorizationStateWaitCode":
       global = {
         ...global,
         authIsCodeViaApp: update.isCodeViaApp,
       };
       setGlobal(global);
       break;
-    case 'authorizationStateWaitPassword':
+    case "authorizationStateWaitPassword":
       global = {
         ...global,
         authHint: update.hint,
@@ -162,7 +173,7 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
 
       setGlobal(global);
       break;
-    case 'authorizationStateWaitQrCode':
+    case "authorizationStateWaitQrCode":
       global = {
         ...global,
         authIsLoadingQrCode: false,
@@ -170,7 +181,7 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
       };
       setGlobal(global);
       break;
-    case 'authorizationStateReady': {
+    case "authorizationStateReady": {
       if (wasAuthReady) {
         break;
       }
@@ -182,9 +193,13 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
         isLoggingOut: false,
       };
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
-        global = updateTabState(global, {
-          isInactive: false,
-        }, tabId);
+        global = updateTabState(
+          global,
+          {
+            isInactive: false,
+          },
+          tabId
+        );
       });
       setGlobal(global);
 
@@ -193,7 +208,10 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
   }
 }
 
-function onUpdateAuthorizationError<T extends GlobalState>(global: T, update: ApiUpdateAuthorizationError) {
+function onUpdateAuthorizationError<T extends GlobalState>(
+  global: T,
+  update: ApiUpdateAuthorizationError
+) {
   // TODO: Investigate why TS is not happy with spread for lang related types
   global = {
     ...global,
@@ -214,15 +232,23 @@ function onUpdateWebAuthTokenFailed<T extends GlobalState>(global: T) {
 }
 
 function onUpdateConnectionState<T extends GlobalState>(
-  global: T, actions: RequiredGlobalActions, update: ApiUpdateConnectionState,
+  global: T,
+  actions: RequiredGlobalActions,
+  update: ApiUpdateConnectionState
 ) {
   const { connectionState } = update;
 
   global = getGlobal();
   const tabState = selectTabState(global, getCurrentTabId());
-  if (connectionState === 'connectionStateReady' && tabState.isMasterTab && tabState.multitabNextAction) {
+  if (
+    connectionState === "connectionStateReady" &&
+    tabState.isMasterTab &&
+    tabState.multitabNextAction
+  ) {
     // @ts-ignore
-    actions[tabState.multitabNextAction.action](tabState.multitabNextAction.payload);
+    actions[tabState.multitabNextAction.action](
+      tabState.multitabNextAction.payload
+    );
     actions.clearMultitabNextAction({ tabId: tabState.id });
   }
 
@@ -244,19 +270,23 @@ function onUpdateConnectionState<T extends GlobalState>(
         const chat = global.chats.byId[chatId];
         return chat && (isChatChannel(chat) || isChatSuperGroup(chat));
       });
-    if (connectionState === 'connectionStateReady' && channelStackIds.length) {
+    if (connectionState === "connectionStateReady" && channelStackIds.length) {
       unique(channelStackIds).forEach((chatId) => {
         actions.requestChannelDifference({ chatId });
       });
     }
   }
 
-  if (connectionState === 'connectionStateBroken') {
+  if (connectionState === "connectionStateBroken") {
     actions.signOut({ forceInitApi: true });
   }
 }
 
-function onUpdateSession<T extends GlobalState>(global: T, actions: RequiredGlobalActions, update: ApiUpdateSession) {
+function onUpdateSession<T extends GlobalState>(
+  global: T,
+  actions: RequiredGlobalActions,
+  update: ApiUpdateSession
+) {
   const { sessionData } = update;
   const { authRememberMe, authState } = global;
   const isEmpty = !sessionData || !sessionData.mainDcId;
@@ -273,7 +303,7 @@ function onUpdateSession<T extends GlobalState>(global: T, actions: RequiredGlob
     setGlobal(global);
   }
 
-  if (!authRememberMe || authState !== 'authorizationStateReady' || isEmpty) {
+  if (!authRememberMe || authState !== "authorizationStateReady" || isEmpty) {
     return;
   }
 
@@ -284,7 +314,10 @@ function onUpdateServerTimeOffset(update: ApiUpdateServerTimeOffset) {
   setServerTimeOffset(update.serverTimeOffset);
 }
 
-function onUpdateCurrentUser<T extends GlobalState>(global: T, update: ApiUpdateCurrentUser) {
+function onUpdateCurrentUser<T extends GlobalState>(
+  global: T,
+  update: ApiUpdateCurrentUser
+) {
   const { currentUser, currentUserFullInfo } = update;
 
   global = {
