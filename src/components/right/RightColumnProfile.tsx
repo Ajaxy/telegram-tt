@@ -131,7 +131,13 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
             <span className="balance-label">Balance</span>
             <div className="balance-value-group">
               <span className="balance-amount">12.5433</span>
-              <span className="balance-icon">☰</span>
+              <img
+                className="balance-icon"
+                src="/solana/Solana (SOL).svg"
+                alt="Solana"
+                width="12"
+                height="10"
+              />
             </div>
           </div>
         </div>

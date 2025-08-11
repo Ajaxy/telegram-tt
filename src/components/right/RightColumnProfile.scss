@@ -61,9 +61,11 @@
         flex: 1;
         
         .wallet-label {
-          font-size: 0.75rem;
-          color: rgba(0, 0, 0, 0.5);
+          font-family: Satoshi, sans-serif;
           font-weight: 400;
+          font-size: 11px;
+          line-height: 14px;
+          color: #686A6D;
           text-transform: uppercase;
           letter-spacing: 0.025em;
         }
@@ -71,7 +73,7 @@
         .wallet-value-group {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 2px;
           
           .wallet-address {
             font-family: Satoshi, sans-serif;
@@ -97,6 +99,7 @@
             .copy-icon {
               width: 12px;
               height: 12px;
+              color: white;
             }
             
             &:hover {
@@ -114,9 +117,11 @@
         align-items: flex-end;
         
         .balance-label {
-          font-size: 0.75rem;
-          color: rgba(0, 0, 0, 0.5);
+          font-family: Satoshi, sans-serif;
           font-weight: 400;
+          font-size: 11px;
+          line-height: 14px;
+          color: #686A6D;
           text-transform: uppercase;
           letter-spacing: 0.025em;
         }
@@ -137,8 +142,9 @@
           }
           
           .balance-icon {
-            font-size: 1.125rem;
-            color: rgba(0, 0, 0, 0.4);
+            width: 12px;
+            height: 10px;
+            flex-shrink: 0;
           }
         }
       }
