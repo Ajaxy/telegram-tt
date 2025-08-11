@@ -143,14 +143,9 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
         </div>
 
         <div className="search-section">
-          <input
-            type="text"
-            placeholder="Search coins"
-            className="search-input"
-          />
-          <Button size="tiny" color="translucent" className="filter-button">
+          <div className="search-input-wrapper">
             <svg
-              className="filter-icon"
+              className="search-icon"
               width="16"
               height="16"
               viewBox="0 0 24 24"
@@ -158,9 +153,15 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
               stroke="currentColor"
               strokeWidth="2"
             >
-              <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3"></polygon>
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
             </svg>
-          </Button>
+            <input
+              type="text"
+              placeholder="Search coins"
+              className="search-input"
+            />
+          </div>
         </div>
       </div>
 
