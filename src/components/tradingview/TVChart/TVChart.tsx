@@ -20,34 +20,58 @@ const createChartTypeButtonHTML = (chartType: "price" | "mcap") => {
       }; font-weight: ${chartType === "price" ? "bold" : "normal"};">
         Price
       </span>
-      /
-      <span style="color: ${
-        chartType === "mcap" ? "#2962ff" : ""
-      }; font-weight: ${chartType === "mcap" ? "bold" : "normal"};">
-        MCap
-      </span>
     </div>
   `;
 };
 
+// // Helper function to create chart type button HTML
+// const createChartTypeButtonHTML = (chartType: "price" | "mcap") => {
+//   return `
+//     <div style="cursor: pointer;">
+//       <span style="color: ${
+//         chartType === "price" ? "#2962ff" : ""
+//       }; font-weight: ${chartType === "price" ? "bold" : "normal"};">
+//         Price
+//       </span>
+//       /
+//       <span style="color: ${
+//         chartType === "mcap" ? "#2962ff" : ""
+//       }; font-weight: ${chartType === "mcap" ? "bold" : "normal"};">
+//         MCap
+//       </span>
+//     </div>
+//   `;
+// };
+
+// // Helper function to create currency button HTML
+// const createCurrencyButtonHTML = (selectedCurrency: "usd" | "whype") => {
+//   return `
+//     <div style="cursor: pointer;">
+//       <span style="color: ${
+//         selectedCurrency === "usd" ? "#2962ff" : ""
+//       }; font-weight: ${
+//     selectedCurrency === "usd" ? "bold" : "normal"
+//   }; text-transform: uppercase;">
+//         USD
+//       </span>
+//       /
+//       <span style="color: ${
+//         selectedCurrency !== "usd" ? "#2962ff" : ""
+//       }; font-weight: ${
+//     selectedCurrency !== "usd" ? "bold" : "normal"
+//   }; text-transform: uppercase;">
+//         WHYPE
+//       </span>
+//     </div>
+//   `;
+// };
+
 // Helper function to create currency button HTML
-const createCurrencyButtonHTML = (selectedCurrency: "usd" | "whype") => {
+const createCurrencyButtonHTML = () => {
   return `
-    <div style="cursor: pointer;">
-      <span style="color: ${
-        selectedCurrency === "usd" ? "#2962ff" : ""
-      }; font-weight: ${
-    selectedCurrency === "usd" ? "bold" : "normal"
-  }; text-transform: uppercase;">
+    <div>
+      <span style="color: #2962ff; font-weight: bold; text-transform: uppercase;">
         USD
-      </span>
-      /
-      <span style="color: ${
-        selectedCurrency !== "usd" ? "#2962ff" : ""
-      }; font-weight: ${
-    selectedCurrency !== "usd" ? "bold" : "normal"
-  }; text-transform: uppercase;">
-        WHYPE
       </span>
     </div>
   `;
@@ -182,18 +206,18 @@ const TVChart: FC<TVChartProps> = ({ poolMetadata, settings }) => {
       tvWidget.headerReady().then(() => {
         const chartTypeButton = tvWidget.createButton();
 
-        chartTypeButton.innerHTML = createChartTypeButtonHTML(chartType);
-        chartTypeButton.addEventListener("click", () => {
-          const newChartType = chartType === "price" ? "mcap" : "price";
-          setChartType(newChartType);
-        });
+        // chartTypeButton.innerHTML = createChartTypeButtonHTML(chartType);
+        // chartTypeButton.addEventListener("click", () => {
+        //   const newChartType = chartType === "price" ? "mcap" : "price";
+        //   setChartType(newChartType);
+        // });
 
-        const currencyButton = tvWidget.createButton();
-        currencyButton.innerHTML = createCurrencyButtonHTML(currency);
-        currencyButton.addEventListener("click", () => {
-          const newCurrency = currency === "usd" ? "whype" : "usd";
-          setCurrency(newCurrency);
-        });
+        // const currencyButton = tvWidget.createButton();
+        // currencyButton.innerHTML = createCurrencyButtonHTML(currency);
+        // currencyButton.addEventListener("click", () => {
+        //   const newCurrency = currency === "usd" ? "whype" : "usd";
+        //   setCurrency(newCurrency);
+        // });
       });
     };
 

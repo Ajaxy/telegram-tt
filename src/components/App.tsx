@@ -140,36 +140,6 @@ const App: FC<StateProps> = ({
   isTestServer,
   theme,
 }) => {
-  // Temporary: testing TradingView TVChart integration
-  const [poolMetadata, setPoolMetadata] = useState<
-    HMPoolTokenMetadata | undefined
-  >();
-
-  console.log("poolMetadata", poolMetadata);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const poolAddress = params.get("pool");
-
-    if (!poolAddress) return;
-
-    fetchPoolTokenMetadata(poolAddress)
-      .then(setPoolMetadata)
-      .catch((err) =>
-        console.error("[TVChart] Failed to load pool metadata", err)
-      );
-  }, []);
-
-  const TVChartElem = useMemo(() => {
-    if (!poolMetadata) return null;
-    return (
-      <TVChart
-        poolMetadata={poolMetadata}
-        settings={{ chartType: "price", currency: "usd" }}
-      />
-    );
-  }, [poolMetadata]);
-
   const [isInactive, markInactive, unmarkInactive] = useFlag(false);
   const { isMobile } = useAppLayout();
   const isMobileOs = PLATFORM_ENV === "iOS" || PLATFORM_ENV === "Android";
@@ -349,7 +319,6 @@ const App: FC<StateProps> = ({
 
   return (
     <UiLoader page={page} isMobile={isMobile}>
-      {TVChartElem && <div style="height: 480px;">{TVChartElem}</div>}
       <Transition
         name="fade"
         activeKey={activeKey}
