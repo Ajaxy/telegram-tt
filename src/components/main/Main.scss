@@ -15,13 +15,25 @@
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-rows: 100%;
+    
+    /* When Moonraker column is shown, adjust the grid */
+    &.moonraker-column-shown {
+      grid-template-columns: auto 1fr var(--right-column-width);
+    }
+    
+    /* When both right column and moonraker are shown on larger screens */
+    @media (min-width: 1600px) {
+      &.right-column-shown.moonraker-column-shown {
+        grid-template-columns: auto 1fr var(--right-column-width) var(--right-column-width);
+      }
+    }
   }
 }
 
 .has-call-header {
   --call-header-height: 2rem;
 
-  #LeftColumn, #MiddleColumn, #RightColumn-wrapper {
+  #LeftColumn, #MiddleColumn, #RightColumn-wrapper, #MoonrakerColumn {
     height: calc(100% - var(--call-header-height));
     margin-top: var(--call-header-height);
   }
@@ -209,6 +221,117 @@
 
     #Main.right-column-open & {
       transform: translate3d(-20vw, 0, 0);
+    }
+  }
+}
+
+/* Moonraker Profile Column */
+#MoonrakerColumn {
+  height: 100%;
+  background: var(--color-background);
+  border-left: 1px solid var(--color-borders);
+  
+  /* Hidden by default - use display none to completely remove from layout */
+  display: none;
+  
+  /* Show when moonraker-column-shown class is present */
+  #Main.moonraker-column-shown & {
+    display: block;
+  }
+
+  /* Hide when regular right column is open to avoid overlap on smaller screens */
+  @media (max-width: 1599px) {
+    #Main.right-column-open & {
+      display: none;
+    }
+  }
+
+  /* On large screens (1600px+), show side by side with regular right column */
+  @media (min-width: 1600px) {
+    #Main.right-column-shown.moonraker-column-shown & {
+      display: block;
+    }
+  }
+
+  /* Mobile and tablet responsive behavior */
+  @media (max-width: 925px) {
+    position: fixed;
+    z-index: calc(var(--z-right-column) + 1);
+    top: 0;
+    right: 0;
+    width: var(--right-column-width);
+    transform: translate3d(var(--right-column-width), 0, 0);
+    transition: transform var(--layer-transition);
+    
+    #Main.moonraker-column-shown & {
+      transform: translate3d(0, 0, 0);
+    }
+    
+    #Main.right-column-open & {
+      transform: translate3d(var(--right-column-width), 0, 0);
+    }
+    
+    body.no-page-transitions &,
+    body.no-right-column-animations & {
+      transition: none !important;
+    }
+  }
+
+  @media (max-width: 1275px) {
+    border-left: none;
+    box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
+  }
+
+  @media (max-width: 600px) {
+    width: 100vw;
+    transform: translate3d(100vw, 0, 0);
+    
+    #Main.moonraker-column-shown & {
+      transform: translate3d(0, 0, 0);
+    }
+    
+    #Main.right-column-open & {
+      transform: translate3d(100vw, 0, 0);
+    }
+  }
+}
+
+/* Trading Column Layout */
+#RightColumnTrading {
+  /* Force no transitions for instant appearance */
+  transition: none !important;
+
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100 + 1px);
+  }
+}
+
+/* Layout adjustments when trading column is shown */
+#Main.trading-column-shown {
+  @media (min-width: 1276px) {
+    /* Default grid template to accommodate trading column */
+    grid-template-columns: auto 1fr var(--right-column-width) var(--trading-column-width);
+    
+    /* Position moonraker column appropriately */
+    &.moonraker-column-shown {
+      /* When both moonraker and trading columns are shown */
+      #MoonrakerColumn {
+        /* Moonraker stays in its current position */
+      }
+      
+      #RightColumnTrading {
+        /* Trading column goes to the rightmost position */
+        right: 0;
+      }
+    }
+    
+    /* When only trading column is shown (no moonraker) */
+    &:not(.moonraker-column-shown) {
+      grid-template-columns: auto 1fr var(--trading-column-width);
+      
+      #RightColumnTrading {
+        right: 0;
+      }
     }
   }
 }

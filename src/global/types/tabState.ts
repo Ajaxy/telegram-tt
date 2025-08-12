@@ -51,10 +51,10 @@ import type {
   ApiUser,
   ApiVideo,
   ApiWebPage,
-} from '../../api/types';
-import type { ApiEmojiStatusCollectible } from '../../api/types/users';
-import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
-import type { ReducerAction } from '../../hooks/useReducer';
+} from "../../api/types";
+import type { ApiEmojiStatusCollectible } from "../../api/types/users";
+import type { FoldersActions } from "../../hooks/reducers/useFoldersReducer";
+import type { ReducerAction } from "../../hooks/useReducer";
 import type {
   ActiveDownloads,
   ActiveEmojiInteraction,
@@ -88,11 +88,11 @@ import type {
   StoryViewerOrigin,
   TabThread,
   ThreadId,
-} from '../../types';
-import type { WebApp, WebAppModalStateType } from '../../types/webapp';
-import type { SearchResultKey } from '../../util/keys/searchResultKey';
-import type { RegularLangFnParameters } from '../../util/localization';
-import type { CallbackAction } from './actions';
+} from "../../types";
+import type { WebApp, WebAppModalStateType } from "../../types/webapp";
+import type { SearchResultKey } from "../../util/keys/searchResultKey";
+import type { RegularLangFnParameters } from "../../util/localization";
+import type { CallbackAction } from "./actions";
 
 export type TabState = {
   id: number;
@@ -123,6 +123,19 @@ export type TabState = {
   };
 
   shouldCloseRightColumn?: boolean;
+  isTradingColumnShown?: boolean;
+  selectedTradingCoin?: {
+    id: string;
+    name: string;
+    subtitle: string;
+    time: string;
+    comments: string;
+    score: string;
+    cap: string;
+    holders: number;
+    volume: string;
+    change: string;
+  };
   nextProfileTab?: ProfileTabType;
   forceScrollProfileTab?: boolean;
   nextFoldersAction?: ReducerAction<FoldersActions>;
@@ -265,13 +278,18 @@ export type TabState = {
       peerIds: string[];
       nextOffset?: string;
     };
-    resultsByType?: Partial<Record<ApiGlobalMessageSearchType, {
-      totalCount?: number;
-      nextOffsetId?: number;
-      nextOffsetPeerId?: string;
-      nextOffsetRate?: number;
-      foundIds: SearchResultKey[];
-    }>>;
+    resultsByType?: Partial<
+      Record<
+        ApiGlobalMessageSearchType,
+        {
+          totalCount?: number;
+          nextOffsetId?: number;
+          nextOffsetPeerId?: string;
+          nextOffsetRate?: number;
+          foundIds: SearchResultKey[];
+        }
+      >
+    >;
   };
 
   userSearch: {
@@ -289,14 +307,22 @@ export type TabState = {
   };
 
   sharedMediaSearch: {
-    byChatThreadKey: Record<string, {
-      currentType?: SharedMediaType;
-      resultsByType?: Partial<Record<SharedMediaType, {
-        totalCount?: number;
-        nextOffsetId: number;
-        foundIds: number[];
-      }>>;
-    }>;
+    byChatThreadKey: Record<
+      string,
+      {
+        currentType?: SharedMediaType;
+        resultsByType?: Partial<
+          Record<
+            SharedMediaType,
+            {
+              totalCount?: number;
+              nextOffsetId: number;
+              foundIds: number[];
+            }
+          >
+        >;
+      }
+    >;
   };
 
   chatMediaSearch: {
@@ -486,7 +512,7 @@ export type TabState = {
     messageIds: number[];
     description: string;
     peerId?: string;
-    subject: 'story' | 'message';
+    subject: "story" | "message";
     sections: {
       title?: string;
       subtitle?: string;
@@ -568,7 +594,7 @@ export type TabState = {
 
   botTrustRequest?: {
     botId: string;
-    type: 'game' | 'webApp' | 'botApp';
+    type: "game" | "webApp" | "botApp";
     shouldRequestWriteAccess?: boolean;
     onConfirm?: CallbackAction;
   };
@@ -782,12 +808,12 @@ export type TabState = {
 
   collectibleInfoModal?: ApiCollectibleInfo & {
     peerId: string;
-    type: 'phone' | 'username';
+    type: "phone" | "username";
     collectible: string;
   };
 
   starsBalanceModal?: {
-    originStarsPayment?: TabState['starsPayment'];
+    originStarsPayment?: TabState["starsPayment"];
     originGift?: StarGiftInfo;
     originReaction?: {
       chatId: string;
@@ -798,7 +824,7 @@ export type TabState = {
       balanceNeeded: number;
       purpose?: string;
     };
-    currency?: ApiTypeCurrencyAmount['currency'];
+    currency?: ApiTypeCurrencyAmount["currency"];
   };
 
   giftInfoModal?: {

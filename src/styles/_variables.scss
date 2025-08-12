@@ -218,6 +218,7 @@ $color-message-story-mention-to: #74bcff;
   --border-radius-forum-avatar: 33.3333%;
   --messages-container-width: 45.5rem;
   --right-column-width: 26.5rem;
+  --trading-column-width: 34.625rem;
   --header-height: 3.4375rem;
   --custom-emoji-size: 1.25rem;
   --emoji-size: 1.25rem;
@@ -318,6 +319,7 @@ $color-message-story-mention-to: #74bcff;
 
   @media (min-width: 1276px) and (max-width: 1920px) {
     --right-column-width: 25vw;
+    --trading-column-width: 34.625rem;
   }
 
   @media (min-width: 1921px) {
@@ -326,6 +328,7 @@ $color-message-story-mention-to: #74bcff;
 
   @media (max-width: 600px) {
     --right-column-width: 100vw;
+    --trading-column-width: 100vw;
     --symbol-menu-width: 100vw;
     --symbol-menu-height: 17.6875rem;
   }

@@ -1,0 +1,763 @@
+/* RightColumnProfile - Styled to match AppSidebar design patterns */
+
+.RightColumnProfile {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-background);
+  border-left: 1px solid var(--color-borders);
+  
+  /* CSS Custom Properties matching AppSidebar */
+  --sidebar-ring: hsl(220 14.3% 95.9%);
+  --sidebar-accent: hsl(220 14.3% 95.9%);
+  --sidebar-foreground: hsl(220 8.9% 46.1%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-background: hsl(0 0% 100%);
+  --muted: hsl(220 14.3% 95.9%);
+  --muted-foreground: hsl(220 8.9% 46.1%);
+
+  /* Header Section */
+  .sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--sidebar-border);
+    
+    .brand-section {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+
+      
+      .size-2 {
+        width: 8px;
+        height: 8px;
+      }
+      
+      .rounded-full {
+        border-radius: 50%;
+      }
+      
+      .bg-sidebar-ring {
+        background-color: var(--sidebar-ring);
+      }
+      
+      .moonraker-brand-text {
+        color: #8C7CD6;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 14px;
+        letter-spacing: 0.025em;
+      }
+    }
+    
+    .wallet-section {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      
+      .wallet-column {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        
+        .wallet-label {
+          font-family: Satoshi, sans-serif;
+          font-weight: 400;
+          font-size: 11px;
+          line-height: 14px;
+          color: #686A6D;
+          text-transform: uppercase;
+          letter-spacing: 0.025em;
+        }
+        
+        .wallet-value-group {
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          
+          .wallet-address {
+            font-family: Satoshi, sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 14px;
+            color: white;
+            letter-spacing: 0.025em;
+          }
+          
+          .copy-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+            
+            .copy-icon {
+              width: 12px;
+              height: 12px;
+              color: white;
+            }
+            
+            &:hover {
+              background: rgba(255, 255, 255, 0.1);
+              color: white;
+            }
+          }
+        }
+      }
+      
+      .balance-column {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: flex-end;
+        
+        .balance-label {
+          font-family: Satoshi, sans-serif;
+          font-weight: 400;
+          font-size: 11px;
+          line-height: 14px;
+          color: #686A6D;
+          text-transform: uppercase;
+          letter-spacing: 0.025em;
+        }
+        
+        .balance-value-group {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          
+          .balance-amount {
+            font-family: Satoshi, sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 14px;
+            font-feature-settings: "tnum";
+            color: white;
+            letter-spacing: 0.025em;
+          }
+          
+          .balance-icon {
+            width: 12px;
+            height: 10px;
+            flex-shrink: 0;
+          }
+        }
+      }
+    }
+    
+
+  }
+
+  /* Content Section */
+  .sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 0 16px 0;
+    
+          .search-section {
+        margin-bottom: 16px;
+        padding: 0 16px;
+        
+        .search-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        
+        .search-icon {
+          position: absolute;
+          left: 12px;
+          width: 16px;
+          height: 16px;
+          color: #9CA3AF;
+          z-index: 1;
+        }
+        
+        .search-input {
+          width: 100%;
+          padding: 10px 14px 10px 35px;
+          border: 1px solid #2A2A2A;
+          border-radius: 12px;
+          background: #FFFFFF0A;
+          font-family: Satoshi, sans-serif;
+          font-weight: 500;
+          font-size: 12px;
+          line-height: 14px;
+          color: #E5E5E5;
+          transition: all 0.15s ease;
+          
+          &::placeholder {
+            color: #686A6D;
+            font-weight: 400;
+          }
+          
+          &:focus {
+            outline: none;
+            border-color: #3A3A3A;
+            background: #FFFFFF0A;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+          }
+          
+          &:hover {
+            border-color: #3A3A3A;
+            background: #FFFFFF0A;
+          }
+        }
+      }
+    }
+    
+    .coins-group {
+      .group-label {
+        font-family: Satoshi, sans-serif;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 14px;
+        color: #FFFFFF;
+        padding: 0 16px 16px 16px;
+        border-bottom: 1px solid #2A2A2A;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+        
+        &:hover {
+          opacity: 0.8;
+        }
+        
+        .chevron-icon {
+          color: #9CA3AF;
+          transition: transform 0.2s ease;
+          
+          &.collapsed {
+            transform: rotate(-90deg);
+          }
+        }
+      }
+      
+      .coins-content {
+        .coins-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+          
+          .coin-item {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #2A2A2A;
+            padding: 16px;
+            transition: background-color 0.15s ease;
+            
+            &.clickable {
+              cursor: pointer;
+              
+              &:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+              }
+            }
+            
+            &:last-child {
+              border-bottom: none;
+            }
+            
+            &:hover {
+              background-color: rgba(255, 255, 255, 0.02);
+            }
+            
+            &.selected {
+              background-color: #8C7CD6;
+              
+              // Make all text white when selected
+              .coin-name,
+              .coin-time,
+              .coin-subtitle,
+              .metric-value,
+              .stat-value,
+              .change-value {
+                color: white !important;
+              }
+              
+              // Make icons white/light when selected
+              .coin-copy-icon,
+              .message-icon,
+              .sparkles-icon,
+              .stat-icon {
+                filter: brightness(0) invert(1);
+                opacity: 1;
+              }
+            }
+            
+            .coin-top-row {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 12px;
+              margin-bottom: 4px;
+              padding-bottom: 24px;
+              
+              .coin-left {
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                flex: 1;
+                
+                .coin-avatar {
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 50%;
+                  background: linear-gradient(135deg, #4F46E5, #7C3AED);
+                  flex-shrink: 0;
+                  border: 2px solid rgba(255, 255, 255, 0.1);
+                  margin-top: 2px; // Small adjustment to align with text
+                }
+                
+                .coin-content {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 2px;
+                  flex: 1;
+                  min-width: 0;
+                  
+                  .coin-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    
+                    .coin-name {
+                      font-family: Satoshi, sans-serif;
+                      font-weight: 600;
+                      font-size: 14px;
+                      color: #FFFFFF;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    }
+                    
+                    .coin-copy-icon {
+                      width: 12px;
+                      height: 12px;
+                      color: #9CA3AF;
+                      opacity: 0.6;
+                      cursor: pointer;
+                      flex-shrink: 0;
+                      transition: all 0.15s ease;
+                      
+                      &:hover {
+                        opacity: 1;
+                        color: #FFFFFF;
+                      }
+                    }
+                    
+                    .coin-time {
+                      font-family: Satoshi, sans-serif;
+                      font-size: 12px;
+                      color: #9CA3AF;
+                      flex-shrink: 0;
+                    }
+                  }
+                  
+                  .coin-subtitle-row {
+                    .coin-subtitle {
+                      font-family: Satoshi, sans-serif;
+                      font-size: 12px;
+                      color: #9CA3AF;
+                      margin: 0;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    }
+                  }
+                }
+              }
+              
+              .coin-metrics {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-shrink: 0;
+                
+                .metric-badge {
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 4px;
+                  border-radius: 12px;
+                  background: rgba(255, 255, 255, 0.1);
+                  padding: 6px 10px;
+                  
+                  .message-icon,
+                  .sparkles-icon {
+                    width: 14px;
+                    height: 14px;
+                    color: #9CA3AF;
+                  }
+                  
+                  .metric-value {
+                    font-family: Satoshi, sans-serif;
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: #FFFFFF;
+                    font-feature-settings: "tnum";
+                  }
+                }
+              }
+            }
+            
+            .coin-stats-row {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              font-family: Satoshi, sans-serif;
+              font-size: 11px;
+              color: #9CA3AF;
+              
+              .left-aligned {
+                // First item stays on the left
+              }
+              
+              .stats-right-group {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+              }
+              
+              .stat-item {
+                display: flex;
+                align-items: center;
+                gap: 2px;
+                
+                .stat-icon {
+                  font-size: 10px;
+                }
+                
+                .stat-value {
+                  font-weight: 500;
+                  font-feature-settings: "tnum";
+                }
+                
+                &.change-item {
+                  margin-left: 4px;
+                  
+                  .change-value {
+                    color: #3DCEC5;
+                    font-weight: 600;
+                  }
+                }
+                
+                &.mc-group {
+                  .change-value {
+                    color: #3DCEC5;
+                    font-weight: 600;
+                  }
+                }
+              }
+              
+              .stat-separator {
+                color: #4B5563;
+                margin: 0 2px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* Footer Section */
+  .sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #2A2A2A;
+    background: #1F1F1F;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 56px;
+    
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+      
+      .footer-action-button.clear-button {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: transparent;
+        border: 1px solid #3A3A3A;
+        color: #FFFFFF;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-family: Satoshi, sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 14px;
+        transition: all 0.15s ease;
+        white-space: nowrap;
+        cursor: pointer;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.05);
+          border-color: #4A4A4A;
+        }
+        
+        .clear-icon {
+          width: 14px;
+          height: 14px;
+          color: #9CA3AF;
+          flex-shrink: 0;
+        }
+      }
+    }
+    
+    .footer-right {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      
+      .footer-action-button.buy-button {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: transparent;
+        border: none;
+        color: #FFFFFF;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-family: Satoshi, sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.15s ease;
+        white-space: nowrap;
+        cursor: pointer;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .zap-icon {
+          width: 14px;
+          height: 14px;
+          color: #FFFFFF;
+          fill: #FFFFFF;
+          flex-shrink: 0;
+        }
+      }
+      
+      .input-menu-container {
+        display: flex;
+        align-items: center;
+        background: #FFFFFF0A;
+        border-radius: 4px;
+        padding: 10px 12px;
+        gap: 6px;
+        
+        &:focus-within {
+          background: rgba(255, 255, 255, 0.1);
+        }
+      }
+      
+      .buy-amount-input {
+        background: transparent;
+        border: none;
+        outline: none;
+        font-family: Satoshi, sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 14px;
+        color: #FFFFFF;
+        font-feature-settings: "tnum";
+        white-space: nowrap;
+        text-align: left;
+        min-width: 20px;
+        max-width: 40px;
+        
+        &::placeholder {
+          color: #FFFFFF;
+          opacity: 0.7;
+        }
+      }
+      
+      .menu-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        color: #9CA3AF;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        flex-shrink: 0;
+        
+        &:hover {
+          color: #FFFFFF;
+        }
+        
+        .solana-icon {
+          width: 18px;
+          height: 15px;
+        }
+      }
+    }
+  }
+
+  /* Dark mode support */
+  .theme-dark & {
+    --sidebar-ring: hsl(215 27.9% 16.9%);
+    --sidebar-accent: hsl(215 27.9% 16.9%);
+    --sidebar-foreground: hsl(215 20.2% 65.1%);
+    --sidebar-border: hsl(215 27.9% 16.9%);
+    --sidebar-background: hsl(222.2 84% 4.9%);
+    --muted: hsl(215 27.9% 16.9%);
+    --muted-foreground: hsl(215 20.2% 65.1%);
+  }
+
+  /* Responsive design */
+  @media (max-width: 1275px) {
+    border-left: none;
+    box-shadow: 0 4px 8px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 600px) {
+    .sidebar-header {
+      .wallet-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        
+        .wallet-info,
+        .balance-info {
+          justify-content: space-between;
+        }
+      }
+    }
+    
+    .sidebar-footer {
+      padding: 10px 12px;
+      gap: 8px;
+      
+      .footer-left {
+        gap: 4px;
+        
+        .footer-action-button.clear-button {
+          padding: 6px 8px;
+          font-size: 10px;
+          gap: 4px;
+          
+          .clear-icon {
+            width: 12px;
+            height: 12px;
+          }
+        }
+      }
+      
+      .footer-right {
+        gap: 8px;
+        
+        .footer-action-button.buy-button {
+          padding: 6px 8px;
+          font-size: 10px;
+          gap: 4px;
+          background: transparent;
+          
+          &:hover {
+            background: rgba(255, 255, 255, 0.05);
+          }
+          
+          .zap-icon {
+            width: 12px;
+            height: 12px;
+            color: #FFFFFF;
+            fill: #FFFFFF;
+          }
+        }
+        
+        .input-menu-container {
+          padding: 5px;
+          gap: 4px;
+        }
+        
+        .buy-amount-input {
+          font-size: 11px;
+          line-height: 13px;
+          max-width: 50px;
+        }
+        
+        .menu-button {
+          .solana-icon {
+            width: 16px;
+            height: 13px;
+          }
+        }
+      }
+    }
+  }
+
+  /* Very small screens - super compact */
+  @media (max-width: 400px) {
+    .sidebar-footer {
+      padding: 8px 10px;
+      gap: 6px;
+      
+      .footer-left {
+        gap: 3px;
+        
+        .footer-action-button.clear-button {
+          padding: 5px 6px;
+          font-size: 9px;
+          gap: 3px;
+          
+          .clear-icon {
+            width: 10px;
+            height: 10px;
+          }
+        }
+      }
+      
+      .footer-right {
+        gap: 6px;
+        
+        .footer-action-button.buy-button {
+          padding: 5px 6px;
+          font-size: 9px;
+          gap: 3px;
+          background: transparent;
+          
+          &:hover {
+            background: rgba(255, 255, 255, 0.05);
+          }
+          
+          .zap-icon {
+            width: 10px;
+            height: 10px;
+            color: #FFFFFF;
+            fill: #FFFFFF;
+          }
+        }
+        
+        .input-menu-container {
+          padding: 4px;
+          gap: 3px;
+        }
+        
+        .buy-amount-input {
+          font-size: 10px;
+          line-height: 12px;
+          max-width: 40px;
+        }
+        
+        .menu-button {
+          .solana-icon {
+            width: 14px;
+            height: 12px;
+          }
+        }
+      }
+    }
+  }
+}

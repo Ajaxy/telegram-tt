@@ -1,12 +1,15 @@
-import { animate } from '../../util/animation';
+import { animate } from "../../util/animation";
 import {
-  IS_ANDROID, IS_IOS, IS_SAFARI,
-} from '../../util/browser/windowEnvironment';
-import cycleRestrict from '../../util/cycleRestrict';
-import Deferred from '../../util/Deferred';
-import generateUniqueId from '../../util/generateUniqueId';
-import launchMediaWorkers, { MAX_WORKERS } from '../../util/launchMediaWorkers';
-import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
+  IS_ANDROID,
+  IS_IOS,
+  IS_SAFARI,
+} from "../../util/browser/windowEnvironment";
+import { IS_BYPASS_AUTH } from "../../config";
+import cycleRestrict from "../../util/cycleRestrict";
+import Deferred from "../../util/Deferred";
+import generateUniqueId from "../../util/generateUniqueId";
+import launchMediaWorkers, { MAX_WORKERS } from "../../util/launchMediaWorkers";
+import { requestMeasure, requestMutation } from "../fasterdom/fasterdom";
 
 interface Params {
   size: number;
@@ -16,18 +19,15 @@ interface Params {
   coords?: { x: number; y: number };
 }
 
-const WAITING = Symbol('WAITING');
-type Frame =
-  undefined
-  | typeof WAITING
-  | ImageBitmap;
+const WAITING = Symbol("WAITING");
+type Frame = undefined | typeof WAITING | ImageBitmap;
 
-const HIGH_PRIORITY_QUALITY = (IS_ANDROID || IS_IOS) ? 0.75 : 1;
+const HIGH_PRIORITY_QUALITY = IS_ANDROID || IS_IOS ? 0.75 : 1;
 const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
 const LOW_PRIORITY_QUALITY_SIZE_THRESHOLD = 24;
 const HIGH_PRIORITY_CACHE_MODULO = IS_SAFARI ? 2 : 4;
 const LOW_PRIORITY_CACHE_MODULO = 0;
-const CANVAS_CLASS = 'rlottie-canvas';
+const CANVAS_CLASS = "rlottie-canvas";
 
 const workers = launchMediaWorkers().map(({ connector }) => connector);
 const instancesByRenderId = new Map<string, RLottie>();
@@ -39,15 +39,18 @@ let lastWorkerIndex = -1;
 class RLottie {
   // Config
 
-  private views = new Map<string, {
-    canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
-    isLoaded?: boolean;
-    isPaused?: boolean;
-    isSharedCanvas?: boolean;
-    coords?: Params['coords'];
-    onLoad?: NoneToVoidFunction;
-  }>();
+  private views = new Map<
+    string,
+    {
+      canvas: HTMLCanvasElement;
+      ctx: CanvasRenderingContext2D;
+      isLoaded?: boolean;
+      isPaused?: boolean;
+      isSharedCanvas?: boolean;
+      coords?: Params["coords"];
+      onLoad?: NoneToVoidFunction;
+    }
+  >();
 
   private imgSize!: number;
 
@@ -90,13 +93,8 @@ class RLottie {
   private lastRenderAt?: number;
 
   static init(...args: ConstructorParameters<typeof RLottie>) {
-    const [
-      , canvas,
-      renderId,
-      params,
-      viewId = generateUniqueId(), ,
-      onLoad,
-    ] = args;
+    const [, canvas, renderId, params, viewId = generateUniqueId(), , onLoad] =
+      args;
     let instance = instancesByRenderId.get(renderId);
 
     if (!instance) {
@@ -118,7 +116,7 @@ class RLottie {
     private customColor?: [number, number, number],
     private onLoad?: NoneToVoidFunction | undefined,
     private onEnded?: (isDestroyed?: boolean) => void,
-    private onLoop?: () => void,
+    private onLoop?: () => void
   ) {
     this.addView(viewId, container, onLoad, params.coords);
     this.initConfig();
@@ -126,9 +124,7 @@ class RLottie {
   }
 
   public removeView(viewId: string) {
-    const {
-      canvas, ctx, isSharedCanvas, coords,
-    } = this.views.get(viewId)!;
+    const { canvas, ctx, isSharedCanvas, coords } = this.views.get(viewId)!;
 
     if (isSharedCanvas) {
       ctx.clearRect(coords!.x, coords!.y, this.imgSize, this.imgSize);
@@ -167,7 +163,9 @@ class RLottie {
     if (viewId) {
       this.views.get(viewId)!.isPaused = true;
 
-      const areAllContainersPaused = Array.from(this.views.values()).every(({ isPaused }) => isPaused);
+      const areAllContainersPaused = Array.from(this.views.values()).every(
+        ({ isPaused }) => isPaused
+      );
       if (!areAllContainersPaused) {
         return;
       }
@@ -194,7 +192,11 @@ class RLottie {
     }
   }
 
-  playSegment([startFrameIndex, stopFrameIndex]: [number, number], forceRestart = false, viewId?: string) {
+  playSegment(
+    [startFrameIndex, stopFrameIndex]: [number, number],
+    forceRestart = false,
+    viewId?: string
+  ) {
     if (viewId) {
       this.views.get(viewId)!.isPaused = false;
     }
@@ -217,13 +219,12 @@ class RLottie {
     this.params.noLoop = noLoop;
   }
 
-  async setSharedCanvasCoords(viewId: string, newCoords: Params['coords']) {
+  async setSharedCanvasCoords(viewId: string, newCoords: Params["coords"]) {
     const containerInfo = this.views.get(viewId)!;
-    const {
-      canvas, ctx,
-    } = containerInfo;
+    const { canvas, ctx } = containerInfo;
 
-    const isCanvasDirty = !canvas.dataset.isJustCleaned || canvas.dataset.isJustCleaned === 'false';
+    const isCanvasDirty =
+      !canvas.dataset.isJustCleaned || canvas.dataset.isJustCleaned === "false";
 
     if (!isCanvasDirty) {
       await PENDING_CANVAS_RESIZES.get(canvas);
@@ -233,11 +234,11 @@ class RLottie {
 
     if (isCanvasDirty) {
       const sizeFactor = this.calcSizeFactor();
-      ([canvasWidth, canvasHeight] = ensureCanvasSize(canvas, sizeFactor));
+      [canvasWidth, canvasHeight] = ensureCanvasSize(canvas, sizeFactor);
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-      canvas.dataset.isJustCleaned = 'true';
+      canvas.dataset.isJustCleaned = "true";
       requestMeasure(() => {
-        canvas.dataset.isJustCleaned = 'false';
+        canvas.dataset.isJustCleaned = "false";
       });
     }
 
@@ -246,7 +247,9 @@ class RLottie {
       y: Math.round((newCoords?.y || 0) * canvasHeight),
     };
 
-    const frame = this.getFrame(this.prevFrameIndex) || this.getFrame(Math.round(this.approxFrameIndex));
+    const frame =
+      this.getFrame(this.prevFrameIndex) ||
+      this.getFrame(Math.round(this.approxFrameIndex));
 
     if (frame && frame !== WAITING) {
       ctx.drawImage(frame, containerInfo.coords.x, containerInfo.coords.y);
@@ -257,7 +260,7 @@ class RLottie {
     viewId: string,
     container: HTMLDivElement | HTMLCanvasElement,
     onLoad?: NoneToVoidFunction,
-    coords?: Params['coords'],
+    coords?: Params["coords"]
   ) {
     const sizeFactor = this.calcSizeFactor();
 
@@ -265,7 +268,7 @@ class RLottie {
 
     if (container instanceof HTMLDivElement) {
       if (!(container.parentNode instanceof HTMLElement)) {
-        throw new Error('[RLottie] Container is not mounted');
+        throw new Error("[RLottie] Container is not mounted");
       }
 
       const { size } = this.params;
@@ -278,8 +281,8 @@ class RLottie {
       }
 
       requestMutation(() => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d')!;
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d")!;
 
         canvas.classList.add(CANVAS_CLASS);
 
@@ -292,16 +295,18 @@ class RLottie {
         container.appendChild(canvas);
 
         this.views.set(viewId, {
-          canvas, ctx, onLoad,
+          canvas,
+          ctx,
+          onLoad,
         });
       });
     } else {
       if (!container.isConnected) {
-        throw new Error('[RLottie] Shared canvas is not mounted');
+        throw new Error("[RLottie] Shared canvas is not mounted");
       }
 
       const canvas = container;
-      const ctx = canvas.getContext('2d')!;
+      const ctx = canvas.getContext("2d")!;
 
       imgSize = Math.round(this.params.size * sizeFactor);
 
@@ -334,8 +339,10 @@ class RLottie {
       size,
       isLowPriority,
       // Reduced quality only looks acceptable on big enough images
-      quality = isLowPriority && (!size || size > LOW_PRIORITY_QUALITY_SIZE_THRESHOLD)
-        ? LOW_PRIORITY_QUALITY : HIGH_PRIORITY_QUALITY,
+      quality = isLowPriority &&
+      (!size || size > LOW_PRIORITY_QUALITY_SIZE_THRESHOLD)
+        ? LOW_PRIORITY_QUALITY
+        : HIGH_PRIORITY_QUALITY,
     } = this.params;
 
     // Reduced quality only looks acceptable on high DPR screens
@@ -366,7 +373,9 @@ class RLottie {
   private initConfig() {
     const { isLowPriority } = this.params;
 
-    this.cacheModulo = isLowPriority ? LOW_PRIORITY_CACHE_MODULO : HIGH_PRIORITY_CACHE_MODULO;
+    this.cacheModulo = isLowPriority
+      ? LOW_PRIORITY_CACHE_MODULO
+      : HIGH_PRIORITY_CACHE_MODULO;
   }
 
   setColor(newColor: [number, number, number] | undefined) {
@@ -374,10 +383,22 @@ class RLottie {
   }
 
   private initRenderer() {
+    // Skip RLottie initialization in bypass auth mode
+    if (IS_BYPASS_AUTH) {
+      console.log(">>> SKIPPING RLOTTIE INIT - BYPASS AUTH MODE");
+      return;
+    }
+
     this.workerIndex = cycleRestrict(MAX_WORKERS, ++lastWorkerIndex);
 
+    // Guard against undefined worker
+    if (!workers[this.workerIndex]) {
+      console.warn("RLottie worker not available, skipping initialization");
+      return;
+    }
+
     workers[this.workerIndex].request({
-      name: 'rlottie:init',
+      name: "rlottie:init",
       args: [
         this.renderId,
         this.tgsUrl,
@@ -390,13 +411,22 @@ class RLottie {
   }
 
   private destroyRenderer() {
+    // Skip if in bypass auth mode or worker not available
+    if (IS_BYPASS_AUTH || !workers[this.workerIndex]) {
+      return;
+    }
+
     workers[this.workerIndex].request({
-      name: 'rlottie:destroy',
+      name: "rlottie:destroy",
       args: [this.renderId],
     });
   }
 
-  private onRendererInit(reduceFactor: number, msPerFrame: number, framesCount: number) {
+  private onRendererInit(
+    reduceFactor: number,
+    msPerFrame: number,
+    framesCount: number
+  ) {
     this.isRendererInited = true;
     this.reduceFactor = reduceFactor;
     this.msPerFrame = msPerFrame;
@@ -413,7 +443,7 @@ class RLottie {
     this.initConfig();
 
     workers[this.workerIndex].request({
-      name: 'rlottie:changeData',
+      name: "rlottie:changeData",
       args: [
         this.renderId,
         this.tgsUrl,
@@ -423,7 +453,11 @@ class RLottie {
     });
   }
 
-  private onChangeData(reduceFactor: number, msPerFrame: number, framesCount: number) {
+  private onChangeData(
+    reduceFactor: number,
+    msPerFrame: number,
+    framesCount: number
+  ) {
     this.reduceFactor = reduceFactor;
     this.msPerFrame = msPerFrame;
     this.framesCount = framesCount;
@@ -461,7 +495,9 @@ class RLottie {
 
       // Paused from outside
       if (!this.isAnimating) {
-        const areAllLoaded = Array.from(this.views.values()).every(({ isLoaded }) => isLoaded);
+        const areAllLoaded = Array.from(this.views.values()).every(
+          ({ isLoaded }) => isLoaded
+        );
         if (areAllLoaded) {
           return false;
         }
@@ -486,7 +522,11 @@ class RLottie {
       if (frameIndex !== this.prevFrameIndex) {
         this.views.forEach((containerData) => {
           const {
-            ctx, isLoaded, isPaused, coords: { x, y } = {}, onLoad,
+            ctx,
+            isLoaded,
+            isPaused,
+            coords: { x, y } = {},
+            onLoad,
           } = containerData;
 
           if (!isLoaded || !isPaused) {
@@ -504,14 +544,20 @@ class RLottie {
       }
 
       const now = Date.now();
-      const currentSpeed = this.lastRenderAt ? this.msPerFrame / (now - this.lastRenderAt) : 1;
+      const currentSpeed = this.lastRenderAt
+        ? this.msPerFrame / (now - this.lastRenderAt)
+        : 1;
       const delta = (this.direction * this.speed) / currentSpeed;
       const expectedNextFrameIndex = Math.round(this.approxFrameIndex + delta);
 
       this.lastRenderAt = now;
 
       // Forward animation finished
-      if (delta > 0 && (frameIndex === this.framesCount! - 1 || expectedNextFrameIndex > this.framesCount! - 1)) {
+      if (
+        delta > 0 &&
+        (frameIndex === this.framesCount! - 1 ||
+          expectedNextFrameIndex > this.framesCount! - 1)
+      ) {
         if (this.params.noLoop) {
           this.isAnimating = false;
           this.isEnded = true;
@@ -523,7 +569,10 @@ class RLottie {
         this.approxFrameIndex = 0;
 
         // Backward animation finished
-      } else if (delta < 0 && (frameIndex === 0 || expectedNextFrameIndex < 0)) {
+      } else if (
+        delta < 0 &&
+        (frameIndex === 0 || expectedNextFrameIndex < 0)
+      ) {
         if (this.params.noLoop) {
           this.isAnimating = false;
           this.isEnded = true;
@@ -536,12 +585,10 @@ class RLottie {
 
         // Stop frame reached
       } else if (
-        this.stopFrameIndex !== undefined
-        && (frameIndex === this.stopFrameIndex
-          || (
-            (delta > 0 && expectedNextFrameIndex > this.stopFrameIndex)
-            || (delta < 0 && expectedNextFrameIndex < this.stopFrameIndex)
-          ))
+        this.stopFrameIndex !== undefined &&
+        (frameIndex === this.stopFrameIndex ||
+          (delta > 0 && expectedNextFrameIndex > this.stopFrameIndex) ||
+          (delta < 0 && expectedNextFrameIndex < this.stopFrameIndex))
       ) {
         this.stopFrameIndex = undefined;
         this.isAnimating = false;
@@ -573,7 +620,7 @@ class RLottie {
     this.frames[frameIndex] = WAITING;
 
     workers[this.workerIndex].request({
-      name: 'rlottie:renderFrames',
+      name: "rlottie:renderFrames",
       args: [this.renderId, frameIndex, this.onFrameLoad.bind(this)],
     });
   }

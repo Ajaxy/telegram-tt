@@ -1,28 +1,44 @@
-import { addCallback } from '../../../lib/teact/teactn';
+import { addCallback } from "../../../lib/teact/teactn";
 
-import type { ApiError, ApiNotification } from '../../../api/types';
-import type { ActionReturnType, GlobalState } from '../../types';
+import type { ApiError, ApiNotification } from "../../../api/types";
+import type { ActionReturnType, GlobalState } from "../../types";
 
 import {
   ANIMATION_WAVE_MIN_INTERVAL,
-  DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE,
-} from '../../../config';
-import { IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/browser/windowEnvironment';
-import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
-import { getAllNotificationsCount } from '../../../util/folderManager';
-import generateUniqueId from '../../../util/generateUniqueId';
-import getIsAppUpdateNeeded from '../../../util/getIsAppUpdateNeeded';
-import getReadableErrorText from '../../../util/getReadableErrorText';
-import { compact, unique } from '../../../util/iteratees';
-import { refreshFromCache } from '../../../util/localization';
-import * as langProvider from '../../../util/oldLangProvider';
-import updateIcon from '../../../util/updateIcon';
-import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
-import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
+  DEBUG,
+  GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT,
+  INACTIVE_MARKER,
+  PAGE_TITLE,
+} from "../../../config";
 import {
-  addActionHandler, getActions, getGlobal, setGlobal,
-} from '../../index';
-import { updateTabState } from '../../reducers/tabs';
+  IS_ELECTRON,
+  IS_WAVE_TRANSFORM_SUPPORTED,
+} from "../../../util/browser/windowEnvironment";
+import {
+  getAllMultitabTokens,
+  getCurrentTabId,
+  reestablishMasterToSelf,
+} from "../../../util/establishMultitabRole";
+import { getAllNotificationsCount } from "../../../util/folderManager";
+import generateUniqueId from "../../../util/generateUniqueId";
+import getIsAppUpdateNeeded from "../../../util/getIsAppUpdateNeeded";
+import getReadableErrorText from "../../../util/getReadableErrorText";
+import { compact, unique } from "../../../util/iteratees";
+import { refreshFromCache } from "../../../util/localization";
+import * as langProvider from "../../../util/oldLangProvider";
+import updateIcon from "../../../util/updateIcon";
+import {
+  setPageTitle,
+  setPageTitleInstant,
+} from "../../../util/updatePageTitle";
+import { getAllowedAttachmentOptions, getChatTitle } from "../../helpers";
+import {
+  addActionHandler,
+  getActions,
+  getGlobal,
+  setGlobal,
+} from "../../index";
+import { updateTabState } from "../../reducers/tabs";
 import {
   selectCanAnimateInterface,
   selectChat,
@@ -38,370 +54,536 @@ import {
   selectSender,
   selectTabState,
   selectTopic,
-} from '../../selectors';
-import { selectSharedSettings } from '../../selectors/sharedState';
+} from "../../selectors";
+import { selectSharedSettings } from "../../selectors/sharedState";
 
-import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
+import { getIsMobile, getIsTablet } from "../../../hooks/useAppLayout";
 
-export const APP_VERSION_URL = 'version.txt';
+export const APP_VERSION_URL = "version.txt";
 const FLOOD_PREMIUM_WAIT_NOTIFICATION_DURATION = 6000;
 const MAX_STORED_EMOJIS = 8 * 4; // Represents four rows of recent emojis
 
-addActionHandler('toggleChatInfo', (global, actions, payload): ActionReturnType => {
-  const { force, tabId = getCurrentTabId() } = payload || {};
-  const isChatInfoShown = force !== undefined ? force : !selectTabState(global, tabId).isChatInfoShown;
+addActionHandler(
+  "toggleChatInfo",
+  (global, actions, payload): ActionReturnType => {
+    const { force, tabId = getCurrentTabId() } = payload || {};
+    const isChatInfoShown =
+      force !== undefined
+        ? force
+        : !selectTabState(global, tabId).isChatInfoShown;
 
-  global = updateTabState(global, { isChatInfoShown }, tabId);
-  global = { ...global, lastIsChatInfoShown: isChatInfoShown };
+    global = updateTabState(global, { isChatInfoShown }, tabId);
+    global = { ...global, lastIsChatInfoShown: isChatInfoShown };
 
-  return global;
-});
+    return global;
+  }
+);
 
-addActionHandler('setLeftColumnWidth', (global, actions, payload): ActionReturnType => {
-  const { leftColumnWidth } = payload;
+addActionHandler(
+  "openTradingColumn",
+  (global, actions, payload): ActionReturnType => {
+    const { coin, tabId = getCurrentTabId() } = payload;
 
-  return {
-    ...global,
-    leftColumnWidth,
-  };
-});
+    return updateTabState(
+      global,
+      {
+        isTradingColumnShown: true,
+        selectedTradingCoin: coin,
+      },
+      tabId
+    );
+  }
+);
 
-addActionHandler('resetLeftColumnWidth', (global): ActionReturnType => {
+addActionHandler(
+  "closeTradingColumn",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
+
+    return updateTabState(
+      global,
+      {
+        isTradingColumnShown: false,
+        selectedTradingCoin: undefined,
+      },
+      tabId
+    );
+  }
+);
+
+addActionHandler(
+  "setLeftColumnWidth",
+  (global, actions, payload): ActionReturnType => {
+    const { leftColumnWidth } = payload;
+
+    return {
+      ...global,
+      leftColumnWidth,
+    };
+  }
+);
+
+addActionHandler("resetLeftColumnWidth", (global): ActionReturnType => {
   return {
     ...global,
     leftColumnWidth: undefined,
   };
 });
 
-addActionHandler('toggleManagement', (global, actions, payload): ActionReturnType => {
-  const { force, tabId = getCurrentTabId() } = payload || {};
-  const { chatId } = selectCurrentMessageList(global, tabId) || {};
+addActionHandler(
+  "toggleManagement",
+  (global, actions, payload): ActionReturnType => {
+    const { force, tabId = getCurrentTabId() } = payload || {};
+    const { chatId } = selectCurrentMessageList(global, tabId) || {};
 
-  if (!chatId) {
-    return undefined;
-  }
+    if (!chatId) {
+      return undefined;
+    }
 
-  const tabState = selectTabState(global, tabId);
+    const tabState = selectTabState(global, tabId);
 
-  return updateTabState(global, {
-    management: {
-      byChatId: {
-        ...tabState.management.byChatId,
-        [chatId]: {
-          ...tabState.management.byChatId[chatId],
-          isActive: force !== undefined ? force : !(tabState.management.byChatId[chatId] || {}).isActive,
+    return updateTabState(
+      global,
+      {
+        management: {
+          byChatId: {
+            ...tabState.management.byChatId,
+            [chatId]: {
+              ...tabState.management.byChatId[chatId],
+              isActive:
+                force !== undefined
+                  ? force
+                  : !(tabState.management.byChatId[chatId] || {}).isActive,
+            },
+          },
         },
       },
-    },
-  }, tabId);
-});
-
-addActionHandler('requestNextManagementScreen', (global, actions, payload): ActionReturnType => {
-  const { screen, tabId = getCurrentTabId() } = payload || {};
-  const { chatId } = selectCurrentMessageList(global, tabId) || {};
-
-  if (!chatId) {
-    return undefined;
+      tabId
+    );
   }
+);
 
-  const tabState = selectTabState(global, tabId);
+addActionHandler(
+  "requestNextManagementScreen",
+  (global, actions, payload): ActionReturnType => {
+    const { screen, tabId = getCurrentTabId() } = payload || {};
+    const { chatId } = selectCurrentMessageList(global, tabId) || {};
 
-  return updateTabState(global, {
-    management: {
-      byChatId: {
-        ...tabState.management.byChatId,
-        [chatId]: {
-          ...tabState.management.byChatId[chatId],
-          isActive: true,
-          nextScreen: screen,
+    if (!chatId) {
+      return undefined;
+    }
+
+    const tabState = selectTabState(global, tabId);
+
+    return updateTabState(
+      global,
+      {
+        management: {
+          byChatId: {
+            ...tabState.management.byChatId,
+            [chatId]: {
+              ...tabState.management.byChatId[chatId],
+              isActive: true,
+              nextScreen: screen,
+            },
+          },
         },
       },
-    },
-  }, tabId);
-});
-
-addActionHandler('closeManagement', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const { chatId } = selectCurrentMessageList(global, tabId) || {};
-
-  if (!chatId) {
-    return undefined;
+      tabId
+    );
   }
+);
 
-  const tabState = selectTabState(global, tabId);
+addActionHandler(
+  "closeManagement",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
+    const { chatId } = selectCurrentMessageList(global, tabId) || {};
 
-  return updateTabState(global, {
-    management: {
-      byChatId: {
-        ...tabState.management.byChatId,
-        [chatId]: {
-          ...tabState.management.byChatId[chatId],
-          isActive: false,
+    if (!chatId) {
+      return undefined;
+    }
+
+    const tabState = selectTabState(global, tabId);
+
+    return updateTabState(
+      global,
+      {
+        management: {
+          byChatId: {
+            ...tabState.management.byChatId,
+            [chatId]: {
+              ...tabState.management.byChatId[chatId],
+              isActive: false,
+            },
+          },
         },
       },
-    },
-  }, tabId);
-});
-
-addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
-  if (!getIsMobile() && !getIsTablet()) {
-    return undefined;
+      tabId
+    );
   }
+);
 
-  return updateTabState(global, {
-    isLeftColumnShown: selectTabState(global, tabId).messageLists.length === 0,
-  }, tabId);
-});
+addActionHandler(
+  "processOpenChatOrThread",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload;
+    if (!getIsMobile() && !getIsTablet()) {
+      return undefined;
+    }
 
-addActionHandler('resetNextProfileTab', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const { chatId } = selectCurrentMessageList(global, tabId) || {};
-
-  if (!chatId) {
-    return undefined;
+    return updateTabState(
+      global,
+      {
+        isLeftColumnShown:
+          selectTabState(global, tabId).messageLists.length === 0,
+      },
+      tabId
+    );
   }
+);
 
-  return updateTabState(global, { nextProfileTab: undefined, forceScrollProfileTab: false }, tabId);
-});
+addActionHandler(
+  "resetNextProfileTab",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
+    const { chatId } = selectCurrentMessageList(global, tabId) || {};
 
-addActionHandler('toggleStatistics', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const tabState = selectTabState(global, tabId);
-  return updateTabState(global, {
-    isStatisticsShown: !tabState.isStatisticsShown,
-    statistics: {
-      ...tabState.statistics,
-      currentMessageId: undefined,
-      currentStoryId: undefined,
-    },
-  }, tabId);
-});
+    if (!chatId) {
+      return undefined;
+    }
 
-addActionHandler('toggleMessageStatistics', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId(), messageId } = payload || {};
-  return updateTabState(global, {
-    statistics: {
-      ...selectTabState(global, tabId).statistics,
-      currentMessageId: messageId,
-      currentStoryId: undefined,
-    },
-  }, tabId);
-});
+    return updateTabState(
+      global,
+      { nextProfileTab: undefined, forceScrollProfileTab: false },
+      tabId
+    );
+  }
+);
 
-addActionHandler('toggleStoryStatistics', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId(), storyId } = payload || {};
-  return updateTabState(global, {
-    statistics: {
-      ...selectTabState(global, tabId).statistics,
-      currentStoryId: storyId,
-      currentMessageId: undefined,
-    },
-  }, tabId);
-});
+addActionHandler(
+  "toggleStatistics",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
+    const tabState = selectTabState(global, tabId);
+    return updateTabState(
+      global,
+      {
+        isStatisticsShown: !tabState.isStatisticsShown,
+        statistics: {
+          ...tabState.statistics,
+          currentMessageId: undefined,
+          currentStoryId: undefined,
+        },
+      },
+      tabId
+    );
+  }
+);
 
-addActionHandler('toggleLeftColumn', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  return updateTabState(global, {
-    isLeftColumnShown: !selectTabState(global, tabId).isLeftColumnShown,
-  }, tabId);
-});
+addActionHandler(
+  "toggleMessageStatistics",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId(), messageId } = payload || {};
+    return updateTabState(
+      global,
+      {
+        statistics: {
+          ...selectTabState(global, tabId).statistics,
+          currentMessageId: messageId,
+          currentStoryId: undefined,
+        },
+      },
+      tabId
+    );
+  }
+);
 
-addActionHandler('addRecentEmoji', (global, actions, payload): ActionReturnType => {
-  const { emoji } = payload;
-  const { recentEmojis } = global;
-  if (!recentEmojis) {
+addActionHandler(
+  "toggleStoryStatistics",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId(), storyId } = payload || {};
+    return updateTabState(
+      global,
+      {
+        statistics: {
+          ...selectTabState(global, tabId).statistics,
+          currentStoryId: storyId,
+          currentMessageId: undefined,
+        },
+      },
+      tabId
+    );
+  }
+);
+
+addActionHandler(
+  "toggleLeftColumn",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
+    return updateTabState(
+      global,
+      {
+        isLeftColumnShown: !selectTabState(global, tabId).isLeftColumnShown,
+      },
+      tabId
+    );
+  }
+);
+
+addActionHandler(
+  "addRecentEmoji",
+  (global, actions, payload): ActionReturnType => {
+    const { emoji } = payload;
+    const { recentEmojis } = global;
+    if (!recentEmojis) {
+      return {
+        ...global,
+        recentEmojis: [emoji],
+      };
+    }
+
+    const newEmojis = recentEmojis.filter((e) => e !== emoji);
+    newEmojis.unshift(emoji);
+    if (newEmojis.length > MAX_STORED_EMOJIS) {
+      newEmojis.pop();
+    }
+
     return {
       ...global,
-      recentEmojis: [emoji],
+      recentEmojis: newEmojis,
     };
   }
+);
 
-  const newEmojis = recentEmojis.filter((e) => e !== emoji);
-  newEmojis.unshift(emoji);
-  if (newEmojis.length > MAX_STORED_EMOJIS) {
-    newEmojis.pop();
-  }
+addActionHandler(
+  "addRecentSticker",
+  (global, actions, payload): ActionReturnType => {
+    const { sticker } = payload;
+    const { recent } = global.stickers;
+    if (!recent) {
+      return {
+        ...global,
+        stickers: {
+          ...global.stickers,
+          recent: {
+            hash: "0",
+            stickers: [sticker],
+          },
+        },
+      };
+    }
 
-  return {
-    ...global,
-    recentEmojis: newEmojis,
-  };
-});
+    const newStickers = recent.stickers.filter((s) => s.id !== sticker.id);
+    newStickers.unshift(sticker);
 
-addActionHandler('addRecentSticker', (global, actions, payload): ActionReturnType => {
-  const { sticker } = payload;
-  const { recent } = global.stickers;
-  if (!recent) {
     return {
       ...global,
       stickers: {
         ...global.stickers,
         recent: {
-          hash: '0',
-          stickers: [sticker],
+          ...recent,
+          stickers: newStickers,
         },
       },
     };
   }
+);
 
-  const newStickers = recent.stickers.filter((s) => s.id !== sticker.id);
-  newStickers.unshift(sticker);
+addActionHandler(
+  "addRecentCustomEmoji",
+  (global, actions, payload): ActionReturnType => {
+    const { documentId } = payload;
+    const { recentCustomEmojis } = global;
+    if (!recentCustomEmojis) {
+      return {
+        ...global,
+        recentCustomEmojis: [documentId],
+      };
+    }
 
-  return {
-    ...global,
-    stickers: {
-      ...global.stickers,
-      recent: {
-        ...recent,
-        stickers: newStickers,
-      },
-    },
-  };
-});
+    const newEmojis = recentCustomEmojis.filter((id) => id !== documentId);
+    newEmojis.unshift(documentId);
+    if (newEmojis.length > MAX_STORED_EMOJIS) {
+      newEmojis.pop();
+    }
 
-addActionHandler('addRecentCustomEmoji', (global, actions, payload): ActionReturnType => {
-  const { documentId } = payload;
-  const { recentCustomEmojis } = global;
-  if (!recentCustomEmojis) {
     return {
       ...global,
-      recentCustomEmojis: [documentId],
+      recentCustomEmojis: newEmojis,
     };
   }
+);
 
-  const newEmojis = recentCustomEmojis.filter((id) => id !== documentId);
-  newEmojis.unshift(documentId);
-  if (newEmojis.length > MAX_STORED_EMOJIS) {
-    newEmojis.pop();
-  }
-
-  return {
-    ...global,
-    recentCustomEmojis: newEmojis,
-  };
-});
-
-addActionHandler('clearRecentCustomEmoji', (global): ActionReturnType => {
+addActionHandler("clearRecentCustomEmoji", (global): ActionReturnType => {
   return {
     ...global,
     recentCustomEmojis: [],
   };
 });
 
-addActionHandler('reorderStickerSets', (global, actions, payload): ActionReturnType => {
-  const { order, isCustomEmoji } = payload;
-  return {
-    ...global,
-    stickers: {
-      ...global.stickers,
-      added: {
-        setIds: (!isCustomEmoji ? order : global.stickers.added.setIds),
+addActionHandler(
+  "reorderStickerSets",
+  (global, actions, payload): ActionReturnType => {
+    const { order, isCustomEmoji } = payload;
+    return {
+      ...global,
+      stickers: {
+        ...global.stickers,
+        added: {
+          setIds: !isCustomEmoji ? order : global.stickers.added.setIds,
+        },
       },
-    },
-    customEmojis: {
-      ...global.customEmojis,
-      added: {
-        setIds: (isCustomEmoji ? order : global.customEmojis.added.setIds),
+      customEmojis: {
+        ...global.customEmojis,
+        added: {
+          setIds: isCustomEmoji ? order : global.customEmojis.added.setIds,
+        },
       },
-    },
-  };
-});
-
-addActionHandler('showNotification', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId(), ...notification } = payload;
-  const hasLocalId = notification.localId;
-  notification.localId ||= generateUniqueId();
-
-  const newNotifications = [...selectTabState(global, tabId).notifications];
-  const existingNotificationIndex = newNotifications.findIndex((n) => (
-    hasLocalId ? n.localId === notification.localId : n.message === notification.message
-  ));
-  if (existingNotificationIndex !== -1) {
-    newNotifications.splice(existingNotificationIndex, 1);
+    };
   }
+);
 
-  newNotifications.push(notification as ApiNotification);
+addActionHandler(
+  "showNotification",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId(), ...notification } = payload;
+    const hasLocalId = notification.localId;
+    notification.localId ||= generateUniqueId();
 
-  return updateTabState(global, {
-    notifications: newNotifications,
-  }, tabId);
-});
+    const newNotifications = [...selectTabState(global, tabId).notifications];
+    const existingNotificationIndex = newNotifications.findIndex((n) =>
+      hasLocalId
+        ? n.localId === notification.localId
+        : n.message === notification.message
+    );
+    if (existingNotificationIndex !== -1) {
+      newNotifications.splice(existingNotificationIndex, 1);
+    }
 
-addActionHandler('showAllowedMessageTypesNotification', (global, actions, payload): ActionReturnType => {
-  const { chatId, messageListType, tabId = getCurrentTabId() } = payload;
+    newNotifications.push(notification as ApiNotification);
 
-  const paidMessagesStars = selectPeerPaidMessagesStars(global, chatId);
-
-  if (paidMessagesStars && messageListType === 'scheduled') {
-    actions.showNotification({
-      message: {
-        key: 'DescriptionScheduledPaidMessagesNotAllowed',
+    return updateTabState(
+      global,
+      {
+        notifications: newNotifications,
       },
+      tabId
+    );
+  }
+);
+
+addActionHandler(
+  "showAllowedMessageTypesNotification",
+  (global, actions, payload): ActionReturnType => {
+    const { chatId, messageListType, tabId = getCurrentTabId() } = payload;
+
+    const paidMessagesStars = selectPeerPaidMessagesStars(global, chatId);
+
+    if (paidMessagesStars && messageListType === "scheduled") {
+      actions.showNotification({
+        message: {
+          key: "DescriptionScheduledPaidMessagesNotAllowed",
+        },
+        tabId,
+      });
+      return;
+    }
+
+    const chat = selectChat(global, chatId);
+    if (!chat) return;
+    const chatFullInfo = selectChatFullInfo(global, chatId);
+    const isSavedMessages = chatId
+      ? selectIsChatWithSelf(global, chatId)
+      : undefined;
+    const isChatWithBot = chatId
+      ? selectIsChatWithBot(global, chat)
+      : undefined;
+
+    const {
+      canSendPlainText,
+      canSendPhotos,
+      canSendVideos,
+      canSendDocuments,
+      canSendAudios,
+      canSendStickers,
+      canSendRoundVideos,
+      canSendVoices,
+    } = getAllowedAttachmentOptions(
+      chat,
+      chatFullInfo,
+      isChatWithBot,
+      isSavedMessages
+    );
+    const allowedContent = compact([
+      canSendPlainText ? "Chat.SendAllowedContentTypeText" : undefined,
+      canSendPhotos ? "Chat.SendAllowedContentTypePhoto" : undefined,
+      canSendVideos ? "Chat.SendAllowedContentTypeVideo" : undefined,
+      canSendVoices ? "Chat.SendAllowedContentTypeVoiceMessage" : undefined,
+      canSendRoundVideos
+        ? "Chat.SendAllowedContentTypeVideoMessage"
+        : undefined,
+      canSendDocuments ? "Chat.SendAllowedContentTypeFile" : undefined,
+      canSendAudios ? "Chat.SendAllowedContentTypeMusic" : undefined,
+      canSendStickers ? "Chat.SendAllowedContentTypeSticker" : undefined,
+    ]).map((l) => langProvider.oldTranslate(l));
+
+    if (!allowedContent.length) {
+      actions.showNotification({
+        message: langProvider.oldTranslate("Chat.SendNotAllowedText"),
+        tabId,
+      });
+      return;
+    }
+
+    const lastDelimiter = langProvider.oldTranslate(
+      "AutoDownloadSettings.LastDelimeter"
+    );
+    const allowedContentString = allowedContent
+      .join(", ")
+      .replace(/,([^,]*)$/, `${lastDelimiter}$1`);
+
+    actions.showNotification({
+      message: langProvider.oldTranslate(
+        "Chat.SendAllowedContentText",
+        allowedContentString
+      ),
       tabId,
     });
-    return;
   }
+);
 
-  const chat = selectChat(global, chatId);
-  if (!chat) return;
-  const chatFullInfo = selectChatFullInfo(global, chatId);
-  const isSavedMessages = chatId ? selectIsChatWithSelf(global, chatId) : undefined;
-  const isChatWithBot = chatId ? selectIsChatWithBot(global, chat) : undefined;
+addActionHandler(
+  "dismissNotification",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload;
+    const newNotifications = selectTabState(global, tabId).notifications.filter(
+      ({ localId }) => localId !== payload.localId
+    );
 
-  const {
-    canSendPlainText, canSendPhotos, canSendVideos, canSendDocuments, canSendAudios,
-    canSendStickers, canSendRoundVideos, canSendVoices,
-  } = getAllowedAttachmentOptions(chat, chatFullInfo, isChatWithBot, isSavedMessages);
-  const allowedContent = compact([
-    canSendPlainText ? 'Chat.SendAllowedContentTypeText' : undefined,
-    canSendPhotos ? 'Chat.SendAllowedContentTypePhoto' : undefined,
-    canSendVideos ? 'Chat.SendAllowedContentTypeVideo' : undefined,
-    canSendVoices ? 'Chat.SendAllowedContentTypeVoiceMessage' : undefined,
-    canSendRoundVideos ? 'Chat.SendAllowedContentTypeVideoMessage' : undefined,
-    canSendDocuments ? 'Chat.SendAllowedContentTypeFile' : undefined,
-    canSendAudios ? 'Chat.SendAllowedContentTypeMusic' : undefined,
-    canSendStickers ? 'Chat.SendAllowedContentTypeSticker' : undefined,
-  ]).map((l) => langProvider.oldTranslate(l));
-
-  if (!allowedContent.length) {
-    actions.showNotification({
-      message: langProvider.oldTranslate('Chat.SendNotAllowedText'),
-      tabId,
-    });
-    return;
+    return updateTabState(
+      global,
+      {
+        notifications: newNotifications,
+      },
+      tabId
+    );
   }
+);
 
-  const lastDelimiter = langProvider.oldTranslate('AutoDownloadSettings.LastDelimeter');
-  const allowedContentString = allowedContent.join(', ').replace(/,([^,]*)$/, `${lastDelimiter}$1`);
-
-  actions.showNotification({
-    message: langProvider.oldTranslate('Chat.SendAllowedContentText', allowedContentString),
-    tabId,
-  });
-});
-
-addActionHandler('dismissNotification', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
-  const newNotifications = selectTabState(global, tabId)
-    .notifications.filter(({ localId }) => localId !== payload.localId);
-
-  return updateTabState(global, {
-    notifications: newNotifications,
-  }, tabId);
-});
-
-addActionHandler('showDialog', (global, actions, payload): ActionReturnType => {
+addActionHandler("showDialog", (global, actions, payload): ActionReturnType => {
   const { data, tabId = getCurrentTabId() } = payload;
 
   // Filter out errors that we don't want to show to the user
-  if ('message' in data && data.hasErrorKey && !getReadableErrorText(data)) {
+  if ("message" in data && data.hasErrorKey && !getReadableErrorText(data)) {
     return global;
   }
 
   const newDialogs = [...selectTabState(global, tabId).dialogs];
-  if ('message' in data) {
-    const existingErrorIndex = newDialogs.findIndex((err) => (err as ApiError).message === data.message);
+  if ("message" in data) {
+    const existingErrorIndex = newDialogs.findIndex(
+      (err) => (err as ApiError).message === data.message
+    );
     if (existingErrorIndex !== -1) {
       newDialogs.splice(existingErrorIndex, 1);
     }
@@ -409,50 +591,80 @@ addActionHandler('showDialog', (global, actions, payload): ActionReturnType => {
 
   newDialogs.push(data);
 
-  return updateTabState(global, {
-    dialogs: newDialogs,
-  }, tabId);
+  return updateTabState(
+    global,
+    {
+      dialogs: newDialogs,
+    },
+    tabId
+  );
 });
 
-addActionHandler('dismissDialog', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const newDialogs = [...selectTabState(global, tabId).dialogs];
+addActionHandler(
+  "dismissDialog",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
+    const newDialogs = [...selectTabState(global, tabId).dialogs];
 
-  newDialogs.pop();
+    newDialogs.pop();
 
-  return updateTabState(global, {
-    dialogs: newDialogs,
-  }, tabId);
-});
+    return updateTabState(
+      global,
+      {
+        dialogs: newDialogs,
+      },
+      tabId
+    );
+  }
+);
 
-addActionHandler('toggleSafeLinkModal', (global, actions, payload): ActionReturnType => {
-  const { url: safeLinkModalUrl, tabId = getCurrentTabId() } = payload;
+addActionHandler(
+  "toggleSafeLinkModal",
+  (global, actions, payload): ActionReturnType => {
+    const { url: safeLinkModalUrl, tabId = getCurrentTabId() } = payload;
 
-  return updateTabState(global, {
-    safeLinkModalUrl,
-  }, tabId);
-});
+    return updateTabState(
+      global,
+      {
+        safeLinkModalUrl,
+      },
+      tabId
+    );
+  }
+);
 
-addActionHandler('openHistoryCalendar', (global, actions, payload): ActionReturnType => {
-  const { selectedAt, tabId = getCurrentTabId() } = payload;
+addActionHandler(
+  "openHistoryCalendar",
+  (global, actions, payload): ActionReturnType => {
+    const { selectedAt, tabId = getCurrentTabId() } = payload;
 
-  return updateTabState(global, {
-    historyCalendarSelectedAt: selectedAt,
-  }, tabId);
-});
+    return updateTabState(
+      global,
+      {
+        historyCalendarSelectedAt: selectedAt,
+      },
+      tabId
+    );
+  }
+);
 
-addActionHandler('closeHistoryCalendar', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+addActionHandler(
+  "closeHistoryCalendar",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
 
-  return updateTabState(global, {
-    historyCalendarSelectedAt: undefined,
-  }, tabId);
-});
+    return updateTabState(
+      global,
+      {
+        historyCalendarSelectedAt: undefined,
+      },
+      tabId
+    );
+  }
+);
 
-addActionHandler('openGame', (global, actions, payload): ActionReturnType => {
-  const {
-    url, chatId, messageId, tabId = getCurrentTabId(),
-  } = payload;
+addActionHandler("openGame", (global, actions, payload): ActionReturnType => {
+  const { url, chatId, messageId, tabId = getCurrentTabId() } = payload;
 
   const message = selectChatMessage(global, chatId, messageId);
   if (!message) return;
@@ -461,100 +673,141 @@ addActionHandler('openGame', (global, actions, payload): ActionReturnType => {
   if (!botId) return;
 
   if (!selectIsTrustedBot(global, botId)) {
-    global = updateTabState(global, {
-      botTrustRequest: {
-        botId,
-        type: 'game',
-        onConfirm: {
-          action: 'openGame',
-          payload,
+    global = updateTabState(
+      global,
+      {
+        botTrustRequest: {
+          botId,
+          type: "game",
+          onConfirm: {
+            action: "openGame",
+            payload,
+          },
         },
       },
-    }, tabId);
+      tabId
+    );
     setGlobal(global);
     return;
   }
 
-  global = updateTabState(global, {
-    openedGame: {
-      url,
-      chatId,
-      messageId,
+  global = updateTabState(
+    global,
+    {
+      openedGame: {
+        url,
+        chatId,
+        messageId,
+      },
     },
-  }, tabId);
+    tabId
+  );
   setGlobal(global);
 });
 
-addActionHandler('closeGame', (global, actions, payload): ActionReturnType => {
+addActionHandler("closeGame", (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
 
-  return updateTabState(global, {
-    openedGame: undefined,
-  }, tabId);
-});
-
-addActionHandler('requestConfetti', (global, actions, payload): ActionReturnType => {
-  const {
-    tabId = getCurrentTabId(), ...rest
-  } = payload;
-
-  if (!selectCanAnimateInterface(global)) return undefined;
-
-  return updateTabState(global, {
-    confetti: {
-      lastConfettiTime: Date.now(),
-      ...rest,
+  return updateTabState(
+    global,
+    {
+      openedGame: undefined,
     },
-  }, tabId);
+    tabId
+  );
 });
 
-addActionHandler('requestWave', (global, actions, payload): ActionReturnType => {
-  const {
-    startX, startY, tabId = getCurrentTabId(),
-  } = payload;
+addActionHandler(
+  "requestConfetti",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId(), ...rest } = payload;
 
-  if (!IS_WAVE_TRANSFORM_SUPPORTED || !selectCanAnimateInterface(global)) return undefined;
+    if (!selectCanAnimateInterface(global)) return undefined;
 
-  const tabState = selectTabState(global, tabId);
-  const currentLastTime = tabState.wave?.lastWaveTime || 0;
-  if (Date.now() - currentLastTime < ANIMATION_WAVE_MIN_INTERVAL) return undefined;
+    return updateTabState(
+      global,
+      {
+        confetti: {
+          lastConfettiTime: Date.now(),
+          ...rest,
+        },
+      },
+      tabId
+    );
+  }
+);
 
-  return updateTabState(global, {
-    wave: {
-      lastWaveTime: Date.now(),
-      startX,
-      startY,
-    },
-  }, tabId);
-});
+addActionHandler(
+  "requestWave",
+  (global, actions, payload): ActionReturnType => {
+    const { startX, startY, tabId = getCurrentTabId() } = payload;
 
-addActionHandler('updateAttachmentSettings', (global, actions, payload): ActionReturnType => {
-  return {
-    ...global,
-    attachmentSettings: {
-      ...global.attachmentSettings,
-      ...payload,
-    },
-  };
-});
+    if (!IS_WAVE_TRANSFORM_SUPPORTED || !selectCanAnimateInterface(global))
+      return undefined;
 
-addActionHandler('requestEffectInComposer', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
+    const tabState = selectTabState(global, tabId);
+    const currentLastTime = tabState.wave?.lastWaveTime || 0;
+    if (Date.now() - currentLastTime < ANIMATION_WAVE_MIN_INTERVAL)
+      return undefined;
 
-  return updateTabState(global, {
-    shouldPlayEffectInComposer: true,
-  }, tabId);
-});
+    return updateTabState(
+      global,
+      {
+        wave: {
+          lastWaveTime: Date.now(),
+          startX,
+          startY,
+        },
+      },
+      tabId
+    );
+  }
+);
 
-addActionHandler('hideEffectInComposer', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
+addActionHandler(
+  "updateAttachmentSettings",
+  (global, actions, payload): ActionReturnType => {
+    return {
+      ...global,
+      attachmentSettings: {
+        ...global.attachmentSettings,
+        ...payload,
+      },
+    };
+  }
+);
 
-  return updateTabState(global, {
-    shouldPlayEffectInComposer: undefined,
-  }, tabId);
-});
+addActionHandler(
+  "requestEffectInComposer",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload;
 
-addActionHandler('setPaidMessageAutoApprove', (global): ActionReturnType => {
+    return updateTabState(
+      global,
+      {
+        shouldPlayEffectInComposer: true,
+      },
+      tabId
+    );
+  }
+);
+
+addActionHandler(
+  "hideEffectInComposer",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload;
+
+    return updateTabState(
+      global,
+      {
+        shouldPlayEffectInComposer: undefined,
+      },
+      tabId
+    );
+  }
+);
+
+addActionHandler("setPaidMessageAutoApprove", (global): ActionReturnType => {
   global = {
     ...global,
     settings: {
@@ -569,165 +822,257 @@ addActionHandler('setPaidMessageAutoApprove', (global): ActionReturnType => {
   return global;
 });
 
-addActionHandler('setReactionEffect', (global, actions, payload): ActionReturnType => {
-  const {
-    chatId, threadId, reaction, tabId = getCurrentTabId(),
-  } = payload;
+addActionHandler(
+  "setReactionEffect",
+  (global, actions, payload): ActionReturnType => {
+    const { chatId, threadId, reaction, tabId = getCurrentTabId() } = payload;
 
-  const emoticon = reaction?.type === 'emoji' && reaction.emoticon;
-  if (!emoticon) return;
+    const emoticon = reaction?.type === "emoji" && reaction.emoticon;
+    if (!emoticon) return;
 
-  const effect = Object.values(global.availableEffectById)
-    .find((currentEffect) => currentEffect.effectAnimationId && currentEffect.emoticon === emoticon);
+    const effect = Object.values(global.availableEffectById).find(
+      (currentEffect) =>
+        currentEffect.effectAnimationId && currentEffect.emoticon === emoticon
+    );
 
-  const effectId = effect?.id;
+    const effectId = effect?.id;
 
-  const isCurrentUserPremium = selectIsCurrentUserPremium(global);
-  if (effect?.isPremium && !isCurrentUserPremium) {
-    actions.openPremiumModal({
-      initialSection: 'effects',
-      tabId,
-    });
-    return;
+    const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+    if (effect?.isPremium && !isCurrentUserPremium) {
+      actions.openPremiumModal({
+        initialSection: "effects",
+        tabId,
+      });
+      return;
+    }
+
+    if (!effectId) return;
+
+    actions.requestEffectInComposer({ tabId });
+
+    actions.saveEffectInDraft({ chatId, threadId, effectId });
   }
+);
 
-  if (!effectId) return;
+addActionHandler(
+  "openLimitReachedModal",
+  (global, actions, payload): ActionReturnType => {
+    const { limit, tabId = getCurrentTabId() } = payload;
 
-  actions.requestEffectInComposer({ tabId });
+    return updateTabState(
+      global,
+      {
+        limitReachedModal: {
+          limit,
+        },
+      },
+      tabId
+    );
+  }
+);
 
-  actions.saveEffectInDraft({ chatId, threadId, effectId });
-});
+addActionHandler(
+  "closeLimitReachedModal",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
 
-addActionHandler('openLimitReachedModal', (global, actions, payload): ActionReturnType => {
-  const { limit, tabId = getCurrentTabId() } = payload;
+    return updateTabState(
+      global,
+      {
+        limitReachedModal: undefined,
+      },
+      tabId
+    );
+  }
+);
 
-  return updateTabState(global, {
-    limitReachedModal: {
-      limit,
-    },
-  }, tabId);
-});
+addActionHandler(
+  "closeStickerSetModal",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
 
-addActionHandler('closeLimitReachedModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+    return updateTabState(
+      global,
+      {
+        openedStickerSetShortName: undefined,
+      },
+      tabId
+    );
+  }
+);
 
-  return updateTabState(global, {
-    limitReachedModal: undefined,
-  }, tabId);
-});
+addActionHandler(
+  "openCustomEmojiSets",
+  (global, actions, payload): ActionReturnType => {
+    const { setIds, tabId = getCurrentTabId() } = payload;
+    return updateTabState(
+      global,
+      {
+        openedCustomEmojiSetIds: setIds,
+      },
+      tabId
+    );
+  }
+);
 
-addActionHandler('closeStickerSetModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+addActionHandler(
+  "closeCustomEmojiSets",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
 
-  return updateTabState(global, {
-    openedStickerSetShortName: undefined,
-  }, tabId);
-});
+    return updateTabState(
+      global,
+      {
+        openedCustomEmojiSetIds: undefined,
+      },
+      tabId
+    );
+  }
+);
 
-addActionHandler('openCustomEmojiSets', (global, actions, payload): ActionReturnType => {
-  const { setIds, tabId = getCurrentTabId() } = payload;
-  return updateTabState(global, {
-    openedCustomEmojiSetIds: setIds,
-  }, tabId);
-});
+addActionHandler(
+  "updateLastRenderedCustomEmojis",
+  (global, actions, payload): ActionReturnType => {
+    const { ids } = payload;
+    const { lastRendered } = global.customEmojis;
 
-addActionHandler('closeCustomEmojiSets', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+    return {
+      ...global,
+      customEmojis: {
+        ...global.customEmojis,
+        lastRendered: unique([...lastRendered, ...ids]).slice(
+          0,
+          GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT
+        ),
+      },
+    };
+  }
+);
 
-  return updateTabState(global, {
-    openedCustomEmojiSetIds: undefined,
-  }, tabId);
-});
+addActionHandler(
+  "openCreateTopicPanel",
+  (global, actions, payload): ActionReturnType => {
+    const { chatId, tabId = getCurrentTabId() } = payload;
 
-addActionHandler('updateLastRenderedCustomEmojis', (global, actions, payload): ActionReturnType => {
-  const { ids } = payload;
-  const { lastRendered } = global.customEmojis;
+    // Topic panel can be opened only if there is a selected chat
+    const currentChat = selectCurrentChat(global, tabId);
+    if (!currentChat) actions.openChat({ id: chatId, tabId });
 
-  return {
-    ...global,
-    customEmojis: {
-      ...global.customEmojis,
-      lastRendered: unique([...lastRendered, ...ids]).slice(0, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT),
-    },
-  };
-});
+    return updateTabState(
+      global,
+      {
+        createTopicPanel: {
+          chatId,
+        },
+      },
+      tabId
+    );
+  }
+);
 
-addActionHandler('openCreateTopicPanel', (global, actions, payload): ActionReturnType => {
-  const { chatId, tabId = getCurrentTabId() } = payload;
+addActionHandler(
+  "closeCreateTopicPanel",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
+    return updateTabState(
+      global,
+      {
+        createTopicPanel: undefined,
+      },
+      tabId
+    );
+  }
+);
 
-  // Topic panel can be opened only if there is a selected chat
-  const currentChat = selectCurrentChat(global, tabId);
-  if (!currentChat) actions.openChat({ id: chatId, tabId });
+addActionHandler(
+  "openEditTopicPanel",
+  (global, actions, payload): ActionReturnType => {
+    const { chatId, topicId, tabId = getCurrentTabId() } = payload;
 
-  return updateTabState(global, {
-    createTopicPanel: {
-      chatId,
-    },
-  }, tabId);
-});
+    // Topic panel can be opened only if there is a selected chat
+    const currentChat = selectCurrentChat(global, tabId);
+    if (!currentChat) actions.openChat({ id: chatId, tabId });
 
-addActionHandler('closeCreateTopicPanel', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  return updateTabState(global, {
-    createTopicPanel: undefined,
-  }, tabId);
-});
+    return updateTabState(
+      global,
+      {
+        editTopicPanel: {
+          chatId,
+          topicId,
+        },
+      },
+      tabId
+    );
+  }
+);
 
-addActionHandler('openEditTopicPanel', (global, actions, payload): ActionReturnType => {
-  const { chatId, topicId, tabId = getCurrentTabId() } = payload;
+addActionHandler(
+  "closeEditTopicPanel",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
+    return updateTabState(
+      global,
+      {
+        editTopicPanel: undefined,
+      },
+      tabId
+    );
+  }
+);
 
-  // Topic panel can be opened only if there is a selected chat
-  const currentChat = selectCurrentChat(global, tabId);
-  if (!currentChat) actions.openChat({ id: chatId, tabId });
+addActionHandler(
+  "updateArchiveSettings",
+  (global, actions, payload): ActionReturnType => {
+    const { archiveSettings } = global;
+    const {
+      isHidden = archiveSettings.isHidden,
+      isMinimized = archiveSettings.isMinimized,
+    } = payload;
 
-  return updateTabState(global, {
-    editTopicPanel: {
-      chatId,
-      topicId,
-    },
-  }, tabId);
-});
+    return {
+      ...global,
+      archiveSettings: {
+        isHidden,
+        isMinimized,
+      },
+    };
+  }
+);
 
-addActionHandler('closeEditTopicPanel', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  return updateTabState(global, {
-    editTopicPanel: undefined,
-  }, tabId);
-});
+addActionHandler(
+  "openMapModal",
+  (global, actions, payload): ActionReturnType => {
+    const { geoPoint, zoom, tabId = getCurrentTabId() } = payload;
 
-addActionHandler('updateArchiveSettings', (global, actions, payload): ActionReturnType => {
-  const { archiveSettings } = global;
-  const { isHidden = archiveSettings.isHidden, isMinimized = archiveSettings.isMinimized } = payload;
+    return updateTabState(
+      global,
+      {
+        mapModal: {
+          point: geoPoint,
+          zoom,
+        },
+      },
+      tabId
+    );
+  }
+);
 
-  return {
-    ...global,
-    archiveSettings: {
-      isHidden,
-      isMinimized,
-    },
-  };
-});
+addActionHandler(
+  "closeMapModal",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
 
-addActionHandler('openMapModal', (global, actions, payload): ActionReturnType => {
-  const { geoPoint, zoom, tabId = getCurrentTabId() } = payload;
+    return updateTabState(
+      global,
+      {
+        mapModal: undefined,
+      },
+      tabId
+    );
+  }
+);
 
-  return updateTabState(global, {
-    mapModal: {
-      point: geoPoint,
-      zoom,
-    },
-  }, tabId);
-});
-
-addActionHandler('closeMapModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  return updateTabState(global, {
-    mapModal: undefined,
-  }, tabId);
-});
-
-addActionHandler('checkAppVersion', (global): ActionReturnType => {
+addActionHandler("checkAppVersion", (global): ActionReturnType => {
   fetch(`${APP_VERSION_URL}?${Date.now()}`)
     .then((response) => response.text())
     .then((version) => {
@@ -745,21 +1090,24 @@ addActionHandler('checkAppVersion', (global): ActionReturnType => {
     .catch((err) => {
       if (DEBUG) {
         // eslint-disable-next-line no-console
-        console.error('[checkAppVersion failed] ', err);
+        console.error("[checkAppVersion failed] ", err);
       }
     });
 });
 
-addActionHandler('setIsElectronUpdateAvailable', (global, action, payload): ActionReturnType => {
-  global = getGlobal();
-  global = {
-    ...global,
-    isElectronUpdateAvailable: Boolean(payload.isAvailable),
-  };
-  setGlobal(global);
-});
+addActionHandler(
+  "setIsElectronUpdateAvailable",
+  (global, action, payload): ActionReturnType => {
+    global = getGlobal();
+    global = {
+      ...global,
+      isElectronUpdateAvailable: Boolean(payload.isAvailable),
+    };
+    setGlobal(global);
+  }
+);
 
-addActionHandler('afterHangUp', (global): ActionReturnType => {
+addActionHandler("afterHangUp", (global): ActionReturnType => {
   if (!selectTabState(global, getCurrentTabId()).multitabNextAction) return;
   reestablishMasterToSelf();
 });
@@ -768,141 +1116,210 @@ let notificationInterval: number | undefined;
 
 const NOTIFICATION_INTERVAL = 500;
 
-addActionHandler('onTabFocusChange', (global, actions, payload): ActionReturnType => {
-  const { isBlurred, tabId = getCurrentTabId() } = payload;
+addActionHandler(
+  "onTabFocusChange",
+  (global, actions, payload): ActionReturnType => {
+    const { isBlurred, tabId = getCurrentTabId() } = payload;
 
-  if (isBlurred) {
-    if (notificationInterval) clearInterval(notificationInterval);
+    if (isBlurred) {
+      if (notificationInterval) clearInterval(notificationInterval);
 
-    notificationInterval = window.setInterval(() => {
-      actions.updatePageTitle({
-        tabId,
-      });
-    }, NOTIFICATION_INTERVAL);
-  } else {
-    clearInterval(notificationInterval);
-    notificationInterval = undefined;
+      notificationInterval = window.setInterval(() => {
+        actions.updatePageTitle({
+          tabId,
+        });
+      }, NOTIFICATION_INTERVAL);
+    } else {
+      clearInterval(notificationInterval);
+      notificationInterval = undefined;
+    }
+
+    global = updateTabState(
+      global,
+      {
+        isBlurred,
+      },
+      tabId
+    );
+
+    return {
+      ...global,
+      initialUnreadNotifications: isBlurred
+        ? getAllNotificationsCount()
+        : undefined,
+    };
   }
+);
 
-  global = updateTabState(global, {
-    isBlurred,
-  }, tabId);
+addActionHandler(
+  "updatePageTitle",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload || {};
+    const { canDisplayChatInTitle } = selectSharedSettings(global);
+    const currentUserId = global.currentUserId;
+    const isTestServer = global.config?.isTestServer;
+    const prefix = isTestServer ? "[T] " : "";
 
-  return {
-    ...global,
-    initialUnreadNotifications: isBlurred ? getAllNotificationsCount() : undefined,
-  };
-});
-
-addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const { canDisplayChatInTitle } = selectSharedSettings(global);
-  const currentUserId = global.currentUserId;
-  const isTestServer = global.config?.isTestServer;
-  const prefix = isTestServer ? '[T] ' : '';
-
-  if (document.title.includes(INACTIVE_MARKER)) {
-    updateIcon(false);
-    setPageTitleInstant(`${prefix}${PAGE_TITLE} ${INACTIVE_MARKER}`);
-    return;
-  }
-
-  if (global.initialUnreadNotifications && Math.round(Date.now() / 1000) % 2 === 0) {
-    const notificationCount = getAllNotificationsCount();
-
-    const newUnread = notificationCount - global.initialUnreadNotifications;
-
-    if (newUnread > 0) {
-      setPageTitleInstant(`${prefix}${newUnread} notification${newUnread > 1 ? 's' : ''}`);
-      updateIcon(true);
+    if (document.title.includes(INACTIVE_MARKER)) {
+      updateIcon(false);
+      setPageTitleInstant(`${prefix}${PAGE_TITLE} ${INACTIVE_MARKER}`);
       return;
     }
-  }
 
-  updateIcon(false);
+    if (
+      global.initialUnreadNotifications &&
+      Math.round(Date.now() / 1000) % 2 === 0
+    ) {
+      const notificationCount = getAllNotificationsCount();
 
-  const messageList = selectCurrentMessageList(global, tabId);
+      const newUnread = notificationCount - global.initialUnreadNotifications;
 
-  if (messageList && canDisplayChatInTitle && !global.passcode.isScreenLocked) {
-    const { chatId, threadId } = messageList;
-    const currentChat = selectChat(global, chatId);
-    if (currentChat) {
-      const title = getChatTitle(langProvider.oldTranslate, currentChat, chatId === currentUserId);
-      const topic = selectTopic(global, chatId, threadId);
-      if (currentChat.isForum && topic) {
-        setPageTitle(`${prefix}${title} › ${topic.title}`);
+      if (newUnread > 0) {
+        setPageTitleInstant(
+          `${prefix}${newUnread} notification${newUnread > 1 ? "s" : ""}`
+        );
+        updateIcon(true);
         return;
       }
-
-      setPageTitle(`${prefix}${title}`);
-      return;
     }
+
+    updateIcon(false);
+
+    const messageList = selectCurrentMessageList(global, tabId);
+
+    if (
+      messageList &&
+      canDisplayChatInTitle &&
+      !global.passcode.isScreenLocked
+    ) {
+      const { chatId, threadId } = messageList;
+      const currentChat = selectChat(global, chatId);
+      if (currentChat) {
+        const title = getChatTitle(
+          langProvider.oldTranslate,
+          currentChat,
+          chatId === currentUserId
+        );
+        const topic = selectTopic(global, chatId, threadId);
+        if (currentChat.isForum && topic) {
+          setPageTitle(`${prefix}${title} › ${topic.title}`);
+          return;
+        }
+
+        setPageTitle(`${prefix}${title}`);
+        return;
+      }
+    }
+
+    setPageTitleInstant(IS_ELECTRON ? "" : `${prefix}${PAGE_TITLE}`);
   }
+);
 
-  setPageTitleInstant(IS_ELECTRON ? '' : `${prefix}${PAGE_TITLE}`);
-});
-
-addActionHandler('closeInviteViaLinkModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload ?? {};
-  return updateTabState(global, {
-    inviteViaLinkModal: undefined,
-  }, tabId);
-});
-
-addActionHandler('closeCollectibleInfoModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload ?? {};
-  return updateTabState(global, {
-    collectibleInfoModal: undefined,
-  }, tabId);
-});
-
-addActionHandler('setShouldCloseRightColumn', (global, actions, payload): ActionReturnType => {
-  const { value, tabId = getCurrentTabId() } = payload;
-  return updateTabState(global, {
-    shouldCloseRightColumn: value,
-  }, tabId);
-});
-
-addActionHandler('refreshLangPackFromCache', (global, actions, payload): ActionReturnType => {
-  refreshFromCache(payload.langCode);
-});
-
-addActionHandler('processPremiumFloodWait', (global, actions, payload): ActionReturnType => {
-  const { isUpload } = payload;
-  const {
-    bandwidthPremiumDownloadSpeedup,
-    bandwidthPremiumUploadSpeedup,
-    bandwidthPremiumNotifyPeriod,
-  } = global.appConfig || {};
-  const { lastPremiumBandwithNotificationDate: lastNotifiedAt } = global.settings;
-
-  if (!bandwidthPremiumDownloadSpeedup || !bandwidthPremiumUploadSpeedup || !bandwidthPremiumNotifyPeriod) {
-    return undefined;
+addActionHandler(
+  "closeInviteViaLinkModal",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload ?? {};
+    return updateTabState(
+      global,
+      {
+        inviteViaLinkModal: undefined,
+      },
+      tabId
+    );
   }
-  if (lastNotifiedAt && Date.now() < lastNotifiedAt + bandwidthPremiumNotifyPeriod * 1000) return undefined;
+);
 
-  const unblurredTabIds = Object.values(global.byTabId).filter((l) => !l.isBlurred).map((l) => l.id);
+addActionHandler(
+  "closeCollectibleInfoModal",
+  (global, actions, payload): ActionReturnType => {
+    const { tabId = getCurrentTabId() } = payload ?? {};
+    return updateTabState(
+      global,
+      {
+        collectibleInfoModal: undefined,
+      },
+      tabId
+    );
+  }
+);
 
-  unblurredTabIds.forEach((tabId) => {
-    actions.showNotification({
-      title: langProvider.oldTranslate(isUpload ? 'UploadSpeedLimited' : 'DownloadSpeedLimited'),
-      message: langProvider.oldTranslate(
-        isUpload ? 'UploadSpeedLimitedMessage' : 'DownloadSpeedLimitedMessage',
-        isUpload ? bandwidthPremiumUploadSpeedup : bandwidthPremiumDownloadSpeedup,
-      ),
-      duration: FLOOD_PREMIUM_WAIT_NOTIFICATION_DURATION,
-      tabId,
+addActionHandler(
+  "setShouldCloseRightColumn",
+  (global, actions, payload): ActionReturnType => {
+    const { value, tabId = getCurrentTabId() } = payload;
+    return updateTabState(
+      global,
+      {
+        shouldCloseRightColumn: value,
+      },
+      tabId
+    );
+  }
+);
+
+addActionHandler(
+  "refreshLangPackFromCache",
+  (global, actions, payload): ActionReturnType => {
+    refreshFromCache(payload.langCode);
+  }
+);
+
+addActionHandler(
+  "processPremiumFloodWait",
+  (global, actions, payload): ActionReturnType => {
+    const { isUpload } = payload;
+    const {
+      bandwidthPremiumDownloadSpeedup,
+      bandwidthPremiumUploadSpeedup,
+      bandwidthPremiumNotifyPeriod,
+    } = global.appConfig || {};
+    const { lastPremiumBandwithNotificationDate: lastNotifiedAt } =
+      global.settings;
+
+    if (
+      !bandwidthPremiumDownloadSpeedup ||
+      !bandwidthPremiumUploadSpeedup ||
+      !bandwidthPremiumNotifyPeriod
+    ) {
+      return undefined;
+    }
+    if (
+      lastNotifiedAt &&
+      Date.now() < lastNotifiedAt + bandwidthPremiumNotifyPeriod * 1000
+    )
+      return undefined;
+
+    const unblurredTabIds = Object.values(global.byTabId)
+      .filter((l) => !l.isBlurred)
+      .map((l) => l.id);
+
+    unblurredTabIds.forEach((tabId) => {
+      actions.showNotification({
+        title: langProvider.oldTranslate(
+          isUpload ? "UploadSpeedLimited" : "DownloadSpeedLimited"
+        ),
+        message: langProvider.oldTranslate(
+          isUpload
+            ? "UploadSpeedLimitedMessage"
+            : "DownloadSpeedLimitedMessage",
+          isUpload
+            ? bandwidthPremiumUploadSpeedup
+            : bandwidthPremiumDownloadSpeedup
+        ),
+        duration: FLOOD_PREMIUM_WAIT_NOTIFICATION_DURATION,
+        tabId,
+      });
     });
-  });
 
-  return {
-    ...global,
-    settings: {
-      ...global.settings,
-      lastPremiumBandwithNotificationDate: Date.now(),
-    },
-  };
-});
+    return {
+      ...global,
+      settings: {
+        ...global.settings,
+        lastPremiumBandwithNotificationDate: Date.now(),
+      },
+    };
+  }
+);
 
 let prevIsScreenLocked: boolean | undefined;
 let prevBlurredTabsCount: number = 0;
@@ -912,7 +1329,9 @@ addCallback((global: GlobalState) => {
   const { updatePageTitle, updateIsOnline } = getActions();
 
   const isLockedUpdated = global.passcode.isScreenLocked !== prevIsScreenLocked;
-  const blurredTabsCount = Object.values(global.byTabId).filter((l) => l.isBlurred).length;
+  const blurredTabsCount = Object.values(global.byTabId).filter(
+    (l) => l.isBlurred
+  ).length;
   const isMasterTab = selectTabState(global, getCurrentTabId()).isMasterTab;
 
   if (isLockedUpdated) {
@@ -924,8 +1343,12 @@ addCallback((global: GlobalState) => {
 
     onlineTimeout = window.setTimeout(() => {
       global = getGlobal();
-      const newBlurredTabsCount = Object.values(global.byTabId).filter((l) => l.isBlurred).length;
-      updateIsOnline({ isOnline: newBlurredTabsCount !== getAllMultitabTokens().length });
+      const newBlurredTabsCount = Object.values(global.byTabId).filter(
+        (l) => l.isBlurred
+      ).length;
+      updateIsOnline({
+        isOnline: newBlurredTabsCount !== getAllMultitabTokens().length,
+      });
     }, ONLINE_TIMEOUT);
   }
 

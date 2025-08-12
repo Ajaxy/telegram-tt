@@ -1,40 +1,63 @@
-import type { FC } from '../lib/teact/teact';
-import { useEffect, useLayoutEffect } from '../lib/teact/teact';
-import { withGlobal } from '../global';
+import type { FC } from "../lib/teact/teact";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "../lib/teact/teact";
+import { withGlobal } from "../global";
+import { getGlobal, setGlobal } from "../global";
 
-import type { GlobalState } from '../global/types';
-import type { ThemeKey } from '../types';
-import type { UiLoaderPage } from './common/UiLoader';
+import type { GlobalState } from "../global/types";
+import type { ThemeKey } from "../types";
+import type { UiLoaderPage } from "./common/UiLoader";
 
 import {
-  DARK_THEME_BG_COLOR, INACTIVE_MARKER, LIGHT_THEME_BG_COLOR, PAGE_TITLE,
-} from '../config';
-import { selectTabState, selectTheme } from '../global/selectors';
-import { IS_INSTALL_PROMPT_SUPPORTED, PLATFORM_ENV } from '../util/browser/windowEnvironment';
-import buildClassName from '../util/buildClassName';
-import { setupBeforeInstallPrompt } from '../util/installPrompt';
-import { ACCOUNT_SLOT, getAccountsInfo, getAccountSlotUrl } from '../util/multiaccount';
-import { hasEncryptedSession } from '../util/passcode';
-import { getInitialLocationHash, parseInitialLocationHash } from '../util/routing';
-import { checkSessionLocked, hasStoredSession } from '../util/sessions';
-import { updateSizes } from '../util/windowSize';
+  DARK_THEME_BG_COLOR,
+  INACTIVE_MARKER,
+  IS_BYPASS_AUTH,
+  LIGHT_THEME_BG_COLOR,
+  PAGE_TITLE,
+} from "../config";
+import { selectTabState, selectTheme } from "../global/selectors";
+import {
+  IS_INSTALL_PROMPT_SUPPORTED,
+  PLATFORM_ENV,
+} from "../util/browser/windowEnvironment";
+import buildClassName from "../util/buildClassName";
+import { setupBeforeInstallPrompt } from "../util/installPrompt";
+import {
+  ACCOUNT_SLOT,
+  getAccountsInfo,
+  getAccountSlotUrl,
+} from "../util/multiaccount";
+import { hasEncryptedSession } from "../util/passcode";
+import {
+  getInitialLocationHash,
+  parseInitialLocationHash,
+} from "../util/routing";
+import { checkSessionLocked, hasStoredSession } from "../util/sessions";
+import { updateSizes } from "../util/windowSize";
 
-import useAppLayout from '../hooks/useAppLayout';
-import useFlag from '../hooks/useFlag';
-import usePreviousDeprecated from '../hooks/usePreviousDeprecated';
+import useAppLayout from "../hooks/useAppLayout";
+import useFlag from "../hooks/useFlag";
+import usePreviousDeprecated from "../hooks/usePreviousDeprecated";
 
 // import Test from './test/TestLocale';
-import Auth from './auth/Auth';
-import UiLoader from './common/UiLoader';
-import AppInactive from './main/AppInactive';
-import LockScreen from './main/LockScreen.async';
-import Main from './main/Main.async';
-import Transition from './ui/Transition';
+import Auth from "./auth/Auth";
+import UiLoader from "./common/UiLoader";
+import AppInactive from "./main/AppInactive";
+import LockScreen from "./main/LockScreen.async";
+import Main from "./main/Main.async";
+import Transition from "./ui/Transition";
 
-import styles from './App.module.scss';
+import styles from "./App.module.scss";
+import TVChart from "./tradingview/TVChart/TVChart";
+import type { HMPoolTokenMetadata } from "../hooks/hellomoon/hmApi";
+import { fetchPoolTokenMetadata } from "../hooks/hellomoon/hmApi";
 
 type StateProps = {
-  authState: GlobalState['authState'];
+  authState: GlobalState["authState"];
   isScreenLocked?: boolean;
   hasPasscode?: boolean;
   isInactiveAuth?: boolean;
@@ -53,6 +76,61 @@ enum AppScreens {
 const TRANSITION_RENDER_COUNT = Object.keys(AppScreens).length / 2;
 const INACTIVE_PAGE_TITLE = `${PAGE_TITLE} ${INACTIVE_MARKER}`;
 
+// Mock data initialization for test mode
+function initMockData() {
+  const global = getGlobal();
+
+  // Set up a mock current user
+  const mockUserId = "mock_user_123";
+  const mockUser = {
+    id: mockUserId,
+    isMin: false,
+    isSelf: true as const,
+    isContact: true as const,
+    accessHash: "12345",
+    firstName: "Test",
+    lastName: "User",
+    phoneNumber: "+1234567890",
+    type: "userTypeRegular" as const,
+  };
+
+  // Set up basic mock state for main app functionality
+  const updatedGlobal: GlobalState = {
+    ...global,
+    currentUserId: mockUserId,
+    authState: "authorizationStateReady",
+    isSynced: true,
+    isInited: true,
+    users: {
+      ...global.users,
+      byId: {
+        ...global.users.byId,
+        [mockUserId]: mockUser,
+      },
+    },
+    chats: {
+      ...global.chats,
+      listIds: {
+        active: [],
+        archived: [],
+        saved: [],
+      },
+      isFullyLoaded: {
+        active: true,
+        archived: true,
+        saved: true,
+      },
+      totalCount: {
+        all: 0,
+        archived: 0,
+        saved: 0,
+      },
+    },
+  };
+
+  setGlobal(updatedGlobal);
+}
+
 const App: FC<StateProps> = ({
   authState,
   isScreenLocked,
@@ -64,7 +142,7 @@ const App: FC<StateProps> = ({
 }) => {
   const [isInactive, markInactive, unmarkInactive] = useFlag(false);
   const { isMobile } = useAppLayout();
-  const isMobileOs = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
+  const isMobileOs = PLATFORM_ENV === "iOS" || PLATFORM_ENV === "Android";
 
   useEffect(() => {
     if (IS_INSTALL_PROMPT_SUPPORTED) {
@@ -85,14 +163,18 @@ const App: FC<StateProps> = ({
           const account = accounts[slot];
           if (account) {
             const url = getAccountSlotUrl(slot);
-            window.location.href = `${url}#${hash || 'login'}`;
+            window.location.href = `${url}#${hash || "login"}`;
           }
         });
     }
 
     // TODO[Passcode]: Remove when multiacc passcode is implemented
     const checkMultiaccPasscode = async () => {
-      if (checkSessionLocked() && ACCOUNT_SLOT && await hasEncryptedSession()) {
+      if (
+        checkSessionLocked() &&
+        ACCOUNT_SLOT &&
+        (await hasEncryptedSession())
+      ) {
         const url = getAccountSlotUrl(1);
         window.location.href = url;
       }
@@ -107,22 +189,22 @@ const App: FC<StateProps> = ({
       e.preventDefault();
       if (!e.dataTransfer) return;
       if (!(e.target as HTMLElement).dataset.dropzone) {
-        e.dataTransfer.dropEffect = 'none';
+        e.dataTransfer.dropEffect = "none";
       } else {
-        e.dataTransfer.dropEffect = 'copy';
+        e.dataTransfer.dropEffect = "copy";
       }
     };
     const handleDrop = (e: DragEvent) => {
       e.preventDefault();
     };
-    body.addEventListener('drop', handleDrop);
-    body.addEventListener('dragover', handleDrag);
-    body.addEventListener('dragenter', handleDrag);
+    body.addEventListener("drop", handleDrop);
+    body.addEventListener("dragover", handleDrag);
+    body.addEventListener("dragenter", handleDrag);
 
     return () => {
-      body.removeEventListener('drop', handleDrop);
-      body.removeEventListener('dragover', handleDrag);
-      body.removeEventListener('dragenter', handleDrag);
+      body.removeEventListener("drop", handleDrop);
+      body.removeEventListener("dragover", handleDrag);
+      body.removeEventListener("dragenter", handleDrag);
     };
   }, []);
 
@@ -131,56 +213,66 @@ const App: FC<StateProps> = ({
   let activeKey: AppScreens;
   let page: UiLoaderPage | undefined;
 
-  if (isInactive) {
+  // Bypass authentication in test mode
+  if (IS_BYPASS_AUTH) {
+    // Initialize mock data for test mode
+    if (!authState || authState !== "authorizationStateReady") {
+      initMockData();
+    }
+    page = "main";
+    activeKey = AppScreens.main;
+  } else if (isInactive) {
     activeKey = AppScreens.inactive;
   } else if (isScreenLocked) {
-    page = 'lock';
+    page = "lock";
     activeKey = AppScreens.lock;
   } else if (authState) {
     switch (authState) {
-      case 'authorizationStateWaitPhoneNumber':
-        page = 'authPhoneNumber';
+      case "authorizationStateWaitPhoneNumber":
+        page = "authPhoneNumber";
         activeKey = AppScreens.auth;
         break;
-      case 'authorizationStateWaitCode':
-        page = 'authCode';
+      case "authorizationStateWaitCode":
+        page = "authCode";
         activeKey = AppScreens.auth;
         break;
-      case 'authorizationStateWaitPassword':
-        page = 'authPassword';
+      case "authorizationStateWaitPassword":
+        page = "authPassword";
         activeKey = AppScreens.auth;
         break;
-      case 'authorizationStateWaitRegistration':
+      case "authorizationStateWaitRegistration":
         activeKey = AppScreens.auth;
         break;
-      case 'authorizationStateWaitQrCode':
-        page = 'authQrCode';
+      case "authorizationStateWaitQrCode":
+        page = "authQrCode";
         activeKey = AppScreens.auth;
         break;
-      case 'authorizationStateClosed':
-      case 'authorizationStateClosing':
-      case 'authorizationStateLoggingOut':
-      case 'authorizationStateReady':
-        page = 'main';
+      case "authorizationStateClosed":
+      case "authorizationStateClosing":
+      case "authorizationStateLoggingOut":
+      case "authorizationStateReady":
+        page = "main";
         activeKey = AppScreens.main;
         break;
     }
   } else if (hasStoredSession()) {
-    page = 'main';
+    page = "main";
     activeKey = AppScreens.main;
   } else if (hasPasscode) {
     activeKey = AppScreens.lock;
   } else {
-    page = isMobileOs ? 'authPhoneNumber' : 'authQrCode';
+    page = isMobileOs ? "authPhoneNumber" : "authQrCode";
     activeKey = AppScreens.auth;
   }
 
-  if (activeKey !== AppScreens.lock
-    && activeKey !== AppScreens.inactive
-    && activeKey !== AppScreens.main
-    && parseInitialLocationHash()?.tgWebAuthToken
-    && !hasWebAuthTokenFailed) {
-    page = 'main';
+  if (
+    activeKey !== AppScreens.lock &&
+    activeKey !== AppScreens.inactive &&
+    activeKey !== AppScreens.main &&
+    parseInitialLocationHash()?.tgWebAuthToken &&
+    !hasWebAuthTokenFailed
+  ) {
+    page = "main";
     activeKey = AppScreens.main;
   }
 
@@ -201,6 +293,7 @@ const App: FC<StateProps> = ({
   const prevActiveKey = usePreviousDeprecated(activeKey);
 
   function renderContent() {
+    console.log("activeKey", activeKey);
     switch (activeKey) {
       case AppScreens.auth:
         return <Auth />;
@@ -219,8 +312,8 @@ const App: FC<StateProps> = ({
 
   useLayoutEffect(() => {
     document.body.style.setProperty(
-      '--theme-background-color',
-      theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR,
+      "--theme-background-color",
+      theme === "dark" ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR
     );
   }, [theme]);
 
@@ -231,28 +324,31 @@ const App: FC<StateProps> = ({
         activeKey={activeKey}
         shouldCleanup
         className={buildClassName(
-          'full-height',
-          (activeKey === AppScreens.auth || prevActiveKey === AppScreens.auth) && 'is-auth',
+          "full-height",
+          (activeKey === AppScreens.auth ||
+            prevActiveKey === AppScreens.auth) &&
+            "is-auth"
         )}
         renderCount={TRANSITION_RENDER_COUNT}
       >
         {renderContent}
       </Transition>
-      {activeKey === AppScreens.auth && isTestServer && <div className="test-server-badge">Test server</div>}
+      {activeKey === AppScreens.auth && isTestServer && (
+        <div className="test-server-badge">Test server</div>
+      )}
     </UiLoader>
   );
 };
 
-export default withGlobal(
-  (global): StateProps => {
-    return {
-      authState: global.authState,
-      isScreenLocked: global.passcode?.isScreenLocked,
-      hasPasscode: global.passcode?.hasPasscode,
-      isInactiveAuth: selectTabState(global).isInactive,
-      hasWebAuthTokenFailed: global.hasWebAuthTokenFailed || global.hasWebAuthTokenPasswordRequired,
-      theme: selectTheme(global),
-      isTestServer: global.config?.isTestServer,
-    };
-  },
-)(App);
+export default withGlobal((global): StateProps => {
+  return {
+    authState: global.authState,
+    isScreenLocked: global.passcode?.isScreenLocked,
+    hasPasscode: global.passcode?.hasPasscode,
+    isInactiveAuth: selectTabState(global).isInactive,
+    hasWebAuthTokenFailed:
+      global.hasWebAuthTokenFailed || global.hasWebAuthTokenPasswordRequired,
+    theme: selectTheme(global),
+    isTestServer: global.config?.isTestServer,
+  };
+})(App);
