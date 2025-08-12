@@ -251,6 +251,14 @@
             padding: 16px;
             transition: background-color 0.15s ease;
             
+            &.clickable {
+              cursor: pointer;
+              
+              &:hover {
+                background-color: rgba(255, 255, 255, 0.05);
+              }
+            }
+            
             &:last-child {
               border-bottom: none;
             }

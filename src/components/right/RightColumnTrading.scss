@@ -1,0 +1,274 @@
+.RightColumnTrading {
+  position: absolute;
+  z-index: calc(var(--z-right-column) + 1);
+  top: 0;
+  right: calc(-1 * var(--right-column-width));
+  transform: translate3d(var(--right-column-width), 0, 0);
+
+  width: var(--right-column-width);
+  height: 100%;
+  padding-right: env(safe-area-inset-right);
+  border-left: 1px solid var(--color-borders);
+
+  background: var(--color-background);
+  display: flex;
+  flex-direction: column;
+  
+  /* Force all text to use the specified color */
+  color: #3DCEC5 ;
+  
+  * {
+    color: inherit ;
+  }
+
+  /* No transition for instant appearance */
+
+  #Main.trading-column-shown & {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .trading-header {
+    background: var(--color-background);
+  }
+
+  .trading-content {
+    flex: 1;
+    overflow-y: auto;
+
+    /* Use coin-item styling since we now use that class */
+    &.coin-item {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #2A2A2A;
+      padding: 16px;
+      transition: background-color 0.15s ease;
+      
+      /* Override text colors to use #3DCEC5 */
+      color: #3DCEC5;
+      
+      .coin-name,
+      .coin-time,
+      .coin-subtitle,
+      .metric-value,
+      .stat-value,
+      span,
+      p {
+        color: #3DCEC5;
+      }
+      
+      /* Ensure close button uses secondary color */
+      .trading-close-button {
+        color: #3DCEC5;
+        
+        &:hover {
+          background: rgba(61, 206, 197, 0.1) !important;
+        }
+      }
+
+      .coin-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+
+        .coin-left {
+          display: flex;
+          align-items: flex-start;
+          gap: 0.75rem;
+
+          .coin-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            flex-shrink: 0;
+          }
+
+          .coin-content {
+            flex: 1;
+
+            .coin-info {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-bottom: 0.25rem;
+
+              .coin-name {
+                font-weight: 600;
+                color: var(--color-text);
+                font-size: 0.9rem;
+              }
+
+              .coin-copy-icon {
+                color: var(--color-text-secondary);
+                cursor: pointer;
+                transition: color 0.15s ease;
+
+                &:hover {
+                  color: var(--color-text);
+                }
+              }
+
+              .coin-time {
+                color: var(--color-text-secondary);
+                font-size: 0.75rem;
+              }
+            }
+
+            .coin-subtitle-row {
+              .coin-subtitle {
+                color: var(--color-text-secondary);
+                font-size: 0.8rem;
+                margin: 0;
+                line-height: 1.3;
+              }
+            }
+          }
+        }
+
+        .coin-metrics-and-close {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.5rem;
+
+          .trading-close-button {
+            background: none;
+            border: none;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.15s ease;
+
+            &:hover {
+              background: var(--color-background-secondary);
+            }
+
+            svg {
+              width: 18px;
+              height: 18px;
+            }
+          }
+        }
+
+        .coin-metrics {
+          display: flex;
+          gap: 0.5rem;
+
+          .metric-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: var(--color-background);
+            border-radius: 12px;
+            font-size: 0.75rem;
+
+            .metric-value {
+              color: var(--color-text);
+              font-weight: 500;
+            }
+
+            .message-icon,
+            .sparkles-icon {
+              opacity: 0.7;
+            }
+          }
+        }
+      }
+
+      .coin-stats-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 0.5rem;
+
+        .stat-item {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          font-size: 0.75rem;
+
+          &.left-aligned {
+            .stat-value {
+              font-weight: 600;
+              color: var(--color-text);
+            }
+          }
+
+          .stat-icon {
+            opacity: 0.7;
+          }
+
+          .stat-value {
+            color: var(--color-text-secondary);
+            font-weight: 500;
+
+            &.change-value {
+              color: var(--color-green);
+              font-weight: 600;
+            }
+          }
+
+          &.mc-group {
+            display: flex;
+            align-items: center;
+            gap: 0.15rem;
+          }
+        }
+
+        .stats-right-group {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .stat-separator {
+          color: var(--color-borders);
+          font-size: 0.75rem;
+        }
+      }
+    }
+
+    .chart-container {
+      height: 480px;
+      margin-top: 16px;
+      width: 100%;
+      background: var(--color-background);
+      border-radius: 8px;
+      overflow: hidden;
+      
+      /* Ensure the chart takes full size */
+      > div {
+        height: 100% !important;
+        width: 100% !important;
+      }
+    }
+
+  }
+
+  @media (max-width: 1275px) {
+    position: fixed;
+    right: 0;
+    transform: translate3d(100%, 0, 0);
+    border-left: none;
+    box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
+
+    #Main.trading-column-shown & {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @media (max-width: 600px) {
+    width: 100vw;
+    height: calc(var(--vh, 1vh) * 100);
+
+    #Main.trading-column-shown & {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+}

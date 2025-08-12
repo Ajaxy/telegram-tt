@@ -1,6 +1,10 @@
-import type { PerformanceType } from '../types';
-import type { GlobalState, SharedState, TabState } from './types';
-import { LeftColumnContent, NewChatMembersProgress, SettingsScreens } from '../types';
+import type { PerformanceType } from "../types";
+import type { GlobalState, SharedState, TabState } from "./types";
+import {
+  LeftColumnContent,
+  NewChatMembersProgress,
+  SettingsScreens,
+} from "../types";
 
 import {
   ANIMATION_LEVEL_DEFAULT,
@@ -13,8 +17,8 @@ import {
   DEFAULT_VOLUME,
   IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX,
   MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX,
-} from '../config';
-import { IS_IOS, IS_MAC_OS } from '../util/browser/windowEnvironment';
+} from "../config";
+import { IS_IOS, IS_MAC_OS } from "../util/browser/windowEnvironment";
 
 export const INITIAL_PERFORMANCE_STATE_MAX: PerformanceType = {
   animatedEmoji: true,
@@ -72,17 +76,19 @@ export const INITIAL_PERFORMANCE_STATE_MIN: PerformanceType = {
 
 export const INITIAL_SHARED_STATE: SharedState = {
   settings: {
-    theme: 'light',
+    theme: "light",
     shouldUseSystemTheme: true,
     messageTextSize: IS_IOS
       ? IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX
-      : (IS_MAC_OS ? MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX : DEFAULT_MESSAGE_TEXT_SIZE_PX),
+      : IS_MAC_OS
+      ? MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX
+      : DEFAULT_MESSAGE_TEXT_SIZE_PX,
     animationLevel: ANIMATION_LEVEL_DEFAULT,
-    messageSendKeyCombo: 'enter',
+    messageSendKeyCombo: "enter",
     performance: INITIAL_PERFORMANCE_STATE_MAX,
     shouldSkipWebAppCloseConfirmation: false,
-    language: 'en',
-    timeFormat: '24h',
+    language: "en",
+    timeFormat: "24h",
     wasTimeFormatSetManually: false,
     isConnectionStatusMinimized: true,
     canDisplayChatInTitle: true,
@@ -201,8 +207,16 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     byMessageKey: {},
   },
 
-  recentEmojis: ['grinning', 'kissing_heart', 'christmas_tree', 'brain', 'trophy', 'duck', 'cherries'],
-  recentCustomEmojis: ['5377305978079288312'],
+  recentEmojis: [
+    "grinning",
+    "kissing_heart",
+    "christmas_tree",
+    "brain",
+    "trophy",
+    "duck",
+    "cherries",
+  ],
+  recentCustomEmojis: ["5377305978079288312"],
 
   reactions: {
     defaultTags: [],
@@ -335,6 +349,8 @@ export const INITIAL_TAB_STATE: TabState = {
   isMasterTab: false,
   isLeftColumnShown: true,
   isChatInfoShown: false,
+  isTradingColumnShown: false,
+  selectedTradingCoin: undefined,
   newChatMembersProgress: NewChatMembersProgress.Closed,
   uiReadyState: 0,
   shouldInit: true,
@@ -355,7 +371,7 @@ export const INITIAL_TAB_STATE: TabState = {
     openedWebApps: {},
     openedOrderedKeys: [],
     sessionKeys: [],
-    modalState: 'maximized',
+    modalState: "maximized",
     isModalOpen: false,
     isMoreAppsTabActive: false,
   },

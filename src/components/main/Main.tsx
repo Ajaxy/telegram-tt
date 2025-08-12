@@ -86,6 +86,7 @@ import PaymentModal from "../payment/PaymentModal.async";
 import ReceiptModal from "../payment/ReceiptModal.async";
 import RightColumn from "../right/RightColumn";
 import RightColumnProfile from "../right/RightColumnProfile";
+import RightColumnTrading from "../right/RightColumnTrading";
 import StoryViewer from "../story/StoryViewer.async";
 import AttachBotRecipientPicker from "./AttachBotRecipientPicker.async";
 import BotTrustModal from "./BotTrustModal.async";
@@ -119,6 +120,7 @@ type StateProps = {
   isLeftColumnOpen: boolean;
   isMiddleColumnOpen: boolean;
   isRightColumnOpen: boolean;
+  isTradingColumnOpen: boolean;
   isMediaViewerOpen: boolean;
   isStoryViewerOpen: boolean;
   isForwardModalOpen: boolean;
@@ -171,6 +173,7 @@ const Main = ({
   isLeftColumnOpen,
   isMiddleColumnOpen,
   isRightColumnOpen,
+  isTradingColumnOpen,
   isMediaViewerOpen,
   isStoryViewerOpen,
   isForwardModalOpen,
@@ -591,6 +594,7 @@ const Main = ({
     isFullscreen && "is-fullscreen",
     isRightColumnOpen && "right-column-shown",
     isRightColumnOpen && "right-column-open",
+    isTradingColumnOpen && "trading-column-shown",
     // Always show Moonraker column for demo
     "moonraker-column-shown"
   );
@@ -630,6 +634,7 @@ const Main = ({
       <div id="MoonrakerColumn" className="moonraker-column">
         <RightColumnProfile isActive={true} onClose={() => {}} />
       </div>
+      <RightColumnTrading isMobile={isMobile} />
       <MediaViewer isOpen={isMediaViewerOpen} />
       <StoryViewer isOpen={isStoryViewerOpen} />
       <ForwardRecipientPicker isOpen={isForwardModalOpen} />
@@ -738,6 +743,7 @@ export default memo(
       isLeftColumnOpen: isLeftColumnShown,
       isMiddleColumnOpen: Boolean(chatId),
       isRightColumnOpen: selectIsRightColumnShown(global, isMobile),
+      isTradingColumnOpen: Boolean(selectTabState(global).isTradingColumnShown),
       isMediaViewerOpen: selectIsMediaViewerOpen(global),
       isStoryViewerOpen: selectIsStoryViewerOpen(global),
       isForwardModalOpen: selectIsForwardModalOpen(global),

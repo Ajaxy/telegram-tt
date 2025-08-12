@@ -100,6 +100,7 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
   onClose,
   currentUser,
 }) => {
+  const { openTradingColumn } = getActions();
   const lang = useLang();
   const [isCoinsExpanded, setIsCoinsExpanded] = useState(true);
 
@@ -107,6 +108,23 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
 
   const toggleCoinsVisibility = () => {
     setIsCoinsExpanded(!isCoinsExpanded);
+  };
+
+  const handleCoinClick = (coin: (typeof coins)[0]) => {
+    openTradingColumn({
+      coin: {
+        id: coin.id,
+        name: coin.name,
+        subtitle: coin.subtitle,
+        time: coin.time,
+        comments: coin.comments.toString(),
+        score: coin.score.toString(),
+        cap: coin.cap,
+        holders: coin.holders,
+        volume: coin.volume.toString(),
+        change: coin.change,
+      },
+    });
   };
 
   return (
@@ -202,7 +220,11 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
             <div className="coins-content">
               <div className="coins-list">
                 {coins.map((coin) => (
-                  <div key={coin.id} className="coin-item">
+                  <div
+                    key={coin.id}
+                    className="coin-item clickable"
+                    onClick={() => handleCoinClick(coin)}
+                  >
                     {/* Top row: Avatar, Name with copy icon, Time, and Metrics */}
                     <div className="coin-top-row">
                       <div className="coin-left">

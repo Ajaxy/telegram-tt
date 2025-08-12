@@ -295,3 +295,43 @@
     }
   }
 }
+
+/* Trading Column Layout */
+#RightColumnTrading {
+  /* Force no transitions for instant appearance */
+  transition: none !important;
+
+  @media (max-width: 600px) {
+    height: calc(var(--vh, 1vh) * 100 + 1px);
+  }
+}
+
+/* Layout adjustments when trading column is shown */
+#Main.trading-column-shown {
+  @media (min-width: 1276px) {
+    /* Default grid template to accommodate trading column */
+    grid-template-columns: auto 1fr var(--right-column-width) var(--right-column-width);
+    
+    /* Position moonraker column appropriately */
+    &.moonraker-column-shown {
+      /* When both moonraker and trading columns are shown */
+      #MoonrakerColumn {
+        /* Moonraker stays in its current position */
+      }
+      
+      #RightColumnTrading {
+        /* Trading column goes to the rightmost position */
+        right: 0;
+      }
+    }
+    
+    /* When only trading column is shown (no moonraker) */
+    &:not(.moonraker-column-shown) {
+      grid-template-columns: auto 1fr var(--right-column-width);
+      
+      #RightColumnTrading {
+        right: 0;
+      }
+    }
+  }
+}
