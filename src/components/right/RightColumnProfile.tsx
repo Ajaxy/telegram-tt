@@ -1,5 +1,5 @@
 import type { FC } from "../../lib/teact/teact";
-import { memo, useMemo } from "../../lib/teact/teact";
+import { memo, useMemo, useState } from "../../lib/teact/teact";
 import { getActions, withGlobal } from "../../global";
 
 import type { ApiUser } from "../../api/types";
@@ -18,61 +18,69 @@ const coins = [
     id: "cwypto",
     name: "CWYPTO",
     subtitle: "Itsa mee cwypto",
+    time: "5m",
+    hasNotification: true,
     comments: 105,
     score: 1238,
     cap: "$250K",
-    ath: "$1.8M",
-    mult: "7.9x",
+    holders: 2430,
+    holdersIcon: "👥",
+    volume: 89,
+    volumeIcon: "📊",
+    marketCap: "$155K",
+    change: "$1.2M",
+    changeIcon: "↗",
   },
   {
     id: "zelenskiii",
     name: "Zelenskiii",
     subtitle: "Memecoin leader",
+    time: "6m",
+    hasNotification: false,
     comments: 23,
     score: 850,
     cap: "$250K",
-    ath: "$1.8M",
-    mult: "7.9x",
+    holders: 2430,
+    holdersIcon: "👥",
+    volume: 89,
+    volumeIcon: "📊",
+    marketCap: "$155K",
+    change: "$1.2M",
+    changeIcon: "↗",
   },
   {
     id: "alien",
     name: "Alien",
     subtitle: "The alien emoji",
+    time: "5m",
+    hasNotification: false,
     comments: 14,
     score: 620,
     cap: "$250K",
-    ath: "$1.8M",
-    mult: "7.9x",
+    holders: 2430,
+    holdersIcon: "👥",
+    volume: 89,
+    volumeIcon: "📊",
+    marketCap: "$155K",
+    change: "$1.2M",
+    changeIcon: "↗",
   },
   {
     id: "hippy",
     name: "Hippy",
     subtitle: "Peace-loving Solana",
+    time: "5m",
+    hasNotification: false,
     comments: 8,
     score: 180,
     cap: "$250K",
-    ath: "$1.8M",
-    mult: "7.9x",
-  },
-  {
-    id: "mark-cuban",
-    name: "Mark Cuban",
-    subtitle: "Entrepreneurial vision",
-    comments: 2,
-    score: 34,
-    cap: "$250K",
-    ath: "$1.8M",
-    mult: "7.9x",
-  },
-  {
-    id: "frud",
-    name: "frud",
-    subtitle: "aw, frud.",
-    comments: 1,
-    score: 8,
-    cap: "$250K",
-    ath: "$1.8M",
-    mult: "7.9x",
+    holders: 2430,
+    holdersIcon: "👥",
+    volume: 89,
+    volumeIcon: "📊",
+    marketCap: "$155K",
+    change: "$1.2M",
+    changeIcon: "↗",
   },
 ];
 
@@ -93,8 +101,13 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
   currentUser,
 }) => {
   const lang = useLang();
+  const [isCoinsExpanded, setIsCoinsExpanded] = useState(true);
 
   const className = buildClassName("RightColumnProfile", isActive && "active");
+
+  const toggleCoinsVisibility = () => {
+    setIsCoinsExpanded(!isCoinsExpanded);
+  };
 
   return (
     <div className={className}>
@@ -141,7 +154,10 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
             </div>
           </div>
         </div>
+      </div>
 
+      {/* Content Section */}
+      <div className="sidebar-content">
         <div className="search-section">
           <div className="search-input-wrapper">
             <svg
@@ -163,78 +179,180 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
             />
           </div>
         </div>
-      </div>
 
-      {/* Content Section */}
-      <div className="sidebar-content">
         <div className="coins-group">
-          <div className="group-label">Scanned coins (6)</div>
-          <div className="coins-content">
-            <div className="coins-list">
-              {coins.map((coin) => (
-                <div key={coin.id} className="coin-item">
-                  <div className="coin-main">
-                    <div className="coin-info">
-                      <div className="coin-avatar" />
-                      <div className="coin-details">
-                        <div className="coin-header">
-                          <span className="coin-name">{coin.name}</span>
-                          <span className="coin-time">5m</span>
-                        </div>
-                        <p className="coin-subtitle">{coin.subtitle}</p>
-                      </div>
-                    </div>
-                    <div className="coin-stats">
-                      <div className="stats-line">
-                        {coin.cap} • ATH {coin.ath}
-                      </div>
-                      <div className="multiplier">↗ {coin.mult}</div>
-                    </div>
-                  </div>
-                  <div className="coin-metrics">
-                    <div className="metric-badge">
-                      <svg
-                        className="message-icon"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path>
-                      </svg>
-                      <span className="metric-value">{coin.comments}</span>
-                    </div>
-                    <div className="metric-badge">
-                      <svg
-                        className="sparkles-icon"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                      </svg>
-                      <span className="metric-value">{coin.score}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="group-label" onClick={toggleCoinsVisibility}>
+            <span>Scanned coins (6)</span>
+            <svg
+              className={buildClassName(
+                "chevron-icon",
+                !isCoinsExpanded && "collapsed"
+              )}
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <polyline points="6,9 12,15 18,9"></polyline>
+            </svg>
           </div>
+          {isCoinsExpanded && (
+            <div className="coins-content">
+              <div className="coins-list">
+                {coins.map((coin) => (
+                  <div key={coin.id} className="coin-item">
+                    {/* Top row: Avatar, Name with copy icon, Time, and Metrics */}
+                    <div className="coin-top-row">
+                      <div className="coin-left">
+                        <div className="coin-avatar" />
+                        <div className="coin-content">
+                          <div className="coin-info">
+                            <span className="coin-name">{coin.name}</span>
+                            <svg
+                              className="coin-copy-icon"
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <rect
+                                x="9"
+                                y="9"
+                                width="13"
+                                height="13"
+                                rx="2"
+                                ry="2"
+                              ></rect>
+                              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                            </svg>
+                            <span className="coin-time">{coin.time}</span>
+                          </div>
+                          <div className="coin-subtitle-row">
+                            <p className="coin-subtitle">{coin.subtitle}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="coin-metrics">
+                        <div className="metric-badge">
+                          <img
+                            src="/svg/chat.svg"
+                            alt="chat"
+                            className="message-icon"
+                            width="14"
+                            height="14"
+                          />
+                          <span className="metric-value">{coin.comments}</span>
+                        </div>
+                        <div className="metric-badge">
+                          <img
+                            src="/svg/radar.svg"
+                            alt="radar"
+                            className="sparkles-icon"
+                            width="14"
+                            height="14"
+                          />
+                          <span className="metric-value">{coin.score}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom row: Stats */}
+                    <div className="coin-stats-row">
+                      <div className="stat-item left-aligned">
+                        <img
+                          src="/svg/liq.svg"
+                          alt="liquidity"
+                          className="stat-icon"
+                          width="11"
+                          height="10"
+                        />
+                        <span className="stat-value">{coin.cap}</span>
+                      </div>
+
+                      <div className="stats-right-group">
+                        <div className="stat-item">
+                          <img
+                            src="/svg/people.svg"
+                            alt="people"
+                            className="stat-icon"
+                            width="11"
+                            height="10"
+                          />
+                          <span className="stat-value">
+                            {coin.holders.toLocaleString()}
+                          </span>
+                        </div>
+                        <span className="stat-separator">|</span>
+                        <div className="stat-item">
+                          <img
+                            src="/svg/wallet.svg"
+                            alt="people"
+                            className="stat-icon"
+                            width="11"
+                            height="10"
+                          />
+                          <span className="stat-value">{coin.score}</span>
+                        </div>
+                        <span className="stat-separator">|</span>
+                        <div className="stat-item">
+                          <img
+                            src="/svg/chart.svg"
+                            alt="volume"
+                            className="stat-icon"
+                            width="11"
+                            height="10"
+                          />
+                          <span className="stat-value">{coin.volume}</span>
+                        </div>
+                        <span className="stat-separator">|</span>
+                        <div className="stat-item mc-group">
+                          <span className="stat-value">MC</span>
+                          <img
+                            src="/svg/mc.svg"
+                            alt="volume"
+                            className="stat-icon"
+                            width="11"
+                            height="10"
+                          />
+                          <span className="stat-value change-value">
+                            {coin.change}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Footer Section */}
       <div className="sidebar-footer">
-        <div className="footer-buttons">
-          <Button size="tiny" color="translucent" className="clear-button">
+        <div className="footer-left">
+          <button className="footer-action-button clear-button">
+            <svg
+              className="clear-icon"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+            </svg>
             Clear coins
-          </Button>
-          <Button size="tiny" color="primary" className="buy-button">
+          </button>
+        </div>
+        <div className="footer-right">
+          <button className="footer-action-button buy-button">
             <svg
               className="zap-icon"
               width="16"
@@ -247,7 +365,24 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
               <polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"></polygon>
             </svg>
             Buy
-          </Button>
+          </button>
+          <div className="input-menu-container">
+            <input
+              type="text"
+              className="buy-amount-input"
+              placeholder="0.1"
+              defaultValue="0.1"
+            />
+            <button className="menu-button" aria-label="Menu">
+              <img
+                className="solana-icon"
+                src="/solana/Solana (SOL)-grey.svg"
+                alt="Solana"
+                width="12"
+                height="10"
+              />
+            </button>
+          </div>
         </div>
       </div>
     </div>
