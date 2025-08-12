@@ -267,6 +267,29 @@
               background-color: rgba(255, 255, 255, 0.02);
             }
             
+            &.selected {
+              background-color: #8C7CD6;
+              
+              // Make all text white when selected
+              .coin-name,
+              .coin-time,
+              .coin-subtitle,
+              .metric-value,
+              .stat-value,
+              .change-value {
+                color: white !important;
+              }
+              
+              // Make icons white/light when selected
+              .coin-copy-icon,
+              .message-icon,
+              .sparkles-icon,
+              .stat-icon {
+                filter: brightness(0) invert(1);
+                opacity: 1;
+              }
+            }
+            
             .coin-top-row {
               display: flex;
               align-items: center;

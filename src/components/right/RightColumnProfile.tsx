@@ -1,10 +1,11 @@
 import type { FC } from "../../lib/teact/teact";
-import { memo, useMemo, useState } from "../../lib/teact/teact";
+import { memo, useMemo, useState, useEffect } from "../../lib/teact/teact";
 import { getActions, withGlobal } from "../../global";
 
 import type { ApiUser } from "../../api/types";
 
 import { selectUser } from "../../global/selectors";
+import { selectTabState } from "../../global/selectors/tabs";
 import buildClassName from "../../util/buildClassName";
 
 import useLang from "../../hooks/useLang";
@@ -93,16 +94,19 @@ type OwnProps = {
 
 type StateProps = {
   currentUser?: ApiUser;
+  isTradingColumnShown?: boolean;
 };
 
 const RightColumnProfile: FC<OwnProps & StateProps> = ({
   isActive,
   onClose,
   currentUser,
+  isTradingColumnShown,
 }) => {
   const { openTradingColumn } = getActions();
   const lang = useLang();
   const [isCoinsExpanded, setIsCoinsExpanded] = useState(true);
+  const [selectedCoinId, setSelectedCoinId] = useState<string | null>(null);
 
   const className = buildClassName("RightColumnProfile", isActive && "active");
 
@@ -111,6 +115,7 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
   };
 
   const handleCoinClick = (coin: (typeof coins)[0]) => {
+    setSelectedCoinId(coin.id);
     openTradingColumn({
       coin: {
         id: coin.id,
@@ -126,6 +131,13 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
       },
     });
   };
+
+  // Deselect coin when trading column closes
+  useEffect(() => {
+    if (!isTradingColumnShown && selectedCoinId) {
+      setSelectedCoinId(null);
+    }
+  }, [isTradingColumnShown, selectedCoinId]);
 
   return (
     <div className={className}>
@@ -222,7 +234,11 @@ const RightColumnProfile: FC<OwnProps & StateProps> = ({
                 {coins.map((coin) => (
                   <div
                     key={coin.id}
-                    className="coin-item clickable"
+                    className={buildClassName(
+                      "coin-item",
+                      "clickable",
+                      selectedCoinId === coin.id && "selected"
+                    )}
                     onClick={() => handleCoinClick(coin)}
                   >
                     {/* Top row: Avatar, Name with copy icon, Time, and Metrics */}
@@ -417,8 +433,11 @@ export default memo(
       ? selectUser(global, global.currentUserId)
       : undefined;
 
+    const tabState = selectTabState(global);
+
     return {
       currentUser,
+      isTradingColumnShown: tabState.isTradingColumnShown,
     };
   })(RightColumnProfile)
 );
