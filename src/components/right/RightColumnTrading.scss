@@ -2,10 +2,10 @@
   position: absolute;
   z-index: calc(var(--z-right-column) + 1);
   top: 0;
-  right: calc(-1 * var(--right-column-width));
-  transform: translate3d(var(--right-column-width), 0, 0);
+  right: calc(-1 * var(--trading-column-width));
+  transform: translate3d(var(--trading-column-width), 0, 0);
 
-  width: var(--right-column-width);
+  width: var(--trading-column-width);
   height: 100%;
   padding-right: env(safe-area-inset-right);
   border-left: 1px solid var(--color-borders);
@@ -34,14 +34,17 @@
   .trading-content {
     flex: 1;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 
-    /* Use coin-item styling since we now use that class */
-    &.coin-item {
+    /* Styles for the coin-item header within trading-content */
+    .coin-item.trading-header {
       background: transparent;
       border: none;
       border-bottom: 1px solid #2A2A2A;
       padding: 16px;
       transition: background-color 0.15s ease;
+      flex-shrink: 0;
       
       /* Override text colors to use #3DCEC5 */
       color: #3DCEC5;
@@ -236,11 +239,11 @@
 
     .chart-container {
       height: 480px;
-      margin-top: 16px;
-      width: 100%;
+      width:  100%;
       background: var(--color-background);
       border-radius: 8px;
       overflow: hidden;
+      flex-shrink: 0;
       
       /* Ensure the chart takes full size */
       > div {

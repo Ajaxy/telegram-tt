@@ -118,8 +118,8 @@ const RightColumnTrading: FC<OwnProps & StateProps> = ({
       id="RightColumnTrading"
     >
       {selectedCoin && (
-        <>
-          <div className="coin-item trading-content trading-header">
+        <div className="trading-content">
+          <div className="coin-item trading-header">
             {/* Top row: Avatar, Name with copy icon, Time, and Metrics */}
             <div className="coin-top-row">
               <div className="coin-left">
@@ -256,7 +256,7 @@ const RightColumnTrading: FC<OwnProps & StateProps> = ({
             )}
             {TVChartElem && TVChartElem}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
