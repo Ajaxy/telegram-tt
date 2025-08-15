@@ -1,14 +1,14 @@
 import type { TeactNode } from '@teact';
-import { memo, useLayoutEffect, useRef } from '@teact';
+import { memo, useRef } from '@teact';
 
 import type { ApiSticker } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { PARTICLE_BURST_PARAMS, PARTICLE_COLORS, setupParticles } from '../../../util/particles.ts';
 import { REM } from '../../common/helpers/mediaDimensions';
 
 import useLastCallback from '../../../hooks/useLastCallback.ts';
 
+import InteractiveSparkles from '../../common/InteractiveSparkles';
 import StickerView from '../../common/StickerView';
 import SpeedingDiamond from './SpeedingDiamond.tsx';
 import SwayingStar from './SwayingStar.tsx';
@@ -40,29 +40,26 @@ function ParticlesHeader({
   isDisabled,
   className,
 }: OwnProps) {
-  const canvasRef = useRef<HTMLCanvasElement>();
   const stickerRef = useRef<HTMLDivElement>();
-
-  useLayoutEffect(() => {
-    if (isDisabled) return undefined;
-
-    return setupParticles(canvasRef.current!, {
-      color: PARTICLE_COLORS[`${color}Gradient`],
-      ...PARTICLE_PARAMS,
-    });
-  }, [color, isDisabled]);
+  const triggerSparklesRef = useRef<(() => void) | undefined>();
 
   const handleMouseMove = useLastCallback(() => {
-    setupParticles(canvasRef.current!, {
-      color: PARTICLE_COLORS[`${color}Gradient`],
-      ...PARTICLE_PARAMS,
-      ...PARTICLE_BURST_PARAMS,
-    });
+    triggerSparklesRef.current?.();
+  });
+
+  const handleRequestAnimation = useLastCallback((animate: NoneToVoidFunction) => {
+    triggerSparklesRef.current = animate;
   });
 
   return (
     <div className={buildClassName(styles.root, className)}>
-      <canvas ref={canvasRef} className={styles.particles} />
+      <InteractiveSparkles
+        color={color}
+        centerShift={PARTICLE_PARAMS.centerShift}
+        isDisabled={isDisabled}
+        className={styles.particles}
+        onRequestAnimation={handleRequestAnimation}
+      />
 
       {model === 'swaying-star' ? (
         <SwayingStar

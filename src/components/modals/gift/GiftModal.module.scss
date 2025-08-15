@@ -199,6 +199,15 @@
   padding: 1rem;
 }
 
+.avatar {
+  z-index: 2;
+  transition: transform 0.25s ease-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
 .logoBackground {
   position: absolute;
   left: 50%;

@@ -31,6 +31,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
+import InteractiveSparkles from '../../common/InteractiveSparkles';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -44,8 +45,6 @@ import GiftResaleFilters from './GiftResaleFilters';
 import StarGiftCategoryList from './StarGiftCategoryList';
 
 import styles from './GiftModal.module.scss';
-
-import StarsBackground from '../../../assets/stars-bg.png';
 
 export type OwnProps = {
   modal: TabState['giftModal'];
@@ -68,6 +67,7 @@ type StateProps = {
 const AVATAR_SIZE = 100;
 const INTERSECTION_THROTTLE = 200;
 const SCROLL_THROTTLE = 200;
+const AVATAR_SPARKLES_CENTER_SHIFT = [0, -50] as const;
 
 const runThrottledForScroll = throttle((cb) => cb(), SCROLL_THROTTLE, true);
 
@@ -104,6 +104,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   const [isGiftScreenHeaderForStarGifts, setIsGiftScreenHeaderForStarGifts] = useState(false);
 
   const [selectedCategory, setSelectedCategory] = useState<StarGiftCategory>('all');
+  const triggerSparklesRef = useRef<(() => void) | undefined>();
 
   const areAllGiftsDisallowed = useMemo(() => {
     if (!disallowedGifts) {
@@ -357,15 +358,30 @@ const GiftModal: FC<OwnProps & StateProps> = ({
     handleCloseModal();
   });
 
+  const handleAvatarMouseMove = useLastCallback(() => {
+    triggerSparklesRef.current?.();
+  });
+
+  const handleRequestAnimation = useLastCallback((animate: NoneToVoidFunction) => {
+    triggerSparklesRef.current = animate;
+  });
+
   function renderMainScreen() {
     return (
       <div ref={scrollerRef} className={buildClassName(styles.main, 'custom-scroll')} onScroll={handleScroll}>
         <div className={styles.avatars}>
           <Avatar
+            className={styles.avatar}
             size={AVATAR_SIZE}
             peer={peer}
+            onMouseMove={handleAvatarMouseMove}
           />
-          <img className={styles.logoBackground} src={StarsBackground} alt="" draggable={false} />
+          <InteractiveSparkles
+            className={styles.logoBackground}
+            color="gold"
+            centerShift={AVATAR_SPARKLES_CENTER_SHIFT}
+            onRequestAnimation={handleRequestAnimation}
+          />
         </div>
         {!isSelf && !chat && !disallowedGifts?.shouldDisallowPremiumGifts && (
           <>

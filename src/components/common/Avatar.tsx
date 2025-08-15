@@ -89,6 +89,7 @@ type OwnProps = {
   observeIntersection?: ObserveFn;
   onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => void;
   onContextMenu?: (e: React.MouseEvent) => void;
+  onMouseMove?: (e: React.MouseEvent) => void;
 };
 
 const Avatar: FC<OwnProps> = ({
@@ -115,6 +116,7 @@ const Avatar: FC<OwnProps> = ({
   asMessageBubble,
   onClick,
   onContextMenu,
+  onMouseMove,
 }) => {
   const { openStoryViewer } = getActions();
 
@@ -304,6 +306,7 @@ const Avatar: FC<OwnProps> = ({
       onClick={handleClick}
       onContextMenu={onContextMenu}
       onMouseDown={handleMouseDown}
+      onMouseMove={onMouseMove}
     >
       <div className="inner">
         {typeof content === 'string' ? renderText(content, [isBig ? 'hq_emoji' : 'emoji']) : content}

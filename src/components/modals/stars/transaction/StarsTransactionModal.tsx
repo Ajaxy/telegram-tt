@@ -1,5 +1,5 @@
 import type { FC } from '../../../../lib/teact/teact';
-import { memo, useMemo } from '../../../../lib/teact/teact';
+import { memo, useMemo, useRef } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
 import type {
@@ -39,6 +39,7 @@ import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Avatar from '../../../common/Avatar';
 import Icon from '../../../common/icons/Icon';
 import StarIcon from '../../../common/icons/StarIcon';
+import InteractiveSparkles from '../../../common/InteractiveSparkles';
 import SafeLink from '../../../common/SafeLink';
 import TableInfoModal, { type TableData } from '../../common/TableInfoModal';
 import UniqueGiftHeader from '../../gift/UniqueGiftHeader';
@@ -46,7 +47,7 @@ import PaidMediaThumb from './PaidMediaThumb';
 
 import styles from './StarsTransactionModal.module.scss';
 
-import StarsBackground from '../../../../assets/stars-bg.png';
+const AVATAR_SPARKLES_CENTER_SHIFT = [0, -50] as const;
 
 export type OwnProps = {
   modal: TabState['starsTransactionModal'];
@@ -71,6 +72,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const oldLang = useOldLang();
   const { transaction } = modal || {};
+  const triggerSparklesRef = useRef<(() => void) | undefined>();
 
   const handleOpenMedia = useLastCallback(() => {
     const media = transaction?.extendedMedia;
@@ -80,6 +82,14 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       origin: MediaViewerOrigin.StarsTransaction,
       standaloneMedia: media.flatMap((item) => Object.values(item)),
     });
+  });
+
+  const handleAvatarMouseMove = useLastCallback(() => {
+    triggerSparklesRef.current?.();
+  });
+
+  const handleRequestAnimation = useLastCallback((animate: NoneToVoidFunction) => {
+    triggerSparklesRef.current = animate;
   });
 
   const starModalData = useMemo(() => {
@@ -160,14 +170,20 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
           />
         )}
         {shouldDisplayAvatar && (
-          <Avatar peer={avatarPeer} webPhoto={photo} size="giant" />
+          <Avatar
+            className={styles.avatar}
+            peer={avatarPeer}
+            webPhoto={photo}
+            size="giant"
+            onMouseMove={handleAvatarMouseMove}
+          />
         )}
         {!sticker && !transaction.isPostsSearch && (
-          <img
+          <InteractiveSparkles
             className={buildClassName(styles.starsBackground)}
-            src={StarsBackground}
-            alt=""
-            draggable={false}
+            color="gold"
+            onRequestAnimation={handleRequestAnimation}
+            centerShift={AVATAR_SPARKLES_CENTER_SHIFT}
           />
         )}
         {Boolean(title) && <h1 className={styles.title}>{title}</h1>}
@@ -305,7 +321,8 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       tableData,
       footer,
     };
-  }, [transaction, oldLang, lang, peer, canPlayAnimatedEmojis, topSticker, paidMessageCommission]);
+  }, [transaction, oldLang, lang, peer, canPlayAnimatedEmojis, topSticker,
+    paidMessageCommission, handleRequestAnimation]);
 
   const prevModalData = usePrevious(starModalData);
   const renderingModalData = prevModalData || starModalData;
