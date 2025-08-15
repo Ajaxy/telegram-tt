@@ -49,6 +49,7 @@ type OwnProps = {
   onUpClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onDownClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onSpinnerClick?: NoneToVoidFunction;
+  onEnter?: NoneToVoidFunction;
 };
 
 const SearchInput: FC<OwnProps> = ({
@@ -80,6 +81,7 @@ const SearchInput: FC<OwnProps> = ({
   onUpClick,
   onDownClick,
   onSpinnerClick,
+  onEnter,
 }) => {
   let inputRef = useRef<HTMLInputElement>();
   if (ref) {
@@ -125,8 +127,22 @@ const SearchInput: FC<OwnProps> = ({
   }
 
   const handleKeyDown = useLastCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!resultsItemSelector) return;
-    if (e.key === 'ArrowDown' || e.key === 'Enter') {
+    if (e.key === 'Enter') {
+      if (onEnter) {
+        e.preventDefault();
+        onEnter();
+        return;
+      }
+
+      if (resultsItemSelector) {
+        const element = document.querySelector(resultsItemSelector) as HTMLElement;
+        if (element) {
+          element.focus();
+        }
+      }
+    }
+
+    if (resultsItemSelector && e.key === 'ArrowDown') {
       const element = document.querySelector(resultsItemSelector) as HTMLElement;
       if (element) {
         element.focus();

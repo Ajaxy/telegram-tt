@@ -110,6 +110,10 @@ export const TODO_ITEMS_LIMIT = 30;
 export const TODO_TITLE_LENGTH_LIMIT = 32;
 export const TODO_ITEM_LENGTH_LIMIT = 64;
 
+// Public Posts Search defaults
+export const PUBLIC_POSTS_SEARCH_DEFAULT_STARS_AMOUNT = 10;
+export const PUBLIC_POSTS_SEARCH_DEFAULT_TOTAL_DAILY = 2;
+
 // Suggested Posts defaults
 export const STARS_SUGGESTED_POST_AMOUNT_MAX = 100000;
 export const STARS_SUGGESTED_POST_AMOUNT_MIN = 5;

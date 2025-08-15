@@ -89,6 +89,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
         {!canRenderContents && <Loading />}
         {canRenderContents && !filteredFoundIds?.length && (
           <NothingFound
+            withSticker
             text={lang('ChatList.Search.NoResults')}
             description={lang('ChatList.Search.NoResultsDescription')}
           />

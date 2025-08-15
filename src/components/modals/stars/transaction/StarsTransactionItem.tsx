@@ -9,7 +9,9 @@ import type { GlobalState } from '../../../../global/types';
 import type { CustomPeer } from '../../../../types';
 
 import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../../config';
-import { buildStarsTransactionCustomPeer, formatStarsTransactionAmount } from '../../../../global/helpers/payments';
+import { buildStarsTransactionCustomPeer,
+  formatStarsTransactionAmount,
+  shouldUseCustomPeer } from '../../../../global/helpers/payments';
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
@@ -71,14 +73,11 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
     let status: string | undefined;
     let avatarPeer: ApiPeer | CustomPeer | undefined;
 
-    if (transaction.peer.type === 'peer') {
+    if (!shouldUseCustomPeer(transaction)) {
       description = peer && getPeerTitle(oldLang, peer);
       avatarPeer = peer || CUSTOM_PEER_PREMIUM;
     } else {
-      const customPeer = buildStarsTransactionCustomPeer(
-        transaction.peer,
-        transaction.amount.currency === TON_CURRENCY_CODE,
-      );
+      const customPeer = buildStarsTransactionCustomPeer(transaction);
       title = customPeer.title || oldLang(customPeer.titleKey!);
       description = oldLang(customPeer.subtitleKey!);
       avatarPeer = customPeer;
@@ -90,6 +89,11 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
 
     if (transaction.isGiftResale && transaction.starGift?.type === 'starGiftUnique') {
       description = lang('GiftUnique', { title: transaction.starGift.title, number: transaction.starGift.number });
+    }
+
+    if (transaction.isPostsSearch) {
+      title = getTransactionTitle(oldLang, lang, transaction);
+      description = undefined;
     }
 
     if (transaction.photo) {

@@ -1333,6 +1333,7 @@ export interface LangPair {
   'SearchTabMusic': undefined;
   'SearchTabVoice': undefined;
   'SearchTabMessages': undefined;
+  'SearchTabPublicPosts': undefined;
   'StarsTransactionsAll': undefined;
   'StarsTransactionsIncoming': undefined;
   'StarsTransactionsOutgoing': undefined;
@@ -1351,6 +1352,7 @@ export interface LangPair {
   'ProfileTabSharedGroups': undefined;
   'ProfileTabSimilarChannels': undefined;
   'ProfileTabSimilarBots': undefined;
+  'ProfileTabPublicPosts': undefined;
   'ActionUnsupportedTitle': undefined;
   'ActionUnsupportedDescription': undefined;
   'UnlockMoreSimilarBots': undefined;
@@ -1620,6 +1622,14 @@ export interface LangPair {
   'LabelPayInTON': undefined;
   'PriceChanged': undefined;
   'PayNewPrice': undefined;
+  'GlobalSearch': undefined;
+  'DescriptionPublicPostsSearch': undefined;
+  'PublicPosts': undefined;
+  'PublicPostsLimitReached': undefined;
+  'PublicPostsPremiumFeatureDescription': undefined;
+  'PublicPostsPremiumFeatureSubtitle': undefined;
+  'PublicPostsSubscribeToPremium': undefined;
+  'PostsSearchTransaction': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -2816,6 +2826,18 @@ export interface LangPairWithVariables<V = LangVariable> {
     'originalAmount': V;
     'newAmount': V;
   };
+  'ButtonSearchPublicPosts': {
+    'query': V;
+  };
+  'PublicPostsSearchForStars': {
+    'stars': V;
+  };
+  'UnlockTimerPublicPostsSearch': {
+    'time': V;
+  };
+  'NotificationPaidExtraSearch': {
+    'stars': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -3135,6 +3157,12 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'TextAgeVerificationModal': {
+    'count': V;
+  };
+  'RemainingPublicPostsSearch': {
+    'count': V;
+  };
+  'HintPublicPostsSearchQuota': {
     'count': V;
   };
 }

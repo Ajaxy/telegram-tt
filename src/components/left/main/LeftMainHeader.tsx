@@ -114,6 +114,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     setGlobalSearchChatId,
     lockScreen,
     openSettingsScreen,
+    searchMessagesGlobal,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -191,6 +192,15 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
   const handleLockScreen = useLastCallback(() => {
     lockScreen();
+  });
+
+  const handleSearchEnter = useLastCallback(() => {
+    if (searchQuery && content === LeftColumnContent.GlobalSearch) {
+      searchMessagesGlobal({
+        type: 'publicPosts',
+        shouldResetResultsByType: true,
+      });
+    }
   });
 
   const isSearchRelevant = Boolean(globalSearchChatId)
@@ -295,6 +305,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           onReset={onReset}
           onFocus={handleSearchFocus}
           onSpinnerClick={connectionStatusPosition === 'minimized' ? toggleConnectionStatus : undefined}
+          onEnter={handleSearchEnter}
         >
           {searchContent}
           <StoryToggler
@@ -344,7 +355,8 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       searchQuery,
-      isLoading: fetchingStatus ? Boolean(fetchingStatus.chats || fetchingStatus.messages) : false,
+      isLoading: fetchingStatus ? Boolean(fetchingStatus.chats
+        || fetchingStatus.messages || fetchingStatus.publicPosts) : false,
       globalSearchChatId: chatId,
       searchDate: minDate,
       theme: selectTheme(global),

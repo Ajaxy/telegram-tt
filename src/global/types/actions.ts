@@ -418,6 +418,9 @@ export interface ActionPayloads {
     shouldCheckFetchingMessagesStatus?: boolean;
   } & WithTabId;
   searchPopularBotApps: WithTabId | undefined;
+  checkSearchPostsFlood: {
+    query?: string;
+  } & WithTabId;
   addRecentlyFoundChatId: {
     id: string;
   };

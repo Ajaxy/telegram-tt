@@ -53,7 +53,7 @@
   background-size: cover;
   outline: none !important;
 
-  transition: background-color 0.15s, color 0.15s;
+  transition: background-color 0.15s, color 0.15s, opacity 0.15s;
 
   // @optimization
   &:active,

@@ -239,6 +239,7 @@ export interface ApiStarsTransaction {
   isGiftUpgrade?: true;
   isGiftResale?: true;
   paidMessages?: number;
+  isPostsSearch?: true;
 }
 
 export interface ApiStarsSubscription {

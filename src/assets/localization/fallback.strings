@@ -1639,6 +1639,7 @@
 "SearchTabMusic" = "Music";
 "SearchTabVoice" = "Voice";
 "SearchTabMessages" = "Messages";
+"SearchTabPublicPosts" = "Posts";
 "StarsTransactionsAll" = "All Transactions";
 "StarsTransactionsIncoming" = "Incoming";
 "StarsTransactionsOutgoing" = "Outgoing";
@@ -1657,6 +1658,7 @@
 "ProfileTabSharedGroups" = "Groups";
 "ProfileTabSimilarChannels" = "Similar Channels";
 "ProfileTabSimilarBots" = "Similar Bots";
+"ProfileTabPublicPosts" = "Public Posts";
 "ActionUnsupportedTitle" = "Action not supported yet";
 "ActionUnsupportedDescription" = "Please use one of our apps to complete this action.";
 "LocationPermissionText" = "**{name}** requests access to set your **location**. You will be able to revoke this access in the profile page of **{name}**.";
@@ -2171,4 +2173,21 @@
 "PriceChanged" = "Price Changed";
 "PayNewPrice" = "Pay New Price";
 "PriceChangedText" = "The price has already changed from **{originalAmount}** to **{newAmount}**. Do you want to pay the new price?";
+"GlobalSearch" = "Global Search";
+"DescriptionPublicPostsSearch" = "Type a keyword to search for posts from public channels.";
+"ButtonSearchPublicPosts" = "Search {query}";
+"RemainingPublicPostsSearch_one" = "{count} free search remaining today.";
+"RemainingPublicPostsSearch_other" = "{count} free searches remaining today.";
+"PublicPosts" = "Public Posts";
+"PublicPostsLimitReached" = "Limit Reached";
+"HintPublicPostsSearchQuota_one" = "You can make up to {count} search query per day.";
+"HintPublicPostsSearchQuota_other" = "You can make up to {count} search queries per day.";
+"PublicPostsSearchForStars" = "Search for {stars}";
+"UnlockTimerPublicPostsSearch" = "free search unlocks in {time}";
+"PublicPostsPremiumFeatureDescription" = "Type a keyword to search for posts from public channels.";
+"PublicPostsPremiumFeatureSubtitle" = "Global search is a Premium feature.";
+"PublicPostsSubscribeToPremium" = "Subscribe to Premium";
+"NotificationPaidExtraSearch" = "{stars} spent on extra search.";
+"PostsSearchTransaction" = "Posts Search";
+
 

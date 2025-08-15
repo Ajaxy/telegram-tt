@@ -4,8 +4,13 @@
   justify-content: center;
   color: var(--color-text-meta);
 
-  &.with-description {
+  &.with-description,
+  &.with-sticker {
     flex-direction: column;
+  }
+
+  .sticker {
+    margin-bottom: 1rem;
   }
 
   .AnimatedSticker {

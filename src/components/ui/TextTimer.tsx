@@ -5,7 +5,10 @@ import { getServerTime } from '../../util/serverTime';
 
 import useInterval from '../../hooks/schedulers/useInterval';
 import useForceUpdate from '../../hooks/useForceUpdate';
+import useLang from '../../hooks/useLang';
 import useOldLang from '../../hooks/useOldLang';
+
+import AnimatedCounter from '../common/AnimatedCounter';
 
 type OwnProps = {
   langKey: string;
@@ -16,7 +19,8 @@ type OwnProps = {
 const UPDATE_FREQUENCY = 500; // Sometimes second gets skipped if using 1000
 
 const TextTimer: FC<OwnProps> = ({ langKey, endsAt, onEnd }) => {
-  const lang = useOldLang();
+  const lang = useLang();
+  const oldLang = useOldLang();
   const forceUpdate = useForceUpdate();
 
   const serverTime = getServerTime();
@@ -32,11 +36,33 @@ const TextTimer: FC<OwnProps> = ({ langKey, endsAt, onEnd }) => {
   if (!isActive) return undefined;
 
   const timeLeft = endsAt - serverTime;
-  const formattedTime = formatMediaDuration(timeLeft);
+  const time = formatMediaDuration(timeLeft);
+
+  const timeParts = time.split(':');
+  const timeCounter = (
+    <span style="font-variant-numeric: tabular-nums;">
+      {timeParts.map((part, index) => (
+        <>
+          {index > 0 && ':'}
+          <AnimatedCounter key={index} text={part} />
+        </>
+      ))}
+    </span>
+  );
+
+  const isTypedKey = langKey === 'UnlockTimerPublicPostsSearch';
+
+  if (isTypedKey) {
+    return (
+      <span>
+        {lang(langKey, { time: timeCounter }, { withNodes: true })}
+      </span>
+    );
+  }
 
   return (
     <span>
-      {lang(langKey, formattedTime)}
+      {oldLang(langKey, time)}
     </span>
   );
 };

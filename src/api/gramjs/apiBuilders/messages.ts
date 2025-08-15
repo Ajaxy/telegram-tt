@@ -22,6 +22,7 @@ import type {
   ApiPreparedInlineMessage,
   ApiQuickReply,
   ApiReplyInfo,
+  ApiSearchPostsFlood,
   ApiSponsoredMessage,
   ApiSticker,
   ApiStory,
@@ -818,5 +819,19 @@ export function buildPreparedInlineMessage(
     result: processInlineBotResult(queryId, result.result),
     peerTypes: result.peerTypes?.map(buildApiInlineQueryPeerType),
     cacheTime: result.cacheTime,
+  };
+}
+
+export function buildApiSearchPostsFlood(
+  searchFlood: GramJs.SearchPostsFlood,
+  query?: string,
+): ApiSearchPostsFlood {
+  return {
+    query,
+    queryIsFree: searchFlood.queryIsFree,
+    totalDaily: searchFlood.totalDaily,
+    remains: searchFlood.remains,
+    waitTill: searchFlood.waitTill,
+    starsAmount: searchFlood.starsAmount.toJSNumber(),
   };
 }

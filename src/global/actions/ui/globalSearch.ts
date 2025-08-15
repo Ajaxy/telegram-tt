@@ -12,8 +12,11 @@ addActionHandler('setGlobalSearchQuery', (global, actions, payload): ActionRetur
   const { query, tabId = getCurrentTabId() } = payload;
   const { chatId, currentContent } = selectTabState(global, tabId).globalSearch;
 
-  const fetchingStatus = query && currentContent !== GlobalSearchContent.BotApps
+  const fetchingStatus = query
+    && currentContent !== GlobalSearchContent.BotApps && currentContent !== GlobalSearchContent.PublicPosts
     ? { chats: !chatId, messages: true } : undefined;
+
+  actions.checkSearchPostsFlood({ query, tabId });
 
   return updateGlobalSearch(global, {
     globalResults: {},

@@ -139,6 +139,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
         {!canRenderContents && <Loading />}
         {canRenderContents && (!foundIds || foundIds.length === 0) && (
           <NothingFound
+            withSticker
             text={lang('ChatList.Search.NoResults')}
             description={lang('ChatList.Search.NoResultsDescription')}
           />

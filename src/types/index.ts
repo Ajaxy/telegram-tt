@@ -313,6 +313,7 @@ export enum GlobalSearchContent {
   ChatList,
   ChannelList,
   BotApps,
+  PublicPosts,
   Media,
   Links,
   Files,

@@ -1,0 +1,129 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  height: 100%;
+  padding: 2rem 1.5rem;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  max-width: 20rem;
+
+  text-align: center;
+}
+
+.searchButtonContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.sticker {
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.description {
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.3125rem;
+  color: var(--color-text-secondary);
+}
+
+.searchButton {
+  overflow: hidden;
+
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 1rem;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remainingSearches {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.searchIcon {
+  margin-right: 0.25rem;
+}
+
+.searchQuery {
+  overflow: hidden;
+  display: inline-block;
+
+  max-width: 10rem;
+  margin-inline-start: 0.25rem;
+
+  color: var(--color-white);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+
+  opacity: 0.75;
+}
+
+.limitTitle {
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.limitDescription {
+  margin-bottom: 1.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  color: var(--color-text-secondary);
+}
+
+.paidSearchButton {
+  width: 100%;
+  margin-bottom: 1rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.freeSearchUnlock {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.premiumTitle {
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.premiumDescription {
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+.subscribePremiumButton {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.premiumSubtitle {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}

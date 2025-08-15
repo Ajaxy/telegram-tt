@@ -2,7 +2,7 @@ import type { ApiStarsAmount, ApiStarsTransaction, ApiTypeCurrencyAmount } from 
 import type { OldLangFn } from '../../../../hooks/useOldLang';
 
 import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../../config';
-import { buildStarsTransactionCustomPeer } from '../../../../global/helpers/payments';
+import { buildStarsTransactionCustomPeer, shouldUseCustomPeer } from '../../../../global/helpers/payments';
 import {
   type LangFn,
 } from '../../../../util/localization';
@@ -25,6 +25,9 @@ export function getTransactionTitle(oldLang: OldLangFn, lang: LangFn, transactio
       ? lang('StarGiftSaleTransaction')
       : lang('StarGiftPurchaseTransaction');
   }
+  if (transaction.isPostsSearch) {
+    return lang('PostsSearchTransaction');
+  }
 
   if (transaction.starRefCommision) {
     return oldLang('StarTransactionCommission', formatPercent(transaction.starRefCommision));
@@ -45,8 +48,8 @@ export function getTransactionTitle(oldLang: OldLangFn, lang: LangFn, transactio
     return isNegativeAmount(transaction.amount) ? oldLang('Gift2TransactionSent') : oldLang('Gift2ConvertedTitle');
   }
 
-  const customPeer = (transaction.peer && transaction.peer.type !== 'peer'
-    && buildStarsTransactionCustomPeer(transaction.peer)) || undefined;
+  const customPeer = (transaction.peer && shouldUseCustomPeer(transaction)
+    && buildStarsTransactionCustomPeer(transaction)) || undefined;
 
   if (customPeer) return customPeer.title || oldLang(customPeer.titleKey!);
 

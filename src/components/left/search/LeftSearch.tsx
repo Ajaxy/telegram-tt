@@ -1,6 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import {
   memo,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -27,6 +28,7 @@ import ChatResults from './ChatResults';
 import FileResults from './FileResults';
 import LinkResults from './LinkResults';
 import MediaResults from './MediaResults';
+import PublicPostsResults from './PublicPostsResults';
 
 import './LeftSearch.scss';
 
@@ -51,6 +53,7 @@ const TABS: TabInfo[] = [
   { type: GlobalSearchContent.ChatList, key: 'SearchTabChats' },
   { type: GlobalSearchContent.ChannelList, key: 'SearchTabChannels' },
   { type: GlobalSearchContent.BotApps, key: 'SearchTabApps' },
+  { type: GlobalSearchContent.PublicPosts, key: 'SearchTabPublicPosts' },
   { type: GlobalSearchContent.Media, key: 'SearchTabMedia' },
   { type: GlobalSearchContent.Links, key: 'SearchTabLinks' },
   { type: GlobalSearchContent.Files, key: 'SearchTabFiles' },
@@ -74,11 +77,18 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
   const {
     setGlobalSearchContent,
     setGlobalSearchDate,
+    checkSearchPostsFlood,
   } = getActions();
 
   const lang = useLang();
   const [activeTab, setActiveTab] = useState(currentContent);
   const dateSearchQuery = useMemo(() => parseDateString(searchQuery), [searchQuery]);
+
+  useEffect(() => {
+    if (isActive) {
+      checkSearchPostsFlood({});
+    }
+  }, [isActive]);
 
   const tabs = useMemo(() => {
     const arr = chatId ? CHAT_TABS : TABS;
@@ -163,6 +173,13 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
               return (
                 <BotAppResults
                   key="botApps"
+                  searchQuery={searchQuery}
+                />
+              );
+            case GlobalSearchContent.PublicPosts:
+              return (
+                <PublicPostsResults
+                  key="publicPosts"
                   searchQuery={searchQuery}
                 />
               );

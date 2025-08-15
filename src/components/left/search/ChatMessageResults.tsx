@@ -132,6 +132,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
         )}
         {nothingFound && (
           <NothingFound
+            withSticker
             text={lang('ChatList.Search.NoResults')}
             description={lang('ChatList.Search.NoResultsDescription')}
           />

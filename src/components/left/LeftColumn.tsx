@@ -17,6 +17,7 @@ import {
   IS_APP, IS_FIREFOX, IS_MAC_OS, IS_TOUCH_ENV, LAYERS_ANIMATION_NAME,
 } from '../../util/browser/windowEnvironment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { debounce } from '../../util/schedulers';
 import { captureControlledSwipe } from '../../util/swipeController';
 
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
@@ -109,6 +110,10 @@ function LeftColumn({
 
   const [contactsFilter, setContactsFilter] = useState<string>('');
   const [foldersState, foldersDispatch] = useFoldersReducer();
+
+  const debouncedSetGlobalSearchQuery = useMemo(() => debounce((query: string) => {
+    setGlobalSearchQuery({ query });
+  }, 200, false, true), [setGlobalSearchQuery]);
 
   // Used to reset child components in background.
   const [lastResetTime, setLastResetTime] = useState<number>(0);
@@ -375,7 +380,7 @@ function LeftColumn({
     openLeftColumnContent({ contentKey: LeftColumnContent.GlobalSearch });
 
     if (query !== searchQuery) {
-      setGlobalSearchQuery({ query });
+      debouncedSetGlobalSearchQuery(query);
     }
   });
 

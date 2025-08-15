@@ -6,8 +6,6 @@ import type {
   ApiRequestInputSavedStarGift,
   ApiStarsAmount,
   ApiStarsTransaction,
-  ApiStarsTransactionPeer,
-  ApiStarsTransactionPeerPeer,
   ApiTypeCurrencyAmount,
 } from '../../api/types';
 import type { CustomPeer } from '../../types';
@@ -259,10 +257,25 @@ export function getRequestInputSavedStarGift<T extends GlobalState>(
   return undefined;
 }
 
+export function shouldUseCustomPeer(transaction: ApiStarsTransaction) {
+  return transaction.peer.type !== 'peer' || Boolean(transaction.isPostsSearch);
+}
+
 export function buildStarsTransactionCustomPeer(
-  peer: Exclude<ApiStarsTransactionPeer, ApiStarsTransactionPeerPeer>,
-  isForTon?: boolean,
+  transaction: ApiStarsTransaction,
 ): CustomPeer {
+  const { peer } = transaction;
+  const isForTon = transaction.amount.currency === TON_CURRENCY_CODE;
+
+  if (transaction.isPostsSearch) {
+    return {
+      avatarIcon: 'search',
+      isCustomPeer: true,
+      title: '',
+      peerColorId: 5,
+    };
+  }
+
   if (peer.type === 'appStore') {
     return {
       avatarIcon: 'star',

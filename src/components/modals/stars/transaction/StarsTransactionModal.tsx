@@ -14,6 +14,7 @@ import { getMessageLink } from '../../../../global/helpers';
 import {
   buildStarsTransactionCustomPeer,
   formatStarsTransactionAmount,
+  shouldUseCustomPeer,
 } from '../../../../global/helpers/payments';
 import {
   selectCanPlayAnimatedEmojis,
@@ -97,8 +98,8 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
 
     const giftAttributes = isUniqueGift ? getGiftAttributes(gift) : undefined;
 
-    const customPeer = (transaction.peer && transaction.peer.type !== 'peer'
-      && buildStarsTransactionCustomPeer(transaction.peer)) || undefined;
+    const customPeer = (transaction.peer && shouldUseCustomPeer(transaction)
+      && buildStarsTransactionCustomPeer(transaction)) || undefined;
 
     const peerId = transaction.peer?.type === 'peer' ? transaction.peer.id : undefined;
     const toName = transaction.peer && oldLang(getStarsPeerTitleKey(transaction.peer));
@@ -123,8 +124,8 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       || (isGiftUpgrade && starGift?.type === 'starGiftUnique' ? starGift.title : undefined)
       || (media ? mediaText : undefined);
 
-    const shouldDisplayAvatar = !media && !sticker;
-    const avatarPeer = !photo ? (peer || customPeer) : undefined;
+    const shouldDisplayAvatar = !media && !sticker && !transaction.isPostsSearch;
+    const avatarPeer = !photo ? ((!shouldUseCustomPeer(transaction) && peer) || customPeer) : undefined;
 
     const uniqueGiftHeader = isUniqueGift && (
       <div className={buildClassName(styles.header, styles.uniqueGift)}>
@@ -161,7 +162,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
         {shouldDisplayAvatar && (
           <Avatar peer={avatarPeer} webPhoto={photo} size="giant" />
         )}
-        {!sticker && (
+        {!sticker && !transaction.isPostsSearch && (
           <img
             className={buildClassName(styles.starsBackground)}
             src={StarsBackground}
@@ -236,10 +237,12 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       peerLabel = oldLang('Stars.Transaction.Via');
     }
 
-    tableData.push([
-      peerLabel,
-      peerId ? { chatId: peerId } : toName || '',
-    ]);
+    if (!transaction.isPostsSearch) {
+      tableData.push([
+        peerLabel,
+        peerId ? { chatId: peerId } : toName || '',
+      ]);
+    }
 
     if (transaction.starRefCommision && transaction.paidMessages) {
       tableData.push([
@@ -329,8 +332,8 @@ export default memo(withGlobal<OwnProps>(
 
     const currencyAmount = modal?.transaction.amount;
     const starsGiftSticker = modal?.transaction.isGift
-      && currencyAmount?.currency === STARS_CURRENCY_CODE ? selectGiftStickerForStars(global, currencyAmount?.amount)
-      : selectGiftStickerForTon(global, currencyAmount?.amount);
+      ? (currencyAmount?.currency === STARS_CURRENCY_CODE ? selectGiftStickerForStars(global, currencyAmount?.amount)
+        : selectGiftStickerForTon(global, currencyAmount?.amount)) : undefined;
 
     return {
       peer,

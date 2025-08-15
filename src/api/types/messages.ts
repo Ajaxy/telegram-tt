@@ -919,7 +919,8 @@ export type ApiTranscription = {
 };
 
 export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'voice' | 'profilePhoto';
-export type ApiGlobalMessageSearchType = 'text' | 'channels' | 'media' | 'documents' | 'links' | 'audio' | 'voice';
+export type ApiGlobalMessageSearchType = 'text' |
+  'channels' | 'media' | 'documents' | 'links' | 'audio' | 'voice' | 'publicPosts';
 export type ApiMessageSearchContext = 'all' | 'users' | 'groups' | 'channels';
 
 export type ApiReportReason = 'spam' | 'violence' | 'pornography' | 'childAbuse'
@@ -990,6 +991,15 @@ export type ApiPreparedInlineMessage = {
   result: ApiBotInlineResult | ApiBotInlineMediaResult;
   peerTypes: ApiInlineQueryPeerType[];
   cacheTime: number;
+};
+
+export type ApiSearchPostsFlood = {
+  query?: string;
+  queryIsFree?: boolean;
+  totalDaily: number;
+  remains: number;
+  waitTill?: number;
+  starsAmount: number;
 };
 
 export const MAIN_THREAD_ID = -1;

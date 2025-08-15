@@ -113,7 +113,7 @@ addActionHandler('performMiddleSearch', async (global, actions, payload): Promis
   }
 
   if (type === 'channels') {
-    result = await callApi('searchHashtagPosts', {
+    result = await callApi('searchPublicPosts', {
       hashtag: query!,
       limit: MESSAGE_SEARCH_SLICE,
       offsetId,

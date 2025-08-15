@@ -1,4 +1,4 @@
-import type { ApiGlobalMessageSearchType, ApiMessage } from '../../api/types';
+import type { ApiGlobalMessageSearchType, ApiMessage, ApiSearchPostsFlood } from '../../api/types';
 import type { GlobalSearchContent } from '../../types';
 import type { GlobalState, TabArgs, TabState } from '../types';
 
@@ -37,6 +37,7 @@ export function updateGlobalSearchResults<T extends GlobalState>(
   nextOffsetRate?: number,
   nextOffsetId?: number,
   nextOffsetPeerId?: string,
+  searchFlood?: ApiSearchPostsFlood,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   const { resultsByType } = selectTabState(global, tabId).globalSearch || {};
@@ -52,8 +53,12 @@ export function updateGlobalSearchResults<T extends GlobalState>(
       (newId) => foundIdsForType.includes(getSearchResultKey(newFoundMessagesById[newId])),
     )
   ) {
-    global = updateGlobalSearchFetchingStatus(global, { messages: false }, tabId);
+    global = updateGlobalSearchFetchingStatus(global, {
+      messages: false,
+      publicPosts: false,
+    }, tabId);
     return updateGlobalSearch(global, {
+      searchFlood,
       resultsByType: {
         ...(selectTabState(global, tabId).globalSearch || {}).resultsByType,
         [type]: {
@@ -74,9 +79,13 @@ export function updateGlobalSearchResults<T extends GlobalState>(
   const foundIds = Array.prototype.concat(prevFoundIds, newFoundIds);
   const foundOrPrevFoundIds = areSortedArraysEqual(prevFoundIds, foundIds) ? prevFoundIds : foundIds;
 
-  global = updateGlobalSearchFetchingStatus(global, { messages: false }, tabId);
+  global = updateGlobalSearchFetchingStatus(global, {
+    messages: false,
+    publicPosts: false,
+  }, tabId);
 
   return updateGlobalSearch(global, {
+    searchFlood,
     resultsByType: {
       ...(selectTabState(global, tabId).globalSearch || {}).resultsByType,
       [type]: {
@@ -91,7 +100,7 @@ export function updateGlobalSearchResults<T extends GlobalState>(
 }
 
 export function updateGlobalSearchFetchingStatus<T extends GlobalState>(
-  global: T, newState: { chats?: boolean; messages?: boolean; botApps?: boolean },
+  global: T, newState: { chats?: boolean; messages?: boolean; botApps?: boolean; publicPosts?: boolean },
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   return updateGlobalSearch(global, {

@@ -36,6 +36,7 @@ import type {
   ApiReceiptRegular,
   ApiSavedGifts,
   ApiSavedStarGift,
+  ApiSearchPostsFlood,
   ApiSponsoredPeer,
   ApiStarGift,
   ApiStarGiftAttribute,
@@ -249,10 +250,12 @@ export type TabState = {
     chatId?: string;
     foundTopicIds?: number[];
     sponsoredPeer?: ApiSponsoredPeer;
+    searchFlood?: ApiSearchPostsFlood;
     fetchingStatus?: {
       chats?: boolean;
       messages?: boolean;
       botApps?: boolean;
+      publicPosts?: boolean;
     };
     isClosing?: boolean;
     localResults?: {

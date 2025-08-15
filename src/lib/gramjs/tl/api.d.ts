@@ -16515,6 +16515,7 @@ namespace Api {
     stargiftUpgrade?: true;
     businessTransfer?: true;
     stargiftResale?: true;
+    postsSearch?: true;
     id: string;
     amount: Api.TypeStarsAmount;
     date: int;
@@ -16548,6 +16549,7 @@ namespace Api {
     stargiftUpgrade?: true;
     businessTransfer?: true;
     stargiftResale?: true;
+    postsSearch?: true;
     id: string;
     amount: Api.TypeStarsAmount;
     date: int;
