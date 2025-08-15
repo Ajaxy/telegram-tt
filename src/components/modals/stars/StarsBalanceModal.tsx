@@ -319,7 +319,7 @@ const StarsBalanceModal = ({
             {oldLang('TelegramStars')}
           </h2>
         </div>
-        <div className={styles.section}>
+        <div className={styles.topSection}>
           {currency === TON_CURRENCY_CODE ? renderTonHeaderSection() : renderStarsHeaderSection()}
         </div>
         {areBuyOptionsShown && (

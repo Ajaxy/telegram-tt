@@ -37,6 +37,7 @@
   @include mixins.side-panel-section;
 }
 
+.topSection,
 .lastSection,
 .section {
   position: relative;
@@ -46,6 +47,14 @@
   align-items: center;
 
   padding: 0.5rem;
+}
+
+.topSection {
+  padding-inline: 1.5rem;
+}
+
+.lastSection,
+.section {
 
   @include mixins.adapt-padding-to-scrollbar(0.5rem);
 }
@@ -69,6 +78,11 @@
   color: var(--color-text-secondary);
 
   background-color: var(--color-background-secondary);
+}
+
+.hint {
+  padding-block: 0.5rem;
+  padding-inline: 1.5rem;
 }
 
 .topUpButton,
