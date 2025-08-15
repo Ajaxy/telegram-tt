@@ -1,5 +1,5 @@
 import type { FC } from '../../../../lib/teact/teact';
-import { memo, useMemo } from '../../../../lib/teact/teact';
+import { memo, useMemo, useRef } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
 import type {
@@ -22,13 +22,12 @@ import usePrevious from '../../../../hooks/usePrevious';
 
 import Avatar from '../../../common/Avatar';
 import StarIcon from '../../../common/icons/StarIcon';
+import InteractiveSparkles from '../../../common/InteractiveSparkles';
 import SafeLink from '../../../common/SafeLink';
 import Button from '../../../ui/Button';
 import TableInfoModal, { type TableData } from '../../common/TableInfoModal';
 
 import styles from './StarsSubscriptionModal.module.scss';
-
-import StarsBackground from '../../../../assets/stars-bg.png';
 
 export type OwnProps = {
   modal: TabState['starsSubscriptionModal'];
@@ -37,6 +36,8 @@ export type OwnProps = {
 type StateProps = {
   peer?: ApiPeer;
 };
+
+const AVATAR_SPARKLES_CENTER_SHIFT = [0, -50] as const;
 
 const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
   modal, peer,
@@ -52,6 +53,15 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
   const oldLang = useOldLang();
   const lang = useLang();
   const { subscription } = modal || {};
+  const triggerSparklesRef = useRef<(() => void) | undefined>();
+
+  const handleAvatarMouseMove = useLastCallback(() => {
+    triggerSparklesRef.current?.();
+  });
+
+  const handleRequestAnimation = useLastCallback((animate: NoneToVoidFunction) => {
+    triggerSparklesRef.current = animate;
+  });
 
   const buttonState = useMemo(() => {
     if (!subscription) {
@@ -127,14 +137,19 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
     const header = (
       <div className={styles.header}>
         <div className={styles.avatarWrapper}>
-          <Avatar peer={!photo ? peer : undefined} webPhoto={photo} size="giant" />
+          <Avatar
+            peer={!photo ? peer : undefined}
+            webPhoto={photo}
+            size="giant"
+            onMouseMove={handleAvatarMouseMove}
+          />
           <StarIcon className={styles.subscriptionStar} type="gold" size="adaptive" />
         </div>
-        <img
+        <InteractiveSparkles
           className={buildClassName(styles.starsBackground)}
-          src={StarsBackground}
-          alt=""
-          draggable={false}
+          color="gold"
+          onRequestAnimation={handleRequestAnimation}
+          centerShift={AVATAR_SPARKLES_CENTER_SHIFT}
         />
         <h1 className={styles.title}>{title || oldLang('StarsSubscriptionTitle')}</h1>
         <p className={styles.amount}>

@@ -37,7 +37,7 @@
 }
 
 .footer {
-  margin-block: 0.5rem;
+  margin-top: 0.5rem;
   font-size: 0.875rem;
   color: var(--color-text-secondary);
   text-align: center;
@@ -51,10 +51,6 @@
   transform: translateX(-50%);
 
   height: 7rem;
-}
-
-.avatarWrapper {
-  position: relative;
 }
 
 .subscriptionStar {
@@ -78,4 +74,14 @@
 
 .danger {
   color: var(--color-error);
+}
+
+.avatarWrapper {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.25s ease-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
 }

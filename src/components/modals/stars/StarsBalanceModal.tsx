@@ -199,6 +199,7 @@ const StarsBalanceModal = ({
           <Button
             className={styles.starButton}
             onClick={showBuyOptions}
+            fluid
           >
             {oldLang('Star.List.BuyMoreStars')}
           </Button>
@@ -208,6 +209,7 @@ const StarsBalanceModal = ({
             isText
             noForcedUpperCase
             className={styles.starButton}
+            fluid
             onClick={openStarsGiftingPickerModalHandler}
           >
             {oldLang('TelegramStarsGift')}
@@ -253,6 +255,7 @@ const StarsBalanceModal = ({
         <Button
           className={styles.topUpButton}
           onClick={handleTonTopUp}
+          fluid
         >
           {lang('ButtonTopUpViaFragment')}
         </Button>
@@ -319,7 +322,7 @@ const StarsBalanceModal = ({
             {oldLang('TelegramStars')}
           </h2>
         </div>
-        <div className={styles.topSection}>
+        <div className={styles.section}>
           {currency === TON_CURRENCY_CODE ? renderTonHeaderSection() : renderStarsHeaderSection()}
         </div>
         {areBuyOptionsShown && (

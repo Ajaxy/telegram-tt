@@ -70,6 +70,7 @@
 }
 
 .refunded {
+  margin-bottom: 0;
   padding: 0.25em 0.5em;
   border-radius: var(--border-radius-messages-small);
 
@@ -91,7 +92,7 @@
 }
 
 .footer {
-  margin-block: 0.5rem;
+  margin-top: 0.5rem;
   font-size: 0.875rem;
   color: var(--color-text-secondary);
   text-align: center;

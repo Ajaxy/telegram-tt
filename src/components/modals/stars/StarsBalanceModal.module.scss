@@ -37,7 +37,6 @@
   @include mixins.side-panel-section;
 }
 
-.topSection,
 .lastSection,
 .section {
   position: relative;
@@ -47,14 +46,6 @@
   align-items: center;
 
   padding: 0.5rem;
-}
-
-.topSection {
-  padding-inline: 1.5rem;
-}
-
-.lastSection,
-.section {
 
   @include mixins.adapt-padding-to-scrollbar(0.5rem);
 }
@@ -235,7 +226,11 @@
 .starButton {
   grid-column: 1/-1;
   gap: 0.5rem;
+  align-self: stretch;
+
   margin-top: 0.5rem;
+  margin-inline: 0.5rem;
+
   font-weight: var(--font-weight-medium);
 }
 
