@@ -1044,7 +1044,6 @@ export function updater(update: Update) {
   } else if (update instanceof GramJs.UpdateStarsBalance) {
     const balance = buildApiCurrencyAmount(update.balance);
     if (!balance) {
-      // Skip TON balance updates for now
       return;
     }
     sendApiUpdate({

@@ -174,11 +174,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateStarsBalance': {
-      const stars = global.stars;
-      if (!stars) {
-        return;
-      }
-
       global = updateStarsBalance(global, update.balance);
 
       setGlobal(global);
