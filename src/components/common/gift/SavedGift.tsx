@@ -6,6 +6,7 @@ import type { ApiEmojiStatusType, ApiPeer, ApiSavedStarGift } from '../../../api
 import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
 import { getHasAdminRight } from '../../../global/helpers';
 import { selectChat, selectPeer, selectUser } from '../../../global/selectors';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment.ts';
 import buildClassName from '../../../util/buildClassName';
 import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
 import { CUSTOM_PEER_HIDDEN } from '../../../util/objects/customPeer';
@@ -13,6 +14,7 @@ import { formatIntegerCompact } from '../../../util/textFormat';
 import { getGiftAttributes, getStickerFromGift, getTotalGiftAvailability } from '../helpers/gifts';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useFlag from '../../../hooks/useFlag.ts';
 import { type ObserveFn } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -59,13 +61,13 @@ const SavedGift = ({
   const { openGiftInfoModal } = getActions();
 
   const ref = useRef<HTMLDivElement>();
-
   const stickerRef = useRef<HTMLDivElement>();
 
   const lang = useLang();
 
-  const canManage = peerId === currentUserId || hasAdminRights;
+  const [isHover, markHover, unmarkHover] = useFlag();
 
+  const canManage = peerId === currentUserId || hasAdminRights;
   const totalIssued = getTotalGiftAvailability(gift.gift);
   const starGift = gift.gift;
   const starGiftUnique = starGift.type === 'starGiftUnique' ? starGift : undefined;
@@ -150,6 +152,8 @@ const SavedGift = ({
       onClick={handleClick}
       onContextMenu={handleContextMenu}
       onMouseDown={handleBeforeContextMenu}
+      onMouseEnter={!IS_TOUCH_ENV ? markHover : undefined}
+      onMouseLeave={!IS_TOUCH_ENV ? unmarkHover : undefined}
     >
       {radialPatternBackdrop}
       {!radialPatternBackdrop && <Avatar className={styles.topIcon} peer={avatarPeer} size="micro" />}
@@ -161,12 +165,13 @@ const SavedGift = ({
       >
         {sticker && (
           <StickerView
-            observeIntersectionForPlaying={observeIntersection}
-            observeIntersectionForLoading={observeIntersection}
             containerRef={stickerRef}
             sticker={sticker}
             size={GIFT_STICKER_SIZE}
+            shouldLoop={isHover}
             shouldPreloadPreview
+            observeIntersectionForPlaying={observeIntersection}
+            observeIntersectionForLoading={observeIntersection}
           />
         )}
 

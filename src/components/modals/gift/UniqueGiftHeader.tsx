@@ -1,5 +1,5 @@
-import type { TeactNode } from '../../../lib/teact/teact';
-import { memo, useMemo } from '../../../lib/teact/teact';
+import type { TeactNode } from '@teact';
+import { memo, useMemo } from '@teact';
 import { getActions } from '../../../global';
 
 import type {
@@ -10,10 +10,12 @@ import type {
 import {
   formatStarsTransactionAmount,
 } from '../../../global/helpers/payments';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment.ts';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 
 import { useTransitionActiveKey } from '../../../hooks/animations/useTransitionActiveKey';
+import useFlag from '../../../hooks/useFlag.ts';
 import useLang from '../../../hooks/useLang';
 
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
@@ -52,6 +54,7 @@ const UniqueGiftHeader = ({
   } = getActions();
 
   const lang = useLang();
+  const [isHover, markHover, unmarkHover] = useFlag();
   const activeKey = useTransitionActiveKey([modelAttribute, backdropAttribute, patternAttribute]);
   const subtitleColor = backdropAttribute?.textColor;
 
@@ -83,6 +86,9 @@ const UniqueGiftHeader = ({
           className={styles.sticker}
           sticker={modelAttribute.sticker}
           size={STICKER_SIZE}
+          noLoop={!isHover}
+          onMouseEnter={!IS_TOUCH_ENV ? markHover : undefined}
+          onMouseLeave={!IS_TOUCH_ENV ? unmarkHover : undefined}
         />
       </Transition>
       {title && <h1 className={styles.title}>{title}</h1>}

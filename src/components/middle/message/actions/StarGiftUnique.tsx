@@ -1,4 +1,4 @@
-import { memo, useMemo, useRef } from '../../../../lib/teact/teact';
+import { memo, useMemo, useRef } from '@teact';
 import { withGlobal } from '../../../../global';
 
 import type { ApiMessage, ApiPeer } from '../../../../api/types';
@@ -11,11 +11,13 @@ import {
   selectSender,
   selectUser,
 } from '../../../../global/selectors';
+import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment.ts';
 import buildClassName from '../../../../util/buildClassName';
 import buildStyle from '../../../../util/buildStyle';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';
 import { renderPeerLink } from '../helpers/messageActions';
 
+import useFlag from '../../../../hooks/useFlag.ts';
 import { type ObserveFn } from '../../../../hooks/useIntersectionObserver';
 import useLang from '../../../../hooks/useLang';
 
@@ -56,6 +58,8 @@ const StarGiftAction = ({
   const stickerRef = useRef<HTMLDivElement>();
   const lang = useLang();
 
+  const [isHover, markHover, unmarkHover] = useFlag();
+
   const { isOutgoing } = message;
 
   const sticker = getStickerFromGift(action.gift)!;
@@ -85,6 +89,8 @@ const StarGiftAction = ({
       tabIndex={0}
       role="button"
       onClick={onClick}
+      onMouseEnter={!IS_TOUCH_ENV ? markHover : undefined}
+      onMouseLeave={!IS_TOUCH_ENV ? unmarkHover : undefined}
     >
       <div className={styles.uniqueBackgroundWrapper}>
         <RadialPatternBackground
@@ -105,6 +111,7 @@ const StarGiftAction = ({
             containerRef={stickerRef}
             sticker={sticker}
             size={STICKER_SIZE}
+            shouldLoop={isHover}
             observeIntersectionForLoading={observeIntersectionForLoading}
             observeIntersectionForPlaying={observeIntersectionForPlaying}
             noLoad={!canPlayAnimatedEmojis}

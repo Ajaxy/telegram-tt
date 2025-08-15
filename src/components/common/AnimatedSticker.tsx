@@ -50,6 +50,8 @@ export type OwnProps = {
   sharedCanvas?: HTMLCanvasElement;
   sharedCanvasCoords?: { x: number; y: number };
   onClick?: NoneToVoidFunction;
+  onMouseEnter?: NoneToVoidFunction;
+  onMouseLeave?: NoneToVoidFunction;
   onLoad?: NoneToVoidFunction;
   onEnded?: NoneToVoidFunction;
   onLoop?: NoneToVoidFunction;
@@ -76,6 +78,8 @@ const AnimatedSticker: FC<OwnProps> = ({
   sharedCanvas,
   sharedCanvasCoords,
   onClick,
+  onMouseEnter,
+  onMouseLeave,
   onLoad,
   onEnded,
   onLoop,
@@ -277,6 +281,8 @@ const AnimatedSticker: FC<OwnProps> = ({
         style,
       )}
       onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     />
   );
 };

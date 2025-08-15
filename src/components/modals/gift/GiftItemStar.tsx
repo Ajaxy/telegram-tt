@@ -1,18 +1,16 @@
-import { memo, useMemo, useRef, useState } from '../../../lib/teact/teact';
+import { memo, useMemo, useRef, useState } from '@teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type {
-  ApiStarGift,
-  ApiTypeCurrencyAmount,
-} from '../../../api/types';
+import type { ApiStarGift, ApiTypeCurrencyAmount } from '../../../api/types';
 
 import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
 import { selectIsCurrentUserPremium } from '../../../global/selectors';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment.ts';
 import buildClassName from '../../../util/buildClassName';
 import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
-import { getStickerFromGift } from '../../common/helpers/gifts';
-import { getGiftAttributes } from '../../common/helpers/gifts';
+import { getGiftAttributes, getStickerFromGift } from '../../common/helpers/gifts';
 
+import useFlag from '../../../hooks/useFlag.ts';
 import { type ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -58,7 +56,9 @@ function GiftItemStar({
   }
 
   const lang = useLang();
+
   const [isVisible, setIsVisible] = useState(false);
+  const [isHover, markHover, unmarkHover] = useFlag();
 
   const sticker = getStickerFromGift(gift);
   const isGiftUnique = gift.type === 'starGiftUnique';
@@ -175,6 +175,8 @@ function GiftItemStar({
       tabIndex={0}
       role="button"
       onClick={handleGiftClick}
+      onMouseEnter={!IS_TOUCH_ENV ? markHover : undefined}
+      onMouseLeave={!IS_TOUCH_ENV ? unmarkHover : undefined}
     >
       {radialPatternBackdrop}
 
@@ -190,6 +192,7 @@ function GiftItemStar({
             containerRef={stickerRef}
             sticker={sticker}
             size={GIFT_STICKER_SIZE}
+            shouldLoop={isHover}
             shouldPreloadPreview
           />
         )}
