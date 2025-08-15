@@ -1439,6 +1439,7 @@
 "GiftInfoPeerDescriptionOutConverted_one" = "{peer} converted this gift to **{amount}** Star.";
 "GiftInfoPeerDescriptionOutConverted_other" = "{peer} converted this gift to **{amount}** Stars.";
 "GiftInfoDescriptionFreeUpgrade" = "Upgrade this gift for free to turn it to a unique collectible.";
+"GiftInfoDescriptionUpgrade" = "Upgrade this gift to turn it to a unique collectible.";
 "GiftInfoPeerDescriptionFreeUpgradeOut" = "{peer} can turn this gift to a unique collectible";
 "GiftInfoDescriptionUpgraded" = "This gift was turned into a unique collectible.";
 "GiftInfoFrom" = "From";
@@ -1487,6 +1488,7 @@
 "GiftInfoViewUpgraded" = "View Upgraded Gift";
 "GiftInfoUpgradeBadge" = "upgrade";
 "GiftInfoUpgradeForFree" = "Upgrade For Free";
+"GiftInfoUpgrade" = "Upgrade";
 "GiftInfoWithdraw" = "Withdraw";
 "GiftInfoWear" = "Wear";
 "GiftInfoTakeOff" = "Take Off";

@@ -272,6 +272,16 @@ const GiftInfoModal = ({
       return (
         <Button size="smaller" isShiny onClick={handleOpenUpgradeModal}>
           {lang('GiftInfoUpgradeForFree')}
+          <Icon name="arrow-down-circle" className={styles.upgradeIcon} />
+        </Button>
+      );
+    }
+
+    if (canManage && savedGift.canUpgrade && !savedGift.upgradeMsgId) {
+      return (
+        <Button size="smaller" isShiny onClick={handleOpenUpgradeModal}>
+          {lang('GiftInfoUpgrade')}
+          <Icon name="arrow-down-circle" className={styles.upgradeIcon} />
         </Button>
       );
     }
@@ -316,7 +326,10 @@ const GiftInfoModal = ({
       if (isTargetChat) return undefined;
 
       if (savedGift.upgradeMsgId) return lang('GiftInfoDescriptionUpgraded');
-      if (savedGift.canUpgrade && savedGift.alreadyPaidUpgradeStars) {
+      if (canManage && savedGift.canUpgrade && savedGift.alreadyPaidUpgradeStars && !savedGift.upgradeMsgId) {
+        return lang('GiftInfoDescriptionUpgrade');
+      }
+      if (savedGift.canUpgrade && canManage) {
         return canManage
           ? lang('GiftInfoDescriptionFreeUpgrade')
           : lang('GiftInfoPeerDescriptionFreeUpgradeOut', { peer: getPeerTitle(lang, renderingTargetPeer!)! });
@@ -547,7 +560,6 @@ const GiftInfoModal = ({
           lang('GiftInfoStatus'),
           <div className={styles.giftValue}>
             {lang('GiftInfoStatusNonUnique')}
-            {canManage && <BadgeButton onClick={handleOpenUpgradeModal}>{lang('GiftInfoUpgradeBadge')}</BadgeButton>}
           </div>,
         ]);
       }

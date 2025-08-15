@@ -1208,6 +1208,7 @@ export interface LangPair {
   'GiftInfoDescriptionRegular': undefined;
   'GiftInfoDescriptionUpgradeRegular': undefined;
   'GiftInfoDescriptionFreeUpgrade': undefined;
+  'GiftInfoDescriptionUpgrade': undefined;
   'GiftInfoDescriptionUpgraded': undefined;
   'GiftInfoFrom': undefined;
   'GiftInfoDate': undefined;
@@ -1234,6 +1235,7 @@ export interface LangPair {
   'GiftInfoViewUpgraded': undefined;
   'GiftInfoUpgradeBadge': undefined;
   'GiftInfoUpgradeForFree': undefined;
+  'GiftInfoUpgrade': undefined;
   'GiftInfoWithdraw': undefined;
   'GiftInfoWear': undefined;
   'GiftInfoTakeOff': undefined;
