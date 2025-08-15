@@ -1,9 +1,10 @@
-import type { FC, TeactNode } from '../../../../lib/teact/teact';
-import { memo } from '../../../../lib/teact/teact';
+import type { FC, TeactNode } from '@teact';
+import { memo } from '@teact';
 
 import type { ApiWebDocument } from '../../../../api/types';
 
 import { getWebDocumentHash } from '../../../../global/helpers';
+import buildClassName from '../../../../util/buildClassName.ts';
 import { getFirstLetters } from '../../../../util/textFormat';
 import renderText from '../../../common/helpers/renderText';
 import { preventMessageInputBlurWithBubbling } from '../../helpers/preventMessageInputBlur';
@@ -49,7 +50,7 @@ const BaseResult: FC<OwnProps> = ({
   return (
     <ListItem
       focus={focus}
-      className="BaseResult chat-item-clickable"
+      className={buildClassName('BaseResult chat-item-clickable', typeof content === 'string' && 'with-text')}
       onMouseDown={preventMessageInputBlurWithBubbling}
       onClick={onClick}
     >

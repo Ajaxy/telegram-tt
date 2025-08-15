@@ -16,7 +16,9 @@
     font-size: 1.5rem;
     line-height: 3rem;
 
-    background-color: var(--color-background-secondary);
+    &.with-text {
+      background-color: var(--color-background-secondary);
+    }
 
     img:not(.emoji) {
       width: 100%;
