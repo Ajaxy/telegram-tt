@@ -52,6 +52,10 @@
   font-size: 0.6875rem !important;
   font-weight: var(--font-weight-semibold) !important;
   line-height: 1;
+
+  background-color: var(--color-light-shadow) !important;
+  -webkit-backdrop-filter: blur(0.5rem);
+  backdrop-filter: blur(0.5rem);
 }
 
 .topIcon {

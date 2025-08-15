@@ -7,7 +7,6 @@ import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
 import { getHasAdminRight } from '../../../global/helpers';
 import { selectChat, selectPeer, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import buildStyle from '../../../util/buildStyle';
 import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
 import { CUSTOM_PEER_HIDDEN } from '../../../util/objects/customPeer';
 import { formatIntegerCompact } from '../../../util/textFormat';
@@ -180,10 +179,6 @@ const SavedGift = ({
       {resellPrice && (
         <Button
           className={styles.priceBadge}
-          style={buildStyle(
-            backdrop?.edgeColor && `background-color: ${backdrop.edgeColor} !important`,
-            backdrop?.centerColor && `box-shadow: 0 0.25rem 1rem ${backdrop.centerColor}`,
-          )}
           nonInteractive
           size="tiny"
           withSparkleEffect={true}
