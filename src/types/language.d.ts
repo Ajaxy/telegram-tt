@@ -1608,6 +1608,8 @@ export interface LangPair {
   'TitleAgeCheckFailed': undefined;
   'TitleAgeCheckSuccess': undefined;
   'ButtonAgeVerification': undefined;
+  'GiftRibbonPremium': undefined;
+  'PremiumGiftHeader': undefined;
   'PriceInStars': undefined;
   'PriceInTON': undefined;
   'OnlyAcceptTON': undefined;
@@ -2792,6 +2794,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'ButtonSensitiveAlways': {
     'years': V;
+  };
+  'NotificationGiftsLimit': {
+    'count': V;
+  };
+  'DescriptionGiftPremiumRequired': {
+    'count': V;
   };
   'DescriptionComposerGiftMinimumCurrencyPrice': {
     'amount': V;

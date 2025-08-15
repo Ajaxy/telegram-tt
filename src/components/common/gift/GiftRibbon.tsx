@@ -15,6 +15,7 @@ const COLORS = {
   blue: [['#6ED2FF', '#34A4FC'], ['#344F5A', '#152E42']],
   purple: [['#E367D7', '#757BF6'], ['#E367D7', '#757BF6']],
   green: [['#52D553', '#4BB121'], ['#52D553', '#4BB121']],
+  orange: [['#D48F23', '#BE7E15'], ['#D48F23', '#BE7E15']],
 } as const;
 type ColorKey = keyof typeof COLORS;
 

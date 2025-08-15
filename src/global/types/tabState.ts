@@ -640,6 +640,7 @@ export type TabState = {
     isGift?: boolean;
     monthsAmount?: number;
     isSuccess?: boolean;
+    gift?: ApiStarGift;
   };
 
   giveawayModal?: {

@@ -2435,6 +2435,7 @@ export interface ActionPayloads {
     isSuccess?: boolean;
     isGift?: boolean;
     monthsAmount?: number;
+    gift?: ApiStarGift;
   } & WithTabId) | undefined;
   closePremiumModal: WithTabId | undefined;
 

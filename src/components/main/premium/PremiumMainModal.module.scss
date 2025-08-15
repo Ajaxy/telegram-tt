@@ -50,6 +50,11 @@
   margin: 1rem;
 }
 
+.sticker-wrapper {
+  position: relative;
+  margin: 1rem;
+}
+
 .header-text {
   margin-inline: 0.5rem;
   font-size: 1.5rem;
@@ -175,4 +180,17 @@
 
 .subscriptionOption {
   margin: 0.8125rem;
+}
+
+.starParticlesHeader,
+.giftParticlesHeader {
+  position: relative !important;
+}
+
+.starParticlesHeader {
+  padding-top: 10rem !important;
+}
+
+.giftParticlesHeader {
+  padding-top: 11rem !important;
 }

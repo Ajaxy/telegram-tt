@@ -75,6 +75,16 @@
   font-size: 0.75rem !important;
 }
 
+.premiumRequired {
+  outline: 0.125rem solid #D18D21;
+  outline-offset: -0.125rem;
+
+  &:focus-visible {
+    outline: 0.125rem solid #D18D21;
+    outline-offset: -0.125rem;
+  }
+}
+
 .amount {
   margin-top: 0.0625rem; // It just refuses to be centered
 }

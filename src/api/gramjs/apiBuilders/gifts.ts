@@ -25,7 +25,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
   if (starGift instanceof GramJs.StarGiftUnique) {
     const {
       id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal, slug, ownerAddress,
-      giftAddress, resellAmount, releasedBy, resaleTonOnly,
+      giftAddress, resellAmount, releasedBy, resaleTonOnly, requirePremium,
     } = starGift;
 
     return {
@@ -43,6 +43,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
       giftAddress,
       resellPrice: resellAmount && resellAmount.map((amount) => buildApiCurrencyAmount(amount)).filter(Boolean),
       releasedByPeerId: releasedBy && getApiChatIdFromMtpPeer(releasedBy),
+      requirePremium,
       resaleTonOnly,
     };
   }
@@ -50,6 +51,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
   const {
     id, limited, stars, availabilityRemains, availabilityTotal, convertStars, firstSaleDate, lastSaleDate, soldOut,
     birthday, upgradeStars, resellMinStars, title, availabilityResale, releasedBy,
+    requirePremium, limitedPerUser, perUserTotal, perUserRemains,
   } = starGift;
 
   addDocumentToLocalDb(starGift.sticker);
@@ -74,6 +76,10 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
     resellMinStars: resellMinStars?.toJSNumber(),
     releasedByPeerId: releasedBy && getApiChatIdFromMtpPeer(releasedBy),
     availabilityResale: availabilityResale?.toJSNumber(),
+    requirePremium,
+    limitedPerUser,
+    perUserTotal,
+    perUserRemains,
   };
 }
 

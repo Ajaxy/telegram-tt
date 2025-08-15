@@ -2153,6 +2153,10 @@
 "TitleAgeCheckFailed" = "Age Check Failed";
 "TitleAgeCheckSuccess" = "Age Check Success";
 "ButtonAgeVerification" = "Verify My Age";
+"GiftRibbonPremium" = "premium";
+"NotificationGiftsLimit" = "You've already sent {count} of these gifts, and it's the limit.";
+"PremiumGiftHeader" = "Premium Gift";
+"DescriptionGiftPremiumRequired" = "Subscribe to **Telegram Premium** to send up to **{count}** of these gifts and unlock access to multiple additional features.";
 "PriceInStars" = "Price in Stars";
 "PriceInTON" = "Price in TON";
 "DescriptionComposerGiftMinimumCurrencyPrice" = "Minimum price is **{amount}**.";
@@ -2165,3 +2169,4 @@
 "PriceChanged" = "Price Changed";
 "PayNewPrice" = "Pay New Price";
 "PriceChangedText" = "The price has already changed from **{originalAmount}** to **{newAmount}**. Do you want to pay the new price?";
+

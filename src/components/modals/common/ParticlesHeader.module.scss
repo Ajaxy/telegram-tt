@@ -30,3 +30,14 @@
   text-align: center;
   text-wrap: balance;
 }
+
+.stickerWrapper {
+  position: absolute;
+  z-index: 1;
+  top: 2rem;
+  transition: transform 0.25s ease-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}

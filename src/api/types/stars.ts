@@ -22,6 +22,10 @@ export interface ApiStarGiftRegular {
   resellMinStars?: number;
   releasedByPeerId?: string;
   title?: string;
+  requirePremium?: true;
+  limitedPerUser?: true;
+  perUserTotal?: number;
+  perUserRemains?: number;
 }
 
 export interface ApiStarGiftUnique {
@@ -39,6 +43,7 @@ export interface ApiStarGiftUnique {
   giftAddress?: string;
   resellPrice?: ApiTypeCurrencyAmount[];
   releasedByPeerId?: string;
+  requirePremium?: true;
   resaleTonOnly?: true;
 }
 
