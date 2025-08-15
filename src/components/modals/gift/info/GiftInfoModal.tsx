@@ -164,7 +164,7 @@ const GiftInfoModal = ({
 
   const resellPrice = getResalePrice();
   const confirmPrice = getResalePrice(shouldPayInTon);
-  const canBuyGift = !canManage && Boolean(resellPrice);
+  const canBuyGift = gift?.type === 'starGiftUnique' && gift.ownerId !== currentUserId && Boolean(resellPrice);
 
   const giftOwnerTitle = (() => {
     if (!isGiftUnique) return undefined;
@@ -423,14 +423,14 @@ const GiftInfoModal = ({
       <div
         className={styles.modalHeader}
       >
-        {Boolean(canManage && resellPrice) && (
+        {canBuyGift && (
           <div className={styles.giftResalePriceContainer}>
-            {resellPrice!.currency === TON_CURRENCY_CODE
-              ? formatTonAsIcon(lang, resellPrice!.amount, {
+            {resellPrice.currency === TON_CURRENCY_CODE
+              ? formatTonAsIcon(lang, resellPrice.amount, {
                 className: styles.giftResalePriceStar,
                 shouldConvertFromNanos: true,
               })
-              : formatStarsAsIcon(lang, resellPrice!.amount, {
+              : formatStarsAsIcon(lang, resellPrice.amount, {
                 asFont: true,
                 className: styles.giftResalePriceStar,
               })}
