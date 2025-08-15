@@ -94,6 +94,10 @@ const LeftSideMenuItems = ({
 
   const bots = useMemo(() => Object.values(attachBots).filter((bot) => bot.isForSideMenu), [attachBots]);
 
+  const handleSelectMyProfile = useLastCallback(() => {
+    openChatWithInfo({ id: currentUserId, shouldReplaceHistory: true, profileTab: 'stories' });
+  });
+
   const handleSelectSaved = useLastCallback(() => {
     openChat({ id: currentUserId, shouldReplaceHistory: true });
   });
@@ -137,10 +141,6 @@ const LeftSideMenuItems = ({
     openUrl({ url: FEEDBACK_URL });
   });
 
-  const handleOpenMyStories = useLastCallback(() => {
-    openChatWithInfo({ id: currentUserId, shouldReplaceHistory: true, profileTab: 'stories' });
-  });
-
   return (
     <>
       {IS_MULTIACCOUNT_SUPPORTED && currentUser && (
@@ -153,6 +153,12 @@ const LeftSideMenuItems = ({
           <MenuSeparator />
         </>
       )}
+      <MenuItem
+        icon="user"
+        onClick={handleSelectMyProfile}
+      >
+        {oldLang('My Profile')}
+      </MenuItem>
       <MenuItem
         icon="saved-messages"
         onClick={handleSelectSaved}
@@ -171,7 +177,7 @@ const LeftSideMenuItems = ({
         </MenuItem>
       )}
       <MenuItem
-        icon="user"
+        icon="group"
         onClick={onSelectContacts}
       >
         {oldLang('Contacts')}
@@ -186,12 +192,6 @@ const LeftSideMenuItems = ({
           onMenuClosed={onBotMenuClosed}
         />
       ))}
-      <MenuItem
-        icon="play-story"
-        onClick={handleOpenMyStories}
-      >
-        {oldLang('Settings.MyStories')}
-      </MenuItem>
       <MenuItem
         icon="settings"
         onClick={onSelectSettings}
