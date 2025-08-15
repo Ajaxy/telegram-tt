@@ -6,8 +6,6 @@ import type { ApiMessage, StatisticsMessageInteractionCounter } from '../../../a
 import type { OldLangFn } from '../../../hooks/useOldLang';
 
 import {
-  getMessageMediaHash,
-  getMessageMediaThumbDataUri,
   getMessageRoundVideo,
   getMessageVideo,
 } from '../../../global/helpers';
@@ -15,6 +13,8 @@ import buildClassName from '../../../util/buildClassName';
 import { formatDateTimeToString } from '../../../util/dates/dateFormat';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
+import useMessageMediaHash from '../../../hooks/media/useMessageMediaHash';
+import useThumbnail from '../../../hooks/media/useThumbnail';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -32,8 +32,9 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ postStatistic, message }) => {
   const lang = useOldLang();
   const { toggleMessageStatistics } = getActions();
 
-  const mediaThumbnail = getMessageMediaThumbDataUri(message);
-  const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'micro'));
+  const thumbDataUri = useThumbnail(message);
+  const mediaHash = useMessageMediaHash(message, 'micro');
+  const mediaBlobUrl = useMedia(mediaHash);
   const isRoundVideo = Boolean(getMessageRoundVideo(message));
 
   const handleClick = useCallback(() => {
@@ -44,13 +45,13 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ postStatistic, message }) => {
     <div
       className={buildClassName(
         styles.root,
-        Boolean(mediaBlobUrl || mediaThumbnail) && styles.withImage,
+        Boolean(mediaBlobUrl || thumbDataUri) && styles.withImage,
       )}
       onClick={handleClick}
     >
       <div className={styles.title}>
         <div className={styles.summary}>
-          {renderSummary(lang, message, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
+          {renderSummary(lang, message, mediaBlobUrl || thumbDataUri, isRoundVideo)}
         </div>
         <div className={styles.meta}>
           {lang('ChannelStats.ViewsCount', postStatistic.viewsCount, 'i')}

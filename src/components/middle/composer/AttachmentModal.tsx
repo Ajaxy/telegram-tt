@@ -554,12 +554,12 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                     canInvertMedia && (!isInvertedMedia ? (
 
                       <MenuItem icon="move-caption-up" onClick={() => setIsInvertedMedia(true)}>
-                        {oldLang('PreviewSender.MoveTextUp')}
+                        {lang('ContextMoveTextUp')}
                       </MenuItem>
                     ) : (
 
                       <MenuItem icon="move-caption-down" onClick={() => setIsInvertedMedia(undefined)}>
-                        {oldLang(('PreviewSender.MoveTextDown'))}
+                        {lang('ContextMoveTextDown')}
                       </MenuItem>
                     ))
                   }

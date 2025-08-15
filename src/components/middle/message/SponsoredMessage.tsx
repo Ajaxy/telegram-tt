@@ -12,13 +12,13 @@ import { MediaViewerOrigin } from '../../../types';
 import {
   getIsDownloading,
   getMessageContent,
-  getMessageDownloadableMedia,
 } from '../../../global/helpers';
 import {
   selectActiveDownloads, selectCanAutoLoadMedia, selectCanAutoPlayMedia,
   selectSponsoredMessage,
   selectTheme,
 } from '../../../global/selectors';
+import { selectMessageDownloadableMedia } from '../../../global/selectors/media';
 import { IS_ANDROID } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
@@ -341,7 +341,7 @@ export default memo(withGlobal<OwnProps>(
     const message = selectSponsoredMessage(global, chatId);
 
     const activeDownloads = selectActiveDownloads(global);
-    const downloadableMedia = message ? getMessageDownloadableMedia(message) : undefined;
+    const downloadableMedia = message ? selectMessageDownloadableMedia(global, message) : undefined;
     const isDownloading = downloadableMedia && getIsDownloading(activeDownloads, downloadableMedia);
 
     return {

@@ -107,6 +107,7 @@ import {
   selectTopicFromMessage,
   selectUser,
   selectUserFullInfo,
+  selectWebPage,
 } from '../../global/selectors';
 import { selectCurrentLimit } from '../../global/selectors/limits';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
@@ -158,6 +159,7 @@ import useDraft from '../middle/composer/hooks/useDraft';
 import useEditing from '../middle/composer/hooks/useEditing';
 import useEmojiTooltip from '../middle/composer/hooks/useEmojiTooltip';
 import useInlineBotTooltip from '../middle/composer/hooks/useInlineBotTooltip';
+import useLoadLinkPreview from '../middle/composer/hooks/useLoadLinkPreview';
 import useMentionTooltip from '../middle/composer/hooks/useMentionTooltip';
 import usePaidMessageConfirmation from '../middle/composer/hooks/usePaidMessageConfirmation';
 import useStickerTooltip from '../middle/composer/hooks/useStickerTooltip';
@@ -824,6 +826,12 @@ const Composer: FC<OwnProps & StateProps> = ({
     setHtml,
     editedMessage: editingMessage,
     isDisabled: isInStoryViewer || Boolean(requestedDraft) || (!hasSuggestedPost && isMonoforum),
+  });
+
+  useLoadLinkPreview({
+    chatId,
+    threadId,
+    getHtml,
   });
 
   const resetComposer = useLastCallback((shouldPreserveInput = false) => {
@@ -2028,8 +2036,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             <WebPagePreview
               chatId={chatId}
               threadId={threadId}
-              getHtml={getHtml}
-              isDisabled={!canAttachEmbedLinks || hasAttachments}
+              isDisabled={!canAttachEmbedLinks || hasAttachments || !hasText}
               isEditing={Boolean(editingMessage)}
             />
           </>
@@ -2523,6 +2530,8 @@ export default memo(withGlobal<OwnProps>(
     const isAppConfigLoaded = global.isAppConfigLoaded;
     const insertingPeerIdMention = tabState.insertingPeerIdMention;
 
+    const webPagePreview = tabState.webPagePreviewId ? selectWebPage(global, tabState.webPagePreviewId) : undefined;
+
     return {
       availableReactions: global.reactions.availableReactions,
       topReactions: type === 'story' ? global.reactions.topReactions : undefined,
@@ -2594,7 +2603,7 @@ export default memo(withGlobal<OwnProps>(
       quickReplies: global.quickReplies.byId,
       canSendQuickReplies,
       noWebPage,
-      webPagePreview: selectTabState(global).webPagePreview,
+      webPagePreview,
       isContactRequirePremium: userFullInfo?.isContactRequirePremium,
       effect,
       effectReactions,

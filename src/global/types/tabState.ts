@@ -51,7 +51,6 @@ import type {
   ApiTypeStoryView,
   ApiUser,
   ApiVideo,
-  ApiWebPage,
 } from '../../api/types';
 import type { ApiEmojiStatusCollectible } from '../../api/types/users';
 import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
@@ -372,7 +371,7 @@ export type TabState = {
     isMuted: boolean;
   };
 
-  webPagePreview?: ApiWebPage;
+  webPagePreviewId?: string;
 
   loadingThread?: {
     loadingChatId: string;

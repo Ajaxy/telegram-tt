@@ -29,6 +29,7 @@ import type {
   ApiTodoItem,
   ApiUser,
   ApiUserStatus,
+  ApiWebPage,
   MediaContent,
 } from '../../types';
 import {
@@ -60,7 +61,8 @@ import {
 } from '../apiBuilders/chats';
 import { buildApiFormattedText } from '../apiBuilders/common';
 import {
-  buildMessageMediaContent, buildMessageTextContent, buildPollFromMedia, buildWebPage,
+  buildMessageMediaContent, buildMessageTextContent, buildPollFromMedia,
+  buildWebPageFromMedia,
 } from '../apiBuilders/messageContent';
 import {
   buildApiFactCheck,
@@ -1709,7 +1711,9 @@ export async function fetchWebPagePreview({
     entities: textWithEntities.entities,
   }));
 
-  return preview && buildWebPage(preview.media);
+  if (!preview) return undefined;
+
+  return buildWebPageFromMedia(preview.media);
 }
 
 export async function sendPollVote({
@@ -2363,6 +2367,7 @@ function handleLocalMessageUpdate(
 
   let newContent: MediaContent | undefined;
   let poll: ApiPoll | undefined;
+  let webPage: ApiWebPage | undefined;
   if (messageUpdate instanceof GramJs.UpdateShortSentMessage) {
     if (localMessage.content.text && messageUpdate.entities) {
       newContent = {
@@ -2377,6 +2382,7 @@ function handleLocalMessageUpdate(
         }),
       };
       poll = buildPollFromMedia(messageUpdate.media);
+      webPage = buildWebPageFromMedia(messageUpdate.media);
     }
 
     const mtpMessage = buildMessageFromUpdate(messageUpdate.id, localMessage.chatId, messageUpdate);
@@ -2417,6 +2423,7 @@ function handleLocalMessageUpdate(
       localId: localMessage.id,
       message: updatedMessage,
       poll,
+      webPage,
     });
   }
 

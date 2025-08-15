@@ -22,10 +22,10 @@ import {
   selectForwardedSender,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
-  selectIsMediaNsfw,
   selectSender,
   selectTabState,
 } from '../../../global/selectors';
+import { selectIsMediaNsfw } from '../../../global/selectors/media';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { unique } from '../../../util/iteratees';

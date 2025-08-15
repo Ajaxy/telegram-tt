@@ -11,6 +11,7 @@ import { IS_ANDROID, IS_IOS, IS_WEBM_SUPPORTED } from '../../util/browser/window
 import buildClassName from '../../util/buildClassName';
 import * as mediaLoader from '../../util/mediaLoader';
 
+import useThumbnail from '../../hooks/media/useThumbnail';
 import useColorFilter from '../../hooks/stickers/useColorFilter';
 import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
 import useFlag from '../../hooks/useFlag';
@@ -18,7 +19,6 @@ import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useMountAfterHeavyAnimation from '../../hooks/useMountAfterHeavyAnimation';
-import useThumbnail from '../../hooks/useThumbnail';
 import useUniqueId from '../../hooks/useUniqueId';
 import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
 
@@ -120,7 +120,7 @@ const StickerView: FC<OwnProps> = ({
     fullMediaHash === previewMediaHash && (cachedPreview || previewMediaData)
   ));
   const fullMediaData = useMedia(fullMediaHash || `sticker${id}`, !shouldLoad || shouldSkipLoadingFullMedia);
-  const shouldRenderFullMedia = isReadyToMountFullMedia && fullMediaData && !isVideoBroken;
+  const shouldRenderFullMedia = isReadyToMountFullMedia && Boolean(fullMediaData) && !isVideoBroken;
   const [isPlayerReady, markPlayerReady] = useFlag();
   const isFullMediaReady = shouldRenderFullMedia && (isStatic || isPlayerReady);
 
@@ -129,10 +129,12 @@ const StickerView: FC<OwnProps> = ({
   const isThumbOpaque = sharedCanvasRef && !withTranslucentThumb;
 
   const noCrossTransition = Boolean(isLottie && withPreview);
-  const thumbRef = useMediaTransition<HTMLImageElement>(thumbData && !isFullMediaReady, {
+  const { ref: thumbRef } = useMediaTransition<HTMLImageElement>({
+    hasMediaData: Boolean(thumbData && !isFullMediaReady),
     noCloseTransition: noCrossTransition,
   });
-  const fullMediaRef = useMediaTransition<HTMLElement>(isFullMediaReady, {
+  const { ref: fullMediaRef } = useMediaTransition<HTMLElement>({
+    hasMediaData: isFullMediaReady,
     noOpenTransition: noCrossTransition,
   });
 

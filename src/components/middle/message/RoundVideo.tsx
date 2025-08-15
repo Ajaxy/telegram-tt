@@ -12,7 +12,6 @@ import { ApiMediaFormat } from '../../../api/types';
 
 import {
   getMediaFormat,
-  getMessageMediaThumbDataUri,
   getVideoMediaHash,
   hasMessageTtl,
 } from '../../../global/helpers';
@@ -22,6 +21,7 @@ import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import safePlay from '../../../util/safePlay';
 import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
 
+import useThumbnail from '../../../hooks/media/useThumbnail';
 import { useThrottledSignal } from '../../../hooks/useAsyncResolvers';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
@@ -109,11 +109,12 @@ const RoundVideo: FC<OwnProps> = ({
   const hasTtl = hasMessageTtl(message);
   const isInOneTimeModal = origin === 'oneTimeModal';
   const shouldRenderSpoiler = hasTtl && !isInOneTimeModal;
-  const hasThumb = Boolean(getMessageMediaThumbDataUri(message));
+  const thumbDataUri = useThumbnail(message);
+  const hasThumb = Boolean(thumbDataUri);
   const noThumb = !hasThumb || isPlayerReady || shouldRenderSpoiler;
   const thumbRef = useBlurredMediaThumbRef(video, noThumb);
-  useMediaTransition(!noThumb, { ref: thumbRef });
-  const thumbDataUri = getMessageMediaThumbDataUri(message);
+  useMediaTransition({ hasMediaData: !noThumb, ref: thumbRef });
+
   const isTransferring = (isLoadAllowed && !isPlayerReady) || isDownloading;
   const wasLoadDisabled = usePreviousDeprecated(isLoadAllowed) === false;
 

@@ -7,9 +7,9 @@ import {
   getMessageHtmlId,
   getMessagePhoto,
   getMessageText,
-  getMessageWebPagePhoto,
-  getMessageWebPageVideo,
   getPhotoMediaHash,
+  getWebPagePhoto,
+  getWebPageVideo,
   hasMediaLocalBlobUrl,
 } from '../../../../global/helpers';
 import { getMessageTextWithSpoilers } from '../../../../global/helpers/messageSummary';
@@ -40,10 +40,11 @@ export function getMessageCopyOptions(
   onCopyMessages?: (messageIds: number[]) => void,
   onCopyNumber?: () => void,
 ): ICopyOptions {
+  const { webPage } = statefulContent || {};
   const options: ICopyOptions = [];
   const text = getMessageText(message);
   const photo = getMessagePhoto(message)
-    || (!getMessageWebPageVideo(message) ? getMessageWebPagePhoto(message) : undefined);
+    || (!getWebPageVideo(webPage) ? getWebPagePhoto(webPage) : undefined);
   const contact = getMessageContact(message);
   const mediaHash = photo ? getPhotoMediaHash(photo, 'full') : undefined;
   const canImageBeCopied = canCopy && photo && (mediaHash || hasMediaLocalBlobUrl(photo))

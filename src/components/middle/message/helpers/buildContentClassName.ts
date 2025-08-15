@@ -1,4 +1,4 @@
-import type { ApiMessage, ApiPoll } from '../../../../api/types';
+import type { ApiMessage, ApiPoll, ApiWebPage } from '../../../../api/types';
 import type { IAlbum } from '../../../../types';
 
 import { EMOJI_SIZES, MESSAGE_CONTENT_CLASS_NAME } from '../../../../config';
@@ -10,6 +10,7 @@ export function buildContentClassName(
   album?: IAlbum,
   {
     poll,
+    webPage,
     hasSubheader,
     isCustomShape,
     isLastInGroup,
@@ -26,6 +27,7 @@ export function buildContentClassName(
     hasOutsideReactions,
   }: {
     poll?: ApiPoll;
+    webPage?: ApiWebPage;
     hasSubheader?: boolean;
     isCustomShape?: boolean | number;
     isLastInGroup?: boolean;
@@ -48,7 +50,7 @@ export function buildContentClassName(
   const content = getMessageContent(message);
   const {
     photo = paidMediaPhoto, video = paidMediaVideo,
-    audio, voice, document, webPage, contact, location, invoice, storyData,
+    audio, voice, document, contact, location, invoice, storyData,
     giveaway, giveawayResults,
   } = content;
   const text = album?.hasMultipleCaptions ? undefined : getMessageContent(album?.captionMessage || message).text;
@@ -128,7 +130,7 @@ export function buildContentClassName(
     classNames.push('poll');
   } else if (giveaway || giveawayResults) {
     classNames.push('giveaway');
-  } else if (webPage) {
+  } else if (webPage?.webpageType === 'full') {
     classNames.push('web-page');
 
     if (webPage.photo || webPage.video) {

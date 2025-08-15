@@ -10,8 +10,6 @@ import type { OldLangFn } from '../../../hooks/useOldLang';
 
 import {
   getMessageIsSpoiler,
-  getMessageMediaHash,
-  getMessageMediaThumbDataUri,
   getMessageRoundVideo,
   getMessageSticker,
   getMessageVideo,
@@ -22,6 +20,8 @@ import buildClassName from '../../../util/buildClassName';
 import { formatPastTimeShort } from '../../../util/dates/dateFormat';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
+import useMessageMediaHash from '../../../hooks/media/useMessageMediaHash';
+import useThumbnail from '../../../hooks/media/useThumbnail';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
@@ -58,8 +58,10 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
   const { focusMessage } = getActions();
 
   const { isMobile } = useAppLayout();
-  const mediaThumbnail = !getMessageSticker(message) ? getMessageMediaThumbDataUri(message) : undefined;
-  const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'micro'));
+  const thumbDataUri = useThumbnail(message);
+  const mediaThumbnail = !getMessageSticker(message) ? thumbDataUri : undefined;
+  const mediaHash = useMessageMediaHash(message, 'micro');
+  const mediaBlobUrl = useMedia(mediaHash);
   const isRoundVideo = Boolean(getMessageRoundVideo(message));
 
   const handleClick = useLastCallback(() => {

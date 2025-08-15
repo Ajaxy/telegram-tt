@@ -1,13 +1,14 @@
 import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 import type { StateProps } from './helpers/createMapStateToProps';
 import { AudioOrigin, LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
-import { getIsDownloading, getMessageDownloadableMedia } from '../../../global/helpers';
+import { getIsDownloading } from '../../../global/helpers';
+import { selectMessageDownloadableMedia } from '../../../global/selectors/media';
 import { formatMonthAndYear, toYearMonth } from '../../../util/dates/dateFormat';
 import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -82,11 +83,12 @@ const AudioResults: FC<OwnProps & StateProps> = ({
 
   function renderList() {
     return foundMessages.map((message, index) => {
+      const global = getGlobal();
       const isFirst = index === 0;
       const shouldDrawDateDivider = isFirst
         || toYearMonth(message.date) !== toYearMonth(foundMessages[index - 1].date);
 
-      const media = getMessageDownloadableMedia(message)!;
+      const media = selectMessageDownloadableMedia(global, message)!;
       return (
         <>
           {shouldDrawDateDivider && (

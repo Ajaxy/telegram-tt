@@ -27,6 +27,7 @@ import type {
   ApiTopic,
   ApiTypeStory,
   ApiUser,
+  ApiWebPage,
 } from '../../../api/types';
 import type { ActionPayloads } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
@@ -52,10 +53,10 @@ import {
   getMainUsername,
   getMessageContent,
   getMessageCustomShape,
-  getMessageDownloadableMedia,
   getMessageHtmlId,
   getMessageSingleCustomEmoji,
   getMessageSingleRegularEmoji,
+  getMessageWebPage,
   hasMessageText,
   hasMessageTtl,
   isAnonymousForwardsChat,
@@ -85,6 +86,7 @@ import {
   selectCurrentMiddleSearch,
   selectDefaultReaction,
   selectForwardedSender,
+  selectFullWebPageFromMessage,
   selectIsChatProtected,
   selectIsChatRestricted,
   selectIsChatWithSelf,
@@ -92,13 +94,10 @@ import {
   selectIsCurrentUserPremium,
   selectIsDocumentGroupSelected,
   selectIsInSelectMode,
-  selectIsMediaNsfw,
   selectIsMessageFocused,
   selectIsMessageProtected,
   selectIsMessageSelected,
   selectMessageIdsByGroupId,
-  selectMessageLastPlaybackTimestamp,
-  selectMessageTimestampableDuration,
   selectOutgoingStatus,
   selectPeer,
   selectPeerStory,
@@ -118,6 +117,12 @@ import {
   selectUploadProgress,
   selectUser,
 } from '../../../global/selectors';
+import {
+  selectIsMediaNsfw,
+  selectMessageDownloadableMedia,
+  selectMessageLastPlaybackTimestamp,
+  selectMessageTimestampableDuration,
+} from '../../../global/selectors/media';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import { IS_ANDROID, IS_ELECTRON, IS_TRANSLATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
@@ -312,6 +317,7 @@ type StateProps = {
   viaBusinessBot?: ApiUser;
   effect?: ApiAvailableEffect;
   poll?: ApiPoll;
+  webPage?: ApiWebPage;
   maxTimestamp?: number;
   lastPlaybackTimestamp?: number;
   paidMessageStars?: number;
@@ -447,6 +453,7 @@ const Message: FC<OwnProps & StateProps> = ({
   isChatWithUser,
   isAccountFrozen,
   minFutureTime,
+  webPage,
   onIntersectPinnedMessage,
 }) => {
   const {
@@ -539,7 +546,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const {
     photo = paidMediaPhoto, video = paidMediaVideo, audio,
     voice, document, sticker, contact,
-    webPage, invoice, location,
+    invoice, location,
     action, game, storyData, giveaway,
     giveawayResults, todo,
   } = getMessageContent(message);
@@ -669,6 +676,7 @@ const Message: FC<OwnProps & StateProps> = ({
     lang: oldLang,
     selectMessage,
     message,
+    webPage,
     chatId,
     threadId,
     isInDocumentGroup,
@@ -799,6 +807,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const contentClassName = buildContentClassName(message, album, {
     poll,
+    webPage,
     hasSubheader,
     isCustomShape,
     isLastInGroup,
@@ -1397,8 +1406,12 @@ const Message: FC<OwnProps & StateProps> = ({
   }
 
   function renderWebPage() {
-    return webPage && (
+    const messageWebPage = getMessageWebPage(message);
+    if (!messageWebPage || !webPage) return undefined;
+    return (
       <WebPage
+        messageWebPage={messageWebPage}
+        webPage={webPage}
         message={message}
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}
@@ -1865,6 +1878,8 @@ export default memo(withGlobal<OwnProps>(
       paidMessageStars,
     } = message;
 
+    const webPage = selectFullWebPageFromMessage(global, message);
+
     const { shouldWarnAboutSvg } = selectSharedSettings(global);
     const isChatWithUser = isUserId(chatId);
 
@@ -1875,7 +1890,7 @@ export default memo(withGlobal<OwnProps>(
     const isChannel = chat && isChatChannel(chat);
     const isGroup = chat && isChatGroup(chat);
     const chatFullInfo = !isChatWithUser ? selectChatFullInfo(global, chatId) : undefined;
-    const webPageStoryData = message.content.webPage?.story;
+    const webPageStoryData = webPage?.story;
     const webPageStory = webPageStoryData
       ? selectPeerStory(global, webPageStoryData.peerId, webPageStoryData.id)
       : undefined;
@@ -1941,7 +1956,7 @@ export default memo(withGlobal<OwnProps>(
 
     const canReply = messageListType === 'thread' && selectCanReplyToMessage(global, message, threadId);
     const activeDownloads = selectActiveDownloads(global);
-    const downloadableMedia = getMessageDownloadableMedia(message);
+    const downloadableMedia = selectMessageDownloadableMedia(global, message);
     const isDownloading = downloadableMedia && getIsDownloading(activeDownloads, downloadableMedia);
 
     const repliesThreadInfo = selectThreadInfo(global, chatId, album?.commentsMessage?.id || id);
@@ -2091,6 +2106,7 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       isMediaNsfw,
       isReplyMediaNsfw,
+      webPage,
     };
   },
 )(Message));

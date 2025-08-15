@@ -1,11 +1,12 @@
-import type { ElementRef, FC } from '../../lib/teact/teact';
+import type { ElementRef } from '../../lib/teact/teact';
 import {
   memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { getActions } from '../../global';
+import { getActions, withGlobal } from '../../global';
 
 import type {
   ApiAudio, ApiMessage, ApiVideo, ApiVoice,
+  ApiWebPage,
 } from '../../api/types';
 import type { BufferedRange } from '../../hooks/useBuffering';
 import type { OldLangFn } from '../../hooks/useOldLang';
@@ -14,15 +15,16 @@ import { ApiMediaFormat } from '../../api/types';
 import { AudioOrigin } from '../../types';
 
 import {
-  getMediaDuration,
   getMediaFormat,
   getMediaHash,
   getMediaTransferState,
-  getMessageWebPageAudio,
+  getWebPageAudio,
   hasMessageTtl,
   isMessageLocal,
   isOwnMessage,
 } from '../../global/helpers';
+import { selectWebPageFromMessage } from '../../global/selectors';
+import { selectMessageMediaDuration } from '../../global/selectors/media';
 import { makeTrackId } from '../../util/audioPlayer';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents } from '../../util/captureEvents';
@@ -77,13 +79,18 @@ type OwnProps = {
   onDateClick?: (arg: ApiMessage) => void;
 };
 
+type StateProps = {
+  mediaDuration?: number;
+  webPage?: ApiWebPage;
+};
+
 export const TINY_SCREEN_WIDTH_MQL = window.matchMedia('(max-width: 375px)');
 export const WITH_AVATAR_TINY_SCREEN_WIDTH_MQL = window.matchMedia('(max-width: 410px)');
 const AVG_VOICE_DURATION = 10;
 // This is needed for browsers requiring user interaction before playing.
 const PRELOAD = true;
 
-const Audio: FC<OwnProps> = ({
+const Audio = ({
   theme,
   message,
   senderTitle,
@@ -102,13 +109,15 @@ const Audio: FC<OwnProps> = ({
   canDownload,
   canTranscribe,
   autoPlay,
+  webPage,
+  mediaDuration,
   onHideTranscription,
   onPlay,
   onPause,
   onReadMedia,
   onCancelUpload,
   onDateClick,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     cancelMediaDownload, downloadMedia, transcribeAudio, openOneTimeMediaModal,
   } = getActions();
@@ -118,7 +127,7 @@ const Audio: FC<OwnProps> = ({
       audio: contentAudio, voice, video,
     }, isMediaUnread,
   } = message;
-  const audio = contentAudio || getMessageWebPageAudio(message);
+  const audio = contentAudio || getWebPageAudio(webPage);
   const media = (voice || video || audio)!;
   const mediaSource = (voice || video);
   const isVoice = Boolean(voice || video);
@@ -166,7 +175,7 @@ const Audio: FC<OwnProps> = ({
     isPlaying, playProgress, playPause, setCurrentTime, duration,
   } = useAudioPlayer(
     makeTrackId(message),
-    getMediaDuration(message)!,
+    mediaDuration!,
     trackType,
     mediaData,
     bufferingHandlers,
@@ -716,4 +725,16 @@ function renderSeekline(
   );
 }
 
-export default memo(Audio);
+export default memo(withGlobal<OwnProps>(
+  (global, {
+    message,
+  }): StateProps => {
+    const webPage = selectWebPageFromMessage(global, message);
+    const mediaDuration = selectMessageMediaDuration(global, message);
+
+    return {
+      webPage,
+      mediaDuration,
+    };
+  },
+)(Audio));

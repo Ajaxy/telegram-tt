@@ -153,11 +153,13 @@ const Video = <T,>({
   const canLoadPreview = isIntersectingForLoading;
   const previewBlobUrl = useMedia(previewMediaHash, !canLoadPreview);
   const shouldHidePreview = isPlayerReady && !isUnsupported;
-  const previewRef = useMediaTransition<HTMLImageElement>((hasThumb || previewBlobUrl) && !shouldHidePreview);
+  const { ref: previewRef } = useMediaTransition<HTMLImageElement>({
+    hasMediaData: Boolean((hasThumb || previewBlobUrl) && !shouldHidePreview),
+  });
 
   const noThumb = Boolean(!hasThumb || previewBlobUrl || isPlayerReady);
   const thumbRef = useBlurredMediaThumbRef(video, noThumb);
-  useMediaTransition(!noThumb, { ref: thumbRef });
+  useMediaTransition({ ref: thumbRef, hasMediaData: !noThumb });
   const blurredBackgroundRef = useBlurredMediaThumbRef(video, !withBlurredBackground);
 
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(

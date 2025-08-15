@@ -47,6 +47,7 @@ import type {
   ApiUserStatus,
   ApiVideo,
   ApiWallpaper,
+  ApiWebPage,
   ApiWebSession,
 } from '../../api/types';
 import type {
@@ -238,6 +239,7 @@ export type GlobalState = {
     }>;
     sponsoredByChatId: Record<string, ApiSponsoredMessage>;
     pollById: Record<string, ApiPoll>;
+    webPageById: Record<string, ApiWebPage>;
   };
 
   stories: {

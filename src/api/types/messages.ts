@@ -361,9 +361,26 @@ export type ApiNewMediaTodo = {
   todo: ApiTodoList;
 };
 
-export interface ApiWebPage {
+export interface ApiWebPagePending {
   mediaType: 'webpage';
-  id: number;
+  webpageType: 'pending';
+  id: string;
+  url?: string;
+  isSafe?: true;
+}
+
+export interface ApiWebPageEmpty {
+  mediaType: 'webpage';
+  webpageType: 'empty';
+  id: string;
+  url?: string;
+  isSafe?: true;
+}
+
+export interface ApiWebPageFull {
+  mediaType: 'webpage';
+  webpageType: 'full';
+  id: string;
   url: string;
   displayUrl: string;
   type?: string;
@@ -378,8 +395,18 @@ export interface ApiWebPage {
   story?: ApiWebPageStoryData;
   gift?: ApiStarGiftUnique;
   stickers?: ApiWebPageStickerData;
-  mediaSize?: WebPageMediaSize;
   hasLargeMedia?: boolean;
+}
+
+export type ApiWebPage = ApiWebPagePending | ApiWebPageEmpty | ApiWebPageFull;
+
+/**
+ * Wrapper with message-specific fields
+ */
+export interface ApiMessageWebPage {
+  id: string;
+  isSafe?: true;
+  mediaSize?: WebPageMediaSize;
 }
 
 export type ApiReplyInfo = ApiMessageReplyInfo | ApiStoryReplyInfo;
@@ -561,7 +588,7 @@ export type MediaContent = {
   pollId?: string;
   todo?: ApiMediaTodo;
   action?: ApiMessageAction;
-  webPage?: ApiWebPage;
+  webPage?: ApiMessageWebPage;
   audio?: ApiAudio;
   voice?: ApiVoice;
   invoice?: ApiMediaInvoice;
@@ -580,7 +607,16 @@ export type MediaContainer = {
 export type StatefulMediaContent = {
   poll?: ApiPoll;
   story?: ApiStory;
+  webPage?: ApiWebPage;
 };
+
+export type SizeTarget =
+  'micro'
+  | 'pictogram'
+  | 'inline'
+  | 'preview'
+  | 'full'
+  | 'download';
 
 export type BoughtPaidMedia = Pick<MediaContent, 'photo' | 'video'>;
 

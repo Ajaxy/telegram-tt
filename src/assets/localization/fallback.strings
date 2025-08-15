@@ -1097,6 +1097,7 @@
 "AttachSticker" = "Sticker";
 "AttachMusic" = "Music";
 "AttachContact" = "Contact";
+"AttachStory" = "Story";
 "MessageLocation" = "Location";
 "MessageLiveLocation" = "Live Location";
 "ServiceNotifications" = "service notifications";
@@ -2140,7 +2141,6 @@
 "ToDoListErrorChooseTasks" = "Please enter at least one task.";
 "GiftInfoCollectibleBy" = "Collectible #{number} by **{owner}**";
 "PremiumPreviewTodo" = "Checklists";
-"MenuTon" = "My TON";
 "DescriptionAboutTon" = "Offer TON to submit post suggestions to channels on Telegram.";
 "ButtonTopUpViaFragment" = "Top-Up Via Fragment";
 "TonModalHint" = "You can top-up your TON using Fragment.";
@@ -2173,6 +2173,13 @@
 "PriceChanged" = "Price Changed";
 "PayNewPrice" = "Pay New Price";
 "PriceChangedText" = "The price has already changed from **{originalAmount}** to **{newAmount}**. Do you want to pay the new price?";
+"LinkPreview" = "Link Preview";
+"ContextMoveTextUp" = "Move Caption Up";
+"ContextMoveTextDown" = "Move Caption Down";
+"ContextLinkLargerMedia" = "Larger Media";
+"ContextLinkSmallerMedia" = "Smaller Media";
+"ContextLinkRemovePreview" = "Remove Preview";
+"AccLinkRemovePreview" = "Remove Preview";
 "GlobalSearch" = "Global Search";
 "DescriptionPublicPostsSearch" = "Type a keyword to search for posts from public channels.";
 "ButtonSearchPublicPosts" = "Search {query}";
@@ -2189,5 +2196,3 @@
 "PublicPostsSubscribeToPremium" = "Subscribe to Premium";
 "NotificationPaidExtraSearch" = "{stars} spent on extra search.";
 "PostsSearchTransaction" = "Posts Search";
-
-

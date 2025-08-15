@@ -2,11 +2,12 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiChat, ApiPoll, ApiThreadInfo, ApiUser,
+  ApiWebPage,
 } from '../../types';
 
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { buildPollFromMedia } from '../apiBuilders/messageContent';
+import { buildPollFromMedia, buildWebPageFromMedia } from '../apiBuilders/messageContent';
 import { buildApiThreadInfoFromMessage } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import { addChatToLocalDb, addMessageToLocalDb, addUserToLocalDb } from '../helpers/localDb';
@@ -24,6 +25,7 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
   let chatById: Record<string, ApiChat> | undefined;
   const threadInfos: ApiThreadInfo[] | undefined = [];
   const polls: ApiPoll[] | undefined = [];
+  const webPages: ApiWebPage[] | undefined = [];
 
   if ('users' in response && Array.isArray(response.users) && TYPE_USER.has(response.users[0]?.className)) {
     const users = response.users.map((user: GramJs.TypeUser) => {
@@ -54,9 +56,16 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
         threadInfos.push(threadInfo);
       }
 
-      const poll = 'media' in message && message.media && buildPollFromMedia(message.media);
-      if (poll) {
-        polls.push(poll);
+      if ('media' in message && message.media) {
+        const poll = buildPollFromMedia(message.media);
+        if (poll) {
+          polls.push(poll);
+        }
+
+        const webPage = buildWebPageFromMedia(message.media);
+        if (webPage) {
+          webPages.push(webPage);
+        }
       }
     });
   }
@@ -69,6 +78,7 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
     chats: chatById,
     threadInfos: threadInfos?.length ? threadInfos : undefined,
     polls: polls?.length ? polls : undefined,
+    webPages: webPages?.length ? webPages : undefined,
   });
 }
 

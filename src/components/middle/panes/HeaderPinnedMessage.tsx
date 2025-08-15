@@ -10,7 +10,6 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import {
   getIsSavedDialog,
   getMessageIsSpoiler,
-  getMessageMediaHash,
   getMessageSingleInlineButton,
   getMessageVideo,
 } from '../../../global/helpers';
@@ -30,6 +29,8 @@ import { getPictogramDimensions, REM } from '../../common/helpers/mediaDimension
 import renderText from '../../common/helpers/renderText';
 import renderKeyboardButtonText from '../composer/helpers/renderKeyboardButtonText';
 
+import useMessageMediaHash from '../../../hooks/media/useMessageMediaHash';
+import useThumbnail from '../../../hooks/media/useThumbnail';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
@@ -39,7 +40,6 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
-import useThumbnail from '../../../hooks/useThumbnail';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
@@ -119,7 +119,7 @@ const HeaderPinnedMessage = ({
   const isVideoThumbnail = Boolean(gif && !gif.previewPhotoSizes?.length);
 
   const mediaThumbnail = useThumbnail(pinnedMessage);
-  const mediaHash = pinnedMessage && getMessageMediaHash(pinnedMessage, isVideoThumbnail ? 'full' : 'pictogram');
+  const mediaHash = useMessageMediaHash(pinnedMessage, isVideoThumbnail ? 'full' : 'pictogram');
   const mediaBlobUrl = useMedia(mediaHash);
   const isSpoiler = pinnedMessage && getMessageIsSpoiler(pinnedMessage);
 

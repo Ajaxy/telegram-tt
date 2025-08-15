@@ -31,16 +31,16 @@ export type HookParams<RefType extends HTMLElement> = BaseHookParams<RefType> & 
   withShouldRender?: never;
 };
 
-type HookParamsWithShouldRender<RefType extends HTMLElement> = BaseHookParams<RefType> & {
+export type HookParamsWithShouldRender<RefType extends HTMLElement> = BaseHookParams<RefType> & {
   withShouldRender: true;
 };
 
-type HookResult<RefType extends HTMLElement> = {
+export type HookResult<RefType extends HTMLElement> = {
   ref: ElementRef<RefType>;
   getIsClosing: Signal<boolean>;
 };
 
-type HookResultWithShouldRender<RefType extends HTMLElement> = HookResult<RefType> & {
+export type HookResultWithShouldRender<RefType extends HTMLElement> = HookResult<RefType> & {
   shouldRender: boolean;
 };
 
@@ -50,6 +50,9 @@ type State =
   | 'open'
   | 'closing';
 
+/**
+ * Use for showing and hiding small elements with transitions. For large elements, use {@link useMediaTransition}.
+ */
 export default function useShowTransition<RefType extends HTMLElement = HTMLDivElement>(
   params: HookParams<RefType>
 ): HookResult<RefType>;

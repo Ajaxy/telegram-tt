@@ -947,6 +947,7 @@ export interface LangPair {
   'AttachSticker': undefined;
   'AttachMusic': undefined;
   'AttachContact': undefined;
+  'AttachStory': undefined;
   'MessageLocation': undefined;
   'MessageLiveLocation': undefined;
   'ServiceNotifications': undefined;
@@ -1622,6 +1623,13 @@ export interface LangPair {
   'LabelPayInTON': undefined;
   'PriceChanged': undefined;
   'PayNewPrice': undefined;
+  'LinkPreview': undefined;
+  'ContextMoveTextUp': undefined;
+  'ContextMoveTextDown': undefined;
+  'ContextLinkLargerMedia': undefined;
+  'ContextLinkSmallerMedia': undefined;
+  'ContextLinkRemovePreview': undefined;
+  'AccLinkRemovePreview': undefined;
   'GlobalSearch': undefined;
   'DescriptionPublicPostsSearch': undefined;
   'PublicPosts': undefined;

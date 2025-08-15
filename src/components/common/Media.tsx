@@ -7,14 +7,14 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import {
   getMessageHtmlId,
   getMessageIsSpoiler,
-  getMessageMediaHash,
-  getMessageMediaThumbDataUri,
   getMessageVideo,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDuration } from '../../util/dates/dateFormat';
 import stopEvent from '../../util/stopEvent';
 
+import useMessageMediaHash from '../../hooks/media/useMessageMediaHash';
+import useThumbnail from '../../hooks/media/useThumbnail';
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -43,8 +43,9 @@ const Media: FC<OwnProps> = ({
   const ref = useRef<HTMLDivElement>();
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
-  const thumbDataUri = getMessageMediaThumbDataUri(message);
-  const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'), !isIntersecting);
+  const thumbDataUri = useThumbnail(message);
+  const mediaHash = useMessageMediaHash(message, 'pictogram');
+  const mediaBlobUrl = useMedia(mediaHash, !isIntersecting);
   const transitionClassNames = useMediaTransitionDeprecated(mediaBlobUrl);
 
   const video = getMessageVideo(message);

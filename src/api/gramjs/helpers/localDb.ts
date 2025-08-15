@@ -25,23 +25,23 @@ export function addMessageToLocalDb(message: GramJs.TypeMessage | GramJs.TypeSpo
   }
 }
 
+export function addWebPageMediaToLocalDb(webPage: GramJs.TypeWebPage, context?: MediaRepairContext) {
+  if (webPage instanceof GramJs.WebPage) {
+    if (webPage.document) {
+      const document = addMessageRepairInfo(webPage.document, context);
+      addDocumentToLocalDb(document);
+    }
+    if (webPage.photo) {
+      const photo = addMessageRepairInfo(webPage.photo, context);
+      addPhotoToLocalDb(photo);
+    }
+  }
+}
+
 export function addMediaToLocalDb(media: GramJs.TypeMessageMedia, context?: MediaRepairContext) {
   if (media instanceof GramJs.MessageMediaDocument && media.document) {
     const document = addMessageRepairInfo(media.document, context);
     addDocumentToLocalDb(document);
-  }
-
-  if (media instanceof GramJs.MessageMediaWebPage
-    && media.webpage instanceof GramJs.WebPage
-  ) {
-    if (media.webpage.document) {
-      const document = addMessageRepairInfo(media.webpage.document, context);
-      addDocumentToLocalDb(document);
-    }
-    if (media.webpage.photo) {
-      const photo = addMessageRepairInfo(media.webpage.photo, context);
-      addPhotoToLocalDb(photo);
-    }
   }
 
   if (media instanceof GramJs.MessageMediaGame) {

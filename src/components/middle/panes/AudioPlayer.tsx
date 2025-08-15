@@ -10,12 +10,13 @@ import type { IconName } from '../../../types/icons';
 
 import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../../../config';
 import {
-  getMediaDuration, getMessageContent, getMessageMediaHash, isMessageLocal,
+  getMessageContent, isMessageLocal,
 } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import {
   selectChat, selectChatMessage, selectSender, selectTabState,
 } from '../../../global/selectors';
+import { selectMessageMediaDuration } from '../../../global/selectors/media';
 import { makeTrackId } from '../../../util/audioPlayer';
 import { IS_IOS, IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
@@ -23,6 +24,7 @@ import * as mediaLoader from '../../../util/mediaLoader';
 import { clearMediaSession } from '../../../util/mediaSession';
 import renderText from '../../common/helpers/renderText';
 
+import useMessageMediaHash from '../../../hooks/media/useMessageMediaHash';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useAudioPlayer from '../../../hooks/useAudioPlayer';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
@@ -54,6 +56,7 @@ type StateProps = {
   message?: ApiMessage;
   sender?: ApiPeer;
   chat?: ApiChat;
+  mediaDuration?: number;
   volume: number;
   playbackRate: number;
   isPlaybackRateActive?: boolean;
@@ -75,6 +78,7 @@ const DEFAULT_FAST_PLAYBACK_RATE = 2;
 
 const AudioPlayer: FC<OwnProps & StateProps> = ({
   message,
+  mediaDuration,
   className,
   noUi,
   sender,
@@ -105,7 +109,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   const shouldRenderPlaybackButton = isVoice || (audio?.duration || 0) > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION;
   const senderName = sender ? getPeerTitle(lang, sender) : undefined;
 
-  const mediaHash = renderingMessage && getMessageMediaHash(renderingMessage, 'inline');
+  const mediaHash = useMessageMediaHash(renderingMessage, 'inline');
   const mediaData = mediaHash && mediaLoader.getFromMemory(mediaHash);
   const mediaMetadata = useMessageMediaMetadata(renderingMessage, sender, chat);
 
@@ -123,7 +127,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     setCurrentTime,
   } = useAudioPlayer(
     message && makeTrackId(message),
-    message ? getMediaDuration(message)! : 0,
+    mediaDuration || 0,
     isVoice ? 'voice' : 'audio',
     mediaData,
     undefined,
@@ -421,6 +425,8 @@ export default withGlobal<OwnProps>(
       volume, playbackRate, isMuted, isPlaybackRateActive, timestamp,
     } = selectTabState(global).audioPlayer;
 
+    const mediaDuration = message ? selectMessageMediaDuration(global, message) : undefined;
+
     return {
       message,
       sender,
@@ -430,6 +436,7 @@ export default withGlobal<OwnProps>(
       isPlaybackRateActive,
       isMuted,
       timestamp,
+      mediaDuration,
     };
   },
 )(AudioPlayer);

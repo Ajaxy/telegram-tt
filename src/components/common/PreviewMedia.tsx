@@ -4,13 +4,12 @@ import { memo, useRef } from '../../lib/teact/teact';
 import type { ApiBotPreviewMedia } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
-import {
-  getMessageMediaHash, getMessageMediaThumbDataUri,
-} from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDuration } from '../../util/dates/dateFormat';
 import stopEvent from '../../util/stopEvent';
 
+import useMessageMediaHash from '../../hooks/media/useMessageMediaHash';
+import useThumbnail from '../../hooks/media/useThumbnail';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
@@ -38,9 +37,10 @@ const PreviewMedia: FC<OwnProps> = ({
   const ref = useRef<HTMLDivElement>();
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
-  const thumbDataUri = getMessageMediaThumbDataUri(media);
+  const thumbDataUri = useThumbnail(media);
 
-  const mediaBlobUrl = useMedia(getMessageMediaHash(media, 'preview'), !isIntersecting);
+  const mediaHash = useMessageMediaHash(media, 'preview');
+  const mediaBlobUrl = useMedia(mediaHash, !isIntersecting);
   const transitionClassNames = useMediaTransitionDeprecated(mediaBlobUrl);
 
   const video = media.content.video;

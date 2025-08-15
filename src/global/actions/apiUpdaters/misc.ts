@@ -12,8 +12,10 @@ import {
   addUsers,
   removeBlockedUser,
   removePeerStory,
+  replaceWebPage,
   setConfirmPaymentUrl,
   setPaymentStep,
+  updateFullWebPage,
   updateLastReadStoryForPeer,
   updatePeerStory,
   updatePeersWithStories,
@@ -33,7 +35,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'updateEntities': {
       const {
-        users, chats, threadInfos, polls,
+        users, chats, threadInfos, polls, webPages,
       } = update;
       if (users) global = addUsers(global, users);
       if (chats) global = addChats(global, chats);
@@ -41,6 +43,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (polls) {
         polls.forEach((poll) => {
           global = updatePoll(global, poll.id, poll);
+        });
+      }
+      if (webPages) {
+        webPages.forEach((webPage) => {
+          if (webPage.webpageType === 'full') {
+            global = updateFullWebPage(global, webPage.id, webPage);
+          } else {
+            global = replaceWebPage(global, webPage.id, webPage);
+          }
         });
       }
       setGlobal(global);
@@ -152,6 +163,17 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         });
       });
       break;
+
+    case 'updateWebPage': {
+      const { webPage } = update;
+      if (webPage.webpageType === 'full') {
+        global = updateFullWebPage(global, webPage.id, webPage);
+      } else {
+        global = replaceWebPage(global, webPage.id, webPage);
+      }
+      setGlobal(global);
+      break;
+    }
 
     case 'updateStory':
       global = addStoriesForPeer(global, update.peerId, { [update.story.id]: update.story });

@@ -23,6 +23,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
+import usePrevious from '../../../hooks/usePrevious';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
@@ -105,13 +106,19 @@ const Photo = <T,>({
   const {
     mediaData, loadProgress,
   } = useMediaWithLoadProgress(!isPaidPreview ? getPhotoMediaHash(photo, size) : undefined, !shouldLoad);
+  const prevMediaData = usePrevious(mediaData);
   const fullMediaData = localBlobUrl || mediaData;
+
+  const { ref: fullMediaRef, shouldRender: shouldRenderFullMedia } = useMediaTransition<HTMLImageElement>({
+    hasMediaData: Boolean(fullMediaData),
+    withShouldRender: true,
+  });
 
   const withBlurredBackground = Boolean(forcedWidth);
   const [withThumb] = useState(!fullMediaData);
   const noThumb = Boolean(fullMediaData);
   const thumbRef = useBlurredMediaThumbRef(photo, noThumb);
-  useMediaTransition(!noThumb, { ref: thumbRef });
+  useMediaTransition({ ref: thumbRef, hasMediaData: !noThumb });
   const blurredBackgroundRef = useBlurredMediaThumbRef(photo, !withBlurredBackground);
   const thumbDataUri = getMediaThumbUri(photo);
 
@@ -255,9 +262,10 @@ const Photo = <T,>({
       {withBlurredBackground && (
         <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />
       )}
-      {fullMediaData && (
+      {shouldRenderFullMedia && (
         <img
-          src={fullMediaData}
+          ref={fullMediaRef}
+          src={fullMediaData || prevMediaData}
           className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
           alt=""
           style={forcedWidth ? `width: ${forcedWidth}px` : undefined}

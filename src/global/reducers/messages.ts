@@ -1,5 +1,7 @@
 import type {
   ApiMessage, ApiPoll, ApiPollResult, ApiQuickReply, ApiSponsoredMessage, ApiThreadInfo,
+  ApiWebPage,
+  ApiWebPageFull,
 } from '../../api/types';
 import type {
   FocusDirection,
@@ -47,6 +49,7 @@ import {
   selectThreadIdFromMessage,
   selectThreadInfo,
   selectViewportIds,
+  selectWebPage,
 } from '../selectors';
 import { removeIdFromSearchResults } from './middleSearch';
 import { updateTabState } from './tabs';
@@ -973,6 +976,40 @@ export function deleteQuickReply<T extends GlobalState>(
     quickReplies: {
       ...global.quickReplies,
       byId: omit(global.quickReplies.byId, [quickReplyId]),
+    },
+  };
+}
+
+export function updateFullWebPage<T extends GlobalState>(
+  global: T,
+  webPageId: string,
+  update: Partial<ApiWebPageFull>,
+) {
+  const webpage = selectWebPage(global, webPageId);
+  const updatedWebpage = webpage?.webpageType === 'full'
+    ? { ...webpage, ...update }
+    : { webpageType: 'full', mediaType: 'webpage', ...update };
+
+  if (!updatedWebpage.id) {
+    return global;
+  }
+
+  return replaceWebPage(global, webPageId, updatedWebpage as ApiWebPageFull);
+}
+
+export function replaceWebPage<T extends GlobalState>(
+  global: T,
+  webPageId: string,
+  webPage: ApiWebPage,
+) {
+  return {
+    ...global,
+    messages: {
+      ...global.messages,
+      webPageById: {
+        ...global.messages.webPageById,
+        [webPageId]: webPage,
+      },
     },
   };
 }

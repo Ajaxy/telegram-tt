@@ -16,6 +16,7 @@ import type {
   ApiThreadInfo,
   ApiTypeStory,
   ApiUser,
+  ApiWebPage,
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
@@ -57,6 +58,7 @@ type OwnProps = {
   targetHref?: string;
   message: ApiMessage;
   poll?: ApiPoll;
+  webPage?: ApiWebPage;
   story?: ApiTypeStory;
   canSendNow?: boolean;
   enabledReactions?: ApiChatReactions;
@@ -148,6 +150,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   isOpen,
   message,
   poll,
+  webPage,
   story,
   isPrivate,
   isCurrentUserPremium,
@@ -301,7 +304,7 @@ const MessageContextMenu: FC<OwnProps> = ({
 
   const copyOptions = getMessageCopyOptions(
     message,
-    groupStatefulContent({ poll, story }),
+    groupStatefulContent({ poll, webPage, story }),
     targetHref,
     canCopy,
     handleAfterCopy,

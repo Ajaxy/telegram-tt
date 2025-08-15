@@ -5,6 +5,7 @@ import type { GroupCallConnectionData } from '../../../lib/secret-sauce';
 import type {
   ApiMessage, ApiPoll, ApiStory, ApiStorySkipped,
   ApiUpdateConnectionStateType,
+  ApiWebPage,
 } from '../../types';
 
 import { DEBUG, GENERAL_TOPIC_ID } from '../../../config';
@@ -36,6 +37,8 @@ import {
   buildPoll,
   buildPollFromMedia,
   buildPollResults,
+  buildWebPage,
+  buildWebPageFromMedia,
 } from '../apiBuilders/messageContent';
 import {
   buildApiMessage,
@@ -124,6 +127,7 @@ export function updater(update: Update) {
   ) {
     let message: ApiMessage | undefined;
     let poll: ApiPoll | undefined;
+    let webPage: ApiWebPage | undefined;
     let shouldForceReply: boolean | undefined;
 
     if (update instanceof GramJs.UpdateShortChatMessage) {
@@ -148,6 +152,7 @@ export function updater(update: Update) {
 
       if (mtpMessage instanceof GramJs.Message) {
         poll = mtpMessage.media && buildPollFromMedia(mtpMessage.media);
+        webPage = mtpMessage.media && buildWebPageFromMedia(mtpMessage.media);
       }
 
       shouldForceReply = 'replyMarkup' in update.message
@@ -162,6 +167,7 @@ export function updater(update: Update) {
         chatId: message.chatId,
         message,
         poll,
+        webPage,
         isFromNew: true,
       });
     } else {
@@ -172,6 +178,7 @@ export function updater(update: Update) {
         message,
         shouldForceReply,
         poll,
+        webPage,
         isFromNew: true,
       });
     }
@@ -275,10 +282,17 @@ export function updater(update: Update) {
     const message = buildApiMessage(update.message);
     if (!message) return;
 
+    const poll = update.message instanceof GramJs.Message && update.message.media
+      ? buildPollFromMedia(update.message.media) : undefined;
+    const webPage = update.message instanceof GramJs.Message && update.message.media
+      ? buildWebPageFromMedia(update.message.media) : undefined;
+
     sendApiUpdate({
       '@type': 'updateQuickReplyMessage',
       id: message.id,
       message,
+      poll,
+      webPage,
     });
   } else if (update instanceof GramJs.UpdateDeleteQuickReplyMessages) {
     sendApiUpdate({
@@ -326,12 +340,16 @@ export function updater(update: Update) {
     const poll = mtpMessage instanceof GramJs.Message && mtpMessage.media
       ? buildPollFromMedia(mtpMessage.media) : undefined;
 
+    const webPage = mtpMessage instanceof GramJs.Message && mtpMessage.media
+      ? buildWebPageFromMedia(mtpMessage.media) : undefined;
+
     sendApiUpdate({
       '@type': 'updateMessage',
       id: message.id,
       chatId: message.chatId,
       message,
       poll,
+      webPage,
     });
   } else if (update instanceof GramJs.UpdateMessageReactions) {
     sendApiUpdate({
@@ -934,6 +952,14 @@ export function updater(update: Update) {
       '@type': 'updateWebViewResultSent',
       queryId: queryId.toString(),
     });
+  } else if (update instanceof GramJs.UpdateWebPage || update instanceof GramJs.UpdateChannelWebPage) {
+    const webPage = buildWebPage(update.webpage);
+    if (webPage) {
+      sendApiUpdate({
+        '@type': 'updateWebPage',
+        webPage,
+      });
+    }
   } else if (update instanceof GramJs.UpdateBotMenuButton) {
     const {
       botId,
@@ -1075,6 +1101,8 @@ export function updater(update: Update) {
     });
   } else if (update instanceof LocalUpdatePts || update instanceof LocalUpdateChannelPts) {
     // Do nothing, handled on the manager side
+  } else if (update instanceof GramJs.UpdateMessageID || update instanceof GramJs.UpdateShortSentMessage) {
+    // Do nothing, handled when sending the message
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
     log('UNEXPECTED UPDATE', params);

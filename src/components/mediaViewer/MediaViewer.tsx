@@ -41,7 +41,8 @@ import { disableDirectTextInput, enableDirectTextInput } from '../../util/direct
 import { isUserId } from '../../util/entities/ids';
 import { MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
-import getViewableMedia, { getMediaViewerItem, type MediaViewerItem } from './helpers/getViewableMedia';
+import { getMediaViewerItem, type MediaViewerItem, type ViewableMedia } from './helpers/getViewableMedia';
+import selectViewableMedia from './helpers/getViewableMedia';
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 
 import useAppLayout from '../../hooks/useAppLayout';
@@ -88,6 +89,8 @@ type StateProps = {
   withDynamicLoading?: boolean;
   isLoadingMoreMedia?: boolean;
   isSynced?: boolean;
+  currentItem?: MediaViewerItem;
+  viewableMedia?: ViewableMedia;
 };
 
 const ANIMATION_DURATION = 250;
@@ -115,6 +118,8 @@ const MediaViewer = ({
   withDynamicLoading,
   isLoadingMoreMedia,
   isSynced,
+  currentItem,
+  viewableMedia,
 }: StateProps) => {
   const {
     openMediaViewer,
@@ -131,6 +136,8 @@ const MediaViewer = ({
   const isOpen = Boolean(avatarOwner || message || standaloneMedia || sponsoredMessage);
   const { isMobile } = useAppLayout();
 
+  const { media, isSingle } = viewableMedia || {};
+
   /* Animation */
   const animationKey = useRef<number>();
   const senderId = message?.senderId || avatarOwner?.id || message?.chatId;
@@ -140,11 +147,6 @@ const MediaViewer = ({
 
   /* Controls */
   const [isReportAvatarModalOpen, openReportAvatarModal, closeReportAvatarModal] = useFlag();
-
-  const currentItem = getMediaViewerItem({
-    message, avatarOwner, standaloneMedia, profilePhotos, mediaIndex, sponsoredMessage,
-  });
-  const { media, isSingle } = getViewableMedia(currentItem) || {};
 
   const {
     isVideo,
@@ -504,18 +506,24 @@ export default memo(withGlobal(
     const isChatWithSelf = Boolean(chatId) && selectIsChatWithSelf(global, chatId);
 
     if (isAvatarView) {
-      const peer = selectPeer(global, chatId!);
+      const avatarOwner = selectPeer(global, chatId!);
       let canUpdateMedia = false;
-      if (peer) {
-        canUpdateMedia = isUserId(peer.id) ? peer.id === currentUserId : isChatAdmin(peer as ApiChat);
+      if (avatarOwner) {
+        canUpdateMedia = isUserId(avatarOwner.id)
+          ? avatarOwner.id === currentUserId : isChatAdmin(avatarOwner as ApiChat);
       }
 
       const profilePhotos = selectPeerPhotos(global, chatId!);
 
+      const currentItem = getMediaViewerItem({
+        avatarOwner, standaloneMedia, profilePhotos, mediaIndex,
+      });
+      const viewableMedia = selectViewableMedia(global, currentItem);
+
       return {
         profilePhotos,
         avatar: profilePhotos?.photos[mediaIndex!],
-        avatarOwner: peer,
+        avatarOwner,
         isLoadingMoreMedia: profilePhotos?.isLoading,
         isChatWithSelf,
         canUpdateMedia,
@@ -526,6 +534,8 @@ export default memo(withGlobal(
         standaloneMedia,
         mediaIndex,
         isSynced,
+        currentItem,
+        viewableMedia,
       };
     }
 
@@ -576,6 +586,11 @@ export default memo(withGlobal(
       }
     }
 
+    const currentItem = getMediaViewerItem({
+      message, standaloneMedia, mediaIndex, sponsoredMessage,
+    });
+    const viewableMedia = selectViewableMedia(global, currentItem);
+
     return {
       chatId,
       threadId,
@@ -594,6 +609,8 @@ export default memo(withGlobal(
       mediaIndex,
       isLoadingMoreMedia,
       isSynced,
+      currentItem,
+      viewableMedia,
     };
   },
 )(MediaViewer));

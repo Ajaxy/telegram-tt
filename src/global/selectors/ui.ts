@@ -5,8 +5,9 @@ import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
 import { IS_SNAP_EFFECT_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { getMessageVideo, getMessageWebPageVideo } from '../helpers/messageMedia';
+import { getMessageVideo, getWebPageVideo } from '../helpers/messageMedia';
 import { selectCurrentManagement } from './management';
+import { selectWebPageFromMessage } from './messages';
 import { selectSharedSettings } from './sharedState';
 import { selectIsStatisticsShown } from './statistics';
 import { selectTabState } from './tabs';
@@ -117,7 +118,8 @@ export function selectPerformanceSettingsValue<T extends GlobalState>(
 }
 
 export function selectCanAutoPlayMedia<T extends GlobalState>(global: T, message: ApiMessage | ApiSponsoredMessage) {
-  const video = getMessageVideo(message) || getMessageWebPageVideo(message);
+  const webPage = selectWebPageFromMessage(global, message);
+  const video = getMessageVideo(message) || getWebPageVideo(webPage);
   if (!video) {
     return undefined;
   }

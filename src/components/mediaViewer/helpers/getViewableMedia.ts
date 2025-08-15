@@ -1,9 +1,11 @@
 import type {
   ApiMessage, ApiPeer, ApiPeerPhotos, ApiSponsoredMessage,
 } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 import type { MediaViewerMedia } from '../../../types';
 
 import { getMessageContent, isDocumentPhoto, isDocumentVideo } from '../../../global/helpers';
+import { selectWebPageFromMessage } from '../../../global/selectors';
 
 export type MediaViewerItem = {
   type: 'message';
@@ -24,7 +26,7 @@ export type MediaViewerItem = {
   mediaIndex?: number;
 };
 
-type ViewableMedia = {
+export type ViewableMedia = {
   media: MediaViewerMedia;
   isSingle?: boolean;
 };
@@ -75,7 +77,7 @@ export function getMediaViewerItem({
   return undefined;
 }
 
-export default function getViewableMedia(params?: MediaViewerItem): ViewableMedia | undefined {
+export default function selectViewableMedia(global: GlobalState, params?: MediaViewerItem): ViewableMedia | undefined {
   if (!params) return undefined;
 
   if (params.type === 'standalone') {
@@ -96,7 +98,7 @@ export default function getViewableMedia(params?: MediaViewerItem): ViewableMedi
   }
 
   const {
-    action, document, photo, video, webPage, paidMedia,
+    action, document, photo, video, paidMedia,
   } = getMessageContent(params.message);
 
   if (action?.type === 'chatEditPhoto' || action?.type === 'suggestProfilePhoto') {
@@ -112,7 +114,8 @@ export default function getViewableMedia(params?: MediaViewerItem): ViewableMedi
     };
   }
 
-  if (webPage) {
+  const webPage = selectWebPageFromMessage(global, params.message);
+  if (webPage?.webpageType === 'full') {
     const { photo: webPagePhoto, video: webPageVideo, document: webPageDocument } = webPage;
     const isDocumentMedia = webPageDocument && (isDocumentPhoto(webPageDocument) || isDocumentVideo(webPageDocument));
     const mediaDocument = isDocumentMedia ? webPageDocument : undefined;

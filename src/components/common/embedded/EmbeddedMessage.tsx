@@ -14,7 +14,6 @@ import type { IconName } from '../../../types/icons';
 import { CONTENT_NOT_SUPPORTED, TON_CURRENCY_CODE } from '../../../config';
 import {
   getMessageIsSpoiler,
-  getMessageMediaHash,
   getMessageRoundVideo,
   isChatChannel,
   isChatGroup,
@@ -31,12 +30,13 @@ import { getPictogramDimensions } from '../helpers/mediaDimensions';
 import renderText from '../helpers/renderText';
 import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
 
+import useMessageMediaHash from '../../../hooks/media/useMessageMediaHash';
+import useThumbnail from '../../../hooks/media/useThumbnail';
 import { useFastClick } from '../../../hooks/useFastClick';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
-import useThumbnail from '../../../hooks/useThumbnail';
 import useMessageTranslation from '../../middle/message/hooks/useMessageTranslation';
 
 import RippleEffect from '../../ui/RippleEffect';
@@ -111,7 +111,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const gif = containedMedia?.content?.video?.isGif ? containedMedia.content.video : undefined;
   const isVideoThumbnail = Boolean(gif && !gif.previewPhotoSizes?.length);
 
-  const mediaHash = containedMedia && getMessageMediaHash(containedMedia, isVideoThumbnail ? 'full' : 'pictogram');
+  const mediaHash = useMessageMediaHash(containedMedia, isVideoThumbnail ? 'full' : 'pictogram');
   const mediaBlobUrl = useMedia(mediaHash, !isIntersecting);
   const mediaThumbnail = useThumbnail(containedMedia);
 

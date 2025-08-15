@@ -45,34 +45,6 @@
     color: var(--accent-color);
   }
 
-  &.in-preview {
-    height: 2.625rem;
-    margin: 0;
-    padding-inline-start: 0.5rem;
-    padding-inline-end: 0.375rem;
-    border-radius: 0.25rem;
-
-    background-color: var(--color-primary-tint);
-
-    transition: background-color 0.2s ease-in;
-
-    &.with-gift {
-      line-height: 1;
-    }
-
-    &.interactive {
-      cursor: var(--custom-cursor, pointer);
-
-      &:active {
-        background-color: var(--background-active-color);
-      }
-    }
-
-    .site-title, .site-name {
-      font-weight: var(--font-weight-normal);
-    }
-  }
-
   .WebPage--content {
     position: relative;
 
@@ -221,16 +193,12 @@
   }
 
   @media (min-width: 1921px) {
-    @supports (aspect-ratio: 1) {
-      &:not(.in-preview) {
-        max-width: none;
+    max-width: none;
 
-        .thumbnail,
-        .full-media {
-          width: 100% !important;
-          height: auto !important;
-        }
-      }
+    .thumbnail,
+    .full-media {
+      width: 100% !important;
+      height: auto !important;
     }
   }
 }

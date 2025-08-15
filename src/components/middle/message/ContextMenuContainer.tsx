@@ -15,6 +15,7 @@ import type {
   ApiStickerSetInfo,
   ApiThreadInfo,
   ApiTypeStory,
+  ApiWebPage,
 } from '../../../api/types';
 import type {
   ActiveDownloads,
@@ -33,7 +34,6 @@ import {
   areReactionsEmpty,
   getCanPostInChat,
   getIsDownloading,
-  getMessageDownloadableMedia,
   getMessageVideo,
   getUserFullName,
   hasMessageTtl,
@@ -75,6 +75,7 @@ import {
   selectUser,
   selectUserStatus,
 } from '../../../global/selectors';
+import { selectMessageDownloadableMedia } from '../../../global/selectors/media';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { isUserId } from '../../../util/entities/ids';
@@ -110,6 +111,7 @@ export type OwnProps = {
 type StateProps = {
   threadId?: ThreadId;
   poll?: ApiPoll;
+  webPage?: ApiWebPage;
   story?: ApiTypeStory;
   chat?: ApiChat;
   availableReactions?: ApiAvailableReaction[];
@@ -180,6 +182,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   customEmojiSets,
   album,
   poll,
+  webPage,
   story,
   anchor,
   targetHref,
@@ -345,15 +348,16 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   }, [message.reactions?.recentReactions, message.seenByDates]);
 
   const isDownloading = useMemo(() => {
+    const global = getGlobal();
     if (album) {
       return album.messages.some((msg) => {
-        const downloadableMedia = getMessageDownloadableMedia(msg);
+        const downloadableMedia = selectMessageDownloadableMedia(global, msg);
         if (!downloadableMedia) return false;
         return getIsDownloading(activeDownloads, downloadableMedia);
       });
     }
 
-    const downloadableMedia = getMessageDownloadableMedia(message);
+    const downloadableMedia = selectMessageDownloadableMedia(global, message);
     if (!downloadableMedia) return false;
     return getIsDownloading(activeDownloads, downloadableMedia);
   }, [activeDownloads, album, message]);
@@ -578,8 +582,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleDownloadClick = useLastCallback(() => {
+    const global = getGlobal();
     (album?.messages || [message]).forEach((msg) => {
-      const downloadableMedia = getMessageDownloadableMedia(msg);
+      const downloadableMedia = selectMessageDownloadableMedia(global, msg);
       if (!downloadableMedia) return;
 
       if (isDownloading) {
@@ -728,6 +733,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         isInSavedMessages={isInSavedMessages}
         noReplies={noReplies}
         poll={poll}
+        webPage={webPage}
         story={story}
         onOpenThread={handleOpenThread}
         onReply={handleReply}

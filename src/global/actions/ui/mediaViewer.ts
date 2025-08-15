@@ -4,11 +4,11 @@ import { AudioOrigin, MediaViewerOrigin } from '../../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { omit } from '../../../util/iteratees';
-import { getTimestampableMedia } from '../../helpers';
 import { getMessageReplyInfo } from '../../helpers/replies';
 import { addActionHandler } from '../../index';
 import { updateTabState } from '../../reducers/tabs';
 import { selectChatMessage, selectReplyMessage, selectTabState } from '../../selectors';
+import { selectTimestampableMedia } from '../../selectors/media';
 
 addActionHandler('openMediaViewer', (global, actions, payload): ActionReturnType => {
   const {
@@ -65,7 +65,7 @@ addActionHandler('openMediaFromTimestamp', (global, actions, payload): ActionRet
   const replyInfo = getMessageReplyInfo(message);
   const replyMessage = selectReplyMessage(global, message);
 
-  const messageMedia = getTimestampableMedia(message);
+  const messageMedia = selectTimestampableMedia(global, message);
   const maxMessageDuration = messageMedia?.duration;
   if (maxMessageDuration) {
     if (maxMessageDuration <= timestamp) return;
@@ -93,7 +93,7 @@ addActionHandler('openMediaFromTimestamp', (global, actions, payload): ActionRet
     return;
   }
 
-  const replyMessageMedia = replyMessage ? getTimestampableMedia(replyMessage) : undefined;
+  const replyMessageMedia = replyMessage ? selectTimestampableMedia(global, replyMessage) : undefined;
   const maxReplyMessageDuration = replyMessageMedia?.duration;
   if (!maxReplyMessageDuration || maxReplyMessageDuration <= timestamp) return;
 

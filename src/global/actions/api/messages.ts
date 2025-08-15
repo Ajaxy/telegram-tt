@@ -1272,19 +1272,23 @@ addActionHandler('loadWebPagePreview', async (global, actions, payload): Promise
 
   global = getGlobal();
   global = updateTabState(global, {
-    webPagePreview,
+    webPagePreviewId: webPagePreview?.id,
   }, tabId);
   setGlobal(global);
+
+  if (!webPagePreview) return;
+
+  actions.apiUpdate({
+    '@type': 'updateWebPage',
+    webPage: webPagePreview,
+  });
 });
 
 addActionHandler('clearWebPagePreview', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
-  if (!selectTabState(global, tabId).webPagePreview) {
-    return undefined;
-  }
 
   return updateTabState(global, {
-    webPagePreview: undefined,
+    webPagePreviewId: undefined,
   }, tabId);
 });
 

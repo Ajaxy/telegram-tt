@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect,
   useMemo,
@@ -18,8 +17,6 @@ import {
   getMessageAudio, getMessageDocument,
   getMessagePhoto,
   getMessageVideo, getMessageVoice,
-  getMessageWebPagePhoto,
-  getMessageWebPageVideo,
 } from '../../../global/helpers';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
@@ -57,18 +54,18 @@ export type OwnProps = {
   peerType?: ApiAttachMenuPeerType;
   shouldCollectDebugLogs?: boolean;
   theme: ThemeKey;
+  canEditMedia?: boolean;
+  editingMessage?: ApiMessage;
+  messageListType?: MessageListType;
+  paidMessagesStars?: number;
   onFileSelect: (files: File[]) => void;
   onPollCreate: NoneToVoidFunction;
   onTodoListCreate: NoneToVoidFunction;
   onMenuOpen: NoneToVoidFunction;
   onMenuClose: NoneToVoidFunction;
-  canEditMedia?: boolean;
-  editingMessage?: ApiMessage;
-  messageListType?: MessageListType;
-  paidMessagesStars?: number;
 };
 
-const AttachMenu: FC<OwnProps> = ({
+const AttachMenu = ({
   chatId,
   threadId,
   isButtonVisible,
@@ -84,16 +81,16 @@ const AttachMenu: FC<OwnProps> = ({
   isScheduled,
   theme,
   shouldCollectDebugLogs,
+  canEditMedia,
+  editingMessage,
+  messageListType,
+  paidMessagesStars,
   onFileSelect,
   onMenuOpen,
   onMenuClose,
   onPollCreate,
   onTodoListCreate,
-  canEditMedia,
-  editingMessage,
-  messageListType,
-  paidMessagesStars,
-}) => {
+}: OwnProps) => {
   const {
     updateAttachmentSettings,
   } = getActions();
@@ -107,8 +104,8 @@ const AttachMenu: FC<OwnProps> = ({
   const isMenuOpen = isAttachMenuOpen || isAttachmentBotMenuOpen;
 
   const isPhotoOrVideo = editingMessage && editingMessage?.groupedId
-    && Boolean(getMessagePhoto(editingMessage) || getMessageWebPagePhoto(editingMessage)
-      || Boolean(getMessageVideo(editingMessage) || getMessageWebPageVideo(editingMessage)));
+    && Boolean(getMessagePhoto(editingMessage)
+      || Boolean(getMessageVideo(editingMessage)));
   const isFile = editingMessage && editingMessage?.groupedId && Boolean(getMessageAudio(editingMessage)
     || getMessageVoice(editingMessage) || getMessageDocument(editingMessage));
 

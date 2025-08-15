@@ -94,7 +94,9 @@ const Checkout: FC<OwnProps> = ({
 
   const photoUrl = useMedia(getWebDocumentHash(photo));
 
-  const ref = useMediaTransition<HTMLImageElement>(photoUrl);
+  const { ref } = useMediaTransition<HTMLImageElement>({
+    hasMediaData: Boolean(photoUrl),
+  });
 
   const handleTipsClick = useCallback((tips: number) => {
     dispatch!({ type: 'setTipAmount', payload: maxTipAmount ? Math.min(tips, maxTipAmount) : tips });

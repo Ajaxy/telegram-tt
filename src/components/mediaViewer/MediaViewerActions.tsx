@@ -6,7 +6,7 @@ import type { ApiChat } from '../../api/types';
 import type { ActiveDownloads, MediaViewerOrigin, MessageListType } from '../../types';
 import type { IconName } from '../../types/icons';
 import type { MenuItemProps } from '../ui/MenuItem';
-import type { MediaViewerItem } from './helpers/getViewableMedia';
+import type { MediaViewerItem, ViewableMedia } from './helpers/getViewableMedia';
 
 import {
   getIsDownloading,
@@ -23,7 +23,7 @@ import {
   selectTabState,
 } from '../../global/selectors';
 import { isUserId } from '../../util/entities/ids';
-import getViewableMedia from './helpers/getViewableMedia';
+import selectViewableMedia from './helpers/getViewableMedia';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
@@ -41,17 +41,6 @@ import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './MediaViewerActions.scss';
 
-type StateProps = {
-  activeDownloads: ActiveDownloads;
-  isProtected?: boolean;
-  isChatProtected?: boolean;
-  canDelete?: boolean;
-  chat?: ApiChat;
-  canUpdate?: boolean;
-  messageListType?: MessageListType;
-  origin?: MediaViewerOrigin;
-};
-
 type OwnProps = {
   item?: MediaViewerItem;
   mediaData?: string;
@@ -63,6 +52,18 @@ type OwnProps = {
   onBeforeDelete: NoneToVoidFunction;
   onCloseMediaViewer: NoneToVoidFunction;
   onForward: NoneToVoidFunction;
+};
+
+type StateProps = {
+  activeDownloads: ActiveDownloads;
+  isProtected?: boolean;
+  isChatProtected?: boolean;
+  canDelete?: boolean;
+  chat?: ApiChat;
+  canUpdate?: boolean;
+  messageListType?: MessageListType;
+  origin?: MediaViewerOrigin;
+  viewableMedia?: ViewableMedia;
 };
 
 const MediaViewerActions: FC<OwnProps & StateProps> = ({
@@ -78,6 +79,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   messageListType,
   activeDownloads,
   origin,
+  viewableMedia,
   onReportAvatar: onReport,
   onCloseMediaViewer,
   onBeforeDelete,
@@ -98,7 +100,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
 
   const isMessage = item?.type === 'message';
 
-  const { media } = getViewableMedia(item) || {};
+  const { media } = viewableMedia || {};
   const fileName = media && getMediaFilename(media);
   const isDownloading = media && getIsDownloading(activeDownloads, media);
 
@@ -411,6 +413,7 @@ export default memo(withGlobal<OwnProps>(
     const canDelete = canDeleteMessage || canDeleteAvatar;
     const canUpdate = canUpdateMedia && Boolean(avatarPhoto) && !isCurrentAvatar;
     const messageListType = currentMessageList?.type;
+    const viewableMedia = selectViewableMedia(global, item);
 
     return {
       activeDownloads,
@@ -421,6 +424,7 @@ export default memo(withGlobal<OwnProps>(
       canUpdate,
       messageListType,
       origin,
+      viewableMedia,
     };
   },
 )(MediaViewerActions));

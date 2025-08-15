@@ -24,7 +24,6 @@ import type {
 
 import { numberToHexColor } from '../../../util/colors';
 import { pick } from '../../../util/iteratees';
-import { generateRandomInt } from '../gramjsBuilders';
 import { addDocumentToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
 import { buildApiMessageEntity, buildApiPhoto } from './common';
@@ -254,16 +253,6 @@ export function buildBotInlineMessage(
       photo: buildApiWebDocument(sendMessage.photo),
       currency: sendMessage.currency,
       amount: sendMessage.totalAmount.toJSNumber(),
-    };
-  } else {
-    const mediaSize = sendMessage.forceSmallMedia ? 'small' : sendMessage.forceLargeMedia ? 'large' : undefined;
-
-    content.webPage = {
-      mediaType: 'webpage',
-      id: generateRandomInt(),
-      mediaSize,
-      url: sendMessage.url,
-      displayUrl: sendMessage.url,
     };
   }
 

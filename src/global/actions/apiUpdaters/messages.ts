@@ -43,6 +43,7 @@ import {
   deleteTopic,
   removeChatFromChatLists,
   replaceThreadParam,
+  replaceWebPage,
   updateChat,
   updateChatLastMessageId,
   updateChatMediaLoadingState,
@@ -101,7 +102,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'newMessage': {
       const {
-        chatId, id, message, shouldForceReply, wasDrafted, poll,
+        chatId, id, message, shouldForceReply, wasDrafted, poll, webPage,
       } = update;
       global = updateWithLocalMedia(global, chatId, id, message);
       global = updateListedAndViewportIds(global, actions, message as ApiMessage);
@@ -169,6 +170,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = updatePoll(global, poll.id, poll);
       }
 
+      if (webPage) {
+        global = replaceWebPage(global, webPage.id, webPage);
+      }
+
       if (message.reportDeliveryUntilDate && message.reportDeliveryUntilDate > getServerTime()) {
         actions.reportMessageDelivery({ chatId, messageId: id });
       }
@@ -228,7 +233,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'newScheduledMessage': {
       const {
-        chatId, id, message, poll,
+        chatId, id, message, poll, webPage,
       } = update;
 
       global = updateWithLocalMedia(global, chatId, id, message, true);
@@ -246,6 +251,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = updatePoll(global, poll.id, poll);
       }
 
+      if (webPage) {
+        global = replaceWebPage(global, webPage.id, webPage);
+      }
+
       global = updatePeerFullInfo(global, chatId, {
         hasScheduledMessages: true,
       });
@@ -257,7 +266,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateScheduledMessage': {
       const {
-        chatId, id, message, poll, isFromNew,
+        chatId, id, message, poll, webPage, isFromNew,
       } = update;
 
       const currentMessage = selectScheduledMessage(global, chatId, id);
@@ -269,6 +278,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
             chatId: update.chatId,
             message: update.message as ApiMessage,
             poll: update.poll,
+            webPage: update.webPage,
           });
         }
         return;
@@ -287,6 +297,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = updatePoll(global, poll.id, poll);
       }
 
+      if (webPage) {
+        global = replaceWebPage(global, webPage.id, webPage);
+      }
+
       setGlobal(global);
 
       break;
@@ -294,7 +308,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateMessage': {
       const {
-        chatId, id, message, poll, isFromNew, shouldForceReply,
+        chatId, id, message, poll, webPage, isFromNew, shouldForceReply,
       } = update;
 
       const currentMessage = selectChatMessage(global, chatId, id);
@@ -307,6 +321,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
             chatId: update.chatId,
             message: update.message,
             poll: update.poll,
+            webPage: update.webPage,
             shouldForceReply,
           });
         }
@@ -333,18 +348,26 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = updatePoll(global, poll.id, poll);
       }
 
+      if (webPage) {
+        global = replaceWebPage(global, webPage.id, webPage);
+      }
+
       setGlobal(global);
 
       break;
     }
 
     case 'updateQuickReplyMessage': {
-      const { id, message, poll } = update;
+      const { id, message, poll, webPage } = update;
 
       global = updateQuickReplyMessage(global, id, message);
 
       if (poll) {
         global = updatePoll(global, poll.id, poll);
+      }
+
+      if (webPage) {
+        global = replaceWebPage(global, webPage.id, webPage);
       }
 
       setGlobal(global);

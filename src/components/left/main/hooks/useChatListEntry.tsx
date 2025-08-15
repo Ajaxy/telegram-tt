@@ -12,8 +12,6 @@ import { ANIMATION_END_DELAY, CHAT_HEIGHT_PX } from '../../../../config';
 import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import {
   getMessageIsSpoiler,
-  getMessageMediaHash,
-  getMessageMediaThumbDataUri,
   getMessageRoundVideo,
   getMessageSticker,
   getMessageVideo,
@@ -24,6 +22,8 @@ import renderText from '../../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 import { ChatAnimationTypes } from './useChatAnimationType';
 
+import useMessageMediaHash from '../../../../hooks/media/useMessageMediaHash';
+import useThumbnail from '../../../../hooks/media/useThumbnail';
 import useEnsureStory from '../../../../hooks/useEnsureStory';
 import useMedia from '../../../../hooks/useMedia';
 import useOldLang from '../../../../hooks/useOldLang';
@@ -82,8 +82,11 @@ export default function useChatListEntry({
   const mediaContent = statefulMediaContent?.story || lastMessage;
   const mediaHasPreview = mediaContent && !getMessageSticker(mediaContent);
 
-  const mediaThumbnail = mediaHasPreview ? getMessageMediaThumbDataUri(mediaContent) : undefined;
-  const mediaBlobUrl = useMedia(mediaHasPreview ? getMessageMediaHash(mediaContent, 'micro') : undefined);
+  const thumbDataUri = useThumbnail(mediaContent);
+
+  const mediaThumbnail = mediaHasPreview ? thumbDataUri : undefined;
+  const mediaHash = useMessageMediaHash(mediaContent, 'micro');
+  const mediaBlobUrl = useMedia(mediaHasPreview ? mediaHash : undefined);
   const isRoundVideo = Boolean(lastMessage && getMessageRoundVideo(lastMessage));
 
   const renderLastMessageOrTyping = useCallback(() => {

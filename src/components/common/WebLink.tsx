@@ -1,5 +1,5 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
+import { withGlobal } from '../../global';
 
 import type { ApiMessage, ApiWebPage } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
@@ -7,8 +7,8 @@ import type { TextPart } from '../../types';
 
 import {
   getFirstLinkInMessage, getMessageText,
-  getMessageWebPage,
 } from '../../global/helpers';
+import { selectWebPageFromMessage } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatPastTimeShort } from '../../util/dates/dateFormat';
 import trimText from '../../util/trimText';
@@ -26,6 +26,10 @@ import './WebLink.scss';
 
 const MAX_TEXT_LENGTH = 170; // symbols
 
+type ApiWebPageWithFormatted =
+  ApiWebPage
+  & { formattedDescription?: TextPart[] };
+
 type OwnProps = {
   message: ApiMessage;
   senderTitle?: string;
@@ -34,16 +38,16 @@ type OwnProps = {
   onMessageClick: (message: ApiMessage) => void;
 };
 
-type ApiWebPageWithFormatted =
-  ApiWebPage
-  & { formattedDescription?: TextPart[] };
+type StateProps = {
+  webPage?: ApiWebPage;
+};
 
-const WebLink: FC<OwnProps> = ({
-  message, senderTitle, isProtected, observeIntersection, onMessageClick,
-}) => {
+const WebLink = ({
+  message, webPage, senderTitle, isProtected, observeIntersection, onMessageClick,
+}: OwnProps & StateProps) => {
   const lang = useOldLang();
 
-  let linkData: ApiWebPageWithFormatted | undefined = getMessageWebPage(message);
+  let linkData: ApiWebPageWithFormatted | undefined = webPage;
 
   if (!linkData) {
     const link = getFirstLinkInMessage(message);
@@ -64,7 +68,7 @@ const WebLink: FC<OwnProps> = ({
     onMessageClick(message);
   });
 
-  if (!linkData) {
+  if (linkData?.webpageType !== 'full') {
     return undefined;
   }
 
@@ -129,4 +133,14 @@ const WebLink: FC<OwnProps> = ({
   );
 };
 
-export default memo(WebLink);
+export default memo(withGlobal<OwnProps>(
+  (global, {
+    message,
+  }): StateProps => {
+    const webPage = selectWebPageFromMessage(global, message);
+
+    return {
+      webPage,
+    };
+  },
+)(WebLink));

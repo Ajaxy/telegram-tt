@@ -13,6 +13,7 @@ import type {
   ApiMediaInvoice,
   ApiMediaTodo,
   ApiMessageStoryData,
+  ApiMessageWebPage,
   ApiPaidMedia,
   ApiPhoto,
   ApiPoll,
@@ -35,7 +36,7 @@ import { addTimestampEntities } from '../../../util/dates/timestamp';
 import { generateWaveform } from '../../../util/generateWaveform';
 import { pick } from '../../../util/iteratees';
 import {
-  addMediaToLocalDb, addStoryToLocalDb, type MediaRepairContext,
+  addMediaToLocalDb, addStoryToLocalDb, addWebPageMediaToLocalDb, type MediaRepairContext,
 } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
 import {
@@ -158,7 +159,7 @@ export function buildMessageMediaContent(
   const todo = buildTodoFromMedia(media);
   if (todo) return { todo };
 
-  const webPage = buildWebPage(media);
+  const webPage = buildMessageWebPageFromMedia(media);
   if (webPage) return { webPage };
 
   const invoice = buildInvoiceFromMedia(media);
@@ -798,83 +799,124 @@ export function buildPollResults(pollResults: GramJs.PollResults): ApiPoll['resu
   };
 }
 
-export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undefined {
-  if (
-    !(media instanceof GramJs.MessageMediaWebPage)
-    || !(media.webpage instanceof GramJs.WebPage)
-  ) {
+export function buildMessageWebPageFromMedia(media: GramJs.TypeMessageMedia): ApiMessageWebPage | undefined {
+  if (!(media instanceof GramJs.MessageMediaWebPage) || media.webpage instanceof GramJs.WebPageNotModified) {
     return undefined;
   }
-
   const {
-    id, photo, document, attributes,
-  } = media.webpage;
-
-  let video;
-  let audio;
-  if (document instanceof GramJs.Document && document.mimeType.startsWith('video/')) {
-    video = buildVideoFromDocument(document);
-  }
-  if (document instanceof GramJs.Document && document.mimeType.startsWith('audio/')) {
-    audio = buildAudioFromDocument(document);
-  }
-  let story: ApiWebPageStoryData | undefined;
-  let gift: ApiStarGiftUnique | undefined;
-  let stickers: ApiWebPageStickerData | undefined;
-  const attributeStory = attributes
-    ?.find((a): a is GramJs.WebPageAttributeStory => a instanceof GramJs.WebPageAttributeStory);
-  const attributeGift = attributes
-    ?.find((a): a is GramJs.WebPageAttributeUniqueStarGift => a instanceof GramJs.WebPageAttributeUniqueStarGift);
-  if (attributeStory) {
-    const peerId = getApiChatIdFromMtpPeer(attributeStory.peer);
-    story = {
-      id: attributeStory.id,
-      peerId,
-    };
-
-    if (attributeStory.story instanceof GramJs.StoryItem) {
-      addStoryToLocalDb(attributeStory.story, peerId);
-    }
-  }
-  if (attributeGift) {
-    const starGift = buildApiStarGift(attributeGift.gift);
-    gift = starGift.type === 'starGiftUnique' ? starGift : undefined;
-  }
-  const attributeStickers = attributes?.find((a): a is GramJs.WebPageAttributeStickerSet => (
-    a instanceof GramJs.WebPageAttributeStickerSet
-  ));
-  if (attributeStickers) {
-    stickers = {
-      documents: processStickerResult(attributeStickers.stickers),
-      isEmoji: attributeStickers.emojis,
-      isWithTextColor: attributeStickers.textColor,
-    };
-  }
-
-  const mediaSize = media.forceSmallMedia ? 'small' : media.forceLargeMedia ? 'large' : undefined;
+    webpage, forceLargeMedia, forceSmallMedia, safe,
+  } = media;
 
   return {
-    mediaType: 'webpage',
-    id: Number(id),
-    ...pick(media.webpage, [
-      'url',
-      'displayUrl',
-      'type',
-      'siteName',
-      'title',
-      'description',
-      'duration',
-      'hasLargeMedia',
-    ]),
-    photo: photo instanceof GramJs.Photo ? buildApiPhoto(photo) : undefined,
-    document: !video && !audio && document ? buildApiDocument(document) : undefined,
-    video,
-    audio,
-    story,
-    gift,
-    stickers,
-    mediaSize,
+    id: webpage.id.toString(),
+    isSafe: safe,
+    mediaSize: forceSmallMedia ? 'small' : forceLargeMedia ? 'large' : undefined,
   };
+}
+
+export function buildWebPageFromMedia(media: GramJs.TypeMessageMedia): ApiWebPage | undefined {
+  if (!(media instanceof GramJs.MessageMediaWebPage)) {
+    return undefined;
+  }
+  const {
+    webpage,
+  } = media;
+
+  return buildWebPage(webpage);
+}
+
+export function buildWebPage(webPage: GramJs.TypeWebPage): ApiWebPage | undefined {
+  addWebPageMediaToLocalDb(webPage);
+
+  if (webPage instanceof GramJs.WebPageEmpty) {
+    return {
+      mediaType: 'webpage',
+      webpageType: 'empty',
+      id: webPage.id.toString(),
+      url: webPage.url,
+    };
+  }
+
+  if (webPage instanceof GramJs.WebPagePending) {
+    return {
+      mediaType: 'webpage',
+      webpageType: 'pending',
+      id: webPage.id.toString(),
+      url: webPage.url,
+    };
+  }
+
+  if (webPage instanceof GramJs.WebPage) {
+    const {
+      id, photo, document, attributes,
+    } = webPage;
+
+    let video;
+    let audio;
+    if (document instanceof GramJs.Document && document.mimeType.startsWith('video/')) {
+      video = buildVideoFromDocument(document);
+    }
+    if (document instanceof GramJs.Document && document.mimeType.startsWith('audio/')) {
+      audio = buildAudioFromDocument(document);
+    }
+    let story: ApiWebPageStoryData | undefined;
+    let gift: ApiStarGiftUnique | undefined;
+    let stickers: ApiWebPageStickerData | undefined;
+    const attributeStory = attributes
+      ?.find((a): a is GramJs.WebPageAttributeStory => a instanceof GramJs.WebPageAttributeStory);
+    const attributeGift = attributes
+      ?.find((a): a is GramJs.WebPageAttributeUniqueStarGift => a instanceof GramJs.WebPageAttributeUniqueStarGift);
+    if (attributeStory) {
+      const peerId = getApiChatIdFromMtpPeer(attributeStory.peer);
+      story = {
+        id: attributeStory.id,
+        peerId,
+      };
+
+      if (attributeStory.story instanceof GramJs.StoryItem) {
+        addStoryToLocalDb(attributeStory.story, peerId);
+      }
+    }
+    if (attributeGift) {
+      const starGift = buildApiStarGift(attributeGift.gift);
+      gift = starGift.type === 'starGiftUnique' ? starGift : undefined;
+    }
+    const attributeStickers = attributes?.find((a): a is GramJs.WebPageAttributeStickerSet => (
+      a instanceof GramJs.WebPageAttributeStickerSet
+    ));
+    if (attributeStickers) {
+      stickers = {
+        documents: processStickerResult(attributeStickers.stickers),
+        isEmoji: attributeStickers.emojis,
+        isWithTextColor: attributeStickers.textColor,
+      };
+    }
+
+    return {
+      mediaType: 'webpage',
+      webpageType: 'full',
+      id: id.toString(),
+      ...pick(webPage, [
+        'url',
+        'displayUrl',
+        'type',
+        'siteName',
+        'title',
+        'description',
+        'duration',
+        'hasLargeMedia',
+      ]),
+      photo: photo instanceof GramJs.Photo ? buildApiPhoto(photo) : undefined,
+      document: !video && !audio && document ? buildApiDocument(document) : undefined,
+      video,
+      audio,
+      story,
+      gift,
+      stickers,
+    };
+  }
+
+  return undefined;
 }
 
 function buildPaidMedia(media: GramJs.TypeMessageMedia): ApiPaidMedia | undefined {

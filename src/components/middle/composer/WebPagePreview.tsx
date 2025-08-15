@@ -1,122 +1,104 @@
-import type { FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiFormattedText, ApiMessage, ApiMessageEntityTextUrl, ApiWebPage,
+  ApiWebPage,
+  ApiWebPageFull,
+  ApiWebPagePending,
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import type { ThemeKey, ThreadId, WebPageMediaSize } from '../../../types';
-import type { Signal } from '../../../util/signals';
-import { ApiMessageEntityTypes } from '../../../api/types';
+import type { ThreadId, WebPageMediaSize } from '../../../types';
 
-import { RE_LINK_TEMPLATE } from '../../../config';
-import { selectNoWebPage, selectTabState, selectTheme } from '../../../global/selectors';
+import {
+  getMediaHash,
+  getWebPageAudio,
+  getWebPageDocument,
+  getWebPagePhoto,
+  getWebPageVideo,
+} from '../../../global/helpers';
+import { selectNoWebPage, selectTabState, selectWebPage } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 
-import { useDebouncedResolver } from '../../../hooks/useAsyncResolvers';
+import useThumbnail from '../../../hooks/media/useThumbnail';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useDerivedSignal from '../../../hooks/useDerivedSignal';
 import useDerivedState from '../../../hooks/useDerivedState';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
-import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
-import useSyncEffect from '../../../hooks/useSyncEffect';
+import useMedia from '../../../hooks/useMedia';
+import useShowTransition from '../../../hooks/useShowTransition';
 
 import Icon from '../../common/icons/Icon';
+import PeerColorWrapper from '../../common/PeerColorWrapper';
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
-import WebPage from '../message/WebPage';
 
-import './WebPagePreview.scss';
+import styles from './WebPagePreview.module.scss';
 
 type OwnProps = {
   chatId: string;
   threadId: ThreadId;
-  getHtml: Signal<string>;
   isEditing: boolean;
   isDisabled?: boolean;
 };
 
 type StateProps = {
-  webPagePreview?: ApiWebPage;
+  webPagePreview?: ApiWebPageFull | ApiWebPagePending;
   noWebPage?: boolean;
-  theme: ThemeKey;
   attachmentSettings: GlobalState['attachmentSettings'];
 };
 
-const DEBOUNCE_MS = 300;
-const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
-
-const WebPagePreview: FC<OwnProps & StateProps> = ({
+const WebPagePreview = ({
   chatId,
   threadId,
-  getHtml,
   isDisabled,
   webPagePreview,
   noWebPage,
-  theme,
   attachmentSettings,
   isEditing,
-}) => {
+}: OwnProps & StateProps) => {
   const {
-    loadWebPagePreview,
-    clearWebPagePreview,
     toggleMessageWebPage,
     updateAttachmentSettings,
   } = getActions();
 
-  const lang = useOldLang();
-
-  const formattedTextWithLinkRef = useRef<ApiFormattedText>();
+  const lang = useLang();
 
   const ref = useRef<HTMLDivElement>();
 
   const isInvertedMedia = attachmentSettings.isInvertedMedia;
   const isSmallerMedia = attachmentSettings.webPageMediaSize === 'small';
 
-  const detectLinkDebounced = useDebouncedResolver(() => {
-    const formattedText = parseHtmlAsFormattedText(getHtml());
-    const linkEntity = formattedText.entities?.find((entity): entity is ApiMessageEntityTextUrl => (
-      entity.type === ApiMessageEntityTypes.TextUrl
-    ));
-
-    formattedTextWithLinkRef.current = formattedText;
-
-    return linkEntity?.url || formattedText.text.match(RE_LINK)?.[0];
-  }, [getHtml], DEBOUNCE_MS, true);
-
-  const getLink = useDerivedSignal(detectLinkDebounced, [detectLinkDebounced, getHtml], true);
-
-  useEffect(() => {
-    const link = getLink();
-    const formattedText = formattedTextWithLinkRef.current;
-
-    if (link) {
-      loadWebPagePreview({ text: formattedText! });
-    } else {
-      clearWebPagePreview();
-      toggleMessageWebPage({ chatId, threadId });
-    }
-  }, [getLink, chatId, threadId]);
-
-  useSyncEffect(() => {
-    clearWebPagePreview();
-    toggleMessageWebPage({ chatId, threadId });
-  }, [chatId, clearWebPagePreview, threadId, toggleMessageWebPage]);
-
   const isShown = useDerivedState(() => {
-    return Boolean(webPagePreview && getHtml() && !noWebPage && !isDisabled);
-  }, [isDisabled, getHtml, noWebPage, webPagePreview]);
-  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isShown);
+    return Boolean(webPagePreview && !noWebPage && !isDisabled);
+  }, [isDisabled, noWebPage, webPagePreview]);
+  const { shouldRender } = useShowTransition({ isOpen: isShown, ref, withShouldRender: true });
 
-  const hasMediaSizeOptions = webPagePreview?.hasLargeMedia;
+  const hasMediaSizeOptions = webPagePreview?.webpageType === 'full' && webPagePreview.hasLargeMedia;
 
-  const renderingWebPage = useCurrentOrPrev(webPagePreview, true);
+  const prevWebPageRef = useRef<ApiWebPage | undefined>(webPagePreview);
+
+  if (webPagePreview && webPagePreview !== prevWebPageRef.current) {
+    prevWebPageRef.current = webPagePreview;
+  }
+
+  const renderingWebPage = webPagePreview || prevWebPageRef.current;
+
+  const isFullWebPage = renderingWebPage?.webpageType === 'full';
+
+  const thumbnailUrl = useThumbnail(isFullWebPage ? { content: renderingWebPage } : undefined);
+  const previewMedia = getWebPagePhoto(renderingWebPage) || getWebPageVideo(renderingWebPage)
+    || getWebPageAudio(renderingWebPage) || getWebPageDocument(renderingWebPage);
+  const previewMediaHash = previewMedia && getMediaHash(previewMedia, 'pictogram');
+  const previewMediaUrl = useMedia(previewMediaHash);
+
+  const { shouldRender: shouldRenderPreviewMedia, ref: previewMediaRef } = useShowTransition<HTMLImageElement>({
+    isOpen: Boolean(previewMediaUrl),
+    withShouldRender: true,
+    noCloseTransition: true,
+  });
+
+  const hasPreviewMedia = Boolean(previewMediaUrl || shouldRenderPreviewMedia);
 
   const handleClearWebpagePreview = useLastCallback(() => {
     toggleMessageWebPage({ chatId, threadId, noWebPage: true });
@@ -124,13 +106,13 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
 
   const {
     isContextMenuOpen, contextMenuAnchor, handleContextMenu,
-    handleContextMenuClose, handleContextMenuHide,
+    handleContextMenuClose, handleContextMenuHide, handleBeforeContextMenu,
   } = useContextMenuHandlers(ref, isEditing, true);
 
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => ref.current!);
   const getMenuElement = useLastCallback(
-    () => ref.current!.querySelector('.web-page-preview-context-menu .bubble'),
+    () => ref.current!.querySelector(`.${styles.contextMenu} .bubble`),
   );
 
   const handlePreviewClick = useLastCallback((e: React.MouseEvent): void => {
@@ -156,14 +138,6 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     return undefined;
   }
 
-  // TODO Refactor so `WebPage` can be used without message
-  const { photo, ...webPageWithoutPhoto } = renderingWebPage;
-  const messageStub = {
-    content: {
-      webPage: webPageWithoutPhoto,
-    },
-  } as ApiMessage;
-
   function renderContextMenu() {
     return (
       <Menu
@@ -172,7 +146,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
         getTriggerElement={getTriggerElement}
         getRootElement={getRootElement}
         getMenuElement={getMenuElement}
-        className="web-page-preview-context-menu"
+        className={styles.contextMenu}
         onClose={handleContextMenuClose}
         onCloseAnimationEnd={handleContextMenuHide}
         autoClose
@@ -180,36 +154,31 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
         <>
           {
             isInvertedMedia ? (
-
               <MenuItem icon="move-caption-up" onClick={() => updateIsInvertedMedia(undefined)}>
-                {lang('PreviewSender.MoveTextUp')}
+                {lang('ContextMoveTextUp')}
               </MenuItem>
             ) : (
-
               <MenuItem icon="move-caption-down" onClick={() => updateIsInvertedMedia(true)}>
-                {lang(('PreviewSender.MoveTextDown'))}
+                {lang('ContextMoveTextDown')}
               </MenuItem>
             )
           }
           {hasMediaSizeOptions && (
             isSmallerMedia ? (
-
               <MenuItem icon="expand" onClick={() => updateIsLargerMedia('large')}>
-                {lang('ChatInput.EditLink.LargerMedia')}
+                {lang('ContextLinkLargerMedia')}
               </MenuItem>
             ) : (
-
               <MenuItem icon="collapse" onClick={() => updateIsLargerMedia('small')}>
-                {lang(('ChatInput.EditLink.SmallerMedia'))}
+                {lang('ContextLinkSmallerMedia')}
               </MenuItem>
             )
           )}
           <MenuItem
             icon="delete"
-
             onClick={handleClearWebpagePreview}
           >
-            {lang('ChatInput.EditLink.RemovePreview')}
+            {lang('ContextLinkRemovePreview')}
           </MenuItem>
         </>
       </Menu>
@@ -217,24 +186,55 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <div className={buildClassName('WebPagePreview', transitionClassNames)} ref={ref}>
-      <div className="WebPagePreview_inner">
-        <div className="WebPagePreview-left-icon" onClick={handlePreviewClick}>
+    <div
+      className={buildClassName(
+        styles.root,
+        !isEditing && styles.interactive,
+      )}
+      ref={ref}
+    >
+      <div className={styles.inner}>
+        <div className={styles.leftIcon} onClick={handlePreviewClick}>
           <Icon name="link" />
         </div>
-        <WebPage
-          message={messageStub}
-          inPreview
-          theme={theme}
-          onContainerClick={handlePreviewClick}
-          isEditing={isEditing}
-        />
+        {renderingWebPage && renderingWebPage.webpageType !== 'empty' && (
+          <PeerColorWrapper
+            noUserColors
+            className={styles.preview}
+            onContextMenu={handleContextMenu}
+            onMouseDown={handleBeforeContextMenu}
+            onClick={handlePreviewClick}
+          >
+            {hasPreviewMedia && (
+              <div className={styles.previewImageContainer}>
+                {thumbnailUrl && (
+                  <img src={thumbnailUrl} alt="" className={styles.previewImage} />
+                )}
+                {shouldRenderPreviewMedia && (
+                  <img ref={previewMediaRef} src={previewMediaUrl} alt="" className={styles.previewImage} />
+                )}
+              </div>
+            )}
+            <div className={styles.previewText}>
+              <span className={styles.siteName}>
+                {isFullWebPage
+                  ? (renderingWebPage.siteName || renderingWebPage.url)
+                  : lang('Loading')}
+              </span>
+              <span className={styles.siteDescription}>
+                {isFullWebPage
+                  ? (renderingWebPage.description || lang(getMediaTypeKey(renderingWebPage)))
+                  : renderingWebPage.url}
+              </span>
+            </div>
+          </PeerColorWrapper>
+        )}
         <Button
-          className="WebPagePreview-clear"
+          className={styles.clear}
           round
           faded
           color="translucent"
-          ariaLabel="Clear Webpage Preview"
+          ariaLabel={lang('AccLinkRemovePreview')}
           onClick={handleClearWebpagePreview}
         >
           <Icon name="close" />
@@ -245,15 +245,27 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   );
 };
 
+function getMediaTypeKey(webPage: ApiWebPageFull) {
+  if (webPage.photo) return 'AttachPhoto';
+  if (webPage.video) return 'AttachVideo';
+  if (webPage.audio) return 'AttachMusic';
+  if (webPage.document) return 'AttachDocument';
+  if (webPage.story) return 'AttachStory';
+  return 'LinkPreview';
+}
+
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId }): StateProps => {
+    const tabState = selectTabState(global);
     const noWebPage = selectNoWebPage(global, chatId, threadId);
     const {
       attachmentSettings,
     } = global;
+
+    const webPagePreview = tabState.webPagePreviewId ? selectWebPage(global, tabState.webPagePreviewId) : undefined;
+
     return {
-      theme: selectTheme(global),
-      webPagePreview: selectTabState(global).webPagePreview,
+      webPagePreview: webPagePreview?.webpageType === 'empty' ? undefined : webPagePreview,
       noWebPage,
       attachmentSettings,
     };

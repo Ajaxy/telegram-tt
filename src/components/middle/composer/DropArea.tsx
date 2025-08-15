@@ -1,5 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -24,9 +22,9 @@ import './DropArea.scss';
 export type OwnProps = {
   isOpen: boolean;
   withQuick?: boolean;
+  editingMessage?: ApiMessage | undefined;
   onHide: NoneToVoidFunction;
   onFileSelect: (files: File[]) => void;
-  editingMessage?: ApiMessage | undefined;
 };
 
 export enum DropAreaState {
@@ -37,9 +35,9 @@ export enum DropAreaState {
 
 const DROP_LEAVE_TIMEOUT_MS = 150;
 
-const DropArea: FC<OwnProps> = ({
-  isOpen, withQuick, onHide, onFileSelect, editingMessage,
-}) => {
+const DropArea = ({
+  isOpen, withQuick, editingMessage, onHide, onFileSelect,
+}: OwnProps) => {
   const lang = useLang();
   const { showNotification, updateAttachmentSettings } = getActions();
   const hideTimeoutRef = useRef<number>();

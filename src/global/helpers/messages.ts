@@ -9,7 +9,7 @@ import type {
   ApiTypeStory,
 } from '../../api/types';
 import type {
-  ApiPoll, MediaContainer, StatefulMediaContent,
+  ApiPoll, ApiWebPage, MediaContainer, StatefulMediaContent,
 } from '../../api/types/messages';
 import type { ThreadId } from '../../types';
 import type { LangFn } from '../../util/localization';
@@ -34,6 +34,7 @@ import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
 import { isLocalMessageId } from '../../util/keys/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { getGlobal } from '../index';
+import { selectPollFromMessage, selectWebPageFromMessage } from '../selectors';
 import { getMainUsername } from './users';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
@@ -68,24 +69,28 @@ export function hasMessageText(message: MediaContainer) {
 }
 
 export function getMessageStatefulContent(global: GlobalState, message: ApiMessage): StatefulMediaContent {
-  const poll = message.content.pollId ? global.messages.pollById[message.content.pollId] : undefined;
+  const poll = selectPollFromMessage(global, message);
+  const webPage = selectWebPageFromMessage(global, message);
 
   const { peerId: storyPeerId, id: storyId } = message.content.storyData || {};
   const story = storyId && storyPeerId ? global.stories.byPeerId[storyPeerId]?.byId[storyId] : undefined;
 
-  return groupStatefulContent({ poll, story });
+  return groupStatefulContent({ poll, story, webPage });
 }
 
 export function groupStatefulContent({
   poll,
   story,
+  webPage,
 }: {
   poll?: ApiPoll;
   story?: ApiTypeStory;
+  webPage?: ApiWebPage;
 }) {
   return {
     poll,
     story: story && 'content' in story ? story : undefined,
+    webPage,
   };
 }
 
@@ -104,8 +109,8 @@ export function getMessageCustomShape(message: ApiMessage): boolean {
     return true;
   }
 
-  if (!text || photo || video || audio || voice || document || pollId || webPage || contact || action || game || invoice
-    || location || storyData) {
+  if (!text || photo || video || audio || voice || document || pollId || webPage || contact || action || game
+    || invoice || location || storyData) {
     return false;
   }
 

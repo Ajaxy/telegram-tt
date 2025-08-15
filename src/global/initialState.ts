@@ -157,6 +157,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     byChatId: {},
     sponsoredByChatId: {},
     pollById: {},
+    webPageById: {},
     playbackByChatId: {},
   },
 
