@@ -34,6 +34,7 @@ import MapModal from './map/MapModal.async';
 import OneTimeMediaModal from './oneTimeMedia/OneTimeMediaModal.async';
 import PaidReactionModal from './paidReaction/PaidReactionModal.async';
 import PreparedMessageModal from './preparedMessage/PreparedMessageModal.async';
+import PriceConfirmModal from './priceConfirm/PriceConfirmModal.async';
 import ReportAdModal from './reportAd/ReportAdModal.async';
 import ReportModal from './reportModal/ReportModal.async';
 import SharePreparedMessageModal from './sharePreparedMessage/SharePreparedMessageModal.async';
@@ -89,6 +90,7 @@ type ModalKey = keyof Pick<TabState,
   'giftStatusInfoModal' |
   'giftTransferModal' |
   'chatRefundModal' |
+  'priceConfirmModal' |
   'isFrozenAccountModalOpen' |
   'deleteAccountModal' |
   'isAgeVerificationModalOpen'
@@ -145,6 +147,7 @@ const MODALS: ModalRegistry = {
   sharePreparedMessageModal: SharePreparedMessageModal,
   giftTransferModal: GiftTransferModal,
   chatRefundModal: ChatRefundModal,
+  priceConfirmModal: PriceConfirmModal,
   isFrozenAccountModalOpen: FrozenAccountModal,
   deleteAccountModal: DeleteAccountModal,
   isAgeVerificationModalOpen: AgeVerificationModal,

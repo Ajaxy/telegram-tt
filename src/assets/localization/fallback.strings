@@ -2153,3 +2153,15 @@
 "TitleAgeCheckFailed" = "Age Check Failed";
 "TitleAgeCheckSuccess" = "Age Check Success";
 "ButtonAgeVerification" = "Verify My Age";
+"PriceInStars" = "Price in Stars";
+"PriceInTON" = "Price in TON";
+"DescriptionComposerGiftMinimumCurrencyPrice" = "Minimum price is **{amount}**.";
+"DescriptionComposerGiftResaleCurrencyPrice" = "You will receive **{amount}**.";
+"ButtonSellGiftTon" = "Sell for {amount}";
+"OnlyAcceptTON" = "Only Accept TON";
+"OnlyAcceptTONDescription" = "If the buyer pays you in TON, there is no risk of refunds, unlike Star payments.";
+"DescriptionPayInTON" = "Pay with TON to skip the 21-day wait before transferring the gift again.";
+"LabelPayInTON" = "Pay in TON";
+"PriceChanged" = "Price Changed";
+"PayNewPrice" = "Pay New Price";
+"PriceChangedText" = "The price has already changed from **{originalAmount}** to **{newAmount}**. Do you want to pay the new price?";

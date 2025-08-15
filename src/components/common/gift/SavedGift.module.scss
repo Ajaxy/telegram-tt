@@ -34,6 +34,24 @@
   }
 }
 
+.star {
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0.125rem;
+  font-size: 0.75rem !important;
+}
+
+.priceBadge {
+  position: absolute;
+  bottom: 0.5rem;
+
+  height: 1.5rem !important;
+  margin-top: 0.625rem;
+
+  font-size: 0.6875rem !important;
+  font-weight: var(--font-weight-semibold) !important;
+  line-height: 1;
+}
+
 .topIcon {
   position: absolute;
   top: 0.25rem;

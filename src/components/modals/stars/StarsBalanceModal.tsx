@@ -243,7 +243,7 @@ const StarsBalanceModal = ({
           {Boolean(tonUsdRate) && (
             <span className={styles.tonInUsd}>
               {`≈ ${formatCurrencyAsString(
-                convertTonToUsd(balance?.amount || 0, tonUsdRate),
+                convertTonToUsd(balance?.amount || 0, tonUsdRate, true),
                 'USD',
                 lang.code,
               )}`}

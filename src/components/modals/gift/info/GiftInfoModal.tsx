@@ -9,6 +9,7 @@ import type {
 } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 
+import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../../config';
 import { getHasAdminRight } from '../../../../global/helpers';
 import { getPeerTitle, isApiPeerChat, isApiPeerUser } from '../../../../global/helpers/peers';
 import { getMainUsername } from '../../../../global/helpers/users';
@@ -16,7 +17,9 @@ import { selectPeer, selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
 import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
-import { formatStarsAsIcon, formatStarsAsText } from '../../../../util/localization/format';
+import {
+  formatStarsAsIcon, formatStarsAsText, formatTonAsIcon, formatTonAsText,
+} from '../../../../util/localization/format';
 import { CUSTOM_PEER_HIDDEN } from '../../../../util/objects/customPeer';
 import { getServerTime } from '../../../../util/serverTime';
 import { formatPercent } from '../../../../util/textFormat';
@@ -37,6 +40,7 @@ import GiftTransferPreview from '../../../common/gift/GiftTransferPreview';
 import Icon from '../../../common/icons/Icon';
 import SafeLink from '../../../common/SafeLink';
 import Button from '../../../ui/Button';
+import Checkbox from '../../../ui/Checkbox';
 import ConfirmDialog from '../../../ui/ConfirmDialog';
 import DropdownMenu from '../../../ui/DropdownMenu';
 import Link from '../../../ui/Link';
@@ -96,6 +100,7 @@ const GiftInfoModal = ({
   const lang = useLang();
   const oldLang = useOldLang();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
+  const [shouldPayInTon, setShouldPayInTon] = useState<boolean>(false);
 
   const isOpen = Boolean(modal);
   const renderingModal = useCurrentOrPrev(modal);
@@ -145,8 +150,21 @@ const GiftInfoModal = ({
     isTargetChat ? hasAdminRights : renderingTargetPeer?.id === currentUserId
   );
 
-  const resellPriceInStars = isGiftUnique ? gift.resellPriceInStars : undefined;
-  const canBuyGift = !canManage && Boolean(resellPriceInStars);
+  function getResalePrice(shouldPayInTon?: boolean) {
+    if (!isGiftUnique) return undefined;
+    const amounts = gift.resellPrice;
+    if (!amounts) return undefined;
+
+    if (gift?.resaleTonOnly || shouldPayInTon) {
+      return amounts.find((amount) => amount.currency === TON_CURRENCY_CODE);
+    }
+
+    return amounts.find((amount) => amount.currency === STARS_CURRENCY_CODE);
+  }
+
+  const resellPrice = getResalePrice();
+  const confirmPrice = getResalePrice(shouldPayInTon);
+  const canBuyGift = !canManage && Boolean(resellPrice);
 
   const giftOwnerTitle = (() => {
     if (!isGiftUnique) return undefined;
@@ -187,7 +205,7 @@ const GiftInfoModal = ({
   });
 
   const handleBuyGift = useLastCallback(() => {
-    if (gift?.type !== 'starGiftUnique' || !gift.resellPriceInStars) return;
+    if (gift?.type !== 'starGiftUnique' || !getResalePrice()) return;
     setIsConfirmModalOpen(true);
   });
 
@@ -197,10 +215,11 @@ const GiftInfoModal = ({
 
   const handleConfirmBuyGift = useLastCallback(() => {
     const peer = recipientPeer || currentUser;
-    if (!peer || gift?.type !== 'starGiftUnique' || !gift.resellPriceInStars) return;
+    const price = getResalePrice(shouldPayInTon);
+    if (!peer || !price || gift?.type !== 'starGiftUnique') return;
     closeConfirmModal();
     closeGiftModal();
-    buyStarGift({ peerId: peer.id, slug: gift.slug, stars: gift.resellPriceInStars });
+    buyStarGift({ peerId: peer.id, slug: gift.slug, price });
   });
 
   const giftAttributes = useMemo(() => {
@@ -233,7 +252,9 @@ const GiftInfoModal = ({
       return (
         <Button noForcedUpperCase size="smaller" onClick={handleBuyGift}>
           {lang('ButtonBuyGift', {
-            stars: formatStarsAsIcon(lang, resellPriceInStars, { asFont: true }),
+            stars: resellPrice?.currency === TON_CURRENCY_CODE
+              ? formatTonAsIcon(lang, resellPrice.amount, { shouldConvertFromNanos: true })
+              : formatStarsAsIcon(lang, resellPrice?.amount, { asFont: true }),
           }, { withNodes: true })}
         </Button>
       );
@@ -389,12 +410,17 @@ const GiftInfoModal = ({
       <div
         className={styles.modalHeader}
       >
-        {Boolean(canManage && resellPriceInStars) && (
+        {Boolean(canManage && resellPrice) && (
           <div className={styles.giftResalePriceContainer}>
-            {formatStarsAsIcon(lang, resellPriceInStars!, {
-              asFont: true,
-              className: styles.giftResalePriceStar,
-            })}
+            {resellPrice!.currency === TON_CURRENCY_CODE
+              ? formatTonAsIcon(lang, resellPrice!.amount, {
+                className: styles.giftResalePriceStar,
+                shouldConvertFromNanos: true,
+              })
+              : formatStarsAsIcon(lang, resellPrice!.amount, {
+                asFont: true,
+                className: styles.giftResalePriceStar,
+              })}
           </div>
         )}
         <div className={styles.headerSplitButton}>
@@ -727,7 +753,7 @@ const GiftInfoModal = ({
     gift, giftAttributes, renderFooterButton, isTargetChat,
     SettingsMenuButton, isGiftUnique, renderingModal,
     collectibleEmojiStatuses, currentUserEmojiStatus, saleDateInfo,
-    canBuyGift, giftOwnerTitle, isOpen, resellPriceInStars, giftSubtitle,
+    canBuyGift, giftOwnerTitle, isOpen, resellPrice, giftSubtitle,
     releasedByPeer,
   ]);
 
@@ -743,15 +769,18 @@ const GiftInfoModal = ({
         className={styles.modal}
         onClose={handleClose}
         withBalanceBar={Boolean(canBuyGift)}
+        currencyInBalanceBar={confirmPrice?.currency}
         isLowStackPriority
       />
-      {uniqueGift && currentUser && Boolean(resellPriceInStars) && (
+      {uniqueGift && currentUser && Boolean(confirmPrice) && (
         <ConfirmDialog
           isOpen={isConfirmModalOpen}
           noDefaultTitle
           onClose={closeConfirmModal}
           confirmLabel={lang('ButtonBuyGift', {
-            stars: formatStarsAsIcon(lang, resellPriceInStars, { asFont: true }),
+            stars: confirmPrice?.currency === TON_CURRENCY_CODE
+              ? formatTonAsIcon(lang, confirmPrice.amount, { shouldConvertFromNanos: true })
+              : formatStarsAsIcon(lang, confirmPrice.amount, { asFont: true }),
           }, { withNodes: true })}
           confirmHandler={handleConfirmBuyGift}
         >
@@ -765,7 +794,9 @@ const GiftInfoModal = ({
               <p>
                 {lang('GiftBuyConfirmDescription', {
                   gift: lang('GiftUnique', { title: uniqueGift.title, number: uniqueGift.number }),
-                  stars: formatStarsAsText(lang, resellPriceInStars),
+                  stars: confirmPrice?.currency === TON_CURRENCY_CODE
+                    ? formatTonAsText(lang, confirmPrice.amount, true)
+                    : formatStarsAsText(lang, confirmPrice.amount),
                 }, {
                   withNodes: true,
                   withMarkdown: true,
@@ -777,7 +808,9 @@ const GiftInfoModal = ({
               <p>
                 {lang('GiftBuyForPeerConfirmDescription', {
                   gift: lang('GiftUnique', { title: uniqueGift.title, number: uniqueGift.number }),
-                  stars: formatStarsAsText(lang, resellPriceInStars),
+                  stars: confirmPrice?.currency === TON_CURRENCY_CODE
+                    ? formatTonAsText(lang, confirmPrice.amount, true)
+                    : formatStarsAsText(lang, confirmPrice.amount),
                   peer: getPeerTitle(lang, recipientPeer),
                 }, {
                   withNodes: true,
@@ -785,6 +818,20 @@ const GiftInfoModal = ({
                 })}
               </p>
             )}
+          {!uniqueGift.resaleTonOnly && (
+            <>
+              <Checkbox
+                className={styles.checkBox}
+                label={lang('LabelPayInTON')}
+                checked={shouldPayInTon}
+                onCheck={setShouldPayInTon}
+              />
+
+              <div className={styles.checkBoxDescription}>
+                {lang('DescriptionPayInTON')}
+              </div>
+            </>
+          )}
         </ConfirmDialog>
       )}
       {savedGift && (

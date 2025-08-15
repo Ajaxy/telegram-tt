@@ -17,6 +17,7 @@ import { useTransitionActiveKey } from '../../../hooks/animations/useTransitionA
 import useLang from '../../../hooks/useLang';
 
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
+import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
 import RadialPatternBackground from '../../common/profile/RadialPatternBackground';
 import Transition from '../../ui/Transition';
@@ -103,7 +104,8 @@ const UniqueGiftHeader = ({
           <span>
             {formatStarsTransactionAmount(lang, resellPrice)}
           </span>
-          <StarIcon type="gold" size="middle" />
+          {resellPrice.currency === 'XTR' && <StarIcon type="gold" size="middle" />}
+          {resellPrice.currency === 'TON' && <Icon name="toncoin" />}
         </p>
       )}
     </div>

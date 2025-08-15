@@ -5,14 +5,17 @@ import { getActions, withGlobal } from '../../../../global';
 
 import type { TabState } from '../../../../global/types';
 
-import { formatCurrencyAsString } from '../../../../util/formatCurrency';
-import { formatStarsAsIcon, formatStarsAsText } from '../../../../util/localization/format';
+import { convertTonFromNanos, convertTonToNanos } from '../../../../util/formatCurrency';
+import { convertTonToUsd, formatCurrencyAsString } from '../../../../util/formatCurrency';
+import { formatStarsAsIcon, formatStarsAsText, formatTonAsIcon,
+  formatTonAsText } from '../../../../util/localization/format';
 
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 
 import Button from '../../../ui/Button';
+import Checkbox from '../../../ui/Checkbox';
 import InputText from '../../../ui/InputText';
 import Modal from '../../../ui/Modal';
 
@@ -27,11 +30,16 @@ export type StateProps = {
   starsStargiftResaleAmountMin: number;
   starsStargiftResaleAmountMax?: number;
   starsUsdWithdrawRate?: number;
+  tonStargiftResaleCommissionPermille?: number;
+  tonStargiftResaleAmountMin: number;
+  tonStargiftResaleAmountMax?: number;
+  tonUsdRate?: number;
 };
 
 const GiftResalePriceComposerModal = ({
   modal, starsStargiftResaleCommissionPermille,
   starsStargiftResaleAmountMin, starsStargiftResaleAmountMax, starsUsdWithdrawRate,
+  tonStargiftResaleCommissionPermille, tonStargiftResaleAmountMin, tonStargiftResaleAmountMax, tonUsdRate,
 }: OwnProps & StateProps) => {
   const {
     closeGiftResalePriceComposerModal,
@@ -41,6 +49,7 @@ const GiftResalePriceComposerModal = ({
   } = getActions();
   const isOpen = Boolean(modal);
   const [price, setPrice] = useState<number | undefined>(undefined);
+  const [isPriceInTon, setIsPriceInTon] = useState(false);
 
   const renderingModal = useCurrentOrPrev(modal);
   const { gift: typeGift } = renderingModal || {};
@@ -53,8 +62,9 @@ const GiftResalePriceComposerModal = ({
   const handleChangePrice = useLastCallback((e) => {
     const value = e.target.value;
     const number = parseFloat(value);
+    const maxAmount = isPriceInTon ? tonStargiftResaleAmountMax : starsStargiftResaleAmountMax;
     const result = value === '' || Number.isNaN(number) ? undefined
-      : starsStargiftResaleAmountMax ? Math.min(number, starsStargiftResaleAmountMax) : number;
+      : maxAmount ? Math.min(number, maxAmount) : number;
     setPrice(result);
   });
 
@@ -66,7 +76,15 @@ const GiftResalePriceComposerModal = ({
     if (!savedGift || savedGift.gift.type !== 'starGiftUnique' || !savedGift.inputGift || !price) return;
     closeGiftResalePriceComposerModal();
     closeGiftInfoModal();
-    updateStarGiftPrice({ gift: savedGift.inputGift, price });
+    updateStarGiftPrice(
+      {
+        gift: savedGift.inputGift,
+        price: {
+          currency: isPriceInTon ? 'TON' : 'XTR',
+          amount: isPriceInTon ? convertTonToNanos(price) : price,
+          nanos: 0,
+        },
+      });
     showNotification({
       icon: 'sell-outline',
       message: {
@@ -77,50 +95,56 @@ const GiftResalePriceComposerModal = ({
       },
     });
   });
-  const commission = starsStargiftResaleCommissionPermille;
-  const isPriceCorrect = hasPrice && price > starsStargiftResaleAmountMin;
+  const commission = isPriceInTon ? tonStargiftResaleCommissionPermille : starsStargiftResaleCommissionPermille;
+  const minAmount = isPriceInTon ? tonStargiftResaleAmountMin : starsStargiftResaleAmountMin;
+  const isPriceCorrect = hasPrice && price >= minAmount;
 
   return (
     <Modal
       isOpen={isOpen}
-      title={lang('GiftSellTitle')}
+      title={isPriceInTon ? lang('PriceInTON') : lang('PriceInStars')}
       hasCloseButton
       isSlim
       onClose={handleClose}
     >
       <div className={styles.inputPrice}>
         <InputText
-          label={lang('InputPlaceholderGiftResalePrice')}
+          label={isPriceInTon ? lang('EnterPriceInTon') : lang('EnterPriceInStars')}
           onChange={handleChangePrice}
           value={price?.toString()}
           inputMode="numeric"
           tabIndex={0}
-          teactExperimentControlled
+          teactExperimentControlled={!isPriceInTon}
         />
       </div>
 
-      <div className={styles.descriptionContainer}>
+      <div className={styles.inputPriceDescription}>
         <span>
           {!isPriceCorrect && Boolean(commission) && lang('DescriptionComposerGiftMinimumPrice', {
-            stars: formatStarsAsText(lang, starsStargiftResaleAmountMin),
+            stars: isPriceInTon ? formatTonAsText(lang, minAmount) : formatStarsAsText(lang, minAmount),
           }, {
             withMarkdown: true,
             withNodes: true,
           })}
-          {isPriceCorrect && lang('DescriptionComposerGiftResalePrice',
-            {
-              stars: formatStarsAsText(lang, commission ? Number((price * (commission)).toFixed()) : price),
-            },
-            {
-              withMarkdown: true,
-              withNodes: true,
-            })}
+          {isPriceCorrect && (() => {
+            const priceWithCommission = commission ? Number((price * commission).toFixed()) : price;
+            return lang('DescriptionComposerGiftResalePrice',
+              {
+                stars: isPriceInTon
+                  ? formatTonAsText(lang, priceWithCommission)
+                  : formatStarsAsText(lang, priceWithCommission),
+              },
+              {
+                withMarkdown: true,
+                withNodes: true,
+              });
+          })()}
         </span>
 
-        {isPriceCorrect && Boolean(starsUsdWithdrawRate) && (
+        {isPriceCorrect && Boolean(isPriceInTon ? tonUsdRate : starsUsdWithdrawRate) && (
           <span className={styles.descriptionPrice}>
             {`≈ ${formatCurrencyAsString(
-              price * starsUsdWithdrawRate,
+              isPriceInTon ? convertTonToUsd(price, tonUsdRate!) : price * starsUsdWithdrawRate!,
               'USD',
               lang.code,
             )}`}
@@ -128,9 +152,21 @@ const GiftResalePriceComposerModal = ({
         )}
       </div>
 
+      <Checkbox
+        className={styles.checkBox}
+        label={lang('OnlyAcceptTON')}
+        checked={isPriceInTon}
+        onCheck={setIsPriceInTon}
+      />
+
+      <div className={styles.checkBoxDescription}>
+        {lang('OnlyAcceptTONDescription')}
+      </div>
+
       <Button noForcedUpperCase disabled={!isPriceCorrect} size="smaller" onClick={handleSellGift}>
         {isPriceCorrect && lang('ButtonSellGift', {
-          stars: formatStarsAsIcon(lang, price, { asFont: true }),
+          stars: isPriceInTon ? formatTonAsIcon(lang, price)
+            : formatStarsAsIcon(lang, price, { asFont: true }),
         }, { withNodes: true })}
         {!isPriceCorrect && lang('Sell')}
       </Button>
@@ -148,11 +184,23 @@ export default memo(withGlobal<OwnProps>(
     const starsUsdWithdrawRateX1000 = global.appConfig?.starsUsdWithdrawRateX1000;
     const starsUsdWithdrawRate = starsUsdWithdrawRateX1000 ? starsUsdWithdrawRateX1000 / 1000 : 1;
 
+    const tonConfigPermille = global.appConfig?.tonStargiftResaleCommissionPermille;
+    const tonStargiftResaleCommissionPermille = tonConfigPermille ? (tonConfigPermille / 1000) : 0;
+    const tonStargiftResaleAmountMin = convertTonFromNanos(global.appConfig?.tonStargiftResaleAmountMin || 0);
+    const maxTonFromConfig = global.appConfig?.tonStargiftResaleAmountMax;
+    const tonStargiftResaleAmountMax = maxTonFromConfig && convertTonFromNanos(maxTonFromConfig);
+
+    const tonUsdRate = global.appConfig?.tonUsdRate;
+
     return {
       starsStargiftResaleCommissionPermille,
       starsStargiftResaleAmountMin,
       starsStargiftResaleAmountMax,
       starsUsdWithdrawRate,
+      tonStargiftResaleCommissionPermille,
+      tonStargiftResaleAmountMin,
+      tonStargiftResaleAmountMax,
+      tonUsdRate,
     };
   },
 )(GiftResalePriceComposerModal));

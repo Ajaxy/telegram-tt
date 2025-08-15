@@ -49,6 +49,7 @@ export type OwnProps = {
   onCloseAnimationEnd?: () => void;
   onEnter?: () => void;
   withBalanceBar?: boolean;
+  currencyInBalanceBar?: 'TON' | 'XTR';
   isCondensedHeader?: boolean;
 };
 
@@ -76,6 +77,7 @@ const Modal: FC<OwnProps> = ({
   onEnter,
   withBalanceBar,
   isCondensedHeader,
+  currencyInBalanceBar = 'XTR',
 }) => {
   const {
     ref: modalRef,
@@ -187,6 +189,7 @@ const Modal: FC<OwnProps> = ({
         {withBalanceBar && (
           <ModalStarBalanceBar
             isModalOpen={isOpen}
+            currency={currencyInBalanceBar}
           />
         )}
         <div className="modal-container">

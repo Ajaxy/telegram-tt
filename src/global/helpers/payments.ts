@@ -16,7 +16,7 @@ import type { GlobalState } from '../types';
 
 import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../config';
 import arePropsShallowEqual from '../../util/arePropsShallowEqual';
-import { convertCurrencyFromBaseUnit } from '../../util/formatCurrency';
+import { convertTonFromNanos } from '../../util/formatCurrency';
 import { selectChat, selectPeer, selectUser } from '../selectors';
 
 export function getRequestInputInvoice<T extends GlobalState>(
@@ -37,6 +37,7 @@ export function getRequestInputInvoice<T extends GlobalState>(
       type: 'stargiftResale',
       slug,
       peer,
+      currency: inputInvoice.currency,
     };
   }
 
@@ -352,15 +353,14 @@ export function formatStarsTransactionAmount(lang: LangFn, currencyAmount: ApiTy
   }
 
   if (currencyAmount.currency === TON_CURRENCY_CODE) {
-    const amount = convertCurrencyFromBaseUnit(currencyAmount.amount, currencyAmount.currency);
+    const amount = convertTonFromNanos(currencyAmount.amount);
     const absAmount = Math.abs(amount);
-    const tonText = lang('TonAmountText', { amount: absAmount }, { pluralValue: absAmount });
 
     if (amount < 0) {
-      return `- ${tonText}`;
+      return `- ${lang.preciseNumber(absAmount)}`;
     }
 
-    return `+ ${tonText}`;
+    return `+ ${lang.preciseNumber(absAmount)}`;
   }
 
   return undefined;

@@ -33,6 +33,7 @@ type OwnProps = {
   onClose: NoneToVoidFunction;
   onButtonClick?: NoneToVoidFunction;
   withBalanceBar?: boolean;
+  currencyInBalanceBar?: 'TON' | 'XTR';
   isLowStackPriority?: true;
 };
 
@@ -51,6 +52,7 @@ const TableInfoModal = ({
   onButtonClick,
   withBalanceBar,
   isLowStackPriority,
+  currencyInBalanceBar,
 }: OwnProps) => {
   const { openChat } = getActions();
   const handleOpenChat = useLastCallback((peerId: string) => {
@@ -71,6 +73,7 @@ const TableInfoModal = ({
       contentClassName={styles.content}
       onClose={onClose}
       withBalanceBar={withBalanceBar}
+      currencyInBalanceBar={currencyInBalanceBar}
       isLowStackPriority={isLowStackPriority}
     >
       {headerAvatarPeer && (

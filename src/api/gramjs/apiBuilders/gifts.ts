@@ -16,6 +16,7 @@ import { numberToHexColor } from '../../../util/colors';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { addDocumentToLocalDb } from '../helpers/localDb';
 import { buildApiFormattedText } from './common';
+import { buildApiCurrencyAmount } from './payments';
 import { getApiChatIdFromMtpPeer } from './peers';
 import { buildStickerFromDocument } from './symbols';
 import { buildApiUser } from './users';
@@ -24,7 +25,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
   if (starGift instanceof GramJs.StarGiftUnique) {
     const {
       id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal, slug, ownerAddress,
-      giftAddress, resellStars, releasedBy,
+      giftAddress, resellAmount, releasedBy, resaleTonOnly,
     } = starGift;
 
     return {
@@ -40,8 +41,9 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
       issuedCount: availabilityIssued,
       slug,
       giftAddress,
-      resellPriceInStars: resellStars?.toJSNumber(),
+      resellPrice: resellAmount && resellAmount.map((amount) => buildApiCurrencyAmount(amount)).filter(Boolean),
       releasedByPeerId: releasedBy && getApiChatIdFromMtpPeer(releasedBy),
+      resaleTonOnly,
     };
   }
 

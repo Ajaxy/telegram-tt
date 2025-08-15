@@ -38,14 +38,14 @@ export function formatCurrency(
   }
 
   if (currency === TON_CURRENCY_CODE) {
-    return formatTonAsIcon(lang, price, { asFont: options?.asFontIcon, className: options?.iconClassName });
+    return formatTonAsIcon(lang, price, { className: options?.iconClassName });
   }
 
   return formatCurrencyAsString(totalPrice, currency, lang.code, options);
 }
 
-export function convertTonToUsd(amount: number, usdRate: number): number {
-  const tonInRegularUnits = convertTonFromNanos(amount);
+export function convertTonToUsd(amount: number, usdRate: number, isInNanos: boolean = false): number {
+  const tonInRegularUnits = isInNanos ? convertTonFromNanos(amount) : amount;
   return tonInRegularUnits * usdRate * 100;
 }
 

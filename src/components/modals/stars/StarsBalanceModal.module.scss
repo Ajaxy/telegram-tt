@@ -76,6 +76,12 @@
   margin-bottom: 0.5rem;
 }
 
+.tonBalanceContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .tonBalance {
   unicode-bidi: plaintext;
   display: flex;
@@ -87,12 +93,14 @@
 }
 
 .tonIconBalance {
+  margin-right: 0.25rem;
   color: var(--color-primary);
 }
 
 .tonInUsd {
   font-size: 1rem;
   color: var(--color-text-secondary);
+  text-align: center;
 }
 
 .tonIconLogo {

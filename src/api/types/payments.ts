@@ -1,4 +1,4 @@
-import type { PREMIUM_FEATURE_SECTIONS } from '../../config';
+import type { PREMIUM_FEATURE_SECTIONS, STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../config';
 import type { ApiWebDocument } from './bots';
 import type { ApiChat, ApiPeer } from './chats';
 import type {
@@ -364,6 +364,7 @@ export type ApiInputInvoiceStarGiftResale = {
   type: 'stargiftResale';
   slug: string;
   peerId: string;
+  currency: typeof TON_CURRENCY_CODE | typeof STARS_CURRENCY_CODE;
 };
 
 export type ApiInputInvoiceStarsGiveaway = {
@@ -451,6 +452,7 @@ export type ApiRequestInputInvoiceStarGiftResale = {
   type: 'stargiftResale';
   slug: string;
   peer: ApiPeer;
+  currency: typeof TON_CURRENCY_CODE | typeof STARS_CURRENCY_CODE;
 };
 
 export type ApiRequestInputInvoiceChatInviteSubscription = {

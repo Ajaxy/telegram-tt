@@ -2,6 +2,20 @@
   overflow: hidden;
 }
 
+.checkBox {
+  margin-inline: -1rem;
+}
+
+.checkBoxDescription {
+  display: flex;
+
+  margin-bottom: 2rem;
+  margin-inline: 1rem;
+
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
 .header {
   display: flex;
   flex-direction: column;

@@ -444,6 +444,16 @@ export type TabState = {
     status?: ApiPaymentStatus;
   };
 
+  priceConfirmModal?: {
+    originalAmount?: number;
+    newAmount?: number;
+    currency: 'TON' | 'XTR';
+    directInfo?: {
+      formId: string;
+      inputInvoice: ApiInputInvoice;
+    };
+  };
+
   chatCreation?: {
     progress: ChatCreationProgress;
     error?: string;

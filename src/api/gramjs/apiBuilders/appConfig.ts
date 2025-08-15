@@ -105,6 +105,9 @@ export interface GramJsAppConfig extends LimitsConfig {
   stars_stargift_resale_amount_max?: number;
   stars_stargift_resale_amount_min?: number;
   stars_stargift_resale_commission_permille?: number;
+  ton_stargift_resale_amount_min?: number;
+  ton_stargift_resale_amount_max?: number;
+  ton_stargift_resale_commission_permille?: number;
   stars_suggested_post_amount_max?: number;
   stars_suggested_post_amount_min?: number;
   stars_suggested_post_commission_permille?: number;
@@ -225,6 +228,9 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     starsStargiftResaleAmountMin: appConfig.stars_stargift_resale_amount_min,
     starsStargiftResaleAmountMax: appConfig.stars_stargift_resale_amount_max,
     starsStargiftResaleCommissionPermille: appConfig.stars_stargift_resale_commission_permille,
+    tonStargiftResaleAmountMin: appConfig.ton_stargift_resale_amount_min,
+    tonStargiftResaleAmountMax: appConfig.ton_stargift_resale_amount_max,
+    tonStargiftResaleCommissionPermille: appConfig.ton_stargift_resale_commission_permille,
     starsSuggestedPostAmountMax: appConfig.stars_suggested_post_amount_max,
     starsSuggestedPostAmountMin: appConfig.stars_suggested_post_amount_min,
     starsSuggestedPostCommissionPermille: appConfig.stars_suggested_post_commission_permille,

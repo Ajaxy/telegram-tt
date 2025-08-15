@@ -43,5 +43,11 @@
 }
 
 .starIcon {
+  height: 1rem !important;
   margin-inline-start: 0.125rem !important;
+  line-height: 1rem !important;
+}
+
+.tonInUsdDescription {
+  color: var(--color-text-secondary);
 }

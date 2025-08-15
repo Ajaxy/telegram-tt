@@ -151,3 +151,30 @@ addActionHandler('closePaymentMessageConfirmDialogOpen', (global, actions, paylo
     isPaymentMessageConfirmDialogOpen: false,
   }, tabId);
 });
+
+addActionHandler('openPriceConfirmModal', (global, actions, payload): ActionReturnType => {
+  const {
+    originalAmount,
+    newAmount,
+    currency,
+    directInfo,
+    tabId = getCurrentTabId(),
+  } = payload;
+
+  return updateTabState(global, {
+    priceConfirmModal: {
+      originalAmount,
+      newAmount,
+      currency,
+      directInfo,
+    },
+  }, tabId);
+});
+
+addActionHandler('closePriceConfirmModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    priceConfirmModal: undefined,
+  }, tabId);
+});

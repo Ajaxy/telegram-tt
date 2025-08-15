@@ -290,7 +290,7 @@ const SuggestMessageModal = ({
             : currencyAmount ? lang('ButtonOfferAmount', {
               amount: isCurrencyStars
                 ? formatStarsAsIcon(lang, currencyAmount, { asFont: true })
-                : formatTonAsIcon(lang, currencyAmount, { asFont: true }),
+                : formatTonAsIcon(lang, currencyAmount),
             }, {
               withNodes: true,
               withMarkdown: true,

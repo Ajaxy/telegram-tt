@@ -1608,6 +1608,14 @@ export interface LangPair {
   'TitleAgeCheckFailed': undefined;
   'TitleAgeCheckSuccess': undefined;
   'ButtonAgeVerification': undefined;
+  'PriceInStars': undefined;
+  'PriceInTON': undefined;
+  'OnlyAcceptTON': undefined;
+  'OnlyAcceptTONDescription': undefined;
+  'DescriptionPayInTON': undefined;
+  'LabelPayInTON': undefined;
+  'PriceChanged': undefined;
+  'PayNewPrice': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -2784,6 +2792,19 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'ButtonSensitiveAlways': {
     'years': V;
+  };
+  'DescriptionComposerGiftMinimumCurrencyPrice': {
+    'amount': V;
+  };
+  'DescriptionComposerGiftResaleCurrencyPrice': {
+    'amount': V;
+  };
+  'ButtonSellGiftTon': {
+    'amount': V;
+  };
+  'PriceChangedText': {
+    'originalAmount': V;
+    'newAmount': V;
   };
 }
 

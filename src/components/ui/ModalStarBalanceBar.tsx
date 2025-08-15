@@ -3,11 +3,15 @@ import {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiStarsAmount } from '../../api/types';
+import type { ApiStarsAmount, ApiTonAmount } from '../../api/types';
 
+import {
+  TON_USD_RATE_DEFAULT,
+} from '../../config';
 import { formatStarsAmount } from '../../global/helpers/payments';
 import buildClassName from '../../util/buildClassName';
-import { formatStarsAsIcon } from '../../util/localization/format';
+import { convertTonFromNanos, convertTonToUsd, formatCurrencyAsString } from '../../util/formatCurrency';
+import { formatStarsAsIcon, formatTonAsIcon } from '../../util/localization/format';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -20,23 +24,31 @@ import styles from './ModalStarBalanceBar.module.scss';
 export type OwnProps = {
   onCloseAnimationEnd?: () => void;
   isModalOpen?: true;
+  currency?: 'TON' | 'XTR';
 };
 
 export type StateProps = {
   starBalance?: ApiStarsAmount;
+  tonBalance?: ApiTonAmount;
+  tonUsdRate: number;
 };
 
 function ModalStarBalanceBar({
   starBalance,
+  tonBalance,
+  tonUsdRate,
   isModalOpen,
   onCloseAnimationEnd,
+  currency,
 }: StateProps & OwnProps) {
   const {
     openStarsBalanceModal,
   } = getActions();
 
   const lang = useLang();
-  const isOpen = isModalOpen ? Boolean(starBalance) : false;
+  const isTonMode = currency === 'TON';
+  const currentBalance = isTonMode ? tonBalance : starBalance;
+  const isOpen = isModalOpen ? Boolean(currentBalance) : false;
 
   const {
     ref,
@@ -48,10 +60,10 @@ function ModalStarBalanceBar({
   });
 
   const handleGetMoreStars = useLastCallback(() => {
-    openStarsBalanceModal({});
+    openStarsBalanceModal(isTonMode ? { currency: 'TON' } : {});
   });
 
-  if (!shouldRender || !starBalance) {
+  if (!shouldRender || !currentBalance) {
     return undefined;
   }
 
@@ -61,15 +73,41 @@ function ModalStarBalanceBar({
       ref={ref}
     >
       <div>
-        {lang('ModalStarsBalanceBarDescription', {
-          stars: formatStarsAsIcon(lang, formatStarsAmount(lang, starBalance), { className: styles.starIcon }),
-        }, {
-          withNodes: true,
-          withMarkdown: true,
-        })}
+        {isTonMode ? (
+          lang('ModalStarsBalanceBarDescription', {
+            stars: formatTonAsIcon(lang, convertTonFromNanos(currentBalance.amount), {
+              className: styles.starIcon,
+            }),
+          }, {
+            withNodes: true,
+            withMarkdown: true,
+          })
+        ) : (
+          lang('ModalStarsBalanceBarDescription', {
+            stars: formatStarsAsIcon(lang, formatStarsAmount(lang, currentBalance as ApiStarsAmount), {
+              className: styles.starIcon,
+            }),
+          }, {
+            withNodes: true,
+            withMarkdown: true,
+          })
+        )}
       </div>
       <div>
-        <Link isPrimary onClick={handleGetMoreStars}>{lang('GetMoreStarsLinkText')}</Link>
+        {isTonMode && (
+          <div className={styles.tonInUsdDescription} style="color: var(--color-text-secondary)">
+            {`≈ ${formatCurrencyAsString(
+              convertTonToUsd((currentBalance as ApiTonAmount).amount, tonUsdRate, true),
+              'USD',
+              lang.code,
+            )}`}
+          </div>
+        )}
+        {!isTonMode && (
+          <Link isPrimary onClick={handleGetMoreStars}>
+            {lang('GetMoreStarsLinkText')}
+          </Link>
+        )}
       </div>
     </div>
   );
@@ -79,10 +117,13 @@ export default memo(withGlobal(
   (global): StateProps => {
     const {
       stars,
+      ton,
     } = global;
 
     return {
       starBalance: stars?.balance,
+      tonBalance: ton?.balance,
+      tonUsdRate: global.appConfig?.tonUsdRate || TON_USD_RATE_DEFAULT,
     };
   },
 )(ModalStarBalanceBar));

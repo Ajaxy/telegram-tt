@@ -147,16 +147,17 @@ addActionHandler('sendStarGift', (global, actions, payload): ActionReturnType =>
 
 addActionHandler('buyStarGift', (global, actions, payload): ActionReturnType => {
   const {
-    slug, peerId, stars, tabId = getCurrentTabId(),
+    slug, peerId, price, tabId = getCurrentTabId(),
   } = payload;
 
   const inputInvoice: ApiInputInvoiceStarGiftResale = {
     type: 'stargiftResale',
     slug,
     peerId,
+    currency: price.currency,
   };
 
-  payInputStarInvoice(global, inputInvoice, stars, tabId);
+  payInputStarInvoice(global, inputInvoice, price.amount, tabId);
 });
 
 addActionHandler('sendPremiumGiftByStars', (global, actions, payload): ActionReturnType => {
@@ -1082,12 +1083,13 @@ async function payInputStarInvoice<T extends GlobalState>(
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const actions = getActions();
-  const balance = global.stars?.balance;
+  const isTon = inputInvoice.type === 'stargiftResale' && inputInvoice.currency === 'TON';
+  const balance = isTon ? global.ton?.balance : global.stars?.balance;
 
   if (balance === undefined) return;
 
   if (balance.amount < price) {
-    actions.openStarsBalanceModal({ tabId });
+    actions.openStarsBalanceModal({ currency: isTon ? 'TON' : 'XTR', tabId });
     return;
   }
 
@@ -1117,6 +1119,23 @@ async function payInputStarInvoice<T extends GlobalState>(
 
   if ('error' in form) {
     handlePaymentFormError(form.error, tabId);
+    return;
+  }
+
+  const formPrice = form.invoice.totalAmount;
+  if (formPrice !== price) {
+    const isTon = inputInvoice.type === 'stargiftResale' && inputInvoice.currency === 'TON';
+
+    actions.openPriceConfirmModal({
+      originalAmount: price,
+      newAmount: formPrice,
+      currency: isTon ? 'TON' : 'XTR',
+      directInfo: {
+        inputInvoice,
+        formId: form.formId,
+      },
+      tabId,
+    });
     return;
   }
 

@@ -26,6 +26,7 @@ import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Avatar from '../../../common/Avatar';
+import Icon from '../../../common/icons/Icon';
 import StarIcon from '../../../common/icons/StarIcon';
 import RadialPatternBackground from '../../../common/profile/RadialPatternBackground';
 import PaidMediaThumb from './PaidMediaThumb';
@@ -165,6 +166,8 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
     openStarsTransactionModal({ transaction });
   });
 
+  const amountColorClass = isNegativeAmount(amount) ? styles.negative : styles.positive;
+
   return (
     <div className={buildClassName(styles.root, className)} onClick={handleClick}>
       <div className={styles.preview}>
@@ -182,11 +185,12 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
       </div>
       <div className={styles.stars}>
         <span
-          className={buildClassName(styles.amount, isNegativeAmount(amount) ? styles.negative : styles.positive)}
+          className={buildClassName(styles.amount, amountColorClass)}
         >
           {formatStarsTransactionAmount(lang, amount)}
         </span>
         {amount.currency === STARS_CURRENCY_CODE && <StarIcon className={styles.star} type="gold" size="adaptive" />}
+        {amount.currency === TON_CURRENCY_CODE && <Icon name="toncoin" className={amountColorClass} />}
       </div>
     </div>
   );

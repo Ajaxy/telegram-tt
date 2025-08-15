@@ -261,6 +261,9 @@ export interface ApiAppConfig {
   tonSuggestedPostCommissionPermille?: number;
   tonSuggestedPostAmountMax?: number;
   tonSuggestedPostAmountMin?: number;
+  tonStargiftResaleAmountMax?: number;
+  tonStargiftResaleAmountMin?: number;
+  tonStargiftResaleCommissionPermille?: number;
   tonUsdRate?: number;
   tonTopupUrl?: string;
   pollMaxAnswers?: number;

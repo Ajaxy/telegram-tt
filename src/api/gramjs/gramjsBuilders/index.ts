@@ -725,6 +725,7 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
       return new GramJs.InputInvoiceStarGiftResale({
         toId: buildInputPeer(peer.id, peer.accessHash),
         slug,
+        ton: invoice.currency === 'TON' || undefined,
       });
     }
 

@@ -139,6 +139,8 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       </div>
     );
 
+    const amountColorClass = isNegativeAmount(amount) ? styles.negative : styles.positive;
+
     const regularHeader = (
       <div className={styles.header}>
         {media && (
@@ -171,11 +173,12 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
         <p className={styles.description}>{description}</p>
         <p className={styles.amount}>
           <span
-            className={buildClassName(styles.amount, isNegativeAmount(amount) ? styles.negative : styles.positive)}
+            className={buildClassName(styles.amount, amountColorClass)}
           >
             {formatStarsTransactionAmount(lang, amount)}
           </span>
           {amount.currency === STARS_CURRENCY_CODE && <StarIcon type="gold" size="middle" />}
+          {amount.currency === 'TON' && <Icon name="toncoin" className={amountColorClass} />}
           {transaction.isRefund && (
             <p className={styles.refunded}>{lang('Refunded')}</p>
           )}

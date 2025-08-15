@@ -607,7 +607,7 @@ const ActionMessageText = ({
 
       case 'starGiftUnique': {
         const {
-          isTransferred, isUpgrade, savedId, peerId, fromId, resaleStars, gift,
+          isTransferred, isUpgrade, savedId, peerId, fromId, resaleAmount, gift,
         } = action;
 
         const isToChannel = Boolean(peerId && savedId);
@@ -616,14 +616,18 @@ const ActionMessageText = ({
         const fromTitle = (fromPeer && getPeerTitle(lang, fromPeer)) || userFallbackText;
         const fromLink = renderPeerLink(fromPeer?.id, fromTitle, asPreview);
 
-        if (resaleStars) {
+        if (resaleAmount) {
+          const amountText = resaleAmount.currency === TON_CURRENCY_CODE
+            ? formatTonAsText(lang, convertTonFromNanos(resaleAmount.amount))
+            : formatStarsAsText(lang, resaleAmount.amount);
+
           return lang(
             isOutgoing
               ? 'ApiMessageMessageActionResaleStarGiftUniqueOutgoing'
               : 'ApiMessageMessageActionResaleStarGiftUniqueIncoming',
             {
               gift: lang('GiftUnique', { title: gift.title, number: gift.number }),
-              stars: renderStrong(formatStarsAsText(lang, resaleStars)),
+              stars: renderStrong(amountText),
             },
             { withNodes: true },
           );

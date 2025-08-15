@@ -8,6 +8,7 @@ import type {
   ApiRequestInputSavedStarGift,
   ApiStarGiftAttributeId,
   ApiStarGiftRegular,
+  ApiTypeCurrencyAmount,
 } from '../../types';
 
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
@@ -22,7 +23,11 @@ import {
   buildApiStarTopupOption,
 } from '../apiBuilders/payments';
 import { buildApiUser } from '../apiBuilders/users';
-import { buildInputPeer, buildInputSavedStarGift, buildInputUser, DEFAULT_PRIMITIVES } from '../gramjsBuilders';
+import { buildInputPeer,
+  buildInputSavedStarGift,
+  buildInputStarsAmount,
+  buildInputUser,
+  DEFAULT_PRIMITIVES } from '../gramjsBuilders';
 import { checkErrorType, wrapError } from '../helpers/misc';
 import { invokeRequest } from './client';
 import { getPassword } from './twoFaSettings';
@@ -423,11 +428,11 @@ export function updateStarGiftPrice({
   price,
 }: {
   inputSavedGift: ApiRequestInputSavedStarGift;
-  price: number;
+  price: ApiTypeCurrencyAmount;
 }) {
   return invokeRequest(new GramJs.payments.UpdateStarGiftPrice({
     stargift: buildInputSavedStarGift(inputSavedGift),
-    resellStars: bigInt(price),
+    resellAmount: buildInputStarsAmount(price),
   }), {
     shouldReturnTrue: true,
   });

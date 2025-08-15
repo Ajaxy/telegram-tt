@@ -3,10 +3,12 @@ import { getActions } from '../../../global';
 
 import type {
   ApiStarGift,
+  ApiTypeCurrencyAmount,
 } from '../../../api/types';
 
+import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
-import { formatStarsAsIcon } from '../../../util/localization/format';
+import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
 import { getStickerFromGift } from '../../common/helpers/gifts';
 import { getGiftAttributes } from '../../common/helpers/gifts';
 
@@ -38,6 +40,18 @@ function GiftItemStar({
   const ref = useRef<HTMLDivElement>();
   const stickerRef = useRef<HTMLDivElement>();
 
+  function getPriceAmount(amounts?: ApiTypeCurrencyAmount[]) {
+    if (!amounts) return { amount: 0, currency: STARS_CURRENCY_CODE };
+
+    if (gift.type === 'starGiftUnique' && gift.resaleTonOnly) {
+      const tonAmount = amounts.find((amount) => amount.currency === TON_CURRENCY_CODE);
+      if (tonAmount) return tonAmount;
+    }
+
+    const starsAmount = amounts.find((amount) => amount.currency === STARS_CURRENCY_CODE);
+    return starsAmount;
+  }
+
   const lang = useLang();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -46,10 +60,13 @@ function GiftItemStar({
   const uniqueGift = isGiftUnique ? gift : undefined;
   const regularGift = !isGiftUnique ? gift : undefined;
 
-  const stars = !isGiftUnique ? regularGift?.stars : uniqueGift?.resellPriceInStars;
+  const priceInfo = !isGiftUnique
+    ? { amount: regularGift?.stars || 0, currency: STARS_CURRENCY_CODE }
+    : getPriceAmount(uniqueGift?.resellPrice);
+  const priceCurrency = priceInfo?.currency || STARS_CURRENCY_CODE;
   const resellMinStars = regularGift?.resellMinStars;
   const priceInStarsAsString = !isGiftUnique && isResale && resellMinStars
-    ? lang.number(resellMinStars) + '+' : stars;
+    ? lang.number(resellMinStars) + '+' : priceInfo?.amount || 0;
   const isLimited = !isGiftUnique && Boolean(regularGift?.isLimited);
   const isSoldOut = !isGiftUnique && Boolean(regularGift?.isSoldOut);
 
@@ -152,7 +169,9 @@ function GiftItemStar({
         pill
         fluid
       >
-        {formatStarsAsIcon(lang, priceInStarsAsString || 0, { asFont: true, className: styles.star })}
+        {priceCurrency === TON_CURRENCY_CODE
+          ? formatTonAsIcon(lang, priceInStarsAsString || 0, { shouldConvertFromNanos: true, className: styles.star })
+          : formatStarsAsIcon(lang, priceInStarsAsString || 0, { asFont: true, className: styles.star })}
       </Button>
       {giftRibbon}
     </div>

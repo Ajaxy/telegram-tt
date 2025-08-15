@@ -1,4 +1,5 @@
-.descriptionContainer {
+.checkBoxDescription,
+.inputPriceDescription {
   display: flex;
 
   margin-bottom: 2rem;
@@ -6,6 +7,15 @@
 
   font-size: 0.875rem;
   color: var(--color-text-secondary);
+}
+
+.checkBox {
+  margin-inline: -1rem;
+}
+
+.inputPriceDescription {
+  margin-top: 0.875rem;
+  margin-bottom: 1rem;
 }
 
 .descriptionPrice {

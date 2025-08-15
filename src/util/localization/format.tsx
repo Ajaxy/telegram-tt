@@ -1,7 +1,7 @@
 import type { LangFn } from './types';
 
 import { STARS_ICON_PLACEHOLDER } from '../../config';
-import { convertCurrencyFromBaseUnit } from '../../util/formatCurrency';
+import { convertTonFromNanos } from '../../util/formatCurrency';
 import buildClassName from '../buildClassName';
 
 import Icon from '../../components/common/icons/Icon';
@@ -11,14 +11,19 @@ export function formatStarsAsText(lang: LangFn, amount: number) {
   return lang('StarsAmountText', { amount }, { pluralValue: amount });
 }
 
-export function formatTonAsText(lang: LangFn, amount: number) {
-  return lang('TonAmountText', { amount: lang.preciseNumber(amount) }, { pluralValue: amount });
+export function formatTonAsText(lang: LangFn, amount: number, shouldConvertFromNanos?: boolean) {
+  const formattedAmount = shouldConvertFromNanos ? convertTonFromNanos(Number(amount)) : amount;
+  return lang('TonAmountText', { amount: lang.preciseNumber(formattedAmount) }, { pluralValue: formattedAmount });
 }
 
-export function formatTonAsIcon(lang: LangFn, amount: number | string, options?: {
-  asFont?: boolean; className?: string; containerClassName?: string; shouldConvertFromNanos?: boolean; }) {
+export function formatTonAsIcon(
+  lang: LangFn,
+  amount: number | string,
+  options?: {
+    className?: string; containerClassName?: string; shouldConvertFromNanos?: boolean;
+  }) {
   const { className, containerClassName, shouldConvertFromNanos } = options || {};
-  const formattedAmount = shouldConvertFromNanos ? convertCurrencyFromBaseUnit(Number(amount), 'TON') : amount;
+  const formattedAmount = shouldConvertFromNanos ? convertTonFromNanos(Number(amount)) : amount;
   const icon = <Icon name="toncoin" className={buildClassName('ton-amount-icon', className)} />;
 
   if (containerClassName) {

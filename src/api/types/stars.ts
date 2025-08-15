@@ -37,8 +37,9 @@ export interface ApiStarGiftUnique {
   attributes: ApiStarGiftAttribute[];
   slug: string;
   giftAddress?: string;
-  resellPriceInStars?: number;
+  resellPrice?: ApiTypeCurrencyAmount[];
   releasedByPeerId?: string;
+  resaleTonOnly?: true;
 }
 
 export type ApiStarGift = ApiStarGiftRegular | ApiStarGiftUnique;
