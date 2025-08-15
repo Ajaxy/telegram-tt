@@ -174,7 +174,13 @@ const PublicPostsSearchLauncher = ({
               activeKey={searchButtonActiveKey}
             >
               <div className={styles.searchButtonContent}>
-                <Icon name="search" className={styles.searchIcon} />
+                <Icon
+                  name="search"
+                  className={
+                    buildClassName(styles.searchIcon,
+                      searchQuery && styles.searchIconWithNext)
+                  }
+                />
                 {lang('ButtonSearchPublicPosts', {
                   query: searchQuery ? <span className={styles.searchQuery}>{searchQuery}</span> : '',
                 }, { withNodes: true })}
