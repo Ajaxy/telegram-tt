@@ -31,6 +31,7 @@ type StateProps = {
   searchFlood?: ApiSearchPostsFlood;
   shouldShowSearchLauncher?: boolean;
   isNothingFound?: boolean;
+  isLoading?: boolean;
 };
 
 const runThrottled = throttle((cb) => cb(), 500, true);
@@ -42,6 +43,7 @@ const PublicPostsResults = ({
   searchFlood,
   shouldShowSearchLauncher,
   isNothingFound,
+  isLoading,
 }: OwnProps & StateProps) => {
   const { searchMessagesGlobal } = getActions();
 
@@ -103,13 +105,14 @@ const PublicPostsResults = ({
   return (
     <Transition
       name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
-      activeKey={shouldShowSearchLauncher ? 0 : 1}
+      activeKey={shouldShowSearchLauncher || isLoading ? 0 : 1}
     >
-      {shouldShowSearchLauncher ? (
+      {shouldShowSearchLauncher || isLoading ? (
         <PublicPostsSearchLauncher
           searchQuery={searchQuery}
           searchFlood={searchFlood}
           onSearch={handleSearch}
+          isLoading={isLoading}
         />
       ) : (
         <div className="LeftSearch--content">
@@ -145,11 +148,12 @@ const PublicPostsResults = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { messages: { byChatId: globalMessagesByChatId } } = global;
-    const { resultsByType, searchFlood } = selectTabState(global).globalSearch;
+    const { resultsByType, searchFlood, fetchingStatus } = selectTabState(global).globalSearch;
 
     const publicPostsResult = resultsByType?.publicPosts;
     const { foundIds } = publicPostsResult || {};
-    const shouldShowSearchLauncher = !publicPostsResult;
+    const isLoading = Boolean(fetchingStatus?.publicPosts && !publicPostsResult);
+    const shouldShowSearchLauncher = !publicPostsResult && !isLoading;
     const isNothingFound = publicPostsResult && !foundIds?.length;
 
     return {
@@ -158,6 +162,7 @@ export default memo(withGlobal<OwnProps>(
       searchFlood,
       shouldShowSearchLauncher,
       isNothingFound,
+      isLoading,
     };
   },
 )(PublicPostsResults));

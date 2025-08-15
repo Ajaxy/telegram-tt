@@ -8,6 +8,7 @@ import {
   PUBLIC_POSTS_SEARCH_DEFAULT_TOTAL_DAILY,
 } from '../../../config';
 import { selectIsCurrentUserPremium } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { formatStarsAsIcon } from '../../../util/localization/format';
 import { getServerTime } from '../../../util/serverTime';
 import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
@@ -19,6 +20,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
+import Loading from '../../ui/Loading';
 import TextTimer from '../../ui/TextTimer';
 import Transition from '../../ui/Transition';
 
@@ -28,6 +30,7 @@ type OwnProps = {
   searchQuery?: string;
   searchFlood?: ApiSearchPostsFlood;
   onSearch: () => void;
+  isLoading?: boolean;
 };
 
 type StateProps = {
@@ -41,6 +44,7 @@ const PublicPostsSearchLauncher = ({
   searchQuery,
   searchFlood,
   onSearch,
+  isLoading,
   isCurrentUserPremium,
   starsBalance,
 }: OwnProps & StateProps) => {
@@ -213,20 +217,52 @@ const PublicPostsSearchLauncher = ({
     );
   };
 
-  if (!isCurrentUserPremium) {
-    return renderPremiumRequired();
-  }
-
   const serverTime = getServerTime();
   const shouldRenderPaidScreen = searchFlood?.remains === 0
     || (searchFlood?.waitTill && searchFlood.waitTill > serverTime);
 
+  const renderLoading = () => {
+    return (
+      <div className={styles.container}>
+        <div className={buildClassName(styles.content, styles.loadingScreen)}>
+          <Loading />
+        </div>
+      </div>
+    );
+  };
+
+  const getActiveKey = () => {
+    if (!isCurrentUserPremium) {
+      return 3;
+    }
+    if (isLoading) {
+      return 2;
+    }
+    if (shouldRenderPaidScreen) {
+      return 0;
+    }
+    return 1;
+  };
+
+  const renderContent = () => {
+    if (!isCurrentUserPremium) {
+      return renderPremiumRequired();
+    }
+    if (isLoading) {
+      return renderLoading();
+    }
+    if (shouldRenderPaidScreen) {
+      return renderLimitReached();
+    }
+    return renderSearchButton();
+  };
+
   return (
     <Transition
       name="fade"
-      activeKey={shouldRenderPaidScreen ? 0 : 1}
+      activeKey={getActiveKey()}
     >
-      {shouldRenderPaidScreen ? renderLimitReached() : renderSearchButton()}
+      {renderContent()}
     </Transition>
   );
 };
