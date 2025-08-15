@@ -167,6 +167,7 @@ function GiftItemStar({
     <div
       ref={ref}
       className={buildClassName(
+        'interactive-gift',
         styles.container,
         styles.starGift,
         'starGiftItem',

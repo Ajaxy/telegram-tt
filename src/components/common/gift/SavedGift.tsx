@@ -147,7 +147,7 @@ const SavedGift = ({
   return (
     <div
       ref={ref}
-      className={buildClassName(styles.root, 'scroll-item')}
+      className={buildClassName('interactive-gift scroll-item', styles.root)}
       style={style}
       onClick={handleClick}
       onContextMenu={handleContextMenu}

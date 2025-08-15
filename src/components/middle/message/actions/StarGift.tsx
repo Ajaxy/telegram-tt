@@ -123,7 +123,7 @@ const StarGiftAction = ({
   return (
     <div
       ref={ref}
-      className={buildClassName(styles.contentBox, styles.starGift)}
+      className={buildClassName('interactive-gift', styles.contentBox, styles.starGift)}
       tabIndex={0}
       role="button"
       onClick={onClick}

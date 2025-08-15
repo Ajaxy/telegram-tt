@@ -3,6 +3,7 @@ import { memo, useRef } from '@teact';
 import type { ApiStarGiftUnique } from '../../../api/types';
 
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment.ts';
+import buildClassName from '../../../util/buildClassName.ts';
 import { getGiftAttributes } from '../../common/helpers/gifts';
 
 import useFlag from '../../../hooks/useFlag.ts';
@@ -39,7 +40,7 @@ const WebPageUniqueGift = ({
 
   return (
     <div
-      className={styles.root}
+      className={buildClassName('interactive-gift', styles.root)}
       onClick={onClick}
       onMouseEnter={!IS_TOUCH_ENV ? markHover : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? unmarkHover : undefined}

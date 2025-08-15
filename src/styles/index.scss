@@ -54,8 +54,10 @@ noscript {
 
   width: 100%;
   height: 100%;
+
   .nojs-video {
     pointer-events: none;
+
     &::-webkit-media-controls {
       display: none;
     }
@@ -262,6 +264,20 @@ body:not(.is-ios) {
 
   &.slow {
     transition-duration: 0.3s;
+  }
+}
+
+.interactive-gift {
+  canvas {
+    transition: 250ms transform;
+  }
+
+  @media (hover: hover) {
+    &:hover, &:focus-visible {
+      canvas {
+        transform: scale(1.1);
+      }
+    }
   }
 }
 

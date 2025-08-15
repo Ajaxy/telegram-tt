@@ -85,7 +85,7 @@ const StarGiftAction = ({
 
   return (
     <div
-      className={buildClassName(styles.contentBox, styles.starGift, styles.uniqueGift)}
+      className={buildClassName('interactive-gift', styles.contentBox, styles.starGift, styles.uniqueGift)}
       tabIndex={0}
       role="button"
       onClick={onClick}

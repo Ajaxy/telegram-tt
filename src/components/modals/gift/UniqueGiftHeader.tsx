@@ -76,7 +76,7 @@ const UniqueGiftHeader = ({
     <div className={buildClassName(styles.root, className)}>
       <Transition
         className={styles.transition}
-        slideClassName={styles.transitionSlide}
+        slideClassName={buildClassName('interactive-gift', styles.transitionSlide)}
         activeKey={activeKey}
         direction={1}
         name="zoomBounceSemiFade"
