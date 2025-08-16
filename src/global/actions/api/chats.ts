@@ -1115,6 +1115,24 @@ addActionHandler('loadRecommendedChatFolders', async (global): Promise<void> => 
   }
 });
 
+addActionHandler('toggleDialogFilterTags', async (global, actions, payload): Promise<void> => {
+  const { enabled } = payload;
+
+  const result = await callApi('toggleDialogFilterTags', enabled);
+
+  if (result) {
+    global = getGlobal();
+    global = {
+      ...global,
+      chatFolders: {
+        ...global.chatFolders,
+        tagsEnabled: enabled,
+      },
+    };
+    setGlobal(global);
+  }
+});
+
 addActionHandler('editChatFolders', (global, actions, payload): ActionReturnType => {
   const {
     chatId, idsToRemove, idsToAdd, tabId = getCurrentTabId(),
