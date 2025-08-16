@@ -125,6 +125,8 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   const minZoom = options.minZoom ?? 1;
   const maxZoom = options.maxZoom ?? 4;
 
+  let isNearEdge = false;
+
   function onCapture(e: MouseEvent | RealTouchEvent) {
     const target = e.target as HTMLElement;
     const {
@@ -162,6 +164,11 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onRelease);
     } else if (e.type === 'touchstart') {
+      if (IS_IOS) {
+        const x = (e as RealTouchEvent).touches[0].pageX;
+        isNearEdge = x <= IOS_SCREEN_EDGE_THRESHOLD || x >= windowSize.get().width - IOS_SCREEN_EDGE_THRESHOLD;
+      }
+
       // We need to always listen on `touchstart` target:
       // https://stackoverflow.com/questions/33298828/touch-move-event-dont-fire-after-touch-start-target-is-removed
       target.addEventListener('touchmove', onMove, { passive: true });
@@ -249,6 +256,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       y: newWindowSize.height / 2,
     };
     captureEvent = undefined;
+    isNearEdge = false;
   }
 
   function onMove(e: MouseEvent | RealTouchEvent) {
@@ -313,12 +321,8 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   }
 
   function onSwipe(e: MouseEvent | RealTouchEvent, dragOffsetX: number, dragOffsetY: number) {
-    // Avoid conflicts with swipe-to-back gestures
-    if (IS_IOS) {
-      const x = (e as RealTouchEvent).touches[0].pageX;
-      if (x <= IOS_SCREEN_EDGE_THRESHOLD || x >= windowSize.get().width - IOS_SCREEN_EDGE_THRESHOLD) {
-        return false;
-      }
+    if (IS_IOS && isNearEdge) {
+      return false;
     }
 
     const xAbs = Math.abs(dragOffsetX);
