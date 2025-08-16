@@ -105,12 +105,14 @@ export default function useChatListEntry({
       return (
         <p className="last-message" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
           <span className="draft">{oldLang('Draft')}</span>
-          {renderTextWithEntities({
-            text: draft.text?.text || '',
-            entities: draft.text?.entities,
-            asPreview: true,
-            withTranslucentThumbs: true,
-          })}
+          <span className="last-message-summary" dir="auto">
+            {renderTextWithEntities({
+              text: draft.text?.text || '',
+              entities: draft.text?.entities,
+              asPreview: true,
+              withTranslucentThumbs: true,
+            })}
+          </span>
         </p>
       );
     }
@@ -133,7 +135,9 @@ export default function useChatListEntry({
         )}
         {!isSavedDialog && lastMessage.forwardInfo && (<Icon name="share-filled" className="chat-prefix-icon" />)}
         {lastMessage.replyInfo?.type === 'story' && (<Icon name="story-reply" className="chat-prefix-icon" />)}
-        {renderSummary(lastMessage, observeIntersection, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
+        <span className="last-message-summary" dir="auto">
+          {renderSummary(lastMessage, observeIntersection, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
+        </span>
       </p>
     );
   }, [

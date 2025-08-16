@@ -249,6 +249,15 @@
     }
 
     .last-message {
+      overflow: hidden;
+      display: flex;
+      &-summary {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        flex: unset;
+        max-width: none;
+        white-space: nowrap;
+      }
       .draft {
         &::after {
           content: ": ";
@@ -280,6 +289,7 @@
         vertical-align: -0.25rem;
 
         object-fit: cover;
+        flex-shrink: 0;
 
         body.is-ios & {
           width: 1.125rem;
