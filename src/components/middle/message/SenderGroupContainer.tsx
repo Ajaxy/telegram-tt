@@ -133,7 +133,7 @@ const SenderGroupContainer: FC<OwnProps & StateProps> = ({
     isContextMenuOpen, contextMenuAnchor,
     handleContextMenu, handleContextMenuClose,
     handleContextMenuHide,
-  } = useContextMenuHandlers(ref);
+  } = useContextMenuHandlers(avatarRef);
 
   const getTriggerElement = useLastCallback(() => avatarRef.current);
   const getRootElement = useLastCallback(() => document.querySelector('.Transition_slide-active > .MessageList'));
