@@ -29,7 +29,6 @@ import Checkbox from '../../../ui/Checkbox';
 import Draggable from '../../../ui/Draggable';
 import ListItem from '../../../ui/ListItem';
 import Loading from '../../../ui/Loading';
-import { ChangeEvent } from 'react';
 
 type OwnProps = {
   isActive?: boolean;
