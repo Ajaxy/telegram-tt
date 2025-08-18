@@ -206,7 +206,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     isSavedDialog,
     isPreview,
     topics,
-    hideForumTitle: areTagsEnabled && folderIds && folderIds?.length > 1,
+    hideForumTitle: areTagsEnabled && folderIds && folderIds.length > 1,
   });
 
   const getIsForumPanelClosed = useSelectorSignal(selectIsForumPanelClosed);
