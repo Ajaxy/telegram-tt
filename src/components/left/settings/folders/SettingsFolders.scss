@@ -128,7 +128,7 @@
 .color-picker-title {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
 }
 
 .color-picker-item {
@@ -178,8 +178,24 @@
 }
 
 .color-picker-item-active, .color-picker-item:focus, .color-picker-item:hover, .color-picker-item:active {
-  width: 1.5rem;
-  height: 1.5rem;
-  border: 0.125rem solid var(--color-background);
-  outline: 0.125rem solid currentColor;
+  &:not(.color-picker-item-hover-disabled) {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 0.125rem solid var(--color-background);
+    outline: 0.125rem solid currentColor;
+  }
+}
+
+.settings-item-relative {
+  position: relative;
+}
+
+.settings-folders-lock-icon {
+  position: absolute;
+  top: 50%;
+  padding: 1.3125rem;
+  transform: translateY(-50%);
+
+  font-size: 0.875rem;
+  color: var(--color-gray);
 }

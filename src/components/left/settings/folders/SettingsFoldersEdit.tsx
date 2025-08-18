@@ -93,6 +93,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     loadChatlistInvites,
     openLimitReachedModal,
     showNotification,
+    openPremiumModal,
   } = getActions();
 
   const isCreating = state.mode === 'create';
@@ -351,48 +352,66 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
           </div>
         )}
 
-        {isCurrentUserPremium && (
-          <div className="settings-item pt-3">
-            <h4 className="settings-item-header mb-3 color-picker-title" dir={lang.isRtl ? 'rtl' : undefined}>
-              {lang('FilterColorTitle')}
-              <div className={buildClassName(
-                'color-picker-selected-color',
-                `color-picker-item-${state.folder.color}`,
-              )}
-              >
-                {state.folder.title.text}
-              </div>
-            </h4>
-            <div className="color-picker">
-              {FOLDER_COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => dispatch({ type: 'setColor', payload: color })}
-                  className={buildClassName(
-                    'color-picker-item',
-                    `color-picker-item-${color}`,
-                    color === state.folder.color && 'color-picker-item-active',
-                  )}
-                />
-              ))}
+        <div className="settings-item pt-3">
+          <h4 className="settings-item-header mb-3 color-picker-title" dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('FilterColorTitle')}
+            <div className={buildClassName(
+              'color-picker-selected-color',
+              isCurrentUserPremium ? `color-picker-item-${state.folder.color}` : 'color-picker-item-disabled',
+            )}
+            >
+              {state.folder.title.text}
+            </div>
+          </h4>
+          <div className="color-picker">
+            {FOLDER_COLORS.map((color) => (
               <button
+                key={color}
                 type="button"
-                onClick={() => dispatch({ type: 'setColor', payload: -1 })}
+                onClick={() => {
+                  if (!isCurrentUserPremium) {
+                    openPremiumModal();
+                    return;
+                  }
+
+                  dispatch({ type: 'setColor', payload: color });
+                }}
                 className={buildClassName(
                   'color-picker-item',
-                  'color-picker-item-none',
-                  (!state.folder.color || state.folder.color === -1) && 'color-picker-item-active',
+                  `color-picker-item-${color}`,
+                  !isCurrentUserPremium && 'color-picker-item-hover-disabled',
+                  color === state.folder.color && isCurrentUserPremium && 'color-picker-item-active',
                 )}
-              >
+              />
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                if (!isCurrentUserPremium) {
+                  openPremiumModal();
+                  return;
+                }
+
+                dispatch({ type: 'setColor', payload: -1 });
+              }}
+              className={buildClassName(
+                'color-picker-item',
+                'color-picker-item-none',
+                (!state.folder.color || state.folder.color === -1 || !isCurrentUserPremium)
+                && 'color-picker-item-active',
+              )}
+            >
+              {isCurrentUserPremium ? (
                 <Icon name="close" />
-              </button>
-            </div>
-            <p className="settings-item-description mb-0" dir={lang.isRtl ? 'rtl' : undefined}>
-              {lang('FilterColorHint')}
-            </p>
+              ) : (
+                <Icon name="lock-badge" />
+              )}
+            </button>
           </div>
-        )}
+          <p className="settings-item-description mb-0" dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('FilterColorHint')}
+          </p>
+        </div>
 
         <div className="settings-item pt-3">
           <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>

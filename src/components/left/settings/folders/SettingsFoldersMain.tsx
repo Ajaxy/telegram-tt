@@ -29,6 +29,7 @@ import Checkbox from '../../../ui/Checkbox';
 import Draggable from '../../../ui/Draggable';
 import ListItem from '../../../ui/ListItem';
 import Loading from '../../../ui/Loading';
+import { ChangeEvent } from 'react';
 
 type OwnProps = {
   isActive?: boolean;
@@ -74,6 +75,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     openDeleteChatFolderModal,
     sortChatFolders,
     toggleDialogFilterTags,
+    openPremiumModal,
   } = getActions();
 
   const [state, setState] = useState<SortState>({
@@ -169,8 +171,12 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   }, [foldersById, maxFolders, addChatFolder, openLimitReachedModal]);
 
   const handleToggleTags = useCallback(() => {
+    if (!isPremium) {
+      return;
+    }
+
     toggleDialogFilterTags({ enabled: !areTagsEnabled });
-  }, [areTagsEnabled, toggleDialogFilterTags]);
+  }, [areTagsEnabled, isPremium, toggleDialogFilterTags]);
 
   const handleDrag = useCallback((translation: { x: number; y: number }, id: string | number) => {
     const delta = Math.round(translation.y / FOLDER_HEIGHT_PX);
@@ -380,16 +386,23 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
           ))}
         </div>
       )}
-      {isPremium && (
-        <div className="settings-item pt-3">
+      <div className="settings-item pt-3">
+        <div className="settings-item-relative">
           <Checkbox
             label={lang('ShowFolderTags')}
             subLabel={lang('ShowFolderTagsHint')}
-            checked={areTagsEnabled}
+            checked={isPremium && areTagsEnabled}
             onChange={handleToggleTags}
+            onClickLabel={(event) => {
+              if (!isPremium) {
+                event.preventDefault();
+                openPremiumModal();
+              }
+            }}
           />
+          {!isPremium && <Icon name="lock-badge" className="settings-folders-lock-icon" />}
         </div>
-      )}
+      </div>
     </div>
   );
 };
