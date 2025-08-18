@@ -30,7 +30,7 @@ type OwnProps = {
   topics?: Record<number, ApiTopic>;
   renderLastMessage: () => React.ReactNode;
   observeIntersection?: ObserveFn;
-  hideForumTitle?: boolean;
+  noForumTitle?: boolean;
 };
 
 const NO_CORNER_THRESHOLD = Number(REM);
@@ -41,7 +41,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
   topics,
   renderLastMessage,
   observeIntersection,
-  hideForumTitle,
+  noForumTitle,
 }) => {
   const { openThread } = getActions();
 
@@ -105,7 +105,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
       style={overwrittenWidth ? `--overwritten-width: ${overwrittenWidth}px` : undefined}
     >
       {
-        !hideForumTitle && (
+        !noForumTitle && (
           <>
             {lastActiveTopic && (
               <div className={styles.titleRow}>
