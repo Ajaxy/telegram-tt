@@ -43,7 +43,7 @@ type StateProps = {
   recommendedChatFolders?: ApiChatFolder[];
   maxFolders: number;
   isPremium?: boolean;
-  tagsEnabled?: boolean;
+  areTagsEnabled?: boolean;
 };
 
 type SortState = {
@@ -65,7 +65,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   isPremium,
   recommendedChatFolders,
   maxFolders,
-  tagsEnabled,
+  areTagsEnabled,
 }) => {
   const {
     loadRecommendedChatFolders,
@@ -169,8 +169,8 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   }, [foldersById, maxFolders, addChatFolder, openLimitReachedModal]);
 
   const handleToggleTags = useCallback(() => {
-    toggleDialogFilterTags({ enabled: !tagsEnabled });
-  }, [tagsEnabled, toggleDialogFilterTags]);
+    toggleDialogFilterTags({ enabled: !areTagsEnabled });
+  }, [areTagsEnabled, toggleDialogFilterTags]);
 
   const handleDrag = useCallback((translation: { x: number; y: number }, id: string | number) => {
     const delta = Math.round(translation.y / FOLDER_HEIGHT_PX);
@@ -385,7 +385,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
           <Checkbox
             label={lang('ShowFolderTags')}
             subLabel={lang('ShowFolderTagsHint')}
-            checked={tagsEnabled || false}
+            checked={areTagsEnabled}
             onChange={handleToggleTags}
           />
         </div>
@@ -400,7 +400,7 @@ export default memo(withGlobal<OwnProps>(
       orderedIds: folderIds,
       byId: foldersById,
       recommended: recommendedChatFolders,
-      tagsEnabled,
+      areTagsEnabled,
     } = global.chatFolders;
 
     return {
@@ -409,7 +409,7 @@ export default memo(withGlobal<OwnProps>(
       isPremium: selectIsCurrentUserPremium(global),
       recommendedChatFolders,
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),
-      tagsEnabled,
+      areTagsEnabled,
     };
   },
 )(SettingsFoldersMain));

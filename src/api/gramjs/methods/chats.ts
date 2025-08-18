@@ -1076,7 +1076,7 @@ export async function fetchChatFolders() {
   if (!result) {
     return undefined;
   }
-  const { filters, tagsEnabled } = result;
+  const { filters, tagsEnabled: areTagsEnabled } = result;
 
   const defaultFolderPosition = filters.findIndex((folder) => folder instanceof GramJs.DialogFilterDefault);
   const dialogFilters = filters.filter(isChatFolder);
@@ -1090,7 +1090,7 @@ export async function fetchChatFolders() {
         .map(buildApiChatFolder), 'id',
     ) as Record<number, ApiChatFolder>,
     orderedIds,
-    tagsEnabled: tagsEnabled || false,
+    areTagsEnabled,
   };
 }
 

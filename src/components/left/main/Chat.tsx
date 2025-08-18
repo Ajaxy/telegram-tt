@@ -121,7 +121,7 @@ type StateProps = {
   isSynced?: boolean;
   isAccountFrozen?: boolean;
   folderIds?: number[];
-  tagsEnabled?: boolean;
+  areTagsEnabled?: boolean;
 };
 
 const Chat: FC<OwnProps & StateProps> = ({
@@ -162,7 +162,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   onDragEnter,
   isAccountFrozen,
   folderIds,
-  tagsEnabled,
+  areTagsEnabled,
 }) => {
   const {
     openChat,
@@ -206,7 +206,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     isSavedDialog,
     isPreview,
     topics,
-    hideForumTitle: tagsEnabled && folderIds && folderIds?.length > 1,
+    hideForumTitle: areTagsEnabled && folderIds && folderIds?.length > 1,
   });
 
   const getIsForumPanelClosed = useSelectorSignal(selectIsForumPanelClosed);
@@ -395,7 +395,7 @@ const Chat: FC<OwnProps & StateProps> = ({
           <ChatCallStatus isMobile={isMobile} isSelected={isSelected} isActive={withInterfaceAnimations} />
         )}
       </div>
-      <div className={buildClassName('info', tagsEnabled && folderIds && folderIds.length > 1 && 'has-tags')}>
+      <div className={buildClassName('info', areTagsEnabled && folderIds && folderIds.length > 1 && 'has-tags')}>
         <div className="info-row">
           <FullNameTitle
             peer={isMonoforum ? monoforumChannel! : peer}
@@ -430,7 +430,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             />
           )}
         </div>
-        {tagsEnabled && <ChatTags folderIds={folderIds} />}
+        {areTagsEnabled && <ChatTags folderIds={folderIds} />}
       </div>
       {shouldRenderDeleteModal && (
         <DeleteChatModal
@@ -474,7 +474,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const folderIds = getChatFolderIds(chatId);
-    const { tagsEnabled } = global.chatFolders;
+    const { areTagsEnabled } = global.chatFolders;
     const isPremium = selectIsCurrentUserPremium(global);
 
     const lastMessageId = previewMessageId || selectChatLastMessageId(global, chatId, isSavedDialog ? 'saved' : 'all');
@@ -537,7 +537,7 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       monoforumChannel,
       folderIds,
-      tagsEnabled: tagsEnabled && isPremium,
+      areTagsEnabled: areTagsEnabled && isPremium,
     };
   },
 )(Chat));

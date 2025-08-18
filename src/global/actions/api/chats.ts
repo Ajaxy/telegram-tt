@@ -1126,7 +1126,7 @@ addActionHandler('toggleDialogFilterTags', async (global, actions, payload): Pro
       ...global,
       chatFolders: {
         ...global.chatFolders,
-        tagsEnabled: enabled,
+        areTagsEnabled: enabled,
       },
     };
     setGlobal(global);
