@@ -160,7 +160,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
         )
       }
       <div
-        className={buildClassName(styles.lastMessage, lastActiveTopic?.unreadCount && styles.unread)}
+        className={buildClassName(styles.lastMessage, lastActiveTopic?.unreadCount && !noForumTitle && styles.unread)}
         ref={lastMessageRef}
         onClick={handleOpenTopicClick}
         onMouseDown={handleOpenTopicMouseDown}
