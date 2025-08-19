@@ -1,25 +1,23 @@
 import type { FC } from '../../../lib/teact/teact';
 import { memo } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../global';
+
+import type { ApiChatFolder } from '../../../api/types';
 
 import styles from './ChatTags.module.scss';
 
 type OwnProps = {
   folderIds?: number[];
+  chatFoldersById?: Record<number, ApiChatFolder>;
 };
 
-type StateProps = {
-  chatFoldersById: Record<number, any>; // Replace 'any' with proper folder type if available
-};
-
-const ChatTags: FC<OwnProps & StateProps> = ({
+const ChatTags: FC<OwnProps> = ({
   folderIds,
   chatFoldersById,
 }) => {
   return (
     <div className={styles.wrapper}>
       {folderIds?.map((folderId) => {
-        const folder = chatFoldersById[folderId];
+        const folder = chatFoldersById?.[folderId];
         return folder && (
           <div key={folder.id} className={`ChatTags ${styles.tag} ${styles[`tagColor${folder.color}`]}`}>
             <div className={styles.tagBackground} />
@@ -31,10 +29,4 @@ const ChatTags: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    return {
-      chatFoldersById: global.chatFolders.byId,
-    };
-  },
-)(ChatTags));
+export default memo(ChatTags);

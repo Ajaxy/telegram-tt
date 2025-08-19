@@ -4,6 +4,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiChat,
+  ApiChatFolder,
   ApiDraft,
   ApiMessage,
   ApiMessageOutgoingStatus,
@@ -121,6 +122,7 @@ type StateProps = {
   isSynced?: boolean;
   isAccountFrozen?: boolean;
   folderIds?: number[];
+  chatFoldersById?: Record<number, ApiChatFolder>;
   areTagsEnabled?: boolean;
 };
 
@@ -162,6 +164,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   onDragEnter,
   isAccountFrozen,
   folderIds,
+  chatFoldersById,
   areTagsEnabled,
 }) => {
   const {
@@ -430,7 +433,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             />
           )}
         </div>
-        {areTagsEnabled && <ChatTags folderIds={folderIds} />}
+        {areTagsEnabled && <ChatTags folderIds={folderIds} chatFoldersById={chatFoldersById} />}
       </div>
       {shouldRenderDeleteModal && (
         <DeleteChatModal
@@ -537,6 +540,7 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       monoforumChannel,
       folderIds,
+      chatFoldersById: global.chatFolders.byId,
       areTagsEnabled: areTagsEnabled && isPremium,
     };
   },
