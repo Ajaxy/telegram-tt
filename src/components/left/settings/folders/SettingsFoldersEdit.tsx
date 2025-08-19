@@ -63,7 +63,7 @@ const SUBMIT_TIMEOUT = 500;
 
 const INITIAL_CHATS_LIMIT = 5;
 
-const FOLDER_COLORS = [1, 2, 3, 4, 5, 6];
+const FOLDER_COLORS = [0, 1, 2, 3, 4, 5, 6];
 
 export const ERROR_NO_TITLE = 'Please provide a title for this folder.';
 export const ERROR_NO_CHATS = 'ChatList.Filter.Error.Empty';

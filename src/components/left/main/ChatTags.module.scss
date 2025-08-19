@@ -26,28 +26,32 @@
     height: 100%;
     opacity: 0.1;
   }
-  
+
+  &Color0 {
+    color: var(--color-peer-0, var(--color-text));
+  }
+
   &Color1 {
-    color: var(--color-topic-blue);
+    color: var(--color-peer-1, var(--color-text));
   }
   
   &Color2 {
-    color: var(--color-topic-green);
+    color: var(--color-peer-2, var(--color-text));
   }
   
   &Color3 {
-    color: var(--color-topic-yellow);
+    color: var(--color-peer-3, var(--color-text));
   }
   
   &Color4 {
-    color: var(--color-topic-red);
+    color: var(--color-peer-4, var(--color-text));
   }
   
   &Color5 {
-    color: var(--color-topic-violet);
+    color: var(--color-peer-5, var(--color-text));
   }
   
   &Color6 {
-    color: var(--color-topic-rose);
+    color: var(--color-peer-6, var(--color-text));
   }
 }

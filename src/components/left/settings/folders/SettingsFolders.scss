@@ -143,28 +143,32 @@
   background-color: currentColor;
 }
 
+.color-picker-item-0 {
+  color: var(--color-peer-0, var(--color-text));
+}
+
 .color-picker-item-1 {
-  color: var(--color-topic-blue);
+  color: var(--color-peer-1, var(--color-text));
 }
 
 .color-picker-item-2 {
-  color: var(--color-topic-green);
+  color: var(--color-peer-2, var(--color-text));
 }
 
 .color-picker-item-3 {
-  color: var(--color-topic-yellow);
+  color: var(--color-peer-3, var(--color-text));
 }
 
 .color-picker-item-4 {
-  color: var(--color-topic-red);
+  color: var(--color-peer-4, var(--color-text));
 }
 
 .color-picker-item-5 {
-  color: var(--color-topic-violet);
+  color: var(--color-peer-5, var(--color-text));
 }
 
 .color-picker-item-6 {
-  color: var(--color-topic-rose);
+  color: var(--color-peer-6, var(--color-text));
 }
 
 .color-picker-item-none {
