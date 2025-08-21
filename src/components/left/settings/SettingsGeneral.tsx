@@ -4,7 +4,8 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { SharedSettings, ThemeKey, TimeFormat } from '../../../types';
+import type { SharedSettings } from '../../../global/types';
+import type { ThemeKey, TimeFormat } from '../../../types';
 import type { IRadioOption } from '../../ui/RadioGroup';
 import { SettingsScreens } from '../../../types';
 

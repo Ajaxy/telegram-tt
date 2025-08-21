@@ -9,8 +9,9 @@ import {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiInputMessageReplyInfo } from '../../../api/types';
+import type { SharedSettings } from '../../../global/types';
 import type {
-  IAnchorPosition, MessageListType, SharedSettings, ThreadId,
+  IAnchorPosition, MessageListType, ThreadId,
 } from '../../../types';
 import type { Signal } from '../../../util/signals';
 

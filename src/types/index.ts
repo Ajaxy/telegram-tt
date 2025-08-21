@@ -18,7 +18,6 @@ import type {
   ApiInputReplyInfo,
   ApiInputSuggestedPostInfo,
   ApiLabeledPrice,
-  ApiLanguage,
   ApiMediaFormat,
   ApiMessage,
   ApiMessageEntity,
@@ -158,34 +157,6 @@ export interface AccountSettings {
   translationLanguage?: string;
   doNotTranslate: string[];
   shouldPaidMessageAutoApprove: boolean;
-}
-
-export interface SharedSettings {
-  shouldUseSystemTheme: boolean;
-  theme: ThemeKey;
-  themes: Partial<Record<ThemeKey, IThemeSettings>>;
-  language: string;
-  languages?: ApiLanguage[];
-  performance: PerformanceType;
-  messageTextSize: number;
-  animationLevel: AnimationLevel;
-  messageSendKeyCombo: 'enter' | 'ctrl-enter';
-  miniAppsCachedPosition?: Point;
-  miniAppsCachedSize?: Size;
-  timeFormat: TimeFormat;
-  wasTimeFormatSetManually: boolean;
-  isConnectionStatusMinimized: boolean;
-  canDisplayChatInTitle: boolean;
-  shouldForceHttpTransport?: boolean;
-  shouldAllowHttpTransport?: boolean;
-  shouldCollectDebugLogs?: boolean;
-  shouldDebugExportedSenders?: boolean;
-  shouldWarnAboutSvg?: boolean;
-  shouldSkipWebAppCloseConfirmation: boolean;
-  hasContactJoinedNotifications?: boolean;
-  hasWebNotifications: boolean;
-  hasPushNotifications: boolean;
-  notificationSoundVolume: number;
 }
 
 export type IAnchorPosition = {

@@ -4,7 +4,8 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { AccountSettings, LangCode, SharedSettings } from '../../../types';
+import type { SharedSettings } from '../../../global/types';
+import type { AccountSettings, LangCode } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { selectIsCurrentUserPremium } from '../../../global/selectors';
