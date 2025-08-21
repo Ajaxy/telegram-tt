@@ -65,6 +65,9 @@ export default function createConfig(
       host: '0.0.0.0',
       allowedHosts: 'all',
       hot: false,
+      client: {
+        overlay: false,
+      },
       static: [
         {
           directory: path.resolve(__dirname, 'public'),
