@@ -1,10 +1,10 @@
-import type { FC } from '../../../lib/teact/teact';
-import { memo, useCallback, useState } from '../../../lib/teact/teact';
+import type { FC } from '@teact';
+import { memo, useCallback, useState } from '@teact';
 import { getActions } from '../../../global';
 
-import { LeftColumnContent } from '../../../types';
+import { type AnimationLevel, LeftColumnContent } from '../../../types';
 
-import { LAYERS_ANIMATION_NAME } from '../../../util/browser/windowEnvironment';
+import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
 
 import useLastCallback from '../../../hooks/useLastCallback.ts';
 
@@ -18,6 +18,7 @@ export type OwnProps = {
   isActive: boolean;
   isChannel?: boolean;
   content: LeftColumnContent;
+  animationLevel: AnimationLevel;
   onReset: () => void;
 };
 
@@ -27,6 +28,7 @@ const NewChat: FC<OwnProps> = ({
   isActive,
   isChannel = false,
   content,
+  animationLevel,
   onReset,
 }) => {
   const { openLeftColumnContent, setGlobalSearchQuery } = getActions();
@@ -50,7 +52,7 @@ const NewChat: FC<OwnProps> = ({
   return (
     <Transition
       id="NewChat"
-      name={LAYERS_ANIMATION_NAME}
+      name={resolveTransitionName('layers', animationLevel)}
       renderCount={RENDER_COUNT}
       activeKey={content}
     >

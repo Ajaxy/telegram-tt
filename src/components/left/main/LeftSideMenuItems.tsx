@@ -19,7 +19,7 @@ import {
 } from '../../../config';
 import {
   INITIAL_PERFORMANCE_STATE_MAX,
-  INITIAL_PERFORMANCE_STATE_MID,
+  INITIAL_PERFORMANCE_STATE_MED,
   INITIAL_PERFORMANCE_STATE_MIN,
 } from '../../../global/initialState';
 import { selectTabState, selectTheme, selectUser } from '../../../global/selectors';
@@ -119,7 +119,7 @@ const LeftSideMenuItems = ({
     }
     const performanceSettings = newLevel === ANIMATION_LEVEL_MIN
       ? INITIAL_PERFORMANCE_STATE_MIN
-      : (newLevel === ANIMATION_LEVEL_MAX ? INITIAL_PERFORMANCE_STATE_MAX : INITIAL_PERFORMANCE_STATE_MID);
+      : (newLevel === ANIMATION_LEVEL_MAX ? INITIAL_PERFORMANCE_STATE_MAX : INITIAL_PERFORMANCE_STATE_MED);
 
     setSharedSettingOption({ animationLevel: newLevel as AnimationLevel });
     updatePerformanceSettings(performanceSettings);

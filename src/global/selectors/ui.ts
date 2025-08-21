@@ -144,16 +144,20 @@ export function selectCanAnimateInterface<T extends GlobalState>(global: T) {
   return selectPerformanceSettingsValue(global, 'pageTransitions');
 }
 
+export function selectCanAnimateRightColumn<T extends GlobalState>(global: T) {
+  return selectPerformanceSettingsValue(global, 'rightColumnAnimations');
+}
+
+export function selectCanAnimateSnapEffect<T extends GlobalState>(global: T) {
+  return IS_SNAP_EFFECT_SUPPORTED && selectPerformanceSettingsValue(global, 'snapEffect');
+}
+
 export function selectIsContextMenuTranslucent<T extends GlobalState>(global: T) {
   return selectPerformanceSettingsValue(global, 'contextMenuBlur');
 }
 
 export function selectIsSynced<T extends GlobalState>(global: T) {
   return global.isSynced;
-}
-
-export function selectCanAnimateSnapEffect<T extends GlobalState>(global: T) {
-  return IS_SNAP_EFFECT_SUPPORTED && selectPerformanceSettingsValue(global, 'snapEffect');
 }
 
 export function selectWebApp<T extends GlobalState>(

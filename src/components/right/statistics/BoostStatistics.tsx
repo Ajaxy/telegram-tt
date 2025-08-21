@@ -1,23 +1,17 @@
-import {
-  memo, useMemo, useRef, useState,
-} from '../../../lib/teact/teact';
+import { memo, useMemo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiBoost, ApiBoostStatistics, ApiTypePrepaidGiveaway } from '../../../api/types';
 import type { TabState } from '../../../global/types';
-import type { CustomPeer } from '../../../types';
+import type { AnimationLevel, CustomPeer } from '../../../types';
 
-import {
-  GIVEAWAY_BOOST_PER_PREMIUM,
-} from '../../../config';
+import { GIVEAWAY_BOOST_PER_PREMIUM } from '../../../config';
 import { isChatChannel } from '../../../global/helpers';
-import {
-  selectChat,
-  selectIsGiveawayGiftsPurchaseAvailable,
-  selectTabState,
-} from '../../../global/selectors';
+import { selectChat, selectIsGiveawayGiftsPurchaseAvailable, selectTabState } from '../../../global/selectors';
+import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateAtTime } from '../../../util/dates/dateFormat';
+import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
 import { formatInteger } from '../../../util/textFormat';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
 
@@ -48,6 +42,7 @@ type StateProps = {
   chatId: string;
   giveawayBoostsPerPremium?: number;
   isChannel?: boolean;
+  animationLevel: AnimationLevel;
 };
 
 const GIVEAWAY_IMG_LIST: Partial<Record<number, string>> = {
@@ -75,6 +70,7 @@ const BoostStatistics = ({
   chatId,
   giveawayBoostsPerPremium,
   isChannel,
+  animationLevel,
 }: StateProps) => {
   const {
     openChat, loadMoreBoosters, closeBoostStatistics, openGiveawayModal, showNotification,
@@ -363,7 +359,7 @@ const BoostStatistics = ({
               >
                 <Transition
                   ref={transitionRef}
-                  name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
+                  name={resolveTransitionName('slideOptimized', animationLevel, undefined, lang.isRtl)}
                   activeKey={activeKey}
                   renderCount={tabs.length}
                   shouldRestoreHeight
@@ -434,6 +430,7 @@ export default memo(withGlobal(
     const chat = chatId ? selectChat(global, chatId) : undefined;
     const isChannel = chat && isChatChannel(chat);
     const giveawayBoostsPerPremium = global.appConfig?.giveawayBoostsPerPremium;
+    const { animationLevel } = selectSharedSettings(global);
 
     return {
       boostStatistics,
@@ -441,6 +438,7 @@ export default memo(withGlobal(
       chatId: chatId!,
       giveawayBoostsPerPremium,
       isChannel,
+      animationLevel,
     };
   },
 )(BoostStatistics));

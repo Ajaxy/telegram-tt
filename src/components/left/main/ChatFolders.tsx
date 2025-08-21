@@ -1,12 +1,11 @@
-import type { FC } from '../../../lib/teact/teact';
-import {
-  memo, useEffect, useMemo, useRef,
-} from '../../../lib/teact/teact';
+import type { FC } from '@teact';
+import { memo, useEffect, useMemo, useRef } from '@teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiChatFolder, ApiChatlistExportedInvite, ApiSession } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
+import type { AnimationLevel } from '../../../types';
 import type { MenuItemContextAction } from '../../ui/ListItem';
 import type { TabWithProperties } from '../../ui/TabList';
 import { SettingsScreens } from '../../../types';
@@ -14,11 +13,13 @@ import { SettingsScreens } from '../../../types';
 import { ALL_FOLDER_ID } from '../../../config';
 import { selectCanShareFolder, selectIsCurrentUserFrozen, selectTabState } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
+import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
 import useDerivedState from '../../../hooks/useDerivedState';
@@ -48,6 +49,7 @@ type StateProps = {
   orderedFolderIds?: number[];
   activeChatFolder: number;
   currentUserId?: string;
+  animationLevel: AnimationLevel;
   shouldSkipHistoryAnimations?: boolean;
   maxFolders: number;
   maxChatLists: number;
@@ -70,6 +72,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   activeChatFolder,
   currentUserId,
   isForumPanelOpen,
+  animationLevel,
   shouldSkipHistoryAnimations,
   maxFolders,
   maxChatLists,
@@ -393,7 +396,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       ) : undefined}
       <Transition
         ref={transitionRef}
-        name={shouldSkipHistoryAnimations ? 'none' : lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
+        name={resolveTransitionName('slideOptimized', animationLevel, shouldSkipHistoryAnimations, lang.isRtl)}
         activeKey={activeChatFolder}
         renderCount={shouldRenderFolders ? folderTabs.length : undefined}
       >
@@ -427,6 +430,7 @@ export default memo(withGlobal<OwnProps>(
       currentUserId,
       archiveSettings,
     } = global;
+    const { animationLevel } = selectSharedSettings(global);
     const { shouldSkipHistoryAnimations, activeChatFolder } = selectTabState(global);
     const { storyViewer: { isRibbonShown: isStoryRibbonShown } } = selectTabState(global);
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
@@ -437,6 +441,7 @@ export default memo(withGlobal<OwnProps>(
       orderedFolderIds,
       activeChatFolder,
       currentUserId,
+      animationLevel,
       shouldSkipHistoryAnimations,
       hasArchivedChats: Boolean(archived?.length),
       hasArchivedStories: Boolean(archivedStories?.length),

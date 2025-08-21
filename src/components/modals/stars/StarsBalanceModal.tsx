@@ -3,6 +3,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiStarTopupOption } from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
+import type { AnimationLevel } from '../../../types';
 import type { RegularLangKey } from '../../../types/language';
 
 import {
@@ -15,8 +16,10 @@ import {
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
+import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
 import buildClassName from '../../../util/buildClassName';
 import { convertCurrencyFromBaseUnit, convertTonToUsd, formatCurrencyAsString } from '../../../util/formatCurrency';
+import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -59,10 +62,11 @@ type StateProps = {
   shouldForceHeight?: boolean;
   tonUsdRate?: number;
   tonTopupUrl: string;
+  animationLevel: AnimationLevel;
 };
 
 const StarsBalanceModal = ({
-  modal, starsBalanceState, tonBalanceState, canBuyPremium, shouldForceHeight, tonUsdRate, tonTopupUrl,
+  modal, starsBalanceState, tonBalanceState, canBuyPremium, shouldForceHeight, tonUsdRate, tonTopupUrl, animationLevel,
 }: OwnProps & StateProps) => {
   const {
     closeStarsBalanceModal, loadStarsTransactions, loadStarsSubscriptions, openStarsGiftingPickerModal, openInvoice,
@@ -365,7 +369,7 @@ const StarsBalanceModal = ({
           <div className={styles.container}>
             <div className={styles.lastSection}>
               <Transition
-                name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
+                name={resolveTransitionName('slideOptimized', animationLevel, undefined, lang.isRtl)}
                 activeKey={selectedTabIndex}
                 renderCount={TRANSACTION_TABS_KEYS.length}
                 shouldRestoreHeight
@@ -417,6 +421,7 @@ export default memo(withGlobal<OwnProps>(
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
       tonUsdRate: global.appConfig?.tonUsdRate || TON_USD_RATE_DEFAULT,
       tonTopupUrl: global.appConfig?.tonTopupUrl || TON_TOPUP_URL_DEFAULT,
+      animationLevel: selectSharedSettings(global).animationLevel,
     };
   },
 )(StarsBalanceModal));

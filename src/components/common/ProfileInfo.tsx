@@ -5,6 +5,7 @@ import { getActions, withGlobal } from '../../global';
 import type {
   ApiChat, ApiPeerPhotos, ApiSticker, ApiTopic, ApiUser, ApiUserStatus,
 } from '../../api/types';
+import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
 import {
@@ -20,10 +21,12 @@ import {
   selectUser,
   selectUserStatus,
 } from '../../global/selectors';
+import { selectSharedSettings } from '../../global/selectors/sharedState.ts';
 import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import { resolveTransitionName } from '../../util/resolveTransitionName.ts';
 import renderText from './helpers/renderText';
 
 import useIntervalForceUpdate from '../../hooks/schedulers/useIntervalForceUpdate';
@@ -58,6 +61,7 @@ type StateProps =
     avatarOwnerId?: string;
     topic?: ApiTopic;
     messagesCount?: number;
+    animationLevel: AnimationLevel;
     emojiStatusSticker?: ApiSticker;
     emojiStatusSlug?: string;
     profilePhotos?: ApiPeerPhotos;
@@ -79,6 +83,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   avatarOwnerId,
   topic,
   messagesCount,
+  animationLevel,
   emojiStatusSticker,
   emojiStatusSlug,
   profilePhotos,
@@ -103,8 +108,6 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   const prevMediaIndex = usePreviousDeprecated(mediaIndex);
   const prevAvatarOwnerId = usePreviousDeprecated(avatarOwnerId);
   const [hasSlideAnimation, setHasSlideAnimation] = useState(true);
-  // slideOptimized doesn't work well when animation is dynamically disabled
-  const slideAnimation = hasSlideAnimation ? (oldLang.isRtl ? 'slideRtl' : 'slide') : 'none';
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const isFirst = photos.length <= 1 || currentPhotoIndex === 0;
@@ -349,7 +352,10 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
             </div>
           </div>
         )}
-        <Transition activeKey={currentPhotoIndex} name={slideAnimation}>
+        <Transition
+          activeKey={currentPhotoIndex}
+          name={resolveTransitionName('slide', animationLevel, !hasSlideAnimation, oldLang.isRtl)}
+        >
           {renderPhoto}
         </Transition>
 
@@ -400,6 +406,7 @@ export default memo(withGlobal<OwnProps>(
     const isForum = chat?.isForum;
     const { threadId: currentTopicId } = selectCurrentMessageList(global) || {};
     const topic = isForum && currentTopicId ? selectTopic(global, peerId, currentTopicId) : undefined;
+    const { animationLevel } = selectSharedSettings(global);
 
     const emojiStatus = (user || chat)?.emojiStatus;
     const emojiStatusSticker = emojiStatus ? global.customEmojis.byId[emojiStatus.documentId] : undefined;
@@ -411,6 +418,7 @@ export default memo(withGlobal<OwnProps>(
       chat,
       mediaIndex,
       avatarOwnerId,
+      animationLevel,
       emojiStatusSticker,
       emojiStatusSlug,
       profilePhotos,

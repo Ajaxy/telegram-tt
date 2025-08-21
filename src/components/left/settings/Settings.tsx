@@ -1,12 +1,13 @@
-import type { FC } from '../../../lib/teact/teact';
-import { memo, useRef, useState } from '../../../lib/teact/teact';
+import type { FC } from '@teact';
+import { memo, useRef, useState } from '@teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type { FolderEditDispatch, FoldersState } from '../../../hooks/reducers/useFoldersReducer';
+import type { AnimationLevel } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
-import { LAYERS_ANIMATION_NAME } from '../../../util/browser/windowEnvironment';
+import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
 
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -150,6 +151,7 @@ export type OwnProps = {
   currentScreen: SettingsScreens;
   foldersState: FoldersState;
   foldersDispatch: FolderEditDispatch;
+  animationLevel: AnimationLevel;
   shouldSkipTransition?: boolean;
   onReset: (forceReturnToChatList?: true | Event) => void;
 };
@@ -160,6 +162,7 @@ const Settings: FC<OwnProps> = ({
   foldersState,
   foldersDispatch,
   onReset,
+  animationLevel,
   shouldSkipTransition,
 }) => {
   const { closeShareChatFolderModal, openSettingsScreen } = getActions();
@@ -510,7 +513,7 @@ const Settings: FC<OwnProps> = ({
     <Transition
       ref={containerRef}
       id="Settings"
-      name={shouldSkipTransition ? 'none' : LAYERS_ANIMATION_NAME}
+      name={resolveTransitionName('layers', animationLevel, shouldSkipTransition)}
       activeKey={currentScreen}
       renderCount={TRANSITION_RENDER_COUNT}
       shouldWrap

@@ -9,10 +9,12 @@ import {
 import { getActions, withGlobal } from '../../../global';
 
 import type { RegularLangKey } from '../../../types/language';
-import { GlobalSearchContent } from '../../../types';
+import { type AnimationLevel, GlobalSearchContent } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
+import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
 import { parseDateString } from '../../../util/dates/dateFormat';
+import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
@@ -42,6 +44,7 @@ export type OwnProps = {
 type StateProps = {
   currentContent?: GlobalSearchContent;
   chatId?: string;
+  animationLevel: AnimationLevel;
 };
 
 type TabInfo = {
@@ -72,6 +75,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
   isActive,
   currentContent = GlobalSearchContent.ChatList,
   chatId,
+  animationLevel,
   onReset,
 }) => {
   const {
@@ -120,7 +124,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
     <div className="LeftSearch" ref={containerRef} onKeyDown={handleKeyDown}>
       <TabList activeTab={activeTab} tabs={tabs} onSwitchTab={handleSwitchTab} />
       <Transition
-        name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
+        name={resolveTransitionName('slideOptimized', animationLevel, undefined, lang.isRtl)}
         renderCount={tabs.length}
         activeKey={currentContent}
       >
@@ -195,7 +199,8 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { currentContent, chatId } = selectTabState(global).globalSearch;
+    const { animationLevel } = selectSharedSettings(global);
 
-    return { currentContent, chatId };
+    return { currentContent, chatId, animationLevel };
   },
 )(LeftSearch));

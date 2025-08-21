@@ -1,13 +1,9 @@
-import type { FC } from '../../lib/teact/teact';
-import {
-  memo, useEffect, useRef, useState,
-} from '../../lib/teact/teact';
+import type { FC } from '@teact';
+import { memo, useEffect, useRef, useState } from '@teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ProfileTabType, ThreadId } from '../../types';
-import {
-  ManagementScreens, NewChatMembersProgress, ProfileState, RightColumnContent,
-} from '../../types';
+import type { AnimationLevel, ProfileTabType, ThreadId } from '../../types';
+import { ManagementScreens, NewChatMembersProgress, ProfileState, RightColumnContent } from '../../types';
 
 import { ANIMATION_END_DELAY, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 import { getIsSavedDialog } from '../../global/helpers';
@@ -18,7 +14,9 @@ import {
   selectRightColumnContentKey,
   selectTabState,
 } from '../../global/selectors';
+import { selectSharedSettings } from '../../global/selectors/sharedState.ts';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { resolveTransitionName } from '../../util/resolveTransitionName.ts';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useHistoryBack from '../../hooks/useHistoryBack';
@@ -55,6 +53,7 @@ type StateProps = {
   threadId?: ThreadId;
   isInsideTopic?: boolean;
   isChatSelected: boolean;
+  animationLevel: AnimationLevel;
   shouldSkipHistoryAnimations?: boolean;
   nextManagementScreen?: ManagementScreens;
   nextProfileTab?: ProfileTabType;
@@ -80,6 +79,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   threadId,
   isMobile,
   isChatSelected,
+  animationLevel,
   shouldSkipHistoryAnimations,
   nextManagementScreen,
   nextProfileTab,
@@ -403,7 +403,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
         />
         <Transition
           ref={containerRef}
-          name={(shouldSkipTransition || shouldSkipHistoryAnimations) ? 'none' : 'zoomFade'}
+          name={resolveTransitionName('layers', animationLevel, shouldSkipTransition || shouldSkipHistoryAnimations)}
           renderCount={MAIN_SCREENS_COUNT + MANAGEMENT_SCREENS_COUNT}
           activeKey={isManagement ? MAIN_SCREENS_COUNT + managementScreen : renderingContentKey}
           shouldCleanup
@@ -425,6 +425,7 @@ export default memo(withGlobal<OwnProps>(
     const { chatId, threadId } = selectCurrentMessageList(global) || {};
 
     const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
+    const { animationLevel } = selectSharedSettings(global);
     const {
       management, shouldSkipHistoryAnimations, nextProfileTab, shouldCloseRightColumn,
     } = selectTabState(global);
@@ -438,6 +439,7 @@ export default memo(withGlobal<OwnProps>(
       chatId,
       threadId,
       isChatSelected: Boolean(chatId && areActiveChatsLoaded),
+      animationLevel,
       shouldSkipHistoryAnimations,
       nextManagementScreen,
       nextProfileTab,

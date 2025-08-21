@@ -34,7 +34,7 @@ export const INITIAL_PERFORMANCE_STATE_MAX: PerformanceType = {
   snapEffect: true,
 };
 
-export const INITIAL_PERFORMANCE_STATE_MID: PerformanceType = {
+export const INITIAL_PERFORMANCE_STATE_MED: PerformanceType = {
   animatedEmoji: true,
   autoplayGifs: true,
   autoplayVideos: true,
@@ -47,8 +47,8 @@ export const INITIAL_PERFORMANCE_STATE_MID: PerformanceType = {
   pageTransitions: true,
   reactionEffects: true,
   rightColumnAnimations: false,
-  stickerEffects: false,
-  storyRibbonAnimations: false,
+  stickerEffects: true,
+  storyRibbonAnimations: true,
   snapEffect: false,
 };
 

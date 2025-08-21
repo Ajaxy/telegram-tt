@@ -6,9 +6,6 @@
 
   width: 100%;
 
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: width var(--layer-transition);
-
   // In case if there are no children, we need to have a shadow
   &::before {
     pointer-events: none;
@@ -23,6 +20,11 @@
     height: 2px;
 
     box-shadow: 0 2px 2px var(--color-light-shadow);
+  }
+
+  &_withRightColumnAnimation {
+    /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+    transition: width var(--layer-transition);
   }
 
   /* stylelint-disable-next-line plugin/selector-tag-no-without-class */
