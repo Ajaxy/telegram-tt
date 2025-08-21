@@ -3,6 +3,10 @@
 #Settings {
   height: 100%;
 
+  .with-notch::before {
+    top: var(--header-height);
+  }
+
   > .Transition_slide {
     overflow: hidden;
     display: flex;
@@ -40,12 +44,6 @@
 .settings-content {
   overflow-y: scroll;
   height: calc(100% - var(--header-height));
-  border-top: 1px solid transparent;
-  transition: border-top-color 0.2s ease-in-out;
-
-  &.scrolled {
-    border-top-color: var(--color-borders);
-  }
 
   &.password-form .input-group.error label::first-letter {
     text-transform: uppercase;

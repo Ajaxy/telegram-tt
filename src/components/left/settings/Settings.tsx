@@ -11,7 +11,7 @@ import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
 
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMarkScrolled from '../../../hooks/useMarkScrolled/useMarkScrolled';
+import useScrollNotch from '../../../hooks/useScrollNotch.ts';
 
 import Transition from '../../ui/Transition';
 import SettingsFolders from './folders/SettingsFolders';
@@ -172,7 +172,7 @@ const Settings: FC<OwnProps> = ({
   const [twoFaState, twoFaDispatch] = useTwoFaReducer();
   const [privacyPasscode, setPrivacyPasscode] = useState<string>('');
 
-  useMarkScrolled({
+  useScrollNotch({
     containerRef,
     selector: '.settings-content',
   }, [currentScreen]);

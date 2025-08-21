@@ -22,7 +22,7 @@ import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
-import useMarkScrolled from '../../hooks/useMarkScrolled/useMarkScrolled';
+import useScrollNotch from '../../hooks/useScrollNotch.ts';
 import useWindowSize from '../../hooks/window/useWindowSize';
 
 import Transition from '../ui/Transition';
@@ -140,7 +140,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true, !isChatSelected) ?? -1;
 
-  useMarkScrolled({
+  useScrollNotch({
     containerRef,
     selector: ':scope .custom-scroll, :scope .panel-content',
   }, [contentKey, managementScreen, chatId, threadId]);

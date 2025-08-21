@@ -359,6 +359,31 @@ body:not(.is-ios) {
   height: 100%;
 }
 
+.with-notch {
+  &::before {
+    content: "";
+
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 1px;
+
+    opacity: 0;
+    background-color: var(--color-borders);
+
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  &.scrolled {
+    &::before {
+      opacity: 1;
+    }
+  }
+}
+
 @keyframes grow-icon {
   0% {
     transform: scale(0.5);
