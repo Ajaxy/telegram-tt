@@ -126,6 +126,7 @@ const SenderGroupContainer: FC<OwnProps & StateProps> = ({
     shouldRender,
   } = useShowTransition({
     isOpen: withAvatar && isShown,
+    noMountTransition: isShown,
     withShouldRender: true,
   });
 
