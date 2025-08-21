@@ -98,14 +98,6 @@
   .form {
     min-height: 26.25rem;
   }
-
-  .Button {
-    margin-top: 2.75rem;
-  }
-
-  .Button + .Button {
-    margin-top: 1rem;
-  }
 }
 
 #auth-code-form,
@@ -137,6 +129,18 @@
   &:focus {
     opacity: 1;
   }
+}
+
+.auth-button {
+  margin-top: 2.5rem;
+}
+
+.auth-button + .auth-button {
+  margin-top: 0.5rem;
+}
+
+.auth-button.text + .auth-button.text {
+  margin-top: 0;
 }
 
 #auth-qr-form {

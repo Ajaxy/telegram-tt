@@ -1,11 +1,11 @@
 .CustomSendMenu {
   position: relative;
-  bottom: 3.5rem;
+  bottom: 3rem;
 
   .is-pointer-env & {
     > .backdrop {
       position: absolute;
-      top: -1rem;
+      top: -0.5rem;
       right: 0;
       left: auto;
 

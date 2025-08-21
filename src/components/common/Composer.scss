@@ -459,7 +459,7 @@
 }
 
 .message-input-wrapper {
-  --action-button-size: var(--base-height, 3.5rem);
+  --action-button-size: var(--base-height, 3rem);
   --action-button-compact-fix: -1rem;
 
   display: flex;
@@ -648,7 +648,7 @@
 
 .input-scroller {
   overflow: hidden;
-  min-height: var(--base-height, 3.5rem);
+  min-height: var(--base-height, 3rem);
   max-height: 26rem;
 
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
@@ -709,7 +709,7 @@
     overflow: hidden;
 
     height: auto;
-    padding: calc((var(--base-height, 3.5rem) - var(--composer-text-size, 1rem) * 1.375) / 2) 0.875rem;
+    padding: calc((var(--base-height, 3rem) - var(--composer-text-size, 1rem) * 1.375) / 2) 0.875rem;
     border: none !important;
     border-radius: 0 !important;
 
@@ -847,7 +847,7 @@
   .form-control {
     height: auto;
     margin-bottom: 0;
-    padding: calc((var(--base-height, 3.5rem) - var(--composer-text-size, 1rem) * 1.3125) / 2) 0;
+    padding: calc((var(--base-height, 3rem) - var(--composer-text-size, 1rem) * 1.3125) / 2) 0;
 
     line-height: 1.3125;
     white-space: pre-wrap;
@@ -859,7 +859,7 @@
 
   .forced-placeholder,
   .placeholder-text {
-    top: calc((var(--base-height, 3.5rem) - var(--composer-text-size, 1rem) * 1.3125) / 2);
+    top: calc((var(--base-height, 3rem) - var(--composer-text-size, 1rem) * 1.3125) / 2);
 
     @media (max-width: 600px) {
       top: calc((2.875rem - var(--composer-text-size, 1rem) * 1.3125) / 2);
@@ -889,7 +889,7 @@
 #caption-input-text {
   --margin-for-scrollbar: 2rem;
   .input-scroller {
-    min-height: var(--base-height, 3.5rem);
+    min-height: var(--base-height, 3rem);
     max-height: 10rem;
     margin-right: calc((var(--margin-for-scrollbar) + 1rem) * -1);
 
@@ -933,11 +933,11 @@
 }
 
 #caption-input-text .placeholder-text {
-  bottom: 1.0625rem;
+  bottom: 0.8125rem;
 }
 
 #story-input-text .placeholder-text {
-  top: calc((var(--base-height, 3.5rem) - var(--composer-text-size, 1rem) * 1.3125) / 2);
+  top: calc((var(--base-height, 3rem) - var(--composer-text-size, 1rem) * 1.3125) / 2);
   left: 0.875rem;
 
   &.is-need-premium {

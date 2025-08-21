@@ -98,11 +98,7 @@
       }
 
       #editable-message-text {
-        height: 3.5rem !important;
-
-        @media (max-width: 600px) {
-          height: 2.5rem !important;
-        }
+        height: var(--base-height) !important;
       }
 
       .message-input-wrapper,
@@ -157,6 +153,8 @@
   }
 
   .middle-column-footer {
+    --base-height: 3rem;
+
     position: relative;
     z-index: var(--z-middle-footer);
     transform: translate3d(0, 0, 0);
@@ -334,16 +332,12 @@
 
   .composer-button {
     transform: scaleX(1);
-    height: 3.5rem;
+    height: var(--base-height);
     transition: transform var(--select-transition), background-color 0.15s, color 0.15s;
 
     .select-mode-active + .middle-column-footer & {
       transform: scaleX(var(--unpin-hidden-scale));
       box-shadow: none;
-    }
-
-    @media (max-width: 600px) {
-      height: 2.5rem;
     }
   }
 

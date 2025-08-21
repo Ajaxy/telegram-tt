@@ -81,16 +81,6 @@
 
     transition: transform var(--select-transition), opacity var(--select-transition);
 
-    > .Button {
-      width: 3rem;
-      height: 3rem;
-
-      @media (max-width: 600px) {
-        width: 2.875rem;
-        height: 2.875rem;
-      }
-    }
-
     @media (max-width: 600px) {
       max-width: none;
       padding: 0;

@@ -9,7 +9,7 @@
 
   &--menu {
     position: relative;
-    top: -3.5rem;
+    top: -3rem;
 
     .bubble {
       overflow: auto;
@@ -19,7 +19,7 @@
     .is-pointer-env & {
       > .backdrop {
         position: absolute;
-        top: -1rem;
+        top: -0.5rem;
         right: 0;
         left: auto;
 

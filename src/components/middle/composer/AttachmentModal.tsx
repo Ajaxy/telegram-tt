@@ -748,6 +748,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               <Button
                 ref={mainButtonRef}
                 className={styles.send}
+                size="smaller"
                 onClick={handleSendClick}
                 onContextMenu={canShowCustomSendMenu ? handleContextMenu : undefined}
               >

@@ -331,7 +331,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
         <>
           {canExpandActions && !shouldSendJoinRequest && (canSubscribe || shouldJoinToSend) && (
             <Button
-              size="tiny"
+              size="smaller"
               ripple
               fluid
               onClick={handleSubscribeClick}
@@ -341,7 +341,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           )}
           {canExpandActions && shouldSendJoinRequest && (
             <Button
-              size="tiny"
+              size="smaller"
               ripple
               fluid
               onClick={handleSubscribeClick}
@@ -351,7 +351,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           )}
           {canExpandActions && canStartBot && (
             <Button
-              size="tiny"
+              size="smaller"
               ripple
               fluid
               onClick={handleStartBot}
@@ -371,7 +371,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           )}
           {canExpandActions && canUnblock && (
             <Button
-              size="tiny"
+              size="smaller"
               ripple
               fluid
               onClick={handleUnblock}
