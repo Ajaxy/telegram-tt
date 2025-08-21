@@ -1,12 +1,6 @@
-import type {
-  ElementRef } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
-import {
-  beginHeavyAnimation, useEffect, useLayoutEffect, useRef,
-} from '../../lib/teact/teact';
-import {
-  addExtraClass, removeExtraClass, setExtraStyles, toggleExtraClass,
-} from '../../lib/teact/teact-dom';
+import type { ElementRef } from '@teact';
+import { beginHeavyAnimation, useEffect, useLayoutEffect, useRef } from '@teact';
+import { addExtraClass, removeExtraClass, setExtraStyles, toggleExtraClass } from '@teact/teact-dom';
 import { getGlobal } from '../../global';
 
 import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
@@ -19,6 +13,7 @@ import { allowSwipeControlForTransition } from '../../util/swipeController';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
+import useSyncEffectWithPrevDeps from '../../hooks/useSyncEffectWithPrevDeps.ts';
 
 import './Transition.scss';
 
@@ -122,6 +117,27 @@ function Transition({
     rendersRef.current[nextKey] = children;
   }
 
+  // Reset when switching from/to "optimized" transitions
+  useSyncEffectWithPrevDeps(([prevName]) => {
+    if (!prevName) return;
+
+    const prevIsSliceOptimized = prevName === 'slideOptimized' || prevName === 'slideOptimizedRtl';
+    const isSlideOptimized = name === 'slideOptimized' || name === 'slideOptimizedRtl';
+    const shouldReset = (prevIsSliceOptimized && !isSlideOptimized) || (!prevIsSliceOptimized && isSlideOptimized);
+    if (!shouldReset) return;
+
+    rendersRef.current = { [activeKey]: children };
+
+    if (prevIsSliceOptimized) {
+      requestMutation(() => {
+        const container = containerRef.current!;
+
+        ['slideOptimized', 'slideOptimizedBackwards', 'slideOptimizedRtl', 'slideOptimizedRtlBackwards']
+          .forEach((cn) => removeExtraClass(container, `Transition-${cn}`));
+      });
+    }
+  }, [name]);
+
   const isBackwards = (
     direction === -1
     || (direction === 'auto' && prevActiveKey > activeKey)
@@ -130,9 +146,8 @@ function Transition({
 
   useLayoutEffect(() => {
     function cleanup() {
-      if (!shouldCleanup) {
-        return;
-      }
+      if (!shouldCleanup) return;
+
       if (cleanupExceptionKey !== undefined) {
         rendersRef.current = { [cleanupExceptionKey]: rendersRef.current[cleanupExceptionKey] };
       } else if (cleanupOnlyKey !== undefined) {
@@ -140,6 +155,7 @@ function Transition({
       } else {
         rendersRef.current = {};
       }
+
       forceUpdate();
     }
 
