@@ -34,7 +34,7 @@ import { encryptSession } from '../util/passcode';
 import { onBeforeUnload, throttle } from '../util/schedulers';
 import { hasStoredSession } from '../util/sessions';
 import { addActionHandler, getGlobal } from './index';
-import { INITIAL_GLOBAL_STATE } from './initialState';
+import { INITIAL_GLOBAL_STATE, INITIAL_PERFORMANCE_STATE_MED } from './initialState';
 import { clearGlobalForLockScreen, clearSharedStateForLockScreen } from './reducers';
 import {
   selectChatLastMessageId,
@@ -351,11 +351,9 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   }
 
   const cachedSharedSettings = cached.sharedState.settings;
-  if (
-    cachedSharedSettings.animationLevel !== ANIMATION_LEVEL_DEFAULT
-    && !cachedSharedSettings.wasAnimationLevelSetManually
-  ) {
+  if (!cachedSharedSettings.wasAnimationLevelSetManually) {
     cachedSharedSettings.animationLevel = ANIMATION_LEVEL_DEFAULT;
+    cachedSharedSettings.performance = INITIAL_PERFORMANCE_STATE_MED;
   }
 }
 

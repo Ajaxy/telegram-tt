@@ -139,7 +139,7 @@ function SettingsPerformance({
       ? INITIAL_PERFORMANCE_STATE_MIN
       : (newLevel === ANIMATION_LEVEL_MED ? INITIAL_PERFORMANCE_STATE_MED : INITIAL_PERFORMANCE_STATE_MAX);
 
-    setSharedSettingOption({ animationLevel: newLevel as AnimationLevel });
+    setSharedSettingOption({ animationLevel: newLevel as AnimationLevel, wasAnimationLevelSetManually: true });
     updatePerformanceSettings(performance);
   }, []);
 

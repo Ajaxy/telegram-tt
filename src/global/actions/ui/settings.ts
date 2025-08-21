@@ -130,6 +130,7 @@ addActionHandler('updatePerformanceSettings', (global, actions, payload): Action
       ...settings.performance,
       ...payload,
     },
+    wasAnimationLevelSetManually: true,
   });
 
   return global;
