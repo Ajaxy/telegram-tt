@@ -24,6 +24,7 @@ import NothingFound from '../../common/NothingFound';
 import WebLink from '../../common/WebLink';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
+import Transition from '../../ui/Transition.tsx';
 
 export type OwnProps = {
   searchQuery?: string;
@@ -122,7 +123,13 @@ const LinkResults: FC<OwnProps & StateProps> = ({
   const canRenderContents = useAsyncRendering([searchQuery], SLIDE_TRANSITION_DURATION) && !isLoading;
 
   return (
-    <div ref={containerRef} className="LeftSearch--content">
+    <Transition
+      ref={containerRef}
+      slideClassName="LeftSearch--content"
+      name="fade"
+      activeKey={canRenderContents ? 1 : 0}
+      shouldCleanup
+    >
       <InfiniteScroll
         className="search-content documents-list custom-scroll"
         items={canRenderContents ? foundMessages : undefined}
@@ -139,7 +146,7 @@ const LinkResults: FC<OwnProps & StateProps> = ({
         )}
         {canRenderContents && foundIds && foundIds.length > 0 && renderList()}
       </InfiniteScroll>
-    </div>
+    </Transition>
   );
 };
 

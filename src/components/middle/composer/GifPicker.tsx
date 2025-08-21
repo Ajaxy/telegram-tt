@@ -1,7 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import {
-  memo, useEffect, useRef,
-} from '../../../lib/teact/teact';
+import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiVideo } from '../../../api/types';
@@ -17,6 +15,7 @@ import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import GifButton from '../../common/GifButton';
 import Loading from '../../ui/Loading';
+import Transition from '../../ui/Transition.tsx';
 
 import './GifPicker.scss';
 
@@ -61,34 +60,37 @@ const GifPicker: FC<OwnProps & StateProps> = ({
   });
 
   const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
+  const isLoading = canSendGifs && (!canRenderContents || !savedGifs);
 
   return (
-    <div>
-      <div
-        ref={containerRef}
-        className={buildClassName('GifPicker', className, IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
-      >
-        {!canSendGifs ? (
-          <div className="picker-disabled">Sending GIFs is not allowed in this chat.</div>
-        ) : canRenderContents && savedGifs && savedGifs.length ? (
-          savedGifs.map((gif) => (
-            <GifButton
-              key={gif.id}
-              gif={gif}
-              observeIntersection={observeIntersection}
-              isDisabled={!loadAndPlay}
-              onClick={canSendGifs ? onGifSelect : undefined}
-              onUnsaveClick={handleUnsaveClick}
-              isSavedMessages={isSavedMessages}
-            />
-          ))
-        ) : canRenderContents && savedGifs ? (
-          <div className="picker-disabled">No saved GIFs.</div>
-        ) : (
-          <Loading />
-        )}
-      </div>
-    </div>
+    <Transition
+      ref={containerRef}
+      className={buildClassName('GifPicker', className, IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
+      slideClassName="GifPickerGrid"
+      activeKey={isLoading ? 0 : 1}
+      name="fade"
+      shouldCleanup
+    >
+      {!canSendGifs ? (
+        <div className="picker-disabled">Sending GIFs is not allowed in this chat.</div>
+      ) : canRenderContents && savedGifs && savedGifs.length ? (
+        savedGifs.map((gif) => (
+          <GifButton
+            key={gif.id}
+            gif={gif}
+            observeIntersection={observeIntersection}
+            isDisabled={!loadAndPlay}
+            onClick={canSendGifs ? onGifSelect : undefined}
+            onUnsaveClick={handleUnsaveClick}
+            isSavedMessages={isSavedMessages}
+          />
+        ))
+      ) : canRenderContents && savedGifs ? (
+        <div className="picker-disabled">No saved GIFs.</div>
+      ) : (
+        <Loading color="yellow" />
+      )}
+    </Transition>
   );
 };
 

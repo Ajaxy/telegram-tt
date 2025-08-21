@@ -20,6 +20,7 @@ import NothingFound from '../../common/NothingFound';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Link from '../../ui/Link';
 import Loading from '../../ui/Loading';
+import Transition from '../../ui/Transition.tsx';
 import LeftSearchResultChat from './LeftSearchResultChat';
 
 export type OwnProps = {
@@ -79,7 +80,13 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
   const canRenderContents = useAsyncRendering([searchQuery], SLIDE_TRANSITION_DURATION) && !isLoading;
 
   return (
-    <div ref={containerRef} className="LeftSearch--content">
+    <Transition
+      ref={containerRef}
+      slideClassName="LeftSearch--content"
+      name="fade"
+      activeKey={canRenderContents ? 1 : 0}
+      shouldCleanup
+    >
       <InfiniteScroll
         className="search-content custom-scroll"
         items={canRenderContents ? filteredFoundIds : undefined}
@@ -134,7 +141,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
           </div>
         )}
       </InfiniteScroll>
-    </div>
+    </Transition>
   );
 };
 

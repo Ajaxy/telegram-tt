@@ -1,16 +1,9 @@
-import type { FC } from '../../lib/teact/teact';
-import {
-  beginHeavyAnimation, memo, useEffect, useMemo, useRef,
-} from '../../lib/teact/teact';
-import { addExtraClass, removeExtraClass } from '../../lib/teact/teact-dom';
+import type { FC } from '@teact';
+import { beginHeavyAnimation, memo, useEffect, useMemo, useRef } from '@teact';
+import { addExtraClass, removeExtraClass } from '@teact/teact-dom.ts';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type {
-  ApiChatFullInfo,
-  ApiMessage,
-  ApiRestrictionReason,
-  ApiTopic,
-} from '../../api/types';
+import type { ApiChatFullInfo, ApiMessage, ApiRestrictionReason, ApiTopic } from '../../api/types';
 import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { LoadMoreDirection, type MessageListType, type ThreadId } from '../../types';
@@ -83,6 +76,7 @@ import useContainerHeight from './hooks/useContainerHeight';
 import useStickyDates from './hooks/useStickyDates';
 
 import Loading from '../ui/Loading';
+import Transition from '../ui/Transition.tsx';
 import ContactGreeting from './ContactGreeting';
 import MessageListAccountInfo from './MessageListAccountInfo';
 import MessageListContent from './MessageListContent';
@@ -149,6 +143,17 @@ type StateProps = {
   translationLanguage?: string;
   shouldAutoTranslate?: boolean;
 };
+
+enum Content {
+  Loading,
+  Restricted,
+  StarsRequired,
+  PremiumRequired,
+  AccountInfo,
+  ContactGreeting,
+  NoMessages,
+  MessageList,
+}
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 20 * 1000;
 const MESSAGE_COMMENTS_POLLING_INTERVAL = 20 * 1000;
@@ -711,73 +716,98 @@ const MessageList: FC<OwnProps & StateProps> = ({
     onScrollDownToggle(false);
   }, [hasMessages, onScrollDownToggle]);
 
+  const activeKey = isRestricted ? (
+    Content.Restricted
+  ) : paidMessagesStars && !hasMessages && !hasCustomGreeting ? (
+    Content.StarsRequired
+  ) : isContactRequirePremium && !hasMessages ? (
+    Content.PremiumRequired
+  ) : (isBot || isNonContact) && !hasMessages ? (
+    Content.AccountInfo
+  ) : shouldRenderGreeting ? (
+    Content.ContactGreeting
+  ) : messageIds && (!messageGroups || isGroupChatJustCreated || isEmptyTopic) ? (
+    Content.NoMessages
+  ) : hasMessages ? (
+    Content.MessageList
+  ) : (
+    Content.Loading
+  );
+
+  function renderContent() {
+    return activeKey === Content.Restricted ? (
+      <div className="empty">
+        <span>
+          {restrictionReasons?.[0]?.text || `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
+        </span>
+      </div>
+    ) : activeKey === Content.StarsRequired ? (
+      <RequirementToContactMessage paidMessagesStars={paidMessagesStars} peerId={monoforumChannelId || chatId} />
+    ) : activeKey === Content.PremiumRequired ? (
+      <RequirementToContactMessage peerId={chatId} />
+    ) : activeKey === Content.AccountInfo ? (
+      <MessageListAccountInfo chatId={chatId} hasMessages={hasMessages} />
+    ) : activeKey === Content.ContactGreeting ? (
+      <ContactGreeting key={chatId} userId={chatId} />
+    ) : activeKey === Content.NoMessages ? (
+      <NoMessages
+        chatId={chatId}
+        topic={topic}
+        type={type}
+        isChatWithSelf={isChatWithSelf}
+        isGroupChatJustCreated={isGroupChatJustCreated}
+      />
+    ) : activeKey === Content.MessageList ? (
+      <MessageListContent
+        canShowAds={areAdsEnabled && isChannelChat}
+        chatId={chatId}
+        isComments={isComments}
+        isChannelChat={isChannelChat}
+        isChatMonoforum={isChatMonoforum}
+        isSavedDialog={isSavedDialog}
+        messageIds={messageIds || [lastMessage!.id]}
+        messageGroups={messageGroups || groupMessages([lastMessage!])}
+        getContainerHeight={getContainerHeight}
+        isViewportNewest={Boolean(isViewportNewest)}
+        isUnread={Boolean(firstUnreadId)}
+        isEmptyThread={isEmptyThread}
+        withUsers={withUsers}
+        noAvatars={noAvatars}
+        containerRef={containerRef}
+        anchorIdRef={anchorIdRef}
+        memoUnreadDividerBeforeIdRef={memoUnreadDividerBeforeIdRef}
+        memoFirstUnreadIdRef={memoFirstUnreadIdRef}
+        threadId={threadId}
+        type={type}
+        isReady={isReady}
+        hasLinkedChat={hasLinkedChat}
+        isSchedule={messageGroups ? type === 'scheduled' : false}
+        shouldRenderAccountInfo={isBot || isNonContact}
+        nameChangeDate={nameChangeDate}
+        photoChangeDate={photoChangeDate}
+        noAppearanceAnimation={!messageGroups || !shouldAnimateAppearanceRef.current}
+        onScrollDownToggle={onScrollDownToggle}
+        onNotchToggle={onNotchToggle}
+        onIntersectPinnedMessage={onIntersectPinnedMessage}
+        canPost={canPost}
+      />
+    ) : (
+      <Loading color="white" backgroundColor="dark" />
+    );
+  }
+
   return (
-    <div
+    <Transition
       ref={containerRef}
       className={className}
+      name="fade"
+      activeKey={activeKey}
+      shouldCleanup
       onScroll={handleScroll}
       onMouseDown={preventMessageInputBlur}
     >
-      {isRestricted ? (
-        <div className="empty">
-          <span>
-            {restrictionReasons?.[0]?.text || `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
-          </span>
-        </div>
-      ) : paidMessagesStars && !hasMessages && !hasCustomGreeting ? (
-        <RequirementToContactMessage paidMessagesStars={paidMessagesStars} peerId={monoforumChannelId || chatId} />
-      ) : isContactRequirePremium && !hasMessages ? (
-        <RequirementToContactMessage peerId={chatId} />
-      ) : (isBot || isNonContact) && !hasMessages ? (
-        <MessageListAccountInfo chatId={chatId} hasMessages={hasMessages} />
-      ) : shouldRenderGreeting ? (
-        <ContactGreeting key={chatId} userId={chatId} />
-      ) : messageIds && (!messageGroups || isGroupChatJustCreated || isEmptyTopic) ? (
-        <NoMessages
-          chatId={chatId}
-          topic={topic}
-          type={type}
-          isChatWithSelf={isChatWithSelf}
-          isGroupChatJustCreated={isGroupChatJustCreated}
-        />
-      ) : hasMessages ? (
-        <MessageListContent
-          canShowAds={areAdsEnabled && isChannelChat}
-          chatId={chatId}
-          isComments={isComments}
-          isChannelChat={isChannelChat}
-          isChatMonoforum={isChatMonoforum}
-          isSavedDialog={isSavedDialog}
-          messageIds={messageIds || [lastMessage!.id]}
-          messageGroups={messageGroups || groupMessages([lastMessage!])}
-          getContainerHeight={getContainerHeight}
-          isViewportNewest={Boolean(isViewportNewest)}
-          isUnread={Boolean(firstUnreadId)}
-          isEmptyThread={isEmptyThread}
-          withUsers={withUsers}
-          noAvatars={noAvatars}
-          containerRef={containerRef}
-          anchorIdRef={anchorIdRef}
-          memoUnreadDividerBeforeIdRef={memoUnreadDividerBeforeIdRef}
-          memoFirstUnreadIdRef={memoFirstUnreadIdRef}
-          threadId={threadId}
-          type={type}
-          isReady={isReady}
-          hasLinkedChat={hasLinkedChat}
-          isSchedule={messageGroups ? type === 'scheduled' : false}
-          shouldRenderAccountInfo={isBot || isNonContact}
-          nameChangeDate={nameChangeDate}
-          photoChangeDate={photoChangeDate}
-          noAppearanceAnimation={!messageGroups || !shouldAnimateAppearanceRef.current}
-          onScrollDownToggle={onScrollDownToggle}
-          onNotchToggle={onNotchToggle}
-          onIntersectPinnedMessage={onIntersectPinnedMessage}
-          canPost={canPost}
-        />
-      ) : (
-        <Loading color="white" backgroundColor="dark" />
-      )}
-    </div>
+      {renderContent()}
+    </Transition>
   );
 };
 

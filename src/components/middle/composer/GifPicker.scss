@@ -3,11 +3,6 @@
   top: 0.1875rem;
 
   overflow-y: auto;
-  display: grid;
-  grid-auto-flow: dense;
-  grid-auto-rows: 6.25rem;
-  grid-gap: 0.125rem;
-  grid-template-columns: repeat(6, 1fr);
 
   height: calc(100% - 0.1875rem);
   margin: 0 0.1875rem;
@@ -29,4 +24,12 @@
   .bubble {
     border-radius: var(--border-radius-default) !important;
   }
+}
+
+.GifPickerGrid {
+  display: grid;
+  grid-auto-flow: dense;
+  grid-auto-rows: 6.25rem;
+  grid-gap: 0.125rem;
+  grid-template-columns: repeat(6, 1fr);
 }

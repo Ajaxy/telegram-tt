@@ -1,8 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import {
-  memo, useEffect, useMemo,
-  useRef,
-} from '../../../lib/teact/teact';
+import { memo, useEffect, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiSticker, ApiStickerSet } from '../../../api/types';
@@ -19,7 +16,11 @@ import {
   STICKER_SIZE_PICKER_HEADER,
 } from '../../../config';
 import {
-  selectChat, selectChatFullInfo, selectIsChatWithSelf, selectIsCurrentUserPremium, selectShouldLoopStickers,
+  selectChat,
+  selectChatFullInfo,
+  selectIsChatWithSelf,
+  selectIsCurrentUserPremium,
+  selectShouldLoopStickers,
 } from '../../../global/selectors';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
@@ -43,6 +44,7 @@ import StickerButton from '../../common/StickerButton';
 import StickerSet from '../../common/StickerSet';
 import Button from '../../ui/Button';
 import Loading from '../../ui/Loading';
+import Transition from '../../ui/Transition.tsx';
 import StickerSetCover from './StickerSetCover';
 
 import styles from './StickerPicker.module.scss';
@@ -329,76 +331,75 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   }
 
   const fullClassName = buildClassName(styles.root, className);
-
-  if (!shouldRenderContents) {
-    return (
-      <div className={fullClassName}>
-        {!canSendStickers && !isForEffects ? (
-          <div className={styles.pickerDisabled}>{lang('ErrorSendRestrictedStickersAll')}</div>
-        ) : noPopulatedSets ? (
-          <div className={styles.pickerDisabled}>{lang('NoStickers')}</div>
-        ) : (
-          <Loading />
-        )}
-      </div>
-    );
-  }
-
   const headerClassName = buildClassName(
     styles.header,
     'no-scrollbar',
     !shouldHideTopBorder && styles.headerWithBorder,
   );
 
+  const isLoading = !shouldRenderContents && (canSendStickers || isForEffects) && !noPopulatedSets;
+
   return (
-    <div className={fullClassName}>
-      {!isForEffects && (
-        <div ref={headerRef} className={headerClassName}>
-          <div className="shared-canvas-container">
-            <canvas ref={sharedCanvasRef} className="shared-canvas" />
-            {allSets.map(renderCover)}
+    <Transition className={fullClassName} activeKey={isLoading ? 0 : 1} name="fade" shouldCleanup>
+      {!shouldRenderContents ? (
+        !canSendStickers && !isForEffects ? (
+          <div className={styles.pickerDisabled}>{lang('ErrorSendRestrictedStickersAll')}</div>
+        ) : noPopulatedSets ? (
+          <div className={styles.pickerDisabled}>{lang('NoStickers')}</div>
+        ) : (
+          <Loading />
+        )
+      ) : (
+        <>
+          {!isForEffects && (
+            <div ref={headerRef} className={headerClassName}>
+              <div className="shared-canvas-container">
+                <canvas ref={sharedCanvasRef} className="shared-canvas" />
+                {allSets.map(renderCover)}
+              </div>
+            </div>
+          )}
+          <div
+            ref={containerRef}
+            onMouseMove={handleMouseMove}
+            onScroll={handleContentScroll}
+            className={
+              buildClassName(
+                styles.main,
+                IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll',
+                !isForEffects && styles.hasHeader,
+              )
+            }
+          >
+            {allSets.map((stickerSet, i) => (
+              <StickerSet
+                key={stickerSet.id}
+                stickerSet={stickerSet}
+                loadAndPlay={Boolean(canAnimate && loadAndPlay)}
+                noContextMenus={noContextMenus}
+                index={i}
+                idPrefix={prefix}
+                observeIntersection={observeIntersectionForSet}
+                observeIntersectionForPlayingItems={observeIntersectionForPlayingItems}
+                observeIntersectionForShowingItems={observeIntersectionForShowingItems}
+                isNearActive={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
+                favoriteStickers={favoriteStickers}
+                isSavedMessages={isSavedMessages}
+                isCurrentUserPremium={isCurrentUserPremium}
+                isTranslucent={isTranslucent}
+                isChatStickerSet={stickerSet.id === chatStickerSetId}
+                onStickerSelect={handleStickerSelect}
+                onStickerUnfave={handleStickerUnfave}
+                onStickerFave={handleStickerFave}
+                onStickerRemoveRecent={handleRemoveRecentSticker}
+                forcePlayback
+                shouldHideHeader={stickerSet.id === EFFECT_EMOJIS_SET_ID}
+              />
+            ))}
           </div>
-        </div>
+        </>
       )}
-      <div
-        ref={containerRef}
-        onMouseMove={handleMouseMove}
-        onScroll={handleContentScroll}
-        className={
-          buildClassName(
-            styles.main,
-            IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll',
-            !isForEffects && styles.hasHeader,
-          )
-        }
-      >
-        {allSets.map((stickerSet, i) => (
-          <StickerSet
-            key={stickerSet.id}
-            stickerSet={stickerSet}
-            loadAndPlay={Boolean(canAnimate && loadAndPlay)}
-            noContextMenus={noContextMenus}
-            index={i}
-            idPrefix={prefix}
-            observeIntersection={observeIntersectionForSet}
-            observeIntersectionForPlayingItems={observeIntersectionForPlayingItems}
-            observeIntersectionForShowingItems={observeIntersectionForShowingItems}
-            isNearActive={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
-            favoriteStickers={favoriteStickers}
-            isSavedMessages={isSavedMessages}
-            isCurrentUserPremium={isCurrentUserPremium}
-            isTranslucent={isTranslucent}
-            isChatStickerSet={stickerSet.id === chatStickerSetId}
-            onStickerSelect={handleStickerSelect}
-            onStickerUnfave={handleStickerUnfave}
-            onStickerFave={handleStickerFave}
-            onStickerRemoveRecent={handleRemoveRecentSticker}
-            forcePlayback
-            shouldHideHeader={stickerSet.id === EFFECT_EMOJIS_SET_ID}
-          />
-        ))}
-      </div>
-    </div>
+    </Transition>
   );
 };
 

@@ -1,8 +1,5 @@
-import type { FC } from '../../lib/teact/teact';
-import {
-  memo, useCallback,
-  useEffect, useMemo, useRef, useState,
-} from '../../lib/teact/teact';
+import type { FC } from '@teact';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from '@teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
@@ -16,20 +13,12 @@ import type {
   ApiUserStatus,
 } from '../../api/types';
 import type { TabState } from '../../global/types';
-import type {
-  AnimationLevel,
-  ProfileState, ProfileTabType, SharedMediaType, ThemeKey, ThreadId,
-} from '../../types';
+import type { AnimationLevel, ProfileState, ProfileTabType, SharedMediaType, ThemeKey, ThreadId } from '../../types';
 import type { RegularLangKey } from '../../types/language';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { AudioOrigin, MediaViewerOrigin, NewChatMembersProgress } from '../../types';
 
-import {
-  MEMBERS_SLICE,
-  PROFILE_SENSITIVE_AREA,
-  SHARED_MEDIA_SLICE,
-  SLIDE_TRANSITION_DURATION,
-} from '../../config';
+import { MEMBERS_SLICE, PROFILE_SENSITIVE_AREA, SHARED_MEDIA_SLICE, SLIDE_TRANSITION_DURATION } from '../../config';
 import {
   getHasAdminRight,
   getIsDownloading,
@@ -592,8 +581,19 @@ const Profile: FC<OwnProps & StateProps> = ({
       );
     }
 
-    if ((!viewportIds && !botPreviewMedia) || !canRenderContent || !messagesById) {
-      const noSpinner = isFirstTab && !canRenderContent;
+    const noContent = (!viewportIds && !botPreviewMedia) || !canRenderContent || !messagesById;
+    const noSpinner = isFirstTab && !canRenderContent;
+    const isSpinner = noContent && !noSpinner;
+
+    return (
+      <Transition activeKey={isSpinner ? 0 : 1} name="fade">
+        {renderSpinnerOrContent(noContent, noSpinner)}
+      </Transition>
+    );
+  }
+
+  function renderSpinnerOrContent(noContent: boolean, noSpinner: boolean) {
+    if (noContent) {
       const forceRenderHiddenMembers = Boolean(resultType === 'members' && areMembersHidden);
 
       return (
@@ -649,6 +649,11 @@ const Profile: FC<OwnProps & StateProps> = ({
           <NothingFound text={text} />
         </div>
       );
+    }
+
+    if (!messagesById) {
+      // A TypeScript assertion, should never be really reached
+      return;
     }
 
     return (

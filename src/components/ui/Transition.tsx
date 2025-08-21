@@ -49,6 +49,8 @@ export type TransitionProps = {
   isBlockingAnimation?: boolean;
   onStart?: NoneToVoidFunction;
   onStop?: NoneToVoidFunction;
+  onScroll?: NoneToVoidFunction;
+  onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
   children: React.ReactNode | ChildrenFn;
 };
 
@@ -89,6 +91,8 @@ function Transition({
   isBlockingAnimation,
   onStart,
   onStop,
+  onScroll,
+  onMouseDown,
   children,
 }: TransitionProps) {
   const currentKeyRef = useRef<number>();
@@ -379,6 +383,8 @@ function Transition({
       id={id}
       className={buildClassName('Transition', className)}
       teactFastList={asFastList}
+      onScroll={onScroll}
+      onMouseDown={onMouseDown}
     >
       {contents}
     </div>

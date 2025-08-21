@@ -331,7 +331,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCloseOnBackdrop={!IS_TOUCH_ENV}
       noCompact
-
       {...(isAttachmentModal ? menuPositionOptions : {
         positionX: 'left',
         positionY: 'bottom',

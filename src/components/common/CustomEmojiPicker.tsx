@@ -1,7 +1,7 @@
-import type { FC } from '../../lib/teact/teact';
+import type { FC } from '@teact';
 import {
   memo, useEffect, useMemo, useRef,
-} from '../../lib/teact/teact';
+} from '@teact';
 import { getGlobal, withGlobal } from '../../global';
 
 import type {
@@ -48,6 +48,7 @@ import { useStickerPickerObservers } from './hooks/useStickerPickerObservers';
 import StickerSetCover from '../middle/composer/StickerSetCover';
 import Button from '../ui/Button';
 import Loading from '../ui/Loading';
+import Transition from '../ui/Transition.tsx';
 import Icon from './icons/Icon';
 import StickerButton from './StickerButton';
 import StickerSet from './StickerSet';
@@ -397,19 +398,6 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   }
 
   const fullClassName = buildClassName('StickerPicker', styles.root, className);
-
-  if (!shouldRenderContent) {
-    return (
-      <div className={fullClassName}>
-        {noPopulatedSets ? (
-          <div className={pickerStyles.pickerDisabled}>{oldLang('NoStickers')}</div>
-        ) : (
-          <Loading />
-        )}
-      </div>
-    );
-  }
-
   const headerClassName = buildClassName(
     pickerStyles.header,
     'no-scrollbar',
@@ -423,62 +411,72 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     pickerStyles.hasHeader,
   );
 
-  return (
-    <div className={fullClassName}>
-      <div
-        ref={headerRef}
-        className={headerClassName}
-      >
-        <div className="shared-canvas-container">
-          <canvas ref={sharedCanvasRef} className="shared-canvas" />
-          <canvas ref={sharedCanvasHqRef} className="shared-canvas" />
-          {allSets.map(renderCover)}
-        </div>
-      </div>
-      <div
-        ref={containerRef}
-        onScroll={handleContentScroll}
-        className={listClassName}
-      >
-        {allSets.map((stickerSet, i) => {
-          const shouldHideHeader = stickerSet.id === TOP_SYMBOL_SET_ID
-            || (stickerSet.id === RECENT_SYMBOL_SET_ID && (withDefaultTopicIcons || isStatusPicker));
-          const isChatEmojiSet = stickerSet.id === chatEmojiSetId;
+  const isLoading = !shouldRenderContent && !noPopulatedSets;
 
-          return (
-            <StickerSet
-              key={stickerSet.id}
-              stickerSet={stickerSet}
-              loadAndPlay={Boolean(canAnimate && canLoadAndPlay)}
-              index={i}
-              idPrefix={prefix}
-              observeIntersection={observeIntersectionForSet}
-              observeIntersectionForPlayingItems={observeIntersectionForPlayingItems}
-              observeIntersectionForShowingItems={observeIntersectionForShowingItems}
-              isNearActive={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
-              isSavedMessages={isSavedMessages}
-              isStatusPicker={isStatusPicker}
-              isReactionPicker={isReactionPicker}
-              shouldHideHeader={shouldHideHeader}
-              withDefaultTopicIcon={withDefaultTopicIcons && stickerSet.id === RECENT_SYMBOL_SET_ID}
-              withDefaultStatusIcon={isStatusPicker && stickerSet.id === RECENT_SYMBOL_SET_ID}
-              isChatEmojiSet={isChatEmojiSet}
-              isCurrentUserPremium={isCurrentUserPremium}
-              selectedReactionIds={selectedReactionIds}
-              availableReactions={availableReactions}
-              isTranslucent={isTranslucent}
-              onReactionSelect={onReactionSelect}
-              onReactionContext={onReactionContext}
-              onStickerSelect={handleEmojiSelect}
-              onContextMenuOpen={onContextMenuOpen}
-              onContextMenuClose={onContextMenuClose}
-              onContextMenuClick={onContextMenuClick}
-              forcePlayback
-            />
-          );
-        })}
-      </div>
-    </div>
+  return (
+    <Transition className={fullClassName} name="fade" activeKey={isLoading ? 0 : 1} shouldCleanup>
+      {!shouldRenderContent && !noPopulatedSets ? (
+        <Loading />
+      ) : !shouldRenderContent && noPopulatedSets ? (
+        <div className={pickerStyles.pickerDisabled}>{oldLang('NoStickers')}</div>
+      ) : (
+        <>
+          <div
+            ref={headerRef}
+            className={headerClassName}
+          >
+            <div className="shared-canvas-container">
+              <canvas ref={sharedCanvasRef} className="shared-canvas" />
+              <canvas ref={sharedCanvasHqRef} className="shared-canvas" />
+              {allSets.map(renderCover)}
+            </div>
+          </div>
+          <div
+            ref={containerRef}
+            onScroll={handleContentScroll}
+            className={listClassName}
+          >
+            {allSets.map((stickerSet, i) => {
+              const shouldHideHeader = stickerSet.id === TOP_SYMBOL_SET_ID
+                || (stickerSet.id === RECENT_SYMBOL_SET_ID && (withDefaultTopicIcons || isStatusPicker));
+              const isChatEmojiSet = stickerSet.id === chatEmojiSetId;
+
+              return (
+                <StickerSet
+                  key={stickerSet.id}
+                  stickerSet={stickerSet}
+                  loadAndPlay={Boolean(canAnimate && canLoadAndPlay)}
+                  index={i}
+                  idPrefix={prefix}
+                  observeIntersection={observeIntersectionForSet}
+                  observeIntersectionForPlayingItems={observeIntersectionForPlayingItems}
+                  observeIntersectionForShowingItems={observeIntersectionForShowingItems}
+                  isNearActive={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
+                  isSavedMessages={isSavedMessages}
+                  isStatusPicker={isStatusPicker}
+                  isReactionPicker={isReactionPicker}
+                  shouldHideHeader={shouldHideHeader}
+                  withDefaultTopicIcon={withDefaultTopicIcons && stickerSet.id === RECENT_SYMBOL_SET_ID}
+                  withDefaultStatusIcon={isStatusPicker && stickerSet.id === RECENT_SYMBOL_SET_ID}
+                  isChatEmojiSet={isChatEmojiSet}
+                  isCurrentUserPremium={isCurrentUserPremium}
+                  selectedReactionIds={selectedReactionIds}
+                  availableReactions={availableReactions}
+                  isTranslucent={isTranslucent}
+                  onReactionSelect={onReactionSelect}
+                  onReactionContext={onReactionContext}
+                  onStickerSelect={handleEmojiSelect}
+                  onContextMenuOpen={onContextMenuOpen}
+                  onContextMenuClose={onContextMenuClose}
+                  onContextMenuClick={onContextMenuClick}
+                  forcePlayback
+                />
+              );
+            })}
+          </div>
+        </>
+      )}
+    </Transition>
   );
 };
 
