@@ -314,6 +314,24 @@ addActionHandler('loadMessage', async (global, actions, payload): Promise<void> 
   }
 });
 
+addActionHandler('loadMessagesById', async (global, actions, payload): Promise<void> => {
+  const { chatId, messageIds } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const messages = await callApi('fetchMessagesById', {
+    chat,
+    messageIds,
+  });
+  if (!messages) return;
+
+  global = getGlobal();
+  global = addChatMessagesById(global, chatId, buildCollectionByKey(messages, 'id'));
+  setGlobal(global);
+});
+
 addActionHandler('sendMessage', async (global, actions, payload): Promise<void> => {
   const { messageList, tabId = getCurrentTabId() } = payload;
 

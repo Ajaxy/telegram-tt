@@ -3,11 +3,12 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiChannelMonetizationStatistics, StatisticsGraph } from '../../../api/types';
+import type { ApiChannelMonetizationStatistics } from '../../../api/types';
 
 import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
+import { isGraph } from './helpers/isGraph';
 
 import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
@@ -68,7 +69,9 @@ const MonetizationStatistics = ({
 
   const containerRef = useRef<HTMLDivElement>();
   const [isReady, setIsReady] = useState(false);
-  const loadedCharts = useRef<string[]>([]);
+  const loadedCharts = useRef<Set<string>>(new Set());
+  const errorCharts = useRef<Set<string>>(new Set());
+
   const forceUpdate = useForceUpdate();
   const [isAboutMonetizationModalOpen, openAboutMonetizationModal, closeAboutMonetizationModal] = useFlag(false);
   const [isConfirmPasswordDialogOpen, openConfirmPasswordDialogOpen, closeConfirmPasswordDialogOpen] = useFlag();
@@ -100,7 +103,8 @@ const MonetizationStatistics = ({
         });
       }
 
-      loadedCharts.current = [];
+      loadedCharts.current.clear();
+      errorCharts.current.clear();
 
       if (!statistics || !containerRef.current) {
         return;
@@ -108,24 +112,29 @@ const MonetizationStatistics = ({
 
       MONETIZATION_GRAPHS.forEach((name, index: number) => {
         const graph = statistics[name];
-        const isAsync = typeof graph === 'string';
+        if (!isGraph(graph)) {
+          return;
+        }
+        const isAsync = graph.graphType === 'async';
+        const isError = graph.graphType === 'error';
 
-        if (isAsync || loadedCharts.current.includes(name)) {
+        if (isAsync || loadedCharts.current.has(name)) {
           return;
         }
 
-        if (!graph) {
-          loadedCharts.current.push(name);
+        if (isError) {
+          loadedCharts.current.add(name);
+          errorCharts.current.add(name);
 
           return;
         }
 
         LovelyChart.create(containerRef.current!.children[index] as HTMLElement, {
           title: oldLang((MONETIZATION_GRAPHS_TITLES as Record<string, string>)[name]),
-          ...graph as StatisticsGraph,
+          ...graph,
         });
 
-        loadedCharts.current.push(name);
+        loadedCharts.current.add(name);
 
         containerRef.current!.children[index].classList.remove(styles.hidden);
       });
@@ -232,7 +241,7 @@ const MonetizationStatistics = ({
         }
       />
 
-      {!loadedCharts.current.length && <Loading />}
+      {!loadedCharts.current.size && <Loading />}
 
       <div ref={containerRef} className={styles.section}>
         {MONETIZATION_GRAPHS.filter(Boolean).map((graph) => (

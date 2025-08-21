@@ -100,6 +100,8 @@ const BOOST_OVERVIEW: OverviewCell[][] = [
 
 type StatisticsType = 'channel' | 'group' | 'message' | 'boost' | 'story' | 'monetization';
 
+const DEFAULT_VALUE = 0;
+
 export type OwnProps = {
   type: StatisticsType;
   title?: string;
@@ -212,13 +214,13 @@ const StatisticsOverview: FC<OwnProps> = ({
         ) : schema.map((row) => (
           <tr>
             {row.map((cell: OverviewCell) => {
-              const field = (statistics as any)[cell.name];
+              const field = (statistics as any)?.[cell.name];
 
               if (cell.isPlain) {
                 return (
                   <td className={styles.tableCell}>
                     <b className={styles.tableValue}>
-                      {`${cell.isApproximate ? '≈' : ''}${formatInteger(field)}`}
+                      {`${cell.isApproximate ? '≈ ' : ''}${formatInteger(field ?? DEFAULT_VALUE)}`}
                     </b>
                     <h3 className={styles.tableHeading}>{oldLang(cell.title)}</h3>
                   </td>
@@ -226,15 +228,18 @@ const StatisticsOverview: FC<OwnProps> = ({
               }
 
               if (cell.isPercentage) {
+                const part = field?.part ?? DEFAULT_VALUE;
+                const percentage = field?.percentage ?? DEFAULT_VALUE;
+
                 return (
                   <td className={styles.tableCell}>
                     {cell.withAbsoluteValue && (
                       <span className={styles.tableValue}>
-                        {`${cell.isApproximate ? '≈' : ''}${formatInteger(field.part)}`}
+                        {`${cell.isApproximate ? '≈ ' : ''}${formatInteger(part)}`}
                       </span>
                     )}
                     <span className={cell.withAbsoluteValue ? styles.tableSecondaryValue : styles.tableValue}>
-                      {field.percentage}
+                      {percentage}
                       %
                     </span>
                     <h3 className={styles.tableHeading}>{oldLang(cell.title)}</h3>
@@ -245,7 +250,7 @@ const StatisticsOverview: FC<OwnProps> = ({
               return (
                 <td className={styles.tableCell}>
                   <b className={styles.tableValue}>
-                    {formatIntegerCompact(lang, field.current)}
+                    {formatIntegerCompact(lang, field?.current ?? DEFAULT_VALUE)}
                   </b>
                   {' '}
                   {renderOverviewItemValue(field)}

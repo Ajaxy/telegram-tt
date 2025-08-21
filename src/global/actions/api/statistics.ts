@@ -1,4 +1,3 @@
-import { areDeepEqual } from '../../../util/areDeepEqual';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
@@ -39,6 +38,25 @@ addActionHandler('loadStatistics', async (global, actions, payload): Promise<voi
   global = getGlobal();
   global = updateStatistics(global, chatId, stats, tabId);
   setGlobal(global);
+
+  if (stats.type === 'channel') {
+    const messageInteractions = stats.recentPosts.filter((post) => post.type === 'message');
+    const storyInteractions = stats.recentPosts.filter((post) => post.type === 'story');
+
+    if (messageInteractions.length > 0) {
+      actions.loadMessagesById({
+        chatId,
+        messageIds: messageInteractions.map((interaction) => interaction.msgId),
+      });
+    }
+
+    if (storyInteractions.length > 0) {
+      actions.loadPeerStoriesByIds({
+        peerId: chatId,
+        storyIds: storyInteractions.map((interaction) => interaction.storyId),
+      });
+    }
+  }
 });
 
 addActionHandler('loadChannelMonetizationStatistics', async (global, actions, payload): Promise<void> => {
@@ -122,17 +140,11 @@ addActionHandler('loadMessagePublicForwards', async (global, actions, payload): 
     count,
   } = publicForwards || {};
 
-  // Api returns the last element from the previous page as the first element
-  const shouldOmitFirstElement = stats.publicForwardsData?.length && forwards?.length
-    && areDeepEqual(stats.publicForwardsData[stats.publicForwardsData.length - 1], forwards[0]);
-
   global = getGlobal();
   global = updateMessageStatistics(global, {
     ...stats,
     publicForwards: count || forwards?.length,
-    publicForwardsData: (stats.publicForwardsData || []).concat(
-      shouldOmitFirstElement ? forwards.slice(1) : (forwards || []),
-    ),
+    publicForwardsData: (stats.publicForwardsData || []).concat((forwards || [])),
     nextOffset,
   }, tabId);
   setGlobal(global);

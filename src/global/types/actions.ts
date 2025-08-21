@@ -504,6 +504,10 @@ export interface ActionPayloads {
       isDeleting?: boolean;
     };
   };
+  loadMessagesById: {
+    chatId: string;
+    messageIds: number[];
+  };
   editMessage: {
     messageList?: MessageList;
     text: string;
@@ -1570,7 +1574,7 @@ export interface ActionPayloads {
   loadPeerStoriesByIds: {
     peerId: string;
     storyIds: number[];
-  } & WithTabId;
+  };
   viewStory: {
     peerId: string;
     storyId: number;

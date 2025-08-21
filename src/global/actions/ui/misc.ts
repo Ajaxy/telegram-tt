@@ -184,7 +184,9 @@ addActionHandler('toggleMessageStatistics', (global, actions, payload): ActionRe
     statistics: {
       ...selectTabState(global, tabId).statistics,
       currentMessageId: messageId,
+      currentMessage: undefined,
       currentStoryId: undefined,
+      currentStory: undefined,
     },
   }, tabId);
 });
@@ -196,6 +198,8 @@ addActionHandler('toggleStoryStatistics', (global, actions, payload): ActionRetu
       ...selectTabState(global, tabId).statistics,
       currentStoryId: storyId,
       currentMessageId: undefined,
+      currentMessage: undefined,
+      currentStory: undefined,
     },
   }, tabId);
 });

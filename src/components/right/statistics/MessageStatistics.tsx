@@ -6,14 +6,13 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiMessagePublicForward,
   ApiPostStatistics,
-  StatisticsGraph,
 } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
-import { STATISTICS_PUBLIC_FORWARDS_LIMIT } from '../../../config';
 import { selectChatFullInfo, selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { callApi } from '../../../api/gramjs';
+import { isGraph } from './helpers/isGraph';
 
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -56,7 +55,7 @@ export type StateProps = {
   dcId?: number;
 };
 
-function Statistics({
+function MessageStatistics({
   chatId,
   isActive,
   statistics,
@@ -66,7 +65,8 @@ function Statistics({
   const lang = useOldLang();
   const containerRef = useRef<HTMLDivElement>();
   const [isReady, setIsReady] = useState(false);
-  const loadedCharts = useRef<string[]>([]);
+  const loadedCharts = useRef<Set<string>>(new Set());
+  const errorCharts = useRef<Set<string>>(new Set());
 
   const { loadMessageStatistics, loadMessagePublicForwards, loadStatisticsAsyncGraph } = getActions();
   const forceUpdate = useForceUpdate();
@@ -79,7 +79,8 @@ function Statistics({
 
   useEffect(() => {
     if (!isActive || messageId) {
-      loadedCharts.current = [];
+      loadedCharts.current.clear();
+      errorCharts.current.clear();
       setIsReady(false);
     }
   }, [isActive, messageId]);
@@ -92,10 +93,13 @@ function Statistics({
 
     GRAPHS.forEach((name) => {
       const graph = statistics[name];
-      const isAsync = typeof graph === 'string';
+      if (!isGraph(graph)) {
+        return;
+      }
+      const isAsync = graph.graphType === 'async';
 
       if (isAsync) {
-        loadStatisticsAsyncGraph({ name, chatId, token: graph });
+        loadStatisticsAsyncGraph({ name, chatId, token: graph.token });
       }
     });
   }, [chatId, statistics, loadStatisticsAsyncGraph]);
@@ -115,19 +119,24 @@ function Statistics({
 
       GRAPHS.forEach((name, index: number) => {
         const graph = statistics[name];
-        const isAsync = typeof graph === 'string';
+        if (!isGraph(graph)) {
+          return;
+        }
+        const isAsync = graph.graphType === 'async';
+        const isError = graph.graphType === 'error';
 
-        if (isAsync || loadedCharts.current.includes(name)) {
+        if (isAsync || loadedCharts.current.has(name)) {
           return;
         }
 
-        if (!graph) {
-          loadedCharts.current.push(name);
+        if (isError) {
+          loadedCharts.current.add(name);
+          errorCharts.current.add(name);
 
           return;
         }
 
-        const { zoomToken } = graph as StatisticsGraph;
+        const { zoomToken } = graph;
 
         LovelyChart.create(
           containerRef.current!.children[index] as HTMLElement,
@@ -137,11 +146,11 @@ function Statistics({
               onZoom: (x: number) => callApi('fetchStatisticsAsyncGraph', { token: zoomToken, x, dcId }),
               zoomOutLabel: lang('Graph.ZoomOut'),
             } : {},
-            ...graph as StatisticsGraph,
+            ...graph,
           },
         );
 
-        loadedCharts.current.push(name);
+        loadedCharts.current.add(name);
       });
 
       forceUpdate();
@@ -161,15 +170,21 @@ function Statistics({
   }
 
   return (
-    <div className={buildClassName(styles.root, 'custom-scroll', isReady && styles.ready)}>
+    <div
+      key={`${chatId}-${messageId}`}
+      className={buildClassName(styles.root, 'custom-scroll', isReady && styles.ready)}
+    >
       <StatisticsOverview statistics={statistics} type="message" title={lang('StatisticOverview')} />
 
-      {!loadedCharts.current.length && <Loading />}
+      {(!loadedCharts.current.size || !statistics.publicForwardsData) && <Loading />}
 
       <div ref={containerRef}>
-        {GRAPHS.map((graph) => (
-          <div className={buildClassName(styles.graph, !loadedCharts.current.includes(graph) && styles.hidden)} />
-        ))}
+        {GRAPHS.map((graph) => {
+          const isReady = loadedCharts.current.has(graph) && !errorCharts.current.has(graph);
+          return (
+            <div className={buildClassName(styles.graph, !isReady && styles.hidden)} />
+          );
+        })}
       </div>
 
       {Boolean(statistics.publicForwards) && (
@@ -180,7 +195,6 @@ function Statistics({
             items={statistics.publicForwardsData}
             itemSelector=".statistic-public-forward"
             onLoadMore={handleLoadMore}
-            preloadBackwards={STATISTICS_PUBLIC_FORWARDS_LIMIT}
             noFastList
           >
             {(statistics.publicForwardsData as ApiMessagePublicForward[]).map((item) => (
@@ -202,4 +216,4 @@ export default memo(withGlobal<OwnProps>(
 
     return { statistics, dcId, messageId };
   },
-)(Statistics));
+)(MessageStatistics));

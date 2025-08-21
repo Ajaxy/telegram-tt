@@ -1026,7 +1026,11 @@ const Message: FC<OwnProps & StateProps> = ({
 
     return (
       <div
-        className={buildClassName('quick-reaction', isQuickReactionVisible && !hasActiveReactions && 'visible')}
+        className={buildClassName(
+          'quick-reaction',
+          'no-selection',
+          isQuickReactionVisible && !hasActiveReactions && 'visible',
+        )}
         onClick={handleSendQuickReaction}
         ref={quickReactionRef}
       >

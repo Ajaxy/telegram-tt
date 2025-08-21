@@ -270,6 +270,30 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
   return { message };
 }
 
+export async function fetchMessagesById({ chat, messageIds }: { chat: ApiChat; messageIds: number[] }) {
+  const isChannel = getEntityTypeById(chat.id) === 'channel';
+
+  const result = await invokeRequest(
+    isChannel
+      ? new GramJs.channels.GetMessages({
+        channel: buildInputChannel(chat.id, chat.accessHash),
+        id: messageIds.map((id) => new GramJs.InputMessageID({ id })),
+      })
+      : new GramJs.messages.GetMessages({
+        id: messageIds.map((id) => new GramJs.InputMessageID({ id })),
+      }),
+    {
+      shouldThrow: true,
+    },
+  );
+
+  if (!result || result instanceof GramJs.messages.MessagesNotModified) {
+    return undefined;
+  }
+
+  return result.messages.map(buildApiMessage).filter(Boolean);
+}
+
 let mediaQueue = Promise.resolve();
 
 export function sendMessageLocal(

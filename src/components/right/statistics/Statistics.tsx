@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo,
   useRef, useState,
@@ -22,6 +21,7 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { callApi } from '../../../api/gramjs';
+import { isGraph } from './helpers/isGraph';
 
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useOldLang from '../../../hooks/useOldLang';
@@ -84,7 +84,7 @@ export type StateProps = {
   storiesById?: Record<string, ApiTypeStory>;
 };
 
-const Statistics: FC<OwnProps & StateProps> = ({
+const Statistics = ({
   chatId,
   chat,
   statistics,
@@ -92,11 +92,12 @@ const Statistics: FC<OwnProps & StateProps> = ({
   isGroup,
   messagesById,
   storiesById,
-}) => {
+}: OwnProps & StateProps) => {
   const lang = useOldLang();
   const containerRef = useRef<HTMLDivElement>();
   const [isReady, setIsReady] = useState(false);
-  const loadedCharts = useRef<string[]>([]);
+  const loadedCharts = useRef<Set<string>>(new Set());
+  const errorCharts = useRef<Set<string>>(new Set());
 
   const { loadStatistics, loadStatisticsAsyncGraph } = getActions();
   const forceUpdate = useForceUpdate();
@@ -121,13 +122,16 @@ const Statistics: FC<OwnProps & StateProps> = ({
 
     graphs.forEach((name) => {
       const graph = statistics[name as keyof typeof statistics];
-      const isAsync = typeof graph === 'string';
+      if (!isGraph(graph)) {
+        return;
+      }
+      const isAsync = graph.graphType === 'async';
 
       if (isAsync) {
         loadStatisticsAsyncGraph({
           name,
           chatId,
-          token: graph,
+          token: graph.token,
           // Hardcode percentage for languages graph, since API does not return `percentage` flag
           isPercentage: name === 'languagesGraph',
         });
@@ -150,14 +154,20 @@ const Statistics: FC<OwnProps & StateProps> = ({
 
       graphs.forEach((name, index: number) => {
         const graph = statistics[name as keyof typeof statistics];
-        const isAsync = typeof graph === 'string';
-
-        if (isAsync || loadedCharts.current.includes(name)) {
+        if (!isGraph(graph)) {
           return;
         }
 
-        if (!graph) {
-          loadedCharts.current.push(name);
+        const isAsync = graph.graphType === 'async';
+        const isError = graph.graphType === 'error';
+
+        if (isAsync || loadedCharts.current.has(name)) {
+          return;
+        }
+
+        if (isError) {
+          loadedCharts.current.add(name);
+          errorCharts.current.add(name);
 
           return;
         }
@@ -176,7 +186,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
           },
         );
 
-        loadedCharts.current.push(name);
+        loadedCharts.current.add(name);
 
         containerRef.current!.children[index].classList.remove(styles.hidden);
       });
@@ -197,12 +207,15 @@ const Statistics: FC<OwnProps & StateProps> = ({
         />
       )}
 
-      {!loadedCharts.current.length && <Loading />}
+      {!loadedCharts.current.size && <Loading />}
 
       <div ref={containerRef}>
-        {graphs.map((graph) => (
-          <div key={graph} className={buildClassName(styles.graph, styles.hidden)} />
-        ))}
+        {graphs.map((graph) => {
+          const isReady = loadedCharts.current.has(graph) && !errorCharts.current.has(graph);
+          return (
+            <div className={buildClassName(styles.graph, !isReady && styles.hidden)} />
+          );
+        })}
       </div>
 
       {Boolean((statistics as ApiChannelStatistics)?.recentPosts?.length) && (
