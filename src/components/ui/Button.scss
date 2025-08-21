@@ -39,11 +39,12 @@
   justify-content: center;
 
   width: 100%;
-  height: 3.5rem;
+  height: 3rem;
   padding: 0.625rem;
   border: 0;
   border-radius: var(--border-radius-default);
 
+  font-weight: var(--font-weight-medium);
   line-height: 1.2;
   color: white;
   text-decoration: none !important;
@@ -324,15 +325,14 @@
   }
 
   &.smaller {
-    height: 2.75rem;
+    height: 2.5rem;
     padding: 0.3125rem;
 
     &.round {
-      width: 2.75rem;
+      width: 2.5rem;
     }
 
     &.pill {
-      height: 2.5rem;
       padding: 0.3125rem 1rem;
       border-radius: 1.25rem;
     }
@@ -356,23 +356,13 @@
         }
       }
     }
-
-    @media (max-width: 600px) {
-      height: 2.5rem;
-
-      &.round {
-        width: 2.5rem;
-      }
-    }
   }
 
   &.tiny {
     height: 2.25rem;
     padding: 0.4375rem;
     border-radius: var(--border-radius-default-small);
-
     font-size: 0.875rem;
-    font-weight: var(--font-weight-medium);
 
     &.round {
       width: 2.25rem;
@@ -393,7 +383,7 @@
   }
 
   &.round {
-    width: 3.5rem;
+    width: 3rem;
     border-radius: 50%;
 
     .icon {

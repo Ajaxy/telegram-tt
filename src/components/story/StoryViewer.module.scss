@@ -682,8 +682,6 @@
   transition: transform var(--layer-transition), opacity 0.15s ease;
 
   &:global(.Composer) {
-    --base-height: 3rem;
-
     @media (max-width: 600px) {
       margin-bottom: env(safe-area-inset-bottom);
       padding: 0 0.5rem 0.5rem;

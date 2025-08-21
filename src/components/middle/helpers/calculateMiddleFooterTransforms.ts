@@ -16,9 +16,7 @@ export default function calculateMiddleFooterTransforms(windowWidth: number, can
     ? REM
     : 2 * REM;
   const messageListWidth = getMessageListWidth(windowWidth);
-  const sendButtonWidth = windowWidth <= MOBILE_SCREEN_MAX_WIDTH
-    ? 3.375 * REM
-    : 4 * REM;
+  const sendButtonWidth = 3 * REM;
 
   const composerWidth = canPost
     ? messageListWidth - sidePadding - sendButtonWidth
