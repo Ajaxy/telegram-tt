@@ -121,7 +121,7 @@ const LeftSideMenuItems = ({
       ? INITIAL_PERFORMANCE_STATE_MIN
       : (newLevel === ANIMATION_LEVEL_MAX ? INITIAL_PERFORMANCE_STATE_MAX : INITIAL_PERFORMANCE_STATE_MED);
 
-    setSharedSettingOption({ animationLevel: newLevel as AnimationLevel });
+    setSharedSettingOption({ animationLevel: newLevel as AnimationLevel, wasAnimationLevelSetManually: true });
     updatePerformanceSettings(performanceSettings);
   });
 

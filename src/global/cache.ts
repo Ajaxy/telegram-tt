@@ -10,7 +10,7 @@ import type { ActionReturnType, GlobalState, SharedState } from './types';
 import { MAIN_THREAD_ID } from '../api/types';
 
 import {
-  ALL_FOLDER_ID,
+  ALL_FOLDER_ID, ANIMATION_LEVEL_DEFAULT,
   ARCHIVED_FOLDER_ID,
   DEBUG,
   DEFAULT_LIMITS,
@@ -348,6 +348,14 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
 
   if (!cached.messages.webPageById) {
     cached.messages.webPageById = initialState.messages.webPageById;
+  }
+
+  const cachedSharedSettings = cached.sharedState.settings;
+  if (
+    cachedSharedSettings.animationLevel !== ANIMATION_LEVEL_DEFAULT
+    && !cachedSharedSettings.wasAnimationLevelSetManually
+  ) {
+    cachedSharedSettings.animationLevel = ANIMATION_LEVEL_DEFAULT;
   }
 }
 

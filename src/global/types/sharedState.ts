@@ -14,6 +14,8 @@ export interface SharedSettings {
   performance: PerformanceType;
   messageTextSize: number;
   animationLevel: AnimationLevel;
+  // This can be deleted after September 2025, along with the corresponding migration
+  wasAnimationLevelSetManually?: boolean;
   messageSendKeyCombo: 'enter' | 'ctrl-enter';
   miniAppsCachedPosition?: Point;
   miniAppsCachedSize?: Size;
