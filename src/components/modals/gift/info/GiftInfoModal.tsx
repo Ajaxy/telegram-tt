@@ -423,7 +423,7 @@ const GiftInfoModal = ({
       <div
         className={styles.modalHeader}
       >
-        {canBuyGift && (
+        {Boolean(resellPrice?.amount) && (
           <div className={styles.giftResalePriceContainer}>
             {resellPrice.currency === TON_CURRENCY_CODE
               ? formatTonAsIcon(lang, resellPrice.amount, {
