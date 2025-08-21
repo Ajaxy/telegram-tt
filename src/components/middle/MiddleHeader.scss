@@ -9,7 +9,7 @@
   align-items: center;
 
   width: 100%;
-  height: 3.5rem;
+  height: var(--header-height);
   padding-top: 0.25rem;
   padding-right: max(0.8125rem, env(safe-area-inset-right));
   padding-bottom: 0.25rem;
