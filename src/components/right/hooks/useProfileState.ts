@@ -45,8 +45,10 @@ export default function useProfileState(
         }, PROGRAMMATIC_SCROLL_TIMEOUT_MS);
       }
     }
-  }, [tabType, onProfileStateChange, containerRef, forceScrollProfileTab,
-    allowAutoScrollToTabs, handleStopAutoScrollToTabs]);
+  }, [
+    tabType, onProfileStateChange, containerRef, forceScrollProfileTab,
+    allowAutoScrollToTabs, handleStopAutoScrollToTabs,
+  ]);
 
   // Scroll to top
   useEffectWithPrevDeps(([prevProfileState]) => {

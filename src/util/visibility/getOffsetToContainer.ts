@@ -8,8 +8,11 @@ export default function getOffsetToContainer(element: HTMLElement, container: HT
     offsetTop += current.offsetTop;
     offsetLeft += current.offsetLeft;
 
-    current = current.offsetParent as HTMLElement;
+    current = current.offsetParent as HTMLElement | null;
   }
+
+  offsetTop -= container.clientTop;
+  offsetLeft -= container.clientLeft;
 
   return { top: offsetTop, left: offsetLeft };
 }

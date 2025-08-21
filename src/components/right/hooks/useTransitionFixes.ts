@@ -5,9 +5,6 @@ import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdo
 
 import useLastCallback from '../../../hooks/useLastCallback';
 
-// Sometimes px values are rounded
-const ROUNDING_COMPENSATION_PX = 1;
-
 export default function useTransitionFixes(
   containerRef: ElementRef<HTMLDivElement>,
   transitionElSelector = '.Transition.shared-media-transition',
@@ -19,7 +16,7 @@ export default function useTransitionFixes(
       const transitionEl = container.querySelector<HTMLDivElement>(transitionElSelector);
       const tabsEl = container.querySelector<HTMLDivElement>('.TabList');
       if (transitionEl && tabsEl) {
-        const newHeight = container.offsetHeight - tabsEl.offsetHeight + ROUNDING_COMPENSATION_PX;
+        const newHeight = container.clientHeight - tabsEl.offsetHeight;
 
         requestMutation(() => {
           transitionEl.style.minHeight = `${newHeight}px`;

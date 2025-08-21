@@ -77,7 +77,7 @@ function createMutateFunction(args: AnimateScrollArgs) {
   }
 
   const { offsetHeight: elementHeight } = element;
-  const { scrollTop: currentScrollTop, offsetHeight: containerHeight, scrollHeight } = container;
+  const { scrollTop: currentScrollTop, clientHeight: containerHeight, scrollHeight } = container;
   const elementTop = getOffsetToContainer(element, container).top;
 
   const targetContainerHeight = forceNormalContainerHeight && container.dataset.normalHeight
