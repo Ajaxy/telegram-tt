@@ -3,7 +3,6 @@ import type React from '../../../lib/teact/teact';
 import {
   memo,
   useEffect,
-  useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -76,7 +75,6 @@ const SenderGroupContainer: FC<OwnProps & StateProps> = ({
   canPost,
 }) => {
   const { openChat, updateInsertingPeerIdMention } = getActions();
-  const ref = useRef<HTMLDivElement>();
 
   const { forwardInfo } = message;
 
@@ -134,12 +132,12 @@ const SenderGroupContainer: FC<OwnProps & StateProps> = ({
     isContextMenuOpen, contextMenuAnchor,
     handleContextMenu, handleContextMenuClose,
     handleContextMenuHide,
-  } = useContextMenuHandlers(ref);
+  } = useContextMenuHandlers(avatarRef);
 
   const getTriggerElement = useLastCallback(() => avatarRef.current);
   const getRootElement = useLastCallback(() => document.querySelector('.Transition_slide-active > .MessageList'));
   const getMenuElement = useLastCallback(
-    () => ref?.current?.querySelector(`.${styles.contextMenu} .bubble`),
+    () => avatarRef?.current?.querySelector(`.${styles.contextMenu} .bubble`),
   );
   const getLayout = useLastCallback(() => ({ withPortal: true }));
 
@@ -204,14 +202,14 @@ const SenderGroupContainer: FC<OwnProps & StateProps> = ({
   );
 
   return (
-    <div id={id} className={className} ref={ref}>
+    <div id={id} className={className}>
       {shouldRender && (
         <div ref={avatarRef} className={styles.avatarContainer}>
           {renderAvatar()}
+          {shouldRenderContextMenu && renderContextMenu()}
         </div>
       )}
       {children}
-      {shouldRenderContextMenu && renderContextMenu()}
     </div>
   );
 };
