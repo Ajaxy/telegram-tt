@@ -397,7 +397,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
               className={buildClassName(
                 'color-picker-item',
                 'color-picker-item-none',
-                (!state.folder.color || state.folder.color === -1 || !isCurrentUserPremium)
+                (state.folder.color === undefined || state.folder.color === -1 || !isCurrentUserPremium)
                 && 'color-picker-item-active',
               )}
             >
