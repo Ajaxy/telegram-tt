@@ -66,6 +66,7 @@
 
   .btn-update {
     position: absolute;
+    z-index: var(--z-chat-float-button);
     bottom: 1rem;
     left: 50%;
     transform: translateX(-50%);
