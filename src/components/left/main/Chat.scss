@@ -332,6 +332,13 @@
       line-height: initial;
       vertical-align: text-top;
     }
+
+    &.has-tags {
+      line-height: 1.25rem;
+      .info-row {
+        height: 1.25rem;
+      }
+    }
   }
 
   &[dir="rtl"] {
@@ -450,6 +457,11 @@
       }
 
       .monoforum-badge {
+        color: var(--color-chat-active);
+        background-color: #fff;
+      }
+
+      .ChatTags {
         color: var(--color-chat-active);
         background-color: #fff;
       }

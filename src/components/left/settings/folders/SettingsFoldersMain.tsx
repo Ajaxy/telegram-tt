@@ -10,6 +10,7 @@ import { ALL_FOLDER_ID, STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config'
 import { getFolderDescriptionText } from '../../../../global/helpers';
 import { selectIsCurrentUserPremium } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
+import buildClassName from '../../../../util/buildClassName';
 import { isBetween } from '../../../../util/math';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { throttle } from '../../../../util/schedulers';
@@ -24,6 +25,7 @@ import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
 import Icon from '../../../common/icons/Icon';
 import Button from '../../../ui/Button';
+import Checkbox from '../../../ui/Checkbox';
 import Draggable from '../../../ui/Draggable';
 import ListItem from '../../../ui/ListItem';
 import Loading from '../../../ui/Loading';
@@ -41,6 +43,7 @@ type StateProps = {
   recommendedChatFolders?: ApiChatFolder[];
   maxFolders: number;
   isPremium?: boolean;
+  areTagsEnabled?: boolean;
 };
 
 type SortState = {
@@ -62,6 +65,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   isPremium,
   recommendedChatFolders,
   maxFolders,
+  areTagsEnabled,
 }) => {
   const {
     loadRecommendedChatFolders,
@@ -69,6 +73,8 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     openLimitReachedModal,
     openDeleteChatFolderModal,
     sortChatFolders,
+    toggleDialogFilterTags,
+    openPremiumModal,
   } = getActions();
 
   const [state, setState] = useState<SortState>({
@@ -145,6 +151,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
         title: folder.title,
         subtitle: getFolderDescriptionText(lang, folder, chatsCountByFolderId[folder.id]),
         isChatList: folder.isChatList,
+        color: folder.color,
         noTitleAnimations: folder.noTitleAnimations,
       };
     });
@@ -161,6 +168,14 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
 
     addChatFolder({ folder });
   }, [foldersById, maxFolders, addChatFolder, openLimitReachedModal]);
+
+  const handleToggleTags = useCallback(() => {
+    if (!isPremium) {
+      return;
+    }
+
+    toggleDialogFilterTags({ enabled: !areTagsEnabled });
+  }, [areTagsEnabled, isPremium, toggleDialogFilterTags]);
 
   const handleDrag = useCallback((translation: { x: number; y: number }, id: string | number) => {
     const delta = Math.round(translation.y / FOLDER_HEIGHT_PX);
@@ -304,7 +319,11 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                     }
                   }}
                 >
-                  <span className="title">
+                  <span className={buildClassName(
+                    'title',
+                    folder?.color !== undefined && isPremium && `color-picker-item-${folder.color}`,
+                  )}
+                  >
                     {renderTextWithEntities({
                       text: folder.title.text,
                       entities: folder.title.entities,
@@ -366,6 +385,23 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
           ))}
         </div>
       )}
+      <div className="settings-item pt-3">
+        <div className="settings-item-relative">
+          <Checkbox
+            label={lang('ShowFolderTags')}
+            subLabel={lang('ShowFolderTagsHint')}
+            checked={isPremium && areTagsEnabled}
+            onChange={handleToggleTags}
+            onClickLabel={(event) => {
+              if (!isPremium) {
+                event.preventDefault();
+                openPremiumModal();
+              }
+            }}
+          />
+          {!isPremium && <Icon name="lock-badge" className="settings-folders-lock-icon" />}
+        </div>
+      </div>
     </div>
   );
 };
@@ -376,6 +412,7 @@ export default memo(withGlobal<OwnProps>(
       orderedIds: folderIds,
       byId: foldersById,
       recommended: recommendedChatFolders,
+      areTagsEnabled,
     } = global.chatFolders;
 
     return {
@@ -384,6 +421,7 @@ export default memo(withGlobal<OwnProps>(
       isPremium: selectIsCurrentUserPremium(global),
       recommendedChatFolders,
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),
+      areTagsEnabled,
     };
   },
 )(SettingsFoldersMain));

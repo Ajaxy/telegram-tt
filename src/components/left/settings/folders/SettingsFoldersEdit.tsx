@@ -12,8 +12,9 @@ import type {
 } from '../../../../hooks/reducers/useFoldersReducer';
 
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
-import { selectCanShareFolder } from '../../../../global/selectors';
+import { selectCanShareFolder, selectIsCurrentUserPremium } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
+import buildClassName from '../../../../util/buildClassName';
 import { isUserId } from '../../../../util/entities/ids';
 import { findIntersectionWithSet } from '../../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
@@ -55,11 +56,14 @@ type StateProps = {
   maxInviteLinks: number;
   maxChatLists: number;
   chatListCount: number;
+  isCurrentUserPremium: boolean;
 };
 
 const SUBMIT_TIMEOUT = 500;
 
 const INITIAL_CHATS_LIMIT = 5;
+
+const FOLDER_COLORS = [0, 1, 2, 3, 4, 5, 6];
 
 export const ERROR_NO_TITLE = 'Please provide a title for this folder.';
 export const ERROR_NO_CHATS = 'ChatList.Filter.Error.Empty';
@@ -83,11 +87,13 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   maxChatLists,
   chatListCount,
   onSaveFolder,
+  isCurrentUserPremium,
 }) => {
   const {
     loadChatlistInvites,
     openLimitReachedModal,
     showNotification,
+    openPremiumModal,
   } = getActions();
 
   const isCreating = state.mode === 'create';
@@ -347,6 +353,67 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
         )}
 
         <div className="settings-item pt-3">
+          <h4 className="settings-item-header mb-3 color-picker-title" dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('FilterColorTitle')}
+            <div className={buildClassName(
+              'color-picker-selected-color',
+              isCurrentUserPremium ? `color-picker-item-${state.folder.color}` : 'color-picker-item-disabled',
+            )}
+            >
+              {state.folder.title.text}
+            </div>
+          </h4>
+          <div className="color-picker">
+            {FOLDER_COLORS.map((color) => (
+              <button
+                key={color}
+                type="button"
+                onClick={() => {
+                  if (!isCurrentUserPremium) {
+                    openPremiumModal();
+                    return;
+                  }
+
+                  dispatch({ type: 'setColor', payload: color });
+                }}
+                className={buildClassName(
+                  'color-picker-item',
+                  `color-picker-item-${color}`,
+                  !isCurrentUserPremium && 'color-picker-item-hover-disabled',
+                  color === state.folder.color && isCurrentUserPremium && 'color-picker-item-active',
+                )}
+              />
+            ))}
+            <button
+              type="button"
+              onClick={() => {
+                if (!isCurrentUserPremium) {
+                  openPremiumModal();
+                  return;
+                }
+
+                dispatch({ type: 'setColor', payload: -1 });
+              }}
+              className={buildClassName(
+                'color-picker-item',
+                'color-picker-item-none',
+                (state.folder.color === undefined || state.folder.color === -1 || !isCurrentUserPremium)
+                && 'color-picker-item-active',
+              )}
+            >
+              {isCurrentUserPremium ? (
+                <Icon name="close" />
+              ) : (
+                <Icon name="lock-badge" />
+              )}
+            </button>
+          </div>
+          <p className="settings-item-description mb-0" dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('FilterColorHint')}
+          </p>
+        </div>
+
+        <div className="settings-item pt-3">
           <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>
             {lang('FolderLinkScreen.Title')}
           </h4>
@@ -401,6 +468,8 @@ export default memo(withGlobal<OwnProps>(
     const { byId, invites } = global.chatFolders;
     const chatListCount = Object.values(byId).reduce((acc, el) => acc + (el.isChatList ? 1 : 0), 0);
 
+    const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+
     return {
       loadedActiveChatIds: listIds.active,
       loadedArchivedChatIds: listIds.archived,
@@ -409,6 +478,7 @@ export default memo(withGlobal<OwnProps>(
       maxInviteLinks: selectCurrentLimit(global, 'chatlistInvites'),
       maxChatLists: selectCurrentLimit(global, 'chatlistJoined'),
       chatListCount,
+      isCurrentUserPremium,
     };
   },
 )(SettingsFoldersEdit));
