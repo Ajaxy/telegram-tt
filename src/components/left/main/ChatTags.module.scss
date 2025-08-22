@@ -54,4 +54,8 @@
   &Color6 {
     color: var(--color-peer-6, var(--color-text));
   }
+
+  &ColorMore {
+    color: var(--color-text-secondary);
+  }
 }
