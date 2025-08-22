@@ -3,20 +3,33 @@ import { memo } from '../../../lib/teact/teact';
 
 import type { ApiChatFolder } from '../../../api/types';
 
+import { ALL_FOLDER_ID } from '../../../config';
+
 import styles from './ChatTags.module.scss';
 
 type OwnProps = {
   folderIds?: number[];
+  orderedIds?: number[];
   chatFoldersById?: Record<number, ApiChatFolder>;
+  activeChatFolder?: number;
 };
 
 const ChatTags: FC<OwnProps> = ({
   folderIds,
+  orderedIds,
   chatFoldersById,
+  activeChatFolder,
 }) => {
   const MAX_VISIBLE_TAGS = 3;
-  const visibleFolderIds = folderIds?.slice(0, MAX_VISIBLE_TAGS + 1) || []; // first tag is "all" and won't be shown
-  const remainingCount = folderIds?.length ? folderIds.length - visibleFolderIds.length : 0;
+
+  const activeFolderId = activeChatFolder !== undefined && orderedIds ? orderedIds[activeChatFolder] : undefined;
+
+  const orderedFolderIds = orderedIds?.filter((id) =>
+    folderIds?.includes(id) && id !== activeFolderId && id !== ALL_FOLDER_ID,
+  ) || [];
+
+  const visibleFolderIds = orderedFolderIds.slice(0, MAX_VISIBLE_TAGS);
+  const remainingCount = orderedFolderIds.length - visibleFolderIds.length;
 
   return (
     <div className={styles.wrapper}>

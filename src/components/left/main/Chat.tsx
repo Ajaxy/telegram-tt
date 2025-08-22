@@ -122,7 +122,9 @@ type StateProps = {
   isSynced?: boolean;
   isAccountFrozen?: boolean;
   folderIds?: number[];
+  orderedIds?: number[];
   chatFoldersById?: Record<number, ApiChatFolder>;
+  activeChatFolder?: number;
   areTagsEnabled?: boolean;
 };
 
@@ -164,7 +166,9 @@ const Chat: FC<OwnProps & StateProps> = ({
   onDragEnter,
   isAccountFrozen,
   folderIds,
+  orderedIds,
   chatFoldersById,
+  activeChatFolder,
   areTagsEnabled,
 }) => {
   const {
@@ -433,7 +437,14 @@ const Chat: FC<OwnProps & StateProps> = ({
             />
           )}
         </div>
-        {areTagsEnabled && <ChatTags folderIds={folderIds} chatFoldersById={chatFoldersById} />}
+        {areTagsEnabled && (
+          <ChatTags
+            folderIds={folderIds}
+            orderedIds={orderedIds}
+            chatFoldersById={chatFoldersById}
+            activeChatFolder={activeChatFolder}
+          />
+        )}
       </div>
       {shouldRenderDeleteModal && (
         <DeleteChatModal
@@ -512,6 +523,8 @@ export default memo(withGlobal<OwnProps>(
 
     const monoforumChannel = selectMonoforumChannel(global, chatId);
 
+    const activeChatFolder = selectTabState(global).activeChatFolder;
+
     return {
       chat,
       isMuted: getIsChatMuted(chat, selectNotifyDefaults(global), selectNotifyException(global, chat.id)),
@@ -540,6 +553,8 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       monoforumChannel,
       folderIds,
+      orderedIds: global.chatFolders.orderedIds,
+      activeChatFolder,
       chatFoldersById: global.chatFolders.byId,
       areTagsEnabled: areTagsEnabled && isPremium,
     };
