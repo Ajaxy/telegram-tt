@@ -53,7 +53,6 @@ const ChatTags = ({
               getApiPeerColorClass({ color: folder.color }),
             )}
           >
-            <div className={styles.tagBackground} />
             {renderTextWithEntities({
               text: folder.title.text,
               entities: folder.title.entities,
@@ -64,7 +63,6 @@ const ChatTags = ({
       })}
       {remainingCount > 0 && (
         <div className={`ChatTags ${styles.tag} ${styles.tagColorMore}`}>
-          <div className={styles.tagBackground} />
           +
           {remainingCount}
         </div>

@@ -20,18 +20,7 @@
   text-align: center;
   text-transform: uppercase;
 
-  &Background {
-    position: absolute;
-    top: 0;
-    left: 0;
-
-    width: 100%;
-    height: 100%;
-    border-radius: 0.25rem;
-
-    opacity: 0.1;
-    background-color: currentColor;
-  }
+  background-color: var(--accent-background-color);
 
   &ColorMore {
     color: var(--color-text-secondary);
