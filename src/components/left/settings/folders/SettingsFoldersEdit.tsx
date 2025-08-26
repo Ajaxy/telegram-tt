@@ -21,6 +21,7 @@ import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { CUSTOM_PEER_EXCLUDED_CHAT_TYPES, CUSTOM_PEER_INCLUDED_CHAT_TYPES } from '../../../../util/objects/customPeer';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 import { getApiPeerColorClass } from '../../../common/helpers/peerColor';
+import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import { selectChatFilters } from '../../../../hooks/reducers/useFoldersReducer';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
@@ -363,7 +364,11 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
                 : 'color-picker-item-disabled',
             )}
             >
-              {state.folder.title.text}
+              {renderTextWithEntities({
+                text: state.folder.title.text,
+                entities: state.folder.title.entities,
+                noCustomEmojiPlayback: state.folder.noTitleAnimations,
+              })}
             </div>
           </h4>
           <div className="color-picker">

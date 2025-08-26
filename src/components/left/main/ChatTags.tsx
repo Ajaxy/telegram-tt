@@ -5,6 +5,7 @@ import type { ApiChatFolder } from '../../../api/types';
 import { ALL_FOLDER_ID } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { getApiPeerColorClass } from '../../common/helpers/peerColor';
+import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
 import styles from './ChatTags.module.scss';
 
@@ -53,7 +54,11 @@ const ChatTags = ({
             )}
           >
             <div className={styles.tagBackground} />
-            {folder.title.text}
+            {renderTextWithEntities({
+              text: folder.title.text,
+              entities: folder.title.entities,
+              noCustomEmojiPlayback: folder.noTitleAnimations,
+            })}
           </div>
         );
       })}
