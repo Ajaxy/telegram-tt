@@ -199,6 +199,8 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   useEnsureMessage(isSavedDialog ? currentUserId : chatId, lastMessageId, lastMessage);
 
+  const shouldRenderTags = areTagsEnabled && withTags && folderIds && folderIds.length > 1;
+
   const { renderSubtitle, ref } = useChatListEntry({
     chat,
     chatId,
@@ -215,7 +217,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     isSavedDialog,
     isPreview,
     topics,
-    noForumTitle: areTagsEnabled && folderIds && folderIds.length > 1,
+    noForumTitle: shouldRenderTags,
   });
 
   const getIsForumPanelClosed = useSelectorSignal(selectIsForumPanelClosed);
@@ -404,7 +406,7 @@ const Chat: FC<OwnProps & StateProps> = ({
           <ChatCallStatus isMobile={isMobile} isSelected={isSelected} isActive={withInterfaceAnimations} />
         )}
       </div>
-      <div className={buildClassName('info', areTagsEnabled && folderIds && folderIds.length > 1 && 'has-tags')}>
+      <div className={buildClassName('info', shouldRenderTags && 'has-tags')}>
         <div className="info-row">
           <FullNameTitle
             peer={isMonoforum ? monoforumChannel! : peer}
@@ -439,7 +441,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             />
           )}
         </div>
-        {areTagsEnabled && withTags && (
+        {shouldRenderTags && (
           <ChatTags
             folderIds={folderIds}
             orderedIds={orderedIds}
