@@ -22,6 +22,11 @@
 
   background-color: var(--accent-background-color);
 
+  :global(.emoji-small) {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
   &ColorMore {
     color: var(--color-text-secondary);
   }
