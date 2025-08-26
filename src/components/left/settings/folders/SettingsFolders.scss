@@ -137,7 +137,6 @@
 
   width: 1.5rem;
   height: 1.5rem;
-  border: none;
   border: 0.125rem solid transparent;
   border-radius: 50%;
 
@@ -146,7 +145,7 @@
   background-color: currentColor;
   outline: none;
 
-  transition: all 0.05s ease-in-out;
+  transition: border 100ms ease-in-out, outline 100ms ease-in-out;
 }
 
 .color-picker-item-disabled {
@@ -173,8 +172,6 @@
   &:focus,
   &:hover,
   &:active {
-    width: 1.5rem;
-    height: 1.5rem;
     border: 0.125rem solid var(--color-background);
     outline: 0.125rem solid currentColor;
   }
