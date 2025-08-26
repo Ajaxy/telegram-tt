@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo } from '../../../lib/teact/teact';
 
 import type { ApiChatFolder } from '../../../api/types';
@@ -16,12 +15,12 @@ type OwnProps = {
   activeChatFolder?: number;
 };
 
-const ChatTags: FC<OwnProps> = ({
+const ChatTags = ({
   folderIds,
   orderedIds,
   chatFoldersById,
   activeChatFolder,
-}) => {
+}: OwnProps) => {
   const MAX_VISIBLE_TAGS = 3;
 
   const activeFolderId = activeChatFolder !== undefined && orderedIds ? orderedIds[activeChatFolder] : undefined;
