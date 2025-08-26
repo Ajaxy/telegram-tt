@@ -22,8 +22,9 @@
   background-color: var(--accent-background-color);
 
   :global(.emoji-small) {
-    width: 0.75rem;
-    height: 0.75rem;
+    width: 0.5625rem;
+    height: 0.5625rem;
+    margin-top: -0.0625rem;
   }
 
   &ColorMore {

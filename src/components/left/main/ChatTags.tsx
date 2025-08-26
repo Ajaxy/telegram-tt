@@ -24,7 +24,6 @@ const ChatTags = ({
   chatFoldersById,
   activeChatFolder,
 }: OwnProps) => {
-
   const activeFolderId = activeChatFolder !== undefined && orderedIds ? orderedIds[activeChatFolder] : undefined;
 
   const orderedFolderIds = useMemo(() => orderedIds?.filter((id) => {
