@@ -9,6 +9,8 @@ import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntit
 
 import styles from './ChatTags.module.scss';
 
+const MAX_VISIBLE_TAGS = 3;
+
 type OwnProps = {
   folderIds?: number[];
   orderedIds?: number[];
@@ -22,7 +24,6 @@ const ChatTags = ({
   chatFoldersById,
   activeChatFolder,
 }: OwnProps) => {
-  const MAX_VISIBLE_TAGS = 3;
 
   const activeFolderId = activeChatFolder !== undefined && orderedIds ? orderedIds[activeChatFolder] : undefined;
 
