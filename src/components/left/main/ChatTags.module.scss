@@ -4,27 +4,32 @@
 }
 
 .tag {
+  position: relative;
+
   flex-shrink: 0;
+
   min-width: 1.5rem;
   height: 0.75rem;
-  border-radius: 0.2375rem;
-  padding: 0 0.2375rem;
+  padding: 0 0.25rem;
+  border-radius: 0.25rem;
+
   font-size: 0.625rem;
   font-weight: var(--font-weight-medium);
   line-height: 0.75rem;
   text-align: center;
-  position: relative;
   text-transform: uppercase;
 
   &Background {
     position: absolute;
-    background-color: currentColor;
-    border-radius: 0.2375rem;
     top: 0;
     left: 0;
+
     width: 100%;
     height: 100%;
+    border-radius: 0.25rem;
+
     opacity: 0.1;
+    background-color: currentColor;
   }
 
   &Color0 {
@@ -34,23 +39,23 @@
   &Color1 {
     color: var(--color-peer-1, var(--color-text));
   }
-  
+
   &Color2 {
     color: var(--color-peer-2, var(--color-text));
   }
-  
+
   &Color3 {
     color: var(--color-peer-3, var(--color-text));
   }
-  
+
   &Color4 {
     color: var(--color-peer-4, var(--color-text));
   }
-  
+
   &Color5 {
     color: var(--color-peer-5, var(--color-text));
   }
-  
+
   &Color6 {
     color: var(--color-peer-6, var(--color-text));
   }
