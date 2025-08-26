@@ -94,6 +94,7 @@ type OwnProps = {
   className?: string;
   observeIntersection?: ObserveFn;
   onDragEnter?: (chatId: string) => void;
+  withTags?: boolean;
 };
 
 type StateProps = {
@@ -170,6 +171,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   chatFoldersById,
   activeChatFolder,
   areTagsEnabled,
+  withTags,
 }) => {
   const {
     openChat,
@@ -437,7 +439,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             />
           )}
         </div>
-        {areTagsEnabled && (
+        {areTagsEnabled && withTags && (
           <ChatTags
             folderIds={folderIds}
             orderedIds={orderedIds}
