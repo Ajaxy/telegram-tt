@@ -16,6 +16,7 @@
   font-size: 0.625rem;
   font-weight: var(--font-weight-medium);
   line-height: 0.75rem;
+  color: var(--accent-color);
   text-align: center;
   text-transform: uppercase;
 
@@ -30,34 +31,6 @@
 
     opacity: 0.1;
     background-color: currentColor;
-  }
-
-  &Color0 {
-    color: var(--color-peer-0, var(--color-text));
-  }
-
-  &Color1 {
-    color: var(--color-peer-1, var(--color-text));
-  }
-
-  &Color2 {
-    color: var(--color-peer-2, var(--color-text));
-  }
-
-  &Color3 {
-    color: var(--color-peer-3, var(--color-text));
-  }
-
-  &Color4 {
-    color: var(--color-peer-4, var(--color-text));
-  }
-
-  &Color5 {
-    color: var(--color-peer-5, var(--color-text));
-  }
-
-  &Color6 {
-    color: var(--color-peer-6, var(--color-text));
   }
 
   &ColorMore {

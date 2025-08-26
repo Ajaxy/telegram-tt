@@ -4,6 +4,8 @@ import { memo } from '../../../lib/teact/teact';
 import type { ApiChatFolder } from '../../../api/types';
 
 import { ALL_FOLDER_ID } from '../../../config';
+import buildClassName from '../../../util/buildClassName';
+import { getApiPeerColorClass } from '../../common/helpers/peerColor';
 
 import styles from './ChatTags.module.scss';
 
@@ -36,7 +38,14 @@ const ChatTags: FC<OwnProps> = ({
       {visibleFolderIds.map((folderId) => {
         const folder = chatFoldersById?.[folderId];
         return folder && (
-          <div key={folder.id} className={`ChatTags ${styles.tag} ${styles[`tagColor${folder.color}`]}`}>
+          <div
+            key={folder.id}
+            className={buildClassName(
+              'ChatTags',
+              styles.tag,
+              getApiPeerColorClass({ color: folder.color }),
+            )}
+          >
             <div className={styles.tagBackground} />
             {folder.title.text}
           </div>
