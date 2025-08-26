@@ -121,6 +121,7 @@
   display: flex;
   gap: 1rem;
   align-items: center;
+
   min-height: 3rem;
   padding: 0 1rem 1rem;
 }
@@ -132,50 +133,31 @@
 }
 
 .color-picker-item {
+  cursor: pointer;
+
   width: 1.5rem;
   height: 1.5rem;
-  border-radius: 50%;
   border: none;
-  cursor: pointer;
-  transition: all 0.05s ease-in-out;
   border: 0.125rem solid transparent;
-  outline: none;
+  border-radius: 50%;
+
+  color: var(--accent-color);
+
   background-color: currentColor;
+  outline: none;
+
+  transition: all 0.05s ease-in-out;
 }
 
-.color-picker-item-0 {
-  color: var(--color-peer-0, var(--color-text));
-}
-
-.color-picker-item-1 {
-  color: var(--color-peer-1, var(--color-text));
-}
-
-.color-picker-item-2 {
-  color: var(--color-peer-2, var(--color-text));
-}
-
-.color-picker-item-3 {
-  color: var(--color-peer-3, var(--color-text));
-}
-
-.color-picker-item-4 {
-  color: var(--color-peer-4, var(--color-text));
-}
-
-.color-picker-item-5 {
-  color: var(--color-peer-5, var(--color-text));
-}
-
-.color-picker-item-6 {
-  color: var(--color-peer-6, var(--color-text));
+.color-picker-selected-color {
+  color: var(--accent-color);
 }
 
 .color-picker-item-none {
-  color: var(--color-topic-grey);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--color-topic-grey);
   i {
     color: var(--color-background);
   }
@@ -197,9 +179,14 @@
 .settings-folders-lock-icon {
   position: absolute;
   top: 50%;
-  padding: 1.3125rem;
   transform: translateY(-50%);
+
+  padding: 1.3125rem;
 
   font-size: 0.875rem;
   color: var(--color-gray);
+}
+
+.settings-folders-title {
+  color: var(--accent-color);
 }

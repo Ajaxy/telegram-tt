@@ -15,6 +15,7 @@ import { isBetween } from '../../../../util/math';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { throttle } from '../../../../util/schedulers';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
+import { getApiPeerColorClass } from '../../../common/helpers/peerColor';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import { useFolderManagerForChatsCount } from '../../../../hooks/useFolderManager';
@@ -321,7 +322,8 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                 >
                   <span className={buildClassName(
                     'title',
-                    folder?.color !== undefined && isPremium && `color-picker-item-${folder.color}`,
+                    'settings-folders-title',
+                    folder?.color !== undefined && isPremium && getApiPeerColorClass({ color: folder.color }),
                   )}
                   >
                     {renderTextWithEntities({

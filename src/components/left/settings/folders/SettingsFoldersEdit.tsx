@@ -20,6 +20,7 @@ import { findIntersectionWithSet } from '../../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { CUSTOM_PEER_EXCLUDED_CHAT_TYPES, CUSTOM_PEER_INCLUDED_CHAT_TYPES } from '../../../../util/objects/customPeer';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
+import { getApiPeerColorClass } from '../../../common/helpers/peerColor';
 
 import { selectChatFilters } from '../../../../hooks/reducers/useFoldersReducer';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
@@ -357,7 +358,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
             {lang('FilterColorTitle')}
             <div className={buildClassName(
               'color-picker-selected-color',
-              isCurrentUserPremium ? `color-picker-item-${state.folder.color}` : 'color-picker-item-disabled',
+              isCurrentUserPremium ? getApiPeerColorClass({ color: state.folder.color }) : 'color-picker-item-disabled',
             )}
             >
               {state.folder.title.text}
@@ -378,7 +379,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
                 }}
                 className={buildClassName(
                   'color-picker-item',
-                  `color-picker-item-${color}`,
+                  getApiPeerColorClass({ color }),
                   !isCurrentUserPremium && 'color-picker-item-hover-disabled',
                   color === state.folder.color && isCurrentUserPremium && 'color-picker-item-active',
                 )}
