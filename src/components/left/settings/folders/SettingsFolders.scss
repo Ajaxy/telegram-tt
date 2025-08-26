@@ -162,7 +162,8 @@
   align-items: center;
   justify-content: center;
   color: var(--color-topic-grey);
-  i {
+
+  .color-picker-item-none-icon {
     color: var(--color-background);
   }
 }

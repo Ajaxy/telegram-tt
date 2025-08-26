@@ -410,9 +410,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
               )}
             >
               {isCurrentUserPremium ? (
-                <Icon name="close" />
+                <Icon name="close" className="color-picker-item-none-icon" />
               ) : (
-                <Icon name="lock-badge" />
+                <Icon name="lock-badge" className="color-picker-item-none-icon" />
               )}
             </button>
           </div>
