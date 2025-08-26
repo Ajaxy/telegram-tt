@@ -1183,9 +1183,9 @@ export function sortChatFolders(ids: number[]) {
   }));
 }
 
-export function toggleDialogFilterTags(enabled: boolean) {
+export function toggleDialogFilterTags(isEnabled: boolean) {
   return invokeRequest(new GramJs.messages.ToggleDialogFilterTags({
-    enabled,
+    enabled: isEnabled,
   }));
 }
 

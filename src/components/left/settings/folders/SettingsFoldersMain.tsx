@@ -175,7 +175,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    toggleDialogFilterTags({ enabled: !areTagsEnabled });
+    toggleDialogFilterTags({ isEnabled: !areTagsEnabled });
   }, [areTagsEnabled, isPremium, toggleDialogFilterTags]);
 
   const handleDrag = useCallback((translation: { x: number; y: number }, id: string | number) => {

@@ -397,7 +397,7 @@ export interface ActionPayloads {
     id: number;
   };
   toggleDialogFilterTags: {
-    enabled: boolean;
+    isEnabled: boolean;
   };
   openSupportChat: WithTabId | undefined;
   openChatByPhoneNumber: {

@@ -1116,9 +1116,9 @@ addActionHandler('loadRecommendedChatFolders', async (global): Promise<void> => 
 });
 
 addActionHandler('toggleDialogFilterTags', async (global, actions, payload): Promise<void> => {
-  const { enabled } = payload;
+  const { isEnabled } = payload;
 
-  const result = await callApi('toggleDialogFilterTags', enabled);
+  const result = await callApi('toggleDialogFilterTags', isEnabled);
 
   if (result) {
     global = getGlobal();
@@ -1126,7 +1126,7 @@ addActionHandler('toggleDialogFilterTags', async (global, actions, payload): Pro
       ...global,
       chatFolders: {
         ...global.chatFolders,
-        areTagsEnabled: enabled,
+        areTagsEnabled: isEnabled,
       },
     };
     setGlobal(global);
