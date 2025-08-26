@@ -149,6 +149,10 @@
   transition: all 0.05s ease-in-out;
 }
 
+.color-picker-item-disabled {
+  --accent-color: var(--color-topic-grey);
+}
+
 .color-picker-selected-color {
   color: var(--accent-color);
 }

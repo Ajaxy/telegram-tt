@@ -358,7 +358,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
             {lang('FilterColorTitle')}
             <div className={buildClassName(
               'color-picker-selected-color',
-              isCurrentUserPremium ? getApiPeerColorClass({ color: state.folder.color }) : 'color-picker-item-disabled',
+              isCurrentUserPremium && state.folder.color !== undefined && state.folder.color !== -1
+                ? getApiPeerColorClass({ color: state.folder.color })
+                : 'color-picker-item-disabled',
             )}
             >
               {state.folder.title.text}
@@ -393,7 +395,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
                   return;
                 }
 
-                dispatch({ type: 'setColor', payload: -1 });
+                dispatch({ type: 'setColor', payload: undefined });
               }}
               className={buildClassName(
                 'color-picker-item',

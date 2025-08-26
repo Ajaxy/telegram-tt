@@ -25,9 +25,16 @@ const ChatTags = ({
 
   const activeFolderId = activeChatFolder !== undefined && orderedIds ? orderedIds[activeChatFolder] : undefined;
 
-  const orderedFolderIds = useMemo(() => orderedIds?.filter((id) =>
-    folderIds?.includes(id) && id !== activeFolderId && id !== ALL_FOLDER_ID,
-  ) || [], [orderedIds, folderIds, activeFolderId]);
+  const orderedFolderIds = useMemo(() => orderedIds?.filter((id) => {
+    const isFolder = folderIds?.includes(id);
+    const isActive = id === activeFolderId;
+    const isAll = id === ALL_FOLDER_ID;
+
+    const folder = chatFoldersById?.[id];
+    const hasColor = folder?.color !== undefined && folder.color !== -1;
+
+    return isFolder && !isActive && !isAll && hasColor;
+  }) || [], [orderedIds, folderIds, activeFolderId, chatFoldersById]);
 
   const visibleFolderIds = orderedFolderIds.slice(0, MAX_VISIBLE_TAGS);
   const remainingCount = orderedFolderIds.length - visibleFolderIds.length;

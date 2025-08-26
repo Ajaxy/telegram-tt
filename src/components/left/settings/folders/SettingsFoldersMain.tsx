@@ -322,8 +322,8 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                 >
                   <span className={buildClassName(
                     'title',
-                    'settings-folders-title',
-                    folder?.color !== undefined && isPremium && getApiPeerColorClass({ color: folder.color }),
+                    folder?.color !== undefined && folder.color !== -1 && isPremium
+                    && `${getApiPeerColorClass({ color: folder.color })} settings-folders-title`,
                   )}
                   >
                     {renderTextWithEntities({
