@@ -168,8 +168,11 @@
   }
 }
 
-.color-picker-item-active, .color-picker-item:focus, .color-picker-item:hover, .color-picker-item:active {
-  &:not(.color-picker-item-hover-disabled) {
+.color-picker-item:not(.color-picker-item-hover-disabled) {
+  &.color-picker-item-active,
+  &:focus,
+  &:hover,
+  &:active {
     width: 1.5rem;
     height: 1.5rem;
     border: 0.125rem solid var(--color-background);
