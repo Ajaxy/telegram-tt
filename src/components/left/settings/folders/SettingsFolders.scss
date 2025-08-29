@@ -130,6 +130,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-inline-end: 1rem;
 }
 
 .color-picker-item {
@@ -192,6 +193,15 @@
   color: var(--color-gray);
 }
 
-.settings-folders-title {
-  color: var(--accent-color);
+.settings-folders-color-circle {
+  position: absolute;
+  top: 50%;
+  right: 2rem;
+  transform: translateY(-50%);
+
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+
+  background-color: var(--accent-color);
 }

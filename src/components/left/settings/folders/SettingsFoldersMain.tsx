@@ -250,6 +250,8 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
             const draggedTop = (state.orderedFolderIds?.indexOf(folder.id) ?? 0) * FOLDER_HEIGHT_PX;
             const top = (state.dragOrderIds?.indexOf(folder.id) ?? 0) * FOLDER_HEIGHT_PX;
 
+            const shouldRenderColor = folder?.color !== undefined && folder.color !== -1 && isPremium;
+
             if (folder.id === ALL_FOLDER_ID) {
               return (
                 <Draggable
@@ -290,7 +292,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                 onDrag={handleDrag}
                 onDragEnd={handleDragEnd}
                 style={`top: ${isDragged ? draggedTop : top}px;`}
-                knobStyle={`${lang.isRtl ? 'left' : 'right'}: 3rem;`}
+                knobStyle={`${lang.isRtl ? 'left' : 'right'}: ${shouldRenderColor ? '3.5rem' : '3rem'};`}
                 isDisabled={isBlocked || !isActive}
               >
                 <ListItem
@@ -319,12 +321,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                     }
                   }}
                 >
-                  <span className={buildClassName(
-                    'title',
-                    folder?.color !== undefined && folder.color !== -1 && isPremium
-                    && `${getApiPeerColorClass({ color: folder.color })} settings-folders-title`,
-                  )}
-                  >
+                  <span className="title">
                     {renderTextWithEntities({
                       text: folder.title.text,
                       entities: folder.title.entities,
@@ -336,6 +333,17 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                     {folder.isChatList && <Icon name="link" className="mr-1" />}
                     {folder.subtitle}
                   </span>
+
+                  {
+                    shouldRenderColor && (
+                      <div className={buildClassName(
+                        'settings-folders-color-circle',
+                        getApiPeerColorClass({ color: folder.color }),
+                      )}
+                      />
+                    )
+                  }
+
                 </ListItem>
               </Draggable>
             );

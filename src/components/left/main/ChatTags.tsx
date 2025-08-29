@@ -57,6 +57,7 @@ const ChatTags = ({
               text: folder.title.text,
               entities: folder.title.entities,
               noCustomEmojiPlayback: folder.noTitleAnimations,
+              emojiSize: 9,
             })}
           </div>
         );
