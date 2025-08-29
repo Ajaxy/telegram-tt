@@ -405,7 +405,6 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         >
           <Button
             className={styles.openAppButton}
-            size="smaller"
             onClick={handleOpenApp}
           >
             {oldLang('ProfileBotOpenApp')}

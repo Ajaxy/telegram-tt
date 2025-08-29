@@ -110,7 +110,6 @@ const StealthModeModal = ({ isOpen, stealthMode, isCurrentUserPremium }: StatePr
       </ListItem>
       <Button
         className={styles.button}
-        size="smaller"
         disabled={isOnCooldown}
         isShiny={!isCurrentUserPremium}
         withPremiumGradient={!isCurrentUserPremium}

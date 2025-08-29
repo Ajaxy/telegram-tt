@@ -82,7 +82,6 @@ const ChatlistNew: FC<OwnProps> = ({ invite }) => {
       </div>
       <Button
         onClick={handleButtonClick}
-        size="smaller"
         disabled={!selectedPeerIds.length}
       >
         <div className={styles.buttonText}>

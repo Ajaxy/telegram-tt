@@ -239,7 +239,6 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
           </div>
           <div className="button-wrapper">
             <Button
-              size="smaller"
               fluid
               color={isAdded ? 'danger' : 'primary'}
               onClick={handleButtonClick}

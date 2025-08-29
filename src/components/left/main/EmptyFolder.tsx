@@ -57,7 +57,6 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
           fluid
           pill
           onClick={handleEditFolder}
-          size="smaller"
           isRtl={lang.isRtl}
         >
           <Icon name="settings" />

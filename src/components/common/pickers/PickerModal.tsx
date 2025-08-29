@@ -50,7 +50,6 @@ const PickerModal = ({
             withPremiumGradient={withPremiumGradient}
             onClick={onConfirm || modalProps.onClose}
             color="primary"
-            size="smaller"
             disabled={isConfirmDisabled}
           >
             {confirmButtonText || lang('Confirm')}

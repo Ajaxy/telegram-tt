@@ -57,10 +57,10 @@ const UnconfirmedSession = ({ sessions, onHeightChange }: OwnProps) => {
         {lang('UnconfirmedAuthSingle', locationString)}
       </p>
       <div className={styles.buttons}>
-        <Button fluid isText size="smaller" className={styles.button} onClick={handleAccept}>
+        <Button fluid isText className={styles.button} onClick={handleAccept}>
           {lang('UnconfirmedAuthConfirm')}
         </Button>
-        <Button fluid isText size="smaller" color="danger" onClick={handleReject} className={styles.button}>
+        <Button fluid isText color="danger" onClick={handleReject} className={styles.button}>
           {lang('UnconfirmedAuthDeny')}
         </Button>
       </div>

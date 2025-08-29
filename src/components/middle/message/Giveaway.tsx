@@ -339,7 +339,6 @@ const Giveaway = ({
       <Button
         className={styles.button}
         color="adaptive"
-        size="smaller"
         onClick={handleShowInfoClick}
       >
         {lang('BoostingHowItWork')}

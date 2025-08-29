@@ -126,7 +126,7 @@ const SuggestedStatusModal = ({ modal, currentUser, bot }: OwnProps & StateProps
           withEmojiStatus
         />
       )}
-      <Button size="smaller" onClick={handleSetStatus}>
+      <Button onClick={handleSetStatus}>
         {lang('GeneralConfirm')}
       </Button>
     </Modal>

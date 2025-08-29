@@ -163,7 +163,7 @@ const GiftResalePriceComposerModal = ({
         {lang('OnlyAcceptTONDescription')}
       </div>
 
-      <Button noForcedUpperCase disabled={!isPriceCorrect} size="smaller" onClick={handleSellGift}>
+      <Button noForcedUpperCase disabled={!isPriceCorrect} onClick={handleSellGift}>
         {isPriceCorrect && lang('ButtonSellGift', {
           stars: isPriceInTon ? formatTonAsIcon(lang, price)
             : formatStarsAsIcon(lang, price, { asFont: true }),

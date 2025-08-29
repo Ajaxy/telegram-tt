@@ -132,7 +132,7 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
     const footer = (
       <div className={styles.footer}>
         {!gift && (
-          <Button className={styles.footerButton} size="smaller" onClick={handleClose}>
+          <Button className={styles.footerButton} onClick={handleClose}>
             {lang('OK')}
           </Button>
         )}
@@ -143,7 +143,7 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
               onCheck={setShouldKeepOriginalDetails}
               checked={shouldKeepOriginalDetails}
             />
-            <Button className={styles.footerButton} size="smaller" isShiny onClick={handleUpgrade}>
+            <Button className={styles.footerButton} isShiny onClick={handleUpgrade}>
               {gift.alreadyPaidUpgradeStars
                 ? lang('GeneralConfirm')
                 : lang('GiftUpgradeButton', {

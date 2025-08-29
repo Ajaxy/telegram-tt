@@ -112,7 +112,6 @@ const InviteLink: FC<OwnProps> = ({
       </div>
       {withShare && (
         <Button
-          size="smaller"
           disabled={isDisabled}
           onClick={handleShare}
           className={styles.share}

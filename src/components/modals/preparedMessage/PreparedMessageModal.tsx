@@ -163,7 +163,6 @@ const PreparedMessageModal: FC<OwnProps & StateProps> = ({
           {lang('WebAppShareMessageInfo', { user: getUserFullName(bot) })}
         </p>
         <Button
-          size="smaller"
           onClick={handleOpenClick}
         >
           {lang('BotShareMessageShare')}

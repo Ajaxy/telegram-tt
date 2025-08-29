@@ -217,7 +217,6 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
         )}
         {buttonState !== 'hidden' && (
           <Button
-            size="smaller"
             color={buttonState === 'cancel' ? 'danger' : 'primary'}
             isText={buttonState === 'cancel'}
             onClick={handleButtonClick}

@@ -103,7 +103,6 @@ const TableInfoModal = ({
       {buttonText && (
         <Button
           className={!footer ? styles.noFooter : undefined}
-          size="smaller"
           onClick={onButtonClick || onClose}
         >
           {buttonText}

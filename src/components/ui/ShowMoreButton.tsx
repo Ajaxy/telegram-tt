@@ -28,7 +28,6 @@ const ShowMoreButton: FC<OwnProps> = ({
     <Button
       className="ShowMoreButton"
       color="translucent"
-      size="smaller"
       isText
       isLoading={isLoading}
       isRtl={lang.isRtl}

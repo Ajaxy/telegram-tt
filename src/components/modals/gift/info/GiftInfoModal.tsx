@@ -250,7 +250,7 @@ const GiftInfoModal = ({
   const renderFooterButton = useLastCallback(() => {
     if (canBuyGift) {
       return (
-        <Button noForcedUpperCase size="smaller" onClick={handleBuyGift}>
+        <Button noForcedUpperCase onClick={handleBuyGift}>
           {lang('ButtonBuyGift', {
             stars: resellPrice?.currency === TON_CURRENCY_CODE
               ? formatTonAsIcon(lang, resellPrice.amount, { shouldConvertFromNanos: true })
@@ -262,7 +262,7 @@ const GiftInfoModal = ({
 
     if (canFocusUpgrade) {
       return (
-        <Button size="smaller" onClick={handleFocusUpgraded}>
+        <Button onClick={handleFocusUpgraded}>
           {lang('GiftInfoViewUpgraded')}
         </Button>
       );
@@ -270,7 +270,7 @@ const GiftInfoModal = ({
 
     if (canManage && savedGift?.alreadyPaidUpgradeStars && !savedGift.upgradeMsgId) {
       return (
-        <Button size="smaller" isShiny onClick={handleOpenUpgradeModal}>
+        <Button isShiny onClick={handleOpenUpgradeModal}>
           {lang('GiftInfoUpgradeForFree')}
           <Icon name="arrow-down-circle" className={styles.upgradeIcon} />
         </Button>
@@ -279,7 +279,7 @@ const GiftInfoModal = ({
 
     if (canManage && savedGift.canUpgrade && !savedGift.upgradeMsgId) {
       return (
-        <Button size="smaller" isShiny onClick={handleOpenUpgradeModal}>
+        <Button isShiny onClick={handleOpenUpgradeModal}>
           {lang('GiftInfoUpgrade')}
           <Icon name="arrow-down-circle" className={styles.upgradeIcon} />
         </Button>
@@ -287,7 +287,7 @@ const GiftInfoModal = ({
     }
 
     return (
-      <Button size="smaller" onClick={handleClose}>
+      <Button onClick={handleClose}>
         {lang('OK')}
       </Button>
     );

@@ -118,7 +118,6 @@ const PublicPostsSearchLauncher = ({
           <Button
             className={styles.paidSearchButton}
             color="primary"
-            size="smaller"
             disabled={!searchQuery}
             noForcedUpperCase
             onClick={handlePaidSearchClick}
@@ -164,7 +163,6 @@ const PublicPostsSearchLauncher = ({
           <Button
             className={styles.searchButton}
             color="primary"
-            size="smaller"
             noForcedUpperCase
             disabled={!searchQuery}
             onClick={handleSearchClick}
@@ -209,7 +207,6 @@ const PublicPostsSearchLauncher = ({
           <Button
             className={styles.subscribePremiumButton}
             color="primary"
-            size="smaller"
             noForcedUpperCase
             onClick={handleSubscribePremiumClick}
           >

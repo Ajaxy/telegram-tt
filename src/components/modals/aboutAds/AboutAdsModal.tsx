@@ -167,7 +167,6 @@ const AboutAdsModal = ({ modal, minLevelToRestrictAds }: OwnProps & StateProps) 
     >
       {regularAdContent}
       <Button
-        size="smaller"
         onClick={handleClose}
       >
         {oldLang('RevenueSharingAdsUnderstood')}

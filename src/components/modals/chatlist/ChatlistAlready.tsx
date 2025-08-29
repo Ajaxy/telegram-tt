@@ -111,7 +111,6 @@ const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
         />
       </div>
       <Button
-        size="smaller"
         onClick={handleButtonClick}
       >
         <div className={styles.buttonText}>

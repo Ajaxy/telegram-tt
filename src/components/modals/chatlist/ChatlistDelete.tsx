@@ -76,7 +76,6 @@ const ChatlistDelete: FC<OwnProps> = ({
         </>
       )}
       <Button
-        size="smaller"
         onClick={handleButtonClick}
       >
         <div className={styles.buttonText}>

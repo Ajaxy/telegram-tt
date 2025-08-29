@@ -219,7 +219,6 @@ const ReportModal = ({
                 noReplaceNewlines
               />
               <Button
-                size="smaller"
                 onClick={sendMessageReportHandler}
                 disabled={!renderingSection.isOptional ? !text.length : undefined}
               >

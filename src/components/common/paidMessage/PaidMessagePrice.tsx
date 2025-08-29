@@ -69,7 +69,6 @@ function PaidMessagePrice({
         <Button
           color="primary"
           fluid
-          size="smaller"
           noForcedUpperCase
           className="settings-unlock-button"
           onClick={handleUnlockWithPremium}

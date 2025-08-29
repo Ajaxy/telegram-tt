@@ -255,7 +255,6 @@ const MonetizationStatistics = ({
         {renderAvailableReward()}
 
         <Button
-          size="smaller"
           type="button"
           onClick={verificationMonetizationHandler}
           disabled={!canWithdraw}

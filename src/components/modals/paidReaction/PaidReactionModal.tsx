@@ -351,7 +351,6 @@ const PaidReactionModal = ({
         label={oldLang('StarsReactionShowMeInTopSenders')}
       />
       <Button
-        size="smaller"
         onClick={handleSend}
       >
         {lang('SendPaidReaction', { amount: starsAmount }, {

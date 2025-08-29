@@ -54,7 +54,6 @@ const EmptyForum: FC<OwnProps & StateProps> = ({
           ripple={!isMobile}
           fluid
           onClick={handleCreateTopic}
-          size="smaller"
           isRtl={lang.isRtl}
         >
           <div className={styles.buttonText}>

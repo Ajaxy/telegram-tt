@@ -405,7 +405,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
             <Button
               color="primary"
               fluid
-              size="smaller"
               noForcedUpperCase
               className="settings-unlock-button"
               onClick={handleAgeVerification}

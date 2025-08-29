@@ -75,7 +75,6 @@ const FrozenAccountModal = ({
       <div className={styles.footer}>
         <Button
           className={styles.buttonAppeal}
-          size="smaller"
           onClick={handleAppeal}
           noForcedUpperCase
         >
@@ -83,7 +82,6 @@ const FrozenAccountModal = ({
         </Button>
         <Button
           isText
-          size="smaller"
           onClick={handleClose}
           noForcedUpperCase
         >

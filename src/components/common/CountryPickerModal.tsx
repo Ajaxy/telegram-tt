@@ -109,7 +109,6 @@ const CountryPickerModal: FC<OwnProps> = ({
 
       <div className={styles.footer}>
         <Button
-          size="smaller"
           onClick={handleSubmit}
         >
           {lang('SelectCountries.OK')}

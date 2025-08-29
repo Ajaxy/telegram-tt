@@ -282,7 +282,6 @@ const SuggestMessageModal = ({
         <Button
           className={styles.offerButton}
           onClick={handleOffer}
-          size="smaller"
           disabled={isDisabled}
         >
           {isInSuggestChangesMode ? lang('ButtonUpdateTerms')

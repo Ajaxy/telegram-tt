@@ -138,7 +138,6 @@ const GiftStatusInfoModal = ({
     return (
       <div className={styles.footer}>
         <Button
-          size="smaller"
           onClick={onWearClick}
         >
           {lang('UniqueStatusWearButton')}

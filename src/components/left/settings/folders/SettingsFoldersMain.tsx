@@ -213,7 +213,6 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
           // TODO: Refactor button component to handle icon placemenet with props
             className="settings-button with-icon"
             color="primary"
-            size="smaller"
             pill
             fluid
             onClick={handleCreateFolder}
