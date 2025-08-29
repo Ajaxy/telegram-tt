@@ -54,6 +54,7 @@ type OwnProps = {
   isAccountFrozen?: boolean;
   isMainList?: boolean;
   foldersDispatch?: FolderEditDispatch;
+  withTags?: boolean;
 };
 
 const INTERSECTION_THROTTLE = 200;
@@ -72,6 +73,7 @@ const ChatList: FC<OwnProps> = ({
   isAccountFrozen,
   isMainList,
   foldersDispatch,
+  withTags,
 }) => {
   const {
     openChat,
@@ -238,6 +240,7 @@ const ChatList: FC<OwnProps> = ({
           offsetTop={offsetTop}
           observeIntersection={observe}
           onDragEnter={handleDragEnter}
+          withTags={withTags}
         />
       );
     });

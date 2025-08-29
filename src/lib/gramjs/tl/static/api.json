@@ -163,6 +163,7 @@
     "messages.getSuggestedDialogFilters",
     "messages.updateDialogFilter",
     "messages.updateDialogFiltersOrder",
+    "messages.toggleDialogFilterTags",
     "messages.getReplies",
     "messages.getDiscussionMessage",
     "messages.readDiscussion",

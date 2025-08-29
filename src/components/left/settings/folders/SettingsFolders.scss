@@ -116,3 +116,82 @@
   flex-direction: column;
   height: 100%;
 }
+
+.color-picker {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+
+  min-height: 3rem;
+  padding: 0 1rem 1rem;
+}
+
+.color-picker-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.color-picker-item {
+  cursor: pointer;
+
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0.125rem solid transparent;
+  border-radius: 50%;
+
+  color: var(--accent-color);
+
+  background-color: currentColor;
+  outline: none;
+
+  transition: border 100ms ease-in-out, outline 100ms ease-in-out;
+}
+
+.color-picker-item-disabled {
+  --accent-color: var(--color-topic-grey);
+}
+
+.color-picker-selected-color {
+  color: var(--accent-color);
+}
+
+.color-picker-item-none {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-topic-grey);
+
+  .color-picker-item-none-icon {
+    color: var(--color-background);
+  }
+}
+
+.color-picker-item:not(.color-picker-item-hover-disabled) {
+  &.color-picker-item-active,
+  &:focus,
+  &:hover,
+  &:active {
+    border: 0.125rem solid var(--color-background);
+    outline: 0.125rem solid currentColor;
+  }
+}
+
+.settings-item-relative {
+  position: relative;
+}
+
+.settings-folders-lock-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+
+  padding: 1.3125rem;
+
+  font-size: 0.875rem;
+  color: var(--color-gray);
+}
+
+.settings-folders-title {
+  color: var(--accent-color);
+}

@@ -396,6 +396,9 @@ export interface ActionPayloads {
   deleteChatFolder: {
     id: number;
   };
+  toggleDialogFilterTags: {
+    isEnabled: boolean;
+  };
   openSupportChat: WithTabId | undefined;
   openChatByPhoneNumber: {
     phoneNumber: string;
