@@ -5,6 +5,7 @@ import {
 } from '../lib/teact/teact';
 
 import { round } from '../util/math';
+import getOffsetToContainer from '../util/visibility/getOffsetToContainer';
 import useLastCallback from './useLastCallback';
 import useResizeObserver from './useResizeObserver';
 import useSharedIntersectionObserver from './useSharedIntersectionObserver';
@@ -38,12 +39,15 @@ export default function useCoordsInSharedCanvas(
       return;
     }
 
-    const targetBounds = target.getBoundingClientRect();
-    const canvasBounds = canvas.getBoundingClientRect();
+    const { left: targetLeftOffset, top: targetTopOffset } = getOffsetToContainer(target, canvas.parentElement!);
+    const { left: canvasLeftOffset, top: canvasTopOffset } = getOffsetToContainer(canvas, canvas.parentElement!);
+
+    const left = targetLeftOffset - canvasLeftOffset;
+    const top = targetTopOffset - canvasTopOffset;
 
     // Factor coords are used to support rendering while being rescaled (e.g. message appearance animation)
-    setX(round((targetBounds.left - canvasBounds.left) / canvasBounds.width, 4) || 0);
-    setY(round((targetBounds.top - canvasBounds.top) / canvasBounds.height, 4) || 0);
+    setX(round(left / canvas.clientWidth, 4) || 0);
+    setY(round(top / canvas.clientHeight, 4) || 0);
   });
 
   useEffect(recalculate, [recalculate]);
