@@ -869,7 +869,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     );
   }
 
-  const activeListSelector = `.shared-media-transition > .Transition_slide-active.${resultType}-list`;
+  const activeListSelector = `.shared-media-transition > .Transition_slide-active .${resultType}-list`;
   const itemSelector = `${activeListSelector} > .scroll-item`;
 
   return (
