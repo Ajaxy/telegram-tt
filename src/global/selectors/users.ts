@@ -36,15 +36,15 @@ export function selectIsCurrentUserPremium<T extends GlobalState>(global: T) {
 }
 
 export function selectIsCurrentUserFrozen<T extends GlobalState>(global: T) {
-  return Boolean(global.appConfig?.freezeUntilDate);
+  return Boolean(global.appConfig.freezeUntilDate);
 }
 
 export function selectIsPremiumPurchaseBlocked<T extends GlobalState>(global: T) {
-  return global.appConfig?.isPremiumPurchaseBlocked ?? true;
+  return global.appConfig.isPremiumPurchaseBlocked ?? true;
 }
 
 export function selectIsGiveawayGiftsPurchaseAvailable<T extends GlobalState>(global: T) {
-  return global.appConfig?.isGiveawayGiftsPurchaseAvailable ?? true;
+  return global.appConfig.isGiveawayGiftsPurchaseAvailable ?? true;
 }
 
 /**

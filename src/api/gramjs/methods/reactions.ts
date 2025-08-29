@@ -5,13 +5,13 @@ import type {
   ApiChat, ApiReaction, ApiSticker,
 } from '../../types';
 
+import { split } from '../../../util/iteratees';
 import {
   API_GENERAL_ID_LIMIT,
   REACTION_LIST_LIMIT,
   RECENT_REACTIONS_LIMIT,
   TOP_REACTIONS_LIMIT,
-} from '../../../config';
-import { split } from '../../../util/iteratees';
+} from '../../../limits';
 import {
   buildApiAvailableEffect,
   buildApiAvailableReaction,

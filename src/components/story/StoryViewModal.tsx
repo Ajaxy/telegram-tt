@@ -44,7 +44,7 @@ interface StateProps {
   isLoading?: boolean;
   views?: ApiTypeStoryView[];
   nextOffset?: string;
-  viewersExpirePeriod: number;
+  viewersExpireDate?: number;
   isCurrentUserPremium?: boolean;
 }
 
@@ -52,7 +52,7 @@ const REFETCH_DEBOUNCE = 250;
 
 function StoryViewModal({
   story,
-  viewersExpirePeriod,
+  viewersExpireDate,
   views,
   nextOffset,
   isLoading,
@@ -69,7 +69,7 @@ function StoryViewModal({
   const lang = useOldLang();
 
   const isOpen = Boolean(story);
-  const isExpired = Boolean(story?.date) && (story.date + viewersExpirePeriod) < getServerTime();
+  const isExpired = Boolean(viewersExpireDate) && viewersExpireDate < getServerTime();
   const { viewsCount = 0, reactionsCount = 0 } = story?.views || {};
 
   const shouldShowJustContacts = story?.isPublic && viewsCount > STORY_VIEWS_MIN_CONTACTS_FILTER;
@@ -275,11 +275,12 @@ export default memo(withGlobal((global) => {
     storyId, views, nextOffset, isLoading,
   } = viewModal || {};
   const story = storyId ? selectPeerStory(global, global.currentUserId!, storyId) : undefined;
+  const storyExpireDate = story?.['@type'] === 'story' ? story.expireDate : undefined;
 
   return {
     storyId,
     views,
-    viewersExpirePeriod: appConfig!.storyExpirePeriod + appConfig!.storyViewersExpirePeriod,
+    viewersExpireDate: storyExpireDate ? (storyExpireDate + appConfig.storyViewersExpirePeriod) : undefined,
     story: story && 'content' in story ? story : undefined,
     nextOffset,
     isLoading,

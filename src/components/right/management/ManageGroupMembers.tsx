@@ -280,7 +280,7 @@ export default memo(withGlobal<OwnProps>(
     const { members, adminMembersById, areParticipantsHidden } = selectChatFullInfo(global, chatId) || {};
     const isChannel = chat && isChatChannel(chat);
     const { userIds: localContactIds } = global.contactList || {};
-    const hiddenMembersMinCount = global.appConfig?.hiddenMembersMinCount;
+    const hiddenMembersMinCount = global.appConfig.hiddenMembersMinCount;
 
     const canDeleteMembers = chat && (chat.isCreator || getHasAdminRight(chat, 'banUsers'));
 

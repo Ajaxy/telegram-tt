@@ -53,7 +53,7 @@ const SensitiveContentConfirmModal = ({
 
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   const appConfig = global.appConfig;
-  const verifyAgeMin = appConfig?.verifyAgeMin;
+  const verifyAgeMin = appConfig.verifyAgeMin;
 
   return {
     verifyAgeMin: verifyAgeMin || VERIFY_AGE_MIN_DEFAULT,

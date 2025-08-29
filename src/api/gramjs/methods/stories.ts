@@ -10,8 +10,9 @@ import type {
   ApiTypeStory,
 } from '../../types';
 
-import { MESSAGE_ID_REQUIRED_ERROR, STORY_LIST_LIMIT } from '../../../config';
+import { MESSAGE_ID_REQUIRED_ERROR } from '../../../config';
 import { buildCollectionByCallback } from '../../../util/iteratees';
+import { STORY_LIST_LIMIT } from '../../../limits';
 import { buildApiReportResult } from '../apiBuilders/messages';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import {

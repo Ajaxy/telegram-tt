@@ -6,7 +6,7 @@ import type {
   ApiChat, ApiGroupCall, ApiPhoneCall, ApiUser,
 } from '../../types';
 
-import { GROUP_CALL_PARTICIPANTS_LIMIT } from '../../../config';
+import { GROUP_CALL_PARTICIPANTS_LIMIT } from '../../../limits';
 import {
   buildApiGroupCall,
   buildApiGroupCallParticipant, buildCallProtocol,

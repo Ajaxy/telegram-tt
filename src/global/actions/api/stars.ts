@@ -4,13 +4,13 @@ import type { ActionReturnType } from '../../types';
 
 import {
   DEFAULT_RESALE_GIFTS_FILTER_OPTIONS,
-  RESALE_GIFTS_LIMIT,
   STARS_CURRENCY_CODE,
   TON_CURRENCY_CODE,
 } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { callApi } from '../../../api/gramjs';
+import { RESALE_GIFTS_LIMIT } from '../../../limits';
 import { areInputSavedGiftsEqual, getRequestInputSavedStarGift } from '../../helpers/payments';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
@@ -485,7 +485,7 @@ addActionHandler('toggleSavedGiftPinned', async (global, actions, payload): Prom
 
   const savedGifts = selectPeerSavedGifts(global, peerId, tabId);
   if (!savedGifts) return;
-  const pinLimit = global.appConfig?.savedGiftPinLimit;
+  const pinLimit = global.appConfig.savedGiftPinLimit;
   const currentPinnedGifts = savedGifts.gifts.filter((g) => g.isPinned);
   const newPinnedGifts = gift.isPinned
     ? currentPinnedGifts.filter((g) => (g.gift as ApiStarGiftUnique).slug !== (gift.gift as ApiStarGiftUnique).slug)

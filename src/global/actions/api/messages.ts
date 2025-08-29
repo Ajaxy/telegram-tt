@@ -34,7 +34,6 @@ import {
   RE_TELEGRAM_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
   STARS_CURRENCY_CODE,
-  STARS_SUGGESTED_POST_FUTURE_MIN,
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
@@ -834,7 +833,7 @@ addActionHandler('initDraftFromSuggestedMessage', (global, actions, payload): Ac
   if (message.suggestedPostInfo) {
     const { scheduleDate, ...messageSuggestedPost } = message.suggestedPostInfo;
     const now = getServerTime();
-    const futureMin = global.appConfig?.starsSuggestedPostFutureMin || STARS_SUGGESTED_POST_FUTURE_MIN;
+    const futureMin = global.appConfig.starsSuggestedPostFutureMin;
 
     const validScheduleDate = scheduleDate && scheduleDate > now + futureMin ? scheduleDate : undefined;
 
@@ -2388,22 +2387,22 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
   }
 
   const { appConfig, config } = global;
-  if (appConfig) {
-    if (config?.autologinToken && appConfig.autologinDomains.includes(parsedUrl.hostname)) {
-      parsedUrl.searchParams.set(AUTOLOGIN_TOKEN_KEY, config.autologinToken);
-      window.open(parsedUrl.href, '_blank', 'noopener');
-      return;
-    }
-
-    if (appConfig.urlAuthDomains.includes(parsedUrl.hostname)) {
-      actions.closeStoryViewer({ tabId });
-
-      actions.requestLinkUrlAuth({ url, tabId });
-      return;
-    }
+  if (config?.autologinToken && appConfig.autologinDomains.includes(parsedUrl.hostname)) {
+    parsedUrl.searchParams.set(AUTOLOGIN_TOKEN_KEY, config.autologinToken);
+    window.open(parsedUrl.href, '_blank', 'noopener');
+    return;
   }
 
-  const shouldDisplayModal = !urlWithProtocol.match(RE_TELEGRAM_LINK) && !shouldSkipModal;
+  if (appConfig.urlAuthDomains.includes(parsedUrl.hostname)) {
+    actions.closeStoryViewer({ tabId });
+
+    actions.requestLinkUrlAuth({ url, tabId });
+    return;
+  }
+
+  const isWhitelisted = appConfig.whitelistedDomains.includes(parsedUrl.hostname);
+
+  const shouldDisplayModal = !urlWithProtocol.match(RE_TELEGRAM_LINK) && !shouldSkipModal && !isWhitelisted;
 
   if (shouldDisplayModal) {
     actions.toggleSafeLinkModal({ url: isMixedScript ? parsedUrl.toString() : urlWithProtocol, tabId });

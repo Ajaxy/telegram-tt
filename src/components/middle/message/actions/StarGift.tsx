@@ -194,7 +194,7 @@ export default memo(withGlobal<OwnProps>(
       canPlayAnimatedEmojis,
       sender: giftSender || messageSender,
       recipient: giftRecipient || messageRecipient,
-      starGiftMaxConvertPeriod: global.appConfig?.starGiftMaxConvertPeriod,
+      starGiftMaxConvertPeriod: global.appConfig.starGiftMaxConvertPeriod,
     };
   },
 )(StarGiftAction));

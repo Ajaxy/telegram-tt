@@ -27,13 +27,13 @@ import {
   ARCHIVED_FOLDER_ID,
   DEBUG,
   GENERAL_TOPIC_ID,
-  GLOBAL_SEARCH_CONTACTS_LIMIT,
   MAX_INT_32,
   MEMBERS_LOAD_SLICE,
   SERVICE_NOTIFICATIONS_USER_ID,
   TOPICS_SLICE,
 } from '../../../config';
 import { buildCollectionByKey, omitUndefined } from '../../../util/iteratees';
+import { GLOBAL_SEARCH_CONTACTS_LIMIT } from '../../../limits';
 import {
   buildApiChatBotCommands,
   buildApiChatFolder,

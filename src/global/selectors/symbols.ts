@@ -167,14 +167,14 @@ export function selectAnimatedEmojiEffect<T extends GlobalState>(global: T, emoj
 }
 
 export function selectAnimatedEmojiSound<T extends GlobalState>(global: T, emoji: string) {
-  return global?.appConfig?.emojiSounds[cleanEmoji(emoji)];
+  return global?.appConfig.emojiSounds[cleanEmoji(emoji)];
 }
 
 export function selectIsAlwaysHighPriorityEmoji<T extends GlobalState>(
   global: T, stickerSet: ApiStickerSetInfo | ApiStickerSet,
 ) {
   if (!('id' in stickerSet)) return false;
-  return stickerSet.id === global.appConfig?.defaultEmojiStatusesStickerSetId
+  return stickerSet.id === global.appConfig.defaultEmojiStatusesStickerSetId
     || stickerSet.id === RESTRICTED_EMOJI_SET_ID;
 }
 

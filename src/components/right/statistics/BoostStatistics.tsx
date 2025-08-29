@@ -429,7 +429,7 @@ export default memo(withGlobal(
     const chatId = boostStatistics && boostStatistics.chatId;
     const chat = chatId ? selectChat(global, chatId) : undefined;
     const isChannel = chat && isChatChannel(chat);
-    const giveawayBoostsPerPremium = global.appConfig?.giveawayBoostsPerPremium;
+    const giveawayBoostsPerPremium = global.appConfig.giveawayBoostsPerPremium;
     const { animationLevel } = selectSharedSettings(global);
 
     return {

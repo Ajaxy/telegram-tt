@@ -26,9 +26,6 @@ import type {
 } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
-import {
-  TODO_ITEMS_LIMIT,
-} from '../../../config';
 import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
   areReactionsEmpty,
@@ -802,7 +799,7 @@ export default memo(withGlobal<OwnProps>(
 
     const {
       seenByExpiresAt, seenByMaxChatMembers, maxUniqueReactions, readDateExpiresAt,
-    } = global.appConfig || {};
+    } = global.appConfig;
 
     const reactionsLimit = chatFullInfo?.reactionsLimit || maxUniqueReactions;
 
@@ -899,7 +896,7 @@ export default memo(withGlobal<OwnProps>(
     const canGift = selectCanGift(global, message.chatId);
 
     const savedDialogId = selectSavedDialogIdFromMessage(global, message);
-    const todoItemsMax = global.appConfig?.todoItemsMax || TODO_ITEMS_LIMIT;
+    const todoItemsMax = global.appConfig.todoItemsMax;
     const canAppendTodoList = message.content.todo?.todo.othersCanAppend
       && message.content.todo?.todo.items?.length < todoItemsMax;
 

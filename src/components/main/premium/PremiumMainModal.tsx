@@ -530,9 +530,9 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
     limitFolders: selectPremiumLimit(global, 'dialogFilters'),
     limitPins: selectPremiumLimit(global, 'dialogFolderPinned'),
     limitLinks: selectPremiumLimit(global, 'channelsPublic'),
-    limits: global.appConfig?.limits,
-    premiumSlug: global.appConfig?.premiumInvoiceSlug,
-    premiumBotUsername: global.appConfig?.premiumBotUsername,
-    premiumPromoOrder: global.appConfig?.premiumPromoOrder,
+    limits: global.appConfig.limits,
+    premiumSlug: global.appConfig.premiumInvoiceSlug,
+    premiumBotUsername: global.appConfig.premiumBotUsername,
+    premiumPromoOrder: global.appConfig.premiumPromoOrder,
   };
 })(PremiumMainModal));

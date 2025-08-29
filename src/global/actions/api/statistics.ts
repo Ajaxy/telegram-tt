@@ -270,7 +270,6 @@ addActionHandler('processMonetizationRevenueWithdrawalUrl', async (global, actio
   if ('url' in result) {
     actions.openUrl({
       url: result.url,
-      shouldSkipModal: true,
       tabId,
       ignoreDeepLinks: true,
     });

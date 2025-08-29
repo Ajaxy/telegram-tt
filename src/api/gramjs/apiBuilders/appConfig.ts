@@ -3,20 +3,11 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiAppConfig, ApiLimitType, ApiPremiumSection } from '../../types';
 
+import { omitUndefined } from '../../../util/iteratees';
 import {
+  DEFAULT_APP_CONFIG,
   DEFAULT_LIMITS,
-  MAX_UNIQUE_REACTIONS,
-  SERVICE_NOTIFICATIONS_USER_ID,
-  STORY_EXPIRE_PERIOD,
-  STORY_VIEWERS_EXPIRE_PERIOD,
-  TODO_ITEM_LENGTH_LIMIT,
-  TODO_ITEMS_LIMIT,
-  TODO_TITLE_LENGTH_LIMIT,
-  TON_SUGGESTED_POST_AMOUNT_MAX,
-  TON_SUGGESTED_POST_AMOUNT_MIN,
-  TON_TOPUP_URL_DEFAULT,
-  TON_USD_RATE_DEFAULT,
-} from '../../../config';
+} from '../../../limits';
 import localDb from '../localDb';
 import { buildJson } from './misc';
 
@@ -36,7 +27,8 @@ type Limit =
   | 'chatlist_invites_limit'
   | 'chatlist_joined_limit'
   | 'recommended_channels_limit'
-  | 'saved_dialogs_pinned_limit';
+  | 'saved_dialogs_pinned_limit'
+  | 'reactions_user_max';
 type LimitKey = `${Limit}_${LimitType}`;
 type LimitsConfig = Record<LimitKey, number>;
 
@@ -57,6 +49,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   autologin_domains: string[];
   autologin_token: string;
   url_auth_domains: string[];
+  whitelisted_domains: string[];
   premium_purchase_blocked: boolean;
   giveaway_gifts_purchase_available: boolean;
   giveaway_add_peers_max: number;
@@ -74,11 +67,9 @@ export interface GramJsAppConfig extends LimitsConfig {
   // Forums
   topics_pinned_limit: number;
   // Stories
-  stories_all_hidden?: boolean;
-  story_expire_period: number;
   story_viewers_expire_period: number;
-  stories_changelog_user_id?: number;
-  stories_pinned_to_top_count_max?: number;
+  stories_changelog_user_id: number;
+  stories_pinned_to_top_count_max: number;
   // Boosts
   group_transcribe_level_min?: number;
   new_noncontact_peers_require_premium_without_ownpremium?: boolean;
@@ -157,14 +148,15 @@ function getLimit(appConfig: GramJsAppConfig, key: Limit, fallbackKey: ApiLimitT
 export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiAppConfig {
   const appConfig = buildJson(json) as GramJsAppConfig;
 
-  return {
+  const config: Partial<ApiAppConfig> = {
     emojiSounds: buildEmojiSounds(appConfig),
     seenByMaxChatMembers: appConfig.chat_read_mark_size_threshold,
     seenByExpiresAt: appConfig.chat_read_mark_expire_period,
     readDateExpiresAt: appConfig.pm_read_date_expire_period,
     autologinDomains: appConfig.autologin_domains || [],
     urlAuthDomains: appConfig.url_auth_domains || [],
-    maxUniqueReactions: appConfig.reactions_uniq_max ?? MAX_UNIQUE_REACTIONS,
+    whitelistedDomains: appConfig.whitelisted_domains || [],
+    maxUniqueReactions: appConfig.reactions_uniq_max,
     premiumBotUsername: appConfig.premium_bot_username,
     premiumInvoiceSlug: appConfig.premium_invoice_slug,
     premiumPromoOrder: appConfig.premium_promo_order as ApiPremiumSection[],
@@ -172,8 +164,6 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     isGiveawayGiftsPurchaseAvailable: appConfig.giveaway_gifts_purchase_available,
     defaultEmojiStatusesStickerSetId: appConfig.default_emoji_statuses_stickerset_id,
     topicsPinnedLimit: appConfig.topics_pinned_limit,
-    maxUserReactionsDefault: appConfig.reactions_user_max_default,
-    maxUserReactionsPremium: appConfig.reactions_user_max_premium,
     hiddenMembersMinCount: appConfig.hidden_members_group_size_min,
     giveawayAddPeersMax: appConfig.giveaway_add_peers_max,
     giveawayBoostsPerPremium: appConfig.giveaway_boosts_per_premium,
@@ -195,13 +185,12 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
       chatlistJoined: getLimit(appConfig, 'chatlist_joined_limit', 'chatlistJoined'),
       recommendedChannels: getLimit(appConfig, 'recommended_channels_limit', 'recommendedChannels'),
       savedDialogsPinned: getLimit(appConfig, 'saved_dialogs_pinned_limit', 'savedDialogsPinned'),
+      maxReactions: getLimit(appConfig, 'reactions_user_max', 'maxReactions'),
       moreAccounts: DEFAULT_LIMITS.moreAccounts,
     },
     hash,
-    areStoriesHidden: appConfig.stories_all_hidden,
-    storyExpirePeriod: appConfig.story_expire_period ?? STORY_EXPIRE_PERIOD,
-    storyViewersExpirePeriod: appConfig.story_viewers_expire_period ?? STORY_VIEWERS_EXPIRE_PERIOD,
-    storyChangelogUserId: appConfig.stories_changelog_user_id?.toString() ?? SERVICE_NOTIFICATIONS_USER_ID,
+    storyViewersExpirePeriod: appConfig.story_viewers_expire_period,
+    storyChangelogUserId: appConfig.stories_changelog_user_id?.toString(),
     maxPinnedStoriesCount: appConfig.stories_pinned_to_top_count_max,
     groupTranscribeLevelMin: appConfig.group_transcribe_level_min,
     canLimitNewMessagesWithoutPremium: appConfig.new_noncontact_peers_require_premium_without_ownpremium,
@@ -238,18 +227,23 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     starsSuggestedPostFutureMax: appConfig.stars_suggested_post_future_max,
     starsSuggestedPostFutureMin: appConfig.stars_suggested_post_future_min,
     tonSuggestedPostCommissionPermille: appConfig.ton_suggested_post_commission_permille,
-    tonSuggestedPostAmountMax: appConfig.ton_suggested_post_amount_max ?? TON_SUGGESTED_POST_AMOUNT_MAX,
-    tonSuggestedPostAmountMin: appConfig.ton_suggested_post_amount_min ?? TON_SUGGESTED_POST_AMOUNT_MIN,
-    tonUsdRate: appConfig.ton_usd_rate ?? TON_USD_RATE_DEFAULT,
-    tonTopupUrl: appConfig.ton_topup_url ?? TON_TOPUP_URL_DEFAULT,
+    tonSuggestedPostAmountMax: appConfig.ton_suggested_post_amount_max,
+    tonSuggestedPostAmountMin: appConfig.ton_suggested_post_amount_min,
+    tonUsdRate: appConfig.ton_usd_rate,
+    tonTopupUrl: appConfig.ton_topup_url,
     pollMaxAnswers: appConfig.poll_answers_max,
-    todoItemsMax: appConfig.todo_items_max ?? TODO_ITEMS_LIMIT,
-    todoTitleLengthMax: appConfig.todo_title_length_max ?? TODO_TITLE_LENGTH_LIMIT,
-    todoItemLengthMax: appConfig.todo_item_length_max ?? TODO_ITEM_LENGTH_LIMIT,
+    todoItemsMax: appConfig.todo_items_max,
+    todoTitleLengthMax: appConfig.todo_title_length_max,
+    todoItemLengthMax: appConfig.todo_item_length_max,
     ignoreRestrictionReasons: appConfig.ignore_restriction_reasons,
     needAgeVideoVerification: appConfig.need_age_video_verification,
     verifyAgeBotUsername: appConfig.verify_age_bot_username,
     verifyAgeCountry: appConfig.verify_age_country,
     verifyAgeMin: appConfig.verify_age_min,
+  };
+
+  return {
+    ...DEFAULT_APP_CONFIG,
+    ...omitUndefined(config),
   };
 }

@@ -304,7 +304,7 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
   const message = chatId && messageId ? selectChatMessage(global, chatId, messageId) : undefined;
   const isPrivateChat = isUserId(chatId || storyPeerId || '');
   const areSomeReactionsAllowed = chatFullInfo?.enabledReactions?.type === 'some';
-  const { maxUniqueReactions } = global.appConfig || {};
+  const { maxUniqueReactions } = global.appConfig;
   const areAllReactionsAllowed = chatFullInfo?.enabledReactions?.type === 'all'
     && chatFullInfo?.enabledReactions?.areCustomAllowed;
 

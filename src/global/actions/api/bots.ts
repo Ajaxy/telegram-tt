@@ -1444,7 +1444,7 @@ addActionHandler('startBotFatherConversation', async (global, actions, payload):
 });
 
 addActionHandler('loadBotFreezeAppeal', async (global): Promise<void> => {
-  const botUrl = global.appConfig?.freezeAppealUrl;
+  const botUrl = global.appConfig.freezeAppealUrl;
   if (!botUrl) return;
   const botAppealUsername = botUrl ? getUsernameFromDeepLink(botUrl) : undefined;
   if (!botAppealUsername) return;

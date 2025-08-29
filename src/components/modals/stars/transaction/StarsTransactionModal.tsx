@@ -345,7 +345,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { modal }): StateProps => {
     const peerId = modal?.transaction?.peer?.type === 'peer' && modal.transaction.peer.id;
     const peer = peerId ? selectPeer(global, peerId) : undefined;
-    const paidMessageCommission = global.appConfig?.starsPaidMessageCommissionPermille;
+    const paidMessageCommission = global.appConfig.starsPaidMessageCommissionPermille;
 
     const currencyAmount = modal?.transaction.amount;
     const starsGiftSticker = modal?.transaction.isGift

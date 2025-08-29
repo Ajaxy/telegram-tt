@@ -428,7 +428,7 @@ export default memo(withGlobal<OwnProps>(
       patternColor,
       customBackground,
       backgroundColor,
-      captionLimit: global.appConfig?.starGiftMaxMessageLength,
+      captionLimit: global.appConfig.starGiftMaxMessageLength,
       currentUserId: global.currentUserId,
       isPaymentFormLoading: tabState.isPaymentFormLoading,
       paidMessagesStars,

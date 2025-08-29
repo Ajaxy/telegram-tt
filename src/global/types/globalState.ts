@@ -76,7 +76,7 @@ export type GlobalState = {
   cacheVersion: number;
   isInited: boolean;
   config?: ApiConfig;
-  appConfig?: ApiAppConfig;
+  appConfig: ApiAppConfig;
   peerColors?: ApiPeerColors;
   timezones?: {
     byId: Record<string, ApiTimezone>;

@@ -4,12 +4,9 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiMessage, ApiPeer } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
-import { STARS_CURRENCY_CODE, STARS_SUGGESTED_POST_AGE_MIN,
-  STARS_SUGGESTED_POST_COMMISSION_PERMILLE,
-  STARS_SUGGESTED_POST_FUTURE_MAX,
-  STARS_SUGGESTED_POST_FUTURE_MIN,
+import {
+  STARS_CURRENCY_CODE,
   TON_CURRENCY_CODE,
-  TON_SUGGESTED_POST_COMMISSION_PERMILLE,
 } from '../../../config';
 import { getPeerFullTitle } from '../../../global/helpers/peers';
 import { selectChatMessage, selectIsMonoforumAdmin, selectSender } from '../../../global/selectors';
@@ -224,13 +221,11 @@ export default memo(withGlobal<OwnProps>(
     const sender = message ? selectSender(global, message) : undefined;
     const isAdmin = modal && selectIsMonoforumAdmin(global, modal.chatId);
     const { appConfig } = global;
-    const commissionPermille = appConfig?.starsSuggestedPostCommissionPermille
-      || STARS_SUGGESTED_POST_COMMISSION_PERMILLE;
-    const tonCommissionPermille = appConfig?.tonSuggestedPostCommissionPermille
-      || TON_SUGGESTED_POST_COMMISSION_PERMILLE;
-    const minAge = appConfig?.starsSuggestedPostAgeMin || STARS_SUGGESTED_POST_AGE_MIN;
-    const futureMin = (appConfig?.starsSuggestedPostFutureMin || STARS_SUGGESTED_POST_FUTURE_MIN) * 2;
-    const futureMax = appConfig?.starsSuggestedPostFutureMax || STARS_SUGGESTED_POST_FUTURE_MAX;
+    const commissionPermille = appConfig.starsSuggestedPostCommissionPermille;
+    const tonCommissionPermille = appConfig.tonSuggestedPostCommissionPermille;
+    const minAge = appConfig.starsSuggestedPostAgeMin;
+    const futureMin = appConfig.starsSuggestedPostFutureMin;
+    const futureMax = appConfig.starsSuggestedPostFutureMax;
     const scheduleDate = message?.suggestedPostInfo?.scheduleDate;
 
     return {

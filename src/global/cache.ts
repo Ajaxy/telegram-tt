@@ -13,7 +13,6 @@ import {
   ALL_FOLDER_ID, ANIMATION_LEVEL_DEFAULT,
   ARCHIVED_FOLDER_ID,
   DEBUG,
-  DEFAULT_LIMITS,
   GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT,
   GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
   GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT,
@@ -213,10 +212,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     ...cached.chatFolders,
   };
 
-  if (cached.appConfig && !cached.appConfig.limits) {
-    cached.appConfig.limits = DEFAULT_LIMITS;
-  }
-
   if (!cached.chats.similarChannelsById) {
     cached.chats.similarChannelsById = initialState.chats.similarChannelsById;
   }
@@ -230,7 +225,7 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   }
 
   // Clear old color storage to optimize cache size
-  if (untypedCached?.appConfig?.peerColors) {
+  if (untypedCached?.appConfig.peerColors) {
     untypedCached.appConfig.peerColors = undefined;
     untypedCached.appConfig.darkPeerColors = undefined;
   }
@@ -309,9 +304,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.cacheVersion = 2;
   }
 
-  if (cached.appConfig?.limits && !cached.appConfig.limits.moreAccounts) {
-    cached.appConfig.limits.moreAccounts = DEFAULT_LIMITS.moreAccounts;
-  }
   if (!cached.chats.notifyExceptionById) {
     cached.chats.notifyExceptionById = initialState.chats.notifyExceptionById;
   }
@@ -354,6 +346,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cachedSharedSettings.wasAnimationLevelSetManually) {
     cachedSharedSettings.animationLevel = ANIMATION_LEVEL_DEFAULT;
     cachedSharedSettings.performance = INITIAL_PERFORMANCE_STATE_MED;
+  }
+
+  if (!cached.appConfig) {
+    cached.appConfig = initialState.appConfig;
   }
 }
 

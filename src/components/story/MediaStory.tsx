@@ -190,7 +190,7 @@ export default memo(withGlobal<OwnProps>((global, { story }): StateProps => {
   const chat = selectChat(global, story.peerId);
   const isProtected = chat?.isProtected;
 
-  const { maxPinnedStoriesCount } = global.appConfig || {};
+  const { maxPinnedStoriesCount } = global.appConfig;
   const isOwn = 'isOut' in story && story.isOut;
   const pinnedStories = selectPinnedStories(global, story.peerId);
   const isPinned = pinnedStories?.some((pinnedStory) => pinnedStory.id === story.id);

@@ -386,7 +386,7 @@ const useWebAppFrame = (
 
       if (eventType === 'web_app_verify_age') {
         const { passed } = eventData;
-        const minAge = getGlobal().appConfig?.verifyAgeMin || VERIFY_AGE_MIN_DEFAULT;
+        const minAge = getGlobal().appConfig.verifyAgeMin || VERIFY_AGE_MIN_DEFAULT;
         const ageFromParam = eventData.age || 0;
 
         if (passed && ageFromParam >= minAge) {

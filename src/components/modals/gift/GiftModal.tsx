@@ -528,7 +528,7 @@ export default memo(withGlobal<OwnProps>((global, { modal }): StateProps => {
   const areResaleGiftsLoading = resaleGifts.isLoading !== false;
 
   return {
-    boostPerSentGift: global.appConfig?.boostsPerSentGift,
+    boostPerSentGift: global.appConfig.boostsPerSentGift,
     starGiftsById: starGifts?.byId,
     starGiftIdsByCategory: starGifts?.idsByCategory,
     starBalance: stars?.balance,

@@ -241,8 +241,8 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
     shouldChargeForMessages: Boolean(nonContactPeersPaidStars),
     nonContactPeersPaidStars: nonContactPeersPaidStars || DEFAULT_CHARGE_FOR_MESSAGES,
     isCurrentUserPremium: selectIsCurrentUserPremium(global),
-    canLimitNewMessagesWithoutPremium: global.appConfig?.canLimitNewMessagesWithoutPremium,
-    canChargeForMessages: global.appConfig?.starsPaidMessagesAvailable,
+    canLimitNewMessagesWithoutPremium: global.appConfig.canLimitNewMessagesWithoutPremium,
+    canChargeForMessages: global.appConfig.starsPaidMessagesAvailable,
     noPaidReactionsForUsersCount,
     privacy,
   };

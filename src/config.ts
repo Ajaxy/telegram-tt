@@ -1,5 +1,5 @@
 import type {
-  ApiLimitType, ApiLimitTypeForPromo, ApiPremiumSection, ApiReactionEmoji,
+  ApiLimitTypeForPromo, ApiPremiumSection, ApiReactionEmoji,
 } from './api/types';
 import type {
   GiftProfileFilterOptions,
@@ -94,39 +94,18 @@ export const CHAT_MEDIA_SLICE = 42;
 export const MESSAGE_SEARCH_SLICE = 42;
 export const GLOBAL_SEARCH_SLICE = 20;
 export const GLOBAL_TOPIC_SEARCH_SLICE = 5;
-export const GLOBAL_SEARCH_CONTACTS_LIMIT = 20;
 export const MEMBERS_SLICE = 30;
 export const MEMBERS_LOAD_SLICE = 200;
-export const PINNED_MESSAGES_LIMIT = 50;
-export const BLOCKED_LIST_LIMIT = 100;
 export const PROFILE_SENSITIVE_AREA = 500;
 export const TOPIC_LIST_SENSITIVE_AREA = 600;
-export const GROUP_CALL_PARTICIPANTS_LIMIT = 100;
-export const STORY_LIST_LIMIT = 100;
-export const API_GENERAL_ID_LIMIT = 100;
-export const RESALE_GIFTS_LIMIT = 50;
-export const TODO_ITEMS_LIMIT = 30;
-export const TODO_TITLE_LENGTH_LIMIT = 32;
-export const TODO_ITEM_LENGTH_LIMIT = 64;
 
 // Public Posts Search defaults
 export const PUBLIC_POSTS_SEARCH_DEFAULT_STARS_AMOUNT = 10;
 export const PUBLIC_POSTS_SEARCH_DEFAULT_TOTAL_DAILY = 2;
 
 // Suggested Posts defaults
-export const STARS_SUGGESTED_POST_AMOUNT_MAX = 100000;
-export const STARS_SUGGESTED_POST_AMOUNT_MIN = 5;
-export const STARS_SUGGESTED_POST_COMMISSION_PERMILLE = 850;
-export const STARS_SUGGESTED_POST_AGE_MIN = 86400; // 24 hours in seconds
-export const STARS_SUGGESTED_POST_FUTURE_MAX = 2678400; // 31 days in seconds
-export const STARS_SUGGESTED_POST_FUTURE_MIN = 300; // 5 minutes in seconds
 export const TON_CURRENCY_CODE = 'TON';
-export const TON_SUGGESTED_POST_COMMISSION_PERMILLE = 850;
-export const TON_USD_RATE_DEFAULT = 3;
 export const VERIFY_AGE_MIN_DEFAULT = 18;
-export const TON_TOPUP_URL_DEFAULT = 'https://fragment.com/ads/topup';
-export const TON_SUGGESTED_POST_AMOUNT_MIN = 10000000; // 0.01 TON in nanos
-export const TON_SUGGESTED_POST_AMOUNT_MAX = 10000000000000; // 10 000 TON in nanos
 
 export const STORY_VIEWS_MIN_SEARCH = 15;
 export const STORY_MIN_REACTIONS_SORT = 10;
@@ -137,13 +116,7 @@ export const MEDIA_TIMESTAMP_SAVE_MINIMUM_DURATION = 30; // 30s
 export const GLOBAL_SUGGESTED_CHANNELS_ID = 'global';
 
 // As in Telegram for Android
-// https://github.com/DrKLO/Telegram/blob/51e9947527/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java#L7799
-export const TOP_REACTIONS_LIMIT = 100;
-
-// As in Telegram for Android
 // https://github.com/DrKLO/Telegram/blob/51e9947527/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java#L7781
-export const RECENT_REACTIONS_LIMIT = 50;
-export const REACTION_LIST_LIMIT = 100;
 export const REACTION_UNREAD_SLICE = 100;
 export const MENTION_UNREAD_SLICE = 100;
 export const TOPICS_SLICE = 20;
@@ -401,7 +374,6 @@ export const PEER_COLOR_BG_OPACITY = '1a';
 export const PEER_COLOR_BG_ACTIVE_OPACITY = '2b';
 export const PEER_COLOR_GRADIENT_STEP = 5; // px
 export const MAX_UPLOAD_FILEPART_SIZE = 524288;
-export const MAX_UNIQUE_REACTIONS = 11;
 
 export const IGNORE_UNHANDLED_ERRORS = new Set([
   'USER_CANCELED',
@@ -410,25 +382,6 @@ export const IGNORE_UNHANDLED_ERRORS = new Set([
 // Group calls
 export const GROUP_CALL_VOLUME_MULTIPLIER = 100;
 export const GROUP_CALL_DEFAULT_VOLUME = 100 * GROUP_CALL_VOLUME_MULTIPLIER;
-
-export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
-  uploadMaxFileparts: [4000, 8000],
-  stickersFaved: [5, 10],
-  savedGifs: [200, 400],
-  dialogFiltersChats: [100, 200],
-  dialogFilters: [10, 20],
-  dialogFolderPinned: [5, 10],
-  captionLength: [1024, 4096],
-  channels: [500, 1000],
-  channelsPublic: [10, 20],
-  aboutLength: [70, 140],
-  chatlistInvites: [3, 100],
-  chatlistJoined: [2, 20],
-  recommendedChannels: [10, 100],
-  savedDialogsPinned: [5, 100],
-  moreAccounts: [3, MULTIACCOUNT_MAX_SLOTS],
-};
-export const DEFAULT_MAX_MESSAGE_LENGTH = 4096;
 
 export const ONE_TIME_MEDIA_TTL_SECONDS = 2147483647;
 

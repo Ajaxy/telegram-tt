@@ -38,13 +38,11 @@ import {
 } from '../../types';
 
 import {
-  API_GENERAL_ID_LIMIT,
   DEBUG,
   GIF_MIME_TYPE,
   MAX_INT_32,
   MENTION_UNREAD_SLICE,
   MESSAGE_ID_REQUIRED_ERROR,
-  PINNED_MESSAGES_LIMIT,
   REACTION_UNREAD_SLICE,
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
@@ -54,6 +52,7 @@ import { compact, split } from '../../../util/iteratees';
 import { getMessageKey } from '../../../util/keys/messageKey';
 import { getServerTime } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
+import { API_GENERAL_ID_LIMIT, PINNED_MESSAGES_LIMIT } from '../../../limits';
 import {
   buildApiChatFromPreview,
   buildApiSendAsPeerId,

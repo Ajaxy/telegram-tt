@@ -100,16 +100,16 @@ function PaidMessagePrice({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const starsUsdWithdrawRateX1000 = global.appConfig?.starsUsdWithdrawRateX1000;
+    const starsUsdWithdrawRateX1000 = global.appConfig.starsUsdWithdrawRateX1000;
     const starsUsdWithdrawRate = starsUsdWithdrawRateX1000 ? starsUsdWithdrawRateX1000 / 1000 : 1;
-    const configStarsPaidMessageCommissionPermille = global.appConfig?.starsPaidMessageCommissionPermille;
+    const configStarsPaidMessageCommissionPermille = global.appConfig.starsPaidMessageCommissionPermille;
     const starsPaidMessageCommissionPermille = configStarsPaidMessageCommissionPermille
       ? configStarsPaidMessageCommissionPermille / 1000 : 100;
 
     return {
       starsPaidMessageCommissionPermille,
       starsUsdWithdrawRate,
-      starsPaidMessageAmountMax: global.appConfig?.starsPaidMessageAmountMax || DEFAULT_MAXIMUM_CHARGE_FOR_MESSAGES,
+      starsPaidMessageAmountMax: global.appConfig.starsPaidMessageAmountMax || DEFAULT_MAXIMUM_CHARGE_FOR_MESSAGES,
     };
   },
 )(PaidMessagePrice));

@@ -153,7 +153,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const { availableReactions, topReactions } = global.reactions;
 
-    const { maxUniqueReactions } = global.appConfig || {};
+    const { maxUniqueReactions } = global.appConfig;
     const { enabledReactions, isPaidReactionAvailable } = selectChatFullInfo(global, chatId) || {};
 
     return {

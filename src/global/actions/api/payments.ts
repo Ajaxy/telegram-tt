@@ -1213,7 +1213,7 @@ addActionHandler('processStarGiftWithdrawal', async (global, actions, payload): 
     return;
   }
 
-  actions.openUrl({ url: result.url, shouldSkipModal: true, tabId });
+  actions.openUrl({ url: result.url, tabId });
   actions.closeGiftWithdrawModal({ tabId });
 });
 

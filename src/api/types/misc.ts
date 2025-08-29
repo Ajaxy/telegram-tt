@@ -205,6 +205,7 @@ export interface ApiAppConfig {
   readDateExpiresAt: number;
   autologinDomains: string[];
   urlAuthDomains: string[];
+  whitelistedDomains: string[];
   premiumInvoiceSlug: string;
   premiumBotUsername: string;
   isPremiumPurchaseBlocked: boolean;
@@ -217,27 +218,24 @@ export interface ApiAppConfig {
   defaultEmojiStatusesStickerSetId: string;
   maxUniqueReactions: number;
   topicsPinnedLimit: number;
-  maxUserReactionsDefault: number;
-  maxUserReactionsPremium: number;
   hiddenMembersMinCount: number;
   limits: Record<ApiLimitType, readonly [number, number]>;
   canDisplayAutoarchiveSetting: boolean;
-  areStoriesHidden?: boolean;
-  storyExpirePeriod: number;
   storyViewersExpirePeriod: number;
   storyChangelogUserId: string;
-  maxPinnedStoriesCount?: number;
-  groupTranscribeLevelMin?: number;
-  canLimitNewMessagesWithoutPremium?: boolean;
+  maxPinnedStoriesCount: number;
+  groupTranscribeLevelMin: number;
+  canLimitNewMessagesWithoutPremium: boolean;
   starsPaidMessagesAvailable?: boolean;
   starsPaidMessageCommissionPermille?: number;
   starsPaidMessageAmountMax?: number;
-  starsUsdWithdrawRateX1000?: number;
+  starsUsdWithdrawRateX1000: number;
   bandwidthPremiumNotifyPeriod?: number;
   bandwidthPremiumUploadSpeedup?: number;
   bandwidthPremiumDownloadSpeedup?: number;
   channelRestrictAdsLevelMin?: number;
   channelAutoTranslationLevelMin?: number;
+  channelLevelMax: number;
   paidReactionMaxAmount?: number;
   isChannelRevenueWithdrawalEnabled?: boolean;
   isStarsGiftEnabled?: boolean;
@@ -252,24 +250,24 @@ export interface ApiAppConfig {
   starsStargiftResaleAmountMin?: number;
   starsStargiftResaleAmountMax?: number;
   starsStargiftResaleCommissionPermille?: number;
-  starsSuggestedPostAmountMax?: number;
-  starsSuggestedPostAmountMin?: number;
-  starsSuggestedPostCommissionPermille?: number;
-  starsSuggestedPostAgeMin?: number;
-  starsSuggestedPostFutureMax?: number;
-  starsSuggestedPostFutureMin?: number;
-  tonSuggestedPostCommissionPermille?: number;
-  tonSuggestedPostAmountMax?: number;
-  tonSuggestedPostAmountMin?: number;
+  starsSuggestedPostAmountMax: number;
+  starsSuggestedPostAmountMin: number;
+  starsSuggestedPostCommissionPermille: number;
+  starsSuggestedPostAgeMin: number;
+  starsSuggestedPostFutureMax: number;
+  starsSuggestedPostFutureMin: number;
+  tonSuggestedPostCommissionPermille: number;
+  tonSuggestedPostAmountMax: number;
+  tonSuggestedPostAmountMin: number;
   tonStargiftResaleAmountMax?: number;
   tonStargiftResaleAmountMin?: number;
   tonStargiftResaleCommissionPermille?: number;
   tonUsdRate?: number;
-  tonTopupUrl?: string;
+  tonTopupUrl: string;
   pollMaxAnswers?: number;
-  todoItemsMax?: number;
-  todoTitleLengthMax?: number;
-  todoItemLengthMax?: number;
+  todoItemsMax: number;
+  todoTitleLengthMax: number;
+  todoItemLengthMax: number;
   ignoreRestrictionReasons?: string[];
   needAgeVideoVerification?: boolean;
   verifyAgeBotUsername?: string;
@@ -375,14 +373,16 @@ export type ApiLimitType =
   | 'chatlistJoined'
   | 'recommendedChannels'
   | 'savedDialogsPinned'
+  | 'maxReactions'
   | 'moreAccounts';
 
 export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
   'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs' | 'recommendedChannels' | 'moreAccounts'
+  | 'maxReactions'
 )>;
 
 export type ApiLimitTypeForPromo = Exclude<ApiLimitType,
-'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned'
+'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned' | 'maxReactions'
 >;
 
 export type ApiPeerNotifySettings = {

@@ -2517,7 +2517,7 @@ addActionHandler('toggleTopicPinned', (global, actions, payload): ActionReturnTy
     chatId, topicId, isPinned, tabId = getCurrentTabId(),
   } = payload;
 
-  const { topicsPinnedLimit } = global.appConfig || {};
+  const { topicsPinnedLimit } = global.appConfig;
   const chat = selectChat(global, chatId);
   const topics = selectTopics(global, chatId);
   if (!chat || !topics || !topicsPinnedLimit) return;
@@ -3375,7 +3375,7 @@ async function openChatByUsername<T extends GlobalState>(
     actions.openChat({ id: TMP_CHAT_ID, tabId });
   }
 
-  const starRefStartPrefixes = global.appConfig?.starRefStartPrefixes;
+  const starRefStartPrefixes = global.appConfig.starRefStartPrefixes;
   let referrer = ref;
   if (startParam && starRefStartPrefixes?.length) {
     const prefix = starRefStartPrefixes.find((p) => startParam.startsWith(p));

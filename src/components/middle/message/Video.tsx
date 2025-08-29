@@ -353,7 +353,7 @@ const Video = <T,>({
 
 export default memo(withGlobal((global): StateProps => {
   const appConfig = global.appConfig;
-  const needsAgeVerification = appConfig?.needAgeVideoVerification;
+  const needsAgeVerification = appConfig.needAgeVideoVerification;
 
   return {
     needsAgeVerification,

@@ -383,7 +383,7 @@ export default memo(withGlobal<OwnProps>(
     const { management } = selectTabState(global);
     const { progress } = management;
     const { invites } = management.byChatId[chatId] || {};
-    const minLevelToToggleAutoTranslation = global.appConfig?.channelAutoTranslationLevelMin;
+    const minLevelToToggleAutoTranslation = global.appConfig.channelAutoTranslationLevelMin;
     const hasAutoTranslation = chat?.hasAutoTranslation;
     const chatBoostLevel = chat?.level;
     const canToggleAutoTranslation = chatBoostLevel && minLevelToToggleAutoTranslation

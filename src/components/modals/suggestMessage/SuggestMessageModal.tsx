@@ -11,14 +11,8 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 
 import {
   STARS_CURRENCY_CODE,
-  STARS_SUGGESTED_POST_AGE_MIN,
-  STARS_SUGGESTED_POST_AMOUNT_MAX,
-  STARS_SUGGESTED_POST_AMOUNT_MIN,
-  STARS_SUGGESTED_POST_FUTURE_MAX,
-  STARS_SUGGESTED_POST_FUTURE_MIN,
   TON_CURRENCY_CODE,
-  TON_SUGGESTED_POST_AMOUNT_MAX,
-  TON_SUGGESTED_POST_AMOUNT_MIN } from '../../../config';
+} from '../../../config';
 import { selectIsMonoforumAdmin, selectPeer } from '../../../global/selectors';
 import { selectDraft } from '../../../global/selectors/messages';
 import buildClassName from '../../../util/buildClassName';
@@ -29,7 +23,9 @@ import {
   formatStarsAsText,
   formatTonAsIcon,
   formatTonAsText } from '../../../util/localization/format';
+import { getServerTime } from '../../../util/serverTime';
 
+import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
@@ -46,8 +42,6 @@ export type OwnProps = {
   modal: TabState['suggestMessageModal'];
 };
 
-import useFlag from '../../../hooks/useFlag';
-
 type StateProps = {
   starBalance?: ApiStarsAmount;
   tonBalance?: number;
@@ -62,6 +56,9 @@ type StateProps = {
   futureMax: number;
   isMonoforumAdmin?: boolean;
 };
+
+// Add 1 minute if time is less than server min, to allow user to send the message
+const FUTURE_TIME_ADJUSTMENT = 1 * 60;
 
 const SuggestMessageModal = ({
   modal,
@@ -174,7 +171,9 @@ const SuggestMessageModal = ({
 
     updateDraftSuggestedPostInfo({
       price: { currency: selectedCurrency, amount: neededAmount, nanos: 0 },
-      scheduleDate: scheduleDate ? scheduleDate / 1000 : undefined,
+      scheduleDate: scheduleDate
+        ? Math.max(scheduleDate / 1000, getServerTime() + futureMin + FUTURE_TIME_ADJUSTMENT)
+        : undefined,
     });
 
     closeSuggestMessageModal();
@@ -308,14 +307,14 @@ export default memo(withGlobal<OwnProps>(
     const currentDraft = modal ? selectDraft(global, modal.chatId, MAIN_THREAD_ID) : undefined;
 
     const { appConfig } = global;
-    const maxStarsAmount = appConfig?.starsSuggestedPostAmountMax || STARS_SUGGESTED_POST_AMOUNT_MAX;
-    const minStarsAmount = appConfig?.starsSuggestedPostAmountMin || STARS_SUGGESTED_POST_AMOUNT_MIN;
-    const ageMinSeconds = appConfig?.starsSuggestedPostAgeMin || STARS_SUGGESTED_POST_AGE_MIN;
-    const futureMin = appConfig?.starsSuggestedPostFutureMin || STARS_SUGGESTED_POST_FUTURE_MIN;
-    const futureMax = appConfig?.starsSuggestedPostFutureMax || STARS_SUGGESTED_POST_FUTURE_MAX;
+    const maxStarsAmount = appConfig.starsSuggestedPostAmountMax;
+    const minStarsAmount = appConfig.starsSuggestedPostAmountMin;
+    const ageMinSeconds = appConfig.starsSuggestedPostAgeMin;
+    const futureMin = appConfig.starsSuggestedPostFutureMin;
+    const futureMax = appConfig.starsSuggestedPostFutureMax;
 
-    const tonMaxAmount = appConfig?.tonSuggestedPostAmountMax || TON_SUGGESTED_POST_AMOUNT_MAX;
-    const tonMinAmount = appConfig?.tonSuggestedPostAmountMin || TON_SUGGESTED_POST_AMOUNT_MIN;
+    const tonMaxAmount = appConfig.tonSuggestedPostAmountMax;
+    const tonMinAmount = appConfig.tonSuggestedPostAmountMin;
 
     const isMonoforumAdmin = modal ? selectIsMonoforumAdmin(global, modal.chatId) : false;
 

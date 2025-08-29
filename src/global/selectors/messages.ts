@@ -23,7 +23,7 @@ import type {
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  ANONYMOUS_USER_ID, API_GENERAL_ID_LIMIT, GENERAL_TOPIC_ID, SERVICE_NOTIFICATIONS_USER_ID,
+  ANONYMOUS_USER_ID, GENERAL_TOPIC_ID, SERVICE_NOTIFICATIONS_USER_ID,
   SVG_EXTENSIONS, WEB_APP_PLATFORM,
 } from '../../config';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
@@ -34,6 +34,7 @@ import { getMessageKey, isLocalMessageId } from '../../util/keys/messageKey';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { getServerTime } from '../../util/serverTime';
 import { getDocumentExtension } from '../../components/common/helpers/documentInfo';
+import { API_GENERAL_ID_LIMIT } from '../../limits';
 import {
   canSendReaction,
   getAllowedAttachmentOptions,
@@ -77,13 +78,14 @@ import {
   selectIsChatWithSelf,
   selectRequestedChatTranslationLanguage,
 } from './chats';
+import { selectCurrentLimit } from './limits';
 import { selectPeer, selectPeerPaidMessagesStars } from './peers';
 import { selectPeerStory } from './stories';
 import { selectIsStickerFavorite } from './symbols';
 import { selectTabState } from './tabs';
 import { selectTopic } from './topics';
 import {
-  selectBot, selectIsCurrentUserPremium, selectUser, selectUserStatus,
+  selectBot, selectUser, selectUserStatus,
 } from './users';
 
 export function selectCurrentMessageList<T extends GlobalState>(
@@ -1349,9 +1351,7 @@ export function selectDefaultReaction<T extends GlobalState>(global: T, chatId: 
 }
 
 export function selectMaxUserReactions<T extends GlobalState>(global: T): number {
-  const isPremium = selectIsCurrentUserPremium(global);
-  const { maxUserReactionsPremium = 3, maxUserReactionsDefault = 1 } = global.appConfig || {};
-  return isPremium ? maxUserReactionsPremium : maxUserReactionsDefault;
+  return selectCurrentLimit(global, 'maxReactions');
 }
 
 // Slow, not to be used in `withGlobal`
@@ -1580,7 +1580,7 @@ export function selectActiveRestrictionReasons<T extends GlobalState>(
 ): ApiRestrictionReason[] {
   if (!restrictionReasons) return [];
 
-  const { ignoreRestrictionReasons } = global.appConfig || {};
+  const { ignoreRestrictionReasons } = global.appConfig;
 
   return restrictionReasons.filter((reason) => {
     const isForCurrentPlatform = reason.platform === 'all' || reason.platform === WEB_APP_PLATFORM;

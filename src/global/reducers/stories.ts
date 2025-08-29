@@ -107,7 +107,7 @@ export function addStoriesForPeer<T extends GlobalState>(
 
   if (selectIsChatWithSelf(global, peerId)
     || selectUser(global, peerId)?.isContact
-    || peerId === global.appConfig?.storyChangelogUserId) {
+    || peerId === global.appConfig.storyChangelogUserId) {
     global = updatePeerLastUpdatedAt(global, peerId);
     global = updateOrderedStoriesPeerIds(global, [peerId]);
   }

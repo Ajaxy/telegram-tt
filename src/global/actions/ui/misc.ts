@@ -877,7 +877,7 @@ addActionHandler('processPremiumFloodWait', (global, actions, payload): ActionRe
     bandwidthPremiumDownloadSpeedup,
     bandwidthPremiumUploadSpeedup,
     bandwidthPremiumNotifyPeriod,
-  } = global.appConfig || {};
+  } = global.appConfig;
   const { lastPremiumBandwithNotificationDate: lastNotifiedAt } = global.settings;
 
   if (!bandwidthPremiumDownloadSpeedup || !bandwidthPremiumUploadSpeedup || !bandwidthPremiumNotifyPeriod) {

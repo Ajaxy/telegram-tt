@@ -86,8 +86,8 @@ const AgeVerificationModal: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal((global): StateProps => {
   const appConfig = global.appConfig;
-  const verifyAgeBotUsername = appConfig?.verifyAgeBotUsername;
-  const verifyAgeMin = appConfig?.verifyAgeMin || VERIFY_AGE_MIN_DEFAULT;
+  const verifyAgeBotUsername = appConfig.verifyAgeBotUsername;
+  const verifyAgeMin = appConfig.verifyAgeMin || VERIFY_AGE_MIN_DEFAULT;
 
   return {
     verifyAgeBotUsername,

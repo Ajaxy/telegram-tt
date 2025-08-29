@@ -301,7 +301,7 @@ export default memo(withGlobal(
 
     const statistics = tabState.statistics.monetization;
 
-    const isChannelRevenueWithdrawalEnabled = global.appConfig?.isChannelRevenueWithdrawalEnabled;
+    const isChannelRevenueWithdrawalEnabled = global.appConfig.isChannelRevenueWithdrawalEnabled;
 
     return {
       chatId: chatId!,

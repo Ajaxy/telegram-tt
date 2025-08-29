@@ -10,8 +10,6 @@ import {
   PAID_MESSAGES_PURPOSE,
   STARS_CURRENCY_CODE,
   TON_CURRENCY_CODE,
-  TON_TOPUP_URL_DEFAULT,
-  TON_USD_RATE_DEFAULT,
 } from '../../../config';
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
@@ -298,7 +296,7 @@ const StarsBalanceModal = ({
   });
 
   const handleTonTopUp = useLastCallback(() => {
-    openUrl({ url: tonTopupUrl, shouldSkipModal: true });
+    openUrl({ url: tonTopupUrl });
   });
 
   return (
@@ -419,8 +417,8 @@ export default memo(withGlobal<OwnProps>(
       starsBalanceState: global.stars,
       tonBalanceState: global.ton,
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
-      tonUsdRate: global.appConfig?.tonUsdRate || TON_USD_RATE_DEFAULT,
-      tonTopupUrl: global.appConfig?.tonTopupUrl || TON_TOPUP_URL_DEFAULT,
+      tonUsdRate: global.appConfig.tonUsdRate,
+      tonTopupUrl: global.appConfig.tonTopupUrl,
       animationLevel: selectSharedSettings(global).animationLevel,
     };
   },

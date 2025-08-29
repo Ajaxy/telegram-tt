@@ -176,21 +176,21 @@ const GiftResalePriceComposerModal = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const configPermille = global.appConfig?.starsStargiftResaleCommissionPermille;
+    const configPermille = global.appConfig.starsStargiftResaleCommissionPermille;
     const starsStargiftResaleCommissionPermille = configPermille ? (configPermille / 1000) : undefined;
-    const starsStargiftResaleAmountMin = global.appConfig?.starsStargiftResaleAmountMin || 0;
-    const starsStargiftResaleAmountMax = global.appConfig?.starsStargiftResaleAmountMax;
+    const starsStargiftResaleAmountMin = global.appConfig.starsStargiftResaleAmountMin || 0;
+    const starsStargiftResaleAmountMax = global.appConfig.starsStargiftResaleAmountMax;
 
-    const starsUsdWithdrawRateX1000 = global.appConfig?.starsUsdWithdrawRateX1000;
+    const starsUsdWithdrawRateX1000 = global.appConfig.starsUsdWithdrawRateX1000;
     const starsUsdWithdrawRate = starsUsdWithdrawRateX1000 ? starsUsdWithdrawRateX1000 / 1000 : 1;
 
-    const tonConfigPermille = global.appConfig?.tonStargiftResaleCommissionPermille;
+    const tonConfigPermille = global.appConfig.tonStargiftResaleCommissionPermille;
     const tonStargiftResaleCommissionPermille = tonConfigPermille ? (tonConfigPermille / 1000) : 0;
-    const tonStargiftResaleAmountMin = convertTonFromNanos(global.appConfig?.tonStargiftResaleAmountMin || 0);
-    const maxTonFromConfig = global.appConfig?.tonStargiftResaleAmountMax;
+    const tonStargiftResaleAmountMin = convertTonFromNanos(global.appConfig.tonStargiftResaleAmountMin || 0);
+    const maxTonFromConfig = global.appConfig.tonStargiftResaleAmountMax;
     const tonStargiftResaleAmountMax = maxTonFromConfig && convertTonFromNanos(maxTonFromConfig);
 
-    const tonUsdRate = global.appConfig?.tonUsdRate;
+    const tonUsdRate = global.appConfig.tonUsdRate;
 
     return {
       starsStargiftResaleCommissionPermille,

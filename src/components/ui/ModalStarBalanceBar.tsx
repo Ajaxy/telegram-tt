@@ -5,9 +5,6 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiStarsAmount, ApiTonAmount } from '../../api/types';
 
-import {
-  TON_USD_RATE_DEFAULT,
-} from '../../config';
 import { formatStarsAmount } from '../../global/helpers/payments';
 import buildClassName from '../../util/buildClassName';
 import { convertTonFromNanos, convertTonToUsd, formatCurrencyAsString } from '../../util/formatCurrency';
@@ -30,7 +27,7 @@ export type OwnProps = {
 export type StateProps = {
   starBalance?: ApiStarsAmount;
   tonBalance?: ApiTonAmount;
-  tonUsdRate: number;
+  tonUsdRate?: number;
 };
 
 function ModalStarBalanceBar({
@@ -38,8 +35,8 @@ function ModalStarBalanceBar({
   tonBalance,
   tonUsdRate,
   isModalOpen,
-  onCloseAnimationEnd,
   currency,
+  onCloseAnimationEnd,
 }: StateProps & OwnProps) {
   const {
     openStarsBalanceModal,
@@ -94,7 +91,7 @@ function ModalStarBalanceBar({
         )}
       </div>
       <div>
-        {isTonMode && (
+        {isTonMode && Boolean(tonUsdRate) && (
           <div className={styles.tonInUsdDescription} style="color: var(--color-text-secondary)">
             {`≈ ${formatCurrencyAsString(
               convertTonToUsd((currentBalance as ApiTonAmount).amount, tonUsdRate, true),
@@ -123,7 +120,7 @@ export default memo(withGlobal(
     return {
       starBalance: stars?.balance,
       tonBalance: ton?.balance,
-      tonUsdRate: global.appConfig?.tonUsdRate || TON_USD_RATE_DEFAULT,
+      tonUsdRate: global.appConfig.tonUsdRate,
     };
   },
 )(ModalStarBalanceBar));

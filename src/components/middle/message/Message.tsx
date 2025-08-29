@@ -46,7 +46,7 @@ import type { OnIntersectPinnedMessage } from '../hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { AudioOrigin } from '../../../types';
 
-import { EMOJI_STATUS_LOOP_LIMIT, MESSAGE_APPEARANCE_DELAY, STARS_SUGGESTED_POST_FUTURE_MIN } from '../../../config';
+import { EMOJI_STATUS_LOOP_LIMIT, MESSAGE_APPEARANCE_DELAY } from '../../../config';
 import {
   areReactionsEmpty,
   getIsDownloading,
@@ -1995,7 +1995,7 @@ export default memo(withGlobal<OwnProps>(
       ? (chatFullInfo?.boostsApplied ?? message.senderBoosts) : message.senderBoosts;
 
     const chatLevel = chat?.boostLevel || 0;
-    const transcribeMinLevel = global.appConfig?.groupTranscribeLevelMin;
+    const transcribeMinLevel = global.appConfig.groupTranscribeLevelMin;
     const canTranscribeVoice = isPremium || Boolean(transcribeMinLevel && chatLevel >= transcribeMinLevel);
 
     const viaBusinessBot = viaBusinessBotId ? selectUser(global, viaBusinessBotId) : undefined;
@@ -2009,7 +2009,7 @@ export default memo(withGlobal<OwnProps>(
     const lastPlaybackTimestamp = selectMessageLastPlaybackTimestamp(global, chatId, message.id);
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
-    const minFutureTime = global.appConfig?.starsSuggestedPostFutureMin || STARS_SUGGESTED_POST_FUTURE_MIN;
+    const minFutureTime = global.appConfig.starsSuggestedPostFutureMin;
 
     const isMediaNsfw = selectIsMediaNsfw(global, message);
     const isReplyMediaNsfw = replyMessage && selectIsMediaNsfw(global, replyMessage);

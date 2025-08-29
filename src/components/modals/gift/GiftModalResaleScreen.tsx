@@ -10,10 +10,10 @@ import type {
 } from '../../../api/types';
 import type { ResaleGiftsFilterOptions } from '../../../types';
 
-import { RESALE_GIFTS_LIMIT } from '../../../config';
 import { selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { RESALE_GIFTS_LIMIT } from '../../../limits';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';

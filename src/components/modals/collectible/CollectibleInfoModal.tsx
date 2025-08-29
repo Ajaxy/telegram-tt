@@ -63,7 +63,6 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
   const handleOpenUrl = useLastCallback(() => {
     openUrl({
       url: modal!.url,
-      shouldSkipModal: true,
     });
     handleClose();
   });

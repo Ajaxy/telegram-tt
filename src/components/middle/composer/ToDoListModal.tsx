@@ -9,11 +9,6 @@ import type { ApiNewMediaTodo } from '../../../api/types';
 import type { ApiMessage } from '../../../api/types';
 import type { TabState } from '../../../global/types/tabState';
 
-import {
-  TODO_ITEM_LENGTH_LIMIT,
-  TODO_ITEMS_LIMIT,
-  TODO_TITLE_LENGTH_LIMIT,
-} from '../../../config';
 import { requestMeasure, requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import { selectChatMessage } from '../../../global/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
@@ -40,9 +35,9 @@ export type OwnProps = {
 
 export type StateProps = {
   editingMessage?: ApiMessage;
-  maxItemsCount?: number;
-  maxTitleLength?: number;
-  maxItemLength?: number;
+  maxItemsCount: number;
+  maxTitleLength: number;
+  maxItemLength: number;
 };
 
 type Item = {
@@ -56,9 +51,9 @@ const MAX_OPTION_LENGTH = 100;
 
 const ToDoListModal = ({
   modal,
-  maxItemsCount = TODO_ITEMS_LIMIT,
-  maxTitleLength = TODO_TITLE_LENGTH_LIMIT,
-  maxItemLength = TODO_ITEM_LENGTH_LIMIT,
+  maxItemsCount,
+  maxTitleLength,
+  maxItemLength,
   editingMessage,
   onSend,
   onClear,
@@ -407,9 +402,9 @@ export default memo(withGlobal<OwnProps>(
     const editingMessage = modal?.messageId ? selectChatMessage(global, modal.chatId, modal.messageId) : undefined;
     return {
       editingMessage,
-      maxItemsCount: appConfig?.todoItemsMax,
-      maxTitleLength: appConfig?.todoTitleLengthMax,
-      maxItemLength: appConfig?.todoItemLengthMax,
+      maxItemsCount: appConfig.todoItemsMax,
+      maxTitleLength: appConfig.todoTitleLengthMax,
+      maxItemLength: appConfig.todoItemLengthMax,
     };
   },
 )(ToDoListModal));
