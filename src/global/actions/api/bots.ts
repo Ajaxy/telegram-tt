@@ -21,7 +21,6 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getTranslationFn } from '../../../util/localization';
 import { formatStarsAsText } from '../../../util/localization/format';
 import { oldTranslate } from '../../../util/oldLangProvider';
-import PopupManager from '../../../util/PopupManager';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { debounce } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
@@ -73,7 +72,6 @@ import { getPeerStarsForMessage } from './messages';
 
 import { getIsWebAppsFullscreenSupported } from '../../../hooks/useAppLayout';
 
-const GAMEE_URL = 'https://prizes.gamee.com/';
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 const runDebouncedForSearch = debounce((cb) => cb(), 500, false);
 let botFatherId: string | null;
@@ -1287,8 +1285,6 @@ async function sendBotCommand(
   });
 }
 
-let gameePopups: PopupManager | undefined;
-
 async function answerCallbackButton<T extends GlobalState>(
   global: T,
   actions: RequiredGlobalActions, chat: ApiChat, messageId: number, data?: string, isGame = false,
@@ -1297,16 +1293,6 @@ async function answerCallbackButton<T extends GlobalState>(
   const {
     showDialog, showNotification, openUrl, openGame,
   } = actions;
-
-  if (isGame) {
-    if (!gameePopups) {
-      gameePopups = new PopupManager('popup,width=800,height=600', () => {
-        showNotification({ message: 'Allow browser to open popup window', tabId });
-      });
-    }
-
-    gameePopups.preOpenIfNeeded();
-  }
 
   const result = await callApi('answerCallbackButton', {
     chatId: chat.id,
@@ -1327,15 +1313,9 @@ async function answerCallbackButton<T extends GlobalState>(
     showNotification({ message, tabId });
   } else if (url) {
     if (isGame) {
-      // Workaround for Gamee embedding bug
-      if (url.includes(GAMEE_URL)) {
-        gameePopups!.open(url);
-      } else {
-        gameePopups!.cancelPreOpen();
-        openGame({
-          url, chatId: chat.id, messageId, tabId,
-        });
-      }
+      openGame({
+        url, chatId: chat.id, messageId, tabId,
+      });
     } else {
       openUrl({ url, tabId });
     }
