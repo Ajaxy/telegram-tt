@@ -586,7 +586,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     const isSpinner = noContent && !noSpinner;
 
     return (
-      <Transition activeKey={isSpinner ? 0 : 1} name="fade">
+      <Transition activeKey={isSpinner ? 0 : 1} name="fade" shouldCleanup>
         {renderSpinnerOrContent(noContent, noSpinner)}
       </Transition>
     );
