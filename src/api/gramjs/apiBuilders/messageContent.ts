@@ -454,6 +454,7 @@ export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | u
         mediaSize = {
           width,
           height,
+          fromDocumentAttribute: true,
         };
       }
     } else if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {

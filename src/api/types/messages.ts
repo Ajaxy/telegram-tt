@@ -153,7 +153,7 @@ export interface ApiDocument {
   previewPhotoSizes?: ApiPhotoSize[];
   previewBlobUrl?: string;
   innerMediaType?: 'photo' | 'video';
-  mediaSize?: ApiDimensions;
+  mediaSize?: ApiDimensions & { fromDocumentAttribute?: boolean };
 }
 
 export interface ApiContact {

@@ -119,7 +119,9 @@ const Document = ({
   const localBlobUrl = hasPreview ? document.previewBlobUrl : undefined;
   const previewData = useMedia(getDocumentMediaHash(document, 'pictogram'), !isIntersecting);
 
-  const withMediaViewer = onMediaClick && document.innerMediaType;
+  const shouldForceDownload = document.innerMediaType === 'photo' && !document.mediaSize?.fromDocumentAttribute;
+
+  const withMediaViewer = onMediaClick && document.innerMediaType && !shouldForceDownload;
 
   const handleDownload = useLastCallback(() => {
     downloadMedia({ media: document, originMessage: message });
