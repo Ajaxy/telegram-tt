@@ -35,7 +35,7 @@ const ChatTags = ({
     const hasColor = folder?.color !== undefined && folder.color !== -1;
 
     return isFolder && !isActive && !isAll && hasColor;
-  }) || [], [orderedIds, folderIds, activeFolderId, chatFoldersById]);
+  }), [orderedIds, folderIds, activeFolderId, chatFoldersById]);
 
   const visibleFolderIds = orderedFolderIds.slice(0, MAX_VISIBLE_TAGS);
   const remainingCount = orderedFolderIds.length - visibleFolderIds.length;
