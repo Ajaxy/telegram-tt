@@ -118,6 +118,10 @@
     }
   }
 
+  .ListItem-button {
+    height: 72px;
+  }
+
   .ripple-container {
     z-index: var(--z-chat-ripple);
   }
@@ -466,7 +470,7 @@
 
       .ChatTags {
         color: var(--color-chat-active);
-        background-color: #fff;
+        background-color: #ffffffab;
       }
     }
   }
