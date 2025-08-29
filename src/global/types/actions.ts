@@ -334,7 +334,7 @@ export interface ActionPayloads {
   deleteChatMember: {
     chatId: string;
     userId: string;
-  };
+  } & WithTabId;
   openPreviousChat: WithTabId | undefined;
   editChatFolders: {
     chatId: string;

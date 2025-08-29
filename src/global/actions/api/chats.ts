@@ -1857,7 +1857,11 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
 
   if (!chat) return;
 
-  await callApi('updateChatMemberBannedRights', { chat, user, bannedRights });
+  const result = await callApi('updateChatMemberBannedRights', { chat, user, bannedRights });
+
+  if (!result) {
+    return;
+  }
 
   global = getGlobal();
 
@@ -1886,6 +1890,10 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
       kickedMembers: kickedMembers.filter((m) => m.userId !== userId),
     }),
   });
+  if (isBanned) {
+    global = updateChat(global, chat.id, { membersCount: Math.max(0, (chat.membersCount || 0) - 1) });
+  }
+
   setGlobal(global);
 });
 
@@ -2181,11 +2189,42 @@ addActionHandler('addChatMembers', async (global, actions, payload): Promise<voi
 });
 
 addActionHandler('deleteChatMember', async (global, actions, payload): Promise<void> => {
-  const { chatId, userId } = payload;
+  const { chatId, userId, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
   const user = selectUser(global, userId);
 
   if (!chat || !user) {
+    return;
+  }
+
+  if (isChatSuperGroup(chat) || isChatChannel(chat)) {
+    actions.updateChatMemberBannedRights({
+      chatId,
+      userId,
+      bannedRights: {
+        viewMessages: true,
+        sendMessages: true,
+        sendMedia: true,
+        sendStickers: true,
+        sendGifs: true,
+        sendGames: true,
+        sendInline: true,
+        embedLinks: true,
+        sendPolls: true,
+        changeInfo: true,
+        inviteUsers: true,
+        pinMessages: true,
+        manageTopics: true,
+        sendPhotos: true,
+        sendVideos: true,
+        sendRoundvideos: true,
+        sendAudios: true,
+        sendVoices: true,
+        sendDocs: true,
+        sendPlain: true,
+      },
+      tabId,
+    });
     return;
   }
 

@@ -1564,42 +1564,12 @@ export async function addChatMembers(chat: ApiChat, users: ApiUser[]) {
 }
 
 export function deleteChatMember(chat: ApiChat, user: ApiUser) {
-  if (chat.type === 'chatTypeChannel' || chat.type === 'chatTypeSuperGroup') {
-    return updateChatMemberBannedRights({
-      chat,
-      user,
-      bannedRights: {
-        viewMessages: true,
-        sendMessages: true,
-        sendMedia: true,
-        sendStickers: true,
-        sendGifs: true,
-        sendGames: true,
-        sendInline: true,
-        embedLinks: true,
-        sendPolls: true,
-        changeInfo: true,
-        inviteUsers: true,
-        pinMessages: true,
-        manageTopics: true,
-        sendPhotos: true,
-        sendVideos: true,
-        sendRoundvideos: true,
-        sendAudios: true,
-        sendVoices: true,
-        sendDocs: true,
-        sendPlain: true,
-      },
-      untilDate: MAX_INT_32,
-    });
-  } else {
-    return invokeRequest(new GramJs.messages.DeleteChatUser({
-      chatId: buildInputChat(chat.id),
-      userId: buildInputUser(user.id, user.accessHash),
-    }), {
-      shouldReturnTrue: true,
-    });
-  }
+  return invokeRequest(new GramJs.messages.DeleteChatUser({
+    chatId: buildInputChat(chat.id),
+    userId: buildInputUser(user.id, user.accessHash),
+  }), {
+    shouldReturnTrue: true,
+  });
 }
 
 export function toggleJoinToSend(chat: ApiChat, isEnabled: boolean) {
