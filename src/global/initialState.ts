@@ -88,7 +88,7 @@ export const INITIAL_SHARED_STATE: SharedState = {
     isConnectionStatusMinimized: true,
     canDisplayChatInTitle: true,
     shouldAllowHttpTransport: true,
-    shouldWarnAboutSvg: true,
+    shouldWarnAboutFiles: true,
   },
   isInitial: true,
 };

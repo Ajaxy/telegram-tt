@@ -27,6 +27,6 @@ export interface SharedSettings {
   shouldAllowHttpTransport?: boolean;
   shouldCollectDebugLogs?: boolean;
   shouldDebugExportedSenders?: boolean;
-  shouldWarnAboutSvg?: boolean;
+  shouldWarnAboutFiles?: boolean;
   shouldSkipWebAppCloseConfirmation: boolean;
 }

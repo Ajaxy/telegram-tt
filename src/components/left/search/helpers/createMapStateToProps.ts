@@ -18,7 +18,7 @@ export type StateProps = {
   searchChatId?: string;
   activeDownloads: TabState['activeDownloads'];
   isChatProtected?: boolean;
-  shouldWarnAboutSvg?: boolean;
+  shouldWarnAboutFiles?: boolean;
 };
 
 export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
@@ -30,7 +30,7 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
       fetchingStatus, resultsByType, chatId,
     } = tabState.globalSearch;
 
-    const { shouldWarnAboutSvg } = selectSharedSettings(global);
+    const { shouldWarnAboutFiles } = selectSharedSettings(global);
 
     // One component is used for two different types of results.
     // The differences between them are only in the isVoice property.
@@ -53,7 +53,7 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
       searchChatId: chatId,
       activeDownloads,
       isChatProtected: chatId ? selectChat(global, chatId)?.isProtected : undefined,
-      shouldWarnAboutSvg,
+      shouldWarnAboutFiles,
     };
   };
 }

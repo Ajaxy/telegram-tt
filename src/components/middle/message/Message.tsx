@@ -310,7 +310,7 @@ type StateProps = {
   webPageStory?: ApiTypeStory;
   isConnected: boolean;
   isLoadingComments?: boolean;
-  shouldWarnAboutSvg?: boolean;
+  shouldWarnAboutFiles?: boolean;
   senderBoosts?: number;
   tags?: Record<ApiReactionKey, ApiSavedReactionTag>;
   canTranscribeVoice?: boolean;
@@ -438,7 +438,7 @@ const Message: FC<OwnProps & StateProps> = ({
   webPageStory,
   isConnected,
   getIsMessageListReady,
-  shouldWarnAboutSvg,
+  shouldWarnAboutFiles,
   senderBoosts,
   tags,
   canTranscribeVoice,
@@ -1261,7 +1261,7 @@ const Message: FC<OwnProps & StateProps> = ({
             onMediaClick={handleDocumentClick}
             onCancelUpload={handleCancelUpload}
             isDownloading={isDownloading}
-            shouldWarnAboutSvg={shouldWarnAboutSvg}
+            shouldWarnAboutFiles={shouldWarnAboutFiles}
           />
         )}
         {storyData && !isStoryMention && (
@@ -1430,7 +1430,7 @@ const Message: FC<OwnProps & StateProps> = ({
         isConnected={isConnected}
         lastPlaybackTimestamp={lastPlaybackTimestamp}
         backgroundEmojiId={messageColorPeer?.color?.backgroundEmojiId}
-        shouldWarnAboutSvg={shouldWarnAboutSvg}
+        shouldWarnAboutFiles={shouldWarnAboutFiles}
         autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
         onAudioPlay={handleAudioPlay}
         onMediaClick={handleMediaClick}
@@ -1884,7 +1884,7 @@ export default memo(withGlobal<OwnProps>(
 
     const webPage = selectFullWebPageFromMessage(global, message);
 
-    const { shouldWarnAboutSvg } = selectSharedSettings(global);
+    const { shouldWarnAboutFiles } = selectSharedSettings(global);
     const isChatWithUser = isUserId(chatId);
 
     const chat = selectChat(global, chatId);
@@ -2085,7 +2085,7 @@ export default memo(withGlobal<OwnProps>(
       isLoadingComments: repliesThreadInfo?.isCommentsInfo
         && loadingThread?.loadingChatId === repliesThreadInfo?.originChannelId
         && loadingThread?.loadingMessageId === repliesThreadInfo?.originMessageId,
-      shouldWarnAboutSvg,
+      shouldWarnAboutFiles,
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
       ...(isFocused && {

@@ -330,7 +330,7 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
       shouldAllowHttpTransport: untypedCached.settings.byKey.shouldAllowHttpTransport,
       shouldCollectDebugLogs: untypedCached.settings.byKey.shouldCollectDebugLogs,
       shouldDebugExportedSenders: untypedCached.settings.byKey.shouldDebugExportedSenders,
-      shouldWarnAboutSvg: untypedCached.settings.byKey.shouldWarnAboutSvg,
+      shouldWarnAboutFiles: untypedCached.settings.byKey.shouldWarnAboutFiles,
     };
   }
 
@@ -350,6 +350,11 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
 
   if (!cached.appConfig) {
     cached.appConfig = initialState.appConfig;
+  }
+
+  if (untypedCached.sharedState?.settings?.shouldWarnAboutSvg) {
+    cached.sharedState.settings.shouldWarnAboutFiles = true;
+    untypedCached.sharedState.settings.shouldWarnAboutSvg = undefined;
   }
 }
 

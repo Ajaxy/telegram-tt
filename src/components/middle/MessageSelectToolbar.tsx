@@ -11,8 +11,8 @@ import {
   selectCanDownloadSelectedMessages,
   selectCanForwardMessages,
   selectCanReportSelectedMessages, selectCurrentChat,
-  selectCurrentMessageList, selectHasProtectedMessage,
-  selectHasSvg,
+  selectCurrentMessageList, selectHasIpRevealingMedia,
+  selectHasProtectedMessage,
   selectSelectedMessagesCount,
   selectTabState,
 } from '../../global/selectors';
@@ -50,8 +50,8 @@ type StateProps = {
   hasProtectedMessage?: boolean;
   isAnyModalOpen?: boolean;
   selectedMessageIds?: number[];
-  shouldWarnAboutSvg?: boolean;
-  hasSvgs?: boolean;
+  shouldWarnAboutFiles?: boolean;
+  hasIpRevealingMedia?: boolean;
 };
 
 const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
@@ -68,8 +68,8 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   hasProtectedMessage,
   isAnyModalOpen,
   selectedMessageIds,
-  shouldWarnAboutSvg,
-  hasSvgs,
+  shouldWarnAboutFiles,
+  hasIpRevealingMedia,
 }) => {
   const {
     exitMessageSelectMode,
@@ -85,8 +85,8 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 
   useCopySelectedMessages(isActive);
 
-  const [isSvgDialogOpen, openSvgDialog, closeSvgDialog] = useFlag();
-  const [shouldNotWarnAboutSvg, setShouldNotWarnAboutSvg] = useState(false);
+  const [isFileIpDialogOpen, openFileIpDialog, closeFileIpDialog] = useFlag();
+  const [shouldNotWarnAboutFiles, setShouldNotWarnAboutFiles] = useState(false);
 
   const handleExitMessageSelectMode = useLastCallback(() => {
     exitMessageSelectMode();
@@ -128,17 +128,17 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   });
 
   const handleMessageDownload = useLastCallback(() => {
-    if (shouldWarnAboutSvg && hasSvgs) {
-      openSvgDialog();
+    if (shouldWarnAboutFiles && hasIpRevealingMedia) {
+      openFileIpDialog();
       return;
     }
 
     handleDownload();
   });
 
-  const handleSvgConfirm = useLastCallback(() => {
-    setSharedSettingOption({ shouldWarnAboutSvg: !shouldNotWarnAboutSvg });
-    closeSvgDialog();
+  const handleFileIpConfirm = useLastCallback(() => {
+    setSharedSettingOption({ shouldWarnAboutFiles: !shouldNotWarnAboutFiles });
+    closeFileIpDialog();
     handleDownload();
   });
 
@@ -223,16 +223,16 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
         </div>
       </div>
       <ConfirmDialog
-        isOpen={isSvgDialogOpen}
-        onClose={closeSvgDialog}
-        confirmHandler={handleSvgConfirm}
+        isOpen={isFileIpDialogOpen}
+        onClose={closeFileIpDialog}
+        confirmHandler={handleFileIpConfirm}
       >
         {lang('lng_launch_svg_warning')}
         <Checkbox
           className="dialog-checkbox"
-          checked={shouldNotWarnAboutSvg}
+          checked={shouldNotWarnAboutFiles}
           label={lang('lng_launch_exe_dont_ask')}
-          onCheck={setShouldNotWarnAboutSvg}
+          onCheck={setShouldNotWarnAboutFiles}
         />
       </ConfirmDialog>
     </>
@@ -242,7 +242,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const tabState = selectTabState(global);
-    const { shouldWarnAboutSvg } = selectSharedSettings(global);
+    const { shouldWarnAboutFiles } = selectSharedSettings(global);
     const chat = selectCurrentChat(global);
 
     const { type: messageListType, chatId } = selectCurrentMessageList(global) || {};
@@ -253,7 +253,8 @@ export default memo(withGlobal<OwnProps>(
     const { messageIds: selectedMessageIds } = tabState.selectedMessages || {};
     const hasProtectedMessage = chatId ? selectHasProtectedMessage(global, chatId, selectedMessageIds) : false;
     const canForward = !isSchedule && chatId ? selectCanForwardMessages(global, chatId, selectedMessageIds) : false;
-    const hasSvgs = selectedMessageIds && chatId ? selectHasSvg(global, chatId, selectedMessageIds) : false;
+    const hasIpRevealingMedia = selectedMessageIds && chatId
+      ? selectHasIpRevealingMedia(global, chatId, selectedMessageIds) : false;
     const isShareMessageModalOpen = tabState.isShareMessageModalShown;
     const isAnyModalOpen = Boolean(isShareMessageModalOpen || tabState.requestedDraft
       || tabState.requestedAttachBotInChat || tabState.requestedAttachBotInstall || tabState.reportModal
@@ -270,8 +271,8 @@ export default memo(withGlobal<OwnProps>(
       selectedMessageIds,
       hasProtectedMessage,
       isAnyModalOpen,
-      shouldWarnAboutSvg,
-      hasSvgs,
+      shouldWarnAboutFiles,
+      hasIpRevealingMedia,
     };
   },
 )(MessageSelectToolbar));

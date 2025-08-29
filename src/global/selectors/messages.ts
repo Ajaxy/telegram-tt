@@ -24,13 +24,14 @@ import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
   ANONYMOUS_USER_ID, GENERAL_TOPIC_ID, SERVICE_NOTIFICATIONS_USER_ID,
-  SVG_EXTENSIONS, WEB_APP_PLATFORM,
+  WEB_APP_PLATFORM,
 } from '../../config';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { findLast } from '../../util/iteratees';
 import { getMessageKey, isLocalMessageId } from '../../util/keys/messageKey';
+import { isIpRevealingMedia } from '../../util/media/ipRevealingMedia';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { getServerTime } from '../../util/serverTime';
 import { getDocumentExtension } from '../../components/common/helpers/documentInfo';
@@ -1305,7 +1306,7 @@ export function selectCanForwardMessages<T extends GlobalState>(global: T, chatI
       && (message.isForwardingAllowed || isServiceNotificationMessage(message)));
 }
 
-export function selectHasSvg<T extends GlobalState>(global: T, chatId: string, messageIds: number[]) {
+export function selectHasIpRevealingMedia<T extends GlobalState>(global: T, chatId: string, messageIds: number[]) {
   const messages = selectChatMessages(global, chatId);
 
   return messageIds
@@ -1319,7 +1320,7 @@ export function selectHasSvg<T extends GlobalState>(global: T, chatId: string, m
       const extension = getDocumentExtension(document);
       if (!extension) return false;
 
-      return SVG_EXTENSIONS.has(extension);
+      return isIpRevealingMedia({ mimeType: document.mimeType, extension });
     });
 }
 

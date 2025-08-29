@@ -146,7 +146,7 @@ type StateProps = {
   isChatProtected?: boolean;
   nextProfileTab?: ProfileTabType;
   animationLevel: AnimationLevel;
-  shouldWarnAboutSvg?: boolean;
+  shouldWarnAboutFiles?: boolean;
   similarChannels?: string[];
   similarBots?: string[];
   botPreviewMedia?: ApiBotPreviewMedia[];
@@ -212,7 +212,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   isChatProtected,
   nextProfileTab,
   animationLevel,
-  shouldWarnAboutSvg,
+  shouldWarnAboutFiles,
   similarChannels,
   similarBots,
   isCurrentUserPremium,
@@ -693,7 +693,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               observeIntersection={observeIntersectionForMedia}
               onDateClick={handleMessageFocus}
               message={messagesById[id]}
-              shouldWarnAboutSvg={shouldWarnAboutSvg}
+              shouldWarnAboutFiles={shouldWarnAboutFiles}
             />
           ))
         ) : resultType === 'links' ? (
@@ -955,7 +955,7 @@ export default memo(withGlobal<OwnProps>(
     const userFullInfo = selectUserFullInfo(global, chatId);
     const messagesById = selectChatMessages(global, chatId);
 
-    const { animationLevel, shouldWarnAboutSvg } = selectSharedSettings(global);
+    const { animationLevel, shouldWarnAboutFiles } = selectSharedSettings(global);
 
     const { currentType: mediaSearchType, resultsByType } = selectCurrentSharedMediaSearch(global) || {};
     const { foundIds } = (resultsByType && mediaSearchType && resultsByType[mediaSearchType]) || {};
@@ -1040,7 +1040,7 @@ export default memo(withGlobal<OwnProps>(
       nextProfileTab: selectTabState(global).nextProfileTab,
       forceScrollProfileTab: selectTabState(global).forceScrollProfileTab,
       animationLevel,
-      shouldWarnAboutSvg,
+      shouldWarnAboutFiles,
       similarChannels: similarChannelIds,
       similarBots: similarBotsIds,
       botPreviewMedia,

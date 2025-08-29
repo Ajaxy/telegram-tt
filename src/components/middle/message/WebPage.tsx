@@ -55,7 +55,7 @@ type OwnProps = {
   backgroundEmojiId?: string;
   theme: ThemeKey;
   story?: ApiTypeStory;
-  shouldWarnAboutSvg?: boolean;
+  shouldWarnAboutFiles?: boolean;
   autoLoadFileMaxSizeMb?: number;
   lastPlaybackTimestamp?: number;
   observeIntersectionForLoading?: ObserveFn;
@@ -84,7 +84,7 @@ const WebPage: FC<OwnProps & StateProps> = ({
   story,
   theme,
   backgroundEmojiId,
-  shouldWarnAboutSvg,
+  shouldWarnAboutFiles,
   autoLoadFileMaxSizeMb,
   lastPlaybackTimestamp,
   observeIntersectionForLoading,
@@ -286,7 +286,7 @@ const WebPage: FC<OwnProps & StateProps> = ({
             onMediaClick={onDocumentClick}
             onCancelUpload={onCancelMediaTransfer}
             isDownloading={isDownloading}
-            shouldWarnAboutSvg={shouldWarnAboutSvg}
+            shouldWarnAboutFiles={shouldWarnAboutFiles}
           />
         )}
         {stickers && (
