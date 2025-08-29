@@ -508,7 +508,7 @@
       width: 2rem;
       max-width: clamp(0px, 12rem, 25vw);
       height: 2rem;
-      margin: 0 0.5rem 0.75rem;
+      margin: 0 0.5rem 0.5rem;
       padding: 0 var(--padding-sides);
       border-radius: 0.5rem;
 
@@ -522,10 +522,6 @@
       &.open {
         width: calc(var(--bot-menu-text-width) + var(--padding-sides) * 2 + var(--icon-gap) + var(--icon-width));
         border-radius: 1rem;
-      }
-
-      @media (max-width: 600px) {
-        margin-bottom: 0.4375rem;
       }
     }
 
@@ -616,15 +612,9 @@
 
       animation: recording-blink-like-macos 1.5s infinite;
     }
-
-    @media (max-width: 600px) {
-      height: 2.875rem;
-      line-height: 2.875rem;
-    }
   }
 
   @media (max-width: 600px) {
-    --action-button-size: 2.875rem;
     --action-button-compact-fix: -0.6875rem;
   }
 }

@@ -156,18 +156,10 @@
   &.one-row {
     align-items: center;
     height: 4rem;
-
-    @media (max-width: 600px) {
-      height: 3.5rem;
-    }
   }
 
   &.two-rows {
-    height: 7.75rem;
-
-    @media (max-width: 600px) {
-      height: 6.9375rem;
-    }
+    height: 8rem;
   }
 
   &.left-to-right {

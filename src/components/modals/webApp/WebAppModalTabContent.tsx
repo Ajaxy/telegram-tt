@@ -568,9 +568,10 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_open_tg_link') {
+      changeWebAppModalState({ state: 'minimized' });
+
       const linkUrl = TME_LINK_PREFIX + eventData.path_full;
       openTelegramLink({ url: linkUrl, shouldIgnoreCache: eventData.force_request });
-      closeActiveWebApp();
     }
 
     if (eventType === 'web_app_setup_back_button') {
@@ -1086,7 +1087,6 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
             disabled={!secondaryButtonCurrentIsActive && !secondaryButton?.isProgressVisible}
             nonInteractive={secondaryButton?.isProgressVisible}
             onClick={handleSecondaryButtonClick}
-            size="smaller"
           >
             {!secondaryButton?.isProgressVisible && secondaryButtonCurrentText}
             {secondaryButton?.isProgressVisible
@@ -1103,7 +1103,6 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
             disabled={!mainButtonCurrentIsActive && !mainButton?.isProgressVisible}
             nonInteractive={mainButton?.isProgressVisible}
             onClick={handleMainButtonClick}
-            size="smaller"
           >
             {!mainButton?.isProgressVisible && mainButtonCurrentText}
             {mainButton?.isProgressVisible && <Spinner className={styles.mainButtonSpinner} color="white" />}
@@ -1128,8 +1127,6 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
                 className="confirm-dialog-button"
                 color={button.type === 'destructive' ? 'danger' : 'primary'}
                 isText
-                size="smaller"
-
                 onClick={() => handleAppPopupClose(button.id)}
               >
                 {button.text || oldLang(DEFAULT_BUTTON_TEXT[button.type])}
