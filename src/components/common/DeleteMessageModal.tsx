@@ -430,7 +430,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onCloseHandler}
-      onEnter={canDeleteForAll ? undefined : handleDeleteMessageList}
+      onEnter={handleDeleteMessageList}
       className={styles.root}
     >
       <div className={styles.main}>
