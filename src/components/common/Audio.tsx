@@ -125,7 +125,7 @@ const Audio = ({
   const {
     content: {
       audio: contentAudio, voice, video,
-    }, isMediaUnread,
+    }, isMediaUnread, isDeleting,
   } = message;
   const audio = contentAudio || getWebPageAudio(webPage);
   const media = (voice || video || audio)!;
@@ -210,6 +210,12 @@ const Audio = ({
   useEffect(() => {
     setIsActivated(isPlaying);
   }, [isPlaying]);
+
+  useEffect(() => {
+    if (isPlaying && isDeleting) {
+      playPause();
+    }
+  }, [isPlaying, isDeleting, playPause]);
 
   const isLoadingForPlaying = isActivated && !isBuffered;
 
