@@ -45,7 +45,7 @@ const SafeLink = ({
     e.preventDefault();
     if (chatId && messageId && isDeepLink(url)) {
       const parsedLink = tryParseDeepLink(url);
-      if (parsedLink && parsedLink.type === 'privateMessageLink') {
+      if (parsedLink?.type === 'privateMessageLink') {
         const targetChatId: string | undefined = parsedLink.channelId;
 
         const parsedThreadId = parsedLink.threadId || MAIN_THREAD_ID as ThreadId;
