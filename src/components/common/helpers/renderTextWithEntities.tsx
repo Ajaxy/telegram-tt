@@ -616,6 +616,9 @@ function processEntity({
         <SafeLink
           url={getLinkUrl(entityText, entity)}
           text={entityText}
+          chatId={chatId}
+          messageId={messageId}
+          threadId={threadId}
         >
           {renderNestedMessagePart()}
         </SafeLink>

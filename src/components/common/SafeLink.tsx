@@ -2,13 +2,18 @@ import type { TeactNode } from '../../lib/teact/teact';
 import type React from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import { ApiMessageEntityTypes } from '../../api/types';
+import type { ThreadId } from '../../types';
+import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import { ensureProtocol, getUnicodeUrl, isMixedScriptUrl } from '../../util/browser/url';
 import buildClassName from '../../util/buildClassName';
+// Add imports for t.me link parsing
+import { isDeepLink } from '../../util/deepLinkParser';
+import { tryParseDeepLink } from '../../util/deepLinkParser';
 
 import useLastCallback from '../../hooks/useLastCallback';
 
+// Add message context props
 type OwnProps = {
   url?: string;
   text: string;
@@ -16,6 +21,10 @@ type OwnProps = {
   children?: TeactNode;
   isRtl?: boolean;
   shouldSkipModal?: boolean;
+  // Add message context for t.me link reply stack behavior
+  chatId?: string;
+  messageId?: number;
+  threadId?: ThreadId;
 };
 
 const SafeLink = ({
@@ -25,8 +34,11 @@ const SafeLink = ({
   children,
   isRtl,
   shouldSkipModal,
+  chatId,
+  messageId,
+  threadId,
 }: OwnProps) => {
-  const { openUrl } = getActions();
+  const { focusMessage, openUrl } = getActions();
 
   const content = children || text;
   const isRegularLink = url === text;
@@ -35,6 +47,28 @@ const SafeLink = ({
     if (!url) return true;
 
     e.preventDefault();
+    // Check if it's a t.me link and we have message context
+    if (chatId && messageId && isDeepLink(url)) {
+      const parsedLink = tryParseDeepLink(url);
+      if (parsedLink && parsedLink.type === 'privateMessageLink') {
+        const targetChatId: string | undefined = parsedLink.channelId;
+
+        const parsedThreadId = parsedLink.threadId || MAIN_THREAD_ID as ThreadId;
+
+        const isWithinSameChat = chatId === targetChatId && threadId === parsedThreadId;
+
+        if (isWithinSameChat && parsedLink.messageId) {
+          focusMessage({
+            chatId: targetChatId,
+            threadId: parsedThreadId,
+            messageId: parsedLink.messageId,
+            replyMessageId: messageId,
+            timestamp: parsedLink.timestamp,
+          });
+          return false;
+        }
+      }
+    }
 
     const isTrustedLink = isRegularLink && !isMixedScriptUrl(url);
     openUrl({ url, shouldSkipModal: shouldSkipModal || isTrustedLink });
