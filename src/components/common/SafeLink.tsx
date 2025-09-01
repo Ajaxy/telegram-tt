@@ -7,13 +7,10 @@ import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import { ensureProtocol, getUnicodeUrl, isMixedScriptUrl } from '../../util/browser/url';
 import buildClassName from '../../util/buildClassName';
-// Add imports for t.me link parsing
-import { isDeepLink } from '../../util/deepLinkParser';
-import { tryParseDeepLink } from '../../util/deepLinkParser';
+import { isDeepLink, tryParseDeepLink } from '../../util/deepLinkParser';
 
 import useLastCallback from '../../hooks/useLastCallback';
 
-// Add message context props
 type OwnProps = {
   url?: string;
   text: string;
@@ -21,7 +18,6 @@ type OwnProps = {
   children?: TeactNode;
   isRtl?: boolean;
   shouldSkipModal?: boolean;
-  // Add message context for t.me link reply stack behavior
   chatId?: string;
   messageId?: number;
   threadId?: ThreadId;
@@ -47,7 +43,6 @@ const SafeLink = ({
     if (!url) return true;
 
     e.preventDefault();
-    // Check if it's a t.me link and we have message context
     if (chatId && messageId && isDeepLink(url)) {
       const parsedLink = tryParseDeepLink(url);
       if (parsedLink && parsedLink.type === 'privateMessageLink') {
