@@ -55,6 +55,7 @@ import type {
   ApiUser,
   ApiVideo,
   BotsPrivacyType,
+  LinkContext,
   PrivacyVisibility,
 } from '../../api/types';
 import type { ApiEmojiStatusCollectible, ApiEmojiStatusType } from '../../api/types/users';
@@ -652,6 +653,7 @@ export interface ActionPayloads {
   openTelegramLink: {
     url: string;
     shouldIgnoreCache?: boolean;
+    linkContext?: LinkContext;
   } & WithTabId;
   resolveBusinessChatLink: {
     slug: string;
@@ -673,6 +675,7 @@ export interface ActionPayloads {
     originalParts?: (string | undefined)[];
     timestamp?: number;
     onChatChanged?: CallbackAction;
+    linkContext?: LinkContext;
   } & WithTabId;
   processBoostParameters: {
     usernameOrId: string;
@@ -1202,6 +1205,7 @@ export interface ActionPayloads {
     messageId?: number;
     commentId?: number;
     timestamp?: number;
+    linkContext?: LinkContext;
   } & WithTabId;
   loadFullChat: {
     chatId: string;
@@ -2290,6 +2294,7 @@ export interface ActionPayloads {
     url: string;
     shouldSkipModal?: boolean;
     ignoreDeepLinks?: boolean;
+    linkContext?: LinkContext;
   } & WithTabId;
   openMapModal: {
     geoPoint: ApiGeoPoint;

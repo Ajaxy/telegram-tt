@@ -3,11 +3,10 @@ import type React from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { ThreadId } from '../../types';
-import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
+import { ApiMessageEntityTypes } from '../../api/types';
 
 import { ensureProtocol, getUnicodeUrl, isMixedScriptUrl } from '../../util/browser/url';
 import buildClassName from '../../util/buildClassName';
-import { isDeepLink, tryParseDeepLink } from '../../util/deepLinkParser';
 
 import useLastCallback from '../../hooks/useLastCallback';
 
@@ -43,30 +42,13 @@ const SafeLink = ({
     if (!url) return true;
 
     e.preventDefault();
-    if (chatId && messageId && isDeepLink(url)) {
-      const parsedLink = tryParseDeepLink(url);
-      if (parsedLink && parsedLink.type === 'privateMessageLink') {
-        const targetChatId: string | undefined = parsedLink.channelId;
-
-        const parsedThreadId = parsedLink.threadId || MAIN_THREAD_ID as ThreadId;
-
-        const isWithinSameChat = chatId === targetChatId && threadId === parsedThreadId;
-
-        if (isWithinSameChat && parsedLink.messageId) {
-          focusMessage({
-            chatId: targetChatId,
-            threadId: parsedThreadId,
-            messageId: parsedLink.messageId,
-            replyMessageId: messageId,
-            timestamp: parsedLink.timestamp,
-          });
-          return false;
-        }
-      }
-    }
 
     const isTrustedLink = isRegularLink && !isMixedScriptUrl(url);
-    openUrl({ url, shouldSkipModal: shouldSkipModal || isTrustedLink });
+    openUrl({
+      url,
+      shouldSkipModal: shouldSkipModal || isTrustedLink,
+      linkContext: { type: 'message', chatId, threadId, messageId },
+    });
 
     return false;
   });

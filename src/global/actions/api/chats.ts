@@ -2,6 +2,7 @@ import type {
   ApiChat, ApiChatFolder, ApiChatlistExportedInvite,
   ApiChatMember, ApiError, ApiMissingInvitedUser,
   ApiTopic,
+  LinkContext,
 } from '../../../api/types';
 import type { RequiredGlobalActions } from '../../index';
 import type {
@@ -1458,6 +1459,7 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
   const {
     url,
     shouldIgnoreCache,
+    linkContext,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -1475,7 +1477,7 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
   } = actions;
 
   if (isDeepLink(url)) {
-    const isProcessed = processDeepLink(url);
+    const isProcessed = processDeepLink(url, linkContext);
     if (isProcessed || url.match(RE_TG_LINK)) {
       return;
     }
@@ -1653,7 +1655,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
   const {
     username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts,
     startApp, shouldStartMainApp, mode,
-    text, onChatChanged, choose, ref, timestamp,
+    text, onChatChanged, choose, ref, timestamp, linkContext,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -1708,6 +1710,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
           attach,
           text,
           timestamp,
+          linkContext,
         }, tabId,
       );
       if (onChatChanged) {
@@ -1785,7 +1788,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
 
 addActionHandler('openPrivateChannel', (global, actions, payload): ActionReturnType => {
   const {
-    id, commentId, messageId, threadId, timestamp, tabId = getCurrentTabId(),
+    id, commentId, messageId, threadId, timestamp, linkContext, tabId = getCurrentTabId(),
   } = payload;
   const chat = selectChat(global, id);
   if (!chat) {
@@ -1827,6 +1830,7 @@ addActionHandler('openPrivateChannel', (global, actions, payload): ActionReturnT
     messageId,
     threadId,
     timestamp,
+    linkContext,
   }, tabId);
 });
 
@@ -3401,11 +3405,13 @@ async function openChatByUsername<T extends GlobalState>(
     attach?: string;
     text?: string;
     timestamp?: number;
+    linkContext?: LinkContext;
   },
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const {
     username, threadId, channelPostId, startParam, ref, startAttach, attach, text, timestamp,
+    linkContext,
   } = params;
   const currentChat = selectCurrentChat(global, tabId);
 
@@ -3461,6 +3467,7 @@ async function openChatByUsername<T extends GlobalState>(
     attach,
     text,
     timestamp,
+    linkContext,
   }, tabId);
 }
 
@@ -3478,11 +3485,13 @@ async function openChatWithParams<T extends GlobalState>(
     attach?: string;
     text?: string;
     timestamp?: number;
+    linkContext?: LinkContext;
   },
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const {
     isCurrentChat, threadId, messageId, startParam, referrer, startAttach, attach, text, timestamp,
+    linkContext,
   } = params;
 
   if (messageId) {
@@ -3504,8 +3513,13 @@ async function openChatWithParams<T extends GlobalState>(
     }
 
     if (!isTopicProcessed) {
+      let isWithinSameChat = chat.id === linkContext?.chatId;
+      if (threadId) {
+        isWithinSameChat = isWithinSameChat && threadId === linkContext?.threadId;
+      }
       actions.focusMessage({
         chatId: chat.id, threadId, messageId, timestamp, tabId,
+        replyMessageId: isWithinSameChat ? linkContext?.messageId : undefined,
       });
     }
   } else if (!isCurrentChat) {
