@@ -3513,13 +3513,9 @@ async function openChatWithParams<T extends GlobalState>(
     }
 
     if (!isTopicProcessed) {
-      let isWithinSameChat = chat.id === linkContext?.chatId;
-      if (threadId) {
-        isWithinSameChat = isWithinSameChat && threadId === linkContext?.threadId;
-      }
       actions.focusMessage({
         chatId: chat.id, threadId, messageId, timestamp, tabId,
-        replyMessageId: isWithinSameChat ? linkContext?.messageId : undefined,
+        replyMessageId: linkContext?.messageId,
       });
     }
   } else if (!isCurrentChat) {
