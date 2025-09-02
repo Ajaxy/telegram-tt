@@ -33,7 +33,7 @@ const SafeLink = ({
   messageId,
   threadId,
 }: OwnProps) => {
-  const { focusMessage, openUrl } = getActions();
+  const { openUrl } = getActions();
 
   const content = children || text;
   const isRegularLink = url === text;
@@ -47,7 +47,9 @@ const SafeLink = ({
     openUrl({
       url,
       shouldSkipModal: shouldSkipModal || isTrustedLink,
-      linkContext: { type: 'message', chatId, threadId, messageId },
+      ...(chatId && messageId && {
+        linkContext: { type: 'message', chatId, threadId, messageId },
+      }),
     });
 
     return false;
