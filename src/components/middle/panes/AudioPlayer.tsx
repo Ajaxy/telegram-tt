@@ -167,6 +167,12 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     }
   }, [timestamp, setCurrentTime]);
 
+  useEffect(() => {
+    if (isPlaying && message?.isDeleting) {
+      playPause();
+    }
+  }, [isPlaying, message?.isDeleting, playPause]);
+
   const handleClick = useLastCallback(() => {
     const { chatId, id } = renderingMessage!;
     focusMessage({ chatId, messageId: id });
