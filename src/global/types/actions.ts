@@ -1,3 +1,4 @@
+import { LinkContext } from './../../api/types/messages';
 import type {
   ApiAttachBot,
   ApiAttachment,
@@ -2039,6 +2040,7 @@ export interface ActionPayloads {
   clickBotInlineButton: {
     chatId: string;
     messageId: number;
+    threadId?: ThreadId;
     button: ApiKeyboardButton;
   } & WithTabId;
   clickSuggestedMessageButton: {

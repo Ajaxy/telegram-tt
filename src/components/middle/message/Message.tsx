@@ -1286,6 +1286,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {game && (
           <Game
             message={message}
+            threadId={threadId}
             canAutoLoadMedia={canAutoLoadMedia}
           />
         )}
