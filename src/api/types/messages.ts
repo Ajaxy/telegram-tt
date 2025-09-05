@@ -1038,6 +1038,13 @@ export type ApiSearchPostsFlood = {
   starsAmount: number;
 };
 
+export type LinkContext = {
+  type: 'message';
+  threadId?: ThreadId;
+  chatId: string;
+  messageId: number;
+};
+
 export const MAIN_THREAD_ID = -1;
 
 // `Symbol` can not be transferred from worker

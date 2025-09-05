@@ -2372,7 +2372,7 @@ addActionHandler('readAllMentions', (global, actions, payload): ActionReturnType
 
 addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
   const {
-    url, shouldSkipModal, ignoreDeepLinks, tabId = getCurrentTabId(),
+    url, shouldSkipModal, ignoreDeepLinks, linkContext, tabId = getCurrentTabId(),
   } = payload;
   const urlWithProtocol = ensureProtocol(url);
   const parsedUrl = new URL(urlWithProtocol);
@@ -2382,7 +2382,7 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
     actions.closeStoryViewer({ tabId });
     actions.closePaymentModal({ tabId });
 
-    actions.openTelegramLink({ url, tabId });
+    actions.openTelegramLink({ url, linkContext, tabId });
     return;
   }
 

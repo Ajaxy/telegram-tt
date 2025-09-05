@@ -3,6 +3,7 @@ import { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
+import type { ThreadId } from '../../../types';
 
 import { getGamePreviewPhotoHash, getGamePreviewVideoHash, getMessageText } from '../../../global/helpers';
 
@@ -19,11 +20,13 @@ const DEFAULT_PREVIEW_DIMENSIONS = {
 
 type OwnProps = {
   message: ApiMessage;
+  threadId?: ThreadId;
   canAutoLoadMedia?: boolean;
 };
 
 const Game: FC<OwnProps> = ({
   message,
+  threadId,
   canAutoLoadMedia,
 }) => {
   const { clickBotInlineButton } = getActions();
@@ -41,6 +44,7 @@ const Game: FC<OwnProps> = ({
     clickBotInlineButton({
       chatId: message.chatId,
       messageId: message.id,
+      threadId,
       button: message.inlineButtons![0][0],
     });
   };

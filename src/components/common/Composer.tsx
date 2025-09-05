@@ -2256,6 +2256,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           {isInMessageList && Boolean(botKeyboardMessageId) && (
             <BotKeyboardMenu
               messageId={botKeyboardMessageId}
+              threadId={threadId}
               isOpen={isBotKeyboardOpen}
               onClose={closeBotKeyboard}
             />

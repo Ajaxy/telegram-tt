@@ -2,6 +2,7 @@ import type { TeactNode } from '../../lib/teact/teact';
 import type React from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
+import type { ThreadId } from '../../types';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import { ensureProtocol, getUnicodeUrl, isMixedScriptUrl } from '../../util/browser/url';
@@ -16,6 +17,9 @@ type OwnProps = {
   children?: TeactNode;
   isRtl?: boolean;
   shouldSkipModal?: boolean;
+  chatId?: string;
+  messageId?: number;
+  threadId?: ThreadId;
 };
 
 const SafeLink = ({
@@ -25,6 +29,9 @@ const SafeLink = ({
   children,
   isRtl,
   shouldSkipModal,
+  chatId,
+  messageId,
+  threadId,
 }: OwnProps) => {
   const { openUrl } = getActions();
 
@@ -37,7 +44,13 @@ const SafeLink = ({
     e.preventDefault();
 
     const isTrustedLink = isRegularLink && !isMixedScriptUrl(url);
-    openUrl({ url, shouldSkipModal: shouldSkipModal || isTrustedLink });
+    openUrl({
+      url,
+      shouldSkipModal: shouldSkipModal || isTrustedLink,
+      ...(chatId && messageId && {
+        linkContext: { type: 'message', chatId, threadId, messageId },
+      }),
+    });
 
     return false;
   });
