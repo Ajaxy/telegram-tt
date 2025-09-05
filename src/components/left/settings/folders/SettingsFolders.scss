@@ -146,6 +146,7 @@
   background-color: currentColor;
   outline: none;
 
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: border 100ms ease-in-out, outline 100ms ease-in-out;
 }
 
