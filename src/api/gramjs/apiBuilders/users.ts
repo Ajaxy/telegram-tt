@@ -3,6 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import type {
   ApiBirthday,
   ApiPeerSettings,
+  ApiStarsRating,
   ApiUser,
   ApiUserFullInfo,
   ApiUserStatus,
@@ -27,6 +28,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
       birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount, botVerification,
       botCanManageEmojiStatus, settings, sendPaidMessagesStars, displayGiftsButton, disallowedGifts,
+      starsRating, starsMyPendingRating, starsMyPendingRatingDate,
     },
     users,
   } = mtpUserFull;
@@ -57,6 +59,9 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     botVerification: botVerification && buildApiBotVerification(botVerification),
     areAdsEnabled: sponsoredEnabled,
     starGiftCount: stargiftsCount,
+    starsRating: starsRating && buildApiStarsRating(starsRating),
+    starsMyPendingRating: starsMyPendingRating && buildApiStarsRating(starsMyPendingRating),
+    starsMyPendingRatingDate,
     isBotCanManageEmojiStatus: botCanManageEmojiStatus,
     hasScheduledMessages: hasScheduled,
     paidMessagesStars: sendPaidMessagesStars?.toJSNumber(),
@@ -181,4 +186,13 @@ export function buildApiUserStatuses(mtpUsers: GramJs.TypeUser[]) {
 
 export function buildApiBirthday(birthday: GramJs.TypeBirthday): ApiBirthday {
   return omitVirtualClassFields(birthday);
+}
+
+export function buildApiStarsRating(starsRating: GramJs.StarsRating): ApiStarsRating {
+  return {
+    level: starsRating.level,
+    currentLevelStars: starsRating.currentLevelStars.toJSNumber(),
+    stars: starsRating.stars.toJSNumber(),
+    nextLevelStars: starsRating.nextLevelStars?.toJSNumber(),
+  };
 }

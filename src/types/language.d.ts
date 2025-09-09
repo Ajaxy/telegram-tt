@@ -1642,6 +1642,19 @@ export interface LangPair {
   'PublicPostsPremiumFeatureSubtitle': undefined;
   'PublicPostsSubscribeToPremium': undefined;
   'PostsSearchTransaction': undefined;
+  'TitleRating': undefined;
+  'RatingYourReflectsActivity': undefined;
+  'RatingGiftsFromTelegram': undefined;
+  'RatingGiftsFromTelegramDesc': undefined;
+  'RatingGiftsAndPostsFromUsers': undefined;
+  'RatingGiftsAndPostsFromUsersDesc': undefined;
+  'RatingRefundsAndConversions': undefined;
+  'RatingRefundsAndConversionsDesc': undefined;
+  'RatingBadgeAdded': undefined;
+  'RatingBadgeDeducted': undefined;
+  'RatingNegativeLevel': undefined;
+  'LinkDescriptionRatingBack': undefined;
+  'LinkDescriptionRatingPreview': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -2850,6 +2863,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   'NotificationPaidExtraSearch': {
     'stars': V;
   };
+  'RatingReflectsActivity': {
+    'name': V;
+  };
+  'RatingLevel': {
+    'level': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -3176,6 +3195,16 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   };
   'HintPublicPostsSearchQuota': {
     'count': V;
+  };
+  'DescriptionPendingRating': {
+    'time': V;
+    'points': V;
+    'link': V;
+  };
+  'DescriptionFutureRating': {
+    'time': V;
+    'points': V;
+    'link': V;
   };
 }
 export type RegularLangKey = keyof LangPair;

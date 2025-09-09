@@ -35,6 +35,7 @@ import OneTimeMediaModal from './oneTimeMedia/OneTimeMediaModal.async';
 import PaidReactionModal from './paidReaction/PaidReactionModal.async';
 import PreparedMessageModal from './preparedMessage/PreparedMessageModal.async';
 import PriceConfirmModal from './priceConfirm/PriceConfirmModal.async';
+import ProfileRatingModal from './profileRating/ProfileRatingModal.async';
 import ReportAdModal from './reportAd/ReportAdModal.async';
 import ReportModal from './reportModal/ReportModal.async';
 import SharePreparedMessageModal from './sharePreparedMessage/SharePreparedMessageModal.async';
@@ -93,7 +94,8 @@ type ModalKey = keyof Pick<TabState,
   'priceConfirmModal' |
   'isFrozenAccountModalOpen' |
   'deleteAccountModal' |
-  'isAgeVerificationModalOpen'
+  'isAgeVerificationModalOpen' |
+  'profileRatingModal'
 >;
 
 type StateProps = {
@@ -151,6 +153,7 @@ const MODALS: ModalRegistry = {
   isFrozenAccountModalOpen: FrozenAccountModal,
   deleteAccountModal: DeleteAccountModal,
   isAgeVerificationModalOpen: AgeVerificationModal,
+  profileRatingModal: ProfileRatingModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

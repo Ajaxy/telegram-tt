@@ -1,5 +1,8 @@
+/* stylelint-disable plugin/no-low-performance-animation-properties */
+
 .root {
   --percent: calc(var(--progress, 0.5) * 100%);
+  --color-negative-progress: #E05356;
 
   position: relative;
 
@@ -73,21 +76,44 @@
   align-items: center;
   justify-content: center;
 
+  height: 2rem;
   padding: 0.25rem 0.75rem;
   border-radius: 1rem;
 
   color: #ffffff;
 
   background-color: #7E85FF;
+
+  transition: width 0.25s ease-in-out;
+
+  &.noTransition {
+    transition: none;
+  }
+}
+
+.floatingBadgeContent {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: fit-content;
+  max-width: 20rem;
+  margin-inline: auto;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .floating-badge-triangle {
   position: absolute;
   bottom: -4px;
-  left: calc(var(--tail-position, 0.5) * 100%);
-  transform: translateX(-50%);
 
   display: inline-block;
+
+  color: #7E85FF;
+
+  transition: left 0.3s ease;
 }
 
 .floating-badge-icon {
@@ -109,6 +135,10 @@
   align-items: center;
 
   font-weight: var(--font-weight-medium);
+
+  opacity: 1;
+
+  transition: opacity 0.15s ease;
 }
 
 .left {
@@ -119,8 +149,21 @@
   right: 0.75rem;
 }
 
-.progress {
-  --multiplier: calc(1 / var(--progress) - 1);
+.progressWrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  overflow: hidden;
+
+  border-radius: 0.625rem;
+}
+
+.positiveLayer,
+.positiveProgress {
+  --multiplier: calc(1 / var(--positive-progress) - 1);
 
   position: absolute;
   top: 0;
@@ -129,16 +172,18 @@
 
   overflow: hidden;
 
-  width: max(var(--percent), 0.625rem);
-  border-top-left-radius: 0.625rem;
-  border-bottom-left-radius: 0.625rem;
+  width: calc(var(--positive-progress) * 100%);
 
   background-image: var(--premium-gradient);
-  background-size: calc(1 / var(--progress) * 100%) 100%;
+  background-size: calc(1 / var(--positive-progress) * 100%) 100%;
+
+  transition: opacity 0.15s ease, width 0.2s, background-size 0.3s ease;
 
   .left, .right {
     color: white;
     white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.15s ease;
   }
 
   .right {
@@ -146,17 +191,114 @@
   }
 }
 
-.fullProgress {
-  border-radius: 0.625rem;
+.negativeLayer,
+.negativeProgress {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+
+  overflow: hidden;
+
+  width: calc(var(--negative-progress) * 100%);
+
+  background-color: var(--color-negative-progress);
+  background-image: none;
+
+  transition: opacity 0.15s, width 0.2s;
+
+  .left, .right {
+    color: white;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.15s ease;
+  }
+
+  .right {
+    right: 0.75rem;
+  }
+
+  .left {
+    right: calc(100% - 0.75rem);
+    left: auto;
+    transition: right 0.3s ease;
+  }
 }
 
 .primary {
-  .progress {
+  .positiveLayer,
+  .positiveProgress {
     background-color: var(--color-primary);
     background-image: none;
   }
 
   .floating-badge {
     background-color: var(--color-primary);
+  }
+
+  .floating-badge-triangle {
+    color: var(--color-primary);
+  }
+}
+
+.negative {
+  .floating-badge {
+    background-color: var(--color-negative-progress);
+  }
+
+  .floating-badge-triangle {
+    color: var(--color-negative-progress);
+  }
+}
+
+.transitioning {
+  .left,
+  .right {
+    opacity: 0;
+  }
+}
+
+.noTransition {
+  &.positiveProgress,
+  &.negativeProgress {
+    transition: opacity 0.15s !important;
+  }
+}
+
+.hidden {
+  opacity: 0 !important;
+}
+
+.cycling {
+  .badgeContainer {
+    transition-duration: var(--cycling-animation-badge-position);
+  }
+
+  .positiveProgress,
+  .negativeProgress {
+    transition: opacity 0.15s, width var(--cycling-animation-progress), background-size 0.3s;
+  }
+}
+
+.positiveLayer {
+  --positive-progress: var(--layer-progress);
+
+  z-index: 2;
+  opacity: 0;
+
+  &.show {
+    opacity: 1;
+  }
+}
+
+.negativeLayer {
+  --negative-progress: var(--layer-progress);
+
+  z-index: 2;
+  opacity: 0;
+
+  &.show {
+    opacity: 1;
   }
 }

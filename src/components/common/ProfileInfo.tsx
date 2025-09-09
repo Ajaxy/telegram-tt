@@ -3,9 +3,10 @@ import { memo, useEffect, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiPeerPhotos, ApiSticker, ApiTopic, ApiUser, ApiUserStatus,
+  ApiChat, ApiPeerPhotos, ApiSticker, ApiTopic, ApiUser, ApiUserFullInfo, ApiUserStatus,
 } from '../../api/types';
 import type { AnimationLevel } from '../../types';
+import type { IconName } from '../../types/icons';
 import { MediaViewerOrigin } from '../../types';
 
 import {
@@ -20,6 +21,7 @@ import {
   selectThreadMessagesCount,
   selectTopic,
   selectUser,
+  selectUserFullInfo,
   selectUserStatus,
 } from '../../global/selectors';
 import { selectSharedSettings } from '../../global/selectors/sharedState.ts';
@@ -40,11 +42,14 @@ import usePhotosPreload from './hooks/usePhotosPreload';
 import Transition from '../ui/Transition';
 import Avatar from './Avatar';
 import FullNameTitle from './FullNameTitle';
+import Icon from './icons/Icon';
 import ProfilePhoto from './ProfilePhoto';
 import TopicIcon from './TopicIcon';
 
 import './ProfileInfo.scss';
 import styles from './ProfileInfo.module.scss';
+
+const MAX_LEVEL_ICON = 90;
 
 type OwnProps = {
   peerId: string;
@@ -56,6 +61,7 @@ type OwnProps = {
 type StateProps =
   {
     user?: ApiUser;
+    userFullInfo?: ApiUserFullInfo;
     userStatus?: ApiUserStatus;
     chat?: ApiChat;
     mediaIndex?: number;
@@ -78,6 +84,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   forceShowSelf,
   canPlayVideo,
   user,
+  userFullInfo,
   userStatus,
   chat,
   mediaIndex,
@@ -98,6 +105,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     openPrivacySettingsNoticeModal,
     loadMoreProfilePhotos,
     openUniqueGiftBySlug,
+    openProfileRatingModal,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -180,6 +188,12 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
   const handleOpenGetReadDateModal = useLastCallback(() => {
     openPrivacySettingsNoticeModal({ chatId: chat!.id, isReadDate: false });
+  });
+
+  const handleRatingClick = useLastCallback((level: number) => {
+    if (user) {
+      openProfileRatingModal({ userId: user.id, level });
+    }
   });
 
   function handleSelectFallbackPhoto() {
@@ -268,6 +282,43 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     );
   }
 
+  function renderUserRating() {
+    if (!userFullInfo?.starsRating) return undefined;
+
+    const level = userFullInfo.starsRating.level;
+    const isNegative = level < 0;
+
+    const onRatingClick = () => handleRatingClick(level);
+
+    if (isNegative) {
+      return (
+        <span className={styles.userRatingNegativeWrapper} onClick={onRatingClick}>
+          <Icon
+            name="rating-icons-negative"
+            className={styles.ratingNegativeIcon}
+          />
+          <span className={styles.ratingLevel}>!</span>
+        </span>
+      );
+    }
+
+    const safeLevel = Math.max(level, 1);
+    const iconLevel = Math.min(safeLevel, MAX_LEVEL_ICON);
+    const iconName = (iconLevel < 10
+      ? `rating-icons-level${iconLevel}`
+      : `rating-icons-level${Math.floor(iconLevel / 10) * 10}`) as IconName;
+
+    return (
+      <span className={styles.userRatingWrapper} onClick={onRatingClick}>
+        <Icon
+          name={iconName}
+          className={styles.ratingIcon}
+        />
+        <span className={styles.ratingLevel}>{level}</span>
+      </span>
+    );
+  }
+
   function renderStatus() {
     const isAnonymousForwards = isAnonymousForwardsChat(peerId);
     const isSystemBotChat = isSystemBot(peerId);
@@ -290,6 +341,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
             isUserOnline(user, userStatus) && 'online',
           )}
         >
+          {renderUserRating()}
           <span className={styles.userStatus} dir="auto">
             {getUserStatus(oldLang, user, userStatus)}
           </span>
@@ -400,6 +452,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { peerId }): StateProps => {
     const user = selectUser(global, peerId);
+    const userFullInfo = user ? selectUserFullInfo(global, peerId) : undefined;
     const userStatus = selectUserStatus(global, peerId);
     const chat = selectChat(global, peerId);
     const profilePhotos = selectPeerPhotos(global, peerId);
@@ -415,6 +468,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       user,
+      userFullInfo,
       userStatus,
       chat,
       mediaIndex,

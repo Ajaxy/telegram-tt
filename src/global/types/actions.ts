@@ -1850,6 +1850,11 @@ export interface ActionPayloads {
     userId: string;
   } & WithTabId;
   closeChatRefundModal: WithTabId | undefined;
+  openProfileRatingModal: {
+    userId: string;
+    level: number;
+  } & WithTabId;
+  closeProfileRatingModal: WithTabId | undefined;
   loadMoreProfilePhotos: {
     peerId: string;
     isPreload?: boolean;

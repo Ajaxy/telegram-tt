@@ -852,6 +852,11 @@ export type TabState = {
     duration?: number;
   };
 
+  profileRatingModal?: {
+    userId: string;
+    level: number;
+  };
+
   monetizationVerificationModal?: {
     chatId: string;
     isLoading?: boolean;

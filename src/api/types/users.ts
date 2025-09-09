@@ -4,7 +4,7 @@ import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from
 import type { ApiPeerColor, ApiPeerSettings } from './chats';
 import type { ApiDocument, ApiPhoto } from './messages';
 import type { ApiBotVerification } from './misc';
-import type { ApiSavedStarGift } from './stars';
+import type { ApiSavedStarGift, ApiStarsRating } from './stars';
 
 export interface ApiUser {
   id: string;
@@ -65,6 +65,9 @@ export interface ApiUserFullInfo {
   businessWorkHours?: ApiBusinessWorkHours;
   businessIntro?: ApiBusinessIntro;
   starGiftCount?: number;
+  starsRating?: ApiStarsRating;
+  starsMyPendingRating?: ApiStarsRating;
+  starsMyPendingRatingDate?: number;
   isBotCanManageEmojiStatus?: boolean;
   isBotAccessEmojiGranted?: boolean;
   hasScheduledMessages?: boolean;

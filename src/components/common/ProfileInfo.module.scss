@@ -191,11 +191,64 @@
   font-size: 0.875rem;
 }
 
-.user-status {
+.userRatingNegativeWrapper,
+.userRatingWrapper {
+  pointer-events: all;
+  cursor: pointer;
+
+  position: relative;
+  z-index: 1;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-right: 0.25rem;
+
+  font-size: 1rem;
+  color: #000000;
+}
+
+.userRatingWrapper {
+  width: 1rem;
+  font-size: 1.5rem;
+}
+
+.ratingNegativeIcon {
+  pointer-events: none;
+  font-size: 1rem;
+  color: var(--color-white);
+
+  -webkit-text-stroke: 1px #000000;
+}
+
+.ratingIcon {
+  pointer-events: none;
+  color: var(--color-white);
+
+  -webkit-text-stroke: 1px #000000;
+}
+
+.ratingLevel {
+  pointer-events: none;
+
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  font-size: 0.625rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  color: #000000;
+}
+
+.userStatus {
   opacity: 0.5;
 }
 
-.get-status {
+.getStatus {
   --blured-background-color: #c4c9cc42;
 
   pointer-events: all;

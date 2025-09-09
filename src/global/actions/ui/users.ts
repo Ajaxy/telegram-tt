@@ -64,3 +64,16 @@ addActionHandler('closeSuggestedStatusModal', (global, actions, payload): Action
 });
 
 addTabStateResetterAction('closeChatRefundModal', 'chatRefundModal');
+
+addActionHandler('openProfileRatingModal', (global, actions, payload): ActionReturnType => {
+  const { userId, level, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    profileRatingModal: {
+      userId,
+      level,
+    },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeProfileRatingModal', 'profileRatingModal');

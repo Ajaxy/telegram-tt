@@ -207,101 +207,124 @@ $icons-map: (
   "quote-text": "\f1aa",
   "quote": "\f1ab",
   "radial-badge": "\f1ac",
-  "readchats": "\f1ad",
-  "recent": "\f1ae",
-  "reload": "\f1af",
-  "remove-quote": "\f1b0",
-  "remove": "\f1b1",
-  "reopen-topic": "\f1b2",
-  "replace": "\f1b3",
-  "replies": "\f1b4",
-  "reply-filled": "\f1b5",
-  "reply": "\f1b6",
-  "revenue-split": "\f1b7",
-  "revote": "\f1b8",
-  "save-story": "\f1b9",
-  "saved-messages": "\f1ba",
-  "schedule": "\f1bb",
-  "sd-photo": "\f1bc",
-  "search": "\f1bd",
-  "select": "\f1be",
-  "sell-outline": "\f1bf",
-  "sell": "\f1c0",
-  "send-outline": "\f1c1",
-  "send": "\f1c2",
-  "settings-filled": "\f1c3",
-  "settings": "\f1c4",
-  "share-filled": "\f1c5",
-  "share-screen-outlined": "\f1c6",
-  "share-screen-stop": "\f1c7",
-  "share-screen": "\f1c8",
-  "show-message": "\f1c9",
-  "sidebar": "\f1ca",
-  "skip-next": "\f1cb",
-  "skip-previous": "\f1cc",
-  "smallscreen": "\f1cd",
-  "smile": "\f1ce",
-  "sort-by-date": "\f1cf",
-  "sort-by-number": "\f1d0",
-  "sort-by-price": "\f1d1",
-  "sort": "\f1d2",
-  "speaker-muted-story": "\f1d3",
-  "speaker-outline": "\f1d4",
-  "speaker-story": "\f1d5",
-  "speaker": "\f1d6",
-  "spoiler-disable": "\f1d7",
-  "spoiler": "\f1d8",
-  "sport": "\f1d9",
-  "star": "\f1da",
-  "stars-lock": "\f1db",
-  "stats": "\f1dc",
-  "stealth-future": "\f1dd",
-  "stealth-past": "\f1de",
-  "stickers": "\f1df",
-  "stop-raising-hand": "\f1e0",
-  "stop": "\f1e1",
-  "story-caption": "\f1e2",
-  "story-expired": "\f1e3",
-  "story-priority": "\f1e4",
-  "story-reply": "\f1e5",
-  "strikethrough": "\f1e6",
-  "tag-add": "\f1e7",
-  "tag-crossed": "\f1e8",
-  "tag-filter": "\f1e9",
-  "tag-name": "\f1ea",
-  "tag": "\f1eb",
-  "timer": "\f1ec",
-  "toncoin": "\f1ed",
-  "trade": "\f1ee",
-  "transcribe": "\f1ef",
-  "truck": "\f1f0",
-  "unarchive": "\f1f1",
-  "underlined": "\f1f2",
-  "unique-profile": "\f1f3",
-  "unlist-outline": "\f1f4",
-  "unlist": "\f1f5",
-  "unlock-badge": "\f1f6",
-  "unlock": "\f1f7",
-  "unmute": "\f1f8",
-  "unpin": "\f1f9",
-  "unread": "\f1fa",
-  "up": "\f1fb",
-  "user-filled": "\f1fc",
-  "user-online": "\f1fd",
-  "user": "\f1fe",
-  "video-outlined": "\f1ff",
-  "video-stop": "\f200",
-  "video": "\f201",
-  "view-once": "\f202",
-  "voice-chat": "\f203",
-  "volume-1": "\f204",
-  "volume-2": "\f205",
-  "volume-3": "\f206",
-  "web": "\f207",
-  "webapp": "\f208",
-  "word-wrap": "\f209",
-  "zoom-in": "\f20a",
-  "zoom-out": "\f20b",
+  "rating-icons-level1": "\f1ad",
+  "rating-icons-level10": "\f1ae",
+  "rating-icons-level2": "\f1af",
+  "rating-icons-level20": "\f1b0",
+  "rating-icons-level3": "\f1b1",
+  "rating-icons-level30": "\f1b2",
+  "rating-icons-level4": "\f1b3",
+  "rating-icons-level40": "\f1b4",
+  "rating-icons-level5": "\f1b5",
+  "rating-icons-level50": "\f1b6",
+  "rating-icons-level6": "\f1b7",
+  "rating-icons-level60": "\f1b8",
+  "rating-icons-level7": "\f1b9",
+  "rating-icons-level70": "\f1ba",
+  "rating-icons-level8": "\f1bb",
+  "rating-icons-level80": "\f1bc",
+  "rating-icons-level9": "\f1bd",
+  "rating-icons-level90": "\f1be",
+  "rating-icons-negative": "\f1bf",
+  "readchats": "\f1c0",
+  "recent": "\f1c1",
+  "refund": "\f1c2",
+  "reload": "\f1c3",
+  "remove-quote": "\f1c4",
+  "remove": "\f1c5",
+  "reopen-topic": "\f1c6",
+  "replace": "\f1c7",
+  "replies": "\f1c8",
+  "reply-filled": "\f1c9",
+  "reply": "\f1ca",
+  "revenue-split": "\f1cb",
+  "revote": "\f1cc",
+  "save-story": "\f1cd",
+  "saved-messages": "\f1ce",
+  "schedule": "\f1cf",
+  "sd-photo": "\f1d0",
+  "search": "\f1d1",
+  "select": "\f1d2",
+  "sell-outline": "\f1d3",
+  "sell": "\f1d4",
+  "send-outline": "\f1d5",
+  "send": "\f1d6",
+  "settings-filled": "\f1d7",
+  "settings": "\f1d8",
+  "share-filled": "\f1d9",
+  "share-screen-outlined": "\f1da",
+  "share-screen-stop": "\f1db",
+  "share-screen": "\f1dc",
+  "show-message": "\f1dd",
+  "sidebar": "\f1de",
+  "skip-next": "\f1df",
+  "skip-previous": "\f1e0",
+  "smallscreen": "\f1e1",
+  "smile": "\f1e2",
+  "sort-by-date": "\f1e3",
+  "sort-by-number": "\f1e4",
+  "sort-by-price": "\f1e5",
+  "sort": "\f1e6",
+  "speaker-muted-story": "\f1e7",
+  "speaker-outline": "\f1e8",
+  "speaker-story": "\f1e9",
+  "speaker": "\f1ea",
+  "spoiler-disable": "\f1eb",
+  "spoiler": "\f1ec",
+  "sport": "\f1ed",
+  "star": "\f1ee",
+  "stars-lock": "\f1ef",
+  "stats": "\f1f0",
+  "stealth-future": "\f1f1",
+  "stealth-past": "\f1f2",
+  "stickers": "\f1f3",
+  "stop-raising-hand": "\f1f4",
+  "stop": "\f1f5",
+  "story-caption": "\f1f6",
+  "story-expired": "\f1f7",
+  "story-priority": "\f1f8",
+  "story-reply": "\f1f9",
+  "strikethrough": "\f1fa",
+  "tag-add": "\f1fb",
+  "tag-crossed": "\f1fc",
+  "tag-filter": "\f1fd",
+  "tag-name": "\f1fe",
+  "tag": "\f1ff",
+  "timer": "\f200",
+  "toncoin": "\f201",
+  "trade": "\f202",
+  "transcribe": "\f203",
+  "truck": "\f204",
+  "unarchive": "\f205",
+  "underlined": "\f206",
+  "understood": "\f207",
+  "unique-profile": "\f208",
+  "unlist-outline": "\f209",
+  "unlist": "\f20a",
+  "unlock-badge": "\f20b",
+  "unlock": "\f20c",
+  "unmute": "\f20d",
+  "unpin": "\f20e",
+  "unread": "\f20f",
+  "up": "\f210",
+  "user-filled": "\f211",
+  "user-online": "\f212",
+  "user-stars": "\f213",
+  "user": "\f214",
+  "video-outlined": "\f215",
+  "video-stop": "\f216",
+  "video": "\f217",
+  "view-once": "\f218",
+  "voice-chat": "\f219",
+  "volume-1": "\f21a",
+  "volume-2": "\f21b",
+  "volume-3": "\f21c",
+  "warning": "\f21d",
+  "web": "\f21e",
+  "webapp": "\f21f",
+  "word-wrap": "\f220",
+  "zoom-in": "\f221",
+  "zoom-out": "\f222",
 );
 
 .icon-active-sessions::before {
@@ -820,11 +843,71 @@ $icons-map: (
 .icon-radial-badge::before {
   content: map.get($icons-map, "radial-badge");
 }
+.icon-rating-icons-level1::before {
+  content: map.get($icons-map, "rating-icons-level1");
+}
+.icon-rating-icons-level10::before {
+  content: map.get($icons-map, "rating-icons-level10");
+}
+.icon-rating-icons-level2::before {
+  content: map.get($icons-map, "rating-icons-level2");
+}
+.icon-rating-icons-level20::before {
+  content: map.get($icons-map, "rating-icons-level20");
+}
+.icon-rating-icons-level3::before {
+  content: map.get($icons-map, "rating-icons-level3");
+}
+.icon-rating-icons-level30::before {
+  content: map.get($icons-map, "rating-icons-level30");
+}
+.icon-rating-icons-level4::before {
+  content: map.get($icons-map, "rating-icons-level4");
+}
+.icon-rating-icons-level40::before {
+  content: map.get($icons-map, "rating-icons-level40");
+}
+.icon-rating-icons-level5::before {
+  content: map.get($icons-map, "rating-icons-level5");
+}
+.icon-rating-icons-level50::before {
+  content: map.get($icons-map, "rating-icons-level50");
+}
+.icon-rating-icons-level6::before {
+  content: map.get($icons-map, "rating-icons-level6");
+}
+.icon-rating-icons-level60::before {
+  content: map.get($icons-map, "rating-icons-level60");
+}
+.icon-rating-icons-level7::before {
+  content: map.get($icons-map, "rating-icons-level7");
+}
+.icon-rating-icons-level70::before {
+  content: map.get($icons-map, "rating-icons-level70");
+}
+.icon-rating-icons-level8::before {
+  content: map.get($icons-map, "rating-icons-level8");
+}
+.icon-rating-icons-level80::before {
+  content: map.get($icons-map, "rating-icons-level80");
+}
+.icon-rating-icons-level9::before {
+  content: map.get($icons-map, "rating-icons-level9");
+}
+.icon-rating-icons-level90::before {
+  content: map.get($icons-map, "rating-icons-level90");
+}
+.icon-rating-icons-negative::before {
+  content: map.get($icons-map, "rating-icons-negative");
+}
 .icon-readchats::before {
   content: map.get($icons-map, "readchats");
 }
 .icon-recent::before {
   content: map.get($icons-map, "recent");
+}
+.icon-refund::before {
+  content: map.get($icons-map, "refund");
 }
 .icon-reload::before {
   content: map.get($icons-map, "reload");
@@ -1030,6 +1113,9 @@ $icons-map: (
 .icon-underlined::before {
   content: map.get($icons-map, "underlined");
 }
+.icon-understood::before {
+  content: map.get($icons-map, "understood");
+}
 .icon-unique-profile::before {
   content: map.get($icons-map, "unique-profile");
 }
@@ -1063,6 +1149,9 @@ $icons-map: (
 .icon-user-online::before {
   content: map.get($icons-map, "user-online");
 }
+.icon-user-stars::before {
+  content: map.get($icons-map, "user-stars");
+}
 .icon-user::before {
   content: map.get($icons-map, "user");
 }
@@ -1089,6 +1178,9 @@ $icons-map: (
 }
 .icon-volume-3::before {
   content: map.get($icons-map, "volume-3");
+}
+.icon-warning::before {
+  content: map.get($icons-map, "warning");
 }
 .icon-web::before {
   content: map.get($icons-map, "web");
