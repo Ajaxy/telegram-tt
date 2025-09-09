@@ -1410,6 +1410,17 @@
 "MenuBetaChangelog" = "Beta Changelog";
 "MenuSwitchToK" = "Switch to K Version";
 "MenuInstallApp" = "Install App";
+"MenuMyProfile" = "My Profile";
+"MenuSavedMessages" = "Saved Messages";
+"MenuArchivedChats" = "Archived Chats";
+"MenuContacts" = "Contacts";
+"MenuSettings" = "Settings";
+"MenuNightMode" = "Night Mode";
+"AriaMenuEnableNightMode" = "Enable night mode";
+"AriaMenuDisableNightMode" = "Disable night mode";
+"MenuAnimationsSwitch" = "Animations";
+"MenuTelegramFeatures" = "Telegram Features";
+"TelegramFeaturesUsername" = "TelegramTips";
 "RemoveEffect" = "Remove effect";
 "ReplyInPrivateMessage" = "Reply In Private Message";
 "ProfileOpenAppAbout" = "By launching this mini app, you agree to the {terms}.";

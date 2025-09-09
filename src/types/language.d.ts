@@ -1202,6 +1202,16 @@ export interface LangPair {
   'MenuBetaChangelog': undefined;
   'MenuSwitchToK': undefined;
   'MenuInstallApp': undefined;
+  'MenuMyProfile': undefined;
+  'MenuSavedMessages': undefined;
+  'MenuArchivedChats': undefined;
+  'MenuContacts': undefined;
+  'MenuSettings': undefined;
+  'AriaMenuEnableNightMode': undefined;
+  'AriaMenuDisableNightMode': undefined;
+  'MenuAnimationsSwitch': undefined;
+  'MenuTelegramFeatures': undefined;
+  'TelegramFeaturesUsername': undefined;
   'RemoveEffect': undefined;
   'ReplyInPrivateMessage': undefined;
   'ProfileOpenAppTerms': undefined;

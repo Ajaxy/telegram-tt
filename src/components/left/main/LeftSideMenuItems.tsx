@@ -33,7 +33,6 @@ import { switchPermanentWebVersion } from '../../../util/permanentWebVersion';
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import AttachBotItem from '../../middle/composer/AttachBotItem';
 import MenuItem from '../../ui/MenuItem';
@@ -82,7 +81,6 @@ const LeftSideMenuItems = ({
     openUrl,
     openChatWithInfo,
   } = getActions();
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const animationLevelValue = animationLevel !== ANIMATION_LEVEL_MIN
@@ -134,7 +132,7 @@ const LeftSideMenuItems = ({
   });
 
   const handleOpenTipsChat = useLastCallback(() => {
-    openChatByUsername({ username: oldLang('Settings.TipsUsername') });
+    openChatByUsername({ username: lang('TelegramFeaturesUsername') });
   });
 
   const handleBugReportClick = useLastCallback(() => {
@@ -157,20 +155,20 @@ const LeftSideMenuItems = ({
         icon="user"
         onClick={handleSelectMyProfile}
       >
-        {oldLang('My Profile')}
+        {lang('MenuMyProfile')}
       </MenuItem>
       <MenuItem
         icon="saved-messages"
         onClick={handleSelectSaved}
       >
-        {oldLang('SavedMessages')}
+        {lang('MenuSavedMessages')}
       </MenuItem>
       {archiveSettings.isHidden && (
         <MenuItem
           icon="archive"
           onClick={onSelectArchived}
         >
-          <span className="menu-item-name">{oldLang('ArchivedChats')}</span>
+          <span className="menu-item-name">{lang('MenuArchivedChats')}</span>
           {archivedUnreadChatsCount > 0 && (
             <div className="right-badge">{archivedUnreadChatsCount}</div>
           )}
@@ -180,7 +178,7 @@ const LeftSideMenuItems = ({
         icon="group"
         onClick={onSelectContacts}
       >
-        {oldLang('Contacts')}
+        {lang('MenuContacts')}
       </MenuItem>
       {bots.map((bot) => (
         <AttachBotItem
@@ -196,16 +194,16 @@ const LeftSideMenuItems = ({
         icon="settings"
         onClick={onSelectSettings}
       >
-        {oldLang('Settings')}
+        {lang('MenuSettings')}
       </MenuItem>
       <MenuItem
         icon="darkmode"
         onClick={handleDarkModeToggle}
       >
-        <span className="menu-item-name">{oldLang('lng_menu_night_mode')}</span>
+        <span className="menu-item-name">{lang('MenuNightMode')}</span>
         <Switcher
           id="darkmode"
-          label={oldLang(theme === 'dark' ? 'lng_settings_disable_night_theme' : 'lng_settings_enable_night_theme')}
+          label={lang(theme === 'dark' ? 'AriaMenuDisableNightMode' : 'AriaMenuEnableNightMode')}
           checked={theme === 'dark'}
           noAnimation
         />
@@ -214,14 +212,14 @@ const LeftSideMenuItems = ({
         icon="animations"
         onClick={handleAnimationLevelChange}
       >
-        <span className="menu-item-name capitalize">{oldLang('Appearance.Animations').toLowerCase()}</span>
+        <span className="menu-item-name capitalize">{lang('MenuAnimationsSwitch')}</span>
         <Toggle value={animationLevelValue} />
       </MenuItem>
       <MenuItem
         icon="help"
         onClick={handleOpenTipsChat}
       >
-        {oldLang('TelegramFeatures')}
+        {lang('MenuTelegramFeatures')}
       </MenuItem>
       <MenuItem
         icon="bug"
