@@ -477,3 +477,20 @@ export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestI
   | ApiRequestInputInvoiceChatInviteSubscription | ApiRequestInputInvoiceStarGift
   | ApiRequestInputInvoiceStarGiftUpgrade | ApiRequestInputInvoiceStarGiftTransfer
   | ApiRequestInputInvoicePremiumGiftStars | ApiRequestInputInvoiceStarGiftResale;
+
+export interface ApiUniqueStarGiftValueInfo {
+  isLastSaleOnFragment?: true;
+  isValueAverage?: true;
+  currency: string;
+  value: number;
+  initialSaleDate: number;
+  initialSaleStars: number;
+  initialSalePrice: number;
+  lastSaleDate?: number;
+  lastSalePrice?: number;
+  floorPrice?: number;
+  averagePrice?: number;
+  listedCount?: number;
+  fragmentListedCount?: number;
+  fragmentListedUrl?: string;
+}

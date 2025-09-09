@@ -326,6 +326,7 @@
     "payments.upgradeStarGift",
     "payments.transferStarGift",
     "payments.getUniqueStarGift",
+    "payments.getUniqueStarGiftValueInfo",
     "payments.getStarGiftWithdrawalUrl",
     "payments.toggleStarGiftsPinnedToTop",
     "payments.getResaleStarGifts",

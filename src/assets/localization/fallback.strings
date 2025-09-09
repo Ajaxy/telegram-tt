@@ -1507,10 +1507,18 @@
 "GiftInfoTonText" = "This gift is on the TON Blockchain. {link}";
 "GiftInfoTonLinkText" = "View >";
 "GiftInfoAvailability" = "Availability";
+"GiftInfoValueLinkMore" = "Learn More";
 "GiftInfoAvailabilityValue_one" = "{count} of {total} left";
 "GiftInfoAvailabilityValue_other" = "{count} of {total} left";
 "GiftInfoFirstSale" = "First Sale";
 "GiftInfoLastSale" = "Last Sale";
+"GiftValueTitleInitialSale" = "Initial Sale";
+"GiftValueTitleInitialPrice" = "Initial Price";
+"GiftValueTitleLastSale" = "Last Sale";
+"GiftValueTitleLastPrice" = "Last Price";
+"GiftValueTitleMinimumPrice" = "Minimum Price";
+"GiftValueTitleAveragePrice" = "Average Price";
+"GiftValueDescription" = "This is average sale price of **{giftName}** on Telegram and Fragment over the past month.";
 "GiftInfoSoldOutTitle" = "Unavailable";
 "GiftInfoSoldOutDescription" = "This gift has been sold out";
 "GiftInfoSenderHidden" = "Only you can see the sender's name and message.";
@@ -1736,6 +1744,7 @@
 "GiftFilterUnique" = "Unique";
 "GiftFilterDisplayed" = "Displayed";
 "GiftFilterHidden" = "Hidden";
+"GiftFilterUpgradable" = "Upgradable";
 "GiftSearchEmpty" = "No matching gifts";
 "GiftSearchReset" = "View All Gifts";
 "SetUp2FA" = "Set up Two-Step Verification";
@@ -2271,4 +2280,5 @@
 "ErrorFocusInaccessibleMessage" = "Unfortunately, you can't access this message. You aren't a member of the chat where it was posted.";
 "ContextMenuHintMouse" = "To edit or reply, close this menu. Then right click on a message.";
 "ContextMenuHintTouch" = "To edit or reply, close this menu. Then long tap on a message.";
-
+"GiftValueForSaleOnFragment" = "for sale on Fragment";
+"GiftValueForSaleOnTelegram" = "for sale on Telegram";

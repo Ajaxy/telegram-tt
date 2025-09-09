@@ -443,6 +443,7 @@ export const DEFAULT_GIFT_PROFILE_FILTER_OPTIONS: GiftProfileFilterOptions = {
   shouldIncludeUnique: true,
   shouldIncludeDisplayed: true,
   shouldIncludeHidden: true,
+  shouldIncludeUpgradable: true,
 } as const;
 
 export const DEFAULT_RESALE_GIFTS_FILTER_OPTIONS: ResaleGiftsFilterOptions = {

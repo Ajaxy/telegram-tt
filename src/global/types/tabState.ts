@@ -41,6 +41,7 @@ import type {
   ApiStarGift,
   ApiStarGiftAttribute,
   ApiStarGiftAttributeCounter,
+  ApiStarGiftUnique,
   ApiStarGiveawayOption,
   ApiStarsSubscription,
   ApiStarsTransaction,
@@ -49,6 +50,7 @@ import type {
   ApiTypeCurrencyAmount,
   ApiTypePrepaidGiveaway,
   ApiTypeStoryView,
+  ApiUniqueStarGiftValueInfo,
   ApiUser,
   ApiVideo,
 } from '../../api/types';
@@ -692,6 +694,7 @@ export type TabState = {
   giftModal?: {
     forPeerId: string;
     gifts?: ApiPremiumGiftCodeOption[];
+    selectedResaleGift?: ApiStarGift;
   };
   chatRefundModal?: {
     userId: string;
@@ -821,6 +824,11 @@ export type TabState = {
     peerId?: string;
     recipientId?: string;
     gift: ApiSavedStarGift | ApiStarGift;
+  };
+
+  giftInfoValueModal?: {
+    valueInfo: ApiUniqueStarGiftValueInfo;
+    gift: ApiStarGiftUnique;
   };
 
   giftResalePriceComposerModal?: {

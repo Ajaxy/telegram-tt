@@ -62,6 +62,8 @@ type StateProps = {
   disallowedGifts?: ApiDisallowedGifts;
   resaleGiftsCount?: number;
   areResaleGiftsLoading?: boolean;
+  selectedResaleGift?: ApiStarGift;
+  tabId: number;
 };
 
 const AVATAR_SIZE = 100;
@@ -81,9 +83,11 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   disallowedGifts,
   resaleGiftsCount,
   areResaleGiftsLoading,
+  selectedResaleGift,
+  tabId,
 }) => {
   const {
-    closeGiftModal, openGiftInfoModal, resetResaleGifts, loadResaleGifts,
+    closeGiftModal, openGiftInfoModal, resetResaleGifts, loadResaleGifts, openGiftInMarket, closeResaleGiftsMarket,
   } = getActions();
   const dialogRef = useRef<HTMLDivElement>();
   const transitionRef = useRef<HTMLDivElement>();
@@ -98,7 +102,6 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   const chat = peer && isApiPeerChat(peer) ? peer : undefined;
 
   const [selectedGift, setSelectedGift] = useState<GiftOption | undefined>();
-  const [selectedResellGift, setSelectedResellGift] = useState<ApiStarGift | undefined>();
   const [shouldShowMainScreenHeader, setShouldShowMainScreenHeader] = useState(false);
   const [isMainScreenHeaderForStarGifts, setIsMainScreenHeaderForStarGifts] = useState(false);
   const [isGiftScreenHeaderForStarGifts, setIsGiftScreenHeaderForStarGifts] = useState(false);
@@ -154,25 +157,27 @@ const GiftModal: FC<OwnProps & StateProps> = ({
     observe: observeIntersection,
   } = useIntersectionObserver({ rootRef: scrollerRef, throttleMs: INTERSECTION_THROTTLE, isDisabled: !isOpen });
 
-  const isResaleScreen = Boolean(selectedResellGift) && !selectedGift;
+  const isResaleScreen = Boolean(selectedResaleGift) && !selectedGift;
   const isGiftScreen = Boolean(selectedGift);
   const shouldShowHeader = isResaleScreen || isGiftScreen || shouldShowMainScreenHeader;
   const isHeaderForStarGifts = isGiftScreen ? isGiftScreenHeaderForStarGifts : isMainScreenHeaderForStarGifts;
 
   useEffect(() => {
-    if (selectedResellGift) {
-      loadResaleGifts({ giftId: selectedResellGift.id });
+    if (selectedResaleGift) {
+      const giftId = 'regularGiftId' in selectedResaleGift
+        ? selectedResaleGift.regularGiftId
+        : selectedResaleGift.id;
+      loadResaleGifts({ giftId });
     }
-  }, [selectedResellGift]);
+  }, [selectedResaleGift]);
 
   useEffect(() => {
     if (!isOpen) {
       setShouldShowMainScreenHeader(false);
       setSelectedGift(undefined);
-      setSelectedResellGift(undefined);
       setSelectedCategory('all');
     }
-  }, [isOpen]);
+  }, [isOpen, tabId, closeResaleGiftsMarket]);
 
   const handleScroll = useLastCallback((e: React.UIEvent<HTMLDivElement>) => {
     if (isGiftScreen) return;
@@ -256,7 +261,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
         openGiftInfoModal({ gift, recipientId: renderingModal?.forPeerId });
         return;
       }
-      setSelectedResellGift(gift);
+      openGiftInMarket({ gift, tabId });
       return;
     }
     setSelectedGift(gift);
@@ -340,15 +345,13 @@ const GiftModal: FC<OwnProps & StateProps> = ({
 
   const handleCloseModal = useLastCallback(() => {
     setSelectedGift(undefined);
-    setSelectedResellGift(undefined);
     resetResaleGifts();
     closeGiftModal();
   });
 
   const handleCloseButtonClick = useLastCallback(() => {
     if (isResaleScreen) {
-      setSelectedResellGift(undefined);
-      resetResaleGifts();
+      closeResaleGiftsMarket({ tabId });
       return;
     }
     if (isGiftScreen) {
@@ -426,7 +429,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
       return (
         <div className={styles.resaleHeaderContentContainer}>
           <h2 className={styles.resaleHeaderText}>
-            {selectedResellGift.title}
+            {selectedResaleGift.title}
           </h2>
           {isFirstLoading
             && (
@@ -494,7 +497,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
         activeKey={isGiftScreen ? 1 : isResaleScreen ? 2 : 0}
       >
         {!isGiftScreen && !isResaleScreen && renderMainScreen()}
-        {isResaleScreen && selectedResellGift
+        {isResaleScreen && selectedResaleGift
           && (
             <GiftModalResaleScreen
               onGiftClick={handleGiftClick}
@@ -526,6 +529,7 @@ export default memo(withGlobal<OwnProps>((global, { modal }): StateProps => {
   const { resaleGifts } = selectTabState(global);
   const resaleGiftsCount = resaleGifts.count;
   const areResaleGiftsLoading = resaleGifts.isLoading !== false;
+  const selectedResaleGift = modal?.selectedResaleGift;
 
   return {
     boostPerSentGift: global.appConfig.boostsPerSentGift,
@@ -537,6 +541,8 @@ export default memo(withGlobal<OwnProps>((global, { modal }): StateProps => {
     disallowedGifts: userFullInfo?.disallowedGifts,
     resaleGiftsCount,
     areResaleGiftsLoading,
+    selectedResaleGift,
+    tabId: selectTabState(global).id,
   };
 })(GiftModal));
 

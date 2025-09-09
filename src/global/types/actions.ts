@@ -44,6 +44,7 @@ import type {
   ApiSendMessageAction,
   ApiSessionData,
   ApiStarGift,
+  ApiStarGiftUnique,
   ApiStarsSubscription,
   ApiStarsTransaction,
   ApiSticker,
@@ -2541,6 +2542,7 @@ export interface ActionPayloads {
 
   openGiftModal: {
     forUserId: string;
+    selectedResaleGift?: ApiStarGift;
   } & WithTabId;
   closeGiftModal: WithTabId | undefined;
   sendStarGift: StarGiftInfo & WithTabId;
@@ -2573,6 +2575,10 @@ export interface ActionPayloads {
   }) & WithTabId;
   closeGiftInfoModal: WithTabId | undefined;
   closeGiftResalePriceComposerModal: WithTabId | undefined;
+  openGiftInMarket: {
+    gift: ApiStarGift;
+  } & WithTabId;
+  closeResaleGiftsMarket: WithTabId | undefined;
 
   openGiftUpgradeModal: {
     giftId: string;
@@ -2595,6 +2601,10 @@ export interface ActionPayloads {
     emojiStatus: ApiEmojiStatusCollectible;
   } & WithTabId;
   closeGiftStatusInfoModal: WithTabId | undefined;
+  openGiftInfoValueModal: {
+    gift: ApiStarGiftUnique;
+  } & WithTabId;
+  closeGiftInfoValueModal: WithTabId | undefined;
   processStarGiftWithdrawal: {
     gift: ApiInputSavedStarGift;
     password: string;

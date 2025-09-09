@@ -548,7 +548,7 @@ addActionHandler('openGiveawayModal', async (global, actions, payload): Promise<
 
 addActionHandler('openGiftModal', async (global, actions, payload): Promise<void> => {
   const {
-    forUserId, tabId = getCurrentTabId(),
+    forUserId, selectedResaleGift, tabId = getCurrentTabId(),
   } = payload;
 
   if (selectIsCurrentUserFrozen(global)) {
@@ -564,6 +564,7 @@ addActionHandler('openGiftModal', async (global, actions, payload): Promise<void
     giftModal: {
       forPeerId: forUserId,
       gifts,
+      selectedResaleGift,
     },
   }, tabId);
   setGlobal(global);

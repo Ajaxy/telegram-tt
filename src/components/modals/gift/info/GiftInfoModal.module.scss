@@ -138,10 +138,21 @@
   line-height: 1;
 }
 
+.uniqueValue,
 .uniqueAttribute {
   display: flex;
   gap: 0.25rem;
   align-items: center;
+}
+
+.attributeName {
+  cursor: pointer;
+  color: var(--color-primary);
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.75;
+  }
 }
 
 /* stylelint-disable-next-line plugin/stylelint-group-selectors */

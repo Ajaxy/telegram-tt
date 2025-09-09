@@ -1254,8 +1254,15 @@ export interface LangPair {
   'GiftActionHide': undefined;
   'GiftInfoTonLinkText': undefined;
   'GiftInfoAvailability': undefined;
+  'GiftInfoValueLinkMore': undefined;
   'GiftInfoFirstSale': undefined;
   'GiftInfoLastSale': undefined;
+  'GiftValueTitleInitialSale': undefined;
+  'GiftValueTitleInitialPrice': undefined;
+  'GiftValueTitleLastSale': undefined;
+  'GiftValueTitleLastPrice': undefined;
+  'GiftValueTitleMinimumPrice': undefined;
+  'GiftValueTitleAveragePrice': undefined;
   'GiftInfoSoldOutTitle': undefined;
   'GiftInfoSoldOutDescription': undefined;
   'GiftInfoSenderHidden': undefined;
@@ -1417,6 +1424,7 @@ export interface LangPair {
   'GiftFilterUnique': undefined;
   'GiftFilterDisplayed': undefined;
   'GiftFilterHidden': undefined;
+  'GiftFilterUpgradable': undefined;
   'GiftSearchEmpty': undefined;
   'GiftSearchReset': undefined;
   'SetUp2FA': undefined;
@@ -1693,6 +1701,8 @@ export interface LangPair {
   'ErrorFocusInaccessibleMessage': undefined;
   'ContextMenuHintMouse': undefined;
   'ContextMenuHintTouch': undefined;
+  'GiftValueForSaleOnFragment': undefined;
+  'GiftValueForSaleOnTelegram': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -2108,6 +2118,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'GiftInfoTonText': {
     'link': V;
+  };
+  'GiftValueDescription': {
+    'giftName': V;
   };
   'GiftInfoIssued': {
     'issued': V;

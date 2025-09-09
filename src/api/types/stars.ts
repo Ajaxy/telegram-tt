@@ -31,6 +31,7 @@ export interface ApiStarGiftRegular {
 export interface ApiStarGiftUnique {
   type: 'starGiftUnique';
   id: string;
+  regularGiftId: string;
   title: string;
   number: number;
   ownerId?: string;
@@ -45,6 +46,8 @@ export interface ApiStarGiftUnique {
   releasedByPeerId?: string;
   requirePremium?: true;
   resaleTonOnly?: true;
+  valueCurrency?: string;
+  valueAmount?: number;
 }
 
 export type ApiStarGift = ApiStarGiftRegular | ApiStarGiftUnique;

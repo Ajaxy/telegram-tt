@@ -69,7 +69,10 @@ const GiftModalResaleScreen: FC<OwnProps & StateProps> = ({
 
   const handleLoadMoreResellGifts = useLastCallback(() => {
     if (gift) {
-      loadResaleGifts({ giftId: gift.id });
+      const giftId = 'regularGiftId' in gift
+        ? gift.regularGiftId
+        : gift.id;
+      loadResaleGifts({ giftId });
     }
   });
 

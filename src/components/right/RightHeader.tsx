@@ -199,6 +199,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     sortType: giftsSortType,
     shouldIncludeUnlimited: shouldIncludeUnlimitedGifts,
     shouldIncludeLimited: shouldIncludeLimitedGifts,
+    shouldIncludeUpgradable: shouldIncludeUpgradableGifts,
     shouldIncludeUnique: shouldIncludeUniqueGifts,
     shouldIncludeDisplayed: shouldIncludeDisplayedGifts,
     shouldIncludeHidden: shouldIncludeHiddenGifts,
@@ -546,10 +547,24 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                     icon={shouldIncludeLimitedGifts ? 'check' : 'placeholder'}
 
                     onClick={() => updateGiftProfileFilter(
-                      { peerId: chatId, filter: { shouldIncludeLimited: !shouldIncludeLimitedGifts } },
+                      { peerId: chatId, filter: {
+                        shouldIncludeLimited: !shouldIncludeLimitedGifts,
+                      } },
                     )}
                   >
                     {lang('GiftFilterLimited')}
+                  </MenuItem>
+
+                  <MenuItem
+                    icon={shouldIncludeUpgradableGifts ? 'check' : 'placeholder'}
+
+                    onClick={() => updateGiftProfileFilter(
+                      { peerId: chatId, filter: {
+                        shouldIncludeUpgradable: !shouldIncludeUpgradableGifts,
+                      } },
+                    )}
+                  >
+                    {lang('GiftFilterUpgradable')}
                   </MenuItem>
 
                   <MenuItem

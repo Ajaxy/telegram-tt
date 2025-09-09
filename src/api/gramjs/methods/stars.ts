@@ -21,6 +21,7 @@ import {
   buildApiStarsSubscription,
   buildApiStarsTransaction,
   buildApiStarTopupOption,
+  buildApiUniqueStarGiftValueInfo,
 } from '../apiBuilders/payments';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildInputPeer,
@@ -130,7 +131,8 @@ export async function fetchSavedStarGifts({
     ...(filter && {
       sortByValue: filter.sortType === 'byValue' || undefined,
       excludeUnlimited: !filter.shouldIncludeUnlimited || undefined,
-      excludeLimited: !filter.shouldIncludeLimited || undefined,
+      excludeUpgradable: !filter.shouldIncludeUpgradable || undefined,
+      excludeUnupgradable: !filter.shouldIncludeLimited || undefined,
       excludeUnique: !filter.shouldIncludeUnique || undefined,
       excludeSaved: !filter.shouldIncludeDisplayed || undefined,
       excludeUnsaved: !filter.shouldIncludeHidden || undefined,
@@ -439,6 +441,18 @@ export function updateStarGiftPrice({
   }), {
     shouldReturnTrue: true,
   });
+}
+
+export async function fetchUniqueStarGiftValueInfo({ slug }: { slug: string }) {
+  const result = await invokeRequest(new GramJs.payments.GetUniqueStarGiftValueInfo({
+    slug,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return buildApiUniqueStarGiftValueInfo(result);
 }
 
 export async function fetchStarGiftWithdrawalUrl({

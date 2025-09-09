@@ -1,0 +1,39 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding-inline: 1rem;
+
+  text-align: center;
+}
+
+.sticker {
+  margin-bottom: 0.75rem;
+}
+
+.description {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.initialPrice {
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.starIcon {
+  margin-inline-start: 0 !important;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.footerSticker {
+  margin-inline: 0.25rem;
+}

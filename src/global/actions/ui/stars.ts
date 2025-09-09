@@ -4,9 +4,10 @@ import type { ActionReturnType } from '../../types';
 import { STARS_CURRENCY_CODE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import * as langProvider from '../../../util/oldLangProvider';
+import { callApi } from '../../../api/gramjs';
 import { addTabStateResetterAction } from '../../helpers/meta';
 import { getPrizeStarsTransactionFromGiveaway, getStarsTransactionFromGift } from '../../helpers/payments';
-import { addActionHandler, setGlobal } from '../../index';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   clearStarPayment, openStarsTransactionModal,
 } from '../../reducers';
@@ -283,7 +284,70 @@ addActionHandler('openGiftResalePriceComposerModal', (global, actions, payload):
   }, tabId);
 });
 
+addActionHandler('openGiftInMarket', (global, actions, payload): ActionReturnType => {
+  const { gift, tabId = getCurrentTabId() } = payload;
+
+  const giftModal = selectTabState(global, tabId).giftModal;
+
+  actions.closeGiftInfoValueModal({ tabId });
+  actions.closeGiftInfoModal({ tabId });
+
+  if (giftModal) {
+    return updateTabState(global, {
+      giftModal: {
+        ...giftModal,
+        selectedResaleGift: gift,
+      },
+    }, tabId);
+  }
+
+  actions.openGiftModal({
+    forUserId: global.currentUserId!,
+    selectedResaleGift: gift,
+    tabId,
+  });
+
+  return global;
+});
+
+addActionHandler('closeResaleGiftsMarket', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  actions.resetResaleGifts({ tabId });
+
+  const giftModal = selectTabState(global, tabId).giftModal;
+
+  if (giftModal) {
+    return updateTabState(global, {
+      giftModal: {
+        ...giftModal,
+        selectedResaleGift: undefined,
+      },
+    }, tabId);
+  }
+
+  return global;
+});
+
+addActionHandler('openGiftInfoValueModal', async (global, actions, payload): Promise<void> => {
+  const { gift, tabId = getCurrentTabId() } = payload;
+
+  const result = await callApi('fetchUniqueStarGiftValueInfo', { slug: gift.slug });
+  if (!result) return;
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    giftInfoValueModal: {
+      valueInfo: result,
+      gift,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
 addTabStateResetterAction('closeGiftInfoModal', 'giftInfoModal');
+
+addTabStateResetterAction('closeGiftInfoValueModal', 'giftInfoValueModal');
 
 addTabStateResetterAction('closeGiftResalePriceComposerModal', 'giftResalePriceComposerModal');
 

@@ -681,6 +681,7 @@ export type GiftProfileFilterOptions = {
   sortType: 'byDate' | 'byValue';
   shouldIncludeUnlimited: boolean;
   shouldIncludeLimited: boolean;
+  shouldIncludeUpgradable: boolean;
   shouldIncludeUnique: boolean;
   shouldIncludeDisplayed: boolean;
   shouldIncludeHidden: boolean;

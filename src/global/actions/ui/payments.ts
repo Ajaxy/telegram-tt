@@ -81,12 +81,14 @@ addActionHandler('updateGiftProfileFilter', (global, actions, payload): ActionRe
 
   if (!updatedFilter.shouldIncludeUnlimited
     && !updatedFilter.shouldIncludeLimited
-    && !updatedFilter.shouldIncludeUnique) {
+    && !updatedFilter.shouldIncludeUnique
+    && !updatedFilter.shouldIncludeUpgradable) {
     updatedFilter = {
       ...prevFilter,
       shouldIncludeUnlimited: true,
       shouldIncludeLimited: true,
       shouldIncludeUnique: true,
+      shouldIncludeUpgradable: true,
       ...filter,
     };
   }

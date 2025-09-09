@@ -17,6 +17,7 @@ import { selectPeer, selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
 import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
+import { formatCurrencyAsString } from '../../../../util/formatCurrency';
 import {
   formatStarsAsIcon, formatStarsAsText, formatTonAsIcon, formatTonAsText,
 } from '../../../../util/localization/format';
@@ -93,6 +94,9 @@ const GiftInfoModal = ({
     showNotification,
     buyStarGift,
     closeGiftModal,
+    openGiftInfoValueModal,
+    updateResaleGiftsFilter,
+    openGiftInMarket,
   } = getActions();
 
   const [isConvertConfirmOpen, openConvertConfirm, closeConvertConfirm] = useFlag();
@@ -101,6 +105,57 @@ const GiftInfoModal = ({
   const oldLang = useOldLang();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
   const [shouldPayInTon, setShouldPayInTon] = useState<boolean>(false);
+
+  const handleSymbolClick = useLastCallback(() => {
+    if (!gift || !giftAttributes?.pattern) return;
+
+    openGiftInMarket({ gift });
+    updateResaleGiftsFilter({
+      filter: {
+        sortType: 'byDate',
+        modelAttributes: [],
+        backdropAttributes: [],
+        patternAttributes: [{
+          type: 'pattern',
+          documentId: giftAttributes.pattern.sticker.id,
+        }],
+      },
+    });
+  });
+
+  const handleBackdropClick = useLastCallback(() => {
+    if (!gift || !giftAttributes?.backdrop) return;
+
+    openGiftInMarket({ gift });
+    updateResaleGiftsFilter({
+      filter: {
+        sortType: 'byDate',
+        modelAttributes: [],
+        backdropAttributes: [{
+          type: 'backdrop',
+          backdropId: giftAttributes.backdrop.backdropId,
+        }],
+        patternAttributes: [],
+      },
+    });
+  });
+
+  const handleModelClick = useLastCallback(() => {
+    if (!gift || !giftAttributes?.model) return;
+
+    openGiftInMarket({ gift });
+    updateResaleGiftsFilter({
+      filter: {
+        sortType: 'byDate',
+        modelAttributes: [{
+          type: 'model',
+          documentId: giftAttributes.model.sticker.id,
+        }],
+        backdropAttributes: [],
+        patternAttributes: [],
+      },
+    });
+  });
 
   const isOpen = Boolean(modal);
   const renderingModal = useCurrentOrPrev(modal);
@@ -234,6 +289,14 @@ const GiftInfoModal = ({
     closeConfirmModal();
     closeGiftModal();
     buyStarGift({ peerId: peer.id, slug: gift.slug, price });
+  });
+
+  const handleOpenValueModal = useLastCallback(() => {
+    if (!gift || gift.type !== 'starGiftUnique') return;
+
+    openGiftInfoValueModal({
+      gift,
+    });
   });
 
   const giftAttributes = useMemo(() => {
@@ -623,7 +686,12 @@ const GiftInfoModal = ({
         tableData.push([
           lang('GiftAttributeModel'),
           <span className={styles.uniqueAttribute}>
-            {model.name}
+            <span
+              className={styles.attributeName}
+              onClick={handleModelClick}
+            >
+              {model.name}
+            </span>
             <BadgeButton>{formatPercent(model.rarityPercent)}</BadgeButton>
           </span>,
         ]);
@@ -633,7 +701,12 @@ const GiftInfoModal = ({
         tableData.push([
           lang('GiftAttributeBackdrop'),
           <span className={styles.uniqueAttribute}>
-            {backdrop.name}
+            <span
+              className={styles.attributeName}
+              onClick={handleBackdropClick}
+            >
+              {backdrop.name}
+            </span>
             <BadgeButton>{formatPercent(backdrop.rarityPercent)}</BadgeButton>
           </span>,
         ]);
@@ -643,7 +716,12 @@ const GiftInfoModal = ({
         tableData.push([
           lang('GiftAttributeSymbol'),
           <span className={styles.uniqueAttribute}>
-            {pattern.name}
+            <span
+              className={styles.attributeName}
+              onClick={handleSymbolClick}
+            >
+              {pattern.name}
+            </span>
             <BadgeButton>{formatPercent(pattern.rarityPercent)}</BadgeButton>
           </span>,
         ]);
@@ -656,6 +734,24 @@ const GiftInfoModal = ({
           total: gift.totalCount,
         }),
       ]);
+
+      if (gift.valueAmount && gift.valueCurrency) {
+        tableData.push([
+          lang('GiftInfoValue'),
+          <span className={styles.uniqueValue}>
+            ~
+            {' '}
+            {formatCurrencyAsString(
+              gift.valueAmount,
+              gift.valueCurrency,
+              lang.code,
+            )}
+            <BadgeButton onClick={handleOpenValueModal}>
+              {lang('GiftInfoValueLinkMore')}
+            </BadgeButton>
+          </span>,
+        ]);
+      }
 
       if (originalDetails) {
         const {
@@ -782,7 +878,7 @@ const GiftInfoModal = ({
     SettingsMenuButton, isGiftUnique, renderingModal,
     collectibleEmojiStatuses, currentUserEmojiStatus, saleDateInfo,
     canBuyGift, giftOwnerTitle, isOpen, resellPrice, giftSubtitle,
-    releasedByPeer,
+    releasedByPeer, handleSymbolClick, handleBackdropClick, handleModelClick,
   ]);
 
   return (

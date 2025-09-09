@@ -26,6 +26,7 @@ import type {
   ApiStarsTransactionPeer,
   ApiStarTopupOption,
   ApiTypeCurrencyAmount,
+  ApiUniqueStarGiftValueInfo,
   BoughtPaidMedia,
 } from '../../types';
 
@@ -628,5 +629,31 @@ export function buildApiStarTopupOption(option: GramJs.TypeStarsTopupOption): Ap
     currency,
     stars: stars.toJSNumber(),
     isExtended: extended,
+  };
+}
+
+export function buildApiUniqueStarGiftValueInfo(
+  info: GramJs.payments.UniqueStarGiftValueInfo): ApiUniqueStarGiftValueInfo {
+  const {
+    lastSaleOnFragment, currency, value, initialSaleDate, initialSaleStars, initialSalePrice,
+    lastSaleDate, lastSalePrice, floorPrice, averagePrice, listedCount, fragmentListedCount,
+    fragmentListedUrl, valueIsAverage,
+  } = info;
+
+  return {
+    isLastSaleOnFragment: lastSaleOnFragment,
+    isValueAverage: valueIsAverage,
+    currency,
+    value: value.toJSNumber(),
+    initialSaleDate,
+    initialSaleStars: initialSaleStars.toJSNumber(),
+    initialSalePrice: initialSalePrice.toJSNumber(),
+    lastSaleDate,
+    lastSalePrice: lastSalePrice?.toJSNumber(),
+    floorPrice: floorPrice?.toJSNumber(),
+    averagePrice: averagePrice?.toJSNumber(),
+    listedCount,
+    fragmentListedCount,
+    fragmentListedUrl,
   };
 }
