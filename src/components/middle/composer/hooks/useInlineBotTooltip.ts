@@ -68,7 +68,7 @@ export default function useInlineBotTooltip(
     help,
   } = (usernameLowered && inlineBots?.[usernameLowered]) || {};
 
-  const isOpen = Boolean((results?.length || switchPm) && !isManuallyClosed);
+  const isOpen = Boolean((results?.length || switchPm || switchWebview) && !isManuallyClosed);
 
   useEffect(() => {
     if (!isOpen && !username) {

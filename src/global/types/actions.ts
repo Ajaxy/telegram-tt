@@ -10,6 +10,8 @@ import type {
   ApiChatType,
   ApiDisallowedGiftsSettings,
   ApiDraft,
+  ApiEmojiStatusCollectible,
+  ApiEmojiStatusType,
   ApiExportedInvite,
   ApiFormattedText,
   ApiGeoPoint,
@@ -58,7 +60,6 @@ import type {
   LinkContext,
   PrivacyVisibility,
 } from '../../api/types';
-import type { ApiEmojiStatusCollectible, ApiEmojiStatusType } from '../../api/types/users';
 import type { ApiCredentials } from '../../components/payment/PaymentModal';
 import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
 import type { ReducerAction } from '../../hooks/useReducer';

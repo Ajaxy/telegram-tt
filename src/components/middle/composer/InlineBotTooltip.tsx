@@ -124,7 +124,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
   );
   const renderedInlineBotResults = inlineBotResults?.length ? inlineBotResults : prevInlineBotResults;
 
-  if (!shouldRender || !(renderedInlineBotResults?.length || switchPm)) {
+  if (!shouldRender || !(renderedInlineBotResults?.length || switchPm || switchWebview)) {
     return undefined;
   }
 

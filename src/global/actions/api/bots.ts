@@ -18,6 +18,7 @@ import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getUsernameFromDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { pick } from '../../../util/iteratees.ts';
 import { getTranslationFn } from '../../../util/localization';
 import { formatStarsAsText } from '../../../util/localization/format';
 import { oldTranslate } from '../../../util/oldLangProvider';
@@ -29,7 +30,7 @@ import { callApi } from '../../../api/gramjs';
 import { getMainUsername } from '../../helpers';
 import {
   getWebAppKey,
-} from '../../helpers/bots';
+} from '../../helpers';
 import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
@@ -1246,27 +1247,25 @@ async function searchInlineBot<T extends GlobalState>(global: T, {
   });
 
   global = getGlobal();
-  const newInlineBotData = selectTabState(global, tabId).inlineBots.byUsername[username];
+  const currentInlineBotSettings = selectTabState(global, tabId).inlineBots.byUsername[username];
   global = replaceInlineBotsIsLoading(global, false, tabId);
-  if (!result || !newInlineBotData || query !== newInlineBotData.query) {
+  if (!result || !currentInlineBotSettings || query !== currentInlineBotSettings.query) {
     setGlobal(global);
     return;
   }
 
-  const currentIds = new Set((newInlineBotData.results || []).map((data) => data.id));
+  const currentIds = new Set((currentInlineBotSettings.results || []).map((data) => data.id));
   const newResults = result.results.filter((data) => !currentIds.has(data.id));
 
   global = replaceInlineBotSettings(global, username, {
-    ...newInlineBotData,
-    help: result.help,
+    ...currentInlineBotSettings,
+    ...pick(result, ['help', 'switchPm', 'switchWebview']),
     cacheTime: Date.now() + result.cacheTime * 1000,
     ...(newResults.length && { isGallery: result.isGallery }),
-    ...(result.switchPm && { switchPm: result.switchPm }),
-    ...(result.switchWebview && { switchWebview: result.switchWebview }),
     canLoadMore: result.results.length > 0 && Boolean(result.nextOffset),
-    results: newInlineBotData.offset === '' || newInlineBotData.offset === result.nextOffset
+    results: currentInlineBotSettings.offset === '' || currentInlineBotSettings.offset === result.nextOffset
       ? result.results
-      : (newInlineBotData.results || []).concat(newResults),
+      : (currentInlineBotSettings.results || []).concat(newResults),
     offset: newResults.length ? result.nextOffset : '',
   }, tabId);
 
