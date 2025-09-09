@@ -3183,19 +3183,21 @@ async function loadChats(
     );
   }
 
-  const idsToUpdateDraft = isFullDraftSync ? result.chatIds : Object.keys(result.draftsById);
-  idsToUpdateDraft.forEach((chatId) => {
-    const draft = result.draftsById[chatId];
-    const thread = selectThread(global, chatId, MAIN_THREAD_ID);
+  if (listType === 'active' || listType === 'archived') {
+    const idsToUpdateDraft = isFullDraftSync ? result.chatIds : Object.keys(result.draftsById);
+    idsToUpdateDraft.forEach((chatId) => {
+      const draft = result.draftsById[chatId];
+      const thread = selectThread(global, chatId, MAIN_THREAD_ID);
 
-    if (!draft && !thread) return;
+      if (!draft && !thread) return;
 
-    if (!selectDraft(global, chatId, MAIN_THREAD_ID)?.isLocal) {
-      global = replaceThreadParam(
-        global, chatId, MAIN_THREAD_ID, 'draft', draft,
-      );
-    }
-  });
+      if (!selectDraft(global, chatId, MAIN_THREAD_ID)?.isLocal) {
+        global = replaceThreadParam(
+          global, chatId, MAIN_THREAD_ID, 'draft', draft,
+        );
+      }
+    });
+  }
 
   if ((chatIds.length === 0 || chatIds.length === result.totalChatCount) && !global.chats.isFullyLoaded[listType]) {
     global = {

@@ -25,8 +25,8 @@ import { ChatAnimationTypes } from './useChatAnimationType';
 import useMessageMediaHash from '../../../../hooks/media/useMessageMediaHash';
 import useThumbnail from '../../../../hooks/media/useThumbnail';
 import useEnsureStory from '../../../../hooks/useEnsureStory';
+import useLang from '../../../../hooks/useLang';
 import useMedia from '../../../../hooks/useMedia';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import ChatForumLastMessage from '../../../common/ChatForumLastMessage';
 import Icon from '../../../common/icons/Icon';
@@ -73,7 +73,7 @@ export default function useChatListEntry({
   withInterfaceAnimations?: boolean;
   noForumTitle?: boolean;
 }) {
-  const oldLang = useOldLang();
+  const lang = useLang();
   const ref = useRef<HTMLDivElement>();
 
   const storyData = lastMessage?.content.storyData;
@@ -105,8 +105,8 @@ export default function useChatListEntry({
 
     if (canDisplayDraft) {
       return (
-        <p className="last-message" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
-          <span className="draft">{oldLang('Draft')}</span>
+        <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
+          <span className="draft">{lang('ChatDraftPrefix')}</span>
           <span className="last-message-summary" dir="auto">
             {renderTextWithEntities({
               text: draft.text?.text || '',
@@ -124,11 +124,11 @@ export default function useChatListEntry({
     }
 
     const senderName = lastMessageSender
-      ? getMessageSenderName(oldLang, chatId, lastMessageSender)
+      ? getMessageSenderName(lang, chatId, lastMessageSender)
       : undefined;
 
     return (
-      <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
+      <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
         {senderName && (
           <>
             <span className="sender-name">{renderText(senderName)}</span>
@@ -143,7 +143,7 @@ export default function useChatListEntry({
       </p>
     );
   }, [
-    chat, chatId, draft, isRoundVideo, isTopic, oldLang, lastMessage, lastMessageSender, lastMessageTopic,
+    chat, chatId, draft, isRoundVideo, isTopic, lang, lastMessage, lastMessageSender, lastMessageTopic,
     mediaBlobUrl, mediaThumbnail, observeIntersection, typingStatus, isSavedDialog, isPreview,
   ]);
 

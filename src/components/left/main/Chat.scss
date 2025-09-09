@@ -260,10 +260,9 @@
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+
       .draft {
-        &::after {
-          content: ": ";
-        }
+        margin-inline-end: 0.5ch;
       }
 
       .colon, .chat-prefix-icon {
@@ -271,9 +270,8 @@
       }
 
       .chat-prefix-icon {
-        transform: translateY(1px);
         display: inline-block;
-        font-size: 0.875rem;
+        align-self: center;
         color: var(--color-list-icon);
       }
 

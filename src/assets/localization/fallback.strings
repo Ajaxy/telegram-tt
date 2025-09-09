@@ -321,6 +321,7 @@
 "ArchivedChats" = "Archived Chats";
 "FilterAddTo" = "Add to folder";
 "Draft" = "Draft";
+"ChatDraftPrefix" = "Draft:";
 "FilterAllChatsShort" = "All";
 "FilterAllChats" = "All Chats";
 "CreateNewContact" = "Create New Contact";
@@ -2024,6 +2025,7 @@
 "NotificationMessageNotSupportedInFrozenAccount" = "This action is not available";
 "NotificationGiftIsSale" = "{gift} is now for sale!";
 "NotificationGiftIsUnlist" = "{gift} is removed from sale.";
+"NotificationMessageTextHidden" = "New message";
 "GiftRibbonSale" = "sale";
 "ButtonBuyGift" = "Buy for {stars}";
 "GiftInfoBuyGift" = "{user} is selling this gift and you can buy it.";

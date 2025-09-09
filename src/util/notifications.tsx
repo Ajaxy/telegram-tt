@@ -31,6 +31,7 @@ import { callApi } from '../api/gramjs';
 import { IS_ELECTRON, IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './browser/windowEnvironment';
 import jsxToHtml from './element/jsxToHtml';
 import { buildCollectionByKey } from './iteratees';
+import { getTranslationFn } from './localization';
 import * as mediaLoader from './mediaLoader';
 import { oldTranslate } from './oldLangProvider';
 import { debounce } from './schedulers';
@@ -313,7 +314,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     !isScreenLocked
     && getShouldShowMessagePreview(chat, selectNotifyDefaults(global), selectNotifyException(global, chat.id))
   ) {
-    const senderName = sender ? getMessageSenderName(oldTranslate, chat.id, sender) : undefined;
+    const senderName = sender ? getMessageSenderName(getTranslationFn(), chat.id, sender) : undefined;
     let summary = jsxToHtml(<span><MessageSummary message={message} /></span>)[0].textContent || '';
 
     if (hasReaction) {
@@ -323,7 +324,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
 
     body = senderName ? `${senderName}: ${summary}` : summary;
   } else {
-    body = 'New message';
+    body = getTranslationFn()('NotificationMessageTextHidden');
   }
 
   let title = isScreenLocked ? APP_NAME : getChatTitle(oldTranslate, chat, isSelf);

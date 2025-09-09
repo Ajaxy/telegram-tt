@@ -279,6 +279,7 @@ export interface LangPair {
   'ArchivedChats': undefined;
   'FilterAddTo': undefined;
   'Draft': undefined;
+  'ChatDraftPrefix': undefined;
   'FilterAllChatsShort': undefined;
   'FilterAllChats': undefined;
   'CreateNewContact': undefined;
@@ -1545,6 +1546,7 @@ export interface LangPair {
   'ActionPaidMessagePriceFreeYou': undefined;
   'NotificationTitleNotSupportedInFrozenAccount': undefined;
   'NotificationMessageNotSupportedInFrozenAccount': undefined;
+  'NotificationMessageTextHidden': undefined;
   'GiftRibbonSale': undefined;
   'StarsGiftBought': undefined;
   'GiftSellTitle': undefined;
