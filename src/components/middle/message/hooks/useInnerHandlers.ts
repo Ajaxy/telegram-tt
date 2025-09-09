@@ -1,15 +1,12 @@
 import { getActions } from '../../../../global';
 
-import type {
-  ApiMessage, ApiPeer, ApiStory, ApiTopic, ApiUser,
-  ApiWebPage,
-} from '../../../../api/types';
+import type { ApiMessage, ApiPeer, ApiStory, ApiTopic, ApiUser, ApiWebPage } from '../../../../api/types';
 import type { OldLangFn } from '../../../../hooks/useOldLang';
 import type { IAlbum, ThreadId } from '../../../../types';
 import { MAIN_THREAD_ID } from '../../../../api/types';
 import { MediaViewerOrigin } from '../../../../types';
 
-import { getMessagePhoto, getWebPagePhoto, getWebPageVideo } from '../../../../global/helpers';
+import { getMainUsername, getMessagePhoto, getWebPagePhoto, getWebPageVideo } from '../../../../global/helpers';
 import { getMessageReplyInfo } from '../../../../global/helpers/replies';
 import { tryParseDeepLink } from '../../../../util/deepLinkParser';
 
@@ -58,7 +55,7 @@ export default function useInnerHandlers({
   lastPlaybackTimestamp?: number;
 }) {
   const {
-    openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
+    openChat, openChatWithDraft, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
     markMessagesRead, cancelUploadMedia, sendPollVote, openForwardMenu,
     openChatLanguageModal, openThread, openStoryViewer, searchChatMediaMessages,
   } = getActions();
@@ -90,7 +87,13 @@ export default function useInnerHandlers({
       return;
     }
 
-    openChat({ id: botSender.id });
+    openChatWithDraft({
+      chatId,
+      threadId,
+      text: {
+        text: `@${getMainUsername(botSender)} `,
+      },
+    });
   });
 
   const handleReplyClick = useLastCallback((): void => {
