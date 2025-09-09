@@ -256,7 +256,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
             isText
             onClick={handleClearPaymentError}
           >
-            {oldLang('OK')}
+            {lang('OK')}
           </Button>
         </div>
       </Modal>
@@ -540,10 +540,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
         onCloseAnimationEnd={handleModalClose}
       >
         <p>
-          Sorry, Telegram Web A doesn&apos;t support payments with this provider yet.
-          {' '}
-          <br />
-          Please use one of our mobile apps to do this.
+          {lang('PaymentsProvidesNotSupported', undefined, { withNodes: true, renderTextFilters: ['br'] })}
         </p>
         <div className="dialog-buttons mt-2">
           <Button
@@ -573,7 +570,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
           round
           size="smaller"
           onClick={step === PaymentStep.Checkout ? closeModal : handleBackClick}
-          ariaLabel="Close"
+          ariaLabel={lang('Close')}
         >
           <Icon name={step === PaymentStep.Checkout ? 'close' : 'arrow-left'} />
         </Button>

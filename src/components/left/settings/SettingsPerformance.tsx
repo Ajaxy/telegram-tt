@@ -182,7 +182,7 @@ function SettingsPerformance({
       </div>
 
       <div className="settings-item-simple settings-item__with-shifted-dropdown">
-        <h3 className="settings-item-header" dir="auto">Resource-Intensive Processes</h3>
+        <h3 className="settings-item-header" dir="auto">{lang('SettingsPerformanceGranularTitle')}</h3>
 
         {PERFORMANCE_OPTIONS.map(([sectionName, options], index) => {
           return (

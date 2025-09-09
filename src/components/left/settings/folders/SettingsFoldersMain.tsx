@@ -20,7 +20,7 @@ import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEn
 
 import { useFolderManagerForChatsCount } from '../../../../hooks/useFolderManager';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useOldLang from '../../../../hooks/useOldLang';
+import useLang from '../../../../hooks/useLang';
 import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
 
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
@@ -117,7 +117,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     onCreateFolder();
   }, [foldersById, maxFolders, onCreateFolder, openLimitReachedModal]);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,
@@ -226,7 +226,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
 
         {canCreateNewFolder && (
           <Button
-          // TODO: Refactor button component to handle icon placemenet with props
+          // TODO: Move icon into button prop
             className="settings-button with-icon"
             color="primary"
             pill
@@ -349,7 +349,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
             );
           }) : userFolders && !userFolders.length ? (
             <p className="settings-item-description my-4" dir="auto">
-              You have no folders yet.
+              {lang('SettingsFoldersEmpty')}
             </p>
           ) : <Loading />}
         </div>

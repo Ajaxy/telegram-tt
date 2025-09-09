@@ -19,8 +19,8 @@ import renderText from '../helpers/renderText';
 
 import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import ListItem from '../../ui/ListItem';
 import StickerView from '../StickerView';
@@ -58,7 +58,7 @@ const UserBirthday = ({
   const animationPlayedRef = useRef(false);
   const [isPlayingAnimation, playAnimation, stopAnimation] = useFlag();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const {
     formattedDate,
@@ -139,7 +139,17 @@ const UserBirthday = ({
     }
   }, [isInSettings, isPlayingAnimation]);
 
-  const valueKey = `ProfileBirthday${isToday ? 'Today' : ''}Value${age ? 'Year' : ''}`;
+  const value = useMemo(() => {
+    if (age) {
+      return lang(
+        `ProfileBirthday${isToday ? 'Today' : ''}ValueYear`,
+        { date: formattedDate, age },
+        { pluralValue: age },
+      );
+    }
+
+    return lang(`ProfileBirthday${isToday ? 'Today' : ''}Value`, { date: formattedDate });
+  }, [age, formattedDate, isToday, lang]);
 
   const canGiftPremium = isToday && !user.isPremium && !user.isSelf && !isPremiumPurchaseBlocked;
 
@@ -175,7 +185,7 @@ const UserBirthday = ({
         onSecondaryIconClick={handleOpenGiftModal}
       >
         <div className="title" dir={lang.isRtl ? 'rtl' : undefined}>
-          {renderText(lang(valueKey, [formattedDate, age], undefined, age))}
+          {renderText(value)}
         </div>
         <span className="subtitle">{lang(isToday ? 'ProfileBirthdayToday' : 'ProfileBirthday')}</span>
       </ListItem>

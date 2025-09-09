@@ -321,9 +321,10 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   }
 
   function getHeaderDescription() {
-    if (gift) {
-      const perUserTotal = gift.type !== 'starGiftUnique' ? gift.perUserTotal : 0;
-      return lang('DescriptionGiftPremiumRequired', { count: perUserTotal });
+    if (gift && gift.type !== 'starGiftUnique' && gift.perUserTotal) {
+      return lang('DescriptionGiftPremiumRequired2', { count: gift.perUserTotal }, {
+        pluralValue: gift.perUserTotal,
+      });
     }
 
     if (isGift) {

@@ -7,11 +7,11 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ThreadId } from '../../types';
 import { ApiMessageEntityTypes } from '../../api/types';
 
-import { CONTENT_NOT_SUPPORTED } from '../../config';
 import { extractMessageText, stripCustomEmoji } from '../../global/helpers';
 import trimText from '../../util/trimText';
 import { insertTextEntity, renderTextWithEntities } from './helpers/renderTextWithEntities';
 
+import useLang from '../../hooks/useLang';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useUniqueId from '../../hooks/useUniqueId';
 
@@ -67,6 +67,8 @@ function MessageText({
 
   const textCacheBusterRef = useRef(0);
 
+  const lang = useLang();
+
   const formattedText = translatedText || extractMessageText(messageOrStory, inChatList);
   const adaptedFormattedText = isForAnimation && formattedText ? stripCustomEmoji(formattedText) : formattedText;
   const { text, entities } = adaptedFormattedText || {};
@@ -106,7 +108,7 @@ function MessageText({
   }, [entitiesWithFocusedQuote]) || 0;
 
   if (!text && !canBeEmpty) {
-    return <span className="content-unsupported">{CONTENT_NOT_SUPPORTED}</span>;
+    return <span className="content-unsupported">{lang('MessageUnsupported')}</span>;
   }
 
   return (

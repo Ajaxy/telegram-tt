@@ -284,7 +284,7 @@ const SettingsTwoFa: FC<OwnProps & StateProps> = ({
         <SettingsTwoFaPassword
           isLoading={isLoading}
           error={errorKey && lang.withRegular(errorKey)}
-          clearError={clearTwoFaError}
+          onClearError={clearTwoFaError}
           hint={hint}
           onSubmit={handleChangePasswordCurrent}
           isActive={isActive || [
@@ -344,7 +344,7 @@ const SettingsTwoFa: FC<OwnProps & StateProps> = ({
         <SettingsTwoFaPassword
           isLoading={isLoading}
           error={errorKey && lang.withRegular(errorKey)}
-          clearError={clearTwoFaError}
+          onClearError={clearTwoFaError}
           hint={hint}
           onSubmit={handleTurnOff}
           isActive={isActive}
@@ -357,7 +357,7 @@ const SettingsTwoFa: FC<OwnProps & StateProps> = ({
         <SettingsTwoFaPassword
           isLoading={isLoading}
           error={errorKey && lang.withRegular(errorKey)}
-          clearError={clearTwoFaError}
+          onClearError={clearTwoFaError}
           hint={hint}
           onSubmit={handleRecoveryEmailCurrentPassword}
           isActive={isActive || [

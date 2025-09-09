@@ -1,13 +1,12 @@
 import { getGlobal } from '../../../global';
 
 import type { ApiMessage, ApiSponsoredMessage } from '../../../api/types';
-import type { OldLangFn } from '../../../hooks/useOldLang';
 import type { TextPart, ThreadId } from '../../../types';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
 import {
   getMessageStatefulContent,
-  getMessageText,
+  getMessageTextWithFallback,
 } from '../../../global/helpers';
 import {
   getMessageSummaryDescription,
@@ -16,6 +15,7 @@ import {
   TRUNCATED_SUMMARY_LENGTH,
 } from '../../../global/helpers/messageSummary';
 import { getMessageKey } from '../../../util/keys/messageKey';
+import { getTranslationFn, type LangFn } from '../../../util/localization';
 import trimText from '../../../util/trimText';
 import renderText from './renderText';
 import { renderTextWithEntities } from './renderTextWithEntities';
@@ -48,7 +48,7 @@ export function renderMessageText({
   const { text, entities } = message.content.text || {};
 
   if (!text) {
-    const contentNotSupportedText = getMessageText(message)?.text;
+    const contentNotSupportedText = getMessageTextWithFallback(getTranslationFn(), message)?.text;
     return contentNotSupportedText ? [trimText(contentNotSupportedText, truncateLength)] : undefined;
   }
 
@@ -73,7 +73,7 @@ export function renderMessageText({
 
 // TODO Use Message Summary component instead
 export function renderMessageSummary(
-  lang: OldLangFn,
+  lang: LangFn,
   message: ApiMessage,
   noEmoji = false,
   highlight?: string,

@@ -16,8 +16,8 @@ import stopEvent from '../../../util/stopEvent';
 import { INPUT_CUSTOM_EMOJI_SELECTOR } from './helpers/customEmoji';
 
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useVirtualBackdrop from '../../../hooks/useVirtualBackdrop';
 
@@ -70,6 +70,8 @@ const TextFormatter: FC<OwnProps> = ({
   const [isEditingLink, setIsEditingLink] = useState(false);
   const [inputClassName, setInputClassName] = useState<string | undefined>();
   const [selectedTextFormats, setSelectedTextFormats] = useState<ISelectedTextFormats>({});
+
+  const lang = useLang();
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
   useVirtualBackdrop(
@@ -338,7 +340,7 @@ const TextFormatter: FC<OwnProps> = ({
     document.execCommand(
       'insertHTML',
       false,
-      `<a href=${formattedLinkUrl} class="text-entity-link" dir="auto">${text}</a>`,
+      `<a href="${formattedLinkUrl}" class="text-entity-link" dir="auto">${text}</a>`,
     );
     onClose();
   });
@@ -377,10 +379,9 @@ const TextFormatter: FC<OwnProps> = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleKeyDown]);
 
-  const lang = useOldLang();
-
   function handleContainerKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key === 'Enter' && isLinkControlOpen) {
+      if (!linkUrl.trim()) return;
       handleLinkUrlConfirm();
       e.preventDefault();
     }
@@ -417,7 +418,7 @@ const TextFormatter: FC<OwnProps> = ({
       <div className="TextFormatter-buttons">
         <Button
           color="translucent"
-          ariaLabel="Spoiler text"
+          ariaLabel={lang('FormattingSpoilerAria')}
           className={getFormatButtonClassName('spoiler')}
           onClick={handleSpoilerText}
         >
@@ -426,7 +427,7 @@ const TextFormatter: FC<OwnProps> = ({
         <div className="TextFormatter-divider" />
         <Button
           color="translucent"
-          ariaLabel="Bold text"
+          ariaLabel={lang('FormattingBoldAria')}
           className={getFormatButtonClassName('bold')}
           onClick={handleBoldText}
         >
@@ -434,7 +435,7 @@ const TextFormatter: FC<OwnProps> = ({
         </Button>
         <Button
           color="translucent"
-          ariaLabel="Italic text"
+          ariaLabel={lang('FormattingItalicAria')}
           className={getFormatButtonClassName('italic')}
           onClick={handleItalicText}
         >
@@ -442,7 +443,7 @@ const TextFormatter: FC<OwnProps> = ({
         </Button>
         <Button
           color="translucent"
-          ariaLabel="Underlined text"
+          ariaLabel={lang('FormattingUnderlineAria')}
           className={getFormatButtonClassName('underline')}
           onClick={handleUnderlineText}
         >
@@ -450,7 +451,7 @@ const TextFormatter: FC<OwnProps> = ({
         </Button>
         <Button
           color="translucent"
-          ariaLabel="Strikethrough text"
+          ariaLabel={lang('FormattingStrikethroughAria')}
           className={getFormatButtonClassName('strikethrough')}
           onClick={handleStrikethroughText}
         >
@@ -458,14 +459,14 @@ const TextFormatter: FC<OwnProps> = ({
         </Button>
         <Button
           color="translucent"
-          ariaLabel="Monospace text"
+          ariaLabel={lang('FormattingMonospaceAria')}
           className={getFormatButtonClassName('monospace')}
           onClick={handleMonospaceText}
         >
           <Icon name="monospace" />
         </Button>
         <div className="TextFormatter-divider" />
-        <Button color="translucent" ariaLabel={lang('TextFormat.AddLinkTitle')} onClick={openLinkControl}>
+        <Button color="translucent" ariaLabel={lang('FormattingAddLinkAria')} onClick={openLinkControl}>
           <Icon name="link" />
         </Button>
       </div>
@@ -485,7 +486,7 @@ const TextFormatter: FC<OwnProps> = ({
               className="TextFormatter-link-url-input"
               type="text"
               value={linkUrl}
-              placeholder="Enter URL..."
+              placeholder={lang('FormattingEnterUrl')}
               autoComplete="off"
               inputMode="url"
               dir="auto"

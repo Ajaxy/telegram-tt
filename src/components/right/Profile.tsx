@@ -601,7 +601,7 @@ const Profile: FC<OwnProps & StateProps> = ({
           className="content empty-list"
         >
           {!noSpinner && !forceRenderHiddenMembers && <Spinner />}
-          {forceRenderHiddenMembers && <NothingFound text="You have no access to group members list." />}
+          {forceRenderHiddenMembers && <NothingFound text={lang('ChatMemberListNoAccess')} />}
         </div>
       );
     }
@@ -617,7 +617,7 @@ const Profile: FC<OwnProps & StateProps> = ({
 
       switch (resultType) {
         case 'members':
-          text = areMembersHidden ? 'You have no access to group members list.' : 'No members found';
+          text = areMembersHidden ? lang('ChatMemberListNoAccess') : lang('NoMembersFound');
           break;
         case 'commonChats':
           text = oldLang('NoGroupsInCommon');

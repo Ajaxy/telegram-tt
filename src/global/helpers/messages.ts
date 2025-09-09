@@ -17,7 +17,6 @@ import type { GlobalState } from '../types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  CONTENT_NOT_SUPPORTED,
   LOTTIE_STICKER_MIME_TYPE,
   RE_LINK_TEMPLATE,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -95,7 +94,11 @@ export function groupStatefulContent({
 }
 
 export function getMessageText(message: MediaContainer) {
-  return hasMessageText(message) ? message.content.text || { text: CONTENT_NOT_SUPPORTED } : undefined;
+  return hasMessageText(message) ? message.content.text : undefined;
+}
+
+export function getMessageTextWithFallback(lang: LangFn, message: MediaContainer) {
+  return hasMessageText(message) ? message.content.text || { text: lang('MessageUnsupported') } : undefined;
 }
 
 export function getMessageCustomShape(message: ApiMessage): boolean {

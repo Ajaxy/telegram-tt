@@ -12,7 +12,7 @@ import {
 } from '../../../config';
 import {
   getMainUsername,
-  getMessageInvoice, getMessageText, isChatChannel,
+  getMessageInvoice, getMessageTextWithFallback, isChatChannel,
 } from '../../../global/helpers';
 import { getMessageContent } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
@@ -116,7 +116,7 @@ const ActionMessageText = ({
     switch (action.type) {
       case 'pinMessage': {
         if (replyMessage) {
-          const formattedText = getMessageText(replyMessage);
+          const formattedText = getMessageTextWithFallback(lang, replyMessage);
           if (formattedText) {
             const textLink = renderMessageLink(
               replyMessage,

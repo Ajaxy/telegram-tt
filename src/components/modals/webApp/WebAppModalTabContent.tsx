@@ -1056,7 +1056,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
         )}
         style={frameStyle}
         src={url}
-        title={`${bot?.firstName} Web App`}
+        title={lang('AriaMiniApp', { bot: bot?.firstName })}
         sandbox={SANDBOX_ATTRIBUTES}
         allow="camera; microphone; geolocation; clipboard-write;"
         allowFullScreen

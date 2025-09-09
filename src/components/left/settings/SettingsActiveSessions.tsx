@@ -11,6 +11,7 @@ import getSessionIcon from './helpers/getSessionIcon';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -44,7 +45,8 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
     changeSessionTtl,
   } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
   const [openedSessionHash, setOpenedSessionHash] = useState<string | undefined>();
   const [isModalOpen, openModal, closeModal] = useFlag();
@@ -80,21 +82,21 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
 
   const AUTO_TERMINATE_OPTIONS = useMemo(() => {
     const options = [{
-      label: lang('Weeks', 1, 'i'),
+      label: lang('Weeks', { count: 1 }, { pluralValue: 1 }),
       value: '7',
     }, {
-      label: lang('Months', 1, 'i'),
+      label: lang('Months', { count: 1 }, { pluralValue: 1 }),
       value: '30',
     }, {
-      label: lang('Months', 3, 'i'),
+      label: lang('Months', { count: 3 }, { pluralValue: 3 }),
       value: '90',
     }, {
-      label: lang('Months', 6, 'i'),
+      label: lang('Months', { count: 6 }, { pluralValue: 6 }),
       value: '183',
     }];
     if (ttlDays && ttlDays >= 365) {
       options.push({
-        label: lang('Years', 1, 'i'),
+        label: lang('Years', { count: 1 }, { pluralValue: 1 }),
         value: '365',
       });
     }
@@ -144,7 +146,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
     return (
       <div className="settings-item">
         <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          {lang('AuthSessions.CurrentSession')}
+          {lang('AuthSessionsCurrentSession')}
         </h4>
 
         <ListItem narrow inactive icon={`device-${getSessionIcon(session)}`} iconClassName="icon-device">
@@ -224,7 +226,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
         ripple
         narrow
         contextActions={[{
-          title: 'Terminate',
+          title: lang('SessionTerminate'),
           icon: 'stop',
           destructive: true,
           handler: () => {
@@ -236,7 +238,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
         onClick={() => { handleOpenSessionModal(session.hash); }}
       >
         <div className="multiline-item full-size" dir="auto">
-          <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
+          <span className="date">{formatPastTimeShort(oldLang, session.dateActive * 1000)}</span>
           <span className="title">{session.deviceModel}</span>
           <span className="subtitle black tight">
             {session.appName}

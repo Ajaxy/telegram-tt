@@ -3,7 +3,6 @@ import { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiMessage, StatisticsMessageInteractionCounter } from '../../../api/types';
-import type { OldLangFn } from '../../../hooks/useOldLang';
 
 import {
   getMessageRoundVideo,
@@ -11,12 +10,13 @@ import {
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateTimeToString } from '../../../util/dates/dateFormat';
+import { type LangFn } from '../../../util/localization';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import useMessageMediaHash from '../../../hooks/media/useMessageMediaHash';
 import useThumbnail from '../../../hooks/media/useThumbnail';
+import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import StatisticsRecentPostMeta from './StatisticsRecentPostMeta';
@@ -29,7 +29,7 @@ export type OwnProps = {
 };
 
 const StatisticsRecentMessage: FC<OwnProps> = ({ postStatistic, message }) => {
-  const lang = useOldLang();
+  const lang = useLang();
   const { toggleMessageStatistics } = getActions();
 
   const thumbDataUri = useThumbnail(message);
@@ -54,7 +54,11 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ postStatistic, message }) => {
           {renderSummary(lang, message, mediaBlobUrl || thumbDataUri, isRoundVideo)}
         </div>
         <div className={styles.meta}>
-          {lang('ChannelStats.ViewsCount', postStatistic.viewsCount, 'i')}
+          {lang(
+            'ChannelStatsViewsCount',
+            { count: postStatistic.viewsCount },
+            { pluralValue: postStatistic.viewsCount },
+          )}
         </div>
       </div>
 
@@ -68,7 +72,7 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ postStatistic, message }) => {
   );
 };
 
-function renderSummary(lang: OldLangFn, message: ApiMessage, blobUrl?: string, isRoundVideo?: boolean) {
+function renderSummary(lang: LangFn, message: ApiMessage, blobUrl?: string, isRoundVideo?: boolean) {
   if (!blobUrl) {
     return renderMessageSummary(lang, message);
   }

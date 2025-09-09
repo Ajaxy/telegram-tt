@@ -6,6 +6,8 @@ import {
 
 import buildClassName from '../../util/buildClassName';
 
+import useLang from '../../hooks/useLang';
+
 import Icon from '../common/icons/Icon';
 import CropModal from './CropModal';
 
@@ -20,7 +22,7 @@ interface OwnProps {
 }
 
 const AvatarEditable: FC<OwnProps> = ({
-  title = 'Change your profile picture',
+  title,
   disabled,
   isForForum,
   currentAvatarBlobUrl,
@@ -28,6 +30,8 @@ const AvatarEditable: FC<OwnProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | undefined>();
   const [croppedBlobUrl, setCroppedBlobUrl] = useState<string | undefined>(currentAvatarBlobUrl);
+
+  const lang = useLang();
 
   useEffect(() => {
     setCroppedBlobUrl(currentAvatarBlobUrl);
@@ -70,7 +74,7 @@ const AvatarEditable: FC<OwnProps> = ({
         className={labelClassName}
         role="button"
         tabIndex={0}
-        title={title}
+        title={title || lang('ChangeYourProfilePicture')}
       >
         <input
           type="file"
@@ -78,7 +82,7 @@ const AvatarEditable: FC<OwnProps> = ({
           accept="image/png, image/jpeg"
         />
         <Icon name="camera-add" />
-        {croppedBlobUrl && <img src={croppedBlobUrl} draggable={false} alt="Avatar" />}
+        {croppedBlobUrl && <img src={croppedBlobUrl} draggable={false} alt="" />}
       </label>
       <CropModal file={selectedFile} onClose={handleModalClose} onChange={handleAvatarCrop} />
     </div>

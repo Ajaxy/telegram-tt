@@ -1,13 +1,13 @@
 import type { ApiMessage } from '../../api/types';
-import type { OldLangFn } from '../../hooks/useOldLang';
 
+import { type LangFn } from '../../util/localization';
 import { renderMessageText } from '../../components/common/helpers/renderMessageText';
 import { getGlobal } from '..';
 import { getMessageStatefulContent } from './messages';
 import { getMessageSummaryDescription, getMessageSummaryEmoji } from './messageSummary';
 
 export function renderMessageSummaryHtml(
-  lang: OldLangFn,
+  lang: LangFn,
   message: ApiMessage,
 ) {
   const global = getGlobal();

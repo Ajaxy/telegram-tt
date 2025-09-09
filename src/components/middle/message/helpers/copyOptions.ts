@@ -21,6 +21,7 @@ import {
   copyTextToClipboard,
 } from '../../../../util/clipboard';
 import getMessageIdsForSelectedText from '../../../../util/getMessageIdsForSelectedText';
+import { getTranslationFn } from '../../../../util/localization';
 import * as mediaLoader from '../../../../util/mediaLoader';
 import { renderMessageText } from '../../../common/helpers/renderMessageText';
 
@@ -99,7 +100,7 @@ export function getMessageCopyOptions(
           if (clipboardText) {
             copyHtmlToClipboard(
               clipboardText.join(''),
-              getMessageTextWithSpoilers(message, statefulContent)!,
+              getMessageTextWithSpoilers(getTranslationFn(), message, statefulContent)!,
             );
           }
         }

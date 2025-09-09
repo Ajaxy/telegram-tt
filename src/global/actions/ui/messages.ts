@@ -17,8 +17,7 @@ import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import { copyHtmlToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { compact, findLast } from '../../../util/iteratees';
-import * as langProvider from '../../../util/oldLangProvider';
-import { oldTranslate } from '../../../util/oldLangProvider';
+import { getTranslationFn } from '../../../util/localization';
 import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import { getServerTime } from '../../../util/serverTime';
 import versionNotification from '../../../versionNotification.txt';
@@ -414,7 +413,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
 
   const chat = selectChat(global, chatId);
   if (!chat) {
-    actions.showNotification({ message: oldTranslate('Conversation.ErrorInaccessibleMessage'), tabId });
+    actions.showNotification({ message: { key: 'ErrorFocusInaccessibleMessage' }, tabId });
     return undefined;
   }
 
@@ -719,8 +718,9 @@ addActionHandler('toggleMessageSelection', (global, actions, payload): ActionRet
   if (global.shouldShowContextMenuHint) {
     actions.disableContextMenuHint();
     actions.showNotification({
-      // eslint-disable-next-line @stylistic/max-len
-      message: `To **edit** or **reply**, close this menu. Then ${IS_TOUCH_ENV ? 'long tap' : 'right click'} on a message.`,
+      message: {
+        key: IS_TOUCH_ENV ? 'ContextMenuHintTouch' : 'ContextMenuHintMouse',
+      },
       tabId,
     });
   }
@@ -1050,7 +1050,7 @@ addActionHandler('closeSuggestedPostApprovalModal', (global, actions, payload): 
 
 function copyTextForMessages(global: GlobalState, chatId: string, messageIds: number[]) {
   const { type: messageListType, threadId } = selectCurrentMessageList(global) || {};
-  const lang = langProvider.oldTranslate;
+  const lang = getTranslationFn();
 
   const chat = selectChat(global, chatId);
 

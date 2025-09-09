@@ -36,7 +36,7 @@ const AuthPassword: FC<StateProps> = ({
         <h1>{lang('LoginHeaderPassword')}</h1>
         <p className="note">{lang('LoginEnterPasswordDescription')}</p>
         <PasswordForm
-          clearError={clearAuthErrorKey}
+          onClearError={clearAuthErrorKey}
           error={authErrorKey && lang.withRegular(authErrorKey)}
           hint={authHint}
           isLoading={authIsLoading}

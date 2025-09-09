@@ -12,7 +12,7 @@ import { throttle } from '../../../util/schedulers';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import useAppLayout from '../../../hooks/useAppLayout';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import NothingFound from '../../common/NothingFound';
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -53,7 +53,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
 }) => {
   const { searchMessagesGlobal, openThread } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const { isMobile } = useAppLayout();
 
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
@@ -133,14 +133,14 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
         {nothingFound && (
           <NothingFound
             withSticker
-            text={lang('ChatList.Search.NoResults')}
-            description={lang('ChatList.Search.NoResultsDescription')}
+            text={lang('ChatListSearchNoResults')}
+            description={lang('ChatListSearchNoResultsDescription')}
           />
         )}
         {Boolean(foundTopicIds?.length) && (
           <div className="pb-2">
             <h3 className="section-heading topic-search-heading" dir={lang.isRtl ? 'auto' : undefined}>
-              {lang('Topics')}
+              {lang('SearchResultTopics')}
             </h3>
             {foundTopicIds.map((id) => {
               return (

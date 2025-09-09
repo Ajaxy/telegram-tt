@@ -3,21 +3,20 @@ import type { TeactNode } from '../../lib/teact/teact';
 import type {
   ApiMediaExtendedPreview, ApiMessage, MediaContent, StatefulMediaContent,
 } from '../../api/types';
-import type { OldLangFn } from '../../hooks/useOldLang';
 import { ApiMessageEntityTypes } from '../../api/types';
 
-import { CONTENT_NOT_SUPPORTED } from '../../config';
+import { type LangFn } from '../../util/localization';
 import trimText from '../../util/trimText';
 import { renderTextWithEntities } from '../../components/common/helpers/renderTextWithEntities';
 import {
-  getMessageText, getMessageTranscription,
+  getMessageTextWithFallback, getMessageTranscription,
 } from './messages';
 
 const SPOILER_CHARS = ['⠺', '⠵', '⠞', '⠟'];
 export const TRUNCATED_SUMMARY_LENGTH = 80;
 
 export function getMessageSummaryText(
-  lang: OldLangFn,
+  lang: LangFn,
   message: ApiMessage,
   statefulContent: StatefulMediaContent | undefined,
   noEmoji = false,
@@ -26,16 +25,20 @@ export function getMessageSummaryText(
 ) {
   const emoji = !noEmoji && getMessageSummaryEmoji(message);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
-  const text = trimText(getMessageTextWithSpoilers(message, statefulContent), truncateLength);
+  const text = trimText(getMessageTextWithSpoilers(lang, message, statefulContent), truncateLength);
   const description = getMessageSummaryDescription(lang, message, statefulContent, text, isExtended) as string;
 
   return `${emojiWithSpace}${description}`;
 }
 
-export function getMessageTextWithSpoilers(message: ApiMessage, statefulContent: StatefulMediaContent | undefined) {
+export function getMessageTextWithSpoilers(
+  lang: LangFn,
+  message: ApiMessage,
+  statefulContent: StatefulMediaContent | undefined,
+) {
   const transcription = getMessageTranscription(message);
 
-  const textWithoutTranscription = getMessageText(statefulContent?.story || message)?.text;
+  const textWithoutTranscription = getMessageTextWithFallback(lang, statefulContent?.story || message)?.text;
   if (!textWithoutTranscription) {
     return transcription;
   }
@@ -56,7 +59,7 @@ export function getMessageTextWithSpoilers(message: ApiMessage, statefulContent:
 
     const spoiler = generateBrailleSpoiler(length);
 
-    return `${accText.substr(0, offset)}${spoiler}${accText.substr(offset + length, accText.length)}`;
+    return `${accText.slice(0, offset)}${spoiler}${accText.slice(offset + length)}`;
   }, textWithoutTranscription);
 
   return transcription ? `${transcription}\n${text}` : text;
@@ -111,12 +114,12 @@ export function getMessageSummaryEmoji(message: ApiMessage) {
 }
 
 export function getMediaContentTypeDescription(
-  lang: OldLangFn, content: MediaContent, statefulContent: StatefulMediaContent | undefined,
+  lang: LangFn, content: MediaContent, statefulContent: StatefulMediaContent | undefined,
 ) {
   return getSummaryDescription(lang, content, statefulContent);
 }
 export function getMessageSummaryDescription(
-  lang: OldLangFn,
+  lang: LangFn,
   message: ApiMessage,
   statefulContent: StatefulMediaContent | undefined,
   truncatedText?: string | TeactNode,
@@ -125,7 +128,7 @@ export function getMessageSummaryDescription(
   return getSummaryDescription(lang, message.content, statefulContent, message, truncatedText, isExtended);
 }
 function getSummaryDescription(
-  lang: OldLangFn,
+  lang: LangFn,
   mediaContent: MediaContent,
   statefulContent: StatefulMediaContent | undefined,
   message?: ApiMessage,
@@ -166,7 +169,7 @@ function getSummaryDescription(
 
   if (message?.groupedId || isPaidMediaAlbum) {
     hasUsedTruncatedText = true;
-    summary = truncatedText || lang('lng_in_dlg_album');
+    summary = truncatedText || lang('Album');
   }
 
   if (photo || isPaidMediaSinglePhoto) {
@@ -210,7 +213,7 @@ function getSummaryDescription(
   }
 
   if (invoice) {
-    summary = invoice.extendedMedia ? invoice.title : `${lang('PaymentInvoice')}: ${invoice.description}`;
+    summary = invoice.extendedMedia ? invoice.title : lang('AttachInvoice', { description: invoice.description });
   }
 
   if (text) {
@@ -222,11 +225,11 @@ function getSummaryDescription(
   }
 
   if (location?.mediaType === 'geo' || location?.mediaType === 'venue') {
-    summary = lang('Message.Location');
+    summary = lang('AttachLocation');
   }
 
   if (location?.mediaType === 'geoLive') {
-    summary = lang('Message.LiveLocation');
+    summary = lang('AttachLiveLocation');
   }
 
   if (game) {
@@ -234,22 +237,22 @@ function getSummaryDescription(
   }
 
   if (giveaway) {
-    summary = lang('BoostingGiveawayChannelStarted');
+    summary = lang('AttachGiveaway');
   }
 
   if (giveawayResults) {
-    summary = lang('Message.GiveawayEndedWinners', giveawayResults.winnersCount);
+    summary = lang('AttachGiveawayResults');
   }
 
   if (storyData) {
-    summary = truncatedText || (message ? lang('ForwardedStory') : lang('Chat.ReplyStory'));
+    summary = truncatedText || lang('AttachStory');
   }
 
   if (todo) {
-    summary = lang('Chat.Todo.Message.Title');
+    summary = lang('AttachTodo');
   }
 
-  return summary || CONTENT_NOT_SUPPORTED;
+  return summary || lang('MessageUnsupported');
 }
 
 export function generateBrailleSpoiler(length: number) {

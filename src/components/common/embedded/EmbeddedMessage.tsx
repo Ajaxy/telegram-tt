@@ -11,7 +11,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatTranslatedMessages } from '../../../types';
 import type { IconName } from '../../../types/icons';
 
-import { CONTENT_NOT_SUPPORTED, TON_CURRENCY_CODE } from '../../../config';
+import { TON_CURRENCY_CODE } from '../../../config';
 import {
   getMessageIsSpoiler,
   getMessageRoundVideo,
@@ -213,8 +213,8 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
   function renderMediaContentType(media?: MediaContainer) {
     if (!media || media.content.text) return NBSP;
-    const description = getMediaContentTypeDescription(oldLang, media.content, {});
-    if (!description || description === CONTENT_NOT_SUPPORTED) return NBSP;
+    const description = getMediaContentTypeDescription(lang, media.content, {});
+    if (!description) return NBSP;
     return (
       <span>
         {renderText(description)}

@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useState } from '../../../lib/teact/teact';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import PasswordForm from '../../common/PasswordForm';
 import PasswordMonkey from '../../common/PasswordMonkey';
@@ -15,46 +15,44 @@ type OwnProps = {
   placeholder?: string;
   hint?: string;
   submitLabel?: string;
-  clearError?: NoneToVoidFunction;
-  onSubmit: (password: string) => void;
   isActive?: boolean;
+  onSubmit: (password: string) => void;
+  onClearError?: NoneToVoidFunction;
   onReset: () => void;
 };
 
-const EQUAL_PASSWORD_ERROR = 'Passwords Should Be Equal';
-
 const SettingsPasswordForm: FC<OwnProps> = ({
   isActive,
-  onReset,
   error,
   isLoading,
   shouldDisablePasswordManager,
   expectedPassword,
-  placeholder = 'Current Password',
+  placeholder,
   hint,
   submitLabel,
-  clearError,
   onSubmit,
+  onClearError,
+  onReset,
 }) => {
   const [validationError, setValidationError] = useState<string>('');
   const [shouldShowPassword, setShouldShowPassword] = useState(false);
 
+  const lang = useLang();
+
   const handleSubmit = useCallback((newPassword) => {
     if (expectedPassword && newPassword !== expectedPassword) {
-      setValidationError(EQUAL_PASSWORD_ERROR);
+      setValidationError(lang('SettingsPasswordEqual'));
     } else {
       onSubmit(newPassword);
     }
-  }, [onSubmit, expectedPassword]);
+  }, [onSubmit, expectedPassword, lang]);
 
   const handleClearError = useCallback(() => {
-    if (clearError) {
-      clearError();
+    if (onClearError) {
+      onClearError();
     }
     setValidationError('');
-  }, [clearError]);
-
-  const lang = useOldLang();
+  }, [onClearError]);
 
   useHistoryBack({
     isActive,
@@ -71,10 +69,10 @@ const SettingsPasswordForm: FC<OwnProps> = ({
         <PasswordForm
           error={validationError || error}
           hint={hint}
-          placeholder={placeholder}
+          placeholder={placeholder || lang('CurrentPasswordPlaceholder')}
           shouldDisablePasswordManager={shouldDisablePasswordManager}
-          submitLabel={submitLabel || lang('Next')}
-          clearError={handleClearError}
+          submitLabel={submitLabel}
+          onClearError={handleClearError}
           isLoading={isLoading}
           isPasswordVisible={shouldShowPassword}
           shouldResetValue={isActive}

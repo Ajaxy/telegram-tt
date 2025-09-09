@@ -132,7 +132,7 @@ const LockScreen: FC<OwnProps & StateProps> = ({
           error={validationError}
           placeholder={lang('Passcode.EnterPasscodePlaceholder')}
           submitLabel={lang('Next')}
-          clearError={handleClearError}
+          onClearError={handleClearError}
           isPasswordVisible={shouldShowPasscode}
           noRipple
           onChangePasswordVisibility={setShouldShowPasscode}

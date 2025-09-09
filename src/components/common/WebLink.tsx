@@ -6,7 +6,8 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { TextPart } from '../../types';
 
 import {
-  getFirstLinkInMessage, getMessageText,
+  getFirstLinkInMessage,
+  getMessageTextWithFallback,
 } from '../../global/helpers';
 import { selectWebPageFromMessage } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -15,6 +16,7 @@ import trimText from '../../util/trimText';
 import { renderMessageSummary } from './helpers/renderMessageText';
 import renderText from './helpers/renderText';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
@@ -45,7 +47,8 @@ type StateProps = {
 const WebLink = ({
   message, webPage, senderTitle, isProtected, observeIntersection, onMessageClick,
 }: OwnProps & StateProps) => {
-  const lang = useOldLang();
+  const lang = useLang();
+  const oldLang = useOldLang();
 
   let linkData: ApiWebPageWithFormatted | undefined = webPage;
 
@@ -57,7 +60,7 @@ const WebLink = ({
       linkData = {
         siteName: domain.replace(/^www./, ''),
         url: url.includes('://') ? url : url.includes('@') ? `mailto:${url}` : `http://${url}`,
-        formattedDescription: getMessageText(message)?.text !== url
+        formattedDescription: getMessageTextWithFallback(lang, message)?.text !== url
           ? renderMessageSummary(lang, message, undefined, undefined, MAX_TEXT_LENGTH)
           : undefined,
       } as ApiWebPageWithFormatted;
@@ -125,7 +128,7 @@ const WebLink = ({
             onClick={handleMessageClick}
             isRtl={lang.isRtl}
           >
-            {formatPastTimeShort(lang, message.date * 1000)}
+            {formatPastTimeShort(oldLang, message.date * 1000)}
           </Link>
         </div>
       )}

@@ -304,7 +304,7 @@ export function getCanDeleteChat(chat: ApiChat) {
   return isChatBasicGroup(chat) || ((isChatSuperGroup(chat) || isChatChannel(chat)) && chat.isCreator);
 }
 
-export function getFolderDescriptionText(lang: OldLangFn, folder: ApiChatFolder, chatsCount?: number) {
+export function getFolderDescriptionText(lang: LangFn, folder: ApiChatFolder, chatsCount?: number) {
   const {
     excludedChatIds, includedChatIds,
     bots, groups, contacts, nonContacts, channels,
@@ -320,7 +320,7 @@ export function getFolderDescriptionText(lang: OldLangFn, folder: ApiChatFolder,
       || (excludedChatIds?.length)
       || (includedChatIds?.length)
     )) {
-    return lang('Chats', chatsCount);
+    return lang('ChatsPlural', { count: chatsCount }, { pluralValue: chatsCount });
   }
 
   // Otherwise, we return a short description of a single filter

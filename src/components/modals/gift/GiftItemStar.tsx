@@ -86,9 +86,10 @@ function GiftItemStar({
 
     if (isUserLimitReached) {
       showNotification({
-        message: lang('NotificationGiftsLimit', {
+        message: lang('NotificationGiftsLimit2', {
           count: perUserTotal,
         }, {
+          pluralValue: perUserTotal!,
           withMarkdown: true,
           withNodes: true,
         }),

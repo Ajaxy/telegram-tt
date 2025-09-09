@@ -340,6 +340,8 @@ const ToDoListModal = ({
     });
   }
 
+  const moreTasksCount = maxItemsCount - items.length - (isAddTaskMode && editingTodo ? editingTodo.items.length : 0);
+
   return (
     <Modal isOpen={isOpen} onClose={onClear} header={renderHeader()} className="ToDoListModal">
       {!isAddTaskMode && (
@@ -369,8 +371,10 @@ const ToDoListModal = ({
       </div>
 
       <div className="items-count-hint">
-        {lang('HintTodoListTasksCount', {
-          count: maxItemsCount - items.length - (isAddTaskMode && editingTodo ? editingTodo.items.length : 0),
+        {lang('HintTodoListTasksCount2', {
+          count: moreTasksCount,
+        }, {
+          pluralValue: moreTasksCount,
         })}
       </div>
 

@@ -13,7 +13,7 @@ import stopEvent from '../../util/stopEvent';
 
 import useTimeout from '../../hooks/schedulers/useTimeout';
 import useAppLayout from '../../hooks/useAppLayout';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 import Icon from './icons/Icon';
@@ -29,8 +29,8 @@ type OwnProps = {
   shouldShowSubmit?: boolean;
   shouldResetValue?: boolean;
   isPasswordVisible?: boolean;
-  clearError: NoneToVoidFunction;
   noRipple?: boolean;
+  onClearError: NoneToVoidFunction;
   onChangePasswordVisibility: (state: boolean) => void;
   onInputChange?: (password: string) => void;
   onSubmit?: (password: string) => void;
@@ -41,20 +41,21 @@ const PasswordForm: FC<OwnProps> = ({
   isPasswordVisible,
   error,
   hint,
-  placeholder = 'Password',
-  submitLabel = 'Next',
+  placeholder,
+  submitLabel,
   description,
   shouldShowSubmit,
   shouldResetValue,
   shouldDisablePasswordManager = false,
   noRipple = false,
-  clearError,
+  onClearError,
   onChangePasswordVisibility,
   onInputChange,
   onSubmit,
 }) => {
   const inputRef = useRef<HTMLInputElement>();
-  const lang = useOldLang();
+
+  const lang = useLang();
 
   const { isMobile } = useAppLayout();
   const [password, setPassword] = useState('');
@@ -84,7 +85,7 @@ const PasswordForm: FC<OwnProps> = ({
 
   function onPasswordChange(e: ChangeEvent<HTMLInputElement>) {
     if (error) {
-      clearError();
+      onClearError();
     }
 
     const { target } = e;
@@ -141,14 +142,14 @@ const PasswordForm: FC<OwnProps> = ({
           maxLength={256}
           dir="auto"
         />
-        <label>{error || hint || placeholder}</label>
+        <label>{error || hint || placeholder || lang('PasswordFormPlaceholder')}</label>
         <div
           className="div-button toggle-password"
           onClick={togglePasswordVisibility}
           role="button"
           tabIndex={0}
-          title="Toggle password visibility"
-          aria-label="Toggle password visibility"
+          title={lang('AriaPasswordToggle')}
+          aria-label={lang('AriaPasswordToggle')}
         >
           <Icon name={isPasswordVisible ? 'eye' : 'eye-crossed'} />
         </div>
@@ -156,7 +157,7 @@ const PasswordForm: FC<OwnProps> = ({
       {description && <p className="description">{description}</p>}
       {onSubmit && (canSubmit || shouldShowSubmit) && (
         <Button type="submit" ripple={!noRipple} isLoading={isLoading} disabled={!canSubmit}>
-          {submitLabel}
+          {submitLabel || lang('PasswordFormSubmit')}
         </Button>
       )}
     </form>

@@ -22,7 +22,7 @@ import { selectPeerStory, selectPollFromMessage } from '../../global/selectors';
 import trimText from '../../util/trimText';
 import renderText from './helpers/renderText';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import ActionMessageText from '../middle/message/ActionMessageText';
 import MessageText from './MessageText';
@@ -59,7 +59,7 @@ function MessageSummary({
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
 }: OwnProps & StateProps) {
-  const lang = useOldLang();
+  const lang = useLang();
   const extractedText = extractMessageText(message, inChatList);
   const hasPoll = Boolean(getMessagePollId(message));
   const isAction = isActionMessage(message);

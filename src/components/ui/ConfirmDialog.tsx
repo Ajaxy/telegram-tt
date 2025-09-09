@@ -7,7 +7,7 @@ import type { TextPart } from '../../types';
 import buildClassName from '../../util/buildClassName';
 
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Button from './Button';
 import Modal from './Modal';
@@ -38,7 +38,7 @@ const ConfirmDialog: FC<OwnProps> = ({
   header,
   text,
   textParts,
-  confirmLabel = 'Confirm',
+  confirmLabel,
   confirmIsDestructive,
   isConfirmDisabled,
   isOnlyConfirm,
@@ -49,7 +49,7 @@ const ConfirmDialog: FC<OwnProps> = ({
   onClose,
   onCloseAnimationEnd,
 }) => {
-  const lang = useOldLang();
+  const lang = useLang();
 
   const containerRef = useRef<HTMLDivElement>();
 
@@ -84,7 +84,7 @@ const ConfirmDialog: FC<OwnProps> = ({
           color={confirmIsDestructive ? 'danger' : 'primary'}
           disabled={isConfirmDisabled}
         >
-          {confirmLabel}
+          {confirmLabel || lang('GeneralConfirm')}
         </Button>
         {!isOnlyConfirm && <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>}
       </div>

@@ -6,6 +6,7 @@ import buildClassName from '../../../util/buildClassName';
 
 import useEffectOnce from '../../../hooks/useEffectOnce';
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useResizeObserver from '../../../hooks/useResizeObserver';
 
@@ -22,6 +23,8 @@ export type OwnProps = {
 const DropTarget: FC<OwnProps> = ({ isQuick, isGeneric, onFileSelect }) => {
   const ref = useRef<HTMLDivElement>();
   const svgRef = useRef<SVGSVGElement>();
+
+  const lang = useLang();
 
   const [isHovered, markHovered, unmarkHovered] = useFlag();
 
@@ -65,13 +68,17 @@ const DropTarget: FC<OwnProps> = ({ isQuick, isGeneric, onFileSelect }) => {
       onDragLeave={handleDragLeave}
       data-dropzone
     >
-      <svg className="target-outline-container">
+      <svg className="target-outline-container" ref={svgRef}>
         <rect className="target-outline" x="0" y="0" width="100%" height="100%" rx="8" />
       </svg>
       <div className="target-content">
         <Icon name={isQuick ? 'photo' : 'document'} />
-        <div className="title">Drop files here to send them</div>
-        {!isGeneric && <div className="description">{isQuick ? 'in a quick way' : 'without compression'}</div>}
+        <div className="title">{lang('FileDropZoneTitle')}</div>
+        {!isGeneric && (
+          <div className="description">
+            {isQuick ? lang('FileDropZoneQuick') : lang('FileDropZoneNoCompression')}
+          </div>
+        )}
       </div>
     </div>
   );

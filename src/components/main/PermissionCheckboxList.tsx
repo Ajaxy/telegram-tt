@@ -12,8 +12,8 @@ import { selectChat, selectChatFullInfo } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Checkbox from '../ui/Checkbox';
 
@@ -61,7 +61,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
 
   const { isForum } = chat || {};
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const isPublic = useMemo(() => chat && isChatPublic(chat), [chat]);
   const shouldDisablePermissionForPublicGroup = hasLinkedChat || isPublic;
@@ -81,7 +81,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
   });
 
   const handleDisabledClick = useLastCallback(() => {
-    showNotification({ message: lang('lng_rights_permission_unavailable') });
+    showNotification({ message: lang('ChatPermissionNotAvailable') });
   });
 
   return (
@@ -119,7 +119,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
             <Checkbox
               name="sendPhotos"
               checked={!permissions.sendPhotos}
-              label={lang('UserRestrictionsSendPhotos')}
+              label={lang('SendMediaPermissionPhotos')}
               blocking
               permissionGroup={permissionGroup}
               onChange={handlePermissionChange}
@@ -131,7 +131,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
             <Checkbox
               name="sendVideos"
               checked={!permissions.sendVideos}
-              label={lang('UserRestrictionsSendVideos')}
+              label={lang('SendMediaPermissionVideos')}
               blocking
               permissionGroup={permissionGroup}
               onChange={handlePermissionChange}
@@ -143,7 +143,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
             <Checkbox
               name="sendStickers"
               checked={!permissions.sendStickers && !permissions.sendGifs}
-              label={lang('UserRestrictionsSendStickers')}
+              label={lang('SendMediaPermissionStickersGifs')}
               blocking
               permissionGroup={permissionGroup}
               onChange={handlePermissionChange}
@@ -155,7 +155,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
             <Checkbox
               name="sendAudios"
               checked={!permissions.sendAudios}
-              label={lang('UserRestrictionsSendMusic')}
+              label={lang('SendMediaPermissionAudios')}
               blocking
               permissionGroup={permissionGroup}
               onChange={handlePermissionChange}
@@ -167,7 +167,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
             <Checkbox
               name="sendDocs"
               checked={!permissions.sendDocs}
-              label={lang('UserRestrictionsSendFiles')}
+              label={lang('SendMediaPermissionFiles')}
               blocking
               permissionGroup={permissionGroup}
               onChange={handlePermissionChange}
@@ -179,7 +179,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
             <Checkbox
               name="sendVoices"
               checked={!permissions.sendVoices}
-              label={lang('UserRestrictionsSendVoices')}
+              label={lang('SendMediaPermissionVoices')}
               blocking
               permissionGroup={permissionGroup}
               onChange={handlePermissionChange}
@@ -191,7 +191,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
             <Checkbox
               name="sendRoundvideos"
               checked={!permissions.sendRoundvideos}
-              label={lang('UserRestrictionsSendRound')}
+              label={lang('SendMediaPermissionRoundVideos')}
               blocking
               permissionGroup={permissionGroup}
               onChange={handlePermissionChange}
@@ -203,7 +203,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
             <Checkbox
               name="embedLinks"
               checked={!permissions.embedLinks}
-              label={lang('UserRestrictionsEmbedLinks')}
+              label={lang('SendMediaPermissionWebPages')}
               blocking
               permissionGroup={permissionGroup}
               onChange={handlePermissionChange}
@@ -215,7 +215,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
             <Checkbox
               name="sendPolls"
               checked={!permissions.sendPolls}
-              label={lang('UserRestrictionsSendPolls')}
+              label={lang('SendMediaPermissionPolls')}
               blocking
               permissionGroup={permissionGroup}
               onChange={handlePermissionChange}
@@ -271,7 +271,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
             <Checkbox
               name="manageTopics"
               checked={!permissions.manageTopics}
-              label={lang('CreateTopicsPermission')}
+              label={lang('UserRestrictionsCreateTopics')}
               blocking
               permissionGroup={permissionGroup}
               onChange={handlePermissionChange}
