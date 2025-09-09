@@ -49,6 +49,7 @@ export const processDeepLink = (url: string, linkContext?: LinkContext): boolean
           attach: parsedLink.attach,
           choose,
           originalParts: [parsedLink.username, parsedLink.appName],
+          isDirect: parsedLink.isDirect,
         });
         return true;
       }

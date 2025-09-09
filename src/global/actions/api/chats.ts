@@ -1654,7 +1654,7 @@ addActionHandler('acceptChatInvite', async (global, actions, payload): Promise<v
 addActionHandler('openChatByUsername', async (global, actions, payload): Promise<void> => {
   const {
     username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts,
-    startApp, shouldStartMainApp, mode,
+    startApp, shouldStartMainApp, mode, isDirect,
     text, onChatChanged, choose, ref, timestamp, linkContext,
     tabId = getCurrentTabId(),
   } = payload;
@@ -3433,7 +3433,13 @@ async function openChatByUsername<T extends GlobalState>(
     return;
   }
 
-  const isCurrentChat = currentChat?.usernames?.some((c) => c.username === username);
+  const localChat = selectChatByUsername(global, username);
+  const localDirectChat = isDirect && localChat?.linkedMonoforumId && !localChat.isMonoforum
+    ? selectChat(global, localChat.linkedMonoforumId) : undefined;
+
+  const isCurrentChat = !isDirect
+    ? currentChat?.usernames?.some((c) => c.username === username)
+    : localDirectChat?.id === currentChat?.id;
 
   if (!isCurrentChat) {
     // Open temporary empty chat to make the click response feel faster
@@ -3459,7 +3465,12 @@ async function openChatByUsername<T extends GlobalState>(
     return;
   }
 
-  openChatWithParams(global, actions, chat, {
+  const monoforumChat = isDirect && !chat.isMonoforum && chat.linkedMonoforumId
+    ? selectChat(global, chat.linkedMonoforumId) : undefined;
+
+  const targetChat = (isDirect && monoforumChat) || chat;
+
+  openChatWithParams(global, actions, targetChat, {
     isCurrentChat,
     threadId,
     messageId: channelPostId,

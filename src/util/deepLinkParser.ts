@@ -70,6 +70,7 @@ interface PublicUsernameOrBotLink {
   attach?: string;
   text?: string;
   choose?: string;
+  isDirect?: boolean;
 }
 
 interface PrivateChannelLink {
@@ -144,6 +145,10 @@ type PrivateMessageLinkBuilderParams = Omit<BuilderParams<PrivateMessageLink>, '
 
 type PublicMessageLinkBuilderParams = Omit<BuilderParams<PublicMessageLink>, 'isSingle'> & {
   single?: string;
+};
+
+type PublicUsernameOrBotLinkBuilderParams = Omit<BuilderParams<PublicUsernameOrBotLink>, 'isDirect'> & {
+  direct?: string;
 };
 
 const ELIGIBLE_HOSTNAMES = new Set(['t.me', 'telegram.me', 'telegram.dog']);
@@ -249,6 +254,7 @@ function parseTgLink(url: URL) {
         attach: queryParams.attach,
         choose: queryParams.choose,
         ref: queryParams.ref,
+        direct: queryParams.direct,
       });
     case 'privateChannelLink': {
       return buildPrivateChannelLink({ channelId: queryParams.channel });
@@ -355,6 +361,7 @@ function parseHttpLink(url: URL) {
         attach: queryParams.attach,
         choose: queryParams.choose,
         ref: queryParams.ref,
+        direct: queryParams.direct,
       });
     case 'privateChannelLink': {
       return buildPrivateChannelLink({ channelId: pathParams[1] });
@@ -605,7 +612,7 @@ function buildTelegramPassportLink(
 }
 
 function buildPublicUsernameOrBotLink(
-  params: BuilderParams<PublicUsernameOrBotLink>,
+  params: PublicUsernameOrBotLinkBuilderParams,
 ): BuilderReturnType<PublicUsernameOrBotLink> {
   const {
     username,
@@ -618,6 +625,7 @@ function buildPublicUsernameOrBotLink(
     appName,
     choose,
     ref,
+    direct,
   } = params;
   if (!username) {
     return undefined;
@@ -637,6 +645,7 @@ function buildPublicUsernameOrBotLink(
     text,
     choose,
     ref,
+    isDirect: direct === '',
   };
 }
 
