@@ -29,7 +29,7 @@ type StateProps = {
 };
 
 const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
-  isOpen, message, onClose, threadId,
+  isOpen, threadId, message, onClose,
 }) => {
   const { clickBotInlineButton } = getActions();
 
