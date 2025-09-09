@@ -20,12 +20,12 @@ import './BotKeyboardMenu.scss';
 export type OwnProps = {
   isOpen: boolean;
   messageId: number;
+  threadId?: ThreadId;
   onClose: NoneToVoidFunction;
 };
 
 type StateProps = {
   message?: ApiMessage;
-  threadId?: ThreadId;
 };
 
 const BotKeyboardMenu: FC<OwnProps & StateProps> = ({

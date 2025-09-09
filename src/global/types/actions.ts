@@ -1,4 +1,3 @@
-import { LinkContext } from './../../api/types/messages';
 import type {
   ApiAttachBot,
   ApiAttachment,
@@ -677,6 +676,7 @@ export interface ActionPayloads {
     timestamp?: number;
     onChatChanged?: CallbackAction;
     linkContext?: LinkContext;
+    isDirect?: boolean;
   } & WithTabId;
   processBoostParameters: {
     usernameOrId: string;

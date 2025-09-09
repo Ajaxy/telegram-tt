@@ -223,6 +223,12 @@
       padding: 0.5625rem;
     }
 
+    &.chat-item-with-tags {
+      .ListItem-button {
+        padding: 0.375rem 0.5625rem;
+      }
+    }
+
     &.contact-list-item {
       .ListItem-button {
         padding: 0.5rem;

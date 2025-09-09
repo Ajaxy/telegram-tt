@@ -118,10 +118,6 @@
     }
   }
 
-  .ListItem-button {
-    height: 72px;
-  }
-
   .ripple-container {
     z-index: var(--z-chat-ripple);
   }
@@ -341,7 +337,7 @@
     }
 
     &.has-tags {
-      line-height: 1.25rem;
+      line-height: 1.375rem;
       .info-row {
         height: 1.25rem;
       }

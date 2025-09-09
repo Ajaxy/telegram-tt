@@ -359,6 +359,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     isSelected && 'selected',
     isSelectedForum && 'selected-forum',
     isPreview && 'standalone',
+    shouldRenderTags && 'chat-item-with-tags',
     className,
   );
 

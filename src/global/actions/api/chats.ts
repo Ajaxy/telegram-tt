@@ -1711,6 +1711,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
           text,
           timestamp,
           linkContext,
+          isDirect,
         }, tabId,
       );
       if (onChatChanged) {
@@ -3406,12 +3407,13 @@ async function openChatByUsername<T extends GlobalState>(
     text?: string;
     timestamp?: number;
     linkContext?: LinkContext;
+    isDirect?: boolean;
   },
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const {
     username, threadId, channelPostId, startParam, ref, startAttach, attach, text, timestamp,
-    linkContext,
+    linkContext, isDirect,
   } = params;
   const currentChat = selectCurrentChat(global, tabId);
 
