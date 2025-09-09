@@ -1,6 +1,8 @@
 import type {
+  ApiDocument,
   ApiGeoPoint,
   ApiMessage,
+  ApiPhoto,
   ApiReaction,
   ApiReactionCount,
   ApiSticker,
@@ -69,6 +71,10 @@ export type ApiPeerStories = {
   isArchiveFullyLoaded?: boolean;
   lastUpdatedAt?: number;
   lastReadId?: number;
+  idsByAlbumId?: Record<number, {
+    ids: number[];
+    isFullyLoaded?: boolean;
+  }>; // Story IDs grouped by album ID with loading state
 };
 
 export type ApiMessageStoryData = {
@@ -184,3 +190,10 @@ export type ApiMediaAreaUniqueGift = {
 
 export type ApiMediaArea = ApiMediaAreaVenue | ApiMediaAreaGeoPoint | ApiMediaAreaSuggestedReaction
   | ApiMediaAreaChannelPost | ApiMediaAreaUrl | ApiMediaAreaWeather | ApiMediaAreaUniqueGift;
+
+export type ApiStoryAlbum = {
+  albumId: number;
+  title: string;
+  iconPhoto?: ApiPhoto;
+  iconVideo?: ApiDocument;
+};

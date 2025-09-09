@@ -8,6 +8,8 @@ import type {
   ApiChatMember,
   ApiMessage,
   ApiSavedStarGift,
+  ApiStarGiftCollection,
+  ApiStoryAlbum,
   ApiTypeStory,
   ApiUser,
   ApiUserStatus,
@@ -19,6 +21,8 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import { AudioOrigin, MediaViewerOrigin, NewChatMembersProgress } from '../../types';
 
 import { MEMBERS_SLICE, PROFILE_SENSITIVE_AREA, SHARED_MEDIA_SLICE, SLIDE_TRANSITION_DURATION } from '../../config';
+
+const CONTENT_PANEL_SHOW_DELAY = 300;
 import {
   getHasAdminRight,
   getIsDownloading,
@@ -53,6 +57,7 @@ import {
 import { selectPremiumLimit } from '../../global/selectors/limits';
 import { selectMessageDownloadableMedia } from '../../global/selectors/media';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
+import { areDeepEqual } from '../../util/areDeepEqual';
 import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
@@ -71,6 +76,7 @@ import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
+import useSyncEffect from '../../hooks/useSyncEffect';
 import useAsyncRendering from './hooks/useAsyncRendering';
 import useProfileState from './hooks/useProfileState';
 import useProfileViewportIds from './hooks/useProfileViewportIds';
@@ -100,6 +106,8 @@ import Spinner from '../ui/Spinner';
 import TabList from '../ui/TabList';
 import Transition from '../ui/Transition';
 import DeleteMemberModal from './DeleteMemberModal';
+import StarGiftCollectionList from './gifts/StarGiftCollectionList';
+import StoryAlbumList from './stories/StoryAlbumList';
 
 import './Profile.scss';
 
@@ -127,6 +135,8 @@ type StateProps = {
   hasPreviewMediaTab?: boolean;
   hasGiftsTab?: boolean;
   gifts?: ApiSavedStarGift[];
+  storyAlbums?: ApiStoryAlbum[];
+  giftCollections?: ApiStarGiftCollection[];
   areMembersHidden?: boolean;
   canAddMembers?: boolean;
   canDeleteMembers?: boolean;
@@ -137,6 +147,9 @@ type StateProps = {
   pinnedStoryIds?: number[];
   archiveStoryIds?: number[];
   storyByIds?: Record<number, ApiTypeStory>;
+  selectedStoryAlbumId?: number;
+  activeCollectionId?: number;
+  giftsFilter?: any;
   chatsById: Record<string, ApiChat>;
   usersById: Record<string, ApiUser>;
   userStatusesById: Record<string, ApiUserStatus>;
@@ -189,6 +202,9 @@ const Profile: FC<OwnProps & StateProps> = ({
   pinnedStoryIds,
   archiveStoryIds,
   storyByIds,
+  selectedStoryAlbumId,
+  activeCollectionId,
+  giftsFilter,
   mediaSearchType,
   hasCommonChatsTab,
   hasStoriesTab,
@@ -196,6 +212,8 @@ const Profile: FC<OwnProps & StateProps> = ({
   hasPreviewMediaTab,
   hasGiftsTab,
   gifts,
+  storyAlbums,
+  giftCollections,
   botPreviewMedia,
   areMembersHidden,
   canAddMembers,
@@ -241,6 +259,9 @@ const Profile: FC<OwnProps & StateProps> = ({
     loadPreviewMedias,
     loadPeerSavedGifts,
     resetGiftProfileFilter,
+    loadStarGiftCollections,
+    loadStoryAlbums,
+    resetSelectedStoryAlbum,
   } = getActions();
 
   const containerRef = useRef<HTMLDivElement>();
@@ -250,9 +271,12 @@ const Profile: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   const [deletingUserId, setDeletingUserId] = useState<string | undefined>();
+  const [isViewTransitionEnabled, enableViewTransition, disableViewTransition] = useFlag();
 
   const profileId = isSavedDialog ? String(threadId) : chatId;
   const isSavedMessages = profileId === currentUserId && !isSavedDialog;
+
+  const [restoreContentHeightKey, setRestoreContentHeightKey] = useState(0);
 
   const tabs = useMemo(() => {
     const arr: TabProps[] = [];
@@ -352,6 +376,25 @@ const Profile: FC<OwnProps & StateProps> = ({
     }
   }, [chatId, isBot, similarBots, isSynced]);
 
+  useEffect(() => {
+    resetSelectedStoryAlbum();
+  }, [chatId]);
+
+  useSyncEffect(() => {
+    enableViewTransition();
+  }, [giftsFilter]);
+
+  useSyncEffect(() => {
+    disableViewTransition();
+  }, [gifts]);
+
+  useEffect(() => {
+    if (hasGiftsTab && isSynced) {
+      loadStarGiftCollections({ peerId: chatId });
+      loadStoryAlbums({ peerId: chatId });
+    }
+  }, [chatId, hasGiftsTab, isSynced]);
+
   const [renderingGifts, setRenderingGifts] = useState(gifts);
   const { startViewTransition, shouldApplyVtn } = useViewTransition();
 
@@ -371,12 +414,17 @@ const Profile: FC<OwnProps & StateProps> = ({
   const handleLoadGifts = useCallback(() => {
     loadPeerSavedGifts({ peerId: chatId });
   }, [chatId]);
+
   const handleLoadMoreMembers = useCallback(() => {
     loadMoreMembers({ chatId });
   }, [chatId, loadMoreMembers]);
 
   useEffectWithPrevDeps(([prevGifts]) => {
-    if (!gifts || !prevGifts) {
+    if (areDeepEqual(gifts, prevGifts)) {
+      return;
+    }
+
+    if (!gifts || !prevGifts || !isViewTransitionEnabled) {
       setRenderingGifts(gifts);
       return;
     }
@@ -385,14 +433,14 @@ const Profile: FC<OwnProps & StateProps> = ({
     const newGiftIds = gifts.map((gift) => getSavedGiftKey(gift));
     const hasOrderChanged = prevGiftIds.some((id, index) => id !== newGiftIds[index]);
 
-    if (hasOrderChanged) {
+    if (hasOrderChanged && animationLevel > 0) {
       startViewTransition(() => {
         setRenderingGifts(gifts);
       });
     } else {
       setRenderingGifts(gifts);
     }
-  }, [gifts, startViewTransition]);
+  }, [gifts, startViewTransition, animationLevel, isViewTransitionEnabled]);
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds({
     loadMoreMembers: handleLoadMoreMembers,
@@ -418,11 +466,39 @@ const Profile: FC<OwnProps & StateProps> = ({
     similarChannels,
     similarBots,
   });
+
   const isFirstTab = (isSavedMessages && resultType === 'dialogs')
     || (hasStoriesTab && resultType === 'stories')
     || resultType === 'members'
     || (!hasMembersTab && resultType === 'media');
   const activeKey = tabs.findIndex(({ type }) => type === resultType);
+
+  const [isGiftCollectionsShowed, markGiftCollectionsShowed, unmarkGiftCollectionsShowed] = useFlag(false);
+  const [isStoryAlbumsShowed, markStoryAlbumsShowed, unmarkStoryAlbums] = useFlag(false);
+
+  const hasGiftsCollections = giftCollections && giftCollections.length > 0;
+  const hasStoryAlbums = storyAlbums && storyAlbums.length > 0;
+  const isGiftsResult = resultType === 'gifts';
+  const isStoriesResult = resultType === 'stories';
+  const shouldShowContentPanel = (isGiftsResult && hasGiftsCollections) || (isStoriesResult && hasStoryAlbums);
+
+  useEffect(() => {
+    if (hasGiftsCollections) {
+      setTimeout(() => {
+        markGiftCollectionsShowed();
+      }, CONTENT_PANEL_SHOW_DELAY);
+    } else {
+      unmarkGiftCollectionsShowed();
+    }
+
+    if (hasStoryAlbums) {
+      setTimeout(() => {
+        markStoryAlbumsShowed();
+      }, CONTENT_PANEL_SHOW_DELAY);
+    } else {
+      unmarkStoryAlbums();
+    }
+  }, [hasGiftsCollections, hasStoryAlbums, markGiftCollectionsShowed, markStoryAlbumsShowed]);
 
   usePeerStoriesPolling(resultType === 'members' ? viewportIds as string[] : undefined);
 
@@ -583,16 +659,48 @@ const Profile: FC<OwnProps & StateProps> = ({
 
     const noContent = (!viewportIds && !botPreviewMedia) || !canRenderContent || !messagesById;
     const noSpinner = isFirstTab && !canRenderContent;
-    const isSpinner = noContent && !noSpinner;
 
     return (
-      <Transition activeKey={isSpinner ? 0 : 1} name="fade" shouldCleanup>
+      <div>
+        {renderCategories()}
         {renderSpinnerOrContent(noContent, noSpinner)}
-      </Transition>
+      </div>
     );
   }
 
-  function renderSpinnerOrContent(noContent: boolean, noSpinner: boolean) {
+  function renderCategories() {
+    if (resultType === 'gifts') {
+      return (
+        <div
+          className={buildClassName(
+            'contentCategoriesPanel',
+            !shouldShowContentPanel && 'hiddenPanel',
+            isGiftCollectionsShowed && 'noTransition',
+          )}
+        >
+          <StarGiftCollectionList peerId={chatId} />
+        </div>
+      );
+    }
+
+    if (resultType === 'stories') {
+      return (
+        <div
+          className={buildClassName(
+            'contentCategoriesPanel',
+            !shouldShowContentPanel && 'hiddenPanel',
+            isStoryAlbumsShowed && 'noTransition',
+          )}
+        >
+          <StoryAlbumList peerId={chatId} />
+        </div>
+      );
+    }
+
+    return undefined;
+  }
+
+  function renderSpinnerOrContentBase(noContent: boolean, noSpinner: boolean) {
     if (noContent) {
       const forceRenderHiddenMembers = Boolean(resultType === 'members' && areMembersHidden);
 
@@ -656,9 +764,15 @@ const Profile: FC<OwnProps & StateProps> = ({
       return;
     }
 
+    const noTransition = resultType === 'gifts' ? isGiftCollectionsShowed
+      : resultType === 'stories' ? isStoryAlbumsShowed : false;
     return (
       <div
-        className={`content ${resultType}-list`}
+        className={buildClassName(
+          `content ${resultType}-list`,
+          shouldShowContentPanel && 'showContentPanel',
+          noTransition && 'noTransition',
+        )}
         dir={oldLang.isRtl && resultType === 'media' ? 'rtl' : undefined}
         teactFastList
       >
@@ -869,8 +983,69 @@ const Profile: FC<OwnProps & StateProps> = ({
     );
   }
 
-  const activeListSelector = `.shared-media-transition > .Transition_slide-active .${resultType}-list`;
-  const itemSelector = `${activeListSelector} > .scroll-item`;
+  const shouldUseTransitionForContent = resultType === 'stories' || resultType === 'gifts';
+  const contentTransitionKey = (() => {
+    if (resultType === 'stories') {
+      return selectedStoryAlbumId || 0;
+    }
+    if (resultType === 'gifts') {
+      return activeCollectionId || 0;
+    }
+    return 0;
+  })();
+
+  const handleOnStop = useLastCallback(() => {
+    setRestoreContentHeightKey(restoreContentHeightKey + 1);
+  });
+
+  function renderSpinnerOrContent(noContent: boolean, noSpinner: boolean) {
+    const baseContent = renderSpinnerOrContentBase(noContent, noSpinner);
+
+    const isSpinner = noContent && !noSpinner;
+
+    if (shouldUseTransitionForContent) {
+      return (
+        <Transition
+          className={`${resultType}-list`}
+          activeKey={contentTransitionKey}
+          name={resolveTransitionName('slideOptimized', animationLevel, undefined, oldLang.isRtl)}
+          shouldCleanup
+          shouldRestoreHeight
+          restoreHeightKey={restoreContentHeightKey}
+          contentSelector=".Transition > .Transition_slide-active > .content"
+        >
+          <Transition
+            activeKey={isSpinner ? 0 : 1}
+            name="fade"
+            shouldCleanup
+            shouldRestoreHeight
+            restoreHeightKey={restoreContentHeightKey}
+            contentSelector=".content"
+            onStop={handleOnStop}
+          >
+            {baseContent}
+          </Transition>
+        </Transition>
+      );
+    }
+
+    return (
+      <Transition
+        activeKey={isSpinner ? 0 : 1}
+        name="fade"
+        shouldCleanup
+        shouldRestoreHeight
+      >
+        {baseContent}
+      </Transition>
+    );
+  }
+
+  const activeListSelector = `.shared-media-transition > .Transition_slide-active`;
+  const itemSelector = !shouldUseTransitionForContent
+    ? `${activeListSelector} .${resultType}-list > .scroll-item`
+    /* eslint-disable @stylistic/max-len */
+    : `${activeListSelector} > .Transition > .Transition_slide-active > .Transition > .Transition_slide-active > .gifts-list > .scroll-item`;
 
   return (
     <InfiniteScroll
@@ -908,6 +1083,10 @@ const Profile: FC<OwnProps & StateProps> = ({
             className="shared-media-transition"
             onStart={applyTransitionFix}
             onStop={handleTransitionStop}
+            restoreHeightKey={shouldUseTransitionForContent ? restoreContentHeightKey : undefined}
+            contentSelector={shouldUseTransitionForContent
+              ? '.Transition > .Transition_slide-active > .Transition > .Transition_slide-active > .content'
+              : undefined}
           >
             {renderContent()}
           </Transition>
@@ -998,13 +1177,21 @@ export default memo(withGlobal<OwnProps>(
     const hasStoriesTab = peer && (user?.isSelf || (!peer.areStoriesHidden && peerFullInfo?.hasPinnedStories))
       && !isSavedDialog;
     const peerStories = hasStoriesTab ? selectPeerStories(global, peer.id) : undefined;
-    const storyIds = peerStories?.profileIds;
+    const tabState = selectTabState(global);
+    const { selectedStoryAlbumId, nextProfileTab, forceScrollProfileTab, savedGifts } = tabState;
+    const storyIds = selectedStoryAlbumId
+      ? peerStories?.idsByAlbumId?.[selectedStoryAlbumId]?.ids
+      : peerStories?.profileIds;
     const pinnedStoryIds = peerStories?.pinnedIds;
     const storyByIds = peerStories?.byId;
     const archiveStoryIds = peerStories?.archiveIds;
 
     const hasGiftsTab = Boolean(peerFullInfo?.starGiftCount) && !isSavedDialog;
-    const peerGifts = selectTabState(global).savedGifts.giftsByPeerId[chatId];
+    const activeCollectionId = savedGifts.activeCollectionByPeerId[chatId];
+    const peerGifts = savedGifts.collectionsByPeerId[chatId]?.[activeCollectionId || 'all'];
+
+    const storyAlbums = global.stories.albumsByPeerId?.[chatId];
+    const giftCollections = global.starGiftCollections?.byPeerId?.[chatId];
 
     const monoforumChannel = selectMonoforumChannel(global, chatId);
     const isRestricted = chat && selectIsChatRestricted(global, chat.id);
@@ -1033,12 +1220,17 @@ export default memo(withGlobal<OwnProps>(
       storyIds,
       hasGiftsTab,
       gifts: peerGifts?.gifts,
+      storyAlbums,
+      giftCollections,
       pinnedStoryIds,
       archiveStoryIds,
       storyByIds,
+      selectedStoryAlbumId,
+      activeCollectionId,
+      giftsFilter: savedGifts.filter,
       isChatProtected: chat?.isProtected,
-      nextProfileTab: selectTabState(global).nextProfileTab,
-      forceScrollProfileTab: selectTabState(global).forceScrollProfileTab,
+      nextProfileTab,
+      forceScrollProfileTab,
       animationLevel,
       shouldWarnAboutFiles,
       similarChannels: similarChannelIds,

@@ -18,12 +18,14 @@ import {
   appendStarsTransactions,
   replacePeerSavedGifts,
   updateChats,
+  updatePeerStarGiftCollections,
   updateStarsBalance,
   updateStarsSubscriptionLoading,
   updateUsers,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
+  selectActiveCollectionId,
   selectGiftProfileFilter,
   selectPeer,
   selectPeerSavedGifts,
@@ -301,17 +303,20 @@ addActionHandler('loadPeerSavedGifts', async (global, actions, payload): Promise
   if (!shouldRefresh && currentGifts && !localNextOffset) return; // Already loaded all
 
   const fetchingFilter = selectGiftProfileFilter(global, peerId, tabId);
+  const fetchingCollectionId = selectActiveCollectionId(global, peerId, tabId);
 
   const result = await callApi('fetchSavedStarGifts', {
     peer,
     offset: !shouldRefresh ? localNextOffset : '',
     filter: fetchingFilter,
+    collectionId: fetchingCollectionId ? Number(fetchingCollectionId) : undefined,
   });
 
   global = getGlobal();
   const currentFilter = selectGiftProfileFilter(global, peerId, tabId);
+  const currentCollectionId = selectActiveCollectionId(global, peerId, tabId);
 
-  if (!result || currentFilter !== fetchingFilter) {
+  if (!result || currentCollectionId !== fetchingCollectionId || currentFilter !== fetchingFilter) {
     return;
   }
 
@@ -395,7 +400,8 @@ addActionHandler('changeGiftVisibility', async (global, actions, payload): Promi
   const requestInputGift = getRequestInputSavedStarGift(global, gift);
   if (!requestInputGift) return;
 
-  const oldGifts = selectTabState(global, tabId).savedGifts.giftsByPeerId[peerId];
+  const activeCollectionId = selectActiveCollectionId(global, peerId, tabId) || 'all';
+  const oldGifts = selectTabState(global, tabId).savedGifts.collectionsByPeerId[peerId]?.[activeCollectionId];
   if (oldGifts?.gifts?.length) {
     const newGifts = oldGifts.gifts.map((g) => {
       if (g.inputGift && areInputSavedGiftsEqual(g.inputGift, gift)) {
@@ -529,4 +535,26 @@ addActionHandler('updateStarGiftPrice', async (global, actions, payload): Promis
   if (!result) return;
 
   actions.reloadPeerSavedGifts({ peerId: global.currentUserId! });
+});
+
+addActionHandler('loadStarGiftCollections', async (global, actions, payload): Promise<void> => {
+  const {
+    peerId,
+    hash,
+  } = payload;
+
+  const peer = selectPeer(global, peerId);
+  if (!peer) return;
+
+  const result = await callApi('fetchStarGiftCollections', {
+    peer,
+    hash,
+  });
+
+  if (!result) return;
+
+  global = getGlobal();
+
+  global = updatePeerStarGiftCollections(global, peerId, result.collections);
+  setGlobal(global);
 });

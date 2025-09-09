@@ -1666,6 +1666,7 @@ export interface LangPair {
   'PublicPostsPremiumFeatureSubtitle': undefined;
   'PublicPostsSubscribeToPremium': undefined;
   'PostsSearchTransaction': undefined;
+  'AllStoriesCategory': undefined;
   'TitleRating': undefined;
   'RatingYourReflectsActivity': undefined;
   'RatingGiftsFromTelegram': undefined;

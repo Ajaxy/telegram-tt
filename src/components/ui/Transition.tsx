@@ -47,6 +47,8 @@ export type TransitionProps = {
   onScroll?: NoneToVoidFunction;
   onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
   children: React.ReactNode | ChildrenFn;
+  contentSelector?: string;
+  restoreHeightKey?: number;
 };
 
 const FALLBACK_ANIMATION_END = 1000;
@@ -89,6 +91,8 @@ function Transition({
   onScroll,
   onMouseDown,
   children,
+  contentSelector,
+  restoreHeightKey,
 }: TransitionProps) {
   const currentKeyRef = useRef<number>();
   // No need for a container to update on change
@@ -361,7 +365,10 @@ function Transition({
       return;
     }
 
-    const { clientHeight, clientWidth } = activeElement || {};
+    const contentElement = contentSelector
+      ? activeElement.querySelector<HTMLDivElement>(contentSelector) : activeElement;
+
+    const { clientHeight, clientWidth } = contentElement || activeElement || {};
     if (!clientHeight || !clientWidth) {
       return;
     }
@@ -373,7 +380,7 @@ function Transition({
         flexBasis: `${clientHeight}px`,
       });
     });
-  }, [shouldRestoreHeight, children]);
+  }, [shouldRestoreHeight, children, restoreHeightKey, contentSelector]);
 
   const asFastList = !renderCount;
   const renders = rendersRef.current;

@@ -30,12 +30,14 @@ import type {
   ApiSavedReactionTag,
   ApiSession,
   ApiSponsoredMessage,
+  ApiStarGiftCollection,
   ApiStarGiftRegular,
   ApiStarsAmount,
   ApiStarTopupOption,
   ApiStealthMode,
   ApiSticker,
   ApiStickerSet,
+  ApiStoryAlbum,
   ApiTimezone,
   ApiTonAmount,
   ApiTranscription,
@@ -253,6 +255,7 @@ export type GlobalState = {
       archived: string[];
     };
     stealthMode: ApiStealthMode;
+    albumsByPeerId: Record<string, ApiStoryAlbum[]>;
   };
 
   groupCalls: {
@@ -306,6 +309,9 @@ export type GlobalState = {
   starGifts?: {
     byId: Record<string, ApiStarGiftRegular>;
     idsByCategory: Record<StarGiftCategory, string[]>;
+  };
+  starGiftCollections?: {
+    byPeerId: Record<string, ApiStarGiftCollection[]>;
   };
 
   stickers: {

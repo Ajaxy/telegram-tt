@@ -9,6 +9,7 @@ import type {
   ApiStarGiftAttribute,
   ApiStarGiftAttributeCounter,
   ApiStarGiftAttributeId,
+  ApiStarGiftCollection,
   ApiTypeResaleStarGifts,
 } from '../../types';
 
@@ -286,4 +287,22 @@ GramJs.TypeStarGiftAttributeId[] {
         throw new Error(`Unknown attribute type: ${(attr as any).type}`);
     }
   });
+}
+
+export function buildApiStarGiftCollection(collection: GramJs.StarGiftCollection): ApiStarGiftCollection | undefined {
+  if (!collection) return undefined;
+
+  const { collectionId, title, icon, giftsCount, hash } = collection;
+
+  if (icon) {
+    addDocumentToLocalDb(icon);
+  }
+
+  return {
+    collectionId,
+    title,
+    icon: icon && buildStickerFromDocument(icon),
+    giftsCount,
+    hash: hash.toString(),
+  };
 }

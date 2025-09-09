@@ -1691,6 +1691,19 @@ export interface ActionPayloads {
     isForPast?: boolean;
     isForFuture?: boolean;
   } | undefined;
+  loadStoryAlbums: {
+    peerId: string;
+  };
+  selectStoryAlbum: {
+    peerId: string;
+    albumId?: number;
+  } & WithTabId;
+  loadAlbumStories: {
+    peerId: string;
+    albumId: number;
+    offsetId?: number;
+  };
+  resetSelectedStoryAlbum: WithTabId | undefined;
 
   openBoostModal: {
     chatId: string;
@@ -2596,6 +2609,13 @@ export interface ActionPayloads {
     recipientId: string;
   } & WithTabId;
   closeGiftTransferModal: WithTabId | undefined;
+  updateSelectedGiftCollection: {
+    peerId: string;
+    collectionId: number;
+  } & WithTabId;
+  resetSelectedGiftCollection: {
+    peerId: string;
+  } & WithTabId;
 
   loadPeerSavedGifts: {
     peerId: string;
@@ -2619,6 +2639,11 @@ export interface ActionPayloads {
   updateStarGiftPrice: {
     gift: ApiInputSavedStarGift;
     price: ApiTypeCurrencyAmount;
+  } & WithTabId;
+
+  loadStarGiftCollections: {
+    peerId: string;
+    hash?: string;
   } & WithTabId;
 
   openStarsGiftModal: ({

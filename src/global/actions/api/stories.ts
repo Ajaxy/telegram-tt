@@ -301,10 +301,40 @@ addActionHandler('loadPeerStories', async (global, actions, payload): Promise<vo
 addActionHandler('loadPeerProfileStories', async (global, actions, payload): Promise<void> => {
   if (selectIsCurrentUserFrozen(global)) return;
 
-  const { peerId, offsetId } = payload;
+  const { peerId, offsetId, tabId = getCurrentTabId() } = payload;
   const peer = selectPeer(global, peerId);
   let peerStories = selectPeerStories(global, peerId);
   if (!peer || peerStories?.isFullyLoaded) {
+    return;
+  }
+
+  const tabState = selectTabState(global, tabId);
+  const selectedAlbumId = tabState.selectedStoryAlbumId;
+  if (selectedAlbumId) {
+    let albumData = peerStories?.idsByAlbumId?.[selectedAlbumId];
+    if (albumData?.isFullyLoaded) {
+      return;
+    }
+
+    const result = await callApi('fetchAlbumStories', {
+      peer,
+      albumId: selectedAlbumId,
+      offset: offsetId || 0,
+    });
+    if (!result) {
+      return;
+    }
+
+    global = getGlobal();
+    global = addStoriesForPeer(global, peerId, result.stories, result.pinnedIds, false, selectedAlbumId);
+    peerStories = selectPeerStories(global, peerId);
+
+    albumData = peerStories?.idsByAlbumId?.[selectedAlbumId];
+    if (Object.values(result.stories).length === 0
+      || (albumData?.ids?.length && albumData.ids.length >= result.count)) {
+      global = updatePeerStoriesFullyLoaded(global, peerId, true, false, selectedAlbumId);
+    }
+    setGlobal(global);
     return;
   }
 
@@ -618,4 +648,67 @@ addActionHandler('activateStealthMode', (global, actions, payload): ActionReturn
   const { isForPast = true, isForFuture = true } = payload || {};
 
   callApi('activateStealthMode', { isForPast: isForPast || true, isForFuture: isForFuture || true });
+});
+
+addActionHandler('loadStoryAlbums', async (global, actions, payload): Promise<void> => {
+  const { peerId } = payload;
+  const peer = selectPeer(global, peerId);
+  if (!peer) return;
+
+  const albums = await callApi('fetchAlbums', { peer });
+  if (!albums) return;
+
+  global = getGlobal();
+  global = {
+    ...global,
+    stories: {
+      ...global.stories,
+      albumsByPeerId: {
+        ...global.stories.albumsByPeerId,
+        [peerId]: albums,
+      },
+    },
+  };
+  setGlobal(global);
+});
+
+addActionHandler('selectStoryAlbum', (global, actions, payload): ActionReturnType => {
+  const { peerId, albumId, tabId = getCurrentTabId() } = payload;
+
+  if (albumId && peerId) {
+    global = updatePeerStoriesFullyLoaded(global, peerId, false);
+  }
+
+  global = updateTabState(global, {
+    selectedStoryAlbumId: albumId || undefined,
+  }, tabId);
+
+  setGlobal(global);
+
+  actions.loadPeerProfileStories({ peerId, tabId });
+});
+
+addActionHandler('loadAlbumStories', async (global, actions, payload): Promise<void> => {
+  const { peerId, albumId, offsetId } = payload;
+  const peer = selectPeer(global, peerId);
+  if (!peer) return;
+
+  const result = await callApi('fetchAlbumStories', {
+    peer,
+    albumId,
+    offset: offsetId || 0,
+  });
+  if (!result) return;
+
+  global = getGlobal();
+  global = addStoriesForPeer(global, peerId, result.stories, result.pinnedIds);
+  setGlobal(global);
+});
+
+addActionHandler('resetSelectedStoryAlbum', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    selectedStoryAlbumId: undefined,
+  }, tabId);
 });

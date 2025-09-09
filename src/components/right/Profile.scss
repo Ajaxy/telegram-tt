@@ -101,7 +101,20 @@
     height: 100% !important;
   }
 
+  .shared-media-transition {
+    overflow: hidden;
+  }
+
   .content {
+    transition: transform 0.3s;
+    &.showContentPanel {
+      transform: translateY(3rem);
+      padding-bottom: 3.5rem !important;
+    }
+    &.noTransition {
+      transition: none;
+    }
+
     &.empty-list {
       display: flex;
       align-items: flex-start;
@@ -208,6 +221,24 @@
         font-size: 0.8125rem;
         text-align: center;
       }
+    }
+  }
+
+  .contentCategoriesPanel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+
+    transition: transform 0.3s, opacity 0.3s;
+
+    &.hiddenPanel {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+
+    &.noTransition {
+      transition: none;
     }
   }
 }

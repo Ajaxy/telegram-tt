@@ -6,7 +6,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import * as langProvider from '../../../util/oldLangProvider';
 import { addTabStateResetterAction } from '../../helpers/meta';
 import { getPrizeStarsTransactionFromGiveaway, getStarsTransactionFromGift } from '../../helpers/payments';
-import { addActionHandler } from '../../index';
+import { addActionHandler, setGlobal } from '../../index';
 import {
   clearStarPayment, openStarsTransactionModal,
 } from '../../reducers';
@@ -344,3 +344,43 @@ addActionHandler('openGiftTransferModal', (global, actions, payload): ActionRetu
 });
 
 addTabStateResetterAction('closeGiftTransferModal', 'giftTransferModal');
+
+addActionHandler('updateSelectedGiftCollection', (global, actions, payload): ActionReturnType => {
+  const { peerId, collectionId, tabId = getCurrentTabId() } = payload;
+  const tabState = selectTabState(global, tabId);
+
+  global = updateTabState(global, {
+    savedGifts: {
+      ...tabState.savedGifts,
+      activeCollectionByPeerId: {
+        ...tabState.savedGifts.activeCollectionByPeerId,
+        [peerId]: collectionId,
+      },
+    },
+  }, tabId);
+  setGlobal(global);
+
+  actions.loadPeerSavedGifts({
+    peerId, shouldRefresh: true, tabId: tabState.id,
+  });
+});
+
+addActionHandler('resetSelectedGiftCollection', (global, actions, payload): ActionReturnType => {
+  const { peerId, tabId = getCurrentTabId() } = payload;
+  const tabState = selectTabState(global, tabId);
+
+  global = updateTabState(global, {
+    savedGifts: {
+      ...tabState.savedGifts,
+      activeCollectionByPeerId: {
+        ...tabState.savedGifts.activeCollectionByPeerId,
+        [peerId]: undefined,
+      },
+    },
+  }, tabId);
+  setGlobal(global);
+
+  actions.loadPeerSavedGifts({
+    peerId, shouldRefresh: true, tabId: tabState.id,
+  });
+});

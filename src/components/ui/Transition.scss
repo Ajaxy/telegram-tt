@@ -29,8 +29,7 @@
   &-slideOptimizedBackwards,
   &-slideOptimizedRtl,
   &-slideOptimizedRtlBackwards {
-    contain: strict;
-
+    transform: translate3d(0, 0, 0);
     #root & > .Transition_slide {
       position: absolute;
       top: 0;

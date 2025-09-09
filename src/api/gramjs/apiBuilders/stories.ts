@@ -5,6 +5,7 @@ import type {
   ApiMediaAreaCoordinates,
   ApiStealthMode,
   ApiStory,
+  ApiStoryAlbum,
   ApiStoryForwardInfo,
   ApiStoryView,
   ApiStoryViews,
@@ -14,8 +15,10 @@ import type {
 } from '../../types';
 
 import { buildCollectionByCallback, omitUndefined } from '../../../util/iteratees';
-import { buildPrivacyRules } from './common';
-import { buildGeoPoint, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
+import { addDocumentToLocalDb } from '../helpers/localDb';
+import { addPhotoToLocalDb } from '../helpers/localDb';
+import { buildApiPhoto, buildPrivacyRules } from './common';
+import { buildApiDocument, buildGeoPoint, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
 import { buildApiMessage } from './messages';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildApiReaction, buildReactionCount } from './reactions';
@@ -277,5 +280,25 @@ export function buildApiStoryForwardInfo(forwardHeader: GramJs.TypeStoryFwdHeade
     fromPeerId: from && getApiChatIdFromMtpPeer(from),
     fromName,
     isModified: modified,
+  };
+}
+
+export function buildApiStoryAlbum(album: GramJs.StoryAlbum): ApiStoryAlbum {
+  const {
+    albumId, title, iconPhoto, iconVideo,
+  } = album;
+
+  if (iconPhoto) {
+    addPhotoToLocalDb(iconPhoto);
+  }
+  if (iconVideo) {
+    addDocumentToLocalDb(iconVideo);
+  }
+
+  return {
+    albumId,
+    title,
+    iconPhoto: iconPhoto && iconPhoto instanceof GramJs.Photo ? buildApiPhoto(iconPhoto) : undefined,
+    iconVideo: iconVideo ? buildApiDocument(iconVideo) : undefined,
   };
 }

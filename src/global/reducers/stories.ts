@@ -55,9 +55,10 @@ export function addStoriesForPeer<T extends GlobalState>(
   newStories: Record<number, ApiTypeStory>,
   newPinnedIds?: number[],
   addToArchive?: boolean,
+  albumId?: number,
 ): T {
   const {
-    byId, orderedIds, profileIds, archiveIds, pinnedIds,
+    byId, orderedIds, profileIds, archiveIds, pinnedIds, idsByAlbumId,
   } = global.stories.byPeerId[peerId] || {};
   const deletedIds = Object.keys(newStories).filter((id) => 'isDeleted' in newStories[Number(id)]).map(Number);
   const updatedById = { ...byId, ...newStories };
@@ -65,7 +66,7 @@ export function addStoriesForPeer<T extends GlobalState>(
   let updatedArchiveIds = [...(archiveIds || [])];
   const updatedProfileIds = unique(
     [...(profileIds || [])].concat(Object.values(newStories).reduce((ids, story) => {
-      if ('isInProfile' in story && story.isInProfile) {
+      if (('isInProfile' in story && story.isInProfile)) {
         ids.push(story.id);
       }
 
@@ -87,6 +88,20 @@ export function addStoriesForPeer<T extends GlobalState>(
       .filter((storyId) => !deletedIds.includes(storyId));
   }
 
+  const updatedIdsByAlbumId = { ...(idsByAlbumId || {}) };
+  if (albumId !== undefined) {
+    const newAlbumStoryIds = Object.keys(newStories).map(Number)
+      .filter((storyId) => !deletedIds.includes(storyId));
+
+    const existingAlbumData = updatedIdsByAlbumId[albumId];
+    const existingIds = existingAlbumData?.ids || [];
+
+    updatedIdsByAlbumId[albumId] = {
+      ...updatedIdsByAlbumId[albumId],
+      ids: unique([...existingIds, ...newAlbumStoryIds]).sort((a, b) => b - a),
+    };
+  }
+
   global = {
     ...global,
     stories: {
@@ -100,6 +115,7 @@ export function addStoriesForPeer<T extends GlobalState>(
           profileIds: updatedProfileIds,
           pinnedIds: pinnedIds || newPinnedIds,
           ...(addToArchive && { archiveIds: updatedArchiveIds }),
+          ...(albumId !== undefined && { idsByAlbumId: updatedIdsByAlbumId }),
         },
       },
     },
@@ -137,7 +153,33 @@ export function updatePeerStoriesFullyLoaded<T extends GlobalState>(
   peerId: string,
   isFullyLoaded: boolean,
   isArchive?: boolean,
+  albumId?: number,
 ): T {
+  const { byPeerId } = global.stories;
+  const peerStories = byPeerId[peerId];
+
+  if (albumId !== undefined && peerStories?.idsByAlbumId?.[albumId]) {
+    return {
+      ...global,
+      stories: {
+        ...global.stories,
+        byPeerId: {
+          ...byPeerId,
+          [peerId]: {
+            ...peerStories,
+            idsByAlbumId: {
+              ...peerStories.idsByAlbumId,
+              [albumId]: {
+                ...peerStories.idsByAlbumId[albumId],
+                isFullyLoaded,
+              },
+            },
+          },
+        },
+      },
+    };
+  }
+
   return {
     ...global,
     stories: {

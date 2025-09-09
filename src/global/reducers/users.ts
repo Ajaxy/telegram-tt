@@ -1,6 +1,7 @@
 import type {
   ApiMissingInvitedUser,
   ApiSavedStarGift,
+  ApiStarGiftCollection,
   ApiUser,
   ApiUserCommonChats,
   ApiUserFullInfo,
@@ -14,6 +15,7 @@ import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { omit, omitUndefined, unique } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { getSavedGiftKey } from '../helpers/stars';
+import { selectActiveCollectionId } from '../selectors';
 import { selectTabState } from '../selectors';
 import { updateTabState } from './tabs';
 
@@ -344,16 +346,38 @@ export function replacePeerSavedGifts<T extends GlobalState>(
     keyCounts.set(id, count + 1);
   });
 
+  const activeCollectionId = selectActiveCollectionId(global, peerId, tabId) || 'all';
+
   return updateTabState(global, {
     savedGifts: {
       ...tabState.savedGifts,
-      giftsByPeerId: {
-        ...tabState.savedGifts.giftsByPeerId,
+      collectionsByPeerId: {
+        ...tabState.savedGifts.collectionsByPeerId,
         [peerId]: {
-          gifts,
-          nextOffset,
+          ...tabState.savedGifts.collectionsByPeerId[peerId],
+          [activeCollectionId]: {
+            gifts,
+            nextOffset,
+          },
         },
       },
     },
   }, tabId);
+}
+
+export function updatePeerStarGiftCollections<T extends GlobalState>(
+  global: T,
+  peerId: string,
+  collections: ApiStarGiftCollection[],
+): T {
+  return {
+    ...global,
+    starGiftCollections: {
+      ...global.starGiftCollections,
+      byPeerId: {
+        ...global.starGiftCollections?.byPeerId,
+        [peerId]: collections,
+      },
+    },
+  };
 }

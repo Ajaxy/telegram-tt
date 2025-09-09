@@ -1,0 +1,72 @@
+.container,
+.clipPathContainer {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  gap: var(--tab-gap-size, 0.25rem);
+  align-items: flex-end;
+  justify-content: flex-start;
+
+  padding-inline: 0.5rem;
+
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.container {
+  user-select: none;
+
+  position: relative;
+  z-index: 1;
+
+  overflow-x: auto;
+
+  color: var(--color-text-secondary);
+
+  opacity: 0;
+
+  transition: background-color 150ms, opacity 150ms;
+
+  mask-image: linear-gradient(to right, transparent, black 0.5rem, black calc(100% - 0.5rem), transparent);
+
+  &::-webkit-scrollbar {
+    height: 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0);
+    // `box-shadow` prevents repaint on macOS when hovering out of scrollable container
+    box-shadow: 0 0 1px rgba(255, 255, 255, 0.01);
+  }
+
+  &.isVisible {
+    opacity: 1;
+  }
+}
+
+.clipPathContainer {
+  // Hardware acceleration for clip-path animations
+  will-change: clip-path;
+  // Use GPU compositing for better performance
+  isolation: isolate;
+  position: absolute;
+  z-index: 3;
+  right: 0;
+  left: 0;
+
+  // Optimize for animations
+  contain: layout style paint;
+  overflow: hidden;
+
+  width: fit-content;
+
+  color: var(--color-primary);
+
+  background-color: var(--color-interactive-element-hover);
+
+  transition: var(--slide-transition) clip-path;
+
+  &.noAnimation {
+    transition: none;
+  }
+}

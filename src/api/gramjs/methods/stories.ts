@@ -7,6 +7,7 @@ import type {
   ApiPeerStories,
   ApiReaction,
   ApiStealthMode,
+  ApiStoryAlbum,
   ApiTypeStory,
 } from '../../types';
 
@@ -19,6 +20,7 @@ import {
   buildApiPeerStories,
   buildApiStealthMode,
   buildApiStory,
+  buildApiStoryAlbum,
   buildApiStoryView,
   buildApiStoryViews,
 } from '../apiBuilders/stories';
@@ -462,4 +464,64 @@ export function activateStealthMode({
   }), {
     shouldReturnTrue: true,
   });
+}
+
+export async function fetchAlbums({
+  peer,
+}: {
+  peer: ApiPeer;
+}): Promise<ApiStoryAlbum[] | undefined> {
+  const result = await invokeRequest(new GramJs.stories.GetAlbums({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    hash: DEFAULT_PRIMITIVES.BIGINT,
+  }));
+
+  if (!result || result instanceof GramJs.stories.AlbumsNotModified) {
+    return undefined;
+  }
+
+  return result.albums.map(buildApiStoryAlbum);
+}
+
+export async function fetchAlbumStories({
+  peer,
+  albumId,
+  offset = 0,
+  limit = STORY_LIST_LIMIT,
+}: {
+  peer: ApiPeer;
+  albumId: number;
+  offset?: number;
+  limit?: number;
+}): Promise<{
+  stories: Record<number, ApiTypeStory>;
+  pinnedIds?: number[];
+  count: number;
+} | undefined> {
+  const result = await invokeRequest(new GramJs.stories.GetAlbumStories({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    albumId,
+    offset,
+    limit,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  const stories = buildCollectionByCallback(result.stories, (story) => (
+    [story.id, buildApiStory(peer.id, story)]
+  ));
+
+  result.stories.forEach((story) => {
+    if (story && story instanceof GramJs.StoryItem) {
+      addStoryToLocalDb(story, peer.id);
+    }
+  });
+
+  return {
+    stories,
+    pinnedIds: result.pinnedToTop,
+    count: result.count,
+  };
 }

@@ -218,7 +218,8 @@ export type TabState = {
   };
 
   savedGifts: {
-    giftsByPeerId: Record<string, ApiSavedGifts>;
+    collectionsByPeerId: Record<string, Record<number | 'all', ApiSavedGifts>>;
+    activeCollectionByPeerId: Record<string, number | undefined>;
     filter: GiftProfileFilterOptions;
   };
 
@@ -341,6 +342,8 @@ export type TabState = {
       storyIdsByPeerId: Record<string, number[]>;
     };
   };
+
+  selectedStoryAlbumId?: number;
 
   mediaViewer: {
     chatId?: string;

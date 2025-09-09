@@ -13,7 +13,7 @@ import type {
 
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiResaleGifts, buildApiSavedStarGift, buildApiStarGift,
-  buildApiStarGiftAttribute, buildInputResaleGiftsAttributes } from '../apiBuilders/gifts';
+  buildApiStarGiftAttribute, buildApiStarGiftCollection, buildInputResaleGiftsAttributes } from '../apiBuilders/gifts';
 import {
   buildApiCurrencyAmount,
   buildApiStarsGiftOptions,
@@ -112,11 +112,13 @@ export async function fetchSavedStarGifts({
   offset = DEFAULT_PRIMITIVES.STRING,
   limit = DEFAULT_PRIMITIVES.INT,
   filter,
+  collectionId,
 }: {
   peer: ApiPeer;
   offset?: string;
   limit?: number;
   filter?: GiftProfileFilterOptions;
+  collectionId?: number;
 }) {
   type GetSavedStarGiftsParams = ConstructorParameters<typeof GramJs.payments.GetSavedStarGifts>[0];
 
@@ -124,6 +126,7 @@ export async function fetchSavedStarGifts({
     peer: buildInputPeer(peer.id, peer.accessHash),
     offset,
     limit,
+    collectionId,
     ...(filter && {
       sortByValue: filter.sortType === 'byValue' || undefined,
       excludeUnlimited: !filter.shouldIncludeUnlimited || undefined,
@@ -475,4 +478,25 @@ export async function fetchStarGiftWithdrawalUrl({
   }
 
   return undefined;
+}
+
+export async function fetchStarGiftCollections({
+  peer,
+  hash,
+}: {
+  peer: ApiPeer;
+  hash?: string;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetStarGiftCollections({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    hash: hash ? bigInt(hash) : DEFAULT_PRIMITIVES.BIGINT,
+  }));
+
+  if (!result || result instanceof GramJs.payments.StarGiftCollectionsNotModified) {
+    return undefined;
+  }
+
+  return {
+    collections: result.collections.map(buildApiStarGiftCollection).filter(Boolean),
+  };
 }

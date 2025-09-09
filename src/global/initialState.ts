@@ -165,6 +165,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
 
   stories: {
     byPeerId: {},
+    albumsByPeerId: {},
     orderedPeerIds: {
       archived: [],
       active: [],
@@ -393,7 +394,8 @@ export const INITIAL_TAB_STATE: TabState = {
     filter: {
       ...DEFAULT_GIFT_PROFILE_FILTER_OPTIONS,
     },
-    giftsByPeerId: {},
+    collectionsByPeerId: {},
+    activeCollectionByPeerId: {},
   },
 
   resaleGifts: {

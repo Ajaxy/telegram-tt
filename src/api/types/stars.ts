@@ -282,6 +282,14 @@ export interface ApiDisallowedGiftsSettings {
   shouldDisallowPremiumGifts?: true;
 }
 
+export interface ApiStarGiftCollection {
+  collectionId: number;
+  title: string;
+  icon?: ApiSticker;
+  giftsCount: number;
+  hash: string;
+}
+
 export interface ApiStarsRating {
   level: number;
   currentLevelStars: number;
