@@ -3,6 +3,8 @@ import type { ElementRef, FC } from '../../lib/teact/teact';
 import type React from '../../lib/teact/teact';
 import { useRef, useState } from '../../lib/teact/teact';
 
+import type { IconName } from '../../types/icons';
+
 import { IS_TOUCH_ENV, MouseButton } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
@@ -10,6 +12,7 @@ import buildStyle from '../../util/buildStyle';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
+import Icon from '../common/icons/Icon';
 import Sparkles from '../common/Sparkles';
 import RippleEffect from './RippleEffect';
 import Spinner from './Spinner';
@@ -23,7 +26,7 @@ export type OwnProps = {
   size?: 'default' | 'smaller' | 'tiny';
   color?: (
     'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'translucent-black'
-    | 'translucent-bordered' | 'dark' | 'green' | 'adaptive' | 'stars' | 'bluredStarsBadge'
+    | 'translucent-bordered' | 'dark' | 'green' | 'adaptive' | 'stars' | 'bluredStarsBadge' | 'transparentBlured'
   );
   backgroundImage?: string;
   id?: string;
@@ -55,6 +58,9 @@ export type OwnProps = {
   noForcedUpperCase?: boolean;
   shouldStopPropagation?: boolean;
   style?: string;
+  iconName?: IconName;
+  iconAlignment?: 'top' | 'bottom' | 'start' | 'end';
+  iconClassName?: string;
   onClick?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onContextMenu?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onMouseDown?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
@@ -112,6 +118,9 @@ const Button: FC<OwnProps> = ({
   shouldStopPropagation,
   noForcedUpperCase,
   style,
+  iconName,
+  iconAlignment = 'start',
+  iconClassName,
 }) => {
   let elementRef = useRef<HTMLButtonElement | HTMLAnchorElement>();
   if (ref) {
@@ -146,6 +155,7 @@ const Button: FC<OwnProps> = ({
     withPremiumGradient && 'premium',
     isRectangular && 'rectangular',
     noForcedUpperCase && 'no-upper-case',
+    iconAlignment && iconName && `content-with-icon-${iconAlignment}`,
   );
 
   const handleClick = useLastCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -173,15 +183,39 @@ const Button: FC<OwnProps> = ({
     }
   });
 
-  const content = (
-    <>
-      {withSparkleEffect && <Sparkles preset="button" />}
-      {isLoading ? (
+  const renderIcon = () => {
+    if (!iconName) return undefined;
+    return <Icon name={iconName} className={iconClassName} />;
+  };
+
+  const renderContent = () => {
+    if (isLoading) {
+      return (
         <div>
           <span dir={isRtl ? 'auto' : undefined}>{lang('Cache.ClearProgress')}</span>
           <Spinner color={isText ? 'blue' : 'white'} />
         </div>
-      ) : children}
+      );
+    }
+
+    const icon = renderIcon();
+
+    if (!icon) {
+      return children;
+    }
+
+    return (
+      <div className={`with-icon-${iconAlignment}`}>
+        {icon}
+        {children}
+      </div>
+    );
+  };
+
+  const content = (
+    <>
+      {withSparkleEffect && <Sparkles preset="button" />}
+      {renderContent()}
       {!isNotInteractive && ripple && (
         <RippleEffect />
       )}

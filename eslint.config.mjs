@@ -29,13 +29,14 @@ export default tseslint.config(
     quoteProps: 'as-needed',
   }),
   globalIgnores([
-    'src/lib/rlottie/rlottie-wasm.js',
+    'src/lib/rlottie/**',
     'src/lib/video-preview/polyfill',
-    'src/lib/fasttextweb/fasttext-wasm.cjs',
+    'src/lib/fasttextweb/**',
     'src/lib/gramjs/tl/',
-    'src/lib/lovely-chart',
+    'src/lib/lovely-chart/**',
     'src/lib/music-metadata-browser',
     'src/lib/secret-sauce/',
+    'src/lib/fastBlur.js',
     'src/types/language.d.ts',
     'dist/',
     'dist-electron/',
@@ -56,6 +57,7 @@ export default tseslint.config(
       'no-template-curly-in-string': 'error',
       'object-shorthand': 'error',
       curly: ['error', 'multi-line'],
+      eqeqeq: ['error', 'always'],
       'no-implicit-coercion': [
         'error',
         {

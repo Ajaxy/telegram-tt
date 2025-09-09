@@ -26,7 +26,7 @@ export function rgb2hex(param: [number, number, number]) {
   const p0 = param[0].toString(16);
   const p1 = param[1].toString(16);
   const p2 = param[2].toString(16);
-  return (p0.length == 1 ? '0' + p0 : p0) + (p1.length == 1 ? '0' + p1 : p1) + (p2.length == 1 ? '0' + p2 : p2);
+  return (p0.length === 1 ? '0' + p0 : p0) + (p1.length === 1 ? '0' + p1 : p1) + (p2.length === 1 ? '0' + p2 : p2);
 }
 
 /**
@@ -49,9 +49,9 @@ export function rgb2hsb([r, g, b]: [number, number, number]): [number, number, n
   let h!: number, s: number, v: number = max;
 
   let d = max - min;
-  s = max == 0 ? 0 : d / max;
+  s = max === 0 ? 0 : d / max;
 
-  if (max == min) {
+  if (max === min) {
     h = 0; // achromatic
   } else {
     switch (max) {

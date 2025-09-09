@@ -9,6 +9,24 @@
   height: var(--_height);
   margin-bottom: 0.5rem;
   padding-bottom: 1rem;
+
+  &.withManageButtons {
+    --_height: 18.5rem;
+
+    .radialPattern {
+      inset: -8rem -5% -5% -5%;
+    }
+
+    .sticker {
+      margin-top: 2.5rem;
+    }
+  }
+
+  :global {
+    canvas {
+      transition: 250ms transform;
+    }
+  }
 }
 
 .subtitleBadge {

@@ -145,9 +145,22 @@ const GiftInfoModal = ({
     return lang('GiftInfoCollectible', { number: gift.number });
   }, [gift, releasedByPeer, lang]);
 
+  const starGiftUniqueSlug = gift?.type === 'starGiftUnique' ? gift.slug : undefined;
+
+  const selfCollectibleStatus = useMemo(() => {
+    if (!starGiftUniqueSlug) return undefined;
+    return collectibleEmojiStatuses?.find((status) =>
+      status.type === 'collectible' && status.slug === starGiftUniqueSlug);
+  }, [starGiftUniqueSlug, collectibleEmojiStatuses]);
+
+  const isSelfUnique = Boolean(selfCollectibleStatus);
   const canFocusUpgrade = Boolean(savedGift?.upgradeMsgId);
+
   const canManage = !canFocusUpgrade && savedGift?.inputGift && (
-    isTargetChat ? hasAdminRights : renderingTargetPeer?.id === currentUserId
+    isTargetChat ? hasAdminRights
+      : gift?.type === 'starGift'
+        ? renderingTargetPeer?.id === currentUserId
+        : gift?.ownerId === currentUserId || isSelfUnique
   );
 
   function getResalePrice(shouldPayInTon?: boolean) {
@@ -164,7 +177,8 @@ const GiftInfoModal = ({
 
   const resellPrice = getResalePrice();
   const confirmPrice = getResalePrice(shouldPayInTon);
-  const canBuyGift = gift?.type === 'starGiftUnique' && gift.ownerId !== currentUserId && Boolean(resellPrice);
+  const canBuyGift = !isSelfUnique && gift?.type === 'starGiftUnique'
+    && gift.ownerId !== currentUserId && Boolean(resellPrice);
 
   const giftOwnerTitle = (() => {
     if (!isGiftUnique) return undefined;
@@ -277,7 +291,7 @@ const GiftInfoModal = ({
       );
     }
 
-    if (canManage && savedGift.canUpgrade && !savedGift.upgradeMsgId) {
+    if (canManage && savedGift?.canUpgrade && !savedGift.upgradeMsgId) {
       return (
         <Button isShiny onClick={handleOpenUpgradeModal}>
           {lang('GiftInfoUpgrade')}
@@ -327,7 +341,7 @@ const GiftInfoModal = ({
 
       if (savedGift.upgradeMsgId) return lang('GiftInfoDescriptionUpgraded');
       if (canManage && savedGift.canUpgrade && savedGift.alreadyPaidUpgradeStars && !savedGift.upgradeMsgId) {
-        return lang('GiftInfoDescriptionUpgrade');
+        return lang('GiftInfoDescriptionUpgrade2');
       }
       if (savedGift.canUpgrade && canManage) {
         return canManage
@@ -470,6 +484,8 @@ const GiftInfoModal = ({
           title={gift.title}
           subtitle={giftSubtitle}
           subtitlePeer={releasedByPeer}
+          showManageButtons={canManage}
+          savedGift={savedGift}
         />
       </div>
     );
@@ -779,6 +795,7 @@ const GiftInfoModal = ({
         tableData={modalData?.tableData}
         footer={modalData?.footer}
         className={styles.modal}
+        contentClassName={styles.modalContent}
         onClose={handleClose}
         withBalanceBar={Boolean(canBuyGift)}
         currencyInBalanceBar={confirmPrice?.currency}

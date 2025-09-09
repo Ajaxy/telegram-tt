@@ -4,6 +4,7 @@ import { getActions } from '../../../global';
 
 import type {
   ApiPeer,
+  ApiSavedStarGift,
   ApiStarGiftAttributeBackdrop, ApiStarGiftAttributeModel, ApiStarGiftAttributePattern,
   ApiTypeCurrencyAmount } from '../../../api/types';
 
@@ -15,7 +16,7 @@ import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 
 import { useTransitionActiveKey } from '../../../hooks/animations/useTransitionActiveKey';
-import useFlag from '../../../hooks/useFlag.ts';
+import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
@@ -23,6 +24,7 @@ import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
 import RadialPatternBackground from '../../common/profile/RadialPatternBackground';
 import Transition from '../../ui/Transition';
+import UniqueGiftManageButtons from './UniqueGiftManageButtons';
 
 import styles from './UniqueGiftHeader.module.scss';
 
@@ -35,6 +37,8 @@ type OwnProps = {
   subtitlePeer?: ApiPeer;
   className?: string;
   resellPrice?: ApiTypeCurrencyAmount;
+  showManageButtons?: boolean;
+  savedGift?: ApiSavedStarGift;
 };
 
 const STICKER_SIZE = 120;
@@ -48,13 +52,15 @@ const UniqueGiftHeader = ({
   subtitlePeer,
   className,
   resellPrice,
+  showManageButtons,
+  savedGift,
 }: OwnProps) => {
   const {
     openChat,
   } = getActions();
 
   const lang = useLang();
-  const [isHover, markHover, unmarkHover] = useFlag();
+  const [isGiftHover, markGiftHover, unmarkGiftHover] = useFlag(false);
   const activeKey = useTransitionActiveKey([modelAttribute, backdropAttribute, patternAttribute]);
   const subtitleColor = backdropAttribute?.textColor;
 
@@ -73,10 +79,14 @@ const UniqueGiftHeader = ({
   }, [backdropAttribute, patternAttribute]);
 
   return (
-    <div className={buildClassName(styles.root, className)}>
+    <div className={buildClassName(styles.root,
+      isGiftHover && 'interactive-gift',
+      showManageButtons && styles.withManageButtons,
+      className)}
+    >
       <Transition
         className={styles.transition}
-        slideClassName={buildClassName('interactive-gift', styles.transitionSlide)}
+        slideClassName={buildClassName(styles.transitionSlide)}
         activeKey={activeKey}
         direction={1}
         name="zoomBounceSemiFade"
@@ -86,9 +96,9 @@ const UniqueGiftHeader = ({
           className={styles.sticker}
           sticker={modelAttribute.sticker}
           size={STICKER_SIZE}
-          noLoop={!isHover}
-          onMouseEnter={!IS_TOUCH_ENV ? markHover : undefined}
-          onMouseLeave={!IS_TOUCH_ENV ? unmarkHover : undefined}
+          noLoop={!isGiftHover}
+          onMouseEnter={!IS_TOUCH_ENV ? markGiftHover : undefined}
+          onMouseLeave={!IS_TOUCH_ENV ? unmarkGiftHover : undefined}
         />
       </Transition>
       {title && <h1 className={styles.title}>{title}</h1>}
@@ -104,6 +114,11 @@ const UniqueGiftHeader = ({
         >
           {subtitle}
         </div>
+      )}
+      {savedGift && showManageButtons && (
+        <UniqueGiftManageButtons
+          savedGift={savedGift}
+        />
       )}
       {resellPrice && (
         <p className={styles.amount}>

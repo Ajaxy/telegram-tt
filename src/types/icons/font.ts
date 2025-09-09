@@ -97,6 +97,7 @@ export type FontIconName =
   | 'frozen-time'
   | 'fullscreen'
   | 'gifs'
+  | 'gift-transfer-inline'
   | 'gift'
   | 'group-filled'
   | 'group'

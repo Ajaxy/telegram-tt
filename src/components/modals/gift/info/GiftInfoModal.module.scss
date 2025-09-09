@@ -36,11 +36,21 @@
   color: var(--color-error);
 }
 
+.modalContent {
+  position: relative;
+  max-height: min(92vh, 46rem) !important;
+}
+
 .headerSplitButton {
   position: absolute;
   right: 0.375rem;
+
   display: flex;
   flex-direction: row;
+
+  border-radius: 1rem;
+
+  backdrop-filter: blur(0.5rem);
 }
 
 .headerButton,

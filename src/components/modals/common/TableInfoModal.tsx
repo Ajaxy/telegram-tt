@@ -29,6 +29,7 @@ type OwnProps = {
   footer?: TeactNode;
   buttonText?: string;
   className?: string;
+  contentClassName?: string;
   hasBackdrop?: boolean;
   onClose: NoneToVoidFunction;
   onButtonClick?: NoneToVoidFunction;
@@ -47,6 +48,7 @@ const TableInfoModal = ({
   footer,
   buttonText,
   className,
+  contentClassName,
   hasBackdrop,
   onClose,
   onButtonClick,
@@ -70,7 +72,7 @@ const TableInfoModal = ({
       header={modalHeader}
       title={title}
       className={className}
-      contentClassName={styles.content}
+      contentClassName={buildClassName(styles.content, contentClassName)}
       onClose={onClose}
       withBalanceBar={withBalanceBar}
       currencyInBalanceBar={currencyInBalanceBar}

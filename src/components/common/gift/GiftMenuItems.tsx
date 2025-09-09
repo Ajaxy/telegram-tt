@@ -6,6 +6,7 @@ import type {
 } from '../../../api/types';
 
 import { DEFAULT_STATUS_ICON_ID, TME_LINK_PREFIX } from '../../../config';
+import { STARS_CURRENCY_CODE } from '../../../config';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatDateAtTime } from '../../../util/dates/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
@@ -125,7 +126,7 @@ const GiftMenuItems = ({
     if (!savedGift || savedGift.gift.type !== 'starGiftUnique' || !savedGift.inputGift) return;
     closeGiftInfoModal();
     updateStarGiftPrice({ gift: savedGift.inputGift, price: {
-      currency: 'XTR', amount: 0, nanos: 0,
+      currency: STARS_CURRENCY_CODE, amount: 0, nanos: 0,
     } });
     showNotification({
       icon: 'unlist-outline',

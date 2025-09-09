@@ -324,6 +324,16 @@
     backdrop-filter: blur(50px);
   }
 
+  &.transparentBlured {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(0.5rem);
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  }
+
   &.smaller {
     height: 2.5rem;
     padding: 0.3125rem;
@@ -338,22 +348,12 @@
     }
 
     &.with-icon {
-      padding-right: 1.25rem;
-      padding-left: 0.75rem;
+      padding-inline-start: 0.75rem;
+      padding-inline-end: 1.25rem;
 
       .icon {
-        margin-right: 0.5rem;
+        margin-inline-end: 0.5rem;
         font-size: 1.5rem;
-      }
-
-      &[dir="rtl"] {
-        padding-right: 0.75rem;
-        padding-left: 1.25rem;
-
-        .icon {
-          margin-right: 0;
-          margin-left: 0.5rem;
-        }
       }
     }
   }
@@ -389,6 +389,11 @@
     .icon {
       font-size: 1.5rem;
     }
+  }
+
+  &.content-with-icon-bottom,
+  &.content-with-icon-top {
+    height: auto;
   }
 
   &.fluid {
@@ -470,5 +475,39 @@
 
   &.rectangular {
     border-radius: 0;
+  }
+
+  .with-icon-top {
+    display: flex;
+    flex-direction: column;
+
+    .icon {
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  .with-icon-bottom {
+    display: flex;
+    flex-direction: column-reverse;
+
+    .icon {
+      margin-top: 0.25rem;
+    }
+  }
+
+  .with-icon-start {
+    display: flex;
+    .icon {
+      margin-inline-end: 0.25rem;
+    }
+  }
+
+  .with-icon-end {
+    display: flex;
+    flex-direction: row-reverse;
+
+    .icon {
+      margin-inline-start: 0.25rem;
+    }
   }
 }

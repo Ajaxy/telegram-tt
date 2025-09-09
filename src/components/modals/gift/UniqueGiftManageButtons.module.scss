@@ -1,0 +1,24 @@
+.manageButtons {
+  z-index: 1;
+
+  display: flex;
+  gap: 0.5rem;
+
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.manageButton {
+  flex-basis: 0;
+  flex-grow: 1;
+}
+
+.text {
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-normal);
+  text-transform: lowercase;
+}
+
+.icon {
+  font-size: 1.5rem;
+}

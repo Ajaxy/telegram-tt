@@ -137,13 +137,13 @@ const StarsBalanceModal = ({
 
   const modalHeight = useMemo(() => {
     const transactionCount = history?.all?.transactions.length || 0;
-    if (transactionCount == 1) {
+    if (transactionCount === 1) {
       return '35.5rem';
     }
-    if (transactionCount == 2) {
+    if (transactionCount === 2) {
       return '39.25rem';
     }
-    if (transactionCount == 3) {
+    if (transactionCount === 3) {
       return '43rem';
     }
     return '45rem';
