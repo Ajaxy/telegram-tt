@@ -5,8 +5,6 @@
 }
 
 .tag {
-  --custom-emoji-size: 0.75rem;
-
   --emoji-size: 0.75rem;
   --custom-emoji-size: 0.75rem;
 
@@ -23,7 +21,7 @@
 
   font-size: 0.625rem;
   font-weight: var(--font-weight-medium);
-  line-height: 0.875rem;
+  line-height: 0.75rem;
   color: var(--accent-color);
   text-align: center;
   text-transform: uppercase;
