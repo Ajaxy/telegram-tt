@@ -97,6 +97,7 @@
   .title {
     font-size: 1.3125rem;
     font-weight: var(--font-weight-medium);
+    text-align: center;
     letter-spacing: -0.18px;
 
     @media (max-height: 450px) {
@@ -106,6 +107,7 @@
 
   .description {
     font-size: 1rem;
+    text-align: center;
     letter-spacing: 0.3px;
 
     @media (max-height: 450px) {
