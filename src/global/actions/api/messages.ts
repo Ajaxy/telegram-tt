@@ -115,6 +115,7 @@ import {
   selectCurrentChat,
   selectCurrentMessageList,
   selectCurrentViewedStory,
+  selectCustomEmoji,
   selectDraft,
   selectEditingId,
   selectEditingMessage,
@@ -1552,7 +1553,7 @@ addActionHandler('transcribeAudio', async (global, actions, payload): Promise<vo
 addActionHandler('loadCustomEmojis', async (global, actions, payload): Promise<void> => {
   const { ids, ignoreCache } = payload;
   const newCustomEmojiIds = ignoreCache ? ids
-    : unique(ids.filter((documentId) => !global.customEmojis.byId[documentId]));
+    : unique(ids.filter((documentId) => !selectCustomEmoji(global, documentId)));
   const customEmoji = await callApi('fetchCustomEmoji', {
     documentId: newCustomEmojiIds,
   });

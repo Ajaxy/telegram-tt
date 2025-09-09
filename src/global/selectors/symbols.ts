@@ -218,3 +218,7 @@ export function selectGiftStickerForTon<T extends GlobalState>(global: T, amount
 
   return stickers.find((sticker) => sticker.emoji === emoji) || stickers[0];
 }
+
+export function selectCustomEmoji<T extends GlobalState>(global: T, documentId: string) {
+  return global.customEmojis.byId[documentId];
+}

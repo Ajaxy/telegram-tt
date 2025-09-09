@@ -80,6 +80,7 @@ import {
   selectChatMessage,
   selectChatType,
   selectCurrentMessageList,
+  selectCustomEmoji,
   selectDraft,
   selectEditingDraft,
   selectEditingMessage,
@@ -1783,7 +1784,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
 
     if (reaction.type === 'custom') {
-      const sticker = getGlobal().customEmojis.byId[reaction.documentId];
+      const sticker = selectCustomEmoji(getGlobal(), reaction.documentId);
       if (!sticker) {
         return;
       }

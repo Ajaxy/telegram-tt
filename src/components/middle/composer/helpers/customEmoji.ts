@@ -4,6 +4,7 @@ import type { ApiMessageEntityCustomEmoji, ApiSticker } from '../../../../api/ty
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
 import { EMOJI_SIZES } from '../../../../config';
+import { selectCustomEmoji } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { getInputCustomEmojiParams } from '../../../../util/emoji/customEmojiManager';
 import { REM } from '../../../common/helpers/mediaDimensions';
@@ -29,7 +30,7 @@ export function buildCustomEmojiHtml(emoji: ApiSticker) {
 }
 
 export function buildCustomEmojiHtmlFromEntity(rawText: string, entity: ApiMessageEntityCustomEmoji) {
-  const customEmoji = getGlobal().customEmojis.byId[entity.documentId];
+  const customEmoji = selectCustomEmoji(getGlobal(), entity.documentId);
   const [isPlaceholder, src, uniqueId] = getInputCustomEmojiParams(customEmoji);
 
   const className = buildClassName(

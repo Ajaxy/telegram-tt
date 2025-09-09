@@ -23,6 +23,7 @@ import {
 import {
   selectChat,
   selectChatMessage,
+  selectCustomEmoji,
   selectIsChatWithSelf,
   selectIsInSelectMode,
   selectIsRightColumnShown,
@@ -403,7 +404,7 @@ export default memo(withGlobal<OwnProps>(
     const typingStatus = selectThreadParam(global, chatId, threadId, 'typingStatus');
 
     const emojiStatus = peer?.emojiStatus;
-    const emojiStatusSticker = emojiStatus && global.customEmojis.byId[emojiStatus.documentId];
+    const emojiStatusSticker = emojiStatus && selectCustomEmoji(global, emojiStatus.documentId);
     const emojiStatusSlug = emojiStatus?.type === 'collectible' ? emojiStatus.slug : undefined;
 
     const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);

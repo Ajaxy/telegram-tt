@@ -1,11 +1,12 @@
 import type {
-  ApiMessage,
-  MediaContainer,
-  SizeTarget,
-} from '../../api/types';
-import type {
   GlobalState,
 } from '../types';
+import {
+  type ApiMessage,
+  ApiMessageEntityTypes,
+  type MediaContainer,
+  type SizeTarget,
+} from '../../api/types';
 
 import { NSFW_RESTRICTION_REASON } from '../../config';
 import {
@@ -16,6 +17,7 @@ import {
   getMessageMediaHash,
   getMessagePhoto,
   getMessageSticker,
+  getMessageText,
   getMessageVideo,
   getMessageVoice,
   getWebPageAudio,
@@ -29,6 +31,7 @@ import {
   selectWebPageFromMessage,
 } from './messages';
 import { selectSettingsKeys } from './settings';
+import { selectCustomEmoji } from './symbols';
 
 export function selectIsMediaNsfw<T extends GlobalState>(global: T, message: ApiMessage) {
   const { isSensitiveEnabled } = selectSettingsKeys(global);
@@ -43,9 +46,20 @@ export function selectIsMediaNsfw<T extends GlobalState>(global: T, message: Api
 }
 
 export function selectMessageDownloadableMedia<T extends GlobalState>(global: T, message: MediaContainer) {
+  const text = getMessageText(message);
+  const firstEntity = text?.entities?.[0];
+  const isSingleCustomEmoji = firstEntity
+    && text.entities?.length === 1
+    && firstEntity.type === ApiMessageEntityTypes.CustomEmoji
+    && firstEntity.offset === 0
+    && firstEntity.length === text.text.length;
+
+  const customEmoji = isSingleCustomEmoji ? selectCustomEmoji(global, firstEntity.documentId) : undefined;
+
   const webPage = selectWebPageFromMessage(global, message);
   return (
-    getMessagePhoto(message)
+    customEmoji
+    || getMessagePhoto(message)
     || getMessageVideo(message)
     || getMessageDocument(message)
     || getMessageSticker(message)

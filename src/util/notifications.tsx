@@ -18,6 +18,7 @@ import { getIsChatMuted, getIsChatSilent, getShouldShowMessagePreview } from '..
 import { getMessageSenderName } from '../global/helpers/peers';
 import {
   selectCurrentMessageList,
+  selectCustomEmoji,
   selectIsChatWithSelf,
   selectNotifyDefaults,
   selectNotifyException,
@@ -183,7 +184,7 @@ export async function unsubscribe() {
 // Load custom emoji from the api if it's not cached already
 async function loadCustomEmoji(id: string) {
   let global = getGlobal();
-  if (global.customEmojis.byId[id]) return;
+  if (selectCustomEmoji(global, id)) return;
   const customEmoji = await callApi('fetchCustomEmoji', {
     documentId: [id],
   });
@@ -352,7 +353,7 @@ function getReactionEmoji(reaction: ApiPeerReaction) {
   }
 
   if (reaction.reaction.type === 'custom') {
-    emoji = getGlobal().customEmojis.byId[reaction.reaction.documentId]?.emoji;
+    emoji = selectCustomEmoji(getGlobal(), reaction.reaction.documentId)?.emoji;
   }
   return emoji || '❤️';
 }

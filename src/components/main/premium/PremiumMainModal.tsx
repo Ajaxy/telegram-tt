@@ -16,7 +16,13 @@ import type { LangPair } from '../../../types/language';
 
 import { PREMIUM_FEATURE_SECTIONS, TME_LINK_PREFIX } from '../../../config';
 import { getUserFullName } from '../../../global/helpers';
-import { selectIsCurrentUserPremium, selectStickerSet, selectTabState, selectUser } from '../../../global/selectors';
+import {
+  selectCustomEmoji,
+  selectIsCurrentUserPremium,
+  selectStickerSet,
+  selectTabState,
+  selectUser,
+} from '../../../global/selectors';
 import { selectPremiumLimit } from '../../../global/selectors/limits';
 import buildClassName from '../../../util/buildClassName';
 import { formatCurrency } from '../../../util/formatCurrency';
@@ -508,7 +514,7 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
   } = selectTabState(global);
 
   const fromUser = premiumModal?.fromUserId ? selectUser(global, premiumModal.fromUserId) : undefined;
-  const fromUserStatusEmoji = fromUser?.emojiStatus ? global.customEmojis.byId[fromUser.emojiStatus.documentId]
+  const fromUserStatusEmoji = fromUser?.emojiStatus ? selectCustomEmoji(global, fromUser.emojiStatus.documentId)
     : undefined;
   const fromUserStatusSet = fromUserStatusEmoji ? selectStickerSet(global, fromUserStatusEmoji.stickerSetInfo)
     : undefined;

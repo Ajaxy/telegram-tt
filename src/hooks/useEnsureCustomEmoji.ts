@@ -1,5 +1,6 @@
 import { getActions, getGlobal } from '../global';
 
+import { selectCustomEmoji } from '../global/selectors';
 import { addCustomEmojiInputRenderCallback } from '../util/emoji/customEmojiManager';
 import { throttle } from '../util/schedulers';
 
@@ -12,7 +13,7 @@ const loadFromQueue = throttle(() => {
   const queue = [...LOAD_QUEUE];
 
   const queueToLoad = queue.slice(0, LIMIT_PER_REQUEST);
-  const otherQueue = queue.slice(LIMIT_PER_REQUEST + 1);
+  const otherQueue = queue.slice(LIMIT_PER_REQUEST);
 
   getActions().loadCustomEmojis({
     ids: queueToLoad,
@@ -45,7 +46,7 @@ export default function useEnsureCustomEmoji(id?: string) {
   if (!id) return;
   notifyCustomEmojiRender(id);
 
-  if (getGlobal().customEmojis.byId[id]) {
+  if (selectCustomEmoji(getGlobal(), id)) {
     return;
   }
 

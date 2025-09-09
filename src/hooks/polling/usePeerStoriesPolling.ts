@@ -17,7 +17,7 @@ const REQUEST_THROTTLE = 500;
 const loadFromQueue = throttle(() => {
   const queue = Array.from(PEER_ID_QUEUE);
   const queueToLoad = queue.slice(0, LIMIT_PER_REQUEST);
-  const otherQueue = queue.slice(LIMIT_PER_REQUEST + 1);
+  const otherQueue = queue.slice(LIMIT_PER_REQUEST);
 
   getActions().loadStoriesMaxIds({
     peerIds: queueToLoad,

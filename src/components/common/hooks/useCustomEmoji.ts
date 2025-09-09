@@ -4,7 +4,7 @@ import { getGlobal } from '../../../global';
 import type { ApiSticker } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 
-import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
+import { selectCanPlayAnimatedEmojis, selectCustomEmoji } from '../../../global/selectors';
 import { addCustomEmojiCallback, removeCustomEmojiCallback } from '../../../util/emoji/customEmojiManager';
 
 import useEnsureCustomEmoji from '../../../hooks/useEnsureCustomEmoji';
@@ -12,7 +12,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 
 export default function useCustomEmoji(documentId?: string) {
   const [customEmoji, setCustomEmoji] = useState<ApiSticker | undefined>(
-    documentId ? getGlobal().customEmojis.byId[documentId] : undefined,
+    documentId ? selectCustomEmoji(getGlobal(), documentId) : undefined,
   );
   const [canPlay, setCanPlay] = useState(selectCanPlayAnimatedEmojis(getGlobal()));
 
@@ -36,7 +36,7 @@ export default function useCustomEmoji(documentId?: string) {
     return () => {
       removeCustomEmojiCallback(handleGlobalChange);
     };
-  }, [customEmoji, documentId, handleGlobalChange]);
+  }, [documentId]);
 
   return { customEmoji, canPlay };
 }

@@ -14,6 +14,7 @@ import {
 import {
   selectChat,
   selectCurrentMessageList,
+  selectCustomEmoji,
   selectPeerPhotos,
   selectTabState,
   selectThreadMessagesCount,
@@ -409,7 +410,7 @@ export default memo(withGlobal<OwnProps>(
     const { animationLevel } = selectSharedSettings(global);
 
     const emojiStatus = (user || chat)?.emojiStatus;
-    const emojiStatusSticker = emojiStatus ? global.customEmojis.byId[emojiStatus.documentId] : undefined;
+    const emojiStatusSticker = emojiStatus ? selectCustomEmoji(global, emojiStatus.documentId) : undefined;
     const emojiStatusSlug = emojiStatus?.type === 'collectible' ? emojiStatus.slug : undefined;
 
     return {

@@ -80,9 +80,10 @@ import {
   selectRequestedChatTranslationLanguage,
 } from './chats';
 import { selectCurrentLimit } from './limits';
+import { selectMessageDownloadableMedia } from './media';
 import { selectPeer, selectPeerPaidMessagesStars } from './peers';
 import { selectPeerStory } from './stories';
-import { selectIsStickerFavorite } from './symbols';
+import { selectCustomEmoji, selectIsStickerFavorite } from './symbols';
 import { selectTabState } from './tabs';
 import { selectTopic } from './topics';
 import {
@@ -682,7 +683,6 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const isDocumentSticker = isMessageDocumentSticker(message);
   const isBoostMessage = message.content.action?.type === 'boostApply';
   const isMonoforum = chat.isMonoforum;
-  const webPage = selectFullWebPageFromMessage(global, message);
 
   const hasChatPinPermission = (chat.isCreator
     || (!isChannel && !isUserRightBanned(chat, 'pinMessages'))
@@ -762,9 +762,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const canCopyLink = !isLocal && !isAction && (isChannel || isSuperGroup) && !isMonoforum;
   const canSelect = !isLocal && !isAction;
 
-  const canDownload = Boolean(webPage?.document || webPage?.video || webPage?.photo
-    || content.audio || content.voice || content.photo || content.video || content.document || content.sticker)
-  && !hasTtl;
+  const canDownload = selectMessageDownloadableMedia(global, message) && !hasTtl;
 
   const canSaveGif = message.content.video?.isGif;
 
@@ -1412,7 +1410,7 @@ export function selectMessageCustomEmojiSets<T extends GlobalState>(
 ): ApiStickerSetInfo[] | undefined {
   const customEmojis = selectCustomEmojis(message);
   if (!customEmojis) return MEMO_EMPTY_ARRAY;
-  const documents = customEmojis.map((entity) => global.customEmojis.byId[entity.documentId]);
+  const documents = customEmojis.map((entity) => selectCustomEmoji(global, entity.documentId));
   // If some emoji still loading, do not return empty array
   if (!documents.every(Boolean)) return undefined;
   const sets = documents.map((doc) => doc.stickerSetInfo);
