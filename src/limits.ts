@@ -58,7 +58,6 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
     moreAccounts: DEFAULT_LIMITS.moreAccounts,
     maxReactions: DEFAULT_LIMITS.maxReactions,
   },
-  canDisplayAutoarchiveSetting: true,
   autologinDomains: [
     'instantview.telegram.org',
     'translations.telegram.org',

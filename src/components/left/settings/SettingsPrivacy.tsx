@@ -481,15 +481,16 @@ export default memo(withGlobal<OwnProps>(
     const { canDisplayChatInTitle } = selectSharedSettings(global);
     const shouldChargeForMessages = Boolean(nonContactPeersPaidStars);
     const isCurrentUserFrozen = selectIsCurrentUserFrozen(global);
+    const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
     return {
-      isCurrentUserPremium: selectIsCurrentUserPremium(global),
+      isCurrentUserPremium,
       hasPassword,
       hasPasscode: Boolean(hasPasscode),
       blockedCount: blocked.totalCount,
       webAuthCount: global.activeWebSessions.orderedHashes.length,
       isSensitiveEnabled,
-      canDisplayAutoarchiveSetting: Boolean(appConfig.canDisplayAutoarchiveSetting),
+      canDisplayAutoarchiveSetting: appConfig.canDisplayAutoarchiveSetting || isCurrentUserPremium,
       shouldArchiveAndMuteNewNonContact,
       canChangeSensitive,
       shouldNewNonContactPeersRequirePremium,

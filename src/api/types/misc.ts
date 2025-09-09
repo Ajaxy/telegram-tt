@@ -220,7 +220,7 @@ export interface ApiAppConfig {
   topicsPinnedLimit: number;
   hiddenMembersMinCount: number;
   limits: Record<ApiLimitType, readonly [number, number]>;
-  canDisplayAutoarchiveSetting: boolean;
+  canDisplayAutoarchiveSetting?: boolean;
   storyViewersExpirePeriod: number;
   storyChangelogUserId: string;
   maxPinnedStoriesCount: number;
