@@ -206,7 +206,7 @@ export interface ApiAppConfig {
   autologinDomains: string[];
   urlAuthDomains: string[];
   whitelistedDomains: string[];
-  premiumInvoiceSlug: string;
+  premiumInvoiceSlug?: string;
   premiumBotUsername: string;
   isPremiumPurchaseBlocked: boolean;
   isGiveawayGiftsPurchaseAvailable: boolean;

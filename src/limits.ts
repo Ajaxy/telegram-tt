@@ -87,7 +87,6 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
   canLimitNewMessagesWithoutPremium: false,
   readDateExpiresAt: 604800,
   premiumBotUsername: 'PremiumBot',
-  premiumInvoiceSlug: 'abc',
   premiumPromoOrder: [
     'stories',
     'more_upload',
