@@ -100,11 +100,21 @@ export function createWindow(url?: string) {
   });
 
   window.on('close', (event) => {
-    if (IS_MAC_OS || (IS_WINDOWS && tray.isEnabled)) {
-      if (forceQuit.isEnabled) {
-        app.exit(0);
-        forceQuit.disable();
-      } else if (hasExtraWindows()) {
+    const focusedWindow = getCurrentWindow();
+    if (forceQuit.isEnabled) {
+      app.exit(0);
+      return;
+    }
+
+    if (focusedWindow && focusedWindow.isFullScreen()) {
+      event.preventDefault();
+      focusedWindow.once('leave-full-screen', () => {
+        focusedWindow.close();
+      });
+      focusedWindow.setFullScreen(false);
+    } else if (IS_MAC_OS || (IS_WINDOWS && tray.isEnabled)) {
+      // Standard logic for closing
+      if (hasExtraWindows()) {
         windows.delete(window);
         windowState.unmanage();
       } else {
