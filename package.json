@@ -2,6 +2,8 @@
   "name": "telegram-t",
   "version": "10.9.73",
   "description": "",
+  "author": "Alexander Zinchuk (alexander@zinchuk.com)",
+  "license": "GPL-3.0-or-later",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -37,8 +39,6 @@
     "*.{ts,tsx,js}": "eslint --fix",
     "*.{css,scss}": "stylelint --fix"
   },
-  "author": "Alexander Zinchuk (alexander@zinchuk.com)",
-  "license": "GPL-3.0-or-later",
   "devDependencies": {
     "@babel/core": "^7.27.4",
     "@babel/preset-env": "^7.27.2",
@@ -129,6 +129,7 @@
     "@tauri-apps/plugin-updater": "^2.9.0",
     "async-mutex": "^0.5.0",
     "big-integer": "github:painor/BigInteger.js",
+    "browserslist-config-baseline": "^0.5.0",
     "emoji-data-ios": "git+https://github.com/korenskoy/emoji-data-ios#443f1c9d7b16a82e7ee53f7f226d7d9a9920a105",
     "idb-keyval": "^6.2.2",
     "lowlight": "^3.3.0",
@@ -143,5 +144,11 @@
   "optionalDependencies": {
     "dmg-license": "^1.0.11",
     "fsevents": "^2.3.3"
+  },
+  "browserslist": [
+    "extends browserslist-config-baseline"
+  ],
+  "browserslist-config-baseline": {
+    "logConfigToConsole": false
   }
 }
