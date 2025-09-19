@@ -50,7 +50,7 @@ import { interpolateArray } from '../../../util/waveform';
 import {
   buildApiCurrencyAmount,
 } from '../apiBuilders/payments';
-import { buildPeer } from '../gramjsBuilders';
+import { buildPeer, getEntityTypeById } from '../gramjsBuilders';
 import {
   addDocumentToLocalDb,
   addPhotoToLocalDb,
@@ -187,7 +187,11 @@ export function buildApiMessageWithChatId(
   chatId: string,
   mtpMessage: UniversalMessage,
 ): ApiMessage {
-  const fromId = mtpMessage.fromId ? getApiChatIdFromMtpPeer(mtpMessage.fromId) : undefined;
+  const isPrivateChat = getEntityTypeById(chatId) === 'user';
+  // Server can return `fromId` for our own messages in private chats, but not for incoming ones
+  // This can break grouping logic, as we do not fill `fromId` for `UpdateShortMessage` case
+  const fromId = mtpMessage.fromId && !isPrivateChat
+    ? getApiChatIdFromMtpPeer(mtpMessage.fromId) : undefined;
 
   const isChatWithSelf = !fromId && chatId === currentUserId;
   const forwardInfo = mtpMessage.fwdFrom && buildApiMessageForwardInfo(mtpMessage.fwdFrom, isChatWithSelf);
