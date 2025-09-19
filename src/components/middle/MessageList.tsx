@@ -380,7 +380,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
     const ids = messageIds.filter((id) => {
       const message = messagesById[id];
-      return message && message.reactions?.results.length && !message.content.action;
+      return message && message.reactions && !message.content.action;
     });
 
     if (!ids.length) return;
