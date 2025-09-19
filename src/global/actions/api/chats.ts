@@ -412,14 +412,19 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
       threadId,
     });
 
+    const lastMessageId = threadInfo?.lastMessageId !== undefined ? threadInfo.lastMessageId
+      : threadInfo?.messagesCount === 0 ? result.threadId : undefined;
+
     global = updateThreadInfo(global, chatId, threadId, {
       isCommentsInfo: false,
       threadId,
       chatId,
       fromChannelId: loadingChatId,
       fromMessageId: loadingThreadId,
+      lastMessageId,
       ...(threadInfo
-        && pick(threadInfo, ['messagesCount', 'lastMessageId', 'lastReadInboxMessageId', 'recentReplierIds'])),
+        && pick(threadInfo, ['messagesCount', 'lastReadInboxMessageId', 'recentReplierIds'])
+      ),
     });
   }
   global = updateThread(global, chatId, threadId, {
