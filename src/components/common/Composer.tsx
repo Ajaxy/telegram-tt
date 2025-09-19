@@ -616,7 +616,14 @@ const Composer: FC<OwnProps & StateProps> = ({
       }
     }
 
-    setHtml(!shouldPrepend ? `${getHtml()}${newHtml}` : `${newHtml}${getHtml()}`);
+    if (shouldPrepend) {
+      const newFirstWord = newHtml.split(' ')[0];
+      const shouldReplace = getHtml().startsWith(newFirstWord);
+
+      setHtml(shouldReplace ? newHtml : `${newHtml}${getHtml()}`);
+    } else {
+      setHtml(`${getHtml()}${newHtml}`);
+    }
 
     // If selection is outside of input, set cursor at the end of input
     requestNextMutation(() => {
