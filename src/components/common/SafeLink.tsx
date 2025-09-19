@@ -20,6 +20,8 @@ type OwnProps = {
   chatId?: string;
   messageId?: number;
   threadId?: ThreadId;
+  entityType?: ApiMessageEntityTypes.Url | ApiMessageEntityTypes.TextUrl |
+    `${ApiMessageEntityTypes.TextUrl}` | `${ApiMessageEntityTypes.Url}`;
 };
 
 const SafeLink = ({
@@ -32,6 +34,7 @@ const SafeLink = ({
   chatId,
   messageId,
   threadId,
+  entityType = ApiMessageEntityTypes.Url,
 }: OwnProps) => {
   const { openUrl } = getActions();
 
@@ -73,7 +76,7 @@ const SafeLink = ({
       className={classNames}
       onClick={handleClick}
       dir={isRtl ? 'rtl' : 'auto'}
-      data-entity-type={ApiMessageEntityTypes.Url}
+      data-entity-type={entityType}
     >
       {content}
     </a>
