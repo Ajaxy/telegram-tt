@@ -607,7 +607,7 @@ const ActionMessageText = ({
 
       case 'starGiftUnique': {
         const {
-          isTransferred, isUpgrade, savedId, peerId, fromId, resaleAmount, gift,
+          isTransferred, isUpgrade, savedId, peerId, fromId, resaleAmount, gift, transferStars,
         } = action;
 
         const isToChannel = Boolean(peerId && savedId);
@@ -616,7 +616,7 @@ const ActionMessageText = ({
         const fromTitle = (fromPeer && getPeerTitle(lang, fromPeer)) || userFallbackText;
         const fromLink = renderPeerLink(fromPeer?.id, fromTitle, asPreview);
 
-        if (resaleAmount) {
+        if (resaleAmount && !transferStars) {
           const amountText = resaleAmount.currency === TON_CURRENCY_CODE
             ? formatTonAsText(lang, convertTonFromNanos(resaleAmount.amount))
             : formatStarsAsText(lang, resaleAmount.amount);
@@ -675,7 +675,7 @@ const ActionMessageText = ({
           return lang('ActionStarGiftUpgradedUser', { user: senderLink }, { withNodes: true });
         }
 
-        if (isTransferred) {
+        if ((isTransferred || transferStars) && !resaleAmount) {
           if (sender?.id === SERVICE_NOTIFICATIONS_USER_ID) {
             return lang('ActionStarGiftTransferredUnknown');
           }
