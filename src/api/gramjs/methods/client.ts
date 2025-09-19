@@ -127,7 +127,7 @@ export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoid
         qrCode: onRequestQrCode,
         onError: onAuthError,
         initialMethod: platform === 'iOS' || platform === 'Android' ? 'phoneNumber' : 'qrCode',
-        shouldThrowIfUnauthorized: Boolean(sessionData),
+        shouldThrowIfUnauthorized: Object.values(sessionData?.keys || {}).length > 0,
         webAuthToken,
         webAuthTokenFailed: onWebAuthTokenFailed,
         mockScenario,
