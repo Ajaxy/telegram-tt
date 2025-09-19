@@ -118,7 +118,6 @@ export function removeCallback(url: string, callbackUniqueId: string) {
 export function getProgressiveUrl(url: string) {
   const base = new URL(`${PROGRESSIVE_URL_PREFIX}${url}`, window.location.href);
   if (ACCOUNT_SLOT) base.searchParams.set('account', ACCOUNT_SLOT.toString());
-  memoryCache.set(url, base.href); // Needed for hooks to detect document as already loaded and apply URL
   return base.href;
 }
 

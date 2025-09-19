@@ -5,7 +5,7 @@ import type { MockTypes } from './MockTypes';
 import Api from '../../tl/api';
 
 export default function createMockedUser(id: string, mockData: MockTypes): Api.User {
-  const user = mockData.users.find((user) => user.id === id);
+  const user = mockData.users.find((u) => u.id === id);
 
   if (!user) throw Error('No such user ' + id);
 

@@ -133,7 +133,7 @@ export function fastRaf(callback: NoneToVoidFunction, withTimeoutFallback = fals
 
         if (fastRafCallbacks) {
           const currentCallbacks = fastRafCallbacks;
-          currentTimeoutCallbacks.forEach((callback) => currentCallbacks.delete(callback));
+          currentTimeoutCallbacks.forEach((c) => currentCallbacks.delete(c));
         }
         fastRafFallbackCallbacks = undefined;
 

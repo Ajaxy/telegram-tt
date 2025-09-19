@@ -287,13 +287,14 @@ const ToDoListModal = ({
   });
 
   function renderHeader() {
-    const title = isAddTaskMode ? 'TitleAppendToDoList' : editingMessage ? 'TitleEditToDoList' : 'TitleNewToDoList';
+    const modalTitle = isAddTaskMode ? 'TitleAppendToDoList'
+      : editingMessage ? 'TitleEditToDoList' : 'TitleNewToDoList';
     return (
       <div className="modal-header-condensed">
         <Button round color="translucent" size="smaller" ariaLabel={lang('AriaToDoCancel')} onClick={onClear}>
           <Icon name="close" />
         </Button>
-        <div className="modal-title">{lang(title)}</div>
+        <div className="modal-title">{lang(modalTitle)}</div>
         <Button
           color="primary"
           size="smaller"

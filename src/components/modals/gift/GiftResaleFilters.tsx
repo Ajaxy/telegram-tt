@@ -276,7 +276,7 @@ const GiftResaleFilters: FC<StateProps & OwnProps> = ({
 
   const handleModelMenuItemClick = useLastCallback((attribute: ApiStarGiftAttributeModel) => {
     if (!counters) return;
-    const attributes = filter.modelAttributes || [];
+    const modelAttributes = filter.modelAttributes || [];
     const modelAttribute
       = counters.find((counter): counter is ApiStarGiftAttributeCounter<StarGiftAttributeIdModel> =>
         counter.attribute.type === 'model' && counter.attribute.documentId === attribute.sticker.id,
@@ -284,10 +284,10 @@ const GiftResaleFilters: FC<StateProps & OwnProps> = ({
 
     if (!modelAttribute) return;
 
-    const isActive = attributes.some((item) => item.documentId === modelAttribute.documentId);
+    const isActive = modelAttributes.some((item) => item.documentId === modelAttribute.documentId);
     const updatedAttributes = isActive
-      ? attributes.filter((item) => item.documentId !== modelAttribute.documentId)
-      : [...attributes, modelAttribute];
+      ? modelAttributes.filter((item) => item.documentId !== modelAttribute.documentId)
+      : [...modelAttributes, modelAttribute];
     updateResaleGiftsFilter({ filter: {
       ...filter,
       modelAttributes: updatedAttributes,
@@ -296,7 +296,7 @@ const GiftResaleFilters: FC<StateProps & OwnProps> = ({
 
   const handlePatternMenuItemClick = useLastCallback((attribute: ApiStarGiftAttributePattern) => {
     if (!counters) return;
-    const attributes = filter.patternAttributes || [];
+    const patternAttributes = filter.patternAttributes || [];
     const patternAttribute = counters.find(
       (counter): counter is ApiStarGiftAttributeCounter<ApiStarGiftAttributeIdPattern> =>
         counter.attribute.type === 'pattern' && counter.attribute.documentId === attribute.sticker.id,
@@ -304,10 +304,10 @@ const GiftResaleFilters: FC<StateProps & OwnProps> = ({
 
     if (!patternAttribute) return;
 
-    const isActive = attributes.some((item) => item.documentId === patternAttribute.documentId);
+    const isActive = patternAttributes.some((item) => item.documentId === patternAttribute.documentId);
     const updatedAttributes = isActive
-      ? attributes.filter((item) => item.documentId !== patternAttribute.documentId)
-      : [...attributes, patternAttribute];
+      ? patternAttributes.filter((item) => item.documentId !== patternAttribute.documentId)
+      : [...patternAttributes, patternAttribute];
     updateResaleGiftsFilter({ filter: {
       ...filter,
       patternAttributes: updatedAttributes,
@@ -316,7 +316,7 @@ const GiftResaleFilters: FC<StateProps & OwnProps> = ({
 
   const handleBackdropMenuItemClick = useLastCallback((attribute: ApiStarGiftAttributeBackdrop) => {
     if (!counters) return;
-    const attributes = filter.backdropAttributes || [];
+    const backdropAttributes = filter.backdropAttributes || [];
     const backdropAttribute = counters.find(
       (counter): counter is ApiStarGiftAttributeCounter<ApiStarGiftAttributeIdBackdrop> =>
         counter.attribute.type === 'backdrop' && counter.attribute.backdropId === attribute.backdropId,
@@ -324,10 +324,10 @@ const GiftResaleFilters: FC<StateProps & OwnProps> = ({
 
     if (!backdropAttribute) return;
 
-    const isActive = attributes.some((item) => item.backdropId === backdropAttribute.backdropId);
+    const isActive = backdropAttributes.some((item) => item.backdropId === backdropAttribute.backdropId);
     const updatedAttributes = isActive
-      ? attributes.filter((item) => item.backdropId !== backdropAttribute.backdropId)
-      : [...attributes, backdropAttribute];
+      ? backdropAttributes.filter((item) => item.backdropId !== backdropAttribute.backdropId)
+      : [...backdropAttributes, backdropAttribute];
     updateResaleGiftsFilter({ filter: {
       ...filter,
       backdropAttributes: updatedAttributes,

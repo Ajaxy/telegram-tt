@@ -257,14 +257,14 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   }, [globalSearchChatId, selectedSearchDate]);
 
   const version = useMemo(() => {
-    let version = '';
+    let fullVersion = '';
     if (IS_TAURI && window.tauri.version) {
-      version = `Tauri ${window.tauri.version} | `;
+      fullVersion = `Tauri ${window.tauri.version} | `;
     }
 
-    version += `${APP_NAME} ${versionString}`;
+    fullVersion += `${APP_NAME} ${versionString}`;
 
-    return version;
+    return fullVersion;
   }, [versionString]);
 
   return (

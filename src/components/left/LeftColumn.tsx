@@ -64,6 +64,7 @@ type StateProps = {
 enum ContentType {
   Main,
 
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Settings,
   Archived,
 

@@ -42,11 +42,11 @@ function SpeedingDiamond({ onMouseMove }: OwnProps) {
         if (!isAnimating) return false;
 
         const t = Math.min((Date.now() - startAt) / SLOWDOWN_DURATION, 1);
-        const speed = (MAX_SPEED - MIN_SPEED) * (1 - transition(t));
+        const newSpeed = (MAX_SPEED - MIN_SPEED) * (1 - transition(t));
 
-        setSpeed(speed);
+        setSpeed(newSpeed);
 
-        isAnimating = t < 1 && speed > 1;
+        isAnimating = t < 1 && newSpeed > 1;
 
         return isAnimating;
       }, requestMutation);

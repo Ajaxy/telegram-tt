@@ -15,6 +15,7 @@ import {
 } from '../../global/helpers';
 import { isIpRevealingMedia } from '../../util/media/ipRevealingMedia';
 import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
+import { preloadDocumentMedia } from './helpers/preloadDocumentMedia';
 
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
@@ -119,9 +120,25 @@ const Document = ({
   const localBlobUrl = hasPreview ? document.previewBlobUrl : undefined;
   const previewData = useMedia(getDocumentMediaHash(document, 'pictogram'), !isIntersecting);
 
-  const shouldForceDownload = document.innerMediaType === 'photo' && !document.mediaSize?.fromDocumentAttribute;
+  const shouldForceDownload = document.innerMediaType === 'photo' && document.mediaSize
+    && !document.mediaSize.fromDocumentAttribute && !document.mediaSize.fromPreload;
 
   const withMediaViewer = onMediaClick && document.innerMediaType && !shouldForceDownload;
+
+  useEffect(() => {
+    const fileEl = ref.current;
+    if (!withMediaViewer || !fileEl || !message) return;
+
+    const onHover = () => {
+      preloadDocumentMedia(message);
+    };
+
+    fileEl.addEventListener('mouseenter', onHover);
+
+    return () => {
+      fileEl.removeEventListener('mouseenter', onHover);
+    };
+  }, [withMediaViewer, message]);
 
   const handleDownload = useLastCallback(() => {
     downloadMedia({ media: document, originMessage: message });

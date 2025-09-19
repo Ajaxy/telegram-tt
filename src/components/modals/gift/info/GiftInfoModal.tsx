@@ -218,12 +218,12 @@ const GiftInfoModal = ({
         : gift?.ownerId === currentUserId || isSelfUnique
   );
 
-  function getResalePrice(shouldPayInTon?: boolean) {
+  function getResalePrice(isInTon?: boolean) {
     if (!isGiftUnique) return undefined;
     const amounts = gift.resellPrice;
     if (!amounts) return undefined;
 
-    if (gift?.resaleTonOnly || shouldPayInTon) {
+    if (gift?.resaleTonOnly || isInTon) {
       return amounts.find((amount) => amount.currency === TON_CURRENCY_CODE);
     }
 

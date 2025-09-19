@@ -3,6 +3,7 @@ import { useEffect } from '../lib/teact/teact';
 import { ApiMediaFormat } from '../api/types';
 
 import { selectIsSynced } from '../global/selectors';
+import { IS_PROGRESSIVE_SUPPORTED } from '../util/browser/windowEnvironment';
 import * as mediaLoader from '../util/mediaLoader';
 import useSelector from './data/useSelector';
 import useForceUpdate from './useForceUpdate';
@@ -13,7 +14,11 @@ const useMedia = (
   mediaFormat = ApiMediaFormat.BlobUrl,
   delay?: number | false,
 ) => {
-  const mediaData = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
+  const isStreaming = IS_PROGRESSIVE_SUPPORTED && mediaFormat === ApiMediaFormat.Progressive;
+  const mediaData = mediaHash
+    ? (isStreaming ? mediaLoader.getProgressiveUrl(mediaHash)
+      : mediaLoader.getFromMemory(mediaHash)) : undefined;
+
   const forceUpdate = useForceUpdate();
   const isSynced = useSelector(selectIsSynced);
 

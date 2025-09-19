@@ -9,7 +9,7 @@ import type {
 } from '../../types';
 import { PaymentStep } from '../../../types';
 
-import { DEBUG_PAYMENT_SMART_GLOCAL } from '../../../config';
+import { DEBUG_PAYMENT_SMART_GLOCAL, STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import * as langProvider from '../../../util/oldLangProvider';
 import { getStripeError } from '../../../util/payments/stripe';
@@ -1085,13 +1085,14 @@ async function payInputStarInvoice<T extends GlobalState>(
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const actions = getActions();
-  const isTon = inputInvoice.type === 'stargiftResale' && inputInvoice.currency === 'TON';
+  const isTon = inputInvoice.type === 'stargiftResale' && inputInvoice.currency === TON_CURRENCY_CODE;
   const balance = isTon ? global.ton?.balance : global.stars?.balance;
+  const currency = isTon ? TON_CURRENCY_CODE : STARS_CURRENCY_CODE;
 
   if (balance === undefined) return;
 
   if (balance.amount < price) {
-    actions.openStarsBalanceModal({ currency: isTon ? 'TON' : 'XTR', tabId });
+    actions.openStarsBalanceModal({ currency, tabId });
     return;
   }
 
@@ -1126,12 +1127,10 @@ async function payInputStarInvoice<T extends GlobalState>(
 
   const formPrice = form.invoice.totalAmount;
   if (formPrice !== price) {
-    const isTon = inputInvoice.type === 'stargiftResale' && inputInvoice.currency === 'TON';
-
     actions.openPriceConfirmModal({
       originalAmount: price,
       newAmount: formPrice,
-      currency: isTon ? 'TON' : 'XTR',
+      currency,
       directInfo: {
         inputInvoice,
         formId: form.formId,

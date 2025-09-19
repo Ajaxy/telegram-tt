@@ -145,12 +145,15 @@ type StateProps = {
 };
 
 enum Content {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Loading,
   Restricted,
   StarsRequired,
   PremiumRequired,
   AccountInfo,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   ContactGreeting,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   NoMessages,
   MessageList,
 }
@@ -180,6 +183,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   isChannelWithAvatars,
   canPost,
   isSynced,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   isChatMonoforum,
   isReady,
   isChatWithSelf,

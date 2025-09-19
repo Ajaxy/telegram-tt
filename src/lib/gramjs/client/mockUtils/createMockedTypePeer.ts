@@ -5,21 +5,21 @@ import type { MockTypes } from './MockTypes';
 import Api from '../../tl/api';
 
 export default function createMockedTypePeer(id: string, mockData: MockTypes): Api.TypePeer {
-  const user = mockData.users.find((user) => user.id === id);
+  const user = mockData.users.find((u) => u.id === id);
   if (user) {
     return new Api.PeerUser({
       userId: BigInt(id),
     });
   }
 
-  const chat = mockData.chats.find((chat) => chat.id === id);
+  const chat = mockData.chats.find((c) => c.id === id);
   if (chat) {
     return new Api.PeerChat({
       chatId: BigInt(id),
     });
   }
 
-  const channel = mockData.channels.find((channel) => channel.id === id);
+  const channel = mockData.channels.find((c) => c.id === id);
   if (channel) {
     return new Api.PeerChannel({
       channelId: BigInt(Number(id) + 1000000000),

@@ -784,10 +784,6 @@ const ActionMessageText = ({
       case 'suggestedPostRefund': {
         const { payerInitiated } = action;
 
-        const replyMessage = message.replyInfo?.type === 'message' && message.replyInfo.replyToMsgId
-          ? selectChatMessage(global, chatId, message.replyInfo.replyToMsgId)
-          : undefined;
-
         const postSender = replyMessage ? selectSender(global, replyMessage) : sender;
         const postSenderTitle = postSender && getPeerTitle(lang, postSender);
         const postSenderLink = renderPeerLink(postSender?.id, postSenderTitle || userFallbackText, asPreview);
@@ -822,9 +818,6 @@ const ActionMessageText = ({
         const { isRejected, isBalanceTooLow, rejectComment } = action;
 
         if (isRejected) {
-          const senderTitle = sender && getPeerTitle(lang, sender);
-          const senderLink = renderPeerLink(sender?.id, senderTitle || userFallbackText, asPreview);
-
           return translateWithYou(
             lang,
             rejectComment ? 'SuggestedPostRejectedWithReason' : 'SuggestedPostRejected',
@@ -835,10 +828,6 @@ const ActionMessageText = ({
         }
 
         if (isBalanceTooLow) {
-          const replyMessage = message.replyInfo?.type === 'message' && message.replyInfo.replyToMsgId
-            ? selectChatMessage(global, chatId, message.replyInfo.replyToMsgId)
-            : undefined;
-
           const replyMessageSender = replyMessage ? selectSender(global, replyMessage) : sender;
           const replyPeerTitle = replyMessageSender && getPeerTitle(lang, replyMessageSender);
           const userLink = renderPeerLink(replyMessageSender?.id, replyPeerTitle || userFallbackText, asPreview);

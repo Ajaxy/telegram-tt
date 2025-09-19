@@ -7,7 +7,7 @@ import Api from '../../tl/api';
 import { MOCK_STARTING_DATE } from './MockTypes';
 
 export default function createMockedChat(id: string, mockData: MockTypes): Api.Chat {
-  const chat = mockData.chats.find((chat) => chat.id === id);
+  const chat = mockData.chats.find((c) => c.id === id);
 
   if (!chat) throw Error('No such chat ' + id);
 

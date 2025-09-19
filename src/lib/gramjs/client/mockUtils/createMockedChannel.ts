@@ -9,7 +9,7 @@ import createMockedChatBannedRights from './createMockedChatBannedRights';
 import { MOCK_STARTING_DATE } from './MockTypes';
 
 export default function createMockedChannel(id: string, mockData: MockTypes): Api.Channel {
-  const channel = mockData.channels.find((channel) => channel.id === id);
+  const channel = mockData.channels.find((c) => c.id === id);
 
   if (!channel) throw Error('No such channel ' + id);
 

@@ -225,21 +225,21 @@ const PremiumProgress: FC<OwnProps> = ({
 
   const renderProgressLayer = (
     isPositive: boolean,
-    layerProgress: number,
+    currentProgress: number,
     layerClassName?: string,
     disableTransition?: boolean,
   ) => {
-    const className = isPositive ? styles.positiveProgress : styles.negativeProgress;
+    const typeClass = isPositive ? styles.positiveProgress : styles.negativeProgress;
     const progressVar = '--layer-progress';
 
     return (
       <div
         className={buildClassName(
-          className,
+          typeClass,
           layerClassName,
           disableTransition && styles.noTransition,
         )}
-        style={`${progressVar}: ${layerProgress}`}
+        style={`${progressVar}: ${currentProgress}`}
       >
         <div className={styles.left}>
           <span>{displayLeftText}</span>

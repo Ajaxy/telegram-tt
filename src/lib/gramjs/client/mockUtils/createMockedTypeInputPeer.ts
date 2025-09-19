@@ -5,7 +5,7 @@ import type { MockTypes } from './MockTypes';
 import Api from '../../tl/api';
 
 export default function createMockedTypeInputPeer(id: string, mockData: MockTypes): Api.TypeInputPeer {
-  const user = mockData.users.find((user) => user.id === id);
+  const user = mockData.users.find((u) => u.id === id);
   if (user) {
     return new Api.InputPeerUser({
       userId: BigInt(id),
@@ -13,14 +13,14 @@ export default function createMockedTypeInputPeer(id: string, mockData: MockType
     });
   }
 
-  const chat = mockData.chats.find((chat) => chat.id === id);
+  const chat = mockData.chats.find((c) => c.id === id);
   if (chat) {
     return new Api.InputPeerChat({
       chatId: BigInt(id),
     });
   }
 
-  const channel = mockData.channels.find((channel) => channel.id === id);
+  const channel = mockData.channels.find((c) => c.id === id);
   if (channel) {
     return new Api.InputPeerChannel({
       channelId: BigInt(Number(id) + 1000000000),

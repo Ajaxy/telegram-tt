@@ -23,8 +23,11 @@ export default function useMediaWithLoadProgress(
   delay?: number | false,
   isHtmlAllowed = false,
 ) {
-  const mediaData = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
   const isStreaming = IS_PROGRESSIVE_SUPPORTED && mediaFormat === ApiMediaFormat.Progressive;
+  const mediaData = mediaHash
+    ? (isStreaming ? mediaLoader.getProgressiveUrl(mediaHash)
+      : mediaLoader.getFromMemory(mediaHash)) : undefined;
+
   const forceUpdate = useForceUpdate();
   const isSynced = useSelector(selectIsSynced);
   const id = useUniqueId();

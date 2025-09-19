@@ -109,7 +109,7 @@ export const useMediaProps = ({
     }
 
     if (isDocument) {
-      return media.mediaSize!;
+      return media.mediaSize || FALLBACK_DIMENSIONS;
     }
 
     if (isPhoto) {

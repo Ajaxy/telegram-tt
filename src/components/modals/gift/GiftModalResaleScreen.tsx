@@ -136,10 +136,10 @@ const GiftModalResaleScreen: FC<OwnProps & StateProps> = ({
           preloadBackwards={RESALE_GIFTS_LIMIT}
           scrollContainerClosest={`.${styles.resaleScreenRoot}`}
         >
-          {resellGifts?.map((gift) => (
+          {resellGifts?.map((g) => (
             <GiftItemStar
-              key={gift.id}
-              gift={gift}
+              key={g.id}
+              gift={g}
               observeIntersection={observe}
               isResale
               onClick={onGiftClick}

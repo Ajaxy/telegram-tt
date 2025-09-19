@@ -4,7 +4,7 @@ import Api from '../../tl/api';
 import createMockedTypeInputPeer from './createMockedTypeInputPeer';
 
 export default function createMockedDialogFilter(id: number, mockData: MockTypes) {
-  const dialogFilter = mockData.dialogFilters.find((dialogFilter) => dialogFilter.id === id);
+  const dialogFilter = mockData.dialogFilters.find((f) => f.id === id);
 
   if (!dialogFilter) throw Error('No such dialog filter ' + id);
 
