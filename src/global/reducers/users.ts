@@ -15,7 +15,7 @@ import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { omit, omitUndefined, unique } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { getSavedGiftKey } from '../helpers/stars';
-import { selectActiveCollectionId } from '../selectors';
+import { selectActiveGiftsCollectionId } from '../selectors';
 import { selectTabState } from '../selectors';
 import { updateTabState } from './tabs';
 
@@ -346,7 +346,7 @@ export function replacePeerSavedGifts<T extends GlobalState>(
     keyCounts.set(id, count + 1);
   });
 
-  const activeCollectionId = selectActiveCollectionId(global, peerId, tabId) || 'all';
+  const activeCollectionId = selectActiveGiftsCollectionId(global, peerId, tabId);
 
   return updateTabState(global, {
     savedGifts: {

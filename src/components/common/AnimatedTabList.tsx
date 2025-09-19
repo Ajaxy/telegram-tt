@@ -23,14 +23,14 @@ type OwnProps = {
   items: TabItem[];
   selectedItemId?: string;
   className?: string;
-  animationLevel?: AnimationLevel;
+  animationLevel: AnimationLevel;
   onItemSelect?: (itemId: string) => void;
 };
 
 const AnimatedTabList = ({
   items,
   selectedItemId,
-  animationLevel = 1,
+  animationLevel,
   onItemSelect,
   className,
 }: OwnProps) => {

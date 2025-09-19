@@ -94,6 +94,7 @@ import type {
 import type { WebApp, WebAppModalStateType } from '../../types/webapp';
 import type { SearchResultKey } from '../../util/keys/searchResultKey';
 import type { RegularLangFnParameters } from '../../util/localization';
+import type { ProfileCollectionKey } from '../selectors/payments';
 import type { CallbackAction } from './actions';
 
 export type TabState = {
@@ -220,7 +221,7 @@ export type TabState = {
   };
 
   savedGifts: {
-    collectionsByPeerId: Record<string, Record<number | 'all', ApiSavedGifts>>;
+    collectionsByPeerId: Record<string, Record<ProfileCollectionKey, ApiSavedGifts>>;
     activeCollectionByPeerId: Record<string, number | undefined>;
     filter: GiftProfileFilterOptions;
   };

@@ -1,5 +1,6 @@
 import type { ApiPeerStories, ApiTypeStory } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
+import type { ProfileCollectionKey } from './payments';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { selectPeer } from './peers';
@@ -149,4 +150,11 @@ function getPeerStoryIdsForViewer<T extends GlobalState>(
   return (storyIds.length > lastReadIndex + 1)
     ? storyIds.slice(lastReadIndex + 1)
     : undefined;
+}
+
+export function selectActiveStoriesCollectionId<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): ProfileCollectionKey {
+  return selectTabState(global, tabId).selectedStoryAlbumId || 'all';
 }

@@ -2,7 +2,7 @@ import type { ApiSavedGifts } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
 import { DEFAULT_GIFT_PROFILE_FILTER_OPTIONS } from '../../../config';
-import { selectActiveCollectionId } from '../../../global/selectors';
+import { selectActiveGiftsCollectionId } from '../../../global/selectors';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { addActionHandler, setGlobal } from '../../index';
 import {
@@ -102,7 +102,7 @@ addActionHandler('updateGiftProfileFilter', (global, actions, payload): ActionRe
     };
   }
 
-  const activeCollectionId = selectActiveCollectionId(global, peerId, tabId) || 'all';
+  const activeCollectionId = selectActiveGiftsCollectionId(global, peerId, tabId);
 
   global = updateTabState(global, {
     savedGifts: {
@@ -126,7 +126,7 @@ addActionHandler('resetGiftProfileFilter', (global, actions, payload): ActionRet
   const { peerId, tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);
 
-  const activeCollectionId = selectActiveCollectionId(global, peerId, tabId) || 'all';
+  const activeCollectionId = selectActiveGiftsCollectionId(global, peerId, tabId);
 
   global = updateTabState(global, {
     savedGifts: {

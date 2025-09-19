@@ -6,6 +6,7 @@ import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { isChatAdmin, isDeletedUser } from '../helpers';
 import { selectChat, selectChatFullInfo } from './chats';
+import { selectActiveGiftsCollectionId } from './payments';
 import { selectTabState } from './tabs';
 import { selectBot, selectUser, selectUserFullInfo } from './users';
 
@@ -34,7 +35,7 @@ export function selectPeerSavedGifts<T extends GlobalState>(
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): ApiSavedGifts | undefined {
   const tabState = selectTabState(global, tabId);
-  const activeCollectionId = tabState.savedGifts.activeCollectionByPeerId[peerId] || 'all';
+  const activeCollectionId = selectActiveGiftsCollectionId(global, peerId, tabId);
   return tabState.savedGifts.collectionsByPeerId[peerId]?.[activeCollectionId];
 }
 

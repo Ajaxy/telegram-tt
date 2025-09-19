@@ -10,6 +10,8 @@ import { selectChat } from './chats';
 import { selectTabState } from './tabs';
 import { selectUser } from './users';
 
+export type ProfileCollectionKey = number | 'all';
+
 export function selectPaymentInputInvoice<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
@@ -97,10 +99,10 @@ export function selectIsGiftProfileFilterDefault<T extends GlobalState>(
   return arePropsShallowEqual(selectTabState(global, tabId).savedGifts.filter, DEFAULT_GIFT_PROFILE_FILTER_OPTIONS);
 }
 
-export function selectActiveCollectionId<T extends GlobalState>(
+export function selectActiveGiftsCollectionId<T extends GlobalState>(
   global: T,
   peerId: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  return selectTabState(global, tabId).savedGifts.activeCollectionByPeerId?.[peerId];
+): ProfileCollectionKey {
+  return selectTabState(global, tabId).savedGifts.activeCollectionByPeerId?.[peerId] || 'all';
 }

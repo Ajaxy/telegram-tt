@@ -14,6 +14,7 @@ import type {
   ApiUser,
   ApiUserStatus,
 } from '../../api/types';
+import type { ProfileCollectionKey } from '../../global/selectors/payments';
 import type { TabState } from '../../global/types';
 import type { AnimationLevel, ProfileState, ProfileTabType, SharedMediaType, ThemeKey, ThreadId } from '../../types';
 import type { RegularLangKey } from '../../types/language';
@@ -21,6 +22,7 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import { AudioOrigin, MediaViewerOrigin, NewChatMembersProgress } from '../../types';
 
 import { MEMBERS_SLICE, PROFILE_SENSITIVE_AREA, SHARED_MEDIA_SLICE, SLIDE_TRANSITION_DURATION } from '../../config';
+import { selectActiveGiftsCollectionId } from '../../global/selectors/payments';
 
 const CONTENT_PANEL_SHOW_DELAY = 300;
 import {
@@ -57,6 +59,7 @@ import {
 import { selectPremiumLimit } from '../../global/selectors/limits';
 import { selectMessageDownloadableMedia } from '../../global/selectors/media';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
+import { selectActiveStoriesCollectionId } from '../../global/selectors/stories';
 import { areDeepEqual } from '../../util/areDeepEqual';
 import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
@@ -147,8 +150,8 @@ type StateProps = {
   pinnedStoryIds?: number[];
   archiveStoryIds?: number[];
   storyByIds?: Record<number, ApiTypeStory>;
-  selectedStoryAlbumId?: number;
-  activeCollectionId?: number;
+  selectedStoryAlbumId: ProfileCollectionKey;
+  activeCollectionId: ProfileCollectionKey;
   giftsFilter?: any;
   chatsById: Record<string, ApiChat>;
   usersById: Record<string, ApiUser>;
@@ -613,10 +616,12 @@ const Profile: FC<OwnProps & StateProps> = ({
   if (isFirstTab) {
     renderingDelay = !isRightColumnShown ? HIDDEN_RENDER_DELAY : 0;
     // @optimization Used to delay first render of secondary tabs while animating
-  } else if (!viewportIds && !botPreviewMedia) {
+  } else if ((!viewportIds && !botPreviewMedia) || (!gifts?.length && resultType === 'gifts')) {
     renderingDelay = SLIDE_TRANSITION_DURATION;
   }
-  const canRenderContent = useAsyncRendering([chatId, threadId, resultType, renderingActiveTab], renderingDelay);
+
+  const canRenderContent = useAsyncRendering([chatId, threadId, resultType,
+    renderingActiveTab, activeCollectionId, selectedStoryAlbumId], renderingDelay);
 
   function getMemberContextAction(memberId: string): MenuItemContextAction[] | undefined {
     return memberId === currentUserId || !canDeleteMembers ? undefined : [{
@@ -986,10 +991,10 @@ const Profile: FC<OwnProps & StateProps> = ({
   const shouldUseTransitionForContent = resultType === 'stories' || resultType === 'gifts';
   const contentTransitionKey = (() => {
     if (resultType === 'stories') {
-      return selectedStoryAlbumId || 0;
+      return selectedStoryAlbumId === 'all' ? 0 : selectedStoryAlbumId;
     }
     if (resultType === 'gifts') {
-      return activeCollectionId || 0;
+      return activeCollectionId === 'all' ? 0 : activeCollectionId;
     }
     return 0;
   })();
@@ -1178,8 +1183,9 @@ export default memo(withGlobal<OwnProps>(
       && !isSavedDialog;
     const peerStories = hasStoriesTab ? selectPeerStories(global, peer.id) : undefined;
     const tabState = selectTabState(global);
-    const { selectedStoryAlbumId, nextProfileTab, forceScrollProfileTab, savedGifts } = tabState;
-    const storyIds = selectedStoryAlbumId
+    const { nextProfileTab, forceScrollProfileTab, savedGifts } = tabState;
+    const selectedStoryAlbumId = selectActiveStoriesCollectionId(global);
+    const storyIds = selectedStoryAlbumId !== 'all'
       ? peerStories?.idsByAlbumId?.[selectedStoryAlbumId]?.ids
       : peerStories?.profileIds;
     const pinnedStoryIds = peerStories?.pinnedIds;
@@ -1187,8 +1193,8 @@ export default memo(withGlobal<OwnProps>(
     const archiveStoryIds = peerStories?.archiveIds;
 
     const hasGiftsTab = Boolean(peerFullInfo?.starGiftCount) && !isSavedDialog;
-    const activeCollectionId = savedGifts.activeCollectionByPeerId[chatId];
-    const peerGifts = savedGifts.collectionsByPeerId[chatId]?.[activeCollectionId || 'all'];
+    const activeCollectionId = selectActiveGiftsCollectionId(global, chatId);
+    const peerGifts = savedGifts.collectionsByPeerId[chatId]?.[activeCollectionId];
 
     const storyAlbums = global.stories.albumsByPeerId?.[chatId];
     const giftCollections = global.starGiftCollections?.byPeerId?.[chatId];

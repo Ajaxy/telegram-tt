@@ -2,11 +2,12 @@ import { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiStoryAlbum } from '../../../api/types';
+import type { ProfileCollectionKey } from '../../../global/selectors/payments';
 import type { AnimationLevel } from '../../../types';
 import type { TabItem } from '../../common/AnimatedTabList';
 
-import { selectTabState } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import { selectActiveStoriesCollectionId } from '../../../global/selectors/stories';
 import buildClassName from '../../../util/buildClassName';
 
 import useLang from '../../../hooks/useLang';
@@ -23,8 +24,8 @@ type OwnProps = {
 
 type StateProps = {
   albums?: ApiStoryAlbum[];
-  selectedAlbumId?: number;
-  animationLevel?: AnimationLevel;
+  selectedAlbumId: ProfileCollectionKey;
+  animationLevel: AnimationLevel;
 };
 
 const StoryAlbumList = ({
@@ -77,9 +78,8 @@ const StoryAlbumList = ({
 export default memo(withGlobal<OwnProps>(
   (global, { peerId }): StateProps => {
     const { stories } = global;
-    const tabState = selectTabState(global);
     const albums = stories?.albumsByPeerId?.[peerId];
-    const selectedAlbumId = tabState.selectedStoryAlbumId;
+    const selectedAlbumId = selectActiveStoriesCollectionId(global);
 
     return {
       albums,

@@ -31,6 +31,7 @@ import {
   selectPeer, selectPeerStories, selectPeerStory,
   selectPinnedStories, selectTabState,
 } from '../../selectors';
+import { selectActiveStoriesCollectionId } from '../../selectors/stories';
 
 const INFINITE_LOOP_MARKER = 100;
 
@@ -308,9 +309,8 @@ addActionHandler('loadPeerProfileStories', async (global, actions, payload): Pro
     return;
   }
 
-  const tabState = selectTabState(global, tabId);
-  const selectedAlbumId = tabState.selectedStoryAlbumId;
-  if (selectedAlbumId) {
+  const selectedAlbumId = selectActiveStoriesCollectionId(global, tabId);
+  if (selectedAlbumId !== 'all') {
     let albumData = peerStories?.idsByAlbumId?.[selectedAlbumId];
     if (albumData?.isFullyLoaded) {
       return;

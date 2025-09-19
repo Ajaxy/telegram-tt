@@ -106,7 +106,7 @@
   }
 
   .content {
-    transition: transform 0.3s;
+    transition: transform var(--layer-transition);
     &.showContentPanel {
       transform: translateY(3rem);
       padding-bottom: 3.5rem !important;
@@ -230,7 +230,7 @@
     right: 0;
     left: 0;
 
-    transition: transform 0.3s, opacity 0.3s;
+    transition: transform var(--layer-transition), opacity 0.2s ease;
 
     &.hiddenPanel {
       transform: translateY(-100%);

@@ -25,7 +25,7 @@ import {
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
-  selectActiveCollectionId,
+  selectActiveGiftsCollectionId,
   selectGiftProfileFilter,
   selectPeer,
   selectPeerSavedGifts,
@@ -303,18 +303,18 @@ addActionHandler('loadPeerSavedGifts', async (global, actions, payload): Promise
   if (!shouldRefresh && currentGifts && !localNextOffset) return; // Already loaded all
 
   const fetchingFilter = selectGiftProfileFilter(global, peerId, tabId);
-  const fetchingCollectionId = selectActiveCollectionId(global, peerId, tabId);
+  const fetchingCollectionId = selectActiveGiftsCollectionId(global, peerId, tabId);
 
   const result = await callApi('fetchSavedStarGifts', {
     peer,
     offset: !shouldRefresh ? localNextOffset : '',
     filter: fetchingFilter,
-    collectionId: fetchingCollectionId ? Number(fetchingCollectionId) : undefined,
+    collectionId: fetchingCollectionId === 'all' ? undefined : fetchingCollectionId,
   });
 
   global = getGlobal();
   const currentFilter = selectGiftProfileFilter(global, peerId, tabId);
-  const currentCollectionId = selectActiveCollectionId(global, peerId, tabId);
+  const currentCollectionId = selectActiveGiftsCollectionId(global, peerId, tabId);
 
   if (!result || currentCollectionId !== fetchingCollectionId || currentFilter !== fetchingFilter) {
     return;
@@ -400,7 +400,7 @@ addActionHandler('changeGiftVisibility', async (global, actions, payload): Promi
   const requestInputGift = getRequestInputSavedStarGift(global, gift);
   if (!requestInputGift) return;
 
-  const activeCollectionId = selectActiveCollectionId(global, peerId, tabId) || 'all';
+  const activeCollectionId = selectActiveGiftsCollectionId(global, peerId, tabId);
   const oldGifts = selectTabState(global, tabId).savedGifts.collectionsByPeerId[peerId]?.[activeCollectionId];
   if (oldGifts?.gifts?.length) {
     const newGifts = oldGifts.gifts.map((g) => {

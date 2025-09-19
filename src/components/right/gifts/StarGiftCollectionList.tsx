@@ -2,10 +2,11 @@ import { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiStarGiftCollection } from '../../../api/types';
+import type { ProfileCollectionKey } from '../../../global/selectors/payments';
 import type { AnimationLevel } from '../../../types';
 import type { TabItem } from '../../common/AnimatedTabList';
 
-import { selectActiveCollectionId } from '../../../global/selectors';
+import { selectActiveGiftsCollectionId } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
 
@@ -15,7 +16,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import AnimatedTabList from '../../common/AnimatedTabList';
 
 import styles from './StarGiftCollectionList.module.scss';
-
 type OwnProps = {
   peerId: string;
   className?: string;
@@ -23,8 +23,8 @@ type OwnProps = {
 
 type StateProps = {
   collections?: ApiStarGiftCollection[];
-  activeCollectionId?: number;
-  animationLevel?: AnimationLevel;
+  activeCollectionId: ProfileCollectionKey;
+  animationLevel: AnimationLevel;
 };
 
 const StarGiftCollectionList = ({
@@ -37,7 +37,7 @@ const StarGiftCollectionList = ({
   const { updateSelectedGiftCollection, resetSelectedGiftCollection } = getActions();
   const lang = useLang();
 
-  const handleItemSelect = useLastCallback((itemId?: string) => {
+  const handleItemSelect = useLastCallback((itemId: string) => {
     if (itemId === 'all') {
       resetSelectedGiftCollection({ peerId });
     } else {
@@ -79,7 +79,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { peerId }): StateProps => {
     const { starGiftCollections } = global;
     const collections = starGiftCollections?.byPeerId?.[peerId];
-    const activeCollectionId = selectActiveCollectionId(global, peerId);
+    const activeCollectionId = selectActiveGiftsCollectionId(global, peerId);
 
     return {
       collections,
