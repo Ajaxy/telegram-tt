@@ -481,7 +481,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, isStatusPicker, isReactionPicker }): StateProps => {
+  (global, { chatId, isStatusPicker, isReactionPicker }): Complete<StateProps> => {
     const {
       stickers: {
         setsById: stickerSetsById,

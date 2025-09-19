@@ -37,7 +37,7 @@ const ErrorTest: FC<OwnProps & StateProps> = ({ parentRand, globalRand }) => {
 };
 
 let firstRender = true;
-export default withGlobal<OwnProps>((): StateProps => {
+export default withGlobal<OwnProps>((): Complete<StateProps> => {
   const globalRand = Math.random();
 
   if (firstRender || globalRand > 0.8) {

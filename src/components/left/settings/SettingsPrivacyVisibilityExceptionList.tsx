@@ -259,7 +259,7 @@ function getCurrentPrivacySettings(global: GlobalState, screen: SettingsScreens)
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { screen }): StateProps => {
+  (global, { screen }): Complete<StateProps> => {
     return {
       currentUserId: global.currentUserId,
       settings: getCurrentPrivacySettings(global, screen),

@@ -24,7 +24,6 @@ type OwnProps = {
 type StateProps = {
   participantsCount: number;
   participants?: Record<string, TypeGroupCallParticipant>;
-  canInvite?: boolean;
 };
 
 const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
@@ -81,7 +80,7 @@ function compareParticipants(a: TypeGroupCallParticipant, b: TypeGroupCallPartic
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { participantsCount, participants } = selectActiveGroupCall(global) || {};
 
     return {

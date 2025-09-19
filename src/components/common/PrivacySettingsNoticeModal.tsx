@@ -136,7 +136,7 @@ const PrivacySettingsNoticeModal = ({ isOpen, isReadDate, user }: OwnProps & Sta
 };
 
 export default memo(
-  withGlobal<OwnProps>((global): StateProps => {
+  withGlobal<OwnProps>((global): Complete<StateProps> => {
     const { chatId, isReadDate } = selectTabState(global).privacySettingsNoticeModal || {};
     const user = chatId ? selectUser(global, chatId) : undefined;
 

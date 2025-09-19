@@ -67,7 +67,7 @@ const PasswordConfirm: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global): StateProps => {
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   const { payment } = selectTabState(global);
   return {
     errorKey: payment.error?.messageKey,

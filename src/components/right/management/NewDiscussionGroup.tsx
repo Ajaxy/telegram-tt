@@ -127,7 +127,7 @@ const NewDiscussionGroup: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const {
       progress: creationProgress,
       error: creationError,

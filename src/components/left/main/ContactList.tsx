@@ -108,7 +108,7 @@ const ContactList: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { userIds: contactIds } = global.contactList || {};
     const { byId: usersById, statusesById: userStatusesById } = global.users;
 

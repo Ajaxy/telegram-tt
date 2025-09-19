@@ -62,7 +62,7 @@ const ResaleGiftMenuAttributeSticker: FC<StateProps & OwnProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global): StateProps => {
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   return {
     theme: selectTheme(global),
   };

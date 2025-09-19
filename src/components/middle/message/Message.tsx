@@ -297,7 +297,6 @@ type StateProps = {
   hasUnreadReaction?: boolean;
   isTranscribing?: boolean;
   transcribedText?: string;
-  isTranscriptionError?: boolean;
   isPremium: boolean;
   senderAdminMember?: ApiChatMember;
   messageTopic?: ApiTopic;
@@ -1871,7 +1870,7 @@ const Message: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, ownProps): StateProps => {
+  (global, ownProps): Complete<StateProps> => {
     const {
       focusedMessage, forwardMessages, activeReactions, activeEmojiInteractions,
       loadingThread,
@@ -2088,16 +2087,14 @@ export default memo(withGlobal<OwnProps>(
         && loadingThread?.loadingChatId === repliesThreadInfo?.originChannelId
         && loadingThread?.loadingMessageId === repliesThreadInfo?.originMessageId,
       shouldWarnAboutFiles,
-      ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
-      ...(typeof uploadProgress === 'number' && { uploadProgress }),
-      ...(isFocused && {
-        focusDirection,
-        noFocusHighlight,
-        isResizingContainer,
-        focusedQuote,
-        focusedQuoteOffset,
-        scrollTargetPosition,
-      }),
+      outgoingStatus: isOutgoing ? selectOutgoingStatus(global, message, messageListType === 'scheduled') : undefined,
+      uploadProgress: typeof uploadProgress === 'number' ? uploadProgress : undefined,
+      focusDirection: isFocused ? focusDirection : undefined,
+      noFocusHighlight: isFocused ? noFocusHighlight : undefined,
+      isResizingContainer: isFocused ? isResizingContainer : undefined,
+      focusedQuote: isFocused ? focusedQuote : undefined,
+      focusedQuoteOffset: isFocused ? focusedQuoteOffset : undefined,
+      scrollTargetPosition: isFocused ? scrollTargetPosition : undefined,
       senderBoosts,
       tags: global.savedReactionTags?.byKey,
       canTranscribeVoice,

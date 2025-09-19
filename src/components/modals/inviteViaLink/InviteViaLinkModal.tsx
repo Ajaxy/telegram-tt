@@ -197,7 +197,7 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const chat = modal?.chatId ? selectChat(global, modal.chatId) : undefined;
 
     return {

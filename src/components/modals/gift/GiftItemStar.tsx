@@ -219,7 +219,7 @@ function GiftItemStar({
 }
 
 export default memo(
-  withGlobal<OwnProps>((global): StateProps => {
+  withGlobal<OwnProps>((global): Complete<StateProps> => {
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
     return {

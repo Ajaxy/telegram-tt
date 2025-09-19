@@ -171,7 +171,7 @@ const SharePreparedMessageModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const tabState = selectTabState(global);
     const { isPaymentMessageConfirmDialogOpen } = tabState;
     const starsBalance = global.stars?.balance.amount || 0;

@@ -120,7 +120,7 @@ function getErrorHeader(error: ApiError) {
 }
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     return {
       dialogs: selectTabState(global).dialogs,
       currentMessageList: selectCurrentMessageList(global),

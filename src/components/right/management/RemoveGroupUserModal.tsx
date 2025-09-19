@@ -76,7 +76,7 @@ const RemoveGroupUserModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chat }): StateProps => {
+  (global, { chat }): Complete<StateProps> => {
     const { currentUserId } = global;
 
     return {

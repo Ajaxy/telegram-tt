@@ -101,7 +101,7 @@ const WaveContainer = ({ waveInfo }: StateProps) => {
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const tabState = selectTabState(global);
     return {
       waveInfo: tabState.wave,

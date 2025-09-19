@@ -164,7 +164,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { byHash, orderedHashes } = global.activeWebSessions;
     return {
       byHash,

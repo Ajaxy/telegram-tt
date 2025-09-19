@@ -210,7 +210,7 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { folderId, url, isLoading } = selectTabState(global).shareFolderScreen || {};
     const folder = folderId ? selectChatFolder(global, folderId) : undefined;
     const invite = folderId ? global.chatFolders.invites[folderId]?.find((i) => i.url === url) : undefined;

@@ -117,7 +117,7 @@ const ChatFolderModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { byId: foldersById, orderedIds: folderOrderedIds } = global.chatFolders;
 
     return {

@@ -215,7 +215,7 @@ const SenderGroupContainer: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, ownProps): StateProps => {
+  (global, ownProps): Complete<StateProps> => {
     const {
       message, withAvatar,
     } = ownProps;

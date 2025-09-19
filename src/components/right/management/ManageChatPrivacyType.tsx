@@ -300,7 +300,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId)!;
     const { isUsernameAvailable, checkedUsername, error } = selectManagement(global, chatId);
 

@@ -416,7 +416,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const {
       orderedIds: folderIds,
       byId: foldersById,

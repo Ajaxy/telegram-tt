@@ -149,7 +149,7 @@ const PublicPostsResults = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { messages: { byChatId: globalMessagesByChatId } } = global;
     const { resultsByType, searchFlood, fetchingStatus } = selectTabState(global).globalSearch;
     const publicPostsResult = resultsByType?.publicPosts;

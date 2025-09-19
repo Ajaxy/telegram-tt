@@ -100,7 +100,7 @@ function RequirementToContactMessage({
 }
 
 export default memo(
-  withGlobal<OwnProps>((global, { peerId: userId }): StateProps => {
+  withGlobal<OwnProps>((global, { peerId: userId }): Complete<StateProps> => {
     const theme = selectTheme(global);
     const { patternColor } = selectThemeValues(global, theme) || {};
     const peer = selectPeer(global, userId);

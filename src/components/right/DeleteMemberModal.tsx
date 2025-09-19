@@ -57,7 +57,7 @@ const DeleteMemberModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { userId }): StateProps => {
+  (global, { userId }): Complete<StateProps> => {
     const chat = selectCurrentChat(global);
     const user = userId && selectUser(global, userId);
     const contactName = user ? getUserFirstOrLastName(user) : undefined;

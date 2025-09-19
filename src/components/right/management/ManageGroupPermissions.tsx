@@ -352,7 +352,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     const fullInfo = selectChatFullInfo(global, chatId);
     const { progress } = selectTabState(global).management;

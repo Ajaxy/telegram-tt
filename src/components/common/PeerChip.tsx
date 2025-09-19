@@ -130,9 +130,12 @@ const PeerChip = <T,>({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { peerId, forceShowSelf }): StateProps => {
+  (global, { peerId, forceShowSelf }): Complete<StateProps> => {
     if (!peerId) {
-      return {};
+      return {
+        peer: undefined,
+        isSavedMessages: undefined,
+      };
     }
 
     const peer = selectPeer(global, peerId);

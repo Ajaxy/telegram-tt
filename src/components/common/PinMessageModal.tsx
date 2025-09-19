@@ -104,7 +104,7 @@ const PinMessageModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const isPrivateChat = isUserId(chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const chat = selectChat(global, chatId);

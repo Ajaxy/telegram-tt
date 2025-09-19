@@ -250,7 +250,7 @@ const App: FC<StateProps> = ({
 };
 
 export default withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     return {
       authState: global.authState,
       isScreenLocked: global.passcode?.isScreenLocked,

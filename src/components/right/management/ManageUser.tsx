@@ -300,7 +300,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { userId }): StateProps => {
+  (global, { userId }): Complete<StateProps> => {
     const user = selectUser(global, userId);
     const chat = selectChat(global, userId);
     const userFullInfo = selectUserFullInfo(global, userId);

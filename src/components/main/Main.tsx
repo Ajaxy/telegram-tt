@@ -605,7 +605,7 @@ const Main = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { isMobile }): StateProps => {
+  (global, { isMobile }): Complete<StateProps> => {
     const {
       currentUserId,
     } = global;

@@ -262,7 +262,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { userId, forceShowSelf }): StateProps => {
+  (global, { userId, forceShowSelf }): Complete<StateProps> => {
     const { isSynced } = global;
     const user = userId ? selectUser(global, userId) : undefined;
     const userStatus = userId ? selectUserStatus(global, userId) : undefined;

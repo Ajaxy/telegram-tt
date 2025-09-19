@@ -100,7 +100,7 @@ const DownloadManager: FC<StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const activeDownloads = selectTabState(global).activeDownloads;
 
     return {

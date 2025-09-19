@@ -107,7 +107,7 @@ const DeleteAccountModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const { selfDestructAccountDays } = modal || {};
 
     return {

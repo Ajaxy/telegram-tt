@@ -41,7 +41,7 @@ const HistoryCalendar: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     return { selectedAt: selectTabState(global).historyCalendarSelectedAt };
   },
 )(HistoryCalendar));

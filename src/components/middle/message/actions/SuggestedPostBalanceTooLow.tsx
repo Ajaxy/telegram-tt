@@ -76,7 +76,7 @@ const SuggestedPostBalanceTooLow = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message }): StateProps => {
+  (global, { message }): Complete<StateProps> => {
     const sender = selectSender(global, message);
 
     const replyMessage = message.replyInfo?.type === 'message' && message.replyInfo.replyToMsgId

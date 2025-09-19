@@ -5,7 +5,7 @@ import {
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiCountry, ApiInvoice, ApiLabeledPrice, ApiPaymentCredentials, ApiPaymentFormRegular,
+  ApiChat, ApiCountry, ApiInvoice, ApiLabeledPrice, ApiPaymentFormRegular,
 } from '../../api/types';
 import type { TabState } from '../../global/types';
 import type { FormState } from '../../hooks/reducers/usePaymentReducer';
@@ -59,7 +59,6 @@ type StateProps = {
   invoice?: ApiInvoice;
   form?: ApiPaymentFormRegular;
   error?: TabState['payment']['error'];
-  prices?: ApiLabeledPrice[];
   isProviderError?: boolean;
   needCardholderName?: boolean;
   needCountry?: boolean;
@@ -71,7 +70,6 @@ type StateProps = {
   requestId?: string;
   smartGlocalToken?: string;
   stripeId?: string;
-  savedCredentials?: ApiPaymentCredentials[];
   passwordValidUntil?: number;
   isExtendedMedia?: boolean;
   isPaymentFormUrl?: boolean;
@@ -99,7 +97,6 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
   requestId,
   smartGlocalToken,
   stripeId,
-  savedCredentials,
   passwordValidUntil,
   isExtendedMedia,
   isPaymentFormUrl,
@@ -205,13 +202,13 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
   }, [form, paymentDispatch, countryList]);
 
   useEffect(() => {
-    if (savedCredentials?.length) {
+    if (form?.savedCredentials?.length) {
       paymentDispatch({
         type: 'changeSavedCredentialId',
-        payload: savedCredentials[0].id,
+        payload: form.savedCredentials[0].id,
       });
     }
-  }, [paymentDispatch, savedCredentials]);
+  }, [paymentDispatch, form?.savedCredentials]);
 
   const handleErrorModalClose = useCallback(() => {
     clearPaymentError();
@@ -297,7 +294,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
             hasShippingOptions={hasShippingOptions}
             tipAmount={paymentState.tipAmount}
             needAddress={Boolean(invoice?.isShippingAddressRequested)}
-            savedCredentials={savedCredentials}
+            savedCredentials={form!.savedCredentials}
             isTosAccepted={isTosAccepted}
             onAcceptTos={setIsTosAccepted}
             botName={botName}
@@ -307,7 +304,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
         return (
           <SavedPaymentCredentials
             state={paymentState}
-            savedCredentials={savedCredentials}
+            savedCredentials={form!.savedCredentials}
             dispatch={paymentDispatch}
             onNewCardClick={handleNewCardClick}
           />
@@ -316,7 +313,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
         return (
           <PasswordConfirm
             state={paymentState}
-            savedCredentials={savedCredentials}
+            savedCredentials={form!.savedCredentials}
             onPasswordChange={setTwoFaPassword}
             isActive={currentStep === step}
           />
@@ -611,7 +608,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const {
       form,
       step,

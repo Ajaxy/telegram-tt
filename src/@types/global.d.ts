@@ -47,6 +47,10 @@ type AnyToVoidFunction = (...args: any[]) => void;
 type BooleanToVoidFunction = (value: boolean) => void;
 type NoneToVoidFunction = () => void;
 
+type Complete<T> = {
+  [P in keyof Required<T>]: Pick<T, P> extends Required<Pick<T, P>> ? T[P] : (T[P] | undefined);
+};
+
 type EmojiCategory = {
   id: string;
   name: string;

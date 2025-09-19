@@ -240,7 +240,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const tabState = selectTabState(global);
     const { shouldWarnAboutFiles } = selectSharedSettings(global);
     const chat = selectCurrentChat(global);

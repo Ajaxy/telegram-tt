@@ -116,7 +116,7 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { activeEmojiInteraction }): StateProps => {
+  (global, { activeEmojiInteraction }): Complete<StateProps> => {
     const animatedEffect = activeEmojiInteraction.animatedEffect !== undefined
       && selectAnimatedEmojiEffect(global, activeEmojiInteraction.animatedEffect);
     return {

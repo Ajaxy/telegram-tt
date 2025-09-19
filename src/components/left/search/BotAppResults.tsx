@@ -145,7 +145,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global) => {
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   const globalSearch = selectTabState(global).globalSearch;
   const foundIds = globalSearch.popularBotApps?.peerIds;
 

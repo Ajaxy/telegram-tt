@@ -342,7 +342,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const peerId = modal?.transaction?.peer?.type === 'peer' && modal.transaction.peer.id;
     const peer = peerId ? selectPeer(global, peerId) : undefined;
     const paidMessageCommission = global.appConfig.starsPaidMessageCommissionPermille;

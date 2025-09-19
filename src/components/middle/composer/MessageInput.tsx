@@ -649,7 +649,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, threadId }: OwnProps): StateProps => {
+  (global, { chatId, threadId }: OwnProps): Complete<StateProps> => {
     const { messageSendKeyCombo } = selectSharedSettings(global);
 
     return {

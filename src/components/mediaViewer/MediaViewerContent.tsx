@@ -244,7 +244,7 @@ const MediaViewerContent = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { item }): StateProps => {
+  (global, { item }): Complete<StateProps> => {
     const {
       volume,
       isMuted,

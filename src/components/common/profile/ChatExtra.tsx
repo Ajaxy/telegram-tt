@@ -484,7 +484,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatOrUserId, isSavedDialog }): StateProps => {
+  (global, { chatOrUserId, isSavedDialog }): Complete<StateProps> => {
     const { countryList: { phoneCodes: phoneCodeList } } = global;
 
     const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;

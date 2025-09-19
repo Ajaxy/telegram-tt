@@ -994,7 +994,7 @@ const GiftInfoModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const typeGift = modal?.gift;
     const isSavedGift = typeGift && 'gift' in typeGift;
     const currentUserId = global.currentUserId;

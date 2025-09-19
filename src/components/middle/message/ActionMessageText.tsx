@@ -1012,7 +1012,7 @@ const ActionMessageText = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message }): StateProps => {
+  (global, { message }): Complete<StateProps> => {
     const chat = selectChat(global, message.chatId);
     const sender = selectSender(global, message);
 

@@ -226,7 +226,7 @@ function SettingsPerformance({
   );
 }
 
-export default memo(withGlobal<OwnProps>((global): StateProps => {
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   return {
     performanceSettings: selectPerformanceSettings(global),
   };

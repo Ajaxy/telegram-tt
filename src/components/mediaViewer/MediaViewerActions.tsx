@@ -392,7 +392,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, {
     item, canUpdateMedia,
-  }): StateProps => {
+  }): Complete<StateProps> => {
     const tabState = selectTabState(global);
     const { origin } = tabState.mediaViewer;
 

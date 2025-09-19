@@ -127,7 +127,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global, { item }): StateProps => {
+  (global, { item }): Complete<StateProps> => {
     const message = item?.type === 'message' ? item.message : undefined;
     const messageSender = message && selectSender(global, message);
 

@@ -194,7 +194,7 @@ const EmojiStatusAccessModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const currentUser = selectUser(global, global.currentUserId!);
     const isPremium = selectIsCurrentUserPremium(global);
     const stickerSet = global.defaultStatusIconsId ? selectStickerSet(global, global.defaultStatusIconsId) : undefined;

@@ -57,7 +57,7 @@ const ActiveCallHeader: FC<StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const tabState = selectTabState(global);
     return {
       groupCall: tabState.isMasterTab ? selectActiveGroupCall(global) : undefined,

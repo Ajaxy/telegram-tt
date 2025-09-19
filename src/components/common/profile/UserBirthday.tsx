@@ -218,7 +218,7 @@ const UserBirthday = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { birthdayNumbers, animatedEmojiEffects } = global;
     return {
       birthdayNumbers,

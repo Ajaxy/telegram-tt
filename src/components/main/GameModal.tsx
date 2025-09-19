@@ -90,7 +90,7 @@ const GameModal: FC<OwnProps & StateProps> = ({ openedGame, gameTitle, canPost }
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { openedGame }): StateProps => {
+  (global, { openedGame }): Complete<StateProps> => {
     const { chatId } = openedGame || {};
     const chat = chatId && selectChat(global, chatId);
     const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;

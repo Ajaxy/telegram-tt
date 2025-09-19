@@ -472,7 +472,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { state }): StateProps => {
+  (global, { state }): Complete<StateProps> => {
     const { listIds } = global.chats;
     const { byId, invites } = global.chatFolders;
     const chatListCount = Object.values(byId).reduce((acc, el) => acc + (el.isChatList ? 1 : 0), 0);

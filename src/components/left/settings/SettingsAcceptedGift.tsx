@@ -141,7 +141,7 @@ const SettingsAcceptedGift = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const {
       settings: {
         byKey: {

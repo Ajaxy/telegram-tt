@@ -83,7 +83,7 @@ const CustomEmojiSetsModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     return {
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
     };

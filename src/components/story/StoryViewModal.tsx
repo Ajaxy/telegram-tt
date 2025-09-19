@@ -268,7 +268,7 @@ function prepareComparator(areReactionsFirst?: boolean) {
   };
 }
 
-export default memo(withGlobal((global) => {
+export default memo(withGlobal((global): Complete<StateProps> => {
   const { appConfig } = global;
   const { storyViewer: { viewModal } } = selectTabState(global);
   const {
@@ -278,13 +278,11 @@ export default memo(withGlobal((global) => {
   const storyExpireDate = story?.['@type'] === 'story' ? story.expireDate : undefined;
 
   return {
-    storyId,
     views,
     viewersExpireDate: storyExpireDate ? (storyExpireDate + appConfig.storyViewersExpirePeriod) : undefined,
     story: story && 'content' in story ? story : undefined,
     nextOffset,
     isLoading,
-    availableReactions: global.reactions.availableReactions,
     isCurrentUserPremium: selectIsCurrentUserPremium(global),
   };
 })(StoryViewModal));

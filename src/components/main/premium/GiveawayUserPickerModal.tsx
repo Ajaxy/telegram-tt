@@ -131,10 +131,13 @@ const GiveawayUserPickerModal = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, { giveawayChatId }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { giveawayChatId }): Complete<StateProps> => {
   const chatFullInfo = giveawayChatId ? selectChatFullInfo(global, giveawayChatId) : undefined;
   if (!chatFullInfo) {
-    return {};
+    return {
+      members: undefined,
+      adminMembersById: undefined,
+    };
   }
 
   return {

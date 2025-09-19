@@ -400,7 +400,7 @@ function StorySettings({
   );
 }
 
-export default memo(withGlobal<OwnProps>((global): StateProps => {
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   const {
     storyViewer: {
       storyId, peerId,

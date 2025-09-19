@@ -198,7 +198,7 @@ const UniqueGiftManageButtons = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { currentUserId } = global;
     const currentUser = currentUserId ? selectUser(global, currentUserId) : undefined;
     const currentUserEmojiStatus = currentUser?.emojiStatus;

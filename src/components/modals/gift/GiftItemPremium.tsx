@@ -101,7 +101,7 @@ function GiftItemPremium({
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { option }): StateProps => {
+  (global, { option }): Complete<StateProps> => {
     const sticker = selectGiftStickerForDuration(global, option.months);
     const canPlayAnimatedEmojis = selectCanPlayAnimatedEmojis(global);
 

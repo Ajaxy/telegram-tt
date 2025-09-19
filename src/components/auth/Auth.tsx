@@ -99,7 +99,7 @@ const Auth: FC<StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     return {
       authState: global.authState,
     };

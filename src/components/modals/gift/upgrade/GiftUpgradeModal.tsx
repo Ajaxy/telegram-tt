@@ -175,7 +175,7 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const recipientId = modal?.recipientId;
     const recipient = recipientId ? selectPeer(global, recipientId) : undefined;
 

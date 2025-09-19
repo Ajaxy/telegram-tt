@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiChatInviteImporter, ApiExportedInvite, ApiUser } from '../../../api/types';
+import type { ApiChatInviteImporter, ApiExportedInvite } from '../../../api/types';
 
 import { isChatChannel } from '../../../global/helpers';
 import { selectChat, selectTabState } from '../../../global/selectors';
@@ -27,7 +27,6 @@ type StateProps = {
   invite?: ApiExportedInvite;
   importers?: ApiChatInviteImporter[];
   requesters?: ApiChatInviteImporter[];
-  admin?: ApiUser;
   isChannel?: boolean;
 };
 
@@ -169,7 +168,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const { inviteInfo } = selectTabState(global).management.byChatId[chatId] || {};
     const { invite, importers, requesters } = inviteInfo || {};
     const chat = selectChat(global, chatId);

@@ -86,5 +86,7 @@ const AuthRegister: FC<StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => pick(global, ['authIsLoading', 'authErrorKey']),
+  (global): Complete<StateProps> => (
+    pick(global, ['authIsLoading', 'authErrorKey']) as Complete<StateProps>
+  ),
 )(AuthRegister));

@@ -147,7 +147,7 @@ const ChatLanguageModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { chatId, messageId } = selectTabState(global).chatLanguageModal || {};
 
     const currentLanguageCode = selectLanguageCode(global);

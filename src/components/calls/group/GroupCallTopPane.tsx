@@ -104,7 +104,7 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId)!;
     const groupCall = selectChatGroupCall(global, chatId);
     const activeGroupCallId = selectTabState(global).isMasterTab ? global.groupCalls.activeGroupCallId : undefined;

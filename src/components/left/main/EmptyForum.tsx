@@ -65,7 +65,7 @@ const EmptyForum: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, { chatId }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { chatId }): Complete<StateProps> => {
   const chat = selectChat(global, chatId);
   const canManageTopics = chat && (chat.isCreator || getHasAdminRight(chat, 'manageTopics'));
 

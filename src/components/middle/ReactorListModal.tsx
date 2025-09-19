@@ -265,7 +265,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { chatId, messageId } = selectTabState(global).reactorModal || {};
     const message = chatId && messageId ? selectChatMessage(global, chatId, messageId) : undefined;
 

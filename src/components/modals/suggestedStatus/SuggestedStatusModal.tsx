@@ -134,7 +134,7 @@ const SuggestedStatusModal = ({ modal, currentUser, bot }: OwnProps & StateProps
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const currentUser = selectUser(global, global.currentUserId!);
     const bot = modal?.botId ? selectUser(global, modal.botId) : undefined;
 

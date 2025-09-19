@@ -402,5 +402,5 @@ const SettingsTwoFa: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => ({ ...global.twoFaSettings }),
+  (global): Complete<StateProps> => ({ ...global.twoFaSettings } as Complete<StateProps>),
 )(SettingsTwoFa));

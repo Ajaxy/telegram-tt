@@ -157,7 +157,7 @@ const GiftWithdrawModal = ({ modal, hasPassword, passwordHint }: OwnProps & Stat
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const {
       settings: {
         byKey: {

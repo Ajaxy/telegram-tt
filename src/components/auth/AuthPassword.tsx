@@ -50,5 +50,7 @@ const AuthPassword: FC<StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => pick(global, ['authIsLoading', 'authErrorKey', 'authHint']),
+  (global): Complete<StateProps> => (
+    pick(global, ['authIsLoading', 'authErrorKey', 'authHint']) as Complete<StateProps>
+  ),
 )(AuthPassword));

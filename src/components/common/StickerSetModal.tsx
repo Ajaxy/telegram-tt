@@ -256,7 +256,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { fromSticker, stickerSetShortName }): StateProps => {
+  (global, { fromSticker, stickerSetShortName }): Complete<StateProps> => {
     const currentMessageList = selectCurrentMessageList(global);
     const { chatId, threadId } = currentMessageList || {};
     const chat = chatId && selectChat(global, chatId);

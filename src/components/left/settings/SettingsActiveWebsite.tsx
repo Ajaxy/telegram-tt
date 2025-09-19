@@ -101,7 +101,7 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, { hash }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { hash }): Complete<StateProps> => {
   const session = hash ? global.activeWebSessions.byHash[hash] : undefined;
   const bot = session ? global.users.byId[session.botId] : undefined;
 

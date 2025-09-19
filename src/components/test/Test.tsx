@@ -38,7 +38,7 @@ const Test: FC<StateProps> = ({ authState, globalRand }) => {
 };
 
 export default withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     return {
       authState: global.authState,
       globalRand: Math.random(),

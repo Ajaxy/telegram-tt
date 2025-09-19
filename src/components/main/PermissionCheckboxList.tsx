@@ -285,7 +285,7 @@ const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const chat = chatId ? selectChat(global, chatId) : undefined;
     const fullInfo = chat && selectChatFullInfo(global, chat.id);
     const hasLinkedChat = Boolean(fullInfo?.linkedChatId);

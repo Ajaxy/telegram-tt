@@ -641,7 +641,7 @@ const GiftResaleFilters: FC<StateProps & OwnProps> = ({
   );
 };
 
-export default memo(withGlobal((global): StateProps => {
+export default memo(withGlobal((global): Complete<StateProps> => {
   const { resaleGifts } = selectTabState(global);
 
   const attributes = resaleGifts.attributes;

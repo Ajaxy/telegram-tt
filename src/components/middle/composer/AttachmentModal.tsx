@@ -100,7 +100,6 @@ type StateProps = {
   currentUserId?: string;
   groupChatMembers?: ApiChatMember[];
   recentEmojis: string[];
-  editingMessage?: ApiMessage;
   baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;
   shouldSuggestCustomEmoji?: boolean;
@@ -777,7 +776,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const {
       currentUserId,
       recentEmojis,

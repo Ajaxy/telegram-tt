@@ -164,7 +164,7 @@ const Album: FC<OwnProps & StateProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const theme = selectTheme(global);
     const activeDownloads = selectActiveDownloads(global);
 

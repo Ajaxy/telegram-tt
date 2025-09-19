@@ -134,7 +134,7 @@ const EmbeddedStoryForward: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { forwardInfo }): StateProps => {
+  (global, { forwardInfo }): Complete<StateProps> => {
     const sender = forwardInfo.fromPeerId ? selectPeer(global, forwardInfo.fromPeerId) : undefined;
     const story = forwardInfo.storyId && forwardInfo.fromPeerId
       ? selectPeerStory(global, forwardInfo.fromPeerId, forwardInfo.storyId) : undefined;

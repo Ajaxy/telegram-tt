@@ -239,7 +239,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chat, isSavedDialog }): StateProps => {
+  (global, { chat, isSavedDialog }): Complete<StateProps> => {
     const isPrivateChat = isUserId(chat.id);
     const isChatWithSelf = selectIsChatWithSelf(global, chat.id);
     const user = isPrivateChat && selectUser(global, getPrivateChatUserId(chat)!);

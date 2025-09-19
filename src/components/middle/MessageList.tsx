@@ -816,12 +816,12 @@ const MessageList: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, threadId, type }): StateProps => {
+  (global, { chatId, threadId, type }): Complete<StateProps> => {
     const currentUserId = global.currentUserId!;
     const chat = selectChat(global, chatId);
     const userFullInfo = selectUserFullInfo(global, chatId);
     if (!chat) {
-      return { currentUserId };
+      return { currentUserId } as Complete<StateProps>;
     }
 
     const messageIds = selectCurrentMessageIds(global, chatId, threadId, type);
@@ -835,7 +835,7 @@ export default memo(withGlobal<OwnProps>(
       threadId !== MAIN_THREAD_ID && !isSavedDialog && !chat?.isForum
       && !(messagesById && threadId && messagesById[Number(threadId)])
     ) {
-      return { currentUserId };
+      return { currentUserId } as Complete<StateProps>;
     }
 
     const isRestricted = selectIsChatRestricted(global, chatId);
@@ -902,7 +902,7 @@ export default memo(withGlobal<OwnProps>(
       isEmptyThread,
       currentUserId,
       isChatProtected: selectIsChatProtected(global, chatId),
-      ...(withLastMessageWhenPreloading && { lastMessage }),
+      lastMessage: withLastMessageWhenPreloading ? lastMessage : undefined,
       isAccountFrozen,
       hasCustomGreeting,
       isAppConfigLoaded,

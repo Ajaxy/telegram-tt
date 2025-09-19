@@ -301,7 +301,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { currentUserId } = global;
     const {
       progress, isUsernameAvailable, checkedUsername, error: editUsernameError,
@@ -310,23 +310,13 @@ export default memo(withGlobal<OwnProps>(
 
     const maxBioLength = selectCurrentLimit(global, 'aboutLength');
 
-    if (!currentUser) {
-      return {
-        progress,
-        checkedUsername,
-        isUsernameAvailable,
-        editUsernameError,
-        maxBioLength,
-      };
-    }
-
     const {
       firstName: currentFirstName,
       lastName: currentLastName,
       usernames,
-    } = currentUser;
+    } = currentUser || {};
     const currentUserFullInfo = currentUserId ? selectUserFullInfo(global, currentUserId) : undefined;
-    const currentAvatarHash = getChatAvatarHash(currentUser);
+    const currentAvatarHash = currentUser && getChatAvatarHash(currentUser);
 
     return {
       currentAvatarHash,

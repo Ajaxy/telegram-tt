@@ -74,7 +74,7 @@ const SettingsPrivacyLastSeen = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     return {
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       shouldHideReadMarks: Boolean(selectShouldHideReadMarks(global)),

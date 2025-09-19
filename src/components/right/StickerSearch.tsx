@@ -105,7 +105,7 @@ const StickerSearch: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const currentSearch = selectCurrentStickerSearch(global);
     const { query, resultIds } = currentSearch || {};
     const { featured } = global.stickers;

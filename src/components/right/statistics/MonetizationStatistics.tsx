@@ -283,7 +283,7 @@ const MonetizationStatistics = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const tabState = selectTabState(global);
     const {
       settings: {

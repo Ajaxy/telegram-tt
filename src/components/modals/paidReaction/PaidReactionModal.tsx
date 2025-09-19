@@ -372,7 +372,7 @@ const PaidReactionModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const chat = modal && selectChat(global, modal.chatId);
     const message = modal && selectChatMessage(global, modal.chatId, modal.messageId);
     const starBalance = global.stars?.balance;

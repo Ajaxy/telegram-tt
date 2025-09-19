@@ -493,7 +493,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId)!;
     const chatFullInfo = selectChatFullInfo(global, chatId);
     const { management, limitReachedModal } = selectTabState(global);

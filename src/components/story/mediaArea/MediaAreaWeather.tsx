@@ -107,7 +107,7 @@ const MediaAreaWeather: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, ownProps): StateProps => {
+export default memo(withGlobal<OwnProps>((global, ownProps): Complete<StateProps> => {
   const { mediaArea } = ownProps;
   const restrictedEmoji = selectRestrictedEmoji(global, mediaArea.emoji);
   return { restrictedEmoji };

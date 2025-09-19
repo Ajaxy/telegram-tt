@@ -131,7 +131,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { userIds: localContactIds } = global.contactList || {};
 
     const {

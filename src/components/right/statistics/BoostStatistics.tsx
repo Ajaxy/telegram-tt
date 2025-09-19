@@ -422,7 +422,7 @@ const BoostStatistics = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const tabState = selectTabState(global);
     const boostStatistics = tabState.boostStatistics;
     const isGiveawayAvailable = selectIsGiveawayGiftsPurchaseAvailable(global);

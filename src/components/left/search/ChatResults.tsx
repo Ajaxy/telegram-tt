@@ -498,14 +498,14 @@ const ChatResults: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { isChannelList }): StateProps => {
+  (global, { isChannelList }): Complete<StateProps> => {
     const { userIds: contactIds } = global.contactList || {};
     const {
       currentUserId, messages,
     } = global;
 
     if (!contactIds) {
-      return {};
+      return {} as Complete<StateProps>;
     }
 
     const {

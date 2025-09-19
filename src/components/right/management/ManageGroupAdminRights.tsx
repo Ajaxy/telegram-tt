@@ -424,7 +424,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, isPromotedByCurrentUser }): StateProps => {
+  (global, { chatId, isPromotedByCurrentUser }): Complete<StateProps> => {
     const chat = selectChat(global, chatId)!;
     const fullInfo = selectChatFullInfo(global, chatId);
     const { byId: usersById } = global.users;

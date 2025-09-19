@@ -61,7 +61,7 @@ const MentionLink = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global, { userId }): StateProps => {
+  (global, { userId }): Complete<StateProps> => {
     return {
       userOrChat: userId ? selectUser(global, userId) : undefined,
     };

@@ -378,7 +378,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const { invites, revokedInvites } = selectTabState(global).management.byChatId[chatId] || {};
     const chat = selectChat(global, chatId);
     const isChannel = chat && isChatChannel(chat);

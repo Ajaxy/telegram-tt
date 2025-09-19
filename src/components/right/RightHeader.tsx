@@ -721,7 +721,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
 export default withGlobal<OwnProps>(
   (global, {
     chatId, isProfile, isManagement, threadId,
-  }): StateProps => {
+  }): Complete<StateProps> => {
     const tabState = selectTabState(global);
     const { query: stickerSearchQuery } = selectCurrentStickerSearch(global) || {};
     const { query: gifSearchQuery } = selectCurrentGifSearch(global) || {};

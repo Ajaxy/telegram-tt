@@ -234,7 +234,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { userId }): StateProps => {
+  (global, { userId }): Complete<StateProps> => {
     const user = userId ? selectUser(global, userId) : undefined;
     return {
       user,

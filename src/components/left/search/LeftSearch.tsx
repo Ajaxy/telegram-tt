@@ -197,7 +197,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { currentContent, chatId } = selectTabState(global).globalSearch;
     const { animationLevel } = selectSharedSettings(global);
 

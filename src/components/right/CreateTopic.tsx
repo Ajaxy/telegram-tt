@@ -170,7 +170,7 @@ const CreateTopic: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { createTopicPanel } = selectTabState(global);
     return {
       chat: createTopicPanel?.chatId ? selectChat(global, createTopicPanel.chatId) : undefined,

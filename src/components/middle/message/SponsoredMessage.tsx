@@ -337,7 +337,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const message = selectSponsoredMessage(global, chatId);
 
     const activeDownloads = selectActiveDownloads(global);

@@ -450,7 +450,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { peerId }): StateProps => {
+  (global, { peerId }): Complete<StateProps> => {
     const user = selectUser(global, peerId);
     const userFullInfo = user ? selectUserFullInfo(global, peerId) : undefined;
     const userStatus = selectUserStatus(global, peerId);
@@ -477,10 +477,8 @@ export default memo(withGlobal<OwnProps>(
       emojiStatusSticker,
       emojiStatusSlug,
       profilePhotos,
-      ...(topic && {
-        topic,
-        messagesCount: selectThreadMessagesCount(global, peerId, currentTopicId!),
-      }),
+      topic,
+      messagesCount: topic ? selectThreadMessagesCount(global, peerId, currentTopicId!) : undefined,
     };
   },
 )(ProfileInfo));

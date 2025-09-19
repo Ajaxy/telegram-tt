@@ -171,7 +171,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global, { isMobile }): StateProps => {
+  (global, { isMobile }): Complete<StateProps> => {
     const tabState = selectTabState(global);
 
     return {

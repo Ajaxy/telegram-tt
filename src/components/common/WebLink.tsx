@@ -139,7 +139,7 @@ const WebLink = ({
 export default memo(withGlobal<OwnProps>(
   (global, {
     message,
-  }): StateProps => {
+  }): Complete<StateProps> => {
     const webPage = selectWebPageFromMessage(global, message);
 
     return {

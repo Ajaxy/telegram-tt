@@ -121,7 +121,7 @@ const MinimizedWebAppModal = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const tabState = selectTabState(global);
     const webApps = tabState.webApps;
 

@@ -119,7 +119,7 @@ const PremiumFeaturePreviewVideo = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     return {
       currentUser: selectUser(global, global.currentUserId!)!,
     };

@@ -41,9 +41,9 @@ const TypingStatus: FC<OwnProps & StateProps> = ({ typingStatus, typingUser }) =
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { typingStatus }): StateProps => {
+  (global, { typingStatus }): Complete<StateProps> => {
     if (!typingStatus.userId) {
-      return {};
+      return { typingUser: undefined };
     }
 
     const typingUser = selectUser(global, typingStatus.userId);

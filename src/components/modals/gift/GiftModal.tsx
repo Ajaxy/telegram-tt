@@ -515,7 +515,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, { modal }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { modal }): Complete<StateProps> => {
   const {
     starGifts,
     stars,

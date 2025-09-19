@@ -122,11 +122,11 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { userId }): StateProps => {
+  (global, { userId }): Complete<StateProps> => {
     const { stickers } = global.stickers.greeting;
     const chat = selectChat(global, userId);
     if (!chat) {
-      return {};
+      return {} as Complete<StateProps>;
     }
 
     const user = selectUser(global, userId);

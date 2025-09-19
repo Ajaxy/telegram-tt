@@ -220,5 +220,5 @@ const SettingsPasscode: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => ({ ...global.passcode }),
+  (global): Complete<StateProps> => ({ ...global.passcode } as Complete<StateProps>),
 )(SettingsPasscode));

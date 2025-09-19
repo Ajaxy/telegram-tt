@@ -239,7 +239,7 @@ const ProfileRatingModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const currentUserId = global.currentUserId;
     const user = modal?.userId ? selectUser(global, modal.userId) : undefined;
     const userFullInfo = modal?.userId

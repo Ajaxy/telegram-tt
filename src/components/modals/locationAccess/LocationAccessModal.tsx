@@ -157,7 +157,7 @@ const LocationAccessModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const currentUser = selectUser(global, global.currentUserId!);
 
     return {

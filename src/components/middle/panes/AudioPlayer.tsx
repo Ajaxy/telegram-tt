@@ -420,7 +420,7 @@ function renderPlaybackRateMenuItem(
 }
 
 export default withGlobal<OwnProps>(
-  (global, { isHidden }): StateProps => {
+  (global, { isHidden }): Complete<StateProps> => {
     const { audioPlayer } = selectTabState(global);
     const { chatId, messageId } = audioPlayer;
     const message = !isHidden && chatId && messageId ? selectChatMessage(global, chatId, messageId) : undefined;

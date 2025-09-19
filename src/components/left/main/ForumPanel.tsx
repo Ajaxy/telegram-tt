@@ -288,7 +288,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const chatId = selectTabState(global).forumPanelChatId;
     const chat = chatId ? selectChat(global, chatId) : undefined;
     const {

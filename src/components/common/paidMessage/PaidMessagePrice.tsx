@@ -98,7 +98,7 @@ function PaidMessagePrice({
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const starsUsdWithdrawRateX1000 = global.appConfig.starsUsdWithdrawRateX1000;
     const starsUsdWithdrawRate = starsUsdWithdrawRateX1000 ? starsUsdWithdrawRateX1000 / 1000 : 1;
     const configStarsPaidMessageCommissionPermille = global.appConfig.starsPaidMessageCommissionPermille;

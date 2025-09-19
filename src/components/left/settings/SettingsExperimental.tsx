@@ -185,7 +185,7 @@ const SettingsExperimental = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const {
       shouldForceHttpTransport,
       shouldAllowHttpTransport,

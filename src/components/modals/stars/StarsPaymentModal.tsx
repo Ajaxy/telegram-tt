@@ -215,7 +215,7 @@ const StarPaymentModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const bot = modal?.form?.botId ? selectUser(global, modal.form.botId) : undefined;
 
     const messageInputInvoice = modal?.inputInvoice?.type === 'message' ? modal.inputInvoice : undefined;

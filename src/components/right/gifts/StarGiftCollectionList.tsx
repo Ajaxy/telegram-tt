@@ -76,7 +76,7 @@ const StarGiftCollectionList = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { peerId }): StateProps => {
+  (global, { peerId }): Complete<StateProps> => {
     const { starGiftCollections } = global;
     const collections = starGiftCollections?.byPeerId?.[peerId];
     const activeCollectionId = selectActiveGiftsCollectionId(global, peerId);

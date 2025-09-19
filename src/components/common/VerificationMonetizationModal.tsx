@@ -88,7 +88,7 @@ const VerificationMonetizationModal = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const {
       twoFaSettings: {
         hint: passwordHint,

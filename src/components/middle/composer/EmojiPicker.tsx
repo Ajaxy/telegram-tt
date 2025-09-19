@@ -252,5 +252,5 @@ async function ensureEmojiData() {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => pick(global, ['recentEmojis']),
+  (global): Complete<StateProps> => pick(global, ['recentEmojis']),
 )(EmojiPicker));

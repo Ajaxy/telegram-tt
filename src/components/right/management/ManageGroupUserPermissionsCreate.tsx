@@ -91,7 +91,7 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     const { byId: usersById, statusesById: userStatusesById } = global.users;
     const members = selectChatFullInfo(global, chatId)?.members;

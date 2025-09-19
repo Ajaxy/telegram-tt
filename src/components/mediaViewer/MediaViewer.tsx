@@ -488,7 +488,7 @@ const MediaViewer = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { mediaViewer, shouldSkipHistoryAnimations } = selectTabState(global);
     const {
       chatId,
@@ -538,6 +538,14 @@ export default memo(withGlobal(
         isSynced,
         currentItem,
         viewableMedia,
+        chatId,
+        threadId,
+        messageId,
+        message: undefined,
+        collectedMessageIds: undefined,
+        chatMessages: undefined,
+        sponsoredMessage: undefined,
+        withDynamicLoading,
       };
     }
 
@@ -613,6 +621,10 @@ export default memo(withGlobal(
       isSynced,
       currentItem,
       viewableMedia,
+      canUpdateMedia: undefined,
+      avatar: undefined,
+      avatarOwner: undefined,
+      profilePhotos: undefined,
     };
   },
 )(MediaViewer));

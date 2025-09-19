@@ -397,7 +397,7 @@ function GiftComposer({
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { peerId }): StateProps => {
+  (global, { peerId }): Complete<StateProps> => {
     const theme = selectTheme(global);
     const {
       stars,

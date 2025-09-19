@@ -13,7 +13,6 @@ import type {
   ApiPrepaidStarsGiveaway,
   ApiStarGiveawayOption,
   ApiTypePrepaidGiveaway,
-  ApiUser,
 } from '../../../api/types';
 
 import {
@@ -72,8 +71,6 @@ export type OwnProps = {
 type StateProps = {
   chatId?: string;
   gifts?: ApiPremiumGiftCodeOption[];
-  isOpen?: boolean;
-  fromUser?: ApiUser;
   selectedMemberList?: string[] | undefined;
   selectedChannelList?: string[] | undefined;
   giveawayBoostPerPremiumLimit?: number;
@@ -906,7 +903,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global): StateProps => {
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   const {
     giveawayModal,
   } = selectTabState(global);

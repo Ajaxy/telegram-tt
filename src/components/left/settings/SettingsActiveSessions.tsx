@@ -5,6 +5,7 @@ import {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiSession } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 
 import { formatPastTimeShort } from '../../../util/dates/dateFormat';
 import getSessionIcon from './helpers/getSessionIcon';
@@ -26,11 +27,7 @@ type OwnProps = {
   onReset: () => void;
 };
 
-type StateProps = {
-  byHash: Record<string, ApiSession>;
-  orderedHashes: string[];
-  ttlDays?: number;
-};
+type StateProps = GlobalState['activeSessions'];
 
 const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   isActive,
@@ -286,5 +283,5 @@ function getLocation(session: ApiSession) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => global.activeSessions,
+  (global): Complete<StateProps> => global.activeSessions as Complete<StateProps>,
 )(SettingsActiveSessions));

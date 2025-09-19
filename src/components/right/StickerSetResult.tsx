@@ -121,7 +121,7 @@ const StickerSetResult: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { stickerSetId }): StateProps => {
+  (global, { stickerSetId }): Complete<StateProps> => {
     return {
       set: selectStickerSet(global, stickerSetId),
       shouldPlay: selectShouldLoopStickers(global),

@@ -407,7 +407,7 @@ const StarsBalanceModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const shouldForceHeight = modal?.currency === TON_CURRENCY_CODE
       ? Boolean(global.ton?.history?.all?.transactions.length)
       : Boolean(global.stars?.history?.all?.transactions.length);

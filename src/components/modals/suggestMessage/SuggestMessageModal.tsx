@@ -300,7 +300,7 @@ const SuggestMessageModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const starBalance = global.stars?.balance;
     const peer = modal ? selectPeer(global, modal.chatId) : undefined;
     const currentDraft = modal ? selectDraft(global, modal.chatId, MAIN_THREAD_ID) : undefined;

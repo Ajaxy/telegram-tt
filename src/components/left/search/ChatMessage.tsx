@@ -3,7 +3,7 @@ import { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiMessageOutgoingStatus,
+  ApiChat, ApiMessage,
   ApiUser,
 } from '../../../api/types';
 
@@ -46,7 +46,6 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   privateChatUser?: ApiUser;
-  lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
 };
 
 const ChatMessage: FC<OwnProps & StateProps> = ({
@@ -141,10 +140,10 @@ function renderSummary(
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     if (!chat) {
-      return {};
+      return {} as Complete<StateProps>;
     }
 
     const privateChatUserId = getPrivateChatUserId(chat);
@@ -152,7 +151,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      ...(privateChatUserId && { privateChatUser }),
+      privateChatUser,
     };
   },
 )(ChatMessage));

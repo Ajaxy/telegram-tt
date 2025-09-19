@@ -211,7 +211,7 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => ({
+  (global, { chatId }): Complete<StateProps> => ({
     currentUserId: global.currentUserId,
     peer: selectPeer(global, chatId),
   }),

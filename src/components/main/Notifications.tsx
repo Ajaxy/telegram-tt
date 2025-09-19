@@ -28,5 +28,5 @@ const Notifications: FC<StateProps> = ({ notifications }) => {
 };
 
 export default memo(withGlobal(
-  (global): StateProps => pick(selectTabState(global), ['notifications']),
+  (global): Complete<StateProps> => pick(selectTabState(global), ['notifications']),
 )(Notifications));

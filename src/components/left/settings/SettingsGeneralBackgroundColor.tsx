@@ -347,7 +347,7 @@ function drawHue(canvas: HTMLCanvasElement) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const theme = selectTheme(global);
     const { backgroundColor } = selectThemeValues(global, theme) || {};
     return {

@@ -87,12 +87,12 @@ const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { messageId }): StateProps => {
+  (global, { messageId }): Complete<StateProps> => {
     const { chatId } = selectCurrentMessageList(global) || {};
-    if (!chatId) {
-      return {};
-    }
 
-    return { message: selectChatMessage(global, chatId, messageId) };
+    const message = chatId ? selectChatMessage(global, chatId, messageId) : undefined;
+    return {
+      message,
+    };
   },
 )(BotKeyboardMenu));

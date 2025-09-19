@@ -78,7 +78,7 @@ function WebAppGridItem({ user, isPopularApp }: OwnProps & StateProps) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const user = selectUser(global, chatId);
 
     return {

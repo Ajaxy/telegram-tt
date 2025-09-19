@@ -123,7 +123,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global): StateProps => {
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   const { messageIds, storyId } = selectTabState(global).forwardMessages;
   const isForwarding = (messageIds && messageIds.length > 0);
   return {

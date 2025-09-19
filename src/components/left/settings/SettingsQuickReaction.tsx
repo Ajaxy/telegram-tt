@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiAvailableReaction } from '../../../api/types';
+import type { ApiAvailableReaction, ApiReaction } from '../../../api/types';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -16,7 +16,7 @@ type OwnProps = {
 
 type StateProps = {
   availableReactions?: ApiAvailableReaction[];
-  selectedReaction?: string;
+  selectedReaction?: ApiReaction;
 };
 
 const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
@@ -56,7 +56,7 @@ const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
       <RadioGroup
         name="quick-reaction-settings"
         options={options}
-        selected={selectedReaction}
+        selected={selectedReaction?.type === 'emoji' ? selectedReaction.emoticon : undefined}
         onChange={handleChange}
         withIcon
       />
@@ -65,7 +65,7 @@ const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global) => {
+  (global): Complete<StateProps> => {
     const { config, reactions } = global;
 
     return {

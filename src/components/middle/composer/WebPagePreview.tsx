@@ -255,7 +255,7 @@ function getMediaTypeKey(webPage: ApiWebPageFull) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, threadId }): StateProps => {
+  (global, { chatId, threadId }): Complete<StateProps> => {
     const tabState = selectTabState(global);
     const noWebPage = selectNoWebPage(global, chatId, threadId);
     const {

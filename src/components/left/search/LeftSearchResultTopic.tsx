@@ -59,7 +59,7 @@ const LeftSearchResultTopic: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, topicId }): StateProps => {
+  (global, { chatId, topicId }): Complete<StateProps> => {
     const topic = selectTopic(global, chatId, topicId);
 
     return {

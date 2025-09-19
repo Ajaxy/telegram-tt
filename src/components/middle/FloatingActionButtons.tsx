@@ -161,10 +161,10 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const currentMessageList = selectCurrentMessageList(global);
     if (!currentMessageList) {
-      return {};
+      return {} as Complete<StateProps>;
     }
 
     const { chatId, threadId, type: messageListType } = currentMessageList;

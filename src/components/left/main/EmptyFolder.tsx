@@ -69,7 +69,7 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, { folderId, folderType }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { folderId, folderType }): Complete<StateProps> => {
   const chatFolder = folderId && folderType === 'folder' ? selectChatFolder(global, folderId) : undefined;
 
   return {

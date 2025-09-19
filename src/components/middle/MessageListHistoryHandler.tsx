@@ -45,7 +45,7 @@ const MessageListHistoryHandler: FC<StateProps> = ({ messageLists }) => {
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     return {
       messageLists: selectTabState(global).messageLists,
     };

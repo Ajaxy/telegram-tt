@@ -92,7 +92,7 @@ const PaidMessageChargePane: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { peerId }): StateProps => {
+  (global, { peerId }): Complete<StateProps> => {
     const chat = selectChat(global, peerId);
     const peerFullInfo = selectUserFullInfo(global, peerId);
     const chargedPaidMessageStars = peerFullInfo?.settings?.chargedPaidMessageStars;

@@ -496,13 +496,13 @@ const Chat: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, {
     chatId, isSavedDialog, isPreview, previewMessageId,
-  }): StateProps => {
+  }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     const user = selectUser(global, chatId);
     if (!chat) {
       return {
         currentUserId: global.currentUserId!,
-      };
+      } as Complete<StateProps>;
     }
 
     const folderIds = getChatFolderIds(chatId);
@@ -553,9 +553,7 @@ export default memo(withGlobal<OwnProps>(
       isForumPanelOpen: selectIsForumPanelOpen(global),
       canScrollDown: isSelected && messageListType === 'thread',
       canChangeFolder: (global.chatFolders.orderedIds?.length || 0) > 1,
-      ...(isOutgoing && lastMessage && {
-        lastMessageOutgoingStatus: selectOutgoingStatus(global, lastMessage),
-      }),
+      lastMessageOutgoingStatus: isOutgoing && lastMessage ? selectOutgoingStatus(global, lastMessage) : undefined,
       user,
       userStatus,
       lastMessageTopic,

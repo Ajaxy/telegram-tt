@@ -108,7 +108,7 @@ const CustomEmojiTooltip: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const { stickers: customEmoji } = global.customEmojis.forEmoji;
     const isSavedMessages = selectIsChatWithSelf(global, chatId);
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);

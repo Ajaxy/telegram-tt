@@ -124,7 +124,7 @@ const StealthModeModal = ({ isOpen, stealthMode, isCurrentUserPremium }: StatePr
   );
 };
 
-export default memo(withGlobal((global): StateProps => {
+export default memo(withGlobal((global): Complete<StateProps> => {
   const tabState = selectTabState(global);
 
   return {

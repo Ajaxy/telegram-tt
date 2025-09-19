@@ -171,7 +171,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const theme = selectTheme(global);
     const { background, isBlurred } = selectThemeValues(global, theme) || {};
     const { loadedWallpapers } = global.settings;

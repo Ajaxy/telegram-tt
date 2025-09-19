@@ -509,7 +509,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global): StateProps => {
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   const {
     premiumModal,
   } = selectTabState(global);

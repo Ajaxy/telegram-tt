@@ -149,7 +149,7 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { participant }): StateProps => {
+  (global, { participant }): Complete<StateProps> => {
     return {
       peer: selectUser(global, participant.id) || selectChat(global, participant.id),
     };

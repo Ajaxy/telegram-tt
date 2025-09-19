@@ -169,7 +169,7 @@ const ModalContainer = (modalProps: StateProps) => {
 };
 
 export default memo(withGlobal(
-  (global): StateProps => (
-    pick(selectTabState(global), MODAL_KEYS)
+  (global): Complete<StateProps> => (
+    pick(selectTabState(global), MODAL_KEYS) as Complete<StateProps>
   ),
 )(ModalContainer));

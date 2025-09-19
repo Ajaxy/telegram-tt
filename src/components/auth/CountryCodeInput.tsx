@@ -182,7 +182,7 @@ function getFilteredList(countryList: ApiCountryCode[], filter = ''): ApiCountry
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { countryList: { phoneCodes: phoneCodeList } } = global;
     return {
       phoneCodeList,

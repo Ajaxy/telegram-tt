@@ -66,7 +66,7 @@ const BotVerificationPane: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { peerId }): StateProps => {
+  (global, { peerId }): Complete<StateProps> => {
     const peerFullInfo = selectPeerFullInfo(global, peerId);
 
     const botVerification = peerFullInfo?.botVerification;

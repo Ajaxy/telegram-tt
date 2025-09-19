@@ -164,7 +164,7 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     return {
       ...pick(global.settings.byKey, [
         'shouldSuggestStickers',

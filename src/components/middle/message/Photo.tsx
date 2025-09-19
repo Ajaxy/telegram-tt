@@ -308,7 +308,7 @@ const Photo = <T,>({
   );
 };
 
-export default memo(withGlobal((global): StateProps => {
+export default memo(withGlobal((global): Complete<StateProps> => {
   const appConfig = global.appConfig;
   const needsAgeVerification = appConfig.needAgeVideoVerification;
 

@@ -134,7 +134,7 @@ const GiftCodeModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const { message } = modal || {};
     const chatMessage = message && selectChatMessage(global, message.chatId, message.messageId);
     const sender = chatMessage && selectSender(global, chatMessage);

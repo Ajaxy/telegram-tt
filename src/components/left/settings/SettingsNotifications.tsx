@@ -239,7 +239,7 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     return {
       hasContactJoinedNotifications: Boolean(global.settings.byKey.hasContactJoinedNotifications),
       hasWebNotifications: global.settings.byKey.hasWebNotifications,

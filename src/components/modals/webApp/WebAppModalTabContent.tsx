@@ -82,7 +82,6 @@ type StateProps = {
   theme?: ThemeKey;
   isPaymentModalOpen?: boolean;
   paymentStatus?: TabState['payment']['status'];
-  isPremium?: boolean;
   modalState?: WebAppModalStateType;
   botAppPermissions?: BotAppPermissions;
 };
@@ -1189,7 +1188,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const activeWebApp = modal?.activeWebAppKey ? selectWebApp(global, modal.activeWebAppKey) : undefined;
     const { botId: activeBotId } = activeWebApp || {};
     const modalState = modal?.modalState;

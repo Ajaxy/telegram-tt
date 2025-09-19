@@ -71,6 +71,7 @@ import {
   selectTopic,
   selectUser,
   selectUserStatus,
+  selectWebPageFromMessage,
 } from '../../../global/selectors';
 import { selectMessageDownloadableMedia } from '../../../global/selectors/media';
 import buildClassName from '../../../util/buildClassName';
@@ -785,7 +786,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message, messageListType, detectedLanguage }): StateProps => {
+  (global, { message, messageListType, detectedLanguage }): Complete<StateProps> => {
     const { threadId } = selectCurrentMessageList(global) || {};
 
     const { defaultTags, topReactions, availableReactions } = global.reactions;
@@ -890,6 +891,7 @@ export default memo(withGlobal<OwnProps>(
     const isInSavedMessages = selectIsChatWithSelf(global, message.chatId);
 
     const poll = selectPollFromMessage(global, message);
+    const webPage = selectWebPageFromMessage(global, message);
     const storyData = message.content.storyData;
     const story = storyData ? selectPeerStory(global, storyData.peerId, storyData.id) : undefined;
 
@@ -957,6 +959,7 @@ export default memo(withGlobal<OwnProps>(
       userFullName,
       canGift,
       savedDialogId,
+      webPage,
     };
   },
 )(ContextMenuContainer));

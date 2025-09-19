@@ -346,7 +346,7 @@ function areAllBoostsInChannel(myBoosts: ApiMyBoost[], chatId: string) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const chat = modal && selectChat(global, modal?.chatId);
     const chatFullInfo = chat && selectChatFullInfo(global, chat.id);
     const firstBoost = modal?.myBoosts && getFirstAvailableBoost(modal.myBoosts, modal.chatId);

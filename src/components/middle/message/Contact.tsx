@@ -125,7 +125,7 @@ function getContactName(contact: ApiContact) {
   return '';
 }
 
-export default withGlobal<OwnProps>((global, { contact }): StateProps => {
+export default withGlobal<OwnProps>((global, { contact }): Complete<StateProps> => {
   const {
     countryList: { phoneCodes: phoneCodeList },
   } = global;

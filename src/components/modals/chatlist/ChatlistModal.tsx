@@ -130,7 +130,7 @@ const ChatlistInviteModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
+  (global, { modal }): Complete<StateProps> => {
     const { invite, removal } = modal || {};
     const folderId = removal?.folderId || (invite && 'folderId' in invite ? invite.folderId : undefined);
     const folder = folderId ? selectChatFolder(global, folderId) : undefined;

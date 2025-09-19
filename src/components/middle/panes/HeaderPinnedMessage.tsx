@@ -342,7 +342,7 @@ const HeaderPinnedMessage = ({
 export default memo(withGlobal<OwnProps>(
   (global, {
     chatId, threadId, messageListType,
-  }): StateProps => {
+  }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
 
     const isSynced = global.isSynced;
@@ -356,7 +356,7 @@ export default memo(withGlobal<OwnProps>(
     };
 
     if (messageListType !== 'thread' || !messagesById) {
-      return state;
+      return state as Complete<StateProps>;
     }
 
     if (threadId !== MAIN_THREAD_ID && !isSavedDialog && !chat?.isForum) {
@@ -389,9 +389,9 @@ export default memo(withGlobal<OwnProps>(
         pinnedMessageIds,
         messagesById,
         canUnpin,
-      };
+      } as Complete<StateProps>;
     }
 
-    return state;
+    return state as Complete<StateProps>;
   },
 )(HeaderPinnedMessage));

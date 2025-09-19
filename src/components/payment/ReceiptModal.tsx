@@ -94,7 +94,7 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { receipt } = selectTabState(global).payment;
 
     return {

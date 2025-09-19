@@ -552,7 +552,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { groupCallId }): StateProps => {
+  (global, { groupCallId }): Complete<StateProps> => {
     const {
       connectionState, title, participants, participantsCount, chatId,
     } = selectGroupCall(global, groupCallId) || {};

@@ -175,7 +175,7 @@ const GiftResalePriceComposerModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const configPermille = global.appConfig.starsStargiftResaleCommissionPermille;
     const starsStargiftResaleCommissionPermille = configPermille ? (configPermille / 1000) : undefined;
     const starsStargiftResaleAmountMin = global.appConfig.starsStargiftResaleAmountMin || 0;

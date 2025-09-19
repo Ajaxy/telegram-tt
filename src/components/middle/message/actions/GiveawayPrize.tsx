@@ -134,7 +134,7 @@ const GiveawayPrizeAction = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { action }): StateProps => {
+  (global, { action }): Complete<StateProps> => {
     const currentUserId = global.currentUserId!;
     const sticker = action.type === 'giftCode'
       ? selectGiftStickerForDuration(global, action.months)

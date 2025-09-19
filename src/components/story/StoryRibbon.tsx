@@ -73,7 +73,7 @@ function StoryRibbon({
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { isArchived }): StateProps => {
+  (global, { isArchived }): Complete<StateProps> => {
     const { orderedPeerIds: { active, archived } } = global.stories;
     const usersById = global.users.byId;
     const chatsById = global.chats.byId;

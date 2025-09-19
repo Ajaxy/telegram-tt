@@ -110,7 +110,7 @@ const PriceConfirmModal: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global): StateProps => {
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   const starBalance = global.stars?.balance;
   const tonBalance = global.ton?.balance?.amount;
 

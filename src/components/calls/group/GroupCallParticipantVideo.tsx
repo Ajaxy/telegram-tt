@@ -317,7 +317,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { participant }): StateProps => {
+  (global, { participant }): Complete<StateProps> => {
     return {
       user: participant.isUser ? selectUser(global, participant.id) : undefined,
       chat: !participant.isUser ? selectChat(global, participant.id) : undefined,

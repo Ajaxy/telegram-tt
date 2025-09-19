@@ -265,7 +265,7 @@ function MoreChannels({
 }
 
 export default memo(
-  withGlobal<OwnProps>((global, { chatId }): StateProps => {
+  withGlobal<OwnProps>((global, { chatId }): Complete<StateProps> => {
     const { similarChannelIds, isExpanded, count } = selectSimilarChannelIds(global, chatId) || {};
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
     const chatFullInfo = selectChatFullInfo(global, chatId);

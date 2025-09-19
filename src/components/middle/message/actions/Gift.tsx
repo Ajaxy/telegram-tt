@@ -102,7 +102,7 @@ const GiftAction = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { action }): StateProps => {
+  (global, { action }): Complete<StateProps> => {
     const sticker = action.type === 'giftPremium'
       ? selectGiftStickerForDuration(global, action.months)
       : action.type === 'giftStars'

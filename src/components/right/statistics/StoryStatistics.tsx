@@ -226,7 +226,7 @@ function StoryStatistics({
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const dcId = selectChatFullInfo(global, chatId)?.statisticsDcId;
     const tabState = selectTabState(global);
     const statistics = tabState.statistics.currentStory;

@@ -374,7 +374,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, {
     chatId, threadId, messageListType, isMobile,
-  }): StateProps => {
+  }): Complete<StateProps> => {
     const {
       isLeftColumnShown, shouldSkipHistoryAnimations, audioPlayer, messageLists,
     } = selectTabState(global);

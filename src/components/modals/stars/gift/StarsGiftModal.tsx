@@ -212,7 +212,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, { modal }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { modal }): Complete<StateProps> => {
   const user = modal?.forUserId ? selectUser(global, modal.forUserId) : undefined;
 
   return {

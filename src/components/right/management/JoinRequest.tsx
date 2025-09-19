@@ -27,7 +27,6 @@ type OwnProps = {
 
 type StateProps = {
   user?: ApiUser;
-  isSavedMessages?: boolean;
 };
 
 const JoinRequest: FC<OwnProps & StateProps> = ({
@@ -90,7 +89,7 @@ const JoinRequest: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { userId }): StateProps => {
+  (global, { userId }): Complete<StateProps> => {
     const user = selectUser(global, userId);
 
     return {

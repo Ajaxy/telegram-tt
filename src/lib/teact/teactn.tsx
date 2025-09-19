@@ -342,6 +342,11 @@ export function typify<
     ) => ProjectGlobalState | void | Promise<void>;
   };
 
+  type WithGlobalFn = <OwnProps extends AnyLiteral>(
+    mapStateToProps: (global: ProjectGlobalState, ownProps: OwnProps) => AnyLiteral,
+    activationFn?: (global: ProjectGlobalState, ownProps: OwnProps, stickToFirst: StickToFirstFn) => boolean,
+  ) => (Component: FC) => FC<OwnProps>;
+
   return {
     getGlobal: getUntypedGlobal as <T extends ProjectGlobalState>() => T,
     setGlobal: setUntypedGlobal as (state: ProjectGlobalState, options?: ActionOptions) => void,
@@ -351,10 +356,7 @@ export function typify<
       name: ActionName,
       handler: ActionHandlers[ActionName],
     ) => void,
-    withGlobal: withUntypedGlobal as <OwnProps extends AnyLiteral>(
-      mapStateToProps: (global: ProjectGlobalState, ownProps: OwnProps) => AnyLiteral,
-      activationFn?: (global: ProjectGlobalState, ownProps: OwnProps, stickToFirst: StickToFirstFn) => boolean,
-    ) => (Component: FC) => FC<OwnProps>,
+    withGlobal: withUntypedGlobal as WithGlobalFn,
   };
 }
 

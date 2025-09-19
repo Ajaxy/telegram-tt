@@ -165,7 +165,7 @@ const GifSearch: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const currentSearch = selectCurrentGifSearch(global);
     const { query, results } = currentSearch || {};
     const { chatId, threadId } = selectCurrentMessageList(global) || {};
@@ -183,6 +183,7 @@ export default memo(withGlobal(
       query,
       results,
       chat,
+      chatFullInfo,
       isChatWithBot,
       isSavedMessages,
       canPostInChat,

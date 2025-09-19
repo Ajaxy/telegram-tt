@@ -402,7 +402,7 @@ function PrivacySubsection({
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { screen }): StateProps => {
+  (global, { screen }): Complete<StateProps> => {
     let primaryPrivacy: ApiPrivacySettings | undefined;
     let secondaryPrivacy: ApiPrivacySettings | undefined;
 
@@ -468,7 +468,7 @@ export default memo(withGlobal<OwnProps>(
         currentUserId: currentUserId!,
         hasCurrentUserFullInfo: Boolean(currentUserFullInfo),
         currentUserFallbackPhoto: currentUserFullInfo?.fallbackPhoto,
-      };
+      } as Complete<StateProps>;
     }
 
     return {

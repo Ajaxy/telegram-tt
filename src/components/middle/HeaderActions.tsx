@@ -469,7 +469,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, {
     chatId, threadId, messageListType, isMobile,
-  }): StateProps => {
+  }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     const isChannel = Boolean(chat && isChatChannel(chat));
     const isSuperGroup = Boolean(chat && isChatSuperGroup(chat));
@@ -485,7 +485,7 @@ export default memo(withGlobal<OwnProps>(
         language,
         translationLanguage,
         doNotTranslate,
-      };
+      } as Complete<StateProps>;
     }
 
     const bot = selectBot(global, chatId);

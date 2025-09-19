@@ -184,7 +184,7 @@ const MiddleHeaderPanes = ({
 export default memo(withGlobal<OwnProps>(
   (global, {
     chatId,
-  }): StateProps => {
+  }): Complete<StateProps> => {
     const { audioPlayer } = selectTabState(global);
     const chat = selectChat(global, chatId);
     const userFullInfo = selectUserFullInfo(global, chatId);

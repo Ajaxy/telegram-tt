@@ -930,7 +930,7 @@ export default memo(withGlobal<OwnProps>((global, {
   peerId,
   storyId,
   isDeleteModalOpen,
-}): StateProps => {
+}): Complete<StateProps> => {
   const { appConfig } = global;
   const user = selectUser(global, peerId);
   const chat = selectChat(global, peerId);

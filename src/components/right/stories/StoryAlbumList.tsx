@@ -76,7 +76,7 @@ const StoryAlbumList = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { peerId }): StateProps => {
+  (global, { peerId }): Complete<StateProps> => {
     const { stories } = global;
     const albums = stories?.albumsByPeerId?.[peerId];
     const selectedAlbumId = selectActiveStoriesCollectionId(global);

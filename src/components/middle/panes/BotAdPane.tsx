@@ -159,7 +159,7 @@ const BotAdPane = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const bot = selectBot(global, chatId);
     const sponsoredMessage = selectSponsoredMessage(global, chatId);
     return {

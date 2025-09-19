@@ -186,7 +186,7 @@ function MediaStory({
   );
 }
 
-export default memo(withGlobal<OwnProps>((global, { story }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { story }): Complete<StateProps> => {
   const chat = selectChat(global, story.peerId);
   const isProtected = chat?.isProtected;
 

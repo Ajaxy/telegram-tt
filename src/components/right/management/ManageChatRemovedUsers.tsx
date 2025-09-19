@@ -124,7 +124,7 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     const { byId: usersById } = global.users;
     const canDeleteMembers = chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);

@@ -288,7 +288,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, threadId }): StateProps => {
+  (global, { chatId, threadId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     const threadInfo = threadId ? selectThreadInfo(global, chatId, threadId) : undefined;
     const onlineCount = chat ? selectChatOnlineCount(global, chat) : undefined;

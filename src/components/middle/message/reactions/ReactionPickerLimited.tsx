@@ -39,10 +39,7 @@ type StateProps = {
   availableReactions?: ApiAvailableReaction[];
   topReactions: ApiReaction[];
   isWithPaidReaction?: boolean;
-  canAnimate?: boolean;
-  isSavedMessages?: boolean;
   reactionsLimit?: number;
-  isCurrentUserPremium?: boolean;
 };
 
 const REACTION_SIZE = 36;
@@ -150,7 +147,7 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const { availableReactions, topReactions } = global.reactions;
 
     const { maxUniqueReactions } = global.appConfig;

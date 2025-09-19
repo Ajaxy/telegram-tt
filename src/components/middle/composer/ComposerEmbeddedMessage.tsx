@@ -429,7 +429,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, {
     shouldForceShowEditing, chatId, threadId, messageListType,
-  }): StateProps => {
+  }): Complete<StateProps> => {
     const {
       forwardMessages: {
         fromChatId, toChatId, messageIds: forwardMessageIds, noAuthors, noCaptions,

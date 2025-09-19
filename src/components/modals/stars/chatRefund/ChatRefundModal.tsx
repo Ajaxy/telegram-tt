@@ -77,7 +77,7 @@ const ChatRefundModal = ({ modal, user }: OwnProps & StateProps) => {
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, { modal }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { modal }): Complete<StateProps> => {
   const user = modal?.userId ? selectUser(global, modal.userId) : undefined;
 
   return {

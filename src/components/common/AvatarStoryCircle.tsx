@@ -115,7 +115,7 @@ function AvatarStoryCircle({
   );
 }
 
-export default memo(withGlobal<OwnProps>((global, { peerId }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { peerId }): Complete<StateProps> => {
   const peerStories = selectPeerStories(global, peerId);
   const appTheme = selectTheme(global);
 

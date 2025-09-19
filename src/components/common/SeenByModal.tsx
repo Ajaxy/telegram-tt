@@ -99,10 +99,12 @@ function SeenByModal({
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { chatId, messageId } = selectTabState(global).seenByModal || {};
     if (!chatId || !messageId) {
-      return {};
+      return {
+        seenByDates: undefined,
+      };
     }
 
     return {

@@ -126,7 +126,7 @@ const FrozenAccountModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const freezeUntilDate = global.appConfig.freezeUntilDate;
     const freezeAppealUrl = global.appConfig.freezeAppealUrl;
     const botFreezeAppeal = global.botFreezeAppealId ? selectUser(global, global.botFreezeAppealId) : undefined;

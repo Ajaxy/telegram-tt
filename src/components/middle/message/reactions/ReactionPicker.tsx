@@ -290,7 +290,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global): StateProps => {
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   const state = selectTabState(global);
   const availableEffectById = global.availableEffectById;
   const {

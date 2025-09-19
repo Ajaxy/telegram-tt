@@ -82,7 +82,7 @@ const StatusPickerMenu: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global): StateProps => {
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   return {
     areFeaturedStickersLoaded: Boolean(global.customEmojis.featuredIds?.length),
     isTranslucent: selectIsContextMenuTranslucent(global),

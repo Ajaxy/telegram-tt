@@ -105,7 +105,7 @@ const StatusButton: FC<StateProps> = ({ emojiStatus, collectibleStatuses, isAcco
   );
 };
 
-export default memo(withGlobal((global): StateProps => {
+export default memo(withGlobal((global): Complete<StateProps> => {
   const { currentUserId } = global;
   const currentUser = currentUserId ? selectUser(global, currentUserId) : undefined;
   const collectibleStatuses = global.collectibleEmojiStatuses?.statuses;

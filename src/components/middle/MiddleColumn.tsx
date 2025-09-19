@@ -743,7 +743,7 @@ function MiddleColumn({
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { isMobile }): StateProps => {
+  (global, { isMobile }): Complete<StateProps> => {
     const theme = selectTheme(global);
     const {
       isBlurred: isBackgroundBlurred, background: customBackground, backgroundColor, patternColor,
@@ -780,7 +780,7 @@ export default memo(withGlobal<OwnProps>(
     };
 
     if (!currentMessageList) {
-      return state;
+      return state as Complete<StateProps>;
     }
 
     const { chatId, threadId, type: messageListType } = currentMessageList;
@@ -883,7 +883,7 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       freezeAppealChat,
       shouldBlockSendInMonoforum,
-    };
+    } as Complete<StateProps>;
   },
 )(MiddleColumn));
 

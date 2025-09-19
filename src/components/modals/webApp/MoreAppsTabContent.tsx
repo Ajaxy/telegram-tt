@@ -127,7 +127,7 @@ const MoreAppsTabContent: FC<StateProps> = ({
   );
 };
 
-export default memo(withGlobal((global) => {
+export default memo(withGlobal((global): Complete<StateProps> => {
   const globalSearch = selectTabState(global).globalSearch;
   const foundIds = globalSearch.popularBotApps?.peerIds;
 

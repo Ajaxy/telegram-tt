@@ -28,9 +28,9 @@ type OwnProps = {
 };
 
 type StateProps = {
-  animatedEmoji: ApiSticker;
-  codeLength: number;
-  recoveryEmail: string;
+  animatedEmoji?: ApiSticker;
+  codeLength?: number;
+  recoveryEmail?: string;
 };
 
 const ICON_SIZE = 160;
@@ -108,7 +108,7 @@ const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global) => {
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   const tabState = selectTabState(global);
   const recoveryEmail = tabState.recoveryEmail;
 

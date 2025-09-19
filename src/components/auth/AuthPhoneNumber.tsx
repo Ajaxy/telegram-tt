@@ -314,7 +314,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const {
       sharedState: { settings: { language } },
       countryList: { phoneCodes: phoneCodeList },
@@ -335,6 +335,6 @@ export default memo(withGlobal(
       language,
       phoneCodeList,
       isTestServer: config?.isTestServer,
-    };
+    } as Complete<StateProps>;
   },
 )(AuthPhoneNumber));

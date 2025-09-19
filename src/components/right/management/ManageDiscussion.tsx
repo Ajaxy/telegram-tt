@@ -294,7 +294,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     const { linkedChatId } = selectChatFullInfo(global, chatId) || {};
     const { forDiscussionIds, byId: chatsByIds } = global.chats;

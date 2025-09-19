@@ -186,7 +186,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { editTopicPanel } = selectTabState(global);
     const chat = editTopicPanel?.chatId ? selectChat(global, editTopicPanel.chatId) : undefined;
     const topic = editTopicPanel?.chatId && editTopicPanel?.topicId

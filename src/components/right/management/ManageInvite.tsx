@@ -269,7 +269,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const { editingInvite } = selectTabState(global).management.byChatId[chatId] || {};
 
     return {

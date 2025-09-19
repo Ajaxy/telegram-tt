@@ -154,7 +154,7 @@ function getPercentage(value: number, total: number) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { answer }: OwnProps): StateProps => {
+  (global, { answer }: OwnProps): Complete<StateProps> => {
     const { voters, offsets } = selectTabState(global).pollResults;
 
     return {

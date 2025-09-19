@@ -51,7 +51,6 @@ type StateProps = {
   contentKey?: RightColumnContent;
   chatId?: string;
   threadId?: ThreadId;
-  isInsideTopic?: boolean;
   isChatSelected: boolean;
   animationLevel: AnimationLevel;
   shouldSkipHistoryAnimations?: boolean;
@@ -421,7 +420,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { isMobile }): StateProps => {
+  (global, { isMobile }): Complete<StateProps> => {
     const { chatId, threadId } = selectCurrentMessageList(global) || {};
 
     const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);

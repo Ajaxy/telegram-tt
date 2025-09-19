@@ -151,7 +151,7 @@ const SuggestedPhotoAction = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message }): StateProps => {
+  (global, { message }): Complete<StateProps> => {
     const peer = selectPeer(global, message.chatId);
 
     return {

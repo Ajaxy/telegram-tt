@@ -842,11 +842,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, threadId }): StateProps => {
+  (global, { chatId, threadId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     const isRestricted = selectIsChatRestricted(global, chatId);
     if (!chat || isRestricted) {
-      return {};
+      return {} as Complete<StateProps>;
     }
     const isPrivate = isUserId(chat.id);
     const user = isPrivate ? selectUser(global, chatId) : undefined;

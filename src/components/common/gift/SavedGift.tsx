@@ -229,7 +229,7 @@ const SavedGift = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { peerId, gift }): StateProps => {
+  (global, { peerId, gift }): Complete<StateProps> => {
     const fromPeer = gift.fromId ? selectPeer(global, gift.fromId) : undefined;
     const chat = selectChat(global, peerId);
     const hasAdminRights = chat && getHasAdminRight(chat, 'postMessages');

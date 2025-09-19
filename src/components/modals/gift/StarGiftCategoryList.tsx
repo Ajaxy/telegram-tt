@@ -15,12 +15,12 @@ import StarIcon from '../../common/icons/StarIcon';
 import styles from './StarGiftCategoryList.module.scss';
 
 type OwnProps = {
+  areLimitedStarGiftsDisallowed?: boolean;
   onCategoryChanged: (category: StarGiftCategory) => void;
 };
 
 type StateProps = {
   idsByCategory?: Record<StarGiftCategory, string[]>;
-  areLimitedStarGiftsDisallowed?: boolean;
 };
 
 const StarGiftCategoryList = ({
@@ -91,7 +91,7 @@ const StarGiftCategoryList = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { starGifts } = global;
 
     return {

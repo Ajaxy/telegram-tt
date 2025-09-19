@@ -214,7 +214,7 @@ const ConfettiContainer = ({ confetti }: StateProps) => {
 };
 
 export default memo(withGlobal(
-  (global): StateProps => pick(selectTabState(global), ['confetti']),
+  (global): Complete<StateProps> => pick(selectTabState(global), ['confetti']) as Complete<StateProps>,
 )(ConfettiContainer));
 
 function generateRandomPositionData(

@@ -517,7 +517,7 @@ const ActionMessage = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message, threadId }): StateProps => {
+  (global, { message, threadId }): Complete<StateProps> => {
     const tabState = selectTabState(global);
     const { themes } = global.settings;
 

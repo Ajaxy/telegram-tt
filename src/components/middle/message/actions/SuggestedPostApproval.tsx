@@ -129,7 +129,7 @@ const SuggestedPostApproval = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message }): StateProps => {
+  (global, { message }): Complete<StateProps> => {
     const sender = selectSender(global, message);
     const chat = selectMonoforumChannel(global, message.chatId);
 

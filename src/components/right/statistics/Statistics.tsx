@@ -258,7 +258,7 @@ const Statistics = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId }): Complete<StateProps> => {
     const statistics = selectStatistics(global, chatId);
     const chat = selectChat(global, chatId);
     const dcId = selectChatFullInfo(global, chatId)?.statisticsDcId;

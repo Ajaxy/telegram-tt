@@ -258,7 +258,7 @@ const LeftSideMenuItems = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const tabState = selectTabState(global);
     const {
       currentUserId, archiveSettings,

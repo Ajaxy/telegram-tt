@@ -160,7 +160,7 @@ const GiftStatusInfoModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const currentUser = selectUser(global, global.currentUserId!)!;
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 

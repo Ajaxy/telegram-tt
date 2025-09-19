@@ -205,7 +205,7 @@ const AuthCode = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const {
       connectionState, authState, authQrCode,
     } = global;

@@ -161,7 +161,7 @@ const MicrophoneButton: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const groupCall = selectActiveGroupCall(global);
 
     const { connectionState } = groupCall || {};

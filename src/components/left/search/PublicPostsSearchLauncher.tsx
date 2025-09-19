@@ -270,7 +270,7 @@ const PublicPostsSearchLauncher = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global): StateProps => ({
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => ({
   isCurrentUserPremium: selectIsCurrentUserPremium(global),
   starsBalance: global.stars?.balance?.amount || 0,
 }))(PublicPostsSearchLauncher));

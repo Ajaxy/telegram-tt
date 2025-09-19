@@ -79,17 +79,13 @@ const PollResults: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const {
       pollResults: { chatId, messageId },
     } = selectTabState(global);
 
-    if (!chatId || !messageId) {
-      return {};
-    }
-
-    const chat = selectChat(global, chatId);
-    const message = selectChatMessage(global, chatId, messageId);
+    const chat = chatId ? selectChat(global, chatId) : undefined;
+    const message = chatId && messageId ? selectChatMessage(global, chatId, messageId) : undefined;
     const poll = message && selectPollFromMessage(global, message);
 
     return {

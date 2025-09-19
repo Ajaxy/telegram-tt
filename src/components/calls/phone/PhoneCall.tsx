@@ -363,7 +363,7 @@ const PhoneCall: FC<StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { phoneCall, currentUserId } = global;
     const { isCallPanelVisible, isMasterTab } = selectTabState(global);
     const user = selectPhoneCallUser(global);

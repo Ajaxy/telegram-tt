@@ -190,7 +190,7 @@ const TodoList = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, { message }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { message }): Complete<StateProps> => {
   const sender = selectSender(global, message);
   return {
     sender,

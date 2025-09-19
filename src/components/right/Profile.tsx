@@ -1132,7 +1132,7 @@ function renderProfileInfo(profileId: string, isReady: boolean, isSavedDialog?: 
 export default memo(withGlobal<OwnProps>(
   (global, {
     chatId, threadId, isMobile,
-  }): StateProps => {
+  }): Complete<StateProps> => {
     const user = selectUser(global, chatId);
     const chat = selectChat(global, chatId);
     const chatFullInfo = selectChatFullInfo(global, chatId);
@@ -1247,8 +1247,9 @@ export default memo(withGlobal<OwnProps>(
       isSavedDialog,
       isSynced: global.isSynced,
       limitSimilarPeers: selectPremiumLimit(global, 'recommendedChannels'),
-      ...(hasMembersTab && members && { members, adminMembersById }),
-      ...(hasCommonChatsTab && user && { commonChatIds: commonChats?.ids }),
+      members: hasMembersTab ? members : undefined,
+      adminMembersById: hasMembersTab ? adminMembersById : undefined,
+      commonChatIds: commonChats?.ids,
       monoforumChannel,
     };
   },

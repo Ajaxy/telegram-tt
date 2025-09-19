@@ -250,7 +250,7 @@ const Component = ({ id, className, stateValue, onClick }: OwnProps & StateProps
   );
 }
 
-export default memo(withGlobal<OwnProps>((global, { id }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { id }): Complete<StateProps> => {
 
     const stateValue = selectValue(global, id);
     return {
@@ -311,6 +311,7 @@ Global State is our single, app-wide store, similar to Redux or Zustand. All its
 * Wrap `withGlobal` in `memo` so the component re-renders only on real data changes.
 * **Don't** return new arrays or objects inside `withGlobal`; that defeats memoization.
 * If you need to filter or map a list, **pass IDs as props** and do the heavy work in a `useMemo` hook.
+* Force `Complete<StateProps>` return type for `withGlobal` parameter, as it ensures that all defined properties are passed.
 
 ### 3. Example Component
 

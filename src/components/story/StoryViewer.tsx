@@ -181,7 +181,7 @@ function StoryViewer({
   );
 }
 
-export default memo(withGlobal((global): StateProps => {
+export default memo(withGlobal((global): Complete<StateProps> => {
   const {
     shouldSkipHistoryAnimations, storyViewer: {
       storyId, peerId, isPrivacyModalOpen, origin,

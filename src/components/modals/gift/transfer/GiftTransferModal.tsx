@@ -197,7 +197,7 @@ const GiftTransferModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global): Complete<StateProps> => {
     const { contactList, currentUserId } = global;
 
     return {

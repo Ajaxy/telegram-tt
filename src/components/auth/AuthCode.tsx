@@ -132,5 +132,7 @@ const AuthCode: FC<StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => pick(global, ['authPhoneNumber', 'authIsCodeViaApp', 'authIsLoading', 'authErrorKey']),
+  (global): Complete<StateProps> => (
+    pick(global, ['authPhoneNumber', 'authIsCodeViaApp', 'authIsLoading', 'authErrorKey']) as Complete<StateProps>
+  ),
 )(AuthCode));
