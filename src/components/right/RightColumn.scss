@@ -122,6 +122,14 @@
     }
   }
 
+  .section-info_push {
+    line-height: 1rem;
+  }
+
+  .align-checkbox-with-list-buttons {
+    padding-inline-start: 4.25rem;
+  }
+
   #Main.right-column-shown & {
     visibility: visible;
   }
