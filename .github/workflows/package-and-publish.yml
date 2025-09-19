@@ -43,9 +43,11 @@ jobs:
         id: extract-version
         run: |
           PACKAGE_VERSION=$(grep -m1 '^version' tauri/Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')
-          TAG_NAME="Tauri v${PACKAGE_VERSION}"
+          TAG_NAME="tauri_v${PACKAGE_VERSION}"
+          RELEASE_NAME="Tauri v${PACKAGE_VERSION}"
           echo "package-version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
           echo "tag-name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "release-name=$RELEASE_NAME" >> $GITHUB_OUTPUT
           echo "should-publish=$SHOULD_PUBLISH" >> $GITHUB_OUTPUT
           echo "Extracted version: $PACKAGE_VERSION"
           echo "Generated tag: $TAG_NAME"
@@ -101,12 +103,13 @@ jobs:
         env:
           PACKAGE_VERSION: ${{ needs.get-version.outputs.package-version }}
           TAG_NAME: ${{ needs.get-version.outputs.tag-name }}
+          RELEASE_NAME: ${{ needs.get-version.outputs.release-name }}
         run: |
           echo "Creating draft release for tag: $TAG_NAME"
           echo "Repository: $PUBLISH_REPO"
           RESPONSE=$(curl -X POST \
             -H "Authorization: token $GH_TOKEN" \
-            -d '{"tag_name": "'"$TAG_NAME"'", "name": "'"$TAG_NAME"'", "draft": true}' \
+            -d '{"tag_name": "'"$TAG_NAME"'", "name": "'"$RELEASE_NAME"'", "draft": true}' \
             "https://api.github.com/repos/$PUBLISH_REPO/releases")
           RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id')
           echo "Extracted Release ID: $RELEASE_ID"

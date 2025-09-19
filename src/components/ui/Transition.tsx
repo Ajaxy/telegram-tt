@@ -47,9 +47,9 @@ export type TransitionProps = {
   onScroll?: NoneToVoidFunction;
   onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
   children: React.ReactNode | ChildrenFn;
+  'data-tauri-drag-region'?: true;
   contentSelector?: string;
   restoreHeightKey?: number;
-  'data-tauri-drag-region'?: true;
 };
 
 const FALLBACK_ANIMATION_END = 1000;
@@ -92,9 +92,9 @@ function Transition({
   onScroll,
   onMouseDown,
   children,
+  'data-tauri-drag-region': dataTauriDragRegion,
   contentSelector,
   restoreHeightKey,
-  'data-tauri-drag-region': dataTauriDragRegion,
 }: TransitionProps) {
   const currentKeyRef = useRef<number>();
   // No need for a container to update on change
