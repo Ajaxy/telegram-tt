@@ -1,7 +1,10 @@
+import { getPromiseActions } from '../../../global';
+
 import type { ApiInputSavedStarGift, ApiSavedStarGift } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
 import { STARS_CURRENCY_CODE } from '../../../config';
+import { selectChat } from '../../../global/selectors';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import * as langProvider from '../../../util/oldLangProvider';
 import { callApi } from '../../../api/gramjs';
@@ -210,12 +213,19 @@ addActionHandler('closeStarsGiftModal', (global, actions, payload): ActionReturn
   }, tabId);
 });
 
-addActionHandler('openGiftInfoModalFromMessage', (global, actions, payload): ActionReturnType => {
+addActionHandler('openGiftInfoModalFromMessage', async (global, actions, payload): Promise<void> => {
   const {
     chatId, messageId, tabId = getCurrentTabId(),
   } = payload;
 
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  await getPromiseActions().loadMessage({ chatId, messageId });
+
+  global = getGlobal();
   const message = selectChatMessage(global, chatId, messageId);
+
   if (!message || !message.content.action) return;
 
   const action = message.content.action;
