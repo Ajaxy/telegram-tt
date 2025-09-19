@@ -144,10 +144,10 @@
   color: var(--accent-color);
 
   background-color: currentColor;
-  outline: none;
+  box-shadow: none;
 
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: border 100ms ease-in-out, outline 100ms ease-in-out;
+  transition: border 100ms ease-in-out, box-shadow 100ms ease-in-out;
 }
 
 .color-picker-item-disabled {
@@ -175,7 +175,7 @@
   &:hover,
   &:active {
     border: 0.125rem solid var(--color-background);
-    outline: 0.125rem solid currentColor;
+    box-shadow: 0 0 0 0.125rem currentColor;
   }
 }
 
