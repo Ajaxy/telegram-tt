@@ -264,11 +264,6 @@
       animation-duration: 0ms !important;
     }
 
-    @media (max-width: 600px) {
-      width: 2.875rem;
-      height: 2.875rem;
-    }
-
     @media (hover: hover) {
       &:not(:active):not(:focus):not(:hover) {
         .icon-send,
@@ -460,13 +455,14 @@
 
 .message-input-wrapper {
   --action-button-size: var(--base-height, 3rem);
-  --action-button-compact-fix: -1rem;
+  --action-button-compact-fix: -0.75rem;
 
   display: flex;
 
   .input-scroller {
     --_scroller-right-gap: calc((var(--action-button-size) + var(--action-button-compact-fix) - 0.125rem));
 
+    scrollbar-gutter: stable;
     margin-right: calc(-1 * var(--_scroller-right-gap));
     padding-right: var(--_scroller-right-gap);
   }
@@ -561,21 +557,14 @@
 
       position: absolute;
       top: 0.75rem;
-      right: 0.875rem;
+      right: 0.75rem;
 
       box-sizing: content-box;
       width: 0.5rem;
       height: 0.5rem;
-      border: 0.1875rem solid var(--color-background);
       border-radius: 50%;
 
       background: var(--color-green-darker);
-      box-shadow: -0.375rem -0.25rem 0 -0.1875rem var(--color-background);
-
-      @media (max-width: 600px) {
-        top: 0.5rem;
-        right: 0.5rem;
-      }
     }
   }
 
@@ -612,10 +601,6 @@
 
       animation: recording-blink-like-macos 1.5s infinite;
     }
-  }
-
-  @media (max-width: 600px) {
-    --action-button-compact-fix: -0.6875rem;
   }
 }
 
@@ -683,7 +668,6 @@
   }
 
   @media (max-width: 600px) {
-    min-height: 2.875rem;
     max-height: 16rem;
   }
 }
@@ -841,19 +825,11 @@
 
     line-height: 1.3125;
     white-space: pre-wrap;
-
-    @media (max-width: 600px) {
-      padding: calc((2.875rem - var(--composer-text-size, 1rem) * 1.3125) / 2) 0;
-    }
   }
 
   .forced-placeholder,
   .placeholder-text {
     top: calc((var(--base-height, 3rem) - var(--composer-text-size, 1rem) * 1.3125) / 2);
-
-    @media (max-width: 600px) {
-      top: calc((2.875rem - var(--composer-text-size, 1rem) * 1.3125) / 2);
-    }
   }
 
   &:not(:only-child) {
@@ -932,10 +908,6 @@
 
   &.is-need-premium {
     pointer-events: auto;
-  }
-
-  @media (max-width: 600px) {
-    top: calc((2.875rem - var(--composer-text-size, 1rem) * 1.3125) / 2);
   }
 }
 

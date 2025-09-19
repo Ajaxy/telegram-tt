@@ -207,6 +207,7 @@ export type FontIconName =
   | 'save-story'
   | 'saved-messages'
   | 'schedule'
+  | 'scheduled'
   | 'sd-photo'
   | 'search'
   | 'select'

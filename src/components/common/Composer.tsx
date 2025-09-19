@@ -2201,7 +2201,7 @@ const Composer: FC<OwnProps & StateProps> = ({
                         onClick={handleAllScheduledClick}
                         ariaLabel={lang('AriaComposerOpenScheduled')}
                       >
-                        <Icon name="schedule" />
+                        <Icon name="scheduled" />
                       </Button>
                     )}
                     {shouldShowGiftButton && (
