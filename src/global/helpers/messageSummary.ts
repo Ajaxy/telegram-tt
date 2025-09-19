@@ -249,7 +249,11 @@ function getSummaryDescription(
   }
 
   if (todo) {
-    summary = lang('AttachTodo');
+    summary = renderTextWithEntities({
+      text: todo.todo.title.text,
+      entities: todo.todo.title.entities,
+      asPreview: true,
+    });
   }
 
   return summary || lang('MessageUnsupported');
