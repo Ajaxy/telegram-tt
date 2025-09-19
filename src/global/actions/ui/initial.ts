@@ -4,7 +4,7 @@ import type { LangCode } from '../../../types';
 import type { ActionReturnType, GlobalState } from '../../types';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { IS_MULTIACCOUNT_SUPPORTED, IS_TAURI } from '../../../util/browser/globalEnvironment';
+import { IS_ELECTRON, IS_MULTIACCOUNT_SUPPORTED, IS_TAURI } from '../../../util/browser/globalEnvironment';
 import {
   IS_ANDROID, IS_IOS, IS_LINUX,
   IS_MAC_OS, IS_SAFARI, IS_TOUCH_ENV, IS_WINDOWS,
@@ -173,6 +173,9 @@ addCallback((global: GlobalState) => {
     }
     if (IS_TAURI) {
       document.body.classList.add('is-tauri');
+    }
+    if (IS_ELECTRON) { // Legacy
+      document.body.classList.add('is-electron');
     }
   });
 
