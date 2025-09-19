@@ -112,6 +112,7 @@
     "stylelint-declaration-block-no-ignored-properties": "^2.8.0",
     "stylelint-group-selectors": "^1.0.10",
     "stylelint-high-performance-animation": "^1.11.0",
+    "stylelint-plugin-use-baseline": "^0.9.1",
     "stylelint-selector-tag-no-without-class": "^3.0.1",
     "telegraph-node": "^1.0.4",
     "tsx": "^4.20.3",

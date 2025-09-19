@@ -6,7 +6,7 @@
       "dom",
       "dom.iterable",
       "webworker",
-      "es2021"
+      "es2022"
     ],
     "allowJs": true,
     "skipLibCheck": true,

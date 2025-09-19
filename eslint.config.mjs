@@ -41,6 +41,7 @@ export default tseslint.config(
     'dist/',
     'public/',
     'deploy/update_version.js',
+    'tauri/target/',
   ]),
   {
     name: 'teact-config',

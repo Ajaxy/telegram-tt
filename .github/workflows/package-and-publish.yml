@@ -261,6 +261,8 @@ jobs:
           path: ${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.name }}.dmg
 
       # Windows release
+      - name: Install DigiCert Client tools
+        uses: digicert/ssm-code-signing@v1.1.1
       - name: Setup certificate and set environment variables (Windows)
         if: matrix.settings.platform == 'windows-latest'
         shell: bash
@@ -275,21 +277,13 @@ jobs:
           echo "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools" >> $GITHUB_PATH
           echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH
 
-      - name: Setup SSM KSP and sign package (Windows)
+      - name: Sign package (Windows)
         if: matrix.settings.platform == 'windows-latest'
         env:
-          SM_API_KEY: ${{ secrets.SM_API_KEY }}
           KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
           FILE_PATH: ${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.filename }}
         shell: cmd
-        run: |
-          curl.exe -X GET https://one.digicert.com/signingmanager/api-ui/v1/releases/smtools-windows-x64.msi/download -H "x-api-key:%SM_API_KEY%" -o smtools.msi
-          msiexec /i smtools.msi /quiet /qn
-          smksp_registrar.exe list
-          smctl.exe keypair ls
-          C:\Windows\System32\certutil.exe -csp "DigiCert Signing Manager KSP" -key -user
-          smksp_cert_sync.exe
-          smctl.exe sign --keypair-alias=%KEYPAIR_ALIAS% --input "%FILE_PATH%"
+        run: smctl.exe sign --keypair-alias=%KEYPAIR_ALIAS% --input "%FILE_PATH%"
 
       - name: Update release asset (Windows)
         if: matrix.settings.platform == 'windows-latest' && needs.get-version.outputs.should-publish != ''
