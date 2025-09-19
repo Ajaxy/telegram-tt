@@ -27,6 +27,7 @@ const useChatContextActions = ({
   topics,
   handleDelete,
   handleMute,
+  handleUnmute,
   handleChatFolderChange,
   handleReport,
 }: {
@@ -42,6 +43,7 @@ const useChatContextActions = ({
   topics?: Record<number, ApiTopic>;
   handleDelete?: NoneToVoidFunction;
   handleMute?: NoneToVoidFunction;
+  handleUnmute?: NoneToVoidFunction;
   handleChatFolderChange: NoneToVoidFunction;
   handleReport?: NoneToVoidFunction;
 }, isInSearch = false) => {
@@ -80,7 +82,6 @@ const useChatContextActions = ({
     const {
       toggleChatPinned,
       toggleSavedDialogPinned,
-      updateChatMutedState,
       toggleChatArchived,
       markChatMessagesRead,
       markChatUnread,
@@ -140,7 +141,7 @@ const useChatContextActions = ({
       ? {
         title: lang('ChatsUnmute'),
         icon: 'unmute',
-        handler: () => updateChatMutedState({ chatId: chat.id, isMuted: false }),
+        handler: handleUnmute,
       }
       : {
         title: `${lang('ChatsMute')}...`,
@@ -188,7 +189,7 @@ const useChatContextActions = ({
   }, [
     chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted, currentUserId,
     handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, isSavedDialog, deleteTitle,
-    isPreview, topics,
+    isPreview, topics, handleUnmute,
   ]);
 };
 

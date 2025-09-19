@@ -1,11 +1,11 @@
 import type { FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
 import { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiUser } from '../../../api/types';
 import { StoryViewerOrigin } from '../../../types';
 
+import { UNMUTE_TIMESTAMP } from '../../../config';
 import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
   selectChat, selectIsChatPinned, selectNotifyDefaults, selectNotifyException, selectUser,
@@ -52,7 +52,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   withOpenAppButton,
   onClick,
 }) => {
-  const { requestMainWebView } = getActions();
+  const { requestMainWebView, updateChatMutedState } = getActions();
   const oldLang = useOldLang();
 
   const [isMuteModalOpen, openMuteModal, closeMuteModal] = useFlag();
@@ -70,6 +70,10 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
     openMuteModal();
   }, [markRenderMuteModal, openMuteModal]);
 
+  const handleUnmute = useLastCallback(() => {
+    updateChatMutedState({ chatId, mutedUntil: UNMUTE_TIMESTAMP });
+  });
+
   const contextActions = useChatContextActions({
     chat,
     user,
@@ -77,6 +81,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
     isMuted,
     canChangeFolder,
     handleMute,
+    handleUnmute,
     handleChatFolderChange,
   }, true);
 

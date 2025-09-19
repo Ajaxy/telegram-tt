@@ -5,7 +5,12 @@ import {
   UPLOADING_WALLPAPER_SLUG,
 } from '../../../types';
 
-import { APP_CONFIG_REFETCH_INTERVAL, COUNTRIES_WITH_12H_TIME_FORMAT, MAX_INT_32 } from '../../../config';
+import {
+  APP_CONFIG_REFETCH_INTERVAL,
+  COUNTRIES_WITH_12H_TIME_FORMAT,
+  MUTE_INDEFINITE_TIMESTAMP,
+  UNMUTE_TIMESTAMP,
+} from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { requestPermission, subscribe, unsubscribe } from '../../../util/notifications';
@@ -16,9 +21,9 @@ import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addBlockedUser, addNotifyException, addNotifyExceptions, deletePeerPhoto,
+  addBlockedUser, addNotifyExceptions, deletePeerPhoto,
   removeBlockedUser, replaceSettings, updateChat,
-  updateSharedSettings, updateUser, updateUserFullInfo,
+  updateNotifyDefaults, updateSharedSettings, updateUser, updateUserFullInfo,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -338,8 +343,8 @@ addActionHandler('updateNotificationSettings', async (global, actions, payload):
   }
 
   global = getGlobal();
-  global = addNotifyException(global, peerType, {
-    mutedUntil: isMuted ? MAX_INT_32 : undefined,
+  global = updateNotifyDefaults(global, peerType, {
+    mutedUntil: isMuted ? MUTE_INDEFINITE_TIMESTAMP : UNMUTE_TIMESTAMP,
     shouldShowPreviews,
   });
   setGlobal(global);

@@ -56,6 +56,10 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
   const areNotificationsSupported = checkIfNotificationsSupported();
   const areOfflineNotificationsSupported = areNotificationsSupported && !checkIfOfflinePushFailed();
 
+  const areChannelsMuted = Boolean(notifyDefaults?.channels?.mutedUntil);
+  const areGroupsMuted = Boolean(notifyDefaults?.groups?.mutedUntil);
+  const areUsersMuted = Boolean(notifyDefaults?.users?.mutedUntil);
+
   const handleSettingsChange = useCallback((
     e: ChangeEvent<HTMLInputElement>,
     peerType: ApiNotifyPeerType,
@@ -169,14 +173,13 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 
         <Checkbox
           label={lang('NotificationsForPrivateChats')}
-          subLabel={lang(notifyDefaults?.users?.mutedUntil
-            ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
-          checked={Boolean(notifyDefaults?.users?.mutedUntil)}
+          subLabel={lang(!areUsersMuted ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
+          checked={!areUsersMuted}
           onChange={handlePrivateChatsNotificationsChange}
         />
         <Checkbox
           label={lang('MessagePreview')}
-          disabled={!notifyDefaults?.users?.mutedUntil}
+          disabled={areUsersMuted}
           subLabel={lang(notifyDefaults?.users?.shouldShowPreviews
             ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
           checked={Boolean(notifyDefaults?.users?.shouldShowPreviews)}
@@ -189,14 +192,13 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 
         <Checkbox
           label={lang('NotificationsForGroups')}
-          subLabel={lang(notifyDefaults?.groups?.mutedUntil
-            ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
-          checked={Boolean(notifyDefaults?.groups?.mutedUntil)}
+          subLabel={lang(!areGroupsMuted ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
+          checked={!areGroupsMuted}
           onChange={handleGroupsNotificationsChange}
         />
         <Checkbox
           label={lang('MessagePreview')}
-          disabled={!notifyDefaults?.groups?.mutedUntil}
+          disabled={areGroupsMuted}
           subLabel={lang(notifyDefaults?.groups?.shouldShowPreviews
             ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
           checked={Boolean(notifyDefaults?.groups?.shouldShowPreviews)}
@@ -209,14 +211,13 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 
         <Checkbox
           label={lang('NotificationsForChannels')}
-          subLabel={lang(notifyDefaults?.channels?.mutedUntil
-            ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
-          checked={Boolean(notifyDefaults?.channels?.mutedUntil)}
+          subLabel={lang(!areChannelsMuted ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
+          checked={!areChannelsMuted}
           onChange={handleChannelsNotificationsChange}
         />
         <Checkbox
           label={lang('MessagePreview')}
-          disabled={!notifyDefaults?.channels?.mutedUntil}
+          disabled={areChannelsMuted}
           subLabel={lang(notifyDefaults?.channels?.shouldShowPreviews
             ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
           checked={Boolean(notifyDefaults?.channels?.shouldShowPreviews)}
@@ -244,6 +245,7 @@ export default memo(withGlobal<OwnProps>(
       hasWebNotifications: global.settings.byKey.hasWebNotifications,
       hasPushNotifications: global.settings.byKey.hasPushNotifications,
       notificationSoundVolume: global.settings.byKey.notificationSoundVolume,
+      notifyDefaults: global.settings.notifyDefaults,
     };
   },
 )(SettingsNotifications));

@@ -15,7 +15,9 @@ import type {
 import type { BotAppPermissions } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
-import { FRAGMENT_PHONE_CODE, FRAGMENT_PHONE_LENGTH } from '../../../config';
+import {
+  FRAGMENT_PHONE_CODE, FRAGMENT_PHONE_LENGTH, MUTE_INDEFINITE_TIMESTAMP, UNMUTE_TIMESTAMP,
+} from '../../../config';
 import {
   buildStaticMapHash,
   getChatLink,
@@ -202,15 +204,16 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     openMapModal({ geoPoint: geo, zoom });
   });
 
-  const handleNotificationChange = useLastCallback(() => {
+  const handleToggleNotifications = useLastCallback(() => {
+    const mutedUntil = isMuted ? UNMUTE_TIMESTAMP : MUTE_INDEFINITE_TIMESTAMP;
     if (isTopicInfo) {
       updateTopicMutedState({
         chatId: chatId!,
         topicId: topicId!,
-        isMuted: !isMuted,
+        mutedUntil,
       });
     } else {
-      updateChatMutedState({ chatId: chatId!, isMuted: !isMuted });
+      updateChatMutedState({ chatId: chatId!, mutedUntil });
     }
   });
 
@@ -415,7 +418,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         </ListItem>
       )}
       {!isInSettings && (
-        <ListItem icon="unmute" narrow ripple onClick={handleNotificationChange}>
+        <ListItem icon={isMuted ? 'unmute' : 'mute'} narrow ripple onClick={handleToggleNotifications}>
           <span>{oldLang('Notifications')}</span>
           <Switcher
             id="group-notifications"

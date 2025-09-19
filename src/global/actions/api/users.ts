@@ -235,7 +235,7 @@ addActionHandler('openChatRefundModal', async (global, actions, payload): Promis
 
 addActionHandler('updateContact', async (global, actions, payload): Promise<void> => {
   const {
-    userId, isMuted = false, firstName, lastName, shouldSharePhoneNumber,
+    userId, firstName, lastName, shouldSharePhoneNumber,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -243,8 +243,6 @@ addActionHandler('updateContact', async (global, actions, payload): Promise<void
   if (!user) {
     return;
   }
-
-  actions.updateChatMutedState({ chatId: userId, isMuted });
 
   global = getGlobal();
   global = updateManagementProgress(global, ManagementProgress.InProgress, tabId);

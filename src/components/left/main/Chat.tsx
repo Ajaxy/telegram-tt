@@ -20,6 +20,7 @@ import type { ChatAnimationTypes } from './hooks';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { StoryViewerOrigin } from '../../../types';
 
+import { UNMUTE_TIMESTAMP } from '../../../config';
 import {
   groupStatefulContent,
   isUserOnline,
@@ -81,6 +82,7 @@ import ChatCallStatus from './ChatCallStatus';
 import ChatTags from './ChatTags';
 
 import './Chat.scss';
+
 type OwnProps = {
   chatId: string;
   folderId?: number;
@@ -185,6 +187,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     setShouldCloseRightColumn,
     reportMessages,
     openFrozenAccountModal,
+    updateChatMutedState,
   } = getActions();
 
   const { isMobile } = useAppLayout();
@@ -292,6 +295,15 @@ const Chat: FC<OwnProps & StateProps> = ({
     openMuteModal();
   });
 
+  const handleUnmute = useLastCallback(() => {
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+      return;
+    }
+
+    updateChatMutedState({ chatId, mutedUntil: UNMUTE_TIMESTAMP });
+  });
+
   const handleChatFolderChange = useLastCallback(() => {
     markRenderChatFolderModal();
     openChatFolderModal();
@@ -312,6 +324,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     user,
     handleDelete,
     handleMute,
+    handleUnmute,
     handleChatFolderChange,
     handleReport,
     folderId,

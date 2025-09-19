@@ -18,6 +18,7 @@ export default function useTopicContextActions({
   canDelete,
   handleDelete,
   handleMute,
+  handleUnmute,
 }: {
   topic: ApiTopic;
   chat: ApiChat;
@@ -26,6 +27,7 @@ export default function useTopicContextActions({
   canDelete?: boolean;
   handleDelete?: NoneToVoidFunction;
   handleMute?: NoneToVoidFunction;
+  handleUnmute?: NoneToVoidFunction;
 }) {
   const lang = useOldLang();
 
@@ -40,7 +42,6 @@ export default function useTopicContextActions({
       editTopic,
       toggleTopicPinned,
       markTopicRead,
-      updateTopicMutedState,
       openChatInNewTab,
     } = getActions();
 
@@ -81,7 +82,7 @@ export default function useTopicContextActions({
       ? {
         title: lang('ChatList.Unmute'),
         icon: 'unmute',
-        handler: () => updateTopicMutedState({ chatId, topicId, isMuted: false }),
+        handler: handleUnmute,
       }
       : {
         title: `${lang('ChatList.Mute')}...`,
@@ -116,5 +117,5 @@ export default function useTopicContextActions({
       actionCloseTopic,
       actionDelete,
     ]) as MenuItemContextAction[];
-  }, [topic, chat, isChatMuted, wasOpened, lang, canDelete, handleDelete, handleMute]);
+  }, [topic, chat, isChatMuted, wasOpened, lang, canDelete, handleDelete, handleMute, handleUnmute]);
 }

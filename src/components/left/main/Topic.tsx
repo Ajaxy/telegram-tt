@@ -9,6 +9,7 @@ import type {
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 
+import { UNMUTE_TIMESTAMP } from '../../../config';
 import { groupStatefulContent } from '../../../global/helpers';
 import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
@@ -101,6 +102,7 @@ const Topic: FC<OwnProps & StateProps> = ({
     deleteTopic,
     focusLastMessage,
     setViewForumAsMessages,
+    updateTopicMutedState,
   } = getActions();
 
   const lang = useOldLang();
@@ -127,6 +129,10 @@ const Topic: FC<OwnProps & StateProps> = ({
   const handleMute = useLastCallback(() => {
     markRenderMuteModal();
     openMuteModal();
+  });
+
+  const handleUnmute = useLastCallback(() => {
+    updateTopicMutedState({ chatId, topicId: topic.id, mutedUntil: UNMUTE_TIMESTAMP });
   });
 
   const { renderSubtitle, ref } = useChatListEntry({
@@ -164,6 +170,7 @@ const Topic: FC<OwnProps & StateProps> = ({
     canDelete,
     handleDelete: handleOpenDeleteModal,
     handleMute,
+    handleUnmute,
   });
 
   return (

@@ -180,6 +180,9 @@ export const MOBILE_SCREEN_LANDSCAPE_MAX_HEIGHT = 450; // px
 export const MAX_INT_32 = 2 ** 31 - 1;
 export const TMP_CHAT_ID = '0';
 
+export const MUTE_INDEFINITE_TIMESTAMP = MAX_INT_32;
+export const UNMUTE_TIMESTAMP = 0;
+
 export const ANIMATION_END_DELAY = 100;
 export const ANIMATION_WAVE_MIN_INTERVAL = 200;
 export const MESSAGE_APPEARANCE_DELAY = 10;

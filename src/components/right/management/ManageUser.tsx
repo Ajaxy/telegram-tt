@@ -8,7 +8,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiPhoto, ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import { MUTE_INDEFINITE_TIMESTAMP, SERVICE_NOTIFICATIONS_USER_ID, UNMUTE_TIMESTAMP } from '../../../config';
 import { isUserBot } from '../../../global/helpers';
 import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
@@ -68,12 +68,14 @@ const ManageUser: FC<OwnProps & StateProps> = ({
     deleteContact,
     closeManagement,
     uploadContactProfilePhoto,
+    updateChatMutedState,
   } = getActions();
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const [isResetPersonalPhotoDialogOpen, openResetPersonalPhotoDialog, closeResetPersonalPhotoDialog] = useFlag();
-  const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
+  const [isProfileFieldsTouched, markProfileFieldsTouched, unmarkProfileFieldsTouched] = useFlag();
   const [error, setError] = useState<string | undefined>();
+  const [isNotificationsTouched, markNotificationsTouched, unmarkNotificationsTouched] = useFlag();
   const lang = useOldLang();
 
   useHistoryBack({
@@ -93,7 +95,8 @@ const ManageUser: FC<OwnProps & StateProps> = ({
   }, [isMuted]);
 
   useEffect(() => {
-    setIsProfileFieldsTouched(false);
+    unmarkProfileFieldsTouched();
+    unmarkNotificationsTouched();
     closeDeleteDialog();
   }, [closeDeleteDialog, userId]);
 
@@ -104,7 +107,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (progress === ManagementProgress.Complete) {
-      setIsProfileFieldsTouched(false);
+      unmarkProfileFieldsTouched();
       setError(undefined);
       closeDeleteDialog();
     }
@@ -112,7 +115,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
 
   const handleFirstNameChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setFirstName(e.target.value);
-    setIsProfileFieldsTouched(true);
+    markProfileFieldsTouched();
 
     if (error === ERROR_FIRST_NAME_MISSING) {
       setError(undefined);
@@ -121,12 +124,13 @@ const ManageUser: FC<OwnProps & StateProps> = ({
 
   const handleLastNameChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setLastName(e.target.value);
-    setIsProfileFieldsTouched(true);
+    markProfileFieldsTouched();
   }, []);
 
   const handleNotificationChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setIsNotificationsEnabled(e.target.checked);
-    setIsProfileFieldsTouched(true);
+    markNotificationsTouched();
+    markProfileFieldsTouched();
   }, []);
 
   const handleProfileSave = useCallback(() => {
@@ -140,11 +144,16 @@ const ManageUser: FC<OwnProps & StateProps> = ({
 
     updateContact({
       userId,
-      isMuted: !isNotificationsEnabled,
       firstName: trimmedFirstName,
       lastName: trimmedLastName,
     });
-  }, [firstName, lastName, updateContact, userId, isNotificationsEnabled]);
+
+    if (isNotificationsTouched) {
+      updateChatMutedState({
+        chatId: userId, mutedUntil: isNotificationsEnabled ? UNMUTE_TIMESTAMP : MUTE_INDEFINITE_TIMESTAMP,
+      });
+    }
+  }, [firstName, isNotificationsEnabled, isNotificationsTouched, lastName, userId]);
 
   const handleDeleteContact = useCallback(() => {
     deleteContact({ userId });
@@ -167,12 +176,12 @@ const ManageUser: FC<OwnProps & StateProps> = ({
 
   const handleResetPersonalAvatar = useCallback(() => {
     closeResetPersonalPhotoDialog();
-    setIsProfileFieldsTouched(true);
+    markProfileFieldsTouched();
     uploadContactProfilePhoto({ userId });
   }, [closeResetPersonalPhotoDialog, uploadContactProfilePhoto, userId]);
 
   const handleSelectAvatar = useCallback((file: File) => {
-    setIsProfileFieldsTouched(true);
+    markProfileFieldsTouched();
     uploadContactProfilePhoto({ userId, file, isSuggest: isSuggestRef.current });
   }, [uploadContactProfilePhoto, userId]);
 

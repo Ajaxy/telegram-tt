@@ -1,6 +1,6 @@
 import type { OnApiUpdate } from '../types';
 
-import { MAX_INT_32 } from '../../config';
+import { MUTE_INDEFINITE_TIMESTAMP } from '../../config';
 import { getServerTime } from '../../util/serverTime';
 
 type UnmuteQueueItem = { chatId: string; topicId?: number; mutedUntil: number };
@@ -12,7 +12,7 @@ const scheduleUnmute = (item: UnmuteQueueItem, onUpdate: NoneToVoidFunction) => 
     clearTimeout(unmuteTimers.get(id));
     unmuteTimers.delete(id);
   }
-  if (item.mutedUntil === MAX_INT_32 || item.mutedUntil <= getServerTime()) return;
+  if (item.mutedUntil === MUTE_INDEFINITE_TIMESTAMP || item.mutedUntil <= getServerTime()) return;
   unmuteQueue.push(item);
   unmuteQueue.sort((a, b) => b.mutedUntil - a.mutedUntil);
   const next = unmuteQueue.pop();
@@ -27,7 +27,7 @@ const scheduleUnmute = (item: UnmuteQueueItem, onUpdate: NoneToVoidFunction) => 
   unmuteTimers.set(id, timer);
 };
 
-export function scheduleMutedChatUpdate(chatId: string, mutedUntil = 0, onUpdate: OnApiUpdate) {
+export function scheduleMutedChatUpdate(chatId: string, mutedUntil: number, onUpdate: OnApiUpdate) {
   scheduleUnmute({
     chatId,
     mutedUntil,
@@ -35,12 +35,12 @@ export function scheduleMutedChatUpdate(chatId: string, mutedUntil = 0, onUpdate
     '@type': 'updateChatNotifySettings',
     chatId,
     settings: {
-      mutedUntil: 0,
+      mutedUntil: undefined,
     },
   }));
 }
 
-export function scheduleMutedTopicUpdate(chatId: string, topicId: number, mutedUntil = 0, onUpdate: OnApiUpdate) {
+export function scheduleMutedTopicUpdate(chatId: string, topicId: number, mutedUntil: number, onUpdate: OnApiUpdate) {
   scheduleUnmute({
     chatId,
     topicId,
@@ -50,7 +50,7 @@ export function scheduleMutedTopicUpdate(chatId: string, topicId: number, mutedU
     chatId,
     topicId,
     settings: {
-      mutedUntil: 0,
+      mutedUntil: undefined,
     },
   }));
 }

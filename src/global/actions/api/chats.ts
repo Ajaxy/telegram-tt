@@ -24,7 +24,6 @@ import {
   CHAT_LIST_LOAD_SLICE,
   DEBUG,
   GLOBAL_SUGGESTED_CHANNELS_ID,
-  MAX_INT_32,
   RE_TG_LINK,
   SAVED_FOLDER_ID,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -689,8 +688,7 @@ addActionHandler('requestSavedDialogUpdate', async (global, actions, payload): P
 });
 
 addActionHandler('updateChatMutedState', (global, actions, payload): ActionReturnType => {
-  const { chatId, isMuted } = payload;
-  let { mutedUntil } = payload;
+  const { chatId, mutedUntil } = payload;
 
   if (selectIsCurrentUserFrozen(global)) {
     actions.openFrozenAccountModal({ tabId: getCurrentTabId() });
@@ -700,9 +698,6 @@ addActionHandler('updateChatMutedState', (global, actions, payload): ActionRetur
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
-  }
-  if (isMuted && !mutedUntil) {
-    mutedUntil = MAX_INT_32;
   }
 
   void callApi('updateChatNotifySettings', { chat, settings: { mutedUntil } });
@@ -721,7 +716,7 @@ addActionHandler('updateChatSilentPosting', (global, actions, payload): ActionRe
 
 addActionHandler('updateTopicMutedState', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, topicId, isMuted, mutedUntil,
+    chatId, topicId, mutedUntil,
   } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -729,7 +724,7 @@ addActionHandler('updateTopicMutedState', (global, actions, payload): ActionRetu
   }
 
   void callApi('updateTopicMutedState', {
-    chat, topicId, isMuted, mutedUntil,
+    chat, topicId, mutedUntil,
   });
 });
 

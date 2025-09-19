@@ -27,7 +27,6 @@ import {
   ARCHIVED_FOLDER_ID,
   DEBUG,
   GENERAL_TOPIC_ID,
-  MAX_INT_32,
   MEMBERS_LOAD_SLICE,
   SERVICE_NOTIFICATIONS_USER_ID,
   TOPICS_SLICE,
@@ -201,7 +200,9 @@ export async function fetchChats({
     if (Object.values(omitUndefined(notifySettings)).length) {
       notifyExceptionById[chat.id] = notifySettings;
 
-      scheduleMutedChatUpdate(chat.id, notifySettings.mutedUntil, sendApiUpdate);
+      if (notifySettings.mutedUntil) {
+        scheduleMutedChatUpdate(chat.id, notifySettings.mutedUntil, sendApiUpdate);
+      }
     }
 
     if (withPinned && dialog.pinned) {
@@ -512,7 +513,9 @@ export async function requestChatUpdate({
 
   const notifySettings = buildApiPeerNotifySettings(dialog.notifySettings);
 
-  scheduleMutedChatUpdate(chatUpdate.id, notifySettings.mutedUntil, sendApiUpdate);
+  if (notifySettings.mutedUntil) {
+    scheduleMutedChatUpdate(chatUpdate.id, notifySettings.mutedUntil, sendApiUpdate);
+  }
 }
 
 export function saveDraft({
@@ -798,13 +801,10 @@ export function updateChatNotifySettings({
 }
 
 export function updateTopicMutedState({
-  chat, topicId, isMuted, mutedUntil = 0,
+  chat, topicId, mutedUntil,
 }: {
-  chat: ApiChat; topicId: number; isMuted?: boolean; mutedUntil?: number;
+  chat: ApiChat; topicId: number; mutedUntil: number;
 }) {
-  if (isMuted && !mutedUntil) {
-    mutedUntil = MAX_INT_32;
-  }
   invokeRequest(new GramJs.account.UpdateNotifySettings({
     peer: new GramJs.InputNotifyForumTopic({
       peer: buildInputPeer(chat.id, chat.accessHash),

@@ -11,6 +11,7 @@ import type { IAnchorPosition, ThreadId } from '../../types';
 import type { IconName } from '../../types/icons';
 import { MAIN_THREAD_ID } from '../../api/types';
 
+import { UNMUTE_TIMESTAMP } from '../../config';
 import {
   getCanAddContact,
   getCanDeleteChat,
@@ -303,7 +304,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     if (isAccountFrozen) {
       openFrozenAccountModal();
     } else {
-      updateChatMutedState({ chatId, isMuted: false });
+      updateChatMutedState({ chatId, mutedUntil: UNMUTE_TIMESTAMP });
     }
     closeMenu();
   });

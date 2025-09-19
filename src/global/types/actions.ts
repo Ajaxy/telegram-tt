@@ -1122,8 +1122,7 @@ export interface ActionPayloads {
   };
   updateChatMutedState: {
     chatId: string;
-    isMuted?: boolean;
-    mutedUntil?: number;
+    mutedUntil: number;
   };
   updateChatSilentPosting: {
     chatId: string;
@@ -1823,7 +1822,6 @@ export interface ActionPayloads {
     name?: string | undefined;
     about?: string | undefined;
     description?: string | undefined;
-    isMuted?: boolean;
   } & WithTabId;
   startBotFatherConversation: {
     param: string;
@@ -1853,7 +1851,6 @@ export interface ActionPayloads {
     userId: string;
     firstName: string;
     lastName?: string;
-    isMuted?: boolean;
     shouldSharePhoneNumber?: boolean;
   } & WithTabId;
   toggleNoPaidMessagesException: {
@@ -2759,8 +2756,7 @@ export interface ActionPayloads {
   updateTopicMutedState: {
     chatId: string;
     topicId: number;
-    isMuted?: boolean;
-    mutedUntil?: number;
+    mutedUntil: number;
   };
   setViewForumAsMessages: {
     chatId: string;

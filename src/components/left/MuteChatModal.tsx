@@ -4,7 +4,7 @@ import {
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import { MAX_INT_32 } from '../../config';
+import { MUTE_INDEFINITE_TIMESTAMP } from '../../config';
 
 import useOldLang from '../../hooks/useOldLang';
 
@@ -53,7 +53,7 @@ const MuteChatModal: FC<OwnProps> = ({
   const handleSubmit = useCallback(() => {
     let mutedUntil: number;
     if (muteUntilOption === MuteDuration.Forever) {
-      mutedUntil = MAX_INT_32;
+      mutedUntil = MUTE_INDEFINITE_TIMESTAMP;
     } else {
       mutedUntil = Math.floor(Date.now() / 1000) + Number(muteUntilOption);
     }

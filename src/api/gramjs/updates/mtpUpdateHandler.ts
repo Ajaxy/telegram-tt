@@ -803,7 +803,9 @@ export function updater(update: Update) {
 
     if (notifyPeer instanceof GramJs.NotifyPeer) {
       const peerId = getApiChatIdFromMtpPeer(notifyPeer.peer);
-      scheduleMutedChatUpdate(peerId, settings.mutedUntil, sendApiUpdate);
+      if (settings.mutedUntil) {
+        scheduleMutedChatUpdate(peerId, settings.mutedUntil, sendApiUpdate);
+      }
       sendApiUpdate({
         '@type': 'updateChatNotifySettings',
         chatId: peerId,
@@ -814,7 +816,9 @@ export function updater(update: Update) {
 
     if (notifyPeer instanceof GramJs.NotifyForumTopic) {
       const peerId = getApiChatIdFromMtpPeer(notifyPeer.peer);
-      scheduleMutedTopicUpdate(peerId, notifyPeer.topMsgId, settings.mutedUntil, sendApiUpdate);
+      if (settings.mutedUntil) {
+        scheduleMutedTopicUpdate(peerId, notifyPeer.topMsgId, settings.mutedUntil, sendApiUpdate);
+      }
       sendApiUpdate({
         '@type': 'updateTopicNotifySettings',
         chatId: peerId,
