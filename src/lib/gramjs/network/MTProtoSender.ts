@@ -152,7 +152,7 @@ export default class MTProtoSender {
 
   _getShouldDebugExportedSenders?: () => boolean;
 
-  private readonly _handlers: Record<number, (message: TLMessage) => void>;
+  private readonly _handlers: Record<number, (message: TLMessage) => void | Promise<void>>;
 
   private readonly _onConnectionBreak?: CallableFunction;
 
@@ -813,7 +813,7 @@ export default class MTProtoSender {
       handler = this._handleUpdate.bind(this);
     }
 
-    handler(message);
+    await handler(message);
   }
 
   /**
