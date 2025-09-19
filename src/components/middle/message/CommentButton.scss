@@ -173,11 +173,6 @@
   }
 
   .message-content.document &,
-  .message-content.voice & {
-    margin-bottom: -0.5rem;
-  }
-
-  .message-content.document &,
   .message-content.audio &,
   .message-content.voice &,
   .message-content.poll &,
