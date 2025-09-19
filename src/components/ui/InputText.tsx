@@ -2,9 +2,9 @@ import type {
   ChangeEvent, FormEvent,
 } from 'react';
 import type { ElementRef, FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 
+import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import buildClassName from '../../util/buildClassName';
 
 import useOldLang from '../../hooks/useOldLang';
@@ -81,6 +81,7 @@ const InputText: FC<OwnProps> = ({
         placeholder={placeholder}
         maxLength={maxLength}
         autoComplete={autoComplete}
+        spellCheck={IS_TAURI ? false : undefined}
         inputMode={inputMode}
         disabled={disabled}
         readOnly={readOnly}

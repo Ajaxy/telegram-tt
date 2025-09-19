@@ -1,6 +1,5 @@
-import { useEffect, useRef, useUnmountCleanup } from '../lib/teact/teact';
+import { useRef, useUnmountCleanup } from '../lib/teact/teact';
 
-import { ELECTRON_WINDOW_DRAG_EVENT_START } from '../config';
 import useLastCallback from './useLastCallback';
 
 const DEFAULT_THRESHOLD = 250;
@@ -51,14 +50,6 @@ function useLongPress({
   useUnmountCleanup(() => {
     window.clearTimeout(timerId.current);
   });
-
-  useEffect(() => {
-    document.body.addEventListener(ELECTRON_WINDOW_DRAG_EVENT_START, cancel);
-
-    return () => {
-      document.body.removeEventListener(ELECTRON_WINDOW_DRAG_EVENT_START, cancel);
-    };
-  }, []);
 
   return {
     onMouseDown: start,

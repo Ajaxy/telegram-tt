@@ -2,9 +2,7 @@ import type { TeactNode } from '../../../lib/teact/teact';
 
 import type { TextPart } from '../../../types';
 
-import {
-  BASE_URL, IS_PACKAGED_ELECTRON, RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE,
-} from '../../../config';
+import { RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE } from '../../../config';
 import EMOJI_REGEX from '../../../lib/twemojiRegex';
 import { IS_EMOJI_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
@@ -118,8 +116,7 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
       if (!code) {
         emojiResult.push(emoji);
       } else {
-        const baseSrcUrl = IS_PACKAGED_ELECTRON ? BASE_URL : '.';
-        const src = `${baseSrcUrl}/img-apple-${size === 'big' ? '160' : '64'}/${code}.png`;
+        const src = `./img-apple-${size === 'big' ? '160' : '64'}/${code}.png`;
         const className = buildClassName(
           'emoji',
           size === 'small' && 'emoji-small',

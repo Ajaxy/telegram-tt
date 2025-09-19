@@ -1647,6 +1647,7 @@ export interface LangPair {
   'ToDoListErrorChooseTitle': undefined;
   'ToDoListErrorChooseTasks': undefined;
   'PremiumPreviewTodo': undefined;
+  'NativeDownloadFailed': undefined;
   'DescriptionAboutTon': undefined;
   'ButtonTopUpViaFragment': undefined;
   'TonModalHint': undefined;

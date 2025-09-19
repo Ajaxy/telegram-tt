@@ -1,10 +1,10 @@
 import type { TeactNode } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { ThreadId } from '../../types';
 import { ApiMessageEntityTypes } from '../../api/types';
 
+import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import { ensureProtocol, getUnicodeUrl, isMixedScriptUrl } from '../../util/browser/url';
 import buildClassName from '../../util/buildClassName';
 
@@ -68,7 +68,7 @@ const SafeLink = ({
     <a
       href={ensureProtocol(url)}
       title={getUnicodeUrl(url)}
-      target="_blank"
+      target={IS_TAURI ? '_self' : '_blank'}
       rel="noopener noreferrer"
       className={classNames}
       onClick={handleClick}

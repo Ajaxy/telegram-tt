@@ -12,7 +12,7 @@ import type RLottieInstance from '../../lib/rlottie/RLottie';
 
 import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { ensureRLottie, getRLottie } from '../../lib/rlottie/RLottie.async';
-import { IS_ELECTRON } from '../../util/browser/windowEnvironment';
+import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import generateUniqueId from '../../util/generateUniqueId';
@@ -276,7 +276,7 @@ const AnimatedSticker: FC<OwnProps> = ({
       className={buildClassName('AnimatedSticker', className)}
       style={buildStyle(
         size !== undefined && `width: ${size}px; height: ${size}px;`,
-        onClick && !IS_ELECTRON && 'cursor: pointer',
+        onClick && !IS_TAURI && 'cursor: pointer',
         colorFilter,
         style,
       )}

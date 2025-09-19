@@ -8,7 +8,8 @@ import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import {
   getCanDeleteChat, isChatArchived, isChatChannel, isChatGroup,
 } from '../global/helpers';
-import { IS_ELECTRON, IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/browser/windowEnvironment';
+import { IS_TAURI } from '../util/browser/globalEnvironment';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/browser/windowEnvironment';
 import { isUserId } from '../util/entities/ids';
 import { compact } from '../util/iteratees';
 import useLang from './useLang';
@@ -87,7 +88,7 @@ const useChatContextActions = ({
     } = getActions();
 
     const actionOpenInNewTab = IS_OPEN_IN_NEW_TAB_SUPPORTED && {
-      title: IS_ELECTRON ? lang('ChatListOpenInNewWindow') : lang('ChatListOpenInNewTab'),
+      title: IS_TAURI ? lang('ChatListOpenInNewWindow') : lang('ChatListOpenInNewTab'),
       icon: 'open-in-new-tab',
       handler: () => {
         if (isSavedDialog) {

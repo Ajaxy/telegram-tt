@@ -124,7 +124,8 @@ import {
   selectMessageTimestampableDuration,
 } from '../../../global/selectors/media';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
-import { IS_ANDROID, IS_ELECTRON, IS_TRANSLATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
+import { IS_TAURI } from '../../../util/browser/globalEnvironment';
+import { IS_ANDROID, IS_TRANSLATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../util/entities/ids';
 import { getMessageKey } from '../../../util/keys/messageKey';
@@ -496,7 +497,7 @@ const Message: FC<OwnProps & StateProps> = ({
   } = useContextMenuHandlers(
     ref,
     (isTouchScreen && isInSelectMode) || isAccountFrozen,
-    !IS_ELECTRON,
+    !IS_TAURI,
     IS_ANDROID,
     getIsMessageListReady,
   );

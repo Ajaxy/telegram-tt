@@ -4,7 +4,7 @@ import {
   APP_CODE_NAME,
   DEBUG, IS_MOCKED_CLIENT,
 } from '../config';
-import { IS_ELECTRON } from './browser/windowEnvironment';
+import { IS_TAURI } from './browser/globalEnvironment';
 import { hasStoredSession } from './sessions';
 
 const WEBSYNC_URLS = [
@@ -30,7 +30,7 @@ const saveSync = (authed: boolean) => {
 let lastTimeout: NodeJS.Timeout | undefined;
 
 export const forceWebsync = (authed: boolean) => {
-  if (IS_MOCKED_CLIENT || IS_ELECTRON) return undefined;
+  if (IS_MOCKED_CLIENT || IS_TAURI) return undefined;
   const currentTs = getTs();
 
   const { canRedirect, ts } = JSON.parse(localStorage.getItem(WEBSYNC_KEY) || '{}');
@@ -72,13 +72,13 @@ export const forceWebsync = (authed: boolean) => {
 };
 
 export function stopWebsync() {
-  if (DEBUG || IS_ELECTRON) return;
+  if (DEBUG || IS_TAURI) return;
 
   if (lastTimeout) clearTimeout(lastTimeout);
 }
 
 export function startWebsync() {
-  if (DEBUG || IS_ELECTRON) {
+  if (DEBUG || IS_TAURI) {
     return;
   }
 

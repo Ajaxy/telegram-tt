@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import {
-  useEffect, useMemo, useRef, useState,
+  useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -26,12 +26,13 @@ import {
   selectTopic,
   selectUser,
 } from '../../global/selectors';
+import { IS_TAURI } from '../../util/browser/globalEnvironment';
+import { IS_MAC_OS } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { isUserId } from '../../util/entities/ids';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import useElectronDrag from '../../hooks/useElectronDrag';
 import useFlag from '../../hooks/useFlag';
 import { useFolderManagerForChatsCount } from '../../hooks/useFolderManager';
 import useLang from '../../hooks/useLang';
@@ -695,11 +696,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     (shouldSkipTransition || shouldSkipHistoryAnimations) && 'no-transition',
   );
 
-  const headerRef = useRef<HTMLDivElement>();
-  useElectronDrag(headerRef);
-
   return (
-    <div className="RightHeader" ref={headerRef}>
+    <div className="RightHeader" data-tauri-drag-region={IS_TAURI && IS_MAC_OS ? true : undefined}>
       <Button
         className="close-button"
         round

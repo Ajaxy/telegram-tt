@@ -28,7 +28,8 @@ import {
   selectTopicFromMessage,
 } from '../global/selectors';
 import { callApi } from '../api/gramjs';
-import { IS_ELECTRON, IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './browser/windowEnvironment';
+import { IS_TAURI } from './browser/globalEnvironment';
+import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './browser/windowEnvironment';
 import jsxToHtml from './element/jsxToHtml';
 import { buildCollectionByKey } from './iteratees';
 import { getTranslationFn } from './localization';
@@ -48,7 +49,7 @@ function getDeviceToken(subscription: PushSubscription) {
 }
 
 function checkIfPushSupported() {
-  if (!IS_SERVICE_WORKER_SUPPORTED || IS_ELECTRON) return false;
+  if (!IS_SERVICE_WORKER_SUPPORTED || IS_TAURI) return false;
 
   if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
     if (DEBUG) {
@@ -89,7 +90,7 @@ export function checkIfNotificationsSupported() {
     return false;
   }
 
-  if (Notification.permission === 'denied' as NotificationPermission) {
+  if (Notification.permission === 'denied') {
     if (DEBUG) {
       // eslint-disable-next-line no-console
       console.warn('[PUSH] The user has blocked push notifications.');
@@ -142,6 +143,19 @@ function checkIfShouldResubscribe(subscription: PushSubscription | null) {
 }
 
 export async function requestPermission() {
+  if (IS_TAURI) {
+    const tauriPlugin = await import('@tauri-apps/plugin-notification');
+    const tauriPermissionGranted = await tauriPlugin.isPermissionGranted();
+
+    if (!tauriPermissionGranted) {
+      const permission = await tauriPlugin.requestPermission();
+
+      return permission === 'granted';
+    }
+
+    return true;
+  }
+
   if (!('Notification' in window)) {
     return false;
   }
@@ -409,7 +423,7 @@ export async function notifyAboutMessage({
 
   const areNotificationsSupported = checkIfNotificationsSupported();
   if (!hasWebNotifications || !areNotificationsSupported) {
-    if (!isSilent && !message.isSilent && !isReaction && !IS_ELECTRON) {
+    if (!isSilent && !message.isSilent && !isReaction && !IS_TAURI) {
       // Only play sound if web notifications are disabled
       playNotifySoundDebounced(String(message.id) || chat.id);
     }
@@ -484,7 +498,7 @@ export async function notifyAboutMessage({
     // Play sound when notification is displayed
     notification.onshow = () => {
       // TODO Update when reaction badges are implemented
-      if (isReaction || message.isSilent || IS_ELECTRON) return;
+      if (isReaction || message.isSilent || IS_TAURI) return;
       playNotifySoundDebounced(String(message.id) || chat.id);
     };
   }

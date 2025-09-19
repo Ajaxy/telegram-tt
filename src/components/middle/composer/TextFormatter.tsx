@@ -8,6 +8,7 @@ import type { IAnchorPosition } from '../../../types';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
+import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { ensureProtocol } from '../../../util/browser/url';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
@@ -488,6 +489,7 @@ const TextFormatter: FC<OwnProps> = ({
               value={linkUrl}
               placeholder={lang('FormattingEnterUrl')}
               autoComplete="off"
+              spellCheck={IS_TAURI ? false : undefined}
               inputMode="url"
               dir="auto"
               onChange={handleLinkUrlChange}

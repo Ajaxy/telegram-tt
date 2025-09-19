@@ -7,7 +7,8 @@ import {
   ANIMATION_WAVE_MIN_INTERVAL,
   DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE,
 } from '../../../config';
-import { IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/browser/windowEnvironment';
+import { IS_TAURI } from '../../../util/browser/globalEnvironment';
+import { IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
 import { getAllNotificationsCount } from '../../../util/folderManager';
 import generateUniqueId from '../../../util/generateUniqueId';
@@ -754,15 +755,6 @@ addActionHandler('checkAppVersion', (global): ActionReturnType => {
     });
 });
 
-addActionHandler('setIsElectronUpdateAvailable', (global, action, payload): ActionReturnType => {
-  global = getGlobal();
-  global = {
-    ...global,
-    isElectronUpdateAvailable: Boolean(payload.isAvailable),
-  };
-  setGlobal(global);
-});
-
 addActionHandler('afterHangUp', (global): ActionReturnType => {
   if (!selectTabState(global, getCurrentTabId()).multitabNextAction) return;
   reestablishMasterToSelf();
@@ -811,7 +803,8 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     return;
   }
 
-  if (global.initialUnreadNotifications && Math.round(Date.now() / 1000) % 2 === 0) {
+  // Show blinking title in browser tab
+  if (!IS_TAURI && global.initialUnreadNotifications && Math.round(Date.now() / 1000) % 2 === 0) {
     const notificationCount = getAllNotificationsCount();
 
     const newUnread = notificationCount - global.initialUnreadNotifications;
@@ -843,7 +836,7 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     }
   }
 
-  setPageTitleInstant(IS_ELECTRON ? '' : `${prefix}${PAGE_TITLE}`);
+  setPageTitleInstant(`${prefix}${PAGE_TITLE}`);
 });
 
 addActionHandler('closeInviteViaLinkModal', (global, actions, payload): ActionReturnType => {

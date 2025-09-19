@@ -1118,7 +1118,6 @@
 "AttachStory" = "Story";
 "AttachInvoice" = "Invoice: {description}";
 "AttachLocation" = "Location";
-"AttachLiveLocation" = "Live Location";
 "AttachGiveaway" = "Giveaway";
 "AttachGiveawayResults" = "Giveaway Results";
 "AttachTodo" = "Checklist";
@@ -2199,6 +2198,7 @@
 "ToDoListErrorChooseTasks" = "Please enter at least one task.";
 "GiftInfoCollectibleBy" = "Collectible #{number} by **{owner}**";
 "PremiumPreviewTodo" = "Checklists";
+"NativeDownloadFailed" = "Failed to save file to the Downloads folder";
 "DescriptionAboutTon" = "Offer TON to submit post suggestions to channels on Telegram.";
 "ButtonTopUpViaFragment" = "Top Up Via Fragment";
 "TonModalHint" = "You can top up your TON using Fragment.";

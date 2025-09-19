@@ -1,10 +1,10 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import type { ElementRef, FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import {
   memo, useEffect, useRef,
 } from '../../lib/teact/teact';
 
+import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import buildClassName from '../../util/buildClassName';
 
 import useFlag from '../../hooks/useFlag';
@@ -186,6 +186,7 @@ const SearchInput: FC<OwnProps> = ({
         value={value}
         disabled={disabled}
         autoComplete={autoComplete}
+        spellCheck={IS_TAURI ? false : undefined}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}

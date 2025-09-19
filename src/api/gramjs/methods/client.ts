@@ -67,7 +67,7 @@ const ABORT_CONTROLLERS = new Map<string, AbortController>();
 let client: TelegramClient;
 let currentUserId: string | undefined;
 
-export async function init(initialArgs: ApiInitialArgs) {
+export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoidFunction) {
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.log('>>> START INIT API');
@@ -132,7 +132,7 @@ export async function init(initialArgs: ApiInitialArgs) {
         webAuthTokenFailed: onWebAuthTokenFailed,
         mockScenario,
         accountIds,
-      });
+      }, onConnected);
     } catch (err: any) {
       // eslint-disable-next-line no-console
       console.error(err);

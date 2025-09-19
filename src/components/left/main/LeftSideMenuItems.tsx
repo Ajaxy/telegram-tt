@@ -26,7 +26,7 @@ import { selectTabState, selectTheme, selectUser } from '../../../global/selecto
 import { selectPremiumLimit } from '../../../global/selectors/limits';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import { IS_MULTIACCOUNT_SUPPORTED } from '../../../util/browser/globalEnvironment';
-import { IS_ELECTRON } from '../../../util/browser/windowEnvironment';
+import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { getPromptInstall } from '../../../util/installPrompt';
 import { switchPermanentWebVersion } from '../../../util/permanentWebVersion';
 
@@ -86,7 +86,7 @@ const LeftSideMenuItems = ({
   const animationLevelValue = animationLevel !== ANIMATION_LEVEL_MIN
     ? (animationLevel === ANIMATION_LEVEL_MAX ? 'max' : 'mid') : 'min';
 
-  const withOtherVersions = !IS_ELECTRON && (window.location.hostname === PRODUCTION_HOSTNAME || IS_TEST);
+  const withOtherVersions = !IS_TAURI && (window.location.hostname === PRODUCTION_HOSTNAME || IS_TEST);
 
   const archivedUnreadChatsCount = useFolderManagerForUnreadCounters()[ARCHIVED_FOLDER_ID]?.chatsCount || 0;
 
@@ -124,7 +124,7 @@ const LeftSideMenuItems = ({
   });
 
   const handleChangelogClick = useLastCallback(() => {
-    window.open(BETA_CHANGELOG_URL, '_blank', 'noopener');
+    window.open(BETA_CHANGELOG_URL, '_blank', 'noopener,noreferrer');
   });
 
   const handleSwitchToWebK = useLastCallback(() => {

@@ -100,7 +100,6 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   passcode: {},
   twoFaSettings: {},
   isAppUpdateAvailable: false,
-  isElectronUpdateAvailable: false,
   shouldShowContextMenuHint: true,
   appConfig: DEFAULT_APP_CONFIG,
 

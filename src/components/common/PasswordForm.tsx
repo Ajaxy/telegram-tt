@@ -7,6 +7,7 @@ import {
 
 import { MIN_PASSWORD_LENGTH } from '../../config';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
+import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
@@ -138,6 +139,7 @@ const PasswordForm: FC<OwnProps> = ({
           id="sign-in-password"
           value={password || ''}
           autoComplete={shouldDisablePasswordManager ? 'one-time-code' : 'current-password'}
+          spellCheck={IS_TAURI ? false : undefined}
           onChange={onPasswordChange}
           maxLength={256}
           dir="auto"

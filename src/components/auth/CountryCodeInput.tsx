@@ -8,6 +8,7 @@ import { withGlobal } from '../../global';
 import type { ApiCountryCode } from '../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
+import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import { IS_EMOJI_SUPPORTED } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { isoToEmoji } from '../../util/emoji/emoji';
@@ -118,6 +119,7 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
           id={id}
           value={inputValue}
           autoComplete="off"
+          spellCheck={IS_TAURI ? false : undefined}
           onClick={handleTrigger}
           onFocus={handleTrigger}
           onInput={handleCodeInput}

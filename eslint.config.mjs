@@ -39,7 +39,6 @@ export default tseslint.config(
     'src/lib/fastBlur.js',
     'src/types/language.d.ts',
     'dist/',
-    'dist-electron/',
     'public/',
     'deploy/update_version.js',
   ]),

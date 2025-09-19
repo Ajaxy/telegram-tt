@@ -63,8 +63,8 @@
     color: #fff;
   }
 
-  :global(body.is-electron) .root.single-column & {
-    padding-left: 5rem;
+  :global(body.is-tauri) .root.single-column & {
+    padding-left: var(--window-controls-width);
   }
 }
 

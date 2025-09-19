@@ -1,4 +1,5 @@
 import { IS_TEST, PRODUCTION_HOSTNAME } from '../../config';
+import { IS_TAURI } from './globalEnvironment';
 
 export function getPlatform() {
   const { userAgent, platform } = window.navigator;
@@ -36,7 +37,6 @@ export const IS_YA_BROWSER = navigator.userAgent.includes('YaBrowser');
 export const IS_FIREFOX = navigator.userAgent.toLowerCase().includes('firefox')
   || navigator.userAgent.toLowerCase().includes('iceweasel')
   || navigator.userAgent.toLowerCase().includes('icecat');
-export const IS_ELECTRON = Boolean(window.electron);
 
 export const MouseButton = {
   Main: 0,
@@ -52,7 +52,7 @@ export const IS_PWA = (
   || document.referrer.includes('android-app://')
 );
 
-export const IS_APP = IS_PWA || IS_ELECTRON;
+export const IS_APP = IS_PWA || IS_TAURI;
 
 export const IS_TOUCH_ENV = window.matchMedia('(pointer: coarse)').matches;
 export const IS_VOICE_RECORDING_SUPPORTED = Boolean(

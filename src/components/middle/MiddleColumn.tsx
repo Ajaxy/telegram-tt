@@ -55,13 +55,9 @@ import {
   selectUserFullInfo,
 } from '../../global/selectors';
 import { selectSharedSettings } from '../../global/selectors/sharedState.ts';
+import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import {
-  IS_ANDROID,
-  IS_ELECTRON,
-  IS_IOS,
-  IS_SAFARI,
-  IS_TRANSLATION_SUPPORTED,
-  MASK_IMAGE_DISABLED,
+  IS_ANDROID, IS_IOS, IS_MAC_OS, IS_SAFARI, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
 } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
@@ -449,7 +445,6 @@ function MiddleColumn({
     backgroundColor && styles.customBgColor,
     customBackground && isBackgroundBlurred && styles.blurred,
     isRightColumnShown && styles.withRightColumn,
-    IS_ELECTRON && !(renderingChatId && renderingThreadId) && styles.draggable,
   );
 
   const messagingDisabledClassName = buildClassName(
@@ -532,6 +527,7 @@ function MiddleColumn({
       <div
         className={bgClassName}
         style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
+        data-tauri-drag-region={IS_TAURI && IS_MAC_OS && !(renderingChatId && renderingThreadId) ? true : undefined}
       />
       <div id="middle-column-portals" />
       {Boolean(renderingChatId && renderingThreadId) && (

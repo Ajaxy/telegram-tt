@@ -1,4 +1,4 @@
-import { DEBUG, ELECTRON_HOST_URL, IS_PACKAGED_ELECTRON } from '../config';
+import { DEBUG } from '../config';
 import { pause } from '../util/schedulers';
 import { clearAssetCache, respondWithCache, respondWithCacheNetworkFirst } from './assetCache';
 import { respondForDownload } from './download';
@@ -47,7 +47,7 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e: FetchEvent) => {
   const { url } = e.request;
-  const scope = IS_PACKAGED_ELECTRON ? ELECTRON_HOST_URL : self.registration.scope;
+  const { scope } = self.registration;
   if (!url.startsWith(scope)) {
     return false;
   }

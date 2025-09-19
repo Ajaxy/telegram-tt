@@ -1,13 +1,13 @@
-import { IS_ELECTRON } from './browser/windowEnvironment';
+import { IS_TAURI } from './browser/globalEnvironment';
 import { debounce } from './schedulers';
 
 const UPDATE_DEBOUNCE_MS = 200;
 
 // For some reason setting `document.title` to the same value
 // causes increment of Chrome Dev Tools > Performance Monitor > DOM Nodes counter
-export function setPageTitleInstant(nextTitle: string) {
-  if (IS_ELECTRON) {
-    window.electron!.setWindowTitle(nextTitle);
+export async function setPageTitleInstant(nextTitle: string) {
+  if (IS_TAURI) {
+    await window.tauri?.setWindowTitle(nextTitle);
 
     return;
   }

@@ -27,7 +27,8 @@ import {
   selectTabState,
   selectTheme,
 } from '../../../global/selectors';
-import { IS_ANDROID, IS_ELECTRON, IS_FLUID_BACKGROUND_SUPPORTED } from '../../../util/browser/windowEnvironment';
+import { IS_TAURI } from '../../../util/browser/globalEnvironment';
+import { IS_ANDROID, IS_FLUID_BACKGROUND_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { isLocalMessageId } from '../../../util/keys/messageKey';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
@@ -199,7 +200,7 @@ const ActionMessage = ({
   } = useContextMenuHandlers(
     ref,
     (isTouchScreen && isInSelectMode) || isAccountFrozen,
-    !IS_ELECTRON,
+    !IS_TAURI,
     IS_ANDROID,
     getIsMessageListReady,
   );

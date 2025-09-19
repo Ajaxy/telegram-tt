@@ -34,12 +34,12 @@
     "plugins",
     "dev",
     "webpack.config.ts",
-    "webpack-electron.config.ts",
     "babel.config.js",
     "eslint.config.mjs",
     ".fantasticonrc.cjs",
     "playwright.config.ts",
     "jest.config.js",
-    ".github/workflows/*.js"
+    ".github/workflows/*.js",
+    "deploy/*.js"
   ]
 }

@@ -9,7 +9,7 @@
 
   height: 1rem;
 
-  :global(body.is-electron) & {
+  :global(body.is-tauri) & {
     cursor: auto;
   }
 }

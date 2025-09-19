@@ -59,17 +59,9 @@
     margin-left: auto;
   }
 
-  body.is-electron.is-macos & {
-    -webkit-app-region: drag;
-
-    .SearchInput {
-      -webkit-app-region: no-drag;
-    }
-  }
-
-  body.is-electron.is-macos #Main:not(.is-fullscreen) & {
+  body.is-tauri.is-macos #Main:not(.is-fullscreen) & {
     @media (max-width: 600px) {
-      padding-left: 5rem;
+      padding-left: var(--window-controls-width);
     }
   }
 

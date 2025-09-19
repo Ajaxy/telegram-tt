@@ -1,7 +1,6 @@
 import type { ActionReturnType } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
-import { IS_ELECTRON } from '../../../util/browser/windowEnvironment';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { createMessageHashUrl } from '../../../util/routing';
 import { addActionHandler, setGlobal } from '../../index';
@@ -93,11 +92,7 @@ addActionHandler('openChatInNewTab', (global, actions, payload): ActionReturnTyp
 
   const hashUrl = createMessageHashUrl(chatId, 'thread', threadId);
 
-  if (IS_ELECTRON) {
-    window.electron!.openNewWindow(hashUrl);
-  } else {
-    window.open(hashUrl, '_blank');
-  }
+  window.open(hashUrl, '_blank');
 });
 
 addActionHandler('openPreviousChat', (global, actions, payload): ActionReturnType => {

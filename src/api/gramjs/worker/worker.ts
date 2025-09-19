@@ -54,14 +54,15 @@ onmessage = ({ data }: OriginMessageEvent) => {
     switch (payload.type) {
       case 'initApi': {
         const { messageId, args } = payload;
-        initApi(onUpdate, args[0], args[1]);
-        if (messageId) {
-          sendToOrigin({
-            type: 'methodResponse',
-            messageId,
-            response: true,
-          });
-        }
+        initApi(onUpdate, args[0], args[1]).then(() => {
+          if (messageId) {
+            sendToOrigin({
+              type: 'methodResponse',
+              messageId,
+              response: true,
+            });
+          }
+        });
         break;
       }
       case 'callMethod': {

@@ -5,7 +5,6 @@ import {
   DATA_BROADCAST_CHANNEL_PREFIX,
   ESTABLISH_BROADCAST_CHANNEL_PREFIX,
   GLOBAL_STATE_CACHE_PREFIX,
-  MULTIACCOUNT_MAX_SLOTS,
   MULTITAB_LOCALSTORAGE_KEY_PREFIX,
   SESSION_ACCOUNT_PREFIX,
 } from '../config';
@@ -35,8 +34,11 @@ export function getAccountSlot(url: string) {
 
 export function getAccountsInfo() {
   if (!IS_MULTIACCOUNT_SUPPORTED) return {};
+  const allKeys = Object.keys(localStorage);
+  const allSlots = allKeys.filter((key) => key.startsWith(SESSION_ACCOUNT_PREFIX));
   const accountInfo: Record<number, AccountInfo> = {};
-  for (let i = 1; i <= MULTIACCOUNT_MAX_SLOTS; i++) {
+  for (const key of allSlots) {
+    const i = Number(key.slice(SESSION_ACCOUNT_PREFIX.length));
     const info = getAccountInfo(i);
     if (info) {
       accountInfo[i] = info;
@@ -95,13 +97,20 @@ export function writeSlotSession(slot: number | undefined, data: SharedSessionDa
   localStorage.setItem(`${SESSION_ACCOUNT_PREFIX}${slot || 1}`, JSON.stringify(data));
 }
 
-export function getAccountSlotUrl(slot: number, forLogin?: boolean) {
+export function getAccountSlotUrl(slot: number, forLogin?: boolean, isTest?: boolean) {
   const url = new URL(globalThis.location.href);
   if (slot !== 1) {
     url.searchParams.set(ACCOUNT_QUERY, String(slot));
   } else {
     url.searchParams.delete(ACCOUNT_QUERY);
   }
+
+  if (isTest) {
+    url.searchParams.set('test', 'true');
+  } else {
+    url.searchParams.delete('test');
+  }
+
   url.hash = forLogin ? 'login' : '';
   return url.toString();
 }

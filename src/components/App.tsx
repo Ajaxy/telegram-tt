@@ -19,6 +19,7 @@ import { getInitialLocationHash, parseInitialLocationHash } from '../util/routin
 import { checkSessionLocked, hasStoredSession } from '../util/sessions';
 import { updateSizes } from '../util/windowSize';
 
+import useTauriDrag from '../hooks/tauri/useTauriDrag';
 import useAppLayout from '../hooks/useAppLayout';
 import useFlag from '../hooks/useFlag';
 import usePreviousDeprecated from '../hooks/usePreviousDeprecated';
@@ -212,6 +213,8 @@ const App: FC<StateProps> = ({
         return <AppInactive />;
     }
   }
+
+  useTauriDrag();
 
   useLayoutEffect(() => {
     document.body.classList.add(styles.bg);

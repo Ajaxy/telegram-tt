@@ -92,7 +92,6 @@ export type GlobalState = {
   isSyncing?: boolean;
   isAppConfigLoaded?: boolean;
   isAppUpdateAvailable?: boolean;
-  isElectronUpdateAvailable?: boolean;
   isSynced?: boolean;
   isFetchingDifference?: boolean;
   leftColumnWidth?: number;

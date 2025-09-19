@@ -1,15 +1,15 @@
 import '../../global/actions/initial';
 
 import type { FC } from '../../lib/teact/teact';
-import { memo, useRef } from '../../lib/teact/teact';
+import { memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
 
-import { PLATFORM_ENV } from '../../util/browser/windowEnvironment';
+import { IS_TAURI } from '../../util/browser/globalEnvironment';
+import { IS_MAC_OS, PLATFORM_ENV } from '../../util/browser/windowEnvironment';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import useElectronDrag from '../../hooks/useElectronDrag';
 import useHistoryBack from '../../hooks/useHistoryBack';
 
 import Transition from '../ui/Transition';
@@ -45,9 +45,6 @@ const Auth: FC<StateProps> = ({
       || (isMobile && authState === 'authorizationStateWaitQrCode'),
     onBack: handleChangeAuthorizationMethod,
   });
-
-  const containerRef = useRef<HTMLDivElement>();
-  useElectronDrag(containerRef);
 
   // For animation purposes
   const renderingAuthState = useCurrentOrPrev(
@@ -90,7 +87,12 @@ const Auth: FC<StateProps> = ({
   }
 
   return (
-    <Transition activeKey={getActiveKey()} name="fade" className="Auth" ref={containerRef}>
+    <Transition
+      activeKey={getActiveKey()}
+      name="fade"
+      className="Auth"
+      data-tauri-drag-region={IS_TAURI && IS_MAC_OS ? true : undefined}
+    >
       {getScreen()}
     </Transition>
   );

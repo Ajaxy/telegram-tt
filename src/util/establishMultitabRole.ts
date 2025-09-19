@@ -1,3 +1,4 @@
+import { IS_TAURI } from './browser/globalEnvironment';
 import { createCallbackManager } from './callbacks';
 import { ESTABLISH_BROADCAST_CHANNEL_NAME } from './multiaccount';
 import { getPasscodeHash, setPasscodeHash } from './passcode';
@@ -17,6 +18,7 @@ const initialEstablishment = new Deferred();
 let masterToken: number | undefined;
 let isWaitingForMaster = false;
 let reestablishToken: number | undefined;
+let isChannelClosed = false;
 
 type EstablishMessage = {
   collectedTokens: Set<number>;
@@ -136,6 +138,7 @@ const handleMessage = ({ data }: { data: EstablishMessage }) => {
 };
 
 export function establishMultitabRole(shouldReestablishMasterToSelf?: boolean) {
+  if (isChannelClosed) return;
   channel.addEventListener('message', handleMessage);
 
   channel.postMessage({ collectedTokens });
@@ -153,13 +156,16 @@ export function establishMultitabRole(shouldReestablishMasterToSelf?: boolean) {
   }, ESTABLISH_TIMEOUT);
 
   window.addEventListener('beforeunload', signalTokenDead);
+  if (IS_TAURI) window.addEventListener('unload', signalTokenDead);
 }
 
 export function signalTokenDead() {
+  if (isChannelClosed) return;
   runCallbacksTokenDied(token);
   channel.removeEventListener('message', handleMessage);
   channel.postMessage({ tokenDied: token, currentPasscodeHash: getPasscodeHash() });
   channel.close();
+  isChannelClosed = true;
 }
 
 export function signalPasscodeHash() {

@@ -6,6 +6,7 @@ import {
 } from '../../lib/teact/teact';
 
 import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
+import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import buildClassName from '../../util/buildClassName';
 
 import useLastCallback from '../../hooks/useLastCallback';
@@ -119,6 +120,7 @@ const TextArea: FC<OwnProps> = ({
         placeholder={placeholder}
         maxLength={maxLength}
         autoComplete={autoComplete}
+        spellCheck={IS_TAURI ? false : undefined}
         inputMode={inputMode}
         disabled={disabled}
         readOnly={readOnly}

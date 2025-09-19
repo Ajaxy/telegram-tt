@@ -19,6 +19,7 @@ import { EDITABLE_INPUT_ID } from '../../../config';
 import { requestForcedReflow, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { selectCanPlayAnimatedEmojis, selectDraft, selectIsInSelectMode } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import {
   IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_TOUCH_ENV,
 } from '../../../util/browser/windowEnvironment';
@@ -581,6 +582,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
             contentEditable={isAttachmentModalInput || canSendPlainText}
             role="textbox"
             dir="auto"
+            spellCheck={IS_TAURI ? false : undefined}
             tabIndex={0}
             onClick={focusInput}
             onChange={handleChange}

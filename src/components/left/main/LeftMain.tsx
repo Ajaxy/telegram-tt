@@ -1,3 +1,4 @@
+import type { Update } from '@tauri-apps/plugin-updater';
 import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useRef, useState,
@@ -7,10 +8,12 @@ import { getActions } from '../../../global';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 import { LeftColumnContent } from '../../../types';
 
-import { PRODUCTION_URL } from '../../../config';
-import { IS_ELECTRON, IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
+import { DEBUG } from '../../../config';
+import { IS_TAURI } from '../../../util/browser/globalEnvironment';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 
+import useInterval from '../../../hooks/schedulers/useInterval';
 import useForumPanelRender from '../../../hooks/useForumPanelRender';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
@@ -35,7 +38,6 @@ type OwnProps = {
   shouldSkipTransition?: boolean;
   foldersDispatch: FolderEditDispatch;
   isAppUpdateAvailable?: boolean;
-  isElectronUpdateAvailable?: boolean;
   isForumPanelOpen?: boolean;
   isClosingSearch?: boolean;
   onSearchQuery: (query: string) => void;
@@ -46,6 +48,7 @@ type OwnProps = {
 
 const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
 const BUTTON_CLOSE_DELAY_MS = 250;
+const TAURI_CHECK_UPDATE_INTERVAL = 10 * 60 * 1000;
 
 let closeTimeout: number | undefined;
 
@@ -58,7 +61,6 @@ const LeftMain: FC<OwnProps> = ({
   shouldSkipTransition,
   foldersDispatch,
   isAppUpdateAvailable,
-  isElectronUpdateAvailable,
   isForumPanelOpen,
   onSearchQuery,
   onReset,
@@ -67,11 +69,8 @@ const LeftMain: FC<OwnProps> = ({
 }) => {
   const { closeForumPanel, openLeftColumnContent } = getActions();
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
-  const [isElectronAutoUpdateEnabled, setIsElectronAutoUpdateEnabled] = useState(false);
-
-  useEffect(() => {
-    window.electron?.getIsAutoUpdateEnabled().then(setIsElectronAutoUpdateEnabled);
-  }, []);
+  const [tauriUpdate, setTauriUpdate] = useState<Update>();
+  const [isTauriUpdateDownloading, setIsTauriUpdateDownloading] = useState(false);
 
   const {
     shouldRenderForumPanel, handleForumPanelAnimationEnd,
@@ -83,7 +82,7 @@ const LeftMain: FC<OwnProps> = ({
   const {
     shouldRender: shouldRenderUpdateButton,
     transitionClassNames: updateButtonClassNames,
-  } = useShowTransitionDeprecated(isAppUpdateAvailable || isElectronUpdateAvailable);
+  } = useShowTransitionDeprecated(isAppUpdateAvailable || Boolean(tauriUpdate));
 
   const isMouseInside = useRef(false);
 
@@ -123,11 +122,20 @@ const LeftMain: FC<OwnProps> = ({
     closeForumPanel();
   });
 
-  const handleUpdateClick = useLastCallback(() => {
-    if (IS_ELECTRON && !isElectronAutoUpdateEnabled) {
-      window.open(`${PRODUCTION_URL}/get`, '_blank', 'noopener');
-    } else if (isElectronUpdateAvailable) {
-      window.electron?.installUpdate();
+  const handleUpdateClick = useLastCallback(async () => {
+    if (tauriUpdate) {
+      try {
+        setIsTauriUpdateDownloading(true);
+        await tauriUpdate.downloadAndInstall();
+        setIsTauriUpdateDownloading(false);
+
+        await window.tauri?.relaunch();
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to download and install Tauri update', e);
+      } finally {
+        setIsTauriUpdateDownloading(false);
+      }
     } else {
       window.location.reload();
     }
@@ -158,6 +166,24 @@ const LeftMain: FC<OwnProps> = ({
       }
     };
   }, [content]);
+
+  const checkTauriUpdate = useLastCallback(() => {
+    window.tauri?.checkUpdate()
+      .then((update) => setTauriUpdate(update ?? undefined))
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.error('Tauri update check failed:', e);
+      });
+  });
+
+  useEffect(() => {
+    checkTauriUpdate();
+  }, []);
+
+  useInterval(
+    checkTauriUpdate,
+    (IS_TAURI && !DEBUG) ? TAURI_CHECK_UPDATE_INTERVAL : undefined,
+  );
 
   const lang = useOldLang();
 
@@ -220,6 +246,7 @@ const LeftMain: FC<OwnProps> = ({
           badge
           className={buildClassName('btn-update', updateButtonClassNames)}
           onClick={handleUpdateClick}
+          isLoading={isTauriUpdateDownloading}
         >
           {lang('lng_update_telegram')}
         </Button>

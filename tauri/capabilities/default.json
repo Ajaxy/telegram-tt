@@ -1,0 +1,15 @@
+{
+  "identifier": "default",
+  "webviews": ["*"],
+  "permissions": [
+    "core:event:default",
+    "core:window:allow-is-fullscreen",
+    "core:window:allow-start-dragging",
+    "process:default",
+    "updater:default",
+    "notification:allow-is-permission-granted",
+    "notification:allow-notify",
+    "notification:allow-request-permission",
+    "shell:default"
+  ]
+}

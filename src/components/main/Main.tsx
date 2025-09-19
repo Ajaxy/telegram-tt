@@ -10,7 +10,6 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiChatFolder, ApiLimitTypeWithModal, ApiUser } from '../../api/types';
 import type { TabState } from '../../global/types';
-import { ElectronEvent } from '../../types/electron';
 
 import { BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER } from '../../config';
 import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
@@ -32,7 +31,8 @@ import {
   selectUser,
 } from '../../global/selectors';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
-import { IS_ANDROID, IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../util/browser/windowEnvironment';
+import { IS_TAURI } from '../../util/browser/globalEnvironment';
+import { IS_ANDROID, IS_WAVE_TRANSFORM_SUPPORTED } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
@@ -42,6 +42,7 @@ import updateIcon from '../../util/updateIcon';
 
 import useInterval from '../../hooks/schedulers/useInterval';
 import useTimeout from '../../hooks/schedulers/useTimeout';
+import useTauriEvent from '../../hooks/tauri/useTauriEvent';
 import useAppLayout from '../../hooks/useAppLayout';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useLang from '../../hooks/useLang';
@@ -242,7 +243,6 @@ const Main = ({
     loadRecentReactions,
     loadDefaultTagReactions,
     loadFeaturedEmojiStickers,
-    setIsElectronUpdateAvailable,
     loadAuthorizations,
     loadPeerColors,
     loadSavedReactionTags,
@@ -288,26 +288,6 @@ const Main = ({
   }, [isDesktop, isLeftColumnOpen, isMiddleColumnOpen, isMobile, toggleLeftColumn]);
 
   useInterval(checkAppVersion, isMasterTab ? APP_OUTDATED_TIMEOUT_MS : undefined, true);
-
-  useEffect(() => {
-    if (!IS_ELECTRON) {
-      return undefined;
-    }
-
-    const removeUpdateAvailableListener = window.electron!.on(ElectronEvent.UPDATE_AVAILABLE, () => {
-      setIsElectronUpdateAvailable({ isAvailable: true });
-    });
-
-    const removeUpdateErrorListener = window.electron!.on(ElectronEvent.UPDATE_ERROR, () => {
-      setIsElectronUpdateAvailable({ isAvailable: false });
-      removeUpdateAvailableListener?.();
-    });
-
-    return () => {
-      removeUpdateErrorListener?.();
-      removeUpdateAvailableListener?.();
-    };
-  }, []);
 
   // Initial API calls
   useEffect(() => {
@@ -432,11 +412,18 @@ const Main = ({
     }
   }, [isSynced]);
 
-  useEffect(() => {
-    return window.electron?.on(ElectronEvent.DEEPLINK, (link: string) => {
-      processDeepLink(decodeURIComponent(link));
-    });
-  }, []);
+  useTauriEvent<string>('deeplink', (event) => {
+    try {
+      const url = event.payload || '';
+      const decodedUrl = decodeURIComponent(url);
+      processDeepLink(decodedUrl);
+    } catch (e) {
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to process deep link', e);
+      }
+    }
+  });
 
   useEffect(() => {
     const parsedLocationHash = parseLocationHash(currentUserId);
@@ -554,7 +541,7 @@ const Main = ({
   });
 
   // Online status and browser tab indicators
-  useBackgroundMode(handleBlur, handleFocus, Boolean(IS_ELECTRON));
+  useBackgroundMode(handleBlur, handleFocus, IS_TAURI);
   useBeforeUnload(handleBlur);
   usePreventPinchZoomGesture(isMediaViewerOpen || isStoryViewerOpen);
 

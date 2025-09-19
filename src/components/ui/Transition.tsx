@@ -49,6 +49,7 @@ export type TransitionProps = {
   children: React.ReactNode | ChildrenFn;
   contentSelector?: string;
   restoreHeightKey?: number;
+  'data-tauri-drag-region'?: true;
 };
 
 const FALLBACK_ANIMATION_END = 1000;
@@ -93,6 +94,7 @@ function Transition({
   children,
   contentSelector,
   restoreHeightKey,
+  'data-tauri-drag-region': dataTauriDragRegion,
 }: TransitionProps) {
   const currentKeyRef = useRef<number>();
   // No need for a container to update on change
@@ -406,6 +408,7 @@ function Transition({
       id={id}
       className={buildClassName('Transition', className)}
       teactFastList={asFastList}
+      data-tauri-drag-region={dataTauriDragRegion}
       onScroll={onScroll}
       onMouseDown={onMouseDown}
     >

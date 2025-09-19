@@ -8,8 +8,8 @@ import {
 } from '../api/types';
 
 import {
-  DEBUG, ELECTRON_HOST_URL,
-  IS_PACKAGED_ELECTRON, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME, MEDIA_CACHE_NAME_AVATARS,
+  DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME,
+  MEDIA_CACHE_NAME_AVATARS,
 } from '../config';
 import { callApi, cancelApiProgress } from '../api/gramjs';
 import {
@@ -27,7 +27,7 @@ const asCacheApiType = {
   [ApiMediaFormat.Progressive]: undefined,
 };
 
-const PROGRESSIVE_URL_PREFIX = `${IS_PACKAGED_ELECTRON ? ELECTRON_HOST_URL : '.'}/progressive/`;
+const PROGRESSIVE_URL_PREFIX = './progressive/';
 const DOWNLOAD_URL_PREFIX = './download/';
 const MAX_MEDIA_RETRIES = 5;
 

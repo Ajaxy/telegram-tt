@@ -1250,10 +1250,11 @@ class TelegramClient {
     }
   }
 
-  async start(authParams: UserAuthParams) {
+  async start(authParams: UserAuthParams, onConnected?: NoneToVoidFunction) {
     if (!this.isConnected()) {
       await this.connect();
     }
+    onConnected?.();
 
     this.loadConfig();
 

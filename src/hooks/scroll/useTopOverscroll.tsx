@@ -2,6 +2,7 @@ import type { ElementRef } from '../../lib/teact/teact';
 import { useEffect, useRef } from '../../lib/teact/teact';
 
 import { forceMutation, requestMutation } from '../../lib/fasterdom/fasterdom';
+import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import { IS_IOS, IS_SAFARI } from '../../util/browser/windowEnvironment';
 import { stopScrollInertia } from '../../util/resetScroll';
 import useDebouncedCallback from '../useDebouncedCallback';
@@ -33,7 +34,7 @@ export default function useTopOverscroll(
     overscrollTriggerRef.current.style.display = 'block';
     containerRef.current.scrollTop = TRIGGER_HEIGHT;
 
-    if (!IS_SAFARI && !noScrollInertiaStop) {
+    if (!IS_SAFARI && !noScrollInertiaStop && !IS_TAURI) {
       stopScrollInertia(containerRef.current);
     }
 

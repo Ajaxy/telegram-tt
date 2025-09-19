@@ -48,8 +48,8 @@
     opacity: 1;
   }
 
-  :global(body.is-electron.is-macos) & {
-    padding-left: 4.5rem;
+  :global(body.is-tauri.is-macos) & {
+    padding-left: var(--window-controls-width);
   }
 
   @media (max-width: 600px) {

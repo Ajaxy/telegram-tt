@@ -20,10 +20,7 @@ export const IS_MOCKED_CLIENT = process.env.APP_MOCKED_CLIENT === '1';
 export const IS_TEST = process.env.APP_ENV === 'test';
 export const IS_PERF = process.env.APP_ENV === 'perf';
 export const IS_BETA = process.env.APP_ENV === 'staging';
-export const IS_PACKAGED_ELECTRON = process.env.IS_PACKAGED_ELECTRON;
 
-export const ELECTRON_WINDOW_DRAG_EVENT_START = 'tt-electron-window-drag-start';
-export const ELECTRON_WINDOW_DRAG_EVENT_END = 'tt-electron-window-drag-end';
 export const PAID_MESSAGES_PURPOSE = 'paid_messages';
 
 export const DEBUG = process.env.APP_ENV !== 'production';
@@ -33,7 +30,6 @@ export const STRICTERDOM_ENABLED = DEBUG;
 export const BOT_VERIFICATION_PEERS_LIMIT = 20;
 
 export const BETA_CHANGELOG_URL = 'https://telegra.ph/WebA-Beta-03-20';
-export const ELECTRON_HOST_URL = process.env.ELECTRON_HOST_URL!;
 
 export const DEBUG_ALERT_MSG = 'Shoot!\nSomething went wrong, please see the error details in Dev Tools Console.';
 export const DEBUG_GRAMJS = false;

@@ -84,12 +84,8 @@
       min-width: 0;
     }
 
-    body.is-electron.is-macos & {
-      -webkit-app-region: drag;
-    }
-
-    body.is-electron.is-macos #Main:not(.is-fullscreen) & {
-      padding-left: 5rem;
+    body.is-tauri.is-macos #Main:not(.is-fullscreen) & {
+      padding-left: var(--window-controls-width);
     }
 
     @media (max-width: 600px) {

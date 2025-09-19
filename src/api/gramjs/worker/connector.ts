@@ -6,6 +6,7 @@ import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
 import type { OriginPayload, ThenArg, WorkerMessageEvent } from './types';
 
 import { DEBUG, IGNORE_UNHANDLED_ERRORS } from '../../../config';
+import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { logDebugMessage } from '../../../util/debugConsole';
 import Deferred from '../../../util/Deferred';
 import { getCurrentTabId, subscribeToMasterChange } from '../../../util/establishMultitabRole';
@@ -101,8 +102,8 @@ export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
     });
     subscribeToWorker(onUpdate);
 
-    if (initialArgs.platform === 'iOS') {
-      setupIosHealthCheck();
+    if (initialArgs.platform === 'iOS' || (initialArgs.platform === 'macOS' && IS_TAURI)) {
+      setupHealthCheck();
     }
   }
 
@@ -419,7 +420,7 @@ function makeRequest(message: OriginPayload) {
 const startedAt = Date.now();
 
 // Workaround for iOS sometimes stops interacting with worker
-function setupIosHealthCheck() {
+function setupHealthCheck() {
   window.addEventListener('focus', () => {
     void ensureWorkerPing();
     // Sometimes a single check is not enough

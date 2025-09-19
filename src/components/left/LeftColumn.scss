@@ -45,15 +45,7 @@
     }
   }
 
-  body.is-electron.is-macos & {
-    -webkit-app-region: drag;
-
-    .SearchInput {
-      -webkit-app-region: no-drag;
-    }
-  }
-
-  body.is-electron.is-macos #Main:not(.is-fullscreen) &:not(#TopicListHeader) {
+  body.is-tauri.is-macos #Main:not(.is-fullscreen) &:not(#TopicListHeader) {
     justify-content: space-between;
     padding: 0.5rem 0.5rem 0.5rem 4.5rem;
 

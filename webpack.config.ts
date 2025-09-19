@@ -23,7 +23,6 @@ const {
   HEAD,
   APP_ENV = 'production',
   APP_MOCKED_CLIENT = '',
-  IS_PACKAGED_ELECTRON,
 } = process.env;
 
 const DEFAULT_APP_TITLE = `Telegram${APP_ENV !== 'production' ? ' Beta' : ''}`;
@@ -33,18 +32,16 @@ process.env.BASE_URL = process.env.BASE_URL || PRODUCTION_URL;
 
 const {
   BASE_URL,
-  ELECTRON_HOST_URL = 'https://telegram-a-host',
   APP_TITLE = DEFAULT_APP_TITLE,
 } = process.env;
 
 const CSP = `
   default-src 'self';
-  connect-src 'self' wss://*.web.telegram.org blob: http: https: ${APP_ENV === 'development' ? 'wss:' : ''};
+  connect-src 'self' wss://*.web.telegram.org blob: http: https: ${APP_ENV === 'development' ? 'wss: ipc:' : ''};
   script-src 'self' 'wasm-unsafe-eval' https://t.me/_websync_ https://telegram.me/_websync_;
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: blob: https://ss3.4sqi.net/img/categories_v2/
-  ${IS_PACKAGED_ELECTRON ? `${BASE_URL}/` : ''};
-  media-src 'self' blob: data: ${IS_PACKAGED_ELECTRON ? [`${BASE_URL}/`, ELECTRON_HOST_URL].join(' ') : ''};
+  img-src 'self' data: blob: https://ss3.4sqi.net/img/categories_v2/;
+  media-src 'self' blob: data:;
   object-src 'none';
   frame-src http: https: mytonwallet-tc:;
   base-uri 'none';
@@ -214,8 +211,6 @@ export default function createConfig(
         TELEGRAM_API_HASH: undefined,
         // eslint-disable-next-line no-null/no-null
         TEST_SESSION: null,
-        IS_PACKAGED_ELECTRON: false,
-        ELECTRON_HOST_URL,
         BASE_URL,
       }),
       // Updates each dev re-build to provide current git branch or commit hash
@@ -260,7 +255,7 @@ export default function createConfig(
       }),
     ],
 
-    devtool: APP_ENV === 'production' && IS_PACKAGED_ELECTRON ? undefined : 'source-map',
+    devtool: 'source-map',
 
     optimization: {
       splitChunks: {
