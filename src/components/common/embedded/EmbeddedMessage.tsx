@@ -65,6 +65,7 @@ type OwnProps = {
   requestedChatTranslationLanguage?: string;
   isOpen?: boolean;
   isMediaNsfw?: boolean;
+  noCaptions?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   onClick: ((e: React.MouseEvent) => void);
@@ -90,6 +91,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   chatTranslations,
   requestedChatTranslationLanguage,
   isMediaNsfw,
+  noCaptions,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   onClick,
@@ -197,6 +199,10 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
     if (!message) {
       return customText || renderMediaContentType(containedMedia) || NBSP;
+    }
+
+    if (noCaptions) {
+      return lang('EmbeddedMessageNoCaption');
     }
 
     return (

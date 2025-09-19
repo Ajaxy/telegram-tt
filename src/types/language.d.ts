@@ -1704,6 +1704,7 @@ export interface LangPair {
   'ContextMenuHintTouch': undefined;
   'GiftValueForSaleOnFragment': undefined;
   'GiftValueForSaleOnTelegram': undefined;
+  'EmbeddedMessageNoCaption': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {

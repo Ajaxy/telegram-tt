@@ -310,6 +310,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
           sender={!noAuthors ? sender : undefined}
           composerForwardSenders={forwardSenders}
           customText={customText}
+          noCaptions={noCaptions}
           title={(editingId && !isShowingReply) ? oldLang('EditMessage')
             : noAuthors ? oldLang('HiddenSendersNameDescription') : undefined}
           onClick={handleMessageClick}

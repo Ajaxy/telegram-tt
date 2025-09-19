@@ -2280,3 +2280,4 @@
 "ContextMenuHintTouch" = "To edit or reply, close this menu. Then long tap on a message.";
 "GiftValueForSaleOnFragment" = "for sale on Fragment";
 "GiftValueForSaleOnTelegram" = "for sale on Telegram";
+"EmbeddedMessageNoCaption" = "Caption removed";
