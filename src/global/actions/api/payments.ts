@@ -1002,7 +1002,7 @@ addActionHandler('launchPrepaidStarsGiveaway', async (global, actions, payload):
   actions.openBoostStatistics({ chatId, tabId });
 });
 
-addActionHandler('upgradeGift', (global, actions, payload): ActionReturnType => {
+addActionHandler('upgradeGift', async (global, actions, payload): Promise<void> => {
   const {
     gift, shouldKeepOriginalDetails, upgradeStars, tabId = getCurrentTabId(),
   } = payload;
@@ -1023,10 +1023,15 @@ addActionHandler('upgradeGift', (global, actions, payload): ActionReturnType => 
   actions.closeGiftInfoModal({ tabId });
 
   if (!upgradeStars) {
-    callApi('upgradeStarGift', {
+    const result = await callApi('upgradeStarGift', {
       inputSavedGift: requestSavedGift,
       shouldKeepOriginalDetails: shouldKeepOriginalDetails || undefined,
     });
+
+    global = getGlobal();
+    if (result && global.currentUserId) {
+      actions.reloadPeerSavedGifts({ peerId: global.currentUserId });
+    }
 
     return;
   }

@@ -170,6 +170,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }
       }
 
+      if (inputInvoice?.type === 'stargiftUpgrade' && global.currentUserId) {
+        actions.reloadPeerSavedGifts({ peerId: global.currentUserId });
+      }
+
       break;
     }
 
