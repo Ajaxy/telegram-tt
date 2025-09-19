@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunktelegram_t=self.webpackChunktelegram_t||[]).push([[2263],{82263:(e,t,a)=>{a.r(t),a.d(t,{exit:()=>s,relaunch:()=>c});var n=a(55962);async function s(e=0){await(0,n.invoke)("plugin:process|exit",{code:e})}async function c(){await(0,n.invoke)("plugin:process|restart")}}}]);
+//# sourceMappingURL=2263.9da2e1bf5941df984bf9.js.map
