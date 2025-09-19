@@ -294,7 +294,6 @@ export interface LangPair {
   'Search': undefined;
   'Contacts': undefined;
   'Settings': undefined;
-  'MenuNightMode': undefined;
   'SettingsDisableNightTheme': undefined;
   'SettingsEnableNightTheme': undefined;
   'TelegramPremium': undefined;
@@ -1207,6 +1206,7 @@ export interface LangPair {
   'MenuArchivedChats': undefined;
   'MenuContacts': undefined;
   'MenuSettings': undefined;
+  'MenuNightMode': undefined;
   'AriaMenuEnableNightMode': undefined;
   'AriaMenuDisableNightMode': undefined;
   'MenuAnimationsSwitch': undefined;

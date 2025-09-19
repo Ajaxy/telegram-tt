@@ -336,7 +336,6 @@
 "Search" = "Search";
 "Contacts" = "Contacts";
 "Settings" = "Settings";
-"MenuNightMode" = "Night Mode";
 "SettingsDisableNightTheme" = "Disable night mode";
 "SettingsEnableNightTheme" = "Enable night mode";
 "TelegramPremium" = "Telegram Premium";
@@ -2257,7 +2256,6 @@
 "NotificationPaidExtraSearch" = "{stars} spent on extra search.";
 "PostsSearchTransaction" = "Posts Search";
 "AllStoriesCategory" = "All stories";
-"PostsSearchTransaction" = "Public Post Search";
 "TitleRating" = "Rating";
 "RatingReflectsActivity" = "This rating reflects {name}'s activity on Telegram. It is based on:";
 "RatingYourReflectsActivity" = "This rating reflects your activity on Telegram. It is based on:";
