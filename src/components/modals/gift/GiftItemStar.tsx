@@ -144,14 +144,14 @@ function GiftItemStar({
         />
       );
     }
-    if (isPremiumRequired) {
-      return <GiftRibbon color="orange" text={lang('LimitPremium')} />;
-    }
     if (isResale) {
       return <GiftRibbon color="green" text={lang('GiftRibbonResale')} />;
     }
     if (isSoldOut) {
       return <GiftRibbon color="red" text={lang('GiftSoldOut')} />;
+    }
+    if (isPremiumRequired) {
+      return <GiftRibbon color="orange" text={lang('LimitPremium')} />;
     }
     if (isLimited) {
       return <GiftRibbon color="blue" text={lang('GiftLimited')} />;
