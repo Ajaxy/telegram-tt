@@ -35,6 +35,7 @@ export const DEBUG_ALERT_MSG = 'Shoot!\nSomething went wrong, please see the err
 export const DEBUG_GRAMJS = false;
 
 export const PAGE_TITLE = process.env.APP_TITLE!;
+export const PAGE_TITLE_TAURI = 'Telegram Air';
 export const INACTIVE_MARKER = '[Inactive]';
 
 export const DEBUG_PAYMENT_SMART_GLOCAL = false;

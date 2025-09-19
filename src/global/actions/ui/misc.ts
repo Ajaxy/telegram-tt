@@ -6,6 +6,7 @@ import type { ActionReturnType, GlobalState } from '../../types';
 import {
   ANIMATION_WAVE_MIN_INTERVAL,
   DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE,
+  PAGE_TITLE_TAURI,
 } from '../../../config';
 import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/browser/windowEnvironment';
@@ -797,9 +798,11 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
   const isTestServer = global.config?.isTestServer;
   const prefix = isTestServer ? '[T] ' : '';
 
+  const defaultTitle = IS_TAURI ? PAGE_TITLE_TAURI : PAGE_TITLE;
+
   if (document.title.includes(INACTIVE_MARKER)) {
     updateIcon(false);
-    setPageTitleInstant(`${prefix}${PAGE_TITLE} ${INACTIVE_MARKER}`);
+    setPageTitleInstant(`${prefix}${defaultTitle} ${INACTIVE_MARKER}`);
     return;
   }
 
@@ -836,7 +839,7 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     }
   }
 
-  setPageTitleInstant(`${prefix}${PAGE_TITLE}`);
+  setPageTitleInstant(`${prefix}${defaultTitle}`);
 });
 
 addActionHandler('closeInviteViaLinkModal', (global, actions, payload): ActionReturnType => {

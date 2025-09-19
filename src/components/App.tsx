@@ -8,8 +8,10 @@ import type { UiLoaderPage } from './common/UiLoader';
 
 import {
   DARK_THEME_BG_COLOR, INACTIVE_MARKER, LIGHT_THEME_BG_COLOR, PAGE_TITLE,
+  PAGE_TITLE_TAURI,
 } from '../config';
 import { selectTabState, selectTheme } from '../global/selectors';
+import { IS_TAURI } from '../util/browser/globalEnvironment';
 import { IS_INSTALL_PROMPT_SUPPORTED, PLATFORM_ENV } from '../util/browser/windowEnvironment';
 import buildClassName from '../util/buildClassName';
 import { setupBeforeInstallPrompt } from '../util/installPrompt';
@@ -52,7 +54,8 @@ enum AppScreens {
 }
 
 const TRANSITION_RENDER_COUNT = Object.keys(AppScreens).length / 2;
-const INACTIVE_PAGE_TITLE = `${PAGE_TITLE} ${INACTIVE_MARKER}`;
+const ACTIVE_PAGE_TITLE = IS_TAURI ? PAGE_TITLE_TAURI : PAGE_TITLE;
+const INACTIVE_PAGE_TITLE = `${ACTIVE_PAGE_TITLE} ${INACTIVE_MARKER}`;
 
 const App: FC<StateProps> = ({
   authState,
@@ -194,7 +197,7 @@ const App: FC<StateProps> = ({
       document.title = INACTIVE_PAGE_TITLE;
       markInactive();
     } else {
-      document.title = PAGE_TITLE;
+      document.title = ACTIVE_PAGE_TITLE;
       unmarkInactive();
     }
   }, [isInactiveAuth, markInactive, unmarkInactive]);
