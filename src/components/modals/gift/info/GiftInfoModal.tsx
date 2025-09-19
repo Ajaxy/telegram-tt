@@ -1,5 +1,5 @@
-import type { FC, TeactNode } from '../../../../lib/teact/teact';
-import { memo, useMemo, useState } from '../../../../lib/teact/teact';
+import type { TeactNode } from '../../../../lib/teact/teact';
+import { memo, useMemo, useRef, useState } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
 import type {
@@ -27,6 +27,7 @@ import { formatPercent } from '../../../../util/textFormat';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
+import useContextMenuHandlers from '../../../../hooks/useContextMenuHandlers';
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
@@ -43,8 +44,8 @@ import SafeLink from '../../../common/SafeLink';
 import Button from '../../../ui/Button';
 import Checkbox from '../../../ui/Checkbox';
 import ConfirmDialog from '../../../ui/ConfirmDialog';
-import DropdownMenu from '../../../ui/DropdownMenu';
 import Link from '../../../ui/Link';
+import Menu from '../../../ui/Menu';
 import TableInfoModal, { type TableData } from '../../common/TableInfoModal';
 import UniqueGiftHeader from '../UniqueGiftHeader';
 
@@ -105,6 +106,17 @@ const GiftInfoModal = ({
   const oldLang = useOldLang();
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
   const [shouldPayInTon, setShouldPayInTon] = useState<boolean>(false);
+
+  const splitButtonRef = useRef<HTMLDivElement>();
+  const menuRef = useRef<HTMLDivElement>();
+  const uniqueGiftHeaderRef = useRef<HTMLDivElement>();
+  const {
+    isContextMenuOpen,
+    contextMenuAnchor,
+    handleContextMenu,
+    handleContextMenuClose,
+    handleContextMenuHide,
+  } = useContextMenuHandlers(splitButtonRef);
 
   const handleSymbolClick = useLastCallback(() => {
     if (!gift || !giftAttributes?.pattern) return;
@@ -303,8 +315,8 @@ const GiftInfoModal = ({
     return gift && getGiftAttributes(gift);
   }, [gift]);
 
-  const SettingsMenuButton: FC<{ onTrigger: () => void; isMenuOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger }) => (
+  const SettingsMenuButton = useMemo(() => {
+    return (
       <div
         className={buildClassName(
           styles.headerButton,
@@ -314,7 +326,8 @@ const GiftInfoModal = ({
         role="button"
         aria-haspopup="menu"
         aria-label={lang('AriaMoreButton')}
-        onClick={onTrigger}
+        onContextMenu={handleContextMenu}
+        onClick={handleContextMenu}
       >
         <Icon
           name="more"
@@ -322,7 +335,7 @@ const GiftInfoModal = ({
         />
       </div>
     );
-  }, [lang]);
+  }, [lang, handleContextMenu]);
 
   const renderFooterButton = useLastCallback(() => {
     if (canBuyGift) {
@@ -480,22 +493,6 @@ const GiftInfoModal = ({
       return canManage ? lang('GiftInfoReceived') : lang('GiftInfoTitle');
     }
 
-    const uniqueGiftContextMenu = (
-      <DropdownMenu
-        className="with-menu-transitions"
-        trigger={SettingsMenuButton}
-        positionX="right"
-      >
-        <GiftMenuItems
-          peerId={renderingModal!.peerId!}
-          gift={typeGift}
-          canManage={canManage}
-          collectibleEmojiStatuses={collectibleEmojiStatuses}
-          currentUserEmojiStatus={currentUserEmojiStatus}
-        />
-      </DropdownMenu>
-    );
-
     const uniqueGiftModalHeader = (
       <div
         className={styles.modalHeader}
@@ -513,8 +510,8 @@ const GiftInfoModal = ({
               })}
           </div>
         )}
-        <div className={styles.headerSplitButton}>
-          {isOpen && uniqueGiftContextMenu}
+        <div className={styles.headerSplitButton} ref={splitButtonRef}>
+          {SettingsMenuButton}
           <div
             className={buildClassName(
               styles.headerButton,
@@ -539,7 +536,7 @@ const GiftInfoModal = ({
     );
 
     const uniqueGiftHeader = isGiftUnique && (
-      <div className={buildClassName(styles.header, styles.uniqueGift)}>
+      <div ref={uniqueGiftHeaderRef} className={buildClassName(styles.header, styles.uniqueGift)}>
         <UniqueGiftHeader
           backdropAttribute={giftAttributes!.backdrop!}
           patternAttribute={giftAttributes!.pattern!}
@@ -875,11 +872,41 @@ const GiftInfoModal = ({
     typeGift, savedGift, renderingTargetPeer, giftSticker, lang,
     canManage, hasConvertOption, isSender, oldLang, tonExplorerUrl,
     gift, giftAttributes, renderFooterButton, isTargetChat,
-    SettingsMenuButton, isGiftUnique, renderingModal,
-    collectibleEmojiStatuses, currentUserEmojiStatus, saleDateInfo,
-    canBuyGift, giftOwnerTitle, isOpen, resellPrice, giftSubtitle,
+    SettingsMenuButton, isGiftUnique, saleDateInfo,
+    canBuyGift, giftOwnerTitle, resellPrice, giftSubtitle,
     releasedByPeer, handleSymbolClick, handleBackdropClick, handleModelClick,
   ]);
+
+  const getRootElement = useLastCallback(() => uniqueGiftHeaderRef.current);
+  const getTriggerElement = useLastCallback(() => splitButtonRef.current);
+  const getMenuElement = useLastCallback(() => menuRef.current);
+  const getLayout = useLastCallback(() => ({ withPortal: true }));
+
+  const uniqueGiftContextMenu = contextMenuAnchor && typeGift && (
+    <Menu
+      ref={menuRef}
+      isOpen={isContextMenuOpen}
+      anchor={contextMenuAnchor}
+      className="gift-context-menu with-menu-transitions"
+      autoClose
+      withPortal
+      onClose={handleContextMenuClose}
+      onCloseAnimationEnd={handleContextMenuHide}
+      positionX="right"
+      getTriggerElement={getTriggerElement}
+      getRootElement={getRootElement}
+      getMenuElement={getMenuElement}
+      getLayout={getLayout}
+    >
+      <GiftMenuItems
+        peerId={renderingModal!.peerId!}
+        gift={typeGift}
+        canManage={canManage}
+        collectibleEmojiStatuses={collectibleEmojiStatuses}
+        currentUserEmojiStatus={currentUserEmojiStatus}
+      />
+    </Menu>
+  );
 
   return (
     <>
@@ -897,6 +924,7 @@ const GiftInfoModal = ({
         currencyInBalanceBar={confirmPrice?.currency}
         isLowStackPriority
       />
+      {uniqueGiftContextMenu}
       {uniqueGift && currentUser && Boolean(confirmPrice) && (
         <ConfirmDialog
           isOpen={isConfirmModalOpen}
