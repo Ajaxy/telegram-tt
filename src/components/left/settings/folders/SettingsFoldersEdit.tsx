@@ -11,7 +11,7 @@ import type {
   FoldersState,
 } from '../../../../hooks/reducers/useFoldersReducer';
 
-import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
+import { FOLDER_TITLE_MAX_LENGTH, STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { selectCanShareFolder, selectIsCurrentUserPremium } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import buildClassName from '../../../../util/buildClassName';
@@ -309,6 +309,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
             className="mb-0"
             label={lang('FilterNameHint')}
             value={state.folder.title.text}
+            maxLength={FOLDER_TITLE_MAX_LENGTH}
             onChange={handleChange}
             error={state.error && state.error === ERROR_NO_TITLE ? ERROR_NO_TITLE : undefined}
           />

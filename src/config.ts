@@ -339,6 +339,7 @@ export const DEFAULT_GIF_SEARCH_BOT_USERNAME = 'gif';
 export const ALL_FOLDER_ID = 0;
 export const ARCHIVED_FOLDER_ID = 1;
 export const SAVED_FOLDER_ID = -1;
+export const FOLDER_TITLE_MAX_LENGTH = 12;
 export const DELETED_COMMENTS_CHANNEL_ID = '-1000000000777';
 export const MAX_MEDIA_FILES_FOR_ALBUM = 10;
 export const MAX_ACTIVE_PINNED_CHATS = 5;

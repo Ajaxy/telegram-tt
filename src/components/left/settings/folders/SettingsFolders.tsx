@@ -71,7 +71,7 @@ const SettingsFolders: FC<OwnProps> = ({
   const isCreating = state.mode === 'create';
 
   const saveState = useCallback((newState: FoldersState) => {
-    const { title } = newState.folder;
+    const { title: { text: title } } = newState.folder;
 
     if (!title) {
       dispatch({ type: 'setError', payload: ERROR_NO_TITLE });
@@ -108,10 +108,9 @@ const SettingsFolders: FC<OwnProps> = ({
   }, [saveState, state]);
 
   const handleSaveFilter = useCallback(() => {
-    const newState = dispatch({ type: 'saveFilters' });
+    dispatch({ type: 'saveFilters' });
     handleReset();
-    saveState(newState);
-  }, [dispatch, handleReset, saveState]);
+  }, [dispatch, handleReset]);
 
   const handleCreateFolder = useCallback(() => {
     dispatch({ type: 'reset' });
