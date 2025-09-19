@@ -339,10 +339,15 @@ export async function downloadMedia(
   onProgress?: ApiOnProgress,
 ) {
   try {
-    return (await downloadMediaWithClient(args, client, onProgress));
+    const result = await downloadMediaWithClient(args, client, onProgress);
+    return result;
   } catch (err: unknown) {
     if (err instanceof RPCError) {
       if (err.errorMessage.startsWith('FILE_REFERENCE')) {
+        if (DEBUG) {
+          // eslint-disable-next-line no-console
+          console.warn('Trying to repair file reference', args.url);
+        }
         const isFileReferenceRepaired = await repairFileReference({ url: args.url });
         if (isFileReferenceRepaired) {
           return downloadMediaWithClient(args, client, onProgress);
@@ -525,20 +530,25 @@ export async function repairFileReference({
 async function repairMessageMedia(peerId: string, messageId: number) {
   const type = getEntityTypeById(peerId);
   const inputChannel = buildInputChannelFromLocalDb(peerId);
-  if (!inputChannel) return false;
-  const result = await invokeRequest(
-    type === 'channel'
-      ? new GramJs.channels.GetMessages({
-        channel: inputChannel,
-        id: [new GramJs.InputMessageID({ id: messageId })],
-      })
-      : new GramJs.messages.GetMessages({
+  let result;
+
+  if (type === 'channel' && inputChannel) {
+    result = await invokeRequest(new GramJs.channels.GetMessages({
+      channel: inputChannel,
+      id: [new GramJs.InputMessageID({ id: messageId })],
+    }), {
+      shouldIgnoreErrors: true,
+    });
+  } else {
+    result = await invokeRequest(
+      new GramJs.messages.GetMessages({
         id: [new GramJs.InputMessageID({ id: messageId })],
       }),
-    {
-      shouldIgnoreErrors: true,
-    },
-  );
+      {
+        shouldIgnoreErrors: true,
+      },
+    );
+  }
 
   if (!result || result instanceof GramJs.messages.MessagesNotModified) return false;
 
