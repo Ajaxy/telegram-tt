@@ -67,7 +67,7 @@ const LeftMain: FC<OwnProps> = ({
   onTopicSearch,
   isAccountFrozen,
 }) => {
-  const { closeForumPanel, openLeftColumnContent } = getActions();
+  const { openLeftColumnContent } = getActions();
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
   const [tauriUpdate, setTauriUpdate] = useState<Update>();
   const [isTauriUpdateDownloading, setIsTauriUpdateDownloading] = useState(false);
@@ -109,19 +109,6 @@ const LeftMain: FC<OwnProps> = ({
     }, BUTTON_CLOSE_DELAY_MS);
   });
 
-  const handleSelectSettings = useLastCallback(() => {
-    openLeftColumnContent({ contentKey: LeftColumnContent.Settings });
-  });
-
-  const handleSelectContacts = useLastCallback(() => {
-    openLeftColumnContent({ contentKey: LeftColumnContent.Contacts });
-  });
-
-  const handleSelectArchived = useLastCallback(() => {
-    openLeftColumnContent({ contentKey: LeftColumnContent.Archived });
-    closeForumPanel();
-  });
-
   const handleUpdateClick = useLastCallback(async () => {
     if (tauriUpdate) {
       try {
@@ -147,6 +134,10 @@ const LeftMain: FC<OwnProps> = ({
 
   const handleSelectNewGroup = useLastCallback(() => {
     openLeftColumnContent({ contentKey: LeftColumnContent.NewGroupStep1 });
+  });
+
+  const handleSelectContacts = useLastCallback(() => {
+    openLeftColumnContent({ contentKey: LeftColumnContent.Contacts });
   });
 
   useEffect(() => {
@@ -198,9 +189,6 @@ const LeftMain: FC<OwnProps> = ({
         content={content}
         contactsFilter={contactsFilter}
         onSearchQuery={onSearchQuery}
-        onSelectSettings={handleSelectSettings}
-        onSelectContacts={handleSelectContacts}
-        onSelectArchived={handleSelectArchived}
         onReset={onReset}
         shouldSkipTransition={shouldSkipTransition}
         isClosingSearch={isClosingSearch}

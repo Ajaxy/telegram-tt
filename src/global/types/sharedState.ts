@@ -1,5 +1,8 @@
 import type { ApiLanguage } from '../../api/types';
-import type { AnimationLevel, PerformanceType, Point, Size, ThemeKey, TimeFormat } from '../../types';
+import type { AnimationLevel,
+  FolderTabsPlacement,
+  PerformanceType,
+  Point, Size, ThemeKey, TimeFormat } from '../../types';
 
 export interface SharedState {
   settings: SharedSettings;
@@ -29,4 +32,5 @@ export interface SharedSettings {
   shouldDebugExportedSenders?: boolean;
   shouldWarnAboutFiles?: boolean;
   shouldSkipWebAppCloseConfirmation: boolean;
+  folderTabsPlacement: FolderTabsPlacement;
 }

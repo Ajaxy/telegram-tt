@@ -1,0 +1,77 @@
+.left-folder-tabs {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  width: 80px;
+  min-width: 80px;
+
+  background-color: #212121;
+
+  :global(.TabList) {
+    flex-direction: column;
+    background-color: #212121;
+  }
+}
+
+.menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 3.5rem;
+  padding: 0.75rem;
+
+  font-size: 1.5rem;
+}
+
+.vertical-tabs {
+  overflow: scroll;
+  flex-grow: 1;
+}
+
+.vertical-tabs :global(.TabList) {
+  padding: 0;
+  box-shadow: none;
+  :global(.Tab) {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    padding: 14px 10px 10px;
+    border-radius: 0;
+
+    font-size: 0.625rem;
+    :global(.Tab_inner) {
+      height: 1.1875rem;
+      :global(.platform) {
+        display: none;
+      }
+      :global(.badge) {
+        position: absolute;
+        top: -38px;
+        left: 4px;
+
+        width: 22px;
+        height: 22px;
+        border: 2px solid #212121;
+        border-radius: 50%;
+
+        font-size: 12px;
+        line-height: 19px;
+      }
+    }
+  }
+  :global(.tab-icon) {
+    width: 1.875rem;
+    height: 1.875rem;
+    font-size: 1.875rem;
+  }
+}

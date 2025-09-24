@@ -2281,3 +2281,6 @@
 "GiftValueForSaleOnFragment" = "for sale on Fragment";
 "GiftValueForSaleOnTelegram" = "for sale on Telegram";
 "EmbeddedMessageNoCaption" = "Caption removed";
+"FolderTabsPosition" = "Folder tabs position";
+"FolderTabsPositionTop" = "Top";
+"FolderTabsPositionLeft" = "Left";

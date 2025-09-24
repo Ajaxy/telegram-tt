@@ -5,13 +5,12 @@ import {
 import { getActions, withGlobal } from '../../../global';
 
 import type { GlobalState } from '../../../global/types';
-import type { ThemeKey } from '../../../types';
+import type { FolderTabsPlacement, ThemeKey } from '../../../types';
 import { LeftColumnContent, SettingsScreens } from '../../../types';
 
 import {
-  APP_NAME,
-  DEBUG,
-  IS_BETA,
+  FOLDER_TABS_PLACEMENT_LEFT,
+  FOLDER_TABS_PLACEMENT_TOP,
 } from '../../../config';
 import {
   selectCanSetPasscode,
@@ -29,23 +28,19 @@ import { formatDateToString } from '../../../util/dates/dateFormat';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
-import useFlag from '../../../hooks/useFlag';
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import { useFullscreenStatus } from '../../../hooks/window/useFullscreen';
-import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
 
 import Icon from '../../common/icons/Icon';
 import PeerChip from '../../common/PeerChip';
 import StoryToggler from '../../story/StoryToggler';
 import Button from '../../ui/Button';
-import DropdownMenu from '../../ui/DropdownMenu';
 import SearchInput from '../../ui/SearchInput';
 import ShowTransition from '../../ui/ShowTransition';
 import ConnectionStatusOverlay from '../ConnectionStatusOverlay';
-import LeftSideMenuItems from './LeftSideMenuItems';
+import LeftSideMenuDropdown from './LeftSideMenuDropdown';
 import StatusButton from './StatusButton';
 
 import './LeftMainHeader.scss';
@@ -57,9 +52,6 @@ type OwnProps = {
   isClosingSearch?: boolean;
   shouldSkipTransition?: boolean;
   onSearchQuery: (query: string) => void;
-  onSelectSettings: NoneToVoidFunction;
-  onSelectContacts: NoneToVoidFunction;
-  onSelectArchived: NoneToVoidFunction;
   onReset: NoneToVoidFunction;
 };
 
@@ -76,6 +68,7 @@ type StateProps =
     areChatsLoaded?: boolean;
     hasPasscode?: boolean;
     canSetPasscode?: boolean;
+    folderTabsPlacement: FolderTabsPlacement;
   }
   & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'isFetchingDifference'>;
 
@@ -103,10 +96,8 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   hasPasscode,
   canSetPasscode,
   onSearchQuery,
-  onSelectSettings,
-  onSelectContacts,
-  onSelectArchived,
   onReset,
+  folderTabsPlacement,
 }) => {
   const {
     setGlobalSearchDate,
@@ -121,10 +112,10 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const { isMobile } = useAppLayout();
 
-  const [isBotMenuOpen, markBotMenuOpen, unmarkBotMenuOpen] = useFlag();
-
   const areContactsVisible = content === LeftColumnContent.Contacts;
   const hasMenu = content === LeftColumnContent.ChatList;
+
+  const shouldHideMenuButton = folderTabsPlacement === FOLDER_TABS_PLACEMENT_LEFT && !isMobile && hasMenu;
 
   const selectedSearchDate = useMemo(() => {
     return searchDate
@@ -215,16 +206,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     ? lang('SearchFriends')
     : lang('Search');
 
-  const versionString = IS_BETA ? `${APP_VERSION} Beta (${APP_REVISION})` : (DEBUG ? APP_REVISION : APP_VERSION);
-
-  const isFullscreen = useFullscreenStatus();
-
-  // Disable dropdown menu RTL animation for resize
-  const {
-    shouldDisableDropdownMenuTransitionRef,
-    handleDropdownMenuTransitionEnd,
-  } = useLeftHeaderButtonRtlForumTransition(shouldHideSearch);
-
   const withStoryToggler = !isSearchFocused && !selectedSearchDate && !globalSearchChatId && !areContactsVisible;
 
   const searchContent = useMemo(() => {
@@ -256,17 +237,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     );
   }, [globalSearchChatId, selectedSearchDate]);
 
-  const version = useMemo(() => {
-    let fullVersion = '';
-    if (IS_TAURI && window.tauri.version) {
-      fullVersion = `Tauri ${window.tauri.version} | `;
-    }
-
-    fullVersion += `${APP_NAME} ${versionString}`;
-
-    return fullVersion;
-  }, [versionString]);
-
   return (
     <div className="LeftMainHeader">
       <div
@@ -275,34 +245,18 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         data-tauri-drag-region={IS_TAURI && IS_MAC_OS ? true : undefined}
       >
         {oldLang.isRtl && <div className="DropdownMenuFiller" />}
-        <DropdownMenu
-          trigger={MainButton}
-          footer={version}
-          className={buildClassName(
-            'main-menu',
-            oldLang.isRtl && 'rtl',
-            shouldHideSearch && oldLang.isRtl && 'right-aligned',
-            shouldDisableDropdownMenuTransitionRef.current && oldLang.isRtl && 'disable-transition',
-          )}
-          forceOpen={isBotMenuOpen}
-          positionX={shouldHideSearch && oldLang.isRtl ? 'right' : 'left'}
-          transformOriginX={IS_TAURI && IS_MAC_OS && !isFullscreen ? 90 : undefined}
-          onTransitionEnd={oldLang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
-        >
-          <LeftSideMenuItems
-            onSelectArchived={onSelectArchived}
-            onSelectContacts={onSelectContacts}
-            onSelectSettings={onSelectSettings}
-            onBotMenuOpened={markBotMenuOpen}
-            onBotMenuClosed={unmarkBotMenuOpen}
+        {!shouldHideMenuButton && (
+          <LeftSideMenuDropdown
+            trigger={MainButton}
           />
-        </DropdownMenu>
+        )}
         <SearchInput
           inputId="telegram-search-input"
           resultsItemSelector=".LeftSearch .ListItem-button"
           className={buildClassName(
             (globalSearchChatId || searchDate) ? 'with-picker-item' : undefined,
             shouldHideSearch && 'SearchInput--hidden',
+            shouldHideMenuButton && 'full-width',
           )}
           value={isClosingSearch ? undefined : (contactsFilter || searchQuery)}
           focused={isSearchFocused}
@@ -362,7 +316,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       connectionState, isSyncing, isFetchingDifference,
     } = global;
-    const { isConnectionStatusMinimized } = selectSharedSettings(global);
+    const { isConnectionStatusMinimized, folderTabsPlacement } = selectSharedSettings(global);
 
     return {
       searchQuery,
@@ -380,6 +334,8 @@ export default memo(withGlobal<OwnProps>(
       areChatsLoaded: Boolean(global.chats.listIds.active),
       hasPasscode: Boolean(global.passcode.hasPasscode),
       canSetPasscode: selectCanSetPasscode(global),
+      folderTabsPlacement:
+        folderTabsPlacement === FOLDER_TABS_PLACEMENT_LEFT ? FOLDER_TABS_PLACEMENT_LEFT : FOLDER_TABS_PLACEMENT_TOP,
     };
   },
 )(LeftMainHeader));

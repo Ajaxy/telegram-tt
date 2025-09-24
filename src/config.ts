@@ -452,3 +452,6 @@ export const DEFAULT_RESALE_GIFTS_FILTER_OPTIONS: ResaleGiftsFilterOptions = {
 };
 
 export const ACCOUNT_TTL_OPTIONS = [1, 3, 6, 12, 18, 24];
+
+export const FOLDER_TABS_PLACEMENT_TOP = 'top';
+export const FOLDER_TABS_PLACEMENT_LEFT = 'left';

@@ -41,6 +41,7 @@ type OwnProps = {
   foldersDispatch: FolderEditDispatch;
   shouldHideFolderTabs?: boolean;
   isForumPanelOpen?: boolean;
+  isSidebar?: boolean;
 };
 
 type StateProps = {
@@ -85,6 +86,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   isStoryRibbonShown,
   sessions,
   isAccountFrozen,
+  isSidebar,
 }) => {
   const {
     loadChatFolders,
@@ -250,6 +252,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
           entities: title.entities,
           noCustomEmojiPlayback: folder.noTitleAnimations,
         }),
+        ...(isSidebar ? { icon: id === 0 ? 'chats-badge' : 'folder-badge' } : {}),
         badgeCount: folderCountersById[id]?.chatsCount,
         isBadgeActive: Boolean(folderCountersById[id]?.notificationsCount),
         isBlocked,
@@ -258,7 +261,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     });
   }, [
     displayedFolders, maxFolders, folderCountersById, lang, chatFoldersById, maxChatLists, folderInvitesById,
-    maxFolderInvites, folderUnreadChatsCountersById, openSettingsScreen,
+    maxFolderInvites, folderUnreadChatsCountersById, openSettingsScreen, isSidebar,
   ]);
 
   const handleSwitchTab = useLastCallback((index: number) => {
@@ -395,20 +398,22 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       ) : shouldRenderPlaceholder ? (
         <div ref={placeholderRef} className="tabs-placeholder" />
       ) : undefined}
-      <Transition
-        ref={transitionRef}
-        name={resolveTransitionName('slideOptimized', animationLevel, shouldSkipHistoryAnimations, lang.isRtl)}
-        activeKey={activeChatFolder}
-        renderCount={shouldRenderFolders ? folderTabs.length : undefined}
-      >
-        {renderCurrentTab}
-      </Transition>
+      {!isSidebar && (
+        <Transition
+          ref={transitionRef}
+          name={resolveTransitionName('slideOptimized', animationLevel, shouldSkipHistoryAnimations, lang.isRtl)}
+          activeKey={activeChatFolder}
+          renderCount={shouldRenderFolders ? folderTabs.length : undefined}
+        >
+          {renderCurrentTab}
+        </Transition>
+      )}
     </div>
   );
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): Complete<StateProps> => {
+  (global): StateProps => {
     const {
       chatFolders: {
         byId: chatFoldersById,

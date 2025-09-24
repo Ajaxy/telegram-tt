@@ -10,8 +10,14 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiChatFolder, ApiLimitTypeWithModal, ApiUser } from '../../api/types';
 import type { TabState } from '../../global/types';
+import type { FolderTabsPlacement } from '../../types';
 
-import { BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER } from '../../config';
+import {
+  BASE_EMOJI_KEYWORD_LANG,
+  DEBUG, FOLDER_TABS_PLACEMENT_LEFT,
+  FOLDER_TABS_PLACEMENT_TOP,
+  INACTIVE_MARKER,
+} from '../../config';
 import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
   selectCanAnimateInterface,
@@ -62,6 +68,7 @@ import CustomEmojiSetsModal from '../common/CustomEmojiSetsModal.async';
 import DeleteMessageModal from '../common/DeleteMessageModal.async';
 import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
+import FoldersSidebar from '../left/FoldersSidebar';
 import LeftColumn from '../left/LeftColumn';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
 import ReactionPicker from '../middle/message/reactions/ReactionPicker.async';
@@ -145,6 +152,7 @@ type StateProps = {
   isSynced?: boolean;
   isAccountFrozen?: boolean;
   isAppConfigLoaded?: boolean;
+  folderTabsPlacement: FolderTabsPlacement;
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -199,6 +207,7 @@ const Main = ({
   currentUserId,
   isAccountFrozen,
   isAppConfigLoaded,
+  folderTabsPlacement,
 }: OwnProps & StateProps) => {
   const {
     initMain,
@@ -267,6 +276,8 @@ const Main = ({
   }
 
   const lang = useLang();
+
+  const shouldDisplayLeftFolderTabs = folderTabsPlacement === FOLDER_TABS_PLACEMENT_LEFT && !isMobile;
 
   // Preload Calls bundle to initialize sounds for iOS
   useTimeout(() => {
@@ -516,6 +527,7 @@ const Main = ({
     isNarrowMessageList && 'narrow-message-list',
     shouldSkipHistoryAnimations && 'history-animation-disabled',
     isFullscreen && 'is-fullscreen',
+    shouldDisplayLeftFolderTabs && 'has-left-folder-tabs',
   );
 
   const handleBlur = useLastCallback(() => {
@@ -547,6 +559,7 @@ const Main = ({
 
   return (
     <div ref={containerRef} id="Main" className={className}>
+      {shouldDisplayLeftFolderTabs && <FoldersSidebar />}
       <LeftColumn ref={leftColumnRef} />
       <MiddleColumn leftColumnRef={leftColumnRef} isMobile={isMobile} />
       <RightColumn isMobile={isMobile} />
@@ -635,7 +648,7 @@ export default memo(withGlobal<OwnProps>(
       deleteFolderDialogModal,
     } = selectTabState(global);
 
-    const { wasTimeFormatSetManually } = selectSharedSettings(global);
+    const { wasTimeFormatSetManually, folderTabsPlacement } = selectSharedSettings(global);
 
     const gameMessage = openedGame && selectChatMessage(global, openedGame.chatId, openedGame.messageId);
     const gameTitle = gameMessage?.content.game?.title;
@@ -692,6 +705,8 @@ export default memo(withGlobal<OwnProps>(
       isSynced: global.isSynced,
       isAccountFrozen,
       isAppConfigLoaded: global.isAppConfigLoaded,
+      folderTabsPlacement:
+        folderTabsPlacement === FOLDER_TABS_PLACEMENT_LEFT ? FOLDER_TABS_PLACEMENT_LEFT : FOLDER_TABS_PLACEMENT_TOP,
     };
   },
 )(Main));

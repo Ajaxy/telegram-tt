@@ -42,6 +42,13 @@
 
   background-color: var(--color-background);
 
+  .has-left-folder-tabs & {
+    --left-column-max-width: calc(33vw + 80px);
+
+    width: calc(25vw + 80px);
+    margin-left: 80px;
+  }
+
   @media (min-width: 926px) {
     --left-column-max-width: 40vw;
   }

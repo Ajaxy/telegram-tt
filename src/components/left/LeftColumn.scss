@@ -31,6 +31,9 @@
     max-width: calc(100% - 3.25rem);
     margin-left: 0.625rem;
 
+    &.full-width {
+      max-width: 100%;
+    }
     @media (max-width: 600px) {
       max-width: calc(100% - 3rem);
     }

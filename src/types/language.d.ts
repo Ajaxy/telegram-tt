@@ -1705,6 +1705,9 @@ export interface LangPair {
   'GiftValueForSaleOnFragment': undefined;
   'GiftValueForSaleOnTelegram': undefined;
   'EmbeddedMessageNoCaption': undefined;
+  'FolderTabsPosition': undefined;
+  'FolderTabsPositionTop': undefined;
+  'FolderTabsPositionLeft': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {

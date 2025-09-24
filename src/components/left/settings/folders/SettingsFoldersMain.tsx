@@ -5,11 +5,14 @@ import {
 import { getActions, withGlobal } from '../../../../global';
 
 import type { ApiChatFolder } from '../../../../api/types';
+import type { FolderTabsPlacement } from '../../../../types';
+import type { IRadioOption } from '../../../ui/RadioGroup';
 
 import { ALL_FOLDER_ID, STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { getFolderDescriptionText } from '../../../../global/helpers';
 import { selectIsCurrentUserPremium } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
+import { selectSharedSettings } from '../../../../global/selectors/sharedState';
 import buildClassName from '../../../../util/buildClassName';
 import { isBetween } from '../../../../util/math';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
@@ -30,6 +33,7 @@ import Checkbox from '../../../ui/Checkbox';
 import Draggable from '../../../ui/Draggable';
 import ListItem from '../../../ui/ListItem';
 import Loading from '../../../ui/Loading';
+import RadioGroup from '../../../ui/RadioGroup';
 
 type OwnProps = {
   isActive?: boolean;
@@ -45,6 +49,7 @@ type StateProps = {
   maxFolders: number;
   isPremium?: boolean;
   areTagsEnabled?: boolean;
+  folderTabsPlacement: FolderTabsPlacement;
 };
 
 type SortState = {
@@ -67,6 +72,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
   recommendedChatFolders,
   maxFolders,
   areTagsEnabled,
+  folderTabsPlacement,
 }) => {
   const {
     loadRecommendedChatFolders,
@@ -76,6 +82,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     sortChatFolders,
     toggleDialogFilterTags,
     openPremiumModal,
+    setSharedSettingOption,
   } = getActions();
 
   const [state, setState] = useState<SortState>({
@@ -123,6 +130,18 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     isActive,
     onBack: onReset,
   });
+
+  const folderTabsPlacementOptions: IRadioOption[] = [{
+    label: lang('FolderTabsPositionTop'),
+    value: 'top',
+  }, {
+    label: lang('FolderTabsPositionLeft'),
+    value: 'left',
+  }];
+
+  const handleFolderTabsPlacementChange = useCallback((value: string) => {
+    setSharedSettingOption({ folderTabsPlacement: value as FolderTabsPlacement });
+  }, []);
 
   const chatsCountByFolderId = useFolderManagerForChatsCount();
   const userFolders = useMemo(() => {
@@ -411,18 +430,33 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
           {!isPremium && <Icon name="lock-badge" className="settings-folders-lock-icon" />}
         </div>
       </div>
+      <div className="settings-item pt-3">
+        <div className="settings-item-relative">
+          <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('FolderTabsPosition')}
+          </h4>
+          <RadioGroup
+            name="timeformat"
+            options={folderTabsPlacementOptions}
+            selected={folderTabsPlacement}
+            onChange={handleFolderTabsPlacementChange}
+          />
+        </div>
+      </div>
     </div>
   );
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): Complete<StateProps> => {
+  (global): StateProps => {
     const {
       orderedIds: folderIds,
       byId: foldersById,
       recommended: recommendedChatFolders,
       areTagsEnabled,
     } = global.chatFolders;
+
+    const { folderTabsPlacement } = selectSharedSettings(global);
 
     return {
       folderIds,
@@ -431,6 +465,7 @@ export default memo(withGlobal<OwnProps>(
       recommendedChatFolders,
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),
       areTagsEnabled,
+      folderTabsPlacement,
     };
   },
 )(SettingsFoldersMain));
