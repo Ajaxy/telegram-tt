@@ -17,7 +17,6 @@ import styles from './FoldersSidebar.module.scss';
 
 const FoldersSidebar = () => {
   const { openSettingsScreen } = getActions();
-
   const MainButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger }) => (
       <Button
