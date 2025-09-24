@@ -18,6 +18,7 @@ import './TabList.scss';
 export type TabWithProperties = {
   id?: number;
   title: TeactNode;
+  icon?: string;
   badgeCount?: number;
   isBlocked?: boolean;
   isBadgeActive?: boolean;
@@ -82,6 +83,7 @@ const TabList: FC<OwnProps> = ({
         <Tab
           key={tab.id}
           title={tab.title}
+          icon={tab.icon}
           isActive={i === activeTab}
           isBlocked={tab.isBlocked}
           badgeCount={tab.badgeCount}

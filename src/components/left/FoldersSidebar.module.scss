@@ -18,6 +18,10 @@
     flex-direction: column;
     background-color: #212121;
   }
+
+  @media (max-width: 925px) {
+    display: none;
+  }
 }
 
 .menu-button {

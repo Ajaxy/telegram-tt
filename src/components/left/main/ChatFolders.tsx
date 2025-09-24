@@ -283,11 +283,11 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   }, [activeChatFolder, folderTabs, setActiveChatFolder]);
 
   useEffect(() => {
-    if (!IS_TOUCH_ENV || !folderTabs?.length || isForumPanelOpen) {
+    if (!IS_TOUCH_ENV || !folderTabs?.length || isForumPanelOpen || !transitionRef.current) {
       return undefined;
     }
 
-    return captureEvents(transitionRef.current!, {
+    return captureEvents(transitionRef.current, {
       selectorToPreventScroll: '.chat-list',
       onSwipe: (e, direction) => {
         if (direction === SwipeDirection.Left) {

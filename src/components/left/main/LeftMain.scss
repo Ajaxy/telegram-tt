@@ -40,6 +40,12 @@
       opacity: 1;
 
       transition: opacity var(--layer-transition);
+
+      .has-left-folder-tabs & {
+        @media (min-width: 926px) {
+          display: none;
+        }
+      }
     }
 
     &--tabs-hidden .TabList {

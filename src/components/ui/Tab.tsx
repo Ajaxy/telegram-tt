@@ -1,5 +1,4 @@
 import type { FC, TeactNode } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import { useEffect, useLayoutEffect, useRef } from '../../lib/teact/teact';
 
 import type { MenuItemContextAction } from './ListItem';
@@ -24,6 +23,7 @@ import './Tab.scss';
 type OwnProps = {
   className?: string;
   title: TeactNode;
+  icon?: string;
   isActive?: boolean;
   isBlocked?: boolean;
   badgeCount?: number;
@@ -52,6 +52,7 @@ const Tab: FC<OwnProps> = ({
   clickArg,
   contextActions,
   contextRootElementSelector,
+  icon,
 }) => {
   const tabRef = useRef<HTMLDivElement>();
 
@@ -139,6 +140,7 @@ const Tab: FC<OwnProps> = ({
       onContextMenu={handleContextMenu}
       ref={tabRef}
     >
+      {icon ? <div className={buildClassName('icon', 'tab-icon', `icon-${icon}`)}></div> : undefined}
       <span className="Tab_inner">
         {typeof title === 'string' ? renderText(title) : title}
         {Boolean(badgeCount) && (
