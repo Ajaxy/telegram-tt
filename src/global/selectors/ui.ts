@@ -190,5 +190,5 @@ export function selectSettingsScreen<T extends GlobalState>(
 export function selectPeerProfileColor<T extends GlobalState>(global: T, peer: ApiPeer | CustomPeer) {
   const key = 'isCustomPeer' in peer ? peer.peerColorId : peer.profileColor?.color;
   if (!key) return undefined;
-  return global.peerColors?.profile[key];
+  return global.peerColors?.profile?.[key];
 }
