@@ -1361,7 +1361,7 @@ addActionHandler('toggleTodoCompleted', (global, actions, payload): ActionReturn
     content: newContent,
   };
 
-  global = updateWithLocalMedia(global, chatId, message.id, messageUpdate);
+  global = updateWithLocalMedia(global, chatId, message.id, false, messageUpdate);
   setGlobal(global);
 
   callApi('toggleTodoCompleted', { chat, messageId: message.id, completedIds, incompletedIds });

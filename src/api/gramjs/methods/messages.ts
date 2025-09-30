@@ -519,10 +519,10 @@ export function sendApiMessage(
       }
 
       sendApiUpdate({
-        '@type': 'updateMessageSendFailed',
+        '@type': localMessage.isScheduled ? 'updateScheduledMessageSendFailed' : 'updateMessageSendFailed',
         chatId: chat.id,
         localId: localMessage.id,
-        error: error.message,
+        error: error.errorMessage,
       });
       clearTimeout(timeout);
     }
@@ -1915,10 +1915,10 @@ export async function forwardApiMessages(params: ForwardMessagesParams) {
   } catch (error: any) {
     Object.values(localMessages).forEach((localMessage) => {
       sendApiUpdate({
-        '@type': 'updateMessageSendFailed',
+        '@type': localMessage.isScheduled ? 'updateScheduledMessageSendFailed' : 'updateMessageSendFailed',
         chatId: toChat.id,
         localId: localMessage.id,
-        error: error.message,
+        error: error.errorMessage,
       });
     });
   }

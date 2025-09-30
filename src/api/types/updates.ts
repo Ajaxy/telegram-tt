@@ -319,6 +319,13 @@ export type ApiUpdateMessageSendFailed = {
   error: string;
 };
 
+export type ApiUpdateScheduledMessageSendFailed = {
+  '@type': 'updateScheduledMessageSendFailed';
+  chatId: string;
+  localId: number;
+  error: string;
+};
+
 export type ApiUpdateCommonBoxMessages = {
   '@type': 'updateCommonBoxMessages';
   ids: number[];
@@ -865,7 +872,7 @@ export type ApiUpdate = (
   ApiDeleteParticipantHistory | ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateServiceNotification | ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus |
   ApiUpdateUserFullInfo | ApiUpdateVideoProcessingPending | ApiUpdatePeerSettings |
-  ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage |
+  ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage | ApiUpdateScheduledMessageSendFailed |
   ApiUpdateError | ApiUpdateResetContacts | ApiUpdateStartEmojiInteraction |
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet | ApiUpdateStickerSets | ApiUpdateStickerSetsOrder |
   ApiUpdateRecentStickers | ApiUpdateSavedGifs | ApiUpdateNewScheduledMessage | ApiUpdateMoveStickerSetToTop |
