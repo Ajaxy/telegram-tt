@@ -149,10 +149,6 @@
       background: var(--color-background-compact-menu);
       backdrop-filter: blur(25px);
     }
-
-    &:not(.open) {
-      transform: scale(0.85) !important;
-    }
   }
 
   .StickerButton.custom-emoji, .sticker-set-cover {

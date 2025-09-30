@@ -36,17 +36,12 @@
   }
 
   .bubble {
+    --animation-start-scale: 0.95;
+
     transform-origin: top center !important;
-    transform: scale(0.95);
-
     overflow-y: auto;
-
     width: 100%;
     max-height: 23.5rem;
-
-    &.open {
-      transform: scaleY(1);
-    }
   }
 
   .MenuItem {

@@ -14,13 +14,13 @@
   }
 
   .bubble {
-
     --offset-y: calc(100% + 0.5rem);
     --offset-x: 0;
+    --animation-start-scale: 0.85;
 
     position: absolute;
     z-index: var(--z-menu-bubble);
-    transform: scale(0.85);
+    transform: scale(var(--animation-start-scale));
 
     overflow: hidden;
     overscroll-behavior: contain;
@@ -56,7 +56,8 @@
     }
 
     body.no-context-menu-animations & {
-      transform: none !important;
+      --animation-start-scale: 1 !important;
+
       transition: opacity 0.15s !important;
     }
 
