@@ -1245,8 +1245,8 @@
 "AtDateAgo" = "on {date}";
 "AudioPause" = "Pause audio";
 "AudioPlay" = "Play audio";
-"ToggleUserNotifications" = "Toggle user notifications";
-"ToggleChatNotifications" = "Toggle chat notifications";
+"AriaToggleUserNotifications" = "Toggle user notifications";
+"AriaToggleChatNotifications" = "Toggle chat notifications";
 "ChannelInaccessible" = "channel is inaccessible";
 "GroupInaccessible" = "group is inaccessible";
 "AriaPasswordToggle" = "Toggle password visibility";

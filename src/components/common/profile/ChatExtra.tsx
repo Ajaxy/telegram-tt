@@ -423,11 +423,11 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         </ListItem>
       )}
       {!isInSettings && (
-        <ListItem icon={isMuted ? 'unmute' : 'mute'} narrow ripple onClick={handleToggleNotifications}>
-          <span>{oldLang('Notifications')}</span>
+        <ListItem icon={isMuted ? 'mute' : 'unmute'} narrow ripple onClick={handleToggleNotifications}>
+          <span>{lang('Notifications')}</span>
           <Switcher
             id="group-notifications"
-            label={userId ? 'Toggle User Notifications' : 'Toggle Chat Notifications'}
+            label={lang(userId ? 'AriaToggleUserNotifications' : 'AriaToggleChatNotifications')}
             checked={!isMuted}
             inactive
           />

@@ -174,8 +174,8 @@ addCallback((global: GlobalState) => {
     if (IS_TAURI) {
       document.body.classList.add('is-tauri');
     }
-    if (IS_ELECTRON) { // Legacy
-      document.body.classList.add('is-electron');
+    if (IS_ELECTRON) { // Legacy, pretend to be Tauri
+      document.body.classList.add('is-tauri');
     }
   });
 

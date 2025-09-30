@@ -1051,8 +1051,8 @@ export interface LangPair {
   'JustNowAgo': undefined;
   'AudioPause': undefined;
   'AudioPlay': undefined;
-  'ToggleUserNotifications': undefined;
-  'ToggleChatNotifications': undefined;
+  'AriaToggleUserNotifications': undefined;
+  'AriaToggleChatNotifications': undefined;
   'ChannelInaccessible': undefined;
   'GroupInaccessible': undefined;
   'AriaPasswordToggle': undefined;

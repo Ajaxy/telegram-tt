@@ -47,7 +47,7 @@
 
   body.is-tauri.is-macos #Main:not(.is-fullscreen) &:not(#TopicListHeader) {
     justify-content: space-between;
-    padding: 0.5rem 0.5rem 0.5rem 4.5rem;
+    padding: 0.5rem 0.5rem 0.5rem var(--window-controls-width);
 
     .SearchInput {
       max-width: calc(100% - 2.75rem);

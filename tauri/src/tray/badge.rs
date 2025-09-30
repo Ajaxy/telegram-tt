@@ -1,8 +1,8 @@
-use image::{Rgba, RgbaImage, imageops};
-use imageproc::drawing::{draw_filled_rect_mut, draw_filled_circle_mut, draw_text_mut, text_size};
-use imageproc::rect::Rect;
-use imageproc::filter::gaussian_blur_f32;
 use ab_glyph::{FontRef, PxScale};
+use image::{Rgba, RgbaImage, imageops};
+use imageproc::drawing::{draw_filled_circle_mut, draw_filled_rect_mut, draw_text_mut, text_size};
+use imageproc::filter::gaussian_blur_f32;
+use imageproc::rect::Rect;
 use std::io::Cursor;
 use tauri::image::Image;
 
@@ -47,21 +47,25 @@ pub fn set_badge_count_icon(window: &tauri::WebviewWindow, amount: i32, is_muted
 }
 
 pub fn generate_counter_png(size: u32, count: i32, is_muted: bool) -> Vec<u8> {
-  let background_color = if is_muted { BADGE_BACKGROUND_COLOR_MUTED } else { BADGE_BACKGROUND_COLOR };
+  let background_color = if is_muted {
+    BADGE_BACKGROUND_COLOR_MUTED
+  } else {
+    BADGE_BACKGROUND_COLOR
+  };
 
   // Prepare text properties
   let (text, font, scale, text_width, text_height) = if count >= 0 {
     let text = if count < 100 {
-        count.to_string()
+      count.to_string()
     } else {
-        format!("..{:02}", count % 100)
+      format!("..{:02}", count % 100)
     };
 
     let font = FontRef::try_from_slice(FONT).expect("Invalid font");
     let scale = {
-        let base = if text.len() < 3 { 0.9 } else { 0.75 };
-        let calculated_scale = (base * size as f32).ceil();
-        PxScale::from(calculated_scale)
+      let base = if text.len() < 3 { 0.9 } else { 0.75 };
+      let calculated_scale = (base * size as f32).ceil();
+      PxScale::from(calculated_scale)
     };
 
     let (text_width, text_height) = text_size(scale, &font, &text);
@@ -102,7 +106,15 @@ pub fn generate_counter_png(size: u32, count: i32, is_muted: bool) -> Vec<u8> {
     badge_height / 2
   };
 
-  draw_rounded_rect(&mut img, edge_space, edge_space, badge_width, badge_height, corner_radius, background_color);
+  draw_rounded_rect(
+    &mut img,
+    edge_space,
+    edge_space,
+    badge_width,
+    badge_height,
+    corner_radius,
+    background_color,
+  );
 
   // Apply gaussian blur for antialiasing effect
   img = gaussian_blur_f32(&img, 0.75);
@@ -111,15 +123,25 @@ pub fn generate_counter_png(size: u32, count: i32, is_muted: bool) -> Vec<u8> {
     let x = edge_space as f32 + ((badge_width as f32 - text_width as f32) / 2.0).ceil();
 
     let baseline_offset = scale.y * 0.15;
-    let y = edge_space as f32 + ((badge_height as f32 - text_height as f32) / 2.0 - baseline_offset).ceil();
+    let y = edge_space as f32
+      + ((badge_height as f32 - text_height as f32) / 2.0 - baseline_offset).ceil();
 
-    draw_text_mut(&mut img, BADGE_TEXT_COLOR, x as i32, y as i32, scale, &font, &text);
+    draw_text_mut(
+      &mut img,
+      BADGE_TEXT_COLOR,
+      x as i32,
+      y as i32,
+      scale,
+      &font,
+      &text,
+    );
   }
 
   let mut buffer = Vec::new();
   let mut cursor = Cursor::new(&mut buffer);
-  img.write_to(&mut cursor, image::ImageFormat::Png)
-     .expect("PNG encode failed");
+  img
+    .write_to(&mut cursor, image::ImageFormat::Png)
+    .expect("PNG encode failed");
   buffer
 }
 
@@ -130,8 +152,9 @@ pub fn overlay_tray_icon(icon: &Image, counter: &Image) -> Image<'static> {
   let icon_img = image::RgbaImage::from_raw(icon.width(), icon.height(), icon_rgba.to_vec())
     .expect("Failed to create RgbaImage from icon data");
 
-  let counter_img = image::RgbaImage::from_raw(counter.width(), counter.height(), counter_rgba.to_vec())
-    .expect("Failed to create RgbaImage from counter data");
+  let counter_img =
+    image::RgbaImage::from_raw(counter.width(), counter.height(), counter_rgba.to_vec())
+      .expect("Failed to create RgbaImage from counter data");
 
   let mut result = icon_img.clone();
 
@@ -150,7 +173,8 @@ pub fn overlay_tray_icon(icon: &Image, counter: &Image) -> Image<'static> {
   // Convert back to tauri Image
   let mut buffer = Vec::new();
   let mut cursor = Cursor::new(&mut buffer);
-  result.write_to(&mut cursor, image::ImageFormat::Png)
+  result
+    .write_to(&mut cursor, image::ImageFormat::Png)
     .expect("PNG encode failed");
 
   Image::from_bytes(&buffer).expect("Failed to create Image from bytes")
@@ -163,33 +187,80 @@ fn draw_rounded_rect(
   width: u32,
   height: u32,
   radius: u32,
-  color: Rgba<u8>
+  color: Rgba<u8>,
 ) {
   let radius = radius.min(width / 2).min(height / 2);
 
   if radius == 0 {
-    draw_filled_rect_mut(img, Rect::at(x as i32, y as i32).of_size(width, height), color);
+    draw_filled_rect_mut(
+      img,
+      Rect::at(x as i32, y as i32).of_size(width, height),
+      color,
+    );
     return;
   }
 
   if width > 2 * radius && height > 2 * radius {
-    draw_filled_rect_mut(img, Rect::at((x + radius) as i32, (y + radius) as i32).of_size(width - 2 * radius, height - 2 * radius), color);
+    draw_filled_rect_mut(
+      img,
+      Rect::at((x + radius) as i32, (y + radius) as i32)
+        .of_size(width - 2 * radius, height - 2 * radius),
+      color,
+    );
   }
 
   if width > 2 * radius {
-    draw_filled_rect_mut(img, Rect::at((x + radius) as i32, y as i32).of_size(width - 2 * radius, radius), color);
-    draw_filled_rect_mut(img, Rect::at((x + radius) as i32, (y + height - radius) as i32).of_size(width - 2 * radius, radius), color);
+    draw_filled_rect_mut(
+      img,
+      Rect::at((x + radius) as i32, y as i32).of_size(width - 2 * radius, radius),
+      color,
+    );
+    draw_filled_rect_mut(
+      img,
+      Rect::at((x + radius) as i32, (y + height - radius) as i32)
+        .of_size(width - 2 * radius, radius),
+      color,
+    );
   }
 
   if height > 2 * radius {
-    draw_filled_rect_mut(img, Rect::at(x as i32, (y + radius) as i32).of_size(radius, height - 2 * radius), color);
-    draw_filled_rect_mut(img, Rect::at((x + width - radius) as i32, (y + radius) as i32).of_size(radius, height - 2 * radius), color);
+    draw_filled_rect_mut(
+      img,
+      Rect::at(x as i32, (y + radius) as i32).of_size(radius, height - 2 * radius),
+      color,
+    );
+    draw_filled_rect_mut(
+      img,
+      Rect::at((x + width - radius) as i32, (y + radius) as i32)
+        .of_size(radius, height - 2 * radius),
+      color,
+    );
   }
 
   let radius_i32 = radius as i32;
 
-  draw_filled_circle_mut(img, ((x + radius) as i32, (y + radius) as i32), radius_i32, color);
-  draw_filled_circle_mut(img, ((x + width - radius) as i32, (y + radius) as i32), radius_i32, color);
-  draw_filled_circle_mut(img, ((x + radius) as i32, (y + height - radius) as i32), radius_i32, color);
-  draw_filled_circle_mut(img, ((x + width - radius) as i32, (y + height - radius) as i32), radius_i32, color);
+  draw_filled_circle_mut(
+    img,
+    ((x + radius) as i32, (y + radius) as i32),
+    radius_i32,
+    color,
+  );
+  draw_filled_circle_mut(
+    img,
+    ((x + width - radius) as i32, (y + radius) as i32),
+    radius_i32,
+    color,
+  );
+  draw_filled_circle_mut(
+    img,
+    ((x + radius) as i32, (y + height - radius) as i32),
+    radius_i32,
+    color,
+  );
+  draw_filled_circle_mut(
+    img,
+    ((x + width - radius) as i32, (y + height - radius) as i32),
+    radius_i32,
+    color,
+  );
 }

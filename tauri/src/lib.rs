@@ -33,8 +33,18 @@ impl Default for AppStateStruct {
 
 pub type AppState = Mutex<AppStateStruct>;
 
-pub const TRAFFIC_LIGHT_POSITION_OVERLAY: LogicalPosition<f64> = LogicalPosition::new(12.0, 26.0);
+pub const TRAFFIC_LIGHT_POSITION_OVERLAY_LEGACY: LogicalPosition<f64> = LogicalPosition::new(12.0, 26.0);
+pub const TRAFFIC_LIGHT_POSITION_OVERLAY_26: LogicalPosition<f64> = LogicalPosition::new(12.0, 30.0);
 pub const TRAFFIC_LIGHT_POSITION_DEFAULT: LogicalPosition<f64> = LogicalPosition::new(12.0, 12.0);
+
+pub static TRAFFIC_LIGHT_POSITION_OVERLAY: LazyLock<LogicalPosition<f64>> = LazyLock::new(|| {
+  if let tauri_plugin_os::Version::Semantic(major, _, _) = tauri_plugin_os::version() {
+      if major >= 26 {
+          return TRAFFIC_LIGHT_POSITION_OVERLAY_26;
+      }
+  }
+  TRAFFIC_LIGHT_POSITION_OVERLAY_LEGACY
+});
 
 pub const WINDOW_WIDTH: f64 = 1088.0;
 pub const WINDOW_HEIGHT: f64 = 700.0;
@@ -90,6 +100,7 @@ pub fn run() {
         open_new_window(app.clone(), BASE_URL.to_string()).unwrap();
       }
     }))
+    .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_shell::init())
     .plugin(tauri_plugin_notification::init())
@@ -124,7 +135,7 @@ pub fn run() {
               state.title.clone()
             };
             let traffic_position = if state.is_overlay {
-              TRAFFIC_LIGHT_POSITION_OVERLAY
+              *TRAFFIC_LIGHT_POSITION_OVERLAY
             } else {
               TRAFFIC_LIGHT_POSITION_DEFAULT
             };
@@ -199,7 +210,7 @@ fn mark_title_bar_overlay(window: tauri::WebviewWindow, is_overlay: bool) {
       mac::update_window_title(
         base_window.clone(),
         "".to_string(),
-        TRAFFIC_LIGHT_POSITION_OVERLAY,
+        *TRAFFIC_LIGHT_POSITION_OVERLAY,
       );
     }
   } else {
@@ -297,7 +308,10 @@ pub(crate) fn open_new_window(
   .inner_size(WINDOW_WIDTH, WINDOW_HEIGHT)
   .min_inner_size(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT)
   .disable_drag_drop_handler() // Required for Drag & Drop on Windows
-  .initialization_script(&format!("window.tauri = {{ version: '{}' }};", env!("CARGO_PKG_VERSION")))
+  .initialization_script(&format!(
+    "window.tauri = {{ version: '{}' }};",
+    env!("CARGO_PKG_VERSION")
+  ))
   .on_download(|window, event| {
     match event {
       #[allow(unused_variables)]
@@ -345,7 +359,7 @@ pub(crate) fn open_new_window(
 
   #[cfg(target_os = "macos")]
   if let Some(base_window) = app.get_window(&window_label) {
-    mac::setup_traffic_light_positioner(&base_window, TRAFFIC_LIGHT_POSITION_OVERLAY);
+    mac::setup_traffic_light_positioner(&base_window, *TRAFFIC_LIGHT_POSITION_OVERLAY);
   }
 
   // Apply stored notification count to the new window
