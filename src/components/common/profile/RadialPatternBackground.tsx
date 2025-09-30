@@ -9,6 +9,7 @@ import { getStickerMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { preloadImage } from '../../../util/files';
+import { clamp } from '../../../util/math';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
@@ -24,6 +25,7 @@ type OwnProps = {
   className?: string;
   clearBottomSector?: boolean;
   patternSize?: number;
+  patternOpacity?: number;
 };
 
 const RINGS = 3;
@@ -39,6 +41,7 @@ const RadialPatternBackground = ({
   backgroundColors,
   patternColor,
   patternIcon,
+  patternOpacity,
   clearBottomSector,
   className,
   patternSize = 1,
@@ -140,8 +143,11 @@ const RadialPatternBackground = ({
     }
 
     const radialGradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width / 2);
-    radialGradient.addColorStop(0, '#FFFFFF77');
-    radialGradient.addColorStop(1, '#FFFFFF');
+
+    const alpha = clamp(0.6 * (patternOpacity ?? 1), 0, 1);
+
+    radialGradient.addColorStop(0, `rgb(255 255 255 / ${1 - alpha})`);
+    radialGradient.addColorStop(1, `rgb(255 255 255 / 1)`);
 
     // Alpha mask
     ctx.save();
@@ -153,12 +159,12 @@ const RadialPatternBackground = ({
 
   useEffect(() => {
     draw();
-  }, [emojiImage]);
+  }, [emojiImage, patternOpacity, patternSize, patternColor, patternPositions]);
 
   useEffect(() => {
     const { width, height } = getContainerSize();
-    const canvas = canvasRef.current!;
-    if (!width || !height) {
+    const canvas = canvasRef.current;
+    if (!width || !height || !canvas) {
       return;
     }
 
@@ -180,7 +186,11 @@ const RadialPatternBackground = ({
         `--_bg-2: ${backgroundColors[1] || backgroundColors[0]}`,
       )}
     >
-      <canvas className={styles.canvas} ref={canvasRef} />
+      <canvas
+        ref={canvasRef}
+        className={buildClassName(styles.canvas, emojiImage && styles.showing)}
+        aria-hidden="true"
+      />
     </div>
   );
 };

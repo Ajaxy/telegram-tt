@@ -104,6 +104,8 @@ const LOAD_MORE_THRESHOLD = 3;
 const MAX_PHOTO_DASH_COUNT = 30;
 const STATUS_UPDATE_INTERVAL = 1000 * 60; // 1 min
 const PATTERN_COLOR = '#000000';
+const PATTERN_SIZE_FACTOR = 0.75;
+const PATTERN_OPACITY = 0.75;
 
 const ProfileInfo = ({
   isExpanded,
@@ -167,7 +169,7 @@ const ProfileInfo = ({
     if (collectibleEmojiStatus) {
       return {
         bgColors: [collectibleEmojiStatus.centerColor, collectibleEmojiStatus.edgeColor],
-        storyColors: [collectibleEmojiStatus.centerColor, collectibleEmojiStatus.edgeColor],
+        storyColors: [collectibleEmojiStatus.textColor, collectibleEmojiStatus.textColor],
       };
     }
 
@@ -482,7 +484,8 @@ const ProfileInfo = ({
           patternIcon={backgroundEmoji}
           patternColor={collectibleEmojiStatus?.patternColor || PATTERN_COLOR}
           className={styles.radialPatternBackground}
-          patternSize={0.75}
+          patternSize={PATTERN_SIZE_FACTOR}
+          patternOpacity={collectibleEmojiStatus ? 1 : PATTERN_OPACITY}
         />
       )}
       {pinnedGifts && (

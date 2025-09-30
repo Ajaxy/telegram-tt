@@ -35,7 +35,7 @@ import renderText from './helpers/renderText';
 import { useFastClick } from '../../hooks/useFastClick';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
-import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
+import useMediaTransition from '../../hooks/useMediaTransition';
 import useOldLang from '../../hooks/useOldLang';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -189,7 +189,7 @@ const Avatar: FC<OwnProps> = ({
   // `videoBlobUrl` can be taken from memory cache, so we need to check `shouldLoadVideo` again
   const shouldPlayVideo = Boolean(videoBlobUrl && shouldLoadVideo);
 
-  const transitionClassNames = useMediaTransitionDeprecated(hasBlobUrl);
+  const { ref: mediaRef } = useMediaTransition<HTMLImageElement>({ hasMediaData: hasBlobUrl });
 
   const handleVideoEnded = useLastCallback((e) => {
     const video = e.currentTarget;
@@ -221,8 +221,9 @@ const Avatar: FC<OwnProps> = ({
     content = (
       <>
         <img
+          ref={mediaRef}
           src={imgUrl}
-          className={buildClassName(cn.media, 'avatar-media', transitionClassNames, videoBlobUrl && 'poster')}
+          className={buildClassName(cn.media, 'avatar-media', videoBlobUrl && 'poster')}
           alt={author}
           decoding="async"
           draggable={false}
