@@ -803,7 +803,9 @@ const Message: FC<OwnProps & StateProps> = ({
     && !isInDocumentGroupNotLast && !isStoryMention && !hasTtl && !isAccountFrozen;
 
   const hasOutsideReactions = !withVoiceTranscription && hasReactions
-    && (isCustomShape || ((photo || video || storyData || (location?.mediaType === 'geo')) && !hasText));
+    && (isCustomShape || (
+      (photo || video || storyData || (location?.mediaType === 'geo')) && (!hasText || isInvertedMedia))
+    );
 
   const contentClassName = buildContentClassName(message, album, {
     poll,
@@ -1099,7 +1101,7 @@ const Message: FC<OwnProps & StateProps> = ({
       noMediaCorners && 'no-media-corners',
     );
     const hasCustomAppendix = isLastInGroup
-      && (!hasText || (isInvertedMedia && !hasFactCheck && !hasReactions)) && !withCommentButton;
+      && (!hasText || (isInvertedMedia && !hasFactCheck && reactionsPosition !== 'inside')) && !withCommentButton;
     const textContentClass = buildClassName(
       'text-content',
       'clearfix',
