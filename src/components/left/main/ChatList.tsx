@@ -215,7 +215,7 @@ const ChatList: FC<OwnProps> = ({
     toggleStoryRibbon({ isShown: false, isArchived });
   });
 
-  const renderedOverflowTrigger = useTopOverscroll(containerRef, handleShowStoryRibbon, handleHideStoryRibbon, isSaved);
+  useTopOverscroll(containerRef, handleShowStoryRibbon, handleHideStoryRibbon, isSaved);
 
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
@@ -254,7 +254,6 @@ const ChatList: FC<OwnProps> = ({
       itemSelector=".ListItem:not(.chat-item-archive)"
       preloadBackwards={CHAT_LIST_SLICE}
       withAbsolutePositioning
-      beforeChildren={renderedOverflowTrigger}
       maxHeight={chatsHeight + archiveHeight + frozenNotificationHeight + unconfirmedSessionHeight}
       onLoadMore={getMore}
       onDragLeave={handleDragLeave}

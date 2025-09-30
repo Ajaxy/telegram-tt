@@ -25,7 +25,6 @@ import { MEMBERS_SLICE, PROFILE_SENSITIVE_AREA, SHARED_MEDIA_SLICE, SLIDE_TRANSI
 import { selectActiveGiftsCollectionId } from '../../global/selectors/payments';
 
 const CONTENT_PANEL_SHOW_DELAY = 300;
-import { forceMutation } from '../../lib/fasterdom/fasterdom.ts';
 import {
   getHasAdminRight,
   getIsDownloading,
@@ -71,7 +70,6 @@ import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import { isUserId } from '../../util/entities/ids';
-import { stopScrollInertia } from '../../util/resetScroll.ts';
 import { resolveTransitionName } from '../../util/resolveTransitionName.ts';
 import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import renderText from '../common/helpers/renderText';
@@ -531,12 +529,7 @@ const Profile: FC<OwnProps & StateProps> = ({
 
   const handleCollapseProfile = useLastCallback(() => {
     if (!isProfileExpanded) return;
-    const scrollContainer = containerRef.current;
     startViewTransition(VTT_RIGHT_PROFILE_COLLAPSE, () => {
-      if (!scrollContainer) return;
-      forceMutation(() => {
-        stopScrollInertia(scrollContainer);
-      }, scrollContainer);
       collapseProfile();
     });
   });
@@ -622,7 +615,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     resetGiftProfileFilter({ peerId: chatId });
   });
 
-  const renderedOverflowTrigger = useTopOverscroll(
+  useTopOverscroll(
     containerRef, handleExpandProfile, handleCollapseProfile, !hasAvatar,
   );
 
@@ -1114,7 +1107,6 @@ const Profile: FC<OwnProps & StateProps> = ({
       itemSelector={itemSelector}
       items={canRenderContent ? viewportIds : undefined}
       cacheBuster={cacheBuster}
-      beforeChildren={renderedOverflowTrigger}
       sensitiveArea={PROFILE_SENSITIVE_AREA}
       preloadBackwards={canRenderContent ? (resultType === 'members' ? MEMBERS_SLICE : SHARED_MEDIA_SLICE) : 0}
       // To prevent scroll jumps caused by reordering member list

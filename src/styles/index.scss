@@ -226,6 +226,14 @@ body:not(.is-ios) {
   }
 }
 
+.no-overscroll {
+  overscroll-behavior: none;
+}
+
+.no-touch {
+  touch-action: none;
+}
+
 .emoji-small {
   overflow: hidden;
   display: inline-block;
