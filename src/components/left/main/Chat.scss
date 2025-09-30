@@ -341,6 +341,11 @@
         min-width: 1.375rem;
         height: 1.375rem;
         line-height: 1.5rem;
+
+        .is-ios &,
+        .is-macos & {
+          line-height: 1.375rem;
+        }
       }
     }
   }
