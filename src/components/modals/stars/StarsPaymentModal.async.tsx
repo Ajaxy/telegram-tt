@@ -8,7 +8,7 @@ import useModuleLoader from '../../../hooks/useModuleLoader';
 
 const StarPaymentModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
-  const StarPaymentModal = useModuleLoader(Bundles.Stars, 'StarPaymentModal', !modal);
+  const StarPaymentModal = useModuleLoader(Bundles.Stars, 'StarPaymentModal', !modal?.inputInvoice);
 
   return StarPaymentModal ? <StarPaymentModal {...props} /> : undefined;
 };

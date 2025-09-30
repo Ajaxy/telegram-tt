@@ -8,7 +8,7 @@ import useModuleLoader from '../../../hooks/useModuleLoader';
 
 const WebAppModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
-  const WebAppModal = useModuleLoader(Bundles.Extra, 'WebAppModal', !modal);
+  const WebAppModal = useModuleLoader(Bundles.Extra, 'WebAppModal', !modal?.isModalOpen);
 
   return WebAppModal ? <WebAppModal {...props} /> : undefined;
 };

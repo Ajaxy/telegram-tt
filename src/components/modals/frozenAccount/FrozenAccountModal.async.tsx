@@ -8,7 +8,7 @@ import useModuleLoader from '../../../hooks/useModuleLoader';
 
 const FrozenAccountModalAsync: FC<OwnProps> = (props) => {
   const { modal } = props;
-  const FrozenAccountModal = useModuleLoader(Bundles.Extra, 'FrozenAccountModal', modal);
+  const FrozenAccountModal = useModuleLoader(Bundles.Extra, 'FrozenAccountModal', !modal);
 
   return FrozenAccountModal ? <FrozenAccountModal {...props} /> : undefined;
 };
