@@ -3,6 +3,7 @@ import 'dotenv/config';
 
 import WatchFilePlugin from '@mytonwallet/webpack-watch-file-plugin';
 import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
+import { statSync } from 'fs';
 import { GitRevisionPlugin } from 'git-revision-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -47,6 +48,8 @@ const CSP = `
   base-uri 'none';
   form-action 'none';`
   .replace(/\s+/g, ' ').trim();
+
+const CHANGELOG_PATH = path.resolve(__dirname, 'src/versionNotification.txt');
 
 export default function createConfig(
   _: any,
@@ -206,7 +209,6 @@ export default function createConfig(
         // eslint-disable-next-line no-null/no-null
         APP_NAME: null,
         APP_TITLE,
-        RELEASE_DATETIME: Date.now(),
         TELEGRAM_API_ID: undefined,
         TELEGRAM_API_HASH: undefined,
         // eslint-disable-next-line no-null/no-null
@@ -221,6 +223,11 @@ export default function createConfig(
           const shouldDisplayOnlyCommit = APP_ENV === 'staging' || !branch || branch === 'HEAD';
           return JSON.stringify(shouldDisplayOnlyCommit ? commit : `${branch}#${commit}`);
         }, mode === 'development' ? true : []),
+        CHANGELOG_DATETIME: DefinePlugin.runtimeValue(() => {
+          return JSON.stringify(statSync(CHANGELOG_PATH, { throwIfNoEntry: false })?.mtime.getTime());
+        }, {
+          fileDependencies: [CHANGELOG_PATH],
+        }),
       }),
       new ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
