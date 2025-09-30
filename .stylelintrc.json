@@ -42,13 +42,22 @@
     "selector-pseudo-class-no-unknown": [
       true,
       {
-        "ignorePseudoClasses": ["global"]
+        "ignorePseudoClasses": ["global", "local"]
       }
     ],
     "plugin/selector-tag-no-without-class": ["/^(?!body|html)([^_-]*)$/", { "severity": "warning" }],
     "plugin/use-baseline": [true, {
       "severity": "warning",
-      "ignoreSelectors": ["nesting", "dir", "selection", "view-transition-group"],
+      "ignoreSelectors": [
+        "nesting",
+        "dir",
+        "selection",
+        "view-transition",
+        "view-transition-group",
+        "view-transition-image-pair",
+        "view-transition-old",
+        "view-transition-new"
+      ],
       "ignoreProperties": [
         "text-wrap",
         "outline",

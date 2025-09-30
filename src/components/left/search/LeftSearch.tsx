@@ -12,9 +12,9 @@ import type { RegularLangKey } from '../../../types/language';
 import { type AnimationLevel, GlobalSearchContent } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
-import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import { parseDateString } from '../../../util/dates/dateFormat';
-import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
+import { resolveTransitionName } from '../../../util/resolveTransitionName';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';

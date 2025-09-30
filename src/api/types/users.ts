@@ -35,6 +35,7 @@ export interface ApiUser {
   hasUnreadStories?: boolean;
   maxStoryId?: number;
   color?: ApiPeerColor;
+  profileColor?: ApiPeerColor;
   canEditBot?: boolean;
   hasMainMiniApp?: boolean;
   botActiveUsers?: number;

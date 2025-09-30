@@ -1,50 +1,69 @@
-import type { FC } from '../../lib/teact/teact';
-import { memo, useEffect, useState } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+import { memo, useEffect, useMemo, useState } from '../../../lib/teact/teact';
 
 import type {
-  ApiChat, ApiPeerPhotos, ApiSticker, ApiTopic, ApiUser, ApiUserFullInfo, ApiUserStatus,
-} from '../../api/types';
-import type { AnimationLevel } from '../../types';
-import type { IconName } from '../../types/icons';
-import { MediaViewerOrigin } from '../../types';
+  ApiChat,
+  ApiEmojiStatusType,
+  ApiPeerColorOption,
+  ApiPeerPhotos,
+  ApiPeerProfileColorSet,
+  ApiSavedGifts,
+  ApiSticker,
+  ApiTopic,
+  ApiUser,
+  ApiUserFullInfo,
+  ApiUserStatus,
+} from '../../../api/types/index';
+import type { IconName } from '../../../types/icons/index';
+import type { AnimationLevel, ThemeKey } from '../../../types/index';
+import { MediaViewerOrigin } from '../../../types/index';
 
 import {
   getUserStatus, isAnonymousForwardsChat, isChatChannel, isSystemBot, isUserOnline,
-} from '../../global/helpers';
+} from '../../../global/helpers/index';
+import { getActions, withGlobal } from '../../../global/index';
 import {
   selectChat,
   selectCurrentMessageList,
   selectCustomEmoji,
+  selectPeer,
+  selectPeerHasProfileBackground,
   selectPeerPhotos,
+  selectPeerProfileColor,
+  selectPeerSavedGifts,
   selectTabState,
+  selectTheme,
   selectThreadMessagesCount,
   selectTopic,
   selectUser,
   selectUserFullInfo,
   selectUserStatus,
-} from '../../global/selectors';
-import { selectSharedSettings } from '../../global/selectors/sharedState.ts';
-import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
-import buildClassName from '../../util/buildClassName';
-import { captureEvents, SwipeDirection } from '../../util/captureEvents';
-import { MEMO_EMPTY_ARRAY } from '../../util/memo';
-import { resolveTransitionName } from '../../util/resolveTransitionName.ts';
-import renderText from './helpers/renderText';
+} from '../../../global/selectors/index';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
+import buildClassName from '../../../util/buildClassName';
+import buildStyle from '../../../util/buildStyle';
+import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+import { resolveTransitionName } from '../../../util/resolveTransitionName';
+import renderText from '../helpers/renderText.tsx';
 
-import useIntervalForceUpdate from '../../hooks/schedulers/useIntervalForceUpdate';
-import useLang from '../../hooks/useLang';
-import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
-import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
-import usePhotosPreload from './hooks/usePhotosPreload';
+import { useVtn } from '../../../hooks/animations/useVtn';
+import useIntervalForceUpdate from '../../../hooks/schedulers/useIntervalForceUpdate';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
+import useCustomEmoji from '../hooks/useCustomEmoji';
+import usePhotosPreload from '../hooks/usePhotosPreload';
 
-import Transition from '../ui/Transition';
-import Avatar from './Avatar';
-import FullNameTitle from './FullNameTitle';
-import Icon from './icons/Icon';
+import Transition from '../../ui/Transition.tsx';
+import Avatar from '../Avatar.tsx';
+import FullNameTitle from '../FullNameTitle.tsx';
+import Icon from '../icons/Icon.tsx';
+import TopicIcon from '../TopicIcon.tsx';
 import ProfilePhoto from './ProfilePhoto';
-import TopicIcon from './TopicIcon';
+import ProfilePinnedGifts from './ProfilePinnedGifts.tsx';
+import RadialPatternBackground from './RadialPatternBackground.tsx';
 
 import './ProfileInfo.scss';
 import styles from './ProfileInfo.module.scss';
@@ -52,36 +71,43 @@ import styles from './ProfileInfo.module.scss';
 const MAX_LEVEL_ICON = 90;
 
 type OwnProps = {
+  isExpanded?: boolean;
   peerId: string;
-  forceShowSelf?: boolean;
+  isForSettings?: boolean;
   canPlayVideo: boolean;
   isForMonoforum?: boolean;
 };
 
-type StateProps =
-  {
-    user?: ApiUser;
-    userFullInfo?: ApiUserFullInfo;
-    userStatus?: ApiUserStatus;
-    chat?: ApiChat;
-    mediaIndex?: number;
-    avatarOwnerId?: string;
-    topic?: ApiTopic;
-    messagesCount?: number;
-    animationLevel: AnimationLevel;
-    emojiStatusSticker?: ApiSticker;
-    emojiStatusSlug?: string;
-    profilePhotos?: ApiPeerPhotos;
-  };
+type StateProps = {
+  user?: ApiUser;
+  userFullInfo?: ApiUserFullInfo;
+  userStatus?: ApiUserStatus;
+  chat?: ApiChat;
+  mediaIndex?: number;
+  avatarOwnerId?: string;
+  topic?: ApiTopic;
+  messagesCount?: number;
+  animationLevel: AnimationLevel;
+  emojiStatus?: ApiEmojiStatusType;
+  emojiStatusSticker?: ApiSticker;
+  emojiStatusSlug?: string;
+  profilePhotos?: ApiPeerPhotos;
+  profileColorOption?: ApiPeerColorOption<ApiPeerProfileColorSet>;
+  theme: ThemeKey;
+  isPlain?: boolean;
+  savedGifts?: ApiSavedGifts;
+};
 
 const EMOJI_STATUS_SIZE = 24;
 const EMOJI_TOPIC_SIZE = 120;
 const LOAD_MORE_THRESHOLD = 3;
 const MAX_PHOTO_DASH_COUNT = 30;
 const STATUS_UPDATE_INTERVAL = 1000 * 60; // 1 min
+const PATTERN_COLOR = '#000000';
 
-const ProfileInfo: FC<OwnProps & StateProps> = ({
-  forceShowSelf,
+const ProfileInfo = ({
+  isExpanded,
+  isForSettings,
   canPlayVideo,
   user,
   userFullInfo,
@@ -92,12 +118,17 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   topic,
   messagesCount,
   animationLevel,
+  emojiStatus,
   emojiStatusSticker,
   emojiStatusSlug,
   profilePhotos,
   peerId,
   isForMonoforum,
-}) => {
+  profileColorOption,
+  theme,
+  isPlain,
+  savedGifts,
+}: OwnProps & StateProps) => {
   const {
     openMediaViewer,
     openPremiumModal,
@@ -106,12 +137,15 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     loadMoreProfilePhotos,
     openUniqueGiftBySlug,
     openProfileRatingModal,
+    loadPeerSavedGifts,
   } = getActions();
 
   const oldLang = useOldLang();
   const lang = useLang();
 
   useIntervalForceUpdate(user ? STATUS_UPDATE_INTERVAL : undefined);
+
+  const { createVtnStyle } = useVtn();
 
   const photos = profilePhotos?.photos || MEMO_EMPTY_ARRAY;
   const prevMediaIndex = usePreviousDeprecated(mediaIndex);
@@ -122,11 +156,45 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   const isFirst = photos.length <= 1 || currentPhotoIndex === 0;
   const isLast = photos.length <= 1 || currentPhotoIndex === photos.length - 1;
 
+  const collectibleEmojiStatus = emojiStatus?.type === 'collectible' ? emojiStatus : undefined;
+
+  const peer = user || chat;
+  const { customEmoji: backgroundEmoji } = useCustomEmoji(
+    collectibleEmojiStatus?.patternDocumentId || peer?.profileColor?.backgroundEmojiId,
+  );
+
+  const profileColorSet = useMemo(() => {
+    if (collectibleEmojiStatus) {
+      return {
+        bgColors: [collectibleEmojiStatus.centerColor, collectibleEmojiStatus.edgeColor],
+        storyColors: [collectibleEmojiStatus.centerColor, collectibleEmojiStatus.edgeColor],
+      };
+    }
+
+    const colors = profileColorOption
+      && (theme === 'dark' ? profileColorOption.darkColors : profileColorOption.colors);
+    if (!colors) return undefined;
+
+    // Why are they reversed on the server?
+    return {
+      bgColors: [...colors.bgColors].reverse(),
+      storyColors: [...colors.storyColors].reverse(),
+    };
+  }, [profileColorOption, theme, collectibleEmojiStatus]);
+
+  const pinnedGifts = useMemo(() => {
+    return savedGifts?.gifts.filter((gift) => gift.isPinned);
+  }, [savedGifts]);
+
   useEffect(() => {
     if (photos.length - currentPhotoIndex <= LOAD_MORE_THRESHOLD) {
       loadMoreProfilePhotos({ peerId });
     }
   }, [currentPhotoIndex, peerId, photos.length]);
+
+  useEffect(() => {
+    loadPeerSavedGifts({ peerId });
+  }, [peerId]);
 
   // Set the current avatar photo to the last selected photo in Media Viewer after it is closed
   useEffect(() => {
@@ -144,6 +212,13 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     }
   }, [currentPhotoIndex, photos.length]);
 
+  // Reset photo index when collapsing
+  useEffect(() => {
+    if (!isExpanded) {
+      setCurrentPhotoIndex(0);
+    }
+  }, [isExpanded]);
+
   usePhotosPreload(photos, currentPhotoIndex);
 
   const handleProfilePhotoClick = useLastCallback(() => {
@@ -151,7 +226,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
       isAvatarView: true,
       chatId: peerId,
       mediaIndex: currentPhotoIndex,
-      origin: forceShowSelf ? MediaViewerOrigin.SettingsAvatar : MediaViewerOrigin.ProfileAvatar,
+      origin: isForSettings ? MediaViewerOrigin.SettingsAvatar : MediaViewerOrigin.ProfileAvatar,
     });
   });
 
@@ -239,7 +314,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
           letterClassName={styles.topicIconTitle}
           noLoopLimit
         />
-        <h3 className={styles.topicTitle} dir={oldLang.isRtl ? 'rtl' : undefined}>{renderText(topic!.title)}</h3>
+        <h3 className={styles.topicTitle} dir={lang.isRtl ? 'rtl' : undefined}>{renderText(topic!.title)}</h3>
         <p className={styles.topicMessagesCounter}>
           {messagesCount ? oldLang('Chat.Title.Topic', messagesCount, 'i') : oldLang('lng_forum_no_messages')}
         </p>
@@ -277,6 +352,8 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
         chat={chat}
         photo={photo}
         canPlayVideo={Boolean(isActive && canPlayVideo)}
+        className={buildClassName(isActive && styles.activeProfilePhoto)}
+        style={isActive ? createVtnStyle('avatar', true) : undefined}
         onClick={handleProfilePhotoClick}
       />
     );
@@ -292,7 +369,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
     if (isNegative) {
       return (
-        <span className={styles.userRatingNegativeWrapper} onClick={onRatingClick}>
+        <span role="button" tabIndex={0} className={styles.userRatingNegativeWrapper} onClick={onRatingClick}>
           <Icon
             name="rating-icons-negative"
             className={styles.ratingNegativeIcon}
@@ -309,7 +386,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
       : `rating-icons-level${Math.floor(iconLevel / 10) * 10}`) as IconName;
 
     return (
-      <span className={styles.userRatingWrapper} onClick={onRatingClick}>
+      <span role="button" tabIndex={0} className={styles.userRatingWrapper} onClick={onRatingClick}>
         <Icon
           name={iconName}
           className={styles.ratingIcon}
@@ -326,7 +403,11 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
     if (isForMonoforum) {
       return (
-        <span className={buildClassName(styles.status, 'status')} dir="auto">
+        <span
+          className={buildClassName(styles.status, 'status')}
+          dir="auto"
+          style={createVtnStyle('status', true)}
+        >
           {lang('MonoforumStatus')}
         </span>
       );
@@ -340,6 +421,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
             'status',
             isUserOnline(user, userStatus) && 'online',
           )}
+          style={createVtnStyle('status', true)}
         >
           {renderUserRating()}
           <span className={styles.userStatus} dir="auto">
@@ -355,7 +437,11 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     }
 
     return (
-      <span className={buildClassName(styles.status, 'status')} dir="auto">
+      <span
+        className={buildClassName(styles.status, 'status')}
+        dir="auto"
+        style={createVtnStyle('status', true)}
+      >
         {
           isChatChannel(chat!)
             ? oldLang('Subscribers', chat!.membersCount ?? 0, 'i')
@@ -371,72 +457,121 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
   return (
     <div
-      className={buildClassName('ProfileInfo')}
-      dir={oldLang.isRtl ? 'rtl' : undefined}
+      className={buildClassName(
+        'ProfileInfo',
+        styles.root,
+        !isExpanded && styles.minimized,
+        isPlain && styles.plain,
+      )}
+      style={buildStyle(
+        profileColorSet && `--rating-outline-color: ${isExpanded ? 'transparent' : profileColorSet?.bgColors[1]}`,
+        profileColorSet && !isExpanded && `--rating-text-color: ${profileColorSet?.bgColors[1]}`,
+        createVtnStyle('profileInfo', true),
+      )}
+      dir={lang.isRtl ? 'rtl' : undefined}
     >
-      <div className={styles.photoWrapper}>
-        {renderPhotoTabs()}
-        {!forceShowSelf && profilePhotos?.personalPhoto && (
-          <div className={buildClassName(
-            styles.fallbackPhoto,
-            isFirst && styles.fallbackPhotoVisible,
-          )}
-          >
-            <div className={styles.fallbackPhotoContents}>
-              {oldLang(profilePhotos.personalPhoto.isVideo ? 'UserInfo.CustomVideo' : 'UserInfo.CustomPhoto')}
+      {profileColorSet?.bgColors && (
+        <RadialPatternBackground
+          backgroundColors={profileColorSet.bgColors}
+          patternIcon={backgroundEmoji}
+          patternColor={collectibleEmojiStatus?.patternColor || PATTERN_COLOR}
+          className={styles.radialPatternBackground}
+          patternSize={0.75}
+        />
+      )}
+      {pinnedGifts && (
+        <ProfilePinnedGifts
+          peerId={peerId}
+          gifts={pinnedGifts}
+          isExpanded={isExpanded}
+          className={styles.pinnedGifts}
+          withGlow={!isPlain}
+        />
+      )}
+      {isExpanded && (
+        <div className={styles.photoWrapper} style={createVtnStyle('photoWrapper', true)}>
+          {renderPhotoTabs()}
+          {!isForSettings && profilePhotos?.personalPhoto && (
+            <div className={buildClassName(
+              styles.fallbackPhoto,
+              isFirst && styles.fallbackPhotoVisible,
+            )}
+            >
+              <div className={styles.fallbackPhotoContents}>
+                {oldLang(profilePhotos.personalPhoto.isVideo ? 'UserInfo.CustomVideo' : 'UserInfo.CustomPhoto')}
+              </div>
             </div>
-          </div>
-        )}
-        {forceShowSelf && profilePhotos?.fallbackPhoto && (
-          <div className={buildClassName(
-            styles.fallbackPhoto,
-            (isFirst || isLast) && styles.fallbackPhotoVisible,
           )}
-          >
-            <div className={styles.fallbackPhotoContents} onClick={handleSelectFallbackPhoto}>
-              {!isLast && (
-                <Avatar
-                  photo={profilePhotos.fallbackPhoto}
-                  className={styles.fallbackPhotoAvatar}
-                  size="mini"
-                />
-              )}
-              {oldLang(profilePhotos.fallbackPhoto.isVideo ? 'UserInfo.PublicVideo' : 'UserInfo.PublicPhoto')}
+          {isForSettings && profilePhotos?.fallbackPhoto && (
+            <div className={buildClassName(
+              styles.fallbackPhoto,
+              (isFirst || isLast) && styles.fallbackPhotoVisible,
+            )}
+            >
+              <div className={styles.fallbackPhotoContents} onClick={handleSelectFallbackPhoto}>
+                {!isLast && (
+                  <Avatar
+                    photo={profilePhotos.fallbackPhoto}
+                    className={styles.fallbackPhotoAvatar}
+                    size="mini"
+                  />
+                )}
+                {oldLang(profilePhotos.fallbackPhoto.isVideo ? 'UserInfo.PublicVideo' : 'UserInfo.PublicPhoto')}
+              </div>
             </div>
-          </div>
-        )}
-        <Transition
-          activeKey={currentPhotoIndex}
-          name={resolveTransitionName('slide', animationLevel, !hasSlideAnimation, oldLang.isRtl)}
-        >
-          {renderPhoto}
-        </Transition>
+          )}
+          <Transition
+            activeKey={currentPhotoIndex}
+            name={resolveTransitionName('slide', animationLevel, !hasSlideAnimation, lang.isRtl)}
+          >
+            {renderPhoto}
+          </Transition>
 
-        {!isFirst && (
-          <button
-            type="button"
-            dir={oldLang.isRtl ? 'rtl' : undefined}
-            className={buildClassName(styles.navigation, styles.navigation_prev)}
-            aria-label={oldLang('AccDescrPrevious')}
-            onClick={selectPreviousMedia}
-          />
-        )}
-        {!isLast && (
-          <button
-            type="button"
-            dir={oldLang.isRtl ? 'rtl' : undefined}
-            className={buildClassName(styles.navigation, styles.navigation_next)}
-            aria-label={oldLang('Next')}
-            onClick={selectNextMedia}
-          />
-        )}
-      </div>
+          {!isFirst && (
+            <button
+              type="button"
+              dir={lang.isRtl ? 'rtl' : undefined}
+              className={buildClassName(styles.navigation, styles.navigation_prev)}
+              aria-label={oldLang('AccDescrPrevious')}
+              onClick={selectPreviousMedia}
+            />
+          )}
+          {!isLast && (
+            <button
+              type="button"
+              dir={lang.isRtl ? 'rtl' : undefined}
+              className={buildClassName(styles.navigation, styles.navigation_next)}
+              aria-label={oldLang('Next')}
+              onClick={selectNextMedia}
+            />
+          )}
+        </div>
+      )}
+      {!isExpanded && (
+        <Avatar
+          withStory
+          storyColors={profileColorSet?.storyColors}
+          className={styles.standaloneAvatar}
+          key={peer?.id}
+          size="jumbo"
+          peer={peer}
+          style={createVtnStyle('avatar', true)}
+          onClick={isForSettings ? handleProfilePhotoClick : undefined}
+        />
+      )}
 
-      <div className={styles.info} dir={oldLang.isRtl ? 'rtl' : 'auto'}>
+      <div
+        className={styles.info}
+        dir={lang.isRtl ? 'rtl' : 'auto'}
+        style={createVtnStyle('info', true)}
+      >
         {(user || chat) && (
           <FullNameTitle
+            className={styles.title}
+            style={createVtnStyle('title', true)}
             peer={(user || chat)!}
             withEmojiStatus
+            withStatusTextColor
             emojiStatusSize={EMOJI_STATUS_SIZE}
             onEmojiStatusClick={handleStatusClick}
             noLoopLimit
@@ -451,6 +586,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { peerId }): Complete<StateProps> => {
+    const peer = selectPeer(global, peerId);
     const user = selectUser(global, peerId);
     const userFullInfo = user ? selectUserFullInfo(global, peerId) : undefined;
     const userStatus = selectUserStatus(global, peerId);
@@ -462,9 +598,15 @@ export default memo(withGlobal<OwnProps>(
     const topic = isForum && currentTopicId ? selectTopic(global, peerId, currentTopicId) : undefined;
     const { animationLevel } = selectSharedSettings(global);
 
-    const emojiStatus = (user || chat)?.emojiStatus;
+    const emojiStatus = peer?.emojiStatus;
     const emojiStatusSticker = emojiStatus ? selectCustomEmoji(global, emojiStatus.documentId) : undefined;
     const emojiStatusSlug = emojiStatus?.type === 'collectible' ? emojiStatus.slug : undefined;
+
+    const profileColor = peer && selectPeerProfileColor(global, peer);
+    const theme = selectTheme(global);
+
+    const hasBackground = selectPeerHasProfileBackground(global, peerId);
+    const savedGifts = selectPeerSavedGifts(global, peerId);
 
     return {
       user,
@@ -476,9 +618,14 @@ export default memo(withGlobal<OwnProps>(
       animationLevel,
       emojiStatusSticker,
       emojiStatusSlug,
+      emojiStatus,
       profilePhotos,
       topic,
       messagesCount: topic ? selectThreadMessagesCount(global, peerId, currentTopicId!) : undefined,
+      profileColorOption: profileColor,
+      theme,
+      isPlain: !hasBackground,
+      savedGifts,
     };
   },
 )(ProfileInfo));

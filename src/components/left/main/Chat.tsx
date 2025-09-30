@@ -430,6 +430,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             isSavedMessages={chatId === user?.id && user?.isSelf}
             isSavedDialog={isSavedDialog}
             observeIntersection={observeIntersection}
+            withStatusTextColor={isSelected}
           />
           {isMuted && !isSavedDialog && <Icon name="muted" />}
           <div className="separator" />

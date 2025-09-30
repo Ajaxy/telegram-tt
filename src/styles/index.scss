@@ -484,13 +484,18 @@ body:not(.is-ios) {
   --color-chat-username: rgb(233, 238, 244);
 }
 
-/* stylelint-disable-next-line scss/at-rule-no-unknown */
 @view-transition {
-  /* stylelint-disable-next-line property-no-unknown */
   navigation: auto;
+  types: page;
 }
 
 :root {
+  view-transition-name: none;
+
+  @include mixins.with-vt-type('page');
+}
+
+@include mixins.on-active-vt('page') {
   &::view-transition-group(root) {
     animation-duration: 400ms;
   }

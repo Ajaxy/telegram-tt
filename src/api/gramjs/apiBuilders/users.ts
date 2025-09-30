@@ -101,7 +101,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   const {
     id, firstName, lastName, fake, scam, support, closeFriend, storiesUnavailable, storiesMaxId,
     bot, botActiveUsers, botVerificationIcon, botInlinePlaceholder, botAttachMenu, botCanEdit,
-    sendPaidMessagesStars, username,
+    sendPaidMessagesStars, username, profileColor,
   } = mtpUser;
   const hasVideoAvatar = mtpUser.photo instanceof GramJs.UserProfilePhoto ? Boolean(mtpUser.photo.hasVideo) : undefined;
   const avatarPhotoId = mtpUser.photo && buildAvatarPhotoId(mtpUser.photo);
@@ -141,6 +141,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     botActiveUsers,
     botVerificationIconId: botVerificationIcon?.toString(),
     color: mtpUser.color && buildApiPeerColor(mtpUser.color),
+    profileColor: profileColor && buildApiPeerColor(profileColor),
     paidMessagesStars: sendPaidMessagesStars?.toJSNumber(),
   };
 }

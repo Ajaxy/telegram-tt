@@ -288,14 +288,23 @@ export interface ApiConfig {
 }
 
 export type ApiPeerColorSet = string[];
+export type ApiPeerProfileColorSet = {
+  paletteColors: string[];
+  bgColors: string[];
+  storyColors: string[];
+};
+
+export type ApiPeerColorOption<T extends ApiPeerColorSet | ApiPeerProfileColorSet> = {
+  isHidden?: true;
+  colors?: T;
+  darkColors?: T;
+};
 
 export interface ApiPeerColors {
-  general: Record<number, {
-    isHidden?: true;
-    colors?: ApiPeerColorSet;
-    darkColors?: ApiPeerColorSet;
-  }>;
+  general: Record<number, ApiPeerColorOption<ApiPeerColorSet>>;
   generalHash?: number;
+  profile: Record<number, ApiPeerColorOption<ApiPeerProfileColorSet>>;
+  profileHash?: number;
 }
 
 export interface ApiTimezone {

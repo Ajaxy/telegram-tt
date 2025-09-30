@@ -6,17 +6,17 @@ import type { ApiPrivacySettings } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 import { SettingsScreens } from '../../../types';
 
-import { ACCOUNT_TTL_OPTIONS } from '../../../config.ts';
+import { ACCOUNT_TTL_OPTIONS } from '../../../config';
 import {
   selectCanSetPasscode, selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
 } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
-import { getClosestEntry } from '../../../util/getClosestEntry.ts';
+import { getClosestEntry } from '../../../util/getClosestEntry';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
-import useLastCallback from '../../../hooks/useLastCallback.ts';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import StarIcon from '../../common/icons/StarIcon';

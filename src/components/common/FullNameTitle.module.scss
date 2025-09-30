@@ -3,17 +3,6 @@
   gap: 0.25rem;
   align-items: center;
 
-  :global(.custom-emoji) {
-    color: var(--color-primary);
-  }
-
-  :global(.statusSparkles) {
-    color: var(--accent-color);
-    :global(.selected) & {
-      color: white;
-    }
-  }
-
   .statusTransition {
     width: 1.5em !important;
     height: 1.5em !important;
@@ -49,4 +38,15 @@
   color: var(--color-white);
 
   background-color: var(--color-gray);
+}
+
+.statusPrimaryColor {
+  color: var(--color-primary);
+
+  :global(.statusSparkles) {
+    color: var(--accent-color);
+    :global(.selected) & {
+      color: white;
+    }
+  }
 }

@@ -14,6 +14,7 @@ import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';
 
 import CustomEmoji from '../../common/CustomEmoji';
+import GiftEffectWrapper from '../../common/gift/GiftEffectWrapper';
 import StarIcon from '../../common/icons/StarIcon';
 import CustomEmojiEffect from '../../common/reactions/CustomEmojiEffect';
 import Button from '../../ui/Button';
@@ -36,6 +37,8 @@ const StatusButton: FC<StateProps> = ({ emojiStatus, collectibleStatuses, isAcco
   const [isEffectShown, showEffect, hideEffect] = useFlag(false);
   const [isStatusPickerOpen, openStatusPicker, closeStatusPicker] = useFlag(false);
   const { isMobile } = useAppLayout();
+
+  const collectibleEmojiStatus = emojiStatus?.type === 'collectible' ? emojiStatus : undefined;
 
   const delay = emojiStatus?.until ? (emojiStatus.until - getServerTime()) * 1000 : undefined;
   useTimeout(loadCurrentUser, delay);
@@ -86,13 +89,18 @@ const StatusButton: FC<StateProps> = ({ emojiStatus, collectibleStatuses, isAcco
         onClick={handleEmojiStatusClick}
       >
         {emojiStatus ? (
-          <CustomEmoji
-            key={emojiStatus.documentId}
-            documentId={emojiStatus.documentId}
-            size={EMOJI_STATUS_SIZE}
-            loopLimit={EMOJI_STATUS_LOOP_LIMIT}
-            withSparkles={emojiStatus?.type === 'collectible'}
-          />
+          <GiftEffectWrapper
+            withSparkles={Boolean(collectibleEmojiStatus)}
+            sparklesClassName="statusSparkles"
+            sparklesColor={collectibleEmojiStatus?.textColor}
+          >
+            <CustomEmoji
+              key={emojiStatus.documentId}
+              documentId={emojiStatus.documentId}
+              size={EMOJI_STATUS_SIZE}
+              loopLimit={EMOJI_STATUS_LOOP_LIMIT}
+            />
+          </GiftEffectWrapper>
         ) : <StarIcon />}
       </Button>
       <StatusPickerMenu

@@ -23,6 +23,7 @@ type OwnProps = {
   patternIcon?: ApiSticker;
   className?: string;
   clearBottomSector?: boolean;
+  patternSize?: number;
 };
 
 const RINGS = 3;
@@ -40,6 +41,7 @@ const RadialPatternBackground = ({
   patternIcon,
   clearBottomSector,
   className,
+  patternSize = 1,
 }: OwnProps) => {
   const containerRef = useRef<HTMLDivElement>();
   const canvasRef = useRef<HTMLCanvasElement>();
@@ -78,13 +80,12 @@ const RadialPatternBackground = ({
         const xOffset = ringRadius * 1.71 * Math.cos(angle);
         const yOffset = ringRadius * Math.sin(angle);
 
-        const x = 0.5 + xOffset;
-        const y = 0.5 + yOffset;
-
         const sizeFactor = 1.4 - ringProgress * Math.random();
 
         coordinates.push({
-          x, y, sizeFactor,
+          x: xOffset,
+          y: yOffset,
+          sizeFactor,
         });
       }
     }
@@ -115,15 +116,16 @@ const RadialPatternBackground = ({
     const { width, height } = canvas;
     if (!width || !height) return;
 
+    ctx.clearRect(0, 0, width, height);
+
     ctx.save();
     patternPositions.forEach(({
       x, y, sizeFactor,
     }) => {
-      const centerShift = (width - Math.max(width, MIN_SIZE * dpr)) / 2; // Shift coords if canvas is smaller than `MIN_SIZE`
-      const renderX = x * Math.max(width, MIN_SIZE * dpr) + centerShift;
-      const renderY = y * Math.max(height, MIN_SIZE * dpr) + centerShift;
+      const renderX = x * patternSize * Math.max(width, MIN_SIZE * dpr) + width / 2;
+      const renderY = y * patternSize * Math.max(height, MIN_SIZE * dpr) + height / 2;
 
-      const size = BASE_ICON_SIZE * dpr * sizeFactor * (centerShift ? 0.8 : 1);
+      const size = BASE_ICON_SIZE * dpr * patternSize * sizeFactor;
 
       ctx.drawImage(emojiImage, renderX - size / 2, renderY - size / 2, size, size);
     });

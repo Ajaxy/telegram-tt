@@ -7,10 +7,10 @@ import type { AnimationLevel } from '../../../types';
 import { LoadMoreDirection } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
-import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import { parseSearchResultKey, type SearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
+import { resolveTransitionName } from '../../../util/resolveTransitionName';
 import { throttle } from '../../../util/schedulers';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 

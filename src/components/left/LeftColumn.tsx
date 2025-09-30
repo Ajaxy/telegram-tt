@@ -13,12 +13,12 @@ import { type AnimationLevel, LeftColumnContent, SettingsScreens } from '../../t
 import {
   selectCurrentChat, selectIsCurrentUserFrozen, selectIsForumPanelOpen, selectTabState,
 } from '../../global/selectors';
-import { selectSharedSettings } from '../../global/selectors/sharedState.ts';
+import { selectSharedSettings } from '../../global/selectors/sharedState';
 import {
   IS_APP, IS_FIREFOX, IS_MAC_OS, IS_TOUCH_ENV,
 } from '../../util/browser/windowEnvironment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { resolveTransitionName } from '../../util/resolveTransitionName.ts';
+import { resolveTransitionName } from '../../util/resolveTransitionName';
 import { captureControlledSwipe } from '../../util/swipeController';
 
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';

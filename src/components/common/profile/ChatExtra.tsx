@@ -38,6 +38,7 @@ import {
   selectUser,
   selectUserFullInfo,
 } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import stopEvent from '../../../util/stopEvent';
@@ -69,6 +70,8 @@ type OwnProps = {
   chatOrUserId: string;
   isSavedDialog?: boolean;
   isInSettings?: boolean;
+  className?: string;
+  style?: string;
 };
 
 type StateProps = {
@@ -117,6 +120,8 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   isBotCanManageEmojiStatus,
   botAppPermissions,
   botVerification,
+  className,
+  style,
 }) => {
   const {
     showNotification,
@@ -338,7 +343,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <div className="ChatExtra">
+    <div className={buildClassName('ChatExtra', className)} style={style}>
       {personalChannel && (
         <div className={styles.personalChannel}>
           <h3 className={styles.personalChannelTitle}>{oldLang('ProfileChannel')}</h3>

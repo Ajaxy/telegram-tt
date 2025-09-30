@@ -4,9 +4,9 @@ import { getActions } from '../../../global';
 
 import { type AnimationLevel, LeftColumnContent } from '../../../types';
 
-import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
+import { resolveTransitionName } from '../../../util/resolveTransitionName';
 
-import useLastCallback from '../../../hooks/useLastCallback.ts';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Transition from '../../ui/Transition';
 import NewChatStep1 from './NewChatStep1';

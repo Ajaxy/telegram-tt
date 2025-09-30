@@ -6,7 +6,7 @@ import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { isChatAdmin, isDeletedUser } from '../helpers';
 import { selectChat, selectChatFullInfo } from './chats';
-import { selectActiveGiftsCollectionId } from './payments';
+import { type ProfileCollectionKey } from './payments';
 import { selectTabState } from './tabs';
 import { selectBot, selectUser, selectUserFullInfo } from './users';
 
@@ -29,14 +29,22 @@ export function selectCanGift<T extends GlobalState>(global: T, peerId: string) 
   return selectChatFullInfo(global, peerId)?.areStarGiftsAvailable;
 }
 
+export function selectPeerCollectionSavedGifts<T extends GlobalState>(
+  global: T,
+  peerId: string,
+  collectionId: ProfileCollectionKey,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): ApiSavedGifts | undefined {
+  const tabState = selectTabState(global, tabId);
+  return tabState.savedGifts.collectionsByPeerId[peerId]?.[collectionId];
+}
+
 export function selectPeerSavedGifts<T extends GlobalState>(
   global: T,
   peerId: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): ApiSavedGifts | undefined {
-  const tabState = selectTabState(global, tabId);
-  const activeCollectionId = selectActiveGiftsCollectionId(global, peerId, tabId);
-  return tabState.savedGifts.collectionsByPeerId[peerId]?.[activeCollectionId];
+  return selectPeerCollectionSavedGifts(global, peerId, 'all', tabId);
 }
 
 export function selectPeerStarGiftCollections<T extends GlobalState>(
@@ -60,4 +68,9 @@ export function selectPeerPaidMessagesStars<T extends GlobalState>(
   if (!chat) return undefined;
   if (isChatAdmin(chat)) return undefined;
   return chat.paidMessagesStars;
+}
+
+export function selectPeerHasProfileBackground<T extends GlobalState>(global: T, peerId: string) {
+  const peer = selectPeer(global, peerId);
+  return Boolean(peer?.profileColor || peer?.emojiStatus?.type === 'collectible');
 }

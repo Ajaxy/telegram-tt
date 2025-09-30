@@ -19,7 +19,6 @@ import {
 } from '../../global/helpers';
 import { isApiPeerUser } from '../../global/helpers/peers';
 import buildClassName from '../../util/buildClassName';
-import buildStyle from '../../util/buildStyle';
 import { copyTextToClipboard } from '../../util/clipboard';
 import stopEvent from '../../util/stopEvent';
 import renderText from './helpers/renderText';
@@ -31,6 +30,7 @@ import useOldLang from '../../hooks/useOldLang';
 import Transition from '../ui/Transition';
 import CustomEmoji from './CustomEmoji';
 import FakeIcon from './FakeIcon';
+import GiftEffectWrapper from './gift/GiftEffectWrapper';
 import StarIcon from './icons/StarIcon';
 import VerifiedIcon from './VerifiedIcon';
 
@@ -39,6 +39,7 @@ import styles from './FullNameTitle.module.scss';
 type OwnProps = {
   peer: ApiPeer | CustomPeer;
   className?: string;
+  style?: string;
   noVerified?: boolean;
   noFake?: boolean;
   withEmojiStatus?: boolean;
@@ -50,13 +51,14 @@ type OwnProps = {
   noLoopLimit?: boolean;
   canCopyTitle?: boolean;
   iconElement?: React.ReactNode;
-  statusSparklesColor?: string;
+  withStatusTextColor?: boolean;
   onEmojiStatusClick?: NoneToVoidFunction;
   observeIntersection?: ObserveFn;
 };
 
 const FullNameTitle: FC<OwnProps> = ({
   className,
+  style,
   peer,
   noVerified,
   noFake,
@@ -67,9 +69,9 @@ const FullNameTitle: FC<OwnProps> = ({
   noLoopLimit,
   canCopyTitle,
   iconElement,
-  statusSparklesColor,
   isMonoforum,
   monoforumBadgeClassName,
+  withStatusTextColor,
   onEmojiStatusClick,
   observeIntersection,
 }) => {
@@ -123,7 +125,7 @@ const FullNameTitle: FC<OwnProps> = ({
   const botVerificationIconId = realPeer?.botVerificationIconId;
 
   return (
-    <div className={buildClassName('title', styles.root, className)}>
+    <div className={buildClassName('title', styles.root, className)} style={style}>
       {botVerificationIconId && (
         <CustomEmoji
           documentId={botVerificationIconId}
@@ -157,18 +159,22 @@ const FullNameTitle: FC<OwnProps> = ({
               direction={-1}
               shouldCleanup
             >
-              <CustomEmoji
-                forceAlways
-                className="no-selection"
+              <GiftEffectWrapper
                 withSparkles={emojiStatus.type === 'collectible'}
                 sparklesClassName="statusSparkles"
-                sparklesStyle={buildStyle(statusSparklesColor && `color: ${statusSparklesColor}`)}
-                documentId={emojiStatus.documentId}
-                size={emojiStatusSize}
-                loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
-                observeIntersectionForLoading={observeIntersection}
-                onClick={onEmojiStatusClick}
-              />
+                sparklesColor={emojiStatus.type === 'collectible' && !withStatusTextColor
+                  ? emojiStatus.textColor : undefined}
+              >
+                <CustomEmoji
+                  forceAlways
+                  className={buildClassName('no-selection', !withStatusTextColor && styles.statusPrimaryColor)}
+                  documentId={emojiStatus.documentId}
+                  size={emojiStatusSize}
+                  loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
+                  observeIntersectionForLoading={observeIntersection}
+                  onClick={onEmojiStatusClick}
+                />
+              </GiftEffectWrapper>
             </Transition>
           )}
           {canShowEmojiStatus && !emojiStatus && isPremium && <StarIcon />}

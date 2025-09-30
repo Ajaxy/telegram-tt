@@ -178,3 +178,17 @@
     box-shadow: none;
   }
 }
+
+@mixin on-active-vt($type) {
+  :global {
+    .active-vt-#{$type} {
+      @content;
+    }
+  }
+}
+
+@mixin with-vt-type($type) {
+  :global(.active-vt-#{$type}) & {
+    view-transition-name: var(--_vtn);
+  }
+}

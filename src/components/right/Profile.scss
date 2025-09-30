@@ -21,6 +21,7 @@
 
     @include mixins.adapt-padding-to-scrollbar(0.5rem);
     @include mixins.side-panel-section;
+    @include mixins.with-vt-type('rightColumn');
 
     .narrow {
       margin-bottom: 0;
@@ -83,6 +84,8 @@
   display: flex;
   flex: 1;
   flex-direction: column-reverse;
+
+  @include mixins.with-vt-type('rightColumn');
 
   .TabList {
     z-index: 1;
@@ -240,5 +243,9 @@
     &.noTransition {
       transition: none;
     }
+  }
+
+  .saved-gift {
+    @include mixins.with-vt-type('profileGifts');
   }
 }

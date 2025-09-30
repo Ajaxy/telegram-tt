@@ -32,6 +32,11 @@
   animation-delay: var(--_duration-shift);
 }
 
+.noAnimation .symbol {
+  opacity: 0.5;
+  animation: none;
+}
+
 @keyframes sparkle {
   0% {
     transform: translate(0, 0);

@@ -678,17 +678,27 @@ addActionHandler('loadConfig', async (global): Promise<void> => {
 });
 
 addActionHandler('loadPeerColors', async (global): Promise<void> => {
-  const hash = global.peerColors?.generalHash;
-  const result = await callApi('fetchPeerColors', hash);
-  if (!result) return;
+  const generalHash = global.peerColors?.generalHash;
+  const profileHash = global.peerColors?.profileHash;
+  const [generalResult, profileResult] = await Promise.all([
+    callApi('fetchPeerColors', generalHash),
+    callApi('fetchPeerProfileColors', profileHash),
+  ]);
+
+  if (!generalResult && !profileResult) return;
 
   global = getGlobal();
+
+  const currentPeerColors = global.peerColors! || {};
+
   global = {
     ...global,
     peerColors: {
-      ...global.peerColors,
-      general: result.colors,
-      generalHash: result.hash,
+      ...currentPeerColors,
+      general: generalResult?.colors || currentPeerColors.general,
+      generalHash: generalResult?.hash || currentPeerColors.generalHash,
+      profile: profileResult?.colors || currentPeerColors.profile,
+      profileHash: profileResult?.hash || currentPeerColors.profileHash,
     },
   };
   setGlobal(global);

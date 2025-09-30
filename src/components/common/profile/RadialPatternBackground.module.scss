@@ -3,11 +3,14 @@
   border-radius: inherit;
 
   &::before {
+    pointer-events: none;
     content: '';
+
     position: absolute;
     inset: 0;
+
     background-image:
-      radial-gradient(circle closest-side, #ffffff32, #ffffff00),
+      radial-gradient(circle closest-side, #ffffff32 3rem, #ffffff00 7rem),
       radial-gradient(closest-side, var(--_bg-1), var(--_bg-2));
   }
 }

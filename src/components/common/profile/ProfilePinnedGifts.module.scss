@@ -1,0 +1,57 @@
+@use "../../../styles/mixins";
+
+.root {
+  position: relative;
+  overflow: hidden;
+}
+
+.gift {
+  cursor: var(--custom-cursor, pointer);
+
+  position: absolute !important;
+  transform: translate(-50%, -50%);
+
+  width: 2rem;
+  height: 2rem;
+
+  @include mixins.with-vt-type('profileAvatar');
+}
+
+@include mixins.on-active-vt('profileExpand') {
+  &::view-transition-new(.profilePinnedGift) {
+    :local {
+      animation-name: fadeOut;
+      animation-timing-function: ease-out;
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+      }
+    }
+  }
+
+  &::view-transition-old(.profilePinnedGift) {
+    display: none;
+  }
+}
+
+@include mixins.on-active-vt('profileCollapse') {
+  &::view-transition-old(.profilePinnedGift) {
+    display: none;
+  }
+
+  &::view-transition-new(.profilePinnedGift) {
+    :local {
+      opacity: 0;
+      animation-name: fadeIn;
+      animation-timing-function: ease-in;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+  }
+}

@@ -295,6 +295,7 @@
 
 .symbol-set-container {
   display: grid !important;
+  grid-auto-rows: var(--emoji-size, 4.5rem);
   grid-template-columns: repeat(auto-fill, var(--emoji-size, 4.5rem));
   row-gap: 0.25rem;
   column-gap: var(--symbol-set-gap-size, 0.625rem);
@@ -311,7 +312,8 @@
   }
 
   > .EmojiButton,
-  > .StickerButton {
+  > .StickerButton,
+  > .gift-effect-wrapper > .StickerButton {
     margin: 0;
   }
 

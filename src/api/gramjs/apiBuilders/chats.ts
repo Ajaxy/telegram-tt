@@ -83,6 +83,7 @@ function buildApiChatFieldsFromPeerEntity(
   const botVerificationIconId = userOrChannel?.botVerificationIcon?.toString();
   const storiesUnavailable = userOrChannel?.storiesUnavailable;
   const color = userOrChannel?.color ? buildApiPeerColor(userOrChannel.color) : undefined;
+  const profileColor = userOrChannel?.profileColor ? buildApiPeerColor(userOrChannel.profileColor) : undefined;
   const emojiStatus = userOrChannel?.emojiStatus ? buildApiEmojiStatus(userOrChannel.emojiStatus) : undefined;
   const paidMessagesStars = userOrChannel?.sendPaidMessagesStars;
   const isVerified = userOrChannel?.verified;
@@ -107,6 +108,7 @@ function buildApiChatFieldsFromPeerEntity(
     isCreator,
     fakeType: isScam ? 'scam' : (isFake ? 'fake' : undefined),
     color,
+    profileColor,
     isJoinToSend: channel?.joinToSend,
     isJoinRequest: channel?.joinRequest,
     isForum: channel?.forum,

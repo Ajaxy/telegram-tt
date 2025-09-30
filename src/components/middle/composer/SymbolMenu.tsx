@@ -11,10 +11,10 @@ import type { MenuPositionOptions } from '../../ui/Menu';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { selectIsContextMenuTranslucent, selectTabState } from '../../../global/selectors';
-import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
+import { resolveTransitionName } from '../../../util/resolveTransitionName';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -36,7 +36,6 @@ import SymbolMenuFooter, { SYMBOL_MENU_TAB_TITLES, SymbolMenuTabs } from './Symb
 import './SymbolMenu.scss';
 
 const ANIMATION_DURATION = 350;
-const STICKERS_TAB_INDEX = 2;
 
 export type OwnProps = {
   chatId: string;
@@ -123,7 +122,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   // If we can't send plain text, we should always show the stickers tab
   useEffect(() => {
     if (canSendPlainText) return;
-    setActiveTab(STICKERS_TAB_INDEX);
+    setActiveTab(SymbolMenuTabs.Stickers);
   }, [canSendPlainText]);
 
   useLayoutEffect(() => {
@@ -178,7 +177,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       });
     });
 
-    setRecentEmojis([]);
+    setRecentCustomEmojis([]);
   }, [isOpen, addRecentCustomEmoji]);
 
   const handleCustomEmojiSelect = useLastCallback((emoji: ApiSticker) => {

@@ -37,6 +37,7 @@ import useWindowSize from '../../hooks/window/useWindowSize';
 
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';
+import GiftEffectWrapper from './gift/GiftEffectWrapper';
 import Icon from './icons/Icon';
 import ReactionEmoji from './reactions/ReactionEmoji';
 import StickerButton from './StickerButton';
@@ -380,10 +381,10 @@ const StickerSet: FC<OwnProps & StateProps> = ({
             const reactionId = sticker.isCustomEmoji ? sticker.id : sticker.emoji;
             const isSelected = reactionId ? selectedReactionIds?.includes(reactionId) : undefined;
 
-            const withSparkles = sticker.id === COLLECTIBLE_STATUS_SET_ID
+            const withSparkles = stickerSet.id === COLLECTIBLE_STATUS_SET_ID
               || collectibleEmojiIdsSet?.has(sticker.id);
 
-            return (
+            const component = (
               <StickerButton
                 key={sticker.id}
                 sticker={sticker}
@@ -412,9 +413,18 @@ const StickerSet: FC<OwnProps & StateProps> = ({
                 isEffectEmoji={stickerSet.id === EFFECT_EMOJIS_SET_ID}
                 noShowPremium={isCurrentUserPremium
                   && (stickerSet.id === EFFECT_STICKERS_SET_ID || stickerSet.id === EFFECT_EMOJIS_SET_ID)}
-                withSparkles={withSparkles}
               />
             );
+
+            if (withSparkles) {
+              return (
+                <GiftEffectWrapper className="gift-effect-wrapper" withSparkles>
+                  {component}
+                </GiftEffectWrapper>
+              );
+            }
+
+            return component;
           })}
         {isCut && totalItemsCount > itemsBeforeCutout && (
           <Button

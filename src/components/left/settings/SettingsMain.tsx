@@ -21,7 +21,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
 import ChatExtra from '../../common/profile/ChatExtra';
-import ProfileInfo from '../../common/ProfileInfo';
+import ProfileInfo from '../../common/profile/ProfileInfo';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import ListItem from '../../ui/ListItem';
 
@@ -86,7 +86,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           <ProfileInfo
             peerId={currentUserId}
             canPlayVideo={Boolean(isActive)}
-            forceShowSelf
+            isForSettings
           />
         )}
         {currentUserId && (

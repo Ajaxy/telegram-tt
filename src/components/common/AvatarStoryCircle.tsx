@@ -13,11 +13,11 @@ import { REM } from './helpers/mediaDimensions';
 import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
 
 interface OwnProps {
-
   peerId: string;
   className?: string;
   size: number;
   withExtraGap?: boolean;
+  colors?: string[];
 }
 
 interface StateProps {
@@ -29,14 +29,13 @@ interface StateProps {
 
 const BLUE = ['#34C578', '#3CA3F3'];
 const GREEN = ['#C9EB38', '#09C167'];
-const PURPLE = ['#A667FF', '#55A5FF'];
 const GRAY = '#C4C9CC';
 const DARK_GRAY = '#737373';
 const STROKE_WIDTH = 0.125 * REM;
-const STROKE_WIDTH_READ = 0.0625 * REM;
+const STROKE_WIDTH_LARGE = 0.25 * REM;
 const GAP_PERCENT = 2;
 const SEGMENTS_MAX = 45; // More than this breaks rendering in Safari and Chrome
-const LARGE_AVATAR_SIZE = 3.5 * REM;
+const LARGE_SIZE = 4 * REM;
 
 const GAP_PERCENT_EXTRA = 10;
 const EXTRA_GAP_ANGLE = Math.PI / 4;
@@ -52,12 +51,15 @@ function AvatarStoryCircle({
   lastReadId,
   withExtraGap,
   appTheme,
+  colors,
 }: OwnProps & StateProps) {
   const ref = useRef<HTMLCanvasElement>();
 
   const dpr = useDevicePixelRatio();
 
-  const adaptedSize = size + STROKE_WIDTH;
+  const isLarge = size > LARGE_SIZE;
+  const strokeWidth = isLarge ? STROKE_WIDTH_LARGE : STROKE_WIDTH;
+  const adaptedSize = size + strokeWidth + (isLarge ? 0.25 * REM : 0); // Add extra gap space for large avatars
 
   const values = useMemo(() => {
     return (storyIds || []).reduce((acc, id) => {
@@ -92,15 +94,16 @@ function AvatarStoryCircle({
 
     drawGradientCircle({
       canvas: ref.current,
-      size: adaptedSize * dpr,
+      size: adaptedSize,
+      strokeWidth,
       segmentsCount: values.total,
-      color: isCloseFriend ? 'green' : 'blue',
+      colorStops: colors || (isCloseFriend ? GREEN : BLUE),
       readSegmentsCount: values.read,
       withExtraGap,
       readSegmentColor: appTheme === 'dark' ? DARK_GRAY : GRAY,
       dpr,
     });
-  }, [appTheme, isCloseFriend, adaptedSize, values.read, values.total, withExtraGap, dpr]);
+  }, [appTheme, isCloseFriend, adaptedSize, values.read, values.total, withExtraGap, dpr, colors, size, strokeWidth]);
 
   if (!values.total) {
     return undefined;
@@ -130,7 +133,8 @@ export default memo(withGlobal<OwnProps>((global, { peerId }): Complete<StatePro
 export function drawGradientCircle({
   canvas,
   size,
-  color,
+  strokeWidth: strokeWidthPx = STROKE_WIDTH,
+  colorStops,
   segmentsCount,
   readSegmentsCount = 0,
   withExtraGap = false,
@@ -138,8 +142,9 @@ export function drawGradientCircle({
   dpr,
 }: {
   canvas: HTMLCanvasElement;
+  strokeWidth?: number;
   size: number;
-  color: string;
+  colorStops: string[];
   segmentsCount: number;
   readSegmentsCount?: number;
   withExtraGap?: boolean;
@@ -152,33 +157,41 @@ export function drawGradientCircle({
     segmentsCount = SEGMENTS_MAX;
   }
 
-  const strokeModifier = Math.max(Math.max(size - LARGE_AVATAR_SIZE * dpr, 0) / dpr / REM / 1.5, 1) * dpr;
+  const sizeModifier = dpr;
+  const strokeModifier = dpr;
 
   const ctx = canvas.getContext('2d');
   if (!ctx) {
     return;
   }
 
-  canvas.width = size;
-  canvas.height = size;
-  const centerCoordinate = size / 2;
-  const radius = (size - STROKE_WIDTH * strokeModifier) / 2;
+  const canvasSize = size * sizeModifier;
+  const strokeWidth = strokeWidthPx * strokeModifier;
+
+  canvas.width = canvasSize;
+  canvas.height = canvasSize;
+  const centerCoordinate = canvasSize / 2;
+  const radius = (canvasSize - strokeWidth) / 2;
   const segmentAngle = (2 * Math.PI) / segmentsCount;
   const gapSize = (GAP_PERCENT / 100) * (2 * Math.PI);
   const gradient = ctx.createLinearGradient(
     0,
     0,
-    Math.ceil(size * Math.cos(Math.PI / 2)),
-    Math.ceil(size * Math.sin(Math.PI / 2)),
+    Math.ceil(canvasSize * Math.cos(Math.PI / 2)),
+    Math.ceil(canvasSize * Math.sin(Math.PI / 2)),
   );
 
-  const colorStops = color === 'purple' ? PURPLE : color === 'green' ? GREEN : BLUE;
-  colorStops.forEach((colorStop, index) => {
-    gradient.addColorStop(index / (colorStops.length - 1), colorStop);
-  });
+  if (colorStops.length === 1) {
+    gradient.addColorStop(0, colorStops[0]);
+    gradient.addColorStop(1, colorStops[0]);
+  } else {
+    colorStops.forEach((colorStop, index) => {
+      gradient.addColorStop(index / (colorStops.length - 1), colorStop);
+    });
+  }
 
   ctx.lineCap = 'round';
-  ctx.clearRect(0, 0, size, size);
+  ctx.clearRect(0, 0, canvasSize, canvasSize);
 
   Array.from({ length: segmentsCount }).forEach((_, i) => {
     const isRead = i < readSegmentsCount;
@@ -186,7 +199,7 @@ export function drawGradientCircle({
     let endAngle = startAngle + segmentAngle - (segmentsCount > 1 ? gapSize : 0);
 
     ctx.strokeStyle = isRead ? readSegmentColor : gradient;
-    ctx.lineWidth = (isRead ? STROKE_WIDTH_READ : STROKE_WIDTH) * strokeModifier;
+    ctx.lineWidth = strokeWidth * (isRead ? 0.5 : 1);
 
     if (withExtraGap) {
       if (startAngle >= EXTRA_GAP_START && endAngle <= EXTRA_GAP_END) { // Segment is inside extra gap

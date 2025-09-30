@@ -102,7 +102,6 @@ const GiftStatusInfoModal = ({
             withEmojiStatus
             noFake
             noVerified
-            statusSparklesColor={subtitleColor}
           />
           <p className={styles.status} style={buildStyle(subtitleColor && `color: ${subtitleColor}`)}>
             {lang('Online')}

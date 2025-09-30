@@ -33,12 +33,9 @@
     "tests",
     "plugins",
     "dev",
-    "webpack.config.ts",
-    "babel.config.js",
-    "eslint.config.mjs",
+    "*.config.ts",
+    "*.config.js",
     ".fantasticonrc.cjs",
-    "playwright.config.ts",
-    "jest.config.js",
     ".github/workflows/*.js",
     "deploy/*.js"
   ]

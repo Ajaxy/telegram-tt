@@ -33,6 +33,7 @@ import {
   buildApiLanguage,
   buildApiPeerColors,
   buildApiPeerNotifySettings,
+  buildApiPeerProfileColors,
   buildApiSession,
   buildApiTimezone,
   buildApiWallpaper,
@@ -621,6 +622,23 @@ export async function fetchPeerColors(hash?: number) {
   if (!result) return undefined;
 
   const colors = buildApiPeerColors(result);
+  if (!colors) return undefined;
+
+  const newHash = result instanceof GramJs.help.PeerColors ? result.hash : undefined;
+
+  return {
+    colors,
+    hash: newHash,
+  };
+}
+
+export async function fetchPeerProfileColors(hash?: number) {
+  const result = await invokeRequest(new GramJs.help.GetPeerProfileColors({
+    hash: hash ?? DEFAULT_PRIMITIVES.INT,
+  }));
+  if (!result) return undefined;
+
+  const colors = buildApiPeerProfileColors(result);
   if (!colors) return undefined;
 
   const newHash = result instanceof GramJs.help.PeerColors ? result.hash : undefined;

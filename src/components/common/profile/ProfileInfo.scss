@@ -1,22 +1,5 @@
 // This class is used in `ghostAnimation`, so we need to keep it global
 .ProfileInfo {
-  position: relative;
-  aspect-ratio: 1 / 1;
-
-  @supports not (aspect-ratio: 1 / 1) {
-    &::before {
-      content: "";
-      float: left;
-      padding-top: 100%;
-    }
-
-    &::after {
-      content: "";
-      clear: both;
-      display: block;
-    }
-  }
-
   .fullName {
     margin-bottom: 0;
 
@@ -25,15 +8,6 @@
     line-height: 1.375rem;
     overflow-wrap: anywhere;
     white-space: pre-wrap;
-  }
-
-  .VerifiedIcon,
-  .StarIcon {
-    --color-fill: var(--color-white);
-    --color-checkmark: var(--color-primary);
-
-    z-index: 2;
-    opacity: 0.8;
   }
 
   .emoji:not(.custom-emoji) {
@@ -47,6 +21,5 @@
 
     pointer-events: auto;
     cursor: var(--custom-cursor, pointer);
-    color: var(--color-white) !important;
   }
 }

@@ -32,7 +32,7 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
   - Early returns.
   - Prefix boolean variables with primary or modal auxiliaries (e.q. `isOpen`, `willUpdate`, `shouldRender`).
   - Functions should start with a verb (e.q. `openModal`, `closeDialog`, `handleClick`).
-  - Prefer checking required parameter before calling a function, avoid making it optinal and checking at the beginning of the function.
+  - Prefer checking required parameter before calling a function, avoid making it optional and checking at the beginning of the function.
   - Only leave comments for complex logic.
   - Do not use `null`. There's linter rule to enforce it.
   - **IMPORTANT: Avoid conditional spread operators** - TypeScript doesn't check if spread fields match the target type.
@@ -203,8 +203,10 @@ const NewComp = (props: OwnProps & StateProps) => { … }
 ### Example
 
 ```ts
-import React, { useFlag } from '../../lib/teact/teact';
+import { memo, useState, useRef } from '../../lib/teact/teact';
+import { withGlobal, getActions } from '../../global';
 
+import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
@@ -236,10 +238,10 @@ const Component = ({ id, className, stateValue, onClick }: OwnProps & StateProps
   const handleClick = useLastCallback(() => {
     if (!ref.current) return;
     const el = ref.current;
-    setColor(el.value);
+    setColor(el.dataset.value);
     close();
     onClick?.();
-    someAction(el.value);
+    someAction(el.dataset.value);
   });
 
   return (
@@ -251,12 +253,11 @@ const Component = ({ id, className, stateValue, onClick }: OwnProps & StateProps
 }
 
 export default memo(withGlobal<OwnProps>((global, { id }): Complete<StateProps> => {
-
     const stateValue = selectValue(global, id);
     return {
       stateValue,
     };
-  })(Component);
+  })(Component)
 )
 ```
 

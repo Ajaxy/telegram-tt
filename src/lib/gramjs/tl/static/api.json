@@ -248,6 +248,7 @@
     "help.getCountriesList",
     "help.getAppConfig",
     "help.getPeerColors",
+    "help.getPeerProfileColors",
     "help.getTimezonesList",
     "help.getPremiumPromo",
     "channels.readHistory",

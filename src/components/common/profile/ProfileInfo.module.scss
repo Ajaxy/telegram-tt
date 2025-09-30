@@ -1,0 +1,549 @@
+@use "../../../styles/mixins";
+
+.root {
+  --rating-outline-color: #000000;
+  --rating-text-color: #000000;
+
+  position: relative;
+
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+
+  aspect-ratio: 1 / 1;
+
+  color: var(--color-white);
+
+  @include mixins.with-vt-type('profileAvatar');
+
+  :global(.VerifiedIcon),
+  :global(.StarIcon) {
+    --color-fill: var(--color-white);
+    --color-checkmark: var(--color-primary);
+
+    z-index: 2;
+    opacity: 0.8;
+  }
+}
+
+.plain.minimized {
+  color: var(--color-text);
+
+  .userRatingNegativeWrapper,
+  .userRatingWrapper {
+    color: var(--color-white);
+  }
+
+  :global(.VerifiedIcon),
+  :global(.StarIcon) {
+    --color-fill: var(--color-primary);
+    --color-checkmark: var(--color-white);
+
+    opacity: 1;
+  }
+}
+
+.fallbackPhoto {
+  pointer-events: none;
+
+  position: absolute;
+  z-index: 1;
+
+  display: flex;
+  justify-content: center;
+
+  width: 100%;
+  padding-top: 1rem;
+  padding-bottom: 0.5rem;
+
+  opacity: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
+
+  transition: 0.25s ease-in-out opacity;
+}
+
+.fallbackPhotoContents {
+  pointer-events: none;
+  cursor: var(--custom-cursor, pointer);
+  user-select: none;
+
+  display: flex;
+  align-items: center;
+
+  height: 1.5rem;
+
+  font-size: 0.75rem;
+
+  opacity: 0.5;
+
+  transition: 0.25s ease-in-out opacity;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.fallbackPhotoVisible {
+  opacity: 1;
+
+  .fallbackPhotoContents {
+    pointer-events: all;
+  }
+}
+
+.fallbackPhotoAvatar {
+  margin-right: 0.5rem;
+}
+
+.photoWrapper {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  overflow: hidden;
+
+  width: 100%;
+
+  @include mixins.with-vt-type('profileAvatar');
+
+  &::before {
+    content: '';
+
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    left: 0;
+
+    height: 2rem;
+
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0) 100%);
+  }
+
+  > :global(.Transition) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.photoDashes {
+  position: absolute;
+  z-index: 2;
+  top: 0.5rem;
+  left: 0;
+
+  display: flex;
+
+  width: 100%;
+  height: 0.125rem;
+  padding: 0 0.375rem;
+}
+
+.photoDash {
+  flex: 1 1 auto;
+
+  margin: 0 0.125rem;
+  border-radius: 0.125rem;
+
+  opacity: 0.25;
+  background-color: var(--color-white);
+
+  transition: opacity 300ms ease;
+
+  &_current {
+    opacity: 0.75;
+  }
+}
+
+.navigation {
+  cursor: var(--custom-cursor, pointer);
+
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+
+  width: 25%;
+  margin: 0;
+  padding: 0;
+  border: none;
+
+  appearance: none;
+  opacity: 0.25;
+  background: transparent no-repeat;
+  background-size: 1.25rem;
+  outline: none !important;
+
+  transition: opacity 0.15s;
+
+  &:global(:hover),
+  :global(.is-touch-env) & {
+    opacity: 1;
+  }
+
+  &_prev {
+    left: 0;
+    background-image: url("../../../assets/media_navigation_previous.svg");
+    background-position: 1.25rem 50%;
+
+    &[dir="rtl"] {
+      right: 0;
+      left: auto;
+      transform: scaleX(-1);
+    }
+  }
+
+  &_next {
+    right: 0;
+    background-image: url("../../../assets/media_navigation_next.svg");
+    background-position: calc(100% - 1.25rem) 50%;
+
+    &[dir="rtl"] {
+      right: auto;
+      left: 0;
+      transform: scaleX(-1);
+    }
+  }
+}
+
+.info {
+  pointer-events: none;
+
+  position: absolute;
+  bottom: 0;
+  left: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  width: 100%;
+  min-height: 100px;
+  padding: 0 1.5rem 0.5rem;
+
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
+
+  @include mixins.with-vt-type('profileAvatar');
+
+  &:dir(rtl) {
+    .status {
+      unicode-bidi: plaintext;
+      text-align: right;
+    }
+  }
+
+  &[dir="rtl"] {
+    .status {
+      unicode-bidi: plaintext;
+      text-align: right;
+    }
+  }
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+
+  @include mixins.with-vt-type('profileAvatar');
+}
+
+.status,
+.info,
+.title {
+  align-self: flex-start;
+}
+
+.userRatingNegativeWrapper,
+.userRatingWrapper {
+  pointer-events: all;
+  cursor: pointer;
+
+  position: relative;
+  z-index: 1;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-right: 0.25rem;
+
+  font-size: 1rem;
+}
+
+.userRatingWrapper {
+  width: 1rem;
+  font-size: 1.5rem;
+}
+
+.ratingIcon, .ratingNegativeIcon {
+  pointer-events: none;
+  paint-order: stroke fill;
+
+  -webkit-text-stroke: 2px var(--rating-outline-color);
+}
+
+.ratingNegativeIcon {
+  font-size: 1rem;
+}
+
+.ratingLevel {
+  pointer-events: none;
+
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  font-size: 0.625rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  color: var(--rating-text-color);
+}
+
+.userStatus {
+  opacity: 0.5;
+}
+
+.getStatus {
+  --blured-background-color: #c4c9cc42;
+
+  pointer-events: all;
+  cursor: var(--custom-cursor, pointer);
+
+  margin-inline-start: 0.375rem;
+  padding: 0.1875rem 0.375rem;
+  border-radius: 1rem;
+
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-medium);
+
+  opacity: 0.8;
+  background: var(--blured-background-color);
+  backdrop-filter: blur(100px);
+
+  transition: 150ms filter ease-in;
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+}
+
+.topicContainer {
+  --custom-emoji-size: 7.5rem;
+
+  padding: 1rem 1rem 0.75rem;
+}
+
+.topicTitle {
+  margin: 0.5rem 0 0;
+  font-size: 1.25rem;
+  line-height: 1.5rem;
+  text-align: center;
+}
+
+.topicIcon {
+  display: flex !important;
+  width: 7.5rem !important;
+  height: 7.5rem !important;
+  margin: auto;
+
+  &:global(.general-forum-icon) {
+    font-size: 7.5rem;
+    color: var(--color-text-secondary);
+  }
+}
+
+.topicIconTitle {
+  font-size: 3rem !important;
+  font-weight: var(--font-weight-normal);
+
+  :global(.emoji-small) {
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+.topicMessagesCounter {
+  margin: 0;
+
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.radialPatternBackground {
+  pointer-events: none;
+
+  // Hacky way to keep background stable during resizes
+  position: absolute;
+  top: 8rem;
+
+  aspect-ratio: 1 / 1;
+  width: 140%;
+  margin-top: -70%;
+}
+
+.standaloneAvatar {
+  grid-area: 1 / -1;
+
+  @include mixins.with-vt-type('profileAvatar');
+}
+
+.activeProfilePhoto {
+  @include mixins.with-vt-type('profileAvatar');
+}
+
+.minimized {
+  aspect-ratio: unset;
+  padding-block: 4.25rem 1rem;
+
+  .status, .title, .info {
+    align-self: center;
+  }
+
+  .info {
+    position: relative;
+
+    justify-content: unset;
+
+    min-height: unset;
+    margin-top: 1rem;
+
+    background: none;
+  }
+}
+
+.title {
+  @include mixins.with-vt-type('profileAvatar');
+}
+
+.pinnedGifts {
+  position: absolute;
+  inset: 0;
+}
+
+@include mixins.on-active-vt('profileAvatar') {
+  &::view-transition-group(.info),
+  &::view-transition-group(.title),
+  &::view-transition-group(.status) {
+    z-index: 1;
+  }
+}
+
+@include mixins.on-active-vt('profileAvatar') {
+  &::view-transition-old(.profileInfo),
+  &::view-transition-new(.profileInfo) {
+    animation-name: none;
+  }
+}
+
+// Delay before showing buttons & overlay
+@include mixins.on-active-vt('profileExpand') {
+  &::view-transition-new(.photoWrapper),
+  &::view-transition-new(.info) {
+    animation-delay: 0.25s;
+  }
+}
+
+// Hide buttons & overlay immediately
+@include mixins.on-active-vt('profileCollapse') {
+  &::view-transition-old(.photoWrapper),
+  &::view-transition-old(.info) {
+    animation-duration: 0.1s;
+  }
+}
+
+@include mixins.on-active-vt('profileExpand') {
+  &::view-transition-old(.avatar) {
+    :local {
+      animation-name: fadeOut;
+      animation-duration: 0.1s;
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0;
+      }
+    }
+  }
+
+  &::view-transition-new(.avatar) {
+    :local {
+      animation-name: profileExpandAvatar;
+      animation-duration: inherit;
+      animation-timing-function: inherit;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes profileExpandAvatar {
+      from {
+        opacity: 1;
+        clip-path: inset(0 0 0 0 round 50%);
+      }
+
+      25% {
+        clip-path: inset(0 0 0 0 round 50%);
+      }
+
+      to {
+        clip-path: inset(0 0 0 0 round 0%);
+      }
+    }
+  }
+}
+
+@include mixins.on-active-vt('profileCollapse') {
+  &::view-transition-new(.avatar) {
+    :local {
+      animation-name: fadeIn;
+      animation-duration: 0.125s;
+      animation-delay: 0.125s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+  }
+
+  &::view-transition-old(.avatar) {
+    :local {
+      animation-name: profileCollapseAvatar;
+      animation-duration: inherit;
+      animation-timing-function: inherit;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes profileCollapseAvatar {
+      from {
+        clip-path: inset(0 0 0 0 round 0%);
+      }
+
+      25% {
+        clip-path: inset(0 0 0 0 round 50%);
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0;
+        clip-path: inset(0 0 0 0 round 50%);
+      }
+    }
+  }
+}

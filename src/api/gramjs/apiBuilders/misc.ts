@@ -9,6 +9,7 @@ import type {
   ApiOldLangString,
   ApiPeerColors,
   ApiPeerNotifySettings,
+  ApiPeerProfileColorSet,
   ApiPrivacyKey,
   ApiRestrictionReason,
   ApiSession,
@@ -293,11 +294,16 @@ export function buildApiLanguage(lang: GramJs.TypeLangPackLanguage): ApiLanguage
   };
 }
 
-function buildApiPeerColorSet(colorSet: GramJs.help.TypePeerColorSet) {
-  if (colorSet instanceof GramJs.help.PeerColorSet) {
-    return colorSet.colors.map((color) => numberToHexColor(color));
-  }
-  return undefined;
+function buildApiPeerColorSet(colorSet: GramJs.help.PeerColorSet) {
+  return colorSet.colors.map((color) => numberToHexColor(color));
+}
+
+function buildApiPeerProfileColorSet(colorSet: GramJs.help.PeerColorProfileSet): ApiPeerProfileColorSet {
+  return {
+    paletteColors: colorSet.paletteColors.map((color) => numberToHexColor(color)),
+    bgColors: colorSet.bgColors.map((color) => numberToHexColor(color)),
+    storyColors: colorSet.storyColors.map((color) => numberToHexColor(color)),
+  };
 }
 
 export function buildApiPeerColors(wrapper: GramJs.help.TypePeerColors): ApiPeerColors['general'] | undefined {
@@ -306,8 +312,24 @@ export function buildApiPeerColors(wrapper: GramJs.help.TypePeerColors): ApiPeer
   return buildCollectionByCallback(wrapper.colors, (color) => {
     return [color.colorId, {
       isHidden: color.hidden,
-      colors: color.colors && buildApiPeerColorSet(color.colors),
-      darkColors: color.darkColors && buildApiPeerColorSet(color.darkColors),
+      colors: color.colors instanceof GramJs.help.PeerColorSet
+        ? buildApiPeerColorSet(color.colors) : undefined,
+      darkColors: color.darkColors instanceof GramJs.help.PeerColorSet
+        ? buildApiPeerColorSet(color.darkColors) : undefined,
+    }];
+  });
+}
+
+export function buildApiPeerProfileColors(wrapper: GramJs.help.TypePeerColors): ApiPeerColors['profile'] | undefined {
+  if (!(wrapper instanceof GramJs.help.PeerColors)) return undefined;
+
+  return buildCollectionByCallback(wrapper.colors, (color) => {
+    return [color.colorId, {
+      isHidden: color.hidden,
+      colors: color.colors instanceof GramJs.help.PeerColorProfileSet
+        ? buildApiPeerProfileColorSet(color.colors) : undefined,
+      darkColors: color.darkColors instanceof GramJs.help.PeerColorProfileSet
+        ? buildApiPeerProfileColorSet(color.darkColors) : undefined,
     }];
   });
 }

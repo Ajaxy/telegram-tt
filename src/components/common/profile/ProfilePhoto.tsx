@@ -1,9 +1,9 @@
-import type { FC, TeactNode } from '../../lib/teact/teact';
+import type { FC, TeactNode } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef,
-} from '../../lib/teact/teact';
+} from '../../../lib/teact/teact';
 
-import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
+import type { ApiChat, ApiPhoto, ApiUser } from '../../../api/types';
 
 import {
   getChatAvatarHash,
@@ -15,24 +15,24 @@ import {
   isAnonymousForwardsChat,
   isChatWithRepliesBot,
   isDeletedUser,
-} from '../../global/helpers';
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/browser/windowEnvironment';
-import buildClassName from '../../util/buildClassName';
-import { isUserId } from '../../util/entities/ids';
-import { getFirstLetters } from '../../util/textFormat';
-import { getPeerColorClass } from './helpers/peerColor';
-import renderText from './helpers/renderText';
+} from '../../../global/helpers';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/browser/windowEnvironment';
+import buildClassName from '../../../util/buildClassName';
+import { isUserId } from '../../../util/entities/ids';
+import { getFirstLetters } from '../../../util/textFormat';
+import { getPeerColorClass } from '../helpers/peerColor';
+import renderText from '../helpers/renderText';
 
-import useAppLayout from '../../hooks/useAppLayout';
-import useCanvasBlur from '../../hooks/useCanvasBlur';
-import useFlag from '../../hooks/useFlag';
-import useMedia from '../../hooks/useMedia';
-import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
-import useOldLang from '../../hooks/useOldLang';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useCanvasBlur from '../../../hooks/useCanvasBlur';
+import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
+import useMedia from '../../../hooks/useMedia';
+import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
 
-import OptimizedVideo from '../ui/OptimizedVideo';
-import Spinner from '../ui/Spinner';
-import Icon from './icons/Icon';
+import OptimizedVideo from '../../ui/OptimizedVideo';
+import Spinner from '../../ui/Spinner';
+import Icon from '../icons/Icon';
 
 import './ProfilePhoto.scss';
 
@@ -43,6 +43,8 @@ type OwnProps = {
   isSavedDialog?: boolean;
   photo?: ApiPhoto;
   canPlayVideo: boolean;
+  className?: string;
+  style?: string;
   onClick: NoneToVoidFunction;
 };
 
@@ -53,11 +55,13 @@ const ProfilePhoto: FC<OwnProps> = ({
   isSavedMessages,
   isSavedDialog,
   canPlayVideo,
+  className,
+  style,
   onClick,
 }) => {
   const videoRef = useRef<HTMLVideoElement>();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const { isMobile } = useAppLayout();
 
   const isDeleted = user && isDeletedUser(user);
@@ -142,6 +146,7 @@ const ProfilePhoto: FC<OwnProps> = ({
           ) : (
             <img
               src={fullMediaData}
+              draggable={false}
               className={buildClassName('avatar-media', transitionClassNames)}
               alt=""
             />
@@ -171,10 +176,11 @@ const ProfilePhoto: FC<OwnProps> = ({
     isDeleted && 'deleted-account',
     isRepliesChat && 'replies-bot-account',
     (!isSavedMessages && !hasMedia) && 'no-photo',
+    className,
   );
 
   return (
-    <div className={fullClassName} onClick={hasMedia ? onClick : undefined}>
+    <div className={fullClassName} onClick={hasMedia ? onClick : undefined} style={style}>
       {typeof content === 'string' ? renderText(content, ['hq_emoji']) : content}
     </div>
   );

@@ -26,6 +26,7 @@ export default function useTopOverscroll(
   const lastIsOnTopRef = useRef(true);
   const lastScrollAtRef = useRef(0);
   const isReturningOverscrollRef = useRef(false);
+  const lastCalledStateRef = useRef<'overscroll' | 'reset' | undefined>(undefined);
 
   const enableOverscrollTrigger = useLastCallback((noScrollInertiaStop = false) => {
     if (isTriggerEnabledRef.current) return;
@@ -77,14 +78,16 @@ export default function useTopOverscroll(
       forceMutation(disableOverscrollTrigger, overscrollTriggerRef.current);
     }
 
-    if (
-      isMovingUp && (
+    if (lastCalledStateRef.current !== 'overscroll' && isMovingUp
+      && (
         (lastIsOnTopRef.current && lastEventDelay > INERTIA_THRESHOLD)
         || (newScrollTop < 0 && isReturningOverscrollRef.current) // Overscroll repeated by the user
       )) {
       onOverscroll?.();
-    } else if (isMovingDown && newScrollTop > 0) {
+      lastCalledStateRef.current = 'overscroll';
+    } else if (lastCalledStateRef.current !== 'reset' && isMovingDown && newScrollTop > 0) {
       onReset?.();
+      lastCalledStateRef.current = 'reset';
     }
 
     lastScrollTopRef.current = newScrollTop;
@@ -101,10 +104,12 @@ export default function useTopOverscroll(
     const isScrollable = container.scrollHeight > container.offsetHeight;
     if (isScrollable || event.deltaY === 0) return;
 
-    if (event.deltaY < 0) {
+    if (lastCalledStateRef.current !== 'overscroll' && event.deltaY < 0) {
       onOverscroll?.();
-    } else {
+      lastCalledStateRef.current = 'overscroll';
+    } else if (lastCalledStateRef.current !== 'reset') {
       onReset?.();
+      lastCalledStateRef.current = 'reset';
     }
   }, [containerRef, onOverscroll, onReset], MOUSE_WHEEL_DEBOUNCE);
 

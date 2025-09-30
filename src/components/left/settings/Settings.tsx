@@ -7,11 +7,11 @@ import type { AnimationLevel } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
-import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
+import { resolveTransitionName } from '../../../util/resolveTransitionName';
 
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useScrollNotch from '../../../hooks/useScrollNotch.ts';
+import useScrollNotch from '../../../hooks/useScrollNotch';
 
 import Transition from '../../ui/Transition';
 import SettingsFolders from './folders/SettingsFolders';

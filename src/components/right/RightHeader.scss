@@ -1,3 +1,5 @@
+@use "../../styles/mixins";
+
 .RightHeader {
   pointer-events: auto;
 
@@ -6,6 +8,10 @@
 
   height: var(--header-height);
   padding: 0.5rem 0.8125rem;
+
+  background: var(--color-background);
+
+  @include mixins.with-vt-type('rightColumn');
 
   .close-button {
     flex-shrink: 0;
@@ -67,5 +73,11 @@
 
   @media (max-width: 600px) {
     padding: 0.5rem;
+  }
+}
+
+@include mixins.on-active-vt('rightColumn') {
+  &::view-transition-group(.rightHeader) {
+    z-index: 10;
   }
 }

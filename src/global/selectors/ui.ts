@@ -1,5 +1,5 @@
-import type { ApiMessage, ApiSponsoredMessage } from '../../api/types';
-import type { PerformanceTypeKey, ThemeKey } from '../../types';
+import type { ApiMessage, ApiPeer, ApiSponsoredMessage } from '../../api/types';
+import type { CustomPeer, PerformanceTypeKey, ThemeKey } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
 import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
@@ -185,4 +185,10 @@ export function selectSettingsScreen<T extends GlobalState>(
   global: T, ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   return selectTabState(global, tabId).leftColumn.settingsScreen;
+}
+
+export function selectPeerProfileColor<T extends GlobalState>(global: T, peer: ApiPeer | CustomPeer) {
+  const key = 'isCustomPeer' in peer ? peer.peerColorId : peer.profileColor?.color;
+  if (!key) return undefined;
+  return global.peerColors?.profile[key];
 }

@@ -54,6 +54,7 @@ export type OwnProps = {
   isRectangular?: boolean;
   withPremiumGradient?: boolean;
   withSparkleEffect?: boolean;
+  noSparkleAnimation?: boolean;
   noPreventDefault?: boolean;
   noForcedUpperCase?: boolean;
   shouldStopPropagation?: boolean;
@@ -78,13 +79,6 @@ const Button: FC<OwnProps> = ({
   ref,
   type = 'button',
   id,
-  onClick,
-  onContextMenu,
-  onMouseDown,
-  onMouseUp,
-  onMouseEnter,
-  onMouseLeave,
-  onFocus,
   children,
   size = 'default',
   color = 'primary',
@@ -99,7 +93,7 @@ const Button: FC<OwnProps> = ({
   isShiny,
   withPremiumGradient,
   withSparkleEffect,
-  onTransitionEnd,
+  noSparkleAnimation,
   ariaLabel,
   ariaControls,
   hasPopup,
@@ -121,6 +115,14 @@ const Button: FC<OwnProps> = ({
   iconName,
   iconAlignment = 'start',
   iconClassName,
+  onClick,
+  onContextMenu,
+  onMouseDown,
+  onMouseUp,
+  onMouseEnter,
+  onMouseLeave,
+  onFocus,
+  onTransitionEnd,
 }) => {
   let elementRef = useRef<HTMLButtonElement | HTMLAnchorElement>();
   if (ref) {
@@ -214,7 +216,7 @@ const Button: FC<OwnProps> = ({
 
   const content = (
     <>
-      {withSparkleEffect && <Sparkles preset="button" />}
+      {withSparkleEffect && <Sparkles preset="button" noAnimation={noSparkleAnimation} />}
       {renderContent()}
       {!isNotInteractive && ripple && (
         <RippleEffect />

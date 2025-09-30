@@ -1,0 +1,21 @@
+.root {
+  --glow-color: transparent;
+
+  position: relative;
+
+  &::before {
+    pointer-events: none;
+    content: '';
+
+    position: absolute;
+    z-index: -1;
+    inset: -25%;
+
+    background-image: radial-gradient(circle closest-side, var(--glow-color) 0%, transparent 100%);
+  }
+}
+
+.sparkles {
+  position: absolute;
+  inset: -0.25rem;
+}

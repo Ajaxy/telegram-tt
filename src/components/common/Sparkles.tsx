@@ -18,6 +18,7 @@ type PresetParameters = ButtonParameters | ProgressParameters;
 type OwnProps = {
   className?: string;
   style?: string;
+  noAnimation?: boolean;
 } & PresetParameters;
 
 const SYMBOL = '✦';
@@ -85,11 +86,15 @@ const PROGRESS_POSITIONS = generateRandomProgressPositions(100);
 const Sparkles = ({
   className,
   style,
+  noAnimation,
   ...presetSettings
 }: OwnProps) => {
   if (presetSettings.preset === 'button') {
     return (
-      <div className={buildClassName(styles.root, styles.button, className)} style={style}>
+      <div
+        className={buildClassName(styles.root, styles.button, className, noAnimation && styles.noAnimation)}
+        style={style}
+      >
         {BUTTON_POSITIONS.map((position) => {
           const shiftX = Math.cos(Math.atan2(-50 + position.y, -50 + position.x)) * 100;
           const shiftY = Math.sin(Math.atan2(-50 + position.y, -50 + position.x)) * 100;
@@ -104,6 +109,7 @@ const Sparkles = ({
                 `--_shift-y: ${shiftY}%`,
                 `scale: ${position.size}%`,
               )}
+              aria-hidden="true"
             >
               {SYMBOL}
             </div>
@@ -128,6 +134,7 @@ const Sparkles = ({
                 `scale: ${position.scale}%`,
                 `--_duration-shift: ${(-position.durationShift / 100) * ANIMATION_DURATION}s`,
               )}
+              aria-hidden="true"
             >
               {SYMBOL}
             </div>
