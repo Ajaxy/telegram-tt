@@ -183,8 +183,14 @@ const ProfileInfo = ({
   }, [profileColorOption, theme, collectibleEmojiStatus]);
 
   const pinnedGifts = useMemo(() => {
-    return savedGifts?.gifts.filter((gift) => gift.isPinned);
-  }, [savedGifts]);
+    return savedGifts?.gifts.filter((gift) => {
+      if (gift.gift.type === 'starGiftUnique') {
+        return gift.isPinned && gift.gift.slug !== collectibleEmojiStatus?.slug;
+      }
+
+      return gift.isPinned;
+    });
+  }, [savedGifts, collectibleEmojiStatus?.slug]);
 
   useEffect(() => {
     if (photos.length - currentPhotoIndex <= LOAD_MORE_THRESHOLD) {
