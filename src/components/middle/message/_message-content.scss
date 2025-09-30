@@ -595,15 +595,6 @@
     }
   }
 
-  .no-media-corners {
-    --border-top-left-radius: 0;
-    --border-top-right-radius: 0;
-
-    .Album {
-      margin-inline: auto !important;
-    }
-  }
-
   &.custom-shape.is-via-bot {
     font-size: inherit !important;
 

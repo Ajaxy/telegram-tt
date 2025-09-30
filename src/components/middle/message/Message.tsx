@@ -139,7 +139,7 @@ import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
 import { buildContentClassName } from './helpers/buildContentClassName';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
 import getSingularPaidMedia from './helpers/getSingularPaidMedia';
-import { calculateMediaDimensions, getMinMediaWidth, MIN_MEDIA_WIDTH_WITH_TEXT } from './helpers/mediaDimensions';
+import { calculateMediaDimensions, getMinMediaWidth, getMinMediaWidthWithText } from './helpers/mediaDimensions';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
@@ -341,7 +341,6 @@ type QuickReactionPosition =
   | 'in-meta';
 
 const NBSP = '\u00A0';
-const NO_MEDIA_CORNERS_THRESHOLD = 18;
 const QUICK_REACTION_SIZE = 1.75 * REM;
 const EXTRA_SPACE_FOR_REACTIONS = 2.25 * REM;
 const MAX_REASON_LENGTH = 200;
@@ -930,7 +929,6 @@ const Message: FC<OwnProps & StateProps> = ({
   const sizeCalculations = useMemo(() => {
     let calculatedWidth;
     let contentWidth: number | undefined;
-    let noMediaCorners = false;
     let style = '';
     let reactionsMaxWidth;
 
@@ -962,21 +960,14 @@ const Message: FC<OwnProps & StateProps> = ({
       }
 
       if (width) {
-        if (width < MIN_MEDIA_WIDTH_WITH_TEXT) {
+        if (width < getMinMediaWidthWithText(isMobile)) {
           contentWidth = width;
         }
-        calculatedWidth = Math.max(getMinMediaWidth(text?.text, isMediaWithCommentButton), width);
-        if (!asForwarded && invoice?.extendedMedia && calculatedWidth - width > NO_MEDIA_CORNERS_THRESHOLD) {
-          noMediaCorners = true;
-        }
+        calculatedWidth = Math.max(getMinMediaWidth(text?.text, isMobile, isMediaWithCommentButton), width);
       }
     } else if (albumLayout) {
-      calculatedWidth = Math.max(
-        getMinMediaWidth(text?.text, isMediaWithCommentButton), albumLayout.containerStyle.width,
-      );
-      if (calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
-        noMediaCorners = true;
-      }
+      const minWidth = getMinMediaWidth(text?.text, isMobile, isMediaWithCommentButton);
+      calculatedWidth = Math.max(minWidth, albumLayout.containerStyle.width);
     }
 
     if (calculatedWidth) {
@@ -989,7 +980,7 @@ const Message: FC<OwnProps & StateProps> = ({
     }
 
     return {
-      contentWidth, noMediaCorners, style, reactionsMaxWidth,
+      contentWidth, style, reactionsMaxWidth,
     };
   }, [
     albumLayout, asForwarded, extraPadding, hasSubheader, invoice?.extendedMedia, isAlbum, isMediaWithCommentButton,
@@ -997,7 +988,7 @@ const Message: FC<OwnProps & StateProps> = ({
   ]);
 
   const {
-    contentWidth, noMediaCorners, style, reactionsMaxWidth,
+    contentWidth, style, reactionsMaxWidth,
   } = sizeCalculations;
 
   function renderMessageText(isForAnimation?: boolean) {
@@ -1098,7 +1089,6 @@ const Message: FC<OwnProps & StateProps> = ({
       asForwarded && 'forwarded-message',
       hasForwardedCustomShape && 'forwarded-custom-shape',
       hasSubheader && 'with-subheader',
-      noMediaCorners && 'no-media-corners',
     );
     const hasCustomAppendix = isLastInGroup
       && (!hasText || (isInvertedMedia && !hasFactCheck && reactionsPosition !== 'inside')) && !withCommentButton;

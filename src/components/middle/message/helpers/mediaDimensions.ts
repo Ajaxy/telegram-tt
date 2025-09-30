@@ -9,13 +9,16 @@ import {
 
 const SMALL_IMAGE_THRESHOLD = 12;
 const MIN_MESSAGE_LENGTH_FOR_BLUR = 40;
-export const MIN_MEDIA_WIDTH_WITH_TEXT = 20 * REM;
 const MIN_MEDIA_WIDTH = SMALL_IMAGE_THRESHOLD * REM;
 export const MIN_MEDIA_HEIGHT = 5 * REM;
 
-export function getMinMediaWidth(text?: string, hasCommentButton?: boolean) {
-  return (text?.length ?? 0) > MIN_MESSAGE_LENGTH_FOR_BLUR || hasCommentButton
-    ? MIN_MEDIA_WIDTH_WITH_TEXT
+export function getMinMediaWidthWithText(isMobile: boolean) {
+  return (isMobile ? 14 : 20) * REM;
+}
+
+export function getMinMediaWidth(text: string = '', isMobile: boolean, hasCommentButton?: boolean) {
+  return text.length > MIN_MESSAGE_LENGTH_FOR_BLUR || hasCommentButton
+    ? getMinMediaWidthWithText(isMobile)
     : MIN_MEDIA_WIDTH;
 }
 
@@ -34,7 +37,7 @@ export function calculateMediaDimensions({
   isInWebPage?: boolean;
   asForwarded?: boolean;
   noAvatars?: boolean;
-  isMobile?: boolean;
+  isMobile: boolean;
 }) {
   const isPhoto = media.mediaType === 'photo';
   const isVideo = media.mediaType === 'video';
@@ -45,7 +48,7 @@ export function calculateMediaDimensions({
     : isVideo ? calculateVideoDimensions(media, isOwn, asForwarded, isWebPageVideo, noAvatars, isMobile)
       : calculateExtendedPreviewDimensions(media, isOwn, asForwarded, isInWebPage, noAvatars, isMobile);
 
-  const minMediaWidth = getMinMediaWidth(messageText);
+  const minMediaWidth = getMinMediaWidth(messageText, isMobile);
 
   let stretchFactor = 1;
   if (width < minMediaWidth && minMediaWidth - width < SMALL_IMAGE_THRESHOLD) {

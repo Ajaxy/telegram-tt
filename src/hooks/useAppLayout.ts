@@ -16,10 +16,10 @@ type MediaQueryCacheKey = 'mobile' | 'tablet' | 'landscape' | 'touch';
 const mediaQueryCache = new Map<MediaQueryCacheKey, MediaQueryList>();
 const callbacks = createCallbackManager();
 
-let isMobile: boolean | undefined;
-let isTablet: boolean | undefined;
-let isLandscape: boolean | undefined;
-let isTouchScreen: boolean | undefined;
+let isMobile: boolean;
+let isTablet: boolean;
+let isLandscape: boolean;
+let isTouchScreen: boolean;
 
 export function getIsMobile() {
   return isMobile;
