@@ -1,6 +1,5 @@
 .root {
-  --base-bottom-pos: 6rem;
-  --translate-x: 0;
+  --base-bottom-pos: 5.3125rem;
   --translate-y: 4.5rem;
 
   pointer-events: none;
@@ -9,7 +8,7 @@
   z-index: var(--z-scroll-down-button);
   right: max(1rem, env(safe-area-inset-right));
   bottom: var(--base-bottom-pos);
-  transform: translate(var(--translate-x), var(--translate-y));
+  transform: translate(0, var(--translate-y));
 
   opacity: 0;
 
@@ -25,7 +24,7 @@
   }
 
   .transform-down {
-    transform: translateY(4rem);
+    transform: translateY(3.5rem);
   }
 
   .unread {
@@ -58,25 +57,6 @@
     .unread {
       pointer-events: none;
       opacity: 0;
-    }
-  }
-
-  @media (min-width: 1276px) {
-    --translate-x: 0;
-
-    transition: transform var(--layer-transition), opacity 0.2s ease;
-
-    :global(body.no-page-transitions) &,
-    :global(body.no-right-column-animations) & {
-      transition: none !important;
-    }
-
-    :global(body:not(.no-right-column-animations) #Main.right-column-open) & {
-      transition: transform var(--layer-transition), opacity 0.2s ease;
-    }
-
-    :global(#Main.right-column-open) & {
-      --translate-x: calc(-1 * var(--right-column-width));
     }
   }
 

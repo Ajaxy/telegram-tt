@@ -581,6 +581,11 @@ function MiddleColumn({
                 onIntersectPinnedMessage={renderingHandleIntersectPinnedMessage!}
               />
               <div className={footerClassName}>
+                <FloatingActionButtons
+                  withScrollDown={renderingIsScrollDownShown}
+                  canPost={renderingCanPost}
+                  withExtraShift={withExtraShift}
+                />
                 {renderingCanPost && (
                   <Composer
                     type="messageList"
@@ -710,12 +715,6 @@ function MiddleColumn({
                 {IS_TRANSLATION_SUPPORTED && <ChatLanguageModal isOpen={isChatLanguageModalOpen} />}
               </div>
             </Transition>
-
-            <FloatingActionButtons
-              withScrollDown={renderingIsScrollDownShown}
-              canPost={renderingCanPost}
-              withExtraShift={withExtraShift}
-            />
           </div>
           <MiddleSearch isActive={Boolean(hasActiveMiddleSearch)} />
         </>
