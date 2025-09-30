@@ -336,8 +336,11 @@
 
     &.has-tags {
       line-height: 1.375rem;
-      .info-row {
-        height: 1.25rem;
+
+      .ChatBadge {
+        min-width: 1.375rem;
+        height: 1.375rem;
+        line-height: 1.5rem;
       }
     }
   }

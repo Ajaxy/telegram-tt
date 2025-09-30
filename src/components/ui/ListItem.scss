@@ -225,7 +225,9 @@
 
     &.chat-item-with-tags {
       .ListItem-button {
+        height: 72px;
         padding: 0.375rem 0.5625rem;
+        align-items: flex-start;
       }
     }
 

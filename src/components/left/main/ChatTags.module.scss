@@ -1,7 +1,8 @@
 .wrapper {
   display: flex;
   gap: 0.25rem;
-  padding-top: 0.25rem;
+  height: 0.875rem;
+  margin-top: 0.125rem;
 }
 
 .tag {
@@ -16,12 +17,12 @@
   justify-content: center;
 
   min-width: 1.5rem;
-  padding: 0.0625rem 0.25rem;
+  padding: 0 0.25rem;
   border-radius: 0.25rem;
 
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   font-weight: var(--font-weight-medium);
-  line-height: 0.75rem;
+  line-height: 1;
   color: var(--accent-color);
   text-align: center;
   text-transform: uppercase;
