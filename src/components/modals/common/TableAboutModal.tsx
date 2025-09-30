@@ -61,7 +61,7 @@ const TableAboutModal = ({
               icon={icon}
               iconClassName={styles.listItemIcon}
             >
-              <span className="title">{title}</span>
+              <span className={buildClassName('title', styles.title)}>{title}</span>
               <span className="subtitle">{subtitle}</span>
             </ListItem>
           );

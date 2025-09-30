@@ -2,7 +2,6 @@
 
 .root {
   --percent: calc(var(--progress, 0.5) * 100%);
-  --color-negative-progress: #E05356;
 
   position: relative;
 

@@ -111,7 +111,7 @@ const ProfileRatingModal = ({
       return (
         <Transition
           name="fade"
-          className={styles.descriptionPreview}
+          className={buildClassName(styles.descriptionPreview, isNegative && styles.negative)}
           activeKey={showFutureRating ? 1 : 0}
           shouldCleanup
           shouldRestoreHeight
@@ -164,9 +164,6 @@ const ProfileRatingModal = ({
 
     return (
       <div className={styles.header}>
-        <div className={styles.title}>
-          {lang('TitleRating')}
-        </div>
         <PremiumProgress
           leftText={isNegative ? undefined : lang('RatingLevel', { level: currentLevel })}
           rightText={isNegative ? lang('RatingNegativeLevel') : lang('RatingLevel', { level: nextLevel })}
@@ -180,10 +177,14 @@ const ProfileRatingModal = ({
           className={buildClassName(styles.ratingProgress, shouldShowPreview && styles.withPreview)}
         />
         {renderPreviewDescription()}
+        <div className={styles.title}>
+          {lang('TitleRating')}
+        </div>
         <p className={styles.description}>
           {user?.id === currentUserId
             ? lang('RatingYourReflectsActivity')
-            : lang('RatingReflectsActivity', { name: getPeerTitle(lang, user) || userFallbackText })}
+            : lang('RatingReflectsActivity', { name: getPeerTitle(lang, user) || userFallbackText },
+              { withMarkdown: true, withNodes: true })}
         </p>
       </div>
     );
@@ -192,7 +193,7 @@ const ProfileRatingModal = ({
     lang, handleShowFuture, handleShowCurrent, isOpen]);
 
   const listItemData = [
-    ['gift', lang('RatingGiftsFromTelegram'), (
+    ['closed-gift', lang('RatingGiftsFromTelegram'), (
       <span className={styles.subtitle}>
         {renderBadge('added')}
         {lang('RatingGiftsFromTelegramDesc')}
@@ -204,7 +205,7 @@ const ProfileRatingModal = ({
         {lang('RatingGiftsAndPostsFromUsersDesc')}
       </span>
     )],
-    ['refund', lang('RatingRefundsAndConversions'), (
+    ['stars-refund', lang('RatingRefundsAndConversions'), (
       <span className={styles.subtitle}>
         {renderBadge('deducted')}
         {lang('RatingRefundsAndConversionsDesc')}
@@ -217,7 +218,6 @@ const ProfileRatingModal = ({
     return (
       <div className={styles.footer}>
         <Button
-          size="smaller"
           onClick={handleClose}
         >
           <Icon name="understood" className={styles.understoodIcon} />
@@ -229,6 +229,7 @@ const ProfileRatingModal = ({
 
   return (
     <TableAboutModal
+      contentClassName={styles.content}
       isOpen={isOpen}
       header={header}
       listItemData={listItemData}

@@ -3,10 +3,8 @@
   width: 26.25rem;
 }
 
-.title, .description {
-  padding-inline: 1.5rem;
-  text-align: center !important;
-  text-wrap: pretty;
+.title {
+  font-weight: var(--font-weight-medium);
 }
 
 .secondary {
