@@ -127,10 +127,9 @@ The build and release process for a Tauri application is managed using a GitHub 
 
 | **Variable Name**    | **Description**                                                                                                               |
 |----------------------|-------------------------------------------------------------------------------------------------------------------------------|
-| `PUBLISH_REPO_TAURI` | `{OWNER}/{REPO}` repository where published releases with artifacts will be pushed.                                           |
+| `PUBLISH_REPO` | `{OWNER}/{REPO}` repository where published releases with artifacts will be pushed.                                           |
 | `NODE_VERSION`       | Node.js version on which NPM modules installation and Tauri build should happen.                                              |
-| `BASE_URL_TAURI`     | Remote URL from which application content will be loaded instead of the local index.html file, if the Auto-Updates feature is enabled in user settings. |
-| `WITH_UPDATER`       | Include `updater` plugin. Check Secrets section for the required env parameters
+| `BASE_URL`     | Remote URL from which application content will be loaded |
 
 ---
 
