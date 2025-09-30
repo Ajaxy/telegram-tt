@@ -63,9 +63,9 @@ function buildApiChatFieldsFromPeerEntity(
   const hasVideoAvatar = 'photo' in peerEntity && peerEntity.photo && 'hasVideo' in peerEntity.photo
     && peerEntity.photo.hasVideo;
   const avatarPhotoId = ('photo' in peerEntity) && peerEntity.photo ? buildAvatarPhotoId(peerEntity.photo) : undefined;
-  const hasUsername = Boolean('username' in peerEntity && peerEntity.username);
 
   const usernames = buildApiUsernames(peerEntity);
+  const hasUsername = usernames?.some((username) => username.isActive);
 
   // Chat and channel shared fields
   const isCallActive = 'callActive' in peerEntity && peerEntity.callActive;
