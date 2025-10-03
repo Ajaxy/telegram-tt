@@ -1,0 +1,11 @@
+{
+  "installCommand": "npm install",
+  "buildCommand": "npm run build:production",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/((?!share|get|api|.*\\..*).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
