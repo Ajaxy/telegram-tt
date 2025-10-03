@@ -118,6 +118,32 @@
   color: #FFFFFF !important;
 }
 
+.downloadButton {
+  position: absolute;
+  z-index: 3;
+  inset-block-start: 0.25rem;
+  inset-inline-end: 3rem;
+
+  color: #FFFFFF !important;
+
+  &.recording {
+    color: #ff595a !important;
+    animation: pulse 1s infinite;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 .bottomPanel {
   position: absolute;
   z-index: 3;

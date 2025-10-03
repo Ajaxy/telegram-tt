@@ -23,6 +23,8 @@ import useInterval from '../../../hooks/schedulers/useInterval';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
+import { startVideoRecording, downloadVideoBlob, isVideoRecordingSupported } from '../../../util/videoRecording';
+import { getActions } from '../../../global';
 
 import FullNameTitle from '../../common/FullNameTitle';
 import Icon from '../../common/icons/Icon';
@@ -144,6 +146,12 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
   }, []);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingController, setRecordingController] = useState<{
+    stop: () => Promise<{ blob: Blob; duration: number; filename: string }>;
+    pause: () => void;
+    resume: () => void;
+  } | null>(null);
 
   const handleCanPlay = useLastCallback(() => {
     setIsLoading(false);
@@ -234,6 +242,50 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
     } : undefined);
   }, [chat, isPinned, setPinned, type, user?.id]);
 
+  const handleDownloadVideo = useLastCallback(async () => {
+    if (!stream || !isVideoRecordingSupported()) {
+      return;
+    }
+
+    const { showNotification } = getActions();
+
+    try {
+      if (isRecording && recordingController) {
+        // Stop recording
+        const result = await recordingController.stop();
+        downloadVideoBlob(result.blob, result.filename);
+        setIsRecording(false);
+        setRecordingController(null);
+        
+        showNotification({
+          message: `Video saved as ${result.filename}`,
+          icon: 'download',
+        });
+      } else {
+        // Start recording
+        const participantName = user?.firstName || chat?.title || 'Participant';
+        const filename = `group_call_${participantName}`;
+        
+        const controller = await startVideoRecording(stream, filename);
+        setRecordingController(controller);
+        setIsRecording(true);
+        
+        showNotification({
+          message: 'Recording started',
+          icon: 'video',
+        });
+      }
+    } catch (error) {
+      console.error('Video recording error:', error);
+      setIsRecording(false);
+      setRecordingController(null);
+      
+      showNotification({
+        message: 'Failed to record video',
+      });
+    }
+  });
+
   return (
     <div
       className={buildClassName(
@@ -289,6 +341,19 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
             onClick={handleClickPin}
           >
             <Icon name={isPinned ? 'unpin' : 'pin'} />
+          </Button>
+        )}
+        {stream && isVideoRecordingSupported() && (
+          <Button
+            round
+            size="smaller"
+            ripple
+            color="translucent"
+            className={buildClassName(styles.downloadButton, isRecording && styles.recording)}
+            ariaLabel={isRecording ? lang('Stop') : lang('MediaDownload')}
+            onClick={handleDownloadVideo}
+          >
+            <Icon name={isRecording ? 'stop' : 'download'} />
           </Button>
         )}
         <div className={styles.bottomPanel}>

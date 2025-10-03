@@ -122,7 +122,9 @@ export function buildMessageMediaContent(
 
   if ('round' in media && media.round) {
     const video = buildVideo(media);
-    if (video) return { video, ttlSeconds };
+    if (video) {
+      return { video };
+    }
   }
 
   // Other disappearing media types are not supported
