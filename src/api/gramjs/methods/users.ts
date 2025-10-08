@@ -67,6 +67,7 @@ export async function fetchFullUser({
 
   const fullInfo = buildApiUserFullInfo(result);
   const users = result.users.map(buildApiUser).filter(Boolean);
+  const userStatusesById = buildApiUserStatuses(result.users);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
 
   const user = users.find(({ id: userId }) => userId === id)!;
@@ -83,6 +84,7 @@ export async function fetchFullUser({
     fullInfo,
     users,
     chats,
+    userStatusesById,
   };
 }
 
