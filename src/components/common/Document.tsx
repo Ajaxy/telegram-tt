@@ -81,7 +81,7 @@ const Document = ({
   const [isFileIpDialogOpen, openFileIpDialog, closeFileIpDialog] = useFlag();
   const [shouldNotWarnAboutFiles, setShouldNotWarnAboutFiles] = useState(false);
 
-  const { fileName, size, timestamp, mimeType } = document;
+  const { fileName, size, mimeType } = document;
   const extension = getDocumentExtension(document) || '';
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
@@ -190,7 +190,7 @@ const Document = ({
         name={fileName}
         extension={extension}
         size={size}
-        timestamp={datetime || timestamp}
+        timestamp={datetime}
         thumbnailDataUri={thumbDataUri}
         previewData={localBlobUrl || previewData}
         smaller={smaller}
