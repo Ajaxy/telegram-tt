@@ -67,6 +67,7 @@ import type { ReducerAction } from '../../hooks/useReducer';
 import type { P2pMessage } from '../../lib/secret-sauce';
 import type {
   AccountSettings,
+  AttachmentCompression,
   AudioOrigin,
   CallSound,
   ChatListType,
@@ -2280,12 +2281,15 @@ export interface ActionPayloads {
   } & WithTabId;
 
   updateAttachmentSettings: {
+    defaultAttachmentCompression?: AttachmentCompression;
     shouldCompress?: boolean;
     shouldSendGrouped?: boolean;
     isInvertedMedia?: true;
     webPageMediaSize?: WebPageMediaSize;
     shouldSendInHighQuality?: boolean;
   };
+  updateShouldSaveAttachmentsCompression: { shouldSave: boolean } & WithTabId;
+  applyDefaultAttachmentsCompression: undefined;
 
   saveEffectInDraft: {
     chatId: string;

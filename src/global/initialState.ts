@@ -180,6 +180,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
 
   attachmentSettings: {
     shouldCompress: true,
+    defaultAttachmentCompression: 'compress',
     shouldSendGrouped: true,
     isInvertedMedia: undefined,
     webPageMediaSize: undefined,

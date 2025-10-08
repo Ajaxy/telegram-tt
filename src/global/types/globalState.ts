@@ -54,6 +54,7 @@ import type {
 } from '../../api/types';
 import type {
   AccountSettings,
+  AttachmentCompression,
   BotAppPermissions,
   ChatListType,
   ChatTranslatedMessages,
@@ -120,6 +121,7 @@ export type GlobalState = {
 
   attachmentSettings: {
     shouldCompress: boolean;
+    defaultAttachmentCompression: AttachmentCompression;
     shouldSendGrouped: boolean;
     isInvertedMedia?: true;
     webPageMediaSize?: WebPageMediaSize;

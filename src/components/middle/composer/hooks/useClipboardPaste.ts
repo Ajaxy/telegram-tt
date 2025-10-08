@@ -32,7 +32,10 @@ const useClipboardPaste = (
   shouldStripCustomEmoji?: boolean,
   onCustomEmojiStripped?: VoidFunction,
 ) => {
-  const { showNotification } = getActions();
+  const {
+    showNotification,
+    updateShouldSaveAttachmentsCompression,
+    applyDefaultAttachmentsCompression } = getActions();
   const lang = useLang();
 
   useEffect(() => {
@@ -127,6 +130,8 @@ const useClipboardPaste = (
       }
 
       if (shouldSetAttachments) {
+        updateShouldSaveAttachmentsCompression({ shouldSave: true });
+        applyDefaultAttachmentsCompression();
         setAttachments(editedMessage ? newAttachments : (attachments) => attachments.concat(newAttachments));
       }
 

@@ -466,6 +466,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     updateChatSilentPosting,
     updateInsertingPeerIdMention,
     updateDraftSuggestedPostInfo,
+    updateShouldSaveAttachmentsCompression,
+    applyDefaultAttachmentsCompression,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -550,6 +552,12 @@ const Composer: FC<OwnProps & StateProps> = ({
   const [attachments, setAttachments] = useState<ApiAttachment[]>([]);
   const hasAttachments = Boolean(attachments.length);
   const [nextText, setNextText] = useState<ApiFormattedText | undefined>(undefined);
+
+  useEffect(() => {
+    if (!attachments.length || !attachments) {
+      updateShouldSaveAttachmentsCompression({ shouldSave: false });
+    }
+  }, [attachments]);
 
   const {
     canSendStickers, canSendGifs, canAttachMedia, canAttachPolls, canAttachEmbedLinks, canAttachToDoLists,
@@ -1343,6 +1351,15 @@ const Composer: FC<OwnProps & StateProps> = ({
       resetOpenChatWithDraft();
     }
   }, [handleFileSelect, requestedDraftFiles, resetOpenChatWithDraft]);
+
+  useEffect(() => {
+    if (requestedDraftFiles?.length) {
+      updateShouldSaveAttachmentsCompression({ shouldSave: true });
+      applyDefaultAttachmentsCompression();
+    } else {
+      updateShouldSaveAttachmentsCompression({ shouldSave: false });
+    }
+  }, [requestedDraftFiles, updateShouldSaveAttachmentsCompression, applyDefaultAttachmentsCompression]);
 
   const handleCustomEmojiSelect = useLastCallback((emoji: ApiSticker, inInputId?: string) => {
     const emojiSetId = 'id' in emoji.stickerSetInfo && emoji.stickerSetInfo.id;

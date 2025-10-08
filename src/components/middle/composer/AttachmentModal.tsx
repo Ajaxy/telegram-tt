@@ -21,7 +21,7 @@ import {
 } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getAttachmentMediaType } from '../../../global/helpers';
-import { selectChatFullInfo, selectIsChatWithSelf } from '../../../global/selectors';
+import { selectChatFullInfo, selectIsChatWithSelf, selectTabState } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
@@ -106,6 +106,7 @@ type StateProps = {
   customEmojiForEmoji?: ApiSticker[];
   captionLimit: number;
   attachmentSettings: GlobalState['attachmentSettings'];
+  shouldSaveAttachmentsCompression?: boolean;
 };
 
 const ATTACHMENT_MODAL_INPUT_ID = 'caption-input-text';
@@ -133,6 +134,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   shouldSuggestCustomEmoji,
   customEmojiForEmoji,
   attachmentSettings,
+  shouldSaveAttachmentsCompression,
   shouldForceCompression,
   shouldForceAsFile,
   isForCurrentMessageList,
@@ -305,7 +307,9 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         : isSilent ? onSendSilent : onSend;
       send(isSendingCompressed, shouldSendGrouped, isInvertedMedia);
       updateAttachmentSettings({
-        shouldCompress: isSendingCompressed,
+        ...(shouldSaveAttachmentsCompression && {
+          defaultAttachmentCompression: attachmentSettings.shouldCompress ? 'compress' : 'original',
+        }),
         shouldSendGrouped,
         isInvertedMedia,
         shouldSendInHighQuality,
@@ -784,6 +788,7 @@ export default memo(withGlobal<OwnProps>(
       attachmentSettings,
     } = global;
 
+    const { shouldSaveAttachmentsCompression } = selectTabState(global);
     const chatFullInfo = selectChatFullInfo(global, chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const { shouldSuggestCustomEmoji } = global.settings.byKey;
@@ -802,6 +807,7 @@ export default memo(withGlobal<OwnProps>(
       customEmojiForEmoji: customEmojis.forEmoji.stickers,
       captionLimit: selectCurrentLimit(global, 'captionLength'),
       attachmentSettings,
+      shouldSaveAttachmentsCompression,
     };
   },
 )(AttachmentModal));

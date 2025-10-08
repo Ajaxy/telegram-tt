@@ -544,6 +544,27 @@ addActionHandler('updateAttachmentSettings', (global, actions, payload): ActionR
   };
 });
 
+addActionHandler('updateShouldSaveAttachmentsCompression', (global, actions, payload): ActionReturnType => {
+  const { shouldSave, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    shouldSaveAttachmentsCompression: shouldSave,
+  }, tabId);
+});
+
+addActionHandler('applyDefaultAttachmentsCompression', (global): ActionReturnType => {
+  const { defaultAttachmentCompression } = global.attachmentSettings;
+  const shouldCompress = defaultAttachmentCompression === 'compress';
+
+  return {
+    ...global,
+    attachmentSettings: {
+      ...global.attachmentSettings,
+      shouldCompress,
+    },
+  };
+});
+
 addActionHandler('requestEffectInComposer', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload;
 
