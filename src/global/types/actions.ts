@@ -2571,11 +2571,20 @@ export interface ActionPayloads {
   } | {
     gift: ApiStarGift;
   }) & WithTabId;
+  openLockedGiftModalInfo: {
+    untilDate?: number;
+    reason?: ApiFormattedText;
+  } & WithTabId;
+  checkCanSendGift: {
+    gift: ApiStarGift;
+    onSuccess: () => void;
+  } & WithTabId;
   openGiftResalePriceComposerModal: ({
     peerId: string;
     gift: ApiSavedStarGift;
   }) & WithTabId;
   closeGiftInfoModal: WithTabId | undefined;
+  closeLockedGiftModal: WithTabId | undefined;
   closeGiftResalePriceComposerModal: WithTabId | undefined;
   openGiftInMarket: {
     gift: ApiStarGift;

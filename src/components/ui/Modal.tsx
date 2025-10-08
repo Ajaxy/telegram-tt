@@ -30,6 +30,7 @@ export type OwnProps = {
   className?: string;
   contentClassName?: string;
   headerClassName?: string;
+  dialogClassName?: string;
   isOpen?: boolean;
   header?: TeactNode;
   isSlim?: boolean;
@@ -72,6 +73,7 @@ const Modal: FC<OwnProps> = ({
   dialogStyle,
   isLowStackPriority,
   dialogContent,
+  dialogClassName,
   onClose,
   onCloseAnimationEnd,
   onEnter,
@@ -178,6 +180,11 @@ const Modal: FC<OwnProps> = ({
     withBalanceBar && 'with-balance-bar',
   );
 
+  const modalDialogClassName = buildClassName(
+    'modal-dialog',
+    dialogClassName,
+  );
+
   return (
     <Portal>
       <div
@@ -194,7 +201,7 @@ const Modal: FC<OwnProps> = ({
         )}
         <div className="modal-container">
           <div className="modal-backdrop" onClick={!noBackdropClose ? onClose : undefined} />
-          <div className="modal-dialog" ref={dialogRef} style={dialogStyle}>
+          <div className={modalDialogClassName} ref={dialogRef} style={dialogStyle}>
             {renderHeader()}
             {dialogContent}
             <div className={buildClassName('modal-content custom-scroll', contentClassName)} style={style}>

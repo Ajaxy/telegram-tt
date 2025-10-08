@@ -320,6 +320,7 @@
     "payments.refundStarsCharge",
     "payments.getStarsGiftOptions",
     "payments.getStarGifts",
+    "payments.checkCanSendGift",
     "payments.getSavedStarGifts",
     "payments.saveStarGift",
     "payments.convertStarGift",

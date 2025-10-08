@@ -21,6 +21,7 @@ import EmojiStatusAccessModal from './emojiStatusAccess/EmojiStatusAccessModal.a
 import FrozenAccountModal from './frozenAccount/FrozenAccountModal.async';
 import PremiumGiftModal from './gift/GiftModal.async';
 import GiftInfoModal from './gift/info/GiftInfoModal.async';
+import GiftLockedModal from './gift/locked/GiftLockedModal.async';
 import GiftRecipientPicker from './gift/recipient/GiftRecipientPicker.async';
 import GiftResalePriceComposerModal from './gift/resale/GiftResalePriceComposerModal.async';
 import GiftStatusInfoModal from './gift/status/GiftStatusInfoModal.async';
@@ -81,6 +82,7 @@ type ModalKey = keyof Pick<TabState,
   'isWebAppsCloseConfirmationModalOpen' |
   'giftInfoModal' |
   'giftInfoValueModal' |
+  'lockedGiftModal' |
   'giftResalePriceComposerModal' |
   'suggestedStatusModal' |
   'emojiStatusAccessModal' |
@@ -141,6 +143,7 @@ const MODALS: ModalRegistry = {
   isWebAppsCloseConfirmationModalOpen: WebAppsCloseConfirmationModal,
   giftInfoModal: GiftInfoModal,
   giftInfoValueModal: GiftInfoValueModal,
+  lockedGiftModal: GiftLockedModal,
   giftResalePriceComposerModal: GiftResalePriceComposerModal,
   suggestedStatusModal: SuggestedStatusModal,
   emojiStatusAccessModal: EmojiStatusAccessModal,

@@ -12,6 +12,9 @@ import type {
 } from '../../types';
 
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
+import {
+  buildApiFormattedText,
+} from '../apiBuilders/common';
 import { buildApiResaleGifts, buildApiSavedStarGift, buildApiStarGift,
   buildApiStarGiftAttribute, buildApiStarGiftCollection, buildInputResaleGiftsAttributes } from '../apiBuilders/gifts';
 import {
@@ -24,7 +27,8 @@ import {
   buildApiUniqueStarGiftValueInfo,
 } from '../apiBuilders/payments';
 import { buildApiUser } from '../apiBuilders/users';
-import { buildInputPeer,
+import {
+  buildInputPeer,
   buildInputSavedStarGift,
   buildInputStarsAmount,
   buildInputUser,
@@ -32,6 +36,26 @@ import { buildInputPeer,
 import { checkErrorType, wrapError } from '../helpers/misc';
 import { invokeRequest } from './client';
 import { getPassword } from './twoFaSettings';
+
+export async function fetchCheckCanSendGift({ giftId }: { giftId: string }) {
+  const result = await invokeRequest(new GramJs.payments.CheckCanSendGift({
+    giftId: bigInt(giftId),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  if (result instanceof GramJs.payments.CheckCanSendGiftResultOk) {
+    return { canSend: true };
+  }
+
+  if (result instanceof GramJs.payments.CheckCanSendGiftResultFail) {
+    return { canSend: false, reason: buildApiFormattedText(result.reason) };
+  }
+
+  return undefined;
+}
 
 export async function fetchStarsGiveawayOptions() {
   const result = await invokeRequest(new GramJs.payments.GetStarsGiveawayOptions());

@@ -2281,4 +2281,6 @@
 "GiftValueForSaleOnFragment" = "for sale on Fragment";
 "GiftValueForSaleOnTelegram" = "for sale on Telegram";
 "EmbeddedMessageNoCaption" = "Caption removed";
+"TitleGiftLocked" = "Gift Locked";
+"GiftLockedMessage" = "This gift is currently only available to earlier Telegram users. It will unlock for your account in about **{relativeDate}**.";
 "QuickPreview" = "Quick Preview";

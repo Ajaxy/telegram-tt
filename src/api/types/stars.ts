@@ -26,6 +26,7 @@ export interface ApiStarGiftRegular {
   limitedPerUser?: true;
   perUserTotal?: number;
   perUserRemains?: number;
+  lockedUntilDate?: number;
 }
 
 export interface ApiStarGiftUnique {

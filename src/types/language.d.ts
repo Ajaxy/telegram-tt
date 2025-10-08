@@ -1705,6 +1705,7 @@ export interface LangPair {
   'GiftValueForSaleOnFragment': undefined;
   'GiftValueForSaleOnTelegram': undefined;
   'EmbeddedMessageNoCaption': undefined;
+  'TitleGiftLocked': undefined;
   'QuickPreview': undefined;
 }
 
@@ -2928,6 +2929,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'RatingLevel': {
     'level': V;
+  };
+  'GiftLockedMessage': {
+    'relativeDate': V;
   };
 }
 

@@ -281,6 +281,21 @@ addActionHandler('openGiftInfoModal', (global, actions, payload): ActionReturnTy
   }, tabId);
 });
 
+addActionHandler('openLockedGiftModalInfo', (global, actions, payload): ActionReturnType => {
+  const {
+    untilDate, reason, tabId = getCurrentTabId(),
+  } = payload;
+
+  return updateTabState(global, {
+    lockedGiftModal: {
+      untilDate,
+      reason,
+    },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeLockedGiftModal', 'lockedGiftModal');
+
 addActionHandler('openGiftResalePriceComposerModal', (global, actions, payload): ActionReturnType => {
   const {
     gift, peerId, tabId = getCurrentTabId(),

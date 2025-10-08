@@ -832,6 +832,11 @@ export type TabState = {
     gift: ApiStarGiftUnique;
   };
 
+  lockedGiftModal?: {
+    untilDate?: number;
+    reason?: ApiFormattedText;
+  };
+
   giftResalePriceComposerModal?: {
     peerId?: string;
     gift: ApiSavedStarGift | ApiStarGift;

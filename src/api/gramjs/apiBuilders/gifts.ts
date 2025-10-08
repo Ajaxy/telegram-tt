@@ -55,7 +55,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
   const {
     id, limited, stars, availabilityRemains, availabilityTotal, convertStars, firstSaleDate, lastSaleDate, soldOut,
     birthday, upgradeStars, resellMinStars, title, availabilityResale, releasedBy,
-    requirePremium, limitedPerUser, perUserTotal, perUserRemains,
+    requirePremium, limitedPerUser, perUserTotal, perUserRemains, lockedUntilDate,
   } = starGift;
 
   addDocumentToLocalDb(starGift.sticker);
@@ -84,6 +84,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
     limitedPerUser,
     perUserTotal,
     perUserRemains,
+    lockedUntilDate,
   };
 }
 
