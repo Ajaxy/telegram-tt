@@ -44,7 +44,9 @@ const CSP = `
   img-src 'self' data: blob: https://ss3.4sqi.net/img/categories_v2/;
   media-src 'self' blob: data:;
   object-src 'none';
-  frame-src http: https: mytonwallet-tc:;
+  frame-src http: https:
+    bitkeep: bnc: bybitapp: echooo: imtokenv2: mytonwallet-tc:
+    nicegram-tc: safepal-tc: tonkeeper-pro-tc: tonkeeper-tc:;
   base-uri 'none';
   form-action 'none';`
   .replace(/\s+/g, ' ').trim();
