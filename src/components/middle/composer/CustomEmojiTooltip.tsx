@@ -74,7 +74,7 @@ const CustomEmojiTooltip: FC<OwnProps & StateProps> = ({
 
   const className = buildClassName(
     styles.root,
-    'composer-tooltip custom-scroll-x',
+    'composer-tooltip no-scrollbar',
     transitionClassNames,
     !displayedStickers?.length && styles.hidden,
   );

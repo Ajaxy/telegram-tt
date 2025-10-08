@@ -14,7 +14,7 @@
     margin: 0.5rem 0 0.5rem 0.25rem;
   }
 
-  &:global(.shown + .StickerTooltip) {
-    transform: translateY(-1.75rem);
+  &:global(.open + .StickerTooltip) {
+    transform: translateY(-3.25rem);
   }
 }

@@ -80,7 +80,7 @@ const EmojiTooltip: FC<OwnProps> = ({
   const containerRef = useRef<HTMLDivElement>();
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
   const listEmojis: (Emoji | ApiSticker)[] = usePrevDuringAnimation(
-    emojis.length ? [...customEmojis, ...emojis] : undefined, CLOSE_DURATION,
+    emojis.length ? [...emojis, ...customEmojis] : undefined, CLOSE_DURATION,
   ) || [];
 
   useHorizontalScroll(containerRef);
@@ -135,7 +135,7 @@ const EmojiTooltip: FC<OwnProps> = ({
   }, [selectedIndex]);
 
   const className = buildClassName(
-    'EmojiTooltip composer-tooltip custom-scroll-x',
+    'EmojiTooltip composer-tooltip no-scrollbar',
     transitionClassNames,
   );
 
