@@ -848,7 +848,7 @@ const Profile = ({
             <Document
               key={id}
               document={getMessageDocument(messagesById[id])!}
-              withDate
+              datetime={messagesById[id].date}
               smaller
               className="scroll-item"
               isDownloading={getIsDownloading(activeDownloads, getMessageDocument(messagesById[id])!)}

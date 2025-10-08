@@ -111,7 +111,6 @@ const FileResults: FC<OwnProps & StateProps> = ({
             <Document
               document={getMessageDocument(message)!}
               message={message}
-              withDate
               datetime={message.date}
               smaller
               sender={getSenderName(lang, message, chatsById, usersById)}

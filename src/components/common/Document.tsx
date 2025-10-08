@@ -36,7 +36,6 @@ type OwnProps = {
   isSelectable?: boolean;
   canAutoLoad?: boolean;
   uploadProgress?: number;
-  withDate?: boolean;
   datetime?: number;
   className?: string;
   sender?: string;
@@ -62,7 +61,6 @@ const Document = ({
   canAutoLoad,
   autoLoadFileMaxSizeMb,
   uploadProgress,
-  withDate,
   datetime,
   className,
   sender,
@@ -192,7 +190,7 @@ const Document = ({
         name={fileName}
         extension={extension}
         size={size}
-        timestamp={withDate ? datetime || timestamp : undefined}
+        timestamp={datetime || timestamp}
         thumbnailDataUri={thumbDataUri}
         previewData={localBlobUrl || previewData}
         smaller={smaller}
