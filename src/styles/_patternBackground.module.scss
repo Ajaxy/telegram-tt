@@ -25,7 +25,7 @@
   }
 
   :global(html.theme-light) &:not(.customBgImage)::before {
-    background-image: url('../../assets/chat-bg-br.png');
+    background-image: url('../assets/chat-bg-br.png');
   }
 
   &:not(.customBgImage).customBgColor::before {
@@ -77,14 +77,14 @@
     bottom: 0;
     left: 0;
 
-    background-image: url('../../assets/chat-bg-pattern-light.png');
+    background-image: url('../assets/chat-bg-pattern-light.png');
     background-repeat: repeat;
     background-position: top right;
     background-size: 510px auto;
     mix-blend-mode: overlay;
 
     :global(html.theme-dark) & {
-      background-image: url('../../assets/chat-bg-pattern-dark.png');
+      background-image: url('../assets/chat-bg-pattern-dark.png');
       mix-blend-mode: unset;
     }
   }

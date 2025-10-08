@@ -102,7 +102,7 @@ import ReactorListModal from './ReactorListModal.async';
 import MiddleSearch from './search/MiddleSearch.async';
 
 import './MiddleColumn.scss';
-import styles from './MiddleColumn.module.scss';
+import backgroundStyles from '../../styles/_patternBackground.module.scss';
 
 interface OwnProps {
   leftColumnRef: ElementRef<HTMLDivElement>;
@@ -439,12 +439,12 @@ function MiddleColumn({
   );
 
   const bgClassName = buildClassName(
-    styles.background,
-    withRightColumnAnimation && styles.withTransition,
-    customBackground && styles.customBgImage,
-    backgroundColor && styles.customBgColor,
-    customBackground && isBackgroundBlurred && styles.blurred,
-    isRightColumnShown && styles.withRightColumn,
+    backgroundStyles.background,
+    withRightColumnAnimation && backgroundStyles.withTransition,
+    customBackground && backgroundStyles.customBgImage,
+    backgroundColor && backgroundStyles.customBgColor,
+    customBackground && isBackgroundBlurred && backgroundStyles.blurred,
+    isRightColumnShown && backgroundStyles.withRightColumn,
   );
 
   const messagingDisabledClassName = buildClassName(
@@ -578,7 +578,7 @@ function MiddleColumn({
                 paidMessagesStars={paidMessagesStars}
                 withBottomShift={withMessageListBottomShift}
                 withDefaultBg={Boolean(!customBackground && !backgroundColor)}
-                onIntersectPinnedMessage={renderingHandleIntersectPinnedMessage!}
+                onIntersectPinnedMessage={renderingHandleIntersectPinnedMessage}
               />
               <div className={footerClassName}>
                 <FloatingActionButtons

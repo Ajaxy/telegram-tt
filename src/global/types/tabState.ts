@@ -875,6 +875,11 @@ export type TabState = {
     errorKey?: RegularLangFnParameters;
   };
 
+  quickPreview?: {
+    chatId: string;
+    threadId?: ThreadId;
+  };
+
   isWaitingForStarGiftUpgrade?: true;
   isWaitingForStarGiftTransfer?: true;
   insertingPeerIdMention?: string;

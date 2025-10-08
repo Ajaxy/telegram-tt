@@ -96,9 +96,10 @@ type OwnProps = {
   withDefaultBg: boolean;
   isContactRequirePremium?: boolean;
   paidMessagesStars?: number;
-  onScrollDownToggle: BooleanToVoidFunction;
-  onNotchToggle: BooleanToVoidFunction;
-  onIntersectPinnedMessage: OnIntersectPinnedMessage;
+  isQuickPreview?: boolean;
+  onScrollDownToggle?: BooleanToVoidFunction;
+  onNotchToggle?: AnyToVoidFunction;
+  onIntersectPinnedMessage?: OnIntersectPinnedMessage;
 };
 
 type StateProps = {
@@ -224,6 +225,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   canTranslate,
   translationLanguage,
   shouldAutoTranslate,
+  isQuickPreview,
   onIntersectPinnedMessage,
   onScrollDownToggle,
   onNotchToggle,
@@ -443,7 +445,12 @@ const MessageList: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    return debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Around }), 1000, true, false);
+    return debounce(
+      () => loadViewportMessages({ direction: LoadMoreDirection.Around, chatId, threadId }),
+      1000,
+      true,
+      false,
+    );
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, [loadViewportMessages, messageIds]);
 
@@ -469,7 +476,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
       const isFocusing = Boolean(selectTabState(global).focusedMessage?.chatId);
       if (!isFocusing) {
-        onIntersectPinnedMessage({ shouldCancelWaiting: true });
+        onIntersectPinnedMessage?.({ shouldCancelWaiting: true });
       }
 
       if (!container.parentElement) {
@@ -478,7 +485,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
       scrollOffsetRef.current = container.scrollHeight - container.scrollTop;
 
-      if (type === 'thread') {
+      if (type === 'thread' && !isQuickPreview) {
         setScrollOffset({ chatId, threadId, scrollOffset: scrollOffsetRef.current });
       }
     });
@@ -717,7 +724,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (hasMessages) return;
 
-    onScrollDownToggle(false);
+    onScrollDownToggle?.(false);
   }, [hasMessages, onScrollDownToggle]);
 
   const activeKey = isRestricted ? (
@@ -790,6 +797,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
         nameChangeDate={nameChangeDate}
         photoChangeDate={photoChangeDate}
         noAppearanceAnimation={!messageGroups || !shouldAnimateAppearanceRef.current}
+        isQuickPreview={isQuickPreview}
         onScrollDownToggle={onScrollDownToggle}
         onNotchToggle={onNotchToggle}
         onIntersectPinnedMessage={onIntersectPinnedMessage}

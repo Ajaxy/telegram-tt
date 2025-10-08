@@ -1,0 +1,55 @@
+.root {
+  :global(.modal-dialog) {
+    overflow: hidden;
+    height: 40rem;
+    max-height: 90vh;
+  }
+}
+
+.content {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  :global(.messages-container) {
+    pointer-events: none;
+
+    // Prevent right column width calculation from applying
+    width: 100% !important;
+  }
+
+  :global(.sticky-date span) {
+    pointer-events: none !important;
+  }
+}
+
+// Analogue of `#MiddleColumn` from MiddleColumn.module.scss
+.column {
+  cursor: pointer;
+
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  justify-content: center;
+
+  min-width: 0;
+  height: 100%;
+}
+
+// Analogue of `.messages-layout` from MiddleColumn.module.scss
+.messagesLayout {
+  position: relative;
+
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+  height: 100%;
+}

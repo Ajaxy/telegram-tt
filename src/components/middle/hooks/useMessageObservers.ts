@@ -17,8 +17,9 @@ export default function useMessageObservers(
   type: MessageListType,
   containerRef: ElementRef<HTMLDivElement>,
   memoFirstUnreadIdRef: { current: number | undefined },
-  onIntersectPinnedMessage: OnIntersectPinnedMessage,
+  onIntersectPinnedMessage: OnIntersectPinnedMessage | undefined,
   chatId: string,
+  isQuickPreview?: boolean,
 ) {
   const {
     markMessageListRead, markMentionsRead, animateUnreadReaction,
@@ -81,12 +82,18 @@ export default function useMessageObservers(
       }
     });
 
-    if (memoFirstUnreadIdRef.current && maxId >= memoFirstUnreadIdRef.current) {
-      markMessageListRead({ maxId });
-    }
+    if (!isQuickPreview) {
+      if (memoFirstUnreadIdRef.current && maxId >= memoFirstUnreadIdRef.current) {
+        markMessageListRead({ maxId });
+      }
 
-    if (mentionIds.length) {
-      markMentionsRead({ chatId, messageIds: mentionIds });
+      if (mentionIds.length) {
+        markMentionsRead({ chatId, messageIds: mentionIds });
+      }
+
+      if (scheduledToUpdateViews.length) {
+        scheduleForViewsIncrement({ chatId, ids: scheduledToUpdateViews });
+      }
     }
 
     if (reactionIds.length) {
@@ -94,11 +101,7 @@ export default function useMessageObservers(
     }
 
     if (viewportPinnedIdsToAdd.length || viewportPinnedIdsToRemove.length) {
-      onIntersectPinnedMessage({ viewportPinnedIdsToAdd, viewportPinnedIdsToRemove });
-    }
-
-    if (scheduledToUpdateViews.length) {
-      scheduleForViewsIncrement({ chatId, ids: scheduledToUpdateViews });
+      onIntersectPinnedMessage?.({ viewportPinnedIdsToAdd, viewportPinnedIdsToRemove });
     }
   });
 

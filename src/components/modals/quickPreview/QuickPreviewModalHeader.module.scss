@@ -1,0 +1,98 @@
+.root {
+  position: relative;
+  min-height: 3rem;
+  padding: 0.5rem 0.625rem 0.625rem 0.75rem !important;
+  border-bottom: 1px solid var(--color-borders);
+
+  :global(.modal-title) {
+    margin: 0 !important;
+    font-size: inherit;
+    font-weight: inherit;
+  }
+}
+
+.closeButton, .markAsReadButton {
+  z-index: 1;
+}
+
+.closeButton {
+  position: absolute !important;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.markAsReadButton {
+  position: absolute !important;
+  top: 0.5rem;
+  right: 3rem;
+}
+
+.chatInfoOverride {
+  // Mimic left column chat list styling
+  :global(.ChatInfo) {
+    display: flex;
+    flex: 1;
+    gap: 0.625rem;
+    align-items: center;
+  }
+
+  :global(.Avatar) {
+    flex-shrink: 0;
+    width: 2.625rem;
+    height: 2.625rem;
+  }
+
+  :global(.info) {
+    overflow: hidden;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.125rem;
+
+    text-align: left;
+  }
+
+  :global(.title),
+  :global(.fullName) {
+    overflow: hidden;
+
+    margin-bottom: 0;
+
+    font-size: 1rem;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.25rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :global(.status) {
+    font-size: 0.875rem;
+    line-height: 1.125rem;
+    color: var(--color-text-secondary);
+  }
+
+  :global(.topic-header-icon) {
+    --custom-emoji-size: 2.25rem;
+
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    font-size: 2.25rem;
+
+    :global(.emoji-small) {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    :global(.topic-icon-letter) {
+      font-size: 1.25rem;
+    }
+
+    &:global(.general-forum-icon) {
+      color: var(--color-text-secondary);
+    }
+  }
+
+  :global(.Transition.message-count-transition) {
+    height: 1.125rem;
+  }
+}

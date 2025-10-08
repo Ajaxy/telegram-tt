@@ -74,9 +74,10 @@ interface OwnProps {
   photoChangeDate?: number;
   noAppearanceAnimation: boolean;
   isSavedDialog?: boolean;
-  onScrollDownToggle: BooleanToVoidFunction;
-  onNotchToggle: AnyToVoidFunction;
-  onIntersectPinnedMessage: OnIntersectPinnedMessage;
+  isQuickPreview?: boolean;
+  onScrollDownToggle?: BooleanToVoidFunction;
+  onNotchToggle?: AnyToVoidFunction;
+  onIntersectPinnedMessage?: OnIntersectPinnedMessage;
   canPost?: boolean;
 }
 
@@ -110,6 +111,7 @@ const MessageListContent: FC<OwnProps> = ({
   photoChangeDate,
   noAppearanceAnimation,
   isSavedDialog,
+  isQuickPreview,
   onScrollDownToggle,
   onNotchToggle,
   onIntersectPinnedMessage,
@@ -126,7 +128,7 @@ const MessageListContent: FC<OwnProps> = ({
     observeIntersectionForReading,
     observeIntersectionForLoading,
     observeIntersectionForPlaying,
-  } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef, onIntersectPinnedMessage, chatId);
+  } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef, onIntersectPinnedMessage, chatId, isQuickPreview);
 
   const {
     withHistoryTriggers,

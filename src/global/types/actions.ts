@@ -2509,6 +2509,12 @@ export interface ActionPayloads {
   } & WithTabId;
   closeSuggestedPostApprovalModal: WithTabId | undefined;
 
+  openQuickPreview: {
+    id: string;
+    threadId?: ThreadId;
+  } & WithTabId;
+  closeQuickPreview: WithTabId | undefined;
+
   openDeleteMessageModal: ({
     chatId: string;
     messageIds: number[];

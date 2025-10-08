@@ -103,6 +103,7 @@ const Topic: FC<OwnProps & StateProps> = ({
     focusLastMessage,
     setViewForumAsMessages,
     updateTopicMutedState,
+    openQuickPreview,
   } = getActions();
 
   const lang = useOldLang();
@@ -153,7 +154,13 @@ const Topic: FC<OwnProps & StateProps> = ({
     orderDiff,
   });
 
-  const handleOpenTopic = useLastCallback(() => {
+  const handleOpenTopic = useLastCallback((e: React.MouseEvent) => {
+    if (e.altKey) {
+      e.preventDefault();
+      openQuickPreview({ id: chatId, threadId: topic.id });
+      return;
+    }
+
     openThread({ chatId, threadId: topic.id, shouldReplaceHistory: true });
     setViewForumAsMessages({ chatId, isEnabled: false });
 

@@ -104,3 +104,4 @@ export { default as OneTimeMediaModal } from '../components/modals/oneTimeMedia/
 export { default as WebAppsCloseConfirmationModal } from '../components/main/WebAppsCloseConfirmationModal';
 export { default as FrozenAccountModal } from '../components/modals/frozenAccount/FrozenAccountModal';
 export { default as ProfileRatingModal } from '../components/modals/profileRating/ProfileRatingModal';
+export { default as QuickPreviewModal } from '../components/modals/quickPreview/QuickPreviewModal';

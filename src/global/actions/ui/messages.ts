@@ -1180,3 +1180,19 @@ addActionHandler('updateSharePreparedMessageModalSendArgs', async (global, actio
   }, tabId);
   setGlobal(global);
 });
+
+addActionHandler('openQuickPreview', (global, actions, payload): ActionReturnType => {
+  const { id: chatId, threadId, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    quickPreview: { chatId, threadId },
+  }, tabId);
+});
+
+addActionHandler('closeQuickPreview', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    quickPreview: undefined,
+  }, tabId);
+});

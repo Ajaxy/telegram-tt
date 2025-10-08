@@ -1,4 +1,4 @@
-import type React from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
@@ -37,6 +37,7 @@ import PaidReactionModal from './paidReaction/PaidReactionModal.async';
 import PreparedMessageModal from './preparedMessage/PreparedMessageModal.async';
 import PriceConfirmModal from './priceConfirm/PriceConfirmModal.async';
 import ProfileRatingModal from './profileRating/ProfileRatingModal.async';
+import QuickPreviewModal from './quickPreview/QuickPreviewModal.async';
 import ReportAdModal from './reportAd/ReportAdModal.async';
 import ReportModal from './reportModal/ReportModal.async';
 import SharePreparedMessageModal from './sharePreparedMessage/SharePreparedMessageModal.async';
@@ -97,14 +98,15 @@ type ModalKey = keyof Pick<TabState,
   'isFrozenAccountModalOpen' |
   'deleteAccountModal' |
   'isAgeVerificationModalOpen' |
-  'profileRatingModal'
+  'profileRatingModal' |
+  'quickPreview'
 >;
 
 type StateProps = {
   [K in ModalKey]?: TabState[K];
 };
 type ModalRegistry = {
-  [K in ModalKey]: React.FC<{
+  [K in ModalKey]: FC<{
     modal: TabState[K];
   }>;
 };
@@ -157,6 +159,7 @@ const MODALS: ModalRegistry = {
   deleteAccountModal: DeleteAccountModal,
   isAgeVerificationModalOpen: AgeVerificationModal,
   profileRatingModal: ProfileRatingModal,
+  quickPreview: QuickPreviewModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

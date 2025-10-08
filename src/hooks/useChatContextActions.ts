@@ -5,9 +5,7 @@ import type { ApiChat, ApiTopic, ApiUser } from '../api/types';
 import type { MenuItemContextAction } from '../components/ui/ListItem';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
-import {
-  getCanDeleteChat, isChatArchived, isChatChannel, isChatGroup,
-} from '../global/helpers';
+import { getCanDeleteChat, isChatArchived, isChatChannel, isChatGroup } from '../global/helpers';
 import { IS_TAURI } from '../util/browser/globalEnvironment';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/browser/windowEnvironment';
 import { isUserId } from '../util/entities/ids';
@@ -86,6 +84,7 @@ const useChatContextActions = ({
       markChatMessagesRead,
       markChatUnread,
       openChatInNewTab,
+      openQuickPreview,
     } = getActions();
 
     const actionOpenInNewTab = IS_OPEN_IN_NEW_TAB_SUPPORTED && {
@@ -97,6 +96,16 @@ const useChatContextActions = ({
         } else {
           openChatInNewTab({ chatId: chat.id });
         }
+      },
+    };
+
+    const actionQuickPreview = !isSavedDialog && !chat.isForum && {
+      title: lang('QuickPreview'),
+      icon: 'eye-outline',
+      handler: () => {
+        openQuickPreview({
+          id: chat.id,
+        });
       },
     };
 
@@ -128,7 +137,7 @@ const useChatContextActions = ({
     };
 
     if (isSavedDialog) {
-      return compact([actionOpenInNewTab, actionPin, actionDelete]) as MenuItemContextAction[];
+      return compact([actionOpenInNewTab, actionQuickPreview, actionPin, actionDelete]) as MenuItemContextAction[];
     }
 
     const actionAddToFolder = canChangeFolder ? {
@@ -150,12 +159,15 @@ const useChatContextActions = ({
       };
 
     if (isInSearch) {
-      return compact([actionOpenInNewTab, actionPin, actionAddToFolder, actionMute]) as MenuItemContextAction[];
+      return compact([
+        actionOpenInNewTab, actionQuickPreview, actionPin, actionAddToFolder, actionMute,
+      ]) as MenuItemContextAction[];
     }
 
     const actionMaskAsRead = (
       chat.unreadCount || chat.hasUnreadMark || Object.values(topics || {}).some(({ unreadCount }) => unreadCount)
-    ) ? {
+    )
+      ? {
         title: lang('ChatListContextMaskAsRead'),
         icon: 'readchats',
         handler: () => markChatMessagesRead({ id: chat.id }),
@@ -177,6 +189,7 @@ const useChatContextActions = ({
 
     return compact([
       actionOpenInNewTab,
+      actionQuickPreview,
       actionAddToFolder,
       actionMaskAsRead,
       actionMarkAsUnread,
