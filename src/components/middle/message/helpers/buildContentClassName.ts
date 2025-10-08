@@ -81,10 +81,10 @@ export function buildContentClassName(
     classNames.push(peerColorClass);
   }
 
-  if (!isMedia && message.emojiOnlyCount) {
+  if (!isMedia && text?.emojiOnlyCount) {
     classNames.push('emoji-only');
-    if (message.emojiOnlyCount <= EMOJI_SIZES) {
-      classNames.push(`emoji-only-${message.emojiOnlyCount}`);
+    if (text.emojiOnlyCount <= EMOJI_SIZES) {
+      classNames.push(`emoji-only-${text.emojiOnlyCount}`);
     }
   } else if (hasText) {
     classNames.push('text');

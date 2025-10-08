@@ -274,19 +274,18 @@ export function updateChatMessage<T extends GlobalState>(
     }
   }
 
-  let emojiOnlyCount = message?.emojiOnlyCount;
   let text = message?.content?.text;
   if (messageUpdate.content) {
-    emojiOnlyCount = getEmojiOnlyCountForMessage(
+    const emojiOnlyCount = getEmojiOnlyCountForMessage(
       messageUpdate.content, message?.groupedId || messageUpdate.groupedId,
     );
     text = messageUpdate.content.text ? addTimestampEntities(messageUpdate.content.text) : text;
+    if (text) text.emojiOnlyCount = emojiOnlyCount;
   }
 
   const updatedMessage = omitUndefined({
     ...message,
     ...messageUpdate,
-    emojiOnlyCount,
     text,
   });
 
@@ -305,19 +304,18 @@ export function updateScheduledMessage<T extends GlobalState>(
 ): T {
   const message = selectScheduledMessage(global, chatId, messageId)!;
 
-  let emojiOnlyCount = message?.emojiOnlyCount;
   let text = message?.content?.text;
   if (messageUpdate.content) {
-    emojiOnlyCount = getEmojiOnlyCountForMessage(
+    const emojiOnlyCount = getEmojiOnlyCountForMessage(
       messageUpdate.content, message?.groupedId || messageUpdate.groupedId,
     );
     text = messageUpdate.content.text ? addTimestampEntities(messageUpdate.content.text) : text;
+    if (text) text.emojiOnlyCount = emojiOnlyCount;
   }
 
   const updatedMessage = {
     ...message,
     ...messageUpdate,
-    emojiOnlyCount,
     text,
   };
 

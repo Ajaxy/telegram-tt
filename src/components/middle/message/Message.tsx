@@ -826,7 +826,7 @@ const Message: FC<OwnProps & StateProps> = ({
   });
 
   const withAppendix = contentClassName.includes('has-appendix');
-  const emojiSize = getCustomEmojiSize(message.emojiOnlyCount);
+  const emojiSize = getCustomEmojiSize(text?.emojiOnlyCount);
 
   const paidMessageStarsInMeta = !isChatWithUser
     ? (isAlbum && paidMessageStars ? album.messages.length * paidMessageStars : paidMessageStars)

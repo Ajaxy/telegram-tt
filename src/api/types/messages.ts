@@ -577,8 +577,12 @@ export interface ApiFormattedText {
   entities?: ApiMessageEntity[];
 }
 
+export interface ApiFormattedTextWithEmojiOnlyCount extends ApiFormattedText {
+  emojiOnlyCount?: number;
+}
+
 export type MediaContent = {
-  text?: ApiFormattedText;
+  text?: ApiFormattedTextWithEmojiOnlyCount;
   photo?: ApiPhoto;
   video?: ApiVideo;
   altVideos?: ApiVideo[];
@@ -661,7 +665,6 @@ export interface ApiMessage {
   isForwardingAllowed?: boolean;
   transcriptionId?: string;
   isTranscriptionError?: boolean;
-  emojiOnlyCount?: number;
   reactors?: {
     nextOffset?: string;
     count: number;
