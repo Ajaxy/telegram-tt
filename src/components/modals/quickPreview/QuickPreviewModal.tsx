@@ -72,7 +72,7 @@ const QuickPreviewModal: FC<OwnProps & StateProps> = ({
     onBack: handleClose,
   });
 
-  const { chatId: renderingChatId, threadId: renderingThreadId } = useCurrentOrPrev(modal, true)!;
+  const { chatId: renderingChatId, threadId: renderingThreadId } = useCurrentOrPrev(modal, true) || {};
 
   const bgClassName = buildClassName(
     backgroundStyles.background,
@@ -80,6 +80,10 @@ const QuickPreviewModal: FC<OwnProps & StateProps> = ({
     backgroundColor && backgroundStyles.customBgColor,
     customBackground && isBackgroundBlurred && backgroundStyles.blurred,
   );
+
+  if (!renderingChatId) {
+    return undefined;
+  }
 
   return (
     <Modal
