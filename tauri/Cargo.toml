@@ -1,6 +1,6 @@
 [package]
 name = "telegram_air"
-version = "2.8.9"
+version = "2.8.10"
 description = "Telegram Air"
 authors = ["Alexander Zinchuk"]
 license = "GPLv3"
