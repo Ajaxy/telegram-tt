@@ -26,6 +26,7 @@ export type OwnProps = {
   needZip?: boolean;
   countryList: ApiCountry[];
   dispatch: FormEditDispatch;
+  isActive?: boolean;
 };
 
 const PaymentInfo: FC<OwnProps> = ({
@@ -36,6 +37,7 @@ const PaymentInfo: FC<OwnProps> = ({
   needZip,
   countryList,
   dispatch,
+  isActive,
 }) => {
   const selectCountryRef = useRef<HTMLSelectElement>();
 
@@ -88,6 +90,7 @@ const PaymentInfo: FC<OwnProps> = ({
           onChange={handleCardNumberChange}
           value={state.cardNumber}
           error={formErrors.cardNumber && lang.withRegular(formErrors.cardNumber)}
+          isActive={isActive}
         />
         {needCardholderName && (
           <InputText

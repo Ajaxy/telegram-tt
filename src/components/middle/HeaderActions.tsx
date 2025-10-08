@@ -35,6 +35,7 @@ import {
 } from '../../global/selectors';
 import { ARE_CALLS_SUPPORTED, IS_APP } from '../../util/browser/windowEnvironment';
 import { isUserId } from '../../util/entities/ids';
+import focusNoScroll from '../../util/focusNoScroll';
 
 import { useHotkeys } from '../../hooks/useHotkeys';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -88,9 +89,6 @@ interface StateProps {
   doNotTranslate: string[];
   isAccountFrozen?: boolean;
 }
-
-// Chrome breaks layout when focusing input during transition
-const SEARCH_FOCUS_DELAY_MS = 320;
 
 const HeaderActions: FC<OwnProps & StateProps> = ({
   chatId,
@@ -207,16 +205,13 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
 
     openMiddleSearch();
 
-    if (isMobile) {
-      // iOS requires synchronous focus on user event.
-      setFocusInSearchInput();
-    } else if (noAnimation) {
+    if (noAnimation) {
       // The second RAF is necessary because Teact must update the state and render the async component
       requestMeasure(() => {
         requestNextMutation(setFocusInSearchInput);
       });
     } else {
-      setTimeout(setFocusInSearchInput, SEARCH_FOCUS_DELAY_MS);
+      setFocusInSearchInput();
     }
   });
 
@@ -566,5 +561,7 @@ export default memo(withGlobal<OwnProps>(
 
 function setFocusInSearchInput() {
   const searchInput = document.querySelector<HTMLInputElement>('#MiddleSearch input');
-  searchInput?.focus();
+  if (searchInput) {
+    focusNoScroll(searchInput);
+  }
 }

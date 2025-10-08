@@ -275,7 +275,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
     sendForm();
   }, [sendForm]);
 
-  function renderModalContent(currentStep: PaymentStep) {
+  function renderModalContent(currentStep: PaymentStep, isActive?: boolean) {
     switch (currentStep) {
       case PaymentStep.Checkout:
         return (
@@ -328,6 +328,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
             needCountry={needCountry}
             needZip={needZip}
             countryList={countryList}
+            isActive={isActive}
           />
         );
       case PaymentStep.ShippingInfo:
@@ -580,9 +581,11 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
           shouldCleanup
           cleanupOnlyKey={PaymentStep.ConfirmPayment}
         >
-          <div className="content custom-scroll">
-            {renderModalContent(step)}
-          </div>
+          {(isActive) => (
+            <div className="content custom-scroll">
+              {renderModalContent(step, isActive)}
+            </div>
+          )}
         </Transition>
       ) : (
         <div className="empty-content">

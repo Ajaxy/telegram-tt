@@ -4,10 +4,12 @@ import {
   useRef, useState,
 } from '../../lib/teact/teact';
 
+import { requestMeasure } from '../../lib/fasterdom/fasterdom';
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
+import focusNoScroll from '../../util/focusNoScroll';
 import { CardType, detectCardType } from '../common/helpers/detectCardType';
 import { formatCardNumber } from '../middle/helpers/inputFormatters';
 
-import useFocusAfterAnimation from '../../hooks/useFocusAfterAnimation';
 import useOldLang from '../../hooks/useOldLang';
 
 import InputText from '../ui/InputText';
@@ -24,13 +26,22 @@ export type OwnProps = {
   value: string;
   error?: string;
   onChange: (value: string) => void;
+  isActive?: boolean;
 };
 
-const CardInput: FC<OwnProps> = ({ value, error, onChange }) => {
+const CardInput: FC<OwnProps> = ({ value, error, onChange, isActive }) => {
   const lang = useOldLang();
   const cardNumberRef = useRef<HTMLInputElement>();
 
-  useFocusAfterAnimation(cardNumberRef);
+  useEffect(() => {
+    if (!isActive || IS_TOUCH_ENV) {
+      return;
+    }
+
+    requestMeasure(() => {
+      focusNoScroll(cardNumberRef.current);
+    });
+  }, [isActive]);
 
   const [cardType, setCardType] = useState<number>(CardType.Default);
   useEffect(() => {

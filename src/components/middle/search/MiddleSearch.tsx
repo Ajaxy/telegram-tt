@@ -35,6 +35,7 @@ import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { getDayStartAt } from '../../../util/dates/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
+import focusNoScroll from '../../../util/focusNoScroll';
 import { getSearchResultKey, parseSearchResultKey, type SearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { debounce, fastRaf } from '../../../util/schedulers';
@@ -174,7 +175,7 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
 
   const focusInput = useLastCallback(() => {
     requestMeasure(() => {
-      inputRef.current?.focus();
+      focusNoScroll(inputRef.current);
     });
   });
 

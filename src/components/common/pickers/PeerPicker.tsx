@@ -12,6 +12,7 @@ import { getGroupStatus, getMainUsername, getUserStatus, isUserOnline } from '..
 import { getPeerTypeKey, isApiPeerChat } from '../../../global/helpers/peers';
 import { selectPeer, selectUserStatus } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import focusNoScroll from '../../../util/focusNoScroll';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
@@ -81,9 +82,6 @@ type OwnProps<CategoryType extends string> = {
   onLoadMore?: () => void;
 } & (SingleModeProps<CategoryType> | MultipleModeProps<CategoryType>);
 
-// Focus slows down animation, also it breaks transition layout in Chrome
-const FOCUS_DELAY_MS = 500;
-
 const MAX_FULL_ITEMS = 10;
 const ALWAYS_FULL_ITEMS_COUNT = 5;
 
@@ -141,15 +139,9 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
 
   useEffect(() => {
     if (!isSearchable) return undefined;
-    const timeoutId = window.setTimeout(() => {
-      requestMeasure(() => {
-        inputRef.current?.focus();
-      });
-    }, FOCUS_DELAY_MS);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
+    requestMeasure(() => {
+      focusNoScroll(inputRef.current);
+    });
   }, [isSearchable]);
 
   const lockedSelectedIdsSet = useMemo(() => new Set(lockedSelectedIds), [lockedSelectedIds]);

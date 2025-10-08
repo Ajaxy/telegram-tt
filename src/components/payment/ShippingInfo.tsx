@@ -7,7 +7,10 @@ import {
 import type { ApiCountry } from '../../api/types';
 import type { FormEditDispatch, FormState } from '../../hooks/reducers/usePaymentReducer';
 
-import useFocusAfterAnimation from '../../hooks/useFocusAfterAnimation';
+import { requestMeasure } from '../../lib/fasterdom/fasterdom';
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
+import focusNoScroll from '../../util/focusNoScroll';
+
 import useLang from '../../hooks/useLang';
 import useOldLang from '../../hooks/useOldLang';
 
@@ -50,7 +53,15 @@ const ShippingInfo: FC<OwnProps> = ({
   const oldLang = useOldLang();
   const lang = useLang();
 
-  useFocusAfterAnimation(inputRef);
+  useEffect(() => {
+    if (IS_TOUCH_ENV) {
+      return;
+    }
+
+    requestMeasure(() => {
+      focusNoScroll(inputRef.current);
+    });
+  }, [inputRef]);
 
   const handleAddress1Change = useCallback((e) => {
     dispatch({ type: 'changeAddress1', payload: e.target.value });

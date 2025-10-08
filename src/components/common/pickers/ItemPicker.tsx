@@ -8,6 +8,7 @@ import {
 
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
+import focusNoScroll from '../../../util/focusNoScroll';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
@@ -69,9 +70,6 @@ type OwnProps = {
   onLoadMore?: () => void;
 } & (SingleModeProps | MultipleModeProps);
 
-// Focus slows down animation, also it breaks transition layout in Chrome
-const FOCUS_DELAY_MS = 500;
-
 const ITEM_CLASS_NAME = 'ItemPickerItem';
 
 const ItemPicker = ({
@@ -103,15 +101,9 @@ const ItemPicker = ({
 
   useEffect(() => {
     if (!isSearchable) return undefined;
-    const timeoutId = window.setTimeout(() => {
-      requestMeasure(() => {
-        inputRef.current?.focus();
-      });
-    }, FOCUS_DELAY_MS);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
+    requestMeasure(() => {
+      focusNoScroll(inputRef.current);
+    });
   }, [isSearchable]);
 
   const selectedValues = useMemo(() => {

@@ -2,7 +2,6 @@ import type { ChangeEvent } from 'react';
 import type { ElementRef, FC, TeactNode } from '../../../lib/teact/teact';
 import type React from '../../../lib/teact/teact';
 import {
-  getIsHeavyAnimating,
   memo, useEffect, useLayoutEffect,
   useRef, useState,
 } from '../../../lib/teact/teact';
@@ -45,8 +44,6 @@ import TextTimer from '../../ui/TextTimer';
 import TextFormatter from './TextFormatter.async';
 
 const CONTEXT_MENU_CLOSE_DELAY_MS = 100;
-// Focus slows down animation, also it breaks transition layout in Chrome
-const FOCUS_DELAY_MS = 350;
 const TRANSITION_DURATION_FACTOR = 50;
 
 const SCROLLER_CLASS = 'input-scroller';
@@ -248,6 +245,10 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   useLayoutEffect(() => {
     const html = isActive ? getHtml() : '';
 
+    if (!isActive && inputRef.current) {
+      inputRef.current.blur();
+    }
+
     if (html !== inputRef.current!.innerHTML) {
       inputRef.current!.innerHTML = html;
     }
@@ -267,11 +268,6 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   chatIdRef.current = chatId;
   const focusInput = useLastCallback(() => {
     if (!inputRef.current || isNeedPremium) {
-      return;
-    }
-
-    if (getIsHeavyAnimating()) {
-      setTimeout(focusInput, FOCUS_DELAY_MS);
       return;
     }
 
