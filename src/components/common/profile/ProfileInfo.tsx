@@ -76,6 +76,7 @@ type OwnProps = {
   isForSettings?: boolean;
   canPlayVideo: boolean;
   isForMonoforum?: boolean;
+  onExpand?: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -130,6 +131,7 @@ const ProfileInfo = ({
   theme,
   isPlain,
   savedGifts,
+  onExpand,
 }: OwnProps & StateProps) => {
   const {
     openMediaViewer,
@@ -277,6 +279,15 @@ const ProfileInfo = ({
     if (user) {
       openProfileRatingModal({ userId: user.id, level });
     }
+  });
+
+  const handleMinimizedAvatarClick = useLastCallback(() => {
+    if (isForSettings) {
+      handleProfilePhotoClick();
+      return;
+    }
+
+    onExpand?.();
   });
 
   function handleSelectFallbackPhoto() {
@@ -565,7 +576,7 @@ const ProfileInfo = ({
           size="jumbo"
           peer={peer}
           style={createVtnStyle('avatar', true)}
-          onClick={isForSettings ? handleProfilePhotoClick : undefined}
+          onClick={handleMinimizedAvatarClick}
         />
       )}
 

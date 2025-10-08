@@ -627,9 +627,13 @@ const Profile = ({
     resetGiftProfileFilter({ peerId: chatId });
   });
 
-  useTopOverscroll(
-    containerRef, handleExpandProfile, handleCollapseProfile, !hasAvatar || !shouldRenderProfileInfo,
-  );
+  useTopOverscroll({
+    containerRef,
+    onOverscroll: handleExpandProfile,
+    onReset: handleCollapseProfile,
+    isOverscrolled: isProfileExpanded,
+    isDisabled: !hasAvatar || !shouldRenderProfileInfo,
+  });
 
   useEffect(() => {
     if (!transitionRef.current || !IS_TOUCH_ENV) {
@@ -1055,6 +1059,7 @@ const Profile = ({
           peerId={peerId}
           canPlayVideo={isReady}
           isForMonoforum={Boolean(monoforumChannel)}
+          onExpand={handleExpandProfile}
         />
         <ChatExtra
           chatOrUserId={profileId}

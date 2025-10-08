@@ -215,7 +215,12 @@ const ChatList: FC<OwnProps> = ({
     toggleStoryRibbon({ isShown: false, isArchived });
   });
 
-  useTopOverscroll(containerRef, handleShowStoryRibbon, handleHideStoryRibbon, isSaved);
+  useTopOverscroll({
+    containerRef,
+    onOverscroll: handleShowStoryRibbon,
+    onReset: handleHideStoryRibbon,
+    isDisabled: isSaved,
+  });
 
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);

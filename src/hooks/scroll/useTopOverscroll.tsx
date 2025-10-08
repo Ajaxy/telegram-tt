@@ -30,11 +30,19 @@ const initialActiveScrollContext: ActiveScrollContext = {
   timeout: undefined,
 };
 
-export default function useTopOverscroll(
-  containerRef: ElementRef<HTMLDivElement>,
-  onOverscroll?: AnyToVoidFunction,
-  onReset?: AnyToVoidFunction,
-  isDisabled?: boolean,
+export default function useTopOverscroll({
+  containerRef,
+  isOverscrolled,
+  isDisabled,
+  onOverscroll,
+  onReset,
+}: {
+  containerRef: ElementRef<HTMLDivElement>;
+  isOverscrolled?: boolean;
+  onOverscroll?: AnyToVoidFunction;
+  onReset?: AnyToVoidFunction;
+  isDisabled?: boolean;
+},
 ) {
   const [getState, setState] = useSignal<State>('normal');
   const activeScrollRef = useRef<ActiveScrollContext>({ ...initialActiveScrollContext });
@@ -196,6 +204,10 @@ export default function useTopOverscroll(
       });
     };
   }, [containerRef, isDisabled, getState]);
+
+  useEffect(() => {
+    setState(isOverscrolled ? 'overscroll' : 'normal');
+  }, [isOverscrolled, setState]);
 
   useEffect(() => {
     const container = containerRef.current;
