@@ -1111,7 +1111,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     lastMessageSendTimeSeconds.current = getServerTime();
 
-    clearDraft({ chatId, isLocalOnly: true });
+    clearDraft({ chatId, threadId, isLocalOnly: true });
 
     // Wait until message animation starts
     requestMeasure(() => {
@@ -1397,6 +1397,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         resetComposer(true);
       });
     }
+
+    clearDraft({ chatId, threadId, isLocalOnly: true });
   });
 
   const handleStickerSelect = useLastCallback((
@@ -1486,14 +1488,14 @@ const Composer: FC<OwnProps & StateProps> = ({
       applyIosAutoCapitalizationFix(messageInput);
     }
 
-    clearDraft({ chatId, isLocalOnly: true });
+    clearDraft({ chatId, threadId, isLocalOnly: true });
     requestMeasure(() => {
       resetComposer();
     });
   });
 
   const handleBotCommandSelect = useLastCallback(() => {
-    clearDraft({ chatId, isLocalOnly: true });
+    clearDraft({ chatId, threadId, isLocalOnly: true });
     requestMeasure(() => {
       resetComposer();
     });
