@@ -22,7 +22,7 @@ import {
   type RegularLangFnParameters,
 } from './types';
 
-import { DEBUG, LANG_PACK } from '../../config';
+import { DEBUG, FORCE_FALLBACK_LANG, LANG_PACK } from '../../config';
 import { callApi } from '../../api/gramjs';
 import renderText from '../../components/common/helpers/renderText';
 import { IS_INTL_LIST_FORMAT_SUPPORTED } from '../browser/globalEnvironment';
@@ -344,7 +344,7 @@ export function getTranslationFn(): LangFn {
 }
 
 function getString(langKey: LangKey, count: number) {
-  let langPackStringValue = langPack?.strings[langKey];
+  let langPackStringValue = !FORCE_FALLBACK_LANG ? langPack?.strings[langKey] : undefined;
 
   if (!langPackStringValue && !fallbackLangPack) {
     loadFallbackPack();

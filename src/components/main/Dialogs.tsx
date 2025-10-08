@@ -12,7 +12,7 @@ import getReadableErrorText from '../../util/getReadableErrorText';
 import renderText from '../common/helpers/renderText';
 
 import useFlag from '../../hooks/useFlag';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -29,7 +29,7 @@ const Dialogs: FC<StateProps> = ({ dialogs, currentMessageList }) => {
   } = getActions();
   const [isModalOpen, openModal, closeModal] = useFlag();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useEffect(() => {
     if (dialogs.length > 0) {
@@ -62,7 +62,11 @@ const Dialogs: FC<StateProps> = ({ dialogs, currentMessageList }) => {
         title={lang('ShareYouPhoneNumberTitle')}
         onCloseAnimationEnd={dismissDialog}
       >
-        {lang('AreYouSureShareMyContactInfoBot')}
+        {lang(
+          'AreYouSureShareMyContactInfoBot',
+          undefined,
+          { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'emoji'],
+          })}
         <div className="dialog-buttons mt-2">
           <Button
             className="confirm-dialog-button"

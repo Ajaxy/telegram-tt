@@ -574,7 +574,8 @@
 "MemberRequestsRequestToJoinDescriptionChannel" = "This channel accepts new subscribers only after they are approved by its admins.";
 "MemberRequestsRequestToJoinDescriptionGroup" = "This group accepts new members only after they are approved by its admins.";
 "ShareYouPhoneNumberTitle" = "Share your phone number?";
-"AreYouSureShareMyContactInfoBot" = "The bot will know your phone number. This can be useful for integration with other services.";
+"AreYouSureShareMyContactInfoBot" = "The bot will know your phone number. This can be useful for integration with other services.\n\n⚠️ Warning! Never enter your Telegram login codes in mini apps.";
+"ContactShare" = "Share Contact";
 "OK" = "OK";
 "ForwardTo" = "Forward to...";
 "AttachGame" = "Game";
@@ -752,7 +753,6 @@
 "PollsStopSure" = "Stop";
 "PaymentTestInvoice" = "TEST INVOICE";
 "PaymentInvoiceNotFound" = "Invoice not found";
-"AttachLiveLocation" = "Live Location";
 "NoWordsRecognized" = "No words recognized.";
 "ViaBot" = "via";
 "DiscussChannel" = "channel";
@@ -1117,6 +1117,7 @@
 "AttachStory" = "Story";
 "AttachInvoice" = "Invoice: {description}";
 "AttachLocation" = "Location";
+"AttachLiveLocation" = "Live Location";
 "AttachGiveaway" = "Giveaway";
 "AttachGiveawayResults" = "Giveaway Results";
 "AttachTodo" = "Checklist";
@@ -1478,9 +1479,9 @@
 "GiftInfoDescriptionConverted_other" = "You converted this gift to **{amount}** Stars.";
 "GiftInfoPeerDescriptionOutConverted_one" = "{peer} converted this gift to **{amount}** Star.";
 "GiftInfoPeerDescriptionOutConverted_other" = "{peer} converted this gift to **{amount}** Stars.";
-"GiftInfoDescriptionFreeUpgrade" = "Upgrade this gift for free to turn it to a unique collectible.";
+"GiftInfoDescriptionFreeUpgrade" = "Upgrade this gift for free to turn it into a unique collectible.";
 "GiftInfoDescriptionUpgrade2" = "Upgrade this gift to turn it to a unique collectible.";
-"GiftInfoPeerDescriptionFreeUpgradeOut" = "{peer} can turn this gift to a unique collectible";
+"GiftInfoPeerDescriptionFreeUpgradeOut" = "{peer} can turn this gift into a unique collectible";
 "GiftInfoDescriptionUpgraded" = "This gift was turned into a unique collectible.";
 "GiftInfoFrom" = "From";
 "GiftInfoDate" = "Date";
@@ -1877,8 +1878,8 @@
 "ActionStarGiftChannelText" = "Add this gift to your channel's profile or convert it to {amount}.";
 "ActionStarGiftDisplaying" = "You added this gift to your profile.";
 "ActionStarGiftChannelDisplaying" = "This gift is displayed to visitors of your channel.";
-"ActionStarGiftUpgradeText" = "{peer} can turn this gift to a unique collectible.";
-"ActionStarGiftUpgradeTextYou" = "Tap “Unpack” to turn this gift to a unique collectible.";
+"ActionStarGiftUpgradeText" = "{peer} can turn this gift into a unique collectible.";
+"ActionStarGiftUpgradeTextYou" = "Tap “Unpack” to turn this gift into a unique collectible.";
 "ActionStarGiftUpgraded" = "This gift was upgraded.";
 "ActionStarGiftUnpack" = "Unpack";
 "ActionStarGiftLimitedRibbon" = "1 of {total}";
@@ -1973,7 +1974,7 @@
 "GiftPremiumDescriptionYourBalance" = "Your balance is **{stars}**. {link}";
 "StarsGiftCompleted" = "Gift sent!";
 "GiftSent" = "Gift sent!";
-"PrivacyDescriptionMessagesContactsAndPremium" = "You can restrict messages from users who are not in your contacts and don't have Premium.";
+"PrivacyDescriptionMessagesContactsAndPremium" = "You can restrict messages from users who are not in your contacts and whom you haven't messaged first.";
 "PrivacyChargeForMessages" = "Charge for Messages";
 "PrivacyDescriptionChargeForMessages" = "Charge a fee for messages from people outside your contacts or those you haven't messaged first.";
 "RemoveFeeTitle" = "Remove Fee";
@@ -2201,7 +2202,7 @@
 "DescriptionAboutTon" = "Offer TON to submit post suggestions to channels on Telegram.";
 "ButtonTopUpViaFragment" = "Top Up Via Fragment";
 "TonModalHint" = "You can top up your TON using Fragment.";
-"TonGiftReceived" = "TON Top Up";
+"TonGiftReceived" = "TON Top-Up";
 "MediaSpoilerSensitive" = "18+";
 "TitleSensitiveModal" = "{years}+ content";
 "TextSensitiveModal" = "This media may contain sensitive content suitable only for adults. Do you still want to view it?";
@@ -2215,8 +2216,8 @@
 "TitleAgeCheckSuccess" = "Age Check Success";
 "ButtonAgeVerification" = "Verify My Age";
 "GiftRibbonPremium" = "premium";
-"NotificationGiftsLimit2_one" = "You've already sent **one** of these gifts, and it's the limit.";
-"NotificationGiftsLimit2_other" = "You've already sent {count} of these gifts, and it's the limit.";
+"NotificationGiftsLimit2_one" = "You already sent **one** of these gifts, which is the limit.";
+"NotificationGiftsLimit2_other" = "You already sent **{count}** of these gifts, which is the limit.";
 "PremiumGiftHeader" = "Premium Gift";
 "DescriptionGiftPremiumRequired2_one" = "Subscribe to **Telegram Premium** to send **one** of these gifts and unlock powerful features.";
 "DescriptionGiftPremiumRequired2_other" = "Subscribe to **Telegram Premium** to send up to **{count}** of these gifts and unlock powerful features.";
@@ -2257,7 +2258,7 @@
 "PostsSearchTransaction" = "Posts Search";
 "AllStoriesCategory" = "All stories";
 "TitleRating" = "Rating";
-"RatingReflectsActivity" = "This rating reflects {name}'s activity on Telegram. It is based on:";
+"RatingReflectsActivity" = "This rating reflects **{name}'s** activity on Telegram. It is based on:";
 "RatingYourReflectsActivity" = "This rating reflects your activity on Telegram. It is based on:";
 "RatingGiftsFromTelegram" = "Gifts from Telegram";
 "RatingGiftsFromTelegramDesc" = "100% of the Stars spent on gifts purchased from Telegram.";

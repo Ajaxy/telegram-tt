@@ -516,6 +516,7 @@ export interface LangPair {
   'MemberRequestsRequestToJoinDescriptionGroup': undefined;
   'ShareYouPhoneNumberTitle': undefined;
   'AreYouSureShareMyContactInfoBot': undefined;
+  'ContactShare': undefined;
   'OK': undefined;
   'ForwardTo': undefined;
   'AttachGame': undefined;
@@ -664,7 +665,6 @@ export interface LangPair {
   'PollsStopSure': undefined;
   'PaymentTestInvoice': undefined;
   'PaymentInvoiceNotFound': undefined;
-  'AttachLiveLocation': undefined;
   'NoWordsRecognized': undefined;
   'ViaBot': undefined;
   'DiscussChannel': undefined;
@@ -964,6 +964,7 @@ export interface LangPair {
   'AttachContact': undefined;
   'AttachStory': undefined;
   'AttachLocation': undefined;
+  'AttachLiveLocation': undefined;
   'AttachGiveaway': undefined;
   'AttachGiveawayResults': undefined;
   'AttachTodo': undefined;

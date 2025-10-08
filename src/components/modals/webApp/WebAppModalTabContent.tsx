@@ -1138,10 +1138,14 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       <ConfirmDialog
         isOpen={isRequestingPhone}
         onClose={handleRejectPhone}
-        title={oldLang('ShareYouPhoneNumberTitle')}
-        text={oldLang('AreYouSureShareMyContactInfoBot')}
+        title={lang('ShareYouPhoneNumberTitle')}
+        textParts={lang(
+          'AreYouSureShareMyContactInfoBot',
+          undefined,
+          { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'emoji'],
+          })}
         confirmHandler={handleAcceptPhone}
-        confirmLabel={oldLang('ContactShare')}
+        confirmLabel={lang('ContactShare')}
       />
       <ConfirmDialog
         isOpen={isRequestingWriteAccess}

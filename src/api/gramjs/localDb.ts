@@ -18,8 +18,13 @@ export type MessageRepairInfo = {
   id: number;
 };
 
+export type WebPageRepairInfo = {
+  type: 'webPage';
+  url: string;
+};
+
 export type RepairInfo = {
-  localRepairInfo?: StoryRepairInfo | MessageRepairInfo;
+  localRepairInfo?: StoryRepairInfo | MessageRepairInfo | WebPageRepairInfo;
 };
 
 export interface LocalDb {
