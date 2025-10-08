@@ -137,7 +137,7 @@ The build and release process for a Tauri application is managed using a GitHub 
 
 | **Secret Name**  | **Description**                                                                      |
 |------------------|--------------------------------------------------------------------------------------|
-| `GH_TOKEN_TAURI` | GitHub access token with `repo` scope/permission, required to publish new releases.  |
+| `GH_TOKEN` | GitHub access token with `repo` scope/permission, required to publish new releases.  |
 
 ---
 
@@ -145,7 +145,7 @@ The build and release process for a Tauri application is managed using a GitHub 
 
 | **Secret Name**       | **Description**                                                                                                         |
 |-----------------------|-------------------------------------------------------------------------------------------------------------------------|
-| `UPDATER_GIST_URL`    | URL to GitHub gist (e.g., `https://gist.githubusercontent.com/GitHubUser/GistID/raw/updater.json`). Ensure `GH_TOKEN_TAURI` has read/write access.       |
+| `UPDATER_GIST_URL`    | URL to GitHub gist (e.g., `https://gist.githubusercontent.com/GitHubUser/GistID/raw/updater.json`). Ensure `GH_TOKEN` has read/write access.       |
 | `UPDATER_GIST_ID`     | GitHub gist ID (`GistID` from `UPDATER_GIST_URL` example).                                                              |
 | `UPDATER_PUBLIC_KEY`  | Public key to validate artifacts before installation. [More info](https://tauri.app/plugin/updater/#signing-updates).   |
 | `UPDATER_PRIVATE_KEY` | Private key used to sign installer files (generated with the same command as public key).                               |
