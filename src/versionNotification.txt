@@ -1,62 +1,29 @@
 **Telegram Web A Digest**
 
-Many new features and useful optimizations have been added in recent months. Here is a brief overview of what's been happening in Web A since August.
+Over the past year, many new features and useful optimisations have been added. Here is a brief overview of the developments that have taken place in Web A during those busy months.
 
-**September – November** 
+✏️ __General__
+• A huge number of design fixes across the app.
+• Preview chats and mark them as read.
+• Video messages can now be transcribed.
+• Track your tasks with the help of [checklists](https://telegram.org/blog/checklists-suggested-posts/#checklists).
+• Folder tags are now supported with the help of GitHub contributors.
+• [Send photos in HD quality](https://telegram.org/blog/direct-to-channel-trim-voice-and-more#send-photos-in-higher-quality).
+• [Global search of public posts](https://telegram.org/blog/post-search-story-albums-and-more#public-post-search).
+• Support for channels with enabled auto-translate has been added.
 
-✏️ __General__
-• [Reply Revolution](https://telegram.org/blog/reply-revolution#reply-revolution) – the app learned to quote specific parts of any message, making your responses 100% precise.
-• Also, [Quote Formatting](https://telegram.org/blog/reply-revolution#quote-formatting) have arrived.
+🎁 __Gifts__
+• Added interactions on hover.
+• Support for [Gift Marketplace](https://telegram.org/blog/gift-marketplace-and-more).
+• Pinned gifts are now displayed in the profile.
 
-📣 __Channels__
-• Channels added [boosts](https://telegram.org/blog/channel-stories#stories-for-channels) and [giveaways.](https://telegram.org/blog/giveaways#free-telegram-premium) 
-• Users also got an option to reassign their boosts between channels.
+📣 __Channels__
+• Accept and send direct messages to channels.
+• [Suggest your posts to be published by your favourite channels](https://telegram.org/blog/checklists-suggested-posts#suggest-posts-in-channels).
 
-🌄 __Stories__
-• Numerous improvements have been made to the animations flow, ensuring the stories bar expands more smoothly. Additionally, a package of optimizations has been added to enhance the performance of stories on mobile devices.
-• Stories have been introduced for [channels,](https://telegram.org/blog/channel-stories#stories-for-channels) and the story viewer has been updated with new gestures to expand and reply.
+👤 __Profile__
+• Full redesign of the profile page.
+• [Explore other people's gift collections and story albums](https://telegram.org/blog/post-search-story-albums-and-more#story-albums).
+• Keep an eye on all your accounts, just like on mobile and desktop clients, with the multi-account feature.
 
-⚙️ __Settings__
-• The app has added an option, 'Who can find me by phone number,' along with a setting under 'Privacy and Security' to manage the visibility of your bio.
-
-✨ __Extra__
-• Some further improvements have been made to the Mini Apps area.
-• New security notifications have been added to the chat list to alert you when your account is logged into from a new device.
-• New design for code blocks formatting.
-
-**December – February**
-
-✏️ __General__
-• [Saved Messages 2.0](https://telegram.org/blog/new-saved-messages-and-9-more#saved-messages-2-0) – including tags, My Notes, Replies and forwards from hidden authors.
-• [One-Time Voice Messages](https://telegram.org/blog/new-saved-messages-and-9-more#one-time-voice-and-video-messages) including both listening and recording. Added support for viewing One-Time Video Messages.
-• [Read-Time in Private Chats](https://telegram.org/blog/new-saved-messages-and-9-more#read-time-in-private-chats)
-• You can now replace media when editing messages.
-• The app learned to [preserve the selected mode](https://telegram.org/blog/similar-channels#improvements-for-topics) for topics in groups.
-• Whenever you create a small group, Web A suggests a name for it based on users' name you have added.
-
-📣 __Channels__ 
-• Added [custom channel reactions.](https://telegram.org/blog/similar-channels#custom-reactions-for-channels)
-• Implemented [channel stories stats.](https://telegram.org/blog/similar-channels#story-stats-for-channels)
-• Channel emoji statuses.
-• [Similar Channels.](https://telegram.org/blog/similar-channels#similar-channels)
-
-👥 __Groups__
-• [9 new features for groups.](https://telegram.org/blog/february2024)
-
-🤖 __Bots__
-• Edit your bots info right from their profile.
-
-🌄 __Stories__
-• Added support for [forwarded stories](https://telegram.org/blog/posts-in-stories-and-more#view-reposts-and-more) and [channel posts in stories.](https://telegram.org/blog/posts-in-stories-and-more#share-posts-in-stories)
-
-✨ __Extra__
-• Giveaway Improvements: displaying winners list and additional prizes.
-
-**March**
-
-📣 __Channels__ 
-• Admins will soon be able to launch giveaways in their channels.
-
-✨ __Extra__
-• Added support for Emoji v15.1.
-• Some design enhancements for shared contacts, links preview and more.
+There are so many other bugfixes and improvements that it would take forever to describe them all! We're continually working on adding new features and improving the user experience.
