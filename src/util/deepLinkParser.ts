@@ -663,7 +663,7 @@ function buildPrivateChannelLink(params: BuilderParams<PrivateChannelLink>): Bui
   };
 }
 
-export function buildChatBoostLink(params: BuilderParams<ChatBoostLink>): BuilderReturnType<ChatBoostLink> {
+function buildChatBoostLink(params: BuilderParams<ChatBoostLink>): BuilderReturnType<ChatBoostLink> {
   const {
     username,
     id,

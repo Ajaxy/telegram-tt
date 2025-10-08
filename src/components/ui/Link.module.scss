@@ -3,10 +3,6 @@
 
   &:hover {
     color: inherit;
-
-    &:global(.GroupCallLink) {
-      text-decoration: none;
-    }
   }
 }
 

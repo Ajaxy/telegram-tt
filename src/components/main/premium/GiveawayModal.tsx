@@ -37,7 +37,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import CalendarModal from '../../common/CalendarModal';
-import CountryPickerModal from '../../common/CountryPickerModal';
+import CountryPickerModal from '../../common/CountryPickerModal.async';
 import GroupChatInfo from '../../common/GroupChatInfo';
 import Icon from '../../common/icons/Icon';
 import StarTopupOptionList from '../../modals/stars/StarTopupOptionList';
