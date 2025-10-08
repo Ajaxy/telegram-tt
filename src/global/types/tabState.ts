@@ -105,7 +105,6 @@ export type TabState = {
   shouldPreventComposerAnimation?: boolean;
   inviteHash?: string;
   canInstall?: boolean;
-  isChatInfoShown: boolean;
   isStatisticsShown?: boolean;
   isLeftColumnShown: boolean;
   newChatMembersProgress?: NewChatMembersProgress;
@@ -126,8 +125,12 @@ export type TabState = {
   };
 
   shouldCloseRightColumn?: boolean;
-  nextProfileTab?: ProfileTabType;
-  forceScrollProfileTab?: boolean;
+  chatInfo: {
+    isOpen: boolean;
+    profileTab?: ProfileTabType;
+    forceScrollProfileTab?: boolean;
+    isOwnProfile?: boolean;
+  };
   nextFoldersAction?: ReducerAction<FoldersActions>;
   shareFolderScreen?: {
     folderId: number;

@@ -52,5 +52,6 @@ export const addActionHandler = typed.addActionHandler as <ActionName extends Pr
   name: ActionName,
   handler: ActionHandlers[ActionName],
 ) => void;
+export const execAfterActions = typed.execAfterActions;
 export const withGlobal = typed.withGlobal;
 export type GlobalActions = ReturnType<typeof getActions>;

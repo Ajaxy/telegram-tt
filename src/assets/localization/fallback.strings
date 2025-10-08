@@ -981,6 +981,7 @@
 "EventLogFilterEditedMessages" = "Edited messages";
 "EventLogFilterLeavingMembers" = "Members leaving";
 "ChannelManagementTitle" = "Admins";
+"MyProfileHeader" = "My Profile";
 "EventLogAllAdmins" = "All admins";
 "UserRestrictionsCanDo" = "What can this user do?";
 "UserRestrictionsBlock" = "Ban and remove from group";

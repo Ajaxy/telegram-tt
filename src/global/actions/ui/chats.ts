@@ -1,9 +1,10 @@
-import type { ActionReturnType } from '../../types';
+import type { ProfileTabType } from '../../../types';
+import type { ActionReturnType, GlobalState } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { createMessageHashUrl } from '../../../util/routing';
-import { addActionHandler, setGlobal } from '../../index';
+import { addActionHandler, execAfterActions, getGlobal, setGlobal } from '../../index';
 import {
   closeMiddleSearch,
   exitMessageSelectMode, replaceTabThreadParam, updateCurrentMessageList, updateRequestedChatTranslation,
@@ -69,6 +70,10 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
         forwardMessages: {},
         isShareMessageModalShown: false,
       }),
+      // Reset chat info state for new chat
+      chatInfo: {
+        isOpen: tabState.chatInfo.isOpen,
+      },
     }, tabId);
   }
 
@@ -102,32 +107,68 @@ addActionHandler('openPreviousChat', (global, actions, payload): ActionReturnTyp
 });
 
 addActionHandler('openChatWithInfo', (global, actions, payload): ActionReturnType => {
-  const { profileTab, forceScrollProfileTab = false, tabId = getCurrentTabId() } = payload;
+  const { profileTab, forceScrollProfileTab, isOwnProfile, tabId = getCurrentTabId(), ...rest } = payload;
 
-  global = updateTabState(global, {
-    ...selectTabState(global, tabId),
-    isChatInfoShown: true,
-    nextProfileTab: profileTab,
-    forceScrollProfileTab,
-  }, tabId);
-  global = { ...global, lastIsChatInfoShown: true };
-  setGlobal(global);
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  const isSameMessageList = currentMessageList?.chatId === rest.id
+    && currentMessageList?.threadId === MAIN_THREAD_ID
+    && currentMessageList?.type === (rest.type || 'thread');
 
-  actions.openChat({ ...payload, tabId });
+  processChatInfoState({ global, isSameMessageList, profileTab, forceScrollProfileTab, isOwnProfile, tabId });
+
+  actions.openChat({ ...rest, tabId });
 });
 
 addActionHandler('openThreadWithInfo', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
+  const { profileTab, forceScrollProfileTab, isOwnProfile, tabId = getCurrentTabId(), ...rest } = payload;
 
-  global = updateTabState(global, {
-    ...selectTabState(global, tabId),
-    isChatInfoShown: true,
-  }, tabId);
-  global = { ...global, lastIsChatInfoShown: true };
-  setGlobal(global);
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  const isSameMessageList = currentMessageList?.chatId === rest.chatId
+    && currentMessageList?.threadId === rest.threadId
+    && currentMessageList?.type === (rest.type || 'thread');
 
-  actions.openThread({ ...payload, tabId });
+  processChatInfoState({ global, isSameMessageList, profileTab, forceScrollProfileTab, isOwnProfile, tabId });
+
+  actions.openThread({ ...rest, tabId });
 });
+
+function processChatInfoState<T extends GlobalState>({
+  global,
+  isSameMessageList,
+  profileTab,
+  forceScrollProfileTab,
+  isOwnProfile,
+  tabId,
+}: {
+  global: T;
+  isSameMessageList: boolean;
+  profileTab?: ProfileTabType;
+  forceScrollProfileTab?: boolean;
+  isOwnProfile?: boolean;
+  tabId: number;
+}) {
+  const currentChatInfo = selectTabState(global, tabId).chatInfo;
+
+  const newProfileTab = profileTab ?? (isSameMessageList ? currentChatInfo.profileTab : undefined);
+  const newForceScrollProfileTab = forceScrollProfileTab
+    ?? (isSameMessageList ? currentChatInfo.forceScrollProfileTab : undefined);
+  const newIsOwnProfile = isOwnProfile ?? (isSameMessageList ? currentChatInfo.isOwnProfile : undefined);
+
+  execAfterActions(() => {
+    global = getGlobal();
+    global = updateTabState(global, {
+      ...selectTabState(global, tabId),
+      chatInfo: {
+        isOpen: true,
+        profileTab: newProfileTab,
+        forceScrollProfileTab: newForceScrollProfileTab,
+        isOwnProfile: newIsOwnProfile,
+      },
+    }, tabId);
+    global = { ...global, lastIsChatInfoShown: true };
+    setGlobal(global);
+  });
+}
 
 addActionHandler('openChatWithDraft', (global, actions, payload): ActionReturnType => {
   const {

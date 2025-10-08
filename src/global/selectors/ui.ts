@@ -59,7 +59,7 @@ export function selectRightColumnContentKey<T extends GlobalState>(
     RightColumnContent.GifSearch
   ) : tabState.newChatMembersProgress !== NewChatMembersProgress.Closed ? (
     RightColumnContent.AddingMembers
-  ) : tabState.isChatInfoShown && tabState.messageLists.length ? (
+  ) : tabState.chatInfo.isOpen && tabState.messageLists.length ? (
     RightColumnContent.ChatInfo
   ) : undefined;
 }

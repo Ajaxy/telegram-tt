@@ -68,6 +68,7 @@ import styles from './ChatExtra.module.scss';
 
 type OwnProps = {
   chatOrUserId: string;
+  isOwnProfile?: boolean;
   isSavedDialog?: boolean;
   isInSettings?: boolean;
   className?: string;
@@ -106,7 +107,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   user,
   chat,
   userFullInfo,
-  isInSettings,
+  isOwnProfile,
   canInviteUsers,
   isMuted,
   phoneCodeList,
@@ -122,6 +123,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   botVerification,
   className,
   style,
+  isInSettings,
 }) => {
   const {
     showNotification,
@@ -283,7 +285,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   }, { withNodes: true });
 
   const isRestricted = chatId ? selectIsChatRestricted(getGlobal(), chatId) : false;
-  if (isRestricted || (isSelf && !isInSettings)) {
+  if (isRestricted || (isSelf && !isOwnProfile && !isInSettings)) {
     return undefined;
   }
 
@@ -422,7 +424,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           </div>
         </ListItem>
       )}
-      {!isInSettings && (
+      {!isOwnProfile && !isInSettings && (
         <ListItem icon={isMuted ? 'mute' : 'unmute'} narrow ripple onClick={handleToggleNotifications}>
           <span>{lang('Notifications')}</span>
           <Switcher
@@ -449,7 +451,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           <span className="subtitle">{oldLang('BusinessProfileLocation')}</span>
         </ListItem>
       )}
-      {hasSavedMessages && !isInSettings && (
+      {hasSavedMessages && !isOwnProfile && !isInSettings && (
         <ListItem icon="saved-messages" narrow ripple onClick={handleOpenSavedDialog}>
           <span>{oldLang('SavedMessagesTab')}</span>
         </ListItem>

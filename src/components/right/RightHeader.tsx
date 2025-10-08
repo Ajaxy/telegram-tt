@@ -7,7 +7,7 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiExportedInvite } from '../../api/types';
 import type { GiftProfileFilterOptions, ThreadId } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
-import { ManagementScreens, ProfileState } from '../../types';
+import { ManagementScreens, ProfileState, SettingsScreens } from '../../types';
 
 import { ANIMATION_END_DELAY, SAVED_FOLDER_ID } from '../../config';
 import {
@@ -94,6 +94,7 @@ type StateProps = {
   isInsideTopic?: boolean;
   canEditTopic?: boolean;
   isSavedMessages?: boolean;
+  isOwnProfile?: boolean;
 };
 
 const COLUMN_ANIMATION_DURATION = 450 + ANIMATION_END_DELAY;
@@ -179,6 +180,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   giftProfileFilter,
   canUseGiftFilter,
   canUseGiftAdminFilter,
+  isOwnProfile,
   onClose,
   onScreenSelect,
 }) => {
@@ -192,6 +194,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     deleteExportedChatInvite,
     openEditTopicPanel,
     updateGiftProfileFilter,
+    openSettingsScreen,
   } = getActions();
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
@@ -244,6 +247,10 @@ const RightHeader: FC<OwnProps & StateProps> = ({
 
   const handleToggleStatistics = useLastCallback(() => {
     toggleStatistics();
+  });
+
+  const handleEditProfile = useLastCallback(() => {
+    openSettingsScreen({ screen: SettingsScreens.EditProfile });
   });
 
   const handleClose = useLastCallback(() => {
@@ -345,6 +352,10 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   const renderingContentKey = useCurrentOrPrev(contentKey, true) ?? -1;
 
   function getHeaderTitle() {
+    if (isOwnProfile) {
+      return lang('MyProfileHeader');
+    }
+
     if (isSavedMessages) {
       return oldLang('SavedMessages');
     }
@@ -673,6 +684,17 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   <Icon name="stats" />
                 </Button>
               )}
+              {isOwnProfile && (
+                <Button
+                  round
+                  color="translucent"
+                  size="smaller"
+                  ariaLabel={lang('Edit')}
+                  onClick={handleEditProfile}
+                >
+                  <Icon name="edit" />
+                </Button>
+              )}
             </section>
           </>
         );
@@ -738,7 +760,8 @@ export default withGlobal<OwnProps>(
     const topic = isInsideTopic ? selectTopic(global, chatId!, threadId!) : undefined;
     const canEditTopic = isInsideTopic && topic && getCanManageTopic(chat, topic);
     const isBot = user && isUserBot(user);
-    const isSavedMessages = chatId ? selectIsChatWithSelf(global, chatId) : undefined;
+    const isOwnProfile = tabState.chatInfo?.isOwnProfile;
+    const isSavedMessages = chatId && !isOwnProfile ? selectIsChatWithSelf(global, chatId) : undefined;
     const canEditBot = isBot && user?.canEditBot;
 
     const canAddContact = user && getCanAddContact(user);
@@ -775,6 +798,7 @@ export default withGlobal<OwnProps>(
       giftProfileFilter,
       canUseGiftFilter,
       canUseGiftAdminFilter,
+      isOwnProfile,
     };
   },
 )(RightHeader);

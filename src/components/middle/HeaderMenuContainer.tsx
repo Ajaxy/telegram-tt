@@ -874,6 +874,7 @@ export default memo(withGlobal<OwnProps>(
     const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
     const savedDialog = isSavedDialog ? selectChat(global, String(threadId)) : undefined;
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
+    const chatInfo = selectTabState(global).chatInfo;
 
     return {
       chat,
@@ -889,8 +890,7 @@ export default memo(withGlobal<OwnProps>(
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       botCommands: chatBot ? userFullInfo?.botInfo?.commands : undefined,
       botPrivacyPolicyUrl: chatBot ? userFullInfo?.botInfo?.privacyPolicyUrl : undefined,
-      isChatInfoShown: selectTabState(global).isChatInfoShown
-        && currentChatId === chatId && currentThreadId === threadId,
+      isChatInfoShown: chatInfo.isOpen && currentChatId === chatId && currentThreadId === threadId,
       canCreateTopic,
       canEditTopic,
       canManage,

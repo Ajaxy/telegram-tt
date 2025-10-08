@@ -34,10 +34,14 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
 
   const initialTabState = cloneDeep(INITIAL_TAB_STATE);
   initialTabState.id = tabId;
-  initialTabState.isChatInfoShown = Boolean(global.lastIsChatInfoShown);
   initialTabState.audioPlayer.playbackRate = global.audioPlayer.lastPlaybackRate;
   initialTabState.audioPlayer.isPlaybackRateActive = global.audioPlayer.isLastPlaybackRateActive;
   initialTabState.mediaViewer.playbackRate = global.mediaViewer.lastPlaybackRate;
+  if (global.lastIsChatInfoShown) {
+    initialTabState.chatInfo = {
+      isOpen: true,
+    };
+  }
 
   global = {
     ...global,

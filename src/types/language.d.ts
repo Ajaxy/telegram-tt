@@ -856,6 +856,7 @@ export interface LangPair {
   'EventLogFilterEditedMessages': undefined;
   'EventLogFilterLeavingMembers': undefined;
   'ChannelManagementTitle': undefined;
+  'MyProfileHeader': undefined;
   'EventLogAllAdmins': undefined;
   'UserRestrictionsCanDo': undefined;
   'UserRestrictionsBlock': undefined;

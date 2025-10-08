@@ -27,11 +27,20 @@
 }
 
 .plain.minimized {
+  padding-block: 1.5rem 0;
   color: var(--color-text);
 
   .userRatingNegativeWrapper,
   .userRatingWrapper {
     color: var(--color-white);
+  }
+
+  .status {
+    color: var(--color-text-secondary);
+  }
+
+  .getStatus, .userStatus {
+    opacity: 1;
   }
 
   :global(.VerifiedIcon),

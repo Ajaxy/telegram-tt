@@ -147,7 +147,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const handleOpenChat = useLastCallback((event: React.MouseEvent | React.TouchEvent) => {
     if ((event.target as Element).closest('.title > .custom-emoji')) return;
 
-    openThreadWithInfo({ chatId, threadId });
+    // Force close My Profile if clicked on Saved Messages header
+    openThreadWithInfo({ chatId, threadId, isOwnProfile: false });
   });
 
   const {
