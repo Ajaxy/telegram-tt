@@ -67,6 +67,7 @@ export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_PREFIX = 'tt-global';
 export const ESTABLISH_BROADCAST_CHANNEL_PREFIX = 'tt-establish';
 export const MULTITAB_LOCALSTORAGE_KEY_PREFIX = 'tt-multitab';
+export const INTERCLIENT_BROADCAST_CHANNEL = 'tgweb';
 export const DC_IDS = [1, 2, 3, 4, 5] as const;
 
 export const DOWNLOAD_WORKERS = 16;

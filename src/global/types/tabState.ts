@@ -101,7 +101,7 @@ export type TabState = {
   id: number;
   isBlurred?: boolean;
   isMasterTab: boolean;
-  isInactive?: boolean;
+  inactiveReason?: 'auth' | 'otherClient';
   shouldPreventComposerAnimation?: boolean;
   inviteHash?: string;
   canInstall?: boolean;

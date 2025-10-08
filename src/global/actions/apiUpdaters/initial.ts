@@ -183,7 +183,7 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
       };
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         global = updateTabState(global, {
-          isInactive: false,
+          inactiveReason: undefined,
         }, tabId);
       });
       setGlobal(global);

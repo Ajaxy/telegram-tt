@@ -1296,9 +1296,11 @@
 "SettingsPasscodeStart2" = "Note: if you forget your local passcode, you'll need to log out of Telegram Web A and log in again.";
 "CurrentPasswordPlaceholder" = "Current password";
 "ChangeYourProfilePicture" = "Change your profile picture";
-"TooManyTabsTitle" = "Such error, many tabs";
-"TooManyTabsDescription" = "Telegram supports only one active tab with the app.\nPlease reload this page to continue using this tab or close it.";
-"TooManyTabsReload" = "Reload app";
+"AppInactiveOtherClientTitle" = "Many sessions. So conflict.";
+"AppInactiveOtherClientDescription" = "Please, keep only one version of the app open.\nReload this page to continue using this tab or close it.";
+"AppInactiveAuthTitle" = "Many logins. So conflict.";
+"AppInactiveAuthDescription" = "Please, keep only one tab open during login.\nReload this page to continue using this tab or close it.";
+"AppInactiveReload" = "Reload App";
 "SlowmodeEnabled" = "Slowmode enabled";
 "SomethingWentWrong" = "Something went wrong";
 "MediaViewDownloading" = "{count}% downloading...";

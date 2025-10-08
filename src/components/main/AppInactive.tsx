@@ -1,7 +1,8 @@
-import type { FC } from '../../lib/teact/teact';
-import { useCallback } from '../../lib/teact/teact';
+import renderText from '../common/helpers/renderText';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import Button from '../ui/Button';
 
@@ -9,10 +10,16 @@ import './AppInactive.scss';
 
 import appInactivePath from '../../assets/app-inactive.png';
 
-const AppInactive: FC = () => {
-  const handleReload = useCallback(() => {
+type OwnProps = {
+  inactiveReason: 'auth' | 'otherClient';
+};
+
+const AppInactive = ({ inactiveReason }: OwnProps) => {
+  const lang = useLang();
+
+  const handleReload = useLastCallback(() => {
     window.location.reload();
-  }, []);
+  });
 
   useHistoryBack({
     isActive: true,
@@ -24,15 +31,18 @@ const AppInactive: FC = () => {
     <div id="AppInactive">
       <div className="content">
         <img src={appInactivePath} alt="" />
-        <h3 className="title">Such error, many tabs</h3>
+        <h3 className="title">
+          {inactiveReason === 'auth' ? lang('AppInactiveAuthTitle') : lang('AppInactiveOtherClientTitle')}
+        </h3>
         <div className="description">
-          Telegram supports only one active tab with the app.
-          <br />
-          Please reload this page to continue using this tab or close it.
+          {renderText(
+            lang(inactiveReason === 'auth' ? 'AppInactiveAuthDescription' : 'AppInactiveOtherClientDescription'),
+            ['br'],
+          )}
         </div>
         <div className="actions">
           <Button isText ripple onClick={handleReload}>
-            Reload app
+            {lang('AppInactiveReload')}
           </Button>
         </div>
       </div>

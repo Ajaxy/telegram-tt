@@ -1102,9 +1102,11 @@ export interface LangPair {
   'SettingsPasscodeStart2': undefined;
   'CurrentPasswordPlaceholder': undefined;
   'ChangeYourProfilePicture': undefined;
-  'TooManyTabsTitle': undefined;
-  'TooManyTabsDescription': undefined;
-  'TooManyTabsReload': undefined;
+  'AppInactiveOtherClientTitle': undefined;
+  'AppInactiveOtherClientDescription': undefined;
+  'AppInactiveAuthTitle': undefined;
+  'AppInactiveAuthDescription': undefined;
+  'AppInactiveReload': undefined;
   'SlowmodeEnabled': undefined;
   'SomethingWentWrong': undefined;
   'VideoPlayerBuffering': undefined;

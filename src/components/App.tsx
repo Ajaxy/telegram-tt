@@ -23,8 +23,7 @@ import { updateSizes } from '../util/windowSize';
 
 import useTauriDrag from '../hooks/tauri/useTauriDrag';
 import useAppLayout from '../hooks/useAppLayout';
-import useFlag from '../hooks/useFlag';
-import usePreviousDeprecated from '../hooks/usePreviousDeprecated';
+import usePrevious from '../hooks/usePrevious';
 
 // import Test from './test/TestLocale';
 import Auth from './auth/Auth';
@@ -40,7 +39,7 @@ type StateProps = {
   authState: GlobalState['authState'];
   isScreenLocked?: boolean;
   hasPasscode?: boolean;
-  isInactiveAuth?: boolean;
+  inactiveReason?: 'auth' | 'otherClient';
   hasWebAuthTokenFailed?: boolean;
   isTestServer?: boolean;
   theme: ThemeKey;
@@ -61,12 +60,11 @@ const App: FC<StateProps> = ({
   authState,
   isScreenLocked,
   hasPasscode,
-  isInactiveAuth,
+  inactiveReason,
   hasWebAuthTokenFailed,
   isTestServer,
   theme,
 }) => {
-  const [isInactive, markInactive, unmarkInactive] = useFlag(false);
   const { isMobile } = useAppLayout();
   const isMobileOs = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
 
@@ -135,7 +133,7 @@ const App: FC<StateProps> = ({
   let activeKey: AppScreens;
   let page: UiLoaderPage | undefined;
 
-  if (isInactive) {
+  if (inactiveReason) {
     activeKey = AppScreens.inactive;
   } else if (isScreenLocked) {
     page = 'lock';
@@ -193,16 +191,14 @@ const App: FC<StateProps> = ({
   }, []);
 
   useEffect(() => {
-    if (isInactiveAuth) {
+    if (inactiveReason) {
       document.title = INACTIVE_PAGE_TITLE;
-      markInactive();
     } else {
       document.title = ACTIVE_PAGE_TITLE;
-      unmarkInactive();
     }
-  }, [isInactiveAuth, markInactive, unmarkInactive]);
+  }, [inactiveReason]);
 
-  const prevActiveKey = usePreviousDeprecated(activeKey);
+  const prevActiveKey = usePrevious(activeKey);
 
   function renderContent() {
     switch (activeKey) {
@@ -213,7 +209,7 @@ const App: FC<StateProps> = ({
       case AppScreens.lock:
         return <LockScreen isLocked={isScreenLocked} />;
       case AppScreens.inactive:
-        return <AppInactive />;
+        return <AppInactive inactiveReason={inactiveReason!} />;
     }
   }
 
@@ -255,7 +251,7 @@ export default withGlobal(
       authState: global.authState,
       isScreenLocked: global.passcode?.isScreenLocked,
       hasPasscode: global.passcode?.hasPasscode,
-      isInactiveAuth: selectTabState(global).isInactive,
+      inactiveReason: selectTabState(global).inactiveReason,
       hasWebAuthTokenFailed: global.hasWebAuthTokenFailed || global.hasWebAuthTokenPasswordRequired,
       theme: selectTheme(global),
       isTestServer: global.config?.isTestServer,

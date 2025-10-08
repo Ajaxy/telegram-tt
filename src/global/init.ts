@@ -115,7 +115,7 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
     Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
       if (otherTabId === tabId) return;
       global = updateTabState(global, {
-        isInactive: true,
+        inactiveReason: 'auth',
       }, otherTabId);
     });
   }
