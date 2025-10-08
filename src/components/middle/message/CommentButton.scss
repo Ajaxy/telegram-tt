@@ -87,10 +87,6 @@
       text-align: center;
     }
 
-    .no-action-button & {
-      bottom: 0;
-    }
-
     &:hover {
       background-color: var(--pattern-color);
       backdrop-filter: brightness(115%);

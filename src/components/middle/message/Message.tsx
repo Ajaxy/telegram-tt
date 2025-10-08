@@ -1,5 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
 import {
   memo,
   useCallback,
@@ -345,7 +343,7 @@ const QUICK_REACTION_SIZE = 1.75 * REM;
 const EXTRA_SPACE_FOR_REACTIONS = 2.25 * REM;
 const MAX_REASON_LENGTH = 200;
 
-const Message: FC<OwnProps & StateProps> = ({
+const Message = ({
   message,
   observeIntersectionForBottom,
   observeIntersectionForLoading,
@@ -454,7 +452,7 @@ const Message: FC<OwnProps & StateProps> = ({
   minFutureTime,
   webPage,
   onIntersectPinnedMessage,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     toggleMessageSelection,
     clickBotInlineButton,
@@ -583,7 +581,6 @@ const Message: FC<OwnProps & StateProps> = ({
     !(isContextMenuShown || isInSelectMode || isForwarding)
     && !isInDocumentGroupNotLast
     && !isStoryMention
-    && !((sticker || hasAnimatedEmoji) && asForwarded)
   );
   const canForward = isChannel && !isScheduled && message.isForwardingAllowed
     && !isChatProtected;
@@ -756,7 +753,6 @@ const Message: FC<OwnProps & StateProps> = ({
     isJustAdded && 'is-just-added',
     (hasActiveReactions || shouldPlayEffect) && 'has-active-effect',
     isStoryMention && 'is-story-mention',
-    !canShowActionButton && 'no-action-button',
   );
 
   const text = textMessage && getMessageContent(textMessage).text;
@@ -816,8 +812,8 @@ const Message: FC<OwnProps & StateProps> = ({
     hasThread: hasThread && !noComments,
     forceSenderName,
     hasCommentCounter: hasThread && repliesThreadInfo.messagesCount > 0,
-    hasCommentButton: withCommentButton,
-    hasActionButton: canForward || canFocus,
+    hasBottomCommentButton: withCommentButton && !isCustomShape,
+    hasActionButton: canForward || canFocus || (withCommentButton && isCustomShape),
     hasReactions,
     isGeoLiveActive: location?.mediaType === 'geoLive' && !isGeoLiveExpired(message),
     withVoiceTranscription,
@@ -1763,7 +1759,7 @@ const Message: FC<OwnProps & StateProps> = ({
               )}
             </div>
           )}
-          {withCommentButton && !(canShowActionButton && isCustomShape) && (
+          {withCommentButton && !isCustomShape && (
             <CommentButton
               threadInfo={repliesThreadInfo}
               disabled={noComments}

@@ -18,7 +18,7 @@ export function buildContentClassName(
     hasThread,
     forceSenderName,
     hasCommentCounter,
-    hasCommentButton,
+    hasBottomCommentButton,
     hasActionButton,
     hasReactions,
     isGeoLiveActive,
@@ -35,7 +35,7 @@ export function buildContentClassName(
     hasThread?: boolean;
     forceSenderName?: boolean;
     hasCommentCounter?: boolean;
-    hasCommentButton?: boolean;
+    hasBottomCommentButton?: boolean;
     hasActionButton?: boolean;
     hasReactions?: boolean;
     isGeoLiveActive?: boolean;
@@ -202,7 +202,7 @@ export function buildContentClassName(
       classNames.push('has-fact-check');
     }
 
-    if (isLastInGroup && !hasInlineKeyboard && (photo || !isMediaWithNoText || hasCommentButton)) {
+    if (isLastInGroup && !hasInlineKeyboard && (photo || !isMediaWithNoText || hasBottomCommentButton)) {
       classNames.push('has-appendix');
     }
   }
