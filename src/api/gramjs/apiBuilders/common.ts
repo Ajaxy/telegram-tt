@@ -3,7 +3,6 @@ import type { Entity } from '../../../lib/gramjs/types';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 
 import type {
-  ApiBotVerification,
   ApiFormattedText,
   ApiMessageEntity,
   ApiMessageEntityDefault,
@@ -291,21 +290,5 @@ export function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMess
     type: type as `${ApiMessageEntityDefault['type']}`,
     offset,
     length,
-  };
-}
-
-export function buildAvatarPhotoId(photo: GramJs.TypeUserProfilePhoto | GramJs.TypeChatPhoto) {
-  if ('photoId' in photo) {
-    return photo.photoId.toString();
-  }
-
-  return undefined;
-}
-
-export function buildApiBotVerification(botVerification: GramJs.BotVerification): ApiBotVerification {
-  return {
-    botId: buildApiPeerId(botVerification.botId, 'user'),
-    iconId: botVerification.icon.toString(),
-    description: botVerification.description,
   };
 }

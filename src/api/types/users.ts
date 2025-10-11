@@ -1,9 +1,15 @@
 import type { API_CHAT_TYPES } from '../../config';
 import type { ApiBotInfo } from './bots';
 import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from './business';
-import type { ApiPeerColor, ApiPeerSettings } from './chats';
 import type { ApiDocument, ApiPhoto } from './messages';
-import type { ApiBotVerification } from './misc';
+import type {
+  ApiBotVerification,
+  ApiEmojiStatusType,
+  ApiFakeType,
+  ApiPeerColor,
+  ApiPeerSettings,
+  ApiProfileTab,
+} from './peers';
 import type { ApiSavedStarGift, ApiStarsRating } from './stars';
 
 export interface ApiUser {
@@ -75,9 +81,8 @@ export interface ApiUserFullInfo {
   botVerification?: ApiBotVerification;
   paidMessagesStars?: number;
   settings?: ApiPeerSettings;
+  mainTab?: ApiProfileTab;
 }
-
-export type ApiFakeType = 'fake' | 'scam';
 
 export type ApiUserType = 'userTypeBot' | 'userTypeRegular' | 'userTypeDeleted' | 'userTypeUnknown';
 
@@ -134,28 +139,6 @@ export type ApiAttachBot = OptionalCombine<ApiAttachBotBase, ApiAttachBotForMenu
 export interface ApiAttachBotIcon {
   name: string;
   document: ApiDocument;
-}
-
-export type ApiEmojiStatusType = ApiEmojiStatus | ApiEmojiStatusCollectible;
-
-export interface ApiEmojiStatus {
-  type: 'regular';
-  documentId: string;
-  until?: number;
-}
-
-export interface ApiEmojiStatusCollectible {
-  type: 'collectible';
-  collectibleId: string;
-  documentId: string;
-  title: string;
-  slug: string;
-  patternDocumentId: string;
-  centerColor: string;
-  edgeColor: string;
-  patternColor: string;
-  textColor: string;
-  until?: number;
 }
 
 export interface ApiBirthday {

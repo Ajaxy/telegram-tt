@@ -6,6 +6,7 @@ import type {
   ApiChat,
   ApiChatMember,
   ApiMessage,
+  ApiProfileTab,
   ApiSavedStarGift,
   ApiStarGiftCollection,
   ApiStoryAlbum,
@@ -29,7 +30,6 @@ import {
   getIsDownloading,
   getIsSavedDialog,
   getMessageDocument,
-  isChatAdmin,
   isChatChannel,
   isChatGroup,
   isUserBot,
@@ -38,6 +38,7 @@ import {
 import { getSavedGiftKey } from '../../global/helpers/stars';
 import {
   selectActiveDownloads,
+  selectCanUpdateMainTab,
   selectChat,
   selectChatFullInfo,
   selectChatMessages,
@@ -47,6 +48,7 @@ import {
   selectIsRightColumnShown,
   selectMonoforumChannel,
   selectPeerStories,
+  selectPerformanceSettingsValue,
   selectSimilarBotsIds,
   selectSimilarChannelIds,
   selectTabState,
@@ -86,6 +88,7 @@ import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import useSyncEffect from '../../hooks/useSyncEffect';
+import useSyncEffectWithPrevDeps from '../../hooks/useSyncEffectWithPrevDeps.ts';
 import useAsyncRendering from './hooks/useAsyncRendering';
 import useProfileState from './hooks/useProfileState';
 import useProfileViewportIds from './hooks/useProfileViewportIds';
@@ -112,7 +115,7 @@ import InfiniteScroll from '../ui/InfiniteScroll';
 import Link from '../ui/Link';
 import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
 import Spinner from '../ui/Spinner';
-import TabList from '../ui/TabList';
+import TabList, { type TabWithProperties } from '../ui/TabList';
 import Transition from '../ui/Transition';
 import DeleteMemberModal from './DeleteMemberModal';
 import StarGiftCollectionList from './gifts/StarGiftCollectionList';
@@ -179,24 +182,40 @@ type StateProps = {
   isSavedMessages?: boolean;
   isSynced?: boolean;
   hasAvatar?: boolean;
+  mainTab?: ApiProfileTab;
+  canUpdateMainTab?: boolean;
+  canAutoPlayGifs?: boolean;
 };
 
-type TabProps = {
+type LocalTabProps = {
   type: ProfileTabType;
   key: RegularLangKey;
 };
 
-const TABS: TabProps[] = [
+type TabWithPropertiesAndType = TabWithProperties & {
+  type: ProfileTabType;
+};
+
+const TABS: LocalTabProps[] = [
   { type: 'media', key: 'ProfileTabMedia' },
   { type: 'documents', key: 'ProfileTabFiles' },
   { type: 'links', key: 'ProfileTabLinks' },
   { type: 'audio', key: 'ProfileTabMusic' },
+  { type: 'gif', key: 'ProfileTabGifs' },
 ];
 
 const HIDDEN_RENDER_DELAY = 1000;
 const INTERSECTION_THROTTLE = 500;
 
-const SHARED_MEDIA_TYPES = new Set<string>(['media', 'documents', 'links', 'audio', 'voice']);
+const VALID_CHANNEL_MAIN_TAB_TYPES = new Set<StringAutocomplete<ApiProfileTab>>([
+  'stories', 'gifts', 'media', 'documents', 'audio', 'voice', 'links', 'gif',
+]);
+const VALID_USER_MAIN_TAB_TYPES = new Set<StringAutocomplete<ApiProfileTab>>([
+  'stories', 'gifts',
+]);
+const SHARED_MEDIA_TYPES = new Set<StringAutocomplete<SharedMediaType>>([
+  'media', 'documents', 'links', 'audio', 'voice', 'gif',
+]);
 
 const Profile = ({
   chatId,
@@ -252,6 +271,9 @@ const Profile = ({
   isSavedMessages,
   isSynced,
   hasAvatar,
+  mainTab,
+  canUpdateMainTab,
+  canAutoPlayGifs,
   onProfileStateChange,
 }: OwnProps & StateProps) => {
   const {
@@ -276,10 +298,13 @@ const Profile = ({
     loadStoryAlbums,
     resetSelectedStoryAlbum,
     changeProfileTab,
+    setMainProfileTab,
   } = getActions();
 
   const containerRef = useRef<HTMLDivElement>();
   const transitionRef = useRef<HTMLDivElement>();
+
+  const shouldSkipTransitionRef = useRef(false);
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -296,8 +321,11 @@ const Profile = ({
 
   const [restoreContentHeightKey, setRestoreContentHeightKey] = useState(0);
 
+  const isUser = isUserId(chatId);
+  const validMainTabTypes = isUser ? VALID_USER_MAIN_TAB_TYPES : VALID_CHANNEL_MAIN_TAB_TYPES;
+
   const tabs = useMemo(() => {
-    const arr: TabProps[] = [];
+    const arr: LocalTabProps[] = [];
     if (isGeneralSavedMessages) {
       arr.push({ type: 'dialogs', key: 'ProfileTabSavedDialogs' });
     }
@@ -306,16 +334,16 @@ const Profile = ({
       arr.push({ type: 'stories', key: 'ProfileTabStories' });
     }
 
-    if (hasStoriesTab && isOwnProfile) {
-      arr.push({ type: 'storiesArchive', key: 'ProfileTabStoriesArchive' });
-    }
-
     if (hasGiftsTab) {
       arr.push({ type: 'gifts', key: 'ProfileTabGifts' });
     }
 
+    if (hasStoriesTab && isOwnProfile) {
+      arr.push({ type: 'storiesArchive', key: 'ProfileTabStoriesArchive' });
+    }
+
     if (hasMembersTab && !isOwnProfile) {
-      arr.push({ type: 'members', key: isChannel ? 'ProfileTabSubscribers' : 'ProfileTabMembers' });
+      arr.push({ type: 'members', key: 'ProfileTabMembers' });
     }
 
     if (hasPreviewMediaTab && !isOwnProfile) {
@@ -349,13 +377,35 @@ const Profile = ({
       arr.push(TABS[0]);
     }
 
-    return arr.map((tab) => ({
-      type: tab.type,
-      title: lang(tab.key),
-    }));
+    if (mainTab) {
+      const mainTabIndex = arr.findIndex((tab) => tab.type === mainTab);
+      if (mainTabIndex !== -1) {
+        const newFirstTab = arr[mainTabIndex];
+        arr.splice(mainTabIndex, 1);
+        arr.unshift(newFirstTab);
+      }
+    }
+
+    return arr.map((tab) => {
+      const contextActions: MenuItemContextAction[] | undefined = canUpdateMainTab && mainTab !== tab.type
+        && validMainTabTypes.has(tab.type) ? [{
+          title: lang('ProfileMenuSetMainTab'),
+          icon: 'replace',
+          handler: () => {
+            setMainProfileTab({ chatId, tab: tab.type as ApiProfileTab });
+          },
+        }] : undefined;
+
+      return {
+        type: tab.type,
+        title: lang(tab.key),
+        contextActions,
+      } satisfies TabWithPropertiesAndType;
+    });
   }, [
     isGeneralSavedMessages, hasStoriesTab, hasGiftsTab, hasMembersTab, hasPreviewMediaTab, isTopicInfo,
     hasCommonChatsTab, isChannel, isBot, similarChannels?.length, similarBots?.length, lang, isOwnProfile,
+    mainTab, chatId, canUpdateMainTab, validMainTabTypes,
   ]);
 
   const [allowAutoScrollToTabs, startAutoScrollToTabsIfNeeded, stopAutoScrollToTabs] = useFlag(false);
@@ -376,6 +426,11 @@ const Profile = ({
 
     setActiveTab(tabs[0].type); // Set default tab
   }, [isClosed, profileTab, tabs]);
+
+  useEffectWithPrevDeps(([prevMainTab]) => {
+    if (prevMainTab || !mainTab) return;
+    setActiveTab(mainTab); // Only focus when loading full info
+  }, [mainTab]);
 
   const handleSwitchTab = useCallback((index: number) => {
     startAutoScrollToTabsIfNeeded();
@@ -429,6 +484,17 @@ const Profile = ({
     const index = tabs.findIndex(({ type }) => type === profileTab);
     return index === -1 ? 0 : index;
   }, [profileTab, tabs]);
+
+  // Reset skip transition flag from previous render
+  if (shouldSkipTransitionRef.current) {
+    shouldSkipTransitionRef.current = false;
+  }
+
+  useSyncEffectWithPrevDeps(([prevProfileTab, prevActiveTabIndex]) => {
+    if (prevProfileTab === profileTab && prevActiveTabIndex !== activeTabIndex) {
+      shouldSkipTransitionRef.current = true;
+    }
+  }, [profileTab, activeTabIndex]);
 
   const tabType = tabs[activeTabIndex].type;
   const handleLoadCommonChats = useCallback(() => {
@@ -498,10 +564,7 @@ const Profile = ({
 
   const shouldRenderProfileInfo = !noProfileInfo && !isSavedMessages;
 
-  const isFirstTab = (isGeneralSavedMessages && resultType === 'dialogs')
-    || (hasStoriesTab && resultType === 'stories')
-    || resultType === 'members'
-    || (!hasMembersTab && resultType === 'media');
+  const isFirstTab = tabs[0].type === resultType;
   const activeKey = tabs.findIndex(({ type }) => type === resultType);
 
   const [isGiftCollectionsShowed, markGiftCollectionsShowed, unmarkGiftCollectionsShowed] = useFlag(false);
@@ -561,18 +624,13 @@ const Profile = ({
     handleStopAutoScrollToTabs,
   });
 
-  const { applyTransitionFix, releaseTransitionFix } = useTransitionFixes(containerRef);
+  useTransitionFixes(containerRef);
 
   const [cacheBuster, resetCacheBuster] = useCacheBuster();
 
   const { observe: observeIntersectionForMedia } = useIntersectionObserver({
     rootRef: containerRef,
     throttleMs: INTERSECTION_THROTTLE,
-  });
-
-  const handleTransitionStop = useLastCallback(() => {
-    releaseTransitionFix();
-    resetCacheBuster();
   });
 
   const handleNewMemberDialogOpen = useLastCallback(() => {
@@ -612,16 +670,6 @@ const Profile = ({
   const handleDeleteMembersModalClose = useLastCallback(() => {
     setDeletingUserId(undefined);
   });
-
-  useEffectWithPrevDeps(([prevHasMemberTabs]) => {
-    if (prevHasMemberTabs === undefined || activeTabIndex === 0 || prevHasMemberTabs === hasMembersTab) {
-      return;
-    }
-
-    const newActiveTab = Math.min(activeTabIndex + (hasMembersTab ? 1 : -1), tabs.length - 1);
-
-    setActiveTab(tabs[newActiveTab].type);
-  }, [hasMembersTab, activeTabIndex, tabs]);
 
   const handleResetGiftsFilter = useLastCallback(() => {
     resetGiftProfileFilter({ peerId: chatId });
@@ -800,6 +848,9 @@ const Profile = ({
         case 'storiesArchive':
           text = oldLang('StoryList.ArchivedEmptyState.Title');
           break;
+        case 'gif':
+          text = oldLang('lng_media_gif_empty');
+          break;
         default:
           text = oldLang('SharedMedia.EmptyTitle');
       }
@@ -825,15 +876,16 @@ const Profile = ({
           shouldShowContentPanel && 'showContentPanel',
           noTransition && 'noTransition',
         )}
-        dir={oldLang.isRtl && resultType === 'media' ? 'rtl' : undefined}
+        dir={lang.isRtl && (resultType === 'media' || resultType === 'gif') ? 'rtl' : undefined}
         teactFastList
       >
-        {resultType === 'media' ? (
+        {resultType === 'media' || resultType === 'gif' ? (
           (viewportIds as number[]).map((id) => messagesById[id] && (
             <Media
               key={id}
               message={messagesById[id]}
               isProtected={isChatProtected || messagesById[id].isProtected}
+              canAutoPlay={canAutoPlayGifs}
               observeIntersection={observeIntersectionForMedia}
               onClick={handleSelectMedia}
             />
@@ -988,17 +1040,10 @@ const Profile = ({
 
                 onClick={() => openChat({ id: userId })}
               >
-                {isUserId(userId) ? (
-                  <PrivateChatInfo
-                    userId={userId}
-                    avatarSize="medium"
-                  />
-                ) : (
-                  <GroupChatInfo
-                    chatId={userId}
-                    avatarSize="medium"
-                  />
-                )}
+                <PrivateChatInfo
+                  userId={userId}
+                  avatarSize="medium"
+                />
               </ListItem>
             ))}
             {!isCurrentUserPremium && (
@@ -1081,7 +1126,7 @@ const Profile = ({
         <Transition
           className={`${resultType}-list`}
           activeKey={contentTransitionKey}
-          name={resolveTransitionName('slideOptimized', animationLevel, undefined, oldLang.isRtl)}
+          name={resolveTransitionName('slideOptimized', animationLevel, undefined, lang.isRtl)}
           shouldCleanup
           shouldRestoreHeight
           restoreHeightKey={restoreContentHeightKey}
@@ -1149,13 +1194,13 @@ const Profile = ({
         >
           <Transition
             ref={transitionRef}
-            name={resolveTransitionName('slideOptimized', animationLevel, undefined, oldLang.isRtl)}
+            name={shouldSkipTransitionRef.current ? 'none'
+              : resolveTransitionName('slideOptimized', animationLevel, undefined, lang.isRtl)}
             activeKey={activeKey}
             renderCount={tabs.length}
             shouldRestoreHeight
             className="shared-media-transition"
-            onStart={applyTransitionFix}
-            onStop={handleTransitionStop}
+            onStop={resetCacheBuster}
             restoreHeightKey={shouldUseTransitionForContent ? restoreContentHeightKey : undefined}
             contentSelector={shouldUseTransitionForContent
               ? '.Transition > .Transition_slide-active > .Transition > .Transition_slide-active > .content'
@@ -1218,8 +1263,7 @@ export default memo(withGlobal<OwnProps>(
     const isGroup = chat && isChatGroup(chat);
     const isChannel = chat && isChatChannel(chat);
     const isBot = user && isUserBot(user);
-    const hasMembersTab = !isTopicInfo && !isSavedDialog
-      && (isGroup || (isChannel && isChatAdmin(chat))) && !chat?.isMonoforum;
+    const hasMembersTab = !isTopicInfo && !isSavedDialog && isGroup && !chat?.isMonoforum;
     const members = chatFullInfo?.members;
     const adminMembersById = chatFullInfo?.adminMembersById;
     const areMembersHidden = hasMembersTab && chat
@@ -1264,6 +1308,8 @@ export default memo(withGlobal<OwnProps>(
     const monoforumChannel = selectMonoforumChannel(global, chatId);
     const isRestricted = chat && selectIsChatRestricted(global, chat.id);
     const hasAvatar = Boolean(peer?.avatarPhotoId);
+
+    const canAutoPlayGifs = selectPerformanceSettingsValue(global, 'autoplayGifs');
 
     return {
       theme: selectTheme(global),
@@ -1315,6 +1361,9 @@ export default memo(withGlobal<OwnProps>(
       commonChatIds: commonChats?.ids,
       monoforumChannel,
       hasAvatar,
+      mainTab: peerFullInfo?.mainTab,
+      canUpdateMainTab: selectCanUpdateMainTab(global, chatId),
+      canAutoPlayGifs,
     };
   },
 )(Profile));

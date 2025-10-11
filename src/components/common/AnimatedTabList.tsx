@@ -3,6 +3,7 @@ import { memo, useEffect, useRef, useState } from '../../lib/teact/teact';
 import type { ApiSticker } from '../../api/types';
 import type { AnimationLevel } from '../../types';
 
+import { ANIMATION_LEVEL_MIN } from '../../config';
 import buildClassName from '../../util/buildClassName';
 
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
@@ -38,7 +39,7 @@ const AnimatedTabList = ({
   const clipPathContainerRef = useRef<HTMLDivElement>();
   const selectedIndex = items.findIndex((item) => item.id === selectedItemId) || 0;
   const [clipPath, setClipPath] = useState<string>('');
-  const shouldAnimate = animationLevel > 0;
+  const shouldAnimate = animationLevel > ANIMATION_LEVEL_MIN;
 
   useHorizontalScroll(containerRef, !items.length, true);
 

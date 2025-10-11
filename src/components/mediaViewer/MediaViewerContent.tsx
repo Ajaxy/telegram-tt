@@ -257,7 +257,7 @@ export default memo(withGlobal<OwnProps>(
     const message = item.type === 'message' ? item.message : undefined;
     const sponsoredMessage = item.type === 'sponsoredMessage' ? item.message : undefined;
     const textMessage = message || sponsoredMessage;
-    const viewableMedia = selectViewableMedia(global, item);
+    const viewableMedia = selectViewableMedia(global, origin, item);
 
     const maxTimestamp = message && selectMessageTimestampableDuration(global, message, true);
 

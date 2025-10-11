@@ -12,7 +12,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, isInsideSortedArrayRange } from '../../../util/iteratees';
 import { getSearchResultKey } from '../../../util/keys/searchResultKey';
 import { callApi } from '../../../api/gramjs';
-import { getChatMediaMessageIds, getIsSavedDialog, isSameReaction } from '../../helpers';
+import { getIsSavedDialog, getMessageContentIds, isSameReaction } from '../../helpers';
 import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
@@ -479,7 +479,7 @@ async function searchChatMedia<T extends GlobalState>(
 
   const loadingState = calcLoadingState(direction, limit, newFoundIds.length, currentSegment);
 
-  const filteredIds = getChatMediaMessageIds(byId, newFoundIds, false);
+  const filteredIds = getMessageContentIds(byId, newFoundIds, 'inlineMedia');
   currentSegment = mergeWithChatMediaSearchSegment(
     filteredIds,
     loadingState,

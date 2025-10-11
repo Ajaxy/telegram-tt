@@ -1434,6 +1434,8 @@
 "ProfileBirthdayValueYear" = "{date} ({age} years old)";
 "ProfileBirthdayTodayValue" = "🎂 {date}";
 "ProfileBirthdayTodayValueYear" = "🎂 {date} ({age} years old)";
+"ProfileMenuSetMainTab" = "Set as Main Tab";
+"ProfileItemSubscribers" = "Subscribers";
 "MonetizationInfoTONTitle" = "What is 💎 TON?";
 "ChannelEarnLearnCoinAbout" = "TON is a blockchain platform and cryptocurrency that Telegram uses for its high speed and low commissions on transactions. {link}";
 "MonetizationBalanceZeroInfo" = "You will be able to collect rewards using Fragment, a third-party platform used by advertisers to pay for ads. {link}";
@@ -1710,6 +1712,7 @@
 "ProfileTabLinks" = "Links";
 "ProfileTabMusic" = "Music";
 "ProfileTabVoice" = "Voice";
+"ProfileTabGifs" = "GIF";
 "ProfileTabSharedGroups" = "Groups";
 "ProfileTabSimilarChannels" = "Similar Channels";
 "ProfileTabSimilarBots" = "Similar Bots";

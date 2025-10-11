@@ -1,7 +1,7 @@
 import { useMemo } from '../../../lib/teact/teact';
 
 import type { MediaViewerMedia } from '../../../types';
-import { ApiMediaFormat } from '../../../api/types';
+import { ApiMediaFormat, type ApiMessageSearchType } from '../../../api/types';
 import { MediaViewerOrigin } from '../../../types';
 
 import {
@@ -45,6 +45,8 @@ export const useMediaProps = ({
   const isGif = media?.mediaType === 'video' && media.isGif;
   const isFromSharedMedia = origin === MediaViewerOrigin.SharedMedia;
   const isFromSearch = origin === MediaViewerOrigin.SearchResult;
+
+  const contentType: ApiMessageSearchType = isGif ? 'gif' : 'media';
 
   const getMediaOrAvatarHash = useMemo(() => (isFull?: boolean) => {
     if (!media) return undefined;
@@ -133,7 +135,7 @@ export const useMediaProps = ({
     bestImageData,
     bestData,
     dimensions,
-    isFromSharedMedia,
+    contentType,
     isVideoAvatar,
     isLocal,
     loadProgress,

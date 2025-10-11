@@ -1494,6 +1494,9 @@ export async function searchMessagesInChat({
     case 'profilePhoto':
       filter = new GramJs.InputMessagesFilterChatPhotos();
       break;
+    case 'gif':
+      filter = new GramJs.InputMessagesFilterGif();
+      break;
     case 'text':
     default: {
       filter = new GramJs.InputMessagesFilterEmpty();

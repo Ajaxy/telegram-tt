@@ -10,6 +10,7 @@ import type {
   ApiCheckedGiftCode,
   ApiCollectibleInfo,
   ApiContact,
+  ApiEmojiStatusCollectible,
   ApiError,
   ApiFormattedText,
   ApiGeoPoint,
@@ -54,7 +55,6 @@ import type {
   ApiUser,
   ApiVideo,
 } from '../../api/types';
-import type { ApiEmojiStatusCollectible } from '../../api/types/users';
 import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
 import type { ReducerAction } from '../../hooks/useReducer';
 import type {

@@ -16,9 +16,9 @@ import type {
   TypeStatisticsGraph,
 } from '../../types';
 
-import { buildApiUsernames, buildAvatarPhotoId } from './common';
+import { buildApiUsernames } from './common';
 import { buildApiCurrencyAmount } from './payments';
-import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
+import { buildApiPeerId, buildAvatarPhotoId, getApiChatIdFromMtpPeer } from './peers';
 
 export function buildChannelStatistics(stats: GramJs.stats.BroadcastStats): ApiChannelStatistics {
   return {

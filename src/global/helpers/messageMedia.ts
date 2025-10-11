@@ -429,12 +429,6 @@ export function hasMediaLocalBlobUrl(media: ApiPhoto | ApiVideo | ApiDocument) {
   return false;
 }
 
-export function getChatMediaMessageIds(
-  messages: Record<number, ApiMessage>, listedIds: number[], isFromSharedMedia = false,
-) {
-  return getMessageContentIds(messages, listedIds, isFromSharedMedia ? 'media' : 'inlineMedia');
-}
-
 export function getPhotoFullDimensions(photo: Pick<ApiPhoto, 'sizes' | 'thumbnail'>): ApiDimensions | undefined {
   return (
     photo.sizes.find((size) => size.type === 'w')
@@ -486,6 +480,13 @@ export function getMessageContentIds(
 
     case 'documents':
       validator = getMessageDocument;
+      break;
+
+    case 'gif':
+      validator = (message: ApiMessage) => {
+        const video = getMessageVideo(message);
+        return video?.isGif;
+      };
       break;
 
     case 'links':

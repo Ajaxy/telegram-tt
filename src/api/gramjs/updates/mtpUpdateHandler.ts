@@ -49,12 +49,16 @@ import {
   buildMessageDraft,
 } from '../apiBuilders/messages';
 import {
-  buildApiPeerNotifySettings,
   buildLangStrings,
   buildPrivacyKey,
 } from '../apiBuilders/misc';
 import { buildApiCurrencyAmount } from '../apiBuilders/payments';
-import { buildApiEmojiStatus, buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
+import {
+  buildApiEmojiStatus,
+  buildApiPeerId,
+  buildApiPeerNotifySettings,
+  getApiChatIdFromMtpPeer,
+} from '../apiBuilders/peers';
 import {
   buildApiPaidReactionPrivacy,
   buildApiReaction,

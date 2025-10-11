@@ -18,7 +18,8 @@ import { type MediaViewerMedia, MediaViewerOrigin, type ThreadId } from '../../t
 import { ANIMATION_END_DELAY } from '../../config';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
-  getChatMediaMessageIds, getMessagePaidMedia, isChatAdmin,
+  getMessageContentIds,
+  getMessagePaidMedia, isChatAdmin,
 } from '../../global/helpers';
 import {
   selectChatMessage,
@@ -156,7 +157,7 @@ const MediaViewer = ({
     bestData,
     dimensions,
     isGif,
-    isFromSharedMedia,
+    contentType,
   } = useMediaProps({
     media, isAvatar: Boolean(avatarOwner), origin, delay: isGhostAnimation && ANIMATION_DURATION,
   });
@@ -173,8 +174,8 @@ const MediaViewer = ({
   const messageMediaIds = useMemo(() => {
     return withDynamicLoading
       ? collectedMessageIds
-      : getChatMediaMessageIds(chatMessages || {}, collectedMessageIds || [], isFromSharedMedia);
-  }, [chatMessages, collectedMessageIds, isFromSharedMedia, withDynamicLoading]);
+      : getMessageContentIds(chatMessages || {}, collectedMessageIds || [], contentType);
+  }, [chatMessages, collectedMessageIds, contentType, withDynamicLoading]);
 
   if (isOpen && (!prevSenderId || prevSenderId !== senderId || animationKey.current === undefined)) {
     animationKey.current = isSingle ? 0 : (messageId || mediaIndex);
@@ -520,7 +521,7 @@ export default memo(withGlobal(
       const currentItem = getMediaViewerItem({
         avatarOwner, standaloneMedia, profilePhotos, mediaIndex,
       });
-      const viewableMedia = selectViewableMedia(global, currentItem);
+      const viewableMedia = selectViewableMedia(global, origin, currentItem);
 
       return {
         profilePhotos,
@@ -565,6 +566,11 @@ export default memo(withGlobal(
       }
     }
 
+    const currentItem = getMediaViewerItem({
+      message, standaloneMedia, mediaIndex, sponsoredMessage,
+    });
+    const viewableMedia = selectViewableMedia(global, origin, currentItem);
+
     let chatMessages: Record<number, ApiMessage> | undefined;
 
     if (chatId) {
@@ -588,18 +594,14 @@ export default memo(withGlobal(
         collectedMessageIds = foundIds;
       } else if (origin === MediaViewerOrigin.SharedMedia) {
         const currentSearch = selectCurrentSharedMediaSearch(global);
-        const { foundIds } = (currentSearch && currentSearch.resultsByType && currentSearch.resultsByType.media) || {};
+        const resultsByType = currentSearch?.resultsByType;
+        const { foundIds } = (viewableMedia?.isGif ? resultsByType?.gif : resultsByType?.media) || {};
         collectedMessageIds = foundIds;
       } else if (isOriginInline || isOriginAlbum) {
         const outlyingList = selectOutlyingListByMessageId(global, chatId, threadId, messageId);
         collectedMessageIds = outlyingList || selectListedIds(global, chatId, threadId);
       }
     }
-
-    const currentItem = getMediaViewerItem({
-      message, standaloneMedia, mediaIndex, sponsoredMessage,
-    });
-    const viewableMedia = selectViewableMedia(global, currentItem);
 
     return {
       chatId,

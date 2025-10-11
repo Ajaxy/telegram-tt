@@ -1,6 +1,8 @@
 @use '../../styles/mixins';
 
 .Profile {
+  scrollbar-gutter: stable;
+
   overflow-x: hidden;
   overflow-y: scroll;
   display: flex;
@@ -134,6 +136,7 @@
     &.storiesArchive-list,
     &.stories-list,
     &.media-list,
+    &.gif-list,
     &.previewMedia-list,
     &.gifts-list {
       display: grid;

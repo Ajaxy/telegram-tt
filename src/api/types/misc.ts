@@ -5,6 +5,7 @@ import type { IconName } from '../../types/icons';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { ApiDocument, ApiPhoto, ApiReaction } from './messages';
 import type { ApiPremiumSection } from './payments';
+import type { ApiBotVerification } from './peers';
 import type { ApiStarsSubscriptionPricing } from './stars';
 import type { ApiUser } from './users';
 
@@ -287,26 +288,6 @@ export interface ApiConfig {
   maxForwardedCount: number;
 }
 
-export type ApiPeerColorSet = string[];
-export type ApiPeerProfileColorSet = {
-  paletteColors: string[];
-  bgColors: string[];
-  storyColors: string[];
-};
-
-export type ApiPeerColorOption<T extends ApiPeerColorSet | ApiPeerProfileColorSet> = {
-  isHidden?: true;
-  colors?: T;
-  darkColors?: T;
-};
-
-export interface ApiPeerColors {
-  general: Record<number, ApiPeerColorOption<ApiPeerColorSet>>;
-  generalHash?: number;
-  profile: Record<number, ApiPeerColorOption<ApiPeerProfileColorSet>>;
-  profileHash?: number;
-}
-
 export interface ApiTimezone {
   id: string;
   name: string;
@@ -350,21 +331,6 @@ export interface ApiCollectibleInfo {
   cryptoCurrency: string;
   purchaseDate: number;
   url: string;
-}
-
-export interface ApiPeerPhotos {
-  fallbackPhoto?: ApiPhoto;
-  personalPhoto?: ApiPhoto;
-  photos: ApiPhoto[];
-  count: number;
-  nextOffset?: number;
-  isLoading?: boolean;
-}
-
-export interface ApiBotVerification {
-  botId: string;
-  iconId: string;
-  description: string;
 }
 
 export type ApiLimitType =

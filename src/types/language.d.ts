@@ -1222,6 +1222,8 @@ export interface LangPair {
   'ProfileBotOpenAppInfoLink': undefined;
   'ProfileBirthday': undefined;
   'ProfileBirthdayToday': undefined;
+  'ProfileMenuSetMainTab': undefined;
+  'ProfileItemSubscribers': undefined;
   'MonetizationInfoTONTitle': undefined;
   'AriaSearchOlderResult': undefined;
   'AriaSearchNewerResult': undefined;
@@ -1395,6 +1397,7 @@ export interface LangPair {
   'ProfileTabLinks': undefined;
   'ProfileTabMusic': undefined;
   'ProfileTabVoice': undefined;
+  'ProfileTabGifs': undefined;
   'ProfileTabSharedGroups': undefined;
   'ProfileTabSimilarChannels': undefined;
   'ProfileTabSimilarBots': undefined;

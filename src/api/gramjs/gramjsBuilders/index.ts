@@ -23,6 +23,7 @@ import type {
   ApiPoll,
   ApiPremiumGiftCodeOption,
   ApiPrivacyKey,
+  ApiProfileTab,
   ApiReactionWithPaid,
   ApiReportReason,
   ApiRequestInputInvoice,
@@ -979,4 +980,29 @@ export function buildInputSavedStarGift(inputGift: ApiRequestInputSavedStarGift)
     peer: buildInputPeer(inputGift.chat.id, inputGift.chat.accessHash),
     savedId: BigInt(inputGift.savedId),
   });
+}
+
+export function buildInputProfileTab(profileTab: ApiProfileTab) {
+  switch (profileTab) {
+    case 'stories':
+      return new GramJs.ProfileTabPosts();
+    case 'gifts':
+      return new GramJs.ProfileTabGifts();
+    case 'media':
+      return new GramJs.ProfileTabMedia();
+    case 'documents':
+      return new GramJs.ProfileTabFiles();
+    case 'audio':
+      return new GramJs.ProfileTabMusic();
+    case 'voice':
+      return new GramJs.ProfileTabVoice();
+    case 'links':
+      return new GramJs.ProfileTabLinks();
+    case 'gif':
+      return new GramJs.ProfileTabGifs();
+    default: {
+      const _exhaustiveCheck: never = profileTab;
+      return _exhaustiveCheck;
+    }
+  }
 }

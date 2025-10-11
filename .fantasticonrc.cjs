@@ -5,7 +5,7 @@ module.exports = {
   fontTypes: ['woff2', 'woff'],
   assetTypes: ['scss', 'ts'],
   tag: '',
-  // Use a custom Handlebars template
+  normalize: true,
   templates: {
     scss: './dev/icons.scss.hbs',
   },

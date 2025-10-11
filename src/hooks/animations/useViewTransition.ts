@@ -9,7 +9,7 @@ import { getGlobal } from '../../global';
 import type { AnimationLevel } from '../../types';
 import type { VTTypes } from '../../util/animations/viewTransitionTypes';
 
-import { VT_CLASS_NAME, VT_TYPE_CLASS_PREFIX } from '../../config';
+import { ANIMATION_LEVEL_MED, VT_CLASS_NAME, VT_TYPE_CLASS_PREFIX } from '../../config';
 import { requestMutation, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
 import { IS_VIEW_TRANSITION_SUPPORTED } from '../../util/browser/windowEnvironment';
@@ -98,7 +98,7 @@ export function useViewTransition(): ViewTransitionController {
   function startViewTransition(
     types: VTTypes,
     updateCallback?: TransitionFunction,
-    minimumAnimationLevel: AnimationLevel = 1,
+    minimumAnimationLevel: AnimationLevel = ANIMATION_LEVEL_MED,
   ): PromiseLike<void> | void {
     const global = getGlobal();
     const { animationLevel } = selectSharedSettings(global);

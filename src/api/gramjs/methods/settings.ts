@@ -31,9 +31,6 @@ import {
   buildApiConfig,
   buildApiCountryList,
   buildApiLanguage,
-  buildApiPeerColors,
-  buildApiPeerNotifySettings,
-  buildApiPeerProfileColors,
   buildApiSession,
   buildApiTimezone,
   buildApiWallpaper,
@@ -41,7 +38,12 @@ import {
   buildLangStrings,
   oldBuildLangPack,
 } from '../apiBuilders/misc';
-import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
+import {
+  buildApiPeerColors,
+  buildApiPeerNotifySettings,
+  buildApiPeerProfileColors,
+  getApiChatIdFromMtpPeer,
+} from '../apiBuilders/peers';
 import {
   buildDisallowedGiftsSettings,
   buildInputChannel,

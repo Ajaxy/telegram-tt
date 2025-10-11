@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useRef } from '../../lib/teact/teact';
 
 import type { ApiMessage } from '../../api/types';
@@ -8,7 +7,9 @@ import {
   getMessageHtmlId,
   getMessageIsSpoiler,
   getMessageVideo,
+  getVideoMediaHash,
 } from '../../global/helpers';
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDuration } from '../../util/dates/dateFormat';
 import stopEvent from '../../util/stopEvent';
@@ -21,6 +22,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 
+import OptimizedVideo from '../ui/OptimizedVideo';
 import MediaSpoiler from './MediaSpoiler';
 
 import './Media.scss';
@@ -29,26 +31,32 @@ type OwnProps = {
   message: ApiMessage;
   idPrefix?: string;
   isProtected?: boolean;
+  canAutoPlay?: boolean;
   observeIntersection?: ObserveFn;
   onClick?: (messageId: number, chatId: string) => void;
 };
 
-const Media: FC<OwnProps> = ({
+const Media = ({
   message,
   idPrefix = 'shared-media',
   isProtected,
+  canAutoPlay,
   observeIntersection,
   onClick,
-}) => {
+}: OwnProps) => {
   const ref = useRef<HTMLDivElement>();
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
+  const [isHovering, markMouseOver, markMouseOut] = useFlag();
+
   const thumbDataUri = useThumbnail(message);
   const mediaHash = useMessageMediaHash(message, 'pictogram');
   const mediaBlobUrl = useMedia(mediaHash, !isIntersecting);
   const transitionClassNames = useMediaTransitionDeprecated(mediaBlobUrl);
 
   const video = getMessageVideo(message);
+  const fullGiftHash = video?.isGif ? getVideoMediaHash(video, 'full') : undefined;
+  const fullGifBlobUrl = useMedia(fullGiftHash, !isIntersecting);
 
   const hasSpoiler = getMessageIsSpoiler(message);
   const [isSpoilerShown, , hideSpoiler] = useFlag(hasSpoiler);
@@ -64,6 +72,8 @@ const Media: FC<OwnProps> = ({
       id={`${idPrefix}${getMessageHtmlId(message.id)}`}
       className="Media scroll-item"
       onClick={onClick ? handleClick : undefined}
+      onMouseOver={!IS_TOUCH_ENV ? markMouseOver : undefined}
+      onMouseOut={!IS_TOUCH_ENV ? markMouseOut : undefined}
     >
       <img
         src={thumbDataUri}
@@ -73,14 +83,28 @@ const Media: FC<OwnProps> = ({
         decoding="async"
         onContextMenu={isProtected ? stopEvent : undefined}
       />
-      <img
-        src={mediaBlobUrl}
-        className={buildClassName('full-media', 'media-miniature', transitionClassNames)}
-        alt=""
-        draggable={!isProtected}
-        decoding="async"
-        onContextMenu={isProtected ? stopEvent : undefined}
-      />
+      {fullGifBlobUrl ? (
+        <OptimizedVideo
+          canPlay={isIntersecting && !hasSpoiler && isHovering && Boolean(canAutoPlay)}
+          src={fullGifBlobUrl}
+          className={buildClassName('full-media', 'media-miniature', transitionClassNames)}
+          muted
+          loop
+          playsInline
+          draggable={false}
+          disablePictureInPicture
+          onContextMenu={isProtected ? stopEvent : undefined}
+        />
+      ) : (
+        <img
+          src={mediaBlobUrl}
+          className={buildClassName('full-media', 'media-miniature', transitionClassNames)}
+          alt=""
+          draggable={false}
+          decoding="async"
+          onContextMenu={isProtected ? stopEvent : undefined}
+        />
+      )}
       {hasSpoiler && (
         <MediaSpoiler
           thumbDataUri={mediaBlobUrl || thumbDataUri}

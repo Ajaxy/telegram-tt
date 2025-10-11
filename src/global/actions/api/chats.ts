@@ -118,6 +118,7 @@ import {
   selectIsCurrentUserFrozen,
   selectLastServiceNotification,
   selectPeer,
+  selectPeerFullInfo,
   selectSimilarChannelIds,
   selectStickerSet,
   selectSupportChat,
@@ -3059,6 +3060,32 @@ addActionHandler('toggleAutoTranslation', async (global, actions, payload): Prom
   global = getGlobal();
   global = updateChat(global, chatId, { hasAutoTranslation: isEnabled || undefined });
   setGlobal(global);
+});
+
+addActionHandler('setMainProfileTab', async (global, actions, payload): Promise<void> => {
+  const { chatId, tab } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const peerFullInfo = selectPeerFullInfo(global, chatId);
+  const oldMainTab = peerFullInfo?.mainTab;
+  if (oldMainTab === tab) return;
+
+  global = updatePeerFullInfo(global, chatId, { mainTab: tab });
+  setGlobal(global);
+
+  let result;
+  if (chatId === global.currentUserId) {
+    result = await callApi('setAccountMainProfileTab', { tab });
+  } else {
+    result = await callApi('setChannelMainProfileTab', { chat, tab });
+  }
+
+  if (!result) {
+    global = getGlobal();
+    global = updatePeerFullInfo(global, chatId, { mainTab: oldMainTab });
+    setGlobal(global);
+  }
 });
 
 addActionHandler('resolveBusinessChatLink', async (global, actions, payload): Promise<void> => {

@@ -37,6 +37,7 @@ import type {
   ApiPreparedInlineMessage,
   ApiPrivacyKey,
   ApiPrivacySettings,
+  ApiProfileTab,
   ApiReaction,
   ApiReactionWithPaid,
   ApiReportReason,
@@ -1142,6 +1143,10 @@ export interface ActionPayloads {
     chatId: string;
     isEnabled: boolean;
   } & WithTabId;
+  setMainProfileTab: {
+    chatId: string;
+    tab: ApiProfileTab;
+  };
 
   updateChat: {
     chatId: string;

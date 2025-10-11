@@ -1,4 +1,4 @@
-import type { FC, TeactNode } from '../../lib/teact/teact';
+import type { TeactNode } from '../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../lib/teact/teact';
 
 import type { MenuItemContextAction } from './ListItem';
@@ -37,10 +37,14 @@ const TAB_SCROLL_THRESHOLD_PX = 16;
 // Should match duration from `--slide-transition` CSS variable
 const SCROLL_DURATION = IS_IOS ? 450 : IS_ANDROID ? 400 : 300;
 
-const TabList: FC<OwnProps> = ({
-  tabs, activeTab, onSwitchTab,
-  contextRootElementSelector, className, tabClassName,
-}) => {
+const TabList = ({
+  tabs,
+  activeTab,
+  className,
+  tabClassName,
+  contextRootElementSelector,
+  onSwitchTab,
+}: OwnProps) => {
   const containerRef = useRef<HTMLDivElement>();
   const previousActiveTab = usePreviousDeprecated(activeTab);
 

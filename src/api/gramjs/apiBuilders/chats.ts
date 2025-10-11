@@ -29,14 +29,17 @@ import { getServerTimeOffset } from '../../../util/serverTime';
 import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
 import {
-  buildApiBotVerification, buildApiFormattedText, buildApiPhoto, buildApiUsernames, buildAvatarPhotoId,
+  buildApiFormattedText, buildApiPhoto, buildApiUsernames,
 } from './common';
 import { omitVirtualClassFields } from './helpers';
-import { buildApiPeerNotifySettings, buildApiRestrictionReasons } from './misc';
+import { buildApiRestrictionReasons } from './misc';
 import {
+  buildApiBotVerification,
   buildApiEmojiStatus,
   buildApiPeerColor,
   buildApiPeerId,
+  buildApiPeerNotifySettings,
+  buildAvatarPhotoId,
   getApiChatIdFromMtpPeer,
   isMtpPeerChat,
   isMtpPeerUser,

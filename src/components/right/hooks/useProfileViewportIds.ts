@@ -89,6 +89,10 @@ export default function useProfileViewportIds({
     'media', resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
+  const [gifViewportIds, getMoreGifs, noProfileInfoForGifs] = useInfiniteScrollForSharedMedia(
+    'gif', resultType, searchMessages, chatMessages, foundIds, threadId,
+  );
+
   const [documentViewportIds, getMoreDocuments, noProfileInfoForDocuments] = useInfiniteScrollForSharedMedia(
     'documents', resultType, searchMessages, chatMessages, foundIds, threadId,
   );
@@ -152,6 +156,11 @@ export default function useProfileViewportIds({
       viewportIds = mediaViewportIds;
       getMore = getMoreMedia;
       noProfileInfo = noProfileInfoForMedia;
+      break;
+    case 'gif':
+      viewportIds = gifViewportIds;
+      getMore = getMoreGifs;
+      noProfileInfo = noProfileInfoForGifs;
       break;
     case 'documents':
       viewportIds = documentViewportIds;

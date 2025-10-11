@@ -18,7 +18,6 @@ import type {
   ApiChatFullInfo,
   ApiChatMember,
   ApiDraft,
-  ApiPeerSettings,
   ApiTypingStatus,
 } from './chats';
 import type {
@@ -43,11 +42,12 @@ import type {
   ApiPeerNotifySettings,
   ApiSessionData,
 } from './misc';
+import type { ApiEmojiStatusType, ApiPeerSettings } from './peers';
 import type { ApiPrivacyKey, LangPackStringValue, PrivacyVisibility } from './settings';
 import type { ApiTypeCurrencyAmount } from './stars';
 import type { ApiStealthMode, ApiStory, ApiStorySkipped } from './stories';
 import type {
-  ApiEmojiStatusType, ApiUser, ApiUserFullInfo, ApiUserStatus,
+  ApiUser, ApiUserFullInfo, ApiUserStatus,
 } from './users';
 
 export type ApiUpdateReady = {

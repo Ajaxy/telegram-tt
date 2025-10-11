@@ -1,11 +1,17 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiPeer, ApiPhoto, ApiReportReason,
+  ApiPeer, ApiPhoto, ApiProfileTab, ApiReportReason,
 } from '../../types';
 
 import { buildApiChatLink } from '../apiBuilders/misc';
-import { buildInputPeer, buildInputPhoto, buildInputReportReason, DEFAULT_PRIMITIVES } from '../gramjsBuilders';
+import {
+  buildInputPeer,
+  buildInputPhoto,
+  buildInputProfileTab,
+  buildInputReportReason,
+  DEFAULT_PRIMITIVES,
+} from '../gramjsBuilders';
 import { invokeRequest } from './client';
 
 export async function reportPeer({
@@ -120,6 +126,14 @@ export async function fetchAccountTTL() {
 export function setAccountTTL({ days }: { days: number }) {
   return invokeRequest(new GramJs.account.SetAccountTTL({
     ttl: buildApiAccountDaysTTL(days),
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export function setAccountMainProfileTab({ tab }: { tab: ApiProfileTab }) {
+  return invokeRequest(new GramJs.account.SetMainProfileTab({
+    tab: buildInputProfileTab(tab),
   }), {
     shouldReturnTrue: true,
   });

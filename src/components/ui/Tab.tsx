@@ -1,5 +1,4 @@
-import type { FC, TeactNode } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
+import type { TeactNode } from '../../lib/teact/teact';
 import { useEffect, useLayoutEffect, useRef } from '../../lib/teact/teact';
 
 import type { MenuItemContextAction } from './ListItem';
@@ -40,7 +39,7 @@ const classNames = {
   badgeActive: 'Tab__badge--active',
 };
 
-const Tab: FC<OwnProps> = ({
+const Tab = ({
   className,
   title,
   isActive,
@@ -48,11 +47,11 @@ const Tab: FC<OwnProps> = ({
   badgeCount,
   isBadgeActive,
   previousActiveTab,
-  onClick,
-  clickArg,
   contextActions,
   contextRootElementSelector,
-}) => {
+  clickArg,
+  onClick,
+}: OwnProps) => {
   const tabRef = useRef<HTMLDivElement>();
 
   useLayoutEffect(() => {

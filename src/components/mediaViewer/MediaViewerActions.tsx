@@ -413,7 +413,7 @@ export default memo(withGlobal<OwnProps>(
     const canDelete = canDeleteMessage || canDeleteAvatar;
     const canUpdate = canUpdateMedia && Boolean(avatarPhoto) && !isCurrentAvatar;
     const messageListType = currentMessageList?.type;
-    const viewableMedia = selectViewableMedia(global, item);
+    const viewableMedia = selectViewableMedia(global, origin, item);
 
     return {
       activeDownloads,

@@ -1,9 +1,7 @@
 import type { ElementRef } from '../../../lib/teact/teact';
 import { useEffect } from '../../../lib/teact/teact';
 
-import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
-
-import useLastCallback from '../../../hooks/useLastCallback';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 
 export default function useTransitionFixes(
   containerRef: ElementRef<HTMLDivElement>,
@@ -32,28 +30,4 @@ export default function useTransitionFixes(
       window.removeEventListener('resize', setMinHeight, false);
     };
   }, [containerRef, transitionElSelector]);
-
-  // Workaround for scrollable content flickering during animation.
-  const applyTransitionFix = useLastCallback(() => {
-    // This callback is called from `Transition.onStart` which is "mutate" phase
-    requestMeasure(() => {
-      const container = containerRef.current!;
-      if (container.style.overflowY === 'hidden') return;
-
-      const scrollBarWidth = container.offsetWidth - container.clientWidth;
-
-      requestMutation(() => {
-        container.style.overflowY = 'hidden';
-        container.style.paddingRight = `${scrollBarWidth}px`;
-      });
-    });
-  });
-
-  const releaseTransitionFix = useLastCallback(() => {
-    const container = containerRef.current!;
-    container.style.overflowY = 'scroll';
-    container.style.paddingRight = '0';
-  });
-
-  return { applyTransitionFix, releaseTransitionFix };
 }
