@@ -9,6 +9,7 @@ import type {
   ApiDisallowedGifts,
   ApiPeer,
   ApiPremiumGiftCodeOption,
+  ApiSavedStarGift,
   ApiStarGift,
   ApiStarGiftRegular,
   ApiStarsAmount,
@@ -34,6 +35,7 @@ import Avatar from '../../common/Avatar';
 import InteractiveSparkles from '../../common/InteractiveSparkles';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
+import InfiniteScroll from '../../ui/InfiniteScroll';
 import Modal from '../../ui/Modal';
 import Transition from '../../ui/Transition';
 import BalanceBlock from '../stars/BalanceBlock';
@@ -56,6 +58,8 @@ type StateProps = {
   boostPerSentGift?: number;
   starGiftsById?: Record<string, ApiStarGiftRegular>;
   starGiftIdsByCategory?: Record<StarGiftCategory, string[]>;
+  myCollectibleGiftsById?: Record<string, ApiSavedStarGift>;
+  myCollectibleGiftIds?: string[];
   starBalance?: ApiStarsAmount;
   peer?: ApiPeer;
   isSelf?: boolean;
@@ -77,6 +81,8 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   modal,
   starGiftsById,
   starGiftIdsByCategory,
+  myCollectibleGiftsById,
+  myCollectibleGiftIds,
   starBalance,
   peer,
   isSelf,
@@ -87,7 +93,14 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   tabId,
 }) => {
   const {
-    closeGiftModal, openGiftInfoModal, resetResaleGifts, loadResaleGifts, openGiftInMarket, closeResaleGiftsMarket,
+    closeGiftModal,
+    openGiftInfoModal,
+    resetResaleGifts,
+    loadResaleGifts,
+    openGiftInMarket,
+    closeResaleGiftsMarket,
+    loadMyCollectibleGifts,
+    openGiftTransferConfirmModal,
   } = getActions();
   const dialogRef = useRef<HTMLDivElement>();
   const transitionRef = useRef<HTMLDivElement>();
@@ -122,6 +135,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
 
   const areUnlimitedStarGiftsDisallowed = !isSelf && disallowedGifts?.shouldDisallowUnlimitedStarGifts;
   const areLimitedStarGiftsDisallowed = !isSelf && disallowedGifts?.shouldDisallowLimitedStarGifts;
+  const areUniqueStarGiftsDisallowed = !isSelf && disallowedGifts?.shouldDisallowUniqueStarGifts;
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -206,19 +220,29 @@ const GiftModal: FC<OwnProps & StateProps> = ({
     ),
   }, { withNodes: true });
 
-  const starGiftDescription = chat
-    ? lang('StarGiftDescriptionChannel', { peer: getPeerTitle(lang, chat) }, {
-      withNodes: true,
-      withMarkdown: true,
-    })
-    : isSelf
-      ? lang('StarGiftDescriptionSelf', undefined, {
+  const starGiftDescription = useMemo(() => {
+    if (chat) {
+      return lang('StarGiftDescriptionChannel', { peer: getPeerTitle(lang, chat) }, {
+        withNodes: true,
+        withMarkdown: true,
+      });
+    }
+
+    if (isSelf) {
+      return lang('StarGiftDescriptionSelf', undefined, {
         withNodes: true,
         renderTextFilters: ['br'],
-      })
-      : lang('StarGiftDescription', {
-        user: getUserFullName(user)!,
-      }, { withNodes: true, withMarkdown: true });
+      });
+    }
+
+    if (selectedCategory === 'resale') {
+      return lang('StarGiftDescriptionCollectibles');
+    }
+
+    return lang('StarGiftDescription', {
+      user: getUserFullName(user)!,
+    }, { withNodes: true, withMarkdown: true });
+  }, [chat, isSelf, selectedCategory, user, lang]);
 
   function renderGiftPremiumHeader() {
     return (
@@ -268,21 +292,61 @@ const GiftModal: FC<OwnProps & StateProps> = ({
     setIsGiftScreenHeaderForStarGifts('id' in gift);
   });
 
+  const handleMyGiftClick = useLastCallback((gift: ApiStarGift) => {
+    if (gift.type === 'starGift' || !myCollectibleGiftsById || !peer?.id) return;
+    const savedGift = myCollectibleGiftsById[gift.id];
+
+    openGiftTransferConfirmModal({
+      gift: savedGift,
+      recipientId: peer.id,
+    });
+  });
+
+  const handleLoadMore = useLastCallback(() => {
+    if (selectedCategory === 'myCollectibles') {
+      loadMyCollectibleGifts();
+    }
+  });
+
   function renderStarGifts() {
+    if (selectedCategory === 'myCollectibles') {
+      return (
+        <InfiniteScroll
+          className={styles.starGiftsContainer}
+          items={myCollectibleGiftIds}
+          onLoadMore={handleLoadMore}
+          scrollContainerClosest={`.${styles.main}`}
+          itemSelector=".starGiftItem"
+        >
+          {myCollectibleGiftsById && myCollectibleGiftIds?.map((giftId) => {
+            const savedGift = myCollectibleGiftsById[giftId];
+            if (!savedGift) return undefined;
+
+            return (
+              <GiftItemStar
+                key={giftId}
+                gift={savedGift.gift}
+                observeIntersection={observeIntersection}
+                onClick={handleMyGiftClick}
+                withTransferBadge
+              />
+            );
+          })}
+        </InfiniteScroll>
+      );
+    }
+
     const filteredGiftIds = starGiftIdsByCategory?.[selectedCategory]?.filter((giftId) => {
       const gift = starGiftsById?.[giftId];
       if (!gift) return false;
 
-      const { isLimited, isSoldOut, upgradeStars } = gift;
-      if (areUnlimitedStarGiftsDisallowed && !areLimitedStarGiftsDisallowed) {
-        return isLimited;
+      const { isLimited, availabilityResale } = gift;
+
+      if (areLimitedStarGiftsDisallowed && isLimited) {
+        return !areUniqueStarGiftsDisallowed ? availabilityResale : false;
       }
-      if (areLimitedStarGiftsDisallowed && !areUnlimitedStarGiftsDisallowed) {
-        return !isLimited && !isSoldOut;
-      }
-      if (areUnlimitedStarGiftsDisallowed && areLimitedStarGiftsDisallowed) {
-        return Boolean(isLimited && Boolean(upgradeStars));
-      }
+
+      if (areUnlimitedStarGiftsDisallowed && !isLimited) return false;
 
       return true;
     });
@@ -291,8 +355,9 @@ const GiftModal: FC<OwnProps & StateProps> = ({
       <div className={styles.starGiftsContainer}>
         {starGiftsById && filteredGiftIds?.flatMap((giftId) => {
           const gift = starGiftsById[giftId];
-          const shouldShowResale = selectedCategory !== 'stock' && Boolean(gift.availabilityResale);
-          const shouldDuplicateAsResale = selectedCategory !== 'resale' && shouldShowResale && !gift.isSoldOut;
+          const shouldShowResale = Boolean(gift.availabilityResale) && !areUniqueStarGiftsDisallowed;
+          const shouldDuplicateAsResale = selectedCategory !== 'resale'
+            && shouldShowResale && !gift.isSoldOut && !areLimitedStarGiftsDisallowed;
 
           const elements = [
             <GiftItemStar
@@ -399,7 +464,9 @@ const GiftModal: FC<OwnProps & StateProps> = ({
             {renderStarGiftsHeader()}
             {renderStarGiftsDescription()}
             <StarGiftCategoryList
-              areLimitedStarGiftsDisallowed={areLimitedStarGiftsDisallowed}
+              areCollectibleStarGiftsDisallowed={areUniqueStarGiftsDisallowed}
+              isSelf={isSelf}
+              hasCollectible={Boolean(myCollectibleGiftIds?.length)}
               onCategoryChanged={onCategoryChanged}
             />
             <Transition
@@ -535,6 +602,8 @@ export default memo(withGlobal<OwnProps>((global, { modal }): Complete<StateProp
     boostPerSentGift: global.appConfig.boostsPerSentGift,
     starGiftsById: starGifts?.byId,
     starGiftIdsByCategory: starGifts?.idsByCategory,
+    myCollectibleGiftsById: global.myCollectibleGifts?.byId,
+    myCollectibleGiftIds: global.myCollectibleGifts?.ids,
     starBalance: stars?.balance,
     peer,
     isSelf,
@@ -548,8 +617,6 @@ export default memo(withGlobal<OwnProps>((global, { modal }): Complete<StateProp
 
 function getCategoryKey(category: StarGiftCategory) {
   if (category === 'all') return 0;
-  if (category === 'limited') return 1;
-  if (category === 'resale') return 2;
-  if (category === 'stock') return 3;
-  return category + 3;
+  if (category === 'myCollectibles') return 1;
+  return 2;
 }

@@ -298,6 +298,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           global = updateTabState(global, {
             isWaitingForStarGiftTransfer: undefined,
           }, tabId);
+
+          actions.reloadPeerSavedGifts({ peerId: global.currentUserId! });
         }
       });
 

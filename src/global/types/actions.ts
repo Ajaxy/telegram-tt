@@ -2544,6 +2544,9 @@ export interface ActionPayloads {
   loadPremiumGifts: undefined;
   loadTonGifts: undefined;
   loadStarGifts: undefined;
+  loadMyCollectibleGifts: {
+    shouldRefresh?: true;
+  } | undefined;
   updateResaleGiftsFilter: {
     filter: ResaleGiftsFilterOptions;
   } & WithTabId;
@@ -2643,6 +2646,11 @@ export interface ActionPayloads {
     recipientId: string;
   } & WithTabId;
   closeGiftTransferModal: WithTabId | undefined;
+  openGiftTransferConfirmModal: {
+    gift: ApiSavedStarGift;
+    recipientId: string;
+  } & WithTabId;
+  closeGiftTransferConfirmModal: WithTabId | undefined;
   updateSelectedGiftCollection: {
     peerId: string;
     collectionId: number;

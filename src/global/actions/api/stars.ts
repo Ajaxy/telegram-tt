@@ -1,5 +1,4 @@
 import type { ApiSavedStarGift, ApiStarGiftUnique } from '../../../api/types';
-import type { StarGiftCategory } from '../../../types';
 import type { ActionReturnType } from '../../types';
 
 import {
@@ -8,7 +7,7 @@ import {
   TON_CURRENCY_CODE,
 } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
+import { buildCollectionByCallback, buildCollectionByKey } from '../../../util/iteratees';
 import { callApi } from '../../../api/gramjs';
 import { RESALE_GIFTS_LIMIT } from '../../../limits';
 import { areInputSavedGiftsEqual, getRequestInputSavedStarGift } from '../../helpers/payments';
@@ -136,46 +135,80 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
 
   const byId = buildCollectionByKey(result.gifts, 'id');
 
-  const idsByCategoryName: Record<StarGiftCategory, string[]> = {
-    all: [],
-    stock: [],
-    limited: [],
-    resale: [],
-  };
-
   const allStarGiftIds = Object.keys(byId);
   const allStarGifts = Object.values(byId);
 
-  const limitedStarGiftIds = allStarGifts.map((gift) => (gift.isLimited ? gift.id : undefined))
-    .filter(Boolean);
-
-  const stockedStarGiftIds = allStarGifts.map((gift) => (
-    gift.availabilityRemains || !gift.availabilityTotal ? gift.id : undefined
-  )).filter(Boolean);
-
   const resaleStarGiftIds = allStarGifts.map((gift) => (gift.availabilityResale ? gift.id : undefined))
     .filter(Boolean);
-
-  idsByCategoryName.all = allStarGiftIds;
-  idsByCategoryName.limited = limitedStarGiftIds;
-  idsByCategoryName.stock = stockedStarGiftIds;
-  idsByCategoryName.resale = resaleStarGiftIds;
-
-  allStarGifts.forEach((gift) => {
-    const starsCategory = gift.stars;
-    if (!idsByCategoryName[starsCategory]) {
-      idsByCategoryName[starsCategory] = [];
-    }
-    idsByCategoryName[starsCategory].push(gift.id);
-  });
 
   global = {
     ...global,
     starGifts: {
       byId,
-      idsByCategory: idsByCategoryName,
+      idsByCategory: {
+        all: allStarGiftIds,
+        resale: resaleStarGiftIds,
+        myCollectibles: [],
+      },
     },
   };
+  setGlobal(global);
+});
+
+addActionHandler('loadMyCollectibleGifts', async (global, actions, payload): Promise<void> => {
+  const { shouldRefresh } = payload || {};
+  const currentUserId = global.currentUserId;
+  if (!currentUserId) return;
+
+  const currentMyCollectibleGifts = global.myCollectibleGifts;
+  const localNextOffset = currentMyCollectibleGifts?.nextOffset;
+
+  if (currentMyCollectibleGifts && !localNextOffset && !shouldRefresh) return;
+
+  const peer = selectPeer(global, currentUserId);
+  if (!peer) return;
+
+  const result = await callApi('fetchSavedStarGifts', {
+    peer,
+    offset: !shouldRefresh ? localNextOffset : undefined,
+    filter: {
+      sortType: 'byDate',
+      shouldIncludeUnique: true,
+      shouldIncludeUnlimited: false,
+      shouldIncludeUpgradable: false,
+      shouldIncludeLimited: false,
+      shouldIncludeDisplayed: true,
+      shouldIncludeHidden: true,
+    },
+  });
+
+  if (!result) return;
+
+  global = getGlobal();
+
+  const gifts = result.gifts;
+
+  const byId = buildCollectionByCallback(gifts, (savedGift) => (
+    [savedGift.gift.id, savedGift]
+  ));
+
+  const ids = gifts.map((gift) => gift.gift.id);
+
+  global = {
+    ...global,
+    myCollectibleGifts: {
+      byId: {
+        ...!shouldRefresh && (global.myCollectibleGifts?.byId || {}),
+        ...byId,
+      },
+      ids: [
+        ...!shouldRefresh ? (global.myCollectibleGifts?.ids || []) : [],
+        ...ids,
+      ],
+      nextOffset: result.nextOffset,
+    },
+  };
+
   setGlobal(global);
 });
 
@@ -338,6 +371,9 @@ addActionHandler('reloadPeerSavedGifts', (global, actions, payload): ActionRetur
       actions.loadPeerSavedGifts({ peerId, shouldRefresh: true, tabId: tabState.id });
     }
   });
+  if (peerId === global.currentUserId) {
+    actions.loadMyCollectibleGifts({ shouldRefresh: true });
+  }
 });
 
 addActionHandler('loadStarsSubscriptions', async (global): Promise<void> => {

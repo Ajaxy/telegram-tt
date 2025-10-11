@@ -849,6 +849,11 @@ export type TabState = {
     gift: ApiSavedStarGift;
   };
 
+  giftTransferConfirmModal?: {
+    gift: ApiSavedStarGift;
+    recipientId: string;
+  };
+
   giftUpgradeModal?: {
     sampleAttributes: ApiStarGiftAttribute[];
     recipientId?: string;

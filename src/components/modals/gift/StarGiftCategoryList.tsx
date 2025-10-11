@@ -1,5 +1,5 @@
 import {
-  memo, useMemo, useRef, useState,
+  memo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
@@ -10,12 +10,12 @@ import buildClassName from '../../../util/buildClassName';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
 
-import StarIcon from '../../common/icons/StarIcon';
-
 import styles from './StarGiftCategoryList.module.scss';
 
 type OwnProps = {
-  areLimitedStarGiftsDisallowed?: boolean;
+  areCollectibleStarGiftsDisallowed?: boolean;
+  isSelf?: boolean;
+  hasCollectible?: boolean;
   onCategoryChanged: (category: StarGiftCategory) => void;
 };
 
@@ -26,16 +26,13 @@ type StateProps = {
 const StarGiftCategoryList = ({
   idsByCategory,
   onCategoryChanged,
-  areLimitedStarGiftsDisallowed,
+  areCollectibleStarGiftsDisallowed,
+  isSelf,
+  hasCollectible,
 }: StateProps & OwnProps) => {
   const ref = useRef<HTMLDivElement>();
 
   const lang = useLang();
-  const starCategories: number[] | undefined = useMemo(() => idsByCategory && Object.keys(idsByCategory)
-    .filter((category) => category !== 'all' && category !== 'limited')
-    .map(Number)
-    .sort((a, b) => a - b),
-  [idsByCategory]);
 
   const hasResale = idsByCategory && idsByCategory['resale'].length > 0;
 
@@ -50,9 +47,8 @@ const StarGiftCategoryList = ({
 
   function renderCategoryName(category: StarGiftCategory) {
     if (category === 'all') return lang('AllGiftsCategory');
-    if (category === 'stock') return lang('StockGiftsCategory');
-    if (category === 'limited') return lang('LimitedGiftsCategory');
-    if (category === 'resale') return lang('GiftCategoryResale');
+    if (category === 'myCollectibles') return lang('GiftCategoryMyGifts');
+    if (category === 'resale') return lang('GiftCategoryCollectibles');
     return category;
   }
 
@@ -65,13 +61,6 @@ const StarGiftCategoryList = ({
         )}
         onClick={() => handleItemClick(category)}
       >
-        {Number.isInteger(category) && (
-          <StarIcon
-            className={styles.star}
-            type="gold"
-            size="middle"
-          />
-        )}
         {renderCategoryName(category)}
       </div>
     );
@@ -82,10 +71,8 @@ const StarGiftCategoryList = ({
   return (
     <div ref={ref} className={buildClassName(styles.list, 'no-scrollbar')}>
       {renderCategoryItem('all')}
-      {!areLimitedStarGiftsDisallowed && renderCategoryItem('limited')}
-      {!areLimitedStarGiftsDisallowed && hasResale && renderCategoryItem('resale')}
-      {renderCategoryItem('stock')}
-      {starCategories?.map(renderCategoryItem)}
+      {!areCollectibleStarGiftsDisallowed && !isSelf && hasCollectible && renderCategoryItem('myCollectibles')}
+      {!areCollectibleStarGiftsDisallowed && hasResale && renderCategoryItem('resale')}
     </div>
   );
 };

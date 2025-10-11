@@ -19,6 +19,17 @@
   font-size: 1.25rem;
 }
 
+.descriptionConfirm {
+  padding-bottom: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.titleConfirm {
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-medium);
+}
+
 .header {
   display: flex;
   flex-direction: column;

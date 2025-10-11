@@ -146,6 +146,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
             },
             tabId,
           });
+          actions.reloadPeerSavedGifts({ peerId: starGiftModalState.forPeerId });
           actions.requestConfetti({ withStars: true, tabId });
           actions.closeGiftModal({ tabId });
         }

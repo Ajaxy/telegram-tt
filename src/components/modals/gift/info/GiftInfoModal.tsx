@@ -938,10 +938,19 @@ const GiftInfoModal = ({
           confirmHandler={handleConfirmBuyGift}
         >
 
+          {uniqueGift.resaleTonOnly
+            && (
+              <div className={styles.descriptionConfirm}>
+                {lang('ConfirmBuyGiftForTonDescription')}
+              </div>
+            )}
           <GiftTransferPreview
             peer={recipientPeer || currentUser}
             gift={uniqueGift}
           />
+          <div className={styles.titleConfirm}>
+            {lang('TitleConfirmPayment')}
+          </div>
           {!recipientPeer
             && (
               <p>

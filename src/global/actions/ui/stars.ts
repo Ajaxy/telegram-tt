@@ -434,6 +434,21 @@ addActionHandler('openGiftTransferModal', (global, actions, payload): ActionRetu
 
 addTabStateResetterAction('closeGiftTransferModal', 'giftTransferModal');
 
+addActionHandler('openGiftTransferConfirmModal', (global, actions, payload): ActionReturnType => {
+  const {
+    gift, recipientId, tabId = getCurrentTabId(),
+  } = payload;
+
+  return updateTabState(global, {
+    giftTransferConfirmModal: {
+      gift,
+      recipientId,
+    },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeGiftTransferConfirmModal', 'giftTransferConfirmModal');
+
 addActionHandler('updateSelectedGiftCollection', (global, actions, payload): ActionReturnType => {
   const { peerId, collectionId, tabId = getCurrentTabId() } = payload;
   const tabState = selectTabState(global, tabId);

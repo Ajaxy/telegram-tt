@@ -28,6 +28,7 @@ import type {
   ApiReaction,
   ApiReactionKey,
   ApiSavedReactionTag,
+  ApiSavedStarGift,
   ApiSession,
   ApiSponsoredMessage,
   ApiStarGiftCollection,
@@ -310,6 +311,11 @@ export type GlobalState = {
   starGifts?: {
     byId: Record<string, ApiStarGiftRegular>;
     idsByCategory: Record<StarGiftCategory, string[]>;
+  };
+  myCollectibleGifts?: {
+    byId: Record<string, ApiSavedStarGift>;
+    ids: string[];
+    nextOffset?: string;
   };
   starGiftCollections?: {
     byPeerId: Record<string, ApiStarGiftCollection[]>;

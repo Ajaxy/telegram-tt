@@ -1232,6 +1232,7 @@ export interface LangPair {
   'GiftPremiumDescriptionLink': undefined;
   'StarsGiftHeader': undefined;
   'StarsGiftHeaderSelf': undefined;
+  'StarGiftDescriptionCollectibles': undefined;
   'StarGiftDescriptionSelf': undefined;
   'GiftLimited': undefined;
   'GiftSoldOut': undefined;
@@ -1304,8 +1305,6 @@ export interface LangPair {
   'GiftWithdrawTitle': undefined;
   'GiftWithdrawSubmit': undefined;
   'AllGiftsCategory': undefined;
-  'LimitedGiftsCategory': undefined;
-  'StockGiftsCategory': undefined;
   'PremiumGiftDescription': undefined;
   'StarsReactionLinkText': undefined;
   'StarsReactionLink': undefined;
@@ -1578,7 +1577,8 @@ export interface LangPair {
   'StarGiftPurchaseTransaction': undefined;
   'ContextMenuItemMention': undefined;
   'GiftRibbonResale': undefined;
-  'GiftCategoryResale': undefined;
+  'GiftCategoryCollectibles': undefined;
+  'GiftCategoryMyGifts': undefined;
   'GiftSortByPrice': undefined;
   'GiftSortByNumber': undefined;
   'ContextMenuItemSelectAll': undefined;
@@ -1709,6 +1709,7 @@ export interface LangPair {
   'GiftValueForSaleOnFragment': undefined;
   'GiftValueForSaleOnTelegram': undefined;
   'EmbeddedMessageNoCaption': undefined;
+  'ConfirmBuyGiftForTonDescription': undefined;
   'TitleGiftLocked': undefined;
   'QuickPreview': undefined;
 }

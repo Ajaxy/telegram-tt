@@ -1452,6 +1452,7 @@
 "StarsGiftHeader" = "Send a Gift";
 "StarsGiftHeaderSelf" = "Buy a Gift";
 "StarGiftDescription" = "Give {user} gifts that can be kept on the profile or converted to Stars.";
+"StarGiftDescriptionCollectibles" = "Collectible gifts are unique digital items you exchange or sell.";
 "StarGiftDescriptionSelf" = "Buy yourself a gift to add to your profile or reserve for later.\n\nLimited-edition gifts upgraded to collectibles can be gifted to others.";
 "StarGiftDescriptionChannel" = "Select gift to show appreciation to **{peer}**.";
 "GiftLimited" = "limited";
@@ -1583,8 +1584,6 @@
 "StarsAmountText_one" = "{amount} Star";
 "StarsAmountText_other" = "{amount} Stars";
 "AllGiftsCategory" = "All gifts";
-"LimitedGiftsCategory" = "Limited";
-"StockGiftsCategory" = "In Stock";
 "PremiumGiftDescription" = "Premium";
 "SendPaidReaction" = "Send ⭐️{amount}";
 "StarsPay" = "Confirm and Pay {amount}";
@@ -2070,7 +2069,8 @@
 "ComposerTitleForwardFrom" = "From: **{users}**";
 "ContextMenuItemMention" = "Mention";
 "GiftRibbonResale" = "resale";
-"GiftCategoryResale" = "Resale";
+"GiftCategoryCollectibles" = "Collectibles";
+"GiftCategoryMyGifts" = "My Gifts";
 "HeaderDescriptionResaleGifts_one" = "{count} for resale";
 "HeaderDescriptionResaleGifts_other" = "{count} for resale";
 "GiftSortByPrice" = "Sort by Price";
@@ -2285,6 +2285,7 @@
 "GiftValueForSaleOnFragment" = "for sale on Fragment";
 "GiftValueForSaleOnTelegram" = "for sale on Telegram";
 "EmbeddedMessageNoCaption" = "Caption removed";
+"ConfirmBuyGiftForTonDescription" = "The seller only accepts TON as payment.";
 "TitleGiftLocked" = "Gift Locked";
 "GiftLockedMessage" = "This gift is currently only available to earlier Telegram users. It will unlock for your account in about **{relativeDate}**.";
 "QuickPreview" = "Quick Preview";

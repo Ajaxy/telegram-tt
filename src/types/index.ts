@@ -669,7 +669,7 @@ export type WebPageMediaSize = 'large' | 'small';
 
 export type AttachmentCompression = 'compress' | 'original';
 
-export type StarGiftCategory = number | 'all' | 'limited' | 'stock' | 'resale';
+export type StarGiftCategory = 'all' | 'myCollectibles' | 'resale';
 
 export type CallSound = (
   'join' | 'allowTalk' | 'leave' | 'connecting' | 'incoming' | 'end' | 'connect' | 'busy' | 'ringing'
