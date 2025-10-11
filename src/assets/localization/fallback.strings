@@ -1428,7 +1428,7 @@
 "ProfileOpenAppAbout" = "By launching this mini app, you agree to the {terms}.";
 "ProfileOpenAppTerms" = "Terms of Service for Mini Apps";
 "ProfileBotOpenAppInfoLink" = "https://telegram.org/tos/mini-apps";
-"ProfileBirthday" = "Date of birth";
+"ProfileBirthday" = "Birthday";
 "ProfileBirthdayToday" = "Birthday today";
 "ProfileBirthdayValue" = "{date}";
 "ProfileBirthdayValueYear" = "{date} ({age} years old)";
@@ -1521,7 +1521,7 @@
 "GiftValueTitleLastPrice" = "Last Price";
 "GiftValueTitleMinimumPrice" = "Minimum Price";
 "GiftValueTitleAveragePrice" = "Average Price";
-"GiftValueDescription" = "This is average sale price of **{giftName}** on Telegram and Fragment over the past month.";
+"GiftValueDescription" = "The average sale price of **{giftName}** gifts on Telegram and Fragment over the past month.";
 "GiftInfoSoldOutTitle" = "Unavailable";
 "GiftInfoSoldOutDescription" = "This gift has been sold out";
 "GiftInfoSenderHidden" = "Only you can see the sender's name and message.";
@@ -1562,7 +1562,7 @@
 "GiftUpgradeTradeableTitle" = "Tradable";
 "GiftUpgradeTradeableDescription" = "Sell or auction your gift on third-party NFT marketplaces.";
 "GiftUpgradeTitle" = "Make unique";
-"GiftPeerUpgradeText" = "Let {peer} turn your gift into a unique collectible.";
+"GiftPeerUpgradeText" = "Let {peer} turn this gift into a unique collectible.";
 "GiftUpgradeTextOwn" = "Turn your gift into a unique collectible that you can transfer or auction.";
 "GiftUpgradeKeepDetails" = "Keep sender's name and comment";
 "GiftUpgradeButton" = "Upgrade for {amount}";
