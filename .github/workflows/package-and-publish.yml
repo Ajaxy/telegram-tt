@@ -183,6 +183,25 @@ jobs:
           echo "owner=${PUBLISH_REPO%%/*}" >> $GITHUB_OUTPUT
           echo "repo=${PUBLISH_REPO#*/}" >> $GITHUB_OUTPUT
 
+      # Windows code signing setup
+      - name: Install DigiCert Client tools (Windows)
+        if: matrix.settings.platform == 'windows-latest'
+        uses: digicert/ssm-code-signing@v1.1.1
+
+      - name: Setup certificate and set environment variables (Windows)
+        if: matrix.settings.platform == 'windows-latest'
+        shell: bash
+        run: |
+          echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /d/Certificate_pkcs12.p12
+          echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV"
+          echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "KEYPAIR_ALIAS=${{ secrets.KEYPAIR_ALIAS }}" >> "$GITHUB_ENV"
+          echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
+          echo "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools" >> $GITHUB_PATH
+          echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH
+
       - name: Define Tauri configuration overrides
         id: config-overrides
         uses: actions/github-script@v7
@@ -267,65 +286,6 @@ jobs:
           path: ${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.name }}.dmg
 
       # Windows release
-      - name: Install DigiCert Client tools
-        uses: digicert/ssm-code-signing@v1.1.1
-      - name: Setup certificate and set environment variables (Windows)
-        if: matrix.settings.platform == 'windows-latest'
-        shell: bash
-        run: |
-          echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /d/Certificate_pkcs12.p12
-          echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-          echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV"
-          echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV"
-          echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
-          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
-          echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
-          echo "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools" >> $GITHUB_PATH
-          echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH
-
-      - name: Sign package (Windows)
-        if: matrix.settings.platform == 'windows-latest'
-        env:
-          KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
-          FILE_PATH: ${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.filename }}
-        shell: cmd
-        run: smctl.exe sign --keypair-alias=%KEYPAIR_ALIAS% --input "%FILE_PATH%"
-
-      - name: Update release asset (Windows)
-        if: matrix.settings.platform == 'windows-latest' && needs.get-version.outputs.should-publish != ''
-        shell: bash
-        run: |
-          PUBLISH_FILE_NAME=$(echo "${{ steps.file-info.outputs.filename }}" | sed 's/ /./g')
-          FILE_PATH="${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.filename }}"
-          RELEASE_ID="${{ needs.create-release.outputs.releaseId }}"
-          echo "Updating release asset for file: $PUBLISH_FILE_NAME"
-          echo "File path: $FILE_PATH"
-          echo "Release ID: $RELEASE_ID"
-          echo "Repository: $PUBLISH_REPO"
-
-          echo "Fetching existing assets..."
-          ASSETS_RESPONSE=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$PUBLISH_REPO/releases/$RELEASE_ID/assets")
-          echo "Assets API Response:"
-          echo "$ASSETS_RESPONSE"
-
-          ASSET_ID=$(echo "$ASSETS_RESPONSE" | jq -r --arg PUBLISH_FILE_NAME "$PUBLISH_FILE_NAME" '.[] | select(.name == $PUBLISH_FILE_NAME) | .id')
-          echo "Found Asset ID: $ASSET_ID"
-
-          if [ "$ASSET_ID" != "null" ] && [ "$ASSET_ID" != "" ]; then
-            echo "Deleting existing asset with ID: $ASSET_ID"
-            DELETE_RESPONSE=$(curl -w "HTTP_STATUS:%{http_code}" -s -X DELETE -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$PUBLISH_REPO/releases/assets/$ASSET_ID")
-            echo "Delete response: $DELETE_RESPONSE"
-          else
-            echo "No existing asset found to delete"
-          fi
-
-          echo "Uploading new asset..."
-          UPLOAD_RESPONSE=$(curl -w "HTTP_STATUS:%{http_code}" -s -X POST -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary "@$FILE_PATH" \
-            "https://uploads.github.com/repos/$PUBLISH_REPO/releases/$RELEASE_ID/assets?name=$PUBLISH_FILE_NAME")
-          echo "Upload response: $UPLOAD_RESPONSE"
-
       - name: Upload Windows artifact (Windows)
         if: matrix.settings.platform == 'windows-latest'
         uses: actions/upload-artifact@v4

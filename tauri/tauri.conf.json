@@ -47,7 +47,6 @@
       "appimage"
     ],
     "windows": {
-      "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
       "nsis": {
         "installerIcon": "icons/icon.ico"
