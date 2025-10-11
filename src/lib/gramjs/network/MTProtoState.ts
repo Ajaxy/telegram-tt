@@ -1,5 +1,3 @@
-import BigInt from 'big-integer';
-
 import type { AuthKey } from '../crypto/AuthKey';
 
 import { CTR } from '../crypto/CTR';
@@ -27,9 +25,9 @@ export default class MTProtoState {
 
   timeOffset: number;
 
-  salt: bigInt.BigInteger;
+  salt: bigint;
 
-  private id: bigInt.BigInteger;
+  private id: bigint;
 
   _sequence: number;
 
@@ -37,7 +35,7 @@ export default class MTProtoState {
 
   _isOutgoing: boolean;
 
-  private _lastMsgId: bigInt.BigInteger;
+  private _lastMsgId: bigint;
 
   private msgIds: string[];
 
@@ -74,11 +72,11 @@ export default class MTProtoState {
     this._isCall = isCall;
     this._isOutgoing = isOutgoing;
     this.timeOffset = 0;
-    this.salt = BigInt.zero;
+    this.salt = 0n;
 
-    this.id = BigInt.zero;
+    this.id = 0n;
     this._sequence = 0;
-    this._lastMsgId = BigInt.zero;
+    this._lastMsgId = 0n;
     this.msgIds = [];
     this.reset();
   }
@@ -90,7 +88,7 @@ export default class MTProtoState {
     // Session IDs can be random on every connection
     this.id = generateRandomLong(true);
     this._sequence = 0;
-    this._lastMsgId = BigInt(0);
+    this._lastMsgId = 0n;
     this.msgIds = [];
   }
 
@@ -142,11 +140,13 @@ export default class MTProtoState {
    * @param contentRelated
    * @param afterId
    */
-  async writeDataAsMessage(buffer: BinaryWriter, data: Buffer, contentRelated: boolean, afterId?: BigInt.BigInteger) {
+  async writeDataAsMessage(
+    buffer: BinaryWriter, data: Buffer, contentRelated: boolean, afterId?: bigint,
+  ): Promise<bigint> {
     const msgId = this._getNewMsgId();
     const seqNo = this._getSeqNo(contentRelated);
     let body;
-    if (!afterId) {
+    if (afterId === undefined) {
       body = await GZIPPacked.gzipIfSmaller(contentRelated, data);
     } else {
       // Invoke query expects a query with a getBytes func
@@ -185,7 +185,7 @@ export default class MTProtoState {
       throw new Error('Auth key unset');
     }
 
-    if (!this.salt || !this.id || !authKey || !this.authKey.keyId) {
+    if (this.salt === undefined || this.authKey.keyId === undefined) {
       throw new Error('Unset params');
     }
 
@@ -255,7 +255,7 @@ export default class MTProtoState {
     if (!this._isCall) {
       const keyId = readBigIntFromBuffer(body.slice(0, 8));
 
-      if (!this.authKey.keyId || keyId.neq(this.authKey.keyId)) {
+      if (keyId !== this.authKey.keyId) {
         throw new SecurityError('Server replied with an invalid auth key');
       }
     }
@@ -304,7 +304,7 @@ export default class MTProtoState {
     } else {
       reader.readLong(); // removeSalt
       const serverId = reader.readLong();
-      if (!serverId.eq(this.id)) {
+      if (serverId !== this.id) {
         throw new SecurityError('Server replied with a wrong session ID');
       }
 
@@ -358,11 +358,9 @@ export default class MTProtoState {
   _getNewMsgId() {
     const now = Date.now() / 1000 + this.timeOffset;
     const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9);
-    let newMsgId = (BigInt(Math.floor(now))
-      .shiftLeft(BigInt(32))).or(BigInt(nanoseconds)
-      .shiftLeft(BigInt(2)));
-    if (this._lastMsgId.greaterOrEquals(newMsgId)) {
-      newMsgId = this._lastMsgId.add(BigInt(4));
+    let newMsgId = (BigInt(Math.floor(now)) << 32n) | (BigInt(nanoseconds) << 2n);
+    if (this._lastMsgId >= newMsgId) {
+      newMsgId = this._lastMsgId + 4n;
     }
     this._lastMsgId = newMsgId;
     return newMsgId;
@@ -371,28 +369,28 @@ export default class MTProtoState {
   /**
    * Returns the understood time by the message id (server time + local offset)
    */
-  getMsgIdTimeLocal(msgId: BigInt.BigInteger) {
-    if (this._lastMsgId.eq(0)) {
+  getMsgIdTimeLocal(msgId: bigint) {
+    if (this._lastMsgId === 0n) {
       // this means it's the first message sent/received so don't check yet
-      return false;
+      return undefined;
     }
-    return msgId.shiftRight(BigInt(32)).toJSNumber() - this.timeOffset;
+    return Number(msgId >> 32n) - this.timeOffset;
   }
 
   /**
    * Updates the time offset to the correct
    * one given a known valid message ID.
-   * @param correctMsgId {BigInteger}
+   * @param correctMsgId {bigint}
    */
-  updateTimeOffset(correctMsgId: BigInt.BigInteger) {
+  updateTimeOffset(correctMsgId: bigint) {
     const bad = this._getNewMsgId();
     const old = this.timeOffset;
     const now = Math.floor(Date.now() / 1000);
-    const correct = correctMsgId.shiftRight(BigInt(32)).toJSNumber();
+    const correct = Number(correctMsgId >> 32n);
     this.timeOffset = correct - now;
 
     if (this.timeOffset !== old) {
-      this._lastMsgId = BigInt(0);
+      this._lastMsgId = 0n;
       this._log.debug(
         // eslint-disable-next-line @stylistic/max-len
         `Updated time offset (old offset ${old}, bad ${bad.toString()}, good ${correctMsgId.toString()}, new ${this.timeOffset})`,

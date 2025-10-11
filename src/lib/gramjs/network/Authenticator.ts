@@ -5,8 +5,6 @@
  * @returns {Promise<{authKey: *, timeOffset: *}>}
  */
 
-import bigInt from 'big-integer';
-
 import type MTProtoPlainSender from './MTProtoPlainSender';
 
 import { IGE } from '../crypto/IGE';
@@ -43,7 +41,7 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
   if (!(resPQ instanceof Api.ResPQ)) {
     throw new SecurityError(`Step 1 answer was ${resPQ}`);
   }
-  if (resPQ.nonce.neq(nonce)) {
+  if (resPQ.nonce !== nonce) {
     throw new SecurityError('Step 1 invalid nonce from server');
   }
   const pq = readBigIntFromBuffer(resPQ.pq, false, true);
@@ -70,7 +68,7 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
   let targetFingerprint;
   let targetKey;
   for (const fingerprint of resPQ.serverPublicKeyFingerprints) {
-    targetKey = SERVER_KEYS.get(fingerprint.toString());
+    targetKey = SERVER_KEYS.get(fingerprint);
     if (targetKey !== undefined) {
       targetFingerprint = fingerprint;
       break;
@@ -98,11 +96,11 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
 
     const keyAesEncrypted = Buffer.concat([tempKeyXor, aesEncrypted]);
     const keyAesEncryptedInt = readBigIntFromBuffer(keyAesEncrypted, false, false);
-    if (keyAesEncryptedInt.greaterOrEquals(targetKey.n)) {
+    if (keyAesEncryptedInt >= targetKey.n) {
       log.debug('Aes key greater than RSA. retrying');
       continue;
     }
-    const encryptedDataBuffer = modExp(keyAesEncryptedInt, bigInt(targetKey.e), targetKey.n);
+    const encryptedDataBuffer = modExp(keyAesEncryptedInt, BigInt(targetKey.e), targetKey.n);
     encryptedData = readBufferFromBigInt(encryptedDataBuffer, 256, false, false);
 
     break;
@@ -133,11 +131,11 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
   ) {
     throw new Error(`Step 2.1 answer was ${serverDhParams}`);
   }
-  if (serverDhParams.nonce.neq(resPQ.nonce)) {
+  if (serverDhParams.nonce !== resPQ.nonce) {
     throw new SecurityError('Step 2 invalid nonce from server');
   }
 
-  if (serverDhParams.serverNonce.neq(resPQ.serverNonce)) {
+  if (serverDhParams.serverNonce !== resPQ.serverNonce) {
     throw new SecurityError('Step 2 invalid server nonce from server');
   }
 
@@ -146,7 +144,7 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
       toSignedLittleBuffer(newNonce, 32).slice(4, 20),
     );
     const nnh = readBigIntFromBuffer(sh, true, true);
-    if (serverDhParams.newNonceHash.neq(nnh)) {
+    if (serverDhParams.newNonceHash !== nnh) {
       throw new SecurityError('Step 2 invalid DH fail nonce from server');
     }
   }
@@ -178,10 +176,10 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
     throw new SecurityError('Step 3 Invalid hash answer');
   }
 
-  if (serverDhInner.nonce.neq(resPQ.nonce)) {
+  if (serverDhInner.nonce !== resPQ.nonce) {
     throw new SecurityError('Step 3 Invalid nonce in encrypted answer');
   }
-  if (serverDhInner.serverNonce.neq(resPQ.serverNonce)) {
+  if (serverDhInner.serverNonce !== resPQ.serverNonce) {
     throw new SecurityError(
       'Step 3 Invalid server nonce in encrypted answer',
     );
@@ -207,26 +205,26 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
     false,
     false,
   );
-  const gb = modExp(bigInt(serverDhInner.g), b, dhPrime);
+  const gb = modExp(BigInt(serverDhInner.g), b, dhPrime);
   const gab = modExp(ga, b, dhPrime);
 
-  if (ga.lesserOrEquals(1)) {
+  if (ga <= 1n) {
     throw new SecurityError('Step 3 failed ga > 1 check');
   }
 
-  if (gb.lesserOrEquals(1)) {
+  if (gb <= 1n) {
     throw new SecurityError('Step 3 failed gb > 1 check');
   }
 
-  if (ga.greater(dhPrime.minus(1))) {
-    throw new SecurityError('Step 3 failed ga > dh_prime - 1 check');
+  if (ga >= (dhPrime - 1n)) {
+    throw new SecurityError('Step 3 failed ga < dh_prime - 1 check');
   }
 
-  const toCheckAgainst = bigInt(2).pow(2048 - 64);
-  if (!(ga.greaterOrEquals(toCheckAgainst) && ga.lesserOrEquals(dhPrime.minus(toCheckAgainst)))) {
+  const toCheckAgainst = 2n ** (2048n - 64n);
+  if (!(ga > toCheckAgainst && ga < (dhPrime - toCheckAgainst))) {
     throw new SecurityError('Step 3 failed dh_prime - 2^{2048-64} < ga < 2^{2048-64} check');
   }
-  if (!(gb.greaterOrEquals(toCheckAgainst) && gb.lesserOrEquals(dhPrime.minus(toCheckAgainst)))) {
+  if (!(gb > toCheckAgainst && gb < (dhPrime - toCheckAgainst))) {
     throw new SecurityError('Step 3 failed dh_prime - 2^{2048-64} < gb < 2^{2048-64} check');
   }
 
@@ -234,7 +232,7 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
   const clientDhInner = new Api.ClientDHInnerData({
     nonce: resPQ.nonce,
     serverNonce: resPQ.serverNonce,
-    retryId: bigInt.zero, // TODO Actual retry ID
+    retryId: 0n, // TODO Actual retry ID
     gB: getByteArray(gb, false),
   }).getBytes();
 
@@ -265,10 +263,10 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
     throw new Error(`Step 3.1 answer was ${dhGen}`);
   }
   const { name } = dhGen.constructor;
-  if (dhGen.nonce.neq(resPQ.nonce)) {
+  if (dhGen.nonce !== resPQ.nonce) {
     throw new SecurityError(`Step 3 invalid ${name} nonce from server`);
   }
-  if (dhGen.serverNonce.neq(resPQ.serverNonce)) {
+  if (dhGen.serverNonce !== resPQ.serverNonce) {
     throw new SecurityError(
       `Step 3 invalid ${name} server nonce from server`,
     );
@@ -279,10 +277,10 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
   const nonceNumber = 1 + nonceTypesString.indexOf(dhGen.className);
 
   const newNonceHash = await authKey.calcNewNonceHash(newNonce, nonceNumber);
-  // @ts-ignore
-  const dhHash = dhGen[`newNonceHash${nonceNumber}`];
+  // @ts-expect-error
+  const dhHash = dhGen[`newNonceHash${nonceNumber}`] as bigint;
 
-  if (dhHash.neq(newNonceHash)) {
+  if (dhHash !== newNonceHash) {
     throw new SecurityError('Step 3 invalid new nonce hash');
   }
 

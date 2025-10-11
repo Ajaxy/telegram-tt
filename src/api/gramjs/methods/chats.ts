@@ -1,6 +1,6 @@
-import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { RPCError } from '../../../lib/gramjs/errors';
+import { generateRandomBigInt } from '../../../lib/gramjs/Helpers';
 
 import type { ChatListType } from '../../../types';
 import type {
@@ -71,7 +71,6 @@ import {
   buildInputUser,
   buildMtpMessageEntity,
   DEFAULT_PRIMITIVES,
-  generateRandomBigInt,
   getEntityTypeById,
 } from '../gramjsBuilders';
 import {

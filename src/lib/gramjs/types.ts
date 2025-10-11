@@ -8,7 +8,7 @@ export type FullEntity =
   | Api.ChannelFull;
 
 export type EntityLike =
-  | bigInt.BigInteger
+  | bigint
   | string
   | Api.TypePeer
   | Api.TypeInputPeer

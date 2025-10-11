@@ -24,6 +24,7 @@ import { numberToHexColor } from '../../../util/colors';
 import {
   buildCollectionByCallback, omit, omitUndefined, pick,
 } from '../../../util/iteratees';
+import { toJSNumber } from '../../../util/numbers';
 import { addUserToLocalDb } from '../helpers/localDb';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildMessageTextContent } from './messageContent';
@@ -362,9 +363,9 @@ export function buildApiCollectibleInfo(info: GramJs.fragment.TypeCollectibleInf
   } = info;
 
   return {
-    amount: amount.toJSNumber(),
+    amount: toJSNumber(amount),
     currency,
-    cryptoAmount: cryptoAmount.toJSNumber(),
+    cryptoAmount: toJSNumber(cryptoAmount),
     cryptoCurrency,
     purchaseDate,
     url,

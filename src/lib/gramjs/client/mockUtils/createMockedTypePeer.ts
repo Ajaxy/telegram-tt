@@ -1,7 +1,6 @@
-import BigInt from 'big-integer';
-
 import type { MockTypes } from './MockTypes';
 
+import { CHANNEL_ID_BASE } from '../../../../config';
 import Api from '../../tl/api';
 
 export default function createMockedTypePeer(id: string, mockData: MockTypes): Api.TypePeer {
@@ -22,7 +21,7 @@ export default function createMockedTypePeer(id: string, mockData: MockTypes): A
   const channel = mockData.channels.find((c) => c.id === id);
   if (channel) {
     return new Api.PeerChannel({
-      channelId: BigInt(Number(id) + 1000000000),
+      channelId: -BigInt(id) - CHANNEL_ID_BASE,
     });
   }
 

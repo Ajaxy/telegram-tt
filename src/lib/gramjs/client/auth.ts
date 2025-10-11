@@ -1,8 +1,7 @@
-import bigInt from 'big-integer';
-
 import type TelegramClient from './TelegramClient';
 import type { Update } from './TelegramClient';
 
+import { tryParseBigInt } from '../../../util/numbers';
 import { getServerTime } from '../../../util/serverTime';
 import { DEFAULT_PRIMITIVES } from '../../../api/gramjs/gramjsBuilders';
 import { RPCError } from '../errors';
@@ -234,6 +233,7 @@ async function signInUserWithQrCode(
   let isScanningComplete = false;
 
   const { apiId, apiHash } = apiCredentials;
+  const exceptIds = authParams.accountIds?.map((id) => tryParseBigInt(id)).filter(Boolean) || [];
 
   const inputPromise = (async () => {
     // eslint-disable-next-line no-constant-condition
@@ -245,7 +245,7 @@ async function signInUserWithQrCode(
       const result = await client.invoke(new Api.auth.ExportLoginToken({
         apiId,
         apiHash,
-        exceptIds: authParams.accountIds?.map((id) => bigInt(id)) || [],
+        exceptIds,
       }));
       if (!(result instanceof Api.auth.LoginToken)) {
         throw new Error('Unexpected');
@@ -286,7 +286,7 @@ async function signInUserWithQrCode(
     const result2 = await client.invoke(new Api.auth.ExportLoginToken({
       apiId,
       apiHash,
-      exceptIds: authParams.accountIds?.map((id) => bigInt(id)) || [],
+      exceptIds,
     }));
 
     if (result2 instanceof Api.auth.LoginTokenSuccess && result2.authorization instanceof Api.auth.Authorization) {

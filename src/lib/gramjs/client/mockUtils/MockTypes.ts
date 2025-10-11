@@ -1,5 +1,3 @@
-import type bigInt from 'big-integer';
-
 import type { GramJsAppConfig } from '../../../../api/gramjs/apiBuilders/appConfig';
 import type { ApiAvailableReaction } from '../../../../api/types';
 import type Api from '../../tl/api';
@@ -62,7 +60,7 @@ export type MockMessageReactions = {
 export type MockDocument = Partial<Api.Document> & {
   id: number;
   mimeType: string;
-  size: bigInt.BigInteger;
+  size: bigint;
   url: string;
   bytes: Buffer;
 };

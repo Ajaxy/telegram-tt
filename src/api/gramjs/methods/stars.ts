@@ -1,4 +1,3 @@
-import bigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { GiftProfileFilterOptions, ResaleGiftsFilterOptions } from '../../../types';
@@ -39,7 +38,7 @@ import { getPassword } from './twoFaSettings';
 
 export async function fetchCheckCanSendGift({ giftId }: { giftId: string }) {
   const result = await invokeRequest(new GramJs.payments.CheckCanSendGift({
-    giftId: bigInt(giftId),
+    giftId: BigInt(giftId),
   }));
 
   if (!result) {
@@ -112,10 +111,10 @@ export async function fetchResaleGifts({
    ];
 
    const params: GetResaleStarGifts = {
-     giftId: bigInt(giftId),
+     giftId: BigInt(giftId),
      offset,
      limit,
-     attributesHash: attributesHash ? bigInt(attributesHash) : DEFAULT_PRIMITIVES.BIGINT,
+     attributesHash: attributesHash ? BigInt(attributesHash) : DEFAULT_PRIMITIVES.BIGINT,
      attributes: buildInputResaleGiftsAttributes(attributes),
      ...(filter && {
        sortByPrice: filter.sortType === 'byPrice' || undefined,
@@ -200,7 +199,7 @@ export function convertStarGift({
   }));
 }
 
-export async function getStarsGiftOptions({
+export async function fetchStarsGiftOptions({
   chat,
 }: {
   chat?: ApiChat;
@@ -397,7 +396,7 @@ export async function fetchStarGiftUpgradePreview({
   giftId: string;
 }) {
   const result = await invokeRequest(new GramJs.payments.GetStarGiftUpgradePreview({
-    giftId: bigInt(giftId),
+    giftId: BigInt(giftId),
   }));
 
   if (!result) {
@@ -527,7 +526,7 @@ export async function fetchStarGiftCollections({
 }) {
   const result = await invokeRequest(new GramJs.payments.GetStarGiftCollections({
     peer: buildInputPeer(peer.id, peer.accessHash),
-    hash: hash ? bigInt(hash) : DEFAULT_PRIMITIVES.BIGINT,
+    hash: hash ? BigInt(hash) : DEFAULT_PRIMITIVES.BIGINT,
   }));
 
   if (!result || result instanceof GramJs.payments.StarGiftCollectionsNotModified) {

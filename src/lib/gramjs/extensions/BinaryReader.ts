@@ -50,7 +50,7 @@ export default class BinaryReader {
   /**
      * Reads a long integer (8 bytes or 64 bits) value.
      * @param signed
-     * @returns {BigInteger}
+     * @returns {bigint}
      */
   readLong(signed = true) {
     return this.readLargeInt(64, signed);
@@ -66,7 +66,7 @@ export default class BinaryReader {
 
   /**
      * Reads a real floating point (8 bytes) value.
-     * @returns {BigInteger}
+     * @returns {number}
      */
   readDouble() {
     // was this a bug ? it should have been <d

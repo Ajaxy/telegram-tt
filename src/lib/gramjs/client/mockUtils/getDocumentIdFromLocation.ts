@@ -1,13 +1,14 @@
+import { toJSNumber } from '../../../../util/numbers';
 import Api from '../../tl/api';
 
 export default function getDocumentIdFromLocation(location: Api.TypeInputFileLocation): number {
   if (location instanceof Api.InputDocumentFileLocation) {
-    return location.id.toJSNumber();
+    return toJSNumber(location.id);
   }
 
   if (location instanceof Api.InputPhotoFileLocation) {
-    return location.id.toJSNumber();
+    return toJSNumber(location.id);
   }
 
-  throw Error('Unsupported input file location type ' + location.className);
+  throw new Error(`Unsupported input file location type ${location.className}`);
 }

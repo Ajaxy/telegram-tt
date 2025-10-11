@@ -1,5 +1,3 @@
-import BigInt from 'big-integer';
-
 import type { MockTypes } from './MockTypes';
 
 import Api from '../../tl/api';
@@ -12,7 +10,7 @@ export default function createMockedUser(id: string, mockData: MockTypes): Api.U
   const {
     firstName = 'John',
     lastName = 'Doe',
-    accessHash = BigInt(1),
+    accessHash = 1n,
     ...rest
   } = user;
 

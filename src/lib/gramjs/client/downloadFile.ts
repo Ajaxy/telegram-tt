@@ -1,5 +1,3 @@
-import BigInt from 'big-integer';
-
 import type TelegramClient from './TelegramClient';
 import type { SizeType } from './TelegramClient';
 

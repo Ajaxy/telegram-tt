@@ -1,5 +1,3 @@
-import type BigInt from 'big-integer';
-
 import { BinaryReader } from '../extensions';
 
 import {
@@ -15,9 +13,9 @@ export class AuthKey {
 
   _hash?: Buffer;
 
-  private auxHash?: BigInt.BigInteger;
+  private auxHash?: bigint;
 
-  keyId?: BigInt.BigInteger;
+  keyId?: bigint;
 
   constructor(value?: Buffer, hash?: Buffer) {
     if (!hash || !value) {
@@ -55,7 +53,7 @@ export class AuthKey {
   }
 
   async waitForKey() {
-    while (!this.keyId) {
+    while (this.keyId === undefined) {
       await sleep(20);
     }
   }
@@ -70,13 +68,13 @@ export class AuthKey {
      * Calculates the new nonce hash based on the current class fields' values
      * @param newNonce
      * @param number
-     * @returns {BigInt.BigInteger}
+     * @returns {bigint}
      */
   async calcNewNonceHash(
-    newNonce: BigInt.BigInteger,
+    newNonce: bigint,
     number: number,
-  ): Promise<BigInt.BigInteger> {
-    if (!this.auxHash) {
+  ): Promise<bigint> {
+    if (this.auxHash === undefined) {
       throw new Error('Auth key not set');
     }
 

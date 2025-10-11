@@ -1,4 +1,3 @@
-import bigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
@@ -31,6 +30,7 @@ import type {
 } from '../../types';
 
 import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
+import { toJSNumber } from '../../../util/numbers';
 import { addWebDocumentToLocalDb } from '../helpers/localDb';
 import { buildApiStarsSubscriptionPricing } from './chats';
 import { buildApiMessageEntity } from './common';
@@ -45,15 +45,16 @@ export function buildShippingOptions(shippingOptions: GramJs.ShippingOption[] | 
     return undefined;
   }
 
-  return Object.values(shippingOptions).map((option) => {
+  return shippingOptions.map((option) => {
     return {
       id: option.id,
       title: option.title,
-      amount: option.prices.reduce((ac, cur) => ac + cur.amount.toJSNumber(), 0),
+
+      amount: option.prices.reduce((ac, cur) => ac + toJSNumber(cur.amount), 0),
       prices: option.prices.map(({ label, amount }) => {
         return {
           label,
-          amount: amount.toJSNumber(),
+          amount: toJSNumber(amount),
         };
       }),
     };
@@ -79,7 +80,7 @@ export function buildApiReceipt(receipt: GramJs.payments.TypePaymentReceipt): Ap
       botId: buildApiPeerId(botId, 'user'),
       description,
       title,
-      totalAmount: -totalAmount.toJSNumber(),
+      totalAmount: -toJSNumber(totalAmount),
       transactionId,
       photo: buildApiWebDocument(photo),
       invoice: buildApiInvoice(invoice),
@@ -110,7 +111,7 @@ export function buildApiReceipt(receipt: GramJs.payments.TypePaymentReceipt): Ap
     shippingPrices = shipping.prices.map(({ label, amount }) => {
       return {
         label,
-        amount: amount.toJSNumber(),
+        amount: toJSNumber(amount),
       };
     });
     shippingMethod = shipping.title;
@@ -119,13 +120,13 @@ export function buildApiReceipt(receipt: GramJs.payments.TypePaymentReceipt): Ap
   return {
     type: 'regular',
     info: { shippingAddress, phone, name },
-    totalAmount: totalAmount.toJSNumber(),
+    totalAmount: toJSNumber(totalAmount),
     currency,
     date,
     credentialsTitle,
     shippingPrices,
     shippingMethod,
-    tipAmount: tipAmount ? tipAmount.toJSNumber() : 0,
+    tipAmount: toJSNumber(tipAmount) || 0,
     title,
     description,
     botId: buildApiPeerId(botId, 'user'),
@@ -240,10 +241,10 @@ export function buildApiInvoice(invoice: GramJs.Invoice): ApiInvoice {
 
   const mappedPrices: ApiLabeledPrice[] = prices.map(({ label, amount }) => ({
     label,
-    amount: amount.toJSNumber(),
+    amount: toJSNumber(amount),
   }));
 
-  const totalAmount = prices.reduce((acc, cur) => acc.add(cur.amount), bigInt(0)).toJSNumber();
+  const totalAmount = prices.reduce((acc, cur) => acc + toJSNumber(cur.amount), 0);
 
   return {
     totalAmount,
@@ -252,8 +253,8 @@ export function buildApiInvoice(invoice: GramJs.Invoice): ApiInvoice {
     isRecurring: recurring,
     termsUrl,
     prices: mappedPrices,
-    maxTipAmount: maxTipAmount?.toJSNumber(),
-    suggestedTipAmounts: suggestedTipAmounts?.map((tip) => tip.toJSNumber()),
+    maxTipAmount: toJSNumber(maxTipAmount),
+    suggestedTipAmounts: suggestedTipAmounts?.map((tip) => toJSNumber(tip)),
     isEmailRequested: emailRequested,
     isEmailSentToProvider: emailToProvider,
     isNameRequested: nameRequested,
@@ -288,7 +289,7 @@ function buildApiPremiumSubscriptionOption(option: GramJs.PremiumSubscriptionOpt
     isCurrent: current,
     canPurchaseUpgrade,
     currency,
-    amount: amount.toJSNumber(),
+    amount: toJSNumber(amount),
     botUrl,
     months,
   };
@@ -314,7 +315,7 @@ export function buildPrepaidGiveaway(
   return {
     type: 'starsGiveaway',
     id: interaction.id.toString(),
-    stars: interaction.stars.toJSNumber(),
+    stars: toJSNumber(interaction.stars),
     quantity: interaction.quantity,
     boosts: interaction.boosts,
     date: interaction.date,
@@ -336,8 +337,8 @@ export function buildApiBoostsStatus(boostStatus: GramJs.premium.BoostsStatus): 
     boostUrl,
     giftBoosts,
     nextLevelBoosts,
-    ...(premiumAudience && { premiumSubscribers: buildStatisticsPercentage(premiumAudience) }),
-    ...(prepaidGiveaways && { prepaidGiveaways: prepaidGiveaways.map((m) => buildPrepaidGiveaway(m)) }),
+    premiumSubscribers: premiumAudience && buildStatisticsPercentage(premiumAudience),
+    prepaidGiveaways: prepaidGiveaways?.map((m) => buildPrepaidGiveaway(m)),
   };
 }
 
@@ -352,12 +353,12 @@ export function buildApiBoost(boost: GramJs.Boost): ApiBoost {
   } = boost;
 
   return {
-    userId: userId && buildApiPeerId(userId, 'user'),
+    userId: userId !== undefined ? buildApiPeerId(userId, 'user') : undefined,
     multiplier,
     expires,
     isFromGiveaway: giveaway,
     isGift: gift,
-    stars: stars?.toJSNumber(),
+    stars: toJSNumber(stars),
   };
 }
 
@@ -390,7 +391,8 @@ export function buildApiGiveawayInfo(info: GramJs.payments.TypeGiveawayInfo): Ap
       type: 'active',
       startDate,
       isParticipating: participating,
-      adminDisallowedChatId: adminDisallowedChatId && buildApiPeerId(adminDisallowedChatId, 'channel'),
+      adminDisallowedChatId: adminDisallowedChatId !== undefined
+        ? buildApiPeerId(adminDisallowedChatId, 'channel') : undefined,
       disallowedCountry,
       joinedTooEarlyDate,
       isPreparingResults: preparingResults,
@@ -416,7 +418,7 @@ export function buildApiGiveawayInfo(info: GramJs.payments.TypeGiveawayInfo): Ap
       giftCodeSlug,
       isRefunded: refunded,
       isWinner: winner,
-      starsPrize: starsPrize?.toJSNumber(),
+      starsPrize: toJSNumber(starsPrize),
     };
   }
 }
@@ -429,7 +431,7 @@ export function buildApiCheckedGiftCode(giftcode: GramJs.payments.TypeCheckedGif
   return {
     date,
     months,
-    toId: toId && buildApiPeerId(toId, 'user'),
+    toId: toId !== undefined ? buildApiPeerId(toId, 'user') : undefined,
     fromId: fromId && getApiChatIdFromMtpPeer(fromId),
     usedAt: usedDate,
     isFromGiveaway: viaGiveaway,
@@ -443,7 +445,7 @@ export function buildApiPremiumGiftCodeOption(option: GramJs.PremiumGiftCodeOpti
   } = option;
 
   return {
-    amount: amount.toJSNumber(),
+    amount: toJSNumber(amount),
     currency,
     months,
     users,
@@ -457,17 +459,17 @@ export function buildApiStarsGiftOptions(option: GramJs.StarsGiftOption): ApiSta
 
   return {
     isExtended: extended,
-    stars: stars.toJSNumber(),
-    amount: amount.toJSNumber(),
+    stars: toJSNumber(stars),
+    amount: toJSNumber(amount),
     currency,
   };
 }
 
-export function buildApiCurrencyAmount(amount: GramJs.TypeStarsAmount): ApiTypeCurrencyAmount | undefined {
+export function buildApiCurrencyAmount(amount: GramJs.TypeStarsAmount): ApiTypeCurrencyAmount {
   if (amount instanceof GramJs.StarsAmount) {
     return {
       currency: STARS_CURRENCY_CODE,
-      amount: amount.amount.toJSNumber(),
+      amount: toJSNumber(amount.amount),
       nanos: amount.nanos,
     };
   }
@@ -475,11 +477,12 @@ export function buildApiCurrencyAmount(amount: GramJs.TypeStarsAmount): ApiTypeC
   if (amount instanceof GramJs.StarsTonAmount) {
     return {
       currency: TON_CURRENCY_CODE,
-      amount: amount.amount.toJSNumber(),
+      amount: toJSNumber(amount.amount),
     };
   }
 
-  return undefined;
+  const _exhaustive: never = amount;
+  return _exhaustive;
 }
 
 export function buildApiStarsGiveawayWinnersOption(
@@ -492,7 +495,7 @@ export function buildApiStarsGiveawayWinnersOption(
   return {
     isDefault,
     users,
-    perUserStars: perUserStars.toJSNumber(),
+    perUserStars: toJSNumber(perUserStars),
   };
 }
 
@@ -507,8 +510,8 @@ export function buildApiStarsGiveawayOptions(option: GramJs.StarsGiveawayOption)
     isExtended: extended,
     isDefault,
     yearlyBoosts,
-    stars: stars.toJSNumber(),
-    amount: amount.toJSNumber(),
+    stars: toJSNumber(stars),
+    amount: toJSNumber(amount),
     currency,
     winners: winnerList,
   };
@@ -625,9 +628,9 @@ export function buildApiStarTopupOption(option: GramJs.TypeStarsTopupOption): Ap
   } = option;
 
   return {
-    amount: amount.toJSNumber(),
+    amount: toJSNumber(amount),
     currency,
-    stars: stars.toJSNumber(),
+    stars: toJSNumber(stars),
     isExtended: extended,
   };
 }
@@ -644,14 +647,14 @@ export function buildApiUniqueStarGiftValueInfo(
     isLastSaleOnFragment: lastSaleOnFragment,
     isValueAverage: valueIsAverage,
     currency,
-    value: value.toJSNumber(),
+    value: toJSNumber(value),
     initialSaleDate,
-    initialSaleStars: initialSaleStars.toJSNumber(),
-    initialSalePrice: initialSalePrice.toJSNumber(),
+    initialSaleStars: toJSNumber(initialSaleStars),
+    initialSalePrice: toJSNumber(initialSalePrice),
     lastSaleDate,
-    lastSalePrice: lastSalePrice?.toJSNumber(),
-    floorPrice: floorPrice?.toJSNumber(),
-    averagePrice: averagePrice?.toJSNumber(),
+    lastSalePrice: toJSNumber(lastSalePrice),
+    floorPrice: toJSNumber(floorPrice),
+    averagePrice: toJSNumber(averagePrice),
     listedCount,
     fragmentListedCount,
     fragmentListedUrl,

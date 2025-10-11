@@ -7,6 +7,7 @@ import type { ApiChannelMonetizationStatistics } from '../../../api/types';
 
 import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { convertTonFromNanos } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 import { isGraph } from './helpers/isGraph';
 
@@ -144,9 +145,10 @@ const MonetizationStatistics = ({
   }, [isReady, statistics, oldLang, chatId, dcId, forceUpdate]);
 
   function renderAvailableReward() {
-    const [integerTonPart, decimalTonPart] = availableBalance ? availableBalance.toFixed(4).split('.') : [0];
+    const tonAmount = availableBalance ? convertTonFromNanos(availableBalance.amount) : 0;
+    const [integerTonPart, decimalTonPart] = tonAmount.toFixed(4).split('.');
     const [integerUsdPart, decimalUsdPart] = availableBalance
-      && statistics?.usdRate ? (availableBalance * statistics.usdRate).toFixed(2).split('.') : [0];
+      && statistics?.usdRate ? (tonAmount * statistics.usdRate).toFixed(2).split('.') : [0];
 
     return (
       <div className={styles.availableReward}>

@@ -1,26 +1,33 @@
 import { CHANNEL_ID_BASE } from '../../config';
+import { toJSNumber } from '../numbers';
 
 export function isUserId(entityId: string) {
   return !entityId.startsWith('-');
 }
 
 export function isChannelId(entityId: string) {
-  const n = Number(entityId);
+  const n = BigInt(entityId);
   return n < -CHANNEL_ID_BASE;
 }
 
 export function toChannelId(mtpId: string) {
-  const n = Number(mtpId);
+  const n = BigInt(mtpId);
   return String(-CHANNEL_ID_BASE - n);
 }
 
-export function getCleanPeerId(peerId: string) {
-  return isChannelId(peerId)
-    // Remove -1 and leading zeros
-    ? peerId.replace(/^-10+/, '')
-    : peerId.replace('-', '');
+export function getRawPeerId(id: string) {
+  const n = BigInt(id);
+  if (isUserId(id)) {
+    return n;
+  }
+
+  if (isChannelId(id)) {
+    return -n - CHANNEL_ID_BASE;
+  }
+
+  return n * -1n;
 }
 
 export function getPeerIdDividend(peerId: string) {
-  return Math.abs(Number(getCleanPeerId(peerId)));
+  return toJSNumber(getRawPeerId(peerId));
 }

@@ -1,4 +1,3 @@
-import bigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { SizeType, TelegramClient } from '../../../lib/gramjs';
@@ -15,6 +14,7 @@ import {
   MEDIA_CACHE_NAME_AVATARS,
 } from '../../../config';
 import * as cacheApi from '../../../util/cacheApi';
+import { toJSNumber } from '../../../util/numbers';
 import { getEntityTypeById } from '../gramjsBuilders';
 import localDb from '../localDb';
 
@@ -89,7 +89,7 @@ async function download(
   } = parsed;
 
   if (entityType === 'staticMap') {
-    const accessHash = bigInt(entityId);
+    const accessHash = BigInt(entityId);
     const parsedParams = new URLSearchParams(params);
     const long = Number(parsedParams.get('long'));
     const lat = Number(parsedParams.get('lat'));
@@ -162,7 +162,7 @@ async function download(
       fullSize = entity.size;
     } else if (entity instanceof GramJs.Document) {
       mimeType = entity.mimeType;
-      fullSize = entity.size.toJSNumber();
+      fullSize = toJSNumber(entity.size);
     }
 
     // Prevent HTML-in-video attacks

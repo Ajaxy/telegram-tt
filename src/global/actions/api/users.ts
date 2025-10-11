@@ -174,7 +174,10 @@ addActionHandler('loadCommonChats', async (global, actions, payload): Promise<vo
     return;
   }
 
-  const result = await callApi('fetchCommonChats', user, commonChats?.maxId);
+  const result = await callApi('fetchCommonChats', {
+    user,
+    maxId: commonChats?.maxId,
+  });
   if (!result) {
     return;
   }

@@ -1,4 +1,3 @@
-import type BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiEmojiStatusType, ApiPeerColor } from '../../types';
@@ -20,16 +19,16 @@ export function isMtpPeerChannel(peer: TypePeerOrInput): peer is GramJs.PeerChan
   return peer.hasOwnProperty('channelId');
 }
 
-export function buildApiPeerId(id: BigInt.BigInteger, type: 'user' | 'chat' | 'channel') {
+export function buildApiPeerId(id: bigint, type: 'user' | 'chat' | 'channel') {
   if (type === 'user') {
     return id.toString();
   }
 
   if (type === 'channel') {
-    return id.add(CHANNEL_ID_BASE).negate().toString();
+    return ((id + CHANNEL_ID_BASE) * -1n).toString();
   }
 
-  return id.negate().toString();
+  return (id * -1n).toString();
 }
 
 export function getApiChatIdFromMtpPeer(peer: TypePeerOrInput) {

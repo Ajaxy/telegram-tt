@@ -1,5 +1,3 @@
-import type BigInt from 'big-integer';
-
 import type { Api } from '../tl';
 
 import Deferred from '../../../util/Deferred';
@@ -8,9 +6,9 @@ export type CallableRequest = Api.AnyRequest | Api.MsgsAck | Api.MsgsStateInfo |
 type RequestResponse<T> = T extends { __response: infer R } ? R : void;
 
 export default class RequestState<T extends CallableRequest = CallableRequest> {
-  public containerId?: BigInt.BigInteger;
+  public containerId?: bigint;
 
-  public msgId?: BigInt.BigInteger;
+  public msgId?: bigint;
 
   public request: any;
 

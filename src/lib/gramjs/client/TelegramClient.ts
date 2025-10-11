@@ -1,4 +1,3 @@
-import bigInt from 'big-integer';
 import os from 'os';
 
 import type LocalUpdatePremiumFloodWait from '../../../api/gramjs/updates/UpdatePremiumFloodWait';
@@ -16,6 +15,7 @@ import type { DownloadFileParams, DownloadFileWithDcParams, DownloadMediaParams 
 import type { UploadFileParams } from './uploadFile';
 
 import Deferred from '../../../util/Deferred';
+import { toJSNumber } from '../../../util/numbers';
 import {
   FloodTestPhoneWaitError,
   FloodWaitError,
@@ -44,7 +44,7 @@ import { authFlow, checkAuthorization } from './auth';
 import { downloadFile } from './downloadFile';
 import { uploadFile } from './uploadFile';
 
-import { getRandomInt, sleep } from '../Helpers';
+import { generateRandomBigInt, sleep } from '../Helpers';
 import RequestState from '../network/RequestState';
 import Session from '../sessions/Abstract';
 import MemorySession from '../sessions/Memory';
@@ -411,7 +411,7 @@ class TelegramClient {
             return undefined;
           }
           return sender.send(new Api.PingDelayDisconnect({
-            pingId: bigInt(getRandomInt(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)),
+            pingId: generateRandomBigInt(),
             disconnectDelay: PING_DISCONNECT_DELAY,
           }));
         };
@@ -877,7 +877,7 @@ class TelegramClient {
         thumbSize: '',
       }),
       {
-        fileSize: doc.size.toJSNumber(),
+        fileSize: toJSNumber(doc.size),
         dcId: doc.dcId,
       }) as Promise<Buffer | undefined>; // Sticker thumb cannot be larger than 2GB, right?
     });
@@ -995,7 +995,7 @@ class TelegramClient {
         thumbSize: size && 'type' in size ? size.type : '',
       }),
       {
-        fileSize: size && 'size' in size ? size.size : doc.size.toJSNumber(),
+        fileSize: size && 'size' in size ? size.size : toJSNumber(doc.size),
         progressCallback: args.progressCallback,
         start: args.start,
         end: args.end,
@@ -1055,7 +1055,7 @@ class TelegramClient {
   }
 
   async downloadStaticMap(
-    accessHash: bigInt.BigInteger,
+    accessHash: bigint,
     long: number,
     lat: number,
     w: number,

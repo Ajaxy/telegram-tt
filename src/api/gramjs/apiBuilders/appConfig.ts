@@ -1,4 +1,3 @@
-import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiAppConfig, ApiLimitType, ApiPremiumSection } from '../../types';
@@ -131,7 +130,7 @@ function buildEmojiSounds(appConfig: GramJsAppConfig) {
       dcId: 1,
       mimeType: 'audio/ogg',
       fileReference: Buffer.alloc(0),
-      size: BigInt(0),
+      size: 0n,
     } as GramJs.Document);
 
     acc[key] = l.id;

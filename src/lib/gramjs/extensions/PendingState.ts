@@ -1,23 +1,21 @@
-import type BigInt from 'big-integer';
-
 import type RequestState from '../network/RequestState';
 
 export default class PendingState {
-  _pending: Map<string, RequestState>;
+  _pending: Map<bigint, RequestState>;
 
   constructor() {
     this._pending = new Map();
   }
 
-  set(msgId: BigInt.BigInteger, state: RequestState) {
-    this._pending.set(msgId.toString(), state);
+  set(msgId: bigint, state: RequestState) {
+    this._pending.set(msgId, state);
   }
 
-  get(msgId: BigInt.BigInteger) {
-    return this._pending.get(msgId.toString());
+  get(msgId: bigint) {
+    return this._pending.get(msgId);
   }
 
-  getAndDelete(msgId: BigInt.BigInteger) {
+  getAndDelete(msgId: bigint) {
     const state = this.get(msgId);
     this.delete(msgId);
     return state;
@@ -27,8 +25,8 @@ export default class PendingState {
     return Array.from(this._pending.values());
   }
 
-  delete(msgId: BigInt.BigInteger) {
-    this._pending.delete(msgId.toString());
+  delete(msgId: bigint) {
+    return this._pending.delete(msgId);
   }
 
   clear() {

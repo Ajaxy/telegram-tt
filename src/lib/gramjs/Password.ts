@@ -1,10 +1,9 @@
-import BigInt from 'big-integer';
-
 import { pbkdf2 } from './crypto/crypto';
 import Api from './tl/api';
 
 import {
   bigIntMod,
+  bitLength,
   generateRandomBytes,
   modExp,
   readBigIntFromBuffer,
@@ -13,59 +12,6 @@ import {
 } from './Helpers';
 
 const SIZE_FOR_HASH = 256;
-
-/**
- *
- *
- * @param prime{BigInteger}
- * @param g{BigInteger}
- */
-
-/*
-We don't support changing passwords yet
-function checkPrimeAndGoodCheck(prime, g) {
-    console.error('Unsupported function `checkPrimeAndGoodCheck` call. Arguments:', prime, g)
-
-    const goodPrimeBitsCount = 2048
-    if (prime < 0 || prime.bitLength() !== goodPrimeBitsCount) {
-        throw new Error(`bad prime count ${prime.bitLength()},expected ${goodPrimeBitsCount}`)
-    }
-    // TODO this is kinda slow
-    if (Factorizator.factorize(prime)[0] !== 1) {
-        throw new Error('give "prime" is not prime')
-    }
-    if (g.eq(BigInt(2))) {
-        if ((prime.remainder(BigInt(8))).neq(BigInt(7))) {
-            throw new Error(`bad g ${g}, mod8 ${prime % 8}`)
-        }
-    } else if (g.eq(BigInt(3))) {
-        if ((prime.remainder(BigInt(3))).neq(BigInt(2))) {
-            throw new Error(`bad g ${g}, mod3 ${prime % 3}`)
-        }
-        // eslint-disable-next-line no-empty
-    } else if (g.eq(BigInt(4))) {
-
-    } else if (g.eq(BigInt(5))) {
-        if (!([ BigInt(1), BigInt(4) ].includes(prime.remainder(BigInt(5))))) {
-            throw new Error(`bad g ${g}, mod8 ${prime % 5}`)
-        }
-    } else if (g.eq(BigInt(6))) {
-        if (!([ BigInt(19), BigInt(23) ].includes(prime.remainder(BigInt(24))))) {
-            throw new Error(`bad g ${g}, mod8 ${prime % 24}`)
-        }
-    } else if (g.eq(BigInt(7))) {
-        if (!([ BigInt(3), BigInt(5), BigInt(6) ].includes(prime.remainder(BigInt(7))))) {
-            throw new Error(`bad g ${g}, mod8 ${prime % 7}`)
-        }
-    } else {
-        throw new Error(`bad g ${g}`)
-    }
-    const primeSub1Div2 = (prime.subtract(BigInt(1))).divide(BigInt(2))
-    if (Factorizator.factorize(primeSub1Div2)[0] !== 1) {
-        throw new Error('(prime - 1) // 2 is not prime')
-    }
-}
-*/
 
 function checkPrimeAndGood(primeBytes: Buffer, g: number) {
   const goodPrime = Buffer.from([
@@ -95,30 +41,29 @@ function checkPrimeAndGood(primeBytes: Buffer, g: number) {
   // checkPrimeAndGoodCheck(readBigIntFromBuffer(primeBytes, false), g)
 }
 
-function isGoodLarge(number: BigInt.BigInteger, p: BigInt.BigInteger): boolean {
-  return (number.greater(BigInt(0)) && (p.subtract(number)
-    .greater(BigInt(0))));
+function isGoodLarge(number: bigint, p: bigint): boolean {
+  return number > 0n && number < p;
 }
 
 function numBytesForHash(number: Buffer): Buffer {
   return Buffer.concat([Buffer.alloc(SIZE_FOR_HASH - number.length), number]);
 }
 
-function bigNumForHash(g: BigInt.BigInteger) {
+function bigNumForHash(g: bigint) {
   return readBufferFromBigInt(g, SIZE_FOR_HASH, false);
 }
 
-function isGoodModExpFirst(modexp: BigInt.BigInteger, prime: BigInt.BigInteger): boolean {
-  const diff = prime.subtract(modexp);
+function isGoodModExpFirst(modexp: bigint, prime: bigint): boolean {
+  const diff = prime - modexp;
 
   const minDiffBitsCount = 2048 - 64;
   const maxModExpSize = 256;
 
   return !(
-    diff.lesser(BigInt(0))
-    || diff.bitLength().toJSNumber() < minDiffBitsCount
-    || modexp.bitLength().toJSNumber() < minDiffBitsCount
-    || Math.floor((modexp.bitLength().toJSNumber() + 7) / 8) > maxModExpSize
+    diff < 0n
+    || bitLength(diff) < minDiffBitsCount
+    || bitLength(modexp) < minDiffBitsCount
+    || Math.floor((bitLength(modexp) + 7) / 8) > maxModExpSize
   );
 }
 
@@ -189,7 +134,7 @@ export async function computeCheck(request: Api.account.Password, password: stri
   try {
     checkPrimeAndGood(algo.p, g);
   } catch (e) {
-    throw new Error('bad /g in password');
+    throw new Error('bad p/g in password');
   }
   if (!isGoodLarge(B, p)) {
     throw new Error('bad b in check');
@@ -200,7 +145,7 @@ export async function computeCheck(request: Api.account.Password, password: stri
   const bForHash = numBytesForHash(srpB);
   const gX = modExp(BigInt(g), x, p);
   const k = readBigIntFromBuffer(await sha256(Buffer.concat([pForHash, gForHash])), false);
-  const kgX = bigIntMod(k.multiply(gX), p);
+  const kgX = bigIntMod(k * gX, p);
   const generateAndCheckRandom = async () => {
     const randomSize = 256;
 
@@ -211,20 +156,20 @@ export async function computeCheck(request: Api.account.Password, password: stri
       if (isGoodModExpFirst(A, p)) {
         const aForHash = bigNumForHash(A);
         const u = readBigIntFromBuffer(await sha256(Buffer.concat([aForHash, bForHash])), false);
-        if (u.greater(BigInt(0))) {
+        if (u > 0n) {
           return { a, aForHash, u };
         }
       }
     }
   };
   const { a, aForHash, u } = await generateAndCheckRandom();
-  const gB = bigIntMod(B.subtract(kgX), p);
+  const gB = bigIntMod(B - kgX, p);
   if (!isGoodModExpFirst(gB, p)) {
     throw new Error('bad gB');
   }
 
-  const ux = u.multiply(x);
-  const aUx = a.add(ux);
+  const ux = u * x;
+  const aUx = a + ux;
   const S = modExp(gB, aUx, p);
   const [K, pSha, gSha, salt1Sha, salt2Sha] = await Promise.all([
     sha256(bigNumForHash(S)),
@@ -244,8 +189,7 @@ export async function computeCheck(request: Api.account.Password, password: stri
 
   return new Api.InputCheckPasswordSRP({
     srpId,
-    A: Buffer.from(aForHash),
+    A: aForHash,
     M1,
-
   });
 }

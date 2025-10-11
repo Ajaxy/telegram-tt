@@ -1,5 +1,3 @@
-import BigInt from 'big-integer';
-
 import type { PromisedWebSockets } from '../../extensions';
 
 import { readBufferFromBigInt } from '../../Helpers';

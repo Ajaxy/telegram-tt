@@ -2,7 +2,6 @@
  *  This module contains the class used to communicate with Telegram's servers
  *  in plain text, when no authorization key has been created yet.
  */
-import BigInt from 'big-integer';
 
 import type { Logger } from '../extensions';
 import type { Api } from '../tl';
@@ -53,11 +52,11 @@ export default class MTProtoPlainSender {
     }
     const reader = new BinaryReader(body);
     const authKeyId = reader.readLong();
-    if (authKeyId.neq(BigInt(0))) {
+    if (authKeyId !== 0n) {
       throw new Error('Bad authKeyId');
     }
     msgId = reader.readLong();
-    if (msgId.eq(BigInt(0))) {
+    if (msgId === 0n) {
       throw new Error('Bad msgId');
     }
     /** ^ We should make sure that the read ``msg_id`` is greater

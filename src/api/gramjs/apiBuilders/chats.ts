@@ -24,6 +24,7 @@ import type {
 } from '../../types';
 
 import { pickTruthy } from '../../../util/iteratees';
+import { toJSNumber } from '../../../util/numbers';
 import { getServerTimeOffset } from '../../../util/serverTime';
 import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
@@ -113,7 +114,8 @@ function buildApiChatFieldsFromPeerEntity(
     isJoinRequest: channel?.joinRequest,
     isForum: channel?.forum,
     isMonoforum: channel?.monoforum,
-    linkedMonoforumId: channel?.linkedMonoforumId && buildApiPeerId(channel.linkedMonoforumId, 'channel'),
+    linkedMonoforumId: channel?.linkedMonoforumId !== undefined
+      ? buildApiPeerId(channel.linkedMonoforumId, 'channel') : undefined,
     areChannelMessagesAllowed: channel?.broadcastMessagesAllowed,
     areStoriesHidden,
     maxStoryId,
@@ -123,7 +125,7 @@ function buildApiChatFieldsFromPeerEntity(
     botVerificationIconId,
     hasGeo: channel?.hasGeo,
     subscriptionUntil: channel?.subscriptionUntilDate,
-    paidMessagesStars: paidMessagesStars?.toJSNumber(),
+    paidMessagesStars: toJSNumber(paidMessagesStars),
     level: channel?.level,
     hasAutoTranslation: channel?.autotranslation,
     withForumTabs: channel?.forumTabs,
@@ -713,7 +715,7 @@ export function buildApiStarsSubscriptionPricing(
 ): ApiStarsSubscriptionPricing {
   return {
     period: pricing.period,
-    amount: pricing.amount.toJSNumber(),
+    amount: toJSNumber(pricing.amount),
   };
 }
 

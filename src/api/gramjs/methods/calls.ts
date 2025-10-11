@@ -1,5 +1,5 @@
-import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
+import { generateRandomInt32 } from '../../../lib/gramjs/Helpers';
 
 import type { JoinGroupCallPayload } from '../../../lib/secret-sauce';
 import type {
@@ -13,7 +13,7 @@ import {
   buildPhoneCall,
 } from '../apiBuilders/calls';
 import {
-  buildInputGroupCall, buildInputPeer, buildInputPhoneCall, buildInputUser, DEFAULT_PRIMITIVES, generateRandomInt,
+  buildInputGroupCall, buildInputPeer, buildInputPhoneCall, buildInputUser, DEFAULT_PRIMITIVES,
 } from '../gramjsBuilders';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest, invokeRequestBeacon } from './client';
@@ -182,7 +182,7 @@ export async function createGroupCall({
 }: {
   peer: ApiChat;
 }) {
-  const randomId = generateRandomInt();
+  const randomId = generateRandomInt32();
   const result = await invokeRequest(new GramJs.phone.CreateGroupCall({
     peer: buildInputPeer(peer.id, peer.accessHash),
     randomId,
@@ -284,7 +284,7 @@ export async function requestCall({
   user: ApiUser; gAHash: number[]; isVideo?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.phone.RequestCall({
-    randomId: generateRandomInt(),
+    randomId: generateRandomInt32(),
     userId: buildInputUser(user.id, user.accessHash),
     gAHash: Buffer.from(gAHash),
     ...(isVideo && { video: true }),

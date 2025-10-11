@@ -1,7 +1,6 @@
-import BigInt from 'big-integer';
-
 import type { MockTypes } from './MockTypes';
 
+import { toJSNumber } from '../../../../util/numbers';
 import Api from '../../tl/api';
 
 import { MOCK_STARTING_DATE } from './MockTypes';
@@ -12,7 +11,7 @@ export default function createMockedPhoto(documentId: number, mockData: MockType
   if (!document) throw Error('No such document ' + documentId);
 
   const {
-    accessHash = BigInt(1),
+    accessHash = 1n,
     fileReference = Buffer.from([0]),
     date = MOCK_STARTING_DATE,
     dcId = 2,
@@ -32,13 +31,13 @@ export default function createMockedPhoto(documentId: number, mockData: MockType
         type: 'm',
         w: 100,
         h: 100,
-        size: size.toJSNumber(),
+        size: toJSNumber(size),
       }),
       new Api.PhotoSize({
         type: 'x',
         w: 100,
         h: 100,
-        size: size.toJSNumber(),
+        size: toJSNumber(size),
       }),
     ],
     // thumbs?: Api.TypePhotoSize[];

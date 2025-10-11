@@ -35,6 +35,7 @@ import { SUPPORTED_PHOTO_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_WEB
 import { addTimestampEntities } from '../../../util/dates/timestamp';
 import { generateWaveform } from '../../../util/generateWaveform';
 import { pick } from '../../../util/iteratees';
+import { toJSNumber } from '../../../util/numbers';
 import {
   addMediaToLocalDb, addStoryToLocalDb, addWebPageMediaToLocalDb, type MediaRepairContext,
 } from '../helpers/localDb';
@@ -260,7 +261,7 @@ export function buildVideoFromDocument(document: GramJs.Document, params?: {
     isRound,
     isGif: Boolean(gifAttr),
     thumbnail: buildApiThumbnailFromStripped(thumbs),
-    size: size.toJSNumber(),
+    size: toJSNumber(size),
     isSpoiler,
     timestamp,
     hasVideoPreview,
@@ -300,7 +301,7 @@ export function buildAudioFromDocument(document: GramJs.Document): ApiAudio | un
     fileName: getFilenameFromDocument(document, 'audio'),
     title,
     performer,
-    size: size.toJSNumber(),
+    size: toJSNumber(size),
   };
 }
 
@@ -359,7 +360,7 @@ function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
     id: String(media.document.id),
     fileName: getFilenameFromDocument(media.document, 'audio'),
     thumbnailSizes,
-    size: media.document.size.toJSNumber(),
+    size: toJSNumber(media.document.size),
     ...pick(media.document, ['mimeType']),
     ...pick(audioAttribute, ['duration', 'performer', 'title']),
   };
@@ -402,7 +403,7 @@ function buildVoice(media: GramJs.TypeMessageMedia): ApiVoice | undefined {
   return {
     mediaType: 'voice',
     id: String(media.document.id),
-    size: media.document.size.toJSNumber(),
+    size: toJSNumber(media.document.size),
     duration,
     waveform: waveform ? Array.from(waveform) : undefined,
   };
@@ -475,7 +476,7 @@ export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | u
   return {
     mediaType: 'document',
     id: String(id),
-    size: size.toJSNumber(),
+    size: toJSNumber(size),
     mimeType,
     timestamp: date,
     fileName: getFilenameFromDocument(document),
@@ -644,7 +645,7 @@ function buildGiveaway(media: GramJs.MessageMediaGiveaway): ApiGiveaway | undefi
     mediaType: 'giveaway',
     channelIds,
     months,
-    stars: stars?.toJSNumber(),
+    stars: toJSNumber(stars),
     quantity,
     untilDate,
     countries: countriesIso2,
@@ -770,7 +771,7 @@ export function buildMediaInvoice(media: GramJs.MessageMediaInvoice): ApiMediaIn
     description,
     photo: buildApiWebDocument(photo),
     receiptMessageId: receiptMsgId,
-    amount: totalAmount.toJSNumber(),
+    amount: toJSNumber(totalAmount),
     currency,
     isTest: test,
     extendedMedia: preview,
@@ -932,7 +933,7 @@ function buildPaidMedia(media: GramJs.TypeMessageMedia): ApiPaidMedia | undefine
   if (isBought) {
     return {
       mediaType: 'paidMedia',
-      starsAmount: starsAmount.toJSNumber(),
+      starsAmount: toJSNumber(starsAmount),
       isBought,
       extendedMedia: buildBoughtMediaContent(extendedMedia)!,
     };
@@ -940,7 +941,7 @@ function buildPaidMedia(media: GramJs.TypeMessageMedia): ApiPaidMedia | undefine
 
   return {
     mediaType: 'paidMedia',
-    starsAmount: starsAmount.toJSNumber(),
+    starsAmount: toJSNumber(starsAmount),
     extendedMedia: extendedMedia
       .filter((paidMedia): paidMedia is GramJs.MessageExtendedMediaPreview => (
         paidMedia instanceof GramJs.MessageExtendedMediaPreview

@@ -1,4 +1,3 @@
-import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
@@ -109,8 +108,14 @@ export async function fetchFeaturedStickers({ hash }: { hash?: string }) {
   };
 }
 
-export async function fetchFeaturedEmojiStickers() {
-  const result = await invokeRequest(new GramJs.messages.GetFeaturedEmojiStickers({ hash: BigInt(0) }));
+export async function fetchFeaturedEmojiStickers({
+  hash,
+}: {
+  hash?: string;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetFeaturedEmojiStickers({
+    hash: hash ? BigInt(hash) : DEFAULT_PRIMITIVES.BIGINT,
+  }));
 
   if (!result || result instanceof GramJs.messages.FeaturedStickersNotModified) {
     return undefined;

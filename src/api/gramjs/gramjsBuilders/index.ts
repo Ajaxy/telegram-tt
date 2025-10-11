@@ -1,6 +1,5 @@
-import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
-import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
+import { generateRandomBigInt, generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
 
 import type {
   ApiBotApp,
@@ -47,13 +46,13 @@ import localDb from '../localDb';
 
 export const DEFAULT_PRIMITIVES = {
   INT: 0,
-  BIGINT: BigInt(0),
+  BIGINT: 0n,
   STRING: '',
 } as const;
 
 export function getEntityTypeById(peerId: string) {
-  const n = Number(peerId);
-  if (n > 0) {
+  const n = BigInt(peerId);
+  if (n > 0n) {
     return 'user';
   }
 
@@ -143,7 +142,7 @@ export function buildInputPaidReactionPrivacy(isPrivate?: boolean, peerId?: stri
 
 export function buildInputPeerFromLocalDb(chatOrUserId: string): GramJs.TypeInputPeer | undefined {
   const type = getEntityTypeById(chatOrUserId);
-  let accessHash: BigInt.BigInteger | undefined;
+  let accessHash: bigint | undefined;
 
   if (type === 'user') {
     accessHash = localDb.users[chatOrUserId]?.accessHash;
@@ -207,7 +206,7 @@ export function buildInputMediaDocument(media: ApiSticker | ApiVideo) {
   return new GramJs.InputMediaDocument({ id: inputDocument });
 }
 
-export function buildInputPoll(pollParams: ApiNewPoll, randomId: BigInt.BigInteger) {
+export function buildInputPoll(pollParams: ApiNewPoll, randomId: bigint) {
   const { summary, quiz } = pollParams;
 
   const poll = new GramJs.Poll({
@@ -359,10 +358,6 @@ export function buildInputStory(story: ApiStory | ApiStorySkipped) {
   });
 }
 
-export function generateRandomBigInt() {
-  return readBigIntFromBuffer(generateRandomBytes(8), true, true);
-}
-
 export function generateRandomTimestampedBigInt() {
   // 32 bits for timestamp, 32 bits are random
   const buffer = generateRandomBytes(8);
@@ -370,10 +365,6 @@ export function generateRandomTimestampedBigInt() {
   timestampBuffer.writeUInt32LE(Math.floor(Date.now() / 1000), 0);
   buffer.set(timestampBuffer, 4);
   return readBigIntFromBuffer(buffer, true, true);
-}
-
-export function generateRandomInt() {
-  return readBigIntFromBuffer(generateRandomBytes(4), true, true).toJSNumber();
 }
 
 export function buildMessageFromUpdate(
@@ -470,7 +461,7 @@ export function buildInputContact({
   lastName: string;
 }) {
   return new GramJs.InputPhoneContact({
-    clientId: BigInt(1),
+    clientId: 1n,
     phone,
     firstName,
     lastName,
@@ -597,17 +588,16 @@ export function buildInputThemeParams(params: ApiThemeParameters) {
 }
 
 export function buildMtpPeerId(id: string, type: 'user' | 'chat' | 'channel') {
+  const n = BigInt(id);
   if (type === 'user') {
-    return BigInt(id);
+    return n;
   }
-
-  const n = Number(id);
 
   if (type === 'channel') {
-    return BigInt(-n - CHANNEL_ID_BASE);
+    return -n - CHANNEL_ID_BASE;
   }
 
-  return BigInt(n * -1);
+  return n * -1n;
 }
 
 export function buildInputGroupCall(groupCall: Partial<ApiGroupCall>) {

@@ -10,6 +10,7 @@ import type {
   ApiUserType,
 } from '../../types';
 
+import { toJSNumber } from '../../../util/numbers';
 import { buildApiBotInfo } from './bots';
 import { buildApiBusinessIntro, buildApiBusinessLocation, buildApiBusinessWorkHours } from './business';
 import {
@@ -54,7 +55,8 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     businessLocation: businessLocation && buildApiBusinessLocation(businessLocation),
     businessWorkHours: businessWorkHours && buildApiBusinessWorkHours(businessWorkHours),
     businessIntro: businessIntro && buildApiBusinessIntro(businessIntro),
-    personalChannelId: personalChannelId && buildApiPeerId(personalChannelId, 'channel'),
+    personalChannelId: personalChannelId !== undefined
+      ? buildApiPeerId(personalChannelId, 'channel') : undefined,
     personalChannelMessageId: personalChannelMessage,
     botVerification: botVerification && buildApiBotVerification(botVerification),
     areAdsEnabled: sponsoredEnabled,
@@ -64,7 +66,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     starsMyPendingRatingDate,
     isBotCanManageEmojiStatus: botCanManageEmojiStatus,
     hasScheduledMessages: hasScheduled,
-    paidMessagesStars: sendPaidMessagesStars?.toJSNumber(),
+    paidMessagesStars: toJSNumber(sendPaidMessagesStars),
     settings: buildApiPeerSettings(settings),
   };
 }
@@ -89,7 +91,7 @@ export function buildApiPeerSettings({
     phoneCountry,
     nameChangeDate,
     photoChangeDate,
-    chargedPaidMessageStars: chargePaidMessageStars?.toJSNumber(),
+    chargedPaidMessageStars: toJSNumber(chargePaidMessageStars),
   };
 }
 
@@ -143,7 +145,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     botVerificationIconId: botVerificationIcon?.toString(),
     color: mtpUser.color && buildApiPeerColor(mtpUser.color),
     profileColor: profileColor && buildApiPeerColor(profileColor),
-    paidMessagesStars: sendPaidMessagesStars?.toJSNumber(),
+    paidMessagesStars: toJSNumber(sendPaidMessagesStars),
   };
 }
 
@@ -193,8 +195,8 @@ export function buildApiBirthday(birthday: GramJs.TypeBirthday): ApiBirthday {
 export function buildApiStarsRating(starsRating: GramJs.StarsRating): ApiStarsRating {
   return {
     level: starsRating.level,
-    currentLevelStars: starsRating.currentLevelStars.toJSNumber(),
-    stars: starsRating.stars.toJSNumber(),
-    nextLevelStars: starsRating.nextLevelStars?.toJSNumber(),
+    currentLevelStars: toJSNumber(starsRating.currentLevelStars),
+    stars: toJSNumber(starsRating.stars),
+    nextLevelStars: toJSNumber(starsRating.nextLevelStars),
   };
 }

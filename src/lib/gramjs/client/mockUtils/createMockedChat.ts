@@ -1,5 +1,3 @@
-import BigInt from 'big-integer';
-
 import type { MockTypes } from './MockTypes';
 
 import Api from '../../tl/api';

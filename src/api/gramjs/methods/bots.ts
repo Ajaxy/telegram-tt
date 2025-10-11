@@ -1,5 +1,5 @@
-import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
+import { generateRandomBigInt } from '../../../lib/gramjs/Helpers';
 
 import type {
   ApiBotApp,
@@ -33,7 +33,6 @@ import {
   buildInputThemeParams,
   buildInputUser,
   DEFAULT_PRIMITIVES,
-  generateRandomBigInt,
 } from '../gramjsBuilders';
 import {
   addDocumentToLocalDb,

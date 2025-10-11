@@ -1,5 +1,6 @@
 import type { ApiChat } from './chats';
 import type { ApiTypePrepaidGiveaway } from './payments';
+import type { ApiTypeCurrencyAmount } from './stars';
 
 export interface ApiChannelStatistics {
   type: 'channel';
@@ -153,8 +154,8 @@ export interface StatisticsStoryInteractionCounter {
 }
 
 export interface ChannelMonetizationBalances {
-  currentBalance: number;
-  availableBalance: number;
-  overallRevenue: number;
+  currentBalance: ApiTypeCurrencyAmount;
+  availableBalance: ApiTypeCurrencyAmount;
+  overallRevenue: ApiTypeCurrencyAmount;
   isWithdrawalEnabled?: boolean;
 }

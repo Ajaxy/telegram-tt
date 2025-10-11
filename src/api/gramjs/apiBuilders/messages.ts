@@ -45,6 +45,7 @@ import {
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
 import { addTimestampEntities } from '../../../util/dates/timestamp';
 import { omitUndefined, pick } from '../../../util/iteratees';
+import { toJSNumber } from '../../../util/numbers';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
 import {
@@ -218,7 +219,7 @@ export function buildApiMessageWithChatId(
     mtpMessage.media instanceof GramJs.MessageMediaInvoice ? mtpMessage.media.receiptMsgId : undefined,
   ) || {};
   const { mediaUnread: isMediaUnread, postAuthor } = mtpMessage;
-  const groupedId = mtpMessage.groupedId && String(mtpMessage.groupedId);
+  const groupedId = mtpMessage.groupedId !== undefined ? String(mtpMessage.groupedId) : undefined;
   const isInAlbum = Boolean(groupedId) && !(content.document || content.audio || content.sticker);
   const shouldHideKeyboardButtons = mtpMessage.replyMarkup instanceof GramJs.ReplyKeyboardHide;
   const isHideKeyboardSelective = mtpMessage.replyMarkup instanceof GramJs.ReplyKeyboardHide
@@ -285,7 +286,7 @@ export function buildApiMessageWithChatId(
     isInvertedMedia,
     isVideoProcessingPending,
     reportDeliveryUntilDate: mtpMessage.reportDeliveryUntilDate,
-    paidMessageStars: mtpMessage.paidMessageStars?.toJSNumber(),
+    paidMessageStars: toJSNumber(mtpMessage.paidMessageStars),
     restrictionReasons,
   };
 }
@@ -835,6 +836,6 @@ export function buildApiSearchPostsFlood(
     totalDaily: searchFlood.totalDaily,
     remains: searchFlood.remains,
     waitTill: searchFlood.waitTill,
-    starsAmount: searchFlood.starsAmount.toJSNumber(),
+    starsAmount: toJSNumber(searchFlood.starsAmount),
   };
 }

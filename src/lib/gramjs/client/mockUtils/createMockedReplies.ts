@@ -1,7 +1,6 @@
-import BigInt from 'big-integer';
-
 import type { MockTypes } from './MockTypes';
 
+import { CHANNEL_ID_BASE } from '../../../../config';
 import Api from '../../tl/api';
 
 export default function createMockedReplies(chatId: string, id: number, mockData: MockTypes) {
@@ -19,7 +18,7 @@ export default function createMockedReplies(chatId: string, id: number, mockData
     comments: true,
     replies: replies.replies,
     repliesPts: 1,
-    channelId: BigInt(1000000000 + 2),
+    channelId: -2n - CHANNEL_ID_BASE,
     // recentRepliers?: Api.TypePeer[];
   });
 }

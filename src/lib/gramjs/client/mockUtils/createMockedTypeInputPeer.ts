@@ -1,7 +1,6 @@
-import BigInt from 'big-integer';
-
 import type { MockTypes } from './MockTypes';
 
+import { CHANNEL_ID_BASE } from '../../../../config';
 import Api from '../../tl/api';
 
 export default function createMockedTypeInputPeer(id: string, mockData: MockTypes): Api.TypeInputPeer {
@@ -9,7 +8,7 @@ export default function createMockedTypeInputPeer(id: string, mockData: MockType
   if (user) {
     return new Api.InputPeerUser({
       userId: BigInt(id),
-      accessHash: BigInt(1),
+      accessHash: 1n,
     });
   }
 
@@ -23,8 +22,8 @@ export default function createMockedTypeInputPeer(id: string, mockData: MockType
   const channel = mockData.channels.find((c) => c.id === id);
   if (channel) {
     return new Api.InputPeerChannel({
-      channelId: BigInt(Number(id) + 1000000000),
-      accessHash: BigInt(1),
+      channelId: -BigInt(id) - CHANNEL_ID_BASE,
+      accessHash: 1n,
     });
   }
 

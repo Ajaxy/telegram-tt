@@ -1,18 +1,16 @@
-import BigInt from 'big-integer';
-
-import { modExp } from '../Helpers';
+import { BigMath, modExp, randBetweenBigInt } from '../Helpers';
 
 export class Factorizator {
   /**
      * Calculates the greatest common divisor
-     * @param a {BigInteger}
-     * @param b {BigInteger}
-     * @returns {BigInteger}
+     * @param a {bigint}
+     * @param b {bigint}
+     * @returns {bigint}
      */
-  static gcd(a: BigInt.BigInteger, b: BigInt.BigInteger) {
-    while (b.neq(BigInt.zero)) {
+  static gcd(a: bigint, b: bigint) {
+    while (b !== 0n) {
       const temp = b;
-      b = a.remainder(b);
+      b = a % b;
       a = temp;
     }
     return a;
@@ -20,57 +18,57 @@ export class Factorizator {
 
   /**
      * Factorizes the given number and returns both the divisor and the number divided by the divisor
-     * @param pq {BigInteger}
+     * @param pq {bigint}
      * @returns {{p: *, q: *}}
      */
-  static factorize(pq: BigInt.BigInteger) {
-    if (pq.remainder(2).equals(BigInt.zero)) {
-      return { p: BigInt(2), q: pq.divide(BigInt(2)) };
+  static factorize(pq: bigint) {
+    if (pq % 2n === 0n) {
+      return { p: 2n, q: pq / 2n };
     }
-    let y = BigInt.randBetween(BigInt(1), pq.minus(1));
-    const c = BigInt.randBetween(BigInt(1), pq.minus(1));
-    const m = BigInt.randBetween(BigInt(1), pq.minus(1));
+    let y = randBetweenBigInt(1n, pq - 1n);
+    const c = randBetweenBigInt(1n, pq - 1n);
+    const m = randBetweenBigInt(1n, pq - 1n);
 
-    let g = BigInt.one;
-    let r = BigInt.one;
-    let q = BigInt.one;
-    let x = BigInt.zero;
-    let ys = BigInt.zero;
-    let k;
+    let g = 1n;
+    let r = 1n;
+    let q = 1n;
+    let x = 0n;
+    let ys = 0n;
+    let k: bigint;
 
-    while (g.eq(BigInt.one)) {
+    while (g === 1n) {
       x = y;
-      for (let i = 0; BigInt(i).lesser(r); i++) {
-        y = modExp(y, BigInt(2), pq).add(c).remainder(pq);
+      for (let i = 0n; i < r; i++) {
+        y = (modExp(y, 2n, pq) + c) % pq;
       }
-      k = BigInt.zero;
+      k = 0n;
 
-      while (k.lesser(r) && g.eq(BigInt.one)) {
+      while (k < r && g === 1n) {
         ys = y;
-        const condition = BigInt.min(m, r.minus(k));
-        for (let i = 0; BigInt(i).lesser(condition); i++) {
-          y = modExp(y, BigInt(2), pq).add(c).remainder(pq);
-          q = q.multiply(x.minus(y).abs()).remainder(pq);
+        const condition = BigMath.min(m, r - k);
+        for (let i = 0n; i < condition; i++) {
+          y = (modExp(y, 2n, pq) + c) % pq;
+          q = (q * BigMath.abs(x - y)) % pq;
         }
         g = Factorizator.gcd(q, pq);
-        k = k.add(m);
+        k = k + m;
       }
 
-      r = r.multiply(2);
+      r = r * 2n;
     }
 
-    if (g.eq(pq)) {
+    if (g === pq) {
       while (true) {
-        ys = modExp(ys, BigInt(2), pq).add(c).remainder(pq);
-        g = Factorizator.gcd(x.minus(ys).abs(), pq);
+        ys = (modExp(ys, 2n, pq) + c) % pq;
+        g = Factorizator.gcd(BigMath.abs(x - ys), pq);
 
-        if (g.greater(1)) {
+        if (g > 1n) {
           break;
         }
       }
     }
     const p = g;
-    q = pq.divide(g);
+    q = pq / g;
     return p < q ? { p, q } : { p: q, q: p };
   }
 }

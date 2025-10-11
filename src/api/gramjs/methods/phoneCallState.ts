@@ -1,5 +1,3 @@
-import type bigInt from 'big-integer';
-import BigInt from 'big-integer';
 import { AuthKey } from '../../../lib/gramjs/crypto/AuthKey';
 import { Logger } from '../../../lib/gramjs/extensions';
 import {
@@ -20,13 +18,13 @@ class PhoneCallState {
 
   private seq = 0;
 
-  private gA?: bigInt.BigInteger;
+  private gA?: bigint;
 
-  private gB: any;
+  private gB?: bigint;
 
-  private p?: bigInt.BigInteger;
+  private p?: bigint;
 
-  private random?: bigInt.BigInteger;
+  private random?: bigint;
 
   private waitForState: Promise<void>;
 
@@ -55,8 +53,8 @@ class PhoneCallState {
   }
 
   acceptCall({ p, g, random }: DhConfig) {
-    const pLast = readBigIntFromBuffer(p, false);
-    const randomLast = readBigIntFromBuffer(random, false);
+    const pLast = readBigIntFromBuffer(Buffer.from(p), false);
+    const randomLast = readBigIntFromBuffer(Buffer.from(random), false);
 
     const gB = modExp(BigInt(g), randomLast, pLast);
     this.gB = gB;
@@ -77,7 +75,7 @@ class PhoneCallState {
       this.gA = readBigIntFromBuffer(Buffer.from(gAOrB), false);
     }
     const authKey = modExp(
-      !this.isOutgoing ? this.gA : this.gB,
+      (!this.isOutgoing ? this.gA : this.gB)!,
       this.random,
       this.p,
     );
@@ -125,14 +123,14 @@ class PhoneCallState {
 
 // https://github.com/TelegramV/App/blob/ead52320975362139cabad18cf8346f98c349a22/src/js/MTProto/Calls/Internal.js#L72
 function computeEmojiIndex(bytes: Uint8Array) {
-  return ((BigInt(bytes[0]).and(0x7F)).shiftLeft(56))
-    .or((BigInt(bytes[1]).shiftLeft(48)))
-    .or((BigInt(bytes[2]).shiftLeft(40)))
-    .or((BigInt(bytes[3]).shiftLeft(32)))
-    .or((BigInt(bytes[4]).shiftLeft(24)))
-    .or((BigInt(bytes[5]).shiftLeft(16)))
-    .or((BigInt(bytes[6]).shiftLeft(8)))
-    .or((BigInt(bytes[7])));
+  return ((BigInt(bytes[0]) & 0x7Fn) << 56n)
+    | ((BigInt(bytes[1]) << 48n))
+    | ((BigInt(bytes[2]) << 40n))
+    | ((BigInt(bytes[3]) << 32n))
+    | ((BigInt(bytes[4]) << 24n))
+    | ((BigInt(bytes[5]) << 16n))
+    | ((BigInt(bytes[6]) << 8n))
+    | ((BigInt(bytes[7])));
 }
 
 async function generateEmojiFingerprint(
@@ -144,7 +142,7 @@ async function generateEmojiFingerprint(
   const kPartSize = 8;
   for (let partOffset = 0; partOffset !== hash.byteLength; partOffset += kPartSize) {
     const value = computeEmojiIndex(hash.subarray(partOffset, partOffset + kPartSize));
-    const index = value.modPow(1, emojiCount).toJSNumber();
+    const index = Number(value % BigInt(emojiCount));
     const offset = emojiOffsets[index];
     const size = emojiOffsets[index + 1] - offset;
     result.push(String.fromCharCode(...emojiData.subarray(offset, offset + size)));

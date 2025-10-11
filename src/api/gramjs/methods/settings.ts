@@ -1,4 +1,3 @@
-import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { RPCError } from '../../../lib/gramjs/errors';
 
@@ -23,6 +22,7 @@ import {
   UNMUTE_TIMESTAMP,
 } from '../../../config';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { toJSNumber } from '../../../util/numbers';
 import { BLOCKED_LIST_LIMIT } from '../../../limits';
 import { buildAppConfig } from '../apiBuilders/appConfig';
 import { buildApiPhoto, buildPrivacyRules } from '../apiBuilders/common';
@@ -686,7 +686,7 @@ export async function fetchGlobalPrivacySettings() {
     shouldArchiveAndMuteNewNonContact: Boolean(result.archiveAndMuteNewNoncontactPeers),
     shouldHideReadMarks: Boolean(result.hideReadMarks),
     shouldNewNonContactPeersRequirePremium: Boolean(result.newNoncontactPeersRequirePremium),
-    nonContactPeersPaidStars: Number(result.noncontactPeersPaidStars),
+    nonContactPeersPaidStars: toJSNumber(result.noncontactPeersPaidStars),
     shouldDisplayGiftsButton: Boolean(result.displayGiftsButton),
     disallowedGifts: result.disallowedGifts && buildApiDisallowedGiftsSettings(result.disallowedGifts),
   };
@@ -726,7 +726,7 @@ export async function updateGlobalPrivacySettings({
     shouldArchiveAndMuteNewNonContact: Boolean(result.archiveAndMuteNewNoncontactPeers),
     shouldHideReadMarks: Boolean(result.hideReadMarks),
     shouldNewNonContactPeersRequirePremium: Boolean(result.newNoncontactPeersRequirePremium),
-    nonContactPeersPaidStars: Number(result.noncontactPeersPaidStars),
+    nonContactPeersPaidStars: toJSNumber(result.noncontactPeersPaidStars),
     shouldDisplayGiftsButton,
     disallowedGifts,
   };

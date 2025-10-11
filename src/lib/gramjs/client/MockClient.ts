@@ -1,10 +1,9 @@
-import BigInt from 'big-integer';
-
 import type { DownloadFileWithDcParams } from './downloadFile';
 import type { MockTypes } from './mockUtils/MockTypes';
 import type { SizeType } from './TelegramClient';
 
 import { GENERAL_TOPIC_ID } from '../../../config';
+import { toJSNumber } from '../../../util/numbers';
 import { Logger } from '../extensions';
 import { UpdateConnectionState } from '../network';
 import Api from '../tl/api';
@@ -195,7 +194,7 @@ class TelegramClient {
           about: 'lol',
           settings: new Api.PeerSettings({}),
           notifySettings: new Api.PeerNotifySettings({}),
-          id: BigInt(1),
+          id: 1n,
           commonChatsCount: 0,
         }),
         chats: [],
@@ -381,7 +380,7 @@ class TelegramClient {
         thumbSize: size ? size.type : '',
       }),
       {
-        fileSize: size ? size.size : doc.size.toJSNumber(),
+        fileSize: size ? size.size : toJSNumber(doc.size),
         progressCallback: args.progressCallback,
         start: args.start,
         end: args.end,

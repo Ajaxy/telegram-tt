@@ -115,7 +115,7 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
   const hasStaticThumb = thumbs?.some((thumb) => thumb.type === 's');
   const hasAnimatedThumb = thumbs?.some((thumb) => thumb.type === 'a');
   const hasVideoThumb = thumbs?.some((thumb) => thumb.type === 'v');
-  const thumbCustomEmojiId = thumbDocumentId && String(thumbDocumentId);
+  const thumbCustomEmojiId = thumbDocumentId !== undefined ? String(thumbDocumentId) : undefined;
 
   const hasThumbnail = hasStaticThumb || hasAnimatedThumb || hasVideoThumb || Boolean(thumbCustomEmojiId);
 

@@ -24,6 +24,7 @@ import type {
 
 import { numberToHexColor } from '../../../util/colors';
 import { pick } from '../../../util/iteratees';
+import { toJSNumber } from '../../../util/numbers';
 import { addDocumentToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
 import { buildApiMessageEntity, buildApiPhoto } from './common';
@@ -252,7 +253,7 @@ export function buildBotInlineMessage(
       description: sendMessage.description,
       photo: buildApiWebDocument(sendMessage.photo),
       currency: sendMessage.currency,
-      amount: sendMessage.totalAmount.toJSNumber(),
+      amount: toJSNumber(sendMessage.totalAmount),
     };
   }
 

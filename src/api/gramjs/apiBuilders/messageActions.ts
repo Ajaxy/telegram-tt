@@ -3,6 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import type { ApiPhoneCallDiscardReason } from '../../types';
 import type { ApiMessageAction } from '../../types/messageActions';
 
+import { toJSNumber } from '../../../util/numbers';
 import { buildApiBotApp } from './bots';
 import { buildApiFormattedText, buildApiPhoto } from './common';
 import { buildApiStarGift } from './gifts';
@@ -128,7 +129,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       isRecurringInit: recurringInit,
       isRecurringUsed: recurringUsed,
       currency,
-      totalAmount: totalAmount.toJSNumber(),
+      totalAmount: toJSNumber(totalAmount),
       invoiceSlug,
       subscriptionUntilDate,
     };
@@ -254,10 +255,10 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       mediaType: 'action',
       type: 'giftPremium',
       currency,
-      amount: amount.toJSNumber(),
+      amount: toJSNumber(amount),
       months,
       cryptoCurrency,
-      cryptoAmount: cryptoAmount?.toJSNumber(),
+      cryptoAmount: toJSNumber(cryptoAmount),
       message: message && buildApiFormattedText(message),
     };
   }
@@ -308,9 +309,9 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       months,
       slug,
       currency,
-      amount: amount?.toJSNumber(),
+      amount: toJSNumber(amount),
       cryptoCurrency,
-      cryptoAmount: cryptoAmount?.toJSNumber(),
+      cryptoAmount: toJSNumber(cryptoAmount),
       message: message && buildApiFormattedText(message),
     };
   }
@@ -319,7 +320,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
     return {
       mediaType: 'action',
       type: 'giveawayLaunch',
-      stars: stars?.toJSNumber(),
+      stars: toJSNumber(stars),
     };
   }
   if (action instanceof GramJs.MessageActionGiveawayResults) {
@@ -341,7 +342,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       type: 'paymentRefunded',
       peerId: getApiChatIdFromMtpPeer(peer),
       currency,
-      totalAmount: totalAmount.toJSNumber(),
+      totalAmount: toJSNumber(totalAmount),
     };
   }
   if (action instanceof GramJs.MessageActionGiftStars) {
@@ -352,10 +353,10 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       mediaType: 'action',
       type: 'giftStars',
       currency,
-      amount: amount.toJSNumber(),
-      stars: stars.toJSNumber(),
+      amount: toJSNumber(amount),
+      stars: toJSNumber(stars),
       cryptoCurrency,
-      cryptoAmount: cryptoAmount?.toJSNumber(),
+      cryptoAmount: toJSNumber(cryptoAmount),
       transactionId,
     };
   }
@@ -367,9 +368,9 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       mediaType: 'action',
       type: 'giftTon',
       currency,
-      amount: amount.toJSNumber(),
+      amount: toJSNumber(amount),
       cryptoCurrency,
-      cryptoAmount: cryptoAmount.toJSNumber(),
+      cryptoAmount: toJSNumber(cryptoAmount),
       transactionId,
     };
   }
@@ -381,7 +382,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       mediaType: 'action',
       type: 'prizeStars',
       isUnclaimed: unclaimed,
-      stars: stars.toJSNumber(),
+      stars: toJSNumber(stars),
       transactionId,
       boostPeerId: getApiChatIdFromMtpPeer(boostPeer),
       giveawayMsgId,
@@ -407,12 +408,12 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       canUpgrade,
       gift: starGift,
       message: message && buildApiFormattedText(message),
-      starsToConvert: convertStars?.toJSNumber(),
+      starsToConvert: toJSNumber(convertStars),
       upgradeMsgId,
-      alreadyPaidUpgradeStars: upgradeStars?.toJSNumber(),
+      alreadyPaidUpgradeStars: toJSNumber(upgradeStars),
       fromId: fromId && getApiChatIdFromMtpPeer(fromId),
       peerId: peer && getApiChatIdFromMtpPeer(peer),
-      savedId: savedId && buildApiPeerId(savedId, 'user'),
+      savedId: savedId !== undefined ? buildApiPeerId(savedId, 'user') : undefined,
     };
   }
   if (action instanceof GramJs.MessageActionStarGiftUnique) {
@@ -433,10 +434,10 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       isRefunded: refunded,
       gift: starGift,
       canExportAt,
-      transferStars: transferStars?.toJSNumber(),
+      transferStars: toJSNumber(transferStars),
       fromId: fromId && getApiChatIdFromMtpPeer(fromId),
       peerId: peer && getApiChatIdFromMtpPeer(peer),
-      savedId: savedId && buildApiPeerId(savedId, 'user'),
+      savedId: savedId !== undefined ? buildApiPeerId(savedId, 'user') : undefined,
       resaleAmount: resaleAmount ? buildApiCurrencyAmount(resaleAmount) : undefined,
     };
   }
@@ -448,7 +449,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       mediaType: 'action',
       type: 'paidMessagesPrice',
       isAllowedInChannel: broadcastMessagesAllowed,
-      stars: stars.toJSNumber(),
+      stars: toJSNumber(stars),
     };
   }
   if (action instanceof GramJs.MessageActionPaidMessagesRefunded) {
@@ -458,7 +459,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
     return {
       mediaType: 'action',
       type: 'paidMessagesRefunded',
-      stars: stars.toJSNumber(),
+      stars: toJSNumber(stars),
       count,
     };
   }

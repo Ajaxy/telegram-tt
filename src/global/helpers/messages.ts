@@ -28,7 +28,7 @@ import {
   VIDEO_STICKER_MIME_TYPE,
 } from '../../config';
 import { areDeepEqual } from '../../util/areDeepEqual';
-import { getCleanPeerId, isUserId } from '../../util/entities/ids';
+import { getRawPeerId, isUserId } from '../../util/entities/ids';
 import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
 import { isLocalMessageId } from '../../util/keys/messageKey';
 import { getServerTime } from '../../util/serverTime';
@@ -385,7 +385,7 @@ export function isUploadingFileSticker(attachment: ApiAttachment) {
 export function getMessageLink(peer: ApiPeer, topicId?: ThreadId, messageId?: number) {
   const chatUsername = getMainUsername(peer);
 
-  const normalizedId = getCleanPeerId(peer.id);
+  const normalizedId = getRawPeerId(peer.id).toString();
 
   const chatPart = chatUsername || `c/${normalizedId}`;
   const topicPart = topicId && topicId !== MAIN_THREAD_ID ? `/${topicId}` : '';

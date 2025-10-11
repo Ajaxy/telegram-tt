@@ -1,4 +1,3 @@
-import type BigInt from 'big-integer';
 
 import type { BinaryReader } from '../../extensions';
 
@@ -13,7 +12,7 @@ export default class RPCResult {
 
     private CONSTRUCTOR_ID: number;
 
-    private reqMsgId: BigInt.BigInteger;
+    private reqMsgId: bigint;
 
     private body?: Buffer;
 
@@ -22,7 +21,7 @@ export default class RPCResult {
     private classType: string;
 
     constructor(
-        reqMsgId: BigInt.BigInteger,
+        reqMsgId: bigint,
         body?: Buffer,
         error?: Api.RpcError,
     ) {

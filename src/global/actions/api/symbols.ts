@@ -787,7 +787,7 @@ addActionHandler('clearCustomEmojiForEmoji', (global): ActionReturnType => {
 });
 
 addActionHandler('loadFeaturedEmojiStickers', async (global): Promise<void> => {
-  const featuredStickers = await callApi('fetchFeaturedEmojiStickers');
+  const featuredStickers = await callApi('fetchFeaturedEmojiStickers', {});
   if (!featuredStickers) {
     return;
   }

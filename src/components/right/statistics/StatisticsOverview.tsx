@@ -9,6 +9,7 @@ import type {
 
 import buildClassName from '../../../util/buildClassName';
 import { formatFullDate } from '../../../util/dates/dateFormat';
+import { convertTonFromNanos } from '../../../util/formatCurrency';
 import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
 
 import useLang from '../../../hooks/useLang';
@@ -206,9 +207,21 @@ const StatisticsOverview: FC<OwnProps> = ({
         {isToncoin ? (
           <tr>
             <td className={styles.tableCell}>
-              {renderBalanceCell(balances?.availableBalance || 0, usdRate || 0, 'lng_channel_earn_available')}
-              {renderBalanceCell(balances?.currentBalance || 0, usdRate || 0, 'lng_channel_earn_reward')}
-              {renderBalanceCell(balances?.overallRevenue || 0, usdRate || 0, 'lng_channel_earn_total')}
+              {renderBalanceCell(
+                balances?.availableBalance ? convertTonFromNanos(balances.availableBalance.amount) : 0,
+                usdRate || 0,
+                'lng_channel_earn_available',
+              )}
+              {renderBalanceCell(
+                balances?.currentBalance ? convertTonFromNanos(balances.currentBalance.amount) : 0,
+                usdRate || 0,
+                'lng_channel_earn_reward',
+              )}
+              {renderBalanceCell(
+                balances?.overallRevenue ? convertTonFromNanos(balances.overallRevenue.amount) : 0,
+                usdRate || 0,
+                'lng_channel_earn_total',
+              )}
             </td>
           </tr>
         ) : schema.map((row) => (
