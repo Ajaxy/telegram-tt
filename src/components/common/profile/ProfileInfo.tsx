@@ -45,6 +45,7 @@ import buildStyle from '../../../util/buildStyle';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
+import { REM } from '../helpers/mediaDimensions.ts';
 import renderText from '../helpers/renderText.tsx';
 
 import { useVtn } from '../../../hooks/animations/useVtn';
@@ -104,9 +105,7 @@ const EMOJI_TOPIC_SIZE = 120;
 const LOAD_MORE_THRESHOLD = 3;
 const MAX_PHOTO_DASH_COUNT = 30;
 const STATUS_UPDATE_INTERVAL = 1000 * 60; // 1 min
-const PATTERN_COLOR = '#000000';
-const PATTERN_SIZE_FACTOR = 0.75;
-const PATTERN_OPACITY = 0.75;
+const PATTERN_Y_SHIFT = 8 * REM;
 
 const ProfileInfo = ({
   isExpanded,
@@ -493,10 +492,11 @@ const ProfileInfo = ({
         <RadialPatternBackground
           backgroundColors={profileColorSet.bgColors}
           patternIcon={backgroundEmoji}
-          patternColor={collectibleEmojiStatus?.patternColor || PATTERN_COLOR}
+          patternColor={collectibleEmojiStatus?.patternColor}
+          patternSize={16}
+          withLinearGradient={Boolean(!collectibleEmojiStatus && profileColorSet.bgColors[1])}
           className={styles.radialPatternBackground}
-          patternSize={PATTERN_SIZE_FACTOR}
-          patternOpacity={collectibleEmojiStatus ? 1 : PATTERN_OPACITY}
+          yPosition={PATTERN_Y_SHIFT}
         />
       )}
       {pinnedGifts && (

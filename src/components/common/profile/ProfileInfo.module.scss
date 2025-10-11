@@ -386,14 +386,9 @@
 
 .radialPatternBackground {
   pointer-events: none;
-
-  // Hacky way to keep background stable during resizes
   position: absolute;
-  top: 8rem;
-
+  inset: 0;
   aspect-ratio: 1 / 1;
-  width: 140%;
-  margin-top: -70%;
 }
 
 .standaloneAvatar {

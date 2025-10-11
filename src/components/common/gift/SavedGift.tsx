@@ -140,6 +140,9 @@ const SavedGift = ({
         backgroundColors={backdropColors}
         patternColor={patternColor}
         patternIcon={pattern.sticker}
+        patternSize={14}
+        ringsCount={1}
+        ovalFactor={1}
       />
     );
   }, [backdrop, pattern]);

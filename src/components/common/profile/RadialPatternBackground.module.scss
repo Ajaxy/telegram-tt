@@ -1,4 +1,6 @@
 .root {
+  --_y-shift: 50%;
+
   overflow: hidden;
   border-radius: inherit;
 
@@ -9,9 +11,15 @@
     position: absolute;
     inset: 0;
 
-    background-image:
-      radial-gradient(circle closest-side, #ffffff32 3rem, #ffffff00 7rem),
-      radial-gradient(closest-side, var(--_bg-1), var(--_bg-2));
+    background-image: radial-gradient(closest-side at 50% var(--_y-shift), var(--_bg-radial-1) 25%, var(--_bg-radial-2) 125%);
+  }
+
+  &.withLinearGradient {
+    &::before {
+      background-image:
+        radial-gradient(closest-side at 50% var(--_y-shift), var(--_bg-radial-1) 25%, var(--_bg-radial-2) 125%),
+        linear-gradient(var(--_bg-linear-1), var(--_bg-linear-2));
+    }
   }
 }
 
