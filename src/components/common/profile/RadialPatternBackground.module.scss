@@ -11,14 +11,14 @@
     position: absolute;
     inset: 0;
 
-    background-image: radial-gradient(closest-side at 50% var(--_y-shift), var(--_bg-radial-1) 25%, var(--_bg-radial-2) 125%);
+    background-image: radial-gradient(closest-side at 50% var(--_y-shift), var(--_bg-light) 25%, var(--_bg-dark) 125%);
   }
 
   &.withLinearGradient {
     &::before {
       background-image:
-        radial-gradient(closest-side at 50% var(--_y-shift), var(--_bg-radial-1) 25%, var(--_bg-radial-2) 125%),
-        linear-gradient(var(--_bg-linear-1), var(--_bg-linear-2));
+        radial-gradient(circle at 50% var(--_y-shift), #ffffff44, #ffffff00 9.5rem),
+        linear-gradient(var(--_bg-light), var(--_bg-dark));
     }
   }
 }

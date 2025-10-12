@@ -33,9 +33,8 @@ type OwnProps = {
 const BASE_RING_ITEM_COUNT = 8;
 const RING_INCREMENT = 0.5;
 const CENTER_EMPTINESS = 0.1;
-const MAX_RADIUS = 0.43;
+const MAX_RADIUS = 0.42;
 const MIN_SIZE = 4 * REM;
-const PATTERN_OPACITY = 0.9;
 
 const DEFAULT_PATTERN_SIZE = 20;
 const DEFAULT_RINGS_COUNT = 3;
@@ -128,51 +127,41 @@ const RadialPatternBackground = ({
 
     ctx.clearRect(0, 0, width, height);
 
-    const patternImage = drawPattern(
-      width, height, centerX, centerY, backgroundColors[1] ?? backgroundColors[0],
-    );
-    ctx.drawImage(patternImage, 0, 0, width, height);
-
-    const radialGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, width / 2);
-    radialGradient.addColorStop(0.75, 'rgb(255 255 255 / 0)');
-    radialGradient.addColorStop(1, 'rgb(255 255 255 / 0.75)');
-
-    // Alpha mask
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = radialGradient;
-    ctx.fillRect(0, 0, width, height);
-  });
-
-  const drawPattern = useLastCallback((
-    width: number, height: number, centerX: number, centerY: number, color: string,
-  ) => {
-    const canvas = new OffscreenCanvas(width, height);
-    const ctx = canvas.getContext('2d')!;
-
-    ctx.globalAlpha = PATTERN_OPACITY;
-
     patternPositions.forEach(({
       x, y, sizeFactor,
     }) => {
       const renderX = x * Math.max(width, MIN_SIZE * dpr) + centerX;
       const renderY = yPosition !== undefined ? y * Math.max(width, MIN_SIZE * dpr) + centerY
         : y * Math.max(height, MIN_SIZE * dpr) + centerY;
-
       const size = patternSize * dpr * sizeFactor;
 
-      ctx.drawImage(emojiImage!, renderX - size / 2, renderY - size / 2, size, size);
+      ctx.drawImage(emojiImage, renderX - size / 2, renderY - size / 2, size, size);
     });
 
-    ctx.fillStyle = adjustBrightness(color, -0.075);
+    ctx.fillStyle = adjustBrightness(backgroundColors[1] ?? backgroundColors[0], -0.075);
     ctx.globalCompositeOperation = 'source-in';
     ctx.fillRect(0, 0, width, height);
 
-    return canvas;
+    const radialGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, width / 2);
+    radialGradient.addColorStop(0.75, 'rgb(255 255 255 / 0)');
+    radialGradient.addColorStop(1, 'rgb(255 255 255 / 0.75)');
+
+    // Scale around the gradient center
+    ctx.translate(centerX, centerY);
+    ctx.scale(1, 1 / ovalFactor);
+    ctx.translate(-centerX, -centerY);
+
+    // Alpha mask
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = radialGradient;
+    // The higher the ovalFactor, the more we need to extend vertically
+    const fillHeight = height * ovalFactor;
+    ctx.fillRect(0, -fillHeight, width, fillHeight * 2);
   });
 
   useEffect(() => {
     draw();
-  }, [emojiImage, patternColor, patternPositions, yPosition]);
+  }, [emojiImage, patternColor, patternPositions, yPosition, ovalFactor]);
 
   useLayoutEffect(() => {
     const { width, height } = getContainerSize();
@@ -194,7 +183,8 @@ const RadialPatternBackground = ({
       ref={containerRef}
       className={buildClassName(styles.root, withLinearGradient && styles.withLinearGradient, className)}
       style={buildStyle(
-        ...buildGradients(backgroundColors, withLinearGradient),
+        `--_bg-light: ${backgroundColors[0]}`,
+        `--_bg-dark: ${backgroundColors[1] ?? backgroundColors[0]}`,
         yPosition !== undefined && `--_y-shift: ${yPosition}px`,
       )}
     >
@@ -208,22 +198,6 @@ const RadialPatternBackground = ({
 };
 
 export default memo(RadialPatternBackground);
-
-function buildGradients(colors: string[], withLinearGradient = false) {
-  if (withLinearGradient) {
-    return [
-      `--_bg-linear-1: ${colors[0]}`,
-      `--_bg-linear-2: ${colors[1]}`,
-      `--_bg-radial-1: #ffffff33`,
-      `--_bg-radial-2: #ffffff00`,
-    ];
-  }
-
-  return [
-    `--_bg-radial-1: ${colors[1] ? colors[0] : adjustBrightness(colors[0], 0.2)}`,
-    `--_bg-radial-2: ${colors[1] ?? colors[0]}`,
-  ];
-}
 
 function adjustBrightness(hex: string, delta: number) {
   const factor = 1 + delta;
