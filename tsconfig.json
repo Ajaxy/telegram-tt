@@ -21,7 +21,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "incremental": true,
-    "tsBuildInfoFile": ".cache/tsbuildinfo/tsconfig.tsbuildinfo",
+    "tsBuildInfoFile": ".cache/.tsconfig.tsbuildinfo",
     "noEmit": true,
     "jsx": "react-jsx",
     "jsxImportSource": "@teact",
