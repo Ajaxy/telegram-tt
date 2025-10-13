@@ -13,13 +13,15 @@
     "build:staging": "cross-env APP_ENV=staging npm run build:dev",
     "build:mocked": "cross-env APP_ENV=test APP_MOCKED_CLIENT=1 npm run build:dev",
     "build:production": "webpack && bash ./deploy/copy_to_dist.sh",
-    "web:release:production": "npm i && npm run build:production && git add -A && git commit -a -m '[Build]' --no-verify && git push",
+    "web:release:production": "npm ci --no-audit --no-fund && npm run build:production && git add -A && git commit -a -m '[Build]' --no-verify && git push",
+    "start": "npm run dev",
+    "preview": "serve -l 1235 dist",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "telegraph:update_changelog": "node ./dev/telegraphChangelog.js",
-    "check": "tsc && stylelint \"**/*.{css,scss}\" && eslint",
-    "check:fix": "stylelint \"**/*.{css,scss}\" --fix && eslint --fix",
+    "check": "tsc && stylelint \"**/*.{css,scss}\" --cache --cache-location .cache/stylelint/.stylelintcache && eslint --cache --cache-location .cache/eslint",
+    "check:fix": "stylelint \"**/*.{css,scss}\" --fix --cache --cache-location .cache/stylelint/.stylelintcache && eslint --fix --cache --cache-location .cache/eslint",
     "tl:rehash": "node ./dev/tlHash.js",
     "gramjs:tl": "tsx ./src/lib/gramjs/tl/generateModules.ts",
     "lang:ts": "tsx ./dev/generateLangTypes.js",
@@ -153,5 +155,6 @@
   ],
   "browserslist-config-baseline": {
     "logConfigToConsole": false
-  }
+  },
+  "packageManager": "pnpm@8.15.9+sha512.499434c9d8fdd1a2794ebf4552b3b25c0a633abcee5bb15e7b5de90f32f47b513aca98cd5cfd001c31f0db454bc3804edccd578501e4ca293a6816166bbd9f81"
 }
