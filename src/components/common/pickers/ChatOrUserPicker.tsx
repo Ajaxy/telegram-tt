@@ -244,7 +244,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   function renderTopicList() {
     return (
       <>
-        <div className="modal-header" dir={oldLang.isRtl ? 'rtl' : undefined}>
+        <div className="modal-header modal-header-condensed" dir={oldLang.isRtl ? 'rtl' : undefined}>
           <Button round color="translucent" size="smaller" ariaLabel={oldLang('Back')} onClick={handleHeaderBackClick}>
             <Icon name="arrow-left" />
           </Button>
@@ -291,7 +291,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   function renderChatList() {
     return (
       <>
-        <div className="modal-header" dir={oldLang.isRtl ? 'rtl' : undefined}>
+        <div className="modal-header modal-header-condensed" dir={oldLang.isRtl ? 'rtl' : undefined}>
           <Button
             round
             color="translucent"
@@ -335,9 +335,9 @@ const ChatOrUserPicker: FC<OwnProps> = ({
     <Modal
       isOpen={isOpen}
       className={buildClassName('ChatOrUserPicker', className)}
+      isLowStackPriority={isLowStackPriority}
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
-      isLowStackPriority={isLowStackPriority}
     >
       <Transition activeKey={activeKey} name="slideFade" slideClassName="ChatOrUserPicker_slide">
         {() => {

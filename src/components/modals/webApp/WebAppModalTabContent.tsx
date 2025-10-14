@@ -86,8 +86,6 @@ type StateProps = {
   botAppPermissions?: BotAppPermissions;
 };
 
-const NBSP = '\u00A0';
-
 const MAIN_BUTTON_ANIMATION_TIME = 250;
 const ANIMATION_WAIT = 400;
 const COLLAPSING_WAIT = 350;
@@ -1111,12 +1109,12 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       {popupParameters && (
         <Modal
           isOpen={Boolean(popupParameters)}
-          title={popupParameters.title || NBSP}
-          onClose={handleAppPopupModalClose}
-          hasCloseButton
+          title={popupParameters.title}
           className={
             buildClassName(styles.webAppPopup, !popupParameters.title?.trim().length && styles.withoutTitle)
           }
+          hasAbsoluteCloseButton
+          onClose={handleAppPopupModalClose}
         >
           {popupParameters.message}
           <div className="dialog-buttons mt-2">

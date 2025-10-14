@@ -32,7 +32,6 @@ const PickerModal = ({
 
   return (
     <Modal
-
       {...modalProps}
       isSlim
       className={buildClassName(
@@ -42,6 +41,7 @@ const PickerModal = ({
       )}
       contentClassName={buildClassName(styles.content, modalProps.contentClassName)}
       headerClassName={buildClassName(styles.header, modalProps.headerClassName)}
+      isCondensedHeader
     >
       {modalProps.children}
       {hasButton && (

@@ -1,13 +1,9 @@
-import type { FC } from '../../../lib/teact/teact';
 import type React from '../../../lib/teact/teact';
-import {
-  memo, useEffect, useMemo, useRef, useState,
-} from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import { memo, useEffect, useMemo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type {
-  ApiAttachment, ApiChatMember, ApiMessage, ApiSticker,
-} from '../../../api/types';
+import type { ApiAttachment, ApiChatMember, ApiMessage, ApiSticker } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 import type { MessageListType, ThreadId } from '../../../types';
 import type { Signal } from '../../../util/signals';
@@ -544,7 +540,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         {notEditingFile && !isInAlbum
           && (
             <DropdownMenu
-              className="attachmeneditingMessaget-modal-more-menu with-menu-transitions"
+              className="with-menu-transitions"
               trigger={MoreMenuButton}
               positionX="right"
             >
@@ -623,17 +619,18 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   }
 
   const isBottomDividerShown = !areAttachmentsScrolledToBottom || !isCaptionNotScrolled;
-  const buttonSendCaption = paidMessagesStars ? formatStarsAsIcon(lang,
+  const buttonSendCaption = paidMessagesStars ? formatStarsAsIcon(
+    lang,
     attachmentsLength * paidMessagesStars,
     {
       className: styles.sendButtonStar,
       asFont: true,
-    }) : oldLang('Send');
+    },
+  ) : oldLang('Send');
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClear}
       header={renderHeader()}
       className={buildClassName(
         styles.root,
@@ -643,8 +640,10 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         isSymbolMenuOpen && styles.symbolMenuOpen,
         forceDarkTheme && 'component-theme-dark',
       )}
+      hasAbsoluteCloseButton={Boolean(renderingAttachments)}
       noBackdropClose
       isLowStackPriority
+      onClose={onClear}
     >
       <div
         className={styles.dropTarget}
