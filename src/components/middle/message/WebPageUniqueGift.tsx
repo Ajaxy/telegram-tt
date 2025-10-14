@@ -49,8 +49,10 @@ const WebPageUniqueGift = ({
         <RadialPatternBackground
           className={styles.background}
           backgroundColors={backgroundColors}
-          patternColor={backdrop!.patternColor}
           patternIcon={pattern!.sticker}
+          centerEmptiness={0.15}
+          ringsCount={2}
+          ovalFactor={1.2}
         />
       </div>
       <div ref={stickerRef} className={styles.stickerWrapper}>

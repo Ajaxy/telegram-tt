@@ -1,5 +1,5 @@
 import { preloadImage } from './files';
-import { lerp } from './math.ts';
+import { clamp, lerp } from './math.ts';
 
 const LUMA_THRESHOLD = 128;
 
@@ -271,4 +271,15 @@ export function lerpRgbaObj(start: Rgba, end: Rgba, interpolationRatio: number):
     : undefined;
 
   return { r, g, b, a };
+}
+
+export function adjustHsv(hex: string, satDelta: number, valDelta: number) {
+  const hsva = rgba2hsva(hex2rgba(hex));
+  const [h, , , a] = hsva;
+  let [, s, v] = hsva;
+
+  if (s > 0.1 && s < 0.9) s = clamp(s + satDelta, 0, 1);
+  v = clamp(v + valDelta, 0, 1);
+
+  return rgba2hex(hsva2rgba([h, s, v, a]));
 }

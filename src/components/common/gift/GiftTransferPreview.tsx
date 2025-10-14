@@ -38,7 +38,6 @@ const GiftTransferPreview = ({
         <RadialPatternBackground
           className={styles.backdrop}
           backgroundColors={[giftAttributes.backdrop!.centerColor, giftAttributes.backdrop!.edgeColor]}
-          patternColor={giftAttributes.backdrop?.patternColor}
           patternIcon={giftAttributes.pattern?.sticker}
         />
         <AnimatedIconFromSticker

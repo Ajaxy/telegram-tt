@@ -492,7 +492,6 @@ const ProfileInfo = ({
         <RadialPatternBackground
           backgroundColors={profileColorSet.bgColors}
           patternIcon={backgroundEmoji}
-          patternColor={collectibleEmojiStatus?.patternColor}
           patternSize={16}
           withLinearGradient={!collectibleEmojiStatus}
           className={styles.radialPatternBackground}

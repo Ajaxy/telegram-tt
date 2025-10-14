@@ -512,7 +512,6 @@ const GiftResaleFilters: FC<StateProps & OwnProps> = ({
               <RadialPatternBackground
                 className={styles.backdrop}
                 backgroundColors={[backdrop.centerColor, backdrop.edgeColor]}
-                patternColor={backdrop.patternColor}
               />
               <div className={styles.backdropAttributeMenuItemText}>
                 {backdrop.name}

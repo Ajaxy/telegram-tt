@@ -126,13 +126,11 @@ function GiftItemStar({
     }
 
     const backdropColors = [backdrop.centerColor, backdrop.edgeColor];
-    const patternColor = backdrop.patternColor;
 
     return (
       <RadialPatternBackground
         className={styles.radialPattern}
         backgroundColors={backdropColors}
-        patternColor={patternColor}
         patternIcon={pattern.sticker}
       />
     );

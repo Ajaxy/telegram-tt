@@ -97,7 +97,6 @@ const StarGiftAction = ({
         <RadialPatternBackground
           className={styles.uniqueBackground}
           backgroundColors={backgroundColors}
-          patternColor={backdrop.patternColor}
           patternIcon={pattern.sticker}
           patternSize={14}
           yPosition={9.5 * REM}

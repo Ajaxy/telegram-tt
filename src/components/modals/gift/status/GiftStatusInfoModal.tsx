@@ -67,13 +67,11 @@ const GiftStatusInfoModal = ({
     if (!emojiStatus || !isOpen) return undefined;
 
     const backdropColors = [emojiStatus.centerColor, emojiStatus.edgeColor];
-    const patternColor = emojiStatus.patternColor;
 
     return (
       <RadialPatternBackground
         className={styles.radialPattern}
         backgroundColors={backdropColors}
-        patternColor={patternColor}
         patternIcon={patternIcon.customEmoji}
       />
     );

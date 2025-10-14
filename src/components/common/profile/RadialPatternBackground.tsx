@@ -6,7 +6,7 @@ import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getStickerMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
-import { hex2rgba, rgba2hex } from '../../../util/colors.ts';
+import { adjustHsv, getColorLuma, hex2rgb } from '../../../util/colors.ts';
 import { preloadImage } from '../../../util/files';
 import { REM } from '../helpers/mediaDimensions';
 
@@ -20,8 +20,9 @@ import styles from './RadialPatternBackground.module.scss';
 type OwnProps = {
   backgroundColors: string[];
   patternIcon?: ApiSticker;
-  patternColor?: string;
+  patternColor?: number;
   patternSize?: number;
+  centerEmptiness?: number;
   ringsCount?: number;
   ovalFactor?: number;
   withLinearGradient?: boolean;
@@ -32,9 +33,10 @@ type OwnProps = {
 
 const BASE_RING_ITEM_COUNT = 8;
 const RING_INCREMENT = 0.5;
-const CENTER_EMPTINESS = 0.1;
+const DEFAULT_CENTER_EMPTINESS = 0.1;
 const MAX_RADIUS = 0.42;
 const MIN_SIZE = 4 * REM;
+const DARK_LUMA_THRESHOLD = 255 * 0.2;
 
 const DEFAULT_PATTERN_SIZE = 20;
 const DEFAULT_RINGS_COUNT = 3;
@@ -43,8 +45,8 @@ const DEFAULT_OVAL_FACTOR = 1.4;
 const RadialPatternBackground = ({
   backgroundColors,
   patternIcon,
-  patternColor,
   patternSize = DEFAULT_PATTERN_SIZE,
+  centerEmptiness = DEFAULT_CENTER_EMPTINESS,
   ringsCount = DEFAULT_RINGS_COUNT,
   ovalFactor = DEFAULT_OVAL_FACTOR,
   withLinearGradient,
@@ -74,7 +76,7 @@ const RadialPatternBackground = ({
     for (let ring = 1; ring <= ringsCount; ring++) {
       const ringItemCount = Math.floor(BASE_RING_ITEM_COUNT * (1 + (ring - 1) * RING_INCREMENT));
       const ringProgress = ring / ringsCount;
-      const ringRadius = CENTER_EMPTINESS + (MAX_RADIUS - CENTER_EMPTINESS) * ringProgress;
+      const ringRadius = centerEmptiness + (MAX_RADIUS - centerEmptiness) * ringProgress;
       const angleShift = ring % 2 === 0 ? Math.PI / ringItemCount : 0;
 
       for (let i = 0; i < ringItemCount; i++) {
@@ -96,7 +98,7 @@ const RadialPatternBackground = ({
       }
     }
     return coordinates;
-  }, [clearBottomSector, ovalFactor, ringsCount]);
+  }, [centerEmptiness, clearBottomSector, ovalFactor, ringsCount]);
 
   useResizeObserver(containerRef, (entry) => {
     setContainerSize({
@@ -138,13 +140,15 @@ const RadialPatternBackground = ({
       ctx.drawImage(emojiImage, renderX - size / 2, renderY - size / 2, size, size);
     });
 
-    ctx.fillStyle = adjustBrightness(backgroundColors[1] ?? backgroundColors[0], -0.075);
+    const patternColor = backgroundColors[1] ?? backgroundColors[0];
+    const isDark = getColorLuma(hex2rgb(patternColor)) < DARK_LUMA_THRESHOLD;
+    ctx.fillStyle = adjustHsv(patternColor, 0.5, isDark ? 0.28 : -0.28);
     ctx.globalCompositeOperation = 'source-in';
     ctx.fillRect(0, 0, width, height);
 
     const radialGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, width / 2);
-    radialGradient.addColorStop(0.75, 'rgb(255 255 255 / 0)');
-    radialGradient.addColorStop(1, 'rgb(255 255 255 / 0.75)');
+    radialGradient.addColorStop(0, 'rgb(255 255 255 / 0.4)');
+    radialGradient.addColorStop(1, 'rgb(255 255 255 / 0.9)');
 
     // Scale around the gradient center
     ctx.translate(centerX, centerY);
@@ -161,7 +165,7 @@ const RadialPatternBackground = ({
 
   useEffect(() => {
     draw();
-  }, [emojiImage, patternColor, patternPositions, yPosition, ovalFactor]);
+  }, [emojiImage, patternPositions, yPosition, ovalFactor]);
 
   useLayoutEffect(() => {
     const { width, height } = getContainerSize();
@@ -198,15 +202,3 @@ const RadialPatternBackground = ({
 };
 
 export default memo(RadialPatternBackground);
-
-function adjustBrightness(hex: string, delta: number) {
-  const factor = 1 + delta;
-  const [r, g, b, a] = hex2rgba(hex);
-
-  return rgba2hex([
-    Math.min(255, Math.round(r * factor)),
-    Math.min(255, Math.round(g * factor)),
-    Math.min(255, Math.round(b * factor)),
-    a ?? 255,
-  ]);
-}

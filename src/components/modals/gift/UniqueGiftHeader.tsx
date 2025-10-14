@@ -66,13 +66,11 @@ const UniqueGiftHeader = ({
 
   const radialPatternBackdrop = useMemo(() => {
     const backdropColors = [backdropAttribute.centerColor, backdropAttribute.edgeColor];
-    const patternColor = backdropAttribute.patternColor;
 
     return (
       <RadialPatternBackground
         className={styles.radialPattern}
         backgroundColors={backdropColors}
-        patternColor={patternColor}
         patternIcon={patternAttribute.sticker}
       />
     );
