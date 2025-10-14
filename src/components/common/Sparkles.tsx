@@ -1,7 +1,9 @@
-import { memo } from '../../lib/teact/teact';
+import { memo, useEffect, useRef } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
+
+import { getIsInBackground } from '../../hooks/window/useBackgroundMode.ts';
 
 import styles from './Sparkles.module.scss';
 
@@ -89,9 +91,19 @@ const Sparkles = ({
   noAnimation,
   ...presetSettings
 }: OwnProps) => {
+  const ref = useRef<HTMLDivElement>();
+
+  const getIsInBackgroundLocal = getIsInBackground;
+  useEffect(() => {
+    (Array.from(ref.current!.children) as HTMLDivElement[]).forEach((sparkleEL) => {
+      sparkleEL.style.animationPlayState = getIsInBackgroundLocal() ? 'paused' : 'running';
+    });
+  }, [getIsInBackgroundLocal]);
+
   if (presetSettings.preset === 'button') {
     return (
       <div
+        ref={ref}
         className={buildClassName(styles.root, styles.button, className, noAnimation && styles.noAnimation)}
         style={style}
       >
@@ -121,7 +133,7 @@ const Sparkles = ({
 
   if (presetSettings.preset === 'progress') {
     return (
-      <div className={buildClassName(styles.root, styles.progress, className)} style={style}>
+      <div ref={ref} className={buildClassName(styles.root, styles.progress, className)} style={style}>
         {PROGRESS_POSITIONS.map((position) => {
           return (
             <div
