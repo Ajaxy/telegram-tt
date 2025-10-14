@@ -3,6 +3,7 @@
 
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
   align-items: center;
 
   width: 100%;
@@ -32,8 +33,10 @@
 .subtitleBadge {
   margin-top: 0.25rem;
   padding: 0.75rem;
-  padding-block: 0.125rem;
+  padding-block: 0.25rem;
   border-radius: 1rem;
+
+  line-height: 1rem;
 
   background-color: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(50px);
