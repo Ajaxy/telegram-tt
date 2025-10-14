@@ -6,8 +6,8 @@ import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getStickerMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
+import { hex2rgba, rgba2hex } from '../../../util/colors.ts';
 import { preloadImage } from '../../../util/files';
-import { hexToRgb } from '../../../util/switchTheme.ts';
 import { REM } from '../helpers/mediaDimensions';
 
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -201,17 +201,12 @@ export default memo(RadialPatternBackground);
 
 function adjustBrightness(hex: string, delta: number) {
   const factor = 1 + delta;
-  const rgba = hexToRgb(hex);
-  const darkenedRgba = [
-    Math.min(255, Math.round(rgba.r * factor)),
-    Math.min(Math.round(rgba.g * factor)),
-    Math.min(Math.round(rgba.b * factor)),
-    rgba.a ?? 1,
-  ] as const;
+  const [r, g, b, a] = hex2rgba(hex);
 
-  return rgbaToHex(...darkenedRgba);
-}
-
-function rgbaToHex(r: number, g: number, b: number, a: number) {
-  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}${Math.round(a * 255).toString(16)}`;
+  return rgba2hex([
+    Math.min(255, Math.round(r * factor)),
+    Math.min(255, Math.round(g * factor)),
+    Math.min(255, Math.round(b * factor)),
+    a ?? 255,
+  ]);
 }

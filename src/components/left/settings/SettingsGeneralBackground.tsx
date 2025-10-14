@@ -99,10 +99,12 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
     const currentWallpaper = loadedWallpapers && loadedWallpapers.find((wallpaper) => wallpaper.slug === slug);
     if (currentWallpaper?.document.thumbnail) {
       getAverageColor(currentWallpaper.document.thumbnail.dataUri)
-        .then((color) => {
-          const patternColor = getPatternColor(color);
-          const rgbColor = `#${rgb2hex(color)}`;
-          setThemeSettings({ theme: themeRef.current!, backgroundColor: rgbColor, patternColor });
+        .then((averageColor) => {
+          setThemeSettings({
+            theme: themeRef.current!,
+            backgroundColor: rgb2hex(averageColor),
+            patternColor: getPatternColor(averageColor),
+          });
         });
     }
   }, [loadedWallpapers, setThemeSettings]);

@@ -1,32 +1,57 @@
-/* eslint-disable prefer-const */
-
 import { preloadImage } from './files';
+import { lerp } from './math.ts';
 
 const LUMA_THRESHOLD = 128;
+
+type Number3 = [number, number, number];
+type Number4 = [number, number, number, number];
+type Rgba = {
+  r: number;
+  g: number;
+  b: number;
+  a?: number;
+};
+
+function clearHex(hex: string) {
+  return hex.length % 2 === 0 ? hex : hex.slice(1);
+}
 
 /**
  * HEX > RGB
  * input: 'xxxxxx' (ex. 'ed15fa') case-insensitive
  * output: [r, g, b] ([0-255, 0-255, 0-255])
  */
-export function hex2rgb(param: string): [number, number, number] {
+export function hex2rgb(hex: string): Number3 {
+  const cleanHex = clearHex(hex);
+
   return [
-    parseInt(param.substring(0, 2), 16),
-    parseInt(param.substring(2, 4), 16),
-    parseInt(param.substring(4, 6), 16),
+    parseInt(cleanHex.substring(0, 2), 16),
+    parseInt(cleanHex.substring(2, 4), 16),
+    parseInt(cleanHex.substring(4, 6), 16),
   ];
 }
 
-/**
- * RGB > HEX
- * input: [r, g, b] ([0-255, 0-255, 0-255])
- * output: 'xxxxxx' (ex. 'ff0000')
- */
-export function rgb2hex(param: [number, number, number]) {
-  const p0 = param[0].toString(16);
-  const p1 = param[1].toString(16);
-  const p2 = param[2].toString(16);
-  return (p0.length === 1 ? '0' + p0 : p0) + (p1.length === 1 ? '0' + p1 : p1) + (p2.length === 1 ? '0' + p2 : p2);
+export function hex2rgba(hex: string): Number4 {
+  const cleanHex = clearHex(hex);
+
+  return [
+    ...hex2rgb(cleanHex),
+    cleanHex.length === 8 ? parseInt(cleanHex.substring(6, 8), 16) : 255,
+  ];
+}
+
+export function hex2rgbaObj(hex: string): Rgba {
+  const [r, g, b, a] = hex2rgba(hex);
+
+  return { r, g, b, a };
+}
+
+export function rgb2hex([r, g, b]: Number3) {
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+export function rgba2hex([r, g, b, a]: Number4) {
+  return `${rgb2hex([r, g, b])}${a.toString(16)}`;
 }
 
 /**
@@ -40,16 +65,16 @@ export function rgb2hex(param: [number, number, number]) {
  * @param   Number  b       The blue color value
  * @return  Array           The HSV representation
  */
-export function rgb2hsb([r, g, b]: [number, number, number]): [number, number, number] {
+export function rgb2hsv([r, g, b]: Number3): Number3 {
   r /= 255;
   g /= 255;
   b /= 255;
 
-  let max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h!: number, s: number, v: number = max;
-
-  let d = max - min;
-  s = max === 0 ? 0 : d / max;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const d = max - min;
+  let h!: number;
+  const s: number = max === 0 ? 0 : d / max;
+  const v: number = max;
 
   if (max === min) {
     h = 0; // achromatic
@@ -72,6 +97,10 @@ export function rgb2hsb([r, g, b]: [number, number, number]): [number, number, n
   return [h, s, v];
 }
 
+export function rgba2hsva([r, g, b, a]: Number4): Number4 {
+  return [...rgb2hsv([r, g, b]), a];
+}
+
 /**
  * Converts an HSV color value to RGB. Conversion formula
  * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
@@ -83,14 +112,14 @@ export function rgb2hsb([r, g, b]: [number, number, number]): [number, number, n
  * @param   Number  v       The value
  * @return  Array           The RGB representation
  */
-export function hsb2rgb([h, s, v]: [number, number, number]): [number, number, number] {
+export function hsv2rgb([h, s, v]: Number3): Number3 {
   let r!: number, g!: number, b!: number;
 
-  let i = Math.floor(h * 6);
-  let f = h * 6 - i;
-  let p = v * (1 - s);
-  let q = v * (1 - f * s);
-  let t = v * (1 - (1 - f) * s);
+  const i = Math.floor(h * 6);
+  const f = h * 6 - i;
+  const p = v * (1 - s);
+  const q = v * (1 - f * s);
+  const t = v * (1 - (1 - f) * s);
 
   switch (i % 6) {
     case 0:
@@ -132,27 +161,28 @@ export function hsb2rgb([h, s, v]: [number, number, number]): [number, number, n
   ];
 }
 
-export async function getAverageColor(url: string): Promise<[number, number, number]> {
+export function hsva2rgba([h, s, v, a]: Number4): Number4 {
+  return [...hsv2rgb([h, s, v]), a];
+}
+
+export async function getAverageColor(url: string): Promise<Number3> {
   // Only visit every 5 pixels
   const blockSize = 5;
-  const defaultRGB: [number, number, number] = [0, 0, 0];
+  const black: Number3 = [0, 0, 0];
   let data;
-  let width;
-  let height;
   let i = -4;
-  let length;
-  let rgb: [number, number, number] = [0, 0, 0];
+  const rgb: Number3 = [0, 0, 0];
   let count = 0;
 
   const canvas = document.createElement('canvas');
   const context = canvas.getContext && canvas.getContext('2d');
   if (!context) {
-    return defaultRGB;
+    return black;
   }
 
   const image = await preloadImage(url);
-  height = image.naturalHeight || image.offsetHeight || image.height;
-  width = image.naturalWidth || image.offsetWidth || image.width;
+  const height = image.naturalHeight || image.offsetHeight || image.height;
+  const width = image.naturalWidth || image.offsetWidth || image.width;
   canvas.height = height;
   canvas.width = width;
 
@@ -161,10 +191,10 @@ export async function getAverageColor(url: string): Promise<[number, number, num
   try {
     data = context.getImageData(0, 0, width, height);
   } catch (e) {
-    return defaultRGB;
+    return black;
   }
 
-  length = data.data.length;
+  const length = data.data.length;
 
   while ((i += blockSize * 4) < length) {
     if (data.data[i + 3] === 0) continue; // Ignore fully transparent pixels
@@ -181,50 +211,64 @@ export async function getAverageColor(url: string): Promise<[number, number, num
   return rgb;
 }
 
-export function getColorLuma(rgbColor: [number, number, number]) {
-  const [r, g, b] = rgbColor;
-  const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return luma;
+export function getColorLuma([r, g, b]: Number3) {
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
+
 // https://stackoverflow.com/a/64090995
-export function hsl2rgb([h, s, l]: [number, number, number]): [number, number, number] {
-  let a = s * Math.min(l, 1 - l);
-  let f = (n: number, k = (n + h / 30) % 12) => l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+export function hsl2rgb([h, s, l]: Number3): Number3 {
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number, k = (n + h / 30) % 12) => l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+
   return [f(0), f(8), f(4)];
 }
 
 // Function was adapted from https://github.com/telegramdesktop/tdesktop/blob/35ff621b5b52f7e3553fb0f990ea13ade7101b8e/Telegram/SourceFiles/data/data_wall_paper.cpp#L518
-export function getPatternColor(rgbColor: [number, number, number]) {
-  let [hue, saturation, value] = rgb2hsb(rgbColor);
+export function getPatternColor(rgb: Number3) {
+  const hsv = rgb2hsv(rgb);
+  const [h] = hsv;
+  let [, s, v] = hsv;
 
-  saturation = Math.min(1, saturation + 0.05 + 0.1 * (1 - saturation));
-  value = value > 0.5
-    ? Math.max(0, value * 0.65)
-    : Math.max(0, Math.min(1, 1 - value * 0.65));
+  s = Math.min(1, s + 0.05 + 0.1 * (1 - s));
+  v = v > 0.5
+    ? Math.max(0, v * 0.65)
+    : Math.max(0, Math.min(1, 1 - v * 0.65));
 
-  const rgb = hsl2rgb([hue * 360, saturation, value]);
-  const hex = rgb2hex(rgb.map((c) => Math.floor(c * 255)) as [number, number, number]);
-  return `#${hex}66`;
+  const newRgb = hsl2rgb([h * 360, s, v]);
+  const mappedRgb = newRgb.map((c) => Math.floor(c * 255)) as Number3;
+
+  return rgba2hex([...mappedRgb, 102]);
 }
 
-export const convertToRGBA = (color: number): string => {
+export function int2cssRgba(color: number): string {
   const alpha = (color >> 24) & 0xff;
   const red = (color >> 16) & 0xff;
   const green = (color >> 8) & 0xff;
   const blue = color & 0xff;
-
   const alphaFloat = alpha / 255;
+
   return `rgba(${red}, ${green}, ${blue}, ${alphaFloat})`;
-};
+}
 
-export const numberToHexColor = (color: number): string => {
+export function int2hex(color: number): string {
   return `#${color.toString(16).padStart(6, '0')}`;
-};
+}
 
-export const getTextColor = (color: number): string => {
+export function getTextColor(color: number): string {
   const r = (color >> 16) & 0xff;
   const g = (color >> 8) & 0xff;
   const b = color & 0xff;
   const luma = getColorLuma([r, g, b]);
   return luma > LUMA_THRESHOLD ? 'black' : 'white';
-};
+}
+
+export function lerpRgbaObj(start: Rgba, end: Rgba, interpolationRatio: number): Rgba {
+  const r = Math.round(lerp(start.r, end.r, interpolationRatio));
+  const g = Math.round(lerp(start.g, end.g, interpolationRatio));
+  const b = Math.round(lerp(start.b, end.b, interpolationRatio));
+  const a = start.a !== undefined
+    ? Math.round(lerp(start.a, end.a!, interpolationRatio))
+    : undefined;
+
+  return { r, g, b, a };
+}

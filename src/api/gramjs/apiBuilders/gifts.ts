@@ -12,7 +12,7 @@ import type {
   ApiTypeResaleStarGifts,
 } from '../../types';
 
-import { numberToHexColor } from '../../../util/colors';
+import { int2hex } from '../../../util/colors';
 import { toJSNumber } from '../../../util/numbers';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { addDocumentToLocalDb } from '../helpers/localDb';
@@ -131,10 +131,10 @@ export function buildApiStarGiftAttribute(attribute: GramJs.TypeStarGiftAttribut
       backdropId,
       name,
       rarityPercent: rarityPermille / 10,
-      centerColor: numberToHexColor(centerColor),
-      edgeColor: numberToHexColor(edgeColor),
-      patternColor: numberToHexColor(patternColor),
-      textColor: numberToHexColor(textColor),
+      centerColor: int2hex(centerColor),
+      edgeColor: int2hex(edgeColor),
+      patternColor: int2hex(patternColor),
+      textColor: int2hex(textColor),
     };
   }
 

@@ -21,8 +21,7 @@ import {
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
-import { getColorLuma } from '../../../util/colors';
-import { hexToRgb } from '../../../util/switchTheme';
+import { getColorLuma, hex2rgbaObj } from '../../../util/colors';
 import windowSize from '../../../util/windowSize';
 
 import useInterval from '../../../hooks/schedulers/useInterval';
@@ -427,7 +426,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const headerTextVar = useMemo(() => {
     if (isMoreAppsTabActive) return 'color-text';
     if (!headerColor) return undefined;
-    const { r, g, b } = hexToRgb(headerColor);
+    const { r, g, b } = hex2rgbaObj(headerColor);
     const luma = getColorLuma([r, g, b]);
     const adaptedLuma = theme === 'dark' ? 255 - luma : luma;
     return adaptedLuma > LUMA_THRESHOLD ? 'color-text' : 'color-background';

@@ -12,7 +12,7 @@ import { requestForcedReflow, requestMutation } from '../../../lib/fasterdom/fas
 import { selectRestrictedEmoji } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
-import { convertToRGBA, getTextColor } from '../../../util/colors';
+import { getTextColor, int2cssRgba } from '../../../util/colors';
 import { formatTemperature } from '../../../util/formatTemperature';
 
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -48,7 +48,7 @@ const MediaAreaWeather: FC<OwnProps & StateProps> = ({
 
   const { temperatureC, color } = mediaArea;
 
-  const backgroundColor = convertToRGBA(color);
+  const backgroundColor = int2cssRgba(color);
   const textColor = getTextColor(color);
 
   const updateCustomSize = useLastCallback((isImmediate?: boolean) => {

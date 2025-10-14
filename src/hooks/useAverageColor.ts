@@ -18,7 +18,7 @@ function useAverageColor(peer: ApiPeer, fallbackColor = '#00000000') {
       }
 
       const averageColor = await getAverageColor(imgBlobUrl);
-      setColor(`#${rgb2hex(averageColor)}`);
+      setColor(rgb2hex(averageColor));
     })();
   }, [imgBlobUrl]);
 

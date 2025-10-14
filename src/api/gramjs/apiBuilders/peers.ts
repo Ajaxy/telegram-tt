@@ -11,7 +11,7 @@ import type {
 } from '../../types';
 
 import { CHANNEL_ID_BASE } from '../../../config';
-import { numberToHexColor } from '../../../util/colors';
+import { int2hex } from '../../../util/colors';
 import { buildCollectionByCallback } from '../../../util/iteratees';
 
 type TypePeerOrInput = GramJs.TypePeer | GramJs.TypeInputPeer | GramJs.TypeInputUser | GramJs.TypeInputChannel;
@@ -59,14 +59,14 @@ export function buildApiPeerColor(peerColor: GramJs.TypePeerColor): ApiPeerColor
 }
 
 function buildApiPeerColorSet(colorSet: GramJs.help.PeerColorSet) {
-  return colorSet.colors.map((color) => numberToHexColor(color));
+  return colorSet.colors.map((color) => int2hex(color));
 }
 
 function buildApiPeerProfileColorSet(colorSet: GramJs.help.PeerColorProfileSet): ApiPeerProfileColorSet {
   return {
-    paletteColors: colorSet.paletteColors.map((color) => numberToHexColor(color)),
-    bgColors: colorSet.bgColors.map((color) => numberToHexColor(color)),
-    storyColors: colorSet.storyColors.map((color) => numberToHexColor(color)),
+    paletteColors: colorSet.paletteColors.map((color) => int2hex(color)),
+    bgColors: colorSet.bgColors.map((color) => int2hex(color)),
+    storyColors: colorSet.storyColors.map((color) => int2hex(color)),
   };
 }
 
@@ -116,10 +116,10 @@ ApiEmojiStatusType | undefined {
       title: mtpEmojiStatus.title,
       slug: mtpEmojiStatus.slug,
       patternDocumentId: mtpEmojiStatus.patternDocumentId.toString(),
-      centerColor: numberToHexColor(mtpEmojiStatus.centerColor),
-      edgeColor: numberToHexColor(mtpEmojiStatus.edgeColor),
-      patternColor: numberToHexColor(mtpEmojiStatus.patternColor),
-      textColor: numberToHexColor(mtpEmojiStatus.textColor),
+      centerColor: int2hex(mtpEmojiStatus.centerColor),
+      edgeColor: int2hex(mtpEmojiStatus.edgeColor),
+      patternColor: int2hex(mtpEmojiStatus.patternColor),
+      textColor: int2hex(mtpEmojiStatus.textColor),
       until: mtpEmojiStatus.until,
     };
   }
