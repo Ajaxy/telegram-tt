@@ -39,7 +39,7 @@ type StateProps = {
   hasUnreadMark?: boolean;
 };
 
-const EMOJI_STATUS_SIZE = 20;
+const EMOJI_STATUS_SIZE = 22;
 
 const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
   chatId,
