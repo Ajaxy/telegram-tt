@@ -166,7 +166,6 @@ const FullNameTitle: FC<OwnProps> = ({
                   ? emojiStatus.textColor : undefined}
               >
                 <CustomEmoji
-                  forceAlways
                   className={buildClassName('no-selection', !withStatusTextColor && styles.statusPrimaryColor)}
                   documentId={emojiStatus.documentId}
                   size={emojiStatusSize}
