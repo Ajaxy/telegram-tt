@@ -9,15 +9,15 @@ import {
 } from '../Helpers';
 
 export class AuthKey {
-  _key?: Buffer;
+  _key?: Buffer<ArrayBuffer>;
 
-  _hash?: Buffer;
+  _hash?: Buffer<ArrayBuffer>;
 
   private auxHash?: bigint;
 
   keyId?: bigint;
 
-  constructor(value?: Buffer, hash?: Buffer) {
+  constructor(value?: Buffer<ArrayBuffer>, hash?: Buffer<ArrayBuffer>) {
     if (!hash || !value) {
       return;
     }
@@ -29,7 +29,7 @@ export class AuthKey {
     this.keyId = reader.readLong(false);
   }
 
-  async setKey(value?: Buffer | AuthKey) {
+  async setKey(value?: Buffer<ArrayBuffer> | AuthKey) {
     if (!value) {
       this._key = undefined;
       this.auxHash = undefined;

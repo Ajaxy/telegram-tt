@@ -145,7 +145,7 @@ const SuggestedPostApprovalModal = ({
       const time = formatScheduledDateTime(scheduleDate, lang, oldLang);
 
       const key
-      = isAdmin ? 'SuggestedPostConfirmDetailsWithTimeAdmin' : 'SuggestedPostConfirmDetailsWithTimeUser';
+        = isAdmin ? 'SuggestedPostConfirmDetailsWithTimeAdmin' : 'SuggestedPostConfirmDetailsWithTimeUser';
 
       return (
         <>

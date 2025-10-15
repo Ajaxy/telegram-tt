@@ -20,14 +20,14 @@ export function i2abLow(buf: Uint32Array): ArrayBuffer {
 /**
  * Uint32Array -> ArrayBuffer (big-endian os)
  */
-export function i2abBig(buf: Uint32Array): ArrayBuffer {
+export function i2abBig(buf: Uint32Array<ArrayBuffer>): ArrayBuffer {
   return buf.buffer;
 }
 
 /**
  * ArrayBuffer -> Uint32Array (low-endian os)
  */
-export function ab2iLow(ab: ArrayBuffer | SharedArrayBuffer | Uint8Array): Uint32Array {
+export function ab2iLow(ab: ArrayBuffer | Uint8Array): Uint32Array {
   const uint8 = new Uint8Array(ab);
   const buf = new Uint32Array(uint8.length / 4);
 
@@ -46,7 +46,7 @@ export function ab2iLow(ab: ArrayBuffer | SharedArrayBuffer | Uint8Array): Uint3
 /**
  * ArrayBuffer -> Uint32Array (big-endian os)
  */
-export function ab2iBig(ab: ArrayBuffer | SharedArrayBuffer | Uint8Array): Uint32Array {
+export function ab2iBig(ab: ArrayBuffer | Uint8Array): Uint32Array {
   return new Uint32Array(ab);
 }
 

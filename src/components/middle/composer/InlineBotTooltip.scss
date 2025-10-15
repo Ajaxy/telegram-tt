@@ -9,8 +9,8 @@
 
     display: grid;
     grid-auto-flow: dense;
-    grid-gap: 1px;
     grid-template-columns: repeat(8, 1fr);
+    gap: 1px;
 
     padding: 0;
 

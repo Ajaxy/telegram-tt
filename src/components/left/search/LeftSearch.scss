@@ -108,8 +108,8 @@
   .media-list {
     display: grid;
     grid-auto-rows: 1fr;
-    grid-gap: 0.25rem;
     grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem;
 
     padding: 0.5rem;
 

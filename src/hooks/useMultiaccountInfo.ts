@@ -23,7 +23,7 @@ export default function useMultiaccountInfo(currentUser?: ApiUser) {
   const isUpdater = Boolean(currentUser) && getGlobal().authRememberMe;
   const isSynced = useSelector(selectIsSynced);
 
-  const [accountsInfo, setAccountsInfo] = useState(getAccountsInfo());
+  const [accountsInfo, setAccountsInfo] = useState(() => getAccountsInfo());
 
   const avatarHash = currentUser && getChatAvatarHash(currentUser);
   const avatarUrl = useMedia(avatarHash, !isUpdater);

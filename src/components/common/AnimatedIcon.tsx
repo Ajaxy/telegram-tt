@@ -36,7 +36,7 @@ function AnimatedIcon(props: OwnProps) {
     onLoad?.();
   });
 
-  const [playKey, setPlayKey] = useState(String(Math.random()));
+  const [playKey, setPlayKey] = useState(() => String(Math.random()));
 
   const handleClick = useLastCallback(() => {
     if (play === true) {

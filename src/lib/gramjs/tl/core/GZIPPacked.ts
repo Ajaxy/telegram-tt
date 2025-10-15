@@ -9,19 +9,19 @@ export default class GZIPPacked {
 
     static classType = 'constructor';
 
-    data: Buffer;
+    data: Buffer<ArrayBuffer>;
 
     private CONSTRUCTOR_ID: number;
 
     private classType: string;
 
-    constructor(data: Buffer) {
+    constructor(data: Buffer<ArrayBuffer>) {
         this.data = data;
         this.CONSTRUCTOR_ID = 0x3072cfa1;
         this.classType = 'constructor';
     }
 
-    static async gzipIfSmaller(contentRelated: boolean, data: Buffer) {
+    static async gzipIfSmaller(contentRelated: boolean, data: Buffer<ArrayBuffer>) {
         if (contentRelated && data.length > 512) {
             const gzipped = await new GZIPPacked(data).toBytes();
             if (gzipped.length < data.length) {
@@ -31,7 +31,7 @@ export default class GZIPPacked {
         return data;
     }
 
-    static gzip(input: Buffer) {
+    static gzip(input: Buffer<ArrayBuffer>) {
         return Buffer.from(input);
         // TODO this usually makes it faster for large requests
         // return Buffer.from(deflate(input, { level: 9, gzip: true }))

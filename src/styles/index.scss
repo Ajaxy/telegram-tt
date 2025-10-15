@@ -172,7 +172,7 @@ body.cursor-ew-resize {
   width: 0;
   height: 0;
 
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
 }
 
 .custom-scroll,

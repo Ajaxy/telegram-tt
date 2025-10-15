@@ -80,7 +80,7 @@ export async function fetchStarGifts() {
 
   // Right now, only regular star gifts can be bought, but API are not specific
   const gifts
-   = result.gifts.map(buildApiStarGift).filter((gift): gift is ApiStarGiftRegular => gift.type === 'starGift');
+    = result.gifts.map(buildApiStarGift).filter((gift): gift is ApiStarGiftRegular => gift.type === 'starGift');
 
   return {
     gifts,
@@ -102,33 +102,33 @@ export async function fetchResaleGifts({
   attributesHash?: string;
   filter?: ResaleGiftsFilterOptions;
 }) {
-   type GetResaleStarGifts = ConstructorParameters<typeof GramJs.payments.GetResaleStarGifts>[0];
+  type GetResaleStarGifts = ConstructorParameters<typeof GramJs.payments.GetResaleStarGifts>[0];
 
-   const attributes: ApiStarGiftAttributeId[] = [
-     ...(filter?.backdropAttributes ?? []),
-     ...(filter?.modelAttributes ?? []),
-     ...(filter?.patternAttributes ?? []),
-   ];
+  const attributes: ApiStarGiftAttributeId[] = [
+    ...(filter?.backdropAttributes ?? []),
+    ...(filter?.modelAttributes ?? []),
+    ...(filter?.patternAttributes ?? []),
+  ];
 
-   const params: GetResaleStarGifts = {
-     giftId: BigInt(giftId),
-     offset,
-     limit,
-     attributesHash: attributesHash ? BigInt(attributesHash) : DEFAULT_PRIMITIVES.BIGINT,
-     attributes: buildInputResaleGiftsAttributes(attributes),
-     ...(filter && {
-       sortByPrice: filter.sortType === 'byPrice' || undefined,
-       sortByNum: filter.sortType === 'byNumber' || undefined,
-     } satisfies Partial<GetResaleStarGifts>),
-   };
+  const params: GetResaleStarGifts = {
+    giftId: BigInt(giftId),
+    offset,
+    limit,
+    attributesHash: attributesHash ? BigInt(attributesHash) : DEFAULT_PRIMITIVES.BIGINT,
+    attributes: buildInputResaleGiftsAttributes(attributes),
+    ...(filter && {
+      sortByPrice: filter.sortType === 'byPrice' || undefined,
+      sortByNum: filter.sortType === 'byNumber' || undefined,
+    } satisfies Partial<GetResaleStarGifts>),
+  };
 
-   const result = await invokeRequest(new GramJs.payments.GetResaleStarGifts(params));
+  const result = await invokeRequest(new GramJs.payments.GetResaleStarGifts(params));
 
-   if (!result) {
-     return undefined;
-   }
+  if (!result) {
+    return undefined;
+  }
 
-   return buildApiResaleGifts(result);
+  return buildApiResaleGifts(result);
 }
 
 export async function fetchSavedStarGifts({

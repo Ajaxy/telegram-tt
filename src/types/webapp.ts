@@ -328,11 +328,11 @@ interface WebAppOutboundEventMap {
 }
 
 export type WebAppInboundEvent =
-{ [K in keyof WebAppInboundEventMap]:
-  WebAppEvent<K, WebAppInboundEventMap[K]>
-}[keyof WebAppInboundEventMap];
+  { [K in keyof WebAppInboundEventMap]:
+    WebAppEvent<K, WebAppInboundEventMap[K]>
+  }[keyof WebAppInboundEventMap];
 
 export type WebAppOutboundEvent =
-{ [K in keyof WebAppOutboundEventMap]:
-  WebAppEvent<K, WebAppOutboundEventMap[K]>
-}[keyof WebAppOutboundEventMap];
+  { [K in keyof WebAppOutboundEventMap]:
+    WebAppEvent<K, WebAppOutboundEventMap[K]>
+  }[keyof WebAppOutboundEventMap];

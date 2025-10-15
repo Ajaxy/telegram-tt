@@ -83,15 +83,15 @@ const CalendarModal: FC<OwnProps> = ({
   const [isTimeInputFocused, markTimeInputAsFocused] = useFlag(false);
 
   const [selectedDate, setSelectedDate] = useState<Date>(passedSelectedDate);
-  const [currentMonthAndYear, setCurrentMonthAndYear] = useState<Date>(
-    new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1),
-  );
-  const [selectedHours, setSelectedHours] = useState<string>(
-    formatInputTime(passedSelectedDate.getHours()),
-  );
-  const [selectedMinutes, setSelectedMinutes] = useState<string>(
-    formatInputTime(passedSelectedDate.getMinutes()),
-  );
+  const [currentMonthAndYear, setCurrentMonthAndYear] = useState<Date>(() => (
+    new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)
+  ));
+  const [selectedHours, setSelectedHours] = useState<string>(() => (
+    formatInputTime(passedSelectedDate.getHours())
+  ));
+  const [selectedMinutes, setSelectedMinutes] = useState<string>(() => (
+    formatInputTime(passedSelectedDate.getMinutes())
+  ));
 
   const selectedDay = formatDay(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
   const currentYear = currentMonthAndYear.getFullYear();

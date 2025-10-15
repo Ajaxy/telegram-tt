@@ -143,7 +143,7 @@ const StickerSet: FC<OwnProps & StateProps> = ({
   const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
   const { isMobile } = useAppLayout();
 
-  const [itemsPerRow, setItemsPerRow] = useState(getItemsPerRowFallback(windowWidth));
+  const [itemsPerRow, setItemsPerRow] = useState(() => getItemsPerRowFallback(windowWidth));
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection ?? observeIntersectionForShowingItems);
   const transitionClassNames = useMediaTransitionDeprecated(isIntersecting);

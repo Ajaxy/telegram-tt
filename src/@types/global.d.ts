@@ -116,7 +116,7 @@ declare module 'opus-recorder' {
 
     sourceNode: MediaStreamAudioSourceNode;
 
-    ondataavailable: (typedArray: Uint8Array) => void;
+    ondataavailable: (typedArray: Uint8Array<ArrayBuffer>) => void;
   }
 
   const recorder: IOpusRecorder;

@@ -4,7 +4,7 @@ import { ab2i, i2ab } from './converters';
 import { getWords } from './words';
 
 class Counter {
-  _counter: Buffer;
+  _counter: Buffer<ArrayBuffer>;
 
   constructor(initialValue: Buffer) {
     this._counter = Buffer.from(initialValue);
@@ -44,16 +44,22 @@ class CTR {
     this._aes = new AES(getWords(key));
   }
 
-  update(plainText: Buffer) {
+  update(plainText: Buffer<ArrayBuffer>) {
     return this.encrypt(plainText);
   }
 
-  encrypt(plainText: Buffer) {
+  encrypt(plainText: Buffer<ArrayBuffer>) {
     const encrypted = Buffer.from(plainText);
 
     for (let i = 0; i < encrypted.length; i++) {
       if (this._remainingCounterIndex === 16) {
-        this._remainingCounter = Buffer.from(i2ab(this._aes.encrypt(ab2i(this._counter._counter))));
+        this._remainingCounter = Buffer.from(
+          i2ab(
+            this._aes.encrypt(
+              ab2i(this._counter._counter),
+            ) as Uint32Array<ArrayBuffer>,
+          ),
+        );
         this._remainingCounterIndex = 0;
         this._counter.increment();
       }
@@ -111,7 +117,7 @@ class Hash {
   }
 }
 
-export async function pbkdf2(password: Buffer, salt: Buffer, iterations: number) {
+export async function pbkdf2(password: Buffer<ArrayBuffer>, salt: Buffer<ArrayBuffer>, iterations: number) {
   const passwordKey = await crypto.subtle.importKey('raw', password, { name: 'PBKDF2' }, false, ['deriveBits']);
   return Buffer.from(await crypto.subtle.deriveBits({
     name: 'PBKDF2',

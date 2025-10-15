@@ -185,7 +185,7 @@ async function download(
 }
 
 function parseMedia(
-  data: Buffer | File, mediaFormat: ApiMediaFormat, mimeType?: string,
+  data: Buffer<ArrayBuffer> | File, mediaFormat: ApiMediaFormat, mimeType?: string,
 ): ApiParsedMedia | undefined {
   if (data instanceof File) {
     return data;

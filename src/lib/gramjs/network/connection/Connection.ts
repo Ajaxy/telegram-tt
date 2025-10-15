@@ -50,9 +50,9 @@ export class Connection {
 
   protected _obfuscation: any;
 
-  _sendArray: AsyncQueue<Buffer>;
+  _sendArray: AsyncQueue<Buffer<ArrayBuffer>>;
 
-  _recvArray: AsyncQueue<Buffer | undefined>;
+  _recvArray: AsyncQueue<Buffer<ArrayBuffer> | undefined>;
 
   socket: PromisedWebSockets | HttpStream;
 
@@ -73,8 +73,8 @@ export class Connection {
     this._recvTask = undefined;
     this._codec = undefined;
     this._obfuscation = undefined; // TcpObfuscated and MTProxy
-    this._sendArray = new AsyncQueue<Buffer>();
-    this._recvArray = new AsyncQueue<Buffer>();
+    this._sendArray = new AsyncQueue<Buffer<ArrayBuffer>>();
+    this._recvArray = new AsyncQueue<Buffer<ArrayBuffer>>();
     // this.socket = new PromiseSocket(new Socket())
 
     this.shouldLongPoll = false;
@@ -120,7 +120,7 @@ export class Connection {
     }
   }
 
-  async send(data: Buffer) {
+  async send(data: Buffer<ArrayBuffer>) {
     if (!this._connected) {
       throw new Error('Not connected');
     }
@@ -241,7 +241,7 @@ export class HttpConnection extends Connection {
     this.href = HttpStream.getURL(this._ip, this._port, this._isTestServer, this._isPremium);
   }
 
-  send(data: Buffer) {
+  send(data: Buffer<ArrayBuffer>) {
     return this.socket.write(data);
   }
 

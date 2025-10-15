@@ -65,11 +65,11 @@ const Poll: FC<OwnProps> = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [chosenOptions, setChosenOptions] = useState<string[]>([]);
   const [wasSubmitted, setWasSubmitted] = useState<boolean>(false);
-  const [closePeriod, setClosePeriod] = useState<number>(
+  const [closePeriod, setClosePeriod] = useState<number>(() => (
     !summary.closed && summary.closeDate && summary.closeDate > 0
       ? Math.min(summary.closeDate - getServerTime(), summary.closePeriod!)
-      : 0,
-  );
+      : 0
+  ));
   const countdownRef = useRef<HTMLDivElement>();
   const timerCircleRef = useRef<SVGCircleElement>();
   const { results: voteResults, totalVoters } = results;

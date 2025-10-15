@@ -4,8 +4,8 @@
   .settings-wallpapers {
     display: grid;
     grid-auto-rows: 1fr;
-    grid-gap: 0.0625rem;
     grid-template-columns: repeat(3, 1fr);
+    gap: 0.0625rem;
 
     @include mixins.side-panel-section;
   }

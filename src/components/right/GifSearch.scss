@@ -10,8 +10,8 @@
       display: grid;
       grid-auto-flow: dense;
       grid-auto-rows: 6.25rem;
-      grid-gap: 0.25rem;
       grid-template-columns: repeat(6, 1fr);
+      gap: 0.25rem;
     }
   }
 

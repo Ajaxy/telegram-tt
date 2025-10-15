@@ -21,7 +21,7 @@ import SafeLink from '../SafeLink';
 export type TextFilter = (
   'escape_html' | 'hq_emoji' | 'emoji' | 'emoji_html' | 'br' | 'br_html' | 'highlight' | 'links' |
   'simple_markdown' | 'simple_markdown_html' | 'tg_links'
-  );
+);
 
 const SIMPLE_MARKDOWN_REGEX = /(\*\*|__).+?\1/g;
 

@@ -43,11 +43,11 @@ const GiftRibbon = ({
   const isDarkTheme = theme === 'dark';
 
   const gradientColor: GradientColor | undefined
-  = Array.isArray(color)
-    ? color as GradientColor
-    : colorKey
-      ? COLORS[colorKey][isDarkTheme ? 1 : 0]
-      : undefined;
+    = Array.isArray(color)
+      ? color as GradientColor
+      : colorKey
+        ? COLORS[colorKey][isDarkTheme ? 1 : 0]
+        : undefined;
 
   const startColor = gradientColor ? gradientColor[0] : color;
   const endColor = gradientColor ? gradientColor[1] : color;

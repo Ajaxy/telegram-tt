@@ -53,7 +53,7 @@ import useFlag from '../../hooks/useFlag';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import { exitPictureInPictureIfNeeded, usePictureInPictureSignal } from '../../hooks/usePictureInPicture';
+import { exitPictureInPictureIfNeeded, PICTURE_IN_PICTURE_SIGNAL } from '../../hooks/usePictureInPicture';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 import { useMediaProps } from './hooks/useMediaProps';
@@ -181,7 +181,7 @@ const MediaViewer = ({
     animationKey.current = isSingle ? 0 : (messageId || mediaIndex);
   }
 
-  const [getIsPictureInPicture] = usePictureInPictureSignal();
+  const [getIsPictureInPicture] = PICTURE_IN_PICTURE_SIGNAL;
 
   useEffect(() => {
     if (!isOpen || getIsPictureInPicture()) {

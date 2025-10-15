@@ -173,80 +173,80 @@ const GiftResaleFilters: FC<StateProps & OwnProps> = ({
   const getPatternMenuElement = useLastCallback(() => patternMenuRef.current!);
 
   const SortMenuButton: FC<{ onTrigger: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void; isOpen?: boolean }>
-   = useMemo(() => {
-     const sortType = filter.sortType;
-     return ({ onTrigger, isOpen: isMenuOpen }) => (
-       <div
-         className={styles.item}
-         onClick={onTrigger}
-       >
-         {sortType === 'byDate' && lang('ValueGiftSortByDate')}
-         {sortType === 'byNumber' && lang('ValueGiftSortByNumber')}
-         {sortType === 'byPrice' && lang('ValueGiftSortByPrice')}
-         <Icon
-           name="dropdown-arrows"
-           className={styles.itemIcon}
-         />
-       </div>
-     );
-   }, [lang, filter]);
+    = useMemo(() => {
+      const sortType = filter.sortType;
+      return ({ onTrigger, isOpen: isMenuOpen }) => (
+        <div
+          className={styles.item}
+          onClick={onTrigger}
+        >
+          {sortType === 'byDate' && lang('ValueGiftSortByDate')}
+          {sortType === 'byNumber' && lang('ValueGiftSortByNumber')}
+          {sortType === 'byPrice' && lang('ValueGiftSortByPrice')}
+          <Icon
+            name="dropdown-arrows"
+            className={styles.itemIcon}
+          />
+        </div>
+      );
+    }, [lang, filter]);
 
   const ModelMenuButton:
   FC<{ onTrigger: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void; isOpen?: boolean }>
-   = useMemo(() => {
-     const attributesCount = filter?.modelAttributes?.length || 0;
-     return ({ onTrigger, isOpen: isMenuOpen }) => (
-       <div
-         className={styles.item}
-         onClick={onTrigger}
-       >
-         {attributesCount === 0 && lang('GiftAttributeModel')}
-         {attributesCount > 0
-           && lang('GiftAttributeModelPlural', { count: attributesCount }, { pluralValue: attributesCount })}
-         <Icon
-           name="dropdown-arrows"
-           className={styles.itemIcon}
-         />
-       </div>
-     );
-   }, [lang, filter]);
+    = useMemo(() => {
+      const attributesCount = filter?.modelAttributes?.length || 0;
+      return ({ onTrigger, isOpen: isMenuOpen }) => (
+        <div
+          className={styles.item}
+          onClick={onTrigger}
+        >
+          {attributesCount === 0 && lang('GiftAttributeModel')}
+          {attributesCount > 0
+            && lang('GiftAttributeModelPlural', { count: attributesCount }, { pluralValue: attributesCount })}
+          <Icon
+            name="dropdown-arrows"
+            className={styles.itemIcon}
+          />
+        </div>
+      );
+    }, [lang, filter]);
   const BackdropMenuButton:
   FC<{ onTrigger: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void; isOpen?: boolean }>
-   = useMemo(() => {
-     const attributesCount = filter?.backdropAttributes?.length || 0;
-     return ({ onTrigger, isOpen: isMenuOpen }) => (
-       <div
-         className={styles.item}
-         onClick={onTrigger}
-       >
-         {attributesCount === 0 && lang('GiftAttributeBackdrop')}
-         {attributesCount > 0
-           && lang('GiftAttributeBackdropPlural', { count: attributesCount }, { pluralValue: attributesCount })}
-         <Icon
-           name="dropdown-arrows"
-           className={styles.itemIcon}
-         />
-       </div>
-     );
-   }, [lang, filter]);
+    = useMemo(() => {
+      const attributesCount = filter?.backdropAttributes?.length || 0;
+      return ({ onTrigger, isOpen: isMenuOpen }) => (
+        <div
+          className={styles.item}
+          onClick={onTrigger}
+        >
+          {attributesCount === 0 && lang('GiftAttributeBackdrop')}
+          {attributesCount > 0
+            && lang('GiftAttributeBackdropPlural', { count: attributesCount }, { pluralValue: attributesCount })}
+          <Icon
+            name="dropdown-arrows"
+            className={styles.itemIcon}
+          />
+        </div>
+      );
+    }, [lang, filter]);
   const PatternMenuButton: FC<{ onTrigger: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void; isOpen?: boolean }>
-  = useMemo(() => {
-    const attributesCount = filter?.patternAttributes?.length || 0;
-    return ({ onTrigger, isOpen: isMenuOpen }) => (
-      <div
-        className={styles.item}
-        onClick={onTrigger}
-      >
-        {attributesCount === 0 && lang('GiftAttributeSymbol')}
-        {attributesCount > 0
-          && lang('GiftAttributeSymbolPlural', { count: attributesCount }, { pluralValue: attributesCount })}
-        <Icon
-          name="dropdown-arrows"
-          className={styles.itemIcon}
-        />
-      </div>
-    );
-  }, [lang, filter]);
+    = useMemo(() => {
+      const attributesCount = filter?.patternAttributes?.length || 0;
+      return ({ onTrigger, isOpen: isMenuOpen }) => (
+        <div
+          className={styles.item}
+          onClick={onTrigger}
+        >
+          {attributesCount === 0 && lang('GiftAttributeSymbol')}
+          {attributesCount > 0
+            && lang('GiftAttributeSymbolPlural', { count: attributesCount }, { pluralValue: attributesCount })}
+          <Icon
+            name="dropdown-arrows"
+            className={styles.itemIcon}
+          />
+        </div>
+      );
+    }, [lang, filter]);
 
   const handleSortMenuItemClick = useLastCallback((type: ResaleGiftsSortType) => {
     updateResaleGiftsFilter({ filter: {

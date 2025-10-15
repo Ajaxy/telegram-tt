@@ -12,9 +12,7 @@ type CallbackType = () => void;
 const signal = createSignal(false);
 const setIsPictureInPicture = signal[1];
 
-export function usePictureInPictureSignal() {
-  return signal;
-}
+export const PICTURE_IN_PICTURE_SIGNAL = signal;
 
 export default function usePictureInPicture(
   elRef: ElementRef<HTMLVideoElement>,

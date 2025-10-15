@@ -5,10 +5,10 @@
   left: 0;
 
   display: grid;
-  grid-column-gap: 0;
-  grid-row-gap: 0;
   grid-template-columns: auto;
   grid-template-rows: auto 1fr;
+  row-gap: 0;
+  column-gap: 0;
   align-items: center;
   justify-items: stretch;
 

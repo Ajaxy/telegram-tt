@@ -45,7 +45,7 @@ function isGoodLarge(number: bigint, p: bigint): boolean {
   return number > 0n && number < p;
 }
 
-function numBytesForHash(number: Buffer): Buffer {
+function numBytesForHash(number: Buffer): Buffer<ArrayBuffer> {
   return Buffer.concat([Buffer.alloc(SIZE_FOR_HASH - number.length), number]);
 }
 
@@ -77,7 +77,7 @@ function xor(a: Buffer, b: Buffer) {
   return a;
 }
 
-function pbkdf2sha512(password: Buffer, salt: Buffer, iterations: number): any {
+function pbkdf2sha512(password: Buffer<ArrayBuffer>, salt: Buffer<ArrayBuffer>, iterations: number): any {
   return pbkdf2(password, salt, iterations);
 }
 
@@ -92,7 +92,7 @@ async function computeHash(
 ) {
   const hash1 = await sha256(Buffer.concat([algo.salt1, Buffer.from(password, 'utf-8'), algo.salt1]));
   const hash2 = await sha256(Buffer.concat([algo.salt2, hash1, algo.salt2]));
-  const hash3 = await pbkdf2sha512(hash2, algo.salt1, 100000);
+  const hash3 = await pbkdf2sha512(hash2, algo.salt1 as Buffer<ArrayBuffer>, 100000);
   return sha256(Buffer.concat([algo.salt2, hash3, algo.salt2]));
 }
 

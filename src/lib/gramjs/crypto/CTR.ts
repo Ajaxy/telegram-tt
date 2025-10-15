@@ -13,11 +13,11 @@ export class CTR {
     this.decipher = createDecipheriv('AES-256-CTR', key, iv);
   }
 
-  encrypt(data: Buffer) {
+  encrypt(data: Buffer<ArrayBuffer>) {
     return Buffer.from(this.cipher.update(data));
   }
 
-  decrypt(data: Buffer) {
+  decrypt(data: Buffer<ArrayBuffer>) {
     return Buffer.from(this.decipher.update(data));
   }
 }

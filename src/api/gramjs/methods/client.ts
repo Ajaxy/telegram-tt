@@ -194,11 +194,11 @@ export async function destroy(noLogOut = false, noClearLocalDb = false) {
     resetUpdatesManager();
   }
 
-  await client.destroy();
+  client.destroy();
 }
 
-export async function disconnect() {
-  await client.disconnect();
+export function disconnect() {
+  client.disconnect();
 }
 
 export function getClient() {

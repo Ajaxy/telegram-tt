@@ -179,7 +179,7 @@ namespace Api {
   type int128 = bigint;
   type int256 = bigint;
   type long = bigint;
-  type bytes = Buffer;
+  type bytes = Buffer<ArrayBuffer>;
 
   class VirtualClass<Args extends AnyLiteral> {
     static CONSTRUCTOR_ID: number;
@@ -187,9 +187,9 @@ namespace Api {
     static className: string;
     static classType: 'constructor' | 'request';
 
-    static serializeBytes(data: Buffer | string): Buffer;
+    static serializeBytes(data: Buffer<ArrayBuffer> | string): Buffer<ArrayBuffer>;
 
-    getBytes(): Buffer;
+    getBytes(): Buffer<ArrayBuffer>;
     CONSTRUCTOR_ID: number;
     SUBCLASS_OF_ID: number;
     className: string;
@@ -199,7 +199,7 @@ namespace Api {
   }
 
   class Request<Args, Response> extends VirtualClass<Args> {
-    static readResult(reader: Reader): Buffer;
+    static readResult(reader: Reader): Buffer<ArrayBuffer>;
 
     __response: Response;
   }

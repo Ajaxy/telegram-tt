@@ -318,9 +318,9 @@ async function signInUserWithQrCode(
 async function sendCode(
   client: TelegramClient, apiCredentials: ApiCredentials, phoneNumber: string, forceSMS = false,
 ): Promise<{
-    phoneCodeHash: string;
-    isCodeViaApp: boolean;
-  }> {
+  phoneCodeHash: string;
+  isCodeViaApp: boolean;
+}> {
   try {
     const { apiId, apiHash } = apiCredentials;
     const sendResult = await client.invoke(new Api.auth.SendCode({

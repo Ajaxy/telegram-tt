@@ -69,6 +69,7 @@ export default tseslint.config(
       'no-undef': 'off',
       'no-unused-vars': 'off',
       '@stylistic/multiline-ternary': 'off',
+      '@stylistic/operator-linebreak': 'off',
       '@stylistic/max-len': ['error', {
         code: 120,
         ignoreComments: true,
@@ -202,6 +203,7 @@ export default tseslint.config(
       'react-x/no-array-index-key': 'off',
       'react-x/no-missing-key': 'off',
       'react-x/no-nested-component-definitions': 'off',
+      'react-x/no-unused-props': 'off',
       'react-x/no-leaked-conditional-rendering': 'error',
       'jsx-a11y/click-events-have-key-events': 'off',
       'jsx-a11y/mouse-events-have-key-events': 'off',

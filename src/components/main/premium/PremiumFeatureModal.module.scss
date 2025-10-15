@@ -38,11 +38,6 @@
 
 .frame {
   aspect-ratio: 1;
-
-  @supports not (aspect-ratio: 1) {
-    height: 0;
-    padding-bottom: 100%;
-  }
 }
 
 .slide {
@@ -104,11 +99,6 @@
   border-top-right-radius: var(--border-radius-default);
 
   background: var(--premium-feature-background);
-
-  @supports not (aspect-ratio: 1) {
-    height: 0;
-    padding-bottom: 100%;
-  }
 }
 
 .title {

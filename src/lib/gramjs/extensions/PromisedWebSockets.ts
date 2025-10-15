@@ -150,7 +150,7 @@ export default class PromisedWebSockets {
     });
   }
 
-  write(data: Buffer) {
+  write(data: Buffer<ArrayBuffer>) {
     if (this.closed) {
       throw closeError;
     }

@@ -64,7 +64,7 @@ const ToDoListModal = ({
   const itemsListRef = useRef<HTMLDivElement>();
 
   const [title, setTitle] = useState<string>('');
-  const [items, setItems] = useState<Item[]>([{ id: generateUniqueNumberId(), text: '' }]);
+  const [items, setItems] = useState<Item[]>(() => [{ id: generateUniqueNumberId(), text: '' }]);
   const [isOthersCanAppend, setIsOthersCanAppend] = useState(true);
   const [isOthersCanComplete, setIsOthersCanComplete] = useState(true);
   const [hasErrors, setHasErrors] = useState<boolean>(false);

@@ -1,8 +1,8 @@
-import { getActions, getGlobal } from '../global';
+import { getActions, getGlobal } from '../../global';
 
-import { selectCustomEmoji } from '../global/selectors';
-import { addCustomEmojiInputRenderCallback } from '../util/emoji/customEmojiManager';
-import { throttle } from '../util/schedulers';
+import { selectCustomEmoji } from '../../global/selectors';
+import { throttle } from '../schedulers';
+import { addCustomEmojiInputRenderCallback } from './customEmojiManager';
 
 let LOAD_QUEUE = new Set<string>();
 const RENDER_HISTORY = new Set<string>();
@@ -42,7 +42,7 @@ function notifyCustomEmojiRender(emojiId: string) {
 
 addCustomEmojiInputRenderCallback(notifyCustomEmojiRender);
 
-export default function useEnsureCustomEmoji(id?: string) {
+export default function ensureCustomEmoji(id?: string) {
   if (!id) return;
   notifyCustomEmojiRender(id);
 

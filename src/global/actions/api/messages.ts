@@ -559,7 +559,7 @@ addActionHandler('sendInviteMessages', async (global, actions, payload): Promise
   await Promise.all(userIds.map((userId) => {
     const chat = selectChat(global, userId);
     if (!chat) {
-      return undefined;
+      return Promise.resolve(undefined);
     }
     const userFullName = getUserFullName(selectUser(global, userId));
     if (userFullName) {

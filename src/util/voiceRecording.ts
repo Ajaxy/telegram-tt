@@ -31,7 +31,7 @@ export async function start(analyzerCallback: (volume: number) => void) {
 
   const startedAt = Date.now();
   let pausedAt: number;
-  const chunks: Uint8Array[] = [];
+  const chunks: Uint8Array<ArrayBuffer>[] = [];
   const waveform: number[] = [];
 
   mediaRecorder.ondataavailable = (typedArray) => {

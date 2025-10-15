@@ -68,7 +68,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
   const huePickerRef = useRef<HTMLDivElement>();
   const isFirstRunRef = useRef(true);
 
-  const [hsv, setHsv] = useState(getInitialHsv(backgroundColor));
+  const [hsv, setHsv] = useState(() => getInitialHsv(backgroundColor));
   // Cache for drag handlers
   const hsvRef = useRef(hsv);
   useEffect(() => {

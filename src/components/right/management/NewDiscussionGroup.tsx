@@ -48,7 +48,7 @@ const NewDiscussionGroup: FC<OwnProps & StateProps> = ({
     onBack: onClose,
   });
 
-  const [title, setTitle] = useState(lang('NewDiscussionChatTitle', { name: chat?.title }));
+  const [title, setTitle] = useState(() => lang('NewDiscussionChatTitle', { name: chat?.title }));
   const [photo, setPhoto] = useState<File | undefined>();
   const [error, setError] = useState<string | undefined>();
 
