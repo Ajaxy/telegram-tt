@@ -73,4 +73,8 @@
       }
     }
   }
+
+  :global(body.in-background) &::before {
+    animation-play-state: paused;
+  }
 }

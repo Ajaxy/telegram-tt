@@ -20,6 +20,10 @@
 
   &--animated {
     animation: pulse-opacity-light 1.75s linear infinite;
+
+    :global(body.in-background) & {
+      animation-play-state: paused;
+    }
   }
 
   &__content {

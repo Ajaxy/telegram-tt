@@ -78,7 +78,6 @@
   transition: transform 500ms ease-in;
 
   &::before {
-
     --x-direction: 0;
     --y-direction: var(--background-size);
 
@@ -99,7 +98,6 @@
   }
 
   &::after {
-
     --x-direction: calc(-1 * var(--background-size));
     --y-direction: calc(-1 * var(--background-size));
 
@@ -140,6 +138,12 @@
   &::after {
     animation: 22s linear -14s infinite;
     animation-name: dots-animation;
+  }
+}
+
+:global(body.in-background) .dots {
+  &, &::before, &::after {
+    animation-play-state: paused;
   }
 }
 

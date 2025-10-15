@@ -93,6 +93,10 @@
   animation-duration: 1s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
+
+  :global(body.in-background) & {
+    animation-play-state: paused;
+  }
 }
 
 @keyframes spin {

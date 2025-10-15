@@ -15,6 +15,10 @@
       html[lang="fa"] & {
         animation-name: dot-animation-rtl;
       }
+
+      body.in-background & {
+        animation-play-state: paused;
+      }
     }
   }
 }

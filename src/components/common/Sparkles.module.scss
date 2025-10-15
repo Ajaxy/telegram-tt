@@ -30,11 +30,15 @@
 
   animation: sparkle 5s infinite;
   animation-delay: var(--_duration-shift);
-}
 
-.noAnimation .symbol {
-  opacity: 0.5;
-  animation: none;
+  .noAnimation & {
+    opacity: 0.5;
+    animation: none;
+  }
+
+  :global(body.in-background) & {
+    animation-play-state: paused;
+  }
 }
 
 @keyframes sparkle {
