@@ -1,21 +1,7 @@
 @use "sass:map";
 
-.icon-char::before {
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  content: attr(data-char);
-  width: 1em;
-  text-align: center;
-  display: block;
-}
-
-.icon-placeholder::before {
-  content: '';
-  display: block;
-  width: 1em;
-}
-
 @mixin icon {
-  /* use !important to prevent issues with browser extensions that change fonts */
+  /* !important to prevent issues with browser extensions that change fonts */
   /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
   font-family: "{{ name }}" !important;
   speak: none;
@@ -25,15 +11,8 @@
   text-transform: none;
   line-height: 1;
 
-  /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-{{# if selector }}{{ selector }}::before {
-{{ else }}{{ tag }}.{{prefix}} {
-{{/ if }}
-  @include icon;
 }
 
 ${{ name }}-map: (
@@ -41,10 +20,3 @@ ${{ name }}-map: (
   "{{ @key }}": "\\{{ codepoint this }}",
 {{/ each }}
 );
-
-{{# each codepoints }}
-{{# if ../selector }} {{ ../selector }}.{{ ../prefix }}-{{ @key }}::before {
-{{ else }}{{ tag }}.{{ ../prefix }}-{{ @key }}::before {
-{{/ if }}  content: map.get(${{ ../name }}-map, "{{ @key }}");
-}
-{{/ each }}

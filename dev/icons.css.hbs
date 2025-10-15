@@ -1,0 +1,31 @@
+@font-face {
+  font-family: "{{ name }}";
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+  src: {{{ fontSrc }}};
+}
+
+.icon-char::before {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  content: attr(data-char);
+  width: 1em;
+  text-align: center;
+  display: block;
+}
+
+.icon-placeholder::before {
+  content: '';
+  display: block;
+  width: 1em;
+}
+
+{{# each codepoints }}
+{{# if ../selector }}
+{{ ../selector }}.{{ ../prefix }}-{{ @key }}::before {
+{{ else }}
+{{ tag }}.{{ ../prefix }}-{{ @key }}::before {
+{{/ if }}
+  content: "\\{{ codepoint this }}";
+}
+{{/ each }}

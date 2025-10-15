@@ -3,11 +3,12 @@ module.exports = {
   outputDir: './src/styles',
   name: 'icons',
   fontTypes: ['woff2', 'woff'],
-  assetTypes: ['scss', 'ts'],
+  assetTypes: ['css', 'scss', 'ts'],
   tag: '',
   normalize: true,
   templates: {
     scss: './dev/icons.scss.hbs',
+    css: './dev/icons.css.hbs',
   },
   formatOptions: {
     ts: {
