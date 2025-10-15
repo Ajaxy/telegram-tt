@@ -108,23 +108,28 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
     case 'command':
       actions.sendBotCommand({ command: button.text, tabId });
       break;
+
     case 'url': {
       const { url } = button;
       actions.openUrl({ url, tabId, linkContext: { type: 'message', chatId, messageId, threadId } });
       break;
     }
+
     case 'copy': {
       copyTextToClipboard(button.copyText);
       actions.showNotification({ message: oldTranslate('ExactTextCopied', button.copyText), tabId });
       break;
     }
+
     case 'callback': {
       void answerCallbackButton(global, actions, chat, messageId, threadId, button.data, undefined, tabId);
       break;
     }
+
     case 'requestPoll':
       actions.openPollModal({ isQuiz: button.isQuiz, tabId });
       break;
+
     case 'requestPhone': {
       const user = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
       if (!user) {
@@ -141,6 +146,7 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       });
       break;
     }
+
     case 'receipt': {
       const { receiptMessageId } = button;
       actions.getReceipt({
@@ -148,6 +154,7 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       });
       break;
     }
+
     case 'buy': {
       actions.openInvoice({
         type: 'message',
@@ -157,10 +164,12 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       });
       break;
     }
+
     case 'game': {
       void answerCallbackButton(global, actions, chat, messageId, threadId, undefined, true, tabId);
       break;
     }
+
     case 'switchBotInline': {
       const { query, isSamePeer } = button;
       actions.switchBotInline({
@@ -207,6 +216,7 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       });
       break;
     }
+
     case 'urlAuth': {
       const { url } = button;
       actions.requestBotUrlAuth({

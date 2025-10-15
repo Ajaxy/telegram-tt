@@ -4,7 +4,7 @@ import { memo, useMemo } from '../../../lib/teact/teact';
 import type { ApiKeyboardButton, ApiMessage } from '../../../api/types';
 import type { ActionPayloads } from '../../../global/types';
 
-import { RE_TME_LINK } from '../../../config';
+import { RE_TME_LINK, TME_LINK_PREFIX } from '../../../config';
 import renderKeyboardButtonText from '../composer/helpers/renderKeyboardButtonText';
 
 import useOldLang from '../../../hooks/useOldLang';
@@ -26,10 +26,15 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
     const { type } = button;
     switch (type) {
       case 'url': {
-        if (!RE_TME_LINK.test(button.url)) {
+        const { url } = button;
+
+        if (url.startsWith(TME_LINK_PREFIX) && url.includes('?startapp')) {
+          return <Icon className="corner-icon" name="webapp" />;
+        } else if (!RE_TME_LINK.test(url)) {
           return <Icon className="corner-icon" name="arrow-right" />;
         }
-        break;
+
+        return;
       }
       case 'urlAuth':
         return <Icon className="corner-icon" name="arrow-right" />;
@@ -55,7 +60,8 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
         }
         break;
     }
-    return undefined;
+
+    return;
   };
 
   const buttonTexts = useMemo(() => {
