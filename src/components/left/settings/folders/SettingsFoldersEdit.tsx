@@ -356,9 +356,10 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
         )}
 
         <div className="settings-item pt-3">
-          <h4 className="settings-item-header mb-3 color-picker-title" dir={lang.isRtl ? 'rtl' : undefined}>
-            {lang('FilterColorTitle')}
+          <h4 className="settings-item-header mb-3 color-picker-header" dir={lang.isRtl ? 'rtl' : undefined}>
+            <span className="color-picker-title-text">{lang('FilterColorTitle')}</span>
             <div className={buildClassName(
+              'color-picker-title',
               'color-picker-selected-color',
               isCurrentUserPremium && state.folder.color !== undefined && state.folder.color !== -1
                 ? getApiPeerColorClass({ color: state.folder.color })
@@ -372,7 +373,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
               })}
             </div>
           </h4>
-          <div className="color-picker">
+          <div className="color-picker custom-scroll-x">
             {FOLDER_COLORS.map((color) => (
               <button
                 key={color}
@@ -417,7 +418,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
               )}
             </button>
           </div>
-          <p className="settings-item-description mb-0" dir={lang.isRtl ? 'rtl' : undefined}>
+          <p className="settings-item-description mb-0 mt-3" dir={lang.isRtl ? 'rtl' : undefined}>
             {lang('FilterColorHint')}
           </p>
         </div>
