@@ -132,6 +132,8 @@ function GiftItemStar({
         className={styles.radialPattern}
         backgroundColors={backdropColors}
         patternIcon={pattern.sticker}
+        ringsCount={1}
+        ovalFactor={1}
       />
     );
   }, [gift]);
