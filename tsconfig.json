@@ -20,6 +20,8 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".cache/.tsconfig.tsbuildinfo",
     "noEmit": true,
     "jsx": "react-jsx",
     "jsxImportSource": "@teact",
@@ -30,7 +32,6 @@
   },
   "include": [
     "src",
-    "tests",
     "plugins",
     "dev",
     "*.config.ts",
