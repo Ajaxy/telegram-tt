@@ -179,6 +179,14 @@ const Photo = <T,>({
     isOpen: !fullMediaData && !isLoadAllowed,
     withShouldRender: true,
   });
+  const {
+    ref: transferProgressRef,
+    shouldRender: shouldRenderTransferProgress,
+  } = useShowTransition({
+    isOpen: isTransferring,
+    noMountTransition: wasLoadDisabled,
+    withShouldRender: true,
+  });
 
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLElement>) => {
     if (isUploading) {
@@ -291,10 +299,9 @@ const Photo = <T,>({
         className="media-spoiler"
         isNsfw={isMediaNsfw}
       />
-      {isTransferring && (
-        <span className="message-transfer-progress">
-          {Math.round(transferProgress * 100)}
-          %
+      {shouldRenderTransferProgress && (
+        <span ref={transferProgressRef} className="message-transfer-progress">
+          {`${Math.round(transferProgress * 100)}%`}
         </span>
       )}
       <SensitiveContentConfirmModal

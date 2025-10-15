@@ -8,7 +8,7 @@ import type {
 } from '../../../../api/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 
-import { ANIMATION_END_DELAY, CHAT_HEIGHT_PX } from '../../../../config';
+import { CHAT_HEIGHT_PX } from '../../../../config';
 import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import {
   getMessageIsSpoiler,
@@ -17,6 +17,7 @@ import {
   getMessageVideo,
 } from '../../../../global/helpers';
 import { getMessageSenderName } from '../../../../global/helpers/peers';
+import { waitStartingTransitionsEnd } from '../../../../util/animations/waitTransitionEnd';
 import buildClassName from '../../../../util/buildClassName';
 import renderText from '../../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
@@ -32,8 +33,6 @@ import ChatForumLastMessage from '../../../common/ChatForumLastMessage';
 import Icon from '../../../common/icons/Icon';
 import MessageSummary from '../../../common/MessageSummary';
 import TypingStatus from '../../../common/TypingStatus';
-
-const ANIMATION_DURATION = 200;
 
 export default function useChatListEntry({
   chat,
@@ -53,6 +52,7 @@ export default function useChatListEntry({
   isSavedDialog,
   isPreview,
   noForumTitle,
+  onReorderAnimationEnd,
 }: {
   chat?: ApiChat;
   topics?: Record<number, ApiTopic>;
@@ -72,6 +72,7 @@ export default function useChatListEntry({
   orderDiff: number;
   withInterfaceAnimations?: boolean;
   noForumTitle?: boolean;
+  onReorderAnimationEnd?: NoneToVoidFunction;
 }) {
   const lang = useLang();
   const ref = useRef<HTMLDivElement>();
@@ -171,6 +172,18 @@ export default function useChatListEntry({
       return;
     }
 
+    let isCancelled = false;
+
+    const notifyAnimationEnd = () => {
+      if (isCancelled) return;
+      requestMutation(() => {
+        element.classList.remove('animate-opacity', 'animate-transform');
+        element.style.opacity = '';
+        element.style.transform = '';
+      });
+      onReorderAnimationEnd?.();
+    };
+
     // TODO Refactor animation: create `useListAnimation` that owns `orderDiff` and `animationType`
     if (animationType === ChatAnimationTypes.Opacity) {
       element.style.opacity = '0';
@@ -178,6 +191,8 @@ export default function useChatListEntry({
       requestMutation(() => {
         element.classList.add('animate-opacity');
         element.style.opacity = '1';
+
+        waitStartingTransitionsEnd(element).then(notifyAnimationEnd);
       });
     } else if (animationType === ChatAnimationTypes.Move) {
       element.style.transform = `translate3d(0, ${-orderDiff * CHAT_HEIGHT_PX}px, 0)`;
@@ -185,19 +200,17 @@ export default function useChatListEntry({
       requestMutation(() => {
         element.classList.add('animate-transform');
         element.style.transform = '';
+
+        waitStartingTransitionsEnd(element).then(notifyAnimationEnd);
       });
     } else {
       return;
     }
 
-    setTimeout(() => {
-      requestMutation(() => {
-        element.classList.remove('animate-opacity', 'animate-transform');
-        element.style.opacity = '';
-        element.style.transform = '';
-      });
-    }, ANIMATION_DURATION + ANIMATION_END_DELAY);
-  }, [withInterfaceAnimations, orderDiff, animationType]);
+    return () => {
+      isCancelled = true;
+    };
+  }, [withInterfaceAnimations, orderDiff, animationType, onReorderAnimationEnd]);
 
   return {
     renderSubtitle,

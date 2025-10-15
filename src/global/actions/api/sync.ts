@@ -1,5 +1,6 @@
 import { addCallback } from '../../../lib/teact/teactn';
 
+import type { ApiThreadInfo } from '../../../api/types/messages';
 import type { Thread, ThreadId } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState } from '../../types';
@@ -128,6 +129,19 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
     selectChatMessage(global, global.currentUserId!, Number(messageId))
   )).filter(Boolean);
 
+  // Memoize thread infos for last messages
+  const lastMessagesThreadInfos: { chatId: string; messageId: number; threadInfo: ApiThreadInfo }[] = [];
+  lastMessages.forEach((message) => {
+    const threadInfo = selectThreadInfo(global, message.chatId, message.id);
+    if (threadInfo) {
+      lastMessagesThreadInfos.push({
+        chatId: message.chatId,
+        messageId: message.id,
+        threadInfo,
+      });
+    }
+  });
+
   for (const { id: tabId } of Object.values(global.byTabId)) {
     global = getGlobal();
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global, tabId) || {};
@@ -254,6 +268,14 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
     Object.keys(threads).forEach((threadId) => {
       global = updateThread(global, chatId, Number(threadId), draftsByChatId[chatId][Number(threadId)]);
     });
+  });
+
+  // Restore thread infos
+  lastMessagesThreadInfos.forEach(({ chatId, messageId, threadInfo }) => {
+    const memoThreadInfo = selectThreadInfo(global, chatId, messageId);
+    if (!memoThreadInfo) {
+      global = updateThreadInfo(global, chatId, String(messageId), threadInfo);
+    }
   });
 
   // Restore last messages

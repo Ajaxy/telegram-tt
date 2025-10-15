@@ -57,6 +57,7 @@ type OwnProps = {
   observeIntersection?: ObserveFn;
   orderDiff: number;
   animationType: ChatAnimationTypes;
+  onReorderAnimationEnd?: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -96,6 +97,7 @@ const Topic: FC<OwnProps & StateProps> = ({
   draft,
   wasTopicOpened,
   topics,
+  onReorderAnimationEnd,
 }) => {
   const {
     openThread,
@@ -152,6 +154,7 @@ const Topic: FC<OwnProps & StateProps> = ({
     animationType,
     withInterfaceAnimations,
     orderDiff,
+    onReorderAnimationEnd,
   });
 
   const handleOpenTopic = useLastCallback((e: React.MouseEvent) => {

@@ -787,11 +787,14 @@ const Message = ({
 
   const phoneCall = action?.type === 'phoneCall' ? action : undefined;
 
-  const isMediaWithCommentButton = (repliesThreadInfo || (hasLinkedChat && isChannel && isLocal))
+  const commentsThreadInfo = repliesThreadInfo?.isCommentsInfo ? repliesThreadInfo : undefined;
+  const isLocalWithCommentButton = hasLinkedChat && isChannel && isLocal;
+
+  const isMediaWithCommentButton = (commentsThreadInfo || isLocalWithCommentButton)
     && !isInDocumentGroupNotLast
     && messageListType === 'thread'
     && !noComments;
-  const withCommentButton = repliesThreadInfo?.isCommentsInfo
+  const withCommentButton = (commentsThreadInfo || isLocalWithCommentButton)
     && !isInDocumentGroupNotLast && messageListType === 'thread'
     && !noComments;
   const withQuickReactionButton = !isTouchScreen && !phoneCall && !isInSelectMode && defaultReaction
@@ -1726,8 +1729,8 @@ const Message = ({
             >
               {withCommentButton && isCustomShape && (
                 <CommentButton
-                  threadInfo={repliesThreadInfo}
-                  disabled={noComments}
+                  threadInfo={commentsThreadInfo}
+                  disabled={noComments || !commentsThreadInfo}
                   isLoading={isLoadingComments}
                   isCustomShape
                   asActionButton
@@ -1761,8 +1764,8 @@ const Message = ({
           )}
           {withCommentButton && !isCustomShape && (
             <CommentButton
-              threadInfo={repliesThreadInfo}
-              disabled={noComments}
+              threadInfo={commentsThreadInfo}
+              disabled={noComments || !commentsThreadInfo}
               isLoading={isLoadingComments}
             />
           )}

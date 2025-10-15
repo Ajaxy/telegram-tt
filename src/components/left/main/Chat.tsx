@@ -97,6 +97,7 @@ type OwnProps = {
   observeIntersection?: ObserveFn;
   onDragEnter?: (chatId: string) => void;
   withTags?: boolean;
+  onReorderAnimationEnd?: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -172,6 +173,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   chatFoldersById,
   areTagsEnabled,
   withTags,
+  onReorderAnimationEnd,
 }) => {
   const {
     openChat,
@@ -234,6 +236,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     orderDiff,
     isSavedDialog,
     isPreview,
+    onReorderAnimationEnd,
     topics,
     noForumTitle: shouldRenderTags,
   });

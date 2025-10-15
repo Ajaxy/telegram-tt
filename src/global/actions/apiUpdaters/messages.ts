@@ -587,6 +587,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       } = update;
 
       global = updateThreadInfos(global, [threadInfo]);
+      setGlobal(global);
+      global = getGlobal();
+
       const { chatId, threadId } = threadInfo;
       if (!chatId || !threadId) return;
 

@@ -130,7 +130,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
       : [];
   }, [topicsInfo]);
 
-  const { orderDiffById, getAnimationType } = useOrderDiff(orderedIds, chat?.id);
+  const { orderDiffById, getAnimationType, onReorderAnimationEnd } = useOrderDiff(orderedIds, chat?.id);
 
   const [viewportIds, getMore] = useInfiniteScroll(() => {
     if (!chat) return;
@@ -207,6 +207,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
         observeIntersection={observe}
         animationType={getAnimationType(id)}
         orderDiff={orderDiffById[id]}
+        onReorderAnimationEnd={onReorderAnimationEnd}
       />
     ));
   }

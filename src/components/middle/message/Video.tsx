@@ -188,6 +188,14 @@ const Video = <T,>({
   } = useShowTransition({
     isOpen: Boolean((isLoadAllowed || fullMediaData) && !isPlayAllowed && !shouldRenderSpinner),
   });
+  const {
+    ref: transferProgressRef,
+    shouldRender: shouldRenderTransferProgress,
+  } = useShowTransition({
+    isOpen: isTransferring && (!isUnsupported || isDownloading),
+    noMountTransition: wasLoadDisabled,
+    withShouldRender: true,
+  });
 
   const [playProgress, setPlayProgress] = useState<number>(0);
   const handleTimeUpdate = useLastCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -324,8 +332,8 @@ const Video = <T,>({
       {!isLoadAllowed && !fullMediaData && (
         <Icon name="download" />
       )}
-      {isTransferring && (!isUnsupported || isDownloading) ? (
-        <span className="message-transfer-progress">
+      {shouldRenderTransferProgress ? (
+        <span ref={transferProgressRef} className="message-transfer-progress">
           {(isUploading || isDownloading) ? `${Math.round(transferProgress * 100)}%` : '...'}
         </span>
       ) : (

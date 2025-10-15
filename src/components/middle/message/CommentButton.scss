@@ -23,7 +23,7 @@
 
   background: var(--background-color);
 
-  transition: background-color 0.15s, color 0.15s;
+  transition: background-color 0.15s, color 0.15s, opacity 150ms, backdrop-filter 150ms, filter 150ms;
 
   .label {
     overflow: hidden;
@@ -70,8 +70,6 @@
     opacity: 0;
     background-color: var(--pattern-color);
 
-    transition: opacity 150ms, backdrop-filter 150ms, filter 150ms;
-
     &::after {
       content: attr(data-cnt);
 
@@ -94,6 +92,10 @@
       @supports not (backdrop-filter: brightness(115%)) {
         filter: brightness(115%);
       }
+    }
+
+    &.disabled {
+      background-color: var(--pattern-color);
     }
 
     .Message:hover &, &.loading {
@@ -138,6 +140,10 @@
       background-color: rgba(255, 255, 255, 0.08);
       filter: none;
       backdrop-filter: none;
+    }
+
+    &.disabled {
+      background-color: rgba(255, 255, 255, 0.08);
     }
   }
 
@@ -249,6 +255,8 @@
   &.disabled {
     pointer-events: none;
     cursor: var(--custom-cursor, default);
+    opacity: 0.65;
+    background-color: var(--hover-color);
   }
 }
 

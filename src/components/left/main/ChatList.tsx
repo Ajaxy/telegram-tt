@@ -105,7 +105,7 @@ const ChatList: FC<OwnProps> = ({
     ? archiveSettings?.isMinimized ? ARCHIVE_MINIMIZED_HEIGHT : CHAT_HEIGHT_PX : 0;
   const frozenNotificationHeight = shouldShowFrozenAccountNotification ? 68 : 0;
 
-  const { orderDiffById, getAnimationType } = useOrderDiff(orderedIds);
+  const { orderDiffById, getAnimationType, onReorderAnimationEnd: onReorderAnimationEnd } = useOrderDiff(orderedIds);
 
   const [viewportIds, getMore] = useInfiniteScroll(undefined, orderedIds, undefined, CHAT_LIST_SLICE);
 
@@ -242,6 +242,7 @@ const ChatList: FC<OwnProps> = ({
           isSavedDialog={isSaved}
           animationType={getAnimationType(id)}
           orderDiff={orderDiffById[id]}
+          onReorderAnimationEnd={onReorderAnimationEnd}
           offsetTop={offsetTop}
           observeIntersection={observe}
           onDragEnter={handleDragEnter}

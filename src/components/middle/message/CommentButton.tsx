@@ -21,7 +21,7 @@ import Spinner from '../../ui/Spinner';
 import './CommentButton.scss';
 
 type OwnProps = {
-  threadInfo: ApiCommentsInfo;
+  threadInfo?: ApiCommentsInfo;
   disabled?: boolean;
   isLoading?: boolean;
   isCustomShape?: boolean;
@@ -45,10 +45,15 @@ const CommentButton: FC<OwnProps> = ({
   const lang = useLang();
   const {
     originMessageId, chatId, messagesCount, lastMessageId, lastReadInboxMessageId, recentReplierIds, originChannelId,
-  } = threadInfo;
+  } = threadInfo || {};
 
   const handleClick = useLastCallback(() => {
     const global = getGlobal();
+
+    if (!originMessageId || !originChannelId) {
+      return;
+    }
+
     if (selectIsCurrentUserFrozen(global)) {
       openFrozenAccountModal();
       return;
@@ -70,10 +75,6 @@ const CommentButton: FC<OwnProps> = ({
       return selectPeer(global, peerId);
     }).filter(Boolean);
   }, [recentReplierIds]);
-
-  if (messagesCount === undefined) {
-    return undefined;
-  }
 
   function renderRecentRepliers() {
     return (
@@ -102,7 +103,7 @@ const CommentButton: FC<OwnProps> = ({
 
   return (
     <div
-      data-cnt={formatIntegerCompact(lang, messagesCount)}
+      data-cnt={formatIntegerCompact(lang, messagesCount || 0)}
       className={buildClassName(
         'CommentButton',
         hasUnread && 'has-unread',
