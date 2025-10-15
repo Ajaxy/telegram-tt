@@ -282,7 +282,6 @@
 }
 
 .userRatingWrapper {
-  width: 1rem;
   font-size: 1.5rem;
 }
 
@@ -290,7 +289,7 @@
   pointer-events: none;
   paint-order: stroke fill;
 
-  -webkit-text-stroke: 2px var(--rating-outline-color);
+  -webkit-text-stroke: 3px var(--rating-outline-color);
 }
 
 .ratingNegativeIcon {

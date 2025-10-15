@@ -482,8 +482,8 @@ const ProfileInfo = ({
         isPlain && styles.plain,
       )}
       style={buildStyle(
-        profileColorSet && `--rating-outline-color: ${isExpanded ? 'transparent' : profileColorSet?.bgColors[1]}`,
-        profileColorSet && !isExpanded && `--rating-text-color: ${profileColorSet?.bgColors[1]}`,
+        profileColorSet && `--rating-outline-color: ${isExpanded ? 'transparent' : profileColorSet?.bgColors[0]}`,
+        profileColorSet && !isExpanded && `--rating-text-color: ${profileColorSet?.bgColors[0]}`,
         createVtnStyle('profileInfo', true),
       )}
       dir={lang.isRtl ? 'rtl' : undefined}
