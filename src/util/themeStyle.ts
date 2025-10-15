@@ -47,7 +47,7 @@ export function validateHexColor(color: string) {
 export function getPropertyHexColor(style: CSSStyleDeclaration, property: string) {
   const value = style.getPropertyValue(property);
   if (!value) return undefined;
-  return prepareHexColor(value.trim());
+  return prepareHexColor(value.trim()).slice(0, 7);
 }
 
 export function prepareHexColor(color: string) {
