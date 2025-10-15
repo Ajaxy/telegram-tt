@@ -350,7 +350,7 @@ const ProfileInfo = ({
     const activeDashIndex = currentPhotoIndex >= MAX_PHOTO_DASH_COUNT ? MAX_PHOTO_DASH_COUNT - 1 : currentPhotoIndex;
 
     return (
-      <div className={styles.photoDashes}>
+      <div className={styles.photoDashes} style={createVtnStyle('photoDashes', true)}>
         {enumerator.map((_, i) => (
           <span className={buildClassName(styles.photoDash, i === activeDashIndex && styles.photoDash_current)} />
         ))}
