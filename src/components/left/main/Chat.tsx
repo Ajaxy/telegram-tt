@@ -94,9 +94,10 @@ type OwnProps = {
   isPreview?: boolean;
   previewMessageId?: number;
   className?: string;
+  withTags?: boolean;
   observeIntersection?: ObserveFn;
   onDragEnter?: (chatId: string) => void;
-  withTags?: boolean;
+  onDragLeave?: NoneToVoidFunction;
   onReorderAnimationEnd?: NoneToVoidFunction;
 };
 
@@ -167,6 +168,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   className,
   isSynced,
   onDragEnter,
+  onDragLeave,
   isAccountFrozen,
   chatFolderIds,
   orderedFolderIds,
@@ -408,9 +410,10 @@ const Chat: FC<OwnProps & StateProps> = ({
       style={`top: ${offsetTop}px`}
       ripple={!isForum && !isMobile}
       contextActions={contextActions}
+      withPortalForMenu
       onClick={handleClick}
       onDragEnter={handleDragEnter}
-      withPortalForMenu
+      onDragLeave={onDragLeave}
     >
       <div className={buildClassName('status', 'status-clickable')}>
         <Avatar

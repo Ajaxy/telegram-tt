@@ -1,5 +1,5 @@
-import type { FC } from '../../../lib/teact/teact';
-import { memo, useCallback } from '../../../lib/teact/teact';
+import type { FC } from '@teact';
+import { memo, useCallback } from '@teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiUser } from '../../../api/types';
@@ -8,8 +8,13 @@ import { StoryViewerOrigin } from '../../../types';
 import { UNMUTE_TIMESTAMP } from '../../../config';
 import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
-  selectChat, selectIsChatPinned, selectNotifyDefaults, selectNotifyException, selectUser,
+  selectChat,
+  selectIsChatPinned,
+  selectNotifyDefaults,
+  selectNotifyException,
+  selectUser,
 } from '../../../global/selectors';
+import { onDragEnter, onDragLeave } from '../../../util/dragNDropHandlers.ts';
 import { isUserId } from '../../../util/entities/ids';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 
@@ -105,6 +110,14 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
     });
   });
 
+  const handleDragEnter = useLastCallback((e) => {
+    e.preventDefault();
+
+    onDragEnter(() => {
+      onClick(chatId);
+    }, true);
+  });
+
   const buttonRef = useSelectWithEnter(() => {
     onClick(chatId);
   });
@@ -112,9 +125,11 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   return (
     <ListItem
       className="chat-item-clickable search-result"
-      onClick={handleClick}
       contextActions={contextActions}
       buttonRef={buttonRef}
+      onClick={handleClick}
+      onDragEnter={handleDragEnter}
+      onDragLeave={onDragLeave}
     >
       {isUserId(chatId) ? (
         <PrivateChatInfo

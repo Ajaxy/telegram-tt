@@ -37,8 +37,6 @@ type OwnProps = {
   onWheel?: (e: React.WheelEvent<HTMLDivElement>) => void;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
-  onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDragLeave?: (e: React.DragEvent<HTMLDivElement>) => void;
 };
 
 const DEFAULT_LIST_SELECTOR = '.ListItem';
@@ -69,8 +67,6 @@ const InfiniteScroll: FC<OwnProps> = ({
   onWheel,
   onClick,
   onKeyDown,
-  onDragOver,
-  onDragLeave,
 }: OwnProps) => {
   let containerRef = useRef<HTMLDivElement>();
   if (ref) {
@@ -270,13 +266,11 @@ const InfiniteScroll: FC<OwnProps> = ({
     <div
       ref={containerRef}
       className={className}
-      onWheel={onWheel}
-      teactFastList={!noFastList && !withAbsolutePositioning}
-      onKeyDown={onKeyDown}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onClick={onClick}
       style={style}
+      teactFastList={!noFastList && !withAbsolutePositioning}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+      onWheel={onWheel}
     >
       {beforeChildren}
       {withAbsolutePositioning && items?.length ? (
