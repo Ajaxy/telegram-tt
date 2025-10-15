@@ -54,8 +54,6 @@ export type OwnProps = {
   isCondensedHeader?: boolean;
 };
 
-const NBSP = '\u00A0';
-
 const Modal: FC<OwnProps> = ({
   dialogRef,
   title,
@@ -147,25 +145,25 @@ const Modal: FC<OwnProps> = ({
       return header;
     }
 
-    if (!title && !withCloseButton) return undefined;
+    const closeButton = withCloseButton ? (
+      <Button
+        className={buildClassName(hasAbsoluteCloseButton && 'modal-absolute-close-button')}
+        round
+        color={absoluteCloseButtonColor}
+        size="smaller"
+        ariaLabel={lang('Close')}
+        onClick={onClose}
+      >
+        <Icon name="close" />
+      </Button>
+    ) : undefined;
 
-    return (
+    return title ? (
       <div className={buildClassName('modal-header', headerClassName, isCondensedHeader && 'modal-header-condensed')}>
-        {withCloseButton && (
-          <Button
-            className={buildClassName(hasAbsoluteCloseButton && 'modal-absolute-close-button')}
-            round
-            color={absoluteCloseButtonColor}
-            size="smaller"
-            ariaLabel={lang('Close')}
-            onClick={onClose}
-          >
-            <Icon name="close" />
-          </Button>
-        )}
-        <div className="modal-title">{title || NBSP}</div>
+        {closeButton}
+        <div className="modal-title">{title}</div>
       </div>
-    );
+    ) : closeButton;
   }
 
   const fullClassName = buildClassName(

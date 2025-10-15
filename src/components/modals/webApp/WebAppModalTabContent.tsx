@@ -107,6 +107,8 @@ const DEFAULT_BUTTON_TEXT: Record<string, string> = {
   close: 'Close',
 };
 
+const NBSP = '\u00A0';
+
 const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   modal,
   webApp,
@@ -1109,7 +1111,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       {popupParameters && (
         <Modal
           isOpen={Boolean(popupParameters)}
-          title={popupParameters.title}
+          title={popupParameters.title || NBSP}
           className={
             buildClassName(styles.webAppPopup, !popupParameters.title?.trim().length && styles.withoutTitle)
           }
