@@ -324,6 +324,10 @@
   position: relative;
   height: calc(100% - var(--header-height));
 
+  .with-notch::before {
+    top: 0 !important;
+  }
+
   .settings-content {
     height: 100%;
   }
