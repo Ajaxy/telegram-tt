@@ -16,8 +16,6 @@ addActionHandler('setGlobalSearchQuery', (global, actions, payload): ActionRetur
     && currentContent !== GlobalSearchContent.BotApps && currentContent !== GlobalSearchContent.PublicPosts
     ? { chats: !chatId, messages: true } : undefined;
 
-  actions.checkSearchPostsFlood({ query, tabId });
-
   return updateGlobalSearch(global, {
     globalResults: {},
     localResults: {},
