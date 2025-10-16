@@ -465,8 +465,34 @@ export function getMediaTransferState(
   };
 }
 
+export function getMediaSearchType(media: DownloadableMedia):
+  Extract<ApiMessageSearchType, 'gif' | 'media' | 'documents' | 'audio' | 'voice'> | undefined {
+  if (media.mediaType === 'video') {
+    if (media.isRound) return 'voice';
+    return media.isGif ? 'gif' : 'media';
+  }
+
+  if (media.mediaType === 'audio') {
+    return 'audio';
+  }
+
+  if (media.mediaType === 'voice') {
+    return 'voice';
+  }
+
+  if (media.mediaType === 'document') {
+    return 'documents';
+  }
+
+  if (media.mediaType === 'photo') {
+    return 'media';
+  }
+
+  return undefined;
+}
+
 export function getMessageContentIds(
-  messages: Record<number, ApiMessage>, messageIds: number[], contentType: ApiMessageSearchType | 'inlineMedia',
+  messages: Record<number, ApiMessage>, messageIds: number[], contentType: ApiMessageSearchType,
 ) {
   let validator: (message: ApiMessage) => unknown;
 
@@ -501,19 +527,6 @@ export function getMessageContentIds(
       validator = (message: ApiMessage) => {
         const video = getMessageVideo(message);
         return getMessageVoice(message) || (video && video.isRound);
-      };
-      break;
-
-    case 'inlineMedia':
-      validator = (message: ApiMessage) => {
-        const video = getMessageVideo(message);
-        const document = getMessageDocument(message);
-        return (
-          getMessagePhoto(message)
-          || (video && !video.isRound && !video.isGif)
-          || (document && isDocumentPhoto(document))
-          || (document && isDocumentVideo(document))
-        );
       };
       break;
 

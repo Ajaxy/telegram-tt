@@ -30,6 +30,7 @@ import {
   getIsDownloading,
   getIsSavedDialog,
   getMessageDocument,
+  getMessageHtmlId,
   isChatChannel,
   isChatGroup,
   isUserBot,
@@ -903,6 +904,7 @@ const Profile = ({
           (viewportIds as number[]).map((id) => messagesById[id] && (
             <Document
               key={id}
+              id={`shared-media${getMessageHtmlId(id)}`}
               document={getMessageDocument(messagesById[id])!}
               datetime={messagesById[id].date}
               smaller
@@ -912,6 +914,7 @@ const Profile = ({
               onDateClick={handleMessageFocus}
               message={messagesById[id]}
               shouldWarnAboutFiles={shouldWarnAboutFiles}
+              onMediaClick={handleSelectMedia}
             />
           ))
         ) : resultType === 'links' ? (

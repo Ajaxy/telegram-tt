@@ -2,7 +2,7 @@ import type {
   ApiMessage, ApiPeer, ApiPeerPhotos, ApiSponsoredMessage,
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import { type MediaViewerMedia, MediaViewerOrigin } from '../../../types';
+import type { MediaViewerMedia, MediaViewerOrigin } from '../../../types';
 
 import { getMessageContent, isDocumentPhoto, isDocumentVideo } from '../../../global/helpers';
 import { selectWebPageFromMessage } from '../../../global/selectors';
@@ -28,7 +28,6 @@ export type MediaViewerItem = {
 
 export type ViewableMedia = {
   media: MediaViewerMedia;
-  isGif?: boolean;
   isSingle?: boolean;
 };
 
@@ -87,7 +86,6 @@ export default function selectViewableMedia(
     const media = params.media[params.mediaIndex];
     return {
       media,
-      isGif: media.mediaType === 'video' && media.isGif,
       isSingle: params.media.length === 1,
     };
   }
@@ -139,7 +137,6 @@ export default function selectViewableMedia(
       const { photo: extendedPhoto, video: extendedVideo } = extendedMedia;
       return {
         media: (extendedPhoto || extendedVideo)!,
-        isGif: extendedVideo?.isGif,
       };
     }
   }
@@ -149,8 +146,6 @@ export default function selectViewableMedia(
   if (media) {
     return {
       media,
-      isGif: video?.isGif,
-      isSingle: video?.isGif && origin !== MediaViewerOrigin.SharedMedia,
     };
   }
 

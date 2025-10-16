@@ -42,14 +42,16 @@ type OwnProps = {
   autoLoadFileMaxSizeMb?: number;
   isDownloading?: boolean;
   shouldWarnAboutFiles?: boolean;
-  onCancelUpload?: () => void;
-  onMediaClick?: () => void;
+  id?: string;
+  onCancelUpload?: NoneToVoidFunction;
 } & ({
   message: ApiMessage;
   onDateClick: (arg: ApiMessage) => void;
+  onMediaClick?: (messageId: number) => void;
 } | {
   message?: ApiMessage;
   onDateClick?: never;
+  onMediaClick?: NoneToVoidFunction;
 });
 
 const BYTES_PER_MB = 1024 * 1024;
@@ -69,6 +71,7 @@ const Document = ({
   shouldWarnAboutFiles,
   isDownloading,
   message,
+  id,
   onCancelUpload,
   onMediaClick,
   onDateClick,
@@ -161,7 +164,11 @@ const Document = ({
     }
 
     if (withMediaViewer) {
-      onMediaClick();
+      if (message) {
+        onMediaClick?.(message.id);
+      } else if (onMediaClick) {
+        (onMediaClick as NoneToVoidFunction)();
+      }
       return;
     }
 
@@ -187,6 +194,7 @@ const Document = ({
     <>
       <File
         ref={ref}
+        id={id}
         name={fileName}
         extension={extension}
         size={size}

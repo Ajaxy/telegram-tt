@@ -479,7 +479,7 @@ async function searchChatMedia<T extends GlobalState>(
 
   const loadingState = calcLoadingState(direction, limit, newFoundIds.length, currentSegment);
 
-  const filteredIds = getMessageContentIds(byId, newFoundIds, 'inlineMedia');
+  const filteredIds = getMessageContentIds(byId, newFoundIds, 'media');
   currentSegment = mergeWithChatMediaSearchSegment(
     filteredIds,
     loadingState,

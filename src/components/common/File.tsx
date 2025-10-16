@@ -27,6 +27,7 @@ import './File.scss';
 
 type OwnProps = {
   ref?: ElementRef<HTMLDivElement>;
+  id?: string;
   name: string;
   extension?: string;
   size: number;
@@ -48,6 +49,7 @@ type OwnProps = {
 
 const File: FC<OwnProps> = ({
   ref,
+  id,
   name,
   size,
   extension = '',
@@ -101,7 +103,7 @@ const File: FC<OwnProps> = ({
   );
 
   return (
-    <div ref={elementRef} className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
+    <div id={id} ref={elementRef} className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
       {isSelectable && (
         <div className="message-select-control no-selection">
           {isSelected && <Icon name="select" />}
