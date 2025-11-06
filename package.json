@@ -18,8 +18,8 @@
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "telegraph:update_changelog": "node ./dev/telegraphChangelog.js",
-    "check": "tsc && stylelint \"**/*.{css,scss}\" && eslint",
-    "check:fix": "stylelint \"**/*.{css,scss}\" --fix && eslint --fix",
+    "check": "tsc && stylelint \"**/*.{css,scss}\" --cache --cache-location .cache/.stylelintcache && eslint --cache --cache-location .cache/.eslintcache",
+    "check:fix": "stylelint \"**/*.{css,scss}\" --fix --cache --cache-location .cache/.stylelintcache && eslint --fix --cache --cache-location .cache/.eslintcache",
     "tl:rehash": "node ./dev/tlHash.js",
     "gramjs:tl": "tsx ./src/lib/gramjs/tl/generateModules.ts",
     "lang:ts": "tsx ./dev/generateLangTypes.js",
@@ -29,6 +29,7 @@
     "test:playwright": "playwright test",
     "test:record": "playwright codegen localhost:1235",
     "statoscope:validate-diff": "statoscope validate --input input.json --reference reference.json",
+    "postinstall": "node -e \"require('fs').rmSync('.cache', { recursive: true, force: true })\"",
     "postversion": "echo $(node -p \"require('./package.json').version\") > public/version.txt && git commit --amend --no-verify --no-edit public/version.txt"
   },
   "engines": {
