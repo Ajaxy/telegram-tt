@@ -98,6 +98,7 @@ type StateProps = {
   theme: ThemeKey;
   isPlain?: boolean;
   savedGifts?: ApiSavedGifts;
+  hasAvatar?: boolean;
 };
 
 const EMOJI_STATUS_SIZE = 24;
@@ -130,6 +131,7 @@ const ProfileInfo = ({
   theme,
   isPlain,
   savedGifts,
+  hasAvatar,
   onExpand,
 }: OwnProps & StateProps) => {
   const {
@@ -286,7 +288,7 @@ const ProfileInfo = ({
       return;
     }
 
-    onExpand?.();
+    if (hasAvatar) onExpand?.();
   });
 
   function handleSelectFallbackPhoto() {
@@ -576,7 +578,7 @@ const ProfileInfo = ({
           size="jumbo"
           peer={peer}
           style={createVtnStyle('avatar', true)}
-          onClick={handleMinimizedAvatarClick}
+          onClick={hasAvatar ? handleMinimizedAvatarClick : undefined}
         />
       )}
 
@@ -627,6 +629,7 @@ export default memo(withGlobal<OwnProps>(
 
     const hasBackground = selectPeerHasProfileBackground(global, peerId);
     const savedGifts = selectPeerSavedGifts(global, peerId);
+    const hasAvatar = Boolean(peer?.avatarPhotoId);
 
     return {
       user,
@@ -646,6 +649,7 @@ export default memo(withGlobal<OwnProps>(
       theme,
       isPlain: !hasBackground,
       savedGifts,
+      hasAvatar,
     };
   },
 )(ProfileInfo));

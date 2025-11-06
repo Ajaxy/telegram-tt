@@ -74,15 +74,10 @@
 
 .uniqueGiftBackground {
   position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-
-  aspect-ratio: 1 / 1;
+  inset: 0;
   border-radius: 0.25rem;
 }
 
 .giftSticker {
-  margin-top: 0.25rem;
-  margin-inline: 0.25rem;
+  margin: 0.25rem;
 }

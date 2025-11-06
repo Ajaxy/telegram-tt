@@ -193,7 +193,7 @@ export function selectPeerProfileColor<T extends GlobalState>(global: T, peer: A
   const profileColor = !isCustomPeer ? peer.profileColor : undefined;
   if (profileColor?.type === 'collectible') return undefined;
 
-  const key = profileColor?.color || peerColorId;
-  if (!key) return undefined;
+  const key = profileColor?.color ?? peerColorId;
+  if (key === undefined) return undefined;
   return global.peerColors?.profile?.[key];
 }

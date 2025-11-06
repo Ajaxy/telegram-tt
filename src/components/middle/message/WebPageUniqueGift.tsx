@@ -45,16 +45,15 @@ const WebPageUniqueGift = ({
       onMouseEnter={!IS_TOUCH_ENV ? markHover : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? unmarkHover : undefined}
     >
-      <div className={styles.backgroundWrapper}>
-        <RadialPatternBackground
-          className={styles.background}
-          backgroundColors={backgroundColors}
-          patternIcon={pattern!.sticker}
-          centerEmptiness={0.15}
-          ringsCount={2}
-          ovalFactor={1.2}
-        />
-      </div>
+      <RadialPatternBackground
+        className={styles.background}
+        backgroundColors={backgroundColors}
+        patternIcon={pattern!.sticker}
+        centerEmptiness={0.15}
+        ringsCount={2}
+        ovalFactor={1.2}
+        withAdaptiveHeight
+      />
       <div ref={stickerRef} className={styles.stickerWrapper}>
         <StickerView
           containerRef={stickerRef}

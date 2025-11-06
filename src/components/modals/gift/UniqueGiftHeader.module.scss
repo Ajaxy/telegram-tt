@@ -14,10 +14,6 @@
   &.withManageButtons {
     --_height: 18.5rem;
 
-    .radialPattern {
-      inset: -8rem -5% -5% -5%;
-    }
-
     .sticker {
       margin-top: 2.5rem;
     }
@@ -52,8 +48,7 @@
 .radialPattern {
   position: absolute;
   z-index: -1;
-  inset: -5rem -5% -5% -5%;
-  height: calc(var(--height) * 1.05);
+  inset: 0;
 }
 
 .amount {

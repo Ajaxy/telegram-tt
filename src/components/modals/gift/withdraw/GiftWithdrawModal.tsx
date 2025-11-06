@@ -87,6 +87,7 @@ const GiftWithdrawModal = ({ modal, hasPassword, passwordHint }: OwnProps & Stat
     <Modal
       isOpen={isOpen}
       title={lang('GiftWithdrawTitle')}
+      isCondensedHeader
       hasCloseButton
       isSlim
       onClose={handleClose}
@@ -99,6 +100,9 @@ const GiftWithdrawModal = ({ modal, hasPassword, passwordHint }: OwnProps & Stat
                 className={styles.backdrop}
                 backgroundColors={[giftAttributes.backdrop!.centerColor, giftAttributes.backdrop!.edgeColor]}
                 patternIcon={giftAttributes.pattern?.sticker}
+                ringsCount={1}
+                ovalFactor={1}
+                patternSize={12}
               />
               <AnimatedIconFromSticker
                 className={styles.sticker}

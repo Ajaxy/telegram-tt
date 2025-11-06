@@ -99,7 +99,7 @@ const StarGiftAction = ({
           backgroundColors={backgroundColors}
           patternIcon={pattern.sticker}
           patternSize={14}
-          yPosition={9.5 * REM}
+          yPosition={5 * REM}
           clearBottomSector
         />
       </div>

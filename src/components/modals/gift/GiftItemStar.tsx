@@ -26,10 +26,10 @@ import styles from './GiftItem.module.scss';
 
 export type OwnProps = {
   gift: ApiStarGift;
-  observeIntersection?: ObserveFn;
-  onClick: (gift: ApiStarGift, target: 'original' | 'resell') => void;
   isResale?: boolean;
   withTransferBadge?: boolean;
+  observeIntersection?: ObserveFn;
+  onClick: (gift: ApiStarGift, target: 'original' | 'resell') => void;
 };
 
 type StateProps = {
@@ -39,7 +39,7 @@ type StateProps = {
 const GIFT_STICKER_SIZE = 90;
 
 function GiftItemStar({
-  gift, observeIntersection, onClick, isResale, isCurrentUserPremium, withTransferBadge,
+  gift, isResale, isCurrentUserPremium, withTransferBadge, observeIntersection, onClick,
 }: OwnProps & StateProps) {
   const { openGiftInfoModal, openPremiumModal, showNotification, checkCanSendGift } = getActions();
 

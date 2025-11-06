@@ -141,6 +141,7 @@ const SavedGift = ({
         patternSize={14}
         ringsCount={1}
         ovalFactor={1}
+        withAdaptiveHeight
       />
     );
   }, [backdrop, pattern]);

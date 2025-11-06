@@ -29,6 +29,7 @@ type OwnProps = {
   className?: string;
   clearBottomSector?: boolean;
   yPosition?: number;
+  withAdaptiveHeight?: boolean;
 };
 
 const BASE_RING_ITEM_COUNT = 8;
@@ -40,7 +41,7 @@ const DARK_LUMA_THRESHOLD = 255 * 0.2;
 
 const DEFAULT_PATTERN_SIZE = 20;
 const DEFAULT_RINGS_COUNT = 3;
-const DEFAULT_OVAL_FACTOR = 1.4;
+const DEFAULT_OVAL_FACTOR = 1.61;
 
 const RadialPatternBackground = ({
   backgroundColors,
@@ -53,6 +54,7 @@ const RadialPatternBackground = ({
   clearBottomSector,
   className,
   yPosition,
+  withAdaptiveHeight,
 }: OwnProps) => {
   const containerRef = useRef<HTMLDivElement>();
   const canvasRef = useRef<HTMLCanvasElement>();
@@ -125,7 +127,8 @@ const RadialPatternBackground = ({
     if (!width || !height) return;
 
     const centerX = width / 2;
-    const centerY = yPosition !== undefined ? yPosition * dpr : height / 2;
+    const centerY = withAdaptiveHeight ? height / 2
+      : yPosition !== undefined ? yPosition * dpr : width / 2;
 
     ctx.clearRect(0, 0, width, height);
 
@@ -133,8 +136,7 @@ const RadialPatternBackground = ({
       x, y, sizeFactor,
     }) => {
       const renderX = x * Math.max(width, MIN_SIZE * dpr) + centerX;
-      const renderY = yPosition !== undefined ? y * Math.max(width, MIN_SIZE * dpr) + centerY
-        : y * Math.max(height, MIN_SIZE * dpr) + centerY;
+      const renderY = y * Math.max(withAdaptiveHeight ? height : width, MIN_SIZE * dpr) + centerY;
       const size = patternSize * dpr * sizeFactor;
 
       ctx.drawImage(emojiImage, renderX - size / 2, renderY - size / 2, size, size);

@@ -17,16 +17,10 @@
   font-weight: var(--font-weight-semibold);
 }
 
-.backgroundWrapper {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  border-radius: inherit;
-}
-
 .background {
   position: absolute;
-  inset: -1rem 0 0 0;
+  inset: 0;
+  border-radius: inherit;
 }
 
 .stickerWrapper {
