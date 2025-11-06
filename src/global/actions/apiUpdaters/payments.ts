@@ -3,8 +3,8 @@ import type { ActionReturnType } from '../../types';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import * as langProvider from '../../../util/oldLangProvider';
 import { getPeerTitle } from '../../helpers/peers';
-import { addActionHandler, setGlobal } from '../../index';
-import { updateStarsBalance } from '../../reducers';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import { removeGiftInfoOriginalDetails, updateStarsBalance } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import { selectPeer, selectTabState } from '../../selectors';
 
@@ -174,6 +174,22 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       if (inputInvoice?.type === 'stargiftUpgrade' && global.currentUserId) {
         actions.reloadPeerSavedGifts({ peerId: global.currentUserId });
+      }
+
+      if (inputInvoice?.type === 'stargiftDropOriginalDetails') {
+        global = getGlobal();
+        global = removeGiftInfoOriginalDetails(global, tabId);
+        setGlobal(global);
+
+        actions.closeGiftDescriptionRemoveModal({ tabId });
+        actions.showNotification({
+          message: { key: 'RemoveGiftDescriptionSuccessMessage' },
+          tabId,
+        });
+
+        if (global.currentUserId) {
+          actions.reloadPeerSavedGifts({ peerId: global.currentUserId });
+        }
       }
 
       if (inputInvoice?.type === 'stargiftPrepaidUpgrade') {

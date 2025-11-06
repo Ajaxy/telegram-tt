@@ -42,6 +42,7 @@ import type {
   ApiStarGift,
   ApiStarGiftAttribute,
   ApiStarGiftAttributeCounter,
+  ApiStarGiftAttributeOriginalDetails,
   ApiStarGiftUnique,
   ApiStarGiveawayOption,
   ApiStarsSubscription,
@@ -852,6 +853,12 @@ export type TabState = {
   giftTransferConfirmModal?: {
     gift: ApiSavedStarGift;
     recipientId: string;
+  };
+
+  giftDescriptionRemoveModal?: {
+    gift: ApiSavedStarGift;
+    price: number;
+    details: ApiStarGiftAttributeOriginalDetails;
   };
 
   giftUpgradeModal?: {

@@ -1292,6 +1292,9 @@ export interface LangPair {
   'GiftTransferTitle': undefined;
   'GiftTransferTON': undefined;
   'GiftTransferConfirmButtonFree': undefined;
+  'RemoveGiftDescriptionTitle': undefined;
+  'RemoveGiftDescriptionConfirmText': undefined;
+  'RemoveGiftDescriptionSuccessMessage': undefined;
   'GiftUpgradeUniqueTitle': undefined;
   'GiftUpgradeUniqueDescription': undefined;
   'GiftUpgradeTransferableTitle': undefined;
@@ -1717,6 +1720,8 @@ export interface LangPair {
   'ConfirmBuyGiftForTonDescription': undefined;
   'TitleGiftLocked': undefined;
   'QuickPreview': undefined;
+  'DropOriginalDetailsTransaction': undefined;
+  'StarGiftReasonDropOriginalDetails': undefined;
   'GiftAnUpgradeButton': undefined;
   'GiftPrepaidUpgradeTransactionTitle': undefined;
   'ActionStarGiftPrepaidUpgradedYou': undefined;
@@ -2190,6 +2195,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   'GiftTransferSuccessMessage': {
     'gift': V;
     'peer': V;
+  };
+  'RemoveGiftDescriptionButton': {
+    'amount': V;
   };
   'GiftPeerUpgradeText': {
     'peer': V;

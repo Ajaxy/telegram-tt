@@ -266,6 +266,7 @@ addActionHandler('openGiftInfoModalFromMessage', async (global, actions, payload
     canExportAt: uniqueGift?.canExportAt,
     savedId: action.savedId,
     transferStars: uniqueGift?.transferStars,
+    dropOriginalDetailsStars: uniqueGift?.dropOriginalDetailsStars,
     prepaidUpgradeHash: starGift?.prepaidUpgradeHash,
   };
 
@@ -456,6 +457,22 @@ addActionHandler('openGiftTransferConfirmModal', (global, actions, payload): Act
 });
 
 addTabStateResetterAction('closeGiftTransferConfirmModal', 'giftTransferConfirmModal');
+
+addActionHandler('openGiftDescriptionRemoveModal', (global, actions, payload): ActionReturnType => {
+  const {
+    gift, price, details, tabId = getCurrentTabId(),
+  } = payload;
+
+  return updateTabState(global, {
+    giftDescriptionRemoveModal: {
+      gift,
+      price,
+      details,
+    },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeGiftDescriptionRemoveModal', 'giftDescriptionRemoveModal');
 
 addActionHandler('updateSelectedGiftCollection', (global, actions, payload): ActionReturnType => {
   const { peerId, collectionId, tabId = getCurrentTabId() } = payload;

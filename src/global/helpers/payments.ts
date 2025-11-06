@@ -235,6 +235,17 @@ export function getRequestInputInvoice<T extends GlobalState>(
     };
   }
 
+  if (inputInvoice.type === 'stargiftDropOriginalDetails') {
+    const { inputSavedGift } = inputInvoice;
+    const savedGift = getRequestInputSavedStarGift(global, inputSavedGift);
+    if (!savedGift) return undefined;
+
+    return {
+      type: 'stargiftDropOriginalDetails',
+      inputSavedGift: savedGift,
+    };
+  }
+
   if (inputInvoice.type === 'stargiftPrepaidUpgrade') {
     const { peerId, hash } = inputInvoice;
     const peer = selectPeer(global, peerId);

@@ -98,7 +98,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     }
 
     const {
-      giveawayPostId, photo, amount, isGiftUpgrade, starGift, isGiftResale,
+      giveawayPostId, photo, amount, isGiftUpgrade, isDropOriginalDetails, starGift, isGiftResale,
       starRefCommision,
     } = transaction;
 
@@ -116,7 +116,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
 
     const title = getTransactionTitle(oldLang, lang, transaction);
 
-    const messageLink = peer && transaction.messageId && !isGiftUpgrade
+    const messageLink = peer && transaction.messageId && !isGiftUpgrade && !isDropOriginalDetails
       ? getMessageLink(peer, undefined, transaction.messageId) : undefined;
     const giveawayMessageLink = peer && giveawayPostId ? getMessageLink(peer, undefined, giveawayPostId) : undefined;
 
@@ -131,7 +131,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
         : oldLang('Media', mediaAmount);
 
     const description = transaction.description
-      || (isGiftUpgrade && starGift?.type === 'starGiftUnique' ? starGift.title : undefined)
+      || ((isGiftUpgrade || isDropOriginalDetails) && starGift?.type === 'starGiftUnique' ? starGift.title : undefined)
       || (media ? mediaText : undefined);
 
     const shouldDisplayAvatar = !media && !sticker && !transaction.isPostsSearch;
@@ -231,6 +231,13 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       ]);
     }
 
+    if (isDropOriginalDetails) {
+      tableData.push([
+        oldLang('StarGiftReason'),
+        lang('StarGiftReasonDropOriginalDetails'),
+      ]);
+    }
+
     if (isGiftResale) {
       tableData.push([
         oldLang('StarGiftReason'),
@@ -253,7 +260,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       peerLabel = oldLang('Stars.Transaction.Via');
     }
 
-    if (!transaction.isPostsSearch) {
+    if (!transaction.isPostsSearch && !isDropOriginalDetails) {
       tableData.push([
         peerLabel,
         peerId ? { chatId: peerId } : toName || '',

@@ -1558,6 +1558,10 @@
 "GiftTransferConfirmButton" = "Transfer for {amount}";
 "GiftTransferConfirmButtonFree" = "Transfer";
 "GiftTransferSuccessMessage" = "You have successfully gifted {gift} to {peer}.";
+"RemoveGiftDescriptionTitle" = "Remove Description";
+"RemoveGiftDescriptionConfirmText" = "Do you want to permanently remove this description from your gift?";
+"RemoveGiftDescriptionButton" = "Remove for {amount}";
+"RemoveGiftDescriptionSuccessMessage" = "Gift's Description Removed!";
 "GiftUpgradeUniqueTitle" = "Unique";
 "GiftUpgradeUniqueDescription" = "Turn your gift into a unique collectible that you can transfer or auction.";
 "GiftUpgradeTransferableTitle" = "Transferable";
@@ -2301,6 +2305,8 @@
 "TitleGiftLocked" = "Gift Locked";
 "GiftLockedMessage" = "This gift is currently only available to earlier Telegram users. It will unlock for your account in about **{relativeDate}**.";
 "QuickPreview" = "Quick Preview";
+"DropOriginalDetailsTransaction" = "Removed Gift Description";
+"StarGiftReasonDropOriginalDetails" = "Removed Description";
 "GiftAnUpgradeButton" = "Gift an Upgrade";
 "GiftPrepaidUpgradeTransactionTitle" = "Gift Upgrade";
 "ActionStarGiftPrepaidUpgraded" = "{user} turned the gift into a unique collectible";

@@ -1117,6 +1117,17 @@ addActionHandler('transferGift', (global, actions, payload): ActionReturnType =>
   payInputStarInvoice(global, invoice, transferStars, tabId);
 });
 
+addActionHandler('removeGiftDescription', (global, actions, payload): ActionReturnType => {
+  const { gift, price, tabId = getCurrentTabId() } = payload;
+
+  const invoice: ApiInputInvoice = {
+    type: 'stargiftDropOriginalDetails',
+    inputSavedGift: gift,
+  };
+
+  payInputStarInvoice(global, invoice, price, tabId);
+});
+
 addActionHandler('upgradePrepaidGift', (global, actions, payload): ActionReturnType => {
   const { peerId, hash, stars, tabId = getCurrentTabId() } = payload;
 

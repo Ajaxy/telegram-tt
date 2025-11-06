@@ -45,6 +45,7 @@ import type {
   ApiSendMessageAction,
   ApiSessionData,
   ApiStarGift,
+  ApiStarGiftAttributeOriginalDetails,
   ApiStarGiftUnique,
   ApiStarsSubscription,
   ApiStarsTransaction,
@@ -2661,12 +2662,22 @@ export interface ActionPayloads {
     transferStars?: number;
     recipientId: string;
   } & WithTabId;
+  removeGiftDescription: {
+    gift: ApiInputSavedStarGift;
+    price: number;
+  } & WithTabId;
   closeGiftTransferModal: WithTabId | undefined;
   openGiftTransferConfirmModal: {
     gift: ApiSavedStarGift;
     recipientId: string;
   } & WithTabId;
   closeGiftTransferConfirmModal: WithTabId | undefined;
+  openGiftDescriptionRemoveModal: {
+    gift: ApiSavedStarGift;
+    price: number;
+    details: ApiStarGiftAttributeOriginalDetails;
+  } & WithTabId;
+  closeGiftDescriptionRemoveModal: WithTabId | undefined;
   updateSelectedGiftCollection: {
     peerId: string;
     collectionId: number;

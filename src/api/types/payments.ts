@@ -399,6 +399,11 @@ export type ApiInputInvoiceStarGiftTransfer = {
   recipientId: string;
 };
 
+export type ApiInputInvoiceStarGiftDropOriginalDetails = {
+  type: 'stargiftDropOriginalDetails';
+  inputSavedGift: ApiInputSavedStarGift;
+};
+
 export type ApiInputInvoiceStarGiftPrepaidUpgrade = {
   type: 'stargiftPrepaidUpgrade';
   peerId: string;
@@ -409,7 +414,7 @@ export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | Api
   | ApiInputInvoiceGiftCode | ApiInputInvoicePremiumGiftStars | ApiInputInvoiceStars | ApiInputInvoiceStarsGift
   | ApiInputInvoiceStarsGiveaway | ApiInputInvoiceStarGift | ApiInputInvoiceChatInviteSubscription
   | ApiInputInvoiceStarGiftUpgrade | ApiInputInvoiceStarGiftTransfer | ApiInputInvoiceStarGiftResale
-  | ApiInputInvoiceStarGiftPrepaidUpgrade;
+  | ApiInputInvoiceStarGiftDropOriginalDetails | ApiInputInvoiceStarGiftPrepaidUpgrade;
 
 /* Used for Invoice request */
 export type ApiRequestInputInvoiceMessage = {
@@ -479,6 +484,11 @@ export type ApiRequestInputInvoiceStarGiftTransfer = {
   recipient: ApiPeer;
 };
 
+export type ApiRequestInputInvoiceStarGiftDropOriginalDetails = {
+  type: 'stargiftDropOriginalDetails';
+  inputSavedGift: ApiRequestInputSavedStarGift;
+};
+
 export type ApiRequestInputInvoiceStarGiftPrepaidUpgrade = {
   type: 'stargiftPrepaidUpgrade';
   peer: ApiPeer;
@@ -490,7 +500,7 @@ export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestI
   | ApiRequestInputInvoiceChatInviteSubscription | ApiRequestInputInvoiceStarGift
   | ApiRequestInputInvoiceStarGiftUpgrade | ApiRequestInputInvoiceStarGiftTransfer
   | ApiRequestInputInvoicePremiumGiftStars | ApiRequestInputInvoiceStarGiftResale
-  | ApiRequestInputInvoiceStarGiftPrepaidUpgrade;
+  | ApiRequestInputInvoiceStarGiftDropOriginalDetails | ApiRequestInputInvoiceStarGiftPrepaidUpgrade;
 
 export interface ApiUniqueStarGiftValueInfo {
   isLastSaleOnFragment?: true;

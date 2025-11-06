@@ -1,4 +1,3 @@
-import type { TeactNode } from '../../../../lib/teact/teact';
 import { memo, useMemo, useRef, useState } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
@@ -24,6 +23,7 @@ import {
 import { CUSTOM_PEER_HIDDEN } from '../../../../util/objects/customPeer';
 import { getServerTime } from '../../../../util/serverTime';
 import { formatPercent } from '../../../../util/textFormat';
+import { renderGiftOriginalInfo } from '../../../common/helpers/giftOriginalInfo';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
@@ -98,6 +98,7 @@ const GiftInfoModal = ({
     openGiftInfoValueModal,
     updateResaleGiftsFilter,
     openGiftInMarket,
+    openGiftDescriptionRemoveModal,
   } = getActions();
 
   const [isConvertConfirmOpen, openConvertConfirm, closeConvertConfirm] = useFlag();
@@ -278,6 +279,19 @@ const GiftInfoModal = ({
     convertGiftToStars({ gift: inputGift! });
     closeConvertConfirm();
     handleClose();
+  });
+
+  const handleRemoveMessage = useLastCallback(() => {
+    if (!savedGift?.inputGift || !savedGift.dropOriginalDetailsStars || !gift || !giftAttributes) return;
+
+    const { originalDetails } = giftAttributes;
+    if (!originalDetails) return;
+
+    openGiftDescriptionRemoveModal({
+      gift: savedGift,
+      price: savedGift.dropOriginalDetailsStars,
+      details: originalDetails,
+    });
   });
 
   const handleOpenUpgradeModal = useLastCallback(() => {
@@ -761,9 +775,7 @@ const GiftInfoModal = ({
       }
 
       if (originalDetails) {
-        const {
-          date, recipientId, message, senderId,
-        } = originalDetails;
+        const { recipientId, senderId } = originalDetails;
         const global = getGlobal(); // Peer titles do not need to be reactive
 
         const openChat = (id: string) => {
@@ -774,54 +786,29 @@ const GiftInfoModal = ({
         const recipient = selectPeer(global, recipientId)!;
         const sender = senderId ? selectPeer(global, senderId) : undefined;
 
-        const formattedDate = formatDateTimeToString(date * 1000, lang.code, true);
-        const recipientLink = (
-
-          <Link onClick={() => openChat(recipientId)} isPrimary>
-            {getPeerTitle(lang, recipient)}
-          </Link>
-        );
-
-        let text: TeactNode | undefined;
-        if (!sender || senderId === recipientId) {
-          text = message ? lang('GiftInfoPeerOriginalInfoText', {
-            peer: recipientLink,
-            text: renderTextWithEntities(message),
-            date: formattedDate,
-          }, {
-            withNodes: true,
-          }) : lang('GiftInfoPeerOriginalInfo', {
-            peer: recipientLink,
-            date: formattedDate,
-          }, {
-            withNodes: true,
-          });
-        } else {
-          const senderLink = (
-
-            <Link onClick={() => openChat(sender.id)} isPrimary>
-              {getPeerTitle(lang, sender)}
-            </Link>
-          );
-          text = message ? lang('GiftInfoPeerOriginalInfoTextSender', {
-            peer: recipientLink,
-            sender: senderLink,
-            text: renderTextWithEntities(message),
-            date: formattedDate,
-          }, {
-            withNodes: true,
-          }) : lang('GiftInfoPeerOriginalInfoSender', {
-            peer: recipientLink,
-            date: formattedDate,
-            sender: senderLink,
-          }, {
-            withNodes: true,
-          });
-        }
+        const text = renderGiftOriginalInfo({
+          originalDetails, recipient, sender, onOpenChat: openChat, lang,
+        });
 
         tableData.push([
           undefined,
-          <span>{text}</span>,
+          <div className={styles.messageContainer}>
+            <div>
+              {text}
+            </div>
+            {Boolean(savedGift?.dropOriginalDetailsStars) && (
+              <Button
+                round
+                className={styles.removeMessageButton}
+                size="smaller"
+                color="translucent"
+                ariaLabel="Delete original details"
+                onClick={handleRemoveMessage}
+              >
+                <Icon name="delete" />
+              </Button>
+            )}
+          </div>,
         ]);
       }
     }

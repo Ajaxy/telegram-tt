@@ -29,6 +29,10 @@ export function getTransactionTitle(oldLang: OldLangFn, lang: LangFn, transactio
     return lang('PostsSearchTransaction');
   }
 
+  if (transaction.isDropOriginalDetails) {
+    return lang('DropOriginalDetailsTransaction');
+  }
+
   if (transaction.isPrepaidUpgrade) {
     return lang('GiftPrepaidUpgradeTransactionTitle');
   }
