@@ -18,7 +18,7 @@ import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 import styles from './RadialPatternBackground.module.scss';
 
 type OwnProps = {
-  backgroundColors: string[];
+  backgroundColors?: string[];
   patternIcon?: ApiSticker;
   patternColor?: number;
   patternSize?: number;
@@ -41,7 +41,7 @@ const DARK_LUMA_THRESHOLD = 255 * 0.2;
 
 const DEFAULT_PATTERN_SIZE = 20;
 const DEFAULT_RINGS_COUNT = 3;
-const DEFAULT_OVAL_FACTOR = 1.61;
+const DEFAULT_OVAL_FACTOR = 1.4;
 
 const RadialPatternBackground = ({
   backgroundColors,
@@ -142,7 +142,7 @@ const RadialPatternBackground = ({
       ctx.drawImage(emojiImage, renderX - size / 2, renderY - size / 2, size, size);
     });
 
-    const patternColor = backgroundColors[1] ?? backgroundColors[0];
+    const patternColor = backgroundColors?.[1] ?? backgroundColors?.[0] ?? '#000000';
     const isDark = getColorLuma(hex2rgb(patternColor)) < DARK_LUMA_THRESHOLD;
     ctx.fillStyle = adjustHsv(patternColor, 0.5, isDark ? 0.28 : -0.28);
     ctx.globalCompositeOperation = 'source-in';
@@ -187,10 +187,14 @@ const RadialPatternBackground = ({
   return (
     <div
       ref={containerRef}
-      className={buildClassName(styles.root, withLinearGradient && styles.withLinearGradient, className)}
+      className={buildClassName(
+        styles.root,
+        withLinearGradient && Boolean(backgroundColors?.length) && styles.withLinearGradient,
+        className,
+      )}
       style={buildStyle(
-        `--_bg-light: ${backgroundColors[0]}`,
-        `--_bg-dark: ${backgroundColors[1] ?? backgroundColors[0]}`,
+        backgroundColors && `--_bg-light: ${backgroundColors[0]}`,
+        backgroundColors && `--_bg-dark: ${backgroundColors[1] ?? backgroundColors[0]}`,
         yPosition !== undefined && `--_y-shift: ${yPosition}px`,
       )}
     >

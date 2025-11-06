@@ -14,6 +14,8 @@
 
   color: var(--color-white);
 
+  background-color: var(--color-background);
+
   @include mixins.with-vt-type('profileAvatar');
 
   :global(.VerifiedIcon),
@@ -30,6 +32,10 @@
   padding-block: 1.5rem 0;
   color: var(--color-text);
 
+  .info {
+    background-image: linear-gradient(0deg, var(--color-background) 50%, transparent);
+  }
+
   .userRatingNegativeWrapper,
   .userRatingWrapper {
     color: var(--color-white);
@@ -41,6 +47,10 @@
 
   .getStatus, .userStatus {
     opacity: 1;
+  }
+
+  :global(.title .custom-emoji) {
+    color: var(--color-primary);
   }
 
   :global(.VerifiedIcon),

@@ -69,8 +69,6 @@ import RadialPatternBackground from './RadialPatternBackground.tsx';
 import './ProfileInfo.scss';
 import styles from './ProfileInfo.module.scss';
 
-const MAX_LEVEL_ICON = 90;
-
 type OwnProps = {
   isExpanded?: boolean;
   peerId: string;
@@ -101,12 +99,16 @@ type StateProps = {
   hasAvatar?: boolean;
 };
 
+const MAX_LEVEL_ICON = 90;
+
 const EMOJI_STATUS_SIZE = 24;
 const EMOJI_TOPIC_SIZE = 120;
 const LOAD_MORE_THRESHOLD = 3;
 const MAX_PHOTO_DASH_COUNT = 30;
 const STATUS_UPDATE_INTERVAL = 1000 * 60; // 1 min
+
 const PATTERN_Y_SHIFT = 8 * REM;
+const PATTERN_PLAIN_Y_SHIFT = 5.25 * REM;
 
 const ProfileInfo = ({
   isExpanded,
@@ -186,6 +188,8 @@ const ProfileInfo = ({
       storyColors: [...colors.storyColors].reverse(),
     };
   }, [profileColorOption, theme, collectibleEmojiStatus]);
+
+  const hasPatternBackground = profileColorSet?.bgColors || backgroundEmoji;
 
   const pinnedGifts = useMemo(() => {
     return savedGifts?.gifts.filter((gift) => {
@@ -491,17 +495,17 @@ const ProfileInfo = ({
       )}
       dir={lang.isRtl ? 'rtl' : undefined}
     >
-      {profileColorSet?.bgColors && (
+      {hasPatternBackground && (
         <RadialPatternBackground
-          backgroundColors={profileColorSet.bgColors}
+          backgroundColors={profileColorSet?.bgColors}
           patternIcon={backgroundEmoji}
           patternSize={16}
           withLinearGradient={!collectibleEmojiStatus}
           className={styles.radialPatternBackground}
-          yPosition={PATTERN_Y_SHIFT}
+          yPosition={isPlain ? PATTERN_PLAIN_Y_SHIFT : PATTERN_Y_SHIFT}
         />
       )}
-      {pinnedGifts && (
+      {Boolean(pinnedGifts?.length) && (
         <ProfilePinnedGifts
           peerId={peerId}
           gifts={pinnedGifts}

@@ -72,7 +72,10 @@ export function selectPeerPaidMessagesStars<T extends GlobalState>(
 
 export function selectPeerHasProfileBackground<T extends GlobalState>(global: T, peerId: string) {
   const peer = selectPeer(global, peerId);
-  return Boolean(peer?.profileColor || peer?.emojiStatus?.type === 'collectible');
+  const profileColor = peer?.profileColor;
+  if (profileColor?.type === 'collectible') return true;
+  if (profileColor?.type === 'regular') return profileColor.color !== undefined;
+  return peer?.emojiStatus?.type === 'collectible';
 }
 
 export function selectCanUpdateMainTab<T extends GlobalState>(global: T, peerId: string) {
