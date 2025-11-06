@@ -154,7 +154,7 @@ import useMessageResizeObserver from '../../../hooks/useResizeMessageObserver';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useTextLanguage from '../../../hooks/useTextLanguage';
 import useDetectChatLanguage from './hooks/useDetectChatLanguage';
-import useFocusMessage from './hooks/useFocusMessage';
+import useFocusMessageListElement from './hooks/useFocusMessageListElement';
 import useInnerHandlers from './hooks/useInnerHandlers';
 import useMessageTranslation from './hooks/useMessageTranslation';
 import useOuterHandlers from './hooks/useOuterHandlers';
@@ -462,7 +462,7 @@ const Message = ({
     openSuggestedPostApprovalModal,
     disableContextMenuHint,
     animateUnreadReaction,
-    focusLastMessage,
+    focusMessage,
     markMentionsRead,
   } = getActions();
 
@@ -698,15 +698,24 @@ const Message = ({
     requestEffect();
   });
 
+  const handleFocusSelf = useLastCallback(() => {
+    focusMessage({
+      chatId,
+      threadId,
+      messageId,
+      noHighlight: true,
+    });
+  });
+
   useEffect(() => {
     if (!isLastInList) {
       return;
     }
 
     if (withVoiceTranscription && transcribedText) {
-      focusLastMessage();
+      handleFocusSelf();
     }
-  }, [focusLastMessage, isLastInList, transcribedText, withVoiceTranscription]);
+  }, [isLastInList, transcribedText, withVoiceTranscription]);
 
   useEffect(() => {
     const element = ref.current;
@@ -882,9 +891,8 @@ const Message = ({
     replyStory,
   );
 
-  useFocusMessage({
+  useFocusMessageListElement({
     elementRef: ref,
-    chatId,
     isFocused,
     focusDirection,
     noFocusHighlight,

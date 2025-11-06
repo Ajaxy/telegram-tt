@@ -102,7 +102,7 @@ const Topic: FC<OwnProps & StateProps> = ({
   const {
     openThread,
     deleteTopic,
-    focusLastMessage,
+    scrollMessageListToBottom,
     setViewForumAsMessages,
     updateTopicMutedState,
     openQuickPreview,
@@ -168,7 +168,7 @@ const Topic: FC<OwnProps & StateProps> = ({
     setViewForumAsMessages({ chatId, isEnabled: false });
 
     if (canScrollDown) {
-      focusLastMessage();
+      scrollMessageListToBottom();
     }
   });
 

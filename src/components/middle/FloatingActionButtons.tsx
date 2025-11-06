@@ -6,7 +6,6 @@ import type { MessageListType, ThreadId } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { selectChat, selectCurrentMessageList, selectCurrentMiddleSearch } from '../../global/selectors';
-import animateScroll from '../../util/animateScroll';
 import buildClassName from '../../util/buildClassName';
 
 import useLastCallback from '../../hooks/useLastCallback';
@@ -32,8 +31,6 @@ type StateProps = {
   mentionsCount?: number;
 };
 
-const FOCUS_MARGIN = 20;
-
 const FloatingActionButtons: FC<OwnProps & StateProps> = ({
   withScrollDown,
   canPost,
@@ -49,7 +46,7 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     focusNextReply, focusNextReaction, focusNextMention, fetchUnreadReactions,
-    readAllMentions, readAllReactions, fetchUnreadMentions,
+    readAllMentions, readAllReactions, fetchUnreadMentions, scrollMessageListToBottom,
   } = getActions();
 
   const elementRef = useRef<HTMLDivElement>();
@@ -99,21 +96,7 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
     if (messageListType === 'thread') {
       focusNextReply();
     } else {
-      const messagesContainer = elementRef.current!.parentElement!.querySelector<HTMLDivElement>(
-        '.Transition_slide-active > .MessageList',
-      )!;
-      const messageElements = messagesContainer.querySelectorAll<HTMLDivElement>('.message-list-item');
-      const lastMessageElement = messageElements[messageElements.length - 1];
-      if (!lastMessageElement) {
-        return;
-      }
-
-      animateScroll({
-        container: messagesContainer,
-        element: lastMessageElement,
-        position: 'end',
-        margin: FOCUS_MARGIN,
-      });
+      scrollMessageListToBottom();
     }
   });
 

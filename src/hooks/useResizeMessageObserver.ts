@@ -16,7 +16,7 @@ function useMessageResizeObserver(
   shouldFocusOnResize = false,
 ) {
   const {
-    focusLastMessage,
+    scrollMessageListToBottom,
   } = getActions();
   const messageHeightRef = useRef(0);
 
@@ -40,7 +40,7 @@ function useMessageResizeObserver(
       const previousScrollBottom = currentScrollBottom - resizeDiff;
 
       if (previousScrollBottom <= BOTTOM_FOCUS_SCROLL_THRESHOLD) {
-        focusLastMessage();
+        scrollMessageListToBottom();
       }
     },
   );

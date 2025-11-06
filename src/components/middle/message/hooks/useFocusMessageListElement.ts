@@ -9,15 +9,16 @@ import {
   requestForcedReflow, requestMeasure, requestMutation,
 } from '../../../../lib/fasterdom/fasterdom';
 import animateScroll from '../../../../util/animateScroll';
+import { REM } from '../../../common/helpers/mediaDimensions';
 
 // This is used when the viewport was replaced.
 const BOTTOM_FOCUS_OFFSET = 500;
 const RELOCATED_FOCUS_OFFSET = SCROLL_MAX_DISTANCE;
-const FOCUS_MARGIN = 20;
+const FOCUS_MARGIN = 1.25 * REM;
+const BOTTOM_FOCUS_MARGIN = 0.5 * REM;
 
-export default function useFocusMessage({
+export default function useFocusMessageListElement({
   elementRef,
-  chatId,
   isFocused,
   focusDirection,
   noFocusHighlight,
@@ -27,7 +28,6 @@ export default function useFocusMessage({
   scrollTargetPosition,
 }: {
   elementRef: ElementRef<HTMLDivElement>;
-  chatId: string;
   isFocused?: boolean;
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
@@ -43,10 +43,12 @@ export default function useFocusMessage({
     isRelocatedRef.current = false;
 
     if (isFocused && elementRef.current) {
-      const messagesContainer = elementRef.current.closest<HTMLDivElement>('.MessageList')!;
+      const messagesContainer = elementRef.current.closest<HTMLDivElement>('.MessageList');
+      if (!messagesContainer) return;
+
       // `noFocusHighlight` is always called with “scroll-to-bottom” buttons
       const isToBottom = noFocusHighlight;
-      const scrollPosition = scrollTargetPosition || isToBottom ? 'end' : 'centerOrTop';
+      const scrollPosition = scrollTargetPosition || (isToBottom ? 'end' : 'centerOrTop');
 
       const exec = () => {
         const maxDistance = focusDirection !== undefined
@@ -56,7 +58,7 @@ export default function useFocusMessage({
           container: messagesContainer,
           element: elementRef.current!,
           position: scrollPosition,
-          margin: FOCUS_MARGIN,
+          margin: isToBottom ? BOTTOM_FOCUS_MARGIN : FOCUS_MARGIN,
           maxDistance,
           forceDirection: focusDirection,
           forceNormalContainerHeight: isResizingContainer,
@@ -85,6 +87,6 @@ export default function useFocusMessage({
       }
     }
   }, [
-    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isQuote, scrollTargetPosition,
+    elementRef, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isQuote, scrollTargetPosition,
   ]);
 }

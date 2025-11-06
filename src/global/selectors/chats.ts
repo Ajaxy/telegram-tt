@@ -1,8 +1,8 @@
-import type {
-  ApiChat, ApiChatFullInfo, ApiChatType,
-} from '../../api/types';
 import type { ChatListType } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
+import {
+  type ApiChat, type ApiChatFullInfo, type ApiChatType,
+} from '../../api/types';
 
 import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SAVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID,

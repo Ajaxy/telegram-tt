@@ -469,6 +469,7 @@ export interface ActionPayloads {
     chatId?: string;
     threadId?: ThreadId;
     shouldForceRender?: boolean;
+    forceLastSlice?: boolean;
     onLoaded?: NoneToVoidFunction;
     onError?: NoneToVoidFunction;
   } & WithTabId;
@@ -1024,8 +1025,8 @@ export interface ActionPayloads {
     scrollTargetPosition?: ScrollTargetPosition;
     timestamp?: number;
   } & WithTabId;
+  scrollMessageListToBottom: WithTabId | undefined;
 
-  focusLastMessage: WithTabId | undefined;
   updateDraftReplyInfo: Partial<ApiInputMessageReplyInfo> & WithTabId;
   resetDraftReplyInfo: WithTabId | undefined;
   updateDraftSuggestedPostInfo: Partial<ApiInputSuggestedPostInfo> & WithTabId;

@@ -1,4 +1,4 @@
-import type { ElementRef, FC } from '../../lib/teact/teact';
+import type { ElementRef } from '../../lib/teact/teact';
 import { getIsHeavyAnimating, memo } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
@@ -43,6 +43,7 @@ import Message from './message/Message';
 import SenderGroupContainer from './message/SenderGroupContainer';
 import SponsoredMessage from './message/SponsoredMessage';
 import MessageListAccountInfo from './MessageListAccountInfo';
+import MessageListBottomMarker from './MessageListBottomMarker';
 
 import actionMessageStyles from './message/ActionMessage.module.scss';
 
@@ -75,15 +76,16 @@ interface OwnProps {
   noAppearanceAnimation: boolean;
   isSavedDialog?: boolean;
   isQuickPreview?: boolean;
+  canPost?: boolean;
+  shouldScrollToBottom?: boolean;
   onScrollDownToggle?: BooleanToVoidFunction;
   onNotchToggle?: AnyToVoidFunction;
   onIntersectPinnedMessage?: OnIntersectPinnedMessage;
-  canPost?: boolean;
 }
 
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
-const MessageListContent: FC<OwnProps> = ({
+const MessageListContent = ({
   canShowAds,
   chatId,
   threadId,
@@ -112,17 +114,19 @@ const MessageListContent: FC<OwnProps> = ({
   noAppearanceAnimation,
   isSavedDialog,
   isQuickPreview,
+  shouldScrollToBottom,
+  canPost,
   onScrollDownToggle,
   onNotchToggle,
   onIntersectPinnedMessage,
-  canPost,
-}) => {
+}: OwnProps) => {
   const { openHistoryCalendar } = getActions();
 
   const getIsHeavyAnimating2 = getIsHeavyAnimating;
   const getIsReady = useDerivedSignal(() => isReady && !getIsHeavyAnimating2(), [isReady, getIsHeavyAnimating2]);
 
   const areDatesClickable = !isSavedDialog && !isSchedule;
+  const shouldRenderSponsoredMessage = canShowAds && isViewportNewest;
 
   const {
     observeIntersectionForReading,
@@ -135,17 +139,17 @@ const MessageListContent: FC<OwnProps> = ({
     backwardsTriggerRef,
     forwardsTriggerRef,
     fabTriggerRef,
-  } = useScrollHooks(
+  } = useScrollHooks({
     type,
     containerRef,
     messageIds,
     getContainerHeight,
     isViewportNewest,
     isUnread,
+    isReady,
     onScrollDownToggle,
     onNotchToggle,
-    isReady,
-  );
+  });
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -457,7 +461,15 @@ const MessageListContent: FC<OwnProps> = ({
         key="fab-trigger"
         className="fab-trigger"
       />
-      {canShowAds && isViewportNewest && (
+      {isViewportNewest && (
+        <MessageListBottomMarker
+          key="bottom-marker"
+          isJustAdded={isNewMessage}
+          isFocused={shouldScrollToBottom}
+          className={shouldRenderSponsoredMessage ? 'with-sponsored' : undefined}
+        />
+      )}
+      {shouldRenderSponsoredMessage && (
         <SponsoredMessage
           key={chatId}
           chatId={chatId}

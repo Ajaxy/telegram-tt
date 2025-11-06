@@ -21,7 +21,6 @@ import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import { getServerTime } from '../../../util/serverTime';
 import versionNotification from '../../../versionNotification.txt';
 import {
-  getIsSavedDialog,
   getMediaFilename,
   getMediaFormat,
   getMediaHash,
@@ -41,7 +40,6 @@ import {
   replaceTabThreadParam,
   replaceThreadParam,
   toggleMessageSelection,
-  updateFocusDirection,
   updateFocusedMessage,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
@@ -60,7 +58,6 @@ import {
   selectIsRightColumnShown,
   selectIsViewportNewest,
   selectMessageIdsByGroupId,
-  selectPinnedIds,
   selectReplyStack,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
@@ -323,52 +320,6 @@ addActionHandler('closePollResults', (global, actions, payload): ActionReturnTyp
   }, tabId);
 });
 
-addActionHandler('focusLastMessage', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const currentMessageList = selectCurrentMessageList(global, tabId);
-  if (!currentMessageList) {
-    return;
-  }
-
-  const { chatId, threadId, type } = currentMessageList;
-
-  const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
-
-  let lastMessageId: number | undefined;
-  if (threadId === MAIN_THREAD_ID) {
-    if (type === 'pinned') {
-      const pinnedMessageIds = selectPinnedIds(global, chatId, MAIN_THREAD_ID);
-      if (!pinnedMessageIds?.length) {
-        return;
-      }
-
-      lastMessageId = pinnedMessageIds[pinnedMessageIds.length - 1];
-    } else {
-      lastMessageId = selectChatLastMessageId(global, chatId);
-    }
-  } else if (isSavedDialog) {
-    lastMessageId = selectChatLastMessageId(global, String(threadId), 'saved');
-  } else {
-    const threadInfo = selectThreadInfo(global, chatId, threadId);
-
-    lastMessageId = threadInfo?.lastMessageId;
-  }
-
-  if (!lastMessageId) {
-    return;
-  }
-
-  actions.focusMessage({
-    chatId,
-    threadId,
-    messageListType: type,
-    messageId: lastMessageId,
-    noHighlight: true,
-    noForumTopicPanel: true,
-    tabId,
-  });
-});
-
 addActionHandler('focusNextReply', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   const currentMessageList = selectCurrentMessageList(global, tabId);
@@ -381,7 +332,7 @@ addActionHandler('focusNextReply', (global, actions, payload): ActionReturnType 
   const replyStack = selectReplyStack(global, chatId, threadId, tabId);
 
   if (!replyStack || replyStack.length === 0) {
-    actions.focusLastMessage({ tabId });
+    actions.scrollMessageListToBottom({ tabId });
   } else {
     const messageId = replyStack.pop();
 
@@ -441,13 +392,11 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   }
   blurTimeout = window.setTimeout(() => {
     global = getGlobal();
-    global = updateFocusedMessage({ global }, tabId);
-    global = updateFocusDirection(global, undefined, tabId);
+    global = updateFocusedMessage(global, undefined, tabId);
     setGlobal(global);
   }, noHighlight ? FOCUS_NO_HIGHLIGHT_DURATION : FOCUS_DURATION);
 
-  global = updateFocusedMessage({
-    global,
+  global = updateFocusedMessage(global, {
     chatId,
     messageId,
     threadId,
@@ -456,8 +405,8 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
     quote,
     quoteOffset,
     scrollTargetPosition,
+    direction: undefined,
   }, tabId);
-  global = updateFocusDirection(global, undefined, tabId);
 
   if (replyMessageId) {
     const replyStack = selectReplyStack(global, chatId, threadId, tabId) || [];
@@ -465,7 +414,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   }
 
   if (shouldSwitchChat) {
-    global = updateFocusDirection(global, FocusDirection.Static, tabId);
+    global = updateFocusedMessage(global, { direction: FocusDirection.Static }, tabId);
   }
 
   const viewportIds = selectViewportIds(global, chatId, threadId, tabId);
@@ -489,7 +438,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
 
   if (viewportIds && !shouldSwitchChat) {
     const direction = messageId > viewportIds[0] ? FocusDirection.Down : FocusDirection.Up;
-    global = updateFocusDirection(global, direction, tabId);
+    global = updateFocusedMessage(global, { direction }, tabId);
   }
 
   if (isAnimatingScroll()) {
@@ -514,6 +463,50 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
     onLoaded: onMessageReady,
   });
   return undefined;
+});
+
+addActionHandler('scrollMessageListToBottom', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  if (!currentMessageList) {
+    return;
+  }
+
+  const { chatId, threadId } = currentMessageList;
+
+  global = updateFocusedMessage(global, {
+    chatId,
+    threadId,
+    messageId: undefined,
+    scrollTargetPosition: 'end',
+    direction: FocusDirection.Down,
+    noHighlight: true,
+  }, tabId);
+
+  setGlobal(global, { forceOnHeavyAnimation: true });
+
+  // Reuse part of `focusMessage`
+  if (blurTimeout) {
+    clearTimeout(blurTimeout);
+    blurTimeout = undefined;
+  }
+  blurTimeout = window.setTimeout(() => {
+    global = getGlobal();
+    global = updateFocusedMessage(global, undefined, tabId);
+    setGlobal(global);
+  }, FOCUS_NO_HIGHLIGHT_DURATION);
+
+  if (isAnimatingScroll()) {
+    cancelScrollBlockingAnimation();
+  }
+
+  actions.loadViewportMessages({
+    chatId,
+    threadId,
+    tabId,
+    shouldForceRender: true,
+    forceLastSlice: true,
+  });
 });
 
 addActionHandler('setShouldPreventComposerAnimation', (global, actions, payload): ActionReturnType => {

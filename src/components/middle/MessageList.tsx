@@ -61,6 +61,7 @@ import { isLocalMessageId } from '../../util/keys/messageKey';
 import resetScroll from '../../util/resetScroll';
 import { debounce, onTickEnd } from '../../util/schedulers';
 import getOffsetToContainer from '../../util/visibility/getOffsetToContainer';
+import { REM } from '../common/helpers/mediaDimensions';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
@@ -76,7 +77,7 @@ import useContainerHeight from './hooks/useContainerHeight';
 import useStickyDates from './hooks/useStickyDates';
 
 import Loading from '../ui/Loading';
-import Transition from '../ui/Transition.tsx';
+import Transition from '../ui/Transition';
 import ContactGreeting from './ContactGreeting';
 import MessageListAccountInfo from './MessageListAccountInfo';
 import MessageListContent from './MessageListContent';
@@ -144,6 +145,7 @@ type StateProps = {
   translationLanguage?: string;
   shouldAutoTranslate?: boolean;
   isActive?: boolean;
+  shouldScrollToBottom?: boolean;
 };
 
 enum Content {
@@ -168,7 +170,7 @@ const BOTTOM_THRESHOLD = 50;
 const UNREAD_DIVIDER_TOP = 10;
 const SCROLL_DEBOUNCE = 200;
 const MESSAGE_ANIMATION_DURATION = 500;
-const BOTTOM_FOCUS_MARGIN = 20;
+const BOTTOM_FOCUS_MARGIN = 0.5 * REM;
 const SELECT_MODE_ANIMATION_DURATION = 200;
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
@@ -186,6 +188,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   canPost,
   isSynced,
   isActive,
+  shouldScrollToBottom,
   // eslint-disable-next-line @typescript-eslint/no-shadow
   isChatMonoforum,
   isReady,
@@ -622,11 +625,11 @@ const MessageList: FC<OwnProps & StateProps> = ({
       if (wasMessageAdded && isAtBottom && !isAlreadyFocusing) {
         // Break out of `forceLayout`
         requestMeasure(() => {
-          const shouldScrollToBottom = !isBackgroundModeActive() || !firstUnreadElement;
+          const isScrollToBottom = !isBackgroundModeActive() || !firstUnreadElement;
           animateScroll({
             container,
-            element: shouldScrollToBottom ? lastItemElement : firstUnreadElement,
-            position: shouldScrollToBottom ? 'end' : 'start',
+            element: isScrollToBottom ? lastItemElement : firstUnreadElement,
+            position: isScrollToBottom ? 'end' : 'start',
             margin: BOTTOM_FOCUS_MARGIN,
             forceDuration: noMessageSendingAnimation ? 0 : undefined,
           });
@@ -800,10 +803,11 @@ const MessageList: FC<OwnProps & StateProps> = ({
         photoChangeDate={photoChangeDate}
         noAppearanceAnimation={!messageGroups || !shouldAnimateAppearanceRef.current}
         isQuickPreview={isQuickPreview}
+        canPost={canPost}
+        shouldScrollToBottom={shouldScrollToBottom}
         onScrollDownToggle={onScrollDownToggle}
         onNotchToggle={onNotchToggle}
         onIntersectPinnedMessage={onIntersectPinnedMessage}
-        canPost={canPost}
       />
     ) : (
       <Loading color="white" backgroundColor="dark" />
@@ -827,6 +831,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId, type }): Complete<StateProps> => {
+    const tabState = selectTabState(global);
     const currentUserId = global.currentUserId!;
     const chat = selectChat(global, chatId);
     const userFullInfo = selectUserFullInfo(global, chatId);
@@ -883,6 +888,13 @@ export default memo(withGlobal<OwnProps>(
     const isActive = currentMessageList && currentMessageList.chatId === chatId
       && currentMessageList.threadId === threadId && currentMessageList.type === type;
 
+    const {
+      chatId: focusedChatId,
+      threadId: focusedThreadId,
+      messageId: focusedMessageId,
+    } = tabState.focusedMessage || {};
+    const shouldScrollToBottom = focusedChatId === chatId && focusedThreadId === threadId && !focusedMessageId;
+
     return {
       isActive,
       areAdsEnabled,
@@ -925,6 +937,7 @@ export default memo(withGlobal<OwnProps>(
       canTranslate,
       translationLanguage,
       shouldAutoTranslate,
+      shouldScrollToBottom,
     };
   },
 )(MessageList));

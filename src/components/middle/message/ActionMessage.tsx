@@ -44,7 +44,7 @@ import useMessageResizeObserver from '../../../hooks/useResizeMessageObserver';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { type OnIntersectPinnedMessage } from '../hooks/usePinnedMessage';
 import useFluidBackgroundFilter from './hooks/useFluidBackgroundFilter';
-import useFocusMessage from './hooks/useFocusMessage';
+import useFocusMessageListElement from './hooks/useFocusMessageListElement';
 
 import ActionMessageText from './ActionMessageText';
 import ChannelPhoto from './actions/ChannelPhoto';
@@ -176,9 +176,8 @@ const ActionMessage = ({
     replyMessage,
     id,
   );
-  useFocusMessage({
+  useFocusMessageListElement({
     elementRef: ref,
-    chatId,
     isFocused,
     focusDirection,
     noFocusHighlight,

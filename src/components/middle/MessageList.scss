@@ -321,6 +321,11 @@
     }
   }
 
+  .list-bottom-marker.with-sponsored {
+    position: relative;
+    top: -1rem; // Prevent overlapping with the sponsored message
+  }
+
   @media (pointer: coarse) {
     user-select: none;
 

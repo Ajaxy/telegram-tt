@@ -181,7 +181,6 @@ const Chat: FC<OwnProps & StateProps> = ({
     openChat,
     openSavedDialog,
     toggleChatInfo,
-    focusLastMessage,
     focusMessage,
     loadTopics,
     openForumPanel,
@@ -191,6 +190,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     openFrozenAccountModal,
     updateChatMutedState,
     openQuickPreview,
+    scrollMessageListToBottom,
   } = getActions();
 
   const { isMobile } = useAppLayout();
@@ -293,7 +293,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     openChat({ id: chatId, noForumTopicPanel, shouldReplaceHistory: true }, { forceOnHeavyAnimation: true });
 
     if (isSelected && canScrollDown) {
-      focusLastMessage();
+      scrollMessageListToBottom();
     }
   });
 
