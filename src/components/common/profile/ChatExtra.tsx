@@ -1,5 +1,5 @@
 import {
-  memo, useMemo,
+  memo, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -46,7 +46,9 @@ import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { ChatAnimationTypes } from '../../left/main/hooks';
 import formatUsername from '../helpers/formatUsername';
 import renderText from '../helpers/renderText';
+import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
 
+import useCollapsibleLines from '../../../hooks/element/useCollapsibleLines';
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -60,6 +62,7 @@ import ListItem from '../../ui/ListItem';
 import Skeleton from '../../ui/placeholder/Skeleton';
 import Switcher from '../../ui/Switcher';
 import CustomEmoji from '../CustomEmoji';
+import Icon from '../icons/Icon';
 import SafeLink from '../SafeLink';
 import BusinessHours from './BusinessHours';
 import UserBirthday from './UserBirthday';
@@ -102,6 +105,7 @@ const DEFAULT_MAP_CONFIG = {
 };
 
 const BOT_VERIFICATION_ICON_SIZE = 16;
+const MAX_LINES = 3;
 
 const ChatExtra = ({
   chatOrUserId,
@@ -154,9 +158,18 @@ const ChatExtra = ({
     businessWorkHours,
     personalChannelMessageId,
     birthday,
+    note,
   } = userFullInfo || {};
   const oldLang = useOldLang();
   const lang = useLang();
+
+  const noteTextRef = useRef<HTMLDivElement>();
+
+  const {
+    isCollapsed: isNoteCollapsed,
+    isCollapsible: isNoteCollapsible,
+    setIsCollapsed: setIsNoteCollapsed,
+  } = useCollapsibleLines(noteTextRef, MAX_LINES, undefined);
 
   useEffectWithPrevDeps(([prevPeerId]) => {
     if (!peerId || prevPeerId === peerId) return;
@@ -239,6 +252,16 @@ const ChatExtra = ({
 
   const handleOpenSavedDialog = useLastCallback(() => {
     openSavedDialog({ chatId: chatOrUserId });
+  });
+
+  const canExpandNote = isNoteCollapsible && isNoteCollapsed;
+
+  const handleExpandNote = useLastCallback(() => {
+    setIsNoteCollapsed(false);
+  });
+
+  const handleToggleNote = useLastCallback(() => {
+    setIsNoteCollapsed((prev) => !prev);
   });
 
   function copy(text: string, entity: string) {
@@ -456,6 +479,50 @@ const ChatExtra = ({
         >
           <div className="title">{businessLocation.address}</div>
           <span className="subtitle">{oldLang('BusinessProfileLocation')}</span>
+        </ListItem>
+      )}
+      {note && (
+        <ListItem
+          icon="note"
+          iconClassName={styles.noteListItemIcon}
+          multiline
+          narrow
+          isStatic
+          allowSelection
+        >
+          <div
+            ref={noteTextRef}
+            className={buildClassName(
+              'title',
+              'word-break',
+              'allow-selection',
+              styles.noteText,
+              isNoteCollapsed && styles.noteTextCollapsed,
+            )}
+            dir={lang.isRtl ? 'rtl' : undefined}
+            onClick={canExpandNote ? handleExpandNote : undefined}
+          >
+            {renderTextWithEntities({
+              text: note.text,
+              entities: note.entities,
+            })}
+          </div>
+          <div className={buildClassName('subtitle', styles.noteSubtitle)}>
+            <span>{lang('UserNoteTitle')}</span>
+
+            <span className={styles.noteHint}>{lang('UserNoteHint')}</span>
+            {isNoteCollapsible && (
+              <Icon
+                className={buildClassName(
+                  styles.noteCollapseIcon,
+                  styles.clickable,
+                  !isNoteCollapsed && styles.expandedIcon,
+                )}
+                onClick={handleToggleNote}
+                name="down"
+              />
+            )}
+          </div>
         </ListItem>
       )}
       {hasSavedMessages && !isOwnProfile && !isInSettings && (

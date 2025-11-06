@@ -79,6 +79,7 @@
     "contacts.resolveUsername",
     "contacts.getTopPeers",
     "contacts.addContact",
+    "contacts.updateContactNote",
     "contacts.resolvePhone",
     "contacts.editCloseFriends",
     "contacts.getSponsoredPeers",

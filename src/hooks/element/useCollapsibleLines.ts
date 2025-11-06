@@ -20,15 +20,19 @@ export default function useCollapsibleLines<T extends HTMLElement, C extends HTM
 ) {
   const isFirstRenderRef = useRef(true);
   const cutoutHeightRef = useRef<number | undefined>();
+  const fullHeightRef = useRef<number | undefined>();
   const [isCollapsible, setIsCollapsible] = useState(!isDisabled);
   const [isCollapsed, setIsCollapsed] = useState(isCollapsible);
 
   useLayoutEffect(() => {
     const element = (cutoutRef || ref).current;
+    const shouldUseStyleInExpand = !cutoutRef;
+
     if (isDisabled || !element || isFirstRenderRef.current) return;
 
     requestMutation(() => {
-      element.style.maxHeight = isCollapsed ? `${cutoutHeightRef.current}px` : '';
+      element.style.maxHeight = isCollapsed ? `${cutoutHeightRef.current}px` :
+        shouldUseStyleInExpand ? `${fullHeightRef.current}px` : ``;
     });
   }, [cutoutRef, isCollapsed, isDisabled, ref]);
 
@@ -39,6 +43,7 @@ export default function useCollapsibleLines<T extends HTMLElement, C extends HTM
     const element = ref.current;
 
     const { lineHeight, totalLines } = calcTextLineHeightAndCount(element);
+    fullHeightRef.current = element.scrollHeight;
     if (totalLines > maxLinesBeforeCollapse) {
       cutoutHeightRef.current = lineHeight * maxLinesBeforeCollapse;
       setIsCollapsible(true);
@@ -63,7 +68,9 @@ export default function useCollapsibleLines<T extends HTMLElement, C extends HTM
           isFirstRenderRef.current = false;
           const element = (cutoutRef || ref).current;
           if (!element) return;
-          element.style.maxHeight = cutoutHeightRef.current ? `${cutoutHeightRef.current}px` : '';
+          element.style.maxHeight = cutoutHeightRef.current ?
+            `${cutoutHeightRef.current}px` :
+            `${fullHeightRef.current}px`;
         };
       });
     }

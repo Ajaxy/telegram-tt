@@ -1716,6 +1716,9 @@ export interface LangPair {
   'ConfirmBuyGiftForTonDescription': undefined;
   'TitleGiftLocked': undefined;
   'QuickPreview': undefined;
+  'UserNoteTitle': undefined;
+  'UserNoteHint': undefined;
+  'EditUserNoteHint': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {

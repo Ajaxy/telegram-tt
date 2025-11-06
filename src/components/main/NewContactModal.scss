@@ -40,12 +40,17 @@
     font-size: 1.5rem;
   }
 
+  &__note-description,
   &__help-text {
     font-size: 0.9375rem;
     color: var(--color-text-secondary);
 
     &__negative {
       margin-top: -1rem;
+    }
+
+    &__edit {
+      margin-top: -0.875rem;
     }
   }
 }

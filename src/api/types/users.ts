@@ -1,7 +1,7 @@
 import type { API_CHAT_TYPES } from '../../config';
 import type { ApiBotInfo } from './bots';
 import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from './business';
-import type { ApiDocument, ApiPhoto } from './messages';
+import type { ApiDocument, ApiFormattedText, ApiPhoto } from './messages';
 import type {
   ApiBotVerification,
   ApiEmojiStatusType,
@@ -82,6 +82,7 @@ export interface ApiUserFullInfo {
   paidMessagesStars?: number;
   settings?: ApiPeerSettings;
   mainTab?: ApiProfileTab;
+  note?: ApiFormattedText;
 }
 
 export type ApiUserType = 'userTypeBot' | 'userTypeRegular' | 'userTypeDeleted' | 'userTypeUnknown';

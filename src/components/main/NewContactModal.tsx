@@ -8,13 +8,15 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiCountryCode, ApiUser, ApiUserStatus } from '../../api/types';
 
 import { getUserStatus } from '../../global/helpers';
-import { selectUser, selectUserStatus } from '../../global/selectors';
+import { selectUser, selectUserFullInfo, selectUserStatus } from '../../global/selectors';
 import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
+import { DEFAULT_MAX_NOTE_LENGTH } from '../../limits';
 import renderText from '../common/helpers/renderText';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useOldLang from '../../hooks/useOldLang';
 
 import Avatar from '../common/Avatar';
@@ -22,6 +24,7 @@ import Button from '../ui/Button';
 import Checkbox from '../ui/Checkbox';
 import InputText from '../ui/InputText';
 import Modal from '../ui/Modal';
+import TextArea from '../ui/TextArea';
 
 import './NewContactModal.scss';
 
@@ -37,6 +40,8 @@ type StateProps = {
   user?: ApiUser;
   userStatus?: ApiUserStatus;
   phoneCodeList: ApiCountryCode[];
+  contactNoteLimit: number;
+  noteText?: string;
 };
 
 const NewContactModal: FC<OwnProps & StateProps> = ({
@@ -46,10 +51,13 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
   user,
   userStatus,
   phoneCodeList,
+  contactNoteLimit,
+  noteText,
 }) => {
   const { updateContact, importContact, closeNewContactDialog } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const renderingUser = useCurrentOrPrev(user);
   const renderingIsByPhoneNumber = useCurrentOrPrev(isByPhoneNumber);
   const inputRef = useRef<HTMLInputElement>();
@@ -58,8 +66,12 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
   const [firstName, setFirstName] = useState<string>(renderingUser?.firstName ?? '');
   const [lastName, setLastName] = useState<string>(renderingUser?.lastName ?? '');
   const [phone, setPhone] = useState<string>(renderingUser?.phoneNumber ?? '');
+  const [note, setNote] = useState<string>('');
   const [shouldSharePhoneNumber, setShouldSharePhoneNumber] = useState<boolean>(true);
   const canBeSubmitted = Boolean(firstName && (!isByPhoneNumber || phone));
+
+  const noteSymbolsLeft = contactNoteLimit - note.length;
+  const noteRef = useRef<HTMLTextAreaElement>();
 
   useEffect(() => {
     if (isOpen) {
@@ -67,9 +79,10 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
       setFirstName(renderingUser?.firstName ?? '');
       setLastName(renderingUser?.lastName ?? '');
       setPhone(renderingUser?.phoneNumber ?? '');
+      setNote(noteText ?? '');
       setShouldSharePhoneNumber(true);
     }
-  }, [isOpen, markIsShown, renderingUser?.firstName, renderingUser?.lastName, renderingUser?.phoneNumber]);
+  }, [isOpen, markIsShown, noteText, renderingUser?.firstName, renderingUser?.lastName, renderingUser?.phoneNumber]);
 
   useEffect(() => {
     if (!IS_TOUCH_ENV && isShown) {
@@ -91,14 +104,21 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
     setLastName(e.target.value);
   }, []);
 
+  const handleNoteChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNote(e.target.value);
+  }, []);
+
   const handleClose = useCallback(() => {
     closeNewContactDialog();
     setFirstName('');
     setLastName('');
     setPhone('');
+    setNote('');
   }, [closeNewContactDialog]);
 
   const handleSubmit = useCallback(() => {
+    const noteToSend = note.trim() ? { text: note, entities: [] } : undefined;
+
     if (isByPhoneNumber || !userId) {
       importContact({
         firstName,
@@ -111,9 +131,10 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
         firstName,
         lastName,
         shouldSharePhoneNumber,
+        note: noteToSend,
       });
     }
-  }, [firstName, importContact, isByPhoneNumber, lastName, phone, shouldSharePhoneNumber, updateContact, userId]);
+  }, [firstName, importContact, isByPhoneNumber, lastName, note, phone, shouldSharePhoneNumber, updateContact, userId]);
 
   if (!isOpen && !isShown) {
     return undefined;
@@ -122,7 +143,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
   function renderAddContact() {
     return (
       <>
-        <div className="NewContactModal__profile" dir={lang.isRtl ? 'rtl' : undefined}>
+        <div className="NewContactModal__profile" dir={oldLang.isRtl ? 'rtl' : undefined}>
           <Avatar
             size="jumbo"
             peer={renderingUser}
@@ -132,29 +153,42 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
             <p className="NewContactModal__phone-number">
               {renderingUser?.phoneNumber
                 ? formatPhoneNumberWithCode(phoneCodeList, renderingUser.phoneNumber)
-                : lang('MobileHidden')}
+                : oldLang('MobileHidden')}
             </p>
             <span className="NewContactModal__user-status" dir="auto">
-              {getUserStatus(lang, renderingUser!, userStatus)}
+              {getUserStatus(oldLang, renderingUser!, userStatus)}
             </span>
           </div>
         </div>
         <InputText
           ref={inputRef}
           value={firstName}
-          label={lang('FirstName')}
+          label={oldLang('FirstName')}
           tabIndex={0}
           onChange={handleFirstNameChange}
         />
         <InputText
           value={lastName}
-          label={lang('LastName')}
+          label={oldLang('LastName')}
           tabIndex={0}
           onChange={handleLastNameChange}
         />
+        <TextArea
+          ref={noteRef}
+          id="user-note"
+          label={lang('UserNoteTitle')}
+          onChange={handleNoteChange}
+          value={note}
+          maxLength={contactNoteLimit}
+          maxLengthIndicator={noteSymbolsLeft.toString()}
+          noReplaceNewlines
+        />
+        <p className="NewContactModal__help-text NewContactModal__help-text__edit">
+          {lang('EditUserNoteHint')}
+        </p>
         <p className="NewContactModal__help-text">
           {renderText(
-            lang('NewContact.Phone.Hidden.Text', renderingUser?.firstName || ''),
+            oldLang('NewContact.Phone.Hidden.Text', renderingUser?.firstName || ''),
             ['emoji', 'simple_markdown'],
           )}
         </p>
@@ -163,10 +197,10 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
           checked={shouldSharePhoneNumber}
           tabIndex={0}
           onCheck={setShouldSharePhoneNumber}
-          label={lang('lng_new_contact_share')}
+          label={oldLang('lng_new_contact_share')}
         />
         <p className="NewContactModal__help-text NewContactModal__help-text__negative">
-          {renderText(lang('AddContact.SharedContactExceptionInfo', renderingUser?.firstName))}
+          {renderText(oldLang('AddContact.SharedContactExceptionInfo', renderingUser?.firstName))}
         </p>
       </>
     );
@@ -181,19 +215,19 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
             ref={inputRef}
             value={phone}
             inputMode="tel"
-            label={lang('lng_contact_phone')}
+            label={oldLang('lng_contact_phone')}
             tabIndex={0}
             onChange={handlePhoneChange}
           />
           <InputText
             value={firstName}
-            label={lang('FirstName')}
+            label={oldLang('FirstName')}
             tabIndex={0}
             onChange={handleFirstNameChange}
           />
           <InputText
             value={lastName}
-            label={lang('LastName')}
+            label={oldLang('LastName')}
             tabIndex={0}
             onChange={handleLastNameChange}
           />
@@ -205,7 +239,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
   return (
     <Modal
       className="NewContactModal"
-      title={lang('NewContact')}
+      title={oldLang('NewContact')}
       isOpen={isOpen}
       onClose={handleClose}
       onCloseAnimationEnd={unmarkIsShown}
@@ -219,14 +253,14 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
           disabled={!canBeSubmitted}
           onClick={handleSubmit}
         >
-          {lang('Done')}
+          {oldLang('Done')}
         </Button>
         <Button
           isText
           className="confirm-dialog-button"
           onClick={handleClose}
         >
-          {lang('Cancel')}
+          {oldLang('Cancel')}
         </Button>
       </div>
     </Modal>
@@ -236,10 +270,15 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { userId }): Complete<StateProps> => {
     const user = userId ? selectUser(global, userId) : undefined;
+    const userFullInfo = userId ? selectUserFullInfo(global, userId) : undefined;
+    const contactNoteLimit = global.appConfig?.contactNoteLimit || DEFAULT_MAX_NOTE_LENGTH;
+
     return {
       user,
       userStatus: userId ? selectUserStatus(global, userId) : undefined,
       phoneCodeList: global.countryList.phoneCodes,
+      contactNoteLimit,
+      noteText: userFullInfo?.note?.text,
     };
   },
 )(NewContactModal));

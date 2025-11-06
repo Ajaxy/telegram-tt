@@ -37,6 +37,7 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
 };
 
 export const DEFAULT_MAX_MESSAGE_LENGTH = 4096;
+export const DEFAULT_MAX_NOTE_LENGTH = 128;
 
 export const DEFAULT_APP_CONFIG: ApiAppConfig = {
   hash: 0,

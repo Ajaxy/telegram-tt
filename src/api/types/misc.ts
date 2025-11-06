@@ -274,6 +274,7 @@ export interface ApiAppConfig {
   verifyAgeBotUsername?: string;
   verifyAgeCountry?: string;
   verifyAgeMin?: number;
+  contactNoteLimit?: number;
 }
 
 export interface ApiConfig {

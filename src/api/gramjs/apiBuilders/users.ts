@@ -14,7 +14,7 @@ import { toJSNumber } from '../../../util/numbers';
 import { buildApiBotInfo } from './bots';
 import { buildApiBusinessIntro, buildApiBusinessLocation, buildApiBusinessWorkHours } from './business';
 import {
-  buildApiPhoto, buildApiUsernames,
+  buildApiFormattedText, buildApiPhoto, buildApiUsernames,
 } from './common';
 import { buildApiDisallowedGiftsSettings } from './gifts';
 import { omitVirtualClassFields } from './helpers';
@@ -36,7 +36,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
       birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount, botVerification,
       botCanManageEmojiStatus, settings, sendPaidMessagesStars, displayGiftsButton, disallowedGifts,
-      starsRating, starsMyPendingRating, starsMyPendingRatingDate, mainTab,
+      starsRating, starsMyPendingRating, starsMyPendingRatingDate, mainTab, note,
     },
     users,
   } = mtpUserFull;
@@ -76,6 +76,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     paidMessagesStars: toJSNumber(sendPaidMessagesStars),
     settings: buildApiPeerSettings(settings),
     mainTab: mainTab && buildApiProfileTab(mainTab),
+    note: note && buildApiFormattedText(note),
   };
 }
 

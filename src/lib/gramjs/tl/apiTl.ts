@@ -1569,6 +1569,7 @@ contacts.addContact#d9ba2e54 flags:# add_phone_privacy_exception:flags.0?true id
 contacts.resolvePhone#8af94344 phone:string = contacts.ResolvedPeer;
 contacts.editCloseFriends#ba6705f0 id:Vector<long> = Bool;
 contacts.getSponsoredPeers#b6c8c393 q:string = contacts.SponsoredPeers;
+contacts.updateContactNote#139f63fb id:InputUser note:TextWithEntities = Bool;
 messages.getMessages#63c66506 id:Vector<InputMessage> = messages.Messages;
 messages.getDialogs#a0f4cb4f flags:# exclude_pinned:flags.0?true folder_id:flags.1?int offset_date:int offset_id:int offset_peer:InputPeer limit:int hash:long = messages.Dialogs;
 messages.getHistory#4423e6c5 peer:InputPeer offset_id:int offset_date:int add_offset:int limit:int max_id:int min_id:int hash:long = messages.Messages;

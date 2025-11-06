@@ -1,3 +1,5 @@
+@use '../../../styles/mixins';
+
 .businessLocation {
   flex-shrink: 0;
 
@@ -67,4 +69,45 @@
 .openAppButton {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+.noteSubtitle {
+  display: flex !important;
+  align-items: center;
+}
+
+.noteListItemIcon {
+  align-self: flex-start;
+  padding-top: 1rem;
+}
+
+.noteHint {
+  margin-left: auto;
+}
+
+.noteText {
+  overflow: hidden;
+  display: inline-block;
+  width: 100%;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: max-height 0.3s ease;
+}
+
+.noteTextCollapsed {
+  @include mixins.gradient-border-bottom(1rem);
+}
+
+.noteCollapseIcon {
+  margin-inline-start: 0.125rem;
+  font-size: 0.9375rem;
+  line-height: 0.9375rem;
+  transition: transform 0.3s ease;
+}
+
+.expandedIcon {
+  transform: rotate(-180deg);
+}
+
+.clickable {
+  cursor: var(--custom-cursor, pointer);
 }

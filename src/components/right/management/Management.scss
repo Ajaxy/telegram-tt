@@ -97,10 +97,15 @@
       }
     }
 
+    .section-edit-info,
     .section-info {
       padding: 0 1rem;
       font-size: 0.875rem;
       color: var(--color-text-secondary);
+    }
+
+    .section-edit-info {
+      margin-top: -0.875rem;
     }
 
     .invite-link {

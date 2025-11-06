@@ -1867,6 +1867,11 @@ export interface ActionPayloads {
     firstName: string;
     lastName?: string;
     shouldSharePhoneNumber?: boolean;
+    note?: ApiFormattedText;
+  } & WithTabId;
+  updateContactNote: {
+    userId: string;
+    note: ApiFormattedText;
   } & WithTabId;
   toggleNoPaidMessagesException: {
     userId: string;

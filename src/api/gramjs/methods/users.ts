@@ -1,6 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiEmojiStatusType, ApiPeer, ApiUser,
+import type {
+  ApiEmojiStatusType, ApiFormattedText, ApiPeer, ApiUser,
 } from '../../types';
 
 import { toJSNumber } from '../../../util/numbers';
@@ -12,6 +13,7 @@ import {
   buildInputContact,
   buildInputEmojiStatus,
   buildInputPeer,
+  buildInputTextWithEntities,
   buildInputUser,
   buildMtpPeerId,
   DEFAULT_PRIMITIVES,
@@ -212,6 +214,7 @@ export function updateContact({
   firstName = DEFAULT_PRIMITIVES.STRING,
   lastName = DEFAULT_PRIMITIVES.STRING,
   shouldSharePhoneNumber = false,
+  note,
 }: {
   id: string;
   accessHash?: string;
@@ -219,6 +222,7 @@ export function updateContact({
   firstName?: string;
   lastName?: string;
   shouldSharePhoneNumber?: boolean;
+  note?: ApiFormattedText;
 }) {
   return invokeRequest(new GramJs.contacts.AddContact({
     id: buildInputUser(id, accessHash),
@@ -226,6 +230,7 @@ export function updateContact({
     lastName,
     phone: phoneNumber,
     addPhonePrivacyException: shouldSharePhoneNumber || undefined,
+    note: note ? buildInputTextWithEntities(note) : undefined,
   }), {
     shouldReturnTrue: true,
   });
@@ -361,6 +366,17 @@ export function saveCloseFriends(userIds: string[]) {
   const id = userIds.map((userId) => buildMtpPeerId(userId, 'user'));
 
   return invokeRequest(new GramJs.contacts.EditCloseFriends({ id }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export function updateContactNote(user: ApiUser, note: ApiFormattedText) {
+  const { id, accessHash } = user;
+
+  return invokeRequest(new GramJs.contacts.UpdateContactNote({
+    id: buildInputUser(id, accessHash),
+    note: buildInputTextWithEntities(note),
+  }), {
     shouldReturnTrue: true,
   });
 }

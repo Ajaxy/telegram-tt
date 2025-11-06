@@ -149,6 +149,7 @@ export type FontIconName =
   | 'nochannel'
   | 'noise-suppression'
   | 'non-contacts'
+  | 'note'
   | 'one-filled'
   | 'open-in-new-tab'
   | 'password-off'
