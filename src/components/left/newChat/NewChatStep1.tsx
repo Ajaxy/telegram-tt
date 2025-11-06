@@ -122,9 +122,8 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           isShown
           onClick={handleNextStep}
           ariaLabel={isChannel ? 'Continue To Channel Info' : 'Continue To Group Info'}
-        >
-          <Icon name="arrow-right" />
-        </FloatingActionButton>
+          iconName="arrow-right"
+        />
       </div>
     </div>
   );

@@ -27,7 +27,6 @@ import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
-import Icon from '../../common/icons/Icon';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -35,7 +34,6 @@ import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
 import ListItem from '../../ui/ListItem';
 import SelectAvatar from '../../ui/SelectAvatar';
-import Spinner from '../../ui/Spinner';
 import TextArea from '../../ui/TextArea';
 
 import './Management.scss';
@@ -315,13 +313,9 @@ const ManageUser: FC<OwnProps & StateProps> = ({
         onClick={handleProfileSave}
         disabled={isLoading}
         ariaLabel={oldLang('Save')}
-      >
-        {isLoading ? (
-          <Spinner color="white" />
-        ) : (
-          <Icon name="check" />
-        )}
-      </FloatingActionButton>
+        iconName="check"
+        isLoading={isLoading}
+      />
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
         onClose={closeDeleteDialog}

@@ -19,11 +19,9 @@ import useHistoryBack from '../../hooks/useHistoryBack';
 import useOldLang from '../../hooks/useOldLang';
 
 import CustomEmojiPicker from '../common/CustomEmojiPicker';
-import Icon from '../common/icons/Icon';
 import TopicIcon from '../common/TopicIcon';
 import FloatingActionButton from '../ui/FloatingActionButton';
 import InputText from '../ui/InputText';
-import Spinner from '../ui/Spinner';
 import Transition from '../ui/Transition';
 
 import styles from './ManageTopic.module.scss';
@@ -158,13 +156,9 @@ const CreateTopic: FC<OwnProps & StateProps> = ({
         disabled={isLoading}
         onClick={handleCreateTopic}
         ariaLabel={lang('Save')}
-      >
-        {isLoading ? (
-          <Spinner color="white" />
-        ) : (
-          <Icon name="check" />
-        )}
-      </FloatingActionButton>
+        iconName="check"
+        isLoading={isLoading}
+      />
     </div>
   );
 };

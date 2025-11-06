@@ -24,7 +24,6 @@ import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation'
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import NothingFound from '../../common/NothingFound';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -258,9 +257,8 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
           isShown
           onClick={handleNewMemberDialogOpen}
           ariaLabel={lang('lng_channel_add_users')}
-        >
-          <Icon name="add-user-filled" />
-        </FloatingActionButton>
+          iconName="add-user-filled"
+        />
       )}
       {canDeleteMembers && (
         <DeleteMemberModal

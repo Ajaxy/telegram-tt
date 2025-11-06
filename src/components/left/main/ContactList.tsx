@@ -13,7 +13,6 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -100,9 +99,8 @@ const ContactList: FC<OwnProps & StateProps> = ({
         isShown
         onClick={openNewContactDialog}
         ariaLabel={lang('CreateNewContact')}
-      >
-        <Icon name="add-user-filled" />
-      </FloatingActionButton>
+        iconName="add-user-filled"
+      />
     </InfiniteScroll>
   );
 };

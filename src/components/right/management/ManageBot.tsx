@@ -26,13 +26,11 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import AvatarEditable from '../../ui/AvatarEditable';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
 import ListItem from '../../ui/ListItem';
 import SelectAvatar from '../../ui/SelectAvatar';
-import Spinner from '../../ui/Spinner';
 import TextArea from '../../ui/TextArea';
 
 import './Management.scss';
@@ -231,13 +229,9 @@ const ManageBot: FC<OwnProps & StateProps> = ({
         onClick={handleProfileSave}
         disabled={isLoading}
         ariaLabel={lang('Save')}
-      >
-        {isLoading ? (
-          <Spinner color="white" />
-        ) : (
-          <Icon name="check" />
-        )}
-      </FloatingActionButton>
+        iconName="check"
+        isLoading={isLoading}
+      />
       <SelectAvatar
         onChange={handleSelectAvatar}
         inputRef={inputRef}

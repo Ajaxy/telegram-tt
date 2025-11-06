@@ -427,9 +427,8 @@ const GroupCall: FC<OwnProps & StateProps> = ({
           onClick={handleInviteMember}
           className={styles.addParticipantButton}
           ariaLabel={lang('VoipGroupInviteMember')}
-        >
-          <Icon name="add-user-filled" />
-        </FloatingActionButton>
+          iconName="add-user-filled"
+        />
       </div>
 
       <div className={styles.mainVideoContainer}>

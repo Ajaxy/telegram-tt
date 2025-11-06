@@ -1224,9 +1224,8 @@ const Profile = ({
           isShown={canRenderContent}
           onClick={handleNewMemberDialogOpen}
           ariaLabel={oldLang('lng_channel_add_users')}
-        >
-          <Icon name="add-user-filled" />
-        </FloatingActionButton>
+          iconName="add-user-filled"
+        />
       )}
       {canDeleteMembers && (
         <DeleteMemberModal

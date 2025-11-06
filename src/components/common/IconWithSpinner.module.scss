@@ -1,0 +1,16 @@
+.root {
+  --icon-size: 1.5rem;
+
+  width: var(--icon-size);
+  height: var(--icon-size);
+}
+
+.spinner {
+  --spinner-size: var(--icon-size);
+
+  margin: 0 !important;
+}
+
+.icon {
+  font-size: var(--icon-size);
+}

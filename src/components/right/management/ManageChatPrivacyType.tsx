@@ -21,7 +21,6 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
-import Icon from '../../common/icons/Icon';
 import LinkField from '../../common/LinkField';
 import ManageUsernames from '../../common/ManageUsernames';
 import SafeLink from '../../common/SafeLink';
@@ -31,7 +30,6 @@ import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
 import RadioGroup from '../../ui/RadioGroup';
-import Spinner from '../../ui/Spinner';
 
 type PrivacyType = 'private' | 'public';
 
@@ -281,13 +279,9 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
         disabled={isLoading}
         ariaLabel={lang('Save')}
         onClick={handleSave}
-      >
-        {isLoading ? (
-          <Spinner color="white" />
-        ) : (
-          <Icon name="check" />
-        )}
-      </FloatingActionButton>
+        iconName="check"
+        isLoading={isLoading}
+      />
       <ConfirmDialog
         isOpen={isUsernameLostDialogOpen}
         onClose={closeUsernameLostDialog}

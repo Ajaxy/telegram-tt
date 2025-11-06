@@ -21,7 +21,6 @@ import Button from '../../ui/Button';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
 import ListItem from '../../ui/ListItem';
-import Spinner from '../../ui/Spinner';
 
 export type OwnProps = {
   isChannel?: boolean;
@@ -210,13 +209,9 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
         onClick={isChannel ? handleCreateChannel : handleCreateGroup}
         disabled={isLoading}
         ariaLabel={isChannel ? lang('ChannelIntro.CreateChannel') : 'Create Group'}
-      >
-        {isLoading ? (
-          <Spinner color="white" />
-        ) : (
-          <Icon name="arrow-right" />
-        )}
-      </FloatingActionButton>
+        iconName="arrow-right"
+        isLoading={isLoading}
+      />
     </div>
   );
 };

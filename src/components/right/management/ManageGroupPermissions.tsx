@@ -25,13 +25,11 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useManagePermissions from '../hooks/useManagePermissions';
 
-import Icon from '../../common/icons/Icon';
 import PaidMessagePrice from '../../common/paidMessage/PaidMessagePrice';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import PermissionCheckboxList from '../../main/PermissionCheckboxList';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem from '../../ui/ListItem';
-import Spinner from '../../ui/Spinner';
 import Switcher from '../../ui/Switcher';
 
 type OwnProps = {
@@ -340,13 +338,9 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
         onClick={handleUpdatePermissions}
         ariaLabel={lang('Save')}
         disabled={arePermissionsLoading}
-      >
-        {arePermissionsLoading ? (
-          <Spinner color="white" />
-        ) : (
-          <Icon name="check" />
-        )}
-      </FloatingActionButton>
+        iconName="check"
+        isLoading={arePermissionsLoading}
+      />
     </div>
   );
 };

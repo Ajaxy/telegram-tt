@@ -16,13 +16,11 @@ import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 import useManagePermissions from '../hooks/useManagePermissions';
 
-import Icon from '../../common/icons/Icon';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import PermissionCheckboxList from '../../main/PermissionCheckboxList';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem from '../../ui/ListItem';
-import Spinner from '../../ui/Spinner';
 
 type OwnProps = {
   chatId: string;
@@ -177,13 +175,9 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
         onClick={handleSavePermissions}
         ariaLabel={oldLang('Save')}
         disabled={isLoading}
-      >
-        {isLoading ? (
-          <Spinner color="white" />
-        ) : (
-          <Icon name="check" />
-        )}
-      </FloatingActionButton>
+        iconName="check"
+        isLoading={isLoading}
+      />
 
       <ConfirmDialog
         isOpen={isBanConfirmationDialogOpen}

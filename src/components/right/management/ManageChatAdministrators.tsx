@@ -13,7 +13,6 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Checkbox from '../../ui/Checkbox';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -149,9 +148,8 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
             isShown={canAddNewAdmins}
             onClick={handleAddAdminClick}
             ariaLabel={lang('Channel.Management.AddModerator')}
-          >
-            <Icon name="add-user-filled" />
-          </FloatingActionButton>
+            iconName="add-user-filled"
+          />
         </div>
 
         {canToggleSignatures && (

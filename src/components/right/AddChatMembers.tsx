@@ -21,10 +21,8 @@ import useHistoryBack from '../../hooks/useHistoryBack';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
-import Icon from '../common/icons/Icon';
 import PeerPicker from '../common/pickers/PeerPicker';
 import FloatingActionButton from '../ui/FloatingActionButton';
-import Spinner from '../ui/Spinner';
 
 import './AddChatMembers.scss';
 
@@ -144,13 +142,9 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
           disabled={isLoading}
           ariaLabel={lang('lng_channel_add_users')}
           onClick={handleNextStep}
-        >
-          {isLoading ? (
-            <Spinner color="white" />
-          ) : (
-            <Icon name="arrow-right" />
-          )}
-        </FloatingActionButton>
+          iconName="arrow-right"
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

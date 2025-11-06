@@ -13,7 +13,6 @@ import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import PeerPicker from '../../common/pickers/PeerPicker';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 
@@ -85,9 +84,8 @@ function CloseFriends({
           isShown={isSubmitShown}
           onClick={handleSubmit}
           ariaLabel={lang('Save')}
-        >
-          <Icon name="check" />
-        </FloatingActionButton>
+          iconName="check"
+        />
       </div>
     </>
   );

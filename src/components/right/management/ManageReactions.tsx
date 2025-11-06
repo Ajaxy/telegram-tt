@@ -16,13 +16,11 @@ import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import Checkbox from '../../ui/Checkbox';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import RadioGroup from '../../ui/RadioGroup';
 import RangeSlider from '../../ui/RangeSlider';
-import Spinner from '../../ui/Spinner';
 
 type OwnProps = {
   chatId: string;
@@ -254,13 +252,9 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
         onClick={handleSaveReactions}
         ariaLabel={lang('Save')}
         disabled={isLoading}
-      >
-        {isLoading ? (
-          <Spinner color="white" />
-        ) : (
-          <Icon name="check" />
-        )}
-      </FloatingActionButton>
+        iconName="check"
+        isLoading={isLoading}
+      />
     </div>
   );
 };

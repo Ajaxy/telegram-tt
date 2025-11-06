@@ -1,35 +1,36 @@
-import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
-
+import type { IconName } from '../../types/icons';
 import type { OwnProps as ButtonProps } from './Button';
 
 import buildClassName from '../../util/buildClassName';
 
 import useOldLang from '../../hooks/useOldLang';
 
+import IconWithSpinner from '../common/IconWithSpinner';
 import Button from './Button';
 
 import './FloatingActionButton.scss';
 
 type OwnProps = {
   isShown: boolean;
+  iconName: IconName;
   className?: string;
   color?: ButtonProps['color'];
   ariaLabel?: ButtonProps['ariaLabel'];
   disabled?: boolean;
+  isLoading?: boolean;
   onClick: () => void;
-  children: React.ReactNode;
 };
 
-const FloatingActionButton: FC<OwnProps> = ({
+const FloatingActionButton = ({
   isShown,
+  iconName,
   className,
   color = 'primary',
   ariaLabel,
   disabled,
+  isLoading,
   onClick,
-  children,
-}) => {
+}: OwnProps) => {
   const lang = useOldLang();
 
   const buttonClassName = buildClassName(
@@ -49,7 +50,7 @@ const FloatingActionButton: FC<OwnProps> = ({
       tabIndex={-1}
       isRtl={lang.isRtl}
     >
-      {children}
+      <IconWithSpinner iconName={iconName} isLoading={isLoading} />
     </Button>
   );
 };

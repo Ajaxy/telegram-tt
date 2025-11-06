@@ -14,11 +14,9 @@ import useHistoryBack from '../../../hooks/useHistoryBack.ts';
 import useLang from '../../../hooks/useLang.ts';
 import useLastCallback from '../../../hooks/useLastCallback.ts';
 
-import Icon from '../../common/icons/Icon.tsx';
 import AvatarEditable from '../../ui/AvatarEditable.tsx';
 import FloatingActionButton from '../../ui/FloatingActionButton.tsx';
 import InputText from '../../ui/InputText.tsx';
-import Spinner from '../../ui/Spinner.tsx';
 
 type OwnProps = {
   chatId: string;
@@ -113,13 +111,9 @@ const NewDiscussionGroup: FC<OwnProps & StateProps> = ({
             onClick={handleCreateGroup}
             disabled={isLoading}
             ariaLabel={lang('DiscussionCreateGroup')}
-          >
-            {isLoading ? (
-              <Spinner color="white" />
-            ) : (
-              <Icon name="arrow-right" />
-            )}
-          </FloatingActionButton>
+            iconName="arrow-right"
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </div>

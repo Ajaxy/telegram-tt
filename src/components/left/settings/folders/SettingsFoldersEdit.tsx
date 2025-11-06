@@ -34,7 +34,6 @@ import PrivateChatInfo from '../../../common/PrivateChatInfo';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
 import InputText from '../../../ui/InputText';
 import ListItem from '../../../ui/ListItem';
-import Spinner from '../../../ui/Spinner';
 
 type OwnProps = {
   state: FoldersState;
@@ -461,13 +460,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
         disabled={state.isLoading}
         onClick={handleSubmit}
         ariaLabel={state.mode === 'edit' ? 'Save changes' : 'Create folder'}
-      >
-        {state.isLoading ? (
-          <Spinner color="white" />
-        ) : (
-          <Icon name="check" />
-        )}
-      </FloatingActionButton>
+        iconName="check"
+        isLoading={state.isLoading}
+      />
     </div>
   );
 };
