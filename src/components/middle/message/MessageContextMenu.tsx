@@ -252,7 +252,7 @@ const MessageContextMenu: FC<OwnProps> = ({
 
   const [areItemsHidden, hideItems] = useFlag();
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
-  const { isMobile, isDesktop } = useAppLayout();
+  const { isMobile } = useAppLayout();
   const seenByDatesCount = useMemo(() => (seenByDates ? Object.keys(seenByDates).length : 0), [seenByDates]);
 
   const handleAfterCopy = useLastCallback(() => {
@@ -314,27 +314,20 @@ const MessageContextMenu: FC<OwnProps> = ({
   );
 
   const getTriggerElement = useLastCallback(() => {
-    return document.querySelector(`.Transition_slide-active > .MessageList div[data-message-id="${message.id}"]`);
+    return document.querySelector(`.Transition_slide-active > .MessageList`);
   });
 
-  const getRootElement = useLastCallback(() => document.querySelector('.Transition_slide-active > .MessageList'));
+  const getRootElement = useLastCallback(() => document.body);
 
   const getMenuElement = useLastCallback(() => document.querySelector('.MessageContextMenu .bubble'));
 
   const getLayout = useLastCallback(() => {
-    const extraHeightAudioPlayer = (isMobile
-      && (document.querySelector<HTMLElement>('.AudioPlayer-content'))?.offsetHeight) || 0;
-    const middleColumn = document.getElementById('MiddleColumn')!;
-    const middleColumnComputedStyle = getComputedStyle(middleColumn);
-    const headerToolsHeight = parseFloat(middleColumnComputedStyle.getPropertyValue('--middle-header-panes-height'));
-    const extraHeightPinned = headerToolsHeight || 0;
-
     return {
       extraPaddingX: SCROLLBAR_WIDTH,
       extraTopPadding: (document.querySelector<HTMLElement>('.MiddleHeader')!).offsetHeight,
-      extraMarginTop: extraHeightPinned + extraHeightAudioPlayer,
-      shouldAvoidNegativePosition: !isDesktop,
+      shouldAvoidNegativePosition: true,
       menuElMinWidth: withReactions && isMobile ? REACTION_SELECTOR_WIDTH_REM * REM : undefined,
+      withPortal: true,
     };
   });
 
@@ -371,6 +364,7 @@ const MessageContextMenu: FC<OwnProps> = ({
       className={buildClassName(
         'MessageContextMenu', 'fluid', withReactions && 'with-reactions',
       )}
+      withPortal
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >

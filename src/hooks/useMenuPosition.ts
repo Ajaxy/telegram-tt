@@ -33,7 +33,6 @@ export type MenuPositionOptions =
 export interface Layout {
   extraPaddingX?: number;
   extraTopPadding?: number;
-  extraMarginTop?: number;
   menuElMinWidth?: number;
   deltaX?: number;
   topShiftY?: number;
@@ -140,7 +139,6 @@ function processDynamically(
   const {
     extraPaddingX = 0,
     extraTopPadding = 0,
-    extraMarginTop = 0,
     topShiftY = 0,
     menuElMinWidth = 0,
     deltaX = 0,
@@ -149,7 +147,7 @@ function processDynamically(
     isDense = false,
   } = getLayout?.() || {};
 
-  const marginTop = menuEl ? parseInt(getComputedStyle(menuEl).marginTop, 10) + extraMarginTop : undefined;
+  const marginTop = menuEl ? parseInt(getComputedStyle(menuEl).marginTop, 10) : undefined;
   const { offsetWidth: menuElWidth, offsetHeight: menuElHeight } = menuEl || { offsetWidth: 0, offsetHeight: 0 };
   const menuRect = menuEl ? {
     width: Math.max(menuElWidth, menuElMinWidth),
