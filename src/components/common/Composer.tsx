@@ -994,6 +994,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     editingMessage,
     !isCurrentUserPremium && !isChatWithSelf,
     showCustomEmojiPremiumNotification,
+    !attachments.length,
   );
 
   const handleEmbeddedClear = useLastCallback(() => {
