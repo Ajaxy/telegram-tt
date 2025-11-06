@@ -93,6 +93,7 @@ const ChatBadge = ({
   }, [isForum, isMuted, topicsWithUnread, topic?.notifySettings.mutedUntil]);
 
   const hasUnreadMark = topic ? false : chat.hasUnreadMark;
+  const isUnread = Boolean((unreadCount || hasUnreadMark) && !isSavedDialog);
 
   const resolvedForceHidden = useDerivedState(
     () => (isSignal(forceHidden) ? forceHidden() : forceHidden),
@@ -133,8 +134,8 @@ const ChatBadge = ({
       <div className={buildClassName(baseClassName, styles.unopened)} />
     );
 
-    const unreadCountElement = (hasUnreadMark || unreadCount) ? (
-      <div className={baseClassName}>
+    const unreadCountElement = isUnread ? (
+      <div className={buildClassName(baseClassName, styles.unread)}>
         {!hasUnreadMark && <AnimatedCounter text={formatIntegerCompact(lang, unreadCount!)} />}
       </div>
     ) : undefined;

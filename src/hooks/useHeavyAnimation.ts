@@ -1,6 +1,6 @@
 import {
   getIsHeavyAnimating,
-  useCallback, useEffect, useMemo, useRef,
+  useCallback, useEffect, useRef,
 } from '../lib/teact/teact';
 
 import { createCallbackManager } from '../util/callbacks';
@@ -48,25 +48,32 @@ export default function useHeavyAnimation(
 export function useThrottleForHeavyAnimation<T extends AnyToVoidFunction>(afterHeavyAnimation: T, deps: unknown[]) {
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   const fnMemo = useCallback(afterHeavyAnimation, deps);
+  const pendingCallRef = useRef<AnyToVoidFunction>();
 
-  const isScheduledRef = useRef(false);
-
-  return useMemo(() => {
-    return (...args: Parameters<T>) => {
-      if (!isScheduledRef.current) {
-        if (!getIsHeavyAnimating()) {
-          fnMemo(...args);
-          return;
-        }
-
-        isScheduledRef.current = true;
-
-        const removeCallback = endCallbacks.addCallback(() => {
-          fnMemo(...args);
-          removeCallback();
-          isScheduledRef.current = false;
-        });
+  useEffect(() => {
+    return () => {
+      if (pendingCallRef.current) {
+        endCallbacks.removeCallback(pendingCallRef.current);
+        pendingCallRef.current = undefined;
       }
     };
   }, [fnMemo]);
+
+  return useCallback((...args: Parameters<T>) => {
+    if (pendingCallRef.current) {
+      endCallbacks.removeCallback(pendingCallRef.current);
+    }
+
+    const wrappedCallback = () => {
+      pendingCallRef.current = undefined;
+      fnMemo(...args);
+    };
+
+    if (getIsHeavyAnimating()) {
+      pendingCallRef.current = wrappedCallback;
+      endCallbacks.addCallback(wrappedCallback);
+    } else {
+      wrappedCallback();
+    }
+  }, [fnMemo]) as T;
 }

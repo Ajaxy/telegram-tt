@@ -4,6 +4,7 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type {
   ApiBotPreviewMedia,
   ApiChat,
+  ApiChatFullInfo,
   ApiChatMember,
   ApiMessage,
   ApiProfileTab,
@@ -12,6 +13,7 @@ import type {
   ApiStoryAlbum,
   ApiTypeStory,
   ApiUser,
+  ApiUserFullInfo,
   ApiUserStatus,
 } from '../../api/types';
 import type { ProfileCollectionKey } from '../../global/selectors/payments';
@@ -183,7 +185,7 @@ type StateProps = {
   isSavedMessages?: boolean;
   isSynced?: boolean;
   hasAvatar?: boolean;
-  mainTab?: ApiProfileTab;
+  peerFullInfo?: ApiUserFullInfo | ApiChatFullInfo;
   canUpdateMainTab?: boolean;
   canAutoPlayGifs?: boolean;
 };
@@ -272,7 +274,7 @@ const Profile = ({
   isSavedMessages,
   isSynced,
   hasAvatar,
-  mainTab,
+  peerFullInfo,
   canUpdateMainTab,
   canAutoPlayGifs,
   onProfileStateChange,
@@ -324,6 +326,7 @@ const Profile = ({
 
   const isUser = isUserId(chatId);
   const validMainTabTypes = isUser ? VALID_USER_MAIN_TAB_TYPES : VALID_CHANNEL_MAIN_TAB_TYPES;
+  const mainTab = peerFullInfo?.mainTab;
 
   const tabs = useMemo(() => {
     const arr: LocalTabProps[] = [];
@@ -428,10 +431,10 @@ const Profile = ({
     setActiveTab(tabs[0].type); // Set default tab
   }, [isClosed, profileTab, tabs]);
 
-  useEffectWithPrevDeps(([prevMainTab]) => {
-    if (prevMainTab || !mainTab) return;
-    setActiveTab(mainTab); // Only focus when loading full info
-  }, [mainTab]);
+  useEffectWithPrevDeps(([prevPeerFullInfo]) => {
+    if (prevPeerFullInfo || !peerFullInfo?.mainTab) return;
+    setActiveTab(peerFullInfo.mainTab); // Only focus when loading full info
+  }, [peerFullInfo]);
 
   const handleSwitchTab = useCallback((index: number) => {
     startAutoScrollToTabsIfNeeded();
@@ -1364,7 +1367,7 @@ export default memo(withGlobal<OwnProps>(
       commonChatIds: commonChats?.ids,
       monoforumChannel,
       hasAvatar,
-      mainTab: peerFullInfo?.mainTab,
+      peerFullInfo,
       canUpdateMainTab: selectCanUpdateMainTab(global, chatId),
       canAutoPlayGifs,
     };

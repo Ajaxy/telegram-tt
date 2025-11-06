@@ -364,7 +364,7 @@ export function getOrderedTopics(
   }
 }
 
-export function getPeerColorKey(peer: ApiPeer | CustomPeer | undefined) {
+export function getPeerColorKey(peer: ApiPeer | CustomPeer | undefined, isForAvatar?: boolean) {
   if (!peer) return 0;
 
   if ('isCustomPeer' in peer) {
@@ -372,8 +372,8 @@ export function getPeerColorKey(peer: ApiPeer | CustomPeer | undefined) {
   }
 
   if (peer.color) {
-    if (peer.color.type === 'collectible') return undefined; // Custom colors
-    if (peer.color.color !== undefined) return peer.color.color;
+    if (peer.color.type === 'regular' && peer.color.color !== undefined) return peer.color.color;
+    if (peer.color.type === 'collectible' && !isForAvatar) return undefined; // Custom colors
   }
 
   return getPeerIdDividend(peer.id) % 7;

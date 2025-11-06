@@ -135,7 +135,7 @@ const Avatar = ({
   const isAnonymousForwards = realPeer && isAnonymousForwardsChat(realPeer.id);
   const isForum = chat?.isForum;
 
-  const peerColorKey = getPeerColorKey(peer);
+  const peerColorKey = getPeerColorKey(peer, true);
   const peerColorClass = peerColorKey !== undefined ? getPeerColorClass(peerColorKey) : undefined;
 
   const isStoryClickable = withStory && storyViewerMode !== 'disabled' && realPeer?.hasStories;
