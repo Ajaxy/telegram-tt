@@ -4,8 +4,9 @@ import type { ApiChatFolder } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import { REM } from '../../common/helpers/mediaDimensions';
-import { getApiPeerColorClass } from '../../common/helpers/peerColor';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
+
+import { getPeerColorClass } from '../../../hooks/usePeerColor';
 
 import styles from './ChatTags.module.scss';
 
@@ -39,7 +40,7 @@ const ChatTags = ({
             key={folder.id}
             className={buildClassName(
               styles.tag,
-              getApiPeerColorClass({ color: folder.color }),
+              folder.color !== undefined && folder.color !== -1 && getPeerColorClass(folder.color),
               itemClassName,
             )}
           >

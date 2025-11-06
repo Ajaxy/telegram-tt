@@ -1,6 +1,6 @@
 import { memo, useMemo, useRef } from '../../../lib/teact/teact';
 
-import type { ApiFactCheck } from '../../../api/types';
+import type { ApiFactCheck, ApiPeerColor } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
@@ -20,7 +20,8 @@ type OwnProps = {
   isToggleDisabled?: boolean;
 };
 
-const COLOR = {
+const COLOR: ApiPeerColor = {
+  type: 'regular',
   color: 0,
 };
 const MAX_LINES = 4;

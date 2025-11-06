@@ -369,6 +369,7 @@ const ProfileInfo = ({
         user={user}
         chat={chat}
         photo={photo}
+        theme={theme}
         canPlayVideo={Boolean(isActive && canPlayVideo)}
         className={buildClassName(isActive && styles.activeProfilePhoto)}
         style={isActive ? createVtnStyle('avatar', true) : undefined}

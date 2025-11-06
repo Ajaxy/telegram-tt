@@ -15,12 +15,12 @@ import { isBetween } from '../../../../util/math';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { throttle } from '../../../../util/schedulers';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
-import { getApiPeerColorClass } from '../../../common/helpers/peerColor';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import { useFolderManagerForChatsCount } from '../../../../hooks/useFolderManager';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useLang from '../../../../hooks/useLang';
+import { getPeerColorClass } from '../../../../hooks/usePeerColor';
 import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
 
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
@@ -338,7 +338,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                     shouldRenderColor && (
                       <div className={buildClassName(
                         'settings-folders-color-circle',
-                        getApiPeerColorClass({ color: folder.color }),
+                        folder.color !== undefined && folder.color !== -1 && getPeerColorClass(folder.color),
                       )}
                       />
                     )

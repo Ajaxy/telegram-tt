@@ -138,6 +138,7 @@ class TelegramClient {
         messages: messages.map((message) => createMockedMessage(peerId, message.id, this.mockData)),
         chats: [],
         users: [],
+        topics: [],
       });
     }
 
@@ -158,11 +159,11 @@ class TelegramClient {
       });
     }
 
-    if (request instanceof Api.channels.GetForumTopics) {
-      const channelId = getIdFromInputPeer(request.channel);
-      if (!channelId) return undefined;
+    if (request instanceof Api.messages.GetForumTopics) {
+      const peerId = getIdFromInputPeer(request.peer);
+      if (!peerId) return undefined;
 
-      const topics = this.getChannel(channelId)?.forumTopics;
+      const topics = this.getChannel(peerId)?.forumTopics;
 
       if (!topics) return undefined;
 
@@ -173,7 +174,7 @@ class TelegramClient {
         topics: topics
           .sort((a, b) => b.id - a.id)
           .map((topic) => {
-            return createMockedForumTopic(channelId, topic.id, this.mockData);
+            return createMockedForumTopic(peerId, topic.id, this.mockData);
           }).filter((topic) => {
             if (offsetTopicId) {
               return topic.id < offsetTopicId;
@@ -219,6 +220,7 @@ class TelegramClient {
         messages: this.getMessagesFrom(peerId),
         chats: [],
         users: [],
+        topics: [],
       });
     }
 

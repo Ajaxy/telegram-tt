@@ -1,5 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
@@ -8,7 +6,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type {
   ApiChat, ApiInputMessageReplyInfo, ApiInputSuggestedPostInfo, ApiMessage, ApiPeer,
 } from '../../../api/types';
-import type { MessageListType, ThreadId } from '../../../types/index';
+import type { MessageListType, ThemeKey, ThreadId } from '../../../types/index';
 
 import { isChatChannel, stripCustomEmoji } from '../../../global/helpers';
 import {
@@ -24,18 +22,19 @@ import {
   selectIsCurrentUserPremium,
   selectSender,
   selectTabState,
+  selectTheme,
 } from '../../../global/selectors';
 import { selectIsMediaNsfw } from '../../../global/selectors/media';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { unique } from '../../../util/iteratees';
-import { getPeerColorClass } from '../../common/helpers/peerColor';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
+import usePeerColor from '../../../hooks/usePeerColor';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import { ClosableEmbeddedMessage } from '../../common/embedded/EmbeddedMessage';
@@ -69,6 +68,7 @@ type StateProps = {
   forwardMessageIds?: number[];
   fromChatId?: string;
   isMediaNsfw?: boolean;
+  theme: ThemeKey;
 };
 
 type OwnProps = {
@@ -81,7 +81,7 @@ type OwnProps = {
 
 const CLOSE_DURATION = 350;
 
-const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
+const ComposerEmbeddedMessage = ({
   replyInfo,
   suggestedPostInfo,
   editingId,
@@ -105,8 +105,9 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   forwardMessageIds,
   fromChatId,
   isMediaNsfw,
+  theme,
   onClear,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     resetDraftReplyInfo,
     resetDraftSuggestedPostInfo,
@@ -243,10 +244,12 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 
   const className = buildClassName('ComposerEmbeddedMessage', transitionClassNames);
   const renderingSender = useCurrentOrPrev(sender, true);
-  const innerClassName = buildClassName(
-    'ComposerEmbeddedMessage_inner',
-    getPeerColorClass(renderingSender),
-  );
+
+  const { className: peerColorClass, style: peerColorStyle } = usePeerColor({
+    peer: renderingSender,
+    theme,
+  });
+  const innerClassName = buildClassName('ComposerEmbeddedMessage_inner', peerColorClass);
 
   const leftIcon = useMemo(() => {
     if (editingId) {
@@ -292,7 +295,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 
   return (
     <div className={className} ref={ref} onContextMenu={handleContextMenu}>
-      <div className={innerClassName}>
+      <div className={innerClassName} style={peerColorStyle}>
         <div className="embedded-left-icon" onClick={handleContextMenu}>
           {renderingLeftIcon && <Icon name={renderingLeftIcon} />}
           {Boolean(replyInfo?.quoteText) && (
@@ -524,6 +527,7 @@ export default memo(withGlobal<OwnProps>(
       forwardMessageIds,
       fromChatId,
       isMediaNsfw,
+      theme: selectTheme(global),
     };
   },
 )(ComposerEmbeddedMessage));

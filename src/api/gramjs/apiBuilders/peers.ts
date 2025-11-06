@@ -3,11 +3,11 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import type {
   ApiBotVerification,
   ApiEmojiStatusType,
-  ApiPeerColor,
   ApiPeerColors,
   ApiPeerNotifySettings,
   ApiPeerProfileColorSet,
   ApiProfileTab,
+  ApiTypePeerColor,
 } from '../../types';
 
 import { CHANNEL_ID_BASE } from '../../../config';
@@ -50,12 +50,33 @@ export function getApiChatIdFromMtpPeer(peer: TypePeerOrInput) {
   }
 }
 
-export function buildApiPeerColor(peerColor: GramJs.TypePeerColor): ApiPeerColor {
-  const { color, backgroundEmojiId } = peerColor;
-  return {
-    color,
-    backgroundEmojiId: backgroundEmojiId?.toString(),
-  };
+export function buildApiPeerColor(peerColor: GramJs.TypePeerColor): ApiTypePeerColor | undefined {
+  if (peerColor instanceof GramJs.PeerColor) {
+    const { color, backgroundEmojiId } = peerColor;
+    return {
+      type: 'regular',
+      color,
+      backgroundEmojiId: backgroundEmojiId?.toString(),
+    };
+  }
+
+  if (peerColor instanceof GramJs.PeerColorCollectible) {
+    const {
+      collectibleId, giftEmojiId, backgroundEmojiId, accentColor, colors, darkAccentColor, darkColors,
+    } = peerColor;
+    return {
+      type: 'collectible',
+      giftEmojiId: giftEmojiId.toString(),
+      collectibleId: collectibleId.toString(),
+      backgroundEmojiId: backgroundEmojiId.toString(),
+      accentColor: int2hex(accentColor),
+      colors: colors.map((color) => int2hex(color)),
+      darkAccentColor: darkAccentColor ? int2hex(darkAccentColor) : undefined,
+      darkColors: darkColors?.map((color) => int2hex(color)),
+    };
+  }
+
+  return undefined;
 }
 
 function buildApiPeerColorSet(colorSet: GramJs.help.PeerColorSet) {

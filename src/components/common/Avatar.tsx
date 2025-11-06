@@ -1,6 +1,5 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
-import type { FC, TeactNode } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
+import type { TeactNode } from '../../lib/teact/teact';
 import { memo, useMemo, useRef } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -15,6 +14,7 @@ import { IS_TEST } from '../../config';
 import {
   getChatAvatarHash,
   getChatTitle,
+  getPeerColorKey,
   getPeerStoryHtmlId,
   getUserFullName,
   getVideoProfilePhotoMediaHash,
@@ -29,7 +29,6 @@ import buildStyle from '../../util/buildStyle';
 import { isUserId } from '../../util/entities/ids';
 import { getFirstLetters } from '../../util/textFormat';
 import { REM } from './helpers/mediaDimensions';
-import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
 
 import { useFastClick } from '../../hooks/useFastClick';
@@ -37,6 +36,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useOldLang from '../../hooks/useOldLang';
+import { getPeerColorClass } from '../../hooks/usePeerColor';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 import AvatarStoryCircle from './AvatarStoryCircle';
@@ -94,7 +94,7 @@ type OwnProps = {
   onMouseMove?: (e: React.MouseEvent) => void;
 };
 
-const Avatar: FC<OwnProps> = ({
+const Avatar = ({
   className,
   style,
   size = 'large',
@@ -121,7 +121,7 @@ const Avatar: FC<OwnProps> = ({
   onClick,
   onContextMenu,
   onMouseMove,
-}) => {
+}: OwnProps) => {
   const { openStoryViewer } = getActions();
 
   const ref = useRef<HTMLDivElement>();
@@ -134,6 +134,9 @@ const Avatar: FC<OwnProps> = ({
   const isReplies = realPeer && isChatWithRepliesBot(realPeer.id);
   const isAnonymousForwards = realPeer && isAnonymousForwardsChat(realPeer.id);
   const isForum = chat?.isForum;
+
+  const peerColorKey = getPeerColorKey(peer);
+  const peerColorClass = peerColorKey !== undefined ? getPeerColorClass(peerColorKey) : undefined;
 
   const isStoryClickable = withStory && storyViewerMode !== 'disabled' && realPeer?.hasStories;
 
@@ -265,7 +268,7 @@ const Avatar: FC<OwnProps> = ({
   const fullClassName = buildClassName(
     'Avatar',
     className,
-    getPeerColorClass(peer),
+    peerColorClass,
     !peer && text && 'hidden-user',
     isSavedMessages && 'saved-messages',
     isAnonymousForwards && 'anonymous-forwards',
@@ -281,6 +284,12 @@ const Avatar: FC<OwnProps> = ({
     withStorySolid && (realPeer?.hasUnreadStories || forceUnreadStorySolid) && 'has-unread-story',
     (onClick || isStoryClickable) && 'interactive',
     (!isSavedMessages && !imgUrl) && 'no-photo',
+  );
+
+  const fullStyle = buildStyle(
+    `--_size: ${pxSize}px;`,
+    customColor && `--color-user: ${customColor}`,
+    style,
   );
 
   const hasMedia = Boolean(isSavedMessages || imgUrl);
@@ -310,7 +319,7 @@ const Avatar: FC<OwnProps> = ({
       data-peer-id={realPeer?.id}
       data-test-sender-id={IS_TEST ? realPeer?.id : undefined}
       aria-label={typeof content === 'string' ? author : undefined}
-      style={buildStyle(`--_size: ${pxSize}px;`, customColor && `--color-user: ${customColor}`, style)}
+      style={fullStyle}
       onClick={handleClick}
       onContextMenu={onContextMenu}
       onMouseDown={handleMouseDown}

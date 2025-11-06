@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -7,19 +6,20 @@ import type {
   ApiStoryForwardInfo,
   ApiTypeStory,
 } from '../../../api/types';
+import type { ThemeKey } from '../../../types';
 import type { IconName } from '../../../types/icons';
 
 import { getPeerTitle } from '../../../global/helpers/peers';
-import { selectPeer, selectPeerStory } from '../../../global/selectors';
+import { selectPeer, selectPeerStory, selectTheme } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../util/entities/ids';
-import { getPeerColorClass } from '../helpers/peerColor';
 import renderText from '../helpers/renderText';
 import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
 
 import { useFastClick } from '../../../hooks/useFastClick';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
+import usePeerColor from '../../../hooks/usePeerColor';
 
 import Icon from '../icons/Icon';
 import PeerColorWrapper from '../PeerColorWrapper';
@@ -35,14 +35,16 @@ type OwnProps = {
 type StateProps = {
   sender?: ApiPeer;
   story?: ApiTypeStory;
+  theme: ThemeKey;
 };
 
-const EmbeddedStoryForward: FC<OwnProps & StateProps> = ({
+const EmbeddedStoryForward = ({
   className,
   forwardInfo,
   sender,
   story,
-}) => {
+  theme,
+}: OwnProps & StateProps) => {
   const { openStoryViewer, loadPeerStoriesByIds, openChat } = getActions();
   const ref = useRef<HTMLDivElement>();
 
@@ -56,6 +58,13 @@ const EmbeddedStoryForward: FC<OwnProps & StateProps> = ({
       });
     }
   }, [forwardInfo, story]);
+
+  const { className: peerColorClass, style: peerColorStyle } = usePeerColor({
+    peer: sender,
+    noUserColors: true,
+    shouldReset: true,
+    theme,
+  });
 
   const senderTitle = sender ? getPeerTitle(lang, sender) : forwardInfo.fromName;
 
@@ -111,8 +120,9 @@ const EmbeddedStoryForward: FC<OwnProps & StateProps> = ({
       className={buildClassName(
         'EmbeddedMessage',
         className,
-        getPeerColorClass(sender, true, true),
+        peerColorClass,
       )}
+      style={peerColorStyle}
       dir={lang.isRtl ? 'rtl' : undefined}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
@@ -138,9 +148,11 @@ export default memo(withGlobal<OwnProps>(
     const sender = forwardInfo.fromPeerId ? selectPeer(global, forwardInfo.fromPeerId) : undefined;
     const story = forwardInfo.storyId && forwardInfo.fromPeerId
       ? selectPeerStory(global, forwardInfo.fromPeerId, forwardInfo.storyId) : undefined;
+
     return {
       sender,
       story,
+      theme: selectTheme(global),
     };
   },
 )(EmbeddedStoryForward));

@@ -12,6 +12,7 @@
   height: auto;
 
   // Slight variation from mixins.header-pane
+  padding-right: max(1rem, env(safe-area-inset-right));
   padding-left: max(1rem, env(safe-area-inset-left));
 
   line-height: 1.25;
@@ -24,7 +25,12 @@
 }
 
 .content {
+  display: flex;
   flex-grow: 1;
+  gap: 0.5rem;
+  align-items: center;
+
+  color: var(--color-text);
 }
 
 .info {

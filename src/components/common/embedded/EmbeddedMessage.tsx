@@ -305,6 +305,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
       emojiIconClassName="EmbeddedMessage--background-icons"
       ref={ref}
       shouldReset
+      isReply={Boolean(replyInfo)}
       noUserColors={noUserColors}
       className={buildClassName(
         'EmbeddedMessage',

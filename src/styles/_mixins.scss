@@ -138,6 +138,7 @@
   transition: transform var(--slide-transition);
 
   &::before {
+    pointer-events: none;
     content: "";
 
     position: absolute;

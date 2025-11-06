@@ -57,9 +57,23 @@ export interface ApiSendAsPeerId {
 }
 
 export interface ApiPeerColor {
+  type: 'regular';
   color?: number;
   backgroundEmojiId?: string;
 }
+
+export interface ApiPeerColorCollectible {
+  type: 'collectible';
+  collectibleId: string;
+  giftEmojiId: string;
+  backgroundEmojiId: string;
+  accentColor: string;
+  colors: string[];
+  darkAccentColor?: string;
+  darkColors?: string[];
+}
+
+export type ApiTypePeerColor = ApiPeerColor | ApiPeerColorCollectible;
 
 export type ApiPeerColorSet = string[];
 export type ApiPeerProfileColorSet = {

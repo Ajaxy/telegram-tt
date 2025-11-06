@@ -1,9 +1,10 @@
-import type { FC, TeactNode } from '../../../lib/teact/teact';
+import type { TeactNode } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 
 import type { ApiChat, ApiPhoto, ApiUser } from '../../../api/types';
+import type { ThemeKey } from '../../../types';
 
 import {
   getChatAvatarHash,
@@ -18,9 +19,9 @@ import {
 } from '../../../global/helpers';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
+import buildStyle from '../../../util/buildStyle';
 import { isUserId } from '../../../util/entities/ids';
 import { getFirstLetters } from '../../../util/textFormat';
-import { getPeerColorClass } from '../helpers/peerColor';
 import renderText from '../helpers/renderText';
 
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -29,6 +30,7 @@ import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
 import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
+import usePeerColor from '../../../hooks/usePeerColor';
 
 import OptimizedVideo from '../../ui/OptimizedVideo';
 import Spinner from '../../ui/Spinner';
@@ -45,10 +47,11 @@ type OwnProps = {
   canPlayVideo: boolean;
   className?: string;
   style?: string;
+  theme: ThemeKey;
   onClick: NoneToVoidFunction;
 };
 
-const ProfilePhoto: FC<OwnProps> = ({
+const ProfilePhoto = ({
   chat,
   user,
   photo,
@@ -57,8 +60,9 @@ const ProfilePhoto: FC<OwnProps> = ({
   canPlayVideo,
   className,
   style,
+  theme,
   onClick,
-}) => {
+}: OwnProps) => {
   const videoRef = useRef<HTMLVideoElement>();
 
   const lang = useLang();
@@ -91,6 +95,8 @@ const ProfilePhoto: FC<OwnProps> = ({
     photo?.thumbnail?.dataUri, !isBlurredThumb, isMobile && !IS_CANVAS_FILTER_SUPPORTED,
   );
   const hasMedia = photo || previewBlobUrl || isBlurredThumb;
+
+  const { className: peerColorClass, style: peerColorStyle } = usePeerColor({ peer, theme });
 
   useEffect(() => {
     if (videoRef.current && !canPlayVideo) {
@@ -170,7 +176,7 @@ const ProfilePhoto: FC<OwnProps> = ({
 
   const fullClassName = buildClassName(
     'ProfilePhoto',
-    getPeerColorClass(peer),
+    peerColorClass,
     isSavedMessages && 'saved-messages',
     isAnonymousForwards && 'anonymous-forwards',
     isDeleted && 'deleted-account',
@@ -180,7 +186,11 @@ const ProfilePhoto: FC<OwnProps> = ({
   );
 
   return (
-    <div className={fullClassName} onClick={hasMedia ? onClick : undefined} style={style}>
+    <div
+      className={fullClassName}
+      style={buildStyle(style, peerColorStyle)}
+      onClick={hasMedia ? onClick : undefined}
+    >
       {typeof content === 'string' ? renderText(content, ['hq_emoji']) : content}
     </div>
   );

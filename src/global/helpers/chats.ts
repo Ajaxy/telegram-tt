@@ -7,6 +7,7 @@ import type {
   ApiChatInviteInfo,
   ApiMessage,
   ApiPeer,
+  ApiPeerColorCollectible,
   ApiPreparedInlineMessage,
   ApiTopic,
 } from '../../api/types';
@@ -363,16 +364,32 @@ export function getOrderedTopics(
   }
 }
 
-export function getPeerColorKey(peer: ApiPeer | undefined) {
-  if (peer?.color?.color) return peer.color.color;
+export function getPeerColorKey(peer: ApiPeer | CustomPeer | undefined) {
+  if (!peer) return 0;
 
-  return peer ? getPeerIdDividend(peer.id) % 7 : 0;
+  if ('isCustomPeer' in peer) {
+    return peer.peerColorId;
+  }
+
+  if (peer.color) {
+    if (peer.color.type === 'collectible') return undefined; // Custom colors
+    if (peer.color.color !== undefined) return peer.color.color;
+  }
+
+  return getPeerIdDividend(peer.id) % 7;
 }
 
 export function getPeerColorCount(peer: ApiPeer) {
   const key = getPeerColorKey(peer);
+  if (peer.color?.type === 'collectible') return getPeerColorCollectibleColorCount(peer.color);
+  if (key === undefined) return 1;
+
   const global = getGlobal();
   return global.peerColors?.general[key].colors?.length || 1;
+}
+
+export function getPeerColorCollectibleColorCount(color: ApiPeerColorCollectible): number {
+  return color.colors.length;
 }
 
 export function getIsSavedDialog(chatId: string, threadId: ThreadId | undefined, currentUserId: string | undefined) {

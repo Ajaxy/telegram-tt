@@ -2,14 +2,14 @@ import type { ApiBotCommand } from './bots';
 import type {
   ApiChatReactions, ApiFormattedText, ApiInputMessageReplyInfo, ApiInputSuggestedPostInfo, ApiPhoto, ApiStickerSet,
 } from './messages';
-import type { ApiChatInviteImporter, ApiPeerNotifySettings, ApiRestrictionReason } from './misc';
+import type { ApiChatInviteImporter, ApiRestrictionReason } from './misc';
 import type {
   ApiBotVerification,
   ApiEmojiStatusType,
   ApiFakeType,
-  ApiPeerColor,
   ApiProfileTab,
   ApiSendAsPeerId,
+  ApiTypePeerColor,
 } from './peers';
 import type {
   ApiUser, ApiUsername,
@@ -51,8 +51,8 @@ export interface ApiChat {
   draftDate?: number;
   isProtected?: boolean;
   fakeType?: ApiFakeType;
-  color?: ApiPeerColor;
-  profileColor?: ApiPeerColor;
+  color?: ApiTypePeerColor;
+  profileColor?: ApiTypePeerColor;
   emojiStatus?: ApiEmojiStatusType;
   isForum?: boolean;
   isForumAsMessages?: true;
@@ -242,27 +242,6 @@ export interface ApiChatFolder {
   excludedChatIds: string[];
   isChatList?: true;
   hasMyInvites?: true;
-}
-
-export interface ApiTopic {
-  id: number;
-  isClosed?: boolean;
-  isPinned?: boolean;
-  isHidden?: boolean;
-  isOwner?: boolean;
-
-  // TODO[forums] https://github.com/telegramdesktop/tdesktop/blob/1aece79a471d99a8b63d826b1bce1f36a04d7293/Telegram/SourceFiles/data/data_forum_topic.cpp#L318
-  isMin?: boolean;
-  date: number;
-  title: string;
-  iconColor: number;
-  iconEmojiId?: string;
-  lastMessageId: number;
-  unreadCount: number;
-  unreadMentionsCount: number;
-  unreadReactionsCount: number;
-  fromId: string;
-  notifySettings: ApiPeerNotifySettings;
 }
 
 export interface ApiChatlistInviteNew {

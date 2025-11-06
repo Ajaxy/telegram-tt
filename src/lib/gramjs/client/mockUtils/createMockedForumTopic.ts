@@ -38,6 +38,7 @@ export default function createMockedForumTopic(chatId: string, topicId: number, 
     unreadMentionsCount,
     unreadReactionsCount,
     fromId: createMockedTypePeer(chatId, mockData),
+    peer: createMockedTypePeer(chatId, mockData),
     ...rest,
   });
 }

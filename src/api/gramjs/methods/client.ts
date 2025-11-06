@@ -466,7 +466,7 @@ function dispatchNotSupportedInFrozenAccountUpdate<T extends GramJs.AnyRequest>(
     || request instanceof GramJs.phone.GetGroupParticipants
     || request instanceof GramJs.channels.GetParticipant
     || request instanceof GramJs.channels.GetParticipants
-    || request instanceof GramJs.channels.GetForumTopics) {
+    || request instanceof GramJs.messages.GetForumTopics) {
     return;
   }
 

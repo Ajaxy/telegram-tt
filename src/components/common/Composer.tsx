@@ -127,7 +127,6 @@ import applyIosAutoCapitalizationFix from '../middle/composer/helpers/applyIosAu
 import buildAttachment, { prepareAttachmentsToSend } from '../middle/composer/helpers/buildAttachment';
 import { buildCustomEmojiHtml } from '../middle/composer/helpers/customEmoji';
 import { isSelectionInsideInput } from '../middle/composer/helpers/selection';
-import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
 import { getTextWithEntitiesAsHtml } from './helpers/renderTextWithEntities';
 
@@ -141,6 +140,7 @@ import useGetSelectionRange from '../../hooks/useGetSelectionRange';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
+import usePeerColor from '../../hooks/usePeerColor';
 import usePrevious from '../../hooks/usePrevious';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useSchedule from '../../hooks/useSchedule';
@@ -980,6 +980,11 @@ const Composer: FC<OwnProps & StateProps> = ({
       handleStoryPickerContextMenuHide();
     }
   }, [chatId, handleStoryPickerContextMenuHide, isReactionPickerOpen, storyId, storyReactionPickerAnchor]);
+
+  const { className: peerColorClass, style: peerColorStyle } = usePeerColor({
+    peer: sendAsPeer || currentUser,
+    theme,
+  });
 
   useClipboardPaste(
     isForCurrentMessageList || isInStoryViewer,
@@ -2082,7 +2087,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             />
           </>
         )}
-        <div className={buildClassName('message-input-wrapper', getPeerColorClass(currentUser))}>
+        <div className={buildClassName('message-input-wrapper', peerColorClass)} style={peerColorStyle}>
           {isInMessageList && (
             <>
               {withBotMenuButton && (

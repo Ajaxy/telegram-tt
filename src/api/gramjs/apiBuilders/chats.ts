@@ -20,7 +20,6 @@ import type {
   ApiSponsoredMessageReportResult,
   ApiSponsoredPeer,
   ApiStarsSubscriptionPricing,
-  ApiTopic,
 } from '../../types';
 
 import { pickTruthy } from '../../../util/iteratees';
@@ -38,7 +37,6 @@ import {
   buildApiEmojiStatus,
   buildApiPeerColor,
   buildApiPeerId,
-  buildApiPeerNotifySettings,
   buildAvatarPhotoId,
   getApiChatIdFromMtpPeer,
   isMtpPeerChat,
@@ -549,50 +547,6 @@ export function buildApiSendAsPeerId(sendAs: GramJs.SendAsPeer): ApiSendAsPeerId
   return {
     id: getApiChatIdFromMtpPeer(sendAs.peer),
     isPremium: sendAs.premiumRequired,
-  };
-}
-
-export function buildApiTopic(forumTopic: GramJs.TypeForumTopic): ApiTopic | undefined {
-  if (forumTopic instanceof GramJs.ForumTopicDeleted) {
-    return undefined;
-  }
-
-  const {
-    id,
-    my,
-    closed,
-    pinned,
-    hidden,
-    short,
-    date,
-    title,
-    iconColor,
-    iconEmojiId,
-    topMessage,
-    unreadCount,
-    unreadMentionsCount,
-    unreadReactionsCount,
-    fromId,
-    notifySettings,
-  } = forumTopic;
-
-  return {
-    id,
-    isClosed: closed,
-    isPinned: pinned,
-    isHidden: hidden,
-    isOwner: my,
-    isMin: short,
-    date,
-    title,
-    iconColor,
-    iconEmojiId: iconEmojiId?.toString(),
-    lastMessageId: topMessage,
-    unreadCount,
-    unreadMentionsCount,
-    unreadReactionsCount,
-    fromId: getApiChatIdFromMtpPeer(fromId),
-    notifySettings: buildApiPeerNotifySettings(notifySettings),
   };
 }
 

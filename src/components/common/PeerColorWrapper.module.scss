@@ -1,5 +1,4 @@
 .root {
-
   --peer-color-wrapper-bar-color: var(--bar-gradient, var(--accent-color));
 
   position: relative;
@@ -13,19 +12,31 @@
   color: var(--accent-color);
 
   background-color: var(--accent-background-color);
+}
 
-  &::before {
-    content: "";
+.withBar::before {
+  content: "";
 
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    inset-inline-start: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-start: 0;
 
-    display: block;
+  display: block;
 
-    width: 0.1875rem;
+  width: 0.1875rem;
 
-    background: var(--peer-color-wrapper-bar-color);
-  }
+  background: var(--peer-color-wrapper-bar-color);
+}
+
+.hasGiftEmoji {
+  padding-inline-end: 1.75rem;
+}
+
+.giftEmoji {
+  --custom-emoji-size: 1.25rem;
+
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
 }

@@ -34,12 +34,13 @@ export default function useMultiaccountInfo(currentUser?: ApiUser) {
 
   useEffect(() => {
     if (!isUpdater || !isSynced) return;
+    const color = currentUser.color?.type === 'regular' ? currentUser.color.color : undefined;
     storeAccountData(ACCOUNT_SLOT, {
       userId: currentUser.id,
       firstName: currentUser.firstName,
       lastName: currentUser.lastName,
       emojiStatusId: currentUser.emojiStatus?.documentId,
-      color: currentUser.color?.color,
+      color,
       isPremium: currentUser.isPremium,
       phone: currentUser.phoneNumber,
     });
@@ -47,7 +48,7 @@ export default function useMultiaccountInfo(currentUser?: ApiUser) {
     refresh();
   }, [
     isUpdater, currentUser?.emojiStatus?.documentId, currentUser?.firstName, currentUser?.id, currentUser?.lastName,
-    currentUser?.color?.color, currentUser?.isPremium, currentUser?.phoneNumber, refresh, isSynced,
+    currentUser?.color, currentUser?.isPremium, currentUser?.phoneNumber, refresh, isSynced,
   ]);
 
   const updateAvatar = useLastCallback(async (url: string, abortSignal?: AbortSignal) => {

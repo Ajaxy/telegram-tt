@@ -6,9 +6,9 @@ import type {
   ApiBotVerification,
   ApiEmojiStatusType,
   ApiFakeType,
-  ApiPeerColor,
   ApiPeerSettings,
   ApiProfileTab,
+  ApiTypePeerColor,
 } from './peers';
 import type { ApiSavedStarGift, ApiStarsRating } from './stars';
 
@@ -40,8 +40,8 @@ export interface ApiUser {
   hasStories?: boolean;
   hasUnreadStories?: boolean;
   maxStoryId?: number;
-  color?: ApiPeerColor;
-  profileColor?: ApiPeerColor;
+  color?: ApiTypePeerColor;
+  profileColor?: ApiTypePeerColor;
   canEditBot?: boolean;
   hasMainMiniApp?: boolean;
   botActiveUsers?: number;

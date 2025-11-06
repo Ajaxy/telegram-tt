@@ -125,13 +125,13 @@ import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { IS_ANDROID, IS_TRANSLATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
+import buildStyle from '../../../util/buildStyle';
 import { isUserId } from '../../../util/entities/ids';
 import { getMessageKey } from '../../../util/keys/messageKey';
 import { getServerTime } from '../../../util/serverTime';
 import stopEvent from '../../../util/stopEvent';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
 import { calculateDimensionsForMessageMedia, getStickerDimensions, REM } from '../../common/helpers/mediaDimensions';
-import { getPeerColorClass } from '../../common/helpers/peerColor';
 import renderText from '../../common/helpers/renderText';
 import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
 import { buildContentClassName } from './helpers/buildContentClassName';
@@ -148,6 +148,7 @@ import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
+import usePeerColor from '../../../hooks/usePeerColor';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useMessageResizeObserver from '../../../hooks/useResizeMessageObserver';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -805,6 +806,13 @@ const Message = ({
       (photo || video || storyData || (location?.mediaType === 'geo')) && (!hasText || isInvertedMedia))
     );
 
+  const { className: peerColorClass, style: peerColorStyle } = usePeerColor({
+    peer: messageColorPeer,
+    noUserColors,
+    shouldReset: true,
+    theme,
+  });
+
   const contentClassName = buildContentClassName(message, album, {
     poll,
     webPage,
@@ -820,7 +828,7 @@ const Message = ({
     hasReactions,
     isGeoLiveActive: location?.mediaType === 'geoLive' && !isGeoLiveExpired(message),
     withVoiceTranscription,
-    peerColorClass: getPeerColorClass(messageColorPeer, noUserColors, true),
+    peerColorClass,
     hasOutsideReactions,
   });
 
@@ -987,8 +995,10 @@ const Message = ({
   ]);
 
   const {
-    contentWidth, style, reactionsMaxWidth,
+    contentWidth, style: sizeStyles, reactionsMaxWidth,
   } = sizeCalculations;
+
+  const contentStyle = buildStyle(peerColorStyle, sizeStyles);
 
   function renderMessageText(isForAnimation?: boolean) {
     if (!textMessage) return undefined;
@@ -1710,7 +1720,7 @@ const Message = ({
       >
         <div
           className={contentClassName}
-          style={style}
+          style={contentStyle}
           dir="auto"
         >
           {asForwarded && !isInDocumentGroupNotFirst && (

@@ -5,11 +5,11 @@ import type {
   ApiWebDocument,
 } from './bots';
 import type { ApiMessageAction } from './messageActions';
-import type { ApiRestrictionReason } from './misc';
+import type { ApiPeerNotifySettings, ApiRestrictionReason } from './misc';
 import type {
   ApiLabeledPrice,
 } from './payments';
-import type { ApiPeerColor } from './peers';
+import type { ApiTypePeerColor } from './peers';
 import type { ApiStarGiftUnique, ApiTypeCurrencyAmount } from './stars';
 import type {
   ApiMessageStoryData, ApiStory, ApiWebPageStickerData, ApiWebPageStoryData,
@@ -851,7 +851,7 @@ export type ApiSponsoredMessage = {
   url: string;
   photo?: ApiPhoto;
   content: MediaContent;
-  peerColor?: ApiPeerColor;
+  peerColor?: ApiTypePeerColor;
 };
 
 // KeyboardButtons
@@ -1048,6 +1048,28 @@ export type LinkContext = {
   chatId: string;
   messageId: number;
 };
+
+export interface ApiTopic {
+  id: number;
+  isClosed?: boolean;
+  isPinned?: boolean;
+  isHidden?: boolean;
+  isOwner?: boolean;
+
+  // TODO[forums] https://github.com/telegramdesktop/tdesktop/blob/1aece79a471d99a8b63d826b1bce1f36a04d7293/Telegram/SourceFiles/data/data_forum_topic.cpp#L318
+  isMin?: boolean;
+  date: number;
+  title: string;
+  iconColor: number;
+  iconEmojiId?: string;
+  lastMessageId: number;
+  unreadCount: number;
+  unreadMentionsCount: number;
+  unreadReactionsCount: number;
+  fromId: string;
+  notifySettings: ApiPeerNotifySettings;
+  isTitleMissing?: boolean;
+}
 
 export const MAIN_THREAD_ID = -1;
 

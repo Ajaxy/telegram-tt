@@ -1003,17 +1003,17 @@ export function updater(update: Update) {
     });
   } else if (update instanceof GramJs.UpdateConfig) {
     sendApiUpdate({ '@type': 'updateConfig' });
-  } else if (update instanceof GramJs.UpdateChannelPinnedTopic) {
+  } else if (update instanceof GramJs.UpdatePinnedForumTopic) {
     sendApiUpdate({
       '@type': 'updatePinnedTopic',
-      chatId: buildApiPeerId(update.channelId, 'channel'),
+      chatId: getApiChatIdFromMtpPeer(update.peer),
       topicId: update.topicId,
       isPinned: Boolean(update.pinned),
     });
-  } else if (update instanceof GramJs.UpdateChannelPinnedTopics) {
+  } else if (update instanceof GramJs.UpdatePinnedForumTopics) {
     sendApiUpdate({
       '@type': 'updatePinnedTopicsOrder',
-      chatId: buildApiPeerId(update.channelId, 'channel'),
+      chatId: getApiChatIdFromMtpPeer(update.peer),
       order: update.order || [],
     });
   } else if (update instanceof GramJs.UpdateRecentEmojiStatuses) {

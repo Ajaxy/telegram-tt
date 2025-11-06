@@ -11,6 +11,7 @@ export default function<A, R>(mockClient: TelegramClient, request: Api.Request<A
       ],
       chats: [],
       users: [],
+      topics: [],
     });
   }
   return 'pass';
