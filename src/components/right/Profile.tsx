@@ -394,7 +394,7 @@ const Profile = ({
       const contextActions: MenuItemContextAction[] | undefined = canUpdateMainTab && mainTab !== tab.type
         && validMainTabTypes.has(tab.type) ? [{
           title: lang('ProfileMenuSetMainTab'),
-          icon: 'replace',
+          icon: 'reorder-tabs',
           handler: () => {
             setMainProfileTab({ chatId, tab: tab.type as ApiProfileTab });
           },

@@ -200,6 +200,7 @@ export type FontIconName =
   | 'remove-quote'
   | 'remove'
   | 'reopen-topic'
+  | 'reorder-tabs'
   | 'replace'
   | 'replies'
   | 'reply-filled'
