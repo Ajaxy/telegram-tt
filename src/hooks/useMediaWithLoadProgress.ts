@@ -25,7 +25,7 @@ export default function useMediaWithLoadProgress(
 ) {
   const isStreaming = IS_PROGRESSIVE_SUPPORTED && mediaFormat === ApiMediaFormat.Progressive;
   const mediaData = mediaHash
-    ? (isStreaming ? mediaLoader.getProgressiveUrl(mediaHash)
+    ? (isStreaming && !noLoad ? mediaLoader.getProgressiveUrl(mediaHash)
       : mediaLoader.getFromMemory(mediaHash)) : undefined;
 
   const forceUpdate = useForceUpdate();
