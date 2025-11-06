@@ -107,6 +107,7 @@ export interface ApiSavedStarGift {
   canTransferAt?: number;
   canResellAt?: number;
   isPinned?: boolean;
+  prepaidUpgradeHash?: string;
   isConverted?: boolean; // Local field, used for Action Message
   upgradeMsgId?: number; // Local field, used for Action Message
   localTag?: number; // Local field, used for key in list
@@ -244,6 +245,7 @@ export interface ApiStarsTransaction {
   isGiftResale?: true;
   paidMessages?: number;
   isPostsSearch?: true;
+  isPrepaidUpgrade?: true;
 }
 
 export interface ApiStarsSubscription {

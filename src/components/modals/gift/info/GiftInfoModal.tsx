@@ -282,7 +282,8 @@ const GiftInfoModal = ({
 
   const handleOpenUpgradeModal = useLastCallback(() => {
     if (!savedGift) return;
-    openGiftUpgradeModal({ giftId: savedGift.gift.id, gift: savedGift });
+    const giftOwnerId = renderingTargetPeer?.id;
+    openGiftUpgradeModal({ giftId: savedGift.gift.id, gift: savedGift, peerId: giftOwnerId });
   });
 
   const handleBuyGift = useLastCallback(() => {
@@ -371,6 +372,15 @@ const GiftInfoModal = ({
       return (
         <Button isShiny onClick={handleOpenUpgradeModal}>
           {lang('GiftInfoUpgrade')}
+          <Icon name="arrow-down-circle" className={styles.upgradeIcon} />
+        </Button>
+      );
+    }
+
+    if (savedGift?.prepaidUpgradeHash) {
+      return (
+        <Button isShiny onClick={handleOpenUpgradeModal}>
+          {lang('GiftAnUpgradeButton')}
           <Icon name="arrow-down-circle" className={styles.upgradeIcon} />
         </Button>
       );

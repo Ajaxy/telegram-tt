@@ -781,6 +781,13 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
       });
     }
 
+    case 'stargiftPrepaidUpgrade': {
+      return new GramJs.InputInvoiceStarGiftPrepaidUpgrade({
+        peer: buildInputPeer(invoice.peer.id, invoice.peer.accessHash),
+        hash: invoice.hash,
+      });
+    }
+
     case 'giveaway':
     default: {
       const purpose = buildInputStorePaymentPurpose(invoice.purpose);

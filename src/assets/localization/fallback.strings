@@ -1569,8 +1569,14 @@
 "GiftUpgradeTextOwn" = "Turn your gift into a unique collectible that you can transfer or auction.";
 "GiftUpgradeKeepDetails" = "Keep sender's name and comment";
 "GiftUpgradeButton" = "Upgrade for {amount}";
+"GiftPayForUpgradeButton" = "Pay {amount} for Upgrade";
 "GiftUpgradedTitle" = "This gift is now a collectible";
 "GiftUpgradedDescription" = "You have received a unique number, model, backdrop and symbol for your gift.";
+"GiftPeerUpgradeUniqueDescription" = "{user} will get a unique number, model, backdrop, and symbol for the gift.";
+"GiftPeerUpgradeTransferableDescription" = "{user} will be able to send the gift to anyone on Telegram.";
+"GiftPeerUpgradeTradeableDescription" = "{user} will be able to auction the gift on third-party NFT marketplaces.";
+"GiftUpgradeSentTitle" = "Gift Upgrade sent!";
+"GiftUpgradeSentMessage" = "{user} can now upgrade this gift for free.";
 "GiftMakeUnique" = "Make unique for {stars}";
 "GiftMakeUniqueAcc" = "Make unique";
 "GiftMakeUniqueDescription" = "Enable this to let {user} turn your gift into a unique collectible. {link}";
@@ -1872,6 +1878,8 @@
 "ActionStarGiftReceivedAnonymous" = "Someone sent you a gift for {cost}";
 "ActionStarGiftSentChannel" = "{user} sent a gift to {channel} for {cost}";
 "ActionStarGiftSentChannelYou" = "You sent a gift to {channel} for {cost}";
+"ActionStarGiftPrepaidUpgradeYou" = "You sent an upgrade worth {cost} for {peer}'s gift";
+"ActionStarGiftPrepaidUpgrade" = "{peer} sent an upgrade worth {cost} for your gift";
 "ActionStarGiftSelfBought" = "You bought a gift for {cost}";
 "ActionStarGiftTo" = "Gift to {peer}";
 "ActionStarGiftFrom" = "Gift from {peer}";
@@ -2293,6 +2301,10 @@
 "TitleGiftLocked" = "Gift Locked";
 "GiftLockedMessage" = "This gift is currently only available to earlier Telegram users. It will unlock for your account in about **{relativeDate}**.";
 "QuickPreview" = "Quick Preview";
+"GiftAnUpgradeButton" = "Gift an Upgrade";
+"GiftPrepaidUpgradeTransactionTitle" = "Gift Upgrade";
+"ActionStarGiftPrepaidUpgraded" = "{user} turned the gift into a unique collectible";
+"ActionStarGiftPrepaidUpgradedYou" = "You turned the gift into a unique collectible";
 "UserNoteTitle" = "Notes";
 "UserNoteHint" = "only visible to you";
 "EditUserNoteHint" = "Notes are only visible to you.";

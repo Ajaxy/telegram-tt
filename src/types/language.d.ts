@@ -1303,6 +1303,7 @@ export interface LangPair {
   'GiftUpgradeKeepDetails': undefined;
   'GiftUpgradedTitle': undefined;
   'GiftUpgradedDescription': undefined;
+  'GiftUpgradeSentTitle': undefined;
   'GiftMakeUniqueAcc': undefined;
   'GiftMakeUniqueLink': undefined;
   'GiftWithdrawTitle': undefined;
@@ -1716,6 +1717,9 @@ export interface LangPair {
   'ConfirmBuyGiftForTonDescription': undefined;
   'TitleGiftLocked': undefined;
   'QuickPreview': undefined;
+  'GiftAnUpgradeButton': undefined;
+  'GiftPrepaidUpgradeTransactionTitle': undefined;
+  'ActionStarGiftPrepaidUpgradedYou': undefined;
   'UserNoteTitle': undefined;
   'UserNoteHint': undefined;
   'EditUserNoteHint': undefined;
@@ -2193,6 +2197,21 @@ export interface LangPairWithVariables<V = LangVariable> {
   'GiftUpgradeButton': {
     'amount': V;
   };
+  'GiftPayForUpgradeButton': {
+    'amount': V;
+  };
+  'GiftPeerUpgradeUniqueDescription': {
+    'user': V;
+  };
+  'GiftPeerUpgradeTransferableDescription': {
+    'user': V;
+  };
+  'GiftPeerUpgradeTradeableDescription': {
+    'user': V;
+  };
+  'GiftUpgradeSentMessage': {
+    'user': V;
+  };
   'GiftMakeUnique': {
     'stars': V;
   };
@@ -2484,6 +2503,14 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'ActionStarGiftSentChannelYou': {
     'channel': V;
+    'cost': V;
+  };
+  'ActionStarGiftPrepaidUpgradeYou': {
+    'cost': V;
+    'peer': V;
+  };
+  'ActionStarGiftPrepaidUpgrade': {
+    'peer': V;
     'cost': V;
   };
   'ActionStarGiftSelfBought': {
@@ -2944,6 +2971,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'GiftLockedMessage': {
     'relativeDate': V;
+  };
+  'ActionStarGiftPrepaidUpgraded': {
+    'user': V;
   };
 }
 

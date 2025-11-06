@@ -49,12 +49,14 @@ type Attributes = {
 const PREVIEW_UPDATE_INTERVAL = 3000;
 
 const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
-  const { closeGiftUpgradeModal, upgradeGift } = getActions();
+  const { closeGiftUpgradeModal, closeGiftInfoModal, upgradeGift, upgradePrepaidGift } = getActions();
   const isOpen = Boolean(modal);
 
   const renderingModal = useCurrentOrPrev(modal);
   const renderingRecipient = useCurrentOrPrev(recipient);
   const [shouldKeepOriginalDetails, setShouldKeepOriginalDetails] = useState(false);
+
+  const isPrepaid = Boolean(renderingModal?.gift?.prepaidUpgradeHash);
 
   const [previewAttributes, setPreviewAttributes] = useState<Attributes | undefined>();
 
@@ -64,12 +66,31 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
 
   const handleUpgrade = useLastCallback(() => {
     const gift = renderingModal?.gift;
+
+    if (!gift) return;
+
+    const regularGift = gift.gift.type === 'starGift' ? gift.gift : undefined;
+
+    if (isPrepaid && gift.prepaidUpgradeHash && renderingRecipient) {
+      const upgradeStars = regularGift?.upgradeStars;
+      if (!upgradeStars) return;
+
+      upgradePrepaidGift({
+        peerId: renderingRecipient.id,
+        hash: gift.prepaidUpgradeHash,
+        stars: upgradeStars,
+      });
+      handleClose();
+      closeGiftInfoModal();
+      return;
+    }
+
     if (!gift?.inputGift) return;
 
     upgradeGift({
       gift: gift.inputGift,
       shouldKeepOriginalDetails,
-      upgradeStars: !gift.alreadyPaidUpgradeStars ? (gift.gift as ApiStarGiftRegular).upgradeStars : undefined,
+      upgradeStars: !gift.alreadyPaidUpgradeStars ? regularGift?.upgradeStars : undefined,
     });
     handleClose();
   });
@@ -109,15 +130,26 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
 
     const gift = renderingModal?.gift;
 
-    const listItemData = [
+    const userName = renderingRecipient ? getPeerTitle(lang, renderingRecipient) : lang('ActionFallbackUser');
+
+    const listItemData = (renderingRecipient ? [
+      ['diamond', lang('GiftUpgradeUniqueTitle'), lang('GiftPeerUpgradeUniqueDescription', { user: userName })],
+      ['trade', lang('GiftUpgradeTransferableTitle'),
+        lang('GiftPeerUpgradeTransferableDescription', { user: userName })],
+      ['auction', lang('GiftUpgradeTradeableTitle'), lang('GiftPeerUpgradeTradeableDescription', { user: userName })],
+    ] : [
       ['diamond', lang('GiftUpgradeUniqueTitle'), lang('GiftUpgradeUniqueDescription')],
       ['trade', lang('GiftUpgradeTransferableTitle'), lang('GiftUpgradeTransferableDescription')],
       ['auction', lang('GiftUpgradeTradeableTitle'), lang('GiftUpgradeTradeableDescription')],
-    ] satisfies TableAboutData;
+    ]) satisfies TableAboutData;
 
     const subtitle = renderingRecipient
       ? lang('GiftPeerUpgradeText', { peer: getPeerTitle(lang, renderingRecipient) })
       : lang('GiftUpgradeTextOwn');
+
+    const formattedPrice = gift
+      ? formatStarsAsIcon(lang, (gift.gift as ApiStarGiftRegular).upgradeStars!, { asFont: true })
+      : undefined;
 
     const header = (
       <UniqueGiftHeader
@@ -138,17 +170,19 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
         )}
         {gift && (
           <>
-            <Checkbox
-              label={lang('GiftUpgradeKeepDetails')}
-              onCheck={setShouldKeepOriginalDetails}
-              checked={shouldKeepOriginalDetails}
-            />
+            {!isPrepaid && (
+              <Checkbox
+                label={lang('GiftUpgradeKeepDetails')}
+                onCheck={setShouldKeepOriginalDetails}
+                checked={shouldKeepOriginalDetails}
+              />
+            )}
             <Button className={styles.footerButton} isShiny onClick={handleUpgrade}>
               {gift.alreadyPaidUpgradeStars
                 ? lang('GeneralConfirm')
-                : lang('GiftUpgradeButton', {
-                  amount: formatStarsAsIcon(lang, (gift.gift as ApiStarGiftRegular).upgradeStars!, { asFont: true }),
-                }, { withNodes: true })}
+                : isPrepaid
+                  ? lang('GiftPayForUpgradeButton', { amount: formattedPrice }, { withNodes: true })
+                  : lang('GiftUpgradeButton', { amount: formattedPrice }, { withNodes: true })}
             </Button>
           </>
         )}
@@ -160,7 +194,9 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
       header,
       footer,
     };
-  }, [previewAttributes, isOpen, lang, renderingRecipient, renderingModal?.gift, shouldKeepOriginalDetails]);
+  }, [previewAttributes, isOpen, lang,
+    renderingRecipient, renderingModal?.gift,
+    shouldKeepOriginalDetails, isPrepaid]);
 
   return (
     <TableAboutModal

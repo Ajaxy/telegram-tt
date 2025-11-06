@@ -235,6 +235,18 @@ export function getRequestInputInvoice<T extends GlobalState>(
     };
   }
 
+  if (inputInvoice.type === 'stargiftPrepaidUpgrade') {
+    const { peerId, hash } = inputInvoice;
+    const peer = selectPeer(global, peerId);
+    if (!peer) return undefined;
+
+    return {
+      type: 'stargiftPrepaidUpgrade',
+      peer,
+      hash,
+    };
+  }
+
   return undefined;
 }
 

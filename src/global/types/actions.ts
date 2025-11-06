@@ -2629,6 +2629,11 @@ export interface ActionPayloads {
     shouldKeepOriginalDetails?: boolean;
     upgradeStars?: number;
   } & WithTabId;
+  upgradePrepaidGift: {
+    peerId: string;
+    hash: string;
+    stars: number;
+  } & WithTabId;
 
   openGiftWithdrawModal: {
     gift: ApiSavedStarGift;

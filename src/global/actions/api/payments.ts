@@ -1117,6 +1117,18 @@ addActionHandler('transferGift', (global, actions, payload): ActionReturnType =>
   payInputStarInvoice(global, invoice, transferStars, tabId);
 });
 
+addActionHandler('upgradePrepaidGift', (global, actions, payload): ActionReturnType => {
+  const { peerId, hash, stars, tabId = getCurrentTabId() } = payload;
+
+  const invoice: ApiInputInvoice = {
+    type: 'stargiftPrepaidUpgrade',
+    peerId,
+    hash,
+  };
+
+  payInputStarInvoice(global, invoice, stars, tabId);
+});
+
 async function payInputStarInvoice<T extends GlobalState>(
   global: T, inputInvoice: ApiInputInvoice, price: number,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
