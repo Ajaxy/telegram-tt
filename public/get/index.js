@@ -23,7 +23,7 @@ const packagesPromise = fetch(LATEST_RELEASE_API_URL)
       } else if (name.endsWith('.AppImage')) {
         acc['linux'] = browser_download_url;
       } else if (name.endsWith('.dmg')) {
-        acc[`mac-${name.includes('arm') ? 'arm' : 'x64'}`] = browser_download_url;
+        acc[`mac-${name.includes('arm') || name.includes('aarch') ? 'arm' : 'x64'}`] = browser_download_url;
       }
 
       return acc;
