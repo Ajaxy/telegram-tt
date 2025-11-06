@@ -310,7 +310,7 @@ const MessageListContent = ({
 
         const documentGroupId = !isMessageAlbum && message.groupedId ? message.groupedId : undefined;
         const nextDocumentGroupId = nextMessage && !isAlbum(nextMessage) ? nextMessage.groupedId : undefined;
-        const isTopicTopMessage = message.id === threadId;
+        const isThreadTopMessage = message.id === threadId;
 
         const position = {
           isFirstInGroup: messageIndex === 0,
@@ -344,7 +344,7 @@ const MessageListContent = ({
             observeIntersectionForPlaying={observeIntersectionForPlaying}
             album={album}
             noAvatars={noAvatars}
-            withAvatar={position.isLastInGroup && withUsers && !isOwn && (!isTopicTopMessage || !isComments)}
+            withAvatar={position.isLastInGroup && withUsers && !isOwn && (!isThreadTopMessage || !isComments)}
             withSenderName={position.isFirstInGroup && withUsers && !isOwn}
             threadId={threadId}
             messageListType={type}
@@ -361,15 +361,6 @@ const MessageListContent = ({
             onIntersectPinnedMessage={onIntersectPinnedMessage}
             getIsMessageListReady={getIsReady}
           />,
-          message.id === threadId && (
-            // eslint-disable-next-line react-x/no-duplicate-key
-            <div className="local-action-message" key="discussion-started">
-              <span>
-                {oldLang(isEmptyThread
-                  ? (isComments ? 'NoComments' : 'NoReplies') : 'DiscussionStarted')}
-              </span>
-            </div>
-          ),
         ]);
       }).flat();
 
@@ -380,7 +371,7 @@ const MessageListContent = ({
       const lastMessageId = getMessageOriginalId(lastMessage);
       const lastAppearanceOrder = messageCountToAnimate - appearanceIndex;
 
-      const isTopicTopMessage = lastMessage.id === threadId;
+      const isThreadTopMessage = lastMessage.id === threadId;
       const isOwn = isOwnMessage(lastMessage);
 
       const firstMessageOrAlbum = senderGroup[0];
@@ -391,8 +382,8 @@ const MessageListContent = ({
       const id = (firstMessageId === lastMessageId) ? `message-group-${firstMessageId}`
         : `message-group-${firstMessageId}-${lastMessageId}`;
 
-      const withAvatar = withUsers && !isOwn && (!isTopicTopMessage || !isComments);
-      return (
+      const withAvatar = withUsers && !isOwn && (!isThreadTopMessage || !isComments);
+      return compact([
         <SenderGroupContainer
           key={key}
           id={id}
@@ -402,9 +393,17 @@ const MessageListContent = ({
           canPost={canPost}
         >
           {senderGroupElements}
-        </SenderGroupContainer>
-      );
-    });
+        </SenderGroupContainer>,
+        isThreadTopMessage && (
+          <div className="local-action-message" key={`discussion-started-${lastMessageId}`}>
+            <span>
+              {oldLang(isEmptyThread
+                ? (isComments ? 'NoComments' : 'NoReplies') : 'DiscussionStarted')}
+            </span>
+          </div>
+        ),
+      ]);
+    }).flat();
   }
 
   const dateGroups = messageGroups.map((
