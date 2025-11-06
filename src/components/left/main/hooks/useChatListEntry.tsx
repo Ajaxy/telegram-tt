@@ -51,7 +51,7 @@ export default function useChatListEntry({
   isTopic,
   isSavedDialog,
   isPreview,
-  noForumTitle,
+  hasTags,
   onReorderAnimationEnd,
 }: {
   chat?: ApiChat;
@@ -67,11 +67,11 @@ export default function useChatListEntry({
   isTopic?: boolean;
   isSavedDialog?: boolean;
   isPreview?: boolean;
+  hasTags?: boolean;
 
   animationType: ChatAnimationTypes;
   orderDiff: number;
   withInterfaceAnimations?: boolean;
-  noForumTitle?: boolean;
   onReorderAnimationEnd?: NoneToVoidFunction;
 }) {
   const lang = useLang();
@@ -156,7 +156,7 @@ export default function useChatListEntry({
           renderLastMessage={renderLastMessageOrTyping}
           observeIntersection={observeIntersection}
           topics={topics}
-          noForumTitle={noForumTitle}
+          hasTags={hasTags}
         />
       );
     }

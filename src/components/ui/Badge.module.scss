@@ -1,15 +1,20 @@
 .root {
   flex-shrink: 0;
 
-  min-width: 1.5rem;
-  height: 1.5rem;
+  min-width: 1.375rem;
+  height: 1.375rem;
   padding: 0 0.4375rem;
   border-radius: 0.75rem;
 
   font-size: 0.875rem;
   font-weight: var(--font-weight-medium);
-  line-height: 1.5625rem;
+  line-height: 1.4375rem;
   text-align: center;
+
+  :global(body.is-ios) &,
+  :global(body.is-macos) & {
+    line-height: 1.375rem;
+  }
 }
 
 .default {

@@ -65,13 +65,6 @@
     }
   }
 
-  body.is-ios &,
-  body.is-android & {
-    .ListItem-button {
-      border-radius: 0 !important;
-    }
-  }
-
   &.forum {
     --color-chat-username: var(--color-text);
 
@@ -103,18 +96,26 @@
       padding-bottom: 0.3125rem;
     }
 
-    .title {
-      line-height: 1.375rem;
-    }
-
     .status {
       background-color: var(--background-color);
+    }
+
+    .info.has-tags .subtitle {
+      height: unset;
+      line-height: inherit;
     }
 
     @media (max-width: 600px) {
       &::before {
         left: 0;
       }
+    }
+  }
+
+  &.chat-item-with-tags {
+    .ListItem-button {
+      align-items: flex-start;
+      padding: 0.375rem 0.5625rem;
     }
   }
 
@@ -133,7 +134,6 @@
   }
 
   .avatar-badge-wrapper {
-
     --outline-color: var(--color-background);
 
     position: absolute;
@@ -141,11 +141,7 @@
     right: 0.5rem;
     bottom: 0;
 
-    .ChatBadge {
-      box-shadow: 0 0 0 2px var(--outline-color);
-    }
-
-    .ChatBadge-transition {
+    .chat-badge-transition {
       position: relative;
       transition: opacity var(--layer-transition), transform var(--layer-transition);
 
@@ -190,10 +186,23 @@
   }
 
   .info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     transition: opacity 300ms ease, transform var(--layer-transition);
 
     body.no-page-transitions & {
       transition: opacity 300ms ease;
+    }
+
+    &.has-tags {
+      justify-content: flex-start;
+      height: 3.75rem;
+
+      .info-row, .subtitle {
+        height: 1.25rem;
+        line-height: 1.25rem;
+      }
     }
 
     .title .custom-emoji {
@@ -204,23 +213,11 @@
       margin-left: 0.25rem;
       font-size: 1.125rem;
       color: var(--color-list-icon);
-
-      body.is-ios & {
-        margin-top: 0;
-        margin-right: 0.5rem;
-      }
     }
 
     .general-forum-icon {
       font-size: 1.25rem;
       color: var(--color-text-secondary);
-    }
-
-    .LastMessageMeta {
-      body.is-ios & {
-        margin-right: 0;
-        font-size: 0.875rem;
-      }
     }
 
     .last-message,
@@ -284,19 +281,12 @@
 
         width: 1.25rem;
         height: 1.25rem;
-        margin-inline-start: 0.125rem;
         margin-inline-end: 0.25rem;
         border-radius: 0.125rem;
 
         vertical-align: -0.25rem;
 
         object-fit: cover;
-
-        body.is-ios & {
-          width: 1.125rem;
-          height: 1.125rem;
-          vertical-align: -0.1875rem;
-        }
 
         &.round {
           border-radius: 0.625rem;
@@ -319,11 +309,6 @@
 
         font-size: 0.75rem;
         color: #fff;
-
-        body.is-ios & {
-          bottom: 0;
-          margin-inline-start: -1.125rem;
-        }
       }
     }
 
@@ -331,21 +316,6 @@
       margin-inline: 0;
       line-height: initial;
       vertical-align: text-top;
-    }
-
-    &.has-tags {
-      line-height: 1.375rem;
-
-      .ChatBadge {
-        min-width: 1.375rem;
-        height: 1.375rem;
-        line-height: 1.5rem;
-
-        .is-ios &,
-        .is-macos & {
-          line-height: 1.375rem;
-        }
-      }
     }
   }
 
@@ -446,30 +416,12 @@
         color: var(--color-white) !important;
       }
 
-      .ChatBadge:not(.pinned):not(.muted) {
-        color: var(--color-chat-active);
-        background: var(--color-white);
-      }
-
-      .ChatBadge:not(.pinned).muted {
-        color: var(--color-white);
-        background: #FFFFFF33;
-      }
-
-      .avatar-badge-wrapper .ChatBadge:not(.pinned) {
-        --outline-color: transparent;
-      }
-
-      .avatar-badge-wrapper .ChatBadge:not(.pinned).muted {
-        background: var(--color-gray);
-      }
-
       .monoforum-badge {
         color: var(--color-chat-active);
         background-color: #fff;
       }
 
-      .ChatTags {
+      .chat-tag {
         color: var(--color-chat-active);
         background-color: #ffffffab;
       }

@@ -20,8 +20,8 @@ import { extractCurrentThemeParams } from '../../../util/themeStyle';
 
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
 import GroupChatInfo from '../../common/GroupChatInfo';
@@ -58,7 +58,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   onClick,
 }) => {
   const { requestMainWebView, updateChatMutedState, openQuickPreview } = getActions();
-  const oldLang = useOldLang();
+  const lang = useLang();
 
   const [isMuteModalOpen, openMuteModal, closeMuteModal] = useFlag();
   const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
@@ -150,13 +150,13 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
       )}
       {withOpenAppButton && user?.hasMainMiniApp && (
         <Button
-          className="ChatBadge miniapp"
+          className="search-result-miniapp-button"
           pill
           fluid
           size="tiny"
           onClick={handleOpenApp}
         >
-          {oldLang('BotOpen')}
+          {lang('BotChatMiniAppOpen')}
         </Button>
       )}
       {shouldRenderMuteModal && (

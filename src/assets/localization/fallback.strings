@@ -606,6 +606,7 @@
 "ConversationOpenBotLinkLogin" = "Log in to **{url}** as {user}";
 "ConversationOpenBotLinkAllowMessages" = "Allow **{bot}** to send me messages";
 "BotWebViewOpenBot" = "Open Bot";
+"BotChatMiniAppOpen" = "Open";
 "WebAppReloadPage" = "Reload Page";
 "WebAppRemoveBot" = "Remove From Menu";
 "WebAppAddToAttachmentAdd" = "Add";

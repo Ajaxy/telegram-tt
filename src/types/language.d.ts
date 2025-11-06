@@ -539,6 +539,7 @@ export interface LangPair {
   'OpenUrlTitle': undefined;
   'OpenUrlConfirm': undefined;
   'BotWebViewOpenBot': undefined;
+  'BotChatMiniAppOpen': undefined;
   'WebAppReloadPage': undefined;
   'WebAppRemoveBot': undefined;
   'WebAppAddToAttachmentAdd': undefined;

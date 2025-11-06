@@ -1,5 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
+import type { TeactNode } from '../../lib/teact/teact';
 import {
   memo,
   useEffect,
@@ -28,21 +27,21 @@ import styles from './ChatForumLastMessage.module.scss';
 type OwnProps = {
   chat: ApiChat;
   topics?: Record<number, ApiTopic>;
-  renderLastMessage: () => React.ReactNode;
+  hasTags?: boolean;
+  renderLastMessage: () => TeactNode | undefined;
   observeIntersection?: ObserveFn;
-  noForumTitle?: boolean;
 };
 
 const NO_CORNER_THRESHOLD = Number(REM);
 const MAX_TOPICS = 3;
 
-const ChatForumLastMessage: FC<OwnProps> = ({
+const ChatForumLastMessage = ({
   chat,
   topics,
+  hasTags,
   renderLastMessage,
   observeIntersection,
-  noForumTitle,
-}) => {
+}: OwnProps) => {
   const { openThread } = getActions();
 
   const lastMessageRef = useRef<HTMLDivElement>();
@@ -81,7 +80,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
   useEffect(() => {
     const lastMessageElement = lastMessageRef.current;
     const mainColumnElement = mainColumnRef.current;
-    if (!lastMessageElement || !mainColumnElement) return;
+    if (!lastMessageElement || !mainColumnElement || hasTags) return;
 
     const lastMessageWidth = lastMessageElement.offsetWidth;
     const mainColumnWidth = mainColumnElement.offsetWidth;
@@ -92,7 +91,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
       setOverwrittenWidth(undefined);
     }
     setIsReversedCorner(lastMessageWidth > mainColumnWidth);
-  }, [lastActiveTopic, renderLastMessage]);
+  }, [lastActiveTopic, renderLastMessage, hasTags]);
 
   return (
     <div
@@ -105,7 +104,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
       style={overwrittenWidth ? `--overwritten-width: ${overwrittenWidth}px` : undefined}
     >
       {
-        !noForumTitle && (
+        !hasTags && (
           <>
             {lastActiveTopic && (
               <div className={styles.titleRow}>
@@ -160,7 +159,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
         )
       }
       <div
-        className={buildClassName(styles.lastMessage, lastActiveTopic?.unreadCount && !noForumTitle && styles.unread)}
+        className={buildClassName(styles.lastMessage, lastActiveTopic?.unreadCount && !hasTags && styles.unread)}
         ref={lastMessageRef}
         onClick={handleOpenTopicClick}
         onMouseDown={handleOpenTopicMouseDown}

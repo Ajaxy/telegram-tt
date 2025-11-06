@@ -197,6 +197,13 @@
         filter: brightness(1.1);
       }
     }
+
+    .search-result-miniapp-button {
+      height: auto !important;
+      padding: 0 0.4375rem !important;
+      font-size: 0.875rem !important;
+      line-height: 1.5rem;
+    }
   }
 
   .search-section {

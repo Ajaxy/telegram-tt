@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
@@ -14,11 +13,11 @@ type OwnProps = {
   isAlternateColor?: boolean;
 };
 
-const Badge: FC<OwnProps> = ({
+const Badge = ({
   text,
   className,
   isAlternateColor,
-}) => {
+}: OwnProps) => {
   return (
     <ShowTransition
       className={buildClassName(styles.root, isAlternateColor ? styles.alternate : styles.default, className)}

@@ -250,7 +250,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
             const draggedTop = (state.orderedFolderIds?.indexOf(folder.id) ?? 0) * FOLDER_HEIGHT_PX;
             const top = (state.dragOrderIds?.indexOf(folder.id) ?? 0) * FOLDER_HEIGHT_PX;
 
-            const shouldRenderColor = folder?.color !== undefined && folder.color !== -1 && isPremium;
+            const shouldRenderColor = folder?.color !== undefined && folder.color !== -1 && areTagsEnabled;
 
             if (folder.id === ALL_FOLDER_ID) {
               return (
@@ -292,7 +292,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                 onDrag={handleDrag}
                 onDragEnd={handleDragEnd}
                 style={`top: ${isDragged ? draggedTop : top}px;`}
-                knobStyle={`${lang.isRtl ? 'left' : 'right'}: ${shouldRenderColor ? '3.5rem' : '3rem'};`}
+                knobStyle={`${lang.isRtl ? 'left' : 'right'}: ${shouldRenderColor ? '4rem' : '2.5rem'};`}
                 isDisabled={isBlocked || !isActive}
               >
                 <ListItem

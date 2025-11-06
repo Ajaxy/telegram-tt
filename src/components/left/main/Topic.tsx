@@ -225,6 +225,7 @@ const Topic: FC<OwnProps & StateProps> = ({
             topic={topic}
             wasTopicOpened={wasTopicOpened}
             topics={topics}
+            isSelected={isSelected}
           />
         </div>
       </div>

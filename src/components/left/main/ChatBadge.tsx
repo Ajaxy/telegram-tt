@@ -1,5 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
 import { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -15,14 +13,13 @@ import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedCounter from '../../common/AnimatedCounter';
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ShowTransition from '../../ui/ShowTransition';
 
-import './ChatBadge.scss';
+import styles from './ChatBadge.module.scss';
 
 type OwnProps = {
   chat: ApiChat;
@@ -36,9 +33,12 @@ type OwnProps = {
   forceHidden?: boolean | Signal<boolean>;
   topics?: Record<number, ApiTopic>;
   isSelected?: boolean;
+  isOnAvatar?: boolean;
+  transitionClassName?: string;
+  badgeClassName?: string;
 };
 
-const ChatBadge: FC<OwnProps> = ({
+const ChatBadge = ({
   topic,
   topics,
   chat,
@@ -50,10 +50,12 @@ const ChatBadge: FC<OwnProps> = ({
   isSavedDialog,
   hasMiniApp,
   isSelected,
-}) => {
+  isOnAvatar,
+  transitionClassName,
+  badgeClassName,
+}: OwnProps) => {
   const { requestMainWebView } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const {
@@ -101,14 +103,6 @@ const ChatBadge: FC<OwnProps> = ({
     || isTopicUnopened || hasMiniApp,
   );
 
-  const isUnread = Boolean((unreadCount || hasUnreadMark) && !isSavedDialog);
-  const className = buildClassName(
-    'ChatBadge',
-    !shouldBeUnMuted && 'muted',
-    !isUnread && isPinned && 'pinned',
-    isUnread && 'unread',
-  );
-
   const handleOpenApp = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
 
@@ -121,30 +115,32 @@ const ChatBadge: FC<OwnProps> = ({
   });
 
   function renderContent() {
+    const baseClassName = buildClassName(styles.badge, !shouldBeUnMuted && styles.muted, badgeClassName);
+
     const unreadReactionsElement = unreadReactionsCount && (
-      <div className={buildClassName('ChatBadge reaction', !shouldBeUnMuted && 'muted')}>
+      <div className={buildClassName(baseClassName, styles.reaction, styles.round)}>
         <Icon name="heart" />
       </div>
     );
 
     const unreadMentionsElement = unreadMentionsCount && (
-      <div className="ChatBadge mention">
+      <div className={buildClassName(baseClassName, styles.mention, styles.round)}>
         <Icon name="mention" />
       </div>
     );
 
     const unopenedTopicElement = isTopicUnopened && (
-      <div className={buildClassName('ChatBadge unopened', !shouldBeUnMuted && 'muted')} />
+      <div className={buildClassName(baseClassName, styles.unopened)} />
     );
 
     const unreadCountElement = (hasUnreadMark || unreadCount) ? (
-      <div className={className}>
+      <div className={baseClassName}>
         {!hasUnreadMark && <AnimatedCounter text={formatIntegerCompact(lang, unreadCount!)} />}
       </div>
     ) : undefined;
 
     const pinnedElement = isPinned && (
-      <div className={className}>
+      <div className={buildClassName(baseClassName, styles.pinned)}>
         <Icon name="pinned-chat" />
       </div>
     );
@@ -152,12 +148,12 @@ const ChatBadge: FC<OwnProps> = ({
     const miniAppButton = hasMiniApp && (
       <Button
         color={isSelected ? 'secondary' : 'primary'}
-        className="ChatBadge miniapp"
+        className={buildClassName(baseClassName, styles.miniapp)}
         pill
         size="tiny"
         onClick={handleOpenApp}
       >
-        {oldLang('BotOpen')}
+        {lang('BotChatMiniAppOpen')}
       </Button>
     );
 
@@ -185,14 +181,23 @@ const ChatBadge: FC<OwnProps> = ({
     }
 
     return (
-      <div className="ChatBadge-wrapper">
+      <div className={styles.wrapper}>
         {elements}
       </div>
     );
   }
 
   return (
-    <ShowTransition isCustom className="ChatBadge-transition" isOpen={isShown}>
+    <ShowTransition
+      isCustom
+      className={buildClassName(
+        styles.transition,
+        isSelected && styles.selected,
+        isOnAvatar && styles.onAvatar,
+        transitionClassName,
+      )}
+      isOpen={isShown}
+    >
       {renderContent()}
     </ShowTransition>
   );
