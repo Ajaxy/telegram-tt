@@ -165,11 +165,18 @@ const ChatExtra = ({
 
   const noteTextRef = useRef<HTMLDivElement>();
 
+  const shouldRenderNote = Boolean(note);
+
   const {
     isCollapsed: isNoteCollapsed,
     isCollapsible: isNoteCollapsible,
     setIsCollapsed: setIsNoteCollapsed,
-  } = useCollapsibleLines(noteTextRef, MAX_LINES, undefined);
+  } = useCollapsibleLines(
+    noteTextRef,
+    MAX_LINES,
+    undefined,
+    !shouldRenderNote,
+  );
 
   useEffectWithPrevDeps(([prevPeerId]) => {
     if (!peerId || prevPeerId === peerId) return;
@@ -481,7 +488,7 @@ const ChatExtra = ({
           <span className="subtitle">{oldLang('BusinessProfileLocation')}</span>
         </ListItem>
       )}
-      {note && (
+      {shouldRenderNote && (
         <ListItem
           icon="note"
           iconClassName={styles.noteListItemIcon}
