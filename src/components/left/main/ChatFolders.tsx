@@ -368,6 +368,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         archiveSettings={archiveSettings}
         sessions={sessions}
         isAccountFrozen={isAccountFrozen}
+        isStoryRibbonShown={isStoryRibbonShown}
         withTags
       />
     );

@@ -206,8 +206,12 @@ export default function useTopOverscroll({
   }, [containerRef, isDisabled, getState]);
 
   useEffect(() => {
+    if (!isOverscrolled && getState() === 'animating') {
+      return; // We're animating towards this state
+    }
+
     setState(isOverscrolled ? 'overscroll' : 'normal');
-  }, [isOverscrolled, setState]);
+  }, [isOverscrolled, getState, setState]);
 
   useEffect(() => {
     const container = containerRef.current;

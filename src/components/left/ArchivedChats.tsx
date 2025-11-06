@@ -134,6 +134,7 @@ const ArchivedChats: FC<OwnProps> = ({
           isMainList
           foldersDispatch={foldersDispatch}
           archiveSettings={archiveSettings}
+          isStoryRibbonShown={isStoryRibbonShown}
         />
       </div>
       {shouldRenderForumPanel && (
