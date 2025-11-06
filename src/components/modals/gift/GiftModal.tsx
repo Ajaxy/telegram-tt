@@ -58,8 +58,8 @@ type StateProps = {
   boostPerSentGift?: number;
   starGiftsById?: Record<string, ApiStarGiftRegular>;
   starGiftIdsByCategory?: Record<StarGiftCategory, string[]>;
-  myCollectibleGiftsById?: Record<string, ApiSavedStarGift>;
-  myCollectibleGiftIds?: string[];
+  myUniqueGiftsById?: Record<string, ApiSavedStarGift>;
+  myUniqueGiftIds?: string[];
   starBalance?: ApiStarsAmount;
   peer?: ApiPeer;
   isSelf?: boolean;
@@ -81,8 +81,8 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   modal,
   starGiftsById,
   starGiftIdsByCategory,
-  myCollectibleGiftsById,
-  myCollectibleGiftIds,
+  myUniqueGiftsById,
+  myUniqueGiftIds,
   starBalance,
   peer,
   isSelf,
@@ -99,7 +99,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
     loadResaleGifts,
     openGiftInMarket,
     closeResaleGiftsMarket,
-    loadMyCollectibleGifts,
+    loadMyUniqueGifts,
     openGiftTransferConfirmModal,
   } = getActions();
   const dialogRef = useRef<HTMLDivElement>();
@@ -235,7 +235,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
       });
     }
 
-    if (selectedCategory === 'resale') {
+    if (selectedCategory === 'collectible') {
       return lang('StarGiftDescriptionCollectibles');
     }
 
@@ -293,8 +293,8 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleMyGiftClick = useLastCallback((gift: ApiStarGift) => {
-    if (gift.type === 'starGift' || !myCollectibleGiftsById || !peer?.id) return;
-    const savedGift = myCollectibleGiftsById[gift.id];
+    if (gift.type === 'starGift' || !myUniqueGiftsById || !peer?.id) return;
+    const savedGift = myUniqueGiftsById[gift.id];
 
     openGiftTransferConfirmModal({
       gift: savedGift,
@@ -303,23 +303,23 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleLoadMore = useLastCallback(() => {
-    if (selectedCategory === 'myCollectibles') {
-      loadMyCollectibleGifts();
+    if (selectedCategory === 'myUnique') {
+      loadMyUniqueGifts();
     }
   });
 
   function renderStarGifts() {
-    if (selectedCategory === 'myCollectibles') {
+    if (selectedCategory === 'myUnique') {
       return (
         <InfiniteScroll
           className={styles.starGiftsContainer}
-          items={myCollectibleGiftIds}
+          items={myUniqueGiftIds}
           onLoadMore={handleLoadMore}
           scrollContainerClosest={`.${styles.main}`}
           itemSelector=".starGiftItem"
         >
-          {myCollectibleGiftsById && myCollectibleGiftIds?.map((giftId) => {
-            const savedGift = myCollectibleGiftsById[giftId];
+          {myUniqueGiftsById && myUniqueGiftIds?.map((giftId) => {
+            const savedGift = myUniqueGiftsById[giftId];
             if (!savedGift) return undefined;
 
             return (
@@ -356,8 +356,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
         {starGiftsById && filteredGiftIds?.flatMap((giftId) => {
           const gift = starGiftsById[giftId];
           const shouldShowResale = Boolean(gift.availabilityResale) && !areUniqueStarGiftsDisallowed;
-          const shouldDuplicateAsResale = selectedCategory !== 'resale'
-            && shouldShowResale && !gift.isSoldOut && !areLimitedStarGiftsDisallowed;
+          const shouldDuplicateAsResale = shouldShowResale && !gift.isSoldOut && !areLimitedStarGiftsDisallowed;
 
           const elements = [
             <GiftItemStar
@@ -464,9 +463,10 @@ const GiftModal: FC<OwnProps & StateProps> = ({
             {renderStarGiftsHeader()}
             {renderStarGiftsDescription()}
             <StarGiftCategoryList
-              areCollectibleStarGiftsDisallowed={areUniqueStarGiftsDisallowed}
+              areUniqueStarGiftsDisallowed={areUniqueStarGiftsDisallowed}
+              areLimitedStarGiftsDisallowed={areLimitedStarGiftsDisallowed}
               isSelf={isSelf}
-              hasCollectible={Boolean(myCollectibleGiftIds?.length)}
+              hasMyUnique={Boolean(myUniqueGiftIds?.length)}
               onCategoryChanged={onCategoryChanged}
             />
             <Transition
@@ -602,8 +602,8 @@ export default memo(withGlobal<OwnProps>((global, { modal }): Complete<StateProp
     boostPerSentGift: global.appConfig.boostsPerSentGift,
     starGiftsById: starGifts?.byId,
     starGiftIdsByCategory: starGifts?.idsByCategory,
-    myCollectibleGiftsById: global.myCollectibleGifts?.byId,
-    myCollectibleGiftIds: global.myCollectibleGifts?.ids,
+    myUniqueGiftsById: global.myUniqueGifts?.byId,
+    myUniqueGiftIds: global.myUniqueGifts?.ids,
     starBalance: stars?.balance,
     peer,
     isSelf,
@@ -617,6 +617,6 @@ export default memo(withGlobal<OwnProps>((global, { modal }): Complete<StateProp
 
 function getCategoryKey(category: StarGiftCategory) {
   if (category === 'all') return 0;
-  if (category === 'myCollectibles') return 1;
+  if (category === 'myUnique') return 1;
   return 2;
 }

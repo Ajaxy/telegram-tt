@@ -217,7 +217,7 @@ const Main = ({
     loadPremiumGifts,
     loadTonGifts,
     loadStarGifts,
-    loadMyCollectibleGifts,
+    loadMyUniqueGifts,
     loadDefaultTopicIcons,
     loadAddedStickers,
     loadFavoriteStickers,
@@ -333,7 +333,7 @@ const Main = ({
       loadPremiumGifts();
       loadTonGifts();
       loadStarGifts();
-      loadMyCollectibleGifts();
+      loadMyUniqueGifts();
       loadAvailableEffects();
       loadBirthdayNumbersStickers();
       loadRestrictedEmojiStickers();

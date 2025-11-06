@@ -13,9 +13,10 @@ import useLang from '../../../hooks/useLang';
 import styles from './StarGiftCategoryList.module.scss';
 
 type OwnProps = {
-  areCollectibleStarGiftsDisallowed?: boolean;
+  areUniqueStarGiftsDisallowed?: boolean;
+  areLimitedStarGiftsDisallowed?: boolean;
   isSelf?: boolean;
-  hasCollectible?: boolean;
+  hasMyUnique?: boolean;
   onCategoryChanged: (category: StarGiftCategory) => void;
 };
 
@@ -26,15 +27,16 @@ type StateProps = {
 const StarGiftCategoryList = ({
   idsByCategory,
   onCategoryChanged,
-  areCollectibleStarGiftsDisallowed,
+  areUniqueStarGiftsDisallowed,
+  areLimitedStarGiftsDisallowed,
   isSelf,
-  hasCollectible,
+  hasMyUnique,
 }: StateProps & OwnProps) => {
   const ref = useRef<HTMLDivElement>();
 
   const lang = useLang();
 
-  const hasResale = idsByCategory && idsByCategory['resale'].length > 0;
+  const hasCollectible = Boolean(idsByCategory?.collectible?.length);
 
   const [selectedCategory, setSelectedCategory] = useState<StarGiftCategory>('all');
 
@@ -47,8 +49,8 @@ const StarGiftCategoryList = ({
 
   function renderCategoryName(category: StarGiftCategory) {
     if (category === 'all') return lang('AllGiftsCategory');
-    if (category === 'myCollectibles') return lang('GiftCategoryMyGifts');
-    if (category === 'resale') return lang('GiftCategoryCollectibles');
+    if (category === 'myUnique') return lang('GiftCategoryMyGifts');
+    if (category === 'collectible') return lang('GiftCategoryCollectibles');
     return category;
   }
 
@@ -71,13 +73,14 @@ const StarGiftCategoryList = ({
   return (
     <div ref={ref} className={buildClassName(styles.list, 'no-scrollbar')}>
       {renderCategoryItem('all')}
-      {!areCollectibleStarGiftsDisallowed && !isSelf && hasCollectible && renderCategoryItem('myCollectibles')}
-      {!areCollectibleStarGiftsDisallowed && hasResale && renderCategoryItem('resale')}
+      {!areUniqueStarGiftsDisallowed && !isSelf && hasMyUnique && renderCategoryItem('myUnique')}
+      {(!areUniqueStarGiftsDisallowed || !areLimitedStarGiftsDisallowed)
+        && hasCollectible && renderCategoryItem('collectible')}
     </div>
   );
 };
 
-export default memo(withGlobal(
+export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
     const { starGifts } = global;
 

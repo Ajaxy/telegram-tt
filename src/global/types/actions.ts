@@ -2556,7 +2556,7 @@ export interface ActionPayloads {
   loadPremiumGifts: undefined;
   loadTonGifts: undefined;
   loadStarGifts: undefined;
-  loadMyCollectibleGifts: {
+  loadMyUniqueGifts: {
     shouldRefresh?: true;
   } | undefined;
   updateResaleGiftsFilter: {

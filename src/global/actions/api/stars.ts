@@ -138,7 +138,8 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
   const allStarGiftIds = Object.keys(byId);
   const allStarGifts = Object.values(byId);
 
-  const resaleStarGiftIds = allStarGifts.map((gift) => (gift.availabilityResale ? gift.id : undefined))
+  const collectibleStarGiftIds = allStarGifts.map((gift) => (
+    (gift.availabilityResale || (gift.isLimited && !gift.isSoldOut)) ? gift.id : undefined))
     .filter(Boolean);
 
   global = {
@@ -147,23 +148,23 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
       byId,
       idsByCategory: {
         all: allStarGiftIds,
-        resale: resaleStarGiftIds,
-        myCollectibles: [],
+        collectible: collectibleStarGiftIds,
+        myUnique: [],
       },
     },
   };
   setGlobal(global);
 });
 
-addActionHandler('loadMyCollectibleGifts', async (global, actions, payload): Promise<void> => {
+addActionHandler('loadMyUniqueGifts', async (global, actions, payload): Promise<void> => {
   const { shouldRefresh } = payload || {};
   const currentUserId = global.currentUserId;
   if (!currentUserId) return;
 
-  const currentMyCollectibleGifts = global.myCollectibleGifts;
-  const localNextOffset = currentMyCollectibleGifts?.nextOffset;
+  const currentMyUniqueGifts = global.myUniqueGifts;
+  const localNextOffset = currentMyUniqueGifts?.nextOffset;
 
-  if (currentMyCollectibleGifts && !localNextOffset && !shouldRefresh) return;
+  if (currentMyUniqueGifts && !localNextOffset && !shouldRefresh) return;
 
   const peer = selectPeer(global, currentUserId);
   if (!peer) return;
@@ -196,13 +197,13 @@ addActionHandler('loadMyCollectibleGifts', async (global, actions, payload): Pro
 
   global = {
     ...global,
-    myCollectibleGifts: {
+    myUniqueGifts: {
       byId: {
-        ...!shouldRefresh && (global.myCollectibleGifts?.byId || {}),
+        ...!shouldRefresh && (global.myUniqueGifts?.byId || {}),
         ...byId,
       },
       ids: [
-        ...!shouldRefresh ? (global.myCollectibleGifts?.ids || []) : [],
+        ...!shouldRefresh ? (global.myUniqueGifts?.ids || []) : [],
         ...ids,
       ],
       nextOffset: result.nextOffset,
@@ -372,7 +373,7 @@ addActionHandler('reloadPeerSavedGifts', (global, actions, payload): ActionRetur
     }
   });
   if (peerId === global.currentUserId) {
-    actions.loadMyCollectibleGifts({ shouldRefresh: true });
+    actions.loadMyUniqueGifts({ shouldRefresh: true });
   }
 });
 
