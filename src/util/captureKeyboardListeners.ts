@@ -62,6 +62,11 @@ function hasActiveHandlers() {
   return Object.values(handlers).some((keyHandlers) => Boolean(keyHandlers.length));
 }
 
+export function hasActiveHandler(key: string) {
+  const handlerName = keyToHandlerName[key];
+  return handlerName ? Boolean(handlers[handlerName].length) : false;
+}
+
 function handleKeyDown(e: KeyboardEvent) {
   const handlerName = keyToHandlerName[e.key];
   if (!handlerName) {
