@@ -160,7 +160,7 @@ function PrivacyMessages({
 
     return (
       <div className="settings-item">
-        <h4 className="settings-item-header" dir={oldLang.isRtl ? 'rtl' : undefined}>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('RemoveFeeTitle')}
         </h4>
         <ListItem
@@ -197,7 +197,7 @@ function PrivacyMessages({
   return (
     <>
       <div className="settings-item">
-        <h4 className="settings-item-header" dir={oldLang.isRtl ? 'rtl' : undefined}>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {oldLang('PrivacyMessagesTitle')}
         </h4>
         <RadioGroup
@@ -206,7 +206,7 @@ function PrivacyMessages({
           onChange={handleChange}
           selected={selectedValue}
         />
-        <p className="settings-item-description-larger" dir={oldLang.isRtl ? 'rtl' : undefined}>
+        <p className="settings-item-description-larger" dir={lang.isRtl ? 'rtl' : undefined}>
           {privacyDescription}
         </p>
       </div>

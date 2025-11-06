@@ -154,7 +154,7 @@ const CustomSendMenu: FC<OwnProps> = ({
           'CustomSendMenu_items',
           areItemsHidden && 'CustomSendMenu_items-hidden',
         )}
-        dir={oldLang.isRtl ? 'rtl' : undefined}
+        dir={lang.isRtl ? 'rtl' : undefined}
       >
         {onSendSilent && <MenuItem icon="mute" onClick={onSendSilent}>{oldLang('SendWithoutSound')}</MenuItem>}
         {canSchedule && onSendSchedule && (

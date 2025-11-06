@@ -1,5 +1,4 @@
 import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -18,6 +17,7 @@ import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
 import useIntervalForceUpdate from '../../hooks/schedulers/useIntervalForceUpdate';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
@@ -109,7 +109,8 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
     loadMoreProfilePhotos,
   } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const { id: userId } = user || {};
 
@@ -158,14 +159,14 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 
     if (withUpdatingStatus && !areMessagesLoaded) {
       return (
-        <DotAnimation className="status" content={lang('Updating')} />
+        <DotAnimation className="status" content={oldLang('Updating')} />
       );
     }
 
     if (customPeer?.subtitleKey) {
       return (
         <span className="status" dir="auto">
-          <span className="user-status" dir="auto">{lang(customPeer.subtitleKey)}</span>
+          <span className="user-status" dir="auto">{oldLang(customPeer.subtitleKey)}</span>
         </span>
       );
     }
@@ -182,7 +183,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    const translatedStatus = getUserStatus(lang, user, userStatus);
+    const translatedStatus = getUserStatus(oldLang, user, userStatus);
     const mainUserNameClassName = buildClassName('handle', translatedStatus && 'withStatus');
     return (
       <span className={buildClassName('status', isUserOnline(user, userStatus, true) && 'online')}>
@@ -193,7 +194,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   }
 
   const customTitle = adminMember
-    ? adminMember.customTitle || lang(adminMember.isOwner ? 'GroupInfo.LabelOwner' : 'GroupInfo.LabelAdmin')
+    ? adminMember.customTitle || oldLang(adminMember.isOwner ? 'GroupInfo.LabelOwner' : 'GroupInfo.LabelAdmin')
     : undefined;
 
   function renderNameTitle() {

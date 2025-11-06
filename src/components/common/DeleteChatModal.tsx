@@ -17,6 +17,7 @@ import { selectIsChatWithSelf, selectUser } from '../../global/selectors';
 import { isUserId } from '../../util/entities/ids';
 import renderText from './helpers/renderText';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
@@ -72,7 +73,8 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     deleteChat,
   } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const chatTitle = getChatTitle(lang, chat);
 
   const handleDeleteForAll = useLastCallback(() => {
@@ -129,7 +131,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
           peer={chat}
           isSavedMessages={isChatWithSelf}
         />
-        <h3 className="modal-title">{lang(renderTitle())}</h3>
+        <h3 className="modal-title">{oldLang(renderTitle())}</h3>
       </div>
     );
   }
@@ -159,7 +161,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
       return (
         <p>
           {renderText(
-            isChatWithSelf ? lang('ClearHistoryMyNotesMessage') : lang('ClearHistoryMessageSingle', chatTitle),
+            isChatWithSelf ? oldLang('ClearHistoryMyNotesMessage') : oldLang('ClearHistoryMessageSingle', chatTitle),
             ['simple_markdown', 'emoji'],
           )}
         </p>
@@ -168,16 +170,16 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     if (isChannel && chat.isCreator) {
       return (
         <p>
-          {renderText(lang('ChatList.DeleteAndLeaveGroupConfirmation', chatTitle), ['simple_markdown', 'emoji'])}
+          {renderText(oldLang('ChatList.DeleteAndLeaveGroupConfirmation', chatTitle), ['simple_markdown', 'emoji'])}
         </p>
       );
     }
 
     if ((isChannel && !chat.isCreator) || isBasicGroup || isSuperGroup) {
-      return <p>{renderText(lang('ChannelLeaveAlertWithName', chatTitle), ['simple_markdown', 'emoji'])}</p>;
+      return <p>{renderText(oldLang('ChannelLeaveAlertWithName', chatTitle), ['simple_markdown', 'emoji'])}</p>;
     }
 
-    return <p>{renderText(lang('ChatList.DeleteChatConfirmation', contactName), ['simple_markdown', 'emoji'])}</p>;
+    return <p>{renderText(oldLang('ChatList.DeleteChatConfirmation', contactName), ['simple_markdown', 'emoji'])}</p>;
   }
 
   function renderActionText() {
@@ -211,17 +213,17 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
       <div className="dialog-buttons-column">
         {isBot && !isSavedDialog && (
           <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteAndStop}>
-            {lang('DeleteAndStop')}
+            {oldLang('DeleteAndStop')}
           </Button>
         )}
         {canDeleteForAll && (
           <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteForAll}>
-            {contactName ? renderText(lang('ChatList.DeleteForEveryone', contactName)) : lang('DeleteForAll')}
+            {contactName ? renderText(oldLang('ChatList.DeleteForEveryone', contactName)) : oldLang('DeleteForAll')}
           </Button>
         )}
         {!isPrivateChat && chat.isCreator && !isSavedDialog && (
           <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteChat}>
-            {lang('DeleteForAll')}
+            {oldLang('DeleteForAll')}
           </Button>
         )}
         <Button
@@ -230,9 +232,9 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
           isText
           onClick={(isPrivateChat || isSavedDialog) ? handleDeleteChat : handleLeaveChat}
         >
-          {lang(renderActionText())}
+          {oldLang(renderActionText())}
         </Button>
-        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+        <Button className="confirm-dialog-button" isText onClick={onClose}>{oldLang('Cancel')}</Button>
       </div>
     </Modal>
   );

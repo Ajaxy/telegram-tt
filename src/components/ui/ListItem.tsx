@@ -12,8 +12,8 @@ import renderText from '../common/helpers/renderText';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useFastClick } from '../../hooks/useFastClick';
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Icon from '../common/icons/Icon';
 import Button from './Button';
@@ -201,7 +201,7 @@ const ListItem = ({
     }
   });
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const fullClassName = buildClassName(
     'ListItem',

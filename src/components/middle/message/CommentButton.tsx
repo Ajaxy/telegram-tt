@@ -79,7 +79,7 @@ const CommentButton: FC<OwnProps> = ({
   function renderRecentRepliers() {
     return (
       Boolean(recentRepliers?.length) && (
-        <div className="recent-repliers" dir={oldLang.isRtl ? 'rtl' : 'ltr'}>
+        <div className="recent-repliers" dir={lang.isRtl ? 'rtl' : 'ltr'}>
           {recentRepliers.map((peer) => (
             <Avatar
               key={peer.id}
@@ -112,7 +112,7 @@ const CommentButton: FC<OwnProps> = ({
         isLoading && 'loading',
         asActionButton && 'as-action-button',
       )}
-      dir={oldLang.isRtl ? 'rtl' : 'ltr'}
+      dir={lang.isRtl ? 'rtl' : 'ltr'}
       onClick={handleClick}
       role="button"
       tabIndex={0}

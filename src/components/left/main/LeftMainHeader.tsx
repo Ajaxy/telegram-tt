@@ -274,20 +274,20 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         className="left-header"
         data-tauri-drag-region={IS_TAURI && IS_MAC_OS ? true : undefined}
       >
-        {oldLang.isRtl && <div className="DropdownMenuFiller" />}
+        {lang.isRtl && <div className="DropdownMenuFiller" />}
         <DropdownMenu
           trigger={MainButton}
           footer={version}
           className={buildClassName(
             'main-menu',
-            oldLang.isRtl && 'rtl',
-            shouldHideSearch && oldLang.isRtl && 'right-aligned',
-            shouldDisableDropdownMenuTransitionRef.current && oldLang.isRtl && 'disable-transition',
+            lang.isRtl && 'rtl',
+            shouldHideSearch && lang.isRtl && 'right-aligned',
+            shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
           )}
           forceOpen={isBotMenuOpen}
-          positionX={shouldHideSearch && oldLang.isRtl ? 'right' : 'left'}
+          positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
           transformOriginX={IS_TAURI && IS_MAC_OS && !isFullscreen ? 90 : undefined}
-          onTransitionEnd={oldLang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
+          onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
         >
           <LeftSideMenuItems
             onSelectArchived={onSelectArchived}

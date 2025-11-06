@@ -158,7 +158,7 @@ const SearchInput: FC<OwnProps> = ({
     <div
       className={buildClassName('SearchInput', className, isInputFocused && 'has-focus')}
       onClick={onClick}
-      dir={oldLang.isRtl ? 'rtl' : undefined}
+      dir={lang.isRtl ? 'rtl' : undefined}
     >
       <Transition
         name="fade"

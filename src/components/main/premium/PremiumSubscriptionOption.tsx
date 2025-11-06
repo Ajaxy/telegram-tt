@@ -7,6 +7,7 @@ import type { ApiPremiumGiftCodeOption, ApiPremiumSubscriptionOption } from '../
 import buildClassName from '../../../util/buildClassName';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
 
+import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 
 import styles from './PremiumSubscriptionOption.module.scss';
@@ -25,6 +26,7 @@ const PremiumSubscriptionOption: FC<OwnProps> = ({
   onChange, className, isGiveaway,
 }) => {
   const oldLang = useOldLang();
+  const lang = useLang();
 
   const {
     months, amount, currency,
@@ -52,7 +54,7 @@ const PremiumSubscriptionOption: FC<OwnProps> = ({
         (checked && !isGiveaway) && styles.active,
         className,
       )}
-      dir={oldLang.isRtl ? 'rtl' : undefined}
+      dir={lang.isRtl ? 'rtl' : undefined}
     >
       <input
         className={styles.input}

@@ -168,8 +168,8 @@
       grid-row: span 2;
       align-self: center;
 
-      margin-right: 0.5rem;
-      margin-left: auto;
+      margin-inline-start: auto;
+      margin-inline-end: 0.5rem;
 
       font-size: 1.25rem;
       color: var(--color-text-secondary);

@@ -26,11 +26,17 @@
 }
 
 .avatar {
+  --_gradient-rotation: 90deg;
+
   z-index: 1;
+
+  :dir(rtl) & {
+    --_gradient-rotation: -90deg;
+  }
 
   &:not(:first-child):before {
     mask-composite: exclude;
-    mask-image: linear-gradient(90deg, #fff 75%, transparent 0);
+    mask-image: linear-gradient(var(--_gradient-rotation), #fff 75%, transparent 0);
   }
 
   &:global(.animating) {

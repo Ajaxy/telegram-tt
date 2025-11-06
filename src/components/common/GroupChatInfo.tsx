@@ -233,7 +233,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
       className={
         buildClassName('ChatInfo', className)
       }
-      dir={!noRtl && oldLang.isRtl ? 'rtl' : undefined}
+      dir={!noRtl && lang.isRtl ? 'rtl' : undefined}
       onClick={onClick}
     >
       {!noAvatar && !isTopic && (

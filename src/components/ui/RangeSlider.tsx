@@ -4,7 +4,7 @@ import { memo, useCallback, useMemo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import './RangeSlider.scss';
 
@@ -39,7 +39,7 @@ const RangeSlider: FC<OwnProps> = ({
   onChange,
   isCenteredLayout,
 }) => {
-  const lang = useOldLang();
+  const lang = useLang();
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     onChange(Number(event.currentTarget.value));
   }, [onChange]);

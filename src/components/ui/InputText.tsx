@@ -7,7 +7,7 @@ import { memo } from '../../lib/teact/teact';
 import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import buildClassName from '../../util/buildClassName';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 type OwnProps = {
   ref?: ElementRef<HTMLInputElement>;
@@ -56,7 +56,7 @@ const InputText: FC<OwnProps> = ({
   onBlur,
   onPaste,
 }) => {
-  const lang = useOldLang();
+  const lang = useLang();
   const labelText = error || success || label;
   const fullClassName = buildClassName(
     'input-group',

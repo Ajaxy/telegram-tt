@@ -19,7 +19,6 @@ import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorList
 import useEnsureStory from '../../../hooks/useEnsureStory';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Audio from '../../common/Audio';
 import Document from '../../common/Document';
@@ -98,7 +97,6 @@ const WebPage: FC<OwnProps & StateProps> = ({
   const { openUrl, openTelegramLink } = getActions();
   const stickersRef = useRef<HTMLDivElement>();
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const handleMediaClick = useLastCallback(() => {
@@ -191,7 +189,7 @@ const WebPage: FC<OwnProps & StateProps> = ({
     <PeerColorWrapper
       className={className}
       data-initial={(siteName || displayUrl)[0]}
-      dir={oldLang.isRtl ? 'rtl' : 'auto'}
+      dir={lang.isRtl ? 'rtl' : 'auto'}
       onClick={handleContainerClick}
     >
       <div className={buildClassName(

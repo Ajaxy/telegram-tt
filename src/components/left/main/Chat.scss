@@ -100,6 +100,10 @@
       background-color: var(--background-color);
     }
 
+    .info-row {
+      line-height: 1.375;
+    }
+
     .info.has-tags .subtitle {
       height: unset;
       line-height: inherit;

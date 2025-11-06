@@ -357,7 +357,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     return (
       <div
         className={shouldShowOption && styles.container}
-        dir={oldLang.isRtl ? 'rtl' : undefined}
+        dir={lang.isRtl ? 'rtl' : undefined}
       >
         {shouldShowOption && (
           <AvatarList

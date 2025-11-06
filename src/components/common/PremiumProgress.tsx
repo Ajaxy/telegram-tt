@@ -11,7 +11,7 @@ import { REM } from './helpers/mediaDimensions';
 
 import { useTransitionActiveKey } from '../../hooks/animations/useTransitionActiveKey';
 import useForceUpdate from '../../hooks/useForceUpdate';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
 import useResizeObserver from '../../hooks/useResizeObserver';
 import useSyncEffect from '../../hooks/useSyncEffect';
@@ -46,7 +46,6 @@ const PremiumProgress: FC<OwnProps> = ({
   animationDirection = 'none',
   className,
 }) => {
-  const lang = useOldLang();
   const floatingBadgeContentRef = useRef<HTMLDivElement>();
   const parentContainerRef = useRef<HTMLDivElement>();
 
@@ -71,6 +70,8 @@ const PremiumProgress: FC<OwnProps> = ({
   const prevLeftText = usePrevious(leftText);
   const prevRightText = usePrevious(rightText);
   const prevIsNegative = usePrevious(isNegative);
+
+  const lang = useLang();
 
   const BEAK_WIDTH_PX = 28;
   const PROGRESS_BORDER_RADIUS_PX = REM;

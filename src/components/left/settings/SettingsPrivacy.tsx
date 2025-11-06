@@ -236,7 +236,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       </div>
 
       <div className="settings-item">
-        <h4 className="settings-item-header" dir={oldLang.isRtl ? 'rtl' : undefined}>{oldLang('PrivacyTitle')}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{oldLang('PrivacyTitle')}</h4>
 
         <ListItem
           narrow
@@ -391,7 +391,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
 
       {canChangeSensitive && (
         <div className="settings-item fluid-container">
-          <h4 className="settings-item-header" dir={oldLang.isRtl ? 'rtl' : undefined}>
+          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
             {oldLang('lng_settings_sensitive_title')}
           </h4>
           <Checkbox
@@ -419,7 +419,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
 
       {canDisplayAutoarchiveSetting && (
         <div className="settings-item">
-          <h4 className="settings-item-header" dir={oldLang.isRtl ? 'rtl' : undefined}>
+          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
             {oldLang('NewChatsFromNonContacts')}
           </h4>
           <Checkbox
@@ -432,7 +432,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       )}
 
       <div className="settings-item">
-        <h4 className="settings-item-header" dir={oldLang.isRtl ? 'rtl' : undefined}>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {oldLang('lng_settings_window_system')}
         </h4>
         <Checkbox
@@ -443,7 +443,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       </div>
 
       <div className="settings-item">
-        <h4 className="settings-item-header" dir={oldLang.isRtl ? 'rtl' : undefined}>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('DeleteMyAccount')}
         </h4>
         <ListItem

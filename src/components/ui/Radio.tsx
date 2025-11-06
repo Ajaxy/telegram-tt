@@ -4,7 +4,7 @@ import { memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Spinner from './Spinner';
 
@@ -49,7 +49,7 @@ const Radio: FC<OwnProps> = ({
   onSubLabelClick,
   isCanCheckedInDisabled,
 }) => {
-  const lang = useOldLang();
+  const lang = useLang();
 
   const fullClassName = buildClassName(
     'Radio',

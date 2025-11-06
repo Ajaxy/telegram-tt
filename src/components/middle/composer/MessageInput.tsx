@@ -34,6 +34,7 @@ import { isSelectionInsideInput } from './helpers/selection';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useInputCustomEmojis from './hooks/useInputCustomEmojis';
@@ -167,6 +168,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const absoluteContainerRef = useRef<HTMLDivElement>();
 
   const oldLang = useOldLang();
+  const lang = useLang();
   const isContextMenuOpenRef = useRef(false);
   const [isTextFormatterOpen, openTextFormatter, closeTextFormatter] = useFlag();
   const [textFormatterAnchorPosition, setTextFormatterAnchorPosition] = useState<IAnchorPosition>();
@@ -572,7 +574,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const placeholderAriaLabel = typeof placeholder === 'string' ? placeholder : undefined;
 
   return (
-    <div id={id} onClick={shouldSuppressFocus ? onSuppressedFocus : undefined} dir={oldLang.isRtl ? 'rtl' : undefined}>
+    <div id={id} onClick={shouldSuppressFocus ? onSuppressedFocus : undefined} dir={lang.isRtl ? 'rtl' : undefined}>
       <div
         className={buildClassName('custom-scroll', SCROLLER_CLASS, isNeedPremium && 'is-need-premium')}
         onScroll={onScroll}

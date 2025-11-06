@@ -10,7 +10,7 @@ import { ANIMATION_END_DELAY, PREVIEW_AVATAR_COUNT } from '../../config';
 import { selectIsForumPanelOpen, selectPerformanceSettingsValue, selectTabState } from '../../global/selectors';
 import { animateClosing, animateOpening, ANIMATION_DURATION } from './helpers/ribbonAnimation';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 import useShowTransition from '../../hooks/useShowTransition';
 import useStoryPreloader from './hooks/useStoryPreloader';
 
@@ -50,7 +50,7 @@ function StoryToggler({
 }: OwnProps & StateProps) {
   const { toggleStoryRibbon } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const peers = useMemo(() => {
     if (orderedPeerIds.length === 1) {
@@ -117,7 +117,7 @@ function StoryToggler({
       type="button"
       id="StoryToggler"
       className={styles.root}
-      aria-label={lang('Chat.Context.Peer.OpenStory')}
+      aria-label={lang('AriaStoryTogglerOpen')}
       onClick={() => toggleStoryRibbon({ isShown: true, isArchived })}
       dir={lang.isRtl ? 'rtl' : undefined}
     >

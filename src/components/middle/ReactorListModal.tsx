@@ -150,7 +150,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
       onCloseAnimationEnd={handleCloseAnimationEnd}
     >
       {canShowFilters && (
-        <div className="Reactions" dir={oldLang.isRtl ? 'rtl' : undefined}>
+        <div className="Reactions" dir={lang.isRtl ? 'rtl' : undefined}>
           <Button
             className={buildClassName(!chosenTab && 'chosen')}
             size="tiny"
@@ -185,7 +185,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
         </div>
       )}
 
-      <div dir={oldLang.isRtl ? 'rtl' : undefined} className="reactor-list-wrapper">
+      <div dir={lang.isRtl ? 'rtl' : undefined} className="reactor-list-wrapper">
         {viewportIds?.length ? (
           <InfiniteScroll
             className="reactor-list custom-scroll"

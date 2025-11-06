@@ -561,7 +561,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
       onClose={closeModal}
       onCloseAnimationEnd={handleModalClose}
     >
-      <div className="header" dir={oldLang.isRtl ? 'rtl' : undefined}>
+      <div className="header" dir={lang.isRtl ? 'rtl' : undefined}>
         <Button
           className="close-button"
           color="translucent"

@@ -7,7 +7,7 @@ import buildClassName from '../../util/buildClassName';
 
 import { getIsMobile } from '../../hooks/useAppLayout';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import StoryRibbonButton from './StoryRibbonButton';
 
@@ -33,7 +33,7 @@ function StoryRibbon({
   chatsById,
   isClosing,
 }: OwnProps & StateProps) {
-  const lang = useOldLang();
+  const lang = useLang();
   const fullClassName = buildClassName(
     styles.root,
     !orderedPeerIds.length && styles.hidden,

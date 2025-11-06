@@ -1728,6 +1728,7 @@ export interface LangPair {
   'UserNoteTitle': undefined;
   'UserNoteHint': undefined;
   'EditUserNoteHint': undefined;
+  'AriaStoryTogglerOpen': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {

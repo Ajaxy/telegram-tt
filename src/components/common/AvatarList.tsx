@@ -6,7 +6,7 @@ import type { AvatarSize } from './Avatar';
 
 import buildClassName from '../../util/buildClassName';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Avatar, { AVATAR_SIZES } from './Avatar';
 
@@ -29,7 +29,7 @@ const AvatarList: FC<OwnProps> = ({
   limit = DEFAULT_LIMIT,
   badgeText,
 }) => {
-  const lang = useOldLang();
+  const lang = useLang();
 
   const pxSize = typeof size === 'number' ? size : AVATAR_SIZES[size];
 
