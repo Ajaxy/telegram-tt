@@ -2315,3 +2315,4 @@
 "UserNoteHint" = "only visible to you";
 "EditUserNoteHint" = "Notes are only visible to you.";
 "AriaStoryTogglerOpen" = "Open Story List";
+"StoryUnsupported" = "This story is not supported in Telegram Web A. Try viewing it in the Telegram app.";

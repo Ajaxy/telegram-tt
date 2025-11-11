@@ -848,3 +848,13 @@
     text-decoration: underline;
   }
 }
+
+.unsupportedMedia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--color-white);
+  text-align: center;
+  text-wrap: balance;
+}

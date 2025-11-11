@@ -14,6 +14,7 @@ export function getStoryMediaHash(
   story: ApiStory, size: StorySize = 'preview', isAlt?: boolean,
 ) {
   const isVideo = Boolean(story.content.video);
+  const isPhoto = Boolean(story.content.photo);
 
   if (isVideo) {
     if (isAlt && !story.content.altVideos) return undefined;
@@ -21,7 +22,11 @@ export function getStoryMediaHash(
     return getVideoMediaHash(media, size);
   }
 
-  return getPhotoMediaHash(story.content.photo!, size);
+  if (isPhoto) {
+    return getPhotoMediaHash(story.content.photo!, size);
+  }
+
+  return undefined;
 }
 
 function getPreferredAlt(alts: ApiVideo[]) {
