@@ -17,6 +17,7 @@ import type { IconName } from '../../../types/icons/index';
 import type { AnimationLevel, ThemeKey } from '../../../types/index';
 import { MediaViewerOrigin } from '../../../types/index';
 
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config.ts';
 import {
   getUserStatus, isAnonymousForwardsChat, isChatChannel, isSystemBot, isUserOnline,
 } from '../../../global/helpers/index';
@@ -97,6 +98,7 @@ type StateProps = {
   isPlain?: boolean;
   savedGifts?: ApiSavedGifts;
   hasAvatar?: boolean;
+  isSystemAccount?: boolean;
 };
 
 const MAX_LEVEL_ICON = 90;
@@ -134,6 +136,7 @@ const ProfileInfo = ({
   isPlain,
   savedGifts,
   hasAvatar,
+  isSystemAccount,
   onExpand,
 }: OwnProps & StateProps) => {
   const {
@@ -452,7 +455,7 @@ const ProfileInfo = ({
           <span className={styles.userStatus} dir="auto">
             {getUserStatus(oldLang, user, userStatus)}
           </span>
-          {userStatus?.isReadDateRestrictedByMe && (
+          {userStatus?.isReadDateRestrictedByMe && !isSystemAccount && (
             <span className={styles.getStatus} onClick={handleOpenGetReadDateModal}>
               <span>{oldLang('StatusHiddenShow')}</span>
             </span>
@@ -635,6 +638,9 @@ export default memo(withGlobal<OwnProps>(
     const savedGifts = selectPeerSavedGifts(global, peerId);
     const hasAvatar = Boolean(peer?.avatarPhotoId);
 
+    const isAnonymousForwards = isAnonymousForwardsChat(peerId);
+    const isSystemAccount = isSystemBot(peerId) || isAnonymousForwards || peer?.id === SERVICE_NOTIFICATIONS_USER_ID;
+
     return {
       user,
       userFullInfo,
@@ -654,6 +660,7 @@ export default memo(withGlobal<OwnProps>(
       isPlain: !hasBackground,
       savedGifts,
       hasAvatar,
+      isSystemAccount,
     };
   },
 )(ProfileInfo));
