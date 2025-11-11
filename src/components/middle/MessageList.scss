@@ -1,6 +1,8 @@
 .MessageList {
   --action-message-bg: var(--pattern-color);
 
+  scroll-snap-type: y proximity;
+
   overflow-x: hidden;
   overflow-y: scroll;
   flex: 1;
@@ -36,6 +38,10 @@
     display: none;
   }
 
+  &.no-bottom-snap {
+    scroll-snap-type: none;
+  }
+
   .messages-container {
     display: flex;
     flex-direction: column;
@@ -49,6 +55,10 @@
 
     .force-messages-scroll & {
       margin-top: 100vh !important;
+    }
+
+    .fab-trigger {
+      scroll-snap-align: end;
     }
 
     @media (max-width: 600px) {

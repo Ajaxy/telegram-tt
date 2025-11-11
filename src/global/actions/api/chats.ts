@@ -2386,9 +2386,6 @@ addActionHandler('processAttachBotParameters', async (global, actions, payload):
 addActionHandler('loadTopics', async (global, actions, payload): Promise<void> => {
   if (selectIsCurrentUserFrozen(global)) return;
   const { chatId, force } = payload;
-  if (selectIsCurrentUserFrozen(global)) {
-    return;
-  }
   const chat = selectChat(global, chatId);
   if (!chat) return;
 

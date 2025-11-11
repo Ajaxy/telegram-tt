@@ -103,7 +103,7 @@
   font-size: 0.875rem !important;
 }
 
-.selected {
+.selected:not(.onAvatar) {
   .badge:not(.pinned) {
     color: var(--color-chat-active);
     background: var(--color-white);

@@ -83,7 +83,7 @@ export default function useMessageObservers(
     });
 
     if (!isQuickPreview) {
-      if (memoFirstUnreadIdRef.current && maxId >= memoFirstUnreadIdRef.current) {
+      if (memoFirstUnreadIdRef.current && maxId && maxId >= memoFirstUnreadIdRef.current) {
         markMessageListRead({ maxId });
       }
 

@@ -1,4 +1,5 @@
 import type {
+  ApiFormattedText,
   ApiMessage, ApiPoll, ApiPollResult, ApiQuickReply, ApiSponsoredMessage, ApiThreadInfo,
   ApiWebPage,
   ApiWebPageFull,
@@ -46,6 +47,7 @@ import {
   selectTabState,
   selectThreadIdFromMessage,
   selectThreadInfo,
+  selectThreadParam,
   selectViewportIds,
   selectWebPage,
 } from '../selectors';
@@ -1063,4 +1065,25 @@ export function updatePollVote<T extends GlobalState>(
       results: newResults,
     },
   });
+}
+
+export function updateTypingDraft<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  threadId: ThreadId | undefined = MAIN_THREAD_ID,
+  randomId: string,
+  text: ApiFormattedText,
+) {
+  const typingDraftStore = selectThreadParam(global, chatId, threadId, 'typingDraftIdByRandomId');
+  const messageId = typingDraftStore?.[randomId];
+  if (!messageId) {
+    return global;
+  }
+
+  global = updateChatMessage(global, chatId, messageId, {
+    content: {
+      text,
+    },
+  });
+  return global;
 }

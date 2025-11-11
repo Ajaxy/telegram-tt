@@ -42,14 +42,15 @@ export type TransitionProps = {
   slideClassName?: string;
   withSwipeControl?: boolean;
   isBlockingAnimation?: boolean;
-  onStart?: NoneToVoidFunction;
-  onStop?: NoneToVoidFunction;
-  onScroll?: NoneToVoidFunction;
-  onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
   children: React.ReactNode | ChildrenFn;
   'data-tauri-drag-region'?: true;
   contentSelector?: string;
   restoreHeightKey?: number;
+  onStart?: NoneToVoidFunction;
+  onStop?: NoneToVoidFunction;
+  onScroll?: NoneToVoidFunction;
+  onWheel?: (e: React.WheelEvent<HTMLDivElement>) => void;
+  onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
 };
 
 const FALLBACK_ANIMATION_END = 1000;
@@ -87,14 +88,15 @@ function Transition({
   slideClassName,
   withSwipeControl,
   isBlockingAnimation,
-  onStart,
-  onStop,
-  onScroll,
-  onMouseDown,
   children,
   'data-tauri-drag-region': dataTauriDragRegion,
   contentSelector,
   restoreHeightKey,
+  onStart,
+  onStop,
+  onScroll,
+  onMouseDown,
+  onWheel,
 }: TransitionProps) {
   const currentKeyRef = useRef<number>();
   // No need for a container to update on change
@@ -411,6 +413,7 @@ function Transition({
       data-tauri-drag-region={dataTauriDragRegion}
       onScroll={onScroll}
       onMouseDown={onMouseDown}
+      onWheel={onWheel}
     >
       {contents}
     </div>

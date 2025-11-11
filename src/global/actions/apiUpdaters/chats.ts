@@ -24,6 +24,7 @@ import {
   updateChatFullInfo,
   updateChatListType,
   updatePeerStoriesHidden,
+  updateThreadInfo,
   updateTopic,
 } from '../../reducers';
 import { updateUnreadReactions } from '../../reducers/reactions';
@@ -148,7 +149,21 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateChatInbox': {
-      return updateChat(global, update.id, update.chat);
+      const { id, threadId, lastReadInboxMessageId, unreadCount } = update;
+      const chat = selectChat(global, id);
+      if (chat?.isBotForum && threadId) {
+        global = updateTopic(global, id, Number(threadId), {
+          unreadCount,
+        });
+        return updateThreadInfo(global, id, threadId, {
+          lastReadInboxMessageId,
+        });
+      } else {
+        return updateChat(global, id, {
+          lastReadInboxMessageId,
+          unreadCount,
+        });
+      }
     }
 
     case 'updateChatTypingStatus': {
@@ -200,6 +215,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
             unreadCount: topic.unreadCount ? topic.unreadCount + 1 : 1,
           });
         }
+
+        // TODO Replace draft with new message
       }
 
       setGlobal(global);

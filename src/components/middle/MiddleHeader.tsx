@@ -279,11 +279,12 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
             <PrivateChatInfo
               key={displayChatId}
               userId={displayChatId}
+              threadId={!isSavedDialog ? threadId : undefined}
               typingStatus={typingStatus}
               status={connectionStatusText || savedMessagesStatus}
               withDots={Boolean(connectionStatusText)}
-              withFullInfo
-              withMediaViewer
+              withFullInfo={threadId === MAIN_THREAD_ID}
+              withMediaViewer={threadId === MAIN_THREAD_ID}
               withStory={!isChatWithSelf}
               withUpdatingStatus
               isSavedDialog={isSavedDialog}

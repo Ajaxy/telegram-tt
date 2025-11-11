@@ -9,8 +9,8 @@ import { selectChatMessage, selectCurrentMessageList } from '../../../global/sel
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import renderKeyboardButtonText from './helpers/renderKeyboardButtonText';
 
+import useLang from '../../../hooks/useLang';
 import useMouseInside from '../../../hooks/useMouseInside';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
@@ -33,7 +33,7 @@ const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
 }) => {
   const { clickBotInlineButton } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
   const { isKeyboardSingleUse } = message || {};

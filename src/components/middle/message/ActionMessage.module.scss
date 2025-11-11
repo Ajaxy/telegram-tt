@@ -283,3 +283,23 @@
   font-size: 1rem;
   vertical-align: middle;
 }
+
+.botForumTopicIcon {
+  padding: 1.25rem;
+  border-radius: 50%;
+  font-size: 2.5rem;
+  background-color: var(--action-message-bg);
+}
+
+.botForumTopicTitle {
+  margin-block: 0.5rem 0;
+}
+
+.botForumTopicDescription {
+  font-weight: var(--font-weight-normal);
+}
+
+.botForumTopicArrow {
+  font-size: 1.5rem;
+  opacity: 0.5;
+}

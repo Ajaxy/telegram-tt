@@ -5,6 +5,7 @@ import type { ApiChat, ApiTopic } from '../../../../api/types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';
 
 import { getCanManageTopic, getHasAdminRight } from '../../../../global/helpers';
+import { IS_TAURI } from '../../../../util/browser/globalEnvironment';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/browser/windowEnvironment';
 import { compact } from '../../../../util/iteratees';
 
@@ -48,11 +49,11 @@ export default function useTopicContextActions({
       openQuickPreview,
     } = getActions();
 
-    const canToggleClosed = getCanManageTopic(chat, topic);
+    const canToggleClosed = getCanManageTopic(chat, topic) && !chat.isBotForum;
     const canTogglePinned = chat.isCreator || getHasAdminRight(chat, 'manageTopics');
 
     const actionOpenInNewTab = IS_OPEN_IN_NEW_TAB_SUPPORTED && {
-      title: 'Open in new tab',
+      title: IS_TAURI ? lang('ChatListOpenInNewWindow') : lang('ChatListOpenInNewTab'),
       icon: 'open-in-new-tab',
       handler: () => {
         openChatInNewTab({ chatId: chat.id, threadId: topicId });
