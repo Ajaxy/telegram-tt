@@ -463,7 +463,6 @@ const MessageListContent = ({
       {isViewportNewest && (
         <MessageListBottomMarker
           key="bottom-marker"
-          isJustAdded={isNewMessage}
           isFocused={shouldScrollToBottom}
           className={shouldRenderSponsoredMessage ? 'with-sponsored' : undefined}
         />

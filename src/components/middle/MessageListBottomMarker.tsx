@@ -1,23 +1,25 @@
 import { memo, useRef } from '@teact';
 
+import { FocusDirection } from '../../types';
+
 import buildClassName from '../../util/buildClassName';
 
 import useFocusMessageListElement from './message/hooks/useFocusMessageListElement';
 
 type OwnProps = {
-  isJustAdded?: boolean;
   isFocused?: boolean;
   className?: string;
 };
 
-const MessageListBottomMarker = ({ isJustAdded, isFocused, className }: OwnProps) => {
+const MessageListBottomMarker = ({ isFocused, className }: OwnProps) => {
   const ref = useRef<HTMLDivElement>();
 
   useFocusMessageListElement({
     elementRef: ref,
-    isJustAdded,
+    isJustAdded: true,
     isFocused,
     noFocusHighlight: true,
+    focusDirection: FocusDirection.Down,
   });
 
   return (
