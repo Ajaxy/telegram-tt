@@ -85,7 +85,8 @@ export default function useCustomEmojiTooltip(
     const regex = new RegExp(`(${regexText})\\1*$`, '');
     const matched = htmlBeforeSelection.match(regex)![0];
     const count = matched.length / lastEmoji.length;
-    const newHtml = htmlBeforeSelection.replace(regex, buildCustomEmojiHtml(emoji).repeat(count));
+    const htmlCustomEmojis = Array.from({ length: count }, () => buildCustomEmojiHtml(emoji));
+    const newHtml = htmlBeforeSelection.replace(regex, htmlCustomEmojis.join(''));
     const htmlAfterSelection = inputEl.innerHTML.substring(htmlBeforeSelection.length);
 
     setHtml(`${newHtml}${htmlAfterSelection}`);
