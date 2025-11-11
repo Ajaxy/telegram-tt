@@ -2,6 +2,7 @@ import { type ElementRef, useEffect, useRef, useSignal } from '@teact';
 
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import stopEvent from '../../util/stopEvent';
+import useEffectWithPrevDeps from '../useEffectWithPrevDeps';
 import useLastCallback from '../useLastCallback';
 
 type State = 'overscroll' | 'animating' | 'normal';
@@ -205,7 +206,8 @@ export default function useTopOverscroll({
     };
   }, [containerRef, isDisabled, getState]);
 
-  useEffect(() => {
+  useEffectWithPrevDeps(([prevIsOverscrolled]) => {
+    if (prevIsOverscrolled === isOverscrolled) return;
     if (!isOverscrolled && getState() === 'animating') {
       return; // We're animating towards this state
     }
