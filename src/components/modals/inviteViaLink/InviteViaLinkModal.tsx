@@ -1,6 +1,5 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
-  memo, useCallback,
+  memo,
   useEffect,
   useMemo, useState,
 } from '../../../lib/teact/teact';
@@ -10,16 +9,14 @@ import type { ApiChat } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
 import { getUserFullName } from '../../../global/helpers';
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectUser } from '../../../global/selectors';
 import { partition } from '../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import renderText from '../../common/helpers/renderText';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
-import Icon from '../../common/icons/Icon';
 import PeerPicker from '../../common/pickers/PeerPicker';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -35,14 +32,14 @@ type StateProps = {
   chat?: ApiChat;
 };
 
-const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
+const InviteViaLinkModal = ({
   modal,
   chat,
-}) => {
+}: OwnProps & StateProps) => {
   const { sendInviteMessages, closeInviteViaLinkModal, openPremiumModal } = getActions();
   const { missingUsers } = modal || {};
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
 
   const userIds = useMemo(() => missingUsers?.map((user) => user.id) || MEMO_EMPTY_ARRAY, [missingUsers]);
@@ -52,20 +49,12 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
     return [requirePremiumIds.map((user) => user.id), regularIds.map((user) => user.id)];
   }, [missingUsers]);
 
-  const invitableWithPremiumIds = useMemo(() => {
+  const invitableWithPremiumPeers = useMemo(() => {
+    const global = getGlobal();
     return missingUsers?.filter((user) => user.isRequiringPremiumToInvite || user.isRequiringPremiumToMessage)
-      .map((user) => user.id);
+      .map((user) => selectUser(global, user.id))
+      .filter(Boolean);
   }, [missingUsers]);
-
-  const isEveryPremiumBlocksPm = useMemo(() => {
-    if (!missingUsers) return undefined;
-    return !missingUsers.some((user) => user.isRequiringPremiumToInvite && !user.isRequiringPremiumToMessage);
-  }, [missingUsers]);
-
-  const topListPeers = useMemo(() => {
-    const users = getGlobal().users.byId;
-    return invitableWithPremiumIds?.map((id) => users[id]);
-  }, [invitableWithPremiumIds]);
 
   useEffect(() => {
     setSelectedMemberIds(selectableIds);
@@ -73,14 +62,14 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
 
   const handleClose = useLastCallback(() => closeInviteViaLinkModal());
 
-  const handleSendInviteLink = useCallback(() => {
+  const handleSendInviteLink = useLastCallback(() => {
     sendInviteMessages({ chatId: chat!.id, userIds: selectedMemberIds });
     closeInviteViaLinkModal();
-  }, [selectedMemberIds, chat]);
+  });
 
-  const handleOpenPremiumModal = useCallback(() => {
+  const handleOpenPremiumModal = useLastCallback(() => {
     openPremiumModal();
-  }, []);
+  });
 
   const canSendInviteLink = useMemo(() => {
     if (!chat) return undefined;
@@ -90,77 +79,80 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
   const inviteSectionText = useMemo(() => {
     return canSendInviteLink
       ? lang(missingUsers?.length === 1 ? 'InviteBlockedOneMessage' : 'InviteBlockedManyMessage')
-      : lang('InviteRestrictedUsers2', missingUsers?.length);
+      : lang('InviteRestrictedUsers', { count: missingUsers?.length }, {
+        pluralValue: missingUsers?.length || 0,
+        withMarkdown: true,
+        withNodes: true,
+      });
   }, [canSendInviteLink, lang, missingUsers?.length]);
 
   const premiumSectionText = useMemo(() => {
-    if (!invitableWithPremiumIds?.length || !topListPeers?.length) return undefined;
-    const prefix = isEveryPremiumBlocksPm ? 'InviteMessagePremiumBlocked' : 'InvitePremiumBlocked';
-    let langKey = `${prefix}One`;
-    let params = [getUserFullName(topListPeers[0])];
-    if (invitableWithPremiumIds.length === 2) {
-      langKey = `${prefix}Two`;
-      params = [getUserFullName(topListPeers[0]), getUserFullName(topListPeers[1])];
-    } else if (invitableWithPremiumIds.length === 3) {
-      langKey = `${prefix}Three`;
-      params = [getUserFullName(topListPeers[0]), getUserFullName(topListPeers[1]), getUserFullName(topListPeers[2])];
-    } else if (invitableWithPremiumIds.length > 3) {
-      langKey = `${prefix}Many`;
-      params = [
-        getUserFullName(topListPeers[0]),
-        getUserFullName(topListPeers[1]),
-        (invitableWithPremiumIds.length - 2).toString(),
-      ];
+    if (!invitableWithPremiumPeers?.length) return undefined;
+    if (invitableWithPremiumPeers.length === 1) {
+      return lang('InviteRestrictedPremiumReasonSingle', { user: getUserFullName(invitableWithPremiumPeers[0]) }, {
+        withMarkdown: true,
+        withNodes: true,
+      });
     }
 
-    return lang(langKey, params, undefined, topListPeers.length);
-  }, [invitableWithPremiumIds, isEveryPremiumBlocksPm, lang, topListPeers]);
+    if (invitableWithPremiumPeers.length <= 3) {
+      const list = lang.conjunction(invitableWithPremiumPeers.map((peer) => getUserFullName(peer)).filter(Boolean));
+      return lang('InviteRestrictedPremiumReasonMultiple', { list }, {
+        withMarkdown: true,
+        withNodes: true,
+      });
+    }
 
-  const hasPremiumSection = Boolean(topListPeers?.length);
+    if (invitableWithPremiumPeers.length > 3) {
+      const moreCount = invitableWithPremiumPeers.length - 2;
+      const peers = invitableWithPremiumPeers.slice(0, 2);
+      const list = lang.conjunction(peers.map((peer) => getUserFullName(peer)).filter(Boolean));
+      return lang('InviteRestrictedPremiumReasonMultipleMore', { list, count: moreCount }, {
+        pluralValue: moreCount,
+        withMarkdown: true,
+        withNodes: true,
+      });
+    }
+
+    return undefined;
+  }, [invitableWithPremiumPeers, lang]);
+
+  const hasPremiumSection = Boolean(invitableWithPremiumPeers?.length);
   const hasSelectableSection = Boolean(selectableIds?.length);
 
   return (
     <Modal
       isOpen={Boolean(userIds && chat)}
       contentClassName={styles.content}
+      hasAbsoluteCloseButton
       onClose={handleClose}
       isSlim
     >
-      <Button
-        round
-        color="translucent"
-        size="smaller"
-        className={styles.closeButton}
-        ariaLabel={lang('Close')}
-        onClick={handleClose}
-      >
-        <Icon name="close" />
-      </Button>
-      {premiumSectionText && (
+      {hasPremiumSection && (
         <>
           <AvatarList
             className={styles.avatarList}
-            peers={topListPeers}
+            peers={invitableWithPremiumPeers}
             size="large"
           />
           <h3 className={styles.title}>
-            {canSendInviteLink ? lang('InvitePremiumBlockedTitle') : lang('ChannelInviteViaLinkRestricted')}
+            {canSendInviteLink ? lang('InviteBlockedPremiumTitle') : lang('InviteBlockedNoLinkTitle')}
           </h3>
           <p className={styles.contentText}>
-            {renderText(premiumSectionText, ['simple_markdown'])}
+            {premiumSectionText}
           </p>
           <Button
             withPremiumGradient
             isShiny
             onClick={handleOpenPremiumModal}
           >
-            {lang('InvitePremiumBlockedSubscribe')}
+            {lang('InviteBlockedPremiumButton')}
           </Button>
         </>
       )}
       {hasPremiumSection && hasSelectableSection && (
         <Separator className={styles.separator}>
-          {lang('InvitePremiumBlockedOr')}
+          {lang('InviteBlockedOr')}
         </Separator>
       )}
       {hasSelectableSection && (
@@ -174,7 +166,7 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
             itemIds={userIds}
             selectedIds={selectedMemberIds}
             lockedUnselectedIds={unselectableIds}
-            lockedUnselectedSubtitle={lang('InvitePremiumBlockedUser')}
+            lockedUnselectedSubtitle={lang('InviteRestrictedPremiumReason')}
             onSelectedIdsChange={setSelectedMemberIds}
             isViewOnly={!canSendInviteLink}
             allowMultiple
@@ -187,7 +179,7 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
               onClick={handleSendInviteLink}
               disabled={!selectedMemberIds.length}
             >
-              {lang('SendInviteLink.ActionInvite')}
+              {lang('InviteViaLinkButton')}
             </Button>
           )}
         </>

@@ -1729,6 +1729,15 @@ export interface LangPair {
   'UserNoteHint': undefined;
   'EditUserNoteHint': undefined;
   'AriaStoryTogglerOpen': undefined;
+  'InviteBlockedTitle': undefined;
+  'InviteBlockedOneMessage': undefined;
+  'InviteBlockedManyMessage': undefined;
+  'InviteBlockedOr': undefined;
+  'InviteBlockedNoLinkTitle': undefined;
+  'InviteBlockedPremiumTitle': undefined;
+  'InviteBlockedPremiumButton': undefined;
+  'InviteRestrictedPremiumReason': undefined;
+  'InviteViaLinkButton': undefined;
   'StoryUnsupported': undefined;
 }
 
@@ -2985,6 +2994,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ActionStarGiftPrepaidUpgraded': {
     'user': V;
   };
+  'InviteRestrictedPremiumReasonSingle': {
+    'user': V;
+  };
+  'InviteRestrictedPremiumReasonMultiple': {
+    'list': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -3333,6 +3348,13 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'time': V;
     'points': V;
     'link': V;
+  };
+  'InviteRestrictedUsers': {
+    'count': V;
+  };
+  'InviteRestrictedPremiumReasonMultipleMore': {
+    'list': V;
+    'count': V;
   };
 }
 export type RegularLangKey = keyof LangPair;
