@@ -1,18 +1,5 @@
 import type { ApiDocument } from '../../../api/types';
 
-const ONE_GIGABYTE = 1024 * 1024 * 1024;
-const ONE_MEGABYTE = 1024 * 1024;
-
-export function getFileSizeString(bytes: number) {
-  if (bytes > (ONE_GIGABYTE / 2)) {
-    return `${(bytes / ONE_GIGABYTE).toFixed(1)} GB`;
-  }
-  if (bytes > (ONE_MEGABYTE / 2)) {
-    return `${(bytes / ONE_MEGABYTE).toFixed(1)} MB`;
-  }
-  return `${(bytes / (1024)).toFixed(1)} KB`;
-}
-
 export function getDocumentExtension(document: ApiDocument) {
   const { fileName, mimeType } = document;
 

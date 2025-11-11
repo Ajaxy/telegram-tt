@@ -9,10 +9,12 @@ import type { IconName } from '../../../../types/icons';
 import { MAX_UPLOAD_FILEPART_SIZE } from '../../../../config';
 import { selectIsCurrentUserPremium, selectIsPremiumPurchaseBlocked } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
+import { type LangFn } from '../../../../util/localization';
 import { formatFileSize } from '../../../../util/textFormat';
 import renderText from '../../../common/helpers/renderText';
 
 import useFlag from '../../../../hooks/useFlag';
+import useLang from '../../../../hooks/useLang';
 import useOldLang from '../../../../hooks/useOldLang';
 
 import Icon from '../../../common/icons/Icon';
@@ -71,16 +73,17 @@ const LIMIT_ICON: Record<ApiLimitTypeWithModal, IconName> = {
 };
 
 const LIMIT_VALUE_FORMATTER: Partial<Record<ApiLimitTypeWithModal, (...args: any[]) => string>> = {
-  uploadMaxFileparts: (lang: OldLangFn, value: number) => {
+  uploadMaxFileparts: (lang: LangFn, value: number) => {
     // The real size is not exactly 4gb, so we need to round it
-    if (value === 8000) return lang('FileSize.GB', '4');
-    if (value === 4000) return lang('FileSize.GB', '2');
+    if (value === 8000) return lang('MediaSizeGB', { size: 4 }, { pluralValue: 4 });
+    if (value === 4000) return lang('MediaSizeGB', { size: 2 }, { pluralValue: 2 });
     return formatFileSize(lang, value * MAX_UPLOAD_FILEPART_SIZE);
   },
 };
 
 function getLimiterDescription({
   lang,
+  oldLang,
   limitType,
   isPremium,
   canBuyPremium,
@@ -88,7 +91,8 @@ function getLimiterDescription({
   premiumValue,
   valueFormatter,
 }: {
-  lang: OldLangFn;
+  lang: LangFn;
+  oldLang: OldLangFn;
   limitType?: ApiLimitTypeWithModal;
   isPremium?: boolean;
   canBuyPremium?: boolean;
@@ -104,13 +108,13 @@ function getLimiterDescription({
   const premiumValueFormatted = valueFormatter ? valueFormatter(lang, premiumValue) : premiumValue;
 
   if (isPremium) {
-    return lang(LIMIT_DESCRIPTION_PREMIUM[limitType], premiumValueFormatted);
+    return oldLang(LIMIT_DESCRIPTION_PREMIUM[limitType], premiumValueFormatted);
   }
 
   return canBuyPremium
-    ? lang(LIMIT_DESCRIPTION[limitType],
+    ? oldLang(LIMIT_DESCRIPTION[limitType],
       limitType === 'channelsPublic' ? premiumValueFormatted : [defaultValueFormatted, premiumValueFormatted])
-    : lang(LIMIT_DESCRIPTION_BLOCKED[limitType], defaultValueFormatted);
+    : oldLang(LIMIT_DESCRIPTION_BLOCKED[limitType], defaultValueFormatted);
 }
 
 export type OwnProps = {
@@ -132,7 +136,8 @@ const PremiumLimitReachedModal: FC<OwnProps & StateProps> = ({
   canBuyPremium,
 }) => {
   const { closeLimitReachedModal, openPremiumModal } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
+  const oldLang = useOldLang();
 
   const [isClosing, startClosing, stopClosing] = useFlag();
 
@@ -149,6 +154,7 @@ const PremiumLimitReachedModal: FC<OwnProps & StateProps> = ({
   const valueFormatter = limit && LIMIT_VALUE_FORMATTER[limit];
   const description = getLimiterDescription({
     lang,
+    oldLang,
     limitType: limit,
     isPremium,
     canBuyPremium,

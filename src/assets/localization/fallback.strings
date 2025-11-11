@@ -419,7 +419,6 @@
 "ClearOtherWebSessionsHelp" = "You can log in on websites that support signing in with Telegram.";
 "AreYouSureWebSessions" = "Are you sure you want to disconnect all websites where you logged in with Telegram?";
 "AutodownloadSizeLimitUpTo" = "up to {limit}";
-"FileSizeMB" = "{count} MB";
 "AutoDownloadMaxFileSize" = "Maximum file size";
 "AutoDownloadSettingsContacts" = "Contacts";
 "AutoDownloadSettingsPrivateChats" = "Other Private Chats";
@@ -590,7 +589,6 @@
 "ContactPhone" = "Phone Number";
 "NewContact" = "New Contact";
 "Done" = "Done";
-"FileSizeGB" = "{count} GB";
 "LimitReached" = "Limit Reached";
 "IncreaseLimit" = "Increase Limit";
 "LimitFree" = "Free";
@@ -1223,8 +1221,6 @@
 "WaitingForNetwork" = "Waiting for network...";
 "ScheduleSendWhenOnline" = "Send When Online";
 "VoipIncoming" = "Incoming call";
-"FileSizeB" = "{count} B";
-"FileSizeKB" = "{count} KB";
 "Years_one" = "{count} year";
 "Years_other" = "{count} years";
 "MessageTimerShortHours" = "{count}h";
@@ -2315,6 +2311,15 @@
 "UserNoteHint" = "only visible to you";
 "EditUserNoteHint" = "Notes are only visible to you.";
 "AriaStoryTogglerOpen" = "Open Story List";
+"FileTransferProgress" = "{currentSize} / {totalSize}";
+"MediaSizeB_one" = "{size}B";
+"MediaSizeB_other" = "{size}B";
+"MediaSizeKB_one" = "{size}KB";
+"MediaSizeKB_other" = "{size}KB";
+"MediaSizeMB_one" = "{size}MB";
+"MediaSizeMB_other" = "{size}MB";
+"MediaSizeGB_one" = "{size}GB";
+"MediaSizeGB_other" = "{size}GB";
 "InviteBlockedTitle" = "Invite via Link";
 "InviteBlockedOneMessage" = "This user restricts adding them to groups. You can send an invite link in a private message instead.";
 "InviteBlockedManyMessage" = "Some users restrict adding them to groups. You can send these people an invite link in a private message instead.";

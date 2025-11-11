@@ -1,5 +1,5 @@
 import {
-  useEffect, useMemo, useRef, useState,
+  useEffect, useRef, useState,
 } from '../lib/teact/teact';
 
 import { ApiMediaFormat } from '../api/types';
@@ -7,9 +7,9 @@ import { ApiMediaFormat } from '../api/types';
 import { selectIsSynced } from '../global/selectors';
 import { IS_PROGRESSIVE_SUPPORTED } from '../util/browser/windowEnvironment';
 import * as mediaLoader from '../util/mediaLoader';
-import { throttle } from '../util/schedulers';
 import useSelector from './data/useSelector';
 import useForceUpdate from './useForceUpdate';
+import useThrottledCallback from './useThrottledCallback';
 import useUniqueId from './useUniqueId';
 
 const STREAMING_PROGRESS = 0.75;
@@ -34,13 +34,11 @@ export default function useMediaWithLoadProgress(
   const [loadProgress, setLoadProgress] = useState(mediaData && !isStreaming ? 1 : 0);
   const startedAtRef = useRef<number>();
 
-  const handleProgress = useMemo(() => {
-    return throttle((progress: number) => {
-      if (startedAtRef.current && (!delay || (Date.now() - startedAtRef.current > delay))) {
-        setLoadProgress(progress);
-      }
-    }, PROGRESS_THROTTLE, true);
-  }, [delay]);
+  const handleProgress = useThrottledCallback((progress: number) => {
+    if (startedAtRef.current && id && (!delay || (Date.now() - startedAtRef.current > delay))) {
+      setLoadProgress(progress);
+    }
+  }, [delay, id], PROGRESS_THROTTLE, true);
 
   useEffect(() => {
     if (!noLoad && mediaHash) {

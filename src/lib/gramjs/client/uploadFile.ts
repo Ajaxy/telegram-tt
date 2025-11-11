@@ -1,6 +1,6 @@
 import type TelegramClient from './TelegramClient';
 
-import { Foreman } from '../../../util/foreman';
+import { getDcBandwidthManager } from '../../../util/dcBandwithManager';
 import { FloodPremiumWaitError, FloodWaitError } from '../errors';
 import Api from '../tl/api';
 
@@ -24,12 +24,6 @@ export interface UploadFileParams {
 const KB_TO_BYTES = 1024;
 const LARGE_FILE_THRESHOLD = 10 * 1024 * 1024;
 const DISCONNECT_SLEEP = 1000;
-const MAX_CONCURRENT_CONNECTIONS = 3;
-const MAX_CONCURRENT_CONNECTIONS_PREMIUM = 6;
-const MAX_WORKERS_PER_CONNECTION = 10;
-
-const foremans = Array(MAX_CONCURRENT_CONNECTIONS_PREMIUM).fill(undefined)
-  .map(() => new Foreman(MAX_WORKERS_PER_CONNECTION));
 
 export async function uploadFile(
   client: TelegramClient,
@@ -54,11 +48,7 @@ export async function uploadFile(
   const partSize = getUploadPartSize(size) * KB_TO_BYTES;
   const partCount = Math.floor((size + partSize - 1) / partSize);
 
-  // Pick the least busy foreman
-  // For some reason, fresh connections give out a higher speed for the first couple of seconds
-  // I have no idea why, but this may speed up the download of small files
-  const activeCounts = foremans.map(({ activeWorkers }) => activeWorkers);
-  let currentForemanIndex = activeCounts.indexOf(Math.min(...activeCounts));
+  const dcManager = getDcBandwidthManager(client.session.dcId, isPremium);
 
   let progress = 0;
   if (onProgress) {
@@ -71,14 +61,10 @@ export async function uploadFile(
   const promises: Promise<any>[] = [];
 
   for (let i = 0; i < partCount; i++) {
-    const senderIndex = currentForemanIndex % (
-      isPremium ? MAX_CONCURRENT_CONNECTIONS_PREMIUM : MAX_CONCURRENT_CONNECTIONS
-    );
-
-    await foremans[senderIndex].requestWorker();
+    const senderIndex = await dcManager.requestWorker(false, partSize);
 
     if (onProgress?.isCanceled) {
-      foremans[senderIndex].releaseWorker();
+      dcManager.releaseWorker(senderIndex, partSize);
       break;
     }
 
@@ -140,13 +126,13 @@ export async function uploadFile(
             await sleep(err.seconds * 1000);
             continue;
           }
-          foremans[senderIndex].releaseWorker();
+          dcManager.releaseWorker(senderIndex, partSize);
           if (sender) client.releaseExportedSender(sender);
 
           throw err;
         }
 
-        foremans[senderIndex].releaseWorker();
+        dcManager.releaseWorker(senderIndex, partSize);
 
         if (onProgress) {
           if (onProgress.isCanceled) {
@@ -160,8 +146,6 @@ export async function uploadFile(
         break;
       }
     })(i, blobSlice));
-
-    currentForemanIndex++;
   }
 
   await Promise.all(promises);

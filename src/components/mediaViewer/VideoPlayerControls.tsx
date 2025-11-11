@@ -14,7 +14,6 @@ import type { IconName } from '../../types/icons';
 import { IS_IOS, IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDuration } from '../../util/dates/dateFormat';
-import { formatFileSize } from '../../util/textFormat';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
@@ -24,6 +23,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import useControlsSignal from './hooks/useControlsSignal';
 
+import AnimatedFileSize from '../common/AnimatedFileSize';
 import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import Menu from '../ui/Menu';
@@ -209,7 +209,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
         {renderTime(currentTime, duration)}
         {!isBuffered && (
           <div className="player-file-size">
-            {`${formatFileSize(lang, fileSize * bufferedProgress)} / ${formatFileSize(lang, fileSize)}`}
+            <AnimatedFileSize size={fileSize} progress={bufferedProgress} />
           </div>
         )}
         <div className="spacer" />

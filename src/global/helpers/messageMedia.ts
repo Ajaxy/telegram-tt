@@ -458,7 +458,7 @@ export function getMediaTransferState(
   progress?: number, isLoadNeeded = false, isUploading = false,
 ) {
   const isTransferring = isUploading || isLoadNeeded;
-  const transferProgress = Number(progress);
+  const transferProgress = progress || 0;
 
   return {
     isUploading, isTransferring, transferProgress,

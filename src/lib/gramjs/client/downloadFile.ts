@@ -1,8 +1,8 @@
 import type TelegramClient from './TelegramClient';
 import type { SizeType } from './TelegramClient';
 
+import { getDcBandwidthManager } from '../../../util/dcBandwithManager';
 import Deferred from '../../../util/Deferred';
-import { Foreman } from '../../../util/foreman';
 import { FloodPremiumWaitError, FloodWaitError, RPCError } from '../errors';
 import Api from '../tl/api';
 
@@ -40,8 +40,6 @@ const MIN_CHUNK_SIZE = 4096;
 const DEFAULT_CHUNK_SIZE = 64; // kb
 const ONE_MB = 1024 * 1024;
 const DISCONNECT_SLEEP = 1000;
-
-const NEW_CONNECTION_QUEUE_THRESHOLD = 5;
 
 // when the sender requests hangs for 60 second we will reimport
 const SENDER_TIMEOUT = 60 * 1000;
@@ -82,14 +80,23 @@ class FileView {
   write(data: Uint8Array, offset: number) {
     if (this.type === 'opfs') {
       this.largeFileAccessHandle!.write(data, { at: offset });
-    } else if (this.size) {
-      for (let i = 0; i < data.length; i++) {
-        if (offset + i >= this.buffer!.length) return;
-        this.buffer!.writeUInt8(data[i], offset + i);
-      }
-    } else {
-      this.buffer = Buffer.concat([this.buffer!, data]);
+      return;
     }
+
+    if (this.size) {
+      const endOffset = offset + data.length;
+      if (endOffset > this.buffer!.length) { // Slow path for potential overflow
+        if (offset >= this.buffer!.length) return; // Ignore writes past the end
+        const writeLength = this.buffer!.length - offset;
+        this.buffer!.set(data.subarray(0, writeLength), offset);
+        return;
+      }
+
+      this.buffer!.set(data, offset);
+      return;
+    }
+
+    this.buffer = Buffer.concat([this.buffer!, data]);
   }
 
   async getData(): Promise<Buffer<ArrayBuffer> | File> {
@@ -125,14 +132,6 @@ export async function downloadFile(
 
   return undefined;
 }
-
-const MAX_CONCURRENT_CONNECTIONS = 3;
-const MAX_CONCURRENT_CONNECTIONS_PREMIUM = 6;
-const MAX_WORKERS_PER_CONNECTION = 10;
-const MULTIPLE_CONNECTIONS_MIN_FILE_SIZE = 10485760; // 10MB
-
-const foremans = Array(MAX_CONCURRENT_CONNECTIONS_PREMIUM).fill(undefined)
-  .map(() => new Foreman(MAX_WORKERS_PER_CONNECTION));
 
 async function downloadFile2(
   client: TelegramClient,
@@ -170,9 +169,6 @@ async function downloadFile2(
   const partSize = partSizeKb * 1024;
   const partsCount = rangeSize ? Math.ceil(rangeSize / partSize) : 1;
   const noParallel = !end;
-  const shouldUseMultipleConnections = Boolean(fileSize)
-    && fileSize >= MULTIPLE_CONNECTIONS_MIN_FILE_SIZE
-    && !noParallel;
   let deferred: Deferred | undefined;
 
   if (partSize % MIN_CHUNK_SIZE !== 0) {
@@ -188,15 +184,15 @@ async function downloadFile2(
   let hasEnded = false;
 
   let progress = 0;
-  if (progressCallback) {
-    progressCallback(progress);
-  }
+  progressCallback?.(progress);
 
   // Limit updates to one per file
   let isPremiumFloodWaitSent = false;
 
   // Allocate memory
   await fileView.init();
+
+  const dcManager = getDcBandwidthManager(dcId, isPremium);
 
   while (true) {
     let limit = partSize;
@@ -211,23 +207,28 @@ async function downloadFile2(
       isPrecise = true;
     }
 
-    const senderIndex = getFreeForemanIndex(isPremium, shouldUseMultipleConnections);
-
-    await foremans[senderIndex].requestWorker(isPriority);
-
     if (deferred) await deferred.promise;
 
     if (noParallel) deferred = new Deferred();
 
     if (hasEnded) {
-      foremans[senderIndex].releaseWorker();
       break;
     }
-    const logWithSenderIndex = (...args: any[]) => {
+
+    const senderIndex = await dcManager.requestWorker(Boolean(isPriority), limit);
+    const logWithSenderIndex = (...args: unknown[]) => {
       logWithId(`[${senderIndex}/${dcId}]`, ...args);
     };
 
-    promises.push((async (offsetMemo: number) => {
+    // Check again after waiting for capacity
+    if (progressCallback?.isCanceled) {
+      hasEnded = true;
+      dcManager.releaseWorker(senderIndex, limit);
+      deferred?.resolve();
+      break;
+    }
+
+    promises.push((async (offsetMemo: number, limitMemo: number, senderIndexMemo: number) => {
       while (true) {
         let sender;
         try {
@@ -238,7 +239,7 @@ async function downloadFile2(
               logWithSenderIndex(`❗️️ getSender took too long ${offsetMemo}`);
             }, 8000);
           }
-          sender = await client.getSender(dcId, senderIndex, isPremium);
+          sender = await client.getSender(dcId, senderIndexMemo, isPremium);
           isDone = true;
 
           let isDone2 = false;
@@ -253,7 +254,7 @@ async function downloadFile2(
             sender.send(new Api.upload.GetFile({
               location: inputLocation,
               offset: BigInt(offsetMemo),
-              limit,
+              limit: limitMemo,
               precise: isPrecise || undefined,
             })),
             sleep(SENDER_TIMEOUT).then(() => {
@@ -284,11 +285,11 @@ async function downloadFile2(
             progressCallback(progress);
           }
 
-          if (!end && (result.bytes.length < limit)) {
+          if (!end && (result.bytes.length < limitMemo)) {
             hasEnded = true;
           }
 
-          foremans[senderIndex].releaseWorker();
+          dcManager.releaseWorker(senderIndexMemo, limitMemo);
           if (deferred) deferred.resolve();
 
           fileView.write(result.bytes, offsetMemo - start);
@@ -308,7 +309,7 @@ async function downloadFile2(
           }
 
           logWithSenderIndex(`Ended not gracefully ${offsetMemo}`);
-          foremans[senderIndex].releaseWorker();
+          dcManager.releaseWorker(senderIndexMemo, limitMemo);
           if (deferred) deferred.resolve();
 
           hasEnded = true;
@@ -316,7 +317,7 @@ async function downloadFile2(
           throw err;
         }
       }
-    })(offset));
+    })(offset, limit, senderIndex));
 
     offset += limit;
 
@@ -326,28 +327,4 @@ async function downloadFile2(
   }
   await Promise.all(promises);
   return fileView.getData();
-}
-
-function getFreeForemanIndex(isPremium: boolean, forceNewConnection?: boolean) {
-  const availableConnections = isPremium ? MAX_CONCURRENT_CONNECTIONS_PREMIUM : MAX_CONCURRENT_CONNECTIONS;
-  let foremanIndex = 0;
-  let minQueueLength = Infinity;
-  for (let i = 0; i < availableConnections; i++) {
-    const foreman = foremans[i];
-    // If worker is free, return it
-    if (!foreman.queueLength) return i;
-
-    // Potentially create a new connection if the current queue is too long
-    if (!forceNewConnection && foreman.queueLength <= NEW_CONNECTION_QUEUE_THRESHOLD) {
-      return i;
-    }
-
-    // If every connection is equally busy, prefer the last one in the list
-    if (foreman.queueLength <= minQueueLength) {
-      foremanIndex = i;
-      minQueueLength = foreman.activeWorkers;
-    }
-  }
-
-  return foremanIndex;
 }

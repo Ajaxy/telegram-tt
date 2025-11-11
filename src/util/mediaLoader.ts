@@ -104,6 +104,7 @@ export function cancelProgress(progressCallback: ApiOnProgress) {
         cancelApiProgress(parentCallback);
         cancellableCallbacks.delete(url);
         progressCallbacks.delete(url);
+        return;
       }
     });
   });
@@ -185,7 +186,10 @@ function makeOnProgress(url: string) {
   const onProgress: ApiOnProgress = (progress: number) => {
     progressCallbacks.get(url)?.forEach((callback) => {
       callback(progress);
-      if (callback.isCanceled) onProgress.isCanceled = true;
+      if (callback.isCanceled) {
+        onProgress.isCanceled = true;
+        memoryCache.delete(url);
+      }
     });
   };
 

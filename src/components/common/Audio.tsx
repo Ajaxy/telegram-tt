@@ -32,7 +32,6 @@ import { captureEvents } from '../../util/captureEvents';
 import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/dates/dateFormat';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
 import { LOCAL_TGS_URLS } from './helpers/animatedAssets';
-import { getFileSizeString } from './helpers/documentInfo';
 import renderText from './helpers/renderText';
 import { MAX_EMPTY_WAVEFORM_POINTS, renderWaveform } from './helpers/waveform';
 
@@ -49,6 +48,7 @@ import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated
 import Button from '../ui/Button';
 import Link from '../ui/Link';
 import ProgressSpinner from '../ui/ProgressSpinner';
+import AnimatedFileSize from './AnimatedFileSize';
 import AnimatedIcon from './AnimatedIcon';
 import Icon from './icons/Icon';
 
@@ -540,10 +540,7 @@ function renderAudio(
         </div>
       )}
       {!showSeekline && showProgress && (
-        <div className="meta" dir={isRtl ? 'rtl' : undefined}>
-          {progress ? `${getFileSizeString(audio.size * progress)} / ` : undefined}
-          {getFileSizeString(audio.size)}
-        </div>
+        <AnimatedFileSize className="meta" size={audio.size} progress={progress} />
       )}
       {!showSeekline && !showProgress && (
         <div className="meta" dir={isRtl ? 'rtl' : undefined}>

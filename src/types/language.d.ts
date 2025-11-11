@@ -1848,9 +1848,6 @@ export interface LangPairWithVariables<V = LangVariable> {
   'AutodownloadSizeLimitUpTo': {
     'limit': V;
   };
-  'FileSizeMB': {
-    'count': V;
-  };
   'WebAppAddToAttachmentText': {
     'bot': V;
   };
@@ -1871,9 +1868,6 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'AddContactSharedContactExceptionInfo': {
     'user': V;
-  };
-  'FileSizeGB': {
-    'count': V;
   };
   'SubscribeToPremium': {
     'price': V;
@@ -2028,12 +2022,6 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ChatOutgoingContextMixedReactionCount': {
     'count': V;
     'total': V;
-  };
-  'FileSizeB': {
-    'count': V;
-  };
-  'FileSizeKB': {
-    'count': V;
   };
   'MessageTimerShortHours': {
     'count': V;
@@ -2994,6 +2982,10 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ActionStarGiftPrepaidUpgraded': {
     'user': V;
   };
+  'FileTransferProgress': {
+    'currentSize': V;
+    'totalSize': V;
+  };
   'InviteRestrictedPremiumReasonSingle': {
     'user': V;
   };
@@ -3348,6 +3340,18 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'time': V;
     'points': V;
     'link': V;
+  };
+  'MediaSizeB': {
+    'size': V;
+  };
+  'MediaSizeKB': {
+    'size': V;
+  };
+  'MediaSizeMB': {
+    'size': V;
+  };
+  'MediaSizeGB': {
+    'size': V;
   };
   'InviteRestrictedUsers': {
     'count': V;
