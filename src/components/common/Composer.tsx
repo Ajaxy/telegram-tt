@@ -1705,7 +1705,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         return lang('ComposerPlaceholderAnonymous');
       }
 
-      if (chat?.isForum && !chat.isBotForum && chat.isForumAsMessages && threadId === MAIN_THREAD_ID) {
+      if (chat?.isForum && chat?.isForumAsMessages && threadId === MAIN_THREAD_ID) {
         return replyToTopic
           ? lang('ComposerPlaceholderTopic', { topic: replyToTopic.title })
           : lang('ComposerPlaceholderTopicGeneral');

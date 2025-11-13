@@ -12,11 +12,8 @@ import trimText from '../../util/trimText';
 import { insertTextEntity, renderTextWithEntities } from './helpers/renderTextWithEntities';
 
 import useLang from '../../hooks/useLang';
-import useLastCallback from '../../hooks/useLastCallback';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useUniqueId from '../../hooks/useUniqueId';
-
-import TypingWrapper from './TypingWrapper';
 
 interface OwnProps {
   messageOrStory: ApiMessage | ApiStory;
@@ -39,7 +36,6 @@ interface OwnProps {
   isInSelectMode?: boolean;
   canBeEmpty?: boolean;
   maxTimestamp?: number;
-  shouldAnimateTyping?: boolean;
 }
 
 const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
@@ -65,7 +61,6 @@ function MessageText({
   canBeEmpty,
   maxTimestamp,
   threadId,
-  shouldAnimateTyping,
 }: OwnProps) {
   const sharedCanvasRef = useRef<HTMLCanvasElement>();
   const sharedCanvasHqRef = useRef<HTMLCanvasElement>();
@@ -112,48 +107,37 @@ function MessageText({
     return customEmojisCount >= MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS;
   }, [entitiesWithFocusedQuote]) || 0;
 
-  const renderText = useLastCallback((t: ApiFormattedText) => {
-    return renderTextWithEntities({
-      text: t.text,
-      entities: t.entities,
-      highlight,
-      emojiSize,
-      shouldRenderAsHtml,
-      containerId,
-      asPreview,
-      isProtected,
-      observeIntersectionForLoading,
-      observeIntersectionForPlaying,
-      withTranslucentThumbs,
-      sharedCanvasRef,
-      sharedCanvasHqRef,
-      cacheBuster: textCacheBusterRef.current.toString(),
-      forcePlayback,
-      isInSelectMode,
-      maxTimestamp,
-      chatId: 'chatId' in messageOrStory ? messageOrStory.chatId : undefined,
-      messageId: messageOrStory.id,
-      threadId,
-    });
-  });
-
   if (!text && !canBeEmpty) {
     return <span className="content-unsupported">{lang('MessageUnsupported')}</span>;
   }
 
-  const textToRender: ApiFormattedText = {
-    text: trimText(text || '', truncateLength),
-    entities: entitiesWithFocusedQuote,
-  };
-
   return (
     <>
       {[
-        withSharedCanvas && <canvas key="shared-canvas" ref={sharedCanvasRef} className="shared-canvas" />,
-        withSharedCanvas && <canvas key="shared-canvas-hq" ref={sharedCanvasHqRef} className="shared-canvas" />,
-        shouldAnimateTyping ? (
-          <TypingWrapper key="typing-wrapper" text={textToRender}>{renderText}</TypingWrapper>
-        ) : renderText(textToRender),
+        withSharedCanvas && <canvas ref={sharedCanvasRef} className="shared-canvas" />,
+        withSharedCanvas && <canvas ref={sharedCanvasHqRef} className="shared-canvas" />,
+        renderTextWithEntities({
+          text: trimText(text!, truncateLength),
+          entities: entitiesWithFocusedQuote,
+          highlight,
+          emojiSize,
+          shouldRenderAsHtml,
+          containerId,
+          asPreview,
+          isProtected,
+          observeIntersectionForLoading,
+          observeIntersectionForPlaying,
+          withTranslucentThumbs,
+          sharedCanvasRef,
+          sharedCanvasHqRef,
+          cacheBuster: textCacheBusterRef.current.toString(),
+          forcePlayback,
+          isInSelectMode,
+          maxTimestamp,
+          chatId: 'chatId' in messageOrStory ? messageOrStory.chatId : undefined,
+          messageId: messageOrStory.id,
+          threadId,
+        }),
       ].flat().filter(Boolean)}
     </>
   );

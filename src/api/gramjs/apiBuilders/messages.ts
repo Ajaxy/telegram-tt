@@ -36,7 +36,6 @@ import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../types';
 
 import {
   DELETED_COMMENTS_CHANNEL_ID,
-  LOCAL_MESSAGES_LIMIT,
   SERVICE_NOTIFICATIONS_USER_ID,
   SPONSORED_MESSAGE_CACHE_MS,
   SUPPORTED_AUDIO_CONTENT_TYPES,
@@ -77,6 +76,8 @@ import { buildApiRestrictionReasons } from './misc';
 import { buildApiPeerColor, buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildMessageReactions } from './reactions';
 
+const LOCAL_MESSAGES_LIMIT = 1e6; // 1M
+
 const LOCAL_MEDIA_UPLOADING_TEMP_ID = 'temp';
 const INPUT_WAVEFORM_LENGTH = 63;
 const MIN_SCHEDULED_PERIOD = 10;
@@ -84,10 +85,6 @@ const MIN_SCHEDULED_PERIOD = 10;
 let localMessageCounter = 0;
 function getNextLocalMessageId(lastMessageId = 0) {
   return lastMessageId + (++localMessageCounter / LOCAL_MESSAGES_LIMIT);
-}
-
-export function incrementLocalMessageCounter() {
-  localMessageCounter++;
 }
 
 let currentUserId!: string;

@@ -489,7 +489,7 @@ export type ApiMessageEntityDefault = {
   type: Exclude<
   `${ApiMessageEntityTypes}`,
   `${ApiMessageEntityTypes.Pre}` | `${ApiMessageEntityTypes.TextUrl}` | `${ApiMessageEntityTypes.MentionName}` |
-  `${ApiMessageEntityTypes.Blockquote}` | `${ApiMessageEntityTypes.CustomEmoji}` | `${ApiMessageEntityTypes.Timestamp}`
+  `${ApiMessageEntityTypes.CustomEmoji}` | `${ApiMessageEntityTypes.Blockquote}` | `${ApiMessageEntityTypes.Timestamp}`
   >;
   offset: number;
   length: number;
@@ -538,8 +538,15 @@ export type ApiMessageEntityTimestamp = {
   timestamp: number;
 };
 
+export type ApiMessageEntityQuoteFocus = {
+  type: 'quoteFocus';
+  offset: number;
+  length: number;
+};
+
 export type ApiMessageEntity = ApiMessageEntityDefault | ApiMessageEntityPre | ApiMessageEntityTextUrl |
-  ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji | ApiMessageEntityBlockquote | ApiMessageEntityTimestamp;
+  ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji | ApiMessageEntityBlockquote | ApiMessageEntityTimestamp |
+  ApiMessageEntityQuoteFocus;
 
 export enum ApiMessageEntityTypes {
   Bold = 'MessageEntityBold',
@@ -676,8 +683,6 @@ export interface ApiMessage {
   reportDeliveryUntilDate?: number;
   paidMessageStars?: number;
   restrictionReasons?: ApiRestrictionReason[];
-
-  isTypingDraft?: boolean; // Local field
 }
 
 export interface ApiReactions {
@@ -917,16 +922,11 @@ interface ApiKeyboardButtonCopy {
   copyText: string;
 }
 
-export interface KeyboardButtonSuggestedMessage {
+export interface ApiKeyboardButtonSuggestedMessage {
   type: 'suggestedMessage';
   text: string;
   buttonType: 'approve' | 'decline' | 'suggestChanges';
   disabled?: boolean;
-}
-
-export interface KeyboardButtonOpenThread {
-  type: 'openThread';
-  text: string;
 }
 
 export type ApiKeyboardButton = (
@@ -941,8 +941,7 @@ export type ApiKeyboardButton = (
   | ApiKeyboardButtonSimpleWebView
   | ApiKeyboardButtonUrlAuth
   | ApiKeyboardButtonCopy
-  | KeyboardButtonSuggestedMessage
-  | KeyboardButtonOpenThread
+  | ApiKeyboardButtonSuggestedMessage
 );
 
 export type ApiKeyboardButtons = ApiKeyboardButton[][];

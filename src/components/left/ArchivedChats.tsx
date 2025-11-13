@@ -23,7 +23,7 @@ import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import ChatList from './main/ChatList';
-import ForumPanel from './main/forum/ForumPanel';
+import ForumPanel from './main/ForumPanel';
 
 import './ArchivedChats.scss';
 

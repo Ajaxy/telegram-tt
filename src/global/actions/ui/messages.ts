@@ -500,11 +500,6 @@ addActionHandler('scrollMessageListToBottom', (global, actions, payload): Action
     cancelScrollBlockingAnimation();
   }
 
-  const isViewportNewest = selectIsViewportNewest(global, chatId, threadId, tabId);
-  if (isViewportNewest) {
-    return;
-  }
-
   actions.loadViewportMessages({
     chatId,
     threadId,

@@ -274,7 +274,6 @@ export interface ApiAppConfig {
   verifyAgeBotUsername?: string;
   verifyAgeCountry?: string;
   verifyAgeMin?: number;
-  typingDraftTtl: number;
   contactNoteLimit?: number;
 }
 

@@ -1,18 +1,19 @@
+import type { FC } from '../../../lib/teact/teact';
 import {
   beginHeavyAnimation,
   memo, useEffect, useMemo, useRef, useState,
-} from '../../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../../global';
+} from '../../../lib/teact/teact';
+import { getActions, withGlobal } from '../../../global';
 
-import type { ApiChat } from '../../../../api/types';
-import type { TopicsInfo } from '../../../../types';
-import { MAIN_THREAD_ID } from '../../../../api/types';
+import type { ApiChat } from '../../../api/types';
+import type { TopicsInfo } from '../../../types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 
 import {
   GENERAL_TOPIC_ID, TOPIC_HEIGHT_PX, TOPIC_LIST_SENSITIVE_AREA, TOPICS_SLICE,
-} from '../../../../config';
-import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
-import { getOrderedTopics } from '../../../../global/helpers';
+} from '../../../config';
+import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
+import { getOrderedTopics } from '../../../global/helpers';
 import {
   selectCanAnimateInterface,
   selectChat,
@@ -20,32 +21,29 @@ import {
   selectIsForumPanelOpen,
   selectTabState,
   selectTopicsInfo,
-} from '../../../../global/selectors';
-import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment';
-import buildClassName from '../../../../util/buildClassName';
-import captureEscKeyListener from '../../../../util/captureEscKeyListener';
-import { captureEvents, SwipeDirection } from '../../../../util/captureEvents';
-import { waitForTransitionEnd } from '../../../../util/cssAnimationEndListeners';
-import { isUserId } from '../../../../util/entities/ids';
+} from '../../../global/selectors';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
+import buildClassName from '../../../util/buildClassName';
+import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
+import { waitForTransitionEnd } from '../../../util/cssAnimationEndListeners';
 
-import useAppLayout from '../../../../hooks/useAppLayout';
-import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
-import { useIntersectionObserver, useOnIntersect } from '../../../../hooks/useIntersectionObserver';
-import useLang from '../../../../hooks/useLang';
-import useLastCallback from '../../../../hooks/useLastCallback';
-import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
-import useOrderDiff from '../hooks/useOrderDiff';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
+import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
+import useOrderDiff from './hooks/useOrderDiff';
 
-import GroupCallTopPane from '../../../calls/group/GroupCallTopPane';
-import GroupChatInfo from '../../../common/GroupChatInfo';
-import Icon from '../../../common/icons/Icon';
-import PrivateChatInfo from '../../../common/PrivateChatInfo';
-import HeaderActions from '../../../middle/HeaderActions';
-import Button from '../../../ui/Button';
-import InfiniteScroll from '../../../ui/InfiniteScroll';
-import Loading from '../../../ui/Loading';
-import AllMessagesTopic from './AllMessagesTopic';
+import GroupCallTopPane from '../../calls/group/GroupCallTopPane';
+import GroupChatInfo from '../../common/GroupChatInfo';
+import Icon from '../../common/icons/Icon';
+import HeaderActions from '../../middle/HeaderActions';
+import Button from '../../ui/Button';
+import InfiniteScroll from '../../ui/InfiniteScroll';
+import Loading from '../../ui/Loading';
 import EmptyForum from './EmptyForum';
 import Topic from './Topic';
 
@@ -68,17 +66,17 @@ type StateProps = {
 
 const INTERSECTION_THROTTLE = 200;
 
-const ForumPanel = ({
+const ForumPanel: FC<OwnProps & StateProps> = ({
   chat,
   currentTopicId,
   isOpen,
   isHidden,
   topicsInfo,
-  withInterfaceAnimations,
   onTopicSearch,
   onCloseAnimationEnd,
   onOpenAnimationStart,
-}: OwnProps & StateProps) => {
+  withInterfaceAnimations,
+}) => {
   const {
     closeForumPanel, openChatWithInfo, loadTopics,
   } = getActions();
@@ -97,7 +95,7 @@ const ForumPanel = ({
   }, [topicsInfo, chatId]);
 
   const [isScrolled, setIsScrolled] = useState(false);
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleClose = useLastCallback(() => {
     closeForumPanel();
@@ -124,17 +122,13 @@ const ForumPanel = ({
   });
 
   const orderedIds = useMemo(() => {
-    const ids = topicsInfo
+    return topicsInfo
       ? getOrderedTopics(
         Object.values(topicsInfo.topicsById),
         topicsInfo.orderedPinnedTopicIds,
       ).map(({ id }) => id)
       : [];
-
-    if (!chat?.isBotForum) return ids;
-
-    return [MAIN_THREAD_ID, ...ids];
-  }, [chat?.isBotForum, topicsInfo]);
+  }, [topicsInfo]);
 
   const { orderDiffById, getAnimationType, onReorderAnimationEnd } = useOrderDiff(orderedIds, chat?.id);
 
@@ -203,36 +197,22 @@ const ForumPanel = ({
   function renderTopics() {
     const viewportOffset = orderedIds.indexOf(viewportIds![0]);
 
-    return viewportIds?.map((id, i) => {
-      if (id === MAIN_THREAD_ID) {
-        return (
-          <AllMessagesTopic
-            key={id}
-            chatId={chat!.id}
-            isSelected={currentTopicId === id}
-          />
-        );
-      }
-
-      return (
-        <Topic
-          key={id}
-          chatId={chat!.id}
-          topic={topicsInfo!.topicsById[id]}
-          style={`top: ${(viewportOffset + i) * TOPIC_HEIGHT_PX}px;`}
-          isSelected={currentTopicId === id}
-          observeIntersection={observe}
-          animationType={getAnimationType(id)}
-          orderDiff={orderDiffById[id]}
-          onReorderAnimationEnd={onReorderAnimationEnd}
-        />
-      );
-    });
+    return viewportIds?.map((id, i) => (
+      <Topic
+        key={id}
+        chatId={chat!.id}
+        topic={topicsInfo!.topicsById[id]}
+        style={`top: ${(viewportOffset + i) * TOPIC_HEIGHT_PX}px;`}
+        isSelected={currentTopicId === id}
+        observeIntersection={observe}
+        animationType={getAnimationType(id)}
+        orderDiff={orderDiffById[id]}
+        onReorderAnimationEnd={onReorderAnimationEnd}
+      />
+    ));
   }
 
   const isLoading = topicsInfo === undefined;
-
-  if (!chat) return undefined;
 
   return (
     <div
@@ -256,14 +236,7 @@ const ForumPanel = ({
           <Icon name="close" />
         </Button>
 
-        {isUserId(chat.id) ? (
-          <PrivateChatInfo
-            noAvatar
-            className={styles.info}
-            userId={chat.id}
-            onClick={handleToggleChatInfo}
-          />
-        ) : (
+        {chat && (
           <GroupChatInfo
             noAvatar
             className={styles.info}
@@ -272,18 +245,21 @@ const ForumPanel = ({
           />
         )}
 
-        <HeaderActions
-          chatId={chat.id}
-          threadId={MAIN_THREAD_ID}
-          messageListType="thread"
-          canExpandActions={false}
-          isForForum
-          isMobile={isMobile}
-          onTopicSearch={onTopicSearch}
-        />
+        {chat
+          && (
+            <HeaderActions
+              chatId={chat.id}
+              threadId={MAIN_THREAD_ID}
+              messageListType="thread"
+              canExpandActions={false}
+              isForForum
+              isMobile={isMobile}
+              onTopicSearch={onTopicSearch}
+            />
+          )}
       </div>
 
-      {!isUserId(chat.id) && <GroupCallTopPane chatId={chat.id} />}
+      {chat && <GroupCallTopPane chatId={chat.id} />}
 
       <div className={styles.notch} />
 

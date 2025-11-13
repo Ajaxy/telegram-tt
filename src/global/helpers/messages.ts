@@ -9,8 +9,7 @@ import type {
   ApiTypeStory,
 } from '../../api/types';
 import type {
-  ApiFormattedText,
-  ApiPoll, ApiReplyInfo, ApiWebPage, MediaContainer, StatefulMediaContent,
+  ApiPoll, ApiWebPage, MediaContainer, StatefulMediaContent,
 } from '../../api/types/messages';
 import type { ThreadId } from '../../types';
 import type { LangFn } from '../../util/localization';
@@ -18,7 +17,6 @@ import type { GlobalState } from '../types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  LOCAL_MESSAGES_LIMIT,
   LOTTIE_STICKER_MIME_TYPE,
   RE_LINK_TEMPLATE,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -39,11 +37,6 @@ import { selectPollFromMessage, selectWebPageFromMessage } from '../selectors';
 import { getMainUsername } from './users';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
-
-let uiLocalMessageCounter = 0;
-function getNextLocalMessageId(lastMessageId = 0) {
-  return lastMessageId + (++uiLocalMessageCounter / LOCAL_MESSAGES_LIMIT);
-}
 
 export function getMessageHtmlId(messageId: number, index?: number) {
   const parts = ['message', messageId.toString().replace('.', '-'), index].filter(Boolean);
@@ -510,39 +503,4 @@ export function getSuggestedChangesActionText(
     withNodes: true,
     withMarkdown: true,
   });
-}
-
-export function createApiMessageFromTypingDraft({
-  lastMessageId,
-  chatId,
-  threadId,
-  text,
-}: {
-  lastMessageId: number;
-  chatId: string;
-  threadId: ThreadId;
-  text: ApiFormattedText;
-}): ApiMessage {
-  const localId = getNextLocalMessageId(lastMessageId);
-
-  const replyInfo: ApiReplyInfo | undefined = typeof threadId === 'number' && threadId !== MAIN_THREAD_ID ? {
-    type: 'message',
-    replyToMsgId: threadId,
-    replyToTopId: threadId,
-    isForumTopic: true,
-  } : undefined;
-
-  return {
-    id: localId,
-    chatId,
-    replyInfo,
-    isOutgoing: false,
-    date: getServerTime(),
-    content: {
-      text,
-    },
-    isSilent: true,
-    isTypingDraft: true,
-    editDate: getServerTime(),
-  };
 }

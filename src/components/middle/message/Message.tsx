@@ -14,7 +14,6 @@ import type {
   ApiAvailableReaction,
   ApiChat,
   ApiChatMember,
-  ApiKeyboardButton,
   ApiMessage,
   ApiMessageOutgoingStatus,
   ApiPeer,
@@ -28,6 +27,7 @@ import type {
   ApiUser,
   ApiWebPage,
 } from '../../../api/types';
+import type { ActionPayloads } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type {
   ActiveEmojiInteraction,
@@ -150,6 +150,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import usePeerColor from '../../../hooks/usePeerColor';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
+import useMessageResizeObserver from '../../../hooks/useResizeMessageObserver';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useTextLanguage from '../../../hooks/useTextLanguage';
 import useDetectChatLanguage from './hooks/useDetectChatLanguage';
@@ -214,25 +215,27 @@ type MessagePositionProperties = {
   isLastInList: boolean;
 };
 
-type OwnProps = {
-  message: ApiMessage;
-  album?: IAlbum;
-  noAvatars?: boolean;
-  withAvatar?: boolean;
-  withSenderName?: boolean;
-  threadId: ThreadId;
-  messageListType: MessageListType;
-  noComments: boolean;
-  noReplies: boolean;
-  appearanceOrder: number;
-  isJustAdded: boolean;
-  memoFirstUnreadIdRef?: { current: number | undefined };
-  getIsMessageListReady?: Signal<boolean>;
-  observeIntersectionForBottom?: ObserveFn;
-  observeIntersectionForLoading?: ObserveFn;
-  observeIntersectionForPlaying?: ObserveFn;
-  onIntersectPinnedMessage?: OnIntersectPinnedMessage;
-} & MessagePositionProperties;
+type OwnProps =
+  {
+    message: ApiMessage;
+    album?: IAlbum;
+    noAvatars?: boolean;
+    withAvatar?: boolean;
+    withSenderName?: boolean;
+    threadId: ThreadId;
+    messageListType: MessageListType;
+    noComments: boolean;
+    noReplies: boolean;
+    appearanceOrder: number;
+    isJustAdded: boolean;
+    memoFirstUnreadIdRef?: { current: number | undefined };
+    getIsMessageListReady?: Signal<boolean>;
+    observeIntersectionForBottom?: ObserveFn;
+    observeIntersectionForLoading?: ObserveFn;
+    observeIntersectionForPlaying?: ObserveFn;
+    onIntersectPinnedMessage?: OnIntersectPinnedMessage;
+  }
+  & MessagePositionProperties;
 
 type StateProps = {
   theme: ThemeKey;
@@ -264,7 +267,6 @@ type StateProps = {
   isResizingContainer?: boolean;
   isForwarding?: boolean;
   isChatWithSelf?: boolean;
-  isBotForum?: boolean;
   isRepliesChat?: boolean;
   isAnonymousForwards?: boolean;
   isChannel?: boolean;
@@ -393,7 +395,6 @@ const Message = ({
   isResizingContainer,
   isForwarding,
   isChatWithSelf,
-  isBotForum,
   isRepliesChat,
   isAnonymousForwards,
   isChannel,
@@ -463,7 +464,6 @@ const Message = ({
     animateUnreadReaction,
     focusMessage,
     markMentionsRead,
-    openThread,
   } = getActions();
 
   const ref = useRef<HTMLDivElement>();
@@ -524,7 +524,6 @@ const Message = ({
 
   const {
     id: messageId, chatId, forwardInfo, viaBotId, isTranscriptionError, factCheck,
-    isTypingDraft,
   } = message;
 
   useUnmountCleanup(() => {
@@ -910,6 +909,8 @@ const Message = ({
     || ((asForwarded || isChatWithSelf) && forwardInfo?.postAuthorTitle)
     || undefined;
 
+  useMessageResizeObserver(ref, isLastInList);
+
   useEffect(() => {
     const bottomMarker = bottomMarkerRef.current;
     if (!bottomMarker || !isElementInViewport(bottomMarker)) return;
@@ -1026,7 +1027,6 @@ const Message = ({
         canBeEmpty={hasFactCheck}
         maxTimestamp={maxTimestamp}
         threadId={threadId}
-        shouldAnimateTyping={isTypingDraft}
       />
     );
   }
@@ -1540,45 +1540,25 @@ const Message = ({
     );
   }
 
-  const handleInlineButtonClick = useLastCallback((button: ApiKeyboardButton) => {
-    clickBotInlineButton({
-      chatId,
-      messageId: message.id,
-      threadId,
-      button,
-    });
-  });
-
-  const handleLocalInlineButtonClick = useLastCallback((button: ApiKeyboardButton) => {
-    if (button.type === 'openThread') {
-      openThread({
-        chatId,
-        threadId: messageTopic!.id,
-      });
-      return;
-    }
-
-    if (button.type === 'suggestedMessage') {
-      if (button.buttonType === 'approve') {
-        openSuggestedPostApprovalModal({
-          chatId,
-          messageId: message.id,
-        });
-        return;
-      }
-
-      if (button.buttonType === 'decline') {
-        openDeclineDialog();
-        return;
-      }
-
-      clickSuggestedMessageButton({
+  const handleSuggestedMessageButton = useLastCallback((payload: ActionPayloads['clickBotInlineButton']) => {
+    if (payload.button.type !== 'suggestedMessage') return;
+    if (payload.button.buttonType === 'approve') {
+      openSuggestedPostApprovalModal({
         chatId,
         messageId: message.id,
-        button,
       });
       return;
     }
+
+    if (payload.button.buttonType === 'decline') {
+      openDeclineDialog();
+      return;
+    }
+
+    clickSuggestedMessageButton({
+      ...payload,
+      button: payload.button,
+    });
   });
 
   const handleDeclineReasonChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1692,52 +1672,11 @@ const Message = ({
   const shouldRenderSuggestedPostButtons = message.suggestedPostInfo
     && !message.isOutgoing && !message.suggestedPostInfo.isAccepted && !message.suggestedPostInfo.isRejected;
 
-  const isSuggestedPostExpired = (() => {
+  const isSuggestedPostExpired = useMemo(() => {
     if (!message.suggestedPostInfo?.scheduleDate || !minFutureTime) return false;
     const now = getServerTime();
     return message.suggestedPostInfo.scheduleDate <= now + minFutureTime;
-  })();
-
-  const suggestedPostButtons: ApiKeyboardButton[][] | undefined = useMemo(() => {
-    if (!shouldRenderSuggestedPostButtons) return undefined;
-    return [
-      [
-        {
-          type: 'suggestedMessage',
-          buttonType: 'decline',
-          text: lang('SuggestedPostDecline'),
-        },
-        {
-          type: 'suggestedMessage',
-          buttonType: 'approve',
-          text: lang('SuggestedPostApprove'),
-          disabled: isSuggestedPostExpired,
-        },
-      ],
-      [
-        {
-          type: 'suggestedMessage',
-          buttonType: 'suggestChanges',
-          text: lang('SuggestedPostSuggestChanges'),
-        },
-      ],
-    ];
-  }, [isSuggestedPostExpired, lang, shouldRenderSuggestedPostButtons]);
-
-  const openThreadButtons: ApiKeyboardButton[][] | undefined = useMemo(() => {
-    if (!isBotForum || message.inlineButtons || !messageTopic || !isLastInList ||
-      threadId !== MAIN_THREAD_ID
-    ) return undefined;
-
-    return [
-      [{
-        type: 'openThread',
-        text: lang('BotForumContinueThreadButton'),
-      }],
-    ];
-  }, [isBotForum, lang, message.inlineButtons, messageTopic, isLastInList, threadId]);
-
-  const additionalInlineButtons = suggestedPostButtons || openThreadButtons;
+  }, [message.suggestedPostInfo, minFutureTime]);
 
   return (
     <div
@@ -1852,12 +1791,36 @@ const Message = ({
           {withQuickReactionButton && quickReactionPosition === 'in-content' && renderQuickReactionButton()}
         </div>
         {message.inlineButtons && (
-          <InlineButtons inlineButtons={message.inlineButtons} onClick={handleInlineButtonClick} />
+          <InlineButtons message={message} onClick={clickBotInlineButton} />
         )}
-        {additionalInlineButtons && (
+        {shouldRenderSuggestedPostButtons && (
           <InlineButtons
-            inlineButtons={additionalInlineButtons}
-            onClick={handleLocalInlineButtonClick}
+            message={{
+              ...message,
+              inlineButtons: [
+                [
+                  {
+                    type: 'suggestedMessage',
+                    buttonType: 'decline',
+                    text: lang('SuggestedPostDecline'),
+                  },
+                  {
+                    type: 'suggestedMessage',
+                    buttonType: 'approve',
+                    text: lang('SuggestedPostApprove'),
+                    disabled: isSuggestedPostExpired,
+                  },
+                ],
+                [
+                  {
+                    type: 'suggestedMessage',
+                    buttonType: 'suggestChanges',
+                    text: lang('SuggestedPostSuggestChanges'),
+                  },
+                ],
+              ],
+            }}
+            onClick={handleSuggestedMessageButton}
           />
         )}
         {reactionsPosition === 'outside' && !isStoryMention && (
@@ -2022,8 +1985,8 @@ export default memo(withGlobal<OwnProps>(
 
     const hasUnreadReaction = chat?.unreadReactions?.includes(message.id);
 
-    const hasTopicChip = threadId === MAIN_THREAD_ID && chat?.isForum && !chat.isBotForum && isFirstInGroup;
-    const messageTopic = selectTopicFromMessage(global, message);
+    const hasTopicChip = threadId === MAIN_THREAD_ID && chat?.isForum && isFirstInGroup;
+    const messageTopic = hasTopicChip ? selectTopicFromMessage(global, message) : undefined;
 
     const chatTranslations = selectChatTranslations(global, chatId);
 
@@ -2084,7 +2047,6 @@ export default memo(withGlobal<OwnProps>(
       isForwarding,
       reactionMessage,
       isChatWithSelf,
-      isBotForum: chat?.isBotForum,
       isRepliesChat: isSystemBotChat,
       isAnonymousForwards,
       isChannel,

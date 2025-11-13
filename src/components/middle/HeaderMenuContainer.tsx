@@ -863,8 +863,7 @@ export default memo(withGlobal<OwnProps>(
     const canGift = selectCanGift(global, chatId);
 
     const topic = selectTopic(global, chatId, threadId);
-    // Disable manual creation for bot forums
-    const canCreateTopic = chat.isForum && !chat.isBotForum && (
+    const canCreateTopic = chat.isForum && (
       chat.isCreator || !isUserRightBanned(chat, 'manageTopics') || getHasAdminRight(chat, 'manageTopics')
     );
     const canEditTopic = topic && getCanManageTopic(chat, topic);

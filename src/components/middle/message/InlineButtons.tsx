@@ -1,12 +1,13 @@
-import type { TeactNode } from '../../../lib/teact/teact';
+import type { FC, TeactNode } from '../../../lib/teact/teact';
 import { memo, useMemo } from '../../../lib/teact/teact';
 
-import type { ApiKeyboardButton } from '../../../api/types';
+import type { ApiKeyboardButton, ApiMessage } from '../../../api/types';
+import type { ActionPayloads } from '../../../global/types';
 
 import { RE_TME_LINK, TME_LINK_PREFIX } from '../../../config';
 import renderKeyboardButtonText from '../composer/helpers/renderKeyboardButtonText';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
@@ -14,12 +15,12 @@ import Button from '../../ui/Button';
 import './InlineButtons.scss';
 
 type OwnProps = {
-  inlineButtons: ApiKeyboardButton[][];
-  onClick: (payload: ApiKeyboardButton) => void;
+  message: ApiMessage;
+  onClick: (payload: ActionPayloads['clickBotInlineButton']) => void;
 };
 
-const InlineButtons = ({ inlineButtons, onClick }: OwnProps) => {
-  const lang = useLang();
+const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
+  const lang = useOldLang();
 
   const renderIcon = (button: ApiKeyboardButton) => {
     const { type } = button;
@@ -65,15 +66,15 @@ const InlineButtons = ({ inlineButtons, onClick }: OwnProps) => {
 
   const buttonTexts = useMemo(() => {
     const texts: TeactNode[][] = [];
-    inlineButtons.forEach((row) => {
+    message.inlineButtons!.forEach((row) => {
       texts.push(row.map((button) => renderKeyboardButtonText(lang, button)));
     });
     return texts;
-  }, [lang, inlineButtons]);
+  }, [lang, message.inlineButtons]);
 
   return (
     <div className="InlineButtons">
-      {inlineButtons.map((row, i) => (
+      {message.inlineButtons!.map((row, i) => (
         <div className="row">
           {row.map((button, j) => (
             <Button
@@ -81,7 +82,7 @@ const InlineButtons = ({ inlineButtons, onClick }: OwnProps) => {
               ripple
               disabled={button.type === 'unsupported' || (button.type === 'suggestedMessage' && button.disabled)}
 
-              onClick={() => onClick(button)}
+              onClick={() => onClick({ chatId: message.chatId, messageId: message.id, button })}
             >
               {renderIcon(button)}
               <span className="inline-button-text">

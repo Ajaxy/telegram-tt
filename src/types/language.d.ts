@@ -1720,10 +1720,6 @@ export interface LangPair {
   'ConfirmBuyGiftForTonDescription': undefined;
   'TitleGiftLocked': undefined;
   'QuickPreview': undefined;
-  'BotForumContinueThreadButton': undefined;
-  'BotForumActionNew': undefined;
-  'BotForumActionNewDescription': undefined;
-  'BotForumTopicTitlePlaceholder': undefined;
   'DropOriginalDetailsTransaction': undefined;
   'StarGiftReasonDropOriginalDetails': undefined;
   'GiftAnUpgradeButton': undefined;
@@ -1732,8 +1728,6 @@ export interface LangPair {
   'UserNoteTitle': undefined;
   'UserNoteHint': undefined;
   'EditUserNoteHint': undefined;
-  'BotForumAllTopicTitle': undefined;
-  'BotForumAllTopicDescription': undefined;
   'AriaStoryTogglerOpen': undefined;
   'InviteBlockedTitle': undefined;
   'InviteBlockedOneMessage': undefined;

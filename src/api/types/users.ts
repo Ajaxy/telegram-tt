@@ -47,7 +47,6 @@ export interface ApiUser {
   botActiveUsers?: number;
   botVerificationIconId?: string;
   paidMessagesStars?: number;
-  isBotForum?: boolean;
 }
 
 export interface ApiUserFullInfo {

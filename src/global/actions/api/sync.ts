@@ -156,8 +156,7 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
           currentChatId,
           activeThreadId,
         ),
-        activeThreadId !== MAIN_THREAD_ID && !currentChat.isForum
-        && !getIsSavedDialog(currentChat.id, activeThreadId, global.currentUserId)
+        activeThreadId !== MAIN_THREAD_ID && !getIsSavedDialog(currentChat.id, activeThreadId, global.currentUserId)
           ? callApi('fetchDiscussionMessage', {
             chat: currentChat,
             messageId: Number(activeThreadId),

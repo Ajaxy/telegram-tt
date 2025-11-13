@@ -551,8 +551,7 @@ export function selectCanDeleteTopic<T extends GlobalState>(global: T, chatId: s
 
   if (topicId === GENERAL_TOPIC_ID) return false;
 
-  return chat.isBotForum
-    || chat.isCreator
+  return chat.isCreator
     || getHasAdminRight(chat, 'deleteMessages')
     || (chat.isForum
       && selectCanDeleteOwnerTopic(global, chat.id, topicId));
@@ -1560,7 +1559,7 @@ export function selectTopicLink<T extends GlobalState>(
   global: T, chatId: string, topicId?: ThreadId,
 ) {
   const chat = selectChat(global, chatId);
-  if (!chat || !chat.isForum || chat.isBotForum) {
+  if (!chat || !chat?.isForum) {
     return undefined;
   }
 

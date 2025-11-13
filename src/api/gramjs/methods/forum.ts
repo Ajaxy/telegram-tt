@@ -16,14 +16,13 @@ import { processAffectedHistory } from '../updates/updateManager';
 import { invokeRequest } from './client';
 
 export async function createTopic({
-  chat, title, iconColor, iconEmojiId, sendAs, isTitleMissing,
+  chat, title, iconColor, iconEmojiId, sendAs,
 }: {
   chat: ApiChat;
   title: string;
   iconColor?: number;
   iconEmojiId?: string;
   sendAs?: ApiPeer;
-  isTitleMissing?: true;
 }) {
   const { id, accessHash } = chat;
 
@@ -34,7 +33,6 @@ export async function createTopic({
     iconEmojiId: iconEmojiId ? BigInt(iconEmojiId) : undefined,
     sendAs: sendAs ? buildInputPeer(sendAs.id, sendAs.accessHash) : undefined,
     randomId: generateRandomBigInt(),
-    titleMissing: isTitleMissing,
   }));
 
   if (!(updates instanceof GramJs.Updates) || !updates.updates.length) {
@@ -77,10 +75,9 @@ export async function fetchTopics({
 
   if (!result) return undefined;
 
-  const { orderByCreateDate } = result;
+  const { count, orderByCreateDate } = result;
 
   const topics = result.topics.map(buildApiTopic).filter(Boolean);
-  const count = result.count === 0 ? topics.length : result.count; // Sometimes count is 0 in result, but we have topics
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
   const draftsById = result.topics.reduce((acc, topic) => {
     if (topic instanceof GramJs.ForumTopic && topic.draft) {

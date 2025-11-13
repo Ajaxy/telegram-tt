@@ -588,13 +588,6 @@ export type StarGiftInfo = {
   shouldUpgrade?: boolean;
 };
 
-export type TypingDraft = {
-  senderId: string;
-  id: string;
-  date: number;
-  text: ApiFormattedText;
-};
-
 export interface TabThread {
   scrollOffset?: number;
   replyStack?: number[];
@@ -617,7 +610,6 @@ export interface Thread {
   threadInfo?: ApiThreadInfo;
   firstMessageId?: number;
   typingStatus?: ApiTypingStatus;
-  typingDraftIdByRandomId?: Record<string, number>;
 }
 
 export interface ServiceNotification {

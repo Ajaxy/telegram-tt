@@ -1,4 +1,5 @@
 import type { ElementRef } from '../../../lib/teact/teact';
+import type React from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiFormattedText, ApiMessageEntity } from '../../../api/types';
@@ -9,6 +10,7 @@ import { ApiMessageEntityTypes } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
+import { oldTranslate } from '../../../util/oldLangProvider';
 import { buildCustomEmojiHtmlFromEntity } from '../../middle/composer/helpers/customEmoji';
 import renderText from './renderText';
 
@@ -297,12 +299,6 @@ function renderMessagePart({
   }
 
   return renderText(content, filters, params);
-}
-
-export function insertTextEntities(entities: ApiMessageEntity[], newEntities: ApiMessageEntity[]) {
-  return newEntities.reduce((acc, newEntity) => {
-    return insertTextEntity(acc, newEntity);
-  }, entities);
 }
 
 export function insertTextEntity(entities: ApiMessageEntity[], newEntity: ApiMessageEntity) {
@@ -765,9 +761,7 @@ function handleHashtagClick(hashtag?: string, username?: string) {
 function handleCodeClick(e: React.MouseEvent<HTMLElement>) {
   copyTextToClipboard(e.currentTarget.innerText);
   getActions().showNotification({
-    message: {
-      key: 'TextCopied',
-    },
+    message: oldTranslate('TextCopied'),
   });
 }
 

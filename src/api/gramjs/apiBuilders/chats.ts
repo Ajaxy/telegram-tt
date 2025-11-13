@@ -89,7 +89,6 @@ function buildApiChatFieldsFromPeerEntity(
   const emojiStatus = userOrChannel?.emojiStatus ? buildApiEmojiStatus(userOrChannel.emojiStatus) : undefined;
   const paidMessagesStars = userOrChannel?.sendPaidMessagesStars;
   const isVerified = userOrChannel?.verified;
-  const isForum = channel?.forum || user?.botForumView;
 
   return {
     isMin,
@@ -114,8 +113,7 @@ function buildApiChatFieldsFromPeerEntity(
     profileColor,
     isJoinToSend: channel?.joinToSend,
     isJoinRequest: channel?.joinRequest,
-    isForum,
-    isBotForum: user?.botForumView,
+    isForum: channel?.forum,
     isMonoforum: channel?.monoforum,
     linkedMonoforumId: channel?.linkedMonoforumId !== undefined
       ? buildApiPeerId(channel.linkedMonoforumId, 'channel') : undefined,

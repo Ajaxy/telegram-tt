@@ -22,6 +22,7 @@ import type {
   ApiInputSavedStarGift,
   ApiInputSuggestedPostInfo,
   ApiKeyboardButton,
+  ApiKeyboardButtonSuggestedMessage,
   ApiLimitTypeWithModal,
   ApiMessage,
   ApiMessageEntity,
@@ -59,7 +60,6 @@ import type {
   ApiUser,
   ApiVideo,
   BotsPrivacyType,
-  KeyboardButtonSuggestedMessage,
   LinkContext,
   PrivacyVisibility,
 } from '../../api/types';
@@ -2084,7 +2084,7 @@ export interface ActionPayloads {
   clickSuggestedMessageButton: {
     chatId: string;
     messageId: number;
-    button: KeyboardButtonSuggestedMessage;
+    button: ApiKeyboardButtonSuggestedMessage;
   } & WithTabId;
 
   switchBotInline: {

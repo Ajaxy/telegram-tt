@@ -75,7 +75,6 @@ import {
   buildLocalMessage,
   buildPreparedInlineMessage,
   buildUploadingMedia,
-  incrementLocalMessageCounter,
 } from '../apiBuilders/messages';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { buildApiUser, buildApiUserStatuses } from '../apiBuilders/users';
@@ -1256,21 +1255,23 @@ export async function markMessageListRead({
 }) {
   const isChannel = getEntityTypeById(chat.id) === 'channel';
 
+  // Workaround for local message IDs overflowing some internal `Buffer` range check
+  const fixedMaxId = Math.min(maxId, MAX_INT_32);
   if (isChannel && threadId === MAIN_THREAD_ID) {
     await invokeRequest(new GramJs.channels.ReadHistory({
       channel: buildInputChannel(chat.id, chat.accessHash),
-      maxId,
+      maxId: fixedMaxId,
     }));
-  } else if (threadId !== MAIN_THREAD_ID) {
+  } else if (isChannel) {
     await invokeRequest(new GramJs.messages.ReadDiscussion({
       peer: buildInputPeer(chat.id, chat.accessHash),
       msgId: Number(threadId),
-      readMaxId: maxId,
+      readMaxId: fixedMaxId,
     }));
   } else {
     const result = await invokeRequest(new GramJs.messages.ReadHistory({
       peer: buildInputPeer(chat.id, chat.accessHash),
-      maxId,
+      maxId: fixedMaxId,
     }));
 
     if (result) {
@@ -2553,8 +2554,4 @@ export async function fetchPreparedInlineMessage({
   if (!result) return undefined;
 
   return buildPreparedInlineMessage(result);
-}
-
-export function incrementLocalMessagesCounter() {
-  incrementLocalMessageCounter();
 }

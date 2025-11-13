@@ -1,17 +1,17 @@
-import type { FC } from '../../../../lib/teact/teact';
-import { memo } from '../../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../../global';
+import type { FC } from '../../../lib/teact/teact';
+import { memo } from '../../../lib/teact/teact';
+import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiChat, ApiDraft, ApiMessage, ApiMessageOutgoingStatus,
   ApiPeer, ApiTopic, ApiTypeStory, ApiTypingStatus,
-} from '../../../../api/types';
-import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
-import type { ChatAnimationTypes } from '../hooks';
+} from '../../../api/types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import type { ChatAnimationTypes } from './hooks';
 
-import { UNMUTE_TIMESTAMP } from '../../../../config';
-import { groupStatefulContent } from '../../../../global/helpers';
-import { getIsChatMuted } from '../../../../global/helpers/notifications';
+import { UNMUTE_TIMESTAMP } from '../../../config';
+import { groupStatefulContent } from '../../../global/helpers';
+import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
   selectCanAnimateInterface,
   selectCanDeleteTopic,
@@ -27,25 +27,25 @@ import {
   selectThreadInfo,
   selectThreadParam,
   selectTopics,
-} from '../../../../global/selectors';
-import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/browser/windowEnvironment';
-import buildClassName from '../../../../util/buildClassName';
-import { createLocationHash } from '../../../../util/routing';
-import renderText from '../../../common/helpers/renderText';
+} from '../../../global/selectors';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/browser/windowEnvironment';
+import buildClassName from '../../../util/buildClassName';
+import { createLocationHash } from '../../../util/routing';
+import renderText from '../../common/helpers/renderText';
 
-import useFlag from '../../../../hooks/useFlag';
-import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
-import useChatListEntry from '../hooks/useChatListEntry';
-import useTopicContextActions from '../hooks/useTopicContextActions';
+import useFlag from '../../../hooks/useFlag';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
+import useChatListEntry from './hooks/useChatListEntry';
+import useTopicContextActions from './hooks/useTopicContextActions';
 
-import Icon from '../../../common/icons/Icon';
-import LastMessageMeta from '../../../common/LastMessageMeta';
-import TopicIcon from '../../../common/TopicIcon';
-import ConfirmDialog from '../../../ui/ConfirmDialog';
-import ListItem from '../../../ui/ListItem';
-import MuteChatModal from '../../MuteChatModal.async';
-import ChatBadge from '../ChatBadge';
+import Icon from '../../common/icons/Icon';
+import LastMessageMeta from '../../common/LastMessageMeta';
+import TopicIcon from '../../common/TopicIcon';
+import ConfirmDialog from '../../ui/ConfirmDialog';
+import ListItem from '../../ui/ListItem';
+import MuteChatModal from '../MuteChatModal.async';
+import ChatBadge from './ChatBadge';
 
 import styles from './Topic.module.scss';
 
@@ -165,7 +165,7 @@ const Topic: FC<OwnProps & StateProps> = ({
     }
 
     openThread({ chatId, threadId: topic.id, shouldReplaceHistory: true });
-    if (!chat.isBotForum && !chat.isMonoforum) setViewForumAsMessages({ chatId, isEnabled: false });
+    setViewForumAsMessages({ chatId, isEnabled: false });
 
     if (canScrollDown) {
       scrollMessageListToBottom();
@@ -263,7 +263,7 @@ export default memo(withGlobal<OwnProps>(
     const typingStatus = selectThreadParam(global, chatId, topic.id, 'typingStatus');
     const draft = selectDraft(global, chatId, topic.id);
     const threadInfo = selectThreadInfo(global, chatId, topic.id);
-    const wasTopicOpened = chat?.isBotForum || Boolean(threadInfo?.lastReadInboxMessageId);
+    const wasTopicOpened = Boolean(threadInfo?.lastReadInboxMessageId);
     const topics = selectTopics(global, chatId);
 
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};

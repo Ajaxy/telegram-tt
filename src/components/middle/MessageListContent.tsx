@@ -37,7 +37,6 @@ import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useMessageObservers from './hooks/useMessageObservers';
 import useScrollHooks from './hooks/useScrollHooks';
 
-import Icon from '../common/icons/Icon';
 import MiniTable, { type TableEntry } from '../common/MiniTable';
 import ActionMessage from './message/ActionMessage';
 import Message from './message/Message';
@@ -60,7 +59,6 @@ interface OwnProps {
   withUsers: boolean;
   isChannelChat: boolean | undefined;
   isChatMonoforum?: boolean;
-  isBotForum?: boolean;
   isEmptyThread?: boolean;
   isComments?: boolean;
   noAvatars: boolean;
@@ -101,7 +99,6 @@ const MessageListContent = ({
   withUsers,
   isChannelChat,
   isChatMonoforum,
-  isBotForum,
   noAvatars,
   containerRef,
   anchorIdRef,
@@ -244,20 +241,6 @@ const MessageListContent = ({
       );
     }
     return undefined;
-  };
-
-  const renderBotForumTopicAction = () => {
-    if (!isBotForum || threadId !== MAIN_THREAD_ID) return undefined;
-    return (
-      <div className={buildClassName('local-action-message', actionMessageStyles.root)} key="botforum-new-topic">
-        <div className={actionMessageStyles.contentBox}>
-          <Icon className={actionMessageStyles.botForumTopicIcon} name="topic-new" />
-          <h3 className={actionMessageStyles.botForumTopicTitle}>{lang('BotForumActionNew')}</h3>
-          <span className={actionMessageStyles.botForumTopicDescription}>{lang('BotForumActionNewDescription')}</span>
-          <Icon className={actionMessageStyles.botForumTopicArrow} name="down" />
-        </div>
-      </div>
-    );
   };
 
   const messageCountToAnimate = noAppearanceAnimation ? 0 : messageGroups.reduce((acc, messageGroup) => {
@@ -465,7 +448,6 @@ const MessageListContent = ({
       {shouldRenderAccountInfo
         && <MessageListAccountInfo key={`account_info_${chatId}`} chatId={chatId} hasMessages />}
       {dateGroups.flat()}
-      {isViewportNewest && renderBotForumTopicAction()}
       {withHistoryTriggers && (
         <div
           ref={forwardsTriggerRef}

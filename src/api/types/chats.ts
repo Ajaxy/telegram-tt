@@ -57,7 +57,6 @@ export interface ApiChat {
   isForum?: boolean;
   isForumAsMessages?: true;
   isMonoforum?: boolean;
-  isBotForum?: boolean;
   withForumTabs?: boolean;
   linkedMonoforumId?: string;
   areChannelMessagesAllowed?: boolean;

@@ -118,7 +118,6 @@ export interface GramJsAppConfig extends LimitsConfig {
   verify_age_bot_username?: string;
   verify_age_country?: string;
   verify_age_min?: number;
-  message_typing_draft_ttl?: number;
   contact_note_length_limit?: number;
 }
 
@@ -242,7 +241,6 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     verifyAgeBotUsername: appConfig.verify_age_bot_username,
     verifyAgeCountry: appConfig.verify_age_country,
     verifyAgeMin: appConfig.verify_age_min,
-    typingDraftTtl: appConfig.message_typing_draft_ttl,
   };
 
   return {
