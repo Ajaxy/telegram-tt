@@ -132,7 +132,9 @@ export type ApiUpdateChatLeave = {
 export type ApiUpdateChatInbox = {
   '@type': 'updateChatInbox';
   id: string;
-  chat: Partial<ApiChat>;
+  threadId?: ThreadId;
+  lastReadInboxMessageId: number;
+  unreadCount: number;
 };
 
 export type ApiUpdateChatTypingStatus = {
@@ -140,6 +142,14 @@ export type ApiUpdateChatTypingStatus = {
   id: string;
   threadId?: ThreadId;
   typingStatus: ApiTypingStatus | undefined;
+};
+
+export type ApiUpdateChatTypingDraft = {
+  '@type': 'updateChatTypingDraft';
+  chatId: string;
+  id: string;
+  threadId?: ThreadId;
+  text: ApiFormattedText;
 };
 
 export type ApiUpdateStartEmojiInteraction = {
@@ -878,7 +888,7 @@ export type ApiUpdate = (
   ApiUpdateRecentStickers | ApiUpdateSavedGifs | ApiUpdateNewScheduledMessage | ApiUpdateMoveStickerSetToTop |
   ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage | ApiUpdateStarPaymentStateCompleted |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages | ApiUpdateMessageTranslations |
-  ApiUpdateFailedMessageTranslations | ApiUpdateWebPage |
+  ApiUpdateFailedMessageTranslations | ApiUpdateWebPage | ApiUpdateChatTypingDraft |
   ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
   ApiUpdateDefaultNotifySettings | ApiUpdatePeerNotifySettings | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
   ApiUpdateServerTimeOffset | ApiUpdateMessageReactions | ApiUpdateSavedReactionTags |

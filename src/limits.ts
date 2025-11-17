@@ -157,4 +157,5 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
     'fragment.com',
     'translations.telegram.org',
   ],
+  typingDraftTtl: 10,
 };

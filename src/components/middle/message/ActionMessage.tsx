@@ -40,7 +40,6 @@ import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useFlag from '../../../hooks/useFlag';
 import { type ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMessageResizeObserver from '../../../hooks/useResizeMessageObserver';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { type OnIntersectPinnedMessage } from '../hooks/usePinnedMessage';
 import useFluidBackgroundFilter from './hooks/useFluidBackgroundFilter';
@@ -125,11 +124,11 @@ const ActionMessage = ({
   hasUnreadReaction,
   isResizingContainer,
   scrollTargetPosition,
+  isAccountFrozen,
   onIntersectPinnedMessage,
   observeIntersectionForBottom,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
-  isAccountFrozen,
 }: OwnProps & StateProps) => {
   const {
     requestConfetti,
@@ -167,8 +166,6 @@ const ActionMessage = ({
   const { isTouchScreen } = useAppLayout();
 
   useOnIntersect(ref, !shouldSkipRender ? observeIntersectionForBottom : undefined);
-
-  useMessageResizeObserver(ref, !shouldSkipRender && isLastInList && action.type !== 'channelJoined');
 
   useEnsureMessage(
     replyToPeerId || chatId,

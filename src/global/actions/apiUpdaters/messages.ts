@@ -20,9 +20,15 @@ import { getMessageKey, isLocalMessageId } from '../../../util/keys/messageKey';
 import { notifyAboutMessage } from '../../../util/notifications';
 import { onTickEnd } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
+import { callApi } from '../../../api/gramjs';
 import {
   addPaidReaction,
-  checkIfHasUnreadReactions, getIsSavedDialog, getMessageContent, getMessageText, isActionMessage,
+  checkIfHasUnreadReactions,
+  createApiMessageFromTypingDraft,
+  getIsSavedDialog,
+  getMessageContent,
+  getMessageText,
+  isActionMessage,
   isMessageLocal,
 } from '../../helpers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../helpers/replies';
@@ -85,9 +91,11 @@ import {
   selectScheduledIds,
   selectScheduledMessage,
   selectTabState,
+  selectThread,
   selectThreadByMessage,
   selectThreadIdFromMessage,
   selectThreadInfo,
+  selectThreadParam,
   selectTopic,
   selectTopicFromMessage,
   selectViewportIds,
@@ -176,6 +184,14 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       if (message.reportDeliveryUntilDate && message.reportDeliveryUntilDate > getServerTime()) {
         actions.reportMessageDelivery({ chatId, messageId: id });
+      }
+
+      if (chat?.isBotForum && !newMessage.isOutgoing && !isLocal) {
+        const threadId = selectThreadIdFromMessage(global, newMessage);
+        const typingDraftStore = selectThreadParam(global, chatId, threadId, 'typingDraftIdByRandomId');
+        const localDraftIds = Object.values(typingDraftStore || {});
+        global = deleteChatMessages(global, chatId, localDraftIds);
+        global = replaceThreadParam(global, chatId, threadId, 'typingDraftIdByRandomId', undefined);
       }
 
       setGlobal(global);
@@ -913,6 +929,78 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       global = updateMessageTranslations(global, chatId, messageIds, toLanguageCode, []);
 
       setGlobal(global);
+      break;
+    }
+
+    case 'updateChatTypingDraft': {
+      const { id, chatId, threadId = MAIN_THREAD_ID, text } = update;
+      const thread = selectThread(global, chatId, threadId);
+      if (!thread) return undefined;
+
+      let typingDraftStore = selectThreadParam(global, chatId, threadId, 'typingDraftIdByRandomId');
+      const messageId = typingDraftStore?.[id];
+
+      const isUpdatingDraft = Boolean(messageId);
+      const updatingMessage = isUpdatingDraft ? selectChatMessage(global, chatId, messageId) : undefined;
+
+      const rescheduleDraftRemoval = () => {
+        // Clear typing draft after timeout
+        setTimeout(() => {
+          global = getGlobal();
+          const currentTypingDraftStore = selectThreadParam(global, chatId, threadId, 'typingDraftIdByRandomId');
+          if (currentTypingDraftStore?.[id]) {
+            const currentMessageId = currentTypingDraftStore[id];
+            const currentMessage = selectChatMessage(global, chatId, currentMessageId);
+            // Already deleted or replaced with a new message
+            if (!currentMessage || getServerTime() - currentMessage.editDate! < global.appConfig.typingDraftTtl) return;
+
+            const newTypingDraftIds = omit(currentTypingDraftStore, [id]);
+            global = replaceThreadParam(global, chatId, threadId, 'typingDraftIdByRandomId', newTypingDraftIds);
+            global = deleteChatMessages(global, chatId, [currentMessageId]);
+            setGlobal(global);
+          }
+        }, global.appConfig.typingDraftTtl * 1000);
+      };
+
+      if (isUpdatingDraft && updatingMessage) {
+        global = updateChatMessage(global, chatId, messageId, {
+          content: {
+            text,
+          },
+          editDate: getServerTime(),
+        });
+        rescheduleDraftRemoval();
+        return global;
+      }
+
+      // Let worker know that we have new local message
+      callApi('incrementLocalMessagesCounter');
+
+      const lastMessageId = selectChatLastMessageId(global, chatId);
+
+      const newMessage = createApiMessageFromTypingDraft({
+        lastMessageId: lastMessageId || 0,
+        chatId,
+        threadId,
+        text,
+      });
+
+      actions.apiUpdate({
+        '@type': 'newMessage',
+        chatId,
+        id: newMessage.id,
+        message: newMessage,
+      });
+
+      typingDraftStore = {
+        ...typingDraftStore,
+        [id]: newMessage.id,
+      };
+      global = replaceThreadParam(global, chatId, threadId, 'typingDraftIdByRandomId', typingDraftStore);
+
+      rescheduleDraftRemoval();
+
+      return global;
     }
   }
 });

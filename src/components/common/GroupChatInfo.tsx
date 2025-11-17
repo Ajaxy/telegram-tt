@@ -1,10 +1,8 @@
-import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiThreadInfo, ApiTopic, ApiTypingStatus, ApiUser,
+  ApiChat, ApiTopic, ApiTypingStatus, ApiUser,
 } from '../../api/types';
 import type { IconName } from '../../types/icons';
 import { MediaViewerOrigin, type StoryViewerOrigin, type ThreadId } from '../../types';
@@ -21,7 +19,6 @@ import {
   selectChatOnlineCount,
   selectIsChatRestricted,
   selectMonoforumChannel,
-  selectThreadInfo,
   selectThreadMessagesCount,
   selectTopic,
   selectUser,
@@ -68,12 +65,11 @@ type OwnProps = {
   isSavedDialog?: boolean;
   withMonoforumStatus?: boolean;
   onClick?: VoidFunction;
-  onEmojiStatusClick?: NoneToVoidFunction;
+  onEmojiStatusClick?: VoidFunction;
 };
 
 type StateProps = {
   chat?: ApiChat;
-  threadInfo?: ApiThreadInfo;
   topic?: ApiTopic;
   onlineCount?: number;
   areMessagesLoaded: boolean;
@@ -82,7 +78,7 @@ type StateProps = {
   monoforumChannel?: ApiChat;
 };
 
-const GroupChatInfo: FC<OwnProps & StateProps> = ({
+const GroupChatInfo = ({
   typingStatus,
   className,
   statusIcon,
@@ -95,7 +91,6 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   withFullInfo,
   withUpdatingStatus,
   withChatType,
-  threadInfo,
   noRtl,
   chat: realChat,
   onlineCount,
@@ -113,7 +108,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   monoforumChannel,
   onClick,
   onEmojiStatusClick,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     loadFullChat,
     openMediaViewer,
@@ -126,7 +121,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   const isSuperGroup = chat && isChatSuperGroup(chat);
-  const isTopic = Boolean(chat?.isForum && threadInfo && topic);
+  const isTopic = Boolean(chat?.isForum && topic);
   const { id: chatId, isMin } = chat || {};
   const isRestricted = selectIsChatRestricted(getGlobal(), chatId!);
 
@@ -204,7 +199,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
             activeKey={messagesCount !== undefined ? 1 : 2}
             className="message-count-transition"
           >
-            {messagesCount !== undefined && oldLang('messages', messagesCount, 'i')}
+            {messagesCount !== undefined ? oldLang('messages', messagesCount, 'i') : oldLang('lng_forum_no_messages')}
           </Transition>
         </span>
       );
@@ -290,7 +285,6 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
-    const threadInfo = threadId ? selectThreadInfo(global, chatId, threadId) : undefined;
     const onlineCount = chat ? selectChatOnlineCount(global, chat) : undefined;
     const areMessagesLoaded = Boolean(selectChatMessages(global, chatId));
     const topic = threadId ? selectTopic(global, chatId, threadId) : undefined;
@@ -300,7 +294,6 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      threadInfo,
       onlineCount,
       topic,
       areMessagesLoaded,

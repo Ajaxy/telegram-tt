@@ -665,7 +665,7 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     }, {} as GlobalState['messages']['byChatId'][string]['threadsById']);
 
     const cleanedById = Object.values(byId).reduce((acc, message) => {
-      if (!message) return acc;
+      if (!message || message.isTypingDraft) return acc;
 
       let cleanedMessage = omitLocalMedia(message);
       cleanedMessage = omitLocalPaidReactions(cleanedMessage);

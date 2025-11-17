@@ -2301,6 +2301,10 @@
 "TitleGiftLocked" = "Gift Locked";
 "GiftLockedMessage" = "This gift is currently only available to earlier Telegram users. It will unlock for your account in about **{relativeDate}**.";
 "QuickPreview" = "Quick Preview";
+"BotForumContinueThreadButton" = "Continue Last Thread";
+"BotForumActionNew" = "New Thread";
+"BotForumActionNewDescription" = "Type any message to create a new thread.";
+"BotForumTopicTitlePlaceholder" = "New Thread";
 "DropOriginalDetailsTransaction" = "Removed Gift Description";
 "StarGiftReasonDropOriginalDetails" = "Removed Description";
 "GiftAnUpgradeButton" = "Gift an Upgrade";
@@ -2310,6 +2314,8 @@
 "UserNoteTitle" = "Notes";
 "UserNoteHint" = "only visible to you";
 "EditUserNoteHint" = "Notes are only visible to you.";
+"BotForumAllTopicTitle" = "All Messages";
+"BotForumAllTopicDescription" = "All messages from all topics";
 "AriaStoryTogglerOpen" = "Open Story List";
 "FileTransferProgress" = "{currentSize} / {totalSize}";
 "MediaSizeB_one" = "{size}B";
