@@ -1,7 +1,5 @@
 import { memo, useRef } from '@teact';
 
-import { FocusDirection } from '../../types';
-
 import buildClassName from '../../util/buildClassName';
 
 import useFocusMessageListElement from './message/hooks/useFocusMessageListElement';
@@ -19,7 +17,6 @@ const MessageListBottomMarker = ({ isFocused, className }: OwnProps) => {
     isJustAdded: true,
     isFocused,
     noFocusHighlight: true,
-    focusDirection: FocusDirection.Down,
   });
 
   return (

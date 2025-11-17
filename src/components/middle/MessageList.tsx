@@ -1,4 +1,3 @@
-import type { FC } from '@teact';
 import { beginHeavyAnimation, memo, useEffect, useMemo, useRef } from '@teact';
 import { addExtraClass, removeExtraClass } from '@teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
@@ -170,7 +169,7 @@ const MESSAGE_FACT_CHECK_UPDATE_INTERVAL = 5 * 1000;
 const MESSAGE_STORY_POLLING_INTERVAL = 5 * 60 * 1000;
 
 const BOTTOM_THRESHOLD = 50;
-const BOTTOM_SNAP_THRESHOLD = 10;
+const BOTTOM_SNAP_THRESHOLD = 7;
 
 const UNREAD_DIVIDER_TOP = 10;
 const SCROLL_DEBOUNCE = 200;
@@ -180,11 +179,11 @@ const SELECT_MODE_ANIMATION_DURATION = 200;
 
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 const FORCE_MESSAGES_SCROLL_CLASS = 'force-messages-scroll';
-const NO_BOTTOM_SNAP_CLASS = 'no-bottom-snap';
+const BOTTOM_SNAP_CLASS = 'with-bottom-snap';
 
 const runDebouncedForScroll = debounce((cb) => cb(), SCROLL_DEBOUNCE, false);
 
-const MessageList: FC<OwnProps & StateProps> = ({
+const MessageList = ({
   chatId,
   threadId,
   type,
@@ -243,7 +242,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   onIntersectPinnedMessage,
   onScrollDownToggle,
   onNotchToggle,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
     loadMessageViews, loadPeerStoriesByIds, loadFactChecks, requestChatTranslation,
@@ -471,6 +470,33 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   const { isScrolled, updateStickyDates } = useStickyDates();
 
+  const updateBottomSnapClass = useLastCallback(() => {
+    const container = containerRef.current;
+    const bottomTrigger = container?.querySelector<HTMLDivElement>('.fab-trigger');
+    if (!container || !bottomTrigger) return;
+
+    // Check if fab-trigger + threshold are entering the viewport
+    const viewportBottom = container.scrollTop + container.offsetHeight;
+    const triggerPosition = bottomTrigger.offsetTop;
+    // Scroll is near fab-trigger + threshold. Prevents snap on sponsored message
+    const shouldSnapBeActive = triggerPosition - BOTTOM_SNAP_THRESHOLD <= viewportBottom
+      && viewportBottom <= triggerPosition + BOTTOM_SNAP_THRESHOLD * 2;
+
+    const hasSnap = container.classList.contains(BOTTOM_SNAP_CLASS);
+    if (hasSnap === shouldSnapBeActive) return;
+
+    if (shouldSnapBeActive) {
+      requestMutation(() => {
+        addExtraClass(container, BOTTOM_SNAP_CLASS);
+      });
+    } else {
+      clearTimeout(scrollSnapDisabledTimerRef.current);
+      requestMutation(() => {
+        removeExtraClass(container, BOTTOM_SNAP_CLASS);
+      });
+    }
+  });
+
   const handleScroll = useLastCallback(() => {
     if (isScrollTopJustUpdatedRef.current) {
       isScrollTopJustUpdatedRef.current = false;
@@ -485,6 +511,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
     if (!memoFocusingIdRef.current) {
       updateStickyDates(container);
     }
+
+    updateBottomSnapClass();
 
     runDebouncedForScroll(() => {
       const global = getGlobal();
@@ -509,28 +537,14 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const [getContainerHeight, prevContainerHeightRef] = useContainerHeight(containerRef, canPost && !isSelectModeActive);
 
   const handleWheel = useLastCallback((e: React.WheelEvent<HTMLDivElement>) => {
-    // Firefox is finicky about bottom scroll snapping, so we enable it only when nearing the bottom
+    // Remove snap when scrolling up to avoid scroll bug
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1753188
-    if (!IS_FIREFOX) return;
+    if (IS_FIREFOX && e.deltaY < 0) {
+      const container = containerRef.current;
+      if (!container) return;
 
-    const container = containerRef.current;
-    if (!container) return;
-
-    const scrollTop = container.scrollTop;
-    const scrollHeight = container.scrollHeight;
-    const offsetHeight = container.offsetHeight;
-    const isNearBottomForSnap = scrollTop >= scrollHeight - offsetHeight - BOTTOM_SNAP_THRESHOLD;
-    if (!isNearBottomForSnap) return;
-
-    if (e.deltaY < 0) {
-      clearTimeout(scrollSnapDisabledTimerRef.current);
       requestMutation(() => {
-        addExtraClass(container, NO_BOTTOM_SNAP_CLASS);
-        container.scrollBy(0, -BOTTOM_SNAP_THRESHOLD); // Manually scroll to prevent ignoring first event
-      });
-    } else {
-      requestMutation(() => {
-        removeExtraClass(container, NO_BOTTOM_SNAP_CLASS);
+        removeExtraClass(container, BOTTOM_SNAP_CLASS);
       });
     }
   });
@@ -645,10 +659,12 @@ const MessageList: FC<OwnProps & StateProps> = ({
     if (wasMessageAdded) {
       clearTimeout(scrollSnapDisabledTimerRef.current);
 
-      addExtraClass(container, NO_BOTTOM_SNAP_CLASS);
+      removeExtraClass(container, BOTTOM_SNAP_CLASS);
 
       scrollSnapDisabledTimerRef.current = window.setTimeout(() => {
-        removeExtraClass(container, NO_BOTTOM_SNAP_CLASS);
+        requestMutation(() => {
+          addExtraClass(container, BOTTOM_SNAP_CLASS);
+        });
       }, MESSAGE_ANIMATION_DURATION);
     }
 
@@ -768,7 +784,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
     !isReady && 'is-animating',
     hasOpenChatButton && 'saved-dialog',
     isChatProtected && 'hide-on-print',
-    IS_FIREFOX && NO_BOTTOM_SNAP_CLASS,
   );
 
   const hasMessages = Boolean((messageIds && messageGroups) || lastMessage);

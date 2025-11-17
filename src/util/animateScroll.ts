@@ -1,3 +1,4 @@
+import { setExtraStyles } from '@teact/teact-dom';
 import { beginHeavyAnimation } from '../lib/teact/teact';
 import { getGlobal } from '../global';
 
@@ -140,6 +141,10 @@ function createMutateFunction(args: AnimateScrollArgs) {
 
     isAnimating = true;
 
+    setExtraStyles(container, {
+      scrollSnapType: 'none',
+    });
+
     const prevOnHeavyAnimationEnd = onHeavyAnimationEnd;
     onHeavyAnimationEnd = beginHeavyAnimation(undefined, true);
     prevOnHeavyAnimationEnd?.();
@@ -155,6 +160,9 @@ function createMutateFunction(args: AnimateScrollArgs) {
 
       if (!isAnimating) {
         currentArgs = undefined;
+        setExtraStyles(container, {
+          scrollSnapType: '',
+        });
 
         onHeavyAnimationEnd?.();
         onHeavyAnimationEnd = undefined;
@@ -170,7 +178,13 @@ export function isAnimatingScroll() {
 }
 
 export function cancelScrollBlockingAnimation() {
-  onHeavyAnimationEnd!();
+  if (currentArgs?.container) {
+    setExtraStyles(currentArgs.container, {
+      scrollSnapType: '',
+    });
+  }
+
+  onHeavyAnimationEnd?.();
   onHeavyAnimationEnd = undefined;
 }
 

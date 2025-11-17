@@ -1,8 +1,6 @@
 .MessageList {
   --action-message-bg: var(--pattern-color);
 
-  scroll-snap-type: y proximity;
-
   overflow-x: hidden;
   overflow-y: scroll;
   flex: 1;
@@ -38,8 +36,8 @@
     display: none;
   }
 
-  &.no-bottom-snap {
-    scroll-snap-type: none;
+  &.with-bottom-snap {
+    scroll-snap-type: y proximity;
   }
 
   .messages-container {
