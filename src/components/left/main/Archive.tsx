@@ -26,6 +26,7 @@ type OwnProps = {
   archiveSettings: GlobalState['archiveSettings'];
   onDragEnter?: NoneToVoidFunction;
   onClick?: NoneToVoidFunction;
+  isFoldersSidebarShown?: boolean;
 };
 
 const PREVIEW_SLICE = 5;
@@ -40,6 +41,7 @@ const Archive: FC<OwnProps> = ({
   archiveSettings,
   onDragEnter,
   onClick,
+  isFoldersSidebarShown,
 }) => {
   const { updateArchiveSettings } = getActions();
   const lang = useLang();
@@ -158,6 +160,7 @@ const Archive: FC<OwnProps> = ({
       className={buildClassName(
         styles.root,
         archiveSettings.isMinimized && styles.minimized,
+        isFoldersSidebarShown && archiveSettings.isMinimized && styles.noMarginTop,
         'chat-item-clickable',
         'chat-item-archive',
       )}

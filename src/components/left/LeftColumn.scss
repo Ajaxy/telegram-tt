@@ -28,12 +28,7 @@
   }
 
   .SearchInput {
-    max-width: calc(100% - 3.25rem);
     margin-left: 0.625rem;
-
-    @media (max-width: 600px) {
-      max-width: calc(100% - 3rem);
-    }
   }
 
   .Button.smaller {
@@ -45,19 +40,8 @@
     }
   }
 
-  body.is-tauri.is-macos #Main:not(.is-fullscreen) &:not(#TopicListHeader) {
-    justify-content: space-between;
-    padding: 0.5rem 0.5rem 0.5rem var(--window-controls-width);
-
-    .SearchInput {
-      max-width: calc(100% - 2.75rem);
-      margin-left: 0.5rem;
-    }
-
-    .Menu.main-menu .bubble {
-      --offset-y: 100%;
-      --offset-x: -4.125rem;
-    }
+  body.is-tauri.is-macos #Main:not(.is-fullscreen):not(.tabs-sidebar-visible) &:not(#TopicListHeader) {
+    padding-left: var(--window-controls-width);
   }
 
   @media (max-width: 600px) {

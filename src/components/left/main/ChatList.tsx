@@ -51,6 +51,7 @@ type OwnProps = {
   isAccountFrozen?: boolean;
   isMainList?: boolean;
   withTags?: boolean;
+  isFoldersSidebarShown?: boolean;
   isStoryRibbonShown?: boolean;
   foldersDispatch?: FolderEditDispatch;
 };
@@ -70,6 +71,7 @@ const ChatList: FC<OwnProps> = ({
   isAccountFrozen,
   isMainList,
   withTags,
+  isFoldersSidebarShown,
   isStoryRibbonShown,
   foldersDispatch,
 }) => {
@@ -234,6 +236,7 @@ const ChatList: FC<OwnProps> = ({
           onDragEnter={handleChatDragEnter}
           onDragLeave={onDragLeave}
           withTags={withTags}
+          isFoldersSidebarShown={isFoldersSidebarShown}
         />
       );
     });
@@ -269,6 +272,7 @@ const ChatList: FC<OwnProps> = ({
           archiveSettings={archiveSettings}
           onClick={handleArchivedClick}
           onDragEnter={handleArchivedDragEnter}
+          isFoldersSidebarShown={isFoldersSidebarShown}
         />
       )}
       {viewportIds?.length ? (

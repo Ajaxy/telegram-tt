@@ -19,7 +19,7 @@ export function animateOpening(isArchived?: boolean) {
   cancelDelayedCallbacks();
 
   const {
-    container, toggler, leftMainHeader, ribbonPeers, toggleAvatars,
+    container, toggler, leftMainHeader, ribbonPeers, toggleAvatars, sidebar,
   } = getHTMLElements(isArchived);
 
   if (!toggler || !toggleAvatars || !ribbonPeers || !container || !leftMainHeader) {
@@ -28,6 +28,7 @@ export function animateOpening(isArchived?: boolean) {
 
   const { bottom: headerBottom, right: headerRight } = leftMainHeader.getBoundingClientRect();
   const toTop = headerBottom + RIBBON_OFFSET;
+  const sidebarWidth = sidebar ? sidebar.getBoundingClientRect().width : 0;
 
   // Toggle avatars are in the reverse order
   const lastToggleAvatar = toggleAvatars[0];
@@ -57,10 +58,11 @@ export function animateOpening(isArchived?: boolean) {
       width: fromWidth,
     } = toggleAvatar.getBoundingClientRect();
 
-    const {
-      left: toLeft,
-      width: toWidth,
-    } = peer.getBoundingClientRect();
+    fromLeft -= sidebarWidth;
+
+    const peerBounds = peer.getBoundingClientRect();
+    const toLeft = peerBounds.left - sidebarWidth;
+    const toWidth = peerBounds.width;
 
     if (toLeft > headerRight) {
       return;
@@ -164,13 +166,14 @@ export function animateClosing(isArchived?: boolean) {
     toggleAvatars,
     ribbonPeers,
     leftMainHeader,
+    sidebar,
   } = getHTMLElements(isArchived);
 
   if (!toggler || !toggleAvatars || !ribbonPeers || !container || !leftMainHeader) {
     return;
   }
   const { right: headerRight } = leftMainHeader.getBoundingClientRect();
-
+  const sidebarWidth = sidebar ? sidebar.getBoundingClientRect().width : 0;
   // Toggle avatars are in the reverse order
   const lastToggleAvatar = toggleAvatars[0];
   const firstToggleAvatar = toggleAvatars[toggleAvatars.length - 1];
@@ -192,17 +195,19 @@ export function animateClosing(isArchived?: boolean) {
 
     if (!toggleAvatar) return;
 
-    const {
-      top: fromTop,
-      left: fromLeft,
-      width: fromWidth,
-    } = peer.getBoundingClientRect();
+    const peerBounds = peer.getBoundingClientRect();
+
+    const fromTop = peerBounds.top;
+    const fromLeft = peerBounds.left - sidebarWidth;
+    const fromWidth = peerBounds.width;
 
     let {
       left: toLeft,
       width: toWidth,
       top: toTop,
     } = toggleAvatar.getBoundingClientRect();
+
+    toLeft -= sidebarWidth;
 
     if (fromLeft > headerRight) {
       return;
@@ -306,6 +311,7 @@ function getHTMLElements(isArchived?: boolean) {
   const leftMainHeader = container.querySelector<HTMLElement>('.left-header');
   const ribbonPeers = ribbon?.querySelectorAll<HTMLElement>(`.${ribbonStyles.peer}`);
   const toggleAvatars = toggler?.querySelectorAll<HTMLElement>('.Avatar');
+  const sidebar = document.getElementById('FoldersSidebar');
 
   return {
     container,
@@ -313,6 +319,7 @@ function getHTMLElements(isArchived?: boolean) {
     leftMainHeader,
     ribbonPeers,
     toggleAvatars,
+    sidebar,
   };
 }
 

@@ -7,6 +7,7 @@ import type { FolderEditDispatch, FoldersState } from '../../../../hooks/reducer
 import { SettingsScreens } from '../../../../types';
 
 import { selectChatFilters } from '../../../../hooks/reducers/useFoldersReducer';
+import useAppLayout from '../../../../hooks/useAppLayout';
 
 import SettingsFoldersChatFilters from './SettingsFoldersChatFilters';
 import SettingsFoldersEdit, { ERROR_NO_CHATS, ERROR_NO_TITLE } from './SettingsFoldersEdit';
@@ -34,6 +35,8 @@ const SettingsFolders: FC<OwnProps> = ({
   isActive,
   onReset,
 }) => {
+  const { isMobile } = useAppLayout();
+
   const {
     openShareChatFolderModal,
     editChatFolder,
@@ -164,6 +167,7 @@ const SettingsFolders: FC<OwnProps> = ({
             SettingsScreens.FoldersExcludedChats,
           ].includes(shownScreen)}
           onReset={onReset}
+          isMobile={isMobile}
         />
       );
     case SettingsScreens.FoldersCreateFolder:
@@ -186,6 +190,7 @@ const SettingsFolders: FC<OwnProps> = ({
           isOnlyInvites={currentScreen === SettingsScreens.FoldersEditFolderInvites}
           onBack={onReset}
           onSaveFolder={handleSaveFolder}
+          isMobile={isMobile}
         />
       );
     case SettingsScreens.FoldersIncludedChats:

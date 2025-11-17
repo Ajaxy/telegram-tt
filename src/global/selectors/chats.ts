@@ -383,3 +383,8 @@ export function selectIsChatRestricted<T extends GlobalState>(global: T, chatId:
   const activeRestrictions = selectActiveRestrictionReasons(global, chat.restrictionReasons);
   return activeRestrictions.length > 0;
 }
+
+export function selectAreFoldersPresent<T extends GlobalState>(global: T) {
+  const ids = global.chatFolders.orderedIds;
+  return Boolean(ids && ids.length > 1);
+}

@@ -571,13 +571,13 @@ function Story({
           color="translucent-white"
           onClick={onTrigger}
           className={buildClassName(styles.button, isOpen && 'active')}
-          ariaLabel={oldLang('AccDescrOpenMenu2')}
+          ariaLabel={lang('AriaLabelOpenMenu')}
         >
           <Icon name="more" />
         </Button>
       );
     };
-  }, [isMobile, oldLang]);
+  }, [isMobile, lang]);
 
   function renderStoriesTabs() {
     return (

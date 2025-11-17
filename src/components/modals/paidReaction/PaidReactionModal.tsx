@@ -208,7 +208,7 @@ const PaidReactionModal = ({
         color="translucent"
         className={buildClassName(styles.sendAsPeerMenuButton, isOpen ? 'active' : '')}
         onClick={onTrigger}
-        ariaLabel={lang('AccDescrOpenMenu2')}
+        ariaLabel={lang('AriaLabelOpenMenu')}
       >
         <Avatar
           className={styles.sendAsPeerButtonAvatar}

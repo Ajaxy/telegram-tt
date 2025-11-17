@@ -107,7 +107,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     id, stickerSetInfo,
   } = sticker;
 
-  const isPremium = (!sticker.isFree && isEffectEmoji) || sticker.hasEffect;
+  const isPremium = !sticker.isFree || sticker.hasEffect;
   const isCustomEmoji = sticker.isCustomEmoji || isEffectEmoji;
   const isLocked = !isCurrentUserPremium && isPremium && !shouldIgnorePremium;
 
@@ -148,9 +148,12 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     if (isLocked) {
       if (isEffectEmoji) {
         openPremiumModal({ initialSection: 'effects' });
+      } else if (isCustomEmoji) {
+        openPremiumModal({ initialSection: 'animated_emoji' });
       } else {
         openPremiumModal({ initialSection: 'premium_stickers' });
       }
+      onContextMenuClose?.();
       return;
     }
     onClick?.(clickArg);

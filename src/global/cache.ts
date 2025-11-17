@@ -21,6 +21,7 @@ import {
   IS_SCREEN_LOCKED_CACHE_KEY,
   SAVED_FOLDER_ID,
   SHARED_STATE_CACHE_KEY,
+  TABS_POSITION_DEFAULT,
 } from '../config';
 import { MAIN_IDB_STORE } from '../util/browser/idb';
 import { isUserId } from '../util/entities/ids';
@@ -313,6 +314,7 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.sharedState.settings = {
       canDisplayChatInTitle: untypedCached.settings.byKey.canDisplayChatInTitle,
       animationLevel: untypedCached.settings.byKey.animationLevel,
+      tabsPosition: untypedCached.settings.byKey.tabsPosition,
       messageSendKeyCombo: untypedCached.settings.byKey.messageSendKeyCombo,
       messageTextSize: untypedCached.settings.byKey.messageTextSize,
       performance: untypedCached.settings.performance,
@@ -346,6 +348,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cachedSharedSettings.wasAnimationLevelSetManually) {
     cachedSharedSettings.animationLevel = ANIMATION_LEVEL_DEFAULT;
     cachedSharedSettings.performance = INITIAL_PERFORMANCE_STATE_MED;
+  }
+
+  if (!cachedSharedSettings.tabsPosition) {
+    cachedSharedSettings.tabsPosition = TABS_POSITION_DEFAULT;
   }
 
   if (!cached.appConfig) {

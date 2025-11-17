@@ -1,6 +1,7 @@
 import type { TeactNode } from '../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../lib/teact/teact';
 
+import type { ApiMessageEntityCustomEmoji } from '../../api/types';
 import type { MenuItemContextAction } from './ListItem';
 
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
@@ -22,6 +23,8 @@ export type TabWithProperties = {
   isBlocked?: boolean;
   isBadgeActive?: boolean;
   contextActions?: MenuItemContextAction[];
+  emoticon?: string | ApiMessageEntityCustomEmoji;
+  noTitleAnimations?: boolean;
 };
 
 type OwnProps = {

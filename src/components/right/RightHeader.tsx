@@ -384,7 +384,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         color="translucent"
         className={isOpen ? 'active' : ''}
         onClick={onTrigger}
-        ariaLabel={lang('AccDescrOpenMenu2')}
+        ariaLabel={lang('AriaLabelOpenMenu')}
       >
         <Icon name="more" />
       </Button>

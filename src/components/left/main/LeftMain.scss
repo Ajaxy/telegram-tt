@@ -47,6 +47,10 @@
       opacity: 0.25;
     }
 
+    &--tabs-sidebar-shown .chat-list {
+      padding-top: 0;
+    }
+
     .Tab {
       flex: 0 0 auto;
     }

@@ -44,6 +44,7 @@ type OwnProps = {
   onTopicSearch: NoneToVoidFunction;
   isAccountFrozen?: boolean;
   onReset: () => void;
+  isFoldersSidebarShown?: boolean;
 };
 
 const TRANSITION_RENDER_COUNT = Object.keys(LeftColumnContent).length / 2;
@@ -66,8 +67,9 @@ const LeftMain: FC<OwnProps> = ({
   onReset,
   onTopicSearch,
   isAccountFrozen,
+  isFoldersSidebarShown,
 }) => {
-  const { closeForumPanel, openLeftColumnContent } = getActions();
+  const { openLeftColumnContent } = getActions();
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
   const [tauriUpdate, setTauriUpdate] = useState<Update>();
   const [isTauriUpdateDownloading, setIsTauriUpdateDownloading] = useState(false);
@@ -109,17 +111,8 @@ const LeftMain: FC<OwnProps> = ({
     }, BUTTON_CLOSE_DELAY_MS);
   });
 
-  const handleSelectSettings = useLastCallback(() => {
-    openLeftColumnContent({ contentKey: LeftColumnContent.Settings });
-  });
-
   const handleSelectContacts = useLastCallback(() => {
     openLeftColumnContent({ contentKey: LeftColumnContent.Contacts });
-  });
-
-  const handleSelectArchived = useLastCallback(() => {
-    openLeftColumnContent({ contentKey: LeftColumnContent.Archived });
-    closeForumPanel();
   });
 
   const handleUpdateClick = useLastCallback(async () => {
@@ -198,12 +191,10 @@ const LeftMain: FC<OwnProps> = ({
         content={content}
         contactsFilter={contactsFilter}
         onSearchQuery={onSearchQuery}
-        onSelectSettings={handleSelectSettings}
-        onSelectContacts={handleSelectContacts}
-        onSelectArchived={handleSelectArchived}
         onReset={onReset}
         shouldSkipTransition={shouldSkipTransition}
         isClosingSearch={isClosingSearch}
+        isFoldersSidebarShown={isFoldersSidebarShown}
       />
       <Transition
         name={shouldSkipTransition ? 'none' : 'zoomFade'}
@@ -222,6 +213,7 @@ const LeftMain: FC<OwnProps> = ({
                   shouldHideFolderTabs={isForumPanelVisible}
                   foldersDispatch={foldersDispatch}
                   isForumPanelOpen={isForumPanelVisible}
+                  isFoldersSidebarShown={isFoldersSidebarShown}
                 />
               );
             case LeftColumnContent.GlobalSearch:

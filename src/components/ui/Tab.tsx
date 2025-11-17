@@ -32,6 +32,7 @@ type OwnProps = {
   clickArg?: number;
   contextActions?: MenuItemContextAction[];
   contextRootElementSelector?: string;
+  icon?: TeactNode;
 };
 
 const classNames = {
@@ -49,6 +50,7 @@ const Tab = ({
   previousActiveTab,
   contextActions,
   contextRootElementSelector,
+  icon,
   clickArg,
   onClick,
 }: OwnProps) => {
@@ -138,6 +140,7 @@ const Tab = ({
       onContextMenu={handleContextMenu}
       ref={tabRef}
     >
+      {icon}
       <span className="Tab_inner">
         {typeof title === 'string' ? renderText(title) : title}
         {Boolean(badgeCount) && (

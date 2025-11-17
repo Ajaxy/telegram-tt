@@ -11,9 +11,10 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type { ApiChatFolder, ApiLimitTypeWithModal, ApiUser } from '../../api/types';
 import type { TabState } from '../../global/types';
 
-import { BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER } from '../../config';
+import { BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER, TABS_POSITION_LEFT } from '../../config';
 import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
+  selectAreFoldersPresent,
   selectCanAnimateInterface,
   selectChatFolder,
   selectChatMessage,
@@ -79,6 +80,7 @@ import DeleteFolderDialog from './DeleteFolderDialog.async';
 import Dialogs from './Dialogs.async';
 import DownloadManager from './DownloadManager';
 import DraftRecipientPicker from './DraftRecipientPicker.async';
+import FoldersSidebar from './FoldersSidebar';
 import ForwardRecipientPicker from './ForwardRecipientPicker.async';
 import GameModal from './GameModal';
 import HistoryCalendar from './HistoryCalendar.async';
@@ -145,6 +147,7 @@ type StateProps = {
   isSynced?: boolean;
   isAccountFrozen?: boolean;
   isAppConfigLoaded?: boolean;
+  isFoldersSidebarShown: boolean;
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -199,6 +202,7 @@ const Main = ({
   currentUserId,
   isAccountFrozen,
   isAppConfigLoaded,
+  isFoldersSidebarShown,
 }: OwnProps & StateProps) => {
   const {
     initMain,
@@ -518,6 +522,7 @@ const Main = ({
     isNarrowMessageList && 'narrow-message-list',
     shouldSkipHistoryAnimations && 'history-animation-disabled',
     isFullscreen && 'is-fullscreen',
+    isFoldersSidebarShown && 'tabs-sidebar-visible',
   );
 
   const handleBlur = useLastCallback(() => {
@@ -549,7 +554,8 @@ const Main = ({
 
   return (
     <div ref={containerRef} id="Main" className={className}>
-      <LeftColumn ref={leftColumnRef} />
+      <FoldersSidebar isMobile={isMobile} isActive={isFoldersSidebarShown} />
+      <LeftColumn ref={leftColumnRef} isFoldersSidebarShown={isFoldersSidebarShown} />
       <MiddleColumn leftColumnRef={leftColumnRef} isMobile={isMobile} />
       <RightColumn isMobile={isMobile} />
       <MediaViewer isOpen={isMediaViewerOpen} />
@@ -637,7 +643,7 @@ export default memo(withGlobal<OwnProps>(
       deleteFolderDialogModal,
     } = selectTabState(global);
 
-    const { wasTimeFormatSetManually } = selectSharedSettings(global);
+    const { wasTimeFormatSetManually, tabsPosition } = selectSharedSettings(global);
 
     const gameMessage = openedGame && selectChatMessage(global, openedGame.chatId, openedGame.messageId);
     const gameTitle = gameMessage?.content.game?.title;
@@ -694,6 +700,7 @@ export default memo(withGlobal<OwnProps>(
       isSynced: global.isSynced,
       isAccountFrozen,
       isAppConfigLoaded: global.isAppConfigLoaded,
+      isFoldersSidebarShown: tabsPosition === TABS_POSITION_LEFT && !isMobile && selectAreFoldersPresent(global),
     };
   },
 )(Main));

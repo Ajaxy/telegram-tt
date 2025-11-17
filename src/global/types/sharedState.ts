@@ -1,5 +1,5 @@
 import type { ApiLanguage } from '../../api/types';
-import type { AnimationLevel, PerformanceType, Point, Size, ThemeKey, TimeFormat } from '../../types';
+import type { AnimationLevel, PerformanceType, Point, Size, TabsPosition, ThemeKey, TimeFormat } from '../../types';
 
 export interface SharedState {
   settings: SharedSettings;
@@ -14,6 +14,7 @@ export interface SharedSettings {
   performance: PerformanceType;
   messageTextSize: number;
   animationLevel: AnimationLevel;
+  tabsPosition: TabsPosition;
   // This can be deleted after September 2025, along with the corresponding migration
   wasAnimationLevelSetManually?: boolean;
   messageSendKeyCombo: 'enter' | 'ctrl-enter';

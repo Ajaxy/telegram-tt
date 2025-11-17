@@ -99,6 +99,7 @@ type OwnProps = {
   onDragEnter?: (chatId: string) => void;
   onDragLeave?: NoneToVoidFunction;
   onReorderAnimationEnd?: NoneToVoidFunction;
+  isFoldersSidebarShown?: boolean;
 };
 
 type StateProps = {
@@ -176,6 +177,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   areTagsEnabled,
   withTags,
   onReorderAnimationEnd,
+  isFoldersSidebarShown,
 }) => {
   const {
     openChat,
@@ -491,6 +493,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             itemClassName="chat-tag"
             orderedFolderIds={tagFolderIds}
             chatFoldersById={chatFoldersById}
+            isFoldersSidebarShown={isFoldersSidebarShown}
           />
         )}
       </div>

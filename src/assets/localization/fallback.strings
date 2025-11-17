@@ -330,7 +330,8 @@
 "ChatEmptyChat" = "No messages here yet";
 "ChatListEmptyChatListEditFilter" = "Edit Folder";
 "UpdateTelegram" = "Update Telegram";
-"AccDescrOpenMenu2" = "Open menu";
+"AriaLabelOpenMenu" = "Open menu";
+"AriaLabelBackChatList" = "Return to chat list";
 "SettingsTipsUsername" = "TelegramTips";
 "SearchFriends" = "Search contacts";
 "Search" = "Search";
@@ -370,6 +371,9 @@
 "FilterColorHint" = "This color will be used for the folder's tag in the chat list";
 "ShowFolderTags" = "Show Folder Tags";
 "ShowFolderTagsHint" = "Display folder names for each chat in the chat list.";
+"TabsPosition" = "Tabs View";
+"TabsPositionLeft" = "Tabs on the left";
+"TabsPositionTop" = "Tabs at the top";
 "FilterIncludeInfo" = "Choose chats or types of chats that will appear in this folder.";
 "FilterNameHint" = "Folder name";
 "FilterInclude" = "Included Chats";

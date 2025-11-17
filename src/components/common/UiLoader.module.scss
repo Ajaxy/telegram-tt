@@ -19,7 +19,16 @@
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-rows: 100%;
+    &.foldersSidebarVisible {
+      grid-template-columns: auto auto 1fr;
+    }
   }
+}
+
+.foldersSidebar {
+  width: var(--tabs-sidebar-width);
+  height: 100%;
+  background: var(--color-background-sidebar);
 }
 
 .left {

@@ -491,6 +491,7 @@ const MessageList = ({
       });
     } else {
       clearTimeout(scrollSnapDisabledTimerRef.current);
+      scrollSnapDisabledTimerRef.current = undefined;
       requestMutation(() => {
         removeExtraClass(container, BOTTOM_SNAP_CLASS);
       });
@@ -512,7 +513,10 @@ const MessageList = ({
       updateStickyDates(container);
     }
 
-    updateBottomSnapClass();
+    // Check if scroll should be snapped, but only if there's no new message animation in progress
+    if (scrollSnapDisabledTimerRef.current === undefined) {
+      updateBottomSnapClass();
+    }
 
     runDebouncedForScroll(() => {
       const global = getGlobal();
@@ -658,12 +662,14 @@ const MessageList = ({
 
     if (wasMessageAdded) {
       clearTimeout(scrollSnapDisabledTimerRef.current);
+      scrollSnapDisabledTimerRef.current = undefined;
 
       removeExtraClass(container, BOTTOM_SNAP_CLASS);
 
       scrollSnapDisabledTimerRef.current = window.setTimeout(() => {
         requestMutation(() => {
           addExtraClass(container, BOTTOM_SNAP_CLASS);
+          scrollSnapDisabledTimerRef.current = undefined;
         });
       }, MESSAGE_ANIMATION_DURATION);
     }

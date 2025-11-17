@@ -1,6 +1,6 @@
-import { memo } from '../../../lib/teact/teact';
+import { memo, useCallback } from '@teact';
 
-import type { ApiChatFolder } from '../../../api/types';
+import { type ApiChatFolder, ApiMessageEntityTypes } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import { REM } from '../../common/helpers/mediaDimensions';
@@ -16,12 +16,14 @@ const CUSTOM_EMOJI_SIZE = 0.875 * REM;
 type OwnProps = {
   orderedFolderIds?: number[];
   chatFoldersById?: Record<number, ApiChatFolder>;
+  isFoldersSidebarShown?: boolean;
   itemClassName?: string;
 };
 
 const ChatTags = ({
   orderedFolderIds,
   chatFoldersById,
+  isFoldersSidebarShown,
   itemClassName,
 }: OwnProps) => {
   if (!orderedFolderIds) {
@@ -30,6 +32,31 @@ const ChatTags = ({
 
   const visibleFolderIds = orderedFolderIds.slice(0, MAX_VISIBLE_TAGS);
   const remainingCount = orderedFolderIds.length - visibleFolderIds.length;
+
+  const getFolderTitle = useCallback((folder: ApiChatFolder) => {
+    let text = folder.title.text;
+    let entities = folder.title.entities;
+
+    if (isFoldersSidebarShown) {
+      const currentCustomEmoji = folder.title.entities?.find(
+        (entity) => entity.type === ApiMessageEntityTypes.CustomEmoji && entity.offset === 0);
+      if (currentCustomEmoji) {
+        const { offset, length } = currentCustomEmoji;
+
+        text = folder.title.text.replace(folder.title.text.substring(offset, offset + length), '');
+        entities = folder.title.entities?.filter((entity) => entity.offset !== offset).map((entity) => ({
+          ...entity,
+          offset: entity.offset - length,
+        }));
+      }
+    }
+    return renderTextWithEntities({
+      text,
+      entities,
+      noCustomEmojiPlayback: folder.noTitleAnimations,
+      emojiSize: CUSTOM_EMOJI_SIZE,
+    });
+  }, [isFoldersSidebarShown]);
 
   return (
     <div className={styles.wrapper}>
@@ -44,12 +71,7 @@ const ChatTags = ({
               itemClassName,
             )}
           >
-            {renderTextWithEntities({
-              text: folder.title.text,
-              entities: folder.title.entities,
-              noCustomEmojiPlayback: folder.noTitleAnimations,
-              emojiSize: CUSTOM_EMOJI_SIZE,
-            })}
+            {getFolderTitle(folder)}
           </div>
         );
       })}

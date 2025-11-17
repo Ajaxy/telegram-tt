@@ -3,6 +3,10 @@
   height: 100%;
   text-align: left;
 
+  &.tabs-sidebar-visible {
+    grid-template-columns: auto auto 1fr;
+  }
+
   @media (min-width: 1276px) {
     position: relative;
   }
@@ -209,6 +213,15 @@
 
     #Main.right-column-open & {
       transform: translate3d(-20vw, 0, 0);
+    }
+  }
+}
+
+@media (max-width: 925px) {
+  .tabs-sidebar-visible {
+    #LeftColumn {
+      left: var(--tabs-sidebar-width) !important;
+      width: 21.5rem !important;
     }
   }
 }

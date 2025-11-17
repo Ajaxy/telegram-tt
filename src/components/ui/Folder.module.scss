@@ -1,0 +1,115 @@
+.folder {
+  cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 0.375rem;
+  align-items: center;
+  justify-content: center;
+
+  width: var(--tabs-sidebar-width);
+  min-height: 4.5rem;
+  padding-right: 0.25rem;
+  padding-left: 0.375rem;
+  border-radius: 0;
+
+  &::before {
+    content: '';
+
+    position: absolute;
+    top: 0.625rem;
+    bottom: 0.625rem;
+    left: 0;
+    transform: translateX(-0.375rem) scaleY(0.5);
+
+    width: 0.3125rem;
+    border-start-end-radius: var(--border-radius-default);
+    border-end-end-radius: var(--border-radius-default);
+
+    background: var(--color-primary);
+
+    transition: transform var(--layer-transition);
+
+    body.no-page-transitions & {
+      transition: none;
+    }
+  }
+
+  .inner {
+    --emoji-size: 0.75rem;
+    --custom-emoji-size: 0.75rem;
+
+    font-size: 0.625rem;
+  }
+
+  .title {
+    overflow: hidden;
+
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+
+  .icon {
+    --emoji-size: 2rem;
+    --custom-emoji-size: 2rem;
+
+    position: relative;
+    font-size: 2.25rem; // Font icons are smaller than custom emojis
+    color: var(--color-text-secondary);
+  }
+
+  .badge {
+    position: absolute;
+    z-index: 1;
+    top: -0.25rem;
+    left: 1.25rem;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    padding: 0.125rem 0.375rem;
+    border: 2px solid var(--color-background-sidebar);
+    border-radius: 0.75rem;
+
+    font-size: 0.75rem;
+    font-weight: var(--font-weight-semibold);
+    line-height: normal;
+    color: var(--color-white);
+
+    background: var(--color-text-secondary);
+
+    &-active {
+      color: var(--color-white);
+      background: var(--color-primary);
+    }
+  }
+
+  .blocked {
+    vertical-align: middle;
+  }
+
+  &:hover {
+    background: var(--color-interactive-element-hover);
+  }
+
+  &.active {
+    &::before {
+      transform: translateX(0) scaleY(1);
+    }
+
+    .icon, .title {
+      color: var(--color-primary);
+    }
+
+    .badge {
+      color: var(--color-white);
+      background: var(--color-primary);
+    }
+  }
+}

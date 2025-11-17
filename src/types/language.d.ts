@@ -288,7 +288,8 @@ export interface LangPair {
   'ChatEmptyChat': undefined;
   'ChatListEmptyChatListEditFilter': undefined;
   'UpdateTelegram': undefined;
-  'AccDescrOpenMenu2': undefined;
+  'AriaLabelOpenMenu': undefined;
+  'AriaLabelBackChatList': undefined;
   'SettingsTipsUsername': undefined;
   'SearchFriends': undefined;
   'Search': undefined;
@@ -326,6 +327,9 @@ export interface LangPair {
   'FilterColorHint': undefined;
   'ShowFolderTags': undefined;
   'ShowFolderTagsHint': undefined;
+  'TabsPosition': undefined;
+  'TabsPositionLeft': undefined;
+  'TabsPositionTop': undefined;
   'FilterIncludeInfo': undefined;
   'FilterNameHint': undefined;
   'FilterInclude': undefined;

@@ -5,8 +5,10 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type { TabState } from '../../global/types';
 import { ApiMediaFormat } from '../../api/types';
 
+import { TABS_POSITION_LEFT } from '../../config';
 import { getChatAvatarHash } from '../../global/helpers/chats'; // Direct import for better module splitting
-import { selectIsRightColumnShown, selectTabState } from '../../global/selectors';
+import { selectAreFoldersPresent, selectIsRightColumnShown, selectTabState } from '../../global/selectors';
+import { selectSharedSettings } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
@@ -48,6 +50,7 @@ type OwnProps = {
 type StateProps = Pick<TabState, 'uiReadyState' | 'shouldSkipHistoryAnimations'> & {
   isRightColumnShown?: boolean;
   leftColumnWidth?: number;
+  isFoldersSidebarShown?: boolean;
 };
 
 const MAX_PRELOAD_DELAY = 700;
@@ -104,6 +107,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
   isRightColumnShown,
   shouldSkipHistoryAnimations,
   leftColumnWidth,
+  isFoldersSidebarShown,
 }) => {
   const { setIsUiReady } = getActions();
 
@@ -151,7 +155,8 @@ const UiLoader: FC<OwnProps & StateProps> = ({
       {shouldRenderMask && !shouldSkipHistoryAnimations && Boolean(page) && (
         <div className={buildClassName(styles.mask, transitionClassNames)}>
           {page === 'main' ? (
-            <div className={styles.main}>
+            <div className={buildClassName(styles.main, isFoldersSidebarShown && styles.foldersSidebarVisible)}>
+              {isFoldersSidebarShown && <div className={styles.foldersSidebar} />}
               <div
                 className={styles.left}
                 style={leftColumnWidth ? `width: ${leftColumnWidth}px` : undefined}
@@ -174,11 +179,14 @@ export default withGlobal<OwnProps>(
   (global, { isMobile }): Complete<StateProps> => {
     const tabState = selectTabState(global);
 
+    const { tabsPosition } = selectSharedSettings(global);
+
     return {
       shouldSkipHistoryAnimations: tabState.shouldSkipHistoryAnimations,
       uiReadyState: tabState.uiReadyState,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       leftColumnWidth: global.leftColumnWidth,
+      isFoldersSidebarShown: tabsPosition === TABS_POSITION_LEFT && !isMobile && selectAreFoldersPresent(global),
     };
   },
 )(UiLoader);

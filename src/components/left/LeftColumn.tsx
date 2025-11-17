@@ -38,6 +38,7 @@ import './LeftColumn.scss';
 
 interface OwnProps {
   ref: ElementRef<HTMLDivElement>;
+  isFoldersSidebarShown: boolean;
 }
 
 type StateProps = {
@@ -96,6 +97,7 @@ function LeftColumn({
   archiveSettings,
   isArchivedStoryRibbonShown,
   isAccountFrozen,
+  isFoldersSidebarShown,
 }: OwnProps & StateProps) {
   const {
     setGlobalSearchQuery,
@@ -541,6 +543,7 @@ function LeftColumn({
             isForumPanelOpen={isForumPanelOpen}
             onTopicSearch={handleTopicSearch}
             isAccountFrozen={isAccountFrozen}
+            isFoldersSidebarShown={isFoldersSidebarShown}
           />
         );
     }

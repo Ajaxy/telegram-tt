@@ -5,14 +5,20 @@ import {
 } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
-import type { ApiChatlistExportedInvite } from '../../../../api/types';
 import type {
   FolderEditDispatch,
   FoldersState,
 } from '../../../../hooks/reducers/useFoldersReducer';
+import {
+  type ApiChatlistExportedInvite,
+  type ApiMessageEntity,
+  type ApiMessageEntityCustomEmoji,
+  ApiMessageEntityTypes,
+  type ApiSticker,
+} from '../../../../api/types';
 
 import { FOLDER_TITLE_MAX_LENGTH, STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
-import { selectCanShareFolder, selectIsCurrentUserPremium } from '../../../../global/selectors';
+import { selectCanShareFolder, selectCustomEmoji, selectIsCurrentUserPremium } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import buildClassName from '../../../../util/buildClassName';
 import { isUserId } from '../../../../util/entities/ids';
@@ -24,16 +30,19 @@ import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEn
 
 import { selectChatFilters } from '../../../../hooks/reducers/useFoldersReducer';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
 import { getPeerColorClass } from '../../../../hooks/usePeerColor';
 
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
+import FolderIcon from '../../../common/FolderIcon';
 import GroupChatInfo from '../../../common/GroupChatInfo';
 import Icon from '../../../common/icons/Icon';
 import PrivateChatInfo from '../../../common/PrivateChatInfo';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
 import InputText from '../../../ui/InputText';
 import ListItem from '../../../ui/ListItem';
+import FolderIconPickerMenu from './FolderIconPickerMenu';
 
 type OwnProps = {
   state: FoldersState;
@@ -47,6 +56,7 @@ type OwnProps = {
   onReset: () => void;
   onBack: () => void;
   onSaveFolder: (cb?: VoidFunction) => void;
+  isMobile?: boolean;
 };
 
 type StateProps = {
@@ -69,6 +79,8 @@ const FOLDER_COLORS = [0, 1, 2, 3, 4, 5, 6];
 export const ERROR_NO_TITLE = 'Please provide a title for this folder.';
 export const ERROR_NO_CHATS = 'ChatList.Filter.Error.Empty';
 
+const DEFAULT_FOLDER_ICON = '🗂';
+
 const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   state,
   dispatch,
@@ -89,6 +101,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   chatListCount,
   onSaveFolder,
   isCurrentUserPremium,
+  isMobile,
 }) => {
   const {
     loadChatlistInvites,
@@ -102,6 +115,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
   const [isIncludedChatsListExpanded, setIsIncludedChatsListExpanded] = useState(false);
   const [isExcludedChatsListExpanded, setIsExcludedChatsListExpanded] = useState(false);
+  const [isIconPickerMenuOpen, setIsIconPickerMenuOpen] = useState(false);
 
   useEffect(() => {
     if (isRemoved) {
@@ -159,10 +173,65 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     onBack,
   });
 
+  const currentCustomEmoji = useMemo(() => state.folder.title.entities?.find(
+    (entity): entity is ApiMessageEntityCustomEmoji =>
+      entity.type === ApiMessageEntityTypes.CustomEmoji && entity.offset === 0,
+  ), [state.folder.title]);
+
+  const folderTitleMaxLength = useMemo(() => {
+    return FOLDER_TITLE_MAX_LENGTH - (currentCustomEmoji ? currentCustomEmoji.length : 0);
+  }, [currentCustomEmoji]);
+
+  const setEmoticon = useCallback((_emoticon: string | ApiSticker) => {
+    let text = state.folder.title.text;
+    const entities: ApiMessageEntity[] = [];
+    let emoticon = DEFAULT_FOLDER_ICON;
+    if (currentCustomEmoji) {
+      const { offset, length } = currentCustomEmoji;
+      text = text.replace(text.substring(offset, offset + length), '');
+    }
+    if (typeof _emoticon === 'string') {
+      emoticon = _emoticon;
+    } else {
+      const { id, emoji } = _emoticon;
+
+      entities.push({
+        type: ApiMessageEntityTypes.CustomEmoji,
+        documentId: id,
+        offset: 0,
+        length: emoji?.length || 2,
+      });
+      if (emoji) {
+        text = `${emoji}${text}`;
+        emoticon = emoji;
+        if (text.length > folderTitleMaxLength) {
+          text = text.slice(0, folderTitleMaxLength);
+        }
+      }
+    }
+
+    dispatch({ type: 'setEmoticon', payload: emoticon });
+    dispatch({ type: 'setTitle', payload: {
+      text,
+      entities,
+    } });
+  }, [dispatch, currentCustomEmoji, state.folder.title, folderTitleMaxLength]);
+
   const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const { currentTarget } = event;
-    dispatch({ type: 'setTitle', payload: currentTarget.value.trim() });
-  }, [dispatch]);
+
+    let title = currentTarget.value;
+
+    if (currentCustomEmoji) {
+      const { emoji } = selectCustomEmoji(getGlobal(), currentCustomEmoji.documentId);
+      title = `${emoji}${title}`;
+    }
+
+    dispatch({ type: 'setTitle', payload: {
+      text: title,
+      entities: currentCustomEmoji ? [currentCustomEmoji] : [],
+    } });
+  }, [dispatch, currentCustomEmoji]);
 
   const handleSubmit = useCallback(() => {
     dispatch({ type: 'setIsLoading', payload: true });
@@ -287,6 +356,27 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     );
   }
 
+  const handleEmojiSelect = useLastCallback((emoji: string | ApiSticker) => {
+    setEmoticon(emoji);
+  });
+
+  const handleIconPickerClose = useLastCallback(() => {
+    setIsIconPickerMenuOpen(false);
+  });
+
+  const handleIconPickerOpen = useLastCallback(() => {
+    setIsIconPickerMenuOpen(true);
+  });
+
+  const titleText = useMemo(() => {
+    let title = state.folder.title.text;
+    if (currentCustomEmoji) {
+      const { offset, length } = currentCustomEmoji;
+      title = title.substring(offset + length, title.length);
+    }
+    return title;
+  }, [state.folder.title.text, currentCustomEmoji]);
+
   return (
     <div className="settings-fab-wrapper">
       <div className="settings-content no-border custom-scroll">
@@ -303,15 +393,36 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
               {lang('FilterIncludeInfo')}
             </p>
           )}
+          <div className="settings-folders-input-container">
+            <InputText
+              className={buildClassName('mb-0', !isMobile && 'settings-folders-input-with-icon')}
+              label={lang('FilterNameHint')}
+              value={titleText}
+              maxLength={folderTitleMaxLength}
+              onChange={handleChange}
+              error={state.error && state.error === ERROR_NO_TITLE ? ERROR_NO_TITLE : undefined}
+            />
 
-          <InputText
-            className="mb-0"
-            label={lang('FilterNameHint')}
-            value={state.folder.title.text}
-            maxLength={FOLDER_TITLE_MAX_LENGTH}
-            onChange={handleChange}
-            error={state.error && state.error === ERROR_NO_TITLE ? ERROR_NO_TITLE : undefined}
-          />
+            {!isMobile && (
+              <div className="settings-folders-icon-picker" dir={lang.isRtl ? 'rtl' : undefined}>
+                <div
+                  className="settings-folders-icon-picker-button"
+                  onClick={handleIconPickerOpen}
+                >
+                  <FolderIcon
+                    emoji={state.folder.emoticon}
+                    customEmojiId={currentCustomEmoji?.documentId}
+                    shouldAnimate={state.folder.noTitleAnimations}
+                  />
+                </div>
+                <FolderIconPickerMenu
+                  isOpen={isIconPickerMenuOpen}
+                  onEmojiSelect={handleEmojiSelect}
+                  onClose={handleIconPickerClose}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {!isOnlyInvites && (

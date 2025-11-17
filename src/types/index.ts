@@ -100,6 +100,7 @@ export type ThreadId = string | number;
 
 export type ThemeKey = 'light' | 'dark';
 export type AnimationLevel = 0 | 1 | 2;
+export type TabsPosition = 'top' | 'left';
 export type PerformanceTypeKey = (
   'pageTransitions' | 'messageSendingAnimations' | 'mediaViewerAnimations'
   | 'messageComposerAnimations' | 'contextMenuAnimations' | 'contextMenuBlur' | 'rightColumnAnimations'

@@ -141,6 +141,10 @@ export const DEFAULT_MESSAGE_TEXT_SIZE_PX = 16;
 export const IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX = 17;
 export const MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX = 15;
 
+export const TABS_POSITION_TOP = 'top';
+export const TABS_POSITION_LEFT = 'left';
+export const TABS_POSITION_DEFAULT = TABS_POSITION_TOP;
+
 export const PREVIEW_AVATAR_COUNT = 3;
 
 export const DRAFT_DEBOUNCE = 10000; // 10s
