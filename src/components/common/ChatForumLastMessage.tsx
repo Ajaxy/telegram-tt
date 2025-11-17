@@ -64,7 +64,7 @@ const ChatForumLastMessage = ({
     handleClick: handleOpenTopicClick,
     handleMouseDown: handleOpenTopicMouseDown,
   } = useFastClick((e: React.MouseEvent<HTMLDivElement>) => {
-    if (lastActiveTopic.unreadCount === 0 || chat.isForumAsMessages) return;
+    if (lastActiveTopic.unreadCount === 0 || (chat.isForumAsMessages && !chat.isBotForum)) return;
 
     e.stopPropagation();
     e.preventDefault();
