@@ -14,10 +14,10 @@ type HookParamsWithMediaDataAndShouldRender<RefType extends HTMLElement>
   };
 
 export default function useMediaTransition<RefType extends HTMLElement = HTMLDivElement>(
-  params: HookParamsWithMediaData<RefType>
+  params: HookParamsWithMediaData<RefType>,
 ): HookResult<RefType>;
 export default function useMediaTransition<RefType extends HTMLElement = HTMLDivElement>(
-  params: HookParamsWithMediaDataAndShouldRender<RefType>
+  params: HookParamsWithMediaDataAndShouldRender<RefType>,
 ): HookResultWithShouldRender<RefType>;
 export default function useMediaTransition<RefType extends HTMLElement = HTMLDivElement>(
   params: HookParamsWithMediaData<RefType> | HookParamsWithMediaDataAndShouldRender<RefType>,

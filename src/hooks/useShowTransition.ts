@@ -54,10 +54,10 @@ type State =
  * Use for showing and hiding small elements with transitions. For large elements, use {@link useMediaTransition}.
  */
 export default function useShowTransition<RefType extends HTMLElement = HTMLDivElement>(
-  params: HookParams<RefType>
+  params: HookParams<RefType>,
 ): HookResult<RefType>;
 export default function useShowTransition<RefType extends HTMLElement = HTMLDivElement>(
-  params: HookParamsWithShouldRender<RefType>
+  params: HookParamsWithShouldRender<RefType>,
 ): HookResultWithShouldRender<RefType>;
 export default function useShowTransition<RefType extends HTMLElement = HTMLDivElement>(
   params: HookParams<RefType> | HookParamsWithShouldRender<RefType>,
