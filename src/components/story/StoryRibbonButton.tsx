@@ -1,4 +1,3 @@
-import type React from '../../lib/teact/teact';
 import { memo, useRef } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -7,12 +6,14 @@ import { StoryViewerOrigin } from '../../types';
 
 import { getPeerTitle } from '../../global/helpers/peers';
 import buildClassName from '../../util/buildClassName';
+import { formatMediaDuration } from '../../util/dates/dateFormat';
 import { isUserId } from '../../util/entities/ids';
+import { getServerTime } from '../../util/serverTime';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import useStoryPreloader from './hooks/useStoryPreloader';
 
 import Avatar from '../common/Avatar';
@@ -24,17 +25,22 @@ import styles from './StoryRibbon.module.scss';
 interface OwnProps {
   peer: ApiPeer;
   isArchived?: boolean;
+  stealthModeActiveUntil?: number;
 }
 
-function StoryRibbonButton({ peer, isArchived }: OwnProps) {
+const STEALTH_MODE_NOTIFICATION_DURATION = 1000;
+
+function StoryRibbonButton({ peer, isArchived, stealthModeActiveUntil }: OwnProps) {
   const {
     openChat,
     openChatWithInfo,
     openStoryViewer,
     toggleStoriesHidden,
+    openStealthModal,
+    showNotification,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const ref = useRef<HTMLDivElement>();
 
   const isSelf = 'isSelf' in peer && peer.isSelf;
@@ -84,6 +90,21 @@ function StoryRibbonButton({ peer, isArchived }: OwnProps) {
     toggleStoriesHidden({ peerId: peer.id, isHidden: !isArchived });
   });
 
+  const handleOpenStealth = useLastCallback(() => {
+    const diff = stealthModeActiveUntil ? stealthModeActiveUntil - getServerTime() : 0;
+    if (diff > 0) {
+      showNotification({
+        title: lang('StealthModeOnTitle'),
+        message: lang('StealthModeOnHint', { time: formatMediaDuration(diff) }),
+        duration: STEALTH_MODE_NOTIFICATION_DURATION,
+      });
+      openStoryViewer({ peerId: peer.id, origin: StoryViewerOrigin.StoryRibbon });
+      return;
+    }
+
+    openStealthModal({ targetPeerId: peer.id });
+  });
+
   return (
     <div
       ref={ref}
@@ -102,7 +123,7 @@ function StoryRibbonButton({ peer, isArchived }: OwnProps) {
         storyViewerMode="full"
       />
       <div className={buildClassName(styles.name, peer.hasUnreadStories && styles.name_hasUnreadStory)}>
-        {isSelf ? lang('MyStory') : getPeerTitle(lang, peer)}
+        {isSelf ? lang('StoryRibbonMyStory') : getPeerTitle(lang, peer)}
       </div>
       {contextMenuAnchor !== undefined && (
         <Menu
@@ -121,33 +142,38 @@ function StoryRibbonButton({ peer, isArchived }: OwnProps) {
           {isSelf ? (
             <>
               <MenuItem onClick={handleSavedStories} icon="play-story">
-                {lang('StoryList.Context.SavedStories')}
+                {lang('StoryMenuSavedStories')}
               </MenuItem>
               <MenuItem onClick={handleArchivedStories} icon="archive">
-                {lang('StoryList.Context.ArchivedStories')}
+                {lang('StoryMenuArchivedStories')}
               </MenuItem>
             </>
           ) : (
             <>
               {!isChannel && (
                 <MenuItem onClick={handleOpenChat} icon="message">
-                  {lang('SendMessageTitle')}
+                  {lang('StoryMenuSendMessage')}
                 </MenuItem>
               )}
               {isChannel ? (
                 <MenuItem onClick={handleOpenProfile} icon="channel">
-                  {lang('ChatList.ContextOpenChannel')}
+                  {lang('StoryMenuViewChannel')}
                 </MenuItem>
               ) : (
                 <MenuItem onClick={handleOpenProfile} icon="user">
-                  {lang('StoryList.Context.ViewProfile')}
+                  {lang('StoryMenuViewProfile')}
+                </MenuItem>
+              )}
+              {!isChannel && (
+                <MenuItem onClick={handleOpenStealth} icon="eye-crossed-outline">
+                  {lang('StoryMenuOpenStealth')}
                 </MenuItem>
               )}
               <MenuItem
                 onClick={handleArchivePeer}
                 icon={isArchived ? 'unarchive' : 'archive'}
               >
-                {lang(isArchived ? 'StoryList.Context.Unarchive' : 'StoryList.Context.Archive')}
+                {lang(isArchived ? 'StoryMenuUnarchivePeer' : 'StoryMenuArchivePeer')}
               </MenuItem>
             </>
           )}

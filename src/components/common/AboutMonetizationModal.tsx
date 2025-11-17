@@ -94,6 +94,7 @@ const AboutMonetizationModal: FC<OwnProps> = ({
       isOpen={isOpen}
       listItemData={modalData.listItemData}
       headerIconName="cash-circle"
+      headerIconPremiumGradient
       withSeparator
       header={modalData.header}
       footer={modalData.footer}

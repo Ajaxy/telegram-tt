@@ -35,6 +35,7 @@ export type OwnProps = {
   pill?: boolean;
   badge?: boolean;
   fluid?: boolean;
+  inline?: boolean;
   isText?: boolean;
   isLoading?: boolean;
   ariaLabel?: string;
@@ -88,6 +89,7 @@ const Button: FC<OwnProps> = ({
   pill,
   badge,
   fluid,
+  inline,
   isText,
   isLoading,
   isShiny,
@@ -157,6 +159,7 @@ const Button: FC<OwnProps> = ({
     withPremiumGradient && 'premium',
     isRectangular && 'rectangular',
     noForcedUpperCase && 'no-upper-case',
+    inline && 'inline',
     iconAlignment && iconName && `content-with-icon-${iconAlignment}`,
   );
 

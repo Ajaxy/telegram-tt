@@ -41,7 +41,6 @@ import useInputCustomEmojis from './hooks/useInputCustomEmojis';
 
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
-import TextTimer from '../../ui/TextTimer';
 import TextFormatter from './TextFormatter.async';
 
 const CONTEXT_MENU_CLOSE_DELAY_MS = 100;
@@ -63,23 +62,21 @@ type OwnProps = {
   isActive: boolean;
   getHtml: Signal<string>;
   placeholder: TeactNode | string;
-  timedPlaceholderLangKey?: string;
-  timedPlaceholderDate?: number;
   forcedPlaceholder?: string;
   noFocusInterception?: boolean;
   canAutoFocus: boolean;
   shouldSuppressFocus?: boolean;
   shouldSuppressTextFormatter?: boolean;
   canSendPlainText?: boolean;
+  isNeedPremium?: boolean;
+  messageListType?: MessageListType;
+  captionLimit?: number;
   onUpdate: (html: string) => void;
   onSuppressedFocus?: () => void;
   onSend: () => void;
   onScroll?: (event: React.UIEvent<HTMLElement>) => void;
-  captionLimit?: number;
   onFocus?: NoneToVoidFunction;
   onBlur?: NoneToVoidFunction;
-  isNeedPremium?: boolean;
-  messageListType?: MessageListType;
 };
 
 type StateProps = {
@@ -127,8 +124,6 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   isActive,
   getHtml,
   placeholder,
-  timedPlaceholderLangKey,
-  timedPlaceholderDate,
   forcedPlaceholder,
   canSendPlainText,
   canAutoFocus,
@@ -139,14 +134,14 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   isSelectModeActive,
   canPlayAnimatedEmojis,
   messageSendKeyCombo,
+  isNeedPremium,
+  messageListType,
   onUpdate,
   onSuppressedFocus,
   onSend,
   onScroll,
   onFocus,
   onBlur,
-  isNeedPremium,
-  messageListType,
 }) => {
   const {
     editLastMessage,
@@ -176,16 +171,6 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const [isTextFormatterDisabled, setIsTextFormatterDisabled] = useState<boolean>(false);
   const { isMobile } = useAppLayout();
   const isMobileDevice = isMobile && (IS_IOS || IS_ANDROID);
-
-  const [shouldDisplayTimer, setShouldDisplayTimer] = useState(false);
-
-  useEffect(() => {
-    setShouldDisplayTimer(Boolean(timedPlaceholderLangKey && timedPlaceholderDate));
-  }, [timedPlaceholderDate, timedPlaceholderLangKey]);
-
-  const handleTimerEnd = useLastCallback(() => {
-    setShouldDisplayTimer(false);
-  });
 
   useInputCustomEmojis(
     getHtml,
@@ -611,9 +596,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
             >
               {!isAttachmentModalInput && !canSendPlainText
                 && <Icon name="lock-badge" className="placeholder-icon" />}
-              {shouldDisplayTimer ? (
-                <TextTimer langKey={timedPlaceholderLangKey!} endsAt={timedPlaceholderDate!} onEnd={handleTimerEnd} />
-              ) : placeholder}
+              {placeholder}
               {isStoryInput && isNeedPremium && (
                 <Button className="unlock-button" size="tiny" color="adaptive" onClick={handleOpenPremiumModal}>
                   {oldLang('StoryRepliesLockedButton')}

@@ -1745,6 +1745,27 @@ export interface LangPair {
   'InviteRestrictedPremiumReason': undefined;
   'InviteViaLinkButton': undefined;
   'StoryUnsupported': undefined;
+  'StoryRibbonMyStory': undefined;
+  'StoryMenuSavedStories': undefined;
+  'StoryMenuArchivedStories': undefined;
+  'StoryMenuSendMessage': undefined;
+  'StoryMenuViewProfile': undefined;
+  'StoryMenuViewChannel': undefined;
+  'StoryMenuOpenStealth': undefined;
+  'StoryMenuArchivePeer': undefined;
+  'StoryMenuUnarchivePeer': undefined;
+  'StealthModeOnTitle': undefined;
+  'StealthModeOnHintEnabled': undefined;
+  'StealthModeTitle': undefined;
+  'StealthModeDescription': undefined;
+  'StealthModeDescriptionPremium': undefined;
+  'StealthModeHideRecentTitle': undefined;
+  'StealthModeHideRecentDescription': undefined;
+  'StealthModeHideFutureTitle': undefined;
+  'StealthModeHideFutureDescription': undefined;
+  'StealthModeButtonPremium': undefined;
+  'StealthModeButton': undefined;
+  'StealthModeButtonToStory': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -1899,6 +1920,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'ReportChat': {
     'peer': V;
+  };
+  'SlowModePlaceholder': {
+    'timer': V;
   };
   'SlowModeHint': {
     'time': V;
@@ -2997,6 +3021,15 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'InviteRestrictedPremiumReasonMultiple': {
     'list': V;
+  };
+  'StealthModeOnHint': {
+    'time': V;
+  };
+  'StealthModeButtonRecharge': {
+    'timer': V;
+  };
+  'StealthModeComposerPlaceholder': {
+    'timer': V;
   };
 }
 

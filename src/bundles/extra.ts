@@ -105,3 +105,4 @@ export { default as WebAppsCloseConfirmationModal } from '../components/main/Web
 export { default as FrozenAccountModal } from '../components/modals/frozenAccount/FrozenAccountModal';
 export { default as ProfileRatingModal } from '../components/modals/profileRating/ProfileRatingModal';
 export { default as QuickPreviewModal } from '../components/modals/quickPreview/QuickPreviewModal';
+export { default as StealthModeModal } from '../components/modals/storyStealthMode/StealthModeModal';

@@ -1700,9 +1700,10 @@ export interface ActionPayloads {
     reaction?: ApiReaction;
     shouldAddToRecent?: boolean;
   } & WithTabId;
-  toggleStealthModal: {
-    isOpen: boolean;
-  } & WithTabId;
+  openStealthModal: ({
+    targetPeerId: string;
+  } | Record<string, never>) & WithTabId;
+  closeStealthModal: WithTabId | undefined;
   activateStealthMode: {
     isForPast?: boolean;
     isForFuture?: boolean;

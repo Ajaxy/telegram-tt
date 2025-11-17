@@ -25,7 +25,6 @@
 }
 
 .Button {
-
   --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
 
   cursor: var(--custom-cursor, pointer);
@@ -56,6 +55,8 @@
 
   transition: background-color 0.15s, color 0.15s, opacity 0.15s;
 
+  white-space-collapse: preserve;
+
   // @optimization
   &:active,
   &.clicked,
@@ -65,6 +66,10 @@
 
   &.no-upper-case {
     text-transform: none;
+  }
+
+  &.inline {
+    display: inline;
   }
 
   &.disabled {

@@ -50,6 +50,7 @@ import StarsBalanceModal from './stars/StarsBalanceModal.async';
 import StarsPaymentModal from './stars/StarsPaymentModal.async';
 import StarsSubscriptionModal from './stars/subscription/StarsSubscriptionModal.async';
 import StarsTransactionInfoModal from './stars/transaction/StarsTransactionModal.async';
+import StealthModeModal from './storyStealthMode/StealthModeModal.async';
 import SuggestedPostApprovalModal from './suggestedPostApproval/SuggestedPostApprovalModal.async';
 import SuggestedStatusModal from './suggestedStatus/SuggestedStatusModal.async';
 import SuggestMessageModal from './suggestMessage/SuggestMessageModal.async';
@@ -105,7 +106,8 @@ type ModalKey = keyof Pick<TabState,
   'deleteAccountModal' |
   'isAgeVerificationModalOpen' |
   'profileRatingModal' |
-  'quickPreview'
+  'quickPreview' |
+  'storyStealthModal'
 >;
 
 type StateProps = {
@@ -169,6 +171,7 @@ const MODALS: ModalRegistry = {
   isAgeVerificationModalOpen: AgeVerificationModal,
   profileRatingModal: ProfileRatingModal,
   quickPreview: QuickPreviewModal,
+  storyStealthModal: StealthModeModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

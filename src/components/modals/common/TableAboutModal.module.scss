@@ -12,24 +12,28 @@
 }
 
 .topIcon {
-  --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
-
   display: grid;
   flex-shrink: 0;
   place-items: center;
 
   width: 6rem;
   height: 6rem;
-  margin-bottom: 1rem;
   border-radius: 50%;
 
   font-size: 4rem;
-  color: white;
+  color: var(--color-white);
+
+  background: var(--color-primary);
+}
+
+.premiumGradient {
+  --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
 
   background: var(--premium-gradient);
 }
 
 .listItemIcon {
+  font-size: 1.875rem !important;
   color: var(--accent-color) !important;
 }
 
@@ -37,6 +41,7 @@
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
   align-items: center;
 }
 

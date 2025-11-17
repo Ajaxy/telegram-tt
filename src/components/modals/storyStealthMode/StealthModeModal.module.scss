@@ -1,0 +1,12 @@
+.title {
+  margin-block: 0;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  text-wrap: balance;
+}

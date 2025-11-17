@@ -369,9 +369,12 @@ function processTranslation(
   variables?: Record<string, LangVariable | RegularLangFnParameters>,
   options?: LangFnOptions | LangFnOptionsWithPlural,
 ): string {
-  const cacheKey = `${langKey}-${JSON.stringify(variables)}-${JSON.stringify(options)}`;
-  if (TRANSLATION_CACHE.has(cacheKey)) {
-    return TRANSLATION_CACHE.get(cacheKey)!;
+  const isCacheable = !options?.withNodes;
+  const cacheKey = isCacheable ? `${langKey}-${JSON.stringify(variables)}-${JSON.stringify(options)}` : undefined;
+  if (cacheKey) {
+    if (TRANSLATION_CACHE.has(cacheKey)) {
+      return TRANSLATION_CACHE.get(cacheKey)!;
+    }
   }
 
   const pluralValue = options && 'pluralValue' in options ? Number(options.pluralValue) : 0;
@@ -390,7 +393,9 @@ function processTranslation(
     return result.replaceAll(`{${key}}`, valueAsString);
   }, string);
 
-  TRANSLATION_CACHE.set(cacheKey, finalString);
+  if (cacheKey) {
+    TRANSLATION_CACHE.set(cacheKey, finalString);
+  }
 
   return finalString;
 }

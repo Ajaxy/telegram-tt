@@ -133,6 +133,7 @@ const AboutAdsModal = ({ modal, minLevelToRestrictAds }: OwnProps & StateProps) 
           isOpen={isOpen}
           listItemData={modalData?.listItemData}
           headerIconName="channel"
+          headerIconPremiumGradient
           withSeparator
           header={modalData?.header}
           footer={modalData?.footer}

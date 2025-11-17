@@ -6,10 +6,6 @@
   width: 100%;
 }
 
-.titleContainer {
-  padding-bottom: 0.5rem;
-}
-
 .profileBlock {
   position: relative;
   margin-bottom: 0.5rem;
@@ -47,7 +43,6 @@
 }
 
 .status {
-  padding-bottom: 1rem;
   font-size: 0.875rem;
   text-align: center;
 }
@@ -58,7 +53,6 @@
 }
 
 .giftTitle {
-  padding-bottom: 0.5rem;
   font-size: 1.5rem;
   font-weight: var(--font-weight-medium);
   text-align: center;
@@ -71,5 +65,4 @@
 .footer {
   display: flex;
   align-self: stretch;
-  margin-top: 0.5rem;
 }

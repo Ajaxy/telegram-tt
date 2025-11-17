@@ -29,7 +29,6 @@ import useStoryProps from './hooks/useStoryProps';
 import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import ShowTransition from '../ui/ShowTransition';
-import StealthModeModal from './StealthModeModal';
 import StoryDeleteConfirmModal from './StoryDeleteConfirmModal';
 import StorySettings from './StorySettings';
 import StorySlides from './StorySlides';
@@ -175,7 +174,6 @@ function StoryViewer({
         onClose={handleCloseDeleteModal}
       />
       <StoryViewModal />
-      <StealthModeModal />
       <StorySettings isOpen={isPrivacyModalOpen} onClose={closeStoryPrivacyEditor} />
     </ShowTransition>
   );

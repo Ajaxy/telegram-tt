@@ -91,27 +91,31 @@ const FrozenAccountModal = ({
     );
   }, [lang, isOpen]);
 
-  if (!freezeUntilDate || !botFreezeAppealUsername) return undefined;
+  const listItemData = useMemo(() => {
+    if (!freezeUntilDate || !botFreezeAppealUsername) return undefined;
 
-  const date = new Date(freezeUntilDate * 1000);
+    const date = new Date(freezeUntilDate * 1000);
 
-  const botLink = (
-    <Link onClick={handleAppeal} isPrimary>
-      {formatUsername(botFreezeAppealUsername)}
-    </Link>
-  );
+    const botLink = (
+      <Link onClick={handleAppeal} isPrimary>
+        {formatUsername(botFreezeAppealUsername)}
+      </Link>
+    );
 
-  const listItemData = [
-    ['hand-stop', lang('FrozenAccountViolationTitle'), lang('FrozenAccountViolationSubtitle')],
-    ['lock', lang('FrozenAccountReadOnlyTitle'), lang('FrozenAccountReadOnlySubtitle')],
-    ['frozen-time', lang('FrozenAccountAppealTitle'),
-      lang('FrozenAccountAppealSubtitle', {
-        botLink,
-        date: formatDateToString(date, lang.code),
-      }, {
-        withNodes: true,
-      })],
-  ] satisfies TableAboutData;
+    return [
+      ['hand-stop', lang('FrozenAccountViolationTitle'), lang('FrozenAccountViolationSubtitle')],
+      ['lock', lang('FrozenAccountReadOnlyTitle'), lang('FrozenAccountReadOnlySubtitle')],
+      ['frozen-time', lang('FrozenAccountAppealTitle'),
+        lang('FrozenAccountAppealSubtitle', {
+          botLink,
+          date: formatDateToString(date, lang.code),
+        }, {
+          withNodes: true,
+        })],
+    ] satisfies TableAboutData;
+  }, [lang, botFreezeAppealUsername, freezeUntilDate]);
+
+  if (!listItemData) return undefined;
 
   return (
     <TableAboutModal

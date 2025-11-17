@@ -138,11 +138,9 @@ const PublicPostsSearchLauncher = ({
           </Button>
           {Boolean(waitTill) && (
             <div className={styles.freeSearchUnlock}>
-              <TextTimer
-                langKey="UnlockTimerPublicPostsSearch"
-                endsAt={waitTill + WAIT_DELAY}
-                onEnd={onCheckFlood}
-              />
+              {lang('UnlockTimerPublicPostsSearch', {
+                time: <TextTimer endsAt={waitTill + WAIT_DELAY} onEnd={onCheckFlood} />,
+              }, { withNodes: true })}
             </div>
           )}
         </div>

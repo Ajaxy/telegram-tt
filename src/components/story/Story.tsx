@@ -137,11 +137,11 @@ function Story({
   isCurrentUserPremium,
   stealthMode,
   withHeaderAnimation,
+  paidMessagesStars,
+  isAccountFrozen,
   onDelete,
   onClose,
   onReport,
-  paidMessagesStars,
-  isAccountFrozen,
 }: OwnProps & StateProps) {
   const {
     viewStory,
@@ -158,7 +158,7 @@ function Story({
     loadPeerSettings,
     fetchChat,
     loadStoryViews,
-    toggleStealthModal,
+    openStealthModal,
   } = getActions();
   const serverTime = getServerTime();
 
@@ -211,7 +211,7 @@ function Story({
     isOut && (story.date + viewersExpirePeriod) < getServerTime(),
   );
 
-  const forwardSenderTitle = forwardSender ? getPeerTitle(oldLang, forwardSender)
+  const forwardSenderTitle = forwardSender ? getPeerTitle(lang, forwardSender)
     : (isLoadedStory && story.forwardInfo?.fromName);
 
   const canCopyLink = Boolean(
@@ -505,7 +505,7 @@ function Story({
       : story.isForContacts ? 'contacts' : (story.isForCloseFriends ? 'closeFriends' : 'nobody');
 
     let message;
-    const myName = getPeerTitle(oldLang, peer);
+    const myName = getPeerTitle(lang, peer);
     switch (visibility) {
       case 'nobody':
         message = oldLang('StorySelectedContactsHint', myName);
@@ -538,14 +538,14 @@ function Story({
     if (stealthMode.activeUntil && getServerTime() < stealthMode.activeUntil) {
       const diff = stealthMode.activeUntil - getServerTime();
       showNotification({
-        title: oldLang('StealthModeOn'),
-        message: oldLang('Story.ToastStealthModeActiveText', formatMediaDuration(diff)),
+        title: lang('StealthModeOnTitle'),
+        message: lang('StealthModeOnHint', { time: formatMediaDuration(diff) }),
         duration: STEALTH_MODE_NOTIFICATION_DURATION,
       });
       return;
     }
 
-    toggleStealthModal({ isOpen: true });
+    openStealthModal({});
   });
 
   const handleDownload = useLastCallback(() => {
@@ -656,7 +656,7 @@ function Story({
         />
         <div className={styles.senderMeta}>
           <span onClick={handleOpenChat} className={styles.senderName}>
-            {renderText(getPeerTitle(oldLang, peer) || '')}
+            {renderText(getPeerTitle(lang, peer) || '')}
           </span>
           <div className={styles.storyMetaRow}>
             {forwardSenderTitle && (
@@ -681,7 +681,7 @@ function Story({
               >
                 <Avatar peer={fromPeer} size="micro" />
                 <span className={styles.headerTitle}>
-                  {renderText(getPeerTitle(oldLang, fromPeer) || '')}
+                  {renderText(getPeerTitle(lang, fromPeer) || '')}
                 </span>
               </span>
             )}
@@ -882,7 +882,7 @@ function Story({
                 withStory
                 storyViewerMode="disabled"
               />
-              <div className={styles.name}>{renderText(getPeerTitle(oldLang, peer) || '')}</div>
+              <div className={styles.name}>{renderText(getPeerTitle(lang, peer) || '')}</div>
             </div>
           </div>
         )}
@@ -949,7 +949,6 @@ export default memo(withGlobal<OwnProps>((global, {
       isMuted,
       viewModal,
       isPrivacyModalOpen,
-      isStealthModalOpen,
       storyList,
     },
     forwardMessages: { storyId: forwardedStoryId },
@@ -959,8 +958,10 @@ export default memo(withGlobal<OwnProps>((global, {
     reportModal,
     giftInfoModal,
     isPaymentMessageConfirmDialogOpen,
+    storyStealthModal,
   } = tabState;
   const { isOpen: isPremiumModalOpen } = premiumModal || {};
+  const isStealthModalOpen = Boolean(storyStealthModal);
   const story = selectPeerStory(global, peerId, storyId);
   const isLoadedStory = story && 'content' in story;
   const shouldForcePause = Boolean(

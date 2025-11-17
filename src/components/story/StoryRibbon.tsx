@@ -21,6 +21,7 @@ interface OwnProps {
 
 interface StateProps {
   orderedPeerIds: string[];
+  stealthModeActiveUntil?: number;
   usersById: Record<string, ApiUser>;
   chatsById: Record<string, ApiChat>;
 }
@@ -29,6 +30,7 @@ function StoryRibbon({
   isArchived,
   className,
   orderedPeerIds,
+  stealthModeActiveUntil,
   usersById,
   chatsById,
   isClosing,
@@ -65,6 +67,7 @@ function StoryRibbon({
             key={peerId}
             peer={peer}
             isArchived={isArchived}
+            stealthModeActiveUntil={stealthModeActiveUntil}
           />
         );
       })}
@@ -78,8 +81,11 @@ export default memo(withGlobal<OwnProps>(
     const usersById = global.users.byId;
     const chatsById = global.chats.byId;
 
+    const stealthMode = global.stories.stealthMode;
+
     return {
       orderedPeerIds: isArchived ? archived : active,
+      stealthModeActiveUntil: stealthMode.activeUntil,
       usersById,
       chatsById,
     };

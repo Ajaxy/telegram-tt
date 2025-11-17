@@ -136,6 +136,7 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useDerivedState from '../../hooks/useDerivedState';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
+import useForceUpdate from '../../hooks/useForceUpdate';
 import useGetSelectionRange from '../../hooks/useGetSelectionRange';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -187,6 +188,7 @@ import ReactionSelector from '../middle/message/reactions/ReactionSelector';
 import Button from '../ui/Button';
 import ResponsiveHoverButton from '../ui/ResponsiveHoverButton';
 import Spinner from '../ui/Spinner';
+import TextTimer from '../ui/TextTimer';
 import Transition from '../ui/Transition';
 import AnimatedCounter from './AnimatedCounter';
 import Avatar from './Avatar';
@@ -484,6 +486,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const lastMessageSendTimeSeconds = useRef<number>();
   const prevDropAreaState = usePreviousDeprecated(dropAreaState);
   const { width: windowWidth } = windowSize.get();
+  const forceUpdate = useForceUpdate();
 
   const isInMessageList = type === 'messageList';
   const isInStoryViewer = type === 'story';
@@ -1662,18 +1665,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     && messageListType === 'thread';
   const isBotMenuButtonOpen = withBotMenuButton && !hasText && !activeVoiceRecording;
 
-  const [timedPlaceholderLangKey, timedPlaceholderDate] = useMemo(() => {
-    if (slowMode?.nextSendDate) {
-      return ['SlowModeWait', slowMode.nextSendDate];
-    }
-
-    if (stealthMode?.activeUntil && isInStoryViewer) {
-      return ['StealthModeActiveHint', stealthMode.activeUntil];
-    }
-
-    return [];
-  }, [isInStoryViewer, slowMode?.nextSendDate, stealthMode?.activeUntil]);
-
   const isComposerHasFocus = isBotKeyboardOpen || isSymbolMenuOpen || isEmojiTooltipOpen || isSendAsMenuOpen
     || isMentionTooltipOpen || isInlineBotTooltipOpen || isBotCommandMenuOpen || isAttachMenuOpen
     || isStickerTooltipOpen || isChatCommandTooltipOpen || isCustomEmojiTooltipOpen || isBotMenuButtonOpen
@@ -1681,12 +1672,21 @@ const Composer: FC<OwnProps & StateProps> = ({
   const isReactionSelectorOpen = isComposerHasFocus && !isReactionPickerOpen && isInStoryViewer && !isAttachMenuOpen
     && !isSymbolMenuOpen;
 
+  const slowModePlaceholder = (() => {
+    if (!slowMode?.nextSendDate || slowMode.nextSendDate < getServerTime()) return undefined;
+
+    return lang('SlowModePlaceholder', {
+      timer: <TextTimer endsAt={slowMode.nextSendDate} onEnd={forceUpdate} />,
+    }, { withNodes: true });
+  })();
+
   const placeholder = useMemo(() => {
     if (activeVoiceRecording && windowWidth <= SCREEN_WIDTH_TO_HIDE_PLACEHOLDER) {
       return '';
     }
 
     if (!isComposerBlocked) {
+      if (slowModePlaceholder) return slowModePlaceholder;
       if (botKeyboardPlaceholder) return botKeyboardPlaceholder;
       if (inputPlaceholder) return inputPlaceholder;
       if (paidMessagesStars) {
@@ -1699,6 +1699,12 @@ const Composer: FC<OwnProps & StateProps> = ({
 
       if (isReplying && hasSuggestedPost) {
         return lang('ComposerPlaceholderCaption');
+      }
+
+      if (stealthMode?.activeUntil && isInStoryViewer && stealthMode.activeUntil > getServerTime()) {
+        return lang('StealthModeComposerPlaceholder', {
+          timer: <TextTimer endsAt={stealthMode.activeUntil} onEnd={forceUpdate} />,
+        }, { withNodes: true });
       }
 
       if (chat?.adminRights?.anonymous) {
@@ -1722,7 +1728,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [
     activeVoiceRecording, botKeyboardPlaceholder, chat, inputPlaceholder, isChannel, isComposerBlocked,
     isInStoryViewer, isSilentPosting, lang, replyToTopic, isReplying, threadId, windowWidth, paidMessagesStars,
-    hasSuggestedPost,
+    hasSuggestedPost, slowModePlaceholder, stealthMode?.activeUntil,
   ]);
 
   useEffect(() => {
@@ -2172,8 +2178,6 @@ const Composer: FC<OwnProps & StateProps> = ({
             isActive={!hasAttachments}
             getHtml={getHtml}
             placeholder={placeholder}
-            timedPlaceholderDate={timedPlaceholderDate}
-            timedPlaceholderLangKey={timedPlaceholderLangKey}
             forcedPlaceholder={inlineBotHelp}
             canAutoFocus={isReady && isForCurrentMessageList && !hasAttachments && isInMessageList}
             noFocusInterception={hasAttachments}

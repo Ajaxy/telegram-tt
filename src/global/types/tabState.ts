@@ -335,7 +335,6 @@ export type TabState = {
     lastViewedByPeerId?: Record<string, number>;
     isPrivacyModalOpen?: boolean;
     isPaymentConfirmDialogOpen?: boolean;
-    isStealthModalOpen?: boolean;
     viewModal?: {
       storyId: number;
       views?: ApiTypeStoryView[];
@@ -349,6 +348,9 @@ export type TabState = {
       storyIdsByPeerId: Record<string, number[]>;
     };
   };
+  storyStealthModal?: {
+    targetPeerId: string;
+  } | Record<string, never>;
 
   selectedStoryAlbumId?: number;
 

@@ -107,19 +107,13 @@ const GiftStatusInfoModal = ({
             {lang('Online')}
           </p>
         </div>
-        <div className={styles.titleContainer}>
-          <div className={styles.giftTitle}>
-            {
-              lang('UniqueStatusWearTitle', {
-                gift: mockPeerWithStatus?.emojiStatus?.title,
-              })
-            }
-          </div>
-          <div className={styles.infoDescription}>
-            {
-              lang('UniqueStatusBenefitsDescription')
-            }
-          </div>
+        <div className={styles.giftTitle}>
+          {lang('UniqueStatusWearTitle', {
+            gift: mockPeerWithStatus?.emojiStatus?.title,
+          })}
+        </div>
+        <div className={styles.infoDescription}>
+          {lang('UniqueStatusBenefitsDescription')}
         </div>
       </div>
     );
