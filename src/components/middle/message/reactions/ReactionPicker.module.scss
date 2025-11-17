@@ -1,6 +1,5 @@
 .menu {
-  position: absolute;
-  z-index: var(--z-reaction-picker);
+  z-index: var(--z-reaction-picker) !important;
 
   @media (max-width: 600px) {
     right: 0 !important;

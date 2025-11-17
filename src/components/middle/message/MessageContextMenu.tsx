@@ -250,7 +250,6 @@ const MessageContextMenu: FC<OwnProps> = ({
   const shouldShowGiftButton = isUserId(message.chatId)
     && canGift && (isPremiumGift || isGiftCode || isStarGift || isStarGiftUnique);
 
-  const [areItemsHidden, hideItems] = useFlag();
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
   const { isMobile } = useAppLayout();
   const seenByDatesCount = useMemo(() => (seenByDates ? Object.keys(seenByDates).length : 0), [seenByDates]);
@@ -266,12 +265,6 @@ const MessageContextMenu: FC<OwnProps> = ({
     openGiftModal({ forUserId: message.chatId });
     onClose();
   });
-
-  useEffect(() => {
-    if (isOpen && areItemsHidden && !isReactionPickerOpen) {
-      onClose();
-    }
-  }, [onClose, isOpen, isReactionPickerOpen, areItemsHidden]);
 
   useEffect(() => {
     if (customEmojiSets?.length) {
@@ -348,7 +341,7 @@ const MessageContextMenu: FC<OwnProps> = ({
 
   const handleOpenMessageReactionPicker = useLastCallback((position: IAnchorPosition) => {
     onReactionPickerOpen!(position);
-    hideItems();
+    onClose();
   });
 
   return (
@@ -388,7 +381,6 @@ const MessageContextMenu: FC<OwnProps> = ({
           canPlayAnimatedEmojis={canPlayAnimatedEmojis}
           onShowMore={handleOpenMessageReactionPicker}
           onClose={onClose}
-          className={buildClassName(areItemsHidden && 'ReactionSelector-hidden')}
         />
       )}
 
@@ -396,7 +388,6 @@ const MessageContextMenu: FC<OwnProps> = ({
         ref={scrollableRef}
         className={buildClassName(
           'MessageContextMenu_items scrollable-content custom-scroll',
-          areItemsHidden && 'MessageContextMenu_items-hidden',
         )}
         dir={lang.isRtl ? 'rtl' : undefined}
       >

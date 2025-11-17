@@ -7,11 +7,6 @@
     overflow: auto;
     overscroll-behavior: contain;
     padding: 0.5rem 0;
-
-    &-hidden {
-      opacity: 0;
-      transition: 300ms opacity;
-    }
   }
 
   &.compact &_items {
@@ -80,9 +75,4 @@
     top: 0;
     transform: translateY(calc(-100% - 0.5rem));
   }
-}
-
-.ReactionSelector-hidden {
-  opacity: 0;
-  transition: 300ms opacity;
 }
