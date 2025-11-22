@@ -151,10 +151,15 @@ const File = ({
         <div className="file-title" dir="auto" title={name}>{renderText(name)}</div>
         <div className="file-subtitle" dir="auto">
           <AnimatedFileSize size={size} progress={isTransferring ? transferProgress : undefined} />
-          {sender && <span className="file-sender">{renderText(sender)}</span>}
+          {sender && (
+            <>
+              <span className="bullet">&bull;</span>
+              <span className="file-sender">{renderText(sender)}</span>
+            </>
+          )}
           {!sender && Boolean(timestamp) && (
             <>
-              <span className="bullet" />
+              <span className="bullet">&bull;</span>
               <Link onClick={onDateClick}>{formatMediaDateTime(oldLang, timestamp * 1000, true)}</Link>
             </>
           )}

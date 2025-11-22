@@ -67,7 +67,7 @@ const AnimatedFileSize = ({
 
   useUnmountCleanup(resetAnimation);
 
-  const currentSizeString = formatFileSize(lang, currentSize);
+  const currentSizeString = formatFileSize(lang, currentSize, 2);
   const totalSizeString = formatFileSize(lang, size);
 
   if (progress === undefined || progress === 1) {

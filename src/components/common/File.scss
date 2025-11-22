@@ -179,12 +179,10 @@
     line-height: 0.9375rem;
     color: var(--secondary-color);
     text-overflow: ellipsis;
+  }
 
-    span + span {
-      &::before {
-        content: "\00a0\2022\00a0";
-      }
-    }
+  .bullet {
+    padding-inline: 0.25rem;
   }
 
   &.smaller {
