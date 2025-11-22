@@ -286,7 +286,7 @@ const ActionMessage = ({
           isGift: true,
           fromUserId: sender?.id,
           toUserId: sender && sender.id === currentUserId ? chatId : currentUserId,
-          monthsAmount: action.months,
+          daysAmount: action.days,
         });
         break;
       }

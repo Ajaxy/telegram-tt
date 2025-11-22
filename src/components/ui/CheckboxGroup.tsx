@@ -2,7 +2,7 @@ import type { ChangeEvent } from 'react';
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 
-import type { ApiUser } from '../../api/types';
+import type { ApiPeer } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
 import { unique } from '../../util/iteratees';
@@ -17,7 +17,7 @@ export type IRadioOption = {
   disabled?: boolean;
   value: string;
   nestedOptions?: IRadioOption[];
-  user?: ApiUser;
+  peer?: ApiPeer;
 };
 
 type OwnProps = {
@@ -77,7 +77,7 @@ const CheckboxGroup: FC<OwnProps> = ({
             label={option.label}
             subLabel={option.subLabel}
             value={option.value}
-            user={option.user}
+            peer={option.peer}
             checked={selected?.indexOf(option.value) !== -1}
             disabled={option.disabled || disabled}
             isLoading={loadingOptions ? loadingOptions.indexOf(option.value) !== -1 : undefined}

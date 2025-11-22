@@ -2645,6 +2645,21 @@ export interface LangPairWithVariables<V = LangVariable> {
     'from': V;
     'amount': V;
   };
+  'ActionGiveawayResultPremiumDuration': {
+    'channel': V;
+    'duration': V;
+  };
+  'ActionGiftCodeSubscriptionDuration': {
+    'peer': V;
+    'duration': V;
+  };
+  'ActionGiftCodeSubscriptionDurationYou': {
+    'peer': V;
+    'duration': V;
+  };
+  'ActionGiftPremiumDuration': {
+    'duration': V;
+  };
   'TonAmount': {
     'amount': V;
   };
@@ -2978,6 +2993,14 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'ButtonSensitiveAlways': {
     'years': V;
+  };
+  'DialogTitlePremiumGiftSentTo': {
+    'user': V;
+    'amount': V;
+  };
+  'DialogTitlePremiumGiftReceivedFrom': {
+    'user': V;
+    'amount': V;
   };
   'DescriptionComposerGiftMinimumCurrencyPrice': {
     'amount': V;

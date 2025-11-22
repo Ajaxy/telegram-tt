@@ -10,7 +10,7 @@ import type {
 } from '../../../api/types';
 
 import { getPeerFullTitle, getPeerTitle } from '../../../global/helpers/peers';
-import { selectIsCurrentUserPremium, selectSender, selectUser } from '../../../global/selectors';
+import { selectIsCurrentUserPremium, selectPeer, selectSender } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
@@ -92,13 +92,13 @@ const TodoList = ({
   const isOutgoing = message.isOutgoing;
 
   const tasks = useMemo(() => items.map((task) => {
-    const user = !othersCanComplete ? undefined : selectUser(getGlobal(),
-      completions?.find((c) => c.itemId === task.id)?.completedBy || '');
-    const subLabel = user ? getPeerFullTitle(lang, user) : undefined;
+    const completedBy = completions?.find((c) => c.itemId === task.id)?.completedBy;
+    const peer = !othersCanComplete || !completedBy ? undefined : selectPeer(getGlobal(), completedBy);
+    const subLabel = peer ? getPeerFullTitle(lang, peer) : undefined;
     return {
       label: renderTextWithEntities(task.title),
       value: task.id.toString(),
-      user,
+      peer,
       subLabel,
     };
   }), [items, othersCanComplete, completions, lang]);

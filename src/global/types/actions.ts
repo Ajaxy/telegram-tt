@@ -2493,7 +2493,7 @@ export interface ActionPayloads {
     toUserId?: string;
     isSuccess?: boolean;
     isGift?: boolean;
-    monthsAmount?: number;
+    daysAmount?: number;
     gift?: ApiStarGift;
   } & WithTabId) | undefined;
   closePremiumModal: WithTabId | undefined;

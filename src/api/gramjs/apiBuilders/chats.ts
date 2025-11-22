@@ -81,7 +81,7 @@ function buildApiChatFieldsFromPeerEntity(
   const isScam = userOrChannel?.scam;
   const isFake = userOrChannel?.fake;
   const areStoriesHidden = userOrChannel?.storiesHidden;
-  const maxStoryId = userOrChannel?.storiesMaxId;
+  const maxStoryId = userOrChannel?.storiesMaxId?.maxId;
   const botVerificationIconId = userOrChannel?.botVerificationIcon?.toString();
   const storiesUnavailable = userOrChannel?.storiesUnavailable;
   const color = userOrChannel?.color ? buildApiPeerColor(userOrChannel.color) : undefined;

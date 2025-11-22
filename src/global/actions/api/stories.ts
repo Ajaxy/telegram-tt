@@ -600,11 +600,11 @@ addActionHandler('loadStoriesMaxIds', async (global, actions, payload): Promise<
   result.forEach((maxId, i) => {
     const peer = peers[i];
     global = updatePeer(global, peer.id, {
-      maxStoryId: maxId,
-      hasStories: maxId !== 0,
+      maxStoryId: maxId.maxId,
+      hasStories: Boolean(maxId.maxId),
     });
 
-    if (maxId !== 0) {
+    if (maxId.maxId !== 0) {
       peerIdsToLoad.push(peer.id);
     }
   });

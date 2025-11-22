@@ -484,7 +484,7 @@ addActionHandler('closePremiumModal', (global, actions, payload): ActionReturnTy
 
 addActionHandler('openPremiumModal', async (global, actions, payload): Promise<void> => {
   const {
-    initialSection, fromUserId, isSuccess, isGift, monthsAmount, toUserId, gift,
+    initialSection, fromUserId, isSuccess, isGift, daysAmount, toUserId, gift,
     tabId = getCurrentTabId(),
   } = payload || {};
 
@@ -503,7 +503,7 @@ addActionHandler('openPremiumModal', async (global, actions, payload): Promise<v
       fromUserId,
       toUserId,
       isGift,
-      monthsAmount,
+      daysAmount,
       isSuccess,
       gift,
     },

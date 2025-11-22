@@ -13,6 +13,7 @@ import {
   selectGiftStickerForStars,
   selectGiftStickerForTon,
 } from '../../../../global/selectors';
+import { formatCountdownDays } from '../../../../util/dates/dateFormat';
 import { formatCurrency } from '../../../../util/formatCurrency';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
@@ -80,7 +81,7 @@ const GiftAction = ({
       <div className={styles.info}>
         <h3 className={styles.title}>
           {action.type === 'giftPremium' ? (
-            lang('ActionGiftPremiumTitle', { months: action.months }, { pluralValue: action.months })
+            lang('ActionGiftPremiumDuration', { duration: formatCountdownDays(lang, action.days) })
           ) : action.type === 'giftStars' ? (
             lang('ActionGiftStarsTitle', { amount: action.stars }, { pluralValue: action.stars })
           ) : renderTonTitle()}
@@ -104,7 +105,7 @@ const GiftAction = ({
 export default memo(withGlobal<OwnProps>(
   (global, { action }): Complete<StateProps> => {
     const sticker = action.type === 'giftPremium'
-      ? selectGiftStickerForDuration(global, action.months)
+      ? selectGiftStickerForDuration(global, action.days)
       : action.type === 'giftStars'
         ? selectGiftStickerForStars(global, action.stars)
         : selectGiftStickerForTon(global, action.cryptoAmount);

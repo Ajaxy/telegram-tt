@@ -111,6 +111,24 @@ export function formatCountdown(
   }
 }
 
+export function formatCountdownDays(
+  lang: LangFn,
+  days: number,
+) {
+  if (days < 7) {
+    return lang('Days', { count: days }, { pluralValue: days });
+  } else if (days < 30) {
+    const count = Math.floor(days / 7);
+    return lang('Weeks', { count }, { pluralValue: count });
+  } else if (days < 360) {
+    const count = Math.floor(days / 30);
+    return lang('Months', { count }, { pluralValue: count });
+  } else {
+    const count = Math.floor(days / 360);
+    return lang('Years', { count }, { pluralValue: count });
+  }
+}
+
 export function formatCountdownShort(lang: OldLangFn, msLeft: number): string {
   if (msLeft < 60 * 1000) {
     return Math.ceil(msLeft / 1000).toString();

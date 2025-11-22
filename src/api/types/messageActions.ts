@@ -142,7 +142,7 @@ export interface ApiMessageActionGiftPremium extends ActionMediaType {
   type: 'giftPremium';
   currency: string;
   amount: number;
-  months: number;
+  days: number;
   cryptoCurrency?: string;
   cryptoAmount?: number;
   message?: ApiFormattedText;
@@ -173,7 +173,7 @@ export interface ApiMessageActionGiftCode extends ActionMediaType {
   isViaGiveaway?: true;
   isUnclaimed?: true;
   boostPeerId?: string;
-  months: number;
+  days: number;
   slug: string;
   currency?: string;
   amount?: number;

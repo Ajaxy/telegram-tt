@@ -652,7 +652,7 @@ export type TabState = {
     fromUserId?: string;
     toUserId?: string;
     isGift?: boolean;
-    monthsAmount?: number;
+    daysAmount?: number;
     isSuccess?: boolean;
     gift?: ApiStarGift;
   };

@@ -425,12 +425,12 @@ export function buildApiGiveawayInfo(info: GramJs.payments.TypeGiveawayInfo): Ap
 
 export function buildApiCheckedGiftCode(giftcode: GramJs.payments.TypeCheckedGiftCode): ApiCheckedGiftCode {
   const {
-    date, fromId, months, giveawayMsgId, toId, usedDate, viaGiveaway,
+    date, fromId, days, giveawayMsgId, toId, usedDate, viaGiveaway,
   } = giftcode;
 
   return {
     date,
-    months,
+    days,
     toId: toId !== undefined ? buildApiPeerId(toId, 'user') : undefined,
     fromId: fromId && getApiChatIdFromMtpPeer(fromId),
     usedAt: usedDate,

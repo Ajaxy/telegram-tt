@@ -7,7 +7,7 @@ import {
   useState,
 } from '../../lib/teact/teact';
 
-import type { ApiUser } from '../../api/types';
+import type { ApiPeer } from '../../api/types';
 import type { IconName } from '../../types/icons';
 import type { IRadioOption } from './CheckboxGroup';
 
@@ -30,7 +30,7 @@ type OwnProps = {
   id?: string;
   name?: string;
   value?: string;
-  user?: ApiUser;
+  peer?: ApiPeer;
   label?: TeactNode;
   labelText?: TeactNode;
   subLabel?: string;
@@ -62,7 +62,7 @@ const Checkbox: FC<OwnProps> = ({
   name,
   value,
   label,
-  user,
+  peer,
   labelText,
   subLabel,
   checked,
@@ -88,7 +88,7 @@ const Checkbox: FC<OwnProps> = ({
   const lang = useLang();
   const labelRef = useRef<HTMLLabelElement>();
   const [showNested, setShowNested] = useState(false);
-  const renderingUser = useCurrentOrPrev(user, true);
+  const renderingPeer = useCurrentOrPrev(peer, true);
 
   const handleChange = useLastCallback((event: ChangeEvent<HTMLInputElement>) => {
     if (disabled) {
@@ -159,10 +159,10 @@ const Checkbox: FC<OwnProps> = ({
           Boolean(leftElement) && 'Nested-avatar-list',
         )}
         >
-          <div className={buildClassName('user-avatar', renderingUser && 'user-avatar-visible')}>
-            {renderingUser && (
+          <div className={buildClassName('user-avatar', renderingPeer && 'user-avatar-visible')}>
+            {renderingPeer && (
               <Avatar
-                peer={renderingUser}
+                peer={renderingPeer}
                 size={AVATAR_SIZE}
               />
             )}

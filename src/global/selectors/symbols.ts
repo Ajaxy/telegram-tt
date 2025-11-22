@@ -7,13 +7,22 @@ import { convertCurrencyFromBaseUnit } from '../../util/formatCurrency';
 import { selectTabState } from './tabs';
 import { selectIsCurrentUserPremium } from './users';
 
+// Duration in days
+const MONTH = 30;
+const QUARTER_YEAR = MONTH * 3;
+const HALF_YEAR = MONTH * 6;
+const YEAR = MONTH * 12;
+const TWO_YEARS = MONTH * 24;
+
+const DURATION_DELTA = 5;
+
 // https://github.com/DrKLO/Telegram/blob/c319639e9a4dff2f22da6762dcebd12d49f5afa1/TMessagesProj/src/main/java/org/telegram/ui/Components/Premium/boosts/cells/msg/GiveawayMessageCell.java#L59
-const MONTH_EMOTICON: Record<number, string> = {
-  1: `${1}\u{FE0F}\u20E3`,
-  3: `${2}\u{FE0F}\u20E3`,
-  6: `${3}\u{FE0F}\u20E3`,
-  12: `${4}\u{FE0F}\u20E3`,
-  24: `${5}\u{FE0F}\u20E3`,
+const DURATION_EMOTICON: Record<number, string> = {
+  [MONTH]: `${1}\u{FE0F}\u20E3`, // 1 month
+  [QUARTER_YEAR]: `${2}\u{FE0F}\u20E3`, // 3 months
+  [HALF_YEAR]: `${3}\u{FE0F}\u20E3`, // 6 months
+  [YEAR]: `${4}\u{FE0F}\u20E3`, // 12 months
+  [TWO_YEARS]: `${5}\u{FE0F}\u20E3`, // 24 months
 };
 
 const STAR_EMOTICON: Record<number, string> = {
@@ -178,10 +187,29 @@ export function selectIsAlwaysHighPriorityEmoji<T extends GlobalState>(
     || stickerSet.id === RESTRICTED_EMOJI_SET_ID;
 }
 
-export function selectGiftStickerForDuration<T extends GlobalState>(global: T, duration = 1) {
+function findDurationEmoji(days: number): string {
+  if (days <= MONTH) {
+    return DURATION_EMOTICON[MONTH];
+  }
+  if (days <= QUARTER_YEAR) {
+    return DURATION_EMOTICON[QUARTER_YEAR];
+  }
+  if (days <= HALF_YEAR + DURATION_DELTA) {
+    return DURATION_EMOTICON[HALF_YEAR];
+  }
+  if (days <= YEAR + DURATION_DELTA) {
+    return DURATION_EMOTICON[YEAR];
+  }
+
+  return DURATION_EMOTICON[TWO_YEARS];
+}
+
+export function selectGiftStickerForDuration<T extends GlobalState>(global: T, days = 30) {
   const stickers = global.premiumGifts?.stickers;
   if (!stickers) return undefined;
-  const emoji = MONTH_EMOTICON[duration];
+
+  const emoji = findDurationEmoji(days);
+
   return stickers.find((sticker) => sticker.emoji === emoji) || stickers[0];
 }
 

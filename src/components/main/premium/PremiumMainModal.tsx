@@ -25,6 +25,7 @@ import {
 } from '../../../global/selectors';
 import { selectPremiumLimit } from '../../../global/selectors/limits';
 import buildClassName from '../../../util/buildClassName';
+import { formatCountdownDays } from '../../../util/dates/dateFormat';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { getStickerFromGift } from '../../common/helpers/gifts';
 import { REM } from '../../common/helpers/mediaDimensions';
@@ -106,7 +107,7 @@ type StateProps = {
   isPremium?: boolean;
   isSuccess?: boolean;
   isGift?: boolean;
-  monthsAmount?: number;
+  daysAmount?: number;
   gift?: ApiStarGift;
   limitChannels: number;
   limitPins: number;
@@ -137,7 +138,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   isSuccess,
   isGift,
   toUser,
-  monthsAmount,
+  daysAmount,
   premiumPromoOrder,
   gift,
 }) => {
@@ -288,10 +289,11 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     }
 
     if (isGift) {
+      const formattedDuration = daysAmount ? formatCountdownDays(lang, daysAmount) : '';
       return renderText(
         fromUser?.id === currentUserId
-          ? oldLang('TelegramPremiumUserGiftedPremiumOutboundDialogTitle', [getUserFullName(toUser), monthsAmount])
-          : oldLang('TelegramPremiumUserGiftedPremiumDialogTitle', [getUserFullName(fromUser), monthsAmount]),
+          ? lang('DialogTitlePremiumGiftSentTo', { user: getUserFullName(toUser), amount: formattedDuration })
+          : lang('DialogTitlePremiumGiftReceivedFrom', { user: getUserFullName(fromUser), amount: formattedDuration }),
         ['simple_markdown', 'emoji'],
       );
     }
@@ -525,7 +527,7 @@ export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
     promo: premiumModal?.promo,
     isSuccess: premiumModal?.isSuccess,
     isGift: premiumModal?.isGift,
-    monthsAmount: premiumModal?.monthsAmount,
+    daysAmount: premiumModal?.daysAmount,
     gift: premiumModal?.gift,
     fromUser,
     fromUserStatusEmoji,

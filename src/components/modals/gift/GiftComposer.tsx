@@ -115,7 +115,7 @@ function GiftComposer({
             type: 'giftPremium',
             amount: currentGift.amount,
             currency: currentGift.currency,
-            months: gift.months,
+            days: gift.months * 30,
             message: giftMessage ? { text: giftMessage } : undefined,
           },
         },

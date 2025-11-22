@@ -110,10 +110,11 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   }
 
   const {
-    id, firstName, lastName, fake, scam, support, closeFriend, storiesUnavailable, storiesMaxId,
+    id, firstName, lastName, fake, scam, support, closeFriend, storiesUnavailable,
     bot, botActiveUsers, botVerificationIcon, botInlinePlaceholder, botAttachMenu, botCanEdit,
     sendPaidMessagesStars, profileColor, botForumView,
   } = mtpUser;
+  const storiesMaxId = mtpUser.storiesMaxId?.maxId;
   const hasVideoAvatar = mtpUser.photo instanceof GramJs.UserProfilePhoto ? Boolean(mtpUser.photo.hasVideo) : undefined;
   const avatarPhotoId = mtpUser.photo && buildAvatarPhotoId(mtpUser.photo);
   const userType = buildApiUserType(mtpUser);

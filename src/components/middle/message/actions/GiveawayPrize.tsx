@@ -11,7 +11,8 @@ import {
   selectGiftStickerForDuration,
   selectGiftStickerForStars,
 } from '../../../../global/selectors';
-import { renderPeerLink, translateWithYou } from '../helpers/messageActions';
+import { formatCountdownDays } from '../../../../util/dates/dateFormat';
+import { renderPeerLink } from '../helpers/messageActions';
 
 import { type ObserveFn } from '../../../../hooks/useIntersectionObserver';
 import useLang from '../../../../hooks/useLang';
@@ -93,21 +94,20 @@ const GiveawayPrizeAction = ({
         <div>
           {action.type === 'giftCode' && (
             action.isViaGiveaway ? lang(
-              'ActionGiveawayResultPremiumText',
-              { channel: channelLink, months: action.months },
+              'ActionGiveawayResultPremiumDuration',
+              { channel: channelLink, duration: formatCountdownDays(lang, action.days) },
               {
                 withNodes: true,
                 withMarkdown: true,
-                pluralValue: action.months,
                 renderTextFilters: ['br'],
               })
-              : translateWithYou(
-                lang,
-                'ActionGiftCodeSubscriptionText',
-                sender?.id === currentUserId,
-                { peer: peerLink, months: action.months },
+              : lang(
+                sender?.id === currentUserId
+                  ? 'ActionGiftCodeSubscriptionDurationYou'
+                  : 'ActionGiftCodeSubscriptionDuration',
+                { peer: peerLink, duration: formatCountdownDays(lang, action.days) },
                 {
-                  pluralValue: action.months,
+                  withNodes: true,
                   renderTextFilters: ['br'],
                 })
           )}
@@ -137,7 +137,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { action }): Complete<StateProps> => {
     const currentUserId = global.currentUserId!;
     const sticker = action.type === 'giftCode'
-      ? selectGiftStickerForDuration(global, action.months)
+      ? selectGiftStickerForDuration(global, action.days)
       : selectGiftStickerForStars(global, action.stars);
     const canPlayAnimatedEmojis = selectCanPlayAnimatedEmojis(global);
 

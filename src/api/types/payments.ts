@@ -276,7 +276,7 @@ export type ApiCheckedGiftCode = {
   giveawayMessageId?: number;
   toId?: string;
   date: number;
-  months: number;
+  days: number;
   usedAt?: number;
 };
 

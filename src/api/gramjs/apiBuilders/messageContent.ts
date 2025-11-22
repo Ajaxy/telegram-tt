@@ -741,7 +741,7 @@ export function buildTodo(todo: GramJs.TodoList, completions?: GramJs.TodoComple
 
   const todoCompletions = completions?.map((completion) => ({
     itemId: completion.id,
-    completedBy: completion.completedBy.toString(),
+    completedBy: getApiChatIdFromMtpPeer(completion.completedBy),
     completedAt: completion.date,
   }));
 
