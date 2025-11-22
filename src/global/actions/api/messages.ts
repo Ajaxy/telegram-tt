@@ -1545,7 +1545,7 @@ addActionHandler('sendScheduledMessages', (global, actions, payload): ActionRetu
 
 addActionHandler('rescheduleMessage', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, messageId, scheduledAt,
+    chatId, messageId, scheduledAt, scheduleRepeatPeriod,
   } = payload;
 
   const chat = selectChat(global, chatId);
@@ -1558,6 +1558,7 @@ addActionHandler('rescheduleMessage', (global, actions, payload): ActionReturnTy
     chat,
     message,
     scheduledAt,
+    scheduleRepeatPeriod,
   });
 });
 
@@ -1610,19 +1611,19 @@ addActionHandler('loadCustomEmojis', async (global, actions, payload): Promise<v
 
 addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType => {
   const {
-    isSilent, scheduledAt, tabId = getCurrentTabId(),
+    isSilent, scheduledAt, scheduleRepeatPeriod, tabId = getCurrentTabId(),
   } = payload;
   const { toChatId } = selectTabState(global, tabId).forwardMessages;
   const toChat = toChatId ? selectChat(global, toChatId) : undefined;
   if (!toChat) return;
-  executeForwardMessages(global, { chat: toChat, isSilent, scheduledAt }, tabId);
+  executeForwardMessages(global, { chat: toChat, isSilent, scheduledAt, scheduleRepeatPeriod }, tabId);
 });
 
 async function executeForwardMessages(global: GlobalState, sendParams: SendMessageParams, tabId: number) {
   const {
     fromChatId, messageIds, toChatId, withMyScore, noAuthors, noCaptions, toThreadId = MAIN_THREAD_ID,
   } = selectTabState(global, tabId).forwardMessages;
-  const { messagePriceInStars, isSilent, scheduledAt } = sendParams;
+  const { messagePriceInStars, isSilent, scheduledAt, scheduleRepeatPeriod } = sendParams;
 
   const isCurrentUserPremium = selectIsCurrentUserPremium(global);
   const isToMainThread = toThreadId === MAIN_THREAD_ID;
@@ -1659,6 +1660,7 @@ async function executeForwardMessages(global: GlobalState, sendParams: SendMessa
         messages: slice,
         isSilent,
         scheduledAt,
+        scheduleRepeatPeriod,
         sendAs,
         withMyScore,
         noAuthors,
@@ -1696,6 +1698,7 @@ async function executeForwardMessages(global: GlobalState, sendParams: SendMessa
       sticker,
       isSilent,
       scheduledAt,
+      scheduleRepeatPeriod,
       sendAs,
       lastMessageId,
     };

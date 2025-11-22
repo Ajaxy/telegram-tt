@@ -2,6 +2,8 @@
 export const MINUTE = 60;
 export const HOUR = 3600;
 export const DAY = 86400;
+export const WEEK = 7 * DAY;
+export const MONTH = 30 * DAY;
 
 export function getMinutes(seconds: number, roundDown?: boolean) {
   const roundFunc = roundDown ? Math.floor : Math.ceil;

@@ -648,6 +648,7 @@ export interface ApiMessage {
   viaBusinessBotId?: string;
   postAuthorTitle?: string;
   isScheduled?: boolean;
+  scheduleRepeatPeriod?: number;
   shouldHideKeyboardButtons?: boolean;
   isHideKeyboardSelective?: boolean;
   isFromScheduled?: boolean;

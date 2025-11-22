@@ -125,9 +125,9 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     };
 
     if (shouldSchedule || isScheduleRequested) {
-      requestCalendar((scheduledAt) => {
+      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
         sendMessage({
-          messageList: currentMessageList, sticker, isSilent, scheduledAt,
+          messageList: currentMessageList, sticker, isSilent, scheduledAt, scheduleRepeatPeriod,
         });
         onClose();
       });

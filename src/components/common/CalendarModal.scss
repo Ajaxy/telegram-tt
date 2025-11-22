@@ -6,6 +6,28 @@
     }
   }
 
+  .repeat-mode {
+    position: relative;
+
+    .repeat-mode-button {
+      margin-bottom: 0.5rem;
+    }
+
+    .drop-down-icon {
+      transition: transform 0.3s ease;
+    }
+
+    .expanded-icon {
+      transform: rotate(-180deg);
+    }
+
+    .repeated-mode-transition-slide {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
   .timepicker {
     display: flex;
     align-items: center;

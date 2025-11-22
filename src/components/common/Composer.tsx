@@ -1079,6 +1079,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     sendGrouped = attachmentSettings.shouldSendGrouped,
     isSilent,
     scheduledAt,
+    scheduleRepeatPeriod,
     isInvertedMedia,
   }: {
     attachments: ApiAttachment[];
@@ -1086,6 +1087,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     sendGrouped?: boolean;
     isSilent?: boolean;
     scheduledAt?: number;
+    scheduleRepeatPeriod?: number;
     isInvertedMedia?: true;
   }) => {
     if (!currentMessageList && !storyId) {
@@ -1110,6 +1112,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         text,
         entities,
         scheduledAt,
+        scheduleRepeatPeriod,
         isSilent,
         shouldUpdateStickerSetOrder,
         attachments: prepareAttachmentsToSend(attachmentsToSend, sendCompressed),
@@ -1159,6 +1162,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     isSilent?: boolean,
     scheduledAt?: number,
     isInvertedMedia?: true,
+    scheduleRepeatPeriod?: number,
   ) => {
     if (canSendAttachments(attachments)) {
       sendAttachments({
@@ -1167,13 +1171,19 @@ const Composer: FC<OwnProps & StateProps> = ({
         sendGrouped,
         isSilent,
         scheduledAt,
+        scheduleRepeatPeriod,
         isInvertedMedia,
       });
     }
   });
 
   const handleSendCore = useLastCallback(
-    (currentAttachments: ApiAttachment[], isSilent = false, scheduledAt?: number) => {
+    (
+      currentAttachments: ApiAttachment[],
+      isSilent = false,
+      scheduledAt?: number,
+      scheduleRepeatPeriod?: number,
+    ) => {
       const { text, entities } = parseHtmlAsFormattedText(getHtml());
 
       if (currentAttachments.length) {
@@ -1181,6 +1191,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           sendAttachments({
             attachments: currentAttachments,
             scheduledAt,
+            scheduleRepeatPeriod,
             isSilent,
           });
         }
@@ -1209,6 +1220,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           text,
           entities,
           scheduledAt,
+          scheduleRepeatPeriod,
           isSilent,
           shouldUpdateStickerSetOrder,
           isInvertedMedia,
@@ -1235,7 +1247,11 @@ const Composer: FC<OwnProps & StateProps> = ({
     },
   );
 
-  const handleSend = useLastCallback(async (isSilent = false, scheduledAt?: number) => {
+  const handleSend = useLastCallback(async (
+    isSilent = false,
+    scheduledAt?: number,
+    scheduleRepeatPeriod?: number,
+  ) => {
     if (!currentMessageList && !storyId) {
       return;
     }
@@ -1257,11 +1273,15 @@ const Composer: FC<OwnProps & StateProps> = ({
       }
     }
 
-    handleSendCore(currentAttachments, isSilent, scheduledAt);
+    handleSendCore(currentAttachments, isSilent, scheduledAt, scheduleRepeatPeriod);
   });
 
-  const handleSendWithConfirmation = useLastCallback((isSilent = false, scheduledAt?: number) => {
-    handleActionWithPaymentConfirmation(handleSend, isSilent, scheduledAt);
+  const handleSendWithConfirmation = useLastCallback((
+    isSilent = false,
+    scheduledAt?: number,
+    scheduleRepeatPeriod?: number,
+  ) => {
+    handleActionWithPaymentConfirmation(handleSend, isSilent, scheduledAt, scheduleRepeatPeriod);
   });
 
   const handleTodoListCreate = useLastCallback(() => {
@@ -1302,7 +1322,11 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const handleMessageSchedule = useLastCallback((
-    args: ScheduledMessageArgs, scheduledAt: number, messageList: MessageList, effectId?: string,
+    args: ScheduledMessageArgs,
+    scheduledAt: number,
+    scheduleRepeatPeriod: number | undefined,
+    messageList: MessageList,
+    effectId?: string,
   ) => {
     if (args && 'queryId' in args) {
       const { id, queryId, isSilent } = args;
@@ -1320,15 +1344,17 @@ const Composer: FC<OwnProps & StateProps> = ({
     const { isSilent, ...restArgs } = args || {};
 
     if (!args || Object.keys(restArgs).length === 0) {
-      void handleSend(Boolean(isSilent), scheduledAt);
+      void handleSend(Boolean(isSilent), scheduledAt, scheduleRepeatPeriod);
     } else if (args.sendCompressed !== undefined || args.sendGrouped !== undefined) {
       const { sendCompressed = false, sendGrouped = false, isInvertedMedia } = args;
-      void handleSendAttachments(sendCompressed, sendGrouped, isSilent, scheduledAt, isInvertedMedia);
+      void handleSendAttachments(sendCompressed, sendGrouped, isSilent, scheduledAt, isInvertedMedia,
+        scheduleRepeatPeriod);
     } else {
       sendMessage({
         ...args,
         messageList,
         scheduledAt,
+        scheduleRepeatPeriod,
         effectId,
       });
     }
@@ -1336,8 +1362,8 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   useEffectWithPrevDeps(([prevContentToBeScheduled]) => {
     if (currentMessageList && contentToBeScheduled && contentToBeScheduled !== prevContentToBeScheduled) {
-      requestCalendar((scheduledAt) => {
-        handleMessageSchedule(contentToBeScheduled, scheduledAt, currentMessageList);
+      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+        handleMessageSchedule(contentToBeScheduled, scheduledAt, scheduleRepeatPeriod, currentMessageList, undefined);
       });
     }
   }, [contentToBeScheduled, currentMessageList, handleMessageSchedule, requestCalendar]);
@@ -1393,9 +1419,15 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     if (isInScheduledList || isScheduleRequested) {
       forceShowSymbolMenu();
-      requestCalendar((scheduledAt) => {
+      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
         cancelForceShowSymbolMenu();
-        handleActionWithPaymentConfirmation(handleMessageSchedule, { gif, isSilent }, scheduledAt, currentMessageList!);
+        handleActionWithPaymentConfirmation(
+          handleMessageSchedule,
+          { gif, isSilent },
+          scheduledAt,
+          scheduleRepeatPeriod,
+          currentMessageList!,
+        );
         requestMeasure(() => {
           resetComposer(true);
         });
@@ -1430,10 +1462,14 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     if (isInScheduledList || isScheduleRequested) {
       forceShowSymbolMenu();
-      requestCalendar((scheduledAt) => {
+      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
         cancelForceShowSymbolMenu();
         handleActionWithPaymentConfirmation(
-          handleMessageSchedule, { sticker, isSilent }, scheduledAt, currentMessageList!,
+          handleMessageSchedule,
+          { sticker, isSilent },
+          scheduledAt,
+          scheduleRepeatPeriod,
+          currentMessageList!,
         );
         requestMeasure(() => {
           resetComposer(shouldPreserveInput);
@@ -1467,7 +1503,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     isSilent = isSilent || isSilentPosting;
 
     if (isInScheduledList || isScheduleRequested) {
-      requestCalendar((scheduledAt) => {
+      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
         handleActionWithPaymentConfirmation(
           handleMessageSchedule,
           {
@@ -1476,6 +1512,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             isSilent,
           },
           scheduledAt,
+          scheduleRepeatPeriod,
           currentMessageList!,
         );
       });
@@ -1516,11 +1553,12 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
 
     if (isInScheduledList) {
-      requestCalendar((scheduledAt) => {
+      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
         handleActionWithPaymentConfirmation(
           handleMessageSchedule,
           { poll },
           scheduledAt,
+          scheduleRepeatPeriod,
           currentMessageList,
         );
       });
@@ -1540,11 +1578,12 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
 
     if (isInScheduledList) {
-      requestCalendar((scheduledAt) => {
+      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
         handleActionWithPaymentConfirmation(
           handleMessageSchedule,
           { todo },
           scheduledAt,
+          scheduleRepeatPeriod,
           currentMessageList,
         );
       });
@@ -1558,8 +1597,13 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const sendSilent = useLastCallback((additionalArgs?: ScheduledMessageArgs) => {
     if (isInScheduledList) {
-      requestCalendar((scheduledAt) => {
-        handleMessageSchedule({ ...additionalArgs, isSilent: true }, scheduledAt, currentMessageList!);
+      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+        handleMessageSchedule(
+          { ...additionalArgs, isSilent: true },
+          scheduledAt,
+          scheduleRepeatPeriod,
+          currentMessageList!,
+        );
       });
     } else if (additionalArgs && ('sendCompressed' in additionalArgs || 'sendGrouped' in additionalArgs)) {
       const { sendCompressed = false, sendGrouped = false, isInvertedMedia } = additionalArgs;
@@ -1779,8 +1823,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         if (!currentMessageList) {
           return;
         }
-        requestCalendar((scheduledAt) => {
-          handleMessageSchedule({}, scheduledAt, currentMessageList, effect?.id);
+        requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+          handleMessageSchedule({}, scheduledAt, scheduleRepeatPeriod, currentMessageList, effect?.id);
         });
         break;
       default:
@@ -1870,8 +1914,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const handleSendScheduled = useLastCallback(() => {
-    requestCalendar((scheduledAt) => {
-      handleMessageSchedule({}, scheduledAt, currentMessageList!);
+    requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+      handleMessageSchedule({}, scheduledAt, scheduleRepeatPeriod, currentMessageList!, undefined);
     });
   });
 
@@ -1881,18 +1925,20 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const handleSendWhenOnline = useLastCallback(() => {
     handleActionWithPaymentConfirmation(
-      handleMessageSchedule, {}, SCHEDULED_WHEN_ONLINE, currentMessageList!, effect?.id,
+      handleMessageSchedule, {}, SCHEDULED_WHEN_ONLINE, undefined, currentMessageList!, effect?.id,
     );
   });
 
   const handleSendScheduledAttachments = useLastCallback(
     (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => {
-      requestCalendar((scheduledAt) => {
+      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
         handleActionWithPaymentConfirmation(
           handleMessageSchedule,
           { sendCompressed, sendGrouped, isInvertedMedia },
           scheduledAt,
+          scheduleRepeatPeriod,
           currentMessageList!,
+          undefined,
         );
       });
     },

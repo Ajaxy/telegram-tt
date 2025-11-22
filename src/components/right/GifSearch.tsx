@@ -87,11 +87,12 @@ const GifSearch: FC<OwnProps & StateProps> = ({
       }
 
       if (shouldSchedule) {
-        requestCalendar((scheduledAt) => {
+        requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
           sendMessage({
             messageList: currentMessageList,
             gif,
             scheduledAt,
+            scheduleRepeatPeriod,
             isSilent,
           });
         });

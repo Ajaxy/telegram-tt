@@ -723,6 +723,7 @@ export type SendMessageParams = {
   contact?: ApiContact;
   isSilent?: boolean;
   scheduledAt?: number;
+  scheduleRepeatPeriod?: number;
   groupedId?: string;
   noWebPage?: boolean;
   sendAs?: ApiPeer;
@@ -758,6 +759,7 @@ export type ForwardMessagesParams = {
   messages: ApiMessage[];
   isSilent?: boolean;
   scheduledAt?: number;
+  scheduleRepeatPeriod?: number;
   sendAs?: ApiPeer;
   withMyScore?: boolean;
   noAuthors?: boolean;

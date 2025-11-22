@@ -47,7 +47,7 @@ import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnl
 import { addTimestampEntities } from '../../../util/dates/timestamp';
 import { omitUndefined, pick } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
-import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
+import { getServerTime } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
 import {
   buildApiCurrencyAmount,
@@ -254,6 +254,7 @@ export function buildApiMessageWithChatId(
     viewsCount: mtpMessage.views,
     forwardsCount: mtpMessage.forwards,
     isScheduled,
+    scheduleRepeatPeriod: mtpMessage.scheduleRepeatPeriod,
     isFromScheduled: mtpMessage.fromScheduled,
     isSilent: mtpMessage.silent,
     isPinned: mtpMessage.pinned,
@@ -442,6 +443,7 @@ export function buildLocalMessage(
   contact?: ApiContact,
   groupedId?: string,
   scheduledAt?: number,
+  scheduleRepeatPeriod?: number,
   sendAs?: ApiPeer,
   story?: ApiStory | ApiStorySkipped,
   isInvertedMedia?: true,
@@ -475,7 +477,7 @@ export function buildLocalMessage(
       pollId: localPoll?.id,
       todo: localTodo,
     }),
-    date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
+    date: scheduledAt || getServerTime(),
     isOutgoing: !isChannel,
     senderId: chat.type !== 'chatTypePrivate' ? (sendAs?.id || currentUserId) : undefined,
     replyInfo: resultReplyInfo,
@@ -485,6 +487,7 @@ export function buildLocalMessage(
       ...(media && (media.photo || media.video) && { isInAlbum: true }),
     }),
     ...(scheduledAt && { isScheduled: true }),
+    scheduleRepeatPeriod,
     isForwardingAllowed: true,
     isInvertedMedia,
     effectId,
@@ -506,6 +509,7 @@ export function buildLocalForwardedMessage({
   toThreadId,
   message,
   scheduledAt,
+  scheduleRepeatPeriod,
   noAuthors,
   noCaptions,
   isCurrentUserPremium,
@@ -516,6 +520,7 @@ export function buildLocalForwardedMessage({
   toThreadId?: number;
   message: ApiMessage;
   scheduledAt?: number;
+  scheduleRepeatPeriod?: number;
   noAuthors?: boolean;
   noCaptions?: boolean;
   isCurrentUserPremium?: boolean;
@@ -565,7 +570,8 @@ export function buildLocalForwardedMessage({
     id: localId,
     chatId: toChat.id,
     content: updatedContent,
-    date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
+    date: scheduledAt || getServerTime(),
+    scheduleRepeatPeriod,
     isOutgoing: !asIncomingInChatWithSelf && toChat.type !== 'chatTypeChannel',
     senderId: toChat.type !== 'chatTypePrivate' ? (sendAs?.id || currentUserId) : undefined,
     sendingState: 'messageSendingStatePending',

@@ -287,7 +287,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isClosePollDialogOpen, openClosePollDialog, closeClosePollDialog] = useFlag();
   const [selectionQuoteOffset, setSelectionQuoteOffset] = useState(UNQUOTABLE_OFFSET);
-  const [requestCalendar, calendar] = useSchedule(canScheduleUntilOnline, onClose, message.date);
+  const [requestCalendar, calendar] = useSchedule(
+    canScheduleUntilOnline,
+    onClose,
+    message.date,
+    message.scheduleRepeatPeriod,
+  );
 
   // `undefined` indicates that emoji are present and loading
   const hasCustomEmoji = customEmojiSetsInfo === undefined || Boolean(customEmojiSetsInfo.length);
@@ -535,11 +540,15 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   });
 
-  const handleRescheduleMessage = useLastCallback((scheduledAt: number) => {
+  const handleRescheduleMessage = useLastCallback((
+    scheduledAt: number,
+    scheduleRepeatPeriod?: number,
+  ) => {
     rescheduleMessage({
       chatId: message.chatId,
       messageId: message.id,
       scheduledAt,
+      scheduleRepeatPeriod,
     });
     onClose();
   });

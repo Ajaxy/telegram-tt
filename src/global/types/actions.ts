@@ -461,6 +461,7 @@ export interface ActionPayloads {
     chatId: string;
     messageId: number;
     scheduledAt: number;
+    scheduleRepeatPeriod?: number;
   };
   deleteScheduledMessages: { messageIds: number[] } & WithTabId;
   // Message
@@ -1934,6 +1935,7 @@ export interface ActionPayloads {
   forwardMessages: {
     isSilent?: boolean;
     scheduledAt?: number;
+    scheduleRepeatPeriod?: number;
   } & WithTabId;
   setForwardNoAuthors: {
     noAuthors: boolean;
