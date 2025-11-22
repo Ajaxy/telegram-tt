@@ -1,6 +1,7 @@
 import type { TeactNode } from '../../lib/teact/teact';
 import { useRef } from '../../lib/teact/teact';
 
+import type { ApiMessageEntityCustomEmoji } from '../../api/types';
 import type { MenuItemContextAction } from './ListItem';
 
 import { MouseButton } from '../../util/browser/windowEnvironment';
@@ -8,8 +9,10 @@ import buildClassName from '../../util/buildClassName';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useFastClick } from '../../hooks/useFastClick';
+import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 
+import FolderIcon from '../common/FolderIcon';
 import Icon from '../common/icons/Icon';
 import Menu from './Menu';
 import MenuItem from './MenuItem';
@@ -26,7 +29,7 @@ type OwnProps = {
   isBadgeActive?: boolean;
   contextActions?: MenuItemContextAction[];
   contextRootElementSelector?: string;
-  icon?: TeactNode;
+  icon?: string | ApiMessageEntityCustomEmoji;
   clickArg?: number;
   onClick?: (arg: number) => void;
 };
@@ -45,6 +48,7 @@ const Folder = ({
   onClick,
 }: OwnProps) => {
   const folderRef = useRef<HTMLDivElement>();
+  const [isHovering, markHovering, unmarkHovering] = useFlag();
 
   const {
     contextMenuAnchor, handleContextMenu, handleBeforeContextMenu, handleContextMenuClose,
@@ -78,10 +82,16 @@ const Folder = ({
       onClick={handleClick}
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
+      onMouseEnter={markHovering}
+      onMouseLeave={unmarkHovering}
       ref={folderRef}
     >
       <div className={styles.icon}>
-        {icon}
+        <FolderIcon
+          emoji={typeof icon === 'string' ? icon : undefined}
+          customEmojiId={typeof icon === 'object' ? icon.documentId : undefined}
+          shouldAnimate={isHovering}
+        />
         {Boolean(badgeCount) && (
           <span className={buildClassName(styles.badge, isBadgeActive && styles.badgeActive)}>{badgeCount}</span>
         )}

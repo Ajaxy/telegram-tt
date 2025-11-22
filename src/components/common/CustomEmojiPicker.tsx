@@ -71,9 +71,7 @@ type OwnProps = {
   onCustomEmojiSelect: (sticker: ApiSticker) => void;
   onReactionSelect?: (reaction: ApiReactionWithPaid) => void;
   onReactionContext?: (reaction: ApiReactionWithPaid) => void;
-  onContextMenuOpen?: NoneToVoidFunction;
-  onContextMenuClose?: NoneToVoidFunction;
-  onContextMenuClick?: NoneToVoidFunction;
+  onDismiss?: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -142,9 +140,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   onCustomEmojiSelect,
   onReactionSelect,
   onReactionContext,
-  onContextMenuOpen,
-  onContextMenuClose,
-  onContextMenuClick,
+  onDismiss,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
   const headerRef = useRef<HTMLDivElement>();
@@ -466,9 +462,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
                   onReactionSelect={onReactionSelect}
                   onReactionContext={onReactionContext}
                   onStickerSelect={handleEmojiSelect}
-                  onContextMenuOpen={onContextMenuOpen}
-                  onContextMenuClose={onContextMenuClose}
-                  onContextMenuClick={onContextMenuClick}
+                  onDismiss={onDismiss}
                   forcePlayback
                 />
               );

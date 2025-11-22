@@ -5,7 +5,7 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type { TabState } from '../../global/types';
 import { ApiMediaFormat } from '../../api/types';
 
-import { TABS_POSITION_LEFT } from '../../config';
+import { FOLDERS_POSITION_LEFT } from '../../config';
 import { getChatAvatarHash } from '../../global/helpers/chats'; // Direct import for better module splitting
 import { selectAreFoldersPresent, selectIsRightColumnShown, selectTabState } from '../../global/selectors';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
@@ -179,14 +179,14 @@ export default withGlobal<OwnProps>(
   (global, { isMobile }): Complete<StateProps> => {
     const tabState = selectTabState(global);
 
-    const { tabsPosition } = selectSharedSettings(global);
+    const { foldersPosition } = selectSharedSettings(global);
 
     return {
       shouldSkipHistoryAnimations: tabState.shouldSkipHistoryAnimations,
       uiReadyState: tabState.uiReadyState,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       leftColumnWidth: global.leftColumnWidth,
-      isFoldersSidebarShown: tabsPosition === TABS_POSITION_LEFT && !isMobile && selectAreFoldersPresent(global),
+      isFoldersSidebarShown: foldersPosition === FOLDERS_POSITION_LEFT && !isMobile && selectAreFoldersPresent(global),
     };
   },
 )(UiLoader);

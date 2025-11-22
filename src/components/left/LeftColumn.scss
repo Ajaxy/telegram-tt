@@ -40,7 +40,7 @@
     }
   }
 
-  body.is-tauri.is-macos #Main:not(.is-fullscreen):not(.tabs-sidebar-visible) &:not(#TopicListHeader) {
+  body.is-tauri.is-macos #Main:not(.is-fullscreen):not(.folders-sidebar-visible) &:not(#TopicListHeader) {
     padding-left: var(--window-controls-width);
   }
 

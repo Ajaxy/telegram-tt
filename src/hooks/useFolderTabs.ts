@@ -177,7 +177,7 @@ const useFolderTabs = ({
           title: sidebarMode ? lang('TabsPositionTop') : lang('TabsPositionLeft'),
           icon: 'forums',
           handler: () => {
-            setSharedSettingOption({ tabsPosition: sidebarMode ? 'top' : 'left' });
+            setSharedSettingOption({ foldersPosition: sidebarMode ? 'top' : 'left' });
           },
         });
       }

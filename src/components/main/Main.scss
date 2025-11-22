@@ -3,7 +3,7 @@
   height: 100%;
   text-align: left;
 
-  &.tabs-sidebar-visible {
+  &.folders-sidebar-visible {
     grid-template-columns: auto auto 1fr;
   }
 
@@ -218,9 +218,9 @@
 }
 
 @media (max-width: 925px) {
-  .tabs-sidebar-visible {
+  .folders-sidebar-visible {
     #LeftColumn {
-      left: var(--tabs-sidebar-width) !important;
+      left: var(--folders-sidebar-width) !important;
       width: 21.5rem !important;
     }
   }

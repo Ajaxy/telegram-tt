@@ -29,6 +29,7 @@ type OwnProps = {
   noPlay?: boolean;
   noVideoOnMobile?: boolean;
   loopLimit?: number;
+  shouldNotLoop?: boolean;
   isSelectable?: boolean;
   withSharedAnimation?: boolean;
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
@@ -55,6 +56,7 @@ const CustomEmoji: FC<OwnProps> = ({
   noPlay,
   noVideoOnMobile,
   loopLimit,
+  shouldNotLoop,
   isSelectable,
   withSharedAnimation,
   sharedCanvasRef,
@@ -146,7 +148,7 @@ const CustomEmoji: FC<OwnProps> = ({
           noVideoOnMobile={noVideoOnMobile}
           thumbClassName={styles.thumb}
           fullMediaClassName={styles.media}
-          shouldLoop
+          shouldLoop={!shouldNotLoop}
           loopLimit={loopLimit}
           shouldPreloadPreview={shouldPreloadPreview || noPlay || !canPlay}
           forceOnHeavyAnimation={forceOnHeavyAnimation}

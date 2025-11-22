@@ -7,12 +7,13 @@ import type {
 } from '../api/types';
 import type { MessageList, ThreadId } from '../types';
 import type { ActionReturnType, GlobalState, SharedState } from './types';
-import { MAIN_THREAD_ID } from '../api/types';
+import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../api/types';
 
 import {
   ALL_FOLDER_ID, ANIMATION_LEVEL_DEFAULT,
   ARCHIVED_FOLDER_ID,
   DEBUG,
+  FOLDERS_POSITION_DEFAULT,
   GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT,
   GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
   GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT,
@@ -21,7 +22,6 @@ import {
   IS_SCREEN_LOCKED_CACHE_KEY,
   SAVED_FOLDER_ID,
   SHARED_STATE_CACHE_KEY,
-  TABS_POSITION_DEFAULT,
 } from '../config';
 import { MAIN_IDB_STORE } from '../util/browser/idb';
 import { isUserId } from '../util/entities/ids';
@@ -314,7 +314,7 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.sharedState.settings = {
       canDisplayChatInTitle: untypedCached.settings.byKey.canDisplayChatInTitle,
       animationLevel: untypedCached.settings.byKey.animationLevel,
-      tabsPosition: untypedCached.settings.byKey.tabsPosition,
+      foldersPosition: FOLDERS_POSITION_DEFAULT,
       messageSendKeyCombo: untypedCached.settings.byKey.messageSendKeyCombo,
       messageTextSize: untypedCached.settings.byKey.messageTextSize,
       performance: untypedCached.settings.performance,
@@ -350,8 +350,8 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cachedSharedSettings.performance = INITIAL_PERFORMANCE_STATE_MED;
   }
 
-  if (!cachedSharedSettings.tabsPosition) {
-    cachedSharedSettings.tabsPosition = TABS_POSITION_DEFAULT;
+  if (!cachedSharedSettings.foldersPosition) {
+    cachedSharedSettings.foldersPosition = FOLDERS_POSITION_DEFAULT;
   }
 
   if (!cached.appConfig) {
@@ -473,7 +473,13 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
 
 function reduceCustomEmojis<T extends GlobalState>(global: T): GlobalState['customEmojis'] {
   const { lastRendered, byId } = global.customEmojis;
-  const idsToSave = lastRendered.slice(0, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT);
+  const folderEmojiIds = Object.values(global.chatFolders.byId)
+    .flatMap((folder) => (
+      folder.title.entities
+        ?.filter((entity) => entity.type === ApiMessageEntityTypes.CustomEmoji)
+        ?.map((entity) => entity.documentId) || []
+    ));
+  const idsToSave = unique([...folderEmojiIds, ...lastRendered]).slice(0, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT);
   const byIdToSave = pick(byId, idsToSave);
 
   return {

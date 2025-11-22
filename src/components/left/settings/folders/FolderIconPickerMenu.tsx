@@ -47,8 +47,7 @@ const FolderIconPickerMenu = ({
           loadAndPlay={isOpen}
           isHidden={!isOpen}
           onCustomEmojiSelect={(emoji) => handleEmojiSelect(emoji)}
-          onContextMenuClick={onClose}
-          onContextMenuClose={onClose}
+          onDismiss={onClose}
         />
       </div>
     </Menu>

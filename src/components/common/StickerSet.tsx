@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
@@ -74,9 +73,7 @@ type OwnProps = {
   onStickerUnfave?: (sticker: ApiSticker) => void;
   onStickerFave?: (sticker: ApiSticker) => void;
   onStickerRemoveRecent?: (sticker: ApiSticker) => void;
-  onContextMenuOpen?: NoneToVoidFunction;
-  onContextMenuClose?: NoneToVoidFunction;
-  onContextMenuClick?: NoneToVoidFunction;
+  onDismiss?: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -89,7 +86,7 @@ const ITEMS_MINI_MOBILE_PER_ROW_FALLBACK = 6;
 const MOBILE_WIDTH_THRESHOLD_PX = 440;
 const MINI_MOBILE_WIDTH_THRESHOLD_PX = 362;
 
-const StickerSet: FC<OwnProps & StateProps> = ({
+const StickerSet = ({
   stickerSet,
   loadAndPlay,
   index,
@@ -110,6 +107,7 @@ const StickerSet: FC<OwnProps & StateProps> = ({
   isTranslucent,
   noContextMenus,
   forcePlayback,
+  collectibleStatuses,
   observeIntersection,
   observeIntersectionForPlayingItems,
   observeIntersectionForShowingItems,
@@ -119,11 +117,8 @@ const StickerSet: FC<OwnProps & StateProps> = ({
   onStickerUnfave,
   onStickerFave,
   onStickerRemoveRecent,
-  onContextMenuOpen,
-  onContextMenuClose,
-  onContextMenuClick,
-  collectibleStatuses,
-}) => {
+  onDismiss,
+}: OwnProps & StateProps) => {
   const {
     clearRecentStickers,
     clearRecentCustomEmoji,
@@ -401,13 +396,12 @@ const StickerSet: FC<OwnProps & StateProps> = ({
                 withTranslucentThumb={isTranslucent}
                 onClick={onStickerSelect}
                 clickArg={sticker}
+                noIcons={isEmoji && !isRecent}
                 isSelected={isSelected}
                 onUnfaveClick={isFavorite && favoriteStickerIdsSet?.has(sticker.id) ? onStickerUnfave : undefined}
                 onFaveClick={!favoriteStickerIdsSet?.has(sticker.id) ? onStickerFave : undefined}
                 onRemoveRecentClick={isRecent ? onStickerRemoveRecent : undefined}
-                onContextMenuOpen={onContextMenuOpen}
-                onContextMenuClose={onContextMenuClose}
-                onContextMenuClick={onContextMenuClick}
+                onDismiss={onDismiss}
                 forcePlayback={forcePlayback}
                 isEffectEmoji={stickerSet.id === EFFECT_EMOJIS_SET_ID}
                 noShowPremium={isCurrentUserPremium

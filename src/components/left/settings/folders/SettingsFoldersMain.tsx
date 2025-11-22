@@ -1,13 +1,14 @@
-import type { FC } from '../../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
 import type { ApiChatFolder } from '../../../../api/types';
-import type { TabsPosition } from '../../../../types';
+import type { FoldersPosition } from '../../../../types';
 
-import { ALL_FOLDER_ID, STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
+import {
+  ALL_FOLDER_ID, FOLDERS_POSITION_LEFT, FOLDERS_POSITION_TOP, STICKER_SIZE_FOLDER_SETTINGS,
+} from '../../../../config';
 import { getFolderDescriptionText } from '../../../../global/helpers';
 import { selectIsCurrentUserPremium } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
@@ -36,10 +37,10 @@ import RadioGroup from '../../../ui/RadioGroup';
 
 type OwnProps = {
   isActive?: boolean;
+  isMobile?: boolean;
   onCreateFolder: () => void;
   onEditFolder: (folder: ApiChatFolder) => void;
   onReset: () => void;
-  isMobile?: boolean;
 };
 
 type StateProps = {
@@ -49,7 +50,7 @@ type StateProps = {
   maxFolders: number;
   isPremium?: boolean;
   areTagsEnabled?: boolean;
-  tabsPosition: TabsPosition;
+  foldersPosition: FoldersPosition;
 };
 
 type SortState = {
@@ -61,20 +62,20 @@ type SortState = {
 const FOLDER_HEIGHT_PX = 56;
 const runThrottledForLoadRecommended = throttle((cb) => cb(), 60000, true);
 
-const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
+const SettingsFoldersMain = ({
   isActive,
-  onCreateFolder,
-  onEditFolder,
-  onReset,
-  folderIds,
   foldersById,
   isPremium,
   recommendedChatFolders,
   maxFolders,
   areTagsEnabled,
-  tabsPosition,
+  foldersPosition,
   isMobile,
-}) => {
+  onCreateFolder,
+  onEditFolder,
+  onReset,
+  folderIds,
+}: OwnProps & StateProps) => {
   const {
     loadRecommendedChatFolders,
     addChatFolder,
@@ -215,8 +216,8 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     });
   }, [sortChatFolders]);
 
-  const handleTabsPositionChange = useLastCallback((value: string) => {
-    setSharedSettingOption({ tabsPosition: value as TabsPosition });
+  const handleFoldersPositionChange = useLastCallback((value: string) => {
+    setSharedSettingOption({ foldersPosition: value as FoldersPosition });
   });
 
   const canCreateNewFolder = useMemo(() => {
@@ -430,13 +431,13 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
             name="tabsPosition"
             options={[{
               label: lang('TabsPositionLeft'),
-              value: 'left',
+              value: FOLDERS_POSITION_LEFT,
             }, {
               label: lang('TabsPositionTop'),
-              value: 'top',
+              value: FOLDERS_POSITION_TOP,
             }]}
-            selected={tabsPosition}
-            onChange={handleTabsPositionChange}
+            selected={foldersPosition}
+            onChange={handleFoldersPositionChange}
           />
         </div>
       )}
@@ -460,7 +461,7 @@ export default memo(withGlobal<OwnProps>(
       recommendedChatFolders,
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),
       areTagsEnabled,
-      tabsPosition: global.sharedState.settings.tabsPosition,
+      foldersPosition: global.sharedState.settings.foldersPosition,
     };
   },
 )(SettingsFoldersMain));

@@ -11,19 +11,19 @@ import styles from './FolderIcon.module.scss';
 
 const ICON_SIZE = 2.25 * REM;
 
-const FolderIcon = (
-  {
-    emoji,
-    customEmojiId,
-    shouldAnimate,
-  }: {
-    emoji?: string;
-    customEmojiId?: string;
-    shouldAnimate?: boolean;
-  },
-) => {
+type OwnProps = {
+  emoji?: string;
+  customEmojiId?: string;
+  shouldAnimate?: boolean;
+};
+
+const FolderIcon = ({
+  emoji,
+  customEmojiId,
+  shouldAnimate,
+}: OwnProps) => {
   if (customEmojiId) {
-    return <CustomEmoji documentId={customEmojiId} size={ICON_SIZE} noPlay={shouldAnimate} />;
+    return <CustomEmoji documentId={customEmojiId} size={ICON_SIZE} shouldNotLoop={!shouldAnimate} />;
   }
 
   if (!emoji) {

@@ -45,7 +45,7 @@
     vertical-align: bottom;
   }
 
-  .sticker-locked {
+  .sticker-locked, .sticker-premium {
     position: absolute;
     z-index: 2;
     right: 0;
@@ -55,30 +55,11 @@
     align-items: center;
     justify-content: center;
 
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1rem;
+    height: 1rem;
     border-radius: 50%;
 
-    color: white;
-
-    opacity: 0.75;
-    background: var(--premium-gradient);
-  }
-
-  .sticker-premium {
-    position: absolute;
-    z-index: 1;
-    right: 0;
-    bottom: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 50%;
-
+    font-size: 0.875rem;
     color: white;
 
     background: var(--premium-gradient);
@@ -135,8 +116,8 @@
     top: -0.125rem;
     right: -0.125rem;
 
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1rem;
+    height: 1rem;
     padding: 0.125rem;
 
     opacity: 0;

@@ -1,6 +1,6 @@
 .menuContent {
   --offset-y: 3.25rem !important;
-  --offset-x: auto !important;
+  --offset-x: var(--folders-sidebar-width) !important;
   --color-text: var(--color-primary);
   --border-radius-default: 1.25rem;
 

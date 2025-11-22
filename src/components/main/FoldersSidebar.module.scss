@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: space-between;
 
-  width: var(--tabs-sidebar-width);
+  width: var(--folders-sidebar-width);
   height: 100%;
 
   background-color: var(--color-background-sidebar);
@@ -78,7 +78,7 @@
 }
 
 .menuButton {
-  width: var(--tabs-sidebar-width);
+  width: var(--folders-sidebar-width);
   height: 3.5rem;
   border-radius: 0;
 }

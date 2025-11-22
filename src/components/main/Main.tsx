@@ -11,7 +11,7 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type { ApiChatFolder, ApiLimitTypeWithModal, ApiUser } from '../../api/types';
 import type { TabState } from '../../global/types';
 
-import { BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER, TABS_POSITION_LEFT } from '../../config';
+import { BASE_EMOJI_KEYWORD_LANG, DEBUG, FOLDERS_POSITION_LEFT, INACTIVE_MARKER } from '../../config';
 import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
   selectAreFoldersPresent,
@@ -522,7 +522,7 @@ const Main = ({
     isNarrowMessageList && 'narrow-message-list',
     shouldSkipHistoryAnimations && 'history-animation-disabled',
     isFullscreen && 'is-fullscreen',
-    isFoldersSidebarShown && 'tabs-sidebar-visible',
+    isFoldersSidebarShown && 'folders-sidebar-visible',
   );
 
   const handleBlur = useLastCallback(() => {
@@ -643,7 +643,7 @@ export default memo(withGlobal<OwnProps>(
       deleteFolderDialogModal,
     } = selectTabState(global);
 
-    const { wasTimeFormatSetManually, tabsPosition } = selectSharedSettings(global);
+    const { wasTimeFormatSetManually, foldersPosition } = selectSharedSettings(global);
 
     const gameMessage = openedGame && selectChatMessage(global, openedGame.chatId, openedGame.messageId);
     const gameTitle = gameMessage?.content.game?.title;
@@ -700,7 +700,7 @@ export default memo(withGlobal<OwnProps>(
       isSynced: global.isSynced,
       isAccountFrozen,
       isAppConfigLoaded: global.isAppConfigLoaded,
-      isFoldersSidebarShown: tabsPosition === TABS_POSITION_LEFT && !isMobile && selectAreFoldersPresent(global),
+      isFoldersSidebarShown: foldersPosition === FOLDERS_POSITION_LEFT && !isMobile && selectAreFoldersPresent(global),
     };
   },
 )(Main));

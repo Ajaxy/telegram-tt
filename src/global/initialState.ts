@@ -11,9 +11,9 @@ import {
   DEFAULT_PLAYBACK_RATE,
   DEFAULT_RESALE_GIFTS_FILTER_OPTIONS,
   DEFAULT_VOLUME,
+  FOLDERS_POSITION_DEFAULT,
   IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX,
   MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX,
-  TABS_POSITION_DEFAULT,
 } from '../config';
 import { IS_IOS, IS_MAC_OS } from '../util/browser/windowEnvironment';
 import { DEFAULT_APP_CONFIG } from '../limits';
@@ -80,7 +80,7 @@ export const INITIAL_SHARED_STATE: SharedState = {
       ? IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX
       : (IS_MAC_OS ? MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX : DEFAULT_MESSAGE_TEXT_SIZE_PX),
     animationLevel: ANIMATION_LEVEL_DEFAULT,
-    tabsPosition: TABS_POSITION_DEFAULT,
+    foldersPosition: FOLDERS_POSITION_DEFAULT,
     messageSendKeyCombo: 'enter',
     performance: INITIAL_PERFORMANCE_STATE_MAX,
     shouldSkipWebAppCloseConfirmation: false,
