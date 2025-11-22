@@ -13,7 +13,6 @@ import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Checkbox from '../../ui/Checkbox';
 import InputText from '../../ui/InputText';
@@ -249,9 +248,14 @@ const PollModal = ({
   function renderHeader() {
     return (
       <div className="modal-header-condensed">
-        <Button round color="translucent" size="smaller" ariaLabel="Cancel poll creation" onClick={onClear}>
-          <Icon name="close" />
-        </Button>
+        <Button
+          round
+          color="translucent"
+          size="smaller"
+          ariaLabel="Cancel poll creation"
+          onClick={onClear}
+          iconName="close"
+        />
         <div className="modal-title">{lang('NewPoll')}</div>
         <Button
           color="primary"
@@ -286,11 +290,9 @@ const PollModal = ({
             color="translucent"
             size="smaller"
             ariaLabel={lang('Delete')}
-
             onClick={() => removeOption(index)}
-          >
-            <Icon name="close" />
-          </Button>
+            iconName="close"
+          />
         )}
       </div>
     ));

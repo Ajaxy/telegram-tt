@@ -35,7 +35,6 @@ import Modal from '../../ui/Modal';
 import Transition from '../../ui/Transition';
 import Avatar from '../Avatar';
 import FullNameTitle from '../FullNameTitle';
-import Icon from '../icons/Icon';
 import TopicIcon from '../TopicIcon';
 import PickerItem from './PickerItem';
 
@@ -247,9 +246,14 @@ const ChatOrUserPicker: FC<OwnProps> = ({
     return (
       <>
         <div className="modal-header modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
-          <Button round color="translucent" size="smaller" ariaLabel={oldLang('Back')} onClick={handleHeaderBackClick}>
-            <Icon name="arrow-left" />
-          </Button>
+          <Button
+            round
+            color="translucent"
+            size="smaller"
+            ariaLabel={oldLang('Back')}
+            onClick={handleHeaderBackClick}
+            iconName="arrow-left"
+          />
           <InputText
             ref={topicSearchRef}
             value={topicSearch}
@@ -300,9 +304,8 @@ const ChatOrUserPicker: FC<OwnProps> = ({
             size="smaller"
             ariaLabel={oldLang('Close')}
             onClick={onClose}
-          >
-            <Icon name="close" />
-          </Button>
+            iconName="close"
+          />
           <InputText
             ref={searchRef}
             value={search}

@@ -52,7 +52,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
-import Icon from '../../common/icons/Icon';
 import PeerChip from '../../common/PeerChip';
 import Button from '../../ui/Button';
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -697,12 +696,10 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
               round
               size="smaller"
               color="translucent"
-
               onClick={() => openHistoryCalendar({ selectedAt: getDayStartAt(Date.now()) })}
               ariaLabel={oldLang('JumpToDate')}
-            >
-              <Icon name="calendar" />
-            </Button>
+              iconName="calendar"
+            />
           </div>
         )}
       </div>
@@ -713,12 +710,10 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
             round
             size="smaller"
             color="translucent"
-
             onClick={() => openHistoryCalendar({ selectedAt: getDayStartAt(Date.now()) })}
             ariaLabel={oldLang('JumpToDate')}
-          >
-            <Icon name="calendar" />
-          </Button>
+            iconName="calendar"
+          />
           <div className={styles.counter}>
             {hasQueryData && (
               foundIds?.length ? (
@@ -750,9 +745,8 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
                 onClick={handleFocusOlder}
                 nonInteractive={!canFocusOlder}
                 ariaLabel={lang('AriaSearchOlderResult')}
-              >
-                <Icon name="up" />
-              </Button>
+                iconName="up"
+              />
               <Button
                 className={buildClassName(styles.navigationButton, !canFocusNewer && styles.navigationDisabled)}
                 round
@@ -761,9 +755,8 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
                 onClick={handleFocusNewer}
                 nonInteractive={!canFocusNewer}
                 ariaLabel={lang('AriaSearchNewerResult')}
-              >
-                <Icon name="down" />
-              </Button>
+                iconName="down"
+              />
             </div>
           )}
         </div>

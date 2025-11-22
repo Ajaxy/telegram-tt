@@ -12,7 +12,6 @@ import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
 import SponsoredMessageContextMenuContainer from '../../middle/message/SponsoredContextMenuContainer';
 import Button from '../../ui/Button';
@@ -91,9 +90,8 @@ const AboutAdsModal = ({ modal, minLevelToRestrictAds }: OwnProps & StateProps) 
           color="translucent"
           className={styles.moreButton}
           onClick={handleContextMenu}
-        >
-          <Icon name="more" />
-        </Button>
+          iconName="more"
+        />
       </>
     );
 

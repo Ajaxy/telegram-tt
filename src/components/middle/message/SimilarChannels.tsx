@@ -175,9 +175,8 @@ const SimilarChannels = ({
                 className={styles.close}
                 color="translucent"
                 onClick={handleToggle}
-              >
-                <Icon name="close" />
-              </Button>
+                iconName="close"
+              />
             </div>
             <div ref={ref} className={buildClassName(styles.channelList, 'no-scrollbar')}>
               {firstSimilarChannels?.map((channel, i) => {

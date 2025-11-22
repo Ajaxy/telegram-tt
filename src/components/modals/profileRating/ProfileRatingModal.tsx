@@ -12,7 +12,6 @@ import { formatShortDuration } from '../../../util/dates/dateFormat';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import Icon from '../../common/icons/Icon';
 import PremiumProgress, { type AnimationDirection } from '../../common/PremiumProgress';
 import Button from '../../ui/Button';
 import Transition from '../../ui/Transition';
@@ -219,8 +218,9 @@ const ProfileRatingModal = ({
       <div className={styles.footer}>
         <Button
           onClick={handleClose}
+          iconName="understood"
+          iconClassName={styles.understoodIcon}
         >
-          <Icon name="understood" className={styles.understoodIcon} />
           {lang('ButtonUnderstood')}
         </Button>
       </div>

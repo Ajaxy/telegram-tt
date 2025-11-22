@@ -262,9 +262,8 @@ const HeaderPinnedMessage = ({
           color="translucent"
           ariaLabel={lang('UnpinMessageAlertTitle')}
           onClick={openUnpinDialog}
-        >
-          <Icon name="close" />
-        </Button>
+          iconName="close"
+        />
       )}
       <ConfirmDialog
         isOpen={isUnpinDialogOpen}

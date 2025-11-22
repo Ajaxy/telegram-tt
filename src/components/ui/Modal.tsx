@@ -16,7 +16,6 @@ import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps
 import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 
-import Icon from '../common/icons/Icon';
 import Button, { type OwnProps as ButtonProps } from './Button';
 import ModalStarBalanceBar from './ModalStarBalanceBar';
 import Portal from './Portal';
@@ -151,11 +150,10 @@ const Modal: FC<OwnProps> = ({
         round
         color={absoluteCloseButtonColor}
         size="smaller"
+        iconName="close"
         ariaLabel={lang('Close')}
         onClick={onClose}
-      >
-        <Icon name="close" />
-      </Button>
+      />
     ) : undefined;
 
     return title ? (

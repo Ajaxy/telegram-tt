@@ -38,7 +38,6 @@ import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import CustomEmoji from '../../common/CustomEmoji';
-import Icon from '../../common/icons/Icon';
 import ParticlesHeader from '../../modals/common/ParticlesHeader.tsx';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -440,9 +439,8 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
               color="translucent"
               onClick={() => closePremiumModal()}
               ariaLabel={oldLang('Close')}
-            >
-              <Icon name="close" />
-            </Button>
+              iconName="close"
+            />
             {renderHeader()}
             {!isPremium && !isGift && renderSubscriptionOptions()}
             <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>

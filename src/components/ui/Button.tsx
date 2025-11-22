@@ -22,7 +22,7 @@ import './Button.scss';
 export type OwnProps = {
   ref?: ElementRef<HTMLButtonElement | HTMLAnchorElement>;
   type?: 'button' | 'submit' | 'reset';
-  children: React.ReactNode;
+  children?: React.ReactNode;
   size?: 'default' | 'smaller' | 'tiny';
   color?: (
     'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'translucent-black'
@@ -160,7 +160,7 @@ const Button: FC<OwnProps> = ({
     isRectangular && 'rectangular',
     noForcedUpperCase && 'no-upper-case',
     inline && 'inline',
-    iconAlignment && iconName && `content-with-icon-${iconAlignment}`,
+    Boolean(iconName && children) && `content-with-icon-${iconAlignment}`,
   );
 
   const handleClick = useLastCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -207,6 +207,10 @@ const Button: FC<OwnProps> = ({
 
     if (!icon) {
       return children;
+    }
+
+    if (!children) {
+      return icon;
     }
 
     return (

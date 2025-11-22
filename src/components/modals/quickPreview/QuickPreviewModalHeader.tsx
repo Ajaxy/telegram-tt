@@ -16,7 +16,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import GroupChatInfo from '../../common/GroupChatInfo';
-import Icon from '../../common/icons/Icon';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Button from '../../ui/Button';
 
@@ -79,9 +78,8 @@ const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
           ariaLabel={lang('ChatListContextMaskAsRead')}
           onClick={handleMarkAsRead}
           className={styles.markAsReadButton}
-        >
-          <Icon name="readchats" />
-        </Button>
+          iconName="readchats"
+        />
       )}
       <Button
         round
@@ -90,9 +88,8 @@ const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
         ariaLabel={lang('Close')}
         onClick={onClose}
         className={styles.closeButton}
-      >
-        <Icon name="close" />
-      </Button>
+        iconName="close"
+      />
       <div className="modal-title">
         <div className={styles.chatInfoOverride}>
           {isUserId(displayChatId) ? (

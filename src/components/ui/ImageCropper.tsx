@@ -9,7 +9,6 @@ import { REM } from '../common/helpers/mediaDimensions';
 import useLastCallback from '../../hooks/useLastCallback';
 import useWindowSize from '../../hooks/window/useWindowSize';
 
-import Icon from '../common/icons/Icon';
 import Button from './Button';
 import RangeSlider from './RangeSlider';
 
@@ -201,9 +200,14 @@ const ImageCropper = ({
           value={zoom}
           onChange={handleZoomChange}
         />
-        <Button className={styles.confirmButton} round color="primary" onClick={handleCrop} ariaLabel="Crop">
-          <Icon name="check" />
-        </Button>
+        <Button
+          className={styles.confirmButton}
+          round
+          color="primary"
+          iconName="check"
+          onClick={handleCrop}
+          ariaLabel="Crop"
+        />
       </div>
     </div>
   );

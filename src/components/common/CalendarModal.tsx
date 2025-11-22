@@ -16,7 +16,6 @@ import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
-import Icon from './icons/Icon';
 
 import './CalendarModal.scss';
 
@@ -265,10 +264,9 @@ const CalendarModal: FC<OwnProps> = ({
             round
             size="smaller"
             color="translucent"
+            iconName="close"
             onClick={onClose}
-          >
-            <Icon name="close" />
-          </Button>
+          />
 
           <h4>
             {lang(`lng_month${currentMonth + 1}`)}
@@ -280,21 +278,19 @@ const CalendarModal: FC<OwnProps> = ({
             round
             size="smaller"
             color="translucent"
+            iconName="previous"
             disabled={shouldDisablePrevMonth}
             onClick={!shouldDisablePrevMonth ? handlePrevMonth : undefined}
-          >
-            <Icon name="previous" />
-          </Button>
+          />
 
           <Button
             round
             size="smaller"
             color="translucent"
+            iconName="next"
             disabled={shouldDisableNextMonth}
             onClick={!shouldDisableNextMonth ? handleNextMonth : undefined}
-          >
-            <Icon name="next" />
-          </Button>
+          />
         </div>
       </div>
 

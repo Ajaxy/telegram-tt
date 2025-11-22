@@ -33,7 +33,6 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import BadgeButton from '../../common/BadgeButton';
-import Icon from '../../common/icons/Icon';
 import PeerColorWrapper from '../../common/PeerColorWrapper';
 import Button from '../../ui/Button';
 import MessageAppendix from './MessageAppendix';
@@ -300,23 +299,23 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
             color="translucent-white"
             round
             size="tiny"
+            iconName="close"
+            iconClassName="sponsored-action-icon"
             ariaLabel={lang('Close')}
             onClick={handleHideSponsoredMessage}
-          >
-            <Icon name="close" className="sponsored-action-icon" />
-          </Button>
+          />
           {message.canReport && (
             <Button
               className="message-action-button"
               color="translucent-white"
               round
               size="tiny"
+              iconName="more"
+              iconClassName="sponsored-action-icon"
               ariaLabel={lang('More')}
               onClick={handleContextMenu}
               onContextMenu={handleContextMenu}
-            >
-              <Icon name="more" className="sponsored-action-icon" />
-            </Button>
+            />
           )}
         </div>
       </div>

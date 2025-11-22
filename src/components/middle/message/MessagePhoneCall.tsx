@@ -59,9 +59,8 @@ const MessagePhoneCall: FC<OwnProps> = ({
         className={styles.button}
         disabled={!ARE_CALLS_SUPPORTED}
         ariaLabel={lang(isOutgoing ? 'CallAgain' : 'CallBack')}
-      >
-        <Icon name={isVideo ? 'video-outlined' : 'phone'} />
-      </Button>
+        iconName={isVideo ? 'video-outlined' : 'phone'}
+      />
       <div className={styles.info}>
         <div className={styles.reason}>{lang(getCallMessageKey(phoneCall, message.isOutgoing))}</div>
         <div className={styles.meta}>

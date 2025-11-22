@@ -329,9 +329,8 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           round
           noFastClick
           onClick={handleRemoveClick}
-        >
-          <Icon name="close" />
-        </Button>
+          iconName="close"
+        />
       )}
       {Boolean(contextMenuItems.length) && (
         <Menu

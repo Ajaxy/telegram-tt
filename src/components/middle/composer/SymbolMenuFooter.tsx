@@ -6,7 +6,6 @@ import buildClassName from '../../../util/buildClassName';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 
 type OwnProps = {
@@ -80,9 +79,8 @@ const SymbolMenuFooter: FC<OwnProps> = ({
           faded
           color="translucent"
           onClick={handleSearchOpen}
-        >
-          <Icon name="search" />
-        </Button>
+          iconName="search"
+        />
       )}
 
       {canSendPlainText && renderTabButton(SymbolMenuTabs.Emoji)}
@@ -98,9 +96,8 @@ const SymbolMenuFooter: FC<OwnProps> = ({
           round
           faded
           color="translucent"
-        >
-          <Icon name="delete-left" />
-        </Button>
+          iconName="delete-left"
+        />
       )}
     </div>
   );

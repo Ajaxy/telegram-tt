@@ -164,9 +164,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         className={isOpen ? 'active' : undefined}
         onClick={onTrigger}
         ariaLabel="More actions"
-      >
-        <Icon name="more" />
-      </Button>
+        iconName="more"
+      />
     );
   }, []);
 
@@ -209,9 +208,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         size="smaller"
         color="translucent-white"
         ariaLabel={lang('AccActionDownload')}
-      >
-        <Icon name="download" />
-      </Button>
+        iconName="download"
+      />
     ));
   }
 
@@ -319,9 +317,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           color="translucent-white"
           ariaLabel={lang('Forward')}
           onClick={onForward}
-        >
-          <Icon name="forward" />
-        </Button>
+          iconName="forward"
+        />
       )}
       {renderDownloadButton()}
       <Button
@@ -330,18 +327,16 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         color="translucent-white"
         ariaLabel={lang('MediaZoomOut')}
         onClick={handleZoomOut}
-      >
-        <Icon name="zoom-out" />
-      </Button>
+        iconName="zoom-out"
+      />
       <Button
         round
         size="smaller"
         color="translucent-white"
         ariaLabel={lang('MediaZoomIn')}
         onClick={handleZoomIn}
-      >
-        <Icon name="zoom-in" />
-      </Button>
+        iconName="zoom-in"
+      />
       {canReportAvatar && (
         <Button
           round
@@ -349,9 +344,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           color="translucent-white"
           ariaLabel={lang(isVideo ? 'PeerInfo.ReportProfileVideo' : 'PeerInfo.ReportProfilePhoto')}
           onClick={onReport}
-        >
-          <Icon name="flag" />
-        </Button>
+          iconName="flag"
+        />
       )}
       {canUpdate && (
         <Button
@@ -360,9 +354,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           color="translucent-white"
           ariaLabel={lang('ProfilePhoto.SetMainPhoto')}
           onClick={handleUpdate}
-        >
-          <Icon name="copy-media" />
-        </Button>
+          iconName="copy-media"
+        />
       )}
       {canDelete && (
         <Button
@@ -371,9 +364,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           color="translucent-white"
           ariaLabel={lang('Delete')}
           onClick={openDeleteModalHandler}
-        >
-          <Icon name="delete" />
-        </Button>
+          iconName="delete"
+        />
       )}
       <Button
         round
@@ -381,9 +373,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         color="translucent-white"
         ariaLabel={lang('Close')}
         onClick={onCloseMediaViewer}
-      >
-        <Icon name="close" />
-      </Button>
+        iconName="close"
+      />
       {canDelete && renderDeleteModal()}
     </div>
   );

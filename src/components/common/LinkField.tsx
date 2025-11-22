@@ -13,7 +13,6 @@ import useOldLang from '../../hooks/useOldLang';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
-import Icon from './icons/Icon';
 
 import styles from './LinkField.module.scss';
 
@@ -68,11 +67,10 @@ const InviteLink: FC<OwnProps> = ({
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}
+        iconName="more"
         onClick={onTrigger}
         ariaLabel={lang('AriaLabelOpenMenu')}
-      >
-        <Icon name="more" />
-      </Button>
+      />
     );
   }, [isMobile, lang]);
 
@@ -94,11 +92,10 @@ const InviteLink: FC<OwnProps> = ({
             className={styles.copy}
             size="smaller"
             round
+            iconName="copy"
             disabled={isDisabled}
             onClick={handleCopyClick}
-          >
-            <Icon name="copy" />
-          </Button>
+          />
         ) : (
           <DropdownMenu
             className={styles.moreMenu}

@@ -264,9 +264,8 @@ const ListItem = ({
             size="smaller"
             onClick={handleSecondaryIconClick}
             onMouseDown={handleSecondaryIconMouseDown}
-          >
-            <Icon name={secondaryIcon} />
-          </Button>
+            iconName={secondaryIcon}
+          />
         )}
         {rightElement}
       </ButtonElementTag>

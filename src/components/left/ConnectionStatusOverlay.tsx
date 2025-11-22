@@ -5,7 +5,6 @@ import type { ConnectionStatus } from '../../hooks/useConnectionStatus';
 
 import useOldLang from '../../hooks/useOldLang';
 
-import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import Spinner from '../ui/Spinner';
 import Transition from '../ui/Transition';
@@ -37,9 +36,8 @@ const ConnectionStatusOverlay: FC<OwnProps> = ({
         round
         size="tiny"
         color="translucent-black"
-      >
-        <Icon name="close" />
-      </Button>
+        iconName="close"
+      />
     </div>
   );
 };

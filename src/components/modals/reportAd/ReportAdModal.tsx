@@ -11,7 +11,6 @@ import buildClassName from '../../../util/buildClassName';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
@@ -86,9 +85,8 @@ const ReportAdModal = ({
           size="smaller"
           ariaLabel={lang(renderingDepth ? 'Back' : 'Close')}
           onClick={handleBackClick}
-        >
-          <Icon name={renderingDepth ? 'arrow-left' : 'close'} />
-        </Button>
+          iconName={renderingDepth ? 'arrow-left' : 'close'}
+        />
         <div className={buildClassName('modal-title', styles.modalTitle, hasSubtitle && styles.titleMultiline)}>
           <h3 className={styles.title}>{lang('ReportAd')}</h3>
           {hasSubtitle && (

@@ -26,7 +26,6 @@ import useLangString from '../../hooks/useLangString';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMultiaccountInfo from '../../hooks/useMultiaccountInfo';
 
-import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import Checkbox from '../ui/Checkbox';
 import InputText from '../ui/InputText';
@@ -241,9 +240,14 @@ const AuthPhoneNumber: FC<StateProps> = ({
   return (
     <div id="auth-phone-number-form" className="custom-scroll">
       {hasActiveAccount && (
-        <Button size="smaller" round color="translucent" className="auth-close" onClick={handleBackNavigation}>
-          <Icon name="close" />
-        </Button>
+        <Button
+          size="smaller"
+          round
+          color="translucent"
+          className="auth-close"
+          iconName="close"
+          onClick={handleBackNavigation}
+        />
       )}
       <div className="auth-form">
         <div id="logo" />

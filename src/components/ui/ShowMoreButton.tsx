@@ -2,7 +2,6 @@ import type { FC } from '../../lib/teact/teact';
 
 import useOldLang from '../../hooks/useOldLang';
 
-import Icon from '../common/icons/Icon';
 import Button from './Button';
 
 import './ShowMoreButton.scss';
@@ -32,8 +31,8 @@ const ShowMoreButton: FC<OwnProps> = ({
       isLoading={isLoading}
       isRtl={lang.isRtl}
       onClick={onClick}
+      iconName="down"
     >
-      <Icon name="down" />
       Show
       {' '}
       {count}

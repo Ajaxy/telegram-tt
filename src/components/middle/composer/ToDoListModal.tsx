@@ -19,7 +19,6 @@ import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Checkbox from '../../ui/Checkbox';
 import InputText from '../../ui/InputText';
@@ -291,9 +290,14 @@ const ToDoListModal = ({
       : editingMessage ? 'TitleEditToDoList' : 'TitleNewToDoList';
     return (
       <div className="modal-header-condensed">
-        <Button round color="translucent" size="smaller" ariaLabel={lang('AriaToDoCancel')} onClick={onClear}>
-          <Icon name="close" />
-        </Button>
+        <Button
+          round
+          color="translucent"
+          size="smaller"
+          ariaLabel={lang('AriaToDoCancel')}
+          onClick={onClear}
+          iconName="close"
+        />
         <div className="modal-title">{lang(modalTitle)}</div>
         <Button
           color="primary"
@@ -332,9 +336,8 @@ const ToDoListModal = ({
               size="smaller"
               ariaLabel={lang('Delete')}
               onClick={() => removeItem(stateIndex)}
-            >
-              <Icon name="close" />
-            </Button>
+              iconName="close"
+            />
           )}
         </div>
       );

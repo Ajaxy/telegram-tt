@@ -102,7 +102,6 @@ import Audio from '../common/Audio';
 import Document from '../common/Document';
 import SavedGift from '../common/gift/SavedGift';
 import GroupChatInfo from '../common/GroupChatInfo';
-import Icon from '../common/icons/Icon';
 import Media from '../common/Media';
 import NothingFound from '../common/NothingFound';
 import PreviewMedia from '../common/PreviewMedia';
@@ -1022,10 +1021,13 @@ const Profile = ({
             ))}
             {!isCurrentUserPremium && (
               <>
-                {}
-                <Button className="show-more-channels" onClick={() => openPremiumModal()}>
+                <Button
+                  className="show-more-channels"
+                  onClick={() => openPremiumModal()}
+                  iconName="unlock-badge"
+                  iconAlignment="end"
+                >
                   {oldLang('UnlockSimilar')}
-                  <Icon name="unlock-badge" />
                 </Button>
                 <div className="more-similar">
                   {renderText(oldLang('MoreSimilarText', limitSimilarPeers), ['simple_markdown'])}
@@ -1054,10 +1056,8 @@ const Profile = ({
             ))}
             {!isCurrentUserPremium && (
               <>
-                {}
-                <Button className="show-more-bots" onClick={() => openPremiumModal()}>
+                <Button className="show-more-bots" onClick={() => openPremiumModal()} iconName="unlock-badge">
                   {lang('UnlockMoreSimilarBots')}
-                  <Icon name="unlock-badge" />
                 </Button>
                 <div className="more-similar">
                   {renderText(lang('MoreSimilarBotsDescription', { count: limitSimilarPeers }, {

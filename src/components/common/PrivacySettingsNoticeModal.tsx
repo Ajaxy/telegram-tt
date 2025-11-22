@@ -17,7 +17,6 @@ import Button from '../ui/Button';
 import Modal, { ANIMATION_DURATION } from '../ui/Modal';
 import Separator from '../ui/Separator';
 import AnimatedIconWithPreview from './AnimatedIconWithPreview';
-import Icon from './icons/Icon';
 
 import styles from './PrivacySettingsNoticeModal.module.scss';
 
@@ -91,9 +90,8 @@ const PrivacySettingsNoticeModal = ({ isOpen, isReadDate, user }: OwnProps & Sta
           size="smaller"
           onClick={handleClose}
           ariaLabel="Close"
-        >
-          <Icon name="close" />
-        </Button>
+          iconName="close"
+        />
         <AnimatedIconWithPreview
           tgsUrl={isReadDate ? LOCAL_TGS_URLS.ReadTime : LOCAL_TGS_URLS.LastSeen}
           size={84}

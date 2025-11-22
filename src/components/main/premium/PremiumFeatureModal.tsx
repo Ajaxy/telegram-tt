@@ -27,7 +27,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
-import Icon from '../../common/icons/Icon';
 import SliderDots from '../../common/SliderDots';
 import Button from '../../ui/Button';
 import PremiumLimitPreview from './common/PremiumLimitPreview';
@@ -233,9 +232,8 @@ const PremiumFeatureModal: FC<OwnProps> = ({
         color={hasHeaderBackdrop ? 'translucent-white' : 'translucent'}
         onClick={onBack}
         ariaLabel={oldLang('Back')}
-      >
-        <Icon name="arrow-left" />
-      </Button>
+        iconName="arrow-left"
+      />
 
       <div className={styles.preview} />
 

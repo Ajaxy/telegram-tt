@@ -16,7 +16,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 
 import styles from './MinimizedWebAppModal.module.scss';
@@ -97,11 +96,11 @@ const MinimizedWebAppModal = ({
         round
         color="translucent"
         size="tiny"
+        iconName="close"
+        iconClassName={styles.icon}
         ariaLabel={oldLang('Close')}
         onClick={handleCloseClick}
-      >
-        <Icon className={styles.icon} name="close" />
-      </Button>
+      />
       <AvatarList className={styles.avatars} size="mini" peers={peers} />
       {renderTitle()}
       <Button
@@ -112,10 +111,10 @@ const MinimizedWebAppModal = ({
         round
         color="translucent"
         size="tiny"
+        iconName="expand-modal"
+        iconClassName={styles.stateIcon}
         onClick={handleExpandClick}
-      >
-        <Icon className={styles.stateIcon} name="expand-modal" />
-      </Button>
+      />
     </div>
   );
 };

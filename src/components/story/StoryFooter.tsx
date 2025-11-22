@@ -126,9 +126,8 @@ const StoryFooter = ({
           onClick={handleForwardClick}
           ariaLabel={lang('Forward')}
           className={styles.footerItem}
-        >
-          <Icon name="forward" />
-        </Button>
+          iconName="forward"
+        />
       )}
       {isChannel && (
         <>
@@ -140,9 +139,8 @@ const StoryFooter = ({
                 size="smaller"
                 nonInteractive
                 ariaLabel={lang('PublicShares')}
-              >
-                <Icon name="loop" />
-              </Button>
+                iconName="loop"
+              />
               <span>{forwardsCount}</span>
             </div>
           )}

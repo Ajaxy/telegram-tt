@@ -238,15 +238,14 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
 
         {canCreateNewFolder && (
           <Button
-          // TODO: Move icon into button prop
             className="settings-button with-icon"
             color="primary"
             pill
             fluid
             onClick={handleCreateFolder}
             isRtl={lang.isRtl}
+            iconName="add"
           >
-            <Icon name="add" />
             {lang('CreateNewFilter')}
           </Button>
         )}

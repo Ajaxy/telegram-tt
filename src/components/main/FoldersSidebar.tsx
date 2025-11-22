@@ -16,7 +16,6 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useScrolledState from '../../hooks/useScrolledState';
 
 import FolderIcon from '../common/FolderIcon';
-import Icon from '../common/icons/Icon';
 import MainMenuDropdown from '../common/MainMenuDropdown';
 import Button from '../ui/Button';
 import Folder from '../ui/Folder';
@@ -122,9 +121,9 @@ const FoldersSidebar = ({
         className={buildClassName(isOpen ? 'active' : '', styles.menuButton)}
         onClick={onTrigger}
         ariaLabel={lang('AriaLabelOpenMenu')}
-      >
-        <Icon name="menu" className={styles.icon} />
-      </Button>
+        iconName="menu"
+        iconClassName={styles.icon}
+      />
     );
   }, [lang]);
 
@@ -175,9 +174,9 @@ const FoldersSidebar = ({
         color="translucent"
         className={buildClassName(styles.menuButton, styles.settingsButton)}
         onClick={handleSettingsClick}
-      >
-        <Icon name="tools" className={styles.icon} />
-      </Button>
+        iconName="tools"
+        iconClassName={styles.icon}
+      />
     </div>
   );
 };

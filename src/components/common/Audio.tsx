@@ -457,9 +457,8 @@ const Audio = ({
           className="download-button"
           ariaLabel={isDownloading ? 'Cancel download' : 'Download'}
           onClick={handleDownloadClick}
-        >
-          <Icon name={isDownloading ? 'close' : 'arrow-down'} />
-        </Button>
+          iconName={isDownloading ? 'close' : 'arrow-down'}
+        />
       )}
       {origin === AudioOrigin.Search && renderWithTitle()}
       {origin !== AudioOrigin.Search && audio && renderAudio(

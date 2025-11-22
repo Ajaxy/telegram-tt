@@ -32,7 +32,6 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import Avatar from '../../common/Avatar';
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 import PhoneCallButton from './PhoneCallButton';
@@ -271,22 +270,20 @@ const PhoneCall: FC<StateProps> = ({
             round
             size="smaller"
             color="translucent"
+            iconName={isFullscreen ? 'smallscreen' : 'fullscreen'}
             onClick={handleToggleFullscreen}
             ariaLabel={lang(isFullscreen ? 'AccExitFullscreen' : 'AccSwitchToFullscreen')}
-          >
-            <Icon name={isFullscreen ? 'smallscreen' : 'fullscreen'} />
-          </Button>
+          />
         )}
 
         <Button
           round
           size="smaller"
           color="translucent"
+          iconName="close"
           onClick={handleClose}
           className={styles.closeButton}
-        >
-          <Icon name="close" />
-        </Button>
+        />
       </div>
       <div
         className={buildClassName(styles.emojisBackdrop, isEmojiOpen && styles.open)}

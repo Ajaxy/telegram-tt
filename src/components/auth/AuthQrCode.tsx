@@ -23,7 +23,6 @@ import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecat
 import useMultiaccountInfo from '../../hooks/useMultiaccountInfo';
 
 import AnimatedIcon from '../common/AnimatedIcon';
-import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import Loading from '../ui/Loading';
 
@@ -157,9 +156,14 @@ const AuthCode = ({
   return (
     <div id="auth-qr-form" className="custom-scroll">
       {hasActiveAccount && (
-        <Button size="smaller" round color="translucent" className="auth-close" onClick={handleBackNavigation}>
-          <Icon name="close" />
-        </Button>
+        <Button
+          size="smaller"
+          round
+          color="translucent"
+          className="auth-close"
+          iconName="close"
+          onClick={handleBackNavigation}
+        />
       )}
       <div className="auth-form qr">
         <div className="qr-outer">

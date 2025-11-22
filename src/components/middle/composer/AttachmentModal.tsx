@@ -45,7 +45,6 @@ import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
 import useEmojiTooltip from './hooks/useEmojiTooltip';
 import useMentionTooltip from './hooks/useMentionTooltip';
 
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
@@ -457,9 +456,8 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         className={isMenuOpen ? 'active' : ''}
         onClick={onTrigger}
         ariaLabel="More actions"
-      >
-        <Icon name="more" />
-      </Button>
+        iconName="more"
+      />
     );
   }, [isMobile]);
 
@@ -533,9 +531,14 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 
     return (
       <div className="modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
-        <Button round color="translucent" size="smaller" ariaLabel="Cancel attachments" onClick={onClear}>
-          <Icon name="close" />
-        </Button>
+        <Button
+          round
+          color="translucent"
+          size="smaller"
+          ariaLabel="Cancel attachments"
+          onClick={onClear}
+          iconName="close"
+        />
         <div className="modal-title">{title}</div>
         {notEditingFile && !isInAlbum
           && (

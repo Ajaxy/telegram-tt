@@ -698,9 +698,8 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
           color="translucent"
           onClick={handleClose}
           ariaLabel={lang('Close')}
-        >
-          <Icon name="close" />
-        </Button>
+          iconName="close"
+        />
         <img className={styles.logo} src={PremiumLogo} alt="" draggable={false} />
         <h2 className={styles.headerText}>
           {renderText(lang('BoostingBoostsViaGifts'))}

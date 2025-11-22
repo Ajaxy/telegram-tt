@@ -295,9 +295,8 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         disabled={isFirst?.()}
         onClick={requestPreviousTrack}
         ariaLabel="Previous track"
-      >
-        <Icon name="skip-previous" />
-      </Button>
+        iconName="skip-previous"
+      />
       <Button
         round
         ripple={!isMobile}
@@ -319,9 +318,8 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         disabled={isLast?.()}
         onClick={requestNextTrack}
         ariaLabel="Next track"
-      >
-        <Icon name="skip-next" />
-      </Button>
+        iconName="skip-next"
+      />
 
       <div className="volume-button-wrapper">
         <Button
@@ -332,9 +330,8 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
           ariaLabel="Volume"
           onClick={handleVolumeClick}
           ripple={!isMobile}
-        >
-          <Icon name={volumeIcon} />
-        </Button>
+          iconName={volumeIcon}
+        />
 
         {!IS_IOS && (
           <div className="volume-slider-wrapper">
@@ -370,9 +367,8 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         size="smaller"
         onClick={handleClose}
         ariaLabel="Close player"
-      >
-        <Icon name="close" />
-      </Button>
+        iconName="close"
+      />
     </div>
   );
 };

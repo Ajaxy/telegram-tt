@@ -82,7 +82,6 @@ import usePinnedMessage from './hooks/usePinnedMessage';
 import useFluidBackgroundFilter from './message/hooks/useFluidBackgroundFilter';
 
 import Composer from '../common/Composer';
-import Icon from '../common/icons/Icon';
 import PrivacySettingsNoticeModal from '../common/PrivacySettingsNoticeModal.async';
 import SeenByModal from '../common/SeenByModal.async';
 import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
@@ -609,8 +608,8 @@ function MiddleColumn({
                       color="secondary"
                       className="composer-button unpin-all-button"
                       onClick={handleOpenUnpinModal}
+                      iconName="unpin"
                     >
-                      <Icon name="unpin" />
                       <span>{oldLang('Chat.Pinned.UnpinAll', pinnedMessagesCount, 'i')}</span>
                     </Button>
                   </div>

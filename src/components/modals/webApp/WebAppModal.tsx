@@ -350,9 +350,8 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         color="translucent"
         onClick={onTrigger}
         ariaLabel="More actions"
-      >
-        <Icon name="more" />
-      </Button>
+        iconName="more"
+      />
     );
   }, [isMobile, supportMultiTabMode]);
 
@@ -479,11 +478,11 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
             round
             color="translucent"
             size="tiny"
+            iconName="close"
+            iconClassName={styles.tabCloseIcon}
             ariaLabel={oldLang('Close')}
             onClick={handleTabClose}
-          >
-            <Icon className={styles.tabCloseIcon} name="close" />
-          </Button>
+          />
         </div>
         {renderTabCurveBorder(styles.tabButtonRightCurve)}
       </div>
@@ -509,11 +508,11 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
             round
             color="translucent"
             size="tiny"
+            iconName="close"
+            iconClassName={styles.tabCloseIcon}
             ariaLabel={oldLang('Close')}
             onClick={handleCloseMoreAppsTab}
-          >
-            <Icon className={styles.tabCloseIcon} name="close" />
-          </Button>
+          />
         </div>
         {renderTabCurveBorder(styles.tabButtonRightCurve)}
       </div>
@@ -531,9 +530,9 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         color="translucent"
         size="tiny"
         onClick={handleOpenMoreAppsTabClick}
-      >
-        <Icon className={styles.icon} name="add" />
-      </Button>
+        iconName="add"
+        iconClassName={styles.icon}
+      />
     );
   }
 
@@ -614,9 +613,9 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
               color="translucent"
               size="tiny"
               onClick={handleFullscreenClick}
-            >
-              <Icon className={styles.stateIcon} name="expand-modal" />
-            </Button>
+              iconName="expand-modal"
+              iconClassName={styles.stateIcon}
+            />
           )}
 
           <Button
@@ -628,9 +627,9 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
             color="translucent"
             size="tiny"
             onClick={handleCollapseClick}
-          >
-            <Icon className={styles.stateIcon} name="collapse-modal" />
-          </Button>
+            iconClassName={styles.stateIcon}
+            iconName="collapse-modal"
+          />
         </div>
       </div>
     );

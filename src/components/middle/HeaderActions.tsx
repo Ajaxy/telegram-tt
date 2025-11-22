@@ -41,7 +41,6 @@ import { useHotkeys } from '../../hooks/useHotkeys';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
-import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -296,9 +295,8 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
         className={isOpen ? 'active' : ''}
         onClick={onTrigger}
         ariaLabel={lang('TranslateMessage')}
-      >
-        <Icon name="language" />
-      </Button>
+        iconName="language"
+      />
     );
   }, [isRightColumnShown, lang]);
 
@@ -382,9 +380,8 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               size="smaller"
               onClick={handleSearchClick}
               ariaLabel={lang('Conversation.SearchPlaceholder')}
-            >
-              <Icon name="search" />
-            </Button>
+              iconName="search"
+            />
           )}
           {canCall && (
             <Button
@@ -393,9 +390,8 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               size="smaller"
               onClick={handleRequestCall}
               ariaLabel="Call"
-            >
-              <Icon name="phone" />
-            </Button>
+              iconName="phone"
+            />
           )}
         </>
       )}
@@ -406,10 +402,10 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           ripple={isRightColumnShown}
           color="translucent"
           size="smaller"
+          iconName="user"
           onClick={handleJoinRequestsClick}
           ariaLabel={isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}
         >
-          <Icon name="user" />
           <div className="badge">{pendingJoinRequests}</div>
         </Button>
       )}
@@ -423,9 +419,8 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
         disabled={noMenu}
         ariaLabel="More actions"
         onClick={handleHeaderMenuOpen}
-      >
-        <Icon name="more" />
-      </Button>
+        iconName="more"
+      />
       {menuAnchor && (
         <HeaderMenuContainer
           chatId={chatId}

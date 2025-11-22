@@ -59,7 +59,6 @@ import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 import { useMediaProps } from './hooks/useMediaProps';
 
-import Icon from '../common/icons/Icon';
 import ReportAvatarModal from '../common/ReportAvatarModal';
 import Button from '../ui/Button';
 import ShowTransition from '../ui/ShowTransition';
@@ -433,11 +432,10 @@ const MediaViewer = ({
             round
             size="smaller"
             color="translucent-white"
+            iconName="close"
             ariaLabel={lang('Close')}
             onClick={handleClose}
-          >
-            <Icon name="close" />
-          </Button>
+          />
         )}
         <Transition activeKey={animationKey.current!} name={headerAnimation}>
           <SenderInfo

@@ -502,6 +502,7 @@
 
   .with-icon-start {
     display: flex;
+    align-items: center;
     .icon {
       margin-inline-end: 0.25rem;
     }
@@ -510,6 +511,7 @@
   .with-icon-end {
     display: flex;
     flex-direction: row-reverse;
+    align-items: center;
 
     .icon {
       margin-inline-start: 0.25rem;

@@ -17,7 +17,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -175,9 +174,8 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
         color="translucent"
         onClick={handleCloseReportPane}
         ariaLabel={lang('Close')}
-      >
-        <Icon name="close" />
-      </Button>
+        iconName="close"
+      />
       <ConfirmDialog
         isOpen={isBlockUserModalOpen}
         onClose={closeBlockUserModal}

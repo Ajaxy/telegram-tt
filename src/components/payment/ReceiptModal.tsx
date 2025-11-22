@@ -10,7 +10,6 @@ import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
 
-import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 import Checkout from './Checkout';
@@ -66,9 +65,8 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
               size="smaller"
               onClick={closeModal}
               ariaLabel="Close"
-            >
-              <Icon name="close" />
-            </Button>
+              iconName="close"
+            />
             <h3>
               {' '}
               {lang('PaymentReceipt')}

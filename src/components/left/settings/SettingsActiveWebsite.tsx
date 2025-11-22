@@ -11,7 +11,6 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 
@@ -52,9 +51,7 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
   function renderHeader() {
     return (
       <div className="modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
-        <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={onClose}>
-          <Icon name="close" />
-        </Button>
+        <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={onClose} iconName="close" />
         <div className="modal-title">{lang('WebSessionsTitle')}</div>
         <Button
           color="danger"

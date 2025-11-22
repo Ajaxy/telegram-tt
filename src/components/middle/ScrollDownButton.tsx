@@ -10,7 +10,6 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useLang from '../../hooks/useLang';
 import useOldLang from '../../hooks/useOldLang';
 
-import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
@@ -54,9 +53,9 @@ const ScrollDownButton: FC<OwnProps> = ({
         onClick={onClick}
         onContextMenu={handleContextMenu}
         ariaLabel={oldLang(ariaLabelLang)}
-      >
-        <Icon name={icon} className={styles.icon} />
-      </Button>
+        iconName={icon}
+        iconClassName={styles.icon}
+      />
       {Boolean(unreadCount) && <div className={styles.unreadCount}>{formatIntegerCompact(lang, unreadCount)}</div>}
       {onReadAll && (
         <Menu

@@ -20,7 +20,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
-import Icon from '../../common/icons/Icon';
 import PeerChip from '../../common/PeerChip';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -110,9 +109,8 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
         className={styles.closeButton}
         ariaLabel={lang('Close')}
         onClick={handleClose}
-      >
-        <Icon name="close" />
-      </Button>
+        iconName="close"
+      />
       <div className={styles.icon}>
         <AnimatedIconWithPreview
           tgsUrl={isUsername ? LOCAL_TGS_URLS.Mention : LOCAL_TGS_URLS.Fragment}

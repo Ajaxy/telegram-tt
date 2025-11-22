@@ -2216,9 +2216,8 @@ const Composer: FC<OwnProps & StateProps> = ({
                           ariaLabel={lang(
                             isSilentPosting ? 'AriaComposerSilentPostingDisable' : 'AriaComposerSilentPostingEnable',
                           )}
-                        >
-                          <Icon name={isSilentPosting ? 'mute' : 'unmute'} />
-                        </Button>
+                          iconName={isSilentPosting ? 'mute' : 'unmute'}
+                        />
                       </Transition>
                     )}
                     {withScheduledButton && (
@@ -2229,9 +2228,8 @@ const Composer: FC<OwnProps & StateProps> = ({
                         color="translucent"
                         onClick={handleAllScheduledClick}
                         ariaLabel={lang('AriaComposerOpenScheduled')}
-                      >
-                        <Icon name="scheduled" />
-                      </Button>
+                        iconName="scheduled"
+                      />
                     )}
                     {shouldShowGiftButton && (
                       <Button
@@ -2240,9 +2238,8 @@ const Composer: FC<OwnProps & StateProps> = ({
                         className="composer-action-button"
                         color="translucent"
                         onClick={handleGiftClick}
-                      >
-                        <Icon name="gift" />
-                      </Button>
+                        iconName="gift"
+                      />
                     )}
                     {shouldShowSuggestedPostButton && (
                       <Button
@@ -2251,9 +2248,8 @@ const Composer: FC<OwnProps & StateProps> = ({
                         className="composer-action-button"
                         color="translucent"
                         onClick={handleSuggestPostClick}
-                      >
-                        <Icon name="cash-circle" />
-                      </Button>
+                        iconName="cash-circle"
+                      />
                     )}
                     {Boolean(botKeyboardMessageId) && !activeVoiceRecording && !editingMessage && (
                       <ResponsiveHoverButton
@@ -2367,9 +2363,8 @@ const Composer: FC<OwnProps & StateProps> = ({
           className="cancel"
           onClick={stopRecordingVoice}
           ariaLabel="Cancel voice recording"
-        >
-          <Icon name="delete" />
-        </Button>
+          iconName="delete"
+        />
       )}
       {isInStoryViewer && !activeVoiceRecording && (
         <Button

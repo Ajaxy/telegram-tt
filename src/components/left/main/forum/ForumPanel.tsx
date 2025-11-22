@@ -39,7 +39,6 @@ import useOrderDiff from '../hooks/useOrderDiff';
 
 import GroupCallTopPane from '../../../calls/group/GroupCallTopPane';
 import GroupChatInfo from '../../../common/GroupChatInfo';
-import Icon from '../../../common/icons/Icon';
 import PrivateChatInfo from '../../../common/PrivateChatInfo';
 import HeaderActions from '../../../middle/HeaderActions';
 import Button from '../../../ui/Button';
@@ -252,9 +251,8 @@ const ForumPanel = ({
           color="translucent"
           onClick={handleClose}
           ariaLabel={lang('Close')}
-        >
-          <Icon name="close" />
-        </Button>
+          iconName="close"
+        />
 
         {isUserId(chat.id) ? (
           <PrivateChatInfo

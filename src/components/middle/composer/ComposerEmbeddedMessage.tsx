@@ -326,9 +326,8 @@ const ComposerEmbeddedMessage = ({
           color="translucent"
           ariaLabel={oldLang('Cancel')}
           onClick={handleClearClick}
-        >
-          <Icon name="close" />
-        </Button>
+          iconName="close"
+        />
         {(isShowingReply || isForwarding) && !isContextMenuDisabled && (
           <Menu
             isOpen={isContextMenuOpen}

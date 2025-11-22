@@ -312,12 +312,10 @@ const StarsBalanceModal = ({
           size="smaller"
           className={styles.closeButton}
           color="translucent"
-
           onClick={() => closeStarsBalanceModal()}
           ariaLabel={lang('Close')}
-        >
-          <Icon name="close" />
-        </Button>
+          iconName="close"
+        />
         {currency !== TON_CURRENCY_CODE && <BalanceBlock balance={balance} className={styles.modalBalance} />}
         <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
           <h2 className={styles.starHeaderText}>

@@ -245,9 +245,8 @@ const RoundVideo: FC<OwnProps> = ({
           size="smaller"
           className="play"
           nonInteractive
-        >
-          <Icon name="play" />
-        </Button>
+          iconName="play"
+        />
         <Icon name="view-once" />
       </div>
     );

@@ -1823,9 +1823,8 @@ const Message = ({
                   size="tiny"
                   ariaLabel={oldLang('lng_context_forward_msg')}
                   onClick={isLastInDocumentGroup ? handleGroupForward : handleForward}
-                >
-                  <Icon name="share-filled" />
-                </Button>
+                  iconName="share-filled"
+                />
               )}
               {canFocus && (
                 <Button
@@ -1835,9 +1834,8 @@ const Message = ({
                   size="tiny"
                   ariaLabel={lang('FocusMessage')}
                   onClick={isPinnedList ? handleFocus : handleFocusForwarded}
-                >
-                  <Icon name="arrow-right" />
-                </Button>
+                  iconName="arrow-right"
+                />
               )}
             </div>
           )}

@@ -11,7 +11,6 @@ import getSessionIcon from './helpers/getSessionIcon';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
 import Modal from '../../ui/Modal';
@@ -63,9 +62,7 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
   function renderHeader() {
     return (
       <div className="modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
-        <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={onClose}>
-          <Icon name="close" />
-        </Button>
+        <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={onClose} iconName="close" />
         <div className="modal-title">{lang('SessionPreviewTitle')}</div>
         <Button
           color="danger"

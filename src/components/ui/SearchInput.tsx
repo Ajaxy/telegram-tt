@@ -198,24 +198,22 @@ const SearchInput: FC<OwnProps> = ({
           round
           size="tiny"
           color="translucent"
+          iconName="up"
           onClick={onUpClick}
           disabled={!onUpClick}
           ariaLabel={lang('AriaSearchOlderResult')}
-        >
-          <Icon name="up" />
-        </Button>
+        />
       )}
       {hasDownButton && (
         <Button
           round
           size="tiny"
           color="translucent"
+          iconName="down"
           onClick={onDownClick}
           disabled={!onDownClick}
           ariaLabel={lang('AriaSearchNewerResult')}
-        >
-          <Icon name="down" />
-        </Button>
+        />
       )}
       <Transition
         name="fade"
@@ -232,10 +230,9 @@ const SearchInput: FC<OwnProps> = ({
               round
               size="tiny"
               color="translucent"
+              iconName="close"
               onClick={onReset}
-            >
-              <Icon name="close" />
-            </Button>
+            />
           )
         )}
       </Transition>

@@ -25,7 +25,6 @@ import useFullscreen from '../../hooks/window/useFullscreen';
 import useControlsSignal from './hooks/useControlsSignal';
 import useVideoWaitingSignal from './hooks/useVideoWaitingSignal';
 
-import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
 import VideoPlayerControls from './VideoPlayerControls';
@@ -365,9 +364,7 @@ const VideoPlayer: FC<OwnProps> = ({
         />
       </div>
       {shouldRenderPlayButton && (
-        <Button round className={`play-button ${playButtonClassNames}`} onClick={togglePlayState}>
-          <Icon name="play" />
-        </Button>
+        <Button round className={`play-button ${playButtonClassNames}`} onClick={togglePlayState} iconName="play" />
       )}
       {shouldRenderSpinner && (
         <div className={['spinner-container', spinnerClassNames].join(' ')}>

@@ -4,7 +4,6 @@ import {
   useCallback, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 
-import Icon from '../common/icons/Icon';
 import Button from './Button';
 import Menu from './Menu';
 
@@ -89,11 +88,10 @@ const DropdownMenu: FC<OwnProps> = ({
         size="smaller"
         color="translucent"
         className={isMenuOpen ? 'active' : ''}
+        iconName="more"
         onClick={onTrigger}
         ariaLabel="More actions"
-      >
-        <Icon name="more" />
-      </Button>
+      />
     );
   }, [trigger]);
 

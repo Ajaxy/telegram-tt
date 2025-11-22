@@ -14,7 +14,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
 import Modal from '../../ui/Modal';
@@ -90,9 +89,8 @@ const ReportModal = ({
             size="smaller"
             ariaLabel={lang('Back')}
             onClick={handleBackClick}
-          >
-            <Icon name="arrow-left" />
-          </Button>
+            iconName="arrow-left"
+          />
         ) : (
           <Button
             round
@@ -100,9 +98,8 @@ const ReportModal = ({
             size="smaller"
             ariaLabel={lang('Close')}
             onClick={handleCloseClick}
-          >
-            <Icon name="close" />
-          </Button>
+            iconName="close"
+          />
         )}
         <div className={buildClassName('modal-title', styles.modalTitle, hasSubtitle && styles.titleMultiline)}>
           <h3 className={buildClassName(styles.title, renderingDepth && styles.hasDepth)}>

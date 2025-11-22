@@ -30,7 +30,6 @@ import useOldLang from '../../../hooks/useOldLang';
 import { useFullscreenStatus } from '../../../hooks/window/useFullscreen';
 import useGroupCallVideoLayout from './hooks/useGroupCallVideoLayout';
 
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Checkbox from '../../ui/Checkbox';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -273,9 +272,8 @@ const GroupCall: FC<OwnProps & StateProps> = ({
                 onClick={handleToggleFullscreen}
                 className={buildClassName(styles.headerButton, styles.firstButton)}
                 ariaLabel={lang(isFullscreen ? 'AccExitFullscreen' : 'AccSwitchToFullscreen')}
-              >
-                <Icon name={isFullscreen ? 'smallscreen' : 'fullscreen'} />
-              </Button>
+                iconName={isFullscreen ? 'smallscreen' : 'fullscreen'}
+              />
             )}
 
             <h3 className={buildClassName(styles.title, styles.bigger)}>
@@ -290,9 +288,8 @@ const GroupCall: FC<OwnProps & StateProps> = ({
                 className={buildClassName(styles.headerButton, styles.videosHeaderLastButton)}
                 onClick={handleToggleSidebar}
                 ariaLabel={lang('AccDescrExpandPanel')}
-              >
-                <Icon name="sidebar" />
-              </Button>
+                iconName="sidebar"
+              />
             )}
           </div>
 
@@ -320,9 +317,8 @@ const GroupCall: FC<OwnProps & StateProps> = ({
                 )}
                 onClick={handleToggleFullscreen}
                 ariaLabel={lang('AccSwitchToFullscreen')}
-              >
-                <Icon name="fullscreen" />
-              </Button>
+                iconName="fullscreen"
+              />
             )}
 
             {isMobile && (
@@ -333,9 +329,8 @@ const GroupCall: FC<OwnProps & StateProps> = ({
                 onClick={handleToggleGroupCallPanel}
                 className={buildClassName(styles.headerButton, styles.firstButton)}
                 ariaLabel={lang('Close')}
-              >
-                <Icon name="close" />
-              </Button>
+                iconName="close"
+              />
             )}
 
             {isLandscapeWithVideos && (
@@ -350,9 +345,8 @@ const GroupCall: FC<OwnProps & StateProps> = ({
                 color="translucent"
                 onClick={handleToggleSidebar}
                 ariaLabel={lang('AccDescrCollapsePanel')}
-              >
-                <Icon name="sidebar" />
-              </Button>
+                iconName="sidebar"
+              />
             )}
 
             <div className={styles.panelHeaderText}>
@@ -378,9 +372,8 @@ const GroupCall: FC<OwnProps & StateProps> = ({
                 color="translucent"
                 onClick={handleInviteMember}
                 ariaLabel={lang('VoipGroupInviteMember')}
-              >
-                <Icon name="add-user" />
-              </Button>
+                iconName="add-user"
+              />
             )}
           </div>
 
@@ -470,9 +463,8 @@ const GroupCall: FC<OwnProps & StateProps> = ({
           onClick={handleClickVideo}
           ariaLabel={lang(hasVideo ? 'VoipStopVideo' : 'VoipStartVideo')}
           disabled={isConnecting}
-        >
-          <Icon name={!hasVideo ? 'video-stop' : 'video'} />
-        </Button>
+          iconName={!hasVideo ? 'video-stop' : 'video'}
+        />
 
         <Button
           round
@@ -486,9 +478,8 @@ const GroupCall: FC<OwnProps & StateProps> = ({
           onClick={handleToggleGroupCallPresentation}
           ariaLabel={lang(hasPresentation ? 'lng_group_call_screen_share_stop' : 'lng_group_call_tooltip_screen')}
           disabled={isConnecting || !IS_SCREENSHARE_SUPPORTED}
-        >
-          <Icon name={!hasPresentation ? 'share-screen-stop' : 'share-screen'} />
-        </Button>
+          iconName={!hasPresentation ? 'share-screen-stop' : 'share-screen'}
+        />
 
         <MicrophoneButton className={styles.actionButton} />
 
@@ -503,9 +494,8 @@ const GroupCall: FC<OwnProps & StateProps> = ({
           )}
           ariaLabel={lang('lng_group_call_settings')}
           disabled
-        >
-          <Icon name="settings-filled" />
-        </Button>
+          iconName="settings-filled"
+        />
 
         <Button
           round
@@ -517,9 +507,8 @@ const GroupCall: FC<OwnProps & StateProps> = ({
           )}
           onClick={handleLeaveGroupCall}
           ariaLabel={lang('lng_group_call_leave')}
-        >
-          <Icon name="close" />
-        </Button>
+          iconName="close"
+        />
       </div>
 
       <Modal

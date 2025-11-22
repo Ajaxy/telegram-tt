@@ -11,7 +11,6 @@ import sortChatIds from '../../common/helpers/sortChatIds';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import PeerPicker from '../../common/pickers/PeerPicker';
 import Button from '../../ui/Button';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -96,9 +95,8 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           color="translucent"
           onClick={onReset}
           ariaLabel="Return to Chat List"
-        >
-          <Icon name="arrow-left" />
-        </Button>
+          iconName="arrow-left"
+        />
         <h3>{lang('GroupAddMembers')}</h3>
       </div>
       <div className="NewChat-inner step-1">

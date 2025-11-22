@@ -192,9 +192,8 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
             round
             onClick={handleExitMessageSelectMode}
             ariaLabel="Exit select mode"
-          >
-            <Icon name="close" />
-          </Button>
+            iconName="close"
+          />
           <span className="MessageSelectToolbar-count" title={formattedMessagesCount}>
             {formattedMessagesCount}
           </span>

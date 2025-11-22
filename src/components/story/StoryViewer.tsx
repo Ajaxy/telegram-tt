@@ -26,7 +26,6 @@ import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCh
 import useSlideSizes from './hooks/useSlideSizes';
 import useStoryProps from './hooks/useStoryProps';
 
-import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import ShowTransition from '../ui/ShowTransition';
 import StoryDeleteConfirmModal from './StoryDeleteConfirmModal';
@@ -156,9 +155,8 @@ function StoryViewer({
         color="translucent-white"
         ariaLabel={lang('Close')}
         onClick={handleClose}
-      >
-        <Icon name="close" />
-      </Button>
+        iconName="close"
+      />
 
       <StorySlides
         isOpen={isOpen}

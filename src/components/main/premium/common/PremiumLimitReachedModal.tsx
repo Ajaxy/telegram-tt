@@ -17,7 +17,6 @@ import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
 import useOldLang from '../../../../hooks/useOldLang';
 
-import Icon from '../../../common/icons/Icon';
 import Button from '../../../ui/Button';
 import Modal from '../../../ui/Modal';
 import PremiumLimitsCompare from './PremiumLimitsCompare';
@@ -213,9 +212,11 @@ const PremiumLimitReachedModal: FC<OwnProps & StateProps> = ({
               isText
               onClick={handleClick}
               color="primary"
+              iconName="double-badge"
+              iconClassName={styles.x2}
+              iconAlignment="end"
             >
               {lang('IncreaseLimit')}
-              <Icon name="double-badge" className={styles.x2} />
             </Button>
           )}
       </div>

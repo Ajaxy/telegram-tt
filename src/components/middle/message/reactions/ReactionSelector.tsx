@@ -20,7 +20,6 @@ import buildClassName, { createClassNameBuilder } from '../../../../util/buildCl
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
 
-import Icon from '../../../common/icons/Icon';
 import Button from '../../../ui/Button';
 import Link from '../../../ui/Link';
 import ReactionSelectorCustomReaction from './ReactionSelectorCustomReaction';
@@ -227,9 +226,8 @@ const ReactionSelector: FC<OwnProps> = ({
                 color="translucent"
                 className={cn('show-more')}
                 onClick={handleShowMoreClick}
-              >
-                <Icon name="down" />
-              </Button>
+                iconName="down"
+              />
             )}
           </div>
         </div>

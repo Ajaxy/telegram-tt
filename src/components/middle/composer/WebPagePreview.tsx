@@ -236,9 +236,8 @@ const WebPagePreview = ({
           color="translucent"
           ariaLabel={lang('AccLinkRemovePreview')}
           onClick={handleClearWebpagePreview}
-        >
-          <Icon name="close" />
-        </Button>
+          iconName="close"
+        />
         {!isEditing && renderContextMenu()}
       </div>
     </div>

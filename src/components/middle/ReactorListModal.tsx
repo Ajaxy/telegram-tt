@@ -155,10 +155,9 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             className={buildClassName(!chosenTab && 'chosen')}
             size="tiny"
             ripple
-
+            iconName="heart"
             onClick={() => setChosenTab(undefined)}
           >
-            <Icon name="heart" />
             {Boolean(reactors?.count) && formatIntegerCompact(lang, reactors.count)}
           </Button>
           {allReactions.map((reaction) => {

@@ -24,7 +24,6 @@ import useOldLang from '../../../hooks/useOldLang';
 import useScrolledState from '../../../hooks/useScrolledState';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Loading from '../../ui/Loading';
 import Transition from '../../ui/Transition.tsx';
@@ -190,12 +189,10 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
         round
         faded
         color="translucent"
-
         onClick={() => selectCategory(index)}
         ariaLabel={category.name}
-      >
-        <Icon name={icon} />
-      </Button>
+        iconName={icon}
+      />
     );
   }
 

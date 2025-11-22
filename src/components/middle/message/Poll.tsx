@@ -26,7 +26,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import CheckboxGroup from '../../ui/CheckboxGroup';
 import RadioGroup from '../../ui/RadioGroup';
@@ -263,9 +262,8 @@ const Poll: FC<OwnProps> = ({
             className="poll-quiz-help"
             onClick={showSolution}
             ariaLabel="Show Solution"
-          >
-            <Icon name="lamp" />
-          </Button>
+            iconName="lamp"
+          />
         )}
       </div>
       {canVote && (

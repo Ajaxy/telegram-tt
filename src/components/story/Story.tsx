@@ -572,9 +572,8 @@ function Story({
           onClick={onTrigger}
           className={buildClassName(styles.button, isOpen && 'active')}
           ariaLabel={lang('AriaLabelOpenMenu')}
-        >
-          <Icon name="more" />
-        </Button>
+          iconName="more"
+        />
       );
     };
   }, [isMobile, lang]);
@@ -716,9 +715,8 @@ function Story({
               disabled={!hasFullData}
               onClick={handleVolumeMuted}
               ariaLabel={oldLang('Volume')}
-            >
-              <Icon name={(isMuted || noSound) ? 'speaker-muted-story' : 'speaker-story'} />
-            </Button>
+              iconName={(isMuted || noSound) ? 'speaker-muted-story' : 'speaker-story'}
+            />
           )}
           <DropdownMenu
             className={styles.buttonMenu}
@@ -766,9 +764,8 @@ function Story({
             color="translucent-white"
             ariaLabel={oldLang('Close')}
             onClick={onClose}
-          >
-            <Icon name="close" />
-          </Button>
+            iconName="close"
+          />
         </div>
       </div>
     );

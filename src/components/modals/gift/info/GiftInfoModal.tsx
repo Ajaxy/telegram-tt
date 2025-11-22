@@ -375,27 +375,42 @@ const GiftInfoModal = ({
 
     if (canManage && savedGift?.alreadyPaidUpgradeStars && !savedGift.upgradeMsgId) {
       return (
-        <Button isShiny onClick={handleOpenUpgradeModal}>
+        <Button
+          isShiny
+          onClick={handleOpenUpgradeModal}
+          iconName="arrow-down-circle"
+          iconClassName={styles.upgradeIcon}
+          iconAlignment="end"
+        >
           {lang('GiftInfoUpgradeForFree')}
-          <Icon name="arrow-down-circle" className={styles.upgradeIcon} />
         </Button>
       );
     }
 
     if (canManage && savedGift?.canUpgrade && !savedGift.upgradeMsgId) {
       return (
-        <Button isShiny onClick={handleOpenUpgradeModal}>
+        <Button
+          isShiny
+          onClick={handleOpenUpgradeModal}
+          iconName="arrow-down-circle"
+          iconClassName={styles.upgradeIcon}
+          iconAlignment="end"
+        >
           {lang('GiftInfoUpgrade')}
-          <Icon name="arrow-down-circle" className={styles.upgradeIcon} />
         </Button>
       );
     }
 
     if (savedGift?.prepaidUpgradeHash) {
       return (
-        <Button isShiny onClick={handleOpenUpgradeModal}>
+        <Button
+          isShiny
+          onClick={handleOpenUpgradeModal}
+          iconName="arrow-down-circle"
+          iconClassName={styles.upgradeIcon}
+          iconAlignment="end"
+        >
           {lang('GiftAnUpgradeButton')}
-          <Icon name="arrow-down-circle" className={styles.upgradeIcon} />
         </Button>
       );
     }
@@ -804,9 +819,8 @@ const GiftInfoModal = ({
                 color="translucent"
                 ariaLabel="Delete original details"
                 onClick={handleRemoveMessage}
-              >
-                <Icon name="delete" />
-              </Button>
+                iconName="delete"
+              />
             )}
           </div>,
         ]);

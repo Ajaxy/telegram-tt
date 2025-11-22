@@ -12,7 +12,6 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
-import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 
 import styles from './EmptyFolder.module.scss';
@@ -56,10 +55,10 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
           ripple={!isMobile}
           fluid
           pill
+          iconName="settings"
           onClick={handleEditFolder}
           isRtl={lang.isRtl}
         >
-          <Icon name="settings" />
           <div className={styles.buttonText}>
             {lang('ChatList.EmptyChatListEditFilter')}
           </div>

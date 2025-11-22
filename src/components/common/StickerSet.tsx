@@ -347,9 +347,8 @@ const StickerSet: FC<OwnProps & StateProps> = ({
             color="translucent"
             onClick={handleDefaultStatusIconClick}
             key="default-status-icon"
-          >
-            <Icon name="star" />
-          </Button>
+            iconName="star"
+          />
         )}
         {shouldRender && stickerSet.reactions?.map((reaction) => {
           const reactionId = getReactionKey(reaction);

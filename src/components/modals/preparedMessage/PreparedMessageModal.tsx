@@ -18,7 +18,6 @@ import useCustomBackground from '../../../hooks/useCustomBackground';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import Icon from '../../common/icons/Icon';
 import Message from '../../middle/message/Message';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -95,9 +94,8 @@ const PreparedMessageModal: FC<OwnProps & StateProps> = ({
           size="smaller"
           ariaLabel={lang('Close')}
           onClick={handleCloseClick}
-        >
-          <Icon name="close" />
-        </Button>
+          iconName="close"
+        />
         <h3 className={buildClassName('modal-title', styles.modalTitle)}>
           {lang('BotShareMessage')}
         </h3>
