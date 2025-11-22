@@ -50,11 +50,13 @@ import selectViewableMedia from './helpers/getViewableMedia';
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 
 import useAppLayout from '../../hooks/useAppLayout';
+import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import { exitPictureInPictureIfNeeded, PICTURE_IN_PICTURE_SIGNAL } from '../../hooks/usePictureInPicture';
+import usePrevious from '../../hooks/usePrevious';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 import { useMediaProps } from './hooks/useMediaProps';
@@ -169,7 +171,6 @@ const MediaViewer = ({
     if (media === info.personalPhoto) return false;
     return true;
   })();
-  const isVisible = !isHidden && isOpen;
 
   const messageMediaIds = useMemo(() => {
     return withDynamicLoading
@@ -198,10 +199,10 @@ const MediaViewer = ({
   }, [isOpen, getIsPictureInPicture]);
 
   useEffect(() => {
-    if (isVisible) {
+    if (!isHidden || !isOpen) {
       exitPictureInPictureIfNeeded();
     }
-  }, [isVisible]);
+  }, [isHidden, isOpen]);
 
   useEffect(() => {
     if (isMobile) {
@@ -221,17 +222,17 @@ const MediaViewer = ({
     };
   }, [forceUpdate]);
 
-  const prevMessage = usePreviousDeprecated<ApiMessage | undefined>(message);
-  const prevIsHidden = usePreviousDeprecated<boolean | undefined>(isHidden);
-  const prevOrigin = usePreviousDeprecated(origin);
-  const prevItem = usePreviousDeprecated(currentItem);
-  const prevBestImageData = usePreviousDeprecated(bestImageData);
+  const prevMessage = usePrevious<ApiMessage | undefined>(message);
+  const prevOrigin = usePrevious(origin);
+  const prevItem = usePrevious(currentItem);
+  const prevBestImageData = usePrevious(bestImageData);
   const textParts = message ? renderMessageText({ message, forcePlayback: true, isForMediaViewer: true }) : undefined;
   const hasFooter = Boolean(textParts);
-  const shouldAnimateOpening = prevIsHidden && prevItem !== currentItem;
 
-  useEffect(() => {
-    if (isGhostAnimation && isOpen && (shouldAnimateOpening || !prevItem)) {
+  useEffectWithPrevDeps(([prevIsOpen, prevIsHidden]) => {
+    if (prevIsOpen === isOpen && prevIsHidden === isHidden) return;
+
+    if (isGhostAnimation && isOpen && !prevItem) {
       beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateOpening(hasFooter, origin!, bestImageData!, dimensions!, isVideo, message, mediaIndex);
     }
@@ -241,8 +242,8 @@ const MediaViewer = ({
       animateClosing(prevOrigin!, prevBestImageData!, prevMessage, prevItem?.mediaIndex);
     }
   }, [
-    bestImageData, dimensions, hasFooter, isGhostAnimation, isOpen, isVideo, message, origin,
-    prevBestImageData, prevItem, prevMessage, prevOrigin, shouldAnimateOpening, mediaIndex,
+    isOpen, isHidden, bestImageData, dimensions, hasFooter, isGhostAnimation, isVideo, message, origin,
+    prevBestImageData, prevItem, prevMessage, prevOrigin, mediaIndex,
   ]);
 
   const handleClose = useLastCallback(() => closeMediaViewer());
