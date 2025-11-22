@@ -1,11 +1,14 @@
-import type React from '../../../lib/teact/teact';
 import {
-  memo, useEffect, useMemo, useRef,
+  memo, useMemo,
 } from '../../../lib/teact/teact';
 
 import type { ApiBusinessWorkHours } from '../../../api/types';
 
-import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
+import {
+  VTT_PROFILE_BUSINESS_HOURS,
+  VTT_PROFILE_BUSINESS_HOURS_COLLAPSE,
+  VTT_PROFILE_BUSINESS_HOURS_EXPAND,
+} from '../../../util/animations/viewTransitionTypes';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { formatTime, formatWeekday } from '../../../util/dates/dateFormat';
@@ -13,6 +16,8 @@ import {
   getUtcOffset, getWeekStart, shiftTimeRanges, splitDays,
 } from '../../../util/dates/workHours';
 
+import { useViewTransition } from '../../../hooks/animations/useViewTransition';
+import { useVtn } from '../../../hooks/animations/useVtn';
 import useSelectorSignal from '../../../hooks/data/useSelectorSignal';
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useDerivedState from '../../../hooks/useDerivedState';
@@ -22,7 +27,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import ListItem from '../../ui/ListItem';
-import Transition, { ACTIVE_SLIDE_CLASS_NAME, TO_SLIDE_CLASS_NAME } from '../../ui/Transition';
 import Icon from '../icons/Icon';
 
 import styles from './BusinessHours.module.scss';
@@ -31,16 +35,20 @@ const DAYS = Array.from({ length: 7 }, (_, i) => i);
 
 type OwnProps = {
   businessHours: ApiBusinessWorkHours;
+  className?: string;
 };
 
 const BusinessHours = ({
   businessHours,
+  className,
 }: OwnProps) => {
-  const transitionRef = useRef<HTMLDivElement>();
   const [isExpanded, expand, collapse] = useFlag(false);
   const [isMyTime, showInMyTime, showInLocalTime] = useFlag(false);
-  const lang = useOldLang();
+  const oldLang = useOldLang();
   const forceUpdate = useForceUpdate();
+
+  const { startViewTransition } = useViewTransition();
+  const { createVtnStyle } = useVtn();
 
   useInterval(forceUpdate, 60 * 1000);
 
@@ -62,20 +70,20 @@ const BusinessHours = ({
     DAYS.forEach((day) => {
       const segments = days[day];
       if (!segments) {
-        result[day] = [lang('BusinessHoursDayClosed')];
+        result[day] = [oldLang('BusinessHoursDayClosed')];
         return;
       }
 
       result[day] = segments.map(({ startMinute, endMinute }) => {
-        if (endMinute - startMinute === 24 * 60) return lang('BusinessHoursDayFullOpened');
-        const start = formatTime(lang, weekStart + startMinute * 60 * 1000);
-        const end = formatTime(lang, weekStart + endMinute * 60 * 1000);
+        if (endMinute - startMinute === 24 * 60) return oldLang('BusinessHoursDayFullOpened');
+        const start = formatTime(oldLang, weekStart + startMinute * 60 * 1000);
+        const end = formatTime(oldLang, weekStart + endMinute * 60 * 1000);
         return `${start} – ${end}`;
       });
     });
 
     return result;
-  }, [businessHours.workHours, isMyTime, lang, timezoneMinuteDifference]);
+  }, [businessHours.workHours, isMyTime, oldLang, timezoneMinuteDifference]);
 
   const isBusinessOpen = useMemo(() => {
     const localTimeHours = shiftTimeRanges(businessHours.workHours, timezoneMinuteDifference);
@@ -96,41 +104,25 @@ const BusinessHours = ({
 
   const handleClick = useLastCallback(() => {
     if (isExpanded) {
-      collapse();
+      startViewTransition(VTT_PROFILE_BUSINESS_HOURS_COLLAPSE, () => {
+        collapse();
+      });
     } else {
-      expand();
+      startViewTransition(VTT_PROFILE_BUSINESS_HOURS_EXPAND, () => {
+        expand();
+      });
     }
   });
 
   const handleTriggerOffset = useLastCallback((e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (isMyTime) {
-      showInLocalTime();
-    } else {
-      showInMyTime();
-    }
-  });
-
-  useEffect(() => {
-    if (!isExpanded) return;
-    const slide = document.querySelector<HTMLElement>(`.${ACTIVE_SLIDE_CLASS_NAME} > .${styles.timetable}`);
-    if (!slide) return;
-
-    const height = slide.offsetHeight;
-    requestMutation(() => {
-      transitionRef.current!.style.height = `${height}px`;
-    });
-  }, [isExpanded]);
-
-  const handleAnimationStart = useLastCallback(() => {
-    const slide = document.querySelector<HTMLElement>(`.${TO_SLIDE_CLASS_NAME} > .${styles.timetable}`)!;
-
-    requestMeasure(() => {
-      const height = slide.offsetHeight;
-      requestMutation(() => {
-        transitionRef.current!.style.height = `${height}px`;
-      });
+    startViewTransition(VTT_PROFILE_BUSINESS_HOURS, () => {
+      if (isMyTime) {
+        showInLocalTime();
+      } else {
+        showInMyTime();
+      }
     });
   });
 
@@ -139,7 +131,8 @@ const BusinessHours = ({
       icon="clock"
       iconClassName={styles.icon}
       multiline
-      className={styles.root}
+      className={buildClassName(styles.root, className)}
+      style={createVtnStyle('businessHours', true)}
       isStatic={isExpanded}
       ripple
       narrow
@@ -148,48 +141,43 @@ const BusinessHours = ({
     >
       <div className={styles.top}>
         <div className={styles.left}>
-          <div>{lang('BusinessHoursProfile')}</div>
-          <div className={buildClassName(styles.status, isBusinessOpen && styles.statusOpen)}>
-            {isBusinessOpen ? lang('BusinessHoursProfileNowOpen') : lang('BusinessHoursProfileNowClosed')}
+          <div>{oldLang('BusinessHoursProfile')}</div>
+          <div
+            className={buildClassName(styles.status, isBusinessOpen && styles.statusOpen)}
+          >
+            {isBusinessOpen ? oldLang('BusinessHoursProfileNowOpen') : oldLang('BusinessHoursProfileNowClosed')}
           </div>
         </div>
-        <Icon className={styles.arrow} name={isExpanded ? 'up' : 'down'} />
+        <Icon className={styles.arrow} style={createVtnStyle('expandArrow', true)} name={isExpanded ? 'up' : 'down'} />
       </div>
       {isExpanded && (
         <div className={styles.bottom}>
           {Boolean(timezoneMinuteDifference) && (
             <div
               className={styles.offsetTrigger}
+              style={createVtnStyle('offsetTrigger')}
               role="button"
               tabIndex={0}
               onMouseDown={!IS_TOUCH_ENV ? handleTriggerOffset : undefined}
               onClick={IS_TOUCH_ENV ? handleTriggerOffset : undefined}
             >
-              {lang(isMyTime ? 'BusinessHoursProfileSwitchMy' : 'BusinessHoursProfileSwitchLocal')}
+              {oldLang(isMyTime ? 'BusinessHoursProfileSwitchMy' : 'BusinessHoursProfileSwitchLocal')}
             </div>
           )}
-          <Transition
-            className={styles.transition}
-            ref={transitionRef}
-            name="fade"
-            activeKey={Number(isMyTime)}
-            onStart={handleAnimationStart}
-          >
-            <dl className={styles.timetable}>
-              {DAYS.map((day) => (
-                <>
-                  <dt className={buildClassName(styles.weekday, day === currentDay && styles.currentDay)}>
-                    {formatWeekday(lang, day === 6 ? 0 : day + 1)}
-                  </dt>
-                  <dd className={styles.schedule}>
-                    {workHours[day].map((segment) => (
-                      <div>{segment}</div>
-                    ))}
-                  </dd>
-                </>
-              ))}
-            </dl>
-          </Transition>
+          <dl className={styles.timetable}>
+            {DAYS.map((day) => (
+              <>
+                <dt className={buildClassName(styles.weekday, day === currentDay && styles.currentDay)}>
+                  {formatWeekday(oldLang, day === 6 ? 0 : day + 1)}
+                </dt>
+                <dd className={styles.schedule}>
+                  {workHours[day].map((segment) => (
+                    <div>{segment}</div>
+                  ))}
+                </dd>
+              </>
+            ))}
+          </dl>
         </div>
       )}
     </ListItem>

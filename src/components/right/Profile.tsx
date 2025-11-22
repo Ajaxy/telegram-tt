@@ -1116,7 +1116,6 @@ const Profile = ({
           chatOrUserId={profileId}
           isSavedDialog={isSavedDialog}
           isOwnProfile={isOwnProfile}
-          style={createVtnStyle('chatExtra')}
         />
       </div>
     );

@@ -1,5 +1,9 @@
+@use '../../../styles/mixins';
+
 .root {
   cursor: pointer;
+
+  @include mixins.with-vt-type('profileBusinessHours');
 }
 
 .top {
@@ -32,6 +36,8 @@
   margin-inline-end: 0.375rem;
   font-size: 1.25rem;
   color: var(--color-text-secondary);
+
+  @include mixins.with-vt-type('profileBusinessHours');
 }
 
 .offset-trigger {
@@ -54,13 +60,13 @@
   &:hover {
     background-color: var(--color-primary-opacity);
   }
+
+  @include mixins.with-vt-type('profileBusinessHours');
 }
 
 .transition {
   height: 0;
   margin-bottom: 0.5rem;
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .timetable {
@@ -90,4 +96,43 @@
 
 .current-day {
   color: var(--color-primary);
+}
+
+@include mixins.on-active-vt('profileBusinessHours') {
+  &::view-transition-image-pair(.businessHours) {
+    overflow: hidden;
+  }
+
+  &::view-transition-old(.businessHours),
+  &::view-transition-new(.businessHours) {
+    animation-name: none;
+  }
+}
+
+@include mixins.on-active-vt('profileBusinessHoursExpand') {
+  &::view-transition-old(.expandArrow) {
+    animation-name: vt-expand-icon-spin;
+  }
+
+  &::view-transition-new(.expandArrow) {
+    display: none;
+  }
+
+  &::view-transition-old(.businessHours) {
+    display: none;
+  }
+}
+
+@include mixins.on-active-vt('profileBusinessHoursCollapse') {
+  &::view-transition-old(.expandArrow) {
+    animation-name: vt-collapse-icon-spin;
+  }
+
+  &::view-transition-new(.expandArrow) {
+    display: none;
+  }
+
+  &::view-transition-new(.businessHours) {
+    display: none;
+  }
 }

@@ -9,6 +9,8 @@
   border-radius: 0.25rem;
 
   object-fit: cover;
+
+  @include mixins.with-vt-type('chatExtra');
 }
 
 .personalChannel {
@@ -18,6 +20,8 @@
   column-gap: 0.5rem;
 
   margin-bottom: 0.5rem;
+
+  @include mixins.with-vt-type('chatExtra');
 }
 
 .personalChannelTitle {
@@ -31,6 +35,11 @@
   color: var(--color-text-secondary);
 }
 
+.phone, .description, .link, .miniapp, .notifications, .location, .note, .savedMessages, .botEmojiStatus,
+.botLocation, .subscribers {
+  @include mixins.with-vt-type('chatExtra');
+}
+
 .botVerificationSection,
 .sectionInfo {
   font-size: 0.875rem;
@@ -39,6 +48,8 @@
 
 .botVerificationSection {
   padding-inline: 1.25rem;
+
+  @include mixins.with-vt-type('chatExtra');
 }
 
 .botVerificationIcon {
@@ -71,9 +82,15 @@
   margin-bottom: 0.5rem;
 }
 
+.note {
+  @include mixins.with-vt-type('profileNote');
+}
+
 .noteSubtitle {
   display: flex !important;
   align-items: center;
+
+  @include mixins.with-vt-type('profileNote');
 }
 
 .noteListItemIcon {
@@ -87,13 +104,9 @@
 
 .noteText {
   position: relative;
-
   overflow: hidden;
   display: inline-block;
-
   width: 100%;
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: max-height 0.3s ease;
 
   &::after {
     pointer-events: none;
@@ -111,23 +124,61 @@
 
     transition: opacity 0.3s ease;
   }
+
+  @include mixins.with-vt-type('profileNote');
 }
 
 .noteTextCollapsed::after {
   opacity: 1;
 }
 
-.noteCollapseIcon {
+.noteExpandIcon {
   margin-inline-start: 0.125rem;
   font-size: 0.9375rem;
   line-height: 0.9375rem;
-  transition: transform 0.3s ease;
-}
 
-.expandedIcon {
-  transform: rotate(-180deg);
+  @include mixins.with-vt-type('profileNote');
 }
 
 .clickable {
   cursor: var(--custom-cursor, pointer);
+}
+
+@include mixins.on-active-vt('profileNote') {
+  &::view-transition-image-pair(.noteText) {
+    overflow: hidden;
+  }
+
+  &::view-transition-old(.noteText),
+  &::view-transition-new(.noteText) {
+    animation-name: none;
+  }
+}
+
+@include mixins.on-active-vt('profileNoteExpand') {
+  &::view-transition-old(.noteExpandIcon) {
+    animation-name: vt-expand-icon-spin;
+  }
+
+  &::view-transition-new(.noteExpandIcon) {
+    display: none;
+  }
+
+  &::view-transition-old(.noteText) {
+    display: none;
+  }
+}
+
+@include mixins.on-active-vt('profileNoteCollapse') {
+  &::view-transition-old(.noteExpandIcon) {
+    animation-name: vt-collapse-icon-spin;
+  }
+
+  &::view-transition-new(.noteExpandIcon) {
+    display: none;
+  }
+
+  &::view-transition-new(.noteText) {
+    display: none;
+  }
 }

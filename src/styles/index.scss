@@ -424,6 +424,18 @@ body:not(.is-ios) {
   }
 }
 
+@keyframes vt-expand-icon-spin {
+  to {
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes vt-collapse-icon-spin {
+  to {
+    transform: rotate(-180deg);
+  }
+}
+
 .component-theme-dark {
   --color-background: rgb(33, 33, 33);
   --color-background-compact-menu: rgb(33, 33, 33, 0.867);
