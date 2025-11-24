@@ -949,6 +949,7 @@ async function uploadMedia(message: ApiMessage, attachment: ApiAttachment, onPro
         return new GramJs.InputMediaUploadedPhoto({
           file: inputFile,
           spoiler: shouldSendAsSpoiler,
+          ttlSeconds,
         });
       }
 
