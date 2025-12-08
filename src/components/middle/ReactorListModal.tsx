@@ -26,6 +26,7 @@ import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
+import useScrollNotch from '../../hooks/useScrollNotch';
 
 import Avatar from '../common/Avatar';
 import FullNameTitle from '../common/FullNameTitle';
@@ -37,6 +38,7 @@ import InfiniteScroll from '../ui/InfiniteScroll';
 import ListItem from '../ui/ListItem';
 import Loading from '../ui/Loading';
 import Modal from '../ui/Modal';
+import Transition from '../ui/Transition';
 
 import './ReactorListModal.scss';
 
@@ -81,6 +83,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
     && reactions.results.length > 1;
   const chatIdRef = useRef<string>();
   const reactionsRef = useRef<HTMLDivElement>();
+  const containerRef = useRef<HTMLDivElement>();
 
   useHorizontalScroll(reactionsRef, !canShowFilters || !isOpen);
 
@@ -128,6 +131,12 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
     return uniqueReactions;
   }, [reactors]);
 
+  const contentActiveKey = useMemo(() => {
+    if (!chosenTab) return 0;
+    const index = allReactions.findIndex((r) => isSameReaction(r, chosenTab));
+    return index + 1;
+  }, [chosenTab, allReactions]);
+
   const peerIds = useMemo(() => {
     if (chosenTab) {
       return reactors?.reactions
@@ -143,6 +152,11 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   const [viewportIds, getMore] = useInfiniteScroll(
     handleLoadMore, peerIds, reactors && reactors.nextOffset === undefined,
   );
+
+  useScrollNotch({
+    containerRef,
+    selector: '.reactor-list',
+  }, [contentActiveKey, isOpen]);
 
   useEffect(() => {
     getMore?.({ direction: LoadMoreDirection.Backwards });
@@ -200,74 +214,80 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
         </div>
       )}
 
-      <div dir={lang.isRtl ? 'rtl' : undefined} className="reactor-list-wrapper">
-        {viewportIds?.length ? (
-          <InfiniteScroll
-            className="reactor-list custom-scroll"
-            items={viewportIds}
-            onLoadMore={getMore}
-          >
-            {viewportIds?.flatMap(
-              (peerId) => {
-                const peer = usersById[peerId] || chatsById[peerId];
+      <div
+        ref={containerRef}
+        dir={lang.isRtl ? 'rtl' : undefined}
+        className="reactor-list-wrapper"
+      >
+        <Transition activeKey={contentActiveKey} name="slide">
+          {viewportIds?.length ? (
+            <InfiniteScroll
+              className="reactor-list custom-scroll"
+              items={viewportIds}
+              onLoadMore={getMore}
+            >
+              {viewportIds?.flatMap(
+                (peerId) => {
+                  const peer = usersById[peerId] || chatsById[peerId];
 
-                const peerReactions = reactors?.reactions.filter((reactor) => reactor.peerId === peerId);
-                const items: React.ReactNode[] = [];
-                const seenByUser = seenByDates?.[peerId];
+                  const peerReactions = reactors?.reactions.filter((reactor) => reactor.peerId === peerId);
+                  const items: React.ReactNode[] = [];
+                  const seenByUser = seenByDates?.[peerId];
 
-                peerReactions?.forEach((r) => {
-                  if (chosenTab && !isSameReaction(r.reaction, chosenTab)) return;
+                  peerReactions?.forEach((r) => {
+                    if (chosenTab && !isSameReaction(r.reaction, chosenTab)) return;
 
-                  items.push(
-                    <ListItem
-                      key={`${peerId}-${getReactionKey(r.reaction)}`}
-                      className="chat-item-clickable reactors-list-item"
+                    items.push(
+                      <ListItem
+                        key={`${peerId}-${getReactionKey(r.reaction)}`}
+                        className="chat-item-clickable reactors-list-item"
 
-                      onClick={() => handleClick(peerId)}
-                    >
-                      <Avatar peer={peer} size="medium" />
-                      <div className="info">
-                        <FullNameTitle peer={peer} withEmojiStatus />
-                        <span className="status" dir="auto">
-                          <Icon name="heart-outline" className="status-icon" />
-                          {formatDateAtTime(oldLang, r.addedDate * 1000)}
-                        </span>
-                      </div>
-                      {r.reaction && (
-                        <ReactionStaticEmoji
-                          className="reactors-list-emoji"
-                          reaction={r.reaction}
-                          availableReactions={availableReactions}
-                          size={DEFAULT_REACTION_SIZE}
+                        onClick={() => handleClick(peerId)}
+                      >
+                        <Avatar peer={peer} size="medium" />
+                        <div className="info">
+                          <FullNameTitle peer={peer} withEmojiStatus />
+                          <span className="status" dir="auto">
+                            <Icon name="heart-outline" className="status-icon" />
+                            {formatDateAtTime(oldLang, r.addedDate * 1000)}
+                          </span>
+                        </div>
+                        {r.reaction && (
+                          <ReactionStaticEmoji
+                            className="reactors-list-emoji"
+                            reaction={r.reaction}
+                            availableReactions={availableReactions}
+                            size={DEFAULT_REACTION_SIZE}
+                          />
+                        )}
+                      </ListItem>,
+                    );
+                  });
+
+                  if (!chosenTab && !peerReactions?.length) {
+                    items.push(
+                      <ListItem
+                        key={`${peerId}-seen-by`}
+                        className="chat-item-clickable scroll-item small-icon"
+
+                        onClick={() => handleClick(peerId)}
+                      >
+                        <PrivateChatInfo
+                          userId={peerId}
+                          noStatusOrTyping
+                          avatarSize="medium"
+                          status={seenByUser ? formatDateAtTime(oldLang, seenByUser * 1000) : undefined}
+                          statusIcon="message-read"
                         />
-                      )}
-                    </ListItem>,
-                  );
-                });
-
-                if (!chosenTab && !peerReactions?.length) {
-                  items.push(
-                    <ListItem
-                      key={`${peerId}-seen-by`}
-                      className="chat-item-clickable scroll-item small-icon"
-
-                      onClick={() => handleClick(peerId)}
-                    >
-                      <PrivateChatInfo
-                        userId={peerId}
-                        noStatusOrTyping
-                        avatarSize="medium"
-                        status={seenByUser ? formatDateAtTime(oldLang, seenByUser * 1000) : undefined}
-                        statusIcon="message-read"
-                      />
-                    </ListItem>,
-                  );
-                }
-                return items;
-              },
-            )}
-          </InfiniteScroll>
-        ) : <Loading />}
+                      </ListItem>,
+                    );
+                  }
+                  return items;
+                },
+              )}
+            </InfiniteScroll>
+          ) : <Loading />}
+        </Transition>
       </div>
     </Modal>
   );
