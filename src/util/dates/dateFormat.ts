@@ -398,13 +398,13 @@ export function formatDateToString(
 
 export function formatDateTimeToString(
   datetime: Date | number, locale = 'en-US', noSeconds?: boolean,
-  timeFormat?: TimeFormat,
+  timeFormat?: TimeFormat, noYear?: boolean,
 ) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
   return date.toLocaleString(
     locale,
     {
-      year: 'numeric',
+      year: noYear ? undefined : 'numeric',
       month: 'short',
       day: 'numeric',
       hour: 'numeric',

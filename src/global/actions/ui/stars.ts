@@ -387,6 +387,23 @@ addTabStateResetterAction('closeGiftResalePriceComposerModal', 'giftResalePriceC
 
 addTabStateResetterAction('closeGiftUpgradeModal', 'giftUpgradeModal');
 
+addActionHandler('openStarGiftPriceDecreaseInfoModal', (global, actions, payload): ActionReturnType => {
+  const {
+    prices, currentPrice, minPrice, maxPrice, tabId = getCurrentTabId(),
+  } = payload;
+
+  return updateTabState(global, {
+    starGiftPriceDecreaseInfoModal: {
+      prices,
+      currentPrice,
+      minPrice,
+      maxPrice,
+    },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeStarGiftPriceDecreaseInfoModal', 'starGiftPriceDecreaseInfoModal');
+
 addActionHandler('openGiftWithdrawModal', (global, actions, payload): ActionReturnType => {
   const { gift, tabId = getCurrentTabId() } = payload || {};
 

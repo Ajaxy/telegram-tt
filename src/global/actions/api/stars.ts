@@ -8,6 +8,7 @@ import {
 } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByCallback, buildCollectionByKey } from '../../../util/iteratees';
+import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
 import { RESALE_GIFTS_LIMIT } from '../../../limits';
 import { areInputSavedGiftsEqual, getRequestInputSavedStarGift } from '../../helpers/payments';
@@ -494,11 +495,24 @@ addActionHandler('openGiftUpgradeModal', async (global, actions, payload): Promi
     giftId, gift, peerId, tabId = getCurrentTabId(),
   } = payload;
 
-  const samples = await callApi('fetchStarGiftUpgradePreview', {
+  const preview = await callApi('fetchStarGiftUpgradePreview', {
     giftId,
   });
 
-  if (!samples) return;
+  if (!preview) return;
+
+  const serverTime = getServerTime();
+  const filteredPrices = preview.prices.filter((price) => price.date > serverTime);
+  const filteredNextPrices = preview.nextPrices.filter((price) => price.date > serverTime);
+
+  const passedPrices = preview.nextPrices.filter((price) => price.date <= serverTime);
+  const regularGift = gift?.gift.type === 'starGift' ? gift.gift : undefined;
+  const currentUpgradeStars = passedPrices.length
+    ? passedPrices[passedPrices.length - 1].upgradeStars
+    : regularGift?.upgradeStars;
+
+  const maxPrice = preview.prices[0]?.upgradeStars;
+  const minPrice = preview.prices.at(-1)?.upgradeStars;
 
   global = getGlobal();
 
@@ -506,10 +520,62 @@ addActionHandler('openGiftUpgradeModal', async (global, actions, payload): Promi
     giftUpgradeModal: {
       recipientId: peerId,
       gift,
-      sampleAttributes: samples,
+      sampleAttributes: preview.sampleAttributes,
+      prices: filteredPrices,
+      nextPrices: filteredNextPrices,
+      currentUpgradeStars,
+      minPrice,
+      maxPrice,
     },
   }, tabId);
 
+  setGlobal(global);
+});
+
+addActionHandler('shiftGiftUpgradeNextPrice', async (global, _actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const tabState = selectTabState(global, tabId);
+  const giftUpgradeModal = tabState?.giftUpgradeModal;
+  if (!giftUpgradeModal?.nextPrices?.length) return;
+
+  const currentUpgradeStars = giftUpgradeModal.nextPrices[0].upgradeStars;
+  const newNextPrices = giftUpgradeModal.nextPrices.slice(1);
+
+  if (newNextPrices.length) {
+    global = updateTabState(global, {
+      giftUpgradeModal: {
+        ...giftUpgradeModal,
+        nextPrices: newNextPrices,
+        currentUpgradeStars,
+      },
+    }, tabId);
+    setGlobal(global);
+
+    return;
+  }
+
+  const gift = giftUpgradeModal.gift?.gift;
+  const giftId = gift?.type === 'starGift' ? gift.id : undefined;
+  if (!giftId) return;
+
+  const preview = await callApi('fetchStarGiftUpgradePreview', { giftId });
+  if (!preview) return;
+
+  const serverTime = getServerTime();
+  const filteredNextPrices = preview.nextPrices.filter((price) => price.date > serverTime);
+
+  global = getGlobal();
+  const currentTabState = selectTabState(global, tabId);
+  const currentModal = currentTabState?.giftUpgradeModal;
+  if (!currentModal) return;
+
+  global = updateTabState(global, {
+    giftUpgradeModal: {
+      ...currentModal,
+      nextPrices: filteredNextPrices,
+      currentUpgradeStars,
+    },
+  }, tabId);
   setGlobal(global);
 });
 

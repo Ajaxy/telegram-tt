@@ -2398,3 +2398,9 @@
 "StealthModeButtonToStory" = "Enable and Open the Story";
 "StealthModeButtonRecharge" = "Available in {timer}";
 "StealthModeComposerPlaceholder" = "Stealth Mode active – {timer}";
+"UsersWhoUpgradeFirst" = "Users who upgrade their gifts first get collectibles with shorter numbers.";
+"UpgradeCostDrops" = "Upgrade cost drops every minute.";
+"StarGiftPriceDecreaseInfoLink" = "See how price will decrease >";
+"StarGiftUpgradeCostModalTitle" = "Upgrade Cost";
+"StarGiftUpgradeCostHint" = "Users who upgrade their gifts first get collectibles with shorter numbers.";
+"StarGiftPriceDecreaseTimer" = "Price decreases in {timer}";

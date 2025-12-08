@@ -44,6 +44,7 @@ import type {
   ApiStarGiftAttributeCounter,
   ApiStarGiftAttributeOriginalDetails,
   ApiStarGiftUnique,
+  ApiStarGiftUpgradePrice,
   ApiStarGiveawayOption,
   ApiStarsSubscription,
   ApiStarsTransaction,
@@ -867,6 +868,11 @@ export type TabState = {
     sampleAttributes: ApiStarGiftAttribute[];
     recipientId?: string;
     gift?: ApiSavedStarGift;
+    prices?: ApiStarGiftUpgradePrice[];
+    nextPrices?: ApiStarGiftUpgradePrice[];
+    currentUpgradeStars?: number;
+    minPrice?: number;
+    maxPrice?: number;
   };
 
   giftWithdrawModal?: {
@@ -877,6 +883,13 @@ export type TabState = {
 
   giftStatusInfoModal?: {
     emojiStatus: ApiEmojiStatusCollectible;
+  };
+
+  starGiftPriceDecreaseInfoModal?: {
+    prices: ApiStarGiftUpgradePrice[];
+    currentPrice: number;
+    minPrice: number;
+    maxPrice: number;
   };
 
   suggestedStatusModal?: {

@@ -9,6 +9,8 @@ import type {
   ApiStarGiftAttributeCounter,
   ApiStarGiftAttributeId,
   ApiStarGiftCollection,
+  ApiStarGiftUpgradePreview,
+  ApiStarGiftUpgradePrice,
   ApiTypeResaleStarGifts,
 } from '../../types';
 
@@ -313,5 +315,22 @@ export function buildApiStarGiftCollection(collection: GramJs.StarGiftCollection
     icon: icon && buildStickerFromDocument(icon),
     giftsCount,
     hash: hash.toString(),
+  };
+}
+
+export function buildApiStarGiftUpgradePrice(price: GramJs.StarGiftUpgradePrice): ApiStarGiftUpgradePrice {
+  return {
+    date: price.date,
+    upgradeStars: toJSNumber(price.upgradeStars),
+  };
+}
+
+export function buildApiStarGiftUpgradePreview(
+  result: GramJs.payments.StarGiftUpgradePreview,
+): ApiStarGiftUpgradePreview {
+  return {
+    sampleAttributes: result.sampleAttributes.map(buildApiStarGiftAttribute).filter(Boolean),
+    prices: result.prices?.map(buildApiStarGiftUpgradePrice) || [],
+    nextPrices: result.nextPrices?.map(buildApiStarGiftUpgradePrice) || [],
   };
 }

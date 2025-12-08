@@ -9,7 +9,6 @@ import type {
   ApiStarGiftAttributeBackdrop,
   ApiStarGiftAttributeModel,
   ApiStarGiftAttributePattern,
-  ApiStarGiftRegular,
 } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 import { ApiMediaFormat } from '../../../../api/types';
@@ -17,7 +16,6 @@ import { ApiMediaFormat } from '../../../../api/types';
 import { getStickerMediaHash } from '../../../../global/helpers';
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
-import { formatStarsAsIcon } from '../../../../util/localization/format';
 import { fetch } from '../../../../util/mediaLoader';
 
 import useInterval from '../../../../hooks/schedulers/useInterval';
@@ -25,8 +23,12 @@ import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 
+import AnimatedCounter from '../../../common/AnimatedCounter';
+import Icon from '../../../common/icons/Icon';
 import Button from '../../../ui/Button';
 import Checkbox from '../../../ui/Checkbox';
+import Link from '../../../ui/Link';
+import TextTimer from '../../../ui/TextTimer';
 import TableAboutModal, { type TableAboutData } from '../../common/TableAboutModal';
 import UniqueGiftHeader from '../UniqueGiftHeader';
 
@@ -49,7 +51,14 @@ type Attributes = {
 const PREVIEW_UPDATE_INTERVAL = 3000;
 
 const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
-  const { closeGiftUpgradeModal, closeGiftInfoModal, upgradeGift, upgradePrepaidGift } = getActions();
+  const {
+    closeGiftUpgradeModal,
+    closeGiftInfoModal,
+    upgradeGift,
+    upgradePrepaidGift,
+    openStarGiftPriceDecreaseInfoModal,
+    shiftGiftUpgradeNextPrice,
+  } = getActions();
   const isOpen = Boolean(modal);
 
   const renderingModal = useCurrentOrPrev(modal);
@@ -64,15 +73,20 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
 
   const handleClose = useLastCallback(() => closeGiftUpgradeModal());
 
+  const handleTimerEnd = useLastCallback(() => {
+    shiftGiftUpgradeNextPrice();
+  });
+
+  const nextPrice = renderingModal?.nextPrices?.[0];
+  const nextPriceDate = nextPrice?.date;
+  const upgradeStars = renderingModal?.currentUpgradeStars;
+
   const handleUpgrade = useLastCallback(() => {
     const gift = renderingModal?.gift;
 
     if (!gift) return;
 
-    const regularGift = gift.gift.type === 'starGift' ? gift.gift : undefined;
-
     if (isPrepaid && gift.prepaidUpgradeHash && renderingRecipient) {
-      const upgradeStars = regularGift?.upgradeStars;
       if (!upgradeStars) return;
 
       upgradePrepaidGift({
@@ -90,7 +104,7 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
     upgradeGift({
       gift: gift.inputGift,
       shouldKeepOriginalDetails,
-      upgradeStars: !gift.alreadyPaidUpgradeStars ? regularGift?.upgradeStars : undefined,
+      upgradeStars: !gift.alreadyPaidUpgradeStars ? upgradeStars : undefined,
     });
     handleClose();
   });
@@ -98,6 +112,17 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
   const updatePreviewAttributes = useLastCallback(() => {
     if (!renderingModal?.sampleAttributes) return;
     setPreviewAttributes(getRandomAttributes(renderingModal.sampleAttributes, previewAttributes));
+  });
+
+  const handleOpenPriceInfo = useLastCallback(() => {
+    if (!renderingModal?.prices) return;
+
+    openStarGiftPriceDecreaseInfoModal({
+      prices: renderingModal.prices,
+      currentPrice: upgradeStars || 0,
+      minPrice: renderingModal.minPrice || 0,
+      maxPrice: renderingModal.maxPrice || 0,
+    });
   });
 
   useInterval(updatePreviewAttributes, isOpen ? PREVIEW_UPDATE_INTERVAL : undefined, true);
@@ -123,6 +148,13 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
     });
   }, [renderingModal?.sampleAttributes]);
 
+  const formattedPriceElement = useMemo(() => (upgradeStars ? (
+    <span>
+      <Icon name="star" className="star-amount-icon" />
+      <AnimatedCounter text={lang.number(upgradeStars)} />
+    </span>
+  ) : undefined), [lang, upgradeStars]);
+
   const modalData = useMemo(() => {
     if (!previewAttributes || !isOpen) {
       return undefined;
@@ -147,9 +179,9 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
       ? lang('GiftPeerUpgradeText', { peer: getPeerTitle(lang, renderingRecipient) })
       : lang('GiftUpgradeTextOwn');
 
-    const formattedPrice = gift
-      ? formatStarsAsIcon(lang, (gift.gift as ApiStarGiftRegular).upgradeStars!, { asFont: true })
-      : undefined;
+    const hasPriceDecreaseInfo = Boolean(nextPriceDate)
+      && Boolean(renderingModal?.prices?.length)
+      && !gift?.alreadyPaidUpgradeStars;
 
     const header = (
       <UniqueGiftHeader
@@ -178,12 +210,32 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
               />
             )}
             <Button className={styles.footerButton} isShiny onClick={handleUpgrade}>
-              {gift.alreadyPaidUpgradeStars
-                ? lang('GeneralConfirm')
-                : isPrepaid
-                  ? lang('GiftPayForUpgradeButton', { amount: formattedPrice }, { withNodes: true })
-                  : lang('GiftUpgradeButton', { amount: formattedPrice }, { withNodes: true })}
+              <div className={styles.buttonContent}>
+                <div>
+                  {gift.alreadyPaidUpgradeStars
+                    ? lang('GeneralConfirm')
+                    : isPrepaid
+                      ? lang('GiftPayForUpgradeButton', { amount: formattedPriceElement }, { withNodes: true })
+                      : lang('GiftUpgradeButton', { amount: formattedPriceElement }, { withNodes: true })}
+                </div>
+                {hasPriceDecreaseInfo && (
+                  <div className={styles.priceDecreaseTimer}>
+                    {lang('StarGiftPriceDecreaseTimer', {
+                      timer: <TextTimer endsAt={nextPriceDate} onEnd={handleTimerEnd} />,
+                    }, { withNodes: true })}
+                  </div>
+                )}
+              </div>
             </Button>
+            {hasPriceDecreaseInfo && (
+              <Link
+                className={styles.link}
+                isPrimary
+                onClick={handleOpenPriceInfo}
+              >
+                {lang('StarGiftPriceDecreaseInfoLink')}
+              </Link>
+            )}
           </>
         )}
       </div>
@@ -196,7 +248,9 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
     };
   }, [previewAttributes, isOpen, lang,
     renderingRecipient, renderingModal?.gift,
-    shouldKeepOriginalDetails, isPrepaid]);
+    shouldKeepOriginalDetails, isPrepaid,
+    renderingModal?.prices?.length,
+    nextPriceDate, formattedPriceElement]);
 
   return (
     <TableAboutModal

@@ -14,8 +14,14 @@ import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import {
   buildApiFormattedText,
 } from '../apiBuilders/common';
-import { buildApiResaleGifts, buildApiSavedStarGift, buildApiStarGift,
-  buildApiStarGiftAttribute, buildApiStarGiftCollection, buildInputResaleGiftsAttributes } from '../apiBuilders/gifts';
+import {
+  buildApiResaleGifts,
+  buildApiSavedStarGift,
+  buildApiStarGift,
+  buildApiStarGiftCollection,
+  buildApiStarGiftUpgradePreview,
+  buildInputResaleGiftsAttributes,
+} from '../apiBuilders/gifts';
 import {
   buildApiCurrencyAmount,
   buildApiStarsGiftOptions,
@@ -403,7 +409,7 @@ export async function fetchStarGiftUpgradePreview({
     return undefined;
   }
 
-  return result.sampleAttributes.map(buildApiStarGiftAttribute).filter(Boolean);
+  return buildApiStarGiftUpgradePreview(result);
 }
 
 export function upgradeStarGift({

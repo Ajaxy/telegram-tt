@@ -1,5 +1,7 @@
 /* stylelint-disable plugin/no-low-performance-animation-properties */
 
+$progress-color: #7e85ff;
+
 .root {
   --percent: calc(var(--progress, 0.5) * 100%);
 
@@ -81,7 +83,7 @@
 
   color: #ffffff;
 
-  background-color: #7E85FF;
+  background-color: $progress-color;
 
   transition: width 0.25s ease-in-out;
 
@@ -110,7 +112,7 @@
 
   display: inline-block;
 
-  color: #7E85FF;
+  color: $progress-color;
 
   transition: left 0.3s ease;
 }
@@ -248,6 +250,34 @@
 
   .floating-badge-triangle {
     color: var(--color-negative-progress);
+  }
+}
+
+.inverted {
+  .positiveLayer,
+  .positiveProgress {
+    --multiplier: calc(1 / var(--positive-progress) - 1);
+
+    right: 0;
+    left: auto;
+    background-position: 100% 0;
+    background-size: calc(100% / var(--positive-progress)) 100%;
+
+    .left {
+      left: calc(-100% * var(--multiplier) + 0.75rem);
+    }
+
+    .right {
+      right: 0.75rem;
+    }
+  }
+}
+
+.noGradient {
+  .positiveLayer,
+  .positiveProgress {
+    background-color: $progress-color;
+    background-image: none;
   }
 }
 

@@ -89,6 +89,17 @@ export interface ApiStarGiftAttributeOriginalDetails {
 export type ApiStarGiftAttribute = ApiStarGiftAttributeModel | ApiStarGiftAttributePattern
   | ApiStarGiftAttributeBackdrop | ApiStarGiftAttributeOriginalDetails;
 
+export interface ApiStarGiftUpgradePrice {
+  date: number;
+  upgradeStars: number;
+}
+
+export interface ApiStarGiftUpgradePreview {
+  sampleAttributes: ApiStarGiftAttribute[];
+  prices: ApiStarGiftUpgradePrice[];
+  nextPrices: ApiStarGiftUpgradePrice[];
+}
+
 export interface ApiSavedStarGift {
   isNameHidden?: boolean;
   isUnsaved?: boolean;

@@ -30,6 +30,7 @@ type OwnProps = {
   buttonText?: string;
   className?: string;
   contentClassName?: string;
+  tableClassName?: string;
   hasBackdrop?: boolean;
   onClose: NoneToVoidFunction;
   onButtonClick?: NoneToVoidFunction;
@@ -49,6 +50,7 @@ const TableInfoModal = ({
   buttonText,
   className,
   contentClassName,
+  tableClassName,
   hasBackdrop,
   onClose,
   onButtonClick,
@@ -82,7 +84,7 @@ const TableInfoModal = ({
         <Avatar peer={headerAvatarPeer} size="jumbo" className={styles.avatar} />
       )}
       {header}
-      <div className={styles.table}>
+      <div className={buildClassName(styles.table, tableClassName)}>
         {tableData?.map(([label, value]) => (
           <>
             {Boolean(label) && <div className={buildClassName(styles.cell, styles.title)}>{label}</div>}

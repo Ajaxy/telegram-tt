@@ -1782,6 +1782,11 @@ export interface LangPair {
   'StealthModeButtonPremium': undefined;
   'StealthModeButton': undefined;
   'StealthModeButtonToStory': undefined;
+  'UsersWhoUpgradeFirst': undefined;
+  'UpgradeCostDrops': undefined;
+  'StarGiftPriceDecreaseInfoLink': undefined;
+  'StarGiftUpgradeCostModalTitle': undefined;
+  'StarGiftUpgradeCostHint': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -3071,6 +3076,9 @@ export interface LangPairWithVariables<V = LangVariable> {
     'timer': V;
   };
   'StealthModeComposerPlaceholder': {
+    'timer': V;
+  };
+  'StarGiftPriceDecreaseTimer': {
     'timer': V;
   };
 }

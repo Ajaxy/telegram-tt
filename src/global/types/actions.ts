@@ -46,6 +46,7 @@ import type {
   ApiStarGift,
   ApiStarGiftAttributeOriginalDetails,
   ApiStarGiftUnique,
+  ApiStarGiftUpgradePrice,
   ApiStarsSubscription,
   ApiStarsTransaction,
   ApiSticker,
@@ -2628,6 +2629,15 @@ export interface ActionPayloads {
     gift?: ApiSavedStarGift;
   } & WithTabId;
   closeGiftUpgradeModal: WithTabId | undefined;
+  shiftGiftUpgradeNextPrice: WithTabId | undefined;
+
+  openStarGiftPriceDecreaseInfoModal: {
+    prices: ApiStarGiftUpgradePrice[];
+    currentPrice: number;
+    minPrice: number;
+    maxPrice: number;
+  } & WithTabId;
+  closeStarGiftPriceDecreaseInfoModal: WithTabId | undefined;
   upgradeGift: {
     gift: ApiInputSavedStarGift;
     shouldKeepOriginalDetails?: boolean;

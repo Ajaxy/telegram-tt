@@ -31,6 +31,8 @@ type OwnProps = {
   progress?: number;
   isPrimary?: boolean;
   isNegative?: boolean;
+  isInverted?: boolean;
+  shouldSkipGradient?: boolean;
   animationDirection?: AnimationDirection;
   className?: string;
 };
@@ -43,6 +45,8 @@ const PremiumProgress: FC<OwnProps> = ({
   progress = 0,
   isPrimary,
   isNegative,
+  isInverted,
+  shouldSkipGradient,
   animationDirection = 'none',
   className,
 }) => {
@@ -89,7 +93,8 @@ const PremiumProgress: FC<OwnProps> = ({
       const minBadgeShift = halfBadgeWidth;
       const maxBadgeShift = parentWidth - halfBadgeWidth;
       const halfBeakWidth = BEAK_WIDTH_PX / 2;
-      const currentShift = isNegative ? (1 - badgeProgress) * parentWidth : badgeProgress * parentWidth;
+      const effectiveProgress = (isInverted || isNegative) ? (1 - badgeProgress) : badgeProgress;
+      const currentShift = effectiveProgress * parentWidth;
 
       let safeShift = Math.max(minBadgeShift, Math.min(currentShift, maxBadgeShift));
       if (currentShift < CORNER_BEAK_THRESHOLD) {
@@ -107,7 +112,7 @@ const PremiumProgress: FC<OwnProps> = ({
     }
   };
 
-  useEffect(updateBadgePosition, [badgeProgress, badgeWidth, isNegative, CORNER_BEAK_THRESHOLD]);
+  useEffect(updateBadgePosition, [badgeProgress, badgeWidth, isNegative, isInverted, CORNER_BEAK_THRESHOLD]);
 
   useResizeObserver(parentContainerRef, updateBadgePosition);
 
@@ -260,6 +265,8 @@ const PremiumProgress: FC<OwnProps> = ({
         hasFloatingBadge && styles.withBadge,
         isPrimary && styles.primary,
         isNegative && styles.negative,
+        isInverted && styles.inverted,
+        shouldSkipGradient && styles.noGradient,
         shouldAnimateCaptions && styles.transitioning,
         isCycling && styles.cycling,
         className,

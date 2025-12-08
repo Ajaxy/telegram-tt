@@ -1,0 +1,49 @@
+.header {
+  text-align: center;
+}
+
+.headerTitle {
+  margin-top: 1.5rem;
+  margin-bottom: 0;
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+.headerHint {
+  margin-top: 0.375rem;
+  margin-bottom: 0.5rem;
+
+  font-size: 1rem;
+  line-height: 1.375rem;
+  text-wrap: balance;
+}
+
+.starIconContainer {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1rem;
+}
+
+.progress {
+  margin: 4.5rem auto 1.5rem;
+}
+
+.table {
+  overflow-y: auto;
+  max-height: 19.25rem;
+}
+
+.footerText {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+}
+
+.understoodIcon {
+  font-size: 1.25rem;
+}
