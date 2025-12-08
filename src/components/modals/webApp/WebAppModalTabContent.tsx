@@ -631,7 +631,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_setup_closing_behavior') {
-      updateCurrentWebApp({ shouldConfirmClosing: true });
+      updateCurrentWebApp({ shouldConfirmClosing: eventData.need_confirmation });
     }
 
     if (eventType === 'web_app_open_popup') {
