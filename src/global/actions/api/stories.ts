@@ -604,7 +604,7 @@ addActionHandler('loadStoriesMaxIds', async (global, actions, payload): Promise<
       hasStories: Boolean(maxId.maxId),
     });
 
-    if (maxId.maxId !== 0) {
+    if (maxId.maxId && maxId.maxId > 0) {
       peerIdsToLoad.push(peer.id);
     }
   });
