@@ -32,7 +32,9 @@ export const IS_LINUX = PLATFORM_ENV === 'Linux';
 export const IS_IOS = PLATFORM_ENV === 'iOS';
 export const IS_ANDROID = PLATFORM_ENV === 'Android';
 export const IS_MOBILE = IS_IOS || IS_ANDROID;
-export const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+export const IS_CHROMIUM = navigator.userAgentData?.brands.some((data) => data.brand === 'Chromium')
+  || /Chrom(e|ium)\//.test(navigator.userAgent);
+export const IS_SAFARI = !IS_CHROMIUM && /applewebkit/i.test(navigator.userAgent);
 export const IS_YA_BROWSER = navigator.userAgent.includes('YaBrowser');
 export const IS_FIREFOX = navigator.userAgent.toLowerCase().includes('firefox')
   || navigator.userAgent.toLowerCase().includes('iceweasel')

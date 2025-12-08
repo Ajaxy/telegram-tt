@@ -1,3 +1,5 @@
+/// <reference types="user-agent-data-types" />
+
 declare const process: NodeJS.Process;
 
 declare module '*.module.scss';
