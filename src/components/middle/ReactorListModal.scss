@@ -1,7 +1,18 @@
+@use "../../styles/mixins";
+
 .ReactorListModal {
   --color-reaction: var(--color-message-reaction);
   --hover-color-reaction: var(--color-message-reaction-hover);
   --accent-color: var(--color-primary);
+
+  .modal-header {
+    padding-top: 0.5rem;
+    padding-inline: 0.5rem;
+
+    .modal-title {
+      margin-inline: 1.3125rem;
+    }
+  }
 
   .modal-content {
     overflow: hidden;
@@ -9,12 +20,13 @@
     flex-direction: column;
 
     height: min(92vh, 32rem);
-    padding: 0.5rem 0 !important;
+    padding: 0 !important;
   }
 
   .reactor-list-wrapper {
     flex-grow: 1;
     min-height: 0;
+    border-top: 1px solid var(--color-borders);
   }
 
   .confirm-dialog-button {
@@ -23,20 +35,15 @@
   }
 
   .Reactions {
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-    padding: 0 1rem;
+    overflow-x: auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.4375rem;
 
-    &::after {
-      content: '';
-      flex-grow: 1;
-    }
-  }
-
-  .icon-heart {
-    width: 1.125rem;
-    height: 1.125rem;
-    margin-inline-end: 0.25rem;
+    width: auto;
+    min-height: 2.25rem;
+    padding-inline: 0.4375rem;
   }
 
   .reaction-filter-emoji {
@@ -60,9 +67,16 @@
   }
 
   .reactors-list-emoji {
+    --custom-emoji-size: 1.5rem;
+
+    display: flex;
+
     width: 1.5rem;
     height: 1.5rem;
     margin-inline-start: auto;
+
+    font-size: 1.5rem;
+    line-height: 1.5rem;
   }
 
   .status {

@@ -18,8 +18,10 @@ import buildClassName from '../../util/buildClassName';
 import { formatDateAtTime } from '../../util/dates/dateFormat';
 import { unique } from '../../util/iteratees';
 import { formatIntegerCompact } from '../../util/textFormat';
+import { REM } from '../common/helpers/mediaDimensions';
 
 import useFlag from '../../hooks/useFlag';
+import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -50,6 +52,8 @@ export type StateProps = Pick<ApiMessage, 'reactors' | 'reactions' | 'seenByDate
   availableReactions?: ApiAvailableReaction[];
 };
 
+const DEFAULT_REACTION_SIZE = 1.5 * REM;
+
 const ReactorListModal: FC<OwnProps & StateProps> = ({
   isOpen,
   reactors,
@@ -76,6 +80,9 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   const canShowFilters = reactors && reactions && reactors.count >= MIN_REACTIONS_COUNT_FOR_FILTERS
     && reactions.results.length > 1;
   const chatIdRef = useRef<string>();
+  const reactionsRef = useRef<HTMLDivElement>();
+
+  useHorizontalScroll(reactionsRef, !canShowFilters || !isOpen);
 
   useEffect(() => {
     if (isOpen && !isClosing) {
@@ -148,14 +155,21 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
       className="ReactorListModal narrow"
       title={oldLang('Reactions')}
       onCloseAnimationEnd={handleCloseAnimationEnd}
+      hasCloseButton
     >
       {canShowFilters && (
-        <div className="Reactions" dir={lang.isRtl ? 'rtl' : undefined}>
+        <div
+          ref={reactionsRef}
+          className={buildClassName('Reactions', 'no-scrollbar')}
+          dir={lang.isRtl ? 'rtl' : undefined}
+        >
           <Button
-            className={buildClassName(!chosenTab && 'chosen')}
+            color={chosenTab ? 'adaptive' : 'primary'}
             size="tiny"
             ripple
             iconName="heart"
+            pill
+            fluid
             onClick={() => setChosenTab(undefined)}
           >
             {Boolean(reactors?.count) && formatIntegerCompact(lang, reactors.count)}
@@ -166,16 +180,18 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             return (
               <Button
                 key={getReactionKey(reaction)}
-                className={buildClassName(isSameReaction(chosenTab, reaction) && 'chosen')}
+                color={isSameReaction(chosenTab, reaction) ? 'primary' : 'adaptive'}
                 size="tiny"
+                pill
+                fluid
                 ripple
-
                 onClick={() => setChosenTab(reaction)}
               >
                 <ReactionStaticEmoji
                   reaction={reaction}
                   className="reaction-filter-emoji"
                   availableReactions={availableReactions}
+                  size={DEFAULT_REACTION_SIZE}
                 />
                 {Boolean(count) && formatIntegerCompact(lang, count)}
               </Button>
@@ -222,6 +238,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                           className="reactors-list-emoji"
                           reaction={r.reaction}
                           availableReactions={availableReactions}
+                          size={DEFAULT_REACTION_SIZE}
                         />
                       )}
                     </ListItem>,
@@ -252,13 +269,6 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
           </InfiniteScroll>
         ) : <Loading />}
       </div>
-      <Button
-        className="confirm-dialog-button"
-        isText
-        onClick={handleClose}
-      >
-        {oldLang('Close')}
-      </Button>
     </Modal>
   );
 };
