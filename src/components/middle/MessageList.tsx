@@ -742,6 +742,8 @@ const MessageList = ({
 
           requestMeasure(() => {
             isScrollTopJustUpdatedRef.current = false;
+
+            updateBottomSnapClass();
           });
         }
 
