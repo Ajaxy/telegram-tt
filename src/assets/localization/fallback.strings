@@ -556,6 +556,16 @@
 "ChangePassword" = "Change Password";
 "TurnPasswordOff" = "Disable Password";
 "SetRecoveryEmail" = "Set Recovery Email";
+"Passkeys" = "Passkeys";
+"PasskeyDescription" = "Passkeys are a simpler and more secure alternative to passwords. Sign in using your fingerprint, face, or screen lock.";
+"PasskeyAdd" = "Add Passkey";
+"PasskeyUnknown" = "Unknown Passkey";
+"PasskeyCreated" = "Created: {date}";
+"PasskeyLastUsed" = "Last used: {date}";
+"PasskeyDeleteTitle" = "Delete Passkey";
+"PasskeyDeleteText" = "Are you sure you want to delete this passkey?";
+"PasskeyAdded" = "Passkey added successfully";
+"PasskeyRegistrationFailed" = "Failed to register passkey";
 "YourEmailSkip" = "Skip";
 "YourEmailSkipWarning" = "Warning";
 "YourEmailSkipWarningText" = "No, seriously.\n\nIf you forget your password, you will lose access to your Telegram account. There will be no way to restore it.";

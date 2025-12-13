@@ -36,6 +36,7 @@ type StateProps = {
   canSetPasscode?: boolean;
   blockedCount: number;
   webAuthCount: number;
+  passkeysCount: number;
   isSensitiveEnabled?: boolean;
   canChangeSensitive?: boolean;
   canDisplayAutoarchiveSetting: boolean;
@@ -58,6 +59,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   hasPasscode,
   blockedCount,
   webAuthCount,
+  passkeysCount,
   isSensitiveEnabled,
   canChangeSensitive,
   canDisplayAutoarchiveSetting,
@@ -221,6 +223,16 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
               {oldLang(hasPassword ? 'PasswordOn' : 'PasswordOff')}
             </span>
           </div>
+        </ListItem>
+        <ListItem
+          icon="key"
+          narrow
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.Passkeys })}
+        >
+          {lang('Passkeys')}
+          {passkeysCount > 0 && (
+            <span className="settings-item__current-value">{passkeysCount}</span>
+          )}
         </ListItem>
         {webAuthCount > 0 && (
           <ListItem
@@ -489,6 +501,7 @@ export default memo(withGlobal<OwnProps>(
       hasPasscode: Boolean(hasPasscode),
       blockedCount: blocked.totalCount,
       webAuthCount: global.activeWebSessions.orderedHashes.length,
+      passkeysCount: global.passkeys.length,
       isSensitiveEnabled,
       canDisplayAutoarchiveSetting: appConfig.canDisplayAutoarchiveSetting || isCurrentUserPremium,
       shouldArchiveAndMuteNewNonContact,

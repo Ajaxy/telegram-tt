@@ -78,3 +78,11 @@ export type LangPackStringValuePlural = {
 };
 
 export type LangPackStringValue = LangPackStringValueRegular | LangPackStringValueDeleted | LangPackStringValuePlural;
+
+export interface ApiPasskey {
+  id: string;
+  name: string;
+  createdAt: number;
+  lastUsedAt?: number;
+  softwareEmojiId?: string;
+}

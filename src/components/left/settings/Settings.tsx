@@ -31,6 +31,7 @@ import SettingsHeader from './SettingsHeader';
 import SettingsLanguage from './SettingsLanguage';
 import SettingsMain from './SettingsMain';
 import SettingsNotifications from './SettingsNotifications';
+import SettingsPasskeys from './SettingsPasskeys';
 import SettingsPerformance from './SettingsPerformance';
 import SettingsPrivacy from './SettingsPrivacy';
 import SettingsPrivacyBlockedUsers from './SettingsPrivacyBlockedUsers';
@@ -473,6 +474,14 @@ const Settings: FC<OwnProps> = ({
             passcode={privacyPasscode}
             onSetPasscode={setPrivacyPasscode}
             shownScreen={activeScreen}
+            isActive={isScreenActive}
+            onReset={handleReset}
+          />
+        );
+
+      case SettingsScreens.Passkeys:
+        return (
+          <SettingsPasskeys
             isActive={isScreenActive}
             onReset={handleReset}
           />

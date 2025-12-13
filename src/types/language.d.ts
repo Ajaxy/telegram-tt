@@ -503,6 +503,14 @@ export interface LangPair {
   'ChangePassword': undefined;
   'TurnPasswordOff': undefined;
   'SetRecoveryEmail': undefined;
+  'Passkeys': undefined;
+  'PasskeyDescription': undefined;
+  'PasskeyAdd': undefined;
+  'PasskeyUnknown': undefined;
+  'PasskeyDeleteTitle': undefined;
+  'PasskeyDeleteText': undefined;
+  'PasskeyAdded': undefined;
+  'PasskeyRegistrationFailed': undefined;
   'YourEmailSkip': undefined;
   'YourEmailSkipWarning': undefined;
   'YourEmailSkipWarningText': undefined;
@@ -1895,6 +1903,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'AutodownloadSizeLimitUpTo': {
     'limit': V;
+  };
+  'PasskeyCreated': {
+    'date': V;
+  };
+  'PasskeyLastUsed': {
+    'date': V;
   };
   'WebAppAddToAttachmentText': {
     'bot': V;

@@ -16,6 +16,7 @@ import type {
   ApiMessage,
   ApiNotifyPeerType,
   ApiPaidReactionPrivacyType,
+  ApiPasskey,
   ApiPeerColors,
   ApiPeerNotifySettings,
   ApiPeerPhotos,
@@ -424,6 +425,8 @@ export type GlobalState = {
     byHash: Record<string, ApiWebSession>;
     orderedHashes: string[];
   };
+
+  passkeys: ApiPasskey[];
 
   settings: {
     byKey: AccountSettings;

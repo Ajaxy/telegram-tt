@@ -7,6 +7,7 @@ import type {
   ApiCountry,
   ApiLanguage,
   ApiOldLangString,
+  ApiPasskey,
   ApiPrivacyKey,
   ApiRestrictionReason,
   ApiSession,
@@ -71,6 +72,16 @@ export function buildApiWebSession(session: GramJs.WebAuthorization): ApiWebSess
     ...pick(session, [
       'platform', 'browser', 'dateCreated', 'dateActive', 'ip', 'region', 'domain',
     ]),
+  };
+}
+
+export function buildApiPasskey(passkey: GramJs.Passkey): ApiPasskey {
+  return {
+    id: passkey.id,
+    name: passkey.name,
+    createdAt: passkey.date,
+    lastUsedAt: passkey.lastUsageDate,
+    softwareEmojiId: passkey.softwareEmojiId ? String(passkey.softwareEmojiId) : undefined,
   };
 }
 

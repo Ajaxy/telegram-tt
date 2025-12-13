@@ -133,6 +133,7 @@
     "@tauri-apps/plugin-updater": "^2.9.0",
     "async-mutex": "^0.5.0",
     "emoji-data-ios": "git+https://github.com/korenskoy/emoji-data-ios#443f1c9",
+    "highlight.js": "10.7.3",
     "idb-keyval": "^6.2.2",
     "lowlight": "^3.3.0",
     "mp4box": "^0.5.4",

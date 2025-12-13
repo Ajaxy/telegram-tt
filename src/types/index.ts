@@ -256,6 +256,7 @@ export enum SettingsScreens {
   PasscodeChangePasscodeConfirm,
   PasscodeTurnOff,
   PasscodeCongratulations,
+  Passkeys,
   Experimental,
   Stickers,
   QuickReaction,

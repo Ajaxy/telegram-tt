@@ -274,6 +274,8 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     orderedHashes: [],
   },
 
+  passkeys: [],
+
   settings: {
     byKey: {
       canAutoLoadPhotoFromContacts: true,

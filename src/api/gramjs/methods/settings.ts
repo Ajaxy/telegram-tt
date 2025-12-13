@@ -9,6 +9,7 @@ import type {
   ApiInputPrivacyRules,
   ApiLanguage,
   ApiNotifyPeerType,
+  ApiPasskey,
   ApiPeerNotifySettings,
   ApiPhoto,
   ApiPrivacyKey,
@@ -31,6 +32,7 @@ import {
   buildApiConfig,
   buildApiCountryList,
   buildApiLanguage,
+  buildApiPasskey,
   buildApiSession,
   buildApiTimezone,
   buildApiWallpaper,
@@ -771,4 +773,57 @@ export function reorderUsernames({ chatId, accessHash, usernames }: {
   return invokeRequest(new GramJs.account.ReorderUsernames({
     order: usernames,
   }));
+}
+
+export async function fetchPasskeys(): Promise<ApiPasskey[] | undefined> {
+  const result = await invokeRequest(new GramJs.account.GetPasskeys());
+  if (!result) {
+    return undefined;
+  }
+
+  return result.passkeys.map(buildApiPasskey);
+}
+
+export async function initPasskeyRegistration(): Promise<string | undefined> {
+  const result = await invokeRequest(new GramJs.account.InitPasskeyRegistration());
+  if (!result) {
+    return undefined;
+  }
+
+  return result.options.data;
+}
+
+export async function registerPasskey({
+  id,
+  rawId,
+  clientDataJSON,
+  attestationObject,
+}: {
+  id: string;
+  rawId: string;
+  clientDataJSON: string;
+  attestationObject: ArrayBuffer;
+}): Promise<ApiPasskey | undefined> {
+  const result = await invokeRequest(new GramJs.account.RegisterPasskey({
+    credential: new GramJs.InputPasskeyCredentialPublicKey({
+      id,
+      rawId,
+      response: new GramJs.InputPasskeyResponseRegister({
+        clientData: new GramJs.DataJSON({ data: clientDataJSON }),
+        attestationData: Buffer.from(attestationObject),
+      }),
+    }),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return buildApiPasskey(result);
+}
+
+export function deletePasskey({ id }: { id: string }) {
+  return invokeRequest(new GramJs.account.DeletePasskey({ id }), {
+    shouldReturnTrue: true,
+  });
 }

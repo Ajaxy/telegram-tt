@@ -215,6 +215,9 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.PasscodeChangePasscodeConfirm:
         return <h3>{oldLang('PasscodeController.ReEnterPasscode.Placeholder')}</h3>;
 
+      case SettingsScreens.Passkeys:
+        return <h3>{lang('Passkeys')}</h3>;
+
       case SettingsScreens.Folders:
         return <h3>{oldLang('Filters')}</h3>;
       case SettingsScreens.FoldersCreateFolder:

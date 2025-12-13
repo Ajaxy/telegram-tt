@@ -2246,6 +2246,13 @@ export interface ActionPayloads {
     hash: string;
   };
   terminateAllWebAuthorizations: undefined;
+
+  loadPasskeys: undefined;
+  createPasskey: WithTabId | undefined;
+  deletePasskey: {
+    id: string;
+  };
+
   toggleUsername: {
     username: string;
     isActive: boolean;

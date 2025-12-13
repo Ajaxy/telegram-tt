@@ -277,3 +277,143 @@ addActionHandler('setAccountTTL', async (global, actions, payload): Promise<void
   setGlobal(global);
   actions.closeDeleteAccountModal({ tabId });
 });
+
+addActionHandler('loadPasskeys', async (global): Promise<void> => {
+  const result = await callApi('fetchPasskeys');
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = {
+    ...global,
+    passkeys: result,
+  };
+  setGlobal(global);
+});
+
+addActionHandler('createPasskey', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  if (!window.PublicKeyCredential) {
+    actions.showNotification({
+      message: oldTranslate('PasskeyRegistrationFailed'),
+      tabId,
+    });
+    return;
+  }
+
+  const optionsJson = await callApi('initPasskeyRegistration');
+  if (!optionsJson) {
+    actions.showNotification({
+      message: oldTranslate('PasskeyRegistrationFailed'),
+      tabId,
+    });
+    return;
+  }
+
+  try {
+    const options = JSON.parse(optionsJson);
+    const publicKeyOptions = options.publicKey || options;
+
+    const createOptions: CredentialCreationOptions = {
+      publicKey: {
+        challenge: base64UrlToBuffer(publicKeyOptions.challenge),
+        rp: publicKeyOptions.rp,
+        user: {
+          ...publicKeyOptions.user,
+          id: base64UrlToBuffer(publicKeyOptions.user.id),
+        },
+        pubKeyCredParams: publicKeyOptions.pubKeyCredParams,
+        timeout: publicKeyOptions.timeout || 60000,
+        attestation: publicKeyOptions.attestation || 'none',
+        authenticatorSelection: publicKeyOptions.authenticatorSelection,
+        excludeCredentials: publicKeyOptions.excludeCredentials?.map((cred: { id: string; type: string }) => ({
+          type: cred.type,
+          id: base64UrlToBuffer(cred.id),
+        })),
+      },
+    };
+
+    const credential = await navigator.credentials.create(createOptions) as PublicKeyCredential | undefined;
+
+    if (!credential) {
+      return;
+    }
+
+    const response = credential.response as AuthenticatorAttestationResponse;
+
+    const passkey = await callApi('registerPasskey', {
+      id: credential.id,
+      rawId: bufferToBase64Url(credential.rawId),
+      clientDataJSON: new TextDecoder().decode(response.clientDataJSON),
+      attestationObject: response.attestationObject,
+    });
+
+    if (!passkey) {
+      actions.showNotification({
+        message: oldTranslate('PasskeyRegistrationFailed'),
+        tabId,
+      });
+      return;
+    }
+
+    global = getGlobal();
+    global = {
+      ...global,
+      passkeys: [...global.passkeys, passkey],
+    };
+    setGlobal(global);
+
+    actions.showNotification({
+      message: oldTranslate('PasskeyAdded'),
+      tabId,
+    });
+  } catch (err) {
+    // NotAllowedError means user cancelled - don't show notification
+    if ((err as Error).name === 'NotAllowedError') {
+      return;
+    }
+
+    actions.showNotification({
+      message: oldTranslate('PasskeyRegistrationFailed'),
+      tabId,
+    });
+  }
+});
+
+addActionHandler('deletePasskey', async (global, actions, payload): Promise<void> => {
+  const { id } = payload;
+
+  const result = await callApi('deletePasskey', { id });
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = {
+    ...global,
+    passkeys: global.passkeys.filter((p) => p.id !== id),
+  };
+  setGlobal(global);
+});
+
+function base64UrlToBuffer(base64Url: string): ArrayBuffer {
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const paddedBase64 = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+  const binary = atob(paddedBase64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+
+function bufferToBase64Url(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
