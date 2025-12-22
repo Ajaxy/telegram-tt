@@ -2,9 +2,11 @@ import { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
-import type { CustomPeer } from '../../../types';
+import type { AccountInfo, CustomPeer } from '../../../types';
 
+import { temporarilySuspendCacheUpdate } from '../../../global/cache';
 import { getCurrentMaxAccountCount, getCurrentProdAccountCount } from '../../../global/helpers';
+import { IS_SAFARI } from '../../../util/browser/windowEnvironment';
 import { getAccountSlotUrl } from '../../../util/multiaccount';
 import { REM } from '../../common/helpers/mediaDimensions';
 
@@ -43,12 +45,27 @@ const AccountMenuItems = ({
 
   const shouldShowLimit = currentCount >= maxCount;
 
-  const handleLimitClick = useLastCallback(() => {
-    showNotification({
-      title: lang('PremiumLimitAccountsTitle'),
-      message: currentUser.isPremium ? lang('PremiumLimitAccounts') : lang('PremiumLimitAccountsNoPremium'),
-      duration: NOTIFICATION_DURATION,
-    });
+  const handleAccountClick = useLastCallback((account: AccountInfo) => {
+    if (account.userId === currentUser.id) {
+      onSelectCurrent?.();
+      return;
+    }
+
+    // IDB locks up if we write large payload on navigation
+    if (IS_SAFARI) temporarilySuspendCacheUpdate();
+  });
+
+  const handleNewAccountClick = useLastCallback(() => {
+    if (shouldShowLimit) {
+      showNotification({
+        title: lang('PremiumLimitAccountsTitle'),
+        message: currentUser.isPremium ? lang('PremiumLimitAccounts') : lang('PremiumLimitAccountsNoPremium'),
+        duration: NOTIFICATION_DURATION,
+      });
+      return;
+    }
+
+    if (IS_SAFARI) temporarilySuspendCacheUpdate();
   });
 
   const newAccountUrl = useMemo(() => {
@@ -96,7 +113,7 @@ const AccountMenuItems = ({
                     previewUrl={account.avatarUri}
                   />
                 )}
-                onClick={account.userId === currentUser.id ? onSelectCurrent : undefined}
+                onClick={() => handleAccountClick(account)}
                 href={account.userId !== currentUser.id ? getAccountSlotUrl(Number(slot)) : undefined}
               >
                 {account.isTest && <span className="account-menu-item-test">T</span>}
@@ -111,7 +128,7 @@ const AccountMenuItems = ({
           icon="add"
           rel="noopener" // Allow referrer to be passed
           href={!shouldShowLimit ? newAccountUrl : undefined}
-          onClick={shouldShowLimit ? handleLimitClick : undefined}
+          onClick={handleNewAccountClick}
         >
           {lang('MenuAddAccount')}
         </MenuItem>

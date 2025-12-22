@@ -55,6 +55,7 @@ const updateCacheForced = () => updateCache(true);
 
 let isCaching = false;
 let isRemovingCache = false;
+let cacheUpdateSuspensionTimestamp = 0;
 let unsubscribeFromBeforeUnload: NoneToVoidFunction | undefined;
 
 export function cacheGlobal(global: GlobalState) {
@@ -382,7 +383,15 @@ function updateCache(force?: boolean) {
   forceUpdateCache();
 }
 
+export function temporarilySuspendCacheUpdate() {
+  cacheUpdateSuspensionTimestamp = Date.now() + UPDATE_THROTTLE;
+}
+
 export function forceUpdateCache(noEncrypt = false) {
+  if (Date.now() < cacheUpdateSuspensionTimestamp) {
+    return;
+  }
+
   const global = getGlobal();
   const { hasPasscode, isScreenLocked } = global.passcode;
 
