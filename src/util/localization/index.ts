@@ -24,7 +24,7 @@ import {
 
 import { DEBUG, FORCE_FALLBACK_LANG, LANG_PACK } from '../../config';
 import { callApi } from '../../api/gramjs';
-import renderText from '../../components/common/helpers/renderText';
+import renderText, { type TextFilter } from '../../components/common/helpers/renderText';
 import { IS_INTL_LIST_FORMAT_SUPPORTED } from '../browser/globalEnvironment';
 import { MAIN_IDB_STORE } from '../browser/idb';
 import { getBasicListFormat } from '../browser/intlListFormat';
@@ -32,7 +32,7 @@ import { notifyLangpackUpdate } from '../browser/multitab';
 import { createCallbackManager } from '../callbacks';
 import readFallbackStrings from '../data/readFallbackStrings';
 import { initialEstablishmentPromise, isCurrentTabMaster } from '../establishMultitabRole';
-import { omit } from '../iteratees';
+import { omit, unique } from '../iteratees';
 import { replaceInStringsWithTeact } from '../replaceWithTeact';
 import { fastRaf } from '../schedulers';
 
@@ -422,14 +422,9 @@ function processTranslationAdvanced(
   const withRenderText = options?.withNodes;
 
   if (withRenderText) {
-    const textFiltersSet = new Set(options?.renderTextFilters);
-    textFiltersSet.add('emoji');
+    const initialFilters: TextFilter[] = options.withMarkdown ? ['simple_markdown', 'emoji'] : ['emoji'];
 
-    if (options?.withMarkdown) {
-      textFiltersSet.add('simple_markdown');
-    }
-
-    const filters = Array.from(textFiltersSet);
+    const filters = unique([...initialFilters, ...options.renderTextFilters || []]);
 
     const tempResultArray = Array.isArray(tempResult) ? tempResult : [tempResult];
     return tempResultArray.flatMap((curr: TeactNode) => {
