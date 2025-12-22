@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useMemo, useState,
 } from '../../../lib/teact/teact';
@@ -8,42 +7,14 @@ import type { AccountSettings } from '../../../types';
 
 import { SUPPORTED_TRANSLATION_LANGUAGES } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
-import { partition } from '../../../util/iteratees';
 
-import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import ItemPicker, { type ItemPickerOption } from '../../common/pickers/ItemPicker';
 
 import styles from './SettingsDoNotTranslate.module.scss';
-
-// https://fasttext.cc/docs/en/language-identification.html
-const LOCAL_SUPPORTED_DETECTION_LANGUAGES = [
-  'af', 'als', 'am', 'an', 'ar', 'arz', 'as', 'ast', 'av', 'az',
-  'azb', 'ba', 'bar', 'bcl', 'be', 'bg', 'bh', 'bn', 'bo', 'bpy',
-  'br', 'bs', 'bxr', 'ca', 'cbk', 'ce', 'ceb', 'ckb', 'co', 'cs',
-  'cv', 'cy', 'da', 'de', 'diq', 'dsb', 'dty', 'dv', 'el', 'eml',
-  'en', 'eo', 'es', 'et', 'eu', 'fa', 'fi', 'fr', 'frr', 'fy',
-  'ga', 'gd', 'gl', 'gn', 'gom', 'gu', 'gv', 'he', 'hi', 'hif',
-  'hr', 'hsb', 'ht', 'hu', 'hy', 'ia', 'id', 'ie', 'ilo', 'io',
-  'is', 'it', 'ja', 'jbo', 'jv', 'ka', 'kk', 'km', 'kn', 'ko',
-  'krc', 'ku', 'kv', 'kw', 'ky', 'la', 'lb', 'lez', 'li', 'lmo',
-  'lo', 'lrc', 'lt', 'lv', 'mai', 'mg', 'mhr', 'min', 'mk', 'ml',
-  'mn', 'mr', 'mrj', 'ms', 'mt', 'mwl', 'my', 'myv', 'mzn', 'nah',
-  'nap', 'nds', 'ne', 'new', 'nl', 'nn', 'no', 'oc', 'or', 'os',
-  'pa', 'pam', 'pfl', 'pl', 'pms', 'pnb', 'ps', 'pt', 'qu', 'rm',
-  'ro', 'ru', 'rue', 'sa', 'sah', 'sc', 'scn', 'sco', 'sd', 'sh',
-  'si', 'sk', 'sl', 'so', 'sq', 'sr', 'su', 'sv', 'sw', 'ta', 'te',
-  'tg', 'th', 'tk', 'tl', 'tr', 'tt', 'tyv', 'ug', 'uk', 'ur', 'uz',
-  'vec', 'vep', 'vi', 'vls', 'vo', 'wa', 'war', 'wuu', 'xal', 'xmf',
-  'yi', 'yo', 'yue', 'zh',
-];
-
-const SUPPORTED_LANGUAGES = SUPPORTED_TRANSLATION_LANGUAGES.filter((lang: string) => (
-  LOCAL_SUPPORTED_DETECTION_LANGUAGES.includes(lang)
-));
 
 type OwnProps = {
   isActive?: boolean;
@@ -52,36 +23,35 @@ type OwnProps = {
 
 type StateProps = Pick<AccountSettings, 'doNotTranslate'>;
 
-const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
+const SettingsDoNotTranslate = ({
   isActive,
   doNotTranslate,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const { setSettingOption } = getActions();
 
-  const lang = useOldLang();
-  const language = lang.code || 'en';
-  const [displayedOptions, setDisplayedOptions] = useState<string[]>([]);
+  const lang = useLang();
+  const language = lang.code;
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const displayedOptionList: ItemPickerOption[] = useMemo(() => {
-    const options = SUPPORTED_LANGUAGES.map((langCode: string) => {
-      const translatedNames = new Intl.DisplayNames([language], { type: 'language' });
-      const translatedName = translatedNames.of(langCode)!;
+    const translatedNames = new Intl.DisplayNames([language], { type: 'language' });
+    const options = SUPPORTED_TRANSLATION_LANGUAGES.map((langCode: string) => {
+      const translatedName = translatedNames.of(langCode);
 
-      const originalNames = new Intl.DisplayNames([langCode], { type: 'language' });
-      const originalName = originalNames.of(langCode)!;
+      const originalName = new Intl.DisplayNames([langCode], { type: 'language' })
+        .of(langCode);
+
+      if (!translatedName || !originalName) {
+        return undefined;
+      }
 
       return {
-        langCode,
-        translatedName,
-        originalName,
+        value: langCode,
+        label: translatedName,
+        subLabel: originalName,
       };
-    }).filter(Boolean).map(({ langCode, translatedName, originalName }) => ({
-      label: translatedName,
-      subLabel: originalName,
-      value: langCode,
-    }));
+    }).filter(Boolean);
 
     if (!searchQuery.trim()) {
       const currentLanguageOption = options.find((option) => option.value === language);
@@ -89,17 +59,14 @@ const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
       return currentLanguageOption ? [currentLanguageOption, ...otherOptionList] : options;
     }
 
-    return options?.filter((option) => option.label.toLowerCase().includes(searchQuery.toLowerCase()));
+    return options?.filter((option) => (
+      option.label.toLowerCase().includes(searchQuery.toLowerCase())
+      || option.subLabel?.toLowerCase().includes(searchQuery.toLowerCase())
+      || option.value.toLowerCase().includes(searchQuery.toLowerCase())
+    ));
   }, [language, searchQuery]);
 
-  useEffectWithPrevDeps(([prevIsActive, prevLanguage]) => {
-    if (prevIsActive === isActive && prevLanguage?.find((option) => option === language)) return;
-    const [selected] = partition(displayedOptionList, (option) => doNotTranslate.includes(option.value));
-    setDisplayedOptions([...selected.map((option) => option.value)]);
-  }, [isActive, doNotTranslate, displayedOptions.length, language, displayedOptionList]);
-
   const handleChange = useLastCallback((newSelectedIds: string[]) => {
-    setDisplayedOptions(newSelectedIds);
     setSettingOption({
       doNotTranslate: newSelectedIds,
     });
@@ -116,7 +83,7 @@ const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
         <ItemPicker
           className={styles.picker}
           items={displayedOptionList}
-          selectedValues={displayedOptions}
+          selectedValues={doNotTranslate}
           onSelectedValuesChange={handleChange}
           filterValue={searchQuery}
           onFilterChange={setSearchQuery}

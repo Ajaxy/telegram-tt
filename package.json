@@ -59,6 +59,7 @@
     "@tauri-apps/cli": "^2.9.4",
     "@testing-library/jest-dom": "^6.9.1",
     "@twbs/fantasticon": "^3.1.0",
+    "@types/dom-chromium-ai": "^0.0.11",
     "@types/dom-view-transitions": "^1.0.6",
     "@types/hast": "^3.0.4",
     "@types/jest": "^30.0.0",

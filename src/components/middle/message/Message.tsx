@@ -782,7 +782,7 @@ const Message = ({
 
   const detectedLanguage = useTextLanguage(
     text?.text,
-    !(areTranslationsEnabled && shouldDetectChatLanguage),
+    !(areTranslationsEnabled && shouldDetectChatLanguage) || isTypingDraft,
     getIsMessageListReady,
   );
   useDetectChatLanguage(message, detectedLanguage, !shouldDetectChatLanguage, getIsMessageListReady);

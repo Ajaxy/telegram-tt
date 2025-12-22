@@ -111,6 +111,7 @@ export const IS_BACKDROP_BLUR_SUPPORTED = CSS.supports('backdrop-filter: blur()'
 export const IS_INSTALL_PROMPT_SUPPORTED = 'onbeforeinstallprompt' in window;
 export const IS_OPEN_IN_NEW_TAB_SUPPORTED = !(IS_PWA && IS_MOBILE);
 export const IS_TRANSLATION_SUPPORTED = !IS_TEST;
+export const IS_TRANSLATION_DETECTOR_SUPPORTED = 'LanguageDetector' in window;
 export const IS_VIEW_TRANSITION_SUPPORTED = CSS.supports('view-transition-class: test')
   && !IS_FIREFOX; // Fix flashing elements before removing
 
