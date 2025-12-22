@@ -49,6 +49,7 @@ const SuggestionPane = ({ promoData, onPaneStateChange }: OwnProps) => {
   const { ref, shouldRender } = useHeaderPane({
     isOpen: Boolean(currentSuggestion),
     onStateChange: onPaneStateChange,
+    withResizeObserver: true,
   });
 
   const handleClick = useLastCallback(() => {

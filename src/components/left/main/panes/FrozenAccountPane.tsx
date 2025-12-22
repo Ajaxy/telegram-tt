@@ -19,6 +19,7 @@ const FrozenAccountPane = ({ isAccountFrozen, onPaneStateChange }: OwnProps) => 
   const { ref, shouldRender } = useHeaderPane({
     isOpen: isAccountFrozen,
     onStateChange: onPaneStateChange,
+    withResizeObserver: true,
   });
 
   const handleClick = useLastCallback(() => {
