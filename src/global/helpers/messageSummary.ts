@@ -13,7 +13,7 @@ import {
 } from './messages';
 
 const SPOILER_CHARS = ['⠺', '⠵', '⠞', '⠟'];
-export const TRUNCATED_SUMMARY_LENGTH = 80;
+export const TRUNCATED_SUMMARY_LENGTH = 200;
 
 export function getMessageSummaryText(
   lang: LangFn,
