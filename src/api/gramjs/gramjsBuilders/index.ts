@@ -615,13 +615,17 @@ export function buildInputPhoneCall({ id, accessHash }: ApiPhoneCall) {
   });
 }
 
-export function buildInputStorePaymentPurpose(purpose: ApiInputStorePaymentPurpose):
-GramJs.TypeInputStorePaymentPurpose {
+export function buildInputStorePaymentPurpose(
+  purpose: ApiInputStorePaymentPurpose,
+): GramJs.TypeInputStorePaymentPurpose {
   if (purpose.type === 'stars') {
     return new GramJs.InputStorePaymentStarsTopup({
       stars: BigInt(purpose.stars),
       currency: purpose.currency,
       amount: BigInt(purpose.amount),
+      spendPurposePeer: purpose.spendPurposePeer
+        ? buildInputPeer(purpose.spendPurposePeer.id, purpose.spendPurposePeer.accessHash)
+        : undefined,
     });
   }
 

@@ -79,8 +79,10 @@ export function getRequestInputInvoice<T extends GlobalState>(
 
   if (inputInvoice.type === 'stars') {
     const {
-      stars, amount, currency,
+      stars, amount, currency, spendPurposePeerId,
     } = inputInvoice;
+
+    const spendPurposePeer = spendPurposePeerId ? selectPeer(global, spendPurposePeerId) : undefined;
 
     return {
       type: 'stars',
@@ -89,6 +91,7 @@ export function getRequestInputInvoice<T extends GlobalState>(
         stars,
         amount,
         currency,
+        spendPurposePeer,
       },
     };
   }

@@ -163,6 +163,7 @@ export type ApiInputStorePaymentStarsTopup = {
   stars: number;
   currency: string;
   amount: number;
+  spendPurposePeer?: ApiPeer;
 };
 
 export type ApiInputStorePaymentStarsGift = {
@@ -341,6 +342,7 @@ export type ApiInputInvoiceStars = {
   stars: number;
   currency: string;
   amount: number;
+  spendPurposePeerId?: string;
 };
 
 export type ApiInputInvoiceStarsGift = {

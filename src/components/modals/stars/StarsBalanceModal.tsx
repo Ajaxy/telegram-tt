@@ -310,11 +310,33 @@ const StarsBalanceModal = ({
   });
 
   const handleBuyStars = useLastCallback((option: ApiStarTopupOption) => {
+    const originPaymentInputInvoice = originStarsPayment?.inputInvoice;
+
+    let spendPurposePeerId: string | undefined;
+
+    switch (originPaymentInputInvoice?.type) {
+      case 'message': {
+        spendPurposePeerId = originPaymentInputInvoice.chatId;
+        break;
+      }
+
+      case 'slug': {
+        const form = originStarsPayment?.form;
+        spendPurposePeerId = form?.botId;
+        break;
+      }
+    }
+
+    if (originReaction) {
+      spendPurposePeerId = originReaction.chatId;
+    }
+
     openInvoice({
       type: 'stars',
       stars: option.stars,
       currency: option.currency,
       amount: option.amount,
+      spendPurposePeerId,
     });
   });
 
