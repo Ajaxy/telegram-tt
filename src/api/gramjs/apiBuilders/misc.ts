@@ -226,7 +226,7 @@ export function buildApiPromoData(promoData: GramJs.help.PromoData): ApiPromoDat
   };
 }
 
-export function buildApiPendingSuggestion(pendingSuggestion: GramJs.TypePendingSuggestion): ApiPendingSuggestion {
+function buildApiPendingSuggestion(pendingSuggestion: GramJs.TypePendingSuggestion): ApiPendingSuggestion {
   const {
     suggestion, title, description, url,
   } = pendingSuggestion;
@@ -245,7 +245,7 @@ export function oldBuildLangPack(mtpLangPack: GramJs.LangPackDifference) {
   }, {});
 }
 
-export function oldBuildLangPackString(mtpString: GramJs.TypeLangPackString) {
+function oldBuildLangPackString(mtpString: GramJs.TypeLangPackString) {
   return mtpString instanceof GramJs.LangPackString
     ? mtpString.value
     : mtpString instanceof GramJs.LangPackStringPluralized

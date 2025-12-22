@@ -131,7 +131,7 @@ const AttachmentModalItem: FC<OwnProps> = ({
   );
 };
 
-export function getDisplayType(attachment: ApiAttachment, shouldDisplayCompressed?: boolean) {
+function getDisplayType(attachment: ApiAttachment, shouldDisplayCompressed?: boolean) {
   if (shouldDisplayCompressed && attachment.quick) {
     if (SUPPORTED_PHOTO_CONTENT_TYPES.has(attachment.mimeType)) {
       return 'photo';

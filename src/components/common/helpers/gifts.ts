@@ -1,5 +1,4 @@
 import type {
-  ApiFormattedText,
   ApiStarGift,
   ApiStarGiftAttribute,
   ApiStarGiftAttributeBackdrop,
@@ -32,19 +31,13 @@ export function getTotalGiftAvailability(gift: ApiStarGift): number | undefined 
   return gift.totalCount;
 }
 
-export function getGiftMessage(gift: ApiStarGift): ApiFormattedText | undefined {
-  if (gift.type !== 'starGiftUnique') return undefined;
-
-  return gift.attributes.find((attr): attr is ApiStarGiftAttributeOriginalDetails => attr.type === 'model')?.message;
-}
-
 export function getGiftAttributes(gift: ApiStarGift): GiftAttributes | undefined {
   if (gift.type !== 'starGiftUnique') return undefined;
 
   return getGiftAttributesFromList(gift.attributes);
 }
 
-export function getGiftAttributesFromList(attributes: ApiStarGiftAttribute[]) {
+function getGiftAttributesFromList(attributes: ApiStarGiftAttribute[]) {
   const model = attributes.find((attr): attr is ApiStarGiftAttributeModel => attr.type === 'model');
   const backdrop = attributes.find((attr): attr is ApiStarGiftAttributeBackdrop => attr.type === 'backdrop');
   const pattern = attributes.find((attr): attr is ApiStarGiftAttributePattern => attr.type === 'pattern');

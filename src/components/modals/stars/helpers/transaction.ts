@@ -1,4 +1,4 @@
-import type { ApiStarsAmount, ApiStarsTransaction, ApiTypeCurrencyAmount } from '../../../../api/types';
+import type { ApiStarsTransaction, ApiTypeCurrencyAmount } from '../../../../api/types';
 import type { OldLangFn } from '../../../../hooks/useOldLang';
 
 import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../../config';
@@ -64,14 +64,10 @@ export function getTransactionTitle(oldLang: OldLangFn, lang: LangFn, transactio
   return transaction.title;
 }
 
-export function isNegativeStarsAmount(starsAmount: ApiStarsAmount) {
-  if (starsAmount.amount) return starsAmount.amount < 0;
-  return starsAmount.nanos < 0;
-}
-
 export function isNegativeAmount(currencyAmount: ApiTypeCurrencyAmount) {
   if (currencyAmount.currency === STARS_CURRENCY_CODE) {
-    return isNegativeStarsAmount(currencyAmount);
+    if (currencyAmount.amount) return currencyAmount.amount < 0;
+    return currencyAmount.nanos < 0;
   }
   return currencyAmount.amount < 0;
 }
