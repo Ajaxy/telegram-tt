@@ -272,6 +272,8 @@
 
   transition: opacity 300ms;
 
+  dynamic-range-limit: no-limit;
+
   :global(body.ghost-animating) .activeSlide & {
     visibility: hidden;
   }

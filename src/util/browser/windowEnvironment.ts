@@ -113,7 +113,7 @@ export const IS_OPEN_IN_NEW_TAB_SUPPORTED = !(IS_PWA && IS_MOBILE);
 export const IS_TRANSLATION_SUPPORTED = !IS_TEST;
 export const IS_TRANSLATION_DETECTOR_SUPPORTED = 'LanguageDetector' in window;
 export const IS_VIEW_TRANSITION_SUPPORTED = CSS.supports('view-transition-class: test')
-  && !IS_FIREFOX; // Fix flashing elements before removing
+  && !IS_FIREFOX; // https://bugzilla.mozilla.org/show_bug.cgi?id=1994547
 
 export const MESSAGE_LIST_SENSITIVE_AREA = 750;
 

@@ -41,4 +41,8 @@
   .Spinner {
     margin: auto;
   }
+
+  img, video {
+    dynamic-range-limit: no-limit;
+  }
 }

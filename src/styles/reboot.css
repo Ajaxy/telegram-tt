@@ -172,6 +172,10 @@ img {
   vertical-align: middle;
 }
 
+img, video {
+  dynamic-range-limit: standard;
+}
+
 svg:not(:root) {
   overflow: hidden;
 }
