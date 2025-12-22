@@ -31,6 +31,7 @@ import SettingsHeader from './SettingsHeader';
 import SettingsLanguage from './SettingsLanguage';
 import SettingsMain from './SettingsMain';
 import SettingsNotifications from './SettingsNotifications';
+import SettingsPasskeys from './SettingsPasskeys';
 import SettingsPerformance from './SettingsPerformance';
 import SettingsPrivacy from './SettingsPrivacy';
 import SettingsPrivacyBlockedUsers from './SettingsPrivacyBlockedUsers';
@@ -85,6 +86,7 @@ const FOLDERS_SCREENS = [
 const PRIVACY_SCREENS = [
   SettingsScreens.PrivacyBlockedUsers,
   SettingsScreens.ActiveWebsites,
+  SettingsScreens.Passkeys,
 ];
 
 const PRIVACY_PHONE_NUMBER_SCREENS = [
@@ -481,6 +483,14 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.Performance:
         return (
           <SettingsPerformance
+            isActive={isScreenActive}
+            onReset={handleReset}
+          />
+        );
+
+      case SettingsScreens.Passkeys:
+        return (
+          <SettingsPasskeys
             isActive={isScreenActive}
             onReset={handleReset}
           />

@@ -113,7 +113,9 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     lastPlaybackRate: DEFAULT_PLAYBACK_RATE,
   },
 
-  authRememberMe: true,
+  auth: {
+    rememberMe: true,
+  },
   countryList: {
     phoneCodes: [],
     general: [],

@@ -78,7 +78,7 @@ async function init() {
     getActions()
       .switchMultitabRole({ isMasterTab }, { forceSyncOnIOs: true });
   });
-  const shouldReestablishMasterToSelf = getGlobal().authState !== 'authorizationStateReady';
+  const shouldReestablishMasterToSelf = getGlobal().auth.state !== 'authorizationStateReady';
   establishMultitabRole(shouldReestablishMasterToSelf);
 
   if (DEBUG) {

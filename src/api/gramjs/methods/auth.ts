@@ -1,4 +1,7 @@
+import { PasskeyLoginRequestedError, UserAlreadyAuthorizedError } from '../../../lib/gramjs/errors';
+
 import type {
+  ApiPasskeyOption,
   ApiUpdateAuthorizationState,
   ApiUpdateAuthorizationStateType,
   ApiUser,
@@ -16,6 +19,13 @@ const authController: {
 export function onWebAuthTokenFailed() {
   sendApiUpdate({
     '@type': 'updateWebAuthTokenFailed',
+  });
+}
+
+export function onPasskeyOption(option: ApiPasskeyOption) {
+  sendApiUpdate({
+    '@type': 'updatePasskeyOption',
+    option,
   });
 }
 
@@ -75,11 +85,20 @@ export function onRequestQrCode(qrCode: { token: Buffer; expires: number }) {
 }
 
 export function onAuthError(err: Error) {
-  const { messageKey } = wrapError(err);
+  if (err instanceof UserAlreadyAuthorizedError) {
+    sendApiUpdate({
+      '@type': 'updateUserAlreadyAuthorized',
+      userId: err.userId,
+    });
+    return;
+  }
+
+  const { messageKey, errorMessage } = wrapError(err);
 
   sendApiUpdate({
     '@type': 'updateAuthorizationError',
     errorKey: messageKey,
+    errorCode: errorMessage,
   });
 }
 
@@ -150,4 +169,12 @@ export function restartAuthWithQr() {
   }
 
   authController.reject(new Error('RESTART_AUTH_WITH_QR'));
+}
+
+export function restartAuthWithPasskey(credentialJson: PublicKeyCredentialJSON) {
+  if (!authController.reject) {
+    return;
+  }
+
+  authController.reject(new PasskeyLoginRequestedError(credentialJson));
 }

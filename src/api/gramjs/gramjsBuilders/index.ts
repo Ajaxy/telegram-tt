@@ -362,7 +362,7 @@ export function buildInputStory(story: ApiStory | ApiStorySkipped) {
 export function generateRandomTimestampedBigInt() {
   // 32 bits for timestamp, 32 bits are random
   const buffer = generateRandomBytes(8);
-  const timestampBuffer = Buffer.alloc(4);
+  const timestampBuffer = Buffer.allocUnsafe(4);
   timestampBuffer.writeUInt32LE(Math.floor(Date.now() / 1000), 0);
   buffer.set(timestampBuffer, 4);
   return readBigIntFromBuffer(buffer, true, true);

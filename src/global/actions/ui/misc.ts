@@ -1,6 +1,6 @@
 import { addCallback } from '../../../lib/teact/teactn';
 
-import type { ApiError, ApiNotification } from '../../../api/types';
+import type { ApiError } from '../../../api/types';
 import type { ActionReturnType, GlobalState } from '../../types';
 
 import {
@@ -12,7 +12,6 @@ import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
 import { getAllNotificationsCount } from '../../../util/folderManager';
-import generateUniqueId from '../../../util/generateUniqueId';
 import getIsAppUpdateNeeded from '../../../util/getIsAppUpdateNeeded';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import { compact, unique } from '../../../util/iteratees';
@@ -332,26 +331,6 @@ addActionHandler('reorderStickerSets', (global, actions, payload): ActionReturnT
   };
 });
 
-addActionHandler('showNotification', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId(), ...notification } = payload;
-  const hasLocalId = notification.localId;
-  notification.localId ||= generateUniqueId();
-
-  const newNotifications = [...selectTabState(global, tabId).notifications];
-  const existingNotificationIndex = newNotifications.findIndex((n) => (
-    hasLocalId ? n.localId === notification.localId : n.message === notification.message
-  ));
-  if (existingNotificationIndex !== -1) {
-    newNotifications.splice(existingNotificationIndex, 1);
-  }
-
-  newNotifications.push(notification as ApiNotification);
-
-  return updateTabState(global, {
-    notifications: newNotifications,
-  }, tabId);
-});
-
 addActionHandler('showAllowedMessageTypesNotification', (global, actions, payload): ActionReturnType => {
   const { chatId, messageListType, tabId = getCurrentTabId() } = payload;
 
@@ -403,16 +382,6 @@ addActionHandler('showAllowedMessageTypesNotification', (global, actions, payloa
     message: langProvider.oldTranslate('Chat.SendAllowedContentText', allowedContentString),
     tabId,
   });
-});
-
-addActionHandler('dismissNotification', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
-  const newNotifications = selectTabState(global, tabId)
-    .notifications.filter(({ localId }) => localId !== payload.localId);
-
-  return updateTabState(global, {
-    notifications: newNotifications,
-  }, tabId);
 });
 
 addActionHandler('showDialog', (global, actions, payload): ActionReturnType => {

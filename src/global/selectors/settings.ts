@@ -22,7 +22,7 @@ export function selectLanguageCode<T extends GlobalState>(global: T) {
 export function selectCanSetPasscode<T extends GlobalState>(global: T) {
   // TODO[passcode]: remove this when multiacc passcode is implemented
   const accounts = getAccountsInfo();
-  return global.authRememberMe && !ACCOUNT_SLOT && Object.keys(accounts).length === 1;
+  return global.auth.rememberMe && !ACCOUNT_SLOT && Object.keys(accounts).length === 1;
 }
 
 export function selectTranslationLanguage<T extends GlobalState>(global: T) {

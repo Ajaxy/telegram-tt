@@ -39,6 +39,7 @@ import type {
   ApiEmojiInteraction,
   ApiError,
   ApiNotifyPeerType,
+  ApiPasskeyOption,
   ApiPeerNotifySettings,
   ApiSessionData,
 } from './misc';
@@ -85,6 +86,11 @@ export type ApiUpdateWebAuthTokenFailed = {
   '@type': 'updateWebAuthTokenFailed';
 };
 
+export type ApiUpdatePasskeyOption = {
+  '@type': 'updatePasskeyOption';
+  option: ApiPasskeyOption;
+};
+
 export type ApiUpdateSession = {
   '@type': 'updateSession';
   sessionData?: ApiSessionData;
@@ -93,6 +99,12 @@ export type ApiUpdateSession = {
 export type ApiUpdateAuthorizationError = {
   '@type': 'updateAuthorizationError';
   errorKey: RegularLangFnParameters;
+  errorCode?: string;
+};
+
+export type ApiUpdateUserAlreadyAuthorized = {
+  '@type': 'updateUserAlreadyAuthorized';
+  userId: string;
 };
 
 export type ApiUpdateConnectionState = {
@@ -877,11 +889,11 @@ export type ApiUpdate = (
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned | ApiUpdatePinnedMessageIds |
   ApiUpdateChatListType | ApiUpdateChatFolder | ApiUpdateChatFoldersOrder | ApiUpdateRecommendedChatFolders |
-  ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateThreadInfo | ApiUpdateCommonBoxMessages |
+  ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateThreadInfo | ApiUpdateCommonBoxMessages | ApiUpdatePasskeyOption |
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
   ApiDeleteParticipantHistory | ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateServiceNotification | ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus |
-  ApiUpdateUserFullInfo | ApiUpdateVideoProcessingPending | ApiUpdatePeerSettings |
+  ApiUpdateUserFullInfo | ApiUpdateVideoProcessingPending | ApiUpdatePeerSettings | ApiUpdateUserAlreadyAuthorized |
   ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage | ApiUpdateScheduledMessageSendFailed |
   ApiUpdateError | ApiUpdateResetContacts | ApiUpdateStartEmojiInteraction |
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet | ApiUpdateStickerSets | ApiUpdateStickerSetsOrder |

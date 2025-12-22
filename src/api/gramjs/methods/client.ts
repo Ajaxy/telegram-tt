@@ -54,8 +54,16 @@ import {
   updateChannelState,
 } from '../updates/updateManager';
 import {
-  onAuthError, onAuthReady, onCurrentUserUpdate, onRequestCode, onRequestPassword, onRequestPhoneNumber,
-  onRequestQrCode, onRequestRegistration, onWebAuthTokenFailed,
+  onAuthError,
+  onAuthReady,
+  onCurrentUserUpdate,
+  onPasskeyOption,
+  onRequestCode,
+  onRequestPassword,
+  onRequestPhoneNumber,
+  onRequestQrCode,
+  onRequestRegistration,
+  onWebAuthTokenFailed,
 } from './auth';
 import downloadMediaWithClient, { parseMediaUrl } from './media';
 
@@ -84,6 +92,7 @@ export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoid
     userAgent, platform, sessionData, isWebmSupported, maxBufferSize, webAuthToken, dcId,
     mockScenario, shouldForceHttpTransport, shouldAllowHttpTransport,
     shouldDebugExportedSenders, langCode, isTestServerRequested, accountIds,
+    hasPasskeySupport,
   } = initialArgs;
 
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
@@ -131,6 +140,7 @@ export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoid
         phoneCode: onRequestCode,
         password: onRequestPassword,
         firstAndLastNames: onRequestRegistration,
+        onPasskeyOption,
         qrCode: onRequestQrCode,
         onError: onAuthError,
         initialMethod: platform === 'iOS' || platform === 'Android' ? 'phoneNumber' : 'qrCode',
@@ -139,6 +149,7 @@ export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoid
         webAuthTokenFailed: onWebAuthTokenFailed,
         mockScenario,
         accountIds,
+        hasPasskeySupport,
       }, onConnected);
     } catch (err: any) {
       // eslint-disable-next-line no-console

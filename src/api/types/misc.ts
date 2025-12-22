@@ -25,7 +25,16 @@ export interface ApiInitialArgs {
   langCode: string;
   isTestServerRequested?: boolean;
   accountIds?: string[];
+  hasPasskeySupport?: boolean;
 }
+
+export type ApiPasskeyOption = {
+  publicKey: PublicKeyCredentialRequestOptionsJSON;
+};
+
+export type ApiPasskeyRegistrationOption = {
+  publicKey: PublicKeyCredentialCreationOptionsJSON;
+};
 
 export interface ApiOnProgress {
   (
@@ -276,6 +285,8 @@ export interface ApiAppConfig {
   verifyAgeMin?: number;
   typingDraftTtl: number;
   contactNoteLimit?: number;
+  arePasskeysAvailable: boolean;
+  passkeysMaxCount: number;
 }
 
 export interface ApiConfig {
@@ -389,4 +400,12 @@ export interface ApiRestrictionReason {
   reason: string;
   text: string;
   platform: string;
+}
+
+export interface ApiPasskey {
+  id: string;
+  name: string;
+  date: number;
+  softwareEmojiId?: string;
+  lastUsageDate?: number;
 }

@@ -1,6 +1,3 @@
-import type { ChangeEvent } from 'react';
-import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import { memo, useCallback, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -14,12 +11,15 @@ import AvatarEditable from '../ui/AvatarEditable';
 import Button from '../ui/Button';
 import InputText from '../ui/InputText';
 
-type StateProps = Pick<GlobalState, 'authIsLoading' | 'authErrorKey'>;
+type StateProps = {
+  auth: GlobalState['auth'];
+};
 
-const AuthRegister: FC<StateProps> = ({
-  authIsLoading, authErrorKey,
-}) => {
+const AuthRegister = ({
+  auth,
+}: StateProps) => {
   const { signUp, clearAuthErrorKey, uploadProfilePhoto } = getActions();
+  const { isLoading, errorKey } = auth;
 
   const lang = useLang();
   const [isButtonShown, setIsButtonShown] = useState(false);
@@ -27,8 +27,8 @@ const AuthRegister: FC<StateProps> = ({
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
-  const handleFirstNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    if (authErrorKey) {
+  const handleFirstNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    if (errorKey) {
       clearAuthErrorKey();
     }
 
@@ -36,9 +36,9 @@ const AuthRegister: FC<StateProps> = ({
 
     setFirstName(target.value);
     setIsButtonShown(target.value.length > 0);
-  }, [authErrorKey]);
+  }, [errorKey]);
 
-  const handleLastNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+  const handleLastNameChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const { target } = event;
 
     setLastName(target.value);
@@ -66,7 +66,7 @@ const AuthRegister: FC<StateProps> = ({
             label={lang('LoginRegisterFirstNamePlaceholder')}
             onChange={handleFirstNameChange}
             value={firstName}
-            error={authErrorKey && lang.withRegular(authErrorKey)}
+            error={errorKey && lang.withRegular(errorKey)}
             autoComplete="given-name"
           />
           <InputText
@@ -77,7 +77,7 @@ const AuthRegister: FC<StateProps> = ({
             autoComplete="family-name"
           />
           {isButtonShown && (
-            <Button type="submit" ripple isLoading={authIsLoading}>{lang('Next')}</Button>
+            <Button type="submit" ripple isLoading={isLoading}>{lang('Next')}</Button>
           )}
         </form>
       </div>
@@ -87,6 +87,6 @@ const AuthRegister: FC<StateProps> = ({
 
 export default memo(withGlobal(
   (global): Complete<StateProps> => (
-    pick(global, ['authIsLoading', 'authErrorKey']) as Complete<StateProps>
+    pick(global, ['auth'])
   ),
 )(AuthRegister));

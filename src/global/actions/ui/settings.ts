@@ -12,6 +12,7 @@ import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
 import switchTheme from '../../../util/switchTheme';
 import { updatePeerColors } from '../../../util/theme';
 import { callApi, setShouldEnableDebugLog } from '../../../api/gramjs';
+import { addTabStateResetterAction } from '../../helpers/meta';
 import {
   addActionHandler, getActions, setGlobal,
 } from '../../index';
@@ -226,3 +227,12 @@ addActionHandler('closeShareChatFolderModal', (global, actions, payload): Action
     shareFolderScreen: undefined,
   }, tabId);
 });
+
+addActionHandler('openPasskeyModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    isPasskeyModalOpen: true,
+  }, tabId);
+});
+
+addTabStateResetterAction('closePasskeyModal', 'isPasskeyModalOpen');

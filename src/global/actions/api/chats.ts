@@ -531,7 +531,7 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
 
     global = getGlobal();
 
-    if (global.connectionState !== 'connectionStateReady' || global.authState !== 'authorizationStateReady') {
+    if (global.connectionState !== 'connectionStateReady' || global.auth.state !== 'authorizationStateReady') {
       return;
     }
 

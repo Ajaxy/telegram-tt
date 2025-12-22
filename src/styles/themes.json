@@ -73,5 +73,6 @@
   "--color-chat-username": ["#3C7EB0", "#E9EEF4"],
   "--color-borders-read-story": ["#C4C9CC", "#737373"],
   "--color-background-menu-separator": ["#0000001a", "#ffffff1a"],
-  "--color-hover-overlay": ["#00000006", "#ffffff06"]
+  "--color-hover-overlay": ["#00000006", "#ffffff06"],
+  "--color-toast-background": ["#202020CC", "#000000CC"]
 }

@@ -157,6 +157,7 @@ export interface LangPair {
   'LoginQRHelp2': undefined;
   'LoginQRHelp3': undefined;
   'LoginQRCancel': undefined;
+  'LoginPasskey': undefined;
   'YourName': undefined;
   'LoginRegisterDesc': undefined;
   'LoginRegisterFirstNamePlaceholder': undefined;
@@ -468,8 +469,6 @@ export interface LangPair {
   'P2PContacts': undefined;
   'P2PNobody': undefined;
   'PrivacySettingsWebSessions': undefined;
-  'PasswordOn': undefined;
-  'PasswordOff': undefined;
   'PrivacyTitle': undefined;
   'PrivacyPhoneTitle': undefined;
   'LastSeenTitle': undefined;
@@ -634,6 +633,7 @@ export interface LangPair {
   'ErrorNewSaltInvalid': undefined;
   'ErrorPasswordChanged': undefined;
   'ErrorPasswordMissing': undefined;
+  'ErrorPasskeyUnknown': undefined;
   'ErrorUnspecified': undefined;
   'NoStickers': undefined;
   'ClearRecentEmoji': undefined;
@@ -1788,6 +1788,27 @@ export interface LangPair {
   'StarGiftPriceDecreaseInfoLink': undefined;
   'StarGiftUpgradeCostModalTitle': undefined;
   'StarGiftUpgradeCostHint': undefined;
+  'SettingsItemPrivacyPasskeys': undefined;
+  'SettingsItemPrivacyOn': undefined;
+  'SettingsItemPrivacyOff': undefined;
+  'SettingsPasskeyTitle': undefined;
+  'SettingsPasskeyInfo': undefined;
+  'SettingsPasskeyFallbackTitle': undefined;
+  'SettingsPasskeysFooterLink': undefined;
+  'SettingsPasskeysCreate': undefined;
+  'PasskeyModalTitle': undefined;
+  'PasskeyModalDescription': undefined;
+  'PasskeyModalFeature1Title': undefined;
+  'PasskeyModalFeature1Description': undefined;
+  'PasskeyModalFeature2Title': undefined;
+  'PasskeyModalFeature2Description': undefined;
+  'PasskeyModalFeature3Title': undefined;
+  'PasskeyModalFeature3Description': undefined;
+  'PasskeyModalButtonText': undefined;
+  'PasskeyDeleteTitle': undefined;
+  'PasskeyDeleteText': undefined;
+  'PasskeyCreateError': undefined;
+  'PasskeyLoginError': undefined;
   'UnconfirmedAuthDeniedTitle': undefined;
   'UnconfirmedAuthTitle': undefined;
   'UnconfirmedAuthConfirm': undefined;
@@ -3097,6 +3118,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'StarGiftPriceDecreaseTimer': {
     'timer': V;
+  };
+  'SettingsPasskeyUsedAt': {
+    'date': V;
+  };
+  'SettingsPasskeysFooter': {
+    'link': V;
   };
   'UnconfirmedAuthDeniedMessage': {
     'location': V;

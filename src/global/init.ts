@@ -110,7 +110,7 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
 
   const parsedMessageList = parseLocationHash(global.currentUserId);
 
-  if (global.authState !== 'authorizationStateReady'
+  if (global.auth.state !== 'authorizationStateReady'
     && !global.passcode.hasPasscode && !global.passcode.isScreenLocked) {
     Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
       if (otherTabId === tabId) return;

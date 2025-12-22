@@ -14,16 +14,16 @@ document.ondblclick = () => {
   setGlobal(global);
 };
 
-type AStateProps = Pick<GlobalState, 'authState'> & {
+type AStateProps = Pick<GlobalState, 'isSyncing'> & {
   aValue: number;
 };
 
-type BStateProps = Pick<GlobalState, 'authState'> & {
+type BStateProps = Pick<GlobalState, 'isSyncing'> & {
   bValue: number;
   derivedAValue: number;
 };
 
-type BOwnProps = Pick<GlobalState, 'authState'> & {
+type BOwnProps = Pick<GlobalState, 'isSyncing'> & {
   aValue: number;
 };
 

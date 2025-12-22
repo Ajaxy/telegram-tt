@@ -253,6 +253,10 @@ const SettingsHeader: FC<OwnProps> = ({
             )}
           </h3>
         );
+
+      case SettingsScreens.Passkeys:
+        return <h3>{lang('SettingsPasskeyTitle')}</h3>;
+
       default:
         return (
           <div className="settings-main-header">

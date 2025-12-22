@@ -218,6 +218,7 @@ function LeftColumn({
         case SettingsScreens.PasscodeDisabled:
         case SettingsScreens.PasscodeEnabled:
         case SettingsScreens.PasscodeCongratulations:
+        case SettingsScreens.Passkeys:
           openSettingsScreen({ screen: SettingsScreens.Privacy });
           return;
 

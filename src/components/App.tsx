@@ -1,4 +1,3 @@
-import type { FC } from '../lib/teact/teact';
 import { useEffect, useLayoutEffect } from '../lib/teact/teact';
 import { withGlobal } from '../global';
 
@@ -22,11 +21,12 @@ import { updateSizes } from '../util/windowSize';
 import useTauriDrag from '../hooks/tauri/useTauriDrag';
 import useAppLayout from '../hooks/useAppLayout';
 import usePrevious from '../hooks/usePrevious';
-import { useSignalEffect } from '../hooks/useSignalEffect.ts';
-import { getIsInBackground } from '../hooks/window/useBackgroundMode.ts';
+import { useSignalEffect } from '../hooks/useSignalEffect';
+import { getIsInBackground } from '../hooks/window/useBackgroundMode';
 
 // import Test from './test/TestLocale';
 import Auth from './auth/Auth';
+import Notifications from './common/Notifications';
 import UiLoader from './common/UiLoader';
 import AppInactive from './main/AppInactive';
 import LockScreen from './main/LockScreen.async';
@@ -36,7 +36,7 @@ import Transition from './ui/Transition';
 import styles from './App.module.scss';
 
 type StateProps = {
-  authState: GlobalState['authState'];
+  authState: GlobalState['auth']['state'];
   isScreenLocked?: boolean;
   hasPasscode?: boolean;
   inactiveReason?: 'auth' | 'otherClient';
@@ -57,7 +57,7 @@ const TRANSITION_RENDER_COUNT = Object.keys(AppScreens).length / 2;
 const ACTIVE_PAGE_TITLE = IS_TAURI ? PAGE_TITLE_TAURI : PAGE_TITLE;
 const INACTIVE_PAGE_TITLE = `${ACTIVE_PAGE_TITLE} ${INACTIVE_MARKER}`;
 
-const App: FC<StateProps> = ({
+const App = ({
   authState,
   isScreenLocked,
   hasPasscode,
@@ -66,7 +66,7 @@ const App: FC<StateProps> = ({
   isTestServer,
   theme,
   actionMessageBg,
-}) => {
+}: StateProps) => {
   const { isMobile } = useAppLayout();
   const isMobileOs = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
 
@@ -257,18 +257,20 @@ const App: FC<StateProps> = ({
         {renderContent}
       </Transition>
       {activeKey === AppScreens.auth && isTestServer && <div className="test-server-badge">Test server</div>}
+      <Notifications />
     </UiLoader>
   );
 };
 
 export default withGlobal(
   (global): Complete<StateProps> => {
+    const { state: authState, hasWebAuthTokenFailed, hasWebAuthTokenPasswordRequired } = global.auth;
     return {
-      authState: global.authState,
+      authState,
       isScreenLocked: global.passcode?.isScreenLocked,
       hasPasscode: global.passcode?.hasPasscode,
       inactiveReason: selectTabState(global).inactiveReason,
-      hasWebAuthTokenFailed: global.hasWebAuthTokenFailed || global.hasWebAuthTokenPasswordRequired,
+      hasWebAuthTokenFailed: hasWebAuthTokenFailed || hasWebAuthTokenPasswordRequired,
       theme: selectTheme(global),
       isTestServer: global.config?.isTestServer,
       actionMessageBg: selectActionMessageBg(global),

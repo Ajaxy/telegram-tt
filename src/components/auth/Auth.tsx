@@ -1,6 +1,5 @@
 import '../../global/actions/initial';
 
-import type { FC } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -21,11 +20,13 @@ import AuthRegister from './AuthRegister.async';
 
 import './Auth.scss';
 
-type StateProps = Pick<GlobalState, 'authState'>;
+type StateProps = {
+  authState: GlobalState['auth']['state'];
+};
 
-const Auth: FC<StateProps> = ({
+const Auth = ({
   authState,
-}) => {
+}: StateProps) => {
   const {
     returnToAuthPhoneNumber, goToAuthQrCode,
   } = getActions();
@@ -101,7 +102,7 @@ const Auth: FC<StateProps> = ({
 export default memo(withGlobal(
   (global): Complete<StateProps> => {
     return {
-      authState: global.authState,
+      authState: global.auth.state,
     };
   },
 )(Auth));

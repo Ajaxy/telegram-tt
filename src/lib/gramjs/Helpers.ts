@@ -130,7 +130,7 @@ export async function generateKeyDataFromNonce(
 }
 
 export function convertToLittle(buf: Uint32Array) {
-  const correct = Buffer.alloc(buf.length * 4);
+  const correct = Buffer.allocUnsafe(buf.length * 4);
 
   for (let i = 0; i < buf.length; i++) {
     correct.writeUInt32BE(buf[i], i * 4);

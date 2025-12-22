@@ -36,6 +36,7 @@ const ERROR_KEYS: Record<string, RegularLangKey> = {
   SRP_PASSWORD_CHANGED: 'ErrorPasswordChanged',
   CODE_INVALID: 'ErrorEmailCodeInvalid',
   PASSWORD_MISSING: 'ErrorPasswordMissing',
+  PASSKEY_CREDENTIAL_NOT_FOUND: 'ErrorPasskeyUnknown',
 };
 
 export type MessageRepairContext = Pick<GramJs.TypeMessage, 'peerId' | 'id'>;

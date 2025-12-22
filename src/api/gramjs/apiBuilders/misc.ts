@@ -7,6 +7,7 @@ import type {
   ApiCountry,
   ApiLanguage,
   ApiOldLangString,
+  ApiPasskey,
   ApiPendingSuggestion,
   ApiPrivacyKey,
   ApiPromoData,
@@ -348,4 +349,15 @@ export function buildApiRestrictionReasons(
   return restrictionReasons.map((
     { reason, text, platform }) =>
     ({ reason, text, platform }));
+}
+
+export function buildApiPasskey(passkey: GramJs.TypePasskey): ApiPasskey {
+  const { id, name, date, softwareEmojiId, lastUsageDate } = passkey;
+  return {
+    id,
+    name,
+    date,
+    softwareEmojiId: softwareEmojiId?.toString(),
+    lastUsageDate,
+  };
 }

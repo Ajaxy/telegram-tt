@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useCallback, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -11,12 +10,15 @@ import useLang from '../../hooks/useLang';
 import PasswordForm from '../common/PasswordForm';
 import MonkeyPassword from '../common/PasswordMonkey';
 
-type StateProps = Pick<GlobalState, 'authIsLoading' | 'authErrorKey' | 'authHint'>;
+type StateProps = {
+  auth: GlobalState['auth'];
+};
 
-const AuthPassword: FC<StateProps> = ({
-  authIsLoading, authErrorKey, authHint,
-}) => {
+const AuthPassword = ({
+  auth,
+}: StateProps) => {
   const { setAuthPassword, clearAuthErrorKey } = getActions();
+  const { isLoading, errorKey, hint } = auth;
 
   const lang = useLang();
   const [showPassword, setShowPassword] = useState(false);
@@ -37,9 +39,9 @@ const AuthPassword: FC<StateProps> = ({
         <p className="note">{lang('LoginEnterPasswordDescription')}</p>
         <PasswordForm
           onClearError={clearAuthErrorKey}
-          error={authErrorKey && lang.withRegular(authErrorKey)}
-          hint={authHint}
-          isLoading={authIsLoading}
+          error={errorKey && lang.withRegular(errorKey)}
+          hint={hint}
+          isLoading={isLoading}
           isPasswordVisible={showPassword}
           onChangePasswordVisibility={handleChangePasswordVisibility}
           onSubmit={handleSubmit}
@@ -51,6 +53,6 @@ const AuthPassword: FC<StateProps> = ({
 
 export default memo(withGlobal(
   (global): Complete<StateProps> => (
-    pick(global, ['authIsLoading', 'authErrorKey', 'authHint']) as Complete<StateProps>
+    pick(global, ['auth'])
   ),
 )(AuthPassword));

@@ -1,5 +1,4 @@
-import type { FC } from '../../../lib/teact/teact';
-import { memo, useCallback, useEffect, useMemo } from '../../../lib/teact/teact';
+import { memo, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiPrivacySettings } from '../../../api/types';
@@ -47,17 +46,21 @@ type StateProps = {
   needAgeVideoVerification?: boolean;
   privacy: GlobalState['settings']['privacy'];
   accountDaysTtl?: number;
+  passkeyCount?: number;
+  arePasskeysAvailable?: boolean;
 };
 
 const DAYS_PER_MONTH = 30;
 
-const SettingsPrivacy: FC<OwnProps & StateProps> = ({
+const SettingsPrivacy = ({
   isActive,
   isCurrentUserPremium,
   hasPassword,
   hasPasscode,
   blockedCount,
   webAuthCount,
+  passkeyCount,
+  arePasskeysAvailable,
   isSensitiveEnabled,
   canChangeSensitive,
   canDisplayAutoarchiveSetting,
@@ -71,7 +74,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   isCurrentUserFrozen,
   accountDaysTtl,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     openDeleteAccountModal,
     loadPrivacySettings,
@@ -84,6 +87,8 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     openSettingsScreen,
     loadAccountDaysTtl,
     openAgeVerificationModal,
+    loadPasskeys,
+    openPasskeyModal,
   } = getActions();
 
   useEffect(() => {
@@ -91,6 +96,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       loadBlockedUsers();
       loadPrivacySettings({});
       loadWebAuthorizations();
+      loadPasskeys();
     }
   }, [isCurrentUserFrozen]);
 
@@ -99,7 +105,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       loadGlobalPrivacySettings();
       loadAccountDaysTtl();
     }
-  }, [isActive, isCurrentUserFrozen, loadGlobalPrivacySettings]);
+  }, [isActive, isCurrentUserFrozen]);
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -109,29 +115,39 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     onBack: onReset,
   });
 
-  const handleArchiveAndMuteChange = useCallback((isEnabled: boolean) => {
+  const handleArchiveAndMuteChange = useLastCallback((isEnabled: boolean) => {
     updateGlobalPrivacySettings({
       shouldArchiveAndMuteNewNonContact: isEnabled,
     });
-  }, [updateGlobalPrivacySettings]);
+  });
 
-  const handleChatInTitleChange = useCallback((isChecked: boolean) => {
+  const handleChatInTitleChange = useLastCallback((isChecked: boolean) => {
     setSharedSettingOption({
       canDisplayChatInTitle: isChecked,
     });
-  }, []);
+  });
 
-  const handleUpdateContentSettings = useCallback((isChecked: boolean) => {
+  const handleUpdateContentSettings = useLastCallback((isChecked: boolean) => {
     updateContentSettings({ isSensitiveEnabled: isChecked });
-  }, [updateContentSettings]);
+  });
 
-  const handleAgeVerification = useCallback(() => {
+  const handleAgeVerification = useLastCallback(() => {
     openAgeVerificationModal();
-  }, [openAgeVerificationModal]);
+  });
 
   const handleOpenDeleteAccountModal = useLastCallback(() => {
     if (!accountDaysTtl) return;
     openDeleteAccountModal({ days: accountDaysTtl });
+  });
+
+  const handleOpenPasskeys = useLastCallback(() => {
+    if (!arePasskeysAvailable || passkeyCount === undefined) return;
+    if (passkeyCount === 0) {
+      openPasskeyModal();
+      return;
+    }
+
+    openSettingsScreen({ screen: SettingsScreens.Passkeys });
   });
 
   const dayOption = useMemo(() => {
@@ -192,7 +208,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         </ListItem>
         {canSetPasscode && (
           <ListItem
-            icon="key"
+            icon="lock"
             narrow
 
             onClick={() => openSettingsScreen({
@@ -202,13 +218,13 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
             <div className="multiline-item">
               <span className="title">{oldLang('Passcode')}</span>
               <span className="subtitle" dir="auto">
-                {oldLang(hasPasscode ? 'PasswordOn' : 'PasswordOff')}
+                {lang(hasPasscode ? 'SettingsItemPrivacyOn' : 'SettingsItemPrivacyOff')}
               </span>
             </div>
           </ListItem>
         )}
         <ListItem
-          icon="lock"
+          icon="admin"
           narrow
 
           onClick={() => openSettingsScreen({
@@ -218,10 +234,25 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <div className="multiline-item">
             <span className="title">{oldLang('TwoStepVerification')}</span>
             <span className="subtitle" dir="auto">
-              {oldLang(hasPassword ? 'PasswordOn' : 'PasswordOff')}
+              {lang(hasPassword ? 'SettingsItemPrivacyOn' : 'SettingsItemPrivacyOff')}
             </span>
           </div>
         </ListItem>
+        {arePasskeysAvailable && (
+          <ListItem
+            icon="key"
+            narrow
+            onClick={handleOpenPasskeys}
+          >
+            <div className="multiline-item">
+              <span className="title">{lang('SettingsItemPrivacyPasskeys')}</span>
+              <span className="subtitle" dir="auto">
+                {lang(passkeyCount === undefined ? 'Loading'
+                  : passkeyCount > 0 ? 'SettingsItemPrivacyOn' : 'SettingsItemPrivacyOff')}
+              </span>
+            </div>
+          </ListItem>
+        )}
         {webAuthCount > 0 && (
           <ListItem
             icon="web"
@@ -470,6 +501,7 @@ export default memo(withGlobal<OwnProps>(
         },
         privacy,
         accountDaysTtl,
+        passkeys,
       },
       blocked,
       passcode: {
@@ -501,6 +533,8 @@ export default memo(withGlobal<OwnProps>(
       canSetPasscode: selectCanSetPasscode(global),
       isCurrentUserFrozen,
       accountDaysTtl,
+      passkeyCount: passkeys?.length,
+      arePasskeysAvailable: appConfig.arePasskeysAvailable,
     };
   },
 )(SettingsPrivacy));

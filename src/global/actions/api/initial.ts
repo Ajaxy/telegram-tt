@@ -11,7 +11,9 @@ import {
 } from '../../../config';
 import { updateAppBadge } from '../../../util/appBadge';
 import { PASSCODE_IDB_STORE } from '../../../util/browser/idb';
+import { toCredentialRequestOptions } from '../../../util/browser/passkeys';
 import {
+  IS_WEBAUTHN_SUPPORTED,
   IS_WEBM_SUPPORTED, MAX_BUFFER_SIZE, PLATFORM_ENV,
 } from '../../../util/browser/windowEnvironment';
 import * as cacheApi from '../../../util/cacheApi';
@@ -37,6 +39,7 @@ import {
 import {
   clearGlobalForLockScreen, updateManagementProgress, updatePasscodeSettings,
 } from '../../reducers';
+import { updateAuth } from '../../reducers/auth';
 import { selectSharedSettings } from '../../selectors/sharedState';
 import { destroySharedStatePort } from '../../shared/sharedStateConnector';
 
@@ -74,6 +77,7 @@ addActionHandler('initApi', (global, actions): ActionReturnType => {
     langCode: language,
     isTestServerRequested: hasTestParam,
     accountIds,
+    hasPasskeySupport: IS_WEBAUTHN_SUPPORTED,
   });
 
   void setShouldEnableDebugLog(Boolean(shouldCollectDebugLogs));
@@ -84,11 +88,10 @@ addActionHandler('setAuthPhoneNumber', (global, actions, payload): ActionReturnT
 
   void callApi('provideAuthPhoneNumber', phoneNumber.replace(/[^\d]/g, ''));
 
-  return {
-    ...global,
-    authIsLoading: true,
-    authErrorKey: undefined,
-  };
+  return updateAuth(global, {
+    isLoading: true,
+    errorKey: undefined,
+  });
 });
 
 addActionHandler('setAuthCode', (global, actions, payload): ActionReturnType => {
@@ -96,11 +99,10 @@ addActionHandler('setAuthCode', (global, actions, payload): ActionReturnType => 
 
   void callApi('provideAuthCode', code);
 
-  return {
-    ...global,
-    authIsLoading: true,
-    authErrorKey: undefined,
-  };
+  return updateAuth(global, {
+    isLoading: true,
+    errorKey: undefined,
+  });
 });
 
 addActionHandler('setAuthPassword', (global, actions, payload): ActionReturnType => {
@@ -108,11 +110,28 @@ addActionHandler('setAuthPassword', (global, actions, payload): ActionReturnType
 
   void callApi('provideAuthPassword', password);
 
-  return {
-    ...global,
-    authIsLoading: true,
-    authErrorKey: undefined,
-  };
+  return updateAuth(global, {
+    isLoading: true,
+    errorKey: undefined,
+  });
+});
+
+addActionHandler('loginWithPasskey', async (global, actions, payload): Promise<void> => {
+  const passkeyOption = global.auth.passkeyOption;
+  if (!passkeyOption) return;
+
+  const credential = await navigator.credentials.get(toCredentialRequestOptions(passkeyOption)).catch((e: unknown) => {
+    actions.showNotification({
+      message: {
+        key: 'PasskeyLoginError',
+      },
+      tabId: getCurrentTabId(),
+    });
+  });
+  if (!credential) return;
+
+  const publicKeyCredential = credential as PublicKeyCredential;
+  callApi('restartAuthWithPasskey', publicKeyCredential.toJSON());
 });
 
 addActionHandler('uploadProfilePhoto', async (global, actions, payload): Promise<void> => {
@@ -139,30 +158,27 @@ addActionHandler('signUp', (global, actions, payload): ActionReturnType => {
 
   void callApi('provideAuthRegistration', { firstName, lastName });
 
-  return {
-    ...global,
-    authIsLoading: true,
-    authErrorKey: undefined,
-  };
+  return updateAuth(global, {
+    isLoading: true,
+    errorKey: undefined,
+  });
 });
 
 addActionHandler('returnToAuthPhoneNumber', (global): ActionReturnType => {
   void callApi('restartAuth');
 
-  return {
-    ...global,
-    authErrorKey: undefined,
-  };
+  return updateAuth(global, {
+    errorKey: undefined,
+  });
 });
 
 addActionHandler('goToAuthQrCode', (global): ActionReturnType => {
   void callApi('restartAuthWithQr');
 
-  return {
-    ...global,
-    authIsLoadingQrCode: true,
-    authErrorKey: undefined,
-  };
+  return updateAuth(global, {
+    isLoadingQrCode: true,
+    errorKey: undefined,
+  });
 });
 
 addActionHandler('saveSession', (global, actions, payload): ActionReturnType => {
@@ -254,10 +270,9 @@ addActionHandler('loadNearestCountry', async (global): Promise<void> => {
   const authNearestCountry = await callApi('fetchNearestCountry');
 
   global = getGlobal();
-  global = {
-    ...global,
-    authNearestCountry,
-  };
+  global = updateAuth(global, {
+    nearestCountry: authNearestCountry,
+  });
   setGlobal(global);
 });
 

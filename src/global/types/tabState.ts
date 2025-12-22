@@ -920,6 +920,8 @@ export type TabState = {
     threadId?: ThreadId;
   };
 
+  isPasskeyModalOpen?: boolean;
+
   isWaitingForStarGiftUpgrade?: true;
   isWaitingForStarGiftTransfer?: true;
   insertingPeerIdMention?: string;

@@ -20,7 +20,7 @@ const REFRESH_INTERVAL = 1000 * 60;
 const PREVIEW_SIZE = 72;
 
 export default function useMultiaccountInfo(currentUser?: ApiUser) {
-  const isUpdater = Boolean(currentUser) && getGlobal().authRememberMe;
+  const isUpdater = Boolean(currentUser) && getGlobal().auth.rememberMe;
   const isSynced = useSelector(selectIsSynced);
 
   const [accountsInfo, setAccountsInfo] = useState(() => getAccountsInfo());

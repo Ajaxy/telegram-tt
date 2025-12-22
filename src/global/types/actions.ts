@@ -147,6 +147,7 @@ export interface ActionPayloads {
     tabId?: number;
   };
   goToAuthQrCode: undefined;
+  loginWithPasskey: undefined;
 
   // stickers & GIFs
   setStickerSearchQuery: { query?: string } & WithTabId;
@@ -250,6 +251,15 @@ export interface ActionPayloads {
     notificationSoundVolume?: number;
   };
   loadLanguages: undefined;
+
+  loadPasskeys: undefined;
+  startPasskeyRegistration: WithTabId | undefined;
+  deletePasskey: {
+    id: string;
+  };
+  openPasskeyModal: WithTabId | undefined;
+  closePasskeyModal: WithTabId | undefined;
+
   loadPrivacySettings: {
     skipIfCached?: boolean;
   };

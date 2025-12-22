@@ -19,12 +19,13 @@
 
   margin: 0 0.5rem;
   padding: 0.9375rem;
-  border-radius: var(--border-radius-default);
+  border-radius: var(--border-radius-toast);
 
   color: #fff;
 
-  background-color: rgba(32, 32, 32, 0.8);
+  background-color: var(--color-toast-background);
   background-size: 1.5rem;
+  backdrop-filter: blur(0.5rem);
 
   .text-entity-link,
   .text-entity-link:hover,

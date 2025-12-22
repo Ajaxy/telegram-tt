@@ -253,7 +253,6 @@ export default {
     oneValue: '%1$d user',
     otherValue: '%1$d users',
   },
-  PasswordOn: 'On',
   BlockedUsersInfo: 'Blocked users will not be able to contact you and will not see your Last Seen time.',
   EnabledPasswordText: 'You have enabled Two-Step verification.\nYou\'ll need the password you set up here to log in to your Telegram account.',
   ChangePassword: 'Change Password',

@@ -548,8 +548,9 @@ export default class MTProtoSender {
       try {
         await this._fallbackConnection?.send(data);
       } catch (e: any) {
-        this._log.error(e);
         this._log.info('Connection closed while sending data');
+        // eslint-disable-next-line no-console
+        console.error(e);
         this._longPollLoopHandle = undefined;
         this.isSendingLongPoll = false;
         if (!this.userDisconnected) {
@@ -651,8 +652,9 @@ export default class MTProtoSender {
         await this.getConnection()!.send(data);
       } catch (e: any) {
         this.logWithIndex.debug(`Connection closed while sending data ${e}`);
-        this._log.error(e);
         this._log.info('Connection closed while sending data');
+        // eslint-disable-next-line no-console
+        console.error(e);
         this._sendLoopHandle = undefined;
         if (!this.userDisconnected) {
           this.reconnect();
@@ -694,8 +696,9 @@ export default class MTProtoSender {
         // this._log.info('Connection closed while receiving data');
         /** when the server disconnects us we want to reconnect */
         if (!this.userDisconnected) {
-          this._log.error(e);
           this._log.warn('Connection closed while receiving data');
+          // eslint-disable-next-line no-console
+          console.error(e);
           this.reconnect();
         }
         this._recvLoopHandle = undefined;
@@ -731,7 +734,8 @@ export default class MTProtoSender {
           return;
         } else {
           this._log.error('Unhandled error while receiving data');
-          this._log.error(e);
+          // eslint-disable-next-line no-console
+          console.error(e);
           this.reconnect();
           this._recvLoopHandle = undefined;
           return;
@@ -750,7 +754,8 @@ export default class MTProtoSender {
           }
         } else {
           this._log.error('Unhandled error while receiving data');
-          this._log.error(e);
+          // eslint-disable-next-line no-console
+          console.error(e);
         }
       }
 

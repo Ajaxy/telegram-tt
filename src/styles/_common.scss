@@ -274,3 +274,9 @@
 .peer-color-count-3 {
   @include mixins.peer-gradient(--bar-gradient, 3);
 }
+
+.flex-column-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

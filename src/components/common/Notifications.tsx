@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
@@ -13,7 +12,7 @@ type StateProps = {
   notifications: ApiNotification[];
 };
 
-const Notifications: FC<StateProps> = ({ notifications }) => {
+const Notifications = ({ notifications }: StateProps) => {
   if (!notifications.length) {
     return undefined;
   }

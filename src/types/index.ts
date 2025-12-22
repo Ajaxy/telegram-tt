@@ -262,6 +262,7 @@ export enum SettingsScreens {
   CustomEmoji,
   DoNotTranslate,
   FoldersShare,
+  Passkeys,
 }
 
 export type StickerSetOrReactionsSetOrRecent = Pick<ApiStickerSet, (

@@ -5,7 +5,6 @@ export { default as ForwardRecipientPicker } from '../components/main/ForwardRec
 export { default as DraftRecipientPicker } from '../components/main/DraftRecipientPicker';
 export { default as AttachBotRecipientPicker } from '../components/main/AttachBotRecipientPicker';
 export { default as Dialogs } from '../components/main/Dialogs';
-export { default as Notifications } from '../components/main/Notifications';
 export { default as SafeLinkModal } from '../components/main/SafeLinkModal';
 export { default as MapModal } from '../components/modals/map/MapModal';
 export { default as UrlAuthModal } from '../components/modals/urlAuth/UrlAuthModal';
@@ -27,6 +26,7 @@ export { default as DeleteAccountModal } from '../components/modals/deleteAccoun
 export { default as AgeVerificationModal } from '../components/modals/ageVerification/AgeVerificationModal';
 export { default as ChatlistModal } from '../components/modals/chatlist/ChatlistModal';
 export { default as ChatInviteModal } from '../components/modals/chatInvite/ChatInviteModal';
+export { default as PasskeyModal } from '../components/modals/passkey/PasskeyModal';
 export { default as BirthdaySetupModal } from '../components/modals/birthday/BirthdaySetupModal';
 
 export { default as AboutAdsModal } from '../components/modals/aboutAds/AboutAdsModal';

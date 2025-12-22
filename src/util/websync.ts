@@ -90,9 +90,9 @@ export function startWebsync() {
   const timeout = WEBSYNC_TIMEOUT - (currentTs - ts);
 
   lastTimeout = setTimeout(() => {
-    const { authState } = getGlobal();
+    const { auth } = getGlobal();
 
-    const authed = authState === 'authorizationStateReady' || hasStoredSession();
+    const authed = auth.state === 'authorizationStateReady' || hasStoredSession();
     forceWebsync(authed);
   }, Math.max(0, timeout * 1000));
 }

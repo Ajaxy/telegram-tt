@@ -313,15 +313,15 @@ function loadTopMessages<T extends GlobalState>(global: T, chatId: string, threa
 let previousGlobal: GlobalState | undefined;
 // RAF can be unreliable when device goes into sleep mode, so sync logic is handled outside any component
 addCallback((global: GlobalState) => {
-  const { connectionState, authState, isSynced } = global;
+  const { connectionState, auth, isSynced } = global;
   const { isMasterTab } = selectTabState(global);
   if (!isMasterTab || isSynced || (previousGlobal?.connectionState === connectionState
-    && previousGlobal?.authState === authState)) {
+    && previousGlobal?.auth.state === auth.state)) {
     previousGlobal = global;
     return;
   }
 
-  if (connectionState === 'connectionStateReady' && authState === 'authorizationStateReady') {
+  if (connectionState === 'connectionStateReady' && auth.state === 'authorizationStateReady') {
     getActions().sync();
   }
 

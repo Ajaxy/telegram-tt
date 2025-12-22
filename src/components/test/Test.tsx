@@ -7,7 +7,8 @@ import type { GlobalState } from '../../global/types';
 import ErrorTest from './ErrorTest';
 import SubTest from './SubTest';
 
-type StateProps = Pick<GlobalState, 'authState'> & {
+type StateProps = {
+  authState: GlobalState['auth']['state'];
   globalRand: number;
 };
 
@@ -40,7 +41,7 @@ const Test: FC<StateProps> = ({ authState, globalRand }) => {
 export default withGlobal(
   (global): Complete<StateProps> => {
     return {
-      authState: global.authState,
+      authState: global.auth.state,
       globalRand: Math.random(),
     };
   },

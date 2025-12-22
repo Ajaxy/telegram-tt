@@ -362,11 +362,16 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.sharedState.settings.shouldWarnAboutFiles = true;
     untypedCached.sharedState.settings.shouldWarnAboutSvg = undefined;
   }
+
+  if (!cached.auth) {
+    cached.auth = initialState.auth;
+    cached.auth.rememberMe = untypedCached.rememberMe;
+  }
 }
 
 function updateCache(force?: boolean) {
   const global = getGlobal();
-  if (isRemovingCache || !isCaching || global.isLoggingOut || (!force && getIsHeavyAnimating())) {
+  if (isRemovingCache || !isCaching || global.auth.isLoggingOut || (!force && getIsHeavyAnimating())) {
     return;
   }
 
@@ -400,10 +405,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
     ...pick(global, [
       'appConfig',
       'config',
-      'authState',
-      'authPhoneNumber',
-      'authRememberMe',
-      'authNearestCountry',
+      'auth',
       'attachMenu',
       'currentUserId',
       'contactList',

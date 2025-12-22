@@ -102,6 +102,7 @@ $color-message-story-mention-to: #74bcff;
   --color-interactive-buffered: rgba(var(--color-text-secondary-rgb), 0.25); // Overlays underlying inactive element
   --color-interactive-element-hover: rgba(var(--color-text-secondary-rgb), 0.08);
   --color-composer-button: #{$color-text-secondary}CC;
+  --color-toast-background: #202020CC;
 
   --color-voice-transcribe-button: #e8f3ff;
   --color-voice-transcribe-button-own: #cceebf;
@@ -215,6 +216,7 @@ $color-message-story-mention-to: #74bcff;
   --border-radius-button: 1rem;
   --border-radius-button-tiny: 0.875rem;
   --border-radius-modal: 2rem;
+  --border-radius-toast: 1rem;
   --border-radius-default: 0.75rem;
   --border-radius-default-small: 0.625rem;
   --border-radius-default-tiny: 0.375rem;

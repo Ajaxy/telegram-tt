@@ -85,7 +85,6 @@ import ForwardRecipientPicker from './ForwardRecipientPicker.async';
 import GameModal from './GameModal';
 import HistoryCalendar from './HistoryCalendar.async';
 import NewContactModal from './NewContactModal.async';
-import Notifications from './Notifications.async';
 import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
 import GiveawayModal from './premium/GiveawayModal.async';
 import PremiumMainModal from './premium/PremiumMainModal.async';
@@ -110,7 +109,6 @@ type StateProps = {
   isMediaViewerOpen: boolean;
   isStoryViewerOpen: boolean;
   isForwardModalOpen: boolean;
-  hasNotifications: boolean;
   hasDialogs: boolean;
   safeLinkModalUrl?: string;
   isHistoryCalendarOpen: boolean;
@@ -163,7 +161,6 @@ const Main = ({
   isMediaViewerOpen,
   isStoryViewerOpen,
   isForwardModalOpen,
-  hasNotifications,
   hasDialogs,
   activeGroupCallId,
   safeLinkModalUrl,
@@ -564,7 +561,6 @@ const Main = ({
       <StoryViewer isOpen={isStoryViewerOpen} />
       <ForwardRecipientPicker isOpen={isForwardModalOpen} />
       <DraftRecipientPicker requestedDraft={requestedDraft} />
-      <Notifications isOpen={hasNotifications} />
       <Dialogs isOpen={hasDialogs} />
       <AudioPlayer noUi />
       <ModalContainer />
@@ -631,7 +627,6 @@ export default memo(withGlobal<OwnProps>(
       openedGame,
       isLeftColumnShown,
       historyCalendarSelectedAt,
-      notifications,
       dialogs,
       newContact,
       ratingPhoneCall,
@@ -665,7 +660,6 @@ export default memo(withGlobal<OwnProps>(
       isStoryViewerOpen: selectIsStoryViewerOpen(global),
       isForwardModalOpen: selectIsForwardModalOpen(global),
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
-      hasNotifications: Boolean(notifications.length),
       hasDialogs: Boolean(dialogs.length),
       safeLinkModalUrl,
       isHistoryCalendarOpen: Boolean(historyCalendarSelectedAt),

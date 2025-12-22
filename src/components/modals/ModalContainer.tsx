@@ -1,5 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
-import { memo } from '../../lib/teact/teact';
+import { type FC, memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type { TabState } from '../../global/types';
@@ -39,6 +38,7 @@ import LocationAccessModal from './locationAccess/LocationAccessModal.async';
 import MapModal from './map/MapModal.async';
 import OneTimeMediaModal from './oneTimeMedia/OneTimeMediaModal.async';
 import PaidReactionModal from './paidReaction/PaidReactionModal.async';
+import PasskeyModal from './passkey/PasskeyModal.async';
 import PreparedMessageModal from './preparedMessage/PreparedMessageModal.async';
 import PriceConfirmModal from './priceConfirm/PriceConfirmModal.async';
 import ProfileRatingModal from './profileRating/ProfileRatingModal.async';
@@ -111,6 +111,7 @@ type ModalKey = keyof Pick<TabState,
   'profileRatingModal' |
   'quickPreview' |
   'storyStealthModal' |
+  'isPasskeyModalOpen' |
   'birthdaySetupModal'
 >;
 
@@ -177,6 +178,7 @@ const MODALS: ModalRegistry = {
   profileRatingModal: ProfileRatingModal,
   quickPreview: QuickPreviewModal,
   storyStealthModal: StealthModeModal,
+  isPasskeyModalOpen: PasskeyModal,
   birthdaySetupModal: BirthdaySetupModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];

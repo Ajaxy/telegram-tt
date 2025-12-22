@@ -19,7 +19,7 @@ export async function initGlobal(force: boolean = false, prevGlobal?: GlobalStat
   const initial = cloneDeep(INITIAL_GLOBAL_STATE);
   const cache = await loadCache(initial);
   let global = cache || initial;
-  if (IS_MOCKED_CLIENT) global.authState = 'authorizationStateReady';
+  if (IS_MOCKED_CLIENT) global.auth.state = 'authorizationStateReady';
 
   const { hasPasscode, isScreenLocked } = global.passcode;
   if (hasPasscode && !isScreenLocked) {
