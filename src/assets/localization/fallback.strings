@@ -174,7 +174,7 @@
 "LoginQRHelp1" = "Open Telegram on your phone";
 "LoginQRHelp2" = "Go to **Settings** > **Devices** > **Link Desktop Device**";
 "LoginQRHelp3" = "Point your phone at this screen to confirm login";
-"LoginQRCancel" = "Log in by phone Number";
+"LoginQRCancel" = "Log in by phone number";
 "YourName" = "Your Name";
 "LoginRegisterDesc" = "Enter your name and add a profile photo.";
 "LoginRegisterFirstNamePlaceholder" = "First Name";
@@ -2069,7 +2069,7 @@
 "UnlockButtonTitle" = "Unlock with Telegram Premium";
 "FrozenAccountModalTitle" = "Your Account is Frozen";
 "FrozenAccountViolationTitle" = "Violation of Terms";
-"FrozenAccountViolationSubtitle" = "Your account was frozen for breaking Telegram's Terms and Conditions";
+"FrozenAccountViolationSubtitle" = "Your account was frozen for breaking Telegram’s Terms of Service";
 "FrozenAccountReadOnlyTitle" = "Read-Only Mode";
 "FrozenAccountReadOnlySubtitle" = "You can access your account but can't send messages or take actions.";
 "FrozenAccountAppealTitle" = "Appeal Before Deactivation";
@@ -2302,7 +2302,7 @@
 "PublicPostsPremiumFeatureSubtitle" = "Global search is a Premium feature.";
 "PublicPostsSubscribeToPremium" = "Subscribe to Premium";
 "NotificationPaidExtraSearch" = "{stars} spent on extra search.";
-"PostsSearchTransaction" = "Posts Search";
+"PostsSearchTransaction" = "Public Post Search";
 "AllStoriesCategory" = "All stories";
 "TitleRating" = "Rating";
 "RatingReflectsActivity" = "This rating reflects **{name}'s** activity on Telegram. It is based on:";
