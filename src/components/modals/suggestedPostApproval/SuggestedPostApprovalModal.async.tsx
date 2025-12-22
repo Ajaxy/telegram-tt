@@ -1,12 +1,10 @@
-import type { FC } from '../../../lib/teact/teact';
-
 import type { OwnProps } from './SuggestedPostApprovalModal';
 
 import { Bundles } from '../../../util/moduleLoader';
 
 import useModuleLoader from '../../../hooks/useModuleLoader';
 
-const SuggestedPostApprovalModalAsync: FC<OwnProps> = (props) => {
+const SuggestedPostApprovalModalAsync = (props: OwnProps) => {
   const { modal } = props;
   const SuggestedPostApprovalModal = useModuleLoader(Bundles.Extra, 'SuggestedPostApprovalModal', !modal);
 

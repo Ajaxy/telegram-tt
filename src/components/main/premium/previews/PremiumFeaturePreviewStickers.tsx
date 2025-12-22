@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import {
   memo, useEffect, useRef, useState,
 } from '../../../../lib/teact/teact';
@@ -25,24 +24,26 @@ type StateProps = {
   stickers: GlobalState['stickers']['premium']['stickers'];
 };
 
-const EMOJI_SIZE_MULTIPLIER = 0.6;
-const EFFECT_SIZE_MULTIPLIER = 0.8;
-const MAX_EMOJIS = 15;
-const ENDED_DELAY = 150;
-
-const AnimatedCircleSticker: FC<{
+type StickerProps = {
   size: number;
   realIndex: number;
   sticker: ApiSticker;
   index: number;
   maxLength: number;
+  canPlay: boolean;
   onClick: (index: number) => void;
   onEnded: (index: number) => void;
-  canPlay: boolean;
-}> = ({
+};
+
+const EMOJI_SIZE_MULTIPLIER = 0.6;
+const EFFECT_SIZE_MULTIPLIER = 0.8;
+const MAX_EMOJIS = 15;
+const ENDED_DELAY = 150;
+
+const AnimatedCircleSticker = ({
   size, realIndex, canPlay,
   sticker, index, maxLength, onClick, onEnded,
-}) => {
+}: StickerProps) => {
   const mediaData = useMedia(`sticker${sticker.id}`);
   const mediaDataAround = useMedia(`sticker${sticker.id}?size=f`);
 
@@ -103,9 +104,9 @@ const AnimatedCircleSticker: FC<{
   );
 };
 
-const PremiumFeaturePreviewStickers: FC<OwnProps & StateProps> = ({
+const PremiumFeaturePreviewStickers = ({
   stickers, isActive,
-}) => {
+}: OwnProps & StateProps) => {
   const containerRef = useRef<HTMLDivElement>();
   const [offset, setOffset] = useState(0);
   const [size, setSize] = useState(0);

@@ -1,5 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
-
 import type { IconName } from '../../types/icons';
 
 import { IS_TEST } from '../../config';
@@ -17,9 +15,6 @@ export type MenuItemProps = {
   customIcon?: React.ReactNode;
   className?: string;
   children: React.ReactNode;
-  onClick?: (e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>, arg?: number) => void;
-  clickArg?: number;
-  onContextMenu?: (e: React.UIEvent) => void;
   href?: string;
   rel?: string;
   target?: string;
@@ -29,6 +24,9 @@ export type MenuItemProps = {
   ariaLabel?: string;
   withWrap?: boolean;
   withPreventDefaultOnMouseDown?: boolean;
+  clickArg?: number;
+  onClick?: (e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>, arg?: number) => void;
+  onContextMenu?: (e: React.UIEvent) => void;
 } & ({
   icon: 'A' | 'K';
   isCharIcon: true;
@@ -37,14 +35,13 @@ export type MenuItemProps = {
   isCharIcon?: false;
 });
 
-const MenuItem: FC<MenuItemProps> = (props) => {
+const MenuItem = (props: MenuItemProps) => {
   const {
     icon,
     isCharIcon,
     customIcon,
     className,
     children,
-    onClick,
     href,
     target,
     download,
@@ -53,9 +50,10 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     ariaLabel,
     withWrap,
     rel = 'noopener noreferrer',
-    onContextMenu,
-    clickArg,
     withPreventDefaultOnMouseDown,
+    clickArg,
+    onClick,
+    onContextMenu,
   } = props;
 
   const lang = useLang();

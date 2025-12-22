@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
@@ -18,7 +17,7 @@ import PollAnswerResults from './PollAnswerResults';
 
 import './PollResults.scss';
 
-type OwnProps = {
+export type OwnProps = {
   isActive: boolean;
   onClose: NoneToVoidFunction;
 };
@@ -29,13 +28,13 @@ type StateProps = {
   poll?: ApiPoll;
 };
 
-const PollResults: FC<OwnProps & StateProps> = ({
+const PollResults = ({
   isActive,
   chat,
   message,
   poll,
   onClose,
-}) => {
+}: OwnProps & StateProps) => {
   const lang = useOldLang();
 
   useHistoryBack({

@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { useState } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
@@ -14,7 +13,7 @@ type StateProps = {
 
 let lastTimeout: number | undefined;
 
-const Test: FC<StateProps> = ({ authState, globalRand }) => {
+const Test = ({ authState, globalRand }: StateProps) => {
   // eslint-disable-next-line no-console
   console.log('rendering `Test`', authState, globalRand);
 

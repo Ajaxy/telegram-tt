@@ -77,7 +77,7 @@ import StoryViewer from '../story/StoryViewer.async';
 import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
 import BotTrustModal from './BotTrustModal.async';
 import DeleteFolderDialog from './DeleteFolderDialog.async';
-import Dialogs from './Dialogs.async';
+import Dialogs from './Dialogs';
 import DownloadManager from './DownloadManager';
 import DraftRecipientPicker from './DraftRecipientPicker.async';
 import FoldersSidebar from './FoldersSidebar';
@@ -109,7 +109,6 @@ type StateProps = {
   isMediaViewerOpen: boolean;
   isStoryViewerOpen: boolean;
   isForwardModalOpen: boolean;
-  hasDialogs: boolean;
   safeLinkModalUrl?: string;
   isHistoryCalendarOpen: boolean;
   shouldSkipHistoryAnimations?: boolean;
@@ -161,7 +160,6 @@ const Main = ({
   isMediaViewerOpen,
   isStoryViewerOpen,
   isForwardModalOpen,
-  hasDialogs,
   activeGroupCallId,
   safeLinkModalUrl,
   isHistoryCalendarOpen,
@@ -561,7 +559,7 @@ const Main = ({
       <StoryViewer isOpen={isStoryViewerOpen} />
       <ForwardRecipientPicker isOpen={isForwardModalOpen} />
       <DraftRecipientPicker requestedDraft={requestedDraft} />
-      <Dialogs isOpen={hasDialogs} />
+      <Dialogs />
       <AudioPlayer noUi />
       <ModalContainer />
       <SafeLinkModal url={safeLinkModalUrl} />
@@ -627,7 +625,6 @@ export default memo(withGlobal<OwnProps>(
       openedGame,
       isLeftColumnShown,
       historyCalendarSelectedAt,
-      dialogs,
       newContact,
       ratingPhoneCall,
       premiumModal,
@@ -660,7 +657,6 @@ export default memo(withGlobal<OwnProps>(
       isStoryViewerOpen: selectIsStoryViewerOpen(global),
       isForwardModalOpen: selectIsForwardModalOpen(global),
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
-      hasDialogs: Boolean(dialogs.length),
       safeLinkModalUrl,
       isHistoryCalendarOpen: Boolean(historyCalendarSelectedAt),
       shouldSkipHistoryAnimations,

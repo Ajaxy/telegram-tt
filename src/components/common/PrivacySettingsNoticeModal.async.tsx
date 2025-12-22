@@ -1,12 +1,10 @@
-import type { FC } from '../../lib/teact/teact';
-
 import type { OwnProps } from './PrivacySettingsNoticeModal';
 
 import { Bundles } from '../../util/moduleLoader';
 
 import useModuleLoader from '../../hooks/useModuleLoader';
 
-const PrivacySettingsNoticeModalAsync: FC<OwnProps> = (props) => {
+const PrivacySettingsNoticeModalAsync = (props: OwnProps) => {
   const { isOpen } = props;
   const PrivacySettingsNoticeModal = useModuleLoader(Bundles.Extra, 'PrivacySettingsNoticeModal', !isOpen);
 

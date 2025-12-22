@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useEffect, useRef,
 } from '../../lib/teact/teact';
@@ -16,7 +15,7 @@ import StickerSetResult from './StickerSetResult';
 
 import './StickerSearch.scss';
 
-type OwnProps = {
+export type OwnProps = {
   onClose: NoneToVoidFunction;
   isActive: boolean;
 };
@@ -32,14 +31,14 @@ const INTERSECTION_THROTTLE = 200;
 
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
-const StickerSearch: FC<OwnProps & StateProps> = ({
+const StickerSearch = ({
   isActive,
   query,
   featuredIds,
   resultIds,
   isModalOpen,
   onClose,
-}) => {
+}: OwnProps & StateProps) => {
   const { loadFeaturedStickers } = getActions();
 
   const containerRef = useRef<HTMLDivElement>();

@@ -1,12 +1,10 @@
-import type { FC } from '../../../lib/teact/teact';
-
 import type { OwnProps } from './SymbolMenu';
 
 import { Bundles } from '../../../util/moduleLoader';
 
 import useModuleLoader from '../../../hooks/useModuleLoader';
 
-const SymbolMenuAsync: FC<OwnProps> = (props) => {
+const SymbolMenuAsync = (props: OwnProps) => {
   const { isOpen } = props;
   const SymbolMenu = useModuleLoader(Bundles.Extra, 'SymbolMenu', !isOpen);
 

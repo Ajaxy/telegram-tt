@@ -1,5 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../lib/teact/teact';
 
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
@@ -14,6 +12,17 @@ import Icon from '../common/icons/Icon';
 
 import './ProgressSpinner.scss';
 
+type OwnProps = {
+  progress?: number;
+  size?: 's' | 'm' | 'l' | 'xl';
+  square?: boolean;
+  transparent?: boolean;
+  noCross?: boolean;
+  rotationOffset?: number;
+  withColor?: boolean;
+  onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+};
+
 const SIZES = {
   s: 42, m: 48, l: 54, xl: 52,
 };
@@ -25,16 +34,7 @@ const MAX_PROGRESS = 1;
 const GROW_DURATION = 600; // 0.6 s
 const ROTATE_DURATION = 2000; // 2 s
 
-const ProgressSpinner: FC<{
-  progress?: number;
-  size?: 's' | 'm' | 'l' | 'xl';
-  square?: boolean;
-  transparent?: boolean;
-  noCross?: boolean;
-  rotationOffset?: number;
-  withColor?: boolean;
-  onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
-}> = ({
+const ProgressSpinner = ({
   progress = 0,
   size = 'l',
   square,
@@ -43,7 +43,7 @@ const ProgressSpinner: FC<{
   rotationOffset,
   withColor,
   onClick,
-}) => {
+}: OwnProps) => {
   const canvasRef = useRef<HTMLCanvasElement>();
   const width = SIZES[size];
   const progressRef = useStateRef(progress);

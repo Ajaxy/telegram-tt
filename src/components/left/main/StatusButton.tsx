@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -29,7 +28,7 @@ interface StateProps {
 const EFFECT_DURATION_MS = 1500;
 const EMOJI_STATUS_SIZE = 24;
 
-const StatusButton: FC<StateProps> = ({ emojiStatus, collectibleStatuses, isAccountFrozen }) => {
+const StatusButton = ({ emojiStatus, collectibleStatuses, isAccountFrozen }: StateProps) => {
   const { setEmojiStatus, loadCurrentUser, openFrozenAccountModal } = getActions();
 
   const buttonRef = useRef<HTMLButtonElement>();

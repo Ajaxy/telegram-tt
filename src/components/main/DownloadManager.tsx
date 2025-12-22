@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useEffect } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -23,9 +22,9 @@ const GLOBAL_UPDATE_DEBOUNCE = 1000;
 const processedHashes = new Set<string>();
 const downloadedHashes = new Set<string>();
 
-const DownloadManager: FC<StateProps> = ({
+const DownloadManager = ({
   activeDownloads,
-}) => {
+}: StateProps) => {
   const { cancelMediaHashDownloads, showNotification } = getActions();
 
   const runDebounced = useRunDebounced(GLOBAL_UPDATE_DEBOUNCE, true);

@@ -1,12 +1,10 @@
-import type { FC } from '../../../lib/teact/teact';
-
 import type { OwnProps } from './EmojiStatusAccessModal';
 
 import { Bundles } from '../../../util/moduleLoader';
 
 import useModuleLoader from '../../../hooks/useModuleLoader';
 
-const EmojiStatusAccessModalAsync: FC<OwnProps> = (props) => {
+const EmojiStatusAccessModalAsync = (props: OwnProps) => {
   const { modal } = props;
   const EmojiStatusAccessModal = useModuleLoader(Bundles.Extra, 'EmojiStatusAccessModal', !modal);
 

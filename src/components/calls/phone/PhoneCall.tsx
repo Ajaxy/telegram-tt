@@ -1,6 +1,5 @@
 import '../../../global/actions/calls';
 
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
@@ -45,12 +44,12 @@ type StateProps = {
   isCallPanelVisible?: boolean;
 };
 
-const PhoneCall: FC<StateProps> = ({
+const PhoneCall = ({
   user,
   isOutgoing,
   phoneCall,
   isCallPanelVisible,
-}) => {
+}: StateProps) => {
   const lang = useOldLang();
   const {
     hangUp, requestMasterAndAcceptCall, playGroupCallSound, toggleGroupCallPanel, connectToActivePhoneCall,

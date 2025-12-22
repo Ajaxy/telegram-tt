@@ -1,4 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
+import type { OwnProps } from './PollResults';
 
 import { Bundles } from '../../util/moduleLoader';
 
@@ -6,10 +6,11 @@ import useModuleLoader from '../../hooks/useModuleLoader';
 
 import Loading from '../ui/Loading';
 
-const PollResultsAsync: FC = () => {
-  const PollResults = useModuleLoader(Bundles.Extra, 'PollResults');
+const PollResultsAsync = (props: OwnProps) => {
+  const { isActive } = props;
+  const PollResults = useModuleLoader(Bundles.Extra, 'PollResults', !isActive);
 
-  return PollResults ? <PollResults /> : <Loading />;
+  return PollResults ? <PollResults {...props} /> : <Loading />;
 };
 
 export default PollResultsAsync;

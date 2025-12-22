@@ -1,8 +1,9 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
+
+import type { TabState } from '../../global/types';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -14,16 +15,19 @@ import Button from '../ui/Button';
 import Checkbox from '../ui/Checkbox';
 import Modal from '../ui/Modal';
 
-type OwnProps = {
-  isOpen: boolean;
+export type OwnProps = {
+  modal: TabState['isWebAppsCloseConfirmationModalOpen'];
 };
 
-const WebAppsCloseConfirmationModal: FC<OwnProps> = ({
-  isOpen,
-}) => {
+const WebAppsCloseConfirmationModal = ({
+  modal,
+}: OwnProps) => {
+  const { closeWebAppsCloseConfirmationModal, closeWebAppModal } = getActions();
+
   const oldLang = useOldLang();
   const lang = useLang();
-  const { closeWebAppsCloseConfirmationModal, closeWebAppModal } = getActions();
+
+  const isOpen = Boolean(modal);
 
   const [shouldSkipInFuture, setShouldSkipInFuture] = useState(false);
 

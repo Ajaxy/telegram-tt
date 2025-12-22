@@ -1,12 +1,10 @@
-import type { FC } from '../../lib/teact/teact';
-
 import type { OwnProps } from './BotTrustModal';
 
 import { Bundles } from '../../util/moduleLoader';
 
 import useModuleLoader from '../../hooks/useModuleLoader';
 
-const BotTrustModalAsync: FC<OwnProps> = (props) => {
+const BotTrustModalAsync = (props: OwnProps) => {
   const { bot } = props;
   const BotTrustModal = useModuleLoader(Bundles.Extra, 'BotTrustModal', !bot);
 

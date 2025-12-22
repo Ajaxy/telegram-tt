@@ -1,8 +1,6 @@
-import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import { useState } from '../../lib/teact/teact';
 
-const Test: FC = () => {
+const Test = () => {
   const [inputValue, setInputValue] = useState('Controlled');
   const [isCheckboxAllowed, setIsCheckboxAllowed] = useState(true);
   const [isChecked, setIsChecked] = useState(true);

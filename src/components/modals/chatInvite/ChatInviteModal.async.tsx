@@ -1,12 +1,10 @@
-import type { FC } from '../../../lib/teact/teact';
-
 import type { OwnProps } from './ChatInviteModal';
 
 import { Bundles } from '../../../util/moduleLoader';
 
 import useModuleLoader from '../../../hooks/useModuleLoader';
 
-const ChatInviteModalAsync: FC<OwnProps> = (props) => {
+const ChatInviteModalAsync = (props: OwnProps) => {
   const { modal } = props;
   const ChatInviteModal = useModuleLoader(Bundles.Extra, 'ChatInviteModal', !modal);
 

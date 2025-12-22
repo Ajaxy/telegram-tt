@@ -30,7 +30,7 @@ import Loading from '../ui/Loading';
 
 import './GifSearch.scss';
 
-type OwnProps = {
+export type OwnProps = {
   onClose: NoneToVoidFunction;
   isActive: boolean;
 };

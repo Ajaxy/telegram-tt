@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useEffect } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -18,11 +17,11 @@ type StateProps = {
   phoneCallUser?: ApiUser;
 };
 
-const ActiveCallHeader: FC<StateProps> = ({
+const ActiveCallHeader = ({
   groupCall,
   phoneCallUser,
   isCallPanelVisible,
-}) => {
+}: StateProps) => {
   const { toggleGroupCallPanel } = getActions();
 
   const lang = useOldLang();

@@ -1,12 +1,10 @@
-import type { FC } from '../../lib/teact/teact';
-
 import type { OwnProps } from './SeenByModal';
 
 import { Bundles } from '../../util/moduleLoader';
 
 import useModuleLoader from '../../hooks/useModuleLoader';
 
-const SeenByModalAsync: FC<OwnProps> = (props) => {
+const SeenByModalAsync = (props: OwnProps) => {
   const { isOpen } = props;
   const SeenByModal = useModuleLoader(Bundles.Extra, 'SeenByModal', !isOpen);
 

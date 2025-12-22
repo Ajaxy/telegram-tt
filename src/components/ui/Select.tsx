@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import type { ElementRef, FC } from '../../lib/teact/teact';
+import type { ElementRef } from '../../lib/teact/teact';
 import type React from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 
@@ -17,7 +17,7 @@ type OwnProps = {
   children: React.ReactNode;
 };
 
-const Select: FC<OwnProps> = (props) => {
+const Select = (props: OwnProps) => {
   const {
     id,
     value,
