@@ -24,6 +24,7 @@ import type {
   ApiPoll,
   ApiPrivacyKey,
   ApiPrivacySettings,
+  ApiPromoData,
   ApiQuickReply,
   ApiReaction,
   ApiReactionKey,
@@ -81,6 +82,7 @@ export type GlobalState = {
   isInited: boolean;
   config?: ApiConfig;
   appConfig: ApiAppConfig;
+  promoData?: ApiPromoData;
   peerColors?: ApiPeerColors;
   timezones?: {
     byId: Record<string, ApiTimezone>;

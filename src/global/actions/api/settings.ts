@@ -103,6 +103,17 @@ addActionHandler('updateProfile', async (global, actions, payload): Promise<void
   }
 });
 
+addActionHandler('updateBirthday', async (global, actions, payload): Promise<void> => {
+  const { birthday } = payload;
+  const { currentUserId } = global;
+  if (!currentUserId) return;
+
+  const result = await callApi('updateBirthday', birthday);
+  if (!result) return;
+
+  actions.loadFullUser({ userId: currentUserId });
+});
+
 addActionHandler('updateProfilePhoto', async (global, actions, payload): Promise<void> => {
   const { photo, isFallback } = payload;
   const { currentUserId } = global;
@@ -395,7 +406,12 @@ addActionHandler('loadLanguages', async (global): Promise<void> => {
   setGlobal(global);
 });
 
-addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
+addActionHandler('loadPrivacySettings', async (global, actions, payload): Promise<void> => {
+  const { skipIfCached } = payload;
+  if (skipIfCached && Object.keys(global.settings.privacy).length > 0) {
+    return;
+  }
+
   if (selectIsCurrentUserFrozen(global)) return;
 
   const result = await Promise.all([
@@ -642,7 +658,7 @@ addActionHandler('ensureTimeFormat', async (global, actions): Promise<void> => {
 addActionHandler('loadAppConfig', async (global, actions, payload): Promise<void> => {
   const hash = payload?.hash;
 
-  const appConfig = await callApi('fetchAppConfig', hash);
+  const appConfig = await callApi('fetchAppConfig', { hash });
   if (!appConfig) return;
 
   requestActionTimeout({
@@ -675,6 +691,33 @@ addActionHandler('loadConfig', async (global): Promise<void> => {
     config,
   };
   setGlobal(global);
+});
+
+addActionHandler('loadPromoData', async (global): Promise<void> => {
+  const promoData = await callApi('fetchPromoData');
+  if (!promoData) return;
+
+  global = getGlobal();
+  const timeout = promoData.expires - getServerTime();
+  if (timeout > 0) {
+    requestActionTimeout({
+      action: 'loadPromoData',
+      payload: undefined,
+    }, timeout * 1000);
+  }
+
+  global = {
+    ...global,
+    promoData,
+  };
+  setGlobal(global);
+});
+
+addActionHandler('dismissSuggestion', async (global, actions, payload): Promise<void> => {
+  const { suggestion } = payload;
+  await callApi('dismissSuggestion', suggestion);
+
+  actions.loadPromoData();
 });
 
 addActionHandler('loadPeerColors', async (global): Promise<void> => {

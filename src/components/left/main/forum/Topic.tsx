@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import { memo } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
@@ -55,6 +54,7 @@ type OwnProps = {
   isSelected: boolean;
   style: string;
   observeIntersection?: ObserveFn;
+  shiftDiff: number;
   orderDiff: number;
   animationType: ChatAnimationTypes;
   onReorderAnimationEnd?: NoneToVoidFunction;
@@ -76,7 +76,7 @@ type StateProps = {
   topics?: Record<number, ApiTopic>;
 };
 
-const Topic: FC<OwnProps & StateProps> = ({
+const Topic = ({
   topic,
   isSelected,
   chatId,
@@ -93,12 +93,13 @@ const Topic: FC<OwnProps & StateProps> = ({
   animationType,
   withInterfaceAnimations,
   orderDiff,
+  shiftDiff,
   typingStatus,
   draft,
   wasTopicOpened,
   topics,
   onReorderAnimationEnd,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     openThread,
     deleteTopic,
@@ -154,6 +155,7 @@ const Topic: FC<OwnProps & StateProps> = ({
     animationType,
     withInterfaceAnimations,
     orderDiff,
+    shiftDiff,
     onReorderAnimationEnd,
   });
 

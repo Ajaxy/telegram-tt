@@ -1,5 +1,6 @@
 import type {
   ApiAttachBot,
+  ApiBirthday,
   ApiBoost,
   ApiBoostsStatus,
   ApiChannelMonetizationStatistics,
@@ -782,6 +783,10 @@ export type TabState = {
   };
 
   isAgeVerificationModalOpen?: boolean;
+
+  birthdaySetupModal?: {
+    currentBirthday?: ApiBirthday;
+  };
 
   paidReactionModal?: {
     chatId: string;

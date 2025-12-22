@@ -65,7 +65,7 @@ const Dialogs: FC<StateProps> = ({ dialogs, currentMessageList }) => {
         {lang(
           'AreYouSureShareMyContactInfoBot',
           undefined,
-          { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'emoji'],
+          { withNodes: true, withMarkdown: true, renderTextFilters: ['br'],
           })}
         <div className="dialog-buttons mt-2">
           <Button

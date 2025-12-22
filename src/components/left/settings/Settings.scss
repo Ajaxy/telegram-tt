@@ -177,7 +177,9 @@
   }
 
   &-description {
-    margin: -0.5rem 1rem 1rem;
+    margin-block: 0;
+    margin-inline: 1rem;
+
     font-size: 0.875rem;
     line-height: 1.3125;
     color: var(--color-text-secondary);
@@ -284,6 +286,10 @@
         margin-left: 0;
       }
     }
+
+    & + .settings-item-description {
+      margin-top: 0.5rem;
+    }
   }
 
   .radio-group {
@@ -389,4 +395,9 @@
 
 .settings-button {
   font-weight: var(--font-weight-semibold);
+}
+
+.settings-birthday-date {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
 }

@@ -1,7 +1,7 @@
 @use "../../../styles/mixins";
 
 .root {
-  @include mixins.header-pane;
+  @include mixins.middle-header-pane;
 
   cursor: var(--custom-cursor, pointer);
 
@@ -11,7 +11,7 @@
 
   height: auto;
 
-  // Slight variation from mixins.header-pane
+  // Slight variation from mixins.middle-header-pane
   padding-right: max(1rem, env(safe-area-inset-right));
   padding-left: max(1rem, env(safe-area-inset-left));
 

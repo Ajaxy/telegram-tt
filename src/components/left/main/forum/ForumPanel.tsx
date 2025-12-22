@@ -135,7 +135,7 @@ const ForumPanel = ({
     return [MAIN_THREAD_ID, ...ids];
   }, [chat?.isBotForum, topicsInfo]);
 
-  const { orderDiffById, getAnimationType, onReorderAnimationEnd } = useOrderDiff(orderedIds, chat?.id);
+  const { orderDiffById, shiftDiff, getAnimationType, onReorderAnimationEnd } = useOrderDiff(orderedIds, 0, chat?.id);
 
   const [viewportIds, getMore] = useInfiniteScroll(() => {
     if (!chat) return;
@@ -223,6 +223,7 @@ const ForumPanel = ({
           observeIntersection={observe}
           animationType={getAnimationType(id)}
           orderDiff={orderDiffById[id]}
+          shiftDiff={shiftDiff}
           onReorderAnimationEnd={onReorderAnimationEnd}
         />
       );

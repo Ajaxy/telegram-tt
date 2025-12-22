@@ -32,7 +32,7 @@ import { notifyLangpackUpdate } from '../browser/multitab';
 import { createCallbackManager } from '../callbacks';
 import readFallbackStrings from '../data/readFallbackStrings';
 import { initialEstablishmentPromise, isCurrentTabMaster } from '../establishMultitabRole';
-import { omit, unique } from '../iteratees';
+import { omit } from '../iteratees';
 import { replaceInStringsWithTeact } from '../replaceWithTeact';
 import { fastRaf } from '../schedulers';
 
@@ -411,40 +411,46 @@ function processTranslationAdvanced(
 
   const variableEntries = variables ? Object.entries(variables) : [];
 
-  let tempResult: TeactNode = [string];
+  let tempResult: TeactNode = string;
   if (options?.specialReplacement) {
     const specialReplacements = Object.entries(options.specialReplacement);
     tempResult = specialReplacements.reduce((acc, [key, value]) => {
       return replaceInStringsWithTeact(acc, key, value);
-    }, tempResult);
+    }, tempResult as TeactNode);
   }
 
-  const withRenderText = options?.withMarkdown || options?.renderTextFilters;
+  const withRenderText = options?.withNodes;
 
   if (withRenderText) {
-    const filters = options?.withMarkdown
-      ? unique((options.renderTextFilters || []).concat(['simple_markdown', 'emoji']))
-      : options.renderTextFilters;
+    const textFiltersSet = new Set(options?.renderTextFilters);
+    textFiltersSet.add('emoji');
 
-    return tempResult.flatMap((curr: TeactNode) => {
+    if (options?.withMarkdown) {
+      textFiltersSet.add('simple_markdown');
+    }
+
+    const filters = Array.from(textFiltersSet);
+
+    const tempResultArray = Array.isArray(tempResult) ? tempResult : [tempResult];
+    return tempResultArray.flatMap((curr: TeactNode) => {
       if (typeof curr !== 'string') {
         return curr;
       }
 
       return renderText(curr, filters, {
         markdownPostProcessor: (part: string) => {
-          return variableEntries.reduce((result, [key, value]): TeactNode[] => {
+          return variableEntries.reduce((result, [key, value]): TeactNode => {
             if (value === undefined) return result;
 
             const preparedValue = Number.isFinite(value) ? formatters!.number.format(value as number) : value;
             return replaceInStringsWithTeact(result, `{${key}}`, renderText(preparedValue));
-          }, [part] as TeactNode[]);
+          }, part as TeactNode);
         },
       });
     });
   }
 
-  return variableEntries.reduce((result, [key, value]): TeactNode[] => {
+  return variableEntries.reduce((result, [key, value]): TeactNode => {
     if (value === undefined) return result;
 
     const preparedValue = Number.isFinite(value) ? formatters!.number.format(value as number) : value;

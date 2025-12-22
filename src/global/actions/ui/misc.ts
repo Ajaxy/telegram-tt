@@ -21,6 +21,7 @@ import * as langProvider from '../../../util/oldLangProvider';
 import updateIcon from '../../../util/updateIcon';
 import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
 import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
+import { addTabStateResetterAction } from '../../helpers/meta';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
@@ -893,6 +894,17 @@ addActionHandler('closeCollectibleInfoModal', (global, actions, payload): Action
     collectibleInfoModal: undefined,
   }, tabId);
 });
+
+addActionHandler('openBirthdaySetupModal', (global, actions, payload): ActionReturnType => {
+  const { currentBirthday, tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    birthdaySetupModal: {
+      currentBirthday,
+    },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeBirthdaySetupModal', 'birthdaySetupModal');
 
 addActionHandler('setShouldCloseRightColumn', (global, actions, payload): ActionReturnType => {
   const { value, tabId = getCurrentTabId() } = payload;

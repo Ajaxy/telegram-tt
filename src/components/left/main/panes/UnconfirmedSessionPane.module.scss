@@ -1,13 +1,10 @@
-/* stylelint-disable-next-line */
-@value minimized from "./Archive.module.scss";
+@use "../../../../styles/mixins";
 
 .root {
+  @include mixins.chat-list-pane;
+
   padding: 0.5rem;
   text-align: center;
-
-  & + :global(.minimized) {
-    margin-top: 0 !important;
-  }
 }
 
 .title {

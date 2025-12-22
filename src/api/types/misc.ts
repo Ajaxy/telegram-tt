@@ -3,7 +3,7 @@ import type { TeactNode } from '../../lib/teact/teact';
 import type { CallbackAction } from '../../global/types';
 import type { IconName } from '../../types/icons';
 import type { RegularLangFnParameters } from '../../util/localization';
-import type { ApiDocument, ApiPhoto, ApiReaction } from './messages';
+import type { ApiDocument, ApiFormattedText, ApiPhoto, ApiReaction } from './messages';
 import type { ApiPremiumSection } from './payments';
 import type { ApiBotVerification } from './peers';
 import type { ApiStarsSubscriptionPricing } from './stars';
@@ -288,6 +288,20 @@ export interface ApiConfig {
   maxMessageLength: number;
   editTimeLimit: number;
   maxForwardedCount: number;
+}
+
+export interface ApiPromoData {
+  expires: number;
+  pendingSuggestions: string[];
+  dismissedSuggestions: string[];
+  customPendingSuggestion?: ApiPendingSuggestion;
+}
+
+export interface ApiPendingSuggestion {
+  suggestion: string;
+  title: ApiFormattedText;
+  description: ApiFormattedText;
+  url: string;
 }
 
 export interface ApiTimezone {

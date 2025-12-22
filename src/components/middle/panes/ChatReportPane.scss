@@ -1,7 +1,7 @@
 @use "../../../styles/mixins";
 
 .ChatReportPane {
-  @include mixins.header-pane;
+  @include mixins.middle-header-pane;
 
   display: flex;
   align-items: center;

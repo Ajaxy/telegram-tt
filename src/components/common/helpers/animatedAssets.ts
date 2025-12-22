@@ -27,6 +27,7 @@ import Search from '../../../assets/tgs/Search.tgs';
 import SearchingDuck from '../../../assets/tgs/SearchingDuck.tgs';
 import Congratulations from '../../../assets/tgs/settings/Congratulations.tgs';
 import DiscussionGroups from '../../../assets/tgs/settings/DiscussionGroupsDucks.tgs';
+import DuckCake from '../../../assets/tgs/settings/DuckCake.tgs';
 import Experimental from '../../../assets/tgs/settings/Experimental.tgs';
 import FoldersAll from '../../../assets/tgs/settings/FoldersAll.tgs';
 import FoldersNew from '../../../assets/tgs/settings/FoldersNew.tgs';
@@ -81,4 +82,5 @@ export const LOCAL_TGS_URLS = {
   Diamond,
   Search,
   DuckNothingFound,
+  DuckCake,
 };

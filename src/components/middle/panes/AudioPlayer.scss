@@ -227,7 +227,7 @@
   }
 
   &.full-width-player {
-    @include mixins.header-pane;
+    @include mixins.middle-header-pane;
 
     .AudioPlayer-content {
       flex-grow: 1;

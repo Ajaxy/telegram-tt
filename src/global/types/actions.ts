@@ -1,6 +1,7 @@
 import type {
   ApiAttachBot,
   ApiAttachment,
+  ApiBirthday,
   ApiChat,
   ApiChatAdminRights,
   ApiChatBannedRights,
@@ -249,7 +250,9 @@ export interface ActionPayloads {
     notificationSoundVolume?: number;
   };
   loadLanguages: undefined;
-  loadPrivacySettings: undefined;
+  loadPrivacySettings: {
+    skipIfCached?: boolean;
+  };
   setPrivacyVisibility: {
     privacyKey: ApiPrivacyKey;
     visibility: PrivacyVisibility;
@@ -1831,6 +1834,13 @@ export interface ActionPayloads {
     bio?: string;
     username?: string;
   } & WithTabId;
+  updateBirthday: {
+    birthday?: ApiBirthday;
+  };
+  openBirthdaySetupModal: {
+    currentBirthday?: ApiBirthday;
+  } & WithTabId;
+  closeBirthdaySetupModal: WithTabId | undefined;
   updateBotProfile: {
     photo?: File;
     firstName?: string;
@@ -2452,6 +2462,10 @@ export interface ActionPayloads {
   loadAppConfig: {
     hash: number;
   } | undefined;
+  loadPromoData: undefined;
+  dismissSuggestion: {
+    suggestion: string;
+  } & WithTabId;
   loadPeerColors: undefined;
   loadTimezones: undefined;
   openLeftColumnContent: {

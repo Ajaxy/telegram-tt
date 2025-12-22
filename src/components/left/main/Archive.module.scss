@@ -1,9 +1,15 @@
 .root {
   --background-color: var(--color-background);
 
+  transition: transform var(--chat-transform-transition);
+
   :global(.ListItem-button) {
     min-height: auto;
   }
+}
+
+.noAnimation {
+  transition: none;
 }
 
 .minimized {
@@ -14,7 +20,7 @@
     display: none;
   }
 
-  &.no-margin-top {
+  &.noMarginTop {
     margin-top: 0 !important;
   }
 

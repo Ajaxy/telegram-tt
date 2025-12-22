@@ -1,5 +1,6 @@
-import { useMemo, useRef } from '../../../../lib/teact/teact';
+import { useEffect, useMemo, useRef } from '../../../../lib/teact/teact';
 
+import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { mapValues } from '../../../../util/iteratees';
 import { useChatAnimationType } from './useChatAnimationType';
 
@@ -10,7 +11,7 @@ import useSyncEffect from '../../../../hooks/useSyncEffect';
 
 const EMPTY_ORDER_DIFF = {};
 
-export default function useOrderDiff(orderedIds: (string | number)[] | undefined, key?: string) {
+export default function useOrderDiff(orderedIds: (string | number)[] | undefined, topOffset: number, key?: string) {
   const orderById = useMemo(() => {
     if (!orderedIds) {
       return undefined;
@@ -24,6 +25,14 @@ export default function useOrderDiff(orderedIds: (string | number)[] | undefined
 
   const prevOrderById = usePreviousDeprecated(orderById);
   const prevChatId = usePreviousDeprecated(key);
+  const prevTopOffset = usePreviousDeprecated(topOffset);
+  const isInitialRenderRef = useRef(true);
+
+  useEffect(() => {
+    requestNextMutation(() => {
+      isInitialRenderRef.current = false;
+    });
+  }, []);
 
   const orderDiffByIdRef = useRef<Record<string | number, number>>(EMPTY_ORDER_DIFF);
   const forceUpdate = useForceUpdate();
@@ -35,8 +44,10 @@ export default function useOrderDiff(orderedIds: (string | number)[] | undefined
     forceUpdate();
   });
 
+  const shiftDiff = prevTopOffset !== undefined ? topOffset - prevTopOffset : 0;
+
   useSyncEffect(() => {
-    if (!orderById || !prevOrderById || key !== prevChatId) {
+    if (!orderById || !prevOrderById || key !== prevChatId || prevOrderById === orderById) {
       orderDiffByIdRef.current = EMPTY_ORDER_DIFF;
       return;
     }
@@ -47,12 +58,17 @@ export default function useOrderDiff(orderedIds: (string | number)[] | undefined
 
     const hasChanges = Object.values(diff).some((value) => value !== 0);
     orderDiffByIdRef.current = hasChanges ? diff : EMPTY_ORDER_DIFF;
-  }, [key, orderById, prevChatId, prevOrderById]);
+  }, [key, orderById, prevChatId, prevOrderById, topOffset]);
 
-  const getAnimationType = useChatAnimationType(orderDiffByIdRef.current);
+  const getAnimationType = useChatAnimationType(
+    orderDiffByIdRef.current,
+    isInitialRenderRef.current,
+    Boolean(shiftDiff),
+  );
 
   return {
     orderDiffById: orderDiffByIdRef.current,
+    shiftDiff,
     getAnimationType,
     onReorderAnimationEnd,
   };

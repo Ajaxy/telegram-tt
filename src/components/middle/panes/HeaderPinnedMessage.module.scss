@@ -49,7 +49,7 @@
 }
 
 .fullWidth {
-  @include mixins.header-pane;
+  @include mixins.middle-header-pane;
 
   height: 3.5rem;
 

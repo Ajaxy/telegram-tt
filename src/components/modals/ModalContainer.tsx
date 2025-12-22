@@ -12,6 +12,7 @@ import WebAppsCloseConfirmationModal from '../main/WebAppsCloseConfirmationModal
 import AboutAdsModal from './aboutAds/AboutAdsModal.async';
 import AgeVerificationModal from './ageVerification/AgeVerificationModal.async';
 import AttachBotInstallModal from './attachBotInstall/AttachBotInstallModal.async';
+import BirthdaySetupModal from './birthday/BirthdaySetupModal.async';
 import BoostModal from './boost/BoostModal.async';
 import ChatInviteModal from './chatInvite/ChatInviteModal.async';
 import ChatlistModal from './chatlist/ChatlistModal.async';
@@ -109,7 +110,8 @@ type ModalKey = keyof Pick<TabState,
   'isAgeVerificationModalOpen' |
   'profileRatingModal' |
   'quickPreview' |
-  'storyStealthModal'
+  'storyStealthModal' |
+  'birthdaySetupModal'
 >;
 
 type StateProps = {
@@ -175,6 +177,7 @@ const MODALS: ModalRegistry = {
   profileRatingModal: ProfileRatingModal,
   quickPreview: QuickPreviewModal,
   storyStealthModal: StealthModeModal,
+  birthdaySetupModal: BirthdaySetupModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

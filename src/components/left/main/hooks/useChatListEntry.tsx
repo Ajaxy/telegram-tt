@@ -47,6 +47,7 @@ export default function useChatListEntry({
   observeIntersection,
   animationType,
   orderDiff,
+  shiftDiff,
   withInterfaceAnimations,
   isTopic,
   isSavedDialog,
@@ -71,6 +72,7 @@ export default function useChatListEntry({
 
   animationType: ChatAnimationTypes;
   orderDiff: number;
+  shiftDiff: number;
   withInterfaceAnimations?: boolean;
   onReorderAnimationEnd?: NoneToVoidFunction;
 }) {
@@ -194,8 +196,10 @@ export default function useChatListEntry({
 
         waitStartingTransitionsEnd(element).then(notifyAnimationEnd);
       });
-    } else if (animationType === ChatAnimationTypes.Move) {
-      element.style.transform = `translate3d(0, ${-orderDiff * CHAT_HEIGHT_PX}px, 0)`;
+    }
+
+    if (animationType === ChatAnimationTypes.Move) {
+      element.style.transform = `translate3d(0, ${-orderDiff * CHAT_HEIGHT_PX - shiftDiff}px, 0)`;
 
       requestMutation(() => {
         element.classList.add('animate-transform');
@@ -203,14 +207,27 @@ export default function useChatListEntry({
 
         waitStartingTransitionsEnd(element).then(notifyAnimationEnd);
       });
-    } else {
+    }
+
+    if (animationType === ChatAnimationTypes.Shift) {
+      element.style.transform = `translate3d(0, ${-shiftDiff}px, 0)`;
+
+      requestMutation(() => {
+        element.classList.add('animate-transform');
+        element.style.transform = '';
+
+        waitStartingTransitionsEnd(element).then(notifyAnimationEnd);
+      });
+    }
+
+    if (animationType === ChatAnimationTypes.None) {
       return;
     }
 
     return () => {
       isCancelled = true;
     };
-  }, [withInterfaceAnimations, orderDiff, animationType, onReorderAnimationEnd]);
+  }, [withInterfaceAnimations, orderDiff, shiftDiff, animationType, onReorderAnimationEnd]);
 
   return {
     renderSubtitle,

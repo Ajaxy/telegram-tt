@@ -1142,7 +1142,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
         textParts={lang(
           'AreYouSureShareMyContactInfoBot',
           undefined,
-          { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'emoji'],
+          { withNodes: true, withMarkdown: true, renderTextFilters: ['br'],
           })}
         confirmHandler={handleAcceptPhone}
         confirmLabel={lang('ContactShare')}

@@ -233,6 +233,10 @@ body:not(.is-ios) {
   touch-action: none;
 }
 
+.flex-grow {
+  flex-grow: 1;
+}
+
 .icon {
   @include iconsMixins.icon;
 }

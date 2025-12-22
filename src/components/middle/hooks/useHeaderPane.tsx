@@ -126,7 +126,17 @@ export default function useHeaderPane<RefType extends HTMLElement = HTMLDivEleme
   };
 }
 
-export function applyAnimationState(list: PaneState[], noTransition = false) {
+export function applyAnimationState({
+  list,
+  noTransition = false,
+  zIndexIncrease,
+  topMargin = 0,
+}: {
+  list: PaneState[];
+  noTransition?: boolean;
+  zIndexIncrease?: boolean;
+  topMargin?: number;
+}) {
   let cumulativeHeight = 0;
   for (let i = 0; i < list.length; i++) {
     const state = list[i];
@@ -139,7 +149,7 @@ export function applyAnimationState(list: PaneState[], noTransition = false) {
 
     const apply = () => {
       setExtraStyles(element, {
-        transform: `translateY(${state.isOpen ? shiftPx : `calc(${shiftPx} - 100%)`})`,
+        transform: `translateY(${state.isOpen ? shiftPx : `calc(${shiftPx} - ${topMargin}px - 100%)`})`,
         zIndex: String(-i),
         transition: noTransition ? 'none' : '',
       });
@@ -148,8 +158,8 @@ export function applyAnimationState(list: PaneState[], noTransition = false) {
     if (!element.dataset.isPanelOpen && state.isOpen && !noTransition) {
       // Start animation right above its final position
       setExtraStyles(element, {
-        transform: `translateY(calc(${shiftPx} - 100%))`,
-        zIndex: String(-i),
+        transform: `translateY(calc(${shiftPx} - ${topMargin}px - 100%))`,
+        zIndex: String(zIndexIncrease ? i : -i),
         transition: 'none',
       });
       element.dataset.isPanelOpen = 'true';

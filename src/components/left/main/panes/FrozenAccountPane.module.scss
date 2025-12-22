@@ -1,9 +1,13 @@
+@use "../../../../styles/mixins";
+
 .root {
+  @include mixins.chat-list-pane;
+
   cursor: pointer;
 
-  margin-inline: -0.5rem;
   padding-block: 0.75rem;
   padding-inline: 1rem;
+  border-radius: var(--border-radius-default);
 
   background-color: var(--color-background-secondary);
 

@@ -66,13 +66,11 @@ const UserBirthday = ({
     age,
   } = useMemo(() => {
     const today = new Date();
-    const date = new Date();
-    if (birthday.year) {
-      date.setFullYear(birthday.year);
-    }
-    date.setMonth(birthday.month - 1);
-    date.setDate(birthday.day);
-    date.setHours(0, 0, 0, 0);
+    const date = new Date(
+      birthday.year || 2024, // Use leap year as fallback
+      birthday.month - 1,
+      birthday.day,
+    );
 
     const formatted = formatDateToString(date, lang.code, true, 'long');
     const isBirthdayToday = date.getDate() === today.getDate() && date.getMonth() === today.getMonth();

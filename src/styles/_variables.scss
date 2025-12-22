@@ -301,6 +301,7 @@ $color-message-story-mention-to: #74bcff;
   --layer-transition-behind: 300ms cubic-bezier(0.33, 1, 0.68, 1);
   --slide-transition: 300ms cubic-bezier(0.25, 1, 0.5, 1);
   --select-transition: 200ms ease-out;
+  --chat-transform-transition: 0.2s ease-out;
 
   --safe-area-top: env(safe-area-inset-top);
   --safe-area-right: env(safe-area-inset-right);

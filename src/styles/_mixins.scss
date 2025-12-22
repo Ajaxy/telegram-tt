@@ -121,7 +121,7 @@
   }
 }
 
-@mixin header-pane {
+@mixin middle-header-pane {
   position: absolute;
   top: 0;
   transform: translateY(-100%);
@@ -152,6 +152,34 @@
 
     box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
   }
+
+  // Some panels might unmount without animation, so we provide same background above panel to make it less noticeable
+  &::after {
+    content: "";
+
+    position: absolute;
+    z-index: -1;
+    top: -100%;
+    right: 0;
+    left: 0;
+
+    height: inherit;
+
+    background-color: inherit;
+  }
+}
+
+@mixin chat-list-pane {
+  position: absolute;
+  top: 0;
+  transform: translateY(calc(-100% - 0.5rem)); // Include top margin to hide fully
+
+  width: 100%;
+  padding: 0.5625rem;
+
+  background-color: var(--color-background);
+
+  transition: transform var(--chat-transform-transition);
 
   // Some panels might unmount without animation, so we provide same background above panel to make it less noticeable
   &::after {

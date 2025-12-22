@@ -1,0 +1,56 @@
+@use "../../../../styles/mixins";
+
+.root {
+  @include mixins.chat-list-pane;
+
+  cursor: var(--custom-cursor, pointer);
+
+  display: grid;
+  grid-template-columns: 1fr min-content;
+  grid-template-rows: 1fr 1fr;
+
+  border-radius: var(--border-radius-default);
+
+  line-height: 1.25;
+
+  background-color: var(--color-background-secondary);
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.title {
+  --emoji-size: 1.125rem;
+  --custom-emoji-size: var(--emoji-size);
+
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+.subtitle {
+  --emoji-size: 1rem;
+  --custom-emoji-size: var(--emoji-size);
+
+  grid-column: 1 / 3;
+  grid-row: 2 / 3;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.closeIcon {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+  place-self: center;
+
+  padding: 0.125rem;
+  border-radius: 50%;
+
+  color: var(--color-text-secondary);
+
+  &:hover {
+    background-color: var(--color-interactive-element-hover);
+  }
+}

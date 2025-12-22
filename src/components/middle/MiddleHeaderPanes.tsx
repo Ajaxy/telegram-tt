@@ -113,7 +113,7 @@ const MiddleHeaderPanes = ({
     const middleColumn = document.getElementById('MiddleColumn');
     if (!middleColumn) return;
 
-    applyAnimationState(stateArray, isFirstRender);
+    applyAnimationState({ list: stateArray, noTransition: isFirstRender });
 
     setExtraStyles(middleColumn, {
       '--middle-header-panes-height': `${totalHeight}px`,

@@ -1,7 +1,7 @@
 @use "../../../styles/mixins";
 
 .root {
-  @include mixins.header-pane;
+  @include mixins.middle-header-pane;
 
   display: flex;
   flex-direction: column;

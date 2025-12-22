@@ -3,8 +3,7 @@ import { RPCError } from '../../../lib/gramjs/errors';
 
 import type { LANG_PACKS } from '../../../config';
 import type {
-  ApiAppConfig,
-  ApiConfig,
+  ApiBirthday,
   ApiDisallowedGiftsSettings,
   ApiInputPrivacyRules,
   ApiLanguage,
@@ -24,11 +23,9 @@ import {
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
 import { BLOCKED_LIST_LIMIT } from '../../../limits';
-import { buildAppConfig } from '../apiBuilders/appConfig';
 import { buildApiPhoto, buildPrivacyRules } from '../apiBuilders/common';
 import { buildApiDisallowedGiftsSettings } from '../apiBuilders/gifts';
 import {
-  buildApiConfig,
   buildApiCountryList,
   buildApiLanguage,
   buildApiSession,
@@ -100,6 +97,18 @@ export async function checkUsername(username: string) {
 
 export function updateUsername(username: string) {
   return invokeRequest(new GramJs.account.UpdateUsername({ username }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export function updateBirthday(birthday?: ApiBirthday) {
+  return invokeRequest(new GramJs.account.UpdateBirthday({
+    birthday: birthday ? new GramJs.Birthday({
+      day: birthday.day,
+      month: birthday.month,
+      year: birthday.year,
+    }) : undefined,
+  }), {
     shouldReturnTrue: true,
   });
 }
@@ -600,21 +609,6 @@ export function updateContentSettings(isEnabled: boolean) {
   return invokeRequest(new GramJs.account.SetContentSettings({
     sensitiveEnabled: isEnabled || undefined,
   }));
-}
-
-export async function fetchAppConfig(hash?: number): Promise<ApiAppConfig | undefined> {
-  const result = await invokeRequest(new GramJs.help.GetAppConfig({ hash: hash ?? DEFAULT_PRIMITIVES.INT }));
-  if (!result || result instanceof GramJs.help.AppConfigNotModified) return undefined;
-
-  const { config, hash: resultHash } = result;
-  return buildAppConfig(config, resultHash);
-}
-
-export async function fetchConfig(): Promise<ApiConfig | undefined> {
-  const result = await invokeRequest(new GramJs.help.GetConfig());
-  if (!result) return undefined;
-
-  return buildApiConfig(result);
 }
 
 export async function fetchPeerColors(hash?: number) {

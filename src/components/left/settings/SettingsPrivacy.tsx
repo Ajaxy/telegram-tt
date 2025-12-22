@@ -68,9 +68,9 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   canSetPasscode,
   needAgeVideoVerification,
   privacy,
-  onReset,
   isCurrentUserFrozen,
   accountDaysTtl,
+  onReset,
 }) => {
   const {
     openDeleteAccountModal,
@@ -89,7 +89,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (!isCurrentUserFrozen) {
       loadBlockedUsers();
-      loadPrivacySettings();
+      loadPrivacySettings({});
       loadWebAuthorizations();
     }
   }, [isCurrentUserFrozen]);

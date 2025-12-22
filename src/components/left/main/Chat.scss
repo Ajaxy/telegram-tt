@@ -37,7 +37,7 @@
 
   &.animate-transform {
     will-change: transform;
-    transition: transform 0.2s ease-out;
+    transition: transform var(--chat-transform-transition);
   }
 
   &:hover,

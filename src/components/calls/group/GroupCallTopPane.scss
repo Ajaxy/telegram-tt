@@ -1,7 +1,7 @@
 @use "../../../styles/mixins";
 
 .GroupCallTopPane {
-  @include mixins.header-pane;
+  @include mixins.middle-header-pane;
 
   cursor: var(--custom-cursor, pointer);
 

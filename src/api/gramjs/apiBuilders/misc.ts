@@ -7,7 +7,9 @@ import type {
   ApiCountry,
   ApiLanguage,
   ApiOldLangString,
+  ApiPendingSuggestion,
   ApiPrivacyKey,
+  ApiPromoData,
   ApiRestrictionReason,
   ApiSession,
   ApiTimezone,
@@ -22,6 +24,7 @@ import {
 } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
 import { addUserToLocalDb } from '../helpers/localDb';
+import { buildApiFormattedText } from './common';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildMessageTextContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
@@ -207,6 +210,30 @@ export function buildApiConfig(config: GramJs.Config): ApiConfig {
     maxMessageLength: messageLengthMax,
     editTimeLimit,
     maxForwardedCount: forwardedCountMax,
+  };
+}
+
+export function buildApiPromoData(promoData: GramJs.help.PromoData): ApiPromoData {
+  const {
+    expires, pendingSuggestions, dismissedSuggestions, customPendingSuggestion,
+  } = promoData;
+  return {
+    expires,
+    pendingSuggestions,
+    dismissedSuggestions,
+    customPendingSuggestion: customPendingSuggestion ? buildApiPendingSuggestion(customPendingSuggestion) : undefined,
+  };
+}
+
+export function buildApiPendingSuggestion(pendingSuggestion: GramJs.TypePendingSuggestion): ApiPendingSuggestion {
+  const {
+    suggestion, title, description, url,
+  } = pendingSuggestion;
+  return {
+    suggestion,
+    title: buildApiFormattedText(title),
+    description: buildApiFormattedText(description),
+    url,
   };
 }
 

@@ -12,10 +12,14 @@ export function replaceWithTeact(
 }
 
 export function replaceInStringsWithTeact(
-  input: TeactNode[], searchValue: string | RegExp, replaceValue: TeactNode,
-) {
+  input: TeactNode, searchValue: string | RegExp, replaceValue: TeactNode,
+): TeactNode {
+  if (typeof input === 'string') return replaceWithTeact(input, searchValue, replaceValue);
+  if (!input || !Array.isArray(input)) return input;
+
   return input.flatMap((curr: TeactNode) => {
     if (typeof curr === 'string') return replaceWithTeact(curr, searchValue, replaceValue);
+    if (Array.isArray(curr)) return replaceInStringsWithTeact(curr, searchValue, replaceValue);
     return curr;
-  }, []);
+  });
 }

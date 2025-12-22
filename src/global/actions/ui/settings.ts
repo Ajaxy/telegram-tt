@@ -163,6 +163,8 @@ addActionHandler('openLeftColumnContent', (global, actions, payload): ActionRetu
 addActionHandler('openSettingsScreen', (global, actions, payload): ActionReturnType => {
   const { screen, tabId = getCurrentTabId() } = payload;
   const tabState = selectTabState(global, tabId);
+
+  actions.loadPrivacySettings({ skipIfCached: true });
   // Force settings only if new screen is passed, do not on resets
   if (payload.screen !== undefined) actions.openLeftColumnContent({ contentKey: LeftColumnContent.Settings, tabId });
   return updateTabState(global, {

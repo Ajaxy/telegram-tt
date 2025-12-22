@@ -1230,6 +1230,7 @@ export interface LangPair {
   'MenuNightMode': undefined;
   'AriaMenuEnableNightMode': undefined;
   'AriaMenuDisableNightMode': undefined;
+  'AriaSettingsEditProfilePhoto': undefined;
   'MenuAnimationsSwitch': undefined;
   'MenuTelegramFeatures': undefined;
   'TelegramFeaturesUsername': undefined;
@@ -1787,6 +1788,19 @@ export interface LangPair {
   'StarGiftPriceDecreaseInfoLink': undefined;
   'StarGiftUpgradeCostModalTitle': undefined;
   'StarGiftUpgradeCostHint': undefined;
+  'UnconfirmedAuthDeniedTitle': undefined;
+  'UnconfirmedAuthTitle': undefined;
+  'UnconfirmedAuthConfirm': undefined;
+  'UnconfirmedAuthDeny': undefined;
+  'SuggestionBirthdaySetupTitle': undefined;
+  'SuggestionBirthdaySetupMessage': undefined;
+  'BirthdaySetupTitle': undefined;
+  'BirthdayInputDay': undefined;
+  'BirthdayInputMonth': undefined;
+  'BirthdayInputYear': undefined;
+  'BirthdayRemove': undefined;
+  'BirthdayPrivacySuggestionLink': undefined;
+  'SettingsBirthday': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -3083,6 +3097,24 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'StarGiftPriceDecreaseTimer': {
     'timer': V;
+  };
+  'UnconfirmedAuthDeniedMessage': {
+    'location': V;
+  };
+  'UnconfirmedAuthSingle': {
+    'location': V;
+  };
+  'UnconfirmedAuthLocationRegion': {
+    'deviceModel': V;
+    'region': V;
+    'country': V;
+  };
+  'UnconfirmedAuthLocationCountry': {
+    'deviceModel': V;
+    'country': V;
+  };
+  'BirthdayPrivacySuggestion': {
+    'link': V;
   };
 }
 

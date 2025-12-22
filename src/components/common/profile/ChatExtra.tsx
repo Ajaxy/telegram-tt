@@ -401,6 +401,7 @@ const ChatExtra = ({
           <Chat
             chatId={personalChannel.id}
             orderDiff={0}
+            shiftDiff={0}
             animationType={ChatAnimationTypes.None}
             isPreview
             previewMessageId={personalChannelMessageId}
