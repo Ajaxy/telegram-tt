@@ -6,13 +6,16 @@ import { requestMutation } from '../lib/fasterdom/fasterdom.ts';
 import { throttle } from '../util/schedulers.ts';
 
 const THROTTLE_DELAY = 100;
+const SCROLL_THRESHOLD = 5;
 
 const useScrollNotch = ({
   containerRef,
   selector,
+  isBottomNotch,
 }: {
   containerRef: ElementRef<HTMLDivElement>;
   selector: string;
+  isBottomNotch?: boolean;
 }, deps: unknown[]) => {
   useLayoutEffect(() => {
     const elements = containerRef.current?.querySelectorAll<HTMLElement>(selector);
@@ -21,14 +24,24 @@ const useScrollNotch = ({
     const handleScroll = throttle((event: Event) => {
       const target = event.target as HTMLElement;
       const isScrolled = target.scrollTop > 0;
+      const { scrollHeight, scrollTop, clientHeight } = target;
+      const isAtEnd = scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD;
 
       requestMutation(() => {
-        toggleExtraClass(target, 'scrolled', isScrolled);
+        if (isBottomNotch) {
+          toggleExtraClass(target, 'scrolled-to-end', isAtEnd);
+        } else {
+          toggleExtraClass(target, 'scrolled', isScrolled);
+        }
       });
     }, THROTTLE_DELAY);
 
     elements.forEach((el) => {
-      addExtraClass(el, 'with-notch');
+      if (isBottomNotch) {
+        addExtraClass(el, 'with-bottom-notch');
+      } else {
+        addExtraClass(el, 'with-notch');
+      }
       el.addEventListener('scroll', handleScroll, { passive: true });
     });
 
@@ -36,10 +49,13 @@ const useScrollNotch = ({
       elements.forEach((el) => {
         el.removeEventListener('scroll', handleScroll);
         removeExtraClass(el, 'with-notch');
+        removeExtraClass(el, 'with-bottom-notch');
+        removeExtraClass(el, 'scrolled');
+        removeExtraClass(el, 'scrolled-to-end');
       });
     };
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  }, [containerRef, selector, ...deps]);
+  }, [containerRef, selector, isBottomNotch, ...deps]);
 
   useEffect(() => {
     const elements = containerRef.current?.querySelectorAll<HTMLElement>(selector);
@@ -47,12 +63,19 @@ const useScrollNotch = ({
 
     elements.forEach((el) => {
       const isScrolled = el.scrollTop > 0;
+      const { scrollHeight, scrollTop, clientHeight } = el;
+      const isAtEnd = scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD;
+
       requestMutation(() => {
-        toggleExtraClass(el, 'scrolled', isScrolled);
+        if (isBottomNotch) {
+          toggleExtraClass(el, 'scrolled-to-end', isAtEnd);
+        } else {
+          toggleExtraClass(el, 'scrolled', isScrolled);
+        }
       });
     });
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  }, [containerRef, selector, ...deps]);
+  }, [containerRef, selector, isBottomNotch, ...deps]);
 };
 
 export default useScrollNotch;

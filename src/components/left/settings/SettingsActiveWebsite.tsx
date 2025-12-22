@@ -51,7 +51,14 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
   function renderHeader() {
     return (
       <div className="modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
-        <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={onClose} iconName="close" />
+        <Button
+          round
+          color="translucent"
+          size="tiny"
+          ariaLabel={lang('Close')}
+          onClick={onClose}
+          iconName="close"
+        />
         <div className="modal-title">{lang('WebSessionsTitle')}</div>
         <Button
           color="danger"

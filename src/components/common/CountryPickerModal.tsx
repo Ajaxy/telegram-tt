@@ -76,16 +76,10 @@ const CountryPickerModal: FC<OwnProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       onEnter={handleSubmit}
+      hasAbsoluteCloseButton
     >
       <div className={styles.container}>
         <div className={styles.pickerSelector}>
-          <Button
-            round
-            size="smaller"
-            color="translucent"
-            onClick={onClose}
-            iconName="close"
-          />
 
           <h4 className={styles.pickerTitle}>
             {lang('BoostingSelectCountry')}

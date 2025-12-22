@@ -293,7 +293,7 @@ const ToDoListModal = ({
         <Button
           round
           color="translucent"
-          size="smaller"
+          size="tiny"
           ariaLabel={lang('AriaToDoCancel')}
           onClick={onClear}
           iconName="close"
@@ -301,7 +301,7 @@ const ToDoListModal = ({
         <div className="modal-title">{lang(modalTitle)}</div>
         <Button
           color="primary"
-          size="smaller"
+          size="tiny"
           className="modal-action-button"
           onClick={handleCreate}
         >

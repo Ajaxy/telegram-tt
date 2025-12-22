@@ -2108,6 +2108,7 @@
 "StarGiftPurchaseTransaction" = "Gift Sale";
 "GiftBuyConfirmDescription" = "Do you want to buy **{gift}** for **{stars}**?";
 "GiftBuyForPeerConfirmDescription" = "Do you want to buy **{gift}** for **{stars}** and gift it to **{peer}**?";
+"GiftBuyEqualsTo" = "Equals to {stars}";
 "ComposerTitleForwardFrom" = "From: **{users}**";
 "ContextMenuItemMention" = "Mention";
 "GiftRibbonResale" = "resale";

@@ -251,7 +251,7 @@ const PollModal = ({
         <Button
           round
           color="translucent"
-          size="smaller"
+          size="tiny"
           ariaLabel="Cancel poll creation"
           onClick={onClear}
           iconName="close"

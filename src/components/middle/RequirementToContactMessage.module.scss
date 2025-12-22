@@ -17,12 +17,12 @@
     color: var(--color-white);
     text-transform: none;
 
-    background: var(--pattern-color);
+    background: var(--action-message-bg);
 
     transition: filter 150ms ease-in-out;
 
     &:not(.disabled):not(:disabled):hover {
-      background-color: var(--pattern-color);
+      background-color: var(--action-message-bg);
       filter: brightness(1.05);
     }
   }
@@ -37,7 +37,7 @@
   padding: 1.0625rem 0;
   border-radius: 1.5rem;
 
-  background: var(--pattern-color);
+  background: var(--action-message-bg);
 
   &[dir="rtl"] {
     text-align: right;

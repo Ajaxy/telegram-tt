@@ -1820,7 +1820,6 @@ const Message = ({
                   className="message-action-button"
                   color="translucent-white"
                   round
-                  size="tiny"
                   ariaLabel={oldLang('lng_context_forward_msg')}
                   onClick={isLastInDocumentGroup ? handleGroupForward : handleForward}
                   iconName="share-filled"
@@ -1831,7 +1830,6 @@ const Message = ({
                   className="message-action-button"
                   color="translucent-white"
                   round
-                  size="tiny"
                   ariaLabel={lang('FocusMessage')}
                   onClick={isPinnedList ? handleFocus : handleFocusForwarded}
                   iconName="arrow-right"

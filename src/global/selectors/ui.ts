@@ -80,6 +80,11 @@ export function selectThemeValues<T extends GlobalState>(global: T, themeKey: Th
   return global.settings.themes[themeKey];
 }
 
+export function selectActionMessageBg<T extends GlobalState>(global: T) {
+  const theme = selectTheme(global);
+  return global.settings.themes[theme]?.patternColor;
+}
+
 export function selectIsForumPanelOpen<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>

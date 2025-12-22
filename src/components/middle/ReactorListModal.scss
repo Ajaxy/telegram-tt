@@ -5,15 +5,6 @@
   --hover-color-reaction: var(--color-message-reaction-hover);
   --accent-color: var(--color-primary);
 
-  .modal-header {
-    padding-top: 0.5rem;
-    padding-inline: 0.5rem;
-
-    .modal-title {
-      margin-inline: 1.3125rem;
-    }
-  }
-
   .modal-dialog {
     overflow: clip;
   }
@@ -46,12 +37,19 @@
     gap: 0.4375rem;
 
     width: auto;
-    min-height: 2.25rem;
-    padding-inline: 0.4375rem;
+    min-height: 2rem;
+    margin-top: 0;
+    padding-inline: 0.75rem;
   }
 
   .reaction-filter-emoji {
     margin-inline-end: 0.25rem;
+  }
+
+  .not-chosen-button {
+    &:hover {
+      background-color: var(--hover-color-reaction) !important;
+    }
   }
 
   .reactor-list {
@@ -59,7 +57,7 @@
     overflow-x: hidden;
 
     max-height: 100%;
-    padding-top: 0.5rem;
+    padding-top: 0.25rem;
     padding-inline: 0.5rem;
   }
 

@@ -8,7 +8,7 @@ import type { UiLoaderPage } from './common/UiLoader';
 
 import { DARK_THEME_BG_COLOR, INACTIVE_MARKER, LIGHT_THEME_BG_COLOR, PAGE_TITLE, PAGE_TITLE_TAURI } from '../config';
 import { forceMutation } from '../lib/fasterdom/stricterdom.ts';
-import { selectTabState, selectTheme } from '../global/selectors';
+import { selectActionMessageBg, selectTabState, selectTheme } from '../global/selectors';
 import { IS_TAURI } from '../util/browser/globalEnvironment';
 import { IS_INSTALL_PROMPT_SUPPORTED, PLATFORM_ENV } from '../util/browser/windowEnvironment';
 import buildClassName from '../util/buildClassName';
@@ -43,6 +43,7 @@ type StateProps = {
   hasWebAuthTokenFailed?: boolean;
   isTestServer?: boolean;
   theme: ThemeKey;
+  actionMessageBg?: string;
 };
 
 enum AppScreens {
@@ -64,6 +65,7 @@ const App: FC<StateProps> = ({
   hasWebAuthTokenFailed,
   isTestServer,
   theme,
+  actionMessageBg,
 }) => {
   const { isMobile } = useAppLayout();
   const isMobileOs = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
@@ -226,6 +228,12 @@ const App: FC<StateProps> = ({
     );
   }, [theme]);
 
+  useLayoutEffect(() => {
+    if (actionMessageBg) {
+      document.body.style.setProperty('--action-message-bg', actionMessageBg);
+    }
+  }, [actionMessageBg]);
+
   const getIsInBackgroundLocal = getIsInBackground;
   useSignalEffect(() => {
     // Mutation forced to avoid RAF throttling in background
@@ -263,6 +271,7 @@ export default withGlobal(
       hasWebAuthTokenFailed: global.hasWebAuthTokenFailed || global.hasWebAuthTokenPasswordRequired,
       theme: selectTheme(global),
       isTestServer: global.config?.isTestServer,
+      actionMessageBg: selectActionMessageBg(global),
     };
   },
 )(App);

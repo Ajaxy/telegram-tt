@@ -82,7 +82,7 @@ const ReportAdModal = ({
         <Button
           round
           color="translucent"
-          size="smaller"
+          size="tiny"
           ariaLabel={lang(renderingDepth ? 'Back' : 'Close')}
           onClick={handleBackClick}
           iconName={renderingDepth ? 'arrow-left' : 'close'}

@@ -1,3 +1,4 @@
+import type { ElementRef } from '../../../lib/teact/teact';
 import {
   memo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -13,10 +14,12 @@ import useLang from '../../../hooks/useLang';
 import styles from './StarGiftCategoryList.module.scss';
 
 type OwnProps = {
+  ref?: ElementRef<HTMLDivElement>;
   areUniqueStarGiftsDisallowed?: boolean;
   areLimitedStarGiftsDisallowed?: boolean;
   isSelf?: boolean;
   hasMyUnique?: boolean;
+  isPinned?: boolean;
   onCategoryChanged: (category: StarGiftCategory) => void;
 };
 
@@ -25,14 +28,19 @@ type StateProps = {
 };
 
 const StarGiftCategoryList = ({
+  ref: externalRef,
   idsByCategory,
   onCategoryChanged,
   areUniqueStarGiftsDisallowed,
   areLimitedStarGiftsDisallowed,
   isSelf,
   hasMyUnique,
+  isPinned,
 }: StateProps & OwnProps) => {
-  const ref = useRef<HTMLDivElement>();
+  let ref = useRef<HTMLDivElement>();
+  if (externalRef) {
+    ref = externalRef;
+  }
 
   const lang = useLang();
 
@@ -42,9 +50,7 @@ const StarGiftCategoryList = ({
 
   function handleItemClick(category: StarGiftCategory) {
     setSelectedCategory(category);
-    onCategoryChanged(
-      category,
-    );
+    onCategoryChanged(category);
   }
 
   function renderCategoryName(category: StarGiftCategory) {
@@ -71,7 +77,7 @@ const StarGiftCategoryList = ({
   useHorizontalScroll(ref, undefined, true);
 
   return (
-    <div ref={ref} className={buildClassName(styles.list, 'no-scrollbar')}>
+    <div ref={ref} className={buildClassName(styles.list, isPinned && styles.pinned, 'no-scrollbar')}>
       {renderCategoryItem('all')}
       {!areUniqueStarGiftsDisallowed && !isSelf && hasMyUnique && renderCategoryItem('myUnique')}
       {(!areUniqueStarGiftsDisallowed || !areLimitedStarGiftsDisallowed)

@@ -60,7 +60,6 @@
   color: var(--color-primary);
 }
 
-.hint,
 .tos {
   padding: 0.5rem 1rem;
   padding-top: 0;
@@ -72,8 +71,9 @@
 }
 
 .hint {
-  padding-block: 0.5rem;
-  padding-inline: 1.5rem;
+  margin-block: 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
 }
 
 .topUpButton,
@@ -140,7 +140,7 @@
 
   background: var(--color-background);
 
-  transition: 0.25s ease-out transform;
+  transition: 0.25s ease-out transform, 0.25s ease-out border-bottom-color;
 }
 
 .starHeaderText {
@@ -158,11 +158,15 @@
   transform: translateY(-100%);
 }
 
+.noSeparator {
+  border-bottom-color: transparent;
+}
+
 .closeButton {
   position: absolute;
   z-index: 3;
-  top: 0.5rem;
-  left: 0.5rem;
+  top: 0.875rem;
+  left: 0.875rem;
 }
 
 .addStarsButton {
@@ -294,6 +298,7 @@
   // Disable tabs rounded corners
   --border-radius-messages-small: 0;
 
+  z-index: 1;
   top: 3.5rem;
   padding-inline: 0;
 }

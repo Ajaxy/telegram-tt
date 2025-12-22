@@ -86,7 +86,7 @@ const ReportModal = ({
           <Button
             round
             color="translucent"
-            size="smaller"
+            size="tiny"
             ariaLabel={lang('Back')}
             onClick={handleBackClick}
             iconName="arrow-left"
@@ -95,7 +95,7 @@ const ReportModal = ({
           <Button
             round
             color="translucent"
-            size="smaller"
+            size="tiny"
             ariaLabel={lang('Close')}
             onClick={handleCloseClick}
             iconName="close"

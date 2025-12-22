@@ -11,6 +11,7 @@ import buildClassName from '../../../../util/buildClassName';
 import buildStyle from '../../../../util/buildStyle';
 import { REM } from '../../../common/helpers/mediaDimensions';
 
+import useAppLayout from '../../../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
@@ -34,6 +35,8 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
 };
 
+const AVATAR_SIZE = 7 * REM;
+
 const GiftStatusInfoModal = ({
   modal,
   currentUser,
@@ -44,6 +47,8 @@ const GiftStatusInfoModal = ({
     setEmojiStatus,
   } = getActions();
   const lang = useLang();
+  const { isMobile } = useAppLayout();
+
   const isOpen = Boolean(modal);
   const renderingModal = useCurrentOrPrev(modal);
 
@@ -74,10 +79,13 @@ const GiftStatusInfoModal = ({
         className={styles.radialPattern}
         backgroundColors={backdropColors}
         patternIcon={patternIcon.customEmoji}
-        yPosition={6.5 * REM}
+        yPosition={6.875 * REM}
+        maxRadius={0.31}
+        patternSize={isMobile ? 13 : 15}
+        ovalFactor={1}
       />
     );
-  }, [emojiStatus, isOpen, patternIcon]);
+  }, [emojiStatus, isOpen, isMobile, patternIcon]);
 
   const mockPeerWithStatus = useMemo(() => {
     return {
@@ -95,7 +103,7 @@ const GiftStatusInfoModal = ({
         >
 
           {radialPatternBackdrop}
-          <Avatar peer={mockPeerWithStatus} size="jumbo" className={styles.avatar} />
+          <Avatar peer={mockPeerWithStatus} size={AVATAR_SIZE} className={styles.avatar} />
           <FullNameTitle
             peer={mockPeerWithStatus}
             className={styles.userTitle}

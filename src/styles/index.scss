@@ -396,6 +396,15 @@ body:not(.is-ios) {
   }
 }
 
+.with-bottom-notch {
+  border-bottom: 1px solid var(--color-borders);
+  transition: border-color 0.2s ease-in-out;
+
+  &.scrolled-to-end {
+    border-bottom-color: transparent;
+  }
+}
+
 @keyframes grow-icon {
   0% {
     transform: scale(0.5);

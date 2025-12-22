@@ -84,7 +84,7 @@ const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
       <Button
         round
         color="translucent"
-        size="smaller"
+        size="tiny"
         ariaLabel={lang('Close')}
         onClick={onClose}
         className={styles.closeButton}

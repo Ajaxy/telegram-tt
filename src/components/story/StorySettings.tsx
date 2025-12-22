@@ -378,7 +378,7 @@ function StorySettings({
           className={buildClassName(styles.closeButton, 'close-button')}
           round
           color="translucent"
-          size="smaller"
+          size="tiny"
           onClick={handleCloseButtonClick}
           ariaLabel={isBackButton ? lang('Common.Back') : lang('Common.Close')}
         >

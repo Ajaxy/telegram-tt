@@ -2830,6 +2830,9 @@ export interface LangPairWithVariables<V = LangVariable> {
     'stars': V;
     'peer': V;
   };
+  'GiftBuyEqualsTo': {
+    'stars': V;
+  };
   'ComposerTitleForwardFrom': {
     'users': V;
   };

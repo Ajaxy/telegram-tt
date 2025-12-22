@@ -67,9 +67,9 @@ const TableAboutModal = ({
               isStatic
               multiline
               icon={icon}
-              iconClassName={styles.listItemIcon}
+              className={styles.listItem}
             >
-              <span className={buildClassName('title', styles.title)}>{title}</span>
+              <span className={buildClassName('title', styles.listItemTitle)}>{title}</span>
               <span className="subtitle">{subtitle}</span>
             </ListItem>
           );

@@ -83,7 +83,7 @@ function GiftItemPremium({
       <div className={styles.description}>
         {lang('PremiumGiftDescription')}
       </div>
-      <Button className={styles.buy} nonInteractive size="tiny" pill fluid>
+      <Button className={styles.buy} color="adaptive" nonInteractive size="tiny" pill fluid>
         {formatCurrencyAsString(amount, currency)}
       </Button>
       {optionByStars && (

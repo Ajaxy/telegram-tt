@@ -30,6 +30,7 @@ import {
   isUserRightBanned,
 } from '../../global/helpers';
 import {
+  selectActionMessageBg,
   selectBot,
   selectCanAnimateInterface, selectCanAnimateRightColumn,
   selectChat,
@@ -125,6 +126,7 @@ type StateProps = {
   customBackground?: string;
   backgroundColor?: string;
   patternColor?: string;
+  actionMessageBg?: string;
   isLeftColumnShown?: boolean;
   isRightColumnShown?: boolean;
   isBackgroundBlurred?: boolean;
@@ -191,6 +193,7 @@ function MiddleColumn({
   theme,
   backgroundColor,
   patternColor,
+  actionMessageBg,
   isLeftColumnShown,
   isRightColumnShown,
   isBackgroundBlurred,
@@ -486,7 +489,7 @@ function MiddleColumn({
   });
 
   // Prepare filter beforehand to avoid flickering
-  useFluidBackgroundFilter(patternColor);
+  useFluidBackgroundFilter(actionMessageBg);
 
   const isMessagingDisabled = Boolean(
     !isPinnedMessageList && !isSavedDialog && !renderingCanPost && !renderingCanRestartBot && !renderingCanStartBot
@@ -760,6 +763,7 @@ export default memo(withGlobal<OwnProps>(
       customBackground,
       backgroundColor,
       patternColor,
+      actionMessageBg: selectActionMessageBg(global),
       isLeftColumnShown,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isBackgroundBlurred,

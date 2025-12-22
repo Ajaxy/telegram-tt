@@ -1,7 +1,7 @@
-@use '../../../styles/mixins';
-
 .list {
+  position: sticky;
   z-index: 1;
+  top: 3.5rem;
 
   overflow-x: auto;
   overflow-y: hidden;
@@ -16,16 +16,21 @@
   margin-left: -0.5rem;
   padding-left: 0.5rem;
   padding-block: 0.25rem;
+  border-bottom: 0.0625rem solid transparent;
 
   font-size: 0.875rem;
 
   background-color: var(--color-background);
 
+  transition: border-color 0.2s ease;
+
   :global(html.theme-dark) & {
     background-color: #181818;
   }
 
-  @include mixins.gradient-border-horizontal(0.5rem, 0.5rem);
+  &.pinned {
+    border-bottom-color: var(--color-borders);
+  }
 }
 
 .item-selected,

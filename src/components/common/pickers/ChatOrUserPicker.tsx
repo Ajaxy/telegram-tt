@@ -249,7 +249,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
           <Button
             round
             color="translucent"
-            size="smaller"
+            size="tiny"
             ariaLabel={oldLang('Back')}
             onClick={handleHeaderBackClick}
             iconName="arrow-left"
@@ -301,7 +301,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
           <Button
             round
             color="translucent"
-            size="smaller"
+            size="tiny"
             ariaLabel={oldLang('Close')}
             onClick={onClose}
             iconName="close"

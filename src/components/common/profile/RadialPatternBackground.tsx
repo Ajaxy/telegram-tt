@@ -22,11 +22,13 @@ type OwnProps = {
   patternIcon?: ApiSticker;
   patternColor?: number;
   patternSize?: number;
+  maxRadius?: number;
   centerEmptiness?: number;
   ringsCount?: number;
   ovalFactor?: number;
   withLinearGradient?: boolean;
   className?: string;
+  canvasClassName?: string;
   clearBottomSector?: boolean;
   yPosition?: number;
   withAdaptiveHeight?: boolean;
@@ -35,7 +37,7 @@ type OwnProps = {
 const BASE_RING_ITEM_COUNT = 8;
 const RING_INCREMENT = 0.5;
 const DEFAULT_CENTER_EMPTINESS = 0.1;
-const MAX_RADIUS = 0.42;
+const DEFAULT_MAX_RADIUS = 0.42;
 const MIN_SIZE = 4 * REM;
 const DARK_LUMA_THRESHOLD = 255 * 0.2;
 
@@ -50,9 +52,11 @@ const RadialPatternBackground = ({
   centerEmptiness = DEFAULT_CENTER_EMPTINESS,
   ringsCount = DEFAULT_RINGS_COUNT,
   ovalFactor = DEFAULT_OVAL_FACTOR,
+  maxRadius = DEFAULT_MAX_RADIUS,
   withLinearGradient,
   clearBottomSector,
   className,
+  canvasClassName,
   yPosition,
   withAdaptiveHeight,
 }: OwnProps) => {
@@ -78,7 +82,7 @@ const RadialPatternBackground = ({
     for (let ring = 1; ring <= ringsCount; ring++) {
       const ringItemCount = Math.floor(BASE_RING_ITEM_COUNT * (1 + (ring - 1) * RING_INCREMENT));
       const ringProgress = ring / ringsCount;
-      const ringRadius = centerEmptiness + (MAX_RADIUS - centerEmptiness) * ringProgress;
+      const ringRadius = centerEmptiness + (maxRadius - centerEmptiness) * ringProgress;
       const angleShift = ring % 2 === 0 ? Math.PI / ringItemCount : 0;
 
       for (let i = 0; i < ringItemCount; i++) {
@@ -100,7 +104,7 @@ const RadialPatternBackground = ({
       }
     }
     return coordinates;
-  }, [centerEmptiness, clearBottomSector, ovalFactor, ringsCount]);
+  }, [centerEmptiness, clearBottomSector, maxRadius, ovalFactor, ringsCount]);
 
   useResizeObserver(containerRef, (entry) => {
     setContainerSize({
@@ -148,7 +152,7 @@ const RadialPatternBackground = ({
     ctx.globalCompositeOperation = 'source-in';
     ctx.fillRect(0, 0, width, height);
 
-    const radialGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, width / 2);
+    const radialGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, width * maxRadius);
     radialGradient.addColorStop(0, 'rgb(255 255 255 / 0.4)');
     radialGradient.addColorStop(1, 'rgb(255 255 255 / 0.9)');
 
@@ -200,7 +204,7 @@ const RadialPatternBackground = ({
     >
       <canvas
         ref={canvasRef}
-        className={buildClassName(styles.canvas, emojiImage && styles.showing)}
+        className={buildClassName(styles.canvas, emojiImage && styles.showing, canvasClassName)}
         aria-hidden="true"
       />
     </div>

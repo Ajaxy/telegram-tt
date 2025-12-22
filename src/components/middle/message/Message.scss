@@ -719,7 +719,7 @@
     border-radius: 1.125rem;
 
     opacity: 0;
-    background-color: var(--pattern-color);
+    background-color: var(--action-message-bg);
 
     transition: opacity 150ms;
 
@@ -729,6 +729,8 @@
   }
 
   .message-action-button {
+    width: 2.25rem;
+    height: 2.25rem;
     color: white;
   }
 

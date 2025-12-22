@@ -98,10 +98,10 @@
     height: 1.3125rem;
     border-radius: 0.5rem;
 
-    background: var(--pattern-color);
+    background: var(--action-message-bg);
     &:hover {
       opacity: 0.8;
-      background: var(--pattern-color) !important;
+      background: var(--action-message-bg) !important;
     }
   }
 

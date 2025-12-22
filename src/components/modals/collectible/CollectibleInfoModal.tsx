@@ -101,16 +101,8 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
       isSlim
       contentClassName={styles.content}
       onClose={closeCollectibleInfoModal}
+      hasAbsoluteCloseButton
     >
-      <Button
-        round
-        color="translucent"
-        size="smaller"
-        className={styles.closeButton}
-        ariaLabel={lang('Close')}
-        onClick={handleClose}
-        iconName="close"
-      />
       <div className={styles.icon}>
         <AnimatedIconWithPreview
           tgsUrl={isUsername ? LOCAL_TGS_URLS.Mention : LOCAL_TGS_URLS.Fragment}

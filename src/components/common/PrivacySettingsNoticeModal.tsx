@@ -87,7 +87,7 @@ const PrivacySettingsNoticeModal = ({ isOpen, isReadDate, user }: OwnProps & Sta
           className={styles.closeButton}
           color="translucent"
           round
-          size="smaller"
+          size="tiny"
           onClick={handleClose}
           ariaLabel="Close"
           iconName="close"

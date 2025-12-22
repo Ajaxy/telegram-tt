@@ -7,6 +7,7 @@ import {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiAvailableReaction, ApiMessage, ApiReaction } from '../../api/types';
+import type { AnimationLevel } from '../../types';
 import { LoadMoreDirection } from '../../types';
 
 import { getReactionKey, isSameReaction } from '../../global/helpers';
@@ -14,9 +15,11 @@ import {
   selectChatMessage,
   selectTabState,
 } from '../../global/selectors';
+import { selectSharedSettings } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
 import { formatDateAtTime } from '../../util/dates/dateFormat';
 import { unique } from '../../util/iteratees';
+import { resolveTransitionName } from '../../util/resolveTransitionName';
 import { formatIntegerCompact } from '../../util/textFormat';
 import { REM } from '../common/helpers/mediaDimensions';
 
@@ -52,6 +55,7 @@ export type StateProps = Pick<ApiMessage, 'reactors' | 'reactions' | 'seenByDate
   chatId?: string;
   messageId?: number;
   availableReactions?: ApiAvailableReaction[];
+  animationLevel: AnimationLevel;
 };
 
 const DEFAULT_REACTION_SIZE = 1.5 * REM;
@@ -64,6 +68,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   messageId,
   seenByDates,
   availableReactions,
+  animationLevel,
 }) => {
   const {
     loadReactors,
@@ -169,6 +174,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
       className="ReactorListModal narrow"
       title={oldLang('Reactions')}
       onCloseAnimationEnd={handleCloseAnimationEnd}
+      isCondensedHeader
       hasCloseButton
     >
       {canShowFilters && (
@@ -182,6 +188,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             size="tiny"
             ripple
             iconName="heart"
+            className={chosenTab ? 'not-chosen-button' : undefined}
             pill
             fluid
             onClick={() => setChosenTab(undefined)}
@@ -191,10 +198,12 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
           {allReactions.map((reaction) => {
             const count = reactions?.results
               .find((reactionsCount) => isSameReaction(reactionsCount.reaction, reaction))?.count;
+            const isChosen = isSameReaction(chosenTab, reaction);
             return (
               <Button
                 key={getReactionKey(reaction)}
-                color={isSameReaction(chosenTab, reaction) ? 'primary' : 'adaptive'}
+                className={!isChosen ? 'not-chosen-button' : undefined}
+                color={isChosen ? 'primary' : 'adaptive'}
                 size="tiny"
                 pill
                 fluid
@@ -219,7 +228,10 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
         dir={lang.isRtl ? 'rtl' : undefined}
         className="reactor-list-wrapper"
       >
-        <Transition activeKey={contentActiveKey} name="slide">
+        <Transition
+          activeKey={contentActiveKey}
+          name={resolveTransitionName('slide', animationLevel, undefined, lang.isRtl)}
+        >
           {viewportIds?.length ? (
             <InfiniteScroll
               className="reactor-list custom-scroll"
@@ -305,6 +317,7 @@ export default memo(withGlobal<OwnProps>(
       reactors: message?.reactors,
       seenByDates: message?.seenByDates,
       availableReactions: global.reactions.availableReactions,
+      animationLevel: selectSharedSettings(global).animationLevel,
     };
   },
 )(ReactorListModal));

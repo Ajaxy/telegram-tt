@@ -12,15 +12,22 @@
   padding-bottom: 1rem;
 
   &.withManageButtons {
-    --_height: 18.5rem;
+    --_height: 19.25rem;
 
     .sticker {
-      margin-top: 2.5rem;
+      margin-top: 2.625rem;
+    }
+
+    :global {
+      canvas {
+        transform-origin: center 32%;
+      }
     }
   }
 
   :global {
     canvas {
+      transform-origin: center 45%;
       transition: 250ms transform;
     }
   }
@@ -48,7 +55,7 @@
 .radialPattern {
   position: absolute;
   z-index: -1;
-  inset: 0;
+  inset: -5%;
 }
 
 .amount {
@@ -65,7 +72,7 @@
 }
 
 .sticker {
-  margin-top: 2rem;
+  margin-top: 2.875rem;
 }
 
 .transition {
@@ -83,14 +90,16 @@
 
 .title {
   margin-top: auto;
-  font-size: 1.25rem;
+
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.75rem;
   color: white;
 }
 
 .subtitle {
-  max-width: 85%;
-
-  font-size: 0.875rem;
+  font-size: 1rem;
+  line-height: 1.375rem;
   text-align: center;
   text-wrap: balance;
 

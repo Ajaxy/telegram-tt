@@ -108,7 +108,7 @@ const GiftInfoModal = ({
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
   const [shouldPayInTon, setShouldPayInTon] = useState<boolean>(false);
 
-  const splitButtonRef = useRef<HTMLDivElement>();
+  const moreButtonRef = useRef<HTMLButtonElement>();
   const menuRef = useRef<HTMLDivElement>();
   const uniqueGiftHeaderRef = useRef<HTMLDivElement>();
   const {
@@ -117,7 +117,7 @@ const GiftInfoModal = ({
     handleContextMenu,
     handleContextMenuClose,
     handleContextMenuHide,
-  } = useContextMenuHandlers(splitButtonRef);
+  } = useContextMenuHandlers(moreButtonRef);
 
   const handleSymbolClick = useLastCallback(() => {
     if (!gift || !giftAttributes?.pattern) return;
@@ -245,6 +245,9 @@ const GiftInfoModal = ({
 
   const resellPrice = getResalePrice();
   const confirmPrice = getResalePrice(shouldPayInTon);
+  const resellPriceInStars = resellPrice?.currency === TON_CURRENCY_CODE && isGiftUnique
+    ? gift.resellPrice?.find((amount) => amount.currency === STARS_CURRENCY_CODE)
+    : undefined;
   const canBuyGift = !isSelfUnique && gift?.type === 'starGiftUnique'
     && gift.ownerId !== currentUserId && Boolean(resellPrice);
 
@@ -330,37 +333,24 @@ const GiftInfoModal = ({
     return gift && getGiftAttributes(gift);
   }, [gift]);
 
-  const SettingsMenuButton = useMemo(() => {
-    return (
-      <div
-        className={buildClassName(
-          styles.headerButton,
-          styles.left,
-        )}
-        tabIndex={0}
-        role="button"
-        aria-haspopup="menu"
-        aria-label={lang('AriaMoreButton')}
-        onContextMenu={handleContextMenu}
-        onClick={handleContextMenu}
-      >
-        <Icon
-          name="more"
-          className={styles.icon}
-        />
-      </div>
-    );
-  }, [lang, handleContextMenu]);
-
   const renderFooterButton = useLastCallback(() => {
     if (canBuyGift) {
       return (
-        <Button noForcedUpperCase onClick={handleBuyGift}>
-          {lang('ButtonBuyGift', {
-            stars: resellPrice?.currency === TON_CURRENCY_CODE
-              ? formatTonAsIcon(lang, resellPrice.amount, { shouldConvertFromNanos: true })
-              : formatStarsAsIcon(lang, resellPrice?.amount, { asFont: true }),
-          }, { withNodes: true })}
+        <Button className={styles.buyButton} onClick={handleBuyGift}>
+          <div>
+            {lang('ButtonBuyGift', {
+              stars: resellPrice?.currency === TON_CURRENCY_CODE
+                ? formatTonAsIcon(lang, resellPrice.amount, { shouldConvertFromNanos: true })
+                : formatStarsAsIcon(lang, resellPrice?.amount, { asFont: true }),
+            }, { withNodes: true })}
+          </div>
+          {resellPrice?.currency === TON_CURRENCY_CODE && Boolean(resellPriceInStars) && (
+            <div className={styles.footerHint}>
+              {lang('GiftBuyEqualsTo', {
+                stars: formatStarsAsIcon(lang, resellPriceInStars.amount, { asFont: true }),
+              }, { withNodes: true })}
+            </div>
+          )}
         </Button>
       );
     }
@@ -536,6 +526,30 @@ const GiftInfoModal = ({
       <div
         className={styles.modalHeader}
       >
+
+        <Button
+          className={styles.closeButton}
+          round
+          color="translucent-white"
+          size="tiny"
+          iconName="close"
+          ariaLabel={lang('Close')}
+          onClick={handleClose}
+        />
+
+        <Button
+          ref={moreButtonRef}
+          className={styles.moreMenuButton}
+          round
+          color="translucent-white"
+          size="tiny"
+          iconName="more"
+          aria-haspopup="menu"
+          aria-label={lang('AriaMoreButton')}
+          onContextMenu={handleContextMenu}
+          onClick={handleContextMenu}
+        />
+
         {Boolean(resellPrice?.amount) && (
           <div className={styles.giftResalePriceContainer}>
             {resellPrice.currency === TON_CURRENCY_CODE
@@ -549,28 +563,6 @@ const GiftInfoModal = ({
               })}
           </div>
         )}
-        <div className={styles.headerSplitButton} ref={splitButtonRef}>
-          {SettingsMenuButton}
-          <div
-            className={buildClassName(
-              styles.headerButton,
-              styles.right,
-            )}
-            tabIndex={0}
-            role="button"
-            aria-haspopup="menu"
-            aria-label={lang('Close')}
-            onClick={handleClose}
-          >
-            <Icon
-              name="close"
-              className={buildClassName(
-                styles.icon,
-                styles.moreIcon,
-              )}
-            />
-          </div>
-        </div>
       </div>
     );
 
@@ -883,13 +875,14 @@ const GiftInfoModal = ({
     typeGift, savedGift, renderingTargetPeer, giftSticker, lang,
     canManage, hasConvertOption, isSender, oldLang, tonExplorerUrl,
     gift, giftAttributes, renderFooterButton, isTargetChat,
-    SettingsMenuButton, isGiftUnique, saleDateInfo,
+    isGiftUnique, saleDateInfo,
     canBuyGift, giftOwnerTitle, resellPrice, giftSubtitle,
     releasedByPeer, handleSymbolClick, handleBackdropClick, handleModelClick,
+    handleContextMenu,
   ]);
 
   const getRootElement = useLastCallback(() => uniqueGiftHeaderRef.current);
-  const getTriggerElement = useLastCallback(() => splitButtonRef.current);
+  const getTriggerElement = useLastCallback(() => moreButtonRef.current);
   const getMenuElement = useLastCallback(() => menuRef.current);
   const getLayout = useLastCallback(() => ({ withPortal: true }));
 

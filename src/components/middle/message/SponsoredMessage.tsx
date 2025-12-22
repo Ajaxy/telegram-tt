@@ -298,7 +298,6 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
             className="message-action-button"
             color="translucent-white"
             round
-            size="tiny"
             iconName="close"
             iconClassName="sponsored-action-icon"
             ariaLabel={lang('Close')}
@@ -309,7 +308,6 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
               className="message-action-button"
               color="translucent-white"
               round
-              size="tiny"
               iconName="more"
               iconClassName="sponsored-action-icon"
               ariaLabel={lang('More')}

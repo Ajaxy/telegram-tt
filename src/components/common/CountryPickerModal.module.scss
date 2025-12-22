@@ -9,8 +9,9 @@
 
 .pickerTitle {
   flex: 1;
-  margin: 0 0 0 1.25rem;
+  margin: 0 0 0 2.25rem;
   font-size: 1.25rem;
+  line-height: 1.25;
 
   @media (max-width: 600px) {
     margin-left: 0.75rem;

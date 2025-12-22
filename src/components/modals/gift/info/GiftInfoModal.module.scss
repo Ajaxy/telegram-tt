@@ -63,31 +63,44 @@
   backdrop-filter: blur(0.5rem);
 }
 
-.headerButton,
+.moreMenuButton {
+  position: absolute;
+  z-index: 1;
+  top: 0.875rem;
+  right: 0.875rem;
+}
+
+.closeButton {
+  position: absolute;
+  z-index: 1;
+  top: 0.875rem;
+  left: 0.875rem;
+}
+
 .giftResalePriceContainer {
   pointer-events: auto;
+
+  position: absolute;
+  top: 0.875rem;
+  right: 3.25rem;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
   width: fit-content;
-  height: 1.75rem;
+  height: 1.875rem;
   padding: 0.25rem;
   padding-inline: 0.625rem;
   border-radius: 1rem;
 
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: var(--font-weight-medium);
   color: white;
 
-  background-color: rgba(0, 0, 0, 0.2);
-  outline: none !important;
-}
-
-.giftResalePriceContainer {
-  font-size: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(25px);
+  outline: none !important;
 }
 
 .starAmountIcon,
@@ -135,6 +148,24 @@
   font-size: 0.875rem;
   color: var(--color-text-secondary);
   text-align: center;
+}
+
+.footerHint {
+  display: flex;
+  align-items: center;
+
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+  color: var(--color-white);
+  text-align: center;
+  text-transform: none;
+
+  opacity: 0.6;
+}
+
+.buyButton {
+  display: flex;
+  flex-direction: column;
 }
 
 .unknown {

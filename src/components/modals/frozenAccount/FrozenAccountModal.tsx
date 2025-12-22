@@ -29,6 +29,8 @@ type StateProps = {
   freezeUntilDate?: number;
 };
 
+const ICON_SIZE = 130;
+
 const FrozenAccountModal = ({
   modal,
   freezeUntilDate,
@@ -58,7 +60,7 @@ const FrozenAccountModal = ({
     return (
       <div className={styles.header}>
         <AnimatedIconWithPreview
-          size={160}
+          size={ICON_SIZE}
           tgsUrl={LOCAL_TGS_URLS.BannedDuck}
           noLoop
         />
@@ -76,14 +78,12 @@ const FrozenAccountModal = ({
         <Button
           className={styles.buttonAppeal}
           onClick={handleAppeal}
-          noForcedUpperCase
         >
           {lang('ButtonAppeal')}
         </Button>
         <Button
           isText
           onClick={handleClose}
-          noForcedUpperCase
         >
           {lang('ButtonUnderstood')}
         </Button>
@@ -123,7 +123,6 @@ const FrozenAccountModal = ({
       header={header}
       listItemData={listItemData}
       footer={footer}
-      hasBackdrop
       onClose={handleClose}
     />
   );

@@ -1,7 +1,7 @@
 import type { FC } from '@teact';
 import {
-  memo, useEffect, useMemo, useRef, useState,
-} from '@teact';
+  memo, useEffect,
+  useMemo, useRef, useState } from '@teact';
 import type React from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -24,8 +24,10 @@ import { selectTabState } from '../../../global/selectors';
 import { selectPeer, selectUserFullInfo } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { throttle } from '../../../util/schedulers';
+import { REM } from '../../common/helpers/mediaDimensions';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useFlag from '../../../hooks/useFlag';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -74,6 +76,7 @@ const AVATAR_SIZE = 100;
 const INTERSECTION_THROTTLE = 200;
 const SCROLL_THROTTLE = 200;
 const AVATAR_SPARKLES_CENTER_SHIFT = [0, -50] as const;
+const CATEGORY_LIST_STICKY_TOP = 3.5 * REM;
 
 const runThrottledForScroll = throttle((cb) => cb(), SCROLL_THROTTLE, true);
 
@@ -105,6 +108,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   const dialogRef = useRef<HTMLDivElement>();
   const transitionRef = useRef<HTMLDivElement>();
   const giftHeaderRef = useRef<HTMLHeadingElement>();
+  const categoryListRef = useRef<HTMLDivElement>();
 
   const scrollerRef = useRef<HTMLDivElement>();
 
@@ -118,8 +122,8 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   const [shouldShowMainScreenHeader, setShouldShowMainScreenHeader] = useState(false);
   const [isMainScreenHeaderForStarGifts, setIsMainScreenHeaderForStarGifts] = useState(false);
   const [isGiftScreenHeaderForStarGifts, setIsGiftScreenHeaderForStarGifts] = useState(false);
-
   const [selectedCategory, setSelectedCategory] = useState<StarGiftCategory>('all');
+  const [isCategoryListPinned, pinCategoryList, unpinCategoryList] = useFlag(false);
   const triggerSparklesRef = useRef<(() => void) | undefined>();
 
   const areAllGiftsDisallowed = useMemo(() => {
@@ -206,6 +210,17 @@ const GiftModal: FC<OwnProps & StateProps> = ({
         const { top: headerTop } = giftHeaderRef.current.getBoundingClientRect();
         const { top: transitionTop } = transitionRef.current.getBoundingClientRect();
         setIsMainScreenHeaderForStarGifts(headerTop - transitionTop <= 0);
+      }
+
+      if (categoryListRef.current && scrollerRef.current) {
+        const { top: listTop } = categoryListRef.current.getBoundingClientRect();
+        const { top: scrollerTop } = scrollerRef.current.getBoundingClientRect();
+        const isPinned = listTop - scrollerTop <= CATEGORY_LIST_STICKY_TOP;
+        if (isPinned) {
+          pinCategoryList();
+        } else {
+          unpinCategoryList();
+        }
       }
     });
   });
@@ -463,10 +478,12 @@ const GiftModal: FC<OwnProps & StateProps> = ({
             {renderStarGiftsHeader()}
             {renderStarGiftsDescription()}
             <StarGiftCategoryList
+              ref={categoryListRef}
               areUniqueStarGiftsDisallowed={areUniqueStarGiftsDisallowed}
               areLimitedStarGiftsDisallowed={areLimitedStarGiftsDisallowed}
               isSelf={isSelf}
               hasMyUnique={Boolean(myUniqueGiftIds?.length)}
+              isPinned={isCategoryListPinned}
               onCategoryChanged={onCategoryChanged}
             />
             <Transition
@@ -537,7 +554,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
         className={styles.closeButton}
         round
         color="translucent"
-        size="smaller"
+        size="tiny"
         onClick={handleCloseButtonClick}
         ariaLabel={isBackButton ? oldLang('Common.Back') : oldLang('Common.Close')}
       >
@@ -547,7 +564,8 @@ const GiftModal: FC<OwnProps & StateProps> = ({
       <div className={buildClassName(
         styles.header,
         isResaleScreen && styles.resaleHeader,
-        !shouldShowHeader && styles.hiddenHeader)}
+        !shouldShowHeader && styles.hiddenHeader,
+        isCategoryListPinned && styles.noBorder)}
       >
         <Transition
           name="slideVerticalFade"

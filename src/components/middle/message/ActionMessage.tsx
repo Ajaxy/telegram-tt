@@ -17,6 +17,7 @@ import { MESSAGE_APPEARANCE_DELAY } from '../../../config';
 import { getMessageHtmlId } from '../../../global/helpers';
 import { getMessageReplyInfo } from '../../../global/helpers/replies';
 import {
+  selectActionMessageBg,
   selectChat,
   selectChatMessage,
   selectIsCurrentUserFrozen,
@@ -25,7 +26,6 @@ import {
   selectIsMessageFocused,
   selectSender,
   selectTabState,
-  selectTheme,
 } from '../../../global/selectors';
 import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { IS_ANDROID, IS_FLUID_BACKGROUND_SUPPORTED } from '../../../util/browser/windowEnvironment';
@@ -83,7 +83,7 @@ type StateProps = {
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
   replyMessage?: ApiMessage;
-  patternColor?: string;
+  actionMessageBg?: string;
   isCurrentUserPremium?: boolean;
   isInSelectMode?: boolean;
   hasUnreadReaction?: boolean;
@@ -118,7 +118,7 @@ const ActionMessage = ({
   focusDirection,
   noFocusHighlight,
   replyMessage,
-  patternColor,
+  actionMessageBg,
   isCurrentUserPremium,
   isInSelectMode,
   hasUnreadReaction,
@@ -245,7 +245,7 @@ const ActionMessage = ({
     }
   }, [action.type, id, isLocal, memoFirstUnreadIdRef]);
 
-  const fluidBackgroundStyle = useFluidBackgroundFilter(isFluidMultiline ? patternColor : undefined);
+  const fluidBackgroundStyle = useFluidBackgroundFilter(isFluidMultiline ? actionMessageBg : undefined);
 
   const handleClick = useLastCallback(() => {
     switch (action.type) {
@@ -515,7 +515,6 @@ const ActionMessage = ({
 export default memo(withGlobal<OwnProps>(
   (global, { message, threadId }): Complete<StateProps> => {
     const tabState = selectTabState(global);
-    const { themes } = global.settings;
 
     const chat = selectChat(global, message.chatId);
 
@@ -549,7 +548,7 @@ export default memo(withGlobal<OwnProps>(
       isInsideTopic,
       replyMessage,
       isInSelectMode: selectIsInSelectMode(global),
-      patternColor: themes[selectTheme(global)]?.patternColor,
+      actionMessageBg: selectActionMessageBg(global),
       hasUnreadReaction,
       isResizingContainer,
       scrollTargetPosition,

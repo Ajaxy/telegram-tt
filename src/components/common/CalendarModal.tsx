@@ -370,16 +370,10 @@ const CalendarModal: FC<OwnProps & StateProps> = ({
       className="CalendarModal"
       onEnter={handleSubmit}
       dialogRef={dialogRef}
+      hasAbsoluteCloseButton
     >
       <div className="container">
         <div className="month-selector">
-          <Button
-            round
-            size="smaller"
-            color="translucent"
-            iconName="close"
-            onClick={onClose}
-          />
 
           <h4>
             {oldLang(`lng_month${currentMonth + 1}`)}

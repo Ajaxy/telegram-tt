@@ -25,7 +25,6 @@ import useOldLang from '../../../../hooks/useOldLang';
 
 import Avatar from '../../../common/Avatar';
 import SafeLink from '../../../common/SafeLink';
-import Button from '../../../ui/Button';
 import Modal from '../../../ui/Modal';
 import StarTopupOptionList from '../StarTopupOptionList';
 
@@ -154,17 +153,9 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
       isSlim
       onClose={handleClose}
       isOpen={isOpen}
+      hasAbsoluteCloseButton
     >
       <div className={buildClassName(styles.main, 'custom-scroll')} onScroll={handleScroll}>
-        <Button
-          round
-          size="smaller"
-          className={styles.closeButton}
-          color="translucent"
-          onClick={() => closeStarsGiftModal()}
-          ariaLabel={oldLang('Close')}
-          iconName="close"
-        />
         <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
           <h2 className={styles.starHeaderText}>
             {user ? oldLang('GiftStarsTitle') : oldLang('Star.List.GetStars')}

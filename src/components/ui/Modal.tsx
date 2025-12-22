@@ -149,7 +149,7 @@ const Modal: FC<OwnProps> = ({
         className={buildClassName(hasAbsoluteCloseButton && 'modal-absolute-close-button')}
         round
         color={absoluteCloseButtonColor}
-        size="smaller"
+        size="tiny"
         iconName="close"
         ariaLabel={lang('Close')}
         onClick={onClose}

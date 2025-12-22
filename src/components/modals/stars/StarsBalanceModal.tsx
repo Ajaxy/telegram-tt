@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from '@teact';
+import { memo, useEffect, useMemo, useRef, useState } from '@teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiStarTopupOption } from '../../../api/types';
@@ -18,6 +18,7 @@ import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
 import buildClassName from '../../../util/buildClassName';
 import { convertCurrencyFromBaseUnit, convertTonToUsd, formatCurrencyAsString } from '../../../util/formatCurrency';
 import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
+import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -40,6 +41,7 @@ import StarsTransactionItem from './transaction/StarsTransactionItem';
 
 import styles from './StarsBalanceModal.module.scss';
 
+const HEADER_HEIGHT = 3.5 * REM;
 const TRANSACTION_TYPES = ['all', 'inbound', 'outbound'] as const;
 const TRANSACTION_TABS_KEYS: RegularLangKey[] = [
   'StarsTransactionsAll',
@@ -80,8 +82,11 @@ const StarsBalanceModal = ({
   const lang = useLang();
 
   const [isHeaderHidden, setHeaderHidden] = useState(true);
+  const [areTabsPinned, pinTabs, unpinTabs] = useFlag(false);
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [areBuyOptionsShown, showBuyOptions, hideBuyOptions] = useFlag();
+
+  const tabsRef = useRef<HTMLDivElement>();
 
   const isOpen = Boolean(modal && (starsBalanceState || tonBalanceState));
 
@@ -160,6 +165,7 @@ const StarsBalanceModal = ({
       setHeaderHidden(true);
       setSelectedTabIndex(0);
       hideBuyOptions();
+      unpinTabs();
     }
   }, [isOpen]);
 
@@ -261,6 +267,12 @@ const StarsBalanceModal = ({
         >
           {lang('ButtonTopUpViaFragment')}
         </Button>
+
+        {currency === TON_CURRENCY_CODE && (
+          <div className={styles.hint}>
+            {lang('TonModalHint')}
+          </div>
+        )}
       </>
     );
   };
@@ -269,6 +281,17 @@ const StarsBalanceModal = ({
     const { scrollTop } = e.currentTarget;
 
     setHeaderHidden(scrollTop <= 150);
+
+    if (tabsRef.current) {
+      const { top: tabsTop } = tabsRef.current.getBoundingClientRect();
+      const { top: scrollerTop } = e.currentTarget.getBoundingClientRect();
+      const isPinned = tabsTop - scrollerTop <= HEADER_HEIGHT;
+      if (isPinned) {
+        pinTabs();
+      } else {
+        unpinTabs();
+      }
+    }
   }
 
   const handleLoadMoreTransactions = useLastCallback(() => {
@@ -305,19 +328,15 @@ const StarsBalanceModal = ({
       isOpen={isOpen}
       onClose={closeStarsBalanceModal}
       dialogStyle={`--modal-height: ${modalHeight}`}
+      hasAbsoluteCloseButton
     >
       <div className={buildClassName(styles.main, 'custom-scroll')} onScroll={handleScroll}>
-        <Button
-          round
-          size="smaller"
-          className={styles.closeButton}
-          color="translucent"
-          onClick={() => closeStarsBalanceModal()}
-          ariaLabel={lang('Close')}
-          iconName="close"
-        />
         {currency !== TON_CURRENCY_CODE && <BalanceBlock balance={balance} className={styles.modalBalance} />}
-        <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
+        <div
+          className={buildClassName(
+            styles.header, isHeaderHidden && styles.hiddenHeader, areTabsPinned && styles.noSeparator,
+          )}
+        >
           <h2 className={styles.starHeaderText}>
             {oldLang('TelegramStars')}
           </h2>
@@ -328,11 +347,6 @@ const StarsBalanceModal = ({
         {areBuyOptionsShown && (
           <div className={styles.tos}>
             {tosText}
-          </div>
-        )}
-        {currency === TON_CURRENCY_CODE && (
-          <div className={styles.hint}>
-            {lang('TonModalHint')}
           </div>
         )}
         {shouldShowItems && Boolean(subscriptions?.list.length) && (
@@ -391,6 +405,7 @@ const StarsBalanceModal = ({
               </Transition>
             </div>
             <TabList
+              ref={tabsRef}
               className={styles.tabs}
               tabClassName={styles.tab}
               activeTab={selectedTabIndex}

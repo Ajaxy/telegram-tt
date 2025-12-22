@@ -195,7 +195,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
         <Button
           round
           color="translucent"
-          size="smaller"
+          size="tiny"
           ariaLabel={lang('Close')}
           onClick={onClose}
           iconName="close"

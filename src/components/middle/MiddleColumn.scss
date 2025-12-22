@@ -218,18 +218,11 @@
     }
 
     &.with-notch::before {
-      opacity: 1;
+      opacity: 0.75;
     }
 
     html.theme-dark &::before {
-      background:
-        linear-gradient(
-          90deg,
-          rgba(127, 127, 127, 0) 0%,
-          rgba(127, 127, 127, 0.4) 2%,
-          rgba(127, 127, 127, 0.4) 98%,
-          rgba(127, 127, 127, 0) 100%
-        );
+      background: var(--action-message-bg);
     }
 
     @media (min-width: 1276px) {

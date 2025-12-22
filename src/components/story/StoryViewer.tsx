@@ -151,7 +151,7 @@ function StoryViewer({
       <Button
         className={styles.close}
         round
-        size="smaller"
+        size="tiny"
         color="translucent-white"
         ariaLabel={lang('Close')}
         onClick={handleClose}

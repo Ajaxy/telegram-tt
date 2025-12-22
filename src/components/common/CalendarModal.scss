@@ -70,13 +70,17 @@
     }
   }
 
+  .container {
+    margin-top: 0.1875rem;
+  }
+
   .month-selector {
     display: flex;
     align-items: center;
 
     h4 {
       flex: 1;
-      margin: 0 0 0 1.25rem;
+      margin: 0 0 0 2.25rem;
       font-size: 1.25rem;
 
       & ~ .Button {

@@ -428,19 +428,11 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
       onClose={closePremiumModal}
       isOpen={isOpen}
       dialogRef={dialogRef}
+      hasAbsoluteCloseButton
     >
       <Transition name="slide" activeKey={currentSection ? 1 : 0} className={styles.transition}>
         {!currentSection ? (
           <div className={buildClassName(styles.main, 'custom-scroll')} onScroll={handleScroll}>
-            <Button
-              round
-              size="smaller"
-              className={styles.closeButton}
-              color="translucent"
-              onClick={() => closePremiumModal()}
-              ariaLabel={oldLang('Close')}
-              iconName="close"
-            />
             {renderHeader()}
             {!isPremium && !isGift && renderSubscriptionOptions()}
             <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>

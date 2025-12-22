@@ -41,7 +41,7 @@
   height: 3rem;
   padding: 0.625rem;
   border: 0;
-  border-radius: var(--border-radius-default);
+  border-radius: var(--border-radius-button);
 
   font-weight: var(--font-weight-medium);
   line-height: 1.2;
@@ -53,7 +53,7 @@
   background-size: cover;
   outline: none !important;
 
-  transition: background-color 0.15s, color 0.15s, opacity 0.15s;
+  transition: background-color 0.2s, color 0.2s, opacity 0.2s;
 
   white-space-collapse: preserve;
 
@@ -91,7 +91,7 @@
     background-color: var(--color-primary);
 
     @include active-styles() {
-      background-color: var(--color-primary-shade);
+      background-color: rgba(var(--color-primary-shade-rgb), 0.9);
     }
 
     @include no-ripple-styles() {
@@ -331,11 +331,11 @@
 
   &.transparentBlured {
     color: white;
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(0.5rem);
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.1);
+      background-color: rgba(255, 255, 255, 0.2);
     }
   }
 
@@ -366,12 +366,12 @@
   &.tiny {
     height: 2.25rem;
     padding: 0.4375rem;
-    border-radius: var(--border-radius-default-small);
+    border-radius: var(--border-radius-button-tiny);
     font-size: 0.875rem;
 
     &.round {
-      width: 2.25rem;
-      height: 2.25rem;
+      width: 1.875rem;
+      height: 1.875rem;
       border-radius: 50%;
     }
 

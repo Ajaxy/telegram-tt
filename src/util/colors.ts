@@ -234,10 +234,9 @@ export function getPatternColor(rgb: Number3) {
     ? Math.max(0, v * 0.65)
     : Math.max(0, Math.min(1, 1 - v * 0.65));
 
-  const newRgb = hsl2rgb([h * 360, s, v]);
-  const mappedRgb = newRgb.map((c) => Math.floor(c * 255)) as Number3;
+  const newRgb = hsv2rgb([h, s, v]);
 
-  return rgba2hex([...mappedRgb, 102]);
+  return rgba2hex([...newRgb, 102]);
 }
 
 export function int2cssRgba(color: number): string {

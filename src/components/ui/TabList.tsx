@@ -1,4 +1,4 @@
-import type { TeactNode } from '../../lib/teact/teact';
+import type { ElementRef, TeactNode } from '../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../lib/teact/teact';
 
 import type { ApiMessageEntityCustomEmoji } from '../../api/types';
@@ -33,6 +33,7 @@ type OwnProps = {
   className?: string;
   tabClassName?: string;
   contextRootElementSelector?: string;
+  ref?: ElementRef<HTMLDivElement>;
   onSwitchTab: (index: number) => void;
 };
 
@@ -46,9 +47,13 @@ const TabList = ({
   className,
   tabClassName,
   contextRootElementSelector,
+  ref,
   onSwitchTab,
 }: OwnProps) => {
-  const containerRef = useRef<HTMLDivElement>();
+  let containerRef = useRef<HTMLDivElement>();
+  if (ref) {
+    containerRef = ref;
+  }
   const previousActiveTab = usePreviousDeprecated(activeTab);
 
   const lang = useLang();

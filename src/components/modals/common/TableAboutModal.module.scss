@@ -1,10 +1,45 @@
-.root :global(.modal-dialog) {
-  overflow: hidden;
-  width: 26.25rem;
-}
+.root {
 
-.title {
-  font-weight: var(--font-weight-medium);
+  :global(.modal-dialog) {
+    overflow: hidden;
+    width: 26.25rem;
+  }
+
+  :global(.modal-content) {
+    padding-bottom: 1rem;
+    padding-inline: 1rem;
+  }
+
+  :global(.ListItem) {
+    :global(.ListItem-button) {
+      align-items: flex-start;
+      padding-inline: 1.5rem;
+    }
+
+    :global(.ListItem-main-icon) {
+      margin-top: 0.875rem;
+      margin-right: 0.875rem;
+      font-size: 1.5rem;
+      color: var(--accent-color);
+    }
+
+    :global(.multiline-item .subtitle) {
+      margin-top: 0.125rem;
+      font-size: 1rem;
+      line-height: 1.375rem;
+    }
+  }
+
+  :global(.Checkbox-main) {
+    &::before,
+    &::after {
+      left: 2.25rem;
+    }
+  }
+
+  :global(.Checkbox) {
+    padding-inline-start: 4.5rem;
+  }
 }
 
 .secondary {
@@ -32,17 +67,21 @@
   background: var(--premium-gradient);
 }
 
-.listItemIcon {
-  font-size: 1.875rem !important;
-  color: var(--accent-color) !important;
-}
-
 .content {
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   align-items: center;
+}
+
+.listItem {
+  padding-bottom: 0.5rem;
+}
+
+.listItemTitle {
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
 }
 
 .separator {

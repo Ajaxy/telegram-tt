@@ -451,7 +451,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
       <Button
         round
         ripple={!isMobile}
-        size="smaller"
+        size="tiny"
         color="translucent"
         className={isMenuOpen ? 'active' : ''}
         onClick={onTrigger}
@@ -534,7 +534,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         <Button
           round
           color="translucent"
-          size="smaller"
+          size="tiny"
           ariaLabel="Cancel attachments"
           onClick={onClear}
           iconName="close"

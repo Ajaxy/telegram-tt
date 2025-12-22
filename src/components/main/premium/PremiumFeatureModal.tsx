@@ -227,7 +227,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
     <div className={styles.root}>
       <Button
         round
-        size="smaller"
+        size="tiny"
         className={buildClassName(styles.backButton, hasHeaderBackdrop && styles.whiteBackButton)}
         color={hasHeaderBackdrop ? 'translucent-white' : 'translucent'}
         onClick={onBack}

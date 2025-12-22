@@ -193,19 +193,19 @@ const ProfileRatingModal = ({
 
   const listItemData = [
     ['closed-gift', lang('RatingGiftsFromTelegram'), (
-      <span className={styles.subtitle}>
+      <span>
         {renderBadge('added')}
         {lang('RatingGiftsFromTelegramDesc')}
       </span>
     )],
     ['user-stars', lang('RatingGiftsAndPostsFromUsers'), (
-      <span className={styles.subtitle}>
+      <span>
         {renderBadge('added')}
         {lang('RatingGiftsAndPostsFromUsersDesc')}
       </span>
     )],
     ['stars-refund', lang('RatingRefundsAndConversions'), (
-      <span className={styles.subtitle}>
+      <span>
         {renderBadge('deducted')}
         {lang('RatingRefundsAndConversionsDesc')}
       </span>

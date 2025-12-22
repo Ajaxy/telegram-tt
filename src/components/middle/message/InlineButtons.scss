@@ -19,13 +19,13 @@
     font-weight: var(--font-weight-medium);
     text-transform: none;
 
-    background: var(--pattern-color);
+    background: var(--action-message-bg);
 
     transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms;
 
     &:hover,
     &:focus {
-      background: var(--pattern-color) !important;
+      background: var(--action-message-bg) !important;
       backdrop-filter: brightness(115%);
 
       @supports not (backdrop-filter: brightness(115%)) {
