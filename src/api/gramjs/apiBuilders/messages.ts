@@ -515,6 +515,7 @@ export function buildLocalForwardedMessage({
   isCurrentUserPremium,
   lastMessageId,
   sendAs,
+  effectId,
 }: {
   toChat: ApiChat;
   toThreadId?: number;
@@ -526,6 +527,7 @@ export function buildLocalForwardedMessage({
   isCurrentUserPremium?: boolean;
   lastMessageId?: number;
   sendAs?: ApiPeer;
+  effectId?: string;
 }): ApiMessage {
   const localId = getNextLocalMessageId(lastMessageId);
   const {
@@ -580,6 +582,7 @@ export function buildLocalForwardedMessage({
     isForwardingAllowed: true,
     replyInfo,
     isInvertedMedia,
+    effectId,
     ...(toThreadId && toChat?.isForum && { isTopicReply: true }),
 
     // Forward info doesn't get added when user forwards own messages and when forwarding audio

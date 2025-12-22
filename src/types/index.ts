@@ -769,4 +769,5 @@ export type ForwardMessagesParams = {
   lastMessageId?: number;
   forwardedLocalMessagesSlice?: ForwardedLocalMessagesSlice;
   messagePriceInStars?: number;
+  effectId?: string;
 };

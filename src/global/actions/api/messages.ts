@@ -1623,7 +1623,9 @@ async function executeForwardMessages(global: GlobalState, sendParams: SendMessa
   const {
     fromChatId, messageIds, toChatId, withMyScore, noAuthors, noCaptions, toThreadId = MAIN_THREAD_ID,
   } = selectTabState(global, tabId).forwardMessages;
-  const { messagePriceInStars, isSilent, scheduledAt, scheduleRepeatPeriod } = sendParams;
+  const { messagePriceInStars, isSilent, scheduledAt, scheduleRepeatPeriod, effectId, attachments } = sendParams;
+  const isForwardOnly = !sendParams.text && !attachments?.length;
+  const forwardEffectId = isForwardOnly ? effectId : undefined;
 
   const isCurrentUserPremium = selectIsCurrentUserPremium(global);
   const isToMainThread = toThreadId === MAIN_THREAD_ID;
@@ -1669,6 +1671,7 @@ async function executeForwardMessages(global: GlobalState, sendParams: SendMessa
         wasDrafted: Boolean(draft),
         lastMessageId,
         messagePriceInStars,
+        effectId: forwardEffectId,
       };
 
       if (!messagePriceInStars) {
