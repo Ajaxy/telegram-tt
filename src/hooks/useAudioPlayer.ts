@@ -65,17 +65,21 @@ const useAudioPlayer = (
           const {
             setVolume, setPlaybackRate, toggleMuted, proxy,
           } = controllerRef.current!;
+          const global = getGlobal();
+
           setIsPlaying(true);
           if (trackType !== 'oneTimeVoice') {
             registerMediaSession(metadata, makeMediaHandlers(controllerRef));
           }
           setPlaybackState('playing');
-          const { audioPlayer } = selectTabState(getGlobal());
-          setVolume(audioPlayer.volume);
-          toggleMuted(Boolean(audioPlayer.isMuted));
+
+          const { audioPlayer: tabAudioPlayerState } = selectTabState(global);
+          const { audioPlayer: globalAudioPlayerState } = global;
+          setVolume(globalAudioPlayerState.volume);
+          toggleMuted(Boolean(tabAudioPlayerState.isMuted));
           const duration = proxy.duration && Number.isFinite(proxy.duration) ? proxy.duration : originalDuration;
           if (trackType === 'voice' || duration > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION) {
-            setPlaybackRate(audioPlayer.playbackRate);
+            setPlaybackRate(tabAudioPlayerState.playbackRate);
           }
           setPositionState({
             duration: proxy.duration || 0,

@@ -10,6 +10,7 @@ import type { IconName } from '../../../types/icons';
 
 import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../../../config';
 import {
+  getMediaFormat,
   getMessageContent, isMessageLocal,
 } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
@@ -20,7 +21,6 @@ import { selectMessageMediaDuration } from '../../../global/selectors/media';
 import { makeTrackId } from '../../../util/audioPlayer';
 import { IS_IOS, IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import * as mediaLoader from '../../../util/mediaLoader';
 import { clearMediaSession } from '../../../util/mediaSession';
 import renderText from '../../common/helpers/renderText';
 
@@ -30,6 +30,7 @@ import useAudioPlayer from '../../../hooks/useAudioPlayer';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useMedia from '../../../hooks/useMedia';
 import useMessageMediaMetadata from '../../../hooks/useMessageMediaMetadata';
 import useOldLang from '../../../hooks/useOldLang';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -109,8 +110,10 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   const shouldRenderPlaybackButton = isVoice || (audio?.duration || 0) > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION;
   const senderName = sender ? getPeerTitle(lang, sender) : undefined;
 
+  const playableMedia = voice || video || audio;
   const mediaHash = useMessageMediaHash(renderingMessage, 'inline');
-  const mediaData = mediaHash && mediaLoader.getFromMemory(mediaHash);
+  const mediaFormat = playableMedia && getMediaFormat(playableMedia, 'inline');
+  const mediaData = useMedia(mediaHash, false, mediaFormat);
   const mediaMetadata = useMessageMediaMetadata(renderingMessage, sender, chat);
 
   const {
@@ -424,8 +427,9 @@ export default withGlobal<OwnProps>(
     const sender = message && selectSender(global, message);
     const chat = message && selectChat(global, message.chatId);
     const {
-      volume, playbackRate, isMuted, isPlaybackRateActive, timestamp,
+      playbackRate, isMuted, isPlaybackRateActive, timestamp,
     } = selectTabState(global).audioPlayer;
+    const { volume } = global.audioPlayer;
 
     const mediaDuration = message ? selectMessageMediaDuration(global, message) : undefined;
 

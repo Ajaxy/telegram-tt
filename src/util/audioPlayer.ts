@@ -4,7 +4,6 @@ import type { ApiMessage } from '../api/types';
 import type { MessageKey } from './keys/messageKey';
 import { AudioOrigin, GlobalSearchContent } from '../types';
 
-import { requestNextMutation } from '../lib/fasterdom/fasterdom';
 import { selectCurrentMessageList, selectTabState } from '../global/selectors';
 import { IS_SAFARI } from './browser/windowEnvironment';
 import { getMessageServerKey, parseMessageKey } from './keys/messageKey';
@@ -179,14 +178,15 @@ export function register(
 
     stop() {
       if (currentTrackId === trackId) {
-        // Hack, reset `src` to remove default media session notification
         const prevSrc = audio.src;
         audio.pause();
-        // `onPause` not called otherwise, but required to sync UI
-        requestNextMutation(() => {
+
+        // `onPause` is required to reset UI state
+        audio.addEventListener('pause', () => {
+          // Hack, reset `src` to remove default media session notification
           audio.src = '';
           audio.src = prevSrc;
-        });
+        }, { once: true });
       }
     },
 

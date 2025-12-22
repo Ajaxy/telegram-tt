@@ -105,6 +105,7 @@ export type GlobalState = {
   botFreezeAppealId?: string;
 
   audioPlayer: {
+    volume: number;
     lastPlaybackRate: number;
     isLastPlaybackRateActive?: boolean;
   };

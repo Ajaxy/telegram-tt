@@ -367,6 +367,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.auth = initialState.auth;
     cached.auth.rememberMe = untypedCached.rememberMe;
   }
+
+  if (cached.audioPlayer.volume === undefined) {
+    cached.audioPlayer.volume = initialState.audioPlayer.volume;
+  }
 }
 
 function updateCache(force?: boolean) {

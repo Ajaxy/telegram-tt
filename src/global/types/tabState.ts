@@ -378,7 +378,6 @@ export type TabState = {
     messageId?: number;
     threadId?: ThreadId;
     origin?: AudioOrigin;
-    volume: number;
     playbackRate: number;
     isPlaybackRateActive?: boolean;
     timestamp?: number;

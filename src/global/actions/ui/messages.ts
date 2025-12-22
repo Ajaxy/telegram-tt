@@ -183,7 +183,7 @@ addActionHandler('replyToNextMessage', (global, actions, payload): ActionReturnT
 
 addActionHandler('openAudioPlayer', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, threadId, messageId, origin, volume, playbackRate, isMuted, timestamp,
+    chatId, threadId, messageId, origin, playbackRate, isMuted, timestamp,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -195,7 +195,6 @@ addActionHandler('openAudioPlayer', (global, actions, payload): ActionReturnType
       messageId,
       timestamp,
       origin: origin ?? tabState.audioPlayer.origin,
-      volume: volume ?? tabState.audioPlayer.volume,
       playbackRate: playbackRate || tabState.audioPlayer.playbackRate || global.audioPlayer.lastPlaybackRate,
       isPlaybackRateActive: (tabState.audioPlayer.isPlaybackRateActive === undefined
         ? global.audioPlayer.isLastPlaybackRateActive
@@ -210,13 +209,20 @@ addActionHandler('setAudioPlayerVolume', (global, actions, payload): ActionRetur
     volume, tabId = getCurrentTabId(),
   } = payload;
 
-  return updateTabState(global, {
+  global = updateTabState(global, {
     audioPlayer: {
       ...selectTabState(global, tabId).audioPlayer,
-      volume,
       isMuted: false,
     },
   }, tabId);
+  global = {
+    ...global,
+    audioPlayer: {
+      ...global.audioPlayer,
+      volume,
+    },
+  };
+  return global;
 });
 
 addActionHandler('setAudioPlayerPlaybackRate', (global, actions, payload): ActionReturnType => {
@@ -273,7 +279,6 @@ addActionHandler('closeAudioPlayer', (global, actions, payload): ActionReturnTyp
   const tabState = selectTabState(global, tabId);
   return updateTabState(global, {
     audioPlayer: {
-      volume: tabState.audioPlayer.volume,
       playbackRate: tabState.audioPlayer.playbackRate,
       isPlaybackRateActive: tabState.audioPlayer.isPlaybackRateActive,
       isMuted: tabState.audioPlayer.isMuted,
