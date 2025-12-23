@@ -285,6 +285,7 @@ export interface ApiAppConfig {
   verifyAgeMin?: number;
   typingDraftTtl: number;
   contactNoteLimit?: number;
+  whitelistedBotIds?: string[];
   arePasskeysAvailable: boolean;
   passkeysMaxCount: number;
 }

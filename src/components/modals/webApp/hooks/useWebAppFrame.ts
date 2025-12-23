@@ -225,18 +225,6 @@ const useWebAppFrame = (
         ignoreEventsRef.current = true;
       }
 
-      // Clipboard access temporarily disabled to address security concerns
-      if (eventType === 'web_app_read_text_from_clipboard') {
-        sendEvent({
-          eventType: 'clipboard_text_received',
-          eventData: {
-            req_id: eventData.req_id,
-            // eslint-disable-next-line no-null/no-null
-            data: null,
-          },
-        });
-      }
-
       if (eventType === 'web_app_open_scan_qr_popup') {
         showNotification({
           message: 'Scanning QR code is not supported in this client yet',

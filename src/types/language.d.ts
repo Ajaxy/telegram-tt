@@ -1821,6 +1821,8 @@ export interface LangPair {
   'BirthdayRemove': undefined;
   'BirthdayPrivacySuggestionLink': undefined;
   'SettingsBirthday': undefined;
+  'BotReadTextFromClipboardTitle': undefined;
+  'BotReadTextFromClipboardConfirm': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -3141,6 +3143,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'BirthdayPrivacySuggestion': {
     'link': V;
+  };
+  'BotReadTextFromClipboardDescription': {
+    'bot': V;
   };
 }
 

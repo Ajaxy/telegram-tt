@@ -91,7 +91,7 @@ export function selectChatOnlineCount<T extends GlobalState>(global: T, chat: Ap
 }
 
 export function selectIsTrustedBot<T extends GlobalState>(global: T, botId: string) {
-  return global.trustedBotIds.includes(botId);
+  return global.trustedBotIds.includes(botId) || global.appConfig.whitelistedBotIds?.includes(botId);
 }
 
 export function selectChatType<T extends GlobalState>(global: T, chatId: string): ApiChatType | undefined {

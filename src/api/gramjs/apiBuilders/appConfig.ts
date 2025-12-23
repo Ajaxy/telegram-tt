@@ -120,6 +120,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   verify_age_min?: number;
   message_typing_draft_ttl?: number;
   contact_note_length_limit?: number;
+  whitelisted_bots?: string[];
   settings_display_passkeys?: boolean;
   passkeys_account_passkeys_max?: number;
 }
@@ -245,6 +246,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     verifyAgeCountry: appConfig.verify_age_country,
     verifyAgeMin: appConfig.verify_age_min,
     typingDraftTtl: appConfig.message_typing_draft_ttl,
+    whitelistedBotIds: appConfig.whitelisted_bots,
     arePasskeysAvailable: appConfig.settings_display_passkeys,
     passkeysMaxCount: appConfig.passkeys_account_passkeys_max,
   };

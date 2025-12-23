@@ -2446,3 +2446,6 @@
 "BirthdayPrivacySuggestion" = "Choose who can see your birthday in {link}";
 "BirthdayPrivacySuggestionLink" = "Settings >";
 "SettingsBirthday" = "Birthday";
+"BotReadTextFromClipboardTitle" = "Clipboard Access";
+"BotReadTextFromClipboardDescription" = "{bot} wants to read the contents of your clipboard. Do you want to continue?";
+"BotReadTextFromClipboardConfirm" = "Allow";
