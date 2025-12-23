@@ -208,7 +208,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     ref: placeholderRef,
     shouldRender: shouldRenderPlaceholder,
   } = useShowTransition({
-    isOpen: !orderedFolderIds,
+    isOpen: !orderedFolderIds && !isFoldersSidebarShown,
     noMountTransition: true,
     withShouldRender: true,
   });
@@ -235,20 +235,21 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     );
   }
 
-  const shouldRenderFolders = folderTabs && folderTabs.length > 1;
+  const hasFolders = folderTabs && folderTabs.length > 1;
+  const shouldRenderFolders = hasFolders && !isFoldersSidebarShown;
 
   return (
     <div
       ref={ref}
       className={buildClassName(
         'ChatFolders',
-        shouldRenderFolders && shouldHideFolderTabs && !isFoldersSidebarShown && 'ChatFolders--tabs-hidden',
+        shouldRenderFolders && shouldHideFolderTabs && 'ChatFolders--tabs-hidden',
         shouldRenderStoryRibbon && 'with-story-ribbon',
         isFoldersSidebarShown && 'ChatFolders--tabs-sidebar-shown',
       )}
     >
       {shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
-      {shouldRenderFolders && !isFoldersSidebarShown ? (
+      {shouldRenderFolders ? (
         <TabList
           contextRootElementSelector="#LeftColumn"
           tabs={folderTabs}
@@ -262,7 +263,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         ref={transitionRef}
         name={resolveTransitionName('slideOptimized', animationLevel, shouldSkipHistoryAnimations, lang.isRtl)}
         activeKey={activeChatFolder}
-        renderCount={shouldRenderFolders ? folderTabs.length : undefined}
+        renderCount={hasFolders ? folderTabs.length : undefined}
       >
         {renderCurrentTab}
       </Transition>
