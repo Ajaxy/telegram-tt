@@ -42,6 +42,7 @@ const PickerModal = ({
     containerRef: dialogRef,
     selector: `.modal-content ${itemsContainerSelector}`,
     isBottomNotch: true,
+    shouldHideTopNotch: true,
   }, [modalProps.isOpen]);
 
   return (

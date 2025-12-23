@@ -1,0 +1,14 @@
+.preview {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.arrow {
+  font-size: 2rem;
+  color: var(--color-text-secondary);
+}

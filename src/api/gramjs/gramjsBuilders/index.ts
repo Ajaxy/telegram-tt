@@ -798,6 +798,20 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
       });
     }
 
+    case 'stargiftAuctionBid': {
+      const {
+        giftId, bidAmount, peer, message, shouldHideName, isUpdateBid,
+      } = invoice;
+      return new GramJs.InputInvoiceStarGiftAuctionBid({
+        giftId: BigInt(giftId),
+        bidAmount: BigInt(bidAmount),
+        peer: peer && buildInputPeer(peer.id, peer.accessHash || ''),
+        message: message && buildInputTextWithEntities(message),
+        hideName: shouldHideName || undefined,
+        updateBid: isUpdateBid || undefined,
+      });
+    }
+
     case 'giveaway':
     default: {
       const purpose = buildInputStorePaymentPurpose(invoice.purpose);

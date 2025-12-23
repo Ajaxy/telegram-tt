@@ -261,6 +261,23 @@ export function getRequestInputInvoice<T extends GlobalState>(
     };
   }
 
+  if (inputInvoice.type === 'stargiftAuctionBid') {
+    const {
+      giftId, bidAmount, peerId, message, shouldHideName, isUpdateBid,
+    } = inputInvoice;
+    const peer = peerId ? selectPeer(global, peerId) : undefined;
+
+    return {
+      type: 'stargiftAuctionBid',
+      giftId,
+      bidAmount,
+      peer,
+      message,
+      shouldHideName,
+      isUpdateBid,
+    };
+  }
+
   return undefined;
 }
 

@@ -1,0 +1,44 @@
+.table {
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  flex-shrink: 0;
+  gap: 1px;
+
+  border: 1px solid var(--color-borders);
+  border-radius: 1rem;
+
+  background-color: var(--color-borders);
+}
+
+.cell {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  min-height: 2.5rem;
+  padding: 0.25rem 0.5rem;
+
+  font-size: 0.9375rem;
+}
+
+.title {
+  background-color: var(--color-background-secondary);
+}
+
+.value {
+  min-width: 2rem;
+  overflow-wrap: anywhere;
+  background-color: var(--color-background);
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.chatItem {
+  width: fit-content;
+  color: var(--color-primary);
+  background-color: var(--color-background);
+}

@@ -19,6 +19,11 @@ import CollectibleInfoModal from './collectible/CollectibleInfoModal.async';
 import DeleteAccountModal from './deleteAccount/DeleteAccountModal.async';
 import EmojiStatusAccessModal from './emojiStatusAccess/EmojiStatusAccessModal.async';
 import FrozenAccountModal from './frozenAccount/FrozenAccountModal.async';
+import GiftAuctionAcquiredModal from './gift/auction/GiftAuctionAcquiredModal.async';
+import GiftAuctionBidModal from './gift/auction/GiftAuctionBidModal.async';
+import GiftAuctionChangeRecipientModal from './gift/auction/GiftAuctionChangeRecipientModal.async';
+import GiftAuctionInfoModal from './gift/auction/GiftAuctionInfoModal.async';
+import GiftAuctionModal from './gift/auction/GiftAuctionModal.async';
 import PremiumGiftModal from './gift/GiftModal.async';
 import GiftInfoModal from './gift/info/GiftInfoModal.async';
 import GiftLockedModal from './gift/locked/GiftLockedModal.async';
@@ -94,6 +99,11 @@ type ModalKey = keyof Pick<TabState,
   'locationAccessModal' |
   'aboutAdsModal' |
   'giftUpgradeModal' |
+  'giftAuctionModal' |
+  'giftAuctionBidModal' |
+  'giftAuctionInfoModal' |
+  'giftAuctionChangeRecipientModal' |
+  'giftAuctionAcquiredModal' |
   'starGiftPriceDecreaseInfoModal' |
   'monetizationVerificationModal' |
   'giftWithdrawModal' |
@@ -161,6 +171,11 @@ const MODALS: ModalRegistry = {
   locationAccessModal: LocationAccessModal,
   aboutAdsModal: AboutAdsModal,
   giftUpgradeModal: GiftUpgradeModal,
+  giftAuctionModal: GiftAuctionModal,
+  giftAuctionBidModal: GiftAuctionBidModal,
+  giftAuctionInfoModal: GiftAuctionInfoModal,
+  giftAuctionChangeRecipientModal: GiftAuctionChangeRecipientModal,
+  giftAuctionAcquiredModal: GiftAuctionAcquiredModal,
   starGiftPriceDecreaseInfoModal: StarGiftPriceDecreaseInfoModal,
   monetizationVerificationModal: VerificationMonetizationModal,
   giftWithdrawModal: GiftWithdrawModal,

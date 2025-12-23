@@ -1,0 +1,53 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+  margin-top: 0.125rem;
+  margin-bottom: 0.25rem;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 5rem;
+  height: 5rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+  border-radius: 50%;
+
+  font-size: 1rem;
+
+  background-color: var(--accent-color);
+}
+
+.icon {
+  font-size: 2.5rem;
+  color: var(--color-white);
+}
+
+.title {
+  padding-top: 0.25rem;
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+.subtitle {
+  padding-top: 0.25rem;
+  text-align: center;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  margin-top: 0.5rem;
+}
+
+.understoodIcon {
+  font-size: 1.1875rem;
+}

@@ -12,11 +12,12 @@ import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
 import { RESALE_GIFTS_LIMIT } from '../../../limits';
 import { areInputSavedGiftsEqual, getRequestInputSavedStarGift } from '../../helpers/payments';
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import { addActionHandler, getGlobal, getPromiseActions, setGlobal } from '../../index';
 import {
   appendStarsSubscriptions,
   appendStarsTransactions,
   replacePeerSavedGifts,
+  updateActiveGiftAuction,
   updateChats,
   updatePeerStarGiftCollections,
   updateStarsBalance,
@@ -579,6 +580,43 @@ addActionHandler('shiftGiftUpgradeNextPrice', async (global, _actions, payload):
   setGlobal(global);
 });
 
+addActionHandler('openGiftAuctionModal', async (global, _actions, payload): Promise<void> => {
+  const { gift, tabId = getCurrentTabId() } = payload;
+
+  await getPromiseActions().loadActiveGiftAuction({ giftId: gift.id, tabId });
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    giftAuctionModal: { isOpen: true },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('loadActiveGiftAuction', async (global, _actions, payload): Promise<void> => {
+  const { giftId, tabId = getCurrentTabId() } = payload;
+
+  const currentAuction = selectTabState(global, tabId).activeGiftAuction;
+  const currentVersion = currentAuction?.state.type === 'active' ? currentAuction.state.version : 0;
+
+  const auctionState = await callApi('fetchStarGiftAuctionState', {
+    giftId,
+    version: currentVersion,
+  });
+  if (!auctionState) return;
+
+  global = getGlobal();
+  global = updateActiveGiftAuction(global, auctionState, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('clearActiveGiftAuction', (global, _actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    activeGiftAuction: undefined,
+  }, tabId);
+});
+
 addActionHandler('toggleSavedGiftPinned', async (global, actions, payload): Promise<void> => {
   const { gift, peerId, tabId = getCurrentTabId() } = payload;
 
@@ -648,5 +686,28 @@ addActionHandler('loadStarGiftCollections', async (global, actions, payload): Pr
   global = getGlobal();
 
   global = updatePeerStarGiftCollections(global, peerId, result.collections);
+  setGlobal(global);
+});
+
+addActionHandler('openGiftAuctionAcquiredModal', async (global, actions, payload): Promise<void> => {
+  const {
+    giftId, giftTitle, giftSticker, tabId = getCurrentTabId(),
+  } = payload;
+
+  const result = await callApi('fetchStarGiftAuctionAcquiredGifts', { giftId });
+
+  if (!result) return;
+
+  global = getGlobal();
+
+  global = updateTabState(global, {
+    giftAuctionAcquiredModal: {
+      giftId,
+      giftTitle,
+      giftSticker,
+      acquiredGifts: result.gifts,
+    },
+  }, tabId);
+
   setGlobal(global);
 });

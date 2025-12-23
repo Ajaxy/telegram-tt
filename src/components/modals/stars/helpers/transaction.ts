@@ -37,6 +37,12 @@ export function getTransactionTitle(oldLang: OldLangFn, lang: LangFn, transactio
     return lang('GiftPrepaidUpgradeTransactionTitle');
   }
 
+  if (transaction.isStarGiftAuctionBid) {
+    return isNegativeAmount(transaction.amount)
+      ? lang('StarGiftAuctionBidTransaction')
+      : lang('StarGiftAuctionBidRefundedTransaction');
+  }
+
   if (transaction.starRefCommision) {
     return oldLang('StarTransactionCommission', formatPercent(transaction.starRefCommision));
   }

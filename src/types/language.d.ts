@@ -1268,6 +1268,7 @@ export interface LangPair {
   'GiftInfoDescriptionFreeUpgrade': undefined;
   'GiftInfoDescriptionUpgrade2': undefined;
   'GiftInfoDescriptionUpgraded': undefined;
+  'GiftInfoDescriptionRefunded': undefined;
   'GiftInfoFrom': undefined;
   'GiftInfoDate': undefined;
   'GiftInfoValue': undefined;
@@ -1745,6 +1746,8 @@ export interface LangPair {
   'StarGiftReasonDropOriginalDetails': undefined;
   'GiftAnUpgradeButton': undefined;
   'GiftPrepaidUpgradeTransactionTitle': undefined;
+  'StarGiftAuctionBidTransaction': undefined;
+  'StarGiftAuctionBidRefundedTransaction': undefined;
   'ActionStarGiftPrepaidUpgradedYou': undefined;
   'UserNoteTitle': undefined;
   'UserNoteHint': undefined;
@@ -1787,6 +1790,39 @@ export interface LangPair {
   'StarGiftPriceDecreaseInfoLink': undefined;
   'StarGiftUpgradeCostModalTitle': undefined;
   'StarGiftUpgradeCostHint': undefined;
+  'GiftRibbonAuction': undefined;
+  'GiftAuctionJoin': undefined;
+  'GiftAuctionLearnMore': undefined;
+  'GiftAuctionStarted': undefined;
+  'GiftAuctionEnds': undefined;
+  'GiftAuctionCurrentRound': undefined;
+  'GiftAuctionPlaceBid': undefined;
+  'GiftAuctionMinimumBid': undefined;
+  'GiftAuctionUntilNextRound': undefined;
+  'GiftAuctionLeft': undefined;
+  'GiftAuctionYourBidWillBe': undefined;
+  'GiftAuctionYoureWinning': undefined;
+  'GiftAuctionBalance': undefined;
+  'GiftAuctionInfoTitle': undefined;
+  'GiftAuctionInfoSubtitle': undefined;
+  'GiftAuctionInfoBidCarryoverTitle': undefined;
+  'GiftAuctionInfoMissedBiddersTitle': undefined;
+  'GiftAuctionInfoMissedBiddersSubtitle': undefined;
+  'GiftAuctionRecipient': undefined;
+  'GiftAuctionDate': undefined;
+  'GiftAuctionAcceptedBid': undefined;
+  'GiftAuctionCustomBidTitle': undefined;
+  'GiftAuctionCustomBidPlaceholder': undefined;
+  'GiftAuctionCustomBidButton': undefined;
+  'GiftAuctionBidPlacedTitle': undefined;
+  'GiftAuctionBidIncreasedTitle': undefined;
+  'GiftAuctionFinished': undefined;
+  'GiftAuctionEnded': undefined;
+  'GiftAuctionSoldOut': undefined;
+  'GiftAuctionChangeRecipientTitle': undefined;
+  'GiftAuctionAveragePrice': undefined;
+  'GiftAuctionTapToBidMore': undefined;
+  'StarGift': undefined;
   'SettingsItemPrivacyPasskeys': undefined;
   'SettingsItemPrivacyOn': undefined;
   'SettingsItemPrivacyOff': undefined;
@@ -2645,6 +2681,15 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ActionStarGiftLimitedRibbon': {
     'total': V;
   };
+  'ActionStarGiftAuctionWon': {
+    'cost': V;
+  };
+  'ActionStarGiftAuctionFor': {
+    'peer': V;
+  };
+  'ActionStarGiftAuctionBought': {
+    'cost': V;
+  };
   'ActionSuggestedPhotoYou': {
     'user': V;
   };
@@ -3120,6 +3165,43 @@ export interface LangPairWithVariables<V = LangVariable> {
   'StarGiftPriceDecreaseTimer': {
     'timer': V;
   };
+  'GiftAuctionRoundValue': {
+    'current': V;
+    'total': V;
+  };
+  'GiftAuctionPlaceBidButton': {
+    'amount': V;
+  };
+  'GiftAuctionTimeLeft': {
+    'time': V;
+  };
+  'GiftAuctionAddToBid': {
+    'amount': V;
+  };
+  'GiftAuctionInfoBidCarryoverSubtitle': {
+    'count': V;
+  };
+  'GiftAuctionBoughtGiftHeader': {
+    'gift': V;
+    'giftNumber': V;
+    'round': V;
+  };
+  'GiftAuctionTopPosition': {
+    'position': V;
+  };
+  'GiftAuctionCustomBidDescription': {
+    'count': V;
+  };
+  'GiftAuctionBidPlacedMessage': {
+    'count': V;
+  };
+  'GiftAuctionChangeRecipientDescription': {
+    'oldPeer': V;
+    'newPeer': V;
+  };
+  'GiftAuctionWonNotification': {
+    'gift': V;
+  };
   'SettingsPasskeyUsedAt': {
     'date': V;
   };
@@ -3525,6 +3607,34 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   };
   'InviteRestrictedPremiumReasonMultipleMore': {
     'list': V;
+    'count': V;
+  };
+  'GiftAuctionTopBidders': {
+    'count': V;
+    'gift': V;
+    'link': V;
+  };
+  'GiftAuctionDescription': {
+    'count': V;
+    'link': V;
+  };
+  'GiftAuctionTopWinners': {
+    'count': V;
+  };
+  'GiftAuctionInfoTopBiddersTitle': {
+    'count': V;
+  };
+  'GiftAuctionInfoTopBiddersSubtitle': {
+    'count': V;
+  };
+  'GiftAuctionItemsBought': {
+    'count': V;
+    'gift': V;
+  };
+  'GiftAuctionBoughtGiftsTitle': {
+    'count': V;
+  };
+  'GiftAuctionGifts': {
     'count': V;
   };
 }

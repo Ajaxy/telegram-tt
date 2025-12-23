@@ -243,6 +243,7 @@ export interface ApiMessageActionStarGift extends ActionMediaType {
   isRefunded?: true;
   canUpgrade?: true;
   isPrepaidUpgrade?: true;
+  isAuctionAcquired?: true;
   gift: ApiStarGiftRegular;
   message?: ApiFormattedText;
   starsToConvert?: number;
@@ -253,6 +254,8 @@ export interface ApiMessageActionStarGift extends ActionMediaType {
   peerId?: string;
   savedId?: string;
   prepaidUpgradeHash?: string;
+  toId?: string;
+  giftNumber?: number;
 }
 
 export interface ApiMessageActionStarGiftUnique extends ActionMediaType {

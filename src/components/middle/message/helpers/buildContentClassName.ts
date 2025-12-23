@@ -144,6 +144,10 @@ export function buildContentClassName(
     if (webPage.gift) {
       classNames.push('gift');
     }
+
+    if (webPage.auction) {
+      classNames.push('auction');
+    }
   }
 
   if (invoice && !invoice.extendedMedia) {

@@ -9,15 +9,13 @@ import buildClassName from '../../../util/buildClassName';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Avatar from '../../common/Avatar';
-import PeerChip from '../../common/PeerChip';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
+import TableInfo, { type TableData } from './TableInfo';
 
 import styles from './TableInfoModal.module.scss';
 
-type ChatItem = { chatId: string; withEmojiStatus?: boolean };
-
-export type TableData = [TeactNode | undefined, TeactNode | ChatItem][];
+export type { TableData };
 
 type OwnProps = {
   isOpen?: boolean;
@@ -59,7 +57,8 @@ const TableInfoModal = ({
   currencyInBalanceBar,
 }: OwnProps) => {
   const { openChat } = getActions();
-  const handleOpenChat = useLastCallback((peerId: string) => {
+
+  const handleChatClick = useLastCallback((peerId: string) => {
     openChat({ id: peerId });
     onClose();
   });
@@ -84,25 +83,7 @@ const TableInfoModal = ({
         <Avatar peer={headerAvatarPeer} size="jumbo" className={styles.avatar} />
       )}
       {header}
-      <div className={buildClassName(styles.table, tableClassName)}>
-        {tableData?.map(([label, value]) => (
-          <>
-            {Boolean(label) && <div className={buildClassName(styles.cell, styles.title)}>{label}</div>}
-            <div className={buildClassName(styles.cell, styles.value, !label && styles.fullWidth)}>
-              {typeof value === 'object' && 'chatId' in value ? (
-                <PeerChip
-                  peerId={value.chatId}
-                  className={styles.chatItem}
-                  forceShowSelf
-                  withEmojiStatus={value.withEmojiStatus}
-                  clickArg={value.chatId}
-                  onClick={handleOpenChat}
-                />
-              ) : value}
-            </div>
-          </>
-        ))}
-      </div>
+      <TableInfo tableData={tableData} className={tableClassName} onChatClick={handleChatClick} />
       {footer}
       {buttonText && (
         <Button

@@ -5,10 +5,7 @@ import { getActions, withGlobal } from '../../../../global';
 
 import type {
   ApiPeer,
-  ApiStarGiftAttribute,
-  ApiStarGiftAttributeBackdrop,
   ApiStarGiftAttributeModel,
-  ApiStarGiftAttributePattern,
 } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 import { ApiMediaFormat } from '../../../../api/types';
@@ -17,6 +14,7 @@ import { getStickerMediaHash } from '../../../../global/helpers';
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
 import { fetch } from '../../../../util/mediaLoader';
+import { getRandomGiftPreviewAttributes, type GiftPreviewAttributes } from '../../../common/helpers/gifts';
 
 import useInterval from '../../../../hooks/schedulers/useInterval';
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
@@ -42,12 +40,6 @@ type StateProps = {
   recipient?: ApiPeer;
 };
 
-type Attributes = {
-  model: ApiStarGiftAttributeModel;
-  pattern: ApiStarGiftAttributePattern;
-  backdrop: ApiStarGiftAttributeBackdrop;
-};
-
 const PREVIEW_UPDATE_INTERVAL = 3000;
 
 const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
@@ -67,7 +59,7 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
 
   const isPrepaid = Boolean(renderingModal?.gift?.prepaidUpgradeHash);
 
-  const [previewAttributes, setPreviewAttributes] = useState<Attributes | undefined>();
+  const [previewAttributes, setPreviewAttributes] = useState<GiftPreviewAttributes | undefined>();
 
   const lang = useLang();
 
@@ -111,7 +103,7 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
 
   const updatePreviewAttributes = useLastCallback(() => {
     if (!renderingModal?.sampleAttributes) return;
-    setPreviewAttributes(getRandomAttributes(renderingModal.sampleAttributes, previewAttributes));
+    setPreviewAttributes(getRandomGiftPreviewAttributes(renderingModal.sampleAttributes, previewAttributes));
   });
 
   const handleOpenPriceInfo = useLastCallback(() => {
@@ -274,25 +266,3 @@ export default memo(withGlobal<OwnProps>(
     };
   },
 )(GiftUpgradeModal));
-
-function getRandomAttributes(list: ApiStarGiftAttribute[], previousSelection?: Attributes): Attributes {
-  const models = list.filter((attr): attr is ApiStarGiftAttributeModel => (
-    attr.type === 'model' && attr.name !== previousSelection?.model.name
-  ));
-  const patterns = list.filter((attr): attr is ApiStarGiftAttributePattern => (
-    attr.type === 'pattern' && attr.name !== previousSelection?.pattern.name
-  ));
-  const backdrops = list.filter((attr): attr is ApiStarGiftAttributeBackdrop => (
-    attr.type === 'backdrop' && attr.name !== previousSelection?.backdrop.name
-  ));
-
-  const randomModel = models[Math.floor(Math.random() * models.length)];
-  const randomPattern = patterns[Math.floor(Math.random() * patterns.length)];
-  const randomBackdrop = backdrops[Math.floor(Math.random() * backdrops.length)];
-
-  return {
-    model: randomModel,
-    pattern: randomPattern,
-    backdrop: randomBackdrop,
-  };
-}

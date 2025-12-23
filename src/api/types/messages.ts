@@ -10,7 +10,7 @@ import type {
   ApiLabeledPrice,
 } from './payments';
 import type { ApiTypePeerColor } from './peers';
-import type { ApiStarGiftUnique, ApiTypeCurrencyAmount } from './stars';
+import type { ApiStarGiftRegular, ApiStarGiftUnique, ApiTypeCurrencyAmount } from './stars';
 import type {
   ApiMessageStoryData, ApiStory, ApiWebPageStickerData, ApiWebPageStoryData,
 } from './stories';
@@ -394,9 +394,15 @@ export interface ApiWebPageFull {
   video?: ApiVideo;
   story?: ApiWebPageStoryData;
   gift?: ApiStarGiftUnique;
+  auction?: ApiWebPageAuctionData;
   stickers?: ApiWebPageStickerData;
   hasLargeMedia?: boolean;
 }
+
+export type ApiWebPageAuctionData = {
+  gift: ApiStarGiftRegular;
+  endDate: number;
+};
 
 export type ApiWebPage = ApiWebPagePending | ApiWebPageEmpty | ApiWebPageFull;
 

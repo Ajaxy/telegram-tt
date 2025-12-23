@@ -8,7 +8,7 @@ import {
 import { addExtraClass } from '../../lib/teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { ApiChatFolder, ApiLimitTypeWithModal, ApiUser } from '../../api/types';
+import type { ApiChatFolder, ApiLimitTypeWithModal, ApiStarGiftAuctionState, ApiUser } from '../../api/types';
 import type { TabState } from '../../global/types';
 
 import { BASE_EMOJI_KEYWORD_LANG, DEBUG, FOLDERS_POSITION_LEFT, INACTIVE_MARKER } from '../../config';
@@ -145,6 +145,7 @@ type StateProps = {
   isAccountFrozen?: boolean;
   isAppConfigLoaded?: boolean;
   isFoldersSidebarShown: boolean;
+  activeGiftAuction?: ApiStarGiftAuctionState;
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -198,6 +199,7 @@ const Main = ({
   isAccountFrozen,
   isAppConfigLoaded,
   isFoldersSidebarShown,
+  activeGiftAuction,
 }: OwnProps & StateProps) => {
   const {
     initMain,
@@ -258,6 +260,7 @@ const Main = ({
     loadAllStories,
     loadAllHiddenStories,
     loadContentSettings,
+    loadActiveGiftAuction,
     loadPromoData,
   } = getActions();
 
@@ -438,6 +441,15 @@ const Main = ({
       type: parsedLocationHash.type,
     });
   }, [currentUserId]);
+
+  // Refresh active gift auction subscription
+  const auctionTimeout = activeGiftAuction?.timeout;
+  const auctionGiftId = activeGiftAuction?.gift.id;
+  useInterval(() => {
+    if (auctionGiftId) {
+      loadActiveGiftAuction({ giftId: auctionGiftId });
+    }
+  }, auctionTimeout ? auctionTimeout * 1000 : undefined);
 
   // Restore Transition slide class after async rendering
   useLayoutEffect(() => {
@@ -635,6 +647,7 @@ export default memo(withGlobal<OwnProps>(
       payment,
       limitReachedModal,
       deleteFolderDialogModal,
+      activeGiftAuction,
     } = selectTabState(global);
 
     const { wasTimeFormatSetManually, foldersPosition } = selectSharedSettings(global);
@@ -693,6 +706,7 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       isAppConfigLoaded: global.isAppConfigLoaded,
       isFoldersSidebarShown: foldersPosition === FOLDERS_POSITION_LEFT && !isMobile && selectAreFoldersPresent(global),
+      activeGiftAuction,
     };
   },
 )(Main));

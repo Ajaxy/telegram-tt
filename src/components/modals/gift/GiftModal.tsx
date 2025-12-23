@@ -41,7 +41,7 @@ import InfiniteScroll from '../../ui/InfiniteScroll';
 import Modal from '../../ui/Modal';
 import Transition from '../../ui/Transition';
 import BalanceBlock from '../stars/BalanceBlock';
-import GiftSendingOptions from './GiftComposer';
+import GiftComposer from './GiftComposer';
 import GiftItemPremium from './GiftItemPremium';
 import GiftItemStar from './GiftItemStar';
 import GiftModalResaleScreen from './GiftModalResaleScreen';
@@ -104,6 +104,8 @@ const GiftModal: FC<OwnProps & StateProps> = ({
     closeResaleGiftsMarket,
     loadMyUniqueGifts,
     openGiftTransferConfirmModal,
+    setGiftModalSelectedGift,
+    clearActiveGiftAuction,
   } = getActions();
   const dialogRef = useRef<HTMLDivElement>();
   const transitionRef = useRef<HTMLDivElement>();
@@ -118,7 +120,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   const user = peer && isApiPeerUser(peer) ? peer : undefined;
   const chat = peer && isApiPeerChat(peer) ? peer : undefined;
 
-  const [selectedGift, setSelectedGift] = useState<GiftOption | undefined>();
+  const selectedGift = renderingModal?.selectedGift;
   const [shouldShowMainScreenHeader, setShouldShowMainScreenHeader] = useState(false);
   const [isMainScreenHeaderForStarGifts, setIsMainScreenHeaderForStarGifts] = useState(false);
   const [isGiftScreenHeaderForStarGifts, setIsGiftScreenHeaderForStarGifts] = useState(false);
@@ -192,10 +194,14 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (!isOpen) {
       setShouldShowMainScreenHeader(false);
-      setSelectedGift(undefined);
+      setGiftModalSelectedGift({ gift: undefined });
       setSelectedCategory('all');
     }
-  }, [isOpen, tabId, closeResaleGiftsMarket]);
+  }, [isOpen]);
+
+  useEffect(() => {
+    setIsGiftScreenHeaderForStarGifts(Boolean(selectedGift && 'id' in selectedGift));
+  }, [selectedGift]);
 
   const handleScroll = useLastCallback((e: React.UIEvent<HTMLDivElement>) => {
     if (isGiftScreen) return;
@@ -303,8 +309,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
       openGiftInMarket({ gift, tabId });
       return;
     }
-    setSelectedGift(gift);
-    setIsGiftScreenHeaderForStarGifts('id' in gift);
+    setGiftModalSelectedGift({ gift });
   });
 
   const handleMyGiftClick = useLastCallback((gift: ApiStarGift) => {
@@ -423,7 +428,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleCloseModal = useLastCallback(() => {
-    setSelectedGift(undefined);
+    setGiftModalSelectedGift({ gift: undefined });
     resetResaleGifts();
     closeGiftModal();
   });
@@ -434,7 +439,8 @@ const GiftModal: FC<OwnProps & StateProps> = ({
       return;
     }
     if (isGiftScreen) {
-      setSelectedGift(undefined);
+      setGiftModalSelectedGift({ gift: undefined });
+      clearActiveGiftAuction();
       return;
     }
     handleCloseModal();
@@ -589,7 +595,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
             />
           )}
         {isGiftScreen && renderingModal?.forPeerId && (
-          <GiftSendingOptions
+          <GiftComposer
             gift={selectedGift}
             giftByStars={giftsByStars.get(selectedGift)}
             peerId={renderingModal.forPeerId}

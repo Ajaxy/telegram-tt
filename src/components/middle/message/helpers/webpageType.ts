@@ -1,7 +1,10 @@
+import type { IconName } from '../../../../types/icons';
 import type { RegularLangKey } from '../../../../types/language';
 
+import { getServerTime } from '../../../../util/serverTime';
+
 // https://github.com/telegramdesktop/tdesktop/blob/3da787791f6d227f69b32bf4003bc6071d05e2ac/Telegram/SourceFiles/history/view/history_view_view_button.cpp#L51
-export function getWebpageButtonLangKey(type?: string): RegularLangKey | undefined {
+export function getWebpageButtonLangKey(type?: string, auctionEndDate?: number): RegularLangKey | undefined {
   switch (type) {
     case 'telegram_channel_request':
     case 'telegram_megagroup_request':
@@ -37,7 +40,18 @@ export function getWebpageButtonLangKey(type?: string): RegularLangKey | undefin
       return 'ViewButtonEmojiset';
     case 'telegram_nft':
       return 'ViewButtonGiftUnique';
+    case 'telegram_auction': {
+      const isFinished = auctionEndDate !== undefined && auctionEndDate * 1000 < getServerTime();
+      return isFinished ? 'PollViewResults' : 'GiftAuctionJoin';
+    }
     default:
       return undefined;
   }
+}
+
+export function getWebpageButtonIcon(type?: string): IconName | undefined {
+  if (type === 'telegram_auction') {
+    return 'auction-filled';
+  }
+  return undefined;
 }

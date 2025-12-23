@@ -1,6 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
+  ApiAuctionBidLevel,
   ApiDisallowedGiftsSettings,
   ApiInputSavedStarGift,
   ApiSavedStarGift,
@@ -8,10 +9,14 @@ import type {
   ApiStarGiftAttribute,
   ApiStarGiftAttributeCounter,
   ApiStarGiftAttributeId,
+  ApiStarGiftAuctionAcquiredGift,
+  ApiStarGiftAuctionState,
+  ApiStarGiftAuctionUserState,
   ApiStarGiftCollection,
   ApiStarGiftUpgradePreview,
   ApiStarGiftUpgradePrice,
   ApiTypeResaleStarGifts,
+  ApiTypeStarGiftAuctionState,
 } from '../../types';
 
 import { int2hex } from '../../../util/colors';
@@ -20,6 +25,7 @@ import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { addDocumentToLocalDb } from '../helpers/localDb';
 import { buildApiFormattedText } from './common';
 import { buildApiCurrencyAmount } from './payments';
+import { buildApiPeerId } from './peers';
 import { getApiChatIdFromMtpPeer } from './peers';
 import { buildStickerFromDocument } from './symbols';
 import { buildApiUser } from './users';
@@ -57,7 +63,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
   const {
     id, limited, stars, availabilityRemains, availabilityTotal, convertStars, firstSaleDate, lastSaleDate, soldOut,
     birthday, upgradeStars, resellMinStars, title, availabilityResale, releasedBy,
-    requirePremium, limitedPerUser, perUserTotal, perUserRemains, lockedUntilDate,
+    requirePremium, limitedPerUser, perUserTotal, perUserRemains, lockedUntilDate, auction, giftsPerRound, background,
   } = starGift;
 
   addDocumentToLocalDb(starGift.sticker);
@@ -87,6 +93,13 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
     perUserTotal,
     perUserRemains,
     lockedUntilDate,
+    isAuction: auction,
+    giftsPerRound,
+    background: background ? {
+      centerColor: int2hex(background.centerColor),
+      edgeColor: int2hex(background.edgeColor),
+      textColor: int2hex(background.textColor),
+    } : undefined,
   };
 }
 
@@ -159,8 +172,9 @@ export function buildApiStarGiftAttribute(attribute: GramJs.TypeStarGiftAttribut
 
 export function buildApiSavedStarGift(userStarGift: GramJs.SavedStarGift, peerId: string): ApiSavedStarGift {
   const {
-    gift, date, convertStars, fromId, message, msgId, nameHidden, unsaved, upgradeStars, transferStars, canUpgrade,
-    savedId, canExportAt, pinnedToTop, canResellAt, canTransferAt, prepaidUpgradeHash, dropOriginalDetailsStars,
+    gift, date, convertStars, fromId, message, msgId, nameHidden, unsaved, refunded, upgradeStars, transferStars,
+    canUpgrade, savedId, canExportAt, pinnedToTop, canResellAt, canTransferAt, prepaidUpgradeHash,
+    dropOriginalDetailsStars,
   } = userStarGift;
 
   const inputGift: ApiInputSavedStarGift | undefined = savedId && peerId
@@ -176,6 +190,7 @@ export function buildApiSavedStarGift(userStarGift: GramJs.SavedStarGift, peerId
     messageId: msgId,
     isNameHidden: nameHidden,
     isUnsaved: unsaved,
+    isRefunded: refunded,
     canUpgrade,
     alreadyPaidUpgradeStars: toJSNumber(upgradeStars),
     transferStars: toJSNumber(transferStars),
@@ -332,5 +347,106 @@ export function buildApiStarGiftUpgradePreview(
     sampleAttributes: result.sampleAttributes.map(buildApiStarGiftAttribute).filter(Boolean),
     prices: result.prices?.map(buildApiStarGiftUpgradePrice) || [],
     nextPrices: result.nextPrices?.map(buildApiStarGiftUpgradePrice) || [],
+  };
+}
+
+export function buildApiAuctionBidLevel(bidLevel: GramJs.AuctionBidLevel): ApiAuctionBidLevel {
+  return {
+    pos: bidLevel.pos,
+    amount: toJSNumber(bidLevel.amount) ?? 0,
+    date: bidLevel.date,
+  };
+}
+
+export function buildApiTypeStarGiftAuctionState(
+  state: GramJs.TypeStarGiftAuctionState,
+): ApiTypeStarGiftAuctionState | undefined {
+  if (state instanceof GramJs.StarGiftAuctionStateNotModified) {
+    return undefined;
+  }
+
+  if (state instanceof GramJs.StarGiftAuctionStateFinished) {
+    const {
+      startDate, endDate, averagePrice, listedCount, fragmentListedCount, fragmentListedUrl,
+    } = state;
+
+    return {
+      type: 'finished',
+      startDate,
+      endDate,
+      averagePrice: toJSNumber(averagePrice),
+      listedCount,
+      fragmentListedCount,
+      fragmentListedUrl,
+    };
+  }
+
+  const {
+    version, startDate, endDate, minBidAmount, bidLevels, topBidders,
+    nextRoundAt, lastGiftNum, giftsLeft, currentRound, totalRounds,
+  } = state;
+
+  return {
+    type: 'active',
+    version,
+    startDate,
+    endDate,
+    minBidAmount: toJSNumber(minBidAmount),
+    bidLevels: bidLevels.map(buildApiAuctionBidLevel),
+    topBidders: topBidders.map((id) => buildApiPeerId(id, 'user')),
+    nextRoundAt,
+    lastGiftNum,
+    giftsLeft,
+    currentRound,
+    totalRounds,
+  };
+}
+
+export function buildApiStarGiftAuctionUserState(
+  userState: GramJs.StarGiftAuctionUserState,
+): ApiStarGiftAuctionUserState {
+  const {
+    returned, bidAmount, bidDate, minBidAmount, bidPeer, acquiredCount,
+  } = userState;
+
+  return {
+    isReturned: returned || undefined,
+    bidAmount: bidAmount !== undefined ? toJSNumber(bidAmount) : undefined,
+    bidDate,
+    minBidAmount: minBidAmount !== undefined ? toJSNumber(minBidAmount) : undefined,
+    bidPeerId: bidPeer && getApiChatIdFromMtpPeer(bidPeer),
+    acquiredCount,
+  };
+}
+
+export function buildApiStarGiftAuctionState(
+  result: GramJs.payments.StarGiftAuctionState,
+): ApiStarGiftAuctionState | undefined {
+  const gift = buildApiStarGift(result.gift);
+  if (gift.type !== 'starGift') return undefined;
+
+  const state = buildApiTypeStarGiftAuctionState(result.state);
+  if (!state) return undefined;
+
+  return {
+    gift,
+    state,
+    userState: buildApiStarGiftAuctionUserState(result.userState),
+    timeout: result.timeout,
+  };
+}
+
+export function buildApiStarGiftAuctionAcquiredGift(
+  result: GramJs.StarGiftAuctionAcquiredGift,
+): ApiStarGiftAuctionAcquiredGift {
+  return {
+    peerId: getApiChatIdFromMtpPeer(result.peer),
+    date: result.date,
+    bidAmount: toJSNumber(result.bidAmount),
+    round: result.round,
+    position: result.pos,
+    message: result.message ? buildApiFormattedText(result.message) : undefined,
+    giftNumber: result.giftNum,
+    isNameHidden: result.nameHidden || undefined,
   };
 }

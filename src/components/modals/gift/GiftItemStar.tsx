@@ -28,8 +28,10 @@ export type OwnProps = {
   gift: ApiStarGift;
   isResale?: boolean;
   withTransferBadge?: boolean;
+  hideBadge?: boolean;
+  noClickable?: boolean;
   observeIntersection?: ObserveFn;
-  onClick: (gift: ApiStarGift, target: 'original' | 'resell') => void;
+  onClick?: (gift: ApiStarGift, target: 'original' | 'resell') => void;
 };
 
 type StateProps = {
@@ -39,9 +41,11 @@ type StateProps = {
 const GIFT_STICKER_SIZE = 90;
 
 function GiftItemStar({
-  gift, isResale, isCurrentUserPremium, withTransferBadge, observeIntersection, onClick,
+  gift, isResale, isCurrentUserPremium, withTransferBadge, hideBadge, noClickable, observeIntersection, onClick,
 }: OwnProps & StateProps) {
-  const { openGiftInfoModal, openPremiumModal, showNotification, checkCanSendGift } = getActions();
+  const {
+    openGiftInfoModal, openPremiumModal, showNotification, checkCanSendGift, openGiftAuctionModal,
+  } = getActions();
 
   const ref = useRef<HTMLDivElement>();
   const stickerRef = useRef<HTMLDivElement>();
@@ -77,11 +81,17 @@ function GiftItemStar({
     ? lang.number(resellMinStars) + '+' : priceInfo?.amount || 0;
   const isLimited = !isGiftUnique && Boolean(regularGift?.isLimited);
   const isSoldOut = !isGiftUnique && Boolean(regularGift?.isSoldOut);
+  const isAuction = !isGiftUnique && !isResale && Boolean(regularGift?.isAuction);
   const isPremiumRequired = Boolean(gift?.requirePremium);
   const isUserLimitReached = Boolean(regularGift?.limitedPerUser && !regularGift?.perUserRemains);
   const perUserTotal = regularGift?.perUserTotal;
 
   const handleGiftClick = useLastCallback(() => {
+    if (isAuction) {
+      openGiftAuctionModal({ gift });
+      return;
+    }
+
     if (isSoldOut && !isResale) {
       openGiftInfoModal({ gift });
       return;
@@ -110,12 +120,12 @@ function GiftItemStar({
     if (isLocked) {
       checkCanSendGift({
         gift,
-        onSuccess: () => onClick(gift, isResale ? 'resell' : 'original'),
+        onSuccess: () => onClick?.(gift, isResale ? 'resell' : 'original'),
       });
       return;
     }
 
-    onClick(gift, isResale ? 'resell' : 'original');
+    onClick?.(gift, isResale ? 'resell' : 'original');
   });
 
   const radialPatternBackdrop = useMemo(() => {
@@ -162,14 +172,18 @@ function GiftItemStar({
     if (isSoldOut) {
       return <GiftRibbon color="red" text={lang('GiftSoldOut')} />;
     }
+    if (isAuction) {
+      return <GiftRibbon color="orange" text={lang('GiftRibbonAuction')} />;
+    }
     if (isPremiumRequired) {
-      return <GiftRibbon color="orange" text={lang('LimitPremium')} />;
+      return <GiftRibbon color="orange" text={lang('GiftRibbonPremium')} />;
     }
     if (isLimited) {
       return <GiftRibbon color="blue" text={lang('GiftLimited')} />;
     }
     return undefined;
-  }, [isGiftUnique, isResale, gift, isSoldOut, isLimited, lang, giftNumber, isPremiumRequired]);
+  }, [isGiftUnique, isResale, gift, isSoldOut,
+    isLimited, lang, giftNumber, isPremiumRequired, isAuction]);
 
   useOnIntersect(ref, observeIntersection, (entry) => {
     const visible = entry.isIntersecting;
@@ -179,6 +193,10 @@ function GiftItemStar({
   const badgeContent = useMemo(() => {
     if (withTransferBadge) {
       return lang('GiftTransferTitle');
+    }
+
+    if (isAuction) {
+      return lang('GiftAuctionJoin');
     }
 
     if (priceCurrency === TON_CURRENCY_CODE) {
@@ -192,7 +210,7 @@ function GiftItemStar({
       asFont: true,
       className: styles.star,
     });
-  }, [withTransferBadge, priceCurrency, formattedPrice, lang]);
+  }, [withTransferBadge, priceCurrency, formattedPrice, isAuction, lang]);
 
   return (
     <div
@@ -203,12 +221,14 @@ function GiftItemStar({
         styles.starGift,
         'starGiftItem',
         isPremiumRequired && styles.premiumRequired,
+        isAuction && styles.auction,
+        noClickable && styles.noClickable,
       )}
-      tabIndex={0}
-      role="button"
-      onClick={handleGiftClick}
-      onMouseEnter={!IS_TOUCH_ENV ? markHover : undefined}
-      onMouseLeave={!IS_TOUCH_ENV ? unmarkHover : undefined}
+      tabIndex={noClickable ? undefined : 0}
+      role={noClickable ? undefined : 'button'}
+      onClick={noClickable ? undefined : handleGiftClick}
+      onMouseEnter={!IS_TOUCH_ENV && !noClickable ? markHover : undefined}
+      onMouseLeave={!IS_TOUCH_ENV && !noClickable ? unmarkHover : undefined}
     >
       {radialPatternBackdrop}
 
@@ -230,20 +250,22 @@ function GiftItemStar({
         )}
 
       </div>
-      <Button
-        className={buildClassName(
-          styles.buy,
-          withTransferBadge && styles.transferBadge,
-        )}
-        nonInteractive
-        size="tiny"
-        color={isGiftUnique ? 'bluredStarsBadge' : 'stars'}
-        withSparkleEffect={isVisible && !withTransferBadge}
-        pill
-        fluid
-      >
-        {badgeContent}
-      </Button>
+      {!hideBadge && (
+        <Button
+          className={buildClassName(
+            styles.buy,
+            withTransferBadge && styles.transferBadge,
+          )}
+          nonInteractive
+          size="tiny"
+          color={isGiftUnique ? 'bluredStarsBadge' : 'stars'}
+          withSparkleEffect={isVisible && !withTransferBadge}
+          pill
+          fluid
+        >
+          {badgeContent}
+        </Button>
+      )}
       {giftRibbon}
       {isLocked && <Icon name="lock-badge" className={styles.lockIcon} />}
     </div>

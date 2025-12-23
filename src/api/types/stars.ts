@@ -27,6 +27,15 @@ export interface ApiStarGiftRegular {
   perUserTotal?: number;
   perUserRemains?: number;
   lockedUntilDate?: number;
+  isAuction?: true;
+  giftsPerRound?: number;
+  background?: ApiStarGiftBackground;
+}
+
+export interface ApiStarGiftBackground {
+  centerColor: string;
+  edgeColor: string;
+  textColor: string;
 }
 
 export interface ApiStarGiftUnique {
@@ -103,6 +112,7 @@ export interface ApiStarGiftUpgradePreview {
 export interface ApiSavedStarGift {
   isNameHidden?: boolean;
   isUnsaved?: boolean;
+  isRefunded?: boolean;
   fromId?: string;
   date: number;
   gift: ApiStarGift;
@@ -259,6 +269,7 @@ export interface ApiStarsTransaction {
   isPostsSearch?: true;
   isDropOriginalDetails?: true;
   isPrepaidUpgrade?: true;
+  isStarGiftAuctionBid?: true;
 }
 
 export interface ApiStarsSubscription {
@@ -314,4 +325,64 @@ export interface ApiStarsRating {
   currentLevelStars: number;
   stars: number;
   nextLevelStars?: number;
+}
+
+export interface ApiAuctionBidLevel {
+  pos: number;
+  amount: number;
+  date: number;
+}
+
+export interface ApiStarGiftAuctionStateActive {
+  type: 'active';
+  version: number;
+  startDate: number;
+  endDate: number;
+  minBidAmount: number;
+  bidLevels: ApiAuctionBidLevel[];
+  topBidders: string[];
+  nextRoundAt: number;
+  lastGiftNum: number;
+  giftsLeft: number;
+  currentRound: number;
+  totalRounds: number;
+}
+
+export interface ApiStarGiftAuctionStateFinished {
+  type: 'finished';
+  startDate: number;
+  endDate: number;
+  averagePrice: number;
+  listedCount?: number;
+  fragmentListedCount?: number;
+  fragmentListedUrl?: string;
+}
+
+export interface ApiStarGiftAuctionUserState {
+  isReturned?: true;
+  bidAmount?: number;
+  bidDate?: number;
+  minBidAmount?: number;
+  bidPeerId?: string;
+  acquiredCount: number;
+}
+
+export type ApiTypeStarGiftAuctionState = ApiStarGiftAuctionStateActive | ApiStarGiftAuctionStateFinished;
+
+export interface ApiStarGiftAuctionState {
+  gift: ApiStarGiftRegular;
+  state: ApiTypeStarGiftAuctionState;
+  userState: ApiStarGiftAuctionUserState;
+  timeout: number;
+}
+
+export interface ApiStarGiftAuctionAcquiredGift {
+  peerId: string;
+  date: number;
+  bidAmount: number;
+  round: number;
+  position: number;
+  message?: ApiFormattedText;
+  giftNumber?: number;
+  isNameHidden?: true;
 }

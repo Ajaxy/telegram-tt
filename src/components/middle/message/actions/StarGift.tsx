@@ -72,23 +72,31 @@ const StarGiftAction = ({
 
   const peer = isOutgoing ? recipient : sender;
   const isChannel = peer && isApiPeerChat(peer) && isChatChannel(peer);
+  const isAuction = action.isAuctionAcquired;
 
   const backgroundColor = useDynamicColorListener(ref, 'background-color', !action.gift.availabilityTotal);
 
   const fallbackPeerTitle = lang('ActionFallbackSomeone');
   const peerTitle = peer && getPeerTitle(lang, peer);
+  const auctionToTitle = recipient && getPeerTitle(lang, recipient);
   const isSelf = sender?.id === recipient?.id;
+
+  const auctionBid = isAuction ? action.gift.stars : undefined;
 
   const giftDescription = useMemo(() => {
     const peerLink = renderPeerLink(peer?.id, peerTitle || fallbackPeerTitle);
     const starsAmount = action.starsToConvert !== undefined
       ? formatStarsAsText(lang, action.starsToConvert) : undefined;
 
+    if (isAuction && auctionBid !== undefined) {
+      return lang('ActionStarGiftAuctionBought', { cost: formatStarsAsText(lang, auctionBid) });
+    }
+
     if (action.isUpgraded) {
       return lang('ActionStarGiftUpgraded');
     }
 
-    if (action.alreadyPaidUpgradeStars) {
+    if (action.alreadyPaidUpgradeStars && !isAuction) {
       return translateWithYou(
         lang, 'ActionStarGiftUpgradeText', !isOutgoing || isSelf, { peer: peerLink },
       );
@@ -100,7 +108,7 @@ const StarGiftAction = ({
       );
     }
 
-    if (starGiftMaxConvertPeriod && getServerTime() < message.date + starGiftMaxConvertPeriod) {
+    if (starGiftMaxConvertPeriod && getServerTime() < message.date + starGiftMaxConvertPeriod && starsAmount) {
       return translateWithYou(
         lang, 'ActionStarGiftConvertText', !isOutgoing || isSelf, { peer: peerLink, amount: starsAmount },
       );
@@ -116,8 +124,8 @@ const StarGiftAction = ({
       lang, 'ActionStarGiftNoConvertText', !isOutgoing || isSelf, { peer: peerLink },
     );
   }, [
-    action, fallbackPeerTitle, isChannel, isOutgoing, lang, message.date, peer?.id, peerTitle, starGiftMaxConvertPeriod,
-    isSelf,
+    action, auctionBid, fallbackPeerTitle, isAuction, isChannel, isOutgoing, lang, message.date, peer?.id, peerTitle,
+    starGiftMaxConvertPeriod, isSelf,
   ]);
 
   return (
@@ -157,7 +165,11 @@ const StarGiftAction = ({
       )}
       <div className={styles.info}>
         <h3 className={styles.title}>
-          {isSelf ? lang('ActionStarGiftSelf') : lang(
+          {isAuction && recipient ? lang(
+            'ActionStarGiftAuctionFor',
+            { peer: renderPeerLink(recipient.id, auctionToTitle || fallbackPeerTitle) },
+            { withNodes: true },
+          ) : isSelf ? lang('ActionStarGiftSelf') : lang(
             isOutgoing ? 'ActionStarGiftTo' : 'ActionStarGiftFrom',
             {
               peer: renderPeerLink(peer?.id, peerTitle || fallbackPeerTitle),
@@ -188,7 +200,8 @@ export default memo(withGlobal<OwnProps>(
     const messageSender = selectSender(global, message);
     const giftSender = action.fromId ? selectPeer(global, action.fromId) : undefined;
     const messageRecipient = message.isOutgoing ? selectPeer(global, message.chatId) : currentUser;
-    const giftRecipient = action.peerId ? selectPeer(global, action.peerId) : undefined;
+    const giftRecipientId = action.toId || action.peerId;
+    const giftRecipient = giftRecipientId ? selectPeer(global, giftRecipientId) : undefined;
 
     return {
       canPlayAnimatedEmojis,

@@ -79,6 +79,9 @@ export const processDeepLink = (url: string, linkContext?: LinkContext): boolean
       case 'giftUniqueLink':
         actions.openUniqueGiftBySlug({ slug: parsedLink.slug });
         return true;
+      case 'giftAuctionLink':
+        actions.openGiftAuctionBySlug({ slug: parsedLink.slug });
+        return true;
       case 'settings':
         if (!parsedLink.screen) {
           actions.openLeftColumnContent({ contentKey: LeftColumnContent.Settings });

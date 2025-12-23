@@ -40,6 +40,14 @@
   &:hover::before {
     opacity: 1;
   }
+
+  &.noClickable {
+    cursor: default;
+
+    &:hover::before {
+      opacity: 0;
+    }
+  }
 }
 
 .starGift {
@@ -80,6 +88,7 @@
   font-size: 0.75rem !important;
 }
 
+.auction,
 .premiumRequired {
   outline: 0.125rem solid #D18D21;
   outline-offset: -0.125rem;

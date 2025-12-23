@@ -1,5 +1,6 @@
 import type {
-  ApiInputInvoice, ApiInputInvoicePremiumGiftStars, ApiInputInvoiceStarGift, ApiInputInvoiceStarGiftResale,
+  ApiInputInvoice, ApiInputInvoicePremiumGiftStars, ApiInputInvoiceStarGift,
+  ApiInputInvoiceStarGiftAuctionBid, ApiInputInvoiceStarGiftResale,
   ApiRequestInputInvoice,
 } from '../../../api/types';
 import type { ApiCredentials } from '../../../components/payment/PaymentModal';
@@ -575,7 +576,7 @@ addActionHandler('checkCanSendGift', async (global, actions, payload): Promise<v
 
 addActionHandler('openGiftModal', async (global, actions, payload): Promise<void> => {
   const {
-    forUserId, selectedResaleGift, tabId = getCurrentTabId(),
+    forUserId, selectedGift, selectedResaleGift, tabId = getCurrentTabId(),
   } = payload;
 
   if (selectIsCurrentUserFrozen(global)) {
@@ -592,6 +593,7 @@ addActionHandler('openGiftModal', async (global, actions, payload): Promise<void
       forPeerId: forUserId,
       gifts,
       selectedResaleGift,
+      selectedGift,
     },
   }, tabId);
   setGlobal(global);
@@ -1140,6 +1142,24 @@ addActionHandler('upgradePrepaidGift', (global, actions, payload): ActionReturnT
   payInputStarInvoice(global, invoice, stars, tabId);
 });
 
+addActionHandler('sendStarGiftAuctionBid', (global, actions, payload): ActionReturnType => {
+  const {
+    giftId, bidAmount, peerId, message, shouldHideName, isUpdateBid, tabId = getCurrentTabId(),
+  } = payload;
+
+  const invoice: ApiInputInvoiceStarGiftAuctionBid = {
+    type: 'stargiftAuctionBid',
+    giftId,
+    bidAmount,
+    peerId,
+    message,
+    shouldHideName,
+    isUpdateBid,
+  };
+
+  payInputStarInvoice(global, invoice, bidAmount, tabId);
+});
+
 async function payInputStarInvoice<T extends GlobalState>(
   global: T, inputInvoice: ApiInputInvoice, price: number,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
@@ -1227,6 +1247,26 @@ addActionHandler('openUniqueGiftBySlug', async (global, actions, payload): Promi
   }
 
   actions.openGiftInfoModal({ gift, tabId });
+});
+
+addActionHandler('openGiftAuctionBySlug', async (global, actions, payload): Promise<void> => {
+  const {
+    slug, tabId = getCurrentTabId(),
+  } = payload;
+
+  const auctionState = await callApi('fetchStarGiftAuctionState', { slug });
+
+  if (!auctionState) {
+    actions.showNotification({
+      message: {
+        key: 'GiftWasNotFound',
+      },
+      tabId,
+    });
+    return;
+  }
+
+  actions.openGiftAuctionModal({ gift: auctionState.gift, tabId });
 });
 
 addActionHandler('processStarGiftWithdrawal', async (global, actions, payload): Promise<void> => {

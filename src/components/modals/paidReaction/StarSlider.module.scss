@@ -1,7 +1,10 @@
 @use "../../../styles/mixins";
 
+/* stylelint-disable plugin/no-low-performance-animation-properties */
+
 .root {
   --_size: 1.875rem;
+  --_transition: 0.15s;
   --progress: 0;
 
   position: relative;
@@ -9,6 +12,24 @@
   padding-top: 4rem;
 
   @include mixins.reset-range();
+
+  &.dragging {
+    .progress {
+      transition: background-color var(--_transition);
+    }
+
+    .floatingBadgeWrapper {
+      transition: none;
+    }
+
+    .floatingBadgeText {
+      transition: background-color var(--_transition);
+    }
+
+    .floatingBadgeTriangle {
+      transition: none;
+    }
+  }
 }
 
 .slider {
@@ -79,6 +100,8 @@
 
   background-image: var(--stars-gradient);
 
+  transition: width var(--_transition), background-color var(--_transition);
+
   &::after {
     content: "";
 
@@ -93,12 +116,14 @@
 
     background-color: white;
   }
+
+  &.dynamicColor {
+    background-color: var(--dynamic-color);
+    background-image: none;
+  }
 }
 
 .floatingBadgeWrapper {
-  --_min-x: 0;
-  --_max-x: 100%;
-
   pointer-events: none;
 
   position: absolute;
@@ -107,11 +132,13 @@
   transform:
   translateX(
     clamp(
-      var(--_min-x),
+      var(--min-badge-x, 0px),
       calc(var(--_size) / 2 + var(--progress) * (100% - var(--_size))),
-      var(--_max-x),
+      var(--max-badge-x, 100%)
     )
   );
+
+  transition: transform var(--_transition);
 }
 
 .floatingBadge {
@@ -121,12 +148,15 @@
   top: -1rem;
   left: 0;
   transform: translate(-50%, -100%);
+
+  &.clickable {
+    pointer-events: auto;
+    cursor: pointer;
+  }
 }
 
 .floatingBadgeText {
-  display: flex;
-  gap: 0.125rem;
-  align-items: center;
+  position: relative;
 
   padding: 0.5rem 1rem;
   border-radius: 2rem;
@@ -138,6 +168,65 @@
   white-space: nowrap;
 
   background-image: var(--stars-gradient);
+
+  transition:
+    border-radius var(--_transition),
+    width var(--_transition),
+    background-color var(--_transition);
+
+  &.dynamicColor {
+    background-color: var(--dynamic-color);
+    background-image: none;
+  }
+
+  &.noTransition {
+    transition: none;
+  }
+}
+
+.floatingBadgeSparkles {
+  position: absolute;
+  inset: 0;
+  color: white;
+}
+
+.floatingBadgeContent {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 1.5rem;
+
+  &.withDescription {
+    .floatingBadgeTitle {
+      transform: translateY(-0.5rem);
+      font-size: 1rem;
+    }
+
+    .floatingBadgeDescription {
+      opacity: 0.8;
+    }
+  }
+}
+
+.floatingBadgeTitle {
+  display: flex;
+  gap: 0.125rem;
+  align-items: center;
+  transition: transform var(--_transition), font-size var(--_transition);
+}
+
+.floatingBadgeDescription {
+  position: absolute;
+  bottom: -0.125rem;
+
+  font-size: 0.75rem;
+
+  opacity: 0;
+
+  transition: opacity var(--_transition);
 }
 
 .floatingBadgeTriangle {
@@ -145,5 +234,22 @@
   z-index: -1;
   bottom: 0;
   left: 50%;
-  transform: translate(-50%, 33%);
+
+  transition: transform var(--_transition);
+}
+
+.floatingBadgeTrianglePath {
+  transition: fill var(--_transition);
+}
+
+.customValueIcon {
+  pointer-events: none;
+
+  position: absolute;
+  z-index: 2;
+  right: 0.375rem;
+  bottom: 0.375rem;
+
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
 }

@@ -1,0 +1,82 @@
+.modal :global(.modal-dialog) {
+  overflow: hidden;
+}
+
+.modalContent {
+  position: relative;
+  max-height: min(97vh, 48rem) !important;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+
+  text-wrap: balance;
+}
+
+.title {
+  margin: 0;
+  margin-top: 0.25rem;
+
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.75rem;
+}
+
+.description {
+  margin: 0;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.finishedBadge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+
+  background-color: var(--color-background-secondary);
+}
+
+.giftName {
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.itemsBoughtLink {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.itemsBoughtSticker {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.footerButton {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.buttonSubtitle {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-normal);
+  opacity: 0.7;
+}
+
+.starIcon {
+  line-height: 1rem !important;
+}

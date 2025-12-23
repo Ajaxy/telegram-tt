@@ -7,7 +7,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ThemeKey } from '../../../types';
 import type { GiftOption } from './GiftModal';
 import {
-  type ApiMessage, type ApiPeer, type ApiStarsAmount, MAIN_THREAD_ID,
+  type ApiMessage, type ApiPeer, type ApiStarGiftAuctionState, type ApiStarsAmount, MAIN_THREAD_ID,
 } from '../../../api/types';
 
 import { getPeerTitle, isApiPeerUser } from '../../../global/helpers/peers';
@@ -16,8 +16,11 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
+import { formatCountdown } from '../../../util/dates/dateFormat';
+import { HOUR } from '../../../util/dates/units';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { formatStarsAsIcon } from '../../../util/localization/format';
+import { getServerTime } from '../../../util/serverTime';
 
 import useCustomBackground from '../../../hooks/useCustomBackground';
 import useLang from '../../../hooks/useLang';
@@ -30,6 +33,7 @@ import Link from '../../ui/Link';
 import ListItem from '../../ui/ListItem';
 import Switcher from '../../ui/Switcher';
 import TextArea from '../../ui/TextArea';
+import TextTimer from '../../ui/TextTimer';
 
 import styles from './GiftComposer.module.scss';
 
@@ -53,9 +57,11 @@ export type StateProps = {
   paidMessagesStars?: number;
   areUniqueStarGiftsDisallowed?: boolean;
   shouldDisallowLimitedStarGifts?: boolean;
+  activeGiftAuction?: ApiStarGiftAuctionState;
 };
 
 const LIMIT_DISPLAY_THRESHOLD = 50;
+const TEXT_TIMER_THRESHOLD = 48 * HOUR;
 
 function GiftComposer({
   gift,
@@ -74,9 +80,11 @@ function GiftComposer({
   paidMessagesStars,
   areUniqueStarGiftsDisallowed,
   shouldDisallowLimitedStarGifts,
+  activeGiftAuction,
 }: OwnProps & StateProps) {
   const {
     sendStarGift, sendPremiumGiftByStars, openInvoice, openGiftUpgradeModal, openStarsBalanceModal,
+    openGiftAuctionBidModal, openGiftAuctionInfoModal, openGiftAuctionChangeRecipientModal,
   } = getActions();
 
   const lang = useLang();
@@ -180,7 +188,31 @@ function GiftComposer({
     openStarsBalanceModal({});
   });
 
+  const handleLearnMoreClick = useLastCallback(() => {
+    openGiftAuctionInfoModal({});
+  });
+
   const handleMainButtonClick = useLastCallback(() => {
+    if (activeGiftAuction) {
+      const existingBidPeerId = activeGiftAuction.userState.bidPeerId;
+      if (existingBidPeerId && existingBidPeerId !== peerId) {
+        openGiftAuctionChangeRecipientModal({
+          oldPeerId: existingBidPeerId,
+          newPeerId: peerId,
+          message: giftMessage || undefined,
+          shouldHideName: shouldHideName || undefined,
+        });
+        return;
+      }
+
+      openGiftAuctionBidModal({
+        peerId,
+        message: giftMessage || undefined,
+        shouldHideName: shouldHideName || undefined,
+      });
+      return;
+    }
+
     if (isStarGift) {
       sendStarGift({
         peerId,
@@ -328,6 +360,12 @@ function GiftComposer({
         ? formatStarsAsIcon(lang, gift.stars + (shouldPayForUpgrade ? gift.upgradeStars! : 0), { asFont: true })
         : isPremiumGift ? formatCurrency(lang, gift.amount, gift.currency) : undefined;
 
+    const giftsPerRound = activeGiftAuction?.gift.giftsPerRound;
+    const auctionEndDate = activeGiftAuction?.state.endDate;
+    const auctionTimeLeft = auctionEndDate ? auctionEndDate - getServerTime() : undefined;
+    const shouldUseTextTimer = auctionTimeLeft !== undefined && auctionTimeLeft > 0
+      && auctionTimeLeft < TEXT_TIMER_THRESHOLD;
+
     return (
       <div className={styles.footer}>
         {isStarGift && Boolean(gift.availabilityRemains) && (
@@ -341,13 +379,37 @@ function GiftComposer({
             className={styles.limited}
           />
         )}
+        {activeGiftAuction && Boolean(giftsPerRound) && (
+          <div className={styles.bottomDescription}>
+            {lang('GiftAuctionDescription', {
+              count: giftsPerRound,
+              link: <Link isPrimary onClick={handleLearnMoreClick}>{lang('GiftAuctionLearnMore')}</Link>,
+            }, { pluralValue: giftsPerRound, withNodes: true })}
+          </div>
+        )}
         <Button
           className={styles.mainButton}
-          size="smaller"
+          size={auctionTimeLeft ? undefined : 'smaller'}
           onClick={handleMainButtonClick}
           isLoading={isPaymentFormLoading}
+          noForcedUpperCase
         >
-          {lang('GiftSend', {
+          {activeGiftAuction ? (
+            <div>
+              <div>
+                {lang('GiftAuctionPlaceBid')}
+              </div>
+              {auctionTimeLeft !== undefined && auctionTimeLeft > 0 && (
+                <div className={styles.buttonSubtitle}>
+                  {lang('GiftAuctionTimeLeft', {
+                    time: shouldUseTextTimer
+                      ? <TextTimer endsAt={auctionEndDate!} />
+                      : formatCountdown(lang, auctionTimeLeft),
+                  }, { withNodes: true })}
+                </div>
+              )}
+            </div>
+          ) : lang('GiftSend', {
             amount,
           }, {
             withNodes: true,
@@ -434,6 +496,7 @@ export default memo(withGlobal<OwnProps>(
       paidMessagesStars,
       areUniqueStarGiftsDisallowed,
       shouldDisallowLimitedStarGifts,
+      activeGiftAuction: tabState.activeGiftAuction,
     };
   },
 )(GiftComposer));

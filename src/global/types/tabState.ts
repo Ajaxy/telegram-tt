@@ -44,6 +44,8 @@ import type {
   ApiStarGiftAttribute,
   ApiStarGiftAttributeCounter,
   ApiStarGiftAttributeOriginalDetails,
+  ApiStarGiftAuctionAcquiredGift,
+  ApiStarGiftAuctionState,
   ApiStarGiftUnique,
   ApiStarGiftUpgradePrice,
   ApiStarGiveawayOption,
@@ -703,7 +705,9 @@ export type TabState = {
     forPeerId: string;
     gifts?: ApiPremiumGiftCodeOption[];
     selectedResaleGift?: ApiStarGift;
+    selectedGift?: ApiPremiumGiftCodeOption | ApiStarGift;
   };
+  activeGiftAuction?: ApiStarGiftAuctionState;
   chatRefundModal?: {
     userId: string;
     starsToRefund: number;
@@ -887,6 +891,36 @@ export type TabState = {
 
   giftStatusInfoModal?: {
     emojiStatus: ApiEmojiStatusCollectible;
+  };
+
+  giftAuctionModal?: {
+    isOpen?: boolean;
+  };
+
+  giftAuctionBidModal?: {
+    isOpen?: boolean;
+    peerId?: string;
+    message?: string;
+    shouldHideName?: boolean;
+  };
+
+  giftAuctionInfoModal?: {
+    isOpen?: boolean;
+  };
+
+  giftAuctionChangeRecipientModal?: {
+    isOpen?: boolean;
+    oldPeerId?: string;
+    newPeerId?: string;
+    message?: string;
+    shouldHideName?: boolean;
+  };
+
+  giftAuctionAcquiredModal?: {
+    giftId?: string;
+    giftTitle?: string;
+    giftSticker?: ApiSticker;
+    acquiredGifts?: ApiStarGiftAuctionAcquiredGift[];
   };
 
   starGiftPriceDecreaseInfoModal?: {

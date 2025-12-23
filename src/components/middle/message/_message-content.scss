@@ -27,7 +27,8 @@
 .message-content {
   position: relative;
   max-width: var(--max-width);
-  &.gift {
+  &.gift,
+  &.auction {
     --max-width: 18rem;
   }
 

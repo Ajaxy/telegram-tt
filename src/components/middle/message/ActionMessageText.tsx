@@ -556,7 +556,7 @@ const ActionMessageText = ({
 
       case 'starGift': {
         const {
-          gift, alreadyPaidUpgradeStars, peerId, savedId, fromId, isPrepaidUpgrade,
+          gift, alreadyPaidUpgradeStars, peerId, savedId, fromId, isPrepaidUpgrade, isAuctionAcquired,
         } = action;
         const isToChannel = Boolean(peerId && savedId);
 
@@ -571,6 +571,10 @@ const ActionMessageText = ({
 
         const starsAmount = gift.stars + (alreadyPaidUpgradeStars || 0);
         const cost = renderStrong(formatStarsAsText(lang, starsAmount));
+
+        if (isAuctionAcquired) {
+          return lang('ActionStarGiftAuctionWon', { cost }, { withNodes: true });
+        }
 
         if (isPrepaidUpgrade && gift.upgradeStars) {
           const upgradeCost = renderStrong(formatStarsAsText(lang, gift.upgradeStars));

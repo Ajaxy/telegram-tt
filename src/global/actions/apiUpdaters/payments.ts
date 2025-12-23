@@ -4,7 +4,12 @@ import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import * as langProvider from '../../../util/oldLangProvider';
 import { getPeerTitle } from '../../helpers/peers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { removeGiftInfoOriginalDetails, updateStarsBalance } from '../../reducers';
+import {
+  removeGiftInfoOriginalDetails,
+  updateActiveGiftAuctionState,
+  updateActiveGiftAuctionUserState,
+  updateStarsBalance,
+} from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import { selectPeer, selectTabState } from '../../selectors';
 
@@ -210,6 +215,27 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         });
       }
 
+      if (inputInvoice?.type === 'stargiftAuctionBid') {
+        const { activeGiftAuction } = selectTabState(global, tabId);
+        const giftsPerRound = activeGiftAuction?.gift.giftsPerRound;
+
+        actions.showNotification({
+          icon: 'auction-filled',
+          title: {
+            key: inputInvoice.isUpdateBid ? 'GiftAuctionBidIncreasedTitle' : 'GiftAuctionBidPlacedTitle',
+          },
+          message: {
+            key: 'GiftAuctionBidPlacedMessage',
+            variables: { count: giftsPerRound },
+          },
+          tabId,
+        });
+
+        if (activeGiftAuction?.gift.id === inputInvoice.giftId) {
+          actions.loadActiveGiftAuction({ giftId: inputInvoice.giftId, tabId });
+        }
+      }
+
       break;
     }
 
@@ -219,6 +245,30 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       setGlobal(global);
 
       actions.loadStarStatus();
+      break;
+    }
+
+    case 'updateStarGiftAuctionState': {
+      const { giftId, state } = update;
+
+      Object.keys(global.byTabId).forEach((tabIdStr) => {
+        const tabId = Number(tabIdStr);
+        global = updateActiveGiftAuctionState(global, giftId, state, tabId);
+      });
+
+      setGlobal(global);
+      break;
+    }
+
+    case 'updateStarGiftAuctionUserState': {
+      const { giftId, userState } = update;
+
+      Object.keys(global.byTabId).forEach((tabIdStr) => {
+        const tabId = Number(tabIdStr);
+        global = updateActiveGiftAuctionUserState(global, giftId, userState, tabId);
+      });
+
+      setGlobal(global);
       break;
     }
   }

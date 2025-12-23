@@ -10,12 +10,13 @@ import AnimatedCounter from '../common/AnimatedCounter';
 
 type OwnProps = {
   endsAt: number;
+  shouldShowZeroOnEnd?: boolean;
   onEnd?: NoneToVoidFunction;
 };
 
 const UPDATE_FREQUENCY = 500; // Sometimes second gets skipped if using 1000
 
-const TextTimer = ({ endsAt, onEnd }: OwnProps) => {
+const TextTimer = ({ endsAt, shouldShowZeroOnEnd, onEnd }: OwnProps) => {
   const forceUpdate = useForceUpdate();
 
   const serverTime = getServerTime();
@@ -28,9 +29,9 @@ const TextTimer = ({ endsAt, onEnd }: OwnProps) => {
     }
   }, [isActive, onEnd]);
 
-  if (!isActive) return undefined;
+  if (!isActive && !shouldShowZeroOnEnd) return undefined;
 
-  const timeLeft = endsAt - serverTime;
+  const timeLeft = Math.max(0, endsAt - serverTime);
   const time = formatMediaDuration(timeLeft);
 
   const timeParts = time.split(':');

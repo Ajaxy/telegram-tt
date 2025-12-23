@@ -1,0 +1,50 @@
+.modal {
+  max-width: 26rem;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding-top: 0 !important;
+  padding-inline: 1.25rem !important;
+}
+
+.giftsListContainer {
+  position: relative;
+}
+
+.giftsList {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  max-height: 29.5rem;
+}
+
+.giftHeader {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.bidValue {
+  display: flex;
+  align-items: center;
+  line-height: 1rem;
+}
+
+.badge {
+  margin-inline-start: 0.5rem;
+}
+
+.starIcon {
+  font-size: 1rem;
+}
+
+.okButton {
+  margin-top: 0.5rem;
+}

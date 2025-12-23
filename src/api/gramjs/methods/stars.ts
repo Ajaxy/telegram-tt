@@ -18,6 +18,8 @@ import {
   buildApiResaleGifts,
   buildApiSavedStarGift,
   buildApiStarGift,
+  buildApiStarGiftAuctionAcquiredGift,
+  buildApiStarGiftAuctionState,
   buildApiStarGiftCollection,
   buildApiStarGiftUpgradePreview,
   buildInputResaleGiftsAttributes,
@@ -410,6 +412,51 @@ export async function fetchStarGiftUpgradePreview({
   }
 
   return buildApiStarGiftUpgradePreview(result);
+}
+
+export async function fetchStarGiftAuctionState({
+  giftId,
+  slug,
+  version = 0,
+}: {
+  giftId?: string;
+  slug?: string;
+  version?: number;
+}) {
+  if (!giftId && !slug) return undefined;
+
+  const auction = slug
+    ? new GramJs.InputStarGiftAuctionSlug({ slug })
+    : new GramJs.InputStarGiftAuction({ giftId: BigInt(giftId!) });
+
+  const result = await invokeRequest(new GramJs.payments.GetStarGiftAuctionState({
+    auction,
+    version,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return buildApiStarGiftAuctionState(result);
+}
+
+export async function fetchStarGiftAuctionAcquiredGifts({
+  giftId,
+}: {
+  giftId: string;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetStarGiftAuctionAcquiredGifts({
+    giftId: BigInt(giftId),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return {
+    gifts: result.gifts.map(buildApiStarGiftAuctionAcquiredGift),
+  };
 }
 
 export function upgradeStarGift({

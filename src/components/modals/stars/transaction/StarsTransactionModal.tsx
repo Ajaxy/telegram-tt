@@ -260,7 +260,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       peerLabel = oldLang('Stars.Transaction.Via');
     }
 
-    if (!transaction.isPostsSearch && !isDropOriginalDetails) {
+    if (!transaction.isPostsSearch && !isDropOriginalDetails && !transaction.isStarGiftAuctionBid) {
       tableData.push([
         peerLabel,
         peerId ? { chatId: peerId } : toName || '',
@@ -311,6 +311,18 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       oldLang('Stars.Transaction.Date'),
       formatDateTimeToString(transaction.date * 1000, oldLang.code, true),
     ]);
+
+    if (transaction.isStarGiftAuctionBid && gift?.type === 'starGift' && gift.availabilityTotal) {
+      tableData.push([
+        lang('GiftInfoAvailability'),
+        lang('GiftInfoAvailabilityValue', {
+          count: gift.availabilityRemains || 0,
+          total: gift.availabilityTotal,
+        }, {
+          pluralValue: gift.availabilityRemains || 0,
+        }),
+      ]);
+    }
 
     const footerText = oldLang('lng_credits_box_out_about');
     const footerTextParts = footerText.split('{link}');

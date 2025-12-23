@@ -440,9 +440,12 @@ const GiftInfoModal = ({
 
     const isVisibleForMe = isNameHidden && renderingTargetPeer;
 
+    const isWarningDescription = savedGift?.isRefunded || (!savedGift && gift?.type === 'starGift');
+
     const description = (() => {
       if (!savedGift) return lang('GiftInfoSoldOutDescription');
       if (isTargetChat) return undefined;
+      if (savedGift.isRefunded) return lang('GiftInfoDescriptionRefunded');
 
       if (savedGift.upgradeMsgId) return lang('GiftInfoDescriptionUpgraded');
       if (canManage && savedGift.canUpgrade && savedGift.alreadyPaidUpgradeStars && !savedGift.upgradeMsgId) {
@@ -592,7 +595,7 @@ const GiftInfoModal = ({
           {getTitle()}
         </h1>
         {Boolean(description) && (
-          <p className={buildClassName(styles.description, !savedGift && gift?.type === 'starGift' && styles.soldOut)}>
+          <p className={buildClassName(styles.description, isWarningDescription && styles.warningDescription)}>
             {description}
           </p>
         )}

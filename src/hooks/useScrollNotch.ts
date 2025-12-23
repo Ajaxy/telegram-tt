@@ -12,10 +12,12 @@ const useScrollNotch = ({
   containerRef,
   selector,
   isBottomNotch,
+  shouldHideTopNotch,
 }: {
   containerRef: ElementRef<HTMLDivElement>;
   selector: string;
   isBottomNotch?: boolean;
+  shouldHideTopNotch?: boolean;
 }, deps: unknown[]) => {
   useLayoutEffect(() => {
     const elements = containerRef.current?.querySelectorAll<HTMLElement>(selector);
@@ -28,19 +30,21 @@ const useScrollNotch = ({
       const isAtEnd = scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD;
 
       requestMutation(() => {
+        if (!shouldHideTopNotch) {
+          toggleExtraClass(target, 'scrolled', isScrolled);
+        }
         if (isBottomNotch) {
           toggleExtraClass(target, 'scrolled-to-end', isAtEnd);
-        } else {
-          toggleExtraClass(target, 'scrolled', isScrolled);
         }
       });
     }, THROTTLE_DELAY);
 
     elements.forEach((el) => {
+      if (!shouldHideTopNotch) {
+        addExtraClass(el, 'with-notch');
+      }
       if (isBottomNotch) {
         addExtraClass(el, 'with-bottom-notch');
-      } else {
-        addExtraClass(el, 'with-notch');
       }
       el.addEventListener('scroll', handleScroll, { passive: true });
     });
@@ -55,7 +59,7 @@ const useScrollNotch = ({
       });
     };
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  }, [containerRef, selector, isBottomNotch, ...deps]);
+  }, [containerRef, selector, isBottomNotch, shouldHideTopNotch, ...deps]);
 
   useEffect(() => {
     const elements = containerRef.current?.querySelectorAll<HTMLElement>(selector);
@@ -67,15 +71,16 @@ const useScrollNotch = ({
       const isAtEnd = scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD;
 
       requestMutation(() => {
+        if (!shouldHideTopNotch) {
+          toggleExtraClass(el, 'scrolled', isScrolled);
+        }
         if (isBottomNotch) {
           toggleExtraClass(el, 'scrolled-to-end', isAtEnd);
-        } else {
-          toggleExtraClass(el, 'scrolled', isScrolled);
         }
       });
     });
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  }, [containerRef, selector, isBottomNotch, ...deps]);
+  }, [containerRef, selector, isBottomNotch, shouldHideTopNotch, ...deps]);
 };
 
 export default useScrollNotch;

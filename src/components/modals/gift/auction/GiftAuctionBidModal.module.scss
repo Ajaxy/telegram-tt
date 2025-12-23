@@ -1,0 +1,232 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-height: min(92vh, 38rem) !important;
+}
+
+.headerControlPanel {
+  position: absolute;
+  z-index: 3;
+  top: 0.75rem;
+  right: 1.25rem;
+
+  display: flex;
+  align-items: center;
+}
+
+.slider {
+  flex-shrink: 0;
+  margin-top: 2rem;
+}
+
+.title {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5rem;
+  text-align: center;
+}
+
+.subtitle {
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.infoCards {
+  display: flex;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.infoCard {
+  flex: 1;
+
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+
+  text-align: center;
+
+  background: var(--color-background-secondary);
+}
+
+.infoCardValue {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-bold);
+}
+
+.infoCardLabel {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.separator {
+  margin-top: 1rem;
+}
+
+.winningStatus,
+.bidderInfoSlide {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.winningText {
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-green);
+}
+
+.winningBadge {
+  padding: 0.0625rem 0.5rem;
+  border-radius: 0.875rem;
+
+  font-size: 0.75rem;
+  line-height: 0.875rem;
+  color: var(--color-text-green);
+
+  background-color: rgba(var(--color-text-green-rgb), 0.1);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sectionTitle {
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+}
+
+.sectionTitleTransition {
+  height: 1.25rem;
+}
+
+.bidderRow {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  padding: 0.25rem 0;
+}
+
+.bidderPosition {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.5rem;
+  min-width: 1.5rem;
+
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.bidderInfo {
+  display: flex;
+  flex: 1;
+  gap: 0.5rem;
+  align-items: center;
+
+  height: 2.125rem;
+}
+
+.bidderName {
+  overflow: hidden;
+  flex: 1;
+
+  font-size: 0.9375rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topBidderRow {
+  position: relative;
+
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+
+  padding: 0.25rem 0;
+
+  &::after {
+    content: "";
+
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 4.4375rem;
+
+    height: 1px;
+
+    opacity: 0.75;
+    background-color: var(--color-borders);
+  }
+
+  &:last-child::after {
+    display: none;
+  }
+}
+
+.topBidderPosition {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.5rem;
+  min-width: 1.5rem;
+
+  font-size: 1.125rem;
+}
+
+.bidderAmount {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.buttonStar {
+  margin-inline-start: 0 !important;
+}
+
+.giftSticker {
+  margin-right: 0.25rem;
+}
+
+.customBidInput {
+  position: relative;
+
+  :global(.input-group) {
+    margin-bottom: 0;
+  }
+
+  :global(.form-control) {
+    padding-left: 2rem;
+  }
+}
+
+.customBidInputIcon {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+
+  font-size: 1rem;
+}

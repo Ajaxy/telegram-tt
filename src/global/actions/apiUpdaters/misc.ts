@@ -240,6 +240,40 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'newMessage': {
       const action = update.message.content?.action;
+
+      if (action?.type === 'starGift' && update.message.isOutgoing) {
+        const { gift } = action;
+        if (!gift.isAuction || update.message.chatId === SERVICE_NOTIFICATIONS_USER_ID) return undefined;
+
+        const { chatId, id } = update.message;
+
+        if (!chatId || !id) return;
+
+        Object.values(global.byTabId).forEach(({ id: tabId }) => {
+          actions.focusMessage({
+            chatId,
+            messageId: id,
+            tabId,
+          });
+          actions.closeGiftAuctionBidModal({ tabId });
+          actions.closeGiftModal({ tabId });
+
+          actions.showNotification({
+            icon: 'auction-filled',
+            message: {
+              key: 'GiftAuctionWonNotification',
+              variables: {
+                gift: gift.title,
+              },
+            },
+            tabId,
+          });
+
+          actions.requestConfetti({ withStars: true, tabId });
+        });
+        return undefined;
+      }
+
       if (!update.message.isOutgoing && update.message.chatId !== SERVICE_NOTIFICATIONS_USER_ID) return undefined;
       if (action?.type !== 'starGiftUnique') return undefined;
       const actionStarGift = action.gift;
