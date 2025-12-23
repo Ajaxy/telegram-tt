@@ -41,7 +41,7 @@ export function getWebpageButtonLangKey(type?: string, auctionEndDate?: number):
     case 'telegram_nft':
       return 'ViewButtonGiftUnique';
     case 'telegram_auction': {
-      const isFinished = auctionEndDate !== undefined && auctionEndDate * 1000 < getServerTime();
+      const isFinished = auctionEndDate !== undefined && auctionEndDate < getServerTime();
       return isFinished ? 'PollViewResults' : 'GiftAuctionJoin';
     }
     default:
