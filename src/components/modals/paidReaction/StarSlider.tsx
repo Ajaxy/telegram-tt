@@ -33,10 +33,13 @@ type OwnProps = {
 
 const DEFAULT_POINTS = [50, 100, 500, 1000, 2000, 5000, 10000];
 const LARGE_STEP = 10000;
-const THUMB_SIZE_IN_PIXELS = 1.875 * REM;
-const BEAK_WIDTH_IN_PIXELS = 28;
-const DEFAULT_RADIUS_IN_REM = 2;
-const MIN_RADIUS_IN_REM = 0.375;
+const THUMB_SIZE = 1.875 * REM;
+const CORNER_BEAK_WIDTH = 44;
+const DEFAULT_BEAK_WIDTH = 52;
+const BEAK_HEIGHT = 32;
+
+const BEAK_OFFSET_END = 10;
+const TIP_OFFSET_END = 0;
 
 const BADGE_HORIZONTAL_PADDING = 2 * REM;
 const BADGE_ICON_SIZE = 1.5 * REM;
@@ -169,10 +172,14 @@ const StarSlider = ({
 
   const progress = value / points.length;
   const {
-    minBadgeX, maxBadgeX, beakOffset, cornerRadius,
+    minBadgeX, maxBadgeX, beakOffset, beakTipOffset, beakWidth: currentBeakWidth,
   } = useMemo(() => {
     return calcBadgePosition(containerWidth, badgeWidth, progress);
   }, [containerWidth, badgeWidth, progress]);
+
+  const beakPath = useMemo(() => {
+    return generateBeakPath(currentBeakWidth, beakTipOffset);
+  }, [currentBeakWidth, beakTipOffset]);
 
   const handleChange = useLastCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = Number(event.currentTarget.value);
@@ -201,11 +208,9 @@ const StarSlider = ({
     setIsDragging(false);
   });
 
-  const { left: radiusLeft, right: radiusRight } = cornerRadius;
   const dynamicColor = shouldUseDynamicColor ? getColorForProgress(progress) : undefined;
 
   const badgeStyle = buildStyle(
-    `border-radius: 2rem 2rem ${radiusRight}rem ${radiusLeft}rem`,
     Boolean(badgeWidth) && `width: ${badgeWidth}px`,
   );
 
@@ -254,9 +259,9 @@ const StarSlider = ({
           </div>
           <svg
             className={styles.floatingBadgeTriangle}
-            width="28"
-            height="28"
-            viewBox="0 0 28 28"
+            width={currentBeakWidth}
+            height={BEAK_HEIGHT}
+            viewBox={`0 0 ${currentBeakWidth} ${BEAK_HEIGHT}`}
             fill="none"
             aria-hidden="true"
             role="presentation"
@@ -272,7 +277,7 @@ const StarSlider = ({
             )}
             <path
               className={styles.floatingBadgeTrianglePath}
-              d="m 28,4 v 9 c 0.0089,7.283278 -3.302215,5.319646 -6.750951,8.589815 l -5.8284,5.82843 c -0.781,0.78105 -2.0474,0.78104 -2.8284,0 L 6.7638083,21.589815 C 2.8288652,17.959047 0.04527024,20.332086 0,13 V 4 C 0,4 0.00150581,0.97697493 3,1 5.3786658,1.018266 22.594519,0.9142007 25,1 c 2.992326,0.1067311 3,3 3,3 z"
+              d={beakPath}
               fill={dynamicColor || 'url(#StarBadgeTriangle)'}
             />
           </svg>
@@ -323,45 +328,61 @@ function calcBadgePosition(
   progress: number,
 ) {
   const halfBadgeWidth = badgeWidth / 2;
-  const halfThumbSize = THUMB_SIZE_IN_PIXELS / 2;
+  const cornerBeakHalfWidth = CORNER_BEAK_WIDTH / 2;
+  const maxBeakOffset = halfBadgeWidth - cornerBeakHalfWidth;
 
-  const baseTargetX = halfThumbSize + progress * (containerWidth - THUMB_SIZE_IN_PIXELS);
-  const cornerTargetX = progress * containerWidth;
-
-  const edgeZone = THUMB_SIZE_IN_PIXELS / 2;
-  const distanceToLeftEdge = cornerTargetX;
-  const distanceToRightEdge = containerWidth - cornerTargetX;
-  const minEdgeDistance = Math.min(distanceToLeftEdge, distanceToRightEdge);
-
-  const t = Math.min(1, minEdgeDistance / edgeZone);
-  const targetX = cornerTargetX + t * (baseTargetX - cornerTargetX);
   const minBadgeX = halfBadgeWidth;
   const maxBadgeX = containerWidth - halfBadgeWidth;
-  const clampedBadgeX = Math.max(minBadgeX, Math.min(targetX, maxBadgeX));
 
-  const beakOffset = targetX - clampedBadgeX;
+  const thumbHalf = THUMB_SIZE / 2;
+  const trackLength = containerWidth - THUMB_SIZE;
+  const distanceFromLeft = progress * trackLength;
+  const distanceFromRight = trackLength - distanceFromLeft;
 
-  const thresholdPx = DEFAULT_RADIUS_IN_REM / 2 * REM;
-  const beakHalfWidth = BEAK_WIDTH_IN_PIXELS / 2;
+  const isLeftSide = distanceFromLeft < distanceFromRight;
+  const distanceToEdge = isLeftSide ? distanceFromLeft : distanceFromRight;
+  const direction = isLeftSide ? -1 : 1;
 
-  const distanceToEdge = halfBadgeWidth - Math.abs(beakOffset);
-  const normalizedDistance = Math.max(0, distanceToEdge - beakHalfWidth);
+  let beakOffset = 0;
+  let beakTipOffset = 0;
+  let beakWidth = DEFAULT_BEAK_WIDTH;
 
-  let edgeRadius = DEFAULT_RADIUS_IN_REM;
-  if (normalizedDistance < thresholdPx) {
-    const radiusT = 1 - (normalizedDistance / thresholdPx);
-    edgeRadius = DEFAULT_RADIUS_IN_REM - radiusT * (DEFAULT_RADIUS_IN_REM - MIN_RADIUS_IN_REM);
+  const beakOffsetStart = halfBadgeWidth - thumbHalf;
+
+  if (distanceToEdge < beakOffsetStart) {
+    if (distanceToEdge > BEAK_OFFSET_END) {
+      const t = (beakOffsetStart - distanceToEdge) / (beakOffsetStart - BEAK_OFFSET_END);
+      beakOffset = direction * t * maxBeakOffset;
+    } else if (distanceToEdge > TIP_OFFSET_END) {
+      beakOffset = direction * maxBeakOffset;
+      const t = (BEAK_OFFSET_END - distanceToEdge) / (BEAK_OFFSET_END - TIP_OFFSET_END);
+      const tExp = 1 - (1 - t) * (1 - t) * (1 - t);
+      beakWidth = DEFAULT_BEAK_WIDTH - tExp * (DEFAULT_BEAK_WIDTH - CORNER_BEAK_WIDTH);
+      beakTipOffset = direction * t * (beakWidth / 2);
+    } else {
+      beakOffset = direction * maxBeakOffset;
+      beakWidth = CORNER_BEAK_WIDTH;
+      beakTipOffset = direction * (beakWidth / 2);
+    }
   }
-
-  const leftRadius = beakOffset < 0 ? edgeRadius : DEFAULT_RADIUS_IN_REM;
-  const rightRadius = beakOffset > 0 ? edgeRadius : DEFAULT_RADIUS_IN_REM;
 
   return {
     minBadgeX,
     maxBadgeX,
     beakOffset,
-    cornerRadius: { left: leftRadius, right: rightRadius },
+    beakTipOffset,
+    beakWidth,
   };
+}
+
+const TIP_RADIUS = 2;
+
+function generateBeakPath(beakWidth: number, tipOffset: number): string {
+  const tipX = beakWidth / 2 + tipOffset;
+  const r = TIP_RADIUS;
+  const y = BEAK_HEIGHT - r;
+
+  return `M 0 0 L ${beakWidth} 0 L ${tipX + r} ${y} Q ${tipX} ${BEAK_HEIGHT} ${tipX - r} ${y} Z`;
 }
 
 export default memo(StarSlider);
