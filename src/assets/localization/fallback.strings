@@ -2387,7 +2387,7 @@
 "StoryMenuUnarchivePeer" = "Unhide Stories";
 "StealthModeOnTitle" = "Stealth Mode On";
 "StealthModeOnHintEnabled" = "The creators of stories you viewed in the past 5 minutes or will view in the next 25 minutes won't see you in the list of viewers.";
-"StealthModeOnHint" = "The creators of stories you view in **{time}** won't see you in their list of viewers.";
+"StealthModeOnHint" = "The creators of stories you view in the next **{time}** won't see you in the list of viewers.";
 "StealthModeTitle" = "Stealth Mode";
 "StealthModeDescription" = "Turn Stealth Mode on to watch stories without appearing in the list of viewers.";
 "StealthModeDescriptionPremium" = "Subscribe to Telegram Premium to watch stories without appearing in the list of viewers.";
@@ -2400,11 +2400,10 @@
 "StealthModeButtonToStory" = "Enable and Open the Story";
 "StealthModeButtonRecharge" = "Available in {timer}";
 "StealthModeComposerPlaceholder" = "Stealth Mode active – {timer}";
-"UsersWhoUpgradeFirst" = "Users who upgrade their gifts first get collectibles with shorter numbers.";
 "UpgradeCostDrops" = "Upgrade cost drops every minute.";
 "StarGiftPriceDecreaseInfoLink" = "See how price will decrease >";
 "StarGiftUpgradeCostModalTitle" = "Upgrade Cost";
-"StarGiftUpgradeCostHint" = "Users who upgrade their gifts first get collectibles with shorter numbers.";
+"StarGiftUpgradeCostHint" = "Users who upgrade their gifts first get collectibles with lower numbers.";
 "StarGiftPriceDecreaseTimer" = "Price decreases in {timer}";
 "SettingsItemPrivacyPasskeys" = "Passkeys";
 "SettingsItemPrivacyOn" = "Enabled";

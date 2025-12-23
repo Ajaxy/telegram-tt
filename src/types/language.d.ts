@@ -1783,7 +1783,6 @@ export interface LangPair {
   'StealthModeButtonPremium': undefined;
   'StealthModeButton': undefined;
   'StealthModeButtonToStory': undefined;
-  'UsersWhoUpgradeFirst': undefined;
   'UpgradeCostDrops': undefined;
   'StarGiftPriceDecreaseInfoLink': undefined;
   'StarGiftUpgradeCostModalTitle': undefined;
