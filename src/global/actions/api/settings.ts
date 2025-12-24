@@ -697,10 +697,9 @@ addActionHandler('loadConfig', async (global): Promise<void> => {
 
 addActionHandler('loadPromoData', async (global): Promise<void> => {
   const promoData = await callApi('fetchPromoData');
-  if (!promoData) return;
 
   global = getGlobal();
-  const timeout = promoData.expires - getServerTime();
+  const timeout = (promoData?.expires || 0) - getServerTime();
   if (timeout > 0) {
     requestActionTimeout({
       action: 'loadPromoData',
