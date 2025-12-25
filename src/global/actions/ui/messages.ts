@@ -415,7 +415,10 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
 
   if (replyMessageId) {
     const replyStack = selectReplyStack(global, chatId, threadId, tabId) || [];
-    global = replaceTabThreadParam(global, chatId, threadId, 'replyStack', [...replyStack, replyMessageId], tabId);
+
+    if (replyMessageId !== replyStack[replyStack.length - 1]) {
+      global = replaceTabThreadParam(global, chatId, threadId, 'replyStack', [...replyStack, replyMessageId], tabId);
+    }
   }
 
   if (shouldSwitchChat) {
