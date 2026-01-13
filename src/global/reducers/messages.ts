@@ -26,7 +26,10 @@ import {
   areSortedArraysEqual, excludeSortedArray, omit, omitUndefined, pick, pickTruthy, unique,
 } from '../../util/iteratees';
 import { isLocalMessageId, type MessageKey } from '../../util/keys/messageKey';
+import { unload } from '../../util/mediaLoader';
 import {
+  getAllMessageMediaHashes,
+  getMessageStatefulContent,
   hasMessageTtl, isMediaLoadableInViewer, mergeIdRanges, orderHistoryIds, orderPinnedIds,
 } from '../helpers';
 import { getEmojiOnlyCountForMessage } from '../helpers/getEmojiOnlyCountForMessage';
@@ -380,6 +383,11 @@ export function deleteChatMessages<T extends GlobalState>(
   messageIds.forEach((messageId) => {
     const message = byId[messageId];
     if (!message) return;
+    const statefulContent = getMessageStatefulContent(global, message);
+    const hashes = getAllMessageMediaHashes(message, statefulContent);
+    hashes.forEach((hash) => {
+      unload(hash);
+    });
     if (isMediaLoadableInViewer(message)) {
       mediaIdsToRemove.push(messageId);
     }

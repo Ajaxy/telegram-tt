@@ -624,6 +624,23 @@ export function getMessageMediaHash(
   return undefined;
 }
 
+export function getAllMessageMediaHashes(
+  message: MediaContainer,
+  statefulMedia: StatefulMediaContent,
+) {
+  const targets: SizeTarget[] = ['micro', 'pictogram', 'inline', 'preview', 'full', 'download'];
+  const hashes = new Set<string>();
+
+  targets.forEach((target) => {
+    const hash = getMessageMediaHash(message, statefulMedia, target);
+    if (hash) {
+      hashes.add(hash);
+    }
+  });
+
+  return Array.from(hashes);
+}
+
 export function canReplaceMessageMedia(
   message: MediaContainer, attachment: ApiAttachment,
 ) {

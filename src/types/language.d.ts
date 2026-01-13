@@ -1893,6 +1893,9 @@ export interface LangPair {
   'AttachmentMenuDisableSpoiler': undefined;
   'AttachmentDragAddItems': undefined;
   'AttachmentCaptionPlaceholder': undefined;
+  'SettingsDataClearMediaCache': undefined;
+  'SettingsDataClearMediaCacheDescription': undefined;
+  'SettingsDataClearMediaDone': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {

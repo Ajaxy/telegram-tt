@@ -182,6 +182,14 @@ async function fetchFromCacheOrRemote(
   return prepared;
 }
 
+export async function unload(url: string) {
+  memoryCache.delete(url);
+  if (!MEDIA_CACHE_DISABLED) {
+    const cacheName = url.startsWith('avatar') ? MEDIA_CACHE_NAME_AVATARS : MEDIA_CACHE_NAME;
+    await cacheApi.remove(cacheName, url);
+  }
+}
+
 function makeOnProgress(url: string) {
   const onProgress: ApiOnProgress = (progress: number) => {
     progressCallbacks.get(url)?.forEach((callback) => {

@@ -1,21 +1,23 @@
-import type { FC } from '../../../lib/teact/teact';
-import { memo, useCallback } from '../../../lib/teact/teact';
+import { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { AccountSettings } from '../../../types';
 
 import { AUTODOWNLOAD_FILESIZE_MB_LIMITS } from '../../../config';
+import { purgeClearableCache } from '../../../util/cacheApi';
 import { pick } from '../../../util/iteratees';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Checkbox from '../../ui/Checkbox';
+import ListItem from '../../ui/ListItem';
 import RangeSlider from '../../ui/RangeSlider';
 
 type OwnProps = {
   isActive?: boolean;
-  onReset: () => void;
+  onReset: NoneToVoidFunction;
 };
 
 type StateProps = Pick<AccountSettings, (
@@ -34,9 +36,8 @@ type StateProps = Pick<AccountSettings, (
   'autoLoadFileMaxSizeMb'
 )>;
 
-const SettingsDataStorage: FC<OwnProps & StateProps> = ({
+const SettingsDataStorage = ({
   isActive,
-  onReset,
   canAutoLoadPhotoFromContacts,
   canAutoLoadPhotoInPrivateChats,
   canAutoLoadPhotoInGroups,
@@ -50,8 +51,9 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
   canAutoLoadFileInGroups,
   canAutoLoadFileInChannels,
   autoLoadFileMaxSizeMb,
-}) => {
-  const { setSettingOption } = getActions();
+  onReset,
+}: OwnProps & StateProps) => {
+  const { setSettingOption, showNotification } = getActions();
 
   const lang = useLang();
 
@@ -60,16 +62,23 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
     onBack: onReset,
   });
 
-  const renderFileSizeCallback = useCallback((value: number) => {
+  const renderFileSizeCallback = useLastCallback((value: number) => {
     const size = AUTODOWNLOAD_FILESIZE_MB_LIMITS[value];
     return lang('AutodownloadSizeLimitUpTo', {
       limit: lang('MediaSizeMB', { size }, { pluralValue: size }),
     });
-  }, [lang]);
+  });
 
-  const handleFileSizeChange = useCallback((value: number) => {
+  const handleFileSizeChange = useLastCallback((value: number) => {
     setSettingOption({ autoLoadFileMaxSizeMb: AUTODOWNLOAD_FILESIZE_MB_LIMITS[value] });
-  }, [setSettingOption]);
+  });
+
+  const handlePurge = useLastCallback(() => {
+    purgeClearableCache();
+    showNotification({
+      message: { key: 'SettingsDataClearMediaDone' },
+    });
+  });
 
   function renderContentSizeSlider() {
     const value = AUTODOWNLOAD_FILESIZE_MB_LIMITS.indexOf(autoLoadFileMaxSizeMb);
@@ -157,6 +166,20 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
         canAutoLoadFileInGroups,
         canAutoLoadFileInChannels,
       )}
+      <div className="settings-item">
+        <ListItem
+          onClick={handlePurge}
+          icon="delete"
+          multiline
+        >
+          <span className="title">
+            {lang('SettingsDataClearMediaCache')}
+          </span>
+          <span className="subtitle">
+            {lang('SettingsDataClearMediaCacheDescription')}
+          </span>
+        </ListItem>
+      </div>
     </div>
   );
 };

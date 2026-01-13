@@ -2568,3 +2568,6 @@
 "AttachmentSendFile_other" = "Send {count} Files";
 "AttachmentDragAddItems" = "Add Items";
 "AttachmentCaptionPlaceholder" = "Add a caption...";
+"SettingsDataClearMediaCache" = "Clear Media Cache";
+"SettingsDataClearMediaCacheDescription" = "Deletes locally cached media for this account";
+"SettingsDataClearMediaDone" = "Media cache cleared";
