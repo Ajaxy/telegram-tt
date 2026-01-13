@@ -29,8 +29,8 @@ $progress-color: #7e85ff;
   display: flex;
   justify-content: center;
 
-  transition: transform 0.2s ease-in-out;
-  animation: slide-in 0.5s ease-in-out;
+  transition: transform 0.2s ease;
+  animation: slide-in 0.5s ease;
 }
 
 @keyframes slide-in {
@@ -85,7 +85,7 @@ $progress-color: #7e85ff;
 
   background-color: $progress-color;
 
-  transition: width 0.25s ease-in-out;
+  transition: width 0.25s ease;
 
   &.noTransition {
     transition: none;
@@ -306,7 +306,7 @@ $progress-color: #7e85ff;
 
   .positiveProgress,
   .negativeProgress {
-    transition: opacity 0.15s, width var(--cycling-animation-progress), background-size 0.3s;
+    transition: opacity 0.15s ease, width var(--cycling-animation-progress) ease, background-size 0.3s ease;
   }
 }
 

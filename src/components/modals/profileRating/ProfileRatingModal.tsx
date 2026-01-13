@@ -8,7 +8,9 @@ import { getPeerTitle } from '../../../global/helpers/peers';
 import { selectUser, selectUserFullInfo } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatShortDuration } from '../../../util/dates/dateFormat';
+import { getServerTime } from '../../../util/serverTime';
 
+import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
@@ -44,6 +46,10 @@ const ProfileRatingModal = ({
   } = getActions();
   const lang = useLang();
   const isOpen = Boolean(modal);
+  const renderingUser = useCurrentOrPrev(user);
+  const renderingStarsRating = useCurrentOrPrev(starsRating);
+  const renderingPendingRating = useCurrentOrPrev(pendingRating);
+  const renderingPendingRatingDate = useCurrentOrPrev(pendingRatingDate);
   const [showFutureRating, setShowFutureRating] = useState(false);
 
   const handleClose = useLastCallback(() => {
@@ -77,16 +83,18 @@ const ProfileRatingModal = ({
   };
 
   const header = useMemo(() => {
-    if (!modal || !user || !starsRating || !isOpen) return undefined;
+    if (!renderingUser || !renderingStarsRating) return undefined;
 
-    const rating = showFutureRating && pendingRating ? pendingRating : starsRating;
+    const rating = showFutureRating && renderingPendingRating
+      ? renderingPendingRating : renderingStarsRating;
     const currentStars = rating.stars;
     const currentLevelStars = rating.currentLevelStars;
     const nextLevelStars = rating.nextLevelStars;
     const currentLevel = rating.level;
     const nextLevel = currentLevel + 1;
     const isNegative = currentLevel < 0;
-    const pendingLevel = !showFutureRating && pendingRating ? pendingRating.level : starsRating.level;
+    const pendingLevel = !showFutureRating && renderingPendingRating
+      ? renderingPendingRating.level : renderingStarsRating.level;
 
     let levelProgress = 0;
 
@@ -100,9 +108,9 @@ const ProfileRatingModal = ({
 
     const progress = isNegative ? 0.5 : Math.max(0, Math.min(1, levelProgress));
 
-    const waitTime = pendingRatingDate ? pendingRatingDate - Math.floor(Date.now() / 1000) : 0;
-    const pendingPoints = pendingRating ? pendingRating.stars - starsRating.stars : 0;
-    const shouldShowPreview = pendingRating && pendingRatingDate;
+    const waitTime = renderingPendingRatingDate ? renderingPendingRatingDate - getServerTime() : 0;
+    const pendingPoints = renderingPendingRating ? renderingPendingRating.stars - renderingStarsRating.stars : 0;
+    const shouldShowPreview = renderingPendingRating && renderingPendingRatingDate;
 
     const renderPreviewDescription = () => {
       if (!shouldShowPreview) return undefined;
@@ -180,16 +188,16 @@ const ProfileRatingModal = ({
           {lang('TitleRating')}
         </div>
         <p className={styles.description}>
-          {user?.id === currentUserId
+          {renderingUser?.id === currentUserId
             ? lang('RatingYourReflectsActivity')
-            : lang('RatingReflectsActivity', { name: getPeerTitle(lang, user) || userFallbackText },
+            : lang('RatingReflectsActivity', { name: getPeerTitle(lang, renderingUser) || userFallbackText },
               { withMarkdown: true, withNodes: true })}
         </p>
       </div>
     );
-  }, [modal, user, currentUserId, starsRating,
-    pendingRating, pendingRatingDate, showFutureRating,
-    lang, handleShowFuture, handleShowCurrent, isOpen]);
+  }, [renderingUser, currentUserId, renderingStarsRating,
+    renderingPendingRating, renderingPendingRatingDate, showFutureRating,
+    lang, handleShowFuture, handleShowCurrent]);
 
   const listItemData = [
     ['closed-gift', lang('RatingGiftsFromTelegram'), (
@@ -213,7 +221,6 @@ const ProfileRatingModal = ({
   ] satisfies TableAboutData;
 
   const footer = useMemo(() => {
-    if (!isOpen) return undefined;
     return (
       <div className={styles.footer}>
         <Button
@@ -225,7 +232,7 @@ const ProfileRatingModal = ({
         </Button>
       </div>
     );
-  }, [lang, isOpen, handleClose]);
+  }, [lang, handleClose]);
 
   return (
     <TableAboutModal
