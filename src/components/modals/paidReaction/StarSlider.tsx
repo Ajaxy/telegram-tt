@@ -23,12 +23,14 @@ type OwnProps = {
   defaultValue: number;
   minValue?: number;
   minAllowedValue?: number;
+  minAllowedProgress?: number;
   className?: string;
   floatingBadgeDescription?: TeactNode;
   shouldUseDynamicColor?: boolean;
   shouldAllowCustomValue?: boolean;
   onChange: (value: number) => void;
   onBadgeClick?: NoneToVoidFunction;
+  onCustomValueClick?: NoneToVoidFunction;
 };
 
 const DEFAULT_POINTS = [50, 100, 500, 1000, 2000, 5000, 10000];
@@ -65,62 +67,63 @@ const SLIDER_COLORS = [
   '#40A920', // Green
   '#E29A09', // Yellow
   '#ED771E', // Orange
-  '#E14542', // Red
-  '#596473', // Silver (100% only)
+  '#E14741', // Red
+  '#5B6676', // Silver
 ];
 
 function getColorForProgress(progress: number): string {
-  if (progress >= 1) return SLIDER_COLORS[SLIDER_COLORS.length - 1];
-
-  const regularColorsCount = SLIDER_COLORS.length - 1;
-  const index = Math.floor(progress * regularColorsCount);
-  return SLIDER_COLORS[Math.min(index, regularColorsCount - 1)];
+  const index = Math.floor(progress * SLIDER_COLORS.length);
+  return SLIDER_COLORS[Math.min(index, SLIDER_COLORS.length - 1)];
 }
 
 const StarSlider = ({
   maxValue,
   defaultValue,
-  minValue,
+  minValue: minValueProp,
   minAllowedValue,
+  minAllowedProgress,
   className,
   floatingBadgeDescription,
   shouldUseDynamicColor,
   shouldAllowCustomValue,
   onChange,
   onBadgeClick,
+  onCustomValueClick,
 }: OwnProps) => {
   const containerRef = useRef<HTMLDivElement>();
   const floatingBadgeContentRef = useRef<HTMLDivElement>();
   const lang = useLang();
 
-  const min = minValue ?? 1;
+  const baseMinValue = minValueProp ?? 1;
+
+  // Uses binary search - O(log n)
+  const actualMinValue = useMemo(() => {
+    if (!minAllowedProgress || !minAllowedValue || minAllowedValue <= baseMinValue) {
+      return baseMinValue;
+    }
+
+    let low = baseMinValue;
+    let high = minAllowedValue;
+
+    while (low < high) {
+      const mid = Math.floor((low + high) / 2);
+      const testPoints = buildPoints(mid, maxValue);
+      const testProgress = getProgress(testPoints, minAllowedValue, mid);
+      const normalizedProgress = testProgress / testPoints.length;
+
+      if (normalizedProgress < minAllowedProgress) {
+        high = mid;
+      } else {
+        low = mid + 1;
+      }
+    }
+
+    return Math.max(baseMinValue, low);
+  }, [baseMinValue, minAllowedValue, minAllowedProgress, maxValue]);
 
   const points = useMemo(() => {
-    const result = [];
-
-    for (let i = 0; i < DEFAULT_POINTS.length; i++) {
-      if (DEFAULT_POINTS[i] <= min) continue;
-
-      if (DEFAULT_POINTS[i] < maxValue) {
-        result.push(DEFAULT_POINTS[i]);
-      }
-
-      if (DEFAULT_POINTS[i] >= maxValue) {
-        result.push(maxValue);
-        return result;
-      }
-    }
-
-    const lastPoint = DEFAULT_POINTS[DEFAULT_POINTS.length - 1];
-    let nextPoint = lastPoint + LARGE_STEP;
-    while (nextPoint < maxValue) {
-      result.push(nextPoint);
-      nextPoint += LARGE_STEP;
-    }
-    result.push(maxValue);
-
-    return result;
-  }, [maxValue, min]);
+    return buildPoints(actualMinValue, maxValue);
+  }, [maxValue, actualMinValue]);
 
   const [value, setValue] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -129,14 +132,14 @@ const StarSlider = ({
   const startXRef = useRef<number | undefined>();
   const prevBadgeWidth = usePrevious(badgeWidth);
 
-  const badgeText = lang.number(getValue(points, value, min));
+  const badgeText = lang.number(getValue(points, value, actualMinValue));
 
-  const minAllowedProgress = minAllowedValue !== undefined
-    ? getProgress(points, minAllowedValue, min) : 0;
+  const minSliderProgress = minAllowedValue !== undefined
+    ? getProgress(points, minAllowedValue, actualMinValue) : 0;
 
   useEffect(() => {
-    setValue(getProgress(points, defaultValue, min));
-  }, [defaultValue, points, min]);
+    setValue(getProgress(points, defaultValue, actualMinValue));
+  }, [defaultValue, points, actualMinValue]);
 
   useEffect(() => {
     if (!floatingBadgeContentRef.current) return;
@@ -183,10 +186,10 @@ const StarSlider = ({
 
   const handleChange = useLastCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = Number(event.currentTarget.value);
-    const clampedValue = Math.max(rawValue, minAllowedProgress);
+    const clampedValue = Math.max(rawValue, minSliderProgress);
     setValue(clampedValue);
 
-    const resultValue = getValue(points, clampedValue, min);
+    const resultValue = getValue(points, clampedValue, actualMinValue);
     onChange(resultValue);
   });
 
@@ -203,8 +206,20 @@ const StarSlider = ({
     }
   });
 
-  const handlePointerUp = useLastCallback(() => {
+  const handlePointerUp = useLastCallback((e: React.PointerEvent<HTMLInputElement>) => {
     startXRef.current = undefined;
+
+    if (!isDragging && onCustomValueClick && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const clickZoneWidth = 1.875 * REM;
+
+      const isInIconArea = e.clientX >= rect.right - clickZoneWidth && e.clientX <= rect.right;
+
+      if (isInIconArea) {
+        onCustomValueClick();
+      }
+    }
+
     setIsDragging(false);
   });
 
@@ -291,7 +306,7 @@ const StarSlider = ({
         type="range"
         min={0}
         max={points.length}
-        defaultValue={getProgress(points, defaultValue, min)}
+        defaultValue={getProgress(points, defaultValue, actualMinValue)}
         step="any"
         onChange={handleChange}
         onPointerDown={handlePointerDown}
@@ -304,6 +319,35 @@ const StarSlider = ({
     </div>
   );
 };
+
+function buildPoints(minValue: number, maxValue: number): number[] {
+  const result = [];
+
+  for (let i = 0; i < DEFAULT_POINTS.length; i++) {
+    if (DEFAULT_POINTS[i] <= minValue) continue;
+
+    if (DEFAULT_POINTS[i] < maxValue) {
+      result.push(DEFAULT_POINTS[i]);
+    }
+
+    if (DEFAULT_POINTS[i] >= maxValue) {
+      result.push(maxValue);
+      return result;
+    }
+  }
+
+  const lastPoint = DEFAULT_POINTS[DEFAULT_POINTS.length - 1];
+  const stepsNeeded = Math.ceil((minValue - lastPoint) / LARGE_STEP);
+  let nextPoint = lastPoint + Math.max(1, stepsNeeded) * LARGE_STEP;
+
+  while (nextPoint < maxValue) {
+    result.push(nextPoint);
+    nextPoint += LARGE_STEP;
+  }
+  result.push(maxValue);
+
+  return result;
+}
 
 function getProgress(points: number[], value: number, minValue: number) {
   const pointIndex = points.findIndex((point) => value <= point);

@@ -100,14 +100,6 @@ const GiftAuctionBidModal = ({
 
   const sliderMaxValue = Math.ceil(currentMinBid / BID_ROUNDING_STEP) * BID_ROUNDING_STEP + MAX_BID_AMOUNT_STEP;
 
-  const currentProgress = (currentMinBid - baseMinBid) / (sliderMaxValue - baseMinBid);
-  const adjustedMinBid = Math.floor(
-    (currentMinBid - MIN_SLIDER_PROGRESS * sliderMaxValue) / (1 - MIN_SLIDER_PROGRESS),
-  );
-  const giftMinBid = currentProgress > MIN_SLIDER_PROGRESS
-    ? Math.max(1, adjustedMinBid)
-    : baseMinBid;
-
   useEffect(() => {
     setSelectedBidAmount(currentMinBid);
   }, [currentMinBid]);
@@ -137,9 +129,13 @@ const GiftAuctionBidModal = ({
     loadActiveGiftAuction({ giftId: renderingAuctionState.gift.id });
   });
 
+  const handleRequestCustomValue = useLastCallback(() => {
+    openCustomBidModal();
+  });
+
   const handleBadgeClick = useLastCallback(() => {
     if (isAtMaxValue) {
-      openCustomBidModal();
+      handleRequestCustomValue();
     }
   });
 
@@ -354,12 +350,14 @@ const GiftAuctionBidModal = ({
       <StarSlider
         className={styles.slider}
         defaultValue={currentMinBid}
-        minValue={giftMinBid}
+        minValue={baseMinBid}
         minAllowedValue={currentMinBid}
+        minAllowedProgress={MIN_SLIDER_PROGRESS}
         maxValue={sliderMaxValue}
         floatingBadgeDescription={sliderSecondaryText}
         onChange={handleAmountChange}
         onBadgeClick={handleBadgeClick}
+        onCustomValueClick={handleRequestCustomValue}
         shouldUseDynamicColor
         shouldAllowCustomValue
       />
