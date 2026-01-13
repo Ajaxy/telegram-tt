@@ -242,11 +242,13 @@
 
 .web-app-popup {
   :global(.modal-dialog) {
+    width: auto;
+    min-width: min(22rem, 100%) !important;
     max-width: min(30rem, 100%);
   }
 
   &.without-title :global(.modal-content) {
-    padding-top: 0;
+    padding-top: 0.75rem;
   }
 
   :global(.modal-content) {

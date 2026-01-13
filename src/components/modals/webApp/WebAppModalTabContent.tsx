@@ -150,6 +150,9 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const [isLoaded, markLoaded, markUnloaded] = useFlag(false);
 
   const [popupParameters, setPopupParameters] = useState<PopupOptions>();
+
+  const renderingPopupParameters = useCurrentOrPrev(popupParameters);
+
   const [isRequestingPhone, setIsRequestingPhone] = useState(false);
   const [isRequestingWriteAccess, setIsRequestingWriteAccess] = useState(false);
   const [clipboardRequestId, setClipboardRequestId] = useState<string>();
@@ -1153,32 +1156,30 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
           </Button>
         </div>
       )}
-      {popupParameters && (
-        <Modal
-          isOpen={Boolean(popupParameters)}
-          title={popupParameters.title || NBSP}
-          className={
-            buildClassName(styles.webAppPopup, !popupParameters.title?.trim().length && styles.withoutTitle)
-          }
-          hasAbsoluteCloseButton
-          onClose={handleAppPopupModalClose}
-        >
-          {popupParameters.message}
-          <div className="dialog-buttons mt-2">
-            {popupParameters.buttons.map((button) => (
-              <Button
-                key={button.id || button.type}
-                className="confirm-dialog-button"
-                color={button.type === 'destructive' ? 'danger' : 'primary'}
-                isText
-                onClick={() => handleAppPopupClose(button.id)}
-              >
-                {button.text || oldLang(DEFAULT_BUTTON_TEXT[button.type])}
-              </Button>
-            ))}
-          </div>
-        </Modal>
-      )}
+      <Modal
+        isOpen={Boolean(popupParameters)}
+        title={renderingPopupParameters?.title || NBSP}
+        className={
+          buildClassName(styles.webAppPopup, !renderingPopupParameters?.title?.trim().length && styles.withoutTitle)
+        }
+        hasCloseButton
+        onClose={handleAppPopupModalClose}
+      >
+        {renderingPopupParameters?.message}
+        <div className="dialog-buttons mt-2">
+          {renderingPopupParameters?.buttons.map((button) => (
+            <Button
+              key={button.id || button.type}
+              className="confirm-dialog-button"
+              color={button.type === 'destructive' ? 'danger' : 'primary'}
+              isText
+              onClick={() => handleAppPopupClose(button.id)}
+            >
+              {button.text || oldLang(DEFAULT_BUTTON_TEXT[button.type])}
+            </Button>
+          ))}
+        </div>
+      </Modal>
 
       <ConfirmDialog
         isOpen={isRequestingPhone}
