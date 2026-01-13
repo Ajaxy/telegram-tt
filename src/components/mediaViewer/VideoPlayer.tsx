@@ -5,7 +5,7 @@ import {
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { ApiDimensions } from '../../api/types';
+import type { ApiDimensions, StoryboardInfo } from '../../api/types';
 
 import { IS_IOS, IS_TOUCH_ENV, IS_YA_BROWSER } from '../../util/browser/windowEnvironment';
 import getPointerPosition from '../../util/events/getPointerPosition';
@@ -33,12 +33,12 @@ import './VideoPlayer.scss';
 
 type OwnProps = {
   url?: string;
+  storyboardInfo?: StoryboardInfo;
   isGif?: boolean;
   posterData?: string;
   posterSize?: ApiDimensions;
   loadProgress?: number;
   fileSize: number;
-  isPreviewDisabled?: boolean;
   isMediaViewerOpen?: boolean;
   noPlay?: boolean;
   volume: number;
@@ -61,6 +61,7 @@ const REWIND_STEP = 5; // Seconds
 
 const VideoPlayer: FC<OwnProps> = ({
   url,
+  storyboardInfo,
   isGif,
   posterData,
   posterSize,
@@ -75,7 +76,6 @@ const VideoPlayer: FC<OwnProps> = ({
   shouldCloseOnClick,
   isProtected,
   isClickDisabled,
-  isPreviewDisabled,
   isSponsoredMessage,
   timestamp,
   handleSponsoredClick,
@@ -378,7 +378,7 @@ const VideoPlayer: FC<OwnProps> = ({
       )}
       {!isGif && !isSponsoredMessage && !isUnsupported && (
         <VideoPlayerControls
-          url={url}
+          storyboardInfo={storyboardInfo}
           isPlaying={isPlaying}
           bufferedRanges={bufferedRanges}
           bufferedProgress={bufferedProgress}
@@ -386,11 +386,9 @@ const VideoPlayer: FC<OwnProps> = ({
           isFullscreenSupported={Boolean(setFullscreen)}
           isPictureInPictureSupported={isPictureInPictureSupported}
           isFullscreen={isFullscreen}
-          isPreviewDisabled={isPreviewDisabled}
           fileSize={fileSize}
           duration={duration}
           isReady={isReady}
-          posterSize={posterSize}
           isForceMobileVersion={isForceMobileVersion}
           onSeek={handleSeek}
           onChangeFullscreen={handleFullscreenChange}

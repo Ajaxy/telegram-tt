@@ -27,10 +27,10 @@
   background: #000;
 }
 
-.previewCanvas {
-  display: block;
+.previewContainer {
   width: 100%;
   height: 100%;
+  background-repeat: no-repeat;
 }
 
 body:global(.is-touch-env) .preview {

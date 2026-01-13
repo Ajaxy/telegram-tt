@@ -136,7 +136,6 @@
     "emoji-data-ios": "git+https://github.com/korenskoy/emoji-data-ios#443f1c9",
     "idb-keyval": "^6.2.2",
     "lowlight": "^3.3.0",
-    "mp4box": "^0.5.4",
     "music-metadata": "^11.10.0",
     "opus-recorder": "github:Ajaxy/opus-recorder#116830a",
     "os-browserify": "^0.3.0",

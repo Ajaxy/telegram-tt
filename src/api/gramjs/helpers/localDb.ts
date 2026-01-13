@@ -42,6 +42,13 @@ export function addMediaToLocalDb(media: GramJs.TypeMessageMedia, context?: Medi
   if (media instanceof GramJs.MessageMediaDocument && media.document) {
     const document = addMessageRepairInfo(media.document, context);
     addDocumentToLocalDb(document);
+
+    if (media.altDocuments) {
+      for (const altDocument of media.altDocuments) {
+        const doc = addMessageRepairInfo(altDocument, context);
+        addDocumentToLocalDb(doc);
+      }
+    }
   }
 
   if (media instanceof GramJs.MessageMediaGame) {

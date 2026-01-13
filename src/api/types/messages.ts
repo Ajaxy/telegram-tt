@@ -99,6 +99,12 @@ type ApiStickerSetInfoMissing = {
 
 export type ApiStickerSetInfo = ApiStickerSetInfoShortName | ApiStickerSetInfoId | ApiStickerSetInfoMissing;
 
+export interface StoryboardInfo {
+  storyboardFile: ApiDocument;
+  storyboardMapFile: ApiDocument;
+  frameSize: ApiDimensions;
+}
+
 export interface ApiVideo {
   mediaType: 'video';
   id: string;
@@ -120,6 +126,8 @@ export interface ApiVideo {
   noSound?: boolean;
   waveform?: number[];
   timestamp?: number;
+  altVideos?: ApiVideo[];
+  storyboardInfo?: StoryboardInfo;
 }
 
 export interface ApiAudio {
@@ -584,7 +592,6 @@ export type MediaContent = {
   text?: ApiFormattedTextWithEmojiOnlyCount;
   photo?: ApiPhoto;
   video?: ApiVideo;
-  altVideos?: ApiVideo[];
   document?: ApiDocument;
   sticker?: ApiSticker;
   contact?: ApiContact;

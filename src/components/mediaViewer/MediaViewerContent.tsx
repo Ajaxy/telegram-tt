@@ -13,7 +13,6 @@ import {
   selectIsMessageProtected, selectTabState,
 } from '../../global/selectors';
 import { selectMessageTimestampableDuration } from '../../global/selectors/media';
-import { ARE_WEBCODECS_SUPPORTED } from '../../util/browser/globalEnvironment';
 import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
@@ -99,7 +98,6 @@ const MediaViewerContent = ({
     bestData,
     dimensions,
     isGif,
-    isLocal,
     isVideoAvatar,
     mediaSize,
     loadProgress,
@@ -159,7 +157,6 @@ const MediaViewerContent = ({
             fileSize={mediaSize!}
             isMediaViewerOpen={isOpen && isActive}
             isProtected={isProtected}
-            isPreviewDisabled={!ARE_WEBCODECS_SUPPORTED || isLocal}
             noPlay={!isActive}
             onClose={onClose}
             isMuted
@@ -207,6 +204,7 @@ const MediaViewerContent = ({
         <VideoPlayer
           key={media.id}
           url={bestData}
+          storyboardInfo={'storyboardInfo' in media ? media.storyboardInfo : undefined}
           isGif={isGif}
           posterData={bestImageData}
           posterSize={posterSize}
@@ -214,7 +212,6 @@ const MediaViewerContent = ({
           fileSize={mediaSize!}
           isMediaViewerOpen={isOpen && isActive}
           noPlay={!isActive}
-          isPreviewDisabled={!ARE_WEBCODECS_SUPPORTED || isLocal}
           onClose={onClose}
           isMuted={isMuted}
           isHidden={isHidden}

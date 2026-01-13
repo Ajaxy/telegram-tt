@@ -7,7 +7,7 @@ import {
   useSignal,
 } from '../../lib/teact/teact';
 
-import type { ApiDimensions } from '../../api/types';
+import type { StoryboardInfo } from '../../api/types';
 import type { BufferedRange } from '../../hooks/useBuffering';
 import type { IconName } from '../../types/icons';
 
@@ -33,7 +33,7 @@ import SeekLine from './SeekLine';
 import './VideoPlayerControls.scss';
 
 type OwnProps = {
-  url?: string;
+  storyboardInfo?: StoryboardInfo;
   bufferedRanges: BufferedRange[];
   bufferedProgress: number;
   duration: number;
@@ -44,12 +44,10 @@ type OwnProps = {
   isFullscreenSupported: boolean;
   isPictureInPictureSupported: boolean;
   isFullscreen: boolean;
-  isPreviewDisabled?: boolean;
   isBuffered: boolean;
   volume: number;
   isMuted: boolean;
   playbackRate: number;
-  posterSize?: ApiDimensions;
   onChangeFullscreen: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onPictureInPictureChange?: () => void;
   onVolumeClick: () => void;
@@ -74,7 +72,7 @@ const PLAYBACK_RATES = [
 const HIDE_CONTROLS_TIMEOUT_MS = 3000;
 
 const VideoPlayerControls: FC<OwnProps> = ({
-  url,
+  storyboardInfo,
   bufferedRanges,
   bufferedProgress,
   duration,
@@ -85,16 +83,14 @@ const VideoPlayerControls: FC<OwnProps> = ({
   isFullscreenSupported,
   isFullscreen,
   isBuffered,
-  isPreviewDisabled,
   volume,
   isMuted,
   playbackRate,
-  posterSize,
+  isPictureInPictureSupported,
   onChangeFullscreen,
   onVolumeClick,
   onVolumeChange,
   onPlaybackRateChange,
-  isPictureInPictureSupported,
   onPictureInPictureChange,
   onPlayPause,
   onSeek,
@@ -168,12 +164,10 @@ const VideoPlayerControls: FC<OwnProps> = ({
       onClick={stopEvent}
     >
       <SeekLine
-        url={url}
+        storyboardInfo={storyboardInfo}
         duration={duration}
         isReady={isReady}
         isPlaying={isPlaying}
-        isPreviewDisabled={isPreviewDisabled}
-        posterSize={posterSize}
         bufferedRanges={bufferedRanges}
         playbackRate={playbackRate}
         onSeek={handleSeek}

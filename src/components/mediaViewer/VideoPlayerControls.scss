@@ -58,13 +58,12 @@
   }
 
   .volume-slider {
-
     --volume-slider-width: 4rem;
     --slider-color: #fff;
     --color-borders: rgba(255, 255, 255, 0.5);
 
     width: 0;
-    margin-bottom: 0;
+    margin: 0;
     margin-left: -0.75rem;
     padding: 0.5rem 0.5rem 0.5rem 0.5rem;
     /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */

@@ -104,8 +104,6 @@ export const useMediaProps = ({
 
   const mediaSize = media && getMediaFileSize(media);
 
-  const isLocal = Boolean(localBlobUrl);
-
   const dimensions = useMemo(() => {
     if (isAvatar) {
       return isVideoAvatar ? VIDEO_AVATAR_FULL_DIMENSIONS : AVATAR_FULL_DIMENSIONS;
@@ -138,7 +136,6 @@ export const useMediaProps = ({
     dimensions,
     contentType,
     isVideoAvatar,
-    isLocal,
     loadProgress,
     mediaSize,
   };
