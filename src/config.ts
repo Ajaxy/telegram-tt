@@ -373,7 +373,7 @@ export const FRAGMENT_PHONE_LENGTH = 11;
 export const BOT_VERIFICATION_PEERS_LIMIT = 20;
 
 export const LIGHT_THEME_BG_COLOR = '#99BA92';
-export const DARK_THEME_BG_COLOR = '#0F0F0F';
+export const DARK_THEME_BG_COLOR = '#000000';
 export const DEFAULT_PATTERN_COLOR = '#4A8E3A8C';
 export const DARK_THEME_PATTERN_COLOR = '#48576166';
 export const PEER_COLOR_BG_OPACITY = '1a';

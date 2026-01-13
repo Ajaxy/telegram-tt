@@ -231,7 +231,7 @@
   bottom: 0;
   left: 0;
 
-  opacity: 0.6;
+  opacity: 0.4;
   background-image: url($path);
   background-repeat: repeat;
   background-position: center;
@@ -239,8 +239,8 @@
   mix-blend-mode: soft-light;
 
   :global(html.theme-dark) & {
-    opacity: 0.3;
-    background: linear-gradient(135deg, #4f5bd5 0%, #962fbf 25%, #dd6cb9 50%, #fec496 100%) !important;
+    opacity: 0.25;
+    background: linear-gradient(145deg, #4f5bd5 0%, #962fbf 35%, #dd6cb9 65%, #fec496 100%) !important;
     background-image: none;
     mix-blend-mode: unset;
 
