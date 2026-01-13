@@ -15,7 +15,7 @@ import { debounce } from '../../util/schedulers';
 
 import useLastCallback from '../../hooks/useLastCallback';
 
-type OwnProps = {
+export type OwnProps = {
   ref?: ElementRef<HTMLDivElement>;
   style?: string;
   className?: string;

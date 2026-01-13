@@ -119,6 +119,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
       onClose={handleClose}
       onCloseAnimationEnd={unmarkIsShown}
       isForwarding={isForwarding}
+      withFolders
     />
   );
 };
