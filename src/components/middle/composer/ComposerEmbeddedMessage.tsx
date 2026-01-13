@@ -37,7 +37,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import usePeerColor from '../../../hooks/usePeerColor';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
-import { ClosableEmbeddedMessage } from '../../common/embedded/EmbeddedMessage';
+import EmbeddedMessage from '../../common/embedded/EmbeddedMessage';
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
@@ -302,7 +302,7 @@ const ComposerEmbeddedMessage = ({
             <Icon name="quote" className="quote-reply" />
           )}
         </div>
-        <ClosableEmbeddedMessage
+        <EmbeddedMessage
           isOpen={isShown}
           className="inside-input"
           replyInfo={replyInfo}

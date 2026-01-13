@@ -24,7 +24,6 @@ import { getPeerTitle } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
 import { formatScheduledDateTime } from '../../../util/dates/dateFormat';
 import { isUserId } from '../../../util/entities/ids';
-import freezeWhenClosed from '../../../util/hoc/freezeWhenClosed';
 import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
 import { getPictogramDimensions } from '../helpers/mediaDimensions';
 import renderText from '../helpers/renderText';
@@ -383,7 +382,5 @@ function renderPictogram(
     </div>
   );
 }
-
-export const ClosableEmbeddedMessage = freezeWhenClosed(EmbeddedMessage);
 
 export default EmbeddedMessage;

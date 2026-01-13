@@ -11,7 +11,6 @@ import type { Signal } from '../../../util/signals';
 
 import { getMainUsername } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import freezeWhenClosed from '../../../util/hoc/freezeWhenClosed';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -166,4 +165,4 @@ const ChatCommandTooltip: FC<OwnProps> = ({
   );
 };
 
-export default memo(freezeWhenClosed(ChatCommandTooltip));
+export default memo(ChatCommandTooltip);

@@ -7,7 +7,6 @@ import type { TextPart } from '../../types';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
-import freezeWhenClosed from '../../util/hoc/freezeWhenClosed';
 import trapFocus from '../../util/trapFocus';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
@@ -207,4 +206,4 @@ const Modal: FC<OwnProps> = ({
   );
 };
 
-export default freezeWhenClosed(Modal);
+export default Modal;

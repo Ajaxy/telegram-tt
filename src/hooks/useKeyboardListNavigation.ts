@@ -28,7 +28,7 @@ const useKeyboardListNavigation = (
   return useLastCallback((e: React.KeyboardEvent<any>) => {
     const element = elementRef.current;
 
-    if (!element) {
+    if (!element || !isOpen) {
       return;
     }
 
