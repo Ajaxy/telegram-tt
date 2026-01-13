@@ -55,7 +55,7 @@ export function hasMessageMedia(message: MediaContainer) {
 
 export function canEditMedia(message: MediaContainer) {
   const {
-    video, ...otherMedia
+    photo, video, audio, document, text, webPage, ...otherMedia
   } = message.content;
 
   return !video?.isRound && !Object.keys(otherMedia).length;
