@@ -221,3 +221,38 @@
     view-transition-name: var(--_vtn);
   }
 }
+
+@mixin chat-pattern-styles($path) {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  opacity: 0.6;
+  background-image: url($path);
+  background-repeat: repeat;
+  background-position: center;
+  background-size: 430px auto;
+  mix-blend-mode: soft-light;
+
+  :global(html.theme-dark) & {
+    opacity: 0.3;
+    background: linear-gradient(135deg, #4f5bd5 0%, #962fbf 25%, #dd6cb9 50%, #fec496 100%) !important;
+    background-image: none;
+    mix-blend-mode: unset;
+
+    mask-image: url($path);
+    mask-position: center;
+    mask-repeat: repeat;
+    mask-size: 430px auto;
+  }
+}
+
+@mixin chat-pattern-background($path) {
+  &::before {
+    @include chat-pattern-styles($path);
+  }
+}

@@ -1,3 +1,5 @@
+@use "./mixins";
+
 .background {
   position: absolute;
   z-index: -1;
@@ -69,24 +71,7 @@
   }
 
   &:not(.customBgImage):not(.customBgColor)::after {
-    content: "";
-
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-
-    background-image: url('../assets/chat-bg-pattern-light.png');
-    background-repeat: repeat;
-    background-position: top right;
-    background-size: 510px auto;
-    mix-blend-mode: overlay;
-
-    :global(html.theme-dark) & {
-      background-image: url('../assets/chat-bg-pattern-dark.png');
-      mix-blend-mode: unset;
-    }
+    @include mixins.chat-pattern-styles("../assets/pattern.svg");
   }
 
   @media screen and (min-width: 1276px) {
