@@ -163,6 +163,8 @@ export interface AccountSettings {
 export type IAnchorPosition = {
   x: number;
   y: number;
+  width?: number;
+  height?: number;
 };
 
 export interface ShippingOption {

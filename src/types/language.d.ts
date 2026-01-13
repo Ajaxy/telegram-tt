@@ -1235,6 +1235,7 @@ export interface LangPair {
   'MenuArchivedChats': undefined;
   'MenuContacts': undefined;
   'MenuSettings': undefined;
+  'MenuMore': undefined;
   'MenuNightMode': undefined;
   'AriaMenuEnableNightMode': undefined;
   'AriaMenuDisableNightMode': undefined;

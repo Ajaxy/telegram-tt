@@ -49,6 +49,7 @@ type OwnProps =
     onMouseEnterBackdrop?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
     onMouseLeave?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
     withPortal?: boolean;
+    nested?: boolean;
     children?: React.ReactNode;
   }
   & MenuPositionOptions;
@@ -75,6 +76,7 @@ const Menu: FC<OwnProps> = ({
   onMouseLeave,
   withPortal,
   onMouseEnterBackdrop,
+  nested,
   ...positionOptions
 }) => {
   const { isTouchScreen } = useAppLayout();
@@ -108,12 +110,16 @@ const Menu: FC<OwnProps> = ({
 
   const handleKeyDown = useKeyboardListNavigation(bubbleRef, isOpen, autoClose ? onClose : undefined, undefined, true);
 
+  const fullExcludedSelector = backdropExcludedSelector
+    ? `${backdropExcludedSelector}, .submenu`
+    : '.submenu';
+
   useVirtualBackdrop(
     isOpen,
     containerRef,
     noCloseOnBackdrop ? undefined : onClose,
     undefined,
-    backdropExcludedSelector,
+    fullExcludedSelector,
   );
 
   const bubbleFullClassName = buildClassName(
@@ -147,7 +153,7 @@ const Menu: FC<OwnProps> = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={isOpen ? onMouseLeave : undefined}
     >
-      {isOpen && (
+      {isOpen && !nested && (
         // This only prevents click events triggering on underlying elements
         <div
           className="backdrop"

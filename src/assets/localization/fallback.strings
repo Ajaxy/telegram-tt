@@ -1446,6 +1446,7 @@
 "MenuArchivedChats" = "Archived Chats";
 "MenuContacts" = "Contacts";
 "MenuSettings" = "Settings";
+"MenuMore" = "More";
 "MenuNightMode" = "Night Mode";
 "AriaMenuEnableNightMode" = "Enable night mode";
 "AriaMenuDisableNightMode" = "Disable night mode";
