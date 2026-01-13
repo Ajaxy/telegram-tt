@@ -3,18 +3,14 @@ import {
 } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
-import type {
-  ApiPeer,
-  ApiStarGiftAttributeModel,
-} from '../../../../api/types';
+import type { ApiPeer } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
-import { ApiMediaFormat } from '../../../../api/types';
 
-import { getStickerMediaHash } from '../../../../global/helpers';
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
-import { fetch } from '../../../../util/mediaLoader';
-import { getRandomGiftPreviewAttributes, type GiftPreviewAttributes } from '../../../common/helpers/gifts';
+import {
+  getRandomGiftPreviewAttributes, type GiftPreviewAttributes,
+  preloadGiftAttributeStickers } from '../../../common/helpers/gifts';
 
 import useInterval from '../../../../hooks/schedulers/useInterval';
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
@@ -125,19 +121,10 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
     }
   }, [isOpen, renderingModal?.sampleAttributes]);
 
-  // Preload stickers and patterns
   useEffect(() => {
     const attributes = renderingModal?.sampleAttributes;
     if (!attributes) return;
-    const patternStickers = attributes.filter((attr): attr is ApiStarGiftAttributeModel => attr.type === 'pattern')
-      .map((attr) => attr.sticker);
-    const modelStickers = attributes.filter((attr): attr is ApiStarGiftAttributeModel => attr.type === 'model')
-      .map((attr) => attr.sticker);
-
-    const mediaHashes = [...patternStickers, ...modelStickers].map((sticker) => getStickerMediaHash(sticker, 'full'));
-    mediaHashes.forEach((hash) => {
-      fetch(hash, ApiMediaFormat.BlobUrl);
-    });
+    preloadGiftAttributeStickers(attributes);
   }, [renderingModal?.sampleAttributes]);
 
   const formattedPriceElement = useMemo(() => (upgradeStars ? (

@@ -1830,6 +1830,16 @@ export interface LangPair {
   'GiftAuctionChangeRecipientTitle': undefined;
   'GiftAuctionAveragePrice': undefined;
   'GiftAuctionTapToBidMore': undefined;
+  'GiftAuctionLearnMoreAboutGifts': undefined;
+  'GiftAuctionLearnMoreMenuItem': undefined;
+  'StarGiftInfoTitle': undefined;
+  'StarGiftInfoSubtitle': undefined;
+  'StarGiftInfoUniqueTitle': undefined;
+  'StarGiftInfoUniqueSubtitle': undefined;
+  'StarGiftInfoTradableTitle': undefined;
+  'StarGiftInfoTradableSubtitle': undefined;
+  'StarGiftInfoWearableTitle': undefined;
+  'StarGiftInfoWearableSubtitle': undefined;
   'StarGift': undefined;
   'SettingsItemPrivacyPasskeys': undefined;
   'SettingsItemPrivacyOn': undefined;
@@ -3144,6 +3154,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'RatingLevel': {
     'level': V;
+  };
+  'GiftAuctionForSaleOnFragment': {
+    'count': V;
+  };
+  'GiftAuctionForSaleOnTelegram': {
+    'count': V;
   };
   'GiftLockedMessage': {
     'relativeDate': V;

@@ -1,6 +1,6 @@
 import type { ElementRef, FC, TeactNode } from '../../lib/teact/teact';
 import type React from '../../lib/teact/teact';
-import { beginHeavyAnimation, useEffect } from '../../lib/teact/teact';
+import { beginHeavyAnimation, useEffect, useRef } from '../../lib/teact/teact';
 
 import type { TextPart } from '../../types';
 
@@ -9,6 +9,7 @@ import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
 import trapFocus from '../../util/trapFocus';
 
+import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
@@ -16,6 +17,7 @@ import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import Button, { type OwnProps as ButtonProps } from './Button';
+import Menu from './Menu';
 import ModalStarBalanceBar from './ModalStarBalanceBar';
 import Portal from './Portal';
 
@@ -44,6 +46,7 @@ export type OwnProps = {
   isLowStackPriority?: boolean;
   dialogContent?: React.ReactNode;
   ignoreFreeze?: boolean;
+  moreMenuItems?: TeactNode;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   onEnter?: () => void;
@@ -72,6 +75,7 @@ const Modal: FC<OwnProps> = ({
   isLowStackPriority,
   dialogContent,
   dialogClassName,
+  moreMenuItems,
   onClose,
   onCloseAnimationEnd,
   onEnter,
@@ -87,6 +91,25 @@ const Modal: FC<OwnProps> = ({
     onCloseAnimationEnd,
     withShouldRender: true,
   });
+
+  const localDialogRef = useRef<HTMLDivElement>();
+  const moreButtonRef = useRef<HTMLButtonElement>();
+  const menuRef = useRef<HTMLDivElement>();
+
+  const {
+    isContextMenuOpen,
+    contextMenuAnchor,
+    handleContextMenu,
+    handleContextMenuClose,
+    handleContextMenuHide,
+  } = useContextMenuHandlers(moreButtonRef);
+
+  const actualDialogRef = dialogRef || localDialogRef;
+
+  const getRootElement = useLastCallback(() => actualDialogRef.current);
+  const getTriggerElement = useLastCallback(() => moreButtonRef.current);
+  const getMenuElement = useLastCallback(() => menuRef.current);
+  const getLayout = useLastCallback(() => ({ withPortal: true }));
 
   const withCloseButton = hasCloseButton || hasAbsoluteCloseButton;
 
@@ -193,8 +216,39 @@ const Modal: FC<OwnProps> = ({
         )}
         <div className="modal-container">
           <div className="modal-backdrop" onClick={!noBackdropClose ? onClose : undefined} />
-          <div className={modalDialogClassName} ref={dialogRef} style={dialogStyle}>
+          <div className={modalDialogClassName} ref={actualDialogRef} style={dialogStyle}>
             {renderHeader()}
+            {Boolean(moreMenuItems) && (
+              <>
+                <Button
+                  ref={moreButtonRef}
+                  className="modal-more-button"
+                  round
+                  color={absoluteCloseButtonColor}
+                  size="tiny"
+                  iconName="more"
+                  ariaLabel={lang('AriaMoreButton')}
+                  onClick={handleContextMenu}
+                  onContextMenu={handleContextMenu}
+                />
+                <Menu
+                  ref={menuRef}
+                  isOpen={isContextMenuOpen}
+                  anchor={contextMenuAnchor}
+                  autoClose
+                  withPortal
+                  positionX="right"
+                  onClose={handleContextMenuClose}
+                  onCloseAnimationEnd={handleContextMenuHide}
+                  getRootElement={getRootElement}
+                  getTriggerElement={getTriggerElement}
+                  getMenuElement={getMenuElement}
+                  getLayout={getLayout}
+                >
+                  {moreMenuItems}
+                </Menu>
+              </>
+            )}
             {dialogContent}
             <div className={buildClassName('modal-content custom-scroll', contentClassName)} style={style}>
               {children}

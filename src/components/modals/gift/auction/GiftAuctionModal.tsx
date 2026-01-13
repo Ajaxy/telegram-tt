@@ -1,16 +1,23 @@
-import { memo, useMemo } from '../../../../lib/teact/teact';
+import {
+  memo, useEffect, useMemo, useRef, useState,
+} from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
 import type { ApiStarGiftAuctionState } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 
+import { TME_LINK_PREFIX } from '../../../../config';
 import { selectTabState } from '../../../../global/selectors';
+import { copyTextToClipboard } from '../../../../util/clipboard';
 import { formatCountdown, formatDateTimeToString } from '../../../../util/dates/dateFormat';
 import { HOUR } from '../../../../util/dates/units';
 import { formatStarsAsIcon } from '../../../../util/localization/format';
 import { getServerTime } from '../../../../util/serverTime';
-import { getStickerFromGift } from '../../../common/helpers/gifts';
+import {
+  getRandomGiftPreviewAttributes, getStickerFromGift, type GiftPreviewAttributes,
+  preloadGiftAttributeStickers } from '../../../common/helpers/gifts';
 
+import useInterval from '../../../../hooks/schedulers/useInterval';
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
@@ -18,13 +25,16 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Button from '../../../ui/Button';
 import Link from '../../../ui/Link';
+import MenuItem from '../../../ui/MenuItem';
 import TextTimer from '../../../ui/TextTimer';
 import TableInfoModal, { type TableData } from '../../common/TableInfoModal';
 import GiftItemStar from '../GiftItemStar';
+import UniqueGiftHeader from '../UniqueGiftHeader';
 
 import styles from './GiftAuctionModal.module.scss';
 
 const TEXT_TIMER_THRESHOLD = 48 * HOUR;
+const PREVIEW_UPDATE_INTERVAL = 3000;
 
 export type OwnProps = {
   modal: TabState['giftAuctionModal'];
@@ -40,9 +50,15 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
     setGiftModalSelectedGift,
     openGiftAuctionInfoModal,
     openGiftAuctionAcquiredModal,
+    openAboutStarGiftModal,
+    showNotification,
+    openChatWithDraft,
+    openUrl,
+    openGiftInMarket,
   } = getActions();
 
   const isOpen = Boolean(modal?.isOpen);
+  const renderingModal = useCurrentOrPrev(modal);
   const renderingAuctionState = useCurrentOrPrev(auctionState);
 
   const gift = renderingAuctionState?.gift;
@@ -50,12 +66,41 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
   const userState = renderingAuctionState?.userState;
   const isFinished = state?.type === 'finished';
 
+  const [previewAttributes, setPreviewAttributes] = useState<GiftPreviewAttributes | undefined>();
+  const shouldUseUniqueHeader = Boolean(gift && state && previewAttributes);
+
+  const uniqueHeaderRef = useRef<HTMLDivElement>();
   const lang = useLang();
+
+  const updatePreviewAttributes = useLastCallback(() => {
+    if (!renderingModal?.sampleAttributes) return;
+    setPreviewAttributes(getRandomGiftPreviewAttributes(renderingModal.sampleAttributes, previewAttributes));
+  });
+
+  useInterval(updatePreviewAttributes, isOpen ? PREVIEW_UPDATE_INTERVAL : undefined, true);
+
+  useEffect(() => {
+    if (isOpen && renderingModal?.sampleAttributes) {
+      updatePreviewAttributes();
+    } else {
+      setPreviewAttributes(undefined);
+    }
+  }, [isOpen, renderingModal?.sampleAttributes]);
+
+  useEffect(() => {
+    const attributes = renderingModal?.sampleAttributes;
+    if (!attributes) return;
+    preloadGiftAttributeStickers(attributes);
+  }, [renderingModal?.sampleAttributes]);
 
   const handleClose = useLastCallback(() => closeGiftAuctionModal());
 
   const handleLearnMoreClick = useLastCallback(() => {
     openGiftAuctionInfoModal({});
+  });
+
+  const handleLearnMoreAboutGiftsClick = useLastCallback(() => {
+    openAboutStarGiftModal({});
   });
 
   const handleItemsBoughtClick = useLastCallback(() => {
@@ -70,8 +115,65 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
     setGiftModalSelectedGift({ gift });
   });
 
-  const header = useMemo(() => {
-    if (!gift || !state) {
+  const auctionLink = useMemo(() => {
+    if (!gift?.auctionSlug) return undefined;
+    return `${TME_LINK_PREFIX}auction/${gift.auctionSlug}`;
+  }, [gift]);
+
+  const handleCopyLink = useLastCallback(() => {
+    if (!auctionLink) return;
+    copyTextToClipboard(auctionLink);
+    showNotification({
+      message: lang('LinkCopied'),
+    });
+  });
+
+  const handleShareLink = useLastCallback(() => {
+    if (!auctionLink) return;
+    openChatWithDraft({ text: { text: auctionLink } });
+  });
+
+  const handleOpenFragment = useLastCallback(() => {
+    if (state?.type === 'finished' && state.fragmentListedUrl) {
+      openUrl({ url: state.fragmentListedUrl });
+    }
+  });
+
+  const handleOpenTelegramMarket = useLastCallback(() => {
+    if (!gift) return;
+    handleClose();
+    openGiftInMarket({ gift });
+  });
+
+  const uniqueHeader = useMemo(() => {
+    if (!shouldUseUniqueHeader) {
+      return undefined;
+    }
+
+    const giftTitle = gift!.title || lang('StarGift');
+    const badge = isFinished ? lang('GiftAuctionEnded') : lang('GiftAuctionInfoTitle');
+    const subtitle = (
+      <Link className={styles.learnMoreLink} isPrimary onClick={handleLearnMoreAboutGiftsClick}>
+        {lang('GiftAuctionLearnMoreAboutGifts')}
+      </Link>
+    );
+
+    return (
+      <div ref={uniqueHeaderRef}>
+        <UniqueGiftHeader
+          modelAttribute={previewAttributes!.model}
+          backdropAttribute={previewAttributes!.backdrop}
+          patternAttribute={previewAttributes!.pattern}
+          title={giftTitle}
+          badge={badge}
+          subtitle={subtitle}
+        />
+      </div>
+    );
+  }, [shouldUseUniqueHeader, gift, isFinished, lang, previewAttributes, handleLearnMoreAboutGiftsClick]);
+
+  const regularHeader = useMemo(() => {
+    if (!gift || !state || shouldUseUniqueHeader) {
       return undefined;
     }
 
@@ -97,7 +199,9 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
         )}
       </div>
     );
-  }, [gift, state, isFinished, lang, handleLearnMoreClick]);
+  }, [gift, state, shouldUseUniqueHeader, isFinished, lang, handleLearnMoreClick]);
+
+  const header = uniqueHeader || regularHeader;
 
   const modalData = useMemo(() => {
     if (!gift || !state || !userState) {
@@ -148,6 +252,10 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
     const auctionTimeLeft = state.endDate - getServerTime();
     const shouldUseTextTimer = auctionTimeLeft > 0 && auctionTimeLeft < TEXT_TIMER_THRESHOLD;
 
+    const canBuyOnFragment = state.type === 'finished'
+      && Boolean(state.fragmentListedUrl && state.fragmentListedCount);
+    const canBuyOnTelegram = state.type === 'finished' && Boolean(state.listedCount);
+
     const footer = (
       <div className={styles.footer}>
         {acquiredCount > 0 && (
@@ -163,6 +271,40 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
                 />
               ),
             }, { pluralValue: acquiredCount, withNodes: true })}
+          </Link>
+        )}
+        {canBuyOnFragment && (
+          <Link className={styles.itemsBoughtLink} isPrimary onClick={handleOpenFragment}>
+            {lang('GiftAuctionForSaleOnFragment', {
+              count: giftSticker ? (
+                <>
+                  {lang.number(state.fragmentListedCount!)}
+                  <AnimatedIconFromSticker
+                    className={styles.itemsBoughtSticker}
+                    sticker={giftSticker}
+                    size={20}
+                    play={false}
+                  />
+                </>
+              ) : lang.number(state.fragmentListedCount!),
+            }, { withNodes: true })}
+          </Link>
+        )}
+        {canBuyOnTelegram && (
+          <Link className={styles.itemsBoughtLink} isPrimary onClick={handleOpenTelegramMarket}>
+            {lang('GiftAuctionForSaleOnTelegram', {
+              count: giftSticker ? (
+                <>
+                  {lang.number(state.listedCount!)}
+                  <AnimatedIconFromSticker
+                    className={styles.itemsBoughtSticker}
+                    sticker={giftSticker}
+                    size={20}
+                    play={false}
+                  />
+                </>
+              ) : lang.number(state.listedCount!),
+            }, { withNodes: true })}
           </Link>
         )}
         <Button
@@ -194,7 +336,26 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
       tableData,
       footer,
     };
-  }, [gift, state, userState, isFinished, lang, handleJoinClick, handleItemsBoughtClick, handleClose]);
+  }, [gift, state, userState, isFinished, lang, handleJoinClick, handleItemsBoughtClick, handleClose,
+    handleOpenFragment, handleOpenTelegramMarket]);
+
+  const moreMenuItems = useMemo(() => {
+    if (!shouldUseUniqueHeader) return undefined;
+
+    return (
+      <>
+        <MenuItem icon="info" onClick={handleLearnMoreClick}>
+          {lang('GiftAuctionLearnMoreMenuItem')}
+        </MenuItem>
+        <MenuItem icon="link-badge" onClick={handleCopyLink}>
+          {lang('CopyLink')}
+        </MenuItem>
+        <MenuItem icon="forward" onClick={handleShareLink}>
+          {lang('Share')}
+        </MenuItem>
+      </>
+    );
+  }, [shouldUseUniqueHeader, lang, handleLearnMoreClick, handleCopyLink, handleShareLink]);
 
   return (
     <TableInfoModal
@@ -204,6 +365,8 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
       tableData={modalData?.tableData}
       className={styles.modal}
       contentClassName={styles.modalContent}
+      closeButtonColor={shouldUseUniqueHeader ? 'translucent-white' : undefined}
+      moreMenuItems={moreMenuItems}
       onClose={handleClose}
     />
   );

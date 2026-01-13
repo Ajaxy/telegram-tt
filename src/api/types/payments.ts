@@ -119,8 +119,11 @@ export type ApiReceipt = ApiReceiptRegular | ApiReceiptStars;
 
 export type ApiPremiumSection = typeof PREMIUM_FEATURE_SECTIONS[number];
 
+// Video sections can include additional values like 'gifts' that are not premium features
+export type ApiPromoVideoSection = ApiPremiumSection | 'gifts';
+
 export interface ApiPremiumPromo {
-  videoSections: ApiPremiumSection[];
+  videoSections: ApiPromoVideoSection[];
   videos: ApiDocument[];
   statusText: string;
   statusEntities: ApiMessageEntity[];

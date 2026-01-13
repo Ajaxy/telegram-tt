@@ -35,7 +35,7 @@
 }
 
 .down {
-  --y-static: 3%;
+  --y-static: 2%;
   --y-dynamic: 10%;
 }
 
@@ -66,4 +66,17 @@
   top: 0;
   bottom: initial;
   border-radius: 10% 10% 0 0;
+}
+
+.placeholder {
+  --placeholder-background: #555555;
+
+  position: absolute;
+  z-index: 0;
+
+  width: 97%;
+  height: 97%;
+  border-radius: 10%;
+
+  background-color: var(--placeholder-background);
 }

@@ -441,6 +441,32 @@ addActionHandler('openGiftAuctionInfoModal', (global, _actions, payload): Action
 
 addTabStateResetterAction('closeGiftAuctionInfoModal', 'giftAuctionInfoModal');
 
+addActionHandler('openAboutStarGiftModal', async (global, _actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  const result = await callApi('fetchPremiumPromo');
+
+  let videoId: string | undefined;
+  let videoThumbnail;
+
+  if (result?.promo) {
+    const giftsIndex = result.promo.videoSections.indexOf('gifts');
+    if (giftsIndex !== -1 && giftsIndex < result.promo.videos.length) {
+      const video = result.promo.videos[giftsIndex];
+      videoId = video.id;
+      videoThumbnail = video.thumbnail;
+    }
+  }
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    aboutStarGiftModal: { isOpen: true, videoId, videoThumbnail },
+  }, tabId);
+  setGlobal(global);
+});
+
+addTabStateResetterAction('closeAboutStarGiftModal', 'aboutStarGiftModal');
+
 addActionHandler('openGiftAuctionChangeRecipientModal', (global, _actions, payload): ActionReturnType => {
   const {
     oldPeerId, newPeerId, message, shouldHideName, tabId = getCurrentTabId(),

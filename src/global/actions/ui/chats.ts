@@ -42,6 +42,7 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
   actions.closeStarsBalanceModal({ tabId });
   actions.closeStarsTransactionModal({ tabId });
   actions.closeGiftInfoModal({ tabId });
+  actions.closeGiftAuctionModal({ tabId });
 
   if (!currentMessageList || (
     currentMessageList.chatId !== chatId

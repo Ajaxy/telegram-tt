@@ -2709,6 +2709,8 @@ export interface ActionPayloads {
   closeGiftAuctionBidModal: WithTabId | undefined;
   openGiftAuctionInfoModal: WithTabId | undefined;
   closeGiftAuctionInfoModal: WithTabId | undefined;
+  openAboutStarGiftModal: WithTabId | undefined;
+  closeAboutStarGiftModal: WithTabId | undefined;
   openGiftAuctionChangeRecipientModal: {
     oldPeerId: string;
     newPeerId: string;

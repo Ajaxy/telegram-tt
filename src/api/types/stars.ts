@@ -28,6 +28,7 @@ export interface ApiStarGiftRegular {
   perUserRemains?: number;
   lockedUntilDate?: number;
   isAuction?: true;
+  auctionSlug?: string;
   giftsPerRound?: number;
   background?: ApiStarGiftBackground;
 }

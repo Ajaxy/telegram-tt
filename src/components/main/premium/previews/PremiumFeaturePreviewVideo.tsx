@@ -16,47 +16,55 @@ import styles from './PremiumFeaturePreviewVideo.module.scss';
 import DeviceFrame from '../../../../assets/premium/DeviceFrame.svg';
 
 type OwnProps = {
-  videoId: string;
-  isReverseAnimation: boolean;
-  isDown: boolean;
-  videoThumbnail: ApiThumbnail;
-  index: number;
-  isActive: boolean;
+  videoId?: string;
+  videoThumbnail?: ApiThumbnail;
+  isActive?: boolean;
+  isReverseAnimation?: boolean;
+  isDown?: boolean;
+  index?: number;
+  className?: string;
+  wrapperClassName?: string;
 };
 
 const PremiumFeaturePreviewVideo: FC<OwnProps> = ({
   videoId,
+  videoThumbnail,
+  isActive,
   isReverseAnimation,
   isDown,
-  videoThumbnail,
   index,
-  isActive,
+  className,
+  wrapperClassName,
 }) => {
-  const mediaData = useMedia(`document${videoId}`);
-  const thumbnailRef = useCanvasBlur(videoThumbnail.dataUri);
+  const mediaData = useMedia(videoId ? `document${videoId}` : undefined);
+  const thumbnailRef = useCanvasBlur(videoThumbnail?.dataUri);
   const transitionClassNames = useMediaTransitionDeprecated(mediaData);
 
   return (
-    <div className={styles.root}>
+    <div className={buildClassName(styles.root, className)}>
       <div
         className={buildClassName(
           styles.wrapper,
           isReverseAnimation && styles.reverse,
           isDown && styles.down,
+          wrapperClassName,
         )}
-        id={`premium_feature_preview_video_${index}`}
+        id={index !== undefined ? `premium_feature_preview_video_${index}` : undefined}
       >
         <img src={DeviceFrame} alt="" className={styles.frame} draggable={false} />
-        <canvas ref={thumbnailRef} className={styles.video} />
-        <OptimizedVideo
-          canPlay={isActive}
-          className={buildClassName(styles.video, transitionClassNames)}
-          src={mediaData}
-          disablePictureInPicture
-          playsInline
-          muted
-          loop
-        />
+        {!videoId && <div className={styles.placeholder} />}
+        {videoThumbnail && <canvas ref={thumbnailRef} className={styles.video} />}
+        {videoId && (
+          <OptimizedVideo
+            canPlay={Boolean(isActive)}
+            className={buildClassName(styles.video, transitionClassNames)}
+            src={mediaData}
+            disablePictureInPicture
+            playsInline
+            muted
+            loop
+          />
+        )}
       </div>
     </div>
   );

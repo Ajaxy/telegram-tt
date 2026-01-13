@@ -7,6 +7,10 @@ import type {
   ApiStarGiftAttributePattern,
   ApiSticker,
 } from '../../../api/types';
+import { ApiMediaFormat } from '../../../api/types';
+
+import { getStickerMediaHash } from '../../../global/helpers';
+import { fetch } from '../../../util/mediaLoader';
 
 export type GiftAttributes = {
   model?: ApiStarGiftAttributeModel;
@@ -100,4 +104,18 @@ export function getRandomGiftPreviewAttributes(
     pattern: randomPattern,
     backdrop: randomBackdrop,
   };
+}
+
+export function preloadGiftAttributeStickers(attributes: ApiStarGiftAttribute[]) {
+  const patternStickers = attributes
+    .filter((attr): attr is ApiStarGiftAttributePattern => attr.type === 'pattern')
+    .map((attr) => attr.sticker);
+  const modelStickers = attributes
+    .filter((attr): attr is ApiStarGiftAttributeModel => attr.type === 'model')
+    .map((attr) => attr.sticker);
+
+  const mediaHashes = [...patternStickers, ...modelStickers].map((sticker) => getStickerMediaHash(sticker, 'full'));
+  mediaHashes.forEach((hash) => {
+    fetch(hash, ApiMediaFormat.BlobUrl);
+  });
 }

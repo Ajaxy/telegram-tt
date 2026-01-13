@@ -20,6 +20,7 @@ export { default as GiftAuctionInfoModal } from '../components/modals/gift/aucti
 export { default as GiftAuctionAcquiredModal } from '../components/modals/gift/auction/GiftAuctionAcquiredModal';
 export { default as GiftAuctionChangeRecipientModal } from '../components/modals/gift/auction/GiftAuctionChangeRecipientModal';
 export { default as StarGiftPriceDecreaseInfoModal } from '../components/modals/gift/StarGiftPriceDecreaseInfoModal';
+export { default as AboutStarGiftModal } from '../components/modals/gift/AboutStarGiftModal';
 export { default as GiftStatusInfoModal } from '../components/modals/gift/status/GiftStatusInfoModal';
 export { default as GiftWithdrawModal } from '../components/modals/gift/withdraw/GiftWithdrawModal';
 export { default as GiftTransferModal } from '../components/modals/gift/transfer/GiftTransferModal';

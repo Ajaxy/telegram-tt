@@ -2342,6 +2342,8 @@
 "ContextMenuHintTouch" = "To edit or reply, close this menu. Then long tap on a message.";
 "GiftValueForSaleOnFragment" = "for sale on Fragment";
 "GiftValueForSaleOnTelegram" = "for sale on Telegram";
+"GiftAuctionForSaleOnFragment" = "{count} for sale on Fragment >";
+"GiftAuctionForSaleOnTelegram" = "{count} for sale on Telegram >";
 "EmbeddedMessageNoCaption" = "Caption removed";
 "ConfirmBuyGiftForTonDescription" = "The seller only accepts TON as payment.";
 "TitleGiftLocked" = "Gift Locked";
@@ -2478,6 +2480,16 @@
 "GiftAuctionAveragePrice" = "Average Price";
 "GiftAuctionTapToBidMore" = "click to bid more";
 "GiftAuctionWonNotification" = "You won {gift} at the auction!";
+"GiftAuctionLearnMoreAboutGifts" = "Learn more about Telegram Gifts >";
+"GiftAuctionLearnMoreMenuItem" = "Learn More";
+"StarGiftInfoTitle" = "Telegram Gifts";
+"StarGiftInfoSubtitle" = "Gifts are collectible items you can trade or showcase on your profile.";
+"StarGiftInfoUniqueTitle" = "Unique";
+"StarGiftInfoUniqueSubtitle" = "Upgrade your gifts to get a unique number, model, backdrop and symbol.";
+"StarGiftInfoTradableTitle" = "Tradable";
+"StarGiftInfoTradableSubtitle" = "Sell your gift on Telegram or on third-party NFT marketplaces.";
+"StarGiftInfoWearableTitle" = "Wearable";
+"StarGiftInfoWearableSubtitle" = "Display gifts on your profile and set them as your cover or status.";
 "StarGift" = "Star Gift";
 "SettingsItemPrivacyPasskeys" = "Passkeys";
 "SettingsItemPrivacyOn" = "Enabled";

@@ -25,6 +25,10 @@
     }
   }
 
+  &.withBadge {
+    --_height: 17rem;
+  }
+
   :global {
     canvas {
       transform-origin: center 45%;
@@ -33,16 +37,22 @@
   }
 }
 
+.subtitleBadge, .badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+
+  line-height: 0.875rem;
+
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(50px);
+}
+
 .subtitleBadge {
   margin-top: 0.25rem;
   padding: 0.75rem;
   padding-block: 0.25rem;
-  border-radius: 1rem;
 
   line-height: 1rem;
-
-  background-color: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(50px);
 
   transition: color 150ms ease-in, background-color 0.15s !important;
 
@@ -97,6 +107,10 @@
   color: white;
 }
 
+.badge + .title {
+  margin-top: 0;
+}
+
 .subtitle {
   font-size: 1rem;
   line-height: 1.375rem;
@@ -106,7 +120,16 @@
   transition: color 150ms ease-in;
 }
 
-.title, .subtitle {
+.title, .subtitle, .badge {
   z-index: 1;
   margin-bottom: 0;
+}
+
+.badge {
+  margin-top: auto;
+  padding: 0.25rem 0.75rem;
+
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-medium);
+  color: white;
 }

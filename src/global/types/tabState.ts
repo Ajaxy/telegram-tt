@@ -53,6 +53,7 @@ import type {
   ApiStarsTransaction,
   ApiStarTopupOption,
   ApiSticker,
+  ApiThumbnail,
   ApiTypeCurrencyAmount,
   ApiTypePrepaidGiveaway,
   ApiTypeStoryView,
@@ -895,6 +896,7 @@ export type TabState = {
 
   giftAuctionModal?: {
     isOpen?: boolean;
+    sampleAttributes?: ApiStarGiftAttribute[];
   };
 
   giftAuctionBidModal?: {
@@ -906,6 +908,12 @@ export type TabState = {
 
   giftAuctionInfoModal?: {
     isOpen?: boolean;
+  };
+
+  aboutStarGiftModal?: {
+    isOpen?: boolean;
+    videoId?: string;
+    videoThumbnail?: ApiThumbnail;
   };
 
   giftAuctionChangeRecipientModal?: {

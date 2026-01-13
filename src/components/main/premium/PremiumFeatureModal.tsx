@@ -291,14 +291,14 @@ const PremiumFeatureModal: FC<OwnProps> = ({
 
           const i = promo.videoSections.indexOf(section);
           if (i === -1) return undefined;
-          const shouldUseNewLang = promo.videoSections[i] === 'todo';
+          const shouldUseNewLang = section === 'todo';
           return (
             <div className={styles.slide}>
               <div className={styles.frame}>
                 <PremiumFeaturePreviewVideo
                   isActive={currentSlideIndex === index}
-                  videoId={promo.videos[i].id!}
-                  videoThumbnail={promo.videos[i].thumbnail!}
+                  videoId={promo.videos[i].id}
+                  videoThumbnail={promo.videos[i].thumbnail}
                   isDown={PREMIUM_BOTTOM_VIDEOS.includes(section)}
                   index={index}
                   isReverseAnimation={index === reverseAnimationSlideIndex}
@@ -307,20 +307,20 @@ const PremiumFeatureModal: FC<OwnProps> = ({
               <h1 className={styles.title}>
                 {shouldUseNewLang
                   ? lang(
-                    PREMIUM_FEATURE_TITLES[promo.videoSections[i]] as keyof LangPair,
+                    PREMIUM_FEATURE_TITLES['todo'] as keyof LangPair,
                     undefined,
                     { withNodes: true, renderTextFilters: ['br'] },
                   )
-                  : oldLang(PREMIUM_FEATURE_TITLES[promo.videoSections[i]])}
+                  : oldLang(PREMIUM_FEATURE_TITLES[section])}
               </h1>
               <div className={styles.description}>
                 {renderText(shouldUseNewLang
                   ? lang(
-                    PREMIUM_FEATURE_DESCRIPTIONS[promo.videoSections[i]] as keyof LangPair,
+                    PREMIUM_FEATURE_DESCRIPTIONS['todo'] as keyof LangPair,
                     undefined,
                     { withNodes: true, renderTextFilters: ['br'] },
                   )
-                  : oldLang(PREMIUM_FEATURE_DESCRIPTIONS[promo.videoSections[i]]), ['br'],
+                  : oldLang(PREMIUM_FEATURE_DESCRIPTIONS[section]), ['br'],
                 )}
               </div>
             </div>

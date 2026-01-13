@@ -35,6 +35,7 @@ type OwnProps = {
   backdropAttribute: ApiStarGiftAttributeBackdrop;
   patternAttribute: ApiStarGiftAttributePattern;
   title?: string;
+  badge?: TeactNode;
   subtitle?: TeactNode;
   subtitlePeer?: ApiPeer;
   className?: string;
@@ -50,6 +51,7 @@ const UniqueGiftHeader = ({
   backdropAttribute,
   patternAttribute,
   title,
+  badge,
   subtitle,
   subtitlePeer,
   className,
@@ -89,6 +91,7 @@ const UniqueGiftHeader = ({
     <div className={buildClassName(styles.root,
       'interactive-gift',
       showManageButtons && styles.withManageButtons,
+      badge && styles.withBadge,
       className)}
     >
       <Transition
@@ -108,6 +111,9 @@ const UniqueGiftHeader = ({
           onMouseLeave={!IS_TOUCH_ENV ? unmarkGiftHover : undefined}
         />
       </Transition>
+      {Boolean(badge) && (
+        <div className={styles.badge}>{badge}</div>
+      )}
       {title && <h1 className={styles.title}>{title}</h1>}
       {Boolean(subtitle) && (
         <div

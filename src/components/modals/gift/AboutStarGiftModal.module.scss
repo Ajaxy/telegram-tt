@@ -1,0 +1,53 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: calc(100% + 2rem);
+  margin: -1rem -1rem 0.25rem;
+}
+
+.content {
+  gap: 0.125rem;
+}
+
+.videoPreviewWrapper {
+  position: relative;
+
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+
+  aspect-ratio: 10 / 8;
+  width: 100%;
+
+  background: var(--premium-gradient);
+}
+
+.sparkles {
+  color: white;
+}
+
+.title {
+  padding-top: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+.subtitle {
+  padding-top: 0.25rem;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  margin-top: 0.5rem;
+}
+
+.understoodIcon {
+  font-size: 1.1875rem;
+}

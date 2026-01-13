@@ -30,6 +30,8 @@ type OwnProps = {
   contentClassName?: string;
   tableClassName?: string;
   hasBackdrop?: boolean;
+  closeButtonColor?: 'translucent' | 'translucent-white';
+  moreMenuItems?: TeactNode;
   onClose: NoneToVoidFunction;
   onButtonClick?: NoneToVoidFunction;
   withBalanceBar?: boolean;
@@ -50,6 +52,8 @@ const TableInfoModal = ({
   contentClassName,
   tableClassName,
   hasBackdrop,
+  closeButtonColor,
+  moreMenuItems,
   onClose,
   onButtonClick,
   withBalanceBar,
@@ -68,12 +72,13 @@ const TableInfoModal = ({
       isOpen={isOpen}
       hasCloseButton={Boolean(title)}
       hasAbsoluteCloseButton={!title}
-      absoluteCloseButtonColor={hasBackdrop ? 'translucent-white' : undefined}
+      absoluteCloseButtonColor={closeButtonColor || (hasBackdrop ? 'translucent-white' : undefined)}
       isSlim
       header={modalHeader}
       title={title}
       className={className}
       contentClassName={buildClassName(styles.content, contentClassName)}
+      moreMenuItems={moreMenuItems}
       onClose={onClose}
       withBalanceBar={withBalanceBar}
       currencyInBalanceBar={currencyInBalanceBar}

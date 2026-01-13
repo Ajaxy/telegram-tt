@@ -583,11 +583,17 @@ addActionHandler('shiftGiftUpgradeNextPrice', async (global, _actions, payload):
 addActionHandler('openGiftAuctionModal', async (global, _actions, payload): Promise<void> => {
   const { gift, tabId = getCurrentTabId() } = payload;
 
-  await getPromiseActions().loadActiveGiftAuction({ giftId: gift.id, tabId });
+  const [, preview] = await Promise.all([
+    getPromiseActions().loadActiveGiftAuction({ giftId: gift.id, tabId }),
+    callApi('fetchStarGiftUpgradePreview', { giftId: gift.id }),
+  ]);
 
   global = getGlobal();
   global = updateTabState(global, {
-    giftAuctionModal: { isOpen: true },
+    giftAuctionModal: {
+      isOpen: true,
+      sampleAttributes: preview?.sampleAttributes,
+    },
   }, tabId);
   setGlobal(global);
 });
