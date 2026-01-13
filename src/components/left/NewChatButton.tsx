@@ -33,17 +33,19 @@ const NewChatButton: FC<OwnProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { openFrozenAccountModal } = getActions();
 
+  const shouldRender = isShown || isMenuOpen;
+
   useEffect(() => {
-    if (!isShown) {
+    if (!shouldRender) {
       setIsMenuOpen(false);
     }
-  }, [isShown]);
+  }, [shouldRender]);
 
   const lang = useOldLang();
 
   const fabClassName = buildClassName(
     'NewChatButton',
-    isShown && 'revealed',
+    shouldRender && 'revealed',
     isMenuOpen && 'menu-is-open',
   );
 
