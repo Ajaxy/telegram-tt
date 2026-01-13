@@ -71,12 +71,16 @@
   }
 
   .header-tools {
+    z-index: 1;
+
     display: flex;
     flex-shrink: 0;
     align-items: center;
     justify-content: flex-end;
 
     margin-left: auto;
+
+    background-color: var(--color-background);
 
     body.no-page-transitions & {
       &,
