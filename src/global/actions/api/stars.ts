@@ -16,8 +16,8 @@ import { addActionHandler, getGlobal, getPromiseActions, setGlobal } from '../..
 import {
   appendStarsSubscriptions,
   appendStarsTransactions,
+  replaceGiftAuction,
   replacePeerSavedGifts,
-  updateActiveGiftAuction,
   updateChats,
   updatePeerStarGiftCollections,
   updateStarsBalance,
@@ -584,24 +584,24 @@ addActionHandler('openGiftAuctionModal', async (global, _actions, payload): Prom
   const { gift, tabId = getCurrentTabId() } = payload;
 
   const [, preview] = await Promise.all([
-    getPromiseActions().loadActiveGiftAuction({ giftId: gift.id, tabId }),
+    getPromiseActions().loadGiftAuction({ giftId: gift.id }),
     callApi('fetchStarGiftUpgradePreview', { giftId: gift.id }),
   ]);
 
   global = getGlobal();
   global = updateTabState(global, {
     giftAuctionModal: {
-      isOpen: true,
+      auctionGiftId: gift.id,
       sampleAttributes: preview?.sampleAttributes,
     },
   }, tabId);
   setGlobal(global);
 });
 
-addActionHandler('loadActiveGiftAuction', async (global, _actions, payload): Promise<void> => {
-  const { giftId, tabId = getCurrentTabId() } = payload;
+addActionHandler('loadGiftAuction', async (global, _actions, payload): Promise<void> => {
+  const { giftId } = payload;
 
-  const currentAuction = selectTabState(global, tabId).activeGiftAuction;
+  const currentAuction = global.giftAuctionByGiftId?.[giftId];
   const currentVersion = currentAuction?.state.type === 'active' ? currentAuction.state.version : 0;
 
   const auctionState = await callApi('fetchStarGiftAuctionState', {
@@ -611,16 +611,8 @@ addActionHandler('loadActiveGiftAuction', async (global, _actions, payload): Pro
   if (!auctionState) return;
 
   global = getGlobal();
-  global = updateActiveGiftAuction(global, auctionState, tabId);
+  global = replaceGiftAuction(global, auctionState);
   setGlobal(global);
-});
-
-addActionHandler('clearActiveGiftAuction', (global, _actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  return updateTabState(global, {
-    activeGiftAuction: undefined,
-  }, tabId);
 });
 
 addActionHandler('toggleSavedGiftPinned', async (global, actions, payload): Promise<void> => {

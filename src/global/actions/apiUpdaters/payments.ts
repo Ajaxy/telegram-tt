@@ -6,8 +6,8 @@ import { getPeerTitle } from '../../helpers/peers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   removeGiftInfoOriginalDetails,
-  updateActiveGiftAuctionState,
-  updateActiveGiftAuctionUserState,
+  updateGiftAuctionState,
+  updateGiftAuctionUserState,
   updateStarsBalance,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
@@ -216,8 +216,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
 
       if (inputInvoice?.type === 'stargiftAuctionBid') {
-        const { activeGiftAuction } = selectTabState(global, tabId);
-        const giftsPerRound = activeGiftAuction?.gift.giftsPerRound;
+        const giftAuction = global.giftAuctionByGiftId?.[inputInvoice.giftId];
+        const giftsPerRound = giftAuction?.gift.giftsPerRound;
 
         actions.showNotification({
           icon: 'auction-filled',
@@ -231,8 +231,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           tabId,
         });
 
-        if (activeGiftAuction?.gift.id === inputInvoice.giftId) {
-          actions.loadActiveGiftAuction({ giftId: inputInvoice.giftId, tabId });
+        if (giftAuction) {
+          actions.loadGiftAuction({ giftId: inputInvoice.giftId });
         }
       }
 
@@ -251,10 +251,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateStarGiftAuctionState': {
       const { giftId, state } = update;
 
-      Object.keys(global.byTabId).forEach((tabIdStr) => {
-        const tabId = Number(tabIdStr);
-        global = updateActiveGiftAuctionState(global, giftId, state, tabId);
-      });
+      global = updateGiftAuctionState(global, giftId, state);
 
       setGlobal(global);
       break;
@@ -263,10 +260,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateStarGiftAuctionUserState': {
       const { giftId, userState } = update;
 
-      Object.keys(global.byTabId).forEach((tabIdStr) => {
-        const tabId = Number(tabIdStr);
-        global = updateActiveGiftAuctionUserState(global, giftId, userState, tabId);
-      });
+      global = updateGiftAuctionUserState(global, giftId, userState);
 
       setGlobal(global);
       break;

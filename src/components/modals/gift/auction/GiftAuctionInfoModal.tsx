@@ -20,17 +20,17 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  activeGiftAuction?: ApiStarGiftAuctionState;
+  giftAuction?: ApiStarGiftAuctionState;
 };
 
 const GiftAuctionInfoModal = ({
   modal,
-  activeGiftAuction,
+  giftAuction,
 }: OwnProps & StateProps) => {
   const { closeGiftAuctionInfoModal } = getActions();
   const lang = useLang();
 
-  const isOpen = Boolean(modal?.isOpen && activeGiftAuction);
+  const isOpen = Boolean(modal && giftAuction);
 
   const handleClose = useLastCallback(() => {
     closeGiftAuctionInfoModal();
@@ -68,7 +68,7 @@ const GiftAuctionInfoModal = ({
   }, [lang, isOpen, handleClose]);
 
   const listItemData = useMemo(() => {
-    const count = activeGiftAuction?.gift.giftsPerRound || 0;
+    const count = giftAuction?.gift.giftsPerRound || 0;
     return [
       ['auction-drop', lang('GiftAuctionInfoTopBiddersTitle', { count }, { pluralValue: count }),
         lang('GiftAuctionInfoTopBiddersSubtitle', { count }, { pluralValue: count })],
@@ -77,7 +77,7 @@ const GiftAuctionInfoModal = ({
       ['stars-refund', lang('GiftAuctionInfoMissedBiddersTitle'),
         lang('GiftAuctionInfoMissedBiddersSubtitle')],
     ] satisfies TableAboutData;
-  }, [lang, activeGiftAuction]);
+  }, [lang, giftAuction]);
 
   return (
     <TableAboutModal
@@ -92,10 +92,11 @@ const GiftAuctionInfoModal = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
-    const { activeGiftAuction } = selectTabState(global);
-
+    const { giftAuctionInfoModal } = selectTabState(global);
+    const auctionGiftId = giftAuctionInfoModal?.auctionGiftId;
     return {
-      activeGiftAuction,
+      giftAuction: auctionGiftId
+        ? global.giftAuctionByGiftId?.[auctionGiftId] : undefined,
     };
   },
 )(GiftAuctionInfoModal));

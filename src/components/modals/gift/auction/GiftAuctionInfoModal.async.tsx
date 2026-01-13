@@ -6,7 +6,7 @@ import useModuleLoader from '../../../../hooks/useModuleLoader';
 
 const GiftAuctionInfoModalAsync = (props: OwnProps) => {
   const { modal } = props;
-  const GiftAuctionInfoModal = useModuleLoader(Bundles.Stars, 'GiftAuctionInfoModal', !modal?.isOpen);
+  const GiftAuctionInfoModal = useModuleLoader(Bundles.Stars, 'GiftAuctionInfoModal', !modal);
 
   return GiftAuctionInfoModal ? <GiftAuctionInfoModal {...props} /> : undefined;
 };

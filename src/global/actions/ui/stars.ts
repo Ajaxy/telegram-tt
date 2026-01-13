@@ -11,11 +11,11 @@ import { callApi } from '../../../api/gramjs';
 import { addTabStateResetterAction } from '../../helpers/meta';
 import { getPrizeStarsTransactionFromGiveaway, getStarsTransactionFromGift } from '../../helpers/payments';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { clearStarPayment, openStarsTransactionModal,
-} from '../../reducers';
+import { clearStarPayment, openStarsTransactionModal } from '../../reducers';
+import { removeGiftAuction } from '../../reducers/gifts';
 import { updateTabState } from '../../reducers/tabs';
 import {
-  selectChatMessage, selectIsCurrentUserFrozen, selectStarsPayment, selectTabState,
+  selectChatMessage, selectIsCurrentUserFrozen, selectShouldRemoveGiftAuction, selectStarsPayment, selectTabState,
 } from '../../selectors';
 
 addActionHandler('processOriginStarsPayment', (global, actions, payload): ActionReturnType => {
@@ -210,6 +210,17 @@ addActionHandler('setGiftModalSelectedGift', (global, actions, payload): ActionR
 
   const tabState = selectTabState(global, tabId);
   const giftModal = tabState?.giftModal;
+
+  if (!gift) {
+    const previousGift = giftModal?.selectedGift;
+    const auctionGiftId = previousGift && 'id' in previousGift && previousGift.type === 'starGift'
+      && previousGift.isAuction ? previousGift.id : undefined;
+
+    if (auctionGiftId && selectShouldRemoveGiftAuction(global, auctionGiftId)) {
+      global = removeGiftAuction(global, auctionGiftId);
+    }
+  }
+
   if (giftModal) {
     return updateTabState(global, {
       giftModal: {
@@ -412,34 +423,56 @@ addTabStateResetterAction('closeGiftResalePriceComposerModal', 'giftResalePriceC
 addTabStateResetterAction('closeGiftUpgradeModal', 'giftUpgradeModal');
 
 addActionHandler('closeGiftAuctionModal', (global, _actions, payload): ActionReturnType => {
-  const { shouldKeepActiveAuction, tabId = getCurrentTabId() } = payload || {};
+  const { shouldKeepAuction, tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);
+  const giftId = tabState.giftAuctionModal?.auctionGiftId;
 
-  return updateTabState(global, {
+  global = updateTabState(global, {
     giftAuctionModal: undefined,
-    activeGiftAuction: shouldKeepActiveAuction ? tabState?.activeGiftAuction : undefined,
   }, tabId);
+
+  if (!shouldKeepAuction && giftId && selectShouldRemoveGiftAuction(global, giftId)) {
+    global = removeGiftAuction(global, giftId);
+  }
+
+  return global;
 });
 
 addActionHandler('openGiftAuctionBidModal', (global, _actions, payload): ActionReturnType => {
-  const { peerId, message, shouldHideName, tabId = getCurrentTabId() } = payload || {};
+  const { auctionGiftId, peerId, message, shouldHideName, tabId = getCurrentTabId() } = payload;
 
   return updateTabState(global, {
-    giftAuctionBidModal: { isOpen: true, peerId, message, shouldHideName },
+    giftAuctionBidModal: { auctionGiftId, peerId, message, shouldHideName },
   }, tabId);
 });
 
-addTabStateResetterAction('closeGiftAuctionBidModal', 'giftAuctionBidModal');
-
-addActionHandler('openGiftAuctionInfoModal', (global, _actions, payload): ActionReturnType => {
+addActionHandler('closeGiftAuctionBidModal', (global, _actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
 
+  global = updateTabState(global, {
+    giftAuctionBidModal: undefined,
+  }, tabId);
+
+  return global;
+});
+
+addActionHandler('openGiftAuctionInfoModal', (global, _actions, payload): ActionReturnType => {
+  const { auctionGiftId, tabId = getCurrentTabId() } = payload;
+
   return updateTabState(global, {
-    giftAuctionInfoModal: { isOpen: true },
+    giftAuctionInfoModal: { auctionGiftId },
   }, tabId);
 });
 
-addTabStateResetterAction('closeGiftAuctionInfoModal', 'giftAuctionInfoModal');
+addActionHandler('closeGiftAuctionInfoModal', (global, _actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  global = updateTabState(global, {
+    giftAuctionInfoModal: undefined,
+  }, tabId);
+
+  return global;
+});
 
 addActionHandler('openAboutStarGiftModal', async (global, _actions, payload): Promise<void> => {
   const { tabId = getCurrentTabId() } = payload || {};
@@ -460,7 +493,7 @@ addActionHandler('openAboutStarGiftModal', async (global, _actions, payload): Pr
 
   global = getGlobal();
   global = updateTabState(global, {
-    aboutStarGiftModal: { isOpen: true, videoId, videoThumbnail },
+    aboutStarGiftModal: { videoId, videoThumbnail },
   }, tabId);
   setGlobal(global);
 });
@@ -469,12 +502,12 @@ addTabStateResetterAction('closeAboutStarGiftModal', 'aboutStarGiftModal');
 
 addActionHandler('openGiftAuctionChangeRecipientModal', (global, _actions, payload): ActionReturnType => {
   const {
-    oldPeerId, newPeerId, message, shouldHideName, tabId = getCurrentTabId(),
+    auctionGiftId, oldPeerId, newPeerId, message, shouldHideName, tabId = getCurrentTabId(),
   } = payload;
 
   return updateTabState(global, {
     giftAuctionChangeRecipientModal: {
-      isOpen: true, oldPeerId, newPeerId, message, shouldHideName,
+      auctionGiftId, oldPeerId, newPeerId, message, shouldHideName,
     },
   }, tabId);
 });

@@ -60,9 +60,9 @@ const GiftAuctionBidModal = ({
   currentUserPeer,
   topBidderIds,
 }: OwnProps & StateProps) => {
-  const { closeGiftAuctionBidModal, sendStarGiftAuctionBid, loadActiveGiftAuction } = getActions();
+  const { closeGiftAuctionBidModal, sendStarGiftAuctionBid, loadGiftAuction } = getActions();
 
-  const isOpen = Boolean(modal?.isOpen);
+  const isOpen = Boolean(modal);
 
   const renderingAuctionState = useCurrentOrPrev(auctionState);
   const renderingTopBidderIds = useCurrentOrPrev(topBidderIds);
@@ -125,8 +125,8 @@ const GiftAuctionBidModal = ({
   });
 
   const handleTimerEnd = useLastCallback(() => {
-    if (!renderingAuctionState?.gift.id) return;
-    loadActiveGiftAuction({ giftId: renderingAuctionState.gift.id });
+    if (!modal?.auctionGiftId || !isOpen) return;
+    loadGiftAuction({ giftId: modal.auctionGiftId });
   });
 
   const handleRequestCustomValue = useLastCallback(() => {
@@ -401,17 +401,20 @@ const GiftAuctionBidModal = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
-    const { activeGiftAuction } = selectTabState(global);
     const { stars, currentUserId } = global;
+    const { giftAuctionBidModal } = selectTabState(global);
+    const auctionGiftId = giftAuctionBidModal?.auctionGiftId;
+    const giftAuction = auctionGiftId
+      ? global.giftAuctionByGiftId?.[auctionGiftId] : undefined;
 
     const currentUserPeer = currentUserId ? selectPeer(global, currentUserId) : undefined;
 
-    const topBidderIds = activeGiftAuction?.state.type === 'active'
-      ? activeGiftAuction.state.topBidders
+    const topBidderIds = giftAuction?.state.type === 'active'
+      ? giftAuction.state.topBidders
       : undefined;
 
     return {
-      auctionState: activeGiftAuction,
+      auctionState: giftAuction,
       starBalance: stars?.balance,
       currentUserPeer,
       topBidderIds,

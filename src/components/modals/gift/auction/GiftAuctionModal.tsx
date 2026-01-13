@@ -57,7 +57,7 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
     openGiftInMarket,
   } = getActions();
 
-  const isOpen = Boolean(modal?.isOpen);
+  const isOpen = Boolean(modal);
   const renderingModal = useCurrentOrPrev(modal);
   const renderingAuctionState = useCurrentOrPrev(auctionState);
 
@@ -80,10 +80,12 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
   useInterval(updatePreviewAttributes, isOpen ? PREVIEW_UPDATE_INTERVAL : undefined, true);
 
   useEffect(() => {
-    if (isOpen && renderingModal?.sampleAttributes) {
-      updatePreviewAttributes();
-    } else {
-      setPreviewAttributes(undefined);
+    if (isOpen) {
+      if (renderingModal?.sampleAttributes) {
+        updatePreviewAttributes();
+      } else {
+        setPreviewAttributes(undefined);
+      }
     }
   }, [isOpen, renderingModal?.sampleAttributes]);
 
@@ -96,7 +98,8 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
   const handleClose = useLastCallback(() => closeGiftAuctionModal());
 
   const handleLearnMoreClick = useLastCallback(() => {
-    openGiftAuctionInfoModal({});
+    if (!gift) return;
+    openGiftAuctionInfoModal({ auctionGiftId: gift.id });
   });
 
   const handleLearnMoreAboutGiftsClick = useLastCallback(() => {
@@ -111,7 +114,7 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
 
   const handleJoinClick = useLastCallback(() => {
     if (!gift) return;
-    closeGiftAuctionModal({ shouldKeepActiveAuction: true });
+    closeGiftAuctionModal({ shouldKeepAuction: true });
     setGiftModalSelectedGift({ gift });
   });
 
@@ -374,10 +377,11 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
 
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
-    const { activeGiftAuction } = selectTabState(global);
-
+    const { giftAuctionModal } = selectTabState(global);
+    const auctionGiftId = giftAuctionModal?.auctionGiftId;
     return {
-      auctionState: activeGiftAuction,
+      auctionState: auctionGiftId
+        ? global.giftAuctionByGiftId?.[auctionGiftId] : undefined,
     };
   },
 )(GiftAuctionModal));

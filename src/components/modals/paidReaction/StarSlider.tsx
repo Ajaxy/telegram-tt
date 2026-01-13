@@ -42,6 +42,7 @@ const BEAK_HEIGHT = 32;
 
 const BEAK_OFFSET_END = 10;
 const TIP_OFFSET_END = 0;
+const BEAK_TIP_PADDING = 1;
 
 const BADGE_HORIZONTAL_PADDING = 2 * REM;
 const BADGE_ICON_SIZE = 1.5 * REM;
@@ -410,11 +411,14 @@ function calcBadgePosition(
     }
   }
 
+  const maxTipOffset = beakWidth / 2 - TIP_RADIUS - BEAK_TIP_PADDING;
+  const clampedTipOffset = Math.max(-maxTipOffset, Math.min(maxTipOffset, beakTipOffset));
+
   return {
     minBadgeX,
     maxBadgeX,
     beakOffset,
-    beakTipOffset,
+    beakTipOffset: clampedTipOffset,
     beakWidth,
   };
 }

@@ -24,7 +24,7 @@ const AboutStarGiftModal = ({
   const { closeAboutStarGiftModal } = getActions();
   const lang = useLang();
 
-  const isOpen = Boolean(modal?.isOpen);
+  const isOpen = Boolean(modal);
   const renderingModal = useCurrentOrPrev(modal);
 
   const handleClose = useLastCallback(() => {

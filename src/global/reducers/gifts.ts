@@ -7,7 +7,7 @@ import type {
 import type { GlobalState } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { selectTabState } from '../selectors';
+import { omit } from '../../util/iteratees';
 import { updateTabState } from './tabs';
 
 export function removeGiftInfoOriginalDetails<T extends GlobalState>(
@@ -57,68 +57,110 @@ function getAuctionStateVersion(state: ApiTypeStarGiftAuctionState): number {
   return state.type === 'active' ? state.version : 0;
 }
 
-export function updateActiveGiftAuction<T extends GlobalState>(
+export function updateGiftAuction<T extends GlobalState>(
   global: T,
   auctionState: ApiStarGiftAuctionState,
-  tabId: number = getCurrentTabId(),
 ): T {
-  const currentAuction = selectTabState(global, tabId).activeGiftAuction;
+  const giftId = auctionState.gift.id;
+  const currentAuction = global.giftAuctionByGiftId?.[giftId];
+
+  if (!currentAuction) return global;
 
   const serverVersion = getAuctionStateVersion(auctionState.state);
-  const clientVersion = currentAuction ? getAuctionStateVersion(currentAuction.state) : -1;
+  const clientVersion = getAuctionStateVersion(currentAuction.state);
 
   if (serverVersion >= clientVersion) {
-    return updateTabState(global, {
-      activeGiftAuction: auctionState,
-    }, tabId);
+    return {
+      ...global,
+      giftAuctionByGiftId: {
+        ...global.giftAuctionByGiftId,
+        [giftId]: auctionState,
+      },
+    };
   }
 
   return global;
 }
 
-export function updateActiveGiftAuctionState<T extends GlobalState>(
+export function updateGiftAuctionState<T extends GlobalState>(
   global: T,
   giftId: string,
   state: ApiTypeStarGiftAuctionState,
-  tabId: number,
 ): T {
-  const activeAuction = selectTabState(global, tabId).activeGiftAuction;
+  const giftAuction = global.giftAuctionByGiftId?.[giftId];
 
-  if (!activeAuction || activeAuction.gift.id !== giftId) {
+  if (!giftAuction) {
     return global;
   }
 
   const serverVersion = getAuctionStateVersion(state);
-  const clientVersion = getAuctionStateVersion(activeAuction.state);
+  const clientVersion = getAuctionStateVersion(giftAuction.state);
 
   if (serverVersion > clientVersion) {
-    return updateTabState(global, {
-      activeGiftAuction: {
-        ...activeAuction,
-        state,
+    return {
+      ...global,
+      giftAuctionByGiftId: {
+        ...global.giftAuctionByGiftId,
+        [giftId]: {
+          ...giftAuction,
+          state,
+        },
       },
-    }, tabId);
+    };
   }
 
   return global;
 }
 
-export function updateActiveGiftAuctionUserState<T extends GlobalState>(
+export function updateGiftAuctionUserState<T extends GlobalState>(
   global: T,
   giftId: string,
   userState: ApiStarGiftAuctionUserState,
-  tabId: number,
 ): T {
-  const activeAuction = selectTabState(global, tabId).activeGiftAuction;
+  const giftAuction = global.giftAuctionByGiftId?.[giftId];
 
-  if (!activeAuction || activeAuction.gift.id !== giftId) {
+  if (!giftAuction) {
     return global;
   }
 
-  return updateTabState(global, {
-    activeGiftAuction: {
-      ...activeAuction,
-      userState,
+  return {
+    ...global,
+    giftAuctionByGiftId: {
+      ...global.giftAuctionByGiftId,
+      [giftId]: {
+        ...giftAuction,
+        userState,
+      },
     },
-  }, tabId);
+  };
+}
+
+export function replaceGiftAuction<T extends GlobalState>(
+  global: T,
+  auctionState: ApiStarGiftAuctionState,
+): T {
+  const giftId = auctionState.gift.id;
+  return {
+    ...global,
+    giftAuctionByGiftId: {
+      ...global.giftAuctionByGiftId,
+      [giftId]: auctionState,
+    },
+  };
+}
+
+export function removeGiftAuction<T extends GlobalState>(
+  global: T,
+  giftId: string,
+): T {
+  if (!global.giftAuctionByGiftId?.[giftId]) {
+    return global;
+  }
+
+  const rest = omit(global.giftAuctionByGiftId, [giftId]);
+
+  return {
+    ...global,
+    giftAuctionByGiftId: Object.keys(rest).length ? rest : undefined,
+  };
 }

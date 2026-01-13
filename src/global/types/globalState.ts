@@ -34,6 +34,7 @@ import type {
   ApiSavedStarGift,
   ApiSession,
   ApiSponsoredMessage,
+  ApiStarGiftAuctionState,
   ApiStarGiftCollection,
   ApiStarGiftRegular,
   ApiStarsAmount,
@@ -328,6 +329,7 @@ export type GlobalState = {
   starGiftCollections?: {
     byPeerId: Record<string, ApiStarGiftCollection[]>;
   };
+  giftAuctionByGiftId?: Record<string, ApiStarGiftAuctionState>;
 
   stickers: {
     setsById: Record<string, ApiStickerSet>;

@@ -28,6 +28,7 @@ import {
   selectIsServiceChatReady,
   selectIsStoryViewerOpen,
   selectPerformanceSettingsValue,
+  selectTabSelectedGiftAuction,
   selectTabState,
   selectUser,
 } from '../../global/selectors';
@@ -145,7 +146,7 @@ type StateProps = {
   isAccountFrozen?: boolean;
   isAppConfigLoaded?: boolean;
   isFoldersSidebarShown: boolean;
-  activeGiftAuction?: ApiStarGiftAuctionState;
+  selectedGiftAuction?: ApiStarGiftAuctionState;
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -199,7 +200,7 @@ const Main = ({
   isAccountFrozen,
   isAppConfigLoaded,
   isFoldersSidebarShown,
-  activeGiftAuction,
+  selectedGiftAuction,
 }: OwnProps & StateProps) => {
   const {
     initMain,
@@ -260,7 +261,7 @@ const Main = ({
     loadAllStories,
     loadAllHiddenStories,
     loadContentSettings,
-    loadActiveGiftAuction,
+    loadGiftAuction,
     loadPromoData,
   } = getActions();
 
@@ -442,12 +443,12 @@ const Main = ({
     });
   }, [currentUserId]);
 
-  // Refresh active gift auction subscription
-  const auctionTimeout = activeGiftAuction?.timeout;
-  const auctionGiftId = activeGiftAuction?.gift.id;
+  // Refresh gift auction subscription
+  const auctionTimeout = selectedGiftAuction?.state.type === 'active' ? selectedGiftAuction?.timeout : undefined;
+  const auctionGiftId = selectedGiftAuction?.gift.id;
   useInterval(() => {
     if (auctionGiftId) {
-      loadActiveGiftAuction({ giftId: auctionGiftId });
+      loadGiftAuction({ giftId: auctionGiftId });
     }
   }, auctionTimeout ? auctionTimeout * 1000 : undefined);
 
@@ -647,8 +648,9 @@ export default memo(withGlobal<OwnProps>(
       payment,
       limitReachedModal,
       deleteFolderDialogModal,
-      activeGiftAuction,
     } = selectTabState(global);
+
+    const selectedGiftAuction = selectTabSelectedGiftAuction(global);
 
     const { wasTimeFormatSetManually, foldersPosition } = selectSharedSettings(global);
 
@@ -706,7 +708,7 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       isAppConfigLoaded: global.isAppConfigLoaded,
       isFoldersSidebarShown: foldersPosition === FOLDERS_POSITION_LEFT && !isMobile && selectAreFoldersPresent(global),
-      activeGiftAuction,
+      selectedGiftAuction,
     };
   },
 )(Main));

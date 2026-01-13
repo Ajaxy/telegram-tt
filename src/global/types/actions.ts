@@ -2699,19 +2699,23 @@ export interface ActionPayloads {
     gift: ApiStarGiftRegular;
   } & WithTabId;
   closeGiftAuctionModal: {
-    shouldKeepActiveAuction?: boolean;
+    shouldKeepAuction?: boolean;
   } & WithTabId | undefined;
   openGiftAuctionBidModal: {
+    auctionGiftId: string;
     peerId?: string;
     message?: string;
     shouldHideName?: boolean;
-  } & WithTabId | undefined;
+  } & WithTabId;
   closeGiftAuctionBidModal: WithTabId | undefined;
-  openGiftAuctionInfoModal: WithTabId | undefined;
+  openGiftAuctionInfoModal: {
+    auctionGiftId: string;
+  } & WithTabId;
   closeGiftAuctionInfoModal: WithTabId | undefined;
   openAboutStarGiftModal: WithTabId | undefined;
   closeAboutStarGiftModal: WithTabId | undefined;
   openGiftAuctionChangeRecipientModal: {
+    auctionGiftId: string;
     oldPeerId: string;
     newPeerId: string;
     message?: string;
@@ -2732,10 +2736,9 @@ export interface ActionPayloads {
     shouldHideName?: boolean;
     isUpdateBid?: boolean;
   } & WithTabId;
-  loadActiveGiftAuction: {
+  loadGiftAuction: {
     giftId: string;
-  } & WithTabId;
-  clearActiveGiftAuction: WithTabId | undefined;
+  };
   processStarGiftWithdrawal: {
     gift: ApiInputSavedStarGift;
     password: string;

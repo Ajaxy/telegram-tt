@@ -105,7 +105,6 @@ const GiftModal: FC<OwnProps & StateProps> = ({
     loadMyUniqueGifts,
     openGiftTransferConfirmModal,
     setGiftModalSelectedGift,
-    clearActiveGiftAuction,
   } = getActions();
   const dialogRef = useRef<HTMLDivElement>();
   const transitionRef = useRef<HTMLDivElement>();
@@ -440,7 +439,6 @@ const GiftModal: FC<OwnProps & StateProps> = ({
     }
     if (isGiftScreen) {
       setGiftModalSelectedGift({ gift: undefined });
-      clearActiveGiftAuction();
       return;
     }
     handleCloseModal();

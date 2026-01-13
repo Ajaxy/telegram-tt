@@ -57,7 +57,7 @@ export type StateProps = {
   paidMessagesStars?: number;
   areUniqueStarGiftsDisallowed?: boolean;
   shouldDisallowLimitedStarGifts?: boolean;
-  activeGiftAuction?: ApiStarGiftAuctionState;
+  giftAuction?: ApiStarGiftAuctionState;
 };
 
 const LIMIT_DISPLAY_THRESHOLD = 50;
@@ -80,7 +80,7 @@ function GiftComposer({
   paidMessagesStars,
   areUniqueStarGiftsDisallowed,
   shouldDisallowLimitedStarGifts,
-  activeGiftAuction,
+  giftAuction,
 }: OwnProps & StateProps) {
   const {
     sendStarGift, sendPremiumGiftByStars, openInvoice, openGiftUpgradeModal, openStarsBalanceModal,
@@ -189,14 +189,16 @@ function GiftComposer({
   });
 
   const handleLearnMoreClick = useLastCallback(() => {
-    openGiftAuctionInfoModal({});
+    if (!giftAuction) return;
+    openGiftAuctionInfoModal({ auctionGiftId: giftAuction.gift.id });
   });
 
   const handleMainButtonClick = useLastCallback(() => {
-    if (activeGiftAuction) {
-      const existingBidPeerId = activeGiftAuction.userState.bidPeerId;
+    if (giftAuction) {
+      const existingBidPeerId = giftAuction.userState.bidPeerId;
       if (existingBidPeerId && existingBidPeerId !== peerId) {
         openGiftAuctionChangeRecipientModal({
+          auctionGiftId: giftAuction.gift.id,
           oldPeerId: existingBidPeerId,
           newPeerId: peerId,
           message: giftMessage || undefined,
@@ -206,6 +208,7 @@ function GiftComposer({
       }
 
       openGiftAuctionBidModal({
+        auctionGiftId: giftAuction.gift.id,
         peerId,
         message: giftMessage || undefined,
         shouldHideName: shouldHideName || undefined,
@@ -360,8 +363,8 @@ function GiftComposer({
         ? formatStarsAsIcon(lang, gift.stars + (shouldPayForUpgrade ? gift.upgradeStars! : 0), { asFont: true })
         : isPremiumGift ? formatCurrency(lang, gift.amount, gift.currency) : undefined;
 
-    const giftsPerRound = activeGiftAuction?.gift.giftsPerRound;
-    const auctionEndDate = activeGiftAuction?.state.endDate;
+    const giftsPerRound = giftAuction?.gift.giftsPerRound;
+    const auctionEndDate = giftAuction?.state.endDate;
     const auctionTimeLeft = auctionEndDate ? auctionEndDate - getServerTime() : undefined;
     const shouldUseTextTimer = auctionTimeLeft !== undefined && auctionTimeLeft > 0
       && auctionTimeLeft < TEXT_TIMER_THRESHOLD;
@@ -379,7 +382,7 @@ function GiftComposer({
             className={styles.limited}
           />
         )}
-        {activeGiftAuction && Boolean(giftsPerRound) && (
+        {giftAuction && Boolean(giftsPerRound) && (
           <div className={styles.bottomDescription}>
             {lang('GiftAuctionDescription', {
               count: giftsPerRound,
@@ -394,7 +397,7 @@ function GiftComposer({
           isLoading={isPaymentFormLoading}
           noForcedUpperCase
         >
-          {activeGiftAuction ? (
+          {giftAuction ? (
             <div>
               <div>
                 {lang('GiftAuctionPlaceBid')}
@@ -459,7 +462,7 @@ function GiftComposer({
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { peerId }): Complete<StateProps> => {
+  (global, { peerId, gift }): Complete<StateProps> => {
     const theme = selectTheme(global);
     const {
       stars,
@@ -481,6 +484,9 @@ export default memo(withGlobal<OwnProps>(
       && userFullInfo?.disallowedGifts?.shouldDisallowLimitedStarGifts;
 
     const tabState = selectTabState(global);
+    const auctionGiftId = 'id' in gift && gift.type === 'starGift' && gift.isAuction ? gift.id : undefined;
+    const giftAuction = auctionGiftId
+      ? global.giftAuctionByGiftId?.[auctionGiftId] : undefined;
 
     return {
       starBalance: stars?.balance,
@@ -496,7 +502,7 @@ export default memo(withGlobal<OwnProps>(
       paidMessagesStars,
       areUniqueStarGiftsDisallowed,
       shouldDisallowLimitedStarGifts,
-      activeGiftAuction: tabState.activeGiftAuction,
+      giftAuction,
     };
   },
 )(GiftComposer));

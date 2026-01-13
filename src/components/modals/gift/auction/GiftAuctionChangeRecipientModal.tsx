@@ -33,16 +33,17 @@ const GiftAuctionChangeRecipientModal = ({ modal, oldPeer, newPeer }: OwnProps &
   const { closeGiftAuctionChangeRecipientModal, openGiftAuctionBidModal } = getActions();
   const lang = useLang();
 
-  const isOpen = Boolean(modal?.isOpen);
+  const isOpen = Boolean(modal);
   const renderingOldPeer = useCurrentOrPrev(oldPeer);
   const renderingNewPeer = useCurrentOrPrev(newPeer);
   const renderingModal = useCurrentOrPrev(modal);
 
   const handleConfirm = useLastCallback(() => {
-    if (!renderingModal) return;
+    if (!renderingModal?.auctionGiftId) return;
 
     closeGiftAuctionChangeRecipientModal();
     openGiftAuctionBidModal({
+      auctionGiftId: renderingModal.auctionGiftId,
       peerId: renderingModal.newPeerId,
       message: renderingModal.message,
       shouldHideName: renderingModal.shouldHideName,
