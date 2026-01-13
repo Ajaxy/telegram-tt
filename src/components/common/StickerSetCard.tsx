@@ -17,8 +17,6 @@ import StickerButton from './StickerButton';
 
 import './StickerSetCard.scss';
 
-const STICKER_SET_CARD_HEIGHT = 56;
-
 type OwnProps = {
   stickerSet?: ApiStickerSet;
   noPlay?: boolean;
@@ -82,7 +80,6 @@ const StickerSetCard: FC<OwnProps> = ({
   return (
     <ListItem
       className={buildClassName('StickerSetCard', 'small-icon', className)}
-      style={`height: ${STICKER_SET_CARD_HEIGHT}px;`}
       inactive={!firstSticker}
       onClick={handleCardClick}
     >
