@@ -3,7 +3,8 @@
   z-index: var(--z-modal);
   color: var(--color-text);
 
-  &.confirm {
+  &.confirm,
+  &.pin {
     z-index: var(--z-modal-confirm);
   }
 
