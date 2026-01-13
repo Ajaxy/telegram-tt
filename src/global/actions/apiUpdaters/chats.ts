@@ -17,6 +17,7 @@ import {
   deletePeerPhoto,
   leaveChat,
   removeUnreadMentions,
+  replaceChatMessages,
   replacePeerPhotos,
   replacePinnedTopicIds,
   replaceThreadParam,
@@ -67,6 +68,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       if (localChat?.areStoriesHidden !== update.chat.areStoriesHidden) {
         global = updatePeerStoriesHidden(global, update.id, update.chat.areStoriesHidden || false);
+      }
+
+      const localAdminRights = localChat?.adminRights;
+      const newAdminRights = update.chat.adminRights;
+
+      if (localAdminRights && localAdminRights.manageDirectMessages && !update.chat.isMin
+        && newAdminRights?.manageDirectMessages !== localAdminRights.manageDirectMessages
+        && localChat.linkedMonoforumId) {
+        global = replaceChatMessages(global, localChat.linkedMonoforumId, {});
       }
 
       setGlobal(global);

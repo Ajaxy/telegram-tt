@@ -1,5 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
@@ -15,7 +13,7 @@ import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Checkbox from '../../ui/Checkbox';
@@ -40,15 +38,13 @@ type StateProps = {
   adminMembersById?: Record<string, ApiChatMember>;
   hasFullInfo: boolean;
   currentUserId?: string;
-  isChannel: boolean;
   isFormFullyDisabled: boolean;
-  isForum?: boolean;
   defaultRights?: ApiChatAdminRights;
 };
 
 const CUSTOM_TITLE_MAX_LENGTH = 16;
 
-const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
+const ManageGroupAdminRights = ({
   isActive,
   isNewAdmin,
   selectedUserId,
@@ -58,12 +54,10 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   currentUserId,
   adminMembersById,
   hasFullInfo,
-  isChannel,
-  isForum,
   isFormFullyDisabled,
   onClose,
   onScreenSelect,
-}) => {
+}: OwnProps & StateProps) => {
   const { updateChatAdmin } = getActions();
 
   const [permissions, setPermissions] = useState<ApiChatAdminRights>({});
@@ -71,7 +65,11 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isDismissConfirmationDialogOpen, openDismissConfirmationDialog, closeDismissConfirmationDialog] = useFlag();
   const [customTitle, setCustomTitle] = useState('');
-  const lang = useOldLang();
+  const lang = useLang();
+
+  const isChannel = isChatChannel(chat);
+  const isForum = chat.isForum;
+  const hasDirectMessages = Boolean(chat.linkedMonoforumId);
 
   useHistoryBack({
     isActive,
@@ -186,7 +184,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
       : undefined;
 
     if (promotedByUser) {
-      return lang('EditAdminPromotedBy', getUserFullName(promotedByUser));
+      return lang('EditAdminPromotedBy', { user: getUserFullName(promotedByUser) });
     }
 
     return lang('ChannelAdmin');
@@ -290,18 +288,28 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
               onChange={handlePermissionChange}
             />
           </div>
-          {!isChannel && (
+          {hasDirectMessages && (
             <div className="ListItem">
               <Checkbox
-                name="banUsers"
-                checked={Boolean(permissions.banUsers)}
-                label={lang('EditAdminBanUsers')}
+                name="manageDirectMessages"
+                checked={Boolean(permissions.manageDirectMessages)}
+                label={lang('EditAdminManageDirect')}
                 blocking
-                disabled={getControlIsDisabled('banUsers')}
+                disabled={getControlIsDisabled('manageDirectMessages')}
                 onChange={handlePermissionChange}
               />
             </div>
           )}
+          <div className="ListItem">
+            <Checkbox
+              name="banUsers"
+              checked={Boolean(permissions.banUsers)}
+              label={lang('EditAdminBanUsers')}
+              blocking
+              disabled={getControlIsDisabled('banUsers')}
+              onChange={handlePermissionChange}
+            />
+          </div>
           <div className="ListItem">
             <Checkbox
               name="inviteUsers"
@@ -349,7 +357,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
               <Checkbox
                 name="manageTopics"
                 checked={Boolean(permissions.manageTopics)}
-                label={lang('ManageTopicsPermission')}
+                label={lang('EditAdminManageTopics')}
                 blocking
                 disabled={getControlIsDisabled('manageTopics')}
                 onChange={handlePermissionChange}
@@ -371,7 +379,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
 
           {isFormFullyDisabled && (
             <p className="section-info mb-4" dir="auto">
-              {lang('Channel.EditAdmin.CannotEdit')}
+              {lang('EditAdminUnavailable')}
             </p>
           )}
 
@@ -407,8 +415,8 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
         <ConfirmDialog
           isOpen={isDismissConfirmationDialogOpen}
           onClose={closeDismissConfirmationDialog}
-          text="Are you sure you want to dismiss this admin?"
-          confirmLabel={lang('Channel.Admin.Dismiss')}
+          text={lang('EditAdminConfirmDismissText')}
+          confirmLabel={lang('EditAdminConfirmDismiss')}
           confirmHandler={handleDismissAdmin}
           confirmIsDestructive
         />
@@ -423,16 +431,12 @@ export default memo(withGlobal<OwnProps>(
     const fullInfo = selectChatFullInfo(global, chatId);
     const { byId: usersById } = global.users;
     const { currentUserId } = global;
-    const isChannel = isChatChannel(chat);
     const isFormFullyDisabled = !(chat.isCreator || isPromotedByCurrentUser);
-    const isForum = chat.isForum;
 
     return {
       chat,
       usersById,
       currentUserId,
-      isChannel,
-      isForum,
       isFormFullyDisabled,
       defaultRights: chat.adminRights,
       hasFullInfo: Boolean(fullInfo),

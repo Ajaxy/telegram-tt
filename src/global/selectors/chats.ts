@@ -360,7 +360,7 @@ export function selectIsMonoforumAdmin<T extends GlobalState>(
   const channel = selectMonoforumChannel(global, chatId);
   if (!channel) return;
 
-  return Boolean(chat.isCreator || chat.adminRights || channel.isCreator || channel.adminRights);
+  return Boolean(chat.isCreator || getHasAdminRight(channel, 'manageDirectMessages'));
 }
 
 /**

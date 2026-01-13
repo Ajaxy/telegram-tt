@@ -831,6 +831,14 @@ export interface LangPair {
   'EditAdminBanUsers': undefined;
   'EditAdminPinMessages': undefined;
   'EditAdminAddAdmins': undefined;
+  'EditAdminManageDirect': undefined;
+  'EditAdminPostStories': undefined;
+  'EditAdminEditStories': undefined;
+  'EditAdminDeleteStories': undefined;
+  'EditAdminManageTopics': undefined;
+  'EditAdminUnavailable': undefined;
+  'EditAdminConfirmDismissText': undefined;
+  'EditAdminConfirmDismiss': undefined;
   'StartVoipChatPermission': undefined;
   'EditAdminSendAnonymously': undefined;
   'ChannelEditAdminCannotEdit': undefined;

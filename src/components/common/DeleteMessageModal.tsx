@@ -24,7 +24,8 @@ import {
   selectBot,
   selectCanDeleteSelectedMessages,
   selectChat,
-  selectChatFullInfo, selectIsChatWithBot,
+  selectChatFullInfo,
+  selectIsChatWithBot,
   selectSenderFromMessage,
   selectTabState,
   selectUser,
@@ -164,7 +165,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
 
   const peerListToBan = useMemo(() => {
     const isCurrentUserInList = peerList.some((peer) => peer.id === currentUserId);
-    const shouldReturnEmpty = !canBanUsers || isCurrentUserInList || chat?.isMonoforum;
+    const shouldReturnEmpty = !canBanUsers || isCurrentUserInList;
 
     if (shouldReturnEmpty) {
       return MEMO_EMPTY_ARRAY;
@@ -174,7 +175,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
       const isAdmin = adminMembersById?.[peer.id];
       return isCreator || !isAdmin;
     });
-  }, [peerList, isCreator, currentUserId, canBanUsers, adminMembersById, chat?.isMonoforum]);
+  }, [peerList, isCreator, currentUserId, canBanUsers, adminMembersById]);
 
   const shouldShowAdditionalOptions = useMemo(() => {
     return Boolean(peerListToDeleteAll.length || peerListToReportSpam.length || peerListToBan.length);
@@ -510,7 +511,7 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
     const chatBot = Boolean(chat && !isSystemBot(chat.id) && selectBot(global, chat.id));
     const adminMembersById = chatFullInfo?.adminMembersById;
-    const canBanUsers = chat && getHasAdminRight(chat, 'banUsers');
+    const canBanUsers = chat && getHasAdminRight(chat, 'banUsers') && !chat.isMonoforum; // TODO: Ban in channel in case of monoforum
     const isCreator = chat?.isCreator;
     const isChatWithBot = chat ? selectIsChatWithBot(global, chat) : undefined;
     const willDeleteForCurrentUserOnly = (chat && isChatBasicGroup(chat) && !canDeleteForAll) || isChatWithBot;

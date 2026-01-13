@@ -197,6 +197,7 @@ export interface ApiChatAdminRights {
   postStories?: true;
   editStories?: true;
   deleteStories?: true;
+  manageDirectMessages?: true;
 }
 
 export interface ApiChatBannedRights {

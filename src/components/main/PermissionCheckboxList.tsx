@@ -1,5 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import {
   memo, useMemo,
 } from '../../lib/teact/teact';
@@ -19,15 +17,15 @@ import Checkbox from '../ui/Checkbox';
 
 export type OwnProps = {
   chatId?: string;
-  handlePermissionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   permissions: ApiChatBannedRights;
   isMediaDropdownOpen: boolean;
-  setIsMediaDropdownOpen: (open: boolean) => void;
   className?: string;
   shiftedClassName?: string;
   dropdownClassName?: string;
   withCheckbox?: boolean;
   permissionGroup?: boolean;
+  handlePermissionChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setIsMediaDropdownOpen: (open: boolean) => void;
   getControlIsDisabled?: (key: Exclude<keyof ApiChatBannedRights, 'untilDate'>) => boolean | undefined;
 };
 
@@ -41,20 +39,20 @@ const permissionKeyList: (keyof ApiChatBannedRights)[] = [
   'sendAudios', 'sendDocs', 'sendVoices', 'sendRoundvideos', 'embedLinks', 'sendPolls',
 ];
 
-const PermissionCheckboxList: FC<OwnProps & StateProps> = ({
+const PermissionCheckboxList = ({
   chat,
   isMediaDropdownOpen,
-  setIsMediaDropdownOpen,
   hasLinkedChat,
   permissions,
-  handlePermissionChange,
   className,
   shiftedClassName,
   dropdownClassName,
   withCheckbox,
-  getControlIsDisabled,
   permissionGroup,
-}) => {
+  setIsMediaDropdownOpen,
+  handlePermissionChange,
+  getControlIsDisabled,
+}: OwnProps & StateProps) => {
   const {
     showNotification,
   } = getActions();

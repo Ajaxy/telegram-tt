@@ -5,7 +5,7 @@ import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { getHasAdminRight, isChatAdmin, isChatChannel, isDeletedUser } from '../helpers';
-import { selectChat, selectChatFullInfo } from './chats';
+import { selectChat, selectChatFullInfo, selectIsMonoforumAdmin } from './chats';
 import { type ProfileCollectionKey } from './payments';
 import { selectTabState } from './tabs';
 import { selectBot, selectUser, selectUserFullInfo } from './users';
@@ -66,7 +66,7 @@ export function selectPeerPaidMessagesStars<T extends GlobalState>(
 
   const chat = selectChat(global, peerId);
   if (!chat) return undefined;
-  if (isChatAdmin(chat)) return undefined;
+  if (isChatAdmin(chat) || selectIsMonoforumAdmin(global, chat.id)) return undefined;
   return chat.paidMessagesStars;
 }
 

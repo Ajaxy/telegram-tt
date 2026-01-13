@@ -955,6 +955,14 @@
 "EditAdminBanUsers" = "Ban Users";
 "EditAdminPinMessages" = "Pin Messages";
 "EditAdminAddAdmins" = "Add New Admins";
+"EditAdminManageDirect" = "Manage Direct Messages";
+"EditAdminPostStories" = "Post Stories";
+"EditAdminEditStories" = "Edit Stories of Others";
+"EditAdminDeleteStories" = "Delete Stories of Others";
+"EditAdminManageTopics" = "Manage Topics";
+"EditAdminUnavailable" = "You can't edit the rights of this admin.";
+"EditAdminConfirmDismissText" = "Are you sure you want to dismiss this admin?";
+"EditAdminConfirmDismiss" = "Dismiss Admin";
 "StartVoipChatPermission" = "Manage Video Chats";
 "EditAdminSendAnonymously" = "Remain Anonymous";
 "ChannelEditAdminCannotEdit" = "You can't edit the rights of this admin.";

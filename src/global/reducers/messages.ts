@@ -96,7 +96,9 @@ export function updateCurrentMessageList<T extends GlobalState>(
   }, tabId);
 }
 
-function replaceChatMessages<T extends GlobalState>(global: T, chatId: string, newById: Record<number, ApiMessage>): T {
+export function replaceChatMessages<T extends GlobalState>(
+  global: T, chatId: string, newById: Record<number, ApiMessage>,
+): T {
   return updateMessageStore(global, chatId, {
     byId: newById,
   });
