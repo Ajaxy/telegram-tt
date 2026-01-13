@@ -1877,6 +1877,21 @@ export interface LangPair {
   'SettingsBirthday': undefined;
   'BotReadTextFromClipboardTitle': undefined;
   'BotReadTextFromClipboardConfirm': undefined;
+  'ChatTypePrivate': undefined;
+  'ChatTypeGroup': undefined;
+  'ChatTypeChannel': undefined;
+  'ChatTypeFallback': undefined;
+  'ChatInfoNoMessages': undefined;
+  'AttachmentMenuSendAsMedia': undefined;
+  'AttachmentMenuSendAllAsMedia': undefined;
+  'AttachmentMenuSendAsFiles': undefined;
+  'AttachmentMenuSendAllAsFiles': undefined;
+  'AttachmentMenuGroupAllMedia': undefined;
+  'AttachmentMenuUngroupAllMedia': undefined;
+  'AttachmentMenuEnableSpoiler': undefined;
+  'AttachmentMenuDisableSpoiler': undefined;
+  'AttachmentDragAddItems': undefined;
+  'AttachmentCaptionPlaceholder': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -2195,16 +2210,8 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ProfileBirthdayValue': {
     'date': V;
   };
-  'ProfileBirthdayValueYear': {
-    'date': V;
-    'age': V;
-  };
   'ProfileBirthdayTodayValue': {
     'date': V;
-  };
-  'ProfileBirthdayTodayValueYear': {
-    'date': V;
-    'age': V;
   };
   'ChannelEarnLearnCoinAbout': {
     'link': V;
@@ -3253,12 +3260,15 @@ export interface LangPairWithVariables<V = LangVariable> {
   'BotReadTextFromClipboardDescription': {
     'bot': V;
   };
+  'GroupStatusWithOnline': {
+    'status': V;
+    'onlineCount': V;
+  };
 }
 
 export interface LangPairPlural {
   'DeleteForMeChatHint': undefined;
   'DeleteForEveryoneHint': undefined;
-  'PreviewDraggingAddItems': undefined;
   'MediaReplaceInvalidError': undefined;
 }
 
@@ -3427,6 +3437,14 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   };
   'ShowMoreVoters': {
     'count': V;
+  };
+  'ProfileBirthdayValueAge': {
+    'date': V;
+    'age': V;
+  };
+  'ProfileBirthdayTodayValueAge': {
+    'date': V;
+    'age': V;
   };
   'GiftInfoDescription': {
     'amount': V;
@@ -3659,6 +3677,30 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'GiftAuctionGifts': {
+    'count': V;
+  };
+  'AttachmentReplacePhoto': {
+    'count': V;
+  };
+  'AttachmentReplaceVideo': {
+    'count': V;
+  };
+  'AttachmentReplaceAudio': {
+    'count': V;
+  };
+  'AttachmentReplaceFile': {
+    'count': V;
+  };
+  'AttachmentSendPhoto': {
+    'count': V;
+  };
+  'AttachmentSendVideo': {
+    'count': V;
+  };
+  'AttachmentSendAudio': {
+    'count': V;
+  };
+  'AttachmentSendFile': {
     'count': V;
   };
 }

@@ -147,7 +147,7 @@ addCallback((global: GlobalState) => {
 
   const performanceType = selectPerformanceSettings(global);
 
-  void oldSetLanguage(language as LangCode, undefined, true);
+  void oldSetLanguage(language as LangCode, undefined);
 
   requestMutation(() => {
     document.documentElement.style.setProperty(

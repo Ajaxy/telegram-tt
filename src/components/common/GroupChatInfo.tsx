@@ -8,7 +8,7 @@ import type { IconName } from '../../types/icons';
 import { MediaViewerOrigin, type StoryViewerOrigin, type ThreadId } from '../../types';
 
 import {
-  getChatTypeString,
+  getChatTypeLangKey,
   getGroupStatus,
   getMainUsername,
   isChatSuperGroup,
@@ -29,7 +29,6 @@ import renderText from './helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Transition from '../ui/Transition';
 import Avatar from './Avatar';
@@ -117,7 +116,6 @@ const GroupChatInfo = ({
 
   const chat = !withMonoforumStatus && monoforumChannel ? monoforumChannel : realChat;
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const isSuperGroup = chat && isChatSuperGroup(chat);
@@ -155,7 +153,7 @@ const GroupChatInfo = ({
   function renderStatusOrTyping() {
     if (withUpdatingStatus && !areMessagesLoaded && !isRestricted) {
       return (
-        <DotAnimation className="status" content={oldLang('Updating')} />
+        <DotAnimation className="status" content={lang('Updating')} />
       );
     }
 
@@ -199,7 +197,9 @@ const GroupChatInfo = ({
             activeKey={messagesCount !== undefined ? 1 : 2}
             className="message-count-transition"
           >
-            {messagesCount !== undefined ? oldLang('messages', messagesCount, 'i') : oldLang('lng_forum_no_messages')}
+            {messagesCount !== undefined
+              ? lang('Messages', { count: messagesCount }, { pluralValue: messagesCount })
+              : lang('ChatInfoNoMessages')}
           </Transition>
         </span>
       );
@@ -207,18 +207,22 @@ const GroupChatInfo = ({
 
     if (withChatType) {
       return (
-        <span className="status" dir="auto">{oldLang(getChatTypeString(chat))}</span>
+        <span className="status" dir="auto">{lang(getChatTypeLangKey(chat))}</span>
       );
     }
 
-    const groupStatus = getGroupStatus(oldLang, chat);
-    const onlineStatus = onlineCount ? `, ${oldLang('OnlineCount', onlineCount, 'i')}` : undefined;
+    const groupStatusElement = <span className="group-status">{getGroupStatus(lang, chat)}</span>;
+    const onlineStatus = onlineCount ? lang('OnlineCount', { count: onlineCount }, { pluralValue: onlineCount })
+      : undefined;
+    const onlineStatusElement = onlineStatus ? <span className="online-status">{onlineStatus}</span> : undefined;
 
     return (
       <span className="status">
         {mainUsername && <span className="handle withStatus">{mainUsername}</span>}
-        <span className="group-status">{groupStatus}</span>
-        {onlineStatus && <span className="online-status">{onlineStatus}</span>}
+        {!onlineStatusElement ? groupStatusElement
+          : lang('GroupStatusWithOnline', {
+            status: groupStatusElement, onlineCount: onlineStatusElement,
+          }, { withNodes: true })}
       </span>
     );
   }

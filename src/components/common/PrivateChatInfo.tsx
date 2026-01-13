@@ -184,7 +184,7 @@ const PrivateChatInfo = ({
 
     if (withUpdatingStatus && !areMessagesLoaded) {
       return (
-        <DotAnimation className="status" content={oldLang('Updating')} />
+        <DotAnimation className="status" content={lang('Updating')} />
       );
     }
 
@@ -213,7 +213,9 @@ const PrivateChatInfo = ({
             activeKey={messagesCount !== undefined ? 1 : 2}
             className="message-count-transition"
           >
-            {messagesCount !== undefined ? oldLang('messages', messagesCount, 'i') : oldLang('lng_forum_no_messages')}
+            {messagesCount !== undefined
+              ? lang('Messages', { count: messagesCount }, { pluralValue: messagesCount })
+              : lang('ChatInfoNoMessages')}
           </Transition>
         </span>
       );

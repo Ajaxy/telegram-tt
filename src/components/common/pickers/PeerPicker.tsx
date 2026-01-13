@@ -17,6 +17,7 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -113,7 +114,8 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
   onLoadMore,
   ...optionalProps
 }: OwnProps<CategoryType>) => {
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const allowMultiple = optionalProps.allowMultiple;
   const lockedSelectedIds = allowMultiple ? optionalProps.lockedSelectedIds : undefined;
@@ -285,14 +287,14 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
 
         const userStatus = selectUserStatus(global, peer.id);
         return [
-          getUserStatus(lang, peer, userStatus),
+          getUserStatus(oldLang, peer, userStatus),
           buildClassName(isUserOnline(peer, userStatus, true) && styles.onlineStatus),
         ];
       }
 
       if (withPeerTypes) {
         const langKey = getPeerTypeKey(peer);
-        return langKey && [lang(langKey)];
+        return langKey && [oldLang(langKey)];
       }
 
       return undefined;
@@ -326,26 +328,26 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
       />
     );
   }, [
-    categoriesByType, forceShowSelf, isViewOnly, itemClassName, itemInputType, lang, lockedSelectedIdsSet,
+    categoriesByType, forceShowSelf, isViewOnly, itemClassName, itemInputType, oldLang, lockedSelectedIdsSet,
     lockedUnselectedIdsSet, lockedUnselectedSubtitle, onDisabledClick, selectedCategories, selectedIds,
-    withPeerTypes, withStatus, withPeerUsernames,
+    withPeerTypes, withStatus, withPeerUsernames, lang,
   ]);
 
   const beforeChildren = useMemo(() => {
     if (!categories?.length) return undefined;
     return (
       <div key="categories">
-        {categoryPlaceholderKey && <div className={styles.pickerCategoryTitle}>{lang(categoryPlaceholderKey)}</div>}
+        {categoryPlaceholderKey && <div className={styles.pickerCategoryTitle}>{oldLang(categoryPlaceholderKey)}</div>}
         {categories?.map((category) => renderItem(category.type, true))}
-        <div className={styles.pickerCategoryTitle}>{lang('FilterChats')}</div>
+        <div className={styles.pickerCategoryTitle}>{oldLang('FilterChats')}</div>
       </div>
     );
-  }, [categories, categoryPlaceholderKey, lang, renderItem]);
+  }, [categories, categoryPlaceholderKey, oldLang, renderItem]);
 
   return (
     <div className={buildClassName(styles.container, className)}>
       {isSearchable && (
-        <div className={buildClassName(styles.header, 'custom-scroll')} dir={lang.isRtl ? 'rtl' : undefined}>
+        <div className={buildClassName(styles.header, 'custom-scroll')} dir={oldLang.isRtl ? 'rtl' : undefined}>
           {selectedCategories?.map((category) => (
             <PeerChip
               className={styles.peerChip}
@@ -382,7 +384,7 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
             ref={inputRef}
             value={filterValue}
             onChange={handleFilterChange}
-            placeholder={filterPlaceholder || lang('SelectChat')}
+            placeholder={filterPlaceholder || oldLang('SelectChat')}
           />
         </div>
       )}

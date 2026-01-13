@@ -105,7 +105,6 @@ const PLURAL_RULES = {
 const cache = new Map<string, string>();
 
 let langPack: ApiOldLangPack | undefined;
-let fallbackLangPack: ApiOldLangPack | undefined;
 
 const {
   addCallback,
@@ -128,11 +127,7 @@ function createLangFn() {
       }
     }
 
-    if (!fallbackLangPack) {
-      void importFallbackLangPack();
-    }
-
-    const langString = langPack?.[key] || fallbackLangPack?.[key];
+    const langString = langPack?.[key];
     if (!langString) {
       return key;
     }
@@ -157,7 +152,7 @@ export function getTranslationFn(): LangFn {
 /**
  * @deprecated Migrate to `changeLanguage` in `util/localization.ts` instead
  */
-export async function oldSetLanguage(langCode: LangCode, callback?: NoneToVoidFunction, withFallback = false) {
+export async function oldSetLanguage(langCode: LangCode, callback?: NoneToVoidFunction) {
   loadAndChangeLanguage(langCode, true);
   if (langPack && langCode === currentLangCode) {
     if (callback) {
@@ -169,10 +164,6 @@ export async function oldSetLanguage(langCode: LangCode, callback?: NoneToVoidFu
 
   let newLangPack = await cacheApi.fetch(LANG_CACHE_NAME, langCode, cacheApi.Type.Json);
   if (!newLangPack) {
-    if (withFallback) {
-      await importFallbackLangPack();
-    }
-
     newLangPack = await fetchRemote(langCode);
     if (!newLangPack) {
       return;
@@ -209,15 +200,6 @@ export function setTimeFormat(timeFormat: TimeFormat) {
   currentTimeFormat = timeFormat;
   translationFn.timeFormat = timeFormat;
 
-  runCallbacks();
-}
-
-async function importFallbackLangPack() {
-  if (fallbackLangPack) {
-    return;
-  }
-
-  fallbackLangPack = (await import('./fallbackLangPack')).default;
   runCallbacks();
 }
 

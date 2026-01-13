@@ -140,7 +140,7 @@ const UserBirthday = ({
   const value = useMemo(() => {
     if (age) {
       return lang(
-        `ProfileBirthday${isToday ? 'Today' : ''}ValueYear`,
+        `ProfileBirthday${isToday ? 'Today' : ''}ValueAge`,
         { date: formattedDate, age },
         { pluralValue: age },
       );

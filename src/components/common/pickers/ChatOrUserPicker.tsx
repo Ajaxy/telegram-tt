@@ -220,7 +220,7 @@ const ChatOrUserPicker = ({
       if (!peer) return undefined;
       if (peer.id === currentUserId) return [oldLang('SavedMessagesInfo')];
       if (isApiPeerChat(peer)) {
-        return [getGroupStatus(oldLang, peer)];
+        return [getGroupStatus(lang, peer)];
       }
 
       const userStatus = selectUserStatus(global, peer.id);
@@ -262,7 +262,7 @@ const ChatOrUserPicker = ({
         onClick={() => handleClick(id)}
       />
     );
-  }, [currentUserId, oldLang, viewportOffset]);
+  }, [currentUserId, oldLang, lang, viewportOffset]);
 
   function renderTopicList() {
     return (
