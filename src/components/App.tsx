@@ -24,7 +24,7 @@ import usePrevious from '../hooks/usePrevious';
 import { useSignalEffect } from '../hooks/useSignalEffect';
 import { getIsInBackground } from '../hooks/window/useBackgroundMode';
 
-// import Test from './test/TestLocale';
+// import Test from './test/TestSvg';
 import Auth from './auth/Auth';
 import Notifications from './common/Notifications';
 import UiLoader from './common/UiLoader';

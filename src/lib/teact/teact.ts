@@ -80,6 +80,7 @@ interface ComponentInstance {
   name: string;
   props: Props;
   renderedValue?: any;
+  lastMountNamespace?: string;
   mountState: MountState;
   context?: Record<string, Signal<unknown>>;
   hooks?: {

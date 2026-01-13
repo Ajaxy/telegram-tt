@@ -84,6 +84,14 @@ function render($element: VirtualElement | undefined, parentEl: HTMLElement) {
   return undefined;
 }
 
+interface RenderWithVirtualOptions {
+  skipComponentUpdate?: boolean;
+  nextSibling?: ChildNode;
+  forceMoveToEnd?: boolean;
+  fragment?: DocumentFragment;
+  namespace?: string;
+}
+
 function renderWithVirtual<T extends VirtualElement | undefined>(
   parentEl: DOMElement,
   $current: VirtualElement | undefined,
@@ -91,13 +99,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   $parent: VirtualElementParent | VirtualDomHead,
   currentContext: CurrentContext,
   index: number,
-  options: {
-    skipComponentUpdate?: boolean;
-    nextSibling?: ChildNode;
-    forceMoveToEnd?: boolean;
-    fragment?: DocumentFragment;
-    namespace?: string;
-  } = {},
+  options: RenderWithVirtualOptions = {},
 ): T {
   const { skipComponentUpdate, fragment } = options;
   let { nextSibling, namespace } = options;
@@ -112,6 +114,10 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   if ($new?.type === VirtualType.Tag) {
     if ($new.tag === 'svg') namespace = SVG_NAMESPACE;
     if ($new.props.xmlns) namespace = $new.props.xmlns;
+  }
+
+  if ($new?.type === VirtualType.Component) {
+    $new.componentInstance.lastMountNamespace = namespace;
   }
 
   if (
@@ -215,6 +221,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
           parentEl,
           nextSibling,
           options.forceMoveToEnd,
+          namespace,
         );
       } else {
         const $currentAsReal = $current as VirtualElementReal;
@@ -288,7 +295,10 @@ function setupComponentUpdateListener(
       $parent,
       currentContext,
       index,
-      { skipComponentUpdate: true },
+      {
+        skipComponentUpdate: true,
+        namespace: componentInstance.lastMountNamespace,
+      },
     );
   };
 }
@@ -461,7 +471,7 @@ function renderChildren(
   namespace?: string,
 ) {
   if (('props' in $new) && $new.props.teactFastList) {
-    renderFastListChildren($current, $new, currentContext, currentEl);
+    renderFastListChildren($current, $new, currentContext, currentEl, namespace);
     return;
   }
 
@@ -524,7 +534,11 @@ function renderChildren(
 // This function allows to prepend/append a bunch of new DOM nodes to the top/bottom of preserved ones.
 // It also allows to selectively move particular preserved nodes within their DOM list.
 function renderFastListChildren(
-  $current: VirtualElementParent, $new: VirtualElementParent, currentContext: CurrentContext, currentEl: DOMElement,
+  $current: VirtualElementParent,
+  $new: VirtualElementParent,
+  currentContext: CurrentContext,
+  currentEl: DOMElement,
+  namespace?: string,
 ) {
   const currentChildren = $current.children;
   const newChildren = $new.children;
@@ -586,7 +600,7 @@ function renderFastListChildren(
 
     // This prepends new children to the top
     if (fragmentSize) {
-      renderFragment(fragmentIndex!, fragmentSize, currentEl, $new, currentContext);
+      renderFragment(fragmentIndex!, fragmentSize, currentEl, $new, currentContext, namespace);
       fragmentSize = undefined;
       fragmentIndex = undefined;
     }
@@ -604,7 +618,14 @@ function renderFastListChildren(
     }
 
     const nextSibling = currentEl.childNodes[isMovingDown ? i + 1 : i];
-    const options = shouldMoveNode ? (nextSibling ? { nextSibling } : { forceMoveToEnd: true }) : undefined;
+    const options: RenderWithVirtualOptions = { namespace };
+    if (shouldMoveNode) {
+      if (nextSibling) {
+        options.nextSibling = nextSibling;
+      } else {
+        options.forceMoveToEnd = true;
+      }
+    }
 
     const $renderedChild = renderWithVirtual(
       currentEl, currentChildInfo.$element, $newChild, $new, currentContext, i, options,
@@ -616,7 +637,7 @@ function renderFastListChildren(
 
   // This appends new children to the bottom
   if (fragmentSize) {
-    renderFragment(fragmentIndex!, fragmentSize, currentEl, $new, currentContext);
+    renderFragment(fragmentIndex!, fragmentSize, currentEl, $new, currentContext, namespace);
   }
 }
 
@@ -626,13 +647,14 @@ function renderFragment(
   parentEl: DOMElement,
   $parent: VirtualElementParent,
   currentContext: CurrentContext,
+  namespace?: string,
 ) {
   const nextSibling = parentEl.childNodes[fragmentIndex];
 
   if (fragmentSize === 1) {
     const $child = $parent.children[fragmentIndex];
     const $renderedChild = renderWithVirtual(
-      parentEl, undefined, $child, $parent, currentContext, fragmentIndex, { nextSibling },
+      parentEl, undefined, $child, $parent, currentContext, fragmentIndex, { nextSibling, namespace },
     );
     if ($renderedChild !== $child) {
       $parent.children[fragmentIndex] = $renderedChild;
@@ -645,7 +667,9 @@ function renderFragment(
 
   for (let i = fragmentIndex; i < fragmentIndex + fragmentSize; i++) {
     const $child = $parent.children[i];
-    const $renderedChild = renderWithVirtual(parentEl, undefined, $child, $parent, currentContext, i, { fragment });
+    const $renderedChild = renderWithVirtual(
+      parentEl, undefined, $child, $parent, currentContext, i, { fragment, namespace },
+    );
     if ($renderedChild !== $child) {
       $parent.children[i] = $renderedChild;
     }

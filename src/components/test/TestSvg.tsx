@@ -1,5 +1,7 @@
 import { useState } from '../../lib/teact/teact';
 
+import useInterval from '../../hooks/schedulers/useInterval';
+
 export function App() {
   const [stateValue, setStateValue] = useState(false);
 
@@ -43,8 +45,32 @@ export function App() {
           stroke-width="10"
           fill="none"
         />
+
+        <NestedSvg />
+
+        <>
+          <rect x="0" y="0" width="50" height="50" fill="blue" />
+          <rect x="50" y="0" width="50" height="50" fill={stateValue ? 'red' : 'green'} />
+        </>
       </svg>
     </div>
+  );
+}
+
+function NestedSvg() {
+  const [stateValue, setStateValue] = useState(false);
+
+  useInterval(() => {
+    setStateValue((current) => !current);
+  }, 1000);
+
+  return (
+    <circle
+      cx="60"
+      cy="60"
+      r="10"
+      fill={stateValue ? 'red' : 'blue'}
+    />
   );
 }
 
