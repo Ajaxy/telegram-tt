@@ -7,6 +7,7 @@ import type { MessageListType, ThreadId } from '../../types';
 import type { Signal } from '../../util/signals';
 import { MAIN_THREAD_ID } from '../../api/types';
 
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
   selectCanAnimateRightColumn,
   selectChat,
@@ -115,8 +116,10 @@ const MiddleHeaderPanes = ({
 
     applyAnimationState({ list: stateArray, noTransition: isFirstRender });
 
-    setExtraStyles(middleColumn, {
-      '--middle-header-panes-height': `${totalHeight}px`,
+    requestMutation(() => {
+      setExtraStyles(middleColumn, {
+        '--middle-header-panes-height': `${totalHeight}px`,
+      });
     });
   }, [getAudioPlayerState, getGroupCallState, getPinnedState,
     getChatReportState, getBotAdState, getBotVerificationState, getPaidMessageChargeState]);

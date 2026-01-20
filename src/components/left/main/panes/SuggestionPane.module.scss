@@ -7,7 +7,7 @@
 
   display: grid;
   grid-template-columns: 1fr min-content;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: min-content 1fr;
 
   border-radius: var(--border-radius-default);
 

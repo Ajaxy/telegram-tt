@@ -5,6 +5,7 @@ import { withGlobal } from '../../../../global';
 import type { ApiPromoData, ApiSession } from '../../../../api/types';
 
 import { FRESH_AUTH_PERIOD } from '../../../../config';
+import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import { selectIsCurrentUserFrozen } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { getServerTime } from '../../../../util/serverTime';
@@ -96,8 +97,10 @@ const ChatListPanes = ({
       zIndexIncrease: true,
     });
 
-    setExtraStyles(leftColumn, {
-      '--chat-list-panes-height': `${totalHeight}px`,
+    requestMutation(() => {
+      setExtraStyles(leftColumn, {
+        '--chat-list-panes-height': `${totalHeight}px`,
+      });
     });
   }, [getUnconfirmedSessionHeight, getFrozenAccountState, getSuggestionState]);
 
