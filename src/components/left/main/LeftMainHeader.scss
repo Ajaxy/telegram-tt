@@ -16,7 +16,6 @@
 
   .DropdownMenu.rtl {
     position: absolute;
-    z-index: 2;
     transition: var(--slide-transition) transform;
 
     &.right-aligned {
@@ -129,7 +128,6 @@
 
   .Menu .bubble {
     overflow-y: auto;
-    min-width: 17rem;
     max-height: calc(100 * var(--vh) - 3.75rem);
   }
 

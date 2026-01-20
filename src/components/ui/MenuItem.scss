@@ -83,7 +83,7 @@
     transition: none !important;
   }
 
-  .Switcher, .menu-item-badge {
+  .Switcher, .Toggle, .menu-item-badge {
     margin-left: auto;
   }
 
@@ -107,7 +107,7 @@
       margin-left: 2rem;
     }
 
-    > .Switcher {
+    > .Switcher, > .Toggle {
       margin-right: auto;
       margin-left: 0;
     }
