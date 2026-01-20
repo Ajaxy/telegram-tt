@@ -125,13 +125,18 @@ const WebPage: FC<OwnProps & StateProps> = ({
     return parsedLink.timestamp;
   }, [webPage?.url]);
 
-  if (webPage?.webpageType !== 'full') return undefined;
+  const handleArticleClick = useLastCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    openUrl({ url: webPage.url!, shouldSkipModal: messageWebPage.isSafe });
+  });
 
   const handleOpenTelegramLink = useLastCallback(() => {
     openTelegramLink({
-      url: webPage.url,
+      url: webPage.url!,
     });
   });
+
+  if (webPage?.webpageType !== 'full') return undefined;
 
   const {
     siteName,
@@ -233,7 +238,7 @@ const WebPage: FC<OwnProps & StateProps> = ({
         {isArticle && (
           <div
             className={buildClassName('WebPage-text', 'WebPage-text_interactive')}
-            onClick={() => openUrl({ url, shouldSkipModal: messageWebPage.isSafe })}
+            onClick={handleArticleClick}
           >
             <SafeLink className="site-name" url={url} text={siteName || displayUrl} />
             {title && (
