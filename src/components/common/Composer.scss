@@ -774,6 +774,7 @@
     cursor: var(--custom-cursor, default);
     color: var(--color-links) !important;
     text-decoration: none;
+    word-break: break-all;
 
     &:hover,
     &:active,
