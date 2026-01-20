@@ -70,13 +70,13 @@ export function formatPastTimeShort(lang: OldLangFn, datetime: number | Date, al
   weekAgo.setDate(today.getDate() - 7);
   if (date >= weekAgo) {
     const weekday = lang(`Weekday.Short${WEEKDAYS_FULL[date.getDay()]}`);
-    return alwaysShowTime ? lang('FullDateTimeFormat', [weekday, time]) : weekday;
+    return alwaysShowTime ? lang('formatDateAtTime', [weekday, time]) : weekday;
   }
 
   const noYear = date.getFullYear() === today.getFullYear();
 
   const formattedDate = formatDateToString(date, lang.code, noYear);
-  return alwaysShowTime ? lang('FullDateTimeFormat', [formattedDate, time]) : formattedDate;
+  return alwaysShowTime ? lang('formatDateAtTime', [formattedDate, time]) : formattedDate;
 }
 
 export function formatFullDate(lang: OldLangFn | LangFn, datetime: number | Date) {
