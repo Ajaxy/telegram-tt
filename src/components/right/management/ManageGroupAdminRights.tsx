@@ -387,6 +387,7 @@ const ManageGroupAdminRights = ({
             <InputText
               id="admin-title"
               label={lang('EditAdminRank')}
+              className="input-admin-title"
               onChange={handleCustomTitleChange}
               value={customTitle}
               disabled={isFormFullyDisabled}
