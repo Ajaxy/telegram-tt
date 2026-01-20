@@ -99,13 +99,17 @@ function GiftItemStar({
 
     if (isUserLimitReached) {
       showNotification({
-        message: lang('NotificationGiftsLimit2', {
-          count: perUserTotal,
-        }, {
-          pluralValue: perUserTotal!,
-          withMarkdown: true,
-          withNodes: true,
-        }),
+        message: {
+          key: 'NotificationGiftsLimit2',
+          variables: {
+            count: perUserTotal,
+          },
+          options: {
+            pluralValue: perUserTotal!,
+            withMarkdown: true,
+            withNodes: true,
+          },
+        },
       });
       return;
     }

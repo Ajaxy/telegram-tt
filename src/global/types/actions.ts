@@ -495,6 +495,9 @@ export interface ActionPayloads {
   sendMessages: {
     sendParams: SendMessageParams[];
   };
+  sendDiceInCurrentChat: {
+    emoji: string;
+  } & WithTabId;
   sendInviteMessages: {
     chatId: string;
     userIds: string[];
@@ -2006,6 +2009,7 @@ export interface ActionPayloads {
   loadRecentStickers: undefined;
   loadFavoriteStickers: undefined;
   loadFeaturedStickers: undefined;
+  loadDiceStickers: undefined;
 
   reorderStickerSets: {
     isCustomEmoji?: boolean;

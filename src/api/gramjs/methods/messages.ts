@@ -301,7 +301,7 @@ export function sendMessageLocal(
   const {
     chat, lastMessageId, text, entities, replyInfo, suggestedPostInfo, attachment, sticker, story, gif, poll, todo,
     contact, scheduledAt, scheduleRepeatPeriod, groupedId, sendAs, wasDrafted, isInvertedMedia, effectId, isPending,
-    messagePriceInStars,
+    messagePriceInStars, dice,
   } = params;
 
   if (!chat) return undefined;
@@ -309,7 +309,7 @@ export function sendMessageLocal(
   const {
     message: localMessage,
     poll: localPoll,
-  } = buildLocalMessage(
+  } = buildLocalMessage({
     chat,
     lastMessageId,
     text,
@@ -331,7 +331,8 @@ export function sendMessageLocal(
     effectId,
     isPending,
     messagePriceInStars,
-  );
+    dice,
+  });
 
   sendApiUpdate({
     '@type': localMessage.isScheduled ? 'newScheduledMessage' : 'newMessage',
@@ -352,7 +353,7 @@ export function sendApiMessage(
 ) {
   const {
     chat, text, entities, replyInfo, suggestedPostInfo, suggestedMedia,
-    attachment, sticker, story, gif, poll, todo, contact,
+    attachment, sticker, story, gif, poll, todo, contact, dice,
 
     isSilent, scheduledAt, scheduleRepeatPeriod, groupedId, noWebPage, sendAs, shouldUpdateStickerSetOrder,
     isInvertedMedia, effectId, webPageMediaSize, webPageUrl, messagePriceInStars,
@@ -464,6 +465,10 @@ export function sendApiMessage(
         firstName: contact.firstName,
         lastName: contact.lastName,
         vcard: DEFAULT_PRIMITIVES.STRING,
+      });
+    } else if (dice) {
+      media = new GramJs.InputMediaDice({
+        emoticon: dice,
       });
     }
 

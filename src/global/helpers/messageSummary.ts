@@ -152,6 +152,7 @@ function getSummaryDescription(
     giveawayResults,
     paidMedia,
     todo,
+    dice,
   } = mediaContent;
   const { poll } = statefulContent || {};
 
@@ -254,6 +255,10 @@ function getSummaryDescription(
       entities: todo.todo.title.entities,
       asPreview: true,
     });
+  }
+
+  if (dice) {
+    summary = dice.emoticon;
   }
 
   return summary || lang('MessageUnsupported');

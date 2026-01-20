@@ -199,6 +199,34 @@ addActionHandler('loadFeaturedStickers', async (global): Promise<void> => {
   setGlobal(global);
 });
 
+addActionHandler('loadDiceStickers', async (global): Promise<void> => {
+  const emojis = global.appConfig.diceEmojies;
+  const promises = emojis.map((emoji) => callApi('fetchDiceStickers', { emoji }));
+  const results = await Promise.all(promises);
+
+  global = getGlobal();
+  results.forEach((result, index) => {
+    if (!result) {
+      return;
+    }
+    const emoji = emojis[index];
+    const { set, stickers, packs } = result;
+    global = updateStickerSet(global, set.id, { ...set, stickers, packs });
+    global = {
+      ...global,
+      stickers: {
+        ...global.stickers,
+        diceSetIdByEmoji: {
+          ...global.stickers.diceSetIdByEmoji,
+          [emoji]: set.id,
+        },
+      },
+    };
+  });
+
+  setGlobal(global);
+});
+
 addActionHandler('loadPremiumGifts', async (global): Promise<void> => {
   const stickerSet = await callApi('fetchPremiumGifts');
   if (!stickerSet) {

@@ -179,7 +179,8 @@ const Poll: FC<OwnProps> = ({
   const showSolution = useLastCallback(() => {
     showNotification({
       localId: getMessageKey(message),
-      message: renderTextWithEntities({ text: poll.results.solution!, entities: poll.results.solutionEntities }),
+      message: poll.results.solution!,
+      messageEntities: poll.results.solutionEntities,
       duration: SOLUTION_DURATION,
       containerSelector: SOLUTION_CONTAINER_ID,
     });

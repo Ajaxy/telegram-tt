@@ -726,7 +726,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
     ) && !(
       content.sticker || content.contact || content.pollId || content.action
       || (content.video?.isRound) || content.location || content.invoice || content.giveaway || content.giveawayResults
-      || isDocumentSticker
+      || isDocumentSticker || content.dice
     )
     && !isForwarded
     && !message.viaBotId
@@ -763,7 +763,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const canReport = !isPrivate && !isOwn;
 
   const canDeleteForAll = canDelete && !chat.isForbidden && (
-    (isPrivate && !isChatWithSelf && !isBotChat)
+    (isPrivate && !isChatWithSelf && !isBotChat && !content.dice)
     || (isBasicGroup && (
       isOwn || getHasAdminRight(chat, 'deleteMessages') || chat.isCreator
     ))

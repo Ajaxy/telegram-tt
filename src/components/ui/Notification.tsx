@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   useEffect,
   useMemo,
@@ -15,6 +14,7 @@ import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { REM } from '../common/helpers/mediaDimensions';
 import renderText from '../common/helpers/renderText';
+import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -37,9 +37,9 @@ const DEFAULT_DURATION = 3000;
 const ANIMATION_DURATION = 150;
 const CUSTOM_EMOJI_SIZE = 1.75 * REM;
 
-const Notification: FC<OwnProps> = ({
+const Notification = ({
   notification,
-}) => {
+}: OwnProps) => {
   const actions = getActions();
 
   const lang = useLang();
@@ -62,7 +62,10 @@ const Notification: FC<OwnProps> = ({
     containerSelector,
   } = notification;
 
+  const isMessageLangFnParam = isLangFnParam(message);
+
   const [isOpen, setIsOpen] = useState(true);
+  const actionActivationRef = useRef<boolean>(false);
   const timerRef = useRef<number | undefined>();
   const { transitionClassNames } = useShowTransitionDeprecated(isOpen);
 
@@ -80,8 +83,9 @@ const Notification: FC<OwnProps> = ({
     }
   });
 
-  const handleActionClick = useLastCallback(() => {
-    if (action) {
+  const handleActionClick = useLastCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    if (action && !actionActivationRef.current) {
+      actionActivationRef.current = true;
       if (Array.isArray(action)) {
         // @ts-ignore
         action.forEach((cb) => actions[cb.action](cb.payload));
@@ -98,7 +102,8 @@ const Notification: FC<OwnProps> = ({
   });
 
   const handleClick = useLastCallback(() => {
-    if (action) {
+    if (action && !actionActivationRef.current) {
+      actionActivationRef.current = true;
       if (Array.isArray(action)) {
         // @ts-ignore
         action.forEach((cb) => actions[cb.action](cb.payload));
@@ -146,19 +151,27 @@ const Notification: FC<OwnProps> = ({
     }
 
     return renderText(title, ['simple_markdown', 'emoji', 'br', 'links']);
+  // @ts-expect-error -- Lang Parameters are too complex
   }, [lang, title]);
 
   const renderedMessage = useMemo(() => {
-    if (isLangFnParam(message)) {
+    if (isMessageLangFnParam) {
       return lang.with(message);
     }
 
     if (typeof message === 'string') {
+      if (notification.messageEntities) {
+        return renderTextWithEntities({
+          text: message,
+          entities: notification.messageEntities,
+        });
+      }
       return renderText(message, ['simple_markdown', 'emoji', 'br', 'links']);
     }
 
     return message;
-  }, [lang, message]);
+  // @ts-expect-error -- Lang Parameters are too complex
+  }, [isMessageLangFnParam, lang, message, notification.messageEntities]);
 
   const renderedActionText = useMemo(() => {
     if (!actionText) return undefined;

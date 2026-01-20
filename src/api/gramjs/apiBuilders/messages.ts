@@ -4,6 +4,7 @@ import type {
   ApiAttachment,
   ApiChat,
   ApiContact,
+  ApiDice,
   ApiDraft,
   ApiFactCheck,
   ApiInputMessageReplyInfo,
@@ -428,29 +429,53 @@ function buildNewTodo(todo: ApiNewMediaTodo): ApiMediaTodo {
   };
 }
 
-export function buildLocalMessage(
-  chat: ApiChat,
-  lastMessageId?: number,
-  text?: string,
-  entities?: ApiMessageEntity[],
-  replyInfo?: ApiInputReplyInfo,
-  suggestedPostInfo?: ApiInputSuggestedPostInfo,
-  attachment?: ApiAttachment,
-  sticker?: ApiSticker,
-  gif?: ApiVideo,
-  poll?: ApiNewPoll,
-  todo?: ApiNewMediaTodo,
-  contact?: ApiContact,
-  groupedId?: string,
-  scheduledAt?: number,
-  scheduleRepeatPeriod?: number,
-  sendAs?: ApiPeer,
-  story?: ApiStory | ApiStorySkipped,
-  isInvertedMedia?: true,
-  effectId?: string,
-  isPending?: true,
-  messagePriceInStars?: number,
-) {
+export function buildLocalMessage({
+  chat,
+  lastMessageId,
+  text,
+  entities,
+  replyInfo,
+  suggestedPostInfo,
+  attachment,
+  sticker,
+  gif,
+  poll,
+  todo,
+  contact,
+  groupedId,
+  scheduledAt,
+  scheduleRepeatPeriod,
+  sendAs,
+  story,
+  isInvertedMedia,
+  effectId,
+  isPending,
+  messagePriceInStars,
+  dice,
+}: {
+  chat: ApiChat;
+  lastMessageId?: number;
+  text?: string;
+  entities?: ApiMessageEntity[];
+  replyInfo?: ApiInputReplyInfo;
+  suggestedPostInfo?: ApiInputSuggestedPostInfo;
+  attachment?: ApiAttachment;
+  sticker?: ApiSticker;
+  gif?: ApiVideo;
+  poll?: ApiNewPoll;
+  todo?: ApiNewMediaTodo;
+  contact?: ApiContact;
+  groupedId?: string;
+  scheduledAt?: number;
+  scheduleRepeatPeriod?: number;
+  sendAs?: ApiPeer;
+  story?: ApiStory | ApiStorySkipped;
+  isInvertedMedia?: true;
+  effectId?: string;
+  isPending?: true;
+  messagePriceInStars?: number;
+  dice?: string;
+}) {
   const localId = getNextLocalMessageId(lastMessageId);
   const media = attachment && buildUploadingMedia(attachment);
   const isChannel = chat.type === 'chatTypeChannel';
@@ -460,7 +485,13 @@ export function buildLocalMessage(
   const localPoll = poll && buildNewPoll(poll, localId);
   const localTodo = todo && buildNewTodo(todo);
 
-  const formattedText = text ? addTimestampEntities(
+  const localDice = dice ? {
+    mediaType: 'dice',
+    value: -1,
+    emoticon: dice,
+  } satisfies ApiDice : undefined;
+
+  const formattedText = text && !dice ? addTimestampEntities(
     { text, entities, emojiOnlyCount: undefined },
   ) : undefined;
 
@@ -476,6 +507,7 @@ export function buildLocalMessage(
       storyData: story && { mediaType: 'storyData', ...story },
       pollId: localPoll?.id,
       todo: localTodo,
+      dice: localDice,
     }),
     date: scheduledAt || getServerTime(),
     isOutgoing: !isChannel,

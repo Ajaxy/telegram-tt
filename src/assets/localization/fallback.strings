@@ -2557,6 +2557,8 @@
 "BotReadTextFromClipboardTitle" = "Clipboard Access";
 "BotReadTextFromClipboardDescription" = "{bot} wants to read the contents of your clipboard. Do you want to continue?";
 "BotReadTextFromClipboardConfirm" = "Allow";
+"DiceToast" = "Send a {emoji} emoji to try your luck.";
+"DiceToastSend" = "Send";
 "ChatTypePrivate" = "Private Chat";
 "ChatTypeGroup" = "Group";
 "ChatTypeChannel" = "Channel";

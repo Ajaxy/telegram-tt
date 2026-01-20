@@ -146,6 +146,7 @@ type StateProps = {
   isAccountFrozen?: boolean;
   isAppConfigLoaded?: boolean;
   isFoldersSidebarShown: boolean;
+  diceEmojies?: string[];
   selectedGiftAuction?: ApiStarGiftAuctionState;
 };
 
@@ -200,6 +201,7 @@ const Main = ({
   isAccountFrozen,
   isAppConfigLoaded,
   isFoldersSidebarShown,
+  diceEmojies,
   selectedGiftAuction,
 }: OwnProps & StateProps) => {
   const {
@@ -216,6 +218,7 @@ const Main = ({
     loadCountryList,
     loadAvailableReactions,
     loadStickerSets,
+    loadDiceStickers,
     loadPremiumGifts,
     loadTonGifts,
     loadStarGifts,
@@ -389,6 +392,12 @@ const Main = ({
       }
     }
   }, [addedSetIds, addedCustomEmojiIds, isMasterTab, isSynced, isAppConfigLoaded, isAccountFrozen]);
+
+  useEffect(() => {
+    if (isMasterTab && isSynced && isAppConfigLoaded && !isAccountFrozen && diceEmojies) {
+      loadDiceStickers();
+    }
+  }, [isMasterTab, isSynced, isAppConfigLoaded, isAccountFrozen, diceEmojies]);
 
   useEffect(() => {
     loadBotFreezeAppeal();
@@ -708,6 +717,7 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       isAppConfigLoaded: global.isAppConfigLoaded,
       isFoldersSidebarShown: foldersPosition === FOLDERS_POSITION_LEFT && !isMobile && selectAreFoldersPresent(global),
+      diceEmojies: global.appConfig?.diceEmojies,
       selectedGiftAuction,
     };
   },

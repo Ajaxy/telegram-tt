@@ -22,6 +22,8 @@ type Frame =
   | typeof WAITING
   | ImageBitmap;
 
+type FrameCallback = (index: number) => void;
+
 const HIGH_PRIORITY_QUALITY = (IS_ANDROID || IS_IOS) ? 0.75 : 1;
 const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
 const LOW_PRIORITY_QUALITY_SIZE_THRESHOLD = 24;
@@ -47,6 +49,7 @@ class RLottie {
     isSharedCanvas?: boolean;
     coords?: Params['coords'];
     onLoad?: NoneToVoidFunction;
+    onFrame?: FrameCallback;
   }>();
 
   private imgSize!: number;
@@ -89,13 +92,19 @@ class RLottie {
 
   private lastRenderAt?: number;
 
+  private requestedSeekToEnd = false;
+
   static init(...args: ConstructorParameters<typeof RLottie>) {
     const [
       , canvas,
       renderId,
       params,
-      viewId = generateUniqueId(), ,
+      viewId = generateUniqueId(),
+      ,
       onLoad,
+      ,
+      ,
+      onFrame,
     ] = args;
     let instance = instancesByRenderId.get(renderId);
 
@@ -103,7 +112,7 @@ class RLottie {
       instance = new RLottie(...args);
       instancesByRenderId.set(renderId, instance);
     } else {
-      instance.addView(viewId, canvas, onLoad, params?.coords);
+      instance.addView(viewId, canvas, onLoad, onFrame, params?.coords);
     }
 
     return instance;
@@ -111,16 +120,17 @@ class RLottie {
 
   constructor(
     private tgsUrl: string,
-    private container: HTMLDivElement | HTMLCanvasElement,
+    container: HTMLDivElement | HTMLCanvasElement,
     private renderId: string,
     private params: Params,
     viewId: string = generateUniqueId(),
     private customColor?: [number, number, number],
-    private onLoad?: NoneToVoidFunction | undefined,
+    onLoad?: NoneToVoidFunction | undefined,
     private onEnded?: (isDestroyed?: boolean) => void,
     private onLoop?: () => void,
+    onFrame?: FrameCallback,
   ) {
-    this.addView(viewId, container, onLoad, params.coords);
+    this.addView(viewId, container, onLoad, onFrame, params.coords);
     this.initConfig();
     this.initRenderer();
   }
@@ -209,6 +219,11 @@ class RLottie {
     this.doPlay();
   }
 
+  seekToEnd() {
+    this.requestedSeekToEnd = true;
+    this.doPlay();
+  }
+
   setSpeed(speed: number) {
     this.speed = speed;
   }
@@ -257,6 +272,7 @@ class RLottie {
     viewId: string,
     container: HTMLDivElement | HTMLCanvasElement,
     onLoad?: NoneToVoidFunction,
+    onFrame?: FrameCallback,
     coords?: Params['coords'],
   ) {
     const sizeFactor = this.calcSizeFactor();
@@ -292,7 +308,7 @@ class RLottie {
         container.appendChild(canvas);
 
         this.views.set(viewId, {
-          canvas, ctx, onLoad,
+          canvas, ctx, onLoad, onFrame,
         });
       });
     } else {
@@ -442,6 +458,12 @@ class RLottie {
       return;
     }
 
+    if (this.requestedSeekToEnd) {
+      this.approxFrameIndex = this.framesCount - 1;
+      this.stopFrameIndex = undefined;
+      this.requestedSeekToEnd = false;
+    }
+
     if (this.isAnimating) {
       return;
     }
@@ -486,12 +508,13 @@ class RLottie {
       if (frameIndex !== this.prevFrameIndex) {
         this.views.forEach((containerData) => {
           const {
-            ctx, isLoaded, isPaused, coords: { x, y } = {}, onLoad,
+            ctx, isLoaded, isPaused, coords: { x, y } = {}, onLoad, onFrame,
           } = containerData;
 
           if (!isLoaded || !isPaused) {
             ctx.clearRect(x || 0, y || 0, this.imgSize, this.imgSize);
             ctx.drawImage(frame, x || 0, y || 0);
+            onFrame?.(frameIndex);
           }
 
           if (!isLoaded) {

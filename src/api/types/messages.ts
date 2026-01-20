@@ -304,6 +304,12 @@ export type ApiGame = {
   document?: ApiDocument;
 };
 
+export type ApiDice = {
+  mediaType: 'dice';
+  value: number;
+  emoticon: string;
+};
+
 export type ApiGiveaway = {
   mediaType: 'giveaway';
   quantity: number;
@@ -608,6 +614,7 @@ export type MediaContent = {
   giveaway?: ApiGiveaway;
   giveawayResults?: ApiGiveawayResults;
   paidMedia?: ApiPaidMedia;
+  dice?: ApiDice;
   ttlSeconds?: number;
 };
 export type MediaContainer = {

@@ -366,6 +366,7 @@ export type GlobalState = {
       stickers: ApiSticker[];
       emojis: ApiSticker[];
     };
+    diceSetIdByEmoji?: Record<string, string>;
   };
 
   customEmojis: {

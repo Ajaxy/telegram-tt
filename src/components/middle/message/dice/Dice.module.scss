@@ -1,0 +1,19 @@
+.root {
+  cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+
+  display: block !important;
+
+  width: var(--_size);
+  height: var(--_size);
+}
+
+.sticker {
+  position: absolute;
+  inset: 0;
+}
+
+.hidden {
+  visibility: hidden;
+}

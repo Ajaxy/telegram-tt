@@ -1885,6 +1885,7 @@ export interface LangPair {
   'SettingsBirthday': undefined;
   'BotReadTextFromClipboardTitle': undefined;
   'BotReadTextFromClipboardConfirm': undefined;
+  'DiceToastSend': undefined;
   'ChatTypePrivate': undefined;
   'ChatTypeGroup': undefined;
   'ChatTypeChannel': undefined;
@@ -3328,6 +3329,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'BotReadTextFromClipboardDescription': {
     'bot': V;
+  };
+  'DiceToast': {
+    'emoji': V;
   };
   'GroupStatusWithOnline': {
     'status': V;

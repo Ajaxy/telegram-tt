@@ -723,6 +723,7 @@ export type SendMessageParams = {
   gif?: ApiVideo;
   poll?: ApiNewPoll;
   todo?: ApiNewMediaTodo;
+  dice?: string;
   contact?: ApiContact;
   isSilent?: boolean;
   scheduledAt?: number;

@@ -63,13 +63,13 @@ export function getMessageTranscription(message: ApiMessage) {
 
 export function hasMessageText(message: MediaContainer) {
   const {
-    action, text, sticker, photo, video, audio, voice, document, pollId, todo,
+    action, text, sticker, photo, video, audio, voice, document, pollId, todo, dice,
     webPage, contact, invoice, location, game, storyData, giveaway, giveawayResults, paidMedia,
   } = message.content;
 
   return Boolean(text) || !(
     sticker || photo || video || audio || voice || document || contact || pollId || todo || webPage
-    || invoice || location || game || storyData || giveaway || giveawayResults
+    || invoice || location || game || storyData || giveaway || giveawayResults || dice
     || paidMedia || action?.type === 'phoneCall'
   );
 }
@@ -112,10 +112,10 @@ export function getMessageCustomShape(message: ApiMessage): boolean {
   const {
     text, sticker, photo, video, audio, voice,
     document, pollId, webPage, contact, action,
-    game, invoice, location, storyData,
+    game, invoice, location, storyData, dice,
   } = message.content;
 
-  if (sticker || (video?.isRound)) {
+  if (sticker || (video?.isRound) || dice) {
     return true;
   }
 

@@ -434,6 +434,12 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
     });
   }
 
+  const diceEmojies = global.appConfig.diceEmojies;
+  let dice = payload.dice;
+  if (payload.text && !payload.entities?.length && diceEmojies.includes(payload.text)) {
+    dice = payload.text;
+  }
+
   const params: SendMessageParams = {
     ...payload,
     chat,
@@ -445,6 +451,8 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
     lastMessageId,
     messagePriceInStars,
     isStoryReply,
+    dice,
+    text: !dice ? payload.text : undefined,
     isPending: messagePriceInStars ? true : undefined,
     ...suggestedMessage && { isInvertedMedia: suggestedMessage?.isInvertedMedia },
   };
@@ -606,6 +614,20 @@ addActionHandler('sendInviteMessages', async (global, actions, payload): Promise
   }));
   return actions.showNotification({
     message: oldTranslate('Conversation.ShareLinkTooltip.Chat.One', userFullNames.join(', ')),
+    tabId,
+  });
+});
+
+addActionHandler('sendDiceInCurrentChat', (global, actions, payload): ActionReturnType => {
+  const { emoji, tabId = getCurrentTabId() } = payload;
+  const messageList = selectCurrentMessageList(global, tabId);
+  if (!messageList) {
+    return undefined;
+  }
+
+  actions.sendMessage({
+    messageList,
+    dice: emoji,
     tabId,
   });
 });

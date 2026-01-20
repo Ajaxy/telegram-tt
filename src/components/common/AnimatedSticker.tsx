@@ -1,4 +1,4 @@
-import type { ElementRef, FC } from '../../lib/teact/teact';
+import type { ElementRef } from '../../lib/teact/teact';
 import {
   getIsHeavyAnimating,
   memo,
@@ -39,6 +39,7 @@ export type OwnProps = {
   tgsUrl?: string;
   play?: boolean | string;
   playSegment?: [number, number];
+  seekToEnd?: boolean;
   speed?: number;
   noLoop?: boolean;
   size: number;
@@ -55,11 +56,12 @@ export type OwnProps = {
   onLoad?: NoneToVoidFunction;
   onEnded?: NoneToVoidFunction;
   onLoop?: NoneToVoidFunction;
+  onFrame?: (index: number) => void;
 };
 
 const THROTTLE_MS = 150;
 
-const AnimatedSticker: FC<OwnProps> = ({
+const AnimatedSticker = ({
   ref,
   renderId,
   className,
@@ -68,6 +70,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   play,
   playSegment,
   speed,
+  seekToEnd,
   noLoop,
   size,
   quality,
@@ -83,7 +86,8 @@ const AnimatedSticker: FC<OwnProps> = ({
   onLoad,
   onEnded,
   onLoop,
-}) => {
+  onFrame,
+}: OwnProps) => {
   let containerRef = useRef<HTMLDivElement>();
   if (ref) {
     containerRef = ref;
@@ -160,10 +164,15 @@ const AnimatedSticker: FC<OwnProps> = ({
       onLoad,
       onEnded,
       onLoop,
+      onFrame,
     );
 
     if (speed) {
       newAnimation.setSpeed(speed);
+    }
+
+    if (seekToEnd) {
+      newAnimation.seekToEnd();
     }
 
     setAnimation(newAnimation);
@@ -207,6 +216,8 @@ const AnimatedSticker: FC<OwnProps> = ({
 
     if (playSegmentRef.current) {
       animation.playSegment(playSegmentRef.current, shouldRestart, viewId);
+    } else if (seekToEnd) {
+      animation.seekToEnd();
     } else {
       animation.play(shouldRestart, viewId);
     }

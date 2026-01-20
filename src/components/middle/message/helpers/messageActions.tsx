@@ -58,7 +58,7 @@ export function translateWithYou<K extends LangKey>(
 export function getPinnedMediaValue(lang: LangFn, message: ApiMessage) {
   const {
     audio, contact, document, game, giveaway, giveawayResults, paidMedia, storyData,
-    invoice, location, photo, pollId, sticker, video, voice,
+    invoice, location, photo, pollId, sticker, video, voice, dice,
   } = getMessageContent(message);
 
   if (message.groupedId || paidMedia) return lang('ActionPinnedMediaAlbum');
@@ -78,6 +78,7 @@ export function getPinnedMediaValue(lang: LangFn, message: ApiMessage) {
   if (pollId) return lang('ActionPinnedMediaPoll');
   if (giveaway) return lang('ActionPinnedMediaGiveaway');
   if (giveawayResults) return lang('ActionPinnedMediaGiveawayResults');
+  if (dice) return dice.emoticon;
 
   return undefined;
 }

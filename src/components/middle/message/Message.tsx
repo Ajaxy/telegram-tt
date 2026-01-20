@@ -181,6 +181,7 @@ import AnimatedEmoji from './AnimatedEmoji';
 import CommentButton from './CommentButton';
 import Contact from './Contact';
 import ContextMenuContainer from './ContextMenuContainer.async';
+import DiceWrapper from './dice/DiceWrapper';
 import FactCheck from './FactCheck';
 import Game from './Game';
 import Giveaway from './Giveaway';
@@ -477,6 +478,7 @@ const Message = ({
   const [isPlayingSnapAnimation, setIsPlayingSnapAnimation] = useState(false);
   const [isPlayingDeleteAnimation, setIsPlayingDeleteAnimation] = useState(false);
   const [shouldPlayEffect, requestEffect, hideEffect] = useFlag();
+  const [shouldPlayDiceEffect, requestDiceEffect, hideDiceEffect] = useFlag();
   const [isDeclineDialogOpen, openDeclineDialog, closeDeclineDialog] = useFlag();
   const [declineReason, setDeclineReason] = useState('');
   const { isMobile, isTouchScreen } = useAppLayout();
@@ -547,7 +549,7 @@ const Message = ({
     voice, document, sticker, contact,
     invoice, location,
     action, game, storyData, giveaway,
-    giveawayResults, todo,
+    giveawayResults, todo, dice,
   } = getMessageContent(message);
 
   const messageReplyInfo = getMessageReplyInfo(message);
@@ -779,6 +781,14 @@ const Message = ({
       requestEffect();
     }
   }, [effect, isLocal, memoFirstUnreadIdRef, messageId, sticker?.hasEffect]);
+
+  useEffect(() => {
+    if (dice && ((
+      memoFirstUnreadIdRef?.current && messageId >= memoFirstUnreadIdRef.current
+    ) || isLocal)) {
+      requestDiceEffect();
+    }
+  }, [dice, memoFirstUnreadIdRef, messageId, isLocal]);
 
   const detectedLanguage = useTextLanguage(
     text?.text,
@@ -1297,6 +1307,15 @@ const Message = ({
             message={message}
             threadId={threadId}
             canAutoLoadMedia={canAutoLoadMedia}
+          />
+        )}
+        {dice && (
+          <DiceWrapper
+            isLocal={isLocal}
+            dice={dice}
+            isOutgoing={isOwn}
+            canPlayWinEffect={shouldPlayDiceEffect}
+            onEffectPlayed={hideDiceEffect}
           />
         )}
         {invoice?.extendedMedia && (

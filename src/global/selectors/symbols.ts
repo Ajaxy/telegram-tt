@@ -250,3 +250,28 @@ export function selectGiftStickerForTon<T extends GlobalState>(global: T, amount
 export function selectCustomEmoji<T extends GlobalState>(global: T, documentId: string) {
   return global.customEmojis.byId[documentId];
 }
+
+export function selectIdleDiceSticker<T extends GlobalState>(global: T, diceEmoji: string) {
+  const { diceSetIdByEmoji } = global.stickers;
+  if (!diceSetIdByEmoji) return undefined;
+  const diceSetId = diceSetIdByEmoji[diceEmoji];
+  if (!diceSetId) return undefined;
+
+  const diceSet = global.stickers.setsById[diceSetId];
+  if (!diceSet) return undefined;
+
+  return diceSet.stickers?.find((sticker) => sticker.emoji === '#\u20E3');
+}
+
+export function selectDiceSticker<T extends GlobalState>(global: T, diceEmoji: string, value: number) {
+  const { diceSetIdByEmoji } = global.stickers;
+  if (!diceSetIdByEmoji) return undefined;
+  const diceSetId = diceSetIdByEmoji[diceEmoji];
+  if (!diceSetId) return undefined;
+
+  const diceSet = global.stickers.setsById[diceSetId];
+  if (!diceSet) return undefined;
+
+  const numberEmoji = `${value}\u20E3`;
+  return diceSet.stickers?.find((sticker) => sticker.emoji === numberEmoji);
+}

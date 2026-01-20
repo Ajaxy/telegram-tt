@@ -160,4 +160,6 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
   typingDraftTtl: 10,
   arePasskeysAvailable: true,
   passkeysMaxCount: 5,
+  diceEmojies: [],
+  diceEmojiesSuccess: {},
 };

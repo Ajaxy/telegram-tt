@@ -3,6 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import type {
   ApiAudio,
   ApiContact,
+  ApiDice,
   ApiDocument,
   ApiFormattedText,
   ApiGame,
@@ -179,13 +180,16 @@ export function buildMessageMediaContent(
   const game = buildGameFromMedia(media);
   if (game) return { game };
 
+  const dice = buildDiceFromMedia(media);
+  if (dice) return { dice };
+
   const storyData = buildMessageStoryData(media);
   if (storyData) return { storyData };
 
-  const giveaway = buildGiweawayFromMedia(media);
+  const giveaway = buildGiveawayFromMedia(media);
   if (giveaway) return { giveaway };
 
-  const giveawayResults = buildGiweawayResultsFromMedia(media);
+  const giveawayResults = buildGiveawayResultsFromMedia(media);
   if (giveawayResults) return { giveawayResults };
 
   const paidMedia = buildPaidMedia(media);
@@ -668,7 +672,24 @@ function buildGame(media: GramJs.MessageMediaGame): ApiGame | undefined {
   };
 }
 
-function buildGiweawayFromMedia(media: GramJs.TypeMessageMedia): ApiGiveaway | undefined {
+function buildDiceFromMedia(media: GramJs.TypeMessageMedia): ApiDice | undefined {
+  if (!(media instanceof GramJs.MessageMediaDice)) {
+    return undefined;
+  }
+
+  return buildDice(media);
+}
+
+function buildDice(media: GramJs.MessageMediaDice): ApiDice | undefined {
+  const { value, emoticon } = media;
+  return {
+    mediaType: 'dice',
+    value,
+    emoticon,
+  };
+}
+
+function buildGiveawayFromMedia(media: GramJs.TypeMessageMedia): ApiGiveaway | undefined {
   if (!(media instanceof GramJs.MessageMediaGiveaway)) {
     return undefined;
   }
@@ -696,7 +717,7 @@ function buildGiveaway(media: GramJs.MessageMediaGiveaway): ApiGiveaway | undefi
   };
 }
 
-function buildGiweawayResultsFromMedia(media: GramJs.TypeMessageMedia): ApiGiveawayResults | undefined {
+function buildGiveawayResultsFromMedia(media: GramJs.TypeMessageMedia): ApiGiveawayResults | undefined {
   if (!(media instanceof GramJs.MessageMediaGiveawayResults)) {
     return undefined;
   }

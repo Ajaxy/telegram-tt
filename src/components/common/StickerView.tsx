@@ -1,4 +1,4 @@
-import type { ElementRef, FC } from '../../lib/teact/teact';
+import type { ElementRef } from '../../lib/teact/teact';
 import { memo, useMemo, useRef } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
@@ -16,6 +16,7 @@ import useColorFilter from '../../hooks/stickers/useColorFilter';
 import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useMountAfterHeavyAnimation from '../../hooks/useMountAfterHeavyAnimation';
@@ -39,24 +40,28 @@ type OwnProps = {
   loopLimit?: number;
   shouldLoop?: boolean;
   shouldPreloadPreview?: boolean;
+  skipPreview?: boolean;
   forceAlways?: boolean;
   forceOnHeavyAnimation?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   noLoad?: boolean;
   noPlay?: boolean;
+  forceAnimatedStickerOnEnd?: boolean;
   noVideoOnMobile?: boolean;
   withSharedAnimation?: boolean;
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
   withTranslucentThumb?: boolean; // With shared canvas thumbs are opaque by default to provide better transition effect
   onVideoEnded?: AnyToVoidFunction;
   onAnimatedStickerLoop?: AnyToVoidFunction;
+  onAnimatedStickerFrame?: (frame: number) => void;
+  onAnimatedStickerLoad?: AnyToVoidFunction;
 };
 
 const SHARED_PREFIX = 'shared';
 const STICKER_SIZE = 24;
 
-const StickerView: FC<OwnProps> = ({
+const StickerView = ({
   containerRef,
   sticker,
   thumbClassName,
@@ -68,6 +73,7 @@ const StickerView: FC<OwnProps> = ({
   loopLimit,
   shouldLoop = false,
   shouldPreloadPreview,
+  skipPreview,
   forceAlways,
   forceOnHeavyAnimation,
   observeIntersectionForLoading,
@@ -75,12 +81,15 @@ const StickerView: FC<OwnProps> = ({
   noLoad,
   noPlay,
   noVideoOnMobile,
+  forceAnimatedStickerOnEnd,
   withSharedAnimation,
   withTranslucentThumb,
   sharedCanvasRef,
   onVideoEnded,
   onAnimatedStickerLoop,
-}) => {
+  onAnimatedStickerFrame,
+  onAnimatedStickerLoad,
+}: OwnProps) => {
   const {
     id, isLottie, stickerSetInfo, emoji,
   } = sticker;
@@ -111,10 +120,11 @@ const StickerView: FC<OwnProps> = ({
 
   const cachedPreview = mediaLoader.getFromMemory(previewMediaHash);
   const isReadyToMountFullMedia = useMountAfterHeavyAnimation(hasIntersectedForPlayingRef.current);
-  const shouldForcePreview = isUnsupportedVideo || (isStatic ? isSmall : noPlay);
-  const shouldLoadPreview = !customColor && !cachedPreview && (!isReadyToMountFullMedia || shouldForcePreview);
+  const shouldForcePreview = !skipPreview && (isUnsupportedVideo || (isStatic ? isSmall : noPlay));
+  const shouldLoadPreview = !skipPreview && !customColor && !cachedPreview
+    && (!isReadyToMountFullMedia || shouldForcePreview);
   const previewMediaData = useMedia(previewMediaHash, !shouldLoadPreview);
-  const withPreview = shouldLoadPreview || cachedPreview;
+  const withPreview = !skipPreview && (shouldLoadPreview || cachedPreview);
 
   const shouldSkipLoadingFullMedia = Boolean(shouldForcePreview || (
     fullMediaHash === previewMediaHash && (cachedPreview || previewMediaData)
@@ -125,7 +135,7 @@ const StickerView: FC<OwnProps> = ({
   const isFullMediaReady = shouldRenderFullMedia && (isStatic || isPlayerReady);
 
   const thumbDataUri = useThumbnail(sticker.thumbnail);
-  const thumbData = cachedPreview || previewMediaData || thumbDataUri;
+  const thumbData = !skipPreview ? (cachedPreview || previewMediaData || thumbDataUri) : undefined;
   const isThumbOpaque = sharedCanvasRef && !withTranslucentThumb;
 
   const noCrossTransition = Boolean(isLottie && withPreview);
@@ -152,6 +162,11 @@ const StickerView: FC<OwnProps> = ({
     dpr,
   ].filter(Boolean).join('_')
   ), [id, size, customColor, dpr, withSharedAnimation, randomIdPrefix]);
+
+  const handleAnimatedStickerLoad = useLastCallback(() => {
+    onAnimatedStickerLoad?.();
+    markPlayerReady();
+  });
 
   return (
     <>
@@ -182,15 +197,17 @@ const StickerView: FC<OwnProps> = ({
           )}
           tgsUrl={fullMediaData}
           play={shouldPlay}
+          seekToEnd={forceAnimatedStickerOnEnd}
           noLoop={!shouldLoop}
           forceOnHeavyAnimation={forceAlways || forceOnHeavyAnimation}
           forceAlways={forceAlways}
           isLowPriority={isSmall && !selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSetInfo)}
           sharedCanvas={sharedCanvasRef?.current || undefined}
           sharedCanvasCoords={coords}
-          onLoad={markPlayerReady}
+          onLoad={handleAnimatedStickerLoad}
           onLoop={onAnimatedStickerLoop}
           onEnded={onAnimatedStickerLoop}
+          onFrame={onAnimatedStickerFrame}
           color={customColor}
         />
       ) : isVideo ? (
