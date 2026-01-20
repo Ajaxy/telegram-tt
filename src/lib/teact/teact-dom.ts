@@ -810,11 +810,15 @@ function setAttribute(element: DOMElement, key: string, value: any, namespace?: 
   } else if (key.startsWith('on')) {
     addEventListener(element, key, value, key.endsWith('Capture'));
   } else if (
-    namespace === SVG_NAMESPACE || key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)
+    key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)
   ) {
     element.setAttribute(key, value);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
-    (element as any)[MAPPED_ATTRIBUTES[key] || key] = value;
+    if (namespace === SVG_NAMESPACE) {
+      element.setAttribute(key, value);
+    } else {
+      (element as any)[MAPPED_ATTRIBUTES[key] || key] = value;
+    }
   }
 }
 
