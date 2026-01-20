@@ -293,28 +293,32 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
           {renderContent()}
         </PeerColorWrapper>
         <MessageAppendix />
-        <div className="message-action-buttons">
-          <Button
-            className="message-action-button"
-            color="translucent-white"
-            round
-            iconName="close"
-            iconClassName="sponsored-action-icon"
-            ariaLabel={lang('Close')}
-            onClick={handleHideSponsoredMessage}
-          />
-          {message.canReport && (
-            <Button
-              className="message-action-button"
-              color="translucent-white"
-              round
-              iconName="more"
-              iconClassName="sponsored-action-icon"
-              ariaLabel={lang('More')}
-              onClick={handleContextMenu}
-              onContextMenu={handleContextMenu}
-            />
-          )}
+        <div className="message-action-buttons-container">
+          <div className="message-action-buttons-sticky-zone">
+            <div className="message-action-buttons message-action-button-sticky">
+              <Button
+                className="message-action-button"
+                color="translucent-white"
+                round
+                iconName="close"
+                iconClassName="sponsored-action-icon"
+                ariaLabel={lang('Close')}
+                onClick={handleHideSponsoredMessage}
+              />
+              {message.canReport && (
+                <Button
+                  className="message-action-button"
+                  color="translucent-white"
+                  round
+                  iconName="more"
+                  iconClassName="sponsored-action-icon"
+                  ariaLabel={lang('More')}
+                  onClick={handleContextMenu}
+                  onContextMenu={handleContextMenu}
+                />
+              )}
+            </div>
+          </div>
         </div>
       </div>
       {contextMenuAnchor && (
