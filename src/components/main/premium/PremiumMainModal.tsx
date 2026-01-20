@@ -428,7 +428,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
       onClose={closePremiumModal}
       isOpen={isOpen}
       dialogRef={dialogRef}
-      hasAbsoluteCloseButton
+      hasAbsoluteCloseButton={!currentSection}
     >
       <Transition name="slide" activeKey={currentSection ? 1 : 0} className={styles.transition}>
         {!currentSection ? (
