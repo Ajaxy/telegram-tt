@@ -1901,6 +1901,10 @@ export interface LangPair {
   'AttachmentMenuDisableSpoiler': undefined;
   'AttachmentDragAddItems': undefined;
   'AttachmentCaptionPlaceholder': undefined;
+  'MessageSummaryTitle': undefined;
+  'MessageSummaryDescription': undefined;
+  'AriaShowSummary': undefined;
+  'AriaHideSummary': undefined;
   'SettingsDataClearMediaCache': undefined;
   'SettingsDataClearMediaCacheDescription': undefined;
   'SettingsDataClearMediaDone': undefined;

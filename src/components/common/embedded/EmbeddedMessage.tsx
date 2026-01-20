@@ -208,7 +208,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
       <MessageSummary
         message={message}
         noEmoji={Boolean(mediaThumbnail)}
-        translatedText={translatedText}
+        forcedText={translatedText}
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}
         emojiSize={EMOJI_SIZE}

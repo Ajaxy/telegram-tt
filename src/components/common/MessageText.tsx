@@ -21,7 +21,7 @@ import TypingWrapper from './TypingWrapper';
 interface OwnProps {
   messageOrStory: ApiMessage | ApiStory;
   threadId?: ThreadId;
-  translatedText?: ApiFormattedText;
+  forcedText?: ApiFormattedText;
   isForAnimation?: boolean;
   emojiSize?: number;
   highlight?: string;
@@ -46,7 +46,7 @@ const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
 
 function MessageText({
   messageOrStory,
-  translatedText,
+  forcedText,
   isForAnimation,
   emojiSize,
   highlight,
@@ -74,7 +74,7 @@ function MessageText({
 
   const lang = useLang();
 
-  const formattedText = translatedText || extractMessageText(messageOrStory, inChatList);
+  const formattedText = forcedText || extractMessageText(messageOrStory, inChatList);
   const adaptedFormattedText = isForAnimation && formattedText ? stripCustomEmoji(formattedText) : formattedText;
   const { text, entities } = adaptedFormattedText || {};
 

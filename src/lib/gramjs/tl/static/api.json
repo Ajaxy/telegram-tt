@@ -245,6 +245,7 @@
     "messages.deleteTopicHistory",
     "messages.toggleTodoCompleted",
     "messages.appendTodoList",
+    "messages.summarizeText",
     "updates.getState",
     "updates.getDifference",
     "updates.getChannelDifference",

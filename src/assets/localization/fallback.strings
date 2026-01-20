@@ -2591,6 +2591,10 @@
 "AttachmentSendFile_other" = "Send {count} Files";
 "AttachmentDragAddItems" = "Add Items";
 "AttachmentCaptionPlaceholder" = "Add a caption...";
+"MessageSummaryTitle" = "AI Summary";
+"MessageSummaryDescription" = "Show original text";
+"AriaShowSummary" = "Show AI Summary";
+"AriaHideSummary" = "Hide AI Summary";
 "SettingsDataClearMediaCache" = "Clear Media Cache";
 "SettingsDataClearMediaCacheDescription" = "Deletes locally cached media for this account";
 "SettingsDataClearMediaDone" = "Media cache cleared";

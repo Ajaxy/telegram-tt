@@ -10,7 +10,7 @@ import { isUsernameValid } from './entities/username';
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
   'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
   'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message' | 'premium_offer' | 'premium_multigift' | 'stars_topup'
-  | 'nft' | 'stars' | 'ton' | 'stargift_auction';
+  | 'nft' | 'stars' | 'ton' | 'stargift_auction' | 'premium';
 
 interface PublicMessageLink {
   type: 'publicMessageLink';
@@ -91,7 +91,7 @@ interface BusinessChatLink {
 
 interface PremiumReferrerLink {
   type: 'premiumReferrerLink';
-  referrer: string;
+  ref?: string;
 }
 
 interface PremiumMultigiftLink {
@@ -268,7 +268,7 @@ function parseTgLink(url: URL) {
     case 'businessChatLink':
       return buildBusinessChatLink({ slug: queryParams.slug });
     case 'premiumReferrerLink':
-      return buildPremiumReferrerLink({ referrer: queryParams.ref });
+      return buildPremiumReferrerLink({ ref: queryParams.ref });
     case 'premiumMultigiftLink':
       return buildPremiumMultigiftLink({ referrer: queryParams.ref });
     case 'chatBoostLink':
@@ -488,6 +488,7 @@ function getTgDeepLinkType(
     case 'message':
       return 'businessChatLink';
     case 'premium_offer':
+    case 'premium':
       return 'premiumReferrerLink';
     case 'premium_multigift':
       return 'premiumMultigiftLink';
@@ -774,16 +775,12 @@ function buildSettingsScreenLink(params: BuilderParams<SettingsScreenLink>): Bui
 
 function buildPremiumReferrerLink(params: BuilderParams<PremiumReferrerLink>): BuilderReturnType<PremiumReferrerLink> {
   const {
-    referrer,
+    ref,
   } = params;
-
-  if (!referrer) {
-    return undefined;
-  }
 
   return {
     type: 'premiumReferrerLink',
-    referrer,
+    ref,
   };
 }
 

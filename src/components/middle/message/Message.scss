@@ -709,10 +709,44 @@
     }
   }
 
-  .message-action-buttons {
+  .message-summary {
+    cursor: var(--custom-cursor, pointer);
+
+    display: flex;
+    flex-direction: column;
+
+    padding-block: 0.1875rem;
+
+    font-size: 0.875rem;
+    line-height: 1.25;
+
+    &-title {
+      font-weight: var(--font-weight-medium);
+    }
+  }
+
+  .message-action-buttons-container {
     position: absolute;
     bottom: 0;
 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    height: 100%;
+  }
+
+  .message-action-buttons-sticky-zone {
+    position: relative;
+    height: 100%;
+  }
+
+  .message-action-button-sticky {
+    position: sticky;
+    top: 0.5rem;
+  }
+
+  .message-action-buttons {
     display: flex;
     flex-direction: column;
 
@@ -729,9 +763,14 @@
   }
 
   .message-action-button {
+    overflow: visible;
     width: 2.25rem;
     height: 2.25rem;
     color: white;
+
+    &.action-summary .icon {
+      font-size: 1.25rem;
+    }
   }
 
   &:hover,
@@ -745,11 +784,11 @@
     opacity: 1;
   }
 
-  &.own .message-action-buttons {
+  &.own .message-action-buttons-container {
     left: -3rem;
   }
 
-  &:not(.own) .message-action-buttons {
+  &:not(.own) .message-action-buttons-container {
     right: -3rem;
   }
 

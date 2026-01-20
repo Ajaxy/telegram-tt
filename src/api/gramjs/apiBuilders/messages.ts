@@ -293,6 +293,7 @@ export function buildApiMessageWithChatId(
     reportDeliveryUntilDate: mtpMessage.reportDeliveryUntilDate,
     paidMessageStars: toJSNumber(mtpMessage.paidMessageStars),
     restrictionReasons,
+    summaryLanguageCode: mtpMessage.summaryFromLanguage,
   };
 }
 

@@ -416,6 +416,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
   const reducedGlobal: GlobalState = {
     ...INITIAL_GLOBAL_STATE,
     ...pick(global, [
+      'cacheVersion',
       'appConfig',
       'config',
       'auth',
@@ -722,6 +723,7 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     byChatId[chatId] = {
       byId: cleanedById,
       threadsById,
+      summaryById: {},
     };
   });
 

@@ -2353,6 +2353,22 @@ export async function translateText(params: TranslateTextParams) {
   return formattedText;
 }
 
+export async function fetchMessageSummary({
+  chat, id, toLanguageCode,
+}: {
+  chat: ApiChat; id: number; toLanguageCode?: string;
+}) {
+  const result = await invokeRequest(new GramJs.messages.SummarizeText({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    id,
+    toLang: toLanguageCode,
+  }));
+
+  if (!result) return undefined;
+
+  return buildApiFormattedText(result);
+}
+
 function handleMultipleLocalMessagesUpdate(
   localMessages: Record<string, ApiMessage>, update: GramJs.TypeUpdates,
 ) {

@@ -13,6 +13,7 @@ import type {
   ChatTranslatedMessages,
   MessageListType,
   TabThread,
+  TextSummary,
   Thread,
   ThreadId,
 } from '../../types';
@@ -1462,6 +1463,20 @@ export function selectForwardsContainVoiceMessages<T extends GlobalState>(
     const message = chatMessages[messageId];
     return Boolean(message.content.voice) || Boolean(message.content.video?.isRound);
   });
+}
+
+export function selectMessageSummary<T extends GlobalState>(
+  global: T, chatId: string, messageId: number, toLanguageCode?: string,
+): TextSummary | undefined {
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!message?.summaryLanguageCode) return undefined;
+
+  if (toLanguageCode && toLanguageCode !== message.summaryLanguageCode) {
+    const messageTranslations = selectMessageTranslations(global, chatId, toLanguageCode);
+    return messageTranslations[messageId]?.summary;
+  }
+
+  return global.messages.byChatId[chatId].summaryById[messageId];
 }
 
 export function selectChatTranslations<T extends GlobalState>(

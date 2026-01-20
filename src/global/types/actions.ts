@@ -1515,6 +1515,11 @@ export interface ActionPayloads {
     messageIds: number[];
     toLanguageCode?: string;
   };
+  summarizeMessage: {
+    chatId: string;
+    id: number;
+    toLanguageCode?: string;
+  };
 
   // Reactions
   loadTopReactions: undefined;

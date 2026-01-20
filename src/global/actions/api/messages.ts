@@ -16,6 +16,7 @@ import type {
 import type {
   ForwardMessagesParams,
   SendMessageParams,
+  TextSummary,
   ThreadId,
 } from '../../../types';
 import type { MessageKey } from '../../../util/keys/messageKey';
@@ -77,6 +78,7 @@ import {
 import {
   addChatMessagesById,
   addUnreadMentions,
+  clearMessageSummary,
   deleteSponsoredMessage,
   removeOutlyingList,
   removeRequestedMessageTranslation,
@@ -91,6 +93,7 @@ import {
   updateChatMessage,
   updateGlobalSearch,
   updateListedIds,
+  updateMessageSummary,
   updateMessageTranslation,
   updateOutlyingLists,
   updatePeerFullInfo,
@@ -2709,6 +2712,39 @@ addActionHandler('translateMessages', (global, actions, payload): ActionReturnTy
   });
 
   return global;
+});
+
+addActionHandler('summarizeMessage', async (global, actions, payload): Promise<void> => {
+  const { chatId, id, toLanguageCode } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const placeholderSummary: TextSummary = {
+    isPending: true,
+    text: undefined,
+  };
+
+  global = updateMessageSummary(global, chatId, id, placeholderSummary, toLanguageCode);
+  setGlobal(global);
+
+  const result = await callApi('fetchMessageSummary', { chat, id, toLanguageCode });
+  if (!result) {
+    global = getGlobal();
+    // Disable summary to prevent endless loading
+    global = updateChatMessage(global, chatId, id, { summaryLanguageCode: undefined });
+    global = clearMessageSummary(global, chatId, id);
+    setGlobal(global);
+    return;
+  }
+
+  const summary: TextSummary = {
+    isPending: false,
+    text: result,
+  };
+
+  global = getGlobal();
+  global = updateMessageSummary(global, chatId, id, summary, toLanguageCode);
+  setGlobal(global);
 });
 
 // https://github.com/telegramdesktop/tdesktop/blob/11906297d82b6ff57b277da5251d2e6eb3d8b6d0/Telegram/SourceFiles/api/api_views.cpp#L22

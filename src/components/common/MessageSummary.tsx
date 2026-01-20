@@ -30,7 +30,7 @@ import MessageText from './MessageText';
 
 type OwnProps = {
   message: ApiMessage;
-  translatedText?: ApiFormattedText;
+  forcedText?: ApiFormattedText;
   noEmoji?: boolean;
   highlight?: string;
   truncateLength?: number;
@@ -49,7 +49,7 @@ type StateProps = {
 
 function MessageSummary({
   message,
-  translatedText,
+  forcedText,
   noEmoji,
   highlight,
   truncateLength = TRUNCATED_SUMMARY_LENGTH,
@@ -70,7 +70,7 @@ function MessageSummary({
   const statefulContent = groupStatefulContent({ poll, story, webPage });
 
   if (!extractedText && !hasPoll && !isAction) {
-    const summaryText = translatedText?.text
+    const summaryText = forcedText?.text
       || getMessageSummaryText(lang, message, statefulContent, noEmoji, truncateLength);
     const trimmedText = trimText(summaryText, truncateLength);
 
@@ -93,7 +93,7 @@ function MessageSummary({
     return (
       <MessageText
         messageOrStory={message}
-        translatedText={translatedText}
+        forcedText={forcedText}
         highlight={highlight}
         asPreview
         observeIntersectionForLoading={observeIntersectionForLoading}

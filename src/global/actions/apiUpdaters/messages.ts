@@ -40,6 +40,7 @@ import {
 import {
   addMessages,
   addViewportId,
+  clearMessageSummary,
   clearMessageTranslation,
   deleteChatMessages,
   deleteChatScheduledMessages,
@@ -358,6 +359,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       if (message.content?.text?.text !== currentMessage?.content?.text?.text) {
         global = clearMessageTranslation(global, chatId, id);
+        global = clearMessageSummary(global, chatId, id);
       }
 
       if (poll) {

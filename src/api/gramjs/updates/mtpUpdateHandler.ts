@@ -29,6 +29,7 @@ import {
 } from '../apiBuilders/chats';
 import {
   buildApiFormattedText,
+  buildApiMessageEntity,
   buildApiPhoto, buildApiUsernames, buildPrivacyRules,
 } from '../apiBuilders/common';
 import { buildApiStarGiftAuctionUserState, buildApiTypeStarGiftAuctionState } from '../apiBuilders/gifts';
@@ -421,6 +422,7 @@ export function updater(update: Update) {
         '@type': 'error',
         error: {
           message: update.message,
+          entities: update.entities.map(buildApiMessageEntity),
         },
       });
     } else {

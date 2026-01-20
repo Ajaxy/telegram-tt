@@ -56,7 +56,7 @@ import {
 } from '../selectors';
 import { removeIdFromSearchResults } from './middleSearch';
 import { updateTabState } from './tabs';
-import { clearMessageTranslation } from './translations';
+import { clearMessageSummary, clearMessageTranslation } from './translations';
 
 type MessageStoreSections = GlobalState['messages']['byChatId'][string];
 
@@ -153,7 +153,8 @@ export function updateThread<T extends GlobalState>(
 export function updateMessageStore<T extends GlobalState>(
   global: T, chatId: string, update: Partial<MessageStoreSections>,
 ): T {
-  const current = global.messages.byChatId[chatId] || { byId: {}, threadsById: {} };
+  const current = global.messages.byChatId[chatId]
+    || { byId: {}, threadsById: {}, summaryById: {} };
 
   return {
     ...global,
@@ -399,6 +400,7 @@ export function deleteChatMessages<T extends GlobalState>(
     threadMessages.push(messageId);
     updatedThreads.set(threadId, threadMessages);
     global = clearMessageTranslation(global, chatId, messageId);
+    global = clearMessageSummary(global, chatId, messageId);
   });
 
   const deletedForwardedPosts = Object.values(pickTruthy(byId, messageIds)).filter(

@@ -697,6 +697,7 @@ export interface ApiMessage {
   reportDeliveryUntilDate?: number;
   paidMessageStars?: number;
   restrictionReasons?: ApiRestrictionReason[];
+  summaryLanguageCode?: string;
 
   isTypingDraft?: boolean; // Local field
 }

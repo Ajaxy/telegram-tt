@@ -36,6 +36,7 @@ import type {
   IAlbum,
   MessageListType,
   ScrollTargetPosition,
+  TextSummary,
   ThemeKey,
   ThreadId,
 } from '../../../types';
@@ -96,6 +97,7 @@ import {
   selectIsMessageProtected,
   selectIsMessageSelected,
   selectMessageIdsByGroupId,
+  selectMessageSummary,
   selectOutgoingStatus,
   selectPeer,
   selectPeerStory,
@@ -141,6 +143,7 @@ import { calculateMediaDimensions, getMinMediaWidth, getMinMediaWidthWithText } 
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useEnsureStory from '../../../hooks/useEnsureStory';
 import useFlag from '../../../hooks/useFlag';
@@ -169,7 +172,9 @@ import FakeIcon from '../../common/FakeIcon';
 import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
 import MessageText from '../../common/MessageText';
+import PeerColorWrapper from '../../common/PeerColorWrapper';
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
+import Sparkles from '../../common/Sparkles';
 import TopicChip from '../../common/TopicChip';
 import { animateSnap } from '../../main/visualEffects/SnapEffectContainer';
 import Button from '../../ui/Button';
@@ -324,6 +329,7 @@ type StateProps = {
   minFutureTime?: number;
   isMediaNsfw?: boolean;
   isReplyMediaNsfw?: boolean;
+  summary?: TextSummary;
 };
 
 type MetaPosition =
@@ -452,6 +458,7 @@ const Message = ({
   isAccountFrozen,
   minFutureTime,
   webPage,
+  summary,
   onIntersectPinnedMessage,
 }: OwnProps & StateProps) => {
   const {
@@ -465,6 +472,7 @@ const Message = ({
     focusMessage,
     markMentionsRead,
     openThread,
+    summarizeMessage,
   } = getActions();
 
   const ref = useRef<HTMLDivElement>();
@@ -480,6 +488,7 @@ const Message = ({
   const [shouldPlayEffect, requestEffect, hideEffect] = useFlag();
   const [shouldPlayDiceEffect, requestDiceEffect, hideDiceEffect] = useFlag();
   const [isDeclineDialogOpen, openDeclineDialog, closeDeclineDialog] = useFlag();
+  const [isShowingSummary, showSummary, hideSummary] = useFlag();
   const [declineReason, setDeclineReason] = useState('');
   const { isMobile, isTouchScreen } = useAppLayout();
 
@@ -528,6 +537,7 @@ const Message = ({
     id: messageId, chatId, forwardInfo, viaBotId, isTranscriptionError, factCheck,
     isTypingDraft,
   } = message;
+  const hasSummary = Boolean(message.summaryLanguageCode);
 
   useUnmountCleanup(() => {
     if (message.isPinned) {
@@ -597,7 +607,8 @@ const Message = ({
   const hasFactCheck = Boolean(factCheck?.text);
 
   const hasForwardedCustomShape = asForwarded && isCustomShape;
-  const hasSubheader = hasTopicChip || hasMessageReply || hasStoryReply || hasForwardedCustomShape;
+  const hasSubheader = hasTopicChip || hasMessageReply || hasStoryReply || hasForwardedCustomShape
+    || Boolean(isShowingSummary && summary?.text);
 
   const selectMessage = useLastCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
     if (isAccountFrozen) return;
@@ -695,6 +706,16 @@ const Message = ({
     lastPlaybackTimestamp,
   });
 
+  useEffect(() => {
+    if (hasSummary && isShowingSummary && !summary) {
+      summarizeMessage({
+        chatId,
+        id: message.id,
+        toLanguageCode: requestedTranslationLanguage,
+      });
+    }
+  }, [hasSummary, chatId, message.id, requestedTranslationLanguage, isShowingSummary, summary]);
+
   const handleEffectClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
 
@@ -706,6 +727,7 @@ const Message = ({
       chatId,
       threadId,
       messageId,
+      scrollTargetPosition: 'start',
       noHighlight: true,
     });
   });
@@ -801,8 +823,16 @@ const Message = ({
   const { isPending: isTranslationPending, translatedText } = useMessageTranslation(
     chatTranslations, chatId, shouldTranslate ? messageId : undefined, requestedTranslationLanguage,
   );
+  const isSummaryPending = Boolean(summary?.isPending);
+  const isNewTextPending = isTranslationPending || isSummaryPending;
   // Used to display previous result while new one is loading
   const previousTranslatedText = usePreviousDeprecated(translatedText, Boolean(shouldTranslate));
+
+  useEffectWithPrevDeps(([prevIsShowingSummary]) => {
+    if (summary?.text || (prevIsShowingSummary && !isShowingSummary)) {
+      handleFocusSelf();
+    }
+  }, [isShowingSummary, summary?.text]);
 
   const currentTranslatedText = translatedText || previousTranslatedText;
 
@@ -1019,10 +1049,13 @@ const Message = ({
 
   function renderMessageText(isForAnimation?: boolean) {
     if (!textMessage) return undefined;
+
+    const forcedText = (isShowingSummary && summary?.text)
+      || (requestedTranslationLanguage ? currentTranslatedText : undefined);
     return (
       <MessageText
         messageOrStory={textMessage}
-        translatedText={requestedTranslationLanguage ? currentTranslatedText : undefined}
+        forcedText={forcedText}
         isForAnimation={isForAnimation}
         focusedQuote={focusedQuote}
         focusedQuoteOffset={focusedQuoteOffset}
@@ -1038,6 +1071,16 @@ const Message = ({
         threadId={threadId}
         shouldAnimateTyping={isTypingDraft}
       />
+    );
+  }
+
+  function renderMessageTextAnimation() {
+    return (
+      <div className="translation-animation">
+        <div className="text-loading">
+          {renderMessageText(true)}
+        </div>
+      </div>
     );
   }
 
@@ -1173,6 +1216,20 @@ const Message = ({
                 observeIntersectionForLoading={observeIntersectionForLoading}
                 onClick={handleStoryClick}
               />
+            )}
+            {hasSummary && isShowingSummary && !summary?.isPending && (
+              <PeerColorWrapper
+                className="message-summary"
+                onClick={hideSummary}
+              >
+                <Sparkles preset="button" className="message-summary-sparkles" />
+                <span className="message-summary-title">
+                  {lang('MessageSummaryTitle')}
+                </span>
+                <span className="message-summary-description">
+                  {lang('MessageSummaryDescription')}
+                </span>
+              </PeerColorWrapper>
             )}
           </div>
         )}
@@ -1347,13 +1404,7 @@ const Message = ({
             {hasText && !hasAnimatedEmoji && (
               <div className={textContentClass} dir="auto">
                 {renderMessageText()}
-                {isTranslationPending && (
-                  <div className="translation-animation">
-                    <div className="text-loading">
-                      {renderMessageText(true)}
-                    </div>
-                  </div>
-                )}
+                {isNewTextPending && renderMessageTextAnimation()}
                 {hasFactCheck && (
                   <FactCheck factCheck={factCheck} isToggleDisabled={isInSelectMode} />
                 )}
@@ -1409,13 +1460,7 @@ const Message = ({
         {hasText && !hasAnimatedEmoji && (
           <div className={textContentClass} dir="auto">
             {renderMessageText()}
-            {isTranslationPending && (
-              <div className="translation-animation">
-                <div className="text-loading">
-                  {renderMessageText(true)}
-                </div>
-              </div>
-            )}
+            {isNewTextPending && renderMessageTextAnimation()}
             {!hasContentAfterText && isMetaInText && renderReactionsAndMeta()}
           </div>
         )}
@@ -1820,40 +1865,57 @@ const Message = ({
           {renderContent()}
           {!isInDocumentGroupNotLast && metaPosition === 'standalone' && !isStoryMention && renderReactionsAndMeta()}
           {canShowActionButton && (
-            <div className={buildClassName(
-              'message-action-buttons',
-              isLoadingComments && 'message-action-buttons-shown',
-            )}
-            >
-              {withCommentButton && isCustomShape && (
-                <CommentButton
-                  threadInfo={commentsThreadInfo}
-                  disabled={noComments || !commentsThreadInfo}
-                  isLoading={isLoadingComments}
-                  isCustomShape
-                  asActionButton
-                />
+            <div className="message-action-buttons-container">
+              <div className="message-action-buttons-sticky-zone">
+                <div className="message-action-buttons message-action-button-sticky">
+                  {hasSummary && (
+                    <Button
+                      className="message-action-button action-summary"
+                      color="translucent-white"
+                      round
+                      withSparkleEffect
+                      ariaLabel={isShowingSummary ? lang('AriaHideSummary') : lang('AriaShowSummary')}
+                      onClick={isShowingSummary ? hideSummary : showSummary}
+                      iconName={isShowingSummary ? 'expand' : 'collapse'}
+                    />
+                  )}
+                </div>
+              </div>
+              <div className={buildClassName(
+                'message-action-buttons',
+                isLoadingComments && 'message-action-buttons-shown',
               )}
-              {canForward && (
-                <Button
-                  className="message-action-button"
-                  color="translucent-white"
-                  round
-                  ariaLabel={oldLang('lng_context_forward_msg')}
-                  onClick={isLastInDocumentGroup ? handleGroupForward : handleForward}
-                  iconName="share-filled"
-                />
-              )}
-              {canFocus && (
-                <Button
-                  className="message-action-button"
-                  color="translucent-white"
-                  round
-                  ariaLabel={lang('FocusMessage')}
-                  onClick={isPinnedList ? handleFocus : handleFocusForwarded}
-                  iconName="arrow-right"
-                />
-              )}
+              >
+                {withCommentButton && isCustomShape && (
+                  <CommentButton
+                    threadInfo={commentsThreadInfo}
+                    disabled={noComments || !commentsThreadInfo}
+                    isLoading={isLoadingComments}
+                    isCustomShape
+                    asActionButton
+                  />
+                )}
+                {canForward && (
+                  <Button
+                    className="message-action-button"
+                    color="translucent-white"
+                    round
+                    ariaLabel={oldLang('lng_context_forward_msg')}
+                    onClick={isLastInDocumentGroup ? handleGroupForward : handleForward}
+                    iconName="share-filled"
+                  />
+                )}
+                {canFocus && (
+                  <Button
+                    className="message-action-button"
+                    color="translucent-white"
+                    round
+                    ariaLabel={lang('FocusMessage')}
+                    onClick={isPinnedList ? handleFocus : handleFocusForwarded}
+                    iconName="arrow-right"
+                  />
+                )}
+              </div>
             </div>
           )}
           {withCommentButton && !isCustomShape && (
@@ -2076,6 +2138,8 @@ export default memo(withGlobal<OwnProps>(
     const isMediaNsfw = selectIsMediaNsfw(global, message);
     const isReplyMediaNsfw = replyMessage && selectIsMediaNsfw(global, replyMessage);
 
+    const summary = selectMessageSummary(global, chatId, message.id, requestedTranslationLanguage);
+
     return {
       theme: selectTheme(global),
       forceSenderName,
@@ -2172,6 +2236,7 @@ export default memo(withGlobal<OwnProps>(
       isMediaNsfw,
       isReplyMediaNsfw,
       webPage,
+      summary,
     };
   },
 )(Message));

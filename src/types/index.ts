@@ -642,6 +642,15 @@ export interface TopicsInfo {
 export type TranslatedMessage = {
   isPending?: boolean;
   text?: ApiFormattedText;
+  summary?: TextSummary;
+};
+
+export type TextSummary = {
+  isPending?: false;
+  text: ApiFormattedText;
+} | {
+  isPending: true;
+  text?: undefined;
 };
 
 export type ChatTranslatedMessages = {
