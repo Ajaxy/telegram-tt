@@ -59,6 +59,8 @@ export interface ApiStarGiftUnique {
   resaleTonOnly?: true;
   valueCurrency?: string;
   valueAmount?: number;
+  valueUsdAmount?: number;
+  offerMinStars?: number;
 }
 
 export type ApiStarGift = ApiStarGiftRegular | ApiStarGiftUnique;

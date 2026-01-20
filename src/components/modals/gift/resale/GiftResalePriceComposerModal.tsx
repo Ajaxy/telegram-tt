@@ -5,6 +5,10 @@ import { getActions, withGlobal } from '../../../../global';
 
 import type { TabState } from '../../../../global/types';
 
+import {
+  selectStarsGiftResaleCommission,
+  selectTonGiftResaleCommission,
+} from '../../../../global/selectors';
 import { convertTonFromNanos, convertTonToNanos } from '../../../../util/formatCurrency';
 import { convertTonToUsd, formatCurrencyAsString } from '../../../../util/formatCurrency';
 import { formatStarsAsIcon, formatStarsAsText, formatTonAsIcon,
@@ -26,20 +30,20 @@ export type OwnProps = {
 };
 
 export type StateProps = {
-  starsStargiftResaleCommissionPermille?: number;
-  starsStargiftResaleAmountMin: number;
-  starsStargiftResaleAmountMax?: number;
+  starsCommission?: number;
+  starsResaleAmountMin: number;
+  starsResaleAmountMax?: number;
   starsUsdWithdrawRate?: number;
-  tonStargiftResaleCommissionPermille?: number;
-  tonStargiftResaleAmountMin: number;
-  tonStargiftResaleAmountMax?: number;
+  tonCommission?: number;
+  tonResaleAmountMin: number;
+  tonResaleAmountMax?: number;
   tonUsdRate?: number;
 };
 
 const GiftResalePriceComposerModal = ({
-  modal, starsStargiftResaleCommissionPermille,
-  starsStargiftResaleAmountMin, starsStargiftResaleAmountMax, starsUsdWithdrawRate,
-  tonStargiftResaleCommissionPermille, tonStargiftResaleAmountMin, tonStargiftResaleAmountMax, tonUsdRate,
+  modal, starsCommission,
+  starsResaleAmountMin, starsResaleAmountMax, starsUsdWithdrawRate,
+  tonCommission, tonResaleAmountMin, tonResaleAmountMax, tonUsdRate,
 }: OwnProps & StateProps) => {
   const {
     closeGiftResalePriceComposerModal,
@@ -62,7 +66,7 @@ const GiftResalePriceComposerModal = ({
   const handleChangePrice = useLastCallback((e) => {
     const value = e.target.value;
     const number = parseFloat(value);
-    const maxAmount = isPriceInTon ? tonStargiftResaleAmountMax : starsStargiftResaleAmountMax;
+    const maxAmount = isPriceInTon ? tonResaleAmountMax : starsResaleAmountMax;
     const result = value === '' || Number.isNaN(number) ? undefined
       : maxAmount ? Math.min(number, maxAmount) : number;
     setPrice(result);
@@ -95,8 +99,8 @@ const GiftResalePriceComposerModal = ({
       },
     });
   });
-  const commission = isPriceInTon ? tonStargiftResaleCommissionPermille : starsStargiftResaleCommissionPermille;
-  const minAmount = isPriceInTon ? tonStargiftResaleAmountMin : starsStargiftResaleAmountMin;
+  const commission = isPriceInTon ? tonCommission : starsCommission;
+  const minAmount = isPriceInTon ? tonResaleAmountMin : starsResaleAmountMin;
   const isPriceCorrect = hasPrice && price >= minAmount;
 
   return (
@@ -176,30 +180,28 @@ const GiftResalePriceComposerModal = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
-    const configPermille = global.appConfig.starsStargiftResaleCommissionPermille;
-    const starsStargiftResaleCommissionPermille = configPermille ? (configPermille / 1000) : undefined;
-    const starsStargiftResaleAmountMin = global.appConfig.starsStargiftResaleAmountMin || 0;
-    const starsStargiftResaleAmountMax = global.appConfig.starsStargiftResaleAmountMax;
+    const starsCommission = selectStarsGiftResaleCommission(global);
+    const starsResaleAmountMin = global.appConfig.starsStargiftResaleAmountMin || 0;
+    const starsResaleAmountMax = global.appConfig.starsStargiftResaleAmountMax;
 
     const starsUsdWithdrawRateX1000 = global.appConfig.starsUsdWithdrawRateX1000;
     const starsUsdWithdrawRate = starsUsdWithdrawRateX1000 ? starsUsdWithdrawRateX1000 / 1000 : 1;
 
-    const tonConfigPermille = global.appConfig.tonStargiftResaleCommissionPermille;
-    const tonStargiftResaleCommissionPermille = tonConfigPermille ? (tonConfigPermille / 1000) : 0;
-    const tonStargiftResaleAmountMin = convertTonFromNanos(global.appConfig.tonStargiftResaleAmountMin || 0);
+    const tonCommission = selectTonGiftResaleCommission(global);
+    const tonResaleAmountMin = convertTonFromNanos(global.appConfig.tonStargiftResaleAmountMin || 0);
     const maxTonFromConfig = global.appConfig.tonStargiftResaleAmountMax;
-    const tonStargiftResaleAmountMax = maxTonFromConfig && convertTonFromNanos(maxTonFromConfig);
+    const tonResaleAmountMax = maxTonFromConfig ? convertTonFromNanos(maxTonFromConfig) : undefined;
 
     const tonUsdRate = global.appConfig.tonUsdRate;
 
     return {
-      starsStargiftResaleCommissionPermille,
-      starsStargiftResaleAmountMin,
-      starsStargiftResaleAmountMax,
+      starsCommission,
+      starsResaleAmountMin,
+      starsResaleAmountMax,
       starsUsdWithdrawRate,
-      tonStargiftResaleCommissionPermille,
-      tonStargiftResaleAmountMin,
-      tonStargiftResaleAmountMax,
+      tonCommission,
+      tonResaleAmountMin,
+      tonResaleAmountMax,
       tonUsdRate,
     };
   },

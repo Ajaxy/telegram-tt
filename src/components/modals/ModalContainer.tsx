@@ -29,6 +29,7 @@ import PremiumGiftModal from './gift/GiftModal.async';
 import GiftInfoModal from './gift/info/GiftInfoModal.async';
 import GiftLockedModal from './gift/locked/GiftLockedModal.async';
 import GiftDescriptionRemoveModal from './gift/message/GiftDescriptionRemoveModal.async';
+import GiftOfferAcceptModal from './gift/offer/GiftOfferAcceptModal.async';
 import GiftRecipientPicker from './gift/recipient/GiftRecipientPicker.async';
 import GiftResalePriceComposerModal from './gift/resale/GiftResalePriceComposerModal.async';
 import StarGiftPriceDecreaseInfoModal from './gift/StarGiftPriceDecreaseInfoModal.async';
@@ -115,6 +116,7 @@ type ModalKey = keyof Pick<TabState,
   'giftTransferModal' |
   'giftTransferConfirmModal' |
   'giftDescriptionRemoveModal' |
+  'giftOfferAcceptModal' |
   'chatRefundModal' |
   'priceConfirmModal' |
   'isFrozenAccountModalOpen' |
@@ -188,6 +190,7 @@ const MODALS: ModalRegistry = {
   giftTransferModal: GiftTransferModal,
   giftTransferConfirmModal: GiftTransferConfirmModal,
   giftDescriptionRemoveModal: GiftDescriptionRemoveModal,
+  giftOfferAcceptModal: GiftOfferAcceptModal,
   chatRefundModal: ChatRefundModal,
   priceConfirmModal: PriceConfirmModal,
   isFrozenAccountModalOpen: FrozenAccountModal,

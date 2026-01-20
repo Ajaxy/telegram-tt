@@ -35,6 +35,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
     const {
       id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal, slug, ownerAddress,
       giftAddress, resellAmount, releasedBy, resaleTonOnly, requirePremium, valueCurrency, valueAmount, giftId,
+      valueUsdAmount,
     } = starGift;
 
     return {
@@ -56,7 +57,9 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
       resaleTonOnly,
       valueCurrency,
       valueAmount: toJSNumber(valueAmount),
+      valueUsdAmount: toJSNumber(valueUsdAmount),
       regularGiftId: giftId.toString(),
+      offerMinStars: starGift.offerMinStars,
     };
   }
 

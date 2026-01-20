@@ -590,3 +590,18 @@ export async function fetchStarGiftCollections({
     collections: result.collections.map(buildApiStarGiftCollection).filter(Boolean),
   };
 }
+
+export function resolveStarGiftOffer({
+  offerMsgId,
+  shouldDecline,
+}: {
+  offerMsgId: number;
+  shouldDecline?: boolean;
+}) {
+  return invokeRequest(new GramJs.payments.ResolveStarGiftOffer({
+    offerMsgId,
+    decline: shouldDecline || undefined,
+  }), {
+    shouldReturnTrue: true,
+  });
+}

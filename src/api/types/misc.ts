@@ -240,6 +240,7 @@ export interface ApiAppConfig {
   starsPaidMessageCommissionPermille?: number;
   starsPaidMessageAmountMax?: number;
   starsUsdWithdrawRateX1000: number;
+  starsUsdSellRateX1000?: number;
   bandwidthPremiumNotifyPeriod?: number;
   bandwidthPremiumUploadSpeedup?: number;
   bandwidthPremiumDownloadSpeedup?: number;

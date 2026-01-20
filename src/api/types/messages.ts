@@ -943,6 +943,12 @@ export interface KeyboardButtonOpenThread {
   text: string;
 }
 
+export interface KeyboardButtonGiftOffer {
+  type: 'giftOffer';
+  text: string;
+  buttonType: 'accept' | 'reject';
+}
+
 export type ApiKeyboardButton = (
   ApiKeyboardButtonSimple
   | ApiKeyboardButtonReceipt
@@ -957,6 +963,7 @@ export type ApiKeyboardButton = (
   | ApiKeyboardButtonCopy
   | KeyboardButtonSuggestedMessage
   | KeyboardButtonOpenThread
+  | KeyboardButtonGiftOffer
 );
 
 export type ApiKeyboardButtons = ApiKeyboardButton[][];

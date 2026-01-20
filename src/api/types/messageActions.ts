@@ -265,6 +265,7 @@ export interface ApiMessageActionStarGiftUnique extends ActionMediaType {
   isSaved?: true;
   isRefunded?: true;
   isPrepaidUpgrade?: true;
+  isFromOffer?: true;
   gift: ApiStarGiftUnique;
   canExportAt?: number;
   transferStars?: number;
@@ -329,6 +330,22 @@ export interface ApiMessageActionTodoAppendTasks extends ActionMediaType {
   items: ApiTodoItem[];
 }
 
+export interface ApiMessageActionStarGiftPurchaseOffer extends ActionMediaType {
+  type: 'starGiftPurchaseOffer';
+  isAccepted?: true;
+  isDeclined?: true;
+  gift: ApiStarGiftUnique;
+  price: ApiTypeCurrencyAmount;
+  expiresAt: number;
+}
+
+export interface ApiMessageActionStarGiftPurchaseOfferDeclined extends ActionMediaType {
+  type: 'starGiftPurchaseOfferDeclined';
+  isExpired?: true;
+  gift: ApiStarGiftUnique;
+  price: ApiTypeCurrencyAmount;
+}
+
 export interface ApiMessageActionUnsupported extends ActionMediaType {
   type: 'unsupported';
 }
@@ -348,4 +365,5 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionGiftTon | ApiMessageActionPrizeStars | ApiMessageActionStarGift | ApiMessageActionStarGiftUnique
   | ApiMessageActionPaidMessagesRefunded | ApiMessageActionPaidMessagesPrice | ApiMessageActionSuggestedPostApproval
   | ApiMessageActionSuggestedPostSuccess | ApiMessageActionSuggestedPostRefund | ApiMessageActionTodoCompletions
-  | ApiMessageActionTodoAppendTasks;
+  | ApiMessageActionTodoAppendTasks | ApiMessageActionStarGiftPurchaseOffer
+  | ApiMessageActionStarGiftPurchaseOfferDeclined;

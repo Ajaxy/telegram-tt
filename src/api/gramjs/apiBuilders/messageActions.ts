@@ -426,7 +426,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
   if (action instanceof GramJs.MessageActionStarGiftUnique) {
     const {
       upgrade, transferred, saved, refunded, gift, canExportAt, transferStars, fromId, peer, savedId,
-      resaleAmount, prepaidUpgrade, dropOriginalDetailsStars,
+      resaleAmount, prepaidUpgrade, dropOriginalDetailsStars, fromOffer,
     } = action;
 
     const starGift = buildApiStarGift(gift);
@@ -440,6 +440,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       isSaved: saved,
       isRefunded: refunded,
       isPrepaidUpgrade: prepaidUpgrade,
+      isFromOffer: fromOffer,
       gift: starGift,
       canExportAt,
       transferStars: toJSNumber(transferStars),
@@ -521,6 +522,38 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       mediaType: 'action',
       type: 'todoAppendTasks',
       items: list.map(buildTodoItem),
+    };
+  }
+  if (action instanceof GramJs.MessageActionStarGiftPurchaseOffer) {
+    const {
+      accepted, declined, gift, price, expiresAt,
+    } = action;
+
+    const starGift = buildApiStarGift(gift);
+    if (starGift.type !== 'starGiftUnique') return UNSUPPORTED_ACTION;
+
+    return {
+      mediaType: 'action',
+      type: 'starGiftPurchaseOffer',
+      isAccepted: accepted,
+      isDeclined: declined,
+      gift: starGift,
+      price: buildApiCurrencyAmount(price),
+      expiresAt,
+    };
+  }
+  if (action instanceof GramJs.MessageActionStarGiftPurchaseOfferDeclined) {
+    const { expired, gift, price } = action;
+
+    const starGift = buildApiStarGift(gift);
+    if (starGift.type !== 'starGiftUnique') return UNSUPPORTED_ACTION;
+
+    return {
+      mediaType: 'action',
+      type: 'starGiftPurchaseOfferDeclined',
+      isExpired: expired,
+      gift: starGift,
+      price: buildApiCurrencyAmount(price),
     };
   }
 

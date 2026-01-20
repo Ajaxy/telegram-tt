@@ -30,7 +30,7 @@ import { ensureProtocol } from '../../../util/browser/url';
 import { formatDateTimeToString, formatScheduledDateTime, formatShortDuration } from '../../../util/dates/dateFormat';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { convertTonFromNanos } from '../../../util/formatCurrency';
-import { formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
+import { formatCurrencyAmountAsText, formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
 import { conjuctionWithNodes } from '../../../util/localization/utils';
 import { getServerTime } from '../../../util/serverTime';
 import renderText from '../../common/helpers/renderText';
@@ -616,6 +616,7 @@ const ActionMessageText = ({
       case 'starGiftUnique': {
         const {
           isTransferred, isUpgrade, savedId, peerId, fromId, resaleAmount, gift, transferStars, isPrepaidUpgrade,
+          isFromOffer,
         } = action;
 
         const isToChannel = Boolean(peerId && savedId);
@@ -629,6 +630,28 @@ const ActionMessageText = ({
           || (isToChannel ? channelFallbackText : userFallbackText);
         const toLink = renderPeerLink(toPeer?.id, toTitle, asPreview);
 
+        if (isFromOffer && resaleAmount) {
+          const giftName = lang('GiftUnique', { title: gift.title, number: gift.number });
+          const amountText = formatCurrencyAmountAsText(lang, resaleAmount);
+
+          const formattedAmountText = asPreview ? amountText : renderStrong(amountText);
+          const formattedGiftName = asPreview ? giftName : renderStrong(giftName);
+
+          if (isOutgoing) {
+            return lang(
+              'ActionStarGiftSoldFromOffer',
+              { user: chatLink, gift: formattedGiftName, cost: formattedAmountText },
+              { withNodes: true },
+            );
+          }
+
+          return lang(
+            'ActionStarGiftBoughtFromOffer',
+            { user: senderLink, gift: formattedGiftName, cost: formattedAmountText },
+            { withNodes: true },
+          );
+        }
+
         if (isPrepaidUpgrade) {
           if (isOutgoing) {
             return lang('ActionStarGiftPrepaidUpgradedYou');
@@ -637,9 +660,7 @@ const ActionMessageText = ({
         }
 
         if (resaleAmount && !transferStars) {
-          const amountText = resaleAmount.currency === TON_CURRENCY_CODE
-            ? formatTonAsText(lang, convertTonFromNanos(resaleAmount.amount))
-            : formatStarsAsText(lang, resaleAmount.amount);
+          const amountText = formatCurrencyAmountAsText(lang, resaleAmount);
 
           return lang(
             isOutgoing
@@ -1023,6 +1044,55 @@ const ActionMessageText = ({
 
       case 'phoneCall': // Rendered as a regular message, but considered an action for the summary
         return lang(getCallMessageKey(action, isOutgoing));
+
+      case 'starGiftPurchaseOffer': {
+        const { gift, price } = action;
+
+        const peer = isOutgoing ? chat : sender;
+        const peerTitle = (peer && getPeerTitle(lang, peer)) || userFallbackText;
+        const peerLink = renderPeerLink(peer?.id, peerTitle, asPreview);
+
+        const giftName = lang('GiftUnique', { title: gift.title, number: gift.number });
+        const priceText = formatCurrencyAmountAsText(lang, price);
+
+        const formattedGiftName = asPreview ? giftName : renderStrong(giftName);
+        const formattedPriceText = asPreview ? priceText : renderStrong(priceText);
+
+        return lang(
+          isOutgoing ? 'ActionStarGiftOfferOutgoing' : 'ActionStarGiftOfferIncoming',
+          {
+            peer: peerLink,
+            cost: formattedPriceText,
+            gift: formattedGiftName,
+          },
+          { withNodes: true },
+        );
+      }
+
+      case 'starGiftPurchaseOfferDeclined': {
+        const { gift, price } = action;
+
+        const peer = isOutgoing ? chat : sender;
+        const peerTitle = (peer && getPeerTitle(lang, peer)) || userFallbackText;
+        const peerLink = renderPeerLink(peer?.id, peerTitle, asPreview);
+
+        const giftName = lang('GiftUnique', { title: gift.title, number: gift.number });
+        const priceText = formatCurrencyAmountAsText(lang, price);
+
+        const formattedGiftName = asPreview ? giftName : renderStrong(giftName);
+        const formattedPriceText = asPreview ? priceText : renderStrong(priceText);
+
+        return lang(
+          isOutgoing ? 'ActionStarGiftOfferDeclinedOutgoing' : 'ActionStarGiftOfferDeclinedIncoming',
+          {
+            peer: peerLink,
+            gift: formattedGiftName,
+            cost: formattedPriceText,
+          },
+          { withNodes: true },
+        );
+      }
+
       default:
         return lang(UNSUPPORTED_LANG_KEY);
     }

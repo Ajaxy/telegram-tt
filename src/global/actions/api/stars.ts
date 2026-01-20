@@ -709,3 +709,29 @@ addActionHandler('openGiftAuctionAcquiredModal', async (global, actions, payload
 
   setGlobal(global);
 });
+
+addActionHandler('acceptStarGiftOffer', async (global, actions, payload): Promise<void> => {
+  const { messageId } = payload;
+
+  const result = await callApi('resolveStarGiftOffer', {
+    offerMsgId: messageId,
+  });
+
+  if (!result) {
+    return;
+  }
+
+  actions.loadStarStatus();
+  if (global.currentUserId) {
+    actions.reloadPeerSavedGifts({ peerId: global.currentUserId });
+  }
+});
+
+addActionHandler('declineStarGiftOffer', async (global, actions, payload): Promise<void> => {
+  const { messageId } = payload;
+
+  await callApi('resolveStarGiftOffer', {
+    offerMsgId: messageId,
+    shouldDecline: true,
+  });
+});

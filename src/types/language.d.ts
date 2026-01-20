@@ -1525,6 +1525,13 @@ export interface LangPair {
   'ActionStarGiftUniqueBackdrop': undefined;
   'ActionStarGiftUniqueSymbol': undefined;
   'ActionStarGiftSelf': undefined;
+  'ActionStarGiftOfferAccepted': undefined;
+  'ActionStarGiftOfferRejected': undefined;
+  'ActionStarGiftOfferHasExpired': undefined;
+  'GiftOfferReject': undefined;
+  'GiftOfferAccept': undefined;
+  'GiftOfferRejectTitle': undefined;
+  'GiftOfferAcceptTitle': undefined;
   'ActionSuggestedPhotoButton': undefined;
   'ActionSuggestedVideoTitle': undefined;
   'ActionSuggestedVideoText': undefined;
@@ -2271,6 +2278,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   'GiftInfoPeerDescriptionFreeUpgradeOut': {
     'peer': V;
   };
+  'GiftInfoValueAmount': {
+    'amount': V;
+  };
   'GiftInfoPeerConvertDescription': {
     'peer': V;
     'amount': V;
@@ -2655,6 +2665,16 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ActionStarGiftTransferredUnknownChannel': {
     'channel': V;
   };
+  'ActionStarGiftSoldFromOffer': {
+    'gift': V;
+    'user': V;
+    'cost': V;
+  };
+  'ActionStarGiftBoughtFromOffer': {
+    'user': V;
+    'gift': V;
+    'cost': V;
+  };
   'ActionStarGiftReceivedAnonymous': {
     'cost': V;
   };
@@ -2718,6 +2738,51 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'ActionStarGiftAuctionBought': {
     'cost': V;
+  };
+  'ActionStarGiftOfferOutgoing': {
+    'peer': V;
+    'cost': V;
+    'gift': V;
+  };
+  'ActionStarGiftOfferIncoming': {
+    'peer': V;
+    'cost': V;
+    'gift': V;
+  };
+  'ActionStarGiftOfferExpires': {
+    'time': V;
+  };
+  'ActionStarGiftOfferDeclinedOutgoing': {
+    'peer': V;
+    'gift': V;
+    'cost': V;
+  };
+  'ActionStarGiftOfferDeclinedIncoming': {
+    'peer': V;
+    'gift': V;
+    'cost': V;
+  };
+  'GiftOfferRejectText': {
+    'user': V;
+  };
+  'GiftOfferAcceptText': {
+    'gift': V;
+    'user': V;
+    'price': V;
+  };
+  'GiftOfferAcceptReceive': {
+    'amount': V;
+  };
+  'GiftOfferAcceptButton': {
+    'amount': V;
+  };
+  'GiftOfferPriceLow': {
+    'percent': V;
+    'gift': V;
+  };
+  'GiftOfferPriceHigh': {
+    'percent': V;
+    'gift': V;
   };
   'ActionSuggestedPhotoYou': {
     'user': V;

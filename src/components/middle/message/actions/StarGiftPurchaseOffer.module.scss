@@ -1,0 +1,63 @@
+.root {
+  gap: 0.25rem;
+
+  &.hasButtons {
+    border-bottom-right-radius: var(--border-radius-messages-small);
+    border-bottom-left-radius: var(--border-radius-messages-small);
+  }
+
+  &.clickable {
+    cursor: var(--custom-cursor, pointer);
+    transition: background-color 150ms, backdrop-filter 150ms, filter 150ms;
+
+    &:hover,
+    &:focus {
+      background: var(--action-message-bg) !important;
+      backdrop-filter: brightness(115%);
+
+      @supports not (backdrop-filter: brightness(115%)) {
+        filter: brightness(115%);
+      }
+    }
+  }
+}
+
+.giftContainer {
+  position: relative;
+
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 4.75rem;
+  height: 4.75rem;
+  border-radius: 1rem;
+}
+
+.uniqueBackgroundWrapper,
+.uniqueBackground {
+  position: absolute;
+  inset: 0;
+}
+
+.stickerWrapper {
+  position: relative;
+}
+
+.info {
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
+.title {
+  margin-bottom: 0;
+  font-size: inherit;
+  font-weight: var(--font-weight-normal);
+}
+
+.subtitle {
+  margin-block: 0.25rem;
+  font-size: 0.8125rem;
+  text-wrap: balance;
+}

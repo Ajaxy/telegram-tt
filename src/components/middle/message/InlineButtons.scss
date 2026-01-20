@@ -23,6 +23,7 @@
 
     transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms;
 
+    &:active,
     &:hover,
     &:focus {
       background: var(--action-message-bg) !important;
@@ -61,6 +62,7 @@
 
   .left-icon {
     margin-right: 0.25rem;
+    font-size: 1rem !important;
   }
 
   .inline-button-text {

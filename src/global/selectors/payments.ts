@@ -106,3 +106,12 @@ export function selectActiveGiftsCollectionId<T extends GlobalState>(
 ): ProfileCollectionKey {
   return selectTabState(global, tabId).savedGifts.activeCollectionByPeerId?.[peerId] || 'all';
 }
+
+export function selectStarsGiftResaleCommission<T extends GlobalState>(global: T) {
+  const permille = global.appConfig?.starsStargiftResaleCommissionPermille;
+  return permille !== undefined ? permille / 1000 : undefined;
+}
+export function selectTonGiftResaleCommission<T extends GlobalState>(global: T) {
+  const permille = global.appConfig?.tonStargiftResaleCommissionPermille;
+  return permille !== undefined ? permille / 1000 : undefined;
+}

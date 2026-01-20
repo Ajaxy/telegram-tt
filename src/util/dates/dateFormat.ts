@@ -339,6 +339,26 @@ export function formatMediaDuration(duration: number, maxValue?: number) {
   return string;
 }
 
+export function formatShortHoursMinutes(lang: OldLangFn, durationInSeconds: number) {
+  if (durationInSeconds <= 0) {
+    return lang('MessageTimer.ShortMinutes', 0);
+  }
+
+  const hours = Math.floor(durationInSeconds / 3600);
+  const minutes = Math.floor((durationInSeconds % 3600) / 60);
+
+  if (hours > 0) {
+    const hoursText = lang('MessageTimer.ShortHours', hours);
+    if (minutes === 0) {
+      return hoursText;
+    }
+
+    const minutesText = lang('MessageTimer.ShortMinutes', minutes);
+    return `${hoursText} ${minutesText}`;
+  }
+  return lang('MessageTimer.ShortMinutes', minutes);
+}
+
 export function formatVoiceRecordDuration(durationInMs: number) {
   const parts = [];
 

@@ -743,16 +743,11 @@ const GiftInfoModal = ({
       ]);
 
       if (gift.valueAmount && gift.valueCurrency) {
+        const formattedValue = formatCurrencyAsString(gift.valueAmount, gift.valueCurrency, lang.code);
         tableData.push([
           lang('GiftInfoValue'),
           <span className={styles.uniqueValue}>
-            ~
-            {' '}
-            {formatCurrencyAsString(
-              gift.valueAmount,
-              gift.valueCurrency,
-              lang.code,
-            )}
+            {lang('GiftInfoValueAmount', { amount: formattedValue })}
             <BadgeButton onClick={handleOpenValueModal}>
               {lang('GiftInfoValueLinkMore')}
             </BadgeButton>

@@ -82,6 +82,16 @@
   max-width: 100%;
 }
 
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  :global(.InlineButtons) {
+    width: 100%;
+  }
+}
+
 .contextContainer {
   grid-area: 1 / 1;
 }
@@ -302,4 +312,8 @@
 .botForumTopicArrow {
   font-size: 1.5rem;
   opacity: 0.5;
+}
+
+.narrowWrapper {
+  max-width: 18rem;
 }

@@ -2768,6 +2768,13 @@ export interface ActionPayloads {
     details: ApiStarGiftAttributeOriginalDetails;
   } & WithTabId;
   closeGiftDescriptionRemoveModal: WithTabId | undefined;
+  openGiftOfferAcceptModal: {
+    peerId: string;
+    messageId: number;
+    gift: ApiStarGiftUnique;
+    price: ApiTypeCurrencyAmount;
+  } & WithTabId;
+  closeGiftOfferAcceptModal: WithTabId | undefined;
   updateSelectedGiftCollection: {
     peerId: string;
     collectionId: number;
@@ -2803,6 +2810,13 @@ export interface ActionPayloads {
   loadStarGiftCollections: {
     peerId: string;
     hash?: string;
+  } & WithTabId;
+
+  acceptStarGiftOffer: {
+    messageId: number;
+  } & WithTabId;
+  declineStarGiftOffer: {
+    messageId: number;
   } & WithTabId;
 
   openStarsGiftModal: ({

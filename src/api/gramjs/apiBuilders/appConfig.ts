@@ -85,6 +85,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   ton_blockchain_explorer_url?: string;
   stars_paid_messages_available?: boolean;
   stars_usd_withdraw_rate_x1000?: number;
+  stars_usd_sell_rate_x1000?: number;
   stars_paid_message_commission_permille?: number;
   stars_paid_message_amount_max?: number;
   stargifts_pinned_to_top_limit?: number;
@@ -203,6 +204,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     starsPaidMessageCommissionPermille: appConfig.stars_paid_message_commission_permille,
     starsPaidMessageAmountMax: appConfig.stars_paid_message_amount_max,
     starsUsdWithdrawRateX1000: appConfig.stars_usd_withdraw_rate_x1000,
+    starsUsdSellRateX1000: appConfig.stars_usd_sell_rate_x1000,
     bandwidthPremiumNotifyPeriod: appConfig.upload_premium_speedup_notify_period,
     bandwidthPremiumUploadSpeedup: appConfig.upload_premium_speedup_upload,
     bandwidthPremiumDownloadSpeedup: appConfig.upload_premium_speedup_download,

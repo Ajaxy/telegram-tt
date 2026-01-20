@@ -58,6 +58,14 @@ const InlineButtons = ({ inlineButtons, onClick }: OwnProps) => {
           return <Icon className="left-icon" name="close" />;
         }
         break;
+      case 'giftOffer':
+        if (button.buttonType === 'accept') {
+          return <Icon className="left-icon" name="check" />;
+        }
+        if (button.buttonType === 'reject') {
+          return <Icon className="left-icon" name="close" />;
+        }
+        break;
     }
 
     return;

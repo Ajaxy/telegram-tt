@@ -1,0 +1,38 @@
+.description {
+  margin-bottom: 0.5rem;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.receiveText {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.table {
+  margin-bottom: 1rem;
+}
+
+.attributeValue {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.warning {
+  margin-bottom: 0.5rem;
+  color: var(--color-error);
+  text-align: center;
+}
+
+.hint {
+  margin-bottom: 0.5rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.success {
+  margin-bottom: 0.5rem;
+  color: var(--color-success);
+  text-align: center;
+}
