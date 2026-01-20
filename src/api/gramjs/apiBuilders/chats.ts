@@ -217,9 +217,24 @@ function buildApiChatRestrictions(peerEntity: Entity): {
     };
   }
 
-  const restrictions = {};
+  const restrictions: {
+    isNotJoined?: boolean;
+    isForbidden?: boolean;
+    isRestricted?: boolean;
+    restrictionReasons?: ApiRestrictionReason[];
+  } = {};
 
-  if ('restricted' in peerEntity && !peerEntity.min) {
+  const isMin = 'min' in peerEntity && peerEntity.min;
+  const hasRestricted = 'restricted' in peerEntity;
+
+  if (!isMin) {
+    Object.assign(restrictions, {
+      isForbidden: undefined,
+      isRestricted: undefined,
+    });
+  }
+
+  if (hasRestricted && !isMin) {
     const restrictionReasons = buildApiRestrictionReasons(peerEntity.restrictionReason);
 
     Object.assign(restrictions, {
