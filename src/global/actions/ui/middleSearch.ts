@@ -12,13 +12,13 @@ import {
 import { selectCurrentMessageList } from '../../selectors';
 
 addActionHandler('openMiddleSearch', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+  const { fromPeerId, tabId = getCurrentTabId() } = payload || {};
   const { chatId, threadId } = selectCurrentMessageList(global, tabId) || {};
   if (!chatId || !threadId) {
     return undefined;
   }
 
-  return updateMiddleSearch(global, chatId, threadId, {}, tabId);
+  return updateMiddleSearch(global, chatId, threadId, { fromPeerId }, tabId);
 });
 
 addActionHandler('closeMiddleSearch', (global, actions, payload): ActionReturnType => {

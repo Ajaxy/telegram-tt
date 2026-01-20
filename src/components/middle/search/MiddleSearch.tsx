@@ -16,7 +16,7 @@ import type {
 import { ANONYMOUS_USER_ID } from '../../../config';
 import { requestMeasure, requestMutation, requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import {
-  getIsSavedDialog, getReactionKey, isSameReaction, isSystemBot,
+  getIsSavedDialog, getReactionKey, isChatGroup, isSameReaction, isSystemBot,
 } from '../../../global/helpers';
 import {
   selectChat,
@@ -27,6 +27,7 @@ import {
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
   selectMonoforumChannel,
+  selectPeer,
   selectSender,
   selectTabState,
 } from '../../../global/selectors';
@@ -50,11 +51,13 @@ import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation'
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
+import usePeerSearch, { prepareChatMemberSearch } from '../../../hooks/usePeerSearch';
 
 import Avatar from '../../common/Avatar';
 import PeerChip from '../../common/PeerChip';
 import Button from '../../ui/Button';
 import InfiniteScroll from '../../ui/InfiniteScroll';
+import Loading from '../../ui/Loading';
 import SearchInput from '../../ui/SearchInput';
 import SavedTagButton from '../message/reactions/SavedTagButton';
 import MiddleSearchResult from './MiddleSearchResult';
@@ -82,6 +85,8 @@ type StateProps = {
   isHashtagQuery?: boolean;
   searchType?: MiddleSearchType;
   currentUserId?: string;
+  fromPeerId?: string;
+  isGroupChat?: boolean;
 };
 
 const CHANNELS_PEER: CustomPeer = {
@@ -92,6 +97,8 @@ const CHANNELS_PEER: CustomPeer = {
 const FOCUSED_SEARCH_TRIGGER_OFFSET = 5;
 const HIDE_TIMEOUT = 200;
 const RESULT_ITEM_CLASS_NAME = 'MiddleSearchResult';
+const FROM_FILTER_PREFIX = 'from:';
+const INLINE_MEMBER_COUNT = 5;
 
 const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
@@ -113,6 +120,8 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
   isHashtagQuery,
   searchType = 'chat',
   currentUserId,
+  fromPeerId,
+  isGroupChat,
 }) => {
   const {
     updateMiddleSearch,
@@ -146,6 +155,28 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
   const [isFocused, markFocused, markBlurred] = useFlag();
   const [isViewAsList, setIsViewAsList] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFromFilterMode, setIsFromFilterMode] = useState(Boolean(fromPeerId));
+  const [memberSearchQuery, setMemberSearchQuery] = useState('');
+
+  useEffect(() => {
+    if (fromPeerId) {
+      setIsFromFilterMode(true);
+      focusInput();
+    }
+  }, [fromPeerId]);
+
+  const memberSearchFn = useMemo(
+    () => (chat && isGroupChat ? prepareChatMemberSearch(chat) : undefined),
+    [chat, isGroupChat],
+  );
+
+  const hasMemberDropdown = isFromFilterMode && !fromPeerId;
+
+  const { result: memberSearchResults, isLoading: isMemberSearchLoading } = usePeerSearch({
+    query: hasMemberDropdown ? (memberSearchQuery || ' ') : query,
+    queryFn: memberSearchFn,
+    isDisabled: !isGroupChat || Boolean(fromPeerId) || (!isFromFilterMode && (!query || isHashtagQuery)),
+  });
 
   const handleClickOutside = useLastCallback((event: MouseEvent) => {
     if (maybeLongPressActiveRef.current) return;
@@ -155,17 +186,11 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
   });
   useClickOutside([ref], handleClickOutside);
 
-  const hasResultsContainer = Boolean((query && foundIds) || isHashtagQuery);
+  const hasResultsContainer = Boolean(((query || fromPeerId) && foundIds) || isHashtagQuery);
   const isOnlyHash = isHashtagQuery && !query;
-  const areResultsEmpty = Boolean(query && foundIds && !foundIds.length && !isLoading && !isOnlyHash);
-  const hasResultsPlaceholder = areResultsEmpty || isOnlyHash;
   const isNonFocusedDropdownForced = searchType === 'myChats' || searchType === 'channels';
-  const hasResultsDropdown = isActive && (isViewAsList || !isMobile) && (isFocused || isNonFocusedDropdownForced)
-    && Boolean(
-      hasResultsContainer || hasResultsPlaceholder || savedTags,
-    );
-
-  const hasQueryData = Boolean((query && !isOnlyHash) || savedTag);
+  const hasMemberResults = !isHashtagQuery && Boolean(memberSearchResults?.length);
+  const hasQueryData = Boolean((query && !isOnlyHash) || savedTag || fromPeerId);
   const hasNavigationButtons = searchType === 'chat' && Boolean(foundIds?.length);
 
   const handleClose = useLastCallback(() => {
@@ -236,6 +261,8 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
       setIsViewAsList(true);
       setFocusedIndex(0);
       setQuery('');
+      setIsFromFilterMode(false);
+      setMemberSearchQuery('');
       hiddenTimerRef.current = window.setTimeout(() => setIsFullyHidden(true), HIDE_TIMEOUT);
     } else {
       setIsFullyHidden(false);
@@ -274,13 +301,15 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
   }, [isHistoryCalendarOpen, isActive]);
 
   const handleReset = useLastCallback(() => {
-    if (!query?.length && !savedTag) {
+    if (!query?.length && !savedTag && !fromPeerId && !isFromFilterMode) {
       handleClose();
       return;
     }
 
     setQuery('');
     setIsLoading(false);
+    setIsFromFilterMode(false);
+    setMemberSearchQuery('');
     resetMiddleSearch();
     focusInput();
   });
@@ -321,9 +350,23 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
       return;
     }
 
+    if (isGroupChat && newQuery.toLowerCase().startsWith(FROM_FILTER_PREFIX) && !fromPeerId && !isFromFilterMode) {
+      setIsFromFilterMode(true);
+      const memberQuery = newQuery.slice(FROM_FILTER_PREFIX.length).trim();
+      setMemberSearchQuery(memberQuery);
+      return;
+    }
+
+    // When in from filter mode (selecting a member), update member search query
+    if (isFromFilterMode && !fromPeerId) {
+      setMemberSearchQuery(newQuery);
+      return;
+    }
+
+    // Normal query update (including when fromPeerId is set - query is separate)
     setQuery(newQuery);
 
-    if (!newQuery) {
+    if (!newQuery && !fromPeerId) {
       setIsLoading(false);
       resetMiddleSearch();
       shouldCancelSearchRef.current = true;
@@ -331,10 +374,10 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
   });
 
   useEffect(() => {
-    if (query) {
+    if (isActive && (query || fromPeerId)) {
       handleSearch();
     }
-  }, [query]);
+  }, [isActive, query, fromPeerId]);
 
   useEffect(() => {
     setIsLoading(Boolean(fetchingQuery));
@@ -391,8 +434,16 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
 
   const [viewportIds, getMore, viewportOffset = 0] = useInfiniteScroll(handleSearch, foundIds);
 
+  const [viewportMemberIds, getMoreMembers] = useInfiniteScroll(
+    undefined,
+    hasMemberDropdown ? memberSearchResults : undefined,
+  );
+
+  const displayedMembers = (hasMemberResults
+    && (hasMemberDropdown ? viewportMemberIds : memberSearchResults.slice(0, INLINE_MEMBER_COUNT))) || undefined;
+
   const viewportResults = useMemo(() => {
-    if ((!query && !savedTag) || !viewportIds?.length) {
+    if ((!query && !savedTag && !fromPeerId) || !viewportIds?.length) {
       return MEMO_EMPTY_ARRAY;
     }
     const global = getGlobal();
@@ -418,7 +469,16 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
         senderPeer,
       };
     }).filter(Boolean);
-  }, [query, savedTag, viewportIds, isSavedMessages]);
+  }, [query, savedTag, fromPeerId, viewportIds, isSavedMessages]);
+
+  const areResultsEmpty = Boolean(
+    (query || fromPeerId) && !isLoading && !viewportResults.length && !isOnlyHash && !hasMemberResults,
+  );
+  const hasResultsPlaceholder = areResultsEmpty || isOnlyHash;
+  const hasResultsDropdown = isActive && (isViewAsList || !isMobile) && (isFocused || isNonFocusedDropdownForced)
+    && Boolean(
+      hasResultsContainer || hasResultsPlaceholder || savedTags || hasMemberResults,
+    );
 
   const handleMessageClick = useLastCallback((message: ApiMessage) => {
     const searchResultKey = getSearchResultKey(message);
@@ -444,13 +504,33 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
     markFocused();
   });
 
-  const handleKeyDown = useKeyboardListNavigation(containerRef, hasResultsContainer, (index) => {
-    const foundResult = viewportResults?.[index === -1 ? 0 : index];
-    if (foundResult) {
-      handleMessageClick(foundResult.message);
-      setFocusedIndex(index + viewportOffset);
-    }
-  }, `.${RESULT_ITEM_CLASS_NAME}`, true);
+  const handleKeyDown = useKeyboardListNavigation(
+    containerRef,
+    hasResultsContainer || hasMemberResults,
+    (index) => {
+      const actualIndex = index === -1 ? 0 : index;
+      const membersCount = displayedMembers?.length || 0;
+
+      // Member selection
+      if (actualIndex < membersCount && displayedMembers) {
+        const memberId = displayedMembers[actualIndex];
+        if (memberId) {
+          handleSelectFromMember(memberId);
+        }
+        return;
+      }
+
+      // Message selection
+      const messageIndex = actualIndex - membersCount;
+      const foundResult = viewportResults?.[messageIndex];
+      if (foundResult) {
+        handleMessageClick(foundResult.message);
+        setFocusedIndex(messageIndex + viewportOffset);
+      }
+    },
+    `.${RESULT_ITEM_CLASS_NAME}`,
+    true,
+  );
 
   const updateSearchParams = useLastCallback((update: Partial<MiddleSearchParams>) => {
     updateMiddleSearch({ chatId: chat!.id, threadId, update });
@@ -474,6 +554,18 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
   });
 
   const handleDeleteTag = useLastCallback(() => {
+    if (fromPeerId) {
+      updateSearchParams({ fromPeerId: undefined });
+      setMemberSearchQuery('');
+      return;
+    }
+
+    if (isFromFilterMode) {
+      setIsFromFilterMode(false);
+      setMemberSearchQuery('');
+      return;
+    }
+
     if (isHashtagQuery) {
       updateSearchParams({ isHashtag: false });
       return;
@@ -487,6 +579,19 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
   const handleChangeSearchType = useLastCallback((type: MiddleSearchType) => {
     updateSearchParams({ type });
     setIsViewAsList(true);
+  });
+
+  const handleFromFilterClick = useLastCallback(() => {
+    setIsFromFilterMode(true);
+    setMemberSearchQuery('');
+    focusInput();
+  });
+
+  const handleSelectFromMember = useLastCallback((peerId: string) => {
+    updateMiddleSearch({ chatId: chat!.id, threadId, update: { fromPeerId: peerId } });
+    setMemberSearchQuery('');
+    setQuery('');
+    focusInput();
   });
 
   const handleFocusOlder = useLastCallback(() => {
@@ -551,11 +656,25 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
     return undefined;
   }
 
+  function renderMemberItem(peerId: string) {
+    const peer = selectPeer(getGlobal(), peerId);
+    if (!peer) return undefined;
+
+    return (
+      <MiddleSearchResult
+        key={`member-${peerId}`}
+        className={RESULT_ITEM_CLASS_NAME}
+        peer={peer}
+        onClick={handleSelectFromMember}
+      />
+    );
+  }
+
   function renderDropdown() {
     return (
       <div className={buildClassName(styles.dropdown, !hasResultsDropdown && styles.dropdownHidden)}>
         {!isMobile && <div className={styles.separator} />}
-        {hasSavedTags && !isHashtagQuery && (
+        {hasSavedTags && !isHashtagQuery && !hasMemberDropdown && (
           <div
             className={buildClassName(
               styles.savedTags,
@@ -580,7 +699,7 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
             })}
           </div>
         )}
-        {isHashtagQuery && (
+        {isHashtagQuery && !hasMemberDropdown && (
           <div
             className={buildClassName(styles.searchTypes, 'no-scrollbar')}
           >
@@ -589,16 +708,21 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
             {renderTypeTag('channels')}
           </div>
         )}
-        {hasResultsContainer && (
+        {Boolean(hasResultsContainer || hasMemberResults) && (
           <InfiniteScroll
             ref={containerRef}
             className={buildClassName(styles.results, 'custom-scroll')}
-            items={viewportResults}
+            items={hasMemberDropdown ? displayedMembers : viewportResults}
             itemSelector={`.${RESULT_ITEM_CLASS_NAME}`}
             preloadBackwards={0}
-            onLoadMore={getMore}
+            onLoadMore={hasMemberDropdown ? getMoreMembers : getMore}
             onKeyDown={handleKeyDown}
           >
+            {isMemberSearchLoading && hasMemberDropdown && <Loading />}
+            {displayedMembers?.map(renderMemberItem)}
+            {hasMemberDropdown && !isMemberSearchLoading && !memberSearchResults?.length && (
+              <span className={styles.placeholder}>{oldLang('NoResult')}</span>
+            )}
             {areResultsEmpty && (
               <span key="nothing" className={styles.placeholder}>
                 {oldLang('NoResultFoundFor', query)}
@@ -609,7 +733,7 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
                 {oldLang('HashtagSearchPlaceholder')}
               </span>
             )}
-            {viewportResults?.map(({
+            {!hasMemberDropdown && viewportResults?.map(({
               message, senderPeer, messageChat, searchResultKey,
             }, i) => (
               <MiddleSearchResult
@@ -618,7 +742,7 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
                 className={RESULT_ITEM_CLASS_NAME}
                 query={query}
                 message={message}
-                senderPeer={senderPeer}
+                peer={senderPeer}
                 messageChat={messageChat}
                 shouldShowChat={isHashtagQuery}
                 isActive={focusedIndex - viewportOffset === i}
@@ -654,7 +778,7 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
         )}
         <SearchInput
           ref={inputRef}
-          value={query}
+          value={isFromFilterMode && !fromPeerId ? memberSearchQuery : query}
           className={buildClassName(
             styles.input,
             hasResultsDropdown && styles.withDropdown,
@@ -687,11 +811,27 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
               />
             )}
             {isHashtagQuery && <div className={styles.hash}>#</div>}
+            {(isFromFilterMode || fromPeerId) && (
+              <div className={styles.fromTag}>
+                {lang('SearchFilterFrom')}
+                {fromPeerId && <PeerChip peerId={fromPeerId} forceShowSelf canClose onClick={handleDeleteTag} />}
+              </div>
+            )}
           </div>
           {!isMobile && renderDropdown()}
         </SearchInput>
         {!isMobile && (
           <div className={styles.icons}>
+            {isGroupChat && !isFromFilterMode && !fromPeerId && (
+              <Button
+                round
+                size="smaller"
+                color="translucent"
+                onClick={handleFromFilterClick}
+                ariaLabel={oldLang('FilterByUser')}
+                iconName="user"
+              />
+            )}
             <Button
               round
               size="smaller"
@@ -706,6 +846,16 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
       {isMobile && renderDropdown()}
       {isMobile && (
         <div className={styles.footer}>
+          {isGroupChat && !isFromFilterMode && !fromPeerId && (
+            <Button
+              round
+              size="smaller"
+              color="translucent"
+              onClick={handleFromFilterClick}
+              ariaLabel={oldLang('FilterByUser')}
+              iconName="user"
+            />
+          )}
           <Button
             round
             size="smaller"
@@ -779,7 +929,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const {
-      requestedQuery, savedTag, results, fetchingQuery, isHashtag, type,
+      requestedQuery, savedTag, results, fetchingQuery, isHashtag, type, fromPeerId,
     } = selectCurrentMiddleSearch(global) || {};
     const { totalCount, foundIds, query: lastSearchQuery } = results || {};
 
@@ -808,6 +958,8 @@ export default memo(withGlobal<OwnProps>(
       currentUserId,
       searchType: type,
       lastSearchQuery,
+      fromPeerId,
+      isGroupChat: isChatGroup(chat),
     };
   },
 )(MiddleSearch));

@@ -1476,6 +1476,7 @@ export async function searchMessagesInChat({
   offsetId,
   addOffset,
   limit,
+  fromPeer,
 }: {
   peer: ApiPeer;
   isSavedDialog?: boolean;
@@ -1488,6 +1489,7 @@ export async function searchMessagesInChat({
   limit: number;
   minDate?: number;
   maxDate?: number;
+  fromPeer?: ApiPeer;
 }): Promise<SearchResults | undefined> {
   let filter;
   switch (type) {
@@ -1519,6 +1521,7 @@ export async function searchMessagesInChat({
   }
 
   const inputPeer = buildInputPeer(peer.id, peer.accessHash);
+  const inputFromPeer = fromPeer ? buildInputPeer(fromPeer.id, fromPeer.accessHash) : undefined;
 
   const result = await invokeRequest(new GramJs.messages.Search({
     peer: isSavedDialog ? new GramJs.InputPeerSelf() : inputPeer,
@@ -1527,6 +1530,7 @@ export async function searchMessagesInChat({
     topMsgId: threadId !== MAIN_THREAD_ID && !isSavedDialog ? Number(threadId) : undefined,
     filter,
     q: query,
+    fromId: inputFromPeer,
     minDate: minDate ?? DEFAULT_PRIMITIVES.INT,
     maxDate: maxDate ?? DEFAULT_PRIMITIVES.INT,
     maxId: DEFAULT_PRIMITIVES.INT,

@@ -312,7 +312,9 @@ export interface ActionPayloads {
   };
 
   // Message search
-  openMiddleSearch: WithTabId | undefined;
+  openMiddleSearch: {
+    fromPeerId?: string;
+  } & WithTabId | undefined;
   closeMiddleSearch: WithTabId | undefined;
   updateMiddleSearch: {
     chatId: string;

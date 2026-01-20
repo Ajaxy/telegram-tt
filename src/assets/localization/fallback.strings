@@ -1711,6 +1711,7 @@
 "GroupChatsSearchContext" = "Group Chats";
 "ChannelsSearchContext" = "Channels";
 "SearchContextCaption" = "From {type}";
+"SearchFilterFrom" = "From:";
 "FolderLinkTitleDescription" = "Anyone with this link can add {folder} folder and {chats} selected below.";
 "FolderLinkTitleDescriptionChats_one" = "the chat";
 "FolderLinkTitleDescriptionChats_other" = "the {count} chats";

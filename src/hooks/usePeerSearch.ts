@@ -1,7 +1,11 @@
 import { useState } from '../lib/teact/teact';
+import { getGlobal } from '../global';
 
 import type { ApiChat } from '../api/types';
 
+import { isChatBasicGroup, isChatSuperGroup } from '../global/helpers';
+import { filterPeersByQuery } from '../global/helpers/peers';
+import { selectChatFullInfo } from '../global/selectors';
 import { callApi } from '../api/gramjs';
 import useAsync from './useAsync';
 import useDebouncedMemo from './useDebouncedMemo';
@@ -20,13 +24,40 @@ export async function peerGlobalSearch(query: string) {
 
 export function prepareChatMemberSearch(chat: ApiChat) {
   return async (query: string) => {
+    const trimmedQuery = query.trim();
+
+    // For basic groups, filter from cached members in fullInfo
+    if (isChatBasicGroup(chat)) {
+      const global = getGlobal();
+      const fullInfo = selectChatFullInfo(global, chat.id);
+      const memberIds = fullInfo?.members?.map((m) => m.userId) || [];
+
+      if (!trimmedQuery) {
+        return memberIds;
+      }
+
+      return filterPeersByQuery({ ids: memberIds, query: trimmedQuery, type: 'user' });
+    }
+
+    // For supergroups/channels, use API
     const searchResult = await callApi('fetchMembers', {
       chat,
-      memberFilter: 'search',
-      query,
+      memberFilter: trimmedQuery ? 'search' : 'recent',
+      query: trimmedQuery,
     });
 
-    return searchResult?.members?.map((member) => member.userId) || [];
+    const memberIds = searchResult?.members?.map((member) => member.userId) || [];
+
+    if (!isChatSuperGroup(chat)) {
+      return memberIds;
+    }
+
+    if (!trimmedQuery) {
+      return [...memberIds, chat.id];
+    }
+
+    const chatMatches = filterPeersByQuery({ ids: [chat.id], query: trimmedQuery, type: 'chat' });
+    return [...memberIds, ...chatMatches];
   };
 }
 

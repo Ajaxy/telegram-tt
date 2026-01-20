@@ -77,7 +77,11 @@ export function updateMiddleSearch<T extends GlobalState>(
     updated.type = 'chat';
   }
 
-  if (currentSearch && (currentSearch.type !== updated.type || currentSearch.savedTag !== updated.savedTag)) {
+  if (currentSearch && (
+    currentSearch.type !== updated.type
+    || currentSearch.savedTag !== updated.savedTag
+    || currentSearch.fromPeerId !== updated.fromPeerId
+  )) {
     updated.results = undefined;
   }
 

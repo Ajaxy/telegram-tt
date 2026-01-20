@@ -1398,6 +1398,7 @@ export interface LangPair {
   'PrivateChatsSearchContext': undefined;
   'GroupChatsSearchContext': undefined;
   'ChannelsSearchContext': undefined;
+  'SearchFilterFrom': undefined;
   'FolderLinkSubtitleNew': undefined;
   'FolderLinkSubtitleAlready': undefined;
   'FolderLinkAddFolder': undefined;

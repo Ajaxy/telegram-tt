@@ -411,6 +411,7 @@ export type MiddleSearchParams = {
   requestedQuery?: string;
   savedTag?: ApiReaction;
   isHashtag?: boolean;
+  fromPeerId?: string;
   fetchingQuery?: string;
   type: MiddleSearchType;
   results?: MiddleSearchResults;

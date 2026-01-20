@@ -2,7 +2,8 @@ import { memo } from '../../../lib/teact/teact';
 
 import type { ApiChat, ApiMessage, ApiPeer } from '../../../api/types';
 
-import { getMessageSenderName } from '../../../global/helpers/peers';
+import { getGroupStatus, getMainUsername } from '../../../global/helpers';
+import { getMessageSenderName, isApiPeerChat } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
@@ -18,13 +19,13 @@ import styles from './MiddleSearchResult.module.scss';
 
 type OwnProps = {
   isActive?: boolean;
-  message: ApiMessage;
-  senderPeer?: ApiPeer;
+  message?: ApiMessage;
+  peer?: ApiPeer;
   messageChat?: ApiChat;
   shouldShowChat?: boolean;
   query?: string;
   className?: string;
-  onClick: (message: ApiMessage) => void;
+  onClick: (clickArg: any) => void;
 };
 
 const TRUNCATE_LENGTH = 200;
@@ -32,7 +33,7 @@ const TRUNCATE_LENGTH = 200;
 const MiddleSearchResult = ({
   isActive,
   message,
-  senderPeer,
+  peer,
   messageChat,
   shouldShowChat,
   query,
@@ -40,11 +41,47 @@ const MiddleSearchResult = ({
   onClick,
 }: OwnProps) => {
   const lang = useLang();
+
+  if (peer && !message) {
+    const username = getMainUsername(peer);
+
+    const handlePeerClick = () => {
+      onClick(peer.id);
+    };
+
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        className={buildClassName(styles.root, isActive && styles.active, className)}
+        onClick={handlePeerClick}
+      >
+        <Avatar
+          className={styles.avatar}
+          peer={peer}
+          size="medium"
+        />
+        <div className={styles.info}>
+          <div className={styles.topRow}>
+            <FullNameTitle peer={peer} withEmojiStatus />
+          </div>
+          {(isApiPeerChat(peer) || username) && (
+            <div className={styles.subtitle} dir="auto">
+              {username
+                ? `@${username}`
+                : getGroupStatus(lang, peer as ApiChat)}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (!message) return undefined;
+
   const hiddenForwardTitle = message.forwardInfo?.hiddenUserName;
-
-  const peer = shouldShowChat ? messageChat : senderPeer;
-
-  const senderName = shouldShowChat && senderPeer ? getMessageSenderName(lang, message.chatId, senderPeer) : undefined;
+  const senderPeer = shouldShowChat ? messageChat : peer;
+  const senderName = shouldShowChat && peer ? getMessageSenderName(lang, message.chatId, peer) : undefined;
 
   const handleClick = useLastCallback(() => {
     onClick(message);
@@ -59,13 +96,13 @@ const MiddleSearchResult = ({
     >
       <Avatar
         className={styles.avatar}
-        peer={peer}
+        peer={senderPeer}
         text={hiddenForwardTitle}
         size="medium"
       />
       <div className={styles.info}>
         <div className={styles.topRow}>
-          {(peer && <FullNameTitle peer={peer} withEmojiStatus />) || hiddenForwardTitle}
+          {(senderPeer && <FullNameTitle peer={senderPeer} withEmojiStatus />) || hiddenForwardTitle}
           <LastMessageMeta className={styles.meta} message={message} />
         </div>
         <div className={styles.subtitle} dir="auto">
