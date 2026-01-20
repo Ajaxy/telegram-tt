@@ -123,6 +123,11 @@
       --color-primary-shade-darker: var(--color-green-darker);
       --color-white: var(--color-background-own);
 
+      &:hover, &:active, &:focus {
+        opacity: 0.8;
+        background-color: var(--color-primary) !important;
+      }
+
       .theme-dark & {
         --color-primary-shade: #fff;
         --color-primary-shade-darker: #fff;
