@@ -1,23 +1,26 @@
 import type { FC, TeactNode } from '../../../lib/teact/teact';
 import type React from '../../../lib/teact/teact';
 import { memo, useMemo } from '../../../lib/teact/teact';
-import { getActions } from '../../../global';
+import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiAvailableReaction, ApiMessage, ApiMessageOutgoingStatus, ApiThreadInfo,
 } from '../../../api/types';
+import type { Reminder } from '../../../telebiz/services/types';
 
 import buildClassName from '../../../util/buildClassName';
 import { formatDateTimeToString, formatPastTimeShort, formatTime } from '../../../util/dates/dateFormat';
 import { formatStarsAsIcon } from '../../../util/localization/format';
 import { getRepeatPeriodText } from '../../../util/scheduledMessages';
 import { formatIntegerCompact } from '../../../util/textFormat';
+import { selectTelebizReminderForMessage } from '../../../telebiz/global/selectors';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 
+import MessageReminderIcon from '../../../telebiz/components/middle/MessageReminderIcon';
 import AnimatedCounter from '../../common/AnimatedCounter';
 import Icon from '../../common/icons/Icon';
 import MessageOutgoingStatus from '../../common/MessageOutgoingStatus';
@@ -44,7 +47,11 @@ type OwnProps = {
   paidMessageStars?: number;
 };
 
-const MessageMeta: FC<OwnProps> = ({
+type StateProps = {
+  reminder?: Reminder;
+};
+
+const MessageMeta: FC<OwnProps & StateProps> = ({
   message,
   outgoingStatus,
   signature,
@@ -61,9 +68,9 @@ const MessageMeta: FC<OwnProps> = ({
   onEffectClick,
   onOpenThread,
   paidMessageStars,
+  reminder,
 }) => {
   const { showNotification } = getActions();
-
   const [isActivated, markActivated] = useFlag();
 
   const oldLang = useOldLang();
@@ -204,6 +211,9 @@ const MessageMeta: FC<OwnProps> = ({
           }
         </span>
       )}
+      {Boolean(reminder) && (
+        <MessageReminderIcon reminder={reminder} />
+      )}
       <span className="message-time" title={dateTitle} onMouseEnter={markActivated}>
         {message.forwardInfo?.isImported && (
           <>
@@ -225,4 +235,8 @@ const MessageMeta: FC<OwnProps> = ({
   );
 };
 
-export default memo(MessageMeta);
+export default memo(withGlobal<OwnProps>(
+  (global, { message }): StateProps => ({
+    reminder: selectTelebizReminderForMessage(global, message.chatId, message.id),
+  }),
+)(MessageMeta));

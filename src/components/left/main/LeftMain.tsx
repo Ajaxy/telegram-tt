@@ -19,6 +19,8 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
+import BulkSendProgressIndicator from '../../../telebiz/components/left/BulkSendProgressIndicator';
+import TelebizDrawer from '../../../telebiz/components/left/TelebizDrawer';
 import Button from '../../ui/Button';
 import Transition from '../../ui/Transition';
 import NewChatButton from '../NewChatButton';
@@ -259,6 +261,8 @@ const LeftMain: FC<OwnProps> = ({
         onNewGroup={handleSelectNewGroup}
         isAccountFrozen={isAccountFrozen}
       />
+      <BulkSendProgressIndicator />
+      <TelebizDrawer />
     </div>
   );
 };

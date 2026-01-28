@@ -159,6 +159,8 @@ function processChatInfoState<T extends GlobalState>({
     global = getGlobal();
     global = updateTabState(global, {
       ...selectTabState(global, tabId),
+      isTelebizPanelOpen: false,
+      telebizPanelScreen: undefined,
       chatInfo: {
         isOpen: true,
         profileTab: newProfileTab,
@@ -166,7 +168,7 @@ function processChatInfoState<T extends GlobalState>({
         isOwnProfile: newIsOwnProfile,
       },
     }, tabId);
-    global = { ...global, lastIsChatInfoShown: true };
+    global = { ...global, lastIsChatInfoShown: true, lastIsTelebizPanelOpen: false };
     setGlobal(global);
   });
 }

@@ -22,6 +22,7 @@ import useLangString from '../../hooks/useLangString';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMultiaccountInfo from '../../hooks/useMultiaccountInfo';
 
+import TelebizAuthMessage from '../../telebiz/components/auth/TelebizAuthMessage';
 import Button from '../ui/Button';
 import Checkbox from '../ui/Checkbox';
 import InputText from '../ui/InputText';
@@ -319,6 +320,7 @@ const AuthPhoneNumber = ({
               {continueText}
             </Button>
           )}
+          <TelebizAuthMessage />
         </form>
       </div>
     </div>

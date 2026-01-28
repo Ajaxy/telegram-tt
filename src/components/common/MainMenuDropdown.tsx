@@ -1,6 +1,7 @@
 import { type FC, memo } from '@teact';
 import { getActions } from '../../global';
 
+import { TelebizSettingsScreens } from '../../telebiz/components/left/types';
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import {
@@ -29,7 +30,7 @@ const LeftSideMenuDropdown = ({
   shouldHideSearch,
   className,
 }: OwnProps) => {
-  const { openLeftColumnContent, closeForumPanel, openSettingsScreen } = getActions();
+  const { openLeftColumnContent, closeForumPanel, openSettingsScreen, openTelebizSettingsScreen } = getActions();
   const [isBotMenuOpen, markBotMenuOpen, unmarkBotMenuOpen] = useFlag();
   const lang = useLang();
 
@@ -54,6 +55,11 @@ const LeftSideMenuDropdown = ({
     closeForumPanel();
   });
 
+  const handleSelectTelebiz = useLastCallback(() => {
+    openLeftColumnContent({ contentKey: LeftColumnContent.Telebiz });
+    openTelebizSettingsScreen({ screen: TelebizSettingsScreens.Main });
+  });
+
   return (
     <DropdownMenu
       trigger={trigger}
@@ -74,6 +80,7 @@ const LeftSideMenuDropdown = ({
         onSelectArchived={handleSelectArchived}
         onSelectContacts={handleSelectContacts}
         onSelectSettings={handleSelectSettings}
+        onSelectTelebiz={handleSelectTelebiz}
         onBotMenuOpened={markBotMenuOpen}
         onBotMenuClosed={unmarkBotMenuOpen}
         footer={`${APP_NAME} ${versionString}`}

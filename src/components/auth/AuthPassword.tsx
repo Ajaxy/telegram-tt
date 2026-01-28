@@ -7,6 +7,7 @@ import { pick } from '../../util/iteratees';
 
 import useLang from '../../hooks/useLang';
 
+import TelebizAuthMessage from '../../telebiz/components/auth/TelebizAuthMessage';
 import PasswordForm from '../common/PasswordForm';
 import MonkeyPassword from '../common/PasswordMonkey';
 
@@ -46,6 +47,7 @@ const AuthPassword = ({
           onChangePasswordVisibility={handleChangePasswordVisibility}
           onSubmit={handleSubmit}
         />
+        <TelebizAuthMessage />
       </div>
     </div>
   );

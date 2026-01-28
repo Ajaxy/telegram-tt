@@ -30,6 +30,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import TelebizNotificationsButton from '../../../telebiz/components/left/TelebizNotifications/TelebizNotificationsButton';
 import Icon from '../../common/icons/Icon';
 import MainMenuDropdown from '../../common/MainMenuDropdown';
 import PeerChip from '../../common/PeerChip';
@@ -288,6 +289,7 @@ const LeftMainHeader = ({
           />
         </SearchInput>
         {isCurrentUserPremium && <StatusButton />}
+        <TelebizNotificationsButton />
         {hasPasscode && (
           <Button
             round

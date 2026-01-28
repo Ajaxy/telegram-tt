@@ -1,0 +1,60 @@
+.container {
+  z-index: calc(var(--z-chat-float-button) + 1);
+
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-evenly;
+
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--color-borders);
+
+  background: var(--color-background-selected);
+}
+
+.active {
+  color: var(--color-primary) !important;
+}
+
+.hasNotifications {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 0.125rem solid var(--color-background);
+  border-radius: 50%;
+
+  background: var(--color-error);
+  &-warning {
+    background: var(--color-warning);
+  }
+}
+
+.organizationSwitcher {
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  &:hover {
+    background: var(--color-interactive-element-hover);
+  }
+}
+
+.organizationMenuItem {
+  gap: 0.5rem;
+  font-weight: var(--font-weight-medium);
+  :global(.Avatar) {
+    margin-inline: 0.4375rem 0.5rem;
+  }
+}
+
+:global(.NewChatButton) {
+  bottom: 4.5rem !important;
+}

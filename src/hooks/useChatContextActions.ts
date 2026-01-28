@@ -28,6 +28,7 @@ const useChatContextActions = ({
   handleUnmute,
   handleChatFolderChange,
   handleReport,
+  handleOpenTelebizSettings,
 }: {
   chat: ApiChat | undefined;
   user: ApiUser | undefined;
@@ -44,6 +45,7 @@ const useChatContextActions = ({
   handleUnmute?: NoneToVoidFunction;
   handleChatFolderChange: NoneToVoidFunction;
   handleReport?: NoneToVoidFunction;
+  handleOpenTelebizSettings?: NoneToVoidFunction;
 }, isInSearch = false) => {
   const lang = useLang();
 
@@ -146,6 +148,12 @@ const useChatContextActions = ({
       handler: handleChatFolderChange,
     } : undefined;
 
+    const actionTelebizSettings = handleOpenTelebizSettings ? {
+      title: 'Followup Settings',
+      icon: 'timer',
+      handler: handleOpenTelebizSettings,
+    } : undefined;
+
     const actionMute = isMuted
       ? {
         title: lang('ChatsUnmute'),
@@ -191,6 +199,7 @@ const useChatContextActions = ({
       actionOpenInNewTab,
       actionQuickPreview,
       actionAddToFolder,
+      actionTelebizSettings,
       actionMaskAsRead,
       actionMarkAsUnread,
       actionPin,
@@ -201,8 +210,8 @@ const useChatContextActions = ({
     ]) as MenuItemContextAction[];
   }, [
     chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted, currentUserId,
-    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, isSavedDialog, deleteTitle,
-    isPreview, topics, handleUnmute,
+    handleDelete, handleMute, handleReport, handleOpenTelebizSettings, folderId, isSelf, isServiceNotifications,
+    isSavedDialog, deleteTitle, isPreview, topics, handleUnmute,
   ]);
 };
 

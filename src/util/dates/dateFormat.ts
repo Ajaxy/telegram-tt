@@ -201,7 +201,7 @@ export function formatPastDatetime(lang: LangFn, pastTime: number, currentTime =
     return lang('DaysAgo', { count: days }, { pluralValue: days });
   }
 
-  return lang('AtDateAgo', { date: formatFullDate(lang, pastTime) });
+  return lang('AtDateAgo', { date: formatFullDate(lang, pastTime * 1000) });
 }
 
 type DurationType = 'Seconds' | 'Minutes' | 'Hours' | 'Days' | 'Weeks';

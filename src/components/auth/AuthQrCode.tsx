@@ -22,6 +22,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 import useMultiaccountInfo from '../../hooks/useMultiaccountInfo';
 
+import TelebizAuthMessage from '../../telebiz/components/auth/TelebizAuthMessage';
 import AnimatedIcon from '../common/AnimatedIcon';
 import Button from '../ui/Button';
 import Loading from '../ui/Loading';
@@ -214,6 +215,7 @@ const AuthCode = ({
             {continueText}
           </Button>
         )}
+        <TelebizAuthMessage />
       </div>
     </div>
   );

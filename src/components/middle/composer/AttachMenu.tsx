@@ -30,6 +30,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Template from '../../../telebiz/components/icons/Template';
 import Icon from '../../common/icons/Icon';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -93,6 +94,7 @@ const AttachMenu = ({
 }: OwnProps) => {
   const {
     updateAttachmentSettings,
+    openTelebizTemplatesChatsModal,
   } = getActions();
   const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
   const [handleMouseEnter, handleMouseLeave, markMouseInside] = useMouseInside(isAttachMenuOpen, closeAttachMenu);
@@ -278,6 +280,14 @@ const AttachMenu = ({
             onMenuClosed={unmarkAttachmentBotMenuOpen}
           />
         ))}
+        <MenuItem
+          customIcon={
+            <span className="icon"><Template /></span>
+          }
+          onClick={() => openTelebizTemplatesChatsModal()}
+        >
+          Templates
+        </MenuItem>
       </Menu>
     </div>
   );

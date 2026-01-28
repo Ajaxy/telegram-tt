@@ -18,6 +18,7 @@ import type {
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 import { MAIN_THREAD_ID } from '../../../api/types';
+import { TelebizPanelScreens } from '../../../telebiz/components/right/types';
 import { StoryViewerOrigin } from '../../../types';
 
 import { ALL_FOLDER_ID, UNMUTE_TIMESTAMP } from '../../../config';
@@ -68,6 +69,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useChatListEntry from './hooks/useChatListEntry';
 
+import ChatEntity from '../../../telebiz/components/common/TelebizChatIndicator';
 import Avatar from '../../common/Avatar';
 import DeleteChatModal from '../../common/DeleteChatModal';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -195,6 +197,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     updateChatMutedState,
     openQuickPreview,
     scrollMessageListToBottom,
+    openTelebizPanelScreen,
   } = getActions();
 
   const { isMobile } = useAppLayout();
@@ -351,6 +354,11 @@ const Chat: FC<OwnProps & StateProps> = ({
     reportMessages({ chatId: chat.id, messageIds: [] });
   });
 
+  const handleOpenTelebizSettings = useLastCallback(() => {
+    openChat({ id: chatId, shouldReplaceHistory: true }, { forceOnHeavyAnimation: true });
+    openTelebizPanelScreen({ screen: TelebizPanelScreens.Settings, shouldOpen: true });
+  });
+
   const contextActions = useChatContextActions({
     chat,
     user,
@@ -359,6 +367,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     handleUnmute,
     handleChatFolderChange,
     handleReport,
+    handleOpenTelebizSettings,
     folderId,
     isPinned,
     isMuted,
@@ -421,6 +430,7 @@ const Chat: FC<OwnProps & StateProps> = ({
       onDragEnter={handleDragEnter}
       onDragLeave={onDragLeave}
     >
+      <ChatEntity chatId={chatId} />
       <div className={buildClassName('status', 'status-clickable')}>
         <Avatar
           peer={isMonoforum ? monoforumChannel : peer}

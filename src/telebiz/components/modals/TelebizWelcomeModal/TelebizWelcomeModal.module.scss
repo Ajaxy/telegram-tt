@@ -1,0 +1,230 @@
+.welcome {
+
+  &Modal {
+    :global(.modal-backdrop) {
+      background-color: rgba(0, 0, 0, 0.5);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+  }
+
+  &Content {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  &Header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+
+    padding-top: 1rem;
+
+    text-align: center;
+  }
+  &Icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &Logo {
+      position: absolute;
+    }
+  }
+
+  &Title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  &Description {
+    margin-bottom: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+
+  &Features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .featuresTitle {
+      font-size: 0.875rem;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-secondary);
+    }
+
+    .featuresList {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      align-self: stretch;
+    }
+
+    .featureItem {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+
+      padding: 1rem;
+      border-radius: var(--border-radius-default-small);
+
+      background-color: var(--color-background-selected);
+
+      .featureIcon {
+        width: 1rem;
+        height: 1rem;
+        color: var(--color-text-secondary);
+        svg {
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+
+      .featureContent {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+
+        .featureTitle {
+          font-size: 0.875rem;
+          color: var(--color-text);
+        }
+
+        .featureDescription {
+          margin-bottom: 0;
+          font-size: 0.75rem;
+          color: var(--color-text-secondary);
+        }
+      }
+    }
+  }
+
+  &Privacy,
+  &Folder {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+
+    padding: 0.75rem;
+    border: 1px solid var(--color-gray);
+    border-radius: 0.75rem;
+
+    .privacyContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .privacy {
+      &Header {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+      }
+    }
+
+    .privacyIcon,
+    .folderIcon {
+      color: var(--color-text-secondary);
+    }
+
+    .privacyTitle,
+    .folderTitle {
+      margin-bottom: 0;
+      font-size: 1rem;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text);
+    }
+
+    .privacyDescription,
+    .folderDescription {
+      margin-bottom: 0;
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+    }
+
+    .privacyPoints {
+      margin: 0;
+      margin-left: 0.25rem;
+      padding-left: 1.25rem;
+
+      li {
+        font-size: 0.75rem;
+        color: var(--color-text-secondary);
+      }
+    }
+  }
+
+  &Actions {
+    position: sticky;
+    bottom: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &Button {
+    width: 100%;
+
+    &.primary {
+      color: var(--color-white);
+      background-color: var(--color-primary);
+
+      &:hover,
+      &:focus,
+      &:active {
+        background-color: var(--color-primary-shade);
+      }
+    }
+
+    &.secondary {
+      color: var(--color-primary);
+    }
+  }
+
+  // Responsive design
+  @media (max-width: 600px) {
+    &Content {
+      gap: 0.5rem;
+      max-height: 100vh;
+    }
+    &Header {
+      margin-bottom: 1.5rem;
+
+      &Icon {
+        font-size: 2.5rem;
+      }
+
+      &Title {
+        font-size: 1.25rem;
+      }
+    }
+
+    &Features,
+    &Privacy,
+    &Folder {
+      margin-bottom: 1.5rem;
+    }
+
+    &Features {
+      .featuresList {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+    }
+
+    .featureItem {
+      .featureIcon {
+        font-size: 1.25rem;
+      }
+    }
+  }
+}

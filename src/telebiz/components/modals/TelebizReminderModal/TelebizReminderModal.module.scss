@@ -1,0 +1,31 @@
+.modal {
+  .modalContent {
+    padding: 1rem;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  width: 100%;
+  margin-top: 0.5rem;
+  .button {
+    flex: 1;
+  }
+}
+
+.remindInButtons {
+  --accent-color: var(--color-text-secondary);
+
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: -1rem;
+}

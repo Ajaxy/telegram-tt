@@ -59,6 +59,8 @@ export function selectRightColumnContentKey<T extends GlobalState>(
     RightColumnContent.GifSearch
   ) : tabState.newChatMembersProgress !== NewChatMembersProgress.Closed ? (
     RightColumnContent.AddingMembers
+  ) : tabState.isTelebizPanelOpen ? (
+    RightColumnContent.Telebiz
   ) : tabState.chatInfo.isOpen && tabState.messageLists.length ? (
     RightColumnContent.ChatInfo
   ) : undefined;

@@ -1,0 +1,70 @@
+.container {
+  z-index: calc(var(--z-chat-float-button) + 2);
+  padding: 0.625rem 1rem;
+  border-top: 1px solid var(--color-borders);
+  background: var(--color-background);
+}
+
+.header {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 0.375rem;
+}
+
+.titleRow {
+  display: flex;
+  flex: 1;
+  gap: 0.5rem;
+  align-items: center;
+
+  min-width: 0;
+}
+
+.title {
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.counter {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.chatName {
+  overflow: hidden;
+
+  margin-bottom: 0.375rem;
+
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  strong {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+  }
+}
+
+.progressBar {
+  overflow: hidden;
+  height: 0.1875rem;
+  border-radius: 0.125rem;
+  background: var(--color-borders);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 0.125rem;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+.cancelButton {
+  flex-shrink: 0;
+}

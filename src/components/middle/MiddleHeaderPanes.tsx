@@ -24,6 +24,7 @@ import useShowTransition from '../../hooks/useShowTransition';
 import { useSignalEffect } from '../../hooks/useSignalEffect';
 import { applyAnimationState, type PaneState } from './hooks/useHeaderPane';
 
+import TelebizNotificationPane from '../../telebiz/components/middle/TelebizNotificationPane';
 import GroupCallTopPane from '../calls/group/GroupCallTopPane';
 import AudioPlayer from './panes/AudioPlayer';
 import BotAdPane from './panes/BotAdPane';
@@ -78,6 +79,7 @@ const MiddleHeaderPanes = ({
   const [getBotAdState, setBotAdState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
   const [getBotVerificationState, setBotVerificationState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
   const [getPaidMessageChargeState, setPaidMessageChargeState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
+  const [getTelebizNotificationState, setTelebizNotificationState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
 
   const isPinnedMessagesFullWidth = isAudioPlayerRendered || !isDesktop;
 
@@ -103,10 +105,12 @@ const MiddleHeaderPanes = ({
     const chatReportState = getChatReportState();
     const botAdState = getBotAdState();
     const paidMessageState = getPaidMessageChargeState();
+    const telebizNotificationState = getTelebizNotificationState();
 
     // Keep in sync with the order of the panes in the DOM
     const stateArray = [audioPlayerState, groupCallState,
-      chatReportState, botVerificationState, pinnedState, botAdState, paidMessageState];
+      chatReportState, botVerificationState, paidMessageState, telebizNotificationState,
+      pinnedState, botAdState];
 
     const isFirstRender = isFirstRenderRef.current;
     const totalHeight = stateArray.reduce((acc, state) => acc + state.height, 0);
@@ -122,7 +126,7 @@ const MiddleHeaderPanes = ({
       });
     });
   }, [getAudioPlayerState, getGroupCallState, getPinnedState,
-    getChatReportState, getBotAdState, getBotVerificationState, getPaidMessageChargeState]);
+    getChatReportState, getBotAdState, getBotVerificationState, getPaidMessageChargeState, getTelebizNotificationState]);
 
   if (!shouldRender) return undefined;
 
@@ -163,6 +167,10 @@ const MiddleHeaderPanes = ({
       <PaidMessageChargePane
         peerId={chatId}
         onPaneStateChange={setPaidMessageChargeState}
+      />
+      <TelebizNotificationPane
+        chatId={chatId}
+        onPaneStateChange={setTelebizNotificationState}
       />
       <HeaderPinnedMessage
         chatId={chatId}

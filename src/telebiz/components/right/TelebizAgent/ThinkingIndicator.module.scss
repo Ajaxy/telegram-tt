@@ -1,0 +1,30 @@
+.thinkingIndicator {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.spinner {
+  flex-shrink: 0;
+
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--color-primary-opacity);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: var(--color-text-secondary);
+}

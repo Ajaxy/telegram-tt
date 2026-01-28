@@ -1,0 +1,32 @@
+.chatIndicator {
+  position: absolute;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  left: 0;
+
+  width: 0.25rem;
+
+  &.entity {
+    background-color: var(--color-telebiz-green);
+  }
+
+  &.templates {
+    background-color: var(--color-telebiz-gray);
+  }
+
+  &.notification {
+    background-color: var(--color-telebiz-red);
+  }
+
+  @media (max-width: 600px) {
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+  }
+}
+
+.followupsIcon {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.375rem;
+  font-size: 0.75rem;
+}

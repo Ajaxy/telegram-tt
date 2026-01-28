@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "telebiz": {
+      "command": "node",
+      "args": ["/path/to/telebiz-private/mcp-server/dist/index.js"]
+    }
+  }
+}

@@ -2,7 +2,7 @@ import { CHANNEL_ID_BASE } from '../../config';
 import { toJSNumber } from '../numbers';
 
 export function isUserId(entityId: string) {
-  return !entityId.startsWith('-');
+  return entityId && !entityId.startsWith('-');
 }
 
 export function isChannelId(entityId: string) {

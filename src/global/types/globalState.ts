@@ -57,6 +57,8 @@ import type {
   ApiWebPage,
   ApiWebSession,
 } from '../../api/types';
+import type { TelebizPanelScreens } from '../../telebiz/components/right/types';
+import type { TelebizState } from '../../telebiz/global/types';
 import type {
   AccountSettings,
   AttachmentCompression,
@@ -102,6 +104,8 @@ export type GlobalState = {
   isFetchingDifference?: boolean;
   leftColumnWidth?: number;
   lastIsChatInfoShown?: boolean;
+  lastIsTelebizPanelOpen?: boolean;
+  lastTelebizPanelScreen?: TelebizPanelScreens;
   initialUnreadNotifications?: number;
   shouldShowContextMenuHint?: boolean;
   botFreezeAppealId?: string;
@@ -488,6 +492,8 @@ export type GlobalState = {
     balance: ApiTonAmount;
     history: StarsTransactionHistory;
   };
+
+  telebiz?: TelebizState;
 };
 
 export type RequiredGlobalState = GlobalState & { _: never };

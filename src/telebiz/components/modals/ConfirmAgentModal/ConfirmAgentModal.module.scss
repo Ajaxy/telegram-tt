@@ -1,0 +1,9 @@
+.enableAgentDialog {
+  :global(.modal-dialog) {
+    max-width: 48rem !important;
+  }
+}
+
+.enableAgentDialogCheckbox {
+  margin-left: -1.125rem;
+}

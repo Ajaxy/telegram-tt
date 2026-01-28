@@ -1,0 +1,94 @@
+.container {
+  overflow: auto;
+  height: 100%;
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    .item {
+      &-placeholder {
+        width: 100%;
+        height: 4.1875rem;
+      }
+      &-wrapper {
+        overflow: hidden;
+        display: flex;
+        width: 100%;
+        border-radius: 0.625rem;
+        .listButton {
+          flex: 1;
+          padding: 0;
+        }
+      }
+      &-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        width: 100%;
+        padding: 0.75rem;
+        border-left: 3px solid var(--stage-color);
+
+        background-color: var(--color-background-selected);
+        &.green {
+          --stage-color: var(--color-telebiz-green);
+        }
+        &.yellow {
+          --stage-color: var(--color-telebiz-yellow);
+        }
+        &.red {
+          --stage-color: var(--color-telebiz-red);
+        }
+        &.contact {
+          --stage-color: var(--color-text-meta);
+        }
+        &.error {
+          --stage-color: var(--color-error);
+        }
+        .integration-icon {
+          width: 1rem;
+          height: 1rem;
+          padding: 0;
+          img {
+            float: left;
+            width: 1rem;
+            height: 1rem;
+            object-fit: cover;
+          }
+        }
+        .title {
+          display: flex;
+          gap: 0.3125rem;
+          align-items: center;
+
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: var(--color-text-primary);
+          &-text {
+            overflow: hidden;
+            flex: 1 1 auto;
+
+            min-width: 0;
+
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .icon {
+            width: 1rem;
+            height: 1rem;
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+          }
+        }
+        .details {
+          font-size: 0.75rem;
+          color: var(--color-text-secondary);
+          p {
+            margin: 0;
+          }
+        }
+      }
+    }
+  }
+}

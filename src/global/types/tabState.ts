@@ -62,6 +62,8 @@ import type {
 } from '../../api/types';
 import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
 import type { ReducerAction } from '../../hooks/useReducer';
+import type { TelebizSettingsScreens } from '../../telebiz/components/left/types';
+import type { TelebizTabStateFields } from '../../telebiz/global/types/tabState';
 import type {
   ActiveDownloads,
   ActiveEmojiInteraction,
@@ -251,6 +253,7 @@ export type TabState = {
   leftColumn: {
     contentKey: LeftColumnContent;
     settingsScreen: SettingsScreens;
+    telebizSettingsScreen?: TelebizSettingsScreens;
   };
 
   globalSearch: {
@@ -970,5 +973,6 @@ export type TabState = {
   isWaitingForStarGiftUpgrade?: true;
   isWaitingForStarGiftTransfer?: true;
   insertingPeerIdMention?: string;
+
   shouldSaveAttachmentsCompression?: boolean;
-};
+} & TelebizTabStateFields;

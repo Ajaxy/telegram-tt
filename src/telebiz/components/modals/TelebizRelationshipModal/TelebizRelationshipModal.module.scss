@@ -1,0 +1,31 @@
+.modal {
+  &-content {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .deleteButton {
+    margin-top: 0.5rem;
+  }
+
+  .footer {
+    padding-top: 4.5rem;
+    &-with-delete-button {
+      padding-top: 9rem;
+    }
+    &-buttons {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      padding: 1.5rem;
+
+      background: var(--color-background);
+    }
+  }
+}

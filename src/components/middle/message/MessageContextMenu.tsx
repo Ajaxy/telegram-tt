@@ -37,6 +37,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import TelebizMenuItem from '../../../telebiz/components/middle/TelebizMenuItem';
 import AvatarList from '../../common/AvatarList';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -391,6 +392,10 @@ const MessageContextMenu: FC<OwnProps> = ({
         )}
         dir={lang.isRtl ? 'rtl' : undefined}
       >
+        <TelebizMenuItem
+          message={message}
+          onClose={onClose}
+        />
         {shouldShowGiftButton
           && (
             <MenuItem icon="gift" onClick={handleGiftClick}>

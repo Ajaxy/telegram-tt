@@ -1,0 +1,52 @@
+.root {
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+  min-height: 14rem;
+  max-height: 26rem;
+}
+
+.input {
+  flex-shrink: 0;
+
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border: none;
+  border-bottom: 1px solid var(--color-borders);
+  border-radius: 0;
+
+  background-color: transparent;
+
+  & :global(.form-control), :global(.form-control.focus) {
+    border: none;
+    box-shadow: none;
+  }
+
+  &:focus {
+    border-color: var(--color-borders);
+    background-color: transparent;
+  }
+}
+
+.results {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  padding: 0.75rem 0.75rem;
+  .resultItem {
+    padding: 0.375rem;
+  }
+}
+
+.placeholder {
+  display: flex;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--color-text-secondary);
+  text-align: center;
+}

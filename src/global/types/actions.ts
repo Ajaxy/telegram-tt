@@ -71,6 +71,7 @@ import type { ApiCredentials } from '../../components/payment/PaymentModal';
 import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
 import type { ReducerAction } from '../../hooks/useReducer';
 import type { P2pMessage } from '../../lib/secret-sauce';
+import type { TelebizActionPayloads } from '../../telebiz/global/types/actionPayloads';
 import type {
   AccountSettings,
   AttachmentCompression,
@@ -115,7 +116,7 @@ import type { TabState } from './tabState';
 
 export type WithTabId = { tabId?: number };
 
-export interface ActionPayloads {
+export interface ActionPayloads extends TelebizActionPayloads {
   // system
   init: ({
     isMasterTab?: boolean;

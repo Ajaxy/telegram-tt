@@ -1,0 +1,58 @@
+{
+  "name": "@telebiz/telebiz-mcp",
+  "version": "1.0.1",
+  "description": "MCP server that connects Claude to Telegram via Telebiz",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "telebiz-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "node --import tsx --test src/index.test.ts",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "telegram",
+    "telebiz",
+    "claude",
+    "anthropic",
+    "ai",
+    "chatbot"
+  ],
+  "author": "Anthropic",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anthropics/telebiz-mcp"
+  },
+  "homepage": "https://github.com/anthropics/telebiz-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/anthropics/telebiz-mcp/issues"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.20.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

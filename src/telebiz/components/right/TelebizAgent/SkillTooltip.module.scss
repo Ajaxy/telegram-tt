@@ -1,0 +1,33 @@
+.root {
+  z-index: 1;
+  flex-direction: column;
+  width: calc(100% - 1rem);
+  max-width: 24rem;
+}
+
+.skillItem {
+  margin: 0 !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.skillInfo {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.skillTag {
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+}
+
+.skillContext {
+  overflow: hidden;
+
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,0 +1,15 @@
+.telebizMenuItem {
+  :global(.right-badge) {
+    display: flex;
+    align-items: center;
+  }
+  :global(.right-badge .icon) {
+    margin-right: 0;
+    transition: transform 0.1s ease-in-out;
+  }
+  &.active {
+    :global(.right-badge .icon) {
+      transform: rotate(90deg);
+    }
+  }
+}

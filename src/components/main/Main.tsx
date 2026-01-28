@@ -1,4 +1,5 @@
 import '../../global/actions/all';
+import '../../telebiz/global';
 
 import {
   beginHeavyAnimation,
@@ -41,6 +42,7 @@ import { processDeepLink } from '../../util/deeplink';
 import { Bundles, loadBundle } from '../../util/moduleLoader';
 import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
 import updateIcon from '../../util/updateIcon';
+import TelebizModals from '../../telebiz/components/modals';
 
 import useInterval from '../../hooks/schedulers/useInterval';
 import useTimeout from '../../hooks/schedulers/useTimeout';
@@ -95,6 +97,7 @@ import ConfettiContainer from './visualEffects/ConfettiContainer';
 import SnapEffectContainer from './visualEffects/SnapEffectContainer';
 import WaveContainer from './visualEffects/WaveContainer';
 
+import '../../telebiz/styles/telebiz.scss';
 import './Main.scss';
 
 export interface OwnProps {
@@ -266,6 +269,7 @@ const Main = ({
     loadContentSettings,
     loadGiftAuction,
     loadPromoData,
+    telebizInit,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -309,6 +313,7 @@ const Main = ({
       checkAppVersion();
       loadAuthorizations();
       loadPasswordInfo();
+      telebizInit();
     }
   }, [isMasterTab, isSynced]);
 
@@ -626,6 +631,7 @@ const Main = ({
       <DeleteFolderDialog folder={deleteFolderDialog} />
       <ReactionPicker isOpen={isReactionPickerOpen} />
       <DeleteMessageModal isOpen={isDeleteMessageModalOpen} />
+      <TelebizModals />
     </div>
   );
 };

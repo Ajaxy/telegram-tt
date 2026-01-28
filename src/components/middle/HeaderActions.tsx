@@ -41,6 +41,7 @@ import { useHotkeys } from '../../hooks/useHotkeys';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
+import TelebizHeaderActions from '../../telebiz/components/middle/TelebizHeaderActions';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -393,8 +394,10 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               iconName="phone"
             />
           )}
+
         </>
       )}
+      <TelebizHeaderActions />
       {!isForForum && Boolean(pendingJoinRequests) && (
         <Button
           round

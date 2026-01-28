@@ -1,0 +1,95 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 100%;
+
+  text-transform: capitalize;
+  &-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+
+    background: var(--color-background-selected);
+    img {
+      aspect-ratio: 1/1;
+      width: 1rem;
+      height: 1rem;
+      object-fit: cover;
+    }
+  }
+
+  &-actions {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    margin-left: auto;
+
+    svg {
+      width: 1.5rem;
+    }
+  }
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+// AI Provider Switcher
+.providerSwitcher {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--color-interactive-element-hover);
+  }
+
+  &Open {
+    background: var(--color-interactive-element-hover);
+  }
+}
+
+.providerSwitcherIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
+}
+
+.providerMenuItem {
+  gap: 0.5rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.providerMenuItemActive {
+  background: var(--color-background-selected);
+}
+
+.providerMenuItemIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-inline: 0.25rem 0.25rem;
+  object-fit: contain;
+}

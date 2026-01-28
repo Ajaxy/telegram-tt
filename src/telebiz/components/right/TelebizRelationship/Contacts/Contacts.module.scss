@@ -1,0 +1,44 @@
+.item {
+  border-left: 3px solid var(--color-text-secondary);
+  border-radius: 0.5rem;
+
+  & .itemContent {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  & .user-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  & .linkButton {
+    width: auto;
+    margin: 0;
+    padding: 0;
+
+    font-size: 0.75rem;
+    color: var(--color-primary);
+    text-transform: none;
+    &:hover {
+      color: var(--color-primary);
+      text-decoration: underline;
+      background-color: transparent;
+    }
+  }
+  &-contactChip {
+    // background-color: var(--color-borders);
+    margin: -0.5rem -0.75rem;
+    margin-top: 0.5rem;
+    padding: 1rem 0.75rem;
+    border: 2px solid var(--color-chat-hover);
+    border-top: none;
+    border-radius: 0.375rem;
+
+    font-size: 0.75rem;
+    :global(.Avatar) {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+}

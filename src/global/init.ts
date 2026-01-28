@@ -42,6 +42,8 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
       isOpen: true,
     };
   }
+  initialTabState.isTelebizPanelOpen = Boolean(global.lastIsTelebizPanelOpen);
+  initialTabState.telebizPanelScreen = global.lastTelebizPanelScreen;
 
   global = {
     ...global,

@@ -282,6 +282,7 @@ export enum LeftColumnContent {
   NewChannelStep2,
   NewGroupStep1,
   NewGroupStep2,
+  Telebiz,
 }
 
 export enum GlobalSearchContent {
@@ -311,6 +312,7 @@ export enum RightColumnContent {
   EditTopic,
   MonetizationStatistics,
   NewGroup,
+  Telebiz,
 }
 
 export type MediaViewerMedia = ApiPhoto | ApiVideo | ApiDocument;
@@ -404,7 +406,8 @@ export type ProfileTabType =
   | 'similarChannels'
   | 'similarBots'
   | 'dialogs'
-  | 'gifts';
+  | 'gifts'
+  | 'telebiz';
 export type SharedMediaType = 'media' | 'documents' | 'links' | 'audio' | 'voice' | 'gif';
 export type MiddleSearchType = 'chat' | 'myChats' | 'channels';
 export type MiddleSearchParams = {
@@ -539,7 +542,8 @@ export type UniqueCustomPeer<T = CustomPeerType> = CustomPeer & {
 export type MessageListType =
   'thread'
   | 'pinned'
-  | 'scheduled';
+  | 'scheduled'
+  | 'telebiz';
 
 export type ChatListType = 'active' | 'archived' | 'saved';
 

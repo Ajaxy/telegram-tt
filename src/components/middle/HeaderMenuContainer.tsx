@@ -10,6 +10,7 @@ import type {
 import type { IAnchorPosition, ThreadId } from '../../types';
 import type { IconName } from '../../types/icons';
 import { MAIN_THREAD_ID } from '../../api/types';
+import { TelebizPanelScreens } from '../../telebiz/components/right/types';
 
 import { UNMUTE_TIMESTAMP } from '../../config';
 import {
@@ -218,6 +219,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     openBoostModal,
     reportMessages,
     showNotification,
+    openTelebizPanelScreen,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -495,6 +497,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
 
   const handleSendChannelMessage = useLastCallback(() => {
     openChat({ id: channelMonoforumId });
+    closeMenu();
+  });
+
+  const handleOpenTelebizSettings = useLastCallback(() => {
+    openTelebizPanelScreen({ screen: TelebizPanelScreens.Settings });
     closeMenu();
   });
 
@@ -807,6 +814,12 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               {isBlocked ? oldLang('Unblock') : oldLang('BlockUser')}
             </MenuItem>
           )}
+          <MenuItem
+            icon="timer"
+            onClick={handleOpenTelebizSettings}
+          >
+            Followup Settings
+          </MenuItem>
           {canLeave && (
             <>
               <MenuSeparator />

@@ -8,6 +8,7 @@ import { getActions, withGlobal } from '../../global';
 import type { GlobalState } from '../../global/types';
 import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
 import type { ReducerAction } from '../../hooks/useReducer';
+import { TelebizSettingsScreens } from '../../telebiz/components/left/types';
 import { type AnimationLevel, LeftColumnContent, SettingsScreens } from '../../types';
 
 import {
@@ -28,6 +29,7 @@ import usePrevious from '../../hooks/usePrevious';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 
+import TelebizSettings from '../../telebiz/components/left/TelebizSettings';
 import Transition from '../ui/Transition';
 import ArchivedChats from './ArchivedChats.async';
 import LeftMain from './main/LeftMain';
@@ -44,6 +46,7 @@ interface OwnProps {
 type StateProps = {
   contentKey: LeftColumnContent;
   settingsScreen: SettingsScreens;
+  telebizSettingsScreen?: TelebizSettingsScreens;
   searchQuery?: string;
   searchDate?: number;
   isFirstChatFolderActive: boolean;
@@ -72,6 +75,8 @@ enum ContentType {
   NewGroup,
 
   NewChannel,
+
+  Telebiz,
 }
 
 const RENDER_COUNT = Object.keys(ContentType).length / 2;
@@ -81,6 +86,7 @@ function LeftColumn({
   ref,
   contentKey,
   settingsScreen,
+  telebizSettingsScreen,
   searchQuery,
   searchDate,
   isFirstChatFolderActive,
@@ -133,6 +139,9 @@ function LeftColumn({
     case LeftColumnContent.NewGroupStep1:
     case LeftColumnContent.NewGroupStep2:
       contentType = ContentType.NewGroup;
+      break;
+    case LeftColumnContent.Telebiz:
+      contentType = ContentType.Telebiz;
       break;
   }
 
@@ -528,6 +537,16 @@ function LeftColumn({
             onReset={handleReset}
           />
         );
+      case ContentType.Telebiz:
+        return (
+          <TelebizSettings
+            isActive={isActive}
+            currentScreen={telebizSettingsScreen || TelebizSettingsScreens.Main}
+            animationLevel={animationLevel}
+            shouldSkipTransition={shouldSkipHistoryAnimations || false}
+            onReset={handleReset}
+          />
+        );
       default:
         return (
           <LeftMain
@@ -619,6 +638,7 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       contentKey: leftColumn.contentKey,
       settingsScreen: leftColumn.settingsScreen,
+      telebizSettingsScreen: leftColumn.telebizSettingsScreen,
     };
   },
 )(LeftColumn));

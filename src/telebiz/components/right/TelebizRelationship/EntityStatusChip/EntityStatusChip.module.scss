@@ -1,0 +1,33 @@
+.itemStatusChip {
+  padding: 0rem 0.3125rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  &-label {
+    margin: 0;
+  }
+  &.green {
+    color: black;
+    background: var(--color-telebiz-green);
+  }
+
+  &.yellow {
+    color: black;
+    background: var(--color-telebiz-yellow);
+  }
+
+  &.red {
+    color: var(--color-white);
+    background: var(--color-telebiz-red);
+  }
+
+  &.gray {
+    color: var(--color-white);
+    background: var(--color-telebiz-gray);
+  }
+
+  &.white {
+    color: black;
+    background: white;
+  }
+}

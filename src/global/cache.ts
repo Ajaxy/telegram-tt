@@ -5,6 +5,7 @@ import type {
   ApiAvailableReaction,
   ApiMessage,
 } from '../api/types';
+import type { TelebizState } from '../telebiz/global/types';
 import type { MessageList, ThreadId } from '../types';
 import type { ActionReturnType, GlobalState, SharedState } from './types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../api/types';
@@ -444,6 +445,8 @@ function reduceGlobal<T extends GlobalState>(global: T) {
       'availableEffectById',
     ]),
     lastIsChatInfoShown: !getIsMobile() ? global.lastIsChatInfoShown : undefined,
+    lastIsTelebizPanelOpen: !getIsMobile() ? global.lastIsTelebizPanelOpen : undefined,
+    lastTelebizPanelScreen: !getIsMobile() ? global.lastTelebizPanelScreen : undefined,
     stickers: reduceStickers(global),
     customEmojis: reduceCustomEmojis(global),
     users: reduceUsers(global),
@@ -468,6 +471,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
       'invalidAttemptsCount',
       'timeoutUntil',
     ]),
+    telebiz: global.telebiz ? reduceTelebiz(global.telebiz) : undefined,
   };
 
   return reducedGlobal;
@@ -481,6 +485,69 @@ function reduceSharedState(sharedState: SharedState): SharedState {
       languages: undefined,
     },
     isInitial: undefined,
+  };
+}
+
+function reduceTelebiz(telebiz: TelebizState): TelebizState {
+  // Cache only the important data, exclude loading/error states
+  return {
+    auth: {
+      ...telebiz.auth,
+      isLoading: false,
+      error: undefined,
+    },
+    organizations: {
+      ...telebiz.organizations,
+      isLoading: false,
+      error: undefined,
+    },
+    integrations: {
+      ...telebiz.integrations,
+      isLoading: false,
+      isLoadingProviders: false,
+      error: undefined,
+    },
+    relationships: {
+      ...telebiz.relationships,
+      isLoading: false,
+      error: undefined,
+      loadingEntityState: undefined,
+    },
+    notifications: {
+      ...telebiz.notifications,
+      isLoading: false,
+      error: undefined,
+    },
+    reminders: {
+      ...telebiz.reminders,
+      isLoading: false,
+      error: undefined,
+    },
+    templatesChats: {
+      ...telebiz.templatesChats,
+      isLoading: false,
+    },
+    agent: {
+      ...telebiz.agent,
+      isLoadingModels: false,
+      isLoadingBalance: false,
+      error: undefined,
+      isRunning: false,
+      thinking: { isThinking: false, steps: [] },
+    },
+    settings: {
+      ...telebiz.settings,
+      isLoading: false,
+      error: undefined,
+    },
+    bulkSend: {
+      isActive: false,
+      targets: [],
+      currentIndex: 0,
+      delayMs: 1000,
+      completedCount: 0,
+      failedCount: 0,
+    },
   };
 }
 

@@ -1,0 +1,88 @@
+.modal {
+  :global(.modal-dialog) {
+    max-width: 32rem;
+  }
+
+  .modalContent {
+    padding: 1rem;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.docsLink {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+
+  margin-bottom: 0.5rem;
+
+  font-size: 0.875rem;
+  color: var(--color-primary);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  :global(.icon) {
+    font-size: 0.75rem;
+  }
+}
+
+.contextInput {
+  :global(.form-control) {
+    min-height: 4rem;
+  }
+}
+
+.contentInput {
+  :global(.form-control) {
+    min-height: 12rem;
+  }
+}
+
+.hint {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+.switcherRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  width: 100%;
+  margin-top: 0.5rem;
+}

@@ -1,0 +1,225 @@
+.modal :global(.modal-content) {
+  padding: 0;
+}
+
+.modal :global(.modal-dialog) {
+  overflow: hidden;
+  // The preview must always be a square
+  max-width: 55vh;
+}
+
+.modal :global(.modal-dialog),
+.modal :global(.modal-content) {
+  overflow: hidden;
+}
+
+.root {
+  user-select: none;
+  position: relative;
+  height: min(calc(55vh + 41px + 193px), 90vh);
+  padding: 1rem;
+}
+
+.backButton {
+  position: absolute;
+  z-index: 3;
+  top: 0.875rem;
+  left: 0.875rem;
+}
+
+.whiteBackButton {
+  color: white !important;
+}
+
+.content {
+  scroll-snap-type: x mandatory;
+
+  overflow-x: scroll;
+  display: flex;
+
+  width: calc(100% + 2rem);
+  margin: 0 -1rem;
+  margin-top: -1rem;
+}
+
+.frame {
+  height: 45vh;
+  max-height: 25rem;
+  border-top-left-radius: var(--border-radius-default);
+  border-top-right-radius: var(--border-radius-default);
+
+  background: linear-gradient(88.39deg, #6c93ff -2.56%, #976fff 51.27%, #df69d1 107.39%);
+
+  @media (max-height: 900px) and (min-width: 600px) {
+    max-height: 38vh;
+  }
+}
+
+.slide {
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+
+  position: relative;
+
+  flex: none;
+
+  width: 100%;
+  padding-bottom: 7.5rem;
+}
+
+// Screenshot Area
+.screenshotArea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+  padding: 1.5rem 2rem;
+}
+
+.screenshot {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 0.75rem;
+
+  object-fit: contain;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+}
+
+.screenshotPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  aspect-ratio: 9 / 16;
+  width: 60%;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 0.75rem;
+
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  color: rgba(255, 255, 255, 0.7);
+
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.title {
+  margin-top: 1rem;
+
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  text-align: center;
+}
+
+.description {
+  padding: 0 5%;
+
+  font-size: 1rem;
+  font-weight: var(--font-weight-normal);
+  line-height: 1.375rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+// Benefits List
+.benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  margin: 1rem 1rem 0;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+}
+
+.benefit {
+  display: flex;
+  gap: 0.625rem;
+  align-items: flex-start;
+}
+
+.benefitCheck {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.0625rem;
+  border-radius: 50%;
+
+  color: white;
+
+  background: linear-gradient(88.39deg, #6c93ff -2.56%, #976fff 51.27%, #df69d1 107.39%);
+
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+.benefitText {
+  flex: 1;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
+// Footer
+.footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+
+  width: 100%;
+  padding: 0 1rem 1rem;
+  border-top: 0.0625rem solid var(--color-borders);
+
+  background: var(--color-background);
+
+  transition: 0.1s ease-out border-top-color;
+}
+
+.noFooterBorder {
+  border-top-color: transparent;
+}
+
+.button {
+  width: 100%;
+  height: 3rem;
+  font-size: 1rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+// Mobile responsive
+@media (max-width: 600px) {
+  .modal :global(.modal-dialog) {
+    width: 100%;
+    max-width: 100% !important;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .modal :global(.modal-content) {
+    max-height: 100vh;
+  }
+
+  .root {
+    height: 100%;
+  }
+
+  .frame {
+    border-radius: 0;
+  }
+
+  .description {
+    padding: 0 2rem;
+  }
+}

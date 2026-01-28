@@ -1,0 +1,29 @@
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.notification {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 0.125rem solid var(--color-background);
+  border-radius: 50%;
+
+  background: var(--color-warning);
+}
+
+.loading {
+  :global(.Spinner) {
+    --spinner-size: 1.5rem;
+  }
+}

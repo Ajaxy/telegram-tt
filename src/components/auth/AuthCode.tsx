@@ -11,6 +11,7 @@ import { pick } from '../../util/iteratees';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';
 
+import TelebizAuthMessage from '../../telebiz/components/auth/TelebizAuthMessage';
 import Icon from '../common/icons/Icon';
 import TrackingMonkey from '../common/TrackingMonkey';
 import InputText from '../ui/InputText';
@@ -124,6 +125,7 @@ const AuthCode = ({
           autoComplete="off"
           inputMode="numeric"
         />
+        <TelebizAuthMessage />
         {isLoading && <Loading />}
       </div>
     </div>

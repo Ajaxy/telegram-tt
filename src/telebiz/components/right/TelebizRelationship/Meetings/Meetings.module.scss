@@ -1,0 +1,14 @@
+.item {
+  &.green {
+    border-left: 3px solid var(--color-telebiz-green);
+  }
+  &.yellow {
+    border-left: 3px solid var(--color-telebiz-yellow);
+  }
+  &.red {
+    border-left: 3px solid var(--color-telebiz-red);
+  }
+  &.gray {
+    border-left: 3px solid var(--color-telebiz-gray);
+  }
+}

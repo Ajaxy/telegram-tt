@@ -7,6 +7,7 @@ import { pick } from '../../util/iteratees';
 
 import useLang from '../../hooks/useLang';
 
+import TelebizAuthMessage from '../../telebiz/components/auth/TelebizAuthMessage';
 import AvatarEditable from '../ui/AvatarEditable';
 import Button from '../ui/Button';
 import InputText from '../ui/InputText';
@@ -79,6 +80,7 @@ const AuthRegister = ({
           {isButtonShown && (
             <Button type="submit" ripple isLoading={isLoading}>{lang('Next')}</Button>
           )}
+          <TelebizAuthMessage />
         </form>
       </div>
     </div>

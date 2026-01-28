@@ -1,0 +1,12 @@
+.calendar {
+  &-input {
+    cursor: pointer;
+    position: relative;
+  }
+  &-icon {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+  }
+}

@@ -35,6 +35,7 @@ import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManag
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import TelebizIcon from '../../../telebiz/components/icons/TelebizIcon';
 import AttachBotItem from '../../middle/composer/AttachBotItem';
 import MenuItem from '../../ui/MenuItem';
 import MenuSeparator from '../../ui/MenuSeparator';
@@ -47,6 +48,7 @@ type OwnProps = {
   onSelectSettings: NoneToVoidFunction;
   onSelectContacts: NoneToVoidFunction;
   onSelectArchived: NoneToVoidFunction;
+  onSelectTelebiz: NoneToVoidFunction;
   onBotMenuOpened: NoneToVoidFunction;
   onBotMenuClosed: NoneToVoidFunction;
   footer?: string;
@@ -75,6 +77,7 @@ const LeftSideMenuItems = ({
   onSelectSettings,
   onBotMenuOpened,
   onBotMenuClosed,
+  onSelectTelebiz,
   footer,
 }: OwnProps & StateProps) => {
   const {
@@ -200,6 +203,12 @@ const LeftSideMenuItems = ({
         onClick={onSelectSettings}
       >
         {lang('MenuSettings')}
+      </MenuItem>
+      <MenuItem
+        customIcon={<i className="icon icon-telebiz"><TelebizIcon /></i>}
+        onClick={onSelectTelebiz}
+      >
+        Telebiz Settings
       </MenuItem>
       <NestedMenuItem
         icon="more"

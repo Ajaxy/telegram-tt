@@ -1,0 +1,217 @@
+.root {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.section {
+  padding: 0.5rem 1rem;
+}
+
+.sectionTitle {
+  margin-bottom: 0.5rem;
+
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.messagePreview {
+  cursor: pointer;
+
+  margin-bottom: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+
+  background: var(--color-background-secondary);
+
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--color-chat-hover);
+  }
+}
+
+.messagePreviewContent {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.messageIcon {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  color: var(--color-primary);
+}
+
+.messageText {
+  flex: 1;
+  min-width: 0;
+
+  p {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+
+    margin: 0;
+
+    font-size: 0.9375rem;
+    color: var(--color-text);
+    text-overflow: ellipsis;
+  }
+
+  span {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+  }
+}
+
+.selectMessage {
+  cursor: pointer;
+
+  padding: 2rem 1rem;
+  border: 2px dashed var(--color-borders);
+  border-radius: 0.75rem;
+
+  color: var(--color-text-secondary);
+  text-align: center;
+
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  i {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 2rem;
+  }
+}
+
+.chatPicker {
+  overflow: hidden;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  min-height: 0;
+}
+
+.chatPickerContainer {
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
+.delaySection {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--color-borders);
+  background: var(--color-background);
+}
+
+.delayLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+
+  span {
+    font-size: 0.875rem;
+    color: var(--color-text);
+  }
+
+  strong {
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-primary);
+  }
+}
+
+.actions {
+  padding: 1rem;
+  border-top: 1px solid var(--color-borders);
+  background: var(--color-background);
+}
+
+.progress {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.progressTitle {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.progressBar {
+  overflow: hidden;
+
+  height: 0.5rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0.25rem;
+
+  background: var(--color-background-secondary);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 0.25rem;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.progressStatus {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.completed {
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.completedIcon {
+  margin-bottom: 1rem;
+  font-size: 3rem;
+  color: var(--color-green);
+}
+
+.completedTitle {
+  margin-bottom: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.completedText {
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.error {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-error);
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}

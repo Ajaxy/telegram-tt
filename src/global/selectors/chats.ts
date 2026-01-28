@@ -222,7 +222,7 @@ export function selectRequestedDraft<T extends GlobalState>(
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const { requestedDraft } = selectTabState(global, tabId);
-  if (requestedDraft?.chatId === chatId && !requestedDraft.files?.length) {
+  if (requestedDraft?.chatId === chatId) {
     return requestedDraft.text;
   }
   return undefined;

@@ -6,8 +6,8 @@ import type {
   ResaleGiftsFilterOptions,
 } from './types';
 
-export const APP_CODE_NAME = 'A';
-export const APP_NAME = process.env.APP_NAME || `Telegram Web ${APP_CODE_NAME}`;
+export const APP_CODE_NAME = '(Unofficial)';
+export const APP_NAME = process.env.APP_NAME || `Telebiz ${APP_CODE_NAME}`;
 
 export const PRODUCTION_HOSTNAME = 'web.telegram.org';
 export const PRODUCTION_URL = 'https://web.telegram.org/a';
@@ -461,3 +461,7 @@ export const DEFAULT_RESALE_GIFTS_FILTER_OPTIONS: ResaleGiftsFilterOptions = {
 export const ACCOUNT_TTL_OPTIONS = [1, 3, 6, 12, 18, 24];
 
 export const SLOT_MACHINE_EMOJI = '🎰';
+
+export const API_URL = process.env.API_URL;
+
+export const AUTH_BOT_USERNAME = process.env.AUTH_BOT_USERNAME;

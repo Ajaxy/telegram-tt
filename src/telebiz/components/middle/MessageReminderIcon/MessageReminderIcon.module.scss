@@ -1,0 +1,16 @@
+.message-reminder {
+  cursor: pointer;
+
+  display: flex;
+  gap: 0.125rem;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 0.125rem;
+  padding: 0 0.125rem;
+
+  color: var(--color-white);
+  span {
+    font-size: 0.75rem;
+  }
+}

@@ -1,0 +1,204 @@
+.header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+
+  margin-bottom: 1rem;
+  padding: 0 1rem;
+}
+
+.icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  width: 4rem;
+  height: 4rem;
+  padding: 1rem;
+  border: 1px solid var(--color-borders-input);
+  border-radius: 0.75rem;
+
+  background: var(--color-background);
+
+  img {
+    width: 2rem;
+    height: 2rem;
+    object-fit: contain;
+  }
+}
+
+.info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.email {
+  overflow: hidden;
+
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+  font-size: 0.75rem;
+
+  &Active {
+    color: var(--color-success);
+  }
+
+  &Error {
+    color: var(--color-error);
+  }
+
+  &Expired {
+    color: var(--color-warning);
+  }
+
+  &Pending {
+    color: var(--color-text-secondary);
+  }
+
+  &Inactive {
+    color: var(--color-text-secondary);
+  }
+}
+
+.statusDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+.sectionTitle {
+  margin-bottom: 0.25rem;
+  padding: 0.5rem 1rem;
+
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.scopesText {
+  padding: 0 1rem;
+
+  font-family: var(--font-family-mono, monospace);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  word-break: break-word;
+}
+
+.actionDescription {
+  margin-bottom: 0.75rem;
+  padding: 0 1rem;
+
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+.buttonWrapper {
+  padding: 0.25rem 1rem;
+}
+
+.description {
+  margin: 0;
+  padding: 0 1rem;
+
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+.balanceSection {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+
+  font-size: 0.875rem;
+}
+
+.balanceLabel {
+  color: var(--color-text-secondary);
+}
+
+.balanceValue {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent);
+}
+
+.rateLimitList {
+  display: flex;
+  flex-direction: column;
+}
+
+.rateLimitItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rateLimitLabel {
+  color: var(--color-text-secondary);
+}
+
+.rateLimitValue {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.list {
+  margin: 1rem 0;
+  padding: 0 1.25rem;
+
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+.connectHint {
+  margin: 0.5rem 0 0;
+  padding: 0 1rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.codeBlock {
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+
+  background: var(--color-background-secondary);
+
+  font-size: 0.7rem;
+}
+
+.configPathNote {
+  margin: 0.25rem 0;
+
+  font-family: var(--font-family);
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  word-break: break-all;
+}

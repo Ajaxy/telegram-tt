@@ -7,6 +7,7 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiExportedInvite } from '../../api/types';
 import type { GiftProfileFilterOptions, ThreadId } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
+import { TelebizPanelScreens } from '../../telebiz/components/right/types';
 import { ManagementScreens, ProfileState, SettingsScreens } from '../../types';
 
 import { ANIMATION_END_DELAY, SAVED_FOLDER_ID } from '../../config';
@@ -30,6 +31,7 @@ import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import { IS_MAC_OS } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { isUserId } from '../../util/entities/ids';
+import { selectTelebizIsAddingRelationship } from '../../telebiz/global/selectors';
 
 import { useVtn } from '../../hooks/animations/useVtn';
 import useAppLayout from '../../hooks/useAppLayout';
@@ -40,6 +42,7 @@ import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
+import TelebizPanelHeader from '../../telebiz/components/right/TelebizPanelHeader';
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import DropdownMenu from '../ui/DropdownMenu';
@@ -67,6 +70,7 @@ type OwnProps = {
   isCreatingTopic?: boolean;
   isEditingTopic?: boolean;
   isAddingChatMembers?: boolean;
+  isTelebiz?: boolean;
   profileState?: ProfileState;
   managementScreen?: ManagementScreens;
   onClose: (shouldScrollUp?: boolean) => void;
@@ -94,6 +98,9 @@ type StateProps = {
   canEditTopic?: boolean;
   isSavedMessages?: boolean;
   isOwnProfile?: boolean;
+  isTelebizMain?: boolean;
+  isTelebizAgentMode?: boolean;
+  isAddingRelationship: boolean;
 };
 
 const COLUMN_ANIMATION_DURATION = 450 + ANIMATION_END_DELAY;
@@ -139,6 +146,7 @@ enum HeaderContent {
   EditTopic,
   SavedDialogs,
   NewDiscussionGroup,
+  Telebiz,
 }
 
 const RightHeader: FC<OwnProps & StateProps> = ({
@@ -158,6 +166,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isCreatingTopic,
   isEditingTopic,
   isAddingChatMembers,
+  isTelebiz,
   profileState,
   managementScreen,
   canAddContact,
@@ -182,6 +191,9 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isOwnProfile,
   onClose,
   onScreenSelect,
+  isTelebizMain,
+  isTelebizAgentMode,
+  isAddingRelationship,
 }) => {
   const {
     setStickerSearchQuery,
@@ -195,6 +207,10 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     updateGiftProfileFilter,
     openSettingsScreen,
   } = getActions();
+
+  const isTelebizMainPanel = useMemo(() => {
+    return isTelebizMain && !isAddingRelationship;
+  }, [isTelebizMain, isAddingRelationship]);
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const { isMobile } = useAppLayout();
@@ -288,6 +304,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     HeaderContent.GifSearch
   ) : isAddingChatMembers ? (
     HeaderContent.AddingMembers
+  ) : isTelebiz ? (
+    HeaderContent.Telebiz
   ) : isManagement ? (
     managementScreen === ManagementScreens.Initial ? (
       HeaderContent.ManageInitial
@@ -557,9 +575,11 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                     icon={shouldIncludeLimitedGifts ? 'check' : 'placeholder'}
 
                     onClick={() => updateGiftProfileFilter(
-                      { peerId: chatId, filter: {
-                        shouldIncludeLimited: !shouldIncludeLimitedGifts,
-                      } },
+                      {
+                        peerId: chatId, filter: {
+                          shouldIncludeLimited: !shouldIncludeLimitedGifts,
+                        },
+                      },
                     )}
                   >
                     {lang('GiftFilterLimited')}
@@ -569,9 +589,11 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                     icon={shouldIncludeUpgradableGifts ? 'check' : 'placeholder'}
 
                     onClick={() => updateGiftProfileFilter(
-                      { peerId: chatId, filter: {
-                        shouldIncludeUpgradable: !shouldIncludeUpgradableGifts,
-                      } },
+                      {
+                        peerId: chatId, filter: {
+                          shouldIncludeUpgradable: !shouldIncludeUpgradableGifts,
+                        },
+                      },
                     )}
                   >
                     {lang('GiftFilterUpgradable')}
@@ -618,6 +640,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         );
       case HeaderContent.NewDiscussionGroup:
         return <h3 className="title">{oldLang('NewGroup')}</h3>;
+      case HeaderContent.Telebiz:
+        return <TelebizPanelHeader />;
       default:
         return (
           <>
@@ -700,6 +724,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
       || contentKey === HeaderContent.AddingMembers
       || contentKey === HeaderContent.MessageStatistics
       || contentKey === HeaderContent.StoryStatistics
+      || (contentKey === HeaderContent.Telebiz && !isTelebizMainPanel && !isTelebizAgentMode)
       || isManagement
     )
   );
@@ -789,6 +814,9 @@ export default withGlobal<OwnProps>(
       canUseGiftFilter,
       canUseGiftAdminFilter,
       isOwnProfile,
+      isTelebizMain: tabState.telebizPanelScreen === TelebizPanelScreens.Main,
+      isTelebizAgentMode: tabState.telebizPanelScreen === TelebizPanelScreens.AgentMode,
+      isAddingRelationship: selectTelebizIsAddingRelationship(global),
     };
   },
 )(RightHeader);

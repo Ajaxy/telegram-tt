@@ -1,0 +1,106 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-background);
+}
+
+.content {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0.5rem;
+}
+
+.conversationItem {
+  margin-bottom: 0.25rem;
+
+  :global(.ListItem-main-icon) {
+    color: var(--color-primary);
+  }
+}
+
+.providerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-right: 0.75rem;
+  border-radius: 50%;
+
+  background: var(--color-background-secondary);
+
+  img {
+    width: 1.25rem;
+    height: 1.25rem;
+    object-fit: contain;
+  }
+}
+
+.active {
+  --background-color: var(--color-chat-active) !important;
+  --color-text: var(--color-white);
+  --color-text-meta: var(--color-white);
+  --color-text-secondary: var(--color-white);
+  --color-list-icon: var(--color-white);
+}
+
+.conversationTitle {
+  overflow: hidden;
+  display: block;
+
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conversationMeta {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  height: 100%;
+  padding: 2rem;
+
+  text-align: center;
+
+  .emptyIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1.5rem;
+    border-radius: 50%;
+
+    font-size: 1.75rem;
+    color: var(--color-text-secondary);
+
+    background: var(--color-background-selected);
+  }
+
+  h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.125rem;
+    font-weight: var(--font-weight-demi);
+    color: var(--color-text);
+  }
+
+  p {
+    max-width: 260px;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--color-text-secondary);
+  }
+}

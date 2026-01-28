@@ -1,0 +1,14 @@
+.container {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  margin: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-borders);
+  border-radius: 0.625rem;
+
+  color: var(--color-error);
+  text-align: center;
+}

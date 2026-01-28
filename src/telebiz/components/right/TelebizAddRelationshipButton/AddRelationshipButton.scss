@@ -1,0 +1,61 @@
+.AddRelationshipButton {
+  position: absolute;
+  z-index: 11;
+  right: 1rem;
+  bottom: 1rem;
+  transform: translateY(5rem);
+
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  &[dir="rtl"] {
+    right: auto;
+    left: 1rem;
+  }
+
+  body.no-page-transitions & {
+    transform: none !important;
+    opacity: 0;
+    transition: opacity 0.15s;
+
+    &.revealed {
+      opacity: 1;
+    }
+  }
+
+  &.revealed {
+    transform: translateY(0);
+
+    @media (max-width: 600px) {
+      transform-style: preserve-3d;
+      // Force rendering in the composite layer to fix the z-index rendering issue
+      transform: translate3d(0, 0, 0.625rem);
+    }
+  }
+
+  > .Button {
+    .icon-add,
+    .icon-close {
+      position: absolute;
+    }
+
+    &:not(.active) {
+      .icon-add {
+        animation: grow-icon 0.4s ease-out;
+      }
+
+      .icon-close {
+        animation: hide-icon 0.4s forwards ease-out;
+      }
+    }
+
+    &.active {
+      .icon-close {
+        animation: grow-icon 0.4s ease-out;
+      }
+
+      .icon-add {
+        animation: hide-icon 0.4s forwards ease-out;
+      }
+    }
+  }
+}

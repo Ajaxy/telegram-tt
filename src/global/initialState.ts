@@ -1,5 +1,6 @@
 import type { PerformanceType } from '../types';
 import type { GlobalState, SharedState, TabState } from './types';
+import { TelebizPanelScreens } from '../telebiz/components/right/types';
 import { LeftColumnContent, NewChatMembersProgress, SettingsScreens } from '../types';
 
 import {
@@ -17,6 +18,7 @@ import {
 } from '../config';
 import { IS_IOS, IS_MAC_OS } from '../util/browser/windowEnvironment';
 import { DEFAULT_APP_CONFIG } from '../limits';
+import { INITIAL_TELEBIZ_STATE } from '../telebiz/global/initialState';
 
 export const INITIAL_PERFORMANCE_STATE_MAX: PerformanceType = {
   animatedEmoji: true,
@@ -338,6 +340,8 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     isMinimized: false,
     isHidden: false,
   },
+
+  telebiz: INITIAL_TELEBIZ_STATE,
 };
 
 export const INITIAL_TAB_STATE: TabState = {
@@ -465,4 +469,6 @@ export const INITIAL_TAB_STATE: TabState = {
   },
 
   isPaymentMessageConfirmDialogOpen: false,
+
+  telebizPanelScreen: TelebizPanelScreens.Main,
 };

@@ -1,0 +1,62 @@
+.integration {
+  &-trigger {
+    cursor: pointer;
+
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0.25rem 1rem;
+    border-radius: 0.625rem;
+    &:hover {
+      background: var(--color-background-selected);
+    }
+    &-open {
+      background: var(--color-background-selected);
+    }
+  }
+
+  &-item {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    &-icon {
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+
+      width: 3rem;
+      height: 3rem;
+      padding: 0.75rem;
+      border-radius: 0.625rem;
+
+      background: var(--color-background-selected);
+      img {
+        aspect-ratio: 1/1;
+        width: 1.5rem;
+        height: 1.5rem;
+        object-fit: cover;
+      }
+      :global(.Spinner) {
+        --spinner-size: 1.5rem;
+      }
+    }
+    &-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    &-name {
+      font-size: 1rem;
+      font-weight: 500;
+      line-height: 1.5rem;
+    }
+    &-subtitle {
+      font-size: 0.875rem;
+      font-weight: 400;
+      line-height: 1.25rem;
+      color: var(--color-text-secondary);
+    }
+  }
+}

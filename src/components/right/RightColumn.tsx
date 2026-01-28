@@ -3,6 +3,7 @@ import { memo, useEffect, useRef, useState } from '@teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { AnimationLevel, ThreadId } from '../../types';
+import { TelebizPanelScreens } from '../../telebiz/components/right/types';
 import { ManagementScreens, NewChatMembersProgress, ProfileState, RightColumnContent } from '../../types';
 
 import { ANIMATION_END_DELAY, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
@@ -24,7 +25,9 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useScrollNotch from '../../hooks/useScrollNotch.ts';
 import useWindowSize from '../../hooks/window/useWindowSize';
+import useTelebizPanel from '../../telebiz/hooks/useTelebizPanel';
 
+import TelebizPanel from '../../telebiz/components/right/TelebizPanel';
 import Transition from '../ui/Transition';
 import AddChatMembers from './AddChatMembers';
 import CreateTopic from './CreateTopic.async';
@@ -59,6 +62,7 @@ type StateProps = {
   isSavedMessages?: boolean;
   isSavedDialog?: boolean;
   isOwnProfile?: boolean;
+  telebizPanelScreen?: TelebizPanelScreens;
 };
 
 const ANIMATION_DURATION = 450 + ANIMATION_END_DELAY;
@@ -85,6 +89,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   isSavedMessages,
   isSavedDialog,
   isOwnProfile,
+  telebizPanelScreen,
 }) => {
   const {
     toggleChatInfo,
@@ -133,7 +138,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const isCreatingTopic = contentKey === RightColumnContent.CreateTopic;
   const isEditingTopic = contentKey === RightColumnContent.EditTopic;
   const isOverlaying = windowWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
-
+  const isTelebiz = contentKey === RightColumnContent.Telebiz;
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isOpen);
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true, !isChatSelected) ?? -1;
@@ -232,6 +237,12 @@ const RightColumn: FC<OwnProps & StateProps> = ({
       case RightColumnContent.EditTopic:
         closeEditTopicPanel();
         break;
+      case RightColumnContent.Telebiz: {
+        const { closePanel } = useTelebizPanel();
+
+        closePanel();
+        break;
+      }
     }
   });
 
@@ -290,7 +301,8 @@ const RightColumn: FC<OwnProps & StateProps> = ({
       || contentKey === RightColumnContent.Management
       || contentKey === RightColumnContent.AddingMembers
       || contentKey === RightColumnContent.CreateTopic
-      || contentKey === RightColumnContent.EditTopic),
+      || contentKey === RightColumnContent.EditTopic
+      || contentKey === RightColumnContent.Telebiz),
     onBack: () => close(false),
   });
 
@@ -357,15 +369,26 @@ const RightColumn: FC<OwnProps & StateProps> = ({
         return <CreateTopic onClose={close} isActive={isOpen && isActive} />;
       case RightColumnContent.EditTopic:
         return <EditTopic onClose={close} isActive={isOpen && isActive} />;
+      case RightColumnContent.Telebiz:
+        return (
+          <TelebizPanel
+            // key={`telebiz_${chatId}`} // This prevent remounting on chatId change
+            chatId={chatId!}
+            animationLevel={animationLevel}
+          />
+        );
     }
 
     return undefined; // Unreachable
   }
 
+  const isAgentMode = isTelebiz &&
+    [TelebizPanelScreens.AgentMode, TelebizPanelScreens.AgentHistory].includes(telebizPanelScreen!);
+
   return (
     <div
       id="RightColumn-wrapper"
-      className={!isChatSelected ? 'is-hidden' : undefined}
+      className={!isChatSelected && !isAgentMode ? 'is-hidden' : undefined}
     >
       {isOverlaying && (
         <div className="overlay-backdrop" onClick={close} />
@@ -388,6 +411,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           isCreatingTopic={isCreatingTopic}
           isEditingTopic={isEditingTopic}
           isAddingChatMembers={isAddingChatMembers}
+          isTelebiz={isTelebiz}
           profileState={profileState}
           managementScreen={managementScreen}
           onClose={close}
@@ -419,7 +443,7 @@ export default memo(withGlobal<OwnProps>(
     const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
     const { animationLevel } = selectSharedSettings(global);
     const {
-      management, shouldSkipHistoryAnimations, shouldCloseRightColumn, chatInfo,
+      management, shouldSkipHistoryAnimations, shouldCloseRightColumn, chatInfo, telebizPanelScreen,
     } = selectTabState(global);
     const nextManagementScreen = chatId ? management.byChatId[chatId]?.nextScreen : undefined;
 
@@ -439,6 +463,7 @@ export default memo(withGlobal<OwnProps>(
       isSavedMessages,
       isSavedDialog,
       isOwnProfile,
+      telebizPanelScreen,
     };
   },
 )(RightColumn));
