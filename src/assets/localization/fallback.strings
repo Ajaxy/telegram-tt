@@ -2665,3 +2665,17 @@
 "ChatListAuctionView" = "View";
 "BotAuthSuccessTitle" = "Login Successful";
 "BotAuthSuccessText" = "You've successfully logged into **{url}**";
+"GiftPreviewSelectedTraits" = "Selected traits";
+"GiftPreviewCountModels_one" = "This collection features **{count}** unique model";
+"GiftPreviewCountModels_other" = "This collection features **{count}** unique models";
+"GiftPreviewCountCraftableModels_one" = "This collection features **{count}** craftable model";
+"GiftPreviewCountCraftableModels_other" = "This collection features **{count}** craftable models";
+"GiftPreviewCountPatterns_one" = "This collection features **{count}** unique pattern";
+"GiftPreviewCountPatterns_other" = "This collection features **{count}** unique patterns";
+"GiftPreviewCountBackdrops_one" = "This collection features **{count}** unique backdrop";
+"GiftPreviewCountBackdrops_other" = "This collection features **{count}** unique backdrops";
+"GiftUpgradeViewAll" =  "View all variants >";
+"GiftPreviewToggleCraftableModels" = "View Craftable Models >";
+"GiftPreviewToggleRegularModels" = "View Primary Models >";
+"AriaGiftPreviewPlay" = "Play random previews";
+"AriaGiftPreviewStop" = "Pause random previews";

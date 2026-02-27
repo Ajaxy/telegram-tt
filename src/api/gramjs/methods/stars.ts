@@ -19,6 +19,7 @@ import {
   buildApiResaleGifts,
   buildApiSavedStarGift,
   buildApiStarGift,
+  buildApiStarGiftAttribute,
   buildApiStarGiftAuctionAcquiredGift,
   buildApiStarGiftAuctionState,
   buildApiStarGiftCollection,
@@ -628,4 +629,22 @@ export function resolveStarGiftOffer({
   }), {
     shouldReturnTrue: true,
   });
+}
+
+export async function fetchStarGiftUpgradeAttributes({
+  giftId,
+}: {
+  giftId: string;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetStarGiftUpgradeAttributes({
+    giftId: BigInt(giftId),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return {
+    attributes: result.attributes.map(buildApiStarGiftAttribute).filter(Boolean),
+  };
 }

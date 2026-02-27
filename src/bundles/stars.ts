@@ -13,6 +13,7 @@ export { default as GiftInfoValueModal } from '../components/modals/gift/value/G
 export { default as GiftLockedModal } from '../components/modals/gift/locked/GiftLockedModal';
 export { default as GiftResalePriceComposerModal } from '../components/modals/gift/resale/GiftResalePriceComposerModal';
 export { default as GiftUpgradeModal } from '../components/modals/gift/upgrade/GiftUpgradeModal';
+export { default as GiftPreviewModal } from '../components/modals/gift/preview/GiftPreviewModal';
 export { default as GiftAuctionModal } from '../components/modals/gift/auction/GiftAuctionModal';
 export { default as GiftAuctionBidModal } from '../components/modals/gift/auction/GiftAuctionBidModal';
 export { default as GiftAuctionInfoModal } from '../components/modals/gift/auction/GiftAuctionInfoModal';

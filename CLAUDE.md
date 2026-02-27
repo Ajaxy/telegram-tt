@@ -190,7 +190,7 @@ const NewComp = (props: OwnProps & StateProps) => { … }
 ```
 
 ### 5. Memoization
-* Wrap most components with `memo()` to avoid unnecessary updates.
+* Wrap most components with `memo()` to avoid unnecessary updates. Consider skipping memo for simple wrapper components whose children change on almost every render.
 * Don't pass freshly created objects or arrays as props to memoized components.
 * **Exceptions** (no memo): `ListItem`, `Button`, `MenuItem`, etc.
 

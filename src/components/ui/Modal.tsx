@@ -47,13 +47,13 @@ export type OwnProps = {
   isLowStackPriority?: boolean;
   dialogContent?: React.ReactNode;
   moreMenuItems?: TeactNode;
-  onClose: () => void;
-  onCloseAnimationEnd?: () => void;
-  onEnter?: () => void;
   withBalanceBar?: boolean;
   currencyInBalanceBar?: 'TON' | 'XTR';
   isCondensedHeader?: boolean;
   noFreezeOnClose?: boolean;
+  onClose: NoneToVoidFunction;
+  onCloseAnimationEnd?: NoneToVoidFunction;
+  onEnter?: NoneToVoidFunction;
 };
 
 const Modal = (props: OwnProps) => {
@@ -61,10 +61,10 @@ const Modal = (props: OwnProps) => {
     dialogRef,
     isOpen,
     noBackdropClose,
+    noFreezeOnClose,
     onClose,
     onCloseAnimationEnd,
     onEnter,
-    noFreezeOnClose,
   } = props;
 
   const {
@@ -72,8 +72,8 @@ const Modal = (props: OwnProps) => {
     shouldRender,
   } = useShowTransition({
     isOpen,
-    onCloseAnimationEnd,
     withShouldRender: true,
+    onCloseAnimationEnd,
   });
 
   const shouldFreeze = !noFreezeOnClose && !isOpen;

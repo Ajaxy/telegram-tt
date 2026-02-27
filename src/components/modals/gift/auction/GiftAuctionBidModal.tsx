@@ -333,6 +333,7 @@ const GiftAuctionBidModal = ({
       isOpen={isOpen}
       hasAbsoluteCloseButton
       isSlim
+      className={styles.root}
       contentClassName={styles.content}
       onClose={closeGiftAuctionBidModal}
       isLowStackPriority

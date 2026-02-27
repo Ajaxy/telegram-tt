@@ -24,7 +24,7 @@ import {
 import { CUSTOM_PEER_HIDDEN } from '../../../../util/objects/customPeer';
 import { getServerTime } from '../../../../util/serverTime';
 import { renderGiftOriginalInfo } from '../../../common/helpers/giftOriginalInfo';
-import { getGiftAttributes, getGiftRarityTitle, getStickerFromGift } from '../../../common/helpers/gifts';
+import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
@@ -95,9 +95,8 @@ const GiftInfoModal = ({
     buyStarGift,
     closeGiftModal,
     openGiftInfoValueModal,
-    updateResaleGiftsFilter,
-    openGiftInMarket,
     openGiftDescriptionRemoveModal,
+    openGiftPreviewModal,
   } = getActions();
 
   const [isConvertConfirmOpen, openConvertConfirm, closeConvertConfirm] = useFlag();
@@ -108,57 +107,6 @@ const GiftInfoModal = ({
   const [shouldPayInTon, setShouldPayInTon] = useState<boolean>(false);
 
   const uniqueGiftHeaderRef = useRef<HTMLDivElement>();
-
-  const handleSymbolClick = useLastCallback(() => {
-    if (!gift || !giftAttributes?.pattern) return;
-
-    openGiftInMarket({ gift });
-    updateResaleGiftsFilter({
-      filter: {
-        sortType: 'byDate',
-        modelAttributes: [],
-        backdropAttributes: [],
-        patternAttributes: [{
-          type: 'pattern',
-          documentId: giftAttributes.pattern.sticker.id,
-        }],
-      },
-    });
-  });
-
-  const handleBackdropClick = useLastCallback(() => {
-    if (!gift || !giftAttributes?.backdrop) return;
-
-    openGiftInMarket({ gift });
-    updateResaleGiftsFilter({
-      filter: {
-        sortType: 'byDate',
-        modelAttributes: [],
-        backdropAttributes: [{
-          type: 'backdrop',
-          backdropId: giftAttributes.backdrop.backdropId,
-        }],
-        patternAttributes: [],
-      },
-    });
-  });
-
-  const handleModelClick = useLastCallback(() => {
-    if (!gift || !giftAttributes?.model) return;
-
-    openGiftInMarket({ gift });
-    updateResaleGiftsFilter({
-      filter: {
-        sortType: 'byDate',
-        modelAttributes: [{
-          type: 'model',
-          documentId: giftAttributes.model.sticker.id,
-        }],
-        backdropAttributes: [],
-        patternAttributes: [],
-      },
-    });
-  });
 
   const isOpen = Boolean(modal);
   const renderingModal = useCurrentOrPrev(modal);
@@ -302,6 +250,13 @@ const GiftInfoModal = ({
   const giftAttributes = useMemo(() => {
     return gift && getGiftAttributes(gift);
   }, [gift]);
+
+  const handleOpenPreviewModal = useLastCallback(() => {
+    if (!gift) return;
+    openGiftPreviewModal({
+      originGift: gift,
+    });
+  });
 
   const uniqueGiftTitle = useMemo(() => {
     if (!gift || gift.type !== 'starGiftUnique' || !giftAttributes?.backdrop) return undefined;
@@ -709,13 +664,8 @@ const GiftInfoModal = ({
       if (model) {
         tableData.push([
           lang('GiftAttributeModel'),
-          <span className={styles.uniqueAttribute}>
-            <span
-              className={styles.attributeName}
-              onClick={handleModelClick}
-            >
-              {model.name}
-            </span>
+          <span className={styles.uniqueAttribute} onClick={handleOpenPreviewModal}>
+            <span className={styles.attributeName}>{model.name}</span>
             <GiftRarityBadge rarity={model.rarity} />
           </span>,
         ]);
@@ -724,14 +674,9 @@ const GiftInfoModal = ({
       if (backdrop) {
         tableData.push([
           lang('GiftAttributeBackdrop'),
-          <span className={styles.uniqueAttribute}>
-            <span
-              className={styles.attributeName}
-              onClick={handleBackdropClick}
-            >
-              {backdrop.name}
-            </span>
-            <BadgeButton>{getGiftRarityTitle(lang, backdrop.rarity)}</BadgeButton>
+          <span className={styles.uniqueAttribute} onClick={handleOpenPreviewModal}>
+            <span className={styles.attributeName}>{backdrop.name}</span>
+            <GiftRarityBadge rarity={backdrop.rarity} />
           </span>,
         ]);
       }
@@ -739,14 +684,9 @@ const GiftInfoModal = ({
       if (pattern) {
         tableData.push([
           lang('GiftAttributeSymbol'),
-          <span className={styles.uniqueAttribute}>
-            <span
-              className={styles.attributeName}
-              onClick={handleSymbolClick}
-            >
-              {pattern.name}
-            </span>
-            <BadgeButton>{getGiftRarityTitle(lang, pattern.rarity)}</BadgeButton>
+          <span className={styles.uniqueAttribute} onClick={handleOpenPreviewModal}>
+            <span className={styles.attributeName}>{pattern.name}</span>
+            <GiftRarityBadge rarity={pattern.rarity} />
           </span>,
         ]);
       }
@@ -874,7 +814,6 @@ const GiftInfoModal = ({
     gift, giftAttributes, renderFooterButton, isTargetChat,
     isGiftUnique, saleDateInfo,
     canBuyGift, giftOwnerTitle, resellPrice, uniqueGiftTitle, uniqueGiftSubtitle, releasedByPeer,
-    handleSymbolClick, handleBackdropClick, handleModelClick,
   ]);
 
   const moreMenuItems = typeGift && (
@@ -896,8 +835,7 @@ const GiftInfoModal = ({
         hasBackdrop={isGiftUnique}
         tableData={modalData?.tableData}
         footer={modalData?.footer}
-        className={styles.modal}
-        contentClassName={styles.modalContent}
+        className={buildClassName(styles.modal, 'tall')}
         closeButtonColor={isGiftUnique ? 'translucent-white' : undefined}
         moreMenuItems={moreMenuItems}
         onClose={handleClose}

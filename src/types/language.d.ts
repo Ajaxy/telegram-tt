@@ -1955,6 +1955,12 @@ export interface LangPair {
   'ChatListAuctionOutbid': undefined;
   'ChatListAuctionView': undefined;
   'BotAuthSuccessTitle': undefined;
+  'GiftPreviewSelectedTraits': undefined;
+  'GiftUpgradeViewAll': undefined;
+  'GiftPreviewToggleCraftableModels': undefined;
+  'GiftPreviewToggleRegularModels': undefined;
+  'AriaGiftPreviewPlay': undefined;
+  'AriaGiftPreviewStop': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -3890,6 +3896,18 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'ChatListAuctionTitle': {
+    'count': V;
+  };
+  'GiftPreviewCountModels': {
+    'count': V;
+  };
+  'GiftPreviewCountCraftableModels': {
+    'count': V;
+  };
+  'GiftPreviewCountPatterns': {
+    'count': V;
+  };
+  'GiftPreviewCountBackdrops': {
     'count': V;
   };
 }

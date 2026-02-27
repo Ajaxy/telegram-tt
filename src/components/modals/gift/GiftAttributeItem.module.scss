@@ -1,0 +1,91 @@
+.root {
+  --_selected-color: var(--color-primary);
+
+  cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.875rem;
+  border-radius: 1rem;
+
+  color: #fff;
+
+  background-color: var(--color-background-secondary);
+  outline: 0.125rem solid transparent;
+
+  transition: outline-color 0.15s ease-out;
+
+  &::before {
+    pointer-events: none;
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    border-radius: inherit;
+
+    opacity: 0;
+    background-color: var(--color-hover-overlay);
+
+    transition: opacity 0.15s;
+  }
+
+  &::after {
+    pointer-events: none;
+    content: "";
+
+    position: absolute;
+    inset: 0.125rem;
+
+    border: 0.125rem solid transparent;
+    border-radius: 0.9375rem;
+
+    transition: border-color 0.15s linear;
+  }
+
+  &.hasBackground {
+    --_selected-color: var(--color-background-secondary);
+  }
+
+  :global(html.theme-dark) & {
+    background-color: rgb(33, 33, 33);
+
+    &.hasBackground {
+      --_selected-color: rgb(33, 33, 33);
+    }
+  }
+
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+.selected::after {
+  border-color: var(--_selected-color);
+}
+
+.radialPattern {
+  position: absolute;
+  inset: 0;
+}
+
+.stickerWrapper {
+  position: relative;
+}
+
+.rarity {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.4375rem;
+  backdrop-filter: blur(0.5rem);
+}
+
+.regular {
+  color: white;
+  backdrop-filter: blur(0.5rem) brightness(0.8);
+}

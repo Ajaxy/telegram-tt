@@ -51,6 +51,8 @@
 }
 
 .starGift {
+  overflow: visible;
+  flex-basis: auto;
   padding: 0.875rem;
   padding-bottom: 0.625rem;
 }
@@ -90,11 +92,11 @@
 
 .auction,
 .premiumRequired {
-  outline: 0.125rem solid #D18D21;
+  outline: 0.125rem solid #D18D21 !important;
   outline-offset: -0.125rem;
 
   &:focus-visible {
-    outline: 0.125rem solid #D18D21;
+    outline: 0.125rem solid #D18D21 !important;
     outline-offset: -0.125rem;
   }
 }

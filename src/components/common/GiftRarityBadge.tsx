@@ -1,5 +1,3 @@
-import { memo } from '../../lib/teact/teact';
-
 import type { ApiStarGiftAttributeRarity } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
@@ -13,16 +11,28 @@ import styles from './GiftRarityBadge.module.scss';
 
 type OwnProps = {
   rarity: ApiStarGiftAttributeRarity;
+  shouldInvertRare?: boolean;
+  className?: string;
+  onClick?: NoneToVoidFunction;
 };
 
-const GiftRarityBadge = ({ rarity }: OwnProps) => {
+const GiftRarityBadge = ({ rarity, shouldInvertRare, className, onClick }: OwnProps) => {
   const lang = useLang();
 
   return (
-    <BadgeButton className={buildClassName(styles.root, rarity.type !== 'regular' && styles[rarity.type])}>
+    <BadgeButton
+      className={buildClassName(
+        styles.root,
+        rarity.type !== 'regular' && styles[rarity.type],
+        rarity.type !== 'regular' && styles.crafted,
+        shouldInvertRare && rarity.type !== 'regular' && styles.inverted,
+        className,
+      )}
+      onClick={onClick}
+    >
       {getGiftRarityTitle(lang, rarity)}
     </BadgeButton>
   );
 };
 
-export default memo(GiftRarityBadge);
+export default GiftRarityBadge;

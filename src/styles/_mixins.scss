@@ -5,12 +5,12 @@
   }
 }
 
-@mixin adapt-padding-to-scrollbar($padding) {
-  padding-inline-end: calc($padding - var(--scrollbar-width));
+@mixin adapt-padding-to-scrollbar($padding, $forceSpace: 0px) {
+  padding-inline-end: calc(max($padding - var(--scrollbar-width), $forceSpace));
 }
 
-@mixin adapt-margin-to-scrollbar($margin) {
-  margin-inline-end: calc($margin - var(--scrollbar-width));
+@mixin adapt-margin-to-scrollbar($margin, $forceSpace: 0px) {
+  margin-inline-end: calc(max($margin - var(--scrollbar-width), $forceSpace));
 }
 
 @mixin filter-outline($width: 0.125rem, $color) {

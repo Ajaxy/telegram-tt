@@ -422,6 +422,8 @@ addTabStateResetterAction('closeGiftResalePriceComposerModal', 'giftResalePriceC
 
 addTabStateResetterAction('closeGiftUpgradeModal', 'giftUpgradeModal');
 
+addTabStateResetterAction('closeGiftPreviewModal', 'giftPreviewModal');
+
 addActionHandler('closeGiftAuctionModal', (global, _actions, payload): ActionReturnType => {
   const { shouldKeepAuction, tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);

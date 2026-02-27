@@ -1,3 +1,7 @@
+.root {
+  z-index: calc(var(--z-modal-low-priority) + 1);
+}
+
 .content {
   display: flex;
   flex-direction: column;

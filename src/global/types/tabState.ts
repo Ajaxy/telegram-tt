@@ -901,6 +901,11 @@ export type TabState = {
     emojiStatus: ApiEmojiStatusCollectible;
   };
 
+  giftPreviewModal?: {
+    attributes: ApiStarGiftAttribute[];
+    originGift: ApiStarGift;
+  };
+
   giftAuctionModal?: {
     auctionGiftId: string;
     sampleAttributes?: ApiStarGiftAttribute[];

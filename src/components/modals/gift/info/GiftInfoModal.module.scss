@@ -56,11 +56,6 @@
   color: var(--color-error) !important;
 }
 
-.modalContent {
-  position: relative;
-  max-height: min(97vh, 48rem) !important;
-}
-
 .moreMenuButton {
   position: absolute;
   z-index: 1;

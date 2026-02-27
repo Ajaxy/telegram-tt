@@ -1,6 +1,5 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
-import type { ElementRef, FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
+import type { ElementRef, TeactNode } from '../../lib/teact/teact';
 import { useRef, useState } from '../../lib/teact/teact';
 
 import type { IconName } from '../../types/icons';
@@ -22,7 +21,7 @@ import './Button.scss';
 export type OwnProps = {
   ref?: ElementRef<HTMLButtonElement | HTMLAnchorElement>;
   type?: 'button' | 'submit' | 'reset';
-  children?: React.ReactNode;
+  children?: TeactNode;
   size?: 'default' | 'smaller' | 'tiny';
   color?: (
     'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'translucent-black'
@@ -76,7 +75,7 @@ export type OwnProps = {
 // Longest animation duration;
 const CLICKED_TIMEOUT = 400;
 
-const Button: FC<OwnProps> = ({
+const Button = ({
   ref,
   type = 'button',
   id,
@@ -125,7 +124,7 @@ const Button: FC<OwnProps> = ({
   onMouseLeave,
   onFocus,
   onTransitionEnd,
-}) => {
+}: OwnProps) => {
   let elementRef = useRef<HTMLButtonElement | HTMLAnchorElement>();
   if (ref) {
     elementRef = ref;

@@ -752,3 +752,20 @@ addActionHandler('loadActiveGiftAuctions', async (global, actions, payload): Pro
   };
   setGlobal(global);
 });
+
+addActionHandler('openGiftPreviewModal', async (global, _actions, payload): Promise<void> => {
+  const { originGift, tabId = getCurrentTabId() } = payload;
+
+  const giftId = originGift.type === 'starGiftUnique' ? originGift.regularGiftId : originGift.id;
+  const result = await callApi('fetchStarGiftUpgradeAttributes', { giftId });
+  if (!result) return;
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    giftPreviewModal: {
+      originGift,
+      attributes: result.attributes,
+    },
+  }, tabId);
+  setGlobal(global);
+});

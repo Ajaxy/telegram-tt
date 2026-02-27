@@ -1,8 +1,10 @@
 .root {
   --_height: 15rem;
 
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 0.25rem;
   align-items: center;
 
@@ -10,6 +12,7 @@
   height: var(--_height);
   margin-bottom: 0.5rem;
   padding-bottom: 1rem;
+  border-radius: 0 0 0.625rem 0.625rem;
 
   &.withManageButtons {
     --_height: 19.25rem;
@@ -114,6 +117,7 @@
 .subtitle {
   font-size: 1rem;
   line-height: 1.375rem;
+  color: var(--tinted-text-color);
   text-align: center;
   text-wrap: balance;
 

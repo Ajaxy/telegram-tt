@@ -2740,6 +2740,10 @@ export interface ActionPayloads {
     gift: ApiStarGiftUnique;
   } & WithTabId;
   closeGiftInfoValueModal: WithTabId | undefined;
+  openGiftPreviewModal: {
+    originGift: ApiStarGift;
+  } & WithTabId;
+  closeGiftPreviewModal: WithTabId | undefined;
   loadActiveGiftAuctions: undefined;
   openActiveGiftAuctionsModal: WithTabId | undefined;
   closeActiveGiftAuctionsModal: WithTabId | undefined;
