@@ -71,8 +71,9 @@ export function updateMessageTranslations<T extends GlobalState>(
   global: T, chatId: string, messageIds: number[], toLanguageCode: string, translations: ApiFormattedText[],
 ) {
   messageIds.forEach((messageId, index) => {
+    const text = translations[index];
     global = updateMessageTranslation(global, chatId, messageId, toLanguageCode, {
-      text: translations[index],
+      text: text.text.length ? text : undefined,
       isPending: false,
     });
   });
