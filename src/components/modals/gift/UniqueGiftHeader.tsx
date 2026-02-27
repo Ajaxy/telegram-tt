@@ -44,6 +44,8 @@ type OwnProps = {
   resellPrice?: ApiTypeCurrencyAmount;
   showManageButtons?: boolean;
   savedGift?: ApiSavedStarGift;
+  noLoop?: boolean;
+  onStickerAnimationEnded?: (modelName: string) => void;
   children?: React.ReactNode;
 };
 
@@ -61,6 +63,8 @@ const UniqueGiftHeader = ({
   resellPrice,
   showManageButtons,
   savedGift,
+  noLoop,
+  onStickerAnimationEnded,
   children,
 }: OwnProps) => {
   const {
@@ -73,6 +77,10 @@ const UniqueGiftHeader = ({
   const [isGiftHover, markGiftHover, unmarkGiftHover] = useFlag(false);
   const activeKey = useTransitionActiveKey([modelAttribute, backdropAttribute, patternAttribute]);
   const subtitleColor = backdropAttribute?.textColor;
+
+  const handleStickerEnded = () => {
+    onStickerAnimationEnded?.(modelAttribute.name);
+  };
 
   const radialPatternBackdrop = useMemo(() => {
     const backdropColors = [backdropAttribute.centerColor, backdropAttribute.edgeColor];
@@ -112,7 +120,8 @@ const UniqueGiftHeader = ({
           className={styles.sticker}
           sticker={modelAttribute.sticker}
           size={STICKER_SIZE}
-          noLoop={!isGiftHover}
+          noLoop={noLoop ?? !isGiftHover}
+          onEnded={handleStickerEnded}
           onMouseEnter={!IS_TOUCH_ENV ? markGiftHover : undefined}
           onMouseLeave={!IS_TOUCH_ENV ? unmarkGiftHover : undefined}
         />

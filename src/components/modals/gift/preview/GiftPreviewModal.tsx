@@ -15,7 +15,6 @@ import { getNextArrowReplacement } from '../../../../util/localization/format';
 import { resolveTransitionName } from '../../../../util/resolveTransitionName';
 import { getGiftAttributes, getRandomGiftPreviewAttributes } from '../../../common/helpers/gifts';
 
-import useInterval from '../../../../hooks/schedulers/useInterval';
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useFlag from '../../../../hooks/useFlag';
 import { useIntersectionObserver } from '../../../../hooks/useIntersectionObserver';
@@ -45,7 +44,6 @@ type StateProps = {
 const MODEL_STICKER_SIZE = 80;
 const PATTERN_STICKER_SIZE = 60;
 const INTERSECTION_THROTTLE = 200;
-const PLAYBACK_INTERVAL = 5000;
 
 enum AttributeTab {
   Model,
@@ -125,7 +123,9 @@ const GiftPreviewModal = ({ modal, animationLevel }: OwnProps & StateProps) => {
     if (newModel && newModel.rarity.type !== 'regular') showCraftableModels();
   }, [initialAttributes, firstModel, firstPattern, firstBackdrop]);
 
-  useInterval(() => {
+  const handleStickerAnimationEnded = useLastCallback((modelName: string) => {
+    if (modelName !== selectedModel?.name || !isPlayingRandomPreviews) return;
+
     if (!originGift || !selectedModel || !selectedPattern || !selectedBackdrop) return;
     const newAttributes = getRandomGiftPreviewAttributes(renderingModal?.attributes, {
       model: selectedModel,
@@ -135,7 +135,7 @@ const GiftPreviewModal = ({ modal, animationLevel }: OwnProps & StateProps) => {
     setSelectedModel(newAttributes.model);
     setSelectedPattern(newAttributes.pattern);
     setSelectedBackdrop(newAttributes.backdrop);
-  }, isPlayingRandomPreviews ? PLAYBACK_INTERVAL : undefined, true);
+  });
 
   const {
     observe: observeModelsIntersection,
@@ -273,6 +273,8 @@ const GiftPreviewModal = ({ modal, animationLevel }: OwnProps & StateProps) => {
         patternAttribute={selectedPattern}
         title={originGift?.title}
         subtitle={lang('GiftPreviewSelectedTraits')}
+        noLoop={isPlayingRandomPreviews}
+        onStickerAnimationEnded={handleStickerAnimationEnded}
       >
         <div
           className={styles.traitButtons}
