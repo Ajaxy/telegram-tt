@@ -834,6 +834,7 @@ const GiftInfoModal = ({
         header={modalData?.header}
         hasBackdrop={isGiftUnique}
         tableData={modalData?.tableData}
+        tableClassName={isGiftUnique ? buildClassName(styles.scrollableTable, 'custom-scroll') : undefined}
         footer={modalData?.footer}
         className={buildClassName(styles.modal, 'tall')}
         closeButtonColor={isGiftUnique ? 'translucent-white' : undefined}

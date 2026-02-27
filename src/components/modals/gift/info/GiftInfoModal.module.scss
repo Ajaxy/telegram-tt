@@ -231,3 +231,9 @@
 .removeMessageButton {
   color: var(--color-primary) !important;
 }
+
+.scrollableTable {
+  overflow-y: auto;
+  flex-shrink: 1;
+  min-height: 0;
+}
