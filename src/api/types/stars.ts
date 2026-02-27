@@ -63,6 +63,7 @@ export interface ApiStarGiftUnique {
   offerMinStars?: number;
   isBurned?: true;
   isCrafted?: true;
+  craftChancePermille?: number;
 }
 
 export type ApiStarGift = ApiStarGiftRegular | ApiStarGiftUnique;
@@ -149,6 +150,7 @@ export interface ApiSavedStarGift {
   upgradeMsgId?: number; // Local field, used for Action Message
   localTag?: number; // Local field, used for key in list
   dropOriginalDetailsStars?: number;
+  canCraftAt?: number;
 }
 
 export type StarGiftAttributeIdModel = {

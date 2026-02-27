@@ -426,7 +426,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
   if (action instanceof GramJs.MessageActionStarGiftUnique) {
     const {
       upgrade, transferred, saved, refunded, gift, canExportAt, transferStars, fromId, peer, savedId,
-      resaleAmount, prepaidUpgrade, dropOriginalDetailsStars, fromOffer,
+      resaleAmount, prepaidUpgrade, dropOriginalDetailsStars, fromOffer, canCraftAt,
     } = action;
 
     const starGift = buildApiStarGift(gift);
@@ -451,6 +451,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       dropOriginalDetailsStars: dropOriginalDetailsStars !== undefined
         ? toJSNumber(dropOriginalDetailsStars)
         : undefined,
+      canCraftAt,
     };
   }
   if (action instanceof GramJs.MessageActionPaidMessagesPrice) {

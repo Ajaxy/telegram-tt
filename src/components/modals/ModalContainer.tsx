@@ -27,6 +27,9 @@ import GiftAuctionBidModal from './gift/auction/GiftAuctionBidModal.async';
 import GiftAuctionChangeRecipientModal from './gift/auction/GiftAuctionChangeRecipientModal.async';
 import GiftAuctionInfoModal from './gift/auction/GiftAuctionInfoModal.async';
 import GiftAuctionModal from './gift/auction/GiftAuctionModal.async';
+import GiftCraftInfoModal from './gift/craft/GiftCraftInfoModal.async';
+import GiftCraftModal from './gift/craft/GiftCraftModal.async';
+import GiftCraftSelectModal from './gift/craft/GiftCraftSelectModal.async';
 import PremiumGiftModal from './gift/GiftModal.async';
 import GiftInfoModal from './gift/info/GiftInfoModal.async';
 import GiftLockedModal from './gift/locked/GiftLockedModal.async';
@@ -108,6 +111,9 @@ type ModalKey = keyof Pick<TabState,
   'aboutAdsModal' |
   'giftPreviewModal' |
   'giftUpgradeModal' |
+  'giftCraftModal' |
+  'giftCraftSelectModal' |
+  'giftCraftInfoModal' |
   'giftAuctionModal' |
   'giftAuctionBidModal' |
   'giftAuctionInfoModal' |
@@ -188,6 +194,9 @@ const MODALS: ModalRegistry = {
   aboutAdsModal: AboutAdsModal,
   giftPreviewModal: GiftPreviewModal,
   giftUpgradeModal: GiftUpgradeModal,
+  giftCraftModal: GiftCraftModal,
+  giftCraftSelectModal: GiftCraftSelectModal,
+  giftCraftInfoModal: GiftCraftInfoModal,
   giftAuctionModal: GiftAuctionModal,
   giftAuctionBidModal: GiftAuctionBidModal,
   giftAuctionInfoModal: GiftAuctionInfoModal,

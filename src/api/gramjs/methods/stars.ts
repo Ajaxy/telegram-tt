@@ -105,12 +105,14 @@ export async function fetchResaleGifts({
   limit = DEFAULT_PRIMITIVES.INT,
   attributesHash,
   filter,
+  forCraft,
 }: {
   giftId: string;
   offset?: string;
   limit?: number;
   attributesHash?: string;
   filter?: ResaleGiftsFilterOptions;
+  forCraft?: boolean;
 }) {
   type GetResaleStarGifts = ConstructorParameters<typeof GramJs.payments.GetResaleStarGifts>[0];
 
@@ -126,6 +128,7 @@ export async function fetchResaleGifts({
     limit,
     attributesHash: attributesHash ? BigInt(attributesHash) : DEFAULT_PRIMITIVES.BIGINT,
     attributes: buildInputResaleGiftsAttributes(attributes),
+    forCraft: forCraft || undefined,
     ...(filter && {
       sortByPrice: filter.sortType === 'byPrice' || undefined,
       sortByNum: filter.sortType === 'byNumber' || undefined,
@@ -629,6 +632,54 @@ export function resolveStarGiftOffer({
   }), {
     shouldReturnTrue: true,
   });
+}
+
+export async function fetchCraftStarGifts({
+  giftId,
+  peerId,
+  offset = DEFAULT_PRIMITIVES.STRING,
+  limit = DEFAULT_PRIMITIVES.INT,
+}: {
+  giftId: string;
+  peerId: string;
+  offset?: string;
+  limit?: number;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetCraftStarGifts({
+    giftId: BigInt(giftId),
+    offset,
+    limit,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return {
+    gifts: result.gifts.map((g) => buildApiSavedStarGift(g, peerId)),
+    nextOffset: result.nextOffset,
+    count: result.count,
+  };
+}
+
+export async function craftStarGift({
+  inputSavedGifts,
+}: {
+  inputSavedGifts: ApiRequestInputSavedStarGift[];
+}) {
+  try {
+    await invokeRequest(new GramJs.payments.CraftStarGift({
+      stargift: inputSavedGifts.map(buildInputSavedStarGift),
+    }), {
+      shouldThrow: true,
+    });
+    return undefined;
+  } catch (err) {
+    if (err instanceof RPCError) {
+      return { error: err.errorMessage };
+    }
+    throw err;
+  }
 }
 
 export async function fetchStarGiftUpgradeAttributes({

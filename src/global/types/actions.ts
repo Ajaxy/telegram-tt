@@ -2640,6 +2640,9 @@ export interface ActionPayloads {
   updateResaleGiftsFilter: {
     filter: ResaleGiftsFilterOptions;
   } & WithTabId;
+  updateCraftGiftsFilter: {
+    filter: ResaleGiftsFilterOptions;
+  } & WithTabId;
   loadResaleGifts: {
     giftId: string;
     shouldRefresh?: boolean;
@@ -2678,8 +2681,10 @@ export interface ActionPayloads {
     peerId: string;
     recipientId?: string;
     gift: ApiSavedStarGift;
+    craftSlotIndex?: number;
   } | {
     gift: ApiStarGift;
+    craftSlotIndex?: number;
   }) & WithTabId;
   openLockedGiftModalInfo: {
     untilDate?: number;
@@ -2708,6 +2713,31 @@ export interface ActionPayloads {
   } & WithTabId;
   closeGiftUpgradeModal: WithTabId | undefined;
   shiftGiftUpgradeNextPrice: WithTabId | undefined;
+
+  openGiftCraftModal: {
+    gift: ApiSavedStarGift;
+  } & WithTabId;
+  closeGiftCraftModal: WithTabId | undefined;
+  resetGiftCraftResult: WithTabId | undefined;
+  openGiftCraftSelectModal: {
+    slotIndex: number;
+  } & WithTabId;
+  closeGiftCraftSelectModal: WithTabId | undefined;
+  openGiftCraftInfoModal: {
+    gift: ApiStarGiftUnique;
+  } & WithTabId;
+  closeGiftCraftInfoModal: WithTabId | undefined;
+  selectGiftForCraft: {
+    gift?: ApiSavedStarGift;
+    slotIndex: number;
+  } & WithTabId;
+  selectPurchasedGiftForCraft: {
+    giftId: string;
+    slotIndex: number;
+  } & WithTabId;
+  loadMoreCraftableGifts: WithTabId | undefined;
+  loadMoreMarketCraftableGifts: WithTabId | undefined;
+  craftStarGift: WithTabId | undefined;
 
   openStarGiftPriceDecreaseInfoModal: {
     prices: ApiStarGiftUpgradePrice[];
@@ -2742,6 +2772,7 @@ export interface ActionPayloads {
   closeGiftInfoValueModal: WithTabId | undefined;
   openGiftPreviewModal: {
     originGift: ApiStarGift;
+    shouldShowCraftableOnStart?: boolean;
   } & WithTabId;
   closeGiftPreviewModal: WithTabId | undefined;
   loadActiveGiftAuctions: undefined;

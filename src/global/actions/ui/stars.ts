@@ -1,22 +1,26 @@
-import { getPromiseActions } from '../../../global';
-
-import type { ApiInputSavedStarGift, ApiSavedStarGift } from '../../../api/types';
+import type { ApiSavedStarGift, ApiStarGiftUnique } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
 import { STARS_CURRENCY_CODE } from '../../../config';
-import { selectChat } from '../../../global/selectors';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import * as langProvider from '../../../util/oldLangProvider';
-import { callApi } from '../../../api/gramjs';
 import { addTabStateResetterAction } from '../../helpers/meta';
 import { getPrizeStarsTransactionFromGiveaway, getStarsTransactionFromGift } from '../../helpers/payments';
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import { addActionHandler, setGlobal } from '../../index';
 import { clearStarPayment, openStarsTransactionModal } from '../../reducers';
 import { removeGiftAuction } from '../../reducers/gifts';
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectChatMessage, selectIsCurrentUserFrozen, selectShouldRemoveGiftAuction, selectStarsPayment, selectTabState,
 } from '../../selectors';
+
+function buildShortSavedGift(gift: ApiStarGiftUnique, fromId?: string): ApiSavedStarGift {
+  return {
+    gift,
+    date: Math.floor(Date.now() / 1000),
+    fromId,
+  };
+}
 
 addActionHandler('processOriginStarsPayment', (global, actions, payload): ActionReturnType => {
   const { originData, status, tabId = getCurrentTabId() } = payload;
@@ -248,69 +252,9 @@ addActionHandler('closeStarsGiftModal', (global, actions, payload): ActionReturn
   }, tabId);
 });
 
-addActionHandler('openGiftInfoModalFromMessage', async (global, actions, payload): Promise<void> => {
-  const {
-    chatId, messageId, tabId = getCurrentTabId(),
-  } = payload;
-
-  const chat = selectChat(global, chatId);
-  if (!chat) return;
-
-  await getPromiseActions().loadMessage({ chatId, messageId });
-
-  global = getGlobal();
-  const message = selectChatMessage(global, chatId, messageId);
-
-  if (!message || !message.content.action) return;
-
-  const action = message.content.action;
-  if (action.type !== 'starGift' && action.type !== 'starGiftUnique') return;
-
-  const starGift = action.type === 'starGift' ? action : undefined;
-  const uniqueGift = action.type === 'starGiftUnique' ? action : undefined;
-  const giftMsgId = starGift?.giftMsgId;
-
-  const giftReceiverId = action.peerId || (message.isOutgoing ? message.chatId : global.currentUserId!);
-
-  const inputGift: ApiInputSavedStarGift = (() => {
-    if (giftMsgId) {
-      return { type: 'user', messageId: giftMsgId };
-    }
-    if (action.savedId) {
-      return { type: 'chat', chatId, savedId: action.savedId };
-    }
-    return { type: 'user', messageId };
-  })();
-
-  const fromId = action.fromId || (message.isOutgoing ? global.currentUserId! : message.chatId);
-
-  const gift: ApiSavedStarGift = {
-    date: message.date,
-    gift: action.gift,
-    message: starGift?.message,
-    starsToConvert: starGift?.starsToConvert,
-    isNameHidden: starGift?.isNameHidden,
-    isUnsaved: !action.isSaved,
-    fromId,
-    messageId: message.id,
-    isConverted: starGift?.isConverted,
-    upgradeMsgId: starGift?.upgradeMsgId,
-    canUpgrade: starGift?.canUpgrade,
-    alreadyPaidUpgradeStars: starGift?.alreadyPaidUpgradeStars,
-    inputGift,
-    canExportAt: uniqueGift?.canExportAt,
-    savedId: action.savedId,
-    transferStars: uniqueGift?.transferStars,
-    dropOriginalDetailsStars: uniqueGift?.dropOriginalDetailsStars,
-    prepaidUpgradeHash: starGift?.prepaidUpgradeHash,
-  };
-
-  actions.openGiftInfoModal({ peerId: giftReceiverId, gift, tabId });
-});
-
 addActionHandler('openGiftInfoModal', (global, actions, payload): ActionReturnType => {
   const {
-    gift, tabId = getCurrentTabId(),
+    gift, craftSlotIndex, tabId = getCurrentTabId(),
   } = payload;
 
   const peerId = 'peerId' in payload ? payload.peerId : undefined;
@@ -321,6 +265,7 @@ addActionHandler('openGiftInfoModal', (global, actions, payload): ActionReturnTy
       peerId,
       gift,
       recipientId,
+      craftSlotIndex,
     },
   }, tabId);
 });
@@ -398,22 +343,6 @@ addActionHandler('closeResaleGiftsMarket', (global, actions, payload): ActionRet
   return global;
 });
 
-addActionHandler('openGiftInfoValueModal', async (global, actions, payload): Promise<void> => {
-  const { gift, tabId = getCurrentTabId() } = payload;
-
-  const result = await callApi('fetchUniqueStarGiftValueInfo', { slug: gift.slug });
-  if (!result) return;
-
-  global = getGlobal();
-  global = updateTabState(global, {
-    giftInfoValueModal: {
-      valueInfo: result,
-      gift,
-    },
-  }, tabId);
-  setGlobal(global);
-});
-
 addTabStateResetterAction('closeGiftInfoModal', 'giftInfoModal');
 
 addTabStateResetterAction('closeGiftInfoValueModal', 'giftInfoValueModal');
@@ -422,6 +351,95 @@ addTabStateResetterAction('closeGiftResalePriceComposerModal', 'giftResalePriceC
 
 addTabStateResetterAction('closeGiftUpgradeModal', 'giftUpgradeModal');
 
+addTabStateResetterAction('closeGiftCraftModal', 'giftCraftModal');
+
+addTabStateResetterAction('closeGiftCraftSelectModal', 'giftCraftSelectModal');
+
+addActionHandler('openGiftCraftInfoModal', (global, _actions, payload): ActionReturnType => {
+  const { gift, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    giftCraftInfoModal: { gift },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeGiftCraftInfoModal', 'giftCraftInfoModal');
+
+addActionHandler('selectGiftForCraft', (global, _actions, payload): ActionReturnType => {
+  const { gift, slotIndex, tabId = getCurrentTabId() } = payload;
+
+  const tabState = selectTabState(global, tabId);
+  const modal = tabState.giftCraftModal;
+
+  if (!modal) return undefined;
+
+  const slots = [modal.gift1, modal.gift2, modal.gift3, modal.gift4];
+  slots[slotIndex] = gift;
+
+  return updateTabState(global, {
+    giftCraftModal: {
+      ...modal,
+      gift1: slots[0],
+      gift2: slots[1],
+      gift3: slots[2],
+      gift4: slots[3],
+    },
+    giftCraftSelectModal: gift ? undefined : tabState.giftCraftSelectModal,
+  }, tabId);
+});
+
+addActionHandler('selectPurchasedGiftForCraft', (global, actions, payload): ActionReturnType => {
+  const { giftId, slotIndex, tabId = getCurrentTabId() } = payload;
+
+  const tabState = selectTabState(global, tabId);
+  const craftModal = tabState.giftCraftModal;
+  const giftInfoModal = tabState.giftInfoModal;
+  if (!craftModal) return undefined;
+
+  const giftFromModal = giftInfoModal?.gift;
+  const actualGift = giftFromModal && 'gift' in giftFromModal ? giftFromModal.gift : giftFromModal;
+
+  if (!actualGift || actualGift.type !== 'starGiftUnique' || actualGift.id !== giftId) {
+    return undefined;
+  }
+
+  const shortSavedGift = buildShortSavedGift(actualGift, global.currentUserId);
+
+  const slots = [craftModal.gift1, craftModal.gift2, craftModal.gift3, craftModal.gift4];
+  slots[slotIndex] = shortSavedGift;
+
+  global = updateTabState(global, {
+    giftCraftModal: {
+      ...craftModal,
+      gift1: slots[0],
+      gift2: slots[1],
+      gift3: slots[2],
+      gift4: slots[3],
+      shouldRefreshMyCraftableGifts: true,
+    },
+  }, tabId);
+
+  actions.closeGiftCraftSelectModal({ tabId });
+
+  return global;
+});
+
+addActionHandler('resetGiftCraftResult', (global, _actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const modal = selectTabState(global, tabId).giftCraftModal;
+  if (!modal) return undefined;
+
+  return updateTabState(global, {
+    giftCraftModal: {
+      ...modal,
+      craftResult: undefined,
+      gift1: undefined,
+      gift2: undefined,
+      gift3: undefined,
+      gift4: undefined,
+    },
+  }, tabId);
+});
 addTabStateResetterAction('closeGiftPreviewModal', 'giftPreviewModal');
 
 addActionHandler('closeGiftAuctionModal', (global, _actions, payload): ActionReturnType => {
@@ -474,30 +492,6 @@ addActionHandler('closeGiftAuctionInfoModal', (global, _actions, payload): Actio
   }, tabId);
 
   return global;
-});
-
-addActionHandler('openAboutStarGiftModal', async (global, _actions, payload): Promise<void> => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  const result = await callApi('fetchPremiumPromo');
-
-  let videoId: string | undefined;
-  let videoThumbnail;
-
-  if (result?.promo) {
-    const giftsIndex = result.promo.videoSections.indexOf('gifts');
-    if (giftsIndex !== -1 && giftsIndex < result.promo.videos.length) {
-      const video = result.promo.videos[giftsIndex];
-      videoId = video.id;
-      videoThumbnail = video.thumbnail;
-    }
-  }
-
-  global = getGlobal();
-  global = updateTabState(global, {
-    aboutStarGiftModal: { videoId, videoThumbnail },
-  }, tabId);
-  setGlobal(global);
 });
 
 addTabStateResetterAction('closeAboutStarGiftModal', 'aboutStarGiftModal');

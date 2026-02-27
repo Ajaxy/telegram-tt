@@ -36,7 +36,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
     const {
       id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal, slug, ownerAddress,
       giftAddress, resellAmount, releasedBy, resaleTonOnly, requirePremium, valueCurrency, valueAmount, giftId,
-      valueUsdAmount, burned, crafted,
+      valueUsdAmount, burned, crafted, craftChancePermille,
     } = starGift;
 
     return {
@@ -63,6 +63,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
       offerMinStars: starGift.offerMinStars,
       isBurned: burned,
       isCrafted: crafted,
+      craftChancePermille,
     };
   }
 
@@ -202,7 +203,7 @@ export function buildApiSavedStarGift(userStarGift: GramJs.SavedStarGift, peerId
   const {
     gift, date, convertStars, fromId, message, msgId, nameHidden, unsaved, refunded, upgradeStars, transferStars,
     canUpgrade, savedId, canExportAt, pinnedToTop, canResellAt, canTransferAt, prepaidUpgradeHash,
-    dropOriginalDetailsStars,
+    dropOriginalDetailsStars, canCraftAt,
   } = userStarGift;
 
   const inputGift: ApiInputSavedStarGift | undefined = savedId && peerId
@@ -230,6 +231,7 @@ export function buildApiSavedStarGift(userStarGift: GramJs.SavedStarGift, peerId
     isPinned: pinnedToTop,
     dropOriginalDetailsStars: dropOriginalDetailsStars !== undefined ? toJSNumber(dropOriginalDetailsStars) : undefined,
     prepaidUpgradeHash,
+    canCraftAt,
   };
 }
 

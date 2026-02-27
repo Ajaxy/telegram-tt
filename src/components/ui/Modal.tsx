@@ -47,6 +47,7 @@ export type OwnProps = {
   isLowStackPriority?: boolean;
   dialogContent?: React.ReactNode;
   moreMenuItems?: TeactNode;
+  headerRightToolBar?: TeactNode;
   withBalanceBar?: boolean;
   currencyInBalanceBar?: 'TON' | 'XTR';
   isCondensedHeader?: boolean;
@@ -95,6 +96,7 @@ const Modal = (props: OwnProps) => {
     dialogStyle,
     dialogContent,
     moreMenuItems,
+    headerRightToolBar: headerToolBar,
     withBalanceBar,
     isCondensedHeader,
     currencyInBalanceBar = 'XTR',
@@ -226,6 +228,7 @@ const Modal = (props: OwnProps) => {
           )}
           <div className={modalDialogClassName} ref={actualDialogRef} style={dialogStyle}>
             {renderHeader()}
+            {headerToolBar}
             {Boolean(moreMenuItems) && (
               <>
                 <Button

@@ -274,6 +274,7 @@ export interface ApiMessageActionStarGiftUnique extends ActionMediaType {
   savedId?: string;
   resaleAmount?: ApiTypeCurrencyAmount;
   dropOriginalDetailsStars?: number;
+  canCraftAt?: number;
 }
 
 export interface ApiMessageActionChannelJoined extends ActionMediaType {

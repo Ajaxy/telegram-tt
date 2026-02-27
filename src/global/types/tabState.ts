@@ -841,6 +841,7 @@ export type TabState = {
     peerId?: string;
     recipientId?: string;
     gift: ApiSavedStarGift | ApiStarGift;
+    craftSlotIndex?: number;
   };
 
   giftInfoValueModal?: {
@@ -891,6 +892,44 @@ export type TabState = {
     maxPrice?: number;
   };
 
+  giftCraftModal?: {
+    regularGiftId?: string;
+    regularGiftTitle?: string;
+    gift1?: ApiSavedStarGift;
+    gift2?: ApiSavedStarGift;
+    gift3?: ApiSavedStarGift;
+    gift4?: ApiSavedStarGift;
+    previewAttributes?: ApiStarGiftAttribute[];
+    myCraftableGifts?: ApiSavedStarGift[];
+    myCraftableGiftsNextOffset?: string;
+    shouldRefreshMyCraftableGifts?: boolean;
+    marketCraftableGifts?: ApiStarGiftUnique[];
+    marketCraftableGiftsNextOffset?: string;
+    marketCraftableGiftsCount?: number;
+    isMarketLoading?: boolean;
+    marketFilter: ResaleGiftsFilterOptions;
+    marketAttributes?: ApiStarGiftAttribute[];
+    marketCounters?: ApiStarGiftAttributeCounter[];
+    marketAttributesHash?: string;
+    marketUpdateIteration: number;
+    craftResult?: {
+      success: true;
+      gift: ApiStarGiftUnique;
+    } | {
+      success: false;
+      isError?: true;
+    };
+  };
+
+  giftCraftSelectModal?: {
+    slotIndex: number;
+    isLoading?: boolean;
+  };
+
+  giftCraftInfoModal?: {
+    gift: ApiStarGiftUnique;
+  };
+
   giftWithdrawModal?: {
     gift: ApiSavedStarGift;
     isLoading?: boolean;
@@ -904,6 +943,7 @@ export type TabState = {
   giftPreviewModal?: {
     attributes: ApiStarGiftAttribute[];
     originGift: ApiStarGift;
+    shouldShowCraftableOnStart?: boolean;
   };
 
   giftAuctionModal?: {

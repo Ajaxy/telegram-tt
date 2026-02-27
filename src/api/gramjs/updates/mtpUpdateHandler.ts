@@ -1136,6 +1136,10 @@ export function updater(update: Update) {
       giftId: update.giftId.toString(),
       userState: buildApiStarGiftAuctionUserState(update.userState),
     });
+  } else if (update instanceof GramJs.UpdateStarGiftCraftFail) {
+    sendApiUpdate({
+      '@type': 'updateStarGiftCraftFail',
+    });
   } else if (update instanceof GramJs.UpdatePaidReactionPrivacy) {
     sendApiUpdate({
       '@type': 'updatePaidReactionPrivacy',

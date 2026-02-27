@@ -861,6 +861,10 @@ export type ApiUpdateStarGiftAuctionUserState = {
   userState: ApiStarGiftAuctionUserState;
 };
 
+export type ApiUpdateStarGiftCraftFail = {
+  '@type': 'updateStarGiftCraftFail';
+};
+
 export type ApiUpdateDeleteProfilePhoto = {
   '@type': 'updateDeleteProfilePhoto';
   peerId: string;
@@ -943,7 +947,8 @@ export type ApiUpdate = (
   ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden |
   ApiUpdateViewForumAsMessages | ApiUpdateSavedDialogPinned | ApiUpdatePinnedSavedDialogIds | ApiUpdateChatLastMessage |
   ApiUpdateDeleteSavedHistory | ApiUpdatePremiumFloodWait | ApiUpdateStarsBalance | ApiUpdateStarGiftAuctionState
-  | ApiUpdateStarGiftAuctionUserState | ApiUpdateBotCommands | ApiUpdateQuickReplyMessage | ApiUpdateQuickReplies
+  | ApiUpdateStarGiftAuctionUserState | ApiUpdateStarGiftCraftFail | ApiUpdateBotCommands
+  | ApiUpdateQuickReplyMessage | ApiUpdateQuickReplies
   | ApiDeleteQuickReply | ApiUpdateDeleteQuickReplyMessages | ApiUpdateDeleteProfilePhoto | ApiUpdateNewProfilePhoto
   | ApiUpdateEntities | ApiUpdatePaidReactionPrivacy | ApiUpdateLangPackTooLong | ApiUpdateLangPack
   | ApiUpdateNotSupportedInFrozenAccountError

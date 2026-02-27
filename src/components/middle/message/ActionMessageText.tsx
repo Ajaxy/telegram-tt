@@ -702,6 +702,17 @@ const ActionMessageText = ({
         if (isSavedMessages) {
           if (isUpgrade) return lang('ActionStarGiftUpgradedSelf');
           if (isTransferred) return lang('ActionStarGiftTransferredSelf');
+          if (resaleAmount) {
+            const amountText = formatCurrencyAmountAsText(lang, resaleAmount);
+            return lang(
+              'ApiMessageMessageActionResaleStarGiftUniqueOutgoing',
+              {
+                gift: lang('GiftUnique', { title: gift.title, number: gift.number }),
+                stars: asPreview ? amountText : renderStrong(amountText),
+              },
+              { withNodes: true },
+            );
+          }
           if (gift.isCrafted) return lang('ActionStarGiftCraftedSelf');
         }
 

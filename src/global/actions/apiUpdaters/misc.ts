@@ -339,6 +339,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
           actions.reloadPeerSavedGifts({ peerId: global.currentUserId! });
         }
+
+        if (tabState.giftCraftModal && actionStarGift.isCrafted) {
+          global = updateTabState(global, {
+            giftCraftModal: {
+              ...tabState.giftCraftModal,
+              craftResult: { success: true, gift: actionStarGift },
+            },
+          }, tabId);
+        }
       });
 
       setGlobal(global);

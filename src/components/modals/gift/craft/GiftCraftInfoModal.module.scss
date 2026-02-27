@@ -1,0 +1,18 @@
+.header {
+  --_height: 16rem;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  margin-top: 0.5rem;
+}
+
+.understoodIcon {
+  font-size: 1.1875rem;
+}
+
+.content {
+  gap: 1.5rem;
+}

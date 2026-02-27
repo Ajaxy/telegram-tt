@@ -123,11 +123,20 @@ const GiftPreviewModal = ({ modal, animationLevel }: OwnProps & StateProps) => {
     if (newModel && newModel.rarity.type !== 'regular') showCraftableModels();
   }, [initialAttributes, firstModel, firstPattern, firstBackdrop]);
 
+  useEffect(() => {
+    if (renderingModal?.shouldShowCraftableOnStart) {
+      showCraftableModels();
+    }
+  }, [renderingModal?.shouldShowCraftableOnStart]);
+
   const handleStickerAnimationEnded = useLastCallback((modelName: string) => {
     if (modelName !== selectedModel?.name || !isPlayingRandomPreviews) return;
 
     if (!originGift || !selectedModel || !selectedPattern || !selectedBackdrop) return;
-    const newAttributes = getRandomGiftPreviewAttributes(renderingModal?.attributes, {
+    const attributesToUse = renderingModal?.shouldShowCraftableOnStart && isCraftableModelsMode
+      ? renderingModal.attributes.filter((attr) => attr.type !== 'model' || attr.rarity.type !== 'regular')
+      : renderingModal?.attributes;
+    const newAttributes = getRandomGiftPreviewAttributes(attributesToUse, {
       model: selectedModel,
       pattern: selectedPattern,
       backdrop: selectedBackdrop,

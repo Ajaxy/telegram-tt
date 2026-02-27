@@ -31,3 +31,5 @@ export const VTT_PROFILE_BUSINESS_HOURS_COLLAPSE = VTT_PROFILE_BUSINESS_HOURS.wi
 export const VTT_PROFILE_NOTE = VTT_CHAT_EXTRA.with('profileNote');
 export const VTT_PROFILE_NOTE_EXPAND = VTT_PROFILE_NOTE.with('profileNoteExpand');
 export const VTT_PROFILE_NOTE_COLLAPSE = VTT_PROFILE_NOTE.with('profileNoteCollapse');
+
+export const VTT_CRAFT_ATTRIBUTES = new VTTypes(['craftAttributes']);

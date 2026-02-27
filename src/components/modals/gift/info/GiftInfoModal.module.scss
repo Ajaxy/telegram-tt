@@ -2,6 +2,21 @@
   overflow: hidden;
 }
 
+.headerRightButtons {
+  position: absolute;
+  z-index: 3;
+  top: 0.875rem;
+  right: 3rem;
+
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.craftButton {
+  position: relative;
+}
+
 .uniqueTitleNumber {
   &.small {
     font-size: 0.75em;
@@ -73,9 +88,7 @@
 .giftResalePriceContainer {
   pointer-events: auto;
 
-  position: absolute;
-  top: 0.875rem;
-  right: 3.25rem;
+  position: relative;
 
   display: flex;
   align-items: center;

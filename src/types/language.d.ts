@@ -1320,6 +1320,24 @@ export interface LangPair {
   'GiftInfoUpgradeBadge': undefined;
   'GiftInfoUpgradeForFree': undefined;
   'GiftInfoUpgrade': undefined;
+  'GiftInfoCraft': undefined;
+  'GiftCraftTitle': undefined;
+  'GiftCraftNewGift': undefined;
+  'GiftCraftSelectTitle': undefined;
+  'GiftCraftSelectYourGifts': undefined;
+  'GiftCraftWarning': undefined;
+  'GiftCraftingTitle': undefined;
+  'GiftCraftFailedTitle': undefined;
+  'GiftCraftInfoTitle': undefined;
+  'GiftCraftInfoSubtitle': undefined;
+  'GiftCraftInfoCraftTitle': undefined;
+  'GiftCraftInfoCraftDescription': undefined;
+  'GiftCraftInfoChanceTitle': undefined;
+  'GiftCraftInfoChanceDescription': undefined;
+  'GiftCraftInfoRiskTitle': undefined;
+  'GiftCraftInfoRiskDescription': undefined;
+  'GiftCraftHelp': undefined;
+  'GiftCraftViewAll': undefined;
   'GiftInfoWithdraw': undefined;
   'GiftInfoWear': undefined;
   'GiftInfoTakeOff': undefined;
@@ -2396,6 +2414,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   'GiftSavedNumber': {
     'number': V;
   };
+  'GiftInfoModelCrafted': {
+    'model': V;
+  };
   'GiftInfoPeerOriginalInfo': {
     'peer': V;
     'date': V;
@@ -2415,6 +2436,18 @@ export interface LangPairWithVariables<V = LangVariable> {
     'peer': V;
     'date': V;
     'text': V;
+  };
+  'GiftCraftButton': {
+    'giftName': V;
+  };
+  'GiftCraftSuccessChance': {
+    'percent': V;
+  };
+  'GiftCraftEmptyHint': {
+    'button': V;
+  };
+  'GiftCraftDescription': {
+    'giftLine': V;
   };
   'GiftTransferTONBlocked': {
     'time': V;
@@ -3664,6 +3697,12 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   'GiftInfoAvailabilityValue': {
     'count': V;
     'total': V;
+  };
+  'GiftCraftSelectMarketGifts': {
+    'count': V;
+  };
+  'GiftCraftFailedDescription': {
+    'count': V;
   };
   'GiftWithdrawWait': {
     'days': V;

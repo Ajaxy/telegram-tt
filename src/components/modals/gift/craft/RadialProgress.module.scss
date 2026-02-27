@@ -1,0 +1,16 @@
+.root {
+  transform: rotate(135deg);
+}
+
+.background {
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-linecap: round;
+  stroke-width: 0.375rem;
+}
+
+.fill {
+  stroke: white;
+  stroke-linecap: round;
+  stroke-width: 0.375rem;
+  transition: stroke-dashoffset 0.3s ease;
+}

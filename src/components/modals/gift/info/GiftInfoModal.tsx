@@ -16,7 +16,7 @@ import { selectPeer, selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
 import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
-import { formatCurrencyAsString } from '../../../../util/formatCurrency';
+import { formatCurrency, formatCurrencyAsString } from '../../../../util/formatCurrency';
 import {
   formatStarsAsIcon, formatStarsAsText, formatTonAsIcon, formatTonAsText,
   getNextArrowReplacement,
@@ -91,6 +91,7 @@ const GiftInfoModal = ({
     openChatWithInfo,
     focusMessage,
     openGiftUpgradeModal,
+    openGiftCraftModal,
     showNotification,
     buyStarGift,
     closeGiftModal,
@@ -247,6 +248,12 @@ const GiftInfoModal = ({
     });
   });
 
+  const handleOpenCraftModal = useLastCallback(() => {
+    if (!savedGift || savedGift.gift.type !== 'starGiftUnique') return;
+    handleClose();
+    openGiftCraftModal({ gift: savedGift });
+  });
+
   const giftAttributes = useMemo(() => {
     return gift && getGiftAttributes(gift);
   }, [gift]);
@@ -262,6 +269,7 @@ const GiftInfoModal = ({
     if (!gift || gift.type !== 'starGiftUnique' || !giftAttributes?.backdrop) return undefined;
 
     const numberColor = giftAttributes.backdrop.textColor;
+
     const digitCount = String(gift.number).length;
     const numberSizeClass = digitCount >= 6 ? styles.small : styles.regular;
     const styledNumber = (
@@ -300,9 +308,7 @@ const GiftInfoModal = ({
         <Button className={styles.buyButton} onClick={handleBuyGift}>
           <div>
             {lang('ButtonBuyGift', {
-              stars: resellPrice?.currency === TON_CURRENCY_CODE
-                ? formatTonAsIcon(lang, resellPrice.amount, { shouldConvertFromNanos: true })
-                : formatStarsAsIcon(lang, resellPrice?.amount, { asFont: true }),
+              stars: formatCurrency(lang, resellPrice.amount, resellPrice.currency, { asFontIcon: true }),
             }, { withNodes: true })}
           </div>
           {resellPrice?.currency === TON_CURRENCY_CODE && Boolean(resellPriceInStars) && (
@@ -388,6 +394,14 @@ const GiftInfoModal = ({
 
     return text;
   }, [gift, lang]);
+
+  // ToDo
+  // const canCraft = Boolean(
+  //   canManage && savedGift?.canCraftAt && getServerTime() >= savedGift.canCraftAt,
+  // );
+
+  // Mock for Tests
+  const canCraft = Boolean(canManage && savedGift?.canCraftAt);
 
   const modalData = useMemo(() => {
     if (!typeGift || !gift) {
@@ -487,10 +501,7 @@ const GiftInfoModal = ({
     }
 
     const uniqueGiftModalHeader = (
-      <div
-        className={styles.modalHeader}
-      >
-
+      <div className={styles.modalHeader}>
         <Button
           className={styles.closeButton}
           round
@@ -500,22 +511,33 @@ const GiftInfoModal = ({
           ariaLabel={lang('Close')}
           onClick={handleClose}
         />
-
-        {Boolean(resellPrice?.amount) && (
-          <div className={styles.giftResalePriceContainer}>
-            {resellPrice.currency === TON_CURRENCY_CODE
-              ? formatTonAsIcon(lang, resellPrice.amount, {
-                className: styles.giftResalePriceStar,
-                shouldConvertFromNanos: true,
-              })
-              : formatStarsAsIcon(lang, resellPrice.amount, {
-                asFont: true,
-                className: styles.giftResalePriceStar,
-              })}
-          </div>
-        )}
       </div>
     );
+
+    const headerRightToolBar = (Boolean(resellPrice?.amount) || canCraft) ? (
+      <div className={styles.headerRightButtons}>
+        {Boolean(resellPrice?.amount) && (
+          <div className={styles.giftResalePriceContainer}>
+            {formatCurrency(lang, resellPrice.amount, resellPrice.currency, {
+              asFontIcon: true,
+              iconClassName: styles.giftResalePriceStar,
+            })}
+          </div>
+        )}
+        {canCraft && (
+          <Button
+            className={styles.craftButton}
+            round
+            color="translucent-white"
+            size="tiny"
+            ariaLabel={lang('GiftInfoCraft')}
+            onClick={handleOpenCraftModal}
+          >
+            <Icon name="craft" />
+          </Button>
+        )}
+      </div>
+    ) : undefined;
 
     const uniqueGiftHeader = isGiftUnique && (
       <div ref={uniqueGiftHeaderRef} className={buildClassName(styles.header, styles.uniqueGift)}>
@@ -804,6 +826,7 @@ const GiftInfoModal = ({
 
     return {
       modalHeader: isGiftUnique ? uniqueGiftModalHeader : undefined,
+      headerRightToolBar: isGiftUnique ? headerRightToolBar : undefined,
       header: isGiftUnique ? uniqueGiftHeader : regularHeader,
       tableData,
       footer,
@@ -812,7 +835,7 @@ const GiftInfoModal = ({
     typeGift, savedGift, renderingTargetPeer, giftSticker, lang,
     canManage, hasConvertOption, isSender, oldLang, tonExplorerUrl,
     gift, giftAttributes, renderFooterButton, isTargetChat,
-    isGiftUnique, saleDateInfo,
+    isGiftUnique, saleDateInfo, canCraft, handleOpenCraftModal,
     canBuyGift, giftOwnerTitle, resellPrice, uniqueGiftTitle, uniqueGiftSubtitle, releasedByPeer,
   ]);
 
@@ -831,6 +854,7 @@ const GiftInfoModal = ({
       <TableInfoModal
         isOpen={isOpen}
         modalHeader={modalData?.modalHeader}
+        headerRightToolBar={modalData?.headerRightToolBar}
         header={modalData?.header}
         hasBackdrop={isGiftUnique}
         tableData={modalData?.tableData}
@@ -842,7 +866,7 @@ const GiftInfoModal = ({
         onClose={handleClose}
         withBalanceBar={Boolean(canBuyGift)}
         currencyInBalanceBar={confirmPrice?.currency}
-        isLowStackPriority
+        isLowStackPriority={renderingModal?.craftSlotIndex !== undefined ? true : undefined}
       />
       {uniqueGift && currentUser && Boolean(confirmPrice) && (
         <ConfirmDialog
