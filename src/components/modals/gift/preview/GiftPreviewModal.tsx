@@ -282,7 +282,7 @@ const GiftPreviewModal = ({ modal, animationLevel }: OwnProps & StateProps) => {
         patternAttribute={selectedPattern}
         title={originGift?.title}
         subtitle={lang('GiftPreviewSelectedTraits')}
-        noLoop={isPlayingRandomPreviews}
+        noLoop
         onStickerAnimationEnded={handleStickerAnimationEnded}
       >
         <div
