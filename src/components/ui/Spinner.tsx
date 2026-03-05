@@ -1,6 +1,6 @@
 import buildClassName from '../../util/buildClassName';
 
-import './Spinner.scss';
+import styles from './Spinner.module.scss';
 
 type OwnProps = {
   color?: 'blue' | 'white' | 'black' | 'green' | 'gray' | 'yellow';
@@ -15,10 +15,15 @@ const Spinner = ({
 }: OwnProps) => {
   return (
     <div className={buildClassName(
-      'Spinner', className, color, backgroundColor && 'with-background', backgroundColor && `bg-${backgroundColor}`,
+      'Spinner',
+      styles.root,
+      color && styles[color],
+      backgroundColor && styles.withBackground,
+      backgroundColor && styles[`${backgroundColor}Bg`],
+      className,
     )}
     >
-      <div className="Spinner__inner" />
+      <div className={buildClassName('Spinner__inner', styles.inner)} />
     </div>
   );
 };
