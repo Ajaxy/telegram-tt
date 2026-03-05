@@ -9,7 +9,7 @@ import type {
 import type { TabState } from '../../../../global/types';
 import { MediaViewerOrigin } from '../../../../types';
 
-import { STARS_CURRENCY_CODE } from '../../../../config';
+import { NNBSP, STARS_CURRENCY_CODE } from '../../../../config';
 import { getMessageLink } from '../../../../global/helpers';
 import {
   buildStarsTransactionCustomPeer,
@@ -188,18 +188,19 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
         )}
         {Boolean(title) && <h1 className={styles.title}>{title}</h1>}
         <p className={styles.description}>{description}</p>
-        <p className={styles.amount}>
-          <span
-            className={buildClassName(styles.amount, amountColorClass)}
-          >
+        <span className={styles.amount}>
+          <span className={amountColorClass}>
             {formatStarsTransactionAmount(lang, amount)}
           </span>
-          {amount.currency === STARS_CURRENCY_CODE && <StarIcon type="gold" size="middle" />}
-          {amount.currency === 'TON' && <Icon name="toncoin" className={amountColorClass} />}
+          {NNBSP}
+          {amount.currency === STARS_CURRENCY_CODE && <StarIcon type="gold" size="adaptive" />}
+          {amount.currency === 'TON' && (
+            <Icon name="toncoin" className={buildClassName('in-text-icon', amountColorClass)} />
+          )}
           {transaction.isRefund && (
             <p className={styles.refunded}>{lang('Refunded')}</p>
           )}
-        </p>
+        </span>
         {Boolean(transaction.paidMessages && transaction.starRefCommision && paidMessageCommission) && (
           <p className={styles.description}>
             {lang(
@@ -272,7 +273,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
         lang('PaidMessageTransactionTotal'),
         formatStarsAsIcon(lang,
           transaction.amount.amount / ((100 - transaction.starRefCommision) / 100),
-          { asFont: false, className: styles.starIcon, containerClassName: styles.totalStars }),
+          { asFont: false, className: styles.starIcon, withWrapper: true }),
       ]);
     }
 

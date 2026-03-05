@@ -1,11 +1,13 @@
 .root {
+  --_status-size: 1.25rem;
+
   display: flex !important;
   gap: 0.25rem;
   align-items: center;
 
   .statusTransition {
-    width: 1.25em !important;
-    height: 1.25em !important;
+    width: var(--_status-size) !important;
+    height: var(--_status-size) !important;
   }
 }
 

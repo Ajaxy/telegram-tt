@@ -409,10 +409,10 @@ function GiftComposer({
           </div>
         )}
         <Button
-          className={styles.mainButton}
           size={auctionTimeLeft ? undefined : 'smaller'}
           onClick={handleMainButtonClick}
           isLoading={isPaymentFormLoading}
+          inline
           noForcedUpperCase
         >
           {giftAuction ? (

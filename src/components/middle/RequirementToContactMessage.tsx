@@ -66,7 +66,6 @@ function RequirementToContactMessage({
                   paidMessagesStars,
                   {
                     asFont: true,
-                    className: styles.starIcon,
                     containerClassName: styles.starIconContainer,
                   }),
               }, {

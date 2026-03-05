@@ -10,6 +10,7 @@ import type {
   ApiTypeCurrencyAmount,
 } from '../../../api/types';
 
+import { NNBSP } from '../../../config.ts';
 import {
   formatStarsTransactionAmount,
 } from '../../../global/helpers/payments';
@@ -148,13 +149,12 @@ const UniqueGiftHeader = ({
         />
       )}
       {resellPrice && (
-        <p className={styles.amount}>
-          <span>
-            {formatStarsTransactionAmount(lang, resellPrice)}
-          </span>
-          {resellPrice.currency === 'XTR' && <StarIcon type="gold" size="middle" />}
-          {resellPrice.currency === 'TON' && <Icon name="toncoin" />}
-        </p>
+        <span className={styles.amount}>
+          {formatStarsTransactionAmount(lang, resellPrice)}
+          {NNBSP}
+          {resellPrice.currency === 'XTR' && <StarIcon type="gold" size="adaptive" />}
+          {resellPrice.currency === 'TON' && <Icon className="in-text-icon" name="toncoin" />}
+        </span>
       )}
       {children}
     </div>

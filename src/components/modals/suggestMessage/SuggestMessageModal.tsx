@@ -283,6 +283,7 @@ const SuggestMessageModal = ({
           className={styles.offerButton}
           onClick={handleOffer}
           disabled={isDisabled}
+          inline
         >
           {isInSuggestChangesMode ? lang('ButtonUpdateTerms')
             : currencyAmount ? lang('ButtonOfferAmount', {

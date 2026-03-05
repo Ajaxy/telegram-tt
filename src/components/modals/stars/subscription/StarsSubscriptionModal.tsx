@@ -152,16 +152,16 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
           centerShift={AVATAR_SPARKLES_CENTER_SHIFT}
         />
         <h1 className={styles.title}>{title || oldLang('StarsSubscriptionTitle')}</h1>
-        <p className={styles.amount}>
+        <span className={styles.amount}>
           {lang('StarsPerMonth', {
             amount: pricing.amount,
           }, {
             withNodes: true,
             specialReplacement: {
-              [STARS_ICON_PLACEHOLDER]: <StarIcon className={styles.amountStar} size="adaptive" type="gold" />,
+              [STARS_ICON_PLACEHOLDER]: <StarIcon size="adaptive" type="gold" />,
             },
           })}
-        </p>
+        </span>
       </div>
     );
 

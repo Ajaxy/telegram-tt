@@ -198,8 +198,6 @@ const MessageMeta: FC<OwnProps> = ({
           {
             formatStarsAsIcon(lang, paidMessageStars, {
               asFont: true,
-              className: 'message-price-star-icon',
-              containerClassName: 'message-price-stars-container',
             })
           }
         </span>

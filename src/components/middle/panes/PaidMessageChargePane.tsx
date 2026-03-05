@@ -16,13 +16,11 @@ import {
 import { formatStarsAsIcon } from '../../../util/localization/format';
 
 import useLang from '../../../hooks/useLang';
-// import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
 import Button from '../../ui/Button';
 
-// import CustomEmoji from '../../common/CustomEmoji';
 import styles from './PaidMessageChargePane.module.scss';
 
 type OwnProps = {
@@ -65,7 +63,7 @@ const PaidMessageChargePane: FC<OwnProps & StateProps> = ({
     peer: peerName,
     amount: formatStarsAsIcon(lang,
       chargedPaidMessageStars,
-      { asFont: true, className: styles.messageStarIcon, containerClassName: styles.messageStars }),
+      { asFont: true }),
   }, {
     withMarkdown: true,
     withNodes: true,
@@ -73,9 +71,9 @@ const PaidMessageChargePane: FC<OwnProps & StateProps> = ({
 
   return (
     <div ref={ref} className={styles.root}>
-      <div className={styles.message}>
+      <span className={styles.message}>
         {message}
-      </div>
+      </span>
       <Button
         isText
         noForcedUpperCase

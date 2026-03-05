@@ -351,12 +351,13 @@ const PaidReactionModal = ({
         label={oldLang('StarsReactionShowMeInTopSenders')}
       />
       <Button
+        inline
         onClick={handleSend}
       >
         {lang('SendPaidReaction', { amount: starsAmount }, {
           withNodes: true,
           specialReplacement: {
-            [STARS_ICON_PLACEHOLDER]: <Icon className={styles.buttonStar} name="star" />,
+            [STARS_ICON_PLACEHOLDER]: <Icon name="star" className="in-text-icon" />,
           },
         })}
       </Button>

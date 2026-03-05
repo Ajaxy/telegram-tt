@@ -306,17 +306,17 @@ const GiftInfoModal = ({
     if (canBuyGift) {
       return (
         <Button className={styles.buyButton} onClick={handleBuyGift}>
-          <div>
+          <span>
             {lang('ButtonBuyGift', {
               stars: formatCurrency(lang, resellPrice.amount, resellPrice.currency, { asFontIcon: true }),
             }, { withNodes: true })}
-          </div>
+          </span>
           {resellPrice?.currency === TON_CURRENCY_CODE && Boolean(resellPriceInStars) && (
-            <div className={styles.footerHint}>
+            <span className={styles.footerHint}>
               {lang('GiftBuyEqualsTo', {
                 stars: formatStarsAsIcon(lang, resellPriceInStars.amount, { asFont: true }),
               }, { withNodes: true })}
-            </div>
+            </span>
           )}
         </Button>
       );
@@ -614,7 +614,7 @@ const GiftInfoModal = ({
       tableData.push([
         lang('GiftInfoValue'),
         <div className={styles.giftValue}>
-          {formatStarsAsIcon(lang, starsValue, { className: styles.starAmountIcon })}
+          {formatStarsAsIcon(lang, starsValue, { className: styles.starAmountIcon, withWrapper: true })}
           {canManage && hasConvertOption && Boolean(starsToConvert) && (
             <BadgeButton onClick={openConvertConfirm}>
               {lang('GiftInfoConvert', { amount: starsToConvert }, { pluralValue: starsToConvert })}

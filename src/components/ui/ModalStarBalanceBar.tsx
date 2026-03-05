@@ -18,9 +18,9 @@ import Link from './Link';
 import styles from './ModalStarBalanceBar.module.scss';
 
 export type OwnProps = {
-  onCloseAnimationEnd?: () => void;
   isModalOpen?: true;
   currency?: 'TON' | 'XTR';
+  onCloseAnimationEnd?: () => void;
 };
 
 export type StateProps = {
@@ -73,18 +73,14 @@ function ModalStarBalanceBar({
       <div>
         {isTonMode ? (
           lang('ModalStarsBalanceBarDescription', {
-            stars: formatTonAsIcon(lang, convertTonFromNanos(currentBalance.amount), {
-              className: styles.starIcon,
-            }),
+            stars: formatTonAsIcon(lang, convertTonFromNanos(currentBalance.amount)),
           }, {
             withNodes: true,
             withMarkdown: true,
           })
         ) : (
           lang('ModalStarsBalanceBarDescription', {
-            stars: formatStarsAsIcon(lang, formatStarsAmount(lang, currentBalance as ApiStarsAmount), {
-              className: styles.starIcon,
-            }),
+            stars: formatStarsAsIcon(lang, formatStarsAmount(lang, currentBalance as ApiStarsAmount)),
           }, {
             withNodes: true,
             withMarkdown: true,

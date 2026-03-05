@@ -198,9 +198,9 @@ const StarPaymentModal = ({
       <div className={styles.description}>
         {renderText(descriptionText, ['simple_markdown', 'emoji'])}
       </div>
-      <Button className={styles.paymentButton} onClick={handlePayment} isLoading={isLoading}>
+      <Button className={styles.paymentButton} inline onClick={handlePayment} isLoading={isLoading}>
         {lang(isBotSubscription ? 'StarsSubscribeBotButtonMonth' : 'StarsPay', {
-          amount: formatStarsAsIcon(lang, amount!, { asFont: true, className: styles.paymentButtonStar }),
+          amount: formatStarsAsIcon(lang, amount!, { asFont: true }),
         }, {
           withNodes: true,
         })}

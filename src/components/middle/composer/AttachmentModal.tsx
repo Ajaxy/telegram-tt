@@ -638,7 +638,6 @@ const AttachmentModal = ({
     lang,
     attachmentsLength * paidMessagesStars,
     {
-      className: styles.sendButtonStar,
       asFont: true,
     },
   ) : lang('Send');
@@ -766,6 +765,7 @@ const AttachmentModal = ({
                 ref={mainButtonRef}
                 className={styles.send}
                 size="smaller"
+                inline
                 onClick={handleSendClick}
                 onContextMenu={canShowCustomSendMenu ? handleContextMenu : undefined}
               >

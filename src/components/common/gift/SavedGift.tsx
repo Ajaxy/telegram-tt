@@ -191,9 +191,9 @@ const SavedGift = ({
           nonInteractive
           size="tiny"
           withSparkleEffect
-          noSparkleAnimation
           pill
           fluid
+          inline
         >
           {resellPrice.currency === 'TON'
             ? formatTonAsIcon(lang, resellPrice.amount, { shouldConvertFromNanos: true, className: styles.star })

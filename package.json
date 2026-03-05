@@ -90,7 +90,7 @@
     "eslint-plugin-tt-multitab": "git+https://github.com/zubiden/eslint-plugin-tt-multitab#137cf50",
     "eslint-plugin-unused-imports": "^4.3.0",
     "fake-indexeddb": "^6.2.5",
-    "fantasticon": "^4.1.0",
+    "@twbs/fantasticon": "^3.1.0",
     "git-revision-webpack-plugin": "^5.0.0",
     "gitlog": "^5.1.0",
     "html-webpack-plugin": "^5.6.6",

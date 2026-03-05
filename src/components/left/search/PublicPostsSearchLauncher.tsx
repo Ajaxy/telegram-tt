@@ -130,6 +130,7 @@ const PublicPostsSearchLauncher = ({
             color="primary"
             disabled={!searchQuery}
             noForcedUpperCase
+            inline
             onClick={handlePaidSearchClick}
           >
             {lang('PublicPostsSearchForStars', {

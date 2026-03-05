@@ -200,8 +200,7 @@ const GiftAuctionBidModal = ({
       <div className={styles.infoCards}>
         <div className={styles.infoCard}>
           <div className={styles.infoCardValue}>
-            <StarIcon type="gold" size="adaptive" />
-            {lang.number(currentMinBid)}
+            {formatStarsAsIcon(lang, currentMinBid, { withWrapper: true })}
           </div>
           <div className={styles.infoCardLabel}>{lang('GiftAuctionMinimumBid')}</div>
         </div>
@@ -269,8 +268,7 @@ const GiftAuctionBidModal = ({
             {currentUserPeer && <FullNameTitle peer={currentUserPeer} className={styles.bidderName} />}
           </div>
           <div className={styles.bidderAmount}>
-            <StarIcon type="gold" size="adaptive" />
-            {lang.number(selectedBidAmount)}
+            {formatStarsAsIcon(lang, selectedBidAmount)}
           </div>
         </div>
       </div>
@@ -304,8 +302,7 @@ const GiftAuctionBidModal = ({
         </Transition>
         {amount !== undefined && (
           <div className={styles.bidderAmount}>
-            <StarIcon type="gold" size="adaptive" />
-            {lang.number(amount)}
+            {formatStarsAsIcon(lang, amount)}
           </div>
         )}
       </div>
@@ -363,11 +360,11 @@ const GiftAuctionBidModal = ({
       {renderUserBid()}
       {renderTopWinners()}
 
-      <Button noForcedUpperCase onClick={handleSubmit}>
+      <Button noForcedUpperCase inline onClick={handleSubmit}>
         {lang(userState?.bidAmount ? 'GiftAuctionAddToBid' : 'GiftAuctionPlaceBidButton', {
           amount: formatStarsAsIcon(lang,
             userState?.bidAmount ? selectedBidAmount - userState.bidAmount : selectedBidAmount,
-            { asFont: true, className: styles.buttonStar }),
+            { asFont: true }),
         }, { withNodes: true })}
       </Button>
       <ConfirmDialog

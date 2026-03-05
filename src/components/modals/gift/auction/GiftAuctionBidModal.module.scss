@@ -60,7 +60,6 @@
 
 .infoCardValue {
   display: flex;
-  gap: 0.25rem;
   align-items: center;
   justify-content: center;
 
@@ -197,17 +196,9 @@
 }
 
 .bidderAmount {
-  display: flex;
-  gap: 0.25rem;
-  align-items: center;
-
   font-size: 0.9375rem;
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
-}
-
-.buttonStar {
-  margin-inline-start: 0 !important;
 }
 
 .giftSticker {

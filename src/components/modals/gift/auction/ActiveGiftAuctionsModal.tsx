@@ -102,7 +102,7 @@ function ActiveAuctionItem({ auction }: { auction: ApiStarGiftAuctionState }) {
       </div>
       <div className="subtitle">
         {lang('GiftAuctionBidPosition', {
-          amount: formatStarsAsIcon(lang, userState.bidAmount!, { noStyles: true }),
+          amount: formatStarsAsIcon(lang, userState.bidAmount!),
           position: lang.number(bidPosition),
         }, {
           withNodes: true,

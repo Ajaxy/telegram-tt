@@ -6,6 +6,7 @@ import type {
 } from '../../../../api/types';
 import type { GlobalState } from '../../../../global/types';
 
+import { NNBSP } from '../../../../config';
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
 import { formatDateToString } from '../../../../util/dates/dateFormat';
@@ -84,6 +85,7 @@ const StarsSubscriptionItem = ({ subscription }: OwnProps) => {
           <>
             <div className={styles.statusPricing}>
               <StarIcon className={styles.star} type="gold" size="adaptive" />
+              {NNBSP}
               <span className={styles.amount}>
                 {formatInteger(pricing.amount)}
               </span>

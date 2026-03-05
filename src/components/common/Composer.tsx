@@ -2482,7 +2482,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           fluid
         >
           <div className="paidStarsBadgeText">
-            <Icon name="star" className={buildClassName('star-amount-icon', className)} />
+            <Icon name="star" />
             <AnimatedCounter
               ref={counterRef}
               text={lang.number(starsForAllMessages)}

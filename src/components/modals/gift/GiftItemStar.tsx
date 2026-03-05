@@ -222,6 +222,7 @@ function GiftItemStar({
           withSparkleEffect={isVisible && !withTransferBadge}
           pill
           fluid
+          inline
         >
           {badgeContent}
         </Button>

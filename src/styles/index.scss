@@ -347,18 +347,9 @@ body:not(.is-ios) {
   opacity: 0;
 }
 
-.star-currency-icon {
-  font-size: 1rem !important;
-  vertical-align: text-top;
-}
-
-// Increase specificity to override the default icon style
-.ton-amount-icon.ton-amount-icon,
-.star-amount-icon.star-amount-icon {
-  margin-inline-start: 0.375em; // Prevent sticking to the text without using `white-space: pre`
-  margin-inline-end: 0.2em; // Prevent sticking to the text without using `white-space: pre`
-  line-height: inherit; // Vertical centring
-  vertical-align: text-top; // As regular text
+.in-text-icon {
+  line-height: inherit;
+  vertical-align: bottom;
 }
 
 .next-arrow-icon {

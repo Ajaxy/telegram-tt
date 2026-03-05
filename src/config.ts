@@ -26,7 +26,7 @@ export const DEBUG = process.env.APP_ENV !== 'production';
 export const DEBUG_MORE = false;
 export const DEBUG_LOG_FILENAME = 'tt-log.json';
 export const STRICTERDOM_ENABLED = DEBUG;
-export const FORCE_FALLBACK_LANG = false;
+export const FORCE_FALLBACK_LANG = DEBUG;
 
 export const BETA_CHANGELOG_URL = 'https://telegra.ph/WebA-Beta-03-20';
 
@@ -140,6 +140,9 @@ export const ANIMATION_LEVEL_DEFAULT = ANIMATION_LEVEL_MED;
 export const DEFAULT_MESSAGE_TEXT_SIZE_PX = 16;
 export const IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX = 17;
 export const MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX = 15;
+
+export const NBSP = '\u00A0';
+export const NNBSP = '\u202F';
 
 export const FOLDERS_POSITION_TOP = 'top';
 export const FOLDERS_POSITION_LEFT = 'left';

@@ -1668,12 +1668,12 @@
 "GiftWithdrawWait_other" = "In {days} days, you'll be able to send this collectible to any TON blockchain address outside Telegram for sale or auction.";
 "ChatGroups_one" = "{count} group";
 "ChatGroups_other" = "{count} groups";
-"StarsAmount" = "⭐️{amount}";
+"StarsAmount" = "⭐️ {amount}";
 "StarsAmountText_one" = "{amount} Star";
 "StarsAmountText_other" = "{amount} Stars";
 "AllGiftsCategory" = "All gifts";
 "PremiumGiftDescription" = "Premium";
-"SendPaidReaction" = "Send ⭐️{amount}";
+"SendPaidReaction" = "Send ⭐️ {amount}";
 "StarsPay" = "Confirm and Pay {amount}";
 "StarsReactionTerms" = "By sending Stars you agree to the {link}";
 "StarsReactionLinkText" = "Terms of Service";
@@ -1689,7 +1689,7 @@
 "StarsSubscribeInfo" = "By subscribing you agree to the {link}";
 "StarsSubscribeInfoLinkText" = "Terms of Service";
 "StarsSubscribeInfoLink" = "https://telegram.org/tos/stars";
-"StarsPerMonth" = "⭐️{amount}/month";
+"StarsPerMonth" = "⭐️ {amount}/month";
 "StarsBalance" = "Balance";
 "OpenApp" = "Open App";
 "PopularApps" = "Popular Apps";
@@ -2066,7 +2066,7 @@
 "ActionGiftStarsTitle_one" = "{amount} Star";
 "ActionGiftStarsTitle_other" = "{amount} Stars";
 "ActionGiftStarsText" = "Use Stars to unlock content and services on Telegram.";
-"TonAmount" = "💎{amount}";
+"TonAmount" = "💎 {amount}";
 "TonAmountText_one" = "{amount} TON";
 "TonAmountText_other" = "{amount} TON";
 "ActionGiftCostCrypto" = "{cryptoPrice} ({price})";
@@ -2125,7 +2125,7 @@
 "ButtonUndo" = "Undo";
 "ActionPaidOneMessageOutgoing" = "You paid {amount} to send a message";
 "ActionPaidOneMessageIncoming" = "{user} paid {amount} to send a message";
-"PaneMessagePaidMessageCharge" = "{peer} must pay {amount} for each message to you.";
+"PaneMessagePaidMessageCharge" = "**{peer}** must pay **{amount}** for each message to you.";
 "ConfirmRemoveMessageFee" = "Yes";
 "ConfirmDialogMessageRemoveFee" = "Are you sure you want to allow **{peer}** to message you for free?";
 "ConfirmDialogRemoveFeeRefundStars" = "Refund already paid **{amount}**";
