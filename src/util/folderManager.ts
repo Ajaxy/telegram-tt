@@ -82,6 +82,7 @@ let prevGlobal: {
   usersById: Record<string, ApiUser>;
   notifyDefaults?: Record<ApiNotifyPeerType, ApiPeerNotifySettings>;
   notifyExceptions?: Record<number, ApiPeerNotifySettings>;
+  threadsByChatId: Record<string, GlobalState['messages']['byChatId'][string]['threadsById'] | undefined>;
 } = initials.prevGlobal;
 
 let prepared: {
@@ -239,6 +240,17 @@ function updateFolderManager(global: GlobalState) {
   const areUsersChanged = global.users.byId !== prevGlobal.usersById;
   const areNotifyDefaultsChanged = selectNotifyDefaults(global) !== prevGlobal.notifyDefaults;
   const areNotifyExceptionsChanged = global.chats.notifyExceptionById !== prevGlobal.notifyExceptions;
+  const allRelevantChatIds = unique([
+    ...global.chats.listIds.active || [],
+    ...global.chats.listIds.archived || [],
+    ...global.chats.listIds.saved || [],
+    ...prevGlobal.allFolderListIds || [],
+    ...prevGlobal.archivedFolderListIds || [],
+    ...prevGlobal.savedFolderListIds || [],
+  ]);
+  const areThreadsByChatChanged = allRelevantChatIds.some((chatId) => (
+    global.messages.byChatId[chatId]?.threadsById !== prevGlobal.threadsByChatId[chatId]
+  ));
 
   let affectedFolderIds: number[] = [];
 
@@ -251,7 +263,7 @@ function updateFolderManager(global: GlobalState) {
   if (!(
     isAllFolderChanged || isArchivedFolderChanged || isSavedFolderChanged || areFoldersChanged
     || areChatsChanged || areUsersChanged || areTopicsChanged || areNotifyDefaultsChanged || areNotifyExceptionsChanged
-    || areSavedLastMessageIdsChanged || areAllLastMessageIdsChanged
+    || areSavedLastMessageIdsChanged || areAllLastMessageIdsChanged || areThreadsByChatChanged
   )
   ) {
     if (affectedFolderIds.length) {
@@ -420,9 +432,9 @@ function buildFolderSummary(folder: ApiChatFolder): FolderSummary {
   return {
     ...folder,
     orderedPinnedIds: folder.pinnedChatIds,
-    excludedChatIds: folder.excludedChatIds ? new Set(folder.excludedChatIds) : undefined,
-    includedChatIds: folder.excludedChatIds ? new Set(folder.includedChatIds) : undefined,
-    pinnedChatIds: folder.excludedChatIds ? new Set(folder.pinnedChatIds) : undefined,
+    excludedChatIds: new Set(folder.excludedChatIds),
+    includedChatIds: new Set(folder.includedChatIds),
+    pinnedChatIds: new Set(folder.pinnedChatIds),
   };
 }
 
@@ -441,6 +453,7 @@ function updateChats(
   const newSavedLastMessageIds = global.chats.lastMessageIds.saved;
   const newNotifyDefaults = selectNotifyDefaults(global);
   const newNotifyExceptions = global.chats.notifyExceptionById;
+  const newMessageStoresByChatId = global.messages.byChatId;
   const folderSummaries = Object.values(prepared.folderSummariesById);
   const affectedFolderIds = new Set<number>();
 
@@ -469,6 +482,7 @@ function updateChats(
       && newUsersById[chatId] === prevGlobal.usersById[chatId]
       && newAllLastMessageIds?.[chatId] === prevGlobal.lastAllMessageIds?.[chatId]
       && newSavedLastMessageIds?.[chatId] === prevGlobal.lastSavedMessageIds?.[chatId]
+      && newMessageStoresByChatId[chatId]?.threadsById === prevGlobal.threadsByChatId[chatId]
     ) {
       return;
     }
@@ -520,6 +534,10 @@ function updateChats(
   prevGlobal.lastSavedMessageIds = newSavedLastMessageIds;
   prevGlobal.notifyDefaults = newNotifyDefaults;
   prevGlobal.notifyExceptions = newNotifyExceptions;
+  prevGlobal.threadsByChatId = allIds.reduce((acc, chatId) => {
+    acc[chatId] = newMessageStoresByChatId[chatId]?.threadsById;
+    return acc;
+  }, {} as typeof prevGlobal.threadsByChatId);
 
   return Array.from(affectedFolderIds);
 }
@@ -858,6 +876,7 @@ function buildInitials() {
       chatsById: {},
       usersById: {},
       topicsInfoById: {},
+      threadsByChatId: {},
     },
 
     prepared: {
