@@ -232,19 +232,19 @@
   }
 
   &.has-unread .label {
-    position: relative;
-
     &::after {
       content: "";
 
       display: inline-block;
 
-      width: 0.5rem;
-      height: 0.5rem;
-      margin-inline-start: 0.5rem;
+      width: 0.375rem;
+      height: 0.375rem;
+      margin-inline-start: 0.375rem;
       border-radius: 50%;
 
-      background: var(--accent-color);
+      vertical-align: middle;
+
+      background-color: var(--accent-color);
     }
   }
 
