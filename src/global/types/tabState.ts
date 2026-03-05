@@ -1029,4 +1029,6 @@ export type TabState = {
   shouldSaveAttachmentsCompression?: boolean;
 
   isCocoonModalOpen?: boolean;
+
+  shouldOpenMessageMediaEditor?: boolean;
 };

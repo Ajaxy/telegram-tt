@@ -3060,6 +3060,9 @@ export interface ActionPayloads {
 
   openCocoonModal: WithTabId | undefined;
   closeCocoonModal: WithTabId | undefined;
+
+  requestMessageMediaEditor: WithTabId | undefined;
+  resetMessageMediaEditorRequest: WithTabId | undefined;
 }
 
 export interface RequiredActionPayloads {

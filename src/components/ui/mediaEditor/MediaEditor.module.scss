@@ -1,0 +1,796 @@
+.root {
+  position: fixed;
+  z-index: var(--z-modal);
+  inset: 0;
+  transform: scale(0.95);
+
+  display: flex;
+
+  opacity: 0;
+  background-color: #000;
+
+  transition: opacity 0.2s ease, transform 0.2s ease;
+
+  &:global(.open) {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  &:global(.closing) {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+
+  :global(body.no-page-transitions) & {
+    transform: none !important;
+    transition: none;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+  }
+}
+
+.canvasArea {
+  position: relative;
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  padding: 2rem;
+
+  @media (max-width: 600px) {
+    padding: 1rem;
+  }
+}
+
+.canvasContainer {
+  position: relative;
+
+  overflow: visible;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+
+  max-width: 100%;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.canvas {
+  display: block;
+  border-radius: 0.25rem;
+
+  &.drawMode {
+    cursor: crosshair;
+  }
+
+  &.transitioningToDraw {
+    animation: canvasFadeInDelayed 0.3s ease;
+  }
+
+  &.transitioningToCrop {
+    animation: canvasZoomOut 0.3s ease;
+  }
+
+  &.transformAnimating {
+    animation: canvasTransformReveal 0.3s ease forwards;
+  }
+
+  &.flipAnimating {
+    animation: canvasFlipReveal 0.3s ease forwards;
+  }
+
+  :global(body.no-page-transitions) & {
+    animation: none !important;
+  }
+}
+
+// Crop → Draw: canvas stays hidden while snapshot zooms, then fades in
+@keyframes canvasFadeInDelayed {
+  0% { opacity: 0; }
+  60% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+// Draw → Crop: canvas starts zoomed into crop region, then zooms out to full
+@keyframes canvasZoomOut {
+  0% {
+    transform: translate(var(--offset-x), var(--offset-y));
+    clip-path:
+ inset(
+      var(--crop-top) var(--crop-right) var(--crop-bottom) var(--crop-left) round 0.25rem
+    );
+  }
+
+  100% {
+    transform: translate(0, 0);
+    clip-path: inset(0 round 0.25rem);
+  }
+}
+
+.canvasSnapshot {
+  pointer-events: none;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  border-radius: 0.25rem;
+
+  :global(body.no-page-transitions) & {
+    display: none;
+  }
+
+  // Crop → Draw: clip to crop frame, translate to center, then fade out
+  &.zoomIn {
+    animation: snapshotZoomIn 0.3s ease forwards;
+  }
+
+  // Draw → Crop: simple crossfade
+  &.fadeOut {
+    animation: snapshotFadeOut 0.3s ease forwards;
+  }
+
+  &.rotateFade {
+    animation: snapshotRotateFade 0.3s ease forwards;
+  }
+
+  &.flipFade {
+    animation: snapshotFlipFade 0.3s ease forwards;
+  }
+}
+
+@keyframes snapshotZoomIn {
+  0% {
+    transform: translate(-50%, -50%);
+    opacity: 1;
+    clip-path: inset(0 round 0.25rem);
+  }
+
+  70% {
+    transform:
+ translate(
+      calc(-50% + var(--offset-x)),
+      calc(-50% + var(--offset-y))
+    );
+    opacity: 1;
+    clip-path:
+ inset(
+      var(--crop-top) var(--crop-right) var(--crop-bottom) var(--crop-left) round 0.25rem
+    );
+  }
+
+  100% {
+    transform:
+ translate(
+      calc(-50% + var(--offset-x)),
+      calc(-50% + var(--offset-y))
+    );
+    opacity: 0;
+    clip-path:
+ inset(
+      var(--crop-top) var(--crop-right) var(--crop-bottom) var(--crop-left) round 0.25rem
+    );
+  }
+}
+
+@keyframes snapshotFadeOut {
+  0% { transform: translate(-50%, -50%); opacity: 1; }
+  25%, 100% { transform: translate(-50%, -50%); opacity: 0; }
+}
+
+@keyframes snapshotRotateFade {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1, 1);
+    opacity: 1;
+  }
+
+  70% {
+    transform: translate(-50%, -50%) rotate(-90deg) scale(var(--end-sx, 1), var(--end-sy, 1));
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(-90deg) scale(var(--end-sx, 1), var(--end-sy, 1));
+    opacity: 0;
+  }
+}
+
+@keyframes snapshotFlipFade {
+  0% {
+    transform: translate(-50%, -50%) rotateX(0deg) rotateY(0deg);
+    opacity: 1;
+  }
+
+  50% {
+    transform: translate(-50%, -50%) rotateX(10deg) rotateY(-90deg);
+    opacity: 1;
+  }
+
+  50.01%, 100% {
+    opacity: 0;
+  }
+}
+
+@keyframes canvasTransformReveal {
+  0%, 65% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes canvasFlipReveal {
+  0%, 45% {
+    transform: rotateX(10deg) rotateY(90deg);
+  }
+
+  100% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+}
+
+// Crop overlay - explicitly sized to match canvas, centered in container
+.cropWrapper {
+  pointer-events: none;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  animation: fadeIn 0.3s ease;
+
+  &.fadingOut {
+    animation: fadeOut 0.3s ease forwards;
+  }
+
+  :global(body.no-page-transitions) & {
+    animation: none !important;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.cropDarkOverlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.cropRegion {
+  pointer-events: auto;
+  cursor: move;
+  position: absolute;
+  border: 2px solid var(--color-white);
+}
+
+.cropGrid {
+  position: absolute;
+  inset: 0;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  &::before {
+    top: 33.33%;
+    right: 0;
+    bottom: 33.33%;
+    left: 0;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+
+    background: transparent;
+  }
+
+  &::after {
+    top: 0;
+    right: 33.33%;
+    bottom: 0;
+    left: 33.33%;
+
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+
+    background: transparent;
+  }
+}
+
+.cropCorner {
+  pointer-events: auto;
+
+  position: absolute;
+  transform: translate(-50%, -50%);
+
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+
+  background-color: var(--color-white);
+
+  &.topLeft {
+    cursor: nwse-resize;
+  }
+
+  &.topRight {
+    cursor: nesw-resize;
+  }
+
+  &.bottomLeft {
+    cursor: nesw-resize;
+  }
+
+  &.bottomRight {
+    cursor: nwse-resize;
+  }
+}
+
+// Right panel (bottom on mobile)
+.editPanel {
+  display: flex;
+  flex: 0 0 var(--right-column-width);
+  flex-direction: column;
+  background-color: var(--color-background);
+
+  @media (max-width: 600px) {
+    flex-basis: auto;
+    width: 100%;
+    max-height: 16rem;
+  }
+}
+
+.panelHeader {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-borders);
+}
+
+.headerTitle {
+  flex: 1;
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.panelTabs {
+  overflow: hidden;
+  display: flex;
+  flex: 1;
+  flex-direction: column-reverse;
+}
+
+.modeTabs {
+  z-index: 1;
+
+  gap: 1rem;
+  justify-content: flex-start;
+
+  margin-top: 0.125rem;
+  padding: 0 1rem;
+
+  background: var(--color-background);
+  box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
+}
+
+.modeTab {
+  flex: 0.125;
+
+  padding: 0.75rem 0.5rem;
+
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
+
+  transition: color 0.15s ease-in-out;
+  &:hover {
+    color: var(--color-text);
+  }
+
+  &:global(.Tab--active) {
+    color: var(--color-primary);
+  }
+}
+
+.panelContent {
+  overflow-x: hidden;
+  overflow-y: auto;
+  flex: 1;
+}
+
+// Draw mode
+.sectionLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 1rem 1.5rem;
+
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.colorRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 1rem;
+}
+
+.colorSwatch {
+  cursor: var(--custom-cursor, pointer);
+
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+
+  background-color: var(--swatch-color);
+  outline: 0.5rem solid transparent !important;
+
+  transition: transform 0.15s ease-in-out, outline-color 0.15s ease-in-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &.selected {
+    outline-color: var(--swatch-outline) !important;
+  }
+
+  &.customColor {
+    --swatch-color: transparent;
+
+    background:
+ conic-gradient(
+      from 0deg,
+      #ff0000,
+      #ff8000,
+      #ffff00,
+      #00ff00,
+      #00ffff,
+      #0000ff,
+      #8000ff,
+      #ff0080,
+      #ff0000
+    );
+
+    &.selected {
+      outline-color: #ffffff1a !important;
+    }
+  }
+}
+
+.sizeRow {
+  --selected-color: var(--color-primary);
+}
+
+.sizeSlider {
+  padding: 0 0.5rem;
+
+  &:global(.RangeSlider) {
+    --slider-color: var(--selected-color);
+  }
+}
+
+.sizeValue {
+  min-width: 1.5rem;
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.canvasControls {
+  display: flex;
+  flex-shrink: 0;
+  gap: 1rem;
+  align-items: center;
+
+  width: 25rem;
+  max-width: 100%;
+  padding: 1rem;
+
+  &.hidden {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  &.fadingOut {
+    pointer-events: none;
+    animation: fadeOut 0.3s ease forwards;
+  }
+
+  &.fadingIn {
+    animation: fadeIn 0.3s ease;
+  }
+
+  :global(body.no-page-transitions) & {
+    animation: none !important;
+  }
+}
+
+.aspectRatioList, .toolList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0 0.5rem;
+}
+
+.toolIcon {
+  position: relative;
+
+  overflow: hidden;
+  display: flex;
+
+  width: 7.5rem;
+  height: 1.25rem;
+
+  &::after {
+    content: "";
+
+    position: absolute;
+
+    width: 3.5rem;
+    height: 1.25rem;
+
+    background: linear-gradient(90deg, var(--color-background) 0%, transparent 100%);
+  }
+
+  :global(.draw-tool-icon) {
+    transform: translateX(-1.5rem);
+    transition: transform 0.15s ease-in-out;
+  }
+}
+
+.toolLabel {
+  transform: translateX(-1.5rem);
+  transition: transform 0.15s ease-in-out;
+}
+
+:global(.ListItem.focus),
+:global(.ListItem:hover) {
+  .toolIcon {
+    &::after {
+      background: linear-gradient(90deg, var(--background-color) 0%, transparent 100%);
+    }
+  }
+}
+
+:global(.ListItem.focus) {
+  .toolIcon {
+    :global(.draw-tool-icon) {
+      transform: translateX(0);
+    }
+  }
+  .toolLabel {
+    transform: translateX(0);
+  }
+}
+
+.aspectRatioRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+}
+
+// CSS-based ratio icons
+.ratioBox {
+
+  // Base height for all ratio boxes
+  --ratio-size: 1.25rem;
+
+  margin-inline-start: 0.125rem;
+  border: 0.125rem solid var(--color-text-secondary);
+  border-radius: 0.125rem;
+
+  .selected & {
+    border-color: var(--color-primary);
+  }
+
+  // Square (1:1)
+  &.ratio1x1 {
+    width: var(--ratio-size);
+    height: var(--ratio-size);
+  }
+
+  // 3:2 (horizontal)
+  &.ratio3x2 {
+    width: var(--ratio-size);
+    height: calc(var(--ratio-size) * 2 / 3);
+  }
+
+  // 2:3 (vertical)
+  &.ratio2x3 {
+    width: calc(var(--ratio-size) * 2 / 3);
+    height: var(--ratio-size);
+  }
+
+  // 4:3 (horizontal)
+  &.ratio4x3 {
+    width: var(--ratio-size);
+    height: calc(var(--ratio-size) * 3 / 4);
+  }
+
+  // 3:4 (vertical)
+  &.ratio3x4 {
+    width: calc(var(--ratio-size) * 3 / 4);
+    height: var(--ratio-size);
+  }
+
+  // 5:4 (horizontal)
+  &.ratio5x4 {
+    width: var(--ratio-size);
+    height: calc(var(--ratio-size) * 4 / 5);
+  }
+
+  // 4:5 (vertical)
+  &.ratio4x5 {
+    width: calc(var(--ratio-size) * 4 / 5);
+    height: var(--ratio-size);
+  }
+
+  // 16:9 (wide)
+  &.ratio16x9 {
+    width: var(--ratio-size);
+    height: calc(var(--ratio-size) * 9 / 16);
+  }
+
+  // 9:16 (tall)
+  &.ratio9x16 {
+    width: calc(var(--ratio-size) * 9 / 16);
+    height: var(--ratio-size);
+  }
+}
+
+// Inline color picker
+.colorPickerInline {
+  display: flex;
+  flex-direction: column;
+  padding: 0 1.5rem;
+}
+
+.colorPickerRow {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.saturationBrightness {
+  cursor: crosshair;
+
+  position: relative;
+
+  flex: 1;
+
+  height: 7.5rem;
+  border-radius: var(--border-radius-default);
+
+  background:
+    linear-gradient(to top, #000, transparent),
+    linear-gradient(to right, #fff, hsl(var(--picker-hue), 100%, 50%));
+
+  @media (max-width: 600px) {
+    height: 6rem;
+  }
+}
+
+.colorInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  justify-content: center;
+}
+
+.colorInput {
+  width: 8rem;
+}
+
+.satBrightHandle {
+  pointer-events: none;
+
+  position: absolute;
+  top: var(--picker-bright);
+  left: var(--picker-sat);
+  transform: translate(-50%, -50%);
+
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 0.125rem solid var(--color-white);
+  border-radius: 50%;
+
+  background-color: var(--picker-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hueSlider {
+  cursor: pointer;
+
+  position: relative;
+
+  flex: 1;
+
+  height: 1.5rem;
+  margin: 0.5rem;
+  border-radius: 0.75rem;
+
+  background:
+ linear-gradient(
+    to right,
+    #ff0000,
+    #ff8000,
+    #ffff00,
+    #80ff00,
+    #00ff00,
+    #00ff80,
+    #00ffff,
+    #0080ff,
+    #0000ff,
+    #8000ff,
+    #ff00ff,
+    #ff0080,
+    #ff0000
+  );
+}
+
+.hueHandle {
+  pointer-events: none;
+
+  position: absolute;
+  top: 50%;
+  left: calc(var(--picker-hue) / 360 * 100%);
+  transform: translate(-50%, -50%);
+
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 0.125rem solid var(--color-white);
+  border-radius: 50%;
+
+  background-color: hsl(var(--picker-hue), 100%, 50%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+// Save button
+.saveButton {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.5rem;
+
+  @media (max-width: 600px) {
+    right: 1rem;
+    bottom: 17rem;
+  }
+}

@@ -1,4 +1,4 @@
-import type { FC, TeactNode } from '../../lib/teact/teact';
+import type { TeactNode } from '../../lib/teact/teact';
 import { memo, useEffect, useMemo, useRef, useSignal, useState } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -39,7 +39,7 @@ import type {
   ThemeKey,
   ThreadId,
 } from '../../types';
-import { MAIN_THREAD_ID } from '../../api/types';
+import { ApiMediaFormat, MAIN_THREAD_ID } from '../../api/types';
 
 import {
   BASE_EMOJI_KEYWORD_LANG,
@@ -56,6 +56,10 @@ import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterd
 import {
   canEditMedia,
   getAllowedAttachmentOptions,
+  getMediaFilename,
+  getMediaHash,
+  getMessageDocumentPhoto,
+  getMessagePhoto,
   getReactionKey,
   getStoryKey,
   isChatAdmin,
@@ -117,8 +121,10 @@ import { tryParseDeepLink } from '../../util/deepLinkParser';
 import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterOutsideSelection';
 import { processMessageInputForCustomEmoji } from '../../util/emoji/customEmojiManager';
 import { isUserId } from '../../util/entities/ids';
+import { fetchBlob } from '../../util/files';
 import focusEditableElement from '../../util/focusEditableElement';
 import { formatStarsAsIcon } from '../../util/localization/format';
+import { fetch } from '../../util/mediaLoader';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import parseHtmlAsFormattedText from '../../util/parseHtmlAsFormattedText';
 import { insertHtmlInSelection } from '../../util/selection';
@@ -311,6 +317,8 @@ type StateProps = {
   isAppConfigLoaded?: boolean;
   insertingPeerIdMention?: string;
   pollMaxAnswers?: number;
+  replyToMessage?: ApiMessage;
+  shouldOpenMessageMediaEditor?: TabState['shouldOpenMessageMediaEditor'];
 };
 
 enum MainButtonState {
@@ -335,7 +343,7 @@ const SELECT_MODE_TRANSITION_MS = 200;
 const SENDING_ANIMATION_DURATION = 350;
 const MOUNT_ANIMATION_DURATION = 430;
 
-const Composer: FC<OwnProps & StateProps> = ({
+const Composer = ({
   type,
   isOnActiveTab,
   dropAreaState,
@@ -436,11 +444,13 @@ const Composer: FC<OwnProps & StateProps> = ({
   isAppConfigLoaded,
   insertingPeerIdMention,
   pollMaxAnswers,
+  replyToMessage,
+  shouldOpenMessageMediaEditor,
   onDropHide,
   onFocus,
   onBlur,
   onForward,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     sendMessage,
     clearDraft,
@@ -694,6 +704,24 @@ const Composer: FC<OwnProps & StateProps> = ({
     editedMessage: editingMessage,
     shouldSendInHighQuality: attachmentSettings.shouldSendInHighQuality,
   });
+
+  const mediaEditRequestRef = useRef(Date.now());
+  useEffect(() => {
+    if (!shouldOpenMessageMediaEditor) return;
+    const targetMessage = editingMessage || replyToMessage;
+    const media = targetMessage && (getMessagePhoto(targetMessage) || getMessageDocumentPhoto(targetMessage));
+    if (!media) return;
+    const mediaHash = getMediaHash(media, 'full');
+    if (!mediaHash) return;
+    const now = Date.now();
+    mediaEditRequestRef.current = now;
+    fetch(mediaHash, ApiMediaFormat.BlobUrl).then(async (blobUrl) => {
+      if (mediaEditRequestRef.current !== now) return;
+      const blob = await fetchBlob(blobUrl);
+      const attachment = await buildAttachment(getMediaFilename(media), blob);
+      handleSetAttachments([attachment]);
+    });
+  }, [editingMessage, replyToMessage, shouldOpenMessageMediaEditor, handleSetAttachments]);
 
   const [isBotKeyboardOpen, openBotKeyboard, closeBotKeyboard] = useFlag();
   const [isBotCommandMenuOpen, openBotCommandMenu, closeBotCommandMenu] = useFlag();
@@ -2563,6 +2591,7 @@ export default memo(withGlobal<OwnProps>(
     const { language, shouldCollectDebugLogs } = selectSharedSettings(global);
     const {
       forwardMessages: { messageIds: forwardMessageIds },
+      shouldOpenMessageMediaEditor,
     } = selectTabState(global);
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
     const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
@@ -2725,6 +2754,8 @@ export default memo(withGlobal<OwnProps>(
       isAppConfigLoaded,
       insertingPeerIdMention,
       pollMaxAnswers: appConfig.pollMaxAnswers,
+      shouldOpenMessageMediaEditor,
+      replyToMessage,
     };
   },
 )(Composer));

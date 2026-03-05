@@ -61,6 +61,10 @@ export function canEditMedia(message: MediaContainer) {
   return !video?.isRound && !Object.keys(otherMedia).length;
 }
 
+export function canEditMediaInEditor(message: MediaContainer) {
+  return canEditMedia(message) && (getMessagePhoto(message) || getMessageDocumentPhoto(message));
+}
+
 export function getMessagePhoto(message: MediaContainer) {
   return message.content.photo;
 }
