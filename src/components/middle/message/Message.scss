@@ -440,8 +440,8 @@
   }
 
   .Audio .message-select-control {
-    top: 1.375rem;
-    left: 1.0625rem;
+    top: 1.75rem;
+    left: 1.75rem;
   }
 
   html.theme-dark &.own .Audio .toggle-play:not(.with-image) + .media-loading {
@@ -655,11 +655,8 @@
 
     transition: opacity var(--select-transition);
 
-    .icon-select {
-      position: absolute;
-      top: -3px;
-      left: -3px;
-      font-size: 1.625rem;
+    &-icon {
+      font-weight: 600;
     }
 
     .theme-dark & {

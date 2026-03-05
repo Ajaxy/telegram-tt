@@ -1833,7 +1833,7 @@ const Message = ({
       />
       {!isInDocumentGroup && (
         <div className="message-select-control no-selection">
-          {isSelected && <Icon name="select" />}
+          {isSelected && <Icon name="check" className="message-select-control-icon" />}
         </div>
       )}
       {isLastInDocumentGroup && (
@@ -1844,7 +1844,7 @@ const Message = ({
           onClick={handleDocumentGroupSelectAll}
         >
           {isGroupSelected && (
-            <Icon name="select" />
+            <Icon name="check" className="message-select-control-icon" />
           )}
         </div>
       )}
