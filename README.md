@@ -1,4 +1,14 @@
-# Telegram Web A
+# Telegram Web A (Modified Fork)
+
+> **⚠️ This is a modified fork of the original [Telegram Web A](https://github.com/Ajaxy/telegram-tt)**
+> 
+> **Modifications**: Enhanced data access API for external integrations
+> 
+> **License**: GPL-3.0 (same as original)
+> 
+> **See**: [MODIFICATIONS.md](MODIFICATIONS.md) for detailed list of changes
+
+---
 
 This project won the first prize 🥇 at [Telegram Lightweight Client Contest](https://contest.com/javascript-web-3) and now is an official Telegram client available to anyone at [web.telegram.org/a](https://web.telegram.org/a).
 
@@ -7,6 +17,21 @@ According to the original contest rules, it has nearly zero dependencies and is 
 The project incorporates lots of technologically advanced features, modern Web APIs and techniques: WebSockets, Web Workers and WebAssembly, multi-level caching and PWA, voice recording and media streaming, cryptography and raw binary data operations, optimistic and progressive interfaces, complicated CSS/Canvas/SVG animations, reactive data streams, and so much more.
 
 Feel free to explore, provide feedback and contribute.
+
+## Fork-Specific Features
+
+This fork adds a minimal API to access Telegram's internal media metadata:
+
+```javascript
+// Access media metadata from external applications
+const localDb = await window.callApi('getLocalDbData');
+const document = localDb.documents[documentId];
+// Access: accessHash, fileReference, dcId, size, fileName, etc.
+```
+
+**Use cases**: Data archival, content analysis, integration tools, research
+
+**Documentation**: See [LOCALDB_SOLUTION.md](LOCALDB_SOLUTION.md) for complete technical guide
 
 ## Local setup
 

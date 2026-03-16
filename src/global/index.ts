@@ -55,3 +55,18 @@ export const addActionHandler = typed.addActionHandler as <ActionName extends Pr
 export const execAfterActions = typed.execAfterActions;
 export const withGlobal = typed.withGlobal;
 export type GlobalActions = ReturnType<typeof getActions>;
+
+// MODIFICATION: Expose API to window for external access
+// Purpose: Enable external applications to access Telegram data
+// License: GPL-3.0 (same as original)
+// See: MODIFICATIONS.md for details
+if (typeof window !== 'undefined') {
+  (window as any).getGlobal = getGlobal;
+  (window as any).getActions = getActions;
+  
+  // Lazy import callApi to avoid circular dependencies
+  import('../api/gramjs').then((api) => {
+    (window as any).callApi = api.callApi;
+  });
+}
+// END MODIFICATION
