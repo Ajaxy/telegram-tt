@@ -1,0 +1,13 @@
+Modified version of Telegram Web A
+
+Original: https://github.com/Ajaxy/telegram-tt
+License: GPL-3.0
+
+Original Copyright (c) 2021-present, Telegram FZ-LLC and Ajaxy
+Modifications Copyright (c) 2026, Tuvis
+
+Changes: Added API to expose media metadata (3 files modified)
+See MODIFICATIONS.md for details
+
+This program is distributed under GPL-3.0 license.
+See LICENSE file for full terms.
