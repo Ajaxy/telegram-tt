@@ -22,6 +22,8 @@ jobs:
       - name: Build production web
         env:
           BASE_URL: ${{ vars.BASE_URL }}
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
         run: npm run build:production
 
       - name: Configure AWS credentials
