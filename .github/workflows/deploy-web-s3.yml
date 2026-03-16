@@ -16,9 +16,6 @@ name: Deploy web to S3
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 env:
   AWS_REGION: 'us-east-2'
