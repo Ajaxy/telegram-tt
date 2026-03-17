@@ -1,30 +1,11 @@
-# Deploy web build to S3 (static site).
-#
-# Required secrets:
-#   AWS_ACCESS_KEY_ID
-#   AWS_SECRET_ACCESS_KEY
-#
-# Required vars (repository variables):
-#   S3_BUCKET   – target S3 bucket name
-#
-# Optional vars:
-#   AWS_REGION        – default: us-east-1
-#   NODE_VERSION      – Node version for build (default: 20)
-#   BASE_URL          – public URL of the app (e.g. https://your-domain.com/a) for build
-
 name: Deploy web to S3
 
 on:
   workflow_dispatch:
 
-env:
-  AWS_REGION: 'us-east-2'
-  S3_BUCKET: 'telegram.tuvis.com'
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: env.S3_BUCKET != ''
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,6 +22,8 @@ jobs:
       - name: Build production web
         env:
           BASE_URL: ${{ vars.BASE_URL }}
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
         run: npm run build:production
 
       - name: Configure AWS credentials
@@ -52,13 +35,13 @@ jobs:
 
       - name: Sync to S3 (assets, long cache)
         run: |
-          aws s3 sync dist/ s3://${{ env.S3_BUCKET }}/ \
+          aws s3 sync dist/ s3://tweb.tuvis.com \
             --delete \
             --exclude "index.html" \
             --cache-control "public, max-age=31536000, immutable"
 
       - name: Upload index.html (no cache)
         run: |
-          aws s3 cp dist/index.html s3://${{ env.S3_BUCKET }}/index.html \
+          aws s3 cp dist/index.html s3://tweb.tuvis.com/index.html \
             --content-type "text/html" \
             --cache-control "max-age=0, no-cache, must-revalidate"
