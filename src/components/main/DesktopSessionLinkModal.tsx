@@ -15,7 +15,7 @@ type OwnProps = {
 };
 
 const DesktopSessionLinkModal = ({ request }: OwnProps) => {
-  const { closeDesktopSessionLink } = getActions();
+  const { cancelDesktopSessionLink } = getActions();
   const lang = useLang();
   const [isBusy, setIsBusy] = useState(false);
 
@@ -23,7 +23,7 @@ const DesktopSessionLinkModal = ({ request }: OwnProps) => {
     if (isBusy) {
       return;
     }
-    closeDesktopSessionLink({ tabId: getCurrentTabId() });
+    cancelDesktopSessionLink({ tabId: getCurrentTabId() });
   });
 
   const handleConfirm = useLastCallback(async () => {

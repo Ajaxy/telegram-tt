@@ -18,7 +18,7 @@ Exports the above methods for `callApi`.
 ### 3. `src/global/index.ts`
 `window.callApi`, `window.getGlobal`, `window.getActions`, and `window.__telegramDesktopBridge` (`ready` promise, `ping`, `startDownload`, `downloadDeferredMedia`, **`acceptLoginToken`**) for Electron-style hosts. The bridge object is attached **immediately**; `ping()` is `true` only after GramJS loads. See [docs/DESKTOP_BRIDGE.md](docs/DESKTOP_BRIDGE.md).
 
-- **`acceptLoginToken(tokenBase64, expires?)`** — requests user confirmation, then `callApi('acceptLoginToken', …)` on the authorized worker (for a **second** desktop session via Telegram’s login-token flow; not a duplicate of the web session key).
+- **`acceptLoginToken(tokenBase64, expires?)`** — requests user confirmation, then `callApi('acceptLoginToken', …)` on the authorized worker (for a **second** desktop session via Telegram’s login-token flow; not a duplicate of the web session key). Outcome is also posted as **`window.postMessage({ type: 'telegram-session:link-result', ok, error? }, '*')`** — see [docs/DESKTOP_BRIDGE.md](docs/DESKTOP_BRIDGE.md).
 
 ### 4a. `callApi('acceptLoginToken', tokenBase64)`
 

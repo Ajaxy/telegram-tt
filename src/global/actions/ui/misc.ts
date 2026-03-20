@@ -46,6 +46,13 @@ import { selectSharedSettings } from '../../selectors/sharedState';
 
 import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
 
+function postTelegramSessionLinkResult(payload: { ok: true } | { ok: false; error: string }) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  window.postMessage({ type: 'telegram-session:link-result', ...payload }, '*');
+}
+
 export const APP_VERSION_URL = 'version.txt';
 const FLOOD_PREMIUM_WAIT_NOTIFICATION_DURATION = 6000;
 const MAX_STORED_EMOJIS = 8 * 4; // Represents four rows of recent emojis
@@ -446,6 +453,16 @@ addActionHandler('closeDesktopSessionLink', (global, actions, payload): ActionRe
   }, tabId);
 });
 
+addActionHandler('cancelDesktopSessionLink', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  postTelegramSessionLinkResult({ ok: false, error: 'User cancelled' });
+
+  return updateTabState(global, {
+    desktopSessionLinkRequest: undefined,
+  }, tabId);
+});
+
 addActionHandler('confirmDesktopSessionLink', async (global, actions, payload): Promise<void> => {
   const { tabId = getCurrentTabId() } = payload || {};
   const { desktopSessionLinkRequest } = selectTabState(global, tabId);
@@ -453,6 +470,7 @@ addActionHandler('confirmDesktopSessionLink', async (global, actions, payload): 
 
   if (!token) {
     actions.closeDesktopSessionLink({ tabId });
+    postTelegramSessionLinkResult({ ok: false, error: 'Missing token' });
     return;
   }
 
@@ -463,11 +481,13 @@ addActionHandler('confirmDesktopSessionLink', async (global, actions, payload): 
 
   if (result.ok) {
     actions.showNotification({ message: lang('DesktopLinkNativeSuccess'), tabId });
+    postTelegramSessionLinkResult({ ok: true });
   } else {
     actions.showNotification({
       message: lang('DesktopLinkNativeFailed', { error: result.error }),
       tabId,
     });
+    postTelegramSessionLinkResult({ ok: false, error: result.error });
   }
 });
 

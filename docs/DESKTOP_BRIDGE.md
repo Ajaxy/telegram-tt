@@ -22,6 +22,25 @@ The bridge exists **only in this fork’s build**. If **`window.__telegramDeskto
 
 Pass the same **raw login token bytes** your requesting client got from `LoginToken`, encoded as **standard base64** or **URL-safe base64** (with `-` / `_`); the fork accepts both.
 
+### `telegram-session:link-result` (after user responds to link modal)
+
+Listen on the **page** `window` (same as chunk messages). The fork posts:
+
+```ts
+// User tapped Allow and auth.acceptLoginToken succeeded:
+window.postMessage({ type: 'telegram-session:link-result', ok: true }, '*');
+
+// User tapped Cancel / closed modal:
+window.postMessage({ type: 'telegram-session:link-result', ok: false, error: 'User cancelled' }, '*');
+
+// RPC failed after Allow (error text from Telegram / GramJS):
+window.postMessage({ type: 'telegram-session:link-result', ok: false, error: '…' }, '*');
+```
+
+Also **`ok: false`, `error: 'Missing token'`** if the confirm action ran without a pending token (edge case).
+
+**Preload:** filter on `data?.type === 'telegram-session:link-result'` (only trusted same-origin webview if possible).
+
 ## IPC / `Object.entries` errors in your host app
 
 If your `MessagingBackend` does `Object.entries(somePayload)` and **`somePayload` is `undefined`**, you get `Cannot convert undefined or null to object`. Guard with `Object.entries(payload ?? {})` or validate before respond — that path is in **your** Electron code, not telegram-tt.
