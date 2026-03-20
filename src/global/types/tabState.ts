@@ -487,6 +487,11 @@ export type TabState = {
   dialogs: (ApiError | ApiContact)[];
 
   safeLinkModalUrl?: string;
+  /** Pending native/Electron session link (`auth.acceptLoginToken`); set via `__telegramDesktopBridge`. */
+  desktopSessionLinkRequest?: {
+    tokenBase64: string;
+    expires?: number;
+  };
   mapModal?: {
     point: ApiGeoPoint;
     zoom?: number;

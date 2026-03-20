@@ -1909,6 +1909,10 @@ export interface LangPair {
   'SettingsDataClearMediaCache': undefined;
   'SettingsDataClearMediaCacheDescription': undefined;
   'SettingsDataClearMediaDone': undefined;
+  'DesktopLinkNativeTitle': undefined;
+  'DesktopLinkNativeMessage': undefined;
+  'DesktopLinkNativeConfirm': undefined;
+  'DesktopLinkNativeSuccess': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -3341,6 +3345,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   'GroupStatusWithOnline': {
     'status': V;
     'onlineCount': V;
+  };
+  'DesktopLinkNativeFailed': {
+    'error': V;
   };
 }
 

@@ -15,10 +15,11 @@ import { getAllNotificationsCount } from '../../../util/folderManager';
 import getIsAppUpdateNeeded from '../../../util/getIsAppUpdateNeeded';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import { compact, unique } from '../../../util/iteratees';
-import { refreshFromCache } from '../../../util/localization';
+import { getTranslationFn, refreshFromCache } from '../../../util/localization';
 import * as langProvider from '../../../util/oldLangProvider';
 import updateIcon from '../../../util/updateIcon';
 import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
+import { callApi } from '../../../api/gramjs';
 import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
 import { addTabStateResetterAction } from '../../helpers/meta';
 import {
@@ -424,6 +425,50 @@ addActionHandler('toggleSafeLinkModal', (global, actions, payload): ActionReturn
   return updateTabState(global, {
     safeLinkModalUrl,
   }, tabId);
+});
+
+addActionHandler('requestDesktopSessionLink', (global, actions, payload): ActionReturnType => {
+  const { tokenBase64, expires, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    desktopSessionLinkRequest: {
+      tokenBase64,
+      expires,
+    },
+  }, tabId);
+});
+
+addActionHandler('closeDesktopSessionLink', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    desktopSessionLinkRequest: undefined,
+  }, tabId);
+});
+
+addActionHandler('confirmDesktopSessionLink', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const { desktopSessionLinkRequest } = selectTabState(global, tabId);
+  const token = desktopSessionLinkRequest?.tokenBase64?.trim();
+
+  if (!token) {
+    actions.closeDesktopSessionLink({ tabId });
+    return;
+  }
+
+  const lang = getTranslationFn();
+  const result = await callApi('acceptLoginToken', token);
+
+  actions.closeDesktopSessionLink({ tabId });
+
+  if (result.ok) {
+    actions.showNotification({ message: lang('DesktopLinkNativeSuccess'), tabId });
+  } else {
+    actions.showNotification({
+      message: lang('DesktopLinkNativeFailed', { error: result.error }),
+      tabId,
+    });
+  }
 });
 
 addActionHandler('openHistoryCalendar', (global, actions, payload): ActionReturnType => {

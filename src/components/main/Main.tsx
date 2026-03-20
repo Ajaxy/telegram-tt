@@ -78,6 +78,7 @@ import StoryViewer from '../story/StoryViewer.async';
 import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
 import BotTrustModal from './BotTrustModal.async';
 import DeleteFolderDialog from './DeleteFolderDialog.async';
+import DesktopSessionLinkModal from './DesktopSessionLinkModal';
 import Dialogs from './Dialogs';
 import DownloadManager from './DownloadManager';
 import DraftRecipientPicker from './DraftRecipientPicker.async';
@@ -111,6 +112,7 @@ type StateProps = {
   isStoryViewerOpen: boolean;
   isForwardModalOpen: boolean;
   safeLinkModalUrl?: string;
+  desktopSessionLinkRequest?: TabState['desktopSessionLinkRequest'];
   isHistoryCalendarOpen: boolean;
   shouldSkipHistoryAnimations?: boolean;
   openedStickerSetShortName?: string;
@@ -165,6 +167,7 @@ const Main = ({
   isForwardModalOpen,
   activeGroupCallId,
   safeLinkModalUrl,
+  desktopSessionLinkRequest,
   isHistoryCalendarOpen,
   shouldSkipHistoryAnimations,
   limitReached,
@@ -585,6 +588,7 @@ const Main = ({
       <AudioPlayer noUi />
       <ModalContainer />
       <SafeLinkModal url={safeLinkModalUrl} />
+      <DesktopSessionLinkModal request={desktopSessionLinkRequest} />
       <HistoryCalendar isOpen={isHistoryCalendarOpen} />
       <StickerSetModal
         isOpen={Boolean(openedStickerSetShortName)}
@@ -641,6 +645,7 @@ export default memo(withGlobal<OwnProps>(
       requestedAttachBotInChat,
       requestedDraft,
       safeLinkModalUrl,
+      desktopSessionLinkRequest,
       openedStickerSetShortName,
       openedCustomEmojiSetIds,
       shouldSkipHistoryAnimations,
@@ -682,6 +687,7 @@ export default memo(withGlobal<OwnProps>(
       isForwardModalOpen: selectIsForwardModalOpen(global),
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
       safeLinkModalUrl,
+      desktopSessionLinkRequest,
       isHistoryCalendarOpen: Boolean(historyCalendarSelectedAt),
       shouldSkipHistoryAnimations,
       openedStickerSetShortName,

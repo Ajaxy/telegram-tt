@@ -411,6 +411,45 @@ function asGramJsBytes(buf: Buffer): GramJs.bytes {
   return buf as unknown as GramJs.bytes;
 }
 
+export type AcceptLoginTokenResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * Approves a pending `auth.exportLoginToken` request from another client (e.g. Electron GramJS).
+ * Must run on the **already authorized** worker session. See docs/DESKTOP_BRIDGE.md.
+ */
+export async function acceptLoginToken(tokenBase64: string): Promise<AcceptLoginTokenResult> {
+  const trimmed = tokenBase64.trim();
+  if (!trimmed) {
+    return { ok: false, error: 'Empty token' };
+  }
+
+  let tokenBuf: Buffer;
+  try {
+    tokenBuf = trimmed.includes('-') || trimmed.includes('_')
+      ? base64UrlToBuffer(trimmed)
+      : Buffer.from(trimmed, 'base64');
+  } catch {
+    return { ok: false, error: 'Invalid token' };
+  }
+
+  if (!tokenBuf.length) {
+    return { ok: false, error: 'Empty token' };
+  }
+
+  try {
+    await invokeRequest(new GramJs.auth.AcceptLoginToken({
+      token: asGramJsBytes(tokenBuf),
+    }));
+    return { ok: true };
+  } catch (err: unknown) {
+    if (err instanceof RPCError) {
+      return { ok: false, error: err.errorMessage };
+    }
+    const message = err instanceof Error ? err.message : String(err);
+    return { ok: false, error: message };
+  }
+}
+
 function mimeTypeForDeferredMedia(mediaType: ApiDesktopDeferredMedia['mediaType']): string {
   switch (mediaType) {
     case 'photo':

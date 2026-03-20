@@ -964,7 +964,8 @@ export default memo(withGlobal<OwnProps>((global, {
   const shouldForcePause = Boolean(
     isPaymentMessageConfirmDialogOpen
     || viewModal || forwardedStoryId || tabState.reactionPicker?.storyId || reportModal || isPrivacyModalOpen
-    || isPremiumModalOpen || isDeleteModalOpen || safeLinkModalUrl || isStealthModalOpen || mapModal || giftInfoModal,
+    || isPremiumModalOpen || isDeleteModalOpen || safeLinkModalUrl || tabState.desktopSessionLinkRequest
+    || isStealthModalOpen || mapModal || giftInfoModal,
   );
 
   const forwardInfo = isLoadedStory ? story.forwardInfo : undefined;

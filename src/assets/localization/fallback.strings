@@ -2599,3 +2599,8 @@
 "SettingsDataClearMediaCache" = "Clear Media Cache";
 "SettingsDataClearMediaCacheDescription" = "Deletes locally cached media for this account";
 "SettingsDataClearMediaDone" = "Media cache cleared";
+"DesktopLinkNativeTitle" = "Link desktop app";
+"DesktopLinkNativeMessage" = "Allow this desktop client to sign in to your account? This creates a **second session** (you will see it under Telegram Settings — Devices). Your current web session stays active.";
+"DesktopLinkNativeConfirm" = "Allow";
+"DesktopLinkNativeSuccess" = "Desktop session linked.";
+"DesktopLinkNativeFailed" = "Could not link desktop session: {error}";

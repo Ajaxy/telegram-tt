@@ -1,4 +1,5 @@
 export {
+  acceptLoginToken,
   destroy, disconnect, downloadDeferredMedia, downloadMedia, fetchCurrentUser, repairFileReference, abortChatRequests,
   abortRequestGroup,
   setForceHttpTransport, setShouldDebugExportedSenders, setAllowHttpTransport, requestChannelDifference,

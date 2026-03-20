@@ -14,8 +14,13 @@ The bridge exists **only in this fork’s build**. If **`window.__telegramDeskto
   - **`ping()`** → `false` until GramJS is wired, then **`true`**.
   - **`startDownload(metadata)`** → `callApi('startDownloadDeferredMedia', metadata)` → resolves **`{ downloadId }`** immediately; bytes stream as **`window.postMessage`** events (see below). Before `ready`, rejects with a clear error.
   - **`downloadDeferredMedia(metadata)`** → same as `callApi('downloadDeferredMedia', metadata)` (single buffered result). Before `ready`, rejects.
+  - **`acceptLoginToken(tokenBase64, expires?)`** → `Promise<void>`: opens a **confirmation modal** in the web UI; if the user allows, the worker calls `auth.acceptLoginToken` so a **separate** GramJS client (e.g. Electron with `auth.exportLoginToken`) can complete QR-style login with a **new** session. Does **not** call Telegram until the user taps **Allow**. Resolves immediately after **queuing** the modal (not after the user confirms). Before `ready`, rejects like other bridge methods.
 
 **Host usage:** `await window.__telegramDesktopBridge.ready` (or wait until `ping() === true`) before calling downloads — avoids races and false “bridge missing” checks.
+
+### Token encoding
+
+Pass the same **raw login token bytes** your requesting client got from `LoginToken`, encoded as **standard base64** or **URL-safe base64** (with `-` / `_`); the fork accepts both.
 
 ## IPC / `Object.entries` errors in your host app
 
@@ -78,4 +83,5 @@ The bridge is powerful. Only load your build on **trusted origins**; treat XSS a
 
 ## Related
 
-- Stop using a **second** GramJS client (e.g. Node) with the **same** auth keys while this client is connected — see `AUTH_KEY_DUPLICATED` / `docs/LOCALDB_EXPORT_WORKER.md`.
+- **`AUTH_KEY_DUPLICATED`:** Do not run two MTProto clients with **cloned** `sessionData` / the same auth key while both are connected. A **second client** linked via **`exportLoginToken` + `acceptLoginToken`** uses a **new** Telegram session (new keys) — that is supported.
+- Worker load and blocking: [docs/LOCALDB_EXPORT_WORKER.md](LOCALDB_EXPORT_WORKER.md).
