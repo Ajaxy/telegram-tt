@@ -427,6 +427,25 @@ function mimeTypeForDeferredMedia(mediaType: ApiDesktopDeferredMedia['mediaType'
 }
 
 /**
+ * `downloadFile` uses OPFS (`File`) when the hinted size exceeds `maxBufferSize`; otherwise `Buffer`.
+ */
+async function downloadFileResultToBuffer(
+  data: Buffer | File | undefined,
+): Promise<Buffer | undefined> {
+  if (data === undefined) {
+    return undefined;
+  }
+  if (Buffer.isBuffer(data)) {
+    return data;
+  }
+  if (typeof File !== 'undefined' && data instanceof File) {
+    const arrayBuffer = await data.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  }
+  return undefined;
+}
+
+/**
  * Download bytes for media described by deferred metadata (no localDb URL).
  * Runs in GramJS worker; safe for Electron when only this stack holds the session.
  * Return shape matches progressive downloadMedia so the worker can transfer ArrayBuffer.
@@ -447,10 +466,10 @@ export async function downloadDeferredMedia(metadata: ApiDesktopDeferredMedia) {
 
   const refBytes = asGramJsBytes(fileReference);
 
-  let data: Buffer | undefined;
+  let raw: Buffer | File | undefined;
   if (mediaType === 'photo') {
     const thumbSize = metadata.thumbSize || 'y';
-    data = await client.downloadFile(
+    raw = await client.downloadFile(
       new GramJs.InputPhotoFileLocation({
         id,
         accessHash,
@@ -458,10 +477,10 @@ export async function downloadDeferredMedia(metadata: ApiDesktopDeferredMedia) {
         thumbSize,
       }),
       { dcId, fileSize: fileSizeHint },
-    ) as Buffer | undefined;
+    );
   } else {
     const thumbSize = metadata.thumbSize ?? '';
-    data = await client.downloadFile(
+    raw = await client.downloadFile(
       new GramJs.InputDocumentFileLocation({
         id,
         accessHash,
@@ -473,8 +492,10 @@ export async function downloadDeferredMedia(metadata: ApiDesktopDeferredMedia) {
         fileSize: fileSizeHint,
         workers: DOWNLOAD_WORKERS,
       },
-    ) as Buffer | undefined;
+    );
   }
+
+  const data = await downloadFileResultToBuffer(raw);
 
   if (!data?.length) {
     return undefined;
@@ -523,6 +544,25 @@ export function startDownloadDeferredMedia(
       return Number.isFinite(n) && n > 0 ? n : 52428800;
     })();
 
+    let finished = false;
+    const finishDownload = (fields: {
+      offset: number;
+      error?: string;
+      totalSize?: number;
+    }) => {
+      if (finished) {
+        return;
+      }
+      finished = true;
+      emitDownloadChunk({
+        type: 'tgDownloadChunk',
+        downloadId,
+        done: true,
+        mimeType,
+        ...fields,
+      });
+    };
+
     const onPart = (offset: number, bytes: Uint8Array) => {
       if (!bytes.length) return;
       const ab = uint8ToTransferableArrayBuffer(bytes);
@@ -539,10 +579,10 @@ export function startDownloadDeferredMedia(
     };
 
     try {
-      let data: Buffer | undefined;
+      let raw: Buffer | File | undefined;
       if (mediaType === 'photo') {
         const thumbSize = metadata.thumbSize || 'y';
-        data = await client.downloadFile(
+        raw = await client.downloadFile(
           new GramJs.InputPhotoFileLocation({
             id,
             accessHash,
@@ -550,10 +590,10 @@ export function startDownloadDeferredMedia(
             thumbSize,
           }),
           { dcId, fileSize: fileSizeHint, onPart },
-        ) as Buffer | undefined;
+        );
       } else {
         const thumbSize = metadata.thumbSize ?? '';
-        data = await client.downloadFile(
+        raw = await client.downloadFile(
           new GramJs.InputDocumentFileLocation({
             id,
             accessHash,
@@ -566,39 +606,46 @@ export function startDownloadDeferredMedia(
             workers: DOWNLOAD_WORKERS,
             onPart,
           },
-        ) as Buffer | undefined;
+        );
       }
 
-      if (!data?.length) {
+      if (raw === undefined) {
+        finishDownload({ offset: 0, error: 'Empty download' });
+        return;
+      }
+      if (Buffer.isBuffer(raw)) {
+        if (!raw.length) {
+          finishDownload({ offset: 0, error: 'Empty download' });
+          return;
+        }
+        finishDownload({ offset: raw.length, totalSize: raw.length });
+        return;
+      }
+      if (typeof File !== 'undefined' && raw instanceof File) {
+        if (!raw.size) {
+          finishDownload({ offset: 0, error: 'Empty download' });
+          return;
+        }
+        finishDownload({ offset: raw.size, totalSize: raw.size });
+        return;
+      }
+
+      finishDownload({ offset: 0, error: 'Unexpected download result' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      finishDownload({ offset: 0, error: message });
+    } finally {
+      if (!finished) {
+        finished = true;
         emitDownloadChunk({
           type: 'tgDownloadChunk',
           downloadId,
           offset: 0,
           done: true,
-          error: 'Empty download',
+          error: 'Download terminated without completion',
           mimeType,
         });
-        return;
       }
-
-      emitDownloadChunk({
-        type: 'tgDownloadChunk',
-        downloadId,
-        offset: data.length,
-        done: true,
-        mimeType,
-        totalSize: data.length,
-      });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      emitDownloadChunk({
-        type: 'tgDownloadChunk',
-        downloadId,
-        offset: 0,
-        done: true,
-        error: message,
-        mimeType,
-      });
     }
   })();
 
