@@ -4,28 +4,18 @@ This is a modified version of [Telegram Web A](https://github.com/Ajaxy/telegram
 
 ## Summary
 
-Added a minimal API to expose Telegram's internal media metadata (localDb) for external access.
-
-**Changes**: 3 files, 33 lines added
+**`getLocalDbData()` has been removed** (reverted to match upstream `localDb` surface). Remaining fork hooks: `window.callApi`, `window.getGlobal`, `window.getActions` (see `src/global/index.ts`).
 
 ## Modified Files
 
-### 1. `src/api/gramjs/localDb.ts`
-Added `getLocalDbData()` function to serialize and export localDb with proper handling of BigInt and Uint8Array types.
-
-### 2. `src/api/gramjs/methods/index.ts`
-Exported the `getLocalDbData` method.
-
-### 3. `src/global/index.ts`
+### 1. `src/global/index.ts`
 Exposed `window.callApi`, `window.getGlobal`, and `window.getActions` for external access.
 
 ## Usage
 
 ```javascript
-// Access media metadata
-const localDb = await window.callApi('getLocalDbData');
-const document = localDb.documents[documentId];
-// Access: accessHash, fileReference, dcId, size, fileName, etc.
+// DEBUG builds only: direct reference to worker localDb (not serialized)
+// Or use window.getGlobal / window.getActions / window.callApi for app APIs
 ```
 
 ## Purpose

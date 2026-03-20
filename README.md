@@ -20,18 +20,7 @@ Feel free to explore, provide feedback and contribute.
 
 ## Fork-Specific Features
 
-This fork adds a minimal API to access Telegram's internal media metadata:
-
-```javascript
-// Access media metadata from external applications
-const localDb = await window.callApi('getLocalDbData');
-const document = localDb.documents[documentId];
-// Access: accessHash, fileReference, dcId, size, fileName, etc.
-```
-
-**Use cases**: Data archival, content analysis, integration tools, research
-
-**Documentation**: See [LOCALDB_SOLUTION.md](LOCALDB_SOLUTION.md) for complete technical guide
+This fork may expose `window.getGlobal`, `window.getActions`, and `window.callApi` (see [MODIFICATIONS.md](MODIFICATIONS.md)). The previous `getLocalDbData` API was removed.
 
 ## Local setup
 

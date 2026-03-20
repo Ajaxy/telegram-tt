@@ -10,7 +10,6 @@ export {
 
 export {
   broadcastLocalDbUpdateFull,
-  getLocalDbData, // MODIFICATION: Added for external data access (GPL-3.0)
 } from '../localDb';
 
 export * from './account';

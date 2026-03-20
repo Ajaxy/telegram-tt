@@ -907,16 +907,8 @@ export default class MTProtoSender {
         this.logWithIndex.debug('Handling RPC result', read);
         state.resolve?.(read);
       } catch (err: any) {
-        if (err instanceof TypeNotFoundError) {
-          // The server responded successfully but the response contains a TL type the client
-          // schema doesn't yet define. Resolve without updates rather than failing the request —
-          // the server-side action (e.g. sending a message) did succeed.
-          this._log.warn(`Unknown constructor ${err.invalidConstructorId} in RPC result, ignoring`);
-          state.resolve?.(undefined);
-        } else {
-          state.reject?.(err);
-          throw err;
-        }
+        state.reject?.(err);
+        throw err;
       }
     }
   }

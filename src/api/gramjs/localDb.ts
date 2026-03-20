@@ -140,32 +140,6 @@ export function clearLocalDb() {
   Object.assign(localDb, createLocalDbInitial());
 }
 
-// MODIFICATION: Added getLocalDbData() function
-// Purpose: Export localDb for external access (e.g., scrapers, integrations)
-// License: GPL-3.0 (same as original)
-// See: MODIFICATIONS.md for details
-export function getLocalDbData(): LocalDb {
-  // Return a deep clone to avoid sending non-cloneable GramJS instances
-  // The localDb already contains plain objects after being processed by createProxy
-  return JSON.parse(JSON.stringify(localDb, (key, value) => {
-    // Handle BigInt serialization
-    if (typeof value === 'bigint') {
-      return value.toString();
-    }
-    // Handle Uint8Array/Buffer (fileReference, etc.)
-    if (value && typeof value === 'object') {
-      if (value.type === 'Buffer' && Array.isArray(value.data)) {
-        return value.data;
-      }
-      if (ArrayBuffer.isView(value)) {
-        return Array.from(value as Uint8Array);
-      }
-    }
-    return value;
-  }));
-}
-// END MODIFICATION
-
 if (DEBUG) {
   (globalThis as any).getLocalDb = () => localDb;
 }
