@@ -25,12 +25,20 @@ If your `MessagingBackend` does `Object.entries(somePayload)` and **`somePayload
 
 After `startDownload` resolves with `{ downloadId }`, listen on the **page** `window`:
 
+Payload shape (main thread → `window.postMessage`, **structured clone**, no transfer list):
+
+- **Data parts:** `done: false`, `chunk: ArrayBuffer` (copy), `chunkSize` / `byteLength` &gt; 0, `offset` = byte offset in file.
+- **Terminal:** `done: true`, `chunk` omitted, `totalSize` / `mimeType` on success, or `error` on failure.
+
+Chunks are sent in **separate** worker → main messages so ArrayBuffers are not mis-ordered with other batched updates.
+
 ```ts
 window.addEventListener('message', (ev) => {
   if (ev.data?.type !== 'tg-download-chunk') return;
-  const { downloadId, offset, byteLength, chunk, done, error, mimeType, totalSize } = ev.data;
-  // chunk: ArrayBuffer (transferred) for data parts; absent on terminal-only message
-  // done: true when finished; error set on failure
+  const { downloadId, offset, byteLength, chunkSize, chunk, done, error, mimeType, totalSize } = ev.data;
+  if (done) { /* close stream */ return; }
+  const n = chunkSize ?? byteLength ?? 0;
+  if (n > 0 && chunk) { /* append chunk */ }
 });
 ```
 

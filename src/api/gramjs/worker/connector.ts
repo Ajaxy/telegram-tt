@@ -79,17 +79,32 @@ function postTgDownloadChunkToWindow(payload: Extract<WorkerPayload, { type: 'tg
     downloadId, offset, byteLength, done, error, mimeType, totalSize, chunk,
   } = payload;
 
+  const isDone = done === true;
+
+  // Copy instead of transfer: avoids detached/empty buffers in Electron webview second hop.
+  let chunkCopy: ArrayBuffer | undefined;
+  if (chunk instanceof ArrayBuffer && chunk.byteLength > 0) {
+    chunkCopy = chunk.slice(0);
+  }
+
+  if (!isDone && !chunkCopy) {
+    return;
+  }
+
+  const chunkSize = chunkCopy ? chunkCopy.byteLength : 0;
+
   window.postMessage({
     type: 'tg-download-chunk',
     downloadId,
     offset,
-    byteLength,
-    done,
+    byteLength: chunkSize || byteLength,
+    chunkSize,
+    chunk: isDone ? undefined : chunkCopy,
+    done: isDone,
     error,
     mimeType,
     totalSize,
-    chunk,
-  }, '*', chunk instanceof ArrayBuffer ? [chunk] : []);
+  }, '*');
 }
 
 let updateCallback: OnApiUpdate;

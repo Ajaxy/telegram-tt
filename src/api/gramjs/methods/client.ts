@@ -524,6 +524,7 @@ export function startDownloadDeferredMedia(
     })();
 
     const onPart = (offset: number, bytes: Uint8Array) => {
+      if (!bytes.length) return;
       const ab = uint8ToTransferableArrayBuffer(bytes);
       emitDownloadChunk(
         {

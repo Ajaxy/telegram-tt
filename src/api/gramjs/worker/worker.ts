@@ -193,8 +193,10 @@ function sendToOrigin(payload: WorkerPayload, transferable?: Transferable) {
   sendToOriginOnTickEnd();
 }
 
+// One worker postMessage per chunk so transferables never mis-align with batched payloads
+// (sendToOrigin batches with updates unshifted first, which breaks multi-transfer order).
 setDesktopBridgeChunkPoster((payload, transferable) => {
-  sendToOrigin(payload, transferable);
+  postMessage({ payloads: [payload] }, transferable ? [transferable] : []);
 });
 
 function onUpdate(update: ApiUpdate) {
