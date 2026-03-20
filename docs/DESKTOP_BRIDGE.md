@@ -32,15 +32,30 @@ Payload shape (main thread → `window.postMessage`, **structured clone**, no tr
 
 Chunks are sent in **separate** worker → main messages so ArrayBuffers are not mis-ordered with other batched updates.
 
+**Always filter** — many scripts call `postMessage`; ignore anything not from this bridge:
+
 ```ts
 window.addEventListener('message', (ev) => {
-  if (ev.data?.type !== 'tg-download-chunk') return;
-  const { downloadId, offset, byteLength, chunkSize, chunk, done, error, mimeType, totalSize } = ev.data;
-  if (done) { /* close stream */ return; }
+  const d = ev.data;
+  if (d?.type !== 'tg-download-chunk' || d?.bridge !== 'telegram-tt-v2') return;
+
+  const { downloadId, offset, byteLength, chunkSize, chunk, done, state, error, mimeType, totalSize } = d;
+
+  if (state === 'done' || state === 'error' || done === true) {
+    /* close stream; check error */
+    return;
+  }
+
   const n = chunkSize ?? byteLength ?? 0;
-  if (n > 0 && chunk) { /* append chunk */ }
+  if (state === 'data' && n > 0 && chunk instanceof ArrayBuffer) {
+    /* append chunk */
+  }
 });
 ```
+
+If you see **`chunkSize: 0`** and **`done` undefined** on events **without** `bridge: 'telegram-tt-v2'`, those are **not** from telegram-tt (e.g. React, extensions, or an **old** deploy before this field existed). Redeploy the fork and filter as above.
+
+Avoid starting **many** `startDownload` calls in parallel unless each stream is keyed by **`downloadId`** — interleaved chunks are expected.
 
 Optional **`metadata.downloadId`** lets you correlate without waiting for the promise.
 

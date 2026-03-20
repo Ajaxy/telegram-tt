@@ -93,8 +93,12 @@ function postTgDownloadChunkToWindow(payload: Extract<WorkerPayload, { type: 'tg
 
   const chunkSize = chunkCopy ? chunkCopy.byteLength : 0;
 
+  const state = isDone ? (error ? 'error' : 'done') : 'data';
+
   window.postMessage({
     type: 'tg-download-chunk',
+    bridge: 'telegram-tt-v2',
+    state,
     downloadId,
     offset,
     byteLength: chunkSize || byteLength,
