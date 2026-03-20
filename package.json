@@ -8,7 +8,6 @@
   "main": "index.js",
   "scripts": {
     "dev": "cross-env APP_ENV=development webpack serve --mode development",
-    "prod": "cross-env APP_ENV=development webpack serve --mode production",
     "dev:mocked": "cross-env APP_ENV=test APP_MOCKED_CLIENT=1 webpack serve --mode development --port 1235",
     "build:dev": "webpack --mode development && bash ./deploy/copy_to_dist.sh",
     "build:staging": "cross-env APP_ENV=staging npm run build:dev",

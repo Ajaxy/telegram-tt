@@ -522,10 +522,8 @@ export function sendApiMessage(
       }
 
       if (update) handleLocalMessageUpdate(localMessage, update);
-    } catch (err: any) {
-      const errorMessage = err instanceof RPCError ? err.errorMessage : err.message;
-
-      if (errorMessage === 'PRIVACY_PREMIUM_REQUIRED') {
+    } catch (error: any) {
+      if (error.errorMessage === 'PRIVACY_PREMIUM_REQUIRED') {
         sendApiUpdate({ '@type': 'updateRequestUserUpdate', id: chat.id });
       }
 
@@ -533,7 +531,7 @@ export function sendApiMessage(
         '@type': localMessage.isScheduled ? 'updateScheduledMessageSendFailed' : 'updateMessageSendFailed',
         chatId: chat.id,
         localId: localMessage.id,
-        error: errorMessage,
+        error: error.errorMessage,
       });
       clearTimeout(timeout);
     }
@@ -1939,14 +1937,13 @@ export async function forwardApiMessages(params: ForwardMessagesParams) {
       messagesForUpdate[randomIds[index].toString()] = message;
     });
     if (update) handleMultipleLocalMessagesUpdate(messagesForUpdate, update);
-  } catch (err: any) {
-    const errorMessage = err instanceof RPCError ? err.errorMessage : err.message;
+  } catch (error: any) {
     Object.values(localMessages).forEach((localMessage) => {
       sendApiUpdate({
         '@type': localMessage.isScheduled ? 'updateScheduledMessageSendFailed' : 'updateMessageSendFailed',
         chatId: toChat.id,
         localId: localMessage.id,
-        error: errorMessage,
+        error: error.errorMessage,
       });
     });
   }

@@ -10,6 +10,7 @@ import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 
 import type { ThreadId } from '../../../types';
 import type {
+  ApiDesktopDeferredMedia,
   ApiInitialArgs,
   ApiMediaFormat,
   ApiOnProgress,
@@ -18,8 +19,9 @@ import type {
 
 import {
   APP_CODE_NAME,
-  DEBUG, DEBUG_GRAMJS, IS_TEST, LANG_PACK, UPLOAD_WORKERS,
+  DEBUG, DEBUG_GRAMJS, DOWNLOAD_WORKERS, IS_TEST, LANG_PACK, UPLOAD_WORKERS,
 } from '../../../config';
+import { base64UrlToBuffer } from '../../../util/encoding/base64';
 import { pause } from '../../../util/schedulers';
 import { buildWebPage } from '../apiBuilders/messageContent';
 import {
@@ -393,6 +395,91 @@ export async function downloadMedia(
 
     throw err;
   }
+}
+
+function fileReferenceBytesFromDeferredMedia(b64: string): Buffer {
+  const trimmed = b64.trim();
+  if (trimmed.includes('-') || trimmed.includes('_')) {
+    return base64UrlToBuffer(trimmed);
+  }
+  return Buffer.from(trimmed, 'base64');
+}
+
+function mimeTypeForDeferredMedia(mediaType: ApiDesktopDeferredMedia['mediaType']): string {
+  switch (mediaType) {
+    case 'photo':
+      return 'image/jpeg';
+    case 'video':
+      return 'video/mp4';
+    case 'audio':
+      return 'audio/mpeg';
+    case 'voice':
+      return 'audio/ogg';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
+/**
+ * Download bytes for media described by deferred metadata (no localDb URL).
+ * Runs in GramJS worker; safe for Electron when only this stack holds the session.
+ * Return shape matches progressive downloadMedia so the worker can transfer ArrayBuffer.
+ */
+export async function downloadDeferredMedia(metadata: ApiDesktopDeferredMedia) {
+  const id = BigInt(metadata.id);
+  const accessHash = BigInt(metadata.accessHash);
+  const fileReference = fileReferenceBytesFromDeferredMedia(metadata.fileReference);
+  const { dcId, mediaType } = metadata;
+
+  const fileSizeHint = (() => {
+    if (metadata.size === undefined || metadata.size === '') {
+      return 52428800;
+    }
+    const n = typeof metadata.size === 'number' ? metadata.size : Number(metadata.size);
+    return Number.isFinite(n) && n > 0 ? n : 52428800;
+  })();
+
+  let data: Buffer | undefined;
+  if (mediaType === 'photo') {
+    const thumbSize = metadata.thumbSize || 'y';
+    data = await client.downloadFile(
+      new GramJs.InputPhotoFileLocation({
+        id,
+        accessHash,
+        fileReference,
+        thumbSize,
+      }),
+      { dcId, fileSize: fileSizeHint },
+    ) as Buffer | undefined;
+  } else {
+    const thumbSize = metadata.thumbSize ?? '';
+    data = await client.downloadFile(
+      new GramJs.InputDocumentFileLocation({
+        id,
+        accessHash,
+        fileReference,
+        thumbSize,
+      }),
+      {
+        dcId,
+        fileSize: fileSizeHint,
+        workers: DOWNLOAD_WORKERS,
+      },
+    ) as Buffer | undefined;
+  }
+
+  if (!data?.length) {
+    return undefined;
+  }
+
+  const arrayBuffer = new Uint8Array(data).buffer;
+
+  return {
+    dataBlob: '',
+    arrayBuffer,
+    mimeType: mimeTypeForDeferredMedia(mediaType),
+    fullSize: data.length,
+  };
 }
 
 export function uploadFile(file: File, onProgress?: ApiOnProgress) {

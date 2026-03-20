@@ -63,10 +63,16 @@ export type GlobalActions = ReturnType<typeof getActions>;
 if (typeof window !== 'undefined') {
   (window as any).getGlobal = getGlobal;
   (window as any).getActions = getActions;
-  
+
   // Lazy import callApi to avoid circular dependencies
   import('../api/gramjs').then((api) => {
     (window as any).callApi = api.callApi;
+    (window as any).__telegramDesktopBridge = {
+      ping: () => Promise.resolve({ ok: true as const, callApiReady: true }),
+      downloadDeferredMedia: (metadata: import('../api/types/desktopBridge').ApiDesktopDeferredMedia) => (
+        api.callApi('downloadDeferredMedia', metadata)
+      ),
+    };
   });
 }
 // END MODIFICATION

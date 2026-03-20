@@ -26,6 +26,9 @@ export class TypeNotFoundError extends Error {
     super(`Could not find a matching Constructor ID for the TLObject that was supposed to be
         read with ID ${invalidConstructorId}. Most likely, a TLObject was trying to be read when
          it should not be read. Remaining bytes: ${remaining.length}`);
+    if (typeof alert !== 'undefined') {
+      alert(`Missing MTProto Entity: Please, make sure to add TL definition for ID ${invalidConstructorId}`);
+    }
     this.invalidConstructorId = invalidConstructorId;
     this.remaining = remaining;
   }
