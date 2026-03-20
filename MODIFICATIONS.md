@@ -24,6 +24,8 @@ Exports the above methods for `callApi`.
 
 Worker invokes `auth.acceptLoginToken` when the user confirms linking a separate native client.
 
+Runtime `GramJs.auth.AcceptLoginToken` is built from [`src/lib/gramjs/tl/apiTl.ts`](src/lib/gramjs/tl/apiTl.ts) (must include the `auth.acceptLoginToken` TL line). If you ever see **`AcceptLoginToken is not a constructor`**, clear browser **`localStorage`** key **`GramJs:apiCache`** for the app origin and reload (only affects environments where GramJS caches the parsed TL in `localStorage`).
+
 ### 4. `src/api/gramjs/methods/client.ts` + types
 - `callApi('downloadDeferredMedia', metadata)` — full file in one response.
 - `callApi('startDownloadDeferredMedia', metadata)` — chunks via `window.postMessage({ type: 'tg-download-chunk', ... })` from the main thread connector.
