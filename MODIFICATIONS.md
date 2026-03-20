@@ -4,18 +4,28 @@ This is a modified version of [Telegram Web A](https://github.com/Ajaxy/telegram
 
 ## Summary
 
-**`getLocalDbData()` has been removed** (reverted to match upstream `localDb` surface). Remaining fork hooks: `window.callApi`, `window.getGlobal`, `window.getActions` (see `src/global/index.ts`).
+Exposes `localDb` (or a media-only slice) via `callApi`. Serialization runs on the **GramJS Web Worker** (same thread as MTProto); large sync `JSON.stringify` can starve recv. We **yield between top-level buckets** and document why in [docs/LOCALDB_EXPORT_WORKER.md](docs/LOCALDB_EXPORT_WORKER.md).
 
 ## Modified Files
 
-### 1. `src/global/index.ts`
-Exposed `window.callApi`, `window.getGlobal`, and `window.getActions` for external access.
+### 1. `src/api/gramjs/localDb.ts`
+- `getLocalDbMediaMetadata()` — **preferred** for scrapers: `documents`, `photos`, `webDocuments` only (smaller, faster).
+- `getLocalDbData()` — full clone; **throttle** (e.g. ≤1 call/s).
+
+### 2. `src/api/gramjs/methods/index.ts`
+Exports the above methods for `callApi`.
+
+### 3. `src/global/index.ts`
+`window.callApi`, `window.getGlobal`, `window.getActions`.
 
 ## Usage
 
 ```javascript
-// DEBUG builds only: direct reference to worker localDb (not serialized)
-// Or use window.getGlobal / window.getActions / window.callApi for app APIs
+// Preferred: media metadata only (async)
+const { documents, photos, webDocuments } = await window.callApi('getLocalDbMediaMetadata');
+
+// Full dump — heavy; throttle
+const localDb = await window.callApi('getLocalDbData');
 ```
 
 ## Purpose

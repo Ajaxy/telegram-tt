@@ -10,6 +10,8 @@ export {
 
 export {
   broadcastLocalDbUpdateFull,
+  getLocalDbData,
+  getLocalDbMediaMetadata,
 } from '../localDb';
 
 export * from './account';

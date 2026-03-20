@@ -20,7 +20,7 @@ Feel free to explore, provide feedback and contribute.
 
 ## Fork-Specific Features
 
-This fork may expose `window.getGlobal`, `window.getActions`, and `window.callApi` (see [MODIFICATIONS.md](MODIFICATIONS.md)). The previous `getLocalDbData` API was removed.
+`window.callApi` exposes `getLocalDbMediaMetadata` (preferred) and `getLocalDbData` (full, throttle). See [MODIFICATIONS.md](MODIFICATIONS.md).
 
 ## Local setup
 
