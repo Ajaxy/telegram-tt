@@ -3,7 +3,7 @@ import type { TypedBroadcastChannel } from '../../../util/browser/multitab';
 import type { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
 import type { LocalDb } from '../localDb';
 import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
-import type { OriginPayload, ThenArg, WorkerMessageEvent } from './types';
+import type { OriginPayload, ThenArg, WorkerMessageEvent, WorkerPayload } from './types';
 
 import { DEBUG, IGNORE_UNHANDLED_ERRORS } from '../../../config';
 import { IS_TAURI } from '../../../util/browser/globalEnvironment';
@@ -70,6 +70,26 @@ export function initApiOnMasterTab(initialArgs: ApiInitialArgs) {
     token: getCurrentTabId(),
     initialArgs,
   });
+}
+
+function postTgDownloadChunkToWindow(payload: Extract<WorkerPayload, { type: 'tgDownloadChunk' }>) {
+  if (typeof window === 'undefined') return;
+
+  const {
+    downloadId, offset, byteLength, done, error, mimeType, totalSize, chunk,
+  } = payload;
+
+  window.postMessage({
+    type: 'tg-download-chunk',
+    downloadId,
+    offset,
+    byteLength,
+    done,
+    error,
+    mimeType,
+    totalSize,
+    chunk,
+  }, '*', chunk instanceof ArrayBuffer ? [chunk] : []);
 }
 
 let updateCallback: OnApiUpdate;
@@ -305,6 +325,8 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
         navigator.sendBeacon(payload.url, payload.data);
       } else if (payload.type === 'debugLog') {
         logDebugMessage(payload.level, ...payload.args);
+      } else if (payload.type === 'tgDownloadChunk') {
+        postTgDownloadChunkToWindow(payload);
       }
     });
   });

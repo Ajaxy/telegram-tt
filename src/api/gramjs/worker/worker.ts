@@ -8,6 +8,7 @@ import { DEBUG } from '../../../config';
 import { DEBUG_LEVELS } from '../../../util/debugConsole';
 import { throttleWithTickEnd } from '../../../util/schedulers';
 import { log } from '../helpers/misc';
+import { setDesktopBridgeChunkPoster } from '../methods/desktopBridgeWorker';
 import { callApi, cancelApiProgress, initApi } from '../methods/init';
 
 declare const self: WorkerGlobalScope;
@@ -191,6 +192,10 @@ function sendToOrigin(payload: WorkerPayload, transferable?: Transferable) {
 
   sendToOriginOnTickEnd();
 }
+
+setDesktopBridgeChunkPoster((payload, transferable) => {
+  sendToOrigin(payload, transferable);
+});
 
 function onUpdate(update: ApiUpdate) {
   if (DEBUG && update['@type'] !== 'updateUserStatus' && update['@type'] !== 'updateServerTimeOffset') {

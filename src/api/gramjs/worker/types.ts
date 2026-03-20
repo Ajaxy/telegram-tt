@@ -41,6 +41,19 @@ export type WorkerPayload =
     type: 'debugLog';
     level: DebugLevel;
     args: any[];
+  }
+  |
+  {
+    type: 'tgDownloadChunk';
+    downloadId: string;
+    offset: number;
+    byteLength?: number;
+    done?: boolean;
+    error?: string;
+    mimeType?: string;
+    totalSize?: number;
+    /** Populated for data chunks; transferred out-of-band when posting to window */
+    chunk?: ArrayBuffer;
   };
 
 export type WorkerMessageData = {

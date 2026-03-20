@@ -2,6 +2,7 @@ export {
   destroy, disconnect, downloadDeferredMedia, downloadMedia, fetchCurrentUser, repairFileReference, abortChatRequests,
   abortRequestGroup,
   setForceHttpTransport, setShouldDebugExportedSenders, setAllowHttpTransport, requestChannelDifference,
+  startDownloadDeferredMedia,
 } from './client';
 
 export {

@@ -16,10 +16,12 @@ Exposes `localDb` (or a media-only slice) via `callApi`. Serialization runs on t
 Exports the above methods for `callApi`.
 
 ### 3. `src/global/index.ts`
-`window.callApi`, `window.getGlobal`, `window.getActions`, and `window.__telegramDesktopBridge` (`ping`, `downloadDeferredMedia`) for Electron-style hosts. See [docs/DESKTOP_BRIDGE.md](docs/DESKTOP_BRIDGE.md).
+`window.callApi`, `window.getGlobal`, `window.getActions`, and `window.__telegramDesktopBridge` (`ping` → `true`, `startDownload`, `downloadDeferredMedia`) for Electron-style hosts. See [docs/DESKTOP_BRIDGE.md](docs/DESKTOP_BRIDGE.md).
 
 ### 4. `src/api/gramjs/methods/client.ts` + types
-`callApi('downloadDeferredMedia', metadata)` — downloads bytes from deferred media metadata inside the **worker** (no second MTProto client). Type: `ApiDesktopDeferredMedia` in `src/api/types/desktopBridge.ts`.
+- `callApi('downloadDeferredMedia', metadata)` — full file in one response.
+- `callApi('startDownloadDeferredMedia', metadata)` — chunks via `window.postMessage({ type: 'tg-download-chunk', ... })` from the main thread connector.
+- Type: `ApiDesktopDeferredMedia` in `src/api/types/desktopBridge.ts` (optional `downloadId`).
 
 ## Usage
 

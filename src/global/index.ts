@@ -68,7 +68,10 @@ if (typeof window !== 'undefined') {
   import('../api/gramjs').then((api) => {
     (window as any).callApi = api.callApi;
     (window as any).__telegramDesktopBridge = {
-      ping: () => Promise.resolve({ ok: true as const, callApiReady: true }),
+      ping: () => true,
+      startDownload: (metadata: import('../api/types/desktopBridge').ApiDesktopDeferredMedia) => (
+        api.callApi('startDownloadDeferredMedia', metadata)
+      ),
       downloadDeferredMedia: (metadata: import('../api/types/desktopBridge').ApiDesktopDeferredMedia) => (
         api.callApi('downloadDeferredMedia', metadata)
       ),

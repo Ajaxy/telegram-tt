@@ -67,6 +67,7 @@ import {
   onRequestRegistration,
   onWebAuthTokenFailed,
 } from './auth';
+import { emitDownloadChunk } from './desktopBridgeWorker';
 import downloadMediaWithClient, { parseMediaUrl } from './media';
 
 import { ChatAbortController } from '../ChatAbortController';
@@ -405,6 +406,11 @@ function fileReferenceBytesFromDeferredMedia(b64: string): Buffer {
   return Buffer.from(trimmed, 'base64');
 }
 
+/** TL `bytes` typing is stricter than runtime Buffer in some TS configs. */
+function asGramJsBytes(buf: Buffer): GramJs.bytes {
+  return buf as unknown as GramJs.bytes;
+}
+
 function mimeTypeForDeferredMedia(mediaType: ApiDesktopDeferredMedia['mediaType']): string {
   switch (mediaType) {
     case 'photo':
@@ -439,6 +445,8 @@ export async function downloadDeferredMedia(metadata: ApiDesktopDeferredMedia) {
     return Number.isFinite(n) && n > 0 ? n : 52428800;
   })();
 
+  const refBytes = asGramJsBytes(fileReference);
+
   let data: Buffer | undefined;
   if (mediaType === 'photo') {
     const thumbSize = metadata.thumbSize || 'y';
@@ -446,7 +454,7 @@ export async function downloadDeferredMedia(metadata: ApiDesktopDeferredMedia) {
       new GramJs.InputPhotoFileLocation({
         id,
         accessHash,
-        fileReference,
+        fileReference: refBytes,
         thumbSize,
       }),
       { dcId, fileSize: fileSizeHint },
@@ -457,7 +465,7 @@ export async function downloadDeferredMedia(metadata: ApiDesktopDeferredMedia) {
       new GramJs.InputDocumentFileLocation({
         id,
         accessHash,
-        fileReference,
+        fileReference: refBytes,
         thumbSize,
       }),
       {
@@ -480,6 +488,120 @@ export async function downloadDeferredMedia(metadata: ApiDesktopDeferredMedia) {
     mimeType: mimeTypeForDeferredMedia(mediaType),
     fullSize: data.length,
   };
+}
+
+function uint8ToTransferableArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const ab = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(ab).set(bytes);
+  return ab;
+}
+
+/**
+ * Starts a deferred-media download in the GramJS worker and streams each part to the UI thread,
+ * which re-posts `window.postMessage({ type: 'tg-download-chunk', ... }, '*', [chunk?])`.
+ * Resolves immediately with `downloadId` (download continues asynchronously).
+ */
+export function startDownloadDeferredMedia(
+  metadata: ApiDesktopDeferredMedia,
+): Promise<{ downloadId: string }> {
+  const downloadId = metadata.downloadId?.trim()
+    ? metadata.downloadId.trim()
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  const mimeType = mimeTypeForDeferredMedia(metadata.mediaType);
+
+  void (async () => {
+    const id = BigInt(metadata.id);
+    const accessHash = BigInt(metadata.accessHash);
+    const refBytes = asGramJsBytes(fileReferenceBytesFromDeferredMedia(metadata.fileReference));
+    const { dcId, mediaType } = metadata;
+
+    const fileSizeHint = (() => {
+      if (metadata.size === undefined || metadata.size === '') {
+        return 52428800;
+      }
+      const n = typeof metadata.size === 'number' ? metadata.size : Number(metadata.size);
+      return Number.isFinite(n) && n > 0 ? n : 52428800;
+    })();
+
+    const onPart = (offset: number, bytes: Uint8Array) => {
+      const ab = uint8ToTransferableArrayBuffer(bytes);
+      emitDownloadChunk(
+        {
+          type: 'tgDownloadChunk',
+          downloadId,
+          offset,
+          byteLength: ab.byteLength,
+          chunk: ab,
+        },
+        ab,
+      );
+    };
+
+    try {
+      let data: Buffer | undefined;
+      if (mediaType === 'photo') {
+        const thumbSize = metadata.thumbSize || 'y';
+        data = await client.downloadFile(
+          new GramJs.InputPhotoFileLocation({
+            id,
+            accessHash,
+            fileReference: refBytes,
+            thumbSize,
+          }),
+          { dcId, fileSize: fileSizeHint, onPart },
+        ) as Buffer | undefined;
+      } else {
+        const thumbSize = metadata.thumbSize ?? '';
+        data = await client.downloadFile(
+          new GramJs.InputDocumentFileLocation({
+            id,
+            accessHash,
+            fileReference: refBytes,
+            thumbSize,
+          }),
+          {
+            dcId,
+            fileSize: fileSizeHint,
+            workers: DOWNLOAD_WORKERS,
+            onPart,
+          },
+        ) as Buffer | undefined;
+      }
+
+      if (!data?.length) {
+        emitDownloadChunk({
+          type: 'tgDownloadChunk',
+          downloadId,
+          offset: 0,
+          done: true,
+          error: 'Empty download',
+          mimeType,
+        });
+        return;
+      }
+
+      emitDownloadChunk({
+        type: 'tgDownloadChunk',
+        downloadId,
+        offset: data.length,
+        done: true,
+        mimeType,
+        totalSize: data.length,
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      emitDownloadChunk({
+        type: 'tgDownloadChunk',
+        downloadId,
+        offset: 0,
+        done: true,
+        error: message,
+        mimeType,
+      });
+    }
+  })();
+
+  return Promise.resolve({ downloadId });
 }
 
 export function uploadFile(file: File, onProgress?: ApiOnProgress) {

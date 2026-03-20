@@ -3,6 +3,8 @@
  * Aligns with deferred media metadata from scrapers (id, accessHash, fileReference, dcId).
  */
 export type ApiDesktopDeferredMedia = {
+  /** Correlates `tg-download-chunk` postMessages; generated if omitted. */
+  downloadId?: string;
   /** Ignored; for app-side tagging (e.g. source: "telegram"). */
   source?: string;
   /** Telegram file / photo id (decimal string; may exceed JS safe integer). */

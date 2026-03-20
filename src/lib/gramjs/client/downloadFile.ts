@@ -25,6 +25,8 @@ export interface DownloadFileParams {
   start?: number;
   end?: number;
   progressCallback?: OnProgress;
+  /** Called for each downloaded part (offset relative to `start`). */
+  onPart?: (offset: number, bytes: Uint8Array) => void;
   isPriority?: boolean;
 }
 
@@ -143,7 +145,7 @@ async function downloadFile2(
     partSizeKb, end = 0,
   } = fileParams;
   const {
-    fileSize, dcId, progressCallback, isPriority, start = 0,
+    fileSize, dcId, progressCallback, onPart, isPriority, start = 0,
   } = fileParams;
 
   const fileId = 'id' in inputLocation ? inputLocation.id : undefined;
@@ -293,6 +295,7 @@ async function downloadFile2(
           if (deferred) deferred.resolve();
 
           fileView.write(result.bytes, offsetMemo - start);
+          onPart?.(offsetMemo - start, result.bytes);
 
           return;
         } catch (err) {
