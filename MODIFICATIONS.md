@@ -16,7 +16,7 @@ Exposes `localDb` (or a media-only slice) via `callApi`. Serialization runs on t
 Exports the above methods for `callApi`.
 
 ### 3. `src/global/index.ts`
-`window.callApi`, `window.getGlobal`, `window.getActions`, and `window.__telegramDesktopBridge` (`ping` → `true`, `startDownload`, `downloadDeferredMedia`) for Electron-style hosts. See [docs/DESKTOP_BRIDGE.md](docs/DESKTOP_BRIDGE.md).
+`window.callApi`, `window.getGlobal`, `window.getActions`, and `window.__telegramDesktopBridge` (`ready` promise, `ping`, `startDownload`, `downloadDeferredMedia`) for Electron-style hosts. The bridge object is attached **immediately**; `ping()` is `true` only after GramJS loads. See [docs/DESKTOP_BRIDGE.md](docs/DESKTOP_BRIDGE.md).
 
 ### 4. `src/api/gramjs/methods/client.ts` + types
 - `callApi('downloadDeferredMedia', metadata)` — full file in one response.

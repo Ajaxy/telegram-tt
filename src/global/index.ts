@@ -64,18 +64,39 @@ if (typeof window !== 'undefined') {
   (window as any).getGlobal = getGlobal;
   (window as any).getActions = getActions;
 
+  type DesktopDeferredMedia = import('../api/types/desktopBridge').ApiDesktopDeferredMedia;
+
+  const notReadyError = () => Promise.reject(new Error(
+    'Telegram GramJS not ready yet. await window.__telegramDesktopBridge.ready then retry.',
+  ));
+
+  let resolveBridgeReady: (() => void) | undefined;
+  const bridgeReady = new Promise<void>((resolve) => {
+    resolveBridgeReady = resolve;
+  });
+
+  /** Present immediately so host apps can detect fork vs stale deploy; methods work after `ready`. */
+  const telegramDesktopBridge = {
+    /** Resolves when `callApi` and download methods are wired to the worker. */
+    ready: bridgeReady,
+    ping: () => false,
+    startDownload: (_metadata: DesktopDeferredMedia) => notReadyError(),
+    downloadDeferredMedia: (_metadata: DesktopDeferredMedia) => notReadyError(),
+  };
+
+  (window as any).__telegramDesktopBridge = telegramDesktopBridge;
+
   // Lazy import callApi to avoid circular dependencies
   import('../api/gramjs').then((api) => {
     (window as any).callApi = api.callApi;
-    (window as any).__telegramDesktopBridge = {
-      ping: () => true,
-      startDownload: (metadata: import('../api/types/desktopBridge').ApiDesktopDeferredMedia) => (
-        api.callApi('startDownloadDeferredMedia', metadata)
-      ),
-      downloadDeferredMedia: (metadata: import('../api/types/desktopBridge').ApiDesktopDeferredMedia) => (
-        api.callApi('downloadDeferredMedia', metadata)
-      ),
-    };
+    telegramDesktopBridge.ping = () => true;
+    telegramDesktopBridge.startDownload = (metadata: DesktopDeferredMedia) => (
+      api.callApi('startDownloadDeferredMedia', metadata)
+    );
+    telegramDesktopBridge.downloadDeferredMedia = (metadata: DesktopDeferredMedia) => (
+      api.callApi('downloadDeferredMedia', metadata)
+    );
+    resolveBridgeReady?.();
   });
 }
 // END MODIFICATION

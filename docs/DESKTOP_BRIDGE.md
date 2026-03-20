@@ -2,13 +2,24 @@
 
 For Electron (or other hosts) that must keep **one** MTProto session in the telegram-tt **web worker**, use this bridge from the **renderer** process after the app is logged in.
 
+## Deploy
+
+The bridge exists **only in this fork’s build**. If **`window.__telegramDesktopBridge`** is missing entirely, the site is serving an **old bundle** — rebuild from branch `EN-6083-feature/localdb-api-and-s3-deploy` (or equivalent) and **redeploy** (e.g. S3).
+
 ## Globals (after bundle load)
 
 - `window.callApi` — existing fork hook; posts to GramJS worker.
-- `window.__telegramDesktopBridge` — small surface for desktop integrations:
-  - **`ping()`** → `true` (bridge script loaded after lazy `gramjs` import attached the object; call after load).
-  - **`startDownload(metadata)`** → `callApi('startDownloadDeferredMedia', metadata)` → resolves **`{ downloadId }`** immediately; bytes stream as **`window.postMessage`** events (see below).
-  - **`downloadDeferredMedia(metadata)`** → same as `callApi('downloadDeferredMedia', metadata)` (single buffered result).
+- `window.__telegramDesktopBridge` — set **synchronously** on `window` (stub first, then wired when GramJS loads):
+  - **`ready`** — `Promise<void>` that resolves when `callApi` and download methods are active.
+  - **`ping()`** → `false` until GramJS is wired, then **`true`**.
+  - **`startDownload(metadata)`** → `callApi('startDownloadDeferredMedia', metadata)` → resolves **`{ downloadId }`** immediately; bytes stream as **`window.postMessage`** events (see below). Before `ready`, rejects with a clear error.
+  - **`downloadDeferredMedia(metadata)`** → same as `callApi('downloadDeferredMedia', metadata)` (single buffered result). Before `ready`, rejects.
+
+**Host usage:** `await window.__telegramDesktopBridge.ready` (or wait until `ping() === true`) before calling downloads — avoids races and false “bridge missing” checks.
+
+## IPC / `Object.entries` errors in your host app
+
+If your `MessagingBackend` does `Object.entries(somePayload)` and **`somePayload` is `undefined`**, you get `Cannot convert undefined or null to object`. Guard with `Object.entries(payload ?? {})` or validate before respond — that path is in **your** Electron code, not telegram-tt.
 
 ## `startDownload` → `tg-download-chunk` messages
 
