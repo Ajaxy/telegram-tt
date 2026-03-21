@@ -17,7 +17,7 @@ This is a modified version of [Telegram Web A](https://github.com/Ajaxy/telegram
 - `src/global/index.ts` — window hooks + bridge.
 - `src/global/actions/ui/misc.ts`, `tabState`, `actions`, `DesktopSessionLinkModal`, `Main.tsx`, `Story.tsx`, i18n — link modal + `telegram-session:link-result` postMessage.
 - `docs/DESKTOP_BRIDGE.md`, `docs/LOCALDB_EXPORT_WORKER.md`
-- `.github/workflows/deploy-web-s3.yml` (fork deploy; tracked via `.gitignore` exception).
+- **CI:** `.github/workflows/deploy-web-s3.yml` only (no upstream `package-and-publish` workflow in this fork). `.gitignore` ignores `.github/workflows/*` except `deploy-web-s3.yml` so other workflow files stay untracked.
 
 ## Usage
 
