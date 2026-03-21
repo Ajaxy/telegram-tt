@@ -91,8 +91,12 @@ export interface StatisticsGraph {
   labels: Array<string | number>;
   isStacked: boolean;
   isPercentage?: boolean;
-  isCurrency?: boolean;
-  currencyRate?: number;
+  secondaryYAxis?: {
+    label: string;
+    multiplier: number;
+    prefix?: string;
+    suffix?: string;
+  };
   hideCaption: boolean;
   hasSecondYAxis: boolean;
   minimapRange: {

@@ -1,0 +1,97 @@
+@layer ui.spinner {
+  .root {
+    --spinner-size: 2rem;
+
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: var(--spinner-size);
+    height: var(--spinner-size);
+  }
+
+  .withBackground {
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -0.125rem;
+      border-radius: 50%;
+    }
+
+    &.darkBg::before {
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    &.lightBg::before {
+      background: rgba(255, 255, 255, 0.4);
+    }
+  }
+
+  .white {
+    .inner {
+      background-image: var(--spinner-white-data);
+    }
+
+    &.withBackground {
+      .inner {
+        background-image: var(--spinner-white-thin-data);
+      }
+    }
+  }
+
+  .blue .inner {
+    background-image: var(--spinner-blue-data);
+
+    :global(.theme-dark) & {
+      background-image: var(--spinner-dark-blue-data);
+    }
+  }
+
+  .black .inner {
+    background-image: var(--spinner-black-data);
+  }
+
+  .green .inner {
+    background-image: var(--spinner-green-data);
+  }
+
+  .gray .inner {
+    background-image: var(--spinner-gray-data);
+  }
+
+  .yellow .inner {
+    background-image: var(--spinner-yellow-data);
+  }
+
+  .inner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    background-repeat: no-repeat;
+    background-size: 100%;
+
+    animation-name: spin;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+
+    :global(body.in-background) & {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

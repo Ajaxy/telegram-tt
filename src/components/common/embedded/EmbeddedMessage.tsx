@@ -1,5 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
 import { useMemo, useRef } from '../../../lib/teact/teact';
 
 import type {
@@ -31,7 +29,6 @@ import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
 
 import useMessageMediaHash from '../../../hooks/media/useMessageMediaHash';
 import useThumbnail from '../../../hooks/media/useThumbnail';
-import { useFastClick } from '../../../hooks/useFastClick';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
@@ -65,15 +62,17 @@ type OwnProps = {
   isOpen?: boolean;
   isMediaNsfw?: boolean;
   noCaptions?: boolean;
+  pictogramActionIcon?: IconName;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   onClick: ((e: React.MouseEvent) => void);
+  onPictogramClick?: ((e: React.MouseEvent) => void);
 };
 
 const NBSP = '\u00A0';
 const EMOJI_SIZE = 17;
 
-const EmbeddedMessage: FC<OwnProps> = ({
+const EmbeddedMessage = ({
   className,
   message,
   replyInfo,
@@ -91,10 +90,12 @@ const EmbeddedMessage: FC<OwnProps> = ({
   requestedChatTranslationLanguage,
   isMediaNsfw,
   noCaptions,
+  pictogramActionIcon,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   onClick,
-}) => {
+  onPictogramClick,
+}: OwnProps) => {
   const ref = useRef<HTMLDivElement>();
   const isIntersecting = useIsIntersecting(ref, observeIntersectionForLoading);
 
@@ -143,8 +144,6 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const forwardSenderTitle = forwardSender ? getPeerTitle(oldLang, forwardSender)
     : message?.forwardInfo?.hiddenUserName;
   const areSendersSame = sender && sender.id === forwardSender?.id;
-
-  const { handleClick, handleMouseDown } = useFastClick(onClick);
 
   function renderTextContent() {
     const isFree = !(suggestedPostInfo?.price?.amount);
@@ -316,14 +315,20 @@ const EmbeddedMessage: FC<OwnProps> = ({
         suggestedPostInfo && 'is-suggested-post',
       )}
       dir={lang.isRtl ? 'rtl' : undefined}
-      onClick={handleClick}
-      onMouseDown={handleMouseDown}
+      onClick={onClick}
     >
       <div className="hover-effect" />
       <RippleEffect />
-      {mediaThumbnail && renderPictogram(
-        mediaThumbnail, mediaBlobUrl, isVideoThumbnail, isRoundVideo, isProtected, isSpoiler,
-      )}
+      {mediaThumbnail && renderPictogram({
+        thumbDataUri: mediaThumbnail,
+        blobUrl: mediaBlobUrl,
+        isFullVideo: isVideoThumbnail,
+        isRoundVideo,
+        isProtected,
+        isSpoiler,
+        pictogramActionIcon,
+        onPictogramClick,
+      })}
       <div className="message-text">
         <p className={buildClassName('embedded-text-wrapper', isQuote && 'multiline')}>
           {renderTextContent()}
@@ -337,21 +342,35 @@ const EmbeddedMessage: FC<OwnProps> = ({
   );
 };
 
-function renderPictogram(
-  thumbDataUri: string,
-  blobUrl?: string,
-  isFullVideo?: boolean,
-  isRoundVideo?: boolean,
-  isProtected?: boolean,
-  isSpoiler?: boolean,
-) {
+function renderPictogram({
+  thumbDataUri,
+  blobUrl,
+  isFullVideo,
+  isRoundVideo,
+  isProtected,
+  isSpoiler,
+  pictogramActionIcon,
+  onPictogramClick,
+}: {
+  thumbDataUri: string;
+  blobUrl?: string;
+  isFullVideo?: boolean;
+  isRoundVideo?: boolean;
+  isProtected?: boolean;
+  isSpoiler?: boolean;
+  pictogramActionIcon?: IconName;
+  onPictogramClick?: ((e: React.MouseEvent) => void);
+}) {
   const { width, height } = getPictogramDimensions();
 
   const srcUrl = blobUrl || thumbDataUri;
   const shouldRenderVideo = isFullVideo && blobUrl;
 
   return (
-    <div className={buildClassName('embedded-thumb', isRoundVideo && 'round')}>
+    <div
+      className={buildClassName('embedded-thumb', isRoundVideo && 'round', pictogramActionIcon && 'with-action-icon')}
+      onClick={onPictogramClick}
+    >
       {!isSpoiler && !shouldRenderVideo && (
         <img
           src={srcUrl}
@@ -379,6 +398,7 @@ function renderPictogram(
         height={height}
       />
       {isProtected && <span className="protector" />}
+      {pictogramActionIcon && <Icon name={pictogramActionIcon} className="pictogram-action-icon" />}
     </div>
   );
 }

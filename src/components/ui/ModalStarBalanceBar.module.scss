@@ -1,14 +1,12 @@
 .root {
-  position: absolute;
   z-index: var(--z-modal);
-  top: 0rem;
-  left: 50%;
-  transform: translate(-50%, -1rem);
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
+  margin-top: 2rem;
+  margin-bottom: 1rem;
   padding: 0.5rem 1.25rem;
   border-radius: 2rem;
 
@@ -19,6 +17,12 @@
   background-color: var(--color-background);
 
   transition: transform 0.2s ease, opacity 0.2s ease;
+
+  &.hidden {
+    pointer-events: none;
+    transform: scale(0);
+    opacity: 0;
+  }
 
   :global(.confirm) & {
     z-index: var(--z-modal-confirm);
@@ -32,22 +36,15 @@
     transform: none !important;
     transition: none;
   }
-
-  &:not(:global(.open)) {
-    transform: translate(-50%, 0);
-  }
-
-  &:not(:global(.closing)) {
-    transform: translate(-50%, 1rem);
-  }
-}
-
-.starIcon {
-  height: 1rem !important;
-  margin-inline-start: 0.125rem !important;
-  line-height: 1rem !important;
 }
 
 .tonInUsdDescription {
   color: var(--color-text-secondary);
+}
+
+.tonInUsdDescription,
+.getMoreStarsLink {
+  --next-arrow-weight: 600;
+
+  font-weight: var(--font-weight-semibold);
 }

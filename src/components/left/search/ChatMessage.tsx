@@ -1,10 +1,9 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiMessage,
-  ApiUser,
+  ApiMessage,
+  ApiPeer,
 } from '../../../api/types';
 
 import {
@@ -12,9 +11,9 @@ import {
   getMessageRoundVideo,
   getMessageSticker,
   getMessageVideo,
-  getPrivateChatUserId,
 } from '../../../global/helpers';
-import { selectChat, selectUser } from '../../../global/selectors';
+import { isApiPeerUser } from '../../../global/helpers/peers';
+import { selectPeer } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatPastTimeShort } from '../../../util/dates/dateFormat';
 import { type LangFn } from '../../../util/localization';
@@ -44,17 +43,15 @@ type OwnProps = {
 };
 
 type StateProps = {
-  chat?: ApiChat;
-  privateChatUser?: ApiUser;
+  peer?: ApiPeer;
 };
 
-const ChatMessage: FC<OwnProps & StateProps> = ({
+const ChatMessage = ({
   message,
   searchQuery,
   chatId,
-  chat,
-  privateChatUser,
-}) => {
+  peer,
+}: OwnProps & StateProps) => {
   const { focusMessage } = getActions();
 
   const { isMobile } = useAppLayout();
@@ -73,11 +70,11 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
 
   const buttonRef = useSelectWithEnter(handleClick);
 
-  if (!chat) {
+  if (!peer) {
     return undefined;
   }
 
-  const peer = privateChatUser || chat;
+  const user = isApiPeerUser(peer) ? peer : undefined;
 
   return (
     <ListItem
@@ -88,14 +85,14 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
     >
       <Avatar
         peer={peer}
-        isSavedMessages={privateChatUser?.isSelf}
+        isSavedMessages={user?.isSelf}
       />
       <div className="info">
         <div className="info-row">
           <FullNameTitle
             peer={peer}
             withEmojiStatus
-            isSavedMessages={chatId === privateChatUser?.id && privateChatUser?.isSelf}
+            isSavedMessages={user?.isSelf}
           />
           <div className="message-date">
             <Link className="date">
@@ -141,17 +138,10 @@ function renderSummary(
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): Complete<StateProps> => {
-    const chat = selectChat(global, chatId);
-    if (!chat) {
-      return {} as Complete<StateProps>;
-    }
-
-    const privateChatUserId = getPrivateChatUserId(chat);
-    const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
+    const peer = selectPeer(global, chatId);
 
     return {
-      chat,
-      privateChatUser,
+      peer,
     };
   },
 )(ChatMessage));

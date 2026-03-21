@@ -1,7 +1,7 @@
 import type { GlobalState, TabArgs } from '../types';
 
 import { DEFAULT_GIFT_PROFILE_FILTER_OPTIONS } from '../../config';
-import arePropsShallowEqual from '../../util/arePropsShallowEqual';
+import { areRecordsShallowEqual } from '../../util/areShallowEqual';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   getHasAdminRight, isChatAdmin, isChatChannel,
@@ -96,7 +96,7 @@ export function selectIsGiftProfileFilterDefault<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  return arePropsShallowEqual(selectTabState(global, tabId).savedGifts.filter, DEFAULT_GIFT_PROFILE_FILTER_OPTIONS);
+  return areRecordsShallowEqual(selectTabState(global, tabId).savedGifts.filter, DEFAULT_GIFT_PROFILE_FILTER_OPTIONS);
 }
 
 export function selectActiveGiftsCollectionId<T extends GlobalState>(

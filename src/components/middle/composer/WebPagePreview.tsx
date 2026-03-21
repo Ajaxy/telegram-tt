@@ -16,7 +16,8 @@ import {
   getWebPagePhoto,
   getWebPageVideo,
 } from '../../../global/helpers';
-import { selectNoWebPage, selectTabState, selectWebPage } from '../../../global/selectors';
+import { selectTabState, selectWebPage } from '../../../global/selectors';
+import { selectNoWebPage } from '../../../global/selectors/threads';
 import buildClassName from '../../../util/buildClassName';
 
 import useThumbnail from '../../../hooks/media/useThumbnail';

@@ -13,6 +13,7 @@ const useMedia = (
   noLoad = false,
   mediaFormat = ApiMediaFormat.BlobUrl,
   delay?: number | false,
+  cacheBuster?: number,
 ) => {
   const isStreaming = IS_PROGRESSIVE_SUPPORTED && mediaFormat === ApiMediaFormat.Progressive;
   const mediaData = mediaHash
@@ -35,7 +36,7 @@ const useMedia = (
         }
       });
     }
-  }, [noLoad, mediaHash, mediaData, mediaFormat, delay, isSynced]);
+  }, [noLoad, mediaHash, mediaData, mediaFormat, cacheBuster, delay, isSynced]);
 
   return mediaData;
 };

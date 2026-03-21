@@ -1,4 +1,4 @@
-import type React from '../../../lib/teact/teact';
+import type { TeactNode } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
@@ -58,10 +58,25 @@ type MultipleModeProps<CategoryType extends string> = {
   onSelectedIdsChange?: (Ids: string[]) => void;
 };
 
+export type PeerPickerSection = {
+  key: string;
+  title: string;
+  ids: string[];
+};
+
+type ItemIdsProps = {
+  itemIds: string[];
+  sections?: undefined;
+};
+
+type SectionsProps = {
+  sections: PeerPickerSection[];
+  itemIds?: undefined;
+};
+
 type OwnProps<CategoryType extends string> = {
   className?: string;
   categories?: UniqueCustomPeer<CategoryType>[];
-  itemIds: string[];
   lockedUnselectedSubtitle?: string;
   filterValue?: string;
   filterPlaceholder?: string;
@@ -81,7 +96,7 @@ type OwnProps<CategoryType extends string> = {
   onFilterChange?: (value: string) => void;
   onDisabledClick?: (id: string, isSelected: boolean) => void;
   onLoadMore?: () => void;
-} & (SingleModeProps<CategoryType> | MultipleModeProps<CategoryType>);
+} & (ItemIdsProps | SectionsProps) & (SingleModeProps<CategoryType> | MultipleModeProps<CategoryType>);
 
 const MAX_FULL_ITEMS = 10;
 const ALWAYS_FULL_ITEMS_COUNT = 5;
@@ -91,7 +106,8 @@ const ITEM_CLASS_NAME = 'PeerPickerItem';
 const PeerPicker = <CategoryType extends string = CustomPeerType>({
   className,
   categories,
-  itemIds,
+  itemIds: itemIdsProp,
+  sections,
   categoryPlaceholderKey,
   filterValue,
   filterPlaceholder,
@@ -116,6 +132,11 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
 }: OwnProps<CategoryType>) => {
   const oldLang = useOldLang();
   const lang = useLang();
+
+  const itemIds = useMemo(() => {
+    if (itemIdsProp) return itemIdsProp;
+    return sections.flatMap((section) => section.ids);
+  }, [itemIdsProp, sections]);
 
   const allowMultiple = optionalProps.allowMultiple;
   const lockedSelectedIds = allowMultiple ? optionalProps.lockedSelectedIds : undefined;
@@ -344,6 +365,28 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
     );
   }, [categories, categoryPlaceholderKey, oldLang, renderItem]);
 
+  const renderItems = useCallback(() => {
+    if (!sections) {
+      return viewportIds?.map((id) => renderItem(id));
+    }
+
+    const result: TeactNode[] = [];
+    sections.forEach((section) => {
+      if (section.ids.length === 0) return;
+      result.push(
+        <div key={section.key} className={styles.sectionHeader}>{section.title}</div>,
+      );
+      section.ids.forEach((id) => {
+        result.push(renderItem(id));
+      });
+    });
+    return result;
+  }, [sections, viewportIds, renderItem]);
+
+  const hasContent = sections
+    ? sections.some((s) => s.ids.length > 0)
+    : Boolean(viewportIds?.length);
+
   return (
     <div className={buildClassName(styles.container, className)}>
       {isSearchable && (
@@ -389,7 +432,7 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
         </div>
       )}
 
-      {viewportIds?.length ? (
+      {hasContent ? (
         <InfiniteScroll
           className={buildClassName(styles.pickerList, withDefaultPadding && styles.padded, 'custom-scroll')}
           items={viewportIds}
@@ -398,7 +441,7 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
           onLoadMore={getMore}
           noScrollRestore={noScrollRestore}
         >
-          {viewportIds.map((id) => renderItem(id))}
+          {renderItems()}
         </InfiniteScroll>
       ) : !isLoading && viewportIds && !viewportIds.length ? (
         <p className={styles.noResults}>{notFoundText || 'Sorry, nothing found.'}</p>

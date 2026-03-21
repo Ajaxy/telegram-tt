@@ -2,11 +2,12 @@ import { onFullyIdle } from '../lib/teact/teact';
 import { addCallback } from '../lib/teact/teactn';
 import { addActionHandler, getGlobal } from '../global';
 
-import type {
-  ApiChat, ApiChatFolder, ApiNotifyPeerType, ApiPeerNotifySettings, ApiUser,
-} from '../api/types';
 import type { GlobalState } from '../global/types';
 import type { CallbackManager } from './callbacks';
+import {
+  type ApiChat, type ApiChatFolder, type ApiNotifyPeerType, type ApiPeerNotifySettings, type ApiUser,
+  MAIN_THREAD_ID,
+} from '../api/types';
 
 import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, DEBUG, SAVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID,
@@ -19,7 +20,8 @@ import {
   selectTabState,
   selectTopics,
 } from '../global/selectors';
-import arePropsShallowEqual from './arePropsShallowEqual';
+import { selectDraft, selectThreadReadState } from '../global/selectors/threads';
+import { areRecordsShallowEqual } from './areShallowEqual';
 import { createCallbackManager } from './callbacks';
 import { areSortedArraysEqual, unique } from './iteratees';
 import { throttle } from './schedulers';
@@ -80,6 +82,7 @@ let prevGlobal: {
   usersById: Record<string, ApiUser>;
   notifyDefaults?: Record<ApiNotifyPeerType, ApiPeerNotifySettings>;
   notifyExceptions?: Record<number, ApiPeerNotifySettings>;
+  threadsByChatId: Record<string, GlobalState['messages']['byChatId'][string]['threadsById'] | undefined>;
 } = initials.prevGlobal;
 
 let prepared: {
@@ -237,6 +240,17 @@ function updateFolderManager(global: GlobalState) {
   const areUsersChanged = global.users.byId !== prevGlobal.usersById;
   const areNotifyDefaultsChanged = selectNotifyDefaults(global) !== prevGlobal.notifyDefaults;
   const areNotifyExceptionsChanged = global.chats.notifyExceptionById !== prevGlobal.notifyExceptions;
+  const allRelevantChatIds = unique([
+    ...global.chats.listIds.active || [],
+    ...global.chats.listIds.archived || [],
+    ...global.chats.listIds.saved || [],
+    ...prevGlobal.allFolderListIds || [],
+    ...prevGlobal.archivedFolderListIds || [],
+    ...prevGlobal.savedFolderListIds || [],
+  ]);
+  const areThreadsByChatChanged = allRelevantChatIds.some((chatId) => (
+    global.messages.byChatId[chatId]?.threadsById !== prevGlobal.threadsByChatId[chatId]
+  ));
 
   let affectedFolderIds: number[] = [];
 
@@ -249,7 +263,7 @@ function updateFolderManager(global: GlobalState) {
   if (!(
     isAllFolderChanged || isArchivedFolderChanged || isSavedFolderChanged || areFoldersChanged
     || areChatsChanged || areUsersChanged || areTopicsChanged || areNotifyDefaultsChanged || areNotifyExceptionsChanged
-    || areSavedLastMessageIdsChanged || areAllLastMessageIdsChanged
+    || areSavedLastMessageIdsChanged || areAllLastMessageIdsChanged || areThreadsByChatChanged
   )
   ) {
     if (affectedFolderIds.length) {
@@ -418,9 +432,9 @@ function buildFolderSummary(folder: ApiChatFolder): FolderSummary {
   return {
     ...folder,
     orderedPinnedIds: folder.pinnedChatIds,
-    excludedChatIds: folder.excludedChatIds ? new Set(folder.excludedChatIds) : undefined,
-    includedChatIds: folder.excludedChatIds ? new Set(folder.includedChatIds) : undefined,
-    pinnedChatIds: folder.excludedChatIds ? new Set(folder.pinnedChatIds) : undefined,
+    excludedChatIds: new Set(folder.excludedChatIds),
+    includedChatIds: new Set(folder.includedChatIds),
+    pinnedChatIds: new Set(folder.pinnedChatIds),
   };
 }
 
@@ -439,6 +453,7 @@ function updateChats(
   const newSavedLastMessageIds = global.chats.lastMessageIds.saved;
   const newNotifyDefaults = selectNotifyDefaults(global);
   const newNotifyExceptions = global.chats.notifyExceptionById;
+  const newMessageStoresByChatId = global.messages.byChatId;
   const folderSummaries = Object.values(prepared.folderSummariesById);
   const affectedFolderIds = new Set<number>();
 
@@ -467,6 +482,7 @@ function updateChats(
       && newUsersById[chatId] === prevGlobal.usersById[chatId]
       && newAllLastMessageIds?.[chatId] === prevGlobal.lastAllMessageIds?.[chatId]
       && newSavedLastMessageIds?.[chatId] === prevGlobal.lastSavedMessageIds?.[chatId]
+      && newMessageStoresByChatId[chatId]?.threadsById === prevGlobal.threadsByChatId[chatId]
     ) {
       return;
     }
@@ -486,7 +502,7 @@ function updateChats(
         isRemovedFromSaved,
       );
 
-      if (!areFoldersChanged && currentSummary && arePropsShallowEqual(newSummary, currentSummary)) {
+      if (!areFoldersChanged && currentSummary && areRecordsShallowEqual(newSummary, currentSummary)) {
         return;
       }
 
@@ -518,6 +534,10 @@ function updateChats(
   prevGlobal.lastSavedMessageIds = newSavedLastMessageIds;
   prevGlobal.notifyDefaults = newNotifyDefaults;
   prevGlobal.notifyExceptions = newNotifyExceptions;
+  prevGlobal.threadsByChatId = allIds.reduce((acc, chatId) => {
+    acc[chatId] = newMessageStoresByChatId[chatId]?.threadsById;
+    return acc;
+  }, {} as typeof prevGlobal.threadsByChatId);
 
   return Array.from(affectedFolderIds);
 }
@@ -533,16 +553,21 @@ function buildChatSummary<T extends GlobalState>(
 ): ChatSummary {
   const {
     id, type, isNotJoined, migratedTo, folderId,
-    unreadCount: chatUnreadCount, unreadMentionsCount: chatUnreadMentionsCount, hasUnreadMark,
     isForum,
   } = chat;
+  const draft = selectDraft(global, id, MAIN_THREAD_ID);
   const isRestricted = selectIsChatRestricted(global, id);
   const topics = selectTopics(global, chat.id);
+  const chatReadState = selectThreadReadState(global, chat.id, MAIN_THREAD_ID);
+  const {
+    unreadCount: chatUnreadCount, unreadMentionsCount: chatUnreadMentionsCount, hasUnreadMark,
+  } = chatReadState || {};
 
   const { unreadCount, unreadMentionsCount } = isForum
     ? Object.values(topics || {}).reduce((acc, topic) => {
-      acc.unreadCount += topic.unreadCount;
-      acc.unreadMentionsCount += topic.unreadMentionsCount;
+      const topicReadState = selectThreadReadState(global, chat.id, topic.id);
+      acc.unreadCount += topicReadState?.unreadCount || 0;
+      acc.unreadMentionsCount += topicReadState?.unreadMentionsCount || 0;
 
       return acc;
     }, { unreadCount: 0, unreadMentionsCount: 0 })
@@ -554,7 +579,7 @@ function buildChatSummary<T extends GlobalState>(
     !lastMessage || lastMessage.content.action?.type === 'historyClear'
   );
 
-  const orderInAll = Math.max(chat.creationDate || 0, chat.draftDate || 0, lastMessage?.date || 0);
+  const orderInAll = Math.max(chat.creationDate || 0, draft?.date || 0, lastMessage?.date || 0);
 
   const lastMessageInSaved = selectChatLastMessage(global, chat.id, 'saved');
   const orderInSaved = lastMessageInSaved?.date || 0;
@@ -731,7 +756,7 @@ function updateResults(affectedFolderIds: number[]) {
     const newUnreadCounters = buildFolderUnreadCounters(folderId);
     if (!wasUnreadCountersChanged) {
       wasUnreadCountersChanged = (
-        !currentUnreadCounters || !arePropsShallowEqual(newUnreadCounters, currentUnreadCounters)
+        !currentUnreadCounters || !areRecordsShallowEqual(newUnreadCounters, currentUnreadCounters)
       );
     }
     results.unreadCountersByFolderId[folderId] = newUnreadCounters;
@@ -851,6 +876,7 @@ function buildInitials() {
       chatsById: {},
       usersById: {},
       topicsInfoById: {},
+      threadsByChatId: {},
     },
 
     prepared: {

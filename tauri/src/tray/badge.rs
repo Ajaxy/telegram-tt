@@ -121,10 +121,7 @@ pub fn generate_counter_png(size: u32, count: i32, is_muted: bool) -> Vec<u8> {
 
   if let (Some(text), Some(font), Some(scale)) = (text, font, scale) {
     let x = edge_space as f32 + ((badge_width as f32 - text_width as f32) / 2.0).ceil();
-
-    let baseline_offset = scale.y * 0.15;
-    let y = edge_space as f32
-      + ((badge_height as f32 - text_height as f32) / 2.0 - baseline_offset).ceil();
+    let y = edge_space as f32 + ((badge_height as f32 - text_height as f32) / 2.0).ceil();
 
     draw_text_mut(
       &mut img,

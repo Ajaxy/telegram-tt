@@ -1,10 +1,11 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiTopic } from '../../types';
+import type { ApiTopic, ApiTopicWithState } from '../../types';
 
+import { buildThreadReadState } from './chats';
 import { buildApiPeerNotifySettings, getApiChatIdFromMtpPeer } from './peers';
 
-export function buildApiTopic(forumTopic: GramJs.TypeForumTopic): ApiTopic | undefined {
+function buildApiTopic(forumTopic: GramJs.TypeForumTopic): ApiTopic | undefined {
   if (forumTopic instanceof GramJs.ForumTopicDeleted) {
     return undefined;
   }
@@ -20,10 +21,6 @@ export function buildApiTopic(forumTopic: GramJs.TypeForumTopic): ApiTopic | und
     title,
     iconColor,
     iconEmojiId,
-    topMessage,
-    unreadCount,
-    unreadMentionsCount,
-    unreadReactionsCount,
     fromId,
     notifySettings,
     titleMissing,
@@ -40,12 +37,24 @@ export function buildApiTopic(forumTopic: GramJs.TypeForumTopic): ApiTopic | und
     title,
     iconColor,
     iconEmojiId: iconEmojiId?.toString(),
-    lastMessageId: topMessage,
-    unreadCount,
-    unreadMentionsCount,
-    unreadReactionsCount,
     fromId: getApiChatIdFromMtpPeer(fromId),
     notifySettings: buildApiPeerNotifySettings(notifySettings),
     isTitleMissing: titleMissing,
+  };
+}
+
+export function buildApiTopicWithState(forumTopic: GramJs.TypeForumTopic): ApiTopicWithState | undefined {
+  if (forumTopic instanceof GramJs.ForumTopicDeleted) {
+    return undefined;
+  }
+
+  const topic = buildApiTopic(forumTopic);
+  if (!topic) return undefined;
+  const isMin = topic.isMin;
+
+  return {
+    topic,
+    readState: !isMin ? buildThreadReadState(forumTopic) : undefined,
+    lastMessageId: !isMin ? forumTopic.topMessage : undefined,
   };
 }

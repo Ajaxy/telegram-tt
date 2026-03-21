@@ -10,6 +10,7 @@ import type { ApiPasskey } from '../../../api/types';
 import { IS_WEBAUTHN_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { formatPastDatetime } from '../../../util/dates/dateFormat';
+import { getNextArrowReplacement } from '../../../util/localization/format';
 import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import { REM } from '../../common/helpers/mediaDimensions';
 
@@ -153,7 +154,12 @@ const SettingsPasskeys = ({
         )}
         <p className="settings-item-description mt-3" dir="auto">
           {lang('SettingsPasskeysFooter', {
-            link: <Link isPrimary onClick={handleOpenPasskeyModal}>{lang('SettingsPasskeysFooterLink')}</Link>,
+            link: (
+              <Link isPrimary onClick={handleOpenPasskeyModal}>
+                {lang('SettingsPasskeysFooterLink', undefined,
+                  { withNodes: true, specialReplacement: getNextArrowReplacement() })}
+              </Link>
+            ),
           }, { withNodes: true })}
         </p>
       </div>

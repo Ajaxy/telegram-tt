@@ -1,7 +1,7 @@
 import type { FC, FC_withDebug, Props } from './teact';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
-import arePropsShallowEqual, { logUnequalProps } from '../../util/arePropsShallowEqual';
+import { areRecordsShallowEqual, logUnequalProps } from '../../util/areShallowEqual';
 import Deferred from '../../util/Deferred';
 import { handleError } from '../../util/handleError';
 import { orderBy } from '../../util/iteratees';
@@ -220,7 +220,7 @@ function updateContainers() {
       }
     }
 
-    if (Object.keys(newMappedProps).length && !arePropsShallowEqual(mappedProps!, newMappedProps)) {
+    if (Object.keys(newMappedProps).length && !areRecordsShallowEqual(mappedProps!, newMappedProps)) {
       if (DEBUG_MORE) {
         logUnequalProps(
           mappedProps!,
@@ -296,7 +296,7 @@ export function withUntypedGlobal<OwnProps extends AnyLiteral>(
       }
 
       if (
-        (!container.mappedProps || !arePropsShallowEqual(container.ownProps, props))
+        (!container.mappedProps || !areRecordsShallowEqual(container.ownProps, props))
         && activateContainer(container, currentGlobal, props)
       ) {
         try {

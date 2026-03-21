@@ -27,6 +27,7 @@ import type {
   ApiSearchPostsFlood,
   ApiSendMessageAction,
   ApiTodoItem,
+  ApiTopicWithState,
   ApiUser,
   ApiUserStatus,
   ApiWebPage,
@@ -57,8 +58,10 @@ import {
   buildApiChatFromPreview,
   buildApiSendAsPeerId,
   buildApiSponsoredMessageReportResult,
+  buildThreadReadState,
 } from '../apiBuilders/chats';
 import { buildApiFormattedText } from '../apiBuilders/common';
+import { buildApiTopicWithState } from '../apiBuilders/forums';
 import {
   buildMessageMediaContent, buildMessageTextContent, buildPollFromMedia,
   buildWebPageFromMedia,
@@ -71,6 +74,7 @@ import {
   buildApiSearchPostsFlood,
   buildApiSponsoredMessage,
   buildApiThreadInfo,
+  buildApiThreadInfoFromMessage,
   buildLocalForwardedMessage,
   buildLocalMessage,
   buildPreparedInlineMessage,
@@ -126,6 +130,7 @@ type TranslateTextParams = ({
 
 type SearchResults = {
   messages: ApiMessage[];
+  topics: ApiTopicWithState[];
   userStatusesById: Record<number, ApiUserStatus>;
   totalCount: number;
   nextOffsetRate?: number;
@@ -196,13 +201,15 @@ export async function fetchMessages({
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-  const count = !(result instanceof GramJs.messages.Messages) && result.count;
+  const count = !(result instanceof GramJs.messages.Messages) ? result.count : undefined;
+  const topics = result.topics.map(buildApiTopicWithState).filter(Boolean);
 
   return {
     messages,
     users,
     chats,
     count,
+    topics,
   };
 }
 
@@ -371,6 +378,7 @@ export function sendApiMessage(
       message: {
         sendingState: 'messageSendingStatePending',
       },
+      isFull: false,
     });
   }, FAST_SEND_TIMEOUT);
 
@@ -740,7 +748,7 @@ export async function editMessage({
     }),
   };
 
-  const messageUpdate: Partial<ApiMessage> = {
+  const messageUpdate: ApiMessage = {
     ...message,
     content: newContent,
     isInvertedMedia,
@@ -751,6 +759,7 @@ export async function editMessage({
     id: message.id,
     chatId: chat.id,
     message: messageUpdate,
+    isFull: true,
   });
 
   try {
@@ -794,6 +803,7 @@ export async function editMessage({
       id: message.id,
       chatId: chat.id,
       message,
+      isFull: true,
     });
   }
 }
@@ -818,7 +828,7 @@ export async function editTodo({
     },
   };
 
-  const messageUpdate: Partial<ApiMessage> = {
+  const messageUpdate: ApiMessage = {
     ...message,
     content: newContent,
   };
@@ -828,6 +838,7 @@ export async function editTodo({
     id: message.id,
     chatId: chat.id,
     message: messageUpdate,
+    isFull: true,
   });
 
   try {
@@ -858,6 +869,7 @@ export async function editTodo({
       id: message.id,
       chatId: chat.id,
       message,
+      isFull: true,
     });
   }
 }
@@ -1372,7 +1384,7 @@ export async function fetchMessageViews({
       id,
       views,
       forwards,
-      threadInfo: replies ? buildApiThreadInfo(replies, id, chat.id) : undefined,
+      threadInfo: replies ? buildApiThreadInfo(chat.id, id, replies) : undefined,
     };
   });
 
@@ -1445,19 +1457,23 @@ export async function fetchDiscussionMessage({
   const messages = topMessages.concat(replies.messages);
   const threadId = result.messages[result.messages.length - 1]?.id;
 
-  if (!threadId) return undefined;
+  const chatId = topMessages[0]?.chatId;
+  if (!chatId || !threadId) return undefined;
 
-  const {
-    unreadCount, maxId, readInboxMaxId, readOutboxMaxId,
-  } = result;
+  const { maxId } = result;
+  const threadReadState = buildThreadReadState(result);
+
+  const topMessageWithReplies = result.messages.find((message): message is GramJs.Message => (
+    message instanceof GramJs.Message && Boolean(message.replies)
+  ))!;
+  const threadInfo = buildApiThreadInfoFromMessage(topMessageWithReplies);
 
   return {
     messages,
     topMessages,
-    unreadCount,
     threadId,
-    lastReadInboxMessageId: readInboxMaxId,
-    lastReadOutboxMessageId: readOutboxMaxId,
+    threadReadState,
+    threadInfo,
     lastMessageId: maxId,
     chatId: topMessages[0]?.chatId,
     firstMessageId: replies.messages[0]?.id,
@@ -1554,6 +1570,7 @@ export async function searchMessagesInChat({
 
   const userStatusesById = buildApiUserStatuses(result.users);
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  const topics = result.topics.map(buildApiTopicWithState).filter(Boolean);
 
   let totalCount = messages.length;
   let nextOffsetId: number | undefined;
@@ -1568,6 +1585,7 @@ export async function searchMessagesInChat({
   return {
     userStatusesById,
     messages,
+    topics,
     totalCount,
     nextOffsetId,
   };
@@ -1649,6 +1667,7 @@ export async function searchMessagesGlobal({
 
   const userStatusesById = buildApiUserStatuses(result.users);
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  const topics = result.topics.map(buildApiTopicWithState).filter(Boolean);
 
   let totalCount = messages.length;
   if (result instanceof GramJs.messages.MessagesSlice || result instanceof GramJs.messages.ChannelMessages) {
@@ -1664,6 +1683,7 @@ export async function searchMessagesGlobal({
 
   return {
     messages,
+    topics,
     userStatusesById,
     totalCount,
     nextOffsetRate,
@@ -1706,6 +1726,7 @@ export async function searchPublicPosts({
 
   const userStatusesById = buildApiUserStatuses(result.users);
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  const topics = result.topics.map(buildApiTopicWithState).filter(Boolean);
 
   let totalCount = messages.length;
   if (result instanceof GramJs.messages.MessagesSlice || result instanceof GramJs.messages.ChannelMessages) {
@@ -1725,6 +1746,7 @@ export async function searchPublicPosts({
 
   return {
     messages,
+    topics,
     userStatusesById,
     totalCount,
     nextOffsetRate,
@@ -2248,10 +2270,14 @@ export async function fetchUnreadMentions({
     return undefined;
   }
 
+  const totalCount = 'count' in result ? result.count : result.messages.length;
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  const topics = result.topics.map(buildApiTopicWithState).filter(Boolean);
 
   return {
+    totalCount,
     messages,
+    topics,
   };
 }
 
@@ -2283,10 +2309,14 @@ export async function fetchUnreadReactions({
     return undefined;
   }
 
+  const totalCount = 'count' in result ? result.count : result.messages.length;
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  const topics = result.topics.map(buildApiTopicWithState).filter(Boolean);
 
   return {
+    totalCount,
     messages,
+    topics,
   };
 }
 

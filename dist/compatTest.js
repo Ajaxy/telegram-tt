@@ -13,10 +13,11 @@ function compatTest() {
   var hasBigInt = typeof BigInt !== 'undefined';
   var hasBroadcastChannel = typeof BroadcastChannel !== 'undefined';
   var hasArrayAt = typeof new Array(0).at !== 'undefined';
+  var hasDecompressionStream = typeof DecompressionStream !== 'undefined';
 
   var isCompatible = hasPromise && hasWebSockets && hasWebCrypto && hasObjectFromEntries && hasResizeObserver
     && hasCssSupports && hasDisplayNames && hasPluralRules && hasNumberFormat && hasWebLocks && hasBigInt && hasBroadcastChannel
-    && hasArrayAt;
+    && hasArrayAt && hasDecompressionStream;
 
   if (isCompatible || (window.localStorage && window.localStorage.getItem('tt-ignore-compat'))) {
     window.isCompatTestPassed = true;
@@ -38,6 +39,7 @@ function compatTest() {
     console.warn('BigInt', hasBigInt);
     console.warn('BroadcastChannel', hasBroadcastChannel);
     console.warn('Array.at', hasArrayAt);
+    console.warn('DecompressionStream', hasDecompressionStream);
   }
 
   // Hardcoded page because server forbids iframe embedding

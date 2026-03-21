@@ -1,0 +1,144 @@
+.modal {
+  :global(.modal-dialog) {
+    overflow: clip;
+  }
+
+  :global(.modal-content) {
+    height: min(92vh, 39rem);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+}
+
+.title {
+  margin: 0;
+  padding: 1rem 1rem 0.5rem;
+  border-bottom: 0.0625rem solid transparent;
+
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+
+  transition: border-bottom-color 0.15s ease;
+
+  &.titleWithBorder {
+    border-bottom-color: var(--color-borders);
+  }
+}
+
+.wrapper {
+  position: relative;
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  min-height: 0;
+}
+
+.scrollContainer {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  height: 100%;
+  padding: 0 1rem 1rem;
+
+  opacity: 1;
+
+  transition: opacity 0.2s;
+}
+
+.section {
+  width: 100%;
+}
+
+.sectionTitle {
+  margin: 0;
+  padding: 0.25rem 0;
+
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  text-transform: uppercase;
+}
+
+.filters {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+
+  width: 100%;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  padding-block: 0.5rem;
+  border-bottom: 0.0625rem solid transparent;
+
+  background-color: var(--color-background);
+
+  transition: border-bottom-color 0.15s ease;
+
+  &.stuck {
+    border-bottom-color: var(--color-borders);
+  }
+}
+
+.transitionWrapper {
+  z-index: 0;
+  min-height: 28rem;
+}
+
+.giftsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  align-content: start;
+
+  min-height: 28rem;
+}
+
+.loading {
+  pointer-events: none;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  opacity: 1;
+
+  transition: opacity 0.2s;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.giftWrapper {
+  position: relative;
+}
+
+.giftChance {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
+
+  padding: 0.0625rem 0.25rem;
+  border-radius: 0.625rem;
+
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-semibold);
+  color: white;
+
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.notFound {
+  padding-top: 5rem;
+  padding-bottom: 12rem;
+}

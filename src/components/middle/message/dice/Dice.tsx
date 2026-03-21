@@ -29,6 +29,7 @@ const FALLBACK_SIZE = 13 * REM;
 
 const Dice = ({
   dice,
+  canSendDice,
   idleSticker,
   valueSticker,
   winEffect,
@@ -62,6 +63,7 @@ const Dice = ({
   });
 
   const handleClick = useLastCallback(() => {
+    if (!canSendDice) return;
     showNotification({
       message: {
         key: 'DiceToast',
@@ -85,7 +87,11 @@ const Dice = ({
   });
 
   return (
-    <div className={styles.root} style={`--_size: ${width}px`} onClick={handleClick}>
+    <div
+      className={buildClassName(styles.root, canSendDice && styles.interactive)}
+      style={`--_size: ${width}px`}
+      onClick={handleClick}
+    >
       {idleSticker && (
         <div
           ref={idleContainerRef}

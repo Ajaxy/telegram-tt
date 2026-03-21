@@ -1,4 +1,3 @@
-import type { FC } from '@teact';
 import { memo, useCallback } from '@teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -12,6 +11,7 @@ import {
   selectIsChatPinned,
   selectNotifyDefaults,
   selectNotifyException,
+  selectTopicsInfo,
   selectUser,
 } from '../../../global/selectors';
 import { onDragEnter, onDragLeave } from '../../../util/dragNDropHandlers.ts';
@@ -41,22 +41,24 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   user?: ApiUser;
+  listedTopicIds?: number[];
   isPinned?: boolean;
   isMuted?: boolean;
   canChangeFolder?: boolean;
 };
 
-const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
+const LeftSearchResultChat = ({
   chatId,
   withUsername,
   chat,
   user,
+  listedTopicIds,
   isPinned,
   isMuted,
   canChangeFolder,
   withOpenAppButton,
   onClick,
-}) => {
+}: OwnProps & StateProps) => {
   const { requestMainWebView, updateChatMutedState, openQuickPreview } = getActions();
   const lang = useLang();
 
@@ -85,6 +87,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
     isPinned,
     isMuted,
     canChangeFolder,
+    topicIds: listedTopicIds,
     handleMute,
     handleUnmute,
     handleChatFolderChange,
@@ -186,12 +189,15 @@ export default memo(withGlobal<OwnProps>(
     const isPinned = selectIsChatPinned(global, chatId);
     const isMuted = chat && getIsChatMuted(chat, selectNotifyDefaults(global), selectNotifyException(global, chat.id));
 
+    const listedTopicIds = selectTopicsInfo(global, chatId)?.listedTopicIds;
+
     return {
       chat,
       user,
       isPinned,
       isMuted,
       canChangeFolder: Boolean(global.chatFolders.orderedIds?.length),
+      listedTopicIds,
     };
   },
 )(LeftSearchResultChat));

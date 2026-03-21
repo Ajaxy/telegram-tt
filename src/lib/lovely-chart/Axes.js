@@ -1,5 +1,5 @@
 import { GUTTER, AXES_FONT, X_AXIS_HEIGHT, X_AXIS_SHIFT_START, PLOT_TOP_PADDING } from './constants.js';
-import { formatCryptoValue, humanize } from './format.js';
+import { humanize } from './format.js';
 import { getCssColor } from './skin.js';
 import { applyXEdgeOpacity, applyYEdgeOpacity, xScaleLevelToStep, yScaleLevelToStep } from './formulas.js';
 import { toPixels } from './Projection.js';
@@ -47,8 +47,25 @@ export function createAxes(context, data, plotSize, colors) {
 
     if (data.isPercentage) {
       _drawYAxisPercents(projection);
-    } else if (data.isCurrency) {
-      _drawYAxisCurrency(projection, data);
+    } else if (data.secondaryYAxis) {
+      _drawYAxisScaled(
+        state,
+        projection,
+        Math.round(yAxisScaleTo || yAxisScale),
+        yMinViewportTo !== undefined ? yMinViewportTo : yMinViewport,
+        yMaxViewportTo !== undefined ? yMaxViewportTo : yMaxViewport,
+        yAxisScaleFrom ? yAxisScaleProgress : 1,
+      );
+
+      _drawSecondaryYAxis(
+        state,
+        projection,
+        Math.round(yAxisScaleTo || yAxisScale),
+        yMinViewportTo !== undefined ? yMinViewportTo : yMinViewport,
+        yMaxViewportTo !== undefined ? yMaxViewportTo : yMaxViewport,
+        yAxisScaleFrom ? yAxisScaleProgress : 1,
+        data.secondaryYAxis,
+      );
     } else {
       _drawYAxisScaled(
         state,
@@ -125,10 +142,14 @@ export function createAxes(context, data, plotSize, colors) {
         ? getCssColor(colors, colorKey, textOpacity)
         : getCssColor(colors, 'y-axis-text', textOpacity);
 
+      const label = isSecondary
+        ? humanize(value)
+        : `${data.valuePrefix || ''}${humanize(value)}${data.valueSuffix || ''}`;
+
       if (!isSecondary) {
-        context.fillText(humanize(value), GUTTER, yPx - GUTTER / 2);
+        context.fillText(label, GUTTER, yPx - GUTTER / 2);
       } else {
-        context.fillText(humanize(value), plotSize.width - GUTTER, yPx - GUTTER / 2);
+        context.fillText(label, plotSize.width - GUTTER, yPx - GUTTER / 2);
       }
 
       if (isSecondary) {
@@ -171,48 +192,24 @@ export function createAxes(context, data, plotSize, colors) {
     context.stroke();
   }
 
-  function _drawYAxisCurrency(projection, data) {
-    const formatValue = data.datasets[0].values.map(value => formatCryptoValue(value));
-
-    const total = formatValue.reduce((sum, value) => sum + value, 0);
-    const avg1 = total / formatValue.length;
-    const avg2 = total / (formatValue.length / 2);
-    const avg3 = total / (formatValue.length / 3);
-
-    const averageRate1 = avg1 * data.currencyRate;
-    const averageRate2 = avg2 * data.currencyRate;
-    const averageRate3 = avg3 * data.currencyRate;
-
-    const totalAvg = [0, avg1, avg2, avg3];
-    const totalRate = [0, averageRate1, averageRate2, averageRate3];
-
-    const [, height] = projection.getSize();
+  function _drawSecondaryYAxis(state, projection, scaleLevel, yMin, yMax, opacity = 1, secondaryYAxis) {
+    const { multiplier, prefix = '', suffix = '' } = secondaryYAxis;
+    const step = yScaleLevelToStep(scaleLevel);
+    const firstVisibleValue = Math.ceil(yMin / step) * step;
+    const lastVisibleValue = Math.floor(yMax / step) * step;
 
     context.font = AXES_FONT;
-    context.textAlign = 'left';
+    context.textAlign = 'right';
     context.textBaseline = 'bottom';
-    context.lineWidth = 1;
 
-    context.beginPath();
+    for (let value = firstVisibleValue; value <= lastVisibleValue; value += step) {
+      const [, yPx] = toPixels(projection, 0, value);
+      const textOpacity = applyXEdgeOpacity(opacity, yPx);
+      const secondaryValue = value * multiplier;
 
-    totalAvg.forEach((value, index) => {
-      const yPx = height - height * (value / Math.max(...formatValue)) + PLOT_TOP_PADDING;
-
-      context.fillStyle = getCssColor(colors, 'y-axis-text', 1);
-
-      context.fillText(`${value.toFixed(2)} TON`, GUTTER, yPx - GUTTER / 4);
-
-      context.textAlign = 'right';
-      context.fillText(`$${totalRate[index].toFixed(2)}`, plotSize.width - GUTTER, yPx - GUTTER / 4);
-
-      context.textAlign = 'left';
-
-      context.moveTo(GUTTER, yPx);
-      context.strokeStyle = getCssColor(colors, 'grid-lines', 1);
-      context.lineTo(plotSize.width - GUTTER, yPx);
-    });
-
-    context.stroke();
+      context.fillStyle = getCssColor(colors, 'y-axis-text', textOpacity);
+      context.fillText(`${prefix}${humanize(secondaryValue)}${suffix}`, plotSize.width - GUTTER, yPx - GUTTER / 2);
+    }
   }
 
   return { drawXAxis, drawYAxis };

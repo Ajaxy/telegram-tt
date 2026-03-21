@@ -12,7 +12,6 @@ import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   getHasAdminRight,
-  getPrivateChatUserId,
   isChatChannel,
   isChatPublic,
   isChatSuperGroup,
@@ -45,21 +44,12 @@ export function selectChatListLoadingParameters<T extends GlobalState>(
   return global.chats.loadingParameters[listType];
 }
 
-export function selectChatUser<T extends GlobalState>(global: T, chat: ApiChat) {
-  const userId = getPrivateChatUserId(chat);
-  if (!userId) {
-    return false;
-  }
-
-  return selectUser(global, userId);
-}
-
 export function selectIsChatWithSelf<T extends GlobalState>(global: T, chatId: string) {
   return chatId === global.currentUserId;
 }
 
-export function selectIsChatWithBot<T extends GlobalState>(global: T, chat: ApiChat) {
-  const user = selectChatUser(global, chat);
+export function selectIsChatWithBot<T extends GlobalState>(global: T, chatId: string) {
+  const user = selectUser(global, chatId);
   return user && isUserBot(user);
 }
 

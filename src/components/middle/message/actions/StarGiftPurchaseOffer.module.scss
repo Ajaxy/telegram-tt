@@ -8,16 +8,11 @@
 
   &.clickable {
     cursor: var(--custom-cursor, pointer);
-    transition: background-color 150ms, backdrop-filter 150ms, filter 150ms;
+    transition: background-color 150ms, backdrop-filter 150ms, filter 150ms, opacity 150ms;
 
-    &:hover,
-    &:focus {
+    &:hover {
+      opacity: 0.85;
       background: var(--action-message-bg) !important;
-      backdrop-filter: brightness(115%);
-
-      @supports not (backdrop-filter: brightness(115%)) {
-        filter: brightness(115%);
-      }
     }
   }
 }

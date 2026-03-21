@@ -41,7 +41,7 @@ const PickerModal = ({
   useScrollNotch({
     containerRef: dialogRef,
     selector: `.modal-content ${itemsContainerSelector}`,
-    isBottomNotch: true,
+    isBottomNotch: hasButton,
     shouldHideTopNotch: true,
   }, [modalProps.isOpen]);
 

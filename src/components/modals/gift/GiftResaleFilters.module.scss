@@ -15,14 +15,14 @@
   overflow-y: hidden;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 
+  width: 100%;
   height: 100%;
-  padding-right: 0.5rem;
-  padding-left: 0.5rem;
 
   white-space: nowrap;
 
-  @include mixins.gradient-border-horizontal(0.5rem, 0.5rem);
+  @include mixins.gradient-border-horizontal(0.25rem, 0.25rem);
 
   &::-webkit-scrollbar {
     height: 0;
@@ -33,8 +33,67 @@
   }
 }
 
-.itemIcon {
+.dropdownArrows {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: 0.625rem;
+  height: 1rem;
   margin-inline-start: 0.25rem;
+}
+
+.arrowLine {
+  /* stylelint-disable-next-line plugin/whole-pixel */
+  --x: 1.5px;
+  --y: 0.25rem;
+  --a: 45deg;
+
+  position: absolute;
+
+  /* stylelint-disable-next-line plugin/whole-pixel */
+  width: 1.5px;
+  height: 0.3125rem;
+  border-radius: 1px;
+
+  background-color: currentcolor;
+
+  transition: transform 0.2s ease-in-out;
+
+  &.topLeft {
+    transform: translate(calc(-1 * var(--x)), calc(-1 * var(--y))) rotate(var(--a));
+  }
+
+  &.topRight {
+    transform: translate(var(--x), calc(-1 * var(--y))) rotate(calc(-1 * var(--a)));
+  }
+
+  &.bottomLeft {
+    transform: translate(calc(-1 * var(--x)), var(--y)) rotate(calc(-1 * var(--a)));
+  }
+
+  &.bottomRight {
+    transform: translate(var(--x), var(--y)) rotate(var(--a));
+  }
+
+  &.open.topLeft {
+    transform: translate(calc(-1 * var(--x)), calc(-1 * var(--y))) rotate(calc(-1 * var(--a)));
+  }
+
+  &.open.topRight {
+    transform: translate(var(--x), calc(-1 * var(--y))) rotate(var(--a));
+  }
+
+  &.open.bottomLeft {
+    transform: translate(calc(-1 * var(--x)), var(--y)) rotate(var(--a));
+  }
+
+  &.open.bottomRight {
+    transform: translate(var(--x), var(--y)) rotate(calc(-1 * var(--a)));
+  }
 }
 
 .sticker {
@@ -55,6 +114,11 @@
   margin-inline-start: 3rem;
 }
 
+.menuItemCount {
+  margin-inline-start: 0.5rem;
+  color: var(--color-text-secondary);
+}
+
 .backdrop {
   position: absolute;
   left: 0.625rem;
@@ -69,6 +133,11 @@
   margin-inline-start: 0.5 !important;
 }
 
+.itemIcon {
+  margin-inline-end: 0.125rem;
+  font-size: 1.125rem !important;
+}
+
 .item {
   display: flex;
   align-items: center;
@@ -76,7 +145,7 @@
 
   width: auto;
   margin-inline: 0.25rem;
-  padding: 0.125rem 0.75rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 1rem;
 
   font-size: 0.875rem;

@@ -7,9 +7,10 @@ import { createMessageHashUrl } from '../../../util/routing';
 import { addActionHandler, execAfterActions, getGlobal, setGlobal } from '../../index';
 import {
   closeMiddleSearch,
-  exitMessageSelectMode, replaceTabThreadParam, updateCurrentMessageList, updateRequestedChatTranslation,
+  exitMessageSelectMode, updateCurrentMessageList, updateRequestedChatTranslation,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
+import { replaceTabThreadParam } from '../../reducers/threads';
 import {
   selectChat, selectCurrentMessageList, selectTabState,
 } from '../../selectors';

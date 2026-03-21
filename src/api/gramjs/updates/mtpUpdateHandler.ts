@@ -2,10 +2,11 @@ import { Api as GramJs, type Update } from '../../../lib/gramjs';
 import { UpdateConnectionState, UpdateServerTimeOffset } from '../../../lib/gramjs/network';
 
 import type { GroupCallConnectionData } from '../../../lib/secret-sauce';
-import type {
-  ApiMessage, ApiPoll, ApiStory, ApiStorySkipped,
-  ApiUpdateConnectionStateType,
-  ApiWebPage,
+import {
+  type ApiMessage, type ApiPoll, type ApiStory, type ApiStorySkipped,
+  type ApiUpdateConnectionStateType,
+  type ApiWebPage,
+  MAIN_THREAD_ID,
 } from '../../types';
 
 import { DEBUG, GENERAL_TOPIC_ID } from '../../../config';
@@ -176,6 +177,7 @@ export function updater(update: Update) {
         poll,
         webPage,
         isFromNew: true,
+        isFull: true,
       });
     } else {
       sendApiUpdate({
@@ -187,6 +189,7 @@ export function updater(update: Update) {
         poll,
         webPage,
         isFromNew: true,
+        isFull: true,
       });
     }
 
@@ -352,7 +355,7 @@ export function updater(update: Update) {
     processMessageAndUpdateThreadInfo(mtpMessage);
 
     // Workaround for a weird server behavior when own message is marked as incoming
-    const message = omit(buildApiMessage(mtpMessage)!, ['isOutgoing']);
+    const message = omit(buildApiMessage(mtpMessage)!, ['isOutgoing']) as ApiMessage;
 
     const poll = mtpMessage instanceof GramJs.Message && mtpMessage.media
       ? buildPollFromMedia(mtpMessage.media) : undefined;
@@ -367,11 +370,13 @@ export function updater(update: Update) {
       message,
       poll,
       webPage,
+      isFull: true,
     });
   } else if (update instanceof GramJs.UpdateMessageReactions) {
     sendApiUpdate({
       '@type': 'updateMessageReactions',
       id: update.msgId,
+      threadId: update.topMsgId,
       chatId: getApiChatIdFromMtpPeer(update.peer),
       reactions: buildMessageReactions(update.reactions),
     });
@@ -508,51 +513,57 @@ export function updater(update: Update) {
     // Chats
   } else if (update instanceof GramJs.UpdateReadHistoryInbox) {
     sendApiUpdate({
-      '@type': 'updateChatInbox',
-      id: getApiChatIdFromMtpPeer(update.peer),
-      lastReadInboxMessageId: update.maxId,
-      unreadCount: update.stillUnreadCount,
-      threadId: update.topMsgId,
+      '@type': 'updateThreadReadState',
+      chatId: getApiChatIdFromMtpPeer(update.peer),
+      threadId: update.topMsgId || MAIN_THREAD_ID,
+      readState: {
+        lastReadInboxMessageId: update.maxId,
+        unreadCount: update.stillUnreadCount,
+      },
     });
   } else if (update instanceof GramJs.UpdateReadHistoryOutbox) {
     sendApiUpdate({
-      '@type': 'updateChat',
-      id: getApiChatIdFromMtpPeer(update.peer),
-      chat: {
+      '@type': 'updateThreadReadState',
+      chatId: getApiChatIdFromMtpPeer(update.peer),
+      threadId: MAIN_THREAD_ID,
+      readState: {
         lastReadOutboxMessageId: update.maxId,
       },
     });
   } else if (update instanceof GramJs.UpdateReadChannelInbox) {
     sendApiUpdate({
-      '@type': 'updateChat',
-      id: buildApiPeerId(update.channelId, 'channel'),
-      chat: {
+      '@type': 'updateThreadReadState',
+      chatId: buildApiPeerId(update.channelId, 'channel'),
+      threadId: MAIN_THREAD_ID,
+      readState: {
         lastReadInboxMessageId: update.maxId,
         unreadCount: update.stillUnreadCount,
       },
     });
   } else if (update instanceof GramJs.UpdateReadChannelOutbox) {
     sendApiUpdate({
-      '@type': 'updateChat',
-      id: buildApiPeerId(update.channelId, 'channel'),
-      chat: {
+      '@type': 'updateThreadReadState',
+      chatId: buildApiPeerId(update.channelId, 'channel'),
+      threadId: MAIN_THREAD_ID,
+      readState: {
         lastReadOutboxMessageId: update.maxId,
       },
     });
   } else if (update instanceof GramJs.UpdateReadChannelDiscussionInbox) {
     sendApiUpdate({
-      '@type': 'updateThreadInfo',
-      threadInfo: {
-        chatId: buildApiPeerId(update.channelId, 'channel'),
-        threadId: update.topMsgId,
+      '@type': 'updateThreadReadState',
+      chatId: buildApiPeerId(update.channelId, 'channel'),
+      threadId: update.topMsgId,
+      readState: {
         lastReadInboxMessageId: update.readMaxId,
       },
     });
   } else if (update instanceof GramJs.UpdateReadChannelDiscussionOutbox) {
     sendApiUpdate({
-      '@type': 'updateChat',
-      id: buildApiPeerId(update.channelId, 'channel'),
-      chat: {
+      '@type': 'updateThreadReadState',
+      chatId: buildApiPeerId(update.channelId, 'channel'),
+      threadId: update.topMsgId,
+      readState: {
         lastReadOutboxMessageId: update.readMaxId,
       },
     });
@@ -752,9 +763,10 @@ export function updater(update: Update) {
     && update.peer instanceof GramJs.DialogPeer
   ) {
     sendApiUpdate({
-      '@type': 'updateChat',
-      id: getApiChatIdFromMtpPeer(update.peer.peer),
-      chat: {
+      '@type': 'updateThreadReadState',
+      chatId: getApiChatIdFromMtpPeer(update.peer.peer),
+      threadId: MAIN_THREAD_ID,
+      readState: {
         hasUnreadMark: update.unread,
       },
     });
@@ -1123,6 +1135,10 @@ export function updater(update: Update) {
       '@type': 'updateStarGiftAuctionUserState',
       giftId: update.giftId.toString(),
       userState: buildApiStarGiftAuctionUserState(update.userState),
+    });
+  } else if (update instanceof GramJs.UpdateStarGiftCraftFail) {
+    sendApiUpdate({
+      '@type': 'updateStarGiftCraftFail',
     });
   } else if (update instanceof GramJs.UpdatePaidReactionPrivacy) {
     sendApiUpdate({

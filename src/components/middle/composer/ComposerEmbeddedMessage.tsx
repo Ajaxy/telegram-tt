@@ -8,15 +8,12 @@ import type {
 } from '../../../api/types';
 import type { MessageListType, ThemeKey, ThreadId } from '../../../types/index';
 
-import { isChatChannel, stripCustomEmoji } from '../../../global/helpers';
+import { canEditMediaInEditor, isChatChannel, stripCustomEmoji } from '../../../global/helpers';
 import {
   selectCanAnimateInterface,
   selectChat,
   selectChatMessage,
-  selectDraft,
-  selectEditingId,
   selectEditingMessage,
-  selectEditingScheduledId,
   selectForwardedSender,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
@@ -25,10 +22,12 @@ import {
   selectTheme,
 } from '../../../global/selectors';
 import { selectIsMediaNsfw } from '../../../global/selectors/media';
+import { selectDraft, selectEditingId, selectEditingScheduledId } from '../../../global/selectors/threads';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { unique } from '../../../util/iteratees';
 
+import useAppLayout from '../../../hooks/useAppLayout';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useFrozenProps from '../../../hooks/useFrozenProps';
@@ -77,7 +76,7 @@ type OwnProps = {
   chatId: string;
   threadId: ThreadId;
   messageListType: MessageListType;
-  onClear?: () => void;
+  onClear?: NoneToVoidFunction;
 };
 
 const CLOSE_DURATION = 350;
@@ -110,10 +109,12 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
     exitForwardMode,
     setShouldPreventComposerAnimation,
     openSuggestMessageModal,
+    requestMessageMediaEditor,
   } = getActions();
   const ref = useRef<HTMLDivElement>();
   const oldLang = useOldLang();
   const lang = useLang();
+  const { isMobile } = useAppLayout();
 
   const isReplyToTopicStart = message?.content.action?.type === 'topicCreate';
   const isShowingSuggestedPost = Boolean(suggestedPostInfo) && !shouldForceShowEditing;
@@ -184,6 +185,8 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
   const isReplyWithQuoteRendering = Boolean(frozenReplyInfo?.quoteText);
   const isShowingSuggestedPostRendering = Boolean(frozenSuggestedPostInfo) && !frozenShouldForceShowEditing;
 
+  const canMediaBeEdited = frozenMessage && canEditMediaInEditor(frozenMessage) && !isMobile;
+
   useEffect(() => {
     if (shouldPreventComposerAnimation) {
       setShouldPreventComposerAnimation({ shouldPreventComposerAnimation: false });
@@ -220,6 +223,14 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
       return;
     }
     handleContextMenu(e);
+  });
+
+  const handlePictogramClick = useLastCallback((e: React.MouseEvent): void => {
+    e.stopPropagation();
+    if ((frozenEditingId || frozenReplyInfo?.type === 'message') && canMediaBeEdited) {
+      requestMessageMediaEditor();
+      return;
+    }
   });
 
   const handleClearClick = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
@@ -346,6 +357,8 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
           title={(frozenEditingId && !isShowingReplyRendering) ? oldLang('EditMessage')
             : noAuthors ? oldLang('HiddenSendersNameDescription') : undefined}
           onClick={handleMessageClick}
+          onPictogramClick={canMediaBeEdited ? handlePictogramClick : undefined}
+          pictogramActionIcon={canMediaBeEdited ? 'edit' : undefined}
           senderChat={senderChat}
         />
         <Button

@@ -1,4 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
+import { RPCError } from '../../../lib/gramjs/errors';
 
 import type { GiftProfileFilterOptions, ResaleGiftsFilterOptions } from '../../../types';
 import type {
@@ -18,6 +19,7 @@ import {
   buildApiResaleGifts,
   buildApiSavedStarGift,
   buildApiStarGift,
+  buildApiStarGiftAttribute,
   buildApiStarGiftAuctionAcquiredGift,
   buildApiStarGiftAuctionState,
   buildApiStarGiftCollection,
@@ -103,12 +105,14 @@ export async function fetchResaleGifts({
   limit = DEFAULT_PRIMITIVES.INT,
   attributesHash,
   filter,
+  forCraft,
 }: {
   giftId: string;
   offset?: string;
   limit?: number;
   attributesHash?: string;
   filter?: ResaleGiftsFilterOptions;
+  forCraft?: boolean;
 }) {
   type GetResaleStarGifts = ConstructorParameters<typeof GramJs.payments.GetResaleStarGifts>[0];
 
@@ -124,6 +128,7 @@ export async function fetchResaleGifts({
     limit,
     attributesHash: attributesHash ? BigInt(attributesHash) : DEFAULT_PRIMITIVES.BIGINT,
     attributes: buildInputResaleGiftsAttributes(attributes),
+    forCraft: forCraft || undefined,
     ...(filter && {
       sortByPrice: filter.sortType === 'byPrice' || undefined,
       sortByNum: filter.sortType === 'byNumber' || undefined,
@@ -389,13 +394,22 @@ export async function fetchStarsTopupOptions() {
 export async function fetchUniqueStarGift({ slug }: {
   slug: string;
 }) {
-  const result = await invokeRequest(new GramJs.payments.GetUniqueStarGift({ slug }));
+  try {
+    const result = await invokeRequest(new GramJs.payments.GetUniqueStarGift({ slug }), {
+      shouldThrow: true,
+    });
 
-  if (!result) return undefined;
+    if (!result) return undefined;
 
-  const gift = buildApiStarGift(result.gift);
-  if (gift.type !== 'starGiftUnique') return undefined;
-  return gift;
+    const gift = buildApiStarGift(result.gift);
+    if (gift.type !== 'starGiftUnique') return undefined;
+    return gift;
+  } catch (err) {
+    if (err instanceof RPCError) {
+      return wrapError(err);
+    }
+    return undefined;
+  }
 }
 
 export async function fetchStarGiftUpgradePreview({
@@ -456,6 +470,20 @@ export async function fetchStarGiftAuctionAcquiredGifts({
 
   return {
     gifts: result.gifts.map(buildApiStarGiftAuctionAcquiredGift),
+  };
+}
+
+export async function fetchStarGiftActiveAuctions() {
+  const result = await invokeRequest(new GramJs.payments.GetStarGiftActiveAuctions({
+    hash: DEFAULT_PRIMITIVES.BIGINT,
+  }));
+
+  if (!result || result instanceof GramJs.payments.StarGiftActiveAuctionsNotModified) {
+    return undefined;
+  }
+
+  return {
+    auctions: result.auctions.map(buildApiStarGiftAuctionState).filter(Boolean),
   };
 }
 
@@ -604,4 +632,70 @@ export function resolveStarGiftOffer({
   }), {
     shouldReturnTrue: true,
   });
+}
+
+export async function fetchCraftStarGifts({
+  giftId,
+  peerId,
+  offset = DEFAULT_PRIMITIVES.STRING,
+  limit = DEFAULT_PRIMITIVES.INT,
+}: {
+  giftId: string;
+  peerId: string;
+  offset?: string;
+  limit?: number;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetCraftStarGifts({
+    giftId: BigInt(giftId),
+    offset,
+    limit,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return {
+    gifts: result.gifts.map((g) => buildApiSavedStarGift(g, peerId)),
+    nextOffset: result.nextOffset,
+    count: result.count,
+  };
+}
+
+export async function craftStarGift({
+  inputSavedGifts,
+}: {
+  inputSavedGifts: ApiRequestInputSavedStarGift[];
+}) {
+  try {
+    await invokeRequest(new GramJs.payments.CraftStarGift({
+      stargift: inputSavedGifts.map(buildInputSavedStarGift),
+    }), {
+      shouldThrow: true,
+    });
+    return undefined;
+  } catch (err) {
+    if (err instanceof RPCError) {
+      return { error: err.errorMessage };
+    }
+    throw err;
+  }
+}
+
+export async function fetchStarGiftUpgradeAttributes({
+  giftId,
+}: {
+  giftId: string;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetStarGiftUpgradeAttributes({
+    giftId: BigInt(giftId),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return {
+    attributes: result.attributes.map(buildApiStarGiftAttribute).filter(Boolean),
+  };
 }

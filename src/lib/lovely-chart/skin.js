@@ -59,7 +59,9 @@ export function createColors(datasetColors) {
 
       addCssRule(styleSheet, `.lovely-chart--tooltip-dataset-value${baseClass}-${datasetColors[key].slice(1)}`, `color: ${datasetColors[key]}`);
       addCssRule(styleSheet, `.lovely-chart--button${baseClass}-${datasetColors[key].slice(1)}`, `border-color: ${datasetColors[key]}; color: ${datasetColors[key]}`);
-      addCssRule(styleSheet, `.lovely-chart--button.lovely-chart--state-checked${baseClass}-${datasetColors[key].slice(1)}`, `background-color: ${datasetColors[key]}`);
+
+      const checkedBtnSelector = `.lovely-chart--button.lovely-chart--state-checked${baseClass}-${datasetColors[key].slice(1)}`;
+      addCssRule(styleSheet, checkedBtnSelector, `background-color: ${datasetColors[key]}`);
     });
   });
 
@@ -83,6 +85,20 @@ function hexToChannels(hexWithAlpha) {
 
 function buildCssColor([r, g, b, a = 1], opacity = 1) {
   return `rgba(${r}, ${g}, ${b}, ${a * opacity})`;
+}
+
+export function isColorCloseToBackground(colors, hex) {
+  const bg = colors[skin]['tooltip-background'];
+  const fg = hexToChannels(hex);
+  return colorDistance(bg, fg) < 70;
+}
+
+export function isColorCloseToWhite(hex) {
+  return colorDistance(hexToChannels(hex), [255, 255, 255]) < 70;
+}
+
+function colorDistance([r1, g1, b1], [r2, g2, b2]) {
+  return Math.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2);
 }
 
 function addCssRule(sheet, selector, rule) {

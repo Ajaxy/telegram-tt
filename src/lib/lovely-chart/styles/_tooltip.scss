@@ -59,7 +59,7 @@
 
 .lovely-chart--tooltip-title {
   position: relative;
-  padding-bottom: 5px;
+  padding-bottom: 6px;
   font-size: 12px;
   font-weight: bold;
 
@@ -89,7 +89,12 @@
 
   .lovely-chart--tooltip-dataset-value {
     float: right;
-    margin-left: 5px;
+    margin-left: 12px;
+    font-weight: bold;
+  }
+
+  &.lovely-chart--tooltip-dataset-total {
+    margin-top: 6px;
     font-weight: bold;
   }
 }

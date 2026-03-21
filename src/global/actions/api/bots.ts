@@ -56,7 +56,6 @@ import {
   selectChatMessage,
   selectCurrentChat,
   selectCurrentMessageList,
-  selectDraft,
   selectIsCurrentUserFrozen,
   selectIsTrustedBot,
   selectMessageReplyInfo,
@@ -68,6 +67,7 @@ import {
   selectUserFullInfo,
 } from '../../selectors';
 import { selectSharedSettings } from '../../selectors/sharedState';
+import { selectDraft } from '../../selectors/threads.ts';
 import { fetchChatByUsername } from './chats';
 import { getPeerStarsForMessage } from './messages';
 
@@ -1212,6 +1212,27 @@ function handleUrlAuthResult<T extends GlobalState>(
       },
     }, tabId);
     setGlobal(global);
+    return;
+  }
+
+  if (result.type === 'accepted' && !result.url) {
+    actions.showNotification({
+      message: {
+        key: 'BotAuthSuccessText',
+        variables: {
+          url,
+        },
+        options: {
+          withMarkdown: true,
+          withNodes: true,
+        },
+      },
+      title: {
+        key: 'BotAuthSuccessTitle',
+      },
+      tabId,
+    });
+    actions.closeUrlAuthModal({ tabId });
     return;
   }
 

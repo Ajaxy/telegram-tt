@@ -161,9 +161,18 @@
     font-weight: var(--font-weight-semibold);
   }
 
+  a:hover {
+    text-decoration: none;
+  }
+
   &.wrap {
     display: block;
     white-space: normal;
+  }
+
+  &.text-only {
+    padding-inline: 0.5rem;
+    line-height: 1.375;
   }
 
   &.menu-custom-emoji-sets {

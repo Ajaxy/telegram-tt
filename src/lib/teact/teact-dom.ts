@@ -15,7 +15,9 @@ import { DEBUG } from '../../config';
 import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
 import {
   captureImmediateEffects,
+  cloneElement,
   hasElementChanged,
+  isElementUsed,
   isParentElement,
   mountComponent,
   MountState,
@@ -103,6 +105,19 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
 ): T {
   const { skipComponentUpdate, fragment } = options;
   let { nextSibling, namespace } = options;
+
+  // Since JSX elements are used as is, clone is needed to allow JSX reuse
+  if ($new && $current !== $new && isElementUsed($new)) {
+    const isSelfUpdate = (
+      $new.type === VirtualType.Component
+      && $current?.type === VirtualType.Component
+      && $new.componentInstance === $current.componentInstance
+    );
+    if (!isSelfUpdate) {
+      // eslint-disable-next-line react-x/no-clone-element
+      $new = cloneElement($new) as T;
+    }
+  }
 
   const isCurrentComponent = $current?.type === VirtualType.Component;
   const isNewComponent = $new?.type === VirtualType.Component;

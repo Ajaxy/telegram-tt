@@ -104,7 +104,7 @@ const RecipientPicker = ({
   });
 
   const ids = useMemo(() => {
-    if (!isOpen) return undefined;
+    if (!isOpen) return [];
 
     let priorityIds = pinnedIds || [];
     if (currentUserId) {
@@ -169,7 +169,7 @@ const RecipientPicker = ({
     shouldRenderFolders,
   ]);
 
-  const renderingIds = useCurrentOrPrev(ids, true)!;
+  const renderingIds = useCurrentOrPrev(ids, true);
 
   const chatFolders = useMemo(() => {
     if (!shouldRenderFolders) return undefined;

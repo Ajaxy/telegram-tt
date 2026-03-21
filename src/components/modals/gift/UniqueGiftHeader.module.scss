@@ -1,8 +1,10 @@
 .root {
   --_height: 15rem;
 
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 0.25rem;
   align-items: center;
 
@@ -10,6 +12,7 @@
   height: var(--_height);
   margin-bottom: 0.5rem;
   padding-bottom: 1rem;
+  border-radius: 0 0 0.625rem 0.625rem;
 
   &.withManageButtons {
     --_height: 19.25rem;
@@ -64,15 +67,10 @@
 
 .radialPattern {
   position: absolute;
-  z-index: -1;
   inset: -5%;
 }
 
 .amount {
-  display: flex;
-  gap: 0.25rem;
-  align-items: center;
-
   margin-bottom: 0.125rem;
 
   font-size: 1.125rem;
@@ -114,6 +112,7 @@
 .subtitle {
   font-size: 1rem;
   line-height: 1.375rem;
+  color: var(--tinted-text-color);
   text-align: center;
   text-wrap: balance;
 

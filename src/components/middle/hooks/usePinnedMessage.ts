@@ -3,21 +3,16 @@ import { getGlobal } from '../../../global';
 
 import type { ThreadId } from '../../../types';
 
-import { selectFocusedMessageId, selectListedIds, selectOutlyingListByMessageId } from '../../../global/selectors';
+import { selectListedIds, selectOutlyingListByMessageId } from '../../../global/selectors';
 import cycleRestrict from '../../../util/cycleRestrict';
-import { unique } from '../../../util/iteratees';
 
 import useDerivedSignal from '../../../hooks/useDerivedSignal';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 export type OnIntersectPinnedMessage = (params: {
-  viewportPinnedIdsToAdd?: number[];
-  viewportPinnedIdsToRemove?: number[];
+  firstViewportId?: number;
   shouldCancelWaiting?: boolean;
 }) => void;
-
-let viewportPinnedIds: number[] | undefined;
-let lastFocusedId: number | undefined;
 
 export default function usePinnedMessage(
   chatId?: string, threadId?: ThreadId, pinnedIds?: number[],
@@ -32,10 +27,9 @@ export default function usePinnedMessage(
 
   // Reset when switching chat
   useEffect(() => {
-    viewportPinnedIds = undefined;
     setLoadingPinnedId(undefined);
   }, [
-    chatId, setPinnedIndexByKey, setLoadingPinnedId, threadId,
+    chatId, threadId, setPinnedIndexByKey, setLoadingPinnedId,
   ]);
 
   useEffect(() => {
@@ -51,14 +45,12 @@ export default function usePinnedMessage(
   }, [getPinnedIndexByKey, key, pinnedIds?.length, setPinnedIndexByKey]);
 
   const handleIntersectPinnedMessage: OnIntersectPinnedMessage = useLastCallback(({
-    viewportPinnedIdsToAdd = [],
-    viewportPinnedIdsToRemove = [],
+    firstViewportId,
     shouldCancelWaiting,
   }) => {
     if (!chatId || !threadId || !key || !pinnedIds?.length) return;
 
     if (shouldCancelWaiting) {
-      lastFocusedId = undefined;
       setLoadingPinnedId(undefined);
       return;
     }
@@ -71,36 +63,22 @@ export default function usePinnedMessage(
         [key]: clampIndex(newPinnedIndex),
       });
       setLoadingPinnedId(undefined);
+
+      // We're still scrolling, prevent updating the index
+      if (loadingPinnedId < (firstViewportId || 0)) {
+        return;
+      }
     }
 
-    viewportPinnedIds = unique(
-      (viewportPinnedIds?.filter((id) => !viewportPinnedIdsToRemove.includes(id)) ?? [])
-        .concat(viewportPinnedIdsToAdd),
-    );
-
-    // Sometimes this callback is called after focus has been reset in global, so we leverage `lastFocusedId`
-    const focusedMessageId = selectFocusedMessageId(getGlobal(), chatId) || lastFocusedId;
-
-    if (lastFocusedId && viewportPinnedIds.includes(lastFocusedId)) {
-      lastFocusedId = undefined;
+    let newIndex = pinnedIds.findIndex((id) => id < (firstViewportId || 0));
+    if (newIndex === -1) {
+      newIndex = 0; // Pinned are sorted from newest to oldest
     }
 
-    if (focusedMessageId) {
-      const pinnedIndexAboveFocused = pinnedIds.findIndex((id) => id < focusedMessageId);
-
-      setPinnedIndexByKey({
-        ...getPinnedIndexByKey(),
-        [key]: clampIndex(pinnedIndexAboveFocused),
-      });
-    } else if (viewportPinnedIds.length) {
-      const maxViewportPinnedId = Math.max(...viewportPinnedIds);
-      const newIndex = pinnedIds.indexOf(maxViewportPinnedId);
-
-      setPinnedIndexByKey({
-        ...getPinnedIndexByKey(),
-        [key]: clampIndex(newIndex),
-      });
-    }
+    setPinnedIndexByKey({
+      ...getPinnedIndexByKey(),
+      [key]: clampIndex(newIndex),
+    });
   });
 
   const handleFocusPinnedMessage = useLastCallback((messageId: number) => {
@@ -108,8 +86,6 @@ export default function usePinnedMessage(
     if (!chatId || !threadId || !pinnedIds?.length) {
       return;
     }
-
-    lastFocusedId = messageId;
 
     const global = getGlobal();
     const listedIds = selectListedIds(global, chatId, threadId);

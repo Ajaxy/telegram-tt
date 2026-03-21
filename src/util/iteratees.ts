@@ -14,7 +14,7 @@ export function buildCollectionByKey<T extends AnyLiteral>(collection: T[], key:
   }, {});
 }
 
-export function buildCollectionByCallback<T extends AnyLiteral, K extends number | string, R>(
+export function buildCollectionByCallback<T, K extends number | string, R>(
   collection: T[],
   callback: (member: T) => [K, R],
 ) {
@@ -32,6 +32,19 @@ export function mapValues<R, M>(
 ): CollectionByKey<R> {
   return Object.keys(byKey).reduce((newByKey: CollectionByKey<R>, key, index) => {
     newByKey[key] = callback(byKey[key], key, index, byKey);
+    return newByKey;
+  }, {});
+}
+
+export function mapTruthyValues<R, M>(
+  byKey: CollectionByKey<M>,
+  callback: (member: M, key: string, index: number, originalByKey: CollectionByKey<M>) => R | Falsy,
+): CollectionByKey<R> {
+  return Object.keys(byKey).reduce((newByKey: CollectionByKey<R>, key, index) => {
+    const value = callback(byKey[key], key, index, byKey);
+    if (value) {
+      newByKey[key] = value;
+    }
     return newByKey;
   }, {});
 }
@@ -109,7 +122,7 @@ export function uniqueByField<T>(array: T[], field: keyof T): T[] {
   return [...new Map(array.map((item) => [item[field], item])).values()];
 }
 
-export function compact<T>(array: T[]) {
+export function compact<T>(array: (T | Falsy)[]): T[] {
   return array.filter(Boolean);
 }
 

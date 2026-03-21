@@ -8,6 +8,7 @@ import useLastCallback from '../../../hooks/useLastCallback.ts';
 import styles from './SwayingStar.module.scss';
 
 interface OwnProps {
+  className?: string;
   color: 'purple' | 'gold';
   centerShift: readonly [number, number];
   onMouseMove: NoneToVoidFunction;
@@ -16,6 +17,7 @@ interface OwnProps {
 const INTERACTIVE_RADIUS = 50;
 
 function SwayingStar({
+  className,
   color,
   centerShift,
   onMouseMove,
@@ -48,7 +50,7 @@ function SwayingStar({
 
   return (
     <div
-      className={styles.root}
+      className={buildClassName(styles.root, className)}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >

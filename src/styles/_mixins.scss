@@ -5,12 +5,12 @@
   }
 }
 
-@mixin adapt-padding-to-scrollbar($padding) {
-  padding-inline-end: calc($padding - var(--scrollbar-width));
+@mixin adapt-padding-to-scrollbar($padding, $forceSpace: 0px) {
+  padding-inline-end: calc(max($padding - var(--scrollbar-width), $forceSpace));
 }
 
-@mixin adapt-margin-to-scrollbar($margin) {
-  margin-inline-end: calc($margin - var(--scrollbar-width));
+@mixin adapt-margin-to-scrollbar($margin, $forceSpace: 0px) {
+  margin-inline-end: calc(max($margin - var(--scrollbar-width), $forceSpace));
 }
 
 @mixin filter-outline($width: 0.125rem, $color) {
@@ -245,8 +245,8 @@
     mix-blend-mode: unset;
 
     mask-image: url($path);
-    mask-position: center;
     mask-repeat: repeat;
+    mask-position: center;
     mask-size: 430px auto;
   }
 }
@@ -254,5 +254,23 @@
 @mixin chat-pattern-background($path) {
   &::before {
     @include chat-pattern-styles($path);
+  }
+}
+
+@mixin action-message-bg($isModule: false, $noBackground: false) {
+  @if not $noBackground {
+    background-color: var(--action-message-bg);
+  }
+
+  @if $isModule {
+    :global(body.with-message-blur) & {
+      backdrop-filter: blur(4px);
+    }
+  }
+
+  @else {
+    body.with-message-blur & {
+      backdrop-filter: blur(4px);
+    }
   }
 }

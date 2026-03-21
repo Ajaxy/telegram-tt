@@ -57,7 +57,9 @@ export function buildChannelMonetizationStatistics(
   return {
     // Graphs
     topHoursGraph: stats.topHoursGraph ? buildGraph(stats.topHoursGraph) : undefined,
-    revenueGraph: buildGraph(stats.revenueGraph, undefined, true, stats.usdRate),
+    revenueGraph: buildGraph(stats.revenueGraph, undefined, {
+      label: 'USD ≈', multiplier: stats.usdRate, prefix: '$',
+    }),
 
     // Statistics overview
     balances: buildChannelMonetizationBalances(stats.status),
@@ -156,7 +158,9 @@ export function buildStoryPublicForwards(
 }
 
 export function buildGraph(
-  result: GramJs.TypeStatsGraph, isPercentage?: boolean, isCurrency?: boolean, currencyRate?: number,
+  result: GramJs.TypeStatsGraph, isPercentage?: boolean, secondaryYAxis?: {
+    label: string; multiplier: number; prefix?: string; suffix?: string;
+  },
 ): TypeStatisticsGraph {
   if (result instanceof GramJs.StatsGraphError) {
     return {
@@ -187,15 +191,15 @@ export function buildGraph(
     hasSecondYAxis,
     isStacked: data.stacked && !hasSecondYAxis,
     isPercentage,
-    isCurrency,
-    currencyRate,
+    secondaryYAxis,
     datasets: y.map((item: any) => {
       const key = item[0];
+      const values = item.slice(1);
 
       return {
         name: data.names[key],
         color: extractColor(data.colors[key]),
-        values: item.slice(1),
+        values: secondaryYAxis ? values.map((v: number) => v / 1e9) : values,
       };
     }),
     ...calculateMinimapRange(data.subchart.defaultZoom, x.slice(1)),

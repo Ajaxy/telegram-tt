@@ -6,10 +6,11 @@ import type { FocusDirection, ScrollTargetPosition } from '../../../../types';
 
 import { SCROLL_MAX_DISTANCE } from '../../../../config';
 import {
-  requestForcedReflow, requestMeasure, requestMutation,
+  requestMeasure, requestMutation,
 } from '../../../../lib/fasterdom/fasterdom';
 import animateScroll from '../../../../util/animateScroll';
 import { REM } from '../../../common/helpers/mediaDimensions';
+import { requestAfterMessageListReflow } from '../../helpers/messageListReflow';
 
 // This is used when the viewport was replaced.
 const BOTTOM_FOCUS_OFFSET = 500;
@@ -79,7 +80,7 @@ export default function useFocusMessageListElement({
 
       if (isRelocated) {
         // We need this to override scroll setting from Message List layout effect
-        requestForcedReflow(exec);
+        requestAfterMessageListReflow(exec);
       } else {
         requestMeasure(() => {
           requestMutation(exec()!);

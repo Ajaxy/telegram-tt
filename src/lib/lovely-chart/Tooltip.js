@@ -1,8 +1,8 @@
 import { setupCanvas, clearCanvas } from './canvas.js';
-import { BALLOON_OFFSET, X_AXIS_HEIGHT } from './constants.js';
+import { BALLOON_OFFSET, X_AXIS_HEIGHT, MAX_TOOLTIP_ITEMS } from './constants.js';
 import { getPieRadius } from './formulas.js';
-import {formatCryptoValue, formatInteger, getLabelDate, getLabelTime, statsFormatDayHourFull} from './format.js';
-import { getCssColor } from './skin.js';
+import { formatInteger, getLabelDate, getLabelTime, statsFormatDayHourFull } from './format.js';
+import { getCssColor, isColorCloseToBackground } from './skin.js';
 import { throttle, throttleWithRaf } from './utils.js';
 import { addEventListener, createElement } from './minifiers.js';
 import { toPixels } from './Projection.js';
@@ -333,12 +333,14 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
   }
 
   function _insertNewDataSet(dataSetContainer, { name, key, value }, totalValue) {
-    const className = `lovely-chart--tooltip-dataset-value lovely-chart--position-right lovely-chart--color-${data.colors[key].slice(1)}`;
+    const colorHex = data.colors[key];
+    const colorClass = isColorCloseToBackground(colors, colorHex) ? '' : ` lovely-chart--color-${colorHex.slice(1)}`;
+    const className = `lovely-chart--tooltip-dataset-value lovely-chart--position-right${colorClass}`;
     const newDataSet = createElement();
     newDataSet.className = 'lovely-chart--tooltip-dataset';
     newDataSet.setAttribute('data-present', 'true');
     newDataSet.setAttribute('data-name', name);
-    newDataSet.innerHTML = `<span class="lovely-chart--dataset-title">${name}</span><span class="${className}">${formatInteger(value)}</span>`;
+    newDataSet.innerHTML = `<span class="lovely-chart--dataset-title">${name}</span><span class="${className}">${_formatValue(value)}</span>`;
     _renderPercentageValue(newDataSet, value, totalValue);
 
     const totalText = dataSetContainer.querySelector(`[data-total="true"]`);
@@ -352,15 +354,17 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
   function _updateDataSet(currentDataSet, { key, value } = {}, totalValue) {
     currentDataSet.setAttribute('data-present', 'true');
 
-    const valueElement = currentDataSet.querySelector(`.lovely-chart--tooltip-dataset-value.lovely-chart--color-${data.colors[key].slice(1)}:not(.lovely-chart--state-hidden)`);
+    const valueElement = currentDataSet.querySelector(`.lovely-chart--tooltip-dataset-value`);
 
-    if (data.isCurrency) {
-      valueElement.innerHTML = formatCryptoValue(value);
-    } else {
-      valueElement.innerHTML = formatInteger(value);
+    if (valueElement) {
+      valueElement.innerHTML = _formatValue(value);
     }
 
     _renderPercentageValue(currentDataSet, value, totalValue);
+  }
+
+  function _formatValue(value) {
+    return `${data.valuePrefix || ''}${formatInteger(value)}${data.valueSuffix || ''}`;
   }
 
   function _renderPercentageValue(dataSet, value, totalValue) {
@@ -402,7 +406,10 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
 
     const totalValue = statistics.reduce((a, x) => a + x.value, 0);
     const pointerVector = getPointerVector();
-    const finalStatistics = data.isPie ? statistics.filter(({ value }, index) => _isPieSectorSelected(statistics, value, totalValue, index, pointerVector)) : statistics;
+    const filteredStatistics = statistics.filter(({ value }) => value !== 0);
+    const sortedStatistics = filteredStatistics.sort((a, b) => b.value - a.value);
+    const limitedStatistics = sortedStatistics.slice(0, MAX_TOOLTIP_ITEMS);
+    const finalStatistics = data.isPie ? limitedStatistics.filter(({ value }, index) => _isPieSectorSelected(statistics, value, totalValue, index, pointerVector)) : limitedStatistics;
 
     finalStatistics.forEach((statItem) => {
       const currentDataSet = dataSetContainer.querySelector(`[data-name="${statItem.name}"]`);
@@ -411,16 +418,21 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
         _insertNewDataSet(dataSetContainer, statItem, totalValue);
       } else {
         _updateDataSet(currentDataSet, statItem, totalValue);
+        dataSetContainer.appendChild(currentDataSet);
       }
     });
 
-    if ((data.isBars || data.isSteps) && data.isStacked) {
-      _renderTotal(dataSetContainer, formatInteger(totalValue));
+    if ((data.isBars || data.isSteps || data.isAreas) && data.isStacked) {
+      _renderTotal(dataSetContainer, _formatValue(totalValue));
     }
 
-    if (data.isCurrency) {
-      _renderCurrencyRate(dataSetContainer, formatCryptoValue(totalValue));
+    if (data.secondaryYAxis) {
+      _renderSecondaryTotal(dataSetContainer, totalValue);
     }
+
+    // Re-append total rows to keep them at the bottom after sort reordering
+    Array.from(dataSetContainer.querySelectorAll('[data-total="true"]'))
+      .forEach((el) => dataSetContainer.appendChild(el));
 
     Array.from(dataSetContainer.querySelectorAll('[data-present="false"]'))
       .forEach((dataSet) => {
@@ -438,10 +450,10 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
     const className = `lovely-chart--tooltip-dataset-value lovely-chart--position-right`;
     if (!totalText) {
       const newTotalText = createElement();
-      newTotalText.className = 'lovely-chart--tooltip-dataset';
+      newTotalText.className = 'lovely-chart--tooltip-dataset lovely-chart--tooltip-dataset-total';
       newTotalText.setAttribute('data-present', 'true');
       newTotalText.setAttribute('data-total', 'true');
-      newTotalText.innerHTML = `<span>All</span><span class="${className}">${totalValue}</span>`;
+      newTotalText.innerHTML = `<span>Total</span><span class="${className}">${totalValue}</span>`;
       dataSetContainer.appendChild(newTotalText);
     } else {
       totalText.setAttribute('data-present', 'true');
@@ -451,24 +463,25 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
     }
   }
 
-  function _renderCurrencyRate(dataSetContainer, totalValue) {
+  function _renderSecondaryTotal(dataSetContainer, totalValue) {
+    const { label, multiplier, prefix = '', suffix = '' } = data.secondaryYAxis;
     const totalText = dataSetContainer.querySelector(`[data-total="true"]`);
     const className = `lovely-chart--tooltip-dataset-value lovely-chart--position-right`;
 
-    const totalUsd = (parseFloat(totalValue) * data.currencyRate).toFixed(2);
+    const secondaryValue = (totalValue * multiplier).toFixed(2);
 
     if (!totalText) {
       const newTotalText = createElement();
-      newTotalText.className = 'lovely-chart--tooltip-dataset';
+      newTotalText.className = 'lovely-chart--tooltip-dataset lovely-chart--tooltip-dataset-total';
       newTotalText.setAttribute('data-present', 'true');
       newTotalText.setAttribute('data-total', 'true');
-      newTotalText.innerHTML = `<span>USD ≈</span><span class="${className}">$${totalUsd}</span>`;
+      newTotalText.innerHTML = `<span>${label}</span><span class="${className}">${prefix}${secondaryValue}${suffix}</span>`;
       dataSetContainer.appendChild(newTotalText);
     } else {
       totalText.setAttribute('data-present', 'true');
 
       const valueElement = totalText.querySelector(`.lovely-chart--tooltip-dataset-value:not(.lovely-chart--state-hidden)`);
-      valueElement.innerHTML = `$${totalUsd}`;
+      valueElement.innerHTML = `${prefix}${secondaryValue}${suffix}`;
     }
   }
 

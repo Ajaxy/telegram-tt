@@ -7,7 +7,7 @@ import type {
 import type { GlobalState } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { omit } from '../../util/iteratees';
+import { omit, unique } from '../../util/iteratees';
 import { updateTabState } from './tabs';
 
 export function removeGiftInfoOriginalDetails<T extends GlobalState>(
@@ -74,7 +74,11 @@ export function updateGiftAuction<T extends GlobalState>(
       ...global,
       giftAuctionByGiftId: {
         ...global.giftAuctionByGiftId,
-        [giftId]: auctionState,
+        [giftId]: {
+          ...auctionState,
+          // Keep timeout in case of updates from active auction list, as those do not have this field
+          timeout: auctionState.timeout || currentAuction.timeout,
+        },
       },
     };
   }
@@ -123,6 +127,21 @@ export function updateGiftAuctionUserState<T extends GlobalState>(
     return global;
   }
 
+  const currentBidDate = giftAuction.userState.bidDate;
+  if (userState.bidDate !== currentBidDate) {
+    if (userState.bidDate) {
+      global = {
+        ...global,
+        activeGiftAuctionIds: unique([...(global.activeGiftAuctionIds || []), giftId]),
+      };
+    } else {
+      global = {
+        ...global,
+        activeGiftAuctionIds: global.activeGiftAuctionIds?.filter((id) => id !== giftId),
+      };
+    }
+  }
+
   return {
     ...global,
     giftAuctionByGiftId: {
@@ -140,11 +159,32 @@ export function replaceGiftAuction<T extends GlobalState>(
   auctionState: ApiStarGiftAuctionState,
 ): T {
   const giftId = auctionState.gift.id;
+
+  const previousAuction = global.giftAuctionByGiftId?.[giftId];
+  if (previousAuction) {
+    if (previousAuction.userState.bidDate !== auctionState.userState.bidDate) {
+      if (auctionState.userState.bidDate) {
+        global = {
+          ...global,
+          activeGiftAuctionIds: unique([...(global.activeGiftAuctionIds || []), giftId]),
+        };
+      } else {
+        global = {
+          ...global,
+          activeGiftAuctionIds: global.activeGiftAuctionIds?.filter((id) => id !== giftId),
+        };
+      }
+    }
+  }
+
   return {
     ...global,
     giftAuctionByGiftId: {
       ...global.giftAuctionByGiftId,
-      [giftId]: auctionState,
+      [giftId]: {
+        ...auctionState,
+        timeout: auctionState.timeout || previousAuction?.timeout,
+      },
     },
   };
 }
@@ -158,9 +198,11 @@ export function removeGiftAuction<T extends GlobalState>(
   }
 
   const rest = omit(global.giftAuctionByGiftId, [giftId]);
+  const activeGiftAuctionIds = global.activeGiftAuctionIds?.filter((id) => id !== giftId);
 
   return {
     ...global,
     giftAuctionByGiftId: Object.keys(rest).length ? rest : undefined,
+    activeGiftAuctionIds,
   };
 }

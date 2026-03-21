@@ -242,12 +242,54 @@
     &.round {
       border-radius: 1rem;
     }
+
+    &.with-action-icon {
+      &::after {
+        content: '';
+
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 100%;
+
+        opacity: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+
+        transition: opacity 0.15s;
+      }
+
+      &:hover::after {
+        opacity: 1;
+      }
+
+      &:hover .pictogram-action-icon {
+        opacity: 1;
+      }
+    }
   }
 
   .pictogram {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .pictogram-action-icon {
+    pointer-events: none;
+
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    color: white;
+
+    opacity: 0;
+
+    transition: opacity 0.15s;
   }
 
   &.inside-input {

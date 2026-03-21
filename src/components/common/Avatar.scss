@@ -3,7 +3,7 @@
   --color-user: var(--color-primary);
   --radius: 50%;
   --_size: 0px;
-  --_font-size: max(calc(var(--_size) / 2 - 2px), 0.5rem);
+  --_font-size: max(calc(var(--_size) / 2 - 4px), 0.5rem);
 
   user-select: none;
 
@@ -23,9 +23,18 @@
   color: white;
   white-space: nowrap;
 
+  &.no-photo {
+    font-family: var(--font-family-rounded);
+  }
+
   .emoji {
     width: var(--_font-size);
     height: var(--_font-size);
+  }
+
+  .letters {
+    /* stylelint-disable-next-line plugin/use-baseline */
+    text-box: trim-both cap alphabetic;
   }
 
   &__icon {
@@ -155,8 +164,8 @@
     --radius: 0;
 
     mask-image: url("../../assets/icons/forumTopic/blue.svg");
-    mask-position: center;
     mask-repeat: no-repeat;
+    mask-position: center;
     mask-size: 100%;
   }
 }

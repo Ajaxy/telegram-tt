@@ -23,14 +23,18 @@
   color: var(--color-composer-button);
   box-shadow: 0 1px 2px var(--color-default-shadow);
 
+  &:hover, &:active, &:focus {
+    color: revert-layer;
+  }
+
   @media (max-width: 600px) {
-    width: 2.875rem !important;
+    width: 2.875rem;
     height: 2.875rem;
   }
 }
 
 .icon {
-  font-size: 1.75rem !important;
+  font-size: 1.75rem;
 }
 
 .unread-count {

@@ -30,7 +30,7 @@ import StarTopupOptionList from '../StarTopupOptionList';
 
 import styles from './StarsGiftModal.module.scss';
 
-import StarLogo from '../../../../assets/icons/GoldStar.svg';
+import StarLogo from '../../../../assets/icons/star/GoldStar.svg';
 import StarsBackground from '../../../../assets/stars-bg.png';
 
 export type OwnProps = {

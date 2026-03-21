@@ -1,4 +1,4 @@
-import type { FC, TeactNode } from '../../../lib/teact/teact';
+import type { TeactNode } from '../../../lib/teact/teact';
 import { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -7,15 +7,17 @@ import type { ThreadId } from '../../../types';
 
 import { selectChatMessage, selectCurrentMessageList } from '../../../global/selectors';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
+import buildClassName from '../../../util/buildClassName';
 import renderKeyboardButtonText from './helpers/renderKeyboardButtonText';
 
 import useLang from '../../../hooks/useLang';
 import useMouseInside from '../../../hooks/useMouseInside';
 
+import CustomEmoji from '../../common/CustomEmoji';
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
 
-import './BotKeyboardMenu.scss';
+import styles from './BotKeyboardMenu.module.scss';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -28,9 +30,11 @@ type StateProps = {
   message?: ApiMessage;
 };
 
-const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
+const ICON_SIZE = 16;
+
+const BotKeyboardMenu = ({
   isOpen, threadId, message, onClose,
-}) => {
+}: OwnProps & StateProps) => {
   const { clickBotInlineButton } = getActions();
 
   const lang = useLang();
@@ -58,25 +62,38 @@ const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
       positionX="right"
       positionY="bottom"
       onClose={onClose}
-      className="BotKeyboardMenu"
+      className={styles.root}
       onCloseAnimationEnd={onClose}
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCompact
     >
-      <div className="content custom-scroll">
+      <div className={buildClassName(styles.content, 'custom-scroll')}>
         {message.keyboardButtons.map((row, i) => (
-          <div className="row">
+          <div className={styles.row}>
             {row.map((button, j) => (
               <Button
+                className={buildClassName(
+                  styles.button,
+                  button.style?.type && styles[`${button.style.type}Tint`],
+                )}
                 ripple
+                noForcedUpperCase
                 disabled={button.type === 'unsupported'}
-
                 onClick={() => clickBotInlineButton({
                   chatId: message.chatId, messageId: message.id, threadId, button,
                 })}
               >
-                {buttonTexts?.[i][j]}
+                <span className={styles.inlineButtonText}>
+                  {button.style?.iconId && (
+                    <CustomEmoji
+                      className={styles.customEmojiIcon}
+                      documentId={button.style.iconId}
+                      size={ICON_SIZE}
+                    />
+                  )}
+                  {buttonTexts?.[i][j]}
+                </span>
               </Button>
             ))}
           </div>

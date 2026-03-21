@@ -33,13 +33,13 @@ import {
   selectPeerSavedGifts,
   selectTabState,
   selectTheme,
-  selectThreadMessagesCount,
   selectTopic,
   selectUser,
   selectUserFullInfo,
   selectUserStatus,
 } from '../../../global/selectors/index';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import { selectThreadMessagesCount } from '../../../global/selectors/threads.ts';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
@@ -585,6 +585,7 @@ const ProfileInfo = ({
           size="jumbo"
           peer={peer}
           style={createVtnStyle('avatar', true)}
+          storyCircleStyle={createVtnStyle('avatarStoryCircle', true)}
           onClick={hasAvatar ? handleMinimizedAvatarClick : undefined}
         />
       )}
@@ -654,7 +655,7 @@ export default memo(withGlobal<OwnProps>(
       emojiStatus,
       profilePhotos,
       topic,
-      messagesCount: topic ? selectThreadMessagesCount(global, peerId, currentTopicId!) : undefined,
+      messagesCount: topic ? selectThreadMessagesCount(global, peerId, topic.id) : undefined,
       profileColorOption: profileColor,
       theme,
       isPlain: !hasBackground,

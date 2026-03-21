@@ -1,5 +1,3 @@
-import { inflate } from 'pako/dist/pako_inflate';
-
 import type { CancellableCallback } from '../../util/PostMessageConnector';
 
 import { createWorkerInterface } from '../../util/createPostMessageInterface';
@@ -98,8 +96,14 @@ async function extractJson(tgsUrl: string) {
     return response.text();
   }
 
-  const arrayBuffer = await response.arrayBuffer();
-  return inflate(arrayBuffer, { to: 'string' });
+  if (!response.body) {
+    return '';
+  }
+
+  // Prefer native gzip decompression over library. This use case has ~same speed
+  const decompressionStream = response.body.pipeThrough(new DecompressionStream('gzip'));
+  const result = await new Response(decompressionStream).text();
+  return result;
 }
 
 function calcParams(json: string, isLowPriority: boolean, framesCount: number) {

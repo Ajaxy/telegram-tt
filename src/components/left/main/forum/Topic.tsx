@@ -17,16 +17,19 @@ import {
   selectChat,
   selectChatMessage,
   selectCurrentMessageList,
-  selectDraft,
   selectNotifyDefaults,
   selectNotifyException,
   selectOutgoingStatus,
   selectPeerStory,
   selectSender,
-  selectThreadInfo,
-  selectThreadParam,
-  selectTopics,
+  selectTopicsInfo,
 } from '../../../../global/selectors';
+import {
+  selectDraft,
+  selectThreadInfo,
+  selectThreadLocalStateParam,
+  selectThreadReadState,
+} from '../../../../global/selectors/threads';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/browser/windowEnvironment';
 import buildClassName from '../../../../util/buildClassName';
 import { createLocationHash } from '../../../../util/routing';
@@ -73,7 +76,8 @@ type StateProps = {
   canScrollDown?: boolean;
   wasTopicOpened?: boolean;
   withInterfaceAnimations?: boolean;
-  topics?: Record<number, ApiTopic>;
+  topicIds?: number[];
+  unreadCount?: number;
 };
 
 const Topic = ({
@@ -97,7 +101,8 @@ const Topic = ({
   typingStatus,
   draft,
   wasTopicOpened,
-  topics,
+  topicIds,
+  unreadCount,
   onReorderAnimationEnd,
 }: OwnProps & StateProps) => {
   const {
@@ -149,7 +154,7 @@ const Topic = ({
     observeIntersection,
     isTopic: true,
     typingStatus,
-    topics,
+    topicIds,
     statefulMediaContent: groupStatefulContent({ story: lastMessageStory }),
 
     animationType,
@@ -180,6 +185,7 @@ const Topic = ({
     isChatMuted,
     wasOpened: wasTopicOpened,
     canDelete,
+    unreadCount,
     handleDelete: handleOpenDeleteModal,
     handleMute,
     handleUnmute,
@@ -226,7 +232,6 @@ const Topic = ({
             isMuted={isMuted}
             topic={topic}
             wasTopicOpened={wasTopicOpened}
-            topics={topics}
             isSelected={isSelected}
           />
         </div>
@@ -259,14 +264,17 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId, topic, isSelected }) => {
     const chat = selectChat(global, chatId);
 
-    const lastMessage = selectChatMessage(global, chatId, topic.lastMessageId);
+    const threadInfo = selectThreadInfo(global, chatId, topic.id);
+    const lastMessage = threadInfo?.lastMessageId
+      ? selectChatMessage(global, chatId, threadInfo.lastMessageId) : undefined;
     const { isOutgoing } = lastMessage || {};
     const lastMessageSender = lastMessage && selectSender(global, lastMessage);
-    const typingStatus = selectThreadParam(global, chatId, topic.id, 'typingStatus');
+    const typingStatus = selectThreadLocalStateParam(global, chatId, topic.id, 'typingStatus');
     const draft = selectDraft(global, chatId, topic.id);
-    const threadInfo = selectThreadInfo(global, chatId, topic.id);
-    const wasTopicOpened = chat?.isBotForum || Boolean(threadInfo?.lastReadInboxMessageId);
-    const topics = selectTopics(global, chatId);
+
+    const readState = selectThreadReadState(global, chatId, topic.id);
+    const wasTopicOpened = chat?.isBotForum || Boolean(readState?.lastReadInboxMessageId);
+    const topicIds = selectTopicsInfo(global, chatId)?.listedTopicIds;
 
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
 
@@ -287,12 +295,13 @@ export default memo(withGlobal<OwnProps>(
       withInterfaceAnimations: selectCanAnimateInterface(global),
       draft,
       ...(isOutgoing && lastMessage && {
-        lastMessageOutgoingStatus: selectOutgoingStatus(global, lastMessage),
+        lastMessageOutgoingStatus: selectOutgoingStatus(global, chatId, topic.id, lastMessage.id, 'thread'),
       }),
       canScrollDown: isSelected && chat?.id === currentChatId && currentThreadId === topic.id,
       wasTopicOpened,
-      topics,
+      topicIds,
       lastMessageStory,
+      unreadCount: readState?.unreadCount,
     };
   },
 )(Topic));

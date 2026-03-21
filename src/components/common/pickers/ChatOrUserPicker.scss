@@ -67,7 +67,9 @@
     .picker-list {
       overflow-x: hidden;
       overflow-y: auto;
+
       height: 100%;
+      padding-block: 0.125rem;
       padding-inline: 0.5rem;
 
       @include mixins.adapt-padding-to-scrollbar(0.5rem);

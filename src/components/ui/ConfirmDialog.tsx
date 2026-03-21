@@ -80,6 +80,7 @@ const ConfirmDialog: FC<OwnProps> = ({
         <Button
           className="confirm-dialog-button"
           isText
+          inline
           onClick={confirmHandler}
           color={confirmIsDestructive ? 'danger' : 'primary'}
           disabled={isConfirmDisabled}

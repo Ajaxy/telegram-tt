@@ -1,0 +1,36 @@
+.root {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr;
+}
+
+.title {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+}
+
+.giftEmojis {
+  margin-inline-end: 0.25rem;
+}
+
+.subtitle {
+  grid-column: 1 / 3;
+  grid-row: 2 / 3;
+}
+
+.button {
+  grid-column: 2 / 3;
+  grid-row: 1 / 3;
+  place-self: center;
+
+  font-size: 0.875rem !important;
+  line-height: 1.5;
+}
+
+.buttonIcon {
+  font-size: 0.875rem !important;
+}
+
+.outbid {
+  color: var(--color-error);
+}

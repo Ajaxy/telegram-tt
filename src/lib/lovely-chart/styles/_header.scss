@@ -16,13 +16,7 @@
 
   &-title {
     float: left;
-    margin: 0 1rem;
     font-size: 16px;
-    text-transform: lowercase;
-
-    &:first-letter {
-      text-transform: uppercase;
-    }
   }
 
   &-caption {

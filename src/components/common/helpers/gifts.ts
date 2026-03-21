@@ -1,4 +1,5 @@
 import type {
+  ApiAuctionBidLevel,
   ApiStarGift,
   ApiStarGiftAttribute,
   ApiStarGiftAttributeBackdrop,
@@ -7,10 +8,12 @@ import type {
   ApiStarGiftAttributePattern,
   ApiSticker,
 } from '../../../api/types';
+import type { LangFn } from '../../../util/localization';
 import { ApiMediaFormat } from '../../../api/types';
 
 import { getStickerMediaHash } from '../../../global/helpers';
 import { fetch } from '../../../util/mediaLoader';
+import { formatPercent } from '../../../util/textFormat';
 
 export type GiftAttributes = {
   model?: ApiStarGiftAttributeModel;
@@ -118,4 +121,37 @@ export function preloadGiftAttributeStickers(attributes: ApiStarGiftAttribute[])
   mediaHashes.forEach((hash) => {
     fetch(hash, ApiMediaFormat.BlobUrl);
   });
+}
+
+export function getBidAuctionPosition(bidAmount: number, bidDate: number, bidLevels: ApiAuctionBidLevel[]) {
+  if (!bidLevels.length) return 1;
+
+  for (const level of bidLevels) {
+    if (level.amount < bidAmount
+      || (level.amount === bidAmount && level.date >= bidDate)) {
+      return level.pos;
+    }
+  }
+
+  return bidLevels[bidLevels.length - 1].pos + 1;
+}
+
+export function getGiftRarityTitle(
+  lang: LangFn,
+  rarity: ApiStarGiftAttributeModel['rarity'],
+) {
+  switch (rarity.type) {
+    case 'uncommon':
+      return lang('GiftRarityUncommon');
+    case 'rare':
+      return lang('GiftRarityRare');
+    case 'epic':
+      return lang('GiftRarityEpic');
+    case 'legendary':
+      return lang('GiftRarityLegendary');
+    case 'regular':
+      return formatPercent(rarity.rarityPercent);
+    default:
+      return undefined;
+  }
 }

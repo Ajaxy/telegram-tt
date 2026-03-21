@@ -27,18 +27,14 @@ export function drawDatasets(
     let datasetProjection = hasOwnYAxis ? secondaryProjection : projection;
 
     if (datasetType === 'area') {
-      const { yMin, yMax } = projection.getParams();
-      const yHeight = yMax - yMin;
       const bottomLine = [
         { labelIndex: range.from, stackValue: 0 },
         { labelIndex: range.to, stackValue: 0 },
       ];
-      const topLine = [
-        { labelIndex: range.to, stackValue: yHeight },
-        { labelIndex: range.from, stackValue: yHeight },
-      ];
+      const lowerBoundary = points[i - 1] || bottomLine;
+      const upperBoundary = points[i].slice().reverse();
 
-      datasetPoints = mergeArrays([points[i - 1] || bottomLine, topLine]);
+      datasetPoints = mergeArrays([lowerBoundary, upperBoundary]);
     }
 
     if (datasetType === 'pie') {

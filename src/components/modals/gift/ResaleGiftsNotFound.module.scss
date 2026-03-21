@@ -1,0 +1,30 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding-top: 5rem;
+}
+
+.description {
+  margin-block: 1rem;
+
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.link {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-links);
+  transition: opacity 0.15s ease-in;
+
+  &:active,
+  &:hover {
+    color: var(--color-links);
+    text-decoration: none;
+    opacity: 0.85;
+  }
+}

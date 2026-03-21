@@ -1,6 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
-
 import buildClassName from '../../util/buildClassName';
 
 import useLastCallback from '../../hooks/useLastCallback';
@@ -16,9 +13,9 @@ type OwnProps = {
   onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 };
 
-const Link: FC<OwnProps> = ({
+const Link = ({
   children, isPrimary, className, isRtl, withMultilineFix, onClick,
-}) => {
+}: OwnProps) => {
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     onClick!(e);

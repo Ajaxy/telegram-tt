@@ -28,12 +28,6 @@ export interface ApiChat {
   folderId?: number;
   type: ApiChatType;
   title: string;
-  hasUnreadMark?: boolean;
-  lastReadOutboxMessageId?: number;
-  lastReadInboxMessageId?: number;
-  unreadCount?: number;
-  unreadMentionsCount?: number;
-  unreadReactionsCount?: number;
   isVerified?: true;
   areSignaturesShown?: boolean;
   areProfilesShown?: boolean;
@@ -48,7 +42,6 @@ export interface ApiChat {
   membersCount?: number;
   creationDate?: number;
   isSupport?: true;
-  draftDate?: number;
   isProtected?: boolean;
   fakeType?: ApiFakeType;
   color?: ApiTypePeerColor;
@@ -92,9 +85,6 @@ export interface ApiChat {
   sendAsPeerIds?: ApiSendAsPeerId[];
   sendPaidReactionsAsPeerIds?: ApiSendAsPeerId[];
   sendPaidReactionsPeer?: ApiSendAsPeerId;
-
-  unreadReactions?: number[];
-  unreadMentions?: number[];
 
   // Stories
   areStoriesHidden?: boolean;

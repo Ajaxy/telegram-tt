@@ -19,7 +19,7 @@ import buildStyle from '../../../util/buildStyle';
 import { formatCountdown } from '../../../util/dates/dateFormat';
 import { HOUR } from '../../../util/dates/units';
 import { formatCurrency } from '../../../util/formatCurrency';
-import { formatStarsAsIcon } from '../../../util/localization/format';
+import { formatStarsAsIcon, getNextArrowReplacement } from '../../../util/localization/format';
 import { getServerTime } from '../../../util/serverTime';
 
 import useCustomBackground from '../../../hooks/useCustomBackground';
@@ -289,7 +289,14 @@ function GiftComposer({
           <div className={styles.description}>
             {lang('GiftPremiumDescriptionYourBalance', {
               stars: formatStarsAsIcon(lang, starBalance.amount, { className: styles.switcherStarIcon }),
-              link: <Link isPrimary onClick={handleGetMoreStars}>{lang('GetMoreStarsLinkText')}</Link>,
+              link: (
+                <Link isPrimary onClick={handleGetMoreStars}>
+                  {lang('GetMoreStarsLinkText', undefined, {
+                    withNodes: true,
+                    specialReplacement: getNextArrowReplacement(),
+                  })}
+                </Link>
+              ),
             }, {
               withNodes: true,
               withMarkdown: true,
@@ -322,13 +329,24 @@ function GiftComposer({
             {isPeerUser
               ? lang('GiftMakeUniqueDescription', {
                 user: title,
-                link: <Link isPrimary onClick={handleOpenUpgradePreview}>{lang('GiftMakeUniqueLink')}</Link>,
+                link: (
+                  <Link isPrimary onClick={handleOpenUpgradePreview}>
+                    {lang('GiftMakeUniqueLink', undefined, { withNodes: true,
+                      specialReplacement: getNextArrowReplacement() })}
+                  </Link>
+                ),
               }, {
                 withNodes: true,
               })
               : lang('GiftMakeUniqueDescriptionChannel', {
                 peer: title,
-                link: <Link isPrimary onClick={handleOpenUpgradePreview}>{lang('GiftMakeUniqueLink')}</Link>,
+                link: (
+                  <Link isPrimary onClick={handleOpenUpgradePreview}>
+                    {lang('GiftMakeUniqueLink', undefined, {
+                      withNodes: true,
+                      specialReplacement: getNextArrowReplacement() })}
+                  </Link>
+                ),
               }, {
                 withNodes: true,
               })}
@@ -391,10 +409,10 @@ function GiftComposer({
           </div>
         )}
         <Button
-          className={styles.mainButton}
           size={auctionTimeLeft ? undefined : 'smaller'}
           onClick={handleMainButtonClick}
           isLoading={isPaymentFormLoading}
+          inline
           noForcedUpperCase
         >
           {giftAuction ? (

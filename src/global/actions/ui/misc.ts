@@ -1,7 +1,7 @@
 import { addCallback } from '../../../lib/teact/teactn';
 
-import type { ApiError } from '../../../api/types';
 import type { ActionReturnType, GlobalState } from '../../types';
+import { type ApiError } from '../../../api/types';
 
 import {
   ANIMATION_WAVE_MIN_INTERVAL,
@@ -20,7 +20,7 @@ import * as langProvider from '../../../util/oldLangProvider';
 import updateIcon from '../../../util/updateIcon';
 import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
 import { callApi } from '../../../api/gramjs';
-import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
+import { canEditMediaInEditor, getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
 import { addTabStateResetterAction } from '../../helpers/meta';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
@@ -43,6 +43,7 @@ import {
   selectTopic,
 } from '../../selectors';
 import { selectSharedSettings } from '../../selectors/sharedState';
+import { selectDraft, selectEditingId } from '../../selectors/threads';
 
 import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
 
@@ -358,7 +359,7 @@ addActionHandler('showAllowedMessageTypesNotification', (global, actions, payloa
   if (!chat) return;
   const chatFullInfo = selectChatFullInfo(global, chatId);
   const isSavedMessages = chatId ? selectIsChatWithSelf(global, chatId) : undefined;
-  const isChatWithBot = chatId ? selectIsChatWithBot(global, chat) : undefined;
+  const isChatWithBot = chatId ? selectIsChatWithBot(global, chatId) : undefined;
 
   const {
     canSendPlainText, canSendPhotos, canSendVideos, canSendDocuments, canSendAudios,
@@ -1016,3 +1017,67 @@ addCallback((global: GlobalState) => {
   prevIsScreenLocked = global.passcode.isScreenLocked;
   prevBlurredTabsCount = blurredTabsCount;
 });
+
+addActionHandler('openLeaveGroupModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, nextOwnerId, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    leaveGroupModal: {
+      chatId,
+      nextOwnerId,
+    },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeLeaveGroupModal', 'leaveGroupModal');
+
+addActionHandler('openTwoFaCheckModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    isTwoFaCheckModalOpen: true,
+  }, tabId);
+});
+
+addTabStateResetterAction('closeTwoFaCheckModal', 'isTwoFaCheckModalOpen');
+
+addActionHandler('openQuickChatPicker', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    isQuickChatPickerOpen: true,
+  }, tabId);
+});
+
+addTabStateResetterAction('closeQuickChatPicker', 'isQuickChatPickerOpen');
+
+addActionHandler('openCocoonModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    isCocoonModalOpen: true,
+  }, tabId);
+});
+
+addTabStateResetterAction('closeCocoonModal', 'isCocoonModalOpen');
+
+addActionHandler('requestMessageMediaEditor', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  if (!currentMessageList) return;
+
+  const draft = selectDraft(global, currentMessageList.chatId, currentMessageList.threadId);
+  const replyToMessage = draft?.replyInfo
+    ? selectChatMessage(global, currentMessageList.chatId, draft.replyInfo.replyToMsgId)
+    : undefined;
+  const editingId = selectEditingId(global, currentMessageList.chatId, currentMessageList.threadId);
+  const editingMessage = editingId ? selectChatMessage(global, currentMessageList.chatId, editingId) : undefined;
+
+  const message = replyToMessage || editingMessage;
+  if (!message || !canEditMediaInEditor(message)) return;
+
+  return updateTabState(global, {
+    shouldOpenMessageMediaEditor: true,
+  }, tabId);
+});
+
+addTabStateResetterAction('resetMessageMediaEditorRequest', 'shouldOpenMessageMediaEditor');

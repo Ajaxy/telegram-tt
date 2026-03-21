@@ -20,6 +20,7 @@ import {
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { resolveTransitionName } from '../../util/resolveTransitionName';
 import { captureControlledSwipe } from '../../util/swipeController';
+import { isComposerHasSelection } from '../middle/composer/helpers/selection';
 
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useHotkeys } from '../../hooks/useHotkeys';
@@ -110,6 +111,7 @@ function LeftColumn({
     openChat,
     openLeftColumnContent,
     openSettingsScreen,
+    openQuickChatPicker,
   } = getActions();
 
   const [contactsFilter, setContactsFilter] = useState<string>('');
@@ -436,8 +438,16 @@ function LeftColumn({
     openLeftColumnContent({ contentKey: LeftColumnContent.Settings });
   });
 
+  const handleQuickChatPicker = useLastCallback((e: KeyboardEvent) => {
+    if (isComposerHasSelection()) return;
+
+    e.preventDefault();
+    openQuickChatPicker();
+  });
+
   useHotkeys(useMemo(() => ({
     'Mod+Shift+F': handleHotkeySearch,
+    'Mod+K': handleQuickChatPicker,
     // https://support.mozilla.org/en-US/kb/take-screenshots-firefox
     ...(!IS_FIREFOX && {
       'Mod+Shift+S': handleHotkeySavedMessages,

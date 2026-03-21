@@ -1,28 +1,31 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import type { Entity } from '../../../lib/gramjs/types';
 
-import type {
-  ApiBotCommand,
-  ApiChat,
-  ApiChatAdminRights,
-  ApiChatBannedRights,
-  ApiChatFolder,
-  ApiChatInviteImporter,
-  ApiChatInviteInfo,
-  ApiChatlistExportedInvite,
-  ApiChatlistInvite,
-  ApiChatMember,
-  ApiChatReactions,
-  ApiExportedInvite,
-  ApiMissingInvitedUser,
-  ApiRestrictionReason,
-  ApiSendAsPeerId,
-  ApiSponsoredMessageReportResult,
-  ApiSponsoredPeer,
-  ApiStarsSubscriptionPricing,
+import type { ThreadReadState } from '../../../types';
+import {
+  type ApiBotCommand,
+  type ApiChat,
+  type ApiChatAdminRights,
+  type ApiChatBannedRights,
+  type ApiChatFolder,
+  type ApiChatInviteImporter,
+  type ApiChatInviteInfo,
+  type ApiChatlistExportedInvite,
+  type ApiChatlistInvite,
+  type ApiChatMember,
+  type ApiChatReactions,
+  type ApiExportedInvite,
+  type ApiMissingInvitedUser,
+  type ApiRestrictionReason,
+  type ApiSendAsPeerId,
+  type ApiSponsoredMessageReportResult,
+  type ApiSponsoredPeer,
+  type ApiStarsSubscriptionPricing,
+  type ApiThreadInfo,
+  MAIN_THREAD_ID,
 } from '../../types';
 
-import { pickTruthy } from '../../../util/iteratees';
+import { omitUndefined, pickTruthy } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
 import { getServerTimeOffset } from '../../../util/serverTime';
 import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
@@ -144,23 +147,15 @@ export function buildApiChatFromDialog(
   peerEntity: GramJs.TypeUser | GramJs.TypeChat,
 ): ApiChat {
   const {
-    peer, folderId, unreadMark, unreadCount, unreadMentionsCount, unreadReactionsCount,
-    readOutboxMaxId, readInboxMaxId, draft, viewForumAsMessages,
+    peer, folderId, viewForumAsMessages,
   } = dialog;
 
   return {
     id: getApiChatIdFromMtpPeer(peer),
-    ...(folderId && { folderId }),
+    folderId,
     type: getApiChatTypeFromPeerEntity(peerEntity),
     title: getApiChatTitleFromMtpPeer(peer, peerEntity),
-    lastReadOutboxMessageId: readOutboxMaxId,
-    lastReadInboxMessageId: readInboxMaxId,
-    unreadCount,
-    unreadMentionsCount,
-    unreadReactionsCount,
-    ...(unreadMark && { hasUnreadMark: true }),
-    ...(draft instanceof GramJs.DraftMessage && { draftDate: draft.date }),
-    ...(viewForumAsMessages && { isForumAsMessages: true }),
+    isForumAsMessages: viewForumAsMessages,
     ...buildApiChatFieldsFromPeerEntity(peerEntity),
   };
 }
@@ -703,5 +698,40 @@ export function buildApiSponsoredPeer(sponsoredPeer: GramJs.SponsoredPeer): ApiS
     randomId: serializeBytes(randomId),
     additionalInfo,
     sponsorInfo,
+  };
+}
+
+export function buildThreadReadState(
+  input: GramJs.Dialog | GramJs.MonoForumDialog | GramJs.ForumTopic | GramJs.messages.DiscussionMessage,
+): ThreadReadState {
+  const { unreadCount, readInboxMaxId, readOutboxMaxId } = input;
+  const dialog = input instanceof GramJs.Dialog ? input : undefined;
+  const monoForumDialog = input instanceof GramJs.MonoForumDialog ? input : undefined;
+  const forumTopic = input instanceof GramJs.ForumTopic ? input : undefined;
+
+  const { unreadReactionsCount } = dialog || monoForumDialog || forumTopic || {};
+  const { unreadMentionsCount } = dialog || forumTopic || {};
+  const { unreadMark } = dialog || monoForumDialog || {};
+
+  return omitUndefined<ThreadReadState>({
+    unreadCount,
+    lastReadInboxMessageId: readInboxMaxId,
+    lastReadOutboxMessageId: readOutboxMaxId,
+    unreadReactionsCount,
+    unreadMentionsCount,
+    hasUnreadMark: unreadMark,
+  });
+}
+
+export function buildApiThreadInfoFromDialog(
+  chatId: string, dialog: GramJs.Dialog | GramJs.SavedDialog,
+): ApiThreadInfo {
+  const isSavedDialog = dialog instanceof GramJs.SavedDialog;
+  const { topMessage } = dialog;
+  return {
+    isCommentsInfo: false,
+    chatId,
+    threadId: isSavedDialog ? getApiChatIdFromMtpPeer(dialog.peer) : MAIN_THREAD_ID,
+    lastMessageId: topMessage,
   };
 }

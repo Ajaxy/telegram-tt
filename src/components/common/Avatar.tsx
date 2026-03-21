@@ -88,6 +88,7 @@ type OwnProps = {
   loopIndefinitely?: boolean;
   noPersonalPhoto?: boolean;
   asMessageBubble?: boolean;
+  storyCircleStyle?: string;
   observeIntersection?: ObserveFn;
   onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => void;
   onContextMenu?: (e: React.MouseEvent) => void;
@@ -118,6 +119,7 @@ const Avatar = ({
   loopIndefinitely,
   noPersonalPhoto,
   asMessageBubble,
+  storyCircleStyle,
   onClick,
   onContextMenu,
   onMouseMove,
@@ -326,7 +328,9 @@ const Avatar = ({
       onMouseMove={onMouseMove}
     >
       <div className="inner">
-        {typeof content === 'string' ? renderText(content, [isBig ? 'hq_emoji' : 'emoji']) : content}
+        {typeof content === 'string'
+          ? <span className="letters">{renderText(content, [isBig ? 'hq_emoji' : 'emoji'])}</span>
+          : content}
       </div>
       {withStory && realPeer?.hasStories && (
         <AvatarStoryCircle
@@ -334,6 +338,7 @@ const Avatar = ({
           size={pxSize}
           withExtraGap={withStoryGap}
           colors={storyColors}
+          style={storyCircleStyle}
         />
       )}
     </div>

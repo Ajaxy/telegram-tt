@@ -1,0 +1,722 @@
+@use "../../../../styles/mixins";
+
+.modal {
+  :global(.modal-dialog) {
+    overflow: clip;
+    background: #232E3F;
+  }
+
+  :global(.modal-content) {
+    max-height: 92vh !important;
+  }
+}
+
+.patternOverlay {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: var(--border-radius-modal);
+}
+
+.patternSlide,
+.patternBackground {
+  position: absolute !important;
+  inset: 0 !important;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 !important;
+}
+
+.title {
+  z-index: 1;
+
+  align-self: flex-start;
+
+  margin: 0;
+  margin-left: 4.3125rem;
+  padding: 0.75rem;
+
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-medium);
+  color: white;
+}
+
+.helpButton {
+  position: absolute;
+  z-index: 3;
+  top: 0.875rem;
+  right: 0.875rem;
+}
+
+.header {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+}
+
+/* 3D Cube Animation */
+.cube {
+  pointer-events: none;
+
+  position: relative;
+  transform-style: preserve-3d;
+
+  width: 100%;
+  height: 100%;
+}
+
+.corners {
+  display: none;
+}
+
+.face {
+  position: absolute;
+
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+  width: var(--cube-size);
+  height: var(--cube-size);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.875rem;
+
+  backface-visibility: hidden;
+  background: #4F5B71;
+
+  transition: opacity 1s;
+
+  &.faceHidden {
+    opacity: 0;
+  }
+
+  &[data-face="front"] {
+    transform: translateZ(var(--cube-half));
+  }
+
+  &[data-face="back"] {
+    transform: translateZ(calc(-1 * var(--cube-half))) rotateY(180deg);
+  }
+
+  &[data-face="left"] {
+    transform: translateX(calc(-1 * var(--cube-half))) rotateY(-90deg);
+  }
+
+  &[data-face="right"] {
+    transform: translateX(var(--cube-half)) rotateY(90deg);
+  }
+
+  &[data-face="top"] {
+    transform: translateY(calc(-1 * var(--cube-half))) rotateX(90deg);
+  }
+
+  &[data-face="bottom"] {
+    transform: translateY(var(--cube-half)) rotateX(-90deg);
+  }
+}
+
+.faceHighChance {
+  background: #36595F;
+}
+
+.faceFailed {
+  border-color: #653B31;
+}
+
+.faceIcon {
+  font-size: 2.5rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.craftedGiftFace {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
+  opacity: 0;
+
+  animation: fadeInContent 0.25s ease-out 0.25s both;
+}
+
+.slotBackdrop,
+.craftedGiftBackdrop,
+.attributeRing,
+.burnedGiftBackdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.slotSticker,
+.craftedGiftSticker,
+.patternAttribute,
+.burnedGift,
+.burnedGiftSticker {
+  position: relative;
+}
+
+.failedGiftFace {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
+  opacity: 0;
+  background: linear-gradient(180deg, #683E34 0%, #51291F 100%);
+
+  animation: fadeInContent 0.2s ease-out 0.2s both;
+}
+
+@keyframes fadeInContent {
+  to {
+    opacity: 1;
+  }
+}
+
+.burnedCount {
+  position: absolute;
+  bottom: 0.5rem;
+
+  margin-top: 0.25rem;
+
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  color: white;
+}
+
+.slotsGrid {
+  --perspective: 600px;
+  --cube-size: 7.5rem;
+  --cube-half: 3.75rem;
+  --slot-size: 4.5rem;
+
+  position: relative;
+
+  display: grid;
+  grid-template-columns: var(--slot-size) var(--cube-size) var(--slot-size);
+  grid-template-rows: var(--slot-size) var(--slot-size);
+  gap: 1.5rem;
+  row-gap: 17px;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+
+  padding: 1.125rem;
+
+  perspective: var(--perspective);
+
+  &.activated {
+    .craftSlot:not(.craftSlotFilled) {
+      opacity: 0;
+    }
+
+    .slotChance,
+    .slotClear {
+      opacity: 0;
+    }
+  }
+}
+
+.slotWrapper {
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: var(--slot-size);
+  height: var(--slot-size);
+
+  &.bottomRow {
+    align-self: start;
+  }
+
+  &.used {
+    pointer-events: none;
+  }
+}
+
+.cubeWrapper {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: scale(0.913);
+
+  display: flex;
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-items: center;
+  justify-content: center;
+
+  width: var(--cube-size);
+  height: var(--cube-size);
+}
+
+.craftSlot {
+  pointer-events: auto;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: var(--slot-size);
+  height: var(--slot-size);
+  border-radius: 1.125rem;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  transition: transform 0.15s, background-color 0.15s, opacity 0.5s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  &.animating {
+    will-change: transform;
+    z-index: 100;
+
+    .slotChance,
+    .slotClear {
+      opacity: 0;
+    }
+  }
+}
+
+.slotIcon {
+  font-size: 1.875rem;
+  color: white;
+}
+
+.craftSlotFilled {
+  position: relative;
+  background: transparent;
+
+  &:hover {
+    background: transparent;
+  }
+}
+
+.craftSlotHidden {
+  opacity: 0;
+  transition: opacity 0.5s !important;
+}
+
+.removing {
+  transform: scale(0.8);
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s ease-out;
+}
+
+.slotInner {
+  position: relative;
+
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+  border-radius: 1.125rem;
+}
+
+.slotChance {
+  position: absolute;
+  top: -0.3125rem;
+  left: -0.3125rem;
+
+  padding: 0.0625rem 0.25rem;
+  border-radius: 0.625rem;
+
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-semibold);
+  color: white;
+
+  opacity: 0.9;
+  background-color: #374354B2;
+  backdrop-filter: blur(25px);
+
+  transition: opacity 0.15s;
+}
+
+.slotClear {
+  cursor: pointer;
+
+  position: absolute;
+  top: -0.3125rem;
+  right: -0.3125rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+
+  font-size: 0.75rem;
+  color: white;
+
+  opacity: 0.9;
+  background-color: #374354B2;
+  backdrop-filter: blur(25px);
+  outline: none !important;
+
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.centerAnvil {
+  position: relative;
+
+  display: flex;
+  grid-column: 2;
+  grid-row: 1 / 3;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+  width: var(--cube-size);
+  height: var(--cube-size);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.875rem;
+
+  background: #4F5B71;
+
+  &.centerAnvilHighChance {
+    background: #36595F;
+  }
+}
+
+.progressRing {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+}
+
+.anvilIcon {
+  font-size: 3.125rem;
+  color: white;
+}
+
+.percentage {
+  position: absolute;
+  bottom: 0.75rem;
+
+  font-size: 1.1875rem;
+  font-weight: var(--font-weight-semibold);
+  color: white;
+}
+
+.infoTransition {
+  z-index: 1;
+  min-height: 20.5rem;
+}
+
+.infoSection,
+.craftingSection,
+.failedSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 0.75rem 1.5rem 1.5rem;
+
+  text-align: center;
+}
+
+.craftingTitle {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-semibold);
+  color: white;
+}
+
+.craftingGiftName {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  color: #8D979B;
+}
+
+.craftingWarning,
+.failedDescription {
+  margin: 0.25rem 0 1.5rem;
+  font-size: 1rem;
+  color: white;
+}
+
+.craftingWarning {
+  max-width: 15rem;
+  margin: 3.5rem 0 1.5rem;
+  color: #8D979B;
+}
+
+.failedDescription {
+  text-wrap: balance;
+}
+
+.infoDescription {
+  max-width: 18rem;
+  min-height: 2.625rem;
+  margin: 0 0 0.5rem;
+
+  font-size: 1rem;
+  line-height: 1.25;
+  color: white;
+}
+
+.giftLine {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.giftIcon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.infoWarning {
+  max-width: 18rem;
+  margin: 0.5rem 0 0.5rem;
+
+  font-size: 1rem;
+  line-height: 1.25;
+  color: white;
+}
+
+.attributeCircles {
+  --circle-attribute-size: 4rem;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+  align-items: flex-start;
+  align-self: center;
+  justify-content: center;
+
+  max-width: 17rem;
+  padding-top: 0.4375rem;
+}
+
+.viewAllButton {
+  gap: 0.1875rem;
+  margin-top: 0.625rem;
+  margin-bottom: 0.5rem;
+  filter: none;
+}
+
+.viewAllText {
+  margin-inline-start: 0.125rem;
+}
+
+.attributeCircle {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: var(--circle-attribute-size);
+
+  @include mixins.with-vt-type('craftAttributes');
+}
+
+.attributeContent {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: var(--circle-attribute-size);
+  height: var(--circle-attribute-size);
+}
+
+.colorAttribute {
+  width: 2rem;
+  height: 1.8125rem;
+  margin-top: -0.1875rem;
+
+  /* stylelint-disable-next-line plugin/use-baseline */
+  mask: url('../../../../assets/attribute-mask.svg') center / 100% 100% no-repeat;
+}
+
+.patternAttributeThumb,
+.burnedGiftBadge {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.burnedGiftBadgeText {
+  font-size: 0.5rem;
+}
+
+.attributePercent {
+  position: absolute;
+  bottom: 0.25rem;
+
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-semibold);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.footer {
+  z-index: 1;
+  width: 100%;
+  padding: 1rem;
+  padding-top: 0;
+}
+
+.emptyHintIcon {
+  display: inline-block;
+  font-size: 0.75rem;
+  vertical-align: middle;
+}
+
+.craftButton {
+  width: 100%;
+  min-height: 3.5rem;
+  padding: 0.75rem 1rem;
+
+  &:global(.danger) {
+    color: var(--color-white);
+    background-color: var(--color-error);
+
+    &:not(.disabled):not(:disabled) {
+      &:active,
+      &:global(.active),
+      &:focus {
+        opacity: 0.85 !important;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          opacity: 0.85 !important;
+        }
+      }
+    }
+  }
+}
+
+.craftButtonCrafting {
+  opacity: 1 !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.craftButtonHighChance {
+  background: linear-gradient(90deg, #0A8A90, #34C351) !important;
+}
+
+.craftButtonContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  justify-content: center;
+
+  height: 100%;
+}
+
+.craftButtonTitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 100%;
+
+  font-size: 1rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+.craftButtonSubtitle {
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.failedTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-semibold);
+  color: white;
+}
+
+.burnedGifts {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.burnedGiftInner {
+  position: relative;
+
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 0.625rem;
+}
+
+@include mixins.on-active-vt('craftAttributes') {
+  &::view-transition-group(.craftAttribute) {
+    animation-duration: 250ms;
+    animation-timing-function: ease-out;
+  }
+
+  &::view-transition-old(.craftAttribute) {
+    :local {
+      animation-name: craftAttributeFadeOut;
+    }
+
+    @keyframes craftAttributeFadeOut {
+      to {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+    }
+  }
+
+  &::view-transition-new(.craftAttribute) {
+    :local {
+      animation-name: craftAttributeFadeIn;
+    }
+
+    @keyframes craftAttributeFadeIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+    }
+  }
+}

@@ -1,53 +1,84 @@
-import { useEffect, useLayoutEffect, useState } from '../../lib/teact/teact';
+/* eslint-disable no-console */
+import { type TeactNode, useEffect, useLayoutEffect, useState } from '../../lib/teact/teact';
 
-const TestCleanupOrder = () => {
-  const [, setRand] = useState(Math.random());
-
+function Component1({ children }: { children?: TeactNode }) {
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('effect 1');
-
-    setTimeout(() => {
-      setRand(Math.random());
-    }, 3000);
-
-    return () => {
-      // eslint-disable-next-line no-console
-      console.log('cleanup 1');
-    };
+    console.log('Effect 1');
+    return () => console.log('Cleanup 1');
   });
 
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('effect 2');
-
-    return () => {
-      // eslint-disable-next-line no-console
-      console.log('cleanup 2');
-    };
+    console.log('Effect 1.2');
+    return () => console.log('Cleanup 1.2');
   });
 
   useLayoutEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('layout effect 1');
-
-    return () => {
-      // eslint-disable-next-line no-console
-      console.log('layout cleanup 1');
-    };
+    console.log('Layout 1');
+    return () => console.log('Layout Cleanup 1');
   });
 
   useLayoutEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('layout effect 2');
+    console.log('Layout 1.2');
+    return () => console.log('Layout Cleanup 1.2');
+  });
+  return children;
+}
 
-    return () => {
-      // eslint-disable-next-line no-console
-      console.log('layout cleanup 2');
-    };
+function Component1B({ children }: { children?: TeactNode }) {
+  useEffect(() => {
+    console.log('Effect 1b');
+    return () => console.log('Cleanup 1b');
   });
 
-  return <div>Test</div>;
-};
+  useLayoutEffect(() => {
+    console.log('Layout 1b');
+    return () => console.log('Layout Cleanup 1b');
+  });
+  return 'B';
+}
+
+function Component2({ children }: { children?: TeactNode }) {
+  useEffect(() => {
+    console.log('Effect 2');
+    return () => console.log('Cleanup 2');
+  });
+
+  useLayoutEffect(() => {
+    console.log('Layout 2');
+    return () => console.log('Layout Cleanup 2');
+  });
+  return children;
+}
+
+function Component3() {
+  useEffect(() => {
+    console.log('Effect 3');
+    return () => console.log('Cleanup 3');
+  });
+
+  useLayoutEffect(() => {
+    console.log('Layout 3');
+    return () => console.log('Layout Cleanup 3');
+  });
+  return <div>Leaf</div>;
+}
+
+function TestCleanupOrder() {
+  const [isMounted, setIsMounted] = useState(true);
+  return (
+    <div style="padding: 1rem" onClick={() => setIsMounted((p) => !p)}>
+      {isMounted && (
+        <>
+          <Component1>
+            <Component2>
+              <Component3 />
+            </Component2>
+          </Component1>
+          <Component1B />
+        </>
+      )}
+    </div>
+  );
+}
 
 export default TestCleanupOrder;

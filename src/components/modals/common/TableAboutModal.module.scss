@@ -75,8 +75,10 @@
   align-items: center;
 }
 
-.listItem {
-  padding-bottom: 0.5rem;
+.listItems {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .listItemTitle {
@@ -86,5 +88,5 @@
 
 .separator {
   width: calc(100% + 2rem); // Hack to cover modal paddings
-  margin-block: 1rem;
+  margin-bottom: 0.5rem;
 }

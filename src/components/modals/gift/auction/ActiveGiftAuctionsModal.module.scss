@@ -1,0 +1,24 @@
+.gift {
+  --custom-emoji-size: 2rem;
+
+  margin-inline-end: 0.5rem;
+}
+
+.timer {
+  margin-inline-start: 0.25rem;
+}
+
+.noActive {
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.content {
+  --border-radius-default: 0;
+
+  padding: 0 !important;
+}
+
+.dialog {
+  overflow: hidden !important;
+}

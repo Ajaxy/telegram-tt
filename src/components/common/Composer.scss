@@ -81,7 +81,7 @@
     height: var(--base-height);
     margin-left: 0.5rem;
 
-    &:not(.danger) {
+    &:not(.danger):not(:hover) {
       color: var(--color-composer-button);
     }
 
@@ -98,10 +98,6 @@
     .paidStarsBadgeText {
       display: inline-flex;
       align-items: center;
-
-      .star-amount-icon {
-        margin-inline-start: 0;
-      }
     }
 
     &.cancel {

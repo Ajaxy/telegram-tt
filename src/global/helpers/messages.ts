@@ -35,7 +35,13 @@ import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
 import { isLocalMessageId } from '../../util/keys/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { getGlobal } from '../index';
-import { selectPollFromMessage, selectWebPageFromMessage } from '../selectors';
+import {
+  selectChatMessage,
+  selectPollFromMessage,
+  selectScheduledMessage,
+  selectWebPageFromMessage,
+} from '../selectors';
+import { selectThreadIdFromMessage } from '../selectors/threads';
 import { getMainUsername } from './users';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
@@ -545,4 +551,25 @@ export function createApiMessageFromTypingDraft({
     isTypingDraft: true,
     editDate: getServerTime(),
   };
+}
+
+export function groupMessageIdsByThreadId(
+  global: GlobalState, chatId: string, messageIds: number[], isScheduled: boolean, notShared?: boolean,
+): Record<ThreadId, number[]> {
+  const grouped = messageIds.reduce<Record<ThreadId, number[]>>((acc, messageId) => {
+    const message = isScheduled ? selectScheduledMessage(global, chatId, messageId)
+      : selectChatMessage(global, chatId, messageId);
+    if (!message) return acc;
+
+    const threadId = selectThreadIdFromMessage(global, message);
+    acc[threadId] = acc[threadId] || [];
+    acc[threadId].push(messageId);
+    return acc;
+  }, {});
+
+  if (!notShared) {
+    grouped[MAIN_THREAD_ID] = messageIds;
+  }
+
+  return grouped;
 }

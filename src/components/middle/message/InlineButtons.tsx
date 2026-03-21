@@ -4,21 +4,26 @@ import { memo, useMemo } from '../../../lib/teact/teact';
 import type { ApiKeyboardButton } from '../../../api/types';
 
 import { RE_TME_LINK, TME_LINK_PREFIX } from '../../../config';
+import buildClassName from '../../../util/buildClassName';
 import renderKeyboardButtonText from '../composer/helpers/renderKeyboardButtonText';
 
 import useLang from '../../../hooks/useLang';
 
+import CustomEmoji from '../../common/CustomEmoji';
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 
-import './InlineButtons.scss';
+import styles from './InlineButtons.module.scss';
 
 type OwnProps = {
+  className?: string;
   inlineButtons: ApiKeyboardButton[][];
   onClick: (payload: ApiKeyboardButton) => void;
 };
 
-const InlineButtons = ({ inlineButtons, onClick }: OwnProps) => {
+const ICON_SIZE = 16;
+
+const InlineButtons = ({ className, inlineButtons, onClick }: OwnProps) => {
   const lang = useLang();
 
   const renderIcon = (button: ApiKeyboardButton) => {
@@ -28,42 +33,42 @@ const InlineButtons = ({ inlineButtons, onClick }: OwnProps) => {
         const { url } = button;
 
         if (url.startsWith(TME_LINK_PREFIX) && url.includes('?startapp')) {
-          return <Icon className="corner-icon" name="webapp" />;
+          return <Icon className={styles.cornerIcon} name="webapp" />;
         } else if (!RE_TME_LINK.test(url)) {
-          return <Icon className="corner-icon" name="arrow-right" />;
+          return <Icon className={styles.cornerIcon} name="arrow-right" />;
         }
 
         return;
       }
       case 'urlAuth':
-        return <Icon className="corner-icon" name="arrow-right" />;
+        return <Icon className={styles.cornerIcon} name="arrow-right" />;
       case 'buy':
       case 'receipt':
-        return <Icon className="corner-icon" name="card" />;
+        return <Icon className={styles.cornerIcon} name="card" />;
       case 'switchBotInline':
-        return <Icon className="corner-icon" name="share-filled" />;
+        return <Icon className={styles.cornerIcon} name="share-filled" />;
       case 'webView':
       case 'simpleWebView':
-        return <Icon className="corner-icon" name="webapp" />;
+        return <Icon className={styles.cornerIcon} name="webapp" />;
       case 'copy':
-        return <Icon className="corner-icon" name="copy" />;
+        return <Icon className={styles.cornerIcon} name="copy" />;
       case 'suggestedMessage':
         if (button.buttonType === 'suggestChanges') {
-          return <Icon className="left-icon" name="edit" />;
+          return <Icon className={styles.leftIcon} name="edit" />;
         }
         if (button.buttonType === 'approve') {
-          return <Icon className="left-icon" name="check" />;
+          return <Icon className={styles.leftIcon} name="check" />;
         }
         if (button.buttonType === 'decline') {
-          return <Icon className="left-icon" name="close" />;
+          return <Icon className={styles.leftIcon} name="close" />;
         }
         break;
       case 'giftOffer':
         if (button.buttonType === 'accept') {
-          return <Icon className="left-icon" name="check" />;
+          return <Icon className={styles.leftIcon} name="check" />;
         }
         if (button.buttonType === 'reject') {
-          return <Icon className="left-icon" name="close" />;
+          return <Icon className={styles.leftIcon} name="close" />;
         }
         break;
     }
@@ -80,19 +85,29 @@ const InlineButtons = ({ inlineButtons, onClick }: OwnProps) => {
   }, [lang, inlineButtons]);
 
   return (
-    <div className="InlineButtons">
+    <div className={buildClassName(styles.root, className)}>
       {inlineButtons.map((row, i) => (
-        <div className="row">
+        <div className={styles.row}>
           {row.map((button, j) => (
             <Button
+              className={buildClassName(
+                styles.button, button.style?.type && styles[`${button.style.type}Tint`],
+              )}
               size="tiny"
               ripple
+              noForcedUpperCase
               disabled={button.type === 'unsupported' || (button.type === 'suggestedMessage' && button.disabled)}
-
               onClick={() => onClick(button)}
             >
               {renderIcon(button)}
-              <span className="inline-button-text">
+              <span className={styles.inlineButtonText}>
+                {button.style?.iconId && (
+                  <CustomEmoji
+                    className={styles.customEmojiIcon}
+                    documentId={button.style.iconId}
+                    size={ICON_SIZE}
+                  />
+                )}
                 {buttonTexts[i][j]}
               </span>
             </Button>

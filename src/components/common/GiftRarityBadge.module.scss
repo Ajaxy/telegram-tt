@@ -1,0 +1,32 @@
+.crafted {
+  --_color: revert;
+  --_background-color: revert;
+
+  color: var(--_color);
+  background-color: var(--_background-color);
+}
+
+.inverted {
+  color: var(--color-white);
+  background-color: var(--_color);
+}
+
+.uncommon {
+  --_color: var(--color-gift-uncommon);
+  --_background-color: var(--color-gift-uncommon-bg);
+}
+
+.rare {
+  --_color: var(--color-gift-rare);
+  --_background-color: var(--color-gift-rare-bg);
+}
+
+.epic {
+  --_color: var(--color-gift-epic);
+  --_background-color: var(--color-gift-epic-bg);
+}
+
+.legendary {
+  --_color: var(--color-gift-legendary);
+  --_background-color: var(--color-gift-legendary-bg);
+}

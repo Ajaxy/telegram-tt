@@ -8,13 +8,15 @@ import type {
 } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
-import { getUserFullName, isChatBasicGroup, isChatChannel } from '../../../global/helpers';
+import { getUserFullName, isChatBasicGroup, isChatChannel, isUserBot } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
+import PasswordConfirmModal from '../../common/PasswordConfirmModal';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -58,12 +60,17 @@ const ManageGroupAdminRights = ({
   onClose,
   onScreenSelect,
 }: OwnProps & StateProps) => {
-  const { updateChatAdmin } = getActions();
+  const {
+    updateChatAdmin, transferChannelOwnership, showNotification,
+    openTwoFaCheckModal, verifyTransferOwnership,
+  } = getActions();
 
   const [permissions, setPermissions] = useState<ApiChatAdminRights>({});
   const [isTouched, setIsTouched] = useState(Boolean(isNewAdmin));
   const [isLoading, setIsLoading] = useState(false);
   const [isDismissConfirmationDialogOpen, openDismissConfirmationDialog, closeDismissConfirmationDialog] = useFlag();
+  const [isTransferDialogOpen, openTransferDialog, closeTransferDialog] = useFlag();
+  const [isPasswordModalOpen, openPasswordModal, closePasswordModal] = useFlag();
   const [customTitle, setCustomTitle] = useState('');
   const lang = useLang();
 
@@ -195,6 +202,52 @@ const ManageGroupAdminRights = ({
     setCustomTitle(value);
     setIsTouched(true);
   }, []);
+
+  const handleStartTransfer = useLastCallback(() => {
+    if (!selectedUserId) return;
+
+    verifyTransferOwnership({
+      chatId: chat.id,
+      userId: selectedUserId,
+      onSuccess: openTransferDialog,
+      onPasswordMissing: openTwoFaCheckModal,
+      onPasswordTooFresh: openTwoFaCheckModal,
+      onSessionTooFresh: openTwoFaCheckModal,
+    });
+  });
+
+  const handleConfirmTransfer = useLastCallback(() => {
+    closeTransferDialog();
+    openPasswordModal();
+  });
+
+  const handleTransferOwnership = useLastCallback((password: string) => {
+    if (!selectedUserId) return;
+
+    const user = usersById[selectedUserId];
+    const userName = user ? getUserFullName(user) : '';
+
+    transferChannelOwnership({
+      chatId: chat.id,
+      userId: selectedUserId,
+      password,
+      onSuccess: () => {
+        showNotification({
+          message: lang(
+            isChannel ? 'EditAdminTransferChannelOwnershipSuccess' : 'EditAdminTransferGroupOwnershipSuccess',
+            { user: userName },
+          ),
+        });
+      },
+    });
+
+    closePasswordModal();
+  });
+
+  const selectedUser = selectedUserId ? usersById[selectedUserId] : undefined;
+  const canTransferOwnership = Boolean(
+    chat.isCreator && selectedUser && !isUserBot(selectedUser) && selectedUserId !== currentUserId,
+  );
 
   if (!selectedChatMember) {
     return undefined;
@@ -395,6 +448,11 @@ const ManageGroupAdminRights = ({
             />
           )}
 
+          {canTransferOwnership && currentUserId !== selectedUserId && !isFormFullyDisabled && !isNewAdmin && (
+            <ListItem icon="key" ripple onClick={handleStartTransfer}>
+              {lang(isChannel ? 'EditAdminTransferChannelOwnership' : 'EditAdminTransferGroupOwnership')}
+            </ListItem>
+          )}
           {currentUserId !== selectedUserId && !isFormFullyDisabled && !isNewAdmin && (
             <ListItem icon="delete" ripple destructive onClick={openDismissConfirmationDialog}>
               {lang('EditAdminRemoveAdmin')}
@@ -422,6 +480,24 @@ const ManageGroupAdminRights = ({
           confirmIsDestructive
         />
       )}
+      <ConfirmDialog
+        isOpen={isTransferDialogOpen}
+        onClose={closeTransferDialog}
+        title={lang(isChannel ? 'EditAdminTransferChannelOwnership' : 'EditAdminTransferGroupOwnership')}
+        textParts={lang('EditAdminTransferOwnershipText', {
+          chat: chat.title,
+          user: selectedUserId ? getUserFullName(usersById[selectedUserId]) : '',
+        }, { withNodes: true, withMarkdown: true })}
+        confirmLabel={lang('EditAdminTransferChangeOwner')}
+        confirmHandler={handleConfirmTransfer}
+      />
+      <PasswordConfirmModal
+        isOpen={isPasswordModalOpen}
+        title={lang(isChannel ? 'EditAdminTransferChannelOwnership' : 'EditAdminTransferGroupOwnership')}
+        confirmLabel={lang('EditAdminTransferChangeOwner')}
+        onClose={closePasswordModal}
+        onSubmit={handleTransferOwnership}
+      />
     </div>
   );
 };

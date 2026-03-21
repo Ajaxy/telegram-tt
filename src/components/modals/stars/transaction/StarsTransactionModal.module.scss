@@ -30,10 +30,6 @@
 }
 
 .amount {
-  display: flex;
-  gap: 0.25rem;
-  align-items: center;
-
   font-size: 1rem;
   font-weight: var(--font-weight-medium);
   line-height: 1.325;
@@ -71,6 +67,7 @@
 
 .refunded {
   margin-bottom: 0;
+  margin-inline-start: 0.125rem;
   padding: 0.25em 0.5em;
   border-radius: var(--border-radius-messages-small);
 
@@ -79,11 +76,6 @@
   color: var(--color-success);
 
   background-color: rgba(var(--color-text-green-rgb), 0.2);
-}
-
-.totalStars {
-  display: inline-flex;
-  align-items: center;
 }
 
 .starIcon {

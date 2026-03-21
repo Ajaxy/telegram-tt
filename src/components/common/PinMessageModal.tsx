@@ -2,7 +2,6 @@ import { memo, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import {
-  getPrivateChatUserId,
   getUserFirstOrLastName,
   isChatBasicGroup,
   isChatChannel,
@@ -112,8 +111,8 @@ export default memo(withGlobal<OwnProps>(
     const isGroup = Boolean(chat) && isChatBasicGroup(chat);
     const isSuperGroup = Boolean(chat) && isChatSuperGroup(chat);
     const canPinForAll = (isPrivateChat && !isChatWithSelf) || isSuperGroup || isGroup;
-    const contactName = chat && isUserId(chat.id)
-      ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
+    const contactName = chatId && isUserId(chatId)
+      ? getUserFirstOrLastName(selectUser(global, chatId))
       : undefined;
 
     return {

@@ -2,6 +2,31 @@
   overflow: hidden;
 }
 
+.headerRightButtons {
+  position: absolute;
+  z-index: 3;
+  top: 0.875rem;
+  right: 3rem;
+
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.craftButton {
+  position: relative;
+}
+
+.uniqueTitleNumber {
+  &.small {
+    font-size: 0.75em;
+  }
+
+  &.regular {
+    font-size: 0.875em;
+  }
+}
+
 .checkBox {
   margin-inline: -1rem;
 }
@@ -46,11 +71,6 @@
   color: var(--color-error) !important;
 }
 
-.modalContent {
-  position: relative;
-  max-height: min(97vh, 48rem) !important;
-}
-
 .moreMenuButton {
   position: absolute;
   z-index: 1;
@@ -68,9 +88,7 @@
 .giftResalePriceContainer {
   pointer-events: auto;
 
-  position: absolute;
-  top: 0.875rem;
-  right: 3.25rem;
+  position: relative;
 
   display: flex;
   align-items: center;
@@ -139,9 +157,6 @@
 }
 
 .footerHint {
-  display: flex;
-  align-items: center;
-
   font-size: 0.75rem;
   line-height: 1.125rem;
   color: var(--color-white);
@@ -225,4 +240,10 @@
 
 .removeMessageButton {
   color: var(--color-primary) !important;
+}
+
+.scrollableTable {
+  overflow-y: auto;
+  flex-shrink: 1;
+  min-height: 0;
 }

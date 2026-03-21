@@ -12,6 +12,7 @@ import { getChatAvatarHash } from '../../../global/helpers';
 import { selectTabState, selectUser, selectUserFullInfo } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { formatDateToString } from '../../../util/dates/dateFormat';
+import { getNextArrowReplacement } from '../../../util/localization/format';
 import { throttle } from '../../../util/schedulers';
 import renderText from '../../common/helpers/renderText';
 
@@ -280,7 +281,12 @@ const SettingsEditProfile = ({
           </ListItem>
           <p className="settings-item-description" dir={oldLang.isRtl ? 'rtl' : undefined}>
             {lang('BirthdayPrivacySuggestion', {
-              link: <Link isPrimary onClick={handleBirthdayPrivacyClick}>{lang('BirthdayPrivacySuggestionLink')}</Link>,
+              link: (
+                <Link isPrimary onClick={handleBirthdayPrivacyClick}>
+                  {lang('BirthdayPrivacySuggestionLink',
+                    undefined, { withNodes: true, specialReplacement: getNextArrowReplacement() })}
+                </Link>
+              ),
             }, { withNodes: true })}
           </p>
         </div>

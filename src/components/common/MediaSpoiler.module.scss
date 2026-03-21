@@ -13,12 +13,12 @@
 }
 
 .mask-animation:global(.closing) {
+  mask-image: url("../../assets/spoilers/mask.svg"), linear-gradient(#ffffff, #ffffff);
+  mask-repeat: no-repeat;
+  mask-position: calc(50% + var(--click-shift-x)) calc(50% + var(--click-shift-y)), center center;
+  mask-size: 0%;
   -webkit-mask-composite: destination-out;
   mask-composite: exclude;
-  mask-image: url("../../assets/spoilers/mask.svg"), linear-gradient(#ffffff, #ffffff);
-  mask-position: calc(50% + var(--click-shift-x)) calc(50% + var(--click-shift-y)), center center;
-  mask-repeat: no-repeat;
-  mask-size: 0%;
 
   :global(body:not(.no-page-transitions)) & {
     animation: 500ms ease-in circle-cut forwards;

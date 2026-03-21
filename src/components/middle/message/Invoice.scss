@@ -13,12 +13,6 @@
     position: relative;
     margin-top: 0.5rem;
 
-    .description-text {
-      .star-amount-icon {
-        margin-inline-start: 0;
-      }
-    }
-
     &.has-image {
       .content-inner:not(.forwarded-message) & {
         margin: 0.5rem -0.5rem -0.375rem;

@@ -1,3 +1,5 @@
+@use "../../../../styles/mixins";
+
 .Reactions {
   overflow: visible;
   display: flex;
@@ -12,6 +14,10 @@
 
   &.is-outside {
     margin-top: 0.25rem;
+
+    .message-reaction {
+      @include mixins.action-message-bg($noBackground: true);
+    }
   }
 
   .is-forwarded.is-inverted-media & {

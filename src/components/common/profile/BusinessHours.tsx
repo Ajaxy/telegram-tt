@@ -4,6 +4,7 @@ import {
 
 import type { ApiBusinessWorkHours } from '../../../api/types';
 
+import { selectTimezones } from '../../../global/selectors';
 import {
   VTT_PROFILE_BUSINESS_HOURS,
   VTT_PROFILE_BUSINESS_HOURS_COLLAPSE,
@@ -18,7 +19,7 @@ import {
 
 import { useViewTransition } from '../../../hooks/animations/useViewTransition';
 import { useVtn } from '../../../hooks/animations/useVtn';
-import useSelectorSignal from '../../../hooks/data/useSelectorSignal';
+import { useSelectorSignal } from '../../../hooks/data/useSelector';
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useFlag from '../../../hooks/useFlag';
@@ -52,7 +53,7 @@ const BusinessHours = ({
 
   useInterval(forceUpdate, 60 * 1000);
 
-  const timezoneSignal = useSelectorSignal((global) => global.timezones?.byId);
+  const timezoneSignal = useSelectorSignal(selectTimezones);
   const timezones = useDerivedState(timezoneSignal, [timezoneSignal]);
   const timezoneMinuteDifference = useMemo(() => {
     if (!timezones) return 0;

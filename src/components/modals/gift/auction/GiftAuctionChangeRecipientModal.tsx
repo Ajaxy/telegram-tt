@@ -6,17 +6,13 @@ import type { TabState } from '../../../../global/types';
 
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
-import { REM } from '../../../common/helpers/mediaDimensions';
 
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 
-import Avatar from '../../../common/Avatar';
-import Icon from '../../../common/icons/Icon';
+import TransferBetweenPeers from '../../../common/TransferBetweenPeers';
 import ConfirmDialog from '../../../ui/ConfirmDialog';
-
-import styles from './GiftAuctionChangeRecipientModal.module.scss';
 
 export type OwnProps = {
   modal: TabState['giftAuctionChangeRecipientModal'];
@@ -26,8 +22,6 @@ type StateProps = {
   oldPeer?: ApiPeer;
   newPeer?: ApiPeer;
 };
-
-const AVATAR_SIZE = 4 * REM;
 
 const GiftAuctionChangeRecipientModal = ({ modal, oldPeer, newPeer }: OwnProps & StateProps) => {
   const { closeGiftAuctionChangeRecipientModal, openGiftAuctionBidModal } = getActions();
@@ -60,11 +54,7 @@ const GiftAuctionChangeRecipientModal = ({ modal, oldPeer, newPeer }: OwnProps &
       confirmLabel={lang('Continue')}
       confirmHandler={handleConfirm}
     >
-      <div className={styles.preview}>
-        <Avatar peer={renderingOldPeer} size={AVATAR_SIZE} />
-        <Icon name="next" className={styles.arrow} />
-        <Avatar peer={renderingNewPeer} size={AVATAR_SIZE} />
-      </div>
+      <TransferBetweenPeers fromPeer={renderingOldPeer} toPeer={renderingNewPeer} />
       <p>
         {lang('GiftAuctionChangeRecipientDescription', {
           oldPeer: getPeerTitle(lang, renderingOldPeer),

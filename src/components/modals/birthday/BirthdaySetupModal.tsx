@@ -5,6 +5,7 @@ import type { TabState } from '../../../global/types';
 import { SettingsScreens } from '../../../types';
 
 import buildClassName from '../../../util/buildClassName';
+import { getNextArrowReplacement } from '../../../util/localization/format';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useLang from '../../../hooks/useLang';
@@ -206,7 +207,12 @@ const BirthdaySetupModal = ({ modal }: OwnProps) => {
       <div className={styles.footer}>
         <span className={styles.privacySuggestion}>
           {lang('BirthdayPrivacySuggestion', {
-            link: <Link isPrimary onClick={handlePrivacyClick}>{lang('BirthdayPrivacySuggestionLink')}</Link>,
+            link: (
+              <Link isPrimary onClick={handlePrivacyClick}>
+                {lang('BirthdayPrivacySuggestionLink', undefined,
+                  { withNodes: true, specialReplacement: getNextArrowReplacement() })}
+              </Link>
+            ),
           }, { withNodes: true })}
         </span>
         {currentBirthday && (

@@ -13,7 +13,7 @@ import type { LangFn } from '../../util/localization';
 import type { GlobalState } from '../types';
 
 import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../config';
-import arePropsShallowEqual from '../../util/arePropsShallowEqual';
+import { areRecordsShallowEqual } from '../../util/areShallowEqual';
 import { convertTonFromNanos } from '../../util/formatCurrency';
 import { selectChat, selectPeer, selectUser } from '../selectors';
 
@@ -494,5 +494,5 @@ export function getPrizeStarsTransactionFromGiveaway(message: ApiMessage): ApiSt
 }
 
 export function areInputSavedGiftsEqual(one: ApiInputSavedStarGift, two: ApiInputSavedStarGift) {
-  return arePropsShallowEqual(one, two);
+  return areRecordsShallowEqual(one, two);
 }

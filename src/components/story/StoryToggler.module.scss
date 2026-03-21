@@ -35,8 +35,8 @@
   }
 
   &:not(:first-child):before {
-    mask-composite: exclude;
     mask-image: linear-gradient(var(--_gradient-rotation), #fff 75%, transparent 0);
+    mask-composite: exclude;
   }
 
   &:global(.animating) {

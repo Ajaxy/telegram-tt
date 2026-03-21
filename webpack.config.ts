@@ -164,7 +164,7 @@ export default function createConfig(
           ],
         },
         {
-          test: /\.(woff(2)?|ttf|eot|svg|png|jpg|tgs)(\?v=\d+\.\d+\.\d+)?$/,
+          test: /\.(woff(2)?|ttf|eot|svg|png|jpg|tgs|webp)(\?v=\d+\.\d+\.\d+)?$/,
           type: 'asset/resource',
         },
         {

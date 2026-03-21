@@ -119,7 +119,6 @@
   transition-duration: 200ms;
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition-property: display, opacity;
-
   transition-behavior: allow-discrete;
 
   .mobile & {

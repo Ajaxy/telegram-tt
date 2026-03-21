@@ -87,6 +87,7 @@ const StarGiftPriceDecreaseInfoModal = ({ modal }: OwnProps) => {
       header={header}
       tableData={tableData}
       tableClassName={buildClassName(styles.table, 'custom-scroll')}
+      contentClassName={styles.content}
       footer={footer}
     />
   );

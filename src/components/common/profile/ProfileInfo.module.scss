@@ -317,7 +317,7 @@
   transform: translate(-50%, -50%);
 
   font-size: 0.625rem;
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   line-height: 1;
   color: var(--rating-text-color);
 }
@@ -405,6 +405,10 @@
   grid-area: 1 / -1;
 
   @include mixins.with-vt-type('profileAvatar');
+
+  :global(.story-circle) {
+    @include mixins.with-vt-type('profileAvatar');
+  }
 }
 
 .activeProfilePhoto {
@@ -448,6 +452,14 @@
 
   &::view-transition-group(.photoDashes) {
     z-index: 1;
+  }
+
+  &::view-transition-group(.avatarStoryCircle) {
+    z-index: -1;
+  }
+
+  &::view-transition-group(.profileInfo) {
+    z-index: -2;
   }
 }
 

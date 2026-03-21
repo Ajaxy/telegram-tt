@@ -104,7 +104,7 @@ export default class MessagePacker {
     this.setReady?.(true);
   }
 
-  async getBeacon(state: RequestState) {
+  getBeacon(state: RequestState) {
     const buffer = new BinaryWriter(Buffer.alloc(0));
     const size = state.data.length + TLMessage.SIZE_OVERHEAD;
     if (size <= MessageContainer.MAXIMUM_SIZE) {
@@ -112,7 +112,7 @@ export default class MessagePacker {
       if (state.after) {
         afterId = state.after.msgId;
       }
-      state.msgId = await this._state.writeDataAsMessage(
+      state.msgId = this._state.writeDataAsMessage(
         buffer, state.data, state.request.classType === 'request', afterId,
       );
       this._log.debug(`Assigned msgId = ${state.msgId.toString()} to ${state.request.className
@@ -136,7 +136,7 @@ export default class MessagePacker {
     }
   }
 
-  async get() {
+  get() {
     if (!this._queue[this._queue.length - 1]) {
       this._queue = this._queue.filter(Boolean);
       return undefined;
@@ -164,7 +164,7 @@ export default class MessagePacker {
         if (state.after) {
           afterId = state.after.msgId;
         }
-        state.msgId = await this._state.writeDataAsMessage(
+        state.msgId = this._state.writeDataAsMessage(
           buffer, state.data, state.request.classType === 'request', afterId,
         );
         this._log.debug(`Assigned msgId = ${state.msgId.toString()} to ${state.request.className
@@ -192,7 +192,7 @@ export default class MessagePacker {
       b.writeInt32LE(batch.length, 4);
       data = Buffer.concat([b, buffer.getValue()]);
       buffer = new BinaryWriter(Buffer.alloc(0));
-      const containerId = await this._state.writeDataAsMessage(
+      const containerId = this._state.writeDataAsMessage(
         buffer, data, false,
       );
       for (const s of batch) {

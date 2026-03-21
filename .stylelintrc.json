@@ -13,7 +13,6 @@
     "stylelint-declaration-block-no-ignored-properties",
     "stylelint-high-performance-animation",
     "stylelint-group-selectors",
-    "stylelint-selector-tag-no-without-class",
     "stylelint-plugin-use-baseline",
     "@mytonwallet/stylelint-whole-pixel"
   ],
@@ -27,6 +26,10 @@
         ]
       }
     ],
+    "selector-max-type": [0, {
+      "ignoreTypes": ["html", "body"],
+      "severity": "warning"
+    }],
     "selector-attribute-quotes": "always",
     "scss/operator-no-unspaced": null,
     "no-descending-specificity": null,
@@ -67,12 +70,6 @@
       "nesting-selector-no-missing-scoping-root": [
       true,
       { "ignoreAtRules": ["include", "mixin"] }
-    ],
-    "plugin/selector-tag-no-without-class": [
-      "/^(?!body|html)([^_-]*)$/",
-      {
-        "severity": "warning"
-      }
     ],
     "plugin/use-baseline": [
       true,

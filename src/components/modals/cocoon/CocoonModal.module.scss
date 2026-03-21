@@ -1,0 +1,26 @@
+.header {
+  position: relative;
+  margin-top: -1rem;
+  margin-inline: -1rem;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footerText {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.egg {
+  transition: transform 0.25s ease-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}

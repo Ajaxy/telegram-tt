@@ -91,6 +91,7 @@ const MenuItem = (props: MenuItemProps) => {
     destructive && 'destructive',
     !isTouchScreen && 'compact',
     withWrap && 'wrap',
+    !icon && !customIcon && 'text-only',
   );
 
   const content = (

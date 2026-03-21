@@ -6,6 +6,7 @@ import type {
 } from '../../../../api/types';
 import type { GlobalState } from '../../../../global/types';
 
+import { NNBSP } from '../../../../config';
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
 import { formatDateToString } from '../../../../util/dates/dateFormat';
@@ -20,6 +21,8 @@ import Avatar from '../../../common/Avatar';
 import StarIcon from '../../../common/icons/StarIcon';
 
 import styles from './StarsSubscriptionItem.module.scss';
+
+const AVATAR_SIZE = 42;
 
 type OwnProps = {
   subscription: ApiStarsSubscription;
@@ -54,7 +57,7 @@ const StarsSubscriptionItem = ({ subscription }: OwnProps) => {
   return (
     <div className={styles.root} onClick={handleClick}>
       <div className={styles.preview}>
-        <Avatar size="medium" peer={peer} />
+        <Avatar size={AVATAR_SIZE} peer={peer} />
         <StarIcon className={styles.subscriptionStar} type="gold" size="small" />
       </div>
       <div className={styles.info}>
@@ -82,6 +85,7 @@ const StarsSubscriptionItem = ({ subscription }: OwnProps) => {
           <>
             <div className={styles.statusPricing}>
               <StarIcon className={styles.star} type="gold" size="adaptive" />
+              {NNBSP}
               <span className={styles.amount}>
                 {formatInteger(pricing.amount)}
               </span>

@@ -14,18 +14,16 @@ import { selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { RESALE_GIFTS_LIMIT } from '../../../limits';
-import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import InfiniteScroll from '../../ui/InfiniteScroll';
-import Link from '../../ui/Link';
 import Transition from '../../ui/Transition';
 import GiftItemStar from './GiftItemStar';
+import ResaleGiftsNotFound from './ResaleGiftsNotFound';
 
 import styles from './GiftModal.module.scss';
 
@@ -96,37 +94,19 @@ const GiftModalResaleScreen: FC<OwnProps & StateProps> = ({
     } });
   });
 
-  function renderNothingFoundGiftsWithFilter() {
-    return (
-      <div className={styles.notFoundGiftsRoot}>
-        <AnimatedIconWithPreview
-          size={160}
-          tgsUrl={LOCAL_TGS_URLS.SearchingDuck}
-          nonInteractive
-          noLoop
-        />
-        <div className={styles.notFoundGiftsDescription}>
-          {lang('ResellGiftsNoFound')}
-        </div>
-        {hasFilter && (
-          <Link
-            className={styles.notFoundGiftsLink}
-            onClick={handleResetGiftsFilter}
-          >
-            {lang('ResellGiftsClearFilters')}
-          </Link>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div ref={scrollerRef} className={buildClassName(styles.resaleScreenRoot, 'custom-scroll')}>
       <Transition
         name="zoomFade"
         activeKey={updateIteration}
       >
-        {isGiftsEmpty && areGiftsAllLoaded && renderNothingFoundGiftsWithFilter()}
+        {isGiftsEmpty && areGiftsAllLoaded && (
+          <ResaleGiftsNotFound
+            description={lang('ResellGiftsNoFound')}
+            linkText={hasFilter ? lang('ResellGiftsClearFilters') : undefined}
+            onLinkClick={hasFilter ? handleResetGiftsFilter : undefined}
+          />
+        )}
         <InfiniteScroll
           className={buildClassName(styles.resaleStarGiftsContainer)}
           items={viewportIds}

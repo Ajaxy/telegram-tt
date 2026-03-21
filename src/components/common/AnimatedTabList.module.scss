@@ -25,9 +25,9 @@
 
   opacity: 0;
 
-  transition: background-color 150ms, opacity 150ms;
-
   mask-image: linear-gradient(to right, transparent, black 0.5rem, black calc(100% - 0.5rem), transparent);
+
+  transition: background-color 150ms, opacity 150ms;
 
   &::-webkit-scrollbar {
     height: 0;

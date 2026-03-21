@@ -162,6 +162,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const starGiftModalState = selectTabState(global, tabId).giftInfoModal;
 
         if (starGiftModalState) {
+          const { craftSlotIndex, gift } = starGiftModalState;
+          const actualGift = 'gift' in gift ? gift.gift : gift;
+          const giftId = actualGift.type === 'starGiftUnique' ? actualGift.id : undefined;
+
           actions.showNotification({
             message: {
               key: 'StarsGiftBought',
@@ -173,6 +177,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           }
           actions.reloadPeerSavedGifts({ peerId: inputInvoice.peerId });
           actions.requestConfetti({ withStars: true, tabId });
+
+          if (craftSlotIndex !== undefined && giftId) {
+            actions.selectPurchasedGiftForCraft({ giftId, slotIndex: craftSlotIndex, tabId });
+          }
+
           actions.closeGiftInfoModal({ tabId });
         }
       }
@@ -260,8 +269,29 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateStarGiftAuctionUserState': {
       const { giftId, userState } = update;
 
+      if (!global.giftAuctionByGiftId?.[giftId]) {
+        actions.loadActiveGiftAuctions();
+        return;
+      }
+
       global = updateGiftAuctionUserState(global, giftId, userState);
 
+      setGlobal(global);
+      break;
+    }
+
+    case 'updateStarGiftCraftFail': {
+      Object.values(global.byTabId).forEach(({ id: tabId }) => {
+        const modal = selectTabState(global, tabId).giftCraftModal;
+        if (modal) {
+          global = updateTabState(global, {
+            giftCraftModal: {
+              ...modal,
+              craftResult: { success: false },
+            },
+          }, tabId);
+        }
+      });
       setGlobal(global);
       break;
     }

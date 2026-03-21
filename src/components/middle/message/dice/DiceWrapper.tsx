@@ -13,6 +13,7 @@ export type OwnProps = {
   canPlayWinEffect?: boolean;
   isLocal?: boolean;
   isOutgoing?: boolean;
+  canSendDice?: boolean;
   onEffectPlayed?: NoneToVoidFunction;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;

@@ -15,6 +15,7 @@ export const PLOT_BARS_WIDTH_SHIFT = 0.5;
 export const PIE_MINIMUM_VISIBLE_PERCENT = 0.02;
 
 export const BALLOON_OFFSET = 20;
+export const MAX_TOOLTIP_ITEMS = 12;
 
 export const AXES_FONT = '300 10px Helvetica, Arial, sans-serif';
 export const AXES_MAX_COLUMN_WIDTH = 45;

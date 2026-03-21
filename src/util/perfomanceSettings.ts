@@ -8,6 +8,7 @@ export function applyPerformanceSettings(performanceType: PerformanceType) {
     messageComposerAnimations,
     contextMenuAnimations,
     contextMenuBlur,
+    messageBlur,
     rightColumnAnimations,
   } = performanceType;
 
@@ -19,5 +20,6 @@ export function applyPerformanceSettings(performanceType: PerformanceType) {
   root.classList.toggle('no-message-composer-animations', !messageComposerAnimations);
   root.classList.toggle('no-context-menu-animations', !contextMenuAnimations);
   root.classList.toggle('no-menu-blur', !contextMenuBlur);
+  root.classList.toggle('with-message-blur', messageBlur);
   root.classList.toggle('no-right-column-animations', !rightColumnAnimations);
 }

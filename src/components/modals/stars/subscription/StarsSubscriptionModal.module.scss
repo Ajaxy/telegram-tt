@@ -30,8 +30,6 @@
 }
 
 .amount {
-  display: flex;
-  align-items: center;
   color: var(--color-text-secondary);
   text-align: center;
 }
@@ -62,10 +60,6 @@
   font-size: 1.75rem;
 
   @include mixins.filter-outline(1px, var(--color-background));
-}
-
-.amountStar {
-  font-size: 1.25rem;
 }
 
 .secondary {

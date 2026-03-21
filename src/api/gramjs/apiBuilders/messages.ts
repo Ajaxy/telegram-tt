@@ -2,7 +2,9 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiAttachment,
+  ApiBaseThreadInfo,
   ApiChat,
+  ApiCommentsInfo,
   ApiContact,
   ApiDice,
   ApiDraft,
@@ -15,6 +17,7 @@ import type {
   ApiMessageEntity,
   ApiMessageForwardInfo,
   ApiMessageReportResult,
+  ApiMessageThreadInfo,
   ApiNewMediaTodo,
   ApiNewPoll,
   ApiPeer,
@@ -759,44 +762,51 @@ export function buildApiThreadInfoFromMessage(
     return undefined;
   }
 
-  return buildApiThreadInfo(mtpMessage.replies, mtpMessage.id, chatId);
+  return buildApiThreadInfo(chatId, mtpMessage.id, mtpMessage.replies, mtpMessage.fwdFrom);
 }
 
 export function buildApiThreadInfo(
-  messageReplies: GramJs.TypeMessageReplies, messageId: number, chatId: string,
+  chatId: string,
+  messageId: number,
+  messageReplies: GramJs.TypeMessageReplies,
+  messageForwardInfo?: GramJs.MessageFwdHeader,
 ): ApiThreadInfo | undefined {
   const {
-    channelId, replies, maxId, readMaxId, recentRepliers, comments,
+    channelId, replies, maxId = messageId, recentRepliers, comments, readMaxId,
   } = messageReplies;
+
+  const { fromId, channelPost } = messageForwardInfo || {};
 
   const apiChannelId = channelId ? buildApiPeerId(channelId, 'channel') : undefined;
   if (apiChannelId === DELETED_COMMENTS_CHANNEL_ID) {
     return undefined;
   }
 
-  const baseThreadInfo = {
+  const baseThreadInfo: Partial<ApiBaseThreadInfo> = {
     messagesCount: replies,
-    ...(maxId && { lastMessageId: maxId }),
-    ...(readMaxId && { lastReadMessageId: readMaxId }),
-    ...(recentRepliers && { recentReplierIds: recentRepliers.map(getApiChatIdFromMtpPeer) }),
+    lastMessageId: maxId,
+    recentReplierIds: recentRepliers?.map(getApiChatIdFromMtpPeer),
   };
 
   if (comments) {
-    return {
+    return omitUndefined<ApiCommentsInfo>({
       ...baseThreadInfo,
       isCommentsInfo: true,
       chatId: apiChannelId!,
       originChannelId: chatId,
       originMessageId: messageId,
-    };
+      hasUnread: Boolean(readMaxId && maxId && readMaxId < maxId),
+    });
   }
 
-  return {
+  return omitUndefined<ApiMessageThreadInfo>({
     ...baseThreadInfo,
     isCommentsInfo: false,
     chatId,
     threadId: messageId,
-  };
+    fromChannelId: fromId && channelPost ? getApiChatIdFromMtpPeer(fromId) : undefined,
+    fromMessageId: channelPost,
+  });
 }
 
 export function buildApiQuickReply(reply: GramJs.TypeQuickReply): ApiQuickReply {

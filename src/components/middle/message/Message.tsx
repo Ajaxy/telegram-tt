@@ -41,13 +41,13 @@ import type {
   ThreadId,
 } from '../../../types';
 import type { Signal } from '../../../util/signals';
-import type { OnIntersectPinnedMessage } from '../hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { AudioOrigin } from '../../../types';
 
 import { EMOJI_STATUS_LOOP_LIMIT, MESSAGE_APPEARANCE_DELAY } from '../../../config';
 import {
   areReactionsEmpty,
+  getAllowedAttachmentOptions,
   getIsDownloading,
   getMainUsername,
   getMessageContent,
@@ -88,6 +88,7 @@ import {
   selectFullWebPageFromMessage,
   selectIsChatProtected,
   selectIsChatRestricted,
+  selectIsChatWithBot,
   selectIsChatWithSelf,
   selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
@@ -112,7 +113,6 @@ import {
   selectShouldLoopStickers,
   selectTabState,
   selectTheme,
-  selectThreadInfo,
   selectTopicFromMessage,
   selectUploadProgress,
   selectUser,
@@ -124,6 +124,7 @@ import {
   selectMessageTimestampableDuration,
 } from '../../../global/selectors/media';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import { selectThreadInfo, selectThreadReadState } from '../../../global/selectors/threads';
 import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { IS_ANDROID, IS_TRANSLATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
@@ -237,7 +238,7 @@ type OwnProps = {
   observeIntersectionForBottom?: ObserveFn;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
-  onIntersectPinnedMessage?: OnIntersectPinnedMessage;
+  onMessageUnmount?: (messageId: number) => void;
 } & MessagePositionProperties;
 
 type StateProps = {
@@ -330,6 +331,7 @@ type StateProps = {
   isMediaNsfw?: boolean;
   isReplyMediaNsfw?: boolean;
   summary?: TextSummary;
+  canSendStickers?: boolean;
 };
 
 type MetaPosition =
@@ -351,9 +353,6 @@ const MAX_REASON_LENGTH = 200;
 
 const Message = ({
   message,
-  observeIntersectionForBottom,
-  observeIntersectionForLoading,
-  observeIntersectionForPlaying,
   album,
   noAvatars,
   withAvatar,
@@ -459,7 +458,11 @@ const Message = ({
   minFutureTime,
   webPage,
   summary,
-  onIntersectPinnedMessage,
+  canSendStickers,
+  observeIntersectionForBottom,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
+  onMessageUnmount,
 }: OwnProps & StateProps) => {
   const {
     toggleMessageSelection,
@@ -533,18 +536,15 @@ const Message = ({
     className: false,
   });
 
+  useUnmountCleanup(() => {
+    onMessageUnmount?.(messageId);
+  });
+
   const {
     id: messageId, chatId, forwardInfo, viaBotId, isTranscriptionError, factCheck,
     isTypingDraft,
   } = message;
   const hasSummary = Boolean(message.summaryLanguageCode);
-
-  useUnmountCleanup(() => {
-    if (message.isPinned) {
-      const id = album ? album.mainMessage.id : messageId;
-      onIntersectPinnedMessage?.({ viewportPinnedIdsToRemove: [id] });
-    }
-  });
 
   const isLocal = isMessageLocal(message);
   const isOwn = isOwnMessage(message);
@@ -872,7 +872,8 @@ const Message = ({
     asForwarded,
     hasThread: hasThread && !noComments,
     forceSenderName,
-    hasCommentCounter: hasThread && repliesThreadInfo.messagesCount > 0,
+    hasCommentCounter: hasThread && repliesThreadInfo.messagesCount !== undefined
+      && repliesThreadInfo.messagesCount > 0,
     hasBottomCommentButton: withCommentButton && !isCustomShape,
     hasActionButton: canForward || canFocus || (withCommentButton && isCustomShape),
     hasReactions,
@@ -955,7 +956,7 @@ const Message = ({
     if (!bottomMarker || !isElementInViewport(bottomMarker)) return;
 
     if (hasUnreadReaction) {
-      animateUnreadReaction({ messageIds: [messageId] });
+      animateUnreadReaction({ chatId, messageIds: [messageId] });
     }
 
     let unreadMentionIds: number[] = [];
@@ -1368,6 +1369,7 @@ const Message = ({
         )}
         {dice && (
           <DiceWrapper
+            canSendDice={canSendStickers}
             isLocal={isLocal}
             dice={dice}
             isOutgoing={isOwn}
@@ -1831,7 +1833,7 @@ const Message = ({
       />
       {!isInDocumentGroup && (
         <div className="message-select-control no-selection">
-          {isSelected && <Icon name="select" />}
+          {isSelected && <Icon name="check" className="message-select-control-icon" />}
         </div>
       )}
       {isLastInDocumentGroup && (
@@ -1842,7 +1844,7 @@ const Message = ({
           onClick={handleDocumentGroupSelectAll}
         >
           {isGroupSelected && (
-            <Icon name="select" />
+            <Icon name="check" className="message-select-control-icon" />
           )}
         </div>
       )}
@@ -1892,7 +1894,6 @@ const Message = ({
                     disabled={noComments || !commentsThreadInfo}
                     isLoading={isLoadingComments}
                     isCustomShape
-                    asActionButton
                   />
                 )}
                 {canForward && (
@@ -2013,6 +2014,7 @@ export default memo(withGlobal<OwnProps>(
 
     const chat = selectChat(global, chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
+    const isChatWithBot = selectIsChatWithBot(global, chatId);
     const isSystemBotChat = isSystemBot(chatId);
     const isAnonymousForwards = isAnonymousForwardsChat(chatId);
     const isChannel = chat && isChatChannel(chat);
@@ -2097,7 +2099,8 @@ export default memo(withGlobal<OwnProps>(
       isLastInDocumentGroup ? selectChatMessage(global, chatId, documentGroupFirstMessageId!) : undefined
     ) : message;
 
-    const hasUnreadReaction = chat?.unreadReactions?.includes(message.id);
+    const readState = selectThreadReadState(global, chatId, threadId);
+    const hasUnreadReaction = readState?.unreadReactions?.includes(message.id);
 
     const hasTopicChip = threadId === MAIN_THREAD_ID && chat?.isForum && !chat.isBotForum && isFirstInGroup;
     const messageTopic = selectTopicFromMessage(global, message);
@@ -2139,6 +2142,8 @@ export default memo(withGlobal<OwnProps>(
     const isReplyMediaNsfw = replyMessage && selectIsMediaNsfw(global, replyMessage);
 
     const summary = selectMessageSummary(global, chatId, message.id, requestedTranslationLanguage);
+
+    const allowedAttachmentOptions = getAllowedAttachmentOptions(chat, chatFullInfo, isChatWithBot);
 
     return {
       theme: selectTheme(global),
@@ -2213,7 +2218,9 @@ export default memo(withGlobal<OwnProps>(
         && loadingThread?.loadingChatId === repliesThreadInfo?.originChannelId
         && loadingThread?.loadingMessageId === repliesThreadInfo?.originMessageId,
       shouldWarnAboutFiles,
-      outgoingStatus: isOutgoing ? selectOutgoingStatus(global, message, messageListType === 'scheduled') : undefined,
+      outgoingStatus: isOutgoing
+        ? selectOutgoingStatus(global, chatId, threadId, message.id, messageListType)
+        : undefined,
       uploadProgress: typeof uploadProgress === 'number' ? uploadProgress : undefined,
       focusDirection: isFocused ? focusDirection : undefined,
       noFocusHighlight: isFocused ? noFocusHighlight : undefined,
@@ -2237,6 +2244,7 @@ export default memo(withGlobal<OwnProps>(
       isReplyMediaNsfw,
       webPage,
       summary,
+      canSendStickers: allowedAttachmentOptions.canSendStickers,
     };
   },
 )(Message));

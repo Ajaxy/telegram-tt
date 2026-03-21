@@ -20,9 +20,9 @@ import {
   selectPeerPaidMessagesStars,
   selectShouldSchedule,
   selectStickerSet,
-  selectThreadInfo,
   selectTopic,
 } from '../../global/selectors';
+import { selectThreadInfo } from '../../global/selectors/threads';
 import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
 import renderText from './helpers/renderText';

@@ -112,7 +112,6 @@ const GiftTransferModal = ({
       hasCloseButton
       shouldAdaptToSearch
       withFixedHeight
-      ignoreFreeze
     >
       <PeerPicker<Categories>
         itemIds={displayIds}

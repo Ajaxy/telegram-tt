@@ -36,6 +36,7 @@ const WIN_BACKGROUND_DELAY = 700;
 
 const SlotMachine = ({
   dice,
+  canSendDice,
   canPlayWinEffect,
   isLocal,
   isOutgoing,
@@ -122,6 +123,7 @@ const SlotMachine = ({
   });
 
   const handleClick = useLastCallback(() => {
+    if (!canSendDice) return;
     showNotification({
       message: {
         key: 'DiceToast',
@@ -171,7 +173,12 @@ const SlotMachine = ({
   }
 
   return (
-    <div ref={ref} className={styles.root} style={`--_size: ${width}px`} onClick={handleClick}>
+    <div
+      ref={ref}
+      className={buildClassName(styles.root, canSendDice && styles.interactive)}
+      style={`--_size: ${width}px`}
+      onClick={handleClick}
+    >
       {renderSticker(backgroundData, backgroundState !== 'base', false, true)}
       {renderSticker(frameWinData, backgroundState !== 'win', false, false, undefined, onWinBackgroundFrame)}
 

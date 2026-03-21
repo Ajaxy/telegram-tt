@@ -1,3 +1,4 @@
+import type React from '@teact';
 import type { TeactNode } from '@teact';
 import { memo, useMemo } from '@teact';
 import { getActions } from '../../../global';
@@ -6,8 +7,10 @@ import type {
   ApiPeer,
   ApiSavedStarGift,
   ApiStarGiftAttributeBackdrop, ApiStarGiftAttributeModel, ApiStarGiftAttributePattern,
-  ApiTypeCurrencyAmount } from '../../../api/types';
+  ApiTypeCurrencyAmount,
+} from '../../../api/types';
 
+import { NNBSP } from '../../../config.ts';
 import {
   formatStarsTransactionAmount,
 } from '../../../global/helpers/payments';
@@ -34,7 +37,7 @@ type OwnProps = {
   modelAttribute: ApiStarGiftAttributeModel;
   backdropAttribute: ApiStarGiftAttributeBackdrop;
   patternAttribute: ApiStarGiftAttributePattern;
-  title?: string;
+  title?: TeactNode;
   badge?: TeactNode;
   subtitle?: TeactNode;
   subtitlePeer?: ApiPeer;
@@ -42,6 +45,9 @@ type OwnProps = {
   resellPrice?: ApiTypeCurrencyAmount;
   showManageButtons?: boolean;
   savedGift?: ApiSavedStarGift;
+  noLoop?: boolean;
+  onStickerAnimationEnded?: (modelName: string) => void;
+  children?: React.ReactNode;
 };
 
 const STICKER_SIZE = 120;
@@ -58,6 +64,9 @@ const UniqueGiftHeader = ({
   resellPrice,
   showManageButtons,
   savedGift,
+  noLoop,
+  onStickerAnimationEnded,
+  children,
 }: OwnProps) => {
   const {
     openChat,
@@ -69,6 +78,10 @@ const UniqueGiftHeader = ({
   const [isGiftHover, markGiftHover, unmarkGiftHover] = useFlag(false);
   const activeKey = useTransitionActiveKey([modelAttribute, backdropAttribute, patternAttribute]);
   const subtitleColor = backdropAttribute?.textColor;
+
+  const handleStickerEnded = () => {
+    onStickerAnimationEnded?.(modelAttribute.name);
+  };
 
   const radialPatternBackdrop = useMemo(() => {
     const backdropColors = [backdropAttribute.centerColor, backdropAttribute.edgeColor];
@@ -88,11 +101,13 @@ const UniqueGiftHeader = ({
   }, [backdropAttribute, patternAttribute, isMobile]);
 
   return (
-    <div className={buildClassName(styles.root,
-      'interactive-gift',
-      showManageButtons && styles.withManageButtons,
-      badge && styles.withBadge,
-      className)}
+    <div
+      className={buildClassName(styles.root,
+        'interactive-gift',
+        showManageButtons && styles.withManageButtons,
+        badge && styles.withBadge,
+        className)}
+      style={buildStyle(subtitleColor && `--tinted-text-color: ${subtitleColor}`)}
     >
       <Transition
         className={styles.transition}
@@ -106,7 +121,8 @@ const UniqueGiftHeader = ({
           className={styles.sticker}
           sticker={modelAttribute.sticker}
           size={STICKER_SIZE}
-          noLoop={!isGiftHover}
+          noLoop={noLoop ?? !isGiftHover}
+          onEnded={handleStickerEnded}
           onMouseEnter={!IS_TOUCH_ENV ? markGiftHover : undefined}
           onMouseLeave={!IS_TOUCH_ENV ? unmarkGiftHover : undefined}
         />
@@ -114,11 +130,10 @@ const UniqueGiftHeader = ({
       {Boolean(badge) && (
         <div className={styles.badge}>{badge}</div>
       )}
-      {title && <h1 className={styles.title}>{title}</h1>}
+      {Boolean(title) && <h1 className={styles.title}>{title}</h1>}
       {Boolean(subtitle) && (
         <div
           className={buildClassName(styles.subtitle, subtitlePeer && styles.subtitleBadge)}
-          style={buildStyle(subtitleColor && `color: ${subtitleColor}`)}
           onClick={() => {
             if (subtitlePeer) {
               openChat({ id: subtitlePeer.id });
@@ -134,14 +149,14 @@ const UniqueGiftHeader = ({
         />
       )}
       {resellPrice && (
-        <p className={styles.amount}>
-          <span>
-            {formatStarsTransactionAmount(lang, resellPrice)}
-          </span>
-          {resellPrice.currency === 'XTR' && <StarIcon type="gold" size="middle" />}
-          {resellPrice.currency === 'TON' && <Icon name="toncoin" />}
-        </p>
+        <span className={styles.amount}>
+          {formatStarsTransactionAmount(lang, resellPrice)}
+          {NNBSP}
+          {resellPrice.currency === 'XTR' && <StarIcon type="gold" size="adaptive" />}
+          {resellPrice.currency === 'TON' && <Icon className="in-text-icon" name="toncoin" />}
+        </span>
       )}
+      {children}
     </div>
   );
 };

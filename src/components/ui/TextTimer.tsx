@@ -9,6 +9,7 @@ import useForceUpdate from '../../hooks/useForceUpdate';
 import AnimatedCounter from '../common/AnimatedCounter';
 
 type OwnProps = {
+  className?: string;
   endsAt: number;
   shouldShowZeroOnEnd?: boolean;
   onEnd?: NoneToVoidFunction;
@@ -16,7 +17,7 @@ type OwnProps = {
 
 const UPDATE_FREQUENCY = 500; // Sometimes second gets skipped if using 1000
 
-const TextTimer = ({ endsAt, shouldShowZeroOnEnd, onEnd }: OwnProps) => {
+const TextTimer = ({ className, endsAt, shouldShowZeroOnEnd, onEnd }: OwnProps) => {
   const forceUpdate = useForceUpdate();
 
   const serverTime = getServerTime();
@@ -35,20 +36,14 @@ const TextTimer = ({ endsAt, shouldShowZeroOnEnd, onEnd }: OwnProps) => {
   const time = formatMediaDuration(timeLeft);
 
   const timeParts = time.split(':');
-  const timeCounter = (
-    <span style="font-variant-numeric: tabular-nums;">
+  return (
+    <span className={className} style="font-variant-numeric: tabular-nums;">
       {timeParts.map((part, index) => (
         <>
           {index > 0 && ':'}
           <AnimatedCounter key={index} text={part} />
         </>
       ))}
-    </span>
-  );
-
-  return (
-    <span>
-      {timeCounter}
     </span>
   );
 };

@@ -608,6 +608,7 @@ export interface LangPair {
   'SettingsPerformanceComposer': undefined;
   'SettingsPerformanceContextAnimation': undefined;
   'SettingsPerformanceContextBlur': undefined;
+  'SettingsPerformanceMessageBlur': undefined;
   'SettingsPerformanceRightColumn': undefined;
   'SettingsPerformanceThanos': undefined;
   'SettingsPerformanceAnimatedEmoji': undefined;
@@ -844,6 +845,9 @@ export interface LangPair {
   'ChannelEditAdminCannotEdit': undefined;
   'EditAdminRank': undefined;
   'EditAdminRemoveAdmin': undefined;
+  'EditAdminTransferChannelOwnership': undefined;
+  'EditAdminTransferGroupOwnership': undefined;
+  'EditAdminTransferChangeOwner': undefined;
   'ChannelAdminDismiss': undefined;
   'ChannelPermissionsHeader': undefined;
   'UserRestrictionsSend': undefined;
@@ -1059,8 +1063,8 @@ export interface LangPair {
   'ChatListPinToTop': undefined;
   'ChatListOpenInNewWindow': undefined;
   'ChatListOpenInNewTab': undefined;
-  'ChatListContextMaskAsRead': undefined;
-  'ChatListContextMaskAsUnread': undefined;
+  'ChatListContextMarkAsRead': undefined;
+  'ChatListContextMarkAsUnread': undefined;
   'ChatListContextAddToFolder': undefined;
   'Unarchive': undefined;
   'Archive': undefined;
@@ -1166,6 +1170,7 @@ export interface LangPair {
   'ComposerPlaceholderBroadcast': undefined;
   'ComposerPlaceholderBroadcastSilent': undefined;
   'ComposerPlaceholderTopicGeneral': undefined;
+  'ComposerPlaceholderBotTopicGeneral': undefined;
   'ComposerStoryPlaceholderLocked': undefined;
   'ComposerPlaceholderNoText': undefined;
   'AriaComposerCancelVoice': undefined;
@@ -1240,7 +1245,7 @@ export interface LangPair {
   'AriaMenuEnableNightMode': undefined;
   'AriaMenuDisableNightMode': undefined;
   'AriaSettingsEditProfilePhoto': undefined;
-  'MenuAnimationsSwitch': undefined;
+  'MenuUIFeaturesSwitch': undefined;
   'MenuTelegramFeatures': undefined;
   'TelegramFeaturesUsername': undefined;
   'RemoveEffect': undefined;
@@ -1305,12 +1310,34 @@ export interface LangPair {
   'GiftAttributeModel': undefined;
   'GiftAttributeBackdrop': undefined;
   'GiftAttributeSymbol': undefined;
+  'GiftRarityUncommon': undefined;
+  'GiftRarityRare': undefined;
+  'GiftRarityEpic': undefined;
+  'GiftRarityLegendary': undefined;
   'GiftInfoStatus': undefined;
   'GiftInfoStatusNonUnique': undefined;
   'GiftInfoViewUpgraded': undefined;
   'GiftInfoUpgradeBadge': undefined;
   'GiftInfoUpgradeForFree': undefined;
   'GiftInfoUpgrade': undefined;
+  'GiftInfoCraft': undefined;
+  'GiftCraftTitle': undefined;
+  'GiftCraftNewGift': undefined;
+  'GiftCraftSelectTitle': undefined;
+  'GiftCraftSelectYourGifts': undefined;
+  'GiftCraftWarning': undefined;
+  'GiftCraftingTitle': undefined;
+  'GiftCraftFailedTitle': undefined;
+  'GiftCraftInfoTitle': undefined;
+  'GiftCraftInfoSubtitle': undefined;
+  'GiftCraftInfoCraftTitle': undefined;
+  'GiftCraftInfoCraftDescription': undefined;
+  'GiftCraftInfoChanceTitle': undefined;
+  'GiftCraftInfoChanceDescription': undefined;
+  'GiftCraftInfoRiskTitle': undefined;
+  'GiftCraftInfoRiskDescription': undefined;
+  'GiftCraftHelp': undefined;
+  'GiftCraftViewAll': undefined;
   'GiftInfoWithdraw': undefined;
   'GiftInfoWear': undefined;
   'GiftInfoTakeOff': undefined;
@@ -1514,6 +1541,8 @@ export interface LangPair {
   'ActionGiftUniqueSent': undefined;
   'ActionStarGiftUpgradedSelf': undefined;
   'ActionStarGiftTransferredSelf': undefined;
+  'ActionStarGiftCraftedSelf': undefined;
+  'ActionStarGiftCrafted': undefined;
   'ActionStarGiftTransferredUnknown': undefined;
   'ActionStarGiftNoConvertTextYou': undefined;
   'ActionStarGiftDisplaying': undefined;
@@ -1522,6 +1551,8 @@ export interface LangPair {
   'ActionStarGiftUpgraded': undefined;
   'ActionStarGiftUnpack': undefined;
   'ActionStarGiftUniqueRibbon': undefined;
+  'ActionStarGiftUniqueBurnedRibbon': undefined;
+  'ActionStarGiftUniqueBurnedError': undefined;
   'ActionStarGiftUniqueModel': undefined;
   'ActionStarGiftUniqueBackdrop': undefined;
   'ActionStarGiftUniqueSymbol': undefined;
@@ -1752,6 +1783,29 @@ export interface LangPair {
   'GiftValueForSaleOnFragment': undefined;
   'GiftValueForSaleOnTelegram': undefined;
   'EmbeddedMessageNoCaption': undefined;
+  'EditMedia': undefined;
+  'Draw': undefined;
+  'Crop': undefined;
+  'Clear': undefined;
+  'Undo': undefined;
+  'Redo': undefined;
+  'ResetCrop': undefined;
+  'CustomColor': undefined;
+  'Size': undefined;
+  'Tool': undefined;
+  'Pen': undefined;
+  'Arrow': undefined;
+  'Brush': undefined;
+  'Neon': undefined;
+  'Eraser': undefined;
+  'AspectRatio': undefined;
+  'Free': undefined;
+  'Original': undefined;
+  'Square': undefined;
+  'HEX': undefined;
+  'RGB': undefined;
+  'Adjust': undefined;
+  'Text': undefined;
   'ConfirmBuyGiftForTonDescription': undefined;
   'TitleGiftLocked': undefined;
   'QuickPreview': undefined;
@@ -1841,6 +1895,9 @@ export interface LangPair {
   'GiftAuctionTapToBidMore': undefined;
   'GiftAuctionLearnMoreAboutGifts': undefined;
   'GiftAuctionLearnMoreMenuItem': undefined;
+  'GiftAuctionListRaiseBid': undefined;
+  'GiftAuctionActiveTitle': undefined;
+  'GiftAuctionNoActive': undefined;
   'StarGiftInfoTitle': undefined;
   'StarGiftInfoSubtitle': undefined;
   'StarGiftInfoUniqueTitle': undefined;
@@ -1886,6 +1943,7 @@ export interface LangPair {
   'SettingsBirthday': undefined;
   'BotReadTextFromClipboardTitle': undefined;
   'BotReadTextFromClipboardConfirm': undefined;
+  'ChatInfoForumTopic': undefined;
   'DiceToastSend': undefined;
   'ChatTypePrivate': undefined;
   'ChatTypeGroup': undefined;
@@ -1913,6 +1971,41 @@ export interface LangPair {
   'DesktopLinkNativeMessage': undefined;
   'DesktopLinkNativeConfirm': undefined;
   'DesktopLinkNativeSuccess': undefined;
+  'LeaveGroupAppointOwner': undefined;
+  'LeaveGroupAdmins': undefined;
+  'LeaveGroupMembers': undefined;
+  'SecurityCheck': undefined;
+  'SecurityCheckInfo': undefined;
+  'SecurityCheckTwoStepEnabled': undefined;
+  'SecurityCheckTwoStepNotChanged': undefined;
+  'SecurityCheckLoggedIn': undefined;
+  'SecurityCheckEnableTwoStep': undefined;
+  'EnterPassword': undefined;
+  'EnterPasswordDescription': undefined;
+  'Transfer': undefined;
+  'TranslateMenuCocoonLinkText': undefined;
+  'CocoonTitle': undefined;
+  'CocoonDescription': undefined;
+  'CocoonFeature1Title': undefined;
+  'CocoonFeature1Username': undefined;
+  'CocoonFeature1UsernameLink': undefined;
+  'CocoonFeature2Title': undefined;
+  'CocoonFeature2Text': undefined;
+  'CocoonFeature3Title': undefined;
+  'CocoonFeature3LinkText': undefined;
+  'CocoonFeature3Link': undefined;
+  'CocoonFooterLinkText': undefined;
+  'CocoonFooterLink': undefined;
+  'ChatListAuctionWinning': undefined;
+  'ChatListAuctionOutbid': undefined;
+  'ChatListAuctionView': undefined;
+  'BotAuthSuccessTitle': undefined;
+  'GiftPreviewSelectedTraits': undefined;
+  'GiftUpgradeViewAll': undefined;
+  'GiftPreviewToggleCraftableModels': undefined;
+  'GiftPreviewToggleRegularModels': undefined;
+  'AriaGiftPreviewPlay': undefined;
+  'AriaGiftPreviewStop': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -2080,6 +2173,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ErrorPasswordFresh': {
     'time': V;
   };
+  'ErrorSessionFresh': {
+    'time': V;
+  };
   'ErrorUnexpectedMessage': {
     'error': V;
   };
@@ -2128,6 +2224,16 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'AreYouSureDeleteThisChatWithGroup': {
     'chat': V;
+  };
+  'EditAdminTransferOwnershipText': {
+    'chat': V;
+    'user': V;
+  };
+  'EditAdminTransferChannelOwnershipSuccess': {
+    'user': V;
+  };
+  'EditAdminTransferGroupOwnershipSuccess': {
+    'user': V;
   };
   'LinkExpiresIn': {
     'time': V;
@@ -2328,8 +2434,15 @@ export interface LangPairWithVariables<V = LangVariable> {
   'GiftInfoCollectible': {
     'number': V;
   };
+  'GiftInfoUniqueTitle': {
+    'name': V;
+    'number': V;
+  };
   'GiftSavedNumber': {
     'number': V;
+  };
+  'GiftInfoModelCrafted': {
+    'model': V;
   };
   'GiftInfoPeerOriginalInfo': {
     'peer': V;
@@ -2350,6 +2463,18 @@ export interface LangPairWithVariables<V = LangVariable> {
     'peer': V;
     'date': V;
     'text': V;
+  };
+  'GiftCraftButton': {
+    'giftName': V;
+  };
+  'GiftCraftSuccessChance': {
+    'percent': V;
+  };
+  'GiftCraftEmptyHint': {
+    'button': V;
+  };
+  'GiftCraftDescription': {
+    'giftLine': V;
   };
   'GiftTransferTONBlocked': {
     'time': V;
@@ -3253,6 +3378,14 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ActionStarGiftPrepaidUpgraded': {
     'user': V;
   };
+  'ActionNewCreatorPending': {
+    'user': V;
+    'from': V;
+  };
+  'ActionChangeCreator': {
+    'from': V;
+    'user': V;
+  };
   'FileTransferProgress': {
     'currentSize': V;
     'totalSize': V;
@@ -3312,6 +3445,14 @@ export interface LangPairWithVariables<V = LangVariable> {
   'GiftAuctionWonNotification': {
     'gift': V;
   };
+  'GiftAuctionBidPosition': {
+    'amount': V;
+    'position': V;
+  };
+  'GiftAuctionListRound': {
+    'current': V;
+    'total': V;
+  };
   'SettingsPasskeyUsedAt': {
     'date': V;
   };
@@ -3348,6 +3489,35 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'DesktopLinkNativeFailed': {
     'error': V;
+  };
+  'LeaveGroupTitle': {
+    'group': V;
+  };
+  'LeaveGroupDescription': {
+    'nextOwner': V;
+    'group': V;
+  };
+  'LeaveGroupJoinedDate': {
+    'date': V;
+  };
+  'TranslateMenuCocoon': {
+    'link': V;
+  };
+  'CocoonFeature1Text': {
+    'username': V;
+  };
+  'CocoonFeature3Text': {
+    'link': V;
+  };
+  'CocoonFooterText': {
+    'link': V;
+  };
+  'ChatListAuctionMixed': {
+    'winCount': V;
+    'outbidCount': V;
+  };
+  'BotAuthSuccessText': {
+    'url': V;
   };
 }
 
@@ -3557,6 +3727,12 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   'GiftInfoAvailabilityValue': {
     'count': V;
     'total': V;
+  };
+  'GiftCraftSelectMarketGifts': {
+    'count': V;
+  };
+  'GiftCraftFailedDescription': {
+    'count': V;
   };
   'GiftWithdrawWait': {
     'days': V;
@@ -3786,6 +3962,21 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'AttachmentSendFile': {
+    'count': V;
+  };
+  'ChatListAuctionTitle': {
+    'count': V;
+  };
+  'GiftPreviewCountModels': {
+    'count': V;
+  };
+  'GiftPreviewCountCraftableModels': {
+    'count': V;
+  };
+  'GiftPreviewCountPatterns': {
+    'count': V;
+  };
+  'GiftPreviewCountBackdrops': {
     'count': V;
   };
 }

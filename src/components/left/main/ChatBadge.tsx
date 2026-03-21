@@ -1,15 +1,20 @@
-import { memo, useMemo } from '../../../lib/teact/teact';
+import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiChat, ApiTopic } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 import type { Signal } from '../../../util/signals';
+import { type ApiChat, type ApiTopic, MAIN_THREAD_ID } from '../../../api/types';
 
+import { selectTopicsInfo } from '../../../global/selectors';
+import { selectThreadReadState } from '../../../global/selectors/threads';
 import buildClassName from '../../../util/buildClassName';
+import { buildCollectionByCallback } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 import { isSignal } from '../../../util/signals';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 
+import useSelector, { useShallowSelector } from '../../../hooks/data/useSelector';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -31,7 +36,6 @@ type OwnProps = {
   shouldShowOnlyMostImportant?: boolean;
   hasMiniApp?: boolean;
   forceHidden?: boolean | Signal<boolean>;
-  topics?: Record<number, ApiTopic>;
   isSelected?: boolean;
   isOnAvatar?: boolean;
   transitionClassName?: string;
@@ -40,7 +44,6 @@ type OwnProps = {
 
 const ChatBadge = ({
   topic,
-  topics,
   chat,
   isPinned,
   isMuted,
@@ -58,23 +61,47 @@ const ChatBadge = ({
 
   const lang = useLang();
 
+  const readStateSelector = useCallback((global: GlobalState) => {
+    return selectThreadReadState(global, chat.id, topic?.id || MAIN_THREAD_ID);
+  }, [chat.id, topic?.id]);
+
+  const readState = useSelector(readStateSelector);
+
   const {
-    unreadMentionsCount = 0, unreadReactionsCount = 0,
-  } = !chat.isForum ? chat : {}; // TODO[forums] Unread mentions and reactions temporarily disabled for forums
+    unreadMentionsCount: stateUnreadMentionsCount = 0,
+    unreadReactionsCount: stateUnreadReactionsCount = 0,
+    unreadCount: stateUnreadCount = 0,
+    hasUnreadMark,
+  } = readState || {};
+
+  const topicsInfoSelector = useCallback((global: GlobalState) => {
+    return selectTopicsInfo(global, chat.id);
+  }, [chat.id]);
+  const topicsInfo = useShallowSelector(topicsInfoSelector);
+  const { listedTopicIds, topicsById } = topicsInfo || {};
+
+  const topicsReadStateSelector = useCallback((global: GlobalState) => {
+    return buildCollectionByCallback(listedTopicIds || [], (tId) => (
+      [tId, selectThreadReadState(global, chat.id, tId)]
+    ));
+  }, [chat.id, listedTopicIds]);
+  const topicsReadStates = useShallowSelector(topicsReadStateSelector);
 
   const isTopicUnopened = !isPinned && topic && !wasTopicOpened;
   const isForum = chat.isForum && !topic;
-  const topicsWithUnread = useMemo(() => (
-    isForum && topics ? Object.values(topics).filter(({ unreadCount }) => unreadCount) : undefined
-  ), [topics, isForum]);
+  const topicsWithUnreadIds = useMemo(() => (
+    isForum && listedTopicIds ? listedTopicIds.filter((tId) => topicsReadStates[tId]?.unreadCount) : undefined
+  ), [listedTopicIds, isForum, topicsReadStates]);
+  const topicsWithUnreadMentionsIds = useMemo(() => (
+    isForum && listedTopicIds ? listedTopicIds.filter((tId) => topicsReadStates[tId]?.unreadMentionsCount) : undefined
+  ), [listedTopicIds, isForum, topicsReadStates]);
+  const topicsWithUnreadReactionsIds = useMemo(() => (
+    isForum && listedTopicIds ? listedTopicIds.filter((tId) => topicsReadStates[tId]?.unreadReactionsCount) : undefined
+  ), [listedTopicIds, isForum, topicsReadStates]);
 
-  const unreadCount = useMemo(() => {
-    if (!isForum) {
-      return (topic || chat).unreadCount;
-    }
-
-    return topicsWithUnread?.length;
-  }, [chat, topic, topicsWithUnread, isForum]);
+  const unreadCount = isForum ? topicsWithUnreadIds?.length : stateUnreadCount;
+  const unreadMentionsCount = isForum ? topicsWithUnreadMentionsIds?.length : stateUnreadMentionsCount;
+  const unreadReactionsCount = isForum ? topicsWithUnreadReactionsIds?.length : stateUnreadReactionsCount;
 
   const shouldBeUnMuted = useMemo(() => {
     if (!isForum) {
@@ -82,17 +109,17 @@ const ChatBadge = ({
     }
 
     if (isMuted) {
-      return topicsWithUnread?.some((acc) => acc.notifySettings.mutedUntil === 0);
+      return topicsWithUnreadIds?.some((tId) => topicsById?.[tId]?.notifySettings.mutedUntil === 0);
     }
 
-    const isEveryUnreadMuted = topicsWithUnread?.every((acc) => (
-      acc.notifySettings.mutedUntil && acc.notifySettings.mutedUntil > getServerTime()
-    ));
+    const isEveryUnreadMuted = topicsWithUnreadIds?.every((tId) => {
+      const mutedUntil = topicsById?.[tId]?.notifySettings.mutedUntil;
+      return mutedUntil && mutedUntil > getServerTime();
+    });
 
     return !isEveryUnreadMuted;
-  }, [isForum, isMuted, topicsWithUnread, topic?.notifySettings.mutedUntil]);
+  }, [isForum, isMuted, topicsWithUnreadIds, topicsById, topic?.notifySettings.mutedUntil]);
 
-  const hasUnreadMark = topic ? false : chat.hasUnreadMark;
   const isUnread = Boolean((unreadCount || hasUnreadMark) && !isSavedDialog);
 
   const resolvedForceHidden = useDerivedState(
@@ -116,26 +143,27 @@ const ChatBadge = ({
   });
 
   function renderContent() {
-    const baseClassName = buildClassName(styles.badge, !shouldBeUnMuted && styles.muted, badgeClassName);
+    const baseClassName = buildClassName(styles.badge, badgeClassName);
+    const statefulClassName = buildClassName(baseClassName, !shouldBeUnMuted && styles.muted);
 
     const unreadReactionsElement = unreadReactionsCount && (
-      <div className={buildClassName(baseClassName, styles.reaction, styles.round)}>
+      <div className={buildClassName(statefulClassName, styles.reaction, styles.round)}>
         <Icon name="heart" />
       </div>
     );
 
     const unreadMentionsElement = unreadMentionsCount && (
-      <div className={buildClassName(baseClassName, styles.mention, styles.round)}>
+      <div className={buildClassName(statefulClassName, styles.mention, styles.round)}>
         <Icon name="mention" />
       </div>
     );
 
     const unopenedTopicElement = isTopicUnopened && (
-      <div className={buildClassName(baseClassName, styles.unopened)} />
+      <div className={buildClassName(statefulClassName, styles.unopened)} />
     );
 
     const unreadCountElement = isUnread ? (
-      <div className={buildClassName(baseClassName, styles.unread)}>
+      <div className={buildClassName(statefulClassName, styles.unread)}>
         {!hasUnreadMark && <AnimatedCounter text={formatIntegerCompact(lang, unreadCount!)} />}
       </div>
     ) : undefined;

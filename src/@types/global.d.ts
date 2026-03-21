@@ -84,6 +84,12 @@ declare module '*.jpg' {
   const url: string;
   export default url;
 }
+
+declare module '*.webp' {
+  const url: string;
+  export default url;
+}
+
 declare module '*.svg' {
   const url: string;
   export default url;
@@ -103,10 +109,6 @@ declare module '*.wasm' {
 declare module '*.strings' {
   const url: string;
   export default url;
-}
-
-declare module 'pako/dist/pako_inflate' {
-  function inflate(...args: any[]): string;
 }
 
 declare module 'opus-recorder' {

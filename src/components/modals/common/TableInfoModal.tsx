@@ -32,6 +32,7 @@ type OwnProps = {
   hasBackdrop?: boolean;
   closeButtonColor?: 'translucent' | 'translucent-white';
   moreMenuItems?: TeactNode;
+  headerRightToolBar?: TeactNode;
   onClose: NoneToVoidFunction;
   onButtonClick?: NoneToVoidFunction;
   withBalanceBar?: boolean;
@@ -54,6 +55,7 @@ const TableInfoModal = ({
   hasBackdrop,
   closeButtonColor,
   moreMenuItems,
+  headerRightToolBar,
   onClose,
   onButtonClick,
   withBalanceBar,
@@ -79,6 +81,7 @@ const TableInfoModal = ({
       className={className}
       contentClassName={buildClassName(styles.content, contentClassName)}
       moreMenuItems={moreMenuItems}
+      headerRightToolBar={headerRightToolBar}
       onClose={onClose}
       withBalanceBar={withBalanceBar}
       currencyInBalanceBar={currencyInBalanceBar}

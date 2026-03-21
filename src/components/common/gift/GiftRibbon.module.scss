@@ -2,16 +2,12 @@
   position: absolute;
   top: -0.125rem;
   right: -0.125rem;
-
-  width: 3.5rem;
-  height: 3.5rem;
 }
 
 .text {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) translate(6px, -6px) rotate(45deg);
 
   font-size: 0.625rem;
   font-weight: var(--font-weight-semibold);

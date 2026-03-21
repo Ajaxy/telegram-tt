@@ -1,7 +1,6 @@
 import { addCallback } from '../../../lib/teact/teactn';
 
-import type { ApiThreadInfo } from '../../../api/types/messages';
-import type { Thread, ThreadId } from '../../../types';
+import type { ThreadId, ThreadLocalState } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
@@ -18,27 +17,33 @@ import {
 } from '../../index';
 import {
   addChatMessagesById,
-  addMessages,
   safeReplaceViewportIds,
   updateChats,
   updateListedIds,
-  updateThread,
-  updateThreadInfo,
   updateUsers,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
+import {
+  replaceThreadLocalStateParam,
+  updateThreadInfo,
+  updateThreadLocalState,
+  updateThreadReadState,
+} from '../../reducers/threads';
 import {
   selectChat,
   selectChatMessage,
   selectChatMessages,
   selectCurrentMessageList,
+  selectTabState,
+  selectTopics,
+} from '../../selectors';
+import {
   selectDraft,
   selectEditingDraft,
   selectEditingId,
-  selectTabState,
   selectThreadInfo,
-  selectTopics,
-} from '../../selectors';
+  selectThreadReadState,
+} from '../../selectors/threads';
 
 const RELEASE_STATUS_TIMEOUT = 15000; // 15 sec;
 
@@ -106,48 +111,26 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
 
   // Memoize drafts
   const draftChatIds = Object.keys(global.messages.byChatId);
-  const draftsByChatId = draftChatIds.reduce<Record<string, Record<number, Partial<Thread>>>>((acc, chatId) => {
-    acc[chatId] = Object
-      .keys(global.messages.byChatId[chatId].threadsById)
-      .reduce<Record<number, Partial<Thread>>>((acc2, threadId) => {
-        acc2[Number(threadId)] = omitUndefined({
-          draft: selectDraft(global, chatId, Number(threadId)),
-          editingId: selectEditingId(global, chatId, Number(threadId)),
-          editingDraft: selectEditingDraft(global, chatId, Number(threadId)),
-        });
+  const draftsByChatId = draftChatIds
+    .reduce<Record<string, Record<number, Partial<ThreadLocalState>>>>((acc, chatId) => {
+      acc[chatId] = Object
+        .keys(global.messages.byChatId[chatId].threadsById)
+        .reduce<Record<number, Partial<ThreadLocalState>>>((acc2, threadId) => {
+          acc2[Number(threadId)] = omitUndefined({
+            draft: selectDraft(global, chatId, Number(threadId)),
+            editingId: selectEditingId(global, chatId, Number(threadId)),
+            editingDraft: selectEditingDraft(global, chatId, Number(threadId)),
+          });
 
-        return acc2;
-      }, {});
-    return acc;
-  }, {});
-
-  // Memoize last messages
-  const lastMessages = Object.entries(global.chats.lastMessageIds.all || {}).map(([chatId, messageId]) => (
-    selectChatMessage(global, chatId, Number(messageId))
-  )).filter(Boolean);
-  const savedLastMessages = Object.values(global.chats.lastMessageIds.saved || {}).map((messageId) => (
-    selectChatMessage(global, global.currentUserId!, Number(messageId))
-  )).filter(Boolean);
-
-  // Memoize thread infos for last messages
-  const lastMessagesThreadInfos: { chatId: string; messageId: number; threadInfo: ApiThreadInfo }[] = [];
-  lastMessages.forEach((message) => {
-    const threadInfo = selectThreadInfo(global, message.chatId, message.id);
-    if (threadInfo) {
-      lastMessagesThreadInfos.push({
-        chatId: message.chatId,
-        messageId: message.id,
-        threadInfo,
-      });
-    }
-  });
+          return acc2;
+        }, {});
+      return acc;
+    }, {});
 
   for (const { id: tabId } of Object.values(global.byTabId)) {
     global = getGlobal();
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global, tabId) || {};
     const activeThreadId = currentThreadId || MAIN_THREAD_ID;
-    const threadInfo = currentChatId && currentThreadId
-      ? selectThreadInfo(global, currentChatId, currentThreadId) : undefined;
     const currentChat = currentChatId ? global.chats.byId[currentChatId] : undefined;
     if (currentChatId && currentChat) {
       const [result, resultDiscussion] = await Promise.all([
@@ -173,12 +156,13 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
           : [];
         const topics = selectTopics(global, currentChatId);
         const topicLastMessages = topics ? Object.values(topics)
-          .map(({ lastMessageId }) => currentChatMessages[lastMessageId])
-          .filter(Boolean)
-          : [];
+          .map(({ id }) => {
+            const topicThreadInfo = selectThreadInfo(global, currentChatId, id);
+            return topicThreadInfo?.lastMessageId ? currentChatMessages[topicThreadInfo.lastMessageId] : undefined;
+          }).filter(Boolean) : [];
 
         const resultMessageIds = result.messages.map(({ id }) => id);
-        const messagesThreadInfos = pick(global.messages.byChatId[currentChatId].threadsById, resultMessageIds);
+        const messagesThreads = pick(global.messages.byChatId[currentChatId].threadsById, resultMessageIds);
 
         const isDiscussionStartLoaded = !result.messages.length
           || result.messages.some(({ id }) => id === resultDiscussion?.firstMessageId);
@@ -189,13 +173,7 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
         const listedIds = unique(allMessages.map(({ id }) => id));
 
         if (!wasReset) {
-          global = {
-            ...global,
-            messages: {
-              ...global.messages,
-              byChatId: {},
-            },
-          };
+          global = resetMessages(global);
 
           Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
             global = updateTabState(global, {
@@ -206,18 +184,20 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
         }
 
         global = addChatMessagesById(global, currentChatId, byId);
+        if (resultDiscussion) {
+          global = updateThreadInfo(global, resultDiscussion.threadInfo);
+          global = updateThreadReadState(global, currentChatId, activeThreadId, resultDiscussion.threadReadState);
+          global = replaceThreadLocalStateParam(
+            global, currentChatId, activeThreadId, 'firstMessageId', resultDiscussion.firstMessageId,
+          );
+          global = addChatMessagesById(global, currentChatId, buildCollectionByKey(resultDiscussion.topMessages, 'id'));
+        }
         global = updateListedIds(global, currentChatId, activeThreadId, listedIds);
 
-        Object.entries(messagesThreadInfos).forEach(([id, thread]) => {
+        Object.entries(messagesThreads).forEach(([id, thread]) => {
           if (!thread?.threadInfo) return;
-          global = updateThreadInfo(global, currentChatId, id, thread.threadInfo);
+          global = updateThreadInfo(global, thread.threadInfo);
         });
-
-        if (threadInfo && !threadInfo.isCommentsInfo && activeThreadId !== MAIN_THREAD_ID) {
-          global = updateThreadInfo(global, currentChatId, activeThreadId, {
-            ...pick(threadInfo, ['fromChannelId', 'fromMessageId']),
-          });
-        }
 
         Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
           const { chatId: otherChatId, threadId: otherThreadId } = selectCurrentMessageList(global, otherTabId) || {};
@@ -247,13 +227,7 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
   global = getGlobal();
 
   if (!areMessagesLoaded) {
-    global = {
-      ...global,
-      messages: {
-        ...global.messages,
-        byChatId: {},
-      },
-    };
+    global = resetMessages(global);
 
     Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
       global = updateTabState(global, {
@@ -263,25 +237,12 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
   }
 
   // Restore drafts
-
   Object.keys(draftsByChatId).forEach((chatId) => {
     const threads = draftsByChatId[chatId];
     Object.keys(threads).forEach((threadId) => {
-      global = updateThread(global, chatId, Number(threadId), draftsByChatId[chatId][Number(threadId)]);
+      global = updateThreadLocalState(global, chatId, Number(threadId), draftsByChatId[chatId][Number(threadId)]);
     });
   });
-
-  // Restore thread infos
-  lastMessagesThreadInfos.forEach(({ chatId, messageId, threadInfo }) => {
-    const memoThreadInfo = selectThreadInfo(global, chatId, messageId);
-    if (!memoThreadInfo) {
-      global = updateThreadInfo(global, chatId, String(messageId), threadInfo);
-    }
-  });
-
-  // Restore last messages
-  global = addMessages(global, lastMessages);
-  global = addMessages(global, savedLastMessages);
 
   setGlobal(global);
 
@@ -293,17 +254,28 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
   });
 }
 
+function resetMessages<T extends GlobalState>(global: T) {
+  return {
+    ...global,
+    messages: {
+      ...global.messages,
+      byChatId: {},
+    },
+  };
+}
+
 function loadTopMessages<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
   const currentUserId = global.currentUserId!;
   const isSavedDialog = getIsSavedDialog(chatId, threadId, currentUserId);
   const realChatId = isSavedDialog ? String(threadId) : chatId;
 
   const chat = selectChat(global, realChatId)!;
+  const readState = selectThreadReadState(global, chatId, threadId);
 
   return callApi('fetchMessages', {
     chat,
     threadId,
-    offsetId: !isSavedDialog ? chat.lastReadInboxMessageId : undefined,
+    offsetId: !isSavedDialog ? readState?.lastReadInboxMessageId : undefined,
     addOffset: -(Math.round(MESSAGE_LIST_SLICE / 2) + 1),
     limit: MESSAGE_LIST_SLICE,
     isSavedDialog,

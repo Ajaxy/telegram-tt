@@ -23,8 +23,8 @@ import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 
-import BadgeButton from '../../../common/BadgeButton';
 import GiftTransferPreview from '../../../common/gift/GiftTransferPreview';
+import GiftRarityBadge from '../../../common/GiftRarityBadge';
 import ConfirmDialog from '../../../ui/ConfirmDialog';
 import TableInfo, { type TableData } from '../../common/TableInfo';
 
@@ -85,7 +85,7 @@ const GiftOfferAcceptModal = ({
         lang('GiftAttributeModel'),
         <span className={styles.attributeValue}>
           <span>{model.name}</span>
-          <BadgeButton>{formatPercent(model.rarityPercent)}</BadgeButton>
+          <GiftRarityBadge rarity={model.rarity} />
         </span>,
       ]);
     }
@@ -95,7 +95,7 @@ const GiftOfferAcceptModal = ({
         lang('GiftAttributeBackdrop'),
         <span className={styles.attributeValue}>
           <span>{backdrop.name}</span>
-          <BadgeButton>{formatPercent(backdrop.rarityPercent)}</BadgeButton>
+          <GiftRarityBadge rarity={backdrop.rarity} />
         </span>,
       ]);
     }
@@ -105,7 +105,7 @@ const GiftOfferAcceptModal = ({
         lang('GiftAttributeSymbol'),
         <span className={styles.attributeValue}>
           <span>{pattern.name}</span>
-          <BadgeButton>{formatPercent(pattern.rarityPercent)}</BadgeButton>
+          <GiftRarityBadge rarity={pattern.rarity} />
         </span>,
       ]);
     }

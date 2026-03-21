@@ -1,0 +1,122 @@
+@use "../../../styles/mixins";
+
+.root {
+  display: flex;
+  flex-direction: column;
+  max-width: var(--max-width);
+}
+
+.button {
+  --secondary-bg: transparent;
+
+  flex: 1;
+
+  width: auto;
+  margin: 0.125rem;
+  border-radius: var(--border-radius-messages-small);
+
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+
+  @include mixins.action-message-bg($isModule: true);
+
+  transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms, opacity 150ms;
+
+  &::before {
+    content: '';
+
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+
+    opacity: 50%;
+    background-color: var(--secondary-bg);
+  }
+
+  &:active,
+  &:hover,
+  &:focus {
+    opacity: 0.85;
+    background-color: var(--action-message-bg) !important;
+  }
+
+  &:first-of-type {
+    margin-left: 0;
+  }
+
+  &:last-of-type {
+    margin-right: 0;
+  }
+}
+
+.cornerIcon {
+  position: absolute;
+  top: 0.1875rem;
+  right: 0.1875rem;
+
+  display: block;
+
+  font-size: 0.875rem;
+
+  &:global(.icon-arrow-right) {
+    top: 0.125rem;
+    right: 0.125rem;
+    transform: rotate(-45deg);
+    font-size: 0.75rem;
+  }
+}
+
+.leftIcon {
+  margin-right: 0.25rem;
+  font-size: 1rem !important;
+}
+
+.inlineButtonText {
+  z-index: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+
+  &:first-of-type .button {
+    margin-top: 0.25rem !important;
+  }
+
+  &:last-of-type .button {
+    margin-bottom: 0;
+
+    &:first-of-type {
+      border-bottom-left-radius: var(--border-radius-messages);
+    }
+
+    &:last-of-type {
+      border-bottom-right-radius: var(--border-radius-messages);
+    }
+  }
+}
+
+.primaryTint {
+  --secondary-bg: var(--color-primary);
+}
+
+.successTint {
+  --secondary-bg: var(--color-success);
+}
+
+.destructiveTint {
+  --secondary-bg: var(--color-error);
+}
+
+.customEmojiIcon {
+  margin-inline-end: 0.125rem;
+  vertical-align: text-top;
+}

@@ -114,6 +114,7 @@ type StateProps = {
   isMuted?: boolean;
   isTopic?: boolean;
   isForum?: boolean;
+  isBotForum?: boolean;
   isForumAsMessages?: true;
   canAddContact?: boolean;
   canDeleteChat?: boolean;
@@ -148,6 +149,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   withForumActions,
   isTopic,
   isForum,
+  isBotForum,
   isForumAsMessages,
   isChatInfoShown,
   canStartBot,
@@ -627,7 +629,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               {oldLang('lng_forum_topic_edit')}
             </MenuItem>
           )}
-          {isMobile && !withForumActions && isForum && !isTopic && (
+          {isMobile && !withForumActions && isForum && !isBotForum && !isTopic && (
             <MenuItem
               icon="forums"
               onClick={handleViewAsTopicsClick}
@@ -644,7 +646,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               <div className="right-badge">{pendingJoinRequests}</div>
             </MenuItem>
           )}
-          {withForumActions && !isTopic && !isForumAsMessages && (
+          {withForumActions && !isTopic && !isBotForum && !isForumAsMessages && (
             <MenuItem
               icon="message"
               onClick={handleOpenAsMessages}
@@ -883,6 +885,7 @@ export default memo(withGlobal<OwnProps>(
       isPrivate,
       isTopic: chat?.isForum && !isMainThread,
       isForum: chat?.isForum,
+      isBotForum: chat?.isBotForum,
       isForumAsMessages: chat?.isForumAsMessages,
       canAddContact,
       canDeleteChat: getCanDeleteChat(chat),

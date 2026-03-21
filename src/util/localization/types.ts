@@ -47,6 +47,27 @@ export type AdvancedLangFnOptions = AdvancedLangFnOptionsRegular | AdvancedLangF
 type LangPairWithNodes = LangPairWithVariables<TeactNode | undefined>;
 type LangPairPluralWithNodes = LangPairPluralWithVariables<TeactNode | undefined>;
 
+// Helpers for merged overloads
+type AllKeysOf<T> = T extends any ? keyof T : never;
+
+type AnyLangOptions = LangFnOptions | AdvancedLangFnOptions;
+type AnyLangPluralOptions = LangFnOptionsWithPlural | AdvancedLangFnOptionsWithPlural;
+
+// Maps unknown option keys to `never`, catching typos even through generics
+type StrictLangOptions<O> = O & Record<Exclude<keyof O & string, AllKeysOf<AnyLangOptions>>, never>;
+
+type LangFnReturnType<O> = O extends AdvancedLangFnOptions ? TeactNode : string;
+
+type PrepVariablesType<K extends RegularLangKeyWithVariables, O> =
+  O extends AdvancedLangFnOptions
+    ? LangPairWithNodes[K]
+    : LangPairWithVariables[K];
+
+type PrepPluralVariablesType<K extends PluralLangKeyWithVariables, O> =
+  O extends AdvancedLangFnOptions
+    ? LangPairPluralWithNodes[K]
+    : LangPairPluralWithVariables[K];
+
 type RegularLangFnParametersWithoutVariables = {
   key: RegularLangKey;
   variables?: undefined;
@@ -122,31 +143,18 @@ export type AdvancedLangFnParameters =
 export type LangFnParameters = RegularLangFnParameters | AdvancedLangFnParameters;
 
 export type LangFn = {
-  <K extends RegularLangKey = RegularLangKey>(
-    key: K, variables?: undefined, options?: LangFnOptions,
-  ): string;
-  <K extends PluralLangKey = PluralLangKey>(
-    key: K, variables: undefined, options: LangFnOptionsWithPlural,
-  ): string;
-  <K extends RegularLangKeyWithVariables = RegularLangKeyWithVariables>(
-    key: K, variables: LangPairWithVariables[K], options?: LangFnOptions,
-  ): string;
-  <K extends PluralLangKeyWithVariables = PluralLangKeyWithVariables>(
-    key: K, variables: LangPairPluralWithVariables[K], options: LangFnOptionsWithPlural,
-  ): string;
-
-  <K extends RegularLangKey = RegularLangKey>(
-    key: K, variables?: undefined, options?: AdvancedLangFnOptions,
-  ): TeactNode;
-  <K extends PluralLangKey = PluralLangKey>(
-    key: K, variables: undefined, options: AdvancedLangFnOptionsWithPlural,
-  ): TeactNode;
-  <K extends RegularLangKeyWithVariables = RegularLangKeyWithVariables>(
-    key: K, variables: LangPairWithVariables<TeactNode | undefined>[K], options: AdvancedLangFnOptions,
-  ): TeactNode;
-  <K extends PluralLangKeyWithVariables = PluralLangKeyWithVariables>(
-    key: K, variables: LangPairPluralWithVariables<TeactNode | undefined>[K], options: AdvancedLangFnOptionsWithPlural,
-  ): TeactNode;
+  <K extends PluralLangKeyWithVariables, O extends AnyLangPluralOptions>(
+    key: K, variables: PrepPluralVariablesType<K, O>, options: StrictLangOptions<O>,
+  ): LangFnReturnType<O>;
+  <K extends RegularLangKeyWithVariables, O extends AnyLangOptions = LangFnOptionsRegular>(
+    key: K, variables: PrepVariablesType<K, O>, options?: StrictLangOptions<O>,
+  ): LangFnReturnType<O>;
+  <K extends PluralLangKey, O extends AnyLangPluralOptions>(
+    key: K, variables: undefined, options: StrictLangOptions<O>,
+  ): LangFnReturnType<O>;
+  <K extends RegularLangKey, O extends AnyLangOptions = LangFnOptionsRegular>(
+    key: K, variables?: undefined, options?: StrictLangOptions<O>,
+  ): LangFnReturnType<O>;
 
   with: (params: LangFnParameters) => TeactNode;
   withRegular: (params: RegularLangFnParameters) => string;

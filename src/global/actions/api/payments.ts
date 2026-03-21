@@ -1234,19 +1234,20 @@ addActionHandler('openUniqueGiftBySlug', async (global, actions, payload): Promi
     slug, tabId = getCurrentTabId(),
   } = payload;
 
-  const gift = await callApi('fetchUniqueStarGift', { slug });
+  const result = await callApi('fetchUniqueStarGift', { slug });
 
-  if (!gift) {
+  if (!result || 'error' in result) {
+    const isBurned = result && 'error' in result && result.errorMessage === 'STARGIFT_ALREADY_BURNED';
     actions.showNotification({
       message: {
-        key: 'GiftWasNotFound',
+        key: isBurned ? 'ActionStarGiftUniqueBurnedError' : 'GiftWasNotFound',
       },
       tabId,
     });
     return;
   }
 
-  actions.openGiftInfoModal({ gift, tabId });
+  actions.openGiftInfoModal({ gift: result, tabId });
 });
 
 addActionHandler('openGiftAuctionBySlug', async (global, actions, payload): Promise<void> => {

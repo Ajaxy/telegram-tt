@@ -428,7 +428,7 @@ const StarsBalanceModal = ({
             </div>
             <TabList
               ref={tabsRef}
-              className={styles.tabs}
+              className={buildClassName(styles.tabs, areTabsPinned && styles.pinned)}
               tabClassName={styles.tab}
               activeTab={selectedTabIndex}
               tabs={transactionTabs}

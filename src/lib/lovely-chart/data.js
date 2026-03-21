@@ -1,8 +1,17 @@
 import { getMaxMin } from './utils.js';
 import { statsFormatDay, statsFormatDayHour, statsFormatText, statsFormatMin } from './format.js';
 
+const LABEL_TYPE_TO_FORMATTER = {
+  'day': "statsFormat('day')",
+  'hour': "statsFormat('hour')",
+  '5min': "statsFormat('5min')",
+  'dayHour': 'statsFormatDayHour',
+  'text': undefined,
+};
+
 export function analyzeData(data) {
-  const { title, labelFormatter, tooltipFormatter, isStacked, isPercentage, isCurrency, currencyRate, hasSecondYAxis, onZoom, minimapRange, hideCaption, zoomOutLabel } = data;
+  const { title, labelFormatter: labelFormatterRaw, labelType, tooltipFormatter, isStacked, isPercentage, secondaryYAxis, hasSecondYAxis, onZoom, minimapRange, hideCaption, zoomOutLabel, valuePrefix, valueSuffix } = data;
+  const labelFormatter = labelFormatterRaw || (labelType && LABEL_TYPE_TO_FORMATTER[labelType]);
   const { datasets, labels } = prepareDatasets(data);
 
   const colors = {};
@@ -20,13 +29,8 @@ export function analyzeData(data) {
     }
   });
 
-  let effectiveLabelFormatter = labelFormatter;
-  if (isCurrency) {
-    effectiveLabelFormatter = 'statsFormat(\'day\')';
-  }
-
   let xLabels;
-  switch (effectiveLabelFormatter) {
+  switch (labelFormatter) {
     case 'statsFormatDayHour':
       xLabels = statsFormatDayHour(labels);
       break;
@@ -50,9 +54,10 @@ export function analyzeData(data) {
     datasets,
     isStacked,
     isPercentage,
-    isCurrency,
-    currencyRate,
+    secondaryYAxis,
     hasSecondYAxis,
+    valuePrefix,
+    valueSuffix,
     onZoom,
     isLines: data.type === 'line',
     isBars: data.type === 'bar',

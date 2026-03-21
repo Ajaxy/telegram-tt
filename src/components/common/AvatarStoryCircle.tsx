@@ -8,6 +8,7 @@ import type { ThemeKey } from '../../types';
 
 import { selectPeerStories, selectTheme } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
 import { REM } from './helpers/mediaDimensions';
 
 import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
@@ -18,6 +19,7 @@ interface OwnProps {
   size: number;
   withExtraGap?: boolean;
   colors?: string[];
+  style?: string;
 }
 
 interface StateProps {
@@ -52,6 +54,7 @@ function AvatarStoryCircle({
   withExtraGap,
   appTheme,
   colors,
+  style,
 }: OwnProps & StateProps) {
   const ref = useRef<HTMLCanvasElement>();
 
@@ -113,7 +116,7 @@ function AvatarStoryCircle({
     <canvas
       ref={ref}
       className={buildClassName('story-circle', className)}
-      style={`max-width: ${adaptedSize}px; max-height: ${adaptedSize}px;`}
+      style={buildStyle(`max-width: ${adaptedSize}px`, `max-height: ${adaptedSize}px`, style)}
     />
   );
 }

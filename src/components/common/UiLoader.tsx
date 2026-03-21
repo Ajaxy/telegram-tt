@@ -27,6 +27,7 @@ import './Avatar.scss';
 import appStyles from '../App.module.scss';
 import styles from './UiLoader.module.scss';
 
+import starIconPath from '../../assets/icons/star/star.webp';
 import lockPreviewPath from '../../assets/lock.png';
 import monkeyPath from '../../assets/monkey.svg';
 import spoilerMaskPath from '../../assets/spoilers/mask.svg';
@@ -84,6 +85,7 @@ const preloadTasks = {
       .then(preloadFonts),
     preloadAvatars(),
     preloadImage(spoilerMaskPath),
+    preloadImage(starIconPath),
     localizationReadyPromise,
   ]),
   authPhoneNumber: () => Promise.all([

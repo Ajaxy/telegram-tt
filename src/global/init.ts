@@ -13,14 +13,15 @@ import { parseLocationHash } from '../util/routing';
 import { updatePeerColors } from '../util/theme';
 import { initializeChatMediaSearchResults } from './reducers/middleSearch';
 import { updateTabState } from './reducers/tabs';
+import { replaceTabThreadParam, replaceThreadLocalStateParam } from './reducers/threads';
+import { selectThreadLocalStateParam } from './selectors/threads';
 import { initSharedState } from './shared/sharedStateConnector';
 import { initCache } from './cache';
 import {
   addActionHandler, getGlobal, setGlobal,
 } from './index';
 import { INITIAL_TAB_STATE } from './initialState';
-import { replaceTabThreadParam, replaceThreadParam } from './reducers';
-import { selectTabState, selectThreadParam } from './selectors';
+import { selectTabState } from './selectors';
 
 initCache();
 
@@ -63,10 +64,10 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
     const threadsById = global.messages.byChatId[chatId].threadsById;
     Object.keys(threadsById).forEach((thread) => {
       const threadId = Number(thread);
-      const lastViewportIds = selectThreadParam(global, chatId, threadId, 'lastViewportIds');
+      const lastViewportIds = selectThreadLocalStateParam(global, chatId, threadId, 'lastViewportIds');
       // Check if migration from previous version is faulty
       if (!lastViewportIds?.every((id) => isLocalMessageId(id) || global.messages.byChatId[chatId]?.byId[id])) {
-        global = replaceThreadParam(global, chatId, threadId, 'lastViewportIds', undefined);
+        global = replaceThreadLocalStateParam(global, chatId, threadId, 'lastViewportIds', undefined);
         return;
       }
       global = initializeChatMediaSearchResults(global, chatId, threadId, tabId);
@@ -85,10 +86,18 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
   Object.keys(global.messages.byChatId).forEach((chatId) => {
     const threadsById = global.messages.byChatId[chatId].threadsById;
     const fixedThreadsById = Object.keys(threadsById).reduce((acc, key) => {
-      const t = threadsById[Number(key)];
-      acc[Number(key)] = {
+      const t = threadsById[key];
+      if (!t.localState?.lastViewportIds) {
+        acc[key] = t;
+        return acc;
+      }
+
+      acc[key] = {
         ...t,
-        listedIds: t.lastViewportIds,
+        localState: {
+          ...t.localState,
+          listedIds: t.localState.lastViewportIds,
+        },
       };
       return acc;
     }, {} as GlobalState['messages']['byChatId'][string]['threadsById']);

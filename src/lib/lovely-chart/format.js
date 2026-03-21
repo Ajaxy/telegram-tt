@@ -59,11 +59,20 @@ function keepThreeDigits(value, decimals) {
 }
 
 export function formatInteger(n) {
-  return String(n).replace(/\d(?=(\d{3})+$)/g, '$& ');
+  if (!Number.isInteger(n)) {
+    const abs = Math.abs(n);
+    const decimals = (abs > 0 && abs < 1)
+      ? Math.max(2, -Math.floor(Math.log10(abs)) + 1)
+      : 2;
+    const [intPart, decPart] = n.toFixed(decimals).split('.');
+    const trimmed = decPart.replace(/0+$/, '');
+    return trimmed ? addThousandSeparators(intPart) + '.' + trimmed : addThousandSeparators(intPart);
+  }
+  return addThousandSeparators(String(n));
 }
 
-export function formatCryptoValue(n) {
-  return Number(n / 10 ** 9);
+function addThousandSeparators(s) {
+  return s.replace(/\d(?=(\d{3})+$)/g, '$& ');
 }
 
 export function getFullLabelDate(label, { isShort = false } = {}) {

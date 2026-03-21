@@ -44,3 +44,7 @@ export function selectShouldHideReadMarks<T extends GlobalState>(global: T) {
 export function selectSettingsKeys<T extends GlobalState>(global: T) {
   return global.settings.byKey;
 }
+
+export function selectTimezones<T extends GlobalState>(global: T) {
+  return global.timezones?.byId;
+}

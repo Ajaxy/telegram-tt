@@ -60,7 +60,7 @@ interface OwnProps {
   withUsers: boolean;
   isChannelChat: boolean | undefined;
   isChatMonoforum?: boolean;
-  isBotForum?: boolean;
+  canManageBotForumTopics?: boolean;
   isEmptyThread?: boolean;
   isComments?: boolean;
   noAvatars: boolean;
@@ -101,7 +101,7 @@ const MessageListContent = ({
   withUsers,
   isChannelChat,
   isChatMonoforum,
-  isBotForum,
+  canManageBotForumTopics,
   noAvatars,
   containerRef,
   anchorIdRef,
@@ -135,7 +135,16 @@ const MessageListContent = ({
     observeIntersectionForReading,
     observeIntersectionForLoading,
     observeIntersectionForPlaying,
-  } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef, onIntersectPinnedMessage, chatId, isQuickPreview);
+    onMessageUnmount,
+  } = useMessageObservers({
+    type,
+    containerRef,
+    memoFirstUnreadIdRef,
+    chatId,
+    threadId,
+    isQuickPreview,
+    onIntersectPinnedMessage,
+  });
 
   const {
     withHistoryTriggers,
@@ -247,7 +256,7 @@ const MessageListContent = ({
   };
 
   const renderBotForumTopicAction = () => {
-    if (!isBotForum || threadId !== MAIN_THREAD_ID) return undefined;
+    if (!canManageBotForumTopics || threadId !== MAIN_THREAD_ID) return undefined;
     return (
       <div className={buildClassName('local-action-message', actionMessageStyles.root)} key="botforum-new-topic">
         <div className={actionMessageStyles.contentBox}>
@@ -304,7 +313,7 @@ const MessageListContent = ({
             isJustAdded={isLastInList && isNewMessage}
             isLastInList={isLastInList}
             getIsMessageListReady={getIsReady}
-            onIntersectPinnedMessage={onIntersectPinnedMessage}
+            onMessageUnmount={onMessageUnmount}
           />,
         ]);
       }
@@ -375,8 +384,8 @@ const MessageListContent = ({
             isLastInDocumentGroup={position.isLastInDocumentGroup}
             isLastInList={position.isLastInList}
             memoFirstUnreadIdRef={memoFirstUnreadIdRef}
-            onIntersectPinnedMessage={onIntersectPinnedMessage}
             getIsMessageListReady={getIsReady}
+            onMessageUnmount={onMessageUnmount}
           />,
         ]);
       }).flat();

@@ -431,7 +431,7 @@ export default class MTProtoSender {
       throw new Error('Cannot send requests while disconnected');
     }
     const state = new RequestState(request, undefined);
-    const data = await this._sendQueue.getBeacon(state);
+    const data = this._sendQueue.getBeacon(state);
     if (!data) return;
     const encryptedData = await this._state.encryptMessageData(data);
 
@@ -529,7 +529,7 @@ export default class MTProtoSender {
       && this.getConnection()!.shouldLongPoll) {
       await this._sendQueueLongPoll.wait();
 
-      const res = await this._sendQueueLongPoll.get();
+      const res = this._sendQueueLongPoll.get();
 
       if (this.isReconnecting || !this._isFallback) {
         this._longPollLoopHandle = undefined;
@@ -612,7 +612,7 @@ export default class MTProtoSender {
       // If we've had new ACKs appended while waiting for messages to send, add them to queue
       appendAcks();
 
-      const res = await this._sendQueue.get();
+      const res = this._sendQueue.get();
 
       this.logWithIndex.debug(`Got ${res?.batch.length} message(s) to send`);
 

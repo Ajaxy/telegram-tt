@@ -3,10 +3,13 @@ import { getActions, getGlobal } from '../../../global';
 
 import type { GlobalState } from '../../../global/types';
 import type { CustomPeer } from '../../../types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { ANIMATION_LEVEL_MIN, ARCHIVED_FOLDER_ID } from '../../../config';
 import { getChatTitle } from '../../../global/helpers';
+import { selectChat } from '../../../global/selectors';
 import { selectAnimationLevel } from '../../../global/selectors/sharedState';
+import { selectThreadReadState } from '../../../global/selectors/threads';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { waitForTransitionEnd } from '../../../util/cssAnimationEndListeners';
@@ -95,11 +98,12 @@ const Archive = ({
   const previewItems = useMemo(() => {
     if (!orderedChatIds?.length) return lang('Loading');
 
-    const chatsById = getGlobal().chats.byId;
+    const global = getGlobal();
 
     return orderedChatIds.slice(0, PREVIEW_SLICE).map((chatId, i, arr) => {
       const isLast = i === arr.length - 1;
-      const chat = chatsById[chatId];
+      const chat = selectChat(global, chatId);
+      const readState = selectThreadReadState(global, chatId, MAIN_THREAD_ID);
       if (!chat) {
         return undefined;
       }
@@ -108,7 +112,7 @@ const Archive = ({
 
       return (
         <>
-          <span className={buildClassName(styles.chat, archiveUnreadCount && chat.unreadCount && styles.unread)}>
+          <span className={buildClassName(styles.chat, archiveUnreadCount && readState?.unreadCount && styles.unread)}>
             {renderText(title)}
           </span>
           {isLast ? '' : ', '}

@@ -16,6 +16,8 @@ import type {
   ApiInlineQueryPeerType,
   ApiInlineResultType,
   ApiKeyboardButton,
+  ApiKeyboardButtonBase,
+  ApiKeyboardButtonStyle,
   ApiMessagesBotApp,
   ApiReplyKeyboard,
   MediaContainer,
@@ -23,7 +25,7 @@ import type {
 } from '../../types';
 
 import { int2hex } from '../../../util/colors';
-import { pick } from '../../../util/iteratees';
+import { omitUndefined, pick } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
 import { addDocumentToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
@@ -50,10 +52,15 @@ export function buildReplyButtons(
 
   const markup = replyMarkup.rows.map(({ buttons }) => {
     return buttons.map((button): ApiKeyboardButton | undefined => {
-      const { text } = button;
+      const { text, style } = button;
+
+      const baseButton = omitUndefined<ApiKeyboardButtonBase>({
+        style: style && buildApiKeyboardButtonStyle(style),
+      });
 
       if (button instanceof GramJs.KeyboardButton) {
         return {
+          ...baseButton,
           type: 'command',
           text,
         };
@@ -62,12 +69,14 @@ export function buildReplyButtons(
       if (button instanceof GramJs.KeyboardButtonUrl) {
         if (button.url.includes('?startgroup=')) {
           return {
+            ...baseButton,
             type: 'unsupported',
             text,
           };
         }
 
         return {
+          ...baseButton,
           type: 'url',
           text,
           url: button.url,
@@ -77,12 +86,14 @@ export function buildReplyButtons(
       if (button instanceof GramJs.KeyboardButtonCallback) {
         if (button.requiresPassword) {
           return {
+            ...baseButton,
             type: 'unsupported',
             text,
           };
         }
 
         return {
+          ...baseButton,
           type: 'callback',
           text,
           data: serializeBytes(button.data),
@@ -91,6 +102,7 @@ export function buildReplyButtons(
 
       if (button instanceof GramJs.KeyboardButtonRequestPoll) {
         return {
+          ...baseButton,
           type: 'requestPoll',
           text,
           isQuiz: button.quiz,
@@ -99,6 +111,7 @@ export function buildReplyButtons(
 
       if (button instanceof GramJs.KeyboardButtonRequestPhone) {
         return {
+          ...baseButton,
           type: 'requestPhone',
           text,
         };
@@ -107,11 +120,13 @@ export function buildReplyButtons(
       if (button instanceof GramJs.KeyboardButtonBuy) {
         if (receiptMessageId) {
           return {
+            ...baseButton,
             type: 'receipt',
             receiptMessageId,
           };
         }
         return {
+          ...baseButton,
           type: 'buy',
           text,
         };
@@ -119,6 +134,7 @@ export function buildReplyButtons(
 
       if (button instanceof GramJs.KeyboardButtonGame) {
         return {
+          ...baseButton,
           type: 'game',
           text,
         };
@@ -126,6 +142,7 @@ export function buildReplyButtons(
 
       if (button instanceof GramJs.KeyboardButtonSwitchInline) {
         return {
+          ...baseButton,
           type: 'switchBotInline',
           text,
           query: button.query,
@@ -135,6 +152,7 @@ export function buildReplyButtons(
 
       if (button instanceof GramJs.KeyboardButtonUserProfile) {
         return {
+          ...baseButton,
           type: 'userProfile',
           text,
           userId: button.userId.toString(),
@@ -143,6 +161,7 @@ export function buildReplyButtons(
 
       if (button instanceof GramJs.KeyboardButtonSimpleWebView) {
         return {
+          ...baseButton,
           type: 'simpleWebView',
           text,
           url: button.url,
@@ -151,6 +170,7 @@ export function buildReplyButtons(
 
       if (button instanceof GramJs.KeyboardButtonWebView) {
         return {
+          ...baseButton,
           type: 'webView',
           text,
           url: button.url,
@@ -159,6 +179,7 @@ export function buildReplyButtons(
 
       if (button instanceof GramJs.KeyboardButtonUrlAuth) {
         return {
+          ...baseButton,
           type: 'urlAuth',
           text,
           url: button.url,
@@ -168,6 +189,7 @@ export function buildReplyButtons(
 
       if (button instanceof GramJs.KeyboardButtonCopy) {
         return {
+          ...baseButton,
           type: 'copy',
           text,
           copyText: button.copyText,
@@ -175,6 +197,7 @@ export function buildReplyButtons(
       }
 
       return {
+        ...baseButton,
         type: 'unsupported',
         text,
       };
@@ -190,6 +213,17 @@ export function buildReplyButtons(
       isKeyboardSingleUse: replyMarkup.singleUse,
       isKeyboardSelective: replyMarkup.selective,
     }),
+  };
+}
+
+export function buildApiKeyboardButtonStyle(
+  style: GramJs.TypeKeyboardButtonStyle,
+): ApiKeyboardButtonStyle | undefined {
+  const { bgPrimary, bgDanger, bgSuccess, icon } = style;
+
+  return {
+    type: bgPrimary ? 'primary' : bgDanger ? 'destructive' : bgSuccess ? 'success' : undefined,
+    iconId: icon?.toString(),
   };
 }
 

@@ -4,6 +4,7 @@ import { getActions } from '../../../../global';
 import type { ApiPromoData } from '../../../../api/types';
 import type { RegularLangKey } from '../../../../types/language';
 
+import buildClassName from '../../../../util/buildClassName';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
@@ -13,6 +14,7 @@ import useHeaderPane, { type PaneState } from '../../../middle/hooks/useHeaderPa
 
 import Icon from '../../../common/icons/Icon';
 
+import paneStyles from './ChatPane.module.scss';
 import styles from './SuggestionPane.module.scss';
 
 type OwnProps = {
@@ -90,13 +92,13 @@ const SuggestionPane = ({ promoData, onPaneStateChange }: OwnProps) => {
   return (
     <div
       ref={ref}
-      className={styles.root}
+      className={buildClassName(paneStyles.pane, styles.root)}
       role="button"
       tabIndex={0}
       onClick={handleClick}
     >
-      <div className={styles.title}>{title}</div>
-      <div className={styles.subtitle}>{message}</div>
+      <div className={buildClassName(paneStyles.title, styles.title)}>{title}</div>
+      <div className={buildClassName(paneStyles.subtitle, styles.subtitle)}>{message}</div>
       <Icon name="close" className={styles.closeIcon} onClick={handleDismiss} />
     </div>
   );

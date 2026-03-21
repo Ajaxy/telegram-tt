@@ -7,7 +7,8 @@ import type { ThreadId } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { getIsSavedDialog } from '../../../global/helpers';
-import { selectChat, selectThreadParam, selectTopic } from '../../../global/selectors';
+import { selectChat } from '../../../global/selectors';
+import { selectThreadLocalStateParam, selectThreadReadState } from '../../../global/selectors/threads';
 import { isUserId } from '../../../util/entities/ids';
 
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
@@ -75,7 +76,7 @@ const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
           round
           color="translucent"
           size="smaller"
-          ariaLabel={lang('ChatListContextMaskAsRead')}
+          ariaLabel={lang('ChatListContextMarkAsRead')}
           onClick={handleMarkAsRead}
           className={styles.markAsReadButton}
           iconName="readchats"
@@ -134,11 +135,10 @@ const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
-    const typingStatus = selectThreadParam(global, chatId, threadId || MAIN_THREAD_ID, 'typingStatus');
+    const typingStatus = selectThreadLocalStateParam(global, chatId, threadId || MAIN_THREAD_ID, 'typingStatus');
     const isSavedDialog = getIsSavedDialog(chatId, threadId || MAIN_THREAD_ID, global.currentUserId);
-    const unreadCount = chat?.isForum && threadId
-      ? selectTopic(global, chatId, threadId)?.unreadCount
-      : chat?.unreadCount;
+    const readState = selectThreadReadState(global, chatId, threadId || MAIN_THREAD_ID);
+    const unreadCount = readState?.unreadCount;
 
     return {
       chat,
@@ -148,7 +148,7 @@ export default memo(withGlobal<OwnProps>(
       typingStatus,
       isSavedDialog,
       unreadCount,
-      hasUnreadMark: chat?.hasUnreadMark,
+      hasUnreadMark: readState?.hasUnreadMark,
     };
   },
 )(QuickPreviewModalHeader));

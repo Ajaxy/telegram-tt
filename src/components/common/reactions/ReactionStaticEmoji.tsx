@@ -7,8 +7,9 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { isSameReaction } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 
+import useThumbnail from '../../../hooks/media/useThumbnail';
 import useMedia from '../../../hooks/useMedia';
-import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 
 import CustomEmoji from '../CustomEmoji';
 import Icon from '../icons/Icon';
@@ -37,11 +38,19 @@ const ReactionStaticEmoji: FC<OwnProps> = ({
   const availableReaction = useMemo(() => (
     availableReactions?.find((available) => isSameReaction(available.reaction, reaction))
   ), [availableReactions, reaction]);
-  const staticIconId = availableReaction?.staticIcon?.id;
+  const staticIcon = availableReaction?.staticIcon;
+  const staticIconId = staticIcon?.id;
   const mediaHash = staticIconId ? `document${staticIconId}` : undefined;
-  const mediaData = useMedia(mediaHash);
+  const cacheBuster = availableReaction?.isLocalCache ? 0 : 1;
+  const mediaData = useMedia(mediaHash, false, undefined, undefined, cacheBuster);
+  const thumbDataUri = useThumbnail(staticIcon?.thumbnail);
 
-  const transitionClassNames = useMediaTransitionDeprecated(mediaData);
+  const { ref: thumbRef } = useMediaTransition<HTMLImageElement>({
+    hasMediaData: Boolean(thumbDataUri && !mediaData),
+  });
+  const { ref: mediaRef } = useMediaTransition<HTMLImageElement>({
+    hasMediaData: Boolean(mediaData),
+  });
 
   const shouldApplySizeFix = reaction.type === 'emoji' && reaction.emoticon === '🦄';
   const shouldReplaceWithHeartIcon = withIconHeart && reaction.type === 'emoji' && reaction.emoticon === '❤';
@@ -64,18 +73,25 @@ const ReactionStaticEmoji: FC<OwnProps> = ({
   }
 
   return (
-    <img
-      className={buildClassName(
-        'ReactionStaticEmoji',
-        shouldApplySizeFix && 'with-unicorn-fix',
-        transitionClassNames,
-        className,
-      )}
+    <div
+      className={buildClassName('ReactionStaticEmoji', className)}
       style={size ? `width: ${size}px; height: ${size}px` : undefined}
-      src={mediaData || blankUrl}
-      alt={availableReaction?.title}
-      draggable={false}
-    />
+    >
+      <img
+        ref={thumbRef}
+        className="thumb"
+        src={thumbDataUri}
+        alt=""
+        draggable={false}
+      />
+      <img
+        ref={mediaRef}
+        className={buildClassName('media', shouldApplySizeFix && 'with-unicorn-fix')}
+        src={mediaData || blankUrl}
+        alt={availableReaction?.title}
+        draggable={false}
+      />
+    </div>
   );
 };
 

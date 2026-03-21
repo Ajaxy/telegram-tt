@@ -1,0 +1,110 @@
+@use "../../../../styles/mixins";
+
+.content {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  height: min(92vh, 46rem); // Required to keep Transition height
+  padding: 0 !important;
+}
+
+.tabs {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+
+  padding-top: 0.5rem;
+
+  background-color: var(--color-background);
+}
+
+.dialog,
+.transition {
+  overflow: hidden;
+}
+
+.grid {
+  overflow-y: scroll;
+  display: grid;
+  grid-auto-rows: max-content;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+
+  padding: 0.5rem;
+
+  @include mixins.adapt-padding-to-scrollbar(0.5rem, 0.125rem); // Prevent outline cutouts
+}
+
+.gridHeader {
+  display: flex;
+  grid-column: 1 / 4;
+  grid-row: 1;
+  flex-direction: column;
+  place-self: center;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--color-text-secondary);
+}
+
+.item {
+  aspect-ratio: 1 / 1;
+}
+
+.header {
+  --_height: 20rem;
+
+  justify-content: flex-end;
+  margin-bottom: 0;
+}
+
+.traitButtons {
+  z-index: 1;
+
+  display: flex;
+  gap: 0.375rem;
+  justify-content: center;
+
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0 1rem;
+}
+
+.traitButton {
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 1;
+  gap: 0.125rem;
+}
+
+.traitName {
+  font-size: 0.8125rem;
+  line-height: 1;
+}
+
+.traitType {
+  font-size: 0.625rem;
+  color: var(--tinted-text-color);
+}
+
+.traitRarity {
+  --accent-background-active-color: var(--_badge-bg);
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(0.25rem, -50%);
+
+  color: white;
+
+  transition: background-color 150ms linear;
+}
+
+.playButton {
+  position: absolute;
+  z-index: 1;
+  top: 0.875rem;
+  right: 0.875rem;
+}

@@ -4,19 +4,21 @@ import {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type {
-  ApiBusinessIntro, ApiSticker, ApiUpdateConnectionStateType, ApiUser,
-} from '../../api/types';
 import type { MessageList } from '../../types';
+import {
+  type ApiBusinessIntro, type ApiSticker, type ApiUpdateConnectionStateType, type ApiUser,
+  MAIN_THREAD_ID,
+} from '../../api/types';
 
 import { getUserFullName } from '../../global/helpers';
 import {
   selectChat,
-  selectChatLastMessage,
+  selectChatLastMessageId,
   selectCurrentMessageList,
   selectUser,
   selectUserFullInfo,
 } from '../../global/selectors';
+import { selectThreadReadState } from '../../global/selectors/threads';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
@@ -31,7 +33,7 @@ type OwnProps = {
 
 type StateProps = {
   defaultStickers?: ApiSticker[];
-  lastUnreadMessageId?: number;
+  lastMessageId?: number;
   connectionState?: ApiUpdateConnectionStateType;
   currentMessageList?: MessageList;
   businessIntro?: ApiBusinessIntro;
@@ -41,7 +43,7 @@ type StateProps = {
 const ContactGreeting: FC<OwnProps & StateProps> = ({
   defaultStickers,
   connectionState,
-  lastUnreadMessageId,
+  lastMessageId,
   currentMessageList,
   businessIntro,
   user,
@@ -52,7 +54,7 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
     markMessageListRead,
   } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
 
   const containerRef = useRef<HTMLDivElement>();
 
@@ -73,10 +75,10 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
   }, [connectionState, loadGreetingStickers, defaultStickers]);
 
   useEffect(() => {
-    if (connectionState === 'connectionStateReady' && lastUnreadMessageId) {
-      markMessageListRead({ maxId: lastUnreadMessageId });
+    if (connectionState === 'connectionStateReady' && lastMessageId) {
+      markMessageListRead({ maxId: lastMessageId });
     }
-  }, [connectionState, markMessageListRead, lastUnreadMessageId]);
+  }, [connectionState, lastMessageId]);
 
   const handleStickerSelect = useLastCallback(() => {
     if (!currentMessageList) {
@@ -92,8 +94,8 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
     });
   });
 
-  const title = businessIntro?.title || lang('Conversation.EmptyPlaceholder');
-  const description = businessIntro?.description || lang('Conversation.GreetingText');
+  const title = businessIntro?.title || oldLang('Conversation.EmptyPlaceholder');
+  const description = businessIntro?.description || oldLang('Conversation.GreetingText');
 
   return (
     <div className={styles.root}>
@@ -114,7 +116,7 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
       </div>
       {businessIntro && (
         <div className={styles.explainer}>
-          {lang('Chat.EmptyStateIntroFooter', getUserFullName(user))}
+          {oldLang('Chat.EmptyStateIntroFooter', getUserFullName(user))}
         </div>
       )}
     </div>
@@ -131,14 +133,16 @@ export default memo(withGlobal<OwnProps>(
 
     const user = selectUser(global, userId);
     const fullInfo = selectUserFullInfo(global, userId);
+    const {
+      unreadCount,
+    } = selectThreadReadState(global, chat.id, MAIN_THREAD_ID) || {};
 
-    const lastMessage = selectChatLastMessage(global, chat.id);
+    // Pass last message id only if there are unread messages
+    const lastMessageId = selectChatLastMessageId(global, chat.id);
 
     return {
       defaultStickers: stickers,
-      lastUnreadMessageId: lastMessage && lastMessage.id !== chat.lastReadInboxMessageId
-        ? lastMessage.id
-        : undefined,
+      lastMessageId: unreadCount ? lastMessageId : undefined,
       connectionState: global.connectionState,
       currentMessageList: selectCurrentMessageList(global),
       businessIntro: fullInfo?.businessIntro,

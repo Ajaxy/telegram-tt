@@ -1,5 +1,4 @@
-import type { FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
+import type { TeactNode } from '../../../lib/teact/teact';
 import { memo } from '../../../lib/teact/teact';
 
 import type { IconName } from '../../../types/icons';
@@ -12,18 +11,17 @@ import Button from '../../ui/Button';
 import styles from './PhoneCallButton.module.scss';
 
 type OwnProps = {
-  onClick: VoidFunction;
   label: string;
   icon?: IconName;
   iconClassName?: string;
-  customIcon?: React.ReactNode;
+  customIcon?: TeactNode;
   className?: string;
   isDisabled?: boolean;
   isActive?: boolean;
+  onClick: VoidFunction;
 };
 
-const PhoneCallButton: FC<OwnProps> = ({
-  onClick,
+const PhoneCallButton = ({
   label,
   customIcon,
   icon,
@@ -31,7 +29,8 @@ const PhoneCallButton: FC<OwnProps> = ({
   className,
   isDisabled,
   isActive,
-}) => {
+  onClick,
+}: OwnProps) => {
   return (
     <div className={styles.root}>
       <Button

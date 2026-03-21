@@ -15,5 +15,17 @@ export default function useScrolledState(threshold = THRESHOLD) {
     setIsAtEnd(scrollHeight - scrollTop - clientHeight < threshold);
   });
 
-  return { isAtBeginning, isAtEnd, handleScroll };
+  const updateScrollState = useLastCallback((element: HTMLElement | undefined) => {
+    if (!element) {
+      setIsAtBeginning(true);
+      setIsAtEnd(true);
+      return;
+    }
+
+    const { scrollHeight, scrollTop, clientHeight } = element;
+    setIsAtBeginning(scrollTop < threshold);
+    setIsAtEnd(scrollHeight - scrollTop - clientHeight < threshold);
+  });
+
+  return { isAtBeginning, isAtEnd, handleScroll, updateScrollState };
 }

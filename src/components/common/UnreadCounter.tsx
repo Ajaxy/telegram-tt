@@ -1,8 +1,7 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useEffect } from '../../lib/teact/teact';
 
+import { ALL_FOLDER_ID } from '../../config';
 import { updateAppBadge } from '../../util/appBadge';
-import { getAllNotificationsCount } from '../../util/folderManager';
 import { formatIntegerCompact } from '../../util/textFormat';
 
 import { useFolderManagerForUnreadCounters } from '../../hooks/useFolderManager';
@@ -12,9 +11,9 @@ interface OwnProps {
   isForAppBadge?: boolean;
 }
 
-const UnreadCounter: FC<OwnProps> = ({ isForAppBadge }) => {
-  useFolderManagerForUnreadCounters();
-  const unreadNotificationsCount = getAllNotificationsCount();
+const UnreadCounter = ({ isForAppBadge }: OwnProps) => {
+  const unreadCounters = useFolderManagerForUnreadCounters();
+  const unreadNotificationsCount = unreadCounters[ALL_FOLDER_ID]?.notificationsCount || 0;
 
   const lang = useLang();
 

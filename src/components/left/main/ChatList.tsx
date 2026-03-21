@@ -48,6 +48,7 @@ type OwnProps = {
   isFoldersSidebarShown?: boolean;
   isStoryRibbonShown?: boolean;
   foldersDispatch?: FolderEditDispatch;
+  onScroll?: (e: React.UIEvent<HTMLDivElement>) => void;
 };
 
 const INTERSECTION_THROTTLE = 200;
@@ -66,6 +67,7 @@ const ChatList = ({
   isFoldersSidebarShown,
   isStoryRibbonShown,
   foldersDispatch,
+  onScroll,
 }: OwnProps) => {
   const {
     openChat,
@@ -227,6 +229,7 @@ const ChatList = ({
       withAbsolutePositioning
       maxHeight={chatsHeight + archiveHeight + panesHeight}
       onLoadMore={getMore}
+      onScroll={onScroll}
     >
       {isAllFolder && <ChatListPanes key="panes" onHeightChange={setPanesHeight} />}
       {shouldDisplayArchive && (

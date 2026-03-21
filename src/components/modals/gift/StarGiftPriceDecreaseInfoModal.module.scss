@@ -1,3 +1,7 @@
+.content {
+  max-height: min(92vh, 37.5rem);
+}
+
 .header {
   text-align: center;
 }
@@ -30,7 +34,8 @@
 
 .table {
   overflow-y: auto;
-  max-height: 19.25rem;
+  flex-shrink: 1;
+  min-height: 0;
 }
 
 .footerText {

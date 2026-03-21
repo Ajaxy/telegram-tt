@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
@@ -25,18 +24,16 @@ type OwnProps = {
   disabled?: boolean;
   isLoading?: boolean;
   isCustomShape?: boolean;
-  asActionButton?: boolean;
 };
 
 const SHOW_LOADER_DELAY = 450;
 
-const CommentButton: FC<OwnProps> = ({
+const CommentButton = ({
   isCustomShape,
   threadInfo,
   disabled,
   isLoading,
-  asActionButton,
-}) => {
+}: OwnProps) => {
   const { openThread, openFrozenAccountModal } = getActions();
 
   const shouldRenderLoading = useAsyncRendering([isLoading], SHOW_LOADER_DELAY);
@@ -44,7 +41,7 @@ const CommentButton: FC<OwnProps> = ({
   const oldLang = useOldLang();
   const lang = useLang();
   const {
-    originMessageId, chatId, messagesCount, lastMessageId, lastReadInboxMessageId, recentReplierIds, originChannelId,
+    originMessageId, chatId, messagesCount, recentReplierIds, originChannelId, hasUnread,
   } = threadInfo || {};
 
   const handleClick = useLastCallback(() => {
@@ -92,8 +89,6 @@ const CommentButton: FC<OwnProps> = ({
     );
   }
 
-  const hasUnread = Boolean(lastReadInboxMessageId && lastMessageId && lastReadInboxMessageId < lastMessageId);
-
   const commentsText = messagesCount ? (oldLang('CommentsCount', '%COMMENTS_COUNT%', undefined, messagesCount))
     .split('%')
     .map((s) => {
@@ -110,7 +105,6 @@ const CommentButton: FC<OwnProps> = ({
         disabled && 'disabled',
         isCustomShape && 'CommentButton-custom-shape',
         isLoading && 'loading',
-        asActionButton && 'as-action-button',
       )}
       dir={lang.isRtl ? 'rtl' : 'ltr'}
       onClick={handleClick}

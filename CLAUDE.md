@@ -56,7 +56,7 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
     ```scss
     // ✅ CORRECT
     font-weight: var(--font-weight-medium);
-    font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-semibold);
 
     // ❌ WRONG
     font-weight: 600;
@@ -116,6 +116,7 @@ Convesion from and to Api* objects is done by `apiBuilders` (function name start
   const result = await callApi('methodName', { /* params */ });
   ```
 * Always check for `undefined` before proceeding.
+* **IMPORTANT: Do not pass `accessHash` directly to API methods.** Methods that accept separate `id` and `accessHash` parameters are outdated. Instead, pass the full `ApiPeer`, `ApiChat`, or `ApiUser` object. The `buildInput*` functions in `gramjsBuilders` will extract the necessary fields.
 
 ## 4. Example
 
@@ -189,7 +190,7 @@ const NewComp = (props: OwnProps & StateProps) => { … }
 ```
 
 ### 5. Memoization
-* Wrap most components with `memo()` to avoid unnecessary updates.
+* Wrap most components with `memo()` to avoid unnecessary updates. Consider skipping memo for simple wrapper components whose children change on almost every render.
 * Don't pass freshly created objects or arrays as props to memoized components.
 * **Exceptions** (no memo): `ListItem`, `Button`, `MenuItem`, etc.
 
@@ -304,7 +305,7 @@ Global State is our single, app-wide store, similar to Redux or Zustand. All its
 ### 1. Accessing Global in Components
 
 * **Use** `withGlobal` (a `mapStateToProps` helper) to pull in state.
-* **Avoid** the experimental `useSelector` API.
+* There is an experimental `useSelector` API available.
 * **Use** `getGlobal` **only** inside hooks for one-off reads (it's non-reactive).
 
 ### 2. Performance
@@ -419,3 +420,110 @@ lang('MarkdownKey', undefined, { withNodes: true, withMarkdown: true });
 
 **7. Beyond React**
 Use `getTranslationFn()` to grab the same `lang` function in non-component code. Discouraged, use object syntax.
+
+# ⚠️ IMPORTANT: Fasterdom & Rendering Phases
+
+## Rendering Cycle
+
+```
+--- frame start ---
+1. effects
+2. requested measures (DOM reads)
+3. render JSX → DOM
+4. layout effects
+5. requested mutations (DOM writes)
+6. forced reflow measure (avoid!)
+7. forced reflow mutate (avoid!)
+--- frame end ---
+```
+
+## Phase Rules
+
+| Hook/Context | Can READ (measure) | Can WRITE (mutate) |
+|--------------|-------------------|-------------------|
+| `useLayoutEffect` | ❌ NO | ✅ YES |
+| `useLayout` (deprecated) | ✅ YES | ❌ NO |
+| Event handlers (default) | ✅ YES | ❌ NO (use `requestMutation`) |
+| `requestMeasure` callback | ✅ YES | ❌ NO |
+| `requestMutation` callback | ❌ NO | ✅ YES |
+
+## Usage Patterns
+
+```typescript
+// ✅ CORRECT: Read in measure phase, write in mutation phase
+requestMeasure(() => {
+  const width = element.offsetWidth;  // READ
+
+  requestMutation(() => {
+    element.style.width = `${width * 2}px`;  // WRITE
+  });
+});
+
+// ❌ WRONG: Alternating reads/writes causes layout thrashing
+const width = element.offsetWidth;        // READ → reflow
+element.style.width = `${width * 2}px`;   // WRITE → reflow
+const height = element.offsetHeight;      // READ → reflow again!
+```
+
+## Signals: State Without Re-renders
+
+Signals deliver updates **without causing component renders**. Use for frequently-updated values.
+
+```typescript
+// Create signal
+const [getValue, setValue] = createSignal(initialValue);
+
+// Get value
+getValue();
+
+// Set value (notifies subscribers, NO re-render)
+setValue(newValue);
+
+// Subscribe to changes
+getValue.subscribe(() => { /* react to change */ });
+```
+
+**Signal Hooks:**
+- `useSignal()` – Create signal tied to component
+- `useDerivedSignal()` – Derive new signal from other signals/variables
+- `useDerivedState()` – Convert signal to render variable (triggers re-render)
+- `useStateRef()` – Access current value without it being a dependency
+
+**When to use signals:**
+- Typing text, caret position
+- Animation state tracking
+- Values that change frequently but don't need re-render
+- Cross-component communication without prop drilling
+
+## Key Optimization Hooks
+
+| Hook | Purpose |
+|------|---------|
+| `useLastCallback` | Stable callback reference, always latest scope |
+| `useStateRef` | Access state without triggering effects |
+| `useLayoutEffectWithPrevDeps` | Synchronous effect with previous values |
+| `useSyncEffect` | Effect that runs during render (not RAF) |
+| `useResizeObserver` | Efficient element size observation |
+| `useIntersectionObserver` | Viewport visibility tracking |
+
+## Heavy Animation Handling
+
+```typescript
+// Mark animation start (pauses non-critical updates)
+const endAnimation = beginHeavyAnimation(duration);
+
+// Run code only when fully idle (no animations + browser idle)
+onFullyIdle(() => {
+  // Safe for heavy computations
+});
+```
+
+## Performance Checklist
+
+1. **Animations first** – Evaluate if code negatively impacts animations
+2. **Simplify algorithms** – Move complex ones to `onFullyIdle`
+3. **No loops in selectors** – Avoid iterations in `withGlobal` selectors
+4. **Minimize re-renders** – Especially in `Message`, `Chat`, `Sticker`, etc.
+5. **Understand effect timing** – `useEffect` vs `useLayoutEffect`
+6. **Prefer signals** – When you need effects only, not renders
+7. **Use `requestForcedReflow`** – Only as last resort for sync measure+mutate

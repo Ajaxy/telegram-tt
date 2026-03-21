@@ -65,15 +65,14 @@ import {
   selectPollFromMessage,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
-  selectSavedDialogIdFromMessage,
   selectStickerSet,
-  selectThreadInfo,
   selectTopic,
   selectUser,
   selectUserStatus,
   selectWebPageFromMessage,
 } from '../../../global/selectors';
 import { selectMessageDownloadableMedia } from '../../../global/selectors/media';
+import { selectSavedDialogIdFromMessage, selectThreadInfo } from '../../../global/selectors/threads';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { isUserId } from '../../../util/entities/ids';
@@ -837,7 +836,9 @@ export default memo(withGlobal<OwnProps>(
     const isOwn = isOwnMessage(message);
     const chatBot = chat && selectBot(global, chat.id);
     const isBot = Boolean(chatBot);
-    const isMessageUnread = selectIsMessageUnread(global, message);
+    const isMessageUnread = selectIsMessageUnread(
+      global, message.chatId, threadId || MAIN_THREAD_ID, message.id, messageListType,
+    );
     const canLoadReadDate = Boolean(
       isPrivate
       && isOwn

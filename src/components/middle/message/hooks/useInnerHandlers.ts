@@ -191,7 +191,7 @@ export default function useInnerHandlers({
   });
 
   const handleReadMedia = useLastCallback((): void => {
-    markMessagesRead({ messageIds: [messageId] });
+    markMessagesRead({ chatId, messageIds: [messageId] });
   });
 
   const handleCancelUpload = useLastCallback(() => {

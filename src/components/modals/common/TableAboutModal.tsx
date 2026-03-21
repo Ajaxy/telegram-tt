@@ -63,7 +63,7 @@ const TableAboutModal = ({
         </div>
       )}
       {header}
-      <div>
+      <div className={styles.listItems}>
         {listItemData?.map(([icon, title, subtitle]) => {
           return (
             <ListItem

@@ -1,6 +1,4 @@
-import {
-  memo,
-} from '../../lib/teact/teact';
+import { memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiStarsAmount, ApiTonAmount } from '../../api/types';
@@ -8,8 +6,9 @@ import type { ApiStarsAmount, ApiTonAmount } from '../../api/types';
 import { formatStarsAmount } from '../../global/helpers/payments';
 import buildClassName from '../../util/buildClassName';
 import { convertTonFromNanos, convertTonToUsd, formatCurrencyAsString } from '../../util/formatCurrency';
-import { formatStarsAsIcon, formatTonAsIcon } from '../../util/localization/format';
+import { formatStarsAsIcon, formatTonAsIcon, getNextArrowReplacement } from '../../util/localization/format';
 
+import useIsTopmostBalanceBarModal from '../../hooks/element/useIsTopmostBalanceBarModal';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -19,9 +18,9 @@ import Link from './Link';
 import styles from './ModalStarBalanceBar.module.scss';
 
 export type OwnProps = {
-  onCloseAnimationEnd?: () => void;
   isModalOpen?: true;
   currency?: 'TON' | 'XTR';
+  onCloseAnimationEnd?: () => void;
 };
 
 export type StateProps = {
@@ -56,6 +55,8 @@ function ModalStarBalanceBar({
     withShouldRender: true,
   });
 
+  const isTopmost = useIsTopmostBalanceBarModal(ref, Boolean(shouldRender && currentBalance));
+
   const handleGetMoreStars = useLastCallback(() => {
     openStarsBalanceModal(isTonMode ? { currency: 'TON' } : {});
   });
@@ -66,24 +67,20 @@ function ModalStarBalanceBar({
 
   return (
     <div
-      className={buildClassName(styles.root)}
+      className={buildClassName(styles.root, !isTopmost && styles.hidden)}
       ref={ref}
     >
       <div>
         {isTonMode ? (
           lang('ModalStarsBalanceBarDescription', {
-            stars: formatTonAsIcon(lang, convertTonFromNanos(currentBalance.amount), {
-              className: styles.starIcon,
-            }),
+            stars: formatTonAsIcon(lang, convertTonFromNanos(currentBalance.amount)),
           }, {
             withNodes: true,
             withMarkdown: true,
           })
         ) : (
           lang('ModalStarsBalanceBarDescription', {
-            stars: formatStarsAsIcon(lang, formatStarsAmount(lang, currentBalance as ApiStarsAmount), {
-              className: styles.starIcon,
-            }),
+            stars: formatStarsAsIcon(lang, formatStarsAmount(lang, currentBalance as ApiStarsAmount)),
           }, {
             withNodes: true,
             withMarkdown: true,
@@ -101,8 +98,11 @@ function ModalStarBalanceBar({
           </div>
         )}
         {!isTonMode && (
-          <Link isPrimary onClick={handleGetMoreStars}>
-            {lang('GetMoreStarsLinkText')}
+          <Link className={styles.getMoreStarsLink} isPrimary onClick={handleGetMoreStars}>
+            {lang('GetMoreStarsLinkText', undefined, {
+              withNodes: true,
+              specialReplacement: getNextArrowReplacement(),
+            })}
           </Link>
         )}
       </div>

@@ -1,14 +1,12 @@
 import type {
   ApiFormattedText,
-  ApiMessage, ApiPoll, ApiPollResult, ApiQuickReply, ApiSponsoredMessage, ApiThreadInfo,
+  ApiMessage, ApiPoll, ApiPollResult, ApiQuickReply, ApiSponsoredMessage,
   ApiWebPage,
   ApiWebPageFull,
 } from '../../api/types';
 import type {
   MessageList,
   MessageListType,
-  TabThread,
-  Thread,
   ThreadId,
 } from '../../types';
 import type {
@@ -30,6 +28,7 @@ import { unload } from '../../util/mediaLoader';
 import {
   getAllMessageMediaHashes,
   getMessageStatefulContent,
+  groupMessageIdsByThreadId,
   hasMessageTtl, isMediaLoadableInViewer, mergeIdRanges, orderHistoryIds, orderPinnedIds,
 } from '../helpers';
 import { getEmojiOnlyCountForMessage } from '../helpers/getEmojiOnlyCountForMessage';
@@ -45,17 +44,22 @@ import {
   selectPinnedIds,
   selectPoll,
   selectQuickReplyMessage,
-  selectScheduledIds,
   selectScheduledMessage,
   selectTabState,
-  selectThreadIdFromMessage,
-  selectThreadInfo,
-  selectThreadParam,
   selectViewportIds,
   selectWebPage,
 } from '../selectors';
+import { selectThreadIdFromMessage, selectThreadInfo, selectThreadLocalStateParam } from '../selectors/threads';
+import { removeUnreadMentions } from './chats';
 import { removeIdFromSearchResults } from './middleSearch';
+import { removeUnreadReactions } from './reactions';
 import { updateTabState } from './tabs';
+import {
+  deleteThread,
+  replaceTabThreadParam,
+  replaceThreadLocalStateParam,
+  updateThreadInfoMessagesCount,
+} from './threads';
 import { clearMessageSummary, clearMessageTranslation } from './translations';
 
 type MessageStoreSections = GlobalState['messages']['byChatId'][string];
@@ -107,49 +111,6 @@ export function replaceChatMessages<T extends GlobalState>(
   });
 }
 
-export function updateTabThread<T extends GlobalState>(
-  global: T, chatId: string, threadId: ThreadId, threadUpdate: Partial<TabThread>,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-): T {
-  const tabState = selectTabState(global, tabId);
-  const current = tabState.tabThreads[chatId]?.[threadId] || {};
-
-  return updateTabState(global, {
-    tabThreads: {
-      ...tabState.tabThreads,
-      [chatId]: {
-        ...tabState.tabThreads[chatId],
-        [threadId]: {
-          ...current,
-          ...threadUpdate,
-        },
-      },
-    },
-  }, tabId);
-}
-
-export function updateThread<T extends GlobalState>(
-  global: T, chatId: string, threadId: ThreadId, threadUpdate: Partial<Thread> | undefined,
-): T {
-  if (!threadUpdate) {
-    return updateMessageStore(global, chatId, {
-      threadsById: omit(global.messages.byChatId[chatId]?.threadsById, [threadId]),
-    });
-  }
-
-  const current = global.messages.byChatId[chatId];
-
-  return updateMessageStore(global, chatId, {
-    threadsById: {
-      ...(current?.threadsById),
-      [threadId]: {
-        ...(current?.threadsById[threadId]),
-        ...threadUpdate,
-      },
-    },
-  });
-}
-
 export function updateMessageStore<T extends GlobalState>(
   global: T, chatId: string, update: Partial<MessageStoreSections>,
 ): T {
@@ -169,24 +130,6 @@ export function updateMessageStore<T extends GlobalState>(
       },
     },
   };
-}
-
-export function replaceTabThreadParam<T extends GlobalState, K extends keyof TabThread>(
-  global: T, chatId: string, threadId: ThreadId, paramName: K, newValue: TabThread[K] | undefined,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  if (paramName === 'viewportIds') {
-    global = replaceThreadParam(
-      global, chatId, threadId, 'lastViewportIds', newValue as number[] | undefined,
-    );
-  }
-  return updateTabThread(global, chatId, threadId, { [paramName]: newValue }, tabId);
-}
-
-export function replaceThreadParam<T extends GlobalState, K extends keyof Thread>(
-  global: T, chatId: string, threadId: ThreadId, paramName: K, newValue: Thread[K] | undefined,
-) {
-  return updateThread(global, chatId, threadId, { [paramName]: newValue });
 }
 
 export function addMessages<T extends GlobalState>(
@@ -462,14 +405,12 @@ export function deleteChatMessages<T extends GlobalState>(
       );
     });
 
-    global = replaceThreadParam(global, chatId, threadId, 'listedIds', listedIds);
-    global = replaceThreadParam(global, chatId, threadId, 'outlyingLists', outlyingLists);
-    global = replaceThreadParam(global, chatId, threadId, 'pinnedIds', pinnedIds);
+    global = replaceThreadLocalStateParam(global, chatId, threadId, 'listedIds', listedIds);
+    global = replaceThreadLocalStateParam(global, chatId, threadId, 'outlyingLists', outlyingLists);
+    global = replaceThreadLocalStateParam(global, chatId, threadId, 'pinnedIds', pinnedIds);
 
     if (threadInfo && newMessageCount !== undefined) {
-      global = updateThreadInfo(global, chatId, threadId, {
-        messagesCount: newMessageCount,
-      });
+      global = updateThreadInfoMessagesCount(global, chatId, threadId, newMessageCount);
     }
   });
 
@@ -488,11 +429,14 @@ export function deleteChatMessages<T extends GlobalState>(
           global = updateCurrentMessageList(global, chatId, undefined, undefined, undefined, undefined, tabId);
         }
         if (originalPost) {
-          global = updateThread(global, fromChatId!, fromMessageId!, undefined);
+          global = deleteThread(global, fromChatId!, fromMessageId!);
         }
       });
     });
   }
+
+  global = removeUnreadReactions({ global, chatId, ids: messageIds });
+  global = removeUnreadMentions({ global, chatId, ids: messageIds });
 
   const newById = omit(byId, messageIds);
   global = replaceChatMessages(global, chatId, newById);
@@ -511,22 +455,15 @@ export function deleteChatScheduledMessages<T extends GlobalState>(
   }
   const newById = omit(byId, messageIds);
 
-  let scheduledIds = selectScheduledIds(global, chatId, MAIN_THREAD_ID);
-  if (scheduledIds) {
-    messageIds.forEach((messageId) => {
-      if (scheduledIds!.includes(messageId)) {
-        scheduledIds = scheduledIds!.filter((id) => id !== messageId);
-      }
-    });
-    global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'scheduledIds', scheduledIds);
+  const groupedByThreadId = groupMessageIdsByThreadId(global, chatId, messageIds, true);
+  Object.entries(groupedByThreadId).forEach(([tId, newThreadScheduledIds]) => {
+    const threadId = tId as ThreadId;
+    const scheduledIds = selectThreadLocalStateParam(global, chatId, threadId, 'scheduledIds');
+    if (!scheduledIds?.length) return;
 
-    Object.entries(global.messages.byChatId[chatId].threadsById).forEach(([threadId, thread]) => {
-      if (thread.scheduledIds) {
-        const newScheduledIds = thread.scheduledIds.filter((id) => !messageIds.includes(id));
-        global = replaceThreadParam(global, chatId, Number(threadId), 'scheduledIds', newScheduledIds);
-      }
-    });
-  }
+    const cleanedScheduledIds = scheduledIds.filter((id) => !newThreadScheduledIds.includes(id));
+    global = replaceThreadLocalStateParam(global, chatId, threadId, 'scheduledIds', cleanedScheduledIds);
+  });
 
   global = {
     ...global,
@@ -558,7 +495,7 @@ export function updateListedIds<T extends GlobalState>(
     return global;
   }
 
-  return replaceThreadParam(global, chatId, threadId, 'listedIds', orderHistoryIds([
+  return replaceThreadLocalStateParam(global, chatId, threadId, 'listedIds', orderHistoryIds([
     ...(listedIds || []),
     ...newIds,
   ]));
@@ -577,7 +514,7 @@ export function removeOutlyingList<T extends GlobalState>(
 
   const newOutlyingLists = outlyingLists.filter((l) => l !== list);
 
-  return replaceThreadParam(global, chatId, threadId, 'outlyingLists', newOutlyingLists);
+  return replaceThreadLocalStateParam(global, chatId, threadId, 'outlyingLists', newOutlyingLists);
 }
 
 export function updateOutlyingLists<T extends GlobalState>(
@@ -592,7 +529,7 @@ export function updateOutlyingLists<T extends GlobalState>(
 
   const newOutlyingLists = mergeIdRanges(outlyingLists || [], idsUpdate);
 
-  return replaceThreadParam(global, chatId, threadId, 'outlyingLists', newOutlyingLists);
+  return replaceThreadLocalStateParam(global, chatId, threadId, 'outlyingLists', newOutlyingLists);
 }
 
 export function addViewportId<T extends GlobalState>(
@@ -648,49 +585,13 @@ export function safeReplacePinnedIds<T extends GlobalState>(
   const currentIds = selectPinnedIds(global, chatId, threadId) || [];
   const newIds = orderPinnedIds(newPinnedIds);
 
-  return replaceThreadParam(
+  return replaceThreadLocalStateParam(
     global,
     chatId,
     threadId,
     'pinnedIds',
     areSortedArraysEqual(currentIds, newIds) ? currentIds : newIds,
   );
-}
-
-export function updateThreadInfo<T extends GlobalState>(
-  global: T, chatId: string, threadId: ThreadId, update: Partial<ApiThreadInfo> | undefined,
-  doNotUpdateLinked?: boolean,
-): T {
-  const newThreadInfo = {
-    ...(selectThreadInfo(global, chatId, threadId) as ApiThreadInfo),
-    ...update,
-  } as ApiThreadInfo;
-
-  if (!doNotUpdateLinked && !newThreadInfo.isCommentsInfo) {
-    const linkedUpdate = pick(newThreadInfo, ['messagesCount', 'lastMessageId', 'lastReadInboxMessageId']);
-    if (newThreadInfo.fromChannelId && newThreadInfo.fromMessageId) {
-      global = updateThreadInfo(
-        global, newThreadInfo.fromChannelId, newThreadInfo.fromMessageId, linkedUpdate, true,
-      );
-    }
-  }
-
-  return replaceThreadParam(global, chatId, threadId, 'threadInfo', newThreadInfo);
-}
-
-export function updateThreadInfos<T extends GlobalState>(
-  global: T, updates: Partial<ApiThreadInfo>[],
-): T {
-  updates.forEach((update) => {
-    global = updateThreadInfo(
-      global,
-      update.isCommentsInfo ? update.originChannelId! : update.chatId!,
-      update.isCommentsInfo ? update.originMessageId! : update.threadId!,
-      update,
-    );
-  });
-
-  return global;
 }
 
 export function updateScheduledMessages<T extends GlobalState>(
@@ -850,27 +751,6 @@ export function exitMessageSelectMode<T extends GlobalState>(
   return updateTabState(global, {
     selectedMessages: undefined,
   }, tabId);
-}
-
-export function updateThreadUnreadFromForwardedMessage<T extends GlobalState>(
-  global: T,
-  originMessage: ApiMessage,
-  chatId: string,
-  lastMessageId: number,
-  isDeleting?: boolean,
-): T {
-  const { channelPostId, fromChatId } = originMessage.forwardInfo || {};
-  if (channelPostId && fromChatId) {
-    const threadInfoOld = selectThreadInfo(global, chatId, channelPostId);
-    if (threadInfoOld) {
-      global = replaceThreadParam(global, chatId, channelPostId, 'threadInfo', {
-        ...threadInfoOld,
-        lastMessageId,
-        messagesCount: (threadInfoOld.messagesCount || 0) + (isDeleting ? -1 : 1),
-      });
-    }
-  }
-  return global;
 }
 
 export function addActiveMediaDownload<T extends GlobalState>(
@@ -1086,7 +966,7 @@ export function updateTypingDraft<T extends GlobalState>(
   randomId: string,
   text: ApiFormattedText,
 ) {
-  const typingDraftStore = selectThreadParam(global, chatId, threadId, 'typingDraftIdByRandomId');
+  const typingDraftStore = selectThreadLocalStateParam(global, chatId, threadId, 'typingDraftIdByRandomId');
   const messageId = typingDraftStore?.[randomId];
   if (!messageId) {
     return global;

@@ -41,6 +41,8 @@ const useKeyboardListNavigation = (
       return;
     }
 
+    e.preventDefault();
+
     const focusedElement = document.activeElement;
     const elementChildren = Array.from(itemSelector ? element.querySelectorAll(itemSelector) : element.children);
 
@@ -59,7 +61,8 @@ const useKeyboardListNavigation = (
     const item = elementChildren[newIndex] as HTMLElement;
     if (item) {
       setFocusedIndex(newIndex);
-      item.focus();
+      item.focus({ preventScroll: true });
+      item.scrollIntoView({ behavior: 'instant', block: 'nearest' });
     }
   });
 };

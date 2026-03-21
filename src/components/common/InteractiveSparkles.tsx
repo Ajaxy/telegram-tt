@@ -17,6 +17,8 @@ const DEFAULT_PARTICLE_PARAMS = {
   centerShift: [0, -36] as const,
 };
 
+const MIN_BURST_INTERVAL = 8;
+
 const InteractiveSparkles = ({
   color = 'purple',
   centerShift = DEFAULT_PARTICLE_PARAMS.centerShift,
@@ -25,6 +27,7 @@ const InteractiveSparkles = ({
   onRequestAnimation,
 }: OwnProps) => {
   const canvasRef = useRef<HTMLCanvasElement>();
+  const lastBurstTimeRef = useRef<number>(0);
 
   useLayoutEffect(() => {
     if (isDisabled) return undefined;
@@ -40,6 +43,11 @@ const InteractiveSparkles = ({
 
     const animate = () => {
       if (isDisabled) return;
+
+      const now = Date.now();
+      if (now - lastBurstTimeRef.current < MIN_BURST_INTERVAL) return;
+
+      lastBurstTimeRef.current = now;
 
       setupParticles(canvasRef.current!, {
         color: PARTICLE_COLORS[`${color}Gradient`],

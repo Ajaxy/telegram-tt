@@ -284,10 +284,6 @@
   margin-top: 1rem;
 }
 
-.paymentButtonStar {
-  --color-fill: white !important;
-}
-
 .transactions, .subscriptions {
   display: flex;
   flex-direction: column;
@@ -300,7 +296,24 @@
 
   z-index: 1;
   top: 3.5rem;
+
   padding-inline: 0;
+  border-bottom: 0.0625rem solid var(--color-light-shadow);
+
+  box-shadow: none;
+
+  transition: box-shadow 0.2s;
+
+  &.pinned {
+    box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
+  }
+
+  :global(.Tab) {
+    padding: 0.75rem 1.125rem;
+    :global(.platform) {
+      bottom: -0.75rem;
+    }
+  }
 }
 
 .disclaimer {

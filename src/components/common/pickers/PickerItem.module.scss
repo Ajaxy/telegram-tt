@@ -1,4 +1,6 @@
 .root {
+  scroll-margin-block: 0.25rem;
+
   position: relative;
 
   overflow: hidden;
@@ -9,7 +11,7 @@
 
   min-height: 2.5rem;
   padding: 0.25rem;
-  border-radius: var(--border-radius-default);
+  border-radius: 1.25rem;
 
   line-height: 1.25;
   color: var(--color-text);
@@ -40,9 +42,13 @@
   cursor: var(--custom-cursor, pointer);
 
   @media (hover: hover) {
-    &:hover,
-    &:focus-visible {
+    &:hover {
       background-color: var(--color-item-hover);
+    }
+
+    &:focus-visible {
+      z-index: 1;
+      outline: 2px solid var(--color-borders);
     }
   }
 }

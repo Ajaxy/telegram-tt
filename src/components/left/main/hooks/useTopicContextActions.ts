@@ -1,4 +1,4 @@
-import { useMemo } from '../../../../lib/teact/teact';
+import { useMemo } from '@teact';
 import { getActions } from '../../../../global';
 
 import type { ApiChat, ApiTopic } from '../../../../api/types';
@@ -14,6 +14,7 @@ import useOldLang from '../../../../hooks/useOldLang';
 
 export default function useTopicContextActions({
   topic,
+  unreadCount,
   chat,
   isChatMuted,
   wasOpened,
@@ -24,6 +25,7 @@ export default function useTopicContextActions({
 }: {
   topic: ApiTopic;
   chat: ApiChat;
+  unreadCount?: number;
   isChatMuted?: boolean;
   wasOpened?: boolean;
   canDelete?: boolean;
@@ -34,7 +36,7 @@ export default function useTopicContextActions({
   const lang = useLang();
   const oldLang = useOldLang();
 
-  return useMemo(() => {
+  const preparedActions = useMemo(() => {
     const {
       isPinned, notifySettings, isClosed, id: topicId,
     } = topic;
@@ -68,7 +70,7 @@ export default function useTopicContextActions({
       },
     };
 
-    const actionUnreadMark = topic.unreadCount || !wasOpened
+    const actionUnreadMark = unreadCount || !wasOpened
       ? {
         title: oldLang('MarkAsRead'),
         icon: 'readchats',
@@ -130,5 +132,10 @@ export default function useTopicContextActions({
       actionCloseTopic,
       actionDelete,
     ]) as MenuItemContextAction[];
-  }, [topic, chat, isChatMuted, wasOpened, lang, oldLang, canDelete, handleDelete, handleMute, handleUnmute]);
+  }, [
+    chat, topic, unreadCount, wasOpened, isChatMuted, canDelete,
+    handleDelete, handleMute, handleUnmute, lang, oldLang,
+  ]);
+
+  return preparedActions;
 }

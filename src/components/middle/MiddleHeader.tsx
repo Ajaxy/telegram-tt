@@ -31,9 +31,8 @@ import {
   selectPinnedIds,
   selectScheduledIds,
   selectTabState,
-  selectThreadInfo,
-  selectThreadParam,
 } from '../../global/selectors';
+import { selectThreadInfo, selectThreadLocalStateParam } from '../../global/selectors/threads';
 import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import { IS_MAC_OS } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
@@ -240,7 +239,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 
     return (
       <>
-        {renderBackButton()}
+        {renderBackButton(currentTransitionKey === 0)}
         <h3>
           {messagesCount !== undefined ? (
             messageListType === 'thread' ? (
@@ -400,7 +399,7 @@ export default memo(withGlobal<OwnProps>(
       messagesCount = threadInfo?.messagesCount || 0;
     }
 
-    const typingStatus = selectThreadParam(global, chatId, threadId, 'typingStatus');
+    const typingStatus = selectThreadLocalStateParam(global, chatId, threadId, 'typingStatus');
 
     const emojiStatus = peer?.emojiStatus;
     const emojiStatusSticker = emojiStatus && selectCustomEmoji(global, emojiStatus.documentId);

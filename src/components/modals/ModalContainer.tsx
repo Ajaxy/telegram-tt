@@ -15,21 +15,27 @@ import BirthdaySetupModal from './birthday/BirthdaySetupModal.async';
 import BoostModal from './boost/BoostModal.async';
 import ChatInviteModal from './chatInvite/ChatInviteModal.async';
 import ChatlistModal from './chatlist/ChatlistModal.async';
+import CocoonModal from './cocoon/CocoonModal.async';
 import CollectibleInfoModal from './collectible/CollectibleInfoModal.async';
 import DeleteAccountModal from './deleteAccount/DeleteAccountModal.async';
 import EmojiStatusAccessModal from './emojiStatusAccess/EmojiStatusAccessModal.async';
 import FrozenAccountModal from './frozenAccount/FrozenAccountModal.async';
 import AboutStarGiftModal from './gift/AboutStarGiftModal.async';
+import ActiveGiftAuctionsModal from './gift/auction/ActiveGiftAuctionsModal.async';
 import GiftAuctionAcquiredModal from './gift/auction/GiftAuctionAcquiredModal.async';
 import GiftAuctionBidModal from './gift/auction/GiftAuctionBidModal.async';
 import GiftAuctionChangeRecipientModal from './gift/auction/GiftAuctionChangeRecipientModal.async';
 import GiftAuctionInfoModal from './gift/auction/GiftAuctionInfoModal.async';
 import GiftAuctionModal from './gift/auction/GiftAuctionModal.async';
+import GiftCraftInfoModal from './gift/craft/GiftCraftInfoModal.async';
+import GiftCraftModal from './gift/craft/GiftCraftModal.async';
+import GiftCraftSelectModal from './gift/craft/GiftCraftSelectModal.async';
 import PremiumGiftModal from './gift/GiftModal.async';
 import GiftInfoModal from './gift/info/GiftInfoModal.async';
 import GiftLockedModal from './gift/locked/GiftLockedModal.async';
 import GiftDescriptionRemoveModal from './gift/message/GiftDescriptionRemoveModal.async';
 import GiftOfferAcceptModal from './gift/offer/GiftOfferAcceptModal.async';
+import GiftPreviewModal from './gift/preview/GiftPreviewModal.async';
 import GiftRecipientPicker from './gift/recipient/GiftRecipientPicker.async';
 import GiftResalePriceComposerModal from './gift/resale/GiftResalePriceComposerModal.async';
 import StarGiftPriceDecreaseInfoModal from './gift/StarGiftPriceDecreaseInfoModal.async';
@@ -41,6 +47,7 @@ import GiftInfoValueModal from './gift/value/GiftInfoValueModal.async';
 import GiftWithdrawModal from './gift/withdraw/GiftWithdrawModal.async';
 import GiftCodeModal from './giftcode/GiftCodeModal.async';
 import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
+import LeaveGroupModal from './leaveGroup/LeaveGroupModal.async';
 import LocationAccessModal from './locationAccess/LocationAccessModal.async';
 import MapModal from './map/MapModal.async';
 import OneTimeMediaModal from './oneTimeMedia/OneTimeMediaModal.async';
@@ -49,6 +56,7 @@ import PasskeyModal from './passkey/PasskeyModal.async';
 import PreparedMessageModal from './preparedMessage/PreparedMessageModal.async';
 import PriceConfirmModal from './priceConfirm/PriceConfirmModal.async';
 import ProfileRatingModal from './profileRating/ProfileRatingModal.async';
+import QuickChatPickerModal from './quickChatPicker/QuickChatPickerModal.async';
 import QuickPreviewModal from './quickPreview/QuickPreviewModal.async';
 import ReportAdModal from './reportAd/ReportAdModal.async';
 import ReportModal from './reportModal/ReportModal.async';
@@ -63,6 +71,7 @@ import StealthModeModal from './storyStealthMode/StealthModeModal.async';
 import SuggestedPostApprovalModal from './suggestedPostApproval/SuggestedPostApprovalModal.async';
 import SuggestedStatusModal from './suggestedStatus/SuggestedStatusModal.async';
 import SuggestMessageModal from './suggestMessage/SuggestMessageModal.async';
+import TwoFaCheckModal from './twoFaCheck/TwoFaCheckModal.async';
 import UrlAuthModal from './urlAuth/UrlAuthModal.async';
 import WebAppModal from './webApp/WebAppModal.async';
 
@@ -100,12 +109,17 @@ type ModalKey = keyof Pick<TabState,
   'emojiStatusAccessModal' |
   'locationAccessModal' |
   'aboutAdsModal' |
+  'giftPreviewModal' |
   'giftUpgradeModal' |
+  'giftCraftModal' |
+  'giftCraftSelectModal' |
+  'giftCraftInfoModal' |
   'giftAuctionModal' |
   'giftAuctionBidModal' |
   'giftAuctionInfoModal' |
   'giftAuctionChangeRecipientModal' |
   'giftAuctionAcquiredModal' |
+  'activeGiftAuctionsModal' |
   'starGiftPriceDecreaseInfoModal' |
   'aboutStarGiftModal' |
   'monetizationVerificationModal' |
@@ -126,7 +140,11 @@ type ModalKey = keyof Pick<TabState,
   'quickPreview' |
   'storyStealthModal' |
   'isPasskeyModalOpen' |
-  'birthdaySetupModal'
+  'birthdaySetupModal' |
+  'leaveGroupModal' |
+  'isTwoFaCheckModalOpen' |
+  'isQuickChatPickerOpen' |
+  'isCocoonModalOpen'
 >;
 
 type StateProps = {
@@ -174,12 +192,17 @@ const MODALS: ModalRegistry = {
   emojiStatusAccessModal: EmojiStatusAccessModal,
   locationAccessModal: LocationAccessModal,
   aboutAdsModal: AboutAdsModal,
+  giftPreviewModal: GiftPreviewModal,
   giftUpgradeModal: GiftUpgradeModal,
+  giftCraftModal: GiftCraftModal,
+  giftCraftSelectModal: GiftCraftSelectModal,
+  giftCraftInfoModal: GiftCraftInfoModal,
   giftAuctionModal: GiftAuctionModal,
   giftAuctionBidModal: GiftAuctionBidModal,
   giftAuctionInfoModal: GiftAuctionInfoModal,
   giftAuctionChangeRecipientModal: GiftAuctionChangeRecipientModal,
   giftAuctionAcquiredModal: GiftAuctionAcquiredModal,
+  activeGiftAuctionsModal: ActiveGiftAuctionsModal,
   starGiftPriceDecreaseInfoModal: StarGiftPriceDecreaseInfoModal,
   aboutStarGiftModal: AboutStarGiftModal,
   monetizationVerificationModal: VerificationMonetizationModal,
@@ -201,6 +224,10 @@ const MODALS: ModalRegistry = {
   storyStealthModal: StealthModeModal,
   isPasskeyModalOpen: PasskeyModal,
   birthdaySetupModal: BirthdaySetupModal,
+  leaveGroupModal: LeaveGroupModal,
+  isTwoFaCheckModalOpen: TwoFaCheckModal,
+  isQuickChatPickerOpen: QuickChatPickerModal,
+  isCocoonModalOpen: CocoonModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

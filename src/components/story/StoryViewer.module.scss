@@ -647,13 +647,12 @@
   .captionInner {
     overflow-y: hidden;
 
+    mask-image: linear-gradient(to top, black 0%, black 0%), linear-gradient(to left, black 75%, transparent 100%);
+    mask-repeat: no-repeat;
+    mask-position: 100% 100%, 100% calc(var(--_overflow-shift) - 1.25rem);
+    mask-size: 100% 100%, calc(var(--expand-button-width, 0%) + 4rem) 1.25em;
     -webkit-mask-composite: xor;
     mask-composite: exclude;
-
-    mask-image: linear-gradient(to top, black 0%, black 0%), linear-gradient(to left, black 75%, transparent 100%);
-    mask-position: 100% 100%, 100% calc(var(--_overflow-shift) - 1.25rem);
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%, calc(var(--expand-button-width, 0%) + 4rem) 1.25em;
   }
 }
 

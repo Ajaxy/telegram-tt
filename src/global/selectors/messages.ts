@@ -12,9 +12,7 @@ import type {
 import type {
   ChatTranslatedMessages,
   MessageListType,
-  TabThread,
   TextSummary,
-  Thread,
   ThreadId,
 } from '../../types';
 import type { IAllowedAttachmentOptions } from '../helpers';
@@ -24,7 +22,8 @@ import type {
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  ANONYMOUS_USER_ID, GENERAL_TOPIC_ID, SERVICE_NOTIFICATIONS_USER_ID,
+  GENERAL_TOPIC_ID,
+  SERVICE_NOTIFICATIONS_USER_ID,
   WEB_APP_PLATFORM,
 } from '../../config';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
@@ -86,7 +85,17 @@ import { selectPeer, selectPeerPaidMessagesStars } from './peers';
 import { selectPeerStory } from './stories';
 import { selectCustomEmoji, selectIsStickerFavorite } from './symbols';
 import { selectTabState } from './tabs';
-import { selectTopic } from './topics';
+import {
+  selectEditingId,
+  selectEditingScheduledId,
+  selectTabThreadParam,
+  selectThreadByMessage,
+  selectThreadInfo,
+  selectThreadLocalState,
+  selectThreadLocalStateParam,
+  selectThreadReadState,
+} from './threads';
+import { selectTopic, selectTopicFromMessage } from './topics';
 import {
   selectBot, selectUser, selectUserStatus,
 } from './users';
@@ -121,45 +130,8 @@ export function selectChatScheduledMessages<T extends GlobalState>(global: T, ch
   return global.scheduledMessages.byChatId[chatId]?.byId;
 }
 
-export function selectTabThreadParam<T extends GlobalState, K extends keyof TabThread>(
-  global: T,
-  chatId: string,
-  threadId: ThreadId,
-  key: K,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  return selectTabState(global, tabId).tabThreads[chatId]?.[threadId]?.[key];
-}
-
-export function selectThreadParam<T extends GlobalState, K extends keyof Thread>(
-  global: T,
-  chatId: string,
-  threadId: ThreadId,
-  key: K,
-) {
-  return selectThread(global, chatId, threadId)?.[key];
-}
-
-export function selectThread<T extends GlobalState>(
-  global: T,
-  chatId: string,
-  threadId: ThreadId,
-) {
-  const messageInfo = global.messages.byChatId[chatId];
-  if (!messageInfo) {
-    return undefined;
-  }
-
-  const thread = messageInfo.threadsById[threadId];
-  if (!thread) {
-    return undefined;
-  }
-
-  return thread;
-}
-
 export function selectListedIds<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
-  return selectThreadParam(global, chatId, threadId, 'listedIds');
+  return selectThreadLocalStateParam(global, chatId, threadId, 'listedIds');
 }
 
 export function selectOutlyingListByMessageId<T extends GlobalState>(
@@ -178,7 +150,7 @@ export function selectOutlyingListByMessageId<T extends GlobalState>(
 export function selectOutlyingLists<T extends GlobalState>(
   global: T, chatId: string, threadId: ThreadId,
 ) {
-  return selectThreadParam(global, chatId, threadId, 'outlyingLists');
+  return selectThreadLocalStateParam(global, chatId, threadId, 'outlyingLists');
 }
 
 export function selectCurrentMessageIds<T extends GlobalState>(
@@ -205,79 +177,15 @@ export function selectViewportIds<T extends GlobalState>(
 }
 
 export function selectPinnedIds<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
-  return selectThreadParam(global, chatId, threadId, 'pinnedIds');
+  return selectThreadLocalStateParam(global, chatId, threadId, 'pinnedIds');
 }
 
 export function selectScheduledIds<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
-  return selectThreadParam(global, chatId, threadId, 'scheduledIds');
-}
-
-export function selectScrollOffset<T extends GlobalState>(
-  global: T, chatId: string, threadId: ThreadId,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  return selectTabThreadParam(global, chatId, threadId, 'scrollOffset', tabId);
-}
-
-export function selectLastScrollOffset<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
-  return selectThreadParam(global, chatId, threadId, 'lastScrollOffset');
-}
-
-export function selectEditingId<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
-  return selectThreadParam(global, chatId, threadId, 'editingId');
-}
-
-export function selectEditingDraft<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
-  return selectThreadParam(global, chatId, threadId, 'editingDraft');
-}
-
-export function selectEditingScheduledId<T extends GlobalState>(global: T, chatId: string) {
-  return selectThreadParam(global, chatId, MAIN_THREAD_ID, 'editingScheduledId');
-}
-
-export function selectEditingScheduledDraft<T extends GlobalState>(global: T, chatId: string) {
-  return selectThreadParam(global, chatId, MAIN_THREAD_ID, 'editingScheduledDraft');
-}
-
-export function selectDraft<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
-  return selectThreadParam(global, chatId, threadId, 'draft');
-}
-
-export function selectNoWebPage<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
-  return selectThreadParam(global, chatId, threadId, 'noWebPage');
-}
-
-export function selectThreadInfo<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
-  return selectThreadParam(global, chatId, threadId, 'threadInfo');
+  return selectThreadLocalStateParam(global, chatId, threadId, 'scheduledIds');
 }
 
 export function selectFirstMessageId<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
-  return selectThreadParam(global, chatId, threadId, 'firstMessageId');
-}
-
-export function selectReplyStack<T extends GlobalState>(
-  global: T, chatId: string, threadId: ThreadId,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  return selectTabThreadParam(global, chatId, threadId, 'replyStack', tabId);
-}
-
-export function selectThreadMessagesCount(global: GlobalState, chatId: string, threadId: ThreadId) {
-  const chat = selectChat(global, chatId);
-  const threadInfo = selectThreadInfo(global, chatId, threadId);
-  if (!chat || !threadInfo || threadInfo.messagesCount === undefined) return undefined;
-  // In forum topics first message is ignored, but not in General
-  if (chat.isForum && threadId !== GENERAL_TOPIC_ID) return threadInfo.messagesCount - 1;
-  return threadInfo.messagesCount;
-}
-
-export function selectThreadByMessage<T extends GlobalState>(global: T, message: ApiMessage) {
-  const threadId = selectThreadIdFromMessage(global, message);
-  if (!threadId || threadId === MAIN_THREAD_ID) {
-    return undefined;
-  }
-
-  return global.messages.byChatId[message.chatId].threadsById[threadId];
+  return selectThreadLocalStateParam(global, chatId, threadId, 'firstMessageId');
 }
 
 export function selectIsMessageInCurrentMessageList<T extends GlobalState>(
@@ -391,16 +299,29 @@ export function selectIsMessageFocused<T extends GlobalState>(
   return focusedId ? focusedId === message.id || focusedId === message.previousLocalId : false;
 }
 
-export function selectIsMessageUnread<T extends GlobalState>(global: T, message: ApiMessage) {
-  const { lastReadOutboxMessageId } = selectChat(global, message.chatId) || {};
-  return isMessageLocal(message) || !lastReadOutboxMessageId || lastReadOutboxMessageId < message.id;
+export function selectIsMessageUnread<T extends GlobalState>(
+  global: T, chatId: string, threadId: ThreadId, messageId: number, messageListType: MessageListType,
+) {
+  const { lastReadOutboxMessageId } = selectThreadReadState(global, chatId, threadId) || {};
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!message) {
+    return false;
+  }
+
+  return messageListType === 'scheduled' || isMessageLocal(message)
+    || !lastReadOutboxMessageId || lastReadOutboxMessageId < message.id;
 }
 
 export function selectOutgoingStatus<T extends GlobalState>(
-  global: T, message: ApiMessage, isScheduledList = false,
+  global: T, chatId: string, threadId: ThreadId, messageId: number, messageListType: MessageListType,
 ): ApiMessageOutgoingStatus {
-  if (!selectIsMessageUnread(global, message) && !isScheduledList) {
+  if (!selectIsMessageUnread(global, chatId, threadId, messageId, messageListType)) {
     return 'read';
+  }
+
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!message) {
+    return 'failed'; // Should never happen
   }
 
   return getSendingState(message);
@@ -514,24 +435,15 @@ export function selectFullWebPageFromMessage<T extends GlobalState>(global: T, m
   return selectFullWebPage(global, message.content.webPage.id);
 }
 
-export function selectTopicFromMessage<T extends GlobalState>(global: T, message: ApiMessage) {
-  const { chatId } = message;
-  const chat = selectChat(global, chatId);
-  if (!chat?.isForum) return undefined;
-
-  const threadId = selectThreadIdFromMessage(global, message);
-  return selectTopic(global, chatId, threadId);
-}
-
 const MAX_MESSAGES_TO_DELETE_OWNER_TOPIC = 10;
 export function selectCanDeleteOwnerTopic<T extends GlobalState>(global: T, chatId: string, topicId: number) {
   const topic = selectTopic(global, chatId, topicId);
   if (topic && !topic.isOwner) return false;
 
-  const thread = selectThread(global, chatId, topicId);
-  if (!thread) return false;
+  const localThreadState = selectThreadLocalState(global, chatId, topicId);
+  if (!localThreadState) return false;
 
-  const { listedIds } = thread;
+  const { listedIds } = localThreadState;
   if (!listedIds
     // Plus one for root message
     || listedIds.length + 1 >= MAX_MESSAGES_TO_DELETE_OWNER_TOPIC) {
@@ -557,59 +469,6 @@ export function selectCanDeleteTopic<T extends GlobalState>(global: T, chatId: s
     || getHasAdminRight(chat, 'deleteMessages')
     || (chat.isForum
       && selectCanDeleteOwnerTopic(global, chat.id, topicId));
-}
-
-export function selectSavedDialogIdFromMessage<T extends GlobalState>(
-  global: T, message: ApiMessage,
-): string | undefined {
-  const {
-    chatId, senderId, forwardInfo, savedPeerId,
-  } = message;
-
-  if (savedPeerId) return savedPeerId;
-
-  if (chatId !== global.currentUserId) {
-    return undefined;
-  }
-
-  if (forwardInfo?.savedFromPeerId) {
-    return forwardInfo.savedFromPeerId;
-  }
-
-  if (forwardInfo?.fromId) {
-    return forwardInfo.fromId;
-  }
-
-  if (forwardInfo?.hiddenUserName) {
-    return ANONYMOUS_USER_ID;
-  }
-
-  return senderId;
-}
-
-export function selectThreadIdFromMessage<T extends GlobalState>(global: T, message: ApiMessage): ThreadId {
-  const savedDialogId = selectSavedDialogIdFromMessage(global, message);
-  if (savedDialogId) {
-    return savedDialogId;
-  }
-
-  const chat = selectChat(global, message.chatId);
-  const { content } = message;
-  const { replyToMsgId, replyToTopId, isForumTopic } = getMessageReplyInfo(message) || {};
-  if (content.action?.type === 'topicCreate') {
-    return message.id;
-  }
-
-  if (!chat?.isForum) {
-    if (chat && isChatBasicGroup(chat)) return MAIN_THREAD_ID;
-
-    if (chat && isChatSuperGroup(chat)) {
-      return replyToTopId || replyToMsgId || MAIN_THREAD_ID;
-    }
-    return MAIN_THREAD_ID;
-  }
-  if (!isForumTopic) return GENERAL_TOPIC_ID;
-  return replyToTopId || replyToMsgId || GENERAL_TOPIC_ID;
 }
 
 export function selectCanReplyToMessage<T extends GlobalState>(global: T, message: ApiMessage, threadId: ThreadId) {
@@ -917,37 +776,28 @@ export function selectUploadProgress<T extends GlobalState>(global: T, message: 
 }
 
 export function selectRealLastReadId<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
-  if (threadId === MAIN_THREAD_ID) {
-    const chat = selectChat(global, chatId);
-    if (!chat) {
-      return undefined;
-    }
-
-    // `lastReadInboxMessageId` is empty for new chats
-    if (!chat.lastReadInboxMessageId) {
-      return undefined;
-    }
-
-    const lastMessageId = selectChatLastMessageId(global, chatId);
-
-    if (!lastMessageId || chat.unreadCount) {
-      return chat.lastReadInboxMessageId;
-    }
-
-    return lastMessageId;
-  } else {
-    const threadInfo = selectThreadInfo(global, chatId, threadId);
-    if (!threadInfo) {
-      return undefined;
-    }
-
-    if (!threadInfo.lastReadInboxMessageId) {
-      return Number(threadInfo.threadId);
-    }
-
-    // Some previously read messages may be deleted
-    return Math.min(threadInfo.lastReadInboxMessageId, threadInfo.lastMessageId || Infinity);
+  const readState = selectThreadReadState(global, chatId, threadId);
+  if (!readState) {
+    return undefined;
   }
+
+  // `lastReadInboxMessageId` is empty for new chats
+  if (!readState.lastReadInboxMessageId) {
+    // For new comments, mark thread start as the last read
+    if (threadId !== MAIN_THREAD_ID && readState.unreadCount && typeof threadId === 'number') {
+      return threadId;
+    }
+
+    return undefined;
+  }
+
+  const lastMessageId = selectChatLastMessageId(global, chatId);
+
+  if (!lastMessageId || readState.unreadCount) {
+    return readState.lastReadInboxMessageId;
+  }
+
+  return lastMessageId;
 }
 
 export function selectFirstUnreadId<T extends GlobalState>(
@@ -961,8 +811,9 @@ export function selectFirstUnreadId<T extends GlobalState>(
     }
   } else {
     const threadInfo = selectThreadInfo(global, chatId, threadId);
-    if (!threadInfo
-      || (threadInfo.lastMessageId !== undefined && threadInfo.lastMessageId === threadInfo.lastReadInboxMessageId)) {
+    const readState = selectThreadReadState(global, chatId, threadId);
+    if (!threadInfo || !readState
+      || (threadInfo.lastMessageId !== undefined && threadInfo.lastMessageId === readState.lastReadInboxMessageId)) {
       return undefined;
     }
   }
@@ -1528,7 +1379,7 @@ export function selectForwardsCanBeSentToChat<T extends GlobalState>(
   const chatMessages = selectChatMessages(global, fromChatId!);
 
   const isSavedMessages = toChatId ? selectIsChatWithSelf(global, toChatId) : undefined;
-  const isChatWithBot = toChatId ? selectIsChatWithBot(global, chat) : undefined;
+  const isChatWithBot = toChatId ? selectIsChatWithBot(global, toChatId) : undefined;
   const options = getAllowedAttachmentOptions(chat, chatFullInfo, isChatWithBot, isSavedMessages);
   return !messageIds!.some((messageId) => сheckMessageSendingDenied(chatMessages[messageId], options));
 }

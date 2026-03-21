@@ -117,6 +117,11 @@ export function wrapError<T extends Error>(error: T): WrappedError<T> {
       key: 'ErrorPasswordFresh',
       variables: { time: formatWait(error.seconds) },
     };
+  } else if (error instanceof errors.SessionFreshError) {
+    messageKey = {
+      key: 'ErrorSessionFresh',
+      variables: { time: formatWait(error.seconds) },
+    };
   } else if (error instanceof errors.RPCError) {
     messageKey = {
       key: ERROR_KEYS[error.errorMessage],

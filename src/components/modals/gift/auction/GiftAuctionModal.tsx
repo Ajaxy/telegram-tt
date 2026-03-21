@@ -196,7 +196,12 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
             {lang('GiftAuctionTopBidders', {
               count: giftsPerRound,
               gift: <span className={styles.giftName}>{giftTitle}</span>,
-              link: <Link isPrimary onClick={handleLearnMoreClick}>{lang('GiftAuctionLearnMore')}</Link>,
+              link: (
+                <Link isPrimary onClick={handleLearnMoreClick}>
+                  {lang('GiftAuctionLearnMore', undefined,
+                    { withNodes: true })}
+                </Link>
+              ),
             }, { pluralValue: giftsPerRound, withNodes: true, withMarkdown: true })}
           </p>
         )}

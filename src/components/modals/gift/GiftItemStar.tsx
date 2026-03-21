@@ -5,22 +5,18 @@ import type { ApiStarGift, ApiTypeCurrencyAmount } from '../../../api/types';
 
 import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
 import { selectIsCurrentUserPremium } from '../../../global/selectors';
-import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment.ts';
 import buildClassName from '../../../util/buildClassName';
 import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
-
-import Icon from '../../common/icons/Icon'; ;
 import { getGiftAttributes, getStickerFromGift } from '../../common/helpers/gifts';
 
-import useFlag from '../../../hooks/useFlag.ts';
 import { type ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import GiftRibbon from '../../common/gift/GiftRibbon';
-import RadialPatternBackground from '../../common/profile/RadialPatternBackground';
-import StickerView from '../../common/StickerView';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
+import GiftAttributeItem from './GiftAttributeItem';
 
 import styles from './GiftItem.module.scss';
 
@@ -48,7 +44,6 @@ function GiftItemStar({
   } = getActions();
 
   const ref = useRef<HTMLDivElement>();
-  const stickerRef = useRef<HTMLDivElement>();
 
   function getPriceAmount(amounts?: ApiTypeCurrencyAmount[]) {
     if (!amounts) return { amount: 0, currency: STARS_CURRENCY_CODE };
@@ -65,7 +60,6 @@ function GiftItemStar({
   const lang = useLang();
 
   const [isVisible, setIsVisible] = useState(false);
-  const [isHover, markHover, unmarkHover] = useFlag();
 
   const sticker = getStickerFromGift(gift);
   const isGiftUnique = gift.type === 'starGiftUnique';
@@ -132,38 +126,19 @@ function GiftItemStar({
     onClick?.(gift, isResale ? 'resell' : 'original');
   });
 
-  const radialPatternBackdrop = useMemo(() => {
-    const { backdrop, pattern } = getGiftAttributes(gift) || {};
-
-    if (!backdrop || !pattern) {
-      return undefined;
-    }
-
-    const backdropColors = [backdrop.centerColor, backdrop.edgeColor];
-
-    return (
-      <RadialPatternBackground
-        className={styles.radialPattern}
-        backgroundColors={backdropColors}
-        patternIcon={pattern.sticker}
-        ringsCount={1}
-        ovalFactor={1}
-      />
-    );
-  }, [gift]);
+  const giftAttrs = useMemo(() => getGiftAttributes(gift), [gift]);
 
   const giftNumber = isGiftUnique ? gift.number : 0;
   const isLocked = Boolean(gift.type === 'starGift' && gift.lockedUntilDate);
 
   const giftRibbon = useMemo(() => {
     if (isGiftUnique) {
-      const { backdrop } = getGiftAttributes(gift) || {};
-      if (!backdrop) {
+      if (!giftAttrs?.backdrop) {
         return undefined;
       }
       return (
         <GiftRibbon
-          color={[backdrop.centerColor, backdrop.edgeColor]}
+          color={[giftAttrs.backdrop.centerColor, giftAttrs.backdrop.edgeColor]}
           text={
             lang('GiftSavedNumber', { number: giftNumber })
           }
@@ -186,7 +161,7 @@ function GiftItemStar({
       return <GiftRibbon color="blue" text={lang('GiftLimited')} />;
     }
     return undefined;
-  }, [isGiftUnique, isResale, gift, isSoldOut,
+  }, [isGiftUnique, isResale, giftAttrs, isSoldOut,
     isLimited, lang, giftNumber, isPremiumRequired, isAuction]);
 
   useOnIntersect(ref, observeIntersection, (entry) => {
@@ -217,8 +192,13 @@ function GiftItemStar({
   }, [withTransferBadge, priceCurrency, formattedPrice, isAuction, lang]);
 
   return (
-    <div
+    <GiftAttributeItem
       ref={ref}
+      backdrop={giftAttrs?.backdrop}
+      patternSticker={giftAttrs?.pattern?.sticker}
+      sticker={sticker}
+      stickerSize={GIFT_STICKER_SIZE}
+      observeIntersection={observeIntersection}
       className={buildClassName(
         'interactive-gift',
         styles.container,
@@ -228,32 +208,8 @@ function GiftItemStar({
         isAuction && styles.auction,
         noClickable && styles.noClickable,
       )}
-      tabIndex={noClickable ? undefined : 0}
-      role={noClickable ? undefined : 'button'}
       onClick={noClickable ? undefined : handleGiftClick}
-      onMouseEnter={!IS_TOUCH_ENV && !noClickable ? markHover : undefined}
-      onMouseLeave={!IS_TOUCH_ENV && !noClickable ? unmarkHover : undefined}
     >
-      {radialPatternBackdrop}
-
-      <div
-        ref={stickerRef}
-        className={styles.stickerWrapper}
-        style={`width: ${GIFT_STICKER_SIZE}px; height: ${GIFT_STICKER_SIZE}px`}
-      >
-        {sticker && (
-          <StickerView
-            observeIntersectionForPlaying={observeIntersection}
-            observeIntersectionForLoading={observeIntersection}
-            containerRef={stickerRef}
-            sticker={sticker}
-            size={GIFT_STICKER_SIZE}
-            shouldLoop={isHover}
-            shouldPreloadPreview
-          />
-        )}
-
-      </div>
       {!hideBadge && (
         <Button
           className={buildClassName(
@@ -266,13 +222,14 @@ function GiftItemStar({
           withSparkleEffect={isVisible && !withTransferBadge}
           pill
           fluid
+          inline
         >
           {badgeContent}
         </Button>
       )}
       {giftRibbon}
       {isLocked && <Icon name="lock-badge" className={styles.lockIcon} />}
-    </div>
+    </GiftAttributeItem>
   );
 }
 

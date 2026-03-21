@@ -19,10 +19,10 @@ import {
   selectChatOnlineCount,
   selectIsChatRestricted,
   selectMonoforumChannel,
-  selectThreadMessagesCount,
   selectTopic,
   selectUser,
 } from '../../global/selectors';
+import { selectThreadMessagesCount } from '../../global/selectors/threads';
 import buildClassName from '../../util/buildClassName';
 import { REM } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';

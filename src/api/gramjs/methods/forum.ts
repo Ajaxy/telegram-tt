@@ -1,7 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { generateRandomBigInt } from '../../../lib/gramjs/Helpers';
 
-import type { ApiMessage, ApiTopic } from '../../types';
+import type { ApiMessage, ApiTopicWithState } from '../../types';
 import type {
   ApiChat,
   ApiDraft,
@@ -9,7 +9,7 @@ import type {
 } from '../../types/chats';
 
 import { GENERAL_TOPIC_ID, TOPICS_SLICE } from '../../../config';
-import { buildApiTopic } from '../apiBuilders/forums';
+import { buildApiTopicWithState } from '../apiBuilders/forums';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildInputPeer, DEFAULT_PRIMITIVES } from '../gramjsBuilders';
 import { processAffectedHistory } from '../updates/updateManager';
@@ -57,12 +57,11 @@ export async function fetchTopics({
   offsetDate?: number;
   limit?: number;
 }): Promise<{
-  topics: ApiTopic[];
+  topics: ApiTopicWithState[];
   messages: ApiMessage[];
   count: number;
   shouldOrderByCreateDate?: boolean;
   draftsById: Record<number, ApiDraft | undefined>;
-  readInboxMessageIdByTopicId: Record<number, number>;
 } | undefined> {
   const { id, accessHash } = chat;
 
@@ -79,7 +78,7 @@ export async function fetchTopics({
 
   const { orderByCreateDate } = result;
 
-  const topics = result.topics.map(buildApiTopic).filter(Boolean);
+  const topics = result.topics.map(buildApiTopicWithState).filter(Boolean);
   const count = result.count === 0 ? topics.length : result.count; // Sometimes count is 0 in result, but we have topics
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
   const draftsById = result.topics.reduce((acc, topic) => {
@@ -88,12 +87,6 @@ export async function fetchTopics({
     }
     return acc;
   }, {} as Record<number, ReturnType<typeof buildMessageDraft>>);
-  const readInboxMessageIdByTopicId = result.topics.reduce((acc, topic) => {
-    if (topic instanceof GramJs.ForumTopic && topic.readInboxMaxId) {
-      acc[topic.id] = topic.readInboxMaxId;
-    }
-    return acc;
-  }, {} as Record<number, number>);
 
   return {
     topics,
@@ -102,7 +95,6 @@ export async function fetchTopics({
     count: count + 1,
     shouldOrderByCreateDate: orderByCreateDate,
     draftsById,
-    readInboxMessageIdByTopicId,
   };
 }
 
@@ -112,7 +104,7 @@ export async function fetchTopicById({
   chat: ApiChat;
   topicId: number;
 }): Promise<{
-  topic: ApiTopic;
+  topic: ApiTopicWithState;
   messages: ApiMessage[];
 } | undefined> {
   const { id, accessHash } = chat;
@@ -129,7 +121,7 @@ export async function fetchTopicById({
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
 
   return {
-    topic: buildApiTopic(result.topics[0])!,
+    topic: buildApiTopicWithState(result.topics[0])!,
     messages,
   };
 }

@@ -48,12 +48,20 @@
 
   @media (min-width: 926px) {
     --left-column-max-width: 40vw;
+
+    .folders-sidebar-visible & {
+      --left-column-max-width: calc(40vw - var(--folders-sidebar-width));
+    }
   }
 
   @media (min-width: 1276px) {
     --left-column-max-width: 33vw;
 
     width: 25vw;
+
+    .folders-sidebar-visible & {
+      --left-column-max-width: calc(33vw - var(--folders-sidebar-width));
+    }
   }
 
   @media (max-width: 925px) {

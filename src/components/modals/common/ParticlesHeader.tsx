@@ -15,14 +15,17 @@ import SwayingStar from './SwayingStar.tsx';
 
 import styles from './ParticlesHeader.module.scss';
 
+import Cocoon from '../../../assets/cocoon.webp';
+
 interface OwnProps {
-  model: 'swaying-star' | 'speeding-diamond' | 'sticker';
+  model: 'swaying-star' | 'speeding-diamond' | 'ai-egg' | 'sticker';
   sticker?: ApiSticker;
   color: 'purple' | 'gold' | 'blue';
   title: TeactNode;
   description: TeactNode;
   isDisabled?: boolean;
   className?: string;
+  modelClassName?: string;
 }
 
 const GIFT_STICKER_SIZE = 8 * REM;
@@ -39,6 +42,7 @@ function ParticlesHeader({
   description,
   isDisabled,
   className,
+  modelClassName,
 }: OwnProps) {
   const stickerRef = useRef<HTMLDivElement>();
   const triggerSparklesRef = useRef<(() => void) | undefined>();
@@ -52,7 +56,7 @@ function ParticlesHeader({
   });
 
   return (
-    <div className={buildClassName(styles.root, className)}>
+    <div className={buildClassName(styles.root, styles[model], className)}>
       <InteractiveSparkles
         color={color}
         centerShift={PARTICLE_PARAMS.centerShift}
@@ -63,16 +67,27 @@ function ParticlesHeader({
 
       {model === 'swaying-star' ? (
         <SwayingStar
+          className={modelClassName}
           color={color as 'purple' | 'gold'}
           centerShift={PARTICLE_PARAMS.centerShift}
           onMouseMove={handleMouseMove}
         />
+      ) : model === 'ai-egg' ? (
+        <img
+          src={Cocoon}
+          alt=""
+          role="presentation"
+          aria-hidden="true"
+          className={buildClassName(styles.cocoon, modelClassName)}
+          draggable={false}
+          onMouseMove={handleMouseMove}
+        />
       ) : model === 'speeding-diamond' ? (
-        <SpeedingDiamond onMouseMove={handleMouseMove} />
+        <SpeedingDiamond className={modelClassName} onMouseMove={handleMouseMove} />
       ) : model === 'sticker' && sticker && (
         <div
           ref={stickerRef}
-          className={styles.stickerWrapper}
+          className={buildClassName(styles.stickerWrapper, modelClassName)}
           style={`width: ${GIFT_STICKER_SIZE}px; height: ${GIFT_STICKER_SIZE}px`}
           onMouseMove={handleMouseMove}
         >

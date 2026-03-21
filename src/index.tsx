@@ -11,7 +11,7 @@ import {
   DEBUG, STRICTERDOM_ENABLED,
 } from './config';
 import { enableStrict, requestMutation } from './lib/fasterdom/fasterdom';
-import { selectTabState } from './global/selectors';
+import { selectChat, selectCurrentMessageList, selectPeerFullInfo, selectTabState } from './global/selectors';
 import { selectSharedSettings } from './global/selectors/sharedState';
 import { betterView } from './util/betterView';
 import { IS_TAURI } from './util/browser/globalEnvironment';
@@ -104,10 +104,21 @@ async function init() {
 
   if (DEBUG) {
     document.addEventListener('dblclick', () => {
+      const currentGlobal = getGlobal();
+      const currentMessageList = selectCurrentMessageList(currentGlobal);
       // eslint-disable-next-line no-console
-      console.warn('TAB STATE', selectTabState(getGlobal()));
+      console.warn('TAB STATE', selectTabState(currentGlobal));
       // eslint-disable-next-line no-console
-      console.warn('GLOBAL STATE', getGlobal());
+      console.warn('GLOBAL STATE', currentGlobal);
+      if (currentMessageList) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          'CURRENT MESSAGE LIST',
+          selectChat(currentGlobal, currentMessageList.chatId),
+          selectPeerFullInfo(currentGlobal, currentMessageList.chatId),
+          currentGlobal.messages.byChatId[currentMessageList.chatId],
+        );
+      }
     });
   }
 }

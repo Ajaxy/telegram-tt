@@ -265,6 +265,7 @@ export interface ApiAppConfig {
   starsStargiftResaleAmountMin?: number;
   starsStargiftResaleAmountMax?: number;
   starsStargiftResaleCommissionPermille?: number;
+  stargiftsCraftAttributePermilles?: number[];
   starsSuggestedPostAmountMax: number;
   starsSuggestedPostAmountMin: number;
   starsSuggestedPostCommissionPermille: number;
@@ -353,7 +354,7 @@ type ApiUrlAuthResultRequest = {
 
 type ApiUrlAuthResultAccepted = {
   type: 'accepted';
-  url: string;
+  url?: string;
 };
 
 type ApiUrlAuthResultDefault = {

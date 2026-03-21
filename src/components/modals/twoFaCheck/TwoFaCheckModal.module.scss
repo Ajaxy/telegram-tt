@@ -1,0 +1,18 @@
+.dialog :global(.modal-dialog) {
+  max-width: 22rem !important;
+}
+
+.list {
+  margin-block: 1.5rem;
+  padding-left: 1rem;
+  text-align: left;
+
+  li {
+    margin-bottom: 1rem;
+    color: var(--color-text-secondary);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

@@ -222,7 +222,7 @@ const LeftSideMenuItems = ({
               icon="animations"
               onClick={handleAnimationLevelChange}
             >
-              <span className="menu-item-name capitalize">{lang('MenuAnimationsSwitch')}</span>
+              <span className="menu-item-name capitalize">{lang('MenuUIFeaturesSwitch')}</span>
               <Toggle value={animationLevelValue} />
             </MenuItem>
             <MenuSeparator />

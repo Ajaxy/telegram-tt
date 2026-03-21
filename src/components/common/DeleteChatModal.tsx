@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -6,7 +5,6 @@ import type { ApiChat } from '../../api/types';
 
 import {
   getChatTitle,
-  getPrivateChatUserId,
   getUserFirstOrLastName,
   isChatBasicGroup,
   isChatChannel,
@@ -47,7 +45,7 @@ type StateProps = {
   contactName?: string;
 };
 
-const DeleteChatModal: FC<OwnProps & StateProps> = ({
+const DeleteChatModal = ({
   isOpen,
   chat,
   isSavedDialog,
@@ -62,7 +60,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
   contactName,
   onClose,
   onCloseAnimationEnd,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     leaveChannel,
     deleteHistory,
@@ -244,12 +242,10 @@ export default memo(withGlobal<OwnProps>(
   (global, { chat, isSavedDialog }): Complete<StateProps> => {
     const isPrivateChat = isUserId(chat.id);
     const isChatWithSelf = selectIsChatWithSelf(global, chat.id);
-    const user = isPrivateChat && selectUser(global, getPrivateChatUserId(chat)!);
+    const user = selectUser(global, chat.id);
     const isBot = user && isUserBot(user) && !chat.isSupport;
     const canDeleteForAll = (isPrivateChat && !isChatWithSelf && !isBot && !isSavedDialog);
-    const contactName = isPrivateChat
-      ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
-      : undefined;
+    const contactName = isPrivateChat ? getUserFirstOrLastName(user) : undefined;
 
     return {
       isPrivateChat,

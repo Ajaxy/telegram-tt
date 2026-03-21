@@ -140,17 +140,17 @@ export default class MTProtoState {
    * @param contentRelated
    * @param afterId
    */
-  async writeDataAsMessage(
+  writeDataAsMessage(
     buffer: BinaryWriter, data: Buffer<ArrayBuffer>, contentRelated: boolean, afterId?: bigint,
-  ): Promise<bigint> {
+  ): bigint {
     const msgId = this._getNewMsgId();
     const seqNo = this._getSeqNo(contentRelated);
     let body;
     if (afterId === undefined) {
-      body = await GZIPPacked.gzipIfSmaller(contentRelated, data);
+      body = GZIPPacked.gzipIfNeeded(contentRelated, data);
     } else {
       // Invoke query expects a query with a getBytes func
-      body = await GZIPPacked.gzipIfSmaller(contentRelated, new Api.InvokeAfterMsg({
+      body = GZIPPacked.gzipIfNeeded(contentRelated, new Api.InvokeAfterMsg({
         msgId: afterId,
         query: {
           getBytes() {

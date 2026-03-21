@@ -13,6 +13,7 @@ import {
   getMediaFormat, getMediaThumbUri, getMediaTransferState, getPhotoMediaHash,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import buildStyle from '../../../util/buildStyle';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import { calculateMediaDimensions, MIN_MEDIA_HEIGHT } from './helpers/mediaDimensions';
 
@@ -256,8 +257,15 @@ const Photo = <T,>({
     className,
   );
 
-  const dimensionsStyle = dimensions ? ` width: ${width}px; left: ${dimensions.x}px; top: ${dimensions.y}px;` : '';
-  const style = size === 'inline' ? `height: ${height}px;${dimensionsStyle}` : undefined;
+  const dimensionsStyle = dimensions && buildStyle(
+    `left: ${dimensions.x}px`,
+    `top: ${dimensions.y}px`,
+  );
+  const style = size === 'inline' ? buildStyle(
+    `height: ${height}px`,
+    `min-width: ${width}px`,
+    dimensionsStyle,
+  ) : undefined;
 
   return (
     <div

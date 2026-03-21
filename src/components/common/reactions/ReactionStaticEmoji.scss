@@ -1,14 +1,28 @@
 .ReactionStaticEmoji {
+  position: relative;
   display: block;
+  aspect-ratio: 1;
   width: 1rem;
-
-  // Unicorn reaction preview is too small
-  &.with-unicorn-fix {
-    transform: scale(2);
-  }
 
   &.icon-heart {
     margin: 0 !important;
     color: var(--color-heart) !important;
+  }
+
+  .thumb,
+  .media {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+  }
+
+  .media {
+    // Unicorn reaction preview is too small
+    &.with-unicorn-fix {
+      transform: scale(2);
+    }
   }
 }

@@ -5,6 +5,29 @@
   padding-top: 9rem;
 }
 
+.ai-egg {
+  padding-top: 10rem;
+  background-color: #061029;
+  background-image: radial-gradient(circle at center, #FFFFFF08 0%, #00000000 50%);
+
+  .title {
+    margin-bottom: 0;
+
+    font-size: 2.5rem;
+    color: transparent;
+
+    background-image: linear-gradient(90deg, #67c9ff 0%, #cb56ff 100%);
+    background-clip: text;
+  }
+
+  .description {
+    color: #b8c9ef;
+    :global(b) {
+      color: white;
+    }
+  }
+}
+
 .particles {
   position: absolute;
   top: 0;
@@ -40,4 +63,11 @@
   &:hover {
     transform: scale(1.1);
   }
+}
+
+.cocoon {
+  position: absolute;
+  z-index: 1;
+  top: 1.75rem;
+  height: 8.125rem;
 }

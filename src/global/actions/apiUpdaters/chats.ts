@@ -1,4 +1,4 @@
-import type { ApiChat, ApiMessage, ApiUpdateChat } from '../../../api/types';
+import type { ApiChat, ApiUpdateChat } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
@@ -20,16 +20,15 @@ import {
   replaceChatMessages,
   replacePeerPhotos,
   replacePinnedTopicIds,
-  replaceThreadParam,
   updateChat,
   updateChatFullInfo,
   updateChatListType,
   updatePeerStoriesHidden,
-  updateThreadInfo,
   updateTopic,
 } from '../../reducers';
-import { updateUnreadReactions } from '../../reducers/reactions';
+import { removeUnreadReactions } from '../../reducers/reactions';
 import { updateTabState } from '../../reducers/tabs';
+import { addUnreadMessageToCounter, replaceThreadLocalStateParam } from '../../reducers/threads';
 import {
   selectChat,
   selectChatFullInfo,
@@ -40,9 +39,8 @@ import {
   selectIsChatListed,
   selectPeer,
   selectTabState,
-  selectThreadParam,
-  selectTopicFromMessage,
 } from '../../selectors';
+import { selectThreadLocalStateParam, selectThreadReadState } from '../../selectors/threads';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 const INVALIDATE_FULL_CHAT_FIELDS = new Set<keyof ApiChat>([
@@ -54,16 +52,16 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'updateChat': {
       const localChat = selectChat(global, update.id);
-      const { isForum: prevIsForum, lastReadOutboxMessageId } = localChat || {};
-
-      if (update.chat.lastReadOutboxMessageId && lastReadOutboxMessageId
-        && update.chat.lastReadOutboxMessageId < lastReadOutboxMessageId) {
+      const localReadState = selectThreadReadState(global, update.id, MAIN_THREAD_ID);
+      const { isForum: prevIsForum } = localChat || {};
+      const { lastReadOutboxMessageId } = localReadState || {};
+      if (update.readState?.lastReadOutboxMessageId && lastReadOutboxMessageId
+        && update.readState.lastReadOutboxMessageId < lastReadOutboxMessageId) {
         update = {
           ...update,
-          chat: omit(update.chat, ['lastReadInboxMessageId']),
+          readState: omit(update.readState, ['lastReadOutboxMessageId']),
         };
       }
-
       global = updateChat(global, update.id, update.chat);
 
       if (localChat?.areStoriesHidden !== update.chat.areStoriesHidden) {
@@ -91,7 +89,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (update.chat.id) {
         closeMessageNotifications({
           chatId: update.chat.id,
-          lastReadInboxMessageId: update.chat.lastReadInboxMessageId,
+          lastReadInboxMessageId: update.readState?.lastReadInboxMessageId,
         });
       }
 
@@ -159,34 +157,16 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       return global;
     }
 
-    case 'updateChatInbox': {
-      const { id, threadId, lastReadInboxMessageId, unreadCount } = update;
-      const chat = selectChat(global, id);
-      if (chat?.isBotForum && threadId) {
-        global = updateTopic(global, id, Number(threadId), {
-          unreadCount,
-        });
-        return updateThreadInfo(global, id, threadId, {
-          lastReadInboxMessageId,
-        });
-      } else {
-        return updateChat(global, id, {
-          lastReadInboxMessageId,
-          unreadCount,
-        });
-      }
-    }
-
     case 'updateChatTypingStatus': {
       const { id, threadId = MAIN_THREAD_ID, typingStatus } = update;
-      global = replaceThreadParam(global, id, threadId, 'typingStatus', typingStatus);
+      global = replaceThreadLocalStateParam(global, id, threadId, 'typingStatus', typingStatus);
       setGlobal(global);
 
       setTimeout(() => {
         global = getGlobal();
-        const currentTypingStatus = selectThreadParam(global, id, threadId, 'typingStatus');
+        const currentTypingStatus = selectThreadLocalStateParam(global, id, threadId, 'typingStatus');
         if (typingStatus && currentTypingStatus && typingStatus.timestamp === currentTypingStatus.timestamp) {
-          global = replaceThreadParam(global, id, threadId, 'typingStatus', undefined);
+          global = replaceThreadLocalStateParam(global, id, threadId, 'typingStatus', undefined);
           setGlobal(global);
         }
       }, TYPING_STATUS_CLEAR_DELAY);
@@ -195,39 +175,32 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'newMessage': {
-      const { message } = update;
+      const { chatId, id, message } = update;
 
       const isOur = message.senderId ? message.senderId === global.currentUserId : message.isOutgoing;
       if (isOur && !message.isFromScheduled) {
         return undefined;
       }
 
-      const isLocal = isLocalMessageId(message.id!);
+      const isLocal = isLocalMessageId(id);
 
-      const chat = selectChat(global, update.chatId);
+      const chat = selectChat(global, chatId);
       if (!chat) {
         return undefined;
       }
 
-      const hasMention = Boolean(update.message.id && update.message.hasUnreadMention);
+      const hasMention = Boolean(message.hasUnreadMention);
 
       if (!isLocal || chat.id === SERVICE_NOTIFICATIONS_USER_ID) {
-        global = updateChat(global, update.chatId, {
-          unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
-        });
+        global = addUnreadMessageToCounter(global, chatId, message);
 
         if (hasMention) {
-          global = addUnreadMentions(global, update.chatId, chat, [update.message.id!], true);
-        }
-
-        const topic = chat.isForum ? selectTopicFromMessage(global, message as ApiMessage) : undefined;
-        if (topic) {
-          global = updateTopic(global, update.chatId, topic.id, {
-            unreadCount: topic.unreadCount ? topic.unreadCount + 1 : 1,
+          global = addUnreadMentions({
+            global,
+            chatId,
+            ids: [id],
           });
         }
-
-        // TODO Replace draft with new message
       }
 
       setGlobal(global);
@@ -246,18 +219,17 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       ids.forEach((id) => {
         const chatId = ('channelId' in update ? update.channelId : selectCommonBoxChatId(global, id))!;
-        const chat = selectChat(global, chatId);
 
-        if (messageUpdate.reactions && chat?.unreadReactionsCount
-          && !checkIfHasUnreadReactions(global, messageUpdate.reactions)) {
-          global = updateUnreadReactions(global, chatId, {
-            unreadReactionsCount: Math.max(chat.unreadReactionsCount - 1, 0) || undefined,
-            unreadReactions: chat.unreadReactions?.filter((i) => i !== id),
-          });
+        if (messageUpdate.reactions && !checkIfHasUnreadReactions(global, messageUpdate.reactions)) {
+          global = removeUnreadReactions({ global, chatId, ids: [id] });
         }
 
-        if (!messageUpdate.hasUnreadMention && chat?.unreadMentionsCount) {
-          global = removeUnreadMentions(global, chatId, chat, [id], true);
+        if (!messageUpdate.hasUnreadMention) {
+          global = removeUnreadMentions({
+            global,
+            chatId,
+            ids: [id],
+          });
         }
       });
 
@@ -481,8 +453,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         return undefined;
       }
 
-      global = replaceThreadParam(global, chatId, threadId || MAIN_THREAD_ID, 'draft', draft);
-      global = updateChat(global, chatId, { draftDate: draft?.date });
+      global = replaceThreadLocalStateParam(global, chatId, threadId || MAIN_THREAD_ID, 'draft', draft);
       return global;
     }
 

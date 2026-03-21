@@ -6,7 +6,7 @@
   display: flex;
   gap: 0.75rem;
 
-  padding: 0.5rem 0.75rem 0.5rem 0.5rem;
+  padding: 0.5rem 0.75rem 0.4375rem 0.5rem;
   border-radius: 0.5rem;
 
   transition: background-color 0.25s ease-out;
@@ -23,10 +23,7 @@
 }
 
 .stars {
-  display: flex;
   flex-shrink: 0;
-  gap: 0.25rem;
-  align-items: center;
 }
 
 .amount {
@@ -35,15 +32,18 @@
 
 .title, .description, .date {
   margin-bottom: 0;
-  line-height: 1.25;
+  line-height: 1.25rem;
 }
 
 .title {
-  font-size: 0.9375rem;
+  font-size: 1rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.3125rem;
 }
 
-.description, .date {
-  font-size: 0.8125rem;
+.date,
+.description {
+  font-size: 0.875rem;
 }
 
 .date {
@@ -60,7 +60,8 @@
 
 .preview {
   position: relative;
-  align-self: center;
+  width: 2.625rem;
+  height: 2.625rem;
 }
 
 .subscriptionStar {

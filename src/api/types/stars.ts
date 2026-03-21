@@ -61,22 +61,36 @@ export interface ApiStarGiftUnique {
   valueAmount?: number;
   valueUsdAmount?: number;
   offerMinStars?: number;
+  isBurned?: true;
+  isCrafted?: true;
+  craftChancePermille?: number;
 }
 
 export type ApiStarGift = ApiStarGiftRegular | ApiStarGiftUnique;
 
+interface ApiStarGiftAttributeRarityUncommon {
+  type: 'uncommon' | 'rare' | 'epic' | 'legendary';
+}
+
+interface ApiStarGiftAttributeRarityRegular {
+  type: 'regular';
+  rarityPercent: number;
+}
+
+export type ApiStarGiftAttributeRarity = ApiStarGiftAttributeRarityRegular | ApiStarGiftAttributeRarityUncommon;
+
 export interface ApiStarGiftAttributeModel {
   type: 'model';
   name: string;
-  rarityPercent: number;
   sticker: ApiSticker;
+  rarity: ApiStarGiftAttributeRarity;
 }
 
 export interface ApiStarGiftAttributePattern {
   type: 'pattern';
   name: string;
-  rarityPercent: number;
   sticker: ApiSticker;
+  rarity: ApiStarGiftAttributeRarity;
 }
 
 export interface ApiStarGiftAttributeBackdrop {
@@ -87,7 +101,7 @@ export interface ApiStarGiftAttributeBackdrop {
   edgeColor: string;
   patternColor: string;
   textColor: string;
-  rarityPercent: number;
+  rarity: ApiStarGiftAttributeRarity;
 }
 
 export interface ApiStarGiftAttributeOriginalDetails {
@@ -136,6 +150,7 @@ export interface ApiSavedStarGift {
   upgradeMsgId?: number; // Local field, used for Action Message
   localTag?: number; // Local field, used for key in list
   dropOriginalDetailsStars?: number;
+  canCraftAt?: number;
 }
 
 export type StarGiftAttributeIdModel = {
@@ -376,7 +391,7 @@ export interface ApiStarGiftAuctionState {
   gift: ApiStarGiftRegular;
   state: ApiTypeStarGiftAuctionState;
   userState: ApiStarGiftAuctionUserState;
-  timeout: number;
+  timeout?: number;
 }
 
 export interface ApiStarGiftAuctionAcquiredGift {

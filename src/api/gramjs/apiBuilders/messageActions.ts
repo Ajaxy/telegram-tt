@@ -426,7 +426,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
   if (action instanceof GramJs.MessageActionStarGiftUnique) {
     const {
       upgrade, transferred, saved, refunded, gift, canExportAt, transferStars, fromId, peer, savedId,
-      resaleAmount, prepaidUpgrade, dropOriginalDetailsStars, fromOffer,
+      resaleAmount, prepaidUpgrade, dropOriginalDetailsStars, fromOffer, canCraftAt,
     } = action;
 
     const starGift = buildApiStarGift(gift);
@@ -451,6 +451,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       dropOriginalDetailsStars: dropOriginalDetailsStars !== undefined
         ? toJSNumber(dropOriginalDetailsStars)
         : undefined,
+      canCraftAt,
     };
   }
   if (action instanceof GramJs.MessageActionPaidMessagesPrice) {
@@ -554,6 +555,22 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       isExpired: expired,
       gift: starGift,
       price: buildApiCurrencyAmount(price),
+    };
+  }
+  if (action instanceof GramJs.MessageActionNewCreatorPending) {
+    const { newCreatorId } = action;
+    return {
+      mediaType: 'action',
+      type: 'newCreatorPending',
+      newCreatorId: buildApiPeerId(newCreatorId, 'user'),
+    };
+  }
+  if (action instanceof GramJs.MessageActionChangeCreator) {
+    const { newCreatorId } = action;
+    return {
+      mediaType: 'action',
+      type: 'changeCreator',
+      newCreatorId: buildApiPeerId(newCreatorId, 'user'),
     };
   }
 

@@ -1,4 +1,10 @@
-import type { ApiSavedStarGift, ApiStarGiftUnique } from '../../../api/types';
+import type {
+  ApiInputSavedStarGift,
+  ApiRequestInputSavedStarGift,
+  ApiSavedStarGift,
+  ApiStarGiftAttribute,
+  ApiStarGiftUnique,
+} from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
 import {
@@ -10,6 +16,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByCallback, buildCollectionByKey } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
+import { preloadGiftAttributeStickers } from '../../../components/common/helpers/gifts';
 import { RESALE_GIFTS_LIMIT } from '../../../limits';
 import { areInputSavedGiftsEqual, getRequestInputSavedStarGift } from '../../helpers/payments';
 import { addActionHandler, getGlobal, getPromiseActions, setGlobal } from '../../index';
@@ -27,6 +34,8 @@ import {
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectActiveGiftsCollectionId,
+  selectChat,
+  selectChatMessage,
   selectGiftProfileFilter,
   selectPeer,
   selectPeerCollectionSavedGifts,
@@ -612,6 +621,7 @@ addActionHandler('loadGiftAuction', async (global, _actions, payload): Promise<v
 
   global = getGlobal();
   global = replaceGiftAuction(global, auctionState);
+
   setGlobal(global);
 });
 
@@ -734,4 +744,419 @@ addActionHandler('declineStarGiftOffer', async (global, actions, payload): Promi
     offerMsgId: messageId,
     shouldDecline: true,
   });
+});
+
+addActionHandler('loadActiveGiftAuctions', async (global, actions, payload): Promise<void> => {
+  const result = await callApi('fetchStarGiftActiveAuctions');
+
+  if (!result) return;
+
+  global = getGlobal();
+  result.auctions.forEach((auction) => {
+    global = replaceGiftAuction(global, auction);
+  });
+  global = {
+    ...global,
+    activeGiftAuctionIds: result.auctions.map((auction) => auction.gift.id),
+  };
+  setGlobal(global);
+});
+
+addActionHandler('openGiftInfoModalFromMessage', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, messageId, tabId = getCurrentTabId(),
+  } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  await getPromiseActions().loadMessage({ chatId, messageId });
+
+  global = getGlobal();
+  const message = selectChatMessage(global, chatId, messageId);
+
+  if (!message || !message.content.action) return;
+
+  const action = message.content.action;
+  if (action.type !== 'starGift' && action.type !== 'starGiftUnique') return;
+
+  const starGift = action.type === 'starGift' ? action : undefined;
+  const uniqueGift = action.type === 'starGiftUnique' ? action : undefined;
+  const giftMsgId = starGift?.giftMsgId;
+
+  const giftReceiverId = action.peerId || (message.isOutgoing ? message.chatId : global.currentUserId!);
+
+  const inputGift: ApiInputSavedStarGift = (() => {
+    if (giftMsgId) {
+      return { type: 'user', messageId: giftMsgId };
+    }
+    if (action.savedId) {
+      return { type: 'chat', chatId, savedId: action.savedId };
+    }
+    return { type: 'user', messageId };
+  })();
+
+  const fromId = action.fromId || (message.isOutgoing ? global.currentUserId! : message.chatId);
+
+  const gift: ApiSavedStarGift = {
+    date: message.date,
+    gift: action.gift,
+    message: starGift?.message,
+    starsToConvert: starGift?.starsToConvert,
+    isNameHidden: starGift?.isNameHidden,
+    isUnsaved: !action.isSaved,
+    fromId,
+    messageId: message.id,
+    isConverted: starGift?.isConverted,
+    upgradeMsgId: starGift?.upgradeMsgId,
+    canUpgrade: starGift?.canUpgrade,
+    alreadyPaidUpgradeStars: starGift?.alreadyPaidUpgradeStars,
+    inputGift,
+    canExportAt: uniqueGift?.canExportAt,
+    savedId: action.savedId,
+    transferStars: uniqueGift?.transferStars,
+    dropOriginalDetailsStars: uniqueGift?.dropOriginalDetailsStars,
+    prepaidUpgradeHash: starGift?.prepaidUpgradeHash,
+    canCraftAt: uniqueGift?.canCraftAt,
+  };
+
+  actions.openGiftInfoModal({ peerId: giftReceiverId, gift, tabId });
+});
+
+addActionHandler('openGiftInfoValueModal', async (global, actions, payload): Promise<void> => {
+  const { gift, tabId = getCurrentTabId() } = payload;
+
+  const result = await callApi('fetchUniqueStarGiftValueInfo', { slug: gift.slug });
+  if (!result) return;
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    giftInfoValueModal: {
+      valueInfo: result,
+      gift,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('openGiftCraftModal', async (global, _actions, payload): Promise<void> => {
+  const { gift, tabId = getCurrentTabId() } = payload;
+
+  const uniqueGift = gift?.gift.type === 'starGiftUnique' ? gift.gift : undefined;
+  const regularGiftId = uniqueGift?.regularGiftId;
+
+  let previewAttributes: ApiStarGiftAttribute[] | undefined;
+
+  if (regularGiftId) {
+    const result = await callApi('fetchStarGiftUpgradeAttributes', { giftId: regularGiftId });
+    if (result) {
+      const craftableModels = result.attributes.filter(
+        (attr) => attr.type === 'model' && attr.rarity.type !== 'regular',
+      );
+      preloadGiftAttributeStickers(craftableModels);
+      previewAttributes = craftableModels;
+    }
+  }
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    giftCraftModal: {
+      regularGiftId,
+      regularGiftTitle: uniqueGift?.title,
+      gift1: gift,
+      marketFilter: { sortType: 'byPrice' },
+      marketUpdateIteration: 0,
+      previewAttributes,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('openGiftCraftSelectModal', async (global, actions, payload): Promise<void> => {
+  const { slotIndex, tabId = getCurrentTabId() } = payload;
+
+  const tabState = selectTabState(global, tabId);
+  const craftModal = tabState.giftCraftModal;
+  if (!craftModal?.regularGiftId) return;
+
+  const shouldLoadMyGifts = !craftModal.myCraftableGifts || craftModal.shouldRefreshMyCraftableGifts;
+  const shouldLoadMarketGifts = !craftModal.marketCraftableGifts;
+
+  if (!shouldLoadMyGifts && !shouldLoadMarketGifts) {
+    global = updateTabState(global, {
+      giftCraftSelectModal: { slotIndex },
+    }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  global = updateTabState(global, {
+    giftCraftSelectModal: { slotIndex, isLoading: true },
+  }, tabId);
+  setGlobal(global);
+
+  const [myGiftsResult, marketGiftsResult] = await Promise.all([
+    shouldLoadMyGifts
+      ? callApi('fetchCraftStarGifts', { giftId: craftModal.regularGiftId, peerId: global.currentUserId! })
+      : undefined,
+    shouldLoadMarketGifts
+      ? callApi('fetchResaleGifts', {
+        giftId: craftModal.regularGiftId,
+        filter: craftModal.marketFilter,
+        forCraft: true,
+      })
+      : undefined,
+  ]);
+
+  global = getGlobal();
+  const currentCraftModal = selectTabState(global, tabId).giftCraftModal;
+  const currentSelectModal = selectTabState(global, tabId).giftCraftSelectModal;
+  if (!currentCraftModal || !currentSelectModal) return;
+
+  // Filter to only unique gifts
+  const savedGifts = myGiftsResult?.gifts.filter((g) => g.gift.type === 'starGiftUnique');
+  const marketGifts = marketGiftsResult?.gifts.filter(
+    (g): g is ApiStarGiftUnique => g.type === 'starGiftUnique',
+  );
+
+  const didLoadMyGifts = shouldLoadMyGifts && myGiftsResult;
+  const didLoadMarketGifts = shouldLoadMarketGifts && marketGiftsResult;
+
+  global = updateTabState(global, {
+    giftCraftModal: {
+      ...currentCraftModal,
+      myCraftableGifts: didLoadMyGifts ? savedGifts : currentCraftModal.myCraftableGifts,
+      myCraftableGiftsNextOffset: didLoadMyGifts
+        ? myGiftsResult.nextOffset : currentCraftModal.myCraftableGiftsNextOffset,
+      shouldRefreshMyCraftableGifts: shouldLoadMyGifts ? !myGiftsResult :
+        currentCraftModal.shouldRefreshMyCraftableGifts,
+      marketCraftableGifts: didLoadMarketGifts ? marketGifts : currentCraftModal.marketCraftableGifts,
+      marketCraftableGiftsNextOffset: didLoadMarketGifts
+        ? marketGiftsResult.nextOffset : currentCraftModal.marketCraftableGiftsNextOffset,
+      marketCraftableGiftsCount: didLoadMarketGifts
+        ? marketGiftsResult.count : currentCraftModal.marketCraftableGiftsCount,
+      marketAttributes: didLoadMarketGifts ? marketGiftsResult.attributes : currentCraftModal.marketAttributes,
+      marketCounters: didLoadMarketGifts ? marketGiftsResult.counters : currentCraftModal.marketCounters,
+      marketAttributesHash: didLoadMarketGifts
+        ? marketGiftsResult.attributesHash : currentCraftModal.marketAttributesHash,
+    },
+    giftCraftSelectModal: {
+      ...currentSelectModal,
+      isLoading: false,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('loadMoreCraftableGifts', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  const tabState = selectTabState(global, tabId);
+  const craftModal = tabState.giftCraftModal;
+  if (!craftModal?.myCraftableGiftsNextOffset) return;
+
+  const gift1Unique = craftModal.gift1?.gift.type === 'starGiftUnique' ? craftModal.gift1.gift : undefined;
+  if (!gift1Unique?.regularGiftId) return;
+
+  const result = await callApi('fetchCraftStarGifts', {
+    giftId: gift1Unique.regularGiftId,
+    peerId: global.currentUserId!,
+    offset: craftModal.myCraftableGiftsNextOffset,
+  });
+
+  if (!result) return;
+
+  global = getGlobal();
+  const currentCraftModal = selectTabState(global, tabId).giftCraftModal;
+  if (!currentCraftModal) return;
+
+  // Filter to only unique gifts
+  const newSavedGifts = result.gifts.filter((g) => g.gift.type === 'starGiftUnique');
+
+  global = updateTabState(global, {
+    giftCraftModal: {
+      ...currentCraftModal,
+      myCraftableGifts: [...(currentCraftModal.myCraftableGifts || []), ...newSavedGifts],
+      myCraftableGiftsNextOffset: result.nextOffset,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('loadMoreMarketCraftableGifts', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  const tabState = selectTabState(global, tabId);
+  const craftModal = tabState.giftCraftModal;
+  if (!craftModal?.regularGiftId) return;
+
+  if (craftModal.isMarketLoading) return;
+  if (craftModal.marketCraftableGifts && !craftModal.marketCraftableGiftsNextOffset) return;
+
+  global = updateTabState(global, {
+    giftCraftModal: {
+      ...craftModal,
+      isMarketLoading: true,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const result = await callApi('fetchResaleGifts', {
+    giftId: craftModal.regularGiftId,
+    offset: craftModal.marketCraftableGiftsNextOffset,
+    filter: craftModal.marketFilter,
+    forCraft: true,
+  });
+
+  global = getGlobal();
+  const currentCraftModal = selectTabState(global, tabId).giftCraftModal;
+  if (!currentCraftModal) return;
+
+  if (!result) {
+    global = updateTabState(global, {
+      giftCraftModal: { ...currentCraftModal, isMarketLoading: false },
+    }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  const newGifts = result.gifts.filter((g): g is ApiStarGiftUnique => g.type === 'starGiftUnique');
+
+  global = updateTabState(global, {
+    giftCraftModal: {
+      ...currentCraftModal,
+      marketCraftableGifts: [...(currentCraftModal.marketCraftableGifts || []), ...newGifts],
+      marketCraftableGiftsNextOffset: result.nextOffset,
+      isMarketLoading: false,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('updateCraftGiftsFilter', async (global, actions, payload): Promise<void> => {
+  const { filter, tabId = getCurrentTabId() } = payload;
+
+  const tabState = selectTabState(global, tabId);
+  const modal = tabState.giftCraftModal;
+  if (!modal?.regularGiftId) return;
+
+  global = updateTabState(global, {
+    giftCraftModal: {
+      ...modal,
+      marketFilter: filter,
+      isMarketLoading: true,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const result = await callApi('fetchResaleGifts', {
+    giftId: modal.regularGiftId,
+    filter,
+    forCraft: true,
+  });
+
+  global = getGlobal();
+  const currentModal = selectTabState(global, tabId).giftCraftModal;
+  if (!currentModal) return;
+
+  if (!result) {
+    global = updateTabState(global, {
+      giftCraftModal: { ...currentModal, isMarketLoading: false },
+    }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  const newGifts = result.gifts.filter((g): g is ApiStarGiftUnique => g.type === 'starGiftUnique');
+
+  global = updateTabState(global, {
+    giftCraftModal: {
+      ...currentModal,
+      marketCraftableGifts: newGifts,
+      marketCraftableGiftsNextOffset: result.nextOffset,
+      marketCraftableGiftsCount: result.count,
+      marketCounters: result.counters,
+      marketUpdateIteration: currentModal.marketUpdateIteration + 1,
+      isMarketLoading: false,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('craftStarGift', async (global, _actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  const tabState = selectTabState(global, tabId);
+  const modal = tabState.giftCraftModal;
+
+  if (!modal?.regularGiftId) return;
+
+  const savedGifts = [modal.gift1, modal.gift2, modal.gift3, modal.gift4].filter(
+    (g): g is ApiSavedStarGift => Boolean(g),
+  );
+  if (savedGifts.length === 0) return;
+
+  const inputSavedGifts = savedGifts
+    .map((g) => g.inputGift && getRequestInputSavedStarGift(global, g.inputGift))
+    .filter((g): g is ApiRequestInputSavedStarGift => Boolean(g));
+
+  if (inputSavedGifts.length === 0) return;
+
+  const result = await callApi('craftStarGift', { inputSavedGifts });
+
+  if (result?.error) {
+    global = getGlobal();
+    const currentModal = selectTabState(global, tabId).giftCraftModal;
+    if (!currentModal) return;
+
+    global = updateTabState(global, {
+      giftCraftModal: {
+        ...currentModal,
+        craftResult: { success: false, isError: true },
+      },
+    }, tabId);
+    setGlobal(global);
+  }
+});
+
+addActionHandler('openAboutStarGiftModal', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  const result = await callApi('fetchPremiumPromo');
+
+  let videoId: string | undefined;
+  let videoThumbnail;
+
+  if (result?.promo) {
+    const giftsIndex = result.promo.videoSections.indexOf('gifts');
+    if (giftsIndex !== -1 && giftsIndex < result.promo.videos.length) {
+      const video = result.promo.videos[giftsIndex];
+      videoId = video.id;
+      videoThumbnail = video.thumbnail;
+    }
+  }
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    aboutStarGiftModal: { videoId, videoThumbnail },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('openGiftPreviewModal', async (global, _actions, payload): Promise<void> => {
+  const { originGift, shouldShowCraftableOnStart, tabId = getCurrentTabId() } = payload;
+
+  const giftId = originGift.type === 'starGiftUnique' ? originGift.regularGiftId : originGift.id;
+  const result = await callApi('fetchStarGiftUpgradeAttributes', { giftId });
+  if (!result) return;
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    giftPreviewModal: {
+      originGift,
+      attributes: result.attributes,
+      shouldShowCraftableOnStart,
+    },
+  }, tabId);
+  setGlobal(global);
 });

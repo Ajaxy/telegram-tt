@@ -1,5 +1,4 @@
 /* eslint-disable @stylistic/max-len */
-
 export { default as StarsGiftModal } from '../components/modals/stars/gift/StarsGiftModal';
 export { default as StarsGiftingPickerModal } from '../components/main/premium/StarsGiftingPickerModal';
 export { default as StarsBalanceModal } from '../components/modals/stars/StarsBalanceModal';
@@ -14,6 +13,10 @@ export { default as GiftInfoValueModal } from '../components/modals/gift/value/G
 export { default as GiftLockedModal } from '../components/modals/gift/locked/GiftLockedModal';
 export { default as GiftResalePriceComposerModal } from '../components/modals/gift/resale/GiftResalePriceComposerModal';
 export { default as GiftUpgradeModal } from '../components/modals/gift/upgrade/GiftUpgradeModal';
+export { default as GiftCraftModal } from '../components/modals/gift/craft/GiftCraftModal';
+export { default as GiftCraftSelectModal } from '../components/modals/gift/craft/GiftCraftSelectModal';
+export { default as GiftCraftInfoModal } from '../components/modals/gift/craft/GiftCraftInfoModal';
+export { default as GiftPreviewModal } from '../components/modals/gift/preview/GiftPreviewModal';
 export { default as GiftAuctionModal } from '../components/modals/gift/auction/GiftAuctionModal';
 export { default as GiftAuctionBidModal } from '../components/modals/gift/auction/GiftAuctionBidModal';
 export { default as GiftAuctionInfoModal } from '../components/modals/gift/auction/GiftAuctionInfoModal';
@@ -29,3 +32,4 @@ export { default as GiftDescriptionRemoveModal } from '../components/modals/gift
 export { default as GiftOfferAcceptModal } from '../components/modals/gift/offer/GiftOfferAcceptModal';
 export { default as ChatRefundModal } from '../components/modals/stars/chatRefund/ChatRefundModal';
 export { default as PriceConfirmModal } from '../components/modals/priceConfirm/PriceConfirmModal';
+export { default as ActiveGiftAuctionsModal } from '../components/modals/gift/auction/ActiveGiftAuctionsModal';

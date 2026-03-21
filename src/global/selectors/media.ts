@@ -21,6 +21,7 @@ import {
   getMessageVideo,
   getMessageVoice,
   getWebPageAudio,
+  getWebPageDocument,
   getWebPagePhoto,
   getWebPageVideo,
 } from '../helpers';
@@ -54,12 +55,13 @@ export function selectMessageDownloadableMedia<T extends GlobalState>(global: T,
   const webPage = selectWebPageFromMessage(global, message);
   return (
     customEmoji || animatedEmoji
+    || getMessageDocument(message)
     || getMessagePhoto(message)
     || getMessageVideo(message)
-    || getMessageDocument(message)
     || getMessageSticker(message)
     || getMessageAudio(message)
     || getMessageVoice(message)
+    || getWebPageDocument(webPage)
     || getWebPagePhoto(webPage)
     || getWebPageVideo(webPage)
     || getWebPageAudio(webPage)

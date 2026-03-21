@@ -1,5 +1,6 @@
 import {
-  memo, useEffect, useMemo, useRef, useUnmountCleanup,
+  memo, useEffect, useMemo, useRef,
+  useUnmountCleanup,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -34,6 +35,7 @@ import {
   selectSender,
   selectTabState,
 } from '../../../global/selectors';
+import { selectThreadReadState } from '../../../global/selectors/threads';
 import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { IS_ANDROID, IS_FLUID_BACKGROUND_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
@@ -50,7 +52,6 @@ import { type ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionOb
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
-import { type OnIntersectPinnedMessage } from '../hooks/usePinnedMessage';
 import useFluidBackgroundFilter from './hooks/useFluidBackgroundFilter';
 import useFocusMessageListElement from './hooks/useFocusMessageListElement';
 
@@ -81,10 +82,10 @@ type OwnProps = {
   isLastInList?: boolean;
   memoFirstUnreadIdRef?: { current: number | undefined };
   getIsMessageListReady?: Signal<boolean>;
-  onIntersectPinnedMessage?: OnIntersectPinnedMessage;
   observeIntersectionForBottom?: ObserveFn;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
+  onMessageUnmount?: (messageId: number) => void;
 };
 
 type StateProps = {
@@ -137,10 +138,10 @@ const ActionMessage = ({
   isResizingContainer,
   scrollTargetPosition,
   isAccountFrozen,
-  onIntersectPinnedMessage,
   observeIntersectionForBottom,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
+  onMessageUnmount,
 }: OwnProps & StateProps) => {
   const {
     requestConfetti,
@@ -157,6 +158,7 @@ const ActionMessage = ({
     focusMessage,
     openGiftOfferAcceptModal,
     declineStarGiftOffer,
+    showNotification,
   } = getActions();
 
   const ref = useRef<HTMLDivElement>();
@@ -248,12 +250,6 @@ const ActionMessage = ({
     scrollTargetPosition,
   });
 
-  useUnmountCleanup(() => {
-    if (message.isPinned) {
-      onIntersectPinnedMessage?.({ viewportPinnedIdsToRemove: [message.id] });
-    }
-  });
-
   const {
     isContextMenuOpen, contextMenuAnchor,
     handleBeforeContextMenu, handleContextMenu,
@@ -290,12 +286,16 @@ const ActionMessage = ({
     ref,
   });
 
+  useUnmountCleanup(() => {
+    onMessageUnmount?.(id);
+  });
+
   useEffect(() => {
     const bottomMarker = ref.current;
     if (!bottomMarker || !isElementInViewport(bottomMarker)) return;
 
     if (hasUnreadReaction) {
-      animateUnreadReaction({ messageIds: [id] });
+      animateUnreadReaction({ chatId, messageIds: [id] });
     }
 
     if (message.hasUnreadMention) {
@@ -372,8 +372,19 @@ const ActionMessage = ({
         break;
       }
 
-      case 'starGift':
+      case 'starGift': {
+        openGiftInfoModalFromMessage({
+          chatId: message.chatId,
+          messageId: message.id,
+        });
+        break;
+      }
+
       case 'starGiftUnique': {
+        if (action.gift.isBurned) {
+          showNotification({ message: lang('ActionStarGiftUniqueBurnedError') });
+          break;
+        }
         openGiftInfoModalFromMessage({
           chatId: message.chatId,
           messageId: message.id,
@@ -605,6 +616,7 @@ const ActionMessage = ({
           {fullContent}
           {shouldRenderInlineButtons && (
             <InlineButtons
+              className={styles.inlineButtons}
               inlineButtons={giftOfferInlineButtons}
               onClick={handleInlineButtonClick}
             />
@@ -672,7 +684,8 @@ export default memo(withGlobal<OwnProps>(
 
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
-    const hasUnreadReaction = chat?.unreadReactions?.includes(message.id);
+    const readState = selectThreadReadState(global, message.chatId, threadId);
+    const hasUnreadReaction = readState?.unreadReactions?.includes(message.id);
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     return {
