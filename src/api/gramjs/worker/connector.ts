@@ -3,7 +3,7 @@ import type { TypedBroadcastChannel } from '../../../util/browser/multitab';
 import type { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
 import type { LocalDb } from '../localDb';
 import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
-import type { OriginPayload, ThenArg, WorkerMessageEvent, WorkerPayload } from './types';
+import type { OriginPayload, ThenArg, WorkerMessageEvent } from './types';
 
 import { DEBUG, IGNORE_UNHANDLED_ERRORS } from '../../../config';
 import { IS_TAURI } from '../../../util/browser/globalEnvironment';
@@ -70,45 +70,6 @@ export function initApiOnMasterTab(initialArgs: ApiInitialArgs) {
     token: getCurrentTabId(),
     initialArgs,
   });
-}
-
-function postTgDownloadChunkToWindow(payload: Extract<WorkerPayload, { type: 'tgDownloadChunk' }>) {
-  if (typeof window === 'undefined') return;
-
-  const {
-    downloadId, offset, byteLength, done, error, mimeType, totalSize, chunk,
-  } = payload;
-
-  const isDone = done === true;
-
-  // Copy instead of transfer: avoids detached/empty buffers in Electron webview second hop.
-  let chunkCopy: ArrayBuffer | undefined;
-  if (chunk instanceof ArrayBuffer && chunk.byteLength > 0) {
-    chunkCopy = chunk.slice(0);
-  }
-
-  if (!isDone && !chunkCopy) {
-    return;
-  }
-
-  const chunkSize = chunkCopy ? chunkCopy.byteLength : 0;
-
-  const state = isDone ? (error ? 'error' : 'done') : 'data';
-
-  window.postMessage({
-    type: 'tg-download-chunk',
-    bridge: 'telegram-tt-v2',
-    state,
-    downloadId,
-    offset,
-    byteLength: chunkSize || byteLength,
-    chunkSize,
-    chunk: isDone ? undefined : chunkCopy,
-    done: isDone,
-    error,
-    mimeType,
-    totalSize,
-  }, '*');
 }
 
 let updateCallback: OnApiUpdate;
@@ -344,8 +305,6 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
         navigator.sendBeacon(payload.url, payload.data);
       } else if (payload.type === 'debugLog') {
         logDebugMessage(payload.level, ...payload.args);
-      } else if (payload.type === 'tgDownloadChunk') {
-        postTgDownloadChunkToWindow(payload);
       }
     });
   });

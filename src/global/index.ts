@@ -64,8 +64,6 @@ if (typeof window !== 'undefined') {
   (window as any).getGlobal = getGlobal;
   (window as any).getActions = getActions;
 
-  type DesktopDeferredMedia = import('../api/types/desktopBridge').ApiDesktopDeferredMedia;
-
   const notReadyError = () => Promise.reject(new Error(
     'Telegram GramJS not ready yet. await window.__telegramDesktopBridge.ready then retry.',
   ));
@@ -75,29 +73,18 @@ if (typeof window !== 'undefined') {
     resolveBridgeReady = resolve;
   });
 
-  type DownloadDeferredMediaResult = {
-    dataBlob: string;
-    arrayBuffer: ArrayBuffer;
-    mimeType: string;
-    fullSize: number;
-  } | undefined;
-
   type TelegramDesktopBridge = {
     ready: Promise<void>;
     ping: () => boolean;
-    startDownload: (metadata: DesktopDeferredMedia) => Promise<{ downloadId: string }>;
-    downloadDeferredMedia: (metadata: DesktopDeferredMedia) => Promise<DownloadDeferredMediaResult>;
     /** Queues confirmation UI, then worker `auth.acceptLoginToken`. */
     acceptLoginToken: (tokenBase64: string, expires?: number) => Promise<void>;
   };
 
   /** Present immediately so host apps can detect fork vs stale deploy; methods work after `ready`. */
   const telegramDesktopBridge: TelegramDesktopBridge = {
-    /** Resolves when `callApi` and download methods are wired to the worker. */
+    /** Resolves when `callApi` is wired to the worker. */
     ready: bridgeReady,
     ping: () => false,
-    startDownload: (_metadata) => notReadyError() as Promise<{ downloadId: string }>,
-    downloadDeferredMedia: (_metadata) => notReadyError() as Promise<DownloadDeferredMediaResult>,
     acceptLoginToken: (_tokenBase64, _expires) => notReadyError() as Promise<void>,
   };
 
@@ -107,12 +94,6 @@ if (typeof window !== 'undefined') {
   import('../api/gramjs').then((api) => {
     (window as any).callApi = api.callApi;
     telegramDesktopBridge.ping = () => true;
-    telegramDesktopBridge.startDownload = (metadata: DesktopDeferredMedia) => (
-      api.callApi('startDownloadDeferredMedia', metadata)
-    );
-    telegramDesktopBridge.downloadDeferredMedia = (metadata: DesktopDeferredMedia) => (
-      api.callApi('downloadDeferredMedia', metadata)
-    );
     telegramDesktopBridge.acceptLoginToken = (tokenBase64: string, expires?: number) => {
       getActions().requestDesktopSessionLink({ tokenBase64, expires });
       return Promise.resolve();

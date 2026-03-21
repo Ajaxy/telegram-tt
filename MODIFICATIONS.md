@@ -4,70 +4,28 @@ This is a modified version of [Telegram Web A](https://github.com/Ajaxy/telegram
 
 ## Summary
 
-Exposes `localDb` (or a media-only slice) via `callApi`. Serialization runs on the **GramJS Web Worker** (same thread as MTProto); large sync `JSON.stringify` can starve recv. We **yield between top-level buckets** and document why in [docs/LOCALDB_EXPORT_WORKER.md](docs/LOCALDB_EXPORT_WORKER.md).
+1. Exposes **`localDb`** (full or media-only slice) via **`window.callApi`**. Serialization runs on the **GramJS worker**; see [docs/LOCALDB_EXPORT_WORKER.md](docs/LOCALDB_EXPORT_WORKER.md).
+2. **`window.callApi`**, **`getGlobal`**, **`getActions`**, and **`window.__telegramDesktopBridge`** for desktop embeds. Bridge: **`ready`**, **`ping`**, **`acceptLoginToken`** (second-session link). See [docs/DESKTOP_BRIDGE.md](docs/DESKTOP_BRIDGE.md).
+3. **`callApi('acceptLoginToken', tokenBase64)`** — worker invokes `auth.acceptLoginToken` after the user confirms in-app. Runtime constructor comes from [`src/lib/gramjs/tl/apiTl.ts`](src/lib/gramjs/tl/apiTl.ts) (`auth.acceptLoginToken` line). If you see **`AcceptLoginToken is not a constructor`**, clear **`localStorage`** key **`GramJs:apiCache`** and reload.
 
-## Modified Files
+## Modified / added files (high level)
 
-### 1. `src/api/gramjs/localDb.ts`
-- `getLocalDbMediaMetadata()` — **preferred** for scrapers: `documents`, `photos`, `webDocuments` only (smaller, faster).
-- `getLocalDbData()` — full clone; **throttle** (e.g. ≤1 call/s).
-
-### 2. `src/api/gramjs/methods/index.ts`
-Exports the above methods for `callApi`.
-
-### 3. `src/global/index.ts`
-`window.callApi`, `window.getGlobal`, `window.getActions`, and `window.__telegramDesktopBridge` (`ready` promise, `ping`, `startDownload`, `downloadDeferredMedia`, **`acceptLoginToken`**) for Electron-style hosts. The bridge object is attached **immediately**; `ping()` is `true` only after GramJS loads. See [docs/DESKTOP_BRIDGE.md](docs/DESKTOP_BRIDGE.md).
-
-- **`acceptLoginToken(tokenBase64, expires?)`** — requests user confirmation, then `callApi('acceptLoginToken', …)` on the authorized worker (for a **second** desktop session via Telegram’s login-token flow; not a duplicate of the web session key). Outcome is also posted as **`window.postMessage({ type: 'telegram-session:link-result', ok, error? }, '*')`** — see [docs/DESKTOP_BRIDGE.md](docs/DESKTOP_BRIDGE.md).
-
-### 4a. `callApi('acceptLoginToken', tokenBase64)`
-
-Worker invokes `auth.acceptLoginToken` when the user confirms linking a separate native client.
-
-Runtime `GramJs.auth.AcceptLoginToken` is built from [`src/lib/gramjs/tl/apiTl.ts`](src/lib/gramjs/tl/apiTl.ts) (must include the `auth.acceptLoginToken` TL line). If you ever see **`AcceptLoginToken is not a constructor`**, clear browser **`localStorage`** key **`GramJs:apiCache`** for the app origin and reload (only affects environments where GramJS caches the parsed TL in `localStorage`).
-
-### 4. `src/api/gramjs/methods/client.ts` + types
-- `callApi('downloadDeferredMedia', metadata)` — full file in one response.
-- `callApi('startDownloadDeferredMedia', metadata)` — chunks via `window.postMessage({ type: 'tg-download-chunk', ... })` from the main thread connector.
-- Type: `ApiDesktopDeferredMedia` in `src/api/types/desktopBridge.ts` (optional `downloadId`).
+- `src/api/gramjs/localDb.ts` — `getLocalDbMediaMetadata`, `getLocalDbData` (+ yielding).
+- `src/api/gramjs/methods/index.ts` — exports `acceptLoginToken` + localDb methods.
+- `src/api/gramjs/methods/client.ts` — `acceptLoginToken`.
+- `src/lib/gramjs/tl/apiTl.ts` — `auth.acceptLoginToken` TL line for runtime `Api`.
+- `src/global/index.ts` — window hooks + bridge.
+- `src/global/actions/ui/misc.ts`, `tabState`, `actions`, `DesktopSessionLinkModal`, `Main.tsx`, `Story.tsx`, i18n — link modal + `telegram-session:link-result` postMessage.
+- `docs/DESKTOP_BRIDGE.md`, `docs/LOCALDB_EXPORT_WORKER.md`
+- `.github/workflows/deploy-web-s3.yml` (fork deploy; tracked via `.gitignore` exception).
 
 ## Usage
 
 ```javascript
-// Preferred: media metadata only (async)
 const { documents, photos, webDocuments } = await window.callApi('getLocalDbMediaMetadata');
-
-// Full dump — heavy; throttle
-const localDb = await window.callApi('getLocalDbData');
-
-// Desktop: deferred media bytes (worker only; see docs/DESKTOP_BRIDGE.md)
-const { arrayBuffer, mimeType } = await window.callApi('downloadDeferredMedia', {
-  id: '…',
-  accessHash: '…',
-  fileReference: '…', // base64
-  dcId: 2,
-  mediaType: 'document',
-  size: 12345,
-}) || {};
+const localDb = await window.callApi('getLocalDbData'); // heavy — throttle
 ```
-
-## Purpose
-
-Enables external applications to access Telegram media metadata for:
-- Data archival and backup
-- Content analysis
-- Integration tools
-- Research purposes
-
-## Technical Details
-
-See `LOCALDB_SOLUTION.md` for complete technical documentation.
 
 ## License
 
-This modified version maintains the original GPL-3.0 license.
-
-**Original Copyright**: Copyright (c) 2021-present, Telegram FZ-LLC and Ajaxy  
-**Modifications**: Copyright (c) 2026, [Your Organization/Name]
-
-All modifications are licensed under GPL-3.0.
+GPL-3.0. **Original**: Telegram FZ-LLC and Ajaxy. **Modifications**: see your organization notice in-repo.

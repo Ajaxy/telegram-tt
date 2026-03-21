@@ -1,0 +1,322 @@
+# Terms:
+# "build" - Compile web project using webpack.
+# "package" - Produce a distributive package for a specific platform as a workflow artifact.
+# "publish" - Send a package to corresponding store and GitHub release page.
+# "release" - build + package + publish
+#
+# Jobs in this workflow will skip the "publish" step when `SHOULD_PUBLISH` is not set.
+
+name: Package and publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      forceRelease:
+        description: 'Force production build'
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches:
+      - master
+
+env:
+  IS_ON_MASTER: ${{ github.ref == 'refs/heads/master' }}
+  SHOULD_PUBLISH: ${{ github.ref == 'refs/heads/master' && vars.PUBLISH_REPO || '' }}
+  PUBLISH_REPO: ${{ vars.PUBLISH_REPO }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  UPDATER_GIST_URL: ${{ secrets.UPDATER_GIST_URL }}
+  UPDATER_GIST_ID: ${{ secrets.UPDATER_GIST_ID }}
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      package-version: ${{ steps.extract-version.outputs.package-version }}
+      tag-name: ${{ steps.extract-version.outputs.tag-name }}
+      should-publish: ${{ steps.extract-version.outputs.should-publish }}
+      release-name: ${{ steps.extract-version.outputs.release-name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version and tag
+        id: extract-version
+        run: |
+          PACKAGE_VERSION=$(grep -m1 '^version' tauri/Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')
+          TAG_NAME="air_v${PACKAGE_VERSION}"
+          RELEASE_NAME="Telegram Air v${PACKAGE_VERSION}"
+          echo "package-version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          echo "tag-name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "release-name=$RELEASE_NAME" >> $GITHUB_OUTPUT
+          echo "should-publish=$SHOULD_PUBLISH" >> $GITHUB_OUTPUT
+          echo "Extracted version: $PACKAGE_VERSION"
+          echo "Generated tag: $TAG_NAME"
+          echo "Generated release name: $RELEASE_NAME"
+
+  check-version:
+    runs-on: ubuntu-latest
+    needs: get-version
+    outputs:
+      should-skip: ${{ steps.check-release.outputs.should-skip }}
+    steps:
+      - name: Check if release already exists
+        id: check-release
+        env:
+          PACKAGE_VERSION: ${{ needs.get-version.outputs.package-version }}
+          TAG_NAME: ${{ needs.get-version.outputs.tag-name }}
+        run: |
+          # For non-master branches or when publishing is disabled, always continue
+          if [ -z "$SHOULD_PUBLISH" ]; then
+            echo "🚧 Publishing disabled (non-master branch or PUBLISH_REPO not set)"
+            echo "should-skip=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Checking if release already exists for tag: $TAG_NAME"
+
+          RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" \
+            "https://api.github.com/repos/$PUBLISH_REPO/releases/tags/$TAG_NAME")
+
+          if echo "$RESPONSE" | jq -e '.tag_name' > /dev/null; then
+            IS_DRAFT=$(echo "$RESPONSE" | jq -r '.draft')
+            if [ "$IS_DRAFT" = "false" ]; then
+              echo "✅ Published release already exists for version $PACKAGE_VERSION"
+              echo "should-skip=true" >> $GITHUB_OUTPUT
+            else
+              echo "📝 Draft release exists for version $PACKAGE_VERSION, will continue"
+              echo "should-skip=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "🆕 No release found for version $PACKAGE_VERSION, will create new release"
+            echo "should-skip=false" >> $GITHUB_OUTPUT
+          fi
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [get-version, check-version]
+    if: needs.get-version.outputs.should-publish != '' && needs.check-version.outputs.should-skip != 'true'
+    outputs:
+      releaseId: ${{ steps.create-release.outputs.releaseId }}
+    steps:
+      - name: Create draft release
+        id: create-release
+        env:
+          PACKAGE_VERSION: ${{ needs.get-version.outputs.package-version }}
+          TAG_NAME: ${{ needs.get-version.outputs.tag-name }}
+          RELEASE_NAME: ${{ needs.get-version.outputs.release-name }}
+        run: |
+          echo "Creating draft release for tag: $TAG_NAME"
+          echo "Repository: $PUBLISH_REPO"
+          RESPONSE=$(curl -X POST \
+            -H "Authorization: token $GH_TOKEN" \
+            -d '{"tag_name": "'"$TAG_NAME"'", "name": "'"$RELEASE_NAME"'", "draft": true}' \
+            "https://api.github.com/repos/$PUBLISH_REPO/releases")
+          RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id')
+          echo "Extracted Release ID: $RELEASE_ID"
+          if [ "$RELEASE_ID" = "null" ]; then
+            echo "Error: Failed to create release. Response was: $RESPONSE"
+            exit 1
+          fi
+          echo "releaseId=$RELEASE_ID" >> $GITHUB_OUTPUT
+
+  package-tauri:
+    name: Build, package and publish Tauri
+    needs: [get-version, check-version, create-release]
+    if: ${{ always() && needs.check-version.outputs.should-skip != 'true' }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - platform: "macos-latest"
+            args: "--target aarch64-apple-darwin"
+          - platform: "macos-latest"
+            args: "--target x86_64-apple-darwin"
+          - platform: 'windows-latest'
+            args: ''
+    runs-on: ${{ matrix.settings.platform }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set Xcode version
+        if: matrix.settings.platform == 'macos-latest'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Setup Node.js ${{ vars.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ vars.NODE_VERSION }}
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.settings.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Install Tauri dependencies (ubuntu only)
+        if: matrix.settings.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Cache node modules
+        id: npm-cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Install dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Extract repository owner and name
+        id: repository-info
+        if: needs.get-version.outputs.should-publish != ''
+        shell: bash
+        run: |
+          echo "owner=${PUBLISH_REPO%%/*}" >> $GITHUB_OUTPUT
+          echo "repo=${PUBLISH_REPO#*/}" >> $GITHUB_OUTPUT
+
+      # Windows code signing setup
+      - name: Install DigiCert Client tools (Windows)
+        if: matrix.settings.platform == 'windows-latest'
+        uses: digicert/ssm-code-signing@v1.1.1
+
+      - name: Setup certificate and set environment variables (Windows)
+        if: matrix.settings.platform == 'windows-latest'
+        shell: bash
+        run: |
+          echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /d/Certificate_pkcs12.p12
+          echo "SM_HOST=${{ secrets.SM_HOST }}" >> "$GITHUB_ENV"
+          echo "SM_API_KEY=${{ secrets.SM_API_KEY }}" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_FILE=D:\\Certificate_pkcs12.p12" >> "$GITHUB_ENV"
+          echo "SM_CLIENT_CERT_PASSWORD=${{ secrets.SM_CLIENT_CERT_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "KEYPAIR_ALIAS=${{ secrets.KEYPAIR_ALIAS }}" >> "$GITHUB_ENV"
+          echo "C:\Program Files (x86)\Windows Kits\10\App Certification Kit" >> $GITHUB_PATH
+          echo "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools" >> $GITHUB_PATH
+          echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH
+
+      - name: Define Tauri configuration overrides
+        id: config-overrides
+        uses: actions/github-script@v7
+        env:
+          BASE_URL: ${{ vars.BASE_URL }}
+          UPDATER_PUBLIC_KEY: ${{ secrets.UPDATER_PUBLIC_KEY }}
+          WITH_UPDATER: ${{ needs.get-version.outputs.should-publish != '' && 'true' || 'false' }}
+        with:
+          script: |
+            const workspacePath = process.env.GITHUB_WORKSPACE.replace(/\\/g, '/');
+            const moduleUrl = `file:///${workspacePath}/deploy/prepareTauriConfig.js`;
+            const { default: prepareTauriConfig } = await import(moduleUrl)
+            const config = prepareTauriConfig();
+
+            const configJson = JSON.stringify(config);
+            console.log(configJson);
+
+            core.setOutput("json", configJson);
+
+      - name: Build, package and publish
+        uses: tauri-apps/tauri-action@v0
+        id: build-tauri
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          BASE_URL: ${{ vars.BASE_URL }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.UPDATER_PRIVATE_KEY_PASSWORD }}
+          WITH_UPDATER: ${{ needs.get-version.outputs.should-publish != '' && 'true' || 'false' }}
+        with:
+          args: "-c ${{ steps.config-overrides.outputs.json }} ${{ matrix.settings.args }}"
+          includeDebug: ${{ needs.get-version.outputs.should-publish == '' && !inputs.forceRelease }}
+          includeRelease: ${{ needs.get-version.outputs.should-publish != '' || inputs.forceRelease }}
+          releaseId: ${{ needs.create-release.outputs.releaseId }}
+          owner: ${{ steps.repository-info.outputs.owner }}
+          repo: ${{ steps.repository-info.outputs.repo }}
+
+      - name: Get file info
+        id: file-info
+        shell: bash
+        run: |
+          FULL_PATH=$(echo "${{ fromJSON(steps.build-tauri.outputs.artifactPaths)[0] }}")
+          FILENAME=$(basename "$FULL_PATH")
+          NAME="${FILENAME%.*}"
+          FILE_PATH=$(readlink -f "$(dirname "$FULL_PATH")")
+          ARCHITECTURE=$(echo "${{ matrix.settings.args }}" | grep -oE 'x86_64|aarch64' || echo "")
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+          echo "architecture=$ARCHITECTURE" >> $GITHUB_OUTPUT
+          echo "path=$FILE_PATH" >> $GITHUB_OUTPUT
+
+      # MacOS release
+      - name: Rebuild DMG with custom background (MacOS)
+        if: matrix.settings.platform == 'macos-latest'
+        run: |
+          brew install create-dmg
+          ./deploy/tauri_create_dmg.sh "${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.name }}.dmg" "${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.filename }}"
+
+      - name: Upload release asset (MacOS)
+        if: matrix.settings.platform == 'macos-latest' && needs.get-version.outputs.should-publish != ''
+        shell: bash
+        run: |
+          SANITIZED_FILENAME=$(echo "${{ steps.file-info.outputs.name }}" | sed 's/ /./g')
+          PUBLISH_FILE_NAME="$SANITIZED_FILENAME-${{ steps.file-info.outputs.architecture }}.dmg"
+          FILE_PATH="${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.name }}.dmg"
+          RELEASE_ID="${{ needs.create-release.outputs.releaseId }}"
+          curl -X POST -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@$FILE_PATH" \
+            "https://uploads.github.com/repos/$PUBLISH_REPO/releases/$RELEASE_ID/assets?name=$PUBLISH_FILE_NAME"
+
+      - name: Upload artifact (MacOS)
+        if: matrix.settings.platform == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.file-info.outputs.name }}-${{ steps.file-info.outputs.architecture }}.dmg
+          path: ${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.name }}.dmg
+
+      # Windows release
+      - name: Upload Windows artifact (Windows)
+        if: matrix.settings.platform == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.file-info.outputs.filename }}
+          path: ${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.filename }}
+
+      # Linux release
+      - name: Upload Linux artifact (Linux)
+        if: matrix.settings.platform == 'ubuntu-22.04'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.file-info.outputs.filename }}
+          path: ${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.filename }}
+
+  publish-release:
+    runs-on: ubuntu-latest
+    needs: [get-version, check-version, create-release, package-tauri]
+    if: needs.get-version.outputs.should-publish != '' && needs.check-version.outputs.should-skip != 'true'
+    env:
+      RELEASE_ID: ${{ needs.create-release.outputs.releaseId }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish release
+        run: |
+          curl -X PATCH -H "Authorization: Bearer $GH_TOKEN" -d '{"draft": false}' "https://api.github.com/repos/$PUBLISH_REPO/releases/$RELEASE_ID"
+
+      - name: Update Gist with JSON
+        run: |
+          ASSET_ID=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$PUBLISH_REPO/releases/$RELEASE_ID/assets" | jq -r '.[] | select(.name == "latest.json") | .id')
+          JSON_CONTENT=$(curl -sSL -H "Accept: application/octet-stream" -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$PUBLISH_REPO/releases/assets/$ASSET_ID")
+          GIST_CONTENT=$(jq -n --arg json "$JSON_CONTENT" '{"files":{"updater.json":{"content":$json}}}')
+          curl -X PATCH -H "Authorization: token $GH_TOKEN" -d "$GIST_CONTENT" "https://api.github.com/gists/$UPDATER_GIST_ID"

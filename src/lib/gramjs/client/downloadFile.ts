@@ -295,9 +295,7 @@ async function downloadFile2(
           if (deferred) deferred.resolve();
 
           fileView.write(result.bytes, offsetMemo - start);
-          if (result.bytes.length > 0) {
-            onPart?.(offsetMemo - start, result.bytes);
-          }
+          onPart?.(offsetMemo - start, result.bytes);
 
           return;
         } catch (err) {

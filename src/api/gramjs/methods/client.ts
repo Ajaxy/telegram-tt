@@ -10,7 +10,6 @@ import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 
 import type { ThreadId } from '../../../types';
 import type {
-  ApiDesktopDeferredMedia,
   ApiInitialArgs,
   ApiMediaFormat,
   ApiOnProgress,
@@ -19,7 +18,7 @@ import type {
 
 import {
   APP_CODE_NAME,
-  DEBUG, DEBUG_GRAMJS, DOWNLOAD_WORKERS, IS_TEST, LANG_PACK, UPLOAD_WORKERS,
+  DEBUG, DEBUG_GRAMJS, IS_TEST, LANG_PACK, UPLOAD_WORKERS,
 } from '../../../config';
 import { base64UrlToBuffer } from '../../../util/encoding/base64';
 import { pause } from '../../../util/schedulers';
@@ -67,7 +66,6 @@ import {
   onRequestRegistration,
   onWebAuthTokenFailed,
 } from './auth';
-import { emitDownloadChunk } from './desktopBridgeWorker';
 import downloadMediaWithClient, { parseMediaUrl } from './media';
 
 import { ChatAbortController } from '../ChatAbortController';
@@ -398,14 +396,6 @@ export async function downloadMedia(
   }
 }
 
-function fileReferenceBytesFromDeferredMedia(b64: string): Buffer {
-  const trimmed = b64.trim();
-  if (trimmed.includes('-') || trimmed.includes('_')) {
-    return base64UrlToBuffer(trimmed);
-  }
-  return Buffer.from(trimmed, 'base64');
-}
-
 /** TL `bytes` typing is stricter than runtime Buffer in some TS configs. */
 function asGramJsBytes(buf: Buffer): GramJs.bytes {
   return buf as unknown as GramJs.bytes;
@@ -448,247 +438,6 @@ export async function acceptLoginToken(tokenBase64: string): Promise<AcceptLogin
     const message = err instanceof Error ? err.message : String(err);
     return { ok: false, error: message };
   }
-}
-
-function mimeTypeForDeferredMedia(mediaType: ApiDesktopDeferredMedia['mediaType']): string {
-  switch (mediaType) {
-    case 'photo':
-      return 'image/jpeg';
-    case 'video':
-      return 'video/mp4';
-    case 'audio':
-      return 'audio/mpeg';
-    case 'voice':
-      return 'audio/ogg';
-    default:
-      return 'application/octet-stream';
-  }
-}
-
-/**
- * `downloadFile` uses OPFS (`File`) when the hinted size exceeds `maxBufferSize`; otherwise `Buffer`.
- */
-async function downloadFileResultToBuffer(
-  data: Buffer | File | undefined,
-): Promise<Buffer | undefined> {
-  if (data === undefined) {
-    return undefined;
-  }
-  if (Buffer.isBuffer(data)) {
-    return data;
-  }
-  if (typeof File !== 'undefined' && data instanceof File) {
-    const arrayBuffer = await data.arrayBuffer();
-    return Buffer.from(arrayBuffer);
-  }
-  return undefined;
-}
-
-/**
- * Download bytes for media described by deferred metadata (no localDb URL).
- * Runs in GramJS worker; safe for Electron when only this stack holds the session.
- * Return shape matches progressive downloadMedia so the worker can transfer ArrayBuffer.
- */
-export async function downloadDeferredMedia(metadata: ApiDesktopDeferredMedia) {
-  const id = BigInt(metadata.id);
-  const accessHash = BigInt(metadata.accessHash);
-  const fileReference = fileReferenceBytesFromDeferredMedia(metadata.fileReference);
-  const { dcId, mediaType } = metadata;
-
-  const fileSizeHint = (() => {
-    if (metadata.size === undefined || metadata.size === '') {
-      return 52428800;
-    }
-    const n = typeof metadata.size === 'number' ? metadata.size : Number(metadata.size);
-    return Number.isFinite(n) && n > 0 ? n : 52428800;
-  })();
-
-  const refBytes = asGramJsBytes(fileReference);
-
-  let raw: Buffer | File | undefined;
-  if (mediaType === 'photo') {
-    const thumbSize = metadata.thumbSize || 'y';
-    raw = await client.downloadFile(
-      new GramJs.InputPhotoFileLocation({
-        id,
-        accessHash,
-        fileReference: refBytes,
-        thumbSize,
-      }),
-      { dcId, fileSize: fileSizeHint },
-    );
-  } else {
-    const thumbSize = metadata.thumbSize ?? '';
-    raw = await client.downloadFile(
-      new GramJs.InputDocumentFileLocation({
-        id,
-        accessHash,
-        fileReference: refBytes,
-        thumbSize,
-      }),
-      {
-        dcId,
-        fileSize: fileSizeHint,
-        workers: DOWNLOAD_WORKERS,
-      },
-    );
-  }
-
-  const data = await downloadFileResultToBuffer(raw);
-
-  if (!data?.length) {
-    return undefined;
-  }
-
-  const arrayBuffer = new Uint8Array(data).buffer;
-
-  return {
-    dataBlob: '',
-    arrayBuffer,
-    mimeType: mimeTypeForDeferredMedia(mediaType),
-    fullSize: data.length,
-  };
-}
-
-function uint8ToTransferableArrayBuffer(bytes: Uint8Array): ArrayBuffer {
-  const ab = new ArrayBuffer(bytes.byteLength);
-  new Uint8Array(ab).set(bytes);
-  return ab;
-}
-
-/**
- * Starts a deferred-media download in the GramJS worker and streams each part to the UI thread,
- * which re-posts `window.postMessage({ type: 'tg-download-chunk', ... }, '*', [chunk?])`.
- * Resolves immediately with `downloadId` (download continues asynchronously).
- */
-export function startDownloadDeferredMedia(
-  metadata: ApiDesktopDeferredMedia,
-): Promise<{ downloadId: string }> {
-  const downloadId = metadata.downloadId?.trim()
-    ? metadata.downloadId.trim()
-    : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-  const mimeType = mimeTypeForDeferredMedia(metadata.mediaType);
-
-  void (async () => {
-    const id = BigInt(metadata.id);
-    const accessHash = BigInt(metadata.accessHash);
-    const refBytes = asGramJsBytes(fileReferenceBytesFromDeferredMedia(metadata.fileReference));
-    const { dcId, mediaType } = metadata;
-
-    const fileSizeHint = (() => {
-      if (metadata.size === undefined || metadata.size === '') {
-        return 52428800;
-      }
-      const n = typeof metadata.size === 'number' ? metadata.size : Number(metadata.size);
-      return Number.isFinite(n) && n > 0 ? n : 52428800;
-    })();
-
-    let finished = false;
-    const finishDownload = (fields: {
-      offset: number;
-      error?: string;
-      totalSize?: number;
-    }) => {
-      if (finished) {
-        return;
-      }
-      finished = true;
-      emitDownloadChunk({
-        type: 'tgDownloadChunk',
-        downloadId,
-        done: true,
-        mimeType,
-        ...fields,
-      });
-    };
-
-    const onPart = (offset: number, bytes: Uint8Array) => {
-      if (!bytes.length) return;
-      const ab = uint8ToTransferableArrayBuffer(bytes);
-      emitDownloadChunk(
-        {
-          type: 'tgDownloadChunk',
-          downloadId,
-          offset,
-          byteLength: ab.byteLength,
-          chunk: ab,
-        },
-        ab,
-      );
-    };
-
-    try {
-      let raw: Buffer | File | undefined;
-      if (mediaType === 'photo') {
-        const thumbSize = metadata.thumbSize || 'y';
-        raw = await client.downloadFile(
-          new GramJs.InputPhotoFileLocation({
-            id,
-            accessHash,
-            fileReference: refBytes,
-            thumbSize,
-          }),
-          { dcId, fileSize: fileSizeHint, onPart },
-        );
-      } else {
-        const thumbSize = metadata.thumbSize ?? '';
-        raw = await client.downloadFile(
-          new GramJs.InputDocumentFileLocation({
-            id,
-            accessHash,
-            fileReference: refBytes,
-            thumbSize,
-          }),
-          {
-            dcId,
-            fileSize: fileSizeHint,
-            workers: DOWNLOAD_WORKERS,
-            onPart,
-          },
-        );
-      }
-
-      if (raw === undefined) {
-        finishDownload({ offset: 0, error: 'Empty download' });
-        return;
-      }
-      if (Buffer.isBuffer(raw)) {
-        if (!raw.length) {
-          finishDownload({ offset: 0, error: 'Empty download' });
-          return;
-        }
-        finishDownload({ offset: raw.length, totalSize: raw.length });
-        return;
-      }
-      if (typeof File !== 'undefined' && raw instanceof File) {
-        if (!raw.size) {
-          finishDownload({ offset: 0, error: 'Empty download' });
-          return;
-        }
-        finishDownload({ offset: raw.size, totalSize: raw.size });
-        return;
-      }
-
-      finishDownload({ offset: 0, error: 'Unexpected download result' });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      finishDownload({ offset: 0, error: message });
-    } finally {
-      if (!finished) {
-        finished = true;
-        emitDownloadChunk({
-          type: 'tgDownloadChunk',
-          downloadId,
-          offset: 0,
-          done: true,
-          error: 'Download terminated without completion',
-          mimeType,
-        });
-      }
-    }
-  })();
-
-  return Promise.resolve({ downloadId });
 }
 
 export function uploadFile(file: File, onProgress?: ApiOnProgress) {
