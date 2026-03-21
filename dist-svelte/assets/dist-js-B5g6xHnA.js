@@ -1,0 +1,1 @@
+import{o as e}from"./core-Cs__-x6O.js";async function t(){await e(`plugin:process|restart`)}export{t as relaunch};

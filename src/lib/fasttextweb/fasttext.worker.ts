@@ -1,7 +1,7 @@
 import { DEBUG } from '../../config';
 import { createWorkerInterface } from '../../util/createPostMessageInterface';
 import fasttextInitializer from './fasttext-wasm.cjs';
-import fasttextWasmPath from './fasttext-wasm.wasm';
+import fasttextWasmPath from './fasttext-wasm.wasm?url';
 
 type FastTextMethods = {
   makePrediction: (type: 'predict' | 'predict-prob', text: string, k: string, threshold: string) => Promise<string>;

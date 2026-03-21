@@ -102,6 +102,8 @@ import type { RegularLangFnParameters } from '../../util/localization';
 import type { ProfileCollectionKey } from '../selectors/payments';
 import type { CallbackAction } from './actions';
 
+import type { RightColumnContent } from '../../types'; // Import RightColumnContent
+
 export type TabState = {
   id: number;
   isBlurred?: boolean;
@@ -116,6 +118,8 @@ export type TabState = {
   uiReadyState: 0 | 1 | 2;
   shouldInit: boolean;
   shouldSkipHistoryAnimations?: boolean;
+
+  rightColumnContent?: RightColumnContent; // <-- Add this line
 
   gifSearch: {
     query?: string;

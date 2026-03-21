@@ -8,6 +8,7 @@
       "webworker",
       "es2022"
     ],
+    "types": ["svelte", "vite/client", "jest"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -23,6 +24,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "jsxImportSource": "@teact",
+
     "paths": {
       "@teact": ["./src/lib/teact/teact.ts"],
       "@teact/*": ["./src/lib/teact/*"]

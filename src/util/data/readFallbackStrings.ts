@@ -11,9 +11,10 @@ const FALLBACK_TRANSLATE_URL = 'https://translations.telegram.org/en/weba';
 export default async function readFallbackStrings(forLocalScript?: boolean): Promise<CachedLangData> {
   let fileData;
   if (forLocalScript) {
-    fileData = (await import('fs')).readFileSync('./src/assets/localization/fallback.strings', 'utf8');
+    const importFs = new Function('return import("fs")') as () => Promise<typeof import('fs')>;
+    fileData = (await importFs()).readFileSync('./src/assets/localization/fallback.strings', 'utf8');
   } else {
-    const file = await import('../../assets/localization/fallback.strings');
+    const file = await import('../../assets/localization/fallback.strings?raw');
     fileData = file.default;
   }
   const rawStrings = readStrings(fileData);

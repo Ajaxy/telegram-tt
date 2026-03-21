@@ -1,0 +1,1 @@
+var e={10:`shot`,20:`scene`,30:`track`,40:`part`,50:`album`,60:`edition`,70:`collection`},t={video:1,audio:2,complex:3,logo:4,subtitle:17,button:18,control:32},n={[t.video]:`video`,[t.audio]:`audio`,[t.complex]:`complex`,[t.logo]:`logo`,[t.subtitle]:`subtitle`,[t.button]:`button`,[t.control]:`control`};export{t as n,n as r,e as t};

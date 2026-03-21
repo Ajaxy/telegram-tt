@@ -76,6 +76,7 @@ import type {
   ThreadId,
   TopicsInfo,
   WebPageMediaSize,
+  AnimationLevel,
 } from '../../types';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { SharedState } from './sharedState';
@@ -102,9 +103,11 @@ export type GlobalState = {
   isFetchingDifference?: boolean;
   leftColumnWidth?: number;
   lastIsChatInfoShown?: boolean;
+  isRightColumnShown?: boolean;
   initialUnreadNotifications?: number;
   shouldShowContextMenuHint?: boolean;
   botFreezeAppealId?: string;
+  animationLevel?: AnimationLevel;
 
   audioPlayer: {
     volume: number;

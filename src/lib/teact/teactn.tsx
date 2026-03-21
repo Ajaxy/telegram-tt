@@ -1,3 +1,4 @@
+import { globalStore } from '../../global/store';
 import type { FC, FC_withDebug, Props } from './teact';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
@@ -53,10 +54,6 @@ type ActivationFn<OwnProps = undefined> = (
 // TODO: Add callback to typify
 type GlobalCallback = (global: any) => void;
 
-let currentGlobal = {
-  isInited: false,
-} as GlobalState;
-
 let DEBUG_currentRandomId: number | undefined;
 
 const DEBUG_invalidateGlobalOnTickEnd = throttleWithTickEnd(() => {
@@ -80,11 +77,11 @@ function runCallbacks() {
     return;
   }
 
-  callbacks.forEach((cb) => cb(currentGlobal));
+  callbacks.forEach((cb) => cb(globalStore.state));
 }
 
 export function setUntypedGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
-  if (typeof newGlobal === 'object' && newGlobal !== currentGlobal) {
+  if (typeof newGlobal === 'object' && newGlobal !== globalStore.state) {
     if (DEBUG) {
       if (
         !options?.forceOutdated
@@ -96,7 +93,7 @@ export function setUntypedGlobal(newGlobal?: GlobalState, options?: ActionOption
       DEBUG_currentRandomId = Math.random();
     }
 
-    currentGlobal = newGlobal;
+    globalStore.set(newGlobal as any);
 
     if (options?.forceSyncOnIOs) {
       forceOnHeavyAnimation = true;
@@ -113,14 +110,15 @@ export function setUntypedGlobal(newGlobal?: GlobalState, options?: ActionOption
 
 export function getUntypedGlobal() {
   if (DEBUG) {
-    currentGlobal = {
-      ...currentGlobal,
+    const globalWithDebug = {
+      ...globalStore.state,
       DEBUG_randomId: DEBUG_currentRandomId,
     };
     DEBUG_invalidateGlobalOnTickEnd();
+    return globalWithDebug;
   }
 
-  return currentGlobal;
+  return globalStore.state;
 }
 
 export function getUntypedActions() {
@@ -138,7 +136,7 @@ function handleAction(name: string, payload?: ActionPayload, options?: ActionOpt
   const deferred = new Deferred<void>();
   actionQueue.push(() => {
     actionHandlers[name]?.forEach((handler) => {
-      const result = handler(DEBUG ? getUntypedGlobal() : currentGlobal, actions, payload);
+      const result = handler(DEBUG ? getUntypedGlobal() : globalStore.state, actions, payload);
       if (!result) {
         deferred.resolve();
         return;
@@ -196,14 +194,14 @@ function updateContainers() {
       mapStateToProps, ownProps, mappedProps, forceUpdate,
     } = container;
 
-    if (!activateContainer(container, currentGlobal, ownProps)) {
+    if (!activateContainer(container, globalStore.state, ownProps)) {
       continue;
     }
 
     let newMappedProps;
 
     try {
-      newMappedProps = mapStateToProps(currentGlobal, ownProps);
+      newMappedProps = mapStateToProps(globalStore.state, ownProps);
     } catch (err: any) {
       handleError(err);
 
@@ -297,10 +295,10 @@ export function withUntypedGlobal<OwnProps extends AnyLiteral>(
 
       if (
         (!container.mappedProps || !areRecordsShallowEqual(container.ownProps, props))
-        && activateContainer(container, currentGlobal, props)
+        && activateContainer(container, globalStore.state, props)
       ) {
         try {
-          container.mappedProps = mapStateToProps(currentGlobal, props);
+          container.mappedProps = mapStateToProps(globalStore.state, props);
         } catch (err: any) {
           handleError(err);
         }

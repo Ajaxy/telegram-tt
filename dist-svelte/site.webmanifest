@@ -1,0 +1,48 @@
+{
+    "name": "Telegram Web",
+    "short_name": "Telegram Web",
+    "description": "Telegram is a cloud-based mobile and desktop messaging app with a focus on security and speed.",
+    "start_url": "./",
+    "gcm_sender_id": "122867383838",
+    "icons": [
+        {
+            "src": "icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icon-384x384.png",
+            "sizes": "384x384",
+            "type": "image/png"
+        },
+        {
+            "src": "icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "screenshots" : [{
+      "src": "screenshot.jpg",
+      "sizes": "1280x802",
+      "type": "image/jpeg"
+    }],
+    "share_target": {
+      "action": "./share/",
+      "method": "POST",
+      "enctype": "multipart/form-data",
+      "params": {
+        "title": "title",
+        "text": "text",
+        "url": "url",
+        "files": [
+          {
+            "name": "files",
+            "accept": "*/*"
+          }
+        ]
+      }
+    },
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff",
+    "display": "standalone"
+}

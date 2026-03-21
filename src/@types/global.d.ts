@@ -43,6 +43,17 @@ declare namespace React {
   }
 }
 
+declare type HTMLInputAutoCompleteAttribute = 'off' | 'on'
+  | 'name' | 'honorific-prefix' | 'given-name' | 'additional-name' | 'family-name' | 'honorific-suffix'
+  | 'new-password' | 'current-password'
+  | 'organization-title' | 'organization' | 'street-address' | 'address-line1' | 'address-line2' | 'address-line3'
+  | 'address-level4' | 'address-level3' | 'address-level2' | 'address-level1' | 'country' | 'country-name'
+  | 'postal-code' | 'cc-name' | 'cc-given-name' | 'cc-additional-name' | 'cc-family-name' | 'cc-number'
+  | 'cc-exp' | 'cc-exp-month' | 'cc-exp-year' | 'cc-csc' | 'cc-type' | 'transaction-currency' | 'transaction-amount'
+  | 'language' | 'bday' | 'bday-day' | 'bday-month' | 'bday-year' | 'sex' | 'url' | 'photo'
+  | 'tel' | 'tel-country-code' | 'tel-national' | 'tel-area-code' | 'tel-local' | 'tel-local-prefix'
+  | 'tel-local-suffix' | 'tel-extension' | 'email' | 'impp' | 'no-email' | 'no-tel';
+
 type AnyLiteral = Record<string, any>;
 type AnyClass = new (...args: any[]) => any;
 type AnyFunction = (...args: any[]) => any;

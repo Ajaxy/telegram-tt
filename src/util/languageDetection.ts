@@ -15,6 +15,7 @@ const DEFAULT_LABELS_COUNT = 5;
 const UNDEFINED_LANGUAGE = 'und';
 
 let worker: Connector<FastTextApi> | undefined;
+// @ts-ignore
 let languageDetector: LanguageDetector | undefined;
 const initializationDeferred = new Deferred();
 
@@ -26,6 +27,7 @@ async function initLanguageDetection() {
   if (isInitialized()) return;
   if (IS_TRANSLATION_DETECTOR_SUPPORTED) {
     try {
+      // @ts-ignore
       languageDetector = await LanguageDetector.create();
       initializationDeferred.resolve();
       return;
@@ -75,11 +77,13 @@ export async function detectLanguage(text: string, threshold = DEFAULT_THRESHOLD
 
 export async function detectLanguageProbability(
   text: string, labelsCount = DEFAULT_LABELS_COUNT, threshold = DEFAULT_THRESHOLD,
+// @ts-ignore
 ): Promise<LanguageDetectionResult[] | undefined> {
   if (!isInitialized()) await initializationDeferred.promise;
   if (languageDetector) {
     try {
       const results = await languageDetector.detect(text);
+      // @ts-ignore
       return results.filter((result) => result.detectedLanguage !== UNDEFINED_LANGUAGE
         && (result.confidence && result.confidence >= threshold))
         .slice(0, labelsCount);

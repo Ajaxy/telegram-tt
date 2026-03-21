@@ -101,6 +101,7 @@ export const INITIAL_SHARED_STATE: SharedState = {
 export const INITIAL_GLOBAL_STATE: GlobalState = {
   cacheVersion: 3,
   isInited: true,
+  animationLevel: ANIMATION_LEVEL_DEFAULT,
   attachMenu: { bots: {} },
   passcode: {},
   twoFaSettings: {},
