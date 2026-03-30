@@ -35,13 +35,13 @@ jobs:
 
       - name: Sync to S3 (assets, long cache)
         run: |
-          aws s3 sync dist/ s3://tweb.tuvis.com \
+          aws s3 sync dist/ s3://tweb.tuvis.info \
             --delete \
             --exclude "index.html" \
             --cache-control "public, max-age=31536000, immutable"
 
       - name: Upload index.html (no cache)
         run: |
-          aws s3 cp dist/index.html s3://tweb.tuvis.com/index.html \
+          aws s3 cp dist/index.html s3://tweb.tuvis.info/index.html \
             --content-type "text/html" \
             --cache-control "max-age=0, no-cache, must-revalidate"
