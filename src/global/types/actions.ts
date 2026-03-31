@@ -405,6 +405,10 @@ export interface ActionPayloads {
     chatId: string;
     shouldSkipOwnershipCheck?: boolean;
   } & WithTabId;
+  leaveBasicGroup: {
+    chatId: string;
+    shouldSkipOwnershipCheck?: boolean;
+  } & WithTabId;
   deleteChannel: { chatId: string } & WithTabId;
   toggleChatPinned: {
     id: string;

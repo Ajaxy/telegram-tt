@@ -3493,6 +3493,10 @@ export interface LangPairWithVariables<V = LangVariable> {
     'nextOwner': V;
     'group': V;
   };
+  'LeaveBasicGroupDescription': {
+    'nextOwner': V;
+    'group': V;
+  };
   'LeaveGroupJoinedDate': {
     'date': V;
   };

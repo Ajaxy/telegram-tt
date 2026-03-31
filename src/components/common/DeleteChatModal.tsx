@@ -63,6 +63,7 @@ const DeleteChatModal = ({
 }: OwnProps & StateProps) => {
   const {
     leaveChannel,
+    leaveBasicGroup,
     deleteHistory,
     deleteSavedHistory,
     deleteChannel,
@@ -114,8 +115,8 @@ const DeleteChatModal = ({
       leaveChannel({ chatId: chat.id });
       onClose();
     } else if (isBasicGroup && chat.isCreator) {
-      deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
-      deleteChatUser({ chatId: chat.id, userId: currentUserId! });
+      leaveBasicGroup({ chatId: chat.id });
+      onClose();
     } else {
       handleDeleteChat();
     }

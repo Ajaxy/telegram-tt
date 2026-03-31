@@ -57,7 +57,7 @@ import {
   isUserBot,
 } from '../../helpers';
 import {
-  addActionHandler, getGlobal, setGlobal,
+  addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
 import {
   addChatListIds,
@@ -888,6 +888,56 @@ addActionHandler('deleteChat', (global, actions, payload): ActionReturnType => {
   void callApi('deleteChat', { chatId: chat.id });
 });
 
+async function checkFutureCreatorAndOpenModal(
+  chat: ApiChat,
+  shouldSkipOwnershipCheck: boolean | undefined,
+  tabId: number,
+): Promise<boolean> {
+  if (shouldSkipOwnershipCheck || !chat.isCreator) {
+    return false;
+  }
+
+  const futureCreator = await callApi('fetchFutureCreatorAfterLeave', { chat });
+  if (!futureCreator) {
+    return false;
+  }
+
+  const global = getGlobal();
+  const hasPassword = global.settings.byKey.hasPassword;
+  const actions = getActions();
+  if (!hasPassword) {
+    actions.openTwoFaCheckModal({ tabId });
+    return true;
+  }
+
+  actions.openLeaveGroupModal({ chatId: chat.id, nextOwnerId: futureCreator.id, tabId });
+  return true;
+}
+
+function cleanupAfterLeave(chatId: string, tabId: number) {
+  let global = getGlobal();
+  global = leaveChat(global, chatId);
+  setGlobal(global);
+
+  if (selectCurrentMessageList(global, tabId)?.chatId === chatId) {
+    getActions().openChat({ id: undefined, tabId });
+  }
+
+  global = getGlobal();
+  const chatMessages = selectChatMessages(global, chatId);
+  if (!chatMessages) {
+    return;
+  }
+
+  const localMessageIds = Object.keys(chatMessages).map(Number).filter(isLocalMessageId);
+  if (!localMessageIds.length) {
+    return;
+  }
+
+  global = deleteChatMessages(global, chatId, localMessageIds);
+  setGlobal(global);
+}
+
 addActionHandler('leaveChannel', async (global, actions, payload): Promise<void> => {
   const { chatId, shouldSkipOwnershipCheck, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
@@ -895,35 +945,39 @@ addActionHandler('leaveChannel', async (global, actions, payload): Promise<void>
     return;
   }
 
-  if (!shouldSkipOwnershipCheck && chat.isCreator) {
-    const futureCreator = await callApi('fetchFutureCreatorAfterLeave', { chat });
-    if (futureCreator) {
-      global = getGlobal();
-      const hasPassword = global.settings.byKey.hasPassword;
-      if (!hasPassword) {
-        actions.openTwoFaCheckModal({ tabId });
-        return;
-      }
-
-      actions.openLeaveGroupModal({ chatId, nextOwnerId: futureCreator.id, tabId });
-      return;
-    }
+  const isModalOpen = await checkFutureCreatorAndOpenModal(chat, shouldSkipOwnershipCheck, tabId);
+  if (isModalOpen) {
+    return;
   }
 
   global = getGlobal();
-  global = leaveChat(global, chatId);
-  setGlobal(global);
-
-  if (selectCurrentMessageList(global, tabId)?.chatId === chatId) {
-    actions.openChat({ id: undefined, tabId });
-  }
-
   await callApi('leaveChannel', { chat });
+
+  cleanupAfterLeave(chatId, tabId);
+});
+
+addActionHandler('leaveBasicGroup', async (global, actions, payload): Promise<void> => {
+  const { chatId, shouldSkipOwnershipCheck, tabId = getCurrentTabId() } = payload;
+  const chat = selectChat(global, chatId);
+  const currentUserId = global.currentUserId;
+  if (!chat || !currentUserId) {
+    return;
+  }
+
+  const isModalOpen = await checkFutureCreatorAndOpenModal(chat, shouldSkipOwnershipCheck, tabId);
+  if (isModalOpen) {
+    return;
+  }
+
+  actions.deleteHistory({ chatId, shouldDeleteForAll: false, tabId });
+
   global = getGlobal();
-  const chatMessages = selectChatMessages(global, chatId);
-  const localMessageIds = Object.keys(chatMessages).map(Number).filter(isLocalMessageId);
-  global = deleteChatMessages(global, chatId, localMessageIds);
-  setGlobal(global);
+  const user = selectUser(global, currentUserId);
+  if (user) {
+    await callApi('deleteChatUser', { chat, user, shouldRevokeHistory: false });
+  }
+
+  cleanupAfterLeave(chatId, tabId);
 });
 
 addActionHandler('verifyTransferOwnership', async (global, actions, payload): Promise<void> => {
@@ -973,8 +1027,7 @@ addActionHandler('transferChatOwnership', async (global, actions, payload): Prom
 
   const chat = selectChat(global, chatId);
   const user = selectUser(global, userId);
-
-  if (!chat || !user) {
+  if (!chat || !user?.accessHash) {
     return;
   }
 

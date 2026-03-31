@@ -6,6 +6,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiChat, ApiChatFullInfo, ApiPeer } from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
 
+import { isChatBasicGroup } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import { selectChat, selectChatFullInfo, selectPeer } from '../../../global/selectors';
 
@@ -46,7 +47,7 @@ const LeaveGroupModal = ({
   chatFullInfo,
 }: OwnProps & StateProps) => {
   const {
-    closeLeaveGroupModal, leaveChannel, loadMoreMembers, loadFullChat,
+    closeLeaveGroupModal, leaveChannel, leaveBasicGroup, loadMoreMembers, loadFullChat,
     transferChatOwnership, verifyTransferOwnership, openTwoFaCheckModal,
   } = getActions();
   const lang = useLang();
@@ -58,6 +59,7 @@ const LeaveGroupModal = ({
 
   const isOpen = Boolean(modal);
   const renderingChat = useCurrentOrPrev(chat);
+  const isBasicGroup = renderingChat && isChatBasicGroup(renderingChat);
   const renderingCurrentUser = useCurrentOrPrev(currentUser);
 
   useEffect(() => {
@@ -171,15 +173,17 @@ const LeaveGroupModal = ({
     const chatId = modal?.chatId;
     if (!chatId) return;
 
+    const leaveAction = isBasicGroup ? leaveBasicGroup : leaveChannel;
+
     if (isOwnerChanged && newOwnerId) {
       transferChatOwnership({
         chatId,
         userId: newOwnerId,
         password,
-        onSuccess: () => leaveChannel({ chatId, shouldSkipOwnershipCheck: true }),
+        onSuccess: () => leaveAction({ chatId, shouldSkipOwnershipCheck: true }),
       });
     } else {
-      leaveChannel({ chatId, shouldSkipOwnershipCheck: true });
+      leaveAction({ chatId, shouldSkipOwnershipCheck: true });
     }
     closeLeaveGroupModal();
   });
@@ -220,7 +224,7 @@ const LeaveGroupModal = ({
         )}
         <h3>{lang('LeaveGroupTitle', { group: chatTitle })}</h3>
         <p>
-          {lang('LeaveGroupDescription', {
+          {lang(isBasicGroup ? 'LeaveBasicGroupDescription' : 'LeaveGroupDescription', {
             nextOwner: newOwnerName,
             group: chatTitle,
           }, {

@@ -2679,6 +2679,7 @@
 "SettingsDataClearMediaDone" = "Media cache cleared";
 "LeaveGroupTitle" = "Leave {group}?";
 "LeaveGroupDescription" = "If you leave, **{nextOwner}** will become the new owner of **{group}** in 1 week.";
+"LeaveBasicGroupDescription" = "If you leave, **{nextOwner}** will immediately become the new owner of **{group}**.";
 "LeaveGroupAppointOwner" = "Appoint Another Owner";
 "LeaveGroupAdmins" = "GROUP ADMINS";
 "LeaveGroupMembers" = "GROUP MEMBERS";
