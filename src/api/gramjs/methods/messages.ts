@@ -1323,6 +1323,12 @@ export async function markMessageListRead({
       chatId: chat.id,
       topicId: Number(threadId),
     });
+  } else {
+    sendApiUpdate({
+      '@type': 'updateDiscussion',
+      chatId: chat.id,
+      threadId: Number(threadId),
+    });
   }
 }
 

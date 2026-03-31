@@ -3297,6 +3297,29 @@ addActionHandler('requestCollectibleInfo', async (global, actions, payload): Pro
   setGlobal(global);
 });
 
+addActionHandler('loadDiscussion', async (global, actions, payload): Promise<void> => {
+  const { chatId, threadId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('fetchDiscussionMessage', {
+    chat,
+    messageId: threadId,
+  });
+
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = addMessages(global, result.messages);
+  global = updateThreadInfo(global, result.threadInfo);
+  global = updateThreadReadState(global, chatId, result.threadId, result.threadReadState);
+  global = updateThreadInfoLastMessageId(global, chatId, result.threadId, result.lastMessageId);
+  global = replaceThreadLocalStateParam(global, chatId, threadId, 'firstMessageId', result.firstMessageId);
+  setGlobal(global);
+});
+
 async function loadChats(
   listType: ChatListType,
   isFullDraftSync?: boolean,

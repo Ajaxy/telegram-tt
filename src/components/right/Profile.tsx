@@ -500,9 +500,10 @@ const Profile = ({
   }, [profileTab, activeTabIndex]);
 
   const tabType = tabs[activeTabIndex].type;
-  const handleLoadCommonChats = useCallback(() => {
+  const handleLoadCommonChats = useLastCallback(() => {
+    if (!isSynced) return;
     loadCommonChats({ userId: chatId });
-  }, [chatId]);
+  });
   const handleLoadPeerStories = useCallback(({ offsetId }: { offsetId: number }) => {
     loadPeerProfileStories({ peerId: chatId, offsetId });
   }, [chatId]);
@@ -513,9 +514,10 @@ const Profile = ({
     loadPeerSavedGifts({ peerId: chatId });
   }, [chatId]);
 
-  const handleLoadMoreMembers = useCallback(() => {
+  const handleLoadMoreMembers = useLastCallback(() => {
+    if (!isSynced) return;
     loadMoreMembers({ chatId });
-  }, [chatId, loadMoreMembers]);
+  });
 
   useEffectWithPrevDeps(([prevGifts]) => {
     if (areDeepEqual(gifts, prevGifts)) {

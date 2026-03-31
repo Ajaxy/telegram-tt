@@ -524,6 +524,14 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       return undefined;
     }
 
+    case 'updateDiscussion': {
+      const { chatId, threadId } = update;
+
+      actions.loadDiscussion({ chatId, threadId });
+
+      return undefined;
+    }
+
     case 'updateViewForumAsMessages': {
       const { chatId, isEnabled } = update;
 

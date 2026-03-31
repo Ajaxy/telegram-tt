@@ -3028,6 +3028,11 @@ export interface ActionPayloads {
   } & WithTabId;
   closeEditTopicPanel: WithTabId | undefined;
 
+  loadDiscussion: {
+    chatId: string;
+    threadId: number;
+  };
+
   uploadContactProfilePhoto: {
     userId: string;
     file?: File;

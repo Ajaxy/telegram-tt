@@ -6,6 +6,7 @@ import type { ActionReturnType, GlobalState } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { init as initFolderManager } from '../../../util/folderManager';
 import {
   buildCollectionByKey, omitUndefined, pick, unique,
@@ -36,6 +37,7 @@ import {
   selectCurrentMessageList,
   selectTabState,
   selectTopics,
+  selectViewportIds,
 } from '../../selectors';
 import {
   selectDraft,
@@ -108,6 +110,8 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
   global = getGlobal();
 
   let wasReset = false;
+  const preservedTabThreadsByTabId = preserveCurrentTabThreads(global);
+  const preservedCurrentThreadsByChatId = preserveCurrentThreads(global);
 
   // Memoize drafts
   const draftChatIds = Object.keys(global.messages.byChatId);
@@ -127,24 +131,45 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
       return acc;
     }, {});
 
-  for (const { id: tabId } of Object.values(global.byTabId)) {
+  const currentTabId = getCurrentTabId();
+  const tabs = Object.values(global.byTabId)
+    .sort(({ id: leftId }, { id: rightId }) => {
+      if (leftId === currentTabId) return -1;
+      if (rightId === currentTabId) return 1;
+      return 0;
+    });
+
+  for (const { id: tabId } of tabs) {
     global = getGlobal();
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global, tabId) || {};
     const activeThreadId = currentThreadId || MAIN_THREAD_ID;
     const currentChat = currentChatId ? global.chats.byId[currentChatId] : undefined;
+    const currentViewportIds = currentChatId
+      ? selectViewportIds(global, currentChatId, activeThreadId, tabId)
+      : undefined;
+    const isSavedDialog = currentChatId
+      ? getIsSavedDialog(currentChatId, activeThreadId, global.currentUserId)
+      : false;
     if (currentChatId && currentChat) {
-      const [result, resultDiscussion] = await Promise.all([
+      const discussionChat = resolveDiscussionChat(global, currentChatId, activeThreadId);
+      const [result, resultDiscussion, refreshedViewportMessages] = await Promise.all([
         loadTopMessages(
           global,
           currentChatId,
           activeThreadId,
+          currentViewportIds,
         ),
-        activeThreadId !== MAIN_THREAD_ID && !currentChat.isForum
-        && !getIsSavedDialog(currentChat.id, activeThreadId, global.currentUserId)
+        discussionChat
           ? callApi('fetchDiscussionMessage', {
-            chat: currentChat,
-            messageId: Number(activeThreadId),
+            chat: discussionChat.chat,
+            messageId: discussionChat.messageId,
           }) : undefined,
+        currentViewportIds?.length && !isSavedDialog
+          ? callApi('fetchMessagesById', {
+            chat: currentChat,
+            messageIds: currentViewportIds,
+          }).catch(() => undefined)
+          : undefined,
       ]);
       global = getGlobal();
       const { chatId: newCurrentChatId } = selectCurrentMessageList(global, tabId) || {};
@@ -167,17 +192,18 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
         const isDiscussionStartLoaded = !result.messages.length
           || result.messages.some(({ id }) => id === resultDiscussion?.firstMessageId);
         const threadStartMessages = (isDiscussionStartLoaded && resultDiscussion?.topMessages) || [];
-        const allMessages = threadStartMessages.concat(result.messages, localMessages);
+        const refreshedViewportIds = refreshedViewportMessages?.map(({ id }) => id) || [];
+        const allMessages = threadStartMessages.concat(result.messages, refreshedViewportMessages || [], localMessages);
         const allMessagesWithTopicLastMessages = allMessages.concat(topicLastMessages);
         const byId = buildCollectionByKey(allMessagesWithTopicLastMessages, 'id');
-        const listedIds = unique(allMessages.map(({ id }) => id));
+        const listedIds = unique(refreshedViewportIds.concat(allMessages.map(({ id }) => id)));
 
         if (!wasReset) {
-          global = resetMessages(global);
+          global = resetMessages(global, preservedCurrentThreadsByChatId);
 
           Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
             global = updateTabState(global, {
-              tabThreads: {},
+              tabThreads: preservedTabThreadsByTabId[otherTabId] || {},
             }, otherTabId);
           });
           wasReset = true;
@@ -202,7 +228,18 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
         Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
           const { chatId: otherChatId, threadId: otherThreadId } = selectCurrentMessageList(global, otherTabId) || {};
           if (otherChatId === currentChatId && otherThreadId === activeThreadId) {
-            global = safeReplaceViewportIds(global, currentChatId, activeThreadId, listedIds, otherTabId);
+            const preservedViewportIds = preservedTabThreadsByTabId[otherTabId]
+              ?.[currentChatId]?.[activeThreadId]?.viewportIds;
+            const mergedMessagesById = selectChatMessages(global, currentChatId) || {};
+            const nextViewportIds = preservedViewportIds?.filter((id) => Boolean(mergedMessagesById[id]));
+
+            global = safeReplaceViewportIds(
+              global,
+              currentChatId,
+              activeThreadId,
+              nextViewportIds?.length ? nextViewportIds : listedIds,
+              otherTabId,
+            );
           }
         });
         global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
@@ -227,11 +264,11 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
   global = getGlobal();
 
   if (!areMessagesLoaded) {
-    global = resetMessages(global);
+    global = resetMessages(global, preservedCurrentThreadsByChatId);
 
     Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
       global = updateTabState(global, {
-        tabThreads: {},
+        tabThreads: preservedTabThreadsByTabId[otherTabId] || {},
       }, otherTabId);
     });
   }
@@ -254,30 +291,124 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
   });
 }
 
-function resetMessages<T extends GlobalState>(global: T) {
+function resetMessages<T extends GlobalState>(
+  global: T,
+  preservedByChatId: GlobalState['messages']['byChatId'] = {},
+) {
   return {
     ...global,
     messages: {
       ...global.messages,
-      byChatId: {},
+      byChatId: preservedByChatId,
     },
   };
 }
 
-function loadTopMessages<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
+function preserveCurrentTabThreads<T extends GlobalState>(global: T) {
+  return Object.values(global.byTabId).reduce<Record<number, GlobalState['byTabId'][number]['tabThreads']>>(
+    (acc, { id: tabId }) => {
+      const currentMessageList = selectCurrentMessageList(global, tabId);
+      if (!currentMessageList) {
+        return acc;
+      }
+
+      const { chatId, threadId = MAIN_THREAD_ID } = currentMessageList;
+      const currentTabThread = selectTabState(global, tabId).tabThreads[chatId]?.[threadId];
+
+      if (!currentTabThread) {
+        return acc;
+      }
+
+      acc[tabId] = {
+        [chatId]: {
+          [threadId]: currentTabThread,
+        },
+      };
+
+      return acc;
+    },
+    {},
+  );
+}
+
+function preserveCurrentThreads<T extends GlobalState>(global: T) {
+  return Object.values(global.byTabId).reduce<GlobalState['messages']['byChatId']>((acc, { id: tabId }) => {
+    const currentMessageList = selectCurrentMessageList(global, tabId);
+    if (!currentMessageList) {
+      return acc;
+    }
+
+    const { chatId, threadId = MAIN_THREAD_ID } = currentMessageList;
+    const currentThread = global.messages.byChatId[chatId]?.threadsById[threadId];
+    if (!currentThread) {
+      return acc;
+    }
+
+    acc[chatId] = {
+      byId: {},
+      summaryById: {},
+      threadsById: {
+        ...acc[chatId]?.threadsById,
+        [threadId]: {
+          ...currentThread,
+          localState: {
+            ...currentThread.localState,
+            listedIds: undefined,
+            outlyingLists: undefined,
+          },
+        },
+      },
+    };
+
+    return acc;
+  }, {});
+}
+
+function resolveDiscussionChat<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  threadId: ThreadId,
+) {
+  if (threadId === MAIN_THREAD_ID) return undefined;
+
+  const chat = selectChat(global, chatId);
+  if (!chat || chat.isForum || getIsSavedDialog(chatId, threadId, global.currentUserId)) return undefined;
+
+  const threadInfo = selectThreadInfo(global, chatId, threadId);
+  if (threadInfo?.isCommentsInfo === false && threadInfo.fromChannelId) {
+    const originChannel = selectChat(global, threadInfo.fromChannelId);
+    if (originChannel && threadInfo.fromMessageId) {
+      return { chat: originChannel, messageId: threadInfo.fromMessageId };
+    }
+  }
+
+  return { chat, messageId: Number(threadId) };
+}
+
+function loadTopMessages<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  threadId: ThreadId,
+  viewportIds?: number[],
+) {
   const currentUserId = global.currentUserId!;
   const isSavedDialog = getIsSavedDialog(chatId, threadId, currentUserId);
   const realChatId = isSavedDialog ? String(threadId) : chatId;
 
-  const chat = selectChat(global, realChatId)!;
+  const chat = selectChat(global, realChatId);
+  if (!chat) return undefined;
+
   const readState = selectThreadReadState(global, chatId, threadId);
+  const viewportAnchorId = viewportIds?.[0];
+  const shouldRestoreViewport = Boolean(viewportAnchorId && !getIsSavedDialog(chatId, threadId, currentUserId));
 
   return callApi('fetchMessages', {
     chat,
     threadId,
-    offsetId: !isSavedDialog ? readState?.lastReadInboxMessageId : undefined,
-    addOffset: -(Math.round(MESSAGE_LIST_SLICE / 2) + 1),
-    limit: MESSAGE_LIST_SLICE,
+    offsetId: shouldRestoreViewport ? viewportAnchorId
+      : (!isSavedDialog ? readState?.lastReadInboxMessageId : undefined),
+    addOffset: shouldRestoreViewport ? -(MESSAGE_LIST_SLICE + 1) : -(Math.round(MESSAGE_LIST_SLICE / 2) + 1),
+    limit: shouldRestoreViewport ? (MESSAGE_LIST_SLICE + 1) : MESSAGE_LIST_SLICE,
     isSavedDialog,
   });
 }
