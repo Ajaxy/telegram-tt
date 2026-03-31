@@ -398,9 +398,21 @@
       flex-grow: 1;
     }
 
+    .message-title-meta {
+      user-select: none;
+
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-left: 1rem;
+    }
+
     .admin-title-badge, .admin-title {
       user-select: none;
-      margin-left: 1rem;
+    }
+
+    .admin-title-badge:last-child {
+      margin-right: -0.1875rem;
     }
 
     .admin-title {
@@ -414,18 +426,11 @@
       }
     }
 
-    .admin-title-badge {
-      margin-right: -0.1875rem;
-    }
-
     .sender-boosts {
       user-select: none;
 
       display: flex;
       align-items: center;
-
-      margin-top: -0.125rem;
-      margin-inline-start: 0.125rem;
 
       font-size: 0.75rem;
     }

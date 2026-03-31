@@ -1734,25 +1734,29 @@ const Message = ({
           </span>
         )}
         <div className="title-spacer" />
-        {(!shouldSkipRenderAdminTitle && !signature) ? (forwardInfo?.isLinkedChannelPost ? (
-          <span className="admin-title" dir="auto">{oldLang('DiscussChannel')}</span>
-        ) : message.postAuthorTitle && isGroup && !asForwarded ? (
-          <span className="admin-title" dir="auto">{message.postAuthorTitle}</span>
-        ) : (senderChatMember || fromRank) && !asForwarded ? (
-          <RankBadge
-            chatId={chatId}
-            userId={(senderChatMember?.userId || sender?.id)!}
-            isAdmin={senderChatMember?.isAdmin}
-            isOwner={senderChatMember?.isOwner}
-            rank={senderChatMember?.rank || fromRank}
-            className="admin-title-badge"
-            isClickable
-          />
-        ) : undefined) : undefined}
-        {canShowSenderBoosts && (
-          <span className="sender-boosts" aria-hidden>
-            <Icon name={senderBoosts > 1 ? 'boosts' : 'boost'} />
-            {senderBoosts > 1 ? senderBoosts : undefined}
+        {((!shouldSkipRenderAdminTitle && !signature) || canShowSenderBoosts) && (
+          <span className="message-title-meta">
+            {(!shouldSkipRenderAdminTitle && !signature) ? (forwardInfo?.isLinkedChannelPost ? (
+              <span className="admin-title" dir="auto">{oldLang('DiscussChannel')}</span>
+            ) : message.postAuthorTitle && isGroup && !asForwarded ? (
+              <span className="admin-title" dir="auto">{message.postAuthorTitle}</span>
+            ) : (senderChatMember || fromRank) && !asForwarded ? (
+              <RankBadge
+                chatId={chatId}
+                userId={(senderChatMember?.userId || sender?.id)!}
+                isAdmin={senderChatMember?.isAdmin}
+                isOwner={senderChatMember?.isOwner}
+                rank={senderChatMember?.rank || fromRank}
+                className="admin-title-badge"
+                isClickable
+              />
+            ) : undefined) : undefined}
+            {canShowSenderBoosts && (
+              <span className="sender-boosts" aria-hidden>
+                <Icon name={senderBoosts > 1 ? 'boosts' : 'boost'} />
+                {senderBoosts > 1 ? senderBoosts : undefined}
+              </span>
+            )}
           </span>
         )}
       </div>
