@@ -74,6 +74,7 @@ import {
   isUserRightBanned,
   splitMessagesForForwarding,
 } from '../../helpers';
+import { isChatAdmin } from '../../helpers/chats';
 import { isApiPeerChat, isApiPeerUser } from '../../helpers/peers';
 import {
   addActionHandler, getActions, getGlobal, getPromiseActions, setGlobal,
@@ -1908,7 +1909,7 @@ export async function getPeerStarsForMessage<T extends GlobalState>(
   if (!peer) return undefined;
 
   if (isApiPeerChat(peer)) {
-    if (selectIsMonoforumAdmin(global, peerId)) {
+    if (isChatAdmin(peer) || selectIsMonoforumAdmin(global, peerId)) {
       return undefined;
     }
     return peer.paidMessagesStars;
