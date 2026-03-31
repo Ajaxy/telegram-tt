@@ -255,6 +255,11 @@ const MessageContextMenu: FC<OwnProps> = ({
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
   const { isMobile } = useAppLayout();
   const seenByDatesCount = useMemo(() => (seenByDates ? Object.keys(seenByDates).length : 0), [seenByDates]);
+  const totalSeenCount = useMemo(() => {
+    const ids = new Set(seenByDates ? Object.keys(seenByDates) : []);
+    message.reactors?.reactions?.forEach(({ peerId }) => ids.add(peerId));
+    return ids.size;
+  }, [seenByDates, message.reactors?.reactions]);
 
   const handleAfterCopy = useLastCallback(() => {
     showNotification({
@@ -494,11 +499,15 @@ const MessageContextMenu: FC<OwnProps> = ({
                 <span className="MessageContextMenu--seen-by-label" dir={lang.isRtl ? 'rtl' : undefined}>
                   {canShowReactionsCount && message.reactors?.count ? (
                     canShowSeenBy && seenByDatesCount
-                      ? oldLang(
-                        'Chat.OutgoingContextMixedReactionCount',
-                        [message.reactors.count, seenByDatesCount],
+                      ? lang(
+                        'ChatOutgoingContextMixedReactionCount',
+                        { count: message.reactors.count, total: totalSeenCount },
                       )
-                      : oldLang('Chat.ContextReactionCount', message.reactors.count, 'i')
+                      : lang(
+                        'ChatContextReactionCount',
+                        { count: message.reactors.count },
+                        { pluralValue: message.reactors.count },
+                      )
                   ) : (
                     seenByDatesCount === 1 && seenByRecentPeers
                       ? renderText(
@@ -507,8 +516,12 @@ const MessageContextMenu: FC<OwnProps> = ({
                           : (seenByRecentPeers[0] as ApiChat).title,
                       ) : (
                         seenByDatesCount
-                          ? oldLang('Conversation.ContextMenuSeen', seenByDatesCount, 'i')
-                          : oldLang('Conversation.ContextMenuNoViews')
+                          ? lang(
+                            'ConversationContextMenuSeen',
+                            { count: seenByDatesCount },
+                            { pluralValue: seenByDatesCount },
+                          )
+                          : lang('ConversationContextMenuNoViews')
                       )
                   )}
                 </span>
