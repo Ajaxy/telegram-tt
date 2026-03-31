@@ -307,6 +307,8 @@
 
     @media (hover: hover) {
       &:hover {
+        color: var(--color-white);
+
         .icon-unpin {
           color: var(--color-white);
         }
@@ -316,6 +318,8 @@
     @media (max-width: 600px) {
       &:active,
       &:focus {
+        color: var(--color-white);
+
         .icon-unpin {
           color: var(--color-white);
         }
