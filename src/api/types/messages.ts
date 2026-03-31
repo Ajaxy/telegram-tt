@@ -1106,12 +1106,18 @@ export type ApiSearchPostsFlood = {
   starsAmount: number;
 };
 
-export type LinkContext = {
+export type LinkContextMessage = {
   type: 'message';
   threadId?: ThreadId;
   chatId: string;
   messageId: number;
 };
+
+export type LinkContextInner = {
+  type: 'inner';
+};
+
+export type LinkContext = LinkContextMessage | LinkContextInner;
 
 export interface ApiTopic {
   id: number;

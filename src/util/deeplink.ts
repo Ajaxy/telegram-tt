@@ -90,30 +90,34 @@ export const processDeepLink = (url: string, linkContext?: LinkContext): boolean
         switch (parsedLink.screen) {
           case 'editProfile':
             actions.openSettingsScreen({ screen: SettingsScreens.EditProfile });
-            break;
+            return true;
           case 'language':
             actions.openSettingsScreen({ screen: SettingsScreens.Language });
-            break;
+            return true;
           case 'devices':
             actions.openSettingsScreen({ screen: SettingsScreens.ActiveSessions });
-            break;
+            return true;
           case 'privacy':
             actions.openSettingsScreen({ screen: SettingsScreens.Privacy });
-            break;
+            return true;
           case 'folders':
             actions.openSettingsScreen({ screen: SettingsScreens.Folders });
-            break;
+            return true;
           case 'theme':
             actions.openSettingsScreen({ screen: SettingsScreens.General });
-            break;
+            return true;
         }
-        return true;
+        break;
       case 'stars':
         actions.openStarsBalanceModal({});
-        break;
+        return true;
       case 'ton':
         actions.openStarsBalanceModal({ currency: TON_CURRENCY_CODE });
-        break;
+        return true;
+      case 'oauth':
+        if (linkContext?.type !== 'inner') return false;
+        actions.requestLinkUrlAuth({ url: parsedLink.url });
+        return true;
       default:
         break;
     }

@@ -2308,6 +2308,8 @@ export interface ActionPayloads {
 
   acceptBotUrlAuth: {
     isWriteAllowed?: boolean;
+    wasPhoneShared?: boolean;
+    matchCode?: string;
   } & WithTabId;
 
   requestLinkUrlAuth: {
@@ -2316,7 +2318,15 @@ export interface ActionPayloads {
 
   acceptLinkUrlAuth: {
     isWriteAllowed?: boolean;
+    wasPhoneShared?: boolean;
+    matchCode?: string;
   } & WithTabId;
+
+  checkUrlAuthMatchCode: {
+    matchCode: string;
+  } & WithTabId;
+
+  declineUrlAuth: WithTabId | undefined;
 
   // Settings
   loadAuthorizations: undefined;

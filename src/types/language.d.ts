@@ -548,6 +548,16 @@ export interface LangPair {
   'AboutPremiumDescription2': undefined;
   'OpenUrlTitle': undefined;
   'OpenUrlConfirm': undefined;
+  'BotAuthSiteSubtitle': undefined;
+  'BotAuthAllowMessages': undefined;
+  'BotAuthInfo': undefined;
+  'BotAuthDevice': undefined;
+  'BotAuthSelectEmoji': undefined;
+  'BotAuthPhoneNumber': undefined;
+  'BotAuthPhoneNumberQuestion': undefined;
+  'BotAuthPhoneNumberAccept': undefined;
+  'BotAuthPhoneNumberDeny': undefined;
+  'BotAuthLogin': undefined;
   'BotWebViewOpenBot': undefined;
   'BotChatMiniAppOpen': undefined;
   'WebAppReloadPage': undefined;
@@ -642,6 +652,7 @@ export interface LangPair {
   'ErrorPasswordChanged': undefined;
   'ErrorPasswordMissing': undefined;
   'ErrorPasskeyUnknown': undefined;
+  'ErrorUrlExpired': undefined;
   'ErrorUnspecified': undefined;
   'NoStickers': undefined;
   'ClearRecentEmoji': undefined;
@@ -2181,12 +2192,15 @@ export interface LangPairWithVariables<V = LangVariable> {
   'OpenUrlText': {
     'url': V;
   };
-  'ConversationOpenBotLinkLogin': {
+  'BotAuthTitle': {
     'url': V;
-    'user': V;
   };
-  'ConversationOpenBotLinkAllowMessages': {
+  'BotAuthAllowMessagesInfo': {
     'bot': V;
+  };
+  'BotAuthPhoneNumberText': {
+    'domain': V;
+    'phone': V;
   };
   'ForwardForStars': {
     'price': V;
@@ -3573,6 +3587,9 @@ export interface LangPairWithVariables<V = LangVariable> {
     'outbidCount': V;
   };
   'BotAuthSuccessText': {
+    'url': V;
+  };
+  'BotAuthSuccessTextNoPhone': {
     'url': V;
   };
   'RankModalMemberText': {

@@ -112,7 +112,7 @@
     --color-primary-shade: #{color.mix($color-primary, $color-black, 92%)};
     --color-primary-shade-darker: #{color.mix($color-primary, $color-black, 84%)};
     --color-primary-shade-rgb: #{toRGB(color.mix($color-primary, $color-black, 92%))};
-    --color-primary-opacity: rgba(var(--color-primary), 0.15);
+    --color-primary-opacity: rgba(var(--color-primary), 0.2);
     --color-primary-opacity-hover: rgba(var(--color-primary), 0.25);
     --color-primary-tint: rgba(var(--color-primary), 0.1);
     --color-green: #{$color-green};
@@ -121,7 +121,7 @@
 
     --accent-color: var(--color-primary);
     --accent-background-color: var(--color-primary-tint);
-    --accent-background-active-color: var(--color-primary-opacity);
+    --accent-background-active-color: var(--color-primary-opacity-hover);
 
     --color-error: #{$color-error};
     --color-error-shade: #{color.mix($color-error, $color-black, 92%)};

@@ -3770,7 +3770,7 @@ async function openChatWithParams<T extends GlobalState>(
     if (!isTopicProcessed) {
       actions.focusMessage({
         chatId: chat.id, threadId, messageId, timestamp, tabId,
-        replyMessageId: linkContext?.messageId,
+        replyMessageId: linkContext?.type === 'message' ? linkContext.messageId : undefined,
       });
     }
   } else if (!isCurrentChat) {

@@ -1,4 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
+import { RPCError } from '../../../lib/gramjs/errors';
 import { generateRandomBigInt } from '../../../lib/gramjs/Helpers';
 
 import type {
@@ -8,6 +9,7 @@ import type {
   ApiInputMessageReplyInfo,
   ApiPeer,
   ApiThemeParameters,
+  ApiUrlAuthResult,
   ApiUser,
 } from '../../types';
 
@@ -450,23 +452,11 @@ export async function requestBotUrlAuth({
   buttonId: number;
   messageId: number;
 }) {
-  const result = await invokeRequest(new GramJs.messages.RequestUrlAuth({
+  return invokeUrlAuthRequest(new GramJs.messages.RequestUrlAuth({
     peer: buildInputPeer(chat.id, chat.accessHash),
     buttonId,
     msgId: messageId,
   }));
-
-  if (!result) return undefined;
-
-  const authResult = buildApiUrlAuthResult(result);
-  if (authResult?.type === 'request') {
-    sendApiUpdate({
-      '@type': 'updateUser',
-      id: authResult.bot.id,
-      user: authResult.bot,
-    });
-  }
-  return authResult;
 }
 
 export async function acceptBotUrlAuth({
@@ -474,67 +464,71 @@ export async function acceptBotUrlAuth({
   messageId,
   buttonId,
   isWriteAllowed,
+  wasPhoneShared,
+  matchCode,
 }: {
   chat: ApiChat;
   messageId: number;
   buttonId: number;
   isWriteAllowed?: boolean;
+  wasPhoneShared?: boolean;
+  matchCode?: string;
 }) {
-  const result = await invokeRequest(new GramJs.messages.AcceptUrlAuth({
+  return invokeUrlAuthRequest(new GramJs.messages.AcceptUrlAuth({
     peer: buildInputPeer(chat.id, chat.accessHash),
     msgId: messageId,
     buttonId,
     writeAllowed: isWriteAllowed || undefined,
+    sharePhoneNumber: wasPhoneShared || undefined,
+    matchCode: matchCode || undefined,
   }));
-
-  if (!result) return undefined;
-
-  const authResult = buildApiUrlAuthResult(result);
-  if (authResult?.type === 'request') {
-    sendApiUpdate({
-      '@type': 'updateUser',
-      id: authResult.bot.id,
-      user: authResult.bot,
-    });
-  }
-  return authResult;
 }
 
 export async function requestLinkUrlAuth({ url }: { url: string }) {
-  const result = await invokeRequest(new GramJs.messages.RequestUrlAuth({
+  return invokeUrlAuthRequest(new GramJs.messages.RequestUrlAuth({
     url,
   }));
-
-  if (!result) return undefined;
-
-  const authResult = buildApiUrlAuthResult(result);
-  if (authResult?.type === 'request') {
-    sendApiUpdate({
-      '@type': 'updateUser',
-      id: authResult.bot.id,
-      user: authResult.bot,
-    });
-  }
-  return authResult;
 }
 
-export async function acceptLinkUrlAuth({ url, isWriteAllowed }: { url: string; isWriteAllowed?: boolean }) {
-  const result = await invokeRequest(new GramJs.messages.AcceptUrlAuth({
+export async function acceptLinkUrlAuth({
+  url, isWriteAllowed, wasPhoneShared, matchCode,
+}: {
+  url: string;
+  isWriteAllowed?: boolean;
+  wasPhoneShared?: boolean;
+  matchCode?: string;
+}) {
+  return invokeUrlAuthRequest(new GramJs.messages.AcceptUrlAuth({
     url,
     writeAllowed: isWriteAllowed || undefined,
+    sharePhoneNumber: wasPhoneShared || undefined,
+    matchCode: matchCode || undefined,
   }));
+}
 
-  if (!result) return undefined;
-
-  const authResult = buildApiUrlAuthResult(result);
-  if (authResult?.type === 'request') {
-    sendApiUpdate({
-      '@type': 'updateUser',
-      id: authResult.bot.id,
-      user: authResult.bot,
+export async function checkUrlAuthMatchCode({ url, matchCode }: { url: string; matchCode: string }) {
+  try {
+    const result = await invokeRequest(new GramJs.messages.CheckUrlAuthMatchCode({
+      url,
+      matchCode,
+    }), {
+      shouldThrow: true,
     });
+    if (!result) return { type: 'unmatched' };
+
+    return { type: 'matched' };
+  } catch (err) {
+    if (err instanceof RPCError && err.errorMessage === 'URL_EXPIRED') {
+      return { type: 'expired' };
+    }
+    throw err;
   }
-  return authResult;
+}
+
+export async function declineUrlAuth({ url }: { url: string }) {
+  return invokeRequest(new GramJs.messages.DeclineUrlAuth({ url }), {
+    shouldReturnTrue: true,
+  });
 }
 
 export function fetchBotCanSendMessage({ bot }: { bot: ApiUser }) {
@@ -719,4 +713,28 @@ export async function fetchBotsRecommendations({ user }: { user: ApiChat }) {
     similarBots,
     count: result instanceof GramJs.users.UsersSlice ? result.count : similarBots.length,
   };
+}
+
+async function invokeUrlAuthRequest(
+  request: GramJs.messages.RequestUrlAuth | GramJs.messages.AcceptUrlAuth,
+): Promise<ApiUrlAuthResult | undefined> {
+  try {
+    const result = await invokeRequest(request, { shouldThrow: true });
+    if (!result) return undefined;
+
+    const authResult = buildApiUrlAuthResult(result);
+    if (authResult?.type === 'request') {
+      sendApiUpdate({
+        '@type': 'updateUser',
+        id: authResult.bot.id,
+        user: authResult.bot,
+      });
+    }
+    return authResult;
+  } catch (err) {
+    if (err instanceof RPCError && err.errorMessage === 'URL_EXPIRED') {
+      return { type: 'expired' };
+    }
+    throw err;
+  }
 }

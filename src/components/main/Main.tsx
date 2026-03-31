@@ -426,7 +426,7 @@ const Main = ({
 
     const parsedInitialLocationHash = parseInitialLocationHash();
     if (parsedInitialLocationHash?.tgaddr) {
-      processDeepLink(decodeURIComponent(parsedInitialLocationHash.tgaddr));
+      processDeepLink(decodeURIComponent(parsedInitialLocationHash.tgaddr), { type: 'inner' });
     }
   }, [isSynced]);
 
@@ -434,7 +434,7 @@ const Main = ({
     try {
       const url = event.payload || '';
       const decodedUrl = decodeURIComponent(url);
-      processDeepLink(decodedUrl);
+      processDeepLink(decodedUrl, { type: 'inner' });
     } catch (e) {
       if (DEBUG) {
         // eslint-disable-next-line no-console

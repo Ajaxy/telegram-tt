@@ -10,7 +10,7 @@ import { isUsernameValid } from './entities/username';
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
   'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
   'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message' | 'premium_offer' | 'premium_multigift' | 'stars_topup'
-  | 'nft' | 'stars' | 'ton' | 'stargift_auction' | 'premium';
+  | 'nft' | 'stars' | 'ton' | 'stargift_auction' | 'premium' | 'oauth';
 
 interface PublicMessageLink {
   type: 'publicMessageLink';
@@ -122,6 +122,11 @@ interface SettingsScreenLink {
   screen?: 'devices' | 'folders' | 'language' | 'privacy' | 'editProfile' | 'theme';
 }
 
+interface OAuthLink {
+  type: 'oauth';
+  url: string;
+}
+
 type DeepLink =
   TelegramPassportLink |
   LoginCodeLink |
@@ -139,7 +144,8 @@ type DeepLink =
   GiftAuctionLink |
   StarsModalLink |
   TonModalLink |
-  SettingsScreenLink;
+  SettingsScreenLink |
+  OAuthLink;
 
 type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string | undefined>;
 type BuilderReturnType<T extends DeepLink> = T | undefined;
@@ -155,6 +161,10 @@ type PublicMessageLinkBuilderParams = Omit<BuilderParams<PublicMessageLink>, 'is
 
 type PublicUsernameOrBotLinkBuilderParams = Omit<BuilderParams<PublicUsernameOrBotLink>, 'isDirect'> & {
   direct?: string;
+};
+
+type OAuthLinkBuilderParams = Omit<BuilderParams<OAuthLink>, 'url'> & {
+  url: string;
 };
 
 const ELIGIBLE_HOSTNAMES = new Set(['t.me', 'telegram.me', 'telegram.dog']);
@@ -283,6 +293,8 @@ function parseTgLink(url: URL) {
       return { type: 'ton' } satisfies TonModalLink;
     case 'settings':
       return buildSettingsScreenLink({ screen: pathParams.length === 1 ? pathParams[0] : undefined });
+    case 'oauth':
+      return buildOAuthLink({ url: url.toString() });
     default:
       break;
   }
@@ -455,11 +467,13 @@ function getTgDeepLinkType(
   switch (method) {
     case 'resolve': {
       const {
-
-        domain, post, bot_id, scope, public_key, nonce,
+        domain, post, bot_id, scope, public_key, nonce, startapp,
       } = queryParams;
       if (domain === 'telegrampassport' && bot_id && scope && public_key && nonce) {
         return 'telegramPassportLink';
+      }
+      if (domain === 'oauth' && startapp) {
+        return 'oauth';
       }
       if (domain && post) {
         return 'publicMessageLink';
@@ -505,6 +519,8 @@ function getTgDeepLinkType(
     case 'settings': {
       return 'settings';
     }
+    case 'oauth':
+      return 'oauth';
     default:
       break;
   }
@@ -773,6 +789,15 @@ function buildSettingsScreenLink(params: BuilderParams<SettingsScreenLink>): Bui
   };
 }
 
+function buildOAuthLink(params: OAuthLinkBuilderParams): BuilderReturnType<OAuthLink> {
+  const {
+    url,
+  } = params;
+  return {
+    type: 'oauth',
+    url,
+  };
+}
 function buildPremiumReferrerLink(params: BuilderParams<PremiumReferrerLink>): BuilderReturnType<PremiumReferrerLink> {
   const {
     ref,

@@ -1795,6 +1795,8 @@ messages.summarizeText#9d4104e2 flags:# peer:InputPeer id:int to_lang:flags.0?st
 messages.editChatCreator#f743b857 peer:InputPeer user_id:InputUser password:InputCheckPasswordSRP = Updates;
 messages.getFutureChatCreatorAfterLeave#3b7d0ea6 peer:InputPeer = User;
 messages.editChatParticipantRank#a00f32b0 peer:InputPeer participant:InputPeer rank:string = Updates;
+messages.declineUrlAuth#35436bbc url:string = Bool;
+messages.checkUrlAuthMatchCode#c9a47b0b url:string match_code:string = Bool;
 updates.getState#edd4882a = updates.State;
 updates.getDifference#19c2f763 flags:# pts:int pts_limit:flags.1?int pts_total_limit:flags.0?int date:int qts:int qts_limit:flags.2?int = updates.Difference;
 updates.getChannelDifference#3173d78 flags:# force:flags.0?true channel:InputChannel filter:ChannelMessagesFilter pts:int limit:int = updates.ChannelDifference;

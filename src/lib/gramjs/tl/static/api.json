@@ -163,6 +163,8 @@
     "messages.getEmojiKeywordsDifference",
     "messages.requestUrlAuth",
     "messages.acceptUrlAuth",
+    "messages.declineUrlAuth",
+    "messages.checkUrlAuthMatchCode",
     "messages.hidePeerSettingsBar",
     "messages.getScheduledHistory",
     "messages.sendScheduledMessages",

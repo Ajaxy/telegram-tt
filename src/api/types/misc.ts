@@ -348,11 +348,19 @@ export interface ApiEmojiInteraction {
   timestamps: number[];
 }
 
-type ApiUrlAuthResultRequest = {
+export type ApiUrlAuthResultRequest = {
   type: 'request';
   bot: ApiUser;
   domain: string;
   shouldRequestWriteAccess?: boolean;
+  shouldRequestPhoneNumber?: boolean;
+  browser?: string;
+  platform?: string;
+  ip?: string;
+  region?: string;
+  matchCodes?: string[];
+  matchCodesFirst?: boolean;
+  userIdHint?: string;
 };
 
 type ApiUrlAuthResultAccepted = {
@@ -360,11 +368,19 @@ type ApiUrlAuthResultAccepted = {
   url?: string;
 };
 
+type ApiUrlAuthResultExpired = {
+  type: 'expired';
+};
+
 type ApiUrlAuthResultDefault = {
   type: 'default';
 };
 
-export type ApiUrlAuthResult = ApiUrlAuthResultRequest | ApiUrlAuthResultAccepted | ApiUrlAuthResultDefault;
+export type ApiUrlAuthResult =
+  ApiUrlAuthResultRequest
+  | ApiUrlAuthResultAccepted
+  | ApiUrlAuthResultExpired
+  | ApiUrlAuthResultDefault;
 
 export interface ApiCollectibleInfo {
   amount: number;

@@ -1,0 +1,71 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.center {
+  align-self: center;
+}
+
+.textCenter {
+  text-align: center;
+}
+
+.title {
+  margin-bottom: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.infoCard {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 12rem;
+  padding: 0.5rem;
+  border-radius: 1rem;
+
+  background-color: var(--color-background-secondary);
+}
+
+.infoLabel, .note {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}
+
+.allowMessages {
+  margin-top: 0.5rem;
+}
+
+.infoValue {
+  font-size: 0.9375rem;
+  color: var(--color-text);
+}
+
+.matchCodes {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.matchCodeButton {
+  --custom-emoji-size: 2rem;
+
+  font-size: 2rem;
+}
+
+.footnote {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.cancelButton {
+  margin-top: 0.75rem;
+}

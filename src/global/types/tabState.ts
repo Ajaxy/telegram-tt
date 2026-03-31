@@ -57,6 +57,7 @@ import type {
   ApiTypePrepaidGiveaway,
   ApiTypeStoryView,
   ApiUniqueStarGiftValueInfo,
+  ApiUrlAuthResultRequest,
   ApiUser,
   ApiVideo,
 } from '../../api/types';
@@ -645,11 +646,8 @@ export type TabState = {
       messageId: number;
       buttonId: number;
     };
-    request?: {
-      domain: string;
-      botId: string;
-      shouldRequestWriteAccess?: boolean;
-    };
+    matchCode?: string;
+    request?: Omit<ApiUrlAuthResultRequest, 'type' | 'bot'> & { botId: string };
     url: string;
   };
 

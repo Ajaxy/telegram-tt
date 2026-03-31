@@ -611,8 +611,19 @@
 "OpenUrlTitle" = "Open Link";
 "OpenUrlText" = "Do you want to open **{url}**?";
 "OpenUrlConfirm" = "Open";
-"ConversationOpenBotLinkLogin" = "Log in to **{url}** as {user}";
-"ConversationOpenBotLinkAllowMessages" = "Allow **{bot}** to send me messages";
+"BotAuthTitle" = "Log in to {url}";
+"BotAuthSiteSubtitle" = "This site will receive your **name**, **username** and **profile photo**.";
+"BotAuthAllowMessages" = "Allow Messages";
+"BotAuthAllowMessagesInfo" = "This will allow **{bot}** to message you.";
+"BotAuthInfo" = "This login attempt came from the device above.";
+"BotAuthDevice" = "Device";
+"BotAuthSelectEmoji" = "Tap the emoji shown on your other device";
+"BotAuthPhoneNumber" = "Phone Number";
+"BotAuthPhoneNumberText" = "**{domain}** wants to access your phone number **{phone}**.";
+"BotAuthPhoneNumberQuestion" = "Allow access?";
+"BotAuthPhoneNumberAccept" = "Allow";
+"BotAuthPhoneNumberDeny" = "Deny";
+"BotAuthLogin" = "Log in";
 "BotWebViewOpenBot" = "Open Bot";
 "BotChatMiniAppOpen" = "Open";
 "WebAppReloadPage" = "Reload Page";
@@ -725,6 +736,7 @@
 "ErrorPasswordChanged" = "Password has been changed, please try again";
 "ErrorPasswordMissing" = "You must set 2FA password to use this feature";
 "ErrorPasskeyUnknown" = "This passkey is not assigned to any account";
+"ErrorUrlExpired" = "This link has expired";
 "ErrorUnspecified" = "Error";
 "NoStickers" = "No stickers yet";
 "ClearRecentEmoji" = "Clear recent emoji?";
@@ -2749,6 +2761,7 @@
 "ChatListAuctionView" = "View";
 "BotAuthSuccessTitle" = "Login Successful";
 "BotAuthSuccessText" = "You've successfully logged into **{url}**";
+"BotAuthSuccessTextNoPhone" = "You're now logged in to **{url}**, but you didn't grant access to your phone number.";
 "GiftPreviewSelectedTraits" = "Selected traits";
 "GiftPreviewCountModels_one" = "This collection features **{count}** unique model";
 "GiftPreviewCountModels_other" = "This collection features **{count}** unique models";
