@@ -47,7 +47,7 @@ const LeaveGroupModal = ({
 }: OwnProps & StateProps) => {
   const {
     closeLeaveGroupModal, leaveChannel, loadMoreMembers, loadFullChat,
-    transferChannelOwnership, verifyTransferOwnership, openTwoFaCheckModal,
+    transferChatOwnership, verifyTransferOwnership, openTwoFaCheckModal,
   } = getActions();
   const lang = useLang();
 
@@ -172,7 +172,7 @@ const LeaveGroupModal = ({
     if (!chatId) return;
 
     if (isOwnerChanged && newOwnerId) {
-      transferChannelOwnership({
+      transferChatOwnership({
         chatId,
         userId: newOwnerId,
         password,

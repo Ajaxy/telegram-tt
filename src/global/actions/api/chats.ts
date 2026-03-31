@@ -895,7 +895,7 @@ addActionHandler('leaveChannel', async (global, actions, payload): Promise<void>
     return;
   }
 
-  if (!shouldSkipOwnershipCheck && chat.isCreator && chat.accessHash) {
+  if (!shouldSkipOwnershipCheck && chat.isCreator) {
     const futureCreator = await callApi('fetchFutureCreatorAfterLeave', { chat });
     if (futureCreator) {
       global = getGlobal();
@@ -966,18 +966,19 @@ addActionHandler('verifyTransferOwnership', async (global, actions, payload): Pr
   }
 });
 
-addActionHandler('transferChannelOwnership', async (global, actions, payload): Promise<void> => {
+addActionHandler('transferChatOwnership', async (global, actions, payload): Promise<void> => {
   const {
     chatId, userId, password, onSuccess,
   } = payload;
 
   const chat = selectChat(global, chatId);
   const user = selectUser(global, userId);
-  if (!chat?.accessHash || !user?.accessHash) {
+
+  if (!chat || !user) {
     return;
   }
 
-  const result = await callApi('editChannelCreator', {
+  const result = await callApi('editChatCreator', {
     chat,
     user,
     password,

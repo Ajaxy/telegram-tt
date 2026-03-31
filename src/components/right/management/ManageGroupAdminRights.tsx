@@ -61,7 +61,7 @@ const ManageGroupAdminRights = ({
   onScreenSelect,
 }: OwnProps & StateProps) => {
   const {
-    updateChatAdmin, transferChannelOwnership, showNotification,
+    updateChatAdmin, transferChatOwnership, showNotification,
     openTwoFaCheckModal, verifyTransferOwnership,
   } = getActions();
 
@@ -227,7 +227,7 @@ const ManageGroupAdminRights = ({
     const user = usersById[selectedUserId];
     const userName = user ? getUserFullName(user) : '';
 
-    transferChannelOwnership({
+    transferChatOwnership({
       chatId: chat.id,
       userId: selectedUserId,
       password,

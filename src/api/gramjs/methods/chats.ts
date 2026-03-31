@@ -970,8 +970,8 @@ export function leaveChannel({ chat }: { chat: ApiChat }) {
 }
 
 export async function fetchFutureCreatorAfterLeave({ chat }: { chat: ApiChat }) {
-  const result = await invokeRequest(new GramJs.channels.GetFutureCreatorAfterLeave({
-    channel: buildInputChannel(chat.id, chat.accessHash),
+  const result = await invokeRequest(new GramJs.messages.GetFutureChatCreatorAfterLeave({
+    peer: buildInputPeer(chat.id, chat.accessHash),
   }));
 
   if (!result) {
@@ -988,8 +988,8 @@ export async function verifyTransferOwnership({
   user: ApiUser;
 }) {
   try {
-    await invokeRequest(new GramJs.channels.EditCreator({
-      channel: buildInputChannel(chat.id, chat.accessHash),
+    await invokeRequest(new GramJs.messages.EditChatCreator({
+      peer: buildInputPeer(chat.id, chat.accessHash),
       userId: buildInputUser(user.id, user.accessHash),
       password: new GramJs.InputCheckPasswordEmpty(),
     }), {
@@ -1011,7 +1011,7 @@ export async function verifyTransferOwnership({
   }
 }
 
-export async function editChannelCreator({
+export async function editChatCreator({
   chat, user, password,
 }: {
   chat: ApiChat;
@@ -1029,8 +1029,8 @@ export async function editChannelCreator({
       return passwordCheck;
     }
 
-    return invokeRequest(new GramJs.channels.EditCreator({
-      channel: buildInputChannel(chat.id, chat.accessHash),
+    return invokeRequest(new GramJs.messages.EditChatCreator({
+      peer: buildInputPeer(chat.id, chat.accessHash),
       userId: buildInputUser(user.id, user.accessHash),
       password: passwordCheck,
     }), {

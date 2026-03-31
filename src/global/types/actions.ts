@@ -2576,7 +2576,7 @@ export interface ActionPayloads {
     onPasswordTooFresh?: VoidFunction;
     onSessionTooFresh?: VoidFunction;
   };
-  transferChannelOwnership: {
+  transferChatOwnership: {
     chatId: string;
     userId: string;
     password: string;
