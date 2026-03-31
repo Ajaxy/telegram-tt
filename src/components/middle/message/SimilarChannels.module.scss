@@ -61,6 +61,12 @@
   background: var(--color-background);
 }
 
+.channelsWrapper {
+  transform: scale(0) translateY(-50%);
+  height: 0;
+  opacity: 0;
+}
+
 .is-appearing {
   animation: 0.15s ease-out channels-appear forwards;
 }

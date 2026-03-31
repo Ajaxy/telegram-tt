@@ -67,6 +67,13 @@ const SimilarChannels = ({
   const ref = useRef<HTMLDivElement>();
 
   const ignoreAutoScrollRef = useRef(false);
+  const wasExpandedRef = useRef(false);
+  const wasClosedManuallyRef = useRef(false);
+
+  useEffect(() => {
+    wasClosedManuallyRef.current = false;
+  }, [chatId]);
+
   const similarChannels = useMemo(() => {
     if (!similarChannelIds) {
       return undefined;
@@ -111,6 +118,7 @@ const SimilarChannels = ({
 
   useEffect(() => {
     if (isExpanded) {
+      wasExpandedRef.current = true;
       markShowing();
       markNotHiding();
       setShouldRenderSkeleton(!similarChannelIds);
@@ -119,18 +127,21 @@ const SimilarChannels = ({
           ref.current?.scrollIntoView({ behavior: 'smooth' });
         }, ANIMATION_DURATION);
       }
-    } else {
+    } else if (wasExpandedRef.current) {
       markNotShowing();
       markHiding();
     }
   }, [isExpanded, similarChannelIds]);
 
   const handleToggle = useLastCallback(() => {
+    if (isExpanded) {
+      wasClosedManuallyRef.current = true;
+    }
     toggleChannelRecommendations({ chatId });
   });
 
   useEffect(() => {
-    if (!channelJoinInfo?.joinedDate || isExpanded) return;
+    if (!channelJoinInfo?.joinedDate || isExpanded || wasClosedManuallyRef.current) return;
     if (getServerTime() - channelJoinInfo.joinedDate <= AUTO_EXPAND_TIME) {
       handleToggle();
       ignoreAutoScrollRef.current = true;
@@ -147,6 +158,7 @@ const SimilarChannels = ({
       {shouldRenderChannels && (
         <div
           className={buildClassName(
+            styles.channelsWrapper,
             isShowing && styles.isAppearing,
             isHiding && styles.isHiding,
           )}
