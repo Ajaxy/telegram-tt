@@ -54,6 +54,8 @@ export interface LangPair {
   'PremiumPreviewUploadsDescription': undefined;
   'PremiumPreviewAdvancedChatManagementDescription': undefined;
   'PremiumPreviewAnimatedProfilesDescription': undefined;
+  'PremiumPreviewNoForwards': undefined;
+  'PremiumPreviewNoForwardsDescription': undefined;
   'PremiumLimitAccountsTitle': undefined;
   'PremiumLimitAccountsNoPremium': undefined;
   'PremiumLimitAccounts': undefined;
@@ -1537,6 +1539,22 @@ export interface LangPair {
   'ActionChangedPhotoChannel': undefined;
   'ActionCreatedChannel': undefined;
   'ActionScreenshotTakenYou': undefined;
+  'ActionSharingDisabledYou': undefined;
+  'ActionSharingEnabledYou': undefined;
+  'ActionSharingStillDisabled': undefined;
+  'ContextMenuNoForwardsYou': undefined;
+  'DisableSharing': undefined;
+  'EnableSharing': undefined;
+  'NotificationSharingEnabled': undefined;
+  'NotificationSharingDisabled': undefined;
+  'NoForwardingTitle': undefined;
+  'NoForwardingDescription': undefined;
+  'NoSavingTitle': undefined;
+  'NoSavingDescription': undefined;
+  'NoForwardsRequestYouTitle': undefined;
+  'NoForwardsRequestForwarding': undefined;
+  'NoForwardsRequestSaving': undefined;
+  'NoForwardsRequestCopying': undefined;
   'ActionBotAppPlaceholder': undefined;
   'ActionGiftTextUnknown': undefined;
   'ActionGiftTextUnknownYou': undefined;
@@ -2018,6 +2036,8 @@ export interface LangPair {
   'RankEditSave': undefined;
   'RankEditTextOwn': undefined;
   'MenuAddCaption': undefined;
+  'NoForwardsRequestReject': undefined;
+  'NoForwardsRequestAccept': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -2749,6 +2769,18 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'ActionScreenshotTaken': {
     'from': V;
+  };
+  'ActionSharingDisabled': {
+    'from': V;
+  };
+  'ActionSharingEnabled': {
+    'from': V;
+  };
+  'ContextMenuNoForwardsPeer': {
+    'name': V;
+  };
+  'NoForwardsRequestTitle': {
+    'user': V;
   };
   'ActionBotAllowedFromDomain': {
     'domain': V;

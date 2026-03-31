@@ -29,6 +29,13 @@ export function selectIsUserBlocked<T extends GlobalState>(global: T, userId: st
   return selectUserFullInfo(global, userId)?.isBlocked;
 }
 
+export function selectIsUserChatProtected<T extends GlobalState>(global: T, userId: string) {
+  const fullInfo = selectUserFullInfo(global, userId);
+  if (!fullInfo) return undefined;
+
+  return Boolean(fullInfo.noForwardsMyEnabled || fullInfo.noForwardsPeerEnabled);
+}
+
 export function selectIsCurrentUserPremium<T extends GlobalState>(global: T) {
   if (!global.currentUserId) return false;
 

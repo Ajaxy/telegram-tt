@@ -97,7 +97,7 @@ import {
 } from './threads';
 import { selectTopic, selectTopicFromMessage } from './topics';
 import {
-  selectBot, selectUser, selectUserStatus,
+  selectBot, selectIsUserChatProtected, selectUser, selectUserStatus,
 } from './users';
 
 export function selectCurrentMessageList<T extends GlobalState>(
@@ -1141,11 +1141,19 @@ export function selectIsMessageProtected<T extends GlobalState>(global: T, messa
 }
 
 export function selectIsChatProtected<T extends GlobalState>(global: T, chatId: string) {
-  return selectChat(global, chatId)?.isProtected || false;
+  const chat = selectChat(global, chatId);
+
+  if (!chat) return false;
+
+  if (chat.isProtected || (isUserId(chatId) && selectIsUserChatProtected(global, chatId))) {
+    return true;
+  }
+
+  return false;
 }
 
 export function selectHasProtectedMessage<T extends GlobalState>(global: T, chatId: string, messageIds?: number[]) {
-  if (selectChat(global, chatId)?.isProtected) {
+  if (selectIsChatProtected(global, chatId)) {
     return true;
   }
 
@@ -1159,7 +1167,7 @@ export function selectHasProtectedMessage<T extends GlobalState>(global: T, chat
 }
 
 export function selectCanForwardMessages<T extends GlobalState>(global: T, chatId: string, messageIds?: number[]) {
-  if (selectChat(global, chatId)?.isProtected) {
+  if (selectIsChatProtected(global, chatId)) {
     return false;
   }
 

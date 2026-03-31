@@ -110,6 +110,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   stars_suggested_post_age_min?: number;
   stars_suggested_post_future_max?: number;
   stars_suggested_post_future_min?: number;
+  no_forwards_request_expire_period?: number;
   ton_suggested_post_commission_permille?: number;
   ton_suggested_post_amount_max?: number;
   ton_suggested_post_amount_min?: number;
@@ -250,6 +251,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     starsSuggestedPostAgeMin: appConfig.stars_suggested_post_age_min,
     starsSuggestedPostFutureMax: appConfig.stars_suggested_post_future_max,
     starsSuggestedPostFutureMin: appConfig.stars_suggested_post_future_min,
+    noForwardsRequestExpirePeriod: appConfig.no_forwards_request_expire_period,
     tonSuggestedPostCommissionPermille: appConfig.ton_suggested_post_commission_permille,
     tonSuggestedPostAmountMax: appConfig.ton_suggested_post_amount_max,
     tonSuggestedPostAmountMin: appConfig.ton_suggested_post_amount_min,

@@ -357,6 +357,19 @@ export interface ApiMessageActionChangeCreator extends ActionMediaType {
   newCreatorId: string;
 }
 
+export interface ApiMessageActionNoForwardsToggle extends ActionMediaType {
+  type: 'noForwardsToggle';
+  prevValue: boolean;
+  newValue: boolean;
+}
+
+export interface ApiMessageActionNoForwardsRequest extends ActionMediaType {
+  type: 'noForwardsRequest';
+  isExpired?: boolean;
+  prevValue: boolean;
+  newValue: boolean;
+}
+
 export interface ApiMessageActionUnsupported extends ActionMediaType {
   type: 'unsupported';
 }
@@ -378,4 +391,4 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionSuggestedPostSuccess | ApiMessageActionSuggestedPostRefund | ApiMessageActionTodoCompletions
   | ApiMessageActionTodoAppendTasks | ApiMessageActionStarGiftPurchaseOffer
   | ApiMessageActionStarGiftPurchaseOfferDeclined | ApiMessageActionNewCreatorPending
-  | ApiMessageActionChangeCreator;
+  | ApiMessageActionChangeCreator | ApiMessageActionNoForwardsToggle | ApiMessageActionNoForwardsRequest;

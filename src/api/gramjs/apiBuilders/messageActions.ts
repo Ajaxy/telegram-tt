@@ -573,6 +573,25 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       newCreatorId: buildApiPeerId(newCreatorId, 'user'),
     };
   }
+  if (action instanceof GramJs.MessageActionNoForwardsToggle) {
+    const { prevValue, newValue } = action;
+    return {
+      mediaType: 'action',
+      type: 'noForwardsToggle',
+      prevValue: Boolean(prevValue),
+      newValue: Boolean(newValue),
+    };
+  }
+  if (action instanceof GramJs.MessageActionNoForwardsRequest) {
+    const { expired, prevValue, newValue } = action;
+    return {
+      mediaType: 'action',
+      type: 'noForwardsRequest',
+      isExpired: expired,
+      prevValue: Boolean(prevValue),
+      newValue: Boolean(newValue),
+    };
+  }
 
   return UNSUPPORTED_ACTION;
 }

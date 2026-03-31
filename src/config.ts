@@ -417,6 +417,7 @@ export const PREMIUM_FEATURE_SECTIONS = [
   'message_privacy',
   'effects',
   'todo',
+  'pm_noforwards',
 ] as const;
 
 export const PREMIUM_BOTTOM_VIDEOS: ApiPremiumSection[] = [

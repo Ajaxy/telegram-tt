@@ -105,6 +105,7 @@ export { default as OneTimeMediaModal } from '../components/modals/oneTimeMedia/
 export { default as WebAppsCloseConfirmationModal } from '../components/main/WebAppsCloseConfirmationModal';
 export { default as FrozenAccountModal } from '../components/modals/frozenAccount/FrozenAccountModal';
 export { default as ProfileRatingModal } from '../components/modals/profileRating/ProfileRatingModal';
+export { default as DisableSharingAboutModal } from '../components/modals/disableSharing/DisableSharingAboutModal';
 export { default as EditRankModal } from '../components/modals/rank/EditRankModal';
 export { default as RankModal } from '../components/modals/rank/RankModal';
 export { default as QuickPreviewModal } from '../components/modals/quickPreview/QuickPreviewModal';

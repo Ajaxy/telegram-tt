@@ -315,6 +315,11 @@ export interface ActionPayloads {
   markBotVerificationInfoShown: {
     peerId: string;
   };
+  toggleNoForwards: {
+    userId: string;
+    isEnabled: boolean;
+    requestMsgId?: number;
+  };
 
   // Message search
   openMiddleSearch: {
@@ -1938,6 +1943,10 @@ export interface ActionPayloads {
     userId: string;
   } & WithTabId;
   closeChatRefundModal: WithTabId | undefined;
+  openDisableSharingAboutModal: {
+    userId: string;
+  } & WithTabId;
+  closeDisableSharingAboutModal: WithTabId | undefined;
   openProfileRatingModal: {
     userId: string;
     level: number;

@@ -75,4 +75,8 @@
     top: 0;
     transform: translateY(calc(-100% - 0.5rem));
   }
+
+  .no-forwards-notice {
+    min-width: 12rem;
+  }
 }

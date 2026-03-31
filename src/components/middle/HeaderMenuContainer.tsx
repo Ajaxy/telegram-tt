@@ -133,6 +133,8 @@ type StateProps = {
   savedDialog?: ApiChat;
   disallowedGifts?: ApiDisallowedGifts;
   isAccountFrozen?: boolean;
+  noForwardsMyEnabled?: boolean;
+  noForwardsPeerEnabled?: boolean;
 };
 
 const CLOSE_MENU_ANIMATION_DURATION = 200;
@@ -184,6 +186,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   canShowBoostModal,
   disallowedGifts,
   isAccountFrozen,
+  noForwardsMyEnabled,
+  noForwardsPeerEnabled,
   channelMonoforumId,
   onJoinRequestsClick,
   onSubscribeChannel,
@@ -220,6 +224,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     openBoostModal,
     reportMessages,
     showNotification,
+    toggleNoForwards,
+    openDisableSharingAboutModal,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -493,6 +499,21 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
       unblockUser({ userId: chatId });
     }
     closeMenu();
+  });
+
+  const handleToggleNoForwards = useLastCallback(() => {
+    closeMenu();
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+      return;
+    }
+
+    if (noForwardsMyEnabled || noForwardsPeerEnabled) {
+      toggleNoForwards({ userId: chatId, isEnabled: false });
+      return;
+    }
+
+    openDisableSharingAboutModal({ userId: chatId });
   });
 
   const handleSendChannelMessage = useLastCallback(() => {
@@ -803,6 +824,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
           )}
           {isPrivate && !isChatWithSelf && !isBot && (
             <MenuItem
+              icon={noForwardsMyEnabled || noForwardsPeerEnabled ? 'allow-share' : 'no-share'}
+              onClick={handleToggleNoForwards}
+            >
+              {noForwardsMyEnabled || noForwardsPeerEnabled ? lang('EnableSharing') : lang('DisableSharing')}
+            </MenuItem>
+          )}
+          {isPrivate && !isChatWithSelf && !isBot && (
+            <MenuItem
               icon={isBlocked ? 'user' : 'hand-stop'}
               onClick={isBlocked ? handleUnblock : handleBlock}
             >
@@ -906,6 +935,8 @@ export default memo(withGlobal<OwnProps>(
       savedDialog,
       disallowedGifts: userFullInfo?.disallowedGifts,
       isAccountFrozen,
+      noForwardsMyEnabled: userFullInfo?.noForwardsMyEnabled,
+      noForwardsPeerEnabled: userFullInfo?.noForwardsPeerEnabled,
     };
   },
 )(HeaderMenuContainer));

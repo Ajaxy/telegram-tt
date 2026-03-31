@@ -968,6 +968,12 @@ export interface KeyboardButtonGiftOffer extends ApiKeyboardButtonBase {
   buttonType: 'accept' | 'reject';
 }
 
+export interface KeyboardButtonNoForwardsRequest extends ApiKeyboardButtonBase {
+  type: 'noForwardsRequest';
+  text: string;
+  buttonType: 'accept' | 'reject';
+}
+
 export type ApiKeyboardButton = (
   ApiKeyboardButtonSimple
   | ApiKeyboardButtonReceipt
@@ -983,6 +989,7 @@ export type ApiKeyboardButton = (
   | KeyboardButtonSuggestedMessage
   | KeyboardButtonOpenThread
   | KeyboardButtonGiftOffer
+  | KeyboardButtonNoForwardsRequest
 );
 
 export type ApiKeyboardButtons = ApiKeyboardButton[][];

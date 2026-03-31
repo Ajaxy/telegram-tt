@@ -380,3 +380,21 @@ export function updateContactNote(user: ApiUser, note: ApiFormattedText) {
     shouldReturnTrue: true,
   });
 }
+
+export function toggleNoForwards({
+  user,
+  isEnabled,
+  requestMsgId,
+}: {
+  user: ApiUser;
+  isEnabled: boolean;
+  requestMsgId?: number;
+}) {
+  return invokeRequest(new GramJs.messages.ToggleNoForwards({
+    peer: buildInputPeer(user.id, user.accessHash),
+    enabled: isEnabled,
+    requestMsgId,
+  }), {
+    shouldReturnTrue: true,
+  });
+}

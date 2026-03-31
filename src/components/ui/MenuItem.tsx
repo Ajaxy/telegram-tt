@@ -127,7 +127,7 @@ const MenuItem = (props: MenuItemProps) => {
   return (
     <div
       role="menuitem"
-      tabIndex={0}
+      tabIndex={disabled ? -1 : 0}
       className={fullClassName}
       onClick={handleClick}
       onKeyDown={handleKeyDown}

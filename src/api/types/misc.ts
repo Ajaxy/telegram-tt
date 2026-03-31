@@ -274,6 +274,7 @@ export interface ApiAppConfig {
   starsSuggestedPostAgeMin: number;
   starsSuggestedPostFutureMax: number;
   starsSuggestedPostFutureMin: number;
+  noForwardsRequestExpirePeriod: number;
   tonSuggestedPostCommissionPermille: number;
   tonSuggestedPostAmountMax: number;
   tonSuggestedPostAmountMin: number;

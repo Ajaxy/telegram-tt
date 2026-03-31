@@ -30,6 +30,7 @@ import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import SliderDots from '../../common/SliderDots';
 import Button from '../../ui/Button';
 import PremiumLimitPreview from './common/PremiumLimitPreview';
+import PremiumFeaturePreviewNoForwards from './previews/PremiumFeaturePreviewNoForwards';
 import PremiumFeaturePreviewStickers from './previews/PremiumFeaturePreviewStickers';
 import PremiumFeaturePreviewStories from './previews/PremiumFeaturePreviewStories';
 import PremiumFeaturePreviewVideo from './previews/PremiumFeaturePreviewVideo';
@@ -56,6 +57,7 @@ export const PREMIUM_FEATURE_TITLES: Record<ApiPremiumSection, string> = {
   message_privacy: 'PremiumPreviewMessagePrivacy',
   effects: 'Premium.MessageEffects',
   todo: 'PremiumPreviewTodo',
+  pm_noforwards: 'PremiumPreviewNoForwards',
 };
 
 export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
@@ -78,6 +80,7 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
   message_privacy: 'PremiumPreviewMessagePrivacyDescription',
   effects: 'Premium.MessageEffectsInfo',
   todo: 'PremiumPreviewTodoDescription',
+  pm_noforwards: 'PremiumPreviewNoForwardsDescription',
 };
 
 const LIMITS_TITLES: Record<ApiLimitTypeForPromo, string> = {
@@ -221,7 +224,8 @@ const PremiumFeatureModal: FC<OwnProps> = ({
   });
 
   const currentSection = filteredSections[currentSlideIndex];
-  const hasHeaderBackdrop = currentSection !== 'double_limits' && currentSection !== 'stories';
+  const hasHeaderBackdrop = currentSection !== 'double_limits' &&
+    currentSection !== 'stories' && currentSection !== 'pm_noforwards';
 
   return (
     <div className={styles.root}>
@@ -289,16 +293,31 @@ const PremiumFeatureModal: FC<OwnProps> = ({
             );
           }
 
+          if (section === 'pm_noforwards') {
+            return (
+              <div className={buildClassName(styles.slide, styles.noForward)}>
+                <PremiumFeaturePreviewNoForwards />
+                <div className={styles.noForwardFooter}>
+                  <h1 className={styles.title}>
+                    {lang(PREMIUM_FEATURE_TITLES.pm_noforwards as keyof LangPair)}
+                  </h1>
+                  <div className={styles.description}>
+                    {lang(PREMIUM_FEATURE_DESCRIPTIONS.pm_noforwards as keyof LangPair)}
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
           const i = promo.videoSections.indexOf(section);
-          if (i === -1) return undefined;
           const shouldUseNewLang = section === 'todo';
           return (
             <div className={styles.slide}>
               <div className={styles.frame}>
                 <PremiumFeaturePreviewVideo
                   isActive={currentSlideIndex === index}
-                  videoId={promo.videos[i].id}
-                  videoThumbnail={promo.videos[i].thumbnail}
+                  videoId={i !== -1 ? promo.videos[i].id : undefined}
+                  videoThumbnail={i !== -1 ? promo.videos[i].thumbnail : undefined}
                   isDown={PREMIUM_BOTTOM_VIDEOS.includes(section)}
                   index={index}
                   isReverseAnimation={index === reverseAnimationSlideIndex}
@@ -336,7 +355,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
         )}
       >
         <SliderDots
-          length={PREMIUM_FEATURE_SECTIONS.length}
+          length={filteredSections.length}
           active={currentSlideIndex}
           onSelectSlide={handleSelectSlide}
         />

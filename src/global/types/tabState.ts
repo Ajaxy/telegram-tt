@@ -719,6 +719,10 @@ export type TabState = {
     starsToRefund: number;
   };
 
+  disableSharingAboutModal?: {
+    userId: string;
+  };
+
   limitReachedModal?: {
     limit: ApiLimitTypeWithModal;
   };

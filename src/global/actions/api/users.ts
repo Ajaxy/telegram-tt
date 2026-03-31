@@ -629,3 +629,14 @@ addActionHandler('markBotVerificationInfoShown', (global, actions, payload): Act
 
   setGlobal(global);
 });
+
+addActionHandler('toggleNoForwards', async (global, actions, payload): Promise<void> => {
+  const { userId, isEnabled, requestMsgId } = payload;
+
+  const user = selectUser(global, userId);
+  if (!user) {
+    return;
+  }
+
+  await callApi('toggleNoForwards', { user, isEnabled, requestMsgId });
+});

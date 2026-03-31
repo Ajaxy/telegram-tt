@@ -1,0 +1,23 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.title {
+  margin: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+.footer {
+  display: flex;
+  align-self: stretch;
+  margin-top: 1rem;
+}
+
+.unlockIcon {
+  font-size: 1.25rem;
+}

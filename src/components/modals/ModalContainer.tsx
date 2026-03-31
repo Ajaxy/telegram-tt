@@ -18,6 +18,7 @@ import ChatlistModal from './chatlist/ChatlistModal.async';
 import CocoonModal from './cocoon/CocoonModal.async';
 import CollectibleInfoModal from './collectible/CollectibleInfoModal.async';
 import DeleteAccountModal from './deleteAccount/DeleteAccountModal.async';
+import DisableSharingAboutModal from './disableSharing/DisableSharingAboutModal.async';
 import EmojiStatusAccessModal from './emojiStatusAccess/EmojiStatusAccessModal.async';
 import FrozenAccountModal from './frozenAccount/FrozenAccountModal.async';
 import AboutStarGiftModal from './gift/AboutStarGiftModal.async';
@@ -134,6 +135,7 @@ type ModalKey = keyof Pick<TabState,
   'giftDescriptionRemoveModal' |
   'giftOfferAcceptModal' |
   'chatRefundModal' |
+  'disableSharingAboutModal' |
   'priceConfirmModal' |
   'isFrozenAccountModalOpen' |
   'deleteAccountModal' |
@@ -219,6 +221,7 @@ const MODALS: ModalRegistry = {
   giftDescriptionRemoveModal: GiftDescriptionRemoveModal,
   giftOfferAcceptModal: GiftOfferAcceptModal,
   chatRefundModal: ChatRefundModal,
+  disableSharingAboutModal: DisableSharingAboutModal,
   priceConfirmModal: PriceConfirmModal,
   isFrozenAccountModalOpen: FrozenAccountModal,
   deleteAccountModal: DeleteAccountModal,

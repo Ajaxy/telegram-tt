@@ -65,6 +65,16 @@ addActionHandler('closeSuggestedStatusModal', (global, actions, payload): Action
 
 addTabStateResetterAction('closeChatRefundModal', 'chatRefundModal');
 
+addActionHandler('openDisableSharingAboutModal', (global, actions, payload): ActionReturnType => {
+  const { userId, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    disableSharingAboutModal: { userId },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeDisableSharingAboutModal', 'disableSharingAboutModal');
+
 addActionHandler('openProfileRatingModal', (global, actions, payload): ActionReturnType => {
   const { userId, level, tabId = getCurrentTabId() } = payload;
 

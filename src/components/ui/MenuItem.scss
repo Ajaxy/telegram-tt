@@ -68,6 +68,13 @@
   &.disabled {
     cursor: var(--custom-cursor, default) !important;
     opacity: 0.5 !important;
+
+    &:hover,
+    &:focus,
+    &:active {
+      transform: none !important;
+      background-color: transparent !important;
+    }
   }
 
   &.destructive {

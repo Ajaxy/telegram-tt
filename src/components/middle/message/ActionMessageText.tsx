@@ -1059,6 +1059,25 @@ const ActionMessageText = ({
       case 'phoneCall': // Rendered as a regular message, but considered an action for the summary
         return lang(getCallMessageKey(action, isOutgoing));
 
+      case 'noForwardsToggle': {
+        const { prevValue, newValue } = action;
+        if (newValue && newValue === prevValue) {
+          return lang('ActionSharingStillDisabled');
+        }
+        return translateWithYou(
+          lang,
+          newValue ? 'ActionSharingDisabled' : 'ActionSharingEnabled',
+          isOutgoing,
+          { from: senderLink },
+        );
+      }
+
+      case 'noForwardsRequest': {
+        return isOutgoing
+          ? lang('NoForwardsRequestYouTitle')
+          : lang('NoForwardsRequestTitle', { user: senderLink }, { withNodes: true });
+      }
+
       case 'newCreatorPending': {
         const { newCreatorId } = action;
         const newCreator = selectPeer(global, newCreatorId);
