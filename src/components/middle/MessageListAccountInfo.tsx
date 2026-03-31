@@ -24,7 +24,7 @@ import {
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
-import { formatPastDatetime, formatRegistrationMonth } from '../../util/dates/dateFormat';
+import { formatPastDatetime, formatRegistrationMonth } from '../../util/dates/oldDateFormat';
 import { isoToEmoji } from '../../util/emoji/emoji';
 import { getCountryCodeByIso } from '../../util/phoneNumber';
 import stopEvent from '../../util/stopEvent';

@@ -1,6 +1,6 @@
 import { useEffect } from '../../lib/teact/teact';
 
-import { formatMediaDuration } from '../../util/dates/dateFormat';
+import { formatMediaDuration } from '../../util/dates/oldDateFormat';
 import { getServerTime } from '../../util/serverTime';
 
 import useInterval from '../../hooks/schedulers/useInterval';

@@ -13,7 +13,7 @@ import {
   selectPeer,
 } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
+import { formatDateTimeToString } from '../../../../util/dates/oldDateFormat';
 
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';

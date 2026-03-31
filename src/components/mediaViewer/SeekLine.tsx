@@ -15,7 +15,7 @@ import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import { captureEvents } from '../../util/captureEvents';
-import { formatMediaDuration } from '../../util/dates/dateFormat';
+import { formatMediaDuration } from '../../util/dates/oldDateFormat';
 import getPointerPosition from '../../util/events/getPointerPosition';
 import { clamp, round } from '../../util/math';
 import StoryboardParser from '../../util/media/StoryboardParser';

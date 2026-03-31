@@ -12,7 +12,7 @@ import { getPeerTitle } from '../../global/helpers/peers';
 import {
   selectSender,
 } from '../../global/selectors';
-import { formatMediaDateTime } from '../../util/dates/dateFormat';
+import { formatMediaDateTime } from '../../util/dates/oldDateFormat';
 import { isUserId } from '../../util/entities/ids';
 import renderText from '../common/helpers/renderText';
 

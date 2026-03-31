@@ -24,13 +24,13 @@ import usePrevious from '../hooks/usePrevious';
 import { useSignalEffect } from '../hooks/useSignalEffect';
 import { getIsInBackground } from '../hooks/window/useBackgroundMode';
 
-// import Test from './test/TestCleanupOrder';
 import Auth from './auth/Auth';
 import Notifications from './common/Notifications';
 import UiLoader from './common/UiLoader';
 import AppInactive from './main/AppInactive';
 import LockScreen from './main/LockScreen.async';
 import Main from './main/Main.async';
+// import Test from './test/TestDateFormat';
 import Transition from './ui/Transition';
 
 import styles from './App.module.scss';

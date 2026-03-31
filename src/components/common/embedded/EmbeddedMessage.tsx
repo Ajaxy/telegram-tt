@@ -20,7 +20,7 @@ import {
 import { getMediaContentTypeDescription } from '../../../global/helpers/messageSummary';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
-import { formatScheduledDateTime } from '../../../util/dates/dateFormat';
+import { formatScheduledDateTime } from '../../../util/dates/oldDateFormat';
 import { isUserId } from '../../../util/entities/ids';
 import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
 import { getPictogramDimensions } from '../helpers/mediaDimensions';

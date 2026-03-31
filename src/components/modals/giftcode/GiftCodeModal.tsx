@@ -7,7 +7,7 @@ import type { TabState } from '../../../global/types';
 import { TME_LINK_PREFIX } from '../../../config';
 import { selectChatMessage, selectSender } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatCountdownDays, formatDateTimeToString } from '../../../util/dates/dateFormat';
+import { formatCountdownDays, formatDateTimeToString } from '../../../util/dates/oldDateFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useLang from '../../../hooks/useLang';

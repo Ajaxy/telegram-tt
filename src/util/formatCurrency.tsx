@@ -2,7 +2,7 @@ import { type TeactNode } from '../lib/teact/teact';
 
 import type { LangFn } from './localization';
 
-import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../config';
+import { FALLBACK_LANG_CODE, STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../config';
 import { formatStarsAsIcon, formatTonAsIcon } from './localization/format';
 
 export function convertCurrencyFromBaseUnit(amount: number, currency: string) {
@@ -52,7 +52,7 @@ export function convertTonToUsd(amount: number, usdRate: number, isInNanos: bool
 export function formatCurrencyAsString(
   totalPrice: number,
   currency: string,
-  locale: string = 'en',
+  locale: string = FALLBACK_LANG_CODE,
   options?: {
     shouldOmitFractions?: boolean;
   },

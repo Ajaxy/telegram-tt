@@ -6,7 +6,7 @@ import type { ApiMessage } from '../../../api/types';
 
 import { getMessageInvoice } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/dates/dateFormat';
+import { formatMediaDuration } from '../../../util/dates/oldDateFormat';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
 
 import useInterval from '../../../hooks/schedulers/useInterval';

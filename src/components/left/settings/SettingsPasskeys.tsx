@@ -9,7 +9,7 @@ import type { ApiPasskey } from '../../../api/types';
 
 import { IS_WEBAUTHN_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { formatPastDatetime } from '../../../util/dates/dateFormat';
+import { formatPastDatetime } from '../../../util/dates/oldDateFormat';
 import { getNextArrowReplacement } from '../../../util/localization/format';
 import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import { REM } from '../../common/helpers/mediaDimensions';

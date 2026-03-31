@@ -14,7 +14,7 @@ import type {
 import type { PollVote } from '../../global/types/tabState';
 
 import { selectTabState } from '../../global/selectors';
-import { formatMediaDateTime } from '../../util/dates/dateFormat';
+import { formatMediaDateTime } from '../../util/dates/oldDateFormat';
 import { isUserId } from '../../util/entities/ids';
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 

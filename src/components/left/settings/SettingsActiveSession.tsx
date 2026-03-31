@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiSession } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/dates/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
 import getSessionIcon from './helpers/getSessionIcon';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';

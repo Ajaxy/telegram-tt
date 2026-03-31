@@ -1,7 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import { memo, useMemo } from '../../../lib/teact/teact';
 
-import { formatDateToString } from '../../../util/dates/dateFormat';
+import { formatDateToString } from '../../../util/dates/oldDateFormat';
 
 import Icon from '../../common/icons/Icon';
 

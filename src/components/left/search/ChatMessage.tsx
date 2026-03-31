@@ -15,7 +15,7 @@ import {
 import { isApiPeerUser } from '../../../global/helpers/peers';
 import { selectPeer } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatPastTimeShort } from '../../../util/dates/dateFormat';
+import { formatPastTimeShort } from '../../../util/dates/oldDateFormat';
 import { type LangFn } from '../../../util/localization';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 

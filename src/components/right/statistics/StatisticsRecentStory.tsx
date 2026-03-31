@@ -10,7 +10,7 @@ import type { OldLangFn } from '../../../hooks/useOldLang';
 
 import { getStoryMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/dates/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';

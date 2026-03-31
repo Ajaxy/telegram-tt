@@ -16,7 +16,7 @@ import {
 import { selectIsMonoforumAdmin, selectPeer } from '../../../global/selectors';
 import { selectDraft } from '../../../global/selectors/threads';
 import buildClassName from '../../../util/buildClassName';
-import { formatScheduledDateTime, formatShortDuration } from '../../../util/dates/dateFormat';
+import { formatScheduledDateTime, formatShortDuration } from '../../../util/dates/oldDateFormat';
 import { convertTonFromNanos, convertTonToNanos } from '../../../util/formatCurrency';
 import {
   formatStarsAsIcon,

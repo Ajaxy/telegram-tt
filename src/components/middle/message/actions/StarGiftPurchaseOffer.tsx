@@ -13,7 +13,7 @@ import {
 } from '../../../../global/selectors';
 import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment';
 import buildClassName from '../../../../util/buildClassName';
-import { formatShortHoursMinutes } from '../../../../util/dates/dateFormat';
+import { formatShortHoursMinutes } from '../../../../util/dates/oldDateFormat';
 import { formatCurrencyAmountAsText } from '../../../../util/localization/format';
 import { getServerTime } from '../../../../util/serverTime';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';

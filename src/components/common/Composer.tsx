@@ -115,7 +115,7 @@ import {
 } from '../../global/selectors/threads';
 import { IS_IOS, IS_VOICE_RECORDING_SUPPORTED } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/dates/dateFormat';
+import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/dates/oldDateFormat';
 import { processDeepLink } from '../../util/deeplink';
 import { tryParseDeepLink } from '../../util/deepLinkParser';
 import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterOutsideSelection';

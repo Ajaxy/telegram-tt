@@ -11,7 +11,7 @@ import type { RepeatedMessageMode } from '../../util/scheduledMessages';
 import { MAX_INT_32 } from '../../config';
 import { selectIsCurrentUserPremium } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatDateToString, formatTime, getDayStart } from '../../util/dates/dateFormat';
+import { formatDateToString, formatTime, getDayStart } from '../../util/dates/oldDateFormat';
 import { ALL_REPEAT_MODES, getScheduleRepeatModeText, TEST_SERVER_ONLY_MODES } from '../../util/scheduledMessages';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';

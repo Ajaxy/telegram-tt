@@ -2,11 +2,11 @@ import type {
   ApiLanguage, CachedLangData, LangPack, LangPackStringValuePlural,
 } from '../../api/types';
 
+import { FALLBACK_LANG_CODE } from '../../config';
 import readStrings from './readStrings';
 
-const FALLBACK_LANG_CODE = 'en';
 const FALLBACK_VERSION = 0;
-const FALLBACK_TRANSLATE_URL = 'https://translations.telegram.org/en/weba';
+const FALLBACK_TRANSLATE_URL = `https://translations.telegram.org/${FALLBACK_LANG_CODE}/weba`;
 
 export default async function readFallbackStrings(forLocalScript?: boolean): Promise<CachedLangData> {
   let fileData;

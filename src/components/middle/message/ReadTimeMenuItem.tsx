@@ -3,7 +3,7 @@ import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 
-import { formatDateAtTime } from '../../../util/dates/dateFormat';
+import { formatDateAtTime } from '../../../util/dates/oldDateFormat';
 
 import useOldLang from '../../../hooks/useOldLang';
 

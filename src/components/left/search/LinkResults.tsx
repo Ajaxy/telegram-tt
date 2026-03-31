@@ -9,7 +9,7 @@ import type { StateProps } from './helpers/createMapStateToProps';
 import { LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
-import { formatMonthAndYear, toYearMonth } from '../../../util/dates/dateFormat';
+import { formatMonthAndYear, toYearMonth } from '../../../util/dates/oldDateFormat';
 import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';

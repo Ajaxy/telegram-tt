@@ -6,6 +6,7 @@ import type {
   LangPack,
   LangPackStringValue,
 } from '../../api/types';
+import type { TimeFormat } from '../../types';
 import type { LangKey, LangVariable } from '../../types/language';
 import {
   type AdvancedLangFnOptions,
@@ -22,7 +23,7 @@ import {
   type RegularLangFnParameters,
 } from './types';
 
-import { DEBUG, FORCE_FALLBACK_LANG, LANG_PACK } from '../../config';
+import { DEBUG, FALLBACK_LANG_CODE, FORCE_FALLBACK_LANG, LANG_PACK } from '../../config';
 import { callApi } from '../../api/gramjs';
 import renderText, { type TextFilter } from '../../components/common/helpers/renderText';
 import { IS_INTL_LIST_FORMAT_SUPPORTED } from '../browser/globalEnvironment';
@@ -35,6 +36,7 @@ import { initialEstablishmentPromise, isCurrentTabMaster } from '../establishMul
 import { omit, unique } from '../iteratees';
 import { replaceInStringsWithTeact } from '../replaceWithTeact';
 import { fastRaf } from '../schedulers';
+import { resetDateFormatCache } from './dateFormat';
 
 import Deferred from '../Deferred';
 import LimitedMap from '../primitives/LimitedMap';
@@ -42,7 +44,7 @@ import LimitedMap from '../primitives/LimitedMap';
 import initialStrings from '../../assets/localization/initialStrings';
 
 const LANGPACK_STORE_PREFIX = 'langpack-';
-const FORMATTERS_FALLBACK_LANG = 'en';
+const FORMATTERS_FALLBACK_LANG = FALLBACK_LANG_CODE;
 
 const STRING_CACHE_LIMIT = 400;
 const TRANSLATION_CACHE = new LimitedMap<string, string>(STRING_CACHE_LIMIT);
@@ -52,6 +54,7 @@ let formatters: LangFormatters | undefined;
 
 let langPack: LangPack | undefined;
 let fallbackLangPack: LangPack | undefined;
+let currentTimeFormat: TimeFormat = '24h';
 
 let translationFn = createTranslationFn();
 
@@ -155,7 +158,7 @@ function updateLanguage(newLang: ApiLanguage) {
 
 function createFormatters() {
   if (!language) return;
-  const langCode = language.pluralCode;
+  const intlLocale = getIntlLocale();
   const listFormatFallback = getBasicListFormat();
 
   function createListFormat(lang: string, type: 'conjunction' | 'disjunction') {
@@ -164,12 +167,12 @@ function createFormatters() {
 
   try {
     formatters = {
-      pluralRules: new Intl.PluralRules(langCode),
-      region: new Intl.DisplayNames(langCode, { type: 'region' }),
-      conjunction: createListFormat(langCode, 'conjunction'),
-      disjunction: createListFormat(langCode, 'disjunction'),
-      number: new Intl.NumberFormat(langCode),
-      preciseNumber: new Intl.NumberFormat(langCode, {
+      pluralRules: new Intl.PluralRules(intlLocale),
+      region: new Intl.DisplayNames(intlLocale, { type: 'region' }),
+      conjunction: createListFormat(intlLocale, 'conjunction'),
+      disjunction: createListFormat(intlLocale, 'disjunction'),
+      number: new Intl.NumberFormat(intlLocale),
+      preciseNumber: new Intl.NumberFormat(intlLocale, {
         minimumFractionDigits: 0,
         maximumFractionDigits: 10,
       }),
@@ -189,6 +192,8 @@ function createFormatters() {
       }),
     };
   }
+
+  resetDateFormatCache();
 }
 
 function updateLangPack(newLangPack: LangPack) {
@@ -317,6 +322,7 @@ function createTranslationFn(): LangFn {
   fn.rawCode = language?.langCode || FORMATTERS_FALLBACK_LANG;
   fn.isRtl = language?.isRtl;
   fn.code = language?.pluralCode || FORMATTERS_FALLBACK_LANG;
+  fn.timeFormat = currentTimeFormat;
   fn.with = ({ key, variables, options }: LangFnParameters) => {
     if (options && areAdvancedLangFnOptions(options)) {
       return processTranslationAdvanced(key, variables as Record<string, TeactNode | undefined>, options);
@@ -343,8 +349,24 @@ export function getTranslationFn(): LangFn {
   return translationFn;
 }
 
+export function setTimeFormat(timeFormat: TimeFormat) {
+  if (timeFormat === currentTimeFormat) {
+    return;
+  }
+
+  currentTimeFormat = timeFormat;
+  resetDateFormatCache();
+  translationFn.timeFormat = currentTimeFormat;
+  scheduleCallbacks();
+}
+
+function getIntlLocale(languageInfo = language) {
+  return languageInfo?.pluralCode || FORMATTERS_FALLBACK_LANG;
+}
+
 function getString(langKey: LangKey, count: number) {
-  let langPackStringValue = !FORCE_FALLBACK_LANG ? langPack?.strings[langKey] : undefined;
+  const shouldForceFallback = FORCE_FALLBACK_LANG && language?.langCode === FALLBACK_LANG_CODE;
+  let langPackStringValue = !shouldForceFallback ? langPack?.strings[langKey] : undefined;
 
   if (!langPackStringValue && !fallbackLangPack) {
     loadFallbackPack();

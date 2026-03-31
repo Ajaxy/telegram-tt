@@ -3,7 +3,7 @@ import { memo } from '../../lib/teact/teact';
 import type { ApiMessage, ApiMessageOutgoingStatus } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
-import { formatPastTimeShort } from '../../util/dates/dateFormat';
+import { formatPastTimeShort } from '../../util/dates/oldDateFormat';
 
 import useOldLang from '../../hooks/useOldLang';
 

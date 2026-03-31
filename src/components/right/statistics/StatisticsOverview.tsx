@@ -8,7 +8,7 @@ import type {
 } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatFullDate } from '../../../util/dates/dateFormat';
+import { formatFullDate } from '../../../util/dates/oldDateFormat';
 import { convertTonFromNanos } from '../../../util/formatCurrency';
 import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
 

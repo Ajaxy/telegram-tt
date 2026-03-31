@@ -11,7 +11,7 @@ import {
 } from '../../global/helpers';
 import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/dates/dateFormat';
+import { formatMediaDuration } from '../../util/dates/oldDateFormat';
 import stopEvent from '../../util/stopEvent';
 
 import useMessageMediaHash from '../../hooks/media/useMessageMediaHash';

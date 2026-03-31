@@ -9,7 +9,7 @@ import type { IconName } from '../../types/icons';
 import { getUserFullName } from '../../global/helpers';
 import { selectPeer } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatDateAtTime } from '../../util/dates/dateFormat';
+import { formatDateAtTime } from '../../util/dates/oldDateFormat';
 import { isUserId } from '../../util/entities/ids';
 import { REM } from '../common/helpers/mediaDimensions';
 

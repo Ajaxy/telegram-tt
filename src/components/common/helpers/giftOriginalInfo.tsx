@@ -3,7 +3,7 @@ import type { TeactNode } from '../../../lib/teact/teact';
 import type { ApiPeer, ApiStarGiftAttributeOriginalDetails } from '../../../api/types';
 
 import { getPeerTitle } from '../../../global/helpers/peers';
-import { formatDateTimeToString } from '../../../util/dates/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
 import { type LangFn } from '../../../util/localization';
 import { renderTextWithEntities } from './renderTextWithEntities';
 

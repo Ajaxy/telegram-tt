@@ -16,7 +16,7 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
-import { formatCountdown } from '../../../util/dates/dateFormat';
+import { formatCountdown } from '../../../util/dates/oldDateFormat';
 import { HOUR } from '../../../util/dates/units';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { formatStarsAsIcon, getNextArrowReplacement } from '../../../util/localization/format';

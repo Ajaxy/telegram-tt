@@ -7,7 +7,7 @@ import type { ApiMessageActionPhoneCall } from '../../../api/types/messageAction
 
 import { ARE_CALLS_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { formatTime, formatTimeDuration } from '../../../util/dates/dateFormat';
+import { formatTime, formatTimeDuration } from '../../../util/dates/oldDateFormat';
 import { getCallMessageKey } from './helpers/messageActions';
 
 import useLastCallback from '../../../hooks/useLastCallback';

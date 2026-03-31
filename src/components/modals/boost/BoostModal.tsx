@@ -7,7 +7,7 @@ import type { TabState } from '../../../global/types';
 import { getChatTitle, isChatAdmin, isChatChannel } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo, selectIsCurrentUserPremium } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatShortDuration } from '../../../util/dates/dateFormat';
+import { formatShortDuration } from '../../../util/dates/oldDateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
 import renderText from '../../common/helpers/renderText';

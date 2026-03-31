@@ -5,7 +5,7 @@ import type { ApiStarGiftAuctionAcquiredGift, ApiSticker } from '../../../../api
 import type { TabState } from '../../../../global/types';
 
 import { selectTabState } from '../../../../global/selectors';
-import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
+import { formatDateTimeToString } from '../../../../util/dates/oldDateFormat';
 import { formatStarsAsIcon } from '../../../../util/localization/format';
 
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';

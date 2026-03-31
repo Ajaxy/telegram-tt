@@ -2,7 +2,7 @@ import type { ApiPeer, ApiUser, ApiUserStatus } from '../../api/types';
 import type { OldLangFn } from '../../hooks/useOldLang';
 
 import { ANONYMOUS_USER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
-import { formatFullDate, formatTime } from '../../util/dates/dateFormat';
+import { formatFullDate, formatTime } from '../../util/dates/oldDateFormat';
 import { DAY } from '../../util/dates/units';
 import { orderBy } from '../../util/iteratees';
 import { formatPhoneNumber } from '../../util/phoneNumber';

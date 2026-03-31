@@ -9,7 +9,7 @@ import { AudioOrigin, LoadMoreDirection } from '../../../types';
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { getIsDownloading } from '../../../global/helpers';
 import { selectMessageDownloadableMedia } from '../../../global/selectors/media';
-import { formatMonthAndYear, toYearMonth } from '../../../util/dates/dateFormat';
+import { formatMonthAndYear, toYearMonth } from '../../../util/dates/oldDateFormat';
 import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';

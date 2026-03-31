@@ -29,7 +29,7 @@ import { selectMessageMediaDuration } from '../../global/selectors/media';
 import { makeTrackId } from '../../util/audioPlayer';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents } from '../../util/captureEvents';
-import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/dates/dateFormat';
+import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/dates/oldDateFormat';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
 import { LOCAL_TGS_URLS } from './helpers/animatedAssets';
 import renderText from './helpers/renderText';

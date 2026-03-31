@@ -6,7 +6,7 @@ import type { TabState } from '../../../global/types';
 
 import { getUserFullName } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';
-import { formatShortDuration } from '../../../util/dates/dateFormat';
+import { formatShortDuration } from '../../../util/dates/oldDateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { REM } from '../../common/helpers/mediaDimensions';
 

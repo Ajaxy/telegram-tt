@@ -22,7 +22,7 @@ import {
 import { getPeerTitle } from '../../global/helpers/peers';
 import { selectChatMessage, selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatHumanDate, formatScheduledDateTime } from '../../util/dates/dateFormat';
+import { formatHumanDate, formatScheduledDateTime } from '../../util/dates/oldDateFormat';
 import { convertTonFromNanos } from '../../util/formatCurrency';
 import { compact } from '../../util/iteratees';
 import { formatStarsAsText, formatTonAsText } from '../../util/localization/format';

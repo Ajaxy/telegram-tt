@@ -12,7 +12,7 @@ import { getStickerMediaHash } from '../../../global/helpers';
 import { selectIsPremiumPurchaseBlocked } from '../../../global/selectors';
 import { IS_OFFSET_PATH_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateToString } from '../../../util/dates/dateFormat';
+import { formatDateToString } from '../../../util/dates/oldDateFormat';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import * as mediaLoader from '../../../util/mediaLoader';
 import renderText from '../helpers/renderText';

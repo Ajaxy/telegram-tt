@@ -14,7 +14,7 @@ import {
   isGeoLiveExpired,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatCountdownShort, formatLocationLastUpdate } from '../../../util/dates/dateFormat';
+import { formatCountdownShort, formatLocationLastUpdate } from '../../../util/dates/oldDateFormat';
 import {
   getMetersPerPixel, getVenueColor, getVenueIconUrl,
 } from '../../../util/map';

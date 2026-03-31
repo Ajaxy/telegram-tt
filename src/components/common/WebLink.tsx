@@ -11,7 +11,7 @@ import {
 } from '../../global/helpers';
 import { selectWebPageFromMessage } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatPastTimeShort } from '../../util/dates/dateFormat';
+import { formatPastTimeShort } from '../../util/dates/oldDateFormat';
 import trimText from '../../util/trimText';
 import { renderMessageSummary } from './helpers/renderMessageText';
 import renderText from './helpers/renderText';

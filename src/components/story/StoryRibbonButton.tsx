@@ -6,7 +6,7 @@ import { StoryViewerOrigin } from '../../types';
 
 import { getPeerTitle } from '../../global/helpers/peers';
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/dates/dateFormat';
+import { formatMediaDuration } from '../../util/dates/oldDateFormat';
 import { isUserId } from '../../util/entities/ids';
 import { getServerTime } from '../../util/serverTime';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';

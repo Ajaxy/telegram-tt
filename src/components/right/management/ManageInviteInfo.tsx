@@ -6,7 +6,7 @@ import type { ApiChatInviteImporter, ApiExportedInvite } from '../../../api/type
 
 import { isChatChannel } from '../../../global/helpers';
 import { selectChat, selectTabState } from '../../../global/selectors';
-import { formatFullDate, formatMediaDateTime, formatTime } from '../../../util/dates/dateFormat';
+import { formatFullDate, formatMediaDateTime, formatTime } from '../../../util/dates/oldDateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';

@@ -28,7 +28,7 @@ import {
   selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/dates/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
 import { unique } from '../../../util/iteratees';
 import renderText from '../../common/helpers/renderText';
 

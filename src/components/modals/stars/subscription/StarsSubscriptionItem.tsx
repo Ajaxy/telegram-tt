@@ -9,7 +9,7 @@ import type { GlobalState } from '../../../../global/types';
 import { NNBSP } from '../../../../config';
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
-import { formatDateToString } from '../../../../util/dates/dateFormat';
+import { formatDateToString } from '../../../../util/dates/oldDateFormat';
 import { formatInteger } from '../../../../util/textFormat';
 import renderText from '../../../common/helpers/renderText';
 

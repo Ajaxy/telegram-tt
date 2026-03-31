@@ -27,7 +27,9 @@ import {
 } from '../../../global/selectors';
 import { selectThreadIdFromMessage } from '../../../global/selectors/threads';
 import { ensureProtocol } from '../../../util/browser/url';
-import { formatDateTimeToString, formatScheduledDateTime, formatShortDuration } from '../../../util/dates/dateFormat';
+import {
+  formatDateTimeToString, formatScheduledDateTime, formatShortDuration,
+} from '../../../util/dates/oldDateFormat';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { convertTonFromNanos } from '../../../util/formatCurrency';
 import { formatCurrencyAmountAsText, formatStarsAsText, formatTonAsText } from '../../../util/localization/format';

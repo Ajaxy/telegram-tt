@@ -34,7 +34,7 @@ import {
 import { IS_IOS } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import { getDayStartAt } from '../../../util/dates/dateFormat';
+import { getDayStartAt } from '../../../util/dates/oldDateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
 import focusNoScroll from '../../../util/focusNoScroll';
 import { getSearchResultKey, parseSearchResultKey, type SearchResultKey } from '../../../util/keys/searchResultKey';

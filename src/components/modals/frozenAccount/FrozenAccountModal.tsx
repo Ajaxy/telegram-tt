@@ -5,7 +5,7 @@ import type { TabState } from '../../../global/types';
 
 import { getMainUsername } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';
-import { formatDateToString } from '../../../util/dates/dateFormat';
+import { formatDateToString } from '../../../util/dates/oldDateFormat';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import formatUsername from '../../common/helpers/formatUsername';
 

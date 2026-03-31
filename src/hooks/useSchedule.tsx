@@ -3,7 +3,7 @@ import { useState } from '../lib/teact/teact';
 import type { RepeatedMessageMode } from '../util/scheduledMessages';
 
 import { SCHEDULED_WHEN_ONLINE } from '../config';
-import { getDayStartAt } from '../util/dates/dateFormat';
+import { getDayStartAt } from '../util/dates/oldDateFormat';
 import { getRepeatModeFromSeconds, getRepeatPeriodSeconds } from '../util/scheduledMessages';
 import { getServerTimeOffset } from '../util/serverTime';
 import useLastCallback from './useLastCallback';

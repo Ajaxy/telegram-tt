@@ -9,7 +9,7 @@ import type { ApiCountryCode } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatDateAtTime } from '../../../util/dates/dateFormat';
+import { formatDateAtTime } from '../../../util/dates/oldDateFormat';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';

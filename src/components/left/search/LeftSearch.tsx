@@ -13,7 +13,7 @@ import { type AnimationLevel, GlobalSearchContent } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
-import { parseDateString } from '../../../util/dates/dateFormat';
+import { parseDateString } from '../../../util/dates/oldDateFormat';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';

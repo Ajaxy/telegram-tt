@@ -4,7 +4,7 @@ import { getActions } from '../../../../global';
 
 import type { TabState } from '../../../../global/types';
 
-import { formatDateToString } from '../../../../util/dates/dateFormat';
+import { formatDateToString } from '../../../../util/dates/oldDateFormat';
 import { formatCurrencyAsString } from '../../../../util/formatCurrency';
 import { formatStarsAsIcon } from '../../../../util/localization/format';
 import { getGiftAttributes } from '../../../common/helpers/gifts';

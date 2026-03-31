@@ -4,6 +4,7 @@ import type { ApiOldLangPack, ApiOldLangString } from '../api/types';
 import type { LangCode, TimeFormat } from '../types';
 
 import {
+  FALLBACK_LANG_CODE,
   LANG_CACHE_NAME, LANG_PACKS,
 } from '../config';
 import { selectSharedSettings } from '../global/selectors/sharedState';
@@ -214,7 +215,7 @@ async function fetchRemote(langCode: string): Promise<ApiOldLangPack | undefined
 }
 
 function getPluralOption(amount: number) {
-  const langCode = currentLangCode || 'en';
+  const langCode = currentLangCode || FALLBACK_LANG_CODE;
   const optionIndex = PLURAL_RULES[langCode as keyof typeof PLURAL_RULES]
     ? PLURAL_RULES[langCode as keyof typeof PLURAL_RULES](amount)
     : 0;

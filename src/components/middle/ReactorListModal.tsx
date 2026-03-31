@@ -17,7 +17,7 @@ import {
 } from '../../global/selectors';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
-import { formatDateAtTime } from '../../util/dates/dateFormat';
+import { formatDateAtTime } from '../../util/dates/oldDateFormat';
 import { unique } from '../../util/iteratees';
 import { resolveTransitionName } from '../../util/resolveTransitionName';
 import { formatIntegerCompact } from '../../util/textFormat';

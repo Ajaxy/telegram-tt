@@ -10,7 +10,7 @@ import {
 } from '../../../config';
 import { getPeerFullTitle } from '../../../global/helpers/peers';
 import { selectChatMessage, selectIsMonoforumAdmin, selectSender } from '../../../global/selectors';
-import { formatScheduledDateTime, formatShortDuration } from '../../../util/dates/dateFormat';
+import { formatScheduledDateTime, formatShortDuration } from '../../../util/dates/oldDateFormat';
 import { convertTonFromNanos } from '../../../util/formatCurrency';
 import { formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
 import renderText from '../../common/helpers/renderText';

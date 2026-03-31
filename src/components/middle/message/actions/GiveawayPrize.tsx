@@ -11,7 +11,7 @@ import {
   selectGiftStickerForDuration,
   selectGiftStickerForStars,
 } from '../../../../global/selectors';
-import { formatCountdownDays } from '../../../../util/dates/dateFormat';
+import { formatCountdownDays } from '../../../../util/dates/oldDateFormat';
 import { renderPeerLink } from '../helpers/messageActions';
 
 import { type ObserveFn } from '../../../../hooks/useIntersectionObserver';

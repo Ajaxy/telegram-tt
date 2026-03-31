@@ -1,7 +1,7 @@
 import { memo, useEffect, useState } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
-import { formatCountdownShort } from '../../util/dates/dateFormat';
+import { formatCountdownShort } from '../../util/dates/oldDateFormat';
 
 import useInterval from '../../hooks/schedulers/useInterval';
 import useOldLang from '../../hooks/useOldLang';

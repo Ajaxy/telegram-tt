@@ -12,7 +12,7 @@ import {
 } from '../../../util/animations/viewTransitionTypes';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { formatTime, formatWeekday } from '../../../util/dates/dateFormat';
+import { formatTime, formatWeekday } from '../../../util/dates/oldDateFormat';
 import {
   getUtcOffset, getWeekStart, shiftTimeRanges, splitDays,
 } from '../../../util/dates/workHours';

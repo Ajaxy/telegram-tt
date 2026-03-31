@@ -10,7 +10,7 @@ import { isChatChannel } from '../../../global/helpers';
 import { selectChat, selectIsGiveawayGiftsPurchaseAvailable, selectTabState } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateAtTime } from '../../../util/dates/dateFormat';
+import { formatDateAtTime } from '../../../util/dates/oldDateFormat';
 import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
 import { formatInteger } from '../../../util/textFormat';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';

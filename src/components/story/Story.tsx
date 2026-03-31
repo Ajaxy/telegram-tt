@@ -33,7 +33,7 @@ import {
 import { IS_SAFARI } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
-import { formatMediaDuration, formatRelativePastTime } from '../../util/dates/dateFormat';
+import { formatMediaDuration, formatRelativePastTime } from '../../util/dates/oldDateFormat';
 import download from '../../util/download';
 import { isUserId } from '../../util/entities/ids';
 import { formatStarsAsIcon } from '../../util/localization/format';

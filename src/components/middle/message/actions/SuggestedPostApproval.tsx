@@ -11,7 +11,7 @@ import { selectIsMonoforumAdmin, selectMonoforumChannel,
   selectReplyMessage,
   selectSender } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
-import { formatScheduledDateTime, formatShortDuration } from '../../../../util/dates/dateFormat';
+import { formatScheduledDateTime, formatShortDuration } from '../../../../util/dates/oldDateFormat';
 import { convertTonFromNanos } from '../../../../util/formatCurrency';
 import { formatStarsAsText, formatTonAsText } from '../../../../util/localization/format';
 import { getServerTime } from '../../../../util/serverTime';

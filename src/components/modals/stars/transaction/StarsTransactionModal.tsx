@@ -24,7 +24,7 @@ import {
 } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
-import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
+import { formatDateTimeToString } from '../../../../util/dates/oldDateFormat';
 import { formatStarsAsIcon } from '../../../../util/localization/format';
 import { formatPercent } from '../../../../util/textFormat';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';

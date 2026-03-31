@@ -9,7 +9,7 @@ import {
   getMessageVideo,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/dates/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
 import { type LangFn } from '../../../util/localization';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 

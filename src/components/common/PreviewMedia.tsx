@@ -5,7 +5,7 @@ import type { ApiBotPreviewMedia } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/dates/dateFormat';
+import { formatMediaDuration } from '../../util/dates/oldDateFormat';
 import stopEvent from '../../util/stopEvent';
 
 import useMessageMediaHash from '../../hooks/media/useMessageMediaHash';

@@ -10,7 +10,7 @@ import type {
 import { DEFAULT_STATUS_ICON_ID } from '../../../config';
 import { STARS_CURRENCY_CODE } from '../../../config';
 import { selectTabState, selectUser } from '../../../global/selectors';
-import { formatDateAtTime } from '../../../util/dates/dateFormat';
+import { formatDateAtTime } from '../../../util/dates/oldDateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
 import useLang from '../../../hooks/useLang';

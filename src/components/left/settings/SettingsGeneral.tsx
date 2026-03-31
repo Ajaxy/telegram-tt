@@ -13,7 +13,6 @@ import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import {
   IS_ANDROID, IS_IOS, IS_MAC_OS,
 } from '../../../util/browser/windowEnvironment';
-import { setTimeFormat } from '../../../util/oldLangProvider';
 import { getSystemTheme } from '../../../util/systemTheme';
 
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -105,8 +104,6 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
   const handleTimeFormatChange = useCallback((newTimeFormat: string) => {
     setSharedSettingOption({ timeFormat: newTimeFormat as TimeFormat });
     setSharedSettingOption({ wasTimeFormatSetManually: true });
-
-    setTimeFormat(newTimeFormat as TimeFormat);
   }, []);
 
   const handleMessageSendComboChange = useCallback((newCombo: string) => {

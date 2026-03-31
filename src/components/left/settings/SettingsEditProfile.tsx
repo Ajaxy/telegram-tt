@@ -11,7 +11,7 @@ import { PURCHASE_USERNAME, TME_LINK_PREFIX, USERNAME_PURCHASE_ERROR } from '../
 import { getChatAvatarHash } from '../../../global/helpers';
 import { selectTabState, selectUser, selectUserFullInfo } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
-import { formatDateToString } from '../../../util/dates/dateFormat';
+import { formatDateToString } from '../../../util/dates/oldDateFormat';
 import { getNextArrowReplacement } from '../../../util/localization/format';
 import { throttle } from '../../../util/schedulers';
 import renderText from '../../common/helpers/renderText';

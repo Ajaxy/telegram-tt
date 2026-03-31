@@ -4,7 +4,7 @@ import { getActions } from '../../../global';
 import type { TabState } from '../../../global/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/dates/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
 import { formatStarsAsIcon, formatStarsAsText } from '../../../util/localization/format';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';

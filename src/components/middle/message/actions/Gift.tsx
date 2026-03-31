@@ -13,7 +13,7 @@ import {
   selectGiftStickerForStars,
   selectGiftStickerForTon,
 } from '../../../../global/selectors';
-import { formatCountdownDays } from '../../../../util/dates/dateFormat';
+import { formatCountdownDays } from '../../../../util/dates/oldDateFormat';
 import { formatCurrency } from '../../../../util/formatCurrency';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 

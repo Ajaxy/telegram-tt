@@ -15,7 +15,7 @@ import { buildStarsTransactionCustomPeer,
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
+import { formatDateTimeToString } from '../../../../util/dates/oldDateFormat';
 import { CUSTOM_PEER_PREMIUM } from '../../../../util/objects/customPeer';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';
 import renderText from '../../../common/helpers/renderText';

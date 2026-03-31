@@ -7,7 +7,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiWebSession } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatPastTimeShort } from '../../../util/dates/dateFormat';
+import { formatPastTimeShort } from '../../../util/dates/oldDateFormat';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';

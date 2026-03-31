@@ -25,7 +25,7 @@ import {
 } from '../../../global/selectors';
 import { selectPremiumLimit } from '../../../global/selectors/limits';
 import buildClassName from '../../../util/buildClassName';
-import { formatCountdownDays } from '../../../util/dates/dateFormat';
+import { formatCountdownDays } from '../../../util/dates/oldDateFormat';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { getStickerFromGift } from '../../common/helpers/gifts';
 import { REM } from '../../common/helpers/mediaDimensions';

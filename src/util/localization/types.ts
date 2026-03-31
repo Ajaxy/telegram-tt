@@ -8,6 +8,7 @@ import type {
   LangPackStringValueRegular,
 } from '../../api/types';
 import type { TextFilter } from '../../components/common/helpers/renderText';
+import type { TimeFormat } from '../../types';
 import type {
   LangPairPluralWithVariables,
   LangPairWithVariables,
@@ -164,6 +165,7 @@ export type LangFn = {
   disjunction: (list: string[]) => string;
   number: (value: number) => string;
   preciseNumber: (value: number) => string;
+  timeFormat: TimeFormat;
   internalFormatters: LangFormatters;
   isRtl?: boolean;
   rawCode: string;

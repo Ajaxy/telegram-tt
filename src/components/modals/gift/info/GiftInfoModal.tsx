@@ -15,7 +15,7 @@ import { getMainUsername } from '../../../../global/helpers/users';
 import { selectPeer, selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
-import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
+import { formatDateTimeToString } from '../../../../util/dates/oldDateFormat';
 import { formatCurrency, formatCurrencyAsString } from '../../../../util/formatCurrency';
 import {
   formatStarsAsIcon, formatStarsAsText, formatTonAsIcon, formatTonAsText,

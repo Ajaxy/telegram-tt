@@ -25,7 +25,7 @@ import {
   ARCHIVED_FOLDER_ID, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
   VERIFICATION_CODES_USER_ID,
 } from '../../config';
-import { formatDateToString, formatTime } from '../../util/dates/dateFormat';
+import { formatDateToString, formatTime } from '../../util/dates/oldDateFormat';
 import { getPeerIdDividend, isUserId } from '../../util/entities/ids';
 import { getServerTime } from '../../util/serverTime';
 import { selectIsChatRestricted } from '../selectors';

@@ -7,7 +7,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiSession } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 
-import { formatPastTimeShort } from '../../../util/dates/dateFormat';
+import { formatPastTimeShort } from '../../../util/dates/oldDateFormat';
 import getSessionIcon from './helpers/getSessionIcon';
 
 import useFlag from '../../../hooks/useFlag';

@@ -8,7 +8,7 @@ import type { ApiTypeStory } from '../../api/types';
 import { getStoryMediaHash } from '../../global/helpers';
 import { selectChat, selectPinnedStories } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/dates/dateFormat';
+import { formatMediaDuration } from '../../util/dates/oldDateFormat';
 import stopEvent from '../../util/stopEvent';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 

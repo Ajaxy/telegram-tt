@@ -17,7 +17,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { OldLangFn } from '../../../hooks/useOldLang';
 
 import { selectPeer } from '../../../global/selectors';
-import { formatMediaDuration } from '../../../util/dates/dateFormat';
+import { formatMediaDuration } from '../../../util/dates/oldDateFormat';
 import { getMessageKey } from '../../../util/keys/messageKey';
 import { getServerTime } from '../../../util/serverTime';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';

@@ -16,7 +16,6 @@ import { toCredentialCreationOptions } from '../../../util/browser/passkeys';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { requestPermission, subscribe, unsubscribe } from '../../../util/notifications';
-import { setTimeFormat } from '../../../util/oldLangProvider';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
@@ -642,7 +641,6 @@ addActionHandler('ensureTimeFormat', async (global, actions): Promise<void> => {
     const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT
       .has(global.auth.nearestCountry.toUpperCase()) ? '12h' : '24h';
     actions.setSharedSettingOption({ timeFormat });
-    setTimeFormat(timeFormat);
   }
 
   if (selectSharedSettings(global).wasTimeFormatSetManually) {
@@ -653,7 +651,6 @@ addActionHandler('ensureTimeFormat', async (global, actions): Promise<void> => {
   if (nearestCountryCode) {
     const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT.has(nearestCountryCode.toUpperCase()) ? '12h' : '24h';
     actions.setSharedSettingOption({ timeFormat });
-    setTimeFormat(timeFormat);
   }
 });
 
