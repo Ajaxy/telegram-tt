@@ -150,7 +150,10 @@ addActionHandler('uploadProfilePhoto', async (global, actions, payload): Promise
   global = updateManagementProgress(global, ManagementProgress.Complete, tabId);
   setGlobal(global);
 
-  actions.loadFullUser({ userId: global.currentUserId! });
+  const userId = bot?.id ?? global.currentUserId;
+  if (!userId) return;
+
+  actions.loadFullUser({ userId });
 });
 
 addActionHandler('signUp', (global, actions, payload): ActionReturnType => {
