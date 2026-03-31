@@ -96,6 +96,13 @@ export interface IAlbum {
   commentsMessage?: ApiMessage;
 }
 
+export interface IDocumentGroup {
+  documentGroupId: string;
+  messages: ApiMessage[];
+  firstMessageId: number;
+  commentsMessage?: ApiMessage;
+}
+
 export type ThreadId = string | number;
 
 export type ThemeKey = 'light' | 'dark';

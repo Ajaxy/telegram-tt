@@ -34,6 +34,7 @@ import type {
   ChatTranslatedMessages,
   FocusDirection,
   IAlbum,
+  IDocumentGroup,
   MessageListType,
   ScrollTargetPosition,
   TextSummary,
@@ -97,7 +98,6 @@ import {
   selectIsMessageFocused,
   selectIsMessageProtected,
   selectIsMessageSelected,
-  selectMessageIdsByGroupId,
   selectMessageSummary,
   selectOutgoingStatus,
   selectPeer,
@@ -225,6 +225,7 @@ type MessagePositionProperties = {
 type OwnProps = {
   message: ApiMessage;
   album?: IAlbum;
+  documentGroup?: IDocumentGroup;
   noAvatars?: boolean;
   withAvatar?: boolean;
   withSenderName?: boolean;
@@ -234,6 +235,7 @@ type OwnProps = {
   noReplies: boolean;
   appearanceOrder: number;
   isJustAdded: boolean;
+  isThreadTop?: boolean;
   memoFirstUnreadIdRef?: { current: number | undefined };
   getIsMessageListReady?: Signal<boolean>;
   observeIntersectionForBottom?: ObserveFn;
@@ -249,7 +251,6 @@ type StateProps = {
   canShowSender: boolean;
   originSender?: ApiPeer;
   botSender?: ApiUser;
-  isThreadTop?: boolean;
   shouldHideReply?: boolean;
   replyMessage?: ApiMessage;
   replyMessageSender?: ApiPeer;
@@ -2004,7 +2005,8 @@ export default memo(withGlobal<OwnProps>(
       loadingThread,
     } = selectTabState(global);
     const {
-      message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup, isFirstInGroup,
+      message, album, documentGroup, withSenderName, withAvatar, threadId, messageListType,
+      isLastInDocumentGroup, isFirstInGroup,
     } = ownProps;
     const {
       id, chatId, viaBotId, isOutgoing, forwardInfo, transcriptionId, isPinned, viaBusinessBotId, effectId,
@@ -2039,8 +2041,6 @@ export default memo(withGlobal<OwnProps>(
     const senderChatMember = sender?.id
       ? (adminMembersById?.[sender?.id] || members?.find((member) => member.userId === sender?.id))
       : undefined;
-
-    const isThreadTop = message.id === threadId;
 
     const { replyToMsgId, replyToPeerId, replyFrom } = getMessageReplyInfo(message) || {};
     const { peerId: storyReplyPeerId, storyId: storyReplyId } = getStoryReplyInfo(message) || {};
@@ -2094,14 +2094,15 @@ export default memo(withGlobal<OwnProps>(
     const downloadableMedia = selectMessageDownloadableMedia(global, message);
     const isDownloading = downloadableMedia && getIsDownloading(activeDownloads, downloadableMedia);
 
-    const repliesThreadInfo = selectThreadInfo(global, chatId, album?.commentsMessage?.id || id);
-
     const isInDocumentGroup = Boolean(message.groupedId) && !message.isInAlbum;
-    const documentGroupFirstMessageId = isInDocumentGroup
-      ? selectMessageIdsByGroupId(global, chatId, message.groupedId!)![0]
-      : undefined;
+
+    const repliesThreadInfo = selectThreadInfo(
+      global, chatId, album?.commentsMessage?.id || documentGroup?.commentsMessage?.id || id,
+    );
     const reactionMessage = isInDocumentGroup ? (
-      isLastInDocumentGroup ? selectChatMessage(global, chatId, documentGroupFirstMessageId!) : undefined
+      isLastInDocumentGroup && documentGroup?.firstMessageId
+        ? selectChatMessage(global, chatId, documentGroup.firstMessageId)
+        : undefined
     ) : message;
 
     const readState = selectThreadReadState(global, chatId, threadId);
@@ -2158,7 +2159,6 @@ export default memo(withGlobal<OwnProps>(
       originSender,
       botSender,
       shouldHideReply: shouldHideReply || isReplyToTopicStart,
-      isThreadTop,
       replyMessage,
       replyMessageSender,
       replyMessageForwardSender,

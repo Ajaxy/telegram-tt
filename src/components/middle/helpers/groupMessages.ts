@@ -1,10 +1,10 @@
 import type { ApiMessage } from '../../../api/types';
-import type { IAlbum } from '../../../types';
+import type { IAlbum, IDocumentGroup } from '../../../types';
 
 import { isActionMessage } from '../../../global/helpers';
 import { getDayStartAt } from '../../../util/dates/oldDateFormat';
 
-type SenderGroup = (ApiMessage | IAlbum)[];
+type SenderGroup = (ApiMessage | IAlbum | IDocumentGroup)[];
 
 const GROUP_INTERVAL_SECONDS = 600; // 10 minutes
 
@@ -14,8 +14,14 @@ export type MessageDateGroup = {
   senderGroups: SenderGroup[];
 };
 
-export function isAlbum(messageOrAlbum: ApiMessage | IAlbum): messageOrAlbum is IAlbum {
+export function isAlbum(messageOrAlbum: ApiMessage | IAlbum | IDocumentGroup): messageOrAlbum is IAlbum {
   return 'albumId' in messageOrAlbum;
+}
+
+export function isDocumentGroup(
+  messageOrAlbum: ApiMessage | IAlbum | IDocumentGroup,
+): messageOrAlbum is IDocumentGroup {
+  return 'documentGroupId' in messageOrAlbum;
 }
 
 export function groupMessages(
@@ -27,6 +33,7 @@ export function groupMessages(
     senderGroups: [[]],
   };
   let currentAlbum: IAlbum | undefined;
+  let currentDocumentGroup: IDocumentGroup | undefined;
 
   const dateGroups: MessageDateGroup[] = [initDateGroup];
 
@@ -40,6 +47,8 @@ export function groupMessages(
           messages: [message],
           mainMessage: message,
           hasMultipleCaptions: false,
+          commentsMessage: message.hasComments ? message : undefined,
+          captionMessage: message.content.text ? message : undefined,
         } satisfies IAlbum;
       } else {
         currentAlbum.messages.push(message);
@@ -63,6 +72,20 @@ export function groupMessages(
         hasMultipleCaptions: false,
         isPaidMedia: true,
       } satisfies IAlbum);
+    } else if (message.groupedId) {
+      if (!currentDocumentGroup) {
+        currentDocumentGroup = {
+          documentGroupId: message.groupedId,
+          messages: [message],
+          firstMessageId: message.id,
+          commentsMessage: message.hasComments ? message : undefined,
+        } satisfies IDocumentGroup;
+      } else {
+        currentDocumentGroup.messages.push(message);
+        if (message.hasComments) {
+          currentDocumentGroup.commentsMessage = message;
+        }
+      }
     } else {
       currentSenderGroup.push(message);
     }
@@ -77,8 +100,16 @@ export function groupMessages(
       currentAlbum = undefined;
     }
 
+    if (
+      currentDocumentGroup
+      && (!nextMessage || !nextMessage.groupedId || nextMessage.groupedId !== currentDocumentGroup.documentGroupId)
+    ) {
+      currentSenderGroup.push(currentDocumentGroup);
+      currentDocumentGroup = undefined;
+    }
+
     const lastMessageInSenderGroup = currentSenderGroup[currentSenderGroup.length - 1];
-    if (nextMessage && !currentAlbum) {
+    if (nextMessage && !currentAlbum && !currentDocumentGroup) {
       const nextMessageDayStartsAt = getDayStartAt(nextMessage.date * 1000);
       if (currentDateGroup.datetime !== nextMessageDayStartsAt) {
         const newDateGroup: MessageDateGroup = {
@@ -101,10 +132,12 @@ export function groupMessages(
         || (nextMessage.date - message.date) > GROUP_INTERVAL_SECONDS
         || (topMessageId
           && (message.id === topMessageId
-            || (lastMessageInSenderGroup
-              && 'mainMessage' in lastMessageInSenderGroup
-              && lastMessageInSenderGroup.mainMessage?.id === topMessageId))
-            && nextMessage.id !== topMessageId)
+            || (lastMessageInSenderGroup && (
+              (isAlbum(lastMessageInSenderGroup) && lastMessageInSenderGroup.mainMessage.id === topMessageId)
+              || (isDocumentGroup(lastMessageInSenderGroup) && lastMessageInSenderGroup.firstMessageId === topMessageId)
+            )))
+            && nextMessage.id !== topMessageId
+            && !(message.groupedId && message.groupedId === nextMessage.groupedId))
           || (isChatWithSelf && message.forwardInfo?.fromId !== nextMessage.forwardInfo?.fromId)
       ) {
         currentDateGroup.senderGroups.push([]);

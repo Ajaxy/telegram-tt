@@ -141,6 +141,7 @@ import {
   selectIsMonoforumAdmin,
   selectLanguageCode,
   selectListedIds,
+  selectMessageIdsByGroupId,
   selectMessageReplyInfo,
   selectOutlyingListByMessageId,
   selectPeer,
@@ -1809,7 +1810,16 @@ async function loadViewportMessages<T extends GlobalState>(
   if (threadId !== MAIN_THREAD_ID && !getIsSavedDialog(chatId, threadId, global.currentUserId)) {
     const threadFirstMessageId = selectFirstMessageId(global, chatId, threadId);
     if ((!ids[0] || threadFirstMessageId === ids[0]) && threadFirstMessageId !== threadId) {
-      ids.unshift(Number(threadId));
+      const threadTopMessage = selectChatMessage(global, chatId, Number(threadId));
+      const groupedIds = threadTopMessage?.groupedId
+        ? selectMessageIdsByGroupId(global, chatId, threadTopMessage.groupedId)
+        : undefined;
+
+      if (groupedIds && groupedIds.length > 1) {
+        ids.unshift(...groupedIds);
+      } else {
+        ids.unshift(Number(threadId));
+      }
     }
   }
 

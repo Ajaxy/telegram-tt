@@ -3,7 +3,7 @@ import { getIsHeavyAnimating, memo } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
 import type { ApiMessage } from '../../api/types';
-import type { IAlbum, MessageListType, ThreadId } from '../../types';
+import type { IAlbum, IDocumentGroup, MessageListType, ThreadId } from '../../types';
 import type { Signal } from '../../util/signals';
 import type { MessageDateGroup } from './helpers/groupMessages';
 import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
@@ -26,7 +26,7 @@ import { formatHumanDate, formatScheduledDateTime } from '../../util/dates/oldDa
 import { convertTonFromNanos } from '../../util/formatCurrency';
 import { compact } from '../../util/iteratees';
 import { formatStarsAsText, formatTonAsText } from '../../util/localization/format';
-import { isAlbum } from './helpers/groupMessages';
+import { isAlbum, isDocumentGroup } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import { renderPeerLink } from './message/helpers/messageActions';
 
@@ -130,6 +130,7 @@ const MessageListContent = ({
 
   const areDatesClickable = !isSavedDialog && !isSchedule;
   const shouldRenderSponsoredMessage = canShowAds && isViewportNewest;
+  const shouldHideComments = hasLinkedChat === false || !isChannelChat || Boolean(isChatMonoforum);
 
   const {
     observeIntersectionForReading,
@@ -270,7 +271,9 @@ const MessageListContent = ({
   };
 
   const messageCountToAnimate = noAppearanceAnimation ? 0 : messageGroups.reduce((acc, messageGroup) => {
-    return acc + messageGroup.senderGroups.flat().length;
+    return acc + messageGroup.senderGroups.flat().reduce((innerAcc, messageOrAlbum) => {
+      return innerAcc + (isDocumentGroup(messageOrAlbum) ? messageOrAlbum.messages.length : 1);
+    }, 0);
   }, 0);
   let appearanceIndex = 0;
 
@@ -290,6 +293,7 @@ const MessageListContent = ({
       if (
         senderGroup.length === 1
         && !isAlbum(senderGroup[0])
+        && !isDocumentGroup(senderGroup[0])
         && isActionMessage(senderGroup[0])
         && senderGroup[0].content.action?.type !== 'phoneCall'
       ) {
@@ -318,31 +322,115 @@ const MessageListContent = ({
         ]);
       }
 
-      let currentDocumentGroupId: string | undefined;
+      let currentDocumentGroupHasThreadTop = false;
 
       const senderGroupElements = senderGroup.map((
         messageOrAlbum,
         messageIndex,
       ) => {
+        function renderMessageElement(
+          message: ApiMessage,
+          position: {
+            isFirstInGroup: boolean;
+            isLastInGroup: boolean;
+            isFirstInDocumentGroup: boolean;
+            isLastInDocumentGroup: boolean;
+            isLastInList: boolean;
+          },
+          isThreadTopMessage: boolean,
+          album?: IAlbum,
+          documentGroup?: IDocumentGroup,
+        ) {
+          const isOwn = isOwnMessage(message);
+          const originalId = getMessageOriginalId(message);
+          const key = isServiceNotificationMessage(message)
+            ? `${message.date}_${originalId}` : originalId;
+
+          return compact([
+            message.id === memoUnreadDividerBeforeIdRef.current && unreadDivider,
+            message.paidMessageStars && !withUsers && renderPaidMessageAction(message, album),
+            message.suggestedPostInfo && renderSuggestedPostInfoAction(message),
+            <Message
+              key={key}
+              message={message}
+              observeIntersectionForBottom={observeIntersectionForReading}
+              observeIntersectionForLoading={observeIntersectionForLoading}
+              observeIntersectionForPlaying={observeIntersectionForPlaying}
+              album={album}
+              documentGroup={documentGroup}
+              noAvatars={noAvatars}
+              withAvatar={position.isLastInGroup && withUsers && !isOwn && (!isThreadTopMessage || !isComments)}
+              withSenderName={position.isFirstInGroup && withUsers && !isOwn}
+              threadId={threadId}
+              messageListType={type}
+              noComments={shouldHideComments}
+              noReplies={!shouldHideComments || threadId !== MAIN_THREAD_ID || type === 'scheduled'}
+              appearanceOrder={messageCountToAnimate - ++appearanceIndex}
+              isJustAdded={position.isLastInList && isNewMessage}
+              isThreadTop={isThreadTopMessage}
+              isFirstInGroup={position.isFirstInGroup}
+              isLastInGroup={position.isLastInGroup}
+              isFirstInDocumentGroup={position.isFirstInDocumentGroup}
+              isLastInDocumentGroup={position.isLastInDocumentGroup}
+              isLastInList={position.isLastInList}
+              memoFirstUnreadIdRef={memoFirstUnreadIdRef}
+              getIsMessageListReady={getIsReady}
+              onMessageUnmount={onMessageUnmount}
+            />,
+          ]);
+        }
+
+        if (isDocumentGroup(messageOrAlbum)) {
+          const documentGroup = messageOrAlbum;
+          return documentGroup.messages.map((docMessage, docIndex) => {
+            const isFirstInDocGroup = docIndex === 0;
+            const isLastInDocGroup = docIndex === documentGroup.messages.length - 1;
+
+            if (docMessage.previousLocalId && anchorIdRef.current === getMessageHtmlId(docMessage.previousLocalId)) {
+              anchorIdRef.current = getMessageHtmlId(docMessage.id);
+            }
+
+            if (isFirstInDocGroup && docMessage.id === threadId) {
+              currentDocumentGroupHasThreadTop = true;
+            }
+
+            const isThreadTopMessage = docMessage.id === threadId || currentDocumentGroupHasThreadTop;
+
+            if (isLastInDocGroup) {
+              currentDocumentGroupHasThreadTop = false;
+            }
+
+            const position = {
+              isFirstInGroup: messageIndex === 0 && isFirstInDocGroup,
+              isLastInGroup: messageIndex === senderGroup.length - 1 && isLastInDocGroup,
+              isFirstInDocumentGroup: isFirstInDocGroup,
+              isLastInDocumentGroup: isLastInDocGroup,
+              isLastInList: (
+                messageIndex === senderGroup.length - 1
+                && isLastInDocGroup
+                && senderGroupIndex === senderGroupsArray.length - 1
+                && dateGroupIndex === dateGroupsArray.length - 1
+              ),
+            };
+
+            return renderMessageElement(docMessage, position, isThreadTopMessage, undefined, documentGroup);
+          }).flat();
+        }
+
         const message = isAlbum(messageOrAlbum) ? messageOrAlbum.mainMessage : messageOrAlbum;
         const album = isAlbum(messageOrAlbum) ? messageOrAlbum : undefined;
-        const isOwn = isOwnMessage(message);
-        const isMessageAlbum = isAlbum(messageOrAlbum);
-        const nextMessage = senderGroup[messageIndex + 1];
 
         if (message.previousLocalId && anchorIdRef.current === getMessageHtmlId(message.previousLocalId)) {
           anchorIdRef.current = getMessageHtmlId(message.id);
         }
 
-        const documentGroupId = !isMessageAlbum && message.groupedId ? message.groupedId : undefined;
-        const nextDocumentGroupId = nextMessage && !isAlbum(nextMessage) ? nextMessage.groupedId : undefined;
         const isThreadTopMessage = message.id === threadId;
 
         const position = {
           isFirstInGroup: messageIndex === 0,
           isLastInGroup: messageIndex === senderGroup.length - 1,
-          isFirstInDocumentGroup: Boolean(documentGroupId && documentGroupId !== currentDocumentGroupId),
-          isLastInDocumentGroup: Boolean(documentGroupId && documentGroupId !== nextDocumentGroupId),
+          isFirstInDocumentGroup: false,
+          isLastInDocumentGroup: false,
           isLastInList: (
             messageIndex === senderGroup.length - 1
             && senderGroupIndex === senderGroupsArray.length - 1
@@ -350,59 +438,32 @@ const MessageListContent = ({
           ),
         };
 
-        currentDocumentGroupId = documentGroupId;
-
-        const originalId = getMessageOriginalId(message);
-        // Service notifications saved in cache in previous versions may share the same `previousLocalId`
-        const key = isServiceNotificationMessage(message) ? `${message.date}_${originalId}` : originalId;
-
-        const noComments = hasLinkedChat === false || !isChannelChat || Boolean(isChatMonoforum);
-
-        return compact([
-          message.id === memoUnreadDividerBeforeIdRef.current && unreadDivider,
-          message.paidMessageStars && !withUsers && renderPaidMessageAction(message, album),
-          message.suggestedPostInfo && renderSuggestedPostInfoAction(message),
-          <Message
-            key={key}
-            message={message}
-            observeIntersectionForBottom={observeIntersectionForReading}
-            observeIntersectionForLoading={observeIntersectionForLoading}
-            observeIntersectionForPlaying={observeIntersectionForPlaying}
-            album={album}
-            noAvatars={noAvatars}
-            withAvatar={position.isLastInGroup && withUsers && !isOwn && (!isThreadTopMessage || !isComments)}
-            withSenderName={position.isFirstInGroup && withUsers && !isOwn}
-            threadId={threadId}
-            messageListType={type}
-            noComments={noComments}
-            noReplies={!noComments || threadId !== MAIN_THREAD_ID || type === 'scheduled'}
-            appearanceOrder={messageCountToAnimate - ++appearanceIndex}
-            isJustAdded={position.isLastInList && isNewMessage}
-            isFirstInGroup={position.isFirstInGroup}
-            isLastInGroup={position.isLastInGroup}
-            isFirstInDocumentGroup={position.isFirstInDocumentGroup}
-            isLastInDocumentGroup={position.isLastInDocumentGroup}
-            isLastInList={position.isLastInList}
-            memoFirstUnreadIdRef={memoFirstUnreadIdRef}
-            getIsMessageListReady={getIsReady}
-            onMessageUnmount={onMessageUnmount}
-          />,
-        ]);
+        return renderMessageElement(message, position, isThreadTopMessage, album);
       }).flat();
 
       if (!withUsers) return senderGroupElements;
 
-      const lastMessageOrAlbum = senderGroup[senderGroup.length - 1];
-      const lastMessage = isAlbum(lastMessageOrAlbum) ? lastMessageOrAlbum.mainMessage : lastMessageOrAlbum;
+      const lastItem = senderGroup[senderGroup.length - 1];
+      const lastMessage = isAlbum(lastItem)
+        ? lastItem.mainMessage
+        : isDocumentGroup(lastItem)
+          ? lastItem.messages[lastItem.messages.length - 1]
+          : lastItem;
       const lastMessageId = getMessageOriginalId(lastMessage);
       const lastAppearanceOrder = messageCountToAnimate - appearanceIndex;
 
-      const isThreadTopMessage = lastMessage.id === threadId;
       const isOwn = isOwnMessage(lastMessage);
 
-      const firstMessageOrAlbum = senderGroup[0];
-      const firstMessage = isAlbum(firstMessageOrAlbum) ? firstMessageOrAlbum.mainMessage : firstMessageOrAlbum;
+      const firstItem = senderGroup[0];
+      const firstMessage = isAlbum(firstItem)
+        ? firstItem.mainMessage
+        : isDocumentGroup(firstItem)
+          ? firstItem.messages[0]
+          : firstItem;
       const firstMessageId = getMessageOriginalId(firstMessage);
+
+      const isThreadTopMessage = lastMessage.id === threadId
+        || (firstMessage.id === threadId && Boolean(firstMessage.groupedId));
 
       const key = `${firstMessageId}-${lastMessageId}`;
       const id = (firstMessageId === lastMessageId) ? `message-group-${firstMessageId}`
