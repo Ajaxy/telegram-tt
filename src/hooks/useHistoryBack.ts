@@ -52,6 +52,7 @@ let isAlteringHistory = false;
 let deferredHistoryOperations: HistoryOperation[] = [];
 let deferredPopstateOperations: HistoryOperationState[] = [];
 let isSafariGestureAnimation = false;
+let isHistoryInitialized = false;
 
 // Do not remove: used for history unit tests
 if (IS_TEST) {
@@ -127,7 +128,14 @@ function resetHistory() {
   window.history.replaceState({ index: 0, historyUniqueSessionId }, '', PATH_BASE);
 }
 
-resetHistory();
+function ensureHistoryInitialized() {
+  if (isHistoryInitialized) {
+    return;
+  }
+
+  isHistoryInitialized = true;
+  resetHistory();
+}
 
 function cleanupClosed(alreadyClosedCount = 1) {
   let countClosed = alreadyClosedCount;
@@ -164,6 +172,10 @@ function cleanupTrashedState() {
 }
 
 window.addEventListener('popstate', ({ state }: PopStateEvent) => {
+  if (!isHistoryInitialized) {
+    return;
+  }
+
   if (isAlteringHistory) {
     isAlteringHistory = false;
     if (deferredPopstateOperations.length) {
@@ -241,6 +253,8 @@ export default function useHistoryBack({
   shouldResetUrlHash?: boolean;
   onBack: VoidFunction;
 }) {
+  ensureHistoryInitialized();
+
   const lastOnBack = useLastCallback(onBack);
 
   // Active index of the record
