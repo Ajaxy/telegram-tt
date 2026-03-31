@@ -1,4 +1,5 @@
-import { memo, useMemo, useState } from '../../lib/teact/teact';
+import type { TeactNode } from '../../lib/teact/teact';
+import { memo, useCallback, useMemo, useState } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiChatFolder, ApiChatType } from '../../api/types';
@@ -7,36 +8,51 @@ import type { ThreadId } from '../../types';
 import { ALL_FOLDER_ID, API_CHAT_TYPES } from '../../config';
 import {
   getCanPostInChat,
+  getChatTitle,
   getHasAdminRight,
   isChatChannel,
   isDeletedUser,
+  isSystemBot,
 } from '../../global/helpers';
 import { filterPeersByQuery } from '../../global/helpers/peers';
 import {
-  filterChatIdsByType, selectChat, selectChatFullInfo, selectIsMonoforumAdmin, selectUser,
+  filterChatIdsByType, selectCanAnimateInterface, selectChat, selectChatFullInfo, selectIsMonoforumAdmin,
+  selectTopic, selectUser,
 } from '../../global/selectors';
 import { selectCurrentLimit } from '../../global/selectors/limits';
+import buildClassName from '../../util/buildClassName';
 import { unique } from '../../util/iteratees';
 import sortChatIds from './helpers/sortChatIds';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import { useFolderManagerForOrderedIds } from '../../hooks/useFolderManager';
 import useFolderTabs from '../../hooks/useFolderTabs';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import { useStateRef } from '../../hooks/useStateRef';
 
 import TabList from '../ui/TabList';
-import ChatOrUserPicker from './pickers/ChatOrUserPicker';
+import PeerChip from './PeerChip';
+import ChatOrUserPicker, { type SearchRowRenderProps } from './pickers/ChatOrUserPicker';
+import PickerRecentContacts from './pickers/PickerRecentContacts';
+
+import styles from './RecipientPicker.module.scss';
 
 export type OwnProps = {
   isOpen: boolean;
+  title?: string;
   searchPlaceholder: string;
   className?: string;
   filter?: readonly ApiChatType[];
   isLowStackPriority?: boolean;
   isForwarding?: boolean;
+  isMultiSelect?: boolean;
   withFolders?: boolean;
+  footer?: TeactNode;
+  viewportFooter?: TeactNode;
   loadMore?: NoneToVoidFunction;
   onSelectRecipient: (peerId: string, threadId?: ThreadId) => void;
+  onSelectedIdsChange?: (ids: string[]) => void;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
 };
@@ -52,6 +68,8 @@ type StateProps = {
   maxFolders: number;
 };
 
+const RECENT_CONTACTS_LIMIT = 15;
+
 const RecipientPicker = ({
   isOpen,
   currentUserId,
@@ -60,21 +78,34 @@ const RecipientPicker = ({
   pinnedIds,
   contactIds,
   filter = API_CHAT_TYPES,
+  title,
   className,
   searchPlaceholder,
   isLowStackPriority,
   chatFoldersById,
   orderedFolderIds,
   isForwarding,
+  isMultiSelect,
   maxFolders,
   withFolders,
+  footer,
+  viewportFooter,
   loadMore,
   onSelectRecipient,
+  onSelectedIdsChange,
   onClose,
   onCloseAnimationEnd,
 }: OwnProps & StateProps) => {
   const { openLimitReachedModal } = getActions();
+  const lang = useLang();
+
   const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [removingIds, setRemovingIds] = useState<string[]>([]);
+  const [appearingIds, setAppearingIds] = useState<string[]>([]);
+  const selectedIdsRef = useStateRef(selectedIds);
+  const removingIdsRef = useStateRef(removingIds);
+  const appearingIdsRef = useStateRef(appearingIds);
 
   const [activeFolderIndex, setActiveFolderIndex] = useState(0);
   const { displayedFolders, folderTabs } = useFolderTabs({
@@ -85,7 +116,7 @@ const RecipientPicker = ({
     isReadOnly: true,
   });
 
-  const shouldRenderFolders = withFolders && folderTabs?.length && !search;
+  const shouldRenderFolders = withFolders && folderTabs && folderTabs.length > 1 && !search;
   const displayedFolderId = displayedFolders?.[activeFolderIndex]?.id || ALL_FOLDER_ID;
   const orderedChatIds = useFolderManagerForOrderedIds(displayedFolderId);
 
@@ -101,6 +132,57 @@ const RecipientPicker = ({
     }
 
     setActiveFolderIndex(index);
+  });
+
+  const updateSelectedIds = useLastCallback((newIds: string[], newlyAddedId?: string) => {
+    setSelectedIds(newIds);
+    onSelectedIdsChange?.(newIds);
+
+    if (newlyAddedId && selectCanAnimateInterface(getGlobal())) {
+      setAppearingIds([...appearingIdsRef.current, newlyAddedId]);
+      setTimeout(() => {
+        setAppearingIds(appearingIdsRef.current.filter((id) => id !== newlyAddedId));
+      }, 200);
+    }
+  });
+
+  const handleRemoveSelected = useLastCallback((selectionId: string) => {
+    if (removingIdsRef.current.includes(selectionId)) return;
+
+    const canAnimate = selectCanAnimateInterface(getGlobal());
+    if (!canAnimate) {
+      const newIds = selectedIdsRef.current.filter((id) => id !== selectionId);
+      setSelectedIds(newIds);
+      onSelectedIdsChange?.(newIds);
+      return;
+    }
+
+    setRemovingIds([...removingIdsRef.current, selectionId]);
+
+    setTimeout(() => {
+      setRemovingIds(removingIdsRef.current.filter((id) => id !== selectionId));
+      const newIds = selectedIdsRef.current.filter((id) => id !== selectionId);
+      setSelectedIds(newIds);
+      onSelectedIdsChange?.(newIds);
+    }, 300);
+  });
+
+  const handleToggleSelection = useLastCallback((peerId: string, threadId?: ThreadId) => {
+    const selectionId = threadId ? `${peerId}:${threadId}` : peerId;
+
+    if (selectedIds.includes(selectionId)) {
+      handleRemoveSelected(selectionId);
+    } else {
+      updateSelectedIds([...selectedIds, selectionId], selectionId);
+    }
+  });
+
+  const handleSelect = useLastCallback((peerId: string, threadId?: ThreadId) => {
+    if (isMultiSelect) {
+      handleToggleSelection(peerId, threadId);
+    } else {
+      onSelectRecipient(peerId, threadId);
+    }
   });
 
   const ids = useMemo(() => {
@@ -120,6 +202,8 @@ const RecipientPicker = ({
     ];
 
     const peerIds = allIds.filter((id) => {
+      if (isSystemBot(id)) return false;
+
       const chat = selectChat(global, id);
       const user = selectUser(global, id);
       const hasAdminRights = chat && getHasAdminRight(chat, 'postMessages');
@@ -171,16 +255,145 @@ const RecipientPicker = ({
 
   const renderingIds = useCurrentOrPrev(ids, true);
 
-  const chatFolders = useMemo(() => {
-    if (!shouldRenderFolders) return undefined;
+  const recentContactIds = useMemo(() => {
+    if (!contactIds) return [];
+    return contactIds.slice(0, RECENT_CONTACTS_LIMIT);
+  }, [contactIds]);
+
+  const hasSelectedChips = isMultiSelect && selectedIds.length > 0;
+
+  const parseSelectionId = useLastCallback((selectionId: string): { peerId: string; topicId?: number } => {
+    const colonIndex = selectionId.indexOf(':');
+    if (colonIndex === -1) {
+      return { peerId: selectionId };
+    }
+    return {
+      peerId: selectionId.substring(0, colonIndex),
+      topicId: Number(selectionId.substring(colonIndex + 1)),
+    };
+  });
+
+  const getChipTitle = useLastCallback((selectionId: string): string | undefined => {
+    const { peerId, topicId } = parseSelectionId(selectionId);
+    if (!topicId) return undefined;
+
+    const global = getGlobal();
+    const topic = selectTopic(global, peerId, topicId);
+    const chat = selectChat(global, peerId);
+
+    if (!topic || !chat) return undefined;
+
+    const chatTitle = getChatTitle(lang, chat);
+    return `${topic.title} • ${chatTitle}`;
+  });
+
+  const renderSearchRow = useCallback((props: SearchRowRenderProps) => {
+    if (!hasSelectedChips) {
+      return (
+        <div className="search-input-wrapper">
+          <i className="icon icon-search" />
+          <input
+            ref={props.inputRef}
+            className="search-input"
+            type="text"
+            dir="auto"
+            placeholder={props.placeholder}
+            value={props.value}
+            onChange={props.onChange}
+            onKeyDown={props.onKeyDown}
+          />
+        </div>
+      );
+    }
+
     return (
-      <TabList
-        tabs={folderTabs}
-        activeTab={activeFolderIndex}
-        onSwitchTab={handleSwitchFolderIndex}
-      />
+      <div className="search-row-with-chips">
+        <div className="chips-and-search-scroll no-scrollbar">
+          {selectedIds.map((selectionId) => {
+            const { peerId } = parseSelectionId(selectionId);
+            const chipTitle = getChipTitle(selectionId);
+            const isAppearing = appearingIds.includes(selectionId);
+            const isRemoving = removingIds.includes(selectionId);
+
+            return (
+              <div
+                key={selectionId}
+                className={buildClassName(
+                  'picker-chip-wrapper',
+                  isAppearing && 'picker-chip-appear',
+                  isRemoving && 'picker-chip-disappear',
+                )}
+              >
+                <PeerChip
+                  peerId={peerId}
+                  title={chipTitle}
+                  size="small"
+                  forceShowSelf
+                  canClose
+                  className="picker-chip"
+                  itemClassName="picker-chip-name"
+                  clickArg={selectionId}
+                  onClick={handleRemoveSelected}
+                />
+              </div>
+            );
+          })}
+          <div className="inline-search">
+            <i className="icon icon-search" />
+            <input
+              ref={props.inputRef}
+              className="search-input"
+              type="text"
+              dir="auto"
+              placeholder={props.placeholder}
+              value={props.value}
+              onChange={props.onChange}
+              onKeyDown={props.onKeyDown}
+            />
+          </div>
+        </div>
+      </div>
     );
-  }, [folderTabs, activeFolderIndex, shouldRenderFolders]);
+  }, [hasSelectedChips, selectedIds, appearingIds, removingIds]);
+
+  const subheaderContent = useMemo(() => {
+    const hasRecentContacts = recentContactIds.length > 0 && !search;
+    const hasFolderTabs = shouldRenderFolders;
+
+    if (!hasRecentContacts && !hasFolderTabs) return undefined;
+
+    return (
+      <>
+        {hasRecentContacts && (
+          <PickerRecentContacts
+            contactIds={recentContactIds}
+            currentUserId={currentUserId}
+            selectedIds={isMultiSelect ? selectedIds : undefined}
+            className={styles.recentContacts}
+            onSelect={handleSelect}
+          />
+        )}
+        {Boolean(hasFolderTabs) && folderTabs && (
+          <TabList
+            tabs={folderTabs}
+            activeTab={activeFolderIndex}
+            onSwitchTab={handleSwitchFolderIndex}
+          />
+        )}
+      </>
+    );
+  }, [
+    recentContactIds,
+    search,
+    shouldRenderFolders,
+    currentUserId,
+    handleSelect,
+    isMultiSelect,
+    selectedIds,
+    folderTabs,
+    activeFolderIndex,
+    handleSwitchFolderIndex,
+  ]);
 
   return (
     <ChatOrUserPicker
@@ -188,13 +401,18 @@ const RecipientPicker = ({
       className={className}
       chatOrUserIds={renderingIds}
       currentUserId={currentUserId}
+      title={title}
       searchPlaceholder={searchPlaceholder}
       search={search}
-      subheader={chatFolders}
+      renderSearchRow={renderSearchRow}
+      subheader={subheaderContent}
+      footer={footer}
+      viewportFooter={viewportFooter}
       listActiveKey={activeFolderIndex}
+      selectedIds={isMultiSelect ? selectedIds : undefined}
       onSearchChange={setSearch}
       loadMore={loadMore}
-      onSelectChatOrUser={onSelectRecipient}
+      onSelectChatOrUser={handleSelect}
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
       isLowStackPriority={isLowStackPriority}

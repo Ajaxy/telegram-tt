@@ -1,4 +1,4 @@
-import type { TeactNode } from '../../../lib/teact/teact';
+import type { ElementRef, TeactNode } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -34,14 +34,13 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Button from '../../ui/Button';
 import InfiniteScroll, { type OwnProps as InfiniteScrollProps } from '../../ui/InfiniteScroll';
-import InputText from '../../ui/InputText';
 import Loading from '../../ui/Loading';
 import Modal from '../../ui/Modal';
 import Transition from '../../ui/Transition';
 import Avatar from '../Avatar';
 import FullNameTitle from '../FullNameTitle';
+import Icon from '../icons/Icon';
 import TopicIcon from '../TopicIcon';
 import PickerItem from './PickerItem';
 
@@ -51,12 +50,17 @@ export type OwnProps = {
   currentUserId?: string;
   chatOrUserIds: string[];
   isOpen: boolean;
+  title?: string;
   searchPlaceholder: string;
   search: string;
   className?: string;
   isLowStackPriority?: boolean;
   listActiveKey?: number;
   subheader?: TeactNode;
+  renderSearchRow?: (props: SearchRowRenderProps) => TeactNode;
+  footer?: TeactNode;
+  viewportFooter?: TeactNode;
+  selectedIds?: string[];
   loadMore?: NoneToVoidFunction;
   onSearchChange: (search: string) => void;
   onSelectChatOrUser: (chatOrUserId: string, threadId?: ThreadId) => void;
@@ -75,16 +79,29 @@ const TOPIC_ICON_SIZE = 2.75 * REM;
 const ITEM_CLASS_NAME = 'ChatOrUserPicker-item';
 const TOPIC_ITEM_HEIGHT_PX = 56;
 
+export type SearchRowRenderProps = {
+  inputRef: ElementRef<HTMLInputElement>;
+  value: string;
+  placeholder: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
+};
+
 const ChatOrUserPicker = ({
   isOpen,
   currentUserId,
   chatOrUserIds,
+  title,
   search,
   searchPlaceholder,
   className,
   isLowStackPriority,
   subheader,
+  renderSearchRow,
+  footer,
+  viewportFooter,
   listActiveKey,
+  selectedIds,
   animationLevel,
   shouldSkipHistoryAnimations,
   loadMore,
@@ -113,13 +130,13 @@ const ChatOrUserPicker = ({
   useInputFocusOnOpen(searchRef, isOpen && activeKey === CHAT_LIST_SLIDE, resetSearch);
   useInputFocusOnOpen(topicSearchRef, isOpen && activeKey === TOPIC_LIST_SLIDE);
 
-  const selectTopicsById = useLastCallback((global: GlobalState) => {
+  const selectTopicsById = useCallback((global: GlobalState) => {
     if (!forumId) {
       return undefined;
     }
 
     return selectTopics(global, forumId);
-  });
+  }, [forumId]);
 
   const forumTopicsById = useSelector(selectTopicsById);
 
@@ -190,6 +207,8 @@ const ChatOrUserPicker = ({
     }
   }, `.${ITEM_CLASS_NAME}`, true);
 
+  const isMultiSelect = Boolean(selectedIds);
+
   const handleClick = useLastCallback((chatId: string) => {
     const chatsById = getGlobal().chats.byId;
     const chat = chatsById?.[chatId];
@@ -214,7 +233,16 @@ const ChatOrUserPicker = ({
       peer = monoforumChannel;
     }
 
+    const chat = global.chats.byId[id];
+    const isForum = chat?.isForum;
+
     const isSelf = peer && !isApiPeerChat(peer) ? peer.isSelf : undefined;
+    const isSelected = selectedIds?.includes(id);
+
+    const selectedTopicsCount = isForum && selectedIds
+      ? selectedIds.filter((selId) => selId.startsWith(`${id}:`)).length
+      : 0;
+    const hasSelectedTopics = selectedTopicsCount > 0;
 
     function getSubtitle() {
       if (!peer) return undefined;
@@ -232,6 +260,15 @@ const ChatOrUserPicker = ({
 
     const [subtitle, subtitleClassName] = getSubtitle() || [];
 
+    const checkboxElement = selectedIds ? (
+      <div className={buildClassName('picker-checkbox', (isSelected || hasSelectedTopics) && 'selected')}>
+        {(isSelected || hasSelectedTopics) && <Icon name="check-bold" />}
+        {hasSelectedTopics && (
+          <div className="picker-checkbox-count">{selectedTopicsCount}</div>
+        )}
+      </div>
+    ) : undefined;
+
     return (
       <PickerItem
         key={id}
@@ -247,13 +284,18 @@ const ChatOrUserPicker = ({
           </div>
         )}
         avatarElement={(
-          <Avatar
-            peer={peer}
-            asMessageBubble={Boolean(monoforumChannel)}
-            isSavedMessages={isSelf}
-            size="medium"
-          />
+          <div className="picker-avatar-wrapper">
+            <Avatar
+              peer={peer}
+              asMessageBubble={Boolean(monoforumChannel)}
+              isSavedMessages={isSelf}
+              size="medium"
+            />
+            {isForum && <Icon name="forums" className="forum-badge" />}
+          </div>
         )}
+        inputElement={checkboxElement}
+        inputPosition="end"
         subtitle={subtitle}
         subtitleClassName={subtitleClassName}
         ripple
@@ -262,29 +304,33 @@ const ChatOrUserPicker = ({
         onClick={() => handleClick(id)}
       />
     );
-  }, [currentUserId, oldLang, lang, viewportOffset]);
+  }, [currentUserId, oldLang, lang, viewportOffset, selectedIds]);
 
   function renderTopicList() {
     return (
       <>
-        <div className="modal-header modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
-          <div className="search-wrapper">
-            <Button
-              round
-              color="translucent"
-              size="tiny"
-              ariaLabel={oldLang('Back')}
-              onClick={handleHeaderBackClick}
-              iconName="arrow-left"
-            />
-            <InputText
-              ref={topicSearchRef}
-              value={topicSearch}
-              onChange={handleTopicSearchChange}
-              onKeyDown={handleTopicKeyDown}
-              placeholder={searchPlaceholder}
-            />
-          </div>
+        <div className="picker-header" dir={lang.isRtl ? 'rtl' : undefined}>
+          {renderSearchRow ? renderSearchRow({
+            inputRef: topicSearchRef,
+            value: topicSearch,
+            placeholder: searchPlaceholder,
+            onChange: handleTopicSearchChange,
+            onKeyDown: handleTopicKeyDown,
+          }) : (
+            <div className="search-input-wrapper">
+              <i className="icon icon-search" />
+              <input
+                ref={topicSearchRef}
+                className="search-input"
+                type="text"
+                dir="auto"
+                placeholder={searchPlaceholder}
+                value={topicSearch}
+                onChange={handleTopicSearchChange}
+                onKeyDown={handleTopicKeyDown}
+              />
+            </div>
+          )}
         </div>
         {topicIds?.length ? (
           <InfiniteScroll
@@ -295,29 +341,51 @@ const ChatOrUserPicker = ({
             maxHeight={(topicIds?.length || 0) * TOPIC_ITEM_HEIGHT_PX}
             onKeyDown={handleTopicKeyDown}
           >
-            {topicIds.map((topicId, i) => (
-              <PickerItem
-                key={`${forumId}_${topicId}`}
-                className={ITEM_CLASS_NAME}
+            {topicIds.map((topicId, i) => {
+              const selectionId = `${forumId}:${topicId}`;
+              const isTopicSelected = selectedIds?.includes(selectionId);
 
-                onClick={() => onSelectChatOrUser(forumId!, topicId)}
-                style={`top: ${i * TOPIC_ITEM_HEIGHT_PX}px;`}
-                avatarElement={(
-                  <TopicIcon
-                    size={TOPIC_ICON_SIZE}
-                    topic={topics[topicId]}
-                    className="topic-icon"
-                    letterClassName="topic-icon-letter"
-                  />
-                )}
-                title={renderText(topics[topicId].title)}
+              const topicCheckboxElement = isMultiSelect ? (
+                <div className={buildClassName('picker-checkbox', isTopicSelected && 'selected')}>
+                  {isTopicSelected && <Icon name="check-bold" />}
+                </div>
+              ) : undefined;
+
+              return (
+                <PickerItem
+                  key={`${forumId}_${topicId}`}
+                  className={ITEM_CLASS_NAME}
+                  onClick={() => onSelectChatOrUser(forumId!, topicId)}
+                  style={`top: ${i * TOPIC_ITEM_HEIGHT_PX}px;`}
+                  avatarElement={(
+                    <div className="picker-avatar-wrapper">
+                      <TopicIcon
+                        size={TOPIC_ICON_SIZE}
+                        topic={topics[topicId]}
+                        className="topic-icon"
+                        letterClassName="topic-icon-letter"
+                      />
+                    </div>
+                  )}
+                  title={renderText(topics[topicId].title)}
+                  inputElement={topicCheckboxElement}
+                  inputPosition="end"
+                />
+              );
+            })}
+            {Boolean(viewportFooter) && (
+              <div
+                className="picker-list-spacer"
+                style={`top: ${topicIds.length * TOPIC_ITEM_HEIGHT_PX}px`}
               />
-            ))}
+            )}
           </InfiniteScroll>
         ) : topicIds && !topicIds.length ? (
           <p className="no-results">{lang('NothingFound')}</p>
         ) : (
-          <Loading />
+          <div className="picker-list picker-list-loading">
+            <Loading />
+          </div>
         )}
       </>
     );
@@ -326,24 +394,28 @@ const ChatOrUserPicker = ({
   function renderChatList() {
     return (
       <>
-        <div className="modal-header modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
-          <div className="search-wrapper">
-            <Button
-              round
-              color="translucent"
-              size="tiny"
-              ariaLabel={oldLang('Close')}
-              onClick={onClose}
-              iconName="close"
-            />
-            <InputText
-              ref={searchRef}
-              value={search}
-              onChange={handleSearchChange}
-              onKeyDown={chatKeyDownHandler}
-              placeholder={searchPlaceholder}
-            />
-          </div>
+        <div className="picker-header" dir={lang.isRtl ? 'rtl' : undefined}>
+          {renderSearchRow ? renderSearchRow({
+            inputRef: searchRef,
+            value: search,
+            placeholder: searchPlaceholder,
+            onChange: handleSearchChange,
+            onKeyDown: chatKeyDownHandler,
+          }) : (
+            <div className="search-input-wrapper">
+              <i className="icon icon-search" />
+              <input
+                ref={searchRef}
+                className="search-input"
+                type="text"
+                dir="auto"
+                placeholder={searchPlaceholder}
+                value={search}
+                onChange={handleSearchChange}
+                onKeyDown={chatKeyDownHandler}
+              />
+            </div>
+          )}
           {subheader}
         </div>
         <Transition
@@ -355,6 +427,7 @@ const ChatOrUserPicker = ({
             isOpen={isOpen}
             viewportIds={viewportIds}
             maxHeight={chatOrUserIds.length * PEER_PICKER_ITEM_HEIGHT_PX}
+            viewportFooter={viewportFooter}
             onLoadMore={getMore}
             onSelect={handleChatSelect}
             renderItem={renderChatItem}
@@ -365,12 +438,24 @@ const ChatOrUserPicker = ({
     );
   }
 
+  const handleModalClose = useLastCallback(() => {
+    if (forumId) {
+      handleHeaderBackClick();
+    } else {
+      onClose();
+    }
+  });
+
   return (
     <Modal
       isOpen={isOpen}
+      title={title}
+      hasCloseButton
+      isBackButton={Boolean(forumId)}
+      headerClassName="modal-header-condensed-wide"
       className={buildClassName('ChatOrUserPicker', className)}
       isLowStackPriority={isLowStackPriority}
-      onClose={onClose}
+      onClose={handleModalClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
       <Transition activeKey={activeKey} name="slideFade" slideClassName="ChatOrUserPicker_slide">
@@ -378,6 +463,7 @@ const ChatOrUserPicker = ({
           return activeKey === TOPIC_LIST_SLIDE ? renderTopicList() : renderChatList();
         }}
       </Transition>
+      {footer}
     </Modal>
   );
 };
@@ -386,6 +472,7 @@ type ChatListContentProps = {
   isOpen: boolean;
   viewportIds?: string[];
   maxHeight: number;
+  viewportFooter?: TeactNode;
   onLoadMore: InfiniteScrollProps['onLoadMore'];
   onSelect: (index: number) => void;
   renderItem: (id: string, index: number) => TeactNode;
@@ -396,6 +483,7 @@ function ChatListContent({
   isOpen,
   viewportIds,
   maxHeight,
+  viewportFooter,
   onLoadMore,
   onSelect,
   onKeyDownHandlerUpdate,
@@ -424,6 +512,9 @@ function ChatListContent({
           onKeyDown={handleKeyDown}
         >
           {viewportIds.map(renderItem)}
+          {Boolean(viewportFooter) && (
+            <div className="picker-list-spacer" style={`top: ${maxHeight}px`} />
+          )}
         </InfiniteScroll>
       ) : viewportIds && !viewportIds.length ? (
         <p className="no-results">{lang('NothingFound')}</p>

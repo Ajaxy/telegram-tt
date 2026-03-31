@@ -26,7 +26,7 @@ import Button from '../../../ui/Button';
 import InfiniteScroll from '../../../ui/InfiniteScroll';
 import Link from '../../../ui/Link';
 import Modal from '../../../ui/Modal';
-import TabList, { type TabWithProperties } from '../../../ui/TabList';
+import SquareTabList, { type TabWithProperties } from '../../../ui/SquareTabList';
 import Transition from '../../../ui/Transition';
 import GiftAttributeItem from '../GiftAttributeItem';
 import UniqueGiftHeader from '../UniqueGiftHeader';
@@ -474,7 +474,7 @@ const GiftPreviewModal = ({ modal, animationLevel }: OwnProps & StateProps) => {
       onClose={handleClose}
     >
       {renderHeader()}
-      <TabList
+      <SquareTabList
         className={styles.tabs}
         activeTab={selectedTabIndex}
         tabs={tabs}

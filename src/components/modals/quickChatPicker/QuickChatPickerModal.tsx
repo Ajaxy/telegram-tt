@@ -26,6 +26,7 @@ const QuickChatPickerModal = ({
   return (
     <RecipientPicker
       isOpen={isOpen}
+      title={lang('SelectChat')}
       searchPlaceholder={lang('Search')}
       onSelectRecipient={handleSelectRecipient}
       onClose={closeQuickChatPicker}

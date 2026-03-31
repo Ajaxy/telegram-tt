@@ -12,7 +12,7 @@ export default function useTransitionFixes(
     function setMinHeight() {
       const container = containerRef.current!;
       const transitionEl = container.querySelector<HTMLDivElement>(transitionElSelector);
-      const tabsEl = container.querySelector<HTMLDivElement>('.TabList');
+      const tabsEl = container.querySelector<HTMLDivElement>('.SquareTabList');
       if (transitionEl && tabsEl) {
         const newHeight = container.clientHeight - tabsEl.offsetHeight;
 

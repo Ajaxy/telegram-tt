@@ -366,6 +366,7 @@ lang('SimpleKey');
 
 // Plurals
 lang('PluralKey', undefined, { pluralValue: 3 });
+lang('PluralKey', { count: 3 }, { pluralValue: 3 }); // if key has variables
 
 // String replacements
 lang('ReplKey', { name: 'Amy' });

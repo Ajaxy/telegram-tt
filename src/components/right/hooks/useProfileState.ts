@@ -37,7 +37,7 @@ export default function useProfileState({
   useEffectWithPrevDeps(([prevTabType]) => {
     if ((prevTabType && prevTabType !== tabType && allowAutoScrollToTabs) || (tabType && forceScrollProfileTab)) {
       const container = containerRef.current!;
-      const tabsEl = container.querySelector<HTMLDivElement>('.TabList')!;
+      const tabsEl = container.querySelector<HTMLDivElement>('.SquareTabList')!;
       handleStopAutoScrollToTabs();
       if (container.scrollTop < tabsEl.offsetTop) {
         onProfileStateChange(getStateFromTabType(tabType));
@@ -69,7 +69,7 @@ export default function useProfileState({
       return;
     }
 
-    const tabListEl = container.querySelector<HTMLDivElement>('.TabList');
+    const tabListEl = container.querySelector<HTMLDivElement>('.SquareTabList');
     if (!tabListEl || tabListEl.offsetTop > container.scrollTop) {
       return;
     }
@@ -94,7 +94,7 @@ export default function useProfileState({
       return;
     }
 
-    const tabListEl = container.querySelector<HTMLDivElement>('.TabList');
+    const tabListEl = container.querySelector<HTMLDivElement>('.SquareTabList');
     if (!tabListEl) {
       return;
     }

@@ -9,8 +9,8 @@ import type { ApiChat, ApiChatMember } from '../../../api/types';
 import { filterPeersByQuery } from '../../../global/helpers/peers';
 import { selectChatFullInfo } from '../../../global/selectors';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import ChatOrUserPicker from '../../common/pickers/ChatOrUserPicker';
 
@@ -37,7 +37,7 @@ const RemoveGroupUserModal: FC<OwnProps & StateProps> = ({
     deleteChatMember,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [search, setSearch] = useState('');
 
   const usersId = useMemo(() => {
@@ -65,7 +65,8 @@ const RemoveGroupUserModal: FC<OwnProps & StateProps> = ({
     <ChatOrUserPicker
       isOpen={isOpen}
       chatOrUserIds={usersId}
-      searchPlaceholder={lang('ChannelBlockUser')}
+      title={lang('ChannelBlockUser')}
+      searchPlaceholder={lang('Search')}
       search={search}
       onSearchChange={setSearch}
       loadMore={handleLoadMore}

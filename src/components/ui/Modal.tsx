@@ -38,6 +38,7 @@ export type OwnProps = {
   hasCloseButton?: boolean;
   hasAbsoluteCloseButton?: boolean;
   absoluteCloseButtonColor?: ButtonProps['color'];
+  isBackButton?: boolean;
   noBackdrop?: boolean;
   noBackdropClose?: boolean;
   children: React.ReactNode;
@@ -91,6 +92,7 @@ const Modal = (props: OwnProps) => {
     hasCloseButton,
     hasAbsoluteCloseButton,
     absoluteCloseButtonColor = 'translucent',
+    isBackButton,
     noBackdrop,
     style,
     dialogStyle,
@@ -176,16 +178,22 @@ const Modal = (props: OwnProps) => {
       return header;
     }
 
+    const closeIconClassName = buildClassName(
+      'animated-close-icon',
+      isBackButton && 'state-back',
+    );
+
     const closeButton = withCloseButton ? (
       <Button
         className={buildClassName(hasAbsoluteCloseButton && 'modal-absolute-close-button')}
         round
         color={absoluteCloseButtonColor}
         size="tiny"
-        iconName="close"
-        ariaLabel={lang('Close')}
+        ariaLabel={isBackButton ? lang('Back') : lang('Close')}
         onClick={onClose}
-      />
+      >
+        <div className={closeIconClassName} />
+      </Button>
     ) : undefined;
 
     return title ? (

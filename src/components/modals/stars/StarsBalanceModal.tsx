@@ -31,7 +31,7 @@ import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Modal from '../../ui/Modal';
-import TabList, { type TabWithProperties } from '../../ui/TabList';
+import SquareTabList, { type TabWithProperties } from '../../ui/SquareTabList';
 import Transition from '../../ui/Transition';
 import ParticlesHeader from '../common/ParticlesHeader.tsx';
 import BalanceBlock from './BalanceBlock';
@@ -426,7 +426,7 @@ const StarsBalanceModal = ({
                 </InfiniteScroll>
               </Transition>
             </div>
-            <TabList
+            <SquareTabList
               ref={tabsRef}
               className={buildClassName(styles.tabs, areTabsPinned && styles.pinned)}
               tabClassName={styles.tab}

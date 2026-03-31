@@ -149,6 +149,7 @@ const SharePreparedMessageModal: FC<OwnProps & StateProps> = ({
     <>
       <RecipientPicker
         isOpen={isOpen}
+        title={lang('SelectChat')}
         searchPlaceholder={lang('Search')}
         filter={filter}
         onSelectRecipient={handleSelectRecipient}

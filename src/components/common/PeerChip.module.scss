@@ -8,7 +8,7 @@
   align-items: center;
 
   min-width: 0;
-  height: 2rem;
+  height: var(--chip-size, 2rem);
   margin-inline: 0.25rem;
   padding-right: 0.75rem;
   border-radius: 1rem;
@@ -47,12 +47,17 @@
     cursor: default;
   }
 
+  &.small {
+    margin-inline: 0;
+    border-radius: 1.4375rem;
+  }
+
   .avatar,
   .iconWrapper {
     flex-shrink: 0;
 
-    width: 2rem;
-    height: 2rem;
+    width: var(--chip-size, 2rem);
+    height: var(--chip-size, 2rem);
 
     opacity: 1;
 
@@ -102,8 +107,8 @@
     align-items: center;
     justify-content: center;
 
-    width: 2rem;
-    height: 2rem;
+    width: var(--chip-size, 2rem);
+    height: var(--chip-size, 2rem);
     border-radius: 50%;
 
     font-size: 1.5rem;
@@ -118,10 +123,9 @@
   &.squareAvatar {
     --border-radius-forum-avatar: 0.625rem;
 
-    border-start-start-radius: 0.625rem;
-    border-end-start-radius: 0.625rem;
+    border-radius: 0.625rem;
 
-    &.minimized, .remove {
+    .remove {
       border-radius: 0.625rem;
     }
   }

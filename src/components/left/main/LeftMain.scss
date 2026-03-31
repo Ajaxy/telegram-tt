@@ -30,7 +30,7 @@
       }
     }
 
-    .TabList {
+    .SquareTabList {
       z-index: 1;
 
       justify-content: flex-start;
@@ -48,7 +48,7 @@
       }
     }
 
-    &--tabs-hidden .TabList {
+    &--tabs-hidden .SquareTabList {
       pointer-events: none;
       opacity: 0.25;
     }

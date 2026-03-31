@@ -25,7 +25,7 @@ import PrivateChatInfo from '../../common/PrivateChatInfo';
 import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
 import Spinner from '../../ui/Spinner';
-import TabList from '../../ui/TabList';
+import SquareTabList from '../../ui/SquareTabList';
 import Transition from '../../ui/Transition';
 import StatisticsOverview from './StatisticsOverview';
 
@@ -366,7 +366,7 @@ const BoostStatistics = ({
                 >
                   {renderContent()}
                 </Transition>
-                <TabList activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={setActiveTab} />
+                <SquareTabList activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={setActiveTab} />
               </div>
             ) : (
               <>

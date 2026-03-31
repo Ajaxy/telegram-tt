@@ -26,6 +26,8 @@ import Icon from './icons/Icon';
 
 import './File.scss';
 
+type FileSize = 'small' | 'medium' | 'large';
+
 type OwnProps = {
   ref?: ElementRef<HTMLDivElement>;
   id?: string;
@@ -37,7 +39,7 @@ type OwnProps = {
   thumbnailDataUri?: string;
   previewData?: string;
   className?: string;
-  smaller?: boolean;
+  previewSize?: FileSize;
   isTransferring?: boolean;
   isUploading?: boolean;
   isSelectable?: boolean;
@@ -59,7 +61,7 @@ const File = ({
   thumbnailDataUri,
   previewData,
   className,
-  smaller,
+  previewSize = 'medium',
   isTransferring,
   isUploading,
   isSelectable,
@@ -89,12 +91,12 @@ const File = ({
 
   const color = getColorFromExtension(extension);
 
-  const { width, height } = getDocumentThumbnailDimensions(smaller);
+  const { width, height } = getDocumentThumbnailDimensions(previewSize);
 
   const fullClassName = buildClassName(
     'File',
     className,
-    smaller && 'smaller',
+    previewSize !== 'medium' && `size-${previewSize}`,
     onClick && !isUploading && 'interactive',
     isSelected && 'file-is-selected',
   );
@@ -135,7 +137,7 @@ const File = ({
           <div className={buildClassName('file-progress', color, spinnerClassNames)}>
             <ProgressSpinner
               progress={transferProgress}
-              size={smaller ? 's' : 'm'}
+              size={previewSize === 'small' ? 's' : 'm'}
               onClick={isUploading ? onClick : undefined}
             />
           </div>

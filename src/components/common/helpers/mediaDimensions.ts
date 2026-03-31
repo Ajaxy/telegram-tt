@@ -192,18 +192,26 @@ export function getPictogramDimensions(): ApiDimensions {
   };
 }
 
-export function getDocumentThumbnailDimensions(smaller?: boolean): ApiDimensions {
-  if (smaller) {
-    return {
-      width: 3 * REM,
-      height: 3 * REM,
-    };
+export function getDocumentThumbnailDimensions(
+  size: 'small' | 'medium' | 'large' = 'medium',
+): ApiDimensions {
+  switch (size) {
+    case 'small':
+      return {
+        width: 3 * REM,
+        height: 3 * REM,
+      };
+    case 'large':
+      return {
+        width: 4.5 * REM,
+        height: 4.5 * REM,
+      };
+    default:
+      return {
+        width: 3.375 * REM,
+        height: 3.375 * REM,
+      };
   }
-
-  return {
-    width: 3.375 * REM,
-    height: 3.375 * REM,
-  };
 }
 
 export function getStickerDimensions(sticker: ApiSticker, isMobile?: boolean): ApiDimensions {

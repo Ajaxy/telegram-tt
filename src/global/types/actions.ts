@@ -2023,6 +2023,10 @@ export interface ActionPayloads {
   } & WithTabId;
   exitForwardMode: WithTabId | undefined;
   changeRecipient: WithTabId | undefined;
+  forwardToMultipleChats: {
+    toChatIds: string[];
+    comment?: string;
+  } & WithTabId;
   forwardToSavedMessages: {
     scheduledAt?: number;
   } & WithTabId;

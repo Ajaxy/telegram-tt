@@ -9,7 +9,6 @@ import type { Signal } from '../../../util/signals';
 import {
   BASE_EMOJI_KEYWORD_LANG,
   EDITABLE_INPUT_MODAL_ID,
-  GIF_MIME_TYPE,
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
@@ -39,7 +38,6 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useResizeObserver from '../../../hooks/useResizeObserver';
-import useScrolledState from '../../../hooks/useScrolledState';
 import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
 import useEmojiTooltip from './hooks/useEmojiTooltip';
 import useMentionTooltip from './hooks/useMentionTooltip';
@@ -196,14 +194,6 @@ const AttachmentModal = ({
     attachmentSettings.shouldSendInHighQuality,
   );
   const [renderingShouldSendInHighQuality, setRenderingShouldSendInHighQuality] = useState(shouldSendInHighQuality);
-
-  const {
-    handleScroll: handleAttachmentsScroll,
-    isAtBeginning: areAttachmentsNotScrolled,
-    isAtEnd: areAttachmentsScrolledToBottom,
-  } = useScrolledState();
-
-  const { handleScroll: handleCaptionScroll, isAtBeginning: isCaptionNotScrolled } = useScrolledState();
 
   const isOpen = Boolean(attachments.length);
   const renderingIsOpen = Boolean(renderingAttachments?.length);
@@ -520,14 +510,13 @@ const AttachmentModal = ({
   const isQuickGallery = isSendingCompressed && hasOnlyMedia;
 
   const {
-    areAllPhotos, areAllVideos, areAllAudios, areAllGifs, hasAnyPhoto,
+    areAllPhotos, areAllVideos, areAllAudios, hasAnyPhoto,
   } = useMemo(() => {
     if (!isQuickGallery || !renderingAttachments) {
       return {
         areAllPhotos: false,
         areAllVideos: false,
         areAllAudios: false,
-        areAllGifs: false,
         hasAnyPhoto: false,
       };
     }
@@ -535,7 +524,6 @@ const AttachmentModal = ({
       areAllPhotos: renderingAttachments.every((a) => SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType)),
       areAllVideos: renderingAttachments.every((a) => SUPPORTED_VIDEO_CONTENT_TYPES.has(a.mimeType)),
       areAllAudios: renderingAttachments.every((a) => SUPPORTED_AUDIO_CONTENT_TYPES.has(a.mimeType)),
-      areAllGifs: renderingAttachments.every((a) => a.gif || a.mimeType === GIF_MIME_TYPE),
       hasAnyPhoto: renderingAttachments.some((a) => SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType)),
     };
   }, [renderingAttachments, isQuickGallery]);
@@ -575,10 +563,7 @@ const AttachmentModal = ({
 
   let title = '';
   const attachmentsLength = renderingAttachments.length;
-
-  if (areAllGifs) {
-    title = lang(isEditing ? 'AttachmentReplaceGif' : 'AttachmentSendGif');
-  } else if (areAllPhotos) {
+  if (areAllPhotos) {
     title = lang(
       `Attachment${isEditing ? 'Replace' : 'Send'}Photo`,
       { count: attachmentsLength },
@@ -610,7 +595,7 @@ const AttachmentModal = ({
     }
 
     return (
-      <div className="modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
+      <div className="modal-header-condensed-wide" dir={lang.isRtl ? 'rtl' : undefined}>
         <Button
           round
           color="translucent"
@@ -701,14 +686,13 @@ const AttachmentModal = ({
     );
   }
 
-  const isBottomDividerShown = !areAttachmentsScrolledToBottom || !isCaptionNotScrolled;
-  const buttonSendCaption = paidMessagesStars ? formatStarsAsIcon(
+  const paidSendButtonCaption = paidMessagesStars ? formatStarsAsIcon(
     lang,
     attachmentsLength * paidMessagesStars,
     {
       asFont: true,
     },
-  ) : lang('Send');
+  ) : undefined;
 
   return (
     <Modal
@@ -717,7 +701,6 @@ const AttachmentModal = ({
       className={buildClassName(
         styles.root,
         isHovered && styles.hovered,
-        !areAttachmentsNotScrolled && styles.headerBorder,
         isMobile && styles.mobile,
         isSymbolMenuOpen && styles.symbolMenuOpen,
         forceDarkTheme && 'component-theme-dark',
@@ -744,9 +727,8 @@ const AttachmentModal = ({
           className={buildClassName(
             styles.attachments,
             'custom-scroll',
-            isBottomDividerShown && styles.attachmentsBottomPadding,
+            !isSendingCompressed && styles.asFile,
           )}
-          onScroll={handleAttachmentsScroll}
         >
           {renderingAttachments.map((attachment, i) => (
             <AttachmentModalItem
@@ -765,7 +747,6 @@ const AttachmentModal = ({
         <div
           className={buildClassName(
             styles.captionWrapper,
-            isBottomDividerShown && styles.captionTopBorder,
           )}
         >
           <MentionTooltip
@@ -823,7 +804,6 @@ const AttachmentModal = ({
               placeholder={lang('AttachmentCaptionPlaceholder')}
               onUpdate={onCaptionUpdate}
               onSend={handleSendClick}
-              onScroll={handleCaptionScroll}
               canAutoFocus={Boolean(isReady && isForCurrentMessageList && attachments.length)}
               captionLimit={leftChars}
               shouldSuppressFocus={isMobile && isSymbolMenuOpen}
@@ -837,9 +817,11 @@ const AttachmentModal = ({
                 inline
                 onClick={handleSendClick}
                 onContextMenu={canShowCustomSendMenu ? handleContextMenu : undefined}
+                iconName={!editingMessage && !shouldSchedule && !paidMessagesStars ? 'new-send' : undefined}
+                iconClassName={styles.sendIcon}
               >
                 {shouldSchedule && !editingMessage ? lang('Next')
-                  : editingMessage ? lang('Save') : buttonSendCaption}
+                  : editingMessage ? lang('Save') : paidSendButtonCaption}
               </Button>
               {canShowCustomSendMenu && (
                 <CustomSendMenu

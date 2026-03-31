@@ -112,7 +112,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
               document={getMessageDocument(message)!}
               message={message}
               datetime={message.date}
-              smaller
+              fileSize="small"
               sender={getSenderName(lang, message, chatsById, usersById)}
               className="scroll-item"
               isDownloading={getIsDownloading(activeDownloads, message.content.document!)}

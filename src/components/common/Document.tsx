@@ -31,7 +31,7 @@ import File from './File';
 type OwnProps = {
   document: ApiDocument;
   observeIntersection?: ObserveFn;
-  smaller?: boolean;
+  fileSize?: 'small' | 'medium' | 'large';
   isSelected?: boolean;
   isSelectable?: boolean;
   canAutoLoad?: boolean;
@@ -59,7 +59,7 @@ const BYTES_PER_MB = 1024 * 1024;
 const Document = ({
   document,
   observeIntersection,
-  smaller,
+  fileSize,
   canAutoLoad,
   autoLoadFileMaxSizeMb,
   uploadProgress,
@@ -201,7 +201,7 @@ const Document = ({
         timestamp={datetime}
         thumbnailDataUri={thumbDataUri}
         previewData={localBlobUrl || previewData}
-        smaller={smaller}
+        previewSize={fileSize}
         isTransferring={isTransferring}
         isUploading={isUploading}
         transferProgress={transferProgress}

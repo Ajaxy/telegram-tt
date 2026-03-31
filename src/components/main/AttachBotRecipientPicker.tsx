@@ -5,7 +5,7 @@ import { getActions } from '../../global';
 import type { TabState } from '../../global/types';
 
 import useFlag from '../../hooks/useFlag';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import RecipientPicker from '../common/RecipientPicker';
 
@@ -17,7 +17,7 @@ const AttachBotRecipientPicker: FC<OwnProps> = ({
   requestedAttachBotInChat,
 }) => {
   const { cancelAttachBotInChat, callAttachBot } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const isOpen = Boolean(requestedAttachBotInChat);
   const [isShown, markIsShown, unmarkIsShown] = useFlag();
@@ -41,6 +41,7 @@ const AttachBotRecipientPicker: FC<OwnProps> = ({
   return (
     <RecipientPicker
       isOpen={isOpen}
+      title={lang('SelectChat')}
       searchPlaceholder={lang('Search')}
       filter={filter}
       onSelectRecipient={handlePeerRecipient}

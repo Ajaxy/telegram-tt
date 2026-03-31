@@ -31,7 +31,7 @@ import Icon from '../../common/icons/Icon';
 import Button from '../Button';
 import FloatingActionButton from '../FloatingActionButton';
 import Portal from '../Portal';
-import TabList from '../TabList';
+import SquareTabList from '../SquareTabList';
 import Transition from '../Transition';
 import CropOverlay from './CropOverlay';
 import CropPanel from './CropPanel';
@@ -807,7 +807,7 @@ const MediaEditor = ({
             >
               {renderPanelContent()}
             </Transition>
-            <TabList
+            <SquareTabList
               tabs={TABS}
               activeTab={activeTabIndex}
               onSwitchTab={handleTabSwitch}

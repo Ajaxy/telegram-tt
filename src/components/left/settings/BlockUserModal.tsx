@@ -12,7 +12,7 @@ import { filterPeersByQuery } from '../../../global/helpers/peers';
 import { selectTabState } from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import ChatOrUserPicker from '../../common/pickers/ChatOrUserPicker';
 
@@ -43,7 +43,7 @@ const BlockUserModal: FC<OwnProps & StateProps> = ({
     blockUser,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -76,7 +76,8 @@ const BlockUserModal: FC<OwnProps & StateProps> = ({
     <ChatOrUserPicker
       isOpen={isOpen}
       chatOrUserIds={filteredContactIds}
-      searchPlaceholder={lang('BlockedUsers.BlockUser')}
+      title={lang('BlockedUsersBlockUser')}
+      searchPlaceholder={lang('Search')}
       search={search}
       onSearchChange={setSearch}
       onSelectChatOrUser={handleRemoveUser}

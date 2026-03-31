@@ -302,6 +302,7 @@
 "ConversationPinMessagesFor" = "Pin for me and {user}";
 "ConversationPinMessageAlertPinAndNotifyMembers" = "Pin and notify all members";
 "SavedMessages" = "Saved Messages";
+"SavedMessagesShort" = "Saved";
 "AccDescrPrevious" = "Previous";
 "ReportReasonSpam" = "Spam";
 "ReportReasonViolence" = "Violence";
@@ -584,6 +585,8 @@
 "ContactShare" = "Share Contact";
 "OK" = "OK";
 "ForwardTo" = "Forward to...";
+"ShareWith" = "Share with";
+"SelectChats" = "Select chats";
 "AttachGame" = "Game";
 "JumpToDate" = "Jump to Date";
 "FloodWait" = "Too many attempts, please try again later.";
@@ -617,6 +620,7 @@
 "WebAppAddToAttachmentAdd" = "Add";
 "AccActionDownload" = "Download";
 "Forward" = "Forward";
+"ForwardForStars" = "Forward for {price}";
 "MediaZoomOut" = "Zoom Out";
 "MediaZoomIn" = "Zoom In";
 "PeerInfoReportProfileVideo" = "Report Profile Photo";
@@ -2143,6 +2147,11 @@
 "ConfirmationModalPaymentForMessage_other" = "{user} charges **{amount}** per incoming message. Would you like to pay **{totalAmount}** to send **{count} messages?**";
 "PayForMessage_one" = "Pay for {count} message";
 "PayForMessage_other" = "Pay for {count} messages";
+"ForwardPaidChatsConfirmation" = "{chatsSelected} {payConfirmation}";
+"ForwardPaidChatsSelected_one" = "You selected **{paidChatsCount}** chat that charges Stars for messages.";
+"ForwardPaidChatsSelected_other" = "You selected **{paidChatsCount}** chats that charge Stars for messages.";
+"ForwardPaidChatsPayConfirmation_one" = "Would you like to pay **{totalAmount}** to send **{count}** message?";
+"ForwardPaidChatsPayConfirmation_other" = "Would you like to pay **{totalAmount}** to send **{count}** messages?";
 "MessageSentPaidToastTitle_one" = "Message sent!";
 "MessageSentPaidToastTitle_other" = "{count} messages sent!";
 "MessageSentPaidToastText" = "You paid {amount}";
@@ -2690,8 +2699,6 @@
 "AttachmentSendAudio_other" = "Send {count} Audios";
 "AttachmentSendFile_one" = "Send File";
 "AttachmentSendFile_other" = "Send {count} Files";
-"AttachmentSendGif" = "Send GIF";
-"AttachmentReplaceGif" = "Replace GIF";
 "AttachmentDragAddItems" = "Add Items";
 "AttachmentCaptionPlaceholder" = "Add a caption...";
 "MessageSummaryTitle" = "AI Summary";
@@ -2772,6 +2779,8 @@
 "RankEditTextOwn" = "Share your role, title or how you're known in this group. Your tag is visible to all members.";
 "RankEditText" = "Add a short tag next to {user}'s name.";
 "MenuAddCaption" = "Add Caption";
+"FwdMessagesToChats_one" = "Message forwarded to {count} chat";
+"FwdMessagesToChats_other" = "Message forwarded to {count} chats";
 "MenuCopyDate" = "Copy Date";
 "DateCopiedToast" = "Date copied to clipboard";
 "ReminderSetToast" = "You set up a reminder in **Saved Messages**";

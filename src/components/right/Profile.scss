@@ -89,7 +89,7 @@
 
   @include mixins.with-vt-type('rightColumn');
 
-  .TabList {
+  .SquareTabList {
     z-index: 1;
     background: var(--color-background);
   }

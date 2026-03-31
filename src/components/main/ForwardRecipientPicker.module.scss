@@ -1,0 +1,29 @@
+.buttonLayer {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.composerLayer {
+  pointer-events: none;
+
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  opacity: 0;
+
+  transition: opacity 0.2s ease;
+}
+
+.visible {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.buttonSlide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

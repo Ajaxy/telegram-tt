@@ -1,0 +1,110 @@
+.root {
+  overflow: hidden;
+
+  padding: 0.3125rem 0;
+  border-radius: 1.5rem;
+
+  background-color: var(--color-background);
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+.scrollContainer {
+  scrollbar-width: none;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  gap: 1rem;
+
+  padding-inline: 0.5625rem;
+
+  white-space: nowrap;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.item {
+  cursor: var(--custom-cursor, pointer);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  min-width: 3.375rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.375rem;
+  padding-inline: 0.25rem;
+  border-radius: 0.75rem;
+
+  transition: background-color 0.15s;
+
+  &:hover {
+    background-color: var(--color-chat-hover);
+  }
+
+  &:active {
+    background-color: var(--color-item-active);
+  }
+}
+
+.avatarWrapper {
+  position: relative;
+  margin-bottom: 0.3125rem;
+}
+
+.checkmark {
+  position: absolute;
+  z-index: 1;
+  right: -0.125rem;
+  bottom: -0.125rem;
+  transform: scale(0);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--color-background);
+  border-radius: 50%;
+
+  font-size: 0.75rem;
+  color: var(--color-white);
+
+  opacity: 0;
+  background-color: var(--color-primary);
+
+  transition: transform 0.15s, opacity 0.15s, border-color 0.15s;
+
+  .item:hover & {
+    border-color: var(--color-item-active);
+  }
+}
+
+.name {
+  overflow: hidden;
+
+  width: 100%;
+
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--color-text);
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  transition: color 0.15s;
+}
+
+.selected {
+  .name {
+    color: var(--color-primary);
+  }
+
+  .checkmark {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

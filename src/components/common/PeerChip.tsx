@@ -10,6 +10,7 @@ import { getPeerTitle, isApiPeerChat } from '../../global/helpers/peers';
 import { selectPeer, selectTheme, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
+import { REM } from './helpers/mediaDimensions';
 
 import useLang from '../../hooks/useLang';
 import usePeerColor from '../../hooks/usePeerColor';
@@ -20,10 +21,14 @@ import Icon from './icons/Icon';
 
 import styles from './PeerChip.module.scss';
 
+const CHIP_SIZE_SMALL = 1.875 * REM;
+const CHIP_SIZE_MEDIUM = 2 * REM;
+
+export type PeerChipSize = 'small' | 'medium';
+
 type OwnProps<T = undefined> = {
-
   peerId?: string;
-
+  size?: PeerChipSize;
   forceShowSelf?: boolean;
   customPeer?: CustomPeer;
   mockPeer?: ApiPeer;
@@ -33,11 +38,11 @@ type OwnProps<T = undefined> = {
   canClose?: boolean;
   isCloseNonDestructive?: boolean;
   className?: string;
+  itemClassName?: string;
   withPeerColors?: boolean;
   withEmojiStatus?: boolean;
   clickArg?: T;
   onClick?: (arg: T) => void;
-  itemClassName?: string;
 };
 
 type StateProps = {
@@ -49,6 +54,7 @@ type StateProps = {
 const PeerChip = <T,>({
   icon,
   title,
+  size = 'medium',
   isMinimized,
   canClose,
   isCloseNonDestructive,
@@ -57,10 +63,10 @@ const PeerChip = <T,>({
   mockPeer,
   customPeer,
   className,
+  itemClassName,
   isSavedMessages,
   withPeerColors,
   withEmojiStatus,
-  itemClassName,
   theme,
   onClick,
 }: OwnProps<T> & StateProps) => {
@@ -106,6 +112,7 @@ const PeerChip = <T,>({
 
   const fullClassName = buildClassName(
     styles.root,
+    size === 'small' && styles.small,
     (chat?.isForum || customPeer?.isAvatarSquare) && styles.squareAvatar,
     isMinimized && styles.minimized,
     canClose && styles.closeable,
@@ -115,7 +122,10 @@ const PeerChip = <T,>({
     className,
   );
 
+  const chipSize = size === 'small' ? CHIP_SIZE_SMALL : CHIP_SIZE_MEDIUM;
+
   const style = buildStyle(
+    `--chip-size: ${chipSize}px`,
     withPeerColors && peerColorStyle,
   );
 

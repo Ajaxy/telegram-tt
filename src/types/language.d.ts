@@ -262,6 +262,7 @@ export interface LangPair {
   'DialogPin': undefined;
   'ConversationPinMessageAlertPinAndNotifyMembers': undefined;
   'SavedMessages': undefined;
+  'SavedMessagesShort': undefined;
   'AccDescrPrevious': undefined;
   'ReportReasonSpam': undefined;
   'ReportReasonViolence': undefined;
@@ -526,6 +527,8 @@ export interface LangPair {
   'ContactShare': undefined;
   'OK': undefined;
   'ForwardTo': undefined;
+  'ShareWith': undefined;
+  'SelectChats': undefined;
   'AttachGame': undefined;
   'JumpToDate': undefined;
   'FloodWait': undefined;
@@ -1978,8 +1981,6 @@ export interface LangPair {
   'AttachmentMenuUngroupAllMedia': undefined;
   'AttachmentMenuEnableSpoiler': undefined;
   'AttachmentMenuDisableSpoiler': undefined;
-  'AttachmentSendGif': undefined;
-  'AttachmentReplaceGif': undefined;
   'AttachmentDragAddItems': undefined;
   'AttachmentCaptionPlaceholder': undefined;
   'MessageSummaryTitle': undefined;
@@ -2186,6 +2187,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'ConversationOpenBotLinkAllowMessages': {
     'bot': V;
+  };
+  'ForwardForStars': {
+    'price': V;
   };
   'BlockUserTitle': {
     'user': V;
@@ -3085,6 +3089,10 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ComposerPlaceholderPaidReply': {
     'amount': V;
   };
+  'ForwardPaidChatsConfirmation': {
+    'chatsSelected': V;
+    'payConfirmation': V;
+  };
   'MessageSentPaidToastText': {
     'amount': V;
   };
@@ -3910,6 +3918,13 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   'PayForMessage': {
     'count': V;
   };
+  'ForwardPaidChatsSelected': {
+    'paidChatsCount': V;
+  };
+  'ForwardPaidChatsPayConfirmation': {
+    'totalAmount': V;
+    'count': V;
+  };
   'MessageSentPaidToastTitle': {
     'count': V;
   };
@@ -4043,6 +4058,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'GiftPreviewCountBackdrops': {
+    'count': V;
+  };
+  'FwdMessagesToChats': {
     'count': V;
   };
 }

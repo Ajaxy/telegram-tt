@@ -145,6 +145,7 @@ import {
   selectMessageReplyInfo,
   selectOutlyingListByMessageId,
   selectPeer,
+  selectPeerPaidMessagesStars,
   selectPeerStory,
   selectPinnedIds,
   selectPollFromMessage,
@@ -2605,6 +2606,143 @@ addActionHandler('forwardToSavedMessages', (global, actions, payload): ActionRet
 
   actions.exitMessageSelectMode({ tabId });
   actions.forwardMessages({ isSilent: true, scheduledAt, tabId });
+});
+
+interface ForwardToChatOptions {
+  global: GlobalState;
+  fromChat: ApiChat;
+  toChat: ApiChat;
+  realMessages: ApiMessage[];
+  serviceMessages: ApiMessage[];
+  comment?: string;
+  withMyScore?: boolean;
+  noAuthors?: boolean;
+  noCaptions?: boolean;
+  isCurrentUserPremium: boolean;
+}
+
+function forwardMessagesToChat({
+  global,
+  fromChat,
+  toChat,
+  realMessages,
+  serviceMessages,
+  comment,
+  withMyScore,
+  noAuthors,
+  noCaptions,
+  isCurrentUserPremium,
+}: ForwardToChatOptions) {
+  const sendAs = selectSendAs(global, toChat.id);
+  const lastMessageId = selectChatLastMessageId(global, toChat.id);
+  const messagePriceInStars = selectPeerPaidMessagesStars(global, toChat.id);
+
+  if (comment) {
+    sendMessage(global, {
+      chat: toChat,
+      text: comment,
+      sendAs,
+      lastMessageId,
+      messagePriceInStars,
+    });
+  }
+
+  if (realMessages.length) {
+    const messageSlices = global.config?.maxForwardedCount
+      ? splitMessagesForForwarding(realMessages, global.config.maxForwardedCount)
+      : [realMessages];
+
+    for (const slice of messageSlices) {
+      const forwardParams: ForwardMessagesParams = {
+        fromChat,
+        toChat,
+        toThreadId: MAIN_THREAD_ID,
+        messages: slice,
+        isSilent: true,
+        sendAs,
+        withMyScore,
+        noAuthors,
+        noCaptions,
+        isCurrentUserPremium,
+        wasDrafted: false,
+        lastMessageId,
+        messagePriceInStars,
+      };
+
+      callApi('forwardMessages', forwardParams);
+    }
+  }
+
+  for (const message of serviceMessages) {
+    const { text, entities } = message.content.text || {};
+    const { sticker } = message.content;
+
+    sendMessage(global, {
+      chat: toChat,
+      text,
+      entities,
+      sticker,
+      isSilent: true,
+      sendAs,
+      lastMessageId,
+      messagePriceInStars,
+    });
+  }
+}
+
+addActionHandler('forwardToMultipleChats', (global, actions, payload): ActionReturnType => {
+  const { toChatIds, comment, tabId = getCurrentTabId() } = payload;
+
+  const {
+    fromChatId, messageIds, withMyScore, noAuthors, noCaptions,
+  } = selectTabState(global, tabId).forwardMessages;
+
+  const fromChat = fromChatId ? selectChat(global, fromChatId) : undefined;
+  const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+
+  const messages = fromChatId && messageIds
+    ? messageIds
+      .sort((a, b) => a - b)
+      .map((id) => selectChatMessage(global, fromChatId, id)).filter(Boolean)
+    : undefined;
+
+  if (!fromChat || !messages?.length) {
+    return;
+  }
+
+  const [realMessages, serviceMessages] = partition(messages, (m) => !isServiceNotificationMessage(m));
+  const forwardableRealMessages = realMessages.filter((message) => selectCanForwardMessage(global, message));
+
+  if (!forwardableRealMessages.length && !serviceMessages.length) {
+    return;
+  }
+
+  for (const toChatId of toChatIds) {
+    const toChat = selectChat(global, toChatId);
+    if (!toChat) continue;
+
+    forwardMessagesToChat({
+      global,
+      fromChat,
+      toChat,
+      realMessages: forwardableRealMessages,
+      serviceMessages,
+      comment,
+      withMyScore,
+      noAuthors,
+      noCaptions,
+      isCurrentUserPremium,
+    });
+  }
+
+  global = updateTabState(global, {
+    forwardMessages: {},
+    isShareMessageModalShown: false,
+  }, tabId);
+
+  actions.exitMessageSelectMode({ tabId });
+
+  return global;
 });
 
 addActionHandler('forwardStory', (global, actions, payload): ActionReturnType => {

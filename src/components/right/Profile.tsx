@@ -119,7 +119,7 @@ import InfiniteScroll from '../ui/InfiniteScroll';
 import Link from '../ui/Link';
 import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
 import Spinner from '../ui/Spinner';
-import TabList, { type TabWithProperties } from '../ui/TabList';
+import SquareTabList, { type TabWithProperties } from '../ui/SquareTabList';
 import Transition from '../ui/Transition';
 import DeleteMemberModal from './DeleteMemberModal';
 import StarGiftCollectionList from './gifts/StarGiftCollectionList';
@@ -953,7 +953,7 @@ const Profile = ({
               id={`shared-media${getMessageHtmlId(id)}`}
               document={getMessageDocument(messagesById[id])!}
               datetime={messagesById[id].date}
-              smaller
+              fileSize="small"
               className="scroll-item"
               isDownloading={getIsDownloading(activeDownloads, getMessageDocument(messagesById[id])!)}
               observeIntersection={observeIntersectionForMedia}
@@ -1264,7 +1264,7 @@ const Profile = ({
           >
             {renderContent()}
           </Transition>
-          <TabList activeTab={activeTabIndex} tabs={tabs} onSwitchTab={handleSwitchTab} />
+          <SquareTabList activeTab={activeTabIndex} tabs={tabs} onSwitchTab={handleSwitchTab} />
         </div>
       )}
 

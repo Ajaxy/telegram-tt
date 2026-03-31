@@ -185,7 +185,7 @@
     padding-inline: 0.25rem;
   }
 
-  &.smaller {
+  &.size-small {
     --background-color: var(--color-background);
     --border-radius-messages-small: 0.3125rem;
 
@@ -215,6 +215,29 @@
 
     .file-subtitle {
       line-height: 1rem;
+    }
+  }
+
+  &.size-large {
+    .action-icon,
+    .file-progress,
+    .file-icon,
+    .file-preview {
+      width: 4.5rem;
+      height: 4.5rem;
+      border-radius: 0.75rem;
+    }
+
+    .file-info {
+      margin-top: 0;
+    }
+
+    .file-subtitle {
+      line-height: 1rem;
+    }
+
+    .file-icon-container {
+      margin-inline-end: 0.5rem;
     }
   }
 

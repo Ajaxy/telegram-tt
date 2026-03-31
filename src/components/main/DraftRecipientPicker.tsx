@@ -8,7 +8,7 @@ import type { TabState } from '../../global/types';
 import type { ThreadId } from '../../types';
 
 import useFlag from '../../hooks/useFlag';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import RecipientPicker from '../common/RecipientPicker';
 
@@ -25,7 +25,7 @@ const DraftRecipientPicker: FC<OwnProps> = ({
     resetOpenChatWithDraft,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [isShown, markIsShown, unmarkIsShown] = useFlag();
   useEffect(() => {
@@ -54,7 +54,8 @@ const DraftRecipientPicker: FC<OwnProps> = ({
   return (
     <RecipientPicker
       isOpen={isOpen}
-      searchPlaceholder={lang('ForwardTo')}
+      title={lang('ShareWith')}
+      searchPlaceholder={lang('Search')}
       filter={requestedDraft?.filter}
       onSelectRecipient={handleSelectRecipient}
       onClose={handleClose}

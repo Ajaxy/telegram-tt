@@ -26,7 +26,7 @@ import useScrolledState from '../../../hooks/useScrolledState';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import StoryRibbon from '../../story/StoryRibbon';
-import TabList from '../../ui/TabList';
+import SquareTabList from '../../ui/SquareTabList';
 import Transition from '../../ui/Transition';
 import ChatList from './ChatList';
 
@@ -259,7 +259,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     >
       {shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
       {shouldRenderFolders ? (
-        <TabList
+        <SquareTabList
           contextRootElementSelector="#LeftColumn"
           tabs={folderTabs}
           activeTab={activeChatFolder}

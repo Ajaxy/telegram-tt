@@ -692,6 +692,20 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   };
 }
 
+export function selectCanCopyMessageLink<T extends GlobalState>(
+  global: T, message: ApiMessage,
+) {
+  const chat = selectChat(global, message.chatId);
+  if (!chat || selectIsChatRestricted(global, message.chatId)) return false;
+
+  const isLocal = isMessageLocal(message);
+  const isAction = isActionMessage(message);
+  const isChannel = isChatChannel(chat);
+  const isSuperGroup = isChatSuperGroup(chat);
+
+  return !isLocal && !isAction && (isChannel || isSuperGroup) && !chat.isMonoforum;
+}
+
 export function selectCanDeleteMessages<T extends GlobalState>(
   global: T,
   chatId: string,
