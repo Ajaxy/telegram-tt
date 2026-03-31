@@ -274,7 +274,9 @@ const MessageList = ({
   const scrollSnapDisabledTimerRef = useRef<number>();
 
   const isSavedDialog = getIsSavedDialog(chatId, threadId, currentUserId);
-  const hasOpenChatButton = isSavedDialog && threadId !== ANONYMOUS_USER_ID;
+  const hasOpenChatButton = isSavedDialog
+    && threadId !== ANONYMOUS_USER_ID
+    && threadId !== currentUserId;
 
   const areMessagesLoaded = Boolean(messageIds);
 
