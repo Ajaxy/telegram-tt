@@ -2772,5 +2772,8 @@
 "RankEditTextOwn" = "Share your role, title or how you're known in this group. Your tag is visible to all members.";
 "RankEditText" = "Add a short tag next to {user}'s name.";
 "MenuAddCaption" = "Add Caption";
+"MenuCopyDate" = "Copy Date";
+"DateCopiedToast" = "Date copied to clipboard";
+"ReminderSetToast" = "You set up a reminder in **Saved Messages**";
 "NoForwardsRequestReject" = "Reject";
 "NoForwardsRequestAccept" = "Accept";

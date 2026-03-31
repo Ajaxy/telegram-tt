@@ -121,6 +121,7 @@ const ListItem = ({
   if (ref) {
     containerRef = ref;
   }
+  const menuRef = useRef<HTMLDivElement>();
   const [isTouched, markIsTouched, unmarkIsTouched] = useFlag();
 
   const {
@@ -131,10 +132,7 @@ const ListItem = ({
 
   const getTriggerElement = useLastCallback(() => containerRef.current);
   const getRootElement = useLastCallback(() => containerRef.current!.closest('.custom-scroll'));
-  const getMenuElement = useLastCallback(() => {
-    return (withPortalForMenu ? document.querySelector('#portals') : containerRef.current)!
-      .querySelector('.ListItem-context-menu .bubble');
-  });
+  const getMenuElement = useLastCallback(() => menuRef.current);
   const getLayout = useLastCallback(() => ({ withPortal: withPortalForMenu }));
 
   const handleClickEvent = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -271,6 +269,7 @@ const ListItem = ({
       </ButtonElementTag>
       {contextActions && contextMenuAnchor !== undefined && (
         <Menu
+          ref={menuRef}
           isOpen={isContextMenuOpen}
           anchor={contextMenuAnchor}
           getTriggerElement={getTriggerElement}

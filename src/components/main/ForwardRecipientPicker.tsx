@@ -89,7 +89,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
           : 'Conversation.ForwardTooltip.SavedMessages.One',
       );
 
-      forwardToSavedMessages();
+      forwardToSavedMessages({});
       showNotification({ message });
     } else {
       const chatId = recipientId;

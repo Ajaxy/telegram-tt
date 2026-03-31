@@ -1265,7 +1265,6 @@ const Composer = ({
           effectId,
           webPageMediaSize: attachmentSettings.webPageMediaSize,
           webPageUrl: hasWebPagePreview ? webPagePreview.url : undefined,
-          isForwarding,
         });
       }
 

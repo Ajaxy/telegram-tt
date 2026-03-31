@@ -420,6 +420,18 @@ export function buildMtpMessageEntity(entity: ApiMessageEntity): GramJs.TypeMess
       return new GramJs.MessageEntitySpoiler({ offset, length });
     case ApiMessageEntityTypes.CustomEmoji:
       return new GramJs.MessageEntityCustomEmoji({ offset, length, documentId: BigInt(entity.documentId) });
+    case ApiMessageEntityTypes.FormattedDate:
+      return new GramJs.MessageEntityFormattedDate({
+        offset,
+        length,
+        date: entity.date,
+        relative: entity.relative,
+        shortTime: entity.shortTime,
+        longTime: entity.longTime,
+        shortDate: entity.shortDate,
+        longDate: entity.longDate,
+        dayOfWeek: entity.dayOfWeek,
+      });
     default:
       return new GramJs.MessageEntityUnknown({ offset, length });
   }

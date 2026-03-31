@@ -777,7 +777,6 @@ export type SendMessageParams = {
   messagePriceInStars?: number;
   localMessage?: ApiMessage;
   forwardedLocalMessagesSlice?: ForwardedLocalMessagesSlice;
-  isForwarding?: boolean;
   forwardParams?: ForwardMessagesParams;
   isStoryReply?: boolean;
   suggestedMedia?: MediaContent;

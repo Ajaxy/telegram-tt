@@ -16,6 +16,7 @@ import MentionLink from '../../middle/message/MentionLink';
 import Blockquote from '../Blockquote';
 import CodeBlock from '../code/CodeBlock';
 import CustomEmoji from '../CustomEmoji';
+import FormattedDate from '../FormattedDate';
 import SafeLink from '../SafeLink';
 import Spoiler from '../spoiler/Spoiler';
 
@@ -511,6 +512,11 @@ function processEntity({
         />
       );
     }
+
+    if (entity.type === ApiMessageEntityTypes.FormattedDate && entity.date) { // Old entities can have missing fields
+      return <FormattedDate entity={entity} asPreview>{text}</FormattedDate>;
+    }
+
     return text;
   }
 
@@ -667,6 +673,16 @@ function processEntity({
     case ApiMessageEntityTypes.QuoteFocus:
       return (
         <span className="matching-text-highlight is-quote">{renderNestedMessagePart()}</span>
+      );
+    case ApiMessageEntityTypes.FormattedDate:
+      return (
+        <FormattedDate
+          entity={entity}
+          chatId={chatId}
+          messageId={messageId}
+        >
+          {renderNestedMessagePart()}
+        </FormattedDate>
       );
     default:
       return renderNestedMessagePart();

@@ -2036,6 +2036,9 @@ export interface LangPair {
   'RankEditSave': undefined;
   'RankEditTextOwn': undefined;
   'MenuAddCaption': undefined;
+  'MenuCopyDate': undefined;
+  'DateCopiedToast': undefined;
+  'ReminderSetToast': undefined;
   'NoForwardsRequestReject': undefined;
   'NoForwardsRequestAccept': undefined;
 }

@@ -239,6 +239,10 @@ function getHourCycle(timeFormat: TimeFormat) {
   return timeFormat === '12h' ? 'h12' : 'h23';
 }
 
+export function secondsToDate(seconds: number) {
+  return new Date(seconds * 1000);
+}
+
 function serializeRecord(record: object) {
   return Object.entries(record as Record<string, unknown>)
     .filter(([, value]) => value !== undefined)

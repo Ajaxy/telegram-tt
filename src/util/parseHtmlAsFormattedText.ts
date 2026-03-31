@@ -198,13 +198,21 @@ function getEntityDataFromNode(
   }
 
   if (type === ApiMessageEntityTypes.CustomEmoji) {
+    const nodeElement = node as HTMLElement;
+    const documentId = nodeElement.dataset.documentId || nodeElement.getAttribute('emoji-id');
+    if (!documentId) {
+      return {
+        index,
+        entity: undefined,
+      };
+    }
     return {
       index,
       entity: {
         type,
         offset,
         length,
-        documentId: (node as HTMLImageElement).dataset.documentId!,
+        documentId,
       },
     };
   }
@@ -226,6 +234,28 @@ function getEntityDataFromNode(
         length,
         timestamp,
       },
+    };
+  }
+
+  if (type === ApiMessageEntityTypes.FormattedDate) {
+    const date = Number((node as HTMLElement).dataset.unix);
+    if (Number.isNaN(date)) {
+      return {
+        index,
+        entity: undefined,
+      };
+    }
+    const format = (node as HTMLElement).dataset.format;
+    const relative = format?.includes('r') || undefined;
+    const dayOfWeek = format?.includes('w') || undefined;
+    const shortDate = format?.includes('d') || undefined;
+    const longDate = format?.includes('D') || undefined;
+    const shortTime = format?.includes('t') || undefined;
+    const longTime = format?.includes('T') || undefined;
+
+    return {
+      index,
+      entity: { type, offset, length, date, relative, dayOfWeek, shortDate, longDate, shortTime, longTime },
     };
   }
 
@@ -277,6 +307,14 @@ function getEntityTypeFromNode(node: ChildNode): ApiMessageEntityTypes | undefin
     if ((node as HTMLImageElement).dataset.documentId) {
       return ApiMessageEntityTypes.CustomEmoji;
     }
+  }
+
+  if (node.nodeName === 'TG-TIME') {
+    return ApiMessageEntityTypes.FormattedDate;
+  }
+
+  if (node.nodeName === 'TG-EMOJI') {
+    return ApiMessageEntityTypes.CustomEmoji;
   }
 
   return undefined;

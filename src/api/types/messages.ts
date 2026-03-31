@@ -509,7 +509,8 @@ export type ApiMessageEntityDefault = {
   type: Exclude<
   `${ApiMessageEntityTypes}`,
   `${ApiMessageEntityTypes.Pre}` | `${ApiMessageEntityTypes.TextUrl}` | `${ApiMessageEntityTypes.MentionName}` |
-  `${ApiMessageEntityTypes.Blockquote}` | `${ApiMessageEntityTypes.CustomEmoji}` | `${ApiMessageEntityTypes.Timestamp}`
+  `${ApiMessageEntityTypes.Blockquote}` | `${ApiMessageEntityTypes.CustomEmoji}` |
+  `${ApiMessageEntityTypes.Timestamp}` | `${ApiMessageEntityTypes.FormattedDate}`
   >;
   offset: number;
   length: number;
@@ -550,6 +551,19 @@ export type ApiMessageEntityCustomEmoji = {
   documentId: string;
 };
 
+export type ApiMessageEntityFormattedDate = {
+  type: ApiMessageEntityTypes.FormattedDate;
+  offset: number;
+  length: number;
+  date: number;
+  relative?: true;
+  shortTime?: true;
+  longTime?: true;
+  shortDate?: true;
+  longDate?: true;
+  dayOfWeek?: true;
+};
+
 // Local entities
 export type ApiMessageEntityTimestamp = {
   type: ApiMessageEntityTypes.Timestamp;
@@ -559,7 +573,8 @@ export type ApiMessageEntityTimestamp = {
 };
 
 export type ApiMessageEntity = ApiMessageEntityDefault | ApiMessageEntityPre | ApiMessageEntityTextUrl |
-  ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji | ApiMessageEntityBlockquote | ApiMessageEntityTimestamp;
+  ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji | ApiMessageEntityBlockquote | ApiMessageEntityTimestamp |
+  ApiMessageEntityFormattedDate;
 
 export enum ApiMessageEntityTypes {
   Bold = 'MessageEntityBold',
@@ -582,6 +597,7 @@ export enum ApiMessageEntityTypes {
   CustomEmoji = 'MessageEntityCustomEmoji',
   Timestamp = 'MessageEntityTimestamp',
   QuoteFocus = 'MessageEntityQuoteFocus',
+  FormattedDate = 'MessageEntityFormattedDate',
   Unknown = 'MessageEntityUnknown',
 }
 

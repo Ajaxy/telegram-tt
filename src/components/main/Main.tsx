@@ -369,7 +369,7 @@ const Main = ({
 
       loadCountryList({ langCode: lang.code });
     }
-  }, [lang, isMasterTab]);
+  }, [lang.code, isMasterTab]);
 
   // Re-fetch cached saved emoji for `localDb`
   useEffect(() => {

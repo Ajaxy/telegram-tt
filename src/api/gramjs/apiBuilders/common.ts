@@ -286,6 +286,21 @@ export function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMess
     };
   }
 
+  if (entity instanceof GramJs.MessageEntityFormattedDate) {
+    return {
+      type: ApiMessageEntityTypes.FormattedDate,
+      offset,
+      length,
+      date: entity.date,
+      relative: entity.relative,
+      shortTime: entity.shortTime,
+      longTime: entity.longTime,
+      shortDate: entity.shortDate,
+      longDate: entity.longDate,
+      dayOfWeek: entity.dayOfWeek,
+    };
+  }
+
   return {
     type: type as `${ApiMessageEntityDefault['type']}`,
     offset,

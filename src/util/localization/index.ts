@@ -356,7 +356,7 @@ export function setTimeFormat(timeFormat: TimeFormat) {
 
   currentTimeFormat = timeFormat;
   resetDateFormatCache();
-  translationFn.timeFormat = currentTimeFormat;
+  translationFn = createTranslationFn();
   scheduleCallbacks();
 }
 

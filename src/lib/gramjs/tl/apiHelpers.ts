@@ -210,7 +210,7 @@ function createClasses(classesType: 'constructor' | 'request', params: Generatio
                             const flagGroupSuffix = arg.flagGroup > 1 ? arg.flagGroup : '';
                             const flagValue = args[`flags${flagGroupSuffix}`] & (1 << arg.flagIndex);
                             if (arg.type === 'true') {
-                                args[argName] = Boolean(flagValue);
+                                args[argName] = flagValue ? true : undefined;
                                 continue;
                             }
 
