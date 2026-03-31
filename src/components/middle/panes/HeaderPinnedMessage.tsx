@@ -121,6 +121,7 @@ const HeaderPinnedMessage = ({
   const mediaThumbnail = useThumbnail(pinnedMessage);
   const mediaHash = useMessageMediaHash(pinnedMessage, isVideoThumbnail ? 'full' : 'pictogram');
   const mediaBlobUrl = useMedia(mediaHash);
+  const hasPictogram = Boolean(mediaThumbnail || mediaBlobUrl);
   const isSpoiler = pinnedMessage && getMessageIsSpoiler(pinnedMessage);
 
   const isLoading = Boolean(useDerivedState(getLoadingPinnedId));
@@ -291,7 +292,7 @@ const HeaderPinnedMessage = ({
           )}
         </Transition>
         <div
-          className={buildClassName(styles.messageText, mediaThumbnail && styles.withMedia)}
+          className={buildClassName(styles.messageText, hasPictogram && styles.withMedia)}
           dir={lang.isRtl ? 'rtl' : undefined}
         >
           <div className={styles.title} dir={lang.isRtl ? 'rtl' : undefined}>
