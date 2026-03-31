@@ -270,6 +270,7 @@ const Avatar = ({
   const fullClassName = buildClassName(
     'Avatar',
     className,
+    typeof size === 'string' && `size-${size}`,
     peerColorClass,
     !peer && text && 'hidden-user',
     isSavedMessages && 'saved-messages',

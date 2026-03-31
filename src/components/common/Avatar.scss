@@ -27,6 +27,10 @@
     font-family: var(--font-family-rounded);
   }
 
+  &.size-mini {
+    --_font-size: max(calc(var(--_size) / 2 - 2px), 0.625rem);
+  }
+
   .emoji {
     width: var(--_font-size);
     height: var(--_font-size);
