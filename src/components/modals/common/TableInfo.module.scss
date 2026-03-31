@@ -1,6 +1,7 @@
 .table {
   overflow: hidden;
   display: grid;
+  grid-auto-rows: min-content;
   grid-template-columns: max-content 1fr;
   flex-shrink: 0;
   gap: 1px;
