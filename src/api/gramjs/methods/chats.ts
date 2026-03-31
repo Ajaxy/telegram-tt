@@ -1411,8 +1411,8 @@ export function updateChatMemberBannedRights({
 }
 
 export function updateChatAdmin({
-  chat, user, adminRights, customTitle = DEFAULT_PRIMITIVES.STRING,
-}: { chat: ApiChat; user: ApiUser; adminRights: ApiChatAdminRights; customTitle?: string }) {
+  chat, user, adminRights, rank,
+}: { chat: ApiChat; user: ApiUser; adminRights: ApiChatAdminRights; rank?: string }) {
   const channel = buildInputChannel(chat.id, chat.accessHash);
   const userId = buildInputUser(user.id, user.accessHash);
 
@@ -1420,7 +1420,7 @@ export function updateChatAdmin({
     channel,
     userId,
     adminRights: buildChatAdminRights(adminRights),
-    rank: customTitle,
+    rank,
   }), {
     shouldReturnTrue: true,
   });

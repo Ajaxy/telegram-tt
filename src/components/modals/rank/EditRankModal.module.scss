@@ -1,0 +1,31 @@
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.previewMessage {
+  width: 100%;
+}
+
+.previewBlock {
+  margin-bottom: 1.5rem;
+}
+
+.previewRankBadge {
+  max-width: 10rem;
+  font-size: 0.75rem;
+}
+
+.previewLine {
+  display: flex;
+  min-width: 0;
+}
+
+.input {
+  margin-bottom: 0.25rem;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}

@@ -208,6 +208,7 @@ const MessageListAccountInfo: FC<OwnProps & StateProps> = ({
               width={width}
               height={height}
               forceAspectRatio
+              animation="pulse"
             />
           )}
           {isVerifyCodes && (

@@ -160,13 +160,13 @@ export interface ApiChatFullInfo {
 
 export interface ApiChatMember {
   userId: string;
+  rank?: string;
   inviterId?: string;
   joinedDate?: number;
   kickedByUserId?: string;
   promotedByUserId?: string;
   bannedRights?: ApiChatBannedRights;
   adminRights?: ApiChatAdminRights;
-  customTitle?: string;
   isAdmin?: true;
   isOwner?: true;
   isViaRequest?: true;
@@ -188,6 +188,7 @@ export interface ApiChatAdminRights {
   editStories?: true;
   deleteStories?: true;
   manageDirectMessages?: true;
+  manageRanks?: true;
 }
 
 export interface ApiChatBannedRights {
@@ -211,6 +212,7 @@ export interface ApiChatBannedRights {
   sendVoices?: true;
   sendDocs?: true;
   sendPlain?: true;
+  editRank?: true;
   untilDate?: number;
 }
 

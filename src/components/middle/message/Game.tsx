@@ -57,7 +57,7 @@ const Game: FC<OwnProps> = ({
         onClick={handleGameClick}
       >
         {!photoBlobUrl && !videoBlobUrl && (
-          <Skeleton className="skeleton preview-content" />
+          <Skeleton className="skeleton preview-content" animation="pulse" />
         )}
         {photoBlobUrl && (
           <img

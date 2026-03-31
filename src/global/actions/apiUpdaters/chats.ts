@@ -23,6 +23,7 @@ import {
   updateChat,
   updateChatFullInfo,
   updateChatListType,
+  updateChatParticipantRank,
   updatePeerStoriesHidden,
   updateTopic,
 } from '../../reducers';
@@ -442,6 +443,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
 
       return undefined;
+    }
+
+    case 'updateChatParticipantRank': {
+      return updateChatParticipantRank(global, update.id, update.userId, update.rank);
     }
 
     case 'draftMessage': {

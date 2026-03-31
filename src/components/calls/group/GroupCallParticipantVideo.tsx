@@ -254,7 +254,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
         )}
       >
         {isLoading && (
-          <Skeleton className={buildClassName(styles.video, styles.loader)} />
+          <Skeleton className={buildClassName(styles.video, styles.loader)} animation="wave" />
         )}
         {stream && (
           <video

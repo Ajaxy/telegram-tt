@@ -808,7 +808,7 @@ function Story({
           />
         )}
         {shouldRenderSkeleton && (
-          <Skeleton className={buildClassName(skeletonTransitionClassNames, styles.fullSize)} />
+          <Skeleton className={buildClassName(skeletonTransitionClassNames, styles.fullSize)} animation="pulse" />
         )}
         {!isVideo && fullMediaData && (
           <img

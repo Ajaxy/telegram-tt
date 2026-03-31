@@ -442,6 +442,55 @@ export function addChatMembers<T extends GlobalState>(global: T, chat: ApiChat, 
   });
 }
 
+export function updateChatParticipantRank<T extends GlobalState>(
+  global: T, chatId: string, userId: string, rank: string,
+): T {
+  const fullInfo = selectChatFullInfo(global, chatId);
+  if (!fullInfo) {
+    return global;
+  }
+
+  const { adminMembersById, members } = fullInfo;
+  let fullInfoUpdate: Partial<ApiChatFullInfo> | undefined;
+
+  const currentAdminMember = adminMembersById?.[userId];
+  if (currentAdminMember && currentAdminMember.rank !== rank) {
+    fullInfoUpdate = {
+      ...fullInfoUpdate,
+      adminMembersById: {
+        ...adminMembersById,
+        [userId]: {
+          ...currentAdminMember,
+          rank,
+        },
+      },
+    };
+  }
+
+  let shouldUpdateMembers = false;
+  const updatedMembers = members?.map((member) => {
+    if (member.userId !== userId || member.rank === rank) {
+      return member;
+    }
+
+    shouldUpdateMembers = true;
+
+    return {
+      ...member,
+      rank,
+    };
+  });
+
+  if (shouldUpdateMembers) {
+    fullInfoUpdate = {
+      ...fullInfoUpdate,
+      members: updatedMembers,
+    };
+  }
+
+  return fullInfoUpdate ? updateChatFullInfo(global, chatId, fullInfoUpdate) : global;
+}
+
 export function replaceSimilarChannels<T extends GlobalState>(
   global: T,
   chatId: string,

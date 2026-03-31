@@ -112,6 +112,7 @@ export interface LangPair {
   'UserRestrictionsNoChangeInfo': undefined;
   'UserRestrictionsInviteUsers': undefined;
   'UserRestrictionsPinMessages': undefined;
+  'UserRestrictionsEditRank': undefined;
   'ChatPermissionNotAvailable': undefined;
   'StatsMessageInteractionsTitle': undefined;
   'StatsGroupGrowthTitle': undefined;
@@ -490,6 +491,7 @@ export interface LangPair {
   'PrivacyExceptions': undefined;
   'AlwaysAllow': undefined;
   'EditAdminAddUsers': undefined;
+  'EditAdminEditRank': undefined;
   'NeverAllow': undefined;
   'AlwaysAllowPlaceholder': undefined;
   'NeverAllowPlaceholder': undefined;
@@ -2004,6 +2006,17 @@ export interface LangPair {
   'GiftPreviewToggleRegularModels': undefined;
   'AriaGiftPreviewPlay': undefined;
   'AriaGiftPreviewStop': undefined;
+  'RankModalEdit': undefined;
+  'RankModalEditMy': undefined;
+  'MemberContextEditRank': undefined;
+  'RankMemberTag': undefined;
+  'RankAdminTag': undefined;
+  'RankOwnerTag': undefined;
+  'RankModalMemberTagTitle': undefined;
+  'RankModalAdminTagTitle': undefined;
+  'RankModalOwnerTagTitle': undefined;
+  'RankEditSave': undefined;
+  'RankEditTextOwn': undefined;
   'MenuAddCaption': undefined;
 }
 
@@ -3518,6 +3531,24 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'BotAuthSuccessText': {
     'url': V;
+  };
+  'RankModalMemberText': {
+    'tag': V;
+    'author': V;
+    'group': V;
+  };
+  'RankModalAdminText': {
+    'tag': V;
+    'author': V;
+    'group': V;
+  };
+  'RankModalOwnerText': {
+    'tag': V;
+    'author': V;
+    'group': V;
+  };
+  'RankEditText': {
+    'user': V;
   };
 }
 

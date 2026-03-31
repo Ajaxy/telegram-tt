@@ -201,7 +201,7 @@ const ChatExtra = ({
       return <img src={locationBlobUrl} alt="" className={styles.businessLocation} />;
     }
 
-    return <Skeleton className={styles.businessLocation} />;
+    return <Skeleton className={styles.businessLocation} animation="wave" />;
   }, [businessLocation, locationBlobUrl]);
 
   const isTopicInfo = Boolean(topicId && topicId !== MAIN_THREAD_ID);

@@ -297,6 +297,7 @@ export function buildApiMessageWithChatId(
     paidMessageStars: toJSNumber(mtpMessage.paidMessageStars),
     restrictionReasons,
     summaryLanguageCode: mtpMessage.summaryFromLanguage,
+    fromRank: mtpMessage.fromRank,
   };
 }
 

@@ -45,7 +45,7 @@ const InputText = ({
   disabled,
   readOnly,
   placeholder,
-  autoComplete,
+  autoComplete = 'off',
   inputMode,
   maxLength,
   tabIndex,

@@ -184,7 +184,7 @@ const Location: FC<OwnProps> = ({
   }
 
   function renderMap() {
-    if (!mapBlobUrl) return <Skeleton width={width} height={height} />;
+    if (!mapBlobUrl) return <Skeleton width={width} height={height} animation="pulse" />;
     return (
       <img
         className="full-media map"

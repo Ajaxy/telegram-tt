@@ -249,6 +249,17 @@ const PermissionCheckboxList = ({
             onChange={handlePermissionChange}
           />
         </div>
+        <div className={buildClassName('ListItem', withCheckbox && 'with-checkbox')}>
+          <Checkbox
+            name="editRank"
+            checked={!permissions.editRank}
+            label={lang('UserRestrictionsEditRank')}
+            blocking
+            permissionGroup={permissionGroup}
+            onChange={handlePermissionChange}
+            disabled={getControlIsDisabled && getControlIsDisabled('editRank')}
+          />
+        </div>
         <div
           className={buildClassName('ListItem', withCheckbox && 'with-checkbox')}
           onClick={shouldDisablePermissionForPublicGroup ? handleDisabledClick : undefined}

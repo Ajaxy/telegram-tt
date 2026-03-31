@@ -1,5 +1,5 @@
 import {
-  memo, useCallback, useEffect, useMemo, useState,
+  memo, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -9,7 +9,7 @@ import type {
 import { ManagementScreens } from '../../../types';
 
 import { getUserFullName, isChatBasicGroup, isChatChannel, isUserBot } from '../../../global/helpers';
-import { selectChat, selectChatFullInfo } from '../../../global/selectors';
+import { selectCanEditRank, selectChat, selectChatFullInfo } from '../../../global/selectors';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -37,11 +37,12 @@ type OwnProps = {
 type StateProps = {
   chat: ApiChat;
   usersById: Record<string, ApiUser>;
-  adminMembersById?: Record<string, ApiChatMember>;
+  selectedAdminMember?: ApiChatMember;
   hasFullInfo: boolean;
   currentUserId?: string;
   isFormFullyDisabled: boolean;
   defaultRights?: ApiChatAdminRights;
+  canEditRank?: boolean;
 };
 
 const CUSTOM_TITLE_MAX_LENGTH = 16;
@@ -54,9 +55,10 @@ const ManageGroupAdminRights = ({
   chat,
   usersById,
   currentUserId,
-  adminMembersById,
+  selectedAdminMember,
   hasFullInfo,
   isFormFullyDisabled,
+  canEditRank,
   onClose,
   onScreenSelect,
 }: OwnProps & StateProps) => {
@@ -71,7 +73,7 @@ const ManageGroupAdminRights = ({
   const [isDismissConfirmationDialogOpen, openDismissConfirmationDialog, closeDismissConfirmationDialog] = useFlag();
   const [isTransferDialogOpen, openTransferDialog, closeTransferDialog] = useFlag();
   const [isPasswordModalOpen, openPasswordModal, closePasswordModal] = useFlag();
-  const [customTitle, setCustomTitle] = useState('');
+  const [rank, setRank] = useState('');
   const lang = useLang();
 
   const isChannel = isChatChannel(chat);
@@ -83,9 +85,7 @@ const ManageGroupAdminRights = ({
     onBack: onClose,
   });
 
-  const selectedChatMember = useMemo(() => {
-    const selectedAdminMember = selectedUserId ? adminMembersById?.[selectedUserId] : undefined;
-
+  const selectedChatMember: ApiChatMember | undefined = useMemo(() => {
     // If `selectedAdminMember` variable is filled with a value, then we have already saved the administrator,
     // so now we need to return to the list of administrators
     if (isNewAdmin && (selectedAdminMember || !selectedUserId)) {
@@ -98,14 +98,14 @@ const ManageGroupAdminRights = ({
       return user ? {
         userId: user.id,
         adminRights: defaultRights,
-        customTitle: lang('ChannelAdmin'),
-        isOwner: false,
+        rank: lang('ChannelAdmin'),
+        isOwner: undefined,
         promotedByUserId: undefined,
       } : undefined;
     }
 
     return selectedAdminMember;
-  }, [adminMembersById, defaultRights, isNewAdmin, lang, selectedUserId]);
+  }, [selectedAdminMember, defaultRights, isNewAdmin, lang, selectedUserId]);
 
   useEffect(() => {
     if (hasFullInfo && selectedUserId && !selectedChatMember) {
@@ -115,12 +115,12 @@ const ManageGroupAdminRights = ({
 
   useEffect(() => {
     setPermissions(selectedChatMember?.adminRights || {});
-    setCustomTitle((selectedChatMember?.customTitle || '').substr(0, CUSTOM_TITLE_MAX_LENGTH));
+    setRank((selectedChatMember?.rank || '').slice(0, CUSTOM_TITLE_MAX_LENGTH));
     setIsTouched(Boolean(isNewAdmin));
     setIsLoading(false);
   }, [defaultRights, isNewAdmin, selectedChatMember]);
 
-  const handlePermissionChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePermissionChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name } = e.target;
 
     function getUpdatedPermissionValue(value: true | undefined) {
@@ -132,23 +132,24 @@ const ManageGroupAdminRights = ({
       [name]: getUpdatedPermissionValue(p[name as keyof ApiChatAdminRights]),
     }));
     setIsTouched(true);
-  }, []);
+  });
 
-  const handleSavePermissions = useCallback(() => {
+  const handleSavePermissions = useLastCallback(() => {
     if (!selectedUserId) {
       return;
     }
+    const hasRankChanged = rank !== selectedAdminMember?.rank;
 
     setIsLoading(true);
     updateChatAdmin({
       chatId: chat.id,
       userId: selectedUserId,
       adminRights: permissions,
-      customTitle,
+      rank: hasRankChanged ? rank : undefined,
     });
-  }, [selectedUserId, updateChatAdmin, chat.id, permissions, customTitle]);
+  });
 
-  const handleDismissAdmin = useCallback(() => {
+  const handleDismissAdmin = useLastCallback(() => {
     if (!selectedUserId) {
       return;
     }
@@ -159,9 +160,9 @@ const ManageGroupAdminRights = ({
       adminRights: {},
     });
     closeDismissConfirmationDialog();
-  }, [chat.id, closeDismissConfirmationDialog, selectedUserId, updateChatAdmin]);
+  });
 
-  const getControlIsDisabled = useCallback((key: keyof ApiChatAdminRights) => {
+  const getControlIsDisabled = useLastCallback((key: keyof ApiChatAdminRights) => {
     if (isChatBasicGroup(chat)) {
       return false;
     }
@@ -175,7 +176,7 @@ const ManageGroupAdminRights = ({
     }
 
     return !chat.adminRights[key];
-  }, [chat, isFormFullyDisabled]);
+  });
 
   const memberStatus = useMemo(() => {
     if (isNewAdmin || !selectedChatMember) {
@@ -197,11 +198,11 @@ const ManageGroupAdminRights = ({
     return lang('ChannelAdmin');
   }, [isNewAdmin, selectedChatMember, usersById, lang]);
 
-  const handleCustomTitleChange = useCallback((e) => {
+  const handleRankChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    setCustomTitle(value);
+    setRank(value);
     setIsTouched(true);
-  }, []);
+  });
 
   const handleStartTransfer = useLastCallback(() => {
     if (!selectedUserId) return;
@@ -373,6 +374,16 @@ const ManageGroupAdminRights = ({
               onChange={handlePermissionChange}
             />
           </div>
+          <div className="ListItem">
+            <Checkbox
+              name="editRank"
+              checked={Boolean(permissions.manageRanks)}
+              label={lang('EditAdminEditRank')}
+              blocking
+              disabled={getControlIsDisabled('manageRanks')}
+              onChange={handlePermissionChange}
+            />
+          </div>
           {!isChannel && (
             <div className="ListItem">
               <Checkbox
@@ -441,9 +452,9 @@ const ManageGroupAdminRights = ({
               id="admin-title"
               label={lang('EditAdminRank')}
               className="input-admin-title"
-              onChange={handleCustomTitleChange}
-              value={customTitle}
-              disabled={isFormFullyDisabled}
+              onChange={handleRankChange}
+              value={rank}
+              disabled={isFormFullyDisabled || !canEditRank}
               maxLength={CUSTOM_TITLE_MAX_LENGTH}
             />
           )}
@@ -503,12 +514,21 @@ const ManageGroupAdminRights = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, isPromotedByCurrentUser }): Complete<StateProps> => {
+  (global, { chatId, isPromotedByCurrentUser, selectedUserId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId)!;
     const fullInfo = selectChatFullInfo(global, chatId);
     const { byId: usersById } = global.users;
     const { currentUserId } = global;
     const isFormFullyDisabled = !(chat.isCreator || isPromotedByCurrentUser);
+    const adminMembersById = fullInfo?.adminMembersById;
+
+    const selectedAdminMember = selectedUserId ? adminMembersById?.[selectedUserId] : undefined;
+    const canEditRank = selectedAdminMember && selectCanEditRank(global, {
+      chatId,
+      userId: selectedAdminMember.userId,
+      isAdmin: selectedAdminMember.isAdmin,
+      isOwner: selectedAdminMember.isOwner,
+    });
 
     return {
       chat,
@@ -517,7 +537,8 @@ export default memo(withGlobal<OwnProps>(
       isFormFullyDisabled,
       defaultRights: chat.adminRights,
       hasFullInfo: Boolean(fullInfo),
-      adminMembersById: fullInfo?.adminMembersById,
+      selectedAdminMember,
+      canEditRank,
     };
   },
   (global, { chatId }) => {

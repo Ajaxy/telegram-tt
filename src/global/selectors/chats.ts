@@ -1,8 +1,8 @@
+import type {
+  ApiChat, ApiChatFullInfo, ApiChatType,
+} from '../../api/types';
 import type { ChatListType } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
-import {
-  type ApiChat, type ApiChatFullInfo, type ApiChatType,
-} from '../../api/types';
 
 import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SAVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID,
@@ -12,12 +12,14 @@ import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   getHasAdminRight,
+  isChatAdmin,
   isChatChannel,
   isChatPublic,
   isChatSuperGroup,
   isHistoryClearMessage,
   isUserBot,
   isUserOnline,
+  isUserRightBanned,
 } from '../helpers';
 import { selectActiveRestrictionReasons } from './messages';
 import { selectTabState } from './tabs';
@@ -377,4 +379,36 @@ export function selectIsChatRestricted<T extends GlobalState>(global: T, chatId:
 export function selectAreFoldersPresent<T extends GlobalState>(global: T) {
   const ids = global.chatFolders.orderedIds;
   return Boolean(ids && ids.length > 1);
+}
+
+export function selectCanEditRank<T extends GlobalState>(global: T, {
+  chatId, userId, isAdmin, isOwner,
+}: {
+  chatId: string;
+  userId: string;
+  isAdmin?: boolean;
+  isOwner?: boolean;
+}) {
+  const chat = selectChat(global, chatId);
+  if (!chat || chat.isNotJoined || chat.isRestricted) return false;
+
+  const isCurrentUserAdmin = isChatAdmin(chat);
+  const hasAdminRight = getHasAdminRight(chat, 'manageRanks');
+  if (!isCurrentUserAdmin) return userId === global.currentUserId && !isUserRightBanned(chat, 'editRank'); // Users can edit only their own rank
+  if (!hasAdminRight) return false;
+
+  if (userId === global.currentUserId) return true; // Admin can edit own rank with permission
+
+  if (!chat.isCreator && (isOwner || isAdmin)) return false; // Admin can't edit rank of owner or another admin
+
+  return true;
+}
+
+export function selectCanEditOwnRank<T extends GlobalState>(global: T, chatId: string) {
+  const chat = selectChat(global, chatId);
+  if (!chat || chat.isNotJoined || chat.isRestricted) return false;
+
+  const isCurrentUserAdmin = isChatAdmin(chat);
+  if (!isCurrentUserAdmin) return !isUserRightBanned(chat, 'editRank'); // Users can edit only their own rank
+  return getHasAdminRight(chat, 'manageRanks');
 }

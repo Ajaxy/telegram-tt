@@ -1,5 +1,5 @@
 .root {
-  padding: 0.25em 0.5em;
+  padding: 0.25rem 0.5rem;
   border-radius: 1em;
 
   font-size: 0.75rem;
@@ -12,10 +12,19 @@
   transition: 150ms filter ease-in;
 }
 
+.plain {
+  color: rgba(var(--color-text-meta-rgb), 0.75);
+  background-color: transparent;
+}
+
 .clickable {
   cursor: var(--custom-cursor, pointer);
 
   &:hover {
     filter: brightness(1.1);
   }
+}
+
+.inline {
+  display: inline;
 }

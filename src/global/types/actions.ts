@@ -182,8 +182,13 @@ export interface ActionPayloads {
     chatId: string;
     userId: string;
     adminRights: ApiChatAdminRights;
-    customTitle?: string;
+    rank?: string;
   } & WithTabId;
+  editChatParticipantRank: {
+    chatId: string;
+    userId: string;
+    rank: string;
+  };
 
   checkChatInvite: {
     hash: string;
@@ -1938,6 +1943,22 @@ export interface ActionPayloads {
     level: number;
   } & WithTabId;
   closeProfileRatingModal: WithTabId | undefined;
+  openRankModal: {
+    chatId: string;
+    userId: string;
+    isAdmin?: boolean;
+    isOwner?: boolean;
+    rank?: string;
+  } & WithTabId;
+  closeRankModal: WithTabId | undefined;
+  openEditRankModal: {
+    chatId: string;
+    userId: string;
+    isAdmin?: boolean;
+    isOwner?: boolean;
+    rank?: string;
+  } & WithTabId;
+  closeEditRankModal: WithTabId | undefined;
   loadMoreProfilePhotos: {
     peerId: string;
     isPreload?: boolean;

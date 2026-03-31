@@ -77,3 +77,23 @@ addActionHandler('openProfileRatingModal', (global, actions, payload): ActionRet
 });
 
 addTabStateResetterAction('closeProfileRatingModal', 'profileRatingModal');
+
+addActionHandler('openRankModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId(), ...rest } = payload;
+
+  return updateTabState(global, {
+    rankModal: rest,
+  }, tabId);
+});
+
+addTabStateResetterAction('closeRankModal', 'rankModal');
+
+addActionHandler('openEditRankModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId(), ...rest } = payload;
+
+  return updateTabState(global, {
+    editRankModal: rest,
+  }, tabId);
+});
+
+addTabStateResetterAction('closeEditRankModal', 'editRankModal');

@@ -462,8 +462,8 @@ const MessageContextMenu: FC<OwnProps> = ({
             <MenuSeparator size="thick" />
             {!customEmojiSets && (
               <>
-                <Skeleton inline className="menu-loading-row" />
-                <Skeleton inline className="menu-loading-row" />
+                <Skeleton inline className="menu-loading-row" animation="wave" />
+                <Skeleton inline className="menu-loading-row" animation="wave" />
               </>
             )}
             {customEmojiSets && customEmojiSets.length === 1 && (

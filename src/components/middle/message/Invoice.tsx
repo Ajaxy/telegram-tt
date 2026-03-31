@@ -116,6 +116,7 @@ const Invoice: FC<OwnProps> = ({
                 width={width}
                 height={photo.dimensions?.height}
                 forceAspectRatio
+                animation="pulse"
               />
             )}
           </div>

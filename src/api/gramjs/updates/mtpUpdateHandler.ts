@@ -654,6 +654,13 @@ export function updater(update: Update) {
       id: buildApiPeerId(update.chatId, 'chat'),
       deletedMemberId: buildApiPeerId(update.userId, 'user'),
     });
+  } else if (update instanceof GramJs.UpdateChatParticipantRank) {
+    sendApiUpdate({
+      '@type': 'updateChatParticipantRank',
+      id: buildApiPeerId(update.chatId, 'chat'),
+      userId: buildApiPeerId(update.userId, 'user'),
+      rank: update.rank,
+    });
   } else if (
     update instanceof GramJs.UpdatePinnedMessages
     || update instanceof GramJs.UpdatePinnedChannelMessages

@@ -698,6 +698,7 @@ export interface ApiMessage {
   paidMessageStars?: number;
   restrictionReasons?: ApiRestrictionReason[];
   summaryLanguageCode?: string;
+  fromRank?: string;
 
   isTypingDraft?: boolean; // Local field
 }

@@ -130,6 +130,7 @@
 "UserRestrictionsNoChangeInfo" = "can't change Info";
 "UserRestrictionsInviteUsers" = "Add Users";
 "UserRestrictionsPinMessages" = "Pin Messages";
+"UserRestrictionsEditRank" = "Edit Own Tags";
 "ChatPermissionNotAvailable" = "This permission is not available in public groups.";
 "StatsMessageInteractionsTitle" = "INTERACTIONS";
 "StatsGroupGrowthTitle" = "GROWTH";
@@ -541,6 +542,7 @@
 "PrivacyExceptions" = "Exceptions";
 "AlwaysAllow" = "Always Allow";
 "EditAdminAddUsers" = "Add Users";
+"EditAdminEditRank" = "Edit Member Tags";
 "NeverAllow" = "Never Allow";
 "AlwaysAllowPlaceholder" = "Always allow...";
 "NeverAllowPlaceholder" = "Never allow...";
@@ -966,7 +968,7 @@
 "StartVoipChatPermission" = "Manage Video Chats";
 "EditAdminSendAnonymously" = "Remain Anonymous";
 "ChannelEditAdminCannotEdit" = "You can't edit the rights of this admin.";
-"EditAdminRank" = "Custom title";
+"EditAdminRank" = "Member tag";
 "EditAdminRemoveAdmin" = "Dismiss Admin";
 "EditAdminTransferChannelOwnership" = "Transfer Channel Ownership";
 "EditAdminTransferGroupOwnership" = "Transfer Group Ownership";
@@ -2732,4 +2734,19 @@
 "GiftPreviewToggleRegularModels" = "View Primary Models >";
 "AriaGiftPreviewPlay" = "Play random previews";
 "AriaGiftPreviewStop" = "Pause random previews";
+"RankModalEdit" = "Edit Tag";
+"RankModalEditMy" = "Edit My Tag";
+"MemberContextEditRank" = "Edit Tag";
+"RankMemberTag" = "Member Tag";
+"RankAdminTag" = "Admin Tag";
+"RankOwnerTag" = "Owner Tag";
+"RankModalMemberTagTitle" = "Member Tag";
+"RankModalAdminTagTitle" = "Admin Tag";
+"RankModalOwnerTagTitle" = "Owner Tag";
+"RankModalMemberText" = "This gray tag {tag} is **{author}**'s member tag in **{group}**.";
+"RankModalAdminText" = "This green tag {tag} is **{author}**'s admin tag in **{group}**.";
+"RankModalOwnerText" = "This purple tag {tag} is **{author}**'s owner tag in **{group}**.";
+"RankEditSave" = "Edit Tag";
+"RankEditTextOwn" = "Share your role, title or how you're known in this group. Your tag is visible to all members.";
+"RankEditText" = "Add a short tag next to {user}'s name.";
 "MenuAddCaption" = "Add Caption";

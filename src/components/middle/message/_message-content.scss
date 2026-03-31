@@ -303,7 +303,6 @@
     user-select: none;
 
     unicode-bidi: plaintext;
-    overflow: hidden;
     display: flex;
 
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
@@ -399,11 +398,12 @@
       flex-grow: 1;
     }
 
-    .admin-title {
+    .admin-title-badge, .admin-title {
       user-select: none;
-
       margin-left: 1rem;
+    }
 
+    .admin-title {
       font-size: 0.75rem;
       font-weight: var(--font-weight-normal);
       color: rgba(var(--color-text-meta-rgb), 0.75);
@@ -412,6 +412,10 @@
       .Message.own & {
         color: var(--accent-color);
       }
+    }
+
+    .admin-title-badge {
+      margin-right: -0.1875rem;
     }
 
     .sender-boosts {
@@ -537,23 +541,6 @@
 
     .CommentButton {
       margin-top: 0.625rem;
-    }
-  }
-
-  &.voice,
-  &.audio,
-  &.document {
-    .text-content {
-      margin-top: 0.25rem;
-    }
-  }
-
-  &.voice,
-  &.audio {
-    .message-title,
-    .Embedded {
-      margin-top: -0.1875rem;
-      margin-bottom: 0.1875rem;
     }
   }
 

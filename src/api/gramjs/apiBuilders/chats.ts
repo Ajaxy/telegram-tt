@@ -345,6 +345,7 @@ export function buildChatMember(
 
   return {
     userId,
+    rank: 'rank' in member ? member.rank : undefined,
     inviterId: 'inviterId' in member && member.inviterId
       ? buildApiPeerId(member.inviterId, 'user')
       : undefined,
@@ -355,7 +356,6 @@ export function buildChatMember(
       : undefined,
     bannedRights: 'bannedRights' in member ? omitVirtualClassFields(member.bannedRights) : undefined,
     adminRights: 'adminRights' in member ? omitVirtualClassFields(member.adminRights) : undefined,
-    customTitle: 'rank' in member ? member.rank : undefined,
     isViaRequest: 'viaRequest' in member ? member.viaRequest : undefined,
     ...((member instanceof GramJs.ChannelParticipantAdmin || member instanceof GramJs.ChatParticipantAdmin) && {
       isAdmin: true,

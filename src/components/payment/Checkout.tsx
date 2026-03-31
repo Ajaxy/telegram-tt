@@ -188,6 +188,7 @@ const Checkout: FC<OwnProps> = ({
             width={photo.dimensions?.width}
             height={photo.dimensions?.height}
             className={styles.checkoutPicture}
+            animation="pulse"
             forceAspectRatio
           />
         )}

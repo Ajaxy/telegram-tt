@@ -19,6 +19,7 @@ import {
 } from '../../global/selectors';
 import { selectThreadMessagesCount } from '../../global/selectors/threads';
 import buildClassName from '../../util/buildClassName';
+import { hasRank } from './helpers/chatMember';
 import { REM } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
 
@@ -33,6 +34,7 @@ import Avatar from './Avatar';
 import DotAnimation from './DotAnimation';
 import FullNameTitle from './FullNameTitle';
 import Icon from './icons/Icon';
+import RankBadge from './RankBadge';
 import TopicIcon from './TopicIcon';
 import TypingStatus from './TypingStatus';
 
@@ -58,7 +60,8 @@ type BaseOwnProps = {
   emojiStatusSize?: number;
   noStatusOrTyping?: boolean;
   noRtl?: boolean;
-  adminMember?: ApiChatMember;
+  chatMemberOriginId?: string;
+  chatMember?: ApiChatMember;
   isSavedDialog?: boolean;
   noAvatar?: boolean;
   className?: string;
@@ -118,7 +121,8 @@ const PrivateChatInfo = ({
   isSavedMessages,
   isSavedDialog,
   areMessagesLoaded,
-  adminMember,
+  chatMember,
+  chatMemberOriginId,
   ripple,
   className,
   storyViewerOrigin,
@@ -237,10 +241,6 @@ const PrivateChatInfo = ({
     );
   }
 
-  const customTitle = adminMember
-    ? adminMember.customTitle || oldLang(adminMember.isOwner ? 'GroupInfo.LabelOwner' : 'GroupInfo.LabelAdmin')
-    : undefined;
-
   function renderNameTitle() {
     if (isTopic) {
       return (
@@ -248,18 +248,27 @@ const PrivateChatInfo = ({
       );
     }
 
-    if (customTitle) {
+    if (chatMember && hasRank(chatMember)) {
       return (
         <div className="info-name-title">
           <FullNameTitle
-            peer={user!}
+            peer={customPeer || user!}
+            noFake={noFake}
+            noVerified={noVerified}
             withEmojiStatus={!noEmojiStatus}
             emojiStatusSize={emojiStatusSize}
             isSavedMessages={isSavedMessages}
             isSavedDialog={isSavedDialog}
+            iconElement={iconElement}
             onEmojiStatusClick={onEmojiStatusClick}
           />
-          {customTitle && <span className="custom-title">{customTitle}</span>}
+          <RankBadge
+            chatId={chatMemberOriginId!}
+            userId={chatMember.userId}
+            isAdmin={chatMember.isAdmin}
+            isOwner={chatMember.isOwner}
+            rank={chatMember.rank}
+          />
         </div>
       );
     }

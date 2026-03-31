@@ -154,7 +154,7 @@ const SimilarChannels = ({
 
   return (
     <div className={buildClassName(styles.root)}>
-      {shouldRenderSkeleton && <Skeleton className={styles.skeleton} />}
+      {shouldRenderSkeleton && <Skeleton className={styles.skeleton} animation="wave" />}
       {shouldRenderChannels && (
         <div
           className={buildClassName(

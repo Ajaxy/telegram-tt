@@ -85,6 +85,7 @@ import {
   updateChatFullInfo,
   updateChatLastMessageId,
   updateChatListSecondaryInfo,
+  updateChatParticipantRank,
   updateChats,
   updateChatsLastMessageId,
   updateListedTopicIds,
@@ -2081,7 +2082,7 @@ addActionHandler('updateChatAdmin', async (global, actions, payload): Promise<vo
   if (selectIsCurrentUserFrozen(global)) return;
 
   const {
-    chatId, userId, adminRights, customTitle,
+    chatId, userId, adminRights, rank,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -2095,7 +2096,7 @@ addActionHandler('updateChatAdmin', async (global, actions, payload): Promise<vo
   if (!chat) return;
 
   await callApi('updateChatAdmin', {
-    chat, user, adminRights, customTitle,
+    chat, user, adminRights, rank,
   });
 
   const chatAfterUpdate = await callApi('fetchFullChat', chat);
@@ -2116,7 +2117,7 @@ addActionHandler('updateChatAdmin', async (global, actions, payload): Promise<vo
         [userId]: {
           ...adminMembersById[userId],
           adminRights,
-          customTitle,
+          rank,
         },
       };
     }
@@ -2127,6 +2128,31 @@ addActionHandler('updateChatAdmin', async (global, actions, payload): Promise<vo
     global = updateChatFullInfo(global, chat.id, { adminMembersById: newAdminMembersById });
     setGlobal(global);
   }
+});
+
+addActionHandler('editChatParticipantRank', async (global, actions, payload): Promise<void> => {
+  if (selectIsCurrentUserFrozen(global)) {
+    return;
+  }
+
+  const {
+    chatId, userId, rank,
+  } = payload;
+
+  const chat = selectChat(global, chatId);
+  const peer = selectPeer(global, userId);
+  if (!chat || !peer) {
+    return;
+  }
+
+  const isUpdated = await callApi('editChatParticipantRank', { chat, peer, rank });
+  if (!isUpdated) {
+    return;
+  }
+
+  global = getGlobal();
+  global = updateChatParticipantRank(global, chat.id, userId, rank);
+  setGlobal(global);
 });
 
 addActionHandler('updateChat', async (global, actions, payload): Promise<void> => {

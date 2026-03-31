@@ -174,6 +174,7 @@ import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
 import MessageText from '../../common/MessageText';
 import PeerColorWrapper from '../../common/PeerColorWrapper';
+import RankBadge from '../../common/RankBadge';
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import Sparkles from '../../common/Sparkles';
 import TopicChip from '../../common/TopicChip';
@@ -302,7 +303,7 @@ type StateProps = {
   isTranscribing?: boolean;
   transcribedText?: string;
   isPremium: boolean;
-  senderAdminMember?: ApiChatMember;
+  senderChatMember?: ApiChatMember;
   messageTopic?: ApiTopic;
   hasTopicChip?: boolean;
   chatTranslations?: ChatTranslatedMessages;
@@ -429,7 +430,7 @@ const Message = ({
   repliesThreadInfo,
   hasUnreadReaction,
   memoFirstUnreadIdRef,
-  senderAdminMember,
+  senderChatMember,
   messageTopic,
   hasTopicChip,
   chatTranslations,
@@ -542,7 +543,7 @@ const Message = ({
 
   const {
     id: messageId, chatId, forwardInfo, viaBotId, isTranscriptionError, factCheck,
-    isTypingDraft,
+    isTypingDraft, fromRank,
   } = message;
   const hasSummary = Boolean(message.summaryLanguageCode);
 
@@ -1677,7 +1678,6 @@ const Message = ({
     const senderIsPremium = senderPeer && 'isPremium' in senderPeer && senderPeer.isPremium;
 
     const shouldRenderForwardAvatar = asForwarded && senderPeer;
-    const hasBotSenderUsername = botSender?.hasUsername;
     return (
       <div className="message-title" dir="ltr">
         {(senderTitle || asForwarded) ? (
@@ -1733,16 +1733,20 @@ const Message = ({
           </span>
         )}
         <div className="title-spacer" />
-        {!shouldSkipRenderAdminTitle && !hasBotSenderUsername ? (forwardInfo?.isLinkedChannelPost ? (
+        {(!shouldSkipRenderAdminTitle && !signature) ? (forwardInfo?.isLinkedChannelPost ? (
           <span className="admin-title" dir="auto">{oldLang('DiscussChannel')}</span>
         ) : message.postAuthorTitle && isGroup && !asForwarded ? (
           <span className="admin-title" dir="auto">{message.postAuthorTitle}</span>
-        ) : senderAdminMember && !asForwarded && !viaBotId ? (
-          <span className="admin-title" dir="auto">
-            {senderAdminMember.customTitle || oldLang(
-              senderAdminMember.isOwner ? 'GroupInfo.LabelOwner' : 'GroupInfo.LabelAdmin',
-            )}
-          </span>
+        ) : (senderChatMember || fromRank) && !asForwarded ? (
+          <RankBadge
+            chatId={chatId}
+            userId={(senderChatMember?.userId || sender?.id)!}
+            isAdmin={senderChatMember?.isAdmin}
+            isOwner={senderChatMember?.isOwner}
+            rank={senderChatMember?.rank || fromRank}
+            className="admin-title-badge"
+            isClickable
+          />
         ) : undefined) : undefined}
         {canShowSenderBoosts && (
           <span className="sender-boosts" aria-hidden>
@@ -2020,6 +2024,7 @@ export default memo(withGlobal<OwnProps>(
     const isChannel = chat && isChatChannel(chat);
     const isGroup = chat && isChatGroup(chat);
     const chatFullInfo = !isChatWithUser ? selectChatFullInfo(global, chatId) : undefined;
+    const { adminMembersById, members, boostsApplied } = chatFullInfo || {};
     const webPageStoryData = webPage?.story;
     const webPageStory = webPageStoryData
       ? selectPeerStory(global, webPageStoryData.peerId, webPageStoryData.id)
@@ -2031,8 +2036,8 @@ export default memo(withGlobal<OwnProps>(
     const sender = selectSender(global, message);
     const originSender = selectForwardedSender(global, message);
     const botSender = viaBotId ? selectUser(global, viaBotId) : undefined;
-    const senderAdminMember = sender?.id && isGroup
-      ? chatFullInfo?.adminMembersById?.[sender?.id]
+    const senderChatMember = sender?.id
+      ? (adminMembersById?.[sender?.id] || members?.find((member) => member.userId === sender?.id))
       : undefined;
 
     const isThreadTop = message.id === threadId;
@@ -2119,7 +2124,7 @@ export default memo(withGlobal<OwnProps>(
 
     const isPremium = selectIsCurrentUserPremium(global);
     const senderBoosts = sender && selectIsChatWithSelf(global, sender.id)
-      ? (chatFullInfo?.boostsApplied ?? message.senderBoosts) : message.senderBoosts;
+      ? (boostsApplied ?? message.senderBoosts) : message.senderBoosts;
 
     const chatLevel = chat?.boostLevel || 0;
     const transcribeMinLevel = global.appConfig.groupTranscribeLevelMin;
@@ -2202,7 +2207,7 @@ export default memo(withGlobal<OwnProps>(
       isTranscribing: transcriptionId !== undefined && global.transcriptions[transcriptionId]?.isPending,
       transcribedText: transcriptionId !== undefined ? global.transcriptions[transcriptionId]?.text : undefined,
       isPremium,
-      senderAdminMember,
+      senderChatMember,
       messageTopic,
       hasTopicChip,
       chatTranslations,

@@ -1035,5 +1035,19 @@ export type TabState = {
 
   isCocoonModalOpen?: boolean;
 
+  rankModal?: {
+    chatId: string;
+    userId: string;
+    isAdmin?: boolean;
+    isOwner?: boolean;
+    rank?: string;
+  };
+  editRankModal?: {
+    chatId: string;
+    userId: string;
+    isAdmin?: boolean;
+    isOwner?: boolean;
+    rank?: string;
+  };
   shouldOpenMessageMediaEditor?: boolean;
 };

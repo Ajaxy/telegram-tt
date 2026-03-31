@@ -1,0 +1,132 @@
+.root {
+  --preview-background-overscan: 50%;
+
+  isolation: isolate;
+  position: relative;
+
+  overflow: hidden;
+
+  border-radius: 1.5rem;
+
+  background-color: var(--theme-background-color);
+}
+
+.background {
+  &::before,
+  &::after {
+    inset: calc(var(--preview-background-overscan) * -1);
+  }
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  min-height: 100%;
+  padding: 0.75rem;
+}
+
+.message,
+.bubble {
+  --preview-message-background: var(--color-background);
+  --preview-message-sender-color: var(--accent-color);
+  --preview-message-shadow: 0 1px 2px var(--color-default-shadow);
+
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.375rem 0.5rem 0.4375rem 0.625rem;
+  border-radius: 1.125rem;
+
+  background: var(--preview-message-background);
+  box-shadow: var(--preview-message-shadow);
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+}
+
+.messageWithAvatar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+
+  width: 100%;
+  min-width: 0;
+}
+
+.avatar {
+  flex: 0 0 auto;
+}
+
+.bubble {
+  flex: 1 1 auto;
+}
+
+.header {
+  user-select: none;
+
+  display: flex;
+  align-items: center;
+
+  min-width: 0;
+  height: 1.25rem;
+  margin-bottom: 0.375rem;
+
+  font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
+  line-height: 1;
+}
+
+.sender {
+  overflow: hidden;
+  flex: 0 1 auto;
+
+  font-weight: var(--font-weight-medium);
+  color: var(--preview-message-sender-color);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spacer {
+  flex: 1 1 auto;
+  min-width: 0.5rem;
+}
+
+.badge {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  margin-inline-start: 0.5rem;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+
+  min-width: 0;
+
+  font-size: var(--message-text-size, 1rem);
+}
+
+.footer {
+  user-select: none;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.375rem;
+}
+
+.time {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: flex-end;
+
+  font-size: 0.75rem;
+  line-height: 1;
+  color: rgba(var(--color-text-meta-rgb), 0.75);
+  white-space: nowrap;
+}

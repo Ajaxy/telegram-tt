@@ -8,7 +8,7 @@ import './Skeleton.scss';
 
 type OwnProps = {
   variant?: 'rectangular' | 'rounded-rect' | 'round';
-  animation?: 'wave' | 'pulse';
+  animation?: 'wave' | 'pulse' | 'none';
   width?: number;
   height?: number;
   forceAspectRatio?: boolean;
@@ -18,7 +18,7 @@ type OwnProps = {
 
 const Skeleton: FC<OwnProps> = ({
   variant = 'rectangular',
-  animation = 'wave',
+  animation = 'none',
   width,
   height,
   forceAspectRatio,

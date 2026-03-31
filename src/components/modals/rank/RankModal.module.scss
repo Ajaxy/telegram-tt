@@ -1,0 +1,102 @@
+@use "../../../styles/mixins";
+
+.root {
+  :global(.modal-dialog) {
+    overflow: hidden;
+    width: 26.25rem;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 0 1rem 1rem !important;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+
+  padding-top: 2rem;
+
+  text-align: center;
+}
+
+.previewGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.previewBlockContent {
+  justify-content: flex-end;
+}
+
+.previewMessage {
+  --preview-crop-left: 1.5rem;
+  --preview-crop-fade-width: 1.5rem;
+
+  @include mixins.gradient-border-left(
+    calc(var(--preview-crop-left) + var(--preview-crop-fade-width)),
+    0.75rem
+  );
+
+  width: calc(100% + var(--preview-crop-left));
+  max-width: none;
+  margin-top: auto;
+  margin-left: calc(var(--preview-crop-left) * -1);
+}
+
+.previewLine,
+.previewMetaLine {
+  display: flex;
+  min-width: 0;
+}
+
+.previewMetaLine {
+  gap: 0.375rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.memberTag {
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+
+  font-size: 0.75rem;
+  line-height: 1;
+  color: rgba(var(--color-text-meta-rgb), 0.8);
+
+  background: rgb(var(--color-text-meta-rgb) / 12%);
+}
+
+.previewRankBadge {
+  font-size: 0.75rem;
+}
+
+.footer {
+  display: flex;
+  align-self: stretch;
+  margin-top: 1rem;
+}
+
+.understoodIcon {
+  font-size: 1.1875rem;
+}
+
+.topIcon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+
+  font-size: 4rem;
+  color: var(--color-white);
+
+  background: var(--color-primary);
+}

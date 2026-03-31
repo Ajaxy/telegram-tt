@@ -248,6 +248,7 @@
     "messages.summarizeText",
     "messages.editChatCreator",
     "messages.getFutureChatCreatorAfterLeave",
+    "messages.editChatParticipantRank",
     "updates.getState",
     "updates.getDifference",
     "updates.getChannelDifference",
