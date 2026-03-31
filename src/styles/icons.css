@@ -3,8 +3,8 @@
   font-weight: normal;
   font-style: normal;
   font-display: block;
-  src: url("./icons.woff2?d1a9cacb64e401206f928a39a587a2bd") format("woff2"),
-url("./icons.woff?d1a9cacb64e401206f928a39a587a2bd") format("woff");
+  src: url("./icons.woff2?c37e5ad179a86df12e2f9214af6a855a") format("woff2"),
+url("./icons.woff?c37e5ad179a86df12e2f9214af6a855a") format("woff");
 }
 
 .icon-char::before {
@@ -900,87 +900,90 @@ url("./icons.woff?d1a9cacb64e401206f928a39a587a2bd") format("woff");
 .icon-add-filled::before {
   content: "\f225";
 }
-.icon-active-sessions::before {
+.icon-add-caption::before {
   content: "\f226";
 }
-.icon-folder-tabs-user::before {
+.icon-active-sessions::before {
   content: "\f227";
 }
-.icon-folder-tabs-star::before {
+.icon-rating-icons-negative::before {
   content: "\f228";
 }
-.icon-folder-tabs-group::before {
+.icon-rating-icons-level90::before {
   content: "\f229";
 }
-.icon-folder-tabs-folder::before {
+.icon-rating-icons-level9::before {
   content: "\f22a";
 }
-.icon-folder-tabs-chats::before {
+.icon-rating-icons-level80::before {
   content: "\f22b";
 }
-.icon-folder-tabs-chat::before {
+.icon-rating-icons-level8::before {
   content: "\f22c";
 }
-.icon-folder-tabs-channel::before {
+.icon-rating-icons-level70::before {
   content: "\f22d";
 }
-.icon-folder-tabs-bot::before {
+.icon-rating-icons-level7::before {
   content: "\f22e";
 }
-.icon-rating-icons-negative::before {
+.icon-rating-icons-level60::before {
   content: "\f22f";
 }
-.icon-rating-icons-level90::before {
+.icon-rating-icons-level6::before {
   content: "\f230";
 }
-.icon-rating-icons-level9::before {
+.icon-rating-icons-level50::before {
   content: "\f231";
 }
-.icon-rating-icons-level80::before {
+.icon-rating-icons-level5::before {
   content: "\f232";
 }
-.icon-rating-icons-level8::before {
+.icon-rating-icons-level40::before {
   content: "\f233";
 }
-.icon-rating-icons-level70::before {
+.icon-rating-icons-level4::before {
   content: "\f234";
 }
-.icon-rating-icons-level7::before {
+.icon-rating-icons-level30::before {
   content: "\f235";
 }
-.icon-rating-icons-level60::before {
+.icon-rating-icons-level3::before {
   content: "\f236";
 }
-.icon-rating-icons-level6::before {
+.icon-rating-icons-level20::before {
   content: "\f237";
 }
-.icon-rating-icons-level50::before {
+.icon-rating-icons-level2::before {
   content: "\f238";
 }
-.icon-rating-icons-level5::before {
+.icon-rating-icons-level10::before {
   content: "\f239";
 }
-.icon-rating-icons-level40::before {
+.icon-rating-icons-level1::before {
   content: "\f23a";
 }
-.icon-rating-icons-level4::before {
+.icon-folder-tabs-user::before {
   content: "\f23b";
 }
-.icon-rating-icons-level30::before {
+.icon-folder-tabs-star::before {
   content: "\f23c";
 }
-.icon-rating-icons-level3::before {
+.icon-folder-tabs-group::before {
   content: "\f23d";
 }
-.icon-rating-icons-level20::before {
+.icon-folder-tabs-folder::before {
   content: "\f23e";
 }
-.icon-rating-icons-level2::before {
+.icon-folder-tabs-chats::before {
   content: "\f23f";
 }
-.icon-rating-icons-level10::before {
+.icon-folder-tabs-chat::before {
   content: "\f240";
 }
-.icon-rating-icons-level1::before {
+.icon-folder-tabs-channel::before {
   content: "\f241";
+}
+.icon-folder-tabs-bot::before {
+  content: "\f242";
 }

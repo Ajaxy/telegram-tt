@@ -1,4 +1,4 @@
-import type { ApiAttachment } from '../../../../api/types';
+import type { ApiAttachment, ApiVideo } from '../../../../api/types';
 
 import {
   GIF_MIME_TYPE,
@@ -131,4 +131,27 @@ export function prepareAttachmentsToSend(
 function validateAspectRatio(width: number, height: number) {
   const maxAspectRatio = Math.max(width, height) / Math.min(width, height);
   return maxAspectRatio <= MAX_ASPECT_RATIO;
+}
+
+export function buildGifAttachment(gif: ApiVideo): ApiAttachment {
+  const {
+    blobUrl,
+    thumbnail,
+    fileName,
+    mimeType,
+    size,
+    width,
+    height,
+    duration,
+  } = gif;
+
+  return {
+    gif,
+    blobUrl: blobUrl || '',
+    previewBlobUrl: thumbnail?.dataUri,
+    filename: fileName,
+    mimeType,
+    size,
+    quick: width && height ? { width, height, duration } : undefined,
+  } satisfies ApiAttachment;
 }

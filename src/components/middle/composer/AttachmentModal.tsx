@@ -9,6 +9,7 @@ import type { Signal } from '../../../util/signals';
 import {
   BASE_EMOJI_KEYWORD_LANG,
   EDITABLE_INPUT_MODAL_ID,
+  GIF_MIME_TYPE,
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
@@ -154,6 +155,7 @@ const AttachmentModal = ({
   const svgRef = useRef<SVGSVGElement>();
   const {
     addRecentCustomEmoji, addRecentEmoji, updateAttachmentSettings, resetMessageMediaEditorRequest,
+    updateShouldSaveAttachmentsCompression,
   } = getActions();
 
   const lang = useLang();
@@ -170,6 +172,7 @@ const AttachmentModal = ({
   const isInAlbum = editingMessage && editingMessage?.groupedId;
   const isEditingMessageFile = isEditing && attachments?.length && getAttachmentMediaType(attachments[0]);
   const notEditingFile = isEditingMessageFile !== 'file';
+  const hasGifFromPicker = renderingAttachments?.some((a) => a.gif);
 
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
   const [editingAttachmentIndex, setEditingAttachmentIndex] = useState<number | undefined>(undefined);
@@ -185,7 +188,7 @@ const AttachmentModal = ({
 
   const shouldSendCompressed = attachmentSettings.shouldCompress;
   const isSendingCompressed = Boolean(
-    (shouldSendCompressed || shouldForceCompression || isInAlbum) && !shouldForceAsFile,
+    (shouldSendCompressed || shouldForceCompression || isInAlbum || hasGifFromPicker) && !shouldForceAsFile,
   );
   const [shouldSendGrouped, setShouldSendGrouped] = useState(attachmentSettings.shouldSendGrouped);
   const isInvertedMedia = attachmentSettings.isInvertedMedia;
@@ -214,6 +217,13 @@ const AttachmentModal = ({
       updateAttachmentSettings({ isInvertedMedia: undefined });
     }
   }, [closeSymbolMenu, isOpen]);
+
+  useEffect(() => {
+    if (hasGifFromPicker) {
+      updateShouldSaveAttachmentsCompression({ shouldSave: false });
+      setShouldSendGrouped(false);
+    }
+  }, [hasGifFromPicker, updateShouldSaveAttachmentsCompression]);
 
   const [hasMedia, hasOnlyMedia] = useMemo(() => {
     const onlyMedia = Boolean(renderingAttachments?.every((a) => a.quick || a.audio));
@@ -509,13 +519,25 @@ const AttachmentModal = ({
 
   const isQuickGallery = isSendingCompressed && hasOnlyMedia;
 
-  const [areAllPhotos, areAllVideos, areAllAudios, hasAnyPhoto] = useMemo(() => {
-    if (!isQuickGallery || !renderingAttachments) return [false, false, false];
-    const everyPhoto = renderingAttachments.every((a) => SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType));
-    const everyVideo = renderingAttachments.every((a) => SUPPORTED_VIDEO_CONTENT_TYPES.has(a.mimeType));
-    const everyAudio = renderingAttachments.every((a) => SUPPORTED_AUDIO_CONTENT_TYPES.has(a.mimeType));
-    const anyPhoto = renderingAttachments.some((a) => SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType));
-    return [everyPhoto, everyVideo, everyAudio, anyPhoto];
+  const {
+    areAllPhotos, areAllVideos, areAllAudios, areAllGifs, hasAnyPhoto,
+  } = useMemo(() => {
+    if (!isQuickGallery || !renderingAttachments) {
+      return {
+        areAllPhotos: false,
+        areAllVideos: false,
+        areAllAudios: false,
+        areAllGifs: false,
+        hasAnyPhoto: false,
+      };
+    }
+    return {
+      areAllPhotos: renderingAttachments.every((a) => SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType)),
+      areAllVideos: renderingAttachments.every((a) => SUPPORTED_VIDEO_CONTENT_TYPES.has(a.mimeType)),
+      areAllAudios: renderingAttachments.every((a) => SUPPORTED_AUDIO_CONTENT_TYPES.has(a.mimeType)),
+      areAllGifs: renderingAttachments.every((a) => a.gif || a.mimeType === GIF_MIME_TYPE),
+      hasAnyPhoto: renderingAttachments.some((a) => SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType)),
+    };
   }, [renderingAttachments, isQuickGallery]);
 
   const hasAnySpoilerable = useMemo(() => {
@@ -553,7 +575,10 @@ const AttachmentModal = ({
 
   let title = '';
   const attachmentsLength = renderingAttachments.length;
-  if (areAllPhotos) {
+
+  if (areAllGifs) {
+    title = lang(isEditing ? 'AttachmentReplaceGif' : 'AttachmentSendGif');
+  } else if (areAllPhotos) {
     title = lang(
       `Attachment${isEditing ? 'Replace' : 'Send'}Photo`,
       { count: attachmentsLength },
@@ -602,7 +627,7 @@ const AttachmentModal = ({
               trigger={MoreMenuButton}
               positionX="right"
             >
-              {Boolean(!editingMessage) && (
+              {Boolean(!editingMessage) && !hasGifFromPicker && (
                 <MenuItem icon="add" onClick={handleDocumentSelect}>{lang('Add')}</MenuItem>
               )}
               {hasMedia && (
@@ -621,7 +646,7 @@ const AttachmentModal = ({
                     ))
                   }
                   {
-                    !shouldForceAsFile && !shouldForceCompression && (isSendingCompressed ? (
+                    !shouldForceAsFile && !shouldForceCompression && !hasGifFromPicker && (isSendingCompressed ? (
 
                       <MenuItem icon="document" onClick={handleToggleShouldCompress}>
                         {lang(isMultiple ? 'AttachmentMenuSendAllAsFiles' : 'AttachmentMenuSendAsFiles')}

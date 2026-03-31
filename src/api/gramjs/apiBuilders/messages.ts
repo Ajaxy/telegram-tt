@@ -662,6 +662,10 @@ function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiRep
 export function buildUploadingMedia(
   attachment: ApiAttachment,
 ): MediaContent {
+  if (attachment.gif) {
+    return { video: attachment.gif };
+  }
+
   const {
     filename: fileName,
     blobUrl,

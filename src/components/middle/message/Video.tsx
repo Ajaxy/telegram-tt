@@ -299,14 +299,16 @@ const Video = <T,>({
           style={forcedWidth ? `width: ${forcedWidth}px` : undefined}
         />
       )}
-      <img
-        ref={previewRef}
-        src={previewBlobUrl}
-        className={buildClassName('thumbnail', withBlurredBackground && 'with-blurred-bg')}
-        alt=""
-        style={forcedWidth ? `width: ${forcedWidth}px;` : undefined}
-        draggable={!isProtected}
-      />
+      {previewBlobUrl && (
+        <img
+          ref={previewRef}
+          src={previewBlobUrl}
+          className={buildClassName('thumbnail', withBlurredBackground && 'with-blurred-bg')}
+          alt=""
+          style={forcedWidth ? `width: ${forcedWidth}px;` : undefined}
+          draggable={!isProtected}
+        />
+      )}
       {hasThumb && !isPreviewPreloaded && (
         <canvas ref={thumbRef} className="thumbnail" />
       )}

@@ -3,6 +3,7 @@ import { getActions } from '../../../../global';
 
 import type { ApiAttachment, ApiMessage } from '../../../../api/types';
 
+import { GIF_MIME_TYPE } from '../../../../config';
 import { canReplaceMessageMedia, getAttachmentMediaType } from '../../../../global/helpers';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import buildAttachment from '../helpers/buildAttachment';
@@ -86,6 +87,11 @@ export default function useAttachmentModal({
 
   const handleAppendFiles = useLastCallback(async (files: File[], isSpoiler?: boolean) => {
     if (editedMessage) {
+      if (editedMessage.groupedId && files[0].type === GIF_MIME_TYPE) {
+        showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: 1 }) });
+        return;
+      }
+
       const newAttachment = await buildAttachment(files[0].name, files[0]);
       const canReplace = editedMessage && canReplaceMessageMedia(editedMessage, newAttachment);
 
@@ -109,6 +115,11 @@ export default function useAttachmentModal({
 
   const handleFileSelect = useLastCallback(async (files: File[]) => {
     if (editedMessage) {
+      if (editedMessage.groupedId && files[0].type === GIF_MIME_TYPE) {
+        showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: 1 }) });
+        return;
+      }
+
       const newAttachment = await buildAttachment(files[0].name, files[0]);
       const canReplace = editedMessage && canReplaceMessageMedia(editedMessage, newAttachment);
 
@@ -129,8 +140,10 @@ export default function useAttachmentModal({
   });
 
   const handleUpdateAttachmentsQuality = useLastCallback(async () => {
-    const newAttachments = await Promise.all(attachments.map((attachment) =>
-      buildAttachment(attachment.filename, attachment.blob, { shouldSendInHighQuality })));
+    const newAttachments = await Promise.all(attachments.map(async (attachment) => {
+      if (!attachment.blob) return attachment;
+      return buildAttachment(attachment.filename, attachment.blob, { shouldSendInHighQuality });
+    }));
     handleSetAttachments(newAttachments);
   });
 

@@ -132,7 +132,10 @@ import { getServerTime } from '../../util/serverTime';
 import windowSize from '../../util/windowSize';
 import { DEFAULT_MAX_MESSAGE_LENGTH } from '../../limits';
 import applyIosAutoCapitalizationFix from '../middle/composer/helpers/applyIosAutoCapitalizationFix';
-import buildAttachment, { prepareAttachmentsToSend } from '../middle/composer/helpers/buildAttachment';
+import buildAttachment, {
+  buildGifAttachment,
+  prepareAttachmentsToSend,
+} from '../middle/composer/helpers/buildAttachment';
 import { buildCustomEmojiHtml } from '../middle/composer/helpers/customEmoji';
 import { isSelectionInsideInput } from '../middle/composer/helpers/selection';
 import renderText from './helpers/renderText';
@@ -1021,6 +1024,8 @@ const Composer = ({
     theme,
   });
 
+  const hasGifFromPicker = attachments.some((a) => a.gif);
+
   useClipboardPaste(
     isForCurrentMessageList || isInStoryViewer,
     insertFormattedTextAndUpdateCursor,
@@ -1030,6 +1035,7 @@ const Composer = ({
     !isCurrentUserPremium && !isChatWithSelf,
     showCustomEmojiPremiumNotification,
     !attachments.length,
+    hasGifFromPicker,
   );
 
   const handleEmbeddedClear = useLastCallback(() => {
@@ -1472,6 +1478,11 @@ const Composer = ({
     }
 
     clearDraft({ chatId, threadId, isLocalOnly: true });
+  });
+
+  const handleGifAddCaption = useLastCallback((gif: ApiVideo) => {
+    handleSetAttachments([buildGifAttachment(gif)]);
+    closeSymbolMenu();
   });
 
   const handleStickerSelect = useLastCallback((
@@ -2234,6 +2245,7 @@ const Composer = ({
               canSendGifs={canSendGifs}
               isMessageComposer={isInMessageList}
               onGifSelect={handleGifSelect}
+              onGifAddCaption={handleGifAddCaption}
               onStickerSelect={handleStickerSelect}
               onCustomEmojiSelect={handleCustomEmojiSelect}
               onRemoveSymbol={removeSymbol}

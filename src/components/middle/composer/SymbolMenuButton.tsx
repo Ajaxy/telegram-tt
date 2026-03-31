@@ -41,6 +41,7 @@ type OwnProps = {
     canUpdateStickerSetsOrder?: boolean,
   ) => void;
   onGifSelect?: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
+  onGifAddCaption?: (gif: ApiVideo) => void;
   onRemoveSymbol: VoidFunction;
   onEmojiSelect: (emoji: string) => void;
   closeBotCommandMenu?: VoidFunction;
@@ -73,6 +74,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
   onCustomEmojiSelect,
   onStickerSelect,
   onGifSelect,
+  onGifAddCaption,
   onRemoveSymbol,
   onEmojiSelect,
   closeBotCommandMenu,
@@ -181,6 +183,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
         onStickerSelect={onStickerSelect}
         onCustomEmojiSelect={onCustomEmojiSelect}
         onGifSelect={onGifSelect}
+        onGifAddCaption={onGifAddCaption}
         onRemoveSymbol={onRemoveSymbol}
         onSearchOpen={handleSearchOpen}
         addRecentEmoji={addRecentEmoji}

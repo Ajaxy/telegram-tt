@@ -438,6 +438,9 @@ export function sendApiMessage(
       }
     }
 
+    if (!media && attachment?.gif) {
+      media = buildInputMediaDocument(attachment.gif, attachment.shouldSendAsSpoiler);
+    }
     if (!media && attachment) {
       try {
         media = await uploadMedia(localMessage, attachment, onProgress!);
@@ -607,26 +610,32 @@ function sendGroupedMedia(
 
   const prevMediaQueue = mediaQueue;
   mediaQueue = (async () => {
-    let media;
-    try {
-      media = await uploadMedia(localMessage, attachment, onProgress!);
-    } catch (err) {
-      if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.warn(err);
+    let inputMedia: GramJs.TypeInputMedia | undefined;
+
+    if (attachment.gif) {
+      inputMedia = buildInputMediaDocument(attachment.gif, attachment.shouldSendAsSpoiler);
+    } else {
+      let media;
+      try {
+        media = await uploadMedia(localMessage, attachment, onProgress!);
+      } catch (err) {
+        if (DEBUG) {
+          // eslint-disable-next-line no-console
+          console.warn(err);
+        }
+
+        groupedUploads[groupedId].counter--;
+
+        await prevMediaQueue;
+
+        return;
       }
 
-      groupedUploads[groupedId].counter--;
-
-      await prevMediaQueue;
-
-      return;
+      inputMedia = await fetchInputMedia(
+        buildInputPeer(chat.id, chat.accessHash),
+        media,
+      );
     }
-
-    const inputMedia = await fetchInputMedia(
-      buildInputPeer(chat.id, chat.accessHash),
-      media,
-    );
 
     await prevMediaQueue;
 

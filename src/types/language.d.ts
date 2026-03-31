@@ -1958,6 +1958,8 @@ export interface LangPair {
   'AttachmentMenuUngroupAllMedia': undefined;
   'AttachmentMenuEnableSpoiler': undefined;
   'AttachmentMenuDisableSpoiler': undefined;
+  'AttachmentSendGif': undefined;
+  'AttachmentReplaceGif': undefined;
   'AttachmentDragAddItems': undefined;
   'AttachmentCaptionPlaceholder': undefined;
   'MessageSummaryTitle': undefined;
@@ -2002,6 +2004,7 @@ export interface LangPair {
   'GiftPreviewToggleRegularModels': undefined;
   'AriaGiftPreviewPlay': undefined;
   'AriaGiftPreviewStop': undefined;
+  'MenuAddCaption': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {

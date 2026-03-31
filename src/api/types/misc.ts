@@ -1,7 +1,7 @@
 import type { CallbackAction } from '../../global/types';
 import type { IconName } from '../../types/icons';
 import type { LangFnParameters, RegularLangFnParameters } from '../../util/localization';
-import type { ApiDocument, ApiFormattedText, ApiMessageEntity, ApiPhoto, ApiReaction } from './messages';
+import type { ApiDocument, ApiFormattedText, ApiMessageEntity, ApiPhoto, ApiReaction, ApiVideo } from './messages';
 import type { ApiPremiumSection } from './payments';
 import type { ApiBotVerification } from './peers';
 import type { ApiStarsSubscriptionPricing } from './stars';
@@ -44,7 +44,7 @@ export interface ApiOnProgress {
 }
 
 export interface ApiAttachment {
-  blob: Blob;
+  blob?: Blob;
   blobUrl: string;
   compressedBlobUrl?: string;
   filename: string;
@@ -72,6 +72,8 @@ export interface ApiAttachment {
   uniqueId?: string;
   ttlSeconds?: number;
   shouldSendInHighQuality?: boolean;
+
+  gif?: ApiVideo;
 }
 
 export interface ApiWallpaper {

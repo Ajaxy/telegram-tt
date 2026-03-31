@@ -16,6 +16,7 @@ import useBuffering from '../../hooks/useBuffering';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useOldLang from '../../hooks/useOldLang';
@@ -33,9 +34,10 @@ type OwnProps = {
   observeIntersection: ObserveFn;
   isDisabled?: boolean;
   className?: string;
+  isSavedMessages?: boolean;
   onClick?: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onUnsaveClick?: (gif: ApiVideo) => void;
-  isSavedMessages?: boolean;
+  onAddCaption?: (gif: ApiVideo) => void;
 };
 
 const GifButton: FC<OwnProps> = ({
@@ -43,13 +45,15 @@ const GifButton: FC<OwnProps> = ({
   isDisabled,
   className,
   observeIntersection,
+  isSavedMessages,
   onClick,
   onUnsaveClick,
-  isSavedMessages,
+  onAddCaption,
 }) => {
   const ref = useRef<HTMLDivElement>();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const loadAndPlay = isIntersecting && !isDisabled;
@@ -76,6 +80,7 @@ const GifButton: FC<OwnProps> = ({
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => ref.current!.closest('.custom-scroll, .no-scrollbar'));
   const getMenuElement = useLastCallback(() => ref.current!.querySelector('.gif-context-menu .bubble'));
+  const getLayout = useLastCallback(() => ({ shouldAvoidNegativePosition: true }));
 
   const handleClick = useLastCallback(() => {
     if (isContextMenuOpen || !onClick) return;
@@ -107,6 +112,13 @@ const GifButton: FC<OwnProps> = ({
       ...gif,
       blobUrl: videoData,
     }, undefined, true);
+  });
+
+  const handleAddCaption = useLastCallback(() => {
+    onAddCaption?.({
+      ...gif,
+      blobUrl: videoData,
+    });
   });
 
   const handleMouseDown = useLastCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -182,17 +194,21 @@ const GifButton: FC<OwnProps> = ({
           getTriggerElement={getTriggerElement}
           getRootElement={getRootElement}
           getMenuElement={getMenuElement}
+          getLayout={getLayout}
           className="gif-context-menu"
           autoClose
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
         >
-          {!isSavedMessages && <MenuItem onClick={handleSendQuiet} icon="mute">{lang('SendWithoutSound')}</MenuItem>}
+          {!isSavedMessages && <MenuItem onClick={handleSendQuiet} icon="mute">{oldLang('SendWithoutSound')}</MenuItem>}
           <MenuItem onClick={handleSendScheduled} icon="calendar">
-            {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
+            {oldLang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
           </MenuItem>
+          {onAddCaption && (
+            <MenuItem icon="add-caption" onClick={handleAddCaption}>{lang('MenuAddCaption')}</MenuItem>
+          )}
           {onUnsaveClick && (
-            <MenuItem destructive icon="delete" onClick={handleContextDelete}>{lang('Delete')}</MenuItem>
+            <MenuItem destructive icon="delete" onClick={handleContextDelete}>{oldLang('Delete')}</MenuItem>
           )}
         </Menu>
       )}

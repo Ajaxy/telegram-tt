@@ -32,6 +32,7 @@ const useClipboardPaste = (
   shouldStripCustomEmoji?: boolean,
   onCustomEmojiStripped?: VoidFunction,
   shouldUpdateAttachmentCompression?: boolean,
+  shouldSkipFilePaste?: boolean,
 ) => {
   const {
     showNotification,
@@ -100,7 +101,7 @@ const useClipboardPaste = (
       }
 
       const hasText = textToPaste && textToPaste.text;
-      let shouldSetAttachments = files?.length && !isWordDocument;
+      let shouldSetAttachments = files?.length && !isWordDocument && !shouldSkipFilePaste;
 
       const newAttachments = files ? await Promise.all(files.map((file) => buildAttachment(file.name, file))) : [];
       const canReplace = (editedMessage && newAttachments?.length
@@ -154,7 +155,7 @@ const useClipboardPaste = (
     };
   }, [
     insertTextAndUpdateCursor, editedMessage, setAttachments, isActive, shouldStripCustomEmoji,
-    onCustomEmojiStripped, setNextText, lang, shouldUpdateAttachmentCompression,
+    onCustomEmojiStripped, setNextText, lang, shouldUpdateAttachmentCompression, shouldSkipFilePaste,
   ]);
 };
 

@@ -197,14 +197,14 @@ export function buildInputDocument(media: ApiSticker | ApiVideo) {
   ]));
 }
 
-export function buildInputMediaDocument(media: ApiSticker | ApiVideo) {
+export function buildInputMediaDocument(media: ApiSticker | ApiVideo, spoiler?: true) {
   const inputDocument = buildInputDocument(media);
 
   if (!inputDocument) {
     return undefined;
   }
 
-  return new GramJs.InputMediaDocument({ id: inputDocument });
+  return new GramJs.InputMediaDocument({ id: inputDocument, spoiler });
 }
 
 export function buildInputPoll(pollParams: ApiNewPoll, randomId: bigint) {

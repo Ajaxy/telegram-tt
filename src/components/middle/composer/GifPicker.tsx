@@ -24,6 +24,7 @@ type OwnProps = {
   loadAndPlay: boolean;
   canSendGifs?: boolean;
   onGifSelect?: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
+  onGifAddCaption?: (gif: ApiVideo) => void;
 };
 
 type StateProps = {
@@ -40,6 +41,7 @@ const GifPicker: FC<OwnProps & StateProps> = ({
   savedGifs,
   isSavedMessages,
   onGifSelect,
+  onGifAddCaption,
 }) => {
   const { loadSavedGifs, saveGif } = getActions();
 
@@ -80,9 +82,10 @@ const GifPicker: FC<OwnProps & StateProps> = ({
             gif={gif}
             observeIntersection={observeIntersection}
             isDisabled={!loadAndPlay}
+            isSavedMessages={isSavedMessages}
             onClick={canSendGifs ? onGifSelect : undefined}
             onUnsaveClick={handleUnsaveClick}
-            isSavedMessages={isSavedMessages}
+            onAddCaption={canSendGifs ? onGifAddCaption : undefined}
           />
         ))
       ) : canRenderContents && savedGifs ? (

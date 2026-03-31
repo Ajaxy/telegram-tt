@@ -2666,6 +2666,8 @@
 "AttachmentSendAudio_other" = "Send {count} Audios";
 "AttachmentSendFile_one" = "Send File";
 "AttachmentSendFile_other" = "Send {count} Files";
+"AttachmentSendGif" = "Send GIF";
+"AttachmentReplaceGif" = "Replace GIF";
 "AttachmentDragAddItems" = "Add Items";
 "AttachmentCaptionPlaceholder" = "Add a caption...";
 "MessageSummaryTitle" = "AI Summary";
@@ -2729,3 +2731,4 @@
 "GiftPreviewToggleRegularModels" = "View Primary Models >";
 "AriaGiftPreviewPlay" = "Play random previews";
 "AriaGiftPreviewStop" = "Pause random previews";
+"MenuAddCaption" = "Add Caption";

@@ -56,6 +56,7 @@ export type OwnProps = {
     canUpdateStickerSetsOrder?: boolean,
   ) => void;
   onGifSelect?: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
+  onGifAddCaption?: (gif: ApiVideo) => void;
   onRemoveSymbol: () => void;
   onSearchOpen: (type: 'stickers' | 'gifs') => void;
   addRecentEmoji: GlobalActions['addRecentEmoji'];
@@ -91,6 +92,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   onCustomEmojiSelect,
   onStickerSelect,
   onGifSelect,
+  onGifAddCaption,
   onRemoveSymbol,
   onSearchOpen,
   addRecentEmoji,
@@ -239,6 +241,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
             loadAndPlay={canSendGifs ? isOpen && (isActive || isFrom) : false}
             canSendGifs={canSendGifs}
             onGifSelect={onGifSelect}
+            onGifAddCaption={onGifAddCaption}
           />
         );
     }
