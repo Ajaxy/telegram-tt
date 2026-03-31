@@ -43,15 +43,12 @@ export default function renderText(
         return escapeHtml(text, params?.markdownPostProcessor);
 
       case 'hq_emoji':
-        EMOJI_REGEX.lastIndex = 0;
         return replaceEmojis(text, 'big', 'jsx', params?.markdownPostProcessor);
 
       case 'emoji':
-        EMOJI_REGEX.lastIndex = 0;
         return replaceEmojis(text, 'small', 'jsx', params?.markdownPostProcessor);
 
       case 'emoji_html':
-        EMOJI_REGEX.lastIndex = 0;
         return replaceEmojis(text, 'small', 'html');
 
       case 'br':
