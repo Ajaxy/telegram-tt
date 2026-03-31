@@ -12,7 +12,10 @@
     display: flex;
     align-items: center;
 
-    padding: 1rem 0.75rem 0.5rem 1rem;
+    padding-top: 1rem;
+    padding-bottom: 0.5rem;
+    padding-inline-start: 1rem;
+    padding-inline-end: 0.75rem;
 
     font-size: 0.9375rem;
     font-weight: var(--font-weight-medium);
@@ -38,7 +41,6 @@
   .poll-voters {
     position: relative;
     min-height: 3rem;
-    padding: 0 0.75rem;
 
     .Spinner {
       --spinner-size: 1.25rem;
@@ -50,6 +52,11 @@
   }
 
   .chat-item-clickable {
+    .ListItem-button {
+      padding-inline-start: 1rem;
+      padding-inline-end: 0.75rem;
+    }
+
     .ChatInfo .Avatar.size-tiny {
       margin-right: 1.75rem;
     }
@@ -59,6 +66,11 @@
         margin-right: 0;
         margin-left: 1.75rem;
       }
+    }
+
+    .vote-date {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
     }
   }
 

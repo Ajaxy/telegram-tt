@@ -102,6 +102,11 @@ import type { RegularLangFnParameters } from '../../util/localization';
 import type { ProfileCollectionKey } from '../selectors/payments';
 import type { CallbackAction } from './actions';
 
+export type PollVote = {
+  peerId: string;
+  date: number;
+};
+
 export type TabState = {
   id: number;
   isBlurred?: boolean;
@@ -418,7 +423,7 @@ export type TabState = {
   pollResults: {
     chatId?: string;
     messageId?: number;
-    voters?: Record<string, string[]>; // TODO Rename to `voterIds`
+    votesByOption?: Record<string, PollVote[]>;
     offsets?: Record<string, string>;
   };
 

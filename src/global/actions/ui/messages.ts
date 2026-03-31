@@ -297,7 +297,7 @@ addActionHandler('openPollResults', (global, actions, payload): ActionReturnType
         pollResults: {
           chatId,
           messageId,
-          voters: {},
+          votesByOption: {},
         },
       }, tabId);
       setGlobal(global);
@@ -307,7 +307,7 @@ addActionHandler('openPollResults', (global, actions, payload): ActionReturnType
       pollResults: {
         chatId,
         messageId,
-        voters: {},
+        votesByOption: {},
       },
     }, tabId);
   }

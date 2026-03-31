@@ -11,8 +11,10 @@ import type {
   ApiPollAnswer,
   ApiPollResult,
 } from '../../api/types';
+import type { PollVote } from '../../global/types/tabState';
 
 import { selectTabState } from '../../global/selectors';
+import { formatMediaDateTime } from '../../util/dates/dateFormat';
 import { isUserId } from '../../util/entities/ids';
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
@@ -36,7 +38,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  voters?: string[];
+  votes?: PollVote[];
   offset: string;
 };
 
@@ -49,7 +51,7 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
   answer,
   answerVote,
   totalVoters,
-  voters,
+  votes,
   offset,
 }) => {
   const {
@@ -60,7 +62,7 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
 
   const prevVotersCount = usePreviousDeprecated<number>(answerVote.votersCount);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const areVotersLoaded = Boolean(voters);
+  const areVotersLoaded = Boolean(votes);
   const { option, text } = answer;
   const lang = useOldLang();
 
@@ -83,7 +85,7 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     setIsLoading(false);
-  }, [voters]);
+  }, [votes]);
 
   const handleMemberClick = useCallback((id: string) => {
     openChat({ id });
@@ -91,7 +93,7 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
   }, [closePollResults, openChat]);
 
   function renderViewMoreButton() {
-    const leftVotersCount = answerVote.votersCount - voters!.length;
+    const leftVotersCount = answerVote.votersCount - votes!.length;
 
     return answerVote.votersCount > INITIAL_LIMIT && leftVotersCount > 0 && (
       <ShowMoreButton
@@ -106,32 +108,34 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
   return (
     <div className="PollAnswerResults">
       <div className="poll-voters">
-        {voters
-          ? voters.map((id) => (
+        {votes
+          ? votes.map(({ peerId, date }) => (
             <ListItem
-              key={id}
+              key={peerId}
               className="chat-item-clickable"
-
-              onClick={() => handleMemberClick(id)}
+              onClick={() => handleMemberClick(peerId)}
             >
-              {isUserId(id) ? (
+              {isUserId(peerId) ? (
                 <PrivateChatInfo
                   avatarSize="tiny"
-                  userId={id}
+                  userId={peerId}
                   forceShowSelf
                   noStatusOrTyping
                 />
               ) : (
                 <GroupChatInfo
                   avatarSize="tiny"
-                  chatId={id}
+                  chatId={peerId}
                   noStatusOrTyping
                 />
               )}
+              <span className="vote-date">
+                {formatMediaDateTime(lang, date * 1000, true)}
+              </span>
             </ListItem>
           ))
           : <Loading />}
-        {voters && renderViewMoreButton()}
+        {votes && renderViewMoreButton()}
       </div>
       <div className="answer-head" dir={lang.isRtl ? 'rtl' : undefined}>
         <span className="answer-title" dir="auto">
@@ -155,10 +159,10 @@ function getPercentage(value: number, total: number) {
 
 export default memo(withGlobal<OwnProps>(
   (global, { answer }: OwnProps): Complete<StateProps> => {
-    const { voters, offsets } = selectTabState(global).pollResults;
+    const { votesByOption, offsets } = selectTabState(global).pollResults;
 
     return {
-      voters: voters?.[answer.option],
+      votes: votesByOption?.[answer.option],
       offset: (offsets?.[answer.option]) || '',
     };
   },

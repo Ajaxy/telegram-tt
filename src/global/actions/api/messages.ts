@@ -52,6 +52,7 @@ import {
   partition,
   split,
   unique,
+  uniqueByField,
 } from '../../../util/iteratees';
 import { getMessageKey, isLocalMessageId } from '../../../util/keys/messageKey';
 import { getTranslationFn, type RegularLangFnParameters } from '../../../util/localization';
@@ -1477,17 +1478,17 @@ addActionHandler('loadPollOptionResults', async (global, actions, payload): Prom
 
   const tabState = selectTabState(global, tabId);
   const { pollResults } = tabState;
-  const { voters } = tabState.pollResults;
+  const { votesByOption } = pollResults;
+
+  const existingVotes = !shouldResetVoters && votesByOption?.[option] ? votesByOption[option] : [];
+  const newVotes = uniqueByField([...existingVotes, ...result.votes], 'peerId');
 
   global = updateTabState(global, {
     pollResults: {
       ...pollResults,
-      voters: {
-        ...voters,
-        [option]: unique([
-          ...(!shouldResetVoters && voters?.[option] ? voters[option] : []),
-          ...result.votes.map((vote) => vote.peerId),
-        ]),
+      votesByOption: {
+        ...votesByOption,
+        [option]: newVotes,
       },
       offsets: {
         ...(pollResults.offsets ? pollResults.offsets : {}),
