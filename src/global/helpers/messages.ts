@@ -2,6 +2,7 @@ import type { TeactNode } from '../../lib/teact/teact';
 
 import type {
   ApiAttachment,
+  ApiInputMessageReplyInfo,
   ApiMessage,
   ApiMessageEntityTextUrl,
   ApiPeer,
@@ -572,4 +573,18 @@ export function groupMessageIdsByThreadId(
   }
 
   return grouped;
+}
+
+export function prepareMessageReplyInfo(
+  threadId: ThreadId, additionalReplyInfo?: ApiInputMessageReplyInfo,
+): ApiInputMessageReplyInfo | undefined {
+  const isMainThread = threadId === MAIN_THREAD_ID;
+  if (!additionalReplyInfo && isMainThread) return undefined;
+
+  return {
+    type: 'message',
+    ...additionalReplyInfo,
+    replyToMsgId: additionalReplyInfo?.replyToMsgId || Number(threadId),
+    replyToTopId: additionalReplyInfo?.replyToTopId || (!isMainThread ? Number(threadId) : undefined),
+  };
 }

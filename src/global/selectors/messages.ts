@@ -68,6 +68,7 @@ import {
   isOwnMessage,
   isServiceNotificationMessage,
   isUserRightBanned,
+  prepareMessageReplyInfo,
 } from '../helpers';
 import { getMessageReplyInfo } from '../helpers/replies';
 import {
@@ -1446,17 +1447,8 @@ export function selectMessageReplyInfo<T extends GlobalState>(
 ) {
   const chat = selectChat(global, chatId);
   if (!chat) return undefined;
-  const isMainThread = threadId === MAIN_THREAD_ID;
-  if (!additionalReplyInfo && isMainThread) return undefined;
 
-  const replyInfo: ApiInputMessageReplyInfo = {
-    type: 'message',
-    ...additionalReplyInfo,
-    replyToMsgId: additionalReplyInfo?.replyToMsgId || Number(threadId),
-    replyToTopId: additionalReplyInfo?.replyToTopId || (!isMainThread ? Number(threadId) : undefined),
-  };
-
-  return replyInfo;
+  return prepareMessageReplyInfo(threadId, additionalReplyInfo);
 }
 
 export function selectReplyMessage<T extends GlobalState>(global: T, message: ApiMessage) {

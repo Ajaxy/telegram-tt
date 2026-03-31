@@ -27,9 +27,10 @@ import { debounce } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
-import { getMainUsername } from '../../helpers';
 import {
+  getMainUsername,
   getWebAppKey,
+  prepareMessageReplyInfo,
 } from '../../helpers';
 import {
   addActionHandler, getGlobal, setGlobal,
@@ -247,7 +248,8 @@ addActionHandler('sendBotCommand', (global, actions, payload): ActionReturnType 
   const lastMessageId = selectChatLastMessageId(global, chat.id);
 
   void sendBotCommand(
-    chat, command, selectDraft(global, chat.id, threadId)?.replyInfo, selectSendAs(global, chat.id), lastMessageId,
+    chat, threadId, command, selectDraft(global, chat.id, threadId)?.replyInfo, selectSendAs(global, chat.id),
+    lastMessageId,
   );
 });
 
@@ -270,7 +272,7 @@ addActionHandler('restartBot', async (global, actions, payload): Promise<void> =
   global = getGlobal();
   global = removeBlockedUser(global, bot.id);
   setGlobal(global);
-  void sendBotCommand(chat, '/start', undefined, selectSendAs(global, chatId), lastMessageId);
+  void sendBotCommand(chat, MAIN_THREAD_ID, '/start', undefined, selectSendAs(global, chatId), lastMessageId);
 });
 
 addActionHandler('loadTopInlineBots', async (global): Promise<void> => {
@@ -1304,11 +1306,12 @@ async function searchInlineBot<T extends GlobalState>(global: T, {
 }
 
 async function sendBotCommand(
-  chat: ApiChat, command: string, replyInfo?: ApiInputMessageReplyInfo, sendAs?: ApiPeer, lastMessageId?: number,
+  chat: ApiChat, threadId: ThreadId, command: string, replyInfo?: ApiInputMessageReplyInfo,
+  sendAs?: ApiPeer, lastMessageId?: number,
 ) {
   await callApi('sendMessage', {
     chat,
-    replyInfo,
+    replyInfo: prepareMessageReplyInfo(threadId, replyInfo),
     text: command,
     sendAs,
     lastMessageId,
