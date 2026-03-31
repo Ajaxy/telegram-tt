@@ -153,7 +153,7 @@ const ChatBadge = ({
     );
 
     const unreadMentionsElement = unreadMentionsCount && (
-      <div className={buildClassName(statefulClassName, styles.mention, styles.round)}>
+      <div className={buildClassName(baseClassName, styles.mention, styles.round)}>
         <Icon name="mention" />
       </div>
     );
