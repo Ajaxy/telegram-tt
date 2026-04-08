@@ -1,0 +1,29 @@
+.root {
+  --typing-draft-progress: 0%;
+  --typing-draft-spread: 10%;
+
+  display: inline;
+
+  mask-image:
+    linear-gradient(
+      to right,
+      black var(--typing-draft-progress),
+      transparent calc(var(--typing-draft-progress) + var(--typing-draft-spread))
+    );
+
+  &:dir(rtl) {
+    mask-image:
+      linear-gradient(
+        to left,
+        black var(--typing-draft-progress),
+        transparent calc(var(--typing-draft-progress) + var(--typing-draft-spread))
+      );
+  }
+}
+
+.placeholder {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  vertical-align: text-top;
+}

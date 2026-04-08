@@ -708,6 +708,7 @@
 "SettingsPerformanceMessageBlur" = "Message Blur";
 "SettingsPerformanceRightColumn" = "Right Column Animation";
 "SettingsPerformanceThanos" = "Dust-effect deletion";
+"SettingsPerformanceTextStreaming" = "Text Streaming";
 "SettingsPerformanceAnimatedEmoji" = "Allow Animated Emoji";
 "SettingsPerformanceLoopStickers" = "Loop Animated Stickers";
 "SettingsPerformanceReactionEffects" = "Reaction Effects";

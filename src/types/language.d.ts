@@ -628,6 +628,7 @@ export interface LangPair {
   'SettingsPerformanceMessageBlur': undefined;
   'SettingsPerformanceRightColumn': undefined;
   'SettingsPerformanceThanos': undefined;
+  'SettingsPerformanceTextStreaming': undefined;
   'SettingsPerformanceAnimatedEmoji': undefined;
   'SettingsPerformanceLoopStickers': undefined;
   'SettingsPerformanceReactionEffects': undefined;

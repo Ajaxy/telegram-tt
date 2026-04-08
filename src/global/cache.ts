@@ -357,6 +357,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cachedSharedSettings.performance.messageBlur = false;
   }
 
+  if (cachedSharedSettings.performance.textStreaming === undefined) {
+    cachedSharedSettings.performance.textStreaming = true;
+  }
+
   if (!cachedSharedSettings.foldersPosition) {
     cachedSharedSettings.foldersPosition = FOLDERS_POSITION_DEFAULT;
   }

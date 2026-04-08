@@ -313,6 +313,7 @@ type StateProps = {
   requestedTranslationLanguage?: string;
   requestedChatTranslationLanguage?: string;
   withAnimatedEffects?: boolean;
+  canAnimateTextStreaming?: boolean;
   webPageStory?: ApiTypeStory;
   isConnected: boolean;
   isLoadingComments?: boolean;
@@ -440,6 +441,7 @@ const Message = ({
   requestedTranslationLanguage,
   requestedChatTranslationLanguage,
   withAnimatedEffects,
+  canAnimateTextStreaming,
   webPageStory,
   isConnected,
   getIsMessageListReady,
@@ -1073,6 +1075,7 @@ const Message = ({
         maxTimestamp={maxTimestamp}
         threadId={threadId}
         shouldAnimateTyping={isTypingDraft}
+        canAnimateTextStreaming={canAnimateTextStreaming}
       />
     );
   }
@@ -2221,6 +2224,7 @@ export default memo(withGlobal<OwnProps>(
       requestedChatTranslationLanguage,
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       withAnimatedEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
+      canAnimateTextStreaming: selectPerformanceSettingsValue(global, 'textStreaming'),
       webPageStory,
       isConnected,
       isLoadingComments: repliesThreadInfo?.isCommentsInfo

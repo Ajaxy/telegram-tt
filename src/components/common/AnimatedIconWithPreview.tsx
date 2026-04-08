@@ -1,10 +1,11 @@
-import { memo } from '../../lib/teact/teact';
+import { memo, useRef } from '../../lib/teact/teact';
 
 import type { OwnProps as AnimatedIconProps } from './AnimatedIcon';
 
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 
+import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListener';
 import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
@@ -15,7 +16,7 @@ import styles from './AnimatedIconWithPreview.module.scss';
 
 type OwnProps =
   Partial<AnimatedIconProps>
-  & { previewUrl?: string; thumbDataUri?: string; noPreviewTransition?: boolean };
+  & { previewUrl?: string; thumbDataUri?: string; noPreviewTransition?: boolean; shouldUseTextColor?: boolean };
 
 const ANIMATION_DURATION = 300;
 
@@ -23,8 +24,11 @@ const loadedPreviewUrls = new Set();
 
 function AnimatedIconWithPreview(props: OwnProps) {
   const {
-    previewUrl, thumbDataUri, className, ...otherProps
+    previewUrl, thumbDataUri, className, shouldUseTextColor, ...otherProps
   } = props;
+
+  const rootRef = useRef<HTMLDivElement>();
+  const customColor = useDynamicColorListener(rootRef, undefined, !shouldUseTextColor);
 
   const [isThumbOpen, , unmarkThumbOpen] = useFlag(Boolean(thumbDataUri));
   const thumbClassNames = useMediaTransitionDeprecated(isThumbOpen);
@@ -49,6 +53,7 @@ function AnimatedIconWithPreview(props: OwnProps) {
 
   return (
     <div
+      ref={rootRef}
       className={buildClassName(className, styles.root)}
       style={buildStyle(size !== undefined && `width: ${size}px; height: ${size}px;`)}
     >
@@ -65,7 +70,7 @@ function AnimatedIconWithPreview(props: OwnProps) {
           onLoad={handlePreviewLoad}
         />
       )}
-      <AnimatedIcon {...otherProps} onLoad={handleAnimationReady} />
+      <AnimatedIcon {...otherProps} color={customColor} onLoad={handleAnimationReady} />
     </div>
   );
 }

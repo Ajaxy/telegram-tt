@@ -1,71 +1,223 @@
+import type { TeactNode } from '../../lib/teact/teact';
 import {
-  memo, useEffect, useRef, useSignal, useUnmountCleanup,
+  memo, useEffect, useLayoutEffect, useMemo, useRef, useState, useUnmountCleanup,
 } from '../../lib/teact/teact';
 
-import {
-  type ApiFormattedText,
-} from '../../api/types';
+import type { ApiFormattedText } from '../../api/types';
 
-import useDerivedState from '../../hooks/useDerivedState';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
+import { LOCAL_TGS_URLS } from './helpers/animatedAssets';
+import { REM } from './helpers/mediaDimensions';
+
 import useLastCallback from '../../hooks/useLastCallback';
 
+import AnimatedIconWithPreview from './AnimatedIconWithPreview';
+
+import styles from './TypingWrapper.module.scss';
+
 type OwnProps = {
-  text: ApiFormattedText;
-  duration?: number;
-  children: (text: ApiFormattedText) => React.ReactNode;
+  formattedText: ApiFormattedText;
+  shouldAnimateMask?: boolean;
+  renderText: (text: ApiFormattedText) => TeactNode;
 };
 
-const DEFAULT_HEADWAY_DURATION = 1000;
-const MIN_TIMEOUT_DURATION = 1000 / 60; // 60 FPS
-const MAX_SYMBOLS_BATCH = 10;
+const CHUNK_SIZE = 67;
+const CHUNK_SPREAD_DURATION = 500;
+const HEADWAY_DURATION = 750;
+const PLACEHOLDER_SIZE = 1.25 * REM;
+const SPREAD_CHARS = 20;
+const PROGRESS_CSS_PROPERTY = '--typing-draft-progress';
+const SPREAD_CSS_PROPERTY = '--typing-draft-spread';
 
-const TypingWrapper = ({
-  text,
-  duration = DEFAULT_HEADWAY_DURATION,
-  children,
-}: OwnProps) => {
-  const [getCurrentTextLength, setCurrentTextLength] = useSignal(text.text.length);
-  const intervalRef = useRef<number>();
+try {
+  window.CSS.registerProperty({
+    name: PROGRESS_CSS_PROPERTY,
+    syntax: '<percentage>',
+    inherits: false,
+    initialValue: '0%',
+  });
+} catch (_) {
+  // Ignore duplicate registrations
+}
 
-  const animate = useLastCallback(() => {
-    const msPerSymbol = duration / text.text.length;
-    const timeoutDuration = Math.max(msPerSymbol, MIN_TIMEOUT_DURATION);
-    const nextSymbolBatchLength = Math.min(Math.ceil(timeoutDuration / msPerSymbol), MAX_SYMBOLS_BATCH);
+function getRunningProgress(animation: Animation | undefined, baseProgress: number) {
+  const timing = animation?.effect?.getComputedTiming().progress;
+  if (typeof timing !== 'number') return baseProgress;
+  return baseProgress + (100 - baseProgress) * timing;
+}
 
-    intervalRef.current = window.setTimeout(() => {
-      if (getCurrentTextLength() >= text.text.length) {
-        clearTimeout(intervalRef.current);
-        return;
-      }
+const TypingWrapper = ({ formattedText, shouldAnimateMask, renderText }: OwnProps) => {
+  const ref = useRef<HTMLSpanElement>();
+  const animationRef = useRef<Animation>();
+  const progressRef = useRef(0);
+  const prevRevealedRef = useRef(0);
 
-      setCurrentTextLength(getCurrentTextLength() + nextSymbolBatchLength);
-    }, timeoutDuration);
+  const [revealedLength, setRevealedLength] = useState(0);
+  const revealedLengthRef = useRef(0);
+  const chunkTimerRef = useRef<number>();
+  const prevFullTextRef = useRef('');
+
+  const fullText = formattedText.text;
+
+  const stopAnimation = useLastCallback(() => {
+    animationRef.current?.cancel();
+    animationRef.current = undefined;
   });
 
+  const scheduleChunks = useLastCallback((from: number, to: number) => {
+    window.clearTimeout(chunkTimerRef.current);
+
+    const delta = to - from;
+    if (delta <= 0) return;
+
+    const numChunks = Math.ceil(delta / CHUNK_SIZE);
+    const chunkInterval = numChunks > 1 ? CHUNK_SPREAD_DURATION / (numChunks - 1) : 0;
+
+    let position = from;
+
+    const addChunk = () => {
+      position = Math.min(position + CHUNK_SIZE, to);
+      revealedLengthRef.current = position;
+      setRevealedLength(position);
+
+      if (position < to) {
+        chunkTimerRef.current = window.setTimeout(addChunk, chunkInterval);
+      } else {
+        chunkTimerRef.current = undefined;
+      }
+    };
+
+    addChunk();
+  });
+
+  const resetChunking = useLastCallback(() => {
+    window.clearTimeout(chunkTimerRef.current);
+    chunkTimerRef.current = undefined;
+    revealedLengthRef.current = 0;
+    prevRevealedRef.current = 0;
+    progressRef.current = 0;
+    stopAnimation();
+    setRevealedLength(0);
+  });
+
+  // --- Chunking: spread incoming text over time ---
   useEffect(() => {
-    // Text got shorter, skip animation
-    if (text.text.length < getCurrentTextLength()) {
-      clearTimeout(intervalRef.current);
-      setCurrentTextLength(text.text.length);
+    if (fullText === prevFullTextRef.current) return;
+    prevFullTextRef.current = fullText;
+
+    const fullLen = fullText.length;
+    const revealed = revealedLengthRef.current;
+
+    if (fullLen < revealed) {
+      resetChunking();
+      scheduleChunks(0, fullLen);
       return;
     }
 
-    clearTimeout(intervalRef.current);
-    animate();
-  }, [getCurrentTextLength, setCurrentTextLength, text.text.length]);
-
-  useUnmountCleanup(() => {
-    clearTimeout(intervalRef.current);
+    scheduleChunks(revealed, fullLen);
   });
 
-  const displayedText = useDerivedState(() => {
-    return {
-      ...text,
-      text: text.text.slice(0, getCurrentTextLength()),
-    };
-  }, [getCurrentTextLength, text]);
+  // --- Mask animation: smooth reveal of rendered content (layout effect to prevent flash) ---
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
 
-  return children(displayedText);
+    const revealed = revealedLength;
+    const prevRevealed = prevRevealedRef.current;
+    if (revealed === prevRevealed) return;
+
+    prevRevealedRef.current = revealed;
+
+    if (!shouldAnimateMask) {
+      stopAnimation();
+      progressRef.current = 100;
+      element.style.setProperty(PROGRESS_CSS_PROPERTY, '100%');
+      return;
+    }
+
+    let progress = animationRef.current
+      ? getRunningProgress(animationRef.current, progressRef.current)
+      : progressRef.current;
+
+    stopAnimation();
+
+    if (revealed < prevRevealed) {
+      progress = 0;
+    } else if (prevRevealed && revealed) {
+      progress = Math.min((prevRevealed * progress) / revealed, 100);
+    } else if (!prevRevealed) {
+      progress = 0;
+    }
+
+    if (!revealed) {
+      progress = 100;
+    }
+
+    progressRef.current = progress;
+    const remaining = 100 - progress;
+    const spread = revealed ? (SPREAD_CHARS / revealed) * 100 : 0;
+
+    if (!revealed || remaining <= 0) {
+      progressRef.current = 100;
+      element.style.setProperty(PROGRESS_CSS_PROPERTY, '100%');
+      return;
+    }
+
+    element.style.setProperty(SPREAD_CSS_PROPERTY, `${spread}%`);
+    element.style.setProperty(PROGRESS_CSS_PROPERTY, `${progress}%`);
+
+    const animation = element.animate([
+      { [PROGRESS_CSS_PROPERTY]: `${progress}%` },
+      { [PROGRESS_CSS_PROPERTY]: '100%' },
+    ] as Keyframe[], {
+      duration: HEADWAY_DURATION,
+      easing: 'linear',
+      fill: 'forwards',
+    });
+
+    animationRef.current = animation;
+
+    animation.onfinish = () => {
+      if (animationRef.current !== animation) return;
+
+      progressRef.current = 100;
+      animationRef.current = undefined;
+
+      requestMutation(() => {
+        element.style.setProperty(PROGRESS_CSS_PROPERTY, '100%');
+      });
+    };
+
+    animation.oncancel = () => {
+      if (animationRef.current !== animation) return;
+      animationRef.current = undefined;
+    };
+  });
+
+  useUnmountCleanup(() => {
+    window.clearTimeout(chunkTimerRef.current);
+    stopAnimation();
+  });
+
+  const truncatedText = useMemo(() => ({
+    text: fullText.slice(0, revealedLength),
+    entities: formattedText.entities,
+  }), [fullText, formattedText.entities, revealedLength]);
+
+  return (
+    <span ref={ref} className={styles.root}>
+      {renderText(truncatedText)}
+      <span key="typing-placeholder" className={styles.placeholder}>
+        <AnimatedIconWithPreview
+          tgsUrl={LOCAL_TGS_URLS.Typing}
+          size={PLACEHOLDER_SIZE}
+          play
+          noLoop={false}
+          shouldUseTextColor
+        />
+      </span>
+    </span>
+  );
 };
 
 export default memo(TypingWrapper);
