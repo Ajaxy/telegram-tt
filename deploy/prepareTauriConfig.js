@@ -24,7 +24,8 @@ export default function prepareTauriConfig() {
   }
 
   if (process.env.KEYPAIR_ALIAS) {
-    config.bundle.windows.signCommand = `smctl.exe sign --keypair-alias=${process.env.KEYPAIR_ALIAS} --input %1`;
+    // eslint-disable-next-line @stylistic/max-len
+    config.bundle.windows.signCommand = `smctl.exe sign --keypair-alias=${process.env.KEYPAIR_ALIAS} --simple --input %1`;
   }
 
   return config;
