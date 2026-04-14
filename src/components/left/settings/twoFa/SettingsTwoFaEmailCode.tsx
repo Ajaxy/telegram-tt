@@ -10,7 +10,6 @@ import type { ApiSticker } from '../../../../api/types';
 import { selectAnimatedEmoji, selectTabState } from '../../../../global/selectors';
 import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment';
 
-import useAppLayout from '../../../../hooks/useAppLayout';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useOldLang from '../../../../hooks/useOldLang';
 
@@ -47,18 +46,14 @@ const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
   recoveryEmail,
 }) => {
   const inputRef = useRef<HTMLInputElement>();
-  const { isMobile } = useAppLayout();
-  const focusDelayTimeoutMs = isMobile ? 550 : 400;
 
   const [value, setValue] = useState<string>('');
 
   useEffect(() => {
-    if (!IS_TOUCH_ENV) {
-      setTimeout(() => {
-        inputRef.current!.focus();
-      }, focusDelayTimeoutMs);
+    if (!IS_TOUCH_ENV && isActive) {
+      inputRef.current!.focus();
     }
-  }, [focusDelayTimeoutMs]);
+  }, [isActive]);
 
   const lang = useOldLang();
 

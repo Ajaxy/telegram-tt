@@ -61,7 +61,7 @@ const Giveaway = ({
 }: OwnProps & StateProps) => {
   const { openChat } = getActions();
 
-  const isLoadingInfo = useRef(false);
+  const isLoadingInfoRef = useRef(false);
   const [giveawayInfo, setGiveawayInfo] = useState<ApiGiveawayInfo | undefined>();
 
   const lang = useOldLang();
@@ -90,15 +90,15 @@ const Giveaway = ({
   });
 
   const handleShowInfoClick = useLastCallback(async () => {
-    if (isLoadingInfo.current) return;
+    if (isLoadingInfoRef.current) return;
 
-    isLoadingInfo.current = true;
+    isLoadingInfoRef.current = true;
     const result = await callApi('fetchGiveawayInfo', {
       peer: chat,
       messageId: message.id,
     });
     setGiveawayInfo(result);
-    isLoadingInfo.current = false;
+    isLoadingInfoRef.current = false;
   });
 
   const handleCloseInfo = useLastCallback(() => {
@@ -240,7 +240,7 @@ const Giveaway = ({
       ? lang('BoostingGiveawayHowItWorksIncludeText', [chatTitle, quantity, prizeDescription], undefined, quantity)
       : undefined;
 
-    let secondKey = '';
+    let secondKey;
     if (isResultsInfo) {
       secondKey = isSeveral ? 'BoostingGiveawayHowItWorksSubTextSeveralEnd' : 'BoostingGiveawayHowItWorksSubTextEnd';
     } else {

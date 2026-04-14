@@ -42,6 +42,10 @@ const MiddleSearchResult = ({
 }: OwnProps) => {
   const lang = useLang();
 
+  const handleClick = useLastCallback(() => {
+    onClick(message);
+  });
+
   if (peer && !message) {
     const username = getMainUsername(peer);
 
@@ -82,10 +86,6 @@ const MiddleSearchResult = ({
   const hiddenForwardTitle = message.forwardInfo?.hiddenUserName;
   const senderPeer = shouldShowChat ? messageChat : peer;
   const senderName = shouldShowChat && peer ? getMessageSenderName(lang, message.chatId, peer) : undefined;
-
-  const handleClick = useLastCallback(() => {
-    onClick(message);
-  });
 
   return (
     <div

@@ -902,7 +902,6 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
     isWriteAllowed,
     theme,
   });
-  global = getGlobal();
 
   if (!url) return;
 

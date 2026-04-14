@@ -1,4 +1,4 @@
-import { memo, useCallback } from '@teact';
+import { memo } from '@teact';
 
 import { type ApiChatFolder, ApiMessageEntityTypes } from '../../../api/types';
 
@@ -33,7 +33,7 @@ const ChatTags = ({
   const visibleFolderIds = orderedFolderIds.slice(0, MAX_VISIBLE_TAGS);
   const remainingCount = orderedFolderIds.length - visibleFolderIds.length;
 
-  const getFolderTitle = useCallback((folder: ApiChatFolder) => {
+  function getFolderTitle(folder: ApiChatFolder) {
     let text = folder.title.text;
     let entities = folder.title.entities;
 
@@ -56,7 +56,7 @@ const ChatTags = ({
       noCustomEmojiPlayback: folder.noTitleAnimations,
       emojiSize: CUSTOM_EMOJI_SIZE,
     });
-  }, [isFoldersSidebarShown]);
+  };
 
   return (
     <div className={styles.wrapper}>

@@ -499,7 +499,7 @@ const Composer = ({
   const [getHtml, setHtml] = useSignal('');
   const [isMounted, setIsMounted] = useState(false);
   const getSelectionRange = useGetSelectionRange(editableInputCssSelector);
-  const lastMessageSendTimeSeconds = useRef<number>();
+  const lastMessageSendTimeSecondsRef = useRef<number>();
   const prevDropAreaState = usePreviousDeprecated(dropAreaState);
   const { width: windowWidth } = windowSize.get();
   const forceUpdate = useForceUpdate();
@@ -526,7 +526,7 @@ const Composer = ({
 
   useEffect(processMessageInputForCustomEmoji, [getHtml]);
 
-  const customEmojiNotificationNumber = useRef(0);
+  const customEmojiNotificationNumberRef = useRef(0);
 
   const [requestCalendar, calendar] = useSchedule(
     isInMessageList && canScheduleUntilOnline,
@@ -544,7 +544,7 @@ const Composer = ({
   }, [isInMessageList, storyId]);
 
   useEffect(() => {
-    lastMessageSendTimeSeconds.current = undefined;
+    lastMessageSendTimeSecondsRef.current = undefined;
   }, [chatId]);
 
   useEffect(() => {
@@ -708,7 +708,7 @@ const Composer = ({
     shouldSendInHighQuality: attachmentSettings.shouldSendInHighQuality,
   });
 
-  const mediaEditRequestRef = useRef(Date.now());
+  const mediaEditRequestRef = useRef<number>();
   useEffect(() => {
     if (!shouldOpenMessageMediaEditor) return;
     const targetMessage = editingMessage || replyToMessage;
@@ -945,7 +945,7 @@ const Composer = ({
     && !isForwarding && !isReplying && !draft?.suggestedPostInfo;
 
   const showCustomEmojiPremiumNotification = useLastCallback(() => {
-    const notificationNumber = customEmojiNotificationNumber.current;
+    const notificationNumber = customEmojiNotificationNumberRef.current;
     if (!notificationNumber) {
       showNotification({
         message: oldLang('UnlockPremiumEmojiHint'),
@@ -965,7 +965,7 @@ const Composer = ({
         actionText: oldLang('Open'),
       });
     }
-    customEmojiNotificationNumber.current = Number(!notificationNumber);
+    customEmojiNotificationNumberRef.current = Number(!notificationNumber);
   });
 
   const mainButtonState = useDerivedState(() => {
@@ -1073,12 +1073,12 @@ const Composer = ({
       const messageInput = document.querySelector<HTMLDivElement>(editableInputCssSelector);
 
       const nowSeconds = getServerTime();
-      const secondsSinceLastMessage = lastMessageSendTimeSeconds.current
-        && Math.floor(nowSeconds - lastMessageSendTimeSeconds.current);
+      const secondsSinceLastMessage = lastMessageSendTimeSecondsRef.current
+        && Math.floor(nowSeconds - lastMessageSendTimeSecondsRef.current);
       const nextSendDateNotReached = slowMode.nextSendDate && slowMode.nextSendDate > nowSeconds;
 
       if (
-        (secondsSinceLastMessage && secondsSinceLastMessage < slowMode.seconds)
+        (secondsSinceLastMessage !== undefined && secondsSinceLastMessage < slowMode.seconds)
         || nextSendDateNotReached
       ) {
         const secondsRemaining = nextSendDateNotReached
@@ -1168,7 +1168,7 @@ const Composer = ({
       });
     }
 
-    lastMessageSendTimeSeconds.current = getServerTime();
+    lastMessageSendTimeSecondsRef.current = getServerTime();
 
     clearDraft({ chatId, threadId, isLocalOnly: true });
 
@@ -1277,7 +1277,7 @@ const Composer = ({
         });
       }
 
-      lastMessageSendTimeSeconds.current = getServerTime();
+      lastMessageSendTimeSecondsRef.current = getServerTime();
       clearDraft({
         chatId, threadId, isLocalOnly: true, shouldKeepReply: isForwarding,
       });
@@ -1743,15 +1743,21 @@ const Composer = ({
   }, [isRightColumnShown, closeSymbolMenu, isMobile]);
 
   useEffect(() => {
-    if (!isReady) return;
+    if (!isReady) return undefined;
 
+    let timeout: number | undefined;
     if (isSelectModeActive) {
       disableHover();
     } else {
-      setTimeout(() => {
+      timeout = window.setTimeout(() => {
         enableHover();
       }, SELECT_MODE_TRANSITION_MS);
     }
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
   }, [isSelectModeActive, enableHover, disableHover, isReady]);
 
   const hasText = useDerivedState(() => Boolean(getHtml()), [getHtml]);
@@ -1886,13 +1892,6 @@ const Composer = ({
         break;
     }
   });
-
-  const scheduledDefaultDate = new Date();
-  scheduledDefaultDate.setSeconds(0);
-  scheduledDefaultDate.setMilliseconds(0);
-
-  const scheduledMaxDate = new Date();
-  scheduledMaxDate.setFullYear(scheduledMaxDate.getFullYear() + 1);
 
   let sendButtonAriaLabel = 'SendMessage';
   switch (mainButtonState) {

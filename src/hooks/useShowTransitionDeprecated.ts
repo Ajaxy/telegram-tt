@@ -23,6 +23,7 @@ const useShowTransitionDeprecated = (
     setHasOpenClassName(true);
 
     if (closeTimeoutRef.current) {
+      // eslint-disable-next-line @eslint-react/purity
       window.clearTimeout(closeTimeoutRef.current);
 
       closeTimeoutRef.current = undefined;
@@ -44,6 +45,7 @@ const useShowTransitionDeprecated = (
       if (noCloseTransition) {
         exec();
       } else {
+        // eslint-disable-next-line @eslint-react/purity
         closeTimeoutRef.current = window.setTimeout(exec, closeDuration);
       }
     }

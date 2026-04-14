@@ -4,7 +4,7 @@ const ELEMENT_NODE = 1;
 
 export default function getMessageIdsForSelectedText() {
   const selection = window.getSelection();
-  let selectedFragments = selection?.rangeCount ? selection.getRangeAt(0).cloneContents() : undefined;
+  const selectedFragments = selection?.rangeCount ? selection.getRangeAt(0).cloneContents() : undefined;
 
   const shouldIncludeLastMessage = selection?.focusNode && selection.focusOffset > 0
     && hasParentWithClassName(selection.focusNode, MESSAGE_CONTENT_CLASS_NAME);
@@ -28,7 +28,6 @@ export default function getMessageIdsForSelectedText() {
   while (selectedFragments.firstChild) {
     selectedFragments.removeChild(selectedFragments.firstChild);
   }
-  selectedFragments = undefined;
 
   if (!shouldIncludeLastMessage) {
     messageIds.pop();

@@ -380,7 +380,7 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
 
   // DOM refs
   const cubeRef = useRef<HTMLDivElement>();
-  const faceRefs = useRef<Record<FaceName, HTMLDivElement | undefined>>({
+  const facesRef = useRef<Record<FaceName, HTMLDivElement | undefined>>({
     front: undefined,
     back: undefined,
     left: undefined,
@@ -388,8 +388,8 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
     top: undefined,
     bottom: undefined,
   });
-  const slotRefs = useRef<(HTMLDivElement | undefined)[]>([]);
-  const slotInnerRefs = useRef<(HTMLDivElement | undefined)[]>([]);
+  const slotsRef = useRef<(HTMLDivElement | undefined)[]>([]);
+  const slotsInnerRef = useRef<(HTMLDivElement | undefined)[]>([]);
   const backfaceRemovedRef = useRef(false);
 
   // Physics state refs (mutable, not triggering re-renders)
@@ -473,7 +473,7 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
       }
 
       // Reset face backgrounds and backface-visibility
-      Object.values(faceRefs.current).forEach((face) => {
+      Object.values(facesRef.current).forEach((face) => {
         if (face) {
           face.style.background = '';
           face.style.backfaceVisibility = '';
@@ -481,7 +481,7 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
       });
 
       // Reset slot transforms
-      slotRefs.current.forEach((slot) => {
+      slotsRef.current.forEach((slot) => {
         if (slot) {
           slot.style.transform = '';
           slot.style.transition = '';
@@ -520,7 +520,7 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
   // Fade out slots when result rotation is complete
   useEffect(() => {
     if (isRotationStarted) {
-      slotRefs.current.forEach((slot) => {
+      slotsRef.current.forEach((slot) => {
         if (slot) {
           requestMutation(() => {
             slot.classList.add(styles.craftSlotHidden);
@@ -817,7 +817,7 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
   // Slot Flight Animation
   // ===================
   const flySlotToCube = useLastCallback((index: number) => {
-    const slot = slotRefs.current[index];
+    const slot = slotsRef.current[index];
     const cube = cubeRef.current;
     if (!slot || !cube || !faceTransformsRef.current) return;
 
@@ -913,7 +913,7 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
     setAnimatingSlots((prev) => new Set(prev).add(index));
 
     // Pre-rotate slot and counter-rotate inner content to avoid visible rotation jump
-    const slotInner = slotInnerRefs.current[index];
+    const slotInner = slotsInnerRef.current[index];
     const finalTransformStr = finalTransform.toString();
 
     requestMutation(() => {
@@ -947,7 +947,7 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
         // Remove backface-visibility from all faces on first slot stick
         if (!backfaceRemovedRef.current) {
           backfaceRemovedRef.current = true;
-          Object.values(faceRefs.current).forEach((face) => {
+          Object.values(facesRef.current).forEach((face) => {
             if (face) {
               face.style.backfaceVisibility = 'visible';
             }
@@ -1156,11 +1156,11 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
   });
 
   const slotRefCallbacks = useMemo(() => [0, 1, 2, 3].map((i) => (el: HTMLDivElement | undefined) => {
-    slotRefs.current[i] = el;
+    slotsRef.current[i] = el;
   }), []);
 
   const slotInnerRefCallbacks = useMemo(() => [0, 1, 2, 3].map((i) => (el: HTMLDivElement | undefined) => {
-    slotInnerRefs.current[i] = el;
+    slotsInnerRef.current[i] = el;
   }), []);
 
   function renderCraftSlot(index: number) {
@@ -1260,7 +1260,7 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
           return (
             <div
               key={face.name}
-              ref={(el) => { faceRefs.current[face.name] = el || undefined; }}
+              ref={(el) => { facesRef.current[face.name] = el || undefined; }}
               className={buildClassName(
                 styles.face,
                 shouldHide && styles.faceHidden,
@@ -1486,7 +1486,7 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
   }
 
   function renderInfoContent() {
-    let activeKey = 0;
+    let activeKey;
     let content;
 
     if (failedFace) {

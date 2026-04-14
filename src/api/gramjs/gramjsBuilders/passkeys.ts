@@ -3,17 +3,17 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { base64UrlToBuffer, base64UrlToString } from '../../../util/encoding/base64';
 
 export function buildInputPasskeyCredential(
-  credentialJson: PublicKeyCredentialJSON,
+  credentialJson: RegistrationResponseJSON | AuthenticationResponseJSON,
 ): GramJs.TypeInputPasskeyCredential {
   let response: GramJs.TypeInputPasskeyResponse;
   const clientData = base64UrlToString(credentialJson.response.clientDataJSON);
-  if (credentialJson.response.attestationObject) {
+  if ('attestationObject' in credentialJson.response) {
     response = new GramJs.InputPasskeyResponseRegister({
       clientData: new GramJs.DataJSON({ data: clientData }),
       attestationData: base64UrlToBuffer(credentialJson.response.attestationObject),
     });
   } else {
-    const userHandle = base64UrlToString(credentialJson.response.userHandle);
+    const userHandle = base64UrlToString(credentialJson.response.userHandle!);
 
     response = new GramJs.InputPasskeyResponseLogin({
       clientData: new GramJs.DataJSON({ data: clientData }),

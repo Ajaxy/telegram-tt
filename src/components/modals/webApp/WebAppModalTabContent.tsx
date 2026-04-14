@@ -94,7 +94,6 @@ const POPUP_RESET_DELAY = 2000; // 2s
 const APP_NAME_DISPLAY_DURATION = 3800;
 const SANDBOX_ATTRIBUTES = [
   'allow-scripts',
-  'allow-same-origin',
   'allow-popups',
   'allow-forms',
   'allow-modals',
@@ -857,79 +856,79 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const hideDirection = (isHorizontalLayout
     && (!shouldHideMainButton && !shouldHideSecondaryButton)) ? 'horizontal' : 'vertical';
 
-  const mainButtonChangeTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const mainButtonFastTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const secondaryButtonChangeTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const secondaryButtonFastTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const appNameDisplayTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const mainButtonChangeTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const mainButtonFastTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const secondaryButtonChangeTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const secondaryButtonFastTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const appNameDisplayTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (isFullscreen && isOpen && Boolean(activeWebAppName)) {
       setShouldShowAppNameInFullscreen(true);
 
-      if (appNameDisplayTimeout.current) {
-        clearTimeout(appNameDisplayTimeout.current);
+      if (appNameDisplayTimeoutRef.current) {
+        clearTimeout(appNameDisplayTimeoutRef.current);
       }
 
-      appNameDisplayTimeout.current = setTimeout(() => {
+      appNameDisplayTimeoutRef.current = setTimeout(() => {
         setShouldShowAppNameInFullscreen(false);
-        appNameDisplayTimeout.current = undefined;
+        appNameDisplayTimeoutRef.current = undefined;
       }, APP_NAME_DISPLAY_DURATION);
     } else {
       setShouldShowAppNameInFullscreen(false);
 
-      if (appNameDisplayTimeout.current) {
-        clearTimeout(appNameDisplayTimeout.current);
-        appNameDisplayTimeout.current = undefined;
+      if (appNameDisplayTimeoutRef.current) {
+        clearTimeout(appNameDisplayTimeoutRef.current);
+        appNameDisplayTimeoutRef.current = undefined;
       }
     }
 
     return () => {
-      if (appNameDisplayTimeout.current) {
-        clearTimeout(appNameDisplayTimeout.current);
+      if (appNameDisplayTimeoutRef.current) {
+        clearTimeout(appNameDisplayTimeoutRef.current);
       }
     };
   }, [isFullscreen, isOpen, activeWebAppName]);
 
   useEffect(() => {
-    if (mainButtonChangeTimeout.current) clearTimeout(mainButtonChangeTimeout.current);
-    if (mainButtonFastTimeout.current) clearTimeout(mainButtonFastTimeout.current);
+    if (mainButtonChangeTimeoutRef.current) clearTimeout(mainButtonChangeTimeoutRef.current);
+    if (mainButtonFastTimeoutRef.current) clearTimeout(mainButtonFastTimeoutRef.current);
 
     if (isMainButtonVisible) {
-      mainButtonFastTimeout.current = setTimeout(() => {
+      mainButtonFastTimeoutRef.current = setTimeout(() => {
         setShouldShowMainButton(true);
       }, 35);
       setShouldHideMainButton(false);
-      mainButtonChangeTimeout.current = setTimeout(() => {
+      mainButtonChangeTimeoutRef.current = setTimeout(() => {
         setShouldDecreaseWebFrameSize(true);
       }, MAIN_BUTTON_ANIMATION_TIME);
     }
 
     if (!isMainButtonVisible) {
       setShouldShowMainButton(false);
-      mainButtonChangeTimeout.current = setTimeout(() => {
+      mainButtonChangeTimeoutRef.current = setTimeout(() => {
         setShouldHideMainButton(true);
       }, MAIN_BUTTON_ANIMATION_TIME);
     }
   }, [isMainButtonVisible]);
 
   useEffect(() => {
-    if (secondaryButtonChangeTimeout.current) clearTimeout(secondaryButtonChangeTimeout.current);
-    if (secondaryButtonFastTimeout.current) clearTimeout(secondaryButtonFastTimeout.current);
+    if (secondaryButtonChangeTimeoutRef.current) clearTimeout(secondaryButtonChangeTimeoutRef.current);
+    if (secondaryButtonFastTimeoutRef.current) clearTimeout(secondaryButtonFastTimeoutRef.current);
 
     if (isSecondaryButtonVisible) {
-      secondaryButtonFastTimeout.current = setTimeout(() => {
+      secondaryButtonFastTimeoutRef.current = setTimeout(() => {
         setShouldShowSecondaryButton(true);
       }, 35);
       setShouldHideSecondaryButton(false);
-      secondaryButtonChangeTimeout.current = setTimeout(() => {
+      secondaryButtonChangeTimeoutRef.current = setTimeout(() => {
         setShouldDecreaseWebFrameSize(true);
       }, MAIN_BUTTON_ANIMATION_TIME);
     }
 
     if (!isSecondaryButtonVisible) {
       setShouldShowSecondaryButton(false);
-      secondaryButtonChangeTimeout.current = setTimeout(() => {
+      secondaryButtonChangeTimeoutRef.current = setTimeout(() => {
         setShouldHideSecondaryButton(true);
       }, MAIN_BUTTON_ANIMATION_TIME);
     }

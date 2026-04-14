@@ -1,4 +1,5 @@
-/* eslint-disable react-x/no-unnecessary-use-prefix */
+/* eslint-disable @eslint-react/purity */
+/* eslint-disable @eslint-react/no-unnecessary-use-prefix */
 import type { ReactElement } from 'react';
 
 import { DEBUG, DEBUG_MORE } from '../../config';

@@ -1,3 +1,4 @@
+/* eslint-disable @eslint-react/purity */
 import type { ChangeEvent } from 'react';
 import { useRef, useState } from '../../lib/teact/teact';
 
@@ -93,7 +94,7 @@ function MyComponent({
   onChange: (newValue: string) => void;
   onDelete: NoneToVoidFunction;
 }) {
-  const id = useRef(String(Math.random()).slice(-3));
+  const idRef = useRef(String(Math.random()).slice(-3));
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
@@ -103,7 +104,7 @@ function MyComponent({
     <li>
       <input type="text" value={value} size={3} onChange={handleChange} />
       <input type="button" value="x" onClick={onDelete} />
-      {id.current}
+      {idRef.current}
     </li>
   );
 }

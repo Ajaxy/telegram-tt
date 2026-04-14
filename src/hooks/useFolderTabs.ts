@@ -1,10 +1,15 @@
 import { type TeactNode, useMemo } from '../lib/teact/teact';
 import { getActions, getGlobal } from '../global';
 
-import type { ApiMessageEntity, ApiMessageEntityCustomEmoji } from '../api/types';
 import type { MenuItemContextAction } from '../components/ui/ListItem';
 import type { TabWithProperties } from '../components/ui/SquareTabList';
-import { type ApiChatFolder, type ApiChatlistExportedInvite, ApiMessageEntityTypes } from '../api/types';
+import {
+  type ApiChatFolder,
+  type ApiChatlistExportedInvite,
+  type ApiMessageEntity,
+  type ApiMessageEntityCustomEmoji,
+  ApiMessageEntityTypes,
+} from '../api/types';
 import { SettingsScreens } from '../types';
 
 import { ALL_FOLDER_ID } from '../config';

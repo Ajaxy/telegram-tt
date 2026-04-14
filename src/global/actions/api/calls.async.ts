@@ -233,7 +233,6 @@ addActionHandler('connectToActiveGroupCall', async (global, actions, payload): P
   actions.loadMoreGroupCallParticipants();
 
   if (groupCall.chatId) {
-    global = getGlobal();
     const chat = selectChat(global, groupCall.chatId);
     if (!chat) return;
     await loadFullChat(global, actions, chat);

@@ -15,8 +15,7 @@ import type {
 } from '../../types';
 
 import { buildCollectionByCallback, omitUndefined } from '../../../util/iteratees';
-import { addDocumentToLocalDb } from '../helpers/localDb';
-import { addPhotoToLocalDb } from '../helpers/localDb';
+import { addDocumentToLocalDb, addPhotoToLocalDb } from '../helpers/localDb';
 import { buildApiPhoto, buildPrivacyRules } from './common';
 import { buildApiDocument, buildGeoPoint, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
 import { buildApiMessage } from './messages';

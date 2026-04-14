@@ -38,8 +38,8 @@ export default function useAnimatedEmoji(
   const size = preferredSize || SIZE;
   const style = buildStyle(`width: ${size}px`, `height: ${size}px`, emoji && !IS_TAURI && 'cursor: pointer');
 
-  const interactions = useRef<number[] | undefined>(undefined);
-  const startedInteractions = useRef<number | undefined>(undefined);
+  const interactionsRef = useRef<number[] | undefined>(undefined);
+  const startedInteractionsRef = useRef<number | undefined>(undefined);
   const sendInteractionBunch = useLastCallback(() => {
     const container = ref.current;
 
@@ -49,10 +49,10 @@ export default function useAnimatedEmoji(
       chatId: chatId!,
       messageId: messageId!,
       emoji: emoji!,
-      interactions: interactions.current!,
+      interactions: interactionsRef.current!,
     });
-    startedInteractions.current = undefined;
-    interactions.current = undefined;
+    startedInteractionsRef.current = undefined;
+    interactionsRef.current = undefined;
   });
 
   const play = useLastCallback(() => {
@@ -90,14 +90,14 @@ export default function useAnimatedEmoji(
       isReversed: !isOwn,
     });
 
-    if (!interactions.current) {
-      interactions.current = [];
-      startedInteractions.current = performance.now();
+    if (!interactionsRef.current) {
+      interactionsRef.current = [];
+      startedInteractionsRef.current = performance.now();
       setTimeout(sendInteractionBunch, INTERACTION_BUNCH_TIME);
     }
 
-    interactions.current.push(startedInteractions.current
-      ? (performance.now() - startedInteractions.current) / MS_DIVIDER
+    interactionsRef.current.push(startedInteractionsRef.current
+      ? (performance.now() - startedInteractionsRef.current) / MS_DIVIDER
       : TIME_DEFAULT);
   });
 

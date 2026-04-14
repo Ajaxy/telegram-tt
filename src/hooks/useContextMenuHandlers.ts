@@ -96,6 +96,7 @@ const useContextMenuHandlers = (
       }
 
       // Temporarily intercept and clear the next click
+      // eslint-disable-next-line @eslint-react/web-api/no-leaked-event-listener
       document.addEventListener('touchend', (e) => {
         // On iOS in PWA mode, the context menu may cause click-through to the element in the menu upon opening
         if (IS_IOS && IS_PWA) {
@@ -116,10 +117,12 @@ const useContextMenuHandlers = (
 
       // On iOS15, in PWA mode, the context menu immediately closes after opening
       if (IS_PWA && IS_IOS) {
+        // eslint-disable-next-line @eslint-react/web-api/no-leaked-event-listener
         document.addEventListener('mousedown', stopEvent, {
           once: true,
           capture: true,
         });
+        // eslint-disable-next-line @eslint-react/web-api/no-leaked-event-listener
         document.addEventListener('click', stopEvent, {
           once: true,
           capture: true,

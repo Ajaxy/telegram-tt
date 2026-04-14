@@ -97,7 +97,7 @@ const ProfileRatingModal = ({
     const pendingLevel = !showFutureRating && renderingPendingRating
       ? renderingPendingRating.level : renderingStarsRating.level;
 
-    let levelProgress = 0;
+    let levelProgress;
 
     if (!nextLevelStars) {
       levelProgress = 1;

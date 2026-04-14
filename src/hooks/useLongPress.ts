@@ -12,27 +12,27 @@ function useLongPress({
   onEnd?: NoneToVoidFunction;
   threshold?: number;
 }) {
-  const isLongPressActive = useRef(false);
-  const isPressed = useRef(false);
-  const timerId = useRef<number | undefined>(undefined);
+  const isLongPressActiveRef = useRef(false);
+  const isPressedRef = useRef(false);
+  const timerIdRef = useRef<number | undefined>(undefined);
 
   const start = useLastCallback((e: React.MouseEvent | React.TouchEvent) => {
     const canProcessEvent = ('button' in e && e.button === 0) || ('touches' in e && e.touches.length > 0);
-    if (isPressed.current || !canProcessEvent) {
+    if (isPressedRef.current || !canProcessEvent) {
       return;
     }
 
-    isPressed.current = true;
-    timerId.current = window.setTimeout(() => {
+    isPressedRef.current = true;
+    timerIdRef.current = window.setTimeout(() => {
       onStart?.();
-      isLongPressActive.current = true;
+      isLongPressActiveRef.current = true;
     }, threshold);
   });
 
   const end = useLastCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (!isPressed.current) return;
+    if (!isPressedRef.current) return;
 
-    if (isLongPressActive.current) {
+    if (isLongPressActiveRef.current) {
       onEnd?.();
     } else {
       onClick?.(e);
@@ -42,13 +42,13 @@ function useLongPress({
   });
 
   const cancel = useLastCallback(() => {
-    isLongPressActive.current = false;
-    isPressed.current = false;
-    window.clearTimeout(timerId.current);
+    isLongPressActiveRef.current = false;
+    isPressedRef.current = false;
+    window.clearTimeout(timerIdRef.current);
   });
 
   useUnmountCleanup(() => {
-    window.clearTimeout(timerId.current);
+    window.clearTimeout(timerIdRef.current);
   });
 
   return {

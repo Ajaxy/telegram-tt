@@ -14,6 +14,7 @@ export default function usePrevDuringAnimation<T>(current: T, duration?: number)
   const isPrevPresent = prev !== undefined && prev !== null;
 
   if (isCurrentPresent && timeoutRef.current) {
+    // eslint-disable-next-line @eslint-react/purity
     clearTimeout(timeoutRef.current);
     timeoutRef.current = undefined;
   }

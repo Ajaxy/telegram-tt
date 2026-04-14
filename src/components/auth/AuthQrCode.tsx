@@ -127,7 +127,7 @@ const AuthCode = ({
     }
 
     if (STRICTERDOM_ENABLED) {
-      setTimeout(() => {
+      window.setTimeout(() => {
         enableStrict();
       }, QR_CODE_MUTATION_DURATION);
     }

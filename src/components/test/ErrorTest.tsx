@@ -1,3 +1,4 @@
+/* eslint-disable @eslint-react/purity */
 import type { FC } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 

@@ -109,9 +109,13 @@ const CustomSendMenu: FC<OwnProps> = ({
       return;
     }
 
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       markIsReady();
     }, ANIMATION_DURATION);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [isOpen, markIsReady, unmarkIsReady]);
 
   return (

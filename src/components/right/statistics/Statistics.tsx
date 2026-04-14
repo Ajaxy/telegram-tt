@@ -96,8 +96,8 @@ const Statistics = ({
   const lang = useOldLang();
   const containerRef = useRef<HTMLDivElement>();
   const [isReady, setIsReady] = useState(false);
-  const loadedCharts = useRef<Set<string>>(new Set());
-  const errorCharts = useRef<Set<string>>(new Set());
+  const loadedChartsRef = useRef<Set<string>>(new Set());
+  const errorChartsRef = useRef<Set<string>>(new Set());
 
   const { loadStatistics, loadStatisticsAsyncGraph } = getActions();
   const forceUpdate = useForceUpdate();
@@ -161,13 +161,13 @@ const Statistics = ({
         const isAsync = graph.graphType === 'async';
         const isError = graph.graphType === 'error';
 
-        if (isAsync || loadedCharts.current.has(name)) {
+        if (isAsync || loadedChartsRef.current.has(name)) {
           return;
         }
 
         if (isError) {
-          loadedCharts.current.add(name);
-          errorCharts.current.add(name);
+          loadedChartsRef.current.add(name);
+          errorChartsRef.current.add(name);
 
           return;
         }
@@ -186,7 +186,7 @@ const Statistics = ({
           },
         );
 
-        loadedCharts.current.add(name);
+        loadedChartsRef.current.add(name);
 
         containerRef.current!.children[index].classList.remove(styles.hidden);
       });
@@ -207,11 +207,11 @@ const Statistics = ({
         />
       )}
 
-      {!loadedCharts.current.size && <Loading />}
+      {!loadedChartsRef.current.size && <Loading />}
 
       <div ref={containerRef}>
         {graphs.map((graph) => {
-          const isGraphReady = loadedCharts.current.has(graph) && !errorCharts.current.has(graph);
+          const isGraphReady = loadedChartsRef.current.has(graph) && !errorChartsRef.current.has(graph);
           return (
             <div className={buildClassName(styles.graph, !isGraphReady && styles.hidden)} />
           );

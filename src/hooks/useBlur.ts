@@ -16,6 +16,7 @@ export default function useBlur(dataUri?: string, isDisabled = false, delay?: nu
   const forceUpdate = useForceUpdate();
 
   if (timeoutRef.current && isDisabled) {
+    // eslint-disable-next-line @eslint-react/purity
     clearTimeout(timeoutRef.current);
     timeoutRef.current = undefined;
   }

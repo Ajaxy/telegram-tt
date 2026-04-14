@@ -52,7 +52,7 @@ const MicrophoneButton: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const lang = useOldLang();
-  const muteMouseDownState = useRef('up');
+  const muteMouseDownStateRef = useRef('up');
 
   const [isRequestingToSpeak, setIsRequestingToSpeak] = useState(false);
   const isConnecting = connectionState !== 'connected';
@@ -113,11 +113,11 @@ const MicrophoneButton: FC<OwnProps & StateProps> = ({
       }, REQUEST_TO_SPEAK_THROTTLE);
       return;
     }
-    muteMouseDownState.current = 'down';
+    muteMouseDownStateRef.current = 'down';
     if (noAudioStream) {
       setTimeout(() => {
-        if (muteMouseDownState.current === 'down') {
-          muteMouseDownState.current = 'hold';
+        if (muteMouseDownStateRef.current === 'down') {
+          muteMouseDownStateRef.current = 'hold';
           toggleMute();
         }
       }, HOLD_TO_SPEAK_TIME);
@@ -129,7 +129,7 @@ const MicrophoneButton: FC<OwnProps & StateProps> = ({
       return;
     }
     toggleMute();
-    muteMouseDownState.current = 'up';
+    muteMouseDownStateRef.current = 'up';
   }, [shouldRaiseHand, toggleMute]);
 
   return (

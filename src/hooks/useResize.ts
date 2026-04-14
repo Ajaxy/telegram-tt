@@ -83,9 +83,11 @@ export function useResize(
       unmarkIsActive();
     }
 
+    /* eslint-disable @eslint-react/web-api/no-leaked-event-listener */
     document.addEventListener('mousemove', handleMouseMove, false);
     document.addEventListener('mouseup', stopDrag, false);
     document.addEventListener('blur', stopDrag, false);
+    /* eslint-enable @eslint-react/web-api/no-leaked-event-listener */
 
     return cleanup;
   }, [initialElementWidth, initialMouseX, elementRef, onResize, isActive, unmarkIsActive, setElementStyle]);

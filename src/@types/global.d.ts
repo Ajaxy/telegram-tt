@@ -2,7 +2,8 @@
 
 declare const process: NodeJS.Process;
 
-declare module '*.module.scss';
+declare module '*.css';
+declare module '*.scss';
 
 declare const APP_VERSION: string;
 declare const APP_REVISION: string;

@@ -12,16 +12,16 @@ export default function useReducer<State, Actions>(
 ) {
   const forceUpdate = useForceUpdate();
   const reducerRef = useRef(reducer);
-  const state = useRef(initialState);
+  const stateRef = useRef(initialState);
 
   const dispatch = useCallback((action: ReducerAction<Actions>) => {
-    state.current = reducerRef.current(state.current, action);
+    stateRef.current = reducerRef.current(stateRef.current, action);
     forceUpdate();
-    return state.current;
+    return stateRef.current;
   }, []);
 
   return [
-    state.current,
+    stateRef.current,
     dispatch,
   ] as [State, Dispatch<State, Actions>];
 }

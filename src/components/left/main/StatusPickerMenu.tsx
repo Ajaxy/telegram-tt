@@ -36,9 +36,10 @@ const StatusPickerMenu = ({
 }: OwnProps & StateProps) => {
   const { loadFeaturedEmojiStickers } = getActions();
 
-  const transformOriginX = useRef<number>(0);
+  const transformOriginXRef = useRef<number>(0);
   useEffect(() => {
-    transformOriginX.current = statusButtonRef.current!.getBoundingClientRect().right;
+    if (!statusButtonRef.current) return;
+    transformOriginXRef.current = statusButtonRef.current.getBoundingClientRect().right;
   }, [isOpen, statusButtonRef]);
 
   useEffect(() => {
@@ -60,7 +61,7 @@ const StatusPickerMenu = ({
         positionX="left"
         bubbleClassName={styles.menuContent}
         onClose={onClose}
-        transformOriginX={transformOriginX.current}
+        transformOriginX={transformOriginXRef.current}
       >
         <CustomEmojiPicker
           idPrefix="status-emoji-set-"

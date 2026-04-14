@@ -30,19 +30,19 @@ export default function useDebouncedMemo<R, D extends unknown[]>(
 }
 
 function useHeavyAnimationFreeze() {
-  const isPending = useRef(false);
+  const isPendingRef = useRef(false);
 
   const updateWhenUnfrozen = useCallback(() => {
-    isPending.current = true;
+    isPendingRef.current = true;
   }, []);
 
   const forceUpdate = useForceUpdate();
   const handleUnfreeze = useCallback(() => {
-    if (!isPending.current) {
+    if (!isPendingRef.current) {
       return;
     }
 
-    isPending.current = false;
+    isPendingRef.current = false;
     forceUpdate();
   }, [forceUpdate]);
   useHeavyAnimation(noop, handleUnfreeze);

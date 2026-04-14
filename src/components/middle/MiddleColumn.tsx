@@ -251,7 +251,7 @@ function MiddleColumn({
   const oldLang = useOldLang();
   const lang = useLang();
   const [dropAreaState, setDropAreaState] = useState(DropAreaState.None);
-  const [isScrollDownNeeded, setIsScrollDownShown] = useState(false);
+  const [isScrollDownNeeded, setIsScrollDownNeeded] = useState(false);
   const isScrollDownShown = isScrollDownNeeded && (!isMobile || !hasActiveMiddleSearch);
   const [isNotchShown, setIsNotchShown] = useState<boolean | undefined>();
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
@@ -571,7 +571,7 @@ function MiddleColumn({
                 type={renderingMessageListType!}
                 isComments={isComments}
                 canPost={renderingCanPost!}
-                onScrollDownToggle={setIsScrollDownShown}
+                onScrollDownToggle={setIsScrollDownNeeded}
                 onNotchToggle={setIsNotchShown}
                 isReady={isReady}
                 isContactRequirePremium={isContactRequirePremium}
@@ -900,18 +900,23 @@ function useIsReady(
   const forceUpdate = useForceUpdate();
 
   const willSwitchMessageList = prevTransitionKey !== undefined && prevTransitionKey !== currentTransitionKey;
-  if (willSwitchMessageList) {
-    if (withAnimations) {
-      setIsReady(false);
-
-      // Make sure to end even if end callback was not called (which was some hardly-reproducible bug)
-      setTimeout(() => {
-        setIsReady(true);
-      }, LAYER_ANIMATION_DURATION_MS);
-    } else {
+  useSyncEffect(() => {
+    if (!willSwitchMessageList) return;
+    if (!withAnimations) {
       forceUpdate();
+      return undefined;
     }
-  }
+    setIsReady(false);
+
+    // Make sure to end even if end callback was not called (which was some hardly-reproducible bug)
+    const timeout = setTimeout(() => {
+      setIsReady(true);
+    }, LAYER_ANIMATION_DURATION_MS);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [willSwitchMessageList, withAnimations]);
 
   useSyncEffect(() => {
     if (!withAnimations) {

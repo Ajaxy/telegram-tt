@@ -951,7 +951,6 @@ addActionHandler('leaveChannel', async (global, actions, payload): Promise<void>
     return;
   }
 
-  global = getGlobal();
   await callApi('leaveChannel', { chat });
 
   cleanupAfterLeave(chatId, tabId);
@@ -3352,7 +3351,7 @@ async function loadChats(
   shouldIgnorePagination?: boolean,
 ) {
   let global = getGlobal();
-  let lastLocalServiceMessageId = selectLastServiceNotification(global)?.id;
+  const lastLocalServiceMessageId = selectLastServiceNotification(global)?.id;
 
   const params = !shouldIgnorePagination ? selectChatListLoadingParameters(global, listType) : {};
   const offsetPeer = params.nextOffsetPeerId ? selectPeer(global, params.nextOffsetPeerId) : undefined;
@@ -3388,7 +3387,6 @@ async function loadChats(
   const { chatIds } = result;
 
   global = getGlobal();
-  lastLocalServiceMessageId = selectLastServiceNotification(global)?.id;
 
   const newChats = buildCollectionByKey(result.chats, 'id');
 

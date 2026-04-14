@@ -53,6 +53,7 @@ export function useStreaming(videoRef: ElementRef<HTMLVideoElement>, url?: strin
           });
       }
 
+      // eslint-disable-next-line @eslint-react/web-api/no-leaked-event-listener
       sourceBuffer.addEventListener('updateend', onUpdateEnded);
 
       loader.next()

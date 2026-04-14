@@ -133,7 +133,7 @@ const Audio = ({
   const media = (voice || video || audio)!;
   const mediaSource = (voice || video);
   const isVoice = Boolean(voice || video);
-  const isSeeking = useRef<boolean>(false);
+  const isSeekingRef = useRef<boolean>(false);
   const seekerRef = useRef<HTMLDivElement>();
   const oldLang = useOldLang();
   const lang = useLang();
@@ -266,7 +266,7 @@ const Audio = ({
   });
 
   const handleSeek = useLastCallback((e: MouseEvent | TouchEvent) => {
-    if (isSeeking.current && seekerRef.current) {
+    if (isSeekingRef.current && seekerRef.current) {
       const { width, left } = seekerRef.current.getBoundingClientRect();
       const clientX = e instanceof MouseEvent ? e.clientX : e.targetTouches[0].clientX;
       e.stopPropagation(); // Prevent Slide-to-Reply activation
@@ -277,12 +277,12 @@ const Audio = ({
 
   const handleStartSeek = useLastCallback((e: MouseEvent | TouchEvent) => {
     if (e instanceof MouseEvent && e.button === 2) return;
-    isSeeking.current = true;
+    isSeekingRef.current = true;
     handleSeek(e);
   });
 
   const handleStopSeek = useLastCallback(() => {
-    isSeeking.current = false;
+    isSeekingRef.current = false;
   });
 
   const handleDateClick = useLastCallback(() => {

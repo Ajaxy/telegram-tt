@@ -5,8 +5,7 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiNewMediaTodo } from '../../../api/types';
-import type { ApiMessage } from '../../../api/types';
+import type { ApiMessage, ApiNewMediaTodo } from '../../../api/types';
 import type { TabState } from '../../../global/types/tabState';
 
 import { requestMeasure, requestNextMutation } from '../../../lib/fasterdom/fasterdom';

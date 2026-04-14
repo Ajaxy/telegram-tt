@@ -25,8 +25,8 @@ const EXCLUDE_FILTER_FIELDS: Array<keyof FolderExcludeFilters> = [
 ];
 
 export function selectChatFilters(state: FoldersState, mode: 'included' | 'excluded', selectTemp?: boolean) {
-  let selectedChatIds: string[] = [];
-  let selectedChatTypes: FolderChatType['key'][] = [];
+  let selectedChatIds: string[];
+  let selectedChatTypes: FolderChatType['key'][];
 
   if (mode === 'included') {
     const {

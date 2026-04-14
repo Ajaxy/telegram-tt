@@ -25,8 +25,7 @@ import {
 import { selectTabState, selectTheme, selectUser } from '../../../global/selectors';
 import { selectPremiumLimit } from '../../../global/selectors/limits';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
-import { IS_MULTIACCOUNT_SUPPORTED } from '../../../util/browser/globalEnvironment';
-import { IS_TAURI } from '../../../util/browser/globalEnvironment';
+import { IS_MULTIACCOUNT_SUPPORTED, IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { getPromptInstall } from '../../../util/installPrompt';
 import { switchPermanentWebVersion } from '../../../util/permanentWebVersion';
 import { getSystemTheme } from '../../../util/systemTheme';

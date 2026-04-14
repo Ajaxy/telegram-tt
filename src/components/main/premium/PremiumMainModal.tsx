@@ -150,13 +150,13 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 
   const oldLang = useOldLang();
   const lang = useLang();
-  const [isHeaderHidden, setHeaderHidden] = useState(true);
+  const [isHeaderHidden, setIsHeaderHidden] = useState(true);
   const [currentSection, setCurrentSection] = useState<ApiPremiumSection | undefined>(initialSection);
-  const [selectedSubscriptionOption, setSubscriptionOption] = useState<ApiPremiumSubscriptionOption>();
+  const [selectedSubscriptionOption, setSelectedSubscriptionOption] = useState<ApiPremiumSubscriptionOption>();
 
   useEffect(() => {
     if (!isOpen) {
-      setHeaderHidden(true);
+      setIsHeaderHidden(true);
       setCurrentSection(undefined);
     } else if (initialSection) {
       setCurrentSection(initialSection);
@@ -174,7 +174,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop } = e.currentTarget;
 
-    setHeaderHidden(scrollTop <= 150);
+    setIsHeaderHidden(scrollTop <= 150);
   }
 
   const handleClickWithStartParam = useLastCallback((startParam?: string) => {
@@ -204,7 +204,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 
   const handleChangeSubscriptionOption = useLastCallback((months: number) => {
     const foundOption = promo?.options.find((option) => option.months === months);
-    setSubscriptionOption(foundOption);
+    setSelectedSubscriptionOption(foundOption);
   });
 
   const showConfetti = useLastCallback(() => {
@@ -250,7 +250,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     const [defaultOption] = promo?.options ?? [];
-    setSubscriptionOption(defaultOption);
+    setSelectedSubscriptionOption(defaultOption);
   }, [promo]);
 
   const handleOpenStatusSet = useLastCallback(() => {

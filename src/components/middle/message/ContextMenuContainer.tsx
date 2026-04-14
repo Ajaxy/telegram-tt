@@ -692,9 +692,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     return undefined;
   }
 
-  const scheduledMaxDate = new Date();
-  scheduledMaxDate.setFullYear(scheduledMaxDate.getFullYear() + 1);
-
   return (
     <div ref={containerRef} className={buildClassName('ContextMenuContainer', className)}>
       <MessageContextMenu

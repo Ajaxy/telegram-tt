@@ -59,11 +59,11 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
   const oldLang = useOldLang();
 
   const [selectedOption, setSelectedOption] = useState<ApiStarTopupOption | undefined>();
-  const [isHeaderHidden, setHeaderHidden] = useState(true);
+  const [isHeaderHidden, setIsHeaderHidden] = useState(true);
 
   useEffect(() => {
     if (!isOpen) {
-      setHeaderHidden(true);
+      setIsHeaderHidden(true);
     }
   }, [isOpen]);
 
@@ -115,7 +115,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop } = e.currentTarget;
 
-    setHeaderHidden(scrollTop <= 150);
+    setIsHeaderHidden(scrollTop <= 150);
   }
 
   const handleClose = useLastCallback(() => {

@@ -107,7 +107,7 @@ const Poll: FC<OwnProps> = ({
 
   useLayoutEffect(() => {
     if (closePeriod > 0) {
-      setTimeout(() => setClosePeriod(closePeriod - 1), TIMER_UPDATE_INTERVAL);
+      window.setTimeout(() => setClosePeriod(closePeriod - 1), TIMER_UPDATE_INTERVAL);
     }
     if (!timerCircleRef.current) return;
 

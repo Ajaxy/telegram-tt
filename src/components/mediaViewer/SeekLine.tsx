@@ -64,13 +64,13 @@ const SeekLine = ({
   const [getPreviewOffset, setPreviewOffset] = useSignal(0);
   const [getPreviewTime, setPreviewTime] = useSignal(0);
   const isLockedRef = useRef<boolean>(false);
-  const [isPreviewVisible, setPreviewVisible] = useState(false);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
   const previewContainerRef = useRef<HTMLDivElement>();
   const previewRef = useRef<HTMLDivElement>();
   const progressRef = useRef<HTMLDivElement>();
   const previewTimeRef = useRef<HTMLDivElement>();
-  const storyboardParser = useRef<StoryboardParser>();
+  const storyboardParserRef = useRef<StoryboardParser>();
 
   const storyboardHash = storyboardInfo && getDocumentMediaHash(storyboardInfo.storyboardFile, 'full');
   const storyboardMapHash = storyboardInfo && getDocumentMediaHash(storyboardInfo.storyboardMapFile, 'full');
@@ -79,13 +79,13 @@ const SeekLine = ({
   const storyboardMapData = useMedia(storyboardMapHash, !isReady, ApiMediaFormat.Text);
 
   useEffect(() => {
-    setPreviewVisible(false);
+    setIsPreviewVisible(false);
   }, [isActive]);
 
   useEffect(() => {
     if (!storyboardMapData) return;
     try {
-      storyboardParser.current = new StoryboardParser(storyboardMapData);
+      storyboardParserRef.current = new StoryboardParser(storyboardMapData);
     } catch (error) {
       if (DEBUG) {
         // eslint-disable-next-line no-console
@@ -96,8 +96,8 @@ const SeekLine = ({
 
   const setPreview = useLastCallback((time: number) => {
     const previewContainer = previewContainerRef.current;
-    if (!storyboardParser.current || !previewContainer) return;
-    const frame = storyboardParser.current.getNearestPreview(time);
+    if (!storyboardParserRef.current || !previewContainer) return;
+    const frame = storyboardParserRef.current.getNearestPreview(time);
 
     setPreviewTime(Math.floor(frame.time));
 
@@ -189,7 +189,7 @@ const SeekLine = ({
 
     const handleSeek = (e: MouseEvent | TouchEvent) => {
       stopAnimation();
-      setPreviewVisible(true);
+      setIsPreviewVisible(true);
       ([time, offset] = getPreviewProps(e));
       void setPreview(time);
       setPreviewOffset(offset);
@@ -198,7 +198,7 @@ const SeekLine = ({
 
     const handleStartSeek = () => {
       stopAnimation();
-      setPreviewVisible(true);
+      setIsPreviewVisible(true);
       setIsSeeking(true);
       onSeekStart();
     };
@@ -206,7 +206,7 @@ const SeekLine = ({
     const handleStopSeek = () => {
       stopAnimation();
       isLockedRef.current = true;
-      setPreviewVisible(false);
+      setIsPreviewVisible(false);
       setIsSeeking(false);
       setSelectedTime(time);
       onSeek(time);
@@ -228,14 +228,14 @@ const SeekLine = ({
     }
 
     const handleSeekMouseMove = (e: MouseEvent) => {
-      setPreviewVisible(true);
+      setIsPreviewVisible(true);
       ([time, offset] = getPreviewProps(e));
       setPreviewOffset(offset);
       void setPreview(time);
     };
 
     const handleSeekMouseLeave = () => {
-      setPreviewVisible(false);
+      setIsPreviewVisible(false);
     };
 
     seeker.addEventListener('mousemove', handleSeekMouseMove);

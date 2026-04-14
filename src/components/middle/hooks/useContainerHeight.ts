@@ -23,7 +23,7 @@ export default function useContainerHeight(containerRef: ElementRef<HTMLDivEleme
     }
   }, [isComposerVisible, containerRef, getContainerHeight]);
 
-  const prevContainerHeight = useRef<number>();
+  const prevContainerHeightRef = useRef<number>();
 
-  return [getContainerHeight, prevContainerHeight] as const;
+  return [getContainerHeight, prevContainerHeightRef] as const;
 }

@@ -489,7 +489,7 @@ const Message = ({
   const oldLang = useOldLang();
   const lang = useLang();
 
-  const [isTranscriptionHidden, setTranscriptionHidden] = useState(false);
+  const [isTranscriptionHidden, setIsTranscriptionHidden] = useState(false);
   const [isPlayingSnapAnimation, setIsPlayingSnapAnimation] = useState(false);
   const [isPlayingDeleteAnimation, setIsPlayingDeleteAnimation] = useState(false);
   const [shouldPlayEffect, requestEffect, hideEffect] = useFlag();
@@ -530,8 +530,11 @@ const Message = ({
       return;
     }
 
-    setTimeout(markShown, appearanceOrder * MESSAGE_APPEARANCE_DELAY);
-  }, [appearanceOrder, markShown, noAppearanceAnimation]);
+    const timeout = setTimeout(markShown, appearanceOrder * MESSAGE_APPEARANCE_DELAY);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [appearanceOrder, noAppearanceAnimation]);
 
   useShowTransition({
     ref,
@@ -1300,7 +1303,7 @@ const Message = ({
             canAutoLoad={canAutoLoadMedia}
             isDownloading={isDownloading}
             onReadMedia={shouldReadMedia ? handleReadMedia : undefined}
-            onHideTranscription={setTranscriptionHidden}
+            onHideTranscription={setIsTranscriptionHidden}
             isTranscriptionError={isTranscriptionError}
             isTranscribed={Boolean(transcribedText)}
             canTranscribe={canTranscribeVoice && !hasTtl}
@@ -1326,7 +1329,7 @@ const Message = ({
             isTranscribed={Boolean(transcribedText)}
             isTranscriptionError={isTranscriptionError}
             canDownload={!isProtected}
-            onHideTranscription={setTranscriptionHidden}
+            onHideTranscription={setIsTranscriptionHidden}
             canTranscribe={canTranscribeVoice && !hasTtl}
           />
         )}
@@ -1670,7 +1673,6 @@ const Message = ({
     shouldSkipRenderForwardTitle: boolean = false, shouldSkipRenderAdminTitle: boolean = false,
   ) {
     let senderTitle;
-    let senderColor;
     if (senderPeer && !(isCustomShape && viaBotId)) {
       senderTitle = getPeerFullTitle(oldLang, senderPeer);
     } else if (forwardInfo?.hiddenUserName) {
@@ -1689,7 +1691,6 @@ const Message = ({
             className={buildClassName(
               'message-title-name-container',
               forwardInfo?.hiddenUserName ? 'sender-hidden' : 'interactive',
-              senderColor,
             )}
             dir="ltr"
           >

@@ -1702,7 +1702,7 @@ export async function searchMessagesGlobal({
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
   const topics = result.topics.map(buildApiTopicWithState).filter(Boolean);
 
-  let totalCount = messages.length;
+  let totalCount;
   if (result instanceof GramJs.messages.MessagesSlice || result instanceof GramJs.messages.ChannelMessages) {
     totalCount = result.count;
   } else {
@@ -1761,7 +1761,7 @@ export async function searchPublicPosts({
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
   const topics = result.topics.map(buildApiTopicWithState).filter(Boolean);
 
-  let totalCount = messages.length;
+  let totalCount;
   if (result instanceof GramJs.messages.MessagesSlice || result instanceof GramJs.messages.ChannelMessages) {
     totalCount = result.count;
   } else {

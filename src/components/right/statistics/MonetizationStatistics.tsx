@@ -70,8 +70,8 @@ const MonetizationStatistics = ({
 
   const containerRef = useRef<HTMLDivElement>();
   const [isReady, setIsReady] = useState(false);
-  const loadedCharts = useRef<Set<string>>(new Set());
-  const errorCharts = useRef<Set<string>>(new Set());
+  const loadedChartsRef = useRef<Set<string>>(new Set());
+  const errorChartsRef = useRef<Set<string>>(new Set());
 
   const forceUpdate = useForceUpdate();
   const [isAboutMonetizationModalOpen, openAboutMonetizationModal, closeAboutMonetizationModal] = useFlag(false);
@@ -104,8 +104,8 @@ const MonetizationStatistics = ({
         });
       }
 
-      loadedCharts.current.clear();
-      errorCharts.current.clear();
+      loadedChartsRef.current.clear();
+      errorChartsRef.current.clear();
 
       if (!statistics || !containerRef.current) {
         return;
@@ -119,13 +119,13 @@ const MonetizationStatistics = ({
         const isAsync = graph.graphType === 'async';
         const isError = graph.graphType === 'error';
 
-        if (isAsync || loadedCharts.current.has(name)) {
+        if (isAsync || loadedChartsRef.current.has(name)) {
           return;
         }
 
         if (isError) {
-          loadedCharts.current.add(name);
-          errorCharts.current.add(name);
+          loadedChartsRef.current.add(name);
+          errorChartsRef.current.add(name);
 
           return;
         }
@@ -135,7 +135,7 @@ const MonetizationStatistics = ({
           ...graph,
         });
 
-        loadedCharts.current.add(name);
+        loadedChartsRef.current.add(name);
 
         containerRef.current!.children[index].classList.remove(styles.hidden);
       });
@@ -243,7 +243,7 @@ const MonetizationStatistics = ({
         }
       />
 
-      {!loadedCharts.current.size && <Loading />}
+      {!loadedChartsRef.current.size && <Loading />}
 
       <div ref={containerRef} className={styles.section}>
         {MONETIZATION_GRAPHS.filter(Boolean).map((graph) => (

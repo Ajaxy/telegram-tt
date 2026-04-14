@@ -1,5 +1,3 @@
-import { getActions } from '../../../global';
-
 import type {
   ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiMessageSearchContext, ApiPeer, ApiSearchPostsFlood,
   ApiTopicWithState,
@@ -16,9 +14,9 @@ import { getTranslationFn } from '../../../util/localization';
 import { formatStarsAsText } from '../../../util/localization/format';
 import { throttle } from '../../../util/schedulers';
 import { callApi } from '../../../api/gramjs';
+import { addActionHandler, getActions, getGlobal, setGlobal } from '../..';
 import { isChatChannel, isChatGroup } from '../../helpers/chats';
 import { isApiPeerChat } from '../../helpers/peers';
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addMessages,
   addUserStatuses,

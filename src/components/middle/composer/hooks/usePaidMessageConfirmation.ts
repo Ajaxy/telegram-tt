@@ -14,8 +14,7 @@ export default function usePaidMessageConfirmation(
     shouldPaidMessageAutoApprove,
   } = getGlobal().settings.byKey;
 
-  const [shouldAutoApprove,
-    setAutoApprove] = useState(Boolean(shouldPaidMessageAutoApprove));
+  const [shouldAutoApprove, setShouldAutoApprove] = useState(Boolean(shouldPaidMessageAutoApprove));
   const [isWaitingStarsTopup, setIsWaitingStarsTopup] = useState(false);
   const confirmPaymentHandlerRef = useRef<NoneToVoidFunction | undefined>(undefined);
 
@@ -78,6 +77,6 @@ export default function usePaidMessageConfirmation(
     handleWithConfirmation,
     dialogHandler,
     shouldAutoApprove,
-    setAutoApprove,
+    setAutoApprove: setShouldAutoApprove,
   };
 }

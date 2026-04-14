@@ -260,7 +260,6 @@ const SettingsHeader: FC<OwnProps> = ({
       default:
         return (
           <div className="settings-main-header">
-            {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
             <h3 onClick={handleMultiClick}>
               {oldLang('SETTINGS')}
             </h3>

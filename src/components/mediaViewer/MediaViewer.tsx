@@ -143,7 +143,7 @@ const MediaViewer = ({
   const { media, isSingle } = viewableMedia || {};
 
   /* Animation */
-  const animationKey = useRef<number>();
+  const animationKeyRef = useRef<number>();
   const senderId = message?.senderId || avatarOwner?.id || message?.chatId;
   const prevSenderId = usePreviousDeprecated<string | undefined>(senderId);
   const headerAnimation = withAnimation ? 'slideFade' : 'none';
@@ -178,8 +178,8 @@ const MediaViewer = ({
       : getMessageContentIds(chatMessages || {}, collectedMessageIds || [], contentType || 'media');
   }, [chatMessages, collectedMessageIds, contentType, withDynamicLoading]);
 
-  if (isOpen && (!prevSenderId || prevSenderId !== senderId || animationKey.current === undefined)) {
-    animationKey.current = isSingle ? 0 : (messageId || mediaIndex);
+  if (isOpen && (!prevSenderId || prevSenderId !== senderId || animationKeyRef.current === undefined)) {
+    animationKeyRef.current = isSingle ? 0 : (messageId || mediaIndex);
   }
 
   const [getIsPictureInPicture] = PICTURE_IN_PICTURE_SIGNAL;
@@ -438,7 +438,7 @@ const MediaViewer = ({
             onClick={handleClose}
           />
         )}
-        <Transition activeKey={animationKey.current!} name={headerAnimation}>
+        <Transition activeKey={animationKeyRef.current!} name={headerAnimation}>
           <SenderInfo
             key={media?.id}
             item={currentItem}

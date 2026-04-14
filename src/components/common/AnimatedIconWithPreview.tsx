@@ -58,11 +58,9 @@ function AnimatedIconWithPreview(props: OwnProps) {
       style={buildStyle(size !== undefined && `width: ${size}px; height: ${size}px;`)}
     >
       {thumbDataUri && !isAnimationReady && (
-        // eslint-disable-next-line jsx-a11y/alt-text
         <img src={thumbDataUri} className={buildClassName(styles.preview, thumbClassNames)} draggable={false} />
       )}
       {previewUrl && !isAnimationReady && (
-        // eslint-disable-next-line jsx-a11y/alt-text
         <img
           src={previewUrl}
           className={buildClassName(styles.preview, previewClassNames)}

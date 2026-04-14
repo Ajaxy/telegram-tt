@@ -1,3 +1,4 @@
+/* eslint-disable @eslint-react/purity */
 import { useState } from '../../lib/teact/teact';
 
 import Portal from '../ui/Portal';

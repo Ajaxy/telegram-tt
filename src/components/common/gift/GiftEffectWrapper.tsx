@@ -1,5 +1,4 @@
-import type { ElementRef } from '@teact';
-import { memo, type TeactNode, useRef } from '@teact';
+import { type ElementRef, memo, type TeactNode, useRef } from '@teact';
 
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';

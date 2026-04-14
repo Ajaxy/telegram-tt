@@ -183,7 +183,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     const {
       usage = 0, usageLimit, expireDate, isPermanent, requested, isRevoked,
     } = invite;
-    let text = '';
+    let text;
     if (!isRevoked && usageLimit && usage < usageLimit) {
       text = oldLang('CanJoin', usageLimit - usage);
     } else if (usage) {

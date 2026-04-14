@@ -97,7 +97,7 @@ const AnimatedSticker = ({
 
   const [animation, setAnimation] = useState<RLottieInstance>();
   const animationRef = useRef<RLottieInstance>();
-  const isFirstRender = useRef(true);
+  const isFirstRenderRef = useRef(true);
 
   const shouldUseColorFilter = !sharedCanvas && color;
   const colorFilter = useColorFilter(shouldUseColorFilter ? color : undefined);
@@ -106,7 +106,7 @@ const AnimatedSticker = ({
   const playRef = useStateRef(play);
   const playSegmentRef = useStateRef(playSegment);
 
-  const rgbColor = useRef<[number, number, number] | undefined>();
+  const rgbColorRef = useRef<[number, number, number] | undefined>();
 
   const shouldForceOnHeavyAnimation = forceAlways || forceOnHeavyAnimation;
   // Delay initialization until heavy animation ends
@@ -121,9 +121,9 @@ const AnimatedSticker = ({
   useSyncEffect(() => {
     if (color && !shouldUseColorFilter) {
       const { r, g, b } = hex2rgbaObj(color);
-      rgbColor.current = [r, g, b];
+      rgbColorRef.current = [r, g, b];
     } else {
-      rgbColor.current = undefined;
+      rgbColorRef.current = undefined;
     }
   }, [color, shouldUseColorFilter]);
 
@@ -160,7 +160,7 @@ const AnimatedSticker = ({
         coords: sharedCanvasCoords,
       },
       viewId,
-      rgbColor.current,
+      rgbColorRef.current,
       onLoad,
       onEnded,
       onLoop,
@@ -192,7 +192,7 @@ const AnimatedSticker = ({
   useSharedIntersectionObserver(sharedCanvas, throttledInit);
 
   useEffect(() => {
-    animation?.setColor(rgbColor.current);
+    animation?.setColor(rgbColorRef.current);
   }, [color, animation]);
 
   useEffect(() => {
@@ -261,8 +261,8 @@ const AnimatedSticker = ({
 
   useEffect(() => {
     if (animation) {
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
+      if (isFirstRenderRef.current) {
+        isFirstRenderRef.current = false;
       } else if (tgsUrl) {
         animation.changeData(tgsUrl);
         playAnimation();

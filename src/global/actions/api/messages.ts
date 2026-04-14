@@ -171,8 +171,7 @@ import {
   selectThreadLocalStateParam,
   selectThreadReadState,
 } from '../../selectors/threads';
-import { updateWithLocalMedia } from '../apiUpdaters/messages';
-import { deleteMessages } from '../apiUpdaters/messages';
+import { deleteMessages, updateWithLocalMedia } from '../apiUpdaters/messages';
 
 const AUTOLOGIN_TOKEN_KEY = 'autologin_token';
 

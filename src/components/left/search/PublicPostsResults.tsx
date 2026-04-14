@@ -1,6 +1,5 @@
 import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
-import { getGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiMessage, ApiSearchPostsFlood } from '../../../api/types';
 import type { AnimationLevel } from '../../../types';

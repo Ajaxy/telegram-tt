@@ -309,8 +309,11 @@ const ActionMessage = ({
       return;
     }
 
-    setTimeout(markShown, appearanceOrder * MESSAGE_APPEARANCE_DELAY);
-  }, [appearanceOrder, markShown, noAppearanceAnimation]);
+    const timeout = setTimeout(markShown, appearanceOrder * MESSAGE_APPEARANCE_DELAY);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [appearanceOrder, noAppearanceAnimation]);
 
   const { ref: refWithTransition } = useShowTransition({
     isOpen: isShown,

@@ -279,9 +279,6 @@ const MediaViewerSlides: FC<OwnProps> = ({
       const initialContentRect = initialContentRectRef.current;
       if (!initialContentRect) return [{ x, y, scale }, true, true];
       // Get current content boundaries
-      let inBoundsX = true;
-      let inBoundsY = true;
-
       const centerX = (windowWidth - windowWidth * scale) / 2;
       const centerY = (windowHeight - windowHeight * scale) / 2;
 
@@ -289,12 +286,12 @@ const MediaViewerSlides: FC<OwnProps> = ({
       // based on initial content rect and current scale
       const minOffsetX = Math.max(-initialContentRect.left * scale, centerX);
       const maxOffsetX = windowWidth - initialContentRect.right * scale;
-      inBoundsX = isBetween(x, maxOffsetX, minOffsetX);
+      const inBoundsX = isBetween(x, maxOffsetX, minOffsetX);
       x = clamp(x, maxOffsetX, minOffsetX);
 
       const minOffsetY = Math.max(-initialContentRect.top * scale + offsetTop, centerY);
       const maxOffsetY = windowHeight - initialContentRect.bottom * scale;
-      inBoundsY = isBetween(y, maxOffsetY, minOffsetY);
+      const inBoundsY = isBetween(y, maxOffsetY, minOffsetY);
       y = clamp(y, maxOffsetY, minOffsetY);
 
       return [{ x, y, scale }, inBoundsX, inBoundsY];

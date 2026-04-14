@@ -86,18 +86,18 @@ const LeftMain: FC<OwnProps> = ({
     transitionClassNames: updateButtonClassNames,
   } = useShowTransitionDeprecated(isAppUpdateAvailable || Boolean(tauriUpdate));
 
-  const isMouseInside = useRef(false);
+  const isMouseInsideRef = useRef(false);
 
   const handleMouseEnter = useLastCallback(() => {
     if (content !== LeftColumnContent.ChatList) {
       return;
     }
-    isMouseInside.current = true;
+    isMouseInsideRef.current = true;
     setIsNewChatButtonShown(true);
   });
 
   const handleMouseLeave = useLastCallback(() => {
-    isMouseInside.current = false;
+    isMouseInsideRef.current = false;
 
     if (closeTimeout) {
       clearTimeout(closeTimeout);
@@ -105,7 +105,7 @@ const LeftMain: FC<OwnProps> = ({
     }
 
     closeTimeout = window.setTimeout(() => {
-      if (!isMouseInside.current) {
+      if (!isMouseInsideRef.current) {
         setIsNewChatButtonShown(false);
       }
     }, BUTTON_CLOSE_DELAY_MS);
@@ -148,7 +148,7 @@ const LeftMain: FC<OwnProps> = ({
       autoCloseTimeout = window.setTimeout(() => {
         setIsNewChatButtonShown(false);
       }, BUTTON_CLOSE_DELAY_MS);
-    } else if (isMouseInside.current || IS_TOUCH_ENV) {
+    } else if (isMouseInsideRef.current || IS_TOUCH_ENV) {
       setIsNewChatButtonShown(true);
     }
 

@@ -115,7 +115,7 @@ export async function updateTwoFaSettings(
           const code = await emailCodeCallback!(e.codeLength);
 
           if (!code) {
-            throw new Error('Code is empty');
+            throw new Error('Code is empty', { cause: e });
           }
 
           await client.invoke(new Api.account.ConfirmPasswordEmail({ code }));

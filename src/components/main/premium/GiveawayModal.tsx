@@ -159,9 +159,9 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   }
 
   const [customExpireDate, setCustomExpireDate] = useState<number>(() => Date.now() + DEFAULT_CUSTOM_EXPIRE_DATE);
-  const [isHeaderHidden, setHeaderHidden] = useState(true);
+  const [isHeaderHidden, setIsHeaderHidden] = useState(true);
   const [selectedRandomUserCount, setSelectedRandomUserCount] = useState<number>(DEFAULT_BOOST_COUNT);
-  const [selectedGiveawayOption, setGiveawayOption] = useState<ApiGiveawayType>(TYPE_OPTIONS[0].value);
+  const [selectedGiveawayOption, setSelectedGiveawayOption] = useState<ApiGiveawayType>(TYPE_OPTIONS[0].value);
   const [selectedStarOption, setSelectedStarOption] = useState<ApiStarGiveawayOption | undefined>();
   const [selectedSubscriberOption, setSelectedSubscriberOption] = useState<SubscribersType>('all');
   const [selectedMonthOption, setSelectedMonthOption] = useState<number | undefined>();
@@ -390,7 +390,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop } = e.currentTarget;
 
-    setHeaderHidden(scrollTop <= 150);
+    setIsHeaderHidden(scrollTop <= 150);
   }
 
   const handleChangeSubscriberOption = useLastCallback((value) => {
@@ -398,7 +398,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleChangeTypeOption = useLastCallback((value: ApiGiveawayType) => {
-    setGiveawayOption(value);
+    setSelectedGiveawayOption(value);
     setSelectedUserIds([]);
     setSelectedRandomUserCount(DEFAULT_BOOST_COUNT);
   });
@@ -415,7 +415,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   const handleSelectedUserIdsChange = useLastCallback((newSelectedIds: string[]) => {
     setSelectedUserIds(newSelectedIds);
     if (!newSelectedIds.length) {
-      setGiveawayOption('premium_giveaway');
+      setSelectedGiveawayOption('premium_giveaway');
     }
   });
 

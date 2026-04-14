@@ -81,7 +81,7 @@ const GameModal: FC<OwnProps & StateProps> = ({ openedGame, gameTitle, canPost }
           onLoad={handleLoad}
           src={url}
           title={lang('AttachGame')}
-          sandbox="allow-scripts allow-same-origin allow-orientation-lock"
+          sandbox="allow-scripts allow-orientation-lock"
           allow="fullscreen"
         />
       )}

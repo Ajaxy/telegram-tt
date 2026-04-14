@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useLayoutEffect,
   useMemo,
@@ -102,7 +101,7 @@ const INLINE_MEMBER_COUNT = 5;
 
 const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
-const MiddleSearch: FC<OwnProps & StateProps> = ({
+const MiddleSearch = ({
   isActive,
   chat,
   monoforumChat,
@@ -122,7 +121,7 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
   currentUserId,
   fromPeerId,
   isGroupChat,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     updateMiddleSearch,
     resetMiddleSearch,
@@ -414,7 +413,9 @@ const MiddleSearch: FC<OwnProps & StateProps> = ({
       });
     }
 
+    // eslint-disable-next-line @eslint-react/web-api/no-leaked-event-listener
     window.addEventListener('touchend', focus);
+    // eslint-disable-next-line @eslint-react/web-api/no-leaked-event-listener
     window.addEventListener('mouseup', focus);
 
     window.addEventListener('touchstart', removeListeners);

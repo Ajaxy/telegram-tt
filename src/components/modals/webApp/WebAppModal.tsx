@@ -234,27 +234,27 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   }, queryId ? PROLONG_INTERVAL : undefined, true);
 
   // eslint-disable-next-line no-null/no-null
-  const sendEventCallback = useRef<((event: WebAppOutboundEvent) => void) | null>(null);
+  const sendEventCallbackRef = useRef<((event: WebAppOutboundEvent) => void) | null>(null);
   // eslint-disable-next-line no-null/no-null
-  const reloadFrameCallback = useRef<((url: string) => void) | null>(null);
+  const reloadFrameCallbackRef = useRef<((url: string) => void) | null>(null);
 
   const registerSendEventCallback = useLastCallback((callback: (event: WebAppOutboundEvent) => void) => {
-    sendEventCallback.current = callback;
+    sendEventCallbackRef.current = callback;
   });
 
   const sendEvent = useLastCallback((event: WebAppOutboundEvent) => {
-    if (sendEventCallback.current) {
-      sendEventCallback.current(event);
+    if (sendEventCallbackRef.current) {
+      sendEventCallbackRef.current(event);
     }
   });
 
   const registerReloadFrameCallback = useLastCallback((callback: (url: string) => void) => {
-    reloadFrameCallback.current = callback;
+    reloadFrameCallbackRef.current = callback;
   });
 
   const reloadFrame = useLastCallback((url: string) => {
-    if (reloadFrameCallback.current) {
-      reloadFrameCallback.current(url);
+    if (reloadFrameCallbackRef.current) {
+      reloadFrameCallbackRef.current(url);
     }
   });
 

@@ -81,7 +81,7 @@ const StarsBalanceModal = ({
   const oldLang = useOldLang();
   const lang = useLang();
 
-  const [isHeaderHidden, setHeaderHidden] = useState(true);
+  const [isHeaderHidden, setIsHeaderHidden] = useState(true);
   const [areTabsPinned, pinTabs, unpinTabs] = useFlag(false);
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [areBuyOptionsShown, showBuyOptions, hideBuyOptions] = useFlag();
@@ -162,7 +162,7 @@ const StarsBalanceModal = ({
 
   useEffect(() => {
     if (!isOpen) {
-      setHeaderHidden(true);
+      setIsHeaderHidden(true);
       setSelectedTabIndex(0);
       hideBuyOptions();
       unpinTabs();
@@ -280,7 +280,7 @@ const StarsBalanceModal = ({
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop } = e.currentTarget;
 
-    setHeaderHidden(scrollTop <= 150);
+    setIsHeaderHidden(scrollTop <= 150);
 
     if (tabsRef.current) {
       const { top: tabsTop } = tabsRef.current.getBoundingClientRect();

@@ -9,10 +9,8 @@ type OwnProps = {
 };
 
 const Portal: FC<OwnProps> = ({ containerSelector, className, children }) => {
-  const elementRef = useRef<HTMLDivElement>();
-  if (!elementRef.current) {
-    elementRef.current = document.createElement('div');
-  }
+  // eslint-disable-next-line @eslint-react/purity
+  const elementRef = useRef<HTMLDivElement>(document.createElement('div'));
 
   useLayoutEffect(() => {
     const container = document.querySelector<HTMLDivElement>(containerSelector || '#portals');
@@ -20,7 +18,7 @@ const Portal: FC<OwnProps> = ({ containerSelector, className, children }) => {
       return undefined;
     }
 
-    const element = elementRef.current!;
+    const element = elementRef.current;
     if (className) {
       element.classList.add(className);
     }

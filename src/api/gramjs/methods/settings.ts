@@ -800,7 +800,7 @@ export async function initPasskeyRegistration() {
   return undefined;
 }
 
-export async function registerPasskey(credentialJson: PublicKeyCredentialJSON) {
+export async function registerPasskey(credentialJson: RegistrationResponseJSON) {
   const result = await invokeRequest(new GramJs.account.RegisterPasskey({
     credential: buildInputPasskeyCredential(credentialJson),
   }));

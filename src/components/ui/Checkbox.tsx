@@ -136,7 +136,6 @@ const Checkbox: FC<OwnProps> = ({
 
   return (
     <>
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <label
         className={labelClassName}
         dir={lang.isRtl ? 'rtl' : undefined}

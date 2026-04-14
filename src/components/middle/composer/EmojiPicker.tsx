@@ -147,7 +147,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
 
   // Initialize data on first render.
   useEffect(() => {
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       const exec = () => {
         setCategories(emojiData.categories);
 
@@ -161,6 +161,10 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
           .then(exec);
       }
     }, OPEN_ANIMATION_DELAY);
+
+    return () => {
+      clearTimeout(timeout);
+    };
   }, []);
 
   const selectCategory = useLastCallback((index: number) => {

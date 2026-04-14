@@ -38,12 +38,12 @@ export function hasActiveViewTransition(): boolean {
 }
 
 export function useViewTransition(): ViewTransitionController {
-  const parameters = useRef<ViewTransitionParameters>();
+  const parametersRef = useRef<ViewTransitionParameters>();
   const [transitionState, setTransitionState] = useState<TransitionState>('idle');
 
   useEffect(() => {
     if (transitionState !== 'capturing-old') return;
-    const { domUpdateCallback, types } = parameters.current || {};
+    const { domUpdateCallback, types } = parametersRef.current || {};
 
     const onHeavyAnimationEnd = beginHeavyAnimation();
     const transition = document.startViewTransition(async () => {
@@ -115,7 +115,7 @@ export function useViewTransition(): ViewTransitionController {
       return;
     }
 
-    parameters.current = {
+    parametersRef.current = {
       domUpdateCallback: updateCallback,
       types,
     };

@@ -79,7 +79,7 @@ const ConfirmPayment: FC<OwnProps> = ({
         src={url}
         title={lang('Checkout.WebConfirmation.Title')}
         allow="payment"
-        sandbox="allow-modals allow-forms allow-scripts allow-same-origin allow-top-navigation"
+        sandbox="allow-modals allow-forms allow-scripts allow-top-navigation"
         className="ConfirmPayment__content"
       />
     </div>

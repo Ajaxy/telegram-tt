@@ -1,9 +1,5 @@
-import type {
-  ElementRef } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import {
-  beginHeavyAnimation,
-  type FC, memo, useEffect, useRef,
+  beginHeavyAnimation, type ElementRef, memo, useEffect, useRef,
 } from '../../lib/teact/teact';
 
 import type { MenuPositionOptions } from '../../hooks/useMenuPosition';
@@ -56,7 +52,7 @@ type OwnProps =
 
 const ANIMATION_DURATION = 200;
 
-const Menu: FC<OwnProps> = ({
+const Menu = ({
   ref: externalRef,
   shouldCloseFast,
   isOpen,
@@ -78,7 +74,7 @@ const Menu: FC<OwnProps> = ({
   onMouseEnterBackdrop,
   nested,
   ...positionOptions
-}) => {
+}: OwnProps) => {
   const { isTouchScreen } = useAppLayout();
 
   const containerRef = useRef<HTMLDivElement>();

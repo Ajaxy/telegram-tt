@@ -2,7 +2,6 @@ import type { ApiSavedGifts } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
 import { DEFAULT_GIFT_PROFILE_FILTER_OPTIONS } from '../../../config';
-import { selectActiveGiftsCollectionId } from '../../../global/selectors';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { addActionHandler, setGlobal } from '../../index';
 import {
@@ -11,7 +10,7 @@ import {
   updateStarsPayment,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
-import { selectTabState } from '../../selectors';
+import { selectActiveGiftsCollectionId, selectTabState } from '../../selectors';
 
 addActionHandler('closePaymentModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};

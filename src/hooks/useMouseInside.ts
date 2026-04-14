@@ -9,10 +9,10 @@ let closeTimeout: number | undefined;
 export default function useMouseInside(
   isOpen: boolean, onClose: NoneToVoidFunction, menuCloseTimeout = MENU_CLOSE_TIMEOUT, isDisabled = false,
 ) {
-  const isMouseInside = useRef(false);
+  const isMouseInsideRef = useRef(false);
 
   const markMouseInside = useLastCallback(() => {
-    isMouseInside.current = true;
+    isMouseInsideRef.current = true;
   });
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function useMouseInside(
 
     if (isOpen && !IS_TOUCH_ENV && !isDisabled) {
       closeTimeout = window.setTimeout(() => {
-        if (!isMouseInside.current) {
+        if (!isMouseInsideRef.current) {
           onClose();
         }
       }, menuCloseTimeout * 2);
@@ -31,11 +31,11 @@ export default function useMouseInside(
   }, [isDisabled, isOpen, menuCloseTimeout, onClose]);
 
   const handleMouseEnter = useLastCallback(() => {
-    isMouseInside.current = true;
+    isMouseInsideRef.current = true;
   });
 
   const handleMouseLeave = useLastCallback(() => {
-    isMouseInside.current = false;
+    isMouseInsideRef.current = false;
 
     if (closeTimeout) {
       clearTimeout(closeTimeout);
@@ -43,7 +43,7 @@ export default function useMouseInside(
     }
 
     closeTimeout = window.setTimeout(() => {
-      if (!isMouseInside.current) {
+      if (!isMouseInsideRef.current) {
         onClose();
       }
     }, menuCloseTimeout);

@@ -35,9 +35,9 @@ const ImageCropper = ({
 }: OwnProps) => {
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(MIN_ZOOM);
-  const isDragging = useRef(false);
-  const lastMousePosition = useRef({ x: 0, y: 0 });
-  const lastImagePosition = useRef({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const lastMousePositionRef = useRef({ x: 0, y: 0 });
+  const lastImagePositionRef = useRef({ x: 0, y: 0 });
 
   const { width: windowWidth } = useWindowSize();
   const previewContainerSize = Math.min(PREVIEW_SIZE, windowWidth - MODAL_INLINE_PADDING * 2);
@@ -71,9 +71,9 @@ const ImageCropper = ({
   };
 
   const startDrag = (e: any) => {
-    isDragging.current = true;
-    lastMousePosition.current = getPointerPosition(e);
-    lastImagePosition.current = { ...imagePosition };
+    isDraggingRef.current = true;
+    lastMousePositionRef.current = getPointerPosition(e);
+    lastImagePositionRef.current = { ...imagePosition };
     document.addEventListener('mousemove', moveDrag);
     document.addEventListener('touchmove', moveDrag);
     document.addEventListener('mouseup', endDrag);
@@ -81,19 +81,19 @@ const ImageCropper = ({
   };
   const moveDrag = useLastCallback((e: any) => {
     if ('touches' in e && e.touches.length > 1) return;
-    if (!isDragging.current) return;
+    if (!isDraggingRef.current) return;
     const { x: mouseX, y: mouseY } = getPointerPosition(e);
-    const deltaX = mouseX - lastMousePosition.current.x;
-    const deltaY = mouseY - lastMousePosition.current.y;
+    const deltaX = mouseX - lastMousePositionRef.current.x;
+    const deltaY = mouseY - lastMousePositionRef.current.y;
     const newPosition = clampPosition(
-      lastImagePosition.current.x + deltaX,
-      lastImagePosition.current.y + deltaY,
+      lastImagePositionRef.current.x + deltaX,
+      lastImagePositionRef.current.y + deltaY,
       previewImageSize,
     );
     setImagePosition(newPosition);
   });
   const endDrag = useLastCallback(() => {
-    isDragging.current = false;
+    isDraggingRef.current = false;
     document.removeEventListener('mousemove', moveDrag);
     document.removeEventListener('touchmove', moveDrag);
     document.removeEventListener('mouseup', endDrag);

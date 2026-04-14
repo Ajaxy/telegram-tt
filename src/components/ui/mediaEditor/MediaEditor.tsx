@@ -600,8 +600,6 @@ const MediaEditor = ({
   const canUndo = actions.length > 0;
   const canRedo = redoStack.length > 0;
 
-  if (!shouldRender) return undefined;
-
   const renderPanelContent = () => {
     switch (mode) {
       case 'crop':
@@ -690,6 +688,8 @@ const MediaEditor = ({
       `height: ${frameHeight}px`,
     );
   }, [displaySize, cropState, displayScale, mode, isTransitioning]);
+
+  if (!shouldRender) return undefined;
 
   return (
     <Portal>

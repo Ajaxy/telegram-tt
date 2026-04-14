@@ -28,8 +28,6 @@ import TextArea from '../ui/TextArea';
 
 import './NewContactModal.scss';
 
-const ANIMATION_DURATION = 200;
-
 export type OwnProps = {
   isOpen: boolean;
   userId?: string;
@@ -86,9 +84,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (!IS_TOUCH_ENV && isShown) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, ANIMATION_DURATION);
+      inputRef.current?.focus();
     }
   }, [isShown]);
 

@@ -161,9 +161,9 @@ export class SessionFreshError extends BadRequestError {
 }
 
 export class PasskeyLoginRequestedError extends Error {
-  public credentialJson: PublicKeyCredentialJSON;
+  public credentialJson: AuthenticationResponseJSON;
 
-  constructor(credentialJson: PublicKeyCredentialJSON) {
+  constructor(credentialJson: AuthenticationResponseJSON) {
     super('Passkey login requested');
     this.message = 'RESTART_AUTH_WITH_PASSKEY';
     this.credentialJson = credentialJson;

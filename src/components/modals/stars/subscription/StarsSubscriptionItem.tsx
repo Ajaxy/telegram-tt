@@ -10,6 +10,7 @@ import { NNBSP } from '../../../../config';
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
 import { formatDateToString } from '../../../../util/dates/oldDateFormat';
+import { getServerTime } from '../../../../util/serverTime';
 import { formatInteger } from '../../../../util/textFormat';
 import renderText from '../../../common/helpers/renderText';
 
@@ -51,7 +52,7 @@ const StarsSubscriptionItem = ({ subscription }: OwnProps) => {
     return undefined;
   }
 
-  const hasExpired = until < Date.now() / 1000;
+  const hasExpired = until < getServerTime();
   const formattedDate = formatDateToString(until * 1000, lang.code, true, 'long');
 
   return (

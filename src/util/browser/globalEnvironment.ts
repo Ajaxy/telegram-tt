@@ -1,5 +1,6 @@
 import { isTauri } from '@tauri-apps/api/core';
 
+// eslint-disable-next-line no-shadow-restricted-names
 declare const globalThis: ServiceWorkerGlobalScope & WorkerGlobalScope & SharedWorkerGlobalScope & Window;
 
 export const IS_MULTIACCOUNT_SUPPORTED = 'SharedWorker' in globalThis;

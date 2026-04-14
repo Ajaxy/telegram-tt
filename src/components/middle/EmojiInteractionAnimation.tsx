@@ -80,7 +80,12 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
       stop();
       endHeavyAnimation();
     }, PLAYING_DURATION);
-  }, [stop]);
+
+    return () => {
+      clearTimeout(timeoutRef.current);
+      endHeavyAnimation();
+    };
+  }, []);
 
   const effectHash = effectAnimationId && `sticker${effectAnimationId}`;
   const effectTgsUrl = useMedia(effectHash, !effectAnimationId);

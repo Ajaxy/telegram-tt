@@ -1,7 +1,4 @@
-import type { FC } from '../../../lib/teact/teact.ts';
-import type React from '../../../lib/teact/teact.ts';
-import { useState } from '../../../lib/teact/teact.ts';
-import { memo } from '../../../lib/teact/teact.ts';
+import { memo, useState } from '../../../lib/teact/teact';
 
 import type { ApiChat } from '../../../api/types/index';
 import type { ManagementScreens } from '../../../types/index';
@@ -10,13 +7,13 @@ import { ChatCreationProgress } from '../../../types/index';
 import { getActions, withGlobal } from '../../../global/index';
 import { selectChat, selectTabState } from '../../../global/selectors/index';
 
-import useHistoryBack from '../../../hooks/useHistoryBack.ts';
-import useLang from '../../../hooks/useLang.ts';
-import useLastCallback from '../../../hooks/useLastCallback.ts';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
-import AvatarEditable from '../../ui/AvatarEditable.tsx';
-import FloatingActionButton from '../../ui/FloatingActionButton.tsx';
-import InputText from '../../ui/InputText.tsx';
+import AvatarEditable from '../../ui/AvatarEditable';
+import FloatingActionButton from '../../ui/FloatingActionButton';
+import InputText from '../../ui/InputText';
 
 type OwnProps = {
   chatId: string;
@@ -31,13 +28,13 @@ type StateProps = {
   creationError?: string;
 };
 
-const NewDiscussionGroup: FC<OwnProps & StateProps> = ({
+const NewDiscussionGroup = ({
   chat,
   onClose,
   isActive,
   creationProgress,
   creationError,
-}) => {
+}: OwnProps & StateProps) => {
   const { createChannel } = getActions();
   const lang = useLang();
 

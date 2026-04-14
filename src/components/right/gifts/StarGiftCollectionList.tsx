@@ -46,21 +46,21 @@ const StarGiftCollectionList = ({
     }
   });
 
-  if (!collections || collections.length === 0) {
-    return undefined;
-  }
-
   const items: TabItem[] = useMemo(() => [
     {
       id: 'all',
       title: lang('AllGiftsCategory'),
     },
-    ...collections.map((collection) => ({
+    ...(collections || []).map((collection) => ({
       id: String(collection.collectionId),
       title: collection.title,
       sticker: collection.icon,
     })),
   ], [collections, lang]);
+
+  if (!collections || collections.length === 0) {
+    return undefined;
+  }
 
   const selectedItemId = activeCollectionId ? String(activeCollectionId) : 'all';
 

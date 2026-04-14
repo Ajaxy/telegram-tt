@@ -24,8 +24,6 @@ export function isSignal(obj: unknown): obj is Signal {
 // A shorthand to unsubscribe effect from all signals
 const unsubscribesByEffect = new Map<NoneToVoidFunction, Set<NoneToVoidFunction>>();
 
-let currentEffect: NoneToVoidFunction | undefined;
-
 export function createSignal<T>(defaultValue?: T) {
   const state: SignalState<typeof defaultValue> = {
     value: defaultValue,
@@ -62,10 +60,6 @@ export function createSignal<T>(defaultValue?: T) {
   }
 
   function getter() {
-    if (currentEffect) {
-      subscribe(currentEffect);
-    }
-
     return state.value;
   }
 

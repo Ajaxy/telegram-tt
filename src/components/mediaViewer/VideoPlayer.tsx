@@ -113,11 +113,11 @@ const VideoPlayer: FC<OwnProps> = ({
 
   const [, toggleControls, lockControls] = useControlsSignal();
   const [getIsSeeking, setIsSeeking] = useSignal(false);
-  const lastMousePosition = useRef({ x: 0, y: 0 });
+  const lastMousePositionRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const updateMousePosition = (e: MouseEvent | TouchEvent) => {
-      lastMousePosition.current = getPointerPosition(e);
+      lastMousePositionRef.current = getPointerPosition(e);
     };
 
     window.addEventListener('mousemove', updateMousePosition);
@@ -151,7 +151,7 @@ const VideoPlayer: FC<OwnProps> = ({
   const handleSeekingChange = useLastCallback((isSeeking: boolean) => {
     setIsSeeking(isSeeking);
     if (!isSeeking) {
-      const { x, y } = lastMousePosition.current;
+      const { x, y } = lastMousePositionRef.current;
       checkMousePositionAndToggleControls(x, y);
     }
   });

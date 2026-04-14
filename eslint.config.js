@@ -1,26 +1,23 @@
 import eslint from '@eslint/js';
+import eslintReact from '@eslint-react/eslint-plugin';
 import stylisticJs from '@stylistic/eslint-plugin';
-import { globalIgnores } from 'eslint/config';
-import importsPlugin from 'eslint-plugin-import';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import { importX } from 'eslint-plugin-import-x';
 import jestPlugin from 'eslint-plugin-jest';
-import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
 import noNullPlugin from 'eslint-plugin-no-null';
-import reactPlugin from 'eslint-plugin-react';
 import reactHooksStaticDeps from 'eslint-plugin-react-hooks-static-deps';
-import reactXPlugin from 'eslint-plugin-react-x';
 import simpleImportSortPlugin from 'eslint-plugin-simple-import-sort';
 import ttMultitabPlugin from 'eslint-plugin-tt-multitab';
 import unusedImports from 'eslint-plugin-unused-imports';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default defineConfig(
   eslint.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
   tseslint.configs.stylistic,
-  reactPlugin.configs.flat.recommended,
-  reactPlugin.configs.flat['jsx-runtime'],
-  reactXPlugin.configs['recommended-type-checked'],
-  jsxA11yPlugin.flatConfigs.recommended,
+  eslintReact.configs['recommended-typescript'],
+  importX.flatConfigs.recommended,
+  importX.flatConfigs.typescript,
   ttMultitabPlugin.configs.recommended,
   stylisticJs.configs.customize({
     semi: true,
@@ -68,6 +65,16 @@ export default tseslint.config(
       'no-prototype-builtins': 'off',
       'no-undef': 'off',
       'no-unused-vars': 'off',
+      '@stylistic/comma-dangle': ['error', {
+        arrays: 'always-multiline',
+        objects: 'always-multiline',
+        imports: 'always-multiline',
+        exports: 'always-multiline',
+        functions: 'always-multiline',
+        enums: 'always-multiline',
+        tuples: 'always-multiline',
+        generics: 'ignore',
+      }],
       '@stylistic/multiline-ternary': 'off',
       '@stylistic/operator-linebreak': 'off',
       '@stylistic/max-len': ['error', {
@@ -170,6 +177,8 @@ export default tseslint.config(
       '@typescript-eslint/prefer-promise-reject-errors': 'off',
       '@typescript-eslint/unbound-method': 'off',
       'unused-imports/no-unused-imports': 'error',
+      'import-x/namespace': ['error', { allowComputed: true }],
+      'import-x/no-named-as-default-member': 'off',
       'react-hooks/exhaustive-deps': 'off',
       'react-hooks-static-deps/exhaustive-deps': [
         'error',
@@ -185,40 +194,24 @@ export default tseslint.config(
           },
         },
       ],
-      'react/prop-types': 'off',
-      'react/no-unknown-property': 'off',
-      'react/display-name': 'off',
-      'react/jsx-key': 'off',
-      'react/jsx-curly-spacing': [
-        'error',
-        {
-          when: 'never',
-          attributes: true,
-          children: true,
-          allowMultiline: true,
-        },
-      ],
-      'react-x/no-use-context': 'off',
-      'react-x/no-context-provider': 'off',
-      'react-x/no-array-index-key': 'off',
-      'react-x/no-missing-key': 'off',
-      'react-x/no-nested-component-definitions': 'off',
-      'react-x/no-unused-props': 'off',
-      'react-x/no-leaked-conditional-rendering': 'error',
-      'jsx-a11y/click-events-have-key-events': 'off',
-      'jsx-a11y/mouse-events-have-key-events': 'off',
-      'jsx-a11y/no-static-element-interactions': 'off',
-      'jsx-a11y/label-has-associated-control': 'off',
-      'jsx-a11y/anchor-is-valid': 'off',
-      'jsx-a11y/no-noninteractive-element-to-interactive-role': 'off',
-      'jsx-a11y/media-has-caption': 'off',
+      '@eslint-react/exhaustive-deps': 'off',
+      '@eslint-react/set-state-in-effect': 'off',
+      '@eslint-react/unsupported-syntax': 'off',
+      '@eslint-react/no-clone-element': 'off',
+      '@eslint-react/component-hook-factories': 'off',
+      '@eslint-react/no-use-context': 'off',
+      '@eslint-react/no-context-provider': 'off',
+      '@eslint-react/no-array-index-key': 'off',
+      '@eslint-react/web-api/no-leaked-timeout': 'off',
+      '@eslint-react/no-missing-key': 'off',
+      '@eslint-react/no-nested-component-definitions': 'off',
+      '@eslint-react/no-unused-props': 'off',
+      '@eslint-react/no-leaked-conditional-rendering': 'error',
     },
     plugins: {
       'no-null': noNullPlugin,
       'simple-import-sort': simpleImportSortPlugin,
-      import: importsPlugin,
       'unused-imports': unusedImports,
-      react: reactPlugin,
       'react-hooks-static-deps': reactHooksStaticDeps,
       jest: jestPlugin,
       'tt-multitab': ttMultitabPlugin,

@@ -80,11 +80,16 @@ export function useStickerPickerObservers(
       freezeForSet();
       freezeForShowingItems();
     } else {
-      setTimeout(() => {
+      const timeout = window.setTimeout(() => {
         unfreezeForShowingItems();
         unfreezeForSet();
       }, SLIDE_TRANSITION_DURATION);
+
+      return () => {
+        clearTimeout(timeout);
+      };
     }
+    return undefined;
   }, [freezeForSet, freezeForShowingItems, isHidden, unfreezeForSet, unfreezeForShowingItems]);
 
   const selectStickerSet = useLastCallback((index: number) => {

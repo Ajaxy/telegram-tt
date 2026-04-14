@@ -1,3 +1,4 @@
+/* eslint-disable @eslint-react/purity */
 import { useRef, useState } from '../../lib/teact/teact';
 
 export function App() {

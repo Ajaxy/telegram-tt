@@ -57,6 +57,7 @@ const LockScreen: FC<OwnProps & StateProps> = ({
   const [isSignOutDialogOpen, openSignOutConfirmation, closeSignOutConfirmation] = useFlag(false);
   const { shouldRender } = useShowTransitionDeprecated(isLocked);
 
+  // eslint-disable-next-line @eslint-react/purity
   useTimeout(resetInvalidUnlockAttempts, timeoutUntil ? timeoutUntil - Date.now() : undefined);
 
   const handleClearError = useCallback(() => {

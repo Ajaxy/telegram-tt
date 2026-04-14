@@ -171,7 +171,7 @@ export function restartAuthWithQr() {
   authController.reject(new Error('RESTART_AUTH_WITH_QR'));
 }
 
-export function restartAuthWithPasskey(credentialJson: PublicKeyCredentialJSON) {
+export function restartAuthWithPasskey(credentialJson: AuthenticationResponseJSON) {
   if (!authController.reject) {
     return;
   }

@@ -129,7 +129,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const lang = useOldLang();
-  const isBackButtonActive = useRef(true);
+  const isBackButtonActiveRef = useRef(true);
   const { isDesktop, isTablet } = useAppLayout();
 
   const { width: windowWidth } = useWindowSize();
@@ -164,7 +164,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 
   const setBackButtonActive = useLastCallback(() => {
     setTimeout(() => {
-      isBackButtonActive.current = true;
+      isBackButtonActiveRef.current = true;
     }, BACK_BUTTON_INACTIVE_TIME);
   });
 
@@ -187,10 +187,10 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   });
 
   const handleBackClick = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    if (!isBackButtonActive.current) return;
+    if (!isBackButtonActiveRef.current) return;
 
     // Workaround for missing UI when quickly clicking the Back button
-    isBackButtonActive.current = false;
+    isBackButtonActiveRef.current = false;
     if (isMobile) {
       const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
       messageInput?.blur();

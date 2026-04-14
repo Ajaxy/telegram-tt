@@ -218,9 +218,13 @@ const PhoneCall = ({
 
   useEffect(() => {
     if (phoneCall?.state === 'discarded') {
-      setTimeout(hangUp, 250);
+      const timeout = setTimeout(hangUp, 250);
+      return () => {
+        clearTimeout(timeout);
+      };
     }
-  }, [hangUp, phoneCall?.reason, phoneCall?.state]);
+    return undefined;
+  }, [phoneCall?.reason, phoneCall?.state]);
 
   return (
     <Modal

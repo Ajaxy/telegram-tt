@@ -131,7 +131,7 @@ addActionHandler('loginWithPasskey', async (global, actions, payload): Promise<v
   if (!credential) return;
 
   const publicKeyCredential = credential as PublicKeyCredential;
-  callApi('restartAuthWithPasskey', publicKeyCredential.toJSON());
+  callApi('restartAuthWithPasskey', publicKeyCredential.toJSON() as AuthenticationResponseJSON);
 });
 
 addActionHandler('uploadProfilePhoto', async (global, actions, payload): Promise<void> => {

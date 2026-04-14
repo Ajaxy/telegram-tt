@@ -337,10 +337,14 @@ const MessageContextMenu: FC<OwnProps> = ({
       return;
     }
 
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       markIsReady();
     }, ANIMATION_DURATION);
-  }, [isOpen, markIsReady, unmarkIsReady]);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     return disableScrolling(scrollableRef.current, '.ReactionPicker');

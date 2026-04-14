@@ -1,3 +1,4 @@
+/* eslint-disable @eslint-react/purity */
 import {
   createContext, memo, useState,
 } from '../../lib/teact/teact';

@@ -130,7 +130,6 @@ addActionHandler('initMain', (global): ActionReturnType => {
 });
 
 addCallback((global: GlobalState) => {
-  let isUpdated = false;
   const tabState = selectTabState(global, getCurrentTabId());
   if (!tabState?.shouldInit) return;
 
@@ -194,9 +193,7 @@ addCallback((global: GlobalState) => {
 
   startWebsync();
 
-  isUpdated = true;
-
-  if (isUpdated) setGlobal(global);
+  setGlobal(global);
 });
 
 addActionHandler('setInstallPrompt', (global, actions, payload): ActionReturnType => {

@@ -69,7 +69,7 @@ export function useSelectorSignal<T>(selector: Selector<T>): Signal<T> {
 /**
  * @param selector - A stable or memoized selector function.
  */
-export function useSelector<T>(selector: Selector<T>) {
+function useSelector<T>(selector: Selector<T>) {
   const selectorSignal = useSelectorSignal(selector);
   return useDerivedState(selectorSignal, [selectorSignal, selector]);
 }

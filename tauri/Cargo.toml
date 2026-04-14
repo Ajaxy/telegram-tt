@@ -1,6 +1,6 @@
  [package]
 name = "telegram_air"
-version = "2.9.5"
+version = "2.10.3"
 description = "Telegram Air"
 authors = ["Alexander Zinchuk"]
 license = "GPLv3"
@@ -11,35 +11,35 @@ rust-version = "1.93"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "2.5.3", features = [] }
+tauri-build = { version = "2.5.6", features = [] }
 
 [dependencies]
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
-tauri = { version = "2.9.5", features = [ "devtools", "unstable", "config-json5", "tray-icon", "image-png"] }
+tauri = { version = "2.10.3", features = [ "devtools", "unstable", "config-json5", "tray-icon", "image-png"] }
 tauri-plugin-window-state = "2.4.1"
-tauri-plugin-shell = "2.3.4"
+tauri-plugin-shell = "2.3.5"
 tauri-plugin-log = "2.8.0"
 tauri-plugin-notification = "2.3.3"
-tauri-plugin-updater = "2.9.0"
+tauri-plugin-updater = "2.10.0"
 tauri-plugin-process = "2.3.1"
 tauri-plugin-fs = "2.4.5"
-tauri-plugin-deep-link = "2.4.6"
+tauri-plugin-deep-link = "2.4.7"
 log = "0.4.29"
-uuid = { version = "1.20.0", features = ["v4"] }
+uuid = { version = "1.22.0", features = ["v4"] }
 url = "2.5.8"
-image      = "0.25.9"
-imageproc  = "0.26.0"
+image      = "0.25.10"
+imageproc  = "0.26.1"
 ab_glyph   = "0.2.32"
 tauri-plugin-os = "2.3.2"
 
 [target."cfg(any(target_os = \"macos\", windows, target_os = \"linux\"))".dependencies]
-tauri-plugin-single-instance = { version = "2.3.7", features = ["deep-link"] }
+tauri-plugin-single-instance = { version = "2.4.0", features = ["deep-link"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.26.1"
 objc = "0.2.7"
-rand = "0.9.2"
+rand = "0.10.0"
 
 [lib]
 name = "app_lib"

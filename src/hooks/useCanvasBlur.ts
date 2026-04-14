@@ -17,22 +17,22 @@ export default function useCanvasBlur(
   preferredHeight?: number,
 ) {
   const canvasRef = useRef<HTMLCanvasElement>();
-  const isStarted = useRef();
+  const isStartedRef = useRef();
 
   useSyncEffect(() => {
     if (!isDisabled) {
-      isStarted.current = false;
+      isStartedRef.current = false;
     }
   }, [dataUri, isDisabled]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
 
-    if (!dataUri || !canvas || isDisabled || isStarted.current) {
+    if (!dataUri || !canvas || isDisabled || isStartedRef.current) {
       return;
     }
 
-    isStarted.current = true;
+    isStartedRef.current = true;
 
     const img = new Image();
 

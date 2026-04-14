@@ -64,7 +64,7 @@ const UrlAuthModal = ({
   );
   const isOpen = Boolean(modal?.url && modal?.request) && !isMatchCodePrecheckPending;
 
-  const [isWriteAccessChecked, setWriteAccessChecked] = useState(
+  const [isWriteAccessChecked, setIsWriteAccessChecked] = useState(
     () => Boolean(modalRequest?.shouldRequestWriteAccess),
   );
   const [selectedMatchCode, setSelectedMatchCode] = useState<string | undefined>();
@@ -84,7 +84,7 @@ const UrlAuthModal = ({
       return;
     }
 
-    setWriteAccessChecked(Boolean(modalRequest.shouldRequestWriteAccess));
+    setIsWriteAccessChecked(Boolean(modalRequest.shouldRequestWriteAccess));
     setSelectedMatchCode(undefined);
     setDialogState('closed');
   }, [modalRequest]);
@@ -152,7 +152,7 @@ const UrlAuthModal = ({
   });
 
   const handleTriggerWriteAccess = useLastCallback(() => {
-    setWriteAccessChecked(!isWriteAccessChecked);
+    setIsWriteAccessChecked(!isWriteAccessChecked);
   });
 
   if (!renderingRequest) {

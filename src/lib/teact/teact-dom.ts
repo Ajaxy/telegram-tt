@@ -114,7 +114,6 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
       && $new.componentInstance === $current.componentInstance
     );
     if (!isSelfUpdate) {
-      // eslint-disable-next-line react-x/no-clone-element
       $new = cloneElement($new) as T;
     }
   }

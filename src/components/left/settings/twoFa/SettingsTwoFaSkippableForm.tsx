@@ -11,7 +11,6 @@ import { selectAnimatedEmoji } from '../../../../global/selectors';
 import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment';
 import renderText from '../../../common/helpers/renderText';
 
-import useAppLayout from '../../../../hooks/useAppLayout';
 import useFlag from '../../../../hooks/useFlag';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useOldLang from '../../../../hooks/useOldLang';
@@ -53,19 +52,15 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
   onReset,
 }) => {
   const inputRef = useRef<HTMLInputElement>();
-  const { isMobile } = useAppLayout();
 
-  const focusDelayTimeoutMs = isMobile ? 550 : 400;
   const [value, setValue] = useState<string>('');
   const [isConfirmShown, markIsConfirmShown, unmarkIsConfirmShown] = useFlag(false);
 
   useEffect(() => {
-    if (!IS_TOUCH_ENV) {
-      setTimeout(() => {
-        inputRef.current!.focus();
-      }, focusDelayTimeoutMs);
+    if (!IS_TOUCH_ENV && isActive) {
+      inputRef.current!.focus();
     }
-  }, [focusDelayTimeoutMs]);
+  }, [isActive]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (error && clearError) {

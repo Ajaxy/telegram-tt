@@ -20,8 +20,7 @@ import type { ResaleGiftsFilterOptions, StarGiftCategory } from '../../../types'
 import { STARS_CURRENCY_CODE } from '../../../config';
 import { getUserFullName } from '../../../global/helpers';
 import { getPeerTitle, isApiPeerChat, isApiPeerUser } from '../../../global/helpers/peers';
-import { selectTabState } from '../../../global/selectors';
-import { selectPeer, selectUserFullInfo } from '../../../global/selectors';
+import { selectPeer, selectTabState, selectUserFullInfo } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { getNextArrowReplacement } from '../../../util/localization/format';
 import { throttle } from '../../../util/schedulers';

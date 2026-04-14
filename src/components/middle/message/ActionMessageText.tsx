@@ -12,9 +12,11 @@ import {
 } from '../../../config';
 import {
   getMainUsername,
-  getMessageInvoice, getMessageTextWithFallback, isChatChannel,
+  getMessageContent,
+  getMessageInvoice,
+  getMessageTextWithFallback,
+  isChatChannel,
 } from '../../../global/helpers';
-import { getMessageContent } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import { getMessageReplyInfo } from '../../../global/helpers/replies';
 import {
@@ -30,8 +32,7 @@ import { ensureProtocol } from '../../../util/browser/url';
 import {
   formatDateTimeToString, formatScheduledDateTime, formatShortDuration,
 } from '../../../util/dates/oldDateFormat';
-import { formatCurrency } from '../../../util/formatCurrency';
-import { convertTonFromNanos } from '../../../util/formatCurrency';
+import { convertTonFromNanos, formatCurrency } from '../../../util/formatCurrency';
 import { formatCurrencyAmountAsText, formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
 import { conjuctionWithNodes } from '../../../util/localization/utils';
 import { getServerTime } from '../../../util/serverTime';

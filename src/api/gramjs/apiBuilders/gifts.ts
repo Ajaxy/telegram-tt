@@ -26,8 +26,7 @@ import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { addDocumentToLocalDb } from '../helpers/localDb';
 import { buildApiFormattedText } from './common';
 import { buildApiCurrencyAmount } from './payments';
-import { buildApiPeerId } from './peers';
-import { getApiChatIdFromMtpPeer } from './peers';
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildStickerFromDocument } from './symbols';
 import { buildApiUser } from './users';
 

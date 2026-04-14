@@ -47,20 +47,20 @@ const StoryAlbumList = ({
     }
   });
 
-  if (!albums?.length) {
-    return undefined;
-  }
-
   const items: TabItem[] = useMemo(() => [
     {
       id: 'all',
       title: lang('AllStoriesCategory'),
     },
-    ...albums.map((album) => ({
+    ...(albums || []).map((album) => ({
       id: String(album.albumId),
       title: album.title,
     })),
   ], [albums, lang]);
+
+  if (!albums?.length) {
+    return undefined;
+  }
 
   const selectedItemId = selectedAlbumId ? String(selectedAlbumId) : 'all';
 

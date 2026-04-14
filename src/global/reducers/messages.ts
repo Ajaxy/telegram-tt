@@ -74,7 +74,7 @@ export function updateCurrentMessageList<T extends GlobalState>(
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   const { messageLists } = selectTabState(global, tabId);
-  let newMessageLists: MessageList[] = messageLists;
+  let newMessageLists: MessageList[];
   if (shouldReplaceHistory || (IS_TEST && !IS_MOCKED_CLIENT)) {
     newMessageLists = chatId ? [{ chatId, threadId, type }] : [];
   } else if (chatId) {

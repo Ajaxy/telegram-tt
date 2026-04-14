@@ -54,8 +54,8 @@ const useWebAppFrame = (
     updateContentSettings,
   } = getActions();
 
-  const isReloadSupported = useRef<boolean>(false);
-  const reloadTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const isReloadSupportedRef = useRef<boolean>(false);
+  const reloadTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const ignoreEventsRef = useRef<boolean>(false);
   const lastFrameSizeRef = useRef<{ width: number; height: number; isResizing?: boolean }>();
   const windowSize = useWindowSize();
@@ -98,11 +98,11 @@ const useWebAppFrame = (
   });
 
   const reloadFrame = useCallback((url: string) => {
-    if (isReloadSupported.current) {
+    if (isReloadSupportedRef.current) {
       sendEvent({
         eventType: 'reload_iframe',
       });
-      reloadTimeout.current = setTimeout(() => {
+      reloadTimeoutRef.current = setTimeout(() => {
         forceReloadFrame(url);
       }, RELOAD_TIMEOUT);
       return;
@@ -213,11 +213,11 @@ const useWebAppFrame = (
       if (eventType === 'iframe_ready') {
         const scrollbarColor = getComputedStyle(document.body).getPropertyValue('--color-scrollbar');
         sendCustomStyle(SCROLLBAR_STYLE.replace(/%SCROLLBAR_COLOR%/g, scrollbarColor));
-        isReloadSupported.current = Boolean(eventData.reload_supported);
+        isReloadSupportedRef.current = Boolean(eventData.reload_supported);
       }
 
       if (eventType === 'iframe_will_reload') {
-        clearTimeout(reloadTimeout.current);
+        clearTimeout(reloadTimeoutRef.current);
       }
 
       if (eventType === 'web_app_data_send') {

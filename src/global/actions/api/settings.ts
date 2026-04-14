@@ -994,7 +994,7 @@ addActionHandler('startPasskeyRegistration', async (global, actions, payload): P
   if (!credential) return;
   const publicKeyCredential = credential as PublicKeyCredential;
 
-  const result = await callApi('registerPasskey', publicKeyCredential.toJSON());
+  const result = await callApi('registerPasskey', publicKeyCredential.toJSON() as RegistrationResponseJSON);
   if (!result) return;
 
   await getPromiseActions().loadPasskeys();

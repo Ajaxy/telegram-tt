@@ -4,9 +4,8 @@
     "target": "esnext",
     "lib": [
       "dom",
-      "dom.iterable",
       "webworker",
-      "es2022"
+      "esnext"
     ],
     "allowJs": true,
     "skipLibCheck": true,
@@ -16,8 +15,8 @@
     "forceConsistentCasingInFileNames": true,
     "allowImportingTsExtensions": true,
     "noImplicitReturns": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -27,6 +26,10 @@
       "@teact": ["./src/lib/teact/teact.ts"],
       "@teact/*": ["./src/lib/teact/*"]
     },
+    "types": [
+      "dom-chromium-ai",
+      "dom-view-transitions"
+    ],
     "incremental": true,
     "tsBuildInfoFile": ".cache/.tsconfig.tsbuildinfo"
   },

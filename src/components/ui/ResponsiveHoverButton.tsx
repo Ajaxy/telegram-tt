@@ -23,10 +23,10 @@ let openTimeout: number | undefined;
 let isFirstTimeActivation = true;
 
 const ResponsiveHoverButton: FC<OwnProps> = ({ onActivate, ...buttonProps }) => {
-  const isMouseInside = useRef(false);
+  const isMouseInsideRef = useRef(false);
 
   const handleMouseEnter = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    isMouseInside.current = true;
+    isMouseInsideRef.current = true;
 
     // This is used to counter additional delay caused by asynchronous module loading
     if (isFirstTimeActivation) {
@@ -40,18 +40,18 @@ const ResponsiveHoverButton: FC<OwnProps> = ({ onActivate, ...buttonProps }) => 
       openTimeout = undefined;
     }
     openTimeout = window.setTimeout(() => {
-      if (isMouseInside.current) {
+      if (isMouseInsideRef.current) {
         onActivate(e);
       }
     }, BUTTON_ACTIVATE_DELAY);
   });
 
   const handleMouseLeave = useLastCallback(() => {
-    isMouseInside.current = false;
+    isMouseInsideRef.current = false;
   });
 
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    isMouseInside.current = true;
+    isMouseInsideRef.current = true;
     onActivate(e);
   });
 

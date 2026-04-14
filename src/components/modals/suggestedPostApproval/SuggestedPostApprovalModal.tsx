@@ -13,6 +13,7 @@ import { selectChatMessage, selectIsMonoforumAdmin, selectSender } from '../../.
 import { formatScheduledDateTime, formatShortDuration } from '../../../util/dates/oldDateFormat';
 import { convertTonFromNanos } from '../../../util/formatCurrency';
 import { formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
+import { getServerTime } from '../../../util/serverTime';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -62,7 +63,7 @@ const SuggestedPostApprovalModal = ({
   const oldLang = useOldLang();
   const [isCalendarOpened, openCalendar, closeCalendar] = useFlag();
 
-  const now = Math.floor(Date.now() / 1000);
+  const now = getServerTime();
   const minAt = (now + futureMin) * 1000;
   const maxAt = (now + futureMax) * 1000;
   const defaultSelectedTime = now + futureMin * 2;

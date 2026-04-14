@@ -92,6 +92,7 @@ const CalendarModal: FC<OwnProps & StateProps> = ({
 
   const oldLang = useOldLang();
   const lang = useLang();
+  // eslint-disable-next-line @eslint-react/purity
   const now = new Date();
 
   const {
