@@ -92,7 +92,7 @@ const SenderGroupContainer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    // Keep as is for now to avoid breaking appearance order
+    // Message appearance animation works only if this timeout is not cleared
     setTimeout(markShown, appearanceOrder * MESSAGE_APPEARANCE_DELAY);
   }, [appearanceOrder, noAppearanceAnimation]);
 

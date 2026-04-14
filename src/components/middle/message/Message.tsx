@@ -530,7 +530,7 @@ const Message = ({
       return;
     }
 
-    // Keep as is for now to avoid breaking appearance order
+    // Message appearance animation works only if this timeout is not cleared. Migrate to `sibling-index()` when baseline widely available.
     setTimeout(markShown, appearanceOrder * MESSAGE_APPEARANCE_DELAY);
   }, [appearanceOrder, noAppearanceAnimation]);
 
