@@ -342,6 +342,7 @@ export enum MediaViewerOrigin {
   StarsTransaction,
   PreviewMedia,
   SponsoredMessage,
+  PollPreview,
 }
 
 export enum StoryViewerOrigin {

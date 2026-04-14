@@ -18,7 +18,6 @@ import {
   FRAGMENT_PHONE_CODE, FRAGMENT_PHONE_LENGTH, MUTE_INDEFINITE_TIMESTAMP, UNMUTE_TIMESTAMP,
 } from '../../../config';
 import {
-  buildStaticMapHash,
   getChatLink,
   getHasAdminRight,
   isChatAdmin,
@@ -56,15 +55,13 @@ import useCollapsibleLines from '../../../hooks/element/useCollapsibleLines';
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
-import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 
 import Chat from '../../left/main/Chat';
 import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
-import Skeleton from '../../ui/placeholder/Skeleton';
 import Switcher from '../../ui/Switcher';
+import CompactMapPreview from '../CompactMapPreview';
 import CustomEmoji from '../CustomEmoji';
 import Icon from '../icons/Icon';
 import SafeLink from '../SafeLink';
@@ -191,19 +188,18 @@ const ChatExtra = ({
   }, [peerId, chat, user]);
 
   const { width, height, zoom } = DEFAULT_MAP_CONFIG;
-  const dpr = useDevicePixelRatio();
-  const locationMediaHash = businessLocation?.geo
-    && buildStaticMapHash(businessLocation.geo, width, height, zoom, dpr);
-  const locationBlobUrl = useMedia(locationMediaHash);
-
   const locationRightComponent = useMemo(() => {
     if (!businessLocation?.geo) return undefined;
-    if (locationBlobUrl) {
-      return <img src={locationBlobUrl} alt="" className={styles.businessLocation} />;
-    }
-
-    return <Skeleton className={styles.businessLocation} animation="wave" />;
-  }, [businessLocation, locationBlobUrl]);
+    return (
+      <CompactMapPreview
+        className={styles.businessLocation}
+        geo={businessLocation.geo}
+        width={width}
+        height={height}
+        zoom={zoom}
+      />
+    );
+  }, [businessLocation, width, height, zoom]);
 
   const isTopicInfo = Boolean(topicId && topicId !== MAIN_THREAD_ID);
   const shouldRenderAllLinks = (chat && isChatChannel(chat)) || user?.isPremium;

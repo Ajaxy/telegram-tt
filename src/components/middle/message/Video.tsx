@@ -38,7 +38,7 @@ export type OwnProps<T> = {
   video: ApiVideo | ApiMediaExtendedPreview;
   lastPlaybackTimestamp?: number;
   isOwn?: boolean;
-  isInWebPage?: boolean;
+  isNestedMedia?: boolean;
   noAvatars?: boolean;
   canAutoLoad?: boolean;
   canAutoPlay?: boolean;
@@ -65,7 +65,7 @@ const Video = <T,>({
   id,
   video,
   isOwn,
-  isInWebPage,
+  isNestedMedia,
   noAvatars,
   canAutoLoad,
   canAutoPlay,
@@ -209,8 +209,8 @@ const Video = <T,>({
     width, height,
   } = dimensions || (
     isPaidPreview
-      ? calculateExtendedPreviewDimensions(video, Boolean(isOwn), asForwarded, isInWebPage, noAvatars, isMobile)
-      : calculateVideoDimensions(video, Boolean(isOwn), asForwarded, isInWebPage, noAvatars, isMobile)
+      ? calculateExtendedPreviewDimensions(video, Boolean(isOwn), asForwarded, isNestedMedia, noAvatars, isMobile)
+      : calculateVideoDimensions(video, Boolean(isOwn), asForwarded, isNestedMedia, noAvatars, isMobile)
   );
 
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>, isFromSpinner?: boolean) => {

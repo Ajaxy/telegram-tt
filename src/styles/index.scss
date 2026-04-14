@@ -352,11 +352,10 @@ body:not(.is-ios) {
   vertical-align: bottom;
 }
 
-.next-arrow-icon {
+.link-arrow-icon {
   font-size: var(--next-arrow-size, 0.5625em);
   font-weight: var(--next-arrow-weight, inherit);
   line-height: inherit;
-  vertical-align: middle;
 }
 
 .shared-canvas-container {

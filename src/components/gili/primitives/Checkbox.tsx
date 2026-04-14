@@ -15,13 +15,13 @@ type InputProps = React.DetailedHTMLProps<
 >;
 
 type OwnProps = {
-  checked: boolean;
+  checked?: boolean;
   disabled?: boolean;
   isRound?: boolean;
   indeterminate?: boolean;
   isInvalid?: boolean;
   className?: string;
-  onChange: (checked: boolean) => void;
+  onChange?: (checked: boolean) => void;
 };
 
 type Props = OwnProps & Omit<InputProps, keyof OwnProps | 'type'>;
@@ -50,7 +50,7 @@ const Checkbox = ({
   }, [indeterminate]);
 
   const handleChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.currentTarget.checked);
+    onChange?.(e.currentTarget.checked);
   });
 
   if (interactive?.isLoading) return undefined;

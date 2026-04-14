@@ -24,9 +24,9 @@ import type {
   ApiFormattedText,
   ApiMediaExtendedPreview,
   ApiMessage,
+  ApiMessagePoll,
   ApiPaidReactionPrivacyType,
   ApiPhoto,
-  ApiPoll,
   ApiQuickReply,
   ApiReaction,
   ApiReactions,
@@ -237,7 +237,7 @@ export type ApiUpdateNewScheduledMessage = {
   id: number;
   message: ApiMessage;
   wasDrafted?: boolean;
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
 };
 
@@ -248,7 +248,7 @@ export type ApiUpdateNewMessage = {
   message: ApiMessage;
   shouldForceReply?: boolean;
   wasDrafted?: boolean;
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
 };
 
@@ -256,7 +256,7 @@ export type ApiUpdateMessage = {
   '@type': 'updateMessage';
   chatId: string;
   id: number;
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
   shouldForceReply?: boolean;
   isFromNew?: true;
@@ -274,7 +274,7 @@ export type ApiUpdateScheduledMessage = {
   '@type': 'updateScheduledMessage';
   chatId: string;
   id: number;
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
   isFromNew?: true;
 } & (
@@ -291,7 +291,7 @@ export type ApiUpdateQuickReplyMessage = {
   '@type': 'updateQuickReplyMessage';
   id: number;
   message: Partial<ApiMessage>;
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
 };
 
@@ -335,7 +335,7 @@ export type ApiUpdateScheduledMessageSendSucceeded = {
   chatId: string;
   localId: number;
   message: ApiMessage;
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
 };
 
@@ -344,7 +344,7 @@ export type ApiUpdateMessageSendSucceeded = {
   chatId: string;
   localId: number;
   message: ApiMessage;
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
 };
 
@@ -385,7 +385,7 @@ export type ApiUpdateChannelMessages = {
 export type ApiUpdateMessagePoll = {
   '@type': 'updateMessagePoll';
   pollId: string;
-  pollUpdate: Partial<ApiPoll>;
+  pollUpdate: Partial<ApiMessagePoll>;
 };
 
 export type ApiUpdateMessagePollVote = {
@@ -895,7 +895,7 @@ export type ApiUpdateEntities = {
   users?: Record<string, ApiUser>;
   chats?: Record<string, ApiChat>;
   threadInfos?: ApiThreadInfo[];
-  polls?: ApiPoll[];
+  polls?: ApiMessagePoll[];
   webPages?: ApiWebPage[];
 };
 

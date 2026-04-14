@@ -114,6 +114,8 @@ const SINGLE_LINE_ACTIONS = new Set<ApiMessageAction['type']>([
   'chatDeletePhoto',
   'todoCompletions',
   'todoAppendTasks',
+  'pollAppendAnswer',
+  'pollDeleteAnswer',
   'unsupported',
 ]);
 const HIDDEN_TEXT_ACTIONS = new Set<ApiMessageAction['type']>(['giftCode', 'prizeStars',

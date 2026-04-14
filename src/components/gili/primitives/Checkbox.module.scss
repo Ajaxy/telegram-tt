@@ -2,34 +2,72 @@
   .root {
     cursor: var(--custom-cursor, pointer);
 
+    position: relative;
+
+    display: grid;
     flex-shrink: 0;
+    place-items: center;
 
     width: 1.25rem;
     height: 1.25rem;
     margin: 0;
-    border: 0.125rem solid var(--color-borders-input);
+    border: 0.125rem solid var(--ui-border-color, var(--color-borders-input));
     border-radius: 0.25rem;
 
     appearance: none;
-    background-color: var(--color-background);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 0;
+    background-color: var(--ui-bg-color, transparent);
 
-    transition: border-color 0.15s ease, background-color 0.15s ease, background-size 0.15s ease;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+
+    &::before {
+      content: "";
+
+      transform: scale(0.8);
+
+      box-sizing: border-box;
+      width: 0;
+      height: 0;
+      border: 0 solid transparent;
+      border-radius: 0;
+
+      opacity: 0;
+      background-color: transparent;
+
+      transition: opacity 0.15s ease, transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+    }
 
     &:checked {
-      border-color: var(--color-primary);
-      background-color: var(--color-primary);
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
-      background-size: 0.75rem;
+      border-color: var(--ui-accent-color, var(--color-primary));
+      background-color: var(--ui-accent-color, var(--color-primary));
+
+      &::before {
+        transform: rotate(45deg) translate(-0.0625rem, -0.03125rem);
+
+        width: 0.375rem;
+        height: 0.625rem;
+        border-color: var(--ui-check-color, white);
+        border-style: solid;
+        border-width: 0 0.125rem 0.125rem 0;
+
+        opacity: 1;
+      }
     }
 
     &:indeterminate {
-      border-color: var(--color-primary);
-      background-color: var(--color-primary);
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3C/svg%3E");
-      background-size: 0.75rem;
+      border-color: var(--ui-accent-color, var(--color-primary));
+      background-color: var(--ui-accent-color, var(--color-primary));
+
+      &::before {
+        transform: none;
+
+        width: 0.625rem;
+        height: 0.125rem;
+        border-width: 0;
+        border-radius: 9999px;
+
+        opacity: 1;
+        background-color: var(--ui-check-color);
+      }
     }
 
     &:disabled {
@@ -38,7 +76,7 @@
     }
 
     &:focus-visible {
-      outline: 2px solid var(--color-primary);
+      outline: 2px solid var(--ui-accent-color, var(--color-primary));
       outline-offset: 2px;
     }
   }

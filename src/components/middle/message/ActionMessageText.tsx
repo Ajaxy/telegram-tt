@@ -1057,6 +1057,29 @@ const ActionMessageText = ({
         });
       }
 
+      case 'pollAppendAnswer':
+      case 'pollDeleteAnswer': {
+        const optionLink = renderMessageLink(
+          replyMessage,
+          renderTextWithEntities({
+            text: action.answer.text.text,
+            entities: action.answer.text.entities,
+            asPreview: true,
+          }),
+          asPreview,
+        );
+
+        return translateWithYou(
+          lang,
+          action.type === 'pollAppendAnswer' ? 'MessageActionPollAppendAnswer' : 'MessageActionPollDeleteAnswer',
+          isOutgoing,
+          {
+            peer: senderLink,
+            option: optionLink,
+          },
+        );
+      }
+
       case 'phoneCall': // Rendered as a regular message, but considered an action for the summary
         return lang(getCallMessageKey(action, isOutgoing));
 

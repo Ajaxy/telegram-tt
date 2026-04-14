@@ -24,7 +24,8 @@
     "jsxImportSource": "@teact",
     "paths": {
       "@teact": ["./src/lib/teact/teact.ts"],
-      "@teact/*": ["./src/lib/teact/*"]
+      "@teact/*": ["./src/lib/teact/*"],
+      "@gili/*": ["./src/components/gili/*"]
     },
     "types": [
       "dom-chromium-ai",

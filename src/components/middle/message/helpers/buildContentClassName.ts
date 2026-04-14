@@ -1,4 +1,4 @@
-import type { ApiMessage, ApiPoll, ApiWebPage } from '../../../../api/types';
+import type { ApiMessage, ApiMessagePoll, ApiWebPage } from '../../../../api/types';
 import type { IAlbum } from '../../../../types';
 
 import { EMOJI_SIZES, MESSAGE_CONTENT_CLASS_NAME } from '../../../../config';
@@ -26,7 +26,7 @@ export function buildContentClassName(
     peerColorClass,
     hasOutsideReactions,
   }: {
-    poll?: ApiPoll;
+    poll?: ApiMessagePoll;
     webPage?: ApiWebPage;
     hasSubheader?: boolean;
     isCustomShape?: boolean | number;
@@ -61,8 +61,10 @@ export function buildContentClassName(
   const isInvertibleMedia = photo || (video && !isRoundVideo) || album || webPage;
 
   const classNames = [MESSAGE_CONTENT_CLASS_NAME];
-  const isMedia = storyData || photo || video || location || invoice?.extendedMedia || paidMedia;
-  const hasText = text || location?.mediaType === 'venue' || isGeoLiveActive || hasFactCheck;
+  const pollMedia = poll?.attachedMedia;
+  const isMedia = storyData || photo || video || location || invoice?.extendedMedia || paidMedia
+    || pollMedia?.photo || pollMedia?.video || pollMedia?.location;
+  const hasText = text || location?.mediaType === 'venue' || isGeoLiveActive || hasFactCheck || poll;
   const isMediaWithNoText = isMedia && !hasText;
   const hasInlineKeyboard = Boolean(message.inlineButtons);
   const isViaBot = Boolean(message.viaBotId);

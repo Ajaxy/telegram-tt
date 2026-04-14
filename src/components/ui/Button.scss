@@ -150,39 +150,6 @@
       }
     }
 
-    &.text {
-      background-color: transparent;
-
-      &.primary {
-        color: var(--color-primary);
-        background-color: transparent;
-
-        @include active-styles() {
-          background-color: rgba(var(--color-primary-shade-rgb), 0.08);
-        }
-
-        @include no-ripple-styles() {
-          background-color: rgba(var(--color-primary-shade-rgb), 0.16);
-        }
-      }
-
-      &.secondary {
-        color: var(--color-text-secondary);
-        background-color: transparent;
-      }
-
-      &.danger {
-        @include active-styles() {
-          color: var(--color-error);
-          background-color: rgba(var(--color-error-rgb), 0.08);
-        }
-
-        @include no-ripple-styles() {
-          background-color: rgba(var(--color-error-rgb), 0.16);
-        }
-      }
-    }
-
     &.faded {
       opacity: 0.8;
 
@@ -530,6 +497,39 @@
 
       .icon {
         margin-inline-start: 0.25rem;
+      }
+    }
+
+    &.text {
+      background-color: transparent;
+
+      &.primary {
+        color: var(--color-primary);
+        background-color: transparent;
+
+        @include active-styles() {
+          background-color: rgba(var(--color-primary-shade-rgb), 0.08);
+        }
+
+        @include no-ripple-styles() {
+          background-color: rgba(var(--color-primary-shade-rgb), 0.16);
+        }
+      }
+
+      &.secondary {
+        color: var(--color-text-secondary);
+        background-color: transparent;
+      }
+
+      &.danger {
+        @include active-styles() {
+          color: var(--color-error);
+          background-color: rgba(var(--color-error-rgb), 0.08);
+        }
+
+        @include no-ripple-styles() {
+          background-color: rgba(var(--color-error-rgb), 0.16);
+        }
       }
     }
   }

@@ -211,7 +211,10 @@ export function animateClosing(
   });
 }
 
-function createGhost(source: string | HTMLImageElement | HTMLVideoElement, origin?: MediaViewerOrigin) {
+function createGhost(
+  source: string | HTMLImageElement | HTMLVideoElement | HTMLCanvasElement,
+  origin?: MediaViewerOrigin,
+) {
   const ghost = document.createElement('div');
   ghost.classList.add('ghost');
 
@@ -221,6 +224,8 @@ function createGhost(source: string | HTMLImageElement | HTMLVideoElement, origi
 
   if (typeof source === 'string') {
     img.src = source;
+  } else if (source instanceof HTMLCanvasElement) {
+    img.src = source.toDataURL();
   } else if (source instanceof HTMLVideoElement) {
     img.src = source.poster;
   } else {
@@ -305,6 +310,11 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
       mediaSelector = 'img';
       break;
 
+    case MediaViewerOrigin.PollPreview:
+      containerSelector = `#poll-media${getMessageHtmlId(message!.id, index)}`;
+      mediaSelector = 'img.full-media, video.full-media, img.thumbnail:not(.blurred-bg), img, video';
+      break;
+
     case MediaViewerOrigin.SharedMedia:
       containerSelector = `#shared-media${getMessageHtmlId(message!.id, index)}`;
       mediaSelector = 'img';
@@ -343,14 +353,18 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
 
     case MediaViewerOrigin.SponsoredMessage:
       containerSelector = '.Transition_slide-active > .MessageList .sponsored-media-preview';
-      mediaSelector = `${MESSAGE_CONTENT_SELECTOR} .full-media,${MESSAGE_CONTENT_SELECTOR} .thumbnail:not(.blurred-bg)`;
+      mediaSelector = `${MESSAGE_CONTENT_SELECTOR} img.full-media,`
+        + `${MESSAGE_CONTENT_SELECTOR} video.full-media,`
+        + `${MESSAGE_CONTENT_SELECTOR} img.thumbnail:not(.blurred-bg)`;
       break;
 
     case MediaViewerOrigin.ScheduledInline:
     case MediaViewerOrigin.Inline:
     default:
       containerSelector = `.Transition_slide-active > .MessageList #${getMessageHtmlId(message!.id, index)}`;
-      mediaSelector = `${MESSAGE_CONTENT_SELECTOR} .full-media,${MESSAGE_CONTENT_SELECTOR} .thumbnail:not(.blurred-bg)`;
+      mediaSelector = `${MESSAGE_CONTENT_SELECTOR} img.full-media,`
+        + `${MESSAGE_CONTENT_SELECTOR} video.full-media,`
+        + `${MESSAGE_CONTENT_SELECTOR} img.thumbnail:not(.blurred-bg)`;
   }
 
   const container = document.querySelector<HTMLElement>(containerSelector)!;
@@ -371,6 +385,7 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
     case MediaViewerOrigin.ScheduledInline:
     case MediaViewerOrigin.StarsTransaction:
     case MediaViewerOrigin.PreviewMedia:
+    case MediaViewerOrigin.PollPreview:
       ghost.classList.add('rounded-corners');
       break;
 

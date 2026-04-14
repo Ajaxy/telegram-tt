@@ -19,7 +19,7 @@ import { formatDateTimeToString } from '../../../../util/dates/oldDateFormat';
 import { formatCurrency, formatCurrencyAsString } from '../../../../util/formatCurrency';
 import {
   formatStarsAsIcon, formatStarsAsText, formatTonAsIcon, formatTonAsText,
-  getNextArrowReplacement,
+  NEXT_ARROW_REPLACEMENT,
 } from '../../../../util/localization/format';
 import { CUSTOM_PEER_HIDDEN } from '../../../../util/objects/customPeer';
 import { getServerTime } from '../../../../util/serverTime';
@@ -786,7 +786,7 @@ const GiftInfoModal = ({
                   link: (
                     <SafeLink url={tonLink} shouldSkipModal text={lang('GiftInfoTonLinkText')}>
                       {lang('GiftInfoTonLinkText', undefined,
-                        { withNodes: true, specialReplacement: getNextArrowReplacement() })}
+                        { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
                     </SafeLink>
                   ),
                 }, { withNodes: true })}
@@ -798,7 +798,7 @@ const GiftInfoModal = ({
                   link: (
                     <Link isPrimary onClick={handleTriggerVisibility}>
                       {lang(`GiftInfoSaved${isUnsaved ? 'Show' : 'Hide'}`, undefined,
-                        { withNodes: true, specialReplacement: getNextArrowReplacement() })}
+                        { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
                     </Link>
                   ),
                 }, {

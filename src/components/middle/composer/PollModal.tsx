@@ -8,6 +8,7 @@ import type { ApiNewPoll } from '../../../api/types';
 
 import { requestMeasure, requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import { generateUniqueNumberId } from '../../../util/generateUniqueId';
 import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -147,25 +148,26 @@ const PollModal = ({
 
     const payload: ApiNewPoll = {
       summary: {
+        id: generateUniqueNumberId().toString(),
+        hash: '0',
         question: {
           text: questionTrimmed,
         },
         answers,
-        ...(!isAnonymous && { isPublic: true }),
-        ...(isMultipleAnswers && { multipleChoice: true }),
-        ...(isQuizMode && { quiz: true }),
+        isPublic: !isAnonymous || undefined,
+        isMultipleChoice: isMultipleAnswers || undefined,
+        isQuiz: isQuizMode || undefined,
       },
     };
 
     if (isQuizMode) {
       const { text, entities } = (solution && parseHtmlAsFormattedText(solution.substring(0, MAX_SOLUTION_LENGTH)))
         || {};
+      const correctAnswerIndex = answers.findIndex((answer) => answer.option === String(correctOption!));
 
-      payload.quiz = {
-        correctAnswers: [String(correctOption)],
-        ...(text && { solution: text }),
-        ...(entities && { solutionEntities: entities }),
-      };
+      payload.correctAnswers = [correctAnswerIndex];
+      payload.solution = text;
+      payload.solutionEntities = entities;
     }
 
     onSend(payload);

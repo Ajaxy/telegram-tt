@@ -196,7 +196,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       });
 
       if (poll) {
-        global = updatePoll(global, poll.id, poll);
+        global = updatePoll(global, poll.summary.id, poll);
       }
 
       if (webPage) {
@@ -320,7 +320,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
 
       if (poll) {
-        global = updatePoll(global, poll.id, poll);
+        global = updatePoll(global, poll.summary.id, poll);
       }
 
       if (webPage) {
@@ -368,7 +368,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         );
       }
       if (poll) {
-        global = updatePoll(global, poll.id, poll);
+        global = updatePoll(global, poll.summary.id, poll);
       }
 
       if (webPage) {
@@ -398,7 +398,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
 
       if (poll) {
-        global = updatePoll(global, poll.id, poll);
+        global = updatePoll(global, poll.summary.id, poll);
       }
 
       if (webPage) {
@@ -444,7 +444,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       global = updateQuickReplyMessage(global, id, message);
 
       if (poll) {
-        global = updatePoll(global, poll.id, poll);
+        global = updatePoll(global, poll.summary.id, poll);
       }
 
       if (webPage) {
@@ -547,7 +547,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       });
 
       if (poll) {
-        global = updatePoll(global, poll.id, poll);
+        global = updatePoll(global, poll.summary.id, poll);
       }
 
       global = {
@@ -624,7 +624,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       });
 
       if (poll) {
-        global = updatePoll(global, poll.id, poll);
+        global = updatePoll(global, poll.summary.id, poll);
       }
 
       setGlobal(global);

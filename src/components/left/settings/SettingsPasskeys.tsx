@@ -11,7 +11,7 @@ import { IS_WEBAUTHN_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { type LangFn } from '../../../util/localization';
 import { formatDateTime, getCalendarDayDiff, secondsToDate } from '../../../util/localization/dateFormat';
-import { getNextArrowReplacement } from '../../../util/localization/format';
+import { NEXT_ARROW_REPLACEMENT } from '../../../util/localization/format';
 import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import { REM } from '../../common/helpers/mediaDimensions';
 
@@ -158,7 +158,7 @@ const SettingsPasskeys = ({
             link: (
               <Link isPrimary onClick={handleOpenPasskeyModal}>
                 {lang('SettingsPasskeysFooterLink', undefined,
-                  { withNodes: true, specialReplacement: getNextArrowReplacement() })}
+                  { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
               </Link>
             ),
           }, { withNodes: true })}

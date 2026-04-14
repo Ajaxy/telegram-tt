@@ -9,8 +9,8 @@ import type {
   ApiChat,
   ApiChatReactions,
   ApiMessage,
+  ApiMessagePoll,
   ApiPeer,
-  ApiPoll,
   ApiReaction,
   ApiStickerSet,
   ApiThreadInfo,
@@ -57,7 +57,7 @@ type OwnProps = {
   anchor: IAnchorPosition;
   targetHref?: string;
   message: ApiMessage;
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
   story?: ApiTypeStory;
   canSendNow?: boolean;

@@ -18,12 +18,12 @@ import type {
   ApiInputSuggestedPostInfo,
   ApiMessage,
   ApiMessageEntity,
+  ApiMessagePoll,
   ApiMessageSearchContext,
   ApiMessageSearchType,
   ApiNewMediaTodo,
   ApiOnProgress,
   ApiPeer,
-  ApiPoll,
   ApiReaction,
   ApiSearchPostsFlood,
   ApiSendMessageAction,
@@ -64,7 +64,7 @@ import {
 import { buildApiComposedMessageWithAI, buildApiFormattedText } from '../apiBuilders/common';
 import { buildApiTopicWithState } from '../apiBuilders/forums';
 import {
-  buildMessageMediaContent, buildMessageTextContent, buildPollFromMedia,
+  buildMessageMediaContent, buildMessagePollFromMedia, buildMessageTextContent,
   buildWebPageFromMedia,
 } from '../apiBuilders/messageContent';
 import {
@@ -461,7 +461,28 @@ export function sendApiMessage(
     } else if (gif) {
       media = buildInputMediaDocument(gif);
     } else if (poll) {
-      media = buildInputPoll(poll, randomId);
+      try {
+        const attachedMedia = poll.attachedMedia
+          ? await uploadMedia(localMessage, poll.attachedMedia, onProgress!)
+          : undefined;
+        const solutionMedia = poll.solutionMedia
+          ? await uploadMedia(localMessage, poll.solutionMedia, onProgress!)
+          : undefined;
+
+        media = buildInputPoll(poll, randomId, {
+          attachedMedia,
+          solutionMedia,
+        });
+      } catch (err) {
+        if (DEBUG) {
+          // eslint-disable-next-line no-console
+          console.warn(err);
+        }
+
+        await mediaQueue;
+
+        return;
+      }
     } else if (todo) {
       media = buildInputTodo(todo);
     } else if (story) {
@@ -1856,7 +1877,7 @@ export async function closePoll({
 }: {
   chat: ApiChat;
   messageId: number;
-  poll: ApiPoll;
+  poll: ApiMessagePoll;
 }) {
   const { id, accessHash } = chat;
 
@@ -2498,7 +2519,7 @@ function handleLocalMessageUpdate(
   }
 
   let newContent: MediaContent | undefined;
-  let poll: ApiPoll | undefined;
+  let poll: ApiMessagePoll | undefined;
   let webPage: ApiWebPage | undefined;
   if (messageUpdate instanceof GramJs.UpdateShortSentMessage) {
     if (localMessage.content.text && messageUpdate.entities) {
@@ -2513,7 +2534,7 @@ function handleLocalMessageUpdate(
           peerId: buildPeer(localMessage.chatId), id: messageUpdate.id,
         }),
       };
-      poll = buildPollFromMedia(messageUpdate.media);
+      poll = buildMessagePollFromMedia(messageUpdate.media);
       webPage = buildWebPageFromMedia(messageUpdate.media);
     }
 

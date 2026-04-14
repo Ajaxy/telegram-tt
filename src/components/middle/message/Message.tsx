@@ -17,8 +17,8 @@ import type {
   ApiKeyboardButton,
   ApiMessage,
   ApiMessageOutgoingStatus,
+  ApiMessagePoll,
   ApiPeer,
-  ApiPoll,
   ApiReaction,
   ApiReactionKey,
   ApiSavedReactionTag,
@@ -202,7 +202,7 @@ import MessageMeta from './MessageMeta';
 import MessagePhoneCall from './MessagePhoneCall';
 import PaidMediaOverlay from './PaidMediaOverlay';
 import Photo from './Photo';
-import Poll from './Poll';
+import Poll from './poll/Poll';
 import Reactions from './reactions/Reactions';
 import RoundVideo from './RoundVideo';
 import Sticker from './Sticker';
@@ -323,7 +323,7 @@ type StateProps = {
   canTranscribeVoice?: boolean;
   viaBusinessBot?: ApiUser;
   effect?: ApiAvailableEffect;
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
   maxTimestamp?: number;
   lastPlaybackTimestamp?: number;
@@ -680,7 +680,6 @@ const Message = ({
     handleOpenThread,
     handleReadMedia,
     handleCancelUpload,
-    handleVoteSend,
     handleGroupForward,
     handleForward,
     handleFocus,
@@ -1221,6 +1220,7 @@ const Message = ({
                 noUserColors={noUserColors}
                 isProtected={isProtected}
                 observeIntersectionForLoading={observeIntersectionForLoading}
+                observeIntersectionForPlaying={observeIntersectionForPlaying}
                 onClick={handleStoryClick}
               />
             )}
@@ -1358,7 +1358,17 @@ const Message = ({
           <Contact contact={contact} noUserColors={isOwn} />
         )}
         {poll && (
-          <Poll message={message} poll={poll} onSendVote={handleVoteSend} />
+          <Poll
+            key={poll.summary.id}
+            chatId={chatId}
+            messageId={messageId}
+            poll={poll}
+            messageText={text}
+            theme={theme}
+            isInScheduled={isScheduled}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
+          />
         )}
         {todo && (
           <TodoList message={message} todoList={todo} />

@@ -16,13 +16,14 @@ import type {
   ApiMessage,
   ApiMessageEntity,
   ApiMessageForwardInfo,
+  ApiMessagePoll,
   ApiMessageReportResult,
   ApiMessageThreadInfo,
   ApiNewMediaTodo,
   ApiNewPoll,
   ApiPeer,
   ApiPhoto,
-  ApiPoll,
+  ApiPollResult,
   ApiPreparedInlineMessage,
   ApiQuickReply,
   ApiReplyInfo,
@@ -49,7 +50,7 @@ import {
 } from '../../../config';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
 import { addTimestampEntities } from '../../../util/dates/timestamp';
-import { omitUndefined, pick } from '../../../util/iteratees';
+import { omitUndefined } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
 import { getServerTime } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
@@ -418,16 +419,35 @@ export function buildApiFactCheck(factCheck: GramJs.FactCheck): ApiFactCheck {
   };
 }
 
-function buildNewPoll(poll: ApiNewPoll, localId: number): ApiPoll {
+function buildNewLocalPoll(poll: ApiNewPoll): ApiMessagePoll {
+  const resultByOption = poll.correctAnswers?.length
+    ? poll.summary.answers.reduce((acc, answer, index) => {
+      const isCorrect = poll.correctAnswers?.includes(index);
+
+      acc[answer.option] = {
+        option: answer.option,
+        votersCount: 0,
+        isCorrect: isCorrect ? true : undefined,
+      };
+
+      return acc;
+    }, {} as Record<string, ApiPollResult>)
+    : undefined;
+
   return {
     mediaType: 'poll',
-    id: String(localId),
-    summary: pick(poll.summary, ['question', 'answers']),
-    results: {},
+    summary: poll.summary,
+    results: {
+      resultByOption,
+      solution: poll.solution,
+      solutionEntities: poll.solutionEntities,
+      solutionMedia: poll.solutionMedia ? buildUploadingMedia(poll.solutionMedia) : undefined,
+    },
+    attachedMedia: poll.attachedMedia ? buildUploadingMedia(poll.attachedMedia) : undefined,
   };
 }
 
-function buildNewTodo(todo: ApiNewMediaTodo): ApiMediaTodo {
+function buildNewLocalTodo(todo: ApiNewMediaTodo): ApiMediaTodo {
   return {
     mediaType: 'todo',
     todo: todo.todo,
@@ -487,8 +507,8 @@ export function buildLocalMessage({
 
   const resultReplyInfo = replyInfo && buildReplyInfo(replyInfo, chat.isForum);
 
-  const localPoll = poll && buildNewPoll(poll, localId);
-  const localTodo = todo && buildNewTodo(todo);
+  const localPoll = poll && buildNewLocalPoll(poll);
+  const localTodo = todo && buildNewLocalTodo(todo);
 
   const localDice = dice ? {
     mediaType: 'dice',
@@ -510,7 +530,7 @@ export function buildLocalMessage({
       video: gif || media?.video,
       contact,
       storyData: story && { mediaType: 'storyData', ...story },
-      pollId: localPoll?.id,
+      pollId: localPoll?.summary.id,
       todo: localTodo,
       dice: localDice,
     }),

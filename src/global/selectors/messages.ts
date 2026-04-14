@@ -647,8 +647,12 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const canSaveGif = message.content.video?.isGif;
 
   const poll = content.pollId ? selectPoll(global, content.pollId) : undefined;
-  const canRevote = !poll?.summary.closed && !poll?.summary.quiz && poll?.results.results?.some((r) => r.isChosen);
-  const canClosePoll = hasMessageEditRight && poll && !poll.summary.closed && !isForwarded;
+  const hasChosenPollAnswer = Boolean(
+    poll && Object.values(poll.results.resultByOption || {}).some((result) => result.isChosen),
+  );
+  const canRevote = poll && !poll.summary.isClosed && !poll.summary.isRevoteDisabled
+    && hasChosenPollAnswer;
+  const canClosePoll = hasMessageEditRight && poll && !poll.summary.isClosed && !isForwarded;
 
   const noOptions = [
     canReply,

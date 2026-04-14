@@ -16,10 +16,10 @@ type InputProps = React.DetailedHTMLProps<
 
 type OwnProps = {
   value: string;
-  checked: boolean;
+  checked?: boolean;
   disabled?: boolean;
   className?: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
 };
 
 type Props = OwnProps & Omit<InputProps, keyof OwnProps | 'type'>;
@@ -40,7 +40,7 @@ const Radio = ({
   const isDisabled = disabled || interactive?.isDisabled || interactive?.isLoading;
 
   const handleChange = useLastCallback(() => {
-    onChange(value);
+    onChange?.(value);
   });
 
   if (interactive?.isLoading) return undefined;

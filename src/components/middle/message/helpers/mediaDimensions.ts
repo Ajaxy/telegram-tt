@@ -26,7 +26,7 @@ export function calculateMediaDimensions({
   media,
   messageText,
   isOwn,
-  isInWebPage,
+  isNestedMedia,
   asForwarded,
   noAvatars,
   isMobile,
@@ -34,19 +34,19 @@ export function calculateMediaDimensions({
   media: ApiPhoto | ApiVideo | ApiMediaExtendedPreview;
   messageText?: string;
   isOwn?: boolean;
-  isInWebPage?: boolean;
+  isNestedMedia?: boolean;
   asForwarded?: boolean;
   noAvatars?: boolean;
   isMobile: boolean;
 }) {
   const isPhoto = media.mediaType === 'photo';
   const isVideo = media.mediaType === 'video';
-  const isWebPagePhoto = isPhoto && isInWebPage;
-  const isWebPageVideo = isVideo && isInWebPage;
+  const isWebPagePhoto = isPhoto && isNestedMedia;
+  const isWebPageVideo = isVideo && isNestedMedia;
   const { width, height } = isPhoto
     ? calculateInlineImageDimensions(media, isOwn, asForwarded, isWebPagePhoto, noAvatars, isMobile)
     : isVideo ? calculateVideoDimensions(media, isOwn, asForwarded, isWebPageVideo, noAvatars, isMobile)
-      : calculateExtendedPreviewDimensions(media, isOwn, asForwarded, isInWebPage, noAvatars, isMobile);
+      : calculateExtendedPreviewDimensions(media, isOwn, asForwarded, isNestedMedia, noAvatars, isMobile);
 
   const minMediaWidth = getMinMediaWidth(messageText, isMobile);
 

@@ -666,12 +666,17 @@
 
   .message-content {
     &.has-replies:not(.custom-shape),
-    &.has-footer:not(.web-page) {
+    &.has-footer:not(.web-page):not(.poll) {
       .media-inner,
       .Album {
         --border-bottom-left-radius: 0;
         --border-bottom-right-radius: 0;
       }
+    }
+
+    &.poll > .content-inner > .media-inner {
+      --border-bottom-left-radius: 0;
+      --border-bottom-right-radius: 0;
     }
 
     &.text.is-inverted-media {

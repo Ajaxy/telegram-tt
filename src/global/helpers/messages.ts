@@ -10,8 +10,7 @@ import type {
   ApiTypeStory,
 } from '../../api/types';
 import type {
-  ApiFormattedText,
-  ApiPoll, ApiReplyInfo, ApiWebPage, MediaContainer, StatefulMediaContent,
+  ApiFormattedText, ApiMessagePoll, ApiReplyInfo, ApiWebPage, MediaContainer, StatefulMediaContent,
 } from '../../api/types/messages';
 import type { ThreadId } from '../../types';
 import type { LangFn } from '../../util/localization';
@@ -74,6 +73,8 @@ export function hasMessageText(message: MediaContainer) {
     webPage, contact, invoice, location, game, storyData, giveaway, giveawayResults, paidMedia,
   } = message.content;
 
+  if (pollId) return false;
+
   return Boolean(text) || !(
     sticker || photo || video || audio || voice || document || contact || pollId || todo || webPage
     || invoice || location || game || storyData || giveaway || giveawayResults || dice
@@ -96,7 +97,7 @@ export function groupStatefulContent({
   story,
   webPage,
 }: {
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   story?: ApiTypeStory;
   webPage?: ApiWebPage;
 }) {

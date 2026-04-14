@@ -1,27 +1,26 @@
 import type { ElementRef } from '../../lib/teact/teact';
 import {
-  memo, useRef, useState,
+  memo, useRef,
 } from '../../lib/teact/teact';
 
+import type { ApiAttachment, MediaContent } from '../../api/types';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { IconName } from '../../types/icons';
 
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDateTime, formatPastTimeShort } from '../../util/dates/oldDateFormat';
 import { getColorFromExtension } from './helpers/documentInfo';
 import { getDocumentThumbnailDimensions } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
 
-import useAppLayout from '../../hooks/useAppLayout';
-import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useLang from '../../hooks/useLang';
-import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 import useOldLang from '../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import Link from '../ui/Link';
 import ProgressSpinner from '../ui/ProgressSpinner';
 import AnimatedFileSize from './AnimatedFileSize';
+import CompactMediaPreview, { canRenderCompactMediaPreview } from './CompactMediaPreview';
 import Icon from './icons/Icon';
 
 import './File.scss';
@@ -36,8 +35,9 @@ type OwnProps = {
   size: number;
   timestamp?: number;
   sender?: string;
-  thumbnailDataUri?: string;
-  previewData?: string;
+  previewMedia?: MediaContent;
+  previewAttachment?: ApiAttachment;
+  observeIntersection?: ObserveFn;
   className?: string;
   previewSize?: FileSize;
   isTransferring?: boolean;
@@ -58,8 +58,8 @@ const File = ({
   extension = '',
   timestamp,
   sender,
-  thumbnailDataUri,
-  previewData,
+  previewMedia,
+  previewAttachment,
   className,
   previewSize = 'medium',
   isTransferring,
@@ -68,6 +68,7 @@ const File = ({
   isSelected,
   transferProgress,
   actionIcon,
+  observeIntersection,
   onClick,
   onDateClick,
 }: OwnProps) => {
@@ -78,12 +79,6 @@ const File = ({
     elementRef = ref;
   }
 
-  const { isMobile } = useAppLayout();
-  const [withThumb] = useState(!previewData);
-  const noThumb = Boolean(previewData);
-  const thumbRef = useCanvasBlur(thumbnailDataUri, noThumb, isMobile && !IS_CANVAS_FILTER_SUPPORTED);
-  const thumbClassNames = useMediaTransitionDeprecated(!noThumb);
-
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
@@ -91,7 +86,8 @@ const File = ({
 
   const color = getColorFromExtension(extension);
 
-  const { width, height } = getDocumentThumbnailDimensions(previewSize);
+  const { width } = getDocumentThumbnailDimensions(previewSize);
+  const shouldRenderPreview = canRenderCompactMediaPreview(previewMedia, previewAttachment);
 
   const fullClassName = buildClassName(
     'File',
@@ -109,23 +105,14 @@ const File = ({
         </div>
       )}
       <div className="file-icon-container" onClick={isUploading ? undefined : onClick}>
-        {thumbnailDataUri || previewData ? (
-          <div className="file-preview media-inner">
-            <img
-              src={previewData}
-              className="full-media"
-              width={width}
-              height={height}
-              draggable={false}
-              alt=""
-            />
-            {withThumb && (
-              <canvas
-                ref={thumbRef}
-                className={buildClassName('thumbnail', thumbClassNames)}
-              />
-            )}
-          </div>
+        {shouldRenderPreview ? (
+          <CompactMediaPreview
+            className="file-preview media-inner"
+            media={previewMedia}
+            attachment={previewAttachment}
+            size={width}
+            observeIntersectionForLoading={observeIntersection}
+          />
         ) : (
           <div className={`file-icon ${color}`}>
             {extension.length <= 4 && (

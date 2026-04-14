@@ -11,7 +11,6 @@ import {
   getIsSavedDialog,
   getMessageIsSpoiler,
   getMessageSingleInlineButton,
-  getMessageVideo,
 } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import {
@@ -25,12 +24,10 @@ import {
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import cycleRestrict from '../../../util/cycleRestrict';
-import { getPictogramDimensions, REM } from '../../common/helpers/mediaDimensions';
+import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 import renderKeyboardButtonText from '../composer/helpers/renderKeyboardButtonText';
 
-import useMessageMediaHash from '../../../hooks/media/useMessageMediaHash';
-import useThumbnail from '../../../hooks/media/useThumbnail';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
@@ -38,14 +35,13 @@ import { useFastClick } from '../../../hooks/useFastClick';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
 import AnimatedCounter from '../../common/AnimatedCounter';
+import CompactMediaPreview, { canRenderCompactMediaPreview } from '../../common/CompactMediaPreview';
 import Icon from '../../common/icons/Icon';
-import MediaSpoiler from '../../common/MediaSpoiler';
 import MessageSummary from '../../common/MessageSummary';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -114,21 +110,15 @@ const HeaderPinnedMessage = ({
 
   const topMessageTitle = topMessageSender ? getPeerTitle(lang, topMessageSender) : undefined;
 
-  const video = pinnedMessage && getMessageVideo(pinnedMessage);
-  const gif = video?.isGif ? video : undefined;
-  const isVideoThumbnail = Boolean(gif && !gif.previewPhotoSizes?.length);
-
-  const mediaThumbnail = useThumbnail(pinnedMessage);
-  const mediaHash = useMessageMediaHash(pinnedMessage, isVideoThumbnail ? 'full' : 'pictogram');
-  const mediaBlobUrl = useMedia(mediaHash);
-  const hasPictogram = Boolean(mediaThumbnail || mediaBlobUrl);
-  const isSpoiler = pinnedMessage && getMessageIsSpoiler(pinnedMessage);
-
   const isLoading = Boolean(useDerivedState(getLoadingPinnedId));
   const canRenderLoader = useAsyncRendering([isLoading], SHOW_LOADER_DELAY);
   const shouldShowLoader = canRenderLoader && isLoading;
 
   const renderingPinnedMessage = useCurrentOrPrev(pinnedMessage, true);
+  const hasPictogram = Boolean(
+    renderingPinnedMessage && canRenderCompactMediaPreview(renderingPinnedMessage.content),
+  );
+  const isSpoiler = renderingPinnedMessage && getMessageIsSpoiler(renderingPinnedMessage);
 
   useEffect(() => {
     if (isSynced && (threadId === MAIN_THREAD_ID || chat?.isForum)) {
@@ -189,39 +179,6 @@ const HeaderPinnedMessage = ({
   const [noHoverColor, markNoHoverColor, unmarkNoHoverColor] = useFlag();
 
   const { handleClick, handleMouseDown } = useFastClick(handleMessageClick);
-
-  function renderPictogram(thumbDataUri?: string, blobUrl?: string, isFullVideo?: boolean, asSpoiler?: boolean) {
-    const { width, height } = getPictogramDimensions();
-    const srcUrl = blobUrl || thumbDataUri;
-    const shouldRenderVideo = isFullVideo && blobUrl;
-
-    return (
-      <div className={styles.pinnedThumb}>
-        {thumbDataUri && !asSpoiler && !shouldRenderVideo && (
-          <img
-            className={styles.pinnedThumbImage}
-            src={srcUrl}
-            width={width}
-            height={height}
-            alt=""
-            draggable={false}
-          />
-        )}
-        {shouldRenderVideo && !asSpoiler && (
-          <video
-            src={blobUrl}
-            width={width}
-            height={height}
-            playsInline
-            disablePictureInPicture
-            className={styles.pinnedThumbImage}
-          />
-        )}
-        {thumbDataUri
-          && <MediaSpoiler thumbDataUri={srcUrl} isVisible={Boolean(asSpoiler)} width={width} height={height} />}
-      </div>
-    );
-  }
 
   if (!shouldRender || !renderingPinnedMessage) return undefined;
 
@@ -284,12 +241,12 @@ const HeaderPinnedMessage = ({
           index={currentPinnedIndex}
         />
         <Transition activeKey={renderingPinnedMessage.id} name="slideVertical" className={styles.pictogramTransition}>
-          {renderPictogram(
-            mediaThumbnail,
-            mediaBlobUrl,
-            isVideoThumbnail,
-            isSpoiler,
-          )}
+          <CompactMediaPreview
+            media={renderingPinnedMessage.content}
+            className={styles.pinnedThumb}
+            isPictogram
+            isSpoiler={isSpoiler}
+          />
         </Transition>
         <div
           className={buildClassName(styles.messageText, hasPictogram && styles.withMedia)}
@@ -315,7 +272,7 @@ const HeaderPinnedMessage = ({
               <MessageSummary
                 message={renderingPinnedMessage}
                 truncateLength={MAX_LENGTH}
-                noEmoji={Boolean(mediaThumbnail)}
+                noEmoji={hasPictogram}
                 emojiSize={EMOJI_SIZE}
               />
             </p>

@@ -3,11 +3,10 @@ import { getActions } from '../../../global';
 
 import type { TabState } from '../../../global/types';
 
-import { IS_IOS, IS_MAC_OS } from '../../../util/browser/windowEnvironment';
 import { prepareMapUrl } from '../../../util/map';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -23,7 +22,7 @@ const OpenMapModal = ({ modal }: OwnProps) => {
 
   const { point: geoPoint, zoom } = modal || {};
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const isOpen = Boolean(geoPoint);
 
@@ -38,8 +37,8 @@ const OpenMapModal = ({ modal }: OwnProps) => {
 
     const google = prepareMapUrl('google', geoPoint, zoom);
     const bing = prepareMapUrl('bing', geoPoint, zoom);
-    const osm = prepareMapUrl('osm', geoPoint, zoom);
     const apple = prepareMapUrl('apple', geoPoint, zoom);
+    const osm = prepareMapUrl('osm', geoPoint, zoom);
 
     return [google, bing, apple, osm];
   }, [geoPoint, zoom]);
@@ -74,18 +73,16 @@ const OpenMapModal = ({ modal }: OwnProps) => {
       isSlim
     >
       <div className={styles.buttons}>
-        {(IS_IOS || IS_MAC_OS) && (
-          <Button fluid size="smaller" onClick={handleAppleClick}>
-            Apple Maps
-          </Button>
-        )}
-        <Button fluid size="smaller" onClick={handleGoogleClick}>
+        <Button noForcedUpperCase fluid size="smaller" onClick={handleGoogleClick}>
           Google Maps
         </Button>
-        <Button fluid size="smaller" onClick={handleBingClick}>
+        <Button noForcedUpperCase fluid size="smaller" onClick={handleAppleClick}>
+          Apple Maps
+        </Button>
+        <Button noForcedUpperCase fluid size="smaller" onClick={handleBingClick}>
           Bing Maps
         </Button>
-        <Button fluid size="smaller" onClick={handleOsmClick}>
+        <Button noForcedUpperCase fluid size="smaller" onClick={handleOsmClick}>
           OpenStreetMap
         </Button>
       </div>

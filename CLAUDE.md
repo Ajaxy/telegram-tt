@@ -30,8 +30,8 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
 
 - **Code Style:**
   - Early returns.
-  - Prefix boolean variables with primary or modal auxiliaries (e.q. `isOpen`, `willUpdate`, `shouldRender`).
-  - Functions should start with a verb (e.q. `openModal`, `closeDialog`, `handleClick`).
+  - Prefix boolean variables with primary or modal auxiliaries (e.g. `isOpen`, `willUpdate`, `shouldRender`).
+  - Functions should start with a verb (e.g. `openModal`, `closeDialog`, `handleClick`).
   - Prefer checking required parameter before calling a function, avoid making it optional and checking at the beginning of the function.
   - Only leave comments for complex logic.
   - Do not use `null`. There's linter rule to enforce it.
@@ -160,7 +160,7 @@ addActionHandler('loadUser', async (global, actions, { userId }) => {
 ### 1. Basics & Imports
 
 * All components use JSX and render with Teact.
-* Only import from `'react'` when you need React **types** that are not provided in Teact.
+* Do not import "react". React types are available globally in React namespace (e.g. React.MouseEvent).
 * Built-in hooks live in Teact library. Import them from there.
 
 ### 2. Props & Types
@@ -171,6 +171,7 @@ addActionHandler('loadUser', async (global, actions, { userId }) => {
 * Merge them as `OwnProps & StateProps` when defining your component.
 * You can skip one or both if they are not used.
 * **Order rule**: list any function types *last* in your props definitions.
+* Do not pass unmemoized objects as props into memo() components.
 
 ### 3. Hooks
 * **useLastCallback** is your go-to for callbacks, since it won't trigger re-renders and always uses the latest scope.

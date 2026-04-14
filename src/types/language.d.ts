@@ -713,7 +713,10 @@ export interface LangPair {
   'CallAgain': undefined;
   'CallBack': undefined;
   'PollSubmitVotes': undefined;
+  'PollSubmitAnswers': undefined;
   'PollViewResults': undefined;
+  'PollBackToVote': undefined;
+  'PollBackToAnswer': undefined;
   'ChatQuizTotalVotesEmpty': undefined;
   'ChatPollTotalVotesResultEmpty': undefined;
   'Vote': undefined;
@@ -1403,6 +1406,7 @@ export interface LangPair {
   'StarsSubscribeInfoLinkText': undefined;
   'StarsSubscribeInfoLink': undefined;
   'StarsBalance': undefined;
+  'OpenMapWith': undefined;
   'OpenApp': undefined;
   'PopularApps': undefined;
   'SearchApps': undefined;
@@ -2283,6 +2287,15 @@ export interface LangPairWithVariables<V = LangVariable> {
   'CallMessageWithDuration': {
     'time': V;
     'duration': V;
+  };
+  'PollEndsTime': {
+    'time': V;
+  };
+  'PollResultsTime': {
+    'time': V;
+  };
+  'TimeIn': {
+    'time': V;
   };
   'MessageScheduledOn': {
     'date': V;
@@ -3428,6 +3441,20 @@ export interface LangPairWithVariables<V = LangVariable> {
     'tasks': V;
     'list': V;
   };
+  'MessageActionPollAppendAnswer': {
+    'peer': V;
+    'option': V;
+  };
+  'MessageActionPollAppendAnswerYou': {
+    'option': V;
+  };
+  'MessageActionPollDeleteAnswer': {
+    'peer': V;
+    'option': V;
+  };
+  'MessageActionPollDeleteAnswerYou': {
+    'option': V;
+  };
   'GiftInfoCollectibleBy': {
     'number': V;
     'owner': V;
@@ -3724,7 +3751,19 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   'ConversationContextMenuSeen': {
     'count': V;
   };
+  'PollVoteCountButton': {
+    'count': V;
+  };
+  'PollAnswerCountButton': {
+    'count': V;
+  };
   'Answer': {
+    'count': V;
+  };
+  'PollAnsweredCount': {
+    'count': V;
+  };
+  'VoteCount': {
     'count': V;
   };
   'VoiceOverChatMessagesSelected': {

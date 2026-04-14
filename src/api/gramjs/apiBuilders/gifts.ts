@@ -23,7 +23,6 @@ import type {
 import { int2hex } from '../../../util/colors';
 import { toJSNumber } from '../../../util/numbers';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { addDocumentToLocalDb } from '../helpers/localDb';
 import { buildApiFormattedText } from './common';
 import { buildApiCurrencyAmount } from './payments';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
@@ -72,8 +71,6 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
     requirePremium, limitedPerUser, perUserTotal, perUserRemains, lockedUntilDate, auction, auctionSlug, giftsPerRound,
     background,
   } = starGift;
-
-  addDocumentToLocalDb(starGift.sticker);
 
   const sticker = buildStickerFromDocument(starGift.sticker)!;
 
@@ -138,8 +135,6 @@ export function buildApiStarGiftAttribute(attribute: GramJs.TypeStarGiftAttribut
       return undefined;
     }
 
-    addDocumentToLocalDb(attribute.document);
-
     return {
       type: 'model',
       name: attribute.name,
@@ -153,8 +148,6 @@ export function buildApiStarGiftAttribute(attribute: GramJs.TypeStarGiftAttribut
     if (!sticker) {
       return undefined;
     }
-
-    addDocumentToLocalDb(attribute.document);
 
     return {
       type: 'pattern',
@@ -348,10 +341,6 @@ export function buildApiStarGiftCollection(collection: GramJs.StarGiftCollection
   if (!collection) return undefined;
 
   const { collectionId, title, icon, giftsCount, hash } = collection;
-
-  if (icon) {
-    addDocumentToLocalDb(icon);
-  }
 
   return {
     collectionId,

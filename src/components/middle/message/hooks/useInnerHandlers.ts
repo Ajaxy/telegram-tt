@@ -56,7 +56,7 @@ export default function useInnerHandlers({
 }) {
   const {
     openChat, openChatWithDraft, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
-    markMessagesRead, cancelUploadMedia, sendPollVote, openForwardMenu,
+    markMessagesRead, cancelUploadMedia, openForwardMenu,
     openChatLanguageModal, openThread, openStoryViewer, searchChatMediaMessages,
   } = getActions();
 
@@ -198,10 +198,6 @@ export default function useInnerHandlers({
     cancelUploadMedia({ chatId, messageId });
   });
 
-  const handleVoteSend = useLastCallback((options: string[]) => {
-    sendPollVote({ chatId, messageId, options });
-  });
-
   const handleGroupForward = useLastCallback(() => {
     openForwardMenu({ fromChatId: chatId, groupedId });
   });
@@ -305,7 +301,6 @@ export default function useInnerHandlers({
     handleOpenThread,
     handleReadMedia,
     handleCancelUpload,
-    handleVoteSend,
     handleGroupForward,
     handleForward,
     handleFocus,

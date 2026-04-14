@@ -153,6 +153,24 @@ export function formatClockDuration(duration: number) {
   return string;
 }
 
+export function formatCountdownDateTime(
+  lang: LangFn,
+  targetDate: Date,
+  options: Pick<FormatDateTimeOptions, 'anchorDate'> = {},
+) {
+  const anchorDate = options.anchorDate || new Date();
+  const diffInSeconds = Math.max(0, Math.trunc((targetDate.getTime() - anchorDate.getTime()) / 1000));
+
+  if (diffInSeconds < DAY_IN_SECONDS) {
+    return lang('TimeIn', { time: formatClockDuration(diffInSeconds) });
+  }
+
+  return formatDateTime(lang, targetDate, {
+    relative: 'auto',
+    anchorDate,
+  });
+}
+
 function buildAbsoluteFormatterOptions(lang: LangFn, options: FormatDateTimeOptions) {
   const dateStyle = options.date ?? false;
   const timeStyle = options.time ?? false;

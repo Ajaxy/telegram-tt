@@ -5,7 +5,7 @@ import type {
   ApiWebDocument,
 } from './bots';
 import type { ApiMessageAction } from './messageActions';
-import type { ApiPeerNotifySettings, ApiRestrictionReason } from './misc';
+import type { ApiAttachment, ApiPeerNotifySettings, ApiRestrictionReason } from './misc';
 import type {
   ApiLabeledPrice,
 } from './payments';
@@ -186,6 +186,9 @@ export type ApiPaidMedia = {
 export interface ApiPollAnswer {
   text: ApiFormattedText;
   option: string;
+  media?: MediaContent;
+  addedByPeerId?: string;
+  date?: number;
 }
 
 export interface ApiPollResult {
@@ -193,29 +196,42 @@ export interface ApiPollResult {
   isCorrect?: true;
   option: string;
   votersCount: number;
+  recentVoterIds?: string[];
 }
 
 export interface ApiPoll {
-  mediaType: 'poll';
   id: string;
-  summary: {
-    closed?: true;
-    isPublic?: true;
-    multipleChoice?: true;
-    quiz?: true;
-    question: ApiFormattedText;
-    answers: ApiPollAnswer[];
-    closePeriod?: number;
-    closeDate?: number;
-  };
-  results: {
-    isMin?: true;
-    results?: ApiPollResult[];
-    totalVoters?: number;
-    recentVoterIds?: string[];
-    solution?: string;
-    solutionEntities?: ApiMessageEntity[];
-  };
+  hash: string;
+  isClosed?: true;
+  isPublic?: true;
+  isMultipleChoice?: true;
+  isQuiz?: true;
+  canAddAnswers?: true;
+  isRevoteDisabled?: true;
+  shouldShuffleAnswers?: true;
+  shouldHideResultsUntilClose?: true;
+  isCreator?: true;
+  question: ApiFormattedText;
+  answers: ApiPollAnswer[];
+  closePeriod?: number;
+  closeDate?: number;
+}
+
+export interface ApiPollResults {
+  isMin?: true;
+  resultByOption?: Record<string, ApiPollResult>;
+  totalVoters?: number;
+  recentVoterIds?: string[];
+  solution?: string;
+  solutionEntities?: ApiMessageEntity[];
+  solutionMedia?: MediaContent;
+}
+
+export interface ApiMessagePoll {
+  mediaType: 'poll';
+  summary: ApiPoll;
+  results: ApiPollResults;
+  attachedMedia?: MediaContent;
 }
 
 export interface ApiInvoice {
@@ -339,12 +355,12 @@ export type ApiGiveawayResults = {
 };
 
 export type ApiNewPoll = {
-  summary: ApiPoll['summary'];
-  quiz?: {
-    correctAnswers: string[];
-    solution?: string;
-    solutionEntities?: ApiMessageEntity[];
-  };
+  summary: ApiPoll;
+  correctAnswers?: number[];
+  solution?: string;
+  solutionEntities?: ApiMessageEntity[];
+  attachedMedia?: ApiAttachment;
+  solutionMedia?: ApiAttachment;
 };
 
 export interface ApiTodoItem {
@@ -666,7 +682,7 @@ export type MediaContainer = {
 };
 
 export type StatefulMediaContent = {
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   story?: ApiStory;
   webPage?: ApiWebPage;
 };

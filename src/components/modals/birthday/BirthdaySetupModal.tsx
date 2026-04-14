@@ -5,7 +5,7 @@ import type { TabState } from '../../../global/types';
 import { SettingsScreens } from '../../../types';
 
 import buildClassName from '../../../util/buildClassName';
-import { getNextArrowReplacement } from '../../../util/localization/format';
+import { NEXT_ARROW_REPLACEMENT } from '../../../util/localization/format';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useLang from '../../../hooks/useLang';
@@ -210,7 +210,7 @@ const BirthdaySetupModal = ({ modal }: OwnProps) => {
             link: (
               <Link isPrimary onClick={handlePrivacyClick}>
                 {lang('BirthdayPrivacySuggestionLink', undefined,
-                  { withNodes: true, specialReplacement: getNextArrowReplacement() })}
+                  { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
               </Link>
             ),
           }, { withNodes: true })}

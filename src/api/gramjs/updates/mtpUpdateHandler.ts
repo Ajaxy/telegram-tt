@@ -3,7 +3,10 @@ import { UpdateConnectionState, UpdateServerTimeOffset } from '../../../lib/gram
 
 import type { GroupCallConnectionData } from '../../../lib/secret-sauce';
 import {
-  type ApiMessage, type ApiPoll, type ApiStory, type ApiStorySkipped,
+  type ApiMessage,
+  type ApiMessagePoll,
+  type ApiStory,
+  type ApiStorySkipped,
   type ApiUpdateConnectionStateType,
   type ApiWebPage,
   MAIN_THREAD_ID,
@@ -11,7 +14,7 @@ import {
 
 import { DEBUG, GENERAL_TOPIC_ID } from '../../../config';
 import {
-  omit, pick,
+  omit, omitUndefined, pick,
 } from '../../../util/iteratees';
 import { getServerTimeOffset, setServerTimeOffset } from '../../../util/serverTime';
 import { buildApiBotCommand, buildApiBotMenuButton } from '../apiBuilders/bots';
@@ -38,8 +41,8 @@ import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import {
   buildApiMessageExtendedMediaPreview,
   buildBoughtMediaContent,
+  buildMessagePollFromMedia,
   buildPoll,
-  buildPollFromMedia,
   buildPollResults,
   buildWebPage,
   buildWebPageFromMedia,
@@ -134,7 +137,7 @@ export function updater(update: Update) {
     || update instanceof GramJs.UpdateShortMessage
   ) {
     let message: ApiMessage | undefined;
-    let poll: ApiPoll | undefined;
+    let poll: ApiMessagePoll | undefined;
     let webPage: ApiWebPage | undefined;
     let shouldForceReply: boolean | undefined;
 
@@ -159,7 +162,7 @@ export function updater(update: Update) {
       message = buildApiMessage(mtpMessage)!;
 
       if (mtpMessage instanceof GramJs.Message) {
-        poll = mtpMessage.media && buildPollFromMedia(mtpMessage.media);
+        poll = mtpMessage.media && buildMessagePollFromMedia(mtpMessage.media);
         webPage = mtpMessage.media && buildWebPageFromMedia(mtpMessage.media);
       }
 
@@ -303,7 +306,7 @@ export function updater(update: Update) {
     if (!message) return;
 
     const poll = update.message instanceof GramJs.Message && update.message.media
-      ? buildPollFromMedia(update.message.media) : undefined;
+      ? buildMessagePollFromMedia(update.message.media) : undefined;
     const webPage = update.message instanceof GramJs.Message && update.message.media
       ? buildWebPageFromMedia(update.message.media) : undefined;
 
@@ -358,7 +361,7 @@ export function updater(update: Update) {
     const message = omit(buildApiMessage(mtpMessage)!, ['isOutgoing']) as ApiMessage;
 
     const poll = mtpMessage instanceof GramJs.Message && mtpMessage.media
-      ? buildPollFromMedia(mtpMessage.media) : undefined;
+      ? buildMessagePollFromMedia(mtpMessage.media) : undefined;
 
     const webPage = mtpMessage instanceof GramJs.Message && mtpMessage.media
       ? buildWebPageFromMedia(mtpMessage.media) : undefined;
@@ -472,22 +475,14 @@ export function updater(update: Update) {
     });
   } else if (update instanceof GramJs.UpdateMessagePoll) {
     const { pollId, poll, results } = update;
-    if (poll) {
-      const apiPoll = buildPoll(poll, results);
+    const apiPoll = poll && buildPoll(poll);
+    const pollResults = buildPollResults(results);
 
-      sendApiUpdate({
-        '@type': 'updateMessagePoll',
-        pollId: String(pollId),
-        pollUpdate: apiPoll,
-      });
-    } else {
-      const pollResults = buildPollResults(results);
-      sendApiUpdate({
-        '@type': 'updateMessagePoll',
-        pollId: String(pollId),
-        pollUpdate: { results: pollResults },
-      });
-    }
+    sendApiUpdate({
+      '@type': 'updateMessagePoll',
+      pollId: pollId.toString(),
+      pollUpdate: omitUndefined({ summary: apiPoll, results: pollResults }),
+    });
   } else if (update instanceof GramJs.UpdateMessagePollVote) {
     sendApiUpdate({
       '@type': 'updateMessagePollVote',

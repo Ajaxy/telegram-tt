@@ -84,6 +84,12 @@ export function addMediaToLocalDb(media: GramJs.TypeMessageMedia, context?: Medi
       }
     });
   }
+
+  if (media instanceof GramJs.MessageMediaPoll) {
+    if (media.attachedMedia) {
+      addMediaToLocalDb(media.attachedMedia, context);
+    }
+  }
 }
 
 export function addStoryToLocalDb(story: GramJs.TypeStoryItem, peerId: string) {
@@ -117,9 +123,16 @@ export function addPhotoToLocalDb(photo: GramJs.TypePhoto) {
   }
 }
 
-export function addDocumentToLocalDb(document: GramJs.TypeDocument) {
+export function addDocumentToLocalDb(document: GramJs.TypeDocument & RepairInfo) {
   if (document instanceof GramJs.Document) {
-    localDb.documents[String(document.id)] = document;
+    const id = String(document.id);
+    const current = localDb.documents[id];
+    if (current && document.accessHash === current.accessHash && document.fileReference === current.fileReference
+      && !document.localRepairInfo
+    ) {
+      return;
+    }
+    localDb.documents[id] = document;
   }
 }
 

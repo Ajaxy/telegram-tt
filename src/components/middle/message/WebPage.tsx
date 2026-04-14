@@ -247,7 +247,7 @@ const WebPage = ({
           <Photo
             photo={photo}
             isOwn={message?.isOutgoing}
-            isInWebPage
+            isNestedMedia
             observeIntersection={observeIntersectionForLoading}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoad}
@@ -265,7 +265,7 @@ const WebPage = ({
           <Video
             video={video}
             isOwn={message?.isOutgoing}
-            isInWebPage
+            isNestedMedia
             observeIntersectionForLoading={observeIntersectionForLoading}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoad}

@@ -37,7 +37,7 @@ import ProgressSpinner from '../../ui/ProgressSpinner';
 export type OwnProps<T> = {
   id?: string;
   photo: ApiPhoto | ApiMediaExtendedPreview;
-  isInWebPage?: boolean;
+  isNestedMedia?: boolean;
   messageText?: string;
   isOwn?: boolean;
   noAvatars?: boolean;
@@ -85,7 +85,7 @@ const Photo = <T,>({
   isDownloading,
   isProtected,
   theme,
-  isInWebPage,
+  isNestedMedia,
   clickArg,
   className,
   isMediaNsfw,
@@ -245,7 +245,7 @@ const Photo = <T,>({
     noAvatars,
     isMobile,
     messageText,
-    isInWebPage,
+    isNestedMedia,
   });
 
   const componentClassName = buildClassName(

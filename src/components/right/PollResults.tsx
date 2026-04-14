@@ -1,12 +1,11 @@
 import { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import type { ApiChat, ApiMessage, ApiPoll } from '../../api/types';
+import type { ApiChat, ApiMessage, ApiMessagePoll } from '../../api/types';
 
 import {
   selectChat, selectChatMessage, selectPollFromMessage, selectTabState,
 } from '../../global/selectors';
-import { buildCollectionByKey } from '../../util/iteratees';
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
@@ -25,7 +24,7 @@ export type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   message?: ApiMessage;
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
 };
 
 const PollResults = ({
@@ -47,11 +46,9 @@ const PollResults = ({
   }
 
   const { summary, results } = poll;
-  if (!results.results) {
+  if (!results.resultByOption) {
     return undefined;
   }
-
-  const resultsByOption = buildCollectionByKey(results.results, 'option');
 
   return (
     <div className="PollResults" dir={lang.isRtl ? 'rtl' : undefined}>
@@ -64,11 +61,11 @@ const PollResults = ({
       <div className="poll-results-list custom-scroll">
         {summary.answers.map((answer) => (
           <PollAnswerResults
-            key={`${poll.id}-${answer.option}`}
+            key={`${poll.summary.id}-${answer.option}`}
             chat={chat}
             message={message}
             answer={answer}
-            answerVote={resultsByOption[answer.option]}
+            answerVote={results.resultByOption![answer.option]}
             totalVoters={results.totalVoters!}
           />
         ))}

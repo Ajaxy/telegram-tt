@@ -12,7 +12,7 @@ import { getChatAvatarHash } from '../../../global/helpers';
 import { selectTabState, selectUser, selectUserFullInfo } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { formatDateToString } from '../../../util/dates/oldDateFormat';
-import { getNextArrowReplacement } from '../../../util/localization/format';
+import { NEXT_ARROW_REPLACEMENT } from '../../../util/localization/format';
 import { throttle } from '../../../util/schedulers';
 import renderText from '../../common/helpers/renderText';
 
@@ -284,7 +284,7 @@ const SettingsEditProfile = ({
               link: (
                 <Link isPrimary onClick={handleBirthdayPrivacyClick}>
                   {lang('BirthdayPrivacySuggestionLink',
-                    undefined, { withNodes: true, specialReplacement: getNextArrowReplacement() })}
+                    undefined, { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
                 </Link>
               ),
             }, { withNodes: true })}

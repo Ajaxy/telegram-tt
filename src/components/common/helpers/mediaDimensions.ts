@@ -60,11 +60,11 @@ function getMaxMessageWidthRem(fromOwnMessage?: boolean, noAvatars?: boolean, is
 
 export function getAvailableWidth(
   fromOwnMessage?: boolean,
-  isWebPageMedia?: boolean,
+  isNestedMedia?: boolean,
   noAvatars?: boolean,
   isMobile?: boolean,
 ) {
-  const extraPaddingRem = isWebPageMedia ? 1.625 : 0;
+  const extraPaddingRem = isNestedMedia ? 2.125 : 0;
   const availableWidthRem = getMaxMessageWidthRem(fromOwnMessage, noAvatars, isMobile) - extraPaddingRem;
 
   return availableWidthRem * REM;
@@ -85,7 +85,7 @@ export function calculateDimensionsForMessageMedia({
   width,
   height,
   fromOwnMessage,
-  isWebPageMedia,
+  isNestedMedia,
   isGif,
   noAvatars,
   isMobile,
@@ -94,13 +94,13 @@ export function calculateDimensionsForMessageMedia({
   height: number;
   fromOwnMessage?: boolean;
   asForwarded?: boolean;
-  isWebPageMedia?: boolean;
+  isNestedMedia?: boolean;
   isGif?: boolean;
   noAvatars?: boolean;
   isMobile?: boolean;
 }): ApiDimensions {
   const aspectRatio = height / width;
-  const availableWidth = getAvailableWidth(fromOwnMessage, isWebPageMedia, noAvatars, isMobile);
+  const availableWidth = getAvailableWidth(fromOwnMessage, isNestedMedia, noAvatars, isMobile);
   const availableHeight = getAvailableHeight(isGif, aspectRatio);
   const mediaWidth = isGif ? Math.max(GIF_MIN_WIDTH, width) : width;
   const mediaHeight = isGif ? height * (mediaWidth / width) : height;
@@ -125,7 +125,7 @@ export function calculateInlineImageDimensions(
   photo: ApiPhoto,
   fromOwnMessage?: boolean,
   asForwarded?: boolean,
-  isWebPageMedia?: boolean,
+  isNestedMedia?: boolean,
   noAvatars?: boolean,
   isMobile?: boolean,
 ) {
@@ -136,7 +136,7 @@ export function calculateInlineImageDimensions(
     height,
     fromOwnMessage,
     asForwarded,
-    isWebPageMedia,
+    isNestedMedia,
     noAvatars,
     isMobile,
   });
@@ -146,7 +146,7 @@ export function calculateVideoDimensions(
   video: ApiVideo,
   fromOwnMessage?: boolean,
   asForwarded?: boolean,
-  isWebPageMedia?: boolean,
+  isNestedMedia?: boolean,
   noAvatars?: boolean,
   isMobile?: boolean,
 ) {
@@ -157,7 +157,7 @@ export function calculateVideoDimensions(
     height,
     fromOwnMessage,
     asForwarded,
-    isWebPageMedia,
+    isNestedMedia,
     isGif: video.isGif,
     noAvatars,
     isMobile,
@@ -168,7 +168,7 @@ export function calculateExtendedPreviewDimensions(
   preview: ApiMediaExtendedPreview,
   fromOwnMessage?: boolean,
   asForwarded?: boolean,
-  isWebPageMedia?: boolean,
+  isNestedMedia?: boolean,
   noAvatars?: boolean,
   isMobile?: boolean,
 ) {
@@ -179,17 +179,10 @@ export function calculateExtendedPreviewDimensions(
     height,
     fromOwnMessage,
     asForwarded,
-    isWebPageMedia,
+    isNestedMedia,
     noAvatars,
     isMobile,
   });
-}
-
-export function getPictogramDimensions(): ApiDimensions {
-  return {
-    width: 2 * REM,
-    height: 2 * REM,
-  };
 }
 
 export function getDocumentThumbnailDimensions(

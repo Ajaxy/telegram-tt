@@ -1,5 +1,5 @@
 import type { ApiGroupCall, ApiPhoneCallDiscardReason } from './calls';
-import type { ApiBotApp, ApiFormattedText, ApiPhoto, ApiTodoItem } from './messages';
+import type { ApiBotApp, ApiFormattedText, ApiPhoto, ApiPollAnswer, ApiTodoItem } from './messages';
 import type { ApiStarGiftRegular, ApiStarGiftUnique, ApiTypeCurrencyAmount } from './stars';
 
 interface ActionMediaType {
@@ -330,6 +330,16 @@ export interface ApiMessageActionTodoAppendTasks extends ActionMediaType {
   items: ApiTodoItem[];
 }
 
+export interface ApiMessageActionPollAppendAnswer extends ActionMediaType {
+  type: 'pollAppendAnswer';
+  answer: ApiPollAnswer;
+}
+
+export interface ApiMessageActionPollDeleteAnswer extends ActionMediaType {
+  type: 'pollDeleteAnswer';
+  answer: ApiPollAnswer;
+}
+
 export interface ApiMessageActionStarGiftPurchaseOffer extends ActionMediaType {
   type: 'starGiftPurchaseOffer';
   isAccepted?: true;
@@ -388,6 +398,7 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionGiftTon | ApiMessageActionPrizeStars | ApiMessageActionStarGift | ApiMessageActionStarGiftUnique
   | ApiMessageActionPaidMessagesRefunded | ApiMessageActionPaidMessagesPrice | ApiMessageActionSuggestedPostApproval
   | ApiMessageActionSuggestedPostSuccess | ApiMessageActionSuggestedPostRefund | ApiMessageActionTodoCompletions
-  | ApiMessageActionTodoAppendTasks | ApiMessageActionStarGiftPurchaseOffer
+  | ApiMessageActionTodoAppendTasks | ApiMessageActionPollAppendAnswer | ApiMessageActionPollDeleteAnswer
+  | ApiMessageActionStarGiftPurchaseOffer
   | ApiMessageActionStarGiftPurchaseOfferDeclined | ApiMessageActionNewCreatorPending
   | ApiMessageActionChangeCreator | ApiMessageActionNoForwardsToggle | ApiMessageActionNoForwardsRequest;

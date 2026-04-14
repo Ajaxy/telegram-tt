@@ -1,24 +1,18 @@
 import type { FC } from '../../../lib/teact/teact';
-import { useRef } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiPeer, ApiTypeStory } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
-import {
-  getStoryMediaHash,
-} from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
-import { getPictogramDimensions } from '../helpers/mediaDimensions';
 import renderText from '../helpers/renderText';
 
 import { useFastClick } from '../../../hooks/useFastClick';
-import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 
+import CompactMediaPreview, { canRenderCompactMediaPreview } from '../CompactMediaPreview';
 import Icon from '../icons/Icon';
 import PeerColorWrapper from '../PeerColorWrapper';
 
@@ -30,6 +24,7 @@ type OwnProps = {
   noUserColors?: boolean;
   isProtected?: boolean;
   observeIntersectionForLoading?: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
   onClick: NoneToVoidFunction;
 };
 
@@ -41,22 +36,17 @@ const EmbeddedStory: FC<OwnProps> = ({
   noUserColors,
   isProtected,
   observeIntersectionForLoading,
+  observeIntersectionForPlaying,
   onClick,
 }) => {
   const { showNotification } = getActions();
 
   const lang = useOldLang();
-
-  const ref = useRef<HTMLDivElement>();
-  const isIntersecting = useIsIntersecting(ref, observeIntersectionForLoading);
   const isFullStory = story && 'content' in story;
   const isExpiredStory = story && 'isDeleted' in story;
-  const isVideoStory = isFullStory && Boolean(story.content.video);
   const title = isFullStory ? 'Story' : (isExpiredStory ? 'ExpiredStory' : 'Loading');
 
-  const mediaBlobUrl = useMedia(isFullStory && getStoryMediaHash(story, 'pictogram'), !isIntersecting);
-  const mediaThumbnail = isVideoStory ? story.content.video!.thumbnail?.dataUri : undefined;
-  const pictogramUrl = mediaBlobUrl || mediaThumbnail;
+  const hasPictogram = isFullStory && canRenderCompactMediaPreview(story.content);
 
   const senderTitle = sender ? getPeerTitle(lang, sender) : undefined;
   const handleFastClick = useLastCallback(() => {
@@ -73,18 +63,26 @@ const EmbeddedStory: FC<OwnProps> = ({
 
   return (
     <PeerColorWrapper
-      ref={ref}
       peerColor={sender?.color}
       noUserColors={noUserColors}
       shouldReset
       className={buildClassName(
         'EmbeddedMessage',
-        pictogramUrl && 'with-thumb',
+        hasPictogram && 'with-thumb',
       )}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
     >
-      {pictogramUrl && renderPictogram(pictogramUrl, isProtected)}
+      {isFullStory && hasPictogram && (
+        <CompactMediaPreview
+          media={story.content}
+          className="embedded-thumb"
+          isPictogram
+          isProtected={isProtected}
+          observeIntersectionForLoading={observeIntersectionForLoading}
+          observeIntersectionForPlaying={observeIntersectionForPlaying}
+        />
+      )}
       <div className="message-text with-message-color">
         <p className="embedded-text-wrapper">
           {isExpiredStory && (
@@ -100,26 +98,5 @@ const EmbeddedStory: FC<OwnProps> = ({
     </PeerColorWrapper>
   );
 };
-
-function renderPictogram(
-  srcUrl: string,
-  isProtected?: boolean,
-) {
-  const { width, height } = getPictogramDimensions();
-
-  return (
-    <div className="embedded-thumb">
-      <img
-        src={srcUrl}
-        width={width}
-        height={height}
-        alt=""
-        className="pictogram"
-        draggable={false}
-      />
-      {isProtected && <span className="protector" />}
-    </div>
-  );
-}
 
 export default EmbeddedStory;

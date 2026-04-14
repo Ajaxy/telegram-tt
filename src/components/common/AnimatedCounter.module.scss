@@ -5,6 +5,7 @@ $animation-time: 200ms;
 
 .root {
   display: inline-flex;
+  font-variant-numeric: tabular-nums;
   white-space: pre;
 
   &[dir="rtl"] {

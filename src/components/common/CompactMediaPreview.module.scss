@@ -1,0 +1,82 @@
+.root {
+  position: relative;
+  overflow: hidden;
+  display: block;
+  flex-shrink: 0;
+}
+
+.pictogram {
+  width: 2rem;
+  height: 2rem;
+}
+
+.interactive {
+  cursor: var(--custom-cursor, pointer);
+}
+
+.round {
+  border-radius: 50%;
+}
+
+.media,
+.thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+}
+
+.media {
+  object-fit: cover;
+}
+
+.withActionIcon {
+  &::after {
+    content: '';
+
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    opacity: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+
+    transition: opacity 0.15s;
+  }
+
+  &:hover::after {
+    opacity: 1;
+  }
+
+  &:hover .actionIcon {
+    opacity: 1;
+  }
+}
+
+.protector {
+  pointer-events: none;
+}
+
+.actionIcon {
+  pointer-events: none;
+
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  color: white;
+
+  opacity: 0;
+
+  transition: opacity 0.15s;
+}

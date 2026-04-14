@@ -8,6 +8,7 @@ import type {
   ApiChatFolder,
   ApiChatReactions,
   ApiDisallowedGiftsSettings,
+  ApiDocument,
   ApiEmojiStatusType,
   ApiFormattedText,
   ApiGroupCall,
@@ -15,12 +16,13 @@ import type {
   ApiInputReplyInfo,
   ApiInputStorePaymentPurpose,
   ApiInputSuggestedPostInfo,
+  ApiLocation,
   ApiMessageEntity,
+  ApiMessagePoll,
   ApiNewMediaTodo,
   ApiNewPoll,
   ApiPhoneCall,
   ApiPhoto,
-  ApiPoll,
   ApiPremiumGiftCodeOption,
   ApiPrivacyKey,
   ApiProfileTab,
@@ -35,6 +37,7 @@ import type {
   ApiThemeParameters,
   ApiTypeCurrencyAmount,
   ApiVideo,
+  MediaContent,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
@@ -183,7 +186,11 @@ export function buildInputStickerSetShortName(shortName: string) {
   });
 }
 
-export function buildInputDocument(media: ApiSticker | ApiVideo) {
+export function buildInputDocument(media: ApiSticker | ApiVideo | ApiDocument) {
+  if (!media.id) {
+    return undefined;
+  }
+
   const document = localDb.documents[media.id];
 
   if (!document) {
@@ -197,7 +204,7 @@ export function buildInputDocument(media: ApiSticker | ApiVideo) {
   ]));
 }
 
-export function buildInputMediaDocument(media: ApiSticker | ApiVideo, spoiler?: true) {
+export function buildInputMediaDocument(media: ApiSticker | ApiVideo | ApiDocument, spoiler?: true) {
   const inputDocument = buildInputDocument(media);
 
   if (!inputDocument) {
@@ -207,48 +214,47 @@ export function buildInputMediaDocument(media: ApiSticker | ApiVideo, spoiler?: 
   return new GramJs.InputMediaDocument({ id: inputDocument, spoiler });
 }
 
-export function buildInputPoll(pollParams: ApiNewPoll, randomId: bigint) {
-  const { summary, quiz } = pollParams;
+export function buildInputPoll(
+  pollParams: ApiNewPoll,
+  randomId: bigint,
+  media?: {
+    attachedMedia?: GramJs.TypeInputMedia;
+    solutionMedia?: GramJs.TypeInputMedia;
+  },
+) {
+  const { summary: poll, correctAnswers, solution, solutionEntities } = pollParams;
 
-  const poll = new GramJs.Poll({
+  const inputPoll = new GramJs.Poll({
     id: randomId,
-    publicVoters: summary.isPublic,
-    question: buildInputTextWithEntities(summary.question),
-    answers: summary.answers.map(({ text, option }) => {
+    publicVoters: poll.isPublic,
+    question: buildInputTextWithEntities(poll.question),
+    answers: poll.answers.map(({ text, option }) => {
       return new GramJs.PollAnswer({
         text: buildInputTextWithEntities(text),
         option: deserializeBytes(option),
       });
     }),
-    quiz: summary.quiz,
-    multipleChoice: summary.multipleChoice,
+    quiz: poll.isQuiz,
+    multipleChoice: poll.isMultipleChoice,
     hash: DEFAULT_PRIMITIVES.BIGINT,
   });
 
-  if (!quiz) {
-    return new GramJs.InputMediaPoll({ poll });
-  }
-
-  const correctAnswers = quiz.correctAnswers.map((correctOption) => {
-    return summary.answers.findIndex((a) => a.option === correctOption);
-  }).filter((i) => i !== -1);
-  const { solution } = quiz;
-  const solutionEntities = quiz.solutionEntities ? quiz.solutionEntities.map(buildMtpMessageEntity) : [];
+  const inputSolutionEntities = solutionEntities?.map(buildMtpMessageEntity);
 
   return new GramJs.InputMediaPoll({
-    poll,
+    poll: inputPoll,
     correctAnswers,
-    ...(solution && {
-      solution,
-      solutionEntities,
-    }),
+    attachedMedia: media?.attachedMedia,
+    solution,
+    solutionEntities: inputSolutionEntities,
+    solutionMedia: media?.solutionMedia,
   });
 }
 
-export function buildInputPollFromExisting(poll: ApiPoll, shouldClose = false) {
+export function buildInputPollFromExisting(poll: ApiMessagePoll, shouldClose = false) {
   return new GramJs.InputMediaPoll({
     poll: new GramJs.Poll({
-      id: BigInt(poll.id),
+      id: BigInt(poll.summary.id),
       publicVoters: poll.summary.isPublic,
       question: buildInputTextWithEntities(poll.summary.question),
       answers: poll.summary.answers.map(({ text, option }) => {
@@ -257,18 +263,95 @@ export function buildInputPollFromExisting(poll: ApiPoll, shouldClose = false) {
           option: deserializeBytes(option),
         });
       }),
-      quiz: poll.summary.quiz,
-      multipleChoice: poll.summary.multipleChoice,
+      quiz: poll.summary.isQuiz,
+      multipleChoice: poll.summary.isMultipleChoice,
       closeDate: poll.summary.closeDate,
       closePeriod: poll.summary.closePeriod,
-      closed: shouldClose ? true : poll.summary.closed,
-      hash: DEFAULT_PRIMITIVES.BIGINT,
+      closed: shouldClose ? true : poll.summary.isClosed,
+      creator: poll.summary.isCreator,
+      revotingDisabled: poll.summary.isRevoteDisabled,
+      shuffleAnswers: poll.summary.shouldShuffleAnswers,
+      hideResultsUntilClose: poll.summary.shouldHideResultsUntilClose,
+      openAnswers: poll.summary.canAddAnswers,
+      hash: BigInt(poll.summary.hash),
     }),
-    correctAnswers: poll.results.results
-      ?.map((result, index) => (result.isCorrect ? index : -1))
-      .filter((i) => i !== -1),
+    correctAnswers: poll.summary.answers.map((answer, index) => {
+      const result = poll.results.resultByOption?.[answer.option];
+      return result?.isCorrect ? index : -1;
+    }).filter((i) => i !== -1),
+    attachedMedia: buildInputMediaFromContent(poll.attachedMedia),
     solution: poll.results.solution,
     solutionEntities: poll.results.solutionEntities?.map(buildMtpMessageEntity),
+    solutionMedia: buildInputMediaFromContent(poll.results.solutionMedia),
+  });
+}
+
+function buildInputMediaFromContent(content?: MediaContent) {
+  if (!content) {
+    return undefined;
+  }
+
+  if (content.photo) {
+    const inputPhoto = buildInputPhoto(content.photo);
+    return inputPhoto ? new GramJs.InputMediaPhoto({
+      id: inputPhoto,
+      spoiler: content.photo.isSpoiler || undefined,
+    }) : undefined;
+  }
+
+  if (content.video) {
+    return buildInputMediaDocument(content.video, content.video.isSpoiler || undefined);
+  }
+
+  if (content.document) {
+    return buildInputMediaDocument(content.document);
+  }
+
+  if (content.location) {
+    return buildInputLocationMedia(content.location);
+  }
+
+  if (content.sticker) {
+    return buildInputMediaDocument(content.sticker);
+  }
+
+  return undefined;
+}
+
+function buildInputLocationMedia(location: ApiLocation) {
+  const geoPoint = buildInputGeoPoint(location.geo);
+
+  if (!geoPoint) {
+    return undefined;
+  }
+
+  if (location.mediaType === 'venue') {
+    return new GramJs.InputMediaVenue({
+      geoPoint,
+      title: location.title,
+      address: location.address,
+      provider: location.provider,
+      venueId: location.venueId,
+      venueType: location.venueType,
+    });
+  }
+
+  if (location.mediaType === 'geoLive') {
+    return new GramJs.InputMediaGeoLive({
+      geoPoint,
+      heading: location.heading,
+      period: location.period,
+    });
+  }
+
+  return new GramJs.InputMediaGeoPoint({ geoPoint });
+}
+
+function buildInputGeoPoint(geo: ApiLocation['geo']) {
+  return new GramJs.InputGeoPoint({
+    lat: geo.lat,
+    long: geo.long,
+    accuracyRadius: geo.accuracyRadius,
   });
 }
 

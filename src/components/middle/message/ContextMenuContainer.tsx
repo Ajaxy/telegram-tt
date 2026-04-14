@@ -9,7 +9,7 @@ import type {
   ApiChat,
   ApiChatReactions,
   ApiMessage,
-  ApiPoll,
+  ApiMessagePoll,
   ApiReaction,
   ApiStickerSet,
   ApiStickerSetInfo,
@@ -108,7 +108,7 @@ export type OwnProps = {
 
 type StateProps = {
   threadId?: ThreadId;
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
   story?: ApiTypeStory;
   chat?: ApiChat;

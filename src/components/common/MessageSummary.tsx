@@ -2,7 +2,7 @@ import { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type {
-  ApiFormattedText, ApiMessage, ApiPoll, ApiTypeStory,
+  ApiFormattedText, ApiMessage, ApiMessagePoll, ApiTypeStory,
   ApiWebPage,
 } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
@@ -42,7 +42,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  poll?: ApiPoll;
+  poll?: ApiMessagePoll;
   story?: ApiTypeStory;
   webPage?: ApiWebPage;
 };

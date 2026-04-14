@@ -11,7 +11,7 @@ import type { AnimationLevel } from '../../../../types';
 
 import { selectAnimationLevel } from '../../../../global/selectors/sharedState';
 import buildClassName from '../../../../util/buildClassName';
-import { getNextArrowReplacement } from '../../../../util/localization/format';
+import { NEXT_ARROW_REPLACEMENT } from '../../../../util/localization/format';
 import { resolveTransitionName } from '../../../../util/resolveTransitionName';
 import { getGiftAttributes, getRandomGiftPreviewAttributes } from '../../../common/helpers/gifts';
 
@@ -359,7 +359,7 @@ const GiftPreviewModal = ({ modal, animationLevel }: OwnProps & StateProps) => {
                     {lang(
                       isCraftableModelsMode ? 'GiftPreviewToggleRegularModels' : 'GiftPreviewToggleCraftableModels',
                       undefined,
-                      { withNodes: true, specialReplacement: getNextArrowReplacement() },
+                      { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT },
                     )}
                   </Link>
                 )}

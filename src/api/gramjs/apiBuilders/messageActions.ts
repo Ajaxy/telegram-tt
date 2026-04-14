@@ -7,7 +7,7 @@ import { toJSNumber } from '../../../util/numbers';
 import { buildApiBotApp } from './bots';
 import { buildApiFormattedText, buildApiPhoto } from './common';
 import { buildApiStarGift } from './gifts';
-import { buildTodoItem } from './messageContent';
+import { buildPollAnswer, buildTodoItem } from './messageContent';
 import { buildApiCurrencyAmount } from './payments';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 
@@ -523,6 +523,26 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       mediaType: 'action',
       type: 'todoAppendTasks',
       items: list.map(buildTodoItem),
+    };
+  }
+  if (action instanceof GramJs.MessageActionPollAppendAnswer) {
+    const answer = buildPollAnswer(action.answer);
+    if (!answer) return UNSUPPORTED_ACTION;
+
+    return {
+      mediaType: 'action',
+      type: 'pollAppendAnswer',
+      answer,
+    };
+  }
+  if (action instanceof GramJs.MessageActionPollDeleteAnswer) {
+    const answer = buildPollAnswer(action.answer);
+    if (!answer) return UNSUPPORTED_ACTION;
+
+    return {
+      mediaType: 'action',
+      type: 'pollDeleteAnswer',
+      answer,
     };
   }
   if (action instanceof GramJs.MessageActionStarGiftPurchaseOffer) {

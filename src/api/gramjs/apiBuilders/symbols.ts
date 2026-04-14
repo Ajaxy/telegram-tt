@@ -6,6 +6,7 @@ import type {
 
 import { LOTTIE_STICKER_MIME_TYPE, VIDEO_STICKER_MIME_TYPE } from '../../../config';
 import { compact } from '../../../util/iteratees';
+import { addDocumentToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
 import { buildApiPhotoPreviewSizes, buildApiThumbnailFromCached, buildApiThumbnailFromPath } from './common';
 
@@ -14,6 +15,8 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument,
   if (document instanceof GramJs.DocumentEmpty) {
     return undefined;
   }
+
+  addDocumentToLocalDb(document);
 
   const { mimeType, videoThumbs } = document;
   const stickerAttribute = document.attributes
@@ -202,12 +205,7 @@ export function processStickerResult(stickers: GramJs.TypeDocument[]) {
   return stickers
     .map((document) => {
       if (document instanceof GramJs.Document) {
-        const sticker = buildStickerFromDocument(document);
-        if (sticker) {
-          localDb.documents[String(document.id)] = document;
-
-          return sticker;
-        }
+        return buildStickerFromDocument(document);
       }
 
       return undefined;

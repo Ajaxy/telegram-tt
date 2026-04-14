@@ -1,13 +1,13 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiPoll, ApiThreadInfo, ApiUser,
+  ApiChat, ApiMessagePoll, ApiThreadInfo, ApiUser,
   ApiWebPage,
 } from '../../types';
 
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { buildPollFromMedia, buildWebPageFromMedia } from '../apiBuilders/messageContent';
+import { buildMessagePollFromMedia, buildWebPageFromMedia } from '../apiBuilders/messageContent';
 import { buildApiThreadInfoFromMessage } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import { addChatToLocalDb, addMessageToLocalDb, addUserToLocalDb } from '../helpers/localDb';
@@ -24,7 +24,7 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
   let userById: Record<string, ApiUser> | undefined;
   let chatById: Record<string, ApiChat> | undefined;
   const threadInfos: ApiThreadInfo[] | undefined = [];
-  const polls: ApiPoll[] | undefined = [];
+  const polls: ApiMessagePoll[] | undefined = [];
   const webPages: ApiWebPage[] | undefined = [];
 
   if ('users' in response && Array.isArray(response.users) && TYPE_USER.has(response.users[0]?.className)) {
@@ -57,7 +57,7 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
       }
 
       if ('media' in message && message.media) {
-        const poll = buildPollFromMedia(message.media);
+        const poll = buildMessagePollFromMedia(message.media);
         if (poll) {
           polls.push(poll);
         }

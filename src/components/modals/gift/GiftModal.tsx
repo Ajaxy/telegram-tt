@@ -22,7 +22,7 @@ import { getUserFullName } from '../../../global/helpers';
 import { getPeerTitle, isApiPeerChat, isApiPeerUser } from '../../../global/helpers/peers';
 import { selectPeer, selectTabState, selectUserFullInfo } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { getNextArrowReplacement } from '../../../util/localization/format';
+import { NEXT_ARROW_REPLACEMENT } from '../../../util/localization/format';
 import { throttle } from '../../../util/schedulers';
 import { REM } from '../../common/helpers/mediaDimensions';
 
@@ -245,7 +245,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
       >
         {lang('GiftPremiumDescriptionLinkCaption', undefined, {
           withNodes: true,
-          specialReplacement: getNextArrowReplacement(),
+          specialReplacement: NEXT_ARROW_REPLACEMENT,
         })}
       </SafeLink>
     ),

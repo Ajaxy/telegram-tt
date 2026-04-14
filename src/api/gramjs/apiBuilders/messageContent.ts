@@ -13,11 +13,14 @@ import type {
   ApiMediaExtendedPreview,
   ApiMediaInvoice,
   ApiMediaTodo,
+  ApiMessagePoll,
   ApiMessageStoryData,
   ApiMessageWebPage,
   ApiPaidMedia,
   ApiPhoto,
   ApiPoll,
+  ApiPollAnswer,
+  ApiPollResults,
   ApiStarGiftUnique,
   ApiSticker,
   ApiTodoItem,
@@ -43,7 +46,7 @@ import {
 } from '../../../config';
 import { addTimestampEntities } from '../../../util/dates/timestamp';
 import { generateWaveform } from '../../../util/generateWaveform';
-import { pick } from '../../../util/iteratees';
+import { buildCollectionByKey, pick } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
 import {
   addMediaToLocalDb, addStoryToLocalDb, addWebPageMediaToLocalDb, type MediaRepairContext,
@@ -77,7 +80,7 @@ export function buildMessageContent(
   const hasUnsupportedMedia = mtpMessage.media instanceof GramJs.MessageMediaUnsupported;
 
   if (mtpMessage.message && !hasUnsupportedMedia
-    && !content.sticker && !content.pollId && !content.todo && !content.contact && !content.video?.isRound) {
+    && !content.sticker && !content.todo && !content.contact && !content.video?.isRound) {
     const text = buildMessageTextContent(mtpMessage.message, mtpMessage.entities);
     const textWithTimestamps = addTimestampEntities(text);
     content = {
@@ -559,12 +562,12 @@ function buildPollIdFromMedia(media: GramJs.TypeMessageMedia): string | undefine
   return media.poll.id.toString();
 }
 
-export function buildPollFromMedia(media: GramJs.TypeMessageMedia): ApiPoll | undefined {
+export function buildMessagePollFromMedia(media: GramJs.TypeMessageMedia): ApiMessagePoll | undefined {
   if (!(media instanceof GramJs.MessageMediaPoll)) {
     return undefined;
   }
 
-  return buildPoll(media.poll, media.results);
+  return buildMessagePoll(media);
 }
 
 function buildTodoFromMedia(media: GramJs.TypeMessageMedia): ApiMediaTodo | undefined {
@@ -764,31 +767,53 @@ export function buildMessageStoryData(media: GramJs.TypeMessageMedia): ApiMessag
   };
 }
 
-export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): ApiPoll {
-  const { id, answers: rawAnswers } = poll;
-  const answers = rawAnswers
-    .filter((answer): answer is GramJs.PollAnswer => answer instanceof GramJs.PollAnswer)
-    .map((answer) => ({
-      text: buildApiFormattedText(answer.text),
-      option: serializeBytes(answer.option),
-    }));
+export function buildMessagePoll(media: GramJs.MessageMediaPoll): ApiMessagePoll {
+  const { poll, results, attachedMedia } = media;
 
   return {
     mediaType: 'poll',
-    id: String(id),
-    summary: {
-      isPublic: poll.publicVoters,
-      question: buildApiFormattedText(poll.question),
-      ...pick(poll, [
-        'closed',
-        'multipleChoice',
-        'quiz',
-        'closePeriod',
-        'closeDate',
-      ]),
-      answers,
-    },
-    results: buildPollResults(pollResults),
+    summary: buildPoll(poll),
+    results: buildPollResults(results),
+    attachedMedia: attachedMedia ? buildMessageMediaContent(attachedMedia) : undefined,
+  };
+}
+
+export function buildPollAnswer(answer: GramJs.TypePollAnswer): ApiPollAnswer | undefined {
+  if (!(answer instanceof GramJs.PollAnswer)) return undefined;
+  const { text, option, media, addedBy, date } = answer;
+
+  return {
+    text: buildApiFormattedText(text),
+    option: serializeBytes(option),
+    media: media ? buildMessageMediaContent(media) : undefined,
+    addedByPeerId: addedBy ? getApiChatIdFromMtpPeer(addedBy) : undefined,
+    date,
+  };
+}
+
+export function buildPoll(poll: GramJs.Poll): ApiPoll {
+  const {
+    id, closed, publicVoters, multipleChoice, quiz, closePeriod, closeDate, answers, question, creator,
+    hideResultsUntilClose, revotingDisabled, shuffleAnswers, openAnswers, hash,
+  } = poll;
+  const apiAnswers = answers.map(buildPollAnswer).filter(Boolean);
+
+  return {
+    id: id.toString(),
+    isClosed: closed,
+    isPublic: publicVoters,
+    isMultipleChoice: multipleChoice,
+    isQuiz: quiz,
+    closePeriod,
+    closeDate,
+    isCreator: creator,
+    shouldHideResultsUntilClose: hideResultsUntilClose,
+    isRevoteDisabled: revotingDisabled,
+    shouldShuffleAnswers: shuffleAnswers,
+    question: buildApiFormattedText(question),
+    answers: apiAnswers,
+    hash: hash.toString(),
+    canAddAnswers: openAnswers,
   };
 }
 
@@ -843,26 +868,32 @@ export function buildMediaInvoice(media: GramJs.MessageMediaInvoice): ApiMediaIn
   };
 }
 
-export function buildPollResults(pollResults: GramJs.PollResults): ApiPoll['results'] {
+export function buildPollResults(pollResults: GramJs.PollResults): ApiPollResults {
   const {
-    results: rawResults, totalVoters, recentVoters, solution, solutionEntities: entities, min,
+    results: rawResults, totalVoters, recentVoters, solution, solutionEntities: entities, min, solutionMedia,
   } = pollResults;
   const results = rawResults?.map(({
-    option, chosen, correct, voters,
+    option, chosen, correct, voters, recentVoters: recentAnswerVoters,
   }) => ({
     isChosen: chosen,
     isCorrect: correct,
     option: serializeBytes(option),
     votersCount: voters ?? 0,
+    recentVoterIds: recentAnswerVoters?.map((peer) => getApiChatIdFromMtpPeer(peer)),
   }));
+
+  if (solutionMedia) {
+    addMediaToLocalDb(solutionMedia);
+  }
 
   return {
     isMin: min,
     totalVoters,
     recentVoterIds: recentVoters?.map((peer) => getApiChatIdFromMtpPeer(peer)),
-    results,
+    resultByOption: results && buildCollectionByKey(results, 'option'),
     solution,
-    ...(entities && { solutionEntities: entities.map(buildApiMessageEntity) }),
+    solutionEntities: entities?.map(buildApiMessageEntity),
+    solutionMedia: solutionMedia ? buildMessageMediaContent(solutionMedia) : undefined,
   };
 }
 

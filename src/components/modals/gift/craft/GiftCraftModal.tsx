@@ -16,7 +16,7 @@ import type { TabState } from '../../../../global/types';
 import { requestMeasure, requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import { VTT_CRAFT_ATTRIBUTES } from '../../../../util/animations/viewTransitionTypes';
 import buildClassName from '../../../../util/buildClassName';
-import { getNextArrowReplacement } from '../../../../util/localization/format';
+import { NEXT_ARROW_REPLACEMENT } from '../../../../util/localization/format';
 import { formatPercent } from '../../../../util/textFormat';
 import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 import { getGiftAttributes } from '../../../common/helpers/gifts';
@@ -1392,7 +1392,7 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
             <span className={styles.viewAllText}>
               {lang('GiftCraftViewAll', undefined, {
                 withNodes: true,
-                specialReplacement: getNextArrowReplacement(),
+                specialReplacement: NEXT_ARROW_REPLACEMENT,
               })}
             </span>
           </Button>

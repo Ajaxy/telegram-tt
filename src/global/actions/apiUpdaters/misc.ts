@@ -46,7 +46,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
       if (polls) {
         polls.forEach((poll) => {
-          global = updatePoll(global, poll.id, poll);
+          global = updatePoll(global, poll.summary.id, poll);
         });
       }
       if (webPages) {

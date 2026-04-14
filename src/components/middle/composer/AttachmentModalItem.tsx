@@ -84,14 +84,13 @@ const AttachmentModalItem = ({
         );
       default: {
         const canEdit = SUPPORTED_PHOTO_CONTENT_TYPES.has(attachment.mimeType) && !isMobile;
-        const isPhoto = SUPPORTED_PHOTO_CONTENT_TYPES.has(attachment.mimeType);
         return (
           <>
             <File
               className={styles.file}
               name={attachment.filename}
               extension={getFileExtension(attachment.filename, attachment.mimeType)}
-              previewData={isPhoto && attachment.blobUrl ? attachment.blobUrl : attachment.previewBlobUrl}
+              previewAttachment={attachment}
               size={attachment.size}
               previewSize="large"
               onClick={canEdit ? handleEditClick : undefined}

@@ -8,7 +8,7 @@ import type { TabState } from '../../../../global/types';
 
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
-import { getNextArrowReplacement } from '../../../../util/localization/format';
+import { NEXT_ARROW_REPLACEMENT } from '../../../../util/localization/format';
 import {
   getRandomGiftPreviewAttributes, type GiftPreviewAttributes,
   preloadGiftAttributeStickers } from '../../../common/helpers/gifts';
@@ -193,7 +193,7 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
             />
           ))}
           <span className={styles.viewAllText}>
-            {lang('GiftUpgradeViewAll', undefined, { withNodes: true, specialReplacement: getNextArrowReplacement() })}
+            {lang('GiftUpgradeViewAll', undefined, { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
           </span>
         </Button>
       </div>
@@ -255,7 +255,7 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
                 onClick={handleOpenPriceInfo}
               >
                 {lang('StarGiftPriceDecreaseInfoLink', undefined,
-                  { withNodes: true, specialReplacement: getNextArrowReplacement() })}
+                  { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
               </Link>
             )}
           </>
