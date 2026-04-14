@@ -422,24 +422,26 @@ const Chat: FC<OwnProps & StateProps> = ({
       onDragLeave={onDragLeave}
     >
       <div className={buildClassName('status', 'status-clickable')}>
-        <Avatar
-          peer={isMonoforum ? monoforumChannel : peer}
-          isSavedMessages={user?.isSelf}
-          isSavedDialog={isSavedDialog}
-          size={isPreview ? 'medium' : 'large'}
-          asMessageBubble={isMonoforum}
-          withStory={!user?.isSelf && !isMonoforum}
-          withStoryGap={isAvatarOnlineShown || Boolean(chat.subscriptionUntil)}
-          storyViewerOrigin={StoryViewerOrigin.ChatList}
-          storyViewerMode="single-peer"
-        />
-        <div className="avatar-badge-wrapper">
-          <div
-            className={buildClassName('avatar-online', 'avatar-badge', isAvatarOnlineShown && 'avatar-online-shown')}
+        <div className="avatar-wrapper">
+          <Avatar
+            peer={isMonoforum ? monoforumChannel : peer}
+            isSavedMessages={user?.isSelf}
+            isSavedDialog={isSavedDialog}
+            size={isPreview ? 'medium' : 'large'}
+            asMessageBubble={isMonoforum}
+            withStory={!user?.isSelf && !isMonoforum}
+            withStoryGap={isAvatarOnlineShown || Boolean(chat.subscriptionUntil)}
+            storyViewerOrigin={StoryViewerOrigin.ChatList}
+            storyViewerMode="single-peer"
           />
-          {!isAvatarOnlineShown && Boolean(chat.subscriptionUntil) && (
-            <StarIcon type="gold" className="avatar-badge avatar-subscription" size="adaptive" />
-          )}
+          <div className="avatar-badge-wrapper">
+            <div
+              className={buildClassName('avatar-online', 'avatar-badge', isAvatarOnlineShown && 'avatar-online-shown')}
+            />
+            {!isAvatarOnlineShown && Boolean(chat.subscriptionUntil) && (
+              <StarIcon type="gold" className="avatar-badge avatar-subscription" size="adaptive" />
+            )}
+          </div>
           <ChatBadge
             chat={chat}
             isMuted={isMuted}

@@ -50,6 +50,13 @@
   display: flex;
 }
 
+.onAvatar {
+  position: absolute;
+  z-index: 1;
+  top: 0.0625rem;
+  right: 0.3125rem;
+}
+
 .mention,
 .unread,
 .unopened {

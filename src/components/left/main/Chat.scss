@@ -137,22 +137,18 @@
     align-self: stretch;
   }
 
-  .avatar-badge-wrapper {
+  .avatar-wrapper {
     --outline-color: var(--color-background);
 
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .avatar-badge-wrapper {
     position: absolute;
     z-index: var(--z-badge);
     right: 0.5rem;
     bottom: 0;
-
-    .chat-badge-transition {
-      position: relative;
-      transition: opacity var(--layer-transition), transform var(--layer-transition);
-
-      body.no-page-transitions & {
-        transition: opacity var(--layer-transition);
-      }
-    }
   }
 
   .avatar-badge {
