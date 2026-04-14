@@ -120,6 +120,7 @@ const RecipientPicker = ({
     orderedFolderIds,
     chatFoldersById,
     maxFolders,
+    noEmoticons: true,
     isReadOnly: true,
   });
 

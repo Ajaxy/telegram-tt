@@ -10,6 +10,7 @@ import type {
   ApiChatType,
   ApiCheckedGiftCode,
   ApiCollectibleInfo,
+  ApiComposedMessageWithAI,
   ApiDialog,
   ApiEmojiStatusCollectible,
   ApiFormattedText,
@@ -105,6 +106,12 @@ import type { CallbackAction } from './actions';
 export type PollVote = {
   peerId: string;
   date: number;
+};
+
+export type AiEditorTabBase = {
+  isLoading?: boolean;
+  result?: ApiComposedMessageWithAI;
+  error?: 'floodPremium' | 'aiError' | 'generic';
 };
 
 export type TabState = {
@@ -660,6 +667,36 @@ export type TabState = {
     daysAmount?: number;
     isSuccess?: boolean;
     gift?: ApiStarGift;
+  };
+
+  aiMessageEditorModal?: {
+    chatId: string;
+    text: ApiFormattedText;
+    activeTab: 'translate' | 'style' | 'fix';
+    isFromAttachment?: boolean;
+    translateTab?: AiEditorTabBase & {
+      selectedLanguage?: string;
+      selectedTone?: string;
+      shouldEmojify?: boolean;
+      cache?: Record<string, ApiComposedMessageWithAI>;
+    };
+    styleTab?: AiEditorTabBase & {
+      selectedTone?: string;
+      shouldEmojify?: boolean;
+      cache?: Record<string, ApiComposedMessageWithAI>;
+    };
+    fixTab?: AiEditorTabBase & {
+      cache?: ApiComposedMessageWithAI;
+    };
+  };
+
+  aiMessageEditorPendingResult?: {
+    text?: ApiFormattedText;
+    shouldClear?: boolean;
+    shouldSendWithAttachments?: boolean;
+    isSilent?: boolean;
+    scheduledAt?: number;
+    scheduleRepeatPeriod?: number;
   };
 
   giveawayModal?: {

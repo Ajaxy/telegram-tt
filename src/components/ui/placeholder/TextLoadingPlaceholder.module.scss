@@ -1,0 +1,10 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8125rem;
+}
+
+.line {
+  height: 0.5rem;
+  border-radius: 0.125rem;
+}

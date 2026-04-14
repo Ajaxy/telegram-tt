@@ -33,6 +33,7 @@ type Params = {
   orderedFolderIds?: number[];
   chatFoldersById: Record<number, ApiChatFolder>;
   maxFolders: number;
+  noEmoticons?: boolean;
 } & ({
   isReadOnly?: false;
   maxChatLists: number;
@@ -48,6 +49,7 @@ const useFolderTabs = (params: Params) => {
     orderedFolderIds,
     chatFoldersById,
     maxFolders,
+    noEmoticons,
     isReadOnly,
   } = params;
 
@@ -236,13 +238,13 @@ const useFolderTabs = (params: Params) => {
         isBadgeActive: Boolean(folderCountersById[id]?.notificationsCount),
         isBlocked,
         contextActions: contextActions.length ? contextActions : undefined,
-        emoticon: folderIcon,
+        emoticon: noEmoticons ? undefined : folderIcon,
         noTitleAnimations: folder.noTitleAnimations,
       } satisfies TabWithProperties;
     });
   }, [
     displayedFolders, maxFolders, folderCountersById, lang, chatFoldersById, maxChatLists, folderInvitesById,
-    maxFolderInvites, folderUnreadChatsCountersById, isReadOnly, sidebarMode, isMobile,
+    maxFolderInvites, folderUnreadChatsCountersById, isReadOnly, sidebarMode, isMobile, noEmoticons,
   ]);
 
   return {

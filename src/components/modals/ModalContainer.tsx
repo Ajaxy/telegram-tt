@@ -8,6 +8,7 @@ import { pick } from '../../util/iteratees';
 
 import VerificationMonetizationModal from '../common/VerificationMonetizationModal.async';
 import WebAppsCloseConfirmationModal from '../main/WebAppsCloseConfirmationModal.async';
+import AiMessageEditorModal from '../middle/composer/AiMessageEditorModal/AiMessageEditorModal.async';
 import AboutAdsModal from './aboutAds/AboutAdsModal.async';
 import AgeVerificationModal from './ageVerification/AgeVerificationModal.async';
 import AttachBotInstallModal from './attachBotInstall/AttachBotInstallModal.async';
@@ -80,6 +81,7 @@ import WebAppModal from './webApp/WebAppModal.async';
 
 // `Pick` used only to provide tab completion
 type ModalKey = keyof Pick<TabState,
+  'aiMessageEditorModal' |
   'giftCodeModal' |
   'boostModal' |
   'chatlistModal' |
@@ -166,6 +168,7 @@ type Entries<T> = {
 }[keyof T][];
 
 const MODALS: ModalRegistry = {
+  aiMessageEditorModal: AiMessageEditorModal,
   giftCodeModal: GiftCodeModal,
   boostModal: BoostModal,
   chatlistModal: ChatlistModal,

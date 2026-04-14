@@ -510,7 +510,8 @@ export type ApiMessageEntityDefault = {
   `${ApiMessageEntityTypes}`,
   `${ApiMessageEntityTypes.Pre}` | `${ApiMessageEntityTypes.TextUrl}` | `${ApiMessageEntityTypes.MentionName}` |
   `${ApiMessageEntityTypes.Blockquote}` | `${ApiMessageEntityTypes.CustomEmoji}` |
-  `${ApiMessageEntityTypes.Timestamp}` | `${ApiMessageEntityTypes.FormattedDate}`
+  `${ApiMessageEntityTypes.Timestamp}` | `${ApiMessageEntityTypes.FormattedDate}` |
+  `${ApiMessageEntityTypes.DiffInsert}` | `${ApiMessageEntityTypes.DiffReplace}` | `${ApiMessageEntityTypes.DiffDelete}`
   >;
   offset: number;
   length: number;
@@ -572,9 +573,28 @@ export type ApiMessageEntityTimestamp = {
   timestamp: number;
 };
 
+export type ApiMessageEntityDiffInsert = {
+  type: ApiMessageEntityTypes.DiffInsert;
+  offset: number;
+  length: number;
+};
+
+export type ApiMessageEntityDiffReplace = {
+  type: ApiMessageEntityTypes.DiffReplace;
+  offset: number;
+  length: number;
+  oldText: string;
+};
+
+export type ApiMessageEntityDiffDelete = {
+  type: ApiMessageEntityTypes.DiffDelete;
+  offset: number;
+  length: number;
+};
+
 export type ApiMessageEntity = ApiMessageEntityDefault | ApiMessageEntityPre | ApiMessageEntityTextUrl |
   ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji | ApiMessageEntityBlockquote | ApiMessageEntityTimestamp |
-  ApiMessageEntityFormattedDate;
+  ApiMessageEntityFormattedDate | ApiMessageEntityDiffInsert | ApiMessageEntityDiffReplace | ApiMessageEntityDiffDelete;
 
 export enum ApiMessageEntityTypes {
   Bold = 'MessageEntityBold',
@@ -599,6 +619,9 @@ export enum ApiMessageEntityTypes {
   QuoteFocus = 'MessageEntityQuoteFocus',
   FormattedDate = 'MessageEntityFormattedDate',
   Unknown = 'MessageEntityUnknown',
+  DiffInsert = 'MessageEntityDiffInsert',
+  DiffReplace = 'MessageEntityDiffReplace',
+  DiffDelete = 'MessageEntityDiffDelete',
 }
 
 export interface ApiFormattedText {
@@ -608,6 +631,11 @@ export interface ApiFormattedText {
 
 export interface ApiFormattedTextWithEmojiOnlyCount extends ApiFormattedText {
   emojiOnlyCount?: number;
+}
+
+export interface ApiComposedMessageWithAI {
+  resultText: ApiFormattedText;
+  diffText?: ApiFormattedText;
 }
 
 export type MediaContent = {

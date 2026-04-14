@@ -3,6 +3,7 @@ import type { Entity } from '../../../lib/gramjs/types';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 
 import type {
+  ApiComposedMessageWithAI,
   ApiFormattedText,
   ApiMessageEntity,
   ApiMessageEntityDefault,
@@ -301,9 +302,43 @@ export function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMess
     };
   }
 
+  if (entity instanceof GramJs.MessageEntityDiffInsert) {
+    return {
+      type: ApiMessageEntityTypes.DiffInsert,
+      offset,
+      length,
+    };
+  }
+
+  if (entity instanceof GramJs.MessageEntityDiffReplace) {
+    return {
+      type: ApiMessageEntityTypes.DiffReplace,
+      offset,
+      length,
+      oldText: entity.oldText,
+    };
+  }
+
+  if (entity instanceof GramJs.MessageEntityDiffDelete) {
+    return {
+      type: ApiMessageEntityTypes.DiffDelete,
+      offset,
+      length,
+    };
+  }
+
   return {
     type: type as `${ApiMessageEntityDefault['type']}`,
     offset,
     length,
+  };
+}
+
+export function buildApiComposedMessageWithAI(
+  result: GramJs.messages.ComposedMessageWithAI,
+): ApiComposedMessageWithAI {
+  return {
+    resultText: buildApiFormattedText(result.resultText),
+    diffText: result.diffText ? buildApiFormattedText(result.diffText) : undefined,
   };
 }

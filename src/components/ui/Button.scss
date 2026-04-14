@@ -195,6 +195,7 @@
       }
     }
 
+    &.translucent-primary,
     &.translucent {
       --ripple-color: var(--color-interactive-element-hover);
 
@@ -243,6 +244,10 @@
       @include no-ripple-styles() {
         background-color: rgba(0, 0, 0, 0.16);
       }
+    }
+
+    &.translucent-primary {
+      color: var(--color-primary);
     }
 
     &.translucent-bordered {

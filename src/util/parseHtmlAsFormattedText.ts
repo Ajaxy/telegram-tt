@@ -259,6 +259,15 @@ function getEntityDataFromNode(
     };
   }
 
+  if (type === ApiMessageEntityTypes.DiffInsert
+    || type === ApiMessageEntityTypes.DiffReplace
+    || type === ApiMessageEntityTypes.DiffDelete) {
+    return {
+      index,
+      entity: undefined,
+    };
+  }
+
   return {
     index,
     entity: {

@@ -1060,6 +1060,26 @@
   }
 }
 
+.text-entity-diff-insert,
+.text-entity-diff-replace-new {
+  color: var(--color-primary);
+}
+
+.text-entity-diff-replace-new {
+  text-decoration: underline wavy;
+}
+
+.text-entity-diff-replace-old {
+  color: var(--color-error);
+  text-decoration: line-through;
+}
+
+.text-entity-diff-delete {
+  color: var(--color-error);
+  text-decoration: line-through;
+  text-decoration-color: var(--color-error);
+}
+
 // Keep this close to `CodeBlock` style to avoid jumps in height
 .text-entity-pre {
   position: relative;

@@ -42,7 +42,7 @@
     }
 
     .symbol-menu-button, .mobile-symbol-menu-button {
-      align-self: center;
+      align-self: flex-end;
       margin-right: -1.5rem;
       margin-left: -0.25rem !important;
       color: var(--color-composer-button);
@@ -146,6 +146,27 @@
   align-items: center;
 }
 
+.aiButton {
+  position: absolute;
+  z-index: 3;
+  top: 0.5rem;
+  right: 0.5rem;
+
+  width: 1.75rem;
+  height: 1.75rem;
+
+  color: var(--color-composer-button);
+
+  opacity: 1;
+
+  transition: opacity 150ms ease-out;
+}
+
+.aiButtonHidden {
+  pointer-events: none;
+  opacity: 0;
+}
+
 .dropTarget {
   position: relative;
   overflow: hidden;
@@ -219,6 +240,8 @@
 
 .send-wrapper {
   position: relative;
+  align-self: flex-end;
+  margin-bottom: 0.1875rem;
 }
 
 .send {

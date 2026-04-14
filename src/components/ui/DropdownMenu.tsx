@@ -19,6 +19,7 @@ type OwnProps = {
   positionY?: 'top' | 'bottom';
   footer?: string;
   forceOpen?: boolean;
+  withPortal?: boolean;
   onOpen?: NoneToVoidFunction;
   onClose?: NoneToVoidFunction;
   onHide?: NoneToVoidFunction;
@@ -39,6 +40,7 @@ const DropdownMenu: FC<OwnProps> = ({
   positionY = 'top',
   footer,
   forceOpen,
+  withPortal,
   onOpen,
   onClose,
   onTransitionEnd,
@@ -114,6 +116,7 @@ const DropdownMenu: FC<OwnProps> = ({
         positionY={positionY}
         footer={footer}
         autoClose={autoClose}
+        withPortal={withPortal}
         onClose={handleClose}
         onCloseAnimationEnd={onHide}
         onMouseEnterBackdrop={onMouseEnterBackdrop}

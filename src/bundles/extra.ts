@@ -71,6 +71,9 @@ export { default as HeaderMenuContainer } from '../components/middle/HeaderMenuC
 export { default as MiddleSearch } from '../components/middle/search/MiddleSearch';
 export { default as ReactionPicker } from '../components/middle/message/reactions/ReactionPicker';
 
+export { default as AiMessageEditorModal }
+  from '../components/middle/composer/AiMessageEditorModal/AiMessageEditorModal';
+
 export { default as AttachmentModal } from '../components/middle/composer/AttachmentModal';
 export { default as PollModal } from '../components/middle/composer/PollModal';
 export { default as ToDoListModal } from '../components/middle/composer/ToDoListModal';

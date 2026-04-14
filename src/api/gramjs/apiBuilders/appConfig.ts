@@ -130,6 +130,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   whitelisted_bots?: string[];
   settings_display_passkeys?: boolean;
   passkeys_account_passkeys_max?: number;
+  ai_compose_styles?: [string, string, string][];
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -159,6 +160,11 @@ function buildDiceEmojiesSuccess(appConfig: GramJsAppConfig) {
     };
     return acc;
   }, {} as ApiAppConfig['diceEmojiesSuccess']) : {};
+}
+
+function buildAiComposeStyles(appConfig: GramJsAppConfig) {
+  const { ai_compose_styles } = appConfig;
+  return ai_compose_styles?.map(([tone, documentId, title]) => ({ tone, documentId, title }));
 }
 
 function getLimit(appConfig: GramJsAppConfig, key: Limit, fallbackKey: ApiLimitType) {
@@ -272,6 +278,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     passkeysMaxCount: appConfig.passkeys_account_passkeys_max,
     diceEmojies: appConfig.emojies_send_dice,
     diceEmojiesSuccess: buildDiceEmojiesSuccess(appConfig),
+    aiComposeStyles: buildAiComposeStyles(appConfig),
   };
 
   return {

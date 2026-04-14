@@ -685,6 +685,25 @@ function processEntity({
           {renderNestedMessagePart()}
         </FormattedDate>
       );
+    case ApiMessageEntityTypes.DiffInsert:
+      return (
+        <span className="text-entity-diff-insert" data-entity-type={entity.type}>
+          {renderNestedMessagePart()}
+        </span>
+      );
+    case ApiMessageEntityTypes.DiffReplace:
+      return (
+        <span className="text-entity-diff-replace" data-entity-type={entity.type}>
+          <span className="text-entity-diff-replace-old">{entity.oldText}</span>
+          <span className="text-entity-diff-replace-new">{renderNestedMessagePart()}</span>
+        </span>
+      );
+    case ApiMessageEntityTypes.DiffDelete:
+      return (
+        <span className="text-entity-diff-delete" data-entity-type={entity.type}>
+          {renderNestedMessagePart()}
+        </span>
+      );
     default:
       return renderNestedMessagePart();
   }

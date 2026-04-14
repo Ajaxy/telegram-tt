@@ -1,0 +1,132 @@
+.labelRow {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.labelTransition {
+  position: relative;
+  width: auto;
+  height: 1.25rem;
+}
+
+.labelSlide {
+  position: absolute;
+  inset: 0;
+}
+
+.separator {
+  height: 0.0625rem;
+  margin-block: 0.75rem;
+  opacity: 0.75;
+  background: var(--color-borders);
+}
+
+.resultArea {
+  position: relative;
+  overflow: hidden;
+
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: height 0.1s;
+}
+
+.loadingContainer {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+
+  padding-top: 0.5rem;
+
+  opacity: 1;
+  background: var(--color-background);
+
+  transition: opacity 150ms ease-out;
+
+  &.hidden {
+    pointer-events: none;
+    opacity: 0;
+  }
+}
+
+.resultTransition {
+  overflow: hidden;
+  min-height: 0;
+
+  &.hidden {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 150ms ease-out;
+  }
+}
+
+.resultContent {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.optionsRow {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 0.5rem;
+}
+
+.emojifyCheckbox {
+  min-height: 1.75rem;
+  padding: 0.25rem 0.5rem;
+  padding-inline-start: 0.25rem;
+  border-radius: 1rem;
+}
+
+.emojifyCheckboxControl {
+  column-gap: 0.5rem;
+}
+
+.emojifyCheckboxLabel {
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25rem;
+}
+
+.errorMessage {
+  margin-top: 0.5rem;
+  padding-bottom: 0.125rem;
+
+  font-size: 0.9375rem;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.copyButton {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+
+  &.hidden {
+    pointer-events: none;
+    opacity: 0 !important;
+    transition: opacity 150ms ease-out;
+  }
+}
+
+.hidden {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}

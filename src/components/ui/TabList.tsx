@@ -10,14 +10,22 @@ import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useLastCallback from '../../hooks/useLastCallback';
 import useResizeObserver from '../../hooks/useResizeObserver';
 
+import CustomEmoji from '../common/CustomEmoji';
 import Icon from '../common/icons/Icon';
 
 import styles from './TabList.module.scss';
+
+const EMOJI_SIZE = 20;
 
 type OwnProps = {
   tabs: readonly TabWithProperties[];
   activeTab: number;
   className?: string;
+  tabClassName?: string;
+  indicatorClassName?: string;
+  centered?: boolean;
+  stretched?: boolean;
+  itemAlignment?: 'vertical' | 'horizontal';
   onSwitchTab: (index: number) => void;
 };
 
@@ -25,6 +33,11 @@ const TabList = ({
   tabs,
   activeTab,
   className,
+  tabClassName,
+  indicatorClassName,
+  centered,
+  stretched,
+  itemAlignment,
   onSwitchTab,
 }: OwnProps) => {
   const containerRef = useRef<HTMLDivElement>();
@@ -43,7 +56,9 @@ const TabList = ({
       const left = (offsetLeft / containerWidth * 100).toFixed(1);
       const right = ((containerWidth - (offsetLeft + offsetWidth)) / containerWidth * 100).toFixed(1);
 
-      setClipPath(`inset(0.25rem ${right}% 0.25rem ${left}% round 1.25rem)`);
+      setClipPath(`inset(0.25rem ${right}% 0.25rem ${left}% round var(--tab-radius))`);
+    } else if (activeTab < 0) {
+      setClipPath('inset(0 100% 0 100%)');
     }
   });
 
@@ -59,27 +74,56 @@ const TabList = ({
 
   if (!tabs.length) return undefined;
 
-  const renderTab = (tab: TabWithProperties, index: number) => (
-    <div
-      key={tab.id ?? index}
-      className={styles.tab}
-      onClick={() => handleTabClick(index)}
-    >
-      {tab.title}
-      {tab.isBlocked && <Icon name="lock-badge" className={styles.lockIcon} />}
-    </div>
-  );
+  const renderTab = (tab: TabWithProperties, index: number) => {
+    const stringEmoticon = typeof tab.emoticon === 'string' ? tab.emoticon : undefined;
+    const customEmoji = typeof tab.emoticon === 'object' ? tab.emoticon : undefined;
+
+    return (
+      <div
+        key={tab.id ?? index}
+        className={buildClassName(
+          styles.tab,
+          tabClassName,
+          itemAlignment === 'vertical' && styles.vertical,
+          stretched && styles.stretched,
+        )}
+        onClick={() => handleTabClick(index)}
+      >
+        {stringEmoticon && <span className={styles.tabEmoji}>{stringEmoticon}</span>}
+        {customEmoji && (
+          <CustomEmoji
+            documentId={customEmoji.documentId}
+            className={styles.tabEmoji}
+            size={EMOJI_SIZE}
+            shouldNotLoop
+          />
+        )}
+        {tab.icon && <Icon name={tab.icon} className={styles.tabIcon} />}
+        {tab.title}
+        {tab.isBlocked && <Icon name="lock-badge" className={styles.lockIcon} />}
+      </div>
+    );
+  };
 
   return (
     <div
       ref={containerRef}
-      className={buildClassName(styles.container, className, clipPath && styles.ready)}
+      className={buildClassName(
+        styles.container,
+        centered && styles.centered,
+        itemAlignment === 'vertical' && styles.vertical,
+        className,
+        clipPath && styles.ready,
+      )}
     >
       {tabs.map(renderTab)}
 
       <div
         ref={clipPathContainerRef}
-        className={styles.activeIndicator}
+        className={buildClassName(styles.activeIndicator,
+          centered && styles.centered,
+          stretched && styles.stretched,
+          indicatorClassName)}
         style={clipPath ? `clip-path: ${clipPath}` : undefined}
         aria-hidden
       >

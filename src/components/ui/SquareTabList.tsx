@@ -2,6 +2,7 @@ import type { ElementRef, TeactNode } from '../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../lib/teact/teact';
 
 import type { ApiMessageEntityCustomEmoji } from '../../api/types';
+import type { IconName } from '../../types/icons';
 import type { MenuItemContextAction } from './ListItem';
 
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
@@ -19,6 +20,7 @@ import './SquareTabList.scss';
 export type TabWithProperties = {
   id?: number;
   title: TeactNode;
+  icon?: IconName;
   badgeCount?: number;
   isBlocked?: boolean;
   isBadgeActive?: boolean;

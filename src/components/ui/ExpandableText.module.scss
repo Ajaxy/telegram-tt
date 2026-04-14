@@ -1,0 +1,54 @@
+.root {
+  position: relative;
+
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.inner {
+  overflow: hidden;
+
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: height 0.15s;
+}
+
+.content {
+  display: block;
+}
+
+.moreLinkWrapper {
+  display: block;
+  text-align: right;
+}
+
+.truncated .moreLinkWrapper {
+  position: absolute;
+  right: 0;
+  bottom: 0.25rem;
+
+  padding-inline-start: 1.5rem;
+
+  background: linear-gradient(to right, transparent, var(--color-background) 30%);
+}
+
+.moreLink {
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+
+  padding-inline: 0.5rem;
+  border-radius: 0.75rem;
+
+  font-size: 0.9375rem;
+  color: var(--color-primary);
+
+  transition: background-color 0.15s;
+
+  &:hover {
+    background-color: var(--color-primary-opacity);
+  }
+}

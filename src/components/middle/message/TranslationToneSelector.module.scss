@@ -1,0 +1,57 @@
+.root {
+  min-width: 3rem;
+  max-width: fit-content;
+}
+
+.itemsWrapper {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  height: 100%;
+  padding: 0.1875rem 0;
+  border-radius: var(--border-radius-default);
+
+  background: var(--color-background);
+  box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
+
+  body:not(.no-menu-blur) & {
+    background: var(--color-background-compact-menu);
+    backdrop-filter: blur(25px);
+  }
+}
+
+.item {
+  cursor: var(--custom-cursor, pointer);
+
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  margin-block: 0.0625rem;
+  margin-inline: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+
+  font-size: 0.9375rem;
+  white-space: nowrap;
+
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--color-background-compact-menu-hover);
+  }
+
+  &.selected {
+    background-color: var(--color-item-active);
+  }
+}
+
+.neutralEmoji {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.title {
+  color: var(--color-text);
+}

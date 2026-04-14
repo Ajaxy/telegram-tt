@@ -119,6 +119,7 @@ import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/dates
 import { processDeepLink } from '../../util/deeplink';
 import { tryParseDeepLink } from '../../util/deepLinkParser';
 import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterOutsideSelection';
+import calcTextLineHeightAndCount from '../../util/element/calcTextLineHeightAndCount';
 import { processMessageInputForCustomEmoji } from '../../util/emoji/customEmojiManager';
 import { isUserId } from '../../util/entities/ids';
 import { fetchBlob } from '../../util/files';
@@ -254,6 +255,7 @@ type StateProps = {
   forwardedMessagesCount?: number;
   pollModal: TabState['pollModal'];
   todoListModal: TabState['todoListModal'];
+  aiMessageEditorPendingResult: TabState['aiMessageEditorPendingResult'];
   botKeyboardMessageId?: number;
   botKeyboardPlaceholder?: string;
   withScheduledButton?: boolean;
@@ -382,6 +384,7 @@ const Composer = ({
   forwardedMessagesCount,
   pollModal,
   todoListModal,
+  aiMessageEditorPendingResult,
   botKeyboardMessageId,
   botKeyboardPlaceholder,
   inputPlaceholder,
@@ -457,11 +460,14 @@ const Composer = ({
   const {
     sendMessage,
     clearDraft,
+    saveDraft,
     showDialog,
     openPollModal,
     closePollModal,
     openTodoListModal,
     closeTodoListModal,
+    openAiMessageEditorModal,
+    clearAiMessageEditorPendingResult,
     loadScheduledHistory,
     openThread,
     addRecentEmoji,
@@ -858,6 +864,25 @@ const Composer = ({
     }
     updateInsertingPeerIdMention({ peerId: undefined });
   }, [insertingPeerIdMention, insertMention]);
+
+  useEffect(() => {
+    if (!aiMessageEditorPendingResult) return;
+
+    const { text, shouldClear, shouldSendWithAttachments } = aiMessageEditorPendingResult;
+
+    if (shouldSendWithAttachments) return;
+
+    if (shouldClear) {
+      setHtml('');
+      clearDraft({ chatId, threadId, isLocalOnly: true });
+    } else if (text) {
+      setHtml(getTextWithEntitiesAsHtml(text));
+      saveDraft({ chatId, threadId, text });
+    }
+
+    clearAiMessageEditorPendingResult();
+  }, [aiMessageEditorPendingResult, chatId, clearDraft,
+    clearAiMessageEditorPendingResult, saveDraft, setHtml, threadId]);
 
   const {
     isOpen: isInlineBotTooltipOpen,
@@ -1369,6 +1394,14 @@ const Composer = ({
     openTodoListModal({ chatId });
   });
 
+  const handleOpenAiEditor = useLastCallback(() => {
+    const { text, entities } = parseHtmlAsFormattedText(getHtml());
+    openAiMessageEditorModal({
+      chatId,
+      text: { text, entities },
+    });
+  });
+
   const handleClickBotMenu = useLastCallback(() => {
     if (botMenuButton?.type !== 'webApp') {
       return;
@@ -1788,7 +1821,25 @@ const Composer = ({
     };
   }, [isSelectModeActive, enableHover, disableHover, isReady]);
 
-  const hasText = useDerivedState(() => Boolean(getHtml()), [getHtml]);
+  const html = useDerivedState(() => getHtml(), [getHtml]);
+  const hasText = Boolean(html);
+  const [shouldShowAiButton, setShouldShowAiButton] = useState(false);
+
+  useEffect(() => {
+    if (hasAttachments) {
+      return;
+    }
+
+    requestMeasure(() => {
+      const input = inputRef.current;
+      if (!html || !input) {
+        setShouldShowAiButton(false);
+        return;
+      }
+      const { totalLines } = calcTextLineHeightAndCount(input, true);
+      setShouldShowAiButton(totalLines >= 3);
+    });
+  }, [html, hasAttachments]);
 
   const withBotMenuButton = isChatWithBot && botMenuButton?.type === 'webApp' && !editingMessage
     && messageListType === 'thread';
@@ -2012,8 +2063,11 @@ const Composer = ({
   });
 
   const handleSendScheduledAttachments = useLastCallback(
-    (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => {
-      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+    (
+      sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true,
+      scheduledAt?: number, scheduleRepeatPeriod?: number,
+    ) => {
+      if (scheduledAt) {
         handleActionWithPaymentConfirmation(
           handleMessageSchedule,
           { sendCompressed, sendGrouped, isInvertedMedia },
@@ -2022,7 +2076,18 @@ const Composer = ({
           currentMessageList!,
           undefined,
         );
-      });
+      } else {
+        requestCalendar((calendarScheduledAt, calendarRepeatPeriod) => {
+          handleActionWithPaymentConfirmation(
+            handleMessageSchedule,
+            { sendCompressed, sendGrouped, isInvertedMedia },
+            calendarScheduledAt,
+            calendarRepeatPeriod,
+            currentMessageList!,
+            undefined,
+          );
+        });
+      }
     },
   );
 
@@ -2191,6 +2256,17 @@ const Composer = ({
             </g>
           </svg>
         )}
+        <Button
+          round
+          faded
+          className={buildClassName('ai-composer-button', (!shouldShowAiButton
+            || hasAttachments) && 'ai-composer-button-hidden')}
+          color="translucent"
+          ariaLabel={lang('AiMessageEditor')}
+          iconName="ai"
+          tabIndex={shouldShowAiButton && !hasAttachments ? 0 : -1}
+          onClick={handleOpenAiEditor}
+        />
         {isInMessageList && (
           <>
             <InlineBotTooltip
@@ -2739,6 +2815,7 @@ export default memo(withGlobal<OwnProps>(
       forwardedMessagesCount: isForwarding ? forwardMessageIds!.length : undefined,
       pollModal: tabState.pollModal,
       todoListModal: tabState.todoListModal,
+      aiMessageEditorPendingResult: tabState.aiMessageEditorPendingResult,
       stickersForEmoji: global.stickers.forEmoji.stickers,
       customEmojiForEmoji: global.customEmojis.forEmoji.stickers,
       chatFullInfo,
@@ -2794,7 +2871,8 @@ export default memo(withGlobal<OwnProps>(
       paidMessagesStars,
       shouldPaidMessageAutoApprove,
       isSilentPosting,
-      isPaymentMessageConfirmDialogOpen: tabState.isPaymentMessageConfirmDialogOpen,
+      isPaymentMessageConfirmDialogOpen: tabState.isPaymentMessageConfirmDialogOpen
+        && !tabState.aiMessageEditorModal,
       starsBalance,
       isStarsBalanceModalOpen,
       shouldDisplayGiftsButton: userFullInfo?.shouldDisplayGiftsButton,

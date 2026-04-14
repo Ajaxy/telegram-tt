@@ -56,6 +56,7 @@ export const PREMIUM_FEATURE_TITLES: Record<ApiPremiumSection, string> = {
   last_seen: 'PremiumPreviewLastSeen',
   message_privacy: 'PremiumPreviewMessagePrivacy',
   effects: 'Premium.MessageEffects',
+  ai_compose: 'PremiumPreviewAiTools',
   todo: 'PremiumPreviewTodo',
   pm_noforwards: 'PremiumPreviewNoForwards',
 };
@@ -79,6 +80,7 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
   last_seen: 'PremiumPreviewLastSeenDescription',
   message_privacy: 'PremiumPreviewMessagePrivacyDescription',
   effects: 'Premium.MessageEffectsInfo',
+  ai_compose: 'PremiumPreviewAiToolsDescription',
   todo: 'PremiumPreviewTodoDescription',
   pm_noforwards: 'PremiumPreviewNoForwardsDescription',
 };
@@ -310,7 +312,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
           }
 
           const i = promo.videoSections.indexOf(section);
-          const shouldUseNewLang = section === 'todo';
+          const shouldUseNewLang = section === 'todo' || section === 'ai_compose';
           return (
             <div className={styles.slide}>
               <div className={styles.frame}>
@@ -326,7 +328,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
               <h1 className={styles.title}>
                 {shouldUseNewLang
                   ? lang(
-                    PREMIUM_FEATURE_TITLES['todo'] as keyof LangPair,
+                    PREMIUM_FEATURE_TITLES[section] as keyof LangPair,
                     undefined,
                     { withNodes: true, renderTextFilters: ['br'] },
                   )
@@ -335,7 +337,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
               <div className={styles.description}>
                 {renderText(shouldUseNewLang
                   ? lang(
-                    PREMIUM_FEATURE_DESCRIPTIONS['todo'] as keyof LangPair,
+                    PREMIUM_FEATURE_DESCRIPTIONS[section] as keyof LangPair,
                     undefined,
                     { withNodes: true, renderTextFilters: ['br'] },
                   )

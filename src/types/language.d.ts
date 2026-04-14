@@ -1772,6 +1772,8 @@ export interface LangPair {
   'ToDoListErrorChooseTitle': undefined;
   'ToDoListErrorChooseTasks': undefined;
   'PremiumPreviewTodo': undefined;
+  'PremiumPreviewAiTools': undefined;
+  'PremiumPreviewAiToolsDescription': undefined;
   'NativeDownloadFailed': undefined;
   'DescriptionAboutTon': undefined;
   'ButtonTopUpViaFragment': undefined;
@@ -2065,6 +2067,31 @@ export interface LangPair {
   'ReminderSetToast': undefined;
   'NoForwardsRequestReject': undefined;
   'NoForwardsRequestAccept': undefined;
+  'AiMessageEditor': undefined;
+  'AiMessageEditorTranslate': undefined;
+  'AiMessageEditorStyle': undefined;
+  'AiMessageEditorFix': undefined;
+  'AiMessageEditorSelectStyle': undefined;
+  'AiMessageEditorDailyLimitReachedPremium': undefined;
+  'AiMessageEditorGenericError': undefined;
+  'AiMessageEditorStyleFormal': undefined;
+  'AiMessageEditorStyleShort': undefined;
+  'AiMessageEditorStyleTribal': undefined;
+  'AiMessageEditorStyleCorp': undefined;
+  'AiMessageEditorStyleBiblical': undefined;
+  'AiMessageEditorStyleViking': undefined;
+  'AiMessageEditorStyleZen': undefined;
+  'AiMessageEditorResult': undefined;
+  'AiMessageEditorOriginal': undefined;
+  'AiMessageEditorApply': undefined;
+  'AiMessageEditorEmojify': undefined;
+  'AiMessageEditorTranslation': undefined;
+  'TextShowMore': undefined;
+  'TextShowLess': undefined;
+  'AiMessageEditorFrom': undefined;
+  'AiMessageEditorTo': undefined;
+  'TranslationToneNeutral': undefined;
+  'ButtonHelp': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -3624,6 +3651,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'RankEditText': {
     'user': V;
+  };
+  'AiMessageEditorDailyLimitReached': {
+    'link': V;
   };
   'UnofficialSecurityRisk': {
     'peer': V;

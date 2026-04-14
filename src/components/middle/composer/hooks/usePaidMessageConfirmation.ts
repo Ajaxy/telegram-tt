@@ -9,6 +9,7 @@ export default function usePaidMessageConfirmation(
   starsForAllMessages: number,
   isStarsBalanceModeOpen: boolean,
   starsBalance: number,
+  shouldDelayConfirmHandler?: boolean,
 ) {
   const {
     shouldPaidMessageAutoApprove,
@@ -45,14 +46,19 @@ export default function usePaidMessageConfirmation(
   const dialogHandler = useLastCallback(() => {
     if (starsForAllMessages > starsBalance) {
       handleStarsTopup();
+    } else if (shouldDelayConfirmHandler) {
+      setTimeout(() => {
+        confirmPaymentHandlerRef?.current?.();
+      }, 250);
     } else {
       confirmPaymentHandlerRef?.current?.();
     }
+
     getActions().closePaymentMessageConfirmDialogOpen();
     if (shouldAutoApprove) getActions().setPaidMessageAutoApprove();
   });
 
-  const handleWithConfirmation = <T extends (...args: any[]) => void>(
+  const handleWithConfirmation = useLastCallback(<T extends (...args: any[]) => void>(
     handler: T,
     ...args: Parameters<T>
   ) => {
@@ -70,7 +76,7 @@ export default function usePaidMessageConfirmation(
     }
 
     handler(...args);
-  };
+  });
 
   return {
     closeConfirmDialog,

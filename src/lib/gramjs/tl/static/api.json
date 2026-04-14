@@ -204,6 +204,7 @@
     "messages.getAvailableEffects",
     "messages.setDefaultReaction",
     "messages.translateText",
+    "messages.composeMessageWithAI",
     "messages.getAttachMenuBots",
     "messages.getAttachMenuBot",
     "messages.toggleBotInAttachMenu",

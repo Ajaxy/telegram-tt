@@ -1,0 +1,71 @@
+.section {
+  margin-bottom: 0;
+}
+
+.sourceLanguage {
+  padding-inline-start: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+}
+
+.languageLink {
+  cursor: pointer;
+
+  display: inline-flex;
+  gap: 0.125rem;
+  align-items: center;
+
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.75rem;
+
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+
+  transition: background-color 0.15s;
+
+  .icon {
+    font-size: 0.75rem;
+  }
+
+  &:hover {
+    background-color: var(--color-primary-opacity);
+  }
+}
+
+.languageMenu :global(.bubble) {
+  left: -2rem !important;
+
+  overflow: initial;
+
+  min-width: 10rem;
+  padding: 0 !important;
+
+  background: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.languageMenu :global(.TranslationToneSelector) {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  transform: translateX(0.5rem);
+}
+
+.languageItems {
+  overflow: auto;
+
+  max-height: 16rem;
+  padding: 0.25rem 0;
+  border-radius: var(--border-radius-default);
+
+  background: var(--color-background);
+  box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
+
+  body:not(.no-menu-blur) & {
+    background: var(--color-background-compact-menu);
+    backdrop-filter: blur(10px);
+  }
+}

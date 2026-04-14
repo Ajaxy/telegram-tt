@@ -1,0 +1,39 @@
+.styleBlock {
+  padding-top: 0;
+}
+
+.tabList {
+  --tab-radius: 1rem;
+
+  margin-top: 0.4375rem;
+  margin-bottom: 0;
+  margin-inline: -1rem;
+  padding-inline: 0.9375rem;
+  border-radius: 0 !important;
+
+  box-shadow: none;
+}
+
+.tabListIndicator {
+  padding-inline: 0.9375rem;
+}
+
+.tab {
+  gap: 0.125rem;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.875rem;
+}
+
+.textLabel,
+.resultLabel {
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.previewText {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}

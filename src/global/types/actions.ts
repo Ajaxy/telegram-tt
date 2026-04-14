@@ -2600,6 +2600,41 @@ export interface ActionPayloads {
   } & WithTabId) | undefined;
   closePremiumModal: WithTabId | undefined;
 
+  openAiMessageEditorModal: {
+    chatId: string;
+    text: ApiFormattedText;
+    initialTab?: 'translate' | 'style' | 'fix';
+    isFromAttachment?: boolean;
+  } & WithTabId;
+  closeAiMessageEditorModal: WithTabId | undefined;
+  setAiMessageEditorTab: {
+    tab: 'translate' | 'style' | 'fix';
+  } & WithTabId;
+  setAiMessageEditorTranslateOptions: {
+    selectedLanguage?: string;
+    selectedTone?: string;
+    shouldEmojify?: boolean;
+    clearResult?: boolean;
+  } & WithTabId;
+  setAiMessageEditorStyleOptions: {
+    selectedTone?: string;
+    shouldEmojify?: boolean;
+    clearResult?: boolean;
+  } & WithTabId;
+  composeWithAiMessageEditor: {
+    shouldProofread?: boolean;
+    isEmojify?: boolean;
+    translateToLang?: string;
+    changeTone?: string;
+  } & WithTabId;
+  applyAiMessageEditorResult: WithTabId | undefined;
+  sendAiMessageEditorResult: ({
+    isSilent?: boolean;
+    scheduledAt?: number;
+    scheduleRepeatPeriod?: number;
+  } & WithTabId) | undefined;
+  clearAiMessageEditorPendingResult: WithTabId | undefined;
+
   openGiveawayModal: ({
     chatId: string;
     gifts?: number[] | undefined;

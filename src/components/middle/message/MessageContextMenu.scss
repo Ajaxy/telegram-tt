@@ -76,6 +76,13 @@
     transform: translateY(calc(-100% - 0.5rem));
   }
 
+  .TranslationToneSelector {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    transform: translateX(0.5rem);
+  }
+
   .no-forwards-notice {
     min-width: 12rem;
   }

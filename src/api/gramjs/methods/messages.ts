@@ -10,6 +10,7 @@ import type {
 import type {
   ApiAttachment,
   ApiChat,
+  ApiComposedMessageWithAI,
   ApiError,
   ApiFormattedText,
   ApiGlobalMessageSearchType,
@@ -60,7 +61,7 @@ import {
   buildApiSponsoredMessageReportResult,
   buildThreadReadState,
 } from '../apiBuilders/chats';
-import { buildApiFormattedText } from '../apiBuilders/common';
+import { buildApiComposedMessageWithAI, buildApiFormattedText } from '../apiBuilders/common';
 import { buildApiTopicWithState } from '../apiBuilders/forums';
 import {
   buildMessageMediaContent, buildMessageTextContent, buildPollFromMedia,
@@ -126,6 +127,7 @@ type TranslateTextParams = ({
   messageIds: number[];
 }) & {
   toLanguageCode: string;
+  tone?: string;
 };
 
 type SearchResults = {
@@ -2379,17 +2381,19 @@ export async function translateText(params: TranslateTextParams) {
   let result;
   const isMessageTranslation = 'chat' in params;
   if (isMessageTranslation) {
-    const { chat, messageIds, toLanguageCode } = params;
+    const { chat, messageIds, toLanguageCode, tone } = params;
     result = await invokeRequest(new GramJs.messages.TranslateText({
       peer: buildInputPeer(chat.id, chat.accessHash),
       id: messageIds,
       toLang: toLanguageCode,
+      tone,
     }));
   } else {
-    const { text, toLanguageCode } = params;
+    const { text, toLanguageCode, tone } = params;
     result = await invokeRequest(new GramJs.messages.TranslateText({
       text: text.map((t) => buildInputTextWithEntities(t)),
       toLang: toLanguageCode,
+      tone,
     }));
   }
 
@@ -2421,14 +2425,15 @@ export async function translateText(params: TranslateTextParams) {
 }
 
 export async function fetchMessageSummary({
-  chat, id, toLanguageCode,
+  chat, id, toLanguageCode, tone,
 }: {
-  chat: ApiChat; id: number; toLanguageCode?: string;
+  chat: ApiChat; id: number; toLanguageCode?: string; tone?: string;
 }) {
   const result = await invokeRequest(new GramJs.messages.SummarizeText({
     peer: buildInputPeer(chat.id, chat.accessHash),
     id,
     toLang: toLanguageCode,
+    tone,
   }));
 
   if (!result) return undefined;
@@ -2660,4 +2665,42 @@ export async function fetchPreparedInlineMessage({
 
 export function incrementLocalMessagesCounter() {
   incrementLocalMessageCounter();
+}
+
+export async function composeMessageWithAI({
+  text,
+  shouldProofread,
+  isEmojify,
+  translateToLang,
+  changeTone,
+}: {
+  text: ApiFormattedText;
+  shouldProofread?: boolean;
+  isEmojify?: boolean;
+  translateToLang?: string;
+  changeTone?: string;
+}): Promise<{ result?: ApiComposedMessageWithAI; error?: 'floodPremium' | 'aiError' | 'generic' }> {
+  try {
+    const result = await invokeRequest(new GramJs.messages.ComposeMessageWithAI({
+      text: buildInputTextWithEntities(text),
+      proofread: shouldProofread || undefined,
+      emojify: isEmojify || undefined,
+      translateToLang,
+      changeTone,
+    }), { shouldThrow: true });
+
+    if (!result) return { error: 'generic' };
+
+    return { result: buildApiComposedMessageWithAI(result) };
+  } catch (err) {
+    if (err instanceof RPCError) {
+      if (err.errorMessage === 'AICOMPOSE_FLOOD_PREMIUM') {
+        return { error: 'floodPremium' };
+      }
+      if (err.errorMessage === 'AICOMPOSE_ERROR_OCCURED') {
+        return { error: 'aiError' };
+      }
+    }
+    return { error: 'generic' };
+  }
 }

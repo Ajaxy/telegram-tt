@@ -452,6 +452,7 @@ export async function fetchCurrentUser() {
 
 export function dispatchErrorUpdate<T extends GramJs.AnyRequest>(err: Error, request: T) {
   const message = err instanceof RPCError ? err.errorMessage : err.message;
+
   const isSlowMode = message === 'FLOOD' && (
     request instanceof GramJs.messages.SendMessage
     || request instanceof GramJs.messages.SendMedia
