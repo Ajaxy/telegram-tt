@@ -2814,3 +2814,4 @@
 "ReminderSetToast" = "You set up a reminder in **Saved Messages**";
 "NoForwardsRequestReject" = "Reject";
 "NoForwardsRequestAccept" = "Accept";
+"UnofficialSecurityRisk" = "{peer} uses an unofficial Telegram client — messages to this user may be less secure."

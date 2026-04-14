@@ -144,6 +144,18 @@
   cursor: var(--custom-cursor, pointer);
 }
 
+.unofficialSecurityRisk {
+  margin-bottom: 0.5rem;
+  padding-inline: 0.5rem;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.riskIcon {
+  margin-inline-end: 0.25rem;
+  color: var(--color-error);
+}
+
 @include mixins.on-active-vt('profileNote') {
   &::view-transition-image-pair(.noteText) {
     overflow: hidden;

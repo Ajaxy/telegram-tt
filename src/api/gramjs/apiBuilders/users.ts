@@ -37,7 +37,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount, botVerification,
       botCanManageEmojiStatus, settings, sendPaidMessagesStars, displayGiftsButton, disallowedGifts,
       starsRating, starsMyPendingRating, starsMyPendingRatingDate, mainTab, note,
-      noforwardsMyEnabled, noforwardsPeerEnabled,
+      noforwardsMyEnabled, noforwardsPeerEnabled, unofficialSecurityRisk,
     },
     users,
   } = mtpUserFull;
@@ -80,6 +80,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     note: note && buildApiFormattedText(note),
     noForwardsMyEnabled: noforwardsMyEnabled,
     noForwardsPeerEnabled: noforwardsPeerEnabled,
+    isUnofficialSecurityRisk: unofficialSecurityRisk,
   };
 }
 

@@ -26,6 +26,7 @@ import {
   isUserRightBanned,
 } from '../../../global/helpers';
 import { getIsChatMuted } from '../../../global/helpers/notifications';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import {
   selectBotAppPermissions,
   selectChat,
@@ -392,6 +393,12 @@ const ChatExtra = ({
 
   return (
     <div className={buildClassName('ChatExtra', className)} style={createVtnStyle('chatExtra')}>
+      {user && userFullInfo?.isUnofficialSecurityRisk && (
+        <div className={styles.unofficialSecurityRisk}>
+          <Icon className={buildClassName(styles.riskIcon, 'in-text-icon')} name="info-filled" />
+          {lang('UnofficialSecurityRisk', { peer: getPeerTitle(lang, user) })}
+        </div>
+      )}
       {personalChannel && (
         <div className={styles.personalChannel} style={createVtnStyle('personalChannel')}>
           <h3 className={styles.personalChannelTitle}>{oldLang('ProfileChannel')}</h3>

@@ -3625,6 +3625,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   'RankEditText': {
     'user': V;
   };
+  'UnofficialSecurityRisk': {
+    'peer': V;
+  };
 }
 
 export interface LangPairPlural {
