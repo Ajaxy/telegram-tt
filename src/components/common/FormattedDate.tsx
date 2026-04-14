@@ -4,7 +4,11 @@ import { getActions } from '../../global';
 import { type ApiMessageEntityFormattedDate, ApiMessageEntityTypes } from '../../api/types';
 
 import { copyTextToClipboard } from '../../util/clipboard';
-import { formatDateTime, secondsToDate } from '../../util/localization/dateFormat';
+import {
+  formatFormattedDateText,
+  getCanonicalFormattedDate,
+  getFormattedDateFormatString,
+} from '../../util/dates/formattedDate';
 import { getServerTime } from '../../util/serverTime';
 
 import useInterval from '../../hooks/schedulers/useInterval';
@@ -39,11 +43,13 @@ const FormattedDate = ({
 
   const lang = useLang();
 
-  const [requestCalendar, calendar] = useSchedule(undefined, undefined, entity.date);
+  const [requestCalendar, calendar] = useSchedule(
+    undefined, undefined, Math.max(entity.date, getServerTime()),
+  );
 
   useInterval(
     () => setCacheBreaker((prev) => prev + 1),
-    getUpdateInterval(Math.abs(entity.date - getServerTime())),
+    entity.relative && getUpdateInterval(Math.abs(entity.date - getServerTime())),
   );
 
   const canSetReminder = Boolean(chatId && messageId);
@@ -52,25 +58,8 @@ const FormattedDate = ({
     void cacheBreaker;
 
     const { type, offset, length, date, ...formatOptions } = entity;
-    const canonical = formatDateTime(lang, secondsToDate(date), {
-      date: 'long',
-      includeYear: true,
-      includeDay: true,
-      time: 'long',
-    });
-
-    if (Object.values(formatOptions).every((value) => value === undefined)) {
-      return { formattedDate: undefined, canonicalDate: canonical };
-    }
-
-    const { relative, shortTime, longTime, shortDate, longDate, dayOfWeek } = formatOptions;
-
-    const formatted = formatDateTime(lang, secondsToDate(date), {
-      relative: relative ? 'auto' : undefined,
-      time: shortTime ? 'short' : longTime ? 'long' : undefined,
-      date: shortDate ? 'short' : longDate ? 'long' : undefined,
-      weekday: dayOfWeek ? 'long' : undefined,
-    });
+    const canonical = getCanonicalFormattedDate(lang, date);
+    const formatted = formatFormattedDateText(lang, date, formatOptions);
 
     return { formattedDate: formatted, canonicalDate: canonical };
   }, [lang, entity, cacheBreaker]);
@@ -123,7 +112,7 @@ const FormattedDate = ({
       dir="auto"
       data-entity-type={ApiMessageEntityTypes.FormattedDate}
       data-unix={entity.date}
-      data-format={formatToString(entity)}
+      data-format={getFormattedDateFormatString(entity)}
       title={canonicalDate}
     >
       {formattedDate ?? children}
@@ -161,17 +150,9 @@ function getUpdateInterval(diffInSeconds: number) {
     return 60000;
   }
 
-  return undefined;
-}
+  if (diffInSeconds < 60 * 60 * 24) {
+    return 3600000;
+  }
 
-function formatToString(entity: ApiMessageEntityFormattedDate) {
-  const { relative, shortTime, longTime, shortDate, longDate, dayOfWeek } = entity;
-  return [
-    relative && 'r',
-    dayOfWeek && 'w',
-    shortDate && 'd',
-    longDate && 'D',
-    shortTime && 't',
-    longTime && 'T',
-  ].filter(Boolean).join('');
+  return undefined;
 }

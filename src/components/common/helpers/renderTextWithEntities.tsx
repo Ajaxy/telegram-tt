@@ -9,6 +9,7 @@ import { ApiMessageEntityTypes } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
+import { buildFormattedDateHtml } from '../../../util/dates/formattedDate';
 import { buildCustomEmojiHtmlFromEntity } from '../../middle/composer/helpers/customEmoji';
 import renderText from './renderText';
 
@@ -749,6 +750,8 @@ function processEntityAsHtml(
         class="blockquote"
         data-entity-type="${ApiMessageEntityTypes.Blockquote}"
         >${renderedContent}</blockquote>`;
+    case ApiMessageEntityTypes.FormattedDate:
+      return buildFormattedDateHtml(renderedContent, entity);
     default:
       return renderedContent;
   }

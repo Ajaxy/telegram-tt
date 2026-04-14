@@ -4,7 +4,7 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiAttachMenuPeerType, ApiMessage } from '../../../api/types';
+import type { ApiAttachMenuPeerType, ApiFormattedText, ApiMessage } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 import type { MessageListType, ThemeKey, ThreadId } from '../../../types';
 
@@ -35,6 +35,7 @@ import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
 import AttachBotItem from './AttachBotItem';
+import FormattedDateModal from './FormattedDateModal';
 
 import './AttachMenu.scss';
 
@@ -58,7 +59,9 @@ export type OwnProps = {
   editingMessage?: ApiMessage;
   messageListType?: MessageListType;
   paidMessagesStars?: number;
+  canInsertDate?: boolean;
   onFileSelect: (files: File[]) => void;
+  onDateInsert: (text: ApiFormattedText) => void;
   onPollCreate: NoneToVoidFunction;
   onTodoListCreate: NoneToVoidFunction;
   onMenuOpen: NoneToVoidFunction;
@@ -85,7 +88,9 @@ const AttachMenu = ({
   editingMessage,
   messageListType,
   paidMessagesStars,
+  canInsertDate,
   onFileSelect,
+  onDateInsert,
   onMenuOpen,
   onMenuClose,
   onPollCreate,
@@ -96,6 +101,7 @@ const AttachMenu = ({
   } = getActions();
   const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
   const [handleMouseEnter, handleMouseLeave, markMouseInside] = useMouseInside(isAttachMenuOpen, closeAttachMenu);
+  const [isDateModalOpen, openDateModal, closeDateModal] = useFlag();
 
   const canSendVideoAndPhoto = canSendPhotos && canSendVideos;
   const canSendVideoOrPhoto = canSendPhotos || canSendVideos;
@@ -179,106 +185,123 @@ const AttachMenu = ({
   const oldLang = useOldLang();
   const lang = useLang();
 
-  if (!isButtonVisible) {
+  const handleDateMenuClick = useLastCallback(() => {
+    closeAttachMenu();
+    openDateModal();
+  });
+
+  if (!isButtonVisible && !isDateModalOpen) {
     return undefined;
   }
 
   return (
     <div className="AttachMenu">
-      {
-        editingMessage && canEditMedia ? (
-          <ResponsiveHoverButton
-            id="replace-menu-button"
-            className={buildClassName('AttachMenu--button composer-action-button', isAttachMenuOpen && 'activated')}
-            round
-            color="translucent"
-            onActivate={handleToggleAttachMenu}
-            ariaLabel="Replace an attachment"
-            ariaControls="replace-menu-controls"
-            hasPopup
+      {isButtonVisible && (
+        <>
+          {
+            editingMessage && canEditMedia ? (
+              <ResponsiveHoverButton
+                id="replace-menu-button"
+                className={buildClassName('AttachMenu--button composer-action-button', isAttachMenuOpen && 'activated')}
+                round
+                color="translucent"
+                onActivate={handleToggleAttachMenu}
+                ariaLabel="Replace an attachment"
+                ariaControls="replace-menu-controls"
+                hasPopup
+              >
+                <Icon name="replace" />
+              </ResponsiveHoverButton>
+            ) : (
+              <ResponsiveHoverButton
+                id="attach-menu-button"
+                disabled={Boolean(editingMessage)}
+                className={buildClassName('AttachMenu--button composer-action-button', isAttachMenuOpen && 'activated')}
+                round
+                color="translucent"
+                onActivate={handleToggleAttachMenu}
+                ariaLabel="Add an attachment"
+                ariaControls="attach-menu-controls"
+                hasPopup
+              >
+                <Icon name="attach" />
+              </ResponsiveHoverButton>
+            )
+          }
+          <Menu
+            id="attach-menu-controls"
+            isOpen={isMenuOpen}
+            autoClose
+            positionX="right"
+            positionY="bottom"
+            onClose={closeAttachMenu}
+            className="AttachMenu--menu fluid"
+            onCloseAnimationEnd={closeAttachMenu}
+            onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
+            onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
+            noCloseOnBackdrop={!IS_TOUCH_ENV}
+            ariaLabelledBy="attach-menu-button"
           >
-            <Icon name="replace" />
-          </ResponsiveHoverButton>
-        ) : (
-          <ResponsiveHoverButton
-            id="attach-menu-button"
-            disabled={Boolean(editingMessage)}
-            className={buildClassName('AttachMenu--button composer-action-button', isAttachMenuOpen && 'activated')}
-            round
-            color="translucent"
-            onActivate={handleToggleAttachMenu}
-            ariaLabel="Add an attachment"
-            ariaControls="attach-menu-controls"
-            hasPopup
-          >
-            <Icon name="attach" />
-          </ResponsiveHoverButton>
-        )
-      }
-      <Menu
-        id="attach-menu-controls"
-        isOpen={isMenuOpen}
-        autoClose
-        positionX="right"
-        positionY="bottom"
-        onClose={closeAttachMenu}
-        className="AttachMenu--menu fluid"
-        onCloseAnimationEnd={closeAttachMenu}
-        onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
-        onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
-        noCloseOnBackdrop={!IS_TOUCH_ENV}
-        ariaLabelledBy="attach-menu-button"
-      >
-        {/*
-       ** Using ternary operator here causes some attributes from first clause
-       ** transferring to the fragment content in the second clause
-       */}
-        {!canAttachMedia && (
-          <MenuItem className="media-disabled" disabled>
-            {lang(messageListType === 'scheduled' && paidMessagesStars
-              ? 'DescriptionScheduledPaidMediaNotAllowed'
-              : 'DescriptionRestrictedMedia')}
-          </MenuItem>
-        )}
-        {canAttachMedia && (
-          <>
-            {canSendVideoOrPhoto && !isFile && (
-              <MenuItem icon="photo" onClick={handleQuickSelect}>
-                {oldLang(canSendVideoAndPhoto ? 'AttachmentMenu.PhotoOrVideo'
-                  : (canSendPhotos ? 'InputAttach.Popover.Photo' : 'InputAttach.Popover.Video'))}
+            {/*
+           ** Using ternary operator here causes some attributes from first clause
+           ** transferring to the fragment content in the second clause
+           */}
+            {!canAttachMedia && (
+              <MenuItem className="media-disabled" disabled>
+                {lang(messageListType === 'scheduled' && paidMessagesStars
+                  ? 'DescriptionScheduledPaidMediaNotAllowed'
+                  : 'DescriptionRestrictedMedia')}
               </MenuItem>
             )}
-            {((canSendDocuments || canSendAudios) && !isPhotoOrVideo)
-              && (
-                <MenuItem icon="document" onClick={handleDocumentSelect}>
-                  {oldLang(!canSendDocuments && canSendAudios ? 'InputAttach.Popover.Music' : 'AttachDocument')}
-                </MenuItem>
-              )}
-            {canSendDocuments && shouldCollectDebugLogs && (
-              <MenuItem icon="bug" onClick={handleSendLogs}>
-                {oldLang('DebugSendLogs')}
-              </MenuItem>
+            {canAttachMedia && (
+              <>
+                {canSendVideoOrPhoto && !isFile && (
+                  <MenuItem icon="photo" onClick={handleQuickSelect}>
+                    {oldLang(canSendVideoAndPhoto ? 'AttachmentMenu.PhotoOrVideo'
+                      : (canSendPhotos ? 'InputAttach.Popover.Photo' : 'InputAttach.Popover.Video'))}
+                  </MenuItem>
+                )}
+                {((canSendDocuments || canSendAudios) && !isPhotoOrVideo)
+                  && (
+                    <MenuItem icon="document" onClick={handleDocumentSelect}>
+                      {oldLang(!canSendDocuments && canSendAudios ? 'InputAttach.Popover.Music' : 'AttachDocument')}
+                    </MenuItem>
+                  )}
+                {canSendDocuments && shouldCollectDebugLogs && (
+                  <MenuItem icon="bug" onClick={handleSendLogs}>
+                    {oldLang('DebugSendLogs')}
+                  </MenuItem>
+                )}
+              </>
             )}
-          </>
-        )}
-        {canAttachPolls && !editingMessage && (
-          <MenuItem icon="poll" onClick={onPollCreate}>{oldLang('Poll')}</MenuItem>
-        )}
-        {canAttachToDoLists && !editingMessage && (
-          <MenuItem icon="select" onClick={onTodoListCreate}>{lang('TitleToDoList')}</MenuItem>
-        )}
+            {canAttachPolls && !editingMessage && (
+              <MenuItem icon="poll" onClick={onPollCreate}>{oldLang('Poll')}</MenuItem>
+            )}
+            {canAttachToDoLists && !editingMessage && (
+              <MenuItem icon="select" onClick={onTodoListCreate}>{lang('TitleToDoList')}</MenuItem>
+            )}
+            {canInsertDate && !editingMessage && (
+              <MenuItem icon="calendar" onClick={handleDateMenuClick}>{lang('GiftInfoDate')}</MenuItem>
+            )}
 
-        {!editingMessage && !canEditMedia && !isScheduled && bots?.map((bot) => (
-          <AttachBotItem
-            bot={bot}
-            chatId={chatId}
-            threadId={threadId}
-            theme={theme}
-            onMenuOpened={markAttachmentBotMenuOpen}
-            onMenuClosed={unmarkAttachmentBotMenuOpen}
-          />
-        ))}
-      </Menu>
+            {!editingMessage && !canEditMedia && !isScheduled && bots?.map((bot) => (
+              <AttachBotItem
+                bot={bot}
+                chatId={chatId}
+                threadId={threadId}
+                theme={theme}
+                onMenuOpened={markAttachmentBotMenuOpen}
+                onMenuClosed={unmarkAttachmentBotMenuOpen}
+              />
+            ))}
+          </Menu>
+        </>
+      )}
+      <FormattedDateModal
+        isOpen={isDateModalOpen}
+        onClose={closeDateModal}
+        onSubmit={onDateInsert}
+      />
     </div>
   );
 };

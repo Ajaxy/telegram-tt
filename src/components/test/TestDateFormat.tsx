@@ -1,7 +1,7 @@
 import type { FormatDateTimeOptions } from '../../util/localization/dateFormat';
 
 import buildClassName from '../../util/buildClassName';
-import { formatDateTime } from '../../util/localization/dateFormat';
+import { formatDateTime, formatMessageListDate } from '../../util/localization/dateFormat';
 
 import useLang from '../../hooks/useLang';
 
@@ -45,7 +45,7 @@ const ABSOLUTE_CASES: Array<{ label: string; options: FormatDateTimeOptions }> =
   },
 ];
 
-const RELATIVE_CASES = [
+const RELATIVE_CASES: Array<{ label: string; startDate: Date; anchorDate?: Date }> = [
   { label: '30 seconds later', startDate: new Date(2026, 2, 16, 12, 35, 26) },
   { label: '5 minutes later', startDate: new Date(2026, 2, 16, 12, 39, 56) },
   { label: '3 hours later', startDate: new Date(2026, 2, 16, 15, 34, 56) },
@@ -56,6 +56,29 @@ const RELATIVE_CASES = [
   { label: '2 hours earlier', startDate: new Date(2026, 2, 16, 10, 34, 56) },
   { label: 'yesterday', startDate: new Date(2026, 2, 15, 12, 34, 56) },
   { label: '3 days earlier', startDate: new Date(2026, 2, 13, 12, 34, 56) },
+  {
+    label: '25 hours later, but 2 calendar days later',
+    anchorDate: new Date(2026, 2, 16, 23, 0, 0),
+    startDate: new Date(2026, 2, 18, 0, 0, 0),
+  },
+  {
+    label: '25 hours earlier, but 2 calendar days earlier',
+    anchorDate: new Date(2026, 2, 16, 1, 0, 0),
+    startDate: new Date(2026, 2, 14, 0, 0, 0),
+  },
+];
+const MESSAGE_LIST_CASES: Array<{ label: string; date: Date; anchorDate?: Date }> = [
+  { label: 'today', date: new Date(2026, 2, 16, 9, 0, 0) },
+  { label: 'yesterday', date: new Date(2026, 2, 15, 23, 0, 0) },
+  { label: '3 days earlier', date: new Date(2026, 2, 13, 12, 0, 0) },
+  { label: '8 days earlier', date: new Date(2026, 2, 8, 12, 0, 0) },
+  { label: 'same year, older date', date: new Date(2026, 0, 14, 12, 0, 0) },
+  { label: 'different year', date: new Date(2025, 0, 14, 12, 0, 0) },
+  {
+    label: 'yesterday across year boundary',
+    anchorDate: new Date(2026, 0, 1, 12, 0, 0),
+    date: new Date(2025, 11, 31, 12, 0, 0),
+  },
 ];
 
 function DebugTable({ rows }: { rows: Row[] }) {
@@ -88,12 +111,23 @@ const DateFormatTest = () => {
     value: formatDateTime(lang, ANCHOR_DATE, options),
   }));
 
-  const relativeRows: Row[] = RELATIVE_CASES.map(({ label, startDate }) => {
+  const relativeRows: Row[] = RELATIVE_CASES.map(({ label, startDate, anchorDate }) => {
     const startDateLabel = startDate.toLocaleString();
+    const effectiveAnchorDate = anchorDate || ANCHOR_DATE;
+    const anchorDateLabel = anchorDate ? `; anchor ${anchorDate.toLocaleString()}` : '';
 
     return {
-      label: `${label} (${startDateLabel})`,
-      value: formatDateTime(lang, startDate, { relative: 'auto', anchorDate: ANCHOR_DATE }),
+      label: `${label} (${startDateLabel}${anchorDateLabel})`,
+      value: formatDateTime(lang, startDate, { relative: 'auto', anchorDate: effectiveAnchorDate }),
+    };
+  });
+  const messageListRows: Row[] = MESSAGE_LIST_CASES.map(({ label, date, anchorDate }) => {
+    const effectiveAnchorDate = anchorDate || ANCHOR_DATE;
+    const anchorDateLabel = anchorDate ? `; anchor ${anchorDate.toLocaleString()}` : '';
+
+    return {
+      label: `${label} (${date.toLocaleString()}${anchorDateLabel})`,
+      value: formatMessageListDate(lang, date, { anchorDate: effectiveAnchorDate }),
     };
   });
 
@@ -121,6 +155,9 @@ const DateFormatTest = () => {
 
       <h3>Relative Formatting</h3>
       <DebugTable rows={relativeRows} />
+
+      <h3>Message List Date Formatting</h3>
+      <DebugTable rows={messageListRows} />
     </div>
   );
 };

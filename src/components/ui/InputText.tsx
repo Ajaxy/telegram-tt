@@ -23,6 +23,7 @@ type OwnProps = {
   autoComplete?: string;
   maxLength?: number;
   tabIndex?: number;
+  title?: string;
   teactExperimentControlled?: boolean;
   inputMode?: 'text' | 'none' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -49,6 +50,7 @@ const InputText = ({
   inputMode,
   maxLength,
   tabIndex,
+  title,
   teactExperimentControlled,
   onChange,
   onInput,
@@ -94,6 +96,7 @@ const InputText = ({
         onBlur={onBlur}
         onPaste={onPaste}
         aria-label={labelText}
+        title={title}
         teactExperimentControlled={teactExperimentControlled}
         onClick={onClick}
       />

@@ -628,6 +628,7 @@ const Composer = ({
   ) => {
     if (inInputId === editableInputId && isComposerBlocked) return;
     const selection = window.getSelection()!;
+    const savedSelectionRange = getSelectionRange();
     let messageInput: HTMLDivElement;
     if (inInputId === editableInputId) {
       messageInput = document.querySelector<HTMLDivElement>(editableInputCssSelector)!;
@@ -635,12 +636,33 @@ const Composer = ({
       messageInput = document.getElementById(inInputId) as HTMLDivElement;
     }
 
-    if (selection.rangeCount && !shouldPrepend) {
-      const selectionRange = selection.getRangeAt(0);
-      if (isSelectionInsideInput(selectionRange, inInputId)) {
-        insertHtmlInSelection(newHtml);
-        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-        return;
+    if (!shouldPrepend) {
+      let selectionRange: Range | undefined;
+
+      if (selection.rangeCount) {
+        const currentSelectionRange = selection.getRangeAt(0);
+        if (isSelectionInsideInput(currentSelectionRange, inInputId)) {
+          selectionRange = currentSelectionRange;
+        }
+      }
+
+      if (!selectionRange && savedSelectionRange && isSelectionInsideInput(savedSelectionRange, inInputId)) {
+        selectionRange = savedSelectionRange.cloneRange();
+      }
+
+      if (selectionRange) {
+        try {
+          if (!selection.rangeCount || selection.getRangeAt(0) !== selectionRange) {
+            selection.removeAllRanges();
+            selection.addRange(selectionRange);
+          }
+
+          insertHtmlInSelection(newHtml);
+          messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+          return;
+        } catch {
+          // Fall back to appending below if restoring the previous range fails.
+        }
       }
     }
 
@@ -1692,6 +1714,11 @@ const Composer = ({
     insertTextAndUpdateCursor(text, EDITABLE_INPUT_MODAL_ID);
   });
 
+  const handleFormattedDateInsert = useLastCallback((text: ApiFormattedText) => {
+    const targetInputId = attachments.length ? EDITABLE_INPUT_MODAL_ID : editableInputId;
+    insertFormattedTextAndUpdateCursor(text, targetInputId);
+  });
+
   const removeSymbol = useLastCallback((inInputId = editableInputId) => {
     const selection = window.getSelection()!;
 
@@ -2387,7 +2414,9 @@ const Composer = ({
               canSendVideos={canSendVideos}
               canSendDocuments={canSendDocuments}
               canSendAudios={canSendAudios}
+              canInsertDate={!isComposerBlocked}
               onFileSelect={handleFileSelect}
+              onDateInsert={handleFormattedDateInsert}
               onPollCreate={openPollModal}
               onTodoListCreate={handleTodoListCreate}
               isScheduled={isInScheduledList}

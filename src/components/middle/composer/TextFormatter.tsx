@@ -12,6 +12,7 @@ import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { ensureProtocol } from '../../../util/browser/url';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import { buildFormattedDateHtml } from '../../../util/dates/formattedDate';
 import getKeyFromEvent from '../../../util/getKeyFromEvent';
 import stopEvent from '../../../util/stopEvent';
 import { INPUT_CUSTOM_EMOJI_SELECTOR } from './helpers/customEmoji';
@@ -22,6 +23,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useVirtualBackdrop from '../../../hooks/useVirtualBackdrop';
 
+import CalendarModal from '../../common/CalendarModal';
 import Button from '../../ui/Button';
 
 import './TextFormatter.scss';
@@ -66,16 +68,20 @@ const TextFormatter: FC<OwnProps> = ({
   const linkUrlInputRef = useRef<HTMLInputElement>();
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen);
   const [isLinkControlOpen, openLinkControl, closeLinkControl] = useFlag();
+  const [isDatePickerOpen, openDatePicker, closeDatePicker] = useFlag();
   const [linkUrl, setLinkUrl] = useState('');
   const [isEditingLink, setIsEditingLink] = useState(false);
   const [inputClassName, setInputClassName] = useState<string | undefined>();
   const [selectedTextFormats, setSelectedTextFormats] = useState<ISelectedTextFormats>({});
+  const [selectedDateAt, setSelectedDateAt] = useState(() => roundDateToMinute(new Date()).getTime());
 
   const lang = useLang();
 
-  useEffect(() => (isOpen ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
+  useEffect(() => (
+    isOpen && !isDatePickerOpen ? captureEscKeyListener(onClose) : undefined
+  ), [isDatePickerOpen, isOpen, onClose]);
   useVirtualBackdrop(
-    isOpen,
+    isOpen && !isDatePickerOpen,
     containerRef,
     onClose,
     true,
@@ -93,10 +99,11 @@ const TextFormatter: FC<OwnProps> = ({
   useEffect(() => {
     if (!shouldRender) {
       closeLinkControl();
+      closeDatePicker();
       setSelectedTextFormats({});
       setInputClassName(undefined);
     }
-  }, [closeLinkControl, shouldRender]);
+  }, [closeDatePicker, closeLinkControl, shouldRender]);
 
   useEffect(() => {
     if (!isOpen || !selectedRange) {
@@ -345,7 +352,38 @@ const TextFormatter: FC<OwnProps> = ({
     onClose();
   });
 
+  const handleOpenDatePicker = useLastCallback(() => {
+    closeLinkControl();
+    setSelectedDateAt(roundDateToMinute(new Date()).getTime());
+    openDatePicker();
+  });
+
+  const handleDateChange = useLastCallback((date: Date) => {
+    setSelectedDateAt(date.getTime());
+  });
+
+  const handleFormattedDateConfirm = useLastCallback((date: Date) => {
+    const text = getSelectedText();
+    if (!text || !selectedRange) {
+      return;
+    }
+
+    restoreSelection();
+    document.execCommand('insertHTML', false, buildFormattedDateHtml(text, {
+      type: ApiMessageEntityTypes.FormattedDate,
+      offset: 0,
+      length: selectedRange.toString().length,
+      date: Math.round(date.getTime() / 1000),
+    }));
+    closeDatePicker();
+    onClose();
+  });
+
   const handleKeyDown = useLastCallback((e: KeyboardEvent) => {
+    if (isDatePickerOpen) {
+      return;
+    }
+
     const HANDLERS_BY_KEY: Record<string, AnyToVoidFunction> = {
       k: openLinkControl,
       b: handleBoldText,
@@ -462,6 +500,12 @@ const TextFormatter: FC<OwnProps> = ({
         <div className="TextFormatter-divider" />
         <Button
           color="translucent"
+          ariaLabel={lang('FormattingAddDateAria')}
+          onClick={handleOpenDatePicker}
+          iconName="calendar"
+        />
+        <Button
+          color="translucent"
           ariaLabel={lang('FormattingAddLinkAria')}
           onClick={openLinkControl}
           iconName="link"
@@ -508,8 +552,24 @@ const TextFormatter: FC<OwnProps> = ({
           </div>
         </div>
       </div>
+      <CalendarModal
+        isOpen={isDatePickerOpen}
+        selectedAt={selectedDateAt}
+        withTimePicker
+        submitButtonLabel={lang('Save')}
+        onClose={closeDatePicker}
+        onDateChange={handleDateChange}
+        onSubmit={handleFormattedDateConfirm}
+      />
     </div>
   );
 };
 
 export default memo(TextFormatter);
+
+function roundDateToMinute(date: Date) {
+  const nextDate = new Date(date.getTime());
+  nextDate.setSeconds(0);
+  nextDate.setMilliseconds(0);
+  return nextDate;
+}

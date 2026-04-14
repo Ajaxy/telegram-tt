@@ -25,6 +25,7 @@ import buildClassName from '../../util/buildClassName';
 import { formatHumanDate, formatScheduledDateTime } from '../../util/dates/oldDateFormat';
 import { convertTonFromNanos } from '../../util/formatCurrency';
 import { compact } from '../../util/iteratees';
+import { formatMessageListDate } from '../../util/localization/dateFormat';
 import { formatStarsAsText, formatTonAsText } from '../../util/localization/format';
 import { isAlbum, isDocumentGroup } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
@@ -521,7 +522,7 @@ const MessageListContent = ({
             {isSchedule && dateGroup.originalDate !== SCHEDULED_WHEN_ONLINE && (
               oldLang('MessageScheduledOn', formatHumanDate(oldLang, dateGroup.datetime, undefined, true))
             )}
-            {!isSchedule && formatHumanDate(oldLang, dateGroup.datetime)}
+            {!isSchedule && formatMessageListDate(lang, new Date(dateGroup.datetime))}
           </span>
         </div>
         {senderGroups.flat()}

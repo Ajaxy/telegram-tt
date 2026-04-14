@@ -8,7 +8,7 @@ import LimitedMap from '../primitives/LimitedMap';
 type DateStyle = 'short' | 'long' | 'numeric' | false;
 type TimeStyle = 'short' | 'long' | false;
 type WeekdayStyle = 'short' | 'long' | boolean;
-type RelativeUnit = 'second' | 'minute' | 'hour' | 'day' | 'week';
+type RelativeUnit = 'minute' | 'hour' | 'day';
 type RelativeType = 'numeric' | 'auto';
 type RelativePart = { unit: RelativeUnit; value: number };
 
@@ -29,6 +29,10 @@ export interface FormatDateTimeOptions {
   includeYear?: boolean;
   includeDay?: boolean;
   maxRelativeDays?: number;
+}
+
+export interface FormatMessageListDateOptions {
+  anchorDate?: Date;
 }
 
 const RESULT_CACHE_LIMIT = 200;
@@ -56,6 +60,36 @@ export function formatDateTime(lang: LangFn, date: Date, options: FormatDateTime
   }
 
   return formatAbsoluteDateTime(lang, date, options);
+}
+
+export function formatMessageListDate(
+  lang: LangFn,
+  date: Date,
+  options: FormatMessageListDateOptions = {},
+) {
+  const anchorDate = options.anchorDate || new Date();
+  const calendarDayDiff = getCalendarDayDiff(date, anchorDate);
+
+  if (calendarDayDiff === 0) {
+    return lang('WeekdayToday');
+  }
+
+  if (calendarDayDiff === -1) {
+    return lang('WeekdayYesterday');
+  }
+
+  if (date.getFullYear() !== anchorDate.getFullYear()) {
+    return formatDateTime(lang, date, { date: 'long' });
+  }
+
+  if (Math.abs(calendarDayDiff) < 7) {
+    return formatDateTime(lang, date, { weekday: 'long' });
+  }
+
+  return formatDateTime(lang, date, {
+    date: 'long',
+    includeYear: false,
+  });
 }
 
 function formatAbsoluteDateTime(lang: LangFn, date: Date, options: FormatDateTimeOptions) {
@@ -86,6 +120,10 @@ function formatRelativeDateTime(
   type: RelativeType = 'numeric',
   options?: Pick<FormatDateTimeOptions, 'maxRelativeDays'>,
 ) {
+  if (type === 'auto' && Math.abs(targetDate.getTime() - anchorDate.getTime()) < 60 * 1000) {
+    return lang('RightNow');
+  }
+
   const { maxRelativeDays } = options || {};
   const relativePart = getRelativePart(targetDate.getTime(), anchorDate.getTime(), maxRelativeDays);
   if (!relativePart) {
@@ -162,10 +200,6 @@ function getRelativePart(targetTime: number, anchorTime: number, maxRelativeDays
     return undefined;
   }
 
-  if (absDiffInSeconds < 60) {
-    return { unit: 'second' as const, value: diffInSeconds };
-  }
-
   if (absDiffInSeconds < 60 * 60) {
     return { unit: 'minute' as const, value: Math.trunc(diffInSeconds / 60) };
   }
@@ -174,7 +208,10 @@ function getRelativePart(targetTime: number, anchorTime: number, maxRelativeDays
     return { unit: 'hour' as const, value: Math.trunc(diffInSeconds / (60 * 60)) };
   }
 
-  return { unit: 'day' as const, value: Math.trunc(diffInSeconds / DAY_IN_SECONDS) };
+  return {
+    unit: 'day' as const,
+    value: getCalendarDayDiff(new Date(targetTime), new Date(anchorTime)),
+  };
 }
 
 function getDateTimeFormatter(locale: string, timeFormat: TimeFormat, options: Intl.DateTimeFormatOptions) {
@@ -241,6 +278,15 @@ function getHourCycle(timeFormat: TimeFormat) {
 
 export function secondsToDate(seconds: number) {
   return new Date(seconds * 1000);
+}
+
+function getCalendarDayDiff(targetDate: Date, anchorDate: Date) {
+  return Math.trunc(
+    (
+      Date.UTC(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate())
+      - Date.UTC(anchorDate.getFullYear(), anchorDate.getMonth(), anchorDate.getDate())
+    ) / (DAY_IN_SECONDS * 1000),
+  );
 }
 
 function serializeRecord(record: object) {

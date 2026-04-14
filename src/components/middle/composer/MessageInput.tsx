@@ -1,6 +1,4 @@
-import type { ChangeEvent } from 'react';
-import type { ElementRef, FC, TeactNode } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
+import type { ElementRef, TeactNode } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useLayoutEffect,
   useRef, useState,
@@ -112,7 +110,7 @@ function clearSelection() {
   }
 }
 
-const MessageInput: FC<OwnProps & StateProps> = ({
+const MessageInput = ({
   ref,
   id,
   chatId,
@@ -143,7 +141,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   onScroll,
   onFocus,
   onBlur,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     editLastMessage,
     replyToNextMessage,
@@ -408,7 +406,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     }
   }
 
-  function handleChange(e: ChangeEvent<HTMLDivElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLDivElement>) {
     const { innerHTML, textContent } = e.currentTarget;
 
     onUpdate(innerHTML === SAFARI_BR ? '' : innerHTML);

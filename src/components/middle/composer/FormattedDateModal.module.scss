@@ -1,0 +1,57 @@
+.root {
+  background-color: var(--color-background-secondary);
+}
+
+.island {
+  padding: 1rem;
+  border-radius: var(--border-radius-island);
+  background-color: var(--color-background);
+  box-shadow: 0px 1px 4px 0px #0000000D;
+}
+
+.previewInput {
+  margin-bottom: 0;
+
+  &:global(.disabled) {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  :global(.form-control) {
+    cursor: var(--custom-cursor, pointer);
+    text-align: center;
+  }
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.checkboxRow,
+.tabGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.groupLabel {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.tabList {
+  align-self: flex-start;
+}
+
+.modeTabList {
+  align-self: center;
+}
+
+.tabListDisabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
