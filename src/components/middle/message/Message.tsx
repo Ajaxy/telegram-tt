@@ -530,10 +530,8 @@ const Message = ({
       return;
     }
 
-    const timeout = setTimeout(markShown, appearanceOrder * MESSAGE_APPEARANCE_DELAY);
-    return () => {
-      clearTimeout(timeout);
-    };
+    // Keep as is for now to avoid breaking appearance order
+    setTimeout(markShown, appearanceOrder * MESSAGE_APPEARANCE_DELAY);
   }, [appearanceOrder, noAppearanceAnimation]);
 
   useShowTransition({
