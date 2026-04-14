@@ -1,5 +1,5 @@
 import {
-  memo, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
@@ -15,12 +15,14 @@ import { formatPercent } from '../../../../util/textFormat';
 import { getGiftAttributes } from '../../../common/helpers/gifts';
 
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
+import useFlag from '../../../../hooks/useFlag';
 import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver } from '../../../../hooks/useIntersectionObserver';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import usePrevious from '../../../../hooks/usePrevious';
 
+import Checkbox from '../../../ui/Checkbox';
 import InfiniteScroll from '../../../ui/InfiniteScroll';
 import Loading from '../../../ui/Loading';
 import Modal from '../../../ui/Modal';
@@ -89,6 +91,7 @@ const GiftCraftSelectModal = ({ modal, craftModal }: OwnProps & StateProps) => {
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isFiltersSeparatorAbove, setIsFiltersSeparatorAbove] = useState(false);
+  const [wasStarsOnlyToggleShown, markStarsOnlyToggleShown, resetStarsOnlyToggleShown] = useFlag(false);
 
   const lang = useLang();
   const isOpen = Boolean(modal);
@@ -234,9 +237,34 @@ const GiftCraftSelectModal = ({ modal, craftModal }: OwnProps & StateProps) => {
         modelAttributes: [],
         backdropAttributes: [],
         patternAttributes: [],
+        starsOnly: undefined,
       },
     });
   });
+
+  const handleStarsOnlyChange = useLastCallback((isChecked: boolean) => {
+    updateCraftGiftsFilter({
+      filter: {
+        ...marketFilter,
+        sortType: marketFilter?.sortType || 'byPrice',
+        starsOnly: isChecked,
+      },
+    });
+  });
+
+  const isStarsOnly = Boolean(marketFilter?.starsOnly);
+
+  useEffect(() => {
+    if (!isOpen) {
+      resetStarsOnlyToggleShown();
+    }
+  }, [isOpen, resetStarsOnlyToggleShown]);
+
+  useEffect(() => {
+    if (marketCraftableGiftsCount && !isMarketLoading) {
+      markStarsOnlyToggleShown();
+    }
+  }, [marketCraftableGiftsCount, isMarketLoading, markStarsOnlyToggleShown]);
 
   const hasMyGifts = availableMyGifts.length > 0;
   const hasMarketGifts = availableMarketGifts.length > 0;
@@ -244,7 +272,8 @@ const GiftCraftSelectModal = ({ modal, craftModal }: OwnProps & StateProps) => {
   const hasMarketFilter = Boolean(
     marketFilter?.modelAttributes?.length
     || marketFilter?.patternAttributes?.length
-    || marketFilter?.backdropAttributes?.length,
+    || marketFilter?.backdropAttributes?.length
+    || marketFilter?.starsOnly,
   );
   const shouldShowMarketSection = isMarketDataLoaded && (hasMarketGifts || hasMarketFilter || isMarketLoading);
 
@@ -354,6 +383,18 @@ const GiftCraftSelectModal = ({ modal, craftModal }: OwnProps & StateProps) => {
           )}
         </InfiniteScroll>
       </div>
+      {shouldShowMarketSection && (
+        <Checkbox
+          className={buildClassName(
+            styles.starsOnlyToggle,
+            wasStarsOnlyToggleShown && styles.starsOnlyToggleVisible,
+          )}
+          label={lang('GiftResaleStarsOnly')}
+          checked={isStarsOnly}
+          isRound
+          onCheck={handleStarsOnlyChange}
+        />
+      )}
     </Modal>
   );
 };

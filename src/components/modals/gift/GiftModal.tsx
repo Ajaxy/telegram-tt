@@ -15,7 +15,7 @@ import type {
   ApiStarsAmount,
 } from '../../../api/types';
 import type { TabState } from '../../../global/types';
-import type { StarGiftCategory } from '../../../types';
+import type { ResaleGiftsFilterOptions, StarGiftCategory } from '../../../types';
 
 import { STARS_CURRENCY_CODE } from '../../../config';
 import { getUserFullName } from '../../../global/helpers';
@@ -38,6 +38,7 @@ import Avatar from '../../common/Avatar';
 import InteractiveSparkles from '../../common/InteractiveSparkles';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
+import Checkbox from '../../ui/Checkbox';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Modal from '../../ui/Modal';
 import Transition from '../../ui/Transition';
@@ -69,6 +70,7 @@ type StateProps = {
   resaleGiftsCount?: number;
   areResaleGiftsLoading?: boolean;
   selectedResaleGift?: ApiStarGift;
+  resaleFilter?: ResaleGiftsFilterOptions;
   tabId: number;
 };
 
@@ -93,6 +95,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   resaleGiftsCount,
   areResaleGiftsLoading,
   selectedResaleGift,
+  resaleFilter,
   tabId,
 }) => {
   const {
@@ -103,6 +106,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
     openGiftInMarket,
     closeResaleGiftsMarket,
     loadMyUniqueGifts,
+    updateResaleGiftsFilter,
     openGiftTransferConfirmModal,
     setGiftModalSelectedGift,
   } = getActions();
@@ -127,6 +131,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
   const [isGiftScreenHeaderForStarGifts, setIsGiftScreenHeaderForStarGifts] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<StarGiftCategory>('all');
   const [isCategoryListPinned, pinCategoryList, unpinCategoryList] = useFlag(false);
+  const [wasStarsOnlyToggleShown, markStarsOnlyToggleShown, resetStarsOnlyToggleShown] = useFlag(false);
   const triggerSparklesRef = useRef<(() => void) | undefined>();
 
   const areAllGiftsDisallowed = useMemo(() => {
@@ -459,6 +464,28 @@ const GiftModal: FC<OwnProps & StateProps> = ({
     triggerSparklesRef.current = animate;
   });
 
+  const handleStarsOnlyChange = useLastCallback((isChecked: boolean) => {
+    updateResaleGiftsFilter({
+      filter: {
+        ...resaleFilter,
+        sortType: resaleFilter?.sortType || 'byDate',
+        starsOnly: isChecked,
+      },
+    });
+  });
+
+  const isStarsOnly = Boolean(resaleFilter?.starsOnly);
+
+  useEffect(() => {
+    resetStarsOnlyToggleShown();
+  }, [selectedResaleGift, resetStarsOnlyToggleShown]);
+
+  useEffect(() => {
+    if (resaleGiftsCount && !areResaleGiftsLoading) {
+      markStarsOnlyToggleShown();
+    }
+  }, [resaleGiftsCount, areResaleGiftsLoading, markStarsOnlyToggleShown]);
+
   function renderMainScreen() {
     return (
       <div ref={scrollerRef} className={buildClassName(styles.main, 'custom-scroll')} onScroll={handleScroll}>
@@ -609,6 +636,18 @@ const GiftModal: FC<OwnProps & StateProps> = ({
           />
         )}
       </Transition>
+      {isResaleScreen && (
+        <Checkbox
+          className={buildClassName(
+            styles.starsOnlyToggle,
+            wasStarsOnlyToggleShown && styles.starsOnlyToggleVisible,
+          )}
+          label={lang('GiftResaleStarsOnly')}
+          checked={isStarsOnly}
+          isRound
+          onCheck={handleStarsOnlyChange}
+        />
+      )}
     </Modal>
   );
 };
@@ -641,6 +680,7 @@ export default memo(withGlobal<OwnProps>((global, { modal }): Complete<StateProp
     resaleGiftsCount,
     areResaleGiftsLoading,
     selectedResaleGift,
+    resaleFilter: resaleGifts.filter,
     tabId: selectTabState(global).id,
   };
 })(GiftModal));

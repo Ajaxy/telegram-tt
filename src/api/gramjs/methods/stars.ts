@@ -129,10 +129,9 @@ export async function fetchResaleGifts({
     attributesHash: attributesHash ? BigInt(attributesHash) : DEFAULT_PRIMITIVES.BIGINT,
     attributes: buildInputResaleGiftsAttributes(attributes),
     forCraft: forCraft || undefined,
-    ...(filter && {
-      sortByPrice: filter.sortType === 'byPrice' || undefined,
-      sortByNum: filter.sortType === 'byNumber' || undefined,
-    } satisfies Partial<GetResaleStarGifts>),
+    sortByPrice: filter?.sortType === 'byPrice' || undefined,
+    sortByNum: filter?.sortType === 'byNumber' || undefined,
+    starsOnly: filter?.starsOnly || undefined,
   };
 
   const result = await invokeRequest(new GramJs.payments.GetResaleStarGifts(params));

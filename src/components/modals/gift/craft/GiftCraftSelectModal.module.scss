@@ -142,3 +142,39 @@
   padding-top: 5rem;
   padding-bottom: 12rem;
 }
+
+.starsOnlyToggle {
+  position: absolute;
+  z-index: 1;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(1rem);
+
+  min-width: 17rem;
+  min-height: auto;
+  padding: 0.5rem 1rem 0.5rem 3rem;
+  padding-block: 0.75rem;
+  border-radius: 1.5rem;
+
+  opacity: 0;
+  background-color: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(12px);
+
+  transition: background-color 0.15s, opacity 0.2s ease, transform 0.2s ease;
+
+  &:active,
+  &:hover {
+    border-radius: 1.5rem !important;
+    background-color: rgba(255, 255, 255, 0.25) !important;
+  }
+
+  :global(.Checkbox-main)::before {
+    border-color: black;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+}
+
+.starsOnlyToggleVisible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}

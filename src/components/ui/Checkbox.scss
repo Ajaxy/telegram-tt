@@ -45,6 +45,18 @@
       &::before, &::after {
         border-radius: 50%;
       }
+
+      &::before {
+        background-color: transparent;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+      }
+
+      &::after {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
     }
   }
 

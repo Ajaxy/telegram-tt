@@ -26,6 +26,7 @@ export default function createMockedDialog(id: string, mockData: MockTypes): Api
     unreadCount,
     unreadMentionsCount,
     unreadReactionsCount,
+    unreadPollVotesCount: 0,
     notifySettings: new Api.PeerNotifySettings({}),
   });
 }

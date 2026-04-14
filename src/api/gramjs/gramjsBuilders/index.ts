@@ -222,13 +222,16 @@ export function buildInputPoll(pollParams: ApiNewPoll, randomId: bigint) {
     }),
     quiz: summary.quiz,
     multipleChoice: summary.multipleChoice,
+    hash: DEFAULT_PRIMITIVES.BIGINT,
   });
 
   if (!quiz) {
     return new GramJs.InputMediaPoll({ poll });
   }
 
-  const correctAnswers = quiz.correctAnswers.map(deserializeBytes);
+  const correctAnswers = quiz.correctAnswers.map((correctOption) => {
+    return summary.answers.findIndex((a) => a.option === correctOption);
+  }).filter((i) => i !== -1);
   const { solution } = quiz;
   const solutionEntities = quiz.solutionEntities ? quiz.solutionEntities.map(buildMtpMessageEntity) : [];
 
@@ -259,8 +262,11 @@ export function buildInputPollFromExisting(poll: ApiPoll, shouldClose = false) {
       closeDate: poll.summary.closeDate,
       closePeriod: poll.summary.closePeriod,
       closed: shouldClose ? true : poll.summary.closed,
+      hash: DEFAULT_PRIMITIVES.BIGINT,
     }),
-    correctAnswers: poll.results.results?.filter((o) => o.isCorrect).map((o) => deserializeBytes(o.option)),
+    correctAnswers: poll.results.results
+      ?.map((result, index) => (result.isCorrect ? index : -1))
+      .filter((i) => i !== -1),
     solution: poll.results.solution,
     solutionEntities: poll.results.solutionEntities?.map(buildMtpMessageEntity),
   });

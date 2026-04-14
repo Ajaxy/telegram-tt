@@ -2241,8 +2241,8 @@
 "GiftRibbonResale" = "resale";
 "GiftCategoryCollectibles" = "Collectibles";
 "GiftCategoryMyGifts" = "My Gifts";
-"HeaderDescriptionResaleGifts_one" = "{count} for resale";
-"HeaderDescriptionResaleGifts_other" = "{count} for resale";
+"HeaderDescriptionResaleGifts_one" = "{count} listing";
+"HeaderDescriptionResaleGifts_other" = "{count} listings";
 "GiftSortByPrice" = "Sort by Price";
 "GiftSortByNumber" = "Sort by Number";
 "ContextMenuItemSelectAll" = "Select All";
@@ -2257,6 +2257,7 @@
 "ValueGiftSortByNumber" = "Number";
 "ResellGiftsNoFound" = "No gifts found";
 "ResellGiftsClearFilters" = "Clear Filters";
+"GiftResaleStarsOnly" = "Show listings for stars only";
 "SendInStandardQuality" = "Send In Standard Quality";
 "SendInHighQuality" = "Send In High Quality";
 "MonoforumBadge" = "DIRECT";

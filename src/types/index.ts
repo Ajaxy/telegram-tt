@@ -746,6 +746,7 @@ export type ResaleGiftsFilterOptions = {
   modelAttributes?: StarGiftAttributeIdModel[];
   patternAttributes?: ApiStarGiftAttributeIdPattern[];
   backdropAttributes?: ApiStarGiftAttributeIdBackdrop[];
+  starsOnly?: boolean;
 };
 
 export type SendMessageParams = {

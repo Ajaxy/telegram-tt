@@ -10,8 +10,7 @@ import type {
 } from '../../../api/types';
 import type { ResaleGiftsFilterOptions } from '../../../types';
 
-import { selectTabState,
-} from '../../../global/selectors';
+import { selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { RESALE_GIFTS_LIMIT } from '../../../limits';
 
@@ -63,7 +62,7 @@ const GiftModalResaleScreen: FC<OwnProps & StateProps> = ({
   }, [resellGifts]);
 
   const hasFilter = Boolean(filter?.modelAttributes?.length
-    || filter?.patternAttributes?.length || filter?.backdropAttributes?.length);
+    || filter?.patternAttributes?.length || filter?.backdropAttributes?.length || filter?.starsOnly);
 
   const handleLoadMoreResellGifts = useLastCallback(() => {
     if (gift) {
@@ -91,6 +90,7 @@ const GiftModalResaleScreen: FC<OwnProps & StateProps> = ({
       modelAttributes: [],
       backdropAttributes: [],
       patternAttributes: [],
+      starsOnly: undefined,
     } });
   });
 

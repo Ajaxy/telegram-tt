@@ -766,10 +766,12 @@ export function buildMessageStoryData(media: GramJs.TypeMessageMedia): ApiMessag
 
 export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): ApiPoll {
   const { id, answers: rawAnswers } = poll;
-  const answers = rawAnswers.map((answer) => ({
-    text: buildApiFormattedText(answer.text),
-    option: serializeBytes(answer.option),
-  }));
+  const answers = rawAnswers
+    .filter((answer): answer is GramJs.PollAnswer => answer instanceof GramJs.PollAnswer)
+    .map((answer) => ({
+      text: buildApiFormattedText(answer.text),
+      option: serializeBytes(answer.option),
+    }));
 
   return {
     mediaType: 'poll',
@@ -851,7 +853,7 @@ export function buildPollResults(pollResults: GramJs.PollResults): ApiPoll['resu
     isChosen: chosen,
     isCorrect: correct,
     option: serializeBytes(option),
-    votersCount: voters,
+    votersCount: voters ?? 0,
   }));
 
   return {

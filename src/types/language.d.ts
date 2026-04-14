@@ -1696,6 +1696,7 @@ export interface LangPair {
   'ValueGiftSortByNumber': undefined;
   'ResellGiftsNoFound': undefined;
   'ResellGiftsClearFilters': undefined;
+  'GiftResaleStarsOnly': undefined;
   'SendInStandardQuality': undefined;
   'SendInHighQuality': undefined;
   'MonoforumBadge': undefined;
