@@ -1,5 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
@@ -65,7 +63,7 @@ const WEEKDAY_LETTERS = [
   'lng_weekday7',
 ];
 
-const CalendarModal: FC<OwnProps & StateProps> = ({
+const CalendarModal = ({
   selectedAt,
   minAt,
   maxAt,
@@ -84,7 +82,7 @@ const CalendarModal: FC<OwnProps & StateProps> = ({
   onSubmit,
   onDateChange,
   onSecondButtonClick,
-}) => {
+}: OwnProps & StateProps) => {
   const { showNotification } = getActions();
 
   const menuRef = useRef<HTMLDivElement>();
@@ -214,20 +212,32 @@ const CalendarModal: FC<OwnProps & StateProps> = ({
     handleContextMenu(e);
   });
 
-  function handlePrevMonth() {
+  function handlePrevMonth(e: React.MouseEvent) {
     setCurrentMonthAndYear((d) => {
       const dateCopy = new Date(d);
-      dateCopy.setMonth(dateCopy.getMonth() - 1);
-
+      if (e.shiftKey) {
+        dateCopy.setFullYear(dateCopy.getFullYear() - 1);
+        if (dateCopy < minDate) {
+          return new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+        }
+      } else {
+        dateCopy.setMonth(dateCopy.getMonth() - 1);
+      }
       return dateCopy;
     });
   }
 
-  function handleNextMonth() {
+  function handleNextMonth(e: React.MouseEvent) {
     setCurrentMonthAndYear((d) => {
       const dateCopy = new Date(d);
-      dateCopy.setMonth(dateCopy.getMonth() + 1);
-
+      if (e.shiftKey) {
+        dateCopy.setFullYear(dateCopy.getFullYear() + 1);
+        if (dateCopy > maxDate) {
+          return new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+        }
+      } else {
+        dateCopy.setMonth(dateCopy.getMonth() + 1);
+      }
       return dateCopy;
     });
   }
@@ -388,7 +398,7 @@ const CalendarModal: FC<OwnProps & StateProps> = ({
             color="translucent"
             iconName="previous"
             disabled={shouldDisablePrevMonth}
-            onClick={!shouldDisablePrevMonth ? handlePrevMonth : undefined}
+            onClick={shouldDisablePrevMonth ? undefined : handlePrevMonth}
           />
 
           <Button
@@ -397,7 +407,7 @@ const CalendarModal: FC<OwnProps & StateProps> = ({
             color="translucent"
             iconName="next"
             disabled={shouldDisableNextMonth}
-            onClick={!shouldDisableNextMonth ? handleNextMonth : undefined}
+            onClick={shouldDisableNextMonth ? undefined : handleNextMonth}
           />
         </div>
       </div>
