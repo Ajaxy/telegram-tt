@@ -9,7 +9,8 @@ import type { ApiPasskey } from '../../../api/types';
 
 import { IS_WEBAUTHN_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { formatPastDatetime } from '../../../util/dates/oldDateFormat';
+import { type LangFn } from '../../../util/localization';
+import { formatDateTime, getCalendarDayDiff, secondsToDate } from '../../../util/localization/dateFormat';
 import { getNextArrowReplacement } from '../../../util/localization/format';
 import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import { REM } from '../../common/helpers/mediaDimensions';
@@ -110,12 +111,12 @@ const SettingsPasskeys = ({
         )}
       >
         <div className="multiline-item full-size" dir="auto">
-          <span className="date">{formatPastDatetime(lang, date)}</span>
+          <span className="date">{formatDate(lang, secondsToDate(date))}</span>
           <span className="title">{name || lang('SettingsPasskeyFallbackTitle')}</span>
           {Boolean(lastUsageDate) && (
             <span className="subtitle">
               {lang('SettingsPasskeyUsedAt', {
-                date: formatPastDatetime(lang, lastUsageDate),
+                date: formatDate(lang, secondsToDate(lastUsageDate)),
               })}
             </span>
           )}
@@ -175,6 +176,17 @@ const SettingsPasskeys = ({
     </div>
   );
 };
+
+function formatDate(
+  lang: LangFn, date: Date,
+) {
+  const anchorDate = new Date();
+  const calendarDayDiff = getCalendarDayDiff(date, anchorDate);
+  if (Math.abs(calendarDayDiff) > 28) {
+    return formatDateTime(lang, date);
+  }
+  return formatDateTime(lang, date, { relative: 'auto' });
+}
 
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {

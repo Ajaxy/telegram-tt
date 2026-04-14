@@ -28,7 +28,6 @@ export interface FormatDateTimeOptions {
   anchorDate?: Date;
   includeYear?: boolean;
   includeDay?: boolean;
-  maxRelativeDays?: number;
 }
 
 export interface FormatMessageListDateOptions {
@@ -51,9 +50,7 @@ export function resetDateFormatCache() {
 export function formatDateTime(lang: LangFn, date: Date, options: FormatDateTimeOptions = {}) {
   if (options.relative) {
     const relative = formatRelativeDateTime(
-      lang, date, options.anchorDate, options.relative, {
-        maxRelativeDays: options.maxRelativeDays,
-      });
+      lang, date, options.anchorDate, options.relative);
     if (relative) {
       return relative;
     }
@@ -118,24 +115,18 @@ function formatRelativeDateTime(
   targetDate: Date,
   anchorDate: Date = new Date(),
   type: RelativeType = 'numeric',
-  options?: Pick<FormatDateTimeOptions, 'maxRelativeDays'>,
 ) {
   if (type === 'auto' && Math.abs(targetDate.getTime() - anchorDate.getTime()) < 60 * 1000) {
     return lang('RightNow');
   }
 
-  const { maxRelativeDays } = options || {};
-  const relativePart = getRelativePart(targetDate.getTime(), anchorDate.getTime(), maxRelativeDays);
-  if (!relativePart) {
-    return undefined;
-  }
+  const relativePart = getRelativePart(targetDate.getTime(), anchorDate.getTime());
 
   const cacheKey = [
     'formatRelativeDateTime',
     lang.code,
     type,
     targetDate.getTime() - anchorDate.getTime(),
-    maxRelativeDays,
     relativePart.unit,
     relativePart.value,
   ].join(':');
@@ -193,12 +184,9 @@ function buildAbsoluteFormatterOptions(lang: LangFn, options: FormatDateTimeOpti
   return formatterOptions;
 }
 
-function getRelativePart(targetTime: number, anchorTime: number, maxRelativeDays?: number): RelativePart | undefined {
+function getRelativePart(targetTime: number, anchorTime: number): RelativePart {
   const diffInSeconds = Math.trunc((targetTime - anchorTime) / 1000);
   const absDiffInSeconds = Math.abs(diffInSeconds);
-  if (maxRelativeDays && absDiffInSeconds >= maxRelativeDays * DAY_IN_SECONDS) {
-    return undefined;
-  }
 
   if (absDiffInSeconds < 60 * 60) {
     return { unit: 'minute' as const, value: Math.trunc(diffInSeconds / 60) };
@@ -280,7 +268,7 @@ export function secondsToDate(seconds: number) {
   return new Date(seconds * 1000);
 }
 
-function getCalendarDayDiff(targetDate: Date, anchorDate: Date) {
+export function getCalendarDayDiff(targetDate: Date, anchorDate: Date) {
   return Math.trunc(
     (
       Date.UTC(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate())
