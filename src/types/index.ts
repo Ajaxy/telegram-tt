@@ -105,6 +105,11 @@ export interface IDocumentGroup {
 
 export type ThreadId = string | number;
 
+export type ForwardTarget = {
+  chatId: string;
+  topicId?: number;
+};
+
 export type ThemeKey = 'light' | 'dark';
 export type AnimationLevel = 0 | 1 | 2;
 export type FoldersPosition = 'top' | 'left';

@@ -4,7 +4,8 @@ import {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { ThreadId } from '../../types';
+import type { ForwardTarget, ThreadId } from '../../types';
+import type { ChatSelectionKey } from '../../util/keys/chatSelectionKey';
 
 import { getChatTitle, getUserFirstOrLastName } from '../../global/helpers';
 import {
@@ -78,7 +79,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
 
   const renderingIsStory = usePreviousDeprecated(isStory, true);
   const [isShown, markIsShown, unmarkIsShown] = useFlag();
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<ChatSelectionKey[]>([]);
   const [caption, setCaption] = useState('');
   const [isPaymentConfirmOpen, openPaymentConfirm, closePaymentConfirm] = useFlag();
   const [shouldAutoApprove, setShouldAutoApprove] = useState(shouldPaidMessageAutoApprove);
@@ -90,20 +91,20 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
     if (!selectedIds.length) return { paidChatsCount: 0, totalStars: 0, totalMessages: 0 };
 
     const global = getGlobal();
-    let paidChatsCount = 0;
+    const paidChatIds = new Set<string>();
     let totalStars = 0;
     const hasCaption = caption.trim().length > 0;
     const totalMessages = messageCount + (hasCaption ? 1 : 0);
 
-    for (const chatId of selectedIds) {
+    for (const { peerId: chatId } of selectedIds) {
       const paidStars = selectPeerPaidMessagesStars(global, chatId);
       if (paidStars) {
-        paidChatsCount++;
+        paidChatIds.add(chatId);
         totalStars += paidStars * totalMessages;
       }
     }
 
-    return { paidChatsCount, totalStars, totalMessages };
+    return { paidChatsCount: paidChatIds.size, totalStars, totalMessages };
   }, [selectedIds, messageCount, caption]);
 
   const canCopyLink = useMemo(() => {
@@ -179,7 +180,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
     exitForwardMode();
   }, [exitForwardMode]);
 
-  const handleSelectedIdsChange = useLastCallback((ids: string[]) => {
+  const handleSelectedIdsChange = useLastCallback((ids: ChatSelectionKey[]) => {
     setSelectedIds(ids);
   });
 
@@ -196,7 +197,8 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
     if (!selectedIds.length) return;
 
     if (selectedIds.length === 1) {
-      setForwardChatOrTopic({ chatId: selectedIds[0] });
+      const { peerId: chatId, topicId } = selectedIds[0];
+      setForwardChatOrTopic({ chatId, topicId });
       return;
     }
 
@@ -221,7 +223,11 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
   });
 
   const executeForward = useLastCallback(() => {
-    forwardToMultipleChats({ toChatIds: selectedIds, comment: caption || undefined });
+    const targets: ForwardTarget[] = selectedIds.map(({ peerId, topicId }) => ({
+      chatId: peerId,
+      topicId,
+    }));
+    forwardToMultipleChats({ targets, comment: caption || undefined });
 
     showNotification({
       message: lang('FwdMessagesToChats', { count: selectedIds.length }, { pluralValue: selectedIds.length }),

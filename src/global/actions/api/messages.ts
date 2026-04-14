@@ -2620,6 +2620,7 @@ interface ForwardToChatOptions {
   global: GlobalState;
   fromChat: ApiChat;
   toChat: ApiChat;
+  toThreadId?: ThreadId;
   realMessages: ApiMessage[];
   serviceMessages: ApiMessage[];
   comment?: string;
@@ -2633,6 +2634,7 @@ function forwardMessagesToChat({
   global,
   fromChat,
   toChat,
+  toThreadId = MAIN_THREAD_ID,
   realMessages,
   serviceMessages,
   comment,
@@ -2642,12 +2644,21 @@ function forwardMessagesToChat({
   isCurrentUserPremium,
 }: ForwardToChatOptions) {
   const sendAs = selectSendAs(global, toChat.id);
-  const lastMessageId = selectChatLastMessageId(global, toChat.id);
+  const threadInfo = toThreadId !== MAIN_THREAD_ID ? selectThreadInfo(global, toChat.id, toThreadId) : undefined;
+  const lastMessageId = toThreadId === MAIN_THREAD_ID
+    ? selectChatLastMessageId(global, toChat.id)
+    : threadInfo?.lastMessageId;
   const messagePriceInStars = selectPeerPaidMessagesStars(global, toChat.id);
+  const targetMessageList = {
+    chatId: toChat.id,
+    threadId: toThreadId,
+    type: 'thread',
+  } as const;
 
   if (comment) {
     sendMessage(global, {
       chat: toChat,
+      messageList: targetMessageList,
       text: comment,
       sendAs,
       lastMessageId,
@@ -2664,7 +2675,7 @@ function forwardMessagesToChat({
       const forwardParams: ForwardMessagesParams = {
         fromChat,
         toChat,
-        toThreadId: MAIN_THREAD_ID,
+        toThreadId,
         messages: slice,
         isSilent: true,
         sendAs,
@@ -2687,6 +2698,7 @@ function forwardMessagesToChat({
 
     sendMessage(global, {
       chat: toChat,
+      messageList: targetMessageList,
       text,
       entities,
       sticker,
@@ -2699,7 +2711,7 @@ function forwardMessagesToChat({
 }
 
 addActionHandler('forwardToMultipleChats', (global, actions, payload): ActionReturnType => {
-  const { toChatIds, comment, tabId = getCurrentTabId() } = payload;
+  const { targets, comment, tabId = getCurrentTabId() } = payload;
 
   const {
     fromChatId, messageIds, withMyScore, noAuthors, noCaptions,
@@ -2725,14 +2737,15 @@ addActionHandler('forwardToMultipleChats', (global, actions, payload): ActionRet
     return;
   }
 
-  for (const toChatId of toChatIds) {
-    const toChat = selectChat(global, toChatId);
+  for (const { chatId, topicId } of targets) {
+    const toChat = selectChat(global, chatId);
     if (!toChat) continue;
 
     forwardMessagesToChat({
       global,
       fromChat,
       toChat,
+      toThreadId: topicId || MAIN_THREAD_ID,
       realMessages: forwardableRealMessages,
       serviceMessages,
       comment,

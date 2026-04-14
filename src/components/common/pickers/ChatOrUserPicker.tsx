@@ -22,6 +22,11 @@ import {
 } from '../../../global/selectors';
 import { selectAnimationLevel } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
+import {
+  buildChatSelectionKey,
+  type ChatSelectionKey,
+  includesChatSelectionKey,
+} from '../../../util/keys/chatSelectionKey';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
 import { REM } from '../helpers/mediaDimensions';
 import renderText from '../helpers/renderText';
@@ -60,7 +65,7 @@ export type OwnProps = {
   renderSearchRow?: (props: SearchRowRenderProps) => TeactNode;
   footer?: TeactNode;
   viewportFooter?: TeactNode;
-  selectedIds?: string[];
+  selectedIds?: ChatSelectionKey[];
   loadMore?: NoneToVoidFunction;
   onSearchChange: (search: string) => void;
   onSelectChatOrUser: (chatOrUserId: string, threadId?: ThreadId) => void;
@@ -237,10 +242,10 @@ const ChatOrUserPicker = ({
     const isForum = chat?.isForum;
 
     const isSelf = peer && !isApiPeerChat(peer) ? peer.isSelf : undefined;
-    const isSelected = selectedIds?.includes(id);
+    const isSelected = selectedIds && includesChatSelectionKey(selectedIds, buildChatSelectionKey(id));
 
     const selectedTopicsCount = isForum && selectedIds
-      ? selectedIds.filter((selId) => selId.startsWith(`${id}:`)).length
+      ? selectedIds.filter((key) => key.peerId === id && key.topicId !== undefined).length
       : 0;
     const hasSelectedTopics = selectedTopicsCount > 0;
 
@@ -342,8 +347,8 @@ const ChatOrUserPicker = ({
             onKeyDown={handleTopicKeyDown}
           >
             {topicIds.map((topicId, i) => {
-              const selectionId = `${forumId}:${topicId}`;
-              const isTopicSelected = selectedIds?.includes(selectionId);
+              const chatSelectionKey = buildChatSelectionKey(forumId!, topicId);
+              const isTopicSelected = selectedIds && includesChatSelectionKey(selectedIds, chatSelectionKey);
 
               const topicCheckboxElement = isMultiSelect ? (
                 <div className={buildClassName('picker-checkbox', isTopicSelected && 'selected')}>

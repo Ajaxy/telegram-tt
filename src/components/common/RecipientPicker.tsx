@@ -22,6 +22,13 @@ import {
 import { selectCurrentLimit } from '../../global/selectors/limits';
 import buildClassName from '../../util/buildClassName';
 import { unique } from '../../util/iteratees';
+import {
+  areChatSelectionKeysEqual,
+  buildChatSelectionKey,
+  type ChatSelectionKey,
+  getChatSelectionKeyHash,
+  includesChatSelectionKey,
+} from '../../util/keys/chatSelectionKey';
 import sortChatIds from './helpers/sortChatIds';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
@@ -52,7 +59,7 @@ export type OwnProps = {
   viewportFooter?: TeactNode;
   loadMore?: NoneToVoidFunction;
   onSelectRecipient: (peerId: string, threadId?: ThreadId) => void;
-  onSelectedIdsChange?: (ids: string[]) => void;
+  onSelectedIdsChange?: (ids: ChatSelectionKey[]) => void;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
 };
@@ -100,9 +107,9 @@ const RecipientPicker = ({
   const lang = useLang();
 
   const [search, setSearch] = useState('');
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [removingIds, setRemovingIds] = useState<string[]>([]);
-  const [appearingIds, setAppearingIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<ChatSelectionKey[]>([]);
+  const [removingIds, setRemovingIds] = useState<ChatSelectionKey[]>([]);
+  const [appearingIds, setAppearingIds] = useState<ChatSelectionKey[]>([]);
   const selectedIdsRef = useStateRef(selectedIds);
   const removingIdsRef = useStateRef(removingIds);
   const appearingIdsRef = useStateRef(appearingIds);
@@ -134,46 +141,46 @@ const RecipientPicker = ({
     setActiveFolderIndex(index);
   });
 
-  const updateSelectedIds = useLastCallback((newIds: string[], newlyAddedId?: string) => {
+  const updateSelectedIds = useLastCallback((newIds: ChatSelectionKey[], newlyAddedKey?: ChatSelectionKey) => {
     setSelectedIds(newIds);
     onSelectedIdsChange?.(newIds);
 
-    if (newlyAddedId && selectCanAnimateInterface(getGlobal())) {
-      setAppearingIds([...appearingIdsRef.current, newlyAddedId]);
+    if (newlyAddedKey && selectCanAnimateInterface(getGlobal())) {
+      setAppearingIds([...appearingIdsRef.current, newlyAddedKey]);
       setTimeout(() => {
-        setAppearingIds(appearingIdsRef.current.filter((id) => id !== newlyAddedId));
+        setAppearingIds(appearingIdsRef.current.filter((key) => !areChatSelectionKeysEqual(key, newlyAddedKey)));
       }, 200);
     }
   });
 
-  const handleRemoveSelected = useLastCallback((selectionId: string) => {
-    if (removingIdsRef.current.includes(selectionId)) return;
+  const handleRemoveSelected = useLastCallback((selectionKey: ChatSelectionKey) => {
+    if (includesChatSelectionKey(removingIdsRef.current, selectionKey)) return;
 
     const canAnimate = selectCanAnimateInterface(getGlobal());
     if (!canAnimate) {
-      const newIds = selectedIdsRef.current.filter((id) => id !== selectionId);
+      const newIds = selectedIdsRef.current.filter((key) => !areChatSelectionKeysEqual(key, selectionKey));
       setSelectedIds(newIds);
       onSelectedIdsChange?.(newIds);
       return;
     }
 
-    setRemovingIds([...removingIdsRef.current, selectionId]);
+    setRemovingIds([...removingIdsRef.current, selectionKey]);
 
     setTimeout(() => {
-      setRemovingIds(removingIdsRef.current.filter((id) => id !== selectionId));
-      const newIds = selectedIdsRef.current.filter((id) => id !== selectionId);
+      setRemovingIds(removingIdsRef.current.filter((key) => !areChatSelectionKeysEqual(key, selectionKey)));
+      const newIds = selectedIdsRef.current.filter((key) => !areChatSelectionKeysEqual(key, selectionKey));
       setSelectedIds(newIds);
       onSelectedIdsChange?.(newIds);
     }, 300);
   });
 
   const handleToggleSelection = useLastCallback((peerId: string, threadId?: ThreadId) => {
-    const selectionId = threadId ? `${peerId}:${threadId}` : peerId;
+    const selectionKey = buildChatSelectionKey(peerId, threadId ? Number(threadId) : undefined);
 
-    if (selectedIds.includes(selectionId)) {
-      handleRemoveSelected(selectionId);
+    if (includesChatSelectionKey(selectedIds, selectionKey)) {
+      handleRemoveSelected(selectionKey);
     } else {
-      updateSelectedIds([...selectedIds, selectionId], selectionId);
+      updateSelectedIds([...selectedIds, selectionKey], selectionKey);
     }
   });
 
@@ -262,19 +269,8 @@ const RecipientPicker = ({
 
   const hasSelectedChips = isMultiSelect && selectedIds.length > 0;
 
-  const parseSelectionId = useLastCallback((selectionId: string): { peerId: string; topicId?: number } => {
-    const colonIndex = selectionId.indexOf(':');
-    if (colonIndex === -1) {
-      return { peerId: selectionId };
-    }
-    return {
-      peerId: selectionId.substring(0, colonIndex),
-      topicId: Number(selectionId.substring(colonIndex + 1)),
-    };
-  });
-
-  const getChipTitle = useLastCallback((selectionId: string): string | undefined => {
-    const { peerId, topicId } = parseSelectionId(selectionId);
+  const getChipTitle = useLastCallback((selectionKey: ChatSelectionKey): string | undefined => {
+    const { peerId, topicId } = selectionKey;
     if (!topicId) return undefined;
 
     const global = getGlobal();
@@ -309,15 +305,16 @@ const RecipientPicker = ({
     return (
       <div className="search-row-with-chips">
         <div className="chips-and-search-scroll no-scrollbar">
-          {selectedIds.map((selectionId) => {
-            const { peerId } = parseSelectionId(selectionId);
-            const chipTitle = getChipTitle(selectionId);
-            const isAppearing = appearingIds.includes(selectionId);
-            const isRemoving = removingIds.includes(selectionId);
+          {selectedIds.map((selectionKey) => {
+            const { peerId } = selectionKey;
+            const chipTitle = getChipTitle(selectionKey);
+            const isAppearing = includesChatSelectionKey(appearingIds, selectionKey);
+            const isRemoving = includesChatSelectionKey(removingIds, selectionKey);
+            const keyHash = getChatSelectionKeyHash(selectionKey);
 
             return (
               <div
-                key={selectionId}
+                key={keyHash}
                 className={buildClassName(
                   'picker-chip-wrapper',
                   isAppearing && 'picker-chip-appear',
@@ -332,7 +329,7 @@ const RecipientPicker = ({
                   canClose
                   className="picker-chip"
                   itemClassName="picker-chip-name"
-                  clickArg={selectionId}
+                  clickArg={selectionKey}
                   onClick={handleRemoveSelected}
                 />
               </div>
@@ -356,6 +353,8 @@ const RecipientPicker = ({
     );
   }, [hasSelectedChips, selectedIds, appearingIds, removingIds]);
 
+  const selectedPeerIds = useMemo(() => selectedIds.map((key) => key.peerId), [selectedIds]);
+
   const subheaderContent = useMemo(() => {
     const hasRecentContacts = recentContactIds.length > 0 && !search;
     const hasFolderTabs = shouldRenderFolders;
@@ -368,7 +367,7 @@ const RecipientPicker = ({
           <PickerRecentContacts
             contactIds={recentContactIds}
             currentUserId={currentUserId}
-            selectedIds={isMultiSelect ? selectedIds : undefined}
+            selectedIds={isMultiSelect ? selectedPeerIds : undefined}
             className={styles.recentContacts}
             onSelect={handleSelect}
           />
@@ -389,7 +388,7 @@ const RecipientPicker = ({
     currentUserId,
     handleSelect,
     isMultiSelect,
-    selectedIds,
+    selectedPeerIds,
     folderTabs,
     activeFolderIndex,
     handleSwitchFolderIndex,

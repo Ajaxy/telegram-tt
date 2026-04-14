@@ -78,6 +78,7 @@ import type {
   CallSound,
   ChatListType,
   ConfettiParams,
+  ForwardTarget,
   GiftProfileFilterOptions,
   GlobalSearchContent,
   IAnchorPosition,
@@ -2024,7 +2025,7 @@ export interface ActionPayloads {
   exitForwardMode: WithTabId | undefined;
   changeRecipient: WithTabId | undefined;
   forwardToMultipleChats: {
-    toChatIds: string[];
+    targets: ForwardTarget[];
     comment?: string;
   } & WithTabId;
   forwardToSavedMessages: {
