@@ -97,6 +97,7 @@ const SANDBOX_ATTRIBUTES = [
   'allow-popups',
   'allow-forms',
   'allow-modals',
+  'allow-same-origin',
   'allow-storage-access-by-user-activation',
 ].join(' ');
 

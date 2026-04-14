@@ -206,6 +206,8 @@ export default defineConfig(
       '@eslint-react/no-missing-key': 'off',
       '@eslint-react/no-nested-component-definitions': 'off',
       '@eslint-react/no-unused-props': 'off',
+      '@eslint-react/dom-no-unsafe-iframe-sandbox': 'off',
+      '@eslint-react/dom/no-unsafe-iframe-sandbox': 'off',
       '@eslint-react/no-leaked-conditional-rendering': 'error',
     },
     plugins: {
