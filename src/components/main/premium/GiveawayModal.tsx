@@ -423,14 +423,6 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
     setSelectedChannelIds(newSelectedIds);
   });
 
-  const handleShouldShowWinnersChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setShouldShowWinners(e.target.checked);
-  });
-
-  const handleShouldShowPrizesChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setShouldShowPrizes(e.target.checked);
-  });
-
   const onClickActionHandler = useLastCallback(() => {
     openCountryPickerModal();
   });
@@ -600,7 +592,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
             <Switcher
               label={lang('BoostingGiveawayAdditionalPrizes')}
               checked={shouldShowPrizes}
-              onChange={handleShouldShowPrizesChange}
+              onCheck={setShouldShowPrizes}
             />
           </div>
 
@@ -650,7 +642,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
             <Switcher
               label={lang('BoostingGiveawayAdditionalPrizes')}
               checked={shouldShowWinners}
-              onChange={handleShouldShowWinnersChange}
+              onCheck={setShouldShowWinners}
             />
           </div>
         </div>

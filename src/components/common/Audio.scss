@@ -119,8 +119,8 @@
     .icon-view-once,
     .media-loading {
       --color-primary: var(--color-text-green);
-      --color-primary-shade: var(--color-green);
-      --color-primary-shade-darker: var(--color-green-darker);
+      --color-primary-shade: var(--color-active);
+      --color-primary-shade-darker: var(--color-active-darker);
       --color-white: var(--color-background-own);
 
       .theme-dark & {

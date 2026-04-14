@@ -1,0 +1,139 @@
+@layer ui.input {
+  .control {
+    display: grid;
+    grid-template-areas: "input label";
+    grid-template-columns: auto 1fr;
+    flex-grow: 1;
+    column-gap: 1rem;
+    align-items: center;
+
+    &:has(> .controlDescription) {
+      grid-template-areas: "input label" "input desc";
+    }
+
+    &:has(> .controlAfter) {
+      grid-template-areas: "input label after";
+      grid-template-columns: auto 1fr auto;
+
+      &:has(> .controlDescription) {
+        grid-template-areas: "input label after" "input desc after";
+      }
+    }
+
+    &:has(> .controlBefore) {
+      grid-template-areas: "input before label";
+      grid-template-columns: auto auto 1fr;
+
+      &:has(> .controlDescription) {
+        grid-template-areas: "input before label" "input before desc";
+      }
+    }
+
+    &:has(> .controlBefore):has(> .controlAfter) {
+      grid-template-areas: "input before label after";
+      grid-template-columns: auto auto 1fr auto;
+
+      &:has(> .controlDescription) {
+        grid-template-areas: "input before label after" "input before desc after";
+      }
+    }
+
+    // --- inputEnd: input at end ---
+    &.inputEnd {
+      grid-template-areas: "label input";
+      grid-template-columns: 1fr auto;
+
+      &:has(> .controlDescription) {
+        grid-template-areas: "label input" "desc input";
+      }
+
+      &:has(> .controlAfter) {
+        grid-template-areas: "label after input";
+        grid-template-columns: 1fr auto auto;
+
+        &:has(> .controlDescription) {
+          grid-template-areas: "label after input" "desc after input";
+        }
+      }
+
+      &:has(> .controlBefore) {
+        grid-template-areas: "before label input";
+        grid-template-columns: auto 1fr auto;
+
+        &:has(> .controlDescription) {
+          grid-template-areas: "before label input" "before desc input";
+        }
+      }
+
+      &:has(> .controlBefore):has(> .controlAfter) {
+        grid-template-areas: "before label after input";
+        grid-template-columns: auto 1fr auto auto;
+
+        &:has(> .controlDescription) {
+          grid-template-areas: "before label after input" "before desc after input";
+        }
+      }
+    }
+
+    &:has(> .controlDescription) > .controlLabel {
+      align-self: end;
+    }
+
+    &:has(> .controlDescription) > .input,
+    &:has(> .controlDescription) > .spinner {
+      transform: translateY(50%);
+      grid-row: 1;
+      align-self: end;
+    }
+
+    :global(label) {
+      margin-bottom: 0;
+    }
+  }
+
+  .input {
+    grid-area: input;
+    align-self: center;
+  }
+
+  .spinner {
+    --spinner-size: 1.25rem;
+
+    grid-area: input;
+    align-self: center;
+  }
+
+  .controlLabel {
+    cursor: var(--custom-cursor, pointer);
+
+    grid-area: label;
+    align-self: center;
+
+    line-height: 1.25rem;
+    overflow-wrap: anywhere;
+  }
+
+  .controlDescription {
+    cursor: inherit;
+
+    grid-area: desc;
+    align-self: start;
+
+    margin-top: 0.125rem;
+
+    font-size: 0.875rem;
+    line-height: 1rem;
+    color: var(--color-text-secondary);
+    overflow-wrap: anywhere;
+  }
+
+  .controlBefore {
+    grid-area: before;
+    align-self: center;
+  }
+
+  .controlAfter {
+    grid-area: after;
+    align-self: center;
+  }
+}

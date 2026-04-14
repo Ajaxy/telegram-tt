@@ -1,8 +1,8 @@
-import type { ChangeEvent } from 'react';
-import type { FC } from '../../lib/teact/teact';
-import { memo, useCallback } from '../../lib/teact/teact';
+import { memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+
+import useLastCallback from '../../hooks/useLastCallback';
 
 import './Switcher.scss';
 
@@ -15,11 +15,10 @@ type OwnProps = {
   disabled?: boolean;
   inactive?: boolean;
   noAnimation?: boolean;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onCheck?: (isChecked: boolean) => void;
 };
 
-const Switcher: FC<OwnProps> = ({
+const Switcher = ({
   id,
   name,
   value,
@@ -28,18 +27,11 @@ const Switcher: FC<OwnProps> = ({
   disabled,
   inactive,
   noAnimation,
-  onChange,
   onCheck,
-}) => {
-  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    if (onChange) {
-      onChange(e);
-    }
-
-    if (onCheck) {
-      onCheck(e.currentTarget.checked);
-    }
-  }, [onChange, onCheck]);
+}: OwnProps) => {
+  const handleChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onCheck?.(e.currentTarget.checked);
+  });
 
   const className = buildClassName(
     'Switcher',

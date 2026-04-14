@@ -30,7 +30,7 @@ import UiLoader from './common/UiLoader';
 import AppInactive from './main/AppInactive';
 import LockScreen from './main/LockScreen.async';
 import Main from './main/Main.async';
-// import Test from './test/TestDateFormat';
+// import Test from './test/FieldTest.tsx';
 import Transition from './ui/Transition';
 
 import styles from './App.module.scss';

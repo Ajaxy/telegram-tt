@@ -115,13 +115,17 @@
     --color-primary-opacity: rgba(var(--color-primary), 0.2);
     --color-primary-opacity-hover: rgba(var(--color-primary), 0.25);
     --color-primary-tint: rgba(var(--color-primary), 0.1);
-    --color-green: #{$color-green};
-    --color-green-darker: #{color.mix($color-green, $color-black, 84%)};
+    --color-active: #{$color-green};
+    --color-active-darker: #{color.mix($color-green, $color-black, 84%)};
     --color-success: #{$color-green};
 
     --accent-color: var(--color-primary);
     --accent-background-color: var(--color-primary-tint);
     --accent-background-active-color: var(--color-primary-opacity-hover);
+
+    --color-green: #{$color-green};
+    --color-green-darker: #{color.mix($color-green, $color-black, 84%)};
+    --color-green-rgb: #{toRGB($color-green)};
 
     --color-error: #{$color-error};
     --color-error-shade: #{color.mix($color-error, $color-black, 92%)};

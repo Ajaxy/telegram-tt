@@ -197,7 +197,7 @@
     --active-color: var(--color-reply-own-active);
     --max-width: 30rem;
     --accent-color: var(--color-accent-own);
-    --accent-shade-color: var(--color-green);
+    --accent-shade-color: var(--color-active);
     --secondary-color: var(--color-accent-own);
     --color-code: var(--color-code-own);
     --color-code-bg: var(--color-code-own-bg);
@@ -411,13 +411,13 @@
 
   &.is-selected {
     .message-select-control {
-      background: var(--color-green);
+      background: var(--color-active);
 
       &.group-select {
         background: transparent;
 
         &.is-selected {
-          background: var(--color-green);
+          background: var(--color-active);
         }
       }
     }
@@ -425,7 +425,7 @@
 
   .File.file-is-selected {
     .message-select-control {
-      background: var(--color-green);
+      background: var(--color-active);
     }
   }
 
@@ -488,7 +488,7 @@
 
     &.is-selected {
       .message-select-control {
-        background: var(--color-green);
+        background: var(--color-active);
       }
 
       img,
@@ -501,7 +501,7 @@
   &.is-selected,
   &.is-forwarding {
     .message-select-control {
-      background: var(--color-green);
+      background: var(--color-active);
     }
 
     .Menu .bubble {

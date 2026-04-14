@@ -279,7 +279,7 @@ function GiftComposer({
             </span>
             <Switcher
               checked={shouldPayByStars}
-              onChange={toggleShouldPayByStars}
+              inactive
               label={lang('GiftPremiumPayWithStarsAcc')}
             />
           </ListItem>
@@ -319,7 +319,7 @@ function GiftComposer({
             </span>
             <Switcher
               checked={shouldPayForUpgrade}
-              onChange={handleShouldPayForUpgradeChange}
+              inactive
               label={lang('GiftMakeUniqueAcc')}
             />
           </ListItem>
@@ -358,7 +358,7 @@ function GiftComposer({
             <span>{lang('GiftHideMyName')}</span>
             <Switcher
               checked={shouldHideName}
-              onChange={handleShouldHideNameChange}
+              inactive
               label={lang('GiftHideMyName')}
             />
           </ListItem>
