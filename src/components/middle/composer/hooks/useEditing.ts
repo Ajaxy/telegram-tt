@@ -28,6 +28,7 @@ const useEditing = (
   setHtml: (html: string) => void,
   editedMessage: ApiMessage | undefined,
   resetComposer: (shouldPreserveInput?: boolean) => void,
+  validateTextLength: (text: string) => boolean,
   chatId: string,
   threadId: ThreadId,
   type: MessageListType,
@@ -157,6 +158,10 @@ const useEditing = (
         messageIds: [editedMessage.id],
         isSchedule: type === 'scheduled',
       });
+      return;
+    }
+
+    if (text && !validateTextLength(text)) {
       return;
     }
 

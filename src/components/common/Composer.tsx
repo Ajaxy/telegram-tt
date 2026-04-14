@@ -931,11 +931,36 @@ const Composer = ({
     }
   });
 
+  const validateTextLength = useLastCallback((text: string, isAttachmentModal?: boolean) => {
+    const maxLength = isAttachmentModal ? captionLimit : maxMessageLength;
+    if (text?.length > maxLength) {
+      const extraLength = text.length - maxLength;
+      showDialog({
+        data: {
+          type: 'localized',
+          text: {
+            key: 'ErrorMessageTooLong',
+            variables: {
+              count: extraLength,
+            },
+            options: {
+              pluralValue: extraLength,
+            },
+          },
+        },
+      });
+
+      return false;
+    }
+    return true;
+  });
+
   const [handleEditComplete, handleEditCancel, shouldForceShowEditing] = useEditing(
     getHtml,
     setHtml,
     editingMessage,
     resetComposer,
+    validateTextLength,
     chatId,
     threadId,
     messageListType,
@@ -1064,30 +1089,6 @@ const Composer = ({
     if (editingMessage) {
       handleEditCancel();
     }
-  });
-
-  const validateTextLength = useLastCallback((text: string, isAttachmentModal?: boolean) => {
-    const maxLength = isAttachmentModal ? captionLimit : maxMessageLength;
-    if (text?.length > maxLength) {
-      const extraLength = text.length - maxLength;
-      showDialog({
-        data: {
-          type: 'localized',
-          text: {
-            key: 'ErrorMessageTooLong',
-            variables: {
-              count: extraLength,
-            },
-            options: {
-              pluralValue: extraLength,
-            },
-          },
-        },
-      });
-
-      return false;
-    }
-    return true;
   });
 
   const checkSlowMode = useLastCallback(() => {
