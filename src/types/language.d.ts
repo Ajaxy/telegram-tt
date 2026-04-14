@@ -1840,7 +1840,6 @@ export interface LangPair {
   'Square': undefined;
   'HEX': undefined;
   'RGB': undefined;
-  'Adjust': undefined;
   'Text': undefined;
   'ConfirmBuyGiftForTonDescription': undefined;
   'TitleGiftLocked': undefined;

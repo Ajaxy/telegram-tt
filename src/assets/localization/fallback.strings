@@ -617,7 +617,7 @@
 "BotAuthAllowMessagesInfo" = "This will allow **{bot}** to message you.";
 "BotAuthInfo" = "This login attempt came from the device above.";
 "BotAuthDevice" = "Device";
-"BotAuthSelectEmoji" = "Tap the emoji shown on your other device";
+"BotAuthSelectEmoji" = "Tap the emoji shown on your login screen";
 "BotAuthPhoneNumber" = "Phone Number";
 "BotAuthPhoneNumberText" = "**{domain}** wants to access your phone number **{phone}**.";
 "BotAuthPhoneNumberQuestion" = "Allow access?";
@@ -1628,14 +1628,14 @@
 "GiftCraftSelectYourGifts" = "Your Gifts";
 "GiftCraftSelectMarketGifts_one" = "{count} Suitable Gift on Sale";
 "GiftCraftSelectMarketGifts_other" = "{count} Suitable Gifts on Sale";
-"GiftCraftDescription" = "Add up to **4 gifts** to craft new {giftLine}";
-"GiftCraftWarning" = "If crafting fails, all selected gifts will be consumed.";
+"GiftCraftDescription" = "Add up to **4 gifts** to craft a new {giftLine}";
+"GiftCraftWarning" = "If crafting fails, these gifts will be lost.";
 "GiftCraftingTitle" = "Crafting";
 "GiftCraftFailedTitle" = "Crafting Failed";
 "GiftCraftFailedDescription_one" = "This crafting attempt was unsuccessful.\n**{count} gift** was lost.";
 "GiftCraftFailedDescription_other" = "This crafting attempt was unsuccessful.\n**{count} gifts** were lost.";
 "GiftCraftInfoTitle" = "Gift Crafting";
-"GiftCraftInfoSubtitle" = "Turn your gifts into rare, epic, uncommon and legendary versions.";
+"GiftCraftInfoSubtitle" = "Turn your gifts into rare, epic and legendary versions.";
 "GiftCraftInfoCraftTitle" = "Get Rare Models";
 "GiftCraftInfoCraftDescription" = "Select up to 4 gifts to craft a new exclusive model.";
 "GiftCraftInfoChanceTitle" = "Maximize Chances";
@@ -1692,12 +1692,12 @@
 "GiftWithdrawWait_other" = "In {days} days, you'll be able to send this collectible to any TON blockchain address outside Telegram for sale or auction.";
 "ChatGroups_one" = "{count} group";
 "ChatGroups_other" = "{count} groups";
-"StarsAmount" = "⭐️ {amount}";
+"StarsAmount" = "⭐️{amount}";
 "StarsAmountText_one" = "{amount} Star";
 "StarsAmountText_other" = "{amount} Stars";
 "AllGiftsCategory" = "All gifts";
 "PremiumGiftDescription" = "Premium";
-"SendPaidReaction" = "Send ⭐️ {amount}";
+"SendPaidReaction" = "Send ⭐️{amount}";
 "StarsPay" = "Confirm and Pay {amount}";
 "StarsReactionTerms" = "By sending Stars you agree to the {link}";
 "StarsReactionLinkText" = "Terms of Service";
@@ -1713,7 +1713,7 @@
 "StarsSubscribeInfo" = "By subscribing you agree to the {link}";
 "StarsSubscribeInfoLinkText" = "Terms of Service";
 "StarsSubscribeInfoLink" = "https://telegram.org/tos/stars";
-"StarsPerMonth" = "⭐️ {amount}/month";
+"StarsPerMonth" = "⭐️{amount}/month";
 "StarsBalance" = "Balance";
 "OpenApp" = "Open App";
 "PopularApps" = "Popular Apps";
@@ -2110,7 +2110,7 @@
 "ActionGiftStarsTitle_one" = "{amount} Star";
 "ActionGiftStarsTitle_other" = "{amount} Stars";
 "ActionGiftStarsText" = "Use Stars to unlock content and services on Telegram.";
-"TonAmount" = "💎 {amount}";
+"TonAmount" = "💎{amount}";
 "TonAmountText_one" = "{amount} TON";
 "TonAmountText_other" = "{amount} TON";
 "ActionGiftCostCrypto" = "{cryptoPrice} ({price})";
@@ -2174,7 +2174,7 @@
 "ButtonUndo" = "Undo";
 "ActionPaidOneMessageOutgoing" = "You paid {amount} to send a message";
 "ActionPaidOneMessageIncoming" = "{user} paid {amount} to send a message";
-"PaneMessagePaidMessageCharge" = "**{peer}** must pay **{amount}** for each message to you.";
+"PaneMessagePaidMessageCharge" = "{peer} must pay {amount} for each message to you.";
 "ConfirmRemoveMessageFee" = "Yes";
 "ConfirmDialogMessageRemoveFee" = "Are you sure you want to allow **{peer}** to message you for free?";
 "ConfirmDialogRemoveFeeRefundStars" = "Refund already paid **{amount}**";
@@ -2484,7 +2484,6 @@
 "Square" = "Square";
 "HEX" = "HEX";
 "RGB" = "RGB";
-"Adjust" = "Adjust";
 "Text" = "Text";
 "ConfirmBuyGiftForTonDescription" = "The seller only accepts TON as payment.";
 "TitleGiftLocked" = "Gift Locked";
@@ -2776,7 +2775,7 @@
 "GiftPreviewCountPatterns_other" = "This collection features **{count}** unique patterns";
 "GiftPreviewCountBackdrops_one" = "This collection features **{count}** unique backdrop";
 "GiftPreviewCountBackdrops_other" = "This collection features **{count}** unique backdrops";
-"GiftUpgradeViewAll" =  "View all variants >";
+"GiftUpgradeViewAll" = "View all variants >";
 "GiftPreviewToggleCraftableModels" = "View Craftable Models >";
 "GiftPreviewToggleRegularModels" = "View Primary Models >";
 "AriaGiftPreviewPlay" = "Play random previews";
