@@ -1050,12 +1050,16 @@ const Composer = ({
       const extraLength = text.length - maxLength;
       showDialog({
         data: {
-          message: 'MESSAGE_TOO_LONG_PLEASE_REMOVE_CHARACTERS',
-          textParams: {
-            '{EXTRA_CHARS_COUNT}': extraLength.toString(),
-            '{PLURAL_S}': extraLength > 1 ? 's' : '',
+          type: 'localized',
+          text: {
+            key: 'ErrorMessageTooLong',
+            variables: {
+              count: extraLength,
+            },
+            options: {
+              pluralValue: extraLength,
+            },
           },
-          hasErrorKey: true,
         },
       });
 
@@ -1080,11 +1084,16 @@ const Composer = ({
         const secondsRemaining = nextSendDateNotReached
           ? slowMode.nextSendDate! - nowSeconds
           : slowMode.seconds - secondsSinceLastMessage!;
+
         showDialog({
           data: {
-            message: oldLang('SlowModeHint', formatMediaDuration(secondsRemaining)),
-            isSlowMode: true,
-            hasErrorKey: false,
+            type: 'localized',
+            text: {
+              key: 'SlowModeHint',
+              variables: {
+                time: formatMediaDuration(secondsRemaining),
+              },
+            },
           },
         });
 

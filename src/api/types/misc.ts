@@ -1,7 +1,15 @@
 import type { CallbackAction } from '../../global/types';
 import type { IconName } from '../../types/icons';
 import type { LangFnParameters, RegularLangFnParameters } from '../../util/localization';
-import type { ApiDocument, ApiFormattedText, ApiMessageEntity, ApiPhoto, ApiReaction, ApiVideo } from './messages';
+import type {
+  ApiContact,
+  ApiDocument,
+  ApiFormattedText,
+  ApiMessageEntity,
+  ApiPhoto,
+  ApiReaction,
+  ApiVideo,
+} from './messages';
 import type { ApiPremiumSection } from './payments';
 import type { ApiBotVerification } from './peers';
 import type { ApiStarsSubscriptionPricing } from './stars';
@@ -142,6 +150,27 @@ export type ApiNotification = {
   message: LangFnParameters;
   messageEntities?: undefined;
 });
+
+export type ApiDialogError = {
+  type: 'error';
+} & ApiError;
+
+export type ApiDialogMessage = {
+  type: 'message';
+  text: ApiFormattedText;
+};
+
+export type ApiDialogContact = {
+  type: 'contact';
+  contact: ApiContact;
+};
+
+export type ApiDialogLocalizedMessage = {
+  type: 'localized';
+  text: LangFnParameters;
+};
+
+export type ApiDialog = ApiDialogError | ApiDialogMessage | ApiDialogContact | ApiDialogLocalizedMessage;
 
 export type ApiError = {
   message: string;

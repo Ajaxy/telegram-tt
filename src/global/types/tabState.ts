@@ -10,9 +10,8 @@ import type {
   ApiChatType,
   ApiCheckedGiftCode,
   ApiCollectibleInfo,
-  ApiContact,
+  ApiDialog,
   ApiEmojiStatusCollectible,
-  ApiError,
   ApiFormattedText,
   ApiGeoPoint,
   ApiGlobalMessageSearchType,
@@ -490,7 +489,7 @@ export type TabState = {
   };
 
   notifications: ApiNotification[];
-  dialogs: (ApiError | ApiContact)[];
+  dialogs: ApiDialog[];
 
   safeLinkModalUrl?: string;
   mapModal?: {

@@ -402,8 +402,9 @@
       user-select: none;
 
       display: flex;
-      align-items: center;
       gap: 0.25rem;
+      align-items: center;
+
       margin-left: 1rem;
     }
 
@@ -428,10 +429,8 @@
 
     .sender-boosts {
       user-select: none;
-
       display: flex;
       align-items: center;
-
       font-size: 0.75rem;
     }
   }

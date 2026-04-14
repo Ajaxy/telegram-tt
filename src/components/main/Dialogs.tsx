@@ -1,8 +1,13 @@
+import type { TeactNode } from '../../lib/teact/teact';
 import { memo, useEffect } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiContact, ApiError,
+  ApiContact,
+  ApiDialog,
+  ApiDialogError,
+  ApiDialogLocalizedMessage,
+  ApiDialogMessage,
 } from '../../api/types';
 import type { MessageList } from '../../types';
 
@@ -18,7 +23,7 @@ import Modal from '../ui/Modal';
 
 type StateProps = {
   currentMessageList?: MessageList;
-  dialogs: (ApiError | ApiContact)[];
+  dialogs: ApiDialog[];
 };
 
 const Dialogs = ({ dialogs, currentMessageList }: StateProps) => {
@@ -81,17 +86,16 @@ const Dialogs = ({ dialogs, currentMessageList }: StateProps) => {
     );
   };
 
-  const renderError = (error: ApiError) => {
+  const renderTextDialog = (renderedText: TeactNode, title = 'Telegram') => {
     return (
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
         onCloseAnimationEnd={dismissDialog}
         className="error"
-        title={getErrorHeader(error)}
+        title={title}
       >
-        {error.hasErrorKey ? getReadableErrorText(error)
-          : renderTextWithEntities({ text: error.message, entities: error.entities })}
+        {renderedText}
         <div className="dialog-buttons mt-2">
           <Button isText onClick={closeModal}>{lang('OK')}</Button>
         </div>
@@ -99,9 +103,37 @@ const Dialogs = ({ dialogs, currentMessageList }: StateProps) => {
     );
   };
 
-  const renderDialog = (dialog: ApiError | ApiContact) => {
-    if ('phoneNumber' in dialog) {
-      return renderContactRequest(dialog);
+  const renderFormattedTextDialog = (dialog: ApiDialogMessage, title?: string) => {
+    const renderedText = renderTextWithEntities(dialog.text);
+
+    return renderTextDialog(renderedText, title);
+  };
+
+  const renderLocalizedDialog = (dialog: ApiDialogLocalizedMessage, title?: string) => {
+    return renderTextDialog(lang.with(dialog.text), title);
+  };
+
+  const renderError = (error: ApiDialogError) => {
+    const renderedErrorMessage = error.hasErrorKey
+      ? getReadableErrorText(error)
+      : error.entities?.length
+        ? renderTextWithEntities({ text: error.message, entities: error.entities })
+        : error.message;
+
+    return renderTextDialog(renderedErrorMessage, getErrorHeader(error));
+  };
+
+  const renderDialog = (dialog: ApiDialog) => {
+    if (dialog.type === 'contact') {
+      return renderContactRequest(dialog.contact);
+    }
+
+    if (dialog.type === 'message') {
+      return renderFormattedTextDialog(dialog);
+    }
+
+    if (dialog.type === 'localized') {
+      return renderLocalizedDialog(dialog);
     }
 
     return renderError(dialog);
@@ -110,7 +142,7 @@ const Dialogs = ({ dialogs, currentMessageList }: StateProps) => {
   return Boolean(dialogs.length) && renderDialog(dialogs[dialogs.length - 1]);
 };
 
-function getErrorHeader(error: ApiError) {
+function getErrorHeader(error: ApiDialogError) {
   if (error.isSlowMode) {
     return 'Slowmode enabled';
   }

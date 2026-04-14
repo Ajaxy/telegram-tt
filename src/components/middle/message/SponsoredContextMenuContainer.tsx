@@ -71,7 +71,10 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps> = ({
   const handleSponsorInfo = useLastCallback(() => {
     showDialog({
       data: {
-        message: [sponsorInfo, additionalInfo].filter(Boolean).join('\n'),
+        type: 'message',
+        text: {
+          text: [sponsorInfo, additionalInfo].filter(Boolean).join('\n'),
+        },
       },
     });
     handleItemClick();

@@ -6,7 +6,6 @@ import type {
 } from '../../types';
 import {
   type ApiChat,
-  type ApiContact,
   type ApiInputMessageReplyInfo,
   type ApiPeer,
   type ApiUrlAuthResult,
@@ -138,11 +137,15 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       }
       actions.showDialog({
         data: {
-          phoneNumber: user.phoneNumber,
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
-          userId: user.id,
-        } as ApiContact,
+          type: 'contact',
+          contact: {
+            mediaType: 'contact',
+            phoneNumber: user.phoneNumber,
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            userId: user.id,
+          },
+        },
         tabId,
       });
       break;
@@ -1438,7 +1441,7 @@ async function answerCallbackButton<T extends GlobalState>(
   const { message, alert: isError, url } = result;
 
   if (isError) {
-    showDialog({ data: { message: message || 'Error' }, tabId });
+    showDialog({ data: { type: 'error', message: message || 'Error' }, tabId });
   } else if (message) {
     showNotification({ message, tabId });
   } else if (url) {

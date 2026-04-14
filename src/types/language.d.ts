@@ -2222,6 +2222,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   'SlowModeHint': {
     'time': V;
   };
+  'NoVoiceMessagesAllowed': {
+    'user': V;
+  };
   'ErrorFloodTime': {
     'time': V;
   };
@@ -3661,6 +3664,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'PreviewSenderSendFile': {
+    'count': V;
+  };
+  'ErrorMessageTooLong': {
     'count': V;
   };
   'PinnedMessageTitle': {

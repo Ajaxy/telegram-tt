@@ -663,7 +663,8 @@
 "AttachDocument" = "File";
 "Poll" = "Poll";
 "SlowModePlaceholder" = "Next message in {timer}";
-"SlowModeHint" = "Slow Mode is active. You can send\nyour next message in {time}.";
+"SlowModeHint" = "Slow Mode is active. You can send your next message in {time}.";
+"NoVoiceMessagesAllowed" = "**{user}** doesn't accept voice messages.";
 "SendMessageAsTitle" = "Send message as...";
 "Message" = "Message";
 "RecentStickers" = "Recently Used";
@@ -737,6 +738,8 @@
 "ErrorPasswordChanged" = "Password has been changed, please try again";
 "ErrorPasswordMissing" = "You must set 2FA password to use this feature";
 "ErrorPasskeyUnknown" = "This passkey is not assigned to any account";
+"ErrorMessageTooLong_one" = "The provided message is too long. Please remove {count} character.";
+"ErrorMessageTooLong_other" = "The provided message is too long. Please remove {count} characters.";
 "ErrorUrlExpired" = "This link has expired";
 "ErrorUnspecified" = "Error";
 "NoStickers" = "No stickers yet";

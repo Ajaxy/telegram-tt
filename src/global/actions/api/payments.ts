@@ -1329,5 +1329,5 @@ function handlePaymentFormError(error: string, tabId: number) {
     return;
   }
 
-  getActions().showDialog({ data: { message: error, hasErrorKey: true }, tabId });
+  getActions().showDialog({ data: { type: 'error', message: error, hasErrorKey: true }, tabId });
 }

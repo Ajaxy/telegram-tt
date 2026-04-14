@@ -789,7 +789,7 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
     if ((error as ApiError).message === 'CHANNELS_TOO_MUCH') {
       actions.openLimitReachedModal({ limit: 'channels', tabId });
     } else {
-      actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });
+      actions.showDialog({ data: { type: 'error', ...(error as ApiError), hasErrorKey: true }, tabId });
     }
   }
 
@@ -847,7 +847,7 @@ addActionHandler('joinChannel', async (global, actions, payload): Promise<void> 
     if ((error as ApiError).message === 'CHANNELS_TOO_MUCH') {
       actions.openLimitReachedModal({ limit: 'channels', tabId });
     } else {
-      actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });
+      actions.showDialog({ data: { type: 'error', ...(error as ApiError), hasErrorKey: true }, tabId });
     }
   }
 });
@@ -2651,7 +2651,7 @@ addActionHandler('toggleForum', async (global, actions, payload): Promise<void> 
     if ((error as ApiError).message === 'FLOOD') {
       actions.showNotification({ message: langProvider.oldTranslate('FloodWait'), tabId });
     } else {
-      actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });
+      actions.showDialog({ data: { type: 'error', ...(error as ApiError), hasErrorKey: true }, tabId });
     }
   }
 
@@ -2860,7 +2860,7 @@ addActionHandler('joinChatlistInvite', async (global, actions, payload): Promise
     if ((error as ApiError).message === 'CHATLISTS_TOO_MUCH') {
       actions.openLimitReachedModal({ limit: 'chatlistJoined', tabId });
     } else {
-      actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });
+      actions.showDialog({ data: { type: 'error', ...(error as ApiError), hasErrorKey: true }, tabId });
     }
   }
 });
@@ -2946,7 +2946,7 @@ addActionHandler('createChatlistInvite', async (global, actions, payload): Promi
       actions.openLimitReachedModal({ limit: 'chatlistInvites', tabId });
       actions.openSettingsScreen({ screen: SettingsScreens.Folders, tabId });
     } else {
-      actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });
+      actions.showDialog({ data: { type: 'error', ...(error as ApiError), hasErrorKey: true }, tabId });
     }
   }
 
@@ -3031,7 +3031,7 @@ addActionHandler('editChatlistInvite', async (global, actions, payload): Promise
     };
     setGlobal(global);
   } catch (error) {
-    actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });
+    actions.showDialog({ data: { type: 'error', ...(error as ApiError), hasErrorKey: true }, tabId });
   } finally {
     global = getGlobal();
 
@@ -3532,7 +3532,7 @@ export async function migrateChat<T extends GlobalState>(
     if ((error as ApiError).message === 'CHANNELS_TOO_MUCH') {
       actions.openLimitReachedModal({ limit: 'channels', tabId });
     } else {
-      actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });
+      actions.showDialog({ data: { type: 'error', ...(error as ApiError), hasErrorKey: true }, tabId });
     }
 
     return undefined;

@@ -1,7 +1,6 @@
 import { addCallback } from '../../../lib/teact/teactn';
 
 import type { ActionReturnType, GlobalState } from '../../types';
-import { type ApiError } from '../../../api/types';
 
 import {
   ANIMATION_WAVE_MIN_INTERVAL,
@@ -389,13 +388,15 @@ addActionHandler('showDialog', (global, actions, payload): ActionReturnType => {
   const { data, tabId = getCurrentTabId() } = payload;
 
   // Filter out errors that we don't want to show to the user
-  if ('message' in data && data.hasErrorKey && !getReadableErrorText(data)) {
+  if (data.type === 'error' && data.hasErrorKey && !getReadableErrorText(data)) {
     return global;
   }
 
   const newDialogs = [...selectTabState(global, tabId).dialogs];
-  if ('message' in data) {
-    const existingErrorIndex = newDialogs.findIndex((err) => (err as ApiError).message === data.message);
+  if (data.type === 'error') {
+    const existingErrorIndex = newDialogs.findIndex((dialog) => {
+      return dialog.type === 'error' && dialog.message === data.message;
+    });
     if (existingErrorIndex !== -1) {
       newDialogs.splice(existingErrorIndex, 1);
     }

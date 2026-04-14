@@ -733,7 +733,7 @@ function processEntityAsHtml(
     case ApiMessageEntityTypes.TextUrl:
       return `<a
         class="text-entity-link"
-        href=${getLinkUrl(rawEntityText, entity)}
+        href="${getLinkUrl(rawEntityText, entity)}"
         data-entity-type="${entity.type}"
         dir="auto"
       >${renderedContent}</a>`;

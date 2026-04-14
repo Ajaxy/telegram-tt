@@ -101,7 +101,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         } else if (shouldClosePaymentModal(update.error)) {
           actions.closePaymentModal({ tabId });
         } else if (actions.showDialog) {
-          actions.showDialog({ data: update.error, tabId });
+          actions.showDialog({ data: { type: 'error', ...update.error }, tabId });
         }
       });
 
