@@ -1538,7 +1538,6 @@ addActionHandler('loadScheduledHistory', async (global, actions, payload): Promi
 
   Object.entries(idsByThreadId).forEach(([tId, newThreadScheduledIds]) => {
     const threadId = tId as ThreadId;
-    if (!chat.isForum && threadId !== MAIN_THREAD_ID) return;
     global = replaceThreadLocalStateParam(global, chat.id, threadId, 'scheduledIds', newThreadScheduledIds);
   });
   setGlobal(global);

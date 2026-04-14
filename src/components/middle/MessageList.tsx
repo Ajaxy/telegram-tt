@@ -921,22 +921,24 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const messageIds = selectCurrentMessageIds(global, chatId, threadId, type);
+    const chatMessagesById = selectChatMessages(global, chatId);
     const messagesById = type === 'scheduled'
       ? selectChatScheduledMessages(global, chatId)
-      : selectChatMessages(global, chatId);
+      : chatMessagesById;
 
     const isSavedDialog = getIsSavedDialog(chatId, threadId, currentUserId);
 
     if (
       threadId !== MAIN_THREAD_ID && !isSavedDialog && !chat?.isForum
-      && !(messagesById && threadId && messagesById[Number(threadId)])
+      && !(chatMessagesById && threadId && chatMessagesById[Number(threadId)])
     ) {
       return { currentUserId } as Complete<StateProps>;
     }
 
     const isRestricted = selectIsChatRestricted(global, chatId);
     const restrictionReasons = selectActiveRestrictionReasons(global, chat?.restrictionReasons);
-    const lastMessage = selectChatLastMessage(global, chatId, isSavedDialog ? 'saved' : 'all');
+    const lastMessage = type === 'thread' ? selectChatLastMessage(global, chatId, isSavedDialog ? 'saved' : 'all')
+      : undefined;
     const focusingId = selectFocusedMessageId(global, chatId);
 
     const withLastMessageWhenPreloading = (
