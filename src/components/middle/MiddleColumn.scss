@@ -340,6 +340,19 @@
 
   .open-chat-button {
     color: var(--color-primary);
+
+    @media (hover: hover) {
+      &:hover {
+        color: var(--color-white);
+      }
+    }
+
+    @media (max-width: 600px) {
+      &:active,
+      &:focus {
+        color: var(--color-white);
+      }
+    }
   }
 
   .mask-image-disabled &::before {
