@@ -45,6 +45,7 @@ import {
   MAX_INT_32,
   MENTION_UNREAD_SLICE,
   MESSAGE_ID_REQUIRED_ERROR,
+  POLL_UNREAD_SLICE,
   REACTION_UNREAD_SLICE,
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
@@ -2298,6 +2299,27 @@ export async function readAllReactions({
   }
 }
 
+export async function readAllPollVotes({
+  chat,
+  threadId,
+}: {
+  chat: ApiChat;
+  threadId?: ThreadId;
+}) {
+  const result = await invokeRequest(new GramJs.messages.ReadPollVotes({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    topMsgId: threadId ? Number(threadId) : undefined,
+  }));
+
+  if (!result) return;
+
+  processAffectedHistory(chat, result);
+
+  if (result.offset) {
+    await readAllPollVotes({ chat, threadId });
+  }
+}
+
 export async function fetchUnreadMentions({
   chat, threadId, offsetId, addOffset, maxId, minId,
 }: {
@@ -2351,6 +2373,45 @@ export async function fetchUnreadReactions({
     peer: buildInputPeer(chat.id, chat.accessHash),
     topMsgId: threadId ? Number(threadId) : undefined,
     limit: REACTION_UNREAD_SLICE,
+    offsetId: offsetId ?? DEFAULT_PRIMITIVES.INT,
+    addOffset: addOffset ?? DEFAULT_PRIMITIVES.INT,
+    maxId: maxId ?? DEFAULT_PRIMITIVES.INT,
+    minId: minId ?? DEFAULT_PRIMITIVES.INT,
+  }));
+
+  if (
+    !result
+    || result instanceof GramJs.messages.MessagesNotModified
+    || !result.messages
+  ) {
+    return undefined;
+  }
+
+  const totalCount = 'count' in result ? result.count : result.messages.length;
+  const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  const topics = result.topics.map(buildApiTopicWithState).filter(Boolean);
+
+  return {
+    totalCount,
+    messages,
+    topics,
+  };
+}
+
+export async function fetchUnreadPollVotes({
+  chat, threadId, offsetId, addOffset, maxId, minId,
+}: {
+  chat: ApiChat;
+  threadId?: ThreadId;
+  offsetId?: number;
+  addOffset?: number;
+  maxId?: number;
+  minId?: number;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetUnreadPollVotes({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    topMsgId: threadId ? Number(threadId) : undefined,
+    limit: POLL_UNREAD_SLICE,
     offsetId: offsetId ?? DEFAULT_PRIMITIVES.INT,
     addOffset: addOffset ?? DEFAULT_PRIMITIVES.INT,
     maxId: maxId ?? DEFAULT_PRIMITIVES.INT,

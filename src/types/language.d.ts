@@ -91,6 +91,7 @@ export interface LangPair {
   'AnonymousPoll': undefined;
   'AccDescrReactionMentionDown': undefined;
   'AccDescrMentionDown': undefined;
+  'AccDescrPollVoteDown': undefined;
   'AccDescrPageDown': undefined;
   'ChannelPrivate': undefined;
   'ChannelPrivateInfo': undefined;

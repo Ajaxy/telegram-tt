@@ -52,6 +52,7 @@ import {
 import { selectThreadIdFromMessage, selectThreadInfo, selectThreadLocalStateParam } from '../selectors/threads';
 import { removeUnreadMentions } from './chats';
 import { removeIdFromSearchResults } from './middleSearch';
+import { removeUnreadPollVotes } from './polls';
 import { removeUnreadReactions } from './reactions';
 import { updateTabState } from './tabs';
 import {
@@ -437,6 +438,7 @@ export function deleteChatMessages<T extends GlobalState>(
 
   global = removeUnreadReactions({ global, chatId, ids: messageIds });
   global = removeUnreadMentions({ global, chatId, ids: messageIds });
+  global = removeUnreadPollVotes({ global, chatId, ids: messageIds });
 
   const newById = omit(byId, messageIds);
   global = replaceChatMessages(global, chatId, newById);

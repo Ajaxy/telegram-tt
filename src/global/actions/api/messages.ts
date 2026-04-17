@@ -81,12 +81,12 @@ import {
 } from '../../index';
 import {
   addChatMessagesById,
-  addUnreadMentions,
   clearMessageSummary,
   deleteSponsoredMessage,
   removeOutlyingList,
   removeRequestedMessageTranslation,
   removeUnreadMentions,
+  removeUnreadPollVotes,
   replaceSettings,
   replaceUserStatuses,
   safeReplacePinnedIds,
@@ -106,6 +106,7 @@ import {
   updateScheduledMessages,
   updateSponsoredMessage,
   updateTopicWithState,
+  updateUnreadCounters,
   updateUploadByMessageKey,
   updateUserFullInfo,
 } from '../../reducers';
@@ -172,7 +173,6 @@ import {
   selectThreadReadState,
 } from '../../selectors/threads';
 import { deleteMessages, updateWithLocalMedia } from '../apiUpdaters/messages';
-
 const AUTOLOGIN_TOKEN_KEY = 'autologin_token';
 
 const uploadProgressCallbacks = new Map<MessageKey, ApiOnProgress>();
@@ -2287,19 +2287,45 @@ addActionHandler('loadUnreadMentions', async (global, actions, payload): Promise
 
   const { messages, topics, totalCount } = result;
 
-  const byId = buildCollectionByKey(messages, 'id');
-  const ids = Object.keys(byId).map(Number);
-
   global = getGlobal();
-  global = addChatMessagesById(global, chat.id, byId);
-  topics.forEach((topicState) => {
-    global = updateTopicWithState(global, chat.id, topicState);
-  });
-  global = addUnreadMentions({
+  global = updateUnreadCounters({
     global,
     chatId,
-    ids,
+    threadId,
+    messages,
+    topics,
     totalCount,
+    unreadCountKey: 'unreadMentionsCount',
+  });
+
+  setGlobal(global);
+});
+
+addActionHandler('loadUnreadPollVotes', async (global, actions, payload): Promise<void> => {
+  const { chatId, threadId = MAIN_THREAD_ID, offsetId } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('fetchUnreadPollVotes', {
+    chat,
+    threadId: threadId !== MAIN_THREAD_ID ? threadId : undefined,
+    offsetId,
+  });
+
+  if (!result) return;
+
+  const { messages, topics, totalCount } = result;
+
+  global = getGlobal();
+  global = updateUnreadCounters({
+    global,
+    chatId,
+    threadId,
+    messages,
+    topics,
+    totalCount,
+    unreadCountKey: 'unreadPollVotesCount',
   });
 
   setGlobal(global);
@@ -2391,6 +2417,21 @@ addActionHandler('markMentionsRead', (global, actions, payload): ActionReturnTyp
   actions.markMessagesRead({ chatId, messageIds });
 });
 
+addActionHandler('markPollVotesRead', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageIds } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  global = removeUnreadPollVotes({
+    global,
+    chatId,
+    ids: messageIds,
+  });
+  setGlobal(global);
+
+  actions.markMessagesRead({ chatId, messageIds });
+});
+
 addActionHandler('focusNextMention', async (global, actions, payload): Promise<void> => {
   const { chatId, threadId = MAIN_THREAD_ID, tabId = getCurrentTabId() } = payload;
 
@@ -2407,6 +2448,28 @@ addActionHandler('focusNextMention', async (global, actions, payload): Promise<v
   actions.focusMessage({ chatId, messageId: readState.unreadMentions[0], tabId });
 });
 
+addActionHandler('focusNextPollVote', async (global, actions, payload): Promise<void> => {
+  const { chatId, threadId = MAIN_THREAD_ID, tabId = getCurrentTabId() } = payload;
+
+  let readState = selectThreadReadState(global, chatId, threadId);
+
+  if (!readState?.unreadPollVotes?.length) {
+    await getPromiseActions().loadUnreadPollVotes({ chatId, threadId });
+
+    global = getGlobal();
+    readState = selectThreadReadState(global, chatId, threadId);
+    if (!readState?.unreadPollVotes?.length) return;
+  }
+
+  actions.focusMessage({
+    chatId,
+    threadId,
+    messageId: readState.unreadPollVotes[0],
+    tabId,
+    scrollTargetPosition: 'end',
+  });
+});
+
 addActionHandler('readAllMentions', (global, actions, payload): ActionReturnType => {
   const { chatId, threadId = MAIN_THREAD_ID } = payload;
 
@@ -2418,6 +2481,21 @@ addActionHandler('readAllMentions', (global, actions, payload): ActionReturnType
   global = updateThreadReadState(global, chatId, threadId, {
     unreadMentionsCount: 0,
     unreadMentions: undefined,
+  });
+  return global;
+});
+
+addActionHandler('readAllPollVotes', (global, actions, payload): ActionReturnType => {
+  const { chatId, threadId = MAIN_THREAD_ID } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return undefined;
+
+  callApi('readAllPollVotes', { chat, threadId: threadId !== MAIN_THREAD_ID ? threadId : undefined });
+
+  global = updateThreadReadState(global, chatId, threadId, {
+    unreadPollVotesCount: 0,
+    unreadPollVotes: undefined,
   });
   return global;
 });

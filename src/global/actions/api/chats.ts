@@ -1461,6 +1461,7 @@ addActionHandler('markChatMessagesRead', async (global, actions, payload): Promi
     await callApi('markMessageListRead', { chat, threadId: MAIN_THREAD_ID });
     actions.readAllMentions({ chatId: id });
     actions.readAllReactions({ chatId: id });
+    actions.readAllPollVotes({ chatId: id });
     if (chatReadState?.hasUnreadMark) {
       actions.markChatRead({ id });
     }
@@ -1487,7 +1488,13 @@ addActionHandler('markChatMessagesRead', async (global, actions, payload): Promi
       global = updateTopicWithState(global, id, topicWithState);
 
       const { readState } = topicWithState;
-      if (readState && !readState.unreadCount && !readState.unreadMentionsCount && !readState.unreadReactionsCount) {
+      if (
+        readState
+        && !readState.unreadCount
+        && !readState.unreadMentionsCount
+        && !readState.unreadReactionsCount
+        && !readState.unreadPollVotesCount
+      ) {
         return;
       }
 
@@ -1530,6 +1537,7 @@ addActionHandler('markTopicRead', (global, actions, payload): ActionReturnType =
   });
   actions.readAllMentions({ chatId, threadId: topicId });
   actions.readAllReactions({ chatId, threadId: topicId });
+  actions.readAllPollVotes({ chatId, threadId: topicId });
 
   global = getGlobal();
   global = replaceThreadReadStateParam(global, chatId, topicId, 'lastReadInboxMessageId', lastTopicMessageId);

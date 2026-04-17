@@ -197,6 +197,7 @@ export type FontIconName =
   | 'pip'
   | 'play-story'
   | 'play'
+  | 'poll-badge'
   | 'poll'
   | 'previous-link'
   | 'previous'

@@ -1434,6 +1434,11 @@ export interface ActionPayloads {
     threadId?: ThreadId;
     offsetId?: number;
   };
+  loadUnreadPollVotes: {
+    chatId: string;
+    threadId?: ThreadId;
+    offsetId?: number;
+  };
   scheduleForViewsIncrement: {
     chatId: string;
     ids: number[];
@@ -1468,6 +1473,10 @@ export interface ActionPayloads {
     chatId: string;
     threadId?: ThreadId;
   } & WithTabId;
+  focusNextPollVote: {
+    chatId: string;
+    threadId?: ThreadId;
+  } & WithTabId;
   readAllReactions: {
     chatId: string;
     threadId?: ThreadId;
@@ -1476,7 +1485,15 @@ export interface ActionPayloads {
     chatId: string;
     threadId?: ThreadId;
   };
+  readAllPollVotes: {
+    chatId: string;
+    threadId?: ThreadId;
+  };
   markMentionsRead: {
+    chatId: string;
+    messageIds: number[];
+  };
+  markPollVotesRead: {
     chatId: string;
     messageIds: number[];
   };

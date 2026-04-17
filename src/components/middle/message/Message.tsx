@@ -301,6 +301,7 @@ type StateProps = {
   defaultReaction?: ApiReaction;
   activeEmojiInteractions?: ActiveEmojiInteraction[];
   hasUnreadReaction?: boolean;
+  hasUnreadPollVote?: boolean;
   isTranscribing?: boolean;
   transcribedText?: string;
   isPremium: boolean;
@@ -431,6 +432,7 @@ const Message = ({
   autoLoadFileMaxSizeMb,
   repliesThreadInfo,
   hasUnreadReaction,
+  hasUnreadPollVote,
   memoFirstUnreadIdRef,
   senderChatMember,
   messageTopic,
@@ -478,6 +480,7 @@ const Message = ({
     animateUnreadReaction,
     focusMessage,
     markMentionsRead,
+    markPollVotesRead,
     openThread,
     summarizeMessage,
   } = getActions();
@@ -963,6 +966,10 @@ const Message = ({
       animateUnreadReaction({ chatId, messageIds: [messageId] });
     }
 
+    if (hasUnreadPollVote) {
+      markPollVotesRead({ chatId, messageIds: [messageId] });
+    }
+
     let unreadMentionIds: number[] = [];
     if (message.hasUnreadMention) {
       unreadMentionIds = [messageId];
@@ -975,7 +982,16 @@ const Message = ({
     if (unreadMentionIds.length) {
       markMentionsRead({ chatId, messageIds: unreadMentionIds });
     }
-  }, [hasUnreadReaction, album, chatId, messageId, animateUnreadReaction, message.hasUnreadMention]);
+  }, [
+    hasUnreadReaction,
+    hasUnreadPollVote,
+    album,
+    chatId,
+    messageId,
+    animateUnreadReaction,
+    markPollVotesRead,
+    message.hasUnreadMention,
+  ]);
 
   const albumLayout = useMemo(() => {
     return isAlbum
@@ -1848,6 +1864,7 @@ const Message = ({
         data-last-message-id={album ? album.messages[album.messages.length - 1].id : undefined}
         data-album-main-id={album ? album.mainMessage.id : undefined}
         data-has-unread-mention={message.hasUnreadMention || undefined}
+        data-has-unread-poll-vote={hasUnreadPollVote || undefined}
         data-has-unread-reaction={hasUnreadReaction || undefined}
         data-is-pinned={isPinned || undefined}
         data-should-update-views={message.viewsCount !== undefined}
@@ -2123,6 +2140,7 @@ export default memo(withGlobal<OwnProps>(
 
     const readState = selectThreadReadState(global, chatId, threadId);
     const hasUnreadReaction = readState?.unreadReactions?.includes(message.id);
+    const hasUnreadPollVote = readState?.unreadPollVotes?.includes(message.id);
 
     const hasTopicChip = threadId === MAIN_THREAD_ID && chat?.isForum && !chat.isBotForum && isFirstInGroup;
     const messageTopic = selectTopicFromMessage(global, message);
@@ -2220,6 +2238,7 @@ export default memo(withGlobal<OwnProps>(
       hasActiveReactions,
       activeEmojiInteractions,
       hasUnreadReaction,
+      hasUnreadPollVote,
       isTranscribing: transcriptionId !== undefined && global.transcriptions[transcriptionId]?.isPending,
       transcribedText: transcriptionId !== undefined ? global.transcriptions[transcriptionId]?.text : undefined,
       isPremium,

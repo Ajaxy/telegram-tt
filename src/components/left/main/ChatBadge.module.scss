@@ -90,6 +90,10 @@
   background-color: #ed504f;
 }
 
+.poll {
+  background-color: var(--color-primary);
+}
+
 .round {
   display: grid;
   place-content: center;

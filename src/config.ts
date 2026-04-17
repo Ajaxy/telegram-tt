@@ -116,6 +116,7 @@ export const GLOBAL_SUGGESTED_CHANNELS_ID = 'global';
 // https://github.com/DrKLO/Telegram/blob/51e9947527/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java#L7781
 export const REACTION_UNREAD_SLICE = 100;
 export const MENTION_UNREAD_SLICE = 100;
+export const POLL_UNREAD_SLICE = 100;
 export const TOPICS_SLICE = 20;
 export const TOPICS_SLICE_SECOND_LOAD = 500;
 

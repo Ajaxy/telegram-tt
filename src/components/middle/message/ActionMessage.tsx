@@ -102,6 +102,7 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
   isInSelectMode?: boolean;
   hasUnreadReaction?: boolean;
+  hasUnreadPollVote?: boolean;
   isResizingContainer?: boolean;
   scrollTargetPosition?: ScrollTargetPosition;
   isAccountFrozen?: boolean;
@@ -140,6 +141,7 @@ const ActionMessage = ({
   isCurrentUserPremium,
   isInSelectMode,
   hasUnreadReaction,
+  hasUnreadPollVote,
   isResizingContainer,
   scrollTargetPosition,
   isAccountFrozen,
@@ -161,6 +163,7 @@ const ActionMessage = ({
     toggleChannelRecommendations,
     animateUnreadReaction,
     markMentionsRead,
+    markPollVotesRead,
     focusMessage,
     openGiftOfferAcceptModal,
     declineStarGiftOffer,
@@ -335,10 +338,22 @@ const ActionMessage = ({
       animateUnreadReaction({ chatId, messageIds: [id] });
     }
 
+    if (hasUnreadPollVote) {
+      markPollVotesRead({ chatId, messageIds: [id] });
+    }
+
     if (message.hasUnreadMention) {
       markMentionsRead({ chatId, messageIds: [id] });
     }
-  }, [hasUnreadReaction, chatId, id, animateUnreadReaction, message.hasUnreadMention]);
+  }, [
+    hasUnreadReaction,
+    hasUnreadPollVote,
+    chatId,
+    id,
+    animateUnreadReaction,
+    markPollVotesRead,
+    message.hasUnreadMention,
+  ]);
 
   useEffect(() => {
     if (action.type !== 'giftPremium') return;
@@ -619,6 +634,7 @@ const ActionMessage = ({
       data-message-id={message.id}
       data-is-pinned={message.isPinned || undefined}
       data-has-unread-mention={message.hasUnreadMention || undefined}
+      data-has-unread-poll-vote={hasUnreadPollVote || undefined}
       data-has-unread-reaction={hasUnreadReaction || undefined}
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
@@ -737,6 +753,7 @@ export default memo(withGlobal<OwnProps>(
 
     const readState = selectThreadReadState(global, message.chatId, threadId);
     const hasUnreadReaction = readState?.unreadReactions?.includes(message.id);
+    const hasUnreadPollVote = readState?.unreadPollVotes?.includes(message.id);
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     return {
@@ -751,6 +768,7 @@ export default memo(withGlobal<OwnProps>(
       isInSelectMode: selectIsInSelectMode(global),
       actionMessageBg: selectActionMessageBg(global),
       hasUnreadReaction,
+      hasUnreadPollVote,
       isResizingContainer,
       scrollTargetPosition,
       isAccountFrozen,

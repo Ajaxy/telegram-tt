@@ -109,6 +109,7 @@
 "AnonymousPoll" = "Anonymous Poll";
 "AccDescrReactionMentionDown" = "Go to next unread reactions";
 "AccDescrMentionDown" = "Go to next mention";
+"AccDescrPollVoteDown" = "Go to next unread poll vote";
 "AccDescrPageDown" = "Go to bottom";
 "ChannelPrivate" = "Private Channel";
 "ChannelPrivateInfo" = "Private channels can only be joined via invite link.";

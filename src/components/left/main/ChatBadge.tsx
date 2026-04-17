@@ -69,6 +69,7 @@ const ChatBadge = ({
 
   const {
     unreadMentionsCount: stateUnreadMentionsCount = 0,
+    unreadPollVotesCount: stateUnreadPollVotesCount = 0,
     unreadReactionsCount: stateUnreadReactionsCount = 0,
     unreadCount: stateUnreadCount = 0,
     hasUnreadMark,
@@ -95,12 +96,29 @@ const ChatBadge = ({
   const topicsWithUnreadMentionsIds = useMemo(() => (
     isForum && listedTopicIds ? listedTopicIds.filter((tId) => topicsReadStates[tId]?.unreadMentionsCount) : undefined
   ), [listedTopicIds, isForum, topicsReadStates]);
+  const topicsWithUnreadPollVotesIds = useMemo(() => (
+    isForum && listedTopicIds ? listedTopicIds.filter((tId) => topicsReadStates[tId]?.unreadPollVotesCount) : undefined
+  ), [listedTopicIds, isForum, topicsReadStates]);
   const topicsWithUnreadReactionsIds = useMemo(() => (
     isForum && listedTopicIds ? listedTopicIds.filter((tId) => topicsReadStates[tId]?.unreadReactionsCount) : undefined
   ), [listedTopicIds, isForum, topicsReadStates]);
+  const topicsWithStatefulUnreadIds = useMemo(() => {
+    if (!isForum) {
+      return undefined;
+    }
+
+    const allTopicIds = [
+      ...(topicsWithUnreadIds || []),
+      ...(topicsWithUnreadPollVotesIds || []),
+      ...(topicsWithUnreadReactionsIds || []),
+    ];
+
+    return allTopicIds.length ? [...new Set(allTopicIds)] : [];
+  }, [isForum, topicsWithUnreadIds, topicsWithUnreadPollVotesIds, topicsWithUnreadReactionsIds]);
 
   const unreadCount = isForum ? topicsWithUnreadIds?.length : stateUnreadCount;
   const unreadMentionsCount = isForum ? topicsWithUnreadMentionsIds?.length : stateUnreadMentionsCount;
+  const unreadPollVotesCount = isForum ? topicsWithUnreadPollVotesIds?.length : stateUnreadPollVotesCount;
   const unreadReactionsCount = isForum ? topicsWithUnreadReactionsIds?.length : stateUnreadReactionsCount;
 
   const shouldBeUnMuted = useMemo(() => {
@@ -108,17 +126,21 @@ const ChatBadge = ({
       return !isMuted || topic?.notifySettings.mutedUntil === 0;
     }
 
-    if (isMuted) {
-      return topicsWithUnreadIds?.some((tId) => topicsById?.[tId]?.notifySettings.mutedUntil === 0);
+    if (!topicsWithStatefulUnreadIds?.length) {
+      return !isMuted;
     }
 
-    const isEveryUnreadMuted = topicsWithUnreadIds?.every((tId) => {
+    if (isMuted) {
+      return topicsWithStatefulUnreadIds.some((tId) => topicsById?.[tId]?.notifySettings.mutedUntil === 0);
+    }
+
+    const isEveryUnreadMuted = topicsWithStatefulUnreadIds.every((tId) => {
       const mutedUntil = topicsById?.[tId]?.notifySettings.mutedUntil;
       return mutedUntil && mutedUntil > getServerTime();
     });
 
     return !isEveryUnreadMuted;
-  }, [isForum, isMuted, topicsWithUnreadIds, topicsById, topic?.notifySettings.mutedUntil]);
+  }, [isForum, isMuted, topicsById, topic?.notifySettings.mutedUntil, topicsWithStatefulUnreadIds]);
 
   const isUnread = Boolean((unreadCount || hasUnreadMark) && !isSavedDialog);
 
@@ -127,7 +149,7 @@ const ChatBadge = ({
     [forceHidden],
   );
   const isShown = !resolvedForceHidden && Boolean(
-    unreadCount || unreadMentionsCount || hasUnreadMark || isPinned || unreadReactionsCount
+    unreadCount || unreadMentionsCount || unreadPollVotesCount || hasUnreadMark || isPinned || unreadReactionsCount
     || isTopicUnopened || hasMiniApp,
   );
 
@@ -149,6 +171,12 @@ const ChatBadge = ({
     const unreadReactionsElement = unreadReactionsCount && (
       <div className={buildClassName(statefulClassName, styles.reaction, styles.round)}>
         <Icon name="heart" />
+      </div>
+    );
+
+    const unreadPollVotesElement = unreadPollVotesCount && (
+      <div className={buildClassName(statefulClassName, styles.poll, styles.round)}>
+        <Icon name="poll-badge" />
       </div>
     );
 
@@ -187,10 +215,16 @@ const ChatBadge = ({
     );
 
     const visiblePinnedElement = !unreadCountElement && !unreadMentionsElement && !unreadReactionsElement
+      && !unreadPollVotesElement
       && pinnedElement;
 
     const elements = [
-      unopenedTopicElement, unreadReactionsElement, unreadMentionsElement, unreadCountElement, visiblePinnedElement,
+      unopenedTopicElement,
+      unreadPollVotesElement,
+      unreadReactionsElement,
+      unreadMentionsElement,
+      unreadCountElement,
+      visiblePinnedElement,
     ].filter(Boolean);
 
     if (isSavedDialog) return pinnedElement;
@@ -204,7 +238,11 @@ const ChatBadge = ({
 
     if (shouldShowOnlyMostImportant) {
       const importanceOrderedElements = [
-        unreadMentionsElement, unreadCountElement, unreadReactionsElement, pinnedElement,
+        unreadPollVotesElement,
+        unreadReactionsElement,
+        unreadMentionsElement,
+        unreadCountElement,
+        pinnedElement,
       ].filter(Boolean);
       return importanceOrderedElements[0];
     }

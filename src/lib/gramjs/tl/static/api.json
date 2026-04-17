@@ -224,6 +224,8 @@
     "messages.clearRecentReactions",
     "messages.readMentions",
     "messages.getUnreadMentions",
+    "messages.readPollVotes",
+    "messages.getUnreadPollVotes",
     "messages.getSavedDialogs",
     "messages.getSavedHistory",
     "messages.deleteSavedHistory",

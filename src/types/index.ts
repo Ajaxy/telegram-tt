@@ -623,8 +623,10 @@ export interface ThreadReadState {
   unreadCount?: number;
   unreadMentionsCount?: number;
   unreadReactionsCount?: number;
+  unreadPollVotesCount?: number;
   unreadReactions?: number[];
   unreadMentions?: number[];
+  unreadPollVotes?: number[];
   hasUnreadMark?: boolean;
 
   lastReadOutboxMessageId?: number;

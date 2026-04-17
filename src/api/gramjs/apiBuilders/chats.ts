@@ -710,7 +710,7 @@ export function buildThreadReadState(
   const forumTopic = input instanceof GramJs.ForumTopic ? input : undefined;
 
   const { unreadReactionsCount } = dialog || monoForumDialog || forumTopic || {};
-  const { unreadMentionsCount } = dialog || forumTopic || {};
+  const { unreadMentionsCount, unreadPollVotesCount } = dialog || forumTopic || {};
   const { unreadMark } = dialog || monoForumDialog || {};
 
   return omitUndefined<ThreadReadState>({
@@ -718,6 +718,7 @@ export function buildThreadReadState(
     lastReadInboxMessageId: readInboxMaxId,
     lastReadOutboxMessageId: readOutboxMaxId,
     unreadReactionsCount,
+    unreadPollVotesCount,
     unreadMentionsCount,
     hasUnreadMark: unreadMark,
   });

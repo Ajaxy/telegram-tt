@@ -8,12 +8,11 @@ import {
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { areDeepEqual } from '../../util/areDeepEqual';
 import {
-  areSortedArraysEqual, buildCollectionByKey, omit, omitUndefined, pick, unique,
+  areSortedArraysEqual, buildCollectionByKey, omit, omitUndefined, pick,
 } from '../../util/iteratees';
-import { groupMessageIdsByThreadId } from '../helpers';
 import { selectChatFullInfo } from '../selectors';
-import { selectThreadReadState } from '../selectors/threads';
-import { replaceThreadReadStateParam, updateThreadInfoLastMessageId } from './threads';
+import { updateThreadInfoLastMessageId } from './threads';
+import { addUnreadCount, removeUnreadCount } from './unreadCounters';
 
 const DEFAULT_CHAT_LISTS: ChatListType[] = ['active', 'archived'];
 
@@ -132,28 +131,13 @@ export function addUnreadMentions<T extends GlobalState>({
   ids: number[];
   totalCount?: number;
 }): T {
-  const messageIdsByThreadId = groupMessageIdsByThreadId(global, chatId, ids, false);
-
-  for (const threadId in messageIdsByThreadId) {
-    const messageIds = messageIdsByThreadId[threadId];
-    if (totalCount !== undefined) { // Assume that when `totalCount` is passed, server returned full id list
-      global = replaceThreadReadStateParam(global, chatId, threadId, 'unreadMentions', messageIds);
-      global = replaceThreadReadStateParam(global, chatId, threadId, 'unreadMentionsCount', totalCount);
-      continue;
-    }
-
-    const readState = selectThreadReadState(global, chatId, threadId);
-    const prevChatUnreadMentions = readState?.unreadMentions || [];
-    const updatedUnreadMentions = unique([...prevChatUnreadMentions, ...messageIds]).sort((a, b) => b - a);
-    global = replaceThreadReadStateParam(global, chatId, threadId, 'unreadMentions', updatedUnreadMentions);
-
-    const updatedUnreadMentionsCount = (readState?.unreadMentionsCount || 0)
-      + Math.max(0, updatedUnreadMentions.length - prevChatUnreadMentions.length);
-
-    global = replaceThreadReadStateParam(global, chatId, threadId, 'unreadMentionsCount', updatedUnreadMentionsCount);
-  }
-
-  return global;
+  return addUnreadCount({
+    global,
+    chatId,
+    messageIds: ids,
+    totalCount,
+    unreadCountKey: 'unreadMentionsCount',
+  });
 }
 
 export function removeUnreadMentions<T extends GlobalState>({
@@ -163,24 +147,12 @@ export function removeUnreadMentions<T extends GlobalState>({
   chatId: string;
   ids: number[];
 }): T {
-  const messageIdsByThreadId = groupMessageIdsByThreadId(global, chatId, ids, false);
-
-  for (const threadId in messageIdsByThreadId) {
-    const messageIds = messageIdsByThreadId[threadId];
-    const readState = selectThreadReadState(global, chatId, threadId);
-    const prevChatUnreadMentions = (readState?.unreadMentions || []);
-    const updatedUnreadMentions = prevChatUnreadMentions?.filter((id) => !messageIds.includes(id));
-
-    global = replaceThreadReadStateParam(global, chatId, threadId, 'unreadMentions', updatedUnreadMentions);
-
-    const removedCount = prevChatUnreadMentions.length - updatedUnreadMentions.length;
-    if (removedCount && readState?.unreadMentionsCount) {
-      const updatedUnreadMentionsCount = Math.max(readState.unreadMentionsCount - removedCount, 0);
-
-      global = replaceThreadReadStateParam(global, chatId, threadId, 'unreadMentionsCount', updatedUnreadMentionsCount);
-    }
-  }
-  return global;
+  return removeUnreadCount({
+    global,
+    chatId,
+    messageIds: ids,
+    unreadCountKey: 'unreadMentionsCount',
+  });
 }
 
 export function updateChat<T extends GlobalState>(

@@ -1,6 +1,11 @@
-import type { ApiError, ApiReaction, ApiReactionEmoji } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
-import { ApiMediaFormat, MAIN_THREAD_ID } from '../../../api/types';
+import {
+  type ApiError,
+  ApiMediaFormat,
+  type ApiReaction,
+  type ApiReactionEmoji,
+  MAIN_THREAD_ID,
+} from '../../../api/types';
 
 import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -21,13 +26,11 @@ import {
 } from '../../helpers';
 import { addActionHandler, getGlobal, getPromiseActions, setGlobal } from '../../index';
 import {
-  addChatMessagesById,
   updateChatMessage,
-  updateTopicWithState,
+  updateUnreadCounters,
 } from '../../reducers';
 import {
   addMessageReaction,
-  addUnreadReactions,
   removeUnreadReactions,
   subtractXForEmojiInteraction,
 } from '../../reducers/reactions';
@@ -490,19 +493,15 @@ addActionHandler('loadUnreadReactions', async (global, actions, payload): Promis
 
   const { messages, topics, totalCount } = result;
 
-  const byId = buildCollectionByKey(messages, 'id');
-  const ids = Object.keys(byId).map(Number);
-
   global = getGlobal();
-  global = addChatMessagesById(global, chat.id, byId);
-  topics.forEach((topicState) => {
-    global = updateTopicWithState(global, chat.id, topicState);
-  });
-  global = addUnreadReactions({
+  global = updateUnreadCounters({
     global,
     chatId,
-    ids,
+    threadId,
+    messages,
+    topics,
     totalCount,
+    unreadCountKey: 'unreadReactionsCount',
   });
 
   setGlobal(global);

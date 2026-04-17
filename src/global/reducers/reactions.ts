@@ -2,17 +2,15 @@ import type { GlobalState } from '../types';
 import { type ApiMessage, type ApiReactionWithPaid } from '../../api/types';
 
 import { MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
-import { unique } from '../../util/iteratees';
 import windowSize from '../../util/windowSize';
 import {
   MIN_LEFT_COLUMN_WIDTH,
   SIDE_COLUMN_MAX_WIDTH,
 } from '../../components/middle/helpers/calculateMiddleFooterTransforms';
-import { groupMessageIdsByThreadId, updateReactionCount } from '../helpers';
+import { updateReactionCount } from '../helpers';
 import { selectIsChatWithSelf, selectSendAs, selectTabState } from '../selectors';
-import { selectThreadReadState } from '../selectors/threads';
 import { updateChatMessage } from './messages';
-import { replaceThreadReadStateParam } from './threads';
+import { addUnreadCount, removeUnreadCount } from './unreadCounters';
 
 import { getIsMobile } from '../../hooks/useAppLayout';
 
@@ -85,29 +83,13 @@ export function addUnreadReactions<T extends GlobalState>({
   ids: number[];
   totalCount?: number;
 }): T {
-  const messageIdsByThreadId = groupMessageIdsByThreadId(global, chatId, ids, false);
-
-  for (const threadId in messageIdsByThreadId) {
-    const messageIds = messageIdsByThreadId[threadId];
-    if (totalCount !== undefined) { // Assume that when `totalCount` is passed, server returned full id list
-      global = replaceThreadReadStateParam(global, chatId, threadId, 'unreadReactions', messageIds);
-      global = replaceThreadReadStateParam(global, chatId, threadId, 'unreadReactionsCount', totalCount);
-      continue;
-    }
-
-    const readState = selectThreadReadState(global, chatId, threadId);
-    const prevChatUnreadReactions = readState?.unreadReactions || [];
-    const updatedUnreadReactions = unique([...prevChatUnreadReactions, ...messageIds]).sort((a, b) => b - a);
-    global = replaceThreadReadStateParam(global, chatId, threadId, 'unreadReactions', updatedUnreadReactions);
-
-    const delta = updatedUnreadReactions.length - prevChatUnreadReactions.length;
-    if (delta > 0) {
-      const unreadReactionsCount = (readState?.unreadReactionsCount || 0) + delta;
-      global = replaceThreadReadStateParam(global, chatId, threadId, 'unreadReactionsCount', unreadReactionsCount);
-    }
-  }
-
-  return global;
+  return addUnreadCount({
+    global,
+    chatId,
+    messageIds: ids,
+    totalCount,
+    unreadCountKey: 'unreadReactionsCount',
+  });
 }
 
 export function removeUnreadReactions<T extends GlobalState>({
@@ -117,20 +99,10 @@ export function removeUnreadReactions<T extends GlobalState>({
   chatId: string;
   ids: number[];
 }): T {
-  const messageIdsByThreadId = groupMessageIdsByThreadId(global, chatId, ids, false);
-
-  for (const threadId in messageIdsByThreadId) {
-    const messageIds = messageIdsByThreadId[threadId];
-    const readState = selectThreadReadState(global, chatId, threadId);
-    const prevChatUnreadReactions = readState?.unreadReactions || [];
-    const updatedUnreadReactions = prevChatUnreadReactions.filter((id) => !messageIds.includes(id));
-    global = replaceThreadReadStateParam(global, chatId, threadId, 'unreadReactions', updatedUnreadReactions);
-
-    const delta = prevChatUnreadReactions.length - updatedUnreadReactions.length;
-    if (delta > 0 && readState?.unreadReactionsCount) {
-      const unreadReactionsCount = Math.max(readState.unreadReactionsCount - delta, 0);
-      global = replaceThreadReadStateParam(global, chatId, threadId, 'unreadReactionsCount', unreadReactionsCount);
-    }
-  }
-  return global;
+  return removeUnreadCount({
+    global,
+    chatId,
+    messageIds: ids,
+    unreadCountKey: 'unreadReactionsCount',
+  });
 }
