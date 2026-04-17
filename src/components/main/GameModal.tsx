@@ -1,12 +1,13 @@
 import type { FC } from '../../lib/teact/teact';
 import type React from '../../lib/teact/teact';
-import { memo, useCallback, useEffect } from '../../lib/teact/teact';
+import { memo, useCallback, useEffect, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { TabState } from '../../global/types';
 
 import { getCanPostInChat } from '../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../global/selectors';
+import { isMessageFromIframe } from '../../util/browser/iframe';
 
 import useInterval from '../../hooks/schedulers/useInterval';
 import useOldLang from '../../hooks/useOldLang';
@@ -34,6 +35,7 @@ const GameModal: FC<OwnProps & StateProps> = ({ openedGame, gameTitle, canPost }
   const lang = useOldLang();
   const { url, chatId, messageId } = openedGame || {};
   const isOpen = Boolean(url);
+  const frameRef = useRef<HTMLIFrameElement>();
 
   const sendMessageAction = useSendMessageAction(chatId);
   useInterval(() => {
@@ -41,7 +43,10 @@ const GameModal: FC<OwnProps & StateProps> = ({ openedGame, gameTitle, canPost }
   }, isOpen && canPost ? PLAY_GAME_ACTION_INTERVAL : undefined);
 
   const handleMessage = useCallback((event: MessageEvent<string>) => {
-    if (!chatId || !messageId) return;
+    if (!chatId || !messageId || !isMessageFromIframe(event, frameRef.current)) {
+      return;
+    }
+
     try {
       const data = JSON.parse(event.data) as GameEvents;
       if (data.eventType === 'share_score') {
@@ -77,6 +82,7 @@ const GameModal: FC<OwnProps & StateProps> = ({ openedGame, gameTitle, canPost }
     >
       {isOpen && (
         <iframe
+          ref={frameRef}
           className="game-frame"
           onLoad={handleLoad}
           src={url}

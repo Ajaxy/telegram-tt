@@ -6,6 +6,7 @@ import type { WebApp, WebAppInboundEvent, WebAppOutboundEvent } from '../../../.
 
 import { VERIFY_AGE_MIN_DEFAULT } from '../../../../config';
 import { getWebAppKey } from '../../../../global/helpers';
+import { isMessageFromIframe } from '../../../../util/browser/iframe';
 import { extractCurrentThemeParams } from '../../../../util/themeStyle';
 import { REM } from '../../../common/helpers/mediaDimensions';
 
@@ -172,10 +173,8 @@ const useWebAppFrame = (
     if (ignoreEventsRef.current) {
       return;
     }
-    const contentWindow = ref.current?.contentWindow;
-    const sourceWindow = event.source as Window;
 
-    if (contentWindow !== sourceWindow) {
+    if (!isMessageFromIframe(event, ref.current)) {
       return;
     }
 
