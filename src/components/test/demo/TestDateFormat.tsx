@@ -1,9 +1,9 @@
-import type { FormatDateTimeOptions } from '../../util/localization/dateFormat';
+import type { FormatDateTimeOptions } from '../../../util/localization/dateFormat';
 
-import buildClassName from '../../util/buildClassName';
-import { formatDateTime, formatMessageListDate } from '../../util/localization/dateFormat';
+import buildClassName from '../../../util/buildClassName';
+import { formatDateTime, formatMessageListDate } from '../../../util/localization/dateFormat';
 
-import useLang from '../../hooks/useLang';
+import useLang from '../../../hooks/useLang';
 
 import styles from './TestDateFormat.module.scss';
 

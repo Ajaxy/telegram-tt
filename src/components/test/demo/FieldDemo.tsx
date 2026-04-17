@@ -1,40 +1,48 @@
 /* eslint-disable @stylistic/max-len */
-import { useState } from '../../lib/teact/teact';
+import { useState } from '../../../lib/teact/teact';
 
-import buildStyle from '../../util/buildStyle';
+import buildClassName from '../../../util/buildClassName';
 
 import Control, {
   ControlAfter,
   ControlBefore,
   ControlDescription,
   ControlLabel,
-} from '../gili/layout/Control';
-import Interactive from '../gili/layout/Interactive';
-import Checkbox from '../gili/primitives/Checkbox';
-import Radio from '../gili/primitives/Radio';
-import Switch from '../gili/primitives/Switch';
-import CheckboxField from '../gili/templates/CheckboxField';
-import SwitchField from '../gili/templates/SwitchField';
+} from '../../gili/layout/Control';
+import Interactive from '../../gili/layout/Interactive';
+import Island, {
+  IslandDescription,
+  IslandText,
+} from '../../gili/layout/Island';
+import Surface from '../../gili/layout/Surface';
+import Checkbox from '../../gili/primitives/Checkbox';
+import Radio from '../../gili/primitives/Radio';
+import Switch from '../../gili/primitives/Switch';
+import CheckboxField from '../../gili/templates/CheckboxField';
+import SwitchField from '../../gili/templates/SwitchField';
 
-function Section({ title, children, noBorder }: { title: string; children: any; noBorder?: boolean }) {
+import styles from './FieldDemo.module.scss';
+
+type SectionProps = {
+  title: string;
+  children: React.ReactNode;
+  noBorder?: boolean;
+};
+
+function Section({ title, children, noBorder }: SectionProps) {
   return (
-    <div style="margin-bottom: 2rem; break-inside: avoid">
-      <h3 style="margin: 0 0 0.5rem; font-size: 0.875rem; color: #888; text-transform: uppercase; letter-spacing: 0.05em">
-        {title}
-      </h3>
-      <div
-        style={buildStyle(
-          !noBorder && 'border: 1px solid var(--color-borders-input); border-radius: 0.75rem',
-          'overflow: hidden',
-        )}
-      >
-        {children}
-      </div>
+    <div className={styles.section}>
+      <Island>
+        <h3 className={styles.sectionTitle}>{title}</h3>
+        <div className={buildClassName(styles.sectionContent, noBorder && styles.sectionContentNoBorder)}>
+          {children}
+        </div>
+      </Island>
     </div>
   );
 }
 
-const FieldTest = () => {
+const FieldDemo = () => {
   const [check1, setCheck1] = useState(false);
   const [check2, setCheck2] = useState(true);
   const [check3, setCheck3] = useState(false);
@@ -65,13 +73,50 @@ const FieldTest = () => {
   const [switch4, setSwitch4] = useState(true);
 
   return (
-    <div style="overflow-y: auto; height: 100vh">
-      <div style="columns: 28rem 2; column-gap: 2rem; padding: 2rem">
-        <h2 style="margin: 0 0 1.5rem; column-span: all">Control Component Test</h2>
+    <Surface className={styles.root} scrollable>
+      <div className={styles.content}>
+        <h2 className={buildClassName(styles.title, styles.fullWidth)}>Control Component Test</h2>
+
+        <div className={buildClassName(styles.layoutPreview, styles.fullWidth)}>
+          <Island>
+            <IslandText>
+              <h3 className={styles.sectionTitle}>Surface + Islands</h3>
+              <div className={styles.previewCard}>
+                <span className={styles.previewLabel}>Island</span>
+                <span className={styles.previewText}>
+                  Regular background, island radius, and 0.5rem padding.
+                </span>
+              </div>
+            </IslandText>
+          </Island>
+          <IslandDescription>
+            IslandDescription stays attached to the island above it, and the next island starts 1rem lower.
+          </IslandDescription>
+          <Island>
+            <IslandText>
+              <div className={styles.previewCard}>
+                <span className={styles.previewLabel}>Island After Description</span>
+                <span className={styles.previewText}>
+                  This island verifies the description-to-island spacing rule.
+                </span>
+              </div>
+            </IslandText>
+          </Island>
+          <Island>
+            <IslandText>
+              <div className={styles.previewCard}>
+                <span className={styles.previewLabel}>Island After Island</span>
+                <span className={styles.previewText}>
+                  This island verifies the direct island-to-island 1rem gap.
+                </span>
+              </div>
+            </IslandText>
+          </Island>
+        </div>
 
         {/* Bare primitives */}
         <Section title="Bare Primitives (no Control)">
-          <div style="display: flex; gap: 1rem; padding: 1rem; align-items: center">
+          <div className={styles.barePrimitives}>
             <Checkbox checked={check1} onChange={setCheck1} />
             <Checkbox checked={check2} onChange={setCheck2} />
             <Checkbox checked={false} isInvalid onChange={setCheck1} />
@@ -481,7 +526,7 @@ const FieldTest = () => {
 
         {/* Control without Interactive */}
         <Section noBorder title="Control without Interactive (no padding/hover)">
-          <div style="padding: 0.5rem 1rem">
+          <div className={styles.bareControl}>
             <Control>
               <Checkbox checked={check2} onChange={setCheck2} />
               <ControlLabel>Bare field, custom container</ControlLabel>
@@ -494,8 +539,8 @@ const FieldTest = () => {
           </div>
         </Section>
       </div>
-    </div>
+    </Surface>
   );
 };
 
-export default FieldTest;
+export default FieldDemo;

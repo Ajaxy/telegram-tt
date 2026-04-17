@@ -1,0 +1,15 @@
+@use '../../../styles/mixins';
+
+@layer ui.layout {
+  .root {
+    padding-inline: 1rem;
+    background-color: var(--color-background-secondary);
+  }
+
+  .scrollable {
+    scrollbar-gutter: stable;
+    overflow-y: auto;
+
+    @include mixins.adapt-padding-to-scrollbar(1rem);
+  }
+}

@@ -1,0 +1,81 @@
+.root {
+  height: 100vh;
+}
+
+.content {
+  columns: 28rem 2;
+  column-gap: 2rem;
+  padding-block: 2rem;
+}
+
+.fullWidth {
+  column-span: all;
+  break-inside: avoid;
+}
+
+.title {
+  margin: 0 0 1.5rem;
+}
+
+.layoutPreview,
+.section {
+  break-inside: avoid;
+  margin-bottom: 2rem;
+}
+
+.layoutPreview {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionTitle {
+  margin: 0 0 0.5rem;
+
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sectionContent {
+  overflow: hidden;
+  border: 1px solid var(--color-borders-input);
+  border-radius: 0.75rem;
+}
+
+.sectionContentNoBorder {
+  border: 0;
+  border-radius: 0;
+}
+
+.barePrimitives {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+
+  padding: 1rem;
+}
+
+.previewCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.previewLabel {
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.previewText {
+  line-height: 1.25rem;
+}
+
+.bareControl {
+  padding: 0.5rem 1rem;
+}

@@ -1,0 +1,38 @@
+@layer ui.layout {
+  .island {
+    padding: 0.5rem;
+    border-radius: var(--border-radius-island);
+    background-color: var(--color-background);
+    box-shadow: 0px 1px 4px 0px #0000000D;
+  }
+
+  .description {
+    display: block;
+
+    padding: 0.5rem 1rem;
+
+    font-size: 0.875rem;
+    line-height: 1rem;
+    color: var(--color-text-secondary);
+    overflow-wrap: anywhere;
+  }
+
+  .text {
+    display: block;
+    padding: 0.5rem 1rem;
+    line-height: 1.25rem;
+    overflow-wrap: anywhere;
+  }
+
+  .island + .island {
+    margin-top: 1rem;
+  }
+
+  .island + .description {
+    margin-top: 0.5rem;
+  }
+
+  .description + .island {
+    margin-top: 1rem;
+  }
+}
