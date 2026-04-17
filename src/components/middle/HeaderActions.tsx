@@ -4,7 +4,7 @@ import {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { IAnchorPosition, MessageListType, ThreadId } from '../../types';
+import type { IAnchorPosition, MessageListType, ThreadId, TranslationTone } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { ManagementScreens } from '../../types';
 
@@ -31,6 +31,7 @@ import {
   selectIsUserBlocked,
   selectLanguageCode,
   selectRequestedChatTranslationLanguage,
+  selectRequestedChatTranslationTone,
   selectTranslationLanguage,
   selectUserFullInfo,
 } from '../../global/selectors';
@@ -44,11 +45,13 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
 import CustomEmoji from '../common/CustomEmoji';
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import Link from '../ui/Link';
 import MenuItem from '../ui/MenuItem';
 import MenuSeparator from '../ui/MenuSeparator';
+import NestedMenuItem from '../ui/NestedMenuItem';
 import HeaderMenuContainer from './HeaderMenuContainer.async';
 
 interface OwnProps {
@@ -91,6 +94,7 @@ interface StateProps {
   detectedChatLanguage?: string;
   doNotTranslate: string[];
   isAccountFrozen?: boolean;
+  currentTone?: TranslationTone;
 }
 
 const HeaderActions: FC<OwnProps & StateProps> = ({
@@ -128,6 +132,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   detectedChatLanguage,
   doNotTranslate,
   isAccountFrozen,
+  currentTone,
   onTopicSearch,
 }) => {
   const {
@@ -140,6 +145,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     showNotification,
     openChat,
     requestChatTranslation,
+    setChatTranslationTone,
     togglePeerTranslations,
     openChatLanguageModal,
     setSettingOption,
@@ -293,6 +299,11 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     showNotification({ message: getTextWithLanguage('AddedToDoNotTranslate', detectedChatLanguage) });
   });
 
+  const handleSetTone = useLastCallback((tone: TranslationTone) => {
+    setChatTranslationTone({ chatId, tone });
+    setSettingOption({ translationTone: tone });
+  });
+
   useHotkeys(useMemo(() => ({
     'Mod+F': handleHotkeySearchClick,
   }), []));
@@ -326,6 +337,37 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           <MenuItem icon="replace" onClick={handleChangeLanguage}>
             {oldLang('Chat.Translate.Menu.To')}
           </MenuItem>
+          <NestedMenuItem
+            icon="tone"
+            submenuClassName="translation-tone-menu"
+            submenu={(
+              <>
+                <MenuItem
+                  icon={currentTone === 'neutral' ? 'message-succeeded' : undefined}
+                  customIcon={currentTone !== 'neutral' ? <Icon name="placeholder" /> : undefined}
+                  onClick={() => handleSetTone('neutral')}
+                >
+                  {lang('TranslationToneNeutral')}
+                </MenuItem>
+                <MenuItem
+                  icon={currentTone === 'formal' ? 'message-succeeded' : undefined}
+                  customIcon={currentTone !== 'formal' ? <Icon name="placeholder" /> : undefined}
+                  onClick={() => handleSetTone('formal')}
+                >
+                  {lang('TranslationToneFormal')}
+                </MenuItem>
+                <MenuItem
+                  icon={currentTone === 'casual' ? 'message-succeeded' : undefined}
+                  customIcon={currentTone !== 'casual' ? <Icon name="placeholder" /> : undefined}
+                  onClick={() => handleSetTone('casual')}
+                >
+                  {lang('TranslationToneCasual')}
+                </MenuItem>
+              </>
+            )}
+          >
+            {lang('TranslationTone')}
+          </NestedMenuItem>
           <MenuSeparator />
           {detectedChatLanguage
             && <MenuItem icon="hand-stop" onClick={handleDoNotTranslate}>{doNotTranslateText}</MenuItem>}
@@ -494,7 +536,7 @@ export default memo(withGlobal<OwnProps>(
     const language = selectLanguageCode(global);
     const translationLanguage = selectTranslationLanguage(global);
     const isPrivate = isUserId(chatId);
-    const { doNotTranslate } = global.settings.byKey;
+    const { doNotTranslate, translationTone } = global.settings.byKey;
 
     const isRestricted = selectIsChatRestricted(global, chatId);
     if (!chat || isRestricted || selectIsInSelectMode(global)) {
@@ -503,6 +545,7 @@ export default memo(withGlobal<OwnProps>(
         language,
         translationLanguage,
         doNotTranslate,
+        currentTone: translationTone,
       } as Complete<StateProps>;
     }
 
@@ -545,6 +588,7 @@ export default memo(withGlobal<OwnProps>(
     const isTranslating = Boolean(selectRequestedChatTranslationLanguage(global, chatId));
     const canTranslate = selectCanTranslateChat(global, chatId) && !fullInfo?.isTranslationDisabled;
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
+    const currentTone = selectRequestedChatTranslationTone(global, chatId);
 
     const channelMonoforumId = isChatChannel(chat) ? chat.linkedMonoforumId : undefined;
 
@@ -578,6 +622,7 @@ export default memo(withGlobal<OwnProps>(
       canUnblock,
       isAccountFrozen,
       channelMonoforumId,
+      currentTone,
     };
   },
 )(HeaderActions));

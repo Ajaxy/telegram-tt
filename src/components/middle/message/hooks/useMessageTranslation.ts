@@ -1,8 +1,9 @@
 import { useEffect } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import type { ChatTranslatedMessages } from '../../../../types';
+import type { ChatTranslatedMessages, TranslationTone } from '../../../../types';
 
+import { getTranslationCacheKey, parseTranslationCacheKey } from '../../../../util/keys/translationKey';
 import { throttle } from '../../../../util/schedulers';
 
 const MESSAGE_LIMIT_PER_REQUEST = 20;
@@ -14,19 +15,21 @@ export default function useMessageTranslation(
   chatId?: string,
   messageId?: number,
   requestedLanguageCode?: string,
+  tone?: TranslationTone,
 ) {
-  const messageTranslation = requestedLanguageCode && messageId
-    ? chatTranslations?.byLangCode[requestedLanguageCode]?.[messageId] : undefined;
+  const cacheKey = requestedLanguageCode ? getTranslationCacheKey(requestedLanguageCode, tone) : undefined;
+  const messageTranslation = cacheKey && messageId
+    ? chatTranslations?.byLangCode[cacheKey]?.[messageId] : undefined;
 
   const { isPending, text } = messageTranslation || {};
 
   useEffect(() => {
-    if (!chatId || !messageId) return;
+    if (!chatId || !messageId || !cacheKey || !requestedLanguageCode) return;
 
-    if (!text && isPending === undefined && requestedLanguageCode) {
-      addPendingTranslation(chatId, messageId, requestedLanguageCode);
+    if (!text && isPending === undefined) {
+      addPendingTranslation(chatId, messageId, requestedLanguageCode, tone);
     }
-  }, [chatId, text, isPending, messageId, requestedLanguageCode]);
+  }, [chatId, text, isPending, messageId, cacheKey, requestedLanguageCode, tone]);
 
   if (!chatId || !messageId) {
     return {
@@ -46,7 +49,10 @@ const throttledProcessPending = throttle(processPending, THROTTLE_DELAY);
 function processPending() {
   const { translateMessages } = getActions();
   let hasUnprocessed = false;
-  PENDING_TRANSLATIONS.forEach((chats, toLanguageCode) => {
+
+  PENDING_TRANSLATIONS.forEach((chats, cacheKey) => {
+    const { languageCode, tone } = parseTranslationCacheKey(cacheKey);
+
     chats.forEach((messageIds, chatId) => {
       const messageIdsToTranslate = messageIds.slice(0, MESSAGE_LIMIT_PER_REQUEST);
 
@@ -54,9 +60,9 @@ function processPending() {
         hasUnprocessed = true;
       }
 
-      translateMessages({ chatId, messageIds: messageIdsToTranslate, toLanguageCode });
+      translateMessages({ chatId, messageIds: messageIdsToTranslate, toLanguageCode: languageCode, tone });
 
-      removePendingTranslations(chatId, messageIdsToTranslate, toLanguageCode);
+      removePendingTranslations(chatId, messageIdsToTranslate, cacheKey);
     });
   });
 
@@ -69,8 +75,10 @@ function addPendingTranslation(
   chatId: string,
   messageId: number,
   toLanguageCode: string,
+  tone?: TranslationTone,
 ) {
-  const languageTranslations = PENDING_TRANSLATIONS.get(toLanguageCode) || new Map<string, number[]>();
+  const cacheKey = getTranslationCacheKey(toLanguageCode, tone);
+  const languageTranslations = PENDING_TRANSLATIONS.get(cacheKey) || new Map<string, number[]>();
   const messageIds = languageTranslations.get(chatId) || [];
 
   if (messageIds.includes(messageId)) {
@@ -80,9 +88,9 @@ function addPendingTranslation(
 
   messageIds.push(messageId);
   languageTranslations.set(chatId, messageIds);
-  PENDING_TRANSLATIONS.set(toLanguageCode, languageTranslations);
+  PENDING_TRANSLATIONS.set(cacheKey, languageTranslations);
 
-  getActions().markMessagesTranslationPending({ chatId, messageIds, toLanguageCode });
+  getActions().markMessagesTranslationPending({ chatId, messageIds, toLanguageCode, tone });
 
   throttledProcessPending();
 }
@@ -90,11 +98,11 @@ function addPendingTranslation(
 function removePendingTranslations(
   chatId: string,
   messageIds: number[],
-  toLanguageCode: string,
+  cacheKey: string,
 ) {
-  const languageTranslations = PENDING_TRANSLATIONS.get(toLanguageCode);
+  const languageTranslations = PENDING_TRANSLATIONS.get(cacheKey);
   if (!languageTranslations?.size) {
-    PENDING_TRANSLATIONS.delete(toLanguageCode);
+    PENDING_TRANSLATIONS.delete(cacheKey);
     return;
   }
 
@@ -109,7 +117,7 @@ function removePendingTranslations(
   if (!newMessageIds?.length) {
     languageTranslations.delete(chatId);
     if (!languageTranslations.size) {
-      PENDING_TRANSLATIONS.delete(toLanguageCode);
+      PENDING_TRANSLATIONS.delete(cacheKey);
     }
     return;
   }

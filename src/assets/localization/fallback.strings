@@ -2775,6 +2775,10 @@
 "Transfer" = "Transfer";
 "TranslateMenuCocoon" = "Translations are powered by 🥚 **Cocoon**. {link}";
 "TranslateMenuCocoonLinkText" = "How does it work?";
+"TranslationTone" = "Translation Tone";
+"TranslationToneNeutral" = "Neutral";
+"TranslationToneFormal" = "Formal";
+"TranslationToneCasual" = "Casual";
 "CocoonTitle" = "Cocoon";
 "CocoonDescription" = "Cocoon (**Co**nfidential **Co**mpute **O**pen **N**etwork)\nhandles AI tasks safely and efficiently.";
 "CocoonFeature1Title" = "Private";

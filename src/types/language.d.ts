@@ -2033,6 +2033,10 @@ export interface LangPair {
   'EnterPasswordDescription': undefined;
   'Transfer': undefined;
   'TranslateMenuCocoonLinkText': undefined;
+  'TranslationTone': undefined;
+  'TranslationToneNeutral': undefined;
+  'TranslationToneFormal': undefined;
+  'TranslationToneCasual': undefined;
   'CocoonTitle': undefined;
   'CocoonDescription': undefined;
   'CocoonFeature1Title': undefined;
@@ -2095,7 +2099,6 @@ export interface LangPair {
   'TextShowLess': undefined;
   'AiMessageEditorFrom': undefined;
   'AiMessageEditorTo': undefined;
-  'TranslationToneNeutral': undefined;
   'ButtonHelp': undefined;
 }
 

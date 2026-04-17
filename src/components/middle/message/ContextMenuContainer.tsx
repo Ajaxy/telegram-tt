@@ -23,6 +23,7 @@ import type {
   IAnchorPosition,
   MessageListType,
   ThreadId,
+  TranslationTone,
 } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
@@ -64,6 +65,7 @@ import {
   selectPeerStory,
   selectPollFromMessage,
   selectRequestedChatTranslationLanguage,
+  selectRequestedChatTranslationTone,
   selectRequestedMessageTranslationLanguage,
   selectStickerSet,
   selectTopic,
@@ -77,6 +79,7 @@ import { selectSavedDialogIdFromMessage, selectThreadInfo } from '../../../globa
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { isUserId } from '../../../util/entities/ids';
+import { getTranslationCacheKey, parseTranslationCacheKey } from '../../../util/keys/translationKey';
 import { getSelectionAsFormattedText } from './helpers/getSelectionAsFormattedText';
 import { isSelectionRangeInsideMessage } from './helpers/isSelectionRangeInsideMessage';
 
@@ -138,6 +141,8 @@ type StateProps = {
   canShowOriginal?: boolean;
   isMessageTranslated?: boolean;
   canSelectLanguage?: boolean;
+  currentTranslationTone?: TranslationTone;
+  translationRequestLanguage?: string;
   isPrivate?: boolean;
   isCurrentUserPremium?: boolean;
   hasFullInfo?: boolean;
@@ -227,6 +232,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   isMessageTranslated,
   canShowOriginal,
   canSelectLanguage,
+  currentTranslationTone,
+  translationRequestLanguage,
   isReactionPickerOpen,
   isInSavedMessages,
   canReplyInChat,
@@ -278,6 +285,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     reportMessages,
     openTodoListModal,
     showNotification,
+    setSettingOption,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -655,6 +663,20 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     requestMessageTranslation({
       chatId: message.chatId,
       id: message.id,
+      tone: currentTranslationTone,
+    });
+    closeMenu();
+  });
+
+  const handleTranslateWithTone = useLastCallback((tone: TranslationTone) => {
+    const { languageCode } = parseTranslationCacheKey(translationRequestLanguage!);
+
+    setSettingOption({ translationTone: tone });
+    requestMessageTranslation({
+      chatId: message.chatId,
+      id: message.id,
+      toLanguageCode: languageCode,
+      tone,
     });
     closeMenu();
   });
@@ -736,6 +758,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canTranslate={canTranslate}
         canShowOriginal={canShowOriginal}
         canSelectLanguage={canSelectLanguage}
+        currentTranslationTone={currentTranslationTone}
         canPlayAnimatedEmojis={canPlayAnimatedEmojis}
         shouldRenderShowWhen={shouldRenderShowWhen}
         canLoadReadDate={canLoadReadDate}
@@ -777,6 +800,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onShowReactors={handleOpenReactorListModal}
         onReactionPickerOpen={handleReactionPickerOpen}
         onTranslate={handleTranslate}
+        onTranslateWithTone={handleTranslateWithTone}
         onShowOriginal={handleShowOriginal}
         onSelectLanguage={handleSelectLanguage}
         userFullName={userFullName}
@@ -901,11 +925,26 @@ export default memo(withGlobal<OwnProps>(
       ? customEmojiSetsNotFiltered : undefined;
 
     const translationRequestLanguage = selectRequestedMessageTranslationLanguage(global, message.chatId, message.id);
-    const hasTranslation = translationRequestLanguage
-      ? Boolean(selectMessageTranslations(global, message.chatId, translationRequestLanguage)[message.id]?.text)
+    const chatTranslationLanguage = selectRequestedChatTranslationLanguage(global, message.chatId);
+    const chatTranslationTone = selectRequestedChatTranslationTone(global, message.chatId);
+
+    const isManualMessageTranslation = !chatTranslationLanguage && translationRequestLanguage;
+    const { tone: manualMessageTone } = isManualMessageTranslation
+      ? parseTranslationCacheKey(translationRequestLanguage)
+      : { tone: undefined };
+    const globalTone = global.settings.byKey.translationTone;
+    const currentTranslationTone = manualMessageTone || chatTranslationTone || globalTone;
+
+    const translationCacheKey = chatTranslationLanguage
+      ? getTranslationCacheKey(chatTranslationLanguage, currentTranslationTone)
+      : translationRequestLanguage;
+
+    const messageTranslation = translationCacheKey
+      ? selectMessageTranslations(global, message.chatId, translationCacheKey)[message.id]
       : undefined;
+    const hasTranslation = Boolean(messageTranslation?.text);
     const canTranslate = !hasTranslation && selectCanTranslateMessage(global, message, detectedLanguage);
-    const isChatTranslated = selectRequestedChatTranslationLanguage(global, message.chatId);
+    const isChatTranslated = chatTranslationLanguage;
 
     const isInSavedMessages = selectIsChatWithSelf(global, message.chatId);
 
@@ -966,6 +1005,8 @@ export default memo(withGlobal<OwnProps>(
       canShowOriginal: hasTranslation && !isChatTranslated,
       canSelectLanguage: hasTranslation && !isChatTranslated,
       isMessageTranslated: hasTranslation,
+      currentTranslationTone,
+      translationRequestLanguage,
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
       isInSavedMessages,

@@ -945,19 +945,19 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateMessageTranslations': {
       const {
-        chatId, messageIds, toLanguageCode, translations,
+        chatId, messageIds, toLanguageCode, translations, tone,
       } = update;
 
-      global = updateMessageTranslations(global, chatId, messageIds, toLanguageCode, translations);
+      global = updateMessageTranslations(global, chatId, messageIds, toLanguageCode, translations, tone);
 
       setGlobal(global);
       break;
     }
 
     case 'failedMessageTranslations': {
-      const { chatId, messageIds, toLanguageCode } = update;
+      const { chatId, messageIds, toLanguageCode, tone } = update;
 
-      global = updateMessageTranslations(global, chatId, messageIds, toLanguageCode, []);
+      global = updateMessageTranslations(global, chatId, messageIds, toLanguageCode, [], tone);
 
       setGlobal(global);
       break;

@@ -40,6 +40,7 @@ import type {
   TextSummary,
   ThemeKey,
   ThreadId,
+  TranslationTone,
 } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import { MAIN_THREAD_ID } from '../../../api/types';
@@ -106,6 +107,7 @@ import {
   selectPollFromMessage,
   selectReplyMessage,
   selectRequestedChatTranslationLanguage,
+  selectRequestedChatTranslationTone,
   selectRequestedMessageTranslationLanguage,
   selectSender,
   selectSenderFromHeader,
@@ -131,6 +133,7 @@ import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { isUserId } from '../../../util/entities/ids';
 import { getMessageKey } from '../../../util/keys/messageKey';
+import { parseTranslationCacheKey } from '../../../util/keys/translationKey';
 import { getServerTime } from '../../../util/serverTime';
 import stopEvent from '../../../util/stopEvent';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
@@ -313,6 +316,7 @@ type StateProps = {
   shouldDetectChatLanguage?: boolean;
   requestedTranslationLanguage?: string;
   requestedChatTranslationLanguage?: string;
+  requestedTranslationTone?: TranslationTone;
   withAnimatedEffects?: boolean;
   canAnimateTextStreaming?: boolean;
   webPageStory?: ApiTypeStory;
@@ -442,6 +446,7 @@ const Message = ({
   shouldDetectChatLanguage,
   requestedTranslationLanguage,
   requestedChatTranslationLanguage,
+  requestedTranslationTone,
   withAnimatedEffects,
   canAnimateTextStreaming,
   webPageStory,
@@ -827,12 +832,19 @@ const Message = ({
   useDetectChatLanguage(message, detectedLanguage, !shouldDetectChatLanguage, getIsMessageListReady);
 
   const shouldTranslate = isMessageTranslatable(message, !requestedChatTranslationLanguage);
+
+  const isManualMessageTranslation = !requestedChatTranslationLanguage && requestedTranslationLanguage;
+  const parsedManualTranslation = isManualMessageTranslation
+    ? parseTranslationCacheKey(requestedTranslationLanguage) : undefined;
+  const translationLanguageForHook = parsedManualTranslation?.languageCode || requestedChatTranslationLanguage;
+  const translationToneForHook = parsedManualTranslation?.tone || requestedTranslationTone;
+
   const { isPending: isTranslationPending, translatedText } = useMessageTranslation(
-    chatTranslations, chatId, shouldTranslate ? messageId : undefined, requestedTranslationLanguage,
+    chatTranslations, chatId, shouldTranslate ? messageId : undefined, translationLanguageForHook,
+    translationToneForHook,
   );
   const isSummaryPending = Boolean(summary?.isPending);
   const isNewTextPending = isTranslationPending || isSummaryPending;
-  // Used to display previous result while new one is loading
   const previousTranslatedText = usePreviousDeprecated(translatedText, Boolean(shouldTranslate));
 
   useEffectWithPrevDeps(([prevIsShowingSummary]) => {
@@ -1224,6 +1236,7 @@ const Message = ({
                 chatTranslations={chatTranslations}
                 isMediaNsfw={isReplyMediaNsfw}
                 requestedChatTranslationLanguage={requestedChatTranslationLanguage}
+                requestedChatTranslationTone={requestedTranslationTone}
                 observeIntersectionForLoading={observeIntersectionForLoading}
                 observeIntersectionForPlaying={observeIntersectionForPlaying}
                 onClick={handleReplyClick}
@@ -2149,6 +2162,7 @@ export default memo(withGlobal<OwnProps>(
 
     const requestedTranslationLanguage = selectRequestedMessageTranslationLanguage(global, chatId, message.id);
     const requestedChatTranslationLanguage = selectRequestedChatTranslationLanguage(global, chatId);
+    const requestedTranslationTone = selectRequestedChatTranslationTone(global, chatId);
 
     const areTranslationsEnabled = IS_TRANSLATION_SUPPORTED && global.settings.byKey.canTranslate
       && !requestedChatTranslationLanguage; // Stop separate language detection if chat translation is requested
@@ -2250,6 +2264,7 @@ export default memo(withGlobal<OwnProps>(
       shouldDetectChatLanguage: selectShouldDetectChatLanguage(global, chatId),
       requestedTranslationLanguage,
       requestedChatTranslationLanguage,
+      requestedTranslationTone,
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       withAnimatedEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
       canAnimateTextStreaming: selectPerformanceSettingsValue(global, 'textStreaming'),

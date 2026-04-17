@@ -55,6 +55,7 @@ import {
   uniqueByField,
 } from '../../../util/iteratees';
 import { getMessageKey, isLocalMessageId } from '../../../util/keys/messageKey';
+import { parseTranslationCacheKey } from '../../../util/keys/translationKey';
 import { getTranslationFn, type RegularLangFnParameters } from '../../../util/localization';
 import { formatStarsAsText } from '../../../util/localization/format';
 import { oldTranslate } from '../../../util/oldLangProvider';
@@ -2879,13 +2880,16 @@ addActionHandler('forwardStory', (global, actions, payload): ActionReturnType =>
 
 addActionHandler('requestMessageTranslation', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, id, toLanguageCode = selectTranslationLanguage(global), tabId = getCurrentTabId(),
+    chatId, id, toLanguageCode = selectTranslationLanguage(global), tone, tabId = getCurrentTabId(),
   } = payload;
 
-  global = updateRequestedMessageTranslation(global, chatId, id, toLanguageCode, tabId);
-  global = replaceSettings(global, {
-    translationLanguage: toLanguageCode,
-  });
+  global = updateRequestedMessageTranslation(global, chatId, id, toLanguageCode, tone, tabId);
+
+  if (!tone) {
+    global = replaceSettings(global, {
+      translationLanguage: toLanguageCode,
+    });
+  }
 
   return global;
 });
@@ -2902,13 +2906,13 @@ addActionHandler('showOriginalMessage', (global, actions, payload): ActionReturn
 
 addActionHandler('markMessagesTranslationPending', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, messageIds, toLanguageCode = selectLanguageCode(global),
+    chatId, messageIds, toLanguageCode = selectLanguageCode(global), tone,
   } = payload;
 
   messageIds.forEach((id) => {
     global = updateMessageTranslation(global, chatId, id, toLanguageCode, {
       isPending: true,
-    });
+    }, tone);
   });
 
   return global;
@@ -2916,18 +2920,19 @@ addActionHandler('markMessagesTranslationPending', (global, actions, payload): A
 
 addActionHandler('translateMessages', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, messageIds, toLanguageCode = selectLanguageCode(global),
+    chatId, messageIds, toLanguageCode = selectLanguageCode(global), tone,
   } = payload;
 
   const chat = selectChat(global, chatId);
   if (!chat) return undefined;
 
-  actions.markMessagesTranslationPending({ chatId, messageIds, toLanguageCode });
+  actions.markMessagesTranslationPending({ chatId, messageIds, toLanguageCode, tone });
 
   callApi('translateText', {
     chat,
     messageIds,
     toLanguageCode,
+    tone,
   });
 
   return global;
@@ -2938,6 +2943,11 @@ addActionHandler('summarizeMessage', async (global, actions, payload): Promise<v
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
+  const { languageCode, tone } = toLanguageCode
+    ? parseTranslationCacheKey(toLanguageCode)
+    : { languageCode: undefined, tone: undefined };
+  const apiTone = tone === 'neutral' ? undefined : tone;
+
   const placeholderSummary: TextSummary = {
     isPending: true,
     text: undefined,
@@ -2946,10 +2956,9 @@ addActionHandler('summarizeMessage', async (global, actions, payload): Promise<v
   global = updateMessageSummary(global, chatId, id, placeholderSummary, toLanguageCode);
   setGlobal(global);
 
-  const result = await callApi('fetchMessageSummary', { chat, id, toLanguageCode });
+  const result = await callApi('fetchMessageSummary', { chat, id, toLanguageCode: languageCode, tone: apiTone });
   if (!result) {
     global = getGlobal();
-    // Disable summary to prevent endless loading
     global = updateChatMessage(global, chatId, id, { summaryLanguageCode: undefined });
     global = clearMessageSummary(global, chatId, id);
     setGlobal(global);

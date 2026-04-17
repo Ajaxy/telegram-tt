@@ -6,7 +6,7 @@ import type {
   ApiMessage, ApiPeer, ApiReplyInfo, MediaContainer,
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { ChatTranslatedMessages } from '../../../types';
+import type { ChatTranslatedMessages, TranslationTone } from '../../../types';
 import type { IconName } from '../../../types/icons';
 
 import { TON_CURRENCY_CODE } from '../../../config';
@@ -54,6 +54,7 @@ type OwnProps = {
   isInComposer?: boolean;
   chatTranslations?: ChatTranslatedMessages;
   requestedChatTranslationLanguage?: string;
+  requestedChatTranslationTone?: TranslationTone;
   isOpen?: boolean;
   isMediaNsfw?: boolean;
   noCaptions?: boolean;
@@ -83,6 +84,7 @@ const EmbeddedMessage = ({
   noUserColors,
   chatTranslations,
   requestedChatTranslationLanguage,
+  requestedChatTranslationTone,
   isMediaNsfw,
   noCaptions,
   pictogramActionIcon,
@@ -110,7 +112,8 @@ const EmbeddedMessage = ({
 
   const shouldTranslate = message && isMessageTranslatable(message);
   const { translatedText } = useMessageTranslation(
-    chatTranslations, message?.chatId, shouldTranslate ? message?.id : undefined, requestedChatTranslationLanguage,
+    chatTranslations, message?.chatId, shouldTranslate ? message?.id : undefined,
+    requestedChatTranslationLanguage, requestedChatTranslationTone,
   );
 
   const oldLang = useOldLang();

@@ -7,13 +7,15 @@ import { createMessageHashUrl } from '../../../util/routing';
 import { addActionHandler, execAfterActions, getGlobal, setGlobal } from '../../index';
 import {
   closeMiddleSearch,
-  exitMessageSelectMode, updateCurrentMessageList, updateRequestedChatTranslation,
+  exitMessageSelectMode,
+  updateChatTranslationTone,
+  updateCurrentMessageList,
+  updateMessageTranslationTone,
+  updateRequestedChatTranslation,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import { replaceTabThreadParam } from '../../reducers/threads';
-import {
-  selectChat, selectCurrentMessageList, selectTabState,
-} from '../../selectors';
+import { selectChat, selectCurrentMessageList, selectTabState } from '../../selectors';
 
 addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionReturnType => {
   const {
@@ -241,7 +243,20 @@ addActionHandler('closeChatlistModal', (global, actions, payload): ActionReturnT
 
 addActionHandler('requestChatTranslation', (global, actions, payload): ActionReturnType => {
   const { chatId, toLanguageCode, tabId = getCurrentTabId() } = payload;
-  return updateRequestedChatTranslation(global, chatId, toLanguageCode, tabId);
+  const tabState = selectTabState(global, tabId);
+  const existingTone = tabState.requestedTranslations.byChatId[chatId]?.tone;
+  const tone = existingTone || global.settings.byKey.translationTone;
+  return updateRequestedChatTranslation(global, chatId, toLanguageCode, tone, tabId);
+});
+
+addActionHandler('setChatTranslationTone', (global, actions, payload): ActionReturnType => {
+  const { chatId, tone, tabId = getCurrentTabId() } = payload;
+  return updateChatTranslationTone(global, chatId, tone, tabId);
+});
+
+addActionHandler('setMessageTranslationTone', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId, tone, tabId = getCurrentTabId() } = payload;
+  return updateMessageTranslationTone(global, chatId, messageId, tone, tabId);
 });
 
 addActionHandler('closeChatInviteModal', (global, actions, payload): ActionReturnType => {

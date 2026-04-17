@@ -297,6 +297,7 @@ export type FontIconName =
   | 'tag'
   | 'timer'
   | 'toncoin'
+  | 'tone'
   | 'tools'
   | 'topic-new'
   | 'trade'

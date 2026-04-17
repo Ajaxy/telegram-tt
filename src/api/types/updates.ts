@@ -6,7 +6,7 @@ import type {
   VideoRotation,
   VideoState,
 } from '../../lib/secret-sauce';
-import type { ThreadId, ThreadReadState } from '../../types';
+import type { ThreadId, ThreadReadState, TranslationTone } from '../../types';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { ApiBotCommand, ApiBotMenuButton } from './bots';
 import type {
@@ -778,6 +778,7 @@ export type ApiUpdateMessageTranslations = {
   messageIds: number[];
   translations: ApiFormattedText[];
   toLanguageCode: string;
+  tone?: TranslationTone;
 };
 
 export type ApiUpdateFailedMessageTranslations = {
@@ -785,6 +786,7 @@ export type ApiUpdateFailedMessageTranslations = {
   chatId: string;
   messageIds: number[];
   toLanguageCode: string;
+  tone?: TranslationTone;
 };
 
 export type ApiUpdateFetchingDifference = {

@@ -1,16 +1,23 @@
 import type { ApiFormattedText } from '../../api/types';
-import type { TextSummary, TranslatedMessage } from '../../types';
+import type { TextSummary, TranslatedMessage, TranslationTone } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { omit } from '../../util/iteratees';
+import { getTranslationCacheKey, parseTranslationCacheKey } from '../../util/keys/translationKey';
 import { selectMessageTranslations, selectTabState } from '../selectors';
 import { updateTabState } from './tabs';
 
 export function updateMessageTranslation<T extends GlobalState>(
-  global: T, chatId: string, messageId: number, toLanguageCode: string, translation: Partial<TranslatedMessage>,
+  global: T,
+  chatId: string,
+  messageId: number,
+  toLanguageCode: string,
+  translation: Partial<TranslatedMessage>,
+  tone?: TranslationTone,
 ) {
-  const translatedMessages = selectMessageTranslations(global, chatId, toLanguageCode);
+  const cacheKey = getTranslationCacheKey(toLanguageCode, tone);
+  const translatedMessages = selectMessageTranslations(global, chatId, cacheKey);
 
   return {
     ...global,
@@ -22,7 +29,7 @@ export function updateMessageTranslation<T extends GlobalState>(
           ...global.translations.byChatId[chatId],
           byLangCode: {
             ...global.translations.byChatId[chatId]?.byLangCode,
-            [toLanguageCode]: {
+            [cacheKey]: {
               ...translatedMessages,
               [messageId]: {
                 ...translatedMessages[messageId],
@@ -68,30 +75,65 @@ export function clearMessageTranslation<T extends GlobalState>(
 }
 
 export function updateMessageTranslations<T extends GlobalState>(
-  global: T, chatId: string, messageIds: number[], toLanguageCode: string, translations: ApiFormattedText[],
+  global: T,
+  chatId: string,
+  messageIds: number[],
+  toLanguageCode: string,
+  translations: ApiFormattedText[],
+  tone?: TranslationTone,
 ) {
   messageIds.forEach((messageId, index) => {
     const text = translations[index];
     global = updateMessageTranslation(global, chatId, messageId, toLanguageCode, {
-      text: text.text.length ? text : undefined,
+      text: text?.text?.length ? text : undefined,
       isPending: false,
-    });
+    }, tone);
   });
 
   return global;
 }
 
+export function clearChatTranslations<T extends GlobalState>(
+  global: T, chatId: string, toLanguageCode: string,
+) {
+  const chatTranslations = global.translations.byChatId[chatId];
+  if (!chatTranslations) return global;
+
+  const filteredByLangCode = Object.fromEntries(
+    Object.entries(chatTranslations.byLangCode).filter(([cacheKey]) => {
+      return parseTranslationCacheKey(cacheKey).languageCode !== toLanguageCode;
+    }),
+  );
+
+  return {
+    ...global,
+    translations: {
+      ...global.translations,
+      byChatId: {
+        ...global.translations.byChatId,
+        [chatId]: {
+          ...chatTranslations,
+          byLangCode: filteredByLangCode,
+        },
+      },
+    },
+  };
+}
+
 export function updateRequestedChatTranslation<T extends GlobalState>(
-  global: T, chatId: string, toLanguageCode?: string, ...[tabId = getCurrentTabId()]: TabArgs<T>
+  global: T, chatId: string, toLanguageCode?: string, tone?: TranslationTone, ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const tabState = selectTabState(global, tabId);
+  const existingChat = tabState.requestedTranslations.byChatId[chatId];
   global = updateTabState(global, {
     requestedTranslations: {
       ...tabState.requestedTranslations,
       byChatId: {
         ...tabState.requestedTranslations.byChatId,
         [chatId]: {
+          ...existingChat,
           toLanguage: toLanguageCode,
+          tone: tone !== undefined ? tone : existingChat?.tone,
         },
       },
     },
@@ -115,10 +157,38 @@ export function removeRequestedChatTranslation<T extends GlobalState>(
   return global;
 }
 
-export function updateRequestedMessageTranslation<T extends GlobalState>(
-  global: T, chatId: string, messageId: number, toLanguageCode: string, ...[tabId = getCurrentTabId()]: TabArgs<T>
+export function updateChatTranslationTone<T extends GlobalState>(
+  global: T, chatId: string, tone: TranslationTone, ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const tabState = selectTabState(global, tabId);
+  const existingChat = tabState.requestedTranslations.byChatId[chatId];
+
+  global = updateTabState(global, {
+    requestedTranslations: {
+      ...tabState.requestedTranslations,
+      byChatId: {
+        ...tabState.requestedTranslations.byChatId,
+        [chatId]: {
+          ...existingChat,
+          tone,
+        },
+      },
+    },
+  }, tabId);
+
+  return global;
+}
+
+export function updateMessageTranslationTone<T extends GlobalState>(
+  global: T, chatId: string, messageId: number, tone: TranslationTone, ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const tabState = selectTabState(global, tabId);
+  const existingCacheKey = tabState.requestedTranslations.byChatId[chatId]?.manualMessages?.[messageId];
+  if (!existingCacheKey) return global;
+
+  const { languageCode } = parseTranslationCacheKey(existingCacheKey);
+  const newCacheKey = getTranslationCacheKey(languageCode, tone);
+
   global = updateTabState(global, {
     requestedTranslations: {
       ...tabState.requestedTranslations,
@@ -128,7 +198,37 @@ export function updateRequestedMessageTranslation<T extends GlobalState>(
           ...tabState.requestedTranslations.byChatId[chatId],
           manualMessages: {
             ...tabState.requestedTranslations.byChatId[chatId]?.manualMessages,
-            [messageId]: toLanguageCode,
+            [messageId]: newCacheKey,
+          },
+        },
+      },
+    },
+  }, tabId);
+
+  return global;
+}
+
+export function updateRequestedMessageTranslation<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  messageId: number,
+  toLanguageCode: string,
+  tone?: TranslationTone,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const tabState = selectTabState(global, tabId);
+  const cacheKey = getTranslationCacheKey(toLanguageCode, tone);
+
+  global = updateTabState(global, {
+    requestedTranslations: {
+      ...tabState.requestedTranslations,
+      byChatId: {
+        ...tabState.requestedTranslations.byChatId,
+        [chatId]: {
+          ...tabState.requestedTranslations.byChatId[chatId],
+          manualMessages: {
+            ...tabState.requestedTranslations.byChatId[chatId]?.manualMessages,
+            [messageId]: cacheKey,
           },
         },
       },

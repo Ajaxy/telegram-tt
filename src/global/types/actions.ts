@@ -107,6 +107,7 @@ import type {
   StoryViewerOrigin,
   ThemeKey,
   ThreadId,
+  TranslationTone,
   WebPageMediaSize,
 } from '../../types';
 import type { WebApp, WebAppModalStateType, WebAppOutboundEvent } from '../../types/webapp';
@@ -1417,6 +1418,17 @@ export interface ActionPayloads {
     isEnabled: boolean;
   };
 
+  setChatTranslationTone: {
+    chatId: string;
+    tone: TranslationTone;
+  } & WithTabId;
+
+  setMessageTranslationTone: {
+    chatId: string;
+    messageId: number;
+    tone: TranslationTone;
+  } & WithTabId;
+
   // Messages
   setEditingDraft: {
     text?: ApiFormattedText;
@@ -1540,6 +1552,7 @@ export interface ActionPayloads {
     chatId: string;
     id: number;
     toLanguageCode?: string;
+    tone?: TranslationTone;
   } & WithTabId;
 
   showOriginalMessage: {
@@ -1551,11 +1564,13 @@ export interface ActionPayloads {
     chatId: string;
     messageIds: number[];
     toLanguageCode?: string;
+    tone?: TranslationTone;
   };
   translateMessages: {
     chatId: string;
     messageIds: number[];
     toLanguageCode?: string;
+    tone?: TranslationTone;
   };
   summarizeMessage: {
     chatId: string;

@@ -313,6 +313,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
       canTranslate: false,
       canTranslateChats: true,
       doNotTranslate: [],
+      translationTone: 'neutral',
     },
     privacy: {},
     botVerificationShownPeerIds: [],

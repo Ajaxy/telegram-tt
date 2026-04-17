@@ -6,6 +6,7 @@ import type {
   ForwardMessagesParams,
   SendMessageParams,
   ThreadId,
+  TranslationTone,
 } from '../../../types';
 import type {
   ApiAttachment,
@@ -128,7 +129,7 @@ type TranslateTextParams = ({
   messageIds: number[];
 }) & {
   toLanguageCode: string;
-  tone?: string;
+  tone?: TranslationTone;
 };
 
 type SearchResults = {
@@ -2462,20 +2463,24 @@ export async function transcribeAudio({
 export async function translateText(params: TranslateTextParams) {
   let result;
   const isMessageTranslation = 'chat' in params;
+  const { toLanguageCode, tone } = params;
+  const apiTone = tone === 'neutral' ? undefined : tone;
+
   if (isMessageTranslation) {
-    const { chat, messageIds, toLanguageCode, tone } = params;
+    const { chat, messageIds } = params;
+
     result = await invokeRequest(new GramJs.messages.TranslateText({
       peer: buildInputPeer(chat.id, chat.accessHash),
       id: messageIds,
       toLang: toLanguageCode,
-      tone,
+      tone: apiTone,
     }));
   } else {
-    const { text, toLanguageCode, tone } = params;
+    const { text } = params;
     result = await invokeRequest(new GramJs.messages.TranslateText({
       text: text.map((t) => buildInputTextWithEntities(t)),
       toLang: toLanguageCode,
-      tone,
+      tone: apiTone,
     }));
   }
 
@@ -2486,6 +2491,7 @@ export async function translateText(params: TranslateTextParams) {
         chatId: params.chat.id,
         messageIds: params.messageIds,
         toLanguageCode: params.toLanguageCode,
+        tone,
       });
     }
     return undefined;
@@ -2500,6 +2506,7 @@ export async function translateText(params: TranslateTextParams) {
       messageIds: params.messageIds,
       translations: formattedText,
       toLanguageCode: params.toLanguageCode,
+      tone,
     });
   }
 

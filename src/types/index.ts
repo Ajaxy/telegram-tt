@@ -169,6 +169,7 @@ export interface AccountSettings {
   canTranslateChats: boolean;
   translationLanguage?: string;
   doNotTranslate: string[];
+  translationTone?: TranslationTone;
   shouldPaidMessageAutoApprove: boolean;
 }
 
@@ -683,6 +684,9 @@ export type TranslatedMessage = {
   summary?: TextSummary;
 };
 
+export const TRANSLATION_TONES = ['neutral', 'formal', 'casual'] as const;
+export type TranslationTone = typeof TRANSLATION_TONES[number];
+
 export type TextSummary = {
   isPending?: false;
   text: ApiFormattedText;
@@ -698,6 +702,7 @@ export type ChatTranslatedMessages = {
 export type ChatRequestedTranslations = {
   toLanguage?: string;
   manualMessages?: Record<number, string>;
+  tone?: TranslationTone;
 };
 
 export type SimilarBotsInfo = {
