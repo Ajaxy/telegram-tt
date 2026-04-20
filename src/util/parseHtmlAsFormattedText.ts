@@ -113,6 +113,18 @@ function parseMarkdown(html: string) {
     '<img alt="$1" data-document-id="$2">',
   );
 
+  // Protect raw URLs from markdown processing (e.g., '__' inside paths)
+  // Temporarily replace detected URLs with placeholders, apply markdown, then restore.
+  const urlPlaceholders: string[] = [];
+  const PLACEHOLDER_PREFIX = '[[TT_URL_';
+  const PLACEHOLDER_SUFFIX = ']]';
+  const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const reRawLink = new RegExp(RE_LINK_TEMPLATE, 'g');
+  parsedHtml = parsedHtml.replace(reRawLink, (match) => {
+    const i = urlPlaceholders.push(match) - 1;
+    return `${PLACEHOLDER_PREFIX}${i}${PLACEHOLDER_SUFFIX}`;
+  });
+
   // Other simple markdown
   parsedHtml = parsedHtml.replace(
     /(?!<(code|pre)[^<]*|<\/)[*]{2}([^*\n]+)[*]{2}(?![^<]*<\/(code|pre)>)/g,
@@ -130,6 +142,15 @@ function parseMarkdown(html: string) {
     /(?!<(code|pre)[^<]*|<\/)[|]{2}([^|\n]+)[|]{2}(?![^<]*<\/(code|pre)>)/g,
     `<span data-entity-type="${ApiMessageEntityTypes.Spoiler}">$2</span>`,
   );
+
+  // Restore protected URLs
+  if (urlPlaceholders.length) {
+    const restoreRe = new RegExp(`${escapeRegExp(PLACEHOLDER_PREFIX)}(\\d+)${escapeRegExp(PLACEHOLDER_SUFFIX)}`, 'g');
+    parsedHtml = parsedHtml.replace(restoreRe, (full, idx) => {
+      const i = Number(idx);
+      return Number.isFinite(i) && urlPlaceholders[i] !== undefined ? urlPlaceholders[i] : full;
+    });
+  }
 
   return parsedHtml;
 }
