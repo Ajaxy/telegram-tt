@@ -389,6 +389,26 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     );
   }, [isMobile, lang]);
 
+  const primaryEditButton = canEditTopic ? (
+    <Button
+      round
+      color="translucent"
+      size="smaller"
+      ariaLabel={oldLang('EditTopic')}
+      onClick={toggleEditTopic}
+      iconName="edit"
+    />
+  ) : (canManage || canEditBot) ? (
+    <Button
+      round
+      color="translucent"
+      size="smaller"
+      ariaLabel={oldLang('Edit')}
+      onClick={handleToggleManagement}
+      iconName="edit"
+    />
+  ) : undefined;
+
   function renderHeaderContent() {
     if (renderingContentKey === -1) {
       return undefined;
@@ -635,36 +655,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   iconName="add-user"
                 />
               )}
-              {canManage && !isInsideTopic && (
-                <Button
-                  round
-                  color="translucent"
-                  size="smaller"
-                  ariaLabel={oldLang('Edit')}
-                  onClick={handleToggleManagement}
-                  iconName="edit"
-                />
-              )}
-              {canEditBot && (
-                <Button
-                  round
-                  color="translucent"
-                  size="smaller"
-                  ariaLabel={oldLang('Edit')}
-                  onClick={handleToggleManagement}
-                  iconName="edit"
-                />
-              )}
-              {canEditTopic && (
-                <Button
-                  round
-                  color="translucent"
-                  size="smaller"
-                  ariaLabel={oldLang('EditTopic')}
-                  onClick={toggleEditTopic}
-                  iconName="edit"
-                />
-              )}
+              {primaryEditButton}
               {canViewStatistics && (
                 <Button
                   round
