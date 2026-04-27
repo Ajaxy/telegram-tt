@@ -2885,6 +2885,5 @@
 "TextShowLess" = "less";
 "AiMessageEditorFrom" = "From";
 "AiMessageEditorTo" = "To";
-"TranslationToneNeutral" = "Neutral";
 "ButtonHelp" = "Help";
 "UnofficialSecurityRisk" = "{peer} uses an unofficial Telegram client — messages to this user may be less secure.";

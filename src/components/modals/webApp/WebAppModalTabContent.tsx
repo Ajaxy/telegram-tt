@@ -275,6 +275,10 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     return Boolean(text?.trim().length || iconCustomEmojiId);
   }
 
+  function getValidHexColor(color: string | undefined) {
+    return color && validateHexColor(color) ? color : undefined;
+  }
+
   const isMainButtonVisible = isLoaded && mainButton?.isVisible && hasBottomButtonContent(
     mainButton.text,
     mainButton.iconCustomEmojiId,
@@ -674,16 +678,21 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_set_background_color') {
-      setBackgroundColorFromEvent(validateHexColor(eventData.color) ? eventData.color : undefined);
+      const validColor = getValidHexColor(eventData.color);
+      if (validColor) setBackgroundColorFromEvent(validColor);
     }
 
     if (eventType === 'web_app_set_header_color') {
+      const validColor = getValidHexColor(eventData.color);
       const key = eventData.color_key;
-      setHeaderColorFromEvent(eventData.color || (key ? themeParams[key] : undefined));
+      const fallback = key ? themeParams[key] : undefined;
+      const color = validColor || fallback;
+      if (color) setHeaderColorFromEvent(color);
     }
 
     if (eventType === 'web_app_set_bottom_bar_color') {
-      setBottomBarColor(eventData.color);
+      const color = getValidHexColor(eventData.color);
+      if (color) setBottomBarColor(color);
     }
 
     if (eventType === 'web_app_data_send') {
@@ -696,33 +705,43 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_setup_main_button') {
-      const color = eventData.color;
-      const textColor = eventData.text_color;
-      setMainButton({
-        isVisible: eventData.is_visible && hasBottomButtonContent(eventData.text, eventData.icon_custom_emoji_id),
-        isActive: eventData.is_active,
-        text: eventData.text,
-        color,
-        textColor,
-        isProgressVisible: eventData.is_progress_visible,
-        iconCustomEmojiId: eventData.icon_custom_emoji_id,
-        hasShineEffect: eventData.has_shine_effect,
+      setMainButton((prevButton) => {
+        const color = getValidHexColor(eventData.color) || prevButton?.color
+          || themeParams.button_color;
+        const textColor = getValidHexColor(eventData.text_color) || prevButton?.textColor
+          || themeParams.button_text_color;
+
+        return {
+          isVisible: eventData.is_visible && hasBottomButtonContent(eventData.text, eventData.icon_custom_emoji_id),
+          isActive: eventData.is_active,
+          text: eventData.text,
+          color,
+          textColor,
+          isProgressVisible: eventData.is_progress_visible,
+          iconCustomEmojiId: eventData.icon_custom_emoji_id,
+          hasShineEffect: eventData.has_shine_effect,
+        };
       });
     }
 
     if (eventType === 'web_app_setup_secondary_button') {
-      const color = eventData.color;
-      const textColor = eventData.text_color;
-      setSecondaryButton({
-        isVisible: eventData.is_visible && hasBottomButtonContent(eventData.text, eventData.icon_custom_emoji_id),
-        isActive: eventData.is_active,
-        text: eventData.text,
-        color,
-        textColor,
-        isProgressVisible: eventData.is_progress_visible,
-        iconCustomEmojiId: eventData.icon_custom_emoji_id,
-        hasShineEffect: eventData.has_shine_effect,
-        position: eventData.position,
+      setSecondaryButton((prevButton) => {
+        const color = getValidHexColor(eventData.color) || prevButton?.color
+          || themeParams.button_color;
+        const textColor = getValidHexColor(eventData.text_color) || prevButton?.textColor
+          || themeParams.button_text_color;
+
+        return {
+          isVisible: eventData.is_visible && hasBottomButtonContent(eventData.text, eventData.icon_custom_emoji_id),
+          isActive: eventData.is_active,
+          text: eventData.text,
+          color,
+          textColor,
+          isProgressVisible: eventData.is_progress_visible,
+          iconCustomEmojiId: eventData.icon_custom_emoji_id,
+          hasShineEffect: eventData.has_shine_effect,
+          position: eventData.position,
+        };
       });
     }
 
