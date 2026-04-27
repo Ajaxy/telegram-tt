@@ -30,6 +30,7 @@ import buildStyle from '../../../util/buildStyle.ts';
 import download from '../../../util/download';
 import { extractCurrentThemeParams, validateHexColor } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
+import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 
 import { getIsWebAppsFullscreenSupported } from '../../../hooks/useAppLayout';
@@ -44,6 +45,7 @@ import useFullscreen, { checkIfFullscreen } from '../../../hooks/window/useFulls
 import usePopupLimit from './hooks/usePopupLimit';
 import useWebAppFrame from './hooks/useWebAppFrame';
 
+import CustomEmoji from '../../common/CustomEmoji';
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -60,6 +62,8 @@ type WebAppButton = {
   color: string;
   textColor: string;
   isProgressVisible: boolean;
+  iconCustomEmojiId?: string;
+  hasShineEffect?: boolean;
   position?: 'left' | 'right' | 'top' | 'bottom';
 };
 
@@ -262,8 +266,18 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     if (isActive) registerReloadFrameCallback(reloadFrame);
   }, [reloadFrame, registerReloadFrameCallback, isActive]);
 
-  const isMainButtonVisible = isLoaded && mainButton?.isVisible && mainButton.text.trim().length > 0;
-  const isSecondaryButtonVisible = isLoaded && secondaryButton?.isVisible && secondaryButton.text.trim().length > 0;
+  function hasBottomButtonContent(text: string | undefined, iconCustomEmojiId?: string) {
+    return Boolean(text?.trim().length || iconCustomEmojiId);
+  }
+
+  const isMainButtonVisible = isLoaded && mainButton?.isVisible && hasBottomButtonContent(
+    mainButton.text,
+    mainButton.iconCustomEmojiId,
+  );
+  const isSecondaryButtonVisible = isLoaded && secondaryButton?.isVisible && hasBottomButtonContent(
+    secondaryButton.text,
+    secondaryButton.iconCustomEmojiId,
+  );
 
   const handleHideCloseModal = useLastCallback(() => {
     updateCurrentWebApp({ isCloseModalOpen: false });
@@ -651,12 +665,14 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       const color = eventData.color;
       const textColor = eventData.text_color;
       setMainButton({
-        isVisible: eventData.is_visible && Boolean(eventData.text?.trim().length),
+        isVisible: eventData.is_visible && hasBottomButtonContent(eventData.text, eventData.icon_custom_emoji_id),
         isActive: eventData.is_active,
         text: eventData.text,
         color,
         textColor,
         isProgressVisible: eventData.is_progress_visible,
+        iconCustomEmojiId: eventData.icon_custom_emoji_id,
+        hasShineEffect: eventData.has_shine_effect,
       });
     }
 
@@ -664,12 +680,14 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       const color = eventData.color;
       const textColor = eventData.text_color;
       setSecondaryButton({
-        isVisible: eventData.is_visible && Boolean(eventData.text?.trim().length),
+        isVisible: eventData.is_visible && hasBottomButtonContent(eventData.text, eventData.icon_custom_emoji_id),
         isActive: eventData.is_active,
         text: eventData.text,
         color,
         textColor,
         isProgressVisible: eventData.is_progress_visible,
+        iconCustomEmojiId: eventData.icon_custom_emoji_id,
+        hasShineEffect: eventData.has_shine_effect,
         position: eventData.position,
       });
     }
@@ -1084,6 +1102,32 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     );
   }
 
+  function renderBottomButtonContent(text: string | undefined, iconCustomEmojiId?: string) {
+    const hasText = Boolean(text?.trim().length);
+    if (!hasText && !iconCustomEmojiId) return undefined;
+
+    const textContent = hasText ? renderText(text, ['emoji']) : undefined;
+    if (!iconCustomEmojiId) {
+      return textContent;
+    }
+
+    return (
+      <>
+        <CustomEmoji
+          className={buildClassName(styles.buttonEmoji, hasText && styles.buttonEmojiWithLabel)}
+          documentId={iconCustomEmojiId}
+          size={1.25 * REM}
+          forceAlways
+        />
+        {hasText && (
+          <span className={styles.buttonLabel}>
+            {textContent}
+          </span>
+        )}
+      </>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
@@ -1133,9 +1177,13 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
             style={`background-color: ${secondaryButtonCurrentColor}; color: ${secondaryButtonCurrentTextColor}`}
             disabled={!secondaryButtonCurrentIsActive && !secondaryButton?.isProgressVisible}
             nonInteractive={secondaryButton?.isProgressVisible}
+            isShiny={secondaryButton?.hasShineEffect && !secondaryButton?.isProgressVisible}
             onClick={handleSecondaryButtonClick}
           >
-            {!secondaryButton?.isProgressVisible && secondaryButtonCurrentText}
+            {!secondaryButton?.isProgressVisible && renderBottomButtonContent(
+              secondaryButtonCurrentText,
+              secondaryButton?.iconCustomEmojiId,
+            )}
             {secondaryButton?.isProgressVisible
               && <Spinner className={styles.mainButtonSpinner} color="blue" />}
           </Button>
@@ -1149,9 +1197,13 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
             style={`background-color: ${mainButtonCurrentColor}; color: ${mainButtonCurrentTextColor}`}
             disabled={!mainButtonCurrentIsActive && !mainButton?.isProgressVisible}
             nonInteractive={mainButton?.isProgressVisible}
+            isShiny={mainButton?.hasShineEffect && !mainButton?.isProgressVisible}
             onClick={handleMainButtonClick}
           >
-            {!mainButton?.isProgressVisible && mainButtonCurrentText}
+            {!mainButton?.isProgressVisible && renderBottomButtonContent(
+              mainButtonCurrentText,
+              mainButton?.iconCustomEmojiId,
+            )}
             {mainButton?.isProgressVisible && <Spinner className={styles.mainButtonSpinner} color="white" />}
           </Button>
         </div>

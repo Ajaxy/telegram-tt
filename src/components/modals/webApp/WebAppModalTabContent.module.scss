@@ -238,6 +238,25 @@
 .secondary-button-spinner,
 .main-button-spinner {
   position: absolute;
+  z-index: 1;
+
+  :global(.Spinner__inner) {
+    animation-play-state: running !important;
+  }
+}
+
+.button-emoji {
+  --custom-emoji-size: 1.25rem;
+
+  flex: 0 0 auto;
+}
+
+.button-emoji-with-label {
+  margin-inline-end: 0.375rem;
+}
+
+.button-label {
+  min-width: 0;
 }
 
 .web-app-popup {
