@@ -41,6 +41,7 @@ interface OwnProps {
   maxTimestamp?: number;
   shouldAnimateTyping?: boolean;
   canAnimateTextStreaming?: boolean;
+  onTypingAnimationEnd?: NoneToVoidFunction;
 }
 
 const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
@@ -68,6 +69,7 @@ function MessageText({
   threadId,
   shouldAnimateTyping,
   canAnimateTextStreaming,
+  onTypingAnimationEnd,
 }: OwnProps) {
   const sharedCanvasRef = useRef<HTMLCanvasElement>();
   const sharedCanvasHqRef = useRef<HTMLCanvasElement>();
@@ -147,6 +149,7 @@ function MessageText({
     text: trimText(text || '', truncateLength),
     entities: entitiesWithFocusedQuote,
   };
+  const shouldRenderTypingPlaceholder = !('previousLocalId' in messageOrStory) || !messageOrStory.previousLocalId;
 
   return (
     <>
@@ -159,6 +162,9 @@ function MessageText({
             formattedText={textToRender}
             renderText={renderText}
             shouldAnimateMask={canAnimateTextStreaming}
+            shouldRenderPlaceholder={shouldRenderTypingPlaceholder}
+            onCompleted={onTypingAnimationEnd}
+            completionKey={messageOrStory.id}
           />
         ) : renderText(textToRender),
       ].flat().filter(Boolean)}

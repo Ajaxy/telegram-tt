@@ -742,6 +742,10 @@ export interface ActionPayloads {
   setEditingId: {
     messageId?: number;
   } & WithTabId;
+  markTypingDraftDone: {
+    chatId: string;
+    messageId: number;
+  };
   editLastMessage: WithTabId | undefined;
   saveDraft: {
     chatId: string;

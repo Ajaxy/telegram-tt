@@ -38,6 +38,7 @@ import {
   enterMessageSelectMode,
   exitMessageSelectMode,
   toggleMessageSelection,
+  updateChatMessage,
   updateFocusedMessage,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
@@ -97,6 +98,16 @@ addActionHandler('setEditingId', (global, actions, payload): ActionReturnType =>
   const paramName = type === 'scheduled' ? 'editingScheduledId' : 'editingId';
 
   return replaceThreadLocalStateParam(global, chatId, threadId, paramName, messageId);
+});
+
+addActionHandler('markTypingDraftDone', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId } = payload;
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!message?.isTypingDraft) {
+    return undefined;
+  }
+
+  return updateChatMessage(global, chatId, messageId, { isTypingDraft: undefined });
 });
 
 addActionHandler('setEditingDraft', (global, actions, payload): ActionReturnType => {

@@ -43,7 +43,7 @@ export function useIntersectionObserver({
   throttleScheduler?: Scheduler;
   debounceMs?: number;
   shouldSkipFirst?: boolean;
-  margin?: number;
+  margin?: number | string;
   threshold?: number | number[];
   isDisabled?: boolean;
 }, rootCallback?: RootCallback): Response {
@@ -155,7 +155,7 @@ export function useIntersectionObserver({
       },
       {
         root: rootRef.current,
-        rootMargin: margin ? `${margin}px` : undefined,
+        rootMargin: typeof margin === 'number' ? `${margin}px` : margin,
         threshold,
       },
     );

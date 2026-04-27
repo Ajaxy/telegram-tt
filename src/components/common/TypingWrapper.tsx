@@ -18,7 +18,10 @@ import styles from './TypingWrapper.module.scss';
 type OwnProps = {
   formattedText: ApiFormattedText;
   shouldAnimateMask?: boolean;
+  shouldRenderPlaceholder: boolean;
+  completionKey: number;
   renderText: (text: ApiFormattedText) => TeactNode;
+  onCompleted?: NoneToVoidFunction;
 };
 
 const CHUNK_SIZE = 67;
@@ -46,22 +49,46 @@ function getRunningProgress(animation: Animation | undefined, baseProgress: numb
   return baseProgress + (100 - baseProgress) * timing;
 }
 
-const TypingWrapper = ({ formattedText, shouldAnimateMask, renderText }: OwnProps) => {
+const TypingWrapper = ({
+  formattedText,
+  shouldAnimateMask,
+  shouldRenderPlaceholder,
+  completionKey,
+  renderText,
+  onCompleted,
+}: OwnProps) => {
   const ref = useRef<HTMLSpanElement>();
   const animationRef = useRef<Animation>();
   const progressRef = useRef(0);
   const prevRevealedRef = useRef(0);
+  const fullTextRef = useRef('');
 
   const [revealedLength, setRevealedLength] = useState(0);
   const revealedLengthRef = useRef(0);
   const chunkTimerRef = useRef<number>();
+  const completedKeyRef = useRef<string>();
   const prevFullTextRef = useRef('');
 
   const fullText = formattedText.text;
+  fullTextRef.current = fullText;
 
   const stopAnimation = useLastCallback(() => {
     animationRef.current?.cancel();
     animationRef.current = undefined;
+  });
+
+  const maybeNotifyCompleted = useLastCallback(() => {
+    const currentFullText = fullTextRef.current;
+    const currentCompletionKey = `${completionKey}:${currentFullText}`;
+    const isFullyRevealed = revealedLengthRef.current >= currentFullText.length;
+    const isMaskCompleted = !shouldAnimateMask || progressRef.current >= 100;
+
+    if (!isFullyRevealed || !isMaskCompleted || completedKeyRef.current === currentCompletionKey) {
+      return;
+    }
+
+    completedKeyRef.current = currentCompletionKey;
+    onCompleted?.();
   });
 
   const scheduleChunks = useLastCallback((from: number, to: number) => {
@@ -90,16 +117,6 @@ const TypingWrapper = ({ formattedText, shouldAnimateMask, renderText }: OwnProp
     addChunk();
   });
 
-  const resetChunking = useLastCallback(() => {
-    window.clearTimeout(chunkTimerRef.current);
-    chunkTimerRef.current = undefined;
-    revealedLengthRef.current = 0;
-    prevRevealedRef.current = 0;
-    progressRef.current = 0;
-    stopAnimation();
-    setRevealedLength(0);
-  });
-
   // --- Chunking: spread incoming text over time ---
   useEffect(() => {
     if (fullText === prevFullTextRef.current) return;
@@ -109,12 +126,34 @@ const TypingWrapper = ({ formattedText, shouldAnimateMask, renderText }: OwnProp
     const revealed = revealedLengthRef.current;
 
     if (fullLen < revealed) {
-      resetChunking();
-      scheduleChunks(0, fullLen);
+      window.clearTimeout(chunkTimerRef.current);
+      chunkTimerRef.current = undefined;
+      stopAnimation();
+      revealedLengthRef.current = fullLen;
+      prevRevealedRef.current = fullLen;
+      progressRef.current = 100;
+      setRevealedLength(fullLen);
+
+      requestMutation(() => {
+        const element = ref.current;
+        if (!element) return;
+
+        element.style.setProperty(SPREAD_CSS_PROPERTY, '0%');
+        element.style.setProperty(PROGRESS_CSS_PROPERTY, '100%');
+      });
+      return;
+    }
+
+    if (fullLen === revealed) {
       return;
     }
 
     scheduleChunks(revealed, fullLen);
+  }, [fullText, scheduleChunks, stopAnimation]);
+
+  // Completion depends on several refs, so we are calling check after every render to avoid locking the UI
+  useEffect(() => {
+    maybeNotifyCompleted();
   });
 
   // --- Mask animation: smooth reveal of rendered content (layout effect to prevent flash) ---
@@ -186,6 +225,8 @@ const TypingWrapper = ({ formattedText, shouldAnimateMask, renderText }: OwnProp
       requestMutation(() => {
         element.style.setProperty(PROGRESS_CSS_PROPERTY, '100%');
       });
+
+      maybeNotifyCompleted();
     };
 
     animation.oncancel = () => {
@@ -207,15 +248,17 @@ const TypingWrapper = ({ formattedText, shouldAnimateMask, renderText }: OwnProp
   return (
     <span ref={ref} className={styles.root}>
       {renderText(truncatedText)}
-      <span key="typing-placeholder" className={styles.placeholder}>
-        <AnimatedIconWithPreview
-          tgsUrl={LOCAL_TGS_URLS.Writing}
-          size={PLACEHOLDER_SIZE}
-          play
-          noLoop={false}
-          shouldUseTextColor
-        />
-      </span>
+      {shouldRenderPlaceholder && (
+        <span key="typing-placeholder" className={styles.placeholder}>
+          <AnimatedIconWithPreview
+            tgsUrl={LOCAL_TGS_URLS.Writing}
+            size={PLACEHOLDER_SIZE}
+            play
+            noLoop={false}
+            shouldUseTextColor
+          />
+        </span>
+      )}
     </span>
   );
 };

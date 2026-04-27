@@ -112,6 +112,55 @@ export function getMessageText(message: MediaContainer) {
   return hasMessageText(message) ? message.content.text : undefined;
 }
 
+function getSharedPrefixLength(firstText: string, secondText: string) {
+  const minLength = Math.min(firstText.length, secondText.length);
+
+  let index = 0;
+  while (index < minLength && firstText[index] === secondText[index]) {
+    index++;
+  }
+
+  return index;
+}
+
+export function pickMatchingTypingDraftMessage<T extends ApiMessage>(
+  incomingMessage: MediaContainer,
+  typingDraftMessages: T[],
+) {
+  const incomingText = getMessageText(incomingMessage)?.text;
+  if (!incomingText) {
+    return undefined;
+  }
+
+  if (typingDraftMessages.length === 1) {
+    return typingDraftMessages[0];
+  }
+
+  let bestMatch: T | undefined;
+  let bestScore = 0;
+
+  typingDraftMessages.forEach((typingDraftMessage) => {
+    const draftText = getMessageText(typingDraftMessage)?.text;
+    if (!draftText) return;
+
+    const score = getSharedPrefixLength(incomingText, draftText);
+    if (!score) return;
+
+    if (!bestMatch) {
+      bestMatch = typingDraftMessage;
+      bestScore = score;
+      return;
+    }
+
+    if (score > bestScore) {
+      bestMatch = typingDraftMessage;
+      bestScore = score;
+    }
+  });
+
+  return bestMatch;
+}
+
 export function getMessageTextWithFallback(lang: LangFn, message: MediaContainer) {
   return hasMessageText(message) ? message.content.text || { text: lang('MessageUnsupported') } : undefined;
 }

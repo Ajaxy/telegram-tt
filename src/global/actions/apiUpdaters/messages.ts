@@ -31,6 +31,7 @@ import {
   groupMessageIdsByThreadId,
   isActionMessage,
   isMessageLocal,
+  pickMatchingTypingDraftMessage,
 } from '../../helpers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../helpers/replies';
 import {
@@ -114,19 +115,115 @@ const SNAP_ANIMATION_DELAY = 1000;
 const VIDEO_PROCESSING_NOTIFICATION_DELAY = 1000;
 let lastVideoProcessingNotificationTime = 0;
 
+type TypingDraftEntry = {
+  randomId: string;
+  message: ApiMessage;
+};
+
+function getTypingDraftEntries<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  threadId: ThreadId,
+) {
+  const typingDraftStore = selectThreadLocalStateParam(global, chatId, threadId, 'typingDraftIdByRandomId');
+  const typingDraftEntries = Object.entries(typingDraftStore || {}).reduce((result, [randomId, messageId]) => {
+    const message = selectChatMessage(global, chatId, messageId);
+    if (!message?.isTypingDraft) {
+      return result;
+    }
+
+    result.push({ randomId, message });
+    return result;
+  }, [] as TypingDraftEntry[]);
+
+  return typingDraftEntries;
+}
+
+function removeTypingDraftEntries<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  threadId: ThreadId,
+  typingDraftEntries: TypingDraftEntry[],
+) {
+  if (!typingDraftEntries.length) {
+    return global;
+  }
+
+  const typingDraftStore = selectThreadLocalStateParam(global, chatId, threadId, 'typingDraftIdByRandomId') || {};
+  const randomIds = typingDraftEntries.map(({ randomId }) => randomId);
+  const nextTypingDraftStore = omit(typingDraftStore, randomIds);
+  const messageIdsToDelete = randomIds.reduce((result, randomId) => {
+    const messageId = typingDraftStore[randomId];
+    const message = messageId ? selectChatMessage(global, chatId, messageId) : undefined;
+    if (!message?.isTypingDraft) {
+      return result;
+    }
+
+    result.push(messageId);
+    return result;
+  }, [] as number[]);
+
+  global = replaceThreadLocalStateParam(
+    global,
+    chatId,
+    threadId,
+    'typingDraftIdByRandomId',
+    Object.keys(nextTypingDraftStore).length ? nextTypingDraftStore : undefined,
+  );
+
+  if (messageIdsToDelete.length) {
+    global = deleteChatMessages(global, chatId, messageIdsToDelete);
+  }
+
+  return global;
+}
+
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'newMessage': {
       const {
         chatId, id, message, shouldForceReply, wasDrafted, poll, webPage,
       } = update;
-      global = updateWithLocalMedia(global, chatId, id, true, message);
-      global = updateListedAndViewportIds(global, message);
+      const chat = selectChat(global, chatId);
+      const isLocal = isMessageLocal(message);
+      const threadId = selectThreadIdFromMessage(global, message) || MAIN_THREAD_ID;
+      const typingDraftEntries = getTypingDraftEntries(global, chatId, threadId);
+      const hasTypingDraftsInThread = Boolean(typingDraftEntries.length);
+      const shouldAttemptTypingDraftHandoff = !isLocal && !message.isOutgoing && !message.content.action;
+
+      let matchedTypingDraftEntry: TypingDraftEntry | undefined;
+      let shouldClearTypingDraftsAfterRender = false;
+
+      if (hasTypingDraftsInThread && shouldAttemptTypingDraftHandoff) {
+        const matchedTypingDraft = pickMatchingTypingDraftMessage(
+          message,
+          typingDraftEntries.map(({ message: typingDraftMessage }) => typingDraftMessage),
+        );
+
+        matchedTypingDraftEntry = matchedTypingDraft
+          ? typingDraftEntries.find(
+            ({ message: typingDraftMessage }) => typingDraftMessage.id === matchedTypingDraft.id,
+          )
+          : undefined;
+        shouldClearTypingDraftsAfterRender = Boolean(typingDraftEntries.length && !matchedTypingDraftEntry);
+      }
+
+      const nextMessage = matchedTypingDraftEntry ? {
+        ...message,
+        previousLocalId: matchedTypingDraftEntry.message.id,
+        isTypingDraft: true,
+      } : message;
+
+      global = updateWithLocalMedia(global, chatId, id, true, nextMessage);
+      global = updateListedAndViewportIds(global, nextMessage);
+
+      if (hasTypingDraftsInThread && matchedTypingDraftEntry) {
+        global = removeTypingDraftEntries(global, chatId, threadId, [matchedTypingDraftEntry]);
+      }
 
       const newMessage = selectChatMessage(global, chatId, id)!;
       const replyInfo = getMessageReplyInfo(newMessage);
       const storyReplyInfo = getStoryReplyInfo(newMessage);
-      const chat = selectChat(global, chatId);
       if (chat?.isForum
         && replyInfo?.isForumTopic
         && !selectTopicFromMessage(global, newMessage)
@@ -134,16 +231,14 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         actions.loadTopicById({ chatId, topicId: replyInfo.replyToMsgId });
       }
 
-      const isLocal = isMessageLocal(message);
-
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         // Force update for last message on drafted messages to prevent flickering
         if (isLocal && wasDrafted) {
           global = updateChatLastMessage(global, chatId, newMessage);
         }
 
-        const threadId = selectThreadIdFromMessage(global, newMessage);
-        global = updateChatMediaLoadingState(global, newMessage, chatId, threadId, tabId);
+        const messageThreadId = selectThreadIdFromMessage(global, newMessage);
+        global = updateChatMediaLoadingState(global, newMessage, chatId, messageThreadId, tabId);
 
         if (selectIsMessageInCurrentMessageList(global, chatId, message, tabId)) {
           if (isLocal && message.isOutgoing && !(message.content?.action) && !storyReplyInfo?.storyId
@@ -207,12 +302,12 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         actions.reportMessageDelivery({ chatId, messageId: id });
       }
 
-      if (chat?.isBotForum && !newMessage.isOutgoing && !isLocal) {
-        const threadId = selectThreadIdFromMessage(global, newMessage);
-        const typingDraftStore = selectThreadLocalStateParam(global, chatId, threadId, 'typingDraftIdByRandomId');
-        const localDraftIds = Object.values(typingDraftStore || {});
-        global = deleteChatMessages(global, chatId, localDraftIds);
-        global = replaceThreadLocalStateParam(global, chatId, threadId, 'typingDraftIdByRandomId', undefined);
+      if (shouldClearTypingDraftsAfterRender) {
+        onTickEnd(() => {
+          global = getGlobal();
+          global = removeTypingDraftEntries(global, chatId, threadId, typingDraftEntries);
+          setGlobal(global);
+        });
       }
 
       if (!isLocal && message.content?.action?.type === 'noForwardsToggle') {

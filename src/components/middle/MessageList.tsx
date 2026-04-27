@@ -17,6 +17,7 @@ import { forceMeasure, requestMeasure, requestMutation } from '../../lib/fasterd
 import {
   getIsSavedDialog,
   getMessageHtmlId,
+  getMessageOriginalId,
   isAnonymousForwardsChat,
   isChatChannel,
   isChatGroup,
@@ -272,6 +273,7 @@ const MessageList = ({
   const isScrollTopJustUpdatedRef = useRef(false);
   const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
   const scrollSnapDisabledTimerRef = useRef<number>();
+  const typingDraftSnapTriggeredIdRef = useRef<number>();
 
   const isSavedDialog = getIsSavedDialog(chatId, threadId, currentUserId);
   const hasOpenChatButton = isSavedDialog
@@ -401,6 +403,13 @@ const MessageList = ({
     isServiceNotificationsChat, isForum,
     threadId, isChatWithSelf, channelJoinInfo]);
 
+  const currentLastMessageOriginalId = useMemo(() => {
+    const currentLastMessageId = messageIds?.[messageIds.length - 1];
+    const currentLastMessage = currentLastMessageId !== undefined ? messagesById?.[currentLastMessageId] : undefined;
+
+    return currentLastMessage ? getMessageOriginalId(currentLastMessage) : currentLastMessageId;
+  }, [messageIds, messagesById]);
+
   useInterval(() => {
     if (!messageIds || !messagesById || type === 'scheduled' || isAccountFrozen || !isActive) return;
     if (!isChannelChat && !isGroupChat) return;
@@ -503,6 +512,31 @@ const MessageList = ({
         removeExtraClass(container, BOTTOM_SNAP_CLASS);
       });
     }
+  });
+
+  const handleTallTypingDraft = useLastCallback((messageId: number, isNearExit: boolean) => {
+    if (!isNearExit) {
+      if (typingDraftSnapTriggeredIdRef.current === messageId) {
+        typingDraftSnapTriggeredIdRef.current = undefined;
+      }
+      return;
+    }
+
+    if (typingDraftSnapTriggeredIdRef.current === messageId) {
+      return;
+    }
+
+    const container = containerRef.current;
+    if (!container || !container.classList.contains(BOTTOM_SNAP_CLASS)) return;
+
+    typingDraftSnapTriggeredIdRef.current = messageId;
+
+    clearTimeout(scrollSnapDisabledTimerRef.current);
+    scrollSnapDisabledTimerRef.current = undefined;
+
+    requestMutation(() => {
+      removeExtraClass(container, BOTTOM_SNAP_CLASS);
+    });
   });
 
   const handleScroll = useLastCallback(() => {
@@ -613,7 +647,7 @@ const MessageList = ({
   );
 
   // Handles updated message list, takes care of scroll repositioning
-  useLayoutEffectWithPrevDeps(([prevMessageIds, prevIsViewportNewest]) => {
+  useLayoutEffectWithPrevDeps(([prevMessageIds, prevIsViewportNewest, prevCurrentLastMessageOriginalId]) => {
     if (process.env.APP_ENV === 'perf') {
       // eslint-disable-next-line no-console
       console.time('scrollTop');
@@ -640,9 +674,7 @@ const MessageList = ({
       ? container.querySelector<HTMLDivElement>(`#${getMessageHtmlId(memoFirstUnreadIdRef.current)}`)
       : undefined;
 
-    const hasLastMessageChanged = (
-      messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
-    );
+    const hasLastMessageChanged = currentLastMessageOriginalId !== prevCurrentLastMessageOriginalId;
     const hasViewportShifted = (
       messageIds?.[0] !== prevMessageIds?.[0] && messageIds?.length === (MESSAGE_LIST_SLICE / 2 + 1)
     );
@@ -674,10 +706,8 @@ const MessageList = ({
       removeExtraClass(container, BOTTOM_SNAP_CLASS);
 
       scrollSnapDisabledTimerRef.current = window.setTimeout(() => {
-        requestMutation(() => {
-          addExtraClass(container, BOTTOM_SNAP_CLASS);
-          scrollSnapDisabledTimerRef.current = undefined;
-        });
+        scrollSnapDisabledTimerRef.current = undefined;
+        updateBottomSnapClass();
       }, MESSAGE_ANIMATION_DURATION);
     }
 
@@ -761,7 +791,14 @@ const MessageList = ({
       };
     });
     // This should match deps for `useSyncEffect` above
-  }, [messageIds, isViewportNewest, getContainerHeight, prevContainerHeightRef, noMessageSendingAnimation]);
+  }, [
+    messageIds,
+    isViewportNewest,
+    currentLastMessageOriginalId,
+    getContainerHeight,
+    prevContainerHeightRef,
+    noMessageSendingAnimation,
+  ]);
 
   useEffectWithPrevDeps(([prevIsSelectModeActive]) => {
     if (prevIsSelectModeActive !== undefined) {
@@ -886,6 +923,7 @@ const MessageList = ({
         onScrollDownToggle={onScrollDownToggle}
         onNotchToggle={onNotchToggle}
         onIntersectPinnedMessage={onIntersectPinnedMessage}
+        onTallTypingDraft={handleTallTypingDraft}
       />
     ) : (
       <Loading color="white" backgroundColor="dark" />

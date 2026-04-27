@@ -84,6 +84,7 @@ interface OwnProps {
   onScrollDownToggle?: BooleanToVoidFunction;
   onNotchToggle?: AnyToVoidFunction;
   onIntersectPinnedMessage?: OnIntersectPinnedMessage;
+  onTallTypingDraft?: (messageId: number, isNearExit: boolean) => void;
 }
 
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
@@ -123,6 +124,7 @@ const MessageListContent = ({
   onScrollDownToggle,
   onNotchToggle,
   onIntersectPinnedMessage,
+  onTallTypingDraft,
 }: OwnProps) => {
   const { openHistoryCalendar } = getActions();
 
@@ -153,6 +155,7 @@ const MessageListContent = ({
     backwardsTriggerRef,
     forwardsTriggerRef,
     fabTriggerRef,
+    observeIntersectionForTopExit,
   } = useScrollHooks({
     type,
     containerRef,
@@ -376,7 +379,9 @@ const MessageListContent = ({
               isLastInList={position.isLastInList}
               memoFirstUnreadIdRef={memoFirstUnreadIdRef}
               getIsMessageListReady={getIsReady}
+              observeIntersectionForTopExit={observeIntersectionForTopExit}
               onMessageUnmount={onMessageUnmount}
+              onTallTypingDraft={onTallTypingDraft}
             />,
           ]);
         }

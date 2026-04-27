@@ -19,6 +19,7 @@ import useSyncEffect from '../../../hooks/useSyncEffect';
 
 const FAB_THRESHOLD = 50;
 const NOTCH_THRESHOLD = 1; // Notch has zero height so we at least need a 1px margin to intersect
+const TOP_EXIT_THRESHOLD = 50;
 const CONTAINER_HEIGHT_DEBOUNCE = 200;
 const SCROLL_TOOLS_DEBOUNCE = 100;
 const TOOLS_FREEZE_TIMEOUT = 350; // Approximate message sending animation duration
@@ -150,6 +151,14 @@ export default function useScrollHooks({
 
   useOnIntersect(fabTriggerRef, observeIntersectionForNotch);
 
+  const {
+    observe: observeIntersectionForTopExit,
+  } = useIntersectionObserver({
+    rootRef: containerRef,
+    margin: `-${TOP_EXIT_THRESHOLD}px 0px 0px 0px`,
+    throttleScheduler: requestMeasure,
+  });
+
   useEffect(() => {
     if (isReady) {
       updateScrollTools();
@@ -189,5 +198,6 @@ export default function useScrollHooks({
     backwardsTriggerRef,
     forwardsTriggerRef,
     fabTriggerRef,
+    observeIntersectionForTopExit,
   };
 }
