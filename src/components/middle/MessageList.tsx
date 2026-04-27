@@ -953,7 +953,7 @@ export default memo(withGlobal<OwnProps>(
 
     const topic = selectTopic(global, chatId, threadId);
     const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
-    const isEmptyThread = !selectThreadInfo(global, chatId, threadId)?.messagesCount;
+    const isEmptyThread = selectThreadInfo(global, chatId, threadId)?.messagesCount === 0;
 
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
     const areAdsEnabled = !isCurrentUserPremium || selectUserFullInfo(global, currentUserId)?.areAdsEnabled;

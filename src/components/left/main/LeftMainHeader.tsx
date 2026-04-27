@@ -124,7 +124,7 @@ const LeftMainHeader = ({
   }, [searchDate]);
 
   const { connectionStatus, connectionStatusText, connectionStatusPosition } = useConnectionStatus(
-    oldLang,
+    lang,
     connectionState,
     isSyncing || isFetchingDifference,
     isMessageListOpen,

@@ -686,6 +686,8 @@ export interface LangPair {
   'PinnedMessageTitleSingle': undefined;
   'AccPinnedMessages': undefined;
   'AccUnpinMessage': undefined;
+  'CommentsTitle': undefined;
+  'RepliesTitle': undefined;
   'LeaveAComment': undefined;
   'PollsStopWarning': undefined;
   'PollsStopSure': undefined;
@@ -3747,6 +3749,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'index': V;
   };
   'Comments': {
+    'count': V;
+  };
+  'Replies': {
     'count': V;
   };
   'ChatContextReactionCount': {

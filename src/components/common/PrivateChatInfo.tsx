@@ -335,13 +335,19 @@ const PrivateChatInfo = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { userId, threadId, forceShowSelf }): Complete<StateProps> => {
+  (global, {
+    userId, threadId, forceShowSelf, isSavedDialog,
+  }): Complete<StateProps> => {
     const { isSynced } = global;
     const user = userId ? selectUser(global, userId) : undefined;
     const userStatus = userId ? selectUserStatus(global, userId) : undefined;
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
     const self = isSavedMessages ? user : selectUser(global, global.currentUserId!);
-    const areMessagesLoaded = Boolean(userId ? selectChatMessages(global, userId) : undefined);
+    const areMessagesLoaded = Boolean(
+      isSavedDialog
+        ? selectChatMessages(global, global.currentUserId!)
+        : selectChatMessages(global, userId!),
+    );
 
     const topic = threadId ? selectTopic(global, userId, threadId) : undefined;
     const messagesCount = topic && userId ? selectThreadMessagesCount(global, userId, threadId!) : undefined;

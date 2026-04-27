@@ -1,5 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import {
   memo, useRef,
 } from '../../lib/teact/teact';
@@ -32,7 +30,9 @@ import {
   selectScheduledIds,
   selectTabState,
 } from '../../global/selectors';
-import { selectThreadInfo, selectThreadLocalStateParam } from '../../global/selectors/threads';
+import {
+  selectThreadLocalStateParam, selectThreadMessagesCount,
+} from '../../global/selectors/threads';
 import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import { IS_MAC_OS } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
@@ -40,9 +40,9 @@ import { isUserId } from '../../util/entities/ids';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useConnectionStatus from '../../hooks/useConnectionStatus';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLongPress from '../../hooks/useLongPress';
-import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useWindowSize from '../../hooks/window/useWindowSize';
 
@@ -91,7 +91,7 @@ type StateProps = {
   emojiStatusSlug?: string;
 };
 
-const MiddleHeader: FC<OwnProps & StateProps> = ({
+const MiddleHeader = ({
   chatId,
   threadId,
   messageListType,
@@ -115,7 +115,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   emojiStatusSlug,
   isSavedDialog,
   onFocusPinnedMessage,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     openThreadWithInfo,
     openChat,
@@ -128,7 +128,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     openUniqueGiftBySlug,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
+
   const isBackButtonActiveRef = useRef(true);
   const { isDesktop, isTablet } = useAppLayout();
 
@@ -228,7 +229,41 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const isAudioPlayerRendering = isDesktop && isAudioPlayerActive;
   const isPinnedMessagesFullWidth = isAudioPlayerActive || !isDesktop;
 
-  const { connectionStatusText } = useConnectionStatus(lang, connectionState, isSyncing || isFetchingDifference, true);
+  const { connectionStatusText } = useConnectionStatus(
+    lang, connectionState, isSyncing || isFetchingDifference, true,
+  );
+
+  function renderInfoTitle() {
+    if (messagesCount === undefined) {
+      return lang('Loading');
+    }
+
+    if (messageListType === 'thread') {
+      if (!messagesCount) {
+        return lang(isComments ? 'CommentsTitle' : 'RepliesTitle');
+      }
+
+      return lang(
+        isComments ? 'Comments' : 'Replies',
+        { count: messagesCount },
+        { pluralValue: messagesCount },
+      );
+    }
+
+    if (messageListType === 'pinned') {
+      return lang('PinnedMessagesCount', { count: messagesCount }, { pluralValue: messagesCount });
+    }
+
+    if (messageListType === 'scheduled') {
+      if (isChatWithSelf) {
+        return lang('Reminders');
+      }
+
+      return lang('Messages', { count: messagesCount }, { pluralValue: messagesCount });
+    }
+
+    return undefined;
+  }
 
   function renderInfo() {
     if (messageListType === 'thread') {
@@ -240,25 +275,17 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     return (
       <>
         {renderBackButton(currentTransitionKey === 0)}
-        <h3>
-          {messagesCount !== undefined ? (
-            messageListType === 'thread' ? (
-              (messagesCount
-                ? lang(isComments ? 'Comments' : 'Replies', messagesCount, 'i')
-                : lang(isComments ? 'CommentsTitle' : 'RepliesTitle')))
-              : messageListType === 'pinned' ? (lang('PinnedMessagesCount', messagesCount, 'i'))
-                : messageListType === 'scheduled' ? (
-                  isChatWithSelf ? lang('Reminders') : lang('messages', messagesCount, 'i')
-                ) : undefined
-          ) : lang('Loading')}
-        </h3>
+        <h3>{renderInfoTitle()}</h3>
       </>
     );
   }
 
   function renderChatInfo() {
-    // TODO Implement count
-    const savedMessagesStatus = isSavedDialog ? lang('SavedMessages') : undefined;
+    const savedMessagesStatus = isSavedDialog
+      ? (messagesCount !== undefined
+        ? lang('Messages', { count: messagesCount }, { pluralValue: messagesCount })
+        : lang('SavedMessages'))
+      : undefined;
 
     const realChatId = isSavedDialog ? String(threadId) : chatId;
 
@@ -387,6 +414,8 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatMessage(global, audioChatId, audioMessageId)
       : undefined;
 
+    const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
+
     let messagesCount: number | undefined;
     if (messageListType === 'pinned') {
       const pinnedIds = selectPinnedIds(global, chatId, threadId);
@@ -395,8 +424,7 @@ export default memo(withGlobal<OwnProps>(
       const scheduledIds = selectScheduledIds(global, chatId, threadId);
       messagesCount = scheduledIds?.length;
     } else if (messageListType === 'thread' && threadId !== MAIN_THREAD_ID) {
-      const threadInfo = selectThreadInfo(global, chatId, threadId);
-      messagesCount = threadInfo?.messagesCount || 0;
+      messagesCount = selectThreadMessagesCount(global, chatId, threadId);
     }
 
     const typingStatus = selectThreadLocalStateParam(global, chatId, threadId, 'typingStatus');
@@ -404,8 +432,6 @@ export default memo(withGlobal<OwnProps>(
     const emojiStatus = peer?.emojiStatus;
     const emojiStatusSticker = emojiStatus && selectCustomEmoji(global, emojiStatus.documentId);
     const emojiStatusSlug = emojiStatus?.type === 'collectible' ? emojiStatus.slug : undefined;
-
-    const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
 
     return {
       typingStatus,

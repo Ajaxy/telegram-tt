@@ -8,13 +8,16 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { getIsSavedDialog } from '../../../global/helpers';
 import { selectChat } from '../../../global/selectors';
-import { selectThreadLocalStateParam, selectThreadReadState } from '../../../global/selectors/threads';
+import {
+  selectThreadLocalStateParam,
+  selectThreadMessagesCount,
+  selectThreadReadState,
+} from '../../../global/selectors/threads';
 import { isUserId } from '../../../util/entities/ids';
 
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import GroupChatInfo from '../../common/GroupChatInfo';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -35,6 +38,7 @@ type StateProps = {
   isFetchingDifference?: boolean;
   typingStatus?: ApiTypingStatus;
   isSavedDialog?: boolean;
+  messagesCount?: number;
   unreadCount?: number;
   hasUnreadMark?: boolean;
 };
@@ -50,23 +54,26 @@ const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
   isFetchingDifference,
   typingStatus,
   isSavedDialog,
+  messagesCount,
   unreadCount,
   hasUnreadMark,
   onClose,
 }) => {
   const lang = useLang();
-  const oldLang = useOldLang();
   const { markChatMessagesRead } = getActions();
   const {
     connectionStatusText,
-  } = useConnectionStatus(oldLang, connectionState, isSyncing || isFetchingDifference, true);
+  } = useConnectionStatus(lang, connectionState, isSyncing || isFetchingDifference, true);
 
   const handleMarkAsRead = useLastCallback(() => {
     markChatMessagesRead({ id: chatId });
   });
 
-  const savedMessagesStatus = isSavedDialog ? lang('SavedMessages') : undefined;
-  const realChatId = isSavedDialog ? String(MAIN_THREAD_ID) : chatId;
+  const savedMessagesStatus = isSavedDialog
+    ? (messagesCount !== undefined
+      ? lang('Messages', { count: messagesCount }, { pluralValue: messagesCount }) : lang('SavedMessages'))
+    : undefined;
+  const realChatId = isSavedDialog && threadId ? String(threadId) : chatId;
   const displayChatId = chat?.isMonoforum ? chat.linkedMonoforumId! : realChatId;
 
   return (
@@ -137,6 +144,9 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const typingStatus = selectThreadLocalStateParam(global, chatId, threadId || MAIN_THREAD_ID, 'typingStatus');
     const isSavedDialog = getIsSavedDialog(chatId, threadId || MAIN_THREAD_ID, global.currentUserId);
+    const messagesCount = isSavedDialog && threadId
+      ? selectThreadMessagesCount(global, chatId, threadId)
+      : undefined;
     const readState = selectThreadReadState(global, chatId, threadId || MAIN_THREAD_ID);
     const unreadCount = readState?.unreadCount;
 
@@ -147,6 +157,7 @@ export default memo(withGlobal<OwnProps>(
       isFetchingDifference: global.isFetchingDifference,
       typingStatus,
       isSavedDialog,
+      messagesCount,
       unreadCount,
       hasUnreadMark: readState?.hasUnreadMark,
     };

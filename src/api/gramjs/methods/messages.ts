@@ -205,7 +205,7 @@ export async function fetchMessages({
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-  const count = !(result instanceof GramJs.messages.Messages) ? result.count : undefined;
+  const count = 'count' in result ? result.count : messages.length;
   const topics = result.topics.map(buildApiTopicWithState).filter(Boolean);
 
   return {

@@ -287,10 +287,14 @@ const GroupChatInfo = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, threadId }): Complete<StateProps> => {
+  (global, { chatId, threadId, isSavedDialog }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     const onlineCount = chat ? selectChatOnlineCount(global, chat) : undefined;
-    const areMessagesLoaded = Boolean(selectChatMessages(global, chatId));
+    const areMessagesLoaded = Boolean(
+      isSavedDialog
+        ? selectChatMessages(global, global.currentUserId!)
+        : selectChatMessages(global, chatId),
+    );
     const topic = threadId ? selectTopic(global, chatId, threadId) : undefined;
     const messagesCount = topic && selectThreadMessagesCount(global, chatId, threadId!);
     const self = selectUser(global, global.currentUserId!);

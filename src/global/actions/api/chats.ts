@@ -684,7 +684,18 @@ addActionHandler('requestSavedDialogUpdate', async (global, actions, payload): P
   global = addMessages(global, result.messages);
 
   if (result.messages.length) {
-    global = updateChatLastMessageId(global, chatId, result.messages[0].id, 'saved');
+    const currentUserId = global.currentUserId!;
+    const messagesCount = result.count ?? result.messages.length;
+    const lastMessageId = result.messages[0].id;
+
+    global = updateThreadInfo(global, {
+      isCommentsInfo: false,
+      chatId: currentUserId,
+      threadId: chatId,
+      lastMessageId,
+      messagesCount,
+    });
+    global = updateChatLastMessageId(global, chatId, lastMessageId, 'saved');
     global = addChatListIds(global, 'saved', [chatId]);
 
     setGlobal(global);

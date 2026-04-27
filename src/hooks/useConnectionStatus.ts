@@ -1,5 +1,5 @@
 import type { GlobalState } from '../global/types';
-import type { OldLangFn } from './useOldLang';
+import type { LangFn } from '../util/localization';
 
 import useBrowserOnline from './window/useBrowserOnline';
 
@@ -16,7 +16,7 @@ type ConnectionStatusPosition =
   | 'none';
 
 export default function useConnectionStatus(
-  lang: OldLangFn,
+  lang: LangFn,
   connectionState: GlobalState['connectionState'],
   isSyncing: boolean | undefined,
   hasMiddleHeader: boolean,

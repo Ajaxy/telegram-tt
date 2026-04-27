@@ -287,7 +287,7 @@
 "SendWithoutSound" = "Send Without Sound";
 "SetReminder" = "Set a Reminder";
 "ScheduleMessage" = "Schedule Message";
-"Updating" = "Updating...";
+"Updating" = "Updating";
 "OnlineCount_one" = "{count} online";
 "OnlineCount_other" = "{count} online";
 "Subscribers_one" = "{count} subscriber";
@@ -777,6 +777,10 @@
 "AccUnpinMessage" = "Unpin Message";
 "Comments_one" = "{count} Comment";
 "Comments_other" = "{count} Comments";
+"CommentsTitle" = "Comments";
+"Replies_one" = "{count} Reply";
+"Replies_other" = "{count} Replies";
+"RepliesTitle" = "Replies";
 "LeaveAComment" = "Leave a comment";
 "PollsStopWarning" = "If you stop this poll now, nobody will be able to vote in it anymore. This action cannot be undone.";
 "PollsStopSure" = "Stop";
