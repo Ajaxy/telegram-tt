@@ -30,6 +30,7 @@ import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEn
 
 import { selectChatFilters } from '../../../../hooks/reducers/useFoldersReducer';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
 import { getPeerColorClass } from '../../../../hooks/usePeerColor';
@@ -166,7 +167,8 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     loadedActiveChatIds, loadedArchivedChatIds,
   ]);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,
@@ -253,7 +255,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
     // Ignoring global updates is a known drawback here
     if (!selectCanShareFolder(getGlobal(), state.folderId!)) {
-      showNotification({ message: lang('ChatList.Filter.InviteLink.IncludeExcludeError') });
+      showNotification({ message: oldLang('ChatList.Filter.InviteLink.IncludeExcludeError') });
       return;
     }
 
@@ -349,7 +351,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
             onClick={clickHandler}
             icon="down"
           >
-            {lang('FilterShowMoreChats', leftChatsCount, 'i')}
+            {oldLang('FilterShowMoreChats', leftChatsCount, 'i')}
           </ListItem>
         )}
       </>
@@ -429,7 +431,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
           <div className="settings-item">
             {state.error && state.error === ERROR_NO_CHATS && (
               <p className="settings-item-description color-danger mb-2" dir={lang.isRtl ? 'rtl' : undefined}>
-                {lang(state.error)}
+                {oldLang(state.error)}
               </p>
             )}
 
@@ -535,7 +537,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
         <div className="settings-item pt-3">
           <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>
-            {lang('FolderLinkScreen.Title')}
+            {oldLang('FolderLinkScreen.Title')}
           </h4>
 
           <ListItem
@@ -544,7 +546,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
             narrow
             onClick={handleCreateInviteClick}
           >
-            {lang('ChatListFilter.CreateLinkNew')}
+            {oldLang('ChatListFilter.CreateLinkNew')}
           </ListItem>
 
           {invites?.map((invite) => (
@@ -558,7 +560,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
             >
               <span className="title" dir="auto">{invite.title || invite.url}</span>
               <span className="subtitle">
-                {lang('ChatListFilter.LinkLabelChatCount', invite.peerIds.length, 'i')}
+                {oldLang('ChatListFilter.LinkLabelChatCount', invite.peerIds.length, 'i')}
               </span>
             </ListItem>
           ))}
