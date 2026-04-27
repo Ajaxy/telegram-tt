@@ -34,6 +34,8 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
   - Functions should start with a verb (e.g. `openModal`, `closeDialog`, `handleClick`).
   - Prefer checking required parameter before calling a function, avoid making it optional and checking at the beginning of the function.
   - Only leave comments for complex logic.
+  - Avoid using default values for props that can be intentionally undefined/false.
+  - No unnecessary `as` casts. Prefer `satisfies` where possible.
   - Do not use `null`. There's linter rule to enforce it.
   - **IMPORTANT: Avoid conditional spread operators** - TypeScript doesn't check if spread fields match the target type.
     ```typescript
@@ -180,7 +182,7 @@ addActionHandler('loadUser', async (global, actions, { userId }) => {
 ### 3. Hooks
 * **useLastCallback** is your go-to for callbacks, since it won't trigger re-renders and always uses the latest scope.
 * Only use **useCallback** when you really need to memoize a render function.
-* Prefer **useFlag()** over `useState<boolean>()` for simple boolean toggles.
+* Prefer **useFlag()** over `useState<boolean>()` for simple boolean toggles. `useState` is preferred when component just calls `setState(someVariable)`.
 * Check the `hooks/` folders for additional utilities.
 * Avoid adding new `useEffect` where possible.
 

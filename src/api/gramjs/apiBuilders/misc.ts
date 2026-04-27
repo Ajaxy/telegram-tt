@@ -168,7 +168,7 @@ export function buildApiUrlAuthResult(result: GramJs.TypeUrlAuthResult): ApiUrlA
   if (result instanceof GramJs.UrlAuthResultRequest) {
     const {
       bot, domain, requestWriteAccess, requestPhoneNumber, browser, platform, ip, region, matchCodes,
-      matchCodesFirst, userIdHint,
+      matchCodesFirst, userIdHint, isApp, verifiedAppName,
     } = result;
     const user = buildApiUser(bot);
     if (!user) return undefined;
@@ -178,6 +178,7 @@ export function buildApiUrlAuthResult(result: GramJs.TypeUrlAuthResult): ApiUrlA
     return {
       type: 'request',
       domain,
+      isApp,
       shouldRequestWriteAccess: requestWriteAccess,
       bot: user,
       shouldRequestPhoneNumber: requestPhoneNumber,
@@ -188,6 +189,7 @@ export function buildApiUrlAuthResult(result: GramJs.TypeUrlAuthResult): ApiUrlA
       matchCodes,
       matchCodesFirst,
       userIdHint: userIdHint?.toString(),
+      verifiedAppName,
     };
   }
 

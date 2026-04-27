@@ -18,7 +18,7 @@ import { copyTextToClipboard } from '../../../util/clipboard';
 import { getUsernameFromDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { pick } from '../../../util/iteratees.ts';
-import { getTranslationFn } from '../../../util/localization';
+import { type AdvancedLangFnParameters, getTranslationFn } from '../../../util/localization';
 import { formatStarsAsText } from '../../../util/localization/format';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import requestActionTimeout from '../../../util/requestActionTimeout';
@@ -1298,41 +1298,28 @@ function handleUrlAuthResult<T extends GlobalState>(
   }
 
   if (result.type === 'accepted' && !result.url) {
-    if (!wasPhoneShared && tabState.urlAuth?.request?.shouldRequestPhoneNumber) {
-      actions.showNotification({
-        message: {
-          key: 'BotAuthSuccessTextNoPhone',
-          variables: {
-            url: tabState.urlAuth.request?.domain || result.url,
-          },
-          options: {
-            withMarkdown: true,
-            withNodes: true,
-          },
-        },
-        title: {
-          key: 'BotAuthSuccessTitle',
-        },
-        tabId,
-      });
-    } else {
-      actions.showNotification({
-        message: {
-          key: 'BotAuthSuccessText',
-          variables: {
-            url: tabState.urlAuth?.request?.domain || result.url,
-          },
-          options: {
-            withMarkdown: true,
-            withNodes: true,
-          },
-        },
-        title: {
-          key: 'BotAuthSuccessTitle',
-        },
-        tabId,
-      });
-    }
+    const request = tabState.urlAuth?.request;
+    const requestDisplayName = request?.isApp
+      ? (request.verifiedAppName || getTranslationFn()('BotAuthUnverifiedApp'))
+      : (request?.domain || url);
+    const successMessage: AdvancedLangFnParameters = {
+      key: !wasPhoneShared && request?.shouldRequestPhoneNumber ? 'BotAuthSuccessTextNoPhone' : 'BotAuthSuccessText',
+      variables: {
+        url: requestDisplayName,
+      },
+      options: {
+        withMarkdown: true,
+        withNodes: true,
+      },
+    };
+
+    actions.showNotification({
+      message: successMessage,
+      title: {
+        key: 'BotAuthSuccessTitle',
+      },
+      tabId,
+    });
     actions.closeUrlAuthModal({ tabId });
     return;
   }

@@ -613,6 +613,7 @@
 "OpenUrlText" = "Do you want to open **{url}**?";
 "OpenUrlConfirm" = "Open";
 "BotAuthTitle" = "Log in to {url}";
+"BotAuthAppSubtitle" = "This app will receive your **name**, **username** and **profile photo**.";
 "BotAuthSiteSubtitle" = "This site will receive your **name**, **username** and **profile photo**.";
 "BotAuthAllowMessages" = "Allow Messages";
 "BotAuthAllowMessagesInfo" = "This will allow **{bot}** to message you.";
@@ -2007,6 +2008,7 @@
 "ActionBotAllowedFromDomain" = "You allowed this bot to message you when you logged in on {domain}.";
 "ActionBotAllowedFromApp" = "You allowed this bot to message you when you opened {app}.";
 "ActionBotAppPlaceholder" = "App";
+"BotAuthUnverifiedApp" = "Unverified App";
 "ActionGiftTextUnknown" = "You've received a gift";
 "ActionGiftTextUnknownYou" = "You sent a gift";
 "ActionGiftTextCost" = "{from} sent you a gift for {cost}";

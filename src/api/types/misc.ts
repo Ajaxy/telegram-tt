@@ -389,6 +389,7 @@ export type ApiUrlAuthResultRequest = {
   type: 'request';
   bot: ApiUser;
   domain: string;
+  isApp?: boolean;
   shouldRequestWriteAccess?: boolean;
   shouldRequestPhoneNumber?: boolean;
   browser?: string;
@@ -398,6 +399,7 @@ export type ApiUrlAuthResultRequest = {
   matchCodes?: string[];
   matchCodesFirst?: boolean;
   userIdHint?: string;
+  verifiedAppName?: string;
 };
 
 type ApiUrlAuthResultAccepted = {

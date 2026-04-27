@@ -163,13 +163,19 @@ const UrlAuthModal = ({
     || renderingRequest.browser || renderingRequest.ip || renderingRequest.region,
   );
   const requestDomain = renderingRequest.domain;
+  const requestDisplayName = renderingRequest.isApp
+    ? renderingRequest.verifiedAppName || lang('BotAuthUnverifiedApp')
+    : requestDomain;
+  const titleTarget = renderingRequest.isApp
+    ? requestDisplayName
+    : <SafeLink url={requestDomain} text={requestDomain} />;
   const formattedPhoneNumber = currentUser?.phoneNumber ? `+${formatPhoneNumber(currentUser.phoneNumber)}` : undefined;
   const titleText = lang('BotAuthTitle', {
-    url: <SafeLink url={requestDomain} text={requestDomain} />,
+    url: titleTarget,
   }, {
     withNodes: true,
   });
-  const descriptionText = lang('BotAuthSiteSubtitle', undefined, {
+  const descriptionText = lang(renderingRequest.isApp ? 'BotAuthAppSubtitle' : 'BotAuthSiteSubtitle', undefined, {
     withNodes: true,
     withMarkdown: true,
   });
@@ -179,7 +185,7 @@ const UrlAuthModal = ({
       <>
         <p>
           {lang('BotAuthPhoneNumberText', {
-            domain: requestDomain,
+            domain: requestDisplayName,
             phone: formattedPhoneNumber || lang('Phone'),
           }, {
             withNodes: true,
@@ -308,7 +314,7 @@ const UrlAuthModal = ({
         </div>
         <div className={styles.footnote}>
           {lang('BotAuthTitle', {
-            url: <SafeLink url={requestDomain} text={requestDomain} />,
+            url: titleTarget,
           }, {
             withNodes: true,
           })}

@@ -549,6 +549,7 @@ export interface LangPair {
   'AboutPremiumDescription2': undefined;
   'OpenUrlTitle': undefined;
   'OpenUrlConfirm': undefined;
+  'BotAuthAppSubtitle': undefined;
   'BotAuthSiteSubtitle': undefined;
   'BotAuthAllowMessages': undefined;
   'BotAuthInfo': undefined;
@@ -1589,6 +1590,7 @@ export interface LangPair {
   'NoForwardsRequestSaving': undefined;
   'NoForwardsRequestCopying': undefined;
   'ActionBotAppPlaceholder': undefined;
+  'BotAuthUnverifiedApp': undefined;
   'ActionGiftTextUnknown': undefined;
   'ActionGiftTextUnknownYou': undefined;
   'ActionGiftUniqueSent': undefined;
