@@ -272,6 +272,27 @@ addActionHandler('openSavedDialog', (global, actions, payload): ActionReturnType
   });
 });
 
+// Refetch topic if thread info is missing
+addActionHandler('openThread', (global, actions, payload): ActionReturnType => {
+  if (payload.isComments || payload.threadId === MAIN_THREAD_ID) {
+    return;
+  }
+
+  const { chatId, threadId, tabId = getCurrentTabId() } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat?.isForum) {
+    return;
+  }
+
+  const topic = selectTopic(global, chatId, threadId);
+  const threadInfo = selectThreadInfo(global, chatId, threadId);
+  if (!topic || threadInfo) {
+    return;
+  }
+
+  actions.loadTopicById({ chatId, topicId: Number(threadId), tabId });
+});
+
 addActionHandler('openThread', async (global, actions, payload): Promise<void> => {
   const {
     type, isComments, noForumTopicPanel, shouldReplaceHistory, shouldReplaceLast,

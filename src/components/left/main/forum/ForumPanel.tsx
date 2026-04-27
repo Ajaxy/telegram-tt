@@ -19,6 +19,7 @@ import {
   selectChat,
   selectCurrentMessageList,
   selectIsForumPanelOpen,
+  selectIsSynced,
   selectTabState,
   selectTopicsInfo,
 } from '../../../../global/selectors';
@@ -33,6 +34,7 @@ import { mapTruthyValues, mapValues } from '../../../../util/iteratees';
 
 import useSelector from '../../../../hooks/data/useSelector';
 import useAppLayout from '../../../../hooks/useAppLayout';
+import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../../../hooks/useIntersectionObserver';
@@ -66,6 +68,7 @@ type StateProps = {
   chat?: ApiChat;
   topicsInfo?: TopicsInfo;
   currentTopicId?: number;
+  isSynced?: boolean;
   withInterfaceAnimations?: boolean;
 };
 
@@ -76,6 +79,7 @@ const ForumPanel = ({
   currentTopicId,
   isOpen,
   isHidden,
+  isSynced,
   topicsInfo,
   withInterfaceAnimations,
   onTopicSearch,
@@ -93,11 +97,13 @@ const ForumPanel = ({
   const { isMobile } = useAppLayout();
   const chatId = chat?.id;
 
-  useEffect(() => {
-    if (chatId && !topicsInfo) {
-      loadTopics({ chatId });
+  useEffectWithPrevDeps(([prevIsSynced]) => {
+    if (!isSynced) return;
+    const hasJustSynced = prevIsSynced === false;
+    if (chatId && (hasJustSynced || !topicsInfo)) {
+      loadTopics({ chatId, force: hasJustSynced });
     }
-  }, [topicsInfo, chatId]);
+  }, [isSynced, chatId, topicsInfo]);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const lang = useLang();
@@ -150,7 +156,7 @@ const ForumPanel = ({
   const { orderDiffById, shiftDiff, getAnimationType, onReorderAnimationEnd } = useOrderDiff(orderedIds, 0, chat?.id);
 
   const [viewportIds, getMore] = useInfiniteScroll(() => {
-    if (!chat) return;
+    if (!chat || !isSynced) return;
     loadTopics({ chatId: chat.id });
   }, orderedIds, !topicsInfo?.totalCount || orderedIds.length >= topicsInfo.totalCount, TOPICS_SLICE);
 
@@ -336,6 +342,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       chat,
       currentTopicId: chatId === currentChatId ? Number(currentThreadId) : undefined,
+      isSynced: selectIsSynced(global),
       withInterfaceAnimations: selectCanAnimateInterface(global),
       topicsInfo,
     };
