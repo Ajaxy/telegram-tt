@@ -82,7 +82,9 @@ import {
 import {
   addPhotoToLocalDb,
 } from '../helpers/localDb';
-import { checkErrorType, isChatFolder, wrapError } from '../helpers/misc';
+import {
+  buildApiError, checkErrorType, isChatFolder, wrapError,
+} from '../helpers/misc';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import {
@@ -1676,12 +1678,10 @@ export async function addChatMembers(chat: ApiChat, users: ApiUser[]) {
       return addChatUsersResult.flat().filter(Boolean);
     }
   } catch (err: unknown) {
-    const message = err instanceof RPCError ? err.errorMessage : (err as Error).message;
+    const apiError = buildApiError(err as Error);
     sendApiUpdate({
       '@type': 'error',
-      error: {
-        message,
-      },
+      error: apiError,
     });
   }
   return undefined;

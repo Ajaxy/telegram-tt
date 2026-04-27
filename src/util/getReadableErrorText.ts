@@ -136,6 +136,10 @@ const FINAL_PAYMENT_ERRORS = new Set([
   'PAYMENT_FAILED',
 ]);
 
+const ERROR_CODES_WITHOUT_DIALOG = new Set([
+  406,
+]);
+
 export default function getReadableErrorText(error: ApiError) {
   const { message, isSlowMode, textParams } = error;
   // Currently, Telegram API doesn't return `SLOWMODE_WAIT_X` error as described in the docs
@@ -158,4 +162,11 @@ export function getShippingError(error: ApiError): ApiFieldError | undefined {
 
 export function shouldClosePaymentModal(error: ApiError): boolean {
   return FINAL_PAYMENT_ERRORS.has(error.message);
+}
+
+export function shouldShowErrorDialog(error: ApiError): boolean {
+  if (error.code && ERROR_CODES_WITHOUT_DIALOG.has(error.code)) return false;
+  if (error.hasErrorKey && !getReadableErrorText(error)) return false;
+
+  return true;
 }

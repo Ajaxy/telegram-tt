@@ -12,7 +12,7 @@ import { IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/browser/windowEnviron
 import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
 import { getAllNotificationsCount } from '../../../util/folderManager';
 import getIsAppUpdateNeeded from '../../../util/getIsAppUpdateNeeded';
-import getReadableErrorText from '../../../util/getReadableErrorText';
+import { shouldShowErrorDialog } from '../../../util/getReadableErrorText';
 import { compact, unique } from '../../../util/iteratees';
 import { refreshFromCache } from '../../../util/localization';
 import * as langProvider from '../../../util/oldLangProvider';
@@ -388,7 +388,7 @@ addActionHandler('showDialog', (global, actions, payload): ActionReturnType => {
   const { data, tabId = getCurrentTabId() } = payload;
 
   // Filter out errors that we don't want to show to the user
-  if (data.type === 'error' && data.hasErrorKey && !getReadableErrorText(data)) {
+  if (data.type === 'error' && !shouldShowErrorDialog(data)) {
     return global;
   }
 

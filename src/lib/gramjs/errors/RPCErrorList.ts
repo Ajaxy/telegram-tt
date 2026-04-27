@@ -1,4 +1,3 @@
-/* eslint-disable @stylistic/max-len */
 import {
   BadRequestError, FloodError, InvalidDCError, RPCError, TimedOutError,
 } from './RPCBaseErrors';
@@ -8,8 +7,7 @@ export class UserMigrateError extends InvalidDCError {
 
   constructor(args: any) {
     const newDc = Number(args.capture || 0);
-    super(`The user whose identity is being used to execute queries is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`, args.request);
-    this.message = `The user whose identity is being used to execute queries is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`;
+    super(args.errorMessage, args.request, args.code);
     this.newDc = newDc;
   }
 }
@@ -19,8 +17,7 @@ export class PhoneMigrateError extends InvalidDCError {
 
   constructor(args: any) {
     const newDc = Number(args.capture || 0);
-    super(`The phone number a user is trying to use for authorization is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`, args.request);
-    this.message = `The phone number a user is trying to use for authorization is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`;
+    super(args.errorMessage, args.request, args.code);
     this.newDc = newDc;
   }
 }
@@ -30,11 +27,7 @@ export class SlowModeWaitError extends FloodError {
 
   constructor(args: any) {
     const seconds = Number(args.capture || 0);
-    super(
-      `A wait of ${seconds} seconds is required before sending another message in this chat ${RPCError._fmtRequest(args.request)}`,
-      args.request,
-    );
-    this.message = `A wait of ${seconds} seconds is required before sending another message in this chat${RPCError._fmtRequest(args.request)}`;
+    super(args.errorMessage, args.request, args.code);
     this.seconds = seconds;
   }
 }
@@ -44,11 +37,7 @@ export class FloodWaitError extends FloodError {
 
   constructor(args: any) {
     const seconds = Number(args.capture || 0);
-    super(
-      `A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`,
-      args.request,
-    );
-    this.message = `A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`;
+    super(args.errorMessage, args.request, args.code);
     this.seconds = seconds;
   }
 }
@@ -56,21 +45,14 @@ export class FloodWaitError extends FloodError {
 export class FloodPremiumWaitError extends FloodWaitError {
   constructor(args: any) {
     const seconds = Number(args.capture || 0);
-    super(`A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`);
-    this.message = `A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`;
+    super(args);
     this.seconds = seconds;
   }
 }
 
 export class MsgWaitError extends FloodError {
   constructor(args: any) {
-    super(
-      `Message failed to be sent.${RPCError._fmtRequest(args.request)}`,
-      args.request,
-    );
-    this.message = `Message failed to be sent.${RPCError._fmtRequest(
-      args.request,
-    )}`;
+    super(args.errorMessage, args.request, args.code);
   }
 }
 
@@ -79,11 +61,7 @@ export class FloodTestPhoneWaitError extends FloodError {
 
   constructor(args: any) {
     const seconds = Number(args.capture || 0);
-    super(
-      `A wait of ${seconds} seconds is required in the test servers${RPCError._fmtRequest(args.request)}`,
-      args.request,
-    );
-    this.message = `A wait of ${seconds} seconds is required in the test servers${RPCError._fmtRequest(args.request)}`;
+    super(args.errorMessage, args.request, args.code);
     this.seconds = seconds;
   }
 }
@@ -93,11 +71,7 @@ export class FileMigrateError extends InvalidDCError {
 
   constructor(args: any) {
     const newDc = Number(args.capture || 0);
-    super(
-      `The file to be accessed is currently stored in DC ${newDc}${RPCError._fmtRequest(args.request)}`,
-      args.request,
-    );
-    this.message = `The file to be accessed is currently stored in DC ${newDc}${RPCError._fmtRequest(args.request)}`;
+    super(args.errorMessage, args.request, args.code);
     this.newDc = newDc;
   }
 }
@@ -107,11 +81,7 @@ export class NetworkMigrateError extends InvalidDCError {
 
   constructor(args: any) {
     const newDc = Number(args.capture || 0);
-    super(
-      `The source IP address is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`,
-      args.request,
-    );
-    this.message = `The source IP address is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`;
+    super(args.errorMessage, args.request, args.code);
     this.newDc = newDc;
   }
 }
@@ -121,17 +91,7 @@ export class EmailUnconfirmedError extends BadRequestError {
 
   constructor(args: any) {
     const codeLength = Number(args.capture || 0);
-    super(
-      `Email unconfirmed, the length of the code must be ${codeLength}${RPCError._fmtRequest(
-        args.request,
-      )}`,
-      args.request,
-      400,
-    );
-
-    this.message = `Email unconfirmed, the length of the code must be ${codeLength}${RPCError._fmtRequest(
-      args.request,
-    )}`;
+    super(args.errorMessage, args.request, args.code);
     this.codeLength = codeLength;
   }
 }
@@ -141,9 +101,7 @@ export class PasswordFreshError extends BadRequestError {
 
   constructor(args: any) {
     const seconds = Number(args.capture || 0);
-    super(`The password was modified less than 24 hours ago, try again in ${seconds} seconds.`, args.request);
-
-    this.message = `The password was modified less than 24 hours ago, try again in ${seconds} seconds.`;
+    super(args.errorMessage, args.request, args.code);
     this.seconds = seconds;
   }
 }
@@ -153,9 +111,7 @@ export class SessionFreshError extends BadRequestError {
 
   constructor(args: any) {
     const seconds = Number(args.capture || 0);
-    super(`Session is fresh, please try again in ${seconds} seconds.`, args.request);
-
-    this.message = `Session is fresh, please try again in ${seconds} seconds.`;
+    super(args.errorMessage, args.request, args.code);
     this.seconds = seconds;
   }
 }
@@ -181,7 +137,7 @@ export class UserAlreadyAuthorizedError extends Error {
 
 export class PasskeyCredentialNotFoundError extends RPCError {
   constructor(args: any) {
-    super('PASSKEY_CREDENTIAL_NOT_FOUND', args.request);
+    super(args.errorMessage, args.request, args.code);
   }
 }
 

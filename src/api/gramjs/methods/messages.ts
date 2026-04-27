@@ -109,6 +109,7 @@ import {
   getEntityTypeById,
 } from '../gramjsBuilders';
 import {
+  buildApiError,
   deserializeBytes,
   resolveMessageApiChatId,
 } from '../helpers/misc';
@@ -237,7 +238,7 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
       },
     );
   } catch (err: any) {
-    const { message } = err;
+    const { message, code } = buildApiError(err);
 
     // When fetching messages for the bot @replies, there may be situations when the user was banned
     // in the comment group or this group was deleted
@@ -246,6 +247,7 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
         '@type': 'error',
         error: {
           message,
+          code,
           isSlowMode: false,
           hasErrorKey: true,
         },
@@ -821,12 +823,12 @@ export async function editMessage({
       console.warn(err);
     }
 
-    const { message: messageErr } = err as Error;
+    const apiError = buildApiError(err as Error);
 
     sendApiUpdate({
       '@type': 'error',
       error: {
-        message: messageErr,
+        ...apiError,
         hasErrorKey: true,
       },
     });
@@ -887,12 +889,12 @@ export async function editTodo({
       console.warn(err);
     }
 
-    const { message: messageErr } = err as Error;
+    const apiError = buildApiError(err as Error);
 
     sendApiUpdate({
       '@type': 'error',
       error: {
-        message: messageErr,
+        ...apiError,
         hasErrorKey: true,
       },
     });
@@ -936,12 +938,12 @@ export async function appendTodoList({
       console.warn(err);
     }
 
-    const { message: messageErr } = err as Error;
+    const apiError = buildApiError(err as Error);
 
     sendApiUpdate({
       '@type': 'error',
       error: {
-        message: messageErr,
+        ...apiError,
         hasErrorKey: true,
       },
     });

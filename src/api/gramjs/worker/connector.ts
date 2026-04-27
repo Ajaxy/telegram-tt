@@ -1,6 +1,6 @@
 import type { Api } from '../../../lib/gramjs';
 import type { TypedBroadcastChannel } from '../../../util/browser/multitab';
-import type { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
+import type { ApiError, ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
 import type { LocalDb } from '../localDb';
 import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
 import type { OriginPayload, ThenArg, WorkerMessageEvent } from './types';
@@ -313,7 +313,7 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
 export function handleMethodResponse(data: {
   messageId: string;
   response?: ThenArg<MethodResponse<keyof Methods>>;
-  error?: { message: string };
+  error?: Pick<ApiError, 'message' | 'code' | 'hasErrorKey'>;
 }) {
   const requestState = requestStates.get(data.messageId);
   if (requestState) {

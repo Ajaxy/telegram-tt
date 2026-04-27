@@ -1,6 +1,6 @@
 import type { DebugLevel } from '../../../util/debugConsole';
 import type {
-  ApiInitialArgs, ApiUpdate,
+  ApiError, ApiInitialArgs, ApiUpdate,
 } from '../../types';
 import type { LocalDb } from '../localDb';
 import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
@@ -17,7 +17,7 @@ export type WorkerPayload =
     type: 'methodResponse';
     messageId: string;
     response?: ThenArg<MethodResponse<keyof Methods>>;
-    error?: { message: string };
+    error?: Pick<ApiError, 'message' | 'code' | 'hasErrorKey'>;
   }
   |
   {

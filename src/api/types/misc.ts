@@ -174,6 +174,7 @@ export type ApiDialog = ApiDialogError | ApiDialogMessage | ApiDialogContact | A
 
 export type ApiError = {
   message: string;
+  code?: number;
   entities?: ApiMessageEntity[];
   hasErrorKey?: boolean;
   isSlowMode?: boolean;

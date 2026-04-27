@@ -17,7 +17,12 @@ export function RPCMessageToError(
     const m = rpcError.errorMessage.match(msgRegex);
     if (m) {
       const capture = m.length === 2 ? parseInt(m[1], 10) : undefined;
-      return new Cls({ request, capture });
+      return new Cls({
+        request,
+        capture,
+        code: rpcError.errorCode,
+        errorMessage: rpcError.errorMessage,
+      });
     }
   }
   return new RPCError(rpcError.errorMessage, request, rpcError.errorCode);

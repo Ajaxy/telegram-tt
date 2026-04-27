@@ -2,6 +2,7 @@ import { Api as GramJs, errors } from '../../../lib/gramjs';
 
 import type { RegularLangKey } from '../../../types/language';
 import type { RegularLangFnParameters } from '../../../util/localization';
+import type { ApiError } from '../../types';
 
 import { DEBUG } from '../../../config';
 import {
@@ -38,6 +39,10 @@ const ERROR_KEYS: Record<string, RegularLangKey> = {
   PASSWORD_MISSING: 'ErrorPasswordMissing',
   PASSKEY_CREDENTIAL_NOT_FOUND: 'ErrorPasskeyUnknown',
 };
+
+function resolveErrorKey(errorMessage: string) {
+  return ERROR_KEYS[errorMessage] || ERROR_KEYS[errorMessage.replace(/_\d+$/, '')];
+}
 
 export type MessageRepairContext = Pick<GramJs.TypeMessage, 'peerId' | 'id'>;
 export type MediaRepairContext = MessageRepairContext;
@@ -102,6 +107,20 @@ export function checkErrorType(error: unknown): error is Error {
   return true;
 }
 
+export function buildApiError(error: Error): Pick<ApiError, 'message' | 'code' | 'hasErrorKey'> {
+  if (error instanceof errors.RPCError) {
+    return {
+      message: error.errorMessage,
+      code: error.code,
+      hasErrorKey: true,
+    };
+  }
+
+  return {
+    message: error.message,
+  };
+}
+
 export function wrapError<T extends Error>(error: T): WrappedError<T> {
   let messageKey: RegularLangFnParameters | undefined;
 
@@ -123,9 +142,12 @@ export function wrapError<T extends Error>(error: T): WrappedError<T> {
       variables: { time: formatWait(error.seconds) },
     };
   } else if (error instanceof errors.RPCError) {
-    messageKey = {
-      key: ERROR_KEYS[error.errorMessage],
-    };
+    const key = resolveErrorKey(error.errorMessage);
+    if (key) {
+      messageKey = {
+        key,
+      };
+    }
   }
 
   if (!messageKey) {
