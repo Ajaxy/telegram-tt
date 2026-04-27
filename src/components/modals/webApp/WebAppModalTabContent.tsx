@@ -1255,7 +1255,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       />
       <ConfirmDialog
         isOpen={Boolean(requestedFileDownload)}
-        title={oldLang('BotDownloadFileTitle')}
+        title={lang('BotDownloadFileTitle')}
         textParts={lang('BotDownloadFileDescription', {
           bot: bot?.firstName,
           filename: requestedFileDownload?.fileName,
@@ -1263,7 +1263,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
           withNodes: true,
           withMarkdown: true,
         })}
-        confirmLabel={oldLang('BotDownloadFileButton')}
+        confirmLabel={lang('BotDownloadFileButton')}
         onClose={handleRejectFileDownload}
         confirmHandler={handleDownloadFile}
       />
