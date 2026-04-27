@@ -47,14 +47,13 @@ export async function respondForDownload(e: FetchEvent) {
     });
   }
 
-  const matchedFilename = e.request.url.match(/filename=(.*)/);
-  const filenameHeader = matchedFilename ? `filename="${decodeURIComponent(matchedFilename[1])}"` : '';
+  const filenameHeader = buildContentDispositionFilenameHeader(new URL(url).searchParams.get('filename') || undefined);
   const { fullSize, mimeType } = partInfo;
 
   const headers: [string, string][] = [
     ['Content-Length', String(fullSize)],
     ['Content-Type', mimeType],
-    ['Content-Disposition', `attachment; ${filenameHeader}`],
+    ['Content-Disposition', `attachment${filenameHeader ? `; ${filenameHeader}` : ''}`],
   ];
 
   const queue = new FilePartQueue<ArrayBuffer | undefined>();
@@ -98,4 +97,29 @@ export async function respondForDownload(e: FetchEvent) {
     statusText: 'OK',
     headers,
   });
+}
+
+function buildContentDispositionFilenameHeader(filename?: string) {
+  if (!filename) {
+    return undefined;
+  }
+
+  const sanitizedFilename = Array.from(filename)
+    .filter((char) => {
+      const charCode = char.charCodeAt(0);
+      return charCode >= 0x20 && charCode !== 0x7F;
+    })
+    .join('');
+
+  if (!sanitizedFilename) {
+    return undefined;
+  }
+
+  const encodedFilename = encodeURIComponent(sanitizedFilename)
+    .replaceAll('\'', '%27')
+    .replaceAll('(', '%28')
+    .replaceAll(')', '%29')
+    .replaceAll('*', '%2A');
+
+  return `filename*=UTF-8''${encodedFilename}`;
 }

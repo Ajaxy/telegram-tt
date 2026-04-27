@@ -12,6 +12,7 @@ import { filterPeersByQuery, getPeerTitle } from '../../../../global/helpers/pee
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { pickTruthy, unique } from '../../../../util/iteratees';
 import { getCaretPosition, getHtmlBeforeSelection, setCaretPosition } from '../../../../util/selection';
+import { escapeHtml } from '../helpers/cleanHtml';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
 
 import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
@@ -109,14 +110,14 @@ export default function useMentionTooltip(
     const mainUsername = getMainUsername(peer);
     const userFirstOrLastName = getPeerTitle(lang, peer) || '';
     const htmlToInsert = mainUsername
-      ? `@${mainUsername}`
+      ? `@${escapeHtml(mainUsername)}`
       : `<a
           class="text-entity-link"
           data-entity-type="${ApiMessageEntityTypes.MentionName}"
           data-user-id="${peer.id}"
           contenteditable="false"
           dir="auto"
-        >${userFirstOrLastName}</a>`;
+        >${escapeHtml(userFirstOrLastName)}</a>`;
 
     const inputEl = inputRef.current!;
     const htmlBeforeSelection = getHtmlBeforeSelection(inputEl);

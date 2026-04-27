@@ -2,12 +2,32 @@ import { ApiMessageEntityTypes } from '../../../../api/types';
 
 import { DEBUG } from '../../../../config';
 import cleanDocsHtml from '../../../../lib/cleanDocsHtml';
-import { ENTITY_CLASS_BY_NODE_NAME } from '../../../../util/parseHtmlAsFormattedText';
 
 const STYLE_TAG_REGEX = /<style>(.*?)<\/style>/gs;
 
+export const ENTITY_CLASS_BY_NODE_NAME: Record<string, ApiMessageEntityTypes> = {
+  B: ApiMessageEntityTypes.Bold,
+  STRONG: ApiMessageEntityTypes.Bold,
+  I: ApiMessageEntityTypes.Italic,
+  EM: ApiMessageEntityTypes.Italic,
+  INS: ApiMessageEntityTypes.Underline,
+  U: ApiMessageEntityTypes.Underline,
+  S: ApiMessageEntityTypes.Strike,
+  STRIKE: ApiMessageEntityTypes.Strike,
+  DEL: ApiMessageEntityTypes.Strike,
+  CODE: ApiMessageEntityTypes.Code,
+  PRE: ApiMessageEntityTypes.Pre,
+  BLOCKQUOTE: ApiMessageEntityTypes.Blockquote,
+};
+
+export function parseHtmlBody(html: string): HTMLElement {
+  const parser = new DOMParser();
+  const parsedDocument = parser.parseFromString(html, 'text/html');
+
+  return parsedDocument.body;
+}
+
 export function preparePastedHtml(html: string) {
-  let fragment = document.createElement('div');
   try {
     html = cleanDocsHtml(html);
   } catch (err) {
@@ -16,7 +36,7 @@ export function preparePastedHtml(html: string) {
       console.error(err);
     }
   }
-  fragment.innerHTML = html.replace(/\u00a0/g, ' ').replace(STYLE_TAG_REGEX, ''); // Strip &nbsp and styles
+  let fragment = parseHtmlBody(html.replace(/\u00a0/g, ' ').replace(STYLE_TAG_REGEX, '')); // Strip &nbsp and styles
 
   const textContents = fragment.querySelectorAll<HTMLDivElement>('.text-content');
   if (textContents.length) {
@@ -62,4 +82,10 @@ export function escapeHtml(html: string) {
   const text = document.createTextNode(html);
   fragment.appendChild(text);
   return fragment.innerHTML;
+}
+
+export function escapeHtmlAttribute(html: string) {
+  return escapeHtml(html)
+    .replaceAll('"', '&quot;')
+    .replaceAll('\'', '&#39;');
 }
