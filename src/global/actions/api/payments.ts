@@ -111,6 +111,7 @@ addActionHandler('openInvoice', async (global, actions, payload): Promise<void> 
       form,
       isPaymentModalOpen: true,
       isExtendedMedia: (payload as any).isExtendedMedia,
+      confirmPaymentUrl: undefined,
       status: undefined,
     }, tabId);
     global = setPaymentStep(global, PaymentStep.Checkout, tabId);
@@ -280,11 +281,24 @@ addActionHandler('sendPaymentForm', async (global, actions, payload): Promise<vo
     tipAmount,
   });
 
+  global = getGlobal();
+  if (selectTabState(global, tabId).payment.form?.formId !== formId) {
+    return;
+  }
+
   if (!result) {
     return;
   }
 
-  global = getGlobal();
+  if ('verificationUrl' in result) {
+    global = updatePayment(global, {
+      confirmPaymentUrl: result.verificationUrl,
+      step: PaymentStep.ConfirmPayment,
+    }, tabId);
+    setGlobal(global);
+    return;
+  }
+
   global = updatePayment(global, { status: 'paid' }, tabId);
   global = closeInvoice(global, tabId);
   setGlobal(global);

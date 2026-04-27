@@ -36,9 +36,14 @@ import {
   serializeBytes,
 } from '../helpers/misc';
 import localDb from '../localDb';
-import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { handleGramJsUpdate, invokeRequest } from './client';
 import { getTemporaryPaymentPassword } from './twoFaSettings';
+
+type SendPaymentFormResult = {
+  completed: true;
+} | {
+  verificationUrl: string;
+};
 
 export async function validateRequestedInfo({
   inputInvoice,
@@ -90,7 +95,7 @@ export async function sendPaymentForm({
   savedCredentialId?: string;
   temporaryPassword?: string;
   tipAmount?: number;
-}) {
+}): Promise<SendPaymentFormResult | undefined> {
   const inputCredentials = temporaryPassword && savedCredentialId
     ? new GramJs.InputPaymentCredentialsSaved({
       id: savedCredentialId,
@@ -109,20 +114,19 @@ export async function sendPaymentForm({
     ...(tipAmount && { tipAmount: BigInt(tipAmount) }),
   }));
 
-  if (!result) return false;
+  if (!result) return undefined;
 
   if (result instanceof GramJs.payments.PaymentVerificationNeeded) {
-    sendApiUpdate({
-      '@type': 'updatePaymentVerificationNeeded',
-      url: result.url,
-    });
-
-    return undefined;
-  } else {
-    handleGramJsUpdate(result.updates);
+    return {
+      verificationUrl: result.url,
+    };
   }
 
-  return Boolean(result);
+  handleGramJsUpdate(result.updates);
+
+  return {
+    completed: true,
+  };
 }
 
 export async function sendStarPaymentForm({

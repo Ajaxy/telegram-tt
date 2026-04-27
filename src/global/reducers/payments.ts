@@ -87,13 +87,6 @@ export function setSmartGlocalCardInfo<T extends GlobalState>(
   return updatePayment(global, { smartGlocalCredentials: { ...cardInfo } }, tabId);
 }
 
-export function setConfirmPaymentUrl<T extends GlobalState>(
-  global: T, url?: string,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-): T {
-  return updatePayment(global, { confirmPaymentUrl: url }, tabId);
-}
-
 export function setReceipt<T extends GlobalState>(
   global: T,
   receipt?: ApiReceiptRegular,
@@ -131,6 +124,7 @@ export function closeInvoice<T extends GlobalState>(
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   global = updatePayment(global, {
+    confirmPaymentUrl: undefined,
     isPaymentModalOpen: undefined,
     isExtendedMedia: undefined,
   }, tabId);

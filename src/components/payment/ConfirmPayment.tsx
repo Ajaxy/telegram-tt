@@ -85,7 +85,7 @@ const ConfirmPayment = ({
         src={url}
         title={lang('Checkout.WebConfirmation.Title')}
         allow="payment"
-        sandbox="allow-modals allow-forms allow-scripts allow-top-navigation allow-same-origin"
+        sandbox="allow-modals allow-forms allow-scripts allow-same-origin"
         className="ConfirmPayment__content"
       />
     </div>
