@@ -55,6 +55,31 @@ import {
 } from '../../selectors';
 
 const LOCAL_BOOST_COOLDOWN = 86400; // 24 hours
+const SMART_GLOCAL_DOMAIN = 'smart-glocal.com';
+const SMART_GLOCAL_TOKENIZE_PATH = '/cds/v1/tokenize/card';
+
+function isValidSmartGlocalTokenizeUrl(tokenizeUrl: string) {
+  if (tokenizeUrl !== tokenizeUrl.trim()) {
+    return false;
+  }
+
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(tokenizeUrl);
+  } catch {
+    return false;
+  }
+
+  const { protocol, hostname, pathname, port, username, password } = parsedUrl;
+  const isSmartGlocalHost = hostname === SMART_GLOCAL_DOMAIN || hostname.endsWith(`.${SMART_GLOCAL_DOMAIN}`);
+
+  return protocol === 'https:'
+    && isSmartGlocalHost
+    && pathname === SMART_GLOCAL_TOKENIZE_PATH
+    && !port
+    && !username
+    && !password;
+}
 
 addActionHandler('validateRequestedInfo', (global, actions, payload): ActionReturnType => {
   const { requestInfo, saveInfo, tabId = getCurrentTabId() } = payload;
@@ -429,8 +454,7 @@ async function sendSmartGlocalCredentials<T extends GlobalState>(
     url = 'https://tgb.smart-glocal.com/cds/v1/tokenize/card';
   }
 
-  if (tokenizeUrl?.startsWith('https://')
-    && tokenizeUrl.endsWith('.smart-glocal.com/cds/v1/tokenize/card')) {
+  if (tokenizeUrl && isValidSmartGlocalTokenizeUrl(tokenizeUrl)) {
     url = tokenizeUrl;
   }
 

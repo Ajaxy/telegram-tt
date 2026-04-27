@@ -321,6 +321,35 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     });
   });
 
+  const sendLocationUnavailable = useLastCallback(() => {
+    sendEvent({
+      eventType: 'location_requested',
+      eventData: {
+        available: false,
+      },
+    });
+  });
+
+  const sendLocation = useLastCallback((geolocation: GeolocationCoordinates) => {
+    sendEvent({
+      eventType: 'location_requested',
+      eventData: {
+        available: true,
+        latitude: geolocation.latitude,
+        longitude: geolocation.longitude,
+        altitude: geolocation.altitude,
+        course: geolocation.heading,
+        speed: geolocation.speed,
+        horizontal_accuracy: geolocation.accuracy,
+        vertical_accuracy: geolocation.altitudeAccuracy,
+        // eslint-disable-next-line no-null/no-null
+        course_accuracy: null,
+        // eslint-disable-next-line no-null/no-null
+        speed_accuracy: null,
+      },
+    });
+  });
+
   const handleAppPopupModalClose = useLastCallback(() => {
     handleAppPopupClose();
   });
@@ -773,10 +802,20 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
     if (eventType === 'web_app_check_location') {
       const handleGeolocationCheck = () => {
+        if (!isAvailable) {
+          sendEvent({
+            eventType: 'location_checked',
+            eventData: {
+              available: false,
+            },
+          });
+          return;
+        }
+
         sendEvent({
           eventType: 'location_checked',
           eventData: {
-            available: isAvailable,
+            available: true,
             access_requested: isAccessRequested,
             access_granted: isAccessGranted,
           },
@@ -788,43 +827,38 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
     if (eventType === 'web_app_request_location') {
       const handleRequestLocation = async () => {
-        const geolocationData = await getGeolocationStatus();
-        const { accessRequested, accessGranted, geolocation } = geolocationData;
-
-        if (!accessGranted || !accessRequested) {
-          sendEvent({
-            eventType: 'location_requested',
-            eventData: {
-              available: false,
-            },
-          });
+        if (!isAvailable) {
+          sendLocationUnavailable();
           showNotification({ message: oldLang('PermissionNoLocationPosition') });
           handleAppPopupClose(undefined);
           return;
         }
 
-        if (isAvailable) {
-          if (isAccessRequested) {
-            sendEvent({
-              eventType: 'location_requested',
-              eventData: {
-                available: Boolean(botAppPermissions?.geolocation),
-                latitude: geolocation?.latitude,
-                longitude: geolocation?.longitude,
-                altitude: geolocation?.altitude,
-                course: geolocation?.heading,
-                speed: geolocation?.speed,
-                horizontal_accuracy: geolocation?.accuracy,
-                vertical_accuracy: geolocation?.altitudeAccuracy,
-              },
-            });
-          } else {
+        if (!isAccessRequested) {
+          if (bot && webAppKey) {
             openLocationAccessModal({ bot, webAppKey });
+          } else {
+            sendLocationUnavailable();
           }
-        } else {
+          return;
+        }
+
+        if (!isAccessGranted) {
+          sendLocationUnavailable();
+          return;
+        }
+
+        const geolocationData = await getGeolocationStatus();
+        const { accessRequested, accessGranted, geolocation } = geolocationData;
+
+        if (!accessGranted || !accessRequested || !geolocation) {
+          sendLocationUnavailable();
           showNotification({ message: oldLang('PermissionNoLocationPosition') });
           handleAppPopupClose(undefined);
+          return;
         }
+
+        sendLocation(geolocation);
       };
 
       handleRequestLocation();

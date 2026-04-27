@@ -36,7 +36,7 @@ const LocationAccessModal: FC<OwnProps & StateProps> = ({
   currentUser,
 }) => {
   const {
-    closeLocationAccessModal, toggleUserLocationPermission, sendWebAppEvent,
+    closeLocationAccessModal, toggleUserLocationPermission, sendWebAppEvent, showNotification,
   } = getActions();
 
   const isOpen = Boolean(modal);
@@ -47,28 +47,48 @@ const LocationAccessModal: FC<OwnProps & StateProps> = ({
   const containerRef = useRef<HTMLDivElement>();
 
   const confirmHandler = useLastCallback(async () => {
-    const geolocationData = await getGeolocationStatus();
-    const { geolocation } = geolocationData;
     if (!modal?.bot?.id) return;
+
+    const geolocationData = await getGeolocationStatus();
+    const { accessRequested, accessGranted, geolocation } = geolocationData;
+    const isAccessGranted = accessRequested && accessGranted && Boolean(geolocation);
     closeLocationAccessModal();
     if (modal?.webAppKey) {
       toggleUserLocationPermission({
         botId: modal.bot.id,
-        isAccessGranted: true,
+        isAccessGranted,
       });
+      if (!isAccessGranted || !geolocation) {
+        sendWebAppEvent({
+          webAppKey: modal.webAppKey,
+          event: {
+            eventType: 'location_requested',
+            eventData: {
+              available: false,
+            },
+          },
+        });
+        showNotification({ message: oldLang('PermissionNoLocationPosition') });
+        return;
+      }
+
       sendWebAppEvent({
         webAppKey: modal.webAppKey,
         event: {
           eventType: 'location_requested',
           eventData: {
             available: true,
-            latitude: geolocation?.latitude,
-            longitude: geolocation?.longitude,
-            altitude: geolocation?.altitude,
-            course: geolocation?.heading,
-            speed: geolocation?.speed,
-            horizontal_accuracy: geolocation?.accuracy,
-            vertical_accuracy: geolocation?.accuracy,
+            latitude: geolocation.latitude,
+            longitude: geolocation.longitude,
+            altitude: geolocation.altitude,
+            course: geolocation.heading,
+            speed: geolocation.speed,
+            horizontal_accuracy: geolocation.accuracy,
+            vertical_accuracy: geolocation.altitudeAccuracy,
+            // eslint-disable-next-line no-null/no-null
+            course_accuracy: null,
+            // eslint-disable-next-line no-null/no-null
+            speed_accuracy: null,
           },
         },
       });
