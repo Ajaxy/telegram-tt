@@ -9,25 +9,39 @@
   "scripts": {
     "dev": "cross-env APP_ENV=development webpack serve --mode development",
     "dev:mocked": "cross-env APP_ENV=test APP_MOCKED_CLIENT=1 webpack serve --mode development --port 1235",
+
     "build:dev": "webpack --mode development && bash ./deploy/copy_to_dist.sh",
     "build:staging": "cross-env APP_ENV=staging npm run build:dev",
     "build:mocked": "cross-env APP_ENV=test APP_MOCKED_CLIENT=1 npm run build:dev",
     "build:production": "webpack && bash ./deploy/copy_to_dist.sh",
+
     "web:release:production": "npm i && npm run build:production && git add -A && git commit -a -m '[Build]' --no-verify && git push",
+
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
+
     "telegraph:update_changelog": "node ./dev/telegraphChangelog.js",
-    "check": "tsc && stylelint \"**/*.{css,scss}\" --cache --cache-location .cache/.stylelintcache && eslint --cache --cache-location .cache/.eslintcache",
-    "check:fix": "stylelint \"**/*.{css,scss}\" --fix --cache --cache-location .cache/.stylelintcache && eslint --fix --cache --cache-location .cache/.eslintcache",
+
+    "check:ts": "tsc && eslint --cache --cache-location .cache/.eslintcache",
+    "check:css": "stylelint \"**/*.{css,scss}\" --cache --cache-location .cache/.stylelintcache",
+    "fix:ts": "tsc && eslint --cache --cache-location .cache/.eslintcache --fix",
+    "fix:css": "stylelint \"**/*.{css,scss}\" --cache --cache-location .cache/.stylelintcache --fix",
+    "check": "npm run check:ts && npm run check:css",
+    "fix": "npm run fix:ts && npm run fix:css",
+
     "tl:rehash": "node ./dev/tlHash.js",
     "gramjs:tl": "tsx ./src/lib/gramjs/tl/generateModules.ts",
+
     "lang:ts": "tsx ./dev/generateLangTypes.js",
     "lang:initial": "tsx ./dev/generateInitialLangFallback.js",
+
     "icons:build": "fantasticon -c .fantasticonrc.cjs",
+
     "test": "cross-env APP_ENV=test jest --verbose --silent --forceExit",
     "test:playwright": "playwright test",
     "test:record": "playwright codegen localhost:1235",
+
     "statoscope:validate-diff": "statoscope validate --input input.json --reference reference.json",
     "postinstall": "node -e \"require('fs').rmSync('.cache', { recursive: true, force: true })\"",
     "postversion": "echo $(node -p \"require('./package.json').version\") > public/version.txt && git commit --amend --no-verify --no-edit public/version.txt"

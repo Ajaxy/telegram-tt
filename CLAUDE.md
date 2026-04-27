@@ -69,16 +69,20 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
   - Add new translations to `src/assets/localization/fallback.strings`.
 
 - **After your solution:**
-  1. Critique it—identify any shortcomings.
-  2. Fix those issues, do more planning.
+  1. Think like on a code review and identify any shortcomings.
+  2. Fix those issues. Repeat review-fix cycle until you are sure about code quality.
   3. Present the improved result.
 
 - **When deeper debugging is needed:**
-  1. Outline clear, step-by-step debugging instructions for the operator.
+  1. Outline clear, step-by-step debugging instructions in your output.
   2. Remove any temporary debug code once the issue is resolved.
 
+- **Linter commands**
+  After finishing your changes, run `npm run check:ts` if you touched TypeScript files and/or `npm run check:css` for SCSS.
+  If linter reports incorrect import order, try fixing it using command. If it fails, make ONE try to fix it manually and leave it as is.
+
 - **Lint errors you can't fix manually:**
-  Suggest running `eslint --fix <filename>`.
+  Suggest running `npx eslint --fix <filename>`.
 
 # Telegram Web API Guide
 
@@ -178,6 +182,7 @@ addActionHandler('loadUser', async (global, actions, { userId }) => {
 * Only use **useCallback** when you really need to memoize a render function.
 * Prefer **useFlag()** over `useState<boolean>()` for simple boolean toggles.
 * Check the `hooks/` folders for additional utilities.
+* Avoid adding new `useEffect` where possible.
 
 ### 4. Component Signature
 > **Migrate** any old `FC` syntax to the new form.
@@ -200,6 +205,8 @@ const NewComp = (props: OwnProps & StateProps) => { … }
 * Call `const lang = useLang()` at the top of your component.
 * Look up the localization guide for how to add new language keys.
 
+### 7. Icons
+* Use `<Icon>` component for icons. Available icons are listed in `src/types/icons/index.ts`
 ---
 
 ### Example
@@ -305,15 +312,15 @@ Global State is our single, app-wide store, similar to Redux or Zustand. All its
 
 ### 1. Accessing Global in Components
 
-* **Use** `withGlobal` (a `mapStateToProps` helper) to pull in state.
-* There is an experimental `useSelector` API available.
-* **Use** `getGlobal` **only** inside hooks for one-off reads (it's non-reactive).
+* Prefer existing `withGlobal` (a `mapStateToProps` helper) to pull in state.
+* There is an experimental `useSelector` API available. If your value can be retrieved using simple selector and `withGlobal` is not present, use it.
+* **Use** `getGlobal` **only** inside callbacks for one-off reads (it's non-reactive).
 
 ### 2. Performance
 
 * Wrap `withGlobal` in `memo` so the component re-renders only on real data changes.
 * **Don't** return new arrays or objects inside `withGlobal`; that defeats memoization.
-* If you need to filter or map a list, **pass IDs as props** and do the heavy work in a `useMemo` hook.
+* If you need to filter or map a list, use `useShallowSelector` to retrieve reactive array and perform computation in `useMemo`.
 * Force `Complete<StateProps>` return type for `withGlobal` parameter, as it ensures that all defined properties are passed.
 
 ### 3. Example Component
@@ -381,6 +388,7 @@ lang('MarkdownKey', undefined, { withNodes: true, withMarkdown: true });
 
 **3. Adding a New Key**
 
+0. Make sure key does not exist already.
 1. Search Translation Platform for similar strings to get the correct wording.
 2. Add it to `fallback.strings`.
 3. If it's plural, include `_one` and `_other`.
