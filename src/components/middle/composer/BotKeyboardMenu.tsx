@@ -66,6 +66,7 @@ const BotKeyboardMenu = ({
       onCloseAnimationEnd={onClose}
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
+      noCloseOnBackdrop={!IS_TOUCH_ENV}
       noCompact
     >
       <div className={buildClassName(styles.content, 'custom-scroll')}>

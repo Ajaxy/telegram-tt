@@ -2461,6 +2461,7 @@ const Composer = ({
                         className={buildClassName('composer-action-button', isBotKeyboardOpen && 'activated')}
                         round
                         color="translucent"
+                        noClickActivation
                         onActivate={openBotKeyboard}
                         ariaLabel={lang('AriaComposerBotKeyboard')}
                       >
