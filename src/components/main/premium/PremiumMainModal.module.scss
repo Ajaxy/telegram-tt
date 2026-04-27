@@ -158,15 +158,8 @@
 }
 
 @media (max-width: 600px) {
-  .root :global(.modal-dialog) {
-    width: 100%;
-    max-width: 100% !important;
-    height: 100%;
-    border-radius: 0;
-  }
-
   .root :global(.modal-content) {
-    max-height: 100vh;
+    max-height: 100%;
   }
 
   .root .transition {

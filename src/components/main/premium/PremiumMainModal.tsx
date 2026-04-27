@@ -429,6 +429,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   return (
     <Modal
       className={styles.root}
+      dialogClassName="premium-main-modal-dialog"
       onClose={closePremiumModal}
       isOpen={isOpen}
       dialogRef={dialogRef}

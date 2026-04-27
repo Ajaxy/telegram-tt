@@ -21,22 +21,9 @@
 }
 
 @media (max-width: 600px) {
-  .root :global(.modal-dialog),
   .transition,
   .content {
     height: 100%;
-  }
-}
-
-@media (max-width: 600px) {
-  .root :global(.modal-dialog) {
-    width: 100%;
-    max-width: 100% !important;
-    height: 100%;
-    border: none !important;
-    border-radius: 0;
-
-    box-shadow: none !important;
   }
 }
 

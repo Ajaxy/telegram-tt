@@ -687,6 +687,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         isMinimizedState && styles.minimized,
         isFullScreen && styles.fullScreen,
       )}
+      dialogClassName="mini-app-modal-dialog"
       dialogStyle={supportMultiTabMode ? draggableStyle : undefined}
       dialogContent={isDraggingEnabled && !isMinimizedState ? renderResizeHandles() : undefined}
       isOpen={isOpen}

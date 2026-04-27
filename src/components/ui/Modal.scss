@@ -114,6 +114,25 @@
       @media (max-width: 450px) {
         max-width: calc(100vw - 3rem) !important;
       }
+
+      @media (max-width: 450px) {
+        &.mini-app-modal-dialog {
+          width: 100vw !important;
+          max-width: 100vw !important;
+          margin: 0 !important;
+          border-radius: 0;
+        }
+      }
+
+      @media (max-width: 600px) {
+        &.premium-main-modal-dialog {
+          width: 100% !important;
+          max-width: 100% !important;
+          height: 100%;
+          margin: 0;
+          border-radius: 0;
+        }
+      }
     }
 
     &.open .modal-dialog {
