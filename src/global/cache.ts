@@ -369,6 +369,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.appConfig = initialState.appConfig;
   }
 
+  if (cached.appConfig.webAppAllowedProtocols === undefined) {
+    cached.appConfig.webAppAllowedProtocols = initialState.appConfig.webAppAllowedProtocols;
+  }
+
   if (untypedCached.sharedState?.settings?.shouldWarnAboutSvg) {
     cached.sharedState.settings.shouldWarnAboutFiles = true;
     untypedCached.sharedState.settings.shouldWarnAboutSvg = undefined;

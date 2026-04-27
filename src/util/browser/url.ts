@@ -4,6 +4,10 @@ import convertPunycode from '../../lib/punycode';
 const PROTOCOL_WHITELIST = new Set(['http:', 'https:', 'tg:', 'ton:', 'mailto:', 'tel:']);
 const FALLBACK_PREFIX = 'https://';
 
+function normalizeProtocol(protocol: string) {
+  return protocol.replace(/:$/, '').trim().toLowerCase();
+}
+
 export function ensureProtocol(url: string) {
   try {
     const parsedUrl = new URL(url);
@@ -64,4 +68,18 @@ export function isMixedScriptUrl(url: string): boolean {
   }
 
   return false;
+}
+
+export function isValidProtocol(url: string, allowedProtocols: string[]) {
+  if (typeof url !== 'string') {
+    return false;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    return allowedProtocols.includes(normalizeProtocol(parsedUrl.protocol));
+  } catch (err) {
+    return false;
+  }
 }

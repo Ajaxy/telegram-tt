@@ -7,6 +7,7 @@ import type { WebApp, WebAppInboundEvent, WebAppOutboundEvent } from '../../../.
 import { VERIFY_AGE_MIN_DEFAULT } from '../../../../config';
 import { getWebAppKey } from '../../../../global/helpers';
 import { isMessageFromIframe } from '../../../../util/browser/iframe';
+import { isValidProtocol } from '../../../../util/browser/url';
 import { extractCurrentThemeParams } from '../../../../util/themeStyle';
 import { REM } from '../../../common/helpers/mediaDimensions';
 
@@ -241,8 +242,11 @@ const useWebAppFrame = (
       }
 
       if (eventType === 'web_app_open_link') {
-        const linkUrl = eventData.url;
-        window.open(linkUrl, '_blank', 'noreferrer');
+        if (!isValidProtocol(eventData.url, getGlobal().appConfig.webAppAllowedProtocols)) {
+          return;
+        }
+
+        window.open(eventData.url, '_blank', 'noopener,noreferrer');
       }
 
       if (eventType === 'web_app_biometry_get_info') {

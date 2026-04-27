@@ -150,6 +150,10 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
     'z.t.me',
     'a.t.me',
   ],
+  webAppAllowedProtocols: [
+    'http',
+    'https',
+  ],
   whitelistedDomains: [
     'telegram.dog',
     'telegram.me',

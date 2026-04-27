@@ -52,6 +52,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   autologin_domains: string[];
   autologin_token: string;
   url_auth_domains: string[];
+  web_app_allowed_protocols?: string[];
   whitelisted_domains: string[];
   premium_purchase_blocked: boolean;
   giveaway_gifts_purchase_available: boolean;
@@ -184,6 +185,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     autologinDomains: appConfig.autologin_domains || [],
     urlAuthDomains: appConfig.url_auth_domains || [],
     whitelistedDomains: appConfig.whitelisted_domains || [],
+    webAppAllowedProtocols: appConfig.web_app_allowed_protocols,
     maxUniqueReactions: appConfig.reactions_uniq_max,
     premiumBotUsername: appConfig.premium_bot_username,
     premiumInvoiceSlug: appConfig.premium_invoice_slug,
