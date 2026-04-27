@@ -1,9 +1,10 @@
 @font-face {
-  font-family: "{{ name }}";
+  font-family: "{{ fontname }}";
   font-weight: normal;
   font-style: normal;
   font-display: block;
-  src: {{{ fontSrc }}};
+  src: url("./{{ fontname }}.woff2?{{ fontHash }}") format("woff2"),
+url("./{{ fontname }}.woff?{{ fontHash }}") format("woff");
 }
 
 .icon-char::before {
@@ -20,12 +21,8 @@
   width: 1em;
 }
 
-{{# each codepoints }}
-{{# if ../selector }}
-{{ ../selector }}.{{ ../prefix }}-{{ @key }}::before {
-{{ else }}
-{{ tag }}.{{ ../prefix }}-{{ @key }}::before {
-{{/ if }}
-  content: "\\{{ codepoint this }}";
+{% for icon in iconDefinitions -%}
+.icon-{{ icon.publicName }}::before {
+  content: "{{ icon.encodedCode }}";
 }
-{{/ each }}
+{% endfor -%}

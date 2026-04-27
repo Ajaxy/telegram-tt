@@ -3,7 +3,7 @@
 @mixin icon {
   /* !important to prevent issues with browser extensions that change fonts */
   /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-  font-family: "{{ name }}" !important;
+  font-family: "{{ fontname }}" !important;
   speak: none;
   font-style: normal;
   font-weight: normal;
@@ -15,8 +15,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-${{ name }}-map: (
-{{# each codepoints }}
-  "{{ @key }}": "\\{{ codepoint this }}",
-{{/ each }}
+$icons-map: (
+{% for icon in iconDefinitions %}  "{{ icon.publicName }}": "{{ icon.encodedCode }}",
+{% endfor -%}
 );

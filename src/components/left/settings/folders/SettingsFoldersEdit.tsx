@@ -280,7 +280,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     });
   }, [
     invites, state.folderId, state.isTouched, chatListCount, maxInviteLinks, isCreating, onSaveFolder,
-    onShareFolder, lang, maxChatLists, state.folder.isChatList,
+    onShareFolder, oldLang, maxChatLists, state.folder.isChatList,
   ]);
 
   const handleEditInviteClick = useCallback((e: React.MouseEvent<HTMLElement>, url: string) => {

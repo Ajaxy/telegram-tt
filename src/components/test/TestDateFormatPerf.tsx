@@ -12,8 +12,6 @@ import { formatDateTime } from '../../util/localization/dateFormat';
 import useLang from '../../hooks/useLang';
 import useOldLang, { type OldLangFn } from '../../hooks/useOldLang';
 
-import styles from './TestDateFormat.module.scss';
-
 const BENCHMARK_COUNT = 10000;
 const RANDOM_SEED = 123456789;
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -281,7 +279,7 @@ const TestDateFormatPerf = () => {
   }, [lang, oldLang, runId]);
 
   return (
-    <div className={buildClassName(styles.root, 'full-height', 'custom-scroll')}>
+    <div className={buildClassName('full-height', 'custom-scroll')}>
       <h2>Date Format Perf</h2>
       <p>Generates 10,000 random dates, benchmarks old and new formatting paths, and prints results to the console.</p>
       <p>

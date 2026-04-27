@@ -41,7 +41,6 @@
     "dev",
     "*.config.ts",
     "*.config.js",
-    ".fantasticonrc.cjs",
     ".github/workflows/*.js",
     "deploy/*.js"
   ]
