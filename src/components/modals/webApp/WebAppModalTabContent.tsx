@@ -13,7 +13,7 @@ import type {
   WebAppOutboundEvent,
 } from '../../../types/webapp';
 
-import { TME_LINK_PREFIX } from '../../../config';
+import { TME_LINK_PREFIX, VERIFY_AGE_MIN_DEFAULT } from '../../../config';
 import { convertToApiChatType, getUserFullName } from '../../../global/helpers';
 import { getWebAppKey } from '../../../global/helpers/bots';
 import {
@@ -88,6 +88,8 @@ type StateProps = {
   paymentStatus?: TabState['payment']['status'];
   modalState?: WebAppModalStateType;
   botAppPermissions?: BotAppPermissions;
+  verifyAgeMin?: number;
+  verifyAgeBotUsername?: string;
 };
 
 const MAIN_BUTTON_ANIMATION_TIME = 250;
@@ -120,15 +122,17 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   theme,
   isPaymentModalOpen,
   paymentStatus,
-  registerSendEventCallback,
-  registerReloadFrameCallback,
   isTransforming,
   modalState,
   isMultiTabSupported,
-  onContextMenuButtonClick,
   botAppPermissions,
   botAppSettings,
   modalHeight,
+  verifyAgeMin = VERIFY_AGE_MIN_DEFAULT,
+  verifyAgeBotUsername,
+  registerSendEventCallback,
+  registerReloadFrameCallback,
+  onContextMenuButtonClick,
 }) => {
   const {
     closeActiveWebApp,
@@ -147,6 +151,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     changeWebAppModalState,
     closeWebAppModal,
     openPreparedInlineMessageModal,
+    updateContentSettings,
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton>();
   const [secondaryButton, setSecondaryButton] = useState<WebAppButton>();
@@ -832,6 +837,29 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     if (eventType === 'web_app_read_text_from_clipboard') {
       setClipboardRequestId(eventData.req_id);
     }
+
+    if (eventType === 'web_app_verify_age') {
+      if (!bot?.usernames?.some((username) => username.username === verifyAgeBotUsername)) return;
+
+      const { passed } = eventData;
+      const minAge = verifyAgeMin;
+      const ageFromParam = eventData.age || 0;
+
+      if (passed && ageFromParam >= minAge) {
+        showNotification({
+          message: {
+            key: 'TitleAgeCheckSuccess',
+          },
+        });
+        updateContentSettings({ isSensitiveEnabled: true });
+      } else {
+        showNotification({
+          message: {
+            key: 'TitleAgeCheckFailed',
+          },
+        });
+      }
+    }
   }
 
   const mainButtonCurrentColor = useCurrentOrPrev(mainButton?.color, true);
@@ -1302,6 +1330,7 @@ export default memo(withGlobal<OwnProps>(
     const activeWebApp = modal?.activeWebAppKey ? selectWebApp(global, modal.activeWebAppKey) : undefined;
     const { botId: activeBotId } = activeWebApp || {};
     const modalState = modal?.modalState;
+    const { verifyAgeMin, verifyAgeBotUsername } = global.appConfig;
 
     const attachBot = activeBotId ? global.attachMenu.bots[activeBotId] : undefined;
     const bot = activeBotId ? selectUser(global, activeBotId) : undefined;
@@ -1325,6 +1354,8 @@ export default memo(withGlobal<OwnProps>(
       modalState,
       botAppPermissions,
       botAppSettings,
+      verifyAgeMin,
+      verifyAgeBotUsername,
     };
   },
 )(WebAppModalTabContent));
