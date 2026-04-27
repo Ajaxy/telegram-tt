@@ -633,6 +633,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updatePinnedIds': {
       const { chatId, isPinned, messageIds } = update;
+      const shouldBePinned = Boolean(isPinned);
+
+      messageIds.forEach((id) => {
+        global = updateChatMessage(global, chatId, id, { isPinned: shouldBePinned });
+      });
 
       const messageIdsByThreadId = groupMessageIdsByThreadId(global, chatId, messageIds, false);
 
