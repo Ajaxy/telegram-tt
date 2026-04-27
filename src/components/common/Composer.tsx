@@ -2256,17 +2256,6 @@ const Composer = ({
             </g>
           </svg>
         )}
-        <Button
-          round
-          faded
-          className={buildClassName('ai-composer-button', (!shouldShowAiButton
-            || hasAttachments) && 'ai-composer-button-hidden')}
-          color="translucent"
-          ariaLabel={lang('AiMessageEditor')}
-          iconName="ai"
-          tabIndex={shouldShowAiButton && !hasAttachments ? 0 : -1}
-          onClick={handleOpenAiEditor}
-        />
         {isInMessageList && (
           <>
             <InlineBotTooltip
@@ -2370,6 +2359,17 @@ const Composer = ({
               forceDarkTheme={isInStoryViewer}
             />
           )}
+          <Button
+            round
+            faded
+            className={buildClassName('ai-composer-button', (!shouldShowAiButton
+              || hasAttachments) && 'ai-composer-button-hidden')}
+            color="translucent"
+            ariaLabel={lang('AiMessageEditor')}
+            iconName="ai"
+            tabIndex={shouldShowAiButton && !hasAttachments ? 0 : -1}
+            onClick={handleOpenAiEditor}
+          />
           <MessageInput
             ref={inputRef}
             id={inputId}
@@ -2523,34 +2523,34 @@ const Composer = ({
               onClose={closeBotCommandMenu}
             />
           )}
-          <CustomEmojiTooltip
-            key={`custom-emoji-tooltip-${editableInputId}`}
-            chatId={chatId}
-            isOpen={isCustomEmojiTooltipOpen}
-            onCustomEmojiSelect={insertCustomEmoji}
-            addRecentCustomEmoji={addRecentCustomEmoji}
-            onClose={closeCustomEmojiTooltip}
-          />
-          <StickerTooltip
-            key={`sticker-tooltip-${editableInputId}`}
-            chatId={chatId}
-            threadId={threadId}
-            isOpen={isStickerTooltipOpen}
-            onStickerSelect={handleStickerSelect}
-            onClose={closeStickerTooltip}
-          />
-          <EmojiTooltip
-            key={`emoji-tooltip-${editableInputId}`}
-            isOpen={isEmojiTooltipOpen}
-            emojis={filteredEmojis}
-            customEmojis={filteredCustomEmojis}
-            addRecentEmoji={addRecentEmoji}
-            addRecentCustomEmoji={addRecentCustomEmoji}
-            onEmojiSelect={insertEmoji}
-            onCustomEmojiSelect={insertEmoji}
-            onClose={closeEmojiTooltip}
-          />
         </div>
+        <CustomEmojiTooltip
+          key={`custom-emoji-tooltip-${editableInputId}`}
+          chatId={chatId}
+          isOpen={isCustomEmojiTooltipOpen}
+          onCustomEmojiSelect={insertCustomEmoji}
+          addRecentCustomEmoji={addRecentCustomEmoji}
+          onClose={closeCustomEmojiTooltip}
+        />
+        <StickerTooltip
+          key={`sticker-tooltip-${editableInputId}`}
+          chatId={chatId}
+          threadId={threadId}
+          isOpen={isStickerTooltipOpen}
+          onStickerSelect={handleStickerSelect}
+          onClose={closeStickerTooltip}
+        />
+        <EmojiTooltip
+          key={`emoji-tooltip-${editableInputId}`}
+          isOpen={isEmojiTooltipOpen}
+          emojis={filteredEmojis}
+          customEmojis={filteredCustomEmojis}
+          addRecentEmoji={addRecentEmoji}
+          addRecentCustomEmoji={addRecentCustomEmoji}
+          onEmojiSelect={insertEmoji}
+          onCustomEmojiSelect={insertEmoji}
+          onClose={closeEmojiTooltip}
+        />
       </div>
       {canSendOneTimeMedia && activeVoiceRecording && (
         <Button

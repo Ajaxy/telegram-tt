@@ -418,28 +418,6 @@
   background: var(--color-background);
   box-shadow: 0 1px 2px var(--color-default-shadow);
 
-  .ai-composer-button {
-    position: absolute;
-    z-index: 1;
-    top: 0.4375rem;
-    right: 0.625rem;
-
-    width: 1.75rem;
-    height: 1.75rem;
-
-    color: var(--color-composer-button);
-
-    opacity: 1;
-
-    transition: opacity 150ms ease-out;
-  }
-
-  .ai-composer-button-hidden {
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 150ms ease-out;
-  }
-
   &.with-story-tweaks {
     border-radius: var(--border-radius-default-small);
     border-bottom-right-radius: 0;
@@ -475,7 +453,30 @@
   --action-button-size: var(--base-height, 3rem);
   --action-button-compact-fix: -0.75rem;
 
+  position: relative;
   display: flex;
+
+  .ai-composer-button {
+    position: absolute;
+    z-index: 1;
+    top: 0.4375rem;
+    right: 0.625rem;
+
+    width: 1.75rem;
+    height: 1.75rem;
+
+    color: var(--color-composer-button);
+
+    opacity: 1;
+
+    transition: opacity 150ms ease-out;
+  }
+
+  .ai-composer-button-hidden {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 150ms ease-out;
+  }
 
   .input-scroller {
     --_scroller-right-gap: calc((var(--action-button-size) + var(--action-button-compact-fix) - 0.125rem));
