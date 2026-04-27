@@ -215,7 +215,7 @@ async function fetchRemote(langCode: string): Promise<ApiOldLangPack | undefined
 }
 
 function getPluralOption(amount: number) {
-  const langCode = currentLangCode || FALLBACK_LANG_CODE;
+  const langCode = currentLangCode?.replace('-raw', '') || FALLBACK_LANG_CODE;
   const optionIndex = PLURAL_RULES[langCode as keyof typeof PLURAL_RULES]
     ? PLURAL_RULES[langCode as keyof typeof PLURAL_RULES](amount)
     : 0;
