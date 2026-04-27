@@ -75,7 +75,7 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   isSavedDialog?: boolean;
-  typingStatus?: ApiTypingStatus;
+  typingStatusByPeerId?: Record<string, ApiTypingStatus>;
   isSelectModeActive?: boolean;
   isLeftColumnShown?: boolean;
   isRightColumnShown?: boolean;
@@ -96,7 +96,7 @@ const MiddleHeader = ({
   threadId,
   messageListType,
   isMobile,
-  typingStatus,
+  typingStatusByPeerId,
   isSelectModeActive,
   isLeftColumnShown,
   audioMessage,
@@ -306,7 +306,7 @@ const MiddleHeader = ({
               key={displayChatId}
               userId={displayChatId}
               threadId={!isSavedDialog ? threadId : undefined}
-              typingStatus={typingStatus}
+              typingStatusByPeerId={typingStatusByPeerId}
               status={connectionStatusText || savedMessagesStatus}
               withDots={Boolean(connectionStatusText)}
               withFullInfo={threadId === MAIN_THREAD_ID}
@@ -324,7 +324,7 @@ const MiddleHeader = ({
               key={displayChatId}
               chatId={displayChatId}
               threadId={!isSavedDialog ? threadId : undefined}
-              typingStatus={typingStatus}
+              typingStatusByPeerId={typingStatusByPeerId}
               withMonoforumStatus={chat?.isMonoforum}
               status={connectionStatusText || savedMessagesStatus}
               withDots={Boolean(connectionStatusText)}
@@ -427,14 +427,14 @@ export default memo(withGlobal<OwnProps>(
       messagesCount = selectThreadMessagesCount(global, chatId, threadId);
     }
 
-    const typingStatus = selectThreadLocalStateParam(global, chatId, threadId, 'typingStatus');
+    const typingStatusByPeerId = selectThreadLocalStateParam(global, chatId, threadId, 'typingStatusByPeerId');
 
     const emojiStatus = peer?.emojiStatus;
     const emojiStatusSticker = emojiStatus && selectCustomEmoji(global, emojiStatus.documentId);
     const emojiStatusSlug = emojiStatus?.type === 'collectible' ? emojiStatus.slug : undefined;
 
     return {
-      typingStatus,
+      typingStatusByPeerId,
       isLeftColumnShown,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isSelectModeActive: selectIsInSelectMode(global),

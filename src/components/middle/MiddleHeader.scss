@@ -185,19 +185,6 @@
     .status,
     .typing-status {
       unicode-bidi: plaintext;
-      display: inline;
-
-      @media (min-width: 1275px) {
-        #Main.right-column-open & {
-          max-width: calc(100% - var(--right-column-width));
-        }
-      }
-    }
-
-    .user-status {
-      unicode-bidi: plaintext;
-      overflow: hidden;
-      text-overflow: ellipsis;
 
       @media (min-width: 1275px) {
         #Main.right-column-open & {
@@ -254,25 +241,26 @@
     font-size: 1.0625rem;
   }
 
+  .status {
+    color: var(--color-text-secondary);
+    &.online {
+      color: var(--color-primary);
+    }
+  }
+
   .status,
   .typing-status {
     overflow: hidden;
-    display: inline-block;
 
     margin: 0;
 
     font-size: 0.875rem;
     line-height: 1.125rem;
-    color: var(--color-text-secondary);
     text-overflow: ellipsis;
     white-space: nowrap;
 
     .ellipsis {
       display: inline-flex;
-    }
-
-    &.online {
-      color: var(--color-primary);
     }
 
     .font-emoji {

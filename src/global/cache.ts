@@ -720,7 +720,7 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
         localState: {
           ...thread.localState,
           listedIds: thread.localState?.lastViewportIds,
-          typingStatus: undefined,
+          typingStatusByPeerId: undefined,
         },
       };
       return acc;

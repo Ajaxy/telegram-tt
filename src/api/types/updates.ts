@@ -145,6 +145,7 @@ export type ApiUpdateChatLeave = {
 export type ApiUpdateChatTypingStatus = {
   '@type': 'updateChatTypingStatus';
   id: string;
+  peerId: string;
   threadId?: ThreadId;
   typingStatus: ApiTypingStatus | undefined;
 };

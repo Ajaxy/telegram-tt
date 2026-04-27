@@ -71,7 +71,7 @@ type StateProps = {
   lastMessageStory?: ApiTypeStory;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   lastMessageSender?: ApiPeer;
-  typingStatus?: ApiTypingStatus;
+  typingStatusByPeerId?: Record<string, ApiTypingStatus>;
   draft?: ApiDraft;
   canScrollDown?: boolean;
   wasTopicOpened?: boolean;
@@ -98,7 +98,7 @@ const Topic = ({
   withInterfaceAnimations,
   orderDiff,
   shiftDiff,
-  typingStatus,
+  typingStatusByPeerId,
   draft,
   wasTopicOpened,
   topicIds,
@@ -153,7 +153,7 @@ const Topic = ({
     lastMessageTopic: topic,
     observeIntersection,
     isTopic: true,
-    typingStatus,
+    typingStatusByPeerId,
     topicIds,
     statefulMediaContent: groupStatefulContent({ story: lastMessageStory }),
 
@@ -269,7 +269,7 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatMessage(global, chatId, threadInfo.lastMessageId) : undefined;
     const { isOutgoing } = lastMessage || {};
     const lastMessageSender = lastMessage && selectSender(global, lastMessage);
-    const typingStatus = selectThreadLocalStateParam(global, chatId, topic.id, 'typingStatus');
+    const typingStatusByPeerId = selectThreadLocalStateParam(global, chatId, topic.id, 'typingStatusByPeerId');
     const draft = selectDraft(global, chatId, topic.id);
 
     const readState = selectThreadReadState(global, chatId, topic.id);
@@ -289,7 +289,7 @@ export default memo(withGlobal<OwnProps>(
       chat,
       lastMessage,
       lastMessageSender,
-      typingStatus,
+      typingStatusByPeerId,
       isChatMuted,
       canDelete: selectCanDeleteTopic(global, chatId, topic.id),
       withInterfaceAnimations: selectCanAnimateInterface(global),

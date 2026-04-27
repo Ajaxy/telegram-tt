@@ -36,7 +36,7 @@ type StateProps = {
   connectionState?: ApiUpdateConnectionStateType;
   isSyncing?: boolean;
   isFetchingDifference?: boolean;
-  typingStatus?: ApiTypingStatus;
+  typingStatusByPeerId?: Record<string, ApiTypingStatus>;
   isSavedDialog?: boolean;
   messagesCount?: number;
   unreadCount?: number;
@@ -52,7 +52,7 @@ const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
   connectionState,
   isSyncing,
   isFetchingDifference,
-  typingStatus,
+  typingStatusByPeerId,
   isSavedDialog,
   messagesCount,
   unreadCount,
@@ -104,7 +104,7 @@ const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
             <PrivateChatInfo
               key={displayChatId}
               userId={displayChatId}
-              typingStatus={typingStatus}
+              typingStatusByPeerId={typingStatusByPeerId}
               status={connectionStatusText || savedMessagesStatus}
               withDots={Boolean(connectionStatusText)}
               withFullInfo={false}
@@ -120,7 +120,7 @@ const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
               key={displayChatId}
               chatId={displayChatId}
               threadId={!isSavedDialog ? threadId : undefined}
-              typingStatus={typingStatus}
+              typingStatusByPeerId={typingStatusByPeerId}
               withMonoforumStatus={chat?.isMonoforum}
               status={connectionStatusText || savedMessagesStatus}
               withDots={Boolean(connectionStatusText)}
@@ -142,7 +142,12 @@ const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
-    const typingStatus = selectThreadLocalStateParam(global, chatId, threadId || MAIN_THREAD_ID, 'typingStatus');
+    const typingStatusByPeerId = selectThreadLocalStateParam(
+      global,
+      chatId,
+      threadId || MAIN_THREAD_ID,
+      'typingStatusByPeerId',
+    );
     const isSavedDialog = getIsSavedDialog(chatId, threadId || MAIN_THREAD_ID, global.currentUserId);
     const messagesCount = isSavedDialog && threadId
       ? selectThreadMessagesCount(global, chatId, threadId)
@@ -155,7 +160,7 @@ export default memo(withGlobal<OwnProps>(
       connectionState: global.connectionState,
       isSyncing: global.isSyncing,
       isFetchingDifference: global.isFetchingDifference,
-      typingStatus,
+      typingStatusByPeerId,
       isSavedDialog,
       messagesCount,
       unreadCount,

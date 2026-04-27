@@ -45,7 +45,7 @@ type OwnProps = {
   threadId?: ThreadId;
   className?: string;
   statusIcon?: IconName;
-  typingStatus?: ApiTypingStatus;
+  typingStatusByPeerId?: Record<string, ApiTypingStatus>;
   avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   status?: string;
   withDots?: boolean;
@@ -78,7 +78,7 @@ type StateProps = {
 };
 
 const GroupChatInfo = ({
-  typingStatus,
+  typingStatusByPeerId,
   className,
   statusIcon,
   avatarSize = 'medium',
@@ -184,8 +184,8 @@ const GroupChatInfo = ({
       return undefined;
     }
 
-    if (typingStatus) {
-      return <TypingStatus typingStatus={typingStatus} />;
+    if (typingStatusByPeerId) {
+      return <TypingStatus typingStatusByPeerId={typingStatusByPeerId} />;
     }
 
     if (isTopic) {

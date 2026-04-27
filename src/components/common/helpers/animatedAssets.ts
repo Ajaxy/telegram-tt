@@ -20,7 +20,9 @@ import PartyPopper from '../../../assets/tgs/general/PartyPopper.tgs';
 import Invite from '../../../assets/tgs/invites/Invite.tgs';
 import JoinRequest from '../../../assets/tgs/invites/Requests.tgs';
 import LastSeen from '../../../assets/tgs/LastSeen.tgs';
+import Eyes from '../../../assets/tgs/message/Eyes.tgs';
 import Typing from '../../../assets/tgs/message/Typing.tgs';
+import Writing from '../../../assets/tgs/message/Writing.tgs';
 import MonkeyClose from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyClose.tgs';
 import MonkeyIdle from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyIdle.tgs';
 import MonkeyPeek from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyPeek.tgs';
@@ -98,5 +100,7 @@ export const LOCAL_TGS_URLS = {
   Passkeys,
   DuckCake,
   HandStop,
+  Writing,
   Typing,
+  Eyes,
 };

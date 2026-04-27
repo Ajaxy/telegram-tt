@@ -41,7 +41,7 @@ import TypingStatus from './TypingStatus';
 const TOPIC_ICON_SIZE = 2.5 * REM;
 
 type BaseOwnProps = {
-  typingStatus?: ApiTypingStatus;
+  typingStatusByPeerId?: Record<string, ApiTypingStatus>;
   avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   forceShowSelf?: boolean;
   status?: string;
@@ -97,7 +97,7 @@ const UPDATE_INTERVAL = 1000 * 60; // 1 min
 const PrivateChatInfo = ({
   userId,
   customPeer,
-  typingStatus,
+  typingStatusByPeerId,
   avatarSize = 'medium',
   status,
   statusIcon,
@@ -204,8 +204,8 @@ const PrivateChatInfo = ({
       return undefined;
     }
 
-    if (typingStatus) {
-      return <TypingStatus typingStatus={typingStatus} />;
+    if (typingStatusByPeerId) {
+      return <TypingStatus typingStatusByPeerId={typingStatusByPeerId} isPrivate />;
     }
 
     if (isTopic) {

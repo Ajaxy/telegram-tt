@@ -119,7 +119,7 @@ type StateProps = {
   canScrollDown?: boolean;
   canChangeFolder?: boolean;
   lastMessageTopic?: ApiTopic;
-  typingStatus?: ApiTypingStatus;
+  typingStatusByPeerId?: Record<string, ApiTypingStatus>;
   withInterfaceAnimations?: boolean;
   lastMessageId?: number;
   lastMessage?: ApiMessage;
@@ -158,7 +158,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   canScrollDown,
   canChangeFolder,
   lastMessageTopic,
-  typingStatus,
+  typingStatusByPeerId,
   lastMessageId,
   lastMessage,
   isSavedDialog,
@@ -231,7 +231,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     chat,
     chatId,
     lastMessage,
-    typingStatus,
+    typingStatusByPeerId,
     draft,
     statefulMediaContent: groupStatefulContent({ story: lastMessageStory }),
     lastMessageTopic,
@@ -567,7 +567,7 @@ export default memo(withGlobal<OwnProps>(
     const userStatus = selectUserStatus(global, chatId);
     const lastMessageTopic = lastMessage && selectTopicFromMessage(global, lastMessage);
 
-    const typingStatus = selectThreadLocalStateParam(global, chatId, MAIN_THREAD_ID, 'typingStatus');
+    const typingStatusByPeerId = selectThreadLocalStateParam(global, chatId, MAIN_THREAD_ID, 'typingStatusByPeerId');
 
     const topicsInfo = selectTopicsInfo(global, chatId);
 
@@ -593,7 +593,7 @@ export default memo(withGlobal<OwnProps>(
       user,
       userStatus,
       lastMessageTopic,
-      typingStatus,
+      typingStatusByPeerId,
       withInterfaceAnimations: selectCanAnimateInterface(global),
       lastMessage,
       lastMessageId,

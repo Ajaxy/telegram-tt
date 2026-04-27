@@ -653,7 +653,7 @@ export interface ThreadLocalState {
 
   noWebPage?: boolean;
 
-  typingStatus?: ApiTypingStatus;
+  typingStatusByPeerId?: Record<string, ApiTypingStatus>;
 
   typingDraftIdByRandomId?: Record<string, number>;
 }

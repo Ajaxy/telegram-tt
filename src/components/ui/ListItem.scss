@@ -110,8 +110,6 @@
     }
   }
 
-  .user-status,
-  .group-status,
   .title,
   .other-usernames,
   .subtitle {
@@ -325,26 +323,23 @@
         white-space: nowrap;
       }
 
+      .status {
+        color: var(--color-text-secondary);
+        &.online {
+          color: var(--color-primary);
+        }
+      }
+
       .status,
       .typing-status {
         display: inline-block;
         font-size: 0.875rem;
         line-height: 1.25rem;
-        color: var(--color-text-secondary);
-
-        &.online {
-          color: var(--color-primary);
-        }
 
         &[dir="rtl"],
         &[dir="auto"] {
           width: 100%;
           text-align: initial;
-        }
-
-        .group-status:only-child,
-        .user-status:only-child {
-          display: flow-root;
         }
       }
     }

@@ -1,0 +1,20 @@
+.typingStatus {
+  display: flex;
+  gap: 0.125rem;
+  align-items: center;
+  color: var(--color-primary);
+}
+
+.typingIcon {
+  margin-top: -2px;
+}
+
+.eyesIcon {
+  display: inline-block !important;
+  margin-inline: -0.0625rem;
+  vertical-align: middle;
+}
+
+.content {
+  display: inline;
+}

@@ -209,7 +209,7 @@ const TypingWrapper = ({ formattedText, shouldAnimateMask, renderText }: OwnProp
       {renderText(truncatedText)}
       <span key="typing-placeholder" className={styles.placeholder}>
         <AnimatedIconWithPreview
-          tgsUrl={LOCAL_TGS_URLS.Typing}
+          tgsUrl={LOCAL_TGS_URLS.Writing}
           size={PLACEHOLDER_SIZE}
           play
           noLoop={false}

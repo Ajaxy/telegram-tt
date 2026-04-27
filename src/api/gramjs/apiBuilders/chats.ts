@@ -22,12 +22,13 @@ import {
   type ApiSponsoredPeer,
   type ApiStarsSubscriptionPricing,
   type ApiThreadInfo,
+  type ApiTypingStatus,
   MAIN_THREAD_ID,
 } from '../../types';
 
 import { omitUndefined, pickTruthy } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
-import { getServerTimeOffset } from '../../../util/serverTime';
+import { getServerTime } from '../../../util/serverTime';
 import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
 import {
@@ -382,52 +383,73 @@ export function buildChatMembers(
 
 export function buildChatTypingStatus(
   update: GramJs.UpdateUserTyping | GramJs.UpdateChatUserTyping | GramJs.UpdateChannelUserTyping,
-) {
-  let action: string = '';
-  let emoticon: string | undefined;
-  if (update.action instanceof GramJs.SendMessageCancelAction) {
+): ApiTypingStatus | undefined {
+  const action = update.action;
+  const timestamp = getServerTime();
+  const buildTypingStatus = (
+    type: Exclude<ApiTypingStatus['type'], 'watchingAnimations'>,
+  ): ApiTypingStatus => ({
+    timestamp,
+    type,
+  });
+
+  if (action instanceof GramJs.SendMessageCancelAction) {
     return undefined;
-  } else if (update.action instanceof GramJs.SendMessageTypingAction) {
-    action = 'lng_user_typing';
-  } else if (update.action instanceof GramJs.SendMessageRecordVideoAction) {
-    action = 'lng_send_action_record_video';
-  } else if (update.action instanceof GramJs.SendMessageUploadVideoAction) {
-    action = 'lng_send_action_upload_video';
-  } else if (update.action instanceof GramJs.SendMessageRecordAudioAction) {
-    action = 'lng_send_action_record_audio';
-  } else if (update.action instanceof GramJs.SendMessageUploadAudioAction) {
-    action = 'lng_send_action_upload_audio';
-  } else if (update.action instanceof GramJs.SendMessageUploadPhotoAction) {
-    action = 'lng_send_action_upload_photo';
-  } else if (update.action instanceof GramJs.SendMessageUploadDocumentAction) {
-    action = 'lng_send_action_upload_file';
-  } else if (update.action instanceof GramJs.SendMessageGeoLocationAction) {
-    action = 'selecting a location to share';
-  } else if (update.action instanceof GramJs.SendMessageChooseContactAction) {
-    action = 'selecting a contact to share';
-  } else if (update.action instanceof GramJs.SendMessageGamePlayAction) {
-    action = 'lng_playing_game';
-  } else if (update.action instanceof GramJs.SendMessageRecordRoundAction) {
-    action = 'lng_send_action_record_round';
-  } else if (update.action instanceof GramJs.SendMessageUploadRoundAction) {
-    action = 'lng_send_action_upload_round';
-  } else if (update.action instanceof GramJs.SendMessageChooseStickerAction) {
-    action = 'lng_send_action_choose_sticker';
-  } else if (update.action instanceof GramJs.SpeakingInGroupCallAction) {
+  }
+  if (action instanceof GramJs.SendMessageTypingAction) {
+    return buildTypingStatus('typing');
+  }
+  if (action instanceof GramJs.SendMessageRecordVideoAction) {
+    return buildTypingStatus('recordVideo');
+  }
+  if (action instanceof GramJs.SendMessageUploadVideoAction) {
+    return buildTypingStatus('uploadVideo');
+  }
+  if (action instanceof GramJs.SendMessageRecordAudioAction) {
+    return buildTypingStatus('recordAudio');
+  }
+  if (action instanceof GramJs.SendMessageUploadAudioAction) {
+    return buildTypingStatus('uploadAudio');
+  }
+  if (action instanceof GramJs.SendMessageUploadPhotoAction) {
+    return buildTypingStatus('uploadPhoto');
+  }
+  if (action instanceof GramJs.SendMessageUploadDocumentAction) {
+    return buildTypingStatus('uploadFile');
+  }
+  if (action instanceof GramJs.SendMessageGeoLocationAction) {
+    return buildTypingStatus('chooseLocation');
+  }
+  if (action instanceof GramJs.SendMessageChooseContactAction) {
+    return buildTypingStatus('chooseContact');
+  }
+  if (action instanceof GramJs.SendMessageGamePlayAction) {
+    return buildTypingStatus('playingGame');
+  }
+  if (action instanceof GramJs.SendMessageRecordRoundAction) {
+    return buildTypingStatus('recordRound');
+  }
+  if (action instanceof GramJs.SendMessageUploadRoundAction) {
+    return buildTypingStatus('uploadRound');
+  }
+  if (action instanceof GramJs.SendMessageChooseStickerAction) {
+    return buildTypingStatus('chooseSticker');
+  }
+  if (action instanceof GramJs.SpeakingInGroupCallAction) {
     return undefined;
-  } else if (update.action instanceof GramJs.SendMessageEmojiInteractionSeen) {
-    action = 'lng_user_action_watching_animations';
-    emoticon = update.action.emoticon;
-  } else if (update.action instanceof GramJs.SendMessageEmojiInteraction) {
+  }
+  if (action instanceof GramJs.SendMessageEmojiInteractionSeen) {
+    return {
+      timestamp,
+      type: 'watchingAnimations',
+      emoji: action.emoticon,
+    };
+  }
+  if (action instanceof GramJs.SendMessageEmojiInteraction) {
     return undefined;
   }
 
-  return {
-    action,
-    ...(emoticon && { emoji: emoticon }),
-    ...(!(update instanceof GramJs.UpdateUserTyping) && { userId: getApiChatIdFromMtpPeer(update.fromId) }),
-    timestamp: Date.now() + getServerTimeOffset() * 1000,
-  };
+  return undefined;
 }
 
 export function buildApiChatFolder(filter: GramJs.DialogFilter | GramJs.DialogFilterChatlist): ApiChatFolder {

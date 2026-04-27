@@ -100,12 +100,22 @@ export interface ApiChat {
   paidMessagesStars?: number;
 }
 
-export interface ApiTypingStatus {
-  userId?: string;
-  action: string;
+type ApiTypingStatusBase = {
   timestamp: number;
-  emoji?: string;
-}
+};
+
+type ApiTypingStatusSimple = ApiTypingStatusBase & {
+  type: 'typing' | 'recordVideo' | 'uploadVideo' | 'recordAudio' | 'uploadAudio'
+    | 'uploadPhoto' | 'uploadFile' | 'playingGame' | 'recordRound' | 'uploadRound'
+    | 'chooseSticker' | 'chooseLocation' | 'chooseContact';
+};
+
+type ApiTypingStatusWatchingAnimations = ApiTypingStatusBase & {
+  type: 'watchingAnimations';
+  emoji: string;
+};
+
+export type ApiTypingStatus = ApiTypingStatusSimple | ApiTypingStatusWatchingAnimations;
 
 export interface ApiChatFullInfo {
   about?: string;

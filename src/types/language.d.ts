@@ -18,6 +18,7 @@ export interface LangPair {
   'AccDescrGroup': undefined;
   'AccDescrChannel': undefined;
   'Nothing': undefined;
+  'Typing': undefined;
   'SendActionRecordVideo': undefined;
   'SendActionUploadVideo': undefined;
   'SendActionRecordAudio': undefined;
@@ -27,7 +28,6 @@ export interface LangPair {
   'PlayingGame': undefined;
   'SendActionRecordRound': undefined;
   'SendActionUploadRound': undefined;
-  'SendActionChooseSticker': undefined;
   'SetUrlInUse': undefined;
   'UsernameInUse': undefined;
   'CreateGroupError': undefined;
@@ -2111,7 +2111,44 @@ export interface LangPairWithVariables<V = LangVariable> {
   'UserTyping': {
     'user': V;
   };
-  'UserActionWatchingAnimations': {
+  'UserTypingSeveral': {
+    'users': V;
+  };
+  'UserActionRecordVideo': {
+    'user': V;
+  };
+  'UserActionUploadVideo': {
+    'user': V;
+  };
+  'UserActionRecordAudio': {
+    'user': V;
+  };
+  'UserActionUploadAudio': {
+    'user': V;
+  };
+  'UserActionUploadPhoto': {
+    'user': V;
+  };
+  'UserActionUploadFile': {
+    'user': V;
+  };
+  'UserPlayingGame': {
+    'user': V;
+  };
+  'UserActionRecordRound': {
+    'user': V;
+  };
+  'UserActionUploadRound': {
+    'user': V;
+  };
+  'SendActionChooseSticker': {
+    'eyes': V;
+  };
+  'UserActionChooseSticker': {
+    'user': V;
+    'eyes': V;
+  };
+  'ActionWatchingAnimations': {
     'emoji': V;
   };
   'SetUrlAvailable': {
@@ -3703,6 +3740,10 @@ export interface LangPairPlural {
 }
 
 export interface LangPairPluralWithVariables<V = LangVariable> {
+  'UserTypingMany': {
+    'user': V;
+    'count': V;
+  };
   'Participants': {
     'count': V;
   };
