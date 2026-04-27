@@ -335,6 +335,7 @@
 
     .sender-title {
       overflow: hidden;
+      line-height: normal;
       text-overflow: ellipsis;
     }
 
@@ -414,6 +415,10 @@
 
     .admin-title-badge:last-child {
       margin-right: -0.1875rem;
+    }
+
+    .admin-title-plain {
+      padding-inline: 0.25rem;
     }
 
     .admin-title {

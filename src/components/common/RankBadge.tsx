@@ -28,6 +28,7 @@ const RankBadge = ({
   const { openRankModal } = getActions();
   const lang = useLang();
   const hasCustomColor = isOwner || isAdmin;
+  const isPlain = !hasCustomColor;
 
   const rankText = rank || (isOwner && lang('ChannelCreator')) || (isAdmin && lang('ChannelAdmin'));
 
@@ -44,9 +45,10 @@ const RankBadge = ({
     <BadgeButton
       className={buildClassName(
         hasCustomColor && getPeerColorClass(isOwner ? OWNER_PEER_COLOR : ADMIN_PEER_COLOR),
+        isPlain && 'admin-title-plain',
         className,
       )}
-      isPlain={!hasCustomColor}
+      isPlain={isPlain}
       inline
       onClick={isClickable ? handleClick : undefined}
     >
