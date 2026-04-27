@@ -1,5 +1,3 @@
-import type { ChangeEvent } from 'react';
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -26,22 +24,25 @@ type OwnProps = {
 type StateProps = {
   notifyDefaults?: Record<ApiNotifyPeerType, ApiPeerNotifySettings>;
   hasContactJoinedNotifications: boolean;
+  shouldNotifyAboutPinnedMessages: boolean;
   hasWebNotifications: boolean;
   hasPushNotifications: boolean;
   notificationSoundVolume: number;
 };
 
-const SettingsNotifications: FC<OwnProps & StateProps> = ({
+const SettingsNotifications = ({
   isActive,
   onReset,
   notifyDefaults,
   hasContactJoinedNotifications,
+  shouldNotifyAboutPinnedMessages,
   hasPushNotifications,
   hasWebNotifications,
   notificationSoundVolume,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     loadNotificationSettings,
+    setSettingOption,
     updateContactSignUpNotification,
     updateNotificationSettings,
     updateWebNotificationSettings,
@@ -61,7 +62,7 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
   const areUsersMuted = Boolean(notifyDefaults?.users?.mutedUntil);
 
   const handleSettingsChange = useCallback((
-    e: ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>,
     peerType: ApiNotifyPeerType,
     setting: 'mute' | 'showPreviews',
   ) => {
@@ -73,51 +74,55 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
       isMuted: setting === 'mute' ? !e.target.checked : currentIsMuted,
       shouldShowPreviews: setting === 'showPreviews' ? e.target.checked : currentShouldShowPreviews,
     });
-  }, [notifyDefaults]);
+  }, [notifyDefaults, updateNotificationSettings]);
 
-  const handleWebNotificationsChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleWebNotificationsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const isEnabled = e.target.checked;
     updateWebNotificationSettings({
       hasWebNotifications: isEnabled,
-      ...(!isEnabled && { hasPushNotifications: false }),
+      hasPushNotifications: isEnabled ? undefined : false,
     });
   }, [updateWebNotificationSettings]);
 
-  const handlePushNotificationsChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handlePushNotificationsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     updateWebNotificationSettings({
       hasPushNotifications: e.target.checked,
     });
   }, [updateWebNotificationSettings]);
 
-  const handlePrivateChatsNotificationsChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handlePrivateChatsNotificationsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     handleSettingsChange(e, 'users', 'mute');
   }, [handleSettingsChange]);
 
-  const handlePrivateChatsPreviewChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handlePrivateChatsPreviewChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     handleSettingsChange(e, 'users', 'showPreviews');
   }, [handleSettingsChange]);
 
-  const handleGroupsNotificationsChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleGroupsNotificationsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     handleSettingsChange(e, 'groups', 'mute');
   }, [handleSettingsChange]);
 
-  const handleGroupsPreviewChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleGroupsPreviewChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     handleSettingsChange(e, 'groups', 'showPreviews');
   }, [handleSettingsChange]);
 
-  const handleChannelsNotificationsChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleChannelsNotificationsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     handleSettingsChange(e, 'channels', 'mute');
   }, [handleSettingsChange]);
 
-  const handleChannelsPreviewChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleChannelsPreviewChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     handleSettingsChange(e, 'channels', 'showPreviews');
   }, [handleSettingsChange]);
 
-  const handleContactNotificationChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleContactNotificationChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     updateContactSignUpNotification({
       isSilent: !e.target.checked,
     });
   }, [updateContactSignUpNotification]);
+
+  const handlePinnedMessagesNotificationChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSettingOption({ shouldNotifyAboutPinnedMessages: e.target.checked });
+  }, [setSettingOption]);
 
   const handleVolumeChange = useCallback((volume: number) => {
     updateWebNotificationSettings({
@@ -233,6 +238,11 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
           checked={hasContactJoinedNotifications}
           onChange={handleContactNotificationChange}
         />
+        <Checkbox
+          label={lang('PinnedMessagesNotifications')}
+          checked={shouldNotifyAboutPinnedMessages}
+          onChange={handlePinnedMessagesNotificationChange}
+        />
       </div>
     </div>
   );
@@ -242,6 +252,7 @@ export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
     return {
       hasContactJoinedNotifications: Boolean(global.settings.byKey.hasContactJoinedNotifications),
+      shouldNotifyAboutPinnedMessages: global.settings.byKey.shouldNotifyAboutPinnedMessages,
       hasWebNotifications: global.settings.byKey.hasWebNotifications,
       hasPushNotifications: global.settings.byKey.hasPushNotifications,
       notificationSoundVolume: global.settings.byKey.notificationSoundVolume,

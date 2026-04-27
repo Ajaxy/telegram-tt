@@ -139,6 +139,7 @@ export interface AccountSettings {
   hasWebNotifications: boolean;
   hasPushNotifications: boolean;
   hasContactJoinedNotifications?: boolean;
+  shouldNotifyAboutPinnedMessages: boolean;
   notificationSoundVolume: number;
   canAutoLoadPhotoFromContacts: boolean;
   canAutoLoadPhotoInPrivateChats: boolean;

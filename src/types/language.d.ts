@@ -1543,6 +1543,7 @@ export interface LangPair {
   'ActionFallbackSomeone': undefined;
   'ActionUnsupported': undefined;
   'ActionPinnedNotFoundYou': undefined;
+  'PinnedMessagesNotifications': undefined;
   'ActionPinnedMediaPhoto': undefined;
   'ActionPinnedMediaVideo': undefined;
   'ActionPinnedMediaAudio': undefined;

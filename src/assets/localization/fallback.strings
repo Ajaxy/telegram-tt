@@ -1909,6 +1909,7 @@
 "ActionPinnedTextYou" = "You pinned \"{text}\"";
 "ActionPinnedNotFound" = "{from} pinned a message";
 "ActionPinnedNotFoundYou" = "You pinned a message";
+"PinnedMessagesNotifications" = "Pinned Messages";
 "ActionPinnedMedia" = "{from} pinned {media}";
 "ActionPinnedMediaYou" = "You pinned {media}";
 "ActionPinnedMediaPhoto" = "a photo";
