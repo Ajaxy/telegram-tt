@@ -21,9 +21,13 @@
     line-height: inherit;
   }
 
-  &.focus,
   &:hover {
     background-color: var(--color-background-selected);
+  }
+
+  &.focus {
+    background-color: var(--color-background-selected);
+    box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.08);
   }
 
   & > img {

@@ -26,7 +26,7 @@ const VIEWPORT_MARGIN = 8;
 const EMOJI_BUTTON_WIDTH = 44;
 const CLOSE_DURATION = 350;
 
-function setItemVisible(index: number, containerRef: Record<string, any>) {
+function setItemVisible(index: number, prevIndex: number | undefined, containerRef: Record<string, any>) {
   const container = containerRef.current!;
   if (!container) {
     return;
@@ -41,15 +41,35 @@ function setItemVisible(index: number, containerRef: Record<string, any>) {
     true,
   );
 
-  if (!allElements.length || !allElements[index]) {
+  if (!allElements.length || !allElements[index] || !visibleIndexes.length) {
     return;
   }
-  const first = visibleIndexes[0];
-  if (!visibleIndexes.includes(index)
-    || (index === first && !isFullyVisible(container, allElements[first], true))) {
-    const position = index > visibleIndexes[visibleIndexes.length - 1] ? 'start' : 'end';
-    const newLeft = position === 'start' ? index * EMOJI_BUTTON_WIDTH : 0;
 
+  if (prevIndex === undefined || prevIndex === -1 || Math.abs(index - prevIndex) !== 1) {
+    const first = visibleIndexes[0];
+    if (!visibleIndexes.includes(index)
+      || (index === first && !isFullyVisible(container, allElements[first], true))) {
+      const position = index > visibleIndexes[visibleIndexes.length - 1] ? 'start' : 'end';
+      const newLeft = position === 'start' ? index * EMOJI_BUTTON_WIDTH : 0;
+      animateHorizontalScroll(container, newLeft);
+    }
+    return;
+  }
+
+  const middlePosition = Math.floor(visibleIndexes.length / 2);
+  const middleIndex = visibleIndexes[middlePosition];
+  const maxScrollLeft = Math.max(0, container.scrollWidth - container.clientWidth);
+
+  if (index > prevIndex) {
+    if (index >= middleIndex + 1) {
+      const newLeft = Math.min(maxScrollLeft, container.scrollLeft + EMOJI_BUTTON_WIDTH);
+      animateHorizontalScroll(container, newLeft);
+    }
+    return;
+  }
+
+  if (index <= middleIndex - 1) {
+    const newLeft = Math.max(0, container.scrollLeft - EMOJI_BUTTON_WIDTH);
     animateHorizontalScroll(container, newLeft);
   }
 }
@@ -127,11 +147,11 @@ const EmojiTooltip: FC<OwnProps> = ({
   });
 
   useEffectWithPrevDeps(([prevSelectedIndex]) => {
-    if (prevSelectedIndex === undefined || prevSelectedIndex === -1) {
+    if (prevSelectedIndex === undefined) {
       return;
     }
 
-    setItemVisible(selectedIndex, containerRef);
+    setItemVisible(selectedIndex, prevSelectedIndex, containerRef);
   }, [selectedIndex]);
 
   const className = buildClassName(
