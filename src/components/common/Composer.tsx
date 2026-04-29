@@ -347,6 +347,10 @@ const MOBILE_KEYBOARD_HIDE_DELAY_MS = 100;
 const SELECT_MODE_TRANSITION_MS = 200;
 const SENDING_ANIMATION_DURATION = 350;
 const MOUNT_ANIMATION_DURATION = 430;
+const BROWSER_EMOJI_KEYWORD_LANG_FULL = typeof navigator !== 'undefined'
+  ? navigator.language.toLowerCase()
+  : undefined;
+const BROWSER_EMOJI_KEYWORD_LANG_SHORT = BROWSER_EMOJI_KEYWORD_LANG_FULL?.split('-')[0];
 
 const Composer = ({
   type,
@@ -2719,8 +2723,18 @@ export default memo(withGlobal<OwnProps>(
       forwardMessages: { messageIds: forwardMessageIds },
       shouldOpenMessageMediaEditor,
     } = selectTabState(global);
+    const normalizedLanguage = language.toLowerCase();
+    const normalizedLanguageShort = normalizedLanguage.split('-')[0];
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
-    const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
+    const languageCandidates = [
+      normalizedLanguage,
+      normalizedLanguageShort,
+      BROWSER_EMOJI_KEYWORD_LANG_FULL,
+      BROWSER_EMOJI_KEYWORD_LANG_SHORT,
+    ].filter(Boolean);
+    const emojiKeywords = languageCandidates.find((langCode) => (
+      langCode !== BASE_EMOJI_KEYWORD_LANG && global.emojiKeywords[langCode]
+    ));
     const botKeyboardMessageId = messageWithActualBotKeyboard ? messageWithActualBotKeyboard.id : undefined;
     const keyboardMessage = botKeyboardMessageId ? selectChatMessage(global, chatId, botKeyboardMessageId) : undefined;
     const { currentUserId } = global;
@@ -2829,7 +2843,7 @@ export default memo(withGlobal<OwnProps>(
       shouldUpdateStickerSetOrder,
       recentEmojis: global.recentEmojis,
       baseEmojiKeywords: baseEmojiKeywords?.keywords,
-      emojiKeywords: emojiKeywords?.keywords,
+      emojiKeywords: emojiKeywords ? global.emojiKeywords[emojiKeywords]?.keywords : undefined,
       inlineBots: tabState.inlineBots.byUsername,
       isInlineBotLoading: tabState.inlineBots.isLoading,
       botCommands: userFullInfo ? (userFullInfo.botInfo?.commands || false) : undefined,

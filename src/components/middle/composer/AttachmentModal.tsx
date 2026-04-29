@@ -114,6 +114,10 @@ const ATTACHMENT_MODAL_INPUT_ID = 'caption-input-text';
 const DROP_LEAVE_TIMEOUT_MS = 150;
 const MAX_LEFT_CHARS_TO_SHOW = 100;
 const CLOSE_MENU_ANIMATION_DURATION = 200;
+const BROWSER_EMOJI_KEYWORD_LANG_FULL = typeof navigator !== 'undefined'
+  ? navigator.language.toLowerCase()
+  : undefined;
+const BROWSER_EMOJI_KEYWORD_LANG_SHORT = BROWSER_EMOJI_KEYWORD_LANG_FULL?.split('-')[0];
 
 const AttachmentModal = ({
   chatId,
@@ -937,8 +941,18 @@ export default memo(withGlobal<OwnProps>(
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const { shouldSuggestCustomEmoji } = global.settings.byKey;
     const { language } = selectSharedSettings(global);
+    const normalizedLanguage = language.toLowerCase();
+    const normalizedLanguageShort = normalizedLanguage.split('-')[0];
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
-    const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
+    const languageCandidates = [
+      normalizedLanguage,
+      normalizedLanguageShort,
+      BROWSER_EMOJI_KEYWORD_LANG_FULL,
+      BROWSER_EMOJI_KEYWORD_LANG_SHORT,
+    ].filter(Boolean) as string[];
+    const emojiKeywords = languageCandidates.find((langCode) => (
+      langCode !== BASE_EMOJI_KEYWORD_LANG && global.emojiKeywords[langCode]
+    ));
 
     return {
       isChatWithSelf,
@@ -946,7 +960,7 @@ export default memo(withGlobal<OwnProps>(
       groupChatMembers: chatFullInfo?.members,
       recentEmojis,
       baseEmojiKeywords: baseEmojiKeywords?.keywords,
-      emojiKeywords: emojiKeywords?.keywords,
+      emojiKeywords: emojiKeywords ? global.emojiKeywords[emojiKeywords]?.keywords : undefined,
       shouldSuggestCustomEmoji,
       customEmojiForEmoji: customEmojis.forEmoji.stickers,
       captionLimit: selectCurrentLimit(global, 'captionLength'),

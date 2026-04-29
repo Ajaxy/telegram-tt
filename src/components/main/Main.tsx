@@ -284,6 +284,7 @@ const Main = ({
 
   const containerRef = useRef<HTMLDivElement>();
   const leftColumnRef = useRef<HTMLDivElement>();
+  const requestedEmojiKeywordLangsRef = useRef<Set<string>>(new Set());
 
   const { isDesktop } = useAppLayout();
   useEffect(() => {
@@ -363,13 +364,32 @@ const Main = ({
   // Language-based API calls
   useEffect(() => {
     if (isMasterTab) {
-      if (lang.code !== BASE_EMOJI_KEYWORD_LANG) {
-        loadEmojiKeywords({ language: lang.code });
-      }
+      const browserFullLanguageCode = typeof navigator !== 'undefined' ? navigator.language : undefined;
+      const languageCandidates = [
+        lang.code,
+        lang.code.split('-')[0],
+        lang.rawCode,
+        lang.rawCode.split('-')[0],
+        browserFullLanguageCode,
+        browserFullLanguageCode?.split('-')[0],
+      ]
+        .filter(Boolean)
+        .map((value) => value.toLowerCase());
+
+      const uniqueLanguageCandidates = Array.from(new Set(languageCandidates));
+      uniqueLanguageCandidates.forEach((language) => {
+        if (
+          language !== BASE_EMOJI_KEYWORD_LANG
+          && !requestedEmojiKeywordLangsRef.current.has(language)
+        ) {
+          requestedEmojiKeywordLangsRef.current.add(language);
+          loadEmojiKeywords({ language });
+        }
+      });
 
       loadCountryList({ langCode: lang.code });
     }
-  }, [lang.code, isMasterTab]);
+  }, [lang.code, lang.rawCode, isMasterTab]);
 
   // Re-fetch cached saved emoji for `localDb`
   useEffect(() => {
