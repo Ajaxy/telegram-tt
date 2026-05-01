@@ -194,7 +194,7 @@ const SettingsEditProfile = ({
     const trimmedLastName = lastName.trim();
     const trimmedBio = bio.trim();
 
-    if (!editableUsername) return;
+    if (editableUsername === false) return;
 
     if (!trimmedFirstName.length) {
       setError(ERROR_FIRST_NAME_MISSING);
