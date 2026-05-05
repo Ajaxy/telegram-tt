@@ -2457,16 +2457,26 @@ const Composer = ({
                       />
                     )}
                     {Boolean(botKeyboardMessageId) && !activeVoiceRecording && !editingMessage && (
-                      <ResponsiveHoverButton
-                        className={buildClassName('composer-action-button', isBotKeyboardOpen && 'activated')}
-                        round
-                        color="translucent"
-                        noClickActivation
-                        onActivate={openBotKeyboard}
-                        ariaLabel={lang('AriaComposerBotKeyboard')}
-                      >
-                        <Icon name="bot-command" />
-                      </ResponsiveHoverButton>
+                      <>
+                        <ResponsiveHoverButton
+                          className={buildClassName('composer-action-button', isBotKeyboardOpen && 'activated')}
+                          round
+                          color="translucent"
+                          noClickActivation
+                          onActivate={openBotKeyboard}
+                          ariaLabel={lang('AriaComposerBotKeyboard')}
+                        >
+                          <Icon name="bot-command" />
+                        </ResponsiveHoverButton>
+                        {!isMobile && (
+                          <BotKeyboardMenu
+                            messageId={botKeyboardMessageId}
+                            threadId={threadId}
+                            isOpen={isBotKeyboardOpen}
+                            onClose={closeBotKeyboard}
+                          />
+                        )}
+                      </>
                     )}
                   </>
                 )}
@@ -2508,7 +2518,7 @@ const Composer = ({
               paidMessagesStars={paidMessagesStars}
             />
           )}
-          {isInMessageList && Boolean(botKeyboardMessageId) && (
+          {isMobile && isInMessageList && Boolean(botKeyboardMessageId) && (
             <BotKeyboardMenu
               messageId={botKeyboardMessageId}
               threadId={threadId}

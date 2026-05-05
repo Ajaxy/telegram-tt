@@ -2,9 +2,32 @@
 
 .root {
   :global(.bubble) {
-    width: 100% !important;
+    width: calc(100vw - 4rem) !important;
     max-width: 27rem;
     border-radius: var(--border-radius-default-small);
+
+    @media (max-width: 600px) {
+      width: calc(100vw - 3rem) !important;
+    }
+  }
+
+  :global(body.is-touch-env) & {
+    :global(.bubble) {
+      width: 100% !important;
+    }
+  }
+
+  :global(.is-pointer-env) & {
+    > :global(.backdrop) {
+      position: absolute;
+      top: -0.5rem;
+      right: 0;
+      bottom: auto;
+      left: auto;
+
+      width: 3.5rem;
+      height: 4.5rem;
+    }
   }
 }
 

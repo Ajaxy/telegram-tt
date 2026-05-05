@@ -1,5 +1,5 @@
 import type { TeactNode } from '../../../lib/teact/teact';
-import { memo, useMemo } from '../../../lib/teact/teact';
+import { memo, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
@@ -39,8 +39,14 @@ const BotKeyboardMenu = ({
 
   const lang = useLang();
 
-  const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
+  const [handleMouseEnter, handleMouseLeave, markMouseInside] = useMouseInside(isOpen, onClose);
   const { isKeyboardSingleUse } = message || {};
+
+  useEffect(() => {
+    if (isOpen) {
+      markMouseInside();
+    }
+  }, [isOpen, markMouseInside]);
 
   const buttonTexts = useMemo(() => {
     const texts: TeactNode[][] = [];
