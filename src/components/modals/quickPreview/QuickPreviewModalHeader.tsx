@@ -1,4 +1,3 @@
-import type { FC } from '@teact';
 import { memo } from '@teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -45,7 +44,7 @@ type StateProps = {
 
 const EMOJI_STATUS_SIZE = 22;
 
-const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
+const QuickPreviewModalHeader = ({
   chatId,
   threadId,
   chat,
@@ -58,14 +57,19 @@ const QuickPreviewModalHeader: FC<OwnProps & StateProps> = ({
   unreadCount,
   hasUnreadMark,
   onClose,
-}) => {
+}: OwnProps & StateProps) => {
   const lang = useLang();
-  const { markChatMessagesRead } = getActions();
+  const { markChatMessagesRead, markTopicRead } = getActions();
   const {
     connectionStatusText,
   } = useConnectionStatus(lang, connectionState, isSyncing || isFetchingDifference, true);
 
   const handleMarkAsRead = useLastCallback(() => {
+    if (chat?.isForum && threadId !== undefined && threadId !== MAIN_THREAD_ID) {
+      markTopicRead({ chatId, topicId: Number(threadId) });
+      return;
+    }
+
     markChatMessagesRead({ id: chatId });
   });
 
