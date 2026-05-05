@@ -51,8 +51,9 @@ import {
   getDifference,
   init as initUpdatesManager,
   processUpdate,
+  requestChannelDifference as requestChannelDifferenceFromUpdates,
   reset as resetUpdatesManager,
-  scheduleGetChannelDifference,
+  setOpenedChannelIds as setOpenedChannelIdsInUpdates,
   updateChannelState,
 } from '../updates/updateManager';
 import {
@@ -660,5 +661,9 @@ export function setShouldDebugExportedSenders(value: boolean) {
 }
 
 export function requestChannelDifference(channelId: string) {
-  scheduleGetChannelDifference(channelId);
+  requestChannelDifferenceFromUpdates(channelId);
+}
+
+export function setOpenedChannelIds(channelIds: string[]) {
+  setOpenedChannelIdsInUpdates(channelIds);
 }

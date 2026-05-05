@@ -192,7 +192,8 @@ export async function fetchChats({
     const chat = buildApiChatFromDialog(dialog, peerEntity);
     lastMessageByChatId[chat.id] = dialog.topMessage;
 
-    if (dialog.pts) {
+    const isChannel = getEntityTypeById(chat.id) === 'channel';
+    if (dialog.pts && isChannel) {
       updateChannelState(chat.id, dialog.pts);
     }
 
@@ -524,6 +525,11 @@ export async function requestChatUpdate({
     : lastRemoteMessage;
 
   const chatUpdate = buildApiChatFromDialog(dialog, peerEntity);
+
+  const isChannel = getEntityTypeById(chat.id) === 'channel';
+  if (dialog.pts && isChannel) {
+    updateChannelState(chat.id, dialog.pts);
+  }
 
   const readState = buildThreadReadState(dialog);
   const threadInfo = buildApiThreadInfoFromDialog(chat.id, dialog);

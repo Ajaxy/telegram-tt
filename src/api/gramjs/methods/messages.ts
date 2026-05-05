@@ -162,6 +162,7 @@ export async function fetchMessages({
   const RequestClass = threadId === MAIN_THREAD_ID
     ? GramJs.messages.GetHistory : isSavedDialog
       ? GramJs.messages.GetSavedHistory : GramJs.messages.GetReplies;
+  const isChannel = getEntityTypeById(chat.id) === 'channel';
   let result;
 
   try {
@@ -201,6 +202,10 @@ export async function fetchMessages({
     || !result.messages
   ) {
     return undefined;
+  }
+
+  if (isChannel && 'pts' in result) {
+    updateChannelState(chat.id, result.pts);
   }
 
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
@@ -259,7 +264,7 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
     return undefined;
   }
 
-  if ('pts' in result) {
+  if (isChannel && 'pts' in result) {
     updateChannelState(chat.id, result.pts);
   }
 

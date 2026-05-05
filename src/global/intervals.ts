@@ -3,6 +3,7 @@ import { addCallback } from '../lib/teact/teactn';
 import type { GlobalState } from './types';
 
 import { getServerTime } from '../util/serverTime';
+import { resetOpenedChannelShortpollState, syncOpenedShortpollChannelIds } from './openedChannelShortpoll';
 import { removePeerStory } from './reducers';
 import { selectTabState } from './selectors';
 import { getGlobal, setGlobal } from '.';
@@ -22,18 +23,30 @@ addCallback((global: GlobalState) => {
   if (isCurrentMaster === isPreviousMaster) return;
 
   if (isCurrentMaster && !isPreviousMaster) {
-    startIntervals();
+    startIntervals(global);
   } else {
     stopIntervals();
   }
 });
 
-function startIntervals() {
+addCallback((global: GlobalState) => {
+  if (!selectTabState(global)?.isMasterTab) {
+    return;
+  }
+
+  syncOpenedShortpollChannelIds(global);
+});
+
+function startIntervals(global: GlobalState) {
   if (intervals.length) return;
+
+  resetOpenedChannelShortpollState();
   intervals.push(window.setInterval(checkStoryExpiration, STORY_EXPIRATION_INTERVAL));
+  syncOpenedShortpollChannelIds(global);
 }
 
 function stopIntervals() {
+  resetOpenedChannelShortpollState();
   intervals.forEach((interval) => clearInterval(interval));
   intervals = [];
 }

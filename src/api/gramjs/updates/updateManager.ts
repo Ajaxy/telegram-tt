@@ -1,4 +1,5 @@
 import { Api as GramJs, type Update } from '../../../lib/gramjs';
+import { RPCError } from '../../../lib/gramjs/errors';
 import { UpdateConnectionState, UpdateServerTimeOffset } from '../../../lib/gramjs/network';
 import type { Entity } from '../../../lib/gramjs/types';
 
@@ -24,16 +25,37 @@ export type State = {
 };
 type SeqUpdate = (GramJs.Updates | GramJs.UpdatesCombined) & { _isFromDifference?: true };
 type PtsUpdate = ((GramJs.TypeUpdate & { pts: number }) | UpdatePts) & { _isFromDifference?: true };
+type ChannelDifferenceReason = 'gapRecovery' | 'shortpoll';
+type ChannelScheduler = {
+  timeout?: ReturnType<typeof setTimeout>;
+  deadline?: number;
+  reason?: ChannelDifferenceReason;
+  isInFlight: boolean;
+  shortpollTimeoutMs?: number;
+  isShortpollEligible?: boolean;
+};
 
 const COMMON_BOX_QUEUE_ID = '0';
-const CHANNEL_DIFFERENCE_LIMIT = 1000;
+
+const SHORTPOLL_CHANNEL_DIFFERENCE_LIMIT = 100;
+const CATCH_UP_CHANNEL_DIFFERENCE_LIMIT = 1000;
+
+const SHORTPOLL_DEFAULT_TIMEOUT_MS = 1000;
+const INITIAL_SHORTPOLL_TIMEOUT_MS = 10000;
+const CHANNEL_DIFFERENCE_RETRY_TIMEOUT_MS = 5000;
 const UPDATE_WAIT_TIMEOUT = 500;
+
+const TERMINAL_CHANNEL_DIFFERENCE_ERRORS = new Set([
+  'CHANNEL_INVALID',
+  'CHANNEL_PRIVATE',
+]);
 
 let invoke: typeof invokeRequest;
 let isInited = false;
 
 let seqTimeout: ReturnType<typeof setTimeout> | undefined;
-const PTS_TIMEOUTS = new Map<string, ReturnType<typeof setTimeout>>();
+const CHANNEL_SCHEDULERS = new Map<string, ChannelScheduler>();
+const OPENED_CHANNEL_IDS = new Set<string>();
 
 const SEQ_QUEUE = new SortedQueue<SeqUpdate>(seqComparator);
 const PTS_QUEUE = new Map<string, SortedQueue<PtsUpdate>>();
@@ -85,7 +107,7 @@ export function processUpdate(update: Update, isFromDifference?: boolean, should
 
   if ('pts' in update) {
     if (update instanceof GramJs.UpdateChannelTooLong) {
-      getChannelDifference(getUpdateChannelId(update));
+      scheduleChannelDifference(getUpdateChannelId(update), 'gapRecovery', 0);
       return;
     }
     if (isFromDifference) {
@@ -215,8 +237,8 @@ function popPtsQueue(channelId: string) {
   if (update._isFromDifference && pts >= localPts + ptsCount) {
     applyUpdate(update);
   } else if (pts === localPts + ptsCount) {
-    clearTimeout(PTS_TIMEOUTS.get(channelId));
-    PTS_TIMEOUTS.delete(channelId);
+    clearScheduledChannelDifference(channelId, 'gapRecovery');
+    scheduleShortpollFromNow(channelId);
 
     applyUpdate(update);
   } else if (pts > localPts + ptsCount) {
@@ -233,13 +255,114 @@ function popPtsQueue(channelId: string) {
 }
 
 export function scheduleGetChannelDifference(channelId: string) {
-  if (PTS_TIMEOUTS.has(channelId)) return;
+  scheduleChannelDifference(channelId, 'gapRecovery', UPDATE_WAIT_TIMEOUT);
+}
 
-  const timeout = setTimeout(async () => {
-    await getChannelDifference(channelId);
-    PTS_TIMEOUTS.delete(channelId);
-  }, UPDATE_WAIT_TIMEOUT);
-  PTS_TIMEOUTS.set(channelId, timeout);
+export function requestChannelDifference(channelId: string) {
+  scheduleChannelDifference(channelId, 'gapRecovery', 0);
+}
+
+export function setOpenedChannelIds(channelIds: string[]) {
+  const nextOpenedChannelIds = new Set(channelIds);
+
+  OPENED_CHANNEL_IDS.forEach((channelId) => {
+    if (nextOpenedChannelIds.has(channelId)) {
+      return;
+    }
+
+    getOrCreateChannelScheduler(channelId).isShortpollEligible = false;
+    clearScheduledChannelDifference(channelId, 'shortpoll');
+  });
+
+  channelIds.forEach((channelId) => {
+    const scheduler = getOrCreateChannelScheduler(channelId);
+    const wasOpened = OPENED_CHANNEL_IDS.has(channelId);
+
+    scheduler.isShortpollEligible = true;
+
+    if (!wasOpened) {
+      if (scheduler.shortpollTimeoutMs !== undefined) {
+        restartShortpollFromNow(channelId);
+      } else {
+        scheduleChannelDifference(channelId, 'shortpoll', INITIAL_SHORTPOLL_TIMEOUT_MS);
+      }
+    }
+  });
+
+  OPENED_CHANNEL_IDS.clear();
+  channelIds.forEach((channelId) => {
+    OPENED_CHANNEL_IDS.add(channelId);
+  });
+}
+
+function getOrCreateChannelScheduler(channelId: string) {
+  const current = CHANNEL_SCHEDULERS.get(channelId);
+  if (current) {
+    return current;
+  }
+
+  const scheduler: ChannelScheduler = {
+    isInFlight: false,
+  };
+  CHANNEL_SCHEDULERS.set(channelId, scheduler);
+  return scheduler;
+}
+
+function scheduleChannelDifference(channelId: string, reason: ChannelDifferenceReason, timeoutMs: number) {
+  const scheduler = getOrCreateChannelScheduler(channelId);
+  const deadline = Date.now() + timeoutMs;
+  if (scheduler.deadline !== undefined && scheduler.deadline <= deadline) {
+    return;
+  }
+
+  clearScheduledChannelDifference(channelId);
+
+  scheduler.reason = reason;
+  scheduler.deadline = deadline;
+  scheduler.timeout = setTimeout(() => {
+    scheduler.timeout = undefined;
+    scheduler.deadline = undefined;
+    if (scheduler.isInFlight) {
+      scheduleChannelDifference(channelId, reason, UPDATE_WAIT_TIMEOUT);
+      return;
+    }
+
+    void runChannelDifference(channelId, reason);
+  }, timeoutMs);
+}
+
+function clearScheduledChannelDifference(channelId: string, reason?: ChannelDifferenceReason) {
+  const scheduler = CHANNEL_SCHEDULERS.get(channelId);
+  if (!scheduler?.timeout || (reason && scheduler.reason !== reason)) {
+    return;
+  }
+
+  clearTimeout(scheduler.timeout);
+  scheduler.timeout = undefined;
+  scheduler.deadline = undefined;
+  scheduler.reason = undefined;
+}
+
+function scheduleShortpollFromNow(channelId: string) {
+  const scheduler = CHANNEL_SCHEDULERS.get(channelId);
+  if (!scheduler?.isShortpollEligible || scheduler.shortpollTimeoutMs === undefined) {
+    return;
+  }
+
+  scheduleChannelDifference(channelId, 'shortpoll', scheduler.shortpollTimeoutMs);
+}
+
+function restartShortpollFromNow(channelId: string) {
+  const scheduler = CHANNEL_SCHEDULERS.get(channelId);
+  if (!scheduler?.isShortpollEligible || scheduler.shortpollTimeoutMs === undefined || scheduler.isInFlight) {
+    return;
+  }
+
+  if (scheduler.reason === 'shortpoll') {
+    clearScheduledChannelDifference(channelId);
+  }
+
+  scheduleChannelDifference(channelId, 'shortpoll', scheduler.shortpollTimeoutMs);
 }
 
 function scheduleGetDifference() {
@@ -316,9 +439,30 @@ export async function getDifference() {
   });
 }
 
-async function getChannelDifference(channelId: string) {
+async function runChannelDifference(channelId: string, reason: ChannelDifferenceReason) {
+  const scheduler = getOrCreateChannelScheduler(channelId);
+  if (scheduler.isInFlight) {
+    return;
+  }
+
+  scheduler.isInFlight = true;
+  scheduler.reason = reason;
+
+  try {
+    await requestChannelDifferenceInternal(channelId, reason);
+  } finally {
+    scheduler.isInFlight = false;
+  }
+}
+
+async function requestChannelDifferenceInternal(channelId: string, reason: ChannelDifferenceReason): Promise<void> {
   const channel = localDb.chats[channelId];
-  if (!channel || !(channel instanceof GramJs.Channel) || !channel.accessHash || !localDb.channelPtsById[channelId]) {
+  if (
+    !channel
+    || !(channel instanceof GramJs.Channel)
+    || !channel.accessHash
+    || localDb.channelPtsById[channelId] === undefined
+  ) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
       console.error('[UpdateManager] Channel for difference not found', channelId, channel);
@@ -326,18 +470,25 @@ async function getChannelDifference(channelId: string) {
     return;
   }
 
-  const response = await invoke(new GramJs.updates.GetChannelDifference({
-    channel: buildInputChannel(channelId, channel.accessHash.toString()),
-    pts: localDb.channelPtsById[channelId],
-    filter: new GramJs.ChannelMessagesFilterEmpty(),
-    limit: CHANNEL_DIFFERENCE_LIMIT,
-  }));
+  const limit = reason === 'shortpoll' ? SHORTPOLL_CHANNEL_DIFFERENCE_LIMIT : CATCH_UP_CHANNEL_DIFFERENCE_LIMIT;
+  let response: GramJs.updates.TypeChannelDifference;
 
-  if (!response) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.warn('[UpdatesManager] Failed to get ChannelDifference', channelId, channel);
+  try {
+    const result = await invoke(new GramJs.updates.GetChannelDifference({
+      channel: buildInputChannel(channelId, channel.accessHash.toString()),
+      pts: localDb.channelPtsById[channelId],
+      filter: new GramJs.ChannelMessagesFilterEmpty(),
+      limit,
+    }), {
+      shouldThrow: true,
+    });
+    if (!result) {
+      return;
     }
+
+    response = result;
+  } catch (err) {
+    handleChannelDifferenceError(channelId, reason, err);
     return;
   }
 
@@ -347,8 +498,13 @@ async function getChannelDifference(channelId: string) {
   }
 
   localDb.channelPtsById[channelId] = response.pts;
+  updateChannelShortpollTimeout(channelId, response);
 
   if (response instanceof GramJs.updates.ChannelDifferenceEmpty) {
+    if (response.final) {
+      scheduleShortpollIfEligible(channelId);
+    }
+
     popPtsQueue(channelId); // Continue processing updates in queue
     return;
   }
@@ -356,8 +512,45 @@ async function getChannelDifference(channelId: string) {
   processDifference(response, channelId);
 
   if (!response.final) {
-    getChannelDifference(channelId);
+    await requestChannelDifferenceInternal(channelId, 'gapRecovery');
+    return;
   }
+
+  scheduleShortpollIfEligible(channelId);
+}
+
+function updateChannelShortpollTimeout(channelId: string, response: GramJs.updates.TypeChannelDifference) {
+  const scheduler = getOrCreateChannelScheduler(channelId);
+  scheduler.shortpollTimeoutMs = ('timeout' in response && response.timeout)
+    ? response.timeout * 1000
+    : SHORTPOLL_DEFAULT_TIMEOUT_MS;
+}
+
+function scheduleShortpollIfEligible(channelId: string) {
+  const scheduler = getOrCreateChannelScheduler(channelId);
+  if (!scheduler.isShortpollEligible) {
+    return;
+  }
+
+  scheduleShortpollFromNow(channelId);
+}
+
+function handleChannelDifferenceError(channelId: string, reason: ChannelDifferenceReason, err: unknown) {
+  if (DEBUG) {
+    // eslint-disable-next-line no-console
+    console.warn('[UpdatesManager] Failed to get ChannelDifference', channelId, err);
+  }
+
+  const scheduler = getOrCreateChannelScheduler(channelId);
+  const errorMessage = err instanceof RPCError ? err.errorMessage : undefined;
+
+  if (errorMessage && TERMINAL_CHANNEL_DIFFERENCE_ERRORS.has(errorMessage)) {
+    scheduler.isShortpollEligible = false;
+    clearScheduledChannelDifference(channelId);
+    return;
+  }
+
+  scheduleChannelDifference(channelId, reason, CHANNEL_DIFFERENCE_RETRY_TIMEOUT_MS);
 }
 
 function forceSync() {
@@ -377,10 +570,15 @@ export function reset() {
   clearTimeout(seqTimeout);
   seqTimeout = undefined;
 
-  PTS_TIMEOUTS.forEach((timeout) => {
+  CHANNEL_SCHEDULERS.forEach(({ timeout }) => {
+    if (!timeout) {
+      return;
+    }
+
     clearTimeout(timeout);
   });
-  PTS_TIMEOUTS.clear();
+  CHANNEL_SCHEDULERS.clear();
+  OPENED_CHANNEL_IDS.clear();
 
   localDb.commonBoxState = {};
 
