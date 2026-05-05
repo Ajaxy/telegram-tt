@@ -94,6 +94,7 @@ type BroadcastChannelInitApi = {
 };
 
 const MULTITAB_ESTABLISH_TIMEOUT = 800;
+const BROADCAST_DIFF_FALLBACK_TIMEOUT = 500;
 
 export type TypedBroadcastChannel = {
   postMessage: (message: BroadcastChannelMessage) => void;
@@ -117,6 +118,28 @@ const channel = new BroadcastChannel(DATA_BROADCAST_CHANNEL_NAME) as TypedBroadc
 
 let isBroadcastDiffScheduled = false;
 let lastBroadcastDiffGlobal: GlobalState | undefined;
+let broadcastDiffFallbackTimeout: number | undefined;
+
+function flushBroadcastDiff() {
+  if (!isBroadcastDiffScheduled) return;
+
+  if (broadcastDiffFallbackTimeout) {
+    clearTimeout(broadcastDiffFallbackTimeout);
+    broadcastDiffFallbackTimeout = undefined;
+  }
+
+  const diff = deepDiff(lastBroadcastDiffGlobal, currentGlobal);
+
+  if (typeof diff !== 'symbol') {
+    channel.postMessage({
+      type: 'globalDiffUpdate',
+      diff,
+    });
+  }
+
+  isBroadcastDiffScheduled = false;
+  lastBroadcastDiffGlobal = undefined;
+}
 
 function broadcastDiffOnIdle() {
   if (isBroadcastDiffScheduled) return;
@@ -124,18 +147,8 @@ function broadcastDiffOnIdle() {
   isBroadcastDiffScheduled = true;
   lastBroadcastDiffGlobal = currentGlobal;
 
-  onFullyIdle(() => {
-    const diff = deepDiff(lastBroadcastDiffGlobal, currentGlobal);
-
-    if (typeof diff !== 'symbol') {
-      channel.postMessage({
-        type: 'globalDiffUpdate',
-        diff,
-      });
-    }
-
-    isBroadcastDiffScheduled = false;
-  });
+  onFullyIdle(flushBroadcastDiff);
+  broadcastDiffFallbackTimeout = window.setTimeout(flushBroadcastDiff, BROADCAST_DIFF_FALLBACK_TIMEOUT);
 }
 
 export function unsubcribeFromMultitabBroadcastChannel() {
