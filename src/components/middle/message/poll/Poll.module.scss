@@ -62,6 +62,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   column-gap: 0.5rem;
+  min-height: 2.5rem;
 }
 
 .question {

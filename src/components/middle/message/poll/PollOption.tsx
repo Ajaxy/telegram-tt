@@ -314,8 +314,9 @@ const PollOption = ({
         hasResults && !hasMaskedResults && styles.hasResults,
         shouldReserveMediaEndColumn && styles.hasMediaColumn,
         hasResults && !hasMaskedResults && isQuiz && !result?.isCorrect && styles.incorrect,
+        !hasResults && !isInScheduled && styles.clickable,
       )}
-      onClick={handleClick}
+      onClick={!isInScheduled ? handleClick : undefined}
     >
       <Transition
         name="fade"

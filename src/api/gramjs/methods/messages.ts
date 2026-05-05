@@ -1877,6 +1877,24 @@ export async function sendPollVote({
   }));
 }
 
+export async function appendPollAnswer({
+  chat, messageId, text,
+}: {
+  chat: ApiChat;
+  messageId: number;
+  text: string;
+}) {
+  const { id, accessHash } = chat;
+
+  await invokeRequest(new GramJs.messages.AddPollAnswer({
+    peer: buildInputPeer(id, accessHash),
+    msgId: messageId,
+    answer: new GramJs.InputPollAnswer({
+      text: buildInputTextWithEntities({ text }),
+    }),
+  }));
+}
+
 export async function toggleTodoCompleted({
   chat, messageId, completedIds, incompletedIds,
 }: {

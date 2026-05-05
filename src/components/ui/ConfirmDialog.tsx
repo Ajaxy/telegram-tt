@@ -66,6 +66,7 @@ const ConfirmDialog: FC<OwnProps> = ({
       header={header}
       isOpen={isOpen}
       onClose={onClose}
+      isNativeDialog
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
       {text && text.split('\\n').map((textPart) => (

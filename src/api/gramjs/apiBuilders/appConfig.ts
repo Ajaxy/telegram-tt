@@ -118,6 +118,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   ton_usd_rate?: number;
   ton_topup_url?: string;
   poll_answers_max?: number;
+  poll_close_period_max?: number;
   todo_items_max?: number;
   todo_title_length_max?: number;
   todo_item_length_max?: number;
@@ -266,6 +267,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     tonUsdRate: appConfig.ton_usd_rate,
     tonTopupUrl: appConfig.ton_topup_url,
     pollMaxAnswers: appConfig.poll_answers_max,
+    pollClosePeriodMax: appConfig.poll_close_period_max,
     todoItemsMax: appConfig.todo_items_max,
     todoTitleLengthMax: appConfig.todo_title_length_max,
     todoItemLengthMax: appConfig.todo_item_length_max,

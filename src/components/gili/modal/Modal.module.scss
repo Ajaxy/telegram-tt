@@ -1,0 +1,281 @@
+@layer ui.modal {
+  .dialog {
+    --modal-max-width: 35rem;
+    --modal-max-height: min(92dvh, 50rem);
+    --modal-header-height: 3.5rem;
+    --modal-content-block-padding: 1rem;
+    --modal-scroll-fade-size: 1rem;
+    --modal-border-radius: 1.75rem;
+
+    user-select: none;
+
+    position: fixed;
+    inset: 0;
+
+    display: grid;
+    place-items: center;
+
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    border: 0;
+
+    color: var(--color-text);
+
+    background: transparent;
+    outline: none;
+
+    &::backdrop {
+      background-color: rgb(0 0 0 / 30%);
+    }
+  }
+
+  .contained {
+    contain: content;
+  }
+
+  .open .panel {
+    animation: panelOpen 200ms ease-out;
+  }
+
+  .open:not(.noBackdrop)::backdrop {
+    animation: backdropOpen 200ms ease-out;
+  }
+
+  .closing .panel {
+    animation: panelClose 200ms ease-in forwards;
+  }
+
+  .closing:not(.noBackdrop)::backdrop {
+    animation: backdropClose 200ms ease-in forwards;
+  }
+
+  .noBackdrop::backdrop {
+    background-color: transparent;
+  }
+
+  .fullscreen {
+    --_dialog-padding: 0;
+
+    .panel {
+      border-radius: 0;
+    }
+  }
+
+  .widthSlim {
+    --modal-max-width: 26.25rem;
+  }
+
+  .widthRegular {
+    --modal-max-width: 35rem;
+  }
+
+  .widthWide {
+    --modal-max-width: 44rem;
+  }
+
+  .widthFullscreen {
+    --modal-max-width: 100dvw;
+
+    .panel {
+      width: 100%;
+      max-width: none;
+    }
+  }
+
+  .heightAuto {
+    .panel {
+      height: auto;
+    }
+
+    .content {
+      flex: 0 1 auto;
+    }
+  }
+
+  .heightRegular {
+    --modal-max-height: min(92dvh, 50rem);
+  }
+
+  .heightTall {
+    --modal-max-height: min(96dvh, 62rem);
+  }
+
+  .heightFullscreen {
+    --modal-max-height: 100dvh;
+
+    .panel {
+      height: 100%;
+      max-height: none;
+    }
+  }
+
+  .panel {
+    position: relative;
+
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    width: min(100%, var(--modal-max-width));
+    max-width: var(--modal-max-width);
+    max-height: min(100%, var(--modal-max-height));
+    border-radius: var(--modal-border-radius);
+
+    background-color: var(--color-background-secondary);
+    box-shadow: 0 0.625rem 2rem rgb(0 0 0 / 18%);
+  }
+
+  .headerSlot {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    left: 0;
+  }
+
+  .content {
+    flex: 1 1 auto;
+    min-height: 0;
+    border-radius: inherit;
+    background-color: transparent;
+  }
+
+  .withHeader {
+    mask-image:
+      linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent calc(var(--modal-header-height) - var(--modal-scroll-fade-size)),
+        black calc(var(--modal-header-height) + var(--modal-scroll-fade-size)),
+        black 100%
+      );
+  }
+
+  .body {
+    min-height: 100%;
+    padding-block: var(--modal-content-block-padding);
+  }
+
+  .withHeader .body {
+    padding-top: calc(var(--modal-header-height) + var(--modal-content-block-padding));
+  }
+
+  .header {
+    display: grid;
+    grid-template-columns: minmax(2.25rem, 1fr) auto minmax(2.25rem, 1fr);
+    column-gap: 0.5rem;
+    align-items: center;
+
+    min-height: var(--modal-header-height);
+    padding: 0.5rem 1rem;
+  }
+
+  .headerWithSubtitle {
+    grid-template-rows: auto auto;
+    row-gap: 0.125rem;
+  }
+
+  .title {
+    unicode-bidi: plaintext;
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+
+    margin: 0;
+
+    font-size: 1.125rem;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .headerWithSubtitle .title {
+    align-self: end;
+  }
+
+  .subtitle {
+    unicode-bidi: plaintext;
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+
+    font-size: 0.9375rem;
+    line-height: 1.2;
+    color: var(--color-text-secondary);
+    text-align: center;
+  }
+
+  .headerAction {
+    display: flex;
+    grid-column: 3;
+    grid-row: 1 / -1;
+    align-items: center;
+    justify-self: end;
+  }
+
+  .closeButton {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    justify-self: start;
+  }
+
+  .closeButtonAbsolute {
+    position: absolute;
+    z-index: 2;
+    top: 0.75rem;
+    inset-inline-start: 0.75rem;
+  }
+
+  @keyframes panelOpen {
+    from {
+      transform: translateY(1rem) scale(0.98);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes panelClose {
+    from {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    to {
+      transform: translateY(1rem) scale(0.98);
+      opacity: 0;
+    }
+  }
+
+  @keyframes backdropOpen {
+    from {
+      background-color: transparent;
+    }
+
+    to {
+      background-color: rgb(0 0 0 / 30%);
+    }
+  }
+
+  @keyframes backdropClose {
+    from {
+      background-color: rgb(0 0 0 / 30%);
+    }
+
+    to {
+      background-color: transparent;
+    }
+  }
+
+  :global(body.no-page-transitions) {
+    .dialog::backdrop, .panel {
+      animation: none !important;
+    }
+  }
+}

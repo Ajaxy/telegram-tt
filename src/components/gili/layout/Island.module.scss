@@ -17,6 +17,18 @@
     overflow-wrap: anywhere;
   }
 
+  .title {
+    display: block;
+
+    padding: 0 1rem;
+
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.25rem;
+    color: var(--color-text-secondary);
+    overflow-wrap: anywhere;
+  }
+
   .text {
     display: block;
     padding: 0.5rem 1rem;
@@ -33,6 +45,15 @@
   }
 
   .description + .island {
+    margin-top: 1rem;
+  }
+
+  .title + .island {
+    margin-top: 0.5rem;
+  }
+
+  .description + .title,
+  .island + .title {
     margin-top: 1rem;
   }
 }

@@ -1,12 +1,15 @@
 import type { TeactNode } from '../../../lib/teact/teact';
 import { createContext, memo, useMemo } from '../../../lib/teact/teact';
 
+import type { IconName } from '../../../types/icons';
+
 import buildClassName from '../../../util/buildClassName';
 
 import useContext from '../../../hooks/data/useContext';
 import useLang from '../../../hooks/useLang';
 import useUniqueId from '../../../hooks/useUniqueId';
 
+import Icon from '../../common/icons/Icon';
 import Spinner from '../../ui/Spinner';
 import { useInteractiveContext } from './Interactive';
 
@@ -123,6 +126,12 @@ type ControlSlotProps = {
   children: TeactNode;
 };
 
+type ControlIconProps = {
+  iconName?: IconName;
+  className?: string;
+  backgroundColor?: string;
+};
+
 const ControlBefore = ({ className, children }: ControlSlotProps) => {
   return (
     <div className={buildClassName(styles.controlBefore, className)}>
@@ -139,6 +148,22 @@ const ControlAfter = ({ className, children }: ControlSlotProps) => {
   );
 };
 
+const ControlIcon = ({ iconName, className, backgroundColor }: ControlIconProps) => {
+  return (
+    <ControlBefore className={className}>
+      <div
+        className={buildClassName(
+          styles.controlIcon,
+          backgroundColor && styles.controlIconFilled,
+        )}
+        style={backgroundColor ? `--control-icon-background-color: ${backgroundColor};` : undefined}
+      >
+        {iconName && <Icon name={iconName} className={styles.controlIconGlyph} />}
+      </div>
+    </ControlBefore>
+  );
+};
+
 // #endregion
 
 export default memo(Control);
@@ -147,4 +172,5 @@ export {
   ControlDescription,
   ControlBefore,
   ControlAfter,
+  ControlIcon,
 };

@@ -29,6 +29,10 @@
   }
 }
 
+.clickable {
+  cursor: var(--custom-cursor, pointer);
+}
+
 .hasMediaColumn {
   --poll-option-media-width: 3rem;
 }
@@ -46,6 +50,31 @@
 .selectorSlide {
   display: flex;
   align-items: center;
+}
+
+.addAnswerIcon {
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+}
+
+.addAnswerInput {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+
+  font: inherit;
+  line-height: inherit;
+  color: inherit;
+
+  background: transparent;
+  outline: 0;
+
+  &:focus-visible {
+    border-radius: 0.25rem;
+    outline: 0.125rem solid var(--accent-color);
+    outline-offset: 0.125rem;
+  }
 }
 
 .spinner {
@@ -77,6 +106,15 @@
   min-width: 0;
 
   overflow-wrap: anywhere;
+}
+
+.addAnswer {
+  cursor: text;
+}
+
+.addAnswerContent {
+  grid-column: 2 / 4;
+  justify-self: stretch;
 }
 
 .sideMeta {

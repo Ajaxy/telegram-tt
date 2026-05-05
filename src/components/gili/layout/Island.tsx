@@ -1,14 +1,18 @@
+import type { ElementRef } from '../../../lib/teact/teact';
+
 import buildClassName from '../../../util/buildClassName';
 
 import styles from './Island.module.scss';
 
 type OwnProps = React.HTMLAttributes<HTMLDivElement> & {
   children: React.ReactNode;
+  ref?: ElementRef<HTMLDivElement>;
 };
 
-const Island = ({ className, children, ...otherProps }: OwnProps) => {
+const Island = ({ ref, className, children, ...otherProps }: OwnProps) => {
   return (
     <div
+      ref={ref}
       className={buildClassName(styles.island, className)}
       {...otherProps}
     >
@@ -21,6 +25,17 @@ const IslandDescription = ({ className, children, ...otherProps }: OwnProps) => 
   return (
     <div
       className={buildClassName(styles.description, className)}
+      {...otherProps}
+    >
+      {children}
+    </div>
+  );
+};
+
+const IslandTitle = ({ className, children, ...otherProps }: OwnProps) => {
+  return (
+    <div
+      className={buildClassName(styles.title, className)}
       {...otherProps}
     >
       {children}
@@ -42,5 +57,6 @@ const IslandText = ({ className, children, ...otherProps }: OwnProps) => {
 export default Island;
 export {
   IslandDescription,
+  IslandTitle,
   IslandText,
 };

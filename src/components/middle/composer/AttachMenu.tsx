@@ -57,12 +57,11 @@ export type OwnProps = {
   theme: ThemeKey;
   canEditMedia?: boolean;
   editingMessage?: ApiMessage;
-  messageListType?: MessageListType;
+  messageListType: MessageListType;
   paidMessagesStars?: number;
   canInsertDate?: boolean;
   onFileSelect: (files: File[]) => void;
   onDateInsert: (text: ApiFormattedText) => void;
-  onPollCreate: NoneToVoidFunction;
   onTodoListCreate: NoneToVoidFunction;
   onMenuOpen: NoneToVoidFunction;
   onMenuClose: NoneToVoidFunction;
@@ -93,10 +92,10 @@ const AttachMenu = ({
   onDateInsert,
   onMenuOpen,
   onMenuClose,
-  onPollCreate,
   onTodoListCreate,
 }: OwnProps) => {
   const {
+    openPollModal,
     updateAttachmentSettings,
   } = getActions();
   const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
@@ -190,6 +189,11 @@ const AttachMenu = ({
     openDateModal();
   });
 
+  const handlePollCreate = useLastCallback(() => {
+    closeAttachMenu();
+    openPollModal({ chatId, threadId, messageListType });
+  });
+
   if (!isButtonVisible && !isDateModalOpen) {
     return undefined;
   }
@@ -275,7 +279,7 @@ const AttachMenu = ({
               </>
             )}
             {canAttachPolls && !editingMessage && (
-              <MenuItem icon="poll" onClick={onPollCreate}>{oldLang('Poll')}</MenuItem>
+              <MenuItem icon="poll" onClick={handlePollCreate}>{lang('Poll')}</MenuItem>
             )}
             {canAttachToDoLists && !editingMessage && (
               <MenuItem icon="select" onClick={onTodoListCreate}>{lang('TitleToDoList')}</MenuItem>

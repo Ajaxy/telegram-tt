@@ -1,89 +1,27 @@
 @layer ui.layout {
   .control {
+    --control-grid-template-areas: "input before label after";
+    --control-grid-columns: auto auto 1fr auto;
+    --control-gap: 1rem;
+
     display: grid;
-    grid-template-areas: "input label";
-    grid-template-columns: auto 1fr;
+    grid-template-areas: var(--control-grid-template-areas);
+    grid-template-columns: var(--control-grid-columns);
     flex-grow: 1;
-    column-gap: 1rem;
+    column-gap: 0;
     align-items: center;
 
-    &:has(> .controlDescription) {
-      grid-template-areas: "input label" "input desc";
-    }
-
-    &:has(> .controlAfter) {
-      grid-template-areas: "input label after";
-      grid-template-columns: auto 1fr auto;
-
-      &:has(> .controlDescription) {
-        grid-template-areas: "input label after" "input desc after";
-      }
-    }
-
-    &:has(> .controlBefore) {
-      grid-template-areas: "input before label";
-      grid-template-columns: auto auto 1fr;
-
-      &:has(> .controlDescription) {
-        grid-template-areas: "input before label" "input before desc";
-      }
-    }
-
-    &:has(> .controlBefore):has(> .controlAfter) {
-      grid-template-areas: "input before label after";
-      grid-template-columns: auto auto 1fr auto;
-
-      &:has(> .controlDescription) {
-        grid-template-areas: "input before label after" "input before desc after";
-      }
-    }
-
-    // --- inputEnd: input at end ---
     &.inputEnd {
-      grid-template-areas: "label input";
-      grid-template-columns: 1fr auto;
-
-      &:has(> .controlDescription) {
-        grid-template-areas: "label input" "desc input";
-      }
-
-      &:has(> .controlAfter) {
-        grid-template-areas: "label after input";
-        grid-template-columns: 1fr auto auto;
-
-        &:has(> .controlDescription) {
-          grid-template-areas: "label after input" "desc after input";
-        }
-      }
-
-      &:has(> .controlBefore) {
-        grid-template-areas: "before label input";
-        grid-template-columns: auto 1fr auto;
-
-        &:has(> .controlDescription) {
-          grid-template-areas: "before label input" "before desc input";
-        }
-      }
-
-      &:has(> .controlBefore):has(> .controlAfter) {
-        grid-template-areas: "before label after input";
-        grid-template-columns: auto 1fr auto auto;
-
-        &:has(> .controlDescription) {
-          grid-template-areas: "before label after input" "before desc after input";
-        }
-      }
+      --control-grid-template-areas: "before label after input";
+      --control-grid-columns: auto 1fr auto auto;
     }
 
-    &:has(> .controlDescription) > .controlLabel {
-      align-self: end;
-    }
+    &:has(> .controlDescription) {
+      --control-grid-template-areas: "input before label after" "input before desc after";
 
-    &:has(> .controlDescription) > .input,
-    &:has(> .controlDescription) > .spinner {
-      transform: translateY(50%);
-      grid-row: 1;
-      align-self: end;
+      &.inputEnd {
+        --control-grid-template-areas: "before label after input" "before desc after input";
+      }
     }
 
     :global(label) {
@@ -94,6 +32,12 @@
   .input {
     grid-area: input;
     align-self: center;
+    margin-inline-end: var(--control-gap);
+
+    .inputEnd > & {
+      margin-inline-start: var(--control-gap);
+      margin-inline-end: 0;
+    }
   }
 
   .spinner {
@@ -101,6 +45,12 @@
 
     grid-area: input;
     align-self: center;
+    margin-inline-end: var(--control-gap);
+
+    .inputEnd > & {
+      margin-inline-start: var(--control-gap);
+      margin-inline-end: 0;
+    }
   }
 
   .controlLabel {
@@ -130,10 +80,38 @@
   .controlBefore {
     grid-area: before;
     align-self: center;
+    margin-inline-end: var(--control-gap);
   }
 
   .controlAfter {
     grid-area: after;
     align-self: center;
+    margin-inline-start: var(--control-gap);
+  }
+
+  .controlIcon {
+    --control-icon-background-color: transparent;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.625rem;
+
+    color: var(--color-text);
+
+    background-color: var(--control-icon-background-color);
+    background-image: none;
+  }
+
+  .controlIconFilled {
+    color: white;
+    background-image: linear-gradient(180deg, rgb(255 255 255 / 30%) 0%, transparent 100%);
+  }
+
+  .controlIconGlyph {
+    font-size: 1.25rem;
   }
 }

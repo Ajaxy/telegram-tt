@@ -1528,6 +1528,11 @@ export interface ActionPayloads {
     messageId: number;
     options: string[];
   };
+  appendPollAnswer: {
+    chatId: string;
+    messageId: number;
+    text: string;
+  };
   toggleTodoCompleted: {
     chatId: string;
     messageId: number;
@@ -2421,9 +2426,12 @@ export interface ActionPayloads {
   refreshLangPackFromCache: {
     langCode: string;
   };
-  openPollModal: ({
+  openPollModal: {
+    chatId: string;
+    threadId?: ThreadId;
+    messageListType: MessageListType;
     isQuiz?: boolean;
-  } & WithTabId) | undefined;
+  } & WithTabId;
   closePollModal: WithTabId | undefined;
   openTodoListModal: {
     chatId: string;

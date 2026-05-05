@@ -1,0 +1,141 @@
+.input,
+.optionInput,
+.textArea {
+  margin: 0.5rem;
+}
+
+.optionList {
+  display: flex;
+  flex-direction: column;
+}
+
+.optionRowFrame,
+.durationMenuWrapper {
+  position: relative;
+}
+
+.optionRow {
+  display: flex;
+  align-items: center;
+  border-radius: var(--border-radius-default);
+}
+
+.optionRowDragging {
+  --custom-cursor: grabbing;
+
+  will-change: transform;
+  cursor: var(--custom-cursor);
+
+  z-index: var(--z-modal-menu);
+
+  contain: content;
+
+  opacity: 0.95;
+  background: var(--color-background);
+  box-shadow: 0 0.25rem 1rem var(--color-default-shadow);
+
+  input {
+    cursor: var(--custom-cursor);
+  }
+}
+
+.optionRowAdd {
+  color: var(--color-text-secondary);
+}
+
+.optionLeadingIcon {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.5rem;
+
+  color: var(--color-text-secondary);
+
+  opacity: 0.72;
+}
+
+.optionLeadingIconAdd {
+  opacity: 0.5;
+}
+
+.optionLeadingIconGlyph {
+  font-size: 1.5rem;
+}
+
+.optionDragHandle {
+  cursor: grab;
+  border-radius: 0.25rem;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid var(--color-primary);
+    outline-offset: 0.125rem;
+  }
+
+  @media (pointer: coarse) {
+    touch-action: none;
+  }
+}
+
+.optionSelector {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+
+  margin-inline-start: 0.5rem;
+}
+
+.optionRadioInvalid {
+  --ui-border-color: var(--color-error);
+  --ui-accent-color: var(--color-error);
+}
+
+.optionInput {
+  flex: 1 1 auto;
+  min-width: 0;
+
+  &:global(.input-group) {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+.optionTextInput {
+  :global(.form-control) {
+    min-width: 0;
+  }
+}
+
+.optionInputAdd {
+  :global(.form-control)::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 1;
+  }
+}
+
+.optionRemove {
+  flex: 0 0 auto;
+}
+
+.rowValue {
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  color: var(--color-text-secondary);
+  text-align: end;
+}
+
+.errorDescription {
+  padding: 0.75rem 0 0;
+  color: var(--color-error);
+}
+
+.durationMenu :global(.backdrop) {
+  position: absolute;
+  inset: 0;
+}

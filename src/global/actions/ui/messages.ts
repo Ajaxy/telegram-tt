@@ -754,25 +754,24 @@ addActionHandler('exitMessageSelectMode', (global, actions, payload): ActionRetu
 });
 
 addActionHandler('openPollModal', (global, actions, payload): ActionReturnType => {
-  const { isQuiz, tabId = getCurrentTabId() } = payload || {};
+  const {
+    chatId,
+    threadId,
+    messageListType,
+    isQuiz,
+    tabId = getCurrentTabId(),
+  } = payload;
 
   return updateTabState(global, {
     pollModal: {
-      isOpen: true,
+      chatId,
+      threadId,
+      messageListType,
       isQuiz,
     },
   }, tabId);
 });
-
-addActionHandler('closePollModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  return updateTabState(global, {
-    pollModal: {
-      isOpen: false,
-    },
-  }, tabId);
-});
+addTabStateResetterAction('closePollModal', 'pollModal');
 
 addActionHandler('openTodoListModal', (global, actions, payload): ActionReturnType => {
   const {

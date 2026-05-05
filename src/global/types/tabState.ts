@@ -82,6 +82,7 @@ import type {
   MediaViewerMedia,
   MediaViewerOrigin,
   MessageList,
+  MessageListType,
   MiddleSearchParams,
   NewChatMembersProgress,
   PaymentStep,
@@ -567,8 +568,10 @@ export type TabState = {
     filter?: ApiChatType[];
   };
 
-  pollModal: {
-    isOpen: boolean;
+  pollModal?: {
+    chatId: string;
+    threadId?: ThreadId;
+    messageListType: MessageListType;
     isQuiz?: boolean;
   };
 

@@ -235,18 +235,24 @@ export function buildInputPoll(
       });
     }),
     quiz: poll.isQuiz,
+    closeDate: poll.closeDate,
+    closePeriod: poll.closePeriod,
+    hideResultsUntilClose: poll.shouldHideResultsUntilClose,
+    revotingDisabled: poll.isRevoteDisabled,
+    shuffleAnswers: poll.shouldShuffleAnswers,
+    openAnswers: poll.canAddAnswers,
     multipleChoice: poll.isMultipleChoice,
     hash: DEFAULT_PRIMITIVES.BIGINT,
   });
 
-  const inputSolutionEntities = solutionEntities?.map(buildMtpMessageEntity);
+  const inputSolutionEntities = solutionEntities?.map(buildMtpMessageEntity) || [];
 
   return new GramJs.InputMediaPoll({
     poll: inputPoll,
     correctAnswers,
     attachedMedia: media?.attachedMedia,
     solution,
-    solutionEntities: inputSolutionEntities,
+    solutionEntities: solution ? inputSolutionEntities : undefined,
     solutionMedia: media?.solutionMedia,
   });
 }

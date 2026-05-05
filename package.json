@@ -41,8 +41,8 @@
     "npm": "^10.8 || ^11"
   },
   "lint-staged": {
-    "*.{ts,tsx,js}": "eslint --fix",
-    "*.{css,scss}": "stylelint --fix"
+    "*.{ts,tsx,js}": "eslint --cache --cache-location .cache/.eslintcache --fix",
+    "*.{css,scss}": "stylelint --cache --cache-location .cache/.stylelintcache --fix"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",

@@ -1382,6 +1382,19 @@ addActionHandler('sendPollVote', (global, actions, payload): ActionReturnType =>
   }
 });
 
+addActionHandler('appendPollAnswer', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, messageId, text,
+  } = payload;
+  const chat = selectChat(global, chatId);
+
+  if (!chat) {
+    return;
+  }
+
+  await callApi('appendPollAnswer', { chat, messageId, text });
+});
+
 addActionHandler('toggleTodoCompleted', (global, actions, payload): ActionReturnType => {
   const { chatId, messageId, completedIds, incompletedIds } = payload;
   const chat = selectChat(global, chatId);

@@ -464,10 +464,6 @@ export const INITIAL_TAB_STATE: TabState = {
     byChatId: {},
   },
 
-  pollModal: {
-    isOpen: false,
-  },
-
   requestedTranslations: {
     byChatId: {},
   },

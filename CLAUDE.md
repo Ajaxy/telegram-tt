@@ -27,6 +27,7 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
   - **Always extract styles to files** - avoid inline styles unless absolutely necessary.
   - **If file already imports styles**, check where they come from and add new styles there - don't create new style files.
   - Prefer rem units for all measurements. Exceptions are possible, but usually rare.
+  - No complex or broad selectors. Prefer basic classes.
 
 - **Code Style:**
   - Early returns.
@@ -176,7 +177,7 @@ addActionHandler('loadUser', async (global, actions, { userId }) => {
   * **StateProps**: data injected by `withGlobal` HOC
 * Merge them as `OwnProps & StateProps` when defining your component.
 * You can skip one or both if they are not used.
-* **Order rule**: list any function types *last* in your props definitions.
+* **Order rule**: list any handlers or functions *last* in your props definitions.
 * Do not pass unmemoized objects as props into memo() components.
 
 ### 3. Hooks

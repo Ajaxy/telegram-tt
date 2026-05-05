@@ -382,6 +382,7 @@ const CalendarModal = ({
       onEnter={handleSubmit}
       dialogRef={dialogRef}
       hasAbsoluteCloseButton
+      isNativeDialog
     >
       <div className="container">
         <div className="month-selector">

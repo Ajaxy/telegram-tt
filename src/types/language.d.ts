@@ -597,10 +597,23 @@ export interface LangPair {
   'CreatePollAddOption': undefined;
   'PollsChooseCorrect': undefined;
   'AskAQuestion': undefined;
-  'PollOptions': undefined;
-  'PollAnonymous': undefined;
+  'PollAnswersVisible': undefined;
+  'PollAnswersVisibleDescription': undefined;
   'PollMultiple': undefined;
+  'PollMultipleDescription': undefined;
   'PollQuiz': undefined;
+  'PollQuizDescription': undefined;
+  'PollAllowAddingAnswers': undefined;
+  'PollAllowAddingAnswersDescription': undefined;
+  'PollAllowVoteChanges': undefined;
+  'PollAllowVoteChangesDescription': undefined;
+  'PollRandomOrder': undefined;
+  'PollRandomOrderDescription': undefined;
+  'PollLimitedDuration': undefined;
+  'PollLimitedDurationDescription': undefined;
+  'PollDuration': undefined;
+  'PollHideResultsUntilClose': undefined;
+  'PollSelectCloseDate': undefined;
   'PollsSolutionTitle': undefined;
   'CreatePollExplanationInfo': undefined;
   'VoipGroupPersonalAccount': undefined;
@@ -2106,6 +2119,11 @@ export interface LangPair {
   'AiMessageEditorFrom': undefined;
   'AiMessageEditorTo': undefined;
   'ButtonHelp': undefined;
+  'PollModalQuestionTitle': undefined;
+  'PollModalOptionsTitle': undefined;
+  'PollModalSettingsTitle': undefined;
+  'PollModalAddNoMore': undefined;
+  'PollDurationOther': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -4222,6 +4240,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'FwdMessagesToChats': {
+    'count': V;
+  };
+  'PollModalAddMoreText': {
     'count': V;
   };
 }

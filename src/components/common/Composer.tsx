@@ -19,7 +19,6 @@ import type {
   ApiMessage,
   ApiMessageEntity,
   ApiNewMediaTodo,
-  ApiNewPoll,
   ApiPeer,
   ApiQuickReply,
   ApiReaction,
@@ -189,7 +188,6 @@ import EmojiTooltip from '../middle/composer/EmojiTooltip.async';
 import InlineBotTooltip from '../middle/composer/InlineBotTooltip.async';
 import MentionTooltip from '../middle/composer/MentionTooltip.async';
 import MessageInput from '../middle/composer/MessageInput';
-import PollModal from '../middle/composer/PollModal.async';
 import SendAsMenu from '../middle/composer/SendAsMenu.async';
 import StickerTooltip from '../middle/composer/StickerTooltip.async';
 import SymbolMenuButton from '../middle/composer/SymbolMenuButton';
@@ -253,7 +251,6 @@ type StateProps = {
   isReplying?: boolean;
   hasSuggestedPost?: boolean;
   forwardedMessagesCount?: number;
-  pollModal: TabState['pollModal'];
   todoListModal: TabState['todoListModal'];
   aiMessageEditorPendingResult: TabState['aiMessageEditorPendingResult'];
   botKeyboardMessageId?: number;
@@ -321,7 +318,6 @@ type StateProps = {
   isAccountFrozen?: boolean;
   isAppConfigLoaded?: boolean;
   insertingPeerIdMention?: string;
-  pollMaxAnswers?: number;
   replyToMessage?: ApiMessage;
   shouldOpenMessageMediaEditor?: TabState['shouldOpenMessageMediaEditor'];
 };
@@ -382,7 +378,6 @@ const Composer = ({
   isReplying,
   hasSuggestedPost,
   forwardedMessagesCount,
-  pollModal,
   todoListModal,
   aiMessageEditorPendingResult,
   botKeyboardMessageId,
@@ -449,7 +444,6 @@ const Composer = ({
   isAccountFrozen,
   isAppConfigLoaded,
   insertingPeerIdMention,
-  pollMaxAnswers,
   replyToMessage,
   shouldOpenMessageMediaEditor,
   onDropHide,
@@ -462,8 +456,6 @@ const Composer = ({
     clearDraft,
     saveDraft,
     showDialog,
-    openPollModal,
-    closePollModal,
     openTodoListModal,
     closeTodoListModal,
     openAiMessageEditorModal,
@@ -1654,31 +1646,6 @@ const Composer = ({
     });
   });
 
-  const handlePollSend = useLastCallback((poll: ApiNewPoll) => {
-    if (!currentMessageList) {
-      return;
-    }
-
-    if (isInScheduledList) {
-      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
-        handleActionWithPaymentConfirmation(
-          handleMessageSchedule,
-          { poll },
-          scheduledAt,
-          scheduleRepeatPeriod,
-          currentMessageList,
-        );
-      });
-      closePollModal();
-    } else {
-      handleActionWithPaymentConfirmation(
-        sendMessage,
-        { messageList: currentMessageList, poll, isSilent: isSilentPosting },
-      );
-      closePollModal();
-    }
-  });
-
   const handleToDoListSend = useLastCallback((todo: ApiNewMediaTodo) => {
     if (!currentMessageList) {
       return;
@@ -2180,14 +2147,6 @@ const Composer = ({
         canScheduleUntilOnline={canScheduleUntilOnline && !isViewOnceEnabled}
         paidMessagesStars={paidMessagesStars}
       />
-      <PollModal
-        isOpen={pollModal.isOpen}
-        isQuiz={pollModal.isQuiz}
-        shouldBeAnonymous={isChannel}
-        maxOptionsCount={pollMaxAnswers}
-        onClear={closePollModal}
-        onSend={handlePollSend}
-      />
       <ToDoListModal
         modal={todoListModal}
         onClear={closeTodoListModal}
@@ -2505,7 +2464,6 @@ const Composer = ({
               canInsertDate={!isComposerBlocked}
               onFileSelect={handleFileSelect}
               onDateInsert={handleFormattedDateInsert}
-              onPollCreate={openPollModal}
               onTodoListCreate={handleTodoListCreate}
               isScheduled={isInScheduledList}
               attachBots={isInMessageList ? attachBots : undefined}
@@ -2709,7 +2667,6 @@ export default memo(withGlobal<OwnProps>(
   (global, {
     chatId, threadId, storyId, messageListType, isMobile, type,
   }): Complete<StateProps> => {
-    const appConfig = global.appConfig;
     const chat = selectChat(global, chatId);
     const chatBot = !isSystemBot(chatId) ? selectBot(global, chatId) : undefined;
     const isChatWithBot = Boolean(chatBot);
@@ -2824,7 +2781,6 @@ export default memo(withGlobal<OwnProps>(
       isReplying,
       hasSuggestedPost,
       forwardedMessagesCount: isForwarding ? forwardMessageIds!.length : undefined,
-      pollModal: tabState.pollModal,
       todoListModal: tabState.todoListModal,
       aiMessageEditorPendingResult: tabState.aiMessageEditorPendingResult,
       stickersForEmoji: global.stickers.forEmoji.stickers,
@@ -2883,7 +2839,9 @@ export default memo(withGlobal<OwnProps>(
       shouldPaidMessageAutoApprove,
       isSilentPosting,
       isPaymentMessageConfirmDialogOpen: tabState.isPaymentMessageConfirmDialogOpen
-        && !tabState.aiMessageEditorModal,
+        && !tabState.aiMessageEditorModal
+        && !tabState.pollModal
+        && !tabState.sharePreparedMessageModal,
       starsBalance,
       isStarsBalanceModalOpen,
       shouldDisplayGiftsButton: userFullInfo?.shouldDisplayGiftsButton,
@@ -2891,7 +2849,6 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       isAppConfigLoaded,
       insertingPeerIdMention,
-      pollMaxAnswers: appConfig.pollMaxAnswers,
       shouldOpenMessageMediaEditor,
       replyToMessage,
     };

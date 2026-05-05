@@ -250,6 +250,7 @@
     "messages.deleteTopicHistory",
     "messages.toggleTodoCompleted",
     "messages.appendTodoList",
+    "messages.addPollAnswer",
     "messages.summarizeText",
     "messages.editChatCreator",
     "messages.getFutureChatCreatorAfterLeave",

@@ -130,6 +130,8 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
   starsSuggestedPostFutureMin: 300,
   starsSuggestedPostFutureMax: 2678400,
   starsSuggestedPostCommissionPermille: 850,
+  pollMaxAnswers: 12,
+  pollClosePeriodMax: 2628000,
   noForwardsRequestExpirePeriod: 86400,
   tonSuggestedPostCommissionPermille: 850,
   todoItemLengthMax: 64,

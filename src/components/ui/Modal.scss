@@ -4,6 +4,10 @@
     z-index: var(--z-modal);
     color: var(--color-text);
 
+    &[open] {
+      display: block;
+    }
+
     &.confirm,
     &.pin {
       z-index: var(--z-modal-confirm);
@@ -293,6 +297,25 @@
       z-index: 3;
       top: 0.875rem;
       right: 0.875rem;
+    }
+  }
+
+  dialog.Modal {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    color: var(--color-text);
+
+    background: transparent;
+    outline: none;
+
+    &::backdrop {
+      background: transparent;
     }
   }
 }

@@ -126,9 +126,16 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       break;
     }
 
-    case 'requestPoll':
-      actions.openPollModal({ isQuiz: button.isQuiz, tabId });
+    case 'requestPoll': {
+      actions.openPollModal({
+        chatId,
+        threadId,
+        messageListType: 'thread',
+        isQuiz: button.isQuiz,
+        tabId,
+      });
       break;
+    }
 
     case 'requestPhone': {
       const user = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;

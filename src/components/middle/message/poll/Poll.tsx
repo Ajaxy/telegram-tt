@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from '../../../../lib/teact/teact';
-import { getActions, getGlobal } from '../../../../global';
+import { getActions, getGlobal, getPromiseActions, withGlobal } from '../../../../global';
 
 import type {
   ApiFormattedText,
@@ -34,6 +34,7 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 import AvatarList from '../../../common/AvatarList';
 import CompactMapPreview from '../../../common/CompactMapPreview';
 import Document from '../../../common/Document';
+import Icon from '../../../common/icons/Icon';
 import PeerColorWrapper from '../../../common/PeerColorWrapper';
 import StickerView from '../../../common/StickerView';
 import Button from '../../../ui/Button';
@@ -44,6 +45,7 @@ import Video from '../Video';
 import PollOption from './PollOption';
 
 import styles from './Poll.module.scss';
+import optionStyles from './PollOption.module.scss';
 
 type OwnProps = {
   chatId: string;
@@ -56,11 +58,16 @@ type OwnProps = {
   observeIntersectionForPlaying?: ObserveFn;
 };
 
+type StateProps = {
+  pollMaxAnswers: number;
+};
+
 const ATTACHED_MAP_WIDTH = 350;
 const ATTACHED_MAP_HEIGHT = 200;
 const ATTACHED_MAP_ZOOM = 15;
 const STICKER_PREVIEW_SIZE = 96;
 const VOTE_TIMEOUT = 5000;
+const MAX_OPTION_LENGTH = 100;
 
 const Poll = ({
   chatId,
@@ -71,7 +78,8 @@ const Poll = ({
   isInScheduled,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
-}: OwnProps) => {
+  pollMaxAnswers,
+}: OwnProps & StateProps) => {
   const {
     openMapModal,
     openMediaViewer,
@@ -80,6 +88,7 @@ const Poll = ({
     sendPollVote,
     loadMessage,
   } = getActions();
+  const { appendPollAnswer } = getPromiseActions();
   const lang = useLang();
   const serverTime = getServerTime();
 
@@ -88,6 +97,8 @@ const Poll = ({
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
   const [isSendingVote, setIsSendingVote] = useState(false);
+  const [isAppendingAnswer, setIsAppendingAnswer] = useState(false);
+  const [newAnswerText, setNewAnswerText] = useState('');
   const [isViewingAuthorResults, setIsViewingAuthorResults] = useState(false);
   const [answerOrder] = useState<string[]>(() => (
     buildAnswerOrder(answers, summary.shouldShuffleAnswers)
@@ -118,6 +129,11 @@ const Poll = ({
     (!canVote && !areResultsHiddenForCurrentUser) || isViewingAuthorResults
   );
   const canShowResultsPanel = hasChosenAnswer && summary.isPublic && hasResultData && !areResultsHiddenForCurrentUser;
+  const canShowExplanation = hasExplanation && hasChosenAnswer;
+  const canAppendAnswer = Boolean(
+    summary.canAddAnswers && !summary.isClosed && !isInScheduled && answers.length < pollMaxAnswers,
+  );
+  const trimmedNewAnswerText = newAnswerText.trim().substring(0, MAX_OPTION_LENGTH);
 
   useEffect(() => {
     if (!canVote) {
@@ -162,10 +178,19 @@ const Poll = ({
   }, [canToggleAuthorResults]);
 
   useEffect(() => {
-    if (!hasExplanation) {
+    if (!canShowExplanation) {
       setIsExplanationOpen(false);
     }
-  }, [hasExplanation]);
+  }, [canShowExplanation]);
+
+  useEffect(() => {
+    if (canAppendAnswer) {
+      return;
+    }
+
+    setNewAnswerText('');
+    setIsAppendingAnswer(false);
+  }, [canAppendAnswer]);
 
   const answersByOption = useMemo(() => buildCollectionByKey(answers, 'option'), [answers]);
 
@@ -259,6 +284,37 @@ const Poll = ({
     }
 
     submitVote(selectedOptions);
+  });
+
+  const handleNewAnswerChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewAnswerText(e.currentTarget.value);
+  });
+
+  const handleAppendAnswer = useLastCallback(async () => {
+    if (!canAppendAnswer || !trimmedNewAnswerText || isAppendingAnswer) {
+      return;
+    }
+
+    setIsAppendingAnswer(true);
+    try {
+      await appendPollAnswer({
+        chatId,
+        messageId,
+        text: trimmedNewAnswerText,
+      });
+      setNewAnswerText('');
+    } finally {
+      setIsAppendingAnswer(false);
+    }
+  });
+
+  const handleNewAnswerKeyDown = useLastCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') {
+      return;
+    }
+
+    e.preventDefault();
+    handleAppendAnswer();
   });
 
   const handleOpenPreview = useLastCallback((previewIndex: number) => {
@@ -372,6 +428,23 @@ const Poll = ({
       </div>
     );
 
+    if (trimmedNewAnswerText) {
+      return (
+        <Button
+          className={styles.footerButton}
+          disabled={isAppendingAnswer || !canAppendAnswer}
+          noForcedUpperCase
+          isText
+          inline
+          size="smaller"
+          color="adaptive"
+          onClick={handleAppendAnswer}
+        >
+          {renderFooterBody(lang('Save'))}
+        </Button>
+      );
+    }
+
     if (canVote && isMultipleChoice && selectedOptions.length) {
       return (
         <Button
@@ -479,12 +552,16 @@ const Poll = ({
     canShowResultsPanel,
     canToggleAuthorResults,
     canVote,
+    canAppendAnswer,
+    handleAppendAnswer,
+    isAppendingAnswer,
     isMultipleChoice,
     isSendingVote,
     isViewingAuthorResults,
     lang,
     selectedOptions.length,
     summary.isQuiz,
+    trimmedNewAnswerText,
     footerSubtext,
     totalVoters,
   ]);
@@ -493,7 +570,7 @@ const Poll = ({
     <>
       {attachedMediaEl}
       <div className={styles.root} dir={lang.isRtl ? 'rtl' : undefined}>
-        {isExplanationOpen && hasExplanation && (
+        {isExplanationOpen && canShowExplanation && (
           <PeerColorWrapper className={styles.explanation} shouldReset>
             <div className={styles.explanationHeader}>
               <span className={styles.explanationTitle}>
@@ -531,7 +608,7 @@ const Poll = ({
           <div className={styles.question} dir="auto">
             {questionText}
           </div>
-          {hasExplanation && !isExplanationOpen && (
+          {canShowExplanation && !isExplanationOpen && (
             <div className={styles.explanationToggleButton}>
               <Button
                 round
@@ -595,6 +672,31 @@ const Poll = ({
               />
             );
           })}
+          {canAppendAnswer && (
+            <div
+              className={buildClassName(
+                optionStyles.root,
+                optionStyles.addAnswer,
+                hasOptionMedia && optionStyles.hasMediaColumn,
+              )}
+            >
+              <div className={optionStyles.selector}>
+                <Icon name="add" className={optionStyles.addAnswerIcon} />
+              </div>
+              <div className={buildClassName(optionStyles.answer, optionStyles.addAnswerContent)}>
+                <input
+                  className={optionStyles.addAnswerInput}
+                  value={newAnswerText}
+                  placeholder={lang('CreatePollAddOption')}
+                  maxLength={MAX_OPTION_LENGTH}
+                  dir="auto"
+                  disabled={isAppendingAnswer}
+                  onChange={handleNewAnswerChange}
+                  onKeyDown={handleNewAnswerKeyDown}
+                />
+              </div>
+            </div>
+          )}
         </div>
         {footerContent && (
           <div className={styles.footer}>
@@ -761,4 +863,8 @@ function onPreviewClick(onOpenPreview: (previewIndex: number) => void) {
   };
 }
 
-export default memo(Poll);
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
+  return {
+    pollMaxAnswers: global.appConfig.pollMaxAnswers,
+  };
+})(Poll));

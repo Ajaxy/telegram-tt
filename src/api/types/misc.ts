@@ -320,7 +320,8 @@ export interface ApiAppConfig {
   tonStargiftResaleCommissionPermille?: number;
   tonUsdRate?: number;
   tonTopupUrl: string;
-  pollMaxAnswers?: number;
+  pollMaxAnswers: number;
+  pollClosePeriodMax: number;
   todoItemsMax: number;
   todoTitleLengthMax: number;
   todoItemLengthMax: number;

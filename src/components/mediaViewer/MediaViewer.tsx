@@ -226,7 +226,10 @@ const MediaViewer = ({
   const prevOrigin = usePrevious(origin);
   const prevItem = usePrevious(currentItem);
   const prevBestImageData = usePrevious(bestImageData);
-  const textParts = message ? renderMessageText({ message, forcePlayback: true, isForMediaViewer: true }) : undefined;
+  const textMessage = currentItem?.type === 'message' ? currentItem.message : undefined;
+  const textParts = textMessage
+    ? renderMessageText({ message: textMessage, forcePlayback: true, isForMediaViewer: true })
+    : undefined;
   const hasFooter = Boolean(textParts);
 
   useEffectWithPrevDeps(([prevIsOpen, prevIsHidden]) => {
