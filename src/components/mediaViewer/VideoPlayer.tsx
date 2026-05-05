@@ -22,7 +22,7 @@ import usePictureInPicture from '../../hooks/usePictureInPicture';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useFullscreen from '../../hooks/window/useFullscreen';
-import useControlsSignal from './hooks/useControlsSignal';
+import useControlsSignal, { registerPlayerElement } from './hooks/useControlsSignal';
 import useVideoWaitingSignal from './hooks/useVideoWaitingSignal';
 
 import Button from '../ui/Button';
@@ -113,7 +113,7 @@ const VideoPlayer: FC<OwnProps> = ({
 
   const [, toggleControls, lockControls] = useControlsSignal();
   const [getIsSeeking, setIsSeeking] = useSignal(false);
-  const lastMousePositionRef = useRef({ x: 0, y: 0 });
+  const lastMousePositionRef = useRef<{ x: number; y: number }>();
 
   useEffect(() => {
     const updateMousePosition = (e: MouseEvent | TouchEvent) => {
@@ -127,6 +127,11 @@ const VideoPlayer: FC<OwnProps> = ({
       window.removeEventListener('mousemove', updateMousePosition);
       window.removeEventListener('touchmove', updateMousePosition);
     };
+  }, []);
+
+  useEffect(() => {
+    registerPlayerElement(videoRef.current, () => lastMousePositionRef.current);
+    return () => registerPlayerElement(undefined);
   }, []);
 
   const checkMousePositionAndToggleControls = useLastCallback((clientX: number, clientY: number) => {
@@ -150,7 +155,7 @@ const VideoPlayer: FC<OwnProps> = ({
 
   const handleSeekingChange = useLastCallback((isSeeking: boolean) => {
     setIsSeeking(isSeeking);
-    if (!isSeeking) {
+    if (!isSeeking && lastMousePositionRef.current) {
       const { x, y } = lastMousePositionRef.current;
       checkMousePositionAndToggleControls(x, y);
     }
@@ -250,7 +255,7 @@ const VideoPlayer: FC<OwnProps> = ({
     if (isLooped) return;
     setCurrentTime(0);
     setIsPlaying(false);
-    toggleControls(true);
+    toggleControls(true, true);
   });
 
   const handleFullscreenChange = useLastCallback(() => {
