@@ -1516,6 +1516,7 @@ addActionHandler('markChatMessagesRead', async (global, actions, payload): Promi
 
     if (!result?.topics?.length) return;
 
+    const topicIdsToMarkRead: number[] = [];
     result.topics.forEach((topicWithState) => {
       global = updateTopicWithState(global, id, topicWithState);
 
@@ -1530,7 +1531,13 @@ addActionHandler('markChatMessagesRead', async (global, actions, payload): Promi
         return;
       }
 
-      actions.markTopicRead({ chatId: id, topicId: topicWithState.topic.id });
+      topicIdsToMarkRead.push(topicWithState.topic.id);
+    });
+
+    setGlobal(global);
+
+    topicIdsToMarkRead.forEach((topicId) => {
+      actions.markTopicRead({ chatId: id, topicId });
     });
 
     lastTopic = result.topics[result.topics.length - 1].topic;
@@ -1538,6 +1545,10 @@ addActionHandler('markChatMessagesRead', async (global, actions, payload): Promi
     if (result.count <= processedCount) {
       hasMoreTopics = false;
     }
+  }
+
+  if (chatReadState?.hasUnreadMark) {
+    actions.markChatRead({ id });
   }
 });
 

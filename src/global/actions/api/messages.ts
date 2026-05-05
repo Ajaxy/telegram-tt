@@ -1314,9 +1314,11 @@ addActionHandler('markMessageListRead', (global, actions, payload): ActionReturn
     };
   }
 
+  const threadReadState = selectThreadReadState(global, chatId, threadId);
+  global = replaceThreadReadStateParam(global, chatId, threadId, 'hasUnreadMark', undefined);
+
   const viewportIds = selectViewportIds(global, chatId, threadId, tabId);
   const minId = selectFirstUnreadId(global, chatId, threadId);
-  const threadReadState = selectThreadReadState(global, chatId, threadId);
 
   if (!viewportIds || !minId || !threadReadState?.unreadCount) {
     return global;
