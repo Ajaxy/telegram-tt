@@ -1797,6 +1797,7 @@ export interface LangPair {
   'TitleAgeCheckFailed': undefined;
   'TitleAgeCheckSuccess': undefined;
   'ButtonAgeVerification': undefined;
+  'MiniAppUnavailableError': undefined;
   'GiftRibbonPremium': undefined;
   'PremiumGiftHeader': undefined;
   'PriceInStars': undefined;

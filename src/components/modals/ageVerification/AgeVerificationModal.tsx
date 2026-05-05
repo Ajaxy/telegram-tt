@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -20,27 +19,19 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  verifyAgeBotUsername?: string;
   verifyAgeMin: number;
 };
 
-const AgeVerificationModal: FC<OwnProps & StateProps> = ({
+const AgeVerificationModal = ({
   modal,
-  verifyAgeBotUsername,
   verifyAgeMin,
-}) => {
-  const { closeAgeVerificationModal, openChatByUsername } = getActions();
+}: OwnProps & StateProps) => {
+  const { closeAgeVerificationModal, requestAgeVerification } = getActions();
   const lang = useLang();
   const isOpen = Boolean(modal);
 
   const handleVerifyAge = useLastCallback(() => {
-    if (verifyAgeBotUsername) {
-      openChatByUsername({
-        shouldStartMainApp: true,
-        username: verifyAgeBotUsername,
-      });
-    }
-    closeAgeVerificationModal();
+    requestAgeVerification();
   });
 
   const handleClose = useLastCallback(() => {
@@ -86,11 +77,9 @@ const AgeVerificationModal: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal((global): Complete<StateProps> => {
   const appConfig = global.appConfig;
-  const verifyAgeBotUsername = appConfig.verifyAgeBotUsername;
   const verifyAgeMin = appConfig.verifyAgeMin || VERIFY_AGE_MIN_DEFAULT;
 
   return {
-    verifyAgeBotUsername,
     verifyAgeMin,
   };
 })(AgeVerificationModal));

@@ -703,6 +703,42 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
   }
 });
 
+addActionHandler('requestAgeVerification', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const { verifyAgeBotUsername } = global.appConfig;
+
+  if (!verifyAgeBotUsername) {
+    actions.showNotification({
+      message: { key: 'MiniAppUnavailableError' },
+      tabId,
+    });
+    return;
+  }
+
+  const chat = await fetchChatByUsername(global, verifyAgeBotUsername);
+  global = getGlobal();
+  const bot = chat && selectUser(global, chat.id);
+
+  if (!bot?.hasMainMiniApp) {
+    actions.showNotification({
+      message: { key: 'MiniAppUnavailableError' },
+      tabId,
+    });
+    return;
+  }
+
+  const theme = extractCurrentThemeParams();
+  actions.requestMainWebView({
+    botId: bot.id,
+    peerId: bot.id,
+    theme,
+    shouldMarkBotTrusted: true,
+    tabId,
+  });
+
+  actions.closeAgeVerificationModal({ tabId });
+});
+
 addActionHandler('requestMainWebView', async (global, actions, payload): Promise<void> => {
   const {
     botId, peerId, theme, startParam, mode, shouldMarkBotTrusted,
@@ -717,7 +753,14 @@ addActionHandler('requestMainWebView', async (global, actions, payload): Promise
   if (checkIfOpenOrActivate(global, botId, tabId)) return;
 
   const bot = selectUser(global, botId);
-  if (!bot) return;
+  if (!bot) {
+    actions.showNotification({
+      message: { key: 'MiniAppUnavailableError' },
+      tabId,
+    });
+    return;
+  }
+
   const peer = selectPeer(global, peerId);
   if (!peer) return;
 
@@ -748,6 +791,10 @@ addActionHandler('requestMainWebView', async (global, actions, payload): Promise
     mode,
   });
   if (!result) {
+    actions.showNotification({
+      message: { key: 'MiniAppUnavailableError' },
+      tabId,
+    });
     return;
   }
 

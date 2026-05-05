@@ -1149,6 +1149,7 @@ export interface ActionPayloads {
   closeDeleteAccountModal: WithTabId | undefined;
   openAgeVerificationModal: WithTabId | undefined;
   closeAgeVerificationModal: WithTabId | undefined;
+  requestAgeVerification: WithTabId | undefined;
   setAccountTTL: {
     days: number;
   } & WithTabId | undefined;

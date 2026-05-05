@@ -2446,6 +2446,7 @@
 "TitleAgeCheckFailed" = "Age Check Failed";
 "TitleAgeCheckSuccess" = "Age Check Success";
 "ButtonAgeVerification" = "Verify My Age";
+"MiniAppUnavailableError" = "Mini app is not available";
 "GiftRibbonPremium" = "premium";
 "NotificationGiftsLimit2_one" = "You already sent **one** of these gifts, which is the limit.";
 "NotificationGiftsLimit2_other" = "You already sent **{count}** of these gifts, which is the limit.";
