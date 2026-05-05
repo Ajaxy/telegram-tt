@@ -18,6 +18,7 @@ import useSelector, { useShallowSelector } from '../../../hooks/data/useSelector
 import useDerivedState from '../../../hooks/useDerivedState';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useShowTransitionSwap from '../../../hooks/useShowTransitionSwap';
 
 import AnimatedCounter from '../../common/AnimatedCounter';
 import Icon from '../../common/icons/Icon';
@@ -153,6 +154,12 @@ const ChatBadge = ({
     || isTopicUnopened || hasMiniApp,
   );
 
+  const contentCategory = (isUnread || unreadMentionsCount || unreadReactionsCount
+    || unreadPollVotesCount || isTopicUnopened)
+    ? 'active'
+    : (hasMiniApp ? 'miniapp' : (isPinned ? 'pinned' : 'none'));
+  const effectiveIsOpen = useShowTransitionSwap(isShown, contentCategory);
+
   const handleOpenApp = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
 
@@ -263,7 +270,7 @@ const ChatBadge = ({
         isOnAvatar && styles.onAvatar,
         transitionClassName,
       )}
-      isOpen={isShown}
+      isOpen={effectiveIsOpen}
     >
       {renderContent()}
     </ShowTransition>

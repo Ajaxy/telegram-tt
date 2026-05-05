@@ -20,6 +20,8 @@
 }
 
 .transition {
+  transform-origin: center;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -28,7 +30,7 @@
 
   opacity: 1;
 
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.15s ease-out, opacity 0.15s ease-out;
 
   &:not(:global(.open)) {
     transform: scale(0);
@@ -37,12 +39,6 @@
 
   &:not(:global(.shown)) {
     display: none;
-  }
-
-  &:global(.closing) {
-    transition:
-      transform 0.2s ease-out,
-      opacity 0.2s ease-out;
   }
 }
 
