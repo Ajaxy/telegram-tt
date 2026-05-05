@@ -121,7 +121,7 @@ const FullNameTitle = ({
 
     return undefined;
   }, [customPeer, isSavedDialog, isSavedMessages, oldLang, realPeer]);
-  const botVerificationIconId = realPeer?.botVerificationIconId;
+  const botVerificationIconId = !isSavedMessages && !isSavedDialog ? realPeer?.botVerificationIconId : undefined;
 
   return (
     <div
