@@ -5,7 +5,7 @@ import type {
   GroupCallParticipant,
   VideoRotation,
   VideoState,
-} from '../../lib/secret-sauce';
+} from '../../lib/vibecalls';
 import type { ThreadId, ThreadReadState, TranslationTone } from '../../types';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { ApiBotCommand, ApiBotMenuButton } from './bots';

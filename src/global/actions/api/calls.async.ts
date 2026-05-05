@@ -1,6 +1,6 @@
 import type { ActionReturnType } from '../../types';
 
-import { GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
+import { DEBUG_CALLS, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
 import {
   isStreamEnabled,
   joinGroupCall,
@@ -8,7 +8,8 @@ import {
   setVolume, startSharingScreen,
   stopPhoneCall,
   toggleStream,
-} from '../../../lib/secret-sauce';
+} from '../../../lib/vibecalls';
+import { logDebugMessage } from '../../../util/debugConsole';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
@@ -17,7 +18,9 @@ import {
   updateActiveGroupCall,
 } from '../../reducers/calls';
 import { updateTabState } from '../../reducers/tabs';
-import { selectChat, selectTabState, selectUser } from '../../selectors';
+import {
+  selectChat, selectPeer, selectTabState, selectUser,
+} from '../../selectors';
 import {
   selectActiveGroupCall, selectPhoneCallUser,
 } from '../../selectors/calls';
@@ -47,8 +50,11 @@ addActionHandler('leaveGroupCall', async (global, actions, payload): Promise<voi
   };
   setGlobal(global);
 
+  const localParticipantId = groupCall.localJoinAsId ?? global.currentUserId;
+  const source = groupCall.localSource
+    ?? (localParticipantId ? groupCall.participants[localParticipantId]?.source : undefined);
   await callApi('leaveGroupCall', {
-    call: groupCall, isPageUnload,
+    call: groupCall, isPageUnload, source,
   });
   await callApi('abortRequestGroup', 'call');
 
@@ -204,18 +210,30 @@ addActionHandler('connectToActiveGroupCall', async (global, actions, payload): P
     return;
   }
 
-  const {
-    currentUserId,
-  } = global;
+  const { currentUserId } = global;
 
   if (!currentUserId) return;
 
-  const params = await joinGroupCall(currentUserId, audioContext, audioElement, actions.apiUpdate);
+  const localParticipantId = groupCall.localJoinAsId ?? currentUserId;
+  const joinAs = groupCall.localJoinAsId ? selectPeer(global, groupCall.localJoinAsId) : undefined;
+  if (groupCall.localJoinAsId && !joinAs) return;
+
+  const params = await joinGroupCall(localParticipantId, audioContext, audioElement, actions.apiUpdate);
+  if (!params) {
+    actions.showNotification({
+      // TODO[lang] Localize error message
+      message: 'Failed to join voice chat',
+      tabId,
+    });
+    actions.leaveGroupCall({ tabId });
+    return;
+  }
 
   const result = await callApi('joinGroupCall', {
     call: groupCall,
     params,
     inviteHash: groupCall.inviteHash,
+    joinAs,
   });
 
   global = getGlobal();
@@ -228,6 +246,11 @@ addActionHandler('connectToActiveGroupCall', async (global, actions, payload): P
     });
     actions.leaveGroupCall({ tabId });
     return;
+  }
+
+  if (params.ssrc !== undefined) {
+    global = updateActiveGroupCall(global, { localSource: params.ssrc });
+    setGlobal(global);
   }
 
   actions.loadMoreGroupCallParticipants();
@@ -252,7 +275,10 @@ addActionHandler('connectToActivePhoneCall', async (global, actions): Promise<vo
 
   if (!dhConfig) return;
 
-  await callApi('createPhoneCallState', [true]);
+  await callApi('createPhoneCallState', {
+    isOutgoing: true,
+    shouldUseSctp: !phoneCall.customParameters?.network_signaling_nosctp,
+  });
 
   const gAHash = await callApi('requestPhoneCall', [dhConfig]);
 
@@ -271,7 +297,10 @@ addActionHandler('acceptCall', async (global): Promise<void> => {
   const dhConfig = await callApi('getDhConfig');
   if (!dhConfig) return;
 
-  await callApi('createPhoneCallState', [false]);
+  await callApi('createPhoneCallState', {
+    isOutgoing: false,
+    shouldUseSctp: !phoneCall.customParameters?.network_signaling_nosctp,
+  });
 
   const gB = await callApi('acceptPhoneCall', [dhConfig]);
   await callApi('acceptCall', { call: phoneCall, gB });
@@ -283,16 +312,41 @@ addActionHandler('sendSignalingData', (global, actions, payload): ActionReturnTy
     return;
   }
 
-  const data = JSON.stringify(payload);
-
   (async () => {
-    const encodedData = await callApi('encodePhoneCallData', [data]);
+    try {
+      const encodedData = await callApi('encodePhoneCallData', [payload]);
 
-    if (!encodedData) return;
+      if (!encodedData) {
+        return;
+      }
 
-    callApi('sendSignalingData', { data: encodedData, call: phoneCall });
+      await callApi('sendSignalingData', { data: encodedData, call: phoneCall });
+      const pendingPackets = await callApi('drainPhoneCallSignalingData');
+      if (!pendingPackets) return;
+
+      for (const data of pendingPackets) {
+        await callApi('sendSignalingData', { data, call: phoneCall });
+      }
+    } catch (error) {
+      logPhoneCallDebug('Failed to send phone call signaling data', {
+        error: summarizeError(error),
+      });
+    }
   })();
 });
+
+function logPhoneCallDebug(message: string, data: Record<string, unknown>) {
+  if (!DEBUG_CALLS) return;
+
+  logDebugMessage('warn', `[PhoneCall] ${message}`, data);
+}
+
+function summarizeError(error: unknown) {
+  return error instanceof Error ? {
+    name: error.name,
+    message: error.message,
+  } : String(error);
+}
 
 addActionHandler('closeCallRatingModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};

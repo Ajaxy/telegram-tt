@@ -54,7 +54,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       const { groupCallId, participants, nextOffset } = update;
       const { currentUserId } = global;
 
-      // `secret-sauce` should disconnect if the participant is us but from another device
+      // `vibecalls` should disconnect if the participant is us but from another device
       global = getGlobal();
       participants.forEach((participant) => {
         if (participant.id) {

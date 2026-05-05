@@ -1,7 +1,8 @@
 import type {
   Candidate, GroupCallTransport, PayloadType, RTPExtension, SsrcGroup,
-} from './types';
-import { fromTelegramSource } from './utils';
+} from '../types';
+
+import { fromTelegramSource } from '../utils';
 
 export type Conference = {
   sessionId: number;
@@ -77,7 +78,9 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
     add(`a=ice-pwd:${pwd}`);
     fingerprints.forEach((fingerprint) => {
       add(`a=fingerprint:${fingerprint.hash} ${fingerprint.fingerprint}`);
-      add(`a=setup:${isP2p ? (fingerprint.setup) : 'passive'}`);
+      const setup = isAnswer && fingerprint.setup !== 'active' && fingerprint.setup !== 'passive'
+        ? 'passive' : fingerprint.setup || 'passive';
+      add(`a=setup:${setup}`);
     });
 
     candidates.forEach(addCandidate);
@@ -93,7 +96,7 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
 
     if (parameters) {
       const parametersString = Object.keys(parameters).map((key) => {
-        return `${key}=${parameters![key]};`;
+        return `${key}=${parameters[key]};`;
       }).join(' ');
 
       add(`a=fmtp:${id} ${parametersString}`);
@@ -108,7 +111,7 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
     const payloadTypes = entry.isVideo ? videoPayloadTypes : audioPayloadTypes;
 
     const type = entry.isVideo ? 'video' : 'audio';
-    add(`m=${type} ${entry.isMain ? 1 : 0} RTP/SAVPF ${payloadTypes.map((l) => l.id).join(' ')}`);
+    add(`m=${type} ${entry.isRemoved ? 0 : 1} RTP/SAVPF ${payloadTypes.map((l) => l.id).join(' ')}`);
     add('c=IN IP4 0.0.0.0');
     add('b=AS:1300'); // 1300000 / 1000
     add(`a=mid:${entry.mid}`);
@@ -162,9 +165,9 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
   };
 
   if (!isP2p) {
-    ssrcs.filter((ssrc) => ssrc.mid === '0' || ssrc.mid === '1').map(addSsrcEntry);
+    ssrcs.filter((ssrc) => ssrc.mid === '0' || ssrc.mid === '1').forEach(addSsrcEntry);
   } else {
-    ssrcs.filter(addSsrcEntry);
+    ssrcs.forEach(addSsrcEntry);
   }
 
   if (!isPresentation) {
@@ -178,7 +181,7 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
   }
 
   if (!isP2p) {
-    ssrcs.filter((ssrc) => ssrc.mid !== '0' && ssrc.mid !== '1').map(addSsrcEntry);
+    ssrcs.filter((ssrc) => ssrc.mid !== '0' && ssrc.mid !== '1').forEach(addSsrcEntry);
   }
 
   return `${lines.join('\n')}\n`;

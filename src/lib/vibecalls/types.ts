@@ -1,4 +1,6 @@
-import { P2PPayloadType } from './p2pMessage';
+import type { P2PPayloadType } from './phone/signalingMessages';
+
+export type StreamType = 'audio' | 'video' | 'presentation';
 
 export interface GroupCallParticipant {
   isSelf?: boolean;
@@ -111,7 +113,7 @@ export interface GroupCallTransport {
 
 export interface GroupCallConnectionData {
   transport: GroupCallTransport;
-  audio: {
+  audio?: {
     'payload-types': PayloadType[];
     'rtp-hdrexts': RTPExtension[];
   };

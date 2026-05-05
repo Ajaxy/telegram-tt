@@ -1,17 +1,23 @@
-import type { P2PPayloadType } from './p2pMessage';
+import type { P2PPayloadType } from './phone/signalingMessages';
 import type { PayloadType } from './types';
+
+export {
+  sanitizePrimitiveRecord,
+} from '../../util/primitives/primitiveRecord';
+export type {
+  PrimitiveRecord,
+  PrimitiveRecordValue,
+} from '../../util/primitives/primitiveRecord';
 
 /// NOTE: telegram returns sign source, while webrtc uses unsign source internally
 /// unsign => sign
 export function toTelegramSource(source: number) {
-  // eslint-disable-next-line no-bitwise
   return source << 0;
 }
 
 /// NOTE: telegram returns sign source, while webrtc uses unsign source internally
 /// sign => unsign
 export function fromTelegramSource(source: number) {
-  // eslint-disable-next-line no-bitwise
   return source >>> 0;
 }
 
@@ -64,5 +70,4 @@ export const THRESHOLD = 0.1;
 
 export const IS_SCREENSHARE_SUPPORTED = 'getDisplayMedia' in (navigator?.mediaDevices || {});
 export const IS_ECHO_CANCELLATION_SUPPORTED = navigator?.mediaDevices?.getSupportedConstraints().echoCancellation;
-// @ts-ignore
 export const IS_NOISE_SUPPRESSION_SUPPORTED = navigator?.mediaDevices?.getSupportedConstraints().noiseSuppression;

@@ -1,9 +1,10 @@
-import { AuthKey } from '../../../lib/gramjs/crypto/AuthKey';
-import { Logger } from '../../../lib/gramjs/extensions';
+import { gunzipSync, gzipSync } from 'fflate';
+import { CTR } from '../../../lib/gramjs/crypto/CTR';
 import {
-  convertToLittle, getByteArray, modExp, readBigIntFromBuffer, sha1, sha256,
+  getByteArray, modExp, readBigIntFromBuffer, readBufferFromBigInt, sha1, sha256,
 } from '../../../lib/gramjs/Helpers';
-import MTProtoState from '../../../lib/gramjs/network/MTProtoState';
+
+import { isSctpPacket, SctpSignaling } from './sctpSignaling';
 
 type DhConfig = {
   p: number[];
@@ -14,9 +15,15 @@ type DhConfig = {
 let currentPhoneCallState: PhoneCallState | undefined;
 
 class PhoneCallState {
-  private state?: MTProtoState;
+  private authKey?: Buffer;
+
+  private sctp = new SctpSignaling();
 
   private seq = 0;
+
+  private maxInboundSeq = 0;
+
+  private inboundSeqs = new Set<number>();
 
   private gA?: bigint;
 
@@ -30,12 +37,25 @@ class PhoneCallState {
 
   private resolveState?: VoidFunction;
 
+  private isDestroyed = false;
+
   constructor(
     private isOutgoing: boolean,
+    private shouldUseSctp = true,
   ) {
     this.waitForState = new Promise<void>((resolve) => {
       this.resolveState = resolve;
     });
+  }
+
+  destroy() {
+    this.isDestroyed = true;
+    this.resolveState?.();
+    this.resolveState = undefined;
+  }
+
+  setShouldUseSctp(shouldUseSctp: boolean) {
+    this.shouldUseSctp = shouldUseSctp;
   }
 
   async requestCall({ p, g, random }: DhConfig) {
@@ -80,7 +100,7 @@ class PhoneCallState {
       this.p,
     );
     const fingerprint: Buffer = await sha1(getByteArray(authKey));
-    const keyFingerprint = readBigIntFromBuffer(fingerprint.slice(-8).reverse(), false);
+    const keyFingerprint = readBigIntFromBuffer(fingerprint.slice(-8), true, true);
 
     const emojis = await generateEmojiFingerprint(
       getByteArray(authKey),
@@ -89,35 +109,142 @@ class PhoneCallState {
       emojiOffsets,
     );
 
-    const key = new AuthKey();
-    await key.setKey(getByteArray(authKey));
-    this.state = new MTProtoState(key, new Logger(), true, this.isOutgoing);
-    this.resolveState!();
+    this.authKey = readBufferFromBigInt(authKey, 256, false);
+    this.resolveState?.();
+    this.resolveState = undefined;
 
     return { gA: Array.from(getByteArray(this.gA!)), keyFingerprint: keyFingerprint.toString(), emojis };
   }
 
-  async encode(data: string) {
-    if (!this.state) return undefined;
+  private async calcKey(msgKey: Buffer, isClient: boolean) {
+    if (!this.authKey) {
+      throw new Error('Auth key unset');
+    }
 
-    const seqArray = new Uint32Array(1);
-    seqArray[0] = this.seq++;
-    const encodedData = await this.state.encryptMessageData(
-      Buffer.concat([convertToLittle(seqArray), Buffer.from(data)]),
-    );
-    return Array.from(encodedData);
+    const x = 128 + (this.isOutgoing !== isClient ? 8 : 0);
+    const [sha256a, sha256b] = await Promise.all([
+      sha256(Buffer.concat([msgKey, this.authKey.slice(x, x + 36)])),
+      sha256(Buffer.concat([this.authKey.slice(x + 40, x + 76), msgKey])),
+    ]);
+
+    return {
+      key: Buffer.concat([sha256a.slice(0, 8), sha256b.slice(8, 24), sha256a.slice(24, 32)]),
+      iv: Buffer.concat([sha256b.slice(0, 4), sha256a.slice(8, 16), sha256b.slice(24, 28)]),
+    };
+  }
+
+  async encode(data: unknown) {
+    if (!this.authKey) return undefined;
+
+    const message = Buffer.from(gzipSync(Buffer.from(JSON.stringify(data))));
+    const packet = Buffer.alloc(4 + message.length);
+    packet.writeUInt32BE(++this.seq, 0);
+    message.copy(packet, 4);
+
+    const x = 128 + (this.isOutgoing ? 0 : 8);
+    const msgKeyLarge = await sha256(Buffer.concat([this.authKey.slice(88 + x, 88 + x + 32), packet]));
+    const msgKey = msgKeyLarge.slice(8, 24);
+    const { key, iv } = await this.calcKey(msgKey, true);
+    const encrypted = new CTR(key, iv).encrypt(packet);
+    const body = Buffer.concat([msgKey, encrypted]);
+
+    return this.shouldUseSctp ? this.sctp.wrapPayload(body) : Array.from(body);
   }
 
   async decode(data: number[]): Promise<any> {
-    if (!this.state) {
-      return this.waitForState.then(() => {
-        return this.decode(data);
-      });
+    if (this.isDestroyed) {
+      return undefined;
     }
 
-    const message = await this.state.decryptMessageData(Buffer.from(data)) as Buffer;
+    if (!this.authKey) {
+      await this.waitForState;
+      if (this.isDestroyed || !this.authKey) {
+        return undefined;
+      }
+      return this.decode(data);
+    }
 
-    return JSON.parse(message.toString());
+    const incoming = Buffer.from(data);
+    const payloads = isSctpPacket(incoming) ? this.sctp.receive(incoming) : [];
+    const bodies = payloads.length ? payloads : [incoming];
+    const messages = [];
+    for (const body of bodies) {
+      const message = await this.decodeBody(body);
+      if (message) {
+        messages.push(message);
+      }
+    }
+
+    if (messages.length > 1) {
+      return messages;
+    }
+
+    return messages[0];
+  }
+
+  private async decodeBody(body: Buffer): Promise<any> {
+    if (body.length < 21) {
+      return undefined;
+    }
+    const authKey = this.authKey;
+    if (!authKey) {
+      return undefined;
+    }
+
+    const msgKey = body.slice(0, 16);
+    const encryptedData = body.slice(16);
+    const { key, iv } = await this.calcKey(msgKey, false);
+    const decrypted = new CTR(key, iv).decrypt(encryptedData);
+
+    const x = 128 + (this.isOutgoing ? 8 : 0);
+    const msgKeyLarge = await sha256(Buffer.concat([authKey.slice(88 + x, 88 + x + 32), decrypted]));
+    if (!msgKey.equals(msgKeyLarge.slice(8, 24))) {
+      return undefined;
+    }
+
+    if (decrypted.length < 4) {
+      return undefined;
+    }
+
+    const inboundSeq = decrypted.readUInt32BE(0);
+    if (!this.shouldAcceptInboundSeq(inboundSeq)) {
+      return undefined;
+    }
+
+    const message = decrypted.slice(4);
+    try {
+      const payload = message[0] === 0x1F && message[1] === 0x8B ? Buffer.from(gunzipSync(message)) : message;
+      this.markInboundSeq(inboundSeq);
+      return JSON.parse(payload.toString());
+    } catch {
+      return undefined;
+    }
+  }
+
+  private shouldAcceptInboundSeq(seq: number) {
+    return Boolean(seq && seq > this.maxInboundSeq - 64 && !this.inboundSeqs.has(seq));
+  }
+
+  private markInboundSeq(seq: number) {
+    this.inboundSeqs.add(seq);
+    if (seq > this.maxInboundSeq) {
+      this.maxInboundSeq = seq;
+    }
+
+    const minSeq = this.maxInboundSeq - 64;
+    this.inboundSeqs.forEach((item) => {
+      if (item <= minSeq) {
+        this.inboundSeqs.delete(item);
+      }
+    });
+  }
+
+  drainSignalingData() {
+    if (!this.shouldUseSctp) {
+      return [];
+    }
+
+    return this.sctp.drainPackets();
   }
 }
 
@@ -150,11 +277,22 @@ async function generateEmojiFingerprint(
   return result.join('');
 }
 
-export function createPhoneCallState(params: ConstructorParameters<typeof PhoneCallState>) {
-  currentPhoneCallState = new PhoneCallState(...params);
+export function createPhoneCallState({
+  isOutgoing,
+  shouldUseSctp = true,
+}: {
+  isOutgoing: boolean;
+  shouldUseSctp?: boolean;
+}) {
+  currentPhoneCallState = new PhoneCallState(isOutgoing, shouldUseSctp);
+}
+
+export function setPhoneCallSctpEnabled(shouldUseSctp: boolean) {
+  currentPhoneCallState?.setShouldUseSctp(shouldUseSctp);
 }
 
 export function destroyPhoneCallState() {
+  currentPhoneCallState?.destroy();
   currentPhoneCallState = undefined;
 }
 
@@ -177,6 +315,10 @@ export async function decodePhoneCallData(params: ParamsOf<'decode'>) {
   }
   const result = await currentPhoneCallState.decode(...params);
   return result;
+}
+
+export function drainPhoneCallSignalingData() {
+  return currentPhoneCallState?.drainSignalingData() || [];
 }
 
 export function confirmPhoneCall(params: ParamsOf<'confirmCall'>): ReturnTypeOf<'confirmCall'> {

@@ -436,9 +436,11 @@ export default class MTProtoSender {
     const encryptedData = await this._state.encryptMessageData(data);
 
     postMessage({
-      type: 'sendBeacon',
-      data: encryptedData,
-      url: this._fallbackConnection.href,
+      payloads: [{
+        type: 'sendBeacon',
+        data: encryptedData,
+        url: this._fallbackConnection.href,
+      }],
     });
   }
 

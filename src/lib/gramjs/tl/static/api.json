@@ -387,6 +387,7 @@
     "phone.toggleGroupCallStartSubscription",
     "phone.joinGroupCallPresentation",
     "phone.leaveGroupCallPresentation",
+    "phone.getCallConfig",
     "phone.requestCall",
     "phone.acceptCall",
     "phone.confirmCall",

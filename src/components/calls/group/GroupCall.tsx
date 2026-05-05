@@ -8,10 +8,10 @@ import { getActions, withGlobal } from '../../../global';
 
 import type {
   GroupCallConnectionState, GroupCallParticipant as TypeGroupCallParticipant,
-} from '../../../lib/secret-sauce';
+} from '../../../lib/vibecalls';
 import type { VideoParticipant } from './hooks/useGroupCallVideoLayout';
 
-import { IS_SCREENSHARE_SUPPORTED } from '../../../lib/secret-sauce';
+import { IS_SCREENSHARE_SUPPORTED } from '../../../lib/vibecalls';
 import { selectChat, selectTabState } from '../../../global/selectors';
 import {
   selectCanInviteToActiveGroupCall,

@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
+import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/vibecalls';
 
 import { selectActiveGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';

@@ -6,10 +6,29 @@ import type {
   GroupCallParticipant,
   GroupCallParticipantVideo,
   SsrcGroup,
-} from '../../../lib/secret-sauce';
+} from '../../../lib/vibecalls';
 import type { ApiGroupCall, ApiPhoneCall } from '../../types';
 
+import { CALL_PROTOCOL_LIBRARY_VERSIONS } from '../../../config';
+import { sanitizePrimitiveRecord } from '../../../util/primitives/primitiveRecord';
 import { getApiChatIdFromMtpPeer, isMtpPeerUser } from './peers';
+
+function parseCallParameters(data?: GramJs.TypeDataJSON) {
+  if (!data?.data) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(data.data);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return undefined;
+    }
+
+    return sanitizePrimitiveRecord(parsed as Record<string, unknown>);
+  } catch {
+    return undefined;
+  }
+}
 
 export function buildApiGroupCallParticipant(participant: GramJs.GroupCallParticipant): GroupCallParticipant {
   const {
@@ -134,7 +153,7 @@ export function buildPhoneCall(call: GramJs.TypePhoneCall): ApiPhoneCall {
 
   if (call instanceof GramJs.PhoneCall) {
     const {
-      p2pAllowed, gAOrB, keyFingerprint, connections, startDate,
+      p2pAllowed, gAOrB, keyFingerprint, connections, startDate, customParameters,
     } = call;
 
     phoneCall = {
@@ -145,6 +164,7 @@ export function buildPhoneCall(call: GramJs.TypePhoneCall): ApiPhoneCall {
       startDate,
       isP2pAllowed: Boolean(p2pAllowed),
       connections: connections.map(buildApiCallConnection).filter(Boolean),
+      customParameters: parseCallParameters(customParameters),
     };
   }
 
@@ -234,8 +254,9 @@ export function buildApiCallProtocol(protocol: GramJs.PhoneCallProtocol): ApiCal
 
 export function buildCallProtocol() {
   return new GramJs.PhoneCallProtocol({
-    libraryVersions: ['4.0.0'],
-    minLayer: 92,
+    libraryVersions: CALL_PROTOCOL_LIBRARY_VERSIONS,
+    // Hardcoded values according to the docs
+    minLayer: 65,
     maxLayer: 92,
     udpReflector: true,
     udpP2p: true,

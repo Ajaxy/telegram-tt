@@ -1,6 +1,6 @@
 import type {
   Fingerprint, RTCPFeedbackParam, RTPExtension,
-} from './types';
+} from '../types';
 
 export type VideoState = 'inactive' | 'active' | 'suspended';
 
@@ -8,15 +8,17 @@ export type VideoRotation = 0 | 90 | 180 | 270;
 
 export type MediaStateMessage = {
   '@type': 'MediaState';
-  isMuted: boolean;
+  muted: boolean;
   videoState: VideoState;
   videoRotation: VideoRotation;
   screencastState: VideoState;
-  isBatteryLow: boolean;
+  lowBattery: boolean;
 };
 
 type CandidatesMessage = {
   '@type': 'Candidates';
+  exchangeId?: string;
+  ufrag?: string;
   candidates: P2pCandidate[];
 };
 
@@ -24,17 +26,22 @@ export type InitialSetupMessage = {
   '@type': 'InitialSetup';
   ufrag: string;
   pwd: string;
+  renomination: boolean;
   fingerprints: Fingerprint[];
-  audio?: MediaContent;
-  video?: MediaContent;
-  screencast?: MediaContent;
 };
 
 export type MediaContent = {
+  type: 'audio' | 'video';
   ssrc: string;
-  ssrcGroups: P2pSsrcGroup[];
-  payloadTypes: P2PPayloadType[];
-  rtpExtensions: RTPExtension[];
+  ssrcGroups?: P2pSsrcGroup[];
+  payloadTypes?: P2PPayloadType[];
+  rtpExtensions?: RTPExtension[];
+};
+
+export type NegotiateChannelsMessage = {
+  '@type': 'NegotiateChannels';
+  exchangeId: string;
+  contents: MediaContent[];
 };
 
 export interface P2PPayloadType {
@@ -53,6 +60,9 @@ type P2pSsrcGroup = {
 
 type P2pCandidate = {
   sdpString: string;
+  sdpMid?: string;
+  sdpMLineIndex?: number;
+  usernameFragment?: string;
 };
 
-export type P2pMessage = CandidatesMessage | InitialSetupMessage | MediaStateMessage;
+export type P2pMessage = CandidatesMessage | InitialSetupMessage | MediaStateMessage | NegotiateChannelsMessage;

@@ -82,22 +82,10 @@
     display: block;
 
     width: 100%;
-    height: 0.75rem;
     margin-bottom: 0.5rem;
 
     -webkit-appearance: none;
     background: transparent;
-
-    &::-ms-track {
-      cursor: var(--custom-cursor, pointer);
-
-      width: 100%;
-      border-color: transparent;
-
-      color: transparent;
-
-      background: transparent;
-    }
 
     &::-webkit-slider-thumb {
       -webkit-appearance: none;

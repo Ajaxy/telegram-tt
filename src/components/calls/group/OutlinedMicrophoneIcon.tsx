@@ -1,9 +1,9 @@
 import type { FC } from '../../../lib/teact/teact';
 import { memo, useMemo } from '../../../lib/teact/teact';
 
-import type { GroupCallParticipant } from '../../../lib/secret-sauce';
+import type { GroupCallParticipant } from '../../../lib/vibecalls';
 
-import { THRESHOLD } from '../../../lib/secret-sauce';
+import { THRESHOLD } from '../../../lib/vibecalls';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';

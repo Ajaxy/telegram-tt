@@ -3,12 +3,13 @@ export {
   getDevices, getUserStreams, setVolume, isStreamEnabled, toggleStream,
   leaveGroupCall, handleUpdateGroupCallParticipants, switchCameraInput,
   toggleSpeaker, toggleNoiseSuppression,
-} from './secretsauce';
+} from './group/groupCall';
 export {
   joinPhoneCall, processSignalingMessage, getStreams, toggleStreamP2p, stopPhoneCall, switchCameraInputP2p,
-} from './p2p';
-export * from './p2pMessage';
+} from './phone/phoneCall';
+export * from './phone/signalingMessages';
 export {
-  IS_SCREENSHARE_SUPPORTED, THRESHOLD,
+  IS_SCREENSHARE_SUPPORTED, sanitizePrimitiveRecord, THRESHOLD,
 } from './utils';
+export type { PrimitiveRecord, PrimitiveRecordValue } from './utils';
 export * from './types';

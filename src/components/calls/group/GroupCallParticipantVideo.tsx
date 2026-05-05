@@ -5,13 +5,13 @@ import {
 import { withGlobal } from '../../../global';
 
 import type { ApiChat, ApiUser } from '../../../api/types';
-import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
+import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/vibecalls';
 import type { VideoLayout, VideoParticipant } from './hooks/useGroupCallVideoLayout';
 
 import { GROUP_CALL_DEFAULT_VOLUME } from '../../../config';
 import fastBlur from '../../../lib/fastBlur';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { getUserStreams, THRESHOLD } from '../../../lib/secret-sauce';
+import { getUserStreams, THRESHOLD } from '../../../lib/vibecalls';
 import { selectChat, selectUser } from '../../../global/selectors';
 import { animate } from '../../../util/animation';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/browser/windowEnvironment';

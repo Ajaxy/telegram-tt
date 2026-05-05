@@ -24,6 +24,7 @@ export const PAID_MESSAGES_PURPOSE = 'paid_messages';
 
 export const DEBUG = process.env.APP_ENV !== 'production';
 export const DEBUG_MORE = false;
+export const DEBUG_CALLS = false;
 export const DEBUG_LOG_FILENAME = 'tt-log.json';
 export const STRICTERDOM_ENABLED = DEBUG;
 export const FORCE_FALLBACK_LANG = DEBUG;
@@ -377,6 +378,8 @@ export const GIVEAWAY_MAX_ADDITIONAL_COUNTRIES = 10;
 export const FRAGMENT_PHONE_CODE = '888';
 export const FRAGMENT_PHONE_LENGTH = 11;
 export const BOT_VERIFICATION_PEERS_LIMIT = 20;
+
+export const CALL_PROTOCOL_LIBRARY_VERSIONS = ['13.0.0'];
 
 export const LIGHT_THEME_BG_COLOR = '#99BA92';
 export const DARK_THEME_BG_COLOR = '#000000';

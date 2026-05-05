@@ -4,7 +4,7 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { GroupCallConnectionState } from '../../../lib/secret-sauce';
+import type { GroupCallConnectionState } from '../../../lib/vibecalls';
 
 import { selectActiveGroupCall, selectGroupCallParticipant } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';

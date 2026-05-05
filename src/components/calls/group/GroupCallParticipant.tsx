@@ -5,10 +5,10 @@ import {
 import { withGlobal } from '../../../global';
 
 import type { ApiPeer } from '../../../api/types';
-import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
+import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/vibecalls';
 
 import { GROUP_CALL_DEFAULT_VOLUME } from '../../../config';
-import { THRESHOLD } from '../../../lib/secret-sauce';
+import { THRESHOLD } from '../../../lib/vibecalls';
 import { selectChat, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';

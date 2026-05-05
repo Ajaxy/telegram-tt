@@ -39,7 +39,7 @@ export type ReceiverVideoConstraints = {
   onStageEndpoints: string[];
 };
 
-export type ColibriClass = (
+export type GroupCallDataChannelMessage = (
   LastNEndpointsChangeEvent | DebugMessage | EndpointConnectivityStatusChangeEvent |
   SenderVideoConstraints | DominantSpeakerEndpointChangeEvent | ReceiverVideoConstraints
 );

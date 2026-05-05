@@ -32,7 +32,6 @@ export default defineConfig(
     'src/lib/gramjs/tl/',
     'src/lib/lovely-chart/**',
     'src/lib/music-metadata-browser',
-    'src/lib/secret-sauce/',
     'src/lib/fastBlur.js',
     'src/types/language.d.ts',
     'dist/',

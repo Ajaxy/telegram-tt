@@ -1,5 +1,5 @@
 import type { ApiGroupCall } from '../../api/types';
-import type { GroupCallParticipant } from '../../lib/secret-sauce';
+import type { GroupCallParticipant } from '../../lib/vibecalls';
 import type { GlobalState } from '../types';
 
 import { omit } from '../../util/iteratees';

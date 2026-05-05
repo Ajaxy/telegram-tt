@@ -301,6 +301,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload): Promise<void
     {
       ...groupCall,
       inviteHash,
+      localJoinAsId: undefined,
     },
     undefined,
     groupCall.participantsCount + 1,

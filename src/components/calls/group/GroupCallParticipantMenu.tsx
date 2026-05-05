@@ -3,7 +3,7 @@ import type React from '../../../lib/teact/teact';
 import { memo, useEffect, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { GroupCallParticipant } from '../../../lib/secret-sauce';
+import type { GroupCallParticipant } from '../../../lib/vibecalls';
 import type { MenuPositionOptions } from '../../ui/Menu';
 
 import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';

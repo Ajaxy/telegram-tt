@@ -70,7 +70,7 @@ import type {
 import type { ApiCredentials } from '../../components/payment/PaymentModal';
 import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
 import type { ReducerAction } from '../../hooks/useReducer';
-import type { P2pMessage } from '../../lib/secret-sauce';
+import type { P2pMessage } from '../../lib/vibecalls';
 import type {
   AccountSettings,
   AttachmentCompression,

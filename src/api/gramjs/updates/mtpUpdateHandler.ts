@@ -1,7 +1,7 @@
 import { Api as GramJs, type Update } from '../../../lib/gramjs';
 import { UpdateConnectionState, UpdateServerTimeOffset } from '../../../lib/gramjs/network';
 
-import type { GroupCallConnectionData } from '../../../lib/secret-sauce';
+import type { GroupCallConnectionData } from '../../../lib/vibecalls';
 import {
   type ApiMessage,
   type ApiMessagePoll,
