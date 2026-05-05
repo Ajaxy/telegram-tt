@@ -1,6 +1,8 @@
 @use "../../../styles/mixins";
 
 .root {
+  --web-app-safe-area-bottom: 0rem;
+
   position: relative;
   z-index: 0;
 
@@ -10,6 +12,10 @@
   width: 100%;
   height: 100%;
   padding: 0;
+
+  @media (max-width: 600px) {
+    --web-app-safe-area-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 .multi-tab {
@@ -85,7 +91,7 @@
   transition: opacity 0.25s ease-in-out;
 
   &.with-button {
-    height: calc(100% - 3.5rem);
+    height: calc(100% - 3.5rem - var(--web-app-safe-area-bottom));
   }
 
   &.hide {
@@ -146,6 +152,7 @@
   justify-content: space-between;
 
   height: 0rem;
+  padding-bottom: var(--web-app-safe-area-bottom);
 
   transition-timing-function: ease-in-out;
   transition-duration: 0.25s;
@@ -155,11 +162,11 @@
 
   &.one-row {
     align-items: center;
-    height: 4rem;
+    height: calc(4rem + var(--web-app-safe-area-bottom));
   }
 
   &.two-rows {
-    height: 8rem;
+    height: calc(8rem + var(--web-app-safe-area-bottom));
   }
 
   &.left-to-right {
