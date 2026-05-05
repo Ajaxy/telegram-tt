@@ -14,6 +14,7 @@ type OwnProps = {
   isShown: boolean;
   iconName: IconName;
   className?: string;
+  style?: string;
   color?: ButtonProps['color'];
   ariaLabel?: ButtonProps['ariaLabel'];
   disabled?: boolean;
@@ -25,6 +26,7 @@ const FloatingActionButton = ({
   isShown,
   iconName,
   className,
+  style,
   color = 'primary',
   ariaLabel,
   disabled,
@@ -42,6 +44,7 @@ const FloatingActionButton = ({
   return (
     <Button
       className={buttonClassName}
+      style={style}
       color={color}
       round
       disabled={disabled}

@@ -13,7 +13,7 @@
   padding-top: 0.875rem;
   border-radius: 0.625rem;
 
-  background-color: var(--color-background-secondary);
+  background-color: var(--color-background);
 
   &::before {
     pointer-events: none;
@@ -30,7 +30,7 @@
   }
 
   &:hover::before {
-    opacity: 1;
+    opacity: 0.75;
   }
 }
 

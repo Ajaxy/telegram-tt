@@ -11,6 +11,7 @@ import {
   selectAreActiveChatsLoaded,
   selectCurrentMessageList,
   selectIsChatWithSelf,
+  selectPeerHasProfileBackground,
   selectRightColumnContentKey,
   selectTabState,
 } from '../../global/selectors';
@@ -59,6 +60,7 @@ type StateProps = {
   isSavedMessages?: boolean;
   isSavedDialog?: boolean;
   isOwnProfile?: boolean;
+  hasProfileBackground?: boolean;
 };
 
 const ANIMATION_DURATION = 450 + ANIMATION_END_DELAY;
@@ -85,6 +87,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   isSavedMessages,
   isSavedDialog,
   isOwnProfile,
+  hasProfileBackground,
 }) => {
   const {
     toggleChatInfo,
@@ -116,6 +119,8 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const [managementScreen, setManagementScreen] = useState<ManagementScreens>(ManagementScreens.Initial);
   const [selectedChatMemberId, setSelectedChatMemberId] = useState<string | undefined>();
   const [isPromotedByCurrentUser, setIsPromotedByCurrentUser] = useState<boolean | undefined>();
+  const [isProfileExpanded, setIsProfileExpanded] = useState(false);
+  const [isProfileScrolled, setIsProfileScrolled] = useState(false);
   const isScrolledDown = profileState !== ProfileState.Profile;
 
   const isOpen = contentKey !== undefined;
@@ -134,6 +139,14 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const isEditingTopic = contentKey === RightColumnContent.EditTopic;
   const isOverlaying = windowWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
 
+  const headerBackground: 'regular' | 'secondary' = (() => {
+    if (isSavedMessages) return 'secondary';
+    if (!isProfile) return 'regular';
+    if (isScrolledDown) return 'secondary';
+    if (!isProfileScrolled && !isProfileExpanded && !hasProfileBackground) return 'secondary';
+    return 'regular';
+  })();
+
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isOpen);
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true, !isChatSelected) ?? -1;
@@ -141,7 +154,26 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   useScrollNotch({
     containerRef,
     selector: ':scope .custom-scroll, :scope .panel-content',
+    shouldHideTopNotch: isSavedMessages || (isProfile && isScrolledDown),
   }, [contentKey, managementScreen, chatId, threadId]);
+
+  useEffect(() => {
+    if (!isProfile || isScrolledDown || isSavedMessages) {
+      setIsProfileScrolled(false);
+      return undefined;
+    }
+
+    const scrollEl = containerRef.current?.querySelector<HTMLElement>('.custom-scroll');
+    if (!scrollEl) return undefined;
+
+    const handleProfileScroll = () => {
+      setIsProfileScrolled(scrollEl.scrollTop > 1);
+    };
+
+    handleProfileScroll();
+    scrollEl.addEventListener('scroll', handleProfileScroll, { passive: true });
+    return () => scrollEl.removeEventListener('scroll', handleProfileScroll);
+  }, [chatId, threadId, isProfile, isScrolledDown, isSavedMessages]);
 
   const close = useLastCallback((shouldScrollUp = true) => {
     switch (contentKey) {
@@ -320,6 +352,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
             isMobile={isMobile}
             isActive={isOpen && isActive}
             onProfileStateChange={setProfileState}
+            onProfileExpandedChange={setIsProfileExpanded}
           />
         );
       case RightColumnContent.Management:
@@ -376,6 +409,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           threadId={threadId}
           isColumnOpen={isOpen}
           isProfile={isProfile}
+          headerBackground={headerBackground}
           isManagement={isManagement}
           isStatistics={isStatistics}
           isBoostStatistics={isBoostStatistics}
@@ -439,6 +473,7 @@ export default memo(withGlobal<OwnProps>(
       isSavedMessages,
       isSavedDialog,
       isOwnProfile,
+      hasProfileBackground: chatId ? selectPeerHasProfileBackground(global, chatId) : undefined,
     };
   },
 )(RightColumn));

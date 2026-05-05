@@ -1,6 +1,7 @@
 @use "../../../styles/mixins";
 
 .root {
+  --profile-info-bg: var(--color-background);
   --rating-outline-color: #000000;
   --rating-text-color: #000000;
 
@@ -14,7 +15,7 @@
 
   color: var(--color-white);
 
-  background-color: var(--color-background);
+  background-color: var(--profile-info-bg);
 
   @include mixins.with-vt-type('profileAvatar');
 
@@ -33,7 +34,7 @@
   color: var(--color-text);
 
   .info {
-    background-image: linear-gradient(0deg, var(--color-background) 50%, transparent);
+    background-image: linear-gradient(0deg, var(--profile-info-bg) 50%, transparent);
   }
 
   .userRatingNegativeWrapper,
@@ -445,11 +446,6 @@
 }
 
 @include mixins.on-active-vt('profileAvatar') {
-  &::view-transition-old(.profileInfo),
-  &::view-transition-new(.profileInfo) {
-    animation-name: none;
-  }
-
   &::view-transition-group(.photoDashes) {
     z-index: 1;
   }
@@ -460,10 +456,22 @@
 
   &::view-transition-group(.profileInfo) {
     z-index: -2;
+    overflow: clip;
+  }
+
+  &::view-transition-old(.profileInfo),
+  &::view-transition-new(.profileInfo) {
+    object-fit: none;
+    object-position: top;
+    animation-name: none;
   }
 }
 
 @include mixins.on-active-vt('profileExpand') {
+  &::view-transition-old(.profileInfo) {
+    opacity: 0;
+  }
+
   &::view-transition-old(.avatar) {
     z-index: -1;
     animation-name: none;
@@ -487,6 +495,10 @@
 }
 
 @include mixins.on-active-vt('profileCollapse') {
+  &::view-transition-new(.profileInfo) {
+    opacity: 0;
+  }
+
   &::view-transition-new(.avatar) {
     z-index: -1;
     animation-name: none;

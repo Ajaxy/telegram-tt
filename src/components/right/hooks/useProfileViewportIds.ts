@@ -12,6 +12,8 @@ import sortChatIds from '../../common/helpers/sortChatIds';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
+const SHARED_MEDIA_TYPES: SharedMediaType[] = ['media', 'documents', 'links', 'audio', 'voice', 'gif'];
+
 export default function useProfileViewportIds({
   loadMoreMembers,
   loadCommonChats,
@@ -59,7 +61,8 @@ export default function useProfileViewportIds({
   similarChannels?: string[];
   similarBots?: string[];
 }) {
-  const resultType = tabType === 'members' || !mediaSearchType ? tabType : mediaSearchType;
+  const resultType = mediaSearchType && SHARED_MEDIA_TYPES.includes(tabType as SharedMediaType)
+    ? mediaSearchType : tabType;
 
   const memberIds = useMemo(() => {
     if (!groupChatMembers || !usersById || !userStatusesById) {
@@ -218,7 +221,7 @@ function useInfiniteScrollForLoadableItems<ListId extends string | number>(
     handleLoadMore,
     itemIds,
     undefined,
-    MEMBERS_SLICE,
+    itemIds?.length || MEMBERS_SLICE,
   );
 
   const isOnTop = !viewportIds || !itemIds || viewportIds[0] === itemIds[0];
@@ -250,11 +253,16 @@ function useInfiniteScrollForSharedMedia(
     }
   }, [chatMessages, foundIds, currentResultType, forSharedMediaType]);
 
+  const msgLen = messageIdsRef.current?.length ?? 0;
+  const listSlice = forSharedMediaType === 'media'
+    ? Math.max(SHARED_MEDIA_SLICE, msgLen)
+    : Math.max(MESSAGE_SEARCH_SLICE, msgLen);
+
   const [viewportIds, getMore] = useInfiniteScroll(
     handleLoadMore,
     messageIdsRef.current,
     undefined,
-    forSharedMediaType === 'media' ? SHARED_MEDIA_SLICE : MESSAGE_SEARCH_SLICE,
+    listSlice,
   );
 
   const isOnTop = !viewportIds || !messageIdsRef.current || viewportIds[0] === messageIdsRef.current[0];

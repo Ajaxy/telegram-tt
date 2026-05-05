@@ -1,17 +1,16 @@
 import type { ElementRef, TeactNode } from '../../lib/teact/teact';
-import { memo, useEffect, useRef } from '../../lib/teact/teact';
+import { memo, useRef } from '../../lib/teact/teact';
 
 import type { ApiMessageEntityCustomEmoji } from '../../api/types';
 import type { IconName } from '../../types/icons';
 import type { MenuItemContextAction } from './ListItem';
 
-import animateHorizontalScroll from '../../util/animateHorizontalScroll';
-import { IS_ANDROID, IS_IOS } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useLang from '../../hooks/useLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
+import useScrollToActiveTab from '../../hooks/useScrollToActiveTab';
 
 import Tab from './Tab';
 
@@ -39,10 +38,6 @@ type OwnProps = {
   onSwitchTab: (index: number) => void;
 };
 
-const TAB_SCROLL_THRESHOLD_PX = 16;
-// Should match duration from `--slide-transition` CSS variable
-const SCROLL_DURATION = IS_IOS ? 450 : IS_ANDROID ? 400 : 300;
-
 const SquareTabList = ({
   tabs,
   activeTab,
@@ -59,30 +54,7 @@ const SquareTabList = ({
   const lang = useLang();
 
   useHorizontalScroll(containerRef, undefined, true);
-
-  // Scroll container to place active tab in the center
-  useEffect(() => {
-    const container = containerRef.current!;
-    const { scrollWidth, offsetWidth, scrollLeft } = container;
-    if (scrollWidth <= offsetWidth) {
-      return;
-    }
-
-    const activeTabElement = container.childNodes[activeTab] as HTMLElement | null;
-    if (!activeTabElement) {
-      return;
-    }
-
-    const { offsetLeft: activeTabOffsetLeft, offsetWidth: activeTabOffsetWidth } = activeTabElement;
-    const newLeft = activeTabOffsetLeft - (offsetWidth / 2) + (activeTabOffsetWidth / 2);
-
-    // Prevent scrolling by only a couple of pixels, which doesn't look smooth
-    if (Math.abs(newLeft - scrollLeft) < TAB_SCROLL_THRESHOLD_PX) {
-      return;
-    }
-
-    animateHorizontalScroll(container, newLeft, SCROLL_DURATION);
-  }, [activeTab, containerRef]);
+  useScrollToActiveTab(containerRef, activeTab);
 
   return (
     <div

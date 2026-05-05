@@ -12,4 +12,8 @@
 
     @include mixins.adapt-padding-to-scrollbar(1rem);
   }
+
+  .noPadding {
+    padding-inline: 0;
+  }
 }

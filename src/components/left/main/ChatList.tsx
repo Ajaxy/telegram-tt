@@ -48,6 +48,11 @@ type OwnProps = {
   isFoldersSidebarShown?: boolean;
   isStoryRibbonShown?: boolean;
   foldersDispatch?: FolderEditDispatch;
+  noAbsolutePositioning?: boolean;
+  noVirtualization?: boolean;
+  noScrollRestore?: boolean;
+  noFastList?: boolean;
+  scrollContainerClosest?: string;
   onScroll?: (e: React.UIEvent<HTMLDivElement>) => void;
 };
 
@@ -67,6 +72,11 @@ const ChatList = ({
   isFoldersSidebarShown,
   isStoryRibbonShown,
   foldersDispatch,
+  noAbsolutePositioning,
+  noVirtualization,
+  noScrollRestore,
+  noFastList,
+  scrollContainerClosest,
   onScroll,
 }: OwnProps) => {
   const {
@@ -99,7 +109,10 @@ const ChatList = ({
     orderDiffById, shiftDiff, getAnimationType, onReorderAnimationEnd: onReorderAnimationEnd,
   } = useOrderDiff(orderedIds, panesHeight);
 
-  const [viewportIds, getMore] = useInfiniteScroll(undefined, orderedIds, undefined, CHAT_LIST_SLICE);
+  const chatListSlice = noVirtualization
+    ? Math.max(CHAT_LIST_SLICE, orderedIds?.length || 0)
+    : CHAT_LIST_SLICE;
+  const [viewportIds, getMore] = useInfiniteScroll(undefined, orderedIds, undefined, chatListSlice);
 
   // Support <Alt>+<Up/Down> to navigate between chats
   useHotkeys(useMemo(() => (isActive && orderedIds?.length ? {
@@ -194,7 +207,9 @@ const ChatList = ({
 
     return viewportIds!.map((id, i) => {
       const isPinned = viewportOffset + i < pinnedCount;
-      const offsetTop = panesHeight + archiveHeight + (viewportOffset + i) * CHAT_HEIGHT_PX;
+      const offsetTop = noAbsolutePositioning
+        ? undefined
+        : panesHeight + archiveHeight + (viewportOffset + i) * CHAT_HEIGHT_PX;
 
       return (
         <Chat
@@ -219,6 +234,8 @@ const ChatList = ({
     });
   }
 
+  const totalHeight = chatsHeight + archiveHeight + panesHeight;
+
   return (
     <InfiniteScroll
       className={buildClassName('chat-list custom-scroll', isForumPanelOpen && 'forum-panel-open', className)}
@@ -226,8 +243,11 @@ const ChatList = ({
       items={viewportIds}
       itemSelector=".ListItem:not(.chat-item-archive)"
       preloadBackwards={CHAT_LIST_SLICE}
-      withAbsolutePositioning
-      maxHeight={chatsHeight + archiveHeight + panesHeight}
+      withAbsolutePositioning={!noAbsolutePositioning}
+      maxHeight={!noAbsolutePositioning ? totalHeight : undefined}
+      scrollContainerClosest={scrollContainerClosest}
+      noScrollRestore={noScrollRestore}
+      noFastList={noFastList}
       onLoadMore={getMore}
       onScroll={onScroll}
     >

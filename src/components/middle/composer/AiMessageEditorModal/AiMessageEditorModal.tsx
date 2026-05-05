@@ -280,17 +280,17 @@ const AiMessageEditorModal = ({
       )}
       isSlim
     >
-      <div className={styles.tabListWrapper}>
-        <TabList
-          tabs={tabs}
-          activeTab={activeTabIndex}
-          onSwitchTab={handleTabChange}
-          className={styles.tabList}
-          tabClassName={styles.tab}
-          stretched
-          itemAlignment="vertical"
-        />
-      </div>
+      <TabList
+        tabs={tabs}
+        activeTab={activeTabIndex}
+        withFadeMask
+        fadeMaskClassName={styles.fadeMask}
+        className={styles.tabList}
+        tabClassName={styles.tab}
+        stretched
+        itemAlignment="vertical"
+        onSwitchTab={handleTabChange}
+      />
 
       <div className={styles.transitionWrapper}>
         <Transition

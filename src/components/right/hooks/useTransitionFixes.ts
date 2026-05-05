@@ -1,7 +1,7 @@
 import type { ElementRef } from '../../../lib/teact/teact';
 import { useEffect } from '../../../lib/teact/teact';
 
-import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
 
 export default function useTransitionFixes(
   containerRef: ElementRef<HTMLDivElement>,
@@ -10,16 +10,23 @@ export default function useTransitionFixes(
   // Set `min-height` for shared media container to prevent jumping when switching tabs
   useEffect(() => {
     function setMinHeight() {
-      const container = containerRef.current!;
-      const transitionEl = container.querySelector<HTMLDivElement>(transitionElSelector);
-      const tabsEl = container.querySelector<HTMLDivElement>('.SquareTabList');
-      if (transitionEl && tabsEl) {
-        const newHeight = container.clientHeight - tabsEl.offsetHeight;
+      requestMeasure(() => {
+        const container = containerRef.current;
+        if (!container) return;
+        const transitionEl = container.querySelector<HTMLDivElement>(transitionElSelector);
+        const tabsEl = container.querySelector<HTMLDivElement>('.shared-media-tabs');
+        const sharedMediaEl = transitionEl?.parentElement;
+        if (!transitionEl || !tabsEl) return;
+
+        const sharedMediaMargin = sharedMediaEl
+          ? parseInt(getComputedStyle(sharedMediaEl).marginTop, 10) || 0 : 0;
+        const tabsMarginTop = parseInt(getComputedStyle(tabsEl).marginTop, 10) || 0;
+        const newHeight = container.clientHeight - tabsEl.offsetHeight - tabsMarginTop - sharedMediaMargin;
 
         requestMutation(() => {
           transitionEl.style.minHeight = `${newHeight}px`;
         });
-      }
+      });
     }
 
     setMinHeight();

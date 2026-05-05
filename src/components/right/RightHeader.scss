@@ -9,7 +9,13 @@
   height: var(--header-height);
   padding: 0.5rem 0.8125rem;
 
-  background: var(--color-background);
+  background-color: var(--color-background);
+
+  transition: background-color 150ms;
+
+  &.secondary {
+    background-color: var(--color-background-secondary);
+  }
 
   @include mixins.with-vt-type('rightColumn');
 

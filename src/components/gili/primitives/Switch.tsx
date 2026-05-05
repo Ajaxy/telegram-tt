@@ -19,7 +19,7 @@ type OwnProps = {
   disabled?: boolean;
   withPermissionColors?: boolean;
   className?: string;
-  onChange: (checked: boolean) => void;
+  onChange?: (checked: boolean) => void;
 };
 
 type Props = OwnProps & Omit<InputProps, keyof OwnProps | 'type'>;
@@ -40,7 +40,7 @@ const Switch = ({
   const isDisabled = disabled || interactive?.isDisabled || interactive?.isLoading;
 
   const handleChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.currentTarget.checked);
+    onChange?.(e.currentTarget.checked);
   });
 
   if (interactive?.isLoading) return undefined;

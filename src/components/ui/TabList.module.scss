@@ -24,7 +24,7 @@
 
     opacity: 0;
     background-color: var(--color-background);
-    box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.1);
 
     transition: opacity 150ms;
 
@@ -48,11 +48,12 @@
   }
 
   .activeIndicator {
+    pointer-events: none;
     will-change: clip-path;
 
     isolation: isolate;
     position: absolute;
-    z-index: 1;
+    z-index: 4;
     top: 0;
     right: 0;
     bottom: 0;
@@ -116,5 +117,30 @@
 
   .lockIcon {
     font-size: 0.875rem;
+  }
+
+  .withFadeMask {
+    position: relative;
+    z-index: 4;
+  }
+
+  .fadeMaskWrapper {
+    position: relative;
+    flex-shrink: 0;
+
+    &::after {
+      pointer-events: none;
+      content: "";
+
+      position: absolute;
+      z-index: 3;
+      top: 50%;
+      left: 0;
+
+      width: 100%;
+      height: var(--fade-mask-height, 50%);
+
+      background: linear-gradient(to bottom, var(--fade-mask-color, var(--color-background)) 0%, transparent 100%);
+    }
   }
 }

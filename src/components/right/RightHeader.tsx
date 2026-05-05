@@ -67,6 +67,7 @@ type OwnProps = {
   isCreatingTopic?: boolean;
   isEditingTopic?: boolean;
   isAddingChatMembers?: boolean;
+  headerBackground?: 'regular' | 'secondary';
   profileState?: ProfileState;
   managementScreen?: ManagementScreens;
   onClose: (shouldScrollUp?: boolean) => void;
@@ -158,6 +159,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isCreatingTopic,
   isEditingTopic,
   isAddingChatMembers,
+  headerBackground,
   profileState,
   managementScreen,
   canAddContact,
@@ -266,6 +268,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
 
   const oldLang = useOldLang();
   const lang = useLang();
+
+  const isSecondaryBackground = headerBackground === 'secondary';
   const contentKey = isProfile ? (
     profileState === ProfileState.Profile ? (
       HeaderContent.Profile
@@ -703,7 +707,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
 
   return (
     <div
-      className="RightHeader"
+      className={buildClassName('RightHeader', isSecondaryBackground && 'secondary')}
       data-tauri-drag-region={IS_TAURI && IS_MAC_OS ? true : undefined}
       style={createVtnStyle('rightHeader', true)}
     >

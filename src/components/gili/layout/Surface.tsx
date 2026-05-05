@@ -1,14 +1,20 @@
+import type { ElementRef } from '../../../lib/teact/teact';
+
 import buildClassName from '../../../util/buildClassName';
 
 import styles from './Surface.module.scss';
 
 type OwnProps = React.HTMLAttributes<HTMLDivElement> & {
+  ref?: ElementRef<HTMLDivElement>;
   scrollable?: boolean;
+  noPadding?: boolean;
   children: React.ReactNode;
 };
 
 const Surface = ({
+  ref,
   scrollable,
+  noPadding,
   className,
   children,
   ...otherProps
@@ -17,10 +23,12 @@ const Surface = ({
 
   return (
     <div
+      ref={ref}
       className={buildClassName(
         styles.root,
         isScrollable && 'custom-scroll',
         isScrollable && styles.scrollable,
+        noPadding && styles.noPadding,
         className,
       )}
       {...otherProps}

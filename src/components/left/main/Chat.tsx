@@ -413,7 +413,7 @@ const Chat: FC<OwnProps & StateProps> = ({
       ref={ref}
       className={chatClassName}
       href={href}
-      style={`top: ${offsetTop}px`}
+      style={offsetTop !== undefined ? `top: ${offsetTop}px` : undefined}
       ripple={!isForum && !isMobile}
       contextActions={contextActions}
       withPortalForMenu
