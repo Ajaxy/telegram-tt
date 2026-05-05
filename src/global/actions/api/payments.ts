@@ -14,7 +14,6 @@ import { DEBUG_PAYMENT_SMART_GLOCAL, STARS_CURRENCY_CODE, TON_CURRENCY_CODE } fr
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import * as langProvider from '../../../util/oldLangProvider';
 import { getStripeError } from '../../../util/payments/stripe';
-import { buildQueryString } from '../../../util/requestQuery';
 import { getServerTime } from '../../../util/serverTime';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
@@ -388,22 +387,24 @@ async function sendStripeCredentials<T extends GlobalState>(
   publishableKey: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  const query = buildQueryString({
+  const body = new URLSearchParams({
     'card[number]': data.cardNumber,
     'card[exp_month]': data.expiryMonth,
     'card[exp_year]': data.expiryYear,
     'card[cvc]': data.cvv,
+    'card[name]': data.cardholder,
     'card[address_zip]': data.zip,
     'card[address_country]': data.country,
   });
 
-  const response = await fetch(`https://api.stripe.com/v1/tokens${query}`, {
+  const response = await fetch('https://api.stripe.com/v1/tokens', {
     method: 'POST',
     credentials: 'same-origin',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
       Authorization: `Bearer ${publishableKey}`,
     },
+    body,
   });
   const result = await response.json();
   if (result.error) {
