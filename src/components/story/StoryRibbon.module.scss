@@ -4,6 +4,7 @@
 
   overflow-x: auto;
   display: flex;
+  flex-shrink: 0;
   column-gap: 0.625rem;
   justify-content: space-between;
 

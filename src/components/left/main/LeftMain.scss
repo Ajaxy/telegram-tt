@@ -36,11 +36,15 @@
 
     &-content {
       position: relative;
+
       display: flex;
       flex: 1;
       flex-direction: column;
 
+      min-height: 0;
+
       > .Transition {
+        overflow: hidden;
         flex: 1;
       }
 
