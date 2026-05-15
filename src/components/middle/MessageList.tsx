@@ -271,6 +271,9 @@ const MessageList = ({
   const memoUnreadDividerBeforeIdRef = useRef<number | undefined>();
   const memoFocusingIdRef = useRef<number>();
   const isScrollTopJustUpdatedRef = useRef(false);
+  // Suppresses spurious load-more triggers caused by Safari delivering stale
+  // `IntersectionObserver` entries between DOM mutation and scroll restore
+  const isReplacingHistoryRef = useRef(false);
   const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
   const scrollSnapDisabledTimerRef = useRef<number>();
   const typingDraftSnapTriggeredIdRef = useRef<number>();
@@ -636,7 +639,10 @@ const MessageList = ({
   });
 
   useSyncEffect(
-    () => forceMeasure(() => rememberScrollPositionRef.current()),
+    () => {
+      isReplacingHistoryRef.current = true;
+      forceMeasure(() => rememberScrollPositionRef.current());
+    },
     // This will run before modifying content and should match deps for `useLayoutEffectWithPrevDeps` below
     [messageIds, isViewportNewest, rememberScrollPositionRef],
   );
@@ -770,6 +776,9 @@ const MessageList = ({
 
       return () => {
         resetScroll(container, Math.ceil(newScrollTop));
+        requestMeasure(() => {
+          isReplacingHistoryRef.current = false;
+        });
         restartCurrentScrollAnimation();
 
         scrollOffsetRef.current = Math.max(Math.ceil(scrollHeight - newScrollTop), offsetHeight);
@@ -907,6 +916,7 @@ const MessageList = ({
         anchorIdRef={anchorIdRef}
         memoUnreadDividerBeforeIdRef={memoUnreadDividerBeforeIdRef}
         memoFirstUnreadIdRef={memoFirstUnreadIdRef}
+        isReplacingHistoryRef={isReplacingHistoryRef}
         threadId={threadId}
         type={type}
         isReady={isReady}

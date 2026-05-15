@@ -69,6 +69,7 @@ interface OwnProps {
   anchorIdRef: { current: string | undefined };
   memoUnreadDividerBeforeIdRef: { current: number | undefined };
   memoFirstUnreadIdRef: { current: number | undefined };
+  isReplacingHistoryRef: { current: boolean };
   type: MessageListType;
   isReady: boolean;
   hasLinkedChat: boolean | undefined;
@@ -109,6 +110,7 @@ const MessageListContent = ({
   anchorIdRef,
   memoUnreadDividerBeforeIdRef,
   memoFirstUnreadIdRef,
+  isReplacingHistoryRef,
   type,
   isReady,
   hasLinkedChat,
@@ -164,6 +166,7 @@ const MessageListContent = ({
     isViewportNewest,
     isUnread,
     isReady,
+    isReplacingHistoryRef,
     onScrollDownToggle,
     onNotchToggle,
   });
