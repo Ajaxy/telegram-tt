@@ -203,6 +203,25 @@ function processDynamically(
     : (x - triggerRect.left)) + addedXForPortalPositioning;
   let top = y - triggerRect.top + addedYForPortalPositioning;
 
+  // When portalled, `left`/`top` are in viewport coords. The container has width 0 — its anchor
+  // is the bubble's left edge for `positionX='left'` and right edge for `positionX='right'`
+  // (same for `top`/`bottom`). Clamp the anchor so the bubble fits the viewport on either side.
+  if (withPortal) {
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const margin = MENU_POSITION_VISUAL_COMFORT_SPACE_PX;
+    if (positionX === 'left') {
+      left = Math.max(margin, Math.min(left, viewportWidth - menuRect.width - margin));
+    } else {
+      left = Math.max(menuRect.width + margin, Math.min(left, viewportWidth - margin));
+    }
+    if (positionY === 'top') {
+      top = Math.max(margin, Math.min(top, viewportHeight - menuRect.height - margin));
+    } else {
+      top = Math.max(menuRect.height + margin, Math.min(top, viewportHeight - margin));
+    }
+  }
+
   if (isDense) {
     left = Math.min(left, rootRect.width - menuRect.width - MENU_POSITION_VISUAL_COMFORT_SPACE_PX);
     top = Math.min(top, rootRect.height - menuRect.height - MENU_POSITION_VISUAL_COMFORT_SPACE_PX);
