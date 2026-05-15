@@ -7,6 +7,7 @@ import type { OriginPayload, ThenArg, WorkerMessageEvent } from './types';
 
 import { DEBUG, IGNORE_UNHANDLED_ERRORS } from '../../../config';
 import { IS_TAURI } from '../../../util/browser/globalEnvironment';
+import { IS_SAFARI } from '../../../util/browser/windowEnvironment';
 import { logDebugMessage } from '../../../util/debugConsole';
 import Deferred from '../../../util/Deferred';
 import { getCurrentTabId, subscribeToMasterChange } from '../../../util/establishMultitabRole';
@@ -102,7 +103,7 @@ export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
     });
     subscribeToWorker(onUpdate);
 
-    if (initialArgs.platform === 'iOS' || (initialArgs.platform === 'macOS' && IS_TAURI)) {
+    if (IS_SAFARI || (initialArgs.platform === 'macOS' && IS_TAURI)) {
       setupHealthCheck();
     }
   }
