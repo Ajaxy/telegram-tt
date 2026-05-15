@@ -26,15 +26,34 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
   - Use [buildClassName.ts](mdc:src/util/buildClassName.ts) to merge multiple class names.
   - **Always extract styles to files** - avoid inline styles unless absolutely necessary.
   - **If file already imports styles**, check where they come from and add new styles there - don't create new style files.
-  - Prefer rem units for all measurements. Exceptions are possible, but usually rare.
+  - Prefer rem units for all measurements. Exceptions are possible, but usually rare. Conversion: `N px = N / 16 rem`.
   - No complex or broad selectors. Prefer basic classes.
+  - Avoid nested selectors and tag-based selectors. Every styled element must have its own class.
 
 - **Code Style:**
-  - Early returns.
-  - Prefix boolean variables with primary or modal auxiliaries (e.g. `isOpen`, `willUpdate`, `shouldRender`).
-  - Functions should start with a verb (e.g. `openModal`, `closeDialog`, `handleClick`).
+  - Baseline: [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript). Rules below extend/override it.
+  - Early returns (guard clauses) over deeply nested conditionals.
+  - Functions and methods start with an imperative verb (`openModal`, `closeDialog`, `handleClick`, `runMethod`). Exception: `callback`.
+  - Acronyms follow standard camelCase (no all-caps): `parseJson`, `jsonToYaml`, `isUiReady`.
+  - Prefix boolean variables/props with a modal verb:
+    - `is*` (isVisible), `has*` (hasChanged), `are*` for plurals (areMessagesLoaded — never `is` for plurals), `should*` (shouldRedirect), `can*` (canComment), `will*` (willChange).
+    - Exception: the argument `force`.
+  - **Optional boolean args/props default to `false`.** If you need a prop that *hides* an avatar, name it `noAvatar` rather than passing `hasAvatar={false}`.
+  - Allowed abbreviations only: `e` (event handler arg), `err` (catch arg), `cb` (callback). Single-letter names allowed in one-line lambdas (`users.map(u => u.name)`). Avoid all others.
+  - **Hoist static constants** to the top of the module with `UPPER_SNAKE_CASE`. Never inline magic numbers inside function bodies.
+  - Prefer function declarations over function expressions (except arrow functions when you need to bind `this`).
+  - Order functions top-down by call hierarchy: high-level at the top, helpers at the bottom.
+  - **Cache pure function results** — if called more than once in the same scope, store the result in a variable.
   - Prefer checking required parameter before calling a function, avoid making it optional and checking at the beginning of the function.
-  - Only leave comments for complex logic.
+  - **Comments**: start with a capital letter; single-sentence comments have no trailing period; multi-sentence comments end each sentence with a period; wrap code entities in backticks. Only leave comments for complex logic.
+  - **Dead code**: do not keep unused, "just in case", or speculative library-style utilities. If an object isn't used outside its own module, do not export it.
+  - **TypeScript non-null assertion**: when a value is guaranteed to exist at runtime but TS can't infer it, use `!` instead of an `if` guard.
+    ```ts
+    // ✅ Correct
+    func(a!);
+    // ❌ Incorrect
+    if (a) func(a);
+    ```
   - Avoid using default values for props that can be intentionally undefined/false.
   - No unnecessary `as` casts. Prefer `satisfies` where possible.
   - Do not use `null`. There's linter rule to enforce it.
@@ -199,9 +218,12 @@ const NewComp = (props: OwnProps & StateProps) => { … }
 ```
 
 ### 5. Memoization
-* Wrap most components with `memo()` to avoid unnecessary updates. Consider skipping memo for simple wrapper components whose children change on almost every render.
+* Wrap most components with `memo()` to avoid unnecessary updates — **but only if none of the props are inherently non-memoizable** (e.g. `children`). Consider skipping memo for simple wrapper components whose children change on almost every render.
 * Don't pass freshly created objects or arrays as props to memoized components.
 * **Exceptions** (no memo): `ListItem`, `Button`, `MenuItem`, etc.
+* `useMemo` should be used **only** when:
+  - The computation contains loops or expensive operations, **or**
+  - It produces a complex object passed as a prop to a child `memo` component.
 
 ### 6. Localization
 
@@ -540,3 +562,36 @@ onFullyIdle(() => {
 5. **Understand effect timing** – `useEffect` vs `useLayoutEffect`
 6. **Prefer signals** – When you need effects only, not renders
 7. **Use `requestForcedReflow`** – Only as last resort for sync measure+mutate
+
+# Backward Compatibility
+
+- When adding a new required section to `GlobalState`, always add a corresponding entry in `migrateCache`.
+- When changing types in global state or its nested objects, verify the migration path from the current `master` branch.
+
+# Commit Messages
+
+Follow this pattern for PR titles and commit messages:
+
+```
+[Tag] Component / Area: Imperative description
+```
+
+- **Tag** (optional): `[Refactoring]`, `[Perf]`, `[Size]`, `[Dev]`, `[SEO]`, `[CI]`, `[Security]`.
+- **Component or domain area** — capitalized.
+- **Colon**, followed by an imperative-mood description starting with a capital letter.
+- Prefer plain text over code entities, but use backticks when referencing programmatic names.
+- Each sentence starts with a capital letter.
+- If a commit contains more than one task, separate them with a semicolon.
+- No trailing period or semicolon.
+- Add `Closes #<issue_number>` to the PR description to link the issue.
+
+Examples:
+
+```
+Video Player: Hide download button in fullscreen
+Message / Round Video: Fix progressive loading
+PWA: Support system sharing menu
+[SEO] Replace `meta[noindex]` with `link[canonical]`
+[iOS] Startup: Add logs and signposts
+[Refactoring] Fix @typescript-eslint/await-thenable errors
+```
