@@ -4,6 +4,8 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { ApiMessage } from '../../../api/types';
+import type { MenuItemContextAction } from '../../ui/ListItem';
 import type { StateProps } from './helpers/createMapStateToProps';
 import { LoadMoreDirection, MediaViewerOrigin } from '../../../types';
 
@@ -15,6 +17,8 @@ import { throttle } from '../../../util/schedulers';
 import { createMapStateToProps } from './helpers/createMapStateToProps';
 
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
@@ -44,11 +48,13 @@ const MediaResults: FC<OwnProps & StateProps> = ({
   const {
     searchMessagesGlobal,
     openMediaViewer,
+    focusMessage,
   } = getActions();
 
   const containerRef = useRef<HTMLDivElement>();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const { observe: observeIntersectionForMedia } = useIntersectionObserver({
     rootRef: containerRef,
@@ -86,9 +92,19 @@ const MediaResults: FC<OwnProps & StateProps> = ({
     });
   }, [openMediaViewer]);
 
+  const getMessageContextActions = useLastCallback((message: ApiMessage): MenuItemContextAction[] => {
+    return [{
+      title: lang('FocusMessage'),
+      icon: 'show-message',
+      handler: () => {
+        focusMessage({ chatId: message.chatId, messageId: message.id });
+      },
+    }];
+  });
+
   function renderGallery() {
     return (
-      <div className="media-list" dir={lang.isRtl ? 'rtl' : undefined}>
+      <div className="media-list" dir={oldLang.isRtl ? 'rtl' : undefined}>
         {foundMessages.map((message) => (
           <Media
             key={`${message.chatId}-${message.id}`}
@@ -97,6 +113,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
             isProtected={isChatProtected || message.isProtected}
             observeIntersection={observeIntersectionForMedia}
             onClick={handleSelectMedia}
+            contextActions={getMessageContextActions(message)}
           />
         ))}
       </div>
@@ -141,8 +158,8 @@ const MediaResults: FC<OwnProps & StateProps> = ({
         {canRenderContents && (!foundIds || foundIds.length === 0) && (
           <NothingFound
             withSticker
-            text={lang('ChatList.Search.NoResults')}
-            description={lang('ChatList.Search.NoResultsDescription')}
+            text={oldLang('ChatList.Search.NoResults')}
+            description={oldLang('ChatList.Search.NoResultsDescription')}
           />
         )}
         {isMediaGrid && renderGallery()}
