@@ -608,6 +608,7 @@ function MiddleColumn({
                       fluid
                       color="secondary"
                       className="composer-button unpin-all-button"
+                      noForcedUpperCase
                       onClick={handleOpenUnpinModal}
                       iconName="unpin"
                     >

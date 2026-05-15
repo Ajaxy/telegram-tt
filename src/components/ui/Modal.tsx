@@ -44,6 +44,7 @@ export type OwnProps = {
   noBackdrop?: boolean;
   noBackdropClose?: boolean;
   isNativeDialog?: boolean;
+  noTitleAutoFocus?: boolean;
   children: React.ReactNode;
   style?: string;
   dialogStyle?: string;
@@ -68,6 +69,7 @@ const Modal = (props: OwnProps) => {
     noBackdropClose,
     noFreezeOnClose,
     isNativeDialog,
+    noTitleAutoFocus,
     onClose,
     onCloseAnimationEnd,
     onEnter,
@@ -251,7 +253,7 @@ const Modal = (props: OwnProps) => {
     return title ? (
       <div className={buildClassName('modal-header', headerClassName, isCondensedHeader && 'modal-header-condensed')}>
         {closeButton}
-        <div className="modal-title">{title}</div>
+        <div className="modal-title" autoFocus={!noTitleAutoFocus}>{title}</div>
       </div>
     ) : closeButton;
   }

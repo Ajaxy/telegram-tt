@@ -27,6 +27,8 @@
 @layer ui.button {
   .Button {
     --premium-gradient: linear-gradient(88.39deg, #6c93ff -2.56%, #976fff 51.27%, #df69d1 107.39%);
+    --button-text-color: white;
+    --button-background-color: transparent;
 
     cursor: var(--custom-cursor, pointer);
 
@@ -46,11 +48,11 @@
 
     font-weight: var(--font-weight-medium);
     line-height: 1.2;
-    color: white;
+    color: var(--button-text-color);
     text-decoration: none !important;
     text-transform: uppercase;
 
-    background-color: transparent;
+    background-color: var(--button-background-color);
     background-size: cover;
     outline: none !important;
 
@@ -88,66 +90,71 @@
       }
     }
 
+    @include active-styles() {
+      color:
+        var(
+          --button-active-text-color,
+          var(--button-text-color)
+        );
+      background-color:
+        var(
+          --button-active-background-color,
+          var(--button-background-color)
+        );
+    }
+
+    @include no-ripple-styles() {
+      color:
+        var(
+          --button-no-ripple-text-color,
+          var(
+            --button-active-text-color,
+            var(--button-text-color)
+          )
+        );
+      background-color:
+        var(
+          --button-no-ripple-background-color,
+          var(
+            --button-active-background-color,
+            var(--button-background-color)
+          )
+        );
+    }
+
     &.primary {
       --ripple-color: rgba(0, 0, 0, 0.08);
-
-      color: var(--color-white);
-      background-color: var(--color-primary);
-
-      @include active-styles() {
-        background-color: rgba(var(--color-primary-shade-rgb), 0.9);
-      }
-
-      @include no-ripple-styles() {
-        background-color: var(--color-primary-shade-darker);
-      }
+      --button-text-color: var(--color-white);
+      --button-background-color: var(--color-primary);
+      --button-active-text-color: var(--color-white);
+      --button-active-background-color: rgba(var(--color-primary-shade-rgb), 0.9);
+      --button-no-ripple-background-color: var(--color-primary-shade-darker);
     }
 
     &.secondary {
       --ripple-color: rgba(0, 0, 0, 0.08);
-
-      color: rgba(var(--color-text-secondary-rgb), 0.75);
-      background-color: var(--color-background);
-
-      @include active-styles() {
-        color: white;
-        background-color: var(--color-primary);
-      }
-
-      @include no-ripple-styles() {
-        background-color: var(--color-primary-shade);
-      }
+      --button-text-color: rgba(var(--color-text-secondary-rgb), 0.75);
+      --button-background-color: var(--color-background);
+      --button-active-text-color: white;
+      --button-active-background-color: var(--color-primary);
+      --button-no-ripple-background-color: var(--color-primary-shade);
     }
 
     &.gray {
       --ripple-color: rgba(0, 0, 0, 0.08);
-
-      color: var(--color-text-secondary);
-      background-color: var(--color-background);
-
-      @include active-styles() {
-        color: var(--color-primary);
-      }
-
-      @include no-ripple-styles() {
-        background-color: var(--color-chat-hover);
-      }
+      --button-text-color: var(--color-text-secondary);
+      --button-background-color: var(--color-background);
+      --button-active-text-color: var(--color-primary);
+      --button-no-ripple-background-color: var(--color-chat-hover);
     }
 
     &.danger {
       --ripple-color: rgba(var(--color-error-rgb), 0.16);
-
-      color: var(--color-error);
-      background-color: var(--color-background);
-
-      @include active-styles() {
-        color: var(--color-white);
-        background-color: var(--color-error);
-      }
-
-      @include no-ripple-styles() {
-        background-color: var(--color-error-shade);
-      }
+      --button-text-color: var(--color-error);
+      --button-background-color: var(--color-background);
+      --button-active-text-color: var(--color-white);
+      --button-active-background-color: var(--color-error);
+      --button-no-ripple-background-color: var(--color-error-shade);
     }
 
     &.faded {
@@ -165,154 +172,102 @@
     &.translucent-primary,
     &.translucent {
       --ripple-color: var(--color-interactive-element-hover);
-
-      color: var(--color-text-secondary);
-      background-color: transparent;
-
-      @include active-styles() {
-        background-color: var(--color-interactive-element-hover);
-      }
-
-      @include no-ripple-styles() {
-        background-color: rgba(var(--color-text-secondary-rgb), 0.16);
-      }
+      --button-text-color: var(--color-text-secondary);
+      --button-background-color: transparent;
+      --button-active-background-color: var(--color-interactive-element-hover);
+      --button-no-ripple-background-color: rgba(var(--color-text-secondary-rgb), 0.16);
 
       &.activated {
-        color: var(--color-primary);
+        --button-active-text-color: var(--color-primary);
+
+        color: var(--button-active-text-color, var(--color-primary));
       }
     }
 
     &.translucent-white {
       --ripple-color: rgba(255, 255, 255, 0.08);
-
-      color: rgba(255, 255, 255, 0.5);
-      background-color: transparent;
-
-      @include active-styles() {
-        color: white;
-        background-color: rgba(255, 255, 255, 0.08);
-      }
-
-      @include no-ripple-styles() {
-        background-color: rgba(255, 255, 255, 0.16);
-      }
+      --button-text-color: rgba(255, 255, 255, 0.5);
+      --button-background-color: transparent;
+      --button-active-text-color: white;
+      --button-active-background-color: rgba(255, 255, 255, 0.08);
+      --button-no-ripple-background-color: rgba(255, 255, 255, 0.16);
     }
 
     &.translucent-black {
       --ripple-color: rgba(0, 0, 0, 0.08);
-
-      color: rgba(0, 0, 0, 0.8);
-      background-color: transparent;
-
-      @include active-styles() {
-        background-color: rgba(0, 0, 0, 0.08);
-      }
-
-      @include no-ripple-styles() {
-        background-color: rgba(0, 0, 0, 0.16);
-      }
+      --button-text-color: rgba(0, 0, 0, 0.8);
+      --button-background-color: transparent;
+      --button-active-background-color: rgba(0, 0, 0, 0.08);
+      --button-no-ripple-background-color: rgba(0, 0, 0, 0.16);
     }
 
     &.translucent-primary {
-      color: var(--color-primary);
+      --button-text-color: var(--color-primary);
     }
 
     &.translucent-bordered {
       --ripple-color: rgba(0, 0, 0, 0.08);
+      --button-text-color: var(--accent-color);
+      --button-background-color: transparent;
+      --button-active-text-color: var(--color-white);
+      --button-active-background-color: var(--accent-color);
+      --button-no-ripple-background-color: var(--active-color);
 
       border: 1px solid var(--accent-color);
-      color: var(--accent-color);
-      background-color: transparent;
-
-      @include active-styles() {
-        color: var(--color-white);
-        background-color: var(--accent-color);
-      }
-
-      @include no-ripple-styles() {
-        background-color: var(--active-color);
-      }
     }
 
     &.adaptive {
       --ripple-color: var(--accent-background-active-color);
-
-      color: var(--accent-color);
-      background-color: var(--accent-background-color);
-
-      @include active-styles() {
-        background-color: var(--accent-background-active-color);
-      }
-
-      @include no-ripple-styles() {
-        background-color: var(--accent-background-active-color);
-      }
+      --button-text-color: var(--accent-color);
+      --button-background-color: var(--accent-background-color);
+      --button-active-background-color: var(--accent-background-active-color);
+      --button-no-ripple-background-color: var(--accent-background-active-color);
     }
 
     &.dark {
       --ripple-color: rgba(255, 255, 255, 0.08);
-
-      color: white;
-      background-color: rgba(0, 0, 0, 0.75);
-
-      @include active-styles() {
-        color: white;
-        background-color: rgba(0, 0, 0, 0.85);
-      }
-
-      @include no-ripple-styles() {
-        background-color: rgba(0, 0, 0, 0.95);
-      }
+      --button-text-color: white;
+      --button-background-color: rgba(0, 0, 0, 0.75);
+      --button-active-text-color: white;
+      --button-active-background-color: rgba(0, 0, 0, 0.85);
+      --button-no-ripple-background-color: rgba(0, 0, 0, 0.95);
     }
 
     &.green {
       --ripple-color: rgba(0, 0, 0, 0.08);
-
-      color: var(--color-white);
-      background-color: var(--color-green);
-
-      @include active-styles() {
-        background-color: var(--color-green-darker);
-      }
-
-      @include no-ripple-styles() {
-        background-color: var(--color-green);
-      }
+      --button-text-color: var(--color-white);
+      --button-background-color: var(--color-green);
+      --button-active-text-color: var(--color-white);
+      --button-active-background-color: var(--color-green-darker);
+      --button-no-ripple-background-color: var(--color-green);
     }
 
     &.stars {
       --ripple-color: rgba(0, 0, 0, 0.08);
-
-      color: var(--color-white);
-      background-color: #ffb727;
+      --button-text-color: var(--color-white);
+      --button-background-color: #ffb727;
+      --button-active-text-color: var(--color-white);
+      --button-active-background-color: #ffb727cc;
+      --button-no-ripple-background-color: #ffb727;
 
       .theme-dark & {
-        background-color: #cf8920;
-      }
-
-      @include active-styles() {
-        background-color: #ffb727cc;
-      }
-
-      @include no-ripple-styles() {
-        background-color: #ffb727;
+        --button-background-color: #cf8920;
       }
     }
 
     &.bluredStarsBadge {
-      color: var(--color-white);
+      --button-text-color: var(--color-white);
+
       background: rgba(0, 0, 0, 0.2) !important;
       backdrop-filter: blur(50px);
     }
 
     &.transparentBlured {
-      color: white;
-      background-color: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(0.5rem);
+      --button-text-color: white;
+      --button-background-color: rgba(255, 255, 255, 0.1);
+      --button-active-background-color: rgba(255, 255, 255, 0.2);
 
-      &:hover {
-        background-color: rgba(255, 255, 255, 0.2);
-      }
+      backdrop-filter: blur(0.5rem);
     }
 
     &.smaller {
@@ -501,35 +456,23 @@
     }
 
     &.text {
-      background-color: transparent;
+      --button-background-color: transparent;
 
       &.primary {
-        color: var(--color-primary);
-        background-color: transparent;
-
-        @include active-styles() {
-          background-color: rgba(var(--color-primary-shade-rgb), 0.08);
-        }
-
-        @include no-ripple-styles() {
-          background-color: rgba(var(--color-primary-shade-rgb), 0.16);
-        }
+        --button-text-color: var(--color-primary);
+        --button-active-text-color: var(--color-primary);
+        --button-active-background-color: rgba(var(--color-primary-shade-rgb), 0.08);
+        --button-no-ripple-background-color: rgba(var(--color-primary-shade-rgb), 0.16);
       }
 
       &.secondary {
-        color: var(--color-text-secondary);
-        background-color: transparent;
+        --button-text-color: var(--color-text-secondary);
       }
 
       &.danger {
-        @include active-styles() {
-          color: var(--color-error);
-          background-color: rgba(var(--color-error-rgb), 0.08);
-        }
-
-        @include no-ripple-styles() {
-          background-color: rgba(var(--color-error-rgb), 0.16);
-        }
+        --button-active-text-color: var(--color-error);
+        --button-active-background-color: rgba(var(--color-error-rgb), 0.08);
+        --button-no-ripple-background-color: rgba(var(--color-error-rgb), 0.16);
       }
     }
   }

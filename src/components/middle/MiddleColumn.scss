@@ -292,8 +292,7 @@
   padding-bottom: 1.25rem;
 
   .unpin-all-button {
-    color: var(--color-primary);
-    text-transform: capitalize;
+    --button-text-color: var(--color-primary);
 
     .icon-unpin {
       margin-inline-start: -0.4375rem;
@@ -303,27 +302,6 @@
       color: var(--color-text-secondary);
 
       transition: color 0.15s;
-    }
-
-    @media (hover: hover) {
-      &:hover {
-        color: var(--color-white);
-
-        .icon-unpin {
-          color: var(--color-white);
-        }
-      }
-    }
-
-    @media (max-width: 600px) {
-      &:active,
-      &:focus {
-        color: var(--color-white);
-
-        .icon-unpin {
-          color: var(--color-white);
-        }
-      }
     }
   }
 
@@ -339,20 +317,7 @@
   }
 
   .open-chat-button {
-    color: var(--color-primary);
-
-    @media (hover: hover) {
-      &:hover {
-        color: var(--color-white);
-      }
-    }
-
-    @media (max-width: 600px) {
-      &:active,
-      &:focus {
-        color: var(--color-white);
-      }
-    }
+    --button-text-color: var(--color-primary);
   }
 
   .mask-image-disabled &::before {

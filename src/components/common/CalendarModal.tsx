@@ -203,7 +203,7 @@ const CalendarModal = ({
         message: lang('MessageScheduledRepeatPremium'),
         action: {
           action: 'openPremiumModal',
-          payload: { },
+          payload: {},
         },
         actionText: lang('PremiumMore'),
       });
@@ -399,6 +399,8 @@ const CalendarModal = ({
             color="translucent"
             iconName="previous"
             disabled={shouldDisablePrevMonth}
+            noFastClick
+            noPreventDefault
             onClick={shouldDisablePrevMonth ? undefined : handlePrevMonth}
           />
 
@@ -408,6 +410,8 @@ const CalendarModal = ({
             color="translucent"
             iconName="next"
             disabled={shouldDisableNextMonth}
+            noFastClick
+            noPreventDefault
             onClick={shouldDisableNextMonth ? undefined : handleNextMonth}
           />
         </div>
@@ -417,35 +421,53 @@ const CalendarModal = ({
         <div className="calendar-grid">
           {WEEKDAY_LETTERS.map((day) => (
             <div className="day-button faded weekday">
-              <span>{oldLang(day)}</span>
+              {oldLang(day)}
             </div>
           ))}
           {prevMonthGrid.map((gridDate) => (
-            <div className="day-button disabled"><span>{gridDate}</span></div>
-          ))}
-          {currentMonthGrid.map((gridDate) => (
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => handleDateSelect(gridDate)}
-              className={buildClassName(
-                'day-button',
-                'div-button',
-                isDisabledDay(
-                  currentYear, currentMonth, gridDate, minDate, maxDate,
-                )
-                  ? 'disabled'
-                  : gridDate ? 'clickable' : '',
-                selectedDay === formatDay(currentYear, currentMonth, gridDate) && 'selected',
-              )}
+            <Button
+              key={`prev-month-${gridDate}`}
+              round
+              size="smaller"
+              color="translucent"
+              disabled
             >
-              {Boolean(gridDate) && (
-                <span>{gridDate}</span>
-              )}
-            </div>
+              {gridDate}
+            </Button>
           ))}
+          {currentMonthGrid.map((gridDate) => {
+            const isSelected = selectedDay === formatDay(currentYear, currentMonth, gridDate);
+            return (
+              <Button
+                key={`current-month-${gridDate}`}
+                round
+                autoFocus={isSelected}
+                ariaSelected={isSelected}
+                onClick={() => handleDateSelect(gridDate)}
+                disabled={isDisabledDay(
+                  currentYear, currentMonth, gridDate, minDate, maxDate,
+                )}
+                noFastClick
+                noPreventDefault
+                nonInteractive={!gridDate}
+                size="smaller"
+                color={isSelected ? 'primary' : 'translucent'}
+                className={buildClassName('day-button div-button', isSelected && 'selected')}
+              >
+                {gridDate}
+              </Button>
+            );
+          })}
           {nextMonthGrid.map((gridDate) => (
-            <div className="day-button disabled"><span>{gridDate}</span></div>
+            <Button
+              key={`next-month-${gridDate}`}
+              round
+              size="smaller"
+              color="translucent"
+              disabled
+            >
+              {gridDate}
+            </Button>
           ))}
         </div>
       </div>

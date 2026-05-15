@@ -154,7 +154,6 @@ const PollModal = ({
 
   const lang = useLang();
 
-  const questionInputRef = useRef<HTMLInputElement>();
   const mainButtonRef = useRef<HTMLButtonElement>();
   const optionListRef = useRef<HTMLDivElement>();
   const durationMenuRef = useRef<HTMLDivElement>();
@@ -205,14 +204,6 @@ const PollModal = ({
     starsBalance,
     true,
   );
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    questionInputRef.current?.focus();
-  }, [isOpen]);
 
   useEffect(() => {
     if (isChannel) {
@@ -578,11 +569,11 @@ const PollModal = ({
         <IslandTitle>{lang('PollModalQuestionTitle')}</IslandTitle>
         <Island>
           <InputText
-            ref={questionInputRef}
             className={styles.input}
             label={lang('AskAQuestion')}
             value={question}
             maxLength={MAX_QUESTION_LENGTH}
+            autoFocus
             error={hasSubmitted && !trimmedQuestion ? lang('PollsChooseQuestion') : undefined}
             onChange={handleQuestionChange}
           />

@@ -52,6 +52,7 @@ const MAPPED_ATTRIBUTES: Partial<Record<string, string>> = {
   autoCorrect: 'autocorrect',
   autoPlay: 'autoplay',
   spellCheck: 'spellcheck',
+  autoFocus: 'autofocus',
 };
 const INDEX_KEY_PREFIX = '__indexKey#';
 const SELECTION_STATE_ATTRIBUTE = '__teactSelectionState';
