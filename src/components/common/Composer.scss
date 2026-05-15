@@ -710,6 +710,7 @@
     font-size: var(--composer-text-size, 1rem);
     line-height: 1.375;
     text-align: initial;
+    white-space: pre-wrap;
 
     background: transparent !important;
     box-shadow: none !important;
@@ -842,9 +843,7 @@
     height: auto;
     margin-bottom: 0;
     padding: calc((var(--base-height, 3rem) - var(--composer-text-size, 1rem) * 1.3125) / 2) 0;
-
     line-height: 1.3125;
-    white-space: pre-wrap;
   }
 
   .forced-placeholder,
