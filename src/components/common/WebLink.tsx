@@ -12,6 +12,7 @@ import {
 } from '../../global/helpers';
 import { selectWebPageFromMessage } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { copyTextToClipboard } from '../../util/clipboard';
 import { formatPastTimeShort } from '../../util/dates/oldDateFormat';
 import trimText from '../../util/trimText';
 import { renderMessageSummary } from './helpers/renderMessageText';
@@ -128,6 +129,15 @@ const WebLink = ({
 
   if (!url) return undefined;
 
+  const mergedContextActions: MenuItemContextAction[] | undefined = contextActions && [
+    {
+      title: lang('CopyLink'),
+      icon: 'copy',
+      handler: () => copyTextToClipboard(url),
+    },
+    ...contextActions,
+  ];
+
   const truncatedDescription = !senderTitle && description && trimText(description, MAX_TEXT_LENGTH);
 
   const className = buildClassName(
@@ -152,7 +162,7 @@ const WebLink = ({
           message={message}
           isProtected={isProtected}
           observeIntersection={observeIntersection}
-          contextActions={contextActions}
+          contextActions={mergedContextActions}
         />
       )}
       <div className="content">
@@ -198,7 +208,7 @@ const WebLink = ({
           onCloseAnimationEnd={handleContextMenuHide}
           withPortal
         >
-          {contextActions.map((action) => (
+          {mergedContextActions!.map((action) => (
             ('isSeparator' in action) ? (
               <MenuSeparator key={action.key || 'separator'} />
             ) : (
