@@ -1,6 +1,7 @@
 .File {
   --secondary-color: var(--color-text-secondary);
 
+  position: relative;
   display: flex;
   align-items: center;
 
@@ -138,6 +139,12 @@
         opacity: 0;
       }
     }
+  }
+
+  &.has-menu-open {
+    border-radius: var(--border-radius-default);
+    background-color: var(--color-chat-hover);
+    box-shadow: 0 0 0 0.5rem var(--color-chat-hover);
   }
 
   .file-info {

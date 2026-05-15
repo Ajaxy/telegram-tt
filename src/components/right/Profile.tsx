@@ -710,6 +710,16 @@ const Profile = ({
     focusMessage({ chatId: message.chatId, messageId: message.id });
   });
 
+  const getMessageContextActions = useLastCallback((message: ApiMessage): MenuItemContextAction[] => {
+    return [{
+      title: lang('FocusMessage'),
+      icon: 'show-message',
+      handler: () => {
+        handleMessageFocus(message);
+      },
+    }];
+  });
+
   const handleDeleteMembersModalClose = useLastCallback(() => {
     setDeletingUserId(undefined);
   });
@@ -1023,6 +1033,7 @@ const Profile = ({
               canAutoPlay={canAutoPlayGifs}
               observeIntersection={observeIntersectionForMedia}
               onClick={handleSelectMedia}
+              contextActions={getMessageContextActions(messagesById[id])}
             />
           ))
         ) : (resultType === 'stories' || resultType === 'storiesArchive') ? (
@@ -1049,6 +1060,7 @@ const Profile = ({
               message={messagesById[id]}
               shouldWarnAboutFiles={shouldWarnAboutFiles}
               onMediaClick={handleSelectMedia}
+              contextActions={getMessageContextActions(messagesById[id])}
             />
           ))
         ) : resultType === 'links' ? (
@@ -1058,6 +1070,7 @@ const Profile = ({
               message={messagesById[id]}
               isProtected={isChatProtected || messagesById[id].isProtected}
               observeIntersection={observeIntersectionForMedia}
+              contextActions={getMessageContextActions(messagesById[id])}
               onMessageClick={handleMessageFocus}
             />
           ))
@@ -1072,6 +1085,7 @@ const Profile = ({
               className="scroll-item"
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
+              contextActions={getMessageContextActions(messagesById[id])}
               canDownload={!isChatProtected && !messagesById[id].isProtected}
               isDownloading={getIsDownloading(activeDownloads, messagesById[id].content.audio!)}
             />
@@ -1093,6 +1107,7 @@ const Profile = ({
                 className="scroll-item"
                 onPlay={handlePlayAudio}
                 onDateClick={handleMessageFocus}
+                contextActions={getMessageContextActions(message)}
                 canDownload={!isChatProtected && !message.isProtected}
                 isDownloading={getIsDownloading(activeDownloads, media)}
               />

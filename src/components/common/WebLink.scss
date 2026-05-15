@@ -11,6 +11,12 @@
     margin-top: 1.5rem;
   }
 
+  &.has-menu-open {
+    border-radius: var(--border-radius-default);
+    background-color: var(--color-chat-hover);
+    box-shadow: 0 0 0 0.5rem var(--color-chat-hover);
+  }
+
   &.without-media::before {
     content: attr(data-initial);
 

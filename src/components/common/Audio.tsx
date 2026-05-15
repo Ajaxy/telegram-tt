@@ -12,6 +12,7 @@ import type { BufferedRange } from '../../hooks/useBuffering';
 import type { OldLangFn } from '../../hooks/useOldLang';
 import type { ThemeKey } from '../../types';
 import type { LangFn } from '../../util/localization';
+import type { MenuItemContextAction } from '../ui/ListItem';
 import { ApiMediaFormat } from '../../api/types';
 import { AudioOrigin } from '../../types';
 
@@ -38,6 +39,7 @@ import { MAX_EMPTY_WAVEFORM_POINTS, renderWaveform } from './helpers/waveform';
 import useAppLayout from '../../hooks/useAppLayout';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
 import useBuffering from '../../hooks/useBuffering';
+import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
@@ -47,6 +49,9 @@ import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated
 
 import Button from '../ui/Button';
 import Link from '../ui/Link';
+import Menu from '../ui/Menu';
+import MenuItem from '../ui/MenuItem';
+import MenuSeparator from '../ui/MenuSeparator';
 import ProgressSpinner from '../ui/ProgressSpinner';
 import AnimatedFileSize from './AnimatedFileSize';
 import AnimatedIcon from './AnimatedIcon';
@@ -79,6 +84,7 @@ type OwnProps = {
   onReadMedia?: () => void;
   onCancelUpload?: () => void;
   onDateClick?: (arg: ApiMessage) => void;
+  contextActions?: MenuItemContextAction[];
 };
 
 type StateProps = {
@@ -119,6 +125,7 @@ const Audio = ({
   onReadMedia,
   onCancelUpload,
   onDateClick,
+  contextActions,
 }: OwnProps & StateProps) => {
   const {
     cancelMediaDownload, downloadMedia, transcribeAudio, openOneTimeMediaModal,
@@ -133,6 +140,8 @@ const Audio = ({
   const media = (voice || video || audio)!;
   const mediaSource = (voice || video);
   const isVoice = Boolean(voice || video);
+  const containerRef = useRef<HTMLDivElement>();
+  const menuRef = useRef<HTMLDivElement>();
   const isSeekingRef = useRef<boolean>(false);
   const seekerRef = useRef<HTMLDivElement>();
   const oldLang = useOldLang();
@@ -265,6 +274,17 @@ const Audio = ({
     }
   });
 
+  const {
+    isContextMenuOpen, contextMenuAnchor,
+    handleBeforeContextMenu, handleContextMenu,
+    handleContextMenuClose, handleContextMenuHide,
+  } = useContextMenuHandlers(containerRef, !contextActions);
+
+  const getTriggerElement = useLastCallback(() => containerRef.current);
+  const getRootElement = useLastCallback(() => containerRef.current!.closest('.custom-scroll') || document.body);
+  const getMenuElement = useLastCallback(() => menuRef.current);
+  const getLayout = useLastCallback(() => ({ withPortal: true }));
+
   const handleSeek = useLastCallback((e: MouseEvent | TouchEvent) => {
     if (isSeekingRef.current && seekerRef.current) {
       const { width, left } = seekerRef.current.getBoundingClientRect();
@@ -343,6 +363,7 @@ const Audio = ({
     isOwn && origin === AudioOrigin.Inline && 'own',
     (origin === AudioOrigin.Search || origin === AudioOrigin.SharedMedia) && 'bigger',
     isSelected && 'audio-is-selected',
+    contextMenuAnchor && 'has-menu-open',
   );
 
   const buttonClassNames = ['toogle-play-wrapper'];
@@ -420,7 +441,13 @@ const Audio = ({
   }
 
   return (
-    <div className={fullClassName} dir={lang.isRtl ? 'rtl' : 'ltr'}>
+    <div
+      ref={containerRef}
+      className={fullClassName}
+      dir={lang.isRtl ? 'rtl' : 'ltr'}
+      onMouseDown={handleBeforeContextMenu}
+      onContextMenu={contextActions ? handleContextMenu : undefined}
+    >
       {isSelectable && (
         <div className="message-select-control no-selection">
           {isSelected && <Icon name="check" className="message-select-control-icon" />}
@@ -491,6 +518,38 @@ const Audio = ({
           onHideTranscription,
           origin,
         )
+      )}
+      {contextActions && contextMenuAnchor !== undefined && (
+        <Menu
+          ref={menuRef}
+          isOpen={isContextMenuOpen}
+          anchor={contextMenuAnchor}
+          getTriggerElement={getTriggerElement}
+          getRootElement={getRootElement}
+          getMenuElement={getMenuElement}
+          getLayout={getLayout}
+          className="shared-media-context-menu"
+          autoClose
+          onClose={handleContextMenuClose}
+          onCloseAnimationEnd={handleContextMenuHide}
+          withPortal
+        >
+          {contextActions.map((action) => (
+            ('isSeparator' in action) ? (
+              <MenuSeparator key={action.key || 'separator'} />
+            ) : (
+              <MenuItem
+                key={action.title}
+                icon={action.icon}
+                destructive={action.destructive}
+                disabled={!action.handler}
+                onClick={action.handler}
+              >
+                {action.title}
+              </MenuItem>
+            )
+          ))}
+        </Menu>
       )}
     </div>
   );

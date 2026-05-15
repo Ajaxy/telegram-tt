@@ -6,6 +6,7 @@ import {
 import type { ApiAttachment, MediaContent } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { IconName } from '../../types/icons';
+import type { MenuItemContextAction } from '../ui/ListItem';
 
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDateTime, formatPastTimeShort } from '../../util/dates/oldDateFormat';
@@ -13,11 +14,16 @@ import { getColorFromExtension } from './helpers/documentInfo';
 import { getDocumentThumbnailDimensions } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
 
+import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import Link from '../ui/Link';
+import Menu from '../ui/Menu';
+import MenuItem from '../ui/MenuItem';
+import MenuSeparator from '../ui/MenuSeparator';
 import ProgressSpinner from '../ui/ProgressSpinner';
 import AnimatedFileSize from './AnimatedFileSize';
 import CompactMediaPreview, { canRenderCompactMediaPreview } from './CompactMediaPreview';
@@ -46,6 +52,7 @@ type OwnProps = {
   isSelected?: boolean;
   transferProgress?: number;
   actionIcon?: IconName;
+  contextActions?: MenuItemContextAction[];
   onClick?: () => void;
   onDateClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 };
@@ -68,6 +75,7 @@ const File = ({
   isSelected,
   transferProgress,
   actionIcon,
+  contextActions,
   observeIntersection,
   onClick,
   onDateClick,
@@ -78,6 +86,7 @@ const File = ({
   if (ref) {
     elementRef = ref;
   }
+  const menuRef = useRef<HTMLDivElement>();
 
   const {
     shouldRender: shouldSpinnerRender,
@@ -85,6 +94,17 @@ const File = ({
   } = useShowTransitionDeprecated(isTransferring, undefined, true);
 
   const color = getColorFromExtension(extension);
+
+  const {
+    isContextMenuOpen, contextMenuAnchor,
+    handleBeforeContextMenu, handleContextMenu,
+    handleContextMenuClose, handleContextMenuHide,
+  } = useContextMenuHandlers(elementRef, !contextActions);
+
+  const getTriggerElement = useLastCallback(() => elementRef.current);
+  const getRootElement = useLastCallback(() => elementRef.current!.closest('.custom-scroll') || document.body);
+  const getMenuElement = useLastCallback(() => menuRef.current);
+  const getLayout = useLastCallback(() => ({ withPortal: true }));
 
   const { width } = getDocumentThumbnailDimensions(previewSize);
   const shouldRenderPreview = canRenderCompactMediaPreview(previewMedia, previewAttachment);
@@ -95,10 +115,18 @@ const File = ({
     previewSize !== 'medium' && `size-${previewSize}`,
     onClick && !isUploading && 'interactive',
     isSelected && 'file-is-selected',
+    contextMenuAnchor && 'has-menu-open',
   );
 
   return (
-    <div id={id} ref={elementRef} className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
+    <div
+      id={id}
+      ref={elementRef}
+      className={fullClassName}
+      dir={lang.isRtl ? 'rtl' : undefined}
+      onMouseDown={handleBeforeContextMenu}
+      onContextMenu={contextActions ? handleContextMenu : undefined}
+    >
       {isSelectable && (
         <div className="message-select-control no-selection">
           {isSelected && <Icon name="check" className="message-select-control-icon" />}
@@ -156,6 +184,38 @@ const File = ({
       </div>
       {sender && Boolean(timestamp) && (
         <Link onClick={onDateClick}>{formatPastTimeShort(oldLang, timestamp * 1000)}</Link>
+      )}
+      {contextActions && contextMenuAnchor !== undefined && (
+        <Menu
+          ref={menuRef}
+          isOpen={isContextMenuOpen}
+          anchor={contextMenuAnchor}
+          getTriggerElement={getTriggerElement}
+          getRootElement={getRootElement}
+          getMenuElement={getMenuElement}
+          getLayout={getLayout}
+          className="shared-media-context-menu"
+          autoClose
+          onClose={handleContextMenuClose}
+          onCloseAnimationEnd={handleContextMenuHide}
+          withPortal
+        >
+          {contextActions.map((action) => (
+            ('isSeparator' in action) ? (
+              <MenuSeparator key={action.key || 'separator'} />
+            ) : (
+              <MenuItem
+                key={action.title}
+                icon={action.icon}
+                destructive={action.destructive}
+                disabled={!action.handler}
+                onClick={action.handler}
+              >
+                {action.title}
+              </MenuItem>
+            )
+          ))}
+        </Menu>
       )}
     </div>
   );

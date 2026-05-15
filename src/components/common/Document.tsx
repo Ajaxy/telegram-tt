@@ -5,6 +5,7 @@ import { getActions } from '../../global';
 
 import type { ApiDocument, ApiMessage, MediaContent } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import type { MenuItemContextAction } from '../ui/ListItem';
 
 import {
   getDocumentMediaHash,
@@ -42,6 +43,7 @@ type OwnProps = {
   shouldWarnAboutFiles?: boolean;
   id?: string;
   onCancelUpload?: NoneToVoidFunction;
+  contextActions?: MenuItemContextAction[];
 } & ({
   message: ApiMessage;
   onDateClick: (arg: ApiMessage) => void;
@@ -73,12 +75,13 @@ const Document = ({
   onCancelUpload,
   onMediaClick,
   onDateClick,
+  contextActions,
 }: OwnProps) => {
   const { cancelMediaDownload, downloadMedia, setSharedSettingOption } = getActions();
 
   const ref = useRef<HTMLDivElement>();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
   const [isFileIpDialogOpen, openFileIpDialog, closeFileIpDialog] = useFlag();
   const [shouldNotWarnAboutFiles, setShouldNotWarnAboutFiles] = useState(false);
 
@@ -209,6 +212,7 @@ const Document = ({
         isSelectable={isSelectable}
         isSelected={isSelected}
         actionIcon={withMediaViewer ? (isDocumentVideo(document) ? 'play' : 'eye') : 'download'}
+        contextActions={contextActions}
         onClick={handleClick}
         onDateClick={onDateClick ? handleDateClick : undefined}
       />
@@ -217,11 +221,11 @@ const Document = ({
         onClose={closeFileIpDialog}
         confirmHandler={handleFileIpConfirm}
       >
-        {lang('lng_launch_svg_warning')}
+        {oldLang('lng_launch_svg_warning')}
         <Checkbox
           className="dialog-checkbox"
           checked={shouldNotWarnAboutFiles}
-          label={lang('lng_launch_exe_dont_ask')}
+          label={oldLang('lng_launch_exe_dont_ask')}
           onCheck={setShouldNotWarnAboutFiles}
         />
       </ConfirmDialog>
