@@ -95,6 +95,15 @@ const EditTopic: FC<OwnProps & StateProps> = ({
     });
   }, [chat, editTopic, iconEmojiId, title, topic]);
 
+  const handleTitleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter' || e.isComposing || isLoading || !isTouched) {
+      return;
+    }
+
+    e.preventDefault();
+    handleEditTopic();
+  }, [handleEditTopic, isLoading, isTouched]);
+
   const handleCustomEmojiSelect = useCallback((emoji: ApiSticker) => {
     if (!emoji.isFree && !isCurrentUserPremium && emoji.id !== DEFAULT_TOPIC_ICON_STICKER_ID) {
       openPremiumModal({ initialSection: 'animated_emoji' });
@@ -146,6 +155,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
               <InputText
                 value={title}
                 onChange={handleTitleChange}
+                onKeyDown={handleTitleKeyDown}
                 label={lang('lng_forum_topic_title')}
                 disabled={isLoading}
                 teactExperimentControlled
