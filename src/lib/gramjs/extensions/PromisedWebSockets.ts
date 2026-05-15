@@ -1,12 +1,12 @@
 import { Mutex } from 'async-mutex';
 
-const mutex = new Mutex();
-
 const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 3000;
 const MAX_TIMEOUT = 30000;
 
 export default class PromisedWebSockets {
+  private readonly mutex = new Mutex();
+
   private closed: boolean;
 
   private timeout: number;
@@ -92,16 +92,20 @@ export default class PromisedWebSockets {
     this.closed = false;
     this.website = this.getWebSocketLink(ip, port, isTestServer, isPremium);
     this.client = new WebSocket(this.website, 'binary');
+    this.client.binaryType = 'arraybuffer';
+
     return new Promise((resolve, reject) => {
       if (!this.client) return;
       let hasResolved = false;
       let timeout: ReturnType<typeof globalThis.setTimeout> | undefined;
+
       this.client.onopen = () => {
         this.receive();
         resolve(this);
         hasResolved = true;
         if (timeout) clearTimeout(timeout);
       };
+
       this.client.onerror = (error) => {
         // eslint-disable-next-line no-console
         console.error('WebSocket error', error);
@@ -109,6 +113,7 @@ export default class PromisedWebSockets {
         hasResolved = true;
         if (timeout) clearTimeout(timeout);
       };
+
       this.client.onclose = (event) => {
         const { code, reason, wasClean } = event;
         if (code !== 1000) {
@@ -165,7 +170,7 @@ export default class PromisedWebSockets {
   receive() {
     if (!this.client) return;
     this.client.onmessage = async (message) => {
-      await mutex.runExclusive(async () => {
+      await this.mutex.runExclusive(async () => {
         const data = message.data instanceof ArrayBuffer
           ? Buffer.from(message.data)
           : Buffer.from(await new Response(message.data).arrayBuffer());
