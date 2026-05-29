@@ -1,15 +1,20 @@
 <script lang="ts">
+  import { getActions } from '../../../global';
   import { getChatTitle } from '../../../global/helpers/chats';
   import { getMessageTextWithFallback } from '../../../global/helpers/messages';
+  import { getPeerTitle, getMessageSenderName } from '../../../global/helpers/peers';
+  import { getMessageReplyInfo } from '../../../global/helpers/replies';
   import { getUserFullName } from '../../../global/helpers/users';
   import { globalStore } from '../../../global/store.svelte';
   import {
+    selectChatMessage,
     selectCurrentChat,
     selectCurrentMessageList,
     selectListedIds,
-    selectThreadInfo,
+    selectPeer,
     selectViewportIds,
   } from '../../../global/selectors';
+  import { selectDraft, selectThreadInfo } from '../../../global/selectors/threads';
   import { formatTime } from '../../../util/dates/dateFormat';
   import buildClassName from '../../../util/buildClassName';
   import { getTranslationFn } from '../../../util/localization';
@@ -25,6 +30,7 @@
   const currentChat = $derived(selectCurrentChat(globalStore.state));
   const currentUser = $derived(chatId ? globalStore.state.users.byId[chatId] : undefined);
   const threadInfo = $derived(chatId && threadId !== undefined ? selectThreadInfo(globalStore.state, chatId, threadId) : undefined);
+  const draft = $derived(chatId && threadId !== undefined ? selectDraft(globalStore.state, chatId, threadId) : undefined);
   const listedIds = $derived(chatId && threadId !== undefined ? selectListedIds(globalStore.state, chatId, threadId) : undefined);
   const viewportIds = $derived(chatId && threadId !== undefined ? selectViewportIds(globalStore.state, chatId, threadId, 0) : undefined);
   const visibleMessageIds = $derived(viewportIds?.length ? viewportIds : listedIds);
@@ -35,7 +41,36 @@
         .filter(Boolean)
       : []
   );
-  const previewMessages = $derived(visibleMessages.slice(-6).reverse());
+  const previewMessages = $derived(visibleMessages.slice(-8).reverse());
+  const messageItems = $derived.by(() => previewMessages.map((message) => {
+    const sender = message.senderId ? selectPeer(globalStore.state, message.senderId) : undefined;
+    const replyInfo = getMessageReplyInfo(message);
+    const replyMessage = replyInfo?.replyToMsgId
+      ? selectChatMessage(globalStore.state, replyInfo.replyToPeerId || message.chatId, replyInfo.replyToMsgId)
+      : undefined;
+
+    return {
+      id: message.id,
+      isOutgoing: message.isOutgoing,
+      senderTitle: sender ? getMessageSenderName(lang, message.chatId, sender) : undefined,
+      text: getMessageTextWithFallback(lang, message)?.text || lang('ActionUnsupported'),
+      time: formatTime(lang, new Date(message.date * 1000)),
+      replyTitle: replyMessage
+        ? (replyMessage.senderId
+          ? getPeerTitle(lang, selectPeer(globalStore.state, replyMessage.senderId) || currentChat || currentUser)
+          : previewTitle)
+        : undefined,
+      replyText: replyMessage
+        ? (getMessageTextWithFallback(lang, replyMessage)?.text || lang('ActionUnsupported'))
+        : undefined,
+    };
+  }));
+  const replyToMessageId = $derived(draft?.replyInfo?.replyToMsgId);
+  const replyToMessage = $derived(
+    chatId && replyToMessageId
+      ? selectChatMessage(globalStore.state, chatId, replyToMessageId)
+      : undefined
+  );
   const previewTitle = $derived.by(() => {
     if (currentUser) return getUserFullName(currentUser);
     if (currentChat) return getChatTitle(lang, currentChat);
@@ -46,12 +81,25 @@
     if (threadId !== undefined) return `${lang('ChatInfoForumTopic')} #${threadId}`;
     return undefined;
   });
+  const messageCountLabel = $derived.by(() => {
+    if (!visibleMessages.length) return undefined;
+
+    return lang('Messages', { count: visibleMessages.length }, { pluralValue: visibleMessages.length });
+  });
   const composerPlaceholder = $derived.by(() => {
     if (!chatId) return lang('Loading');
     return currentUser ? lang('DlgSearchForMessages') : lang('SearchMessages');
   });
+  const draftText = $derived(draft?.text.text || '');
 
   const isChatOpen = $derived(Boolean(chatId));
+  let composerText = $state('');
+
+  $effect(() => {
+    if (composerText !== draftText) {
+      composerText = draftText;
+    }
+  });
 
   const className = $derived(buildClassName(
     'MiddleColumn',
@@ -64,6 +112,69 @@
   ));
 
   // let isReady = $state(true);
+
+  function handleFocusMessage(messageId: number) {
+    if (!currentMessageList || !chatId || threadId === undefined) return;
+
+    getActions().focusMessage({
+      chatId,
+      threadId,
+      messageId,
+      messageListType: currentMessageList.type,
+      tabId: 0,
+    });
+  }
+
+  function handleComposerInput(event: Event) {
+    if (!chatId || threadId === undefined) return;
+
+    const nextValue = (event.currentTarget as HTMLTextAreaElement).value;
+    composerText = nextValue;
+
+    if (!nextValue.trim()) {
+      getActions().clearDraft({
+        chatId,
+        threadId,
+        isLocalOnly: true,
+      });
+
+      return;
+    }
+
+    getActions().saveDraft({
+      chatId,
+      threadId,
+      text: {
+        text: nextValue,
+        entities: [],
+      },
+    });
+  }
+
+  function handleSendMessage() {
+    if (!currentMessageList) return;
+
+    const trimmedText = composerText.trim();
+    if (!trimmedText) return;
+
+    getActions().sendMessage({
+      messageList: currentMessageList,
+      text: trimmedText,
+      entities: [],
+      tabId: 0,
+    });
+  }
+
+  function handleComposerKeyDown(event: KeyboardEvent) {
+    if (event.key !== 'Enter' || event.shiftKey) return;
+
+    event.preventDefault();
+    handleSendMessage();
+  }
+
+  function handleResetReply() {
+    getActions().resetDraftReplyInfo({ tabId: 0 });
+  }
 </script>
 
 <div
@@ -85,17 +196,36 @@
               {#if threadLabel}
                 <p class="thread-label">{threadLabel}</p>
               {/if}
+              {#if messageCountLabel}
+                <p class="message-count">{messageCountLabel}</p>
+              {/if}
             </div>
 
-            {#if previewMessages.length}
+            {#if messageItems.length}
               <div class="message-stack">
-                {#each previewMessages as message (message.id)}
-                  <div class:outgoing={message.isOutgoing} class="message-bubble">
+                {#each messageItems as item (item.id)}
+                  <button
+                    type="button"
+                    class:outgoing={item.isOutgoing}
+                    class="message-bubble"
+                    onclick={() => handleFocusMessage(item.id)}
+                  >
+                    {#if item.senderTitle}
+                      <span class="message-sender">{item.senderTitle}</span>
+                    {/if}
+                    {#if item.replyText}
+                      <span class="message-reply">
+                        {#if item.replyTitle}
+                          <span class="message-reply-title">{item.replyTitle}</span>
+                        {/if}
+                        <span class="message-reply-text" dir="auto">{item.replyText}</span>
+                      </span>
+                    {/if}
                     <span class="message-text" dir="auto">
-                      {getMessageTextWithFallback(lang, message)?.text || lang('ActionUnsupported')}
+                      {item.text}
                     </span>
-                    <span class="message-time">{formatTime(lang, new Date(message.date * 1000))}</span>
-                  </div>
+                    <span class="message-time">{item.time}</span>
+                  </button>
                 {/each}
               </div>
             {:else}
@@ -106,8 +236,39 @@
       </div>
 
       <div class="middle-column-footer">
-        <div class="composer-placeholder">
-          {composerPlaceholder}
+        <div class="composer-shell">
+          {#if replyToMessage}
+            <div class="reply-preview">
+              <div class="reply-copy">
+                <span class="reply-label">{lang('Reply')}</span>
+                <span class="reply-text" dir="auto">
+                  {getMessageTextWithFallback(lang, replyToMessage)?.text || lang('ActionUnsupported')}
+                </span>
+              </div>
+              <button type="button" class="reply-close" onclick={handleResetReply}>
+                {lang('CommonClose')}
+              </button>
+            </div>
+          {/if}
+
+          <div class="composer-placeholder">
+            <textarea
+              rows="1"
+              class="composer-input"
+              value={composerText}
+              placeholder={composerPlaceholder}
+              oninput={handleComposerInput}
+              onkeydown={handleComposerKeyDown}
+            ></textarea>
+            <button
+              type="button"
+              class="composer-send"
+              disabled={!composerText.trim()}
+              onclick={handleSendMessage}
+            >
+              {lang('Send')}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -197,6 +358,11 @@
     margin-top: 0.375rem !important;
   }
 
+  .message-count {
+    color: var(--color-text-secondary);
+    margin-top: 0.375rem !important;
+  }
+
   .message-stack {
     display: flex;
     flex-direction: column;
@@ -212,12 +378,42 @@
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
+    border: none;
+    width: fit-content;
+    text-align: start;
+    cursor: pointer;
 
     &.outgoing {
       align-self: flex-end;
       border-radius: 1rem 1rem 0.375rem 1rem;
       background: rgba(223, 255, 219, 0.92);
     }
+  }
+
+  .message-sender {
+    font-size: 0.8125rem;
+    color: var(--color-primary);
+  }
+
+  .message-reply {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding-inline-start: 0.625rem;
+    border-inline-start: 0.125rem solid rgba(0, 136, 204, 0.25);
+  }
+
+  .message-reply-title {
+    font-size: 0.75rem;
+    color: var(--color-primary);
+  }
+
+  .message-reply-text {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .message-text {
@@ -237,15 +433,87 @@
     backdrop-filter: blur(10px);
   }
 
+  .composer-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .reply-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.08);
+  }
+
+  .reply-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .reply-label {
+    font-size: 0.75rem;
+    color: var(--color-primary);
+  }
+
+  .reply-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .reply-close {
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+  }
+
   .composer-placeholder {
-    height: 48px;
     background: #fff;
     border-radius: 24px;
     display: flex;
-    align-items: center;
-    padding: 0 16px;
-    color: #999;
+    align-items: flex-end;
+    gap: 0.75rem;
+    padding: 0.625rem 0.75rem 0.625rem 1rem;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+
+  .composer-input {
+    flex: 1;
+    border: none;
+    resize: none;
+    min-height: 2.25rem;
+    max-height: 8rem;
+    padding: 0.375rem 0;
+    font: inherit;
+    background: transparent;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .composer-send {
+    border: none;
+    background: var(--color-primary);
+    color: #fff;
+    border-radius: 999px;
+    min-width: 5.5rem;
+    height: 2.5rem;
+    padding: 0 1rem;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
   }
 
   .no-chat-selected {

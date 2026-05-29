@@ -1,58 +1,149 @@
-# Telegram Web A
+# Telegram Web A, Reimagined in Svelte
 
-This project won the first prize 🥇 at [Telegram Lightweight Client Contest](https://contest.com/javascript-web-3) and now is an official Telegram client available to anyone at [web.telegram.org/a](https://web.telegram.org/a).
+This repository is an active migration of Telegram Web A from its original
+Teact-based interface toward a Svelte-powered client.
 
-According to the original contest rules, it has nearly zero dependencies and is fully based on its own [Teact](https://github.com/Ajaxy/teact) framework (which re-implements React paradigm). It also uses a custom version of [GramJS](https://github.com/gram-js/gramjs) as an MTProto implementation.
+Telegram Web A is already a serious piece of browser engineering: MTProto over
+web workers, rich media playback, voice recording, PWA behavior, caching,
+animation-heavy interfaces, and a custom lightweight UI runtime. This branch
+keeps that foundation and moves the user interface toward Svelte step by step.
 
-The project incorporates lots of technologically advanced features, modern Web APIs and techniques: WebSockets, Web Workers and WebAssembly, multi-level caching and PWA, voice recording and media streaming, cryptography and raw binary data operations, optimistic and progressive interfaces, complicated CSS/Canvas/SVG animations, reactive data streams, and so much more.
+## Why This Branch Exists
 
-Feel free to explore, provide feedback and contribute.
+The goal is not a quick visual clone. The goal is to preserve the real Telegram
+client behavior while replacing the UI layer with Svelte in a way that can be
+built, reviewed, and improved continuously.
 
-## Local setup
+Current focus areas:
+
+- Svelte app bootstrap using the existing Telegram state and action system.
+- Auth screens wired to real global actions.
+- Left column chat navigation and search powered by existing selectors.
+- Middle column preview, message focus, draft handling, and a minimal composer.
+- Right column profile summary connected to real peer state.
+- Vite build path for the Svelte client.
+
+The original Teact/Webpack app is still present while the migration is in
+progress. That makes the branch useful for incremental work instead of a risky
+all-at-once rewrite.
+
+## What Works Today
+
+- `npm run dev` starts the original Telegram Web A development build.
+- `npm run dev:svelte` starts the Svelte/Vite migration build.
+- `npm run build:svelte` produces the Svelte build in `dist-svelte`.
+- The Svelte shell reads from the real global store.
+- Chat selection, folders, search, auth flow, right column visibility, message
+  preview, draft saving, and basic sending are already connected to existing
+  actions.
+
+This is still a migration branch, so feature parity is intentionally incomplete.
+The remaining heavy work is mostly in message rendering, the full composer,
+media flows, right-column details, settings, and secondary navigation screens.
+
+## Quick Start
 
 ```sh
 mv .env.example .env
-
 npm i
 ```
 
-Obtain API ID and API hash on [my.telegram.org](https://my.telegram.org) and populate the `.env` file.
+Create your Telegram API credentials at [my.telegram.org](https://my.telegram.org)
+and add them to `.env`.
 
-## Dev mode
+Run the Svelte migration client:
+
+```sh
+npm run dev:svelte
+```
+
+Build the Svelte client:
+
+```sh
+npm run build:svelte
+```
+
+Run the original client:
 
 ```sh
 npm run dev
 ```
 
-### Invoking API from console
+## Project Map
 
-Start your dev server and locate GramJS worker in console context.
+- `src/main.svelte.ts` boots the Svelte app.
+- `src/App.svelte` decides which high-level Svelte screen is visible.
+- `src/global/store.svelte.ts` bridges Svelte reactivity to the existing global
+  state.
+- `src/components/auth/svelte` contains the migrated auth screens.
+- `src/components/left/**/svelte` contains migrated left-column pieces.
+- `src/components/middle/svelte` contains the active middle-column migration.
+- `src/components/right/svelte` contains the active right-column migration.
+- `vite.config.ts` owns the Svelte/Vite build path.
 
-All constructors and functions available in global `GramJs` variable.
+## Migration Strategy
 
-Run `npm run gramjs:tl full` to get access to all available Telegram requests.
+The fastest practical path is incremental:
 
-Example usage:
-``` javascript
-await invoke(new GramJs.help.GetAppConfig())
+1. Finish the middle column: scrollable message list, complete composer, message
+   rendering, media previews, reply/edit state, and search inside chats.
+2. Finish right/common components: profile panels, shared avatar/info blocks,
+   reusable UI primitives, and real status handling.
+3. Finish left-side flows: archived chats, settings, new group/channel flows,
+   contacts, and the remaining search tabs.
+4. Clean up bundling: chunk splitting, legacy dependency warnings, and temporary
+   bridge code.
+
+That approach keeps the app buildable while the UI moves from Teact to Svelte.
+
+## Useful Commands
+
+```sh
+npm run dev:svelte
+npm run build:svelte
+npm run check:svelte
+npm run dev
+npm run build:dev
 ```
 
-### Dependencies
-* [GramJS](https://github.com/gram-js/gramjs) ([MIT License](https://github.com/gram-js/gramjs/blob/master/LICENSE))
-* [fflate](https://github.com/101arrowz/fflate) ([MIT License](https://github.com/101arrowz/fflate/blob/master/LICENSE))
-* [cryptography](https://github.com/spalt08/cryptography) ([Apache License 2.0](https://github.com/spalt08/cryptography/blob/master/LICENSE))
-* [emoji-data](https://github.com/iamcal/emoji-data) ([MIT License](https://github.com/iamcal/emoji-data/blob/master/LICENSE))
-* [twemoji-parser](https://github.com/twitter/twemoji-parser) ([MIT License](https://github.com/twitter/twemoji-parser/blob/master/LICENSE.md))
-* [rlottie](https://github.com/Samsung/rlottie) ([MIT License](https://github.com/Samsung/rlottie/blob/master/COPYING))
-* [opus-recorder](https://github.com/chris-rudmin/opus-recorder) ([Various Licenses](https://github.com/chris-rudmin/opus-recorder/blob/master/LICENSE.md))
-* [qr-code-styling](https://github.com/kozakdenys/qr-code-styling) ([MIT License](https://github.com/kozakdenys/qr-code-styling/blob/master/LICENSE))
-* [mp4box](https://github.com/gpac/mp4box.js) ([BSD-3-Clause license](https://github.com/gpac/mp4box.js/blob/master/LICENSE))
-* [music-metadata-browser](https://github.com/Borewit/music-metadata-browser) ([MIT License](https://github.com/Borewit/music-metadata-browser/blob/master/LICENSE.txt))
-* [lowlight](https://github.com/wooorm/lowlight) ([MIT License](https://github.com/wooorm/lowlight/blob/main/license))
-* [idb-keyval](https://github.com/jakearchibald/idb-keyval) ([Apache License 2.0](https://github.com/jakearchibald/idb-keyval/blob/main/LICENCE))
-* [fasttextweb](https://github.com/karmdesai/fastTextWeb)
-* webp-wasm
-* fastblur
+`check:svelte` is useful, but this branch currently treats `build:svelte` as the
+main migration safety check because several legacy dependencies still produce
+noisy compatibility warnings in the Vite path.
 
-## Bug reports and Suggestions
-If you find an issue with this app, let Telegram know using the [Suggestions Platform](https://bugs.telegram.org/c/4002).
+## Original Project
+
+Telegram Web A won first prize at the
+[Telegram Lightweight Client Contest](https://contest.com/javascript-web-3) and
+became an official Telegram client at
+[web.telegram.org/a](https://web.telegram.org/a).
+
+The original app is based on [Teact](https://github.com/Ajaxy/teact), a small
+React-like runtime, and a custom version of
+[GramJS](https://github.com/gram-js/gramjs) for MTProto.
+
+## Core Dependencies
+
+- [GramJS](https://github.com/gram-js/gramjs)
+- [fflate](https://github.com/101arrowz/fflate)
+- [cryptography](https://github.com/spalt08/cryptography)
+- [emoji-data](https://github.com/iamcal/emoji-data)
+- [twemoji-parser](https://github.com/twitter/twemoji-parser)
+- [rlottie](https://github.com/Samsung/rlottie)
+- [opus-recorder](https://github.com/chris-rudmin/opus-recorder)
+- [qr-code-styling](https://github.com/kozakdenys/qr-code-styling)
+- [mp4box](https://github.com/gpac/mp4box.js)
+- [music-metadata-browser](https://github.com/Borewit/music-metadata-browser)
+- [lowlight](https://github.com/wooorm/lowlight)
+- [idb-keyval](https://github.com/jakearchibald/idb-keyval)
+- fasttextweb
+- webp-wasm
+- fastblur
+
+## Contributing
+
+Good migration work in this branch is small, honest, and easy to review. Prefer
+moving one surface at a time, reuse existing selectors and actions, keep the
+legacy app working, and verify the Svelte build before opening a pull request.
+
+Bug reports for the official Telegram Web A client should still go through
+Telegram's [Suggestions Platform](https://bugs.telegram.org/c/4002).
