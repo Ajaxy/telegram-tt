@@ -326,7 +326,6 @@ const RecipientPicker = ({
                   peerId={peerId}
                   title={chipTitle}
                   size="small"
-                  forceShowSelf
                   canClose
                   className="picker-chip"
                   itemClassName="picker-chip-name"
