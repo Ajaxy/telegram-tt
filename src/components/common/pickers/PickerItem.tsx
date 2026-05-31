@@ -57,6 +57,14 @@ const PickerItem = ({
     onClick?.();
   });
 
+  const handleKeyDown = useLastCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== ' ') return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    handleClick();
+  });
+
   return (
     <div
       className={buildClassName(
@@ -68,6 +76,7 @@ const PickerItem = ({
         className,
       )}
       onClick={handleClick}
+      onKeyDown={isClickable ? handleKeyDown : undefined}
       style={style}
       dir={lang.isRtl ? 'rtl' : undefined}
       role={isClickable ? 'button' : undefined}

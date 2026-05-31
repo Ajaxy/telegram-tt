@@ -17,6 +17,7 @@ import {
   selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { isUserId } from '../../util/entities/ids';
 import { formatStarsAsIcon, formatStarsAsText } from '../../util/localization/format';
 
@@ -221,6 +222,32 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
 
     executeForward();
   });
+
+  const handleEnterShortcut = useLastCallback((e: KeyboardEvent) => {
+    if (e.isComposing || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) {
+      return false;
+    }
+
+    if (!selectedIds.length) {
+      if (!canCopyLink) return false;
+
+      e.preventDefault();
+      handleCopyLink();
+      return undefined;
+    }
+
+    e.preventDefault();
+    handleForwardToMultiple();
+    return undefined;
+  });
+
+  useEffect(() => {
+    if (!isOpen || !isMultiSelect || isPaymentConfirmOpen) {
+      return undefined;
+    }
+
+    return captureKeyboardListeners({ onEnter: handleEnterShortcut });
+  }, [isOpen, isMultiSelect, isPaymentConfirmOpen, handleEnterShortcut]);
 
   const executeForward = useLastCallback(() => {
     const targets: ForwardTarget[] = selectedIds.map(({ peerId, topicId }) => ({
