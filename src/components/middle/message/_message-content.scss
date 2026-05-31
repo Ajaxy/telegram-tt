@@ -354,6 +354,12 @@
       text-overflow: ellipsis;
     }
 
+    .via-sender {
+      display: flex;
+      align-items: center;
+      line-height: normal;
+    }
+
     .sender-hidden {
       font-weight: normal;
     }
@@ -639,6 +645,9 @@
     .MessageList.no-avatars & {
       max-width: min(29rem, calc(100vw - 3.75rem));
     }
+    .has-guest-avatar & {
+      max-width: min(29rem, calc(100vw - 6.25rem));
+    }
     .Message.own & {
       max-width: min(30rem, calc(100vw - 3.75rem));
     }
@@ -648,6 +657,9 @@
 
       .MessageList.no-avatars & {
         max-width: min(29rem, calc(100vw - 4.5rem));
+      }
+      .has-guest-avatar & {
+        max-width: min(29rem, calc(100vw - 7rem));
       }
 
       .Message.own & {

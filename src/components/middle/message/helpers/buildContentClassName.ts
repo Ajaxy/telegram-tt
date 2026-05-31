@@ -67,7 +67,7 @@ export function buildContentClassName(
   const hasText = text || location?.mediaType === 'venue' || isGeoLiveActive || hasFactCheck || poll;
   const isMediaWithNoText = isMedia && !hasText;
   const hasInlineKeyboard = Boolean(message.inlineButtons);
-  const isViaBot = Boolean(message.viaBotId);
+  const isViaBot = Boolean(message.viaBotId || message.guestChatViaId);
 
   const hasFooter = (() => {
     if (isInvertedMedia && isInvertibleMedia) {

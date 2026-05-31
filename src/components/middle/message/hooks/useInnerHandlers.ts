@@ -1,6 +1,6 @@
 import { getActions } from '../../../../global';
 
-import type { ApiMessage, ApiPeer, ApiStory, ApiTopic, ApiUser, ApiWebPage } from '../../../../api/types';
+import type { ApiMessage, ApiPeer, ApiStory, ApiTopic, ApiWebPage } from '../../../../api/types';
 import type { OldLangFn } from '../../../../hooks/useOldLang';
 import type { IAlbum, ThreadId } from '../../../../types';
 import { MAIN_THREAD_ID } from '../../../../api/types';
@@ -25,6 +25,7 @@ export default function useInnerHandlers({
   album,
   senderPeer,
   botSender,
+  guestFromSender,
   messageTopic,
   isTranslatingChat,
   story,
@@ -45,7 +46,8 @@ export default function useInnerHandlers({
   album?: IAlbum;
   avatarPeer?: ApiPeer;
   senderPeer?: ApiPeer;
-  botSender?: ApiUser;
+  botSender?: ApiPeer;
+  guestFromSender?: ApiPeer;
   messageTopic?: ApiTopic;
   isTranslatingChat?: boolean;
   story?: ApiStory;
@@ -83,7 +85,8 @@ export default function useInnerHandlers({
   });
 
   const handleViaBotClick = useLastCallback(() => {
-    if (!botSender) {
+    const username = botSender && getMainUsername(botSender);
+    if (!username) {
       return;
     }
 
@@ -91,9 +94,17 @@ export default function useInnerHandlers({
       chatId,
       threadId,
       text: {
-        text: `@${getMainUsername(botSender)} `,
+        text: `@${username} `,
       },
     });
+  });
+
+  const handleGuestForClick = useLastCallback(() => {
+    if (!guestFromSender) {
+      return;
+    }
+
+    openChat({ id: guestFromSender.id });
   });
 
   const handleReplyClick = useLastCallback((): void => {
@@ -289,6 +300,7 @@ export default function useInnerHandlers({
   return {
     handleSenderClick,
     handleViaBotClick,
+    handleGuestForClick,
     handleReplyClick,
     handleDocumentClick,
     handleMediaClick,

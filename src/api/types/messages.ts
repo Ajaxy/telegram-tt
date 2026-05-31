@@ -764,6 +764,7 @@ export interface ApiMessage {
   isKeyboardSelective?: boolean;
   viaBotId?: string;
   viaBusinessBotId?: string;
+  guestChatViaId?: string;
   postAuthorTitle?: string;
   isScheduled?: boolean;
   scheduleRepeatPeriod?: number;

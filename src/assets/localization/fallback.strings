@@ -816,6 +816,7 @@
 "PaymentInvoiceNotFound" = "Invoice not found";
 "NoWordsRecognized" = "No words recognized.";
 "ViaBot" = "via";
+"ForBot" = "for";
 "DiscussChannel" = "channel";
 "ForwardedMessage" = "Forwarded message";
 "ContextForwardMsg" = "Forward";

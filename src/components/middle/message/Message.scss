@@ -154,6 +154,10 @@
       padding-left: 0;
     }
 
+    &.has-guest-avatar {
+      padding-left: 2.5rem;
+    }
+
     &.first-in-group:not(.last-in-group) {
       --border-bottom-left-radius: var(--border-radius-messages-small);
     }
@@ -181,6 +185,10 @@
       .no-avatars &,
       &.is-thread-top {
         padding-left: 0.25rem;
+      }
+
+      &.has-guest-avatar {
+        padding-left: 2.875rem;
       }
     }
   }

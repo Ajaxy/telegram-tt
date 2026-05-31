@@ -49,6 +49,7 @@ export interface ApiUser {
   paidMessagesStars?: number;
   isBotForum?: boolean;
   canManageBotForumTopics?: boolean;
+  isGuestChatBot?: boolean;
 }
 
 export interface ApiUserFullInfo {

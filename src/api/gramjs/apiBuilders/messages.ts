@@ -199,7 +199,7 @@ export function buildApiMessageWithChatId(
   const isPrivateChat = getEntityTypeById(chatId) === 'user';
   // Server can return `fromId` for our own messages in private chats, but not for incoming ones
   // This can break grouping logic, as we do not fill `fromId` for `UpdateShortMessage` case
-  const fromId = mtpMessage.fromId && !isPrivateChat
+  const fromId = mtpMessage.fromId && (!isPrivateChat || mtpMessage.guestchatViaFrom)
     ? getApiChatIdFromMtpPeer(mtpMessage.fromId) : undefined;
 
   const isChatWithSelf = !fromId && chatId === currentUserId;
@@ -299,6 +299,7 @@ export function buildApiMessageWithChatId(
     restrictionReasons,
     summaryLanguageCode: mtpMessage.summaryFromLanguage,
     fromRank: mtpMessage.fromRank,
+    guestChatViaId: mtpMessage.guestchatViaFrom && getApiChatIdFromMtpPeer(mtpMessage.guestchatViaFrom),
   };
 }
 

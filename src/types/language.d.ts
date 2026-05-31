@@ -709,6 +709,7 @@ export interface LangPair {
   'PaymentInvoiceNotFound': undefined;
   'NoWordsRecognized': undefined;
   'ViaBot': undefined;
+  'ForBot': undefined;
   'DiscussChannel': undefined;
   'ForwardedMessage': undefined;
   'ContextForwardMsg': undefined;

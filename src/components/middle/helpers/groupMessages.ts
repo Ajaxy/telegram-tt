@@ -121,6 +121,7 @@ export function groupMessages(
       } else if (
         nextMessage.id === firstUnreadId
         || message.senderId !== nextMessage.senderId
+        || message.guestChatViaId !== nextMessage.guestChatViaId
         || (!withUsers && message.paidMessageStars)
         || (nextMessage.suggestedPostInfo)
         || message.isOutgoing !== nextMessage.isOutgoing

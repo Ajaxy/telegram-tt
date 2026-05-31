@@ -23,6 +23,7 @@ import { getPeerTitle } from '../../global/helpers/peers';
 import { selectChatMessage, selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatHumanDate, formatScheduledDateTime } from '../../util/dates/oldDateFormat';
+import { isUserId } from '../../util/entities/ids';
 import { convertTonFromNanos } from '../../util/formatCurrency';
 import { compact } from '../../util/iteratees';
 import { formatMessageListDate } from '../../util/localization/dateFormat';
@@ -134,6 +135,7 @@ const MessageListContent = ({
   const getIsReady = useDerivedSignal(() => isReady && !getIsHeavyAnimating2(), [isReady, getIsHeavyAnimating2]);
 
   const areDatesClickable = !isSavedDialog && !isSchedule;
+  const isPrivate = isUserId(chatId);
   const shouldRenderSponsoredMessage = canShowAds && isViewportNewest;
   const shouldHideComments = hasLinkedChat === false || !isChannelChat || Boolean(isChatMonoforum);
 
@@ -352,6 +354,7 @@ const MessageListContent = ({
           const originalId = getMessageOriginalId(message);
           const key = isServiceNotificationMessage(message)
             ? `${message.date}_${originalId}` : originalId;
+          const shouldShowGuestAvatar = isPrivate && !withUsers && Boolean(message.guestChatViaId);
 
           return compact([
             message.id === memoUnreadDividerBeforeIdRef.current && unreadDivider,
@@ -365,9 +368,10 @@ const MessageListContent = ({
               observeIntersectionForPlaying={observeIntersectionForPlaying}
               album={album}
               documentGroup={documentGroup}
-              noAvatars={noAvatars}
-              withAvatar={position.isLastInGroup && withUsers && !isOwn && (!isThreadTopMessage || !isComments)}
-              withSenderName={position.isFirstInGroup && withUsers && !isOwn}
+              noAvatars={noAvatars && !shouldShowGuestAvatar}
+              withAvatar={position.isLastInGroup && (withUsers || shouldShowGuestAvatar)
+                && !isOwn && (!isThreadTopMessage || !isComments)}
+              withSenderName={position.isFirstInGroup && (withUsers || shouldShowGuestAvatar) && !isOwn}
               threadId={threadId}
               messageListType={type}
               noComments={shouldHideComments}
@@ -450,8 +454,6 @@ const MessageListContent = ({
         return renderMessageElement(message, position, isThreadTopMessage, album);
       }).flat();
 
-      if (!withUsers) return senderGroupElements;
-
       const lastItem = senderGroup[senderGroup.length - 1];
       const lastMessage = isAlbum(lastItem)
         ? lastItem.mainMessage
@@ -474,11 +476,14 @@ const MessageListContent = ({
       const isThreadTopMessage = lastMessage.id === threadId
         || (firstMessage.id === threadId && Boolean(firstMessage.groupedId));
 
+      const shouldShowGuestAvatar = isPrivate && !withUsers && Boolean(lastMessage.guestChatViaId);
+      if (!withUsers && !shouldShowGuestAvatar) return senderGroupElements;
+
       const key = `${firstMessageId}-${lastMessageId}`;
       const id = (firstMessageId === lastMessageId) ? `message-group-${firstMessageId}`
         : `message-group-${firstMessageId}-${lastMessageId}`;
 
-      const withAvatar = withUsers && !isOwn && (!isThreadTopMessage || !isComments);
+      const withAvatar = (withUsers || shouldShowGuestAvatar) && !isOwn && (!isThreadTopMessage || !isComments);
       return compact([
         <SenderGroupContainer
           key={key}
