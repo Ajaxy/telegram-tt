@@ -32,8 +32,8 @@ function waitForEndEvent(
     }
 
     if (detailedName && (
-      (e instanceof TransitionEvent && e.propertyName === detailedName)
-      || (e instanceof AnimationEvent && e.animationName === detailedName)
+      (e instanceof TransitionEvent && e.propertyName !== detailedName)
+      || (e instanceof AnimationEvent && e.animationName !== detailedName)
     )) {
       return;
     }

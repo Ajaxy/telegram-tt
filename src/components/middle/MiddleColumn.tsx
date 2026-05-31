@@ -1,6 +1,6 @@
 import type React from '@teact';
 import type { ElementRef } from '@teact';
-import { memo, useEffect, useMemo, useState } from '@teact';
+import { memo, useEffect, useMemo, useRef, useState } from '@teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiChatBannedRights, ApiInputMessageReplyInfo, ApiTopic } from '../../api/types';
@@ -61,6 +61,7 @@ import {
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { isUserId } from '../../util/entities/ids';
 import { resolveTransitionName } from '../../util/resolveTransitionName';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
@@ -292,12 +293,16 @@ function MiddleColumn({
     prevTransitionKey !== undefined && prevTransitionKey < currentTransitionKey ? prevTransitionKey : undefined
   );
 
-  const { isReady, handleCssTransitionEnd, handleSlideTransitionStop } = useIsReady(
+  const middleColumnRef = useRef<HTMLDivElement>();
+
+  const { isReady, handleSlideTransitionStop } = useIsReady(
     !shouldSkipHistoryAnimations && withInterfaceAnimations,
     currentTransitionKey,
     prevTransitionKey,
     chatId,
     isMobile,
+    isLeftColumnShown,
+    middleColumnRef,
   );
 
   useEffect(() => {
@@ -501,9 +506,9 @@ function MiddleColumn({
 
   return (
     <div
+      ref={middleColumnRef}
       id="MiddleColumn"
       className={className}
-      onTransitionEnd={handleCssTransitionEnd}
       style={buildStyle(
         `--composer-hidden-scale: ${composerHiddenScale}`,
         `--toolbar-hidden-scale: ${toolbarHiddenScale}`,
@@ -896,6 +901,8 @@ function useIsReady(
   prevTransitionKey?: number,
   chatId?: string,
   isMobile?: boolean,
+  isLeftColumnShown?: boolean,
+  middleColumnRef?: ElementRef<HTMLDivElement>,
 ) {
   const [isReady, setIsReady] = useState(!isMobile);
   const forceUpdate = useForceUpdate();
@@ -910,13 +917,9 @@ function useIsReady(
     setIsReady(false);
 
     // Make sure to end even if end callback was not called (which was some hardly-reproducible bug)
-    const timeout = setTimeout(() => {
+    window.setTimeout(() => {
       setIsReady(true);
     }, LAYER_ANIMATION_DURATION_MS);
-
-    return () => {
-      clearTimeout(timeout);
-    };
   }, [willSwitchMessageList, withAnimations]);
 
   useSyncEffect(() => {
@@ -925,11 +928,40 @@ function useIsReady(
     }
   }, [withAnimations]);
 
-  function handleCssTransitionEnd(e: React.TransitionEvent<HTMLDivElement>) {
-    if (e.propertyName === 'transform' && e.target === e.currentTarget) {
-      setIsReady(Boolean(chatId));
+  // Mobile only: wait until `MiddleColumn` slides in after the left column closes
+  useSyncEffect(([prevIsLeftColumnShown, prevWillSwitchMessageList]) => {
+    if (!isMobile) {
+      return;
     }
-  }
+
+    if (!chatId) {
+      setIsReady(false);
+      return;
+    }
+
+    if (!withAnimations) {
+      setIsReady(true);
+      return;
+    }
+
+    if (willSwitchMessageList || prevWillSwitchMessageList) {
+      return;
+    }
+
+    if (isLeftColumnShown) {
+      setIsReady(false);
+      return;
+    }
+
+    if (prevIsLeftColumnShown !== true) {
+      setIsReady(true);
+      return;
+    }
+
+    waitForTransitionEnd(middleColumnRef!.current!, () => {
+      setIsReady(true);
+    }, 'transform', LAYER_ANIMATION_DURATION_MS);
+  }, [isLeftColumnShown, willSwitchMessageList, chatId, isMobile, withAnimations, middleColumnRef]);
 
   function handleSlideTransitionStop() {
     setIsReady(true);
@@ -937,7 +969,6 @@ function useIsReady(
 
   return {
     isReady: isReady && !willSwitchMessageList,
-    handleCssTransitionEnd: withAnimations ? handleCssTransitionEnd : undefined,
     handleSlideTransitionStop: withAnimations ? handleSlideTransitionStop : undefined,
   };
 }
