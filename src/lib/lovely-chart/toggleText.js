@@ -6,7 +6,7 @@ export function toggleText(element, newText, className = '', inverse = false) {
 
   const newElement = createElement(element.tagName);
   newElement.className = `${className} lovely-chart--transition lovely-chart--position-${inverse ? 'top' : 'bottom'} lovely-chart--state-hidden`;
-  newElement.innerHTML = newText;
+  newElement.textContent = newText;
 
   const selector = className.length ? `.${className.split(' ').join('.')}` : '';
   const oldElements = container.querySelectorAll(`${selector}.lovely-chart--state-hidden`);

@@ -18,7 +18,7 @@ export function createHeader(container, title, zoomOutLabel = 'Zoom out', zoomOu
       return;
     }
 
-    _captionElement.innerHTML = caption;
+    _captionElement.textContent = caption;
   }
 
   function zoom(caption) {
@@ -40,7 +40,7 @@ export function createHeader(container, title, zoomOutLabel = 'Zoom out', zoomOu
 
     _titleElement = createElement();
     _titleElement.className = 'lovely-chart--header-title';
-    _titleElement.innerHTML = title;
+    _titleElement.textContent = title;
     _element.appendChild(_titleElement);
 
     _captionElement = createElement();
