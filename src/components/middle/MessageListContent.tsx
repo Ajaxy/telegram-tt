@@ -1,4 +1,4 @@
-import type { ElementRef } from '../../lib/teact/teact';
+import type { ElementRef, TeactNode } from '../../lib/teact/teact';
 import { getIsHeavyAnimating, memo } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
@@ -70,6 +70,7 @@ interface OwnProps {
   anchorIdRef: { current: string | undefined };
   memoUnreadDividerBeforeIdRef: { current: number | undefined };
   memoFirstUnreadIdRef: { current: number | undefined };
+  liveTailStartOriginalId?: number;
   isReplacingHistoryRef: { current: boolean };
   type: MessageListType;
   isReady: boolean;
@@ -86,10 +87,22 @@ interface OwnProps {
   onScrollDownToggle?: BooleanToVoidFunction;
   onNotchToggle?: AnyToVoidFunction;
   onIntersectPinnedMessage?: OnIntersectPinnedMessage;
-  onTallTypingDraft?: (messageId: number, isNearExit: boolean) => void;
 }
 
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
+
+function senderGroupContainsOriginalId(
+  senderGroup: (ApiMessage | IAlbum | IDocumentGroup)[],
+  originalId: number,
+) {
+  return senderGroup.some((messageOrAlbum) => {
+    if (isAlbum(messageOrAlbum) || isDocumentGroup(messageOrAlbum)) {
+      return messageOrAlbum.messages.some((message) => getMessageOriginalId(message) === originalId);
+    }
+
+    return getMessageOriginalId(messageOrAlbum) === originalId;
+  });
+}
 
 const MessageListContent = ({
   canShowAds,
@@ -111,6 +124,7 @@ const MessageListContent = ({
   anchorIdRef,
   memoUnreadDividerBeforeIdRef,
   memoFirstUnreadIdRef,
+  liveTailStartOriginalId,
   isReplacingHistoryRef,
   type,
   isReady,
@@ -127,7 +141,6 @@ const MessageListContent = ({
   onScrollDownToggle,
   onNotchToggle,
   onIntersectPinnedMessage,
-  onTallTypingDraft,
 }: OwnProps) => {
   const { openHistoryCalendar } = getActions();
 
@@ -159,7 +172,6 @@ const MessageListContent = ({
     backwardsTriggerRef,
     forwardsTriggerRef,
     fabTriggerRef,
-    observeIntersectionForTopExit,
   } = useScrollHooks({
     type,
     containerRef,
@@ -352,6 +364,7 @@ const MessageListContent = ({
         ) {
           const isOwn = isOwnMessage(message);
           const originalId = getMessageOriginalId(message);
+          const isInLiveTail = liveTailStartOriginalId !== undefined && originalId >= liveTailStartOriginalId;
           const key = isServiceNotificationMessage(message)
             ? `${message.date}_${originalId}` : originalId;
           const shouldShowGuestAvatar = isPrivate && !withUsers && Boolean(message.guestChatViaId);
@@ -384,11 +397,11 @@ const MessageListContent = ({
               isFirstInDocumentGroup={position.isFirstInDocumentGroup}
               isLastInDocumentGroup={position.isLastInDocumentGroup}
               isLastInList={position.isLastInList}
+              shouldIgnoreSendFocus={isInLiveTail && isOwn}
+              isQuickPreview={isQuickPreview}
               memoFirstUnreadIdRef={memoFirstUnreadIdRef}
               getIsMessageListReady={getIsReady}
-              observeIntersectionForTopExit={observeIntersectionForTopExit}
               onMessageUnmount={onMessageUnmount}
-              onTallTypingDraft={onTallTypingDraft}
             />,
           ]);
         }
@@ -504,43 +517,97 @@ const MessageListContent = ({
           </div>
         ),
       ]);
-    }).flat();
+    });
   }
 
-  const dateGroups = messageGroups.map((
+  function renderDateHeader(dateGroup: MessageDateGroup) {
+    return (
+      <div
+        className={buildClassName('sticky-date', areDatesClickable && 'interactive')}
+        key="date-header"
+        onMouseDown={preventMessageInputBlur}
+        onClick={areDatesClickable ? () => openHistoryCalendar({ selectedAt: dateGroup.datetime }) : undefined}
+      >
+        <span dir="auto">
+          {isSchedule && dateGroup.originalDate === SCHEDULED_WHEN_ONLINE && (
+            oldLang('MessageScheduledUntilOnline')
+          )}
+          {isSchedule && dateGroup.originalDate !== SCHEDULED_WHEN_ONLINE && (
+            oldLang('MessageScheduledOn', formatHumanDate(oldLang, dateGroup.datetime, undefined, true))
+          )}
+          {!isSchedule && formatMessageListDate(lang, new Date(dateGroup.datetime))}
+        </span>
+      </div>
+    );
+  }
+
+  function renderDateGroup(
+    dateGroup: MessageDateGroup,
+    children: TeactNode[],
+    keySuffix: string,
+    shouldAddFirstClass: boolean,
+  ) {
+    return (
+      <div
+        className={buildClassName('message-date-group', shouldAddFirstClass && 'first-message-date-group')}
+        key={`${dateGroup.datetime}-${keySuffix}`}
+        onMouseDown={preventMessageInputBlur}
+        teactFastList
+      >
+        {children}
+      </div>
+    );
+  }
+
+  let isRenderingLiveTail = false;
+  const dateGroups: TeactNode[] = [];
+  const liveTailDateGroups: TeactNode[] = [];
+
+  messageGroups.forEach((
     dateGroup: MessageDateGroup,
     dateGroupIndex: number,
     dateGroupsArray: MessageDateGroup[],
   ) => {
     const senderGroups = calculateSenderGroups(dateGroup, dateGroupIndex, dateGroupsArray);
+    const beforeTailChildren: TeactNode[] = [];
+    const liveTailChildren: TeactNode[] = [];
 
-    return (
-      <div
-        className={buildClassName('message-date-group', !(nameChangeDate || photoChangeDate)
-        && dateGroupIndex === 0 && 'first-message-date-group')}
-        key={dateGroup.datetime}
-        onMouseDown={preventMessageInputBlur}
-        teactFastList
-      >
-        <div
-          className={buildClassName('sticky-date', areDatesClickable && 'interactive')}
-          key="date-header"
-          onMouseDown={preventMessageInputBlur}
-          onClick={areDatesClickable ? () => openHistoryCalendar({ selectedAt: dateGroup.datetime }) : undefined}
-        >
-          <span dir="auto">
-            {isSchedule && dateGroup.originalDate === SCHEDULED_WHEN_ONLINE && (
-              oldLang('MessageScheduledUntilOnline')
-            )}
-            {isSchedule && dateGroup.originalDate !== SCHEDULED_WHEN_ONLINE && (
-              oldLang('MessageScheduledOn', formatHumanDate(oldLang, dateGroup.datetime, undefined, true))
-            )}
-            {!isSchedule && formatMessageListDate(lang, new Date(dateGroup.datetime))}
-          </span>
-        </div>
-        {senderGroups.flat()}
-      </div>
-    );
+    if (isRenderingLiveTail) {
+      liveTailChildren.push(renderDateHeader(dateGroup));
+    } else {
+      beforeTailChildren.push(renderDateHeader(dateGroup));
+    }
+
+    senderGroups.forEach((senderGroupElements, senderGroupIndex) => {
+      const isLiveTailStart = (
+        !isRenderingLiveTail
+        && liveTailStartOriginalId !== undefined
+        && senderGroupContainsOriginalId(
+          dateGroup.senderGroups[senderGroupIndex],
+          liveTailStartOriginalId,
+        )
+      );
+
+      if (isLiveTailStart) {
+        isRenderingLiveTail = true;
+      }
+
+      const target = isRenderingLiveTail ? liveTailChildren : beforeTailChildren;
+      target.push(...senderGroupElements);
+    });
+
+    const shouldAddFirstClass = !(nameChangeDate || photoChangeDate) && dateGroupIndex === 0;
+    if (beforeTailChildren.length) {
+      dateGroups.push(renderDateGroup(
+        dateGroup, beforeTailChildren, 'before-tail', shouldAddFirstClass,
+      ));
+    }
+
+    if (liveTailChildren.length) {
+      liveTailDateGroups.push(renderDateGroup(
+        dateGroup, liveTailChildren, 'live-tail', shouldAddFirstClass && !beforeTailChildren.length,
+      ));
+    }
   });
 
   return (
@@ -548,7 +615,12 @@ const MessageListContent = ({
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {shouldRenderAccountInfo
         && <MessageListAccountInfo key={`account_info_${chatId}`} chatId={chatId} hasMessages />}
-      {dateGroups.flat()}
+      {dateGroups}
+      {Boolean(liveTailDateGroups.length) && (
+        <div className="live-tail" key="live-tail" teactFastList>
+          {liveTailDateGroups}
+        </div>
+      )}
       {isViewportNewest && renderBotForumTopicAction()}
       {withHistoryTriggers && (
         <div

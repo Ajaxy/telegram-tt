@@ -862,6 +862,7 @@ export function selectFirstUnreadId<T extends GlobalState>(
       return (
         (!lastReadId || id > lastReadId)
         && byId[id]
+        && !byId[id].isTypingDraft
         && (!byId[id].isOutgoing || byId[id].isFromScheduled)
         && id > lastReadServiceNotificationId
       );

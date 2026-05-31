@@ -213,6 +213,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         ...message,
         previousLocalId: matchedTypingDraftEntry.message.id,
         isTypingDraft: true,
+        wasTypingDraft: true,
       } : message;
 
       global = updateWithLocalMedia(global, chatId, id, true, nextMessage);

@@ -77,6 +77,10 @@ export default function useMessageObservers({
       const shouldUpdateViews = dataset.shouldUpdateViews === 'true';
       const albumMainId = dataset.albumMainId ? Number(dataset.albumMainId) : undefined;
 
+      if (!Number.isInteger(messageId)) {
+        return;
+      }
+
       if (!isIntersecting) {
         hiddenViewportIds.add(messageId);
         return;

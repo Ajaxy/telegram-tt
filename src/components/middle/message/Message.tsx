@@ -239,14 +239,14 @@ type OwnProps = {
   appearanceOrder: number;
   isJustAdded: boolean;
   isThreadTop?: boolean;
+  shouldIgnoreSendFocus?: boolean;
+  isQuickPreview?: boolean;
   memoFirstUnreadIdRef?: { current: number | undefined };
   getIsMessageListReady?: Signal<boolean>;
   observeIntersectionForBottom?: ObserveFn;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
-  observeIntersectionForTopExit?: ObserveFn;
   onMessageUnmount?: (messageId: number) => void;
-  onTallTypingDraft?: (messageId: number, isNearExit: boolean) => void;
 } & MessagePositionProperties;
 
 type StateProps = {
@@ -477,9 +477,8 @@ const Message = ({
   observeIntersectionForBottom,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
-  observeIntersectionForTopExit,
+  isQuickPreview,
   onMessageUnmount,
-  onTallTypingDraft,
 }: OwnProps & StateProps) => {
   const {
     toggleMessageSelection,
@@ -491,6 +490,7 @@ const Message = ({
     animateUnreadReaction,
     focusMessage,
     markTypingDraftDone,
+    markMessageListRead,
     markMentionsRead,
     markPollVotesRead,
     openThread,
@@ -498,7 +498,6 @@ const Message = ({
   } = getActions();
 
   const ref = useRef<HTMLDivElement>();
-  const topMarkerRef = useRef<HTMLDivElement>();
   const bottomMarkerRef = useRef<HTMLDivElement>();
   const quickReactionRef = useRef<HTMLDivElement>();
 
@@ -519,16 +518,7 @@ const Message = ({
   const [declineReason, setDeclineReason] = useState('');
   const { isMobile, isTouchScreen } = useAppLayout();
 
-  useOnIntersect(bottomMarkerRef, observeIntersectionForBottom);
-
-  const handleTypingDraftNearExit = useLastCallback(({ isIntersecting }: IntersectionObserverEntry) => {
-    onTallTypingDraft?.(messageId, !isIntersecting);
-  });
-  useOnIntersect(
-    topMarkerRef,
-    isTypingDraft && isLastInList ? observeIntersectionForTopExit : undefined,
-    handleTypingDraftNearExit,
-  );
+  useOnIntersect(bottomMarkerRef, isTypingDraft ? undefined : observeIntersectionForBottom);
 
   const {
     isContextMenuOpen,
@@ -993,8 +983,22 @@ const Message = ({
     || undefined;
 
   useEffect(() => {
+    if (isTypingDraft) {
+      return;
+    }
+
     const bottomMarker = bottomMarkerRef.current;
     if (!bottomMarker || !isElementInViewport(bottomMarker)) return;
+
+    if (
+      message.wasTypingDraft
+      && !isQuickPreview
+      && !isOwn
+      && memoFirstUnreadIdRef?.current
+      && messageId >= memoFirstUnreadIdRef.current
+    ) {
+      markMessageListRead({ maxId: messageId });
+    }
 
     if (hasUnreadReaction) {
       animateUnreadReaction({ chatId, messageIds: [messageId] });
@@ -1021,10 +1025,16 @@ const Message = ({
     hasUnreadPollVote,
     album,
     chatId,
+    isQuickPreview,
+    isOwn,
+    isTypingDraft,
+    markMessageListRead,
     messageId,
+    memoFirstUnreadIdRef,
     animateUnreadReaction,
     markPollVotesRead,
     message.hasUnreadMention,
+    message.wasTypingDraft,
   ]);
 
   const albumLayout = useMemo(() => {
@@ -1915,10 +1925,6 @@ const Message = ({
       onMouseLeave={(withQuickReactionButton || isInDocumentGroupNotLast) ? handleMouseLeave : undefined}
     >
       <div
-        ref={topMarkerRef}
-        className="top-marker"
-      />
-      <div
         ref={bottomMarkerRef}
         className="bottom-marker"
         data-message-id={messageId}
@@ -2100,7 +2106,7 @@ export default memo(withGlobal<OwnProps>(
     } = selectTabState(global);
     const {
       message, album, documentGroup, withSenderName, withAvatar, threadId, messageListType,
-      isLastInDocumentGroup, isFirstInGroup,
+      isLastInDocumentGroup, isFirstInGroup, shouldIgnoreSendFocus,
     } = ownProps;
     const {
       id, chatId, viaBotId, guestChatViaId, isOutgoing, forwardInfo, transcriptionId, isPinned,
@@ -2158,11 +2164,18 @@ export default memo(withGlobal<OwnProps>(
     const storySender = storyReplyPeerId ? selectPeer(global, storyReplyPeerId) : undefined;
 
     const uploadProgress = selectUploadProgress(global, message);
-    const isFocused = messageListType === 'thread' && (
+    const isFocusTarget = messageListType === 'thread' && (
       album
         ? album.messages.some((m) => selectIsMessageFocused(global, m, threadId))
         : selectIsMessageFocused(global, message, threadId)
     );
+    const shouldIgnoreFocus = Boolean(
+      isFocusTarget
+      && shouldIgnoreSendFocus
+      && focusedMessage?.noHighlight
+      && focusedMessage.isResizingContainer,
+    );
+    const isFocused = isFocusTarget && !shouldIgnoreFocus;
 
     const {
       direction: focusDirection, noHighlight: noFocusHighlight, isResizingContainer,

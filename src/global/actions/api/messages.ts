@@ -1287,6 +1287,7 @@ addActionHandler('reportChannelSpam', (global, actions, payload): ActionReturnTy
 addActionHandler('markMessageListRead', (global, actions, payload): ActionReturnType => {
   if (selectIsCurrentUserFrozen(global)) return undefined;
   const { maxId, tabId = getCurrentTabId() } = payload;
+  if (isLocalMessageId(maxId)) return undefined;
 
   const currentMessageList = selectCurrentMessageList(global, tabId);
   if (!currentMessageList) {

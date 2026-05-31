@@ -1,7 +1,7 @@
 import type { ApiMessage } from '../../../api/types';
 import type { IAlbum, IDocumentGroup } from '../../../types';
 
-import { isActionMessage } from '../../../global/helpers';
+import { getMessageOriginalId, isActionMessage } from '../../../global/helpers';
 import { getDayStartAt } from '../../../util/dates/oldDateFormat';
 
 type SenderGroup = (ApiMessage | IAlbum | IDocumentGroup)[];
@@ -26,6 +26,7 @@ export function isDocumentGroup(
 
 export function groupMessages(
   messages: ApiMessage[], firstUnreadId?: number, topMessageId?: number, isChatWithSelf?: boolean, withUsers?: boolean,
+  splitBeforeMessageId?: number,
 ) {
   const initDateGroup: MessageDateGroup = {
     originalDate: messages[0].date,
@@ -120,6 +121,7 @@ export function groupMessages(
         dateGroups.push(newDateGroup);
       } else if (
         nextMessage.id === firstUnreadId
+        || (splitBeforeMessageId !== undefined && getMessageOriginalId(nextMessage) === splitBeforeMessageId)
         || message.senderId !== nextMessage.senderId
         || message.guestChatViaId !== nextMessage.guestChatViaId
         || (!withUsers && message.paidMessageStars)

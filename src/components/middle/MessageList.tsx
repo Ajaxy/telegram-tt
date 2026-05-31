@@ -1,4 +1,4 @@
-import { beginHeavyAnimation, memo, useEffect, useMemo, useRef } from '@teact';
+import { beginHeavyAnimation, memo, useEffect, useMemo, useRef, useState, useUnmountCleanup } from '@teact';
 import { addExtraClass, removeExtraClass } from '@teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -11,6 +11,7 @@ import {
   ANIMATION_END_DELAY,
   ANONYMOUS_USER_ID,
   MESSAGE_LIST_SLICE,
+  SCROLL_MAX_DURATION,
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { forceMeasure, requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
@@ -180,6 +181,7 @@ const BOTTOM_SNAP_THRESHOLD = 7;
 const UNREAD_DIVIDER_TOP = 10;
 const SCROLL_DEBOUNCE = 200;
 const MESSAGE_ANIMATION_DURATION = 500;
+const SEND_FOCUS_DURATION = SCROLL_MAX_DURATION + ANIMATION_END_DELAY;
 const BOTTOM_FOCUS_MARGIN = 0.5 * REM;
 const SELECT_MODE_ANIMATION_DURATION = 200;
 
@@ -188,6 +190,12 @@ const FORCE_MESSAGES_SCROLL_CLASS = 'force-messages-scroll';
 const BOTTOM_SNAP_CLASS = 'with-bottom-snap';
 
 const runDebouncedForScroll = debounce((cb) => cb(), SCROLL_DEBOUNCE, false);
+
+function getShouldReleaseLiveTail(liveTailElement: HTMLDivElement) {
+  const liveTailMinHeight = parseFloat(getComputedStyle(liveTailElement).minHeight);
+
+  return Boolean(liveTailMinHeight && liveTailElement.scrollHeight > liveTailMinHeight + 1);
+}
 
 const MessageList = ({
   chatId,
@@ -276,7 +284,11 @@ const MessageList = ({
   const isReplacingHistoryRef = useRef(false);
   const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
   const scrollSnapDisabledTimerRef = useRef<number>();
-  const typingDraftSnapTriggeredIdRef = useRef<number>();
+  const isLiveTailBottomSnapSuppressedRef = useRef(false);
+  const isLiveTailAutoScrollingRef = useRef(false);
+  const liveTailReleaseTimerRef = useRef<number>();
+  const liveTailStartOriginalIdRef = useRef<number>();
+  const [releasedLiveTailStartOriginalId, setReleasedLiveTailStartOriginalId] = useState<number>();
 
   const isSavedDialog = getIsSavedDialog(chatId, threadId, currentUserId);
   const hasOpenChatButton = isSavedDialog
@@ -288,6 +300,42 @@ const MessageList = ({
   const isPrivate = isUserId(chatId);
   const withUsers = Boolean((!isPrivate && !isChannelChat)
     || isChatWithSelf || isSystemBotChat || isAnonymousForwards || isChannelWithAvatars);
+
+  const liveTailStartOriginalId = useMemo(() => {
+    if (!messageIds?.length || !messagesById) {
+      return undefined;
+    }
+
+    const previousLiveTailStartOriginalId = liveTailStartOriginalIdRef.current;
+    let renderedLiveTailStartOriginalId: number | undefined;
+
+    for (let i = messageIds.length - 1; i >= 0; i--) {
+      const message = messagesById[messageIds[i]];
+      if (message?.isTypingDraft && !message.isOutgoing) {
+        return getMessageOriginalId(message);
+      }
+
+      if (
+        previousLiveTailStartOriginalId !== undefined
+        && message?.wasTypingDraft
+        && getMessageOriginalId(message) === previousLiveTailStartOriginalId
+      ) {
+        renderedLiveTailStartOriginalId = previousLiveTailStartOriginalId;
+      }
+    }
+
+    return renderedLiveTailStartOriginalId;
+  }, [messageIds, messagesById]);
+
+  liveTailStartOriginalIdRef.current = liveTailStartOriginalId;
+
+  const effectiveLiveTailStartOriginalId = liveTailStartOriginalId !== releasedLiveTailStartOriginalId
+    ? liveTailStartOriginalId
+    : undefined;
+
+  useUnmountCleanup(() => {
+    clearTimeout(liveTailReleaseTimerRef.current);
+  });
 
   useSyncEffect(() => {
     // We only need it first time when message list appears
@@ -399,19 +447,22 @@ const MessageList = ({
         !isForum ? Number(threadId) : undefined,
         isChatWithSelf,
         withUsers,
+        effectiveLiveTailStartOriginalId,
       )
       : undefined;
   }, [withUsers,
     messageIds, messagesById, type,
     isServiceNotificationsChat, isForum,
-    threadId, isChatWithSelf, channelJoinInfo]);
+    threadId, isChatWithSelf, channelJoinInfo, effectiveLiveTailStartOriginalId]);
 
-  const currentLastMessageOriginalId = useMemo(() => {
-    const currentLastMessageId = messageIds?.[messageIds.length - 1];
-    const currentLastMessage = currentLastMessageId !== undefined ? messagesById?.[currentLastMessageId] : undefined;
-
-    return currentLastMessage ? getMessageOriginalId(currentLastMessage) : currentLastMessageId;
-  }, [messageIds, messagesById]);
+  const currentLastMessageId = messageIds?.[messageIds.length - 1];
+  const currentLastMessage = currentLastMessageId !== undefined ? messagesById?.[currentLastMessageId] : undefined;
+  const currentLastMessageOriginalId = currentLastMessage
+    ? getMessageOriginalId(currentLastMessage)
+    : currentLastMessageId;
+  const isCurrentLastMessageTypingDraft = Boolean(
+    currentLastMessage?.isTypingDraft || currentLastMessage?.wasTypingDraft,
+  );
 
   useInterval(() => {
     if (!messageIds || !messagesById || type === 'scheduled' || isAccountFrozen || !isActive) return;
@@ -494,6 +545,13 @@ const MessageList = ({
     const bottomTrigger = container?.querySelector<HTMLDivElement>('.fab-trigger');
     if (!container || !bottomTrigger) return;
 
+    if (effectiveLiveTailStartOriginalId !== undefined && isLiveTailBottomSnapSuppressedRef.current) {
+      requestMutation(() => {
+        removeExtraClass(container, BOTTOM_SNAP_CLASS);
+      });
+      return;
+    }
+
     // Check if fab-trigger + threshold are entering the viewport
     const viewportBottom = container.scrollTop + container.offsetHeight;
     const triggerPosition = bottomTrigger.offsetTop;
@@ -517,29 +575,13 @@ const MessageList = ({
     }
   });
 
-  const handleTallTypingDraft = useLastCallback((messageId: number, isNearExit: boolean) => {
-    if (!isNearExit) {
-      if (typingDraftSnapTriggeredIdRef.current === messageId) {
-        typingDraftSnapTriggeredIdRef.current = undefined;
-      }
+  const allowLiveTailBottomSnap = useLastCallback(() => {
+    if (effectiveLiveTailStartOriginalId === undefined || !isLiveTailBottomSnapSuppressedRef.current) {
       return;
     }
 
-    if (typingDraftSnapTriggeredIdRef.current === messageId) {
-      return;
-    }
-
-    const container = containerRef.current;
-    if (!container || !container.classList.contains(BOTTOM_SNAP_CLASS)) return;
-
-    typingDraftSnapTriggeredIdRef.current = messageId;
-
-    clearTimeout(scrollSnapDisabledTimerRef.current);
-    scrollSnapDisabledTimerRef.current = undefined;
-
-    requestMutation(() => {
-      removeExtraClass(container, BOTTOM_SNAP_CLASS);
-    });
+    isLiveTailBottomSnapSuppressedRef.current = false;
+    updateBottomSnapClass();
   });
 
   const handleScroll = useLastCallback(() => {
@@ -555,6 +597,16 @@ const MessageList = ({
 
     if (!memoFocusingIdRef.current) {
       updateStickyDates(container);
+    }
+
+    if (isLiveTailAutoScrollingRef.current) {
+      if (!isAnimatingScroll()) {
+        requestMeasure(() => {
+          isLiveTailAutoScrollingRef.current = false;
+        });
+      }
+    } else {
+      allowLiveTailBottomSnap();
     }
 
     // Check if scroll should be snapped, but only if there's no new message animation in progress
@@ -585,6 +637,11 @@ const MessageList = ({
   const [getContainerHeight, prevContainerHeightRef] = useContainerHeight(containerRef, canPost && !isSelectModeActive);
 
   const handleWheel = useLastCallback((e: React.WheelEvent<HTMLDivElement>) => {
+    if (e.deltaY > 0) {
+      isLiveTailAutoScrollingRef.current = false;
+      allowLiveTailBottomSnap();
+    }
+
     // Remove snap when scrolling up to avoid scroll bug
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1753188
     if (IS_FIREFOX && e.deltaY < 0) {
@@ -644,7 +701,7 @@ const MessageList = ({
       forceMeasure(() => rememberScrollPositionRef.current());
     },
     // This will run before modifying content and should match deps for `useLayoutEffectWithPrevDeps` below
-    [messageIds, isViewportNewest, rememberScrollPositionRef],
+    [messageIds, isViewportNewest, effectiveLiveTailStartOriginalId, rememberScrollPositionRef],
   );
   useEffect(
     () => rememberScrollPositionRef.current(),
@@ -653,7 +710,9 @@ const MessageList = ({
   );
 
   // Handles updated message list, takes care of scroll repositioning
-  useLayoutEffectWithPrevDeps(([prevMessageIds, prevIsViewportNewest, prevCurrentLastMessageOriginalId]) => {
+  useLayoutEffectWithPrevDeps(([
+    prevMessageIds, prevIsViewportNewest, prevCurrentLastMessageOriginalId, prevLiveTailStartOriginalId,
+  ]) => {
     if (process.env.APP_ENV === 'perf') {
       // eslint-disable-next-line no-console
       console.time('scrollTop');
@@ -685,11 +744,34 @@ const MessageList = ({
       messageIds?.[0] !== prevMessageIds?.[0] && messageIds?.length === (MESSAGE_LIST_SLICE / 2 + 1)
     );
     const wasMessageAdded = hasLastMessageChanged && !hasViewportShifted;
+    const wasLiveTailCreated = Boolean(
+      effectiveLiveTailStartOriginalId !== undefined
+      && effectiveLiveTailStartOriginalId !== prevLiveTailStartOriginalId,
+    );
+    const hasLiveTail = effectiveLiveTailStartOriginalId !== undefined;
+    if (wasLiveTailCreated) {
+      isLiveTailBottomSnapSuppressedRef.current = true;
+    } else if (!hasLiveTail) {
+      isLiveTailBottomSnapSuppressedRef.current = false;
+    }
+
+    const shouldReleaseLiveTail = Boolean(
+      wasMessageAdded
+      && currentLastMessageOriginalId !== undefined
+      && hasLiveTail
+      && !wasLiveTailCreated
+      && !isCurrentLastMessageTypingDraft
+      && forceMeasure(() => {
+        const liveTailElement = container.querySelector<HTMLDivElement>('.live-tail');
+        return liveTailElement ? getShouldReleaseLiveTail(liveTailElement) : false;
+      }),
+    );
 
     // Add extra height when few messages to allow scroll animation
     if (
       isViewportNewest
       && wasMessageAdded
+      && !hasLiveTail
       && (messageIds && messageIds.length < MESSAGE_LIST_SLICE / 2)
       && !container.parentElement!.classList.contains(FORCE_MESSAGES_SCROLL_CLASS)
       && forceMeasure(() => (
@@ -730,10 +812,13 @@ const MessageList = ({
         bottomOffset -= lastItemHeight;
       }
       const isAtBottom = isViewportNewest && prevIsViewportNewest && bottomOffset <= BOTTOM_THRESHOLD;
+      const shouldFocusLiveTail = wasLiveTailCreated && isAtBottom;
       const isAlreadyFocusing = messageIds && memoFocusingIdRef.current === messageIds[messageIds.length - 1];
 
       // Animate incoming message, but if app is in background mode, scroll to the first unread
-      if (wasMessageAdded && isAtBottom && !isAlreadyFocusing) {
+      if (wasMessageAdded && isAtBottom && (!isAlreadyFocusing || shouldReleaseLiveTail) && (
+        !hasLiveTail || shouldReleaseLiveTail
+      )) {
         // Break out of `forceLayout`
         requestMeasure(() => {
           const isScrollToBottom = !isBackgroundModeActive() || !firstUnreadElement;
@@ -744,6 +829,15 @@ const MessageList = ({
             margin: BOTTOM_FOCUS_MARGIN,
             forceDuration: noMessageSendingAnimation ? 0 : undefined,
           });
+
+          if (shouldReleaseLiveTail && effectiveLiveTailStartOriginalId !== undefined) {
+            clearTimeout(liveTailReleaseTimerRef.current);
+
+            liveTailReleaseTimerRef.current = window.setTimeout(() => {
+              liveTailReleaseTimerRef.current = undefined;
+              setReleasedLiveTailStartOriginalId(effectiveLiveTailStartOriginalId);
+            }, SEND_FOCUS_DURATION);
+          }
         });
       }
 
@@ -758,9 +852,27 @@ const MessageList = ({
         && memoUnreadDividerBeforeIdRef.current
         && container.querySelector<HTMLDivElement>(`.${UNREAD_DIVIDER_CLASS}`)
       );
+      const liveTailElement = shouldFocusLiveTail
+        ? container.querySelector<HTMLDivElement>('.live-tail')
+        : undefined;
+      const animateLiveTailScroll = liveTailElement
+        ? animateScroll({
+          container,
+          element: liveTailElement,
+          position: 'end',
+          maxDistance: Number.MAX_SAFE_INTEGER,
+          forceDuration: noMessageSendingAnimation ? 0 : undefined,
+          shouldReturnMutationFn: true,
+        })
+        : undefined;
 
       let newScrollTop!: number;
-      if (isAtBottom && isResized) {
+      if (liveTailElement) {
+        const liveTailOffset = getOffsetToContainer(liveTailElement, container).top;
+        newScrollTop = liveTailOffset + liveTailElement.offsetHeight - offsetHeight;
+      } else if (shouldFocusLiveTail) {
+        newScrollTop = scrollHeight - offsetHeight;
+      } else if (isAtBottom && isResized) {
         newScrollTop = scrollHeight - offsetHeight;
       } else if (anchor) {
         const newAnchorTop = anchor.getBoundingClientRect().top;
@@ -775,6 +887,19 @@ const MessageList = ({
       }
 
       return () => {
+        if (animateLiveTailScroll) {
+          if (Math.abs(newScrollTop - scrollTop) >= 1) {
+            isLiveTailAutoScrollingRef.current = true;
+          }
+
+          animateLiveTailScroll();
+          scrollOffsetRef.current = Math.max(Math.ceil(scrollHeight - newScrollTop), offsetHeight);
+          requestMeasure(() => {
+            isReplacingHistoryRef.current = false;
+          });
+          return;
+        }
+
         resetScroll(container, Math.ceil(newScrollTop));
         requestMeasure(() => {
           isReplacingHistoryRef.current = false;
@@ -804,6 +929,8 @@ const MessageList = ({
     messageIds,
     isViewportNewest,
     currentLastMessageOriginalId,
+    effectiveLiveTailStartOriginalId,
+    isCurrentLastMessageTypingDraft,
     getContainerHeight,
     prevContainerHeightRef,
     noMessageSendingAnimation,
@@ -916,6 +1043,7 @@ const MessageList = ({
         anchorIdRef={anchorIdRef}
         memoUnreadDividerBeforeIdRef={memoUnreadDividerBeforeIdRef}
         memoFirstUnreadIdRef={memoFirstUnreadIdRef}
+        liveTailStartOriginalId={effectiveLiveTailStartOriginalId}
         isReplacingHistoryRef={isReplacingHistoryRef}
         threadId={threadId}
         type={type}
@@ -933,7 +1061,6 @@ const MessageList = ({
         onScrollDownToggle={onScrollDownToggle}
         onNotchToggle={onNotchToggle}
         onIntersectPinnedMessage={onIntersectPinnedMessage}
-        onTallTypingDraft={handleTallTypingDraft}
       />
     ) : (
       <Loading color="white" backgroundColor="dark" />
