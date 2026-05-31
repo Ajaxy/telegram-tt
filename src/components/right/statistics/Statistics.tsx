@@ -209,7 +209,7 @@ const Statistics = ({
 
       {!loadedChartsRef.current.size && <Loading />}
 
-      <div ref={containerRef}>
+      <div ref={containerRef} data-stricterdom-ignore>
         {graphs.map((graph) => {
           const isGraphReady = loadedChartsRef.current.has(graph) && !errorChartsRef.current.has(graph);
           return (

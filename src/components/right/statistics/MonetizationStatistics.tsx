@@ -245,7 +245,7 @@ const MonetizationStatistics = ({
 
       {!loadedChartsRef.current.size && <Loading />}
 
-      <div ref={containerRef} className={styles.section}>
+      <div ref={containerRef} className={styles.section} data-stricterdom-ignore>
         {MONETIZATION_GRAPHS.filter(Boolean).map((graph) => (
           <div key={graph} className={buildClassName(styles.graph, styles.hidden)} />
         ))}

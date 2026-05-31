@@ -54,6 +54,7 @@ export function forceMeasure(cb: () => any) {
 }
 
 const forcedMutationAllowedFor = new Set<Node>();
+const IGNORE_SUBTREE_ATTR = 'data-stricterdom-ignore';
 
 export function forceMutation(cb: () => any, nodes: Node | Node[]) {
   if (phase !== 'measure') {
@@ -164,6 +165,11 @@ function setupMutationObserver() {
         }
 
         if (forcedMutationAllowedFor.has(target)) {
+          return;
+        }
+
+        const targetElement = target instanceof Element ? target : target.parentElement;
+        if (targetElement?.closest(`[${IGNORE_SUBTREE_ATTR}]`)) {
           return;
         }
 

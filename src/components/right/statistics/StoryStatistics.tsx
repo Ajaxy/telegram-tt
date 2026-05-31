@@ -183,7 +183,7 @@ function StoryStatistics({
 
       {!loadedChartsRef.current.size && <Loading />}
 
-      <div ref={containerRef}>
+      <div ref={containerRef} data-stricterdom-ignore>
         {GRAPHS.map((graph) => {
           const isGraphReady = loadedChartsRef.current.has(graph) && !errorChartsRef.current.has(graph);
           return (

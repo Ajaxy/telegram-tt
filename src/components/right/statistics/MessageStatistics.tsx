@@ -178,7 +178,7 @@ function MessageStatistics({
 
       {(!loadedChartsRef.current.size || !statistics.publicForwardsData) && <Loading />}
 
-      <div ref={containerRef}>
+      <div ref={containerRef} data-stricterdom-ignore>
         {GRAPHS.map((graph) => {
           const isGraphReady = loadedChartsRef.current.has(graph) && !errorChartsRef.current.has(graph);
           return (
