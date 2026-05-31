@@ -19,12 +19,14 @@ import MenuItem from '../../ui/MenuItem';
 type OwnProps = {
   currentScreen: SettingsScreens;
   editedFolderId?: number;
+  hasProfileBackground?: boolean;
   onReset: () => void;
 };
 
 const SettingsHeader: FC<OwnProps> = ({
   currentScreen,
   editedFolderId,
+  hasProfileBackground,
   onReset,
 }) => {
   const {
@@ -286,7 +288,9 @@ const SettingsHeader: FC<OwnProps> = ({
   }
 
   return (
-    <div className="left-header">
+    <div className={hasProfileBackground && currentScreen === SettingsScreens.Main
+      ? 'left-header' : 'left-header secondary'}
+    >
       <Button
         round
         size="smaller"

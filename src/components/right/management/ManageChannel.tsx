@@ -21,6 +21,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Island from '../../gili/layout/Island';
 import AvatarEditable from '../../ui/AvatarEditable';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -225,12 +226,12 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management">
       <div className="panel-content custom-scroll">
-        <div className="section">
-          <AvatarEditable
-            currentAvatarBlobUrl={currentAvatarBlobUrl}
-            onChange={handleSetPhoto}
-            disabled={!canChangeInfo}
-          />
+        <AvatarEditable
+          currentAvatarBlobUrl={currentAvatarBlobUrl}
+          onChange={handleSetPhoto}
+          disabled={!canChangeInfo}
+        />
+        <Island>
           <div className="settings-edit">
             <InputText
               id="channel-title"
@@ -318,8 +319,8 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
               />
             </ListItem>
           )}
-        </div>
-        <div className="section">
+        </Island>
+        <Island>
           <ListItem
             icon="admin"
             multiline
@@ -344,12 +345,12 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
             <span className="title">{lang('ChannelBlockedUsers')}</span>
             <span className="subtitle">{removedUsersCount}</span>
           </ListItem>
-        </div>
-        <div className="section">
+        </Island>
+        <Island>
           <ListItem icon="delete" ripple destructive onClick={openDeleteDialog}>
             {chat.isCreator ? lang('ChannelDelete') : lang('LeaveChannel')}
           </ListItem>
-        </div>
+        </Island>
       </div>
       <FloatingActionButton
         isShown={isProfileFieldsTouched}

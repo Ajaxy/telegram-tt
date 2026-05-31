@@ -14,6 +14,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
 import Switcher from '../../ui/Switcher';
@@ -95,25 +96,27 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-content custom-scroll">
       {screen === SettingsScreens.PrivacyGifts && (
-        <div className="settings-item">
-          <ListItem onClick={handleShowGiftIconInChats}>
-            <span>{lang('PrivacyDisplayGiftsButton')}</span>
-            <Switcher
-              id="gift"
-              disabled={!isCurrentUserPremium}
-              label={shouldDisplayGiftsButton ? lang('HideGiftsButton') : lang('DisplayGiftsButton')}
-              checked={shouldDisplayGiftsButton}
-            />
-          </ListItem>
-          <p className="settings-item-description-larger" dir={lang.isRtl ? 'rtl' : undefined}>
+        <>
+          <Island>
+            <ListItem onClick={handleShowGiftIconInChats}>
+              <span>{lang('PrivacyDisplayGiftsButton')}</span>
+              <Switcher
+                id="gift"
+                disabled={!isCurrentUserPremium}
+                label={shouldDisplayGiftsButton ? lang('HideGiftsButton') : lang('DisplayGiftsButton')}
+                checked={shouldDisplayGiftsButton}
+              />
+            </ListItem>
+          </Island>
+          <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
             {lang('PrivacyDisplayGiftIconInChats', {
               icon: <Icon name="gift" className="gift-icon" />,
               gift: lang('PrivacyDisplayGift'),
             }, {
               withNodes: true,
             })}
-          </p>
-        </div>
+          </IslandDescription>
+        </>
       )}
       <PrivacySubsection
         screen={screen}
@@ -347,54 +350,54 @@ function PrivacySubsection({
 
   return (
     <>
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{headerText}</h4>
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{headerText}</IslandTitle>
+      <Island>
         <RadioGroup
           name={`visibility-${privacyKey}`}
           options={visibilityOptions}
           onChange={handleVisibilityChange}
           selected={privacy?.visibility}
         />
-        {descriptionText && (
-          <p className="settings-item-description-larger" dir={lang.isRtl ? 'rtl' : undefined}>{descriptionText}</p>
-        )}
-      </div>
+      </Island>
+      {descriptionText && (
+        <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>{descriptionText}</IslandDescription>
+      )}
       {!isPremiumRequired && (primaryExceptionLists.shouldShowAllowed || primaryExceptionLists.shouldShowDenied) && (
-        <div className="settings-item">
-          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+        <>
+          <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
             {oldLang('PrivacyExceptions')}
-          </h4>
-          {primaryExceptionLists.shouldShowAllowed && (
-            <ListItem
-              narrow
-              icon="add-user"
-
-              onClick={() => {
-                openSettingsScreen({ screen: allowedContactsScreen });
-              }}
-            >
-              <div className="multiline-item full-size">
-                <span className="title">{oldLang('AlwaysAllow')}</span>
-                <span className="subtitle">{allowedString}</span>
-              </div>
-            </ListItem>
-          )}
-          {primaryExceptionLists.shouldShowDenied && (
-            <ListItem
-              narrow
-              icon="delete-user"
-
-              onClick={() => {
-                openSettingsScreen({ screen: deniedContactsScreen });
-              }}
-            >
-              <div className="multiline-item full-size">
-                <span className="title">{oldLang('NeverAllow')}</span>
-                <span className="subtitle">{blockString}</span>
-              </div>
-            </ListItem>
-          )}
-        </div>
+          </IslandTitle>
+          <Island>
+            {primaryExceptionLists.shouldShowAllowed && (
+              <ListItem
+                narrow
+                icon="add-user"
+                onClick={() => {
+                  openSettingsScreen({ screen: allowedContactsScreen });
+                }}
+              >
+                <div className="multiline-item full-size">
+                  <span className="title">{oldLang('AlwaysAllow')}</span>
+                  <span className="subtitle">{allowedString}</span>
+                </div>
+              </ListItem>
+            )}
+            {primaryExceptionLists.shouldShowDenied && (
+              <ListItem
+                narrow
+                icon="delete-user"
+                onClick={() => {
+                  openSettingsScreen({ screen: deniedContactsScreen });
+                }}
+              >
+                <div className="multiline-item full-size">
+                  <span className="title">{oldLang('NeverAllow')}</span>
+                  <span className="subtitle">{blockString}</span>
+                </div>
+              </ListItem>
+            )}
+          </Island>
+        </>
       )}
       {isPremiumRequired && <PremiumStatusItem />}
     </>

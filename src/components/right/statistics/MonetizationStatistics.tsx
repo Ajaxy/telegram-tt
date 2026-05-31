@@ -20,6 +20,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import AboutMonetizationModal from '../../common/AboutMonetizationModal.async';
 import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
+import Island, { IslandDescription } from '../../gili/layout/Island';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Link from '../../ui/Link';
@@ -230,29 +231,31 @@ const MonetizationStatistics = ({
   }
 
   return (
-    <div className={buildClassName(styles.root, 'custom-scroll', isReady && styles.ready)}>
-      <div className={buildClassName(styles.section, styles.topText)}>{topText}</div>
+    <div className={buildClassName(styles.root, 'panel-content custom-scroll', isReady && styles.ready)}>
+      <IslandDescription>{topText}</IslandDescription>
 
-      <StatisticsOverview
-        statistics={statistics}
-        isToncoin
-        type="monetization"
-        title={oldLang('MonetizationOverview')}
-        subtitle={
-          <div className={styles.textBottom}>{oldLang('MonetizationProceedsTONInfo')}</div>
-        }
-      />
+      <Island>
+        <StatisticsOverview
+          statistics={statistics}
+          isToncoin
+          type="monetization"
+          title={oldLang('MonetizationOverview')}
+        />
+      </Island>
+      <IslandDescription>{oldLang('MonetizationProceedsTONInfo')}</IslandDescription>
 
       {!loadedChartsRef.current.size && <Loading />}
 
-      <div ref={containerRef} className={styles.section} data-stricterdom-ignore>
-        {MONETIZATION_GRAPHS.filter(Boolean).map((graph) => (
-          <div key={graph} className={buildClassName(styles.graph, styles.hidden)} />
-        ))}
-      </div>
+      <Island>
+        <div ref={containerRef} data-stricterdom-ignore className={styles.charts}>
+          {MONETIZATION_GRAPHS.filter(Boolean).map((graph) => (
+            <div key={graph} className={buildClassName(styles.graph, styles.hidden)} />
+          ))}
+        </div>
+      </Island>
 
-      <div className={styles.section}>
-        {oldLang('lng_channel_earn_balance_title')}
+      <Island className={styles.balanceSection}>
+        <h4 className={styles.balanceTitle}>{oldLang('lng_channel_earn_balance_title')}</h4>
 
         {renderAvailableReward()}
 
@@ -264,8 +267,8 @@ const MonetizationStatistics = ({
           {oldLang('MonetizationWithdraw')}
         </Button>
 
-        <div className={styles.textBottom}>{rewardsText}</div>
-      </div>
+      </Island>
+      <IslandDescription>{rewardsText}</IslandDescription>
 
       <AboutMonetizationModal
         isOpen={isAboutMonetizationModalOpen}

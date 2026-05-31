@@ -20,6 +20,7 @@ import useMultiaccountInfo from '../../../hooks/useMultiaccountInfo';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
+import Island from '../../gili/layout/Island';
 import { animateSnap } from '../../main/visualEffects/SnapEffectContainer';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
@@ -110,15 +111,15 @@ const SettingsExperimental = ({
         />
         <p className="settings-item-description pt-3" dir="auto">{lang('lng_settings_experimental_about')}</p>
       </div>
-      <div className="settings-item">
+      <Island>
         <ListItem
           href={newAccountUrl}
           icon="add-user"
         >
           <div className="title">Login on Test Server</div>
         </ListItem>
-      </div>
-      <div className="settings-item">
+      </Island>
+      <Island>
         <ListItem
           onClick={handleRequestConfetti}
           icon="animations"
@@ -141,45 +142,38 @@ const SettingsExperimental = ({
         >
           <div className="title">Vaporize this button</div>
         </ListItem>
-      </div>
-      <div className="settings-item">
+      </Island>
+      <Island>
         <Checkbox
           label="Allow HTTP Transport"
           checked={Boolean(shouldAllowHttpTransport)}
-
           onCheck={() => setSharedSettingOption({ shouldAllowHttpTransport: !shouldAllowHttpTransport })}
         />
-
         <Checkbox
           label="Force HTTP Transport"
           disabled={!shouldAllowHttpTransport}
           checked={Boolean(shouldForceHttpTransport)}
-
           onCheck={() => setSharedSettingOption({ shouldForceHttpTransport: !shouldForceHttpTransport })}
         />
-      </div>
-      <div className="settings-item">
+      </Island>
+      <Island>
         <Checkbox
           label={lang('DebugMenuEnableLogs')}
           checked={Boolean(shouldCollectDebugLogs)}
-
           onCheck={() => setSharedSettingOption({ shouldCollectDebugLogs: !shouldCollectDebugLogs })}
         />
-
         <Checkbox
           label="Enable exported senders debug"
           checked={Boolean(shouldDebugExportedSenders)}
-
           onCheck={() => setSharedSettingOption({ shouldDebugExportedSenders: !shouldDebugExportedSenders })}
         />
-
         <ListItem
           onClick={handleDownloadLog}
           icon="bug"
         >
           <div className="title">Download log</div>
         </ListItem>
-      </div>
+      </Island>
     </div>
   );
 };

@@ -5,37 +5,35 @@
 
   position: relative;
   height: 100%;
-  background-color: var(--color-background);
+  background-color: var(--color-background-secondary);
 }
 
 .content {
   overflow: auto;
   display: flex;
   flex-direction: column;
+
   height: 100%;
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  @include mixins.side-panel-section;
+  padding: 1rem;
 }
 
 .general {
-  border-bottom: 0;
   box-shadow: none;
 }
 
 .top {
+  display: flex;
+  flex-direction: column;
   padding: 1rem 1.5rem;
 }
 
 .bottom {
+  display: flex;
+  flex-direction: column;
   flex-grow: 1;
+
   min-height: 30rem;
-  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .iconWrapper {

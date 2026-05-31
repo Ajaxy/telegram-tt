@@ -20,6 +20,7 @@ import useOldLang from '../../hooks/useOldLang';
 
 import CustomEmojiPicker from '../common/CustomEmojiPicker';
 import TopicIcon from '../common/TopicIcon';
+import Island from '../gili/layout/Island';
 import FloatingActionButton from '../ui/FloatingActionButton';
 import InputText from '../ui/InputText';
 import Loading from '../ui/Loading';
@@ -136,7 +137,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
         {!topic && <Loading />}
         {topic && (
           <>
-            <div className={buildClassName(styles.section, styles.top, isGeneral && styles.general)}>
+            <Island className={buildClassName(styles.top, isGeneral && styles.general)}>
               <span className={styles.heading}>{lang(isGeneral ? 'CreateGeneralTopicTitle' : 'CreateTopicTitle')}</span>
               <Transition
                 name="zoomFade"
@@ -160,9 +161,9 @@ const EditTopic: FC<OwnProps & StateProps> = ({
                 disabled={isLoading}
                 teactExperimentControlled
               />
-            </div>
+            </Island>
             {!isGeneral && (
-              <div className={buildClassName(styles.section, styles.bottom)}>
+              <Island className={styles.bottom}>
                 <CustomEmojiPicker
                   idPrefix="edit-topic-icons-set-"
                   isHidden={!isActive}
@@ -172,7 +173,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
                   pickerListClassName="fab-padding-bottom"
                   withDefaultTopicIcons
                 />
-              </div>
+              </Island>
             )}
           </>
         )}

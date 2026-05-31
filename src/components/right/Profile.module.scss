@@ -7,7 +7,7 @@
   height: 100%;
 
   :global(.FloatingActionButton) {
-    z-index: 1;
+    z-index: 3;
 
     @include mixins.with-vt-type('rightColumn');
 

@@ -163,11 +163,11 @@
   }
 
   &-slideFadeAndroid {
-    --background-color: var(--color-background);
+    --slide-background-color: var(--color-background);
 
     > .Transition_slide {
       z-index: 0;
-      background: var(--background-color);
+      background: var(--slide-background-color);
     }
 
     > .Transition_slide-to {
@@ -179,11 +179,11 @@
   }
 
   &-slideFadeAndroidBackwards {
-    --background-color: var(--color-background);
+    --slide-background-color: var(--color-background);
 
     > .Transition_slide {
       z-index: 0;
-      background: var(--background-color);
+      background: var(--slide-background-color);
     }
 
     > .Transition_slide-from {
@@ -277,12 +277,12 @@
   }
 
   &-slideLayers {
-    --background-color: var(--color-background);
+    --slide-background-color: var(--color-background);
 
     background: black !important;
 
     > .Transition_slide {
-      background: var(--background-color);
+      background: var(--slide-background-color);
     }
 
     > .Transition_slide-to {
@@ -296,12 +296,12 @@
   }
 
   &-slideLayersBackwards {
-    --background-color: var(--color-background);
+    --slide-background-color: var(--color-background);
 
     background: black !important;
 
     > .Transition_slide {
-      background: var(--background-color);
+      background: var(--slide-background-color);
     }
 
     > .Transition_slide-to {
@@ -317,8 +317,10 @@
   }
 
   &-pushSlide {
+    --slide-background-color: var(--color-background);
+
     > .Transition_slide {
-      background: var(--color-background);
+      background: var(--slide-background-color);
     }
 
     > .Transition_slide-from {
@@ -343,8 +345,10 @@
   }
 
   &-pushSlideBackwards {
+    --slide-background-color: var(--color-background);
+
     > .Transition_slide {
-      background: var(--color-background);
+      background: var(--slide-background-color);
     }
 
     > .Transition_slide-to {

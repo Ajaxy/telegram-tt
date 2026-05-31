@@ -22,6 +22,7 @@ import Icon from '../../common/icons/Icon';
 import LinkField from '../../common/LinkField';
 import PremiumProgress from '../../common/PremiumProgress';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
 import Spinner from '../../ui/Spinner';
@@ -222,7 +223,7 @@ const BoostStatistics = ({
 
     return (
       <ListItem
-        className={buildClassName(styles.boostInfo, 'chat-item-clickable')}
+        className="chat-item-clickable"
         onClick={() => handleBoosterClick(boost.userId)}
       >
         <PrivateChatInfo
@@ -254,6 +255,25 @@ const BoostStatistics = ({
     openGiveawayModal({ chatId, prepaidGiveaway });
   });
 
+  function renderLoadMore() {
+    if (!boostersToLoadCount) return undefined;
+    return (
+      <ListItem
+        key="load-more"
+        className={styles.showMore}
+        disabled={boostStatistics?.isLoadingBoosters}
+        onClick={handleLoadMore}
+      >
+        {boostStatistics?.isLoadingBoosters ? (
+          <Spinner className={styles.loadMoreSpinner} />
+        ) : (
+          <Icon name="down" className={styles.down} />
+        )}
+        {lang('ShowVotes', boostersToLoadCount, 'i')}
+      </ListItem>
+    );
+  }
+
   function renderContent() {
     let listToRender;
     if (tabType === 'boostList') {
@@ -267,9 +287,10 @@ const BoostStatistics = ({
     }
 
     return (
-      <div className={styles.section}>
+      <Island>
         {listToRender?.map((boost) => renderBoostList(boost))}
-      </div>
+        {renderLoadMore()}
+      </Island>
     );
   }
 
@@ -278,7 +299,7 @@ const BoostStatistics = ({
       {!isLoaded && <Loading />}
       {isLoaded && statsOverview && (
         <>
-          <div className={styles.section}>
+          <Island>
             <PremiumProgress
               leftText={lang('BoostsLevel', currentLevel)}
               rightText={hasNextLevel ? lang('BoostsLevel', currentLevel + 1) : undefined}
@@ -287,73 +308,75 @@ const BoostStatistics = ({
               floatingBadgeIcon="boost"
             />
             <StatisticsOverview className={styles.stats} statistics={statsOverview} type="boost" />
-          </div>
+          </Island>
           {statsOverview.prepaidGiveaways && (
-            <div className={styles.section}>
-              <h4 className={styles.sectionHeader} dir={lang.isRtl ? 'rtl' : undefined}>
+            <>
+              <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
                 {lang('BoostingPreparedGiveaways')}
-              </h4>
-              {statsOverview?.prepaidGiveaways?.map((prepaidGiveaway) => {
-                const isStarsGiveaway = 'stars' in prepaidGiveaway;
+              </IslandTitle>
+              <Island>
+                {statsOverview?.prepaidGiveaways?.map((prepaidGiveaway) => {
+                  const isStarsGiveaway = 'stars' in prepaidGiveaway;
 
-                return (
-                  <ListItem
-                    key={prepaidGiveaway.id}
-                    className="chat-item-clickable"
+                  return (
+                    <ListItem
+                      key={prepaidGiveaway.id}
+                      className="chat-item-clickable"
 
-                    onClick={() => launchPrepaidGiveawayHandler(prepaidGiveaway)}
-                  >
-                    <div className={buildClassName(styles.status, 'status-clickable')}>
-                      <div>
-                        {isStarsGiveaway
-                          ? (
-                            <img
-                              src={GiftStar}
-                              className={styles.giveawayIcon}
-                              alt={lang('GiftStar')}
-                            />
-                          ) : (
-                            <img
-                              src={GIVEAWAY_IMG_LIST[prepaidGiveaway.months] || GIVEAWAY_IMG_LIST[3]}
-                              className={styles.giveawayIcon}
-                              alt={lang('Giveaway')}
-                            />
-                          )}
-                      </div>
-                      <div className={styles.info}>
-                        <h3>
+                      onClick={() => launchPrepaidGiveawayHandler(prepaidGiveaway)}
+                    >
+                      <div className={buildClassName(styles.status, 'status-clickable')}>
+                        <div>
                           {isStarsGiveaway
-                            ? lang('Giveaway.Stars.Prepaid.Title', prepaidGiveaway.stars)
-                            : lang('BoostingTelegramPremiumCountPlural', prepaidGiveaway.quantity)}
-                        </h3>
-                        <p className={styles.month}>
-                          {
-                            isStarsGiveaway ? lang('Giveaway.Stars.Prepaid.Desc', prepaidGiveaway.quantity)
-                              : lang('PrepaidGiveawayMonths', prepaidGiveaway.months)
-                          }
-                        </p>
-                      </div>
-                      <div className={styles.quantity}>
-                        <div className={buildClassName(styles.floatingBadge,
-                          styles.floatingBadgeButtonColor,
-                          styles.floatingBadgeButton)}
-                        >
-                          <Icon name="boost" className={styles.floatingBadgeIcon} />
-                          <div className={styles.floatingBadgeValue} dir={lang.isRtl ? 'rtl' : undefined}>
-                            {isStarsGiveaway ? prepaidGiveaway.boosts
-                              : prepaidGiveaway.quantity * (giveawayBoostsPerPremium ?? GIVEAWAY_BOOST_PER_PREMIUM)}
+                            ? (
+                              <img
+                                src={GiftStar}
+                                className={styles.giveawayIcon}
+                                alt={lang('GiftStar')}
+                              />
+                            ) : (
+                              <img
+                                src={GIVEAWAY_IMG_LIST[prepaidGiveaway.months] || GIVEAWAY_IMG_LIST[3]}
+                                className={styles.giveawayIcon}
+                                alt={lang('Giveaway')}
+                              />
+                            )}
+                        </div>
+                        <div className={styles.info}>
+                          <h3>
+                            {isStarsGiveaway
+                              ? lang('Giveaway.Stars.Prepaid.Title', prepaidGiveaway.stars)
+                              : lang('BoostingTelegramPremiumCountPlural', prepaidGiveaway.quantity)}
+                          </h3>
+                          <p className={styles.month}>
+                            {
+                              isStarsGiveaway ? lang('Giveaway.Stars.Prepaid.Desc', prepaidGiveaway.quantity)
+                                : lang('PrepaidGiveawayMonths', prepaidGiveaway.months)
+                            }
+                          </p>
+                        </div>
+                        <div className={styles.quantity}>
+                          <div className={buildClassName(styles.floatingBadge,
+                            styles.floatingBadgeButtonColor,
+                            styles.floatingBadgeButton)}
+                          >
+                            <Icon name="boost" className={styles.floatingBadgeIcon} />
+                            <div className={styles.floatingBadgeValue} dir={lang.isRtl ? 'rtl' : undefined}>
+                              {isStarsGiveaway ? prepaidGiveaway.boosts
+                                : prepaidGiveaway.quantity * (giveawayBoostsPerPremium ?? GIVEAWAY_BOOST_PER_PREMIUM)}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </ListItem>
-                );
-              })}
-              <p className="text-muted hint" key="links-hint">{lang('BoostingSelectPaidGiveaway')}</p>
-            </div>
+                    </ListItem>
+                  );
+                })}
+              </Island>
+              <IslandDescription>{lang('BoostingSelectPaidGiveaway')}</IslandDescription>
+            </>
           )}
-          <div className={styles.section}>
-            {shouldDisplayGiftList ? (
+          {shouldDisplayGiftList ? (
+            <Island>
               <div
                 className={buildClassName(styles.boostSection, styles.content)}
               >
@@ -368,52 +391,45 @@ const BoostStatistics = ({
                 </Transition>
                 <SquareTabList activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={setActiveTab} />
               </div>
-            ) : (
-              <>
-                <h4 className={styles.sectionHeader} dir={lang.isRtl ? 'rtl' : undefined}>
-                  {lang('BoostingBoostsCount', boostStatistics?.boosts?.count)}
-                </h4>
-                {!boostStatistics?.boosts?.list?.length && (
-                  <div className={styles.noResults}>
-                    {lang(isChannel ? 'NoBoostersHint' : 'NoBoostersGroupHint')}
-                  </div>
-                )}
-                {boostStatistics?.boosts?.list?.map((boost) => renderBoostList(boost))}
-              </>
-            )}
-            {Boolean(boostersToLoadCount) && (
-              <ListItem
-                key="load-more"
-                className={styles.showMore}
-                disabled={boostStatistics?.isLoadingBoosters}
-                onClick={handleLoadMore}
-              >
-                {boostStatistics?.isLoadingBoosters ? (
-                  <Spinner className={styles.loadMoreSpinner} />
-                ) : (
-                  <Icon name="down" className={styles.down} />
-                )}
-                {lang('ShowVotes', boostersToLoadCount, 'i')}
-              </ListItem>
-            )}
-          </div>
-          <LinkField className={styles.section} link={status!.boostUrl} withShare title={lang('LinkForBoosting')} />
+            </Island>
+          ) : (
+            <>
+              <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
+                {lang('BoostingBoostsCount', boostStatistics?.boosts?.count)}
+              </IslandTitle>
+              {!boostStatistics?.boosts?.list?.length ? (
+                <IslandDescription>
+                  {lang(isChannel ? 'NoBoostersHint' : 'NoBoostersGroupHint')}
+                </IslandDescription>
+              ) : (
+                <Island>
+                  {boostStatistics?.boosts?.list?.map((boost) => renderBoostList(boost))}
+                  {renderLoadMore()}
+                </Island>
+              )}
+            </>
+          )}
+          <IslandTitle>{lang('LinkForBoosting')}</IslandTitle>
+          <Island>
+            <LinkField link={status!.boostUrl} withShare noTitle />
+          </Island>
           {isGiveawayAvailable && (
-            <div className={styles.section}>
-              <ListItem
-                key="load-more"
-                icon="gift"
-                onClick={handleGiveawayClick}
-                className={styles.giveawayButton}
-              >
-                {lang('BoostingGetBoostsViaGifts')}
-              </ListItem>
-              <p className="text-muted hint" key="links-hint">
+            <>
+              <Island>
+                <ListItem
+                  key="load-more"
+                  icon="gift"
+                  onClick={handleGiveawayClick}
+                >
+                  {lang('BoostingGetBoostsViaGifts')}
+                </ListItem>
+              </Island>
+              <IslandDescription>
                 {lang(
                   isChannel ? 'BoostingGetMoreBoosts' : 'BoostingGetMoreBoostsGroup',
                 )}
-              </p>
-            </div>
+              </IslandDescription>
+            </>
           )}
         </>
       )}

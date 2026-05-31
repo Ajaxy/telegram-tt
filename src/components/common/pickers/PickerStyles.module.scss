@@ -32,6 +32,16 @@
   }
 }
 
+.islandHeader {
+  overflow-y: auto;
+  display: flex;
+  flex-flow: row wrap;
+  flex-shrink: 0;
+
+  max-height: 16.5rem;
+  padding-bottom: 0;
+}
+
 .pickerCategoryTitle {
   margin-bottom: 0.5rem;
   padding-inline: 0.5rem;
@@ -75,6 +85,16 @@
   @media (max-width: 600px) {
     padding-inline: 0;
   }
+}
+
+.islandList {
+  overflow: hidden;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+
+  min-height: 0;
+  padding: 0;
 }
 
 .noResults {

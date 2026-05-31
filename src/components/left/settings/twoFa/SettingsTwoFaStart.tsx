@@ -42,9 +42,7 @@ const SettingsTwoFaStart: FC<OwnProps> = ({
         </p>
       </div>
 
-      <div className="settings-item settings-group">
-        <Button onClick={onStart}>{lang('EditAdminTransferSetPassword')}</Button>
-      </div>
+      <Button onClick={onStart}>{lang('EditAdminTransferSetPassword')}</Button>
     </div>
   );
 };

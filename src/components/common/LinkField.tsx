@@ -22,6 +22,7 @@ type OwnProps = {
   isDisabled?: boolean;
   className?: string;
   withShare?: boolean;
+  noTitle?: boolean;
   onRevoke?: VoidFunction;
 };
 
@@ -31,6 +32,7 @@ const InviteLink: FC<OwnProps> = ({
   isDisabled,
   className,
   withShare,
+  noTitle,
   onRevoke,
 }) => {
   const lang = useLang();
@@ -76,9 +78,11 @@ const InviteLink: FC<OwnProps> = ({
 
   return (
     <div className={className}>
-      <p className={styles.title}>
-        {oldLang(title || 'InviteLink.InviteLink')}
-      </p>
+      {!noTitle && (
+        <p className={styles.title}>
+          {oldLang(title || 'InviteLink.InviteLink')}
+        </p>
+      )}
       <div className={styles.primaryLink}>
         <input
           className={buildClassName('form-control', styles.input)}

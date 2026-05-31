@@ -3,9 +3,9 @@
   overflow-y: hidden;
 
   height: 100%;
-  border-top: 1px solid transparent;
+  padding: 1rem;
 
-  transition: border-top-color 0.2s ease-in-out;
+  background-color: var(--color-background-secondary);
 
   :global(.lovely-chart--container) {
     font: inherit !important;
@@ -13,7 +13,7 @@
   }
 
   :global(.lovely-chart--header) {
-    margin: 0 0.75rem;
+    margin: 0.75rem;
   }
 
   :global(.lovely-chart--header),
@@ -35,7 +35,8 @@
 }
 
 .messages, .publicForwards {
-  padding: 1rem 0;
+  margin-top: 1rem;
+  padding: 0;
 
   &-title {
     padding-left: 0.75rem;
@@ -55,20 +56,25 @@
   overflow-y: scroll !important;
 }
 
+.graphContainer {
+  margin-top: 1rem;
+}
+
 .graph {
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--color-borders);
+  border-radius: var(--border-radius-island);
+
   opacity: 1;
+  background-color: var(--color-background);
+  box-shadow: 0 1px 4px 0 #0000000D;
+
   transition: opacity 0.3s ease;
 
-  &:last-of-type {
-    margin-bottom: 0;
-    border-bottom: none;
+  & + & {
+    margin-top: 1rem;
   }
 
   &.hidden {
     margin: 0;
-    border-bottom: none;
     opacity: 0;
   }
 }

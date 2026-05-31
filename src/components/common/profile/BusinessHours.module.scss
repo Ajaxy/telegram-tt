@@ -17,10 +17,26 @@
   margin-top: 1rem;
 }
 
-.left, .bottom {
+.left {
   display: flex;
   flex-direction: column;
   line-height: 1.4;
+}
+
+.bottom {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  max-height: 25rem;
+
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: max-height 0.25s ease-in-out, opacity 0.25s ease-in-out;
+}
+
+.collapsed {
+  max-height: 0;
+  opacity: 0;
 }
 
 .status {
@@ -106,33 +122,5 @@
   &::view-transition-old(.businessHours),
   &::view-transition-new(.businessHours) {
     animation-name: none;
-  }
-}
-
-@include mixins.on-active-vt('profileBusinessHoursExpand') {
-  &::view-transition-old(.expandArrow) {
-    animation-name: vt-expand-icon-spin;
-  }
-
-  &::view-transition-new(.expandArrow) {
-    display: none;
-  }
-
-  &::view-transition-old(.businessHours) {
-    display: none;
-  }
-}
-
-@include mixins.on-active-vt('profileBusinessHoursCollapse') {
-  &::view-transition-old(.expandArrow) {
-    animation-name: vt-collapse-icon-spin;
-  }
-
-  &::view-transition-new(.expandArrow) {
-    display: none;
-  }
-
-  &::view-transition-new(.businessHours) {
-    display: none;
   }
 }

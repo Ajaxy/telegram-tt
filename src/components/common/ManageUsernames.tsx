@@ -14,6 +14,7 @@ import useLang from '../../hooks/useLang';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
+import Island, { IslandDescription, IslandTitle } from '../gili/layout/Island';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import Draggable from '../ui/Draggable';
 import ListItem from '../ui/ListItem';
@@ -147,10 +148,10 @@ const ManageUsernames: FC<OwnProps> = ({
 
   return (
     <>
-      <div className={styles.container}>
-        <h4 className={styles.header} dir={lang.isRtl ? 'rtl' : undefined}>
-          {oldLang('lng_usernames_subtitle')}
-        </h4>
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
+        {oldLang('lng_usernames_subtitle')}
+      </IslandTitle>
+      <Island className={styles.container}>
         <div className={styles.sortableContainer} style={`height: ${(usernames.length) * USERNAME_HEIGHT_PX}px`}>
           {usernames.map((usernameData, i) => {
             const isDragged = state.draggedIndex === i;
@@ -201,10 +202,10 @@ const ManageUsernames: FC<OwnProps> = ({
             );
           })}
         </div>
-        <p className={styles.description} dir={lang.isRtl ? 'rtl' : undefined}>
-          {oldLang('lng_usernames_description')}
-        </p>
-      </div>
+      </Island>
+      <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
+        {oldLang('lng_usernames_description')}
+      </IslandDescription>
       <ConfirmDialog
         isOpen={Boolean(usernameForConfirm)}
         onClose={closeConfirmUsernameDialog}

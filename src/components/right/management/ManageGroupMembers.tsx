@@ -21,11 +21,13 @@ import usePeerStoriesPolling from '../../../hooks/polling/usePeerStoriesPolling'
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import NothingFound from '../../common/NothingFound';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
+import Island, { IslandDescription } from '../../gili/layout/Island';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import InputText from '../../ui/InputText';
@@ -86,7 +88,8 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
     openChat, setUserSearchQuery, closeManagement,
     toggleParticipantsHidden, setNewChatMembersDialogState, toggleManagement,
   } = getActions();
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const inputRef = useRef<HTMLInputElement>();
   const containerRef = useRef<HTMLDivElement>();
 
@@ -182,7 +185,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
 
   function getMemberContextAction(memberId: string): MenuItemContextAction[] | undefined {
     return memberId === currentUserId || !canDeleteMembers ? undefined : [{
-      title: lang('lng_context_remove_from_group'),
+      title: oldLang('lng_context_remove_from_group'),
       icon: 'stop',
       handler: () => {
         setDeletingUserId(memberId);
@@ -192,34 +195,37 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
 
   function renderSearchField() {
     return (
-      <div className="Management__filter" dir={lang.isRtl ? 'rtl' : undefined}>
+      <Island dir={oldLang.isRtl ? 'rtl' : undefined}>
         <InputText
           ref={inputRef}
           value={searchQuery}
           onChange={handleFilterChange}
-          placeholder={lang('Search')}
+          placeholder={oldLang('Search')}
+          noMargin
         />
-      </div>
+      </Island>
     );
   }
 
   return (
-    <div className="Management">
-      {noAdmins && renderSearchField()}
-      <div className="panel-content custom-scroll">
+    <div className="Management ManageGroupMembers">
+      <div className="panel-content">
+        {noAdmins && renderSearchField()}
         {canHideParticipants && !isChannel && (
-          <div className="section">
-            <ListItem icon="group" ripple onClick={handleToggleParticipantsHidden}>
-              <span>{lang('ChannelHideMembers')}</span>
-              <Switcher label={lang('ChannelHideMembers')} checked={areParticipantsHidden} />
-            </ListItem>
-            <p className="section-info">
-              {lang(areParticipantsHidden ? 'GroupMembers.MembersHiddenOn' : 'GroupMembers.MembersHiddenOff')}
-            </p>
-          </div>
+          <>
+            <Island>
+              <ListItem icon="group" ripple onClick={handleToggleParticipantsHidden}>
+                <span>{oldLang('ChannelHideMembers')}</span>
+                <Switcher label={oldLang('ChannelHideMembers')} checked={areParticipantsHidden} />
+              </ListItem>
+            </Island>
+            <IslandDescription>
+              {oldLang(areParticipantsHidden ? 'GroupMembers.MembersHiddenOn' : 'GroupMembers.MembersHiddenOff')}
+            </IslandDescription>
+          </>
         )}
-        <div className="section">
-          {viewportIds?.length ? (
+        {viewportIds?.length ? (
+          <Island className="island-list">
             <InfiniteScroll
               className="picker-list custom-scroll"
               items={displayedIds}
@@ -232,7 +238,6 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
                 <ListItem
                   key={id}
                   className="chat-item-clickable scroll-item"
-
                   onClick={() => handleMemberClick(id)}
                   contextActions={getMemberContextAction(id)}
                   withPortalForMenu
@@ -241,22 +246,22 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
                 </ListItem>
               ))}
             </InfiniteScroll>
-          ) : !isSearching && viewportIds && !viewportIds.length ? (
-            <NothingFound
-              teactOrderKey={0}
-              key="nothing-found"
-              text={isChannel ? 'No subscribers found' : 'No members found'}
-            />
-          ) : (
-            <Loading />
-          )}
-        </div>
+          </Island>
+        ) : !isSearching && viewportIds && !viewportIds.length ? (
+          <NothingFound
+            teactOrderKey={0}
+            key="nothing-found"
+            text={lang(isChannel ? 'NoSubscribersFound' : 'NoMembersFound')}
+          />
+        ) : (
+          <Loading />
+        )}
       </div>
       {canAddMembers && (
         <FloatingActionButton
           isShown
           onClick={handleNewMemberDialogOpen}
-          ariaLabel={lang('lng_channel_add_users')}
+          ariaLabel={oldLang('lng_channel_add_users')}
           iconName="add-user-filled"
         />
       )}

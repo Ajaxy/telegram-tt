@@ -8,6 +8,7 @@ import { selectIsCurrentUserPremium } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import ListItem from '../../ui/ListItem';
 import Switcher from '../../ui/Switcher';
 
@@ -89,54 +90,56 @@ const SettingsAcceptedGift = ({
   });
 
   return (
-    <div className="settings-item">
-      <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+    <>
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
         {lang('PrivacyAcceptedGiftTitle')}
-      </h4>
-      <ListItem onClick={handleLimitedEditionChange}>
-        <span>{lang('PrivacyGiftLimitedEdition')}</span>
-        <Switcher
-          id="limited_edition"
-          label={disallowedGifts?.shouldDisallowLimitedStarGifts ? lang('PrivacyDisableLimitedEditionStarGifts')
-            : lang('PrivacyEnableLimitedEditionStarGifts')}
-          disabled={!isCurrentUserPremium}
-          checked={!isCurrentUserPremium ? true : !disallowedGifts?.shouldDisallowLimitedStarGifts}
-        />
-      </ListItem>
-      <ListItem onClick={handleUnlimitedEditionChange}>
-        <span>{lang('PrivacyGiftUnlimited')}</span>
-        <Switcher
-          id="unlimited"
-          label={disallowedGifts?.shouldDisallowUnlimitedStarGifts ? lang('PrivacyDisableUnlimitedStarGifts')
-            : lang('PrivacyEnableUnlimitedStarGifts')}
-          disabled={!isCurrentUserPremium}
-          checked={!isCurrentUserPremium ? true : !disallowedGifts?.shouldDisallowUnlimitedStarGifts}
-        />
-      </ListItem>
-      <ListItem onClick={handleUniqueChange}>
-        <span>{lang('PrivacyGiftUnique')}</span>
-        <Switcher
-          id="unique"
-          label={disallowedGifts?.shouldDisallowUniqueStarGifts ? lang('PrivacyDisableUniqueStarGifts')
-            : lang('PrivacyEnableUniqueStarGifts')}
-          disabled={!isCurrentUserPremium}
-          checked={!isCurrentUserPremium ? true : !disallowedGifts?.shouldDisallowUniqueStarGifts}
-        />
-      </ListItem>
-      <ListItem onClick={handlePremiumSubscriptionChange}>
-        <span>{lang('PrivacyGiftPremiumSubscription')}</span>
-        <Switcher
-          id="premium_subscription"
-          label={disallowedGifts?.shouldDisallowPremiumGifts ? lang('PrivacyDisablePremiumGifts')
-            : lang('PrivacyEnablePremiumGifts')}
-          disabled={!isCurrentUserPremium}
-          checked={!isCurrentUserPremium ? true : !disallowedGifts?.shouldDisallowPremiumGifts}
-        />
-      </ListItem>
-      <p className="settings-item-description-larger" dir={lang.isRtl ? 'rtl' : undefined}>
+      </IslandTitle>
+      <Island>
+        <ListItem onClick={handleLimitedEditionChange}>
+          <span>{lang('PrivacyGiftLimitedEdition')}</span>
+          <Switcher
+            id="limited_edition"
+            label={disallowedGifts?.shouldDisallowLimitedStarGifts ? lang('PrivacyDisableLimitedEditionStarGifts')
+              : lang('PrivacyEnableLimitedEditionStarGifts')}
+            disabled={!isCurrentUserPremium}
+            checked={!isCurrentUserPremium ? true : !disallowedGifts?.shouldDisallowLimitedStarGifts}
+          />
+        </ListItem>
+        <ListItem onClick={handleUnlimitedEditionChange}>
+          <span>{lang('PrivacyGiftUnlimited')}</span>
+          <Switcher
+            id="unlimited"
+            label={disallowedGifts?.shouldDisallowUnlimitedStarGifts ? lang('PrivacyDisableUnlimitedStarGifts')
+              : lang('PrivacyEnableUnlimitedStarGifts')}
+            disabled={!isCurrentUserPremium}
+            checked={!isCurrentUserPremium ? true : !disallowedGifts?.shouldDisallowUnlimitedStarGifts}
+          />
+        </ListItem>
+        <ListItem onClick={handleUniqueChange}>
+          <span>{lang('PrivacyGiftUnique')}</span>
+          <Switcher
+            id="unique"
+            label={disallowedGifts?.shouldDisallowUniqueStarGifts ? lang('PrivacyDisableUniqueStarGifts')
+              : lang('PrivacyEnableUniqueStarGifts')}
+            disabled={!isCurrentUserPremium}
+            checked={!isCurrentUserPremium ? true : !disallowedGifts?.shouldDisallowUniqueStarGifts}
+          />
+        </ListItem>
+        <ListItem onClick={handlePremiumSubscriptionChange}>
+          <span>{lang('PrivacyGiftPremiumSubscription')}</span>
+          <Switcher
+            id="premium_subscription"
+            label={disallowedGifts?.shouldDisallowPremiumGifts ? lang('PrivacyDisablePremiumGifts')
+              : lang('PrivacyEnablePremiumGifts')}
+            disabled={!isCurrentUserPremium}
+            checked={!isCurrentUserPremium ? true : !disallowedGifts?.shouldDisallowPremiumGifts}
+          />
+        </ListItem>
+      </Island>
+      <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
         {lang('PrivacyAcceptedGiftInfo')}
-      </p>
-    </div>
+      </IslandDescription>
+    </>
   );
 };
 

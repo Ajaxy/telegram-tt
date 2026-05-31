@@ -28,6 +28,8 @@ import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
 
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
 import Icon from '../../../common/icons/Icon';
+import Island, { IslandOutside, IslandTitle } from '../../../gili/layout/Island';
+import Surface from '../../../gili/layout/Surface';
 import Button from '../../../ui/Button';
 import Checkbox from '../../../ui/Checkbox';
 import Draggable from '../../../ui/Draggable';
@@ -225,8 +227,8 @@ const SettingsFoldersMain = ({
   }, [foldersById, isPremium, maxFolders]);
 
   return (
-    <div className="settings-content no-border custom-scroll">
-      <div className="settings-content-header">
+    <Surface scrollable className="settings-content no-border">
+      <IslandOutside className="settings-content-header">
         <AnimatedIconWithPreview
           size={STICKER_SIZE_FOLDER_SETTINGS}
           tgsUrl={LOCAL_TGS_URLS.FoldersAll}
@@ -250,11 +252,10 @@ const SettingsFoldersMain = ({
             {lang('CreateNewFilter')}
           </Button>
         )}
-      </div>
+      </IslandOutside>
 
-      <div className="settings-item pt-3">
-        <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>{lang('Filters')}</h4>
-
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang('Filters')}</IslandTitle>
+      <Island>
         <div className="settings-sortable-container" style={`height: ${(folderIds?.length || 0) * FOLDER_HEIGHT_PX}px`}>
           {userFolders?.length ? userFolders.map((folder, i) => {
             const isBlocked = i > maxFolders - 1;
@@ -365,48 +366,49 @@ const SettingsFoldersMain = ({
             </p>
           ) : <Loading />}
         </div>
-      </div>
+      </Island>
 
       {(recommendedChatFolders && Boolean(recommendedChatFolders.length)) && (
-        <div className="settings-item pt-3">
-          <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>
+        <>
+          <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
             {lang('FilterRecommended')}
-          </h4>
+          </IslandTitle>
+          <Island>
+            {recommendedChatFolders.map((folder) => (
+              <ListItem
+                key={folder.id}
+                narrow
+                onClick={() => handleCreateFolderFromRecommended(folder)}
+              >
+                <div className="settings-folders-recommended-item">
+                  <div className="multiline-item">
+                    <span className="title">
+                      {renderTextWithEntities({
+                        text: folder.title.text,
+                        entities: folder.title.entities,
+                        noCustomEmojiPlayback: folder.noTitleAnimations,
+                      })}
+                    </span>
+                    <span className="subtitle">{folder.description}</span>
+                  </div>
 
-          {recommendedChatFolders.map((folder) => (
-            <ListItem
-              narrow
-
-              onClick={() => handleCreateFolderFromRecommended(folder)}
-            >
-              <div className="settings-folders-recommended-item">
-                <div className="multiline-item">
-                  <span className="title">
-                    {renderTextWithEntities({
-                      text: folder.title.text,
-                      entities: folder.title.entities,
-                      noCustomEmojiPlayback: folder.noTitleAnimations,
-                    })}
-                  </span>
-                  <span className="subtitle">{folder.description}</span>
+                  <Button
+                    className="px-3"
+                    color="primary"
+                    size="tiny"
+                    pill
+                    fluid
+                    isRtl={lang.isRtl}
+                  >
+                    {lang('Add')}
+                  </Button>
                 </div>
-
-                <Button
-                  className="px-3"
-                  color="primary"
-                  size="tiny"
-                  pill
-                  fluid
-                  isRtl={lang.isRtl}
-                >
-                  {lang('Add')}
-                </Button>
-              </div>
-            </ListItem>
-          ))}
-        </div>
+              </ListItem>
+            ))}
+          </Island>
+        </>
       )}
-      <div className="settings-item pt-3">
+      <Island>
         <div className="settings-item-relative">
           <Checkbox
             label={lang('ShowFolderTags')}
@@ -422,26 +424,27 @@ const SettingsFoldersMain = ({
           />
           {!isPremium && <Icon name="lock-badge" className="settings-folders-lock-icon" />}
         </div>
-      </div>
+      </Island>
       {!isMobile && (
-        <div className="settings-item pt-3">
-          <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>{lang('TabsPosition')}</h4>
-
-          <RadioGroup
-            name="tabsPosition"
-            options={[{
-              label: lang('TabsPositionLeft'),
-              value: FOLDERS_POSITION_LEFT,
-            }, {
-              label: lang('TabsPositionTop'),
-              value: FOLDERS_POSITION_TOP,
-            }]}
-            selected={foldersPosition}
-            onChange={handleFoldersPositionChange}
-          />
-        </div>
+        <>
+          <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang('TabsPosition')}</IslandTitle>
+          <Island>
+            <RadioGroup
+              name="tabsPosition"
+              options={[{
+                label: lang('TabsPositionLeft'),
+                value: FOLDERS_POSITION_LEFT,
+              }, {
+                label: lang('TabsPositionTop'),
+                value: FOLDERS_POSITION_TOP,
+              }]}
+              selected={foldersPosition}
+              onChange={handleFoldersPositionChange}
+            />
+          </Island>
+        </>
       )}
-    </div>
+    </Surface>
   );
 };
 

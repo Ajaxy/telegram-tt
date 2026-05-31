@@ -11,6 +11,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import Island, { IslandTitle } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 import RangeSlider from '../../ui/RangeSlider';
@@ -84,7 +85,7 @@ const SettingsDataStorage = ({
     const value = AUTODOWNLOAD_FILESIZE_MB_LIMITS.indexOf(autoLoadFileMaxSizeMb);
 
     return (
-      <div className="pt-5">
+      <div>
         <RangeSlider
           label={lang('AutoDownloadMaxFileSize')}
           min={0}
@@ -106,37 +107,33 @@ const SettingsDataStorage = ({
     canAutoLoadInChannels: boolean,
   ) {
     return (
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{title}</h4>
-
-        <Checkbox
-          label={lang('AutoDownloadSettingsContacts')}
-          checked={canAutoLoadFromContacts}
-          // TODO rewrite to support `useCallback`
-
-          onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}FromContacts`]: isChecked })}
-        />
-        <Checkbox
-          label={lang('AutoDownloadSettingsPrivateChats')}
-          checked={canAutoLoadInPrivateChats}
-
-          onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}InPrivateChats`]: isChecked })}
-        />
-        <Checkbox
-          label={lang('AutoDownloadSettingsGroupChats')}
-          checked={canAutoLoadInGroups}
-
-          onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}InGroups`]: isChecked })}
-        />
-        <Checkbox
-          label={lang('AutoDownloadSettingsChannels')}
-          checked={canAutoLoadInChannels}
-
-          onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}InChannels`]: isChecked })}
-        />
-
-        {key === 'File' && renderContentSizeSlider()}
-      </div>
+      <>
+        <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{title}</IslandTitle>
+        <Island>
+          <Checkbox
+            label={lang('AutoDownloadSettingsContacts')}
+            checked={canAutoLoadFromContacts}
+            // TODO rewrite to support `useCallback`
+            onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}FromContacts`]: isChecked })}
+          />
+          <Checkbox
+            label={lang('AutoDownloadSettingsPrivateChats')}
+            checked={canAutoLoadInPrivateChats}
+            onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}InPrivateChats`]: isChecked })}
+          />
+          <Checkbox
+            label={lang('AutoDownloadSettingsGroupChats')}
+            checked={canAutoLoadInGroups}
+            onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}InGroups`]: isChecked })}
+          />
+          <Checkbox
+            label={lang('AutoDownloadSettingsChannels')}
+            checked={canAutoLoadInChannels}
+            onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}InChannels`]: isChecked })}
+          />
+          {key === 'File' && renderContentSizeSlider()}
+        </Island>
+      </>
     );
   }
 
@@ -166,7 +163,7 @@ const SettingsDataStorage = ({
         canAutoLoadFileInGroups,
         canAutoLoadFileInChannels,
       )}
-      <div className="settings-item">
+      <Island>
         <ListItem
           onClick={handlePurge}
           icon="delete"
@@ -179,7 +176,7 @@ const SettingsDataStorage = ({
             {lang('SettingsDataClearMediaCacheDescription')}
           </span>
         </ListItem>
-      </div>
+      </Island>
     </div>
   );
 };

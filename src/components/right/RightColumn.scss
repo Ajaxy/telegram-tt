@@ -20,6 +20,8 @@
   }
 
   > .Transition {
+    --slide-background-color: var(--color-background-secondary);
+
     overflow: hidden;
     height: calc(100% - var(--header-height));
   }
@@ -33,7 +35,9 @@
     }
   }
 
-  .Management .section > .ChatInfo {
+  .Management .section > .ChatInfo,
+  .Management > .custom-scroll > .ChatInfo,
+  .Management > .panel-content > .ChatInfo {
     margin: 1rem 0;
     padding: 0 1.5rem;
     text-align: center;

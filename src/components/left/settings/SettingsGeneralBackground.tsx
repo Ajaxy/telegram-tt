@@ -19,6 +19,7 @@ import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Island from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
@@ -124,7 +125,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="SettingsGeneralBackground settings-content custom-scroll">
-      <div className="settings-item">
+      <Island>
         <ListItem
           icon="camera-add"
           className="mb-0"
@@ -151,7 +152,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
           checked={Boolean(isBlurred)}
           onChange={handleWallPaperBlurChange}
         />
-      </div>
+      </Island>
 
       {loadedWallpapers ? (
         <div className="settings-wallpapers">

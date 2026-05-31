@@ -13,11 +13,13 @@ const useScrollNotch = ({
   selector,
   isBottomNotch,
   shouldHideTopNotch,
+  onScrolled,
 }: {
   containerRef: ElementRef<HTMLDivElement>;
   selector: string;
   isBottomNotch?: boolean;
   shouldHideTopNotch?: boolean;
+  onScrolled?: (isScrolled: boolean) => void;
 }, deps: unknown[]) => {
   useLayoutEffect(() => {
     const elements = containerRef.current?.querySelectorAll<HTMLElement>(selector);
@@ -28,6 +30,8 @@ const useScrollNotch = ({
       const isScrolled = target.scrollTop > 0;
       const { scrollHeight, scrollTop, clientHeight } = target;
       const isAtEnd = scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD;
+
+      onScrolled?.(isScrolled);
 
       requestMutation(() => {
         if (!shouldHideTopNotch) {
@@ -63,12 +67,17 @@ const useScrollNotch = ({
 
   useEffect(() => {
     const elements = containerRef.current?.querySelectorAll<HTMLElement>(selector);
-    if (!elements?.length) return undefined;
+    if (!elements?.length) {
+      onScrolled?.(false);
+      return undefined;
+    }
 
     elements.forEach((el) => {
       const isScrolled = el.scrollTop > 0;
       const { scrollHeight, scrollTop, clientHeight } = el;
       const isAtEnd = scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD;
+
+      onScrolled?.(isScrolled);
 
       requestMutation(() => {
         if (!shouldHideTopNotch) {

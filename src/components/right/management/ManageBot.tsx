@@ -26,6 +26,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Island, { IslandDescription } from '../../gili/layout/Island';
 import AvatarEditable from '../../ui/AvatarEditable';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
@@ -183,7 +184,7 @@ const ManageBot: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management">
       <div className="custom-scroll">
-        <div className="section">
+        <Island>
           <AvatarEditable
             currentAvatarBlobUrl={currentAvatarBlobUrl}
             onChange={handlePhotoChange}
@@ -206,8 +207,8 @@ const ManageBot: FC<OwnProps & StateProps> = ({
             maxLength={maxBioLength}
             maxLengthIndicator={maxBioLength ? (maxBioLength - bio.length).toString() : undefined}
           />
-        </div>
-        <div className="section">
+        </Island>
+        <Island>
           <div className="dialog-buttons">
             <ListItem icon="bot-commands-filled" ripple onClick={handleChangeEditIntro}>
               <span>{lang('BotEditIntro')}</span>
@@ -218,11 +219,11 @@ const ManageBot: FC<OwnProps & StateProps> = ({
             <ListItem icon="bots" ripple onClick={handleChangeSettings}>
               <span>{lang('BotChangeSettings')}</span>
             </ListItem>
-            <div className="section-info section-info_push">
+            <IslandDescription>
               {renderText(lang('BotManageInfo'), ['links'])}
-            </div>
+            </IslandDescription>
           </div>
-        </div>
+        </Island>
       </div>
       <FloatingActionButton
         isShown={isFieldTouched || isAvatarTouched}

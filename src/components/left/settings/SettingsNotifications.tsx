@@ -13,6 +13,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useRunDebounced from '../../../hooks/useRunDebounced';
 
+import Island, { IslandTitle } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import RangeSlider from '../../ui/RangeSlider';
 
@@ -140,10 +141,10 @@ const SettingsNotifications = ({
 
   return (
     <div className="settings-content custom-scroll">
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          {lang('NotificationsWeb')}
-        </h4>
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
+        {lang('NotificationsWeb')}
+      </IslandTitle>
+      <Island>
         <Checkbox
           label={lang('NotificationsWeb')}
           subLabel={lang(hasWebNotifications ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
@@ -160,22 +161,20 @@ const SettingsNotifications = ({
           checked={hasPushNotifications}
           onChange={handlePushNotificationsChange}
         />
-        <div className="settings-item-slider">
-          <RangeSlider
-            label={lang('NotificationsSound')}
-            min={0}
-            max={10}
-            disabled={!areNotificationsSupported}
-            value={notificationSoundVolume}
-            onChange={handleVolumeChange}
-          />
-        </div>
-      </div>
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          {lang('AutodownloadPrivateChats')}
-        </h4>
+        <RangeSlider
+          label={lang('NotificationsSound')}
+          min={0}
+          max={10}
+          disabled={!areNotificationsSupported}
+          value={notificationSoundVolume}
+          onChange={handleVolumeChange}
+        />
+      </Island>
 
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
+        {lang('AutodownloadPrivateChats')}
+      </IslandTitle>
+      <Island>
         <Checkbox
           label={lang('NotificationsForPrivateChats')}
           subLabel={lang(!areUsersMuted ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
@@ -190,11 +189,10 @@ const SettingsNotifications = ({
           checked={Boolean(notifyDefaults?.users?.shouldShowPreviews)}
           onChange={handlePrivateChatsPreviewChange}
         />
-      </div>
+      </Island>
 
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterGroups')}</h4>
-
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterGroups')}</IslandTitle>
+      <Island>
         <Checkbox
           label={lang('NotificationsForGroups')}
           subLabel={lang(!areGroupsMuted ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
@@ -209,11 +207,10 @@ const SettingsNotifications = ({
           checked={Boolean(notifyDefaults?.groups?.shouldShowPreviews)}
           onChange={handleGroupsPreviewChange}
         />
-      </div>
+      </Island>
 
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterChannels')}</h4>
-
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterChannels')}</IslandTitle>
+      <Island>
         <Checkbox
           label={lang('NotificationsForChannels')}
           subLabel={lang(!areChannelsMuted ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
@@ -228,11 +225,10 @@ const SettingsNotifications = ({
           checked={Boolean(notifyDefaults?.channels?.shouldShowPreviews)}
           onChange={handleChannelsPreviewChange}
         />
-      </div>
+      </Island>
 
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('PhoneOther')}</h4>
-
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang('PhoneOther')}</IslandTitle>
+      <Island>
         <Checkbox
           label={lang('ContactJoined')}
           checked={hasContactJoinedNotifications}
@@ -243,7 +239,7 @@ const SettingsNotifications = ({
           checked={shouldNotifyAboutPinnedMessages}
           onChange={handlePinnedMessagesNotificationChange}
         />
-      </div>
+      </Island>
     </div>
   );
 };

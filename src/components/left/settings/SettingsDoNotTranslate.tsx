@@ -13,6 +13,8 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import ItemPicker, { type ItemPickerOption } from '../../common/pickers/ItemPicker';
+import Island from '../../gili/layout/Island';
+import InputText from '../../ui/InputText';
 
 import styles from './SettingsDoNotTranslate.module.scss';
 
@@ -79,7 +81,16 @@ const SettingsDoNotTranslate = ({
 
   return (
     <div className={buildClassName(styles.root, 'settings-content infinite-scroll')}>
-      <div className={buildClassName(styles.item)}>
+      <Island>
+        <InputText
+          id="lang-picker-search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.currentTarget.value)}
+          placeholder={lang('Search')}
+          noMargin
+        />
+      </Island>
+      <Island className={styles.item}>
         <ItemPicker
           className={styles.picker}
           items={displayedOptionList}
@@ -87,13 +98,11 @@ const SettingsDoNotTranslate = ({
           onSelectedValuesChange={handleChange}
           filterValue={searchQuery}
           onFilterChange={setSearchQuery}
-          isSearchable
           allowMultiple
           withDefaultPadding
           itemInputType="checkbox"
-          searchInputId="lang-picker-search"
         />
-      </div>
+      </Island>
     </div>
   );
 };

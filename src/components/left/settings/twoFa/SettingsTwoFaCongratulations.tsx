@@ -48,9 +48,7 @@ const SettingsTwoFaCongratulations: FC<OwnProps> = ({
         </p>
       </div>
 
-      <div className="settings-item settings-group">
-        <Button onClick={handleClick}>{lang('TwoStepVerificationPasswordReturnSettings')}</Button>
-      </div>
+      <Button onClick={handleClick}>{lang('TwoStepVerificationPasswordReturnSettings')}</Button>
     </div>
   );
 };

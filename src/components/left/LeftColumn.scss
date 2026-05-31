@@ -12,6 +12,12 @@
 
   background-color: var(--color-background);
 
+  transition: background-color 150ms;
+
+  &.secondary {
+    background-color: var(--color-background-secondary);
+  }
+
   h3 {
     user-select: none;
 

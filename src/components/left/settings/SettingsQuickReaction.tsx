@@ -7,6 +7,8 @@ import type { ApiAvailableReaction, ApiReaction } from '../../../api/types';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
+import Island from '../../gili/layout/Island';
+import Surface from '../../gili/layout/Surface';
 import RadioGroup from '../../ui/RadioGroup';
 
 type OwnProps = {
@@ -52,15 +54,17 @@ const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
   }, [setDefaultReaction]);
 
   return (
-    <div className="settings-content settings-item custom-scroll settings-quick-reaction">
-      <RadioGroup
-        name="quick-reaction-settings"
-        options={options}
-        selected={selectedReaction?.type === 'emoji' ? selectedReaction.emoticon : undefined}
-        onChange={handleChange}
-        withIcon
-      />
-    </div>
+    <Surface scrollable className="settings-content settings-quick-reaction">
+      <Island>
+        <RadioGroup
+          name="quick-reaction-settings"
+          options={options}
+          selected={selectedReaction?.type === 'emoji' ? selectedReaction.emoticon : undefined}
+          onChange={handleChange}
+          withIcon
+        />
+      </Island>
+    </Surface>
   );
 };
 

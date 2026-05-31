@@ -19,6 +19,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import StarIcon from '../../common/icons/StarIcon';
+import Island, { IslandTitle } from '../../gili/layout/Island';
 import Button from '../../ui/Button';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
@@ -196,11 +197,10 @@ const SettingsPrivacy = ({
 
   return (
     <div className="settings-content custom-scroll">
-      <div className="settings-item">
+      <Island>
         <ListItem
           icon="delete-user"
           narrow
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyBlockedUsers })}
         >
           {oldLang('BlockedUsers')}
@@ -210,7 +210,6 @@ const SettingsPrivacy = ({
           <ListItem
             icon="lock"
             narrow
-
             onClick={() => openSettingsScreen({
               screen: hasPasscode ? SettingsScreens.PasscodeEnabled : SettingsScreens.PasscodeDisabled,
             })}
@@ -226,7 +225,6 @@ const SettingsPrivacy = ({
         <ListItem
           icon="admin"
           narrow
-
           onClick={() => openSettingsScreen({
             screen: hasPassword ? SettingsScreens.TwoFaEnabled : SettingsScreens.TwoFaDisabled,
           })}
@@ -257,22 +255,19 @@ const SettingsPrivacy = ({
           <ListItem
             icon="web"
             narrow
-
             onClick={() => openSettingsScreen({ screen: SettingsScreens.ActiveWebsites })}
           >
             {oldLang('PrivacySettings.WebSessions')}
             <span className="settings-item__current-value">{webAuthCount}</span>
           </ListItem>
         )}
-      </div>
+      </Island>
 
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{oldLang('PrivacyTitle')}</h4>
-
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{oldLang('PrivacyTitle')}</IslandTitle>
+      <Island>
         <ListItem
           narrow
           className="no-icon"
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyPhoneNumber })}
         >
           <div className="multiline-item">
@@ -285,7 +280,6 @@ const SettingsPrivacy = ({
         <ListItem
           narrow
           className="no-icon"
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyLastSeen })}
         >
           <div className="multiline-item">
@@ -298,7 +292,6 @@ const SettingsPrivacy = ({
         <ListItem
           narrow
           className="no-icon"
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyProfilePhoto })}
         >
           <div className="multiline-item">
@@ -311,7 +304,6 @@ const SettingsPrivacy = ({
         <ListItem
           narrow
           className="no-icon"
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyBio })}
         >
           <div className="multiline-item">
@@ -324,7 +316,6 @@ const SettingsPrivacy = ({
         <ListItem
           narrow
           className="no-icon"
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyBirthday })}
         >
           <div className="multiline-item">
@@ -337,7 +328,6 @@ const SettingsPrivacy = ({
         <ListItem
           narrow
           className="no-icon"
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyGifts })}
         >
           <div className="multiline-item">
@@ -350,7 +340,6 @@ const SettingsPrivacy = ({
         <ListItem
           narrow
           className="no-icon"
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyForwarding })}
         >
           <div className="multiline-item">
@@ -363,7 +352,6 @@ const SettingsPrivacy = ({
         <ListItem
           narrow
           className="no-icon"
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyPhoneCall })}
         >
           <div className="multiline-item">
@@ -378,7 +366,6 @@ const SettingsPrivacy = ({
           allowDisabledClick
           rightElement={isCurrentUserPremium && <StarIcon size="big" type="premium" />}
           className="no-icon"
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyVoiceMessages })}
         >
           <div className="multiline-item">
@@ -392,7 +379,6 @@ const SettingsPrivacy = ({
           narrow
           rightElement={isCurrentUserPremium && <StarIcon size="big" type="premium" />}
           className="no-icon"
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyMessages })}
         >
           <div className="multiline-item">
@@ -408,7 +394,6 @@ const SettingsPrivacy = ({
         <ListItem
           narrow
           className="no-icon"
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyGroupChats })}
         >
           <div className="multiline-item">
@@ -418,65 +403,68 @@ const SettingsPrivacy = ({
             </span>
           </div>
         </ListItem>
-      </div>
+      </Island>
 
       {canChangeSensitive && (
-        <div className="settings-item fluid-container">
-          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+        <>
+          <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
             {oldLang('lng_settings_sensitive_title')}
-          </h4>
-          <Checkbox
-            label={oldLang('lng_settings_sensitive_disable_filtering')}
-            subLabel={oldLang('lng_settings_sensitive_about')}
-            checked={Boolean(isSensitiveEnabled)}
-            disabled={!canChangeSensitive || (!isSensitiveEnabled && needAgeVideoVerification)}
-            onCheck={handleUpdateContentSettings}
-          />
-          {!isSensitiveEnabled && needAgeVideoVerification && (
-            <Button
-              color="primary"
-              fluid
-              noForcedUpperCase
-              className="settings-unlock-button"
-              onClick={handleAgeVerification}
-            >
-              <span className="settings-unlock-button-title">
-                {lang('ButtonAgeVerification')}
-              </span>
-            </Button>
-          )}
-        </div>
+          </IslandTitle>
+          <Island>
+            <Checkbox
+              label={oldLang('lng_settings_sensitive_disable_filtering')}
+              subLabel={oldLang('lng_settings_sensitive_about')}
+              checked={Boolean(isSensitiveEnabled)}
+              disabled={!canChangeSensitive || (!isSensitiveEnabled && needAgeVideoVerification)}
+              onCheck={handleUpdateContentSettings}
+            />
+            {!isSensitiveEnabled && needAgeVideoVerification && (
+              <Button
+                color="primary"
+                noForcedUpperCase
+                className="settings-unlock-button"
+                onClick={handleAgeVerification}
+              >
+                <span className="settings-unlock-button-title">
+                  {lang('ButtonAgeVerification')}
+                </span>
+              </Button>
+            )}
+          </Island>
+        </>
       )}
 
       {canDisplayAutoarchiveSetting && (
-        <div className="settings-item">
-          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+        <>
+          <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
             {oldLang('NewChatsFromNonContacts')}
-          </h4>
-          <Checkbox
-            label={oldLang('ArchiveAndMute')}
-            subLabel={oldLang('ArchiveAndMuteInfo')}
-            checked={Boolean(shouldArchiveAndMuteNewNonContact)}
-            onCheck={handleArchiveAndMuteChange}
-          />
-        </div>
+          </IslandTitle>
+          <Island>
+            <Checkbox
+              label={oldLang('ArchiveAndMute')}
+              subLabel={oldLang('ArchiveAndMuteInfo')}
+              checked={Boolean(shouldArchiveAndMuteNewNonContact)}
+              onCheck={handleArchiveAndMuteChange}
+            />
+          </Island>
+        </>
       )}
 
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          {oldLang('lng_settings_window_system')}
-        </h4>
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
+        {oldLang('lng_settings_window_system')}
+      </IslandTitle>
+      <Island>
         <Checkbox
           label={oldLang('lng_settings_title_chat_name')}
           checked={Boolean(canDisplayChatInTitle)}
           onCheck={handleChatInTitleChange}
         />
-      </div>
+      </Island>
 
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          {lang('DeleteMyAccount')}
-        </h4>
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
+        {lang('DeleteMyAccount')}
+      </IslandTitle>
+      <Island>
         <ListItem
           narrow
           onClick={handleOpenDeleteAccountModal}
@@ -486,7 +474,7 @@ const SettingsPrivacy = ({
             {lang('Months', { count: dayOption }, { pluralValue: 1 })}
           </span>
         </ListItem>
-      </div>
+      </Island>
     </div>
   );
 };

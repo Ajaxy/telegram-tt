@@ -18,6 +18,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 
 import PasswordConfirmModal from '../../common/PasswordConfirmModal';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -257,7 +258,7 @@ const ManageGroupAdminRights = ({
   return (
     <div className="Management">
       <div className="panel-content custom-scroll">
-        <div className="section">
+        <Island>
           <ListItem inactive className="chat-item-clickable">
             <PrivateChatInfo
               userId={selectedChatMember.userId}
@@ -266,8 +267,11 @@ const ManageGroupAdminRights = ({
             />
           </ListItem>
 
-          <h3 className="section-heading mt-4" dir="auto">{lang('EditAdminWhatCanDo')}</h3>
+        </Island>
 
+        <IslandTitle dir="auto">{lang('EditAdminWhatCanDo')}</IslandTitle>
+
+        <Island>
           <div className="ListItem">
             <Checkbox
               name="changeInfo"
@@ -442,9 +446,9 @@ const ManageGroupAdminRights = ({
           )}
 
           {isFormFullyDisabled && (
-            <p className="section-info mb-4" dir="auto">
+            <IslandDescription className="mb-4" dir="auto">
               {lang('EditAdminUnavailable')}
-            </p>
+            </IslandDescription>
           )}
 
           {!isChannel && (
@@ -469,7 +473,7 @@ const ManageGroupAdminRights = ({
               {lang('EditAdminRemoveAdmin')}
             </ListItem>
           )}
-        </div>
+        </Island>
       </div>
 
       <FloatingActionButton

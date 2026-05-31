@@ -1,6 +1,8 @@
 @use "../../../styles/mixins";
 
 .SettingsGeneralBackgroundColor {
+  padding-bottom: 0 !important;
+
   &:not(.is-dragging) .handle {
     transition: transform 300ms ease;
   }
@@ -71,18 +73,30 @@
   }
 
   .predefined-colors {
+    overflow: clip;
     display: grid;
     grid-auto-rows: 1fr;
     grid-template-columns: repeat(3, 1fr);
     gap: 0.0625rem;
 
-    @include mixins.side-panel-section;
+    margin: 1rem -1rem 0;
+    margin-inline: calc(min(var(--scrollbar-width) - 1rem, 0px));
+    border-top-left-radius: var(--border-radius-island);
+    border-top-right-radius: var(--border-radius-island);
   }
 
   .predefined-color {
     cursor: var(--custom-cursor, pointer);
     box-shadow: inset 0 0 0 0 var(--color-background);
     transition: box-shadow 300ms ease;
+
+    &:nth-child(1) {
+      border-top-left-radius: var(--border-radius-island);
+    }
+
+    &:nth-child(3) {
+      border-top-right-radius: var(--border-radius-island);
+    }
 
     &.active {
       border: 0.125rem solid var(--color-primary);

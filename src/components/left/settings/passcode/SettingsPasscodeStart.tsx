@@ -43,9 +43,7 @@ const SettingsPasscodeStart: FC<OwnProps> = ({
         </p>
       </div>
 
-      <div className="settings-item settings-group">
-        <Button onClick={onStart}>{lang('EnablePasscode')}</Button>
-      </div>
+      <Button onClick={onStart}>{lang('EnablePasscode')}</Button>
     </div>
   );
 };

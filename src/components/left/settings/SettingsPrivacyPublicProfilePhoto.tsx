@@ -10,6 +10,7 @@ import useFlag from '../../../hooks/useFlag';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
+import Island, { IslandDescription } from '../../gili/layout/Island';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import ListItem from '../../ui/ListItem';
 import SelectAvatar from '../../ui/SelectAvatar';
@@ -63,44 +64,46 @@ const SettingsPrivacyPublicProfilePhoto: FC<OwnProps> = ({
   }, []);
 
   return (
-    <div className="settings-item">
-      <ListItem
-        narrow
-        icon="camera-add"
-        onClick={handleOpenFileSelector}
-      >
-        <SelectAvatar
-          onChange={handleSelectFile}
-          inputRef={inputRef}
-        />
-        {lang(currentUserFallbackPhoto
-          ? 'Privacy.ProfilePhoto.UpdatePublicPhoto'
-          : 'Privacy.ProfilePhoto.SetPublicPhoto')}
-      </ListItem>
-      {currentUserFallbackPhoto && (
+    <>
+      <Island>
         <ListItem
           narrow
-          leftElement={<Avatar photo={currentUserFallbackPhoto} size="mini" className={styles.fallbackPhoto} />}
-          onClick={openDeleteFallbackPhotoModal}
-          destructive
+          icon="camera-add"
+          onClick={handleOpenFileSelector}
         >
-          {lang(currentUserFallbackPhoto.isVideo
-            ? 'Privacy.ProfilePhoto.RemovePublicVideo'
-            : 'Privacy.ProfilePhoto.RemovePublicPhoto')}
-          <ConfirmDialog
-            isOpen={isDeleteFallbackPhotoModalOpen}
-            onClose={closeDeleteFallbackPhotoModal}
-            text={lang('Privacy.ResetPhoto.Confirm')}
-            confirmLabel={lang('Delete')}
-            confirmHandler={handleConfirmDelete}
-            confirmIsDestructive
+          <SelectAvatar
+            onChange={handleSelectFile}
+            inputRef={inputRef}
           />
+          {lang(currentUserFallbackPhoto
+            ? 'Privacy.ProfilePhoto.UpdatePublicPhoto'
+            : 'Privacy.ProfilePhoto.SetPublicPhoto')}
         </ListItem>
-      )}
-      <p className="settings-item-description-larger" dir={lang.isRtl ? 'rtl' : undefined}>
+        {currentUserFallbackPhoto && (
+          <ListItem
+            narrow
+            leftElement={<Avatar photo={currentUserFallbackPhoto} size="mini" className={styles.fallbackPhoto} />}
+            onClick={openDeleteFallbackPhotoModal}
+            destructive
+          >
+            {lang(currentUserFallbackPhoto.isVideo
+              ? 'Privacy.ProfilePhoto.RemovePublicVideo'
+              : 'Privacy.ProfilePhoto.RemovePublicPhoto')}
+            <ConfirmDialog
+              isOpen={isDeleteFallbackPhotoModalOpen}
+              onClose={closeDeleteFallbackPhotoModal}
+              text={lang('Privacy.ResetPhoto.Confirm')}
+              confirmLabel={lang('Delete')}
+              confirmHandler={handleConfirmDelete}
+              confirmIsDestructive
+            />
+          </ListItem>
+        )}
+      </Island>
+      <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
         {lang('Privacy.ProfilePhoto.PublicPhotoInfo')}
-      </p>
-    </div>
+      </IslandDescription>
+    </>
   );
 };
 

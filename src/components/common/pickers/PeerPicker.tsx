@@ -21,6 +21,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Island from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import InputText from '../../ui/InputText';
@@ -93,6 +94,7 @@ type OwnProps<CategoryType extends string> = {
   withPeerTypes?: boolean;
   withPeerUsernames?: boolean;
   withDefaultPadding?: boolean;
+  withIslands?: boolean;
   onFilterChange?: (value: string) => void;
   onDisabledClick?: (id: string, isSelected: boolean) => void;
   onLoadMore?: () => void;
@@ -125,6 +127,7 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
   withPeerTypes,
   withPeerUsernames,
   withDefaultPadding,
+  withIslands,
   onFilterChange,
   onDisabledClick,
   onLoadMore,
@@ -249,6 +252,19 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
     const { value } = e.currentTarget;
     onFilterChange?.(value);
   });
+
+  function renderSearchInput() {
+    return (
+      <InputText
+        id={searchInputId}
+        ref={inputRef}
+        value={filterValue}
+        onChange={handleFilterChange}
+        placeholder={filterPlaceholder || oldLang('SelectChat')}
+        noMargin={withIslands}
+      />
+    );
+  }
 
   const [viewportIds, getMore] = useInfiniteScroll(
     onLoadMore, sortedItemIds, Boolean(filterValue),
@@ -387,62 +403,78 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
     ? sections.some((s) => s.ids.length > 0)
     : Boolean(viewportIds?.length);
 
+  const SearchWrapper = withIslands ? Island : 'div';
+  const ListWrapper = withIslands ? Island : 'div';
+
+  function renderListWrapper(content: TeactNode) {
+    return withIslands
+      ? <ListWrapper className={styles.islandList}>{content}</ListWrapper>
+      : content;
+  }
+
   return (
     <div className={buildClassName(styles.container, className)}>
       {isSearchable && (
-        <div className={buildClassName(styles.header, 'custom-scroll')} dir={oldLang.isRtl ? 'rtl' : undefined}>
-          {selectedCategories?.map((category) => (
-            <PeerChip
-              className={styles.peerChip}
-              customPeer={categoriesByType[category]}
-              onClick={handleItemClick}
-              clickArg={category}
-              canClose
-            />
-          ))}
-          {lockedSelectedIds?.map((id, i) => (
-            <PeerChip
-              className={styles.peerChip}
-              peerId={id}
-              isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
-              forceShowSelf={forceShowSelf}
-              onClick={handleItemClick}
-              clickArg={id}
-            />
-          ))}
-          {unlockedSelectedIds.map((id, i) => (
-            <PeerChip
-              className={styles.peerChip}
-              peerId={id}
-              isMinimized={
-                shouldMinimize && i + (lockedSelectedIds?.length || 0) < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT
-              }
-              canClose
-              onClick={handleItemClick}
-              clickArg={id}
-            />
-          ))}
-          <InputText
-            id={searchInputId}
-            ref={inputRef}
-            value={filterValue}
-            onChange={handleFilterChange}
-            placeholder={filterPlaceholder || oldLang('SelectChat')}
-          />
-        </div>
+        <>
+          {(!withIslands || selectedIds.length > 0 || (selectedCategories && selectedCategories.length > 0)) && (
+            <SearchWrapper
+              className={buildClassName(withIslands ? styles.islandHeader : styles.header, 'custom-scroll')}
+              dir={oldLang.isRtl ? 'rtl' : undefined}
+            >
+              {selectedCategories?.map((category) => (
+                <PeerChip
+                  className={styles.peerChip}
+                  customPeer={categoriesByType[category]}
+                  onClick={handleItemClick}
+                  clickArg={category}
+                  canClose
+                />
+              ))}
+              {lockedSelectedIds?.map((id, i) => (
+                <PeerChip
+                  className={styles.peerChip}
+                  peerId={id}
+                  isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
+                  forceShowSelf={forceShowSelf}
+                  onClick={handleItemClick}
+                  clickArg={id}
+                />
+              ))}
+              {unlockedSelectedIds.map((id, i) => (
+                <PeerChip
+                  className={styles.peerChip}
+                  peerId={id}
+                  isMinimized={
+                    shouldMinimize
+                    && i + (lockedSelectedIds?.length || 0) < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT
+                  }
+                  canClose
+                  onClick={handleItemClick}
+                  clickArg={id}
+                />
+              ))}
+              {!withIslands && renderSearchInput()}
+            </SearchWrapper>
+          )}
+          {withIslands && (
+            <Island>{renderSearchInput()}</Island>
+          )}
+        </>
       )}
 
       {hasContent ? (
-        <InfiniteScroll
-          className={buildClassName(styles.pickerList, withDefaultPadding && styles.padded, 'custom-scroll')}
-          items={viewportIds}
-          itemSelector={`.${ITEM_CLASS_NAME}`}
-          beforeChildren={beforeChildren}
-          onLoadMore={getMore}
-          noScrollRestore={noScrollRestore}
-        >
-          {renderItems()}
-        </InfiniteScroll>
+        renderListWrapper(
+          <InfiniteScroll
+            className={buildClassName(styles.pickerList, withDefaultPadding && styles.padded, 'custom-scroll')}
+            items={viewportIds}
+            itemSelector={`.${ITEM_CLASS_NAME}`}
+            beforeChildren={beforeChildren}
+            onLoadMore={getMore}
+            noScrollRestore={noScrollRestore}
+          >
+            {renderItems()}
+          </InfiniteScroll>,
+        )
       ) : !isLoading && viewportIds && !viewportIds.length ? (
         <p className={styles.noResults}>{notFoundText || 'Sorry, nothing found.'}</p>
       ) : (

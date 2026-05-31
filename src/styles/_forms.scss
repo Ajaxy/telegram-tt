@@ -14,7 +14,11 @@
 
 .input-group {
   position: relative;
-  margin-bottom: 1.125rem;
+  margin-bottom: var(--input-group-margin, 1.125rem);
+
+  &.no-margin {
+    margin-bottom: 0;
+  }
 
   label {
     pointer-events: none;

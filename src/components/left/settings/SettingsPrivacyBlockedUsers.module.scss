@@ -1,0 +1,15 @@
+.surface {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.listIsland {
+  overflow: hidden;
+  flex: 0 1 auto;
+
+  min-height: 0;
+  margin-bottom: 1rem;
+  padding: 0;
+}

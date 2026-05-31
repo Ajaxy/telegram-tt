@@ -3,6 +3,8 @@
 .root {
   overflow-x: hidden;
   overflow-y: scroll;
+  padding: 1rem;
+  background-color: var(--color-background-secondary);
 }
 
 .noResults {
@@ -19,9 +21,6 @@
 
 .section {
   padding: 1.5rem;
-  padding-inline-end: calc(1.5rem - var(--scrollbar-width));
-
-  @include mixins.side-panel-section;
 }
 
 .user :global(.status) {
@@ -113,10 +112,6 @@
   flex-direction: column-reverse;
 }
 
-.giveawayButton {
-  margin: 0 -1rem 0.5rem;
-}
-
 .giveawayIcon {
   width: 2.75rem;
   height: 2.75rem;
@@ -133,8 +128,4 @@
   top: 50%;
   right: 0.5rem;
   transform: translate(0, -50%);
-}
-
-.boostInfo {
-  margin: 0 -1rem;
 }

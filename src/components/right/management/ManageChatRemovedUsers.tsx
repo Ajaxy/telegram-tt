@@ -13,6 +13,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
+import Island, { IslandDescription } from '../../gili/layout/Island';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 import RemoveGroupUserModal from './RemoveGroupUserModal';
@@ -83,40 +84,41 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management">
       <div className="panel-content custom-scroll">
-        <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
-          <p className="section-help">{lang(isChannel ? 'NoBlockedChannel2' : 'NoBlockedGroup2')}</p>
-
-          {removedMembers.map((member) => (
-            <ListItem
-              key={member.userId}
-              className="chat-item-clickable"
-              ripple
-              contextActions={getContextActions(member)}
-            >
-              <PrivateChatInfo
-                userId={member.userId}
-                status={getRemovedBy(member)}
-                forceShowSelf
-              />
-            </ListItem>
-          ))}
-          {canDeleteMembers && (
-            <FloatingActionButton
-              isShown
-              onClick={openRemoveUserModal}
-              ariaLabel={lang('Channel.EditAdmin.Permission.BanUsers')}
-              iconName="add-user-filled"
-            />
-          )}
-          {chat && canDeleteMembers && (
-            <RemoveGroupUserModal
-              chat={chat}
-              isOpen={isRemoveUserModalOpen}
-              onClose={closeRemoveUserModal}
-            />
-          )}
-        </div>
+        <IslandDescription>{lang(isChannel ? 'NoBlockedChannel2' : 'NoBlockedGroup2')}</IslandDescription>
+        {Boolean(removedMembers.length) && (
+          <Island dir={lang.isRtl ? 'rtl' : undefined}>
+            {removedMembers.map((member) => (
+              <ListItem
+                key={member.userId}
+                className="chat-item-clickable"
+                ripple
+                contextActions={getContextActions(member)}
+              >
+                <PrivateChatInfo
+                  userId={member.userId}
+                  status={getRemovedBy(member)}
+                  forceShowSelf
+                />
+              </ListItem>
+            ))}
+          </Island>
+        )}
       </div>
+      {canDeleteMembers && (
+        <FloatingActionButton
+          isShown
+          onClick={openRemoveUserModal}
+          ariaLabel={lang('Channel.EditAdmin.Permission.BanUsers')}
+          iconName="add-user-filled"
+        />
+      )}
+      {chat && canDeleteMembers && (
+        <RemoveGroupUserModal
+          chat={chat}
+          isOpen={isRemoveUserModalOpen}
+          onClose={closeRemoveUserModal}
+        />
+      )}
     </div>
   );
 };

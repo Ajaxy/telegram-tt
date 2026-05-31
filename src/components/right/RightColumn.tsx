@@ -1,11 +1,11 @@
 import type { FC } from '@teact';
-import { memo, useEffect, useRef, useState } from '@teact';
+import { memo, useEffect, useLayoutEffect, useRef, useState } from '@teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { AnimationLevel, ThreadId } from '../../types';
 import { ManagementScreens, NewChatMembersProgress, ProfileState, RightColumnContent } from '../../types';
 
-import { ANIMATION_END_DELAY, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
+import { MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 import { getIsSavedDialog } from '../../global/helpers';
 import {
   selectAreActiveChatsLoaded,
@@ -20,10 +20,12 @@ import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { resolveTransitionName } from '../../util/resolveTransitionName.ts';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useFlag from '../../hooks/useFlag';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useScrollNotch from '../../hooks/useScrollNotch.ts';
+import useSyncEffect from '../../hooks/useSyncEffect';
 import useWindowSize from '../../hooks/window/useWindowSize';
 
 import Transition from '../ui/Transition';
@@ -63,7 +65,6 @@ type StateProps = {
   hasProfileBackground?: boolean;
 };
 
-const ANIMATION_DURATION = 450 + ANIMATION_END_DELAY;
 const MAIN_SCREENS_COUNT = Object.keys(RightColumnContent).length / 2;
 const MANAGEMENT_SCREENS_COUNT = Object.keys(ManagementScreens).length / 2;
 
@@ -120,7 +121,6 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const [selectedChatMemberId, setSelectedChatMemberId] = useState<string | undefined>();
   const [isPromotedByCurrentUser, setIsPromotedByCurrentUser] = useState<boolean | undefined>();
   const [isProfileExpanded, setIsProfileExpanded] = useState(false);
-  const [isProfileScrolled, setIsProfileScrolled] = useState(false);
   const isScrolledDown = profileState !== ProfileState.Profile;
 
   const isOpen = contentKey !== undefined;
@@ -138,42 +138,56 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const isCreatingTopic = contentKey === RightColumnContent.CreateTopic;
   const isEditingTopic = contentKey === RightColumnContent.EditTopic;
   const isOverlaying = windowWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
+  const isContentScrolledRef = useRef(false);
 
-  const headerBackground: 'regular' | 'secondary' = (() => {
-    if (isSavedMessages) return 'secondary';
-    if (!isProfile) return 'regular';
+  const hasStaticHeader = isSavedMessages || isAddingChatMembers || isCreatingTopic || isEditingTopic
+    || (isManagement && (
+      managementScreen === ManagementScreens.GroupMembers
+      || managementScreen === ManagementScreens.ChatAdministrators
+      || managementScreen === ManagementScreens.GroupAddAdmins
+    ));
+
+  const getHeaderBackground = useLastCallback((): 'regular' | 'secondary' => {
+    const isScrolled = isContentScrolledRef.current;
+    if (hasStaticHeader) return 'secondary';
+    if (!isProfile) return isScrolled ? 'regular' : 'secondary';
     if (isScrolledDown) return 'secondary';
-    if (!isProfileScrolled && !isProfileExpanded && !hasProfileBackground) return 'secondary';
+    if (!isScrolled && !isProfileExpanded && !hasProfileBackground) return 'secondary';
     return 'regular';
-  })();
+  });
 
-  const [shouldSkipTransition, setShouldSkipTransition] = useState(!isOpen);
+  const [headerBackground, setHeaderBackground] = useState<'regular' | 'secondary'>(getHeaderBackground);
+
+  const handleContentScrolled = useLastCallback((isScrolled: boolean) => {
+    isContentScrolledRef.current = isScrolled;
+    setHeaderBackground(getHeaderBackground());
+  });
+
+  const [isAnimating, startAnimating, stopAnimating] = useFlag();
+
+  useLayoutEffect(() => {
+    const elements = containerRef.current?.querySelectorAll<HTMLElement>(
+      ':scope .custom-scroll, :scope .panel-content',
+    );
+    elements?.forEach((el) => {
+      el.scrollTop = 0;
+    });
+    isContentScrolledRef.current = false;
+    setHeaderBackground(getHeaderBackground());
+  }, [contentKey, managementScreen]);
+
+  useSyncEffect(() => {
+    setHeaderBackground(getHeaderBackground());
+  }, [isScrolledDown, isProfileExpanded, hasProfileBackground]);
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true, !isChatSelected) ?? -1;
 
   useScrollNotch({
     containerRef,
     selector: ':scope .custom-scroll, :scope .panel-content',
-    shouldHideTopNotch: isSavedMessages || (isProfile && isScrolledDown),
+    shouldHideTopNotch: isAnimating || isSavedMessages || hasStaticHeader || (isProfile && isScrolledDown),
+    onScrolled: handleContentScrolled,
   }, [contentKey, managementScreen, chatId, threadId]);
-
-  useEffect(() => {
-    if (!isProfile || isScrolledDown || isSavedMessages) {
-      setIsProfileScrolled(false);
-      return undefined;
-    }
-
-    const scrollEl = containerRef.current?.querySelector<HTMLElement>('.custom-scroll');
-    if (!scrollEl) return undefined;
-
-    const handleProfileScroll = () => {
-      setIsProfileScrolled(scrollEl.scrollTop > 1);
-    };
-
-    handleProfileScroll();
-    scrollEl.addEventListener('scroll', handleProfileScroll, { passive: true });
-    return () => scrollEl.removeEventListener('scroll', handleProfileScroll);
-  }, [chatId, threadId, isProfile, isScrolledDown, isSavedMessages]);
 
   const close = useLastCallback((shouldScrollUp = true) => {
     switch (contentKey) {
@@ -277,12 +291,6 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   });
 
   useEffect(() => (isOpen && chatId ? captureEscKeyListener(close) : undefined), [isOpen, close, chatId]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setShouldSkipTransition(!isOpen);
-    }, ANIMATION_DURATION);
-  }, [isOpen]);
 
   useEffect(() => {
     if (nextManagementScreen) {
@@ -429,10 +437,12 @@ const RightColumn: FC<OwnProps & StateProps> = ({
         />
         <Transition
           ref={containerRef}
-          name={resolveTransitionName('layers', animationLevel, shouldSkipTransition || shouldSkipHistoryAnimations)}
+          name={resolveTransitionName('layers', animationLevel, !isOpen || shouldSkipHistoryAnimations)}
           renderCount={MAIN_SCREENS_COUNT + MANAGEMENT_SCREENS_COUNT}
           activeKey={isManagement ? MAIN_SCREENS_COUNT + managementScreen : renderingContentKey}
           shouldCleanup
+          onStart={startAnimating}
+          onStop={stopAnimating}
           cleanupExceptionKey={
             (renderingContentKey === RightColumnContent.MessageStatistics
               || renderingContentKey === RightColumnContent.StoryStatistics)

@@ -137,7 +137,7 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <div className="Picker settings-folders-chat-list">
+    <div className="Picker settings-folders-chat-list settings-picker-islands">
       <PeerPicker
         categories={shouldHideChatTypes ? undefined : chatTypes}
         itemIds={displayedIds}
@@ -150,6 +150,7 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps> = ({
         isSearchable
         withDefaultPadding
         withPeerTypes
+        withIslands
         allowMultiple
         itemInputType="checkbox"
         onSelectedIdsChange={handleSelectedIdsChange}

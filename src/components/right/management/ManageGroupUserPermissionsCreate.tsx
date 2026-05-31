@@ -9,9 +9,11 @@ import { isChatChannel, sortUserIds } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 
 import NothingFound from '../../common/NothingFound';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
+import Island from '../../gili/layout/Island';
 import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
@@ -39,6 +41,8 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
   onClose,
   isActive,
 }) => {
+  const lang = useLang();
+
   useHistoryBack({
     isActive,
     onBack: onClose,
@@ -64,9 +68,9 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management">
       <div className="custom-scroll">
-        <div className="section" teactFastList>
-          {memberIds ? (
-            memberIds.map((id, i) => (
+        {memberIds?.length ? (
+          <Island teactFastList>
+            {memberIds.map((id, i) => (
               <ListItem
                 key={id}
                 teactOrderKey={i}
@@ -76,15 +80,13 @@ const ManageGroupUserPermissionsCreate: FC<OwnProps & StateProps> = ({
               >
                 <PrivateChatInfo userId={id} forceShowSelf />
               </ListItem>
-            ))
-          ) : (
-            <NothingFound
-              teactOrderKey={0}
-              key="nothing-found"
-              text={isChannel ? 'No subscribers found' : 'No members found'}
-            />
-          )}
-        </div>
+            ))}
+          </Island>
+        ) : (
+          <NothingFound
+            text={lang(isChannel ? 'NoSubscribersFound' : 'NoMembersFound')}
+          />
+        )}
       </div>
     </div>
   );

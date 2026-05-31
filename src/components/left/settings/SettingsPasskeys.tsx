@@ -22,6 +22,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import CustomEmoji from '../../common/CustomEmoji';
 import Icon from '../../common/icons/Icon';
+import Island, { IslandDescription } from '../../gili/layout/Island';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Link from '../../ui/Link';
@@ -139,7 +140,7 @@ const SettingsPasskeys = ({
           {lang('SettingsPasskeyInfo')}
         </p>
       </div>
-      <div className="settings-item">
+      <Island className="settings-item">
         {passkeys?.map(renderPasskey)}
         {canAddPasskey && (
           <Button
@@ -153,17 +154,17 @@ const SettingsPasskeys = ({
             {lang('SettingsPasskeysCreate')}
           </Button>
         )}
-        <p className="settings-item-description mt-3" dir="auto">
-          {lang('SettingsPasskeysFooter', {
-            link: (
-              <Link isPrimary onClick={handleOpenPasskeyModal}>
-                {lang('SettingsPasskeysFooterLink', undefined,
-                  { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
-              </Link>
-            ),
-          }, { withNodes: true })}
-        </p>
-      </div>
+      </Island>
+      <IslandDescription dir="auto">
+        {lang('SettingsPasskeysFooter', {
+          link: (
+            <Link isPrimary onClick={handleOpenPasskeyModal}>
+              {lang('SettingsPasskeysFooterLink', undefined,
+                { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
+            </Link>
+          ),
+        }, { withNodes: true })}
+      </IslandDescription>
       <ConfirmDialog
         isOpen={Boolean(deleteModalId)}
         title={lang('PasskeyDeleteTitle')}

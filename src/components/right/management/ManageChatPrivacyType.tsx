@@ -25,6 +25,7 @@ import LinkField from '../../common/LinkField';
 import ManageUsernames from '../../common/ManageUsernames';
 import SafeLink from '../../common/SafeLink';
 import UsernameInput from '../../common/UsernameInput';
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem from '../../ui/ListItem';
@@ -184,71 +185,77 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
     const purchaseInfoLink = `${TME_LINK_PREFIX}${PURCHASE_USERNAME}`;
 
     return (
-      <p className="section-info" dir="auto">
+      <IslandDescription dir="auto">
         {(lang('lng_username_purchase_available'))
           .replace('{link}', '%PURCHASE_LINK%')
           .split('%')
           .map((s) => {
             return (s === 'PURCHASE_LINK' ? <SafeLink url={purchaseInfoLink} text={`@${PURCHASE_USERNAME}`} /> : s);
           })}
-      </p>
+      </IslandDescription>
     );
   }
 
   return (
     <div className="Management">
       <div className="panel-content custom-scroll">
-        <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
-          <h3 className="section-heading">{lang(`${langPrefix2}Type`)}</h3>
+        <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang(`${langPrefix2}Type`)}</IslandTitle>
+        <Island dir={lang.isRtl ? 'rtl' : undefined}>
           <RadioGroup
             selected={privacyType}
             name="channel-type"
             options={options}
             onChange={handleOptionChange}
           />
-        </div>
+        </Island>
         {privacyType === 'private' ? (
-          <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
-            {privateInviteLink ? (
-              <>
-                <LinkField link={privateInviteLink} className="invite-link" />
-                <p className="section-info" dir={lang.isRtl ? 'rtl' : undefined}>
-                  {lang(`${langPrefix1}PrivateLinkHelp`)}
-                </p>
-
-                <ListItem icon="delete" ripple destructive onClick={openRevokeConfirmDialog}>
-                  {lang('RevokeLink')}
-                </ListItem>
-                <ConfirmDialog
-                  isOpen={isRevokeConfirmDialogOpen}
-                  onClose={closeRevokeConfirmDialog}
-                  text={lang('RevokeAlert')}
-                  confirmLabel={lang('RevokeButton')}
-                  confirmHandler={handleRevokePrivateLink}
-                  confirmIsDestructive
-                />
-              </>
-            ) : (
-              <Loading />
-            )}
-          </div>
+          <>
+            <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
+              {lang('InviteLink.InviteLink')}
+            </IslandTitle>
+            <Island dir={lang.isRtl ? 'rtl' : undefined}>
+              {privateInviteLink ? (
+                <>
+                  <LinkField link={privateInviteLink} className="invite-link" noTitle />
+                  <ListItem icon="delete" ripple destructive onClick={openRevokeConfirmDialog}>
+                    {lang('RevokeLink')}
+                  </ListItem>
+                  <ConfirmDialog
+                    isOpen={isRevokeConfirmDialogOpen}
+                    onClose={closeRevokeConfirmDialog}
+                    text={lang('RevokeAlert')}
+                    confirmLabel={lang('RevokeButton')}
+                    confirmHandler={handleRevokePrivateLink}
+                    confirmIsDestructive
+                  />
+                </>
+              ) : (
+                <Loading />
+              )}
+            </Island>
+            <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
+              {lang(`${langPrefix1}PrivateLinkHelp`)}
+            </IslandDescription>
+          </>
         ) : (
-          <div className="section no-border">
-            <div className="settings-input">
-              <UsernameInput
-                asLink
-                currentUsername={currentUsername}
-                isLoading={isLoading}
-                isUsernameAvailable={isUsernameAvailable}
-                checkedUsername={checkedUsername}
-                onChange={handleUsernameChange}
-              />
-            </div>
+          <>
+            <Island>
+              <div className="settings-input">
+                <UsernameInput
+                  asLink
+                  currentUsername={currentUsername}
+                  isLoading={isLoading}
+                  isUsernameAvailable={isUsernameAvailable}
+                  checkedUsername={checkedUsername}
+                  onChange={handleUsernameChange}
+                />
+              </div>
+            </Island>
             {error === USERNAME_PURCHASE_ERROR && renderPurchaseLink()}
-            <p className="section-info" dir="auto">
+            <IslandDescription dir="auto">
               {lang(`${langPrefix2}.Username.CreatePublicLinkHelp`)}
-            </p>
-          </div>
+            </IslandDescription>
+          </>
         )}
         {shouldRenderUsernamesManage && (
           <ManageUsernames
@@ -257,22 +264,22 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
             onEditUsername={handleUsernameChange}
           />
         )}
-        <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
-          <h3 className="section-heading">
-            {lang(isChannel ? 'ChannelVisibility.Forwarding.ChannelTitle' : 'ChannelVisibility.Forwarding.GroupTitle')}
-          </h3>
+        <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
+          {lang(isChannel ? 'ChannelVisibility.Forwarding.ChannelTitle' : 'ChannelVisibility.Forwarding.GroupTitle')}
+        </IslandTitle>
+        <Island dir={lang.isRtl ? 'rtl' : undefined}>
           <RadioGroup
             selected={isProtected ? 'protected' : 'allowed'}
             name="forwarding-type"
             options={forwardingOptions}
             onChange={handleForwardingOptionChange}
           />
-          <p className="section-info section-info_push">
-            {isChannel
-              ? lang('ChannelVisibility.Forwarding.ChannelInfo')
-              : lang('ChannelVisibility.Forwarding.GroupInfo')}
-          </p>
-        </div>
+        </Island>
+        <IslandDescription>
+          {isChannel
+            ? lang('ChannelVisibility.Forwarding.ChannelInfo')
+            : lang('ChannelVisibility.Forwarding.GroupInfo')}
+        </IslandDescription>
       </div>
       <FloatingActionButton
         isShown={canUpdate}

@@ -16,6 +16,7 @@ import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver'
 import useOldLang from '../../../hooks/useOldLang';
 
 import StickerSetCard from '../../common/StickerSetCard';
+import Island, { IslandDescription } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 
 type OwnProps = {
@@ -67,27 +68,31 @@ const SettingsCustomEmoji: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-content custom-scroll">
       {customEmojiSets && (
-        <div className="settings-item">
-          <Checkbox
-            label={lang('SuggestAnimatedEmoji')}
-            checked={shouldSuggestCustomEmoji}
-            onCheck={handleSuggestCustomEmojiChange}
-          />
-          <div className="mt-4" ref={stickerSettingsRef}>
-            {customEmojiSets.map((stickerSet: ApiStickerSet) => (
-              <StickerSetCard
-                key={stickerSet.id}
-                stickerSet={stickerSet}
-                observeIntersection={observeIntersectionForCovers}
-                onClick={handleStickerSetClick}
-                noPlay={!canPlayAnimatedEmojis}
-              />
-            ))}
-          </div>
-          <p className="settings-item-description mt-3" dir="auto">
+        <>
+          <Island>
+            <Checkbox
+              label={lang('SuggestAnimatedEmoji')}
+              checked={shouldSuggestCustomEmoji}
+              onCheck={handleSuggestCustomEmojiChange}
+            />
+          </Island>
+          <Island>
+            <div ref={stickerSettingsRef}>
+              {customEmojiSets.map((stickerSet: ApiStickerSet) => (
+                <StickerSetCard
+                  key={stickerSet.id}
+                  stickerSet={stickerSet}
+                  observeIntersection={observeIntersectionForCovers}
+                  onClick={handleStickerSetClick}
+                  noPlay={!canPlayAnimatedEmojis}
+                />
+              ))}
+            </div>
+          </Island>
+          <IslandDescription dir="auto">
             {renderText(lang('EmojiBotInfo'), ['links'])}
-          </p>
-        </div>
+          </IslandDescription>
+        </>
       )}
     </div>
   );

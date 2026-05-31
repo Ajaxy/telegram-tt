@@ -3,7 +3,7 @@
 
   overflow: hidden;
 
-  margin: 0 10px 16px 10px;
+  margin: 0 10px 10px 10px;
   border-radius: 6px;
 
   opacity: 1;
@@ -62,30 +62,28 @@
 }
 
 .lovely-chart--minimap-limit-mask {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  pointer-events: none;
 
   position: absolute;
   top: 0;
   left: 0;
-  height: 100%;
 
-  border-radius: 6px 0 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 100%;
   border-right: 2px dashed var(--minimap-limit-color);
+  border-radius: 6px 0 0 6px;
 
   color: var(--minimap-limit-color);
 
-  pointer-events: none;
-
-  backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
 
   &.lovely-chart--state-interactive {
-    cursor: var(--custom-cursor, pointer);
-
     pointer-events: auto;
-
+    cursor: var(--custom-cursor, pointer);
     transition: opacity 200ms ease;
 
     &:hover {

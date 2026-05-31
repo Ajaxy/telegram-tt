@@ -131,6 +131,7 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
           onFilterChange={handleFilterChange}
           isSearchable
           withDefaultPadding
+          withIslands
           noScrollRestore={noPickerScrollRestore}
           allowMultiple
           withStatus

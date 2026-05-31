@@ -1,0 +1,22 @@
+@use "../../../styles/mixins";
+
+.root {
+  overflow-y: scroll;
+  height: calc(100% - var(--header-height));
+  background-color: var(--color-background-secondary);
+}
+
+.menuSection,
+.selfProfile {
+  padding: 1rem;
+
+  @include mixins.adapt-padding-to-scrollbar(1rem);
+}
+
+.selfProfile {
+  padding-bottom: 0;
+  :global(.ProfileInfo) {
+    margin: -1rem 0 0.75rem -1rem;
+    margin-inline-end: calc(min(var(--scrollbar-width) - 1rem, 0px));
+  }
+}

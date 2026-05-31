@@ -43,6 +43,24 @@ const IslandTitle = ({ className, children, ...otherProps }: OwnProps) => {
   );
 };
 
+const IslandOutside = ({
+  className,
+  children,
+  ...otherProps
+}: OwnProps) => {
+  return (
+    <div
+      className={buildClassName(
+        styles.outside,
+        className,
+      )}
+      {...otherProps}
+    >
+      {children}
+    </div>
+  );
+};
+
 const IslandText = ({ className, children, ...otherProps }: OwnProps) => {
   return (
     <div
@@ -56,6 +74,7 @@ const IslandText = ({ className, children, ...otherProps }: OwnProps) => {
 
 export default Island;
 export {
+  IslandOutside,
   IslandDescription,
   IslandTitle,
   IslandText,

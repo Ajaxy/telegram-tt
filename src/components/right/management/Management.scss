@@ -3,10 +3,17 @@
 .Management {
   height: 100%;
 
-  & > .custom-scroll {
+  & > .custom-scroll,
+  & > .panel-content {
     overflow-x: hidden;
     overflow-y: scroll;
+
     height: 100%;
+    padding: 1rem;
+
+    background-color: var(--color-background-secondary);
+
+    @include mixins.adapt-padding-to-scrollbar(1rem);
   }
 
   .personal-photo {
@@ -14,116 +21,58 @@
     margin-right: 2rem;
   }
 
-  .section {
-    padding: 1rem 0.5rem;
+  .section-icon {
+    margin: 0 auto 2rem;
+  }
 
-    @include mixins.adapt-padding-to-scrollbar(0.5rem);
-    @include mixins.side-panel-section;
+  & > .custom-scroll > .ChatInfo,
+  & > .panel-content > .ChatInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
-    &.wide {
-      padding: 1.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem 1.5rem;
+
+    text-align: center;
+  }
+
+  .ChatInfo .title h3 {
+    margin-bottom: 0;
+  }
+
+  .ListItem {
+    .Reaction {
+      display: flex;
+      align-items: center;
     }
 
-    &:first-of-type {
-      padding-top: 1rem;
+    .ReactionStaticEmoji {
+      width: 1.5rem;
+      margin-right: 1.6875rem;
     }
 
-    &.no-border {
-      border-top: none;
-    }
-
-    &.section-with-fab {
-      padding-bottom: 3.5rem;
-    }
-
-    > .ChatInfo {
-      margin: 0 0 2rem !important;
-
-      .title h3 {
-        margin-bottom: 0;
+    &.with-checkbox {
+      body.is-ios &::after,
+      body.is-android &::after {
+        bottom: -1rem;
       }
     }
 
-    .section-icon {
-      margin: 0 auto 2rem;
-    }
-
-    .ListItem {
-      .Reaction {
-        display: flex;
-        align-items: center;
-      }
-
-      .ReactionStaticEmoji {
-        width: 1.5rem;
-        margin-right: 1.6875rem;
-      }
-
-      &.with-checkbox {
-        body.is-ios &::after,
-        body.is-android &::after {
-          bottom: -1rem;
-        }
-      }
-
-      &.exceptions-member {
-        .ChatInfo .status {
-          white-space: pre-wrap;
-        }
+    &.exceptions-member {
+      .ChatInfo .status {
+        white-space: pre-wrap;
       }
     }
+  }
 
-    .section-heading {
-      position: relative;
+  .invite-link {
+    padding: 0 1rem;
+  }
 
-      padding-inline-start: 1rem;
-
-      font-size: 1rem;
-      font-weight: var(--font-weight-semibold);
-      color: var(--color-text-secondary);
-
-      &[dir="auto"] {
-        text-align: initial;
-      }
-    }
-
-    .section-help {
-      padding: 0 1rem;
-      line-height: 1.375rem;
-      color: var(--color-text-secondary);
-
-      &[dir="auto"] {
-        text-align: initial;
-      }
-    }
-
-    .section-edit-info,
-    .section-info {
-      padding: 0 1rem;
-      font-size: 0.875rem;
-      color: var(--color-text-secondary);
-    }
-
-    .section-edit-info {
-      margin-top: -0.875rem;
-    }
-
-    .invite-link {
-      padding: 0 1rem;
-    }
-
-    .section-info_push {
-      margin-top: 0.25rem;
-    }
-
-    .input-admin-title {
-      margin-top: 0.875rem;
-      margin-inline: 1rem;
-    }
-
-    &[dir="rtl"] {
-      text-align: right;
-    }
+  .input-admin-title {
+    margin-top: 0.875rem;
+    margin-inline: 1rem;
   }
 
   textarea.form-control {
@@ -183,8 +132,27 @@
   }
 }
 
-.ManageGroupMembers {
-  padding: 0.5rem 1rem;
+.ManageGroupMembers > .panel-content {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .island-list {
+    overflow: hidden;
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: column;
+
+    min-height: 0;
+    padding-block: 0;
+
+    .picker-list {
+      overflow-x: hidden;
+      overflow-y: auto;
+      flex-grow: 1;
+      padding-block: 0.5rem;
+    }
+  }
 }
 
 .ManageInvites {
@@ -311,6 +279,9 @@
   width: 100%;
   height: 0;
 
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: height 0.25s ease-in-out;
+
   &::before {
     content: "";
 
@@ -333,27 +304,28 @@
   }
 
   .without-bottom-shadow {
-    padding-bottom: 0;
+    --before-shift-height: 48px;
+
+    position: relative;
+    overflow: hidden;
+    padding: 0.5rem 0.5rem 0;
     box-shadow: none;
+
+    &.dropdown-open .DropdownListTrap {
+      height: var(--shift-height);
+    }
   }
 
   .part {
-    margin: 0 -1.5rem;
-    padding: 0 1.5rem 1rem;
-
-    @include mixins.side-panel-section;
+    padding-bottom: 0.5rem;
   }
 
   .section, .part {
     position: relative;
-    transition: 0.25s ease-in-out transform;
-
-    &.shifted {
-      transform: translateY(var(--shift-height));
-    }
   }
 }
 
 .settings-edit {
-  padding: 0 1rem !important;
+  padding: 1.125rem !important;
+  padding-bottom: 0 !important;
 }

@@ -15,6 +15,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Island, { IslandTitle } from '../../gili/layout/Island';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
@@ -141,76 +142,79 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
 
   function renderCurrentSession(session: ApiSession) {
     return (
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+      <>
+        <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('AuthSessionsCurrentSession')}
-        </h4>
-
-        <ListItem narrow inactive icon={`device-${getSessionIcon(session)}`} iconClassName="icon-device">
-          <div className="multiline-item full-size" dir="auto">
-            <span className="title" dir="auto">{session.deviceModel}</span>
-            <span className="subtitle black tight">
-              {session.appName}
-              {' '}
-              {session.appVersion}
-              ,
-              {' '}
-              {session.platform}
-              {' '}
-              {session.systemVersion}
-            </span>
-            <span className="subtitle">
-              {session.ip}
-              {' '}
-              -
-              {' '}
-              {getLocation(session)}
-            </span>
-          </div>
-        </ListItem>
-
-        {hasOtherSessions && (
-          <ListItem
-            className="destructive mb-0 no-icon"
-            icon="stop"
-            ripple
-            narrow
-            onClick={openConfirmTerminateAllDialog}
-          >
-            {lang('TerminateAllSessions')}
+        </IslandTitle>
+        <Island>
+          <ListItem narrow inactive icon={`device-${getSessionIcon(session)}`} iconClassName="icon-device">
+            <div className="multiline-item full-size" dir="auto">
+              <span className="title" dir="auto">{session.deviceModel}</span>
+              <span className="subtitle black tight">
+                {session.appName}
+                {' '}
+                {session.appVersion}
+                ,
+                {' '}
+                {session.platform}
+                {' '}
+                {session.systemVersion}
+              </span>
+              <span className="subtitle">
+                {session.ip}
+                {' '}
+                -
+                {' '}
+                {getLocation(session)}
+              </span>
+            </div>
           </ListItem>
-        )}
-      </div>
+
+          {hasOtherSessions && (
+            <ListItem
+              className="destructive mb-0 no-icon"
+              icon="stop"
+              ripple
+              narrow
+              onClick={openConfirmTerminateAllDialog}
+            >
+              {lang('TerminateAllSessions')}
+            </ListItem>
+          )}
+        </Island>
+      </>
     );
   }
 
   function renderOtherSessions(sessionHashes: string[]) {
     return (
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+      <>
+        <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('OtherSessions')}
-        </h4>
-
-        {sessionHashes.map(renderSession)}
-      </div>
+        </IslandTitle>
+        <Island>
+          {sessionHashes.map(renderSession)}
+        </Island>
+      </>
     );
   }
 
   function renderAutoTerminate() {
     return (
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+      <>
+        <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('TerminateOldSessionHeader')}
-        </h4>
-
-        <p className="settings-item-description-larger">{lang('IfInactiveFor')}</p>
-        <RadioGroup
-          name="session_ttl"
-          options={AUTO_TERMINATE_OPTIONS}
-          selected={autoTerminateValue}
-          onChange={handleChangeSessionTtl}
-        />
-      </div>
+        </IslandTitle>
+        <Island>
+          <p className="settings-item-description-larger">{lang('IfInactiveFor')}</p>
+          <RadioGroup
+            name="session_ttl"
+            options={AUTO_TERMINATE_OPTIONS}
+            selected={autoTerminateValue}
+            onChange={handleChangeSessionTtl}
+          />
+        </Island>
+      </>
     );
   }
 

@@ -26,6 +26,8 @@ import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import ManageUsernames from '../../common/ManageUsernames';
 import SafeLink from '../../common/SafeLink';
 import UsernameInput from '../../common/UsernameInput';
+import Island, { IslandDescription, IslandOutside, IslandTitle } from '../../gili/layout/Island';
+import Surface from '../../gili/layout/Surface';
 import AvatarEditable from '../../ui/AvatarEditable';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
@@ -218,28 +220,30 @@ const SettingsEditProfile = ({
     const purchaseInfoLink = `${TME_LINK_PREFIX}${PURCHASE_USERNAME}`;
 
     return (
-      <p className="settings-item-description" dir={oldLang.isRtl ? 'rtl' : undefined}>
+      <IslandDescription dir={oldLang.isRtl ? 'rtl' : undefined}>
         {(oldLang('lng_username_purchase_available'))
           .replace('{link}', '%PURCHASE_LINK%')
           .split('%')
           .map((s) => {
             return (s === 'PURCHASE_LINK' ? <SafeLink url={purchaseInfoLink} text={`@${PURCHASE_USERNAME}`} /> : s);
           })}
-      </p>
+      </IslandDescription>
     );
   }
 
   return (
     <div className="settings-fab-wrapper">
-      <div className="settings-content no-border custom-scroll">
-        <div className="settings-item">
+      <Surface scrollable className="settings-content no-border">
+        <IslandOutside className="settings-content-header">
+          <AvatarEditable
+            currentAvatarBlobUrl={currentAvatarBlobUrl}
+            onChange={handlePhotoChange}
+            title={lang('AriaSettingsEditProfilePhoto')}
+            disabled={isLoading}
+          />
+        </IslandOutside>
+        <Island>
           <div className="settings-input">
-            <AvatarEditable
-              currentAvatarBlobUrl={currentAvatarBlobUrl}
-              onChange={handlePhotoChange}
-              title={lang('AriaSettingsEditProfilePhoto')}
-              disabled={isLoading}
-            />
             <InputText
               value={firstName}
               onChange={handleFirstNameChange}
@@ -262,13 +266,12 @@ const SettingsEditProfile = ({
               maxLengthIndicator={maxBioLength ? (maxBioLength - bio.length).toString() : undefined}
             />
           </div>
+        </Island>
+        <IslandDescription dir={oldLang.isRtl ? 'rtl' : undefined}>
+          {renderText(oldLang('lng_settings_about_bio'), ['br', 'simple_markdown'])}
+        </IslandDescription>
 
-          <p className="settings-item-description" dir={oldLang.isRtl ? 'rtl' : undefined}>
-            {renderText(oldLang('lng_settings_about_bio'), ['br', 'simple_markdown'])}
-          </p>
-        </div>
-
-        <div className="settings-item">
+        <Island>
           <ListItem
             icon="gift"
             narrow
@@ -279,21 +282,20 @@ const SettingsEditProfile = ({
           >
             <span className="flex-grow">{lang('SettingsBirthday')}</span>
           </ListItem>
-          <p className="settings-item-description" dir={oldLang.isRtl ? 'rtl' : undefined}>
-            {lang('BirthdayPrivacySuggestion', {
-              link: (
-                <Link isPrimary onClick={handleBirthdayPrivacyClick}>
-                  {lang('BirthdayPrivacySuggestionLink',
-                    undefined, { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
-                </Link>
-              ),
-            }, { withNodes: true })}
-          </p>
-        </div>
+        </Island>
+        <IslandDescription dir={oldLang.isRtl ? 'rtl' : undefined}>
+          {lang('BirthdayPrivacySuggestion', {
+            link: (
+              <Link isPrimary onClick={handleBirthdayPrivacyClick}>
+                {lang('BirthdayPrivacySuggestionLink',
+                  undefined, { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
+              </Link>
+            ),
+          }, { withNodes: true })}
+        </IslandDescription>
 
-        <div className="settings-item">
-          <h4 className="settings-item-header" dir={oldLang.isRtl ? 'rtl' : undefined}>{oldLang('Username')}</h4>
-
+        <IslandTitle dir={oldLang.isRtl ? 'rtl' : undefined}>{oldLang('Username')}</IslandTitle>
+        <Island>
           <div className="settings-input">
             <UsernameInput
               currentUsername={currentUsername}
@@ -303,22 +305,21 @@ const SettingsEditProfile = ({
               onChange={handleUsernameChange}
             />
           </div>
-
-          {editUsernameError === USERNAME_PURCHASE_ERROR && renderPurchaseLink()}
-          <p className="settings-item-description" dir={oldLang.isRtl ? 'rtl' : undefined}>
-            {renderText(oldLang('UsernameHelp'), ['br', 'simple_markdown'])}
-          </p>
-          {editableUsername && (
-            <p className="settings-item-description" dir={oldLang.isRtl ? 'rtl' : undefined}>
-              {oldLang('lng_username_link')}
-              <br />
-              <span className="username-link">
-                {TME_LINK_PREFIX}
-                {editableUsername}
-              </span>
-            </p>
-          )}
-        </div>
+        </Island>
+        {editUsernameError === USERNAME_PURCHASE_ERROR && renderPurchaseLink()}
+        <IslandDescription dir={oldLang.isRtl ? 'rtl' : undefined}>
+          {renderText(oldLang('UsernameHelp'), ['br', 'simple_markdown'])}
+        </IslandDescription>
+        {editableUsername && (
+          <IslandDescription dir={oldLang.isRtl ? 'rtl' : undefined}>
+            {oldLang('lng_username_link')}
+            <br />
+            <span className="username-link">
+              {TME_LINK_PREFIX}
+              {editableUsername}
+            </span>
+          </IslandDescription>
+        )}
 
         {shouldRenderUsernamesManage && (
           <ManageUsernames
@@ -326,7 +327,7 @@ const SettingsEditProfile = ({
             onEditUsername={setEditableUsername}
           />
         )}
-      </div>
+      </Surface>
 
       <FloatingActionButton
         isShown={isSaveButtonShown}

@@ -26,6 +26,7 @@ import useOldLang from '../../../../hooks/useOldLang';
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import LinkField from '../../../common/LinkField';
 import PeerPicker from '../../../common/pickers/PeerPicker';
+import Island, { IslandTitle } from '../../../gili/layout/Island';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
 
 type OwnProps = {
@@ -170,15 +171,18 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
         )}
       </div>
 
-      <LinkField
-        className="settings-item"
-        link={!url ? oldLang('Loading') : url}
-        withShare
-        onRevoke={handleRevoke}
-        isDisabled={!chatsCount || isTouched}
-      />
+      <IslandTitle>{oldLang('InviteLink.InviteLink')}</IslandTitle>
+      <Island>
+        <LinkField
+          link={!url ? oldLang('Loading') : url}
+          withShare
+          noTitle
+          onRevoke={handleRevoke}
+          isDisabled={!chatsCount || isTouched}
+        />
+      </Island>
 
-      <div className="settings-item settings-item-picker">
+      <Island>
         <PeerPicker
           itemIds={itemIds}
           lockedUnselectedIds={lockedIds}
@@ -189,7 +193,7 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
           withStatus
           itemInputType="checkbox"
         />
-      </div>
+      </Island>
 
       <FloatingActionButton
         isShown={isLoading || isTouched}

@@ -3,6 +3,14 @@
 #Settings {
   height: 100%;
 
+  .chat-list {
+    padding-bottom: 0;
+
+    @media (max-width: 600px) {
+      padding-block: 0;
+    }
+  }
+
   .with-notch::before {
     top: var(--header-height);
   }
@@ -15,11 +23,11 @@
 
   .left-header {
     padding-right: 0.8125rem;
-  }
 
-  .self-profile .ProfileInfo {
-    margin: -0.5rem 0 0.75rem -0.5rem;
-    margin-inline-end: calc(min(var(--scrollbar-width) - 0.5rem, 0px));
+    &:has(~ .scrolled),
+    &:has(~ .settings-fab-wrapper .scrolled) {
+      background-color: var(--color-background);
+    }
   }
 }
 
@@ -43,7 +51,14 @@
 
 .settings-content {
   overflow-y: scroll;
+
   height: calc(100% - var(--header-height));
+  padding: 1rem;
+  padding-top: 0;
+
+  background-color: var(--color-background-secondary);
+
+  @include mixins.adapt-padding-to-scrollbar(1rem);
 
   &.password-form .input-group.error label::first-letter {
     text-transform: uppercase;
@@ -82,7 +97,9 @@
   flex-direction: column;
   align-items: center;
 
-  padding: 0 1.5rem;
+  margin-bottom: 1rem;
+  padding-block: 0;
+  padding-inline: 1.5rem;
 
   text-align: center;
 
@@ -105,21 +122,6 @@
   }
 }
 
-.settings-main-menu {
-  padding: 0.5rem;
-
-  @include mixins.adapt-padding-to-scrollbar(0.5rem);
-  @include mixins.side-panel-section;
-
-  .ListItem.narrow:not(.multiline) {
-    margin-bottom: 0;
-
-    .ListItem-button {
-      min-height: 3.5rem;
-    }
-  }
-}
-
 .settings-range-value {
   display: inline-flex;
   align-items: center;
@@ -137,8 +139,7 @@
 }
 
 .settings-unlock-button {
-  margin-top: 1rem;
-  margin-inline: 1rem;
+  margin-top: 0.5rem;
 }
 
 .fluid-container {
@@ -246,39 +247,6 @@
       }
     }
 
-    &.blocked-list-item {
-      margin-bottom: 0.5rem;
-
-      .ListItem-button {
-        align-items: center;
-        padding: 0.5rem;
-        text-align: left;
-      }
-
-      .Avatar {
-        width: 3rem;
-        height: 3rem;
-        margin-right: 1rem;
-      }
-
-      .contact-info {
-        overflow: hidden;
-      }
-
-      .contact-name {
-        margin-bottom: 0.25rem;
-        font-size: 1rem;
-        font-weight: var(--font-weight-medium);
-        line-height: 1rem;
-      }
-
-      .contact-phone {
-        font-size: 0.875rem;
-        line-height: 1rem;
-        color: var(--color-text-secondary);
-      }
-    }
-
     &[dir="rtl"] {
       .multiline-item .date {
         float: left;
@@ -314,16 +282,61 @@
   }
 }
 
+.settings-language-transition {
+  height: auto;
+  margin-top: 1rem;
+}
+
 .settings-picker {
   padding-block: 0;
 }
 
+.settings-picker-islands {
+  padding: 1rem;
+  background-color: var(--color-background-secondary);
+}
+
 .settings-input {
-  padding: 0.5rem 1rem 0 1rem;
+  padding: 0.125rem;
+}
+
+.settings-input > :last-child {
+  --input-group-margin: 0;
 }
 
 .settings-group {
   padding: 1rem 1.5rem;
+}
+
+.ListItem.blocked-list-item {
+  .ListItem-button {
+    align-items: center;
+    padding: 0.5rem;
+    text-align: left;
+  }
+
+  .Avatar {
+    width: 3rem;
+    height: 3rem;
+    margin-right: 1rem;
+  }
+
+  .contact-info {
+    overflow: hidden;
+  }
+
+  .contact-name {
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+    font-weight: var(--font-weight-medium);
+    line-height: 1rem;
+  }
+
+  .contact-phone {
+    font-size: 0.875rem;
+    line-height: 1rem;
+    color: var(--color-text-secondary);
+  }
 }
 
 .settings-fab-wrapper {

@@ -15,6 +15,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
+import Island, { IslandDescription } from '../../gili/layout/Island';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Spinner from '../../ui/Spinner';
@@ -68,7 +69,7 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management ManageJoinRequests">
       <div className="custom-scroll">
-        <div className="section">
+        <Island>
           <AnimatedIconWithPreview
             tgsUrl={LOCAL_TGS_URLS.JoinRequest}
             size={STICKER_SIZE_JOIN_REQUESTS}
@@ -80,8 +81,8 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
               <Button className="bulk-action-button" onClick={openRejectAllDialog} isText>Dismiss all</Button>
             </div>
           )}
-        </div>
-        <div className="section" teactFastList>
+        </Island>
+        <Island teactFastList>
           <p key="title">
             {!chat?.joinRequests ? lang('Loading') : chat.joinRequests.length
               ? lang('JoinRequests', chat.joinRequests.length) : lang('NoMemberRequests')}
@@ -90,9 +91,9 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
             <Spinner key="loading" />
           )}
           {chat?.joinRequests?.length === 0 && (
-            <p className="section-help" key="empty">
+            <IslandDescription key="empty">
               {isChannel ? lang('NoSubscribeRequestsDescription') : lang('NoMemberRequestsDescription')}
-            </p>
+            </IslandDescription>
           )}
           {chat?.joinRequests?.map(({ userId, about, date }) => (
             <JoinRequest
@@ -104,7 +105,7 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
               key={userId}
             />
           ))}
-        </div>
+        </Island>
       </div>
       <ConfirmDialog
         isOpen={isAcceptAllDialogOpen}

@@ -23,6 +23,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import PaidMessagePrice from '../../common/paidMessage/PaidMessagePrice';
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
 import PremiumStatusItem from './PremiumStatusItem';
@@ -159,28 +160,27 @@ function PrivacyMessages({
       : oldLang('Users', noPaidReactionsForUsersCount, 'i');
 
     return (
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+      <>
+        <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('RemoveFeeTitle')}
-        </h4>
-        <ListItem
-          narrow
-          icon="delete-user"
-
-          onClick={() => {
-            openSettingsScreen({ screen: SettingsScreens.PrivacyNoPaidMessages });
-          }}
-        >
-          <div className="multiline-item full-size">
-            <span className="title">{lang('ExceptionTitlePrivacyChargeForMessages')}</span>
-            <span className="subtitle">
-              {
-                itemSubtitle
-              }
-            </span>
-          </div>
-        </ListItem>
-      </div>
+        </IslandTitle>
+        <Island>
+          <ListItem
+            narrow
+            icon="delete-user"
+            onClick={() => {
+              openSettingsScreen({ screen: SettingsScreens.PrivacyNoPaidMessages });
+            }}
+          >
+            <div className="multiline-item full-size">
+              <span className="title">{lang('ExceptionTitlePrivacyChargeForMessages')}</span>
+              <span className="subtitle">
+                {itemSubtitle}
+              </span>
+            </div>
+          </ListItem>
+        </Island>
+      </>
     );
   }
 
@@ -195,34 +195,34 @@ function PrivacyMessages({
   }, [shouldChargeForMessages, lang]);
 
   return (
-    <>
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          {oldLang('PrivacyMessagesTitle')}
-        </h4>
+    <div className="settings-content custom-scroll">
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
+        {oldLang('PrivacyMessagesTitle')}
+      </IslandTitle>
+      <Island>
         <RadioGroup
           name="privacy-messages"
           options={options}
           onChange={handleChange}
           selected={selectedValue}
         />
-        <p className="settings-item-description-larger" dir={lang.isRtl ? 'rtl' : undefined}>
-          {privacyDescription}
-        </p>
-      </div>
+      </Island>
+      <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
+        {privacyDescription}
+      </IslandDescription>
       {selectedValue === 'charge_for_messages' && (
-        <div className="settings-item fluid-container">
+        <Island>
           <PaidMessagePrice
             canChangeChargeForMessages={canChangeChargeForMessages}
             chargeForMessages={chargeForMessages}
             onChange={handleChargeForMessagesChange}
           />
-        </div>
+        </Island>
       )}
       {canChangeChargeForMessages && selectedValue === 'charge_for_messages' && renderSectionNoPaidMessagesForUsers()}
       {!isCurrentUserPremium && selectedValue !== 'charge_for_messages'
         && <PremiumStatusItem premiumSection="message_privacy" />}
-    </>
+    </div>
   );
 }
 

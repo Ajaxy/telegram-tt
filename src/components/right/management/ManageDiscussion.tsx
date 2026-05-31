@@ -22,6 +22,7 @@ import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Avatar from '../../common/Avatar';
 import GroupChatInfo from '../../common/GroupChatInfo';
 import NothingFound from '../../common/NothingFound';
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import ListItem from '../../ui/ListItem';
@@ -208,7 +209,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   function renderDiscussionGroups() {
     return (
       <div>
-        <p className="section-help" dir="auto">{lang('DiscussionChannelHelp')}</p>
+        <IslandDescription dir="auto">{lang('DiscussionChannelHelp')}</IslandDescription>
 
         <div teactFastList>
           <ListItem
@@ -239,7 +240,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
             <NothingFound key="nothing-found" teactOrderKey={0} text="No discussion groups found" />
           )}
         </div>
-        <p className="mt-4 mb-0 section-help" dir="auto">{lang('DiscussionChannelHelp2')}</p>
+        <IslandDescription className="mt-4 mb-0" dir="auto">{lang('DiscussionChannelHelp2')}</IslandDescription>
         <ConfirmDialog
           isOpen={isConfirmLinkGroupDialogOpen}
           onClose={closeConfirmLinkGroupDialog}
@@ -255,7 +256,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management">
       <div className="panel-content custom-scroll">
-        <div className="section">
+        <Island>
           <AnimatedIconWithPreview
             tgsUrl={LOCAL_TGS_URLS.DiscussionGroups}
             size={STICKER_SIZE_DISCUSSION_GROUPS}
@@ -263,30 +264,32 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
           />
           {linkedChat && renderLinkedGroup()}
           {!linkedChat && renderDiscussionGroups()}
-        </div>
+        </Island>
         {linkedChat && (
-          <div className="section">
-            <h3 className="section-heading">{lang('ChannelSettingsJoinTitle')}</h3>
-            <div className="ListItem narrow">
-              <Checkbox
-                checked={isJoinToSend}
-                onCheck={handleJoinToSendCheck}
-                label={lang('ChannelSettingsJoinToSend')}
-              />
-            </div>
-            {isJoinToSend && (
+          <>
+            <IslandTitle>{lang('ChannelSettingsJoinTitle')}</IslandTitle>
+            <Island>
               <div className="ListItem narrow">
                 <Checkbox
-                  checked={isJoinRequest}
-                  onCheck={handleJoinRequestCheck}
-                  label={lang('ChannelSettingsJoinRequest')}
+                  checked={isJoinToSend}
+                  onCheck={handleJoinToSendCheck}
+                  label={lang('ChannelSettingsJoinToSend')}
                 />
               </div>
-            )}
-            <p className="section-info section-info_push">
+              {isJoinToSend && (
+                <div className="ListItem narrow">
+                  <Checkbox
+                    checked={isJoinRequest}
+                    onCheck={handleJoinRequestCheck}
+                    label={lang('ChannelSettingsJoinRequest')}
+                  />
+                </div>
+              )}
+            </Island>
+            <IslandDescription>
               {isJoinToSend ? lang('ChannelSettingsJoinRequestInfo') : lang('ChannelSettingsJoinToSendInfo')}
-            </p>
-          </div>
+            </IslandDescription>
+          </>
         )}
       </div>
     </div>

@@ -4,17 +4,16 @@
   overflow-x: hidden;
   overflow-y: hidden;
   height: 100%;
+  padding: 1rem;
 }
 
 .graph {
   margin-bottom: 1rem;
-  border-bottom: 0.0625rem solid var(--color-borders);
   opacity: 1;
   transition: opacity 0.3s ease;
 
   &:last-of-type {
     margin-bottom: 0;
-    border-bottom: none;
   }
 
   &.hidden {
@@ -23,21 +22,25 @@
   }
 }
 
+.charts {
+  display: flex;
+  flex-direction: column;
+}
+
 .ready {
   overflow-y: scroll !important;
 }
 
-.section {
+.balanceSection {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-
-  padding: 1rem 0.75rem;
-  border-bottom: 0.0625rem solid var(--color-borders);
+  padding: 1rem;
 }
 
-.topText {
-  display: block;
+.balanceTitle {
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-semibold);
 }
 
 .availableReward {

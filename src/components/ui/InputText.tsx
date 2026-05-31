@@ -26,6 +26,7 @@ type OwnProps = {
   title?: string;
   autoFocus?: boolean;
   teactExperimentControlled?: boolean;
+  noMargin?: boolean;
   inputMode?: 'text' | 'none' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onInput?: (e: FormEvent<HTMLInputElement>) => void;
@@ -54,6 +55,7 @@ const InputText = ({
   title,
   autoFocus,
   teactExperimentControlled,
+  noMargin,
   onChange,
   onInput,
   onKeyPress,
@@ -71,6 +73,7 @@ const InputText = ({
     disabled && 'disabled',
     readOnly && 'disabled',
     labelText && 'with-label',
+    noMargin && 'no-margin',
     className,
   );
 

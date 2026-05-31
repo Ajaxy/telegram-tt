@@ -11,7 +11,8 @@ import type { ReducerAction } from '../../hooks/useReducer';
 import { type AnimationLevel, LeftColumnContent, SettingsScreens } from '../../types';
 
 import {
-  selectCurrentChat, selectIsCurrentUserFrozen, selectIsForumPanelOpen, selectTabState,
+  selectCurrentChat, selectIsCurrentUserFrozen, selectIsForumPanelOpen,
+  selectPeerHasProfileBackground, selectTabState,
 } from '../../global/selectors';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
 import {
@@ -61,6 +62,7 @@ type StateProps = {
   archiveSettings: GlobalState['archiveSettings'];
   isArchivedStoryRibbonShown?: boolean;
   isAccountFrozen?: boolean;
+  hasProfileBackground?: boolean;
 };
 
 enum ContentType {
@@ -98,6 +100,7 @@ function LeftColumn({
   archiveSettings,
   isArchivedStoryRibbonShown,
   isAccountFrozen,
+  hasProfileBackground,
   isFoldersSidebarShown,
 }: OwnProps & StateProps) {
   const {
@@ -514,6 +517,7 @@ function LeftColumn({
             foldersDispatch={foldersDispatch}
             animationLevel={animationLevel}
             shouldSkipTransition={shouldSkipHistoryAnimations}
+            hasProfileBackground={hasProfileBackground}
             onReset={handleReset}
           />
         );
@@ -627,6 +631,8 @@ export default memo(withGlobal<OwnProps>(
       archiveSettings,
       isArchivedStoryRibbonShown: isArchivedRibbonShown,
       isAccountFrozen,
+      hasProfileBackground: currentUserId
+        ? selectPeerHasProfileBackground(global, currentUserId) : undefined,
       contentKey: leftColumn.contentKey,
       settingsScreen: leftColumn.settingsScreen,
     };

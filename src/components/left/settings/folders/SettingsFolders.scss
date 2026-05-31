@@ -123,7 +123,6 @@
   gap: 0.75rem;
   align-items: center;
 
-  margin-inline: 1rem;
   padding: 0.125rem;
 }
 
@@ -224,11 +223,19 @@
   background-color: var(--accent-color);
 }
 
+.settings-folders-header.settings-content-header {
+  padding-inline: 0;
+}
+
 .settings-folders-input-container {
   position: relative;
   display: flex;
   align-items: center;
   align-self: stretch;
+
+  .input-group {
+    margin: 0.5rem;
+  }
 }
 
 .settings-folders-input-with-icon .form-control {
@@ -236,11 +243,11 @@
 }
 
 .settings-folders-icon-picker {
-  --custom-emoji-size: 2rem;
+  --custom-emoji-size: 1.5rem;
 
   position: absolute;
-  inset-inline-end: 0.5rem;
-  font-size: 2rem;
+  inset-inline-end: 1.5rem;
+  font-size: 1.5rem;
   color: var(--color-text-secondary);
 }
 

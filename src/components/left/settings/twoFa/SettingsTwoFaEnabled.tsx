@@ -11,6 +11,7 @@ import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
+import Island from '../../../gili/layout/Island';
 import ListItem from '../../../ui/ListItem';
 
 import lockPreviewUrl from '../../../../assets/lock.png';
@@ -46,7 +47,7 @@ const SettingsTwoFaEnabled: FC<OwnProps> = ({
         </p>
       </div>
 
-      <div className="settings-item">
+      <Island>
         <ListItem
           icon="edit"
 
@@ -68,7 +69,7 @@ const SettingsTwoFaEnabled: FC<OwnProps> = ({
         >
           {lang('SetRecoveryEmail')}
         </ListItem>
-      </div>
+      </Island>
     </div>
   );
 };

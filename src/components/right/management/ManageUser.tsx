@@ -28,6 +28,7 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
+import Island, { IslandDescription } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -227,14 +228,14 @@ const ManageUser: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management">
       <div className="custom-scroll">
-        <div className="section">
-          <PrivateChatInfo
-            userId={user.id}
-            avatarSize="jumbo"
-            noStatusOrTyping
-            noEmojiStatus
-            withFullInfo
-          />
+        <PrivateChatInfo
+          userId={user.id}
+          avatarSize="jumbo"
+          noStatusOrTyping
+          noEmojiStatus
+          withFullInfo
+        />
+        <Island>
           <div className="settings-edit">
             <InputText
               ref={firstNameRef}
@@ -262,7 +263,9 @@ const ManageUser: FC<OwnProps & StateProps> = ({
               noReplaceNewlines
             />
           </div>
-          <p className="section-edit-info" dir="auto">{lang('EditUserNoteHint')}</p>
+        </Island>
+        <IslandDescription dir="auto">{lang('EditUserNoteHint')}</IslandDescription>
+        <Island>
           <div className="ListItem narrow">
             <Checkbox
               checked={isNotificationsEnabled}
@@ -273,40 +276,42 @@ const ManageUser: FC<OwnProps & StateProps> = ({
               onChange={handleNotificationChange}
             />
           </div>
-        </div>
+        </Island>
         {canSetPersonalPhoto && (
-          <div className="section">
-            <ListItem icon="camera-add" ripple onClick={handleSuggestPhoto}>
-              <span className="list-item-ellipsis">{oldLang('UserInfo.SuggestPhoto', user.firstName)}</span>
-            </ListItem>
-            <ListItem icon="camera-add" ripple onClick={handleSetPersonalPhoto}>
-              <span className="list-item-ellipsis">{oldLang('UserInfo.SetCustomPhoto', user.firstName)}</span>
-            </ListItem>
-            {personalPhoto && (
-              <ListItem
-                leftElement={(
-                  <Avatar
-                    photo={notPersonalPhoto}
-                    noPersonalPhoto
-                    peer={user}
-                    size="mini"
-                    className="personal-photo"
-                  />
-                )}
-                ripple
-                onClick={openResetPersonalPhotoDialog}
-              >
-                {oldLang('UserInfo.ResetCustomPhoto')}
+          <>
+            <Island>
+              <ListItem icon="camera-add" ripple onClick={handleSuggestPhoto}>
+                <span className="list-item-ellipsis">{oldLang('UserInfo.SuggestPhoto', user.firstName)}</span>
               </ListItem>
-            )}
-            <p className="section-help" dir="auto">{oldLang('UserInfo.CustomPhotoInfo', user.firstName)}</p>
-          </div>
+              <ListItem icon="camera-add" ripple onClick={handleSetPersonalPhoto}>
+                <span className="list-item-ellipsis">{oldLang('UserInfo.SetCustomPhoto', user.firstName)}</span>
+              </ListItem>
+              {personalPhoto && (
+                <ListItem
+                  leftElement={(
+                    <Avatar
+                      photo={notPersonalPhoto}
+                      noPersonalPhoto
+                      peer={user}
+                      size="mini"
+                      className="personal-photo"
+                    />
+                  )}
+                  ripple
+                  onClick={openResetPersonalPhotoDialog}
+                >
+                  {oldLang('UserInfo.ResetCustomPhoto')}
+                </ListItem>
+              )}
+            </Island>
+            <IslandDescription dir="auto">{oldLang('UserInfo.CustomPhotoInfo', user.firstName)}</IslandDescription>
+          </>
         )}
-        <div className="section">
+        <Island>
           <ListItem icon="delete" ripple destructive onClick={openDeleteDialog}>
             {oldLang('DeleteContact')}
           </ListItem>
-        </div>
+        </Island>
       </div>
       <FloatingActionButton
         isShown={isProfileFieldsTouched}

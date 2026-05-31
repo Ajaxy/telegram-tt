@@ -16,6 +16,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import CalendarModal from '../../common/CalendarModal';
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import Button from '../../ui/Button';
 import Checkbox from '../../ui/Checkbox';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -158,25 +159,25 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management ManageInvite">
       <div className="panel-content custom-scroll">
-        <div className="section">
+        <Island>
           <Checkbox
             label={lang('ApproveNewMembers')}
             subLabel={lang('ApproveNewMembersDescription')}
             checked={isRequestNeeded}
             onChange={handleIsRequestChange}
           />
-        </div>
-        <div className="section">
+        </Island>
+        <Island>
           <InputText
             className="link-name"
             placeholder={lang('LinkNameHint')}
             value={title}
             onChange={handleTitleChange}
           />
-          <p className="section-help hint">{lang('LinkNameHelp')}</p>
-        </div>
-        <div className="section">
-          <div className="section-heading">{lang('LimitByPeriod')}</div>
+          <IslandDescription>{lang('LinkNameHelp')}</IslandDescription>
+        </Island>
+        <IslandTitle>{lang('LimitByPeriod')}</IslandTitle>
+        <Island>
           <RadioGroup
             name="expireOptions"
             options={[
@@ -211,39 +212,41 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
               {formatTime(lang, customExpireDate)}
             </Button>
           )}
-          <p className="section-help hint">{lang('TimeLimitHelp')}</p>
-        </div>
+          <IslandDescription>{lang('TimeLimitHelp')}</IslandDescription>
+        </Island>
         {!isRequestNeeded && (
-          <div className="section">
-            <div className="section-heading">{lang('LimitNumberOfUses')}</div>
-            <RadioGroup
-              name="usageOptions"
-              options={[
-                ...DEFAULT_USAGE_LIMITS.map((n) => ({ value: n.toString(), label: n })),
-                {
-                  value: '0',
-                  label: lang('NoLimit'),
-                },
-                {
-                  value: 'custom',
-                  label: lang('lng_group_invite_usage_custom'),
-                },
-              ]}
-              onChange={setSelectedUsageOption}
-              selected={selectedUsageOption}
-            />
-            {selectedUsageOption === 'custom' && (
-              <input
-                className="form-control usage-limit"
-                type="number"
-                min="1"
-                max="99999"
-                value={customUsageLimit}
-                onChange={handleCustomUsageLimitChange}
+          <>
+            <IslandTitle>{lang('LimitNumberOfUses')}</IslandTitle>
+            <Island>
+              <RadioGroup
+                name="usageOptions"
+                options={[
+                  ...DEFAULT_USAGE_LIMITS.map((n) => ({ value: n.toString(), label: n })),
+                  {
+                    value: '0',
+                    label: lang('NoLimit'),
+                  },
+                  {
+                    value: 'custom',
+                    label: lang('lng_group_invite_usage_custom'),
+                  },
+                ]}
+                onChange={setSelectedUsageOption}
+                selected={selectedUsageOption}
               />
-            )}
-            <p className="section-help hint">{lang('UsesLimitHelp')}</p>
-          </div>
+              {selectedUsageOption === 'custom' && (
+                <input
+                  className="form-control usage-limit"
+                  type="number"
+                  min="1"
+                  max="99999"
+                  value={customUsageLimit}
+                  onChange={handleCustomUsageLimitChange}
+                />
+              )}
+              <IslandDescription>{lang('UsesLimitHelp')}</IslandDescription>
+            </Island>
+          </>
         )}
         <FloatingActionButton
           isShown

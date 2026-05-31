@@ -17,6 +17,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import RadioGroup from '../../ui/RadioGroup';
@@ -189,61 +190,65 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
     <div className="Management">
       <div className="panel-content custom-scroll">
         {Boolean(localReactionsLimit && shouldShowReactionsLimit) && (
-          <div className="section">
-            <h3 className="section-heading">
+          <>
+            <IslandTitle>
               {lang('MaximumReactionsHeader')}
-            </h3>
-            <RangeSlider
-              min={1}
-              max={maxUniqueReactions}
-              value={localReactionsLimit!}
-              onChange={handleReactionsLimitChange}
-              renderValue={renderReactionsMaxCountValue}
-              isCenteredLayout
-            />
-            <p className="section-info section-info_push">
+            </IslandTitle>
+            <Island>
+              <RangeSlider
+                min={1}
+                max={maxUniqueReactions}
+                value={localReactionsLimit!}
+                onChange={handleReactionsLimitChange}
+                renderValue={renderReactionsMaxCountValue}
+                isCenteredLayout
+              />
+            </Island>
+            <IslandDescription>
               {lang('ChannelReactions.MaxCount.Info')}
-            </p>
-          </div>
+            </IslandDescription>
+          </>
         )}
-        <div className="section">
-          <h3 className="section-heading">
-            {lang('AvailableReactions')}
-          </h3>
+        <IslandTitle>
+          {lang('AvailableReactions')}
+        </IslandTitle>
+        <Island>
           <RadioGroup
             selected={localEnabledReactions?.type || 'none'}
             name="reactions"
             options={reactionsOptions}
             onChange={handleReactionsOptionChange}
           />
-          <p className="section-info section-info_push">
-            {localEnabledReactions?.type === 'all' && lang('EnableAllReactionsInfo')}
-            {localEnabledReactions?.type === 'some' && lang('EnableSomeReactionsInfo')}
-            {!localEnabledReactions && lang('DisableReactionsInfo')}
-          </p>
-        </div>
+        </Island>
+        <IslandDescription>
+          {localEnabledReactions?.type === 'all' && lang('EnableAllReactionsInfo')}
+          {localEnabledReactions?.type === 'some' && lang('EnableSomeReactionsInfo')}
+          {!localEnabledReactions && lang('DisableReactionsInfo')}
+        </IslandDescription>
         {localEnabledReactions?.type === 'some' && (
-          <div className="section section-with-fab">
-            <h3 className="section-heading">
+          <>
+            <IslandTitle>
               {lang('OnlyAllowThisReactions')}
-            </h3>
-            {availableActiveReactions?.map(({ reaction, title }) => (
-              <div className="ListItem">
-                <Checkbox
-                  name={reaction.emoticon}
-                  checked={localEnabledReactions?.allowed.some((r) => isSameReaction(reaction, r))}
-                  label={(
-                    <div className="Reaction">
-                      <ReactionStaticEmoji reaction={reaction} availableReactions={availableReactions} />
-                      {title}
-                    </div>
-                  )}
-                  withIcon
-                  onChange={handleReactionChange}
-                />
-              </div>
-            ))}
-          </div>
+            </IslandTitle>
+            <Island>
+              {availableActiveReactions?.map(({ reaction, title }) => (
+                <div key={reaction.emoticon} className="ListItem">
+                  <Checkbox
+                    name={reaction.emoticon}
+                    checked={localEnabledReactions?.allowed.some((r) => isSameReaction(reaction, r))}
+                    label={(
+                      <div className="Reaction">
+                        <ReactionStaticEmoji reaction={reaction} availableReactions={availableReactions} />
+                        {title}
+                      </div>
+                    )}
+                    withIcon
+                    onChange={handleReactionChange}
+                  />
+                </div>
+              ))}
+            </Island>
+          </>
         )}
       </div>
 

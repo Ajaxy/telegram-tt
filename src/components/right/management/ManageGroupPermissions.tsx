@@ -27,6 +27,7 @@ import useManagePermissions from '../hooks/useManagePermissions';
 
 import PaidMessagePrice from '../../common/paidMessage/PaidMessagePrice';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import PermissionCheckboxList from '../../main/PermissionCheckboxList';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem from '../../ui/ListItem';
@@ -222,7 +223,6 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
 
   const arePermissionsChanged = isPriceForMessagesChanged || havePermissionChanged;
   const arePermissionsLoading = progress === ManagementProgress.InProgress || isLoading;
-
   return (
     <div
       className="Management with-shifted-dropdown"
@@ -230,8 +230,8 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
         + `--before-shift-height: ${BEFORE_ITEMS_COUNT * ITEM_HEIGHT}px;`}
     >
       <div className="panel-content custom-scroll">
-        <div className="section without-bottom-shadow">
-          <h3 className="section-heading" dir="auto">{lang('ChannelPermissionsHeader')}</h3>
+        <IslandTitle dir="auto">{lang('ChannelPermissionsHeader')}</IslandTitle>
+        <Island className={buildClassName('without-bottom-shadow', isMediaDropdownOpen && 'dropdown-open')}>
           <PermissionCheckboxList
             chatId={chat?.id}
             isMediaDropdownOpen={isMediaDropdownOpen}
@@ -243,17 +243,12 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
               'DropdownList',
               isMediaDropdownOpen && 'DropdownList--open',
             )}
-            shiftedClassName={buildClassName('part', isMediaDropdownOpen && 'shifted')}
+            shiftedClassName="part"
           />
-        </div>
+        </Island>
 
         {arePaidMessagesAvailable && (
-          <div
-            className={buildClassName(
-              'section',
-              isMediaDropdownOpen && 'shifted',
-            )}
-          >
+          <Island>
             <ListItem onClick={handleChargeStarsForMessages}>
               <span>{lang('GroupMessagesChargePrice')}</span>
               <Switcher
@@ -262,34 +257,26 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
                 checked={isPriceForMessagesOpen}
               />
             </ListItem>
-            <p className="settings-item-description-larger" dir={lang.isRtl ? 'rtl' : undefined}>
-              {lang('RightsChargeStarsAbout')}
-            </p>
-          </div>
+          </Island>
+        )}
+        {arePaidMessagesAvailable && (
+          <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('RightsChargeStarsAbout')}
+          </IslandDescription>
         )}
 
         {isPriceForMessagesOpen && (
-          <div
-            className={buildClassName(
-              'section',
-              isMediaDropdownOpen && 'shifted',
-            )}
-          >
+          <Island>
             <PaidMessagePrice
               canChangeChargeForMessages
               isGroupChat
               chargeForMessages={chargeForMessages}
               onChange={handleChargeForMessagesChange}
             />
-          </div>
+          </Island>
         )}
 
-        <div
-          className={buildClassName(
-            'section',
-            isMediaDropdownOpen && 'shifted',
-          )}
-        >
+        <Island>
           <ListItem
             icon="delete-user"
             multiline
@@ -299,16 +286,10 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
             <span className="title">{lang('ChannelBlockedUsers')}</span>
             <span className="subtitle">{removedUsersCount}</span>
           </ListItem>
-        </div>
+        </Island>
 
-        <div
-          className={buildClassName(
-            'section',
-            isMediaDropdownOpen && 'shifted',
-          )}
-        >
-          <h3 className="section-heading" dir="auto">{lang('PrivacyExceptions')}</h3>
-
+        <IslandTitle dir="auto">{lang('PrivacyExceptions')}</IslandTitle>
+        <Island>
           <ListItem
             icon="add-user"
             onClick={handleAddExceptionClick}
@@ -330,7 +311,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
               />
             </ListItem>
           ))}
-        </div>
+        </Island>
       </div>
 
       <FloatingActionButton

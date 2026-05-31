@@ -6,6 +6,7 @@ import useLang from '../../../hooks/useLang';
 
 import PasswordForm from '../../common/PasswordForm';
 import PasswordMonkey from '../../common/PasswordMonkey';
+import Island from '../../gili/layout/Island';
 
 type OwnProps = {
   error?: string;
@@ -65,21 +66,23 @@ const SettingsPasswordForm: FC<OwnProps> = ({
         <PasswordMonkey isBig isPasswordVisible={shouldShowPassword} />
       </div>
 
-      <div className="settings-item settings-group">
-        <PasswordForm
-          error={validationError || error}
-          hint={hint}
-          placeholder={placeholder || lang('CurrentPasswordPlaceholder')}
-          shouldDisablePasswordManager={shouldDisablePasswordManager}
-          submitLabel={submitLabel}
-          onClearError={handleClearError}
-          isLoading={isLoading}
-          isPasswordVisible={shouldShowPassword}
-          shouldResetValue={isActive}
-          onChangePasswordVisibility={setShouldShowPassword}
-          onSubmit={handleSubmit}
-        />
-      </div>
+      <Island>
+        <div className="settings-input">
+          <PasswordForm
+            error={validationError || error}
+            hint={hint}
+            placeholder={placeholder || lang('CurrentPasswordPlaceholder')}
+            shouldDisablePasswordManager={shouldDisablePasswordManager}
+            submitLabel={submitLabel}
+            onClearError={handleClearError}
+            isLoading={isLoading}
+            isPasswordVisible={shouldShowPassword}
+            shouldResetValue={isActive}
+            onChangePasswordVisibility={setShouldShowPassword}
+            onSubmit={handleSubmit}
+          />
+        </div>
+      </Island>
     </div>
   );
 };

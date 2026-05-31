@@ -20,6 +20,7 @@ import useOldLang from '../../hooks/useOldLang';
 
 import CustomEmojiPicker from '../common/CustomEmojiPicker';
 import TopicIcon from '../common/TopicIcon';
+import Island from '../gili/layout/Island';
 import FloatingActionButton from '../ui/FloatingActionButton';
 import InputText from '../ui/InputText';
 import Transition from '../ui/Transition';
@@ -114,7 +115,7 @@ const CreateTopic: FC<OwnProps & StateProps> = ({
   return (
     <div className={styles.root}>
       <div className={buildClassName(styles.content, 'custom-scroll')}>
-        <div className={buildClassName(styles.section, styles.top)}>
+        <Island className={styles.top}>
           <span className={styles.heading}>{lang('CreateTopicTitle')}</span>
           <Transition
             name="zoomFade"
@@ -138,8 +139,8 @@ const CreateTopic: FC<OwnProps & StateProps> = ({
             disabled={isLoading}
             teactExperimentControlled
           />
-        </div>
-        <div className={buildClassName(styles.section, styles.bottom)}>
+        </Island>
+        <Island className={styles.bottom}>
           <CustomEmojiPicker
             idPrefix="create-topic-icons-set-"
             isHidden={!isActive}
@@ -149,7 +150,7 @@ const CreateTopic: FC<OwnProps & StateProps> = ({
             pickerListClassName="fab-padding-bottom"
             withDefaultTopicIcons
           />
-        </div>
+        </Island>
       </div>
       <FloatingActionButton
         isShown={isTouched}

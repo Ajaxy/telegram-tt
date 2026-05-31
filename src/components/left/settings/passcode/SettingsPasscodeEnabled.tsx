@@ -10,6 +10,7 @@ import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
+import Island from '../../../gili/layout/Island';
 import ListItem from '../../../ui/ListItem';
 
 import lockPreviewUrl from '../../../../assets/lock.png';
@@ -42,7 +43,7 @@ const SettingsPasscodeEnabled: FC<OwnProps> = ({
         </p>
       </div>
 
-      <div className="settings-item">
+      <Island>
         <ListItem
           icon="edit"
 
@@ -57,7 +58,7 @@ const SettingsPasscodeEnabled: FC<OwnProps> = ({
         >
           {lang('Passcode.TurnOff')}
         </ListItem>
-      </div>
+      </Island>
     </div>
   );
 };

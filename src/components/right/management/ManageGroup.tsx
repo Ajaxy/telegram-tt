@@ -28,6 +28,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Island, { IslandDescription } from '../../gili/layout/Island';
 import AvatarEditable from '../../ui/AvatarEditable';
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -320,13 +321,13 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management">
       <div className="panel-content custom-scroll">
-        <div className="section">
-          <AvatarEditable
-            isForForum={isForumEnabled}
-            currentAvatarBlobUrl={currentAvatarBlobUrl}
-            onChange={handleSetPhoto}
-            disabled={!canChangeInfo}
-          />
+        <AvatarEditable
+          isForForum={isForumEnabled}
+          currentAvatarBlobUrl={currentAvatarBlobUrl}
+          onChange={handleSetPhoto}
+          disabled={!canChangeInfo}
+        />
+        <Island>
           <div className="settings-edit">
             <InputText
               id="group-title"
@@ -431,11 +432,11 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
                   inactive
                 />
               </ListItem>
-              <div className="section-info section-info_push">{lang('ForumToggleDescription')}</div>
+              <IslandDescription>{lang('ForumToggleDescription')}</IslandDescription>
             </>
           )}
-        </div>
-        <div className="section">
+        </Island>
+        <Island>
           <ListItem icon="group" multiline onClick={handleClickMembers}>
             <span className="title">{lang('GroupMembers')}</span>
             <span className="subtitle">{formatInteger(chat.membersCount ?? 0)}</span>
@@ -455,12 +456,12 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
               />
             </div>
           )}
-        </div>
-        <div className="section">
+        </Island>
+        <Island>
           <ListItem icon="delete" ripple destructive onClick={openDeleteDialog}>
             {lang('DeleteMega')}
           </ListItem>
-        </div>
+        </Island>
       </div>
       <FloatingActionButton
         isShown={isProfileFieldsTouched}

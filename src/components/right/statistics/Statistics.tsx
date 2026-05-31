@@ -26,6 +26,7 @@ import { isGraph } from './helpers/isGraph';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Island from '../../gili/layout/Island';
 import Loading from '../../ui/Loading';
 import StatisticsOverview from './StatisticsOverview';
 import StatisticsRecentMessage from './StatisticsRecentMessage';
@@ -200,16 +201,18 @@ const Statistics = ({
   return (
     <div className={buildClassName(styles.root, 'panel-content custom-scroll', isReady && styles.ready)}>
       {statistics && (
-        <StatisticsOverview
-          statistics={statistics}
-          type={isGroup ? 'group' : 'channel'}
-          title={lang('StatisticOverview')}
-        />
+        <Island>
+          <StatisticsOverview
+            statistics={statistics}
+            type={isGroup ? 'group' : 'channel'}
+            title={lang('StatisticOverview')}
+          />
+        </Island>
       )}
 
       {!loadedChartsRef.current.size && <Loading />}
 
-      <div ref={containerRef} data-stricterdom-ignore>
+      <div ref={containerRef} data-stricterdom-ignore className={styles.graphContainer}>
         {graphs.map((graph) => {
           const isGraphReady = loadedChartsRef.current.has(graph) && !errorChartsRef.current.has(graph);
           return (
@@ -219,7 +222,7 @@ const Statistics = ({
       </div>
 
       {Boolean((statistics as ApiChannelStatistics)?.recentPosts?.length) && (
-        <div className={styles.messages}>
+        <Island className={styles.messages}>
           <h2 className={styles.messagesTitle}>{lang('ChannelStats.Recent.Header')}</h2>
 
           {(statistics as ApiChannelStatistics).recentPosts.map((postStatistic) => {
@@ -251,7 +254,7 @@ const Statistics = ({
 
             return undefined;
           })}
-        </div>
+        </Island>
       )}
     </div>
   );

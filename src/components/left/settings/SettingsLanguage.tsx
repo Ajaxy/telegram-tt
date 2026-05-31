@@ -19,9 +19,11 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import ItemPicker, { type ItemPickerOption } from '../../common/pickers/ItemPicker';
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
+import Transition from '../../ui/Transition';
 
 type OwnProps = {
   isActive?: boolean;
@@ -131,51 +133,56 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-content settings-language custom-scroll">
       {IS_TRANSLATION_SUPPORTED && (
-        <div className="settings-item">
-          <Checkbox
-            label={lang('ShowTranslateButton')}
-            checked={canTranslate}
-            onCheck={handleShouldTranslateChange}
-          />
-          <Checkbox
-            label={lang('ShowTranslateChatButton')}
-            checked={canTranslateChatsEnabled}
-            disabled={!isCurrentUserPremium}
-            rightIcon={!isCurrentUserPremium ? 'lock' : undefined}
-            onClickLabel={handleShouldTranslateChatsClick}
-            onCheck={handleShouldTranslateChatsChange}
-          />
-          {(canTranslate || canTranslateChatsEnabled) && (
-            <ListItem
-              narrow
-              onClick={handleDoNotSelectOpen}
-            >
-              {lang('DoNotTranslate')}
-              <span className="settings-item__current-value">{doNotTranslateText}</span>
-            </ListItem>
-          )}
-          <p className="settings-item-description mb-0 mt-1">
+        <>
+          <Island>
+            <Checkbox
+              label={lang('ShowTranslateButton')}
+              checked={canTranslate}
+              onCheck={handleShouldTranslateChange}
+            />
+            <Checkbox
+              label={lang('ShowTranslateChatButton')}
+              checked={canTranslateChatsEnabled}
+              disabled={!isCurrentUserPremium}
+              rightIcon={!isCurrentUserPremium ? 'lock' : undefined}
+              onClickLabel={handleShouldTranslateChatsClick}
+              onCheck={handleShouldTranslateChatsChange}
+            />
+            {(canTranslate || canTranslateChatsEnabled) && (
+              <ListItem
+                narrow
+                onClick={handleDoNotSelectOpen}
+              >
+                {lang('DoNotTranslate')}
+                <span className="settings-item__current-value">{doNotTranslateText}</span>
+              </ListItem>
+            )}
+          </Island>
+          <IslandDescription>
             {lang('lng_translate_settings_about')}
-          </p>
-        </div>
+          </IslandDescription>
+        </>
       )}
-      <div className="settings-item settings-item-picker">
-        <h4 className="settings-item-header">
-          {lang('Localization.InterfaceLanguage')}
-        </h4>
+
+      <Transition activeKey={options ? 1 : 0} name="fade" className="settings-language-transition">
         {options ? (
-          <ItemPicker
-            items={options}
-            selectedValue={selectedLanguage}
-            forceRenderAllItems
-            onSelectedValueChange={handleChange}
-            itemInputType="radio"
-            className="settings-picker"
-          />
+          <>
+            <IslandTitle>{lang('Localization.InterfaceLanguage')}</IslandTitle>
+            <Island>
+              <ItemPicker
+                items={options}
+                selectedValue={selectedLanguage}
+                forceRenderAllItems
+                onSelectedValueChange={handleChange}
+                itemInputType="radio"
+                className="settings-picker"
+              />
+            </Island>
+          </>
         ) : (
           <Loading />
         )}
-      </div>
+      </Transition>
     </div>
   );
 };

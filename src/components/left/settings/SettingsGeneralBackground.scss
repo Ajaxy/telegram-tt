@@ -1,13 +1,29 @@
 @use "../../../styles/mixins";
 
 .SettingsGeneralBackground {
+  padding-bottom: 0 !important;
+
   .settings-wallpapers {
+    overflow: clip;
     display: grid;
     grid-auto-rows: 1fr;
     grid-template-columns: repeat(3, 1fr);
     gap: 0.0625rem;
 
-    @include mixins.side-panel-section;
+    margin: 1rem -1rem 0;
+    margin-inline: calc(min(var(--scrollbar-width) - 1rem, 0px));
+    border-top-left-radius: var(--border-radius-island);
+    border-top-right-radius: var(--border-radius-island);
+
+    > :first-child .media-inner,
+    > :first-child::after {
+      border-top-left-radius: var(--border-radius-island);
+    }
+
+    > :nth-child(3) .media-inner,
+    > :nth-child(3)::after {
+      border-top-right-radius: var(--border-radius-island);
+    }
   }
 
   .Loading {

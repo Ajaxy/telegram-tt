@@ -20,6 +20,7 @@ import { pick } from '../../../util/iteratees';
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
+import Island from '../../gili/layout/Island';
 import InputText from '../../ui/InputText';
 
 import './SettingsGeneralBackgroundColor.scss';
@@ -211,7 +212,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
 
   return (
     <div ref={containerRef} className={className}>
-      <div className="settings-item pt-3">
+      <Island>
         <div ref={colorPickerRef} className="color-picker">
           <canvas />
           <div
@@ -230,7 +231,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
           <InputText value={hexInput} label="HEX" onChange={handleHexChange} />
           <InputText value={rgbInput} label="RGB" onChange={handleRgbChange} />
         </div>
-      </div>
+      </Island>
       <div className="predefined-colors">
         {PREDEFINED_COLORS.map((color) => (
           <div

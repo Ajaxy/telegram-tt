@@ -26,6 +26,7 @@ import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Icon from '../../common/icons/Icon';
 import LinkField from '../../common/LinkField';
 import NothingFound from '../../common/NothingFound';
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 
@@ -274,26 +275,33 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management ManageInvites">
       <div className="panel-content custom-scroll">
-        <div className="section">
+        <Island>
           <AnimatedIconWithPreview
             tgsUrl={LOCAL_TGS_URLS.Invite}
             size={STICKER_SIZE_INVITES}
             className="section-icon"
           />
-          <p className="section-help">{isChannel ? oldLang('PrimaryLinkHelpChannel') : oldLang('PrimaryLinkHelp')}</p>
-        </div>
+          <IslandDescription>
+            {isChannel ? oldLang('PrimaryLinkHelpChannel') : oldLang('PrimaryLinkHelp')}
+          </IslandDescription>
+        </Island>
         {primaryInviteLink && (
-          <div className="section">
-            <LinkField
-              className="settings-input"
-              link={primaryInviteLink}
-              withShare
-              onRevoke={!chat?.usernames ? handlePrimaryRevoke : undefined}
-              title={chat?.usernames ? oldLang('PublicLink') : oldLang('lng_create_permanent_link_title')}
-            />
-          </div>
+          <>
+            <IslandTitle>
+              {chat?.usernames ? oldLang('PublicLink') : oldLang('lng_create_permanent_link_title')}
+            </IslandTitle>
+            <Island>
+              <LinkField
+                className="settings-input"
+                link={primaryInviteLink}
+                noTitle
+                withShare
+                onRevoke={!chat?.usernames ? handlePrimaryRevoke : undefined}
+              />
+            </Island>
+          </>
         )}
-        <div className="section" teactFastList>
+        <Island teactFastList>
           <ListItem icon="add" withPrimaryColor key="create" className="create-item" onClick={handleCreateNewClick}>
             {oldLang('CreateNewLink')}
           </ListItem>
@@ -314,11 +322,11 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
               </span>
             </ListItem>
           ))}
-          <p className="section-help hint" key="links-hint">{oldLang('ManageLinksInfoHelp')}</p>
-        </div>
+        </Island>
+        <IslandDescription>{oldLang('ManageLinksInfoHelp')}</IslandDescription>
         {revokedExportedInvites && Boolean(revokedExportedInvites.length) && (
-          <div className="section" teactFastList>
-            <p className="section-help" key="title">{oldLang('RevokedLinks')}</p>
+          <Island teactFastList>
+            <IslandDescription key="title">{oldLang('RevokedLinks')}</IslandDescription>
             <ListItem
               icon="delete"
               destructive
@@ -343,7 +351,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
                 </span>
               </ListItem>
             ))}
-          </div>
+          </Island>
         )}
       </div>
       <ConfirmDialog

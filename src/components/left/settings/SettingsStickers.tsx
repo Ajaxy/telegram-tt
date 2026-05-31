@@ -24,6 +24,7 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import StickerSetCard from '../../common/StickerSetCard';
+import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 
@@ -93,7 +94,7 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="settings-content custom-scroll">
-      <div className="settings-item">
+      <Island>
         <Checkbox
           label={lang('SuggestStickers')}
           checked={shouldSuggestStickers}
@@ -101,7 +102,6 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
         />
         <ListItem
           narrow
-
           onClick={() => openSettingsScreen({ screen: SettingsScreens.CustomEmoji })}
           icon="smile"
         >
@@ -112,7 +112,6 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
           <ListItem
             className="SettingsDefaultReaction"
             narrow
-
             onClick={() => openSettingsScreen({ screen: SettingsScreens.QuickReaction })}
           >
             <ReactionStaticEmoji
@@ -124,40 +123,44 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
             <div className="title">{lang('DoubleTapSetting')}</div>
           </ListItem>
         )}
-      </div>
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          {lang('InstalledStickers.DynamicPackOrder')}
-        </h4>
+      </Island>
+
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
+        {lang('InstalledStickers.DynamicPackOrder')}
+      </IslandTitle>
+      <Island>
         <Checkbox
           label={lang('InstalledStickers.DynamicPackOrder')}
           checked={shouldUpdateStickerSetOrder}
           onCheck={handleSuggestStickerSetOrderChange}
         />
-        <p className="settings-item-description mt-3" dir="auto">
-          {lang('InstalledStickers.DynamicPackOrderInfo')}
-        </p>
-      </div>
+      </Island>
+      <IslandDescription dir="auto">
+        {lang('InstalledStickers.DynamicPackOrderInfo')}
+      </IslandDescription>
+
       {stickerSets && (
-        <div className="settings-item">
-          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+        <>
+          <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
             {lang('ChooseStickerMyStickerSets')}
-          </h4>
-          <div ref={stickerSettingsRef}>
-            {stickerSets.map((stickerSet: ApiStickerSet) => (
-              <StickerSetCard
-                key={stickerSet.id}
-                stickerSet={stickerSet}
-                observeIntersection={observeIntersectionForCovers}
-                onClick={handleStickerSetClick}
-                noPlay={!canPlayAnimatedEmojis}
-              />
-            ))}
-          </div>
-          <p className="settings-item-description mt-3" dir="auto">
+          </IslandTitle>
+          <Island>
+            <div ref={stickerSettingsRef}>
+              {stickerSets.map((stickerSet: ApiStickerSet) => (
+                <StickerSetCard
+                  key={stickerSet.id}
+                  stickerSet={stickerSet}
+                  observeIntersection={observeIntersectionForCovers}
+                  onClick={handleStickerSetClick}
+                  noPlay={!canPlayAnimatedEmojis}
+                />
+              ))}
+            </div>
+          </Island>
+          <IslandDescription dir="auto">
             {renderText(lang('StickersBotInfo'), ['links'])}
-          </p>
-        </div>
+          </IslandDescription>
+        </>
       )}
     </div>
   );

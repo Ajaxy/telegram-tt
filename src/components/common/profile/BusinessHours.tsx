@@ -7,8 +7,6 @@ import type { ApiBusinessWorkHours } from '../../../api/types';
 import { selectTimezones } from '../../../global/selectors';
 import {
   VTT_PROFILE_BUSINESS_HOURS,
-  VTT_PROFILE_BUSINESS_HOURS_COLLAPSE,
-  VTT_PROFILE_BUSINESS_HOURS_EXPAND,
 } from '../../../util/animations/viewTransitionTypes';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
@@ -105,13 +103,9 @@ const BusinessHours = ({
 
   const handleClick = useLastCallback(() => {
     if (isExpanded) {
-      startViewTransition(VTT_PROFILE_BUSINESS_HOURS_COLLAPSE, () => {
-        collapse();
-      });
+      collapse();
     } else {
-      startViewTransition(VTT_PROFILE_BUSINESS_HOURS_EXPAND, () => {
-        expand();
-      });
+      expand();
     }
   });
 
@@ -151,36 +145,34 @@ const BusinessHours = ({
         </div>
         <Icon className={styles.arrow} style={createVtnStyle('expandArrow', true)} name={isExpanded ? 'up' : 'down'} />
       </div>
-      {isExpanded && (
-        <div className={styles.bottom}>
-          {Boolean(timezoneMinuteDifference) && (
-            <div
-              className={styles.offsetTrigger}
-              style={createVtnStyle('offsetTrigger')}
-              role="button"
-              tabIndex={0}
-              onMouseDown={!IS_TOUCH_ENV ? handleTriggerOffset : undefined}
-              onClick={IS_TOUCH_ENV ? handleTriggerOffset : undefined}
-            >
-              {oldLang(isMyTime ? 'BusinessHoursProfileSwitchMy' : 'BusinessHoursProfileSwitchLocal')}
-            </div>
-          )}
-          <dl className={styles.timetable}>
-            {DAYS.map((day) => (
-              <>
-                <dt className={buildClassName(styles.weekday, day === currentDay && styles.currentDay)}>
-                  {formatWeekday(oldLang, day === 6 ? 0 : day + 1)}
-                </dt>
-                <dd className={styles.schedule}>
-                  {workHours[day].map((segment) => (
-                    <div>{segment}</div>
-                  ))}
-                </dd>
-              </>
-            ))}
-          </dl>
-        </div>
-      )}
+      <div className={buildClassName(styles.bottom, !isExpanded && styles.collapsed)} aria-hidden={!isExpanded}>
+        {Boolean(timezoneMinuteDifference) && (
+          <div
+            className={styles.offsetTrigger}
+            style={createVtnStyle('offsetTrigger')}
+            role="button"
+            tabIndex={isExpanded ? 0 : -1}
+            onMouseDown={!IS_TOUCH_ENV ? handleTriggerOffset : undefined}
+            onClick={IS_TOUCH_ENV ? handleTriggerOffset : undefined}
+          >
+            {oldLang(isMyTime ? 'BusinessHoursProfileSwitchMy' : 'BusinessHoursProfileSwitchLocal')}
+          </div>
+        )}
+        <dl className={styles.timetable}>
+          {DAYS.map((day) => (
+            <>
+              <dt className={buildClassName(styles.weekday, day === currentDay && styles.currentDay)}>
+                {formatWeekday(oldLang, day === 6 ? 0 : day + 1)}
+              </dt>
+              <dd className={styles.schedule}>
+                {workHours[day].map((segment) => (
+                  <div>{segment}</div>
+                ))}
+              </dd>
+            </>
+          ))}
+        </dl>
+      </div>
     </ListItem>
   );
 };

@@ -17,6 +17,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import useManagePermissions from '../hooks/useManagePermissions';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
+import Island, { IslandTitle } from '../../gili/layout/Island';
 import PermissionCheckboxList from '../../main/PermissionCheckboxList';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -134,12 +135,12 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
         + `--before-shift-height: ${BEFORE_ITEMS_COUNT * ITEM_HEIGHT + BEFORE_USER_INFO_HEIGHT}px;`}
     >
       <div className="custom-scroll">
-        <div className="section without-bottom-shadow">
+        <Island className={buildClassName('without-bottom-shadow', isMediaDropdownOpen && 'dropdown-open')}>
           <ListItem inactive className="chat-item-clickable">
             <PrivateChatInfo userId={selectedChatMember.userId} forceShowSelf />
           </ListItem>
 
-          <h3 className="section-heading mt-4" dir="auto">{oldLang('UserRestrictionsCanDo')}</h3>
+          <IslandTitle className="mt-4" dir="auto">{oldLang('UserRestrictionsCanDo')}</IslandTitle>
           <PermissionCheckboxList
             chatId={chat?.id}
             isMediaDropdownOpen={isMediaDropdownOpen}
@@ -151,22 +152,22 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
               isMediaDropdownOpen && 'DropdownList--open',
             )}
             dropdownClassName="DropdownListTrap"
-            shiftedClassName={buildClassName('part', isMediaDropdownOpen && 'shifted')}
+            shiftedClassName="part"
             getControlIsDisabled={getControlIsDisabled}
           />
-        </div>
+        </Island>
 
         {!isFormFullyDisabled && (
-          <div
+          <Island
             className={buildClassName(
-              'section',
+              'part',
               isMediaDropdownOpen && 'shifted',
             )}
           >
             <ListItem icon="delete-user" ripple destructive onClick={openBanConfirmationDialog}>
               {oldLang('UserRestrictionsBlock')}
             </ListItem>
-          </div>
+          </Island>
         )}
       </div>
 

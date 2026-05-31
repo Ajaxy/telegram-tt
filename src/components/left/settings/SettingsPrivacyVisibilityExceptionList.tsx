@@ -183,7 +183,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <div className="NewChat-inner step-1">
+    <div className="Picker settings-picker-islands">
       <PeerPicker
         categories={getCustomCategory()}
         itemIds={displayedIds || []}
@@ -201,6 +201,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
         itemInputType="checkbox"
         withDefaultPadding
         withStatus
+        withIslands
       />
 
       <FloatingActionButton

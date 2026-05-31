@@ -16,10 +16,14 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
+import Island, { IslandDescription } from '../../gili/layout/Island';
+import Surface from '../../gili/layout/Surface';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
 import BlockUserModal from './BlockUserModal';
+
+import styles from './SettingsPrivacyBlockedUsers.module.scss';
 
 type OwnProps = {
   isActive?: boolean;
@@ -118,25 +122,28 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="settings-fab-wrapper">
-      <div className="settings-content infinite-scroll">
-        <div className="settings-item no-border">
-          <p className="settings-item-description-larger mt-0 mb-2" dir={lang.isRtl ? 'rtl' : undefined}>
-            {lang('BlockedUsersInfo')}
-          </p>
-        </div>
+      <Surface className={styles.surface}>
+        <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
+          {lang('BlockedUsersInfo')}
+        </IslandDescription>
 
-        <div className="chat-list custom-scroll">
-          {blockedIds?.length ? (
-            <div className="scroll-container settings-item">
-              {blockedIds.map((contactId, i) => renderContact(contactId, i, 0))}
-            </div>
-          ) : blockedIds && !blockedIds.length ? (
-            <div className="no-results" dir="auto">{lang('NoBlocked')}</div>
-          ) : (
-            <Loading key="loading" />
-          )}
-        </div>
-      </div>
+        <Island className={styles.listIsland}>
+          <div className="chat-list custom-scroll">
+            {blockedIds?.length ? (
+              <div
+                className="scroll-container"
+                style={`height: ${blockedIds.length * CHAT_HEIGHT_PX}px`}
+              >
+                {blockedIds.map((contactId, i) => renderContact(contactId, i, 0))}
+              </div>
+            ) : blockedIds && !blockedIds.length ? (
+              <div className="no-results" dir="auto">{lang('NoBlocked')}</div>
+            ) : (
+              <Loading key="loading" />
+            )}
+          </div>
+        </Island>
+      </Surface>
 
       <FloatingActionButton
         isShown
