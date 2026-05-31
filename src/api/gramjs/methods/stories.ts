@@ -1,4 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
+import { RPCError } from '../../../lib/gramjs/errors';
 
 import type {
   ApiError,
@@ -32,7 +33,7 @@ import {
 } from '../gramjsBuilders';
 import { addStoryToLocalDb } from '../helpers/localDb';
 import { deserializeBytes } from '../helpers/misc';
-import { invokeRequest } from './client';
+import { dispatchErrorUpdate, invokeRequest } from './client';
 
 export async function fetchAllStories({
   stateHash,
@@ -181,16 +182,30 @@ export function fetchStoriesArchive({
 }
 
 export async function fetchPeerStoriesByIds({ peer, ids }: { peer: ApiPeer; ids: number[] }) {
-  const result = await invokeRequest(new GramJs.stories.GetStoriesByID({
+  const request = new GramJs.stories.GetStoriesByID({
     peer: buildInputPeer(peer.id, peer.accessHash),
     id: ids,
-  }));
+  });
+  let result;
+
+  try {
+    result = await invokeRequest(request, { shouldThrow: true });
+  } catch (err) {
+    if (err instanceof RPCError && err.errorMessage === 'CHANNEL_PRIVATE') {
+      return {
+        stories: buildDeletedStories(peer.id, ids),
+      };
+    }
+
+    dispatchErrorUpdate(err as Error, request);
+    return undefined;
+  }
 
   if (!result) {
     return undefined;
   }
 
-  const stories = ids.reduce<Record<string, ApiTypeStory>>((acc, id) => {
+  const stories = ids.reduce<Record<number, ApiTypeStory>>((acc, id) => {
     const story = result.stories.find(({ id: currentId }) => currentId === id);
     if (story) {
       acc[id] = buildApiStory(peer.id, story);
@@ -212,6 +227,18 @@ export async function fetchPeerStoriesByIds({ peer, ids }: { peer: ApiPeer; ids:
     pinnedIds: result.pinnedToTop,
     stories,
   };
+}
+
+function buildDeletedStories(peerId: string, ids: number[]): Record<number, ApiTypeStory> {
+  return ids.reduce<Record<number, ApiTypeStory>>((acc, id) => {
+    acc[id] = {
+      id,
+      peerId,
+      isDeleted: true,
+    };
+
+    return acc;
+  }, {});
 }
 
 export function viewStory({ peer, storyId }: { peer: ApiPeer; storyId: number }) {
