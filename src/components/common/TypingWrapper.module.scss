@@ -20,6 +20,11 @@
   }
 }
 
+.fullyRevealed {
+  --typing-draft-progress: 100%;
+  --typing-draft-spread: 0%;
+}
+
 .placeholder {
   display: inline-block;
   width: 1.25rem;

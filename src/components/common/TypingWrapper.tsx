@@ -6,7 +6,8 @@ import {
 import type { ApiFormattedText } from '../../api/types';
 
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
-import { LOCAL_TGS_URLS } from './helpers/animatedAssets';
+import buildClassName from '../../util/buildClassName';
+import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from './helpers/animatedAssets';
 import { REM } from './helpers/mediaDimensions';
 
 import useLastCallback from '../../hooks/useLastCallback';
@@ -57,9 +58,11 @@ const TypingWrapper = ({
   renderText,
   onCompleted,
 }: OwnProps) => {
+  const fullText = formattedText.text;
+
   const ref = useRef<HTMLSpanElement>();
   const animationRef = useRef<Animation>();
-  const progressRef = useRef(0);
+  const progressRef = useRef(fullText ? 0 : 100);
   const prevRevealedRef = useRef(0);
   const fullTextRef = useRef('');
 
@@ -69,7 +72,6 @@ const TypingWrapper = ({
   const completedKeyRef = useRef<string>();
   const prevFullTextRef = useRef('');
 
-  const fullText = formattedText.text;
   fullTextRef.current = fullText;
 
   const stopAnimation = useLastCallback(() => {
@@ -244,14 +246,16 @@ const TypingWrapper = ({
     text: fullText.slice(0, revealedLength),
     entities: formattedText.entities,
   }), [fullText, formattedText.entities, revealedLength]);
+  const className = buildClassName(styles.root, !fullText && styles.fullyRevealed);
 
   return (
-    <span ref={ref} className={styles.root}>
+    <span ref={ref} className={className}>
       {renderText(truncatedText)}
       {shouldRenderPlaceholder && (
         <span key="typing-placeholder" className={styles.placeholder}>
           <AnimatedIconWithPreview
             tgsUrl={LOCAL_TGS_URLS.Writing}
+            previewUrl={LOCAL_TGS_PREVIEW_URLS.Writing}
             size={PLACEHOLDER_SIZE}
             play
             noLoop={false}

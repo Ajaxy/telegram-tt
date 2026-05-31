@@ -45,6 +45,7 @@ import StarReaction from '../../../assets/tgs/stars/StarReaction.tgs';
 import StarReactionEffect from '../../../assets/tgs/stars/StarReactionEffect.tgs';
 import Unlock from '../../../assets/tgs/Unlock.tgs';
 import DuckNothingFoundPreview from '../../../assets/tgs-previews/DuckNothingFound.svg';
+import WritingPreview from '../../../assets/tgs-previews/message/Writing.svg';
 import SearchPreview from '../../../assets/tgs-previews/Search.svg';
 import HandStopPreview from '../../../assets/tgs-previews/settings/HandStopPreview.png';
 import PasskeysPreview from '../../../assets/tgs-previews/settings/Passkeys.svg';
@@ -55,6 +56,7 @@ export const LOCAL_TGS_PREVIEW_URLS = {
   DuckNothingFound: DuckNothingFoundPreview,
   Search: SearchPreview,
   Passkeys: PasskeysPreview,
+  Writing: WritingPreview,
 };
 
 export const LOCAL_TGS_URLS = {
