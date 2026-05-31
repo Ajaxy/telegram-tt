@@ -5,6 +5,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { omit } from '../../../util/iteratees';
 import { notifyAboutCall } from '../../../util/notifications';
 import { onTickEnd } from '../../../util/schedulers';
+import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal } from '../../index';
 import { updateChat, updateChatFullInfo } from '../../reducers';
 import { removeGroupCall, updateGroupCall, updateGroupCallParticipant } from '../../reducers/calls';
@@ -87,6 +88,19 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       } = global;
 
       const { call } = update;
+
+      // Another call (P2P or group) is already active: auto-discard the new incoming call as busy.
+      const isInOtherPhoneCall = Boolean(phoneCall) && call.id !== phoneCall.id;
+      const isInGroupCall = Boolean(global.groupCalls.activeGroupCallId) && !phoneCall;
+      if (isInOtherPhoneCall || isInGroupCall) {
+        if (call.state !== 'discarded') {
+          callApi('discardCall', {
+            call,
+            isBusy: true,
+          });
+        }
+        return undefined;
+      }
 
       if (phoneCall) {
         if (call.state === 'discarded') {

@@ -102,6 +102,14 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (!ARE_CALLS_SUPPORTED) return undefined;
       const { phoneCall, currentUserId } = global;
 
+      // Another call (P2P or group) is already active - ignore here so we don't show the popup;
+      // the non-async handler discards the new call as busy.
+      const isInOtherPhoneCall = Boolean(phoneCall?.id) && update.call.id !== phoneCall?.id;
+      const isInGroupCall = Boolean(global.groupCalls.activeGroupCallId) && !phoneCall;
+      if (isInOtherPhoneCall || isInGroupCall) {
+        return undefined;
+      }
+
       const call: ApiPhoneCall = {
         ...phoneCall,
         ...update.call,
@@ -115,16 +123,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       };
       setGlobal(global);
       global = getGlobal();
-
-      if (phoneCall && phoneCall.id && call.id !== phoneCall.id) {
-        if (call.state !== 'discarded') {
-          callApi('discardCall', {
-            call,
-            isBusy: true,
-          });
-        }
-        return undefined;
-      }
 
       const {
         accessHash, state, connections, gB,
