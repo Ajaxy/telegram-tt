@@ -195,9 +195,15 @@ export default function useChatListEntry({
 
     let isCancelled = false;
 
+    // Clear stale transitions before setting the compensating transform
+    element.classList.remove('animate-opacity', 'animate-transform');
+    element.style.opacity = '';
+    element.style.transform = '';
+
     const notifyAnimationEnd = () => {
       if (isCancelled) return;
       requestMutation(() => {
+        if (isCancelled) return;
         element.classList.remove('animate-opacity', 'animate-transform');
         element.style.opacity = '';
         element.style.transform = '';
@@ -210,6 +216,7 @@ export default function useChatListEntry({
       element.style.opacity = '0';
 
       requestMutation(() => {
+        if (isCancelled) return;
         element.classList.add('animate-opacity');
         element.style.opacity = '1';
 
@@ -221,6 +228,7 @@ export default function useChatListEntry({
       element.style.transform = `translate3d(0, ${-orderDiff * CHAT_HEIGHT_PX - shiftDiff}px, 0)`;
 
       requestMutation(() => {
+        if (isCancelled) return;
         element.classList.add('animate-transform');
         element.style.transform = '';
 
@@ -232,6 +240,7 @@ export default function useChatListEntry({
       element.style.transform = `translate3d(0, ${-shiftDiff}px, 0)`;
 
       requestMutation(() => {
+        if (isCancelled) return;
         element.classList.add('animate-transform');
         element.style.transform = '';
 
