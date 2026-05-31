@@ -71,16 +71,10 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
           iconName="close"
         />
         <div className="modal-title">{lang('SessionPreviewTitle')}</div>
-        <Button
-          color="danger"
-          onClick={handleTerminateSessionClick}
-          className={buildClassName('modal-action-button', styles.headerButton)}
-        >
-          {lang('SessionPreviewTerminateSession')}
-        </Button>
       </div>
     );
   }
+
   return (
     <Modal
       header={renderHeader()}
@@ -140,6 +134,16 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
           checked={renderingSession.areCallsEnabled}
         />
       </ListItem>
+      <div className="dialog-buttons mt-2">
+        <Button
+          color="danger"
+          className="confirm-dialog-button"
+          isText
+          onClick={handleTerminateSessionClick}
+        >
+          {lang('SessionPreviewTerminateSession')}
+        </Button>
+      </div>
     </Modal>
   );
 };

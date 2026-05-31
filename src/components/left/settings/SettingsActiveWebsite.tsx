@@ -1,10 +1,7 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiUser, ApiWebSession } from '../../../api/types';
-
-import buildClassName from '../../../util/buildClassName';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useOldLang from '../../../hooks/useOldLang';
@@ -27,12 +24,12 @@ type StateProps = {
   bot?: ApiUser;
 };
 
-const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
+const SettingsActiveWebsite = ({
   isOpen,
   session,
   bot,
   onClose,
-}) => {
+}: OwnProps & StateProps) => {
   const { terminateWebAuthorization } = getActions();
   const lang = useOldLang();
 
@@ -60,16 +57,10 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
           iconName="close"
         />
         <div className="modal-title">{lang('WebSessionsTitle')}</div>
-        <Button
-          color="danger"
-          onClick={handleTerminateSessionClick}
-          className={buildClassName('modal-action-button', styles.headerButton)}
-        >
-          {lang('AuthSessions.LogOut')}
-        </Button>
       </div>
     );
   }
+
   return (
     <Modal
       header={renderHeader()}
@@ -101,6 +92,16 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
         <dd>{renderingSession?.region}</dd>
       </dl>
       <p className={styles.note}>{lang('AuthSessions.View.LocationInfo')}</p>
+      <div className="dialog-buttons mt-2">
+        <Button
+          color="danger"
+          className="confirm-dialog-button"
+          isText
+          onClick={handleTerminateSessionClick}
+        >
+          {lang('AuthSessions.LogOut')}
+        </Button>
+      </div>
     </Modal>
   );
 };
