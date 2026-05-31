@@ -649,6 +649,44 @@ export interface ApiFormattedTextWithEmojiOnlyCount extends ApiFormattedText {
   emojiOnlyCount?: number;
 }
 
+export type ApiInputAiComposeTone = {
+  type: 'default';
+  tone: string;
+} | {
+  type: 'id';
+  id: string;
+  accessHash: string;
+} | {
+  type: 'slug';
+  slug: string;
+};
+
+export interface ApiAiComposeToneExample {
+  from: ApiFormattedText;
+  to: ApiFormattedText;
+}
+
+export interface ApiAiComposeTone {
+  id: string;
+  accessHash: string;
+  slug: string;
+  title: string;
+  isCreator?: true;
+  emojiId?: string;
+  prompt?: string;
+  installsCount?: number;
+  authorId?: string;
+  exampleEnglish?: ApiAiComposeToneExample;
+}
+
+export interface ApiAiComposeToneDefault {
+  tone: string;
+  emojiId: string;
+  title: string;
+}
+
+export type ApiAiComposeToneType = ApiAiComposeTone | ApiAiComposeToneDefault;
+
 export interface ApiComposedMessageWithAI {
   resultText: ApiFormattedText;
   diffText?: ApiFormattedText;

@@ -15,6 +15,7 @@ import type {
   ApiError,
   ApiFormattedText,
   ApiGlobalMessageSearchType,
+  ApiInputAiComposeTone,
   ApiInputReplyInfo,
   ApiInputSuggestedPostInfo,
   ApiMessage,
@@ -63,7 +64,7 @@ import {
   buildApiSponsoredMessageReportResult,
   buildThreadReadState,
 } from '../apiBuilders/chats';
-import { buildApiComposedMessageWithAI, buildApiFormattedText } from '../apiBuilders/common';
+import { buildApiAiComposeTone, buildApiComposedMessageWithAI, buildApiFormattedText } from '../apiBuilders/common';
 import { buildApiTopicWithState } from '../apiBuilders/forums';
 import {
   buildMessageMediaContent, buildMessagePollFromMedia, buildMessageTextContent,
@@ -87,6 +88,7 @@ import {
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { buildApiUser, buildApiUserStatuses } from '../apiBuilders/users';
 import {
+  buildInputAiComposeTone,
   buildInputChannel,
   buildInputDocument,
   buildInputMediaDocument,
@@ -2800,13 +2802,13 @@ export async function composeMessageWithAI({
   shouldProofread,
   isEmojify,
   translateToLang,
-  changeTone,
+  tone,
 }: {
   text: ApiFormattedText;
   shouldProofread?: boolean;
   isEmojify?: boolean;
   translateToLang?: string;
-  changeTone?: string;
+  tone?: ApiInputAiComposeTone;
 }): Promise<{ result?: ApiComposedMessageWithAI; error?: 'floodPremium' | 'aiError' | 'generic' }> {
   try {
     const result = await invokeRequest(new GramJs.messages.ComposeMessageWithAI({
@@ -2814,7 +2816,7 @@ export async function composeMessageWithAI({
       proofread: shouldProofread || undefined,
       emojify: isEmojify || undefined,
       translateToLang,
-      changeTone,
+      tone: tone ? buildInputAiComposeTone(tone) : undefined,
     }), { shouldThrow: true });
 
     if (!result) return { error: 'generic' };
@@ -2831,4 +2833,23 @@ export async function composeMessageWithAI({
     }
     return { error: 'generic' };
   }
+}
+
+export async function fetchAiComposeTones({
+  hash,
+}: {
+  hash?: string;
+}) {
+  const result = await invokeRequest(new GramJs.aicompose.GetTones({
+    hash: hash ? BigInt(hash) : DEFAULT_PRIMITIVES.BIGINT,
+  }));
+
+  if (!result || result instanceof GramJs.aicompose.TonesNotModified) {
+    return undefined;
+  }
+
+  return {
+    tones: result.tones.map(buildApiAiComposeTone),
+    hash: result.hash.toString(),
+  };
 }

@@ -2102,13 +2102,6 @@ export interface LangPair {
   'AiMessageEditorSelectStyle': undefined;
   'AiMessageEditorDailyLimitReachedPremium': undefined;
   'AiMessageEditorGenericError': undefined;
-  'AiMessageEditorStyleFormal': undefined;
-  'AiMessageEditorStyleShort': undefined;
-  'AiMessageEditorStyleTribal': undefined;
-  'AiMessageEditorStyleCorp': undefined;
-  'AiMessageEditorStyleBiblical': undefined;
-  'AiMessageEditorStyleViking': undefined;
-  'AiMessageEditorStyleZen': undefined;
   'AiMessageEditorResult': undefined;
   'AiMessageEditorOriginal': undefined;
   'AiMessageEditorApply': undefined;

@@ -17,6 +17,7 @@ import type {
   ApiFormattedText,
   ApiGeoPoint,
   ApiGlobalMessageSearchType,
+  ApiInputAiComposeTone,
   ApiInputInvoice,
   ApiInputInvoiceStarGift,
   ApiInputMessageReplyInfo,
@@ -2598,6 +2599,7 @@ export interface ActionPayloads {
   } & WithTabId;
   loadPeerColors: undefined;
   loadTimezones: undefined;
+  loadAiComposeTones: undefined;
   openLeftColumnContent: {
     contentKey?: LeftColumnContent;
   } & WithTabId;
@@ -2657,12 +2659,12 @@ export interface ActionPayloads {
   } & WithTabId;
   setAiMessageEditorTranslateOptions: {
     selectedLanguage?: string;
-    selectedTone?: string;
+    selectedTone?: ApiInputAiComposeTone;
     shouldEmojify?: boolean;
     clearResult?: boolean;
   } & WithTabId;
   setAiMessageEditorStyleOptions: {
-    selectedTone?: string;
+    selectedTone?: ApiInputAiComposeTone;
     shouldEmojify?: boolean;
     clearResult?: boolean;
   } & WithTabId;
@@ -2670,7 +2672,7 @@ export interface ActionPayloads {
     shouldProofread?: boolean;
     isEmojify?: boolean;
     translateToLang?: string;
-    changeTone?: string;
+    tone?: ApiInputAiComposeTone;
   } & WithTabId;
   applyAiMessageEditorResult: WithTabId | undefined;
   sendAiMessageEditorResult: ({

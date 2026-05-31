@@ -533,6 +533,10 @@ export type ApiUpdateConfig = {
   '@type': 'updateConfig';
 };
 
+export type ApiUpdateAiComposeTones = {
+  '@type': 'updateAiComposeTones';
+};
+
 export type ApiUpdateResetContacts = {
   '@type': 'updateResetContactList';
 };
@@ -964,6 +968,7 @@ export type ApiUpdate = (
   | ApiDeleteQuickReply | ApiUpdateDeleteQuickReplyMessages | ApiUpdateDeleteProfilePhoto | ApiUpdateNewProfilePhoto
   | ApiUpdateEntities | ApiUpdatePaidReactionPrivacy | ApiUpdateLangPackTooLong | ApiUpdateLangPack
   | ApiUpdateNotSupportedInFrozenAccountError
+  | ApiUpdateAiComposeTones
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

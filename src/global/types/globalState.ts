@@ -1,4 +1,5 @@
 import type {
+  ApiAiComposeToneType,
   ApiAppConfig,
   ApiAttachBot,
   ApiAvailableEffect,
@@ -91,6 +92,10 @@ export type GlobalState = {
   timezones?: {
     byId: Record<string, ApiTimezone>;
     hash: number;
+  };
+  aiComposeTones?: {
+    tones: ApiAiComposeToneType[];
+    hash: string;
   };
   isCacheApiSupported?: boolean;
   connectionState?: ApiUpdateConnectionStateType;

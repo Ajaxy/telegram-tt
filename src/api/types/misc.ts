@@ -243,12 +243,6 @@ export interface ApiCountryCode extends ApiCountry {
   patterns?: string[];
 }
 
-export interface ApiAiComposeStyle {
-  tone: string;
-  documentId: string;
-  title: string;
-}
-
 export interface ApiAppConfig {
   hash: number;
   emojiSounds: Record<string, string>;
@@ -340,7 +334,11 @@ export interface ApiAppConfig {
     value: number;
     frameStart: number;
   }>;
-  aiComposeStyles?: ApiAiComposeStyle[];
+  aiComposeToneExamplesNum?: number;
+  aiComposeToneTitleLengthMax?: number;
+  aiComposeTonePromptLengthMax?: number;
+  aiComposeToneSavedLimitDefault?: number;
+  aiComposeToneSavedLimitPremium?: number;
 }
 
 export interface ApiConfig {

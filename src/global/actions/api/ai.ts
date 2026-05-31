@@ -1,20 +1,25 @@
+import type { ApiInputAiComposeTone } from '../../../api/types';
+
+import { compareAiTones, getToneCacheKey } from '../../../util/aiComposeTones';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { updateTabState } from '../../reducers/tabs';
 import { selectTabState } from '../../selectors';
 
-function buildStyleCacheKey(tone: string | undefined, emojify: boolean | undefined) {
-  return `${tone || ''}_${emojify ? '1' : '0'}`;
+function buildStyleCacheKey(tone?: ApiInputAiComposeTone, emojify?: boolean) {
+  return `${tone ? getToneCacheKey(tone) : ''}_${emojify ? '1' : '0'}`;
 }
 
-function buildTranslateCacheKey(lang: string | undefined, tone: string | undefined, emojify: boolean | undefined) {
-  return `${lang || ''}_${tone || ''}_${emojify ? '1' : '0'}`;
+function buildTranslateCacheKey(
+  lang?: string, tone?: ApiInputAiComposeTone, emojify?: boolean,
+) {
+  return `${lang || ''}_${tone ? getToneCacheKey(tone) : ''}_${emojify ? '1' : '0'}`;
 }
 
 addActionHandler('composeWithAiMessageEditor', async (global, actions, payload): Promise<void> => {
   const {
-    shouldProofread, isEmojify, translateToLang, changeTone,
+    shouldProofread, isEmojify, translateToLang, tone,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -29,11 +34,11 @@ addActionHandler('composeWithAiMessageEditor', async (global, actions, payload):
     cachedResult = modal.fixTab?.cache;
   } else if (translateToLang) {
     tabKey = 'translateTab';
-    const cacheKey = buildTranslateCacheKey(translateToLang, changeTone, isEmojify);
+    const cacheKey = buildTranslateCacheKey(translateToLang, tone, isEmojify);
     cachedResult = modal.translateTab?.cache?.[cacheKey];
   } else {
     tabKey = 'styleTab';
-    const cacheKey = buildStyleCacheKey(changeTone, isEmojify);
+    const cacheKey = buildStyleCacheKey(tone, isEmojify);
     cachedResult = modal.styleTab?.cache?.[cacheKey];
   }
 
@@ -67,7 +72,7 @@ addActionHandler('composeWithAiMessageEditor', async (global, actions, payload):
     shouldProofread,
     isEmojify,
     translateToLang,
-    changeTone,
+    tone,
   });
 
   global = getGlobal();
@@ -92,11 +97,11 @@ addActionHandler('composeWithAiMessageEditor', async (global, actions, payload):
   if (translateToLang) {
     const { selectedLanguage, selectedTone, shouldEmojify } = modal.translateTab || {};
     isOutdatedResult = selectedLanguage !== translateToLang
-      || selectedTone !== changeTone
+      || !compareAiTones(selectedTone, tone)
       || Boolean(shouldEmojify) !== Boolean(isEmojify);
   } else if (!shouldProofread) {
     const { selectedTone, shouldEmojify } = modal.styleTab || {};
-    isOutdatedResult = selectedTone !== changeTone
+    isOutdatedResult = !compareAiTones(selectedTone, tone)
       || Boolean(shouldEmojify) !== Boolean(isEmojify);
   }
 
@@ -105,10 +110,10 @@ addActionHandler('composeWithAiMessageEditor', async (global, actions, payload):
     if (shouldProofread) {
       updatedCache = result;
     } else if (translateToLang) {
-      const cacheKey = buildTranslateCacheKey(translateToLang, changeTone, isEmojify);
+      const cacheKey = buildTranslateCacheKey(translateToLang, tone, isEmojify);
       updatedCache = { ...currentTabState.cache, [cacheKey]: result };
     } else {
-      const cacheKey = buildStyleCacheKey(changeTone, isEmojify);
+      const cacheKey = buildStyleCacheKey(tone, isEmojify);
       updatedCache = { ...currentTabState.cache, [cacheKey]: result };
     }
   }
@@ -140,5 +145,21 @@ addActionHandler('composeWithAiMessageEditor', async (global, actions, payload):
       },
     },
   }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('loadAiComposeTones', async (global): Promise<void> => {
+  const hash = global.aiComposeTones?.hash;
+  const result = await callApi('fetchAiComposeTones', { hash });
+  if (!result) return;
+
+  global = getGlobal();
+  global = {
+    ...global,
+    aiComposeTones: {
+      tones: result.tones,
+      hash: result.hash,
+    },
+  };
   setGlobal(global);
 });

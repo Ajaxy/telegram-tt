@@ -25,6 +25,7 @@ export type TabWithProperties = {
   isBadgeActive?: boolean;
   contextActions?: MenuItemContextAction[];
   emoticon?: string | ApiMessageEntityCustomEmoji;
+  customEmojiDocumentId?: string;
   noTitleAnimations?: boolean;
 };
 

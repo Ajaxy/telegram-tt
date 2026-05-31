@@ -170,5 +170,4 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
   passkeysMaxCount: 5,
   diceEmojies: [],
   diceEmojiesSuccess: {},
-  aiComposeStyles: [],
 };

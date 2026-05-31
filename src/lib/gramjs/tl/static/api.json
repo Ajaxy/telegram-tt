@@ -446,5 +446,12 @@
     "premium.applyBoost",
     "premium.getMyBoosts",
     "premium.getBoostsList",
-    "fragment.getCollectibleInfo"
+    "fragment.getCollectibleInfo",
+    "aicompose.createTone",
+    "aicompose.updateTone",
+    "aicompose.saveTone",
+    "aicompose.deleteTone",
+    "aicompose.getTone",
+    "aicompose.getTones",
+    "aicompose.getToneExample"
 ]

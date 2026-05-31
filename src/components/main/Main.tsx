@@ -253,6 +253,7 @@ const Main = ({
     loadPeerColors,
     loadSavedReactionTags,
     loadTimezones,
+    loadAiComposeTones,
     loadQuickReplies,
     loadStarStatus,
     loadAvailableEffects,
@@ -348,6 +349,7 @@ const Main = ({
       loadRestrictedEmojiStickers();
       loadQuickReplies();
       loadTimezones();
+      loadAiComposeTones();
       loadActiveGiftAuctions();
     }
   }, [isMasterTab, isSynced, isAppConfigLoaded, isAccountFrozen]);

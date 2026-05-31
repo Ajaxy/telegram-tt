@@ -156,13 +156,16 @@ const AiMessageEditorModal = ({
       case 'translate':
         composeWithAiMessageEditor({
           translateToLang: translateTab?.selectedLanguage,
-          changeTone: translateTab?.selectedTone,
+          tone: translateTab?.selectedTone,
           isEmojify: translateTab?.shouldEmojify,
         });
         break;
       case 'style':
         if (styleTab?.selectedTone) {
-          composeWithAiMessageEditor({ changeTone: styleTab.selectedTone, isEmojify: styleTab?.shouldEmojify });
+          composeWithAiMessageEditor({
+            tone: styleTab.selectedTone,
+            isEmojify: styleTab?.shouldEmojify,
+          });
         }
         break;
       case 'fix':

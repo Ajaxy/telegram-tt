@@ -124,8 +124,9 @@ const TabList = ({
   const hasContextActions = tabs.some((tab) => tab.contextActions?.length);
 
   const renderTab = (tab: TabWithProperties, index: number) => {
+    const customEmojiId = tab.customEmojiDocumentId
+      || (typeof tab.emoticon === 'object' ? tab.emoticon.documentId : undefined);
     const stringEmoticon = typeof tab.emoticon === 'string' ? tab.emoticon : undefined;
-    const customEmoji = typeof tab.emoticon === 'object' ? tab.emoticon : undefined;
 
     return (
       <div
@@ -140,9 +141,9 @@ const TabList = ({
         onContextMenu={hasContextActions ? (e) => handleContextMenu(index, e) : undefined}
       >
         {stringEmoticon && <span className={styles.tabEmoji}>{stringEmoticon}</span>}
-        {customEmoji && (
+        {customEmojiId && (
           <CustomEmoji
-            documentId={customEmoji.documentId}
+            documentId={customEmojiId}
             className={styles.tabEmoji}
             size={EMOJI_SIZE}
             shouldNotLoop

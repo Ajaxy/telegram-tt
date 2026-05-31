@@ -17,6 +17,7 @@ import type {
   ApiGeoPoint,
   ApiGlobalMessageSearchType,
   ApiGroupStatistics,
+  ApiInputAiComposeTone,
   ApiInputInvoice,
   ApiLimitTypeWithModal,
   ApiMessage,
@@ -679,12 +680,12 @@ export type TabState = {
     isFromAttachment?: boolean;
     translateTab?: AiEditorTabBase & {
       selectedLanguage?: string;
-      selectedTone?: string;
+      selectedTone?: ApiInputAiComposeTone;
       shouldEmojify?: boolean;
       cache?: Record<string, ApiComposedMessageWithAI>;
     };
     styleTab?: AiEditorTabBase & {
-      selectedTone?: string;
+      selectedTone?: ApiInputAiComposeTone;
       shouldEmojify?: boolean;
       cache?: Record<string, ApiComposedMessageWithAI>;
     };

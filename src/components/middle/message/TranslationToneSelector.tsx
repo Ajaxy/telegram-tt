@@ -1,44 +1,44 @@
 import { memo } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { ApiAiComposeStyle } from '../../../api/types';
+import type { ApiAiComposeToneType, ApiInputAiComposeTone } from '../../../api/types';
 
+import { compareAiTones, getInputTone } from '../../../util/aiComposeTones';
 import buildClassName from '../../../util/buildClassName';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import CustomEmoji from '../../common/CustomEmoji';
-import { getStyleTitle } from '../composer/AiMessageEditorModal/helpers';
 
 import styles from './TranslationToneSelector.module.scss';
 
 const EMOJI_SIZE = 20;
-const EMPTY_AI_COMPOSE_STYLES: ApiAiComposeStyle[] = [];
 
 type OwnProps = {
-  selectedTone?: string;
+  selectedTone?: ApiInputAiComposeTone;
   style?: string;
-  onSelectTone: (tone?: string) => void;
+  onSelectTone: (tone?: ApiInputAiComposeTone) => void;
 };
 
 type StateProps = {
-  aiComposeStyles: ApiAiComposeStyle[];
+  tones: ApiAiComposeToneType[];
 };
 
 const TranslationToneSelector = ({
   selectedTone,
   style,
-  aiComposeStyles,
+  tones,
   onSelectTone,
 }: OwnProps & StateProps) => {
   const lang = useLang();
 
-  const handleToneClick = useLastCallback((tone?: string) => {
+  const handleToneClick = useLastCallback((tone?: ApiInputAiComposeTone) => {
     onSelectTone(tone);
   });
 
-  if (!aiComposeStyles.length) return undefined;
+  if (!tones.length) return undefined;
 
   return (
     <div className={buildClassName(styles.root, 'TranslationToneSelector')} style={style}>
@@ -50,22 +50,29 @@ const TranslationToneSelector = ({
           <span className={styles.neutralEmoji}>🏳️</span>
           <span className={styles.title}>{lang('TranslationToneNeutral')}</span>
         </div>
-        {aiComposeStyles.map(({ tone, documentId, title }) => (
-          <div
-            key={tone}
-            className={buildClassName(styles.item, selectedTone === tone && styles.selected)}
-            onClick={() => handleToneClick(tone)}
-          >
-            {documentId && (
-              <CustomEmoji
-                documentId={documentId}
-                size={EMOJI_SIZE}
-                shouldNotLoop
-              />
-            )}
-            <span className={styles.title}>{getStyleTitle(lang, tone, title)}</span>
-          </div>
-        ))}
+        {tones.map((entry) => {
+          const inputTone = getInputTone(entry);
+
+          return (
+            <div
+              key={'tone' in entry ? entry.tone : entry.id}
+              className={buildClassName(
+                styles.item,
+                compareAiTones(selectedTone, inputTone) && styles.selected,
+              )}
+              onClick={() => handleToneClick(inputTone)}
+            >
+              {entry.emojiId && (
+                <CustomEmoji
+                  documentId={entry.emojiId}
+                  size={EMOJI_SIZE}
+                  shouldNotLoop
+                />
+              )}
+              <span className={styles.title}>{entry.title}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -74,7 +81,7 @@ const TranslationToneSelector = ({
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
     return {
-      aiComposeStyles: global.appConfig.aiComposeStyles || EMPTY_AI_COMPOSE_STYLES,
+      tones: global.aiComposeTones?.tones ?? MEMO_EMPTY_ARRAY,
     };
   },
 )(TranslationToneSelector));

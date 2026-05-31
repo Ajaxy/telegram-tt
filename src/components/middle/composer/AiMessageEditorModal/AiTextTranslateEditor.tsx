@@ -1,11 +1,15 @@
 import { memo, useMemo, useRef, useState } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
-import type { ApiAiComposeStyle, ApiComposedMessageWithAI, ApiFormattedText } from '../../../../api/types';
+import type {
+  ApiAiComposeToneType, ApiComposedMessageWithAI, ApiFormattedText, ApiInputAiComposeTone,
+} from '../../../../api/types';
 import type { IAnchorPosition } from '../../../../types';
 
 import { SUPPORTED_TRANSLATION_LANGUAGES } from '../../../../config';
+import { compareAiTones, getInputTone } from '../../../../util/aiComposeTones';
 import buildClassName from '../../../../util/buildClassName';
+import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import useFlag from '../../../../hooks/useFlag';
@@ -24,12 +28,10 @@ import sharedStyles from './AiEditorShared.module.scss';
 import modalStyles from './AiMessageEditorModal.module.scss';
 import styles from './AiTextTranslateEditor.module.scss';
 
-const EMPTY_AI_COMPOSE_STYLES: ApiAiComposeStyle[] = [];
-
 type OwnProps = {
   text?: ApiFormattedText;
   selectedLanguage?: string;
-  selectedTone?: string;
+  selectedTone?: ApiInputAiComposeTone;
   shouldEmojify?: boolean;
   isLoading?: boolean;
   result?: ApiComposedMessageWithAI;
@@ -38,7 +40,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  aiComposeStyles: ApiAiComposeStyle[];
+  tones: ApiAiComposeToneType[];
 };
 
 const AiTextTranslateEditor = ({
@@ -50,7 +52,7 @@ const AiTextTranslateEditor = ({
   result,
   error,
   isPremium,
-  aiComposeStyles,
+  tones,
 }: OwnProps & StateProps) => {
   const {
     setAiMessageEditorTranslateOptions,
@@ -96,7 +98,7 @@ const AiTextTranslateEditor = ({
     composeWithAiMessageEditor({
       translateToLang: langCode,
       isEmojify: shouldEmojify,
-      changeTone: selectedTone,
+      tone: selectedTone,
     });
   });
 
@@ -106,7 +108,7 @@ const AiTextTranslateEditor = ({
       composeWithAiMessageEditor({
         translateToLang: selectedLanguage,
         isEmojify: newEmojify,
-        changeTone: selectedTone,
+        tone: selectedTone,
       });
     }
   });
@@ -124,13 +126,13 @@ const AiTextTranslateEditor = ({
   const getMenuElement = useLastCallback(() => document.querySelector('.language-menu .bubble'));
   const getLayout = useLastCallback(() => ({ withPortal: true }));
 
-  const handleToneSelect = useLastCallback((tone?: string) => {
-    setAiMessageEditorTranslateOptions({ selectedTone: tone });
+  const handleToneSelect = useLastCallback((newTone?: ApiInputAiComposeTone) => {
+    setAiMessageEditorTranslateOptions({ selectedTone: newTone });
     if (selectedLanguage) {
       composeWithAiMessageEditor({
         translateToLang: selectedLanguage,
         isEmojify: shouldEmojify,
-        changeTone: tone,
+        tone: newTone,
       });
     }
   });
@@ -138,9 +140,11 @@ const AiTextTranslateEditor = ({
   const displayResult = result?.resultText;
 
   const languageIndex = SUPPORTED_TRANSLATION_LANGUAGES.indexOf(selectedLanguage || '');
-  const toneIndex = aiComposeStyles.findIndex(({ tone }) => tone === selectedTone);
+  const toneIndex = tones.findIndex(
+    (entry) => compareAiTones(selectedTone, getInputTone(entry)),
+  );
   const totalLanguages = SUPPORTED_TRANSLATION_LANGUAGES.length;
-  const totalTones = aiComposeStyles.length;
+  const totalTones = tones.length;
   const transitionKey = languageIndex
     + (toneIndex + 1) * totalLanguages
     + (shouldEmojify ? totalLanguages * (totalTones + 1) : 0);
@@ -238,7 +242,7 @@ const AiTextTranslateEditor = ({
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
     return {
-      aiComposeStyles: global.appConfig.aiComposeStyles || EMPTY_AI_COMPOSE_STYLES,
+      tones: global.aiComposeTones?.tones ?? MEMO_EMPTY_ARRAY,
     };
   },
 )(AiTextTranslateEditor));

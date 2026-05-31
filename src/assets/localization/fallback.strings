@@ -2883,13 +2883,6 @@
 "AiMessageEditorDailyLimitReached" = "Daily limit reached. To increase limits, get {link}.";
 "AiMessageEditorDailyLimitReachedPremium" = "Daily limit reached.";
 "AiMessageEditorGenericError" = "Please try again later.";
-"AiMessageEditorStyleFormal" = "Formal";
-"AiMessageEditorStyleShort" = "Short";
-"AiMessageEditorStyleTribal" = "Tribal";
-"AiMessageEditorStyleCorp" = "Corp";
-"AiMessageEditorStyleBiblical" = "Biblical";
-"AiMessageEditorStyleViking" = "Viking";
-"AiMessageEditorStyleZen" = "Zen";
 "AiMessageEditorResult" = "Result";
 "AiMessageEditorOriginal" = "Original";
 "AiMessageEditorApply" = "Apply";
