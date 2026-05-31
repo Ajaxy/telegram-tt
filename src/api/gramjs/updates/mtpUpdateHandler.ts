@@ -474,7 +474,9 @@ export function updater(update: Update) {
       },
     });
   } else if (update instanceof GramJs.UpdateMessagePoll) {
-    const { pollId, poll, results } = update;
+    const {
+      pollId, poll, results, peer, msgId, topMsgId,
+    } = update;
     const apiPoll = poll && buildPoll(poll);
     const pollResults = buildPollResults(results);
 
@@ -483,6 +485,16 @@ export function updater(update: Update) {
       pollId: pollId.toString(),
       pollUpdate: omitUndefined({ summary: apiPoll, results: pollResults }),
     });
+
+    if (peer && msgId && results.hasUnreadVotes && !results.min) {
+      sendApiUpdate({
+        '@type': 'updateMessagePollUnread',
+        chatId: getApiChatIdFromMtpPeer(peer),
+        messageId: msgId,
+        threadId: topMsgId || MAIN_THREAD_ID,
+        pollId: pollId.toString(),
+      });
+    }
   } else if (update instanceof GramJs.UpdateMessagePollVote) {
     sendApiUpdate({
       '@type': 'updateMessagePollVote',
