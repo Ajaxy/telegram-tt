@@ -61,7 +61,8 @@
     }
 
     .live-tail {
-      min-height: max(0rem, calc(100cqh - var(--middle-header-panes-height) - 3rem));
+      overflow-anchor: none;
+      min-height: max(0rem, calc(100cqh - var(--middle-header-panes-height) - 2.5rem));
 
       .message-list-item {
         animation: live-tail-message-mount 0.2s ease-out;

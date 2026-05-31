@@ -88,7 +88,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
     document.documentElement.style.setProperty(
       '--composer-text-size', `${Math.max(newSize, IS_IOS ? 16 : 15)}px`,
     );
-    document.documentElement.style.setProperty('--message-meta-height', `${Math.floor(newSize * 1.3125)}px`);
+    document.documentElement.style.setProperty('--message-meta-height', `${Math.floor(newSize * 1.25)}px`);
     document.documentElement.style.setProperty('--message-text-size', `${newSize}px`);
     document.documentElement.setAttribute('data-message-text-size', newSize.toString());
 

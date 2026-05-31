@@ -69,7 +69,7 @@ addCallback((global: GlobalState) => {
       '--composer-text-size', `${Math.max(sharedSettings.messageTextSize, IS_IOS ? 16 : 15)}px`,
     );
     document.documentElement.style.setProperty('--message-meta-height',
-      `${Math.floor(sharedSettings.messageTextSize * 1.3125)}px`);
+      `${Math.floor(sharedSettings.messageTextSize * 1.25)}px`);
     document.documentElement.style.setProperty('--message-text-size', `${sharedSettings.messageTextSize}px`);
     document.documentElement.setAttribute('data-message-text-size', sharedSettings.messageTextSize.toString());
   }
