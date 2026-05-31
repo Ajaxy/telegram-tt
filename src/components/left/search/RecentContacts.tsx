@@ -1,19 +1,20 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo,
   useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiUser } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 
-import { getUserFirstOrLastName } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
+import { selectPeer } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { throttle } from '../../../util/schedulers';
 import renderText from '../../common/helpers/renderText';
 
+import { useShallowSelector } from '../../../hooks/data/useSelector';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 import Button from '../../ui/Button';
@@ -26,8 +27,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  topUserIds?: string[];
-  usersById: Record<string, ApiUser>;
+  topPeerIds?: string[];
   recentlyFoundChatIds?: string[];
 };
 
@@ -36,28 +36,33 @@ const NBSP = '\u00A0';
 
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
-const RecentContacts: FC<OwnProps & StateProps> = ({
-  topUserIds,
-  usersById,
+const RecentContacts = ({
+  topPeerIds,
   recentlyFoundChatIds,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const {
-    loadTopUsers, openChat,
+    loadTopPeers, openChat,
     addRecentlyFoundChatId, clearRecentlyFoundChats,
   } = getActions();
 
-  const topUsersRef = useRef<HTMLDivElement>();
+  const topPeersRef = useRef<HTMLDivElement>();
 
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.
   useEffect(() => {
     runThrottled(() => {
-      loadTopUsers();
+      loadTopPeers({ category: 'correspondents' });
     });
-  }, [loadTopUsers]);
+  }, [loadTopPeers]);
 
-  useHorizontalScroll(topUsersRef, !topUserIds);
+  const topPeersSelector = useCallback((global: GlobalState) => {
+    return topPeerIds?.map((peerId) => selectPeer(global, peerId)).filter(Boolean);
+  }, [topPeerIds]);
+  const topPeers = useShallowSelector(topPeersSelector);
+  const shouldRenderTopPeers = Boolean(topPeers?.length);
+
+  useHorizontalScroll(topPeersRef, !shouldRenderTopPeers);
 
   const handleClick = useCallback((id: string) => {
     openChat({ id, shouldReplaceHistory: true });
@@ -71,22 +76,22 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
     clearRecentlyFoundChats();
   }, [clearRecentlyFoundChats]);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   return (
     <div className="RecentContacts custom-scroll">
-      {topUserIds && (
+      {shouldRenderTopPeers && (
         <div className="top-peers-section" dir={lang.isRtl ? 'rtl' : undefined}>
-          <div ref={topUsersRef} className="top-peers">
-            {topUserIds.map((userId) => (
+          <div ref={topPeersRef} className="top-peers">
+            {topPeers?.map((peer) => (
               <div
-                key={userId}
+                key={peer.id}
                 className="top-peer-item"
-                onClick={() => handleClick(userId)}
+                onClick={() => handleClick(peer.id)}
                 dir={lang.isRtl ? 'rtl' : undefined}
               >
-                <Avatar peer={usersById[userId]} />
-                <div className="top-peer-name">{renderText(getUserFirstOrLastName(usersById[userId]) || NBSP)}</div>
+                <Avatar peer={peer} />
+                <div className="top-peer-name">{renderText(getPeerTitle(lang, peer) || NBSP)}</div>
               </div>
             ))}
           </div>
@@ -97,7 +102,7 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
           <h3
             className={buildClassName(
               'section-heading mt-0 recent-chats-header',
-              !topUserIds && 'without-border',
+              !shouldRenderTopPeers && 'without-border',
             )}
             dir={lang.isRtl ? 'rtl' : undefined}
           >
@@ -129,13 +134,11 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
-    const { userIds: topUserIds } = global.topPeers;
-    const usersById = global.users.byId;
+    const topPeerIds = global.topPeerCategories.correspondents?.peerIds;
     const { recentlyFoundChatIds } = global;
 
     return {
-      topUserIds,
-      usersById,
+      topPeerIds,
       recentlyFoundChatIds,
     };
   },

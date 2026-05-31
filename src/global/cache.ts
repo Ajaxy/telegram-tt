@@ -252,8 +252,8 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.chats.loadingParameters) {
     cached.chats.loadingParameters = initialState.chats.loadingParameters;
   }
-  if (!cached.topBotApps) {
-    cached.topBotApps = initialState.topBotApps;
+  if (!cached.topPeerCategories) {
+    cached.topPeerCategories = initialState.topPeerCategories;
   }
 
   if (!cached.reactions.defaultTags?.[0]?.type) {
@@ -443,9 +443,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
       'attachMenu',
       'currentUserId',
       'contactList',
-      'topPeers',
-      'topInlineBots',
-      'topBotApps',
+      'topPeerCategories',
       'recentEmojis',
       'recentCustomEmojis',
       'push',
@@ -560,6 +558,7 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
     .filter((id): id is string => Boolean(id) && isUserId(id));
 
   const attachBotIds = Object.keys(global.attachMenu?.bots || {});
+  const topPeerIds = getTopPeerIds(global);
 
   const idsToSave = unique([
     ...currentUserId ? [currentUserId] : [],
@@ -567,7 +566,7 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
     ...chatStoriesUserIds,
     ...visibleUserIds || [],
     ...attachBotIds,
-    ...global.topPeers.userIds || [],
+    ...topPeerIds.filter(isUserId),
     ...global.recentlyFoundChatIds?.filter(isUserId) || [],
     ...getOrderedIds(ARCHIVED_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT).filter(isUserId) || [],
     ...getOrderedIds(ALL_FOLDER_ID)?.filter(isUserId) || [],
@@ -608,11 +607,13 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
       return content.storyData?.peerId || webPage?.story?.peerId || replyPeer;
     });
   }));
+  const topPeerIds = getTopPeerIds(global);
 
   const unlinkedIdsToSave = [
     ...currentUserId ? [currentUserId] : [],
     ...currentChatIds,
     ...messagesChatIds,
+    ...topPeerIds,
     ...global.recentlyFoundChatIds || [],
     ...getOrderedIds(ARCHIVED_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT) || [],
     ...getOrderedIds(ALL_FOLDER_ID) || [],
@@ -650,6 +651,10 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     },
     topicsInfoById: pickTruthy(global.chats.topicsInfoById, currentChatIds),
   };
+}
+
+function getTopPeerIds<T extends GlobalState>(global: T) {
+  return unique(Object.values(global.topPeerCategories).flatMap((category) => category?.peerIds || []));
 }
 
 function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages'] {

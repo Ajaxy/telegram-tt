@@ -103,6 +103,7 @@ type StateProps = {
   emojiKeywords?: Record<string, string[]>;
   shouldSuggestCustomEmoji?: boolean;
   customEmojiForEmoji?: ApiSticker[];
+  topGuestBotIds?: string[];
   captionLimit: number;
   attachmentSettings: GlobalState['attachmentSettings'];
   shouldSaveAttachmentsCompression?: boolean;
@@ -127,6 +128,7 @@ const AttachmentModal = ({
   isChatWithSelf,
   currentUserId,
   groupChatMembers,
+  topGuestBotIds,
   recentEmojis,
   baseEmojiKeywords,
   emojiKeywords,
@@ -283,6 +285,7 @@ const AttachmentModal = ({
     inputRef,
     groupChatMembers,
     undefined,
+    topGuestBotIds,
     currentUserId,
   );
 
@@ -944,6 +947,7 @@ export default memo(withGlobal<OwnProps>(
       isChatWithSelf,
       currentUserId,
       groupChatMembers: chatFullInfo?.members,
+      topGuestBotIds: global.topPeerCategories.botsGuestChat?.peerIds,
       recentEmojis,
       baseEmojiKeywords: baseEmojiKeywords?.keywords,
       emojiKeywords: emojiKeywords?.keywords,

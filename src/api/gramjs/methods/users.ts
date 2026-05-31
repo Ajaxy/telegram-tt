@@ -132,25 +132,6 @@ export async function fetchNearestCountry() {
   return dcInfo?.country;
 }
 
-export async function fetchTopUsers() {
-  const topPeers = await invokeRequest(new GramJs.contacts.GetTopPeers({
-    correspondents: true,
-    offset: DEFAULT_PRIMITIVES.INT,
-    limit: DEFAULT_PRIMITIVES.INT,
-    hash: DEFAULT_PRIMITIVES.BIGINT,
-  }));
-  if (!(topPeers instanceof GramJs.contacts.TopPeers)) {
-    return undefined;
-  }
-
-  const users = topPeers.users.map(buildApiUser).filter((user): user is ApiUser => Boolean(user) && !user.isSelf);
-  const ids = users.map(({ id }) => id);
-
-  return {
-    ids,
-  };
-}
-
 export async function fetchContactList() {
   const result = await invokeRequest(new GramJs.contacts.GetContacts({ hash: DEFAULT_PRIMITIVES.BIGINT }));
   if (!result || result instanceof GramJs.contacts.ContactsNotModified) {

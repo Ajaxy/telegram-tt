@@ -213,7 +213,7 @@ const Main = ({
     loadNotificationExceptions,
     updateIsOnline,
     onTabFocusChange,
-    loadTopInlineBots,
+    loadTopPeers,
     loadEmojiKeywords,
     loadCountryList,
     loadAvailableReactions,
@@ -257,7 +257,6 @@ const Main = ({
     loadQuickReplies,
     loadStarStatus,
     loadAvailableEffects,
-    loadTopBotApps,
     loadPaidReactionPrivacy,
     loadPasswordInfo,
     loadBotFreezeAppeal,
@@ -327,13 +326,14 @@ const Main = ({
       loadAttachBots();
       loadNotificationSettings();
       loadNotificationExceptions();
-      loadTopInlineBots();
+      loadTopPeers({ category: 'botsInline' });
       loadTopReactions();
       loadStarStatus();
       loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
       loadFeaturedEmojiStickers();
       loadSavedReactionTags();
-      loadTopBotApps();
+      loadTopPeers({ category: 'botsApp' });
+      loadTopPeers({ category: 'botsGuestChat' });
       loadPaidReactionPrivacy();
       loadDefaultTopicIcons();
       loadAnimatedEmojis();

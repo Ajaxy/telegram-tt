@@ -152,6 +152,6 @@ export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   return {
     isLoading: !foundIds && globalSearch.fetchingStatus?.botApps,
     foundIds,
-    recentBotIds: global.topBotApps.userIds,
+    recentBotIds: global.topPeerCategories.botsApp?.peerIds,
   };
 })(BotAppResults));

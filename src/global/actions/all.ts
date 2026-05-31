@@ -9,6 +9,7 @@ import './api/sync';
 import './api/accounts';
 import './api/ai';
 import './api/users';
+import './api/topPeers';
 import './api/bots';
 import './api/settings';
 import './api/twoFaSettings';

@@ -30,7 +30,9 @@ import {
   getMessageText,
   groupMessageIdsByThreadId,
   isActionMessage,
+  isDeletedUser,
   isMessageLocal,
+  isUserBot,
   pickMatchingTypingDraftMessage,
 } from '../../helpers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../helpers/replies';
@@ -99,6 +101,7 @@ import {
   selectTabState,
   selectTopic,
   selectTopicFromMessage,
+  selectUser,
   selectViewportIds,
 } from '../../selectors';
 import {
@@ -177,6 +180,25 @@ function removeTypingDraftEntries<T extends GlobalState>(
   }
 
   return global;
+}
+
+function shouldBumpGuestBotTopPeer<T extends GlobalState>(global: T, message: ApiMessage) {
+  const { guestChatViaId, senderId } = message;
+  if (message.isOutgoing || message.content.action || guestChatViaId !== global.currentUserId || !senderId) {
+    return false;
+  }
+
+  const sender = selectUser(global, senderId);
+  return Boolean(sender?.isGuestChatBot);
+}
+
+function shouldBumpInlineBotTopPeer(message: ApiMessage) {
+  return Boolean(message.isOutgoing && !message.content.action && message.viaBotId);
+}
+
+function shouldBumpCorrespondentTopPeer<T extends GlobalState>(global: T, chatId: string) {
+  const user = selectUser(global, chatId);
+  return Boolean(user && !user.isSelf && !isUserBot(user) && !isDeletedUser(user));
 }
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
@@ -344,6 +366,22 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
 
       setGlobal(global);
+
+      if (shouldBumpGuestBotTopPeer(global, newMessage)) {
+        actions.bumpTopPeerRating({
+          category: 'botsGuestChat',
+          peerId: newMessage.senderId!,
+          date: newMessage.date,
+        });
+      }
+
+      if (shouldBumpInlineBotTopPeer(newMessage)) {
+        actions.bumpTopPeerRating({
+          category: 'botsInline',
+          peerId: newMessage.viaBotId!,
+          date: newMessage.date,
+        });
+      }
 
       // Reload dialogs if chat is not present in the list
       if (!isLocal && !chat?.isNotJoined && !selectIsChatListed(global, chatId)) {
@@ -690,6 +728,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       setGlobal(global);
 
+      if (shouldBumpCorrespondentTopPeer(global, chatId)) {
+        actions.bumpTopPeerRating({ category: 'correspondents', peerId: chatId });
+      }
+
       break;
     }
 
@@ -725,6 +767,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
 
       setGlobal(global);
+      if (shouldBumpCorrespondentTopPeer(global, chatId)) {
+        actions.bumpTopPeerRating({ category: 'correspondents', peerId: chatId });
+      }
       break;
     }
 

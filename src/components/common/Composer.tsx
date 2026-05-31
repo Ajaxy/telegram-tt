@@ -67,6 +67,7 @@ import {
   isChatSuperGroup,
   isSameReaction,
   isSystemBot,
+  isUserRightBanned,
 } from '../../global/helpers';
 import { getChatNotifySettings } from '../../global/helpers/notifications';
 import { getPeerTitle } from '../../global/helpers/peers';
@@ -269,6 +270,7 @@ type StateProps = {
   baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;
   topInlineBotIds?: string[];
+  topGuestBotIds?: string[];
   isInlineBotLoading: boolean;
   inlineBots?: Record<string, false | InlineBotSettings>;
   botCommands?: ApiBotCommand[] | false;
@@ -387,6 +389,7 @@ const Composer = ({
   stickersForEmoji,
   customEmojiForEmoji,
   topInlineBotIds,
+  topGuestBotIds,
   currentUserId,
   currentUser,
   captionLimit,
@@ -591,6 +594,7 @@ const Composer = ({
     ),
     [chat, chatFullInfo, isChatWithBot, isChatWithSelf, isInStoryViewer, paidMessagesStars, isInScheduledList],
   );
+  const canUseInlineBots = !chat || isChatAdmin(chat) || !isUserRightBanned(chat, 'sendInline', chatFullInfo);
 
   const isNeedPremium = isContactRequirePremium && isInStoryViewer;
   const isSendTextBlocked = isNeedPremium || !canSendPlainText;
@@ -844,7 +848,8 @@ const Composer = ({
     getSelectionRange,
     inputRef,
     groupChatMembers,
-    topInlineBotIds,
+    canUseInlineBots ? topInlineBotIds : undefined,
+    topGuestBotIds,
     currentUserId,
   );
 
@@ -887,7 +892,7 @@ const Composer = ({
     help: inlineBotHelp,
     loadMore: loadMoreForInlineBot,
   } = useInlineBotTooltip(
-    Boolean(isInMessageList && isReady && isForCurrentMessageList && !hasAttachments),
+    Boolean(canUseInlineBots && isInMessageList && isReady && isForCurrentMessageList && !hasAttachments),
     chatId,
     getHtml,
     inlineBots,
@@ -1595,7 +1600,7 @@ const Composer = ({
   const handleInlineBotSelect = useLastCallback((
     inlineResult: ApiBotInlineResult | ApiBotInlineMediaResult, isSilent?: boolean, isScheduleRequested?: boolean,
   ) => {
-    if (!currentMessageList && !storyId) {
+    if ((!currentMessageList && !storyId) || !inlineBotId) {
       return;
     }
 
@@ -2786,7 +2791,8 @@ export default memo(withGlobal<OwnProps>(
       stickersForEmoji: global.stickers.forEmoji.stickers,
       customEmojiForEmoji: global.customEmojis.forEmoji.stickers,
       chatFullInfo,
-      topInlineBotIds: global.topInlineBots?.userIds,
+      topInlineBotIds: global.topPeerCategories.botsInline?.peerIds,
+      topGuestBotIds: global.topPeerCategories.botsGuestChat?.peerIds,
       currentUserId,
       currentUser,
       contentToBeScheduled: tabState.contentToBeScheduled,

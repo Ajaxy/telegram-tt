@@ -23,7 +23,6 @@ import {
   buildBotSwitchPm,
   buildBotSwitchWebview,
 } from '../apiBuilders/bots';
-import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import { buildMessageMediaContent } from '../apiBuilders/messageContent';
 import { buildApiUrlAuthResult } from '../apiBuilders/misc';
@@ -39,7 +38,6 @@ import {
 import {
   addDocumentToLocalDb,
   addPhotoToLocalDb,
-  addUserToLocalDb,
   addWebDocumentToLocalDb,
 } from '../helpers/localDb';
 import { deserializeBytes } from '../helpers/misc';
@@ -59,68 +57,6 @@ export async function answerCallbackButton({
   }));
 
   return result ? omitVirtualClassFields(result) : undefined;
-}
-
-export async function fetchTopInlineBots() {
-  const topPeers = await invokeRequest(new GramJs.contacts.GetTopPeers({
-    botsInline: true,
-    limit: DEFAULT_PRIMITIVES.INT,
-    offset: DEFAULT_PRIMITIVES.INT,
-    hash: DEFAULT_PRIMITIVES.BIGINT,
-  }));
-
-  if (!(topPeers instanceof GramJs.contacts.TopPeers)) {
-    return undefined;
-  }
-
-  const users = topPeers.users.map(buildApiUser).filter(Boolean);
-  const ids = users.map(({ id }) => id);
-
-  return {
-    ids,
-  };
-}
-
-export async function fetchTopBotApps() {
-  const topPeers = await invokeRequest(new GramJs.contacts.GetTopPeers({
-    botsApp: true,
-    limit: DEFAULT_PRIMITIVES.INT,
-    offset: DEFAULT_PRIMITIVES.INT,
-    hash: DEFAULT_PRIMITIVES.BIGINT,
-  }));
-
-  if (!(topPeers instanceof GramJs.contacts.TopPeers)) {
-    return undefined;
-  }
-
-  const users = topPeers.users.map(buildApiUser).filter(Boolean);
-  const ids = users.map(({ id }) => id);
-
-  return {
-    ids,
-  };
-}
-
-export async function fetchInlineBot({ username }: { username: string }) {
-  const resolvedPeer = await invokeRequest(new GramJs.contacts.ResolveUsername({ username }));
-
-  if (
-    !resolvedPeer
-    || !(
-      resolvedPeer.users[0] instanceof GramJs.User
-      && resolvedPeer.users[0].bot
-      && resolvedPeer.users[0].botInlinePlaceholder
-    )
-  ) {
-    return undefined;
-  }
-
-  addUserToLocalDb(resolvedPeer.users[0]);
-
-  return {
-    user: buildApiUser(resolvedPeer.users[0]),
-    chat: buildApiChatFromPreview(resolvedPeer.users[0]),
-  };
 }
 
 export async function fetchInlineBotResults({

@@ -39,6 +39,7 @@ export default function useMentionTooltip(
   inputRef: ElementRef<HTMLDivElement>,
   groupChatMembers?: ApiChatMember[],
   topInlineBotIds?: string[],
+  topGuestBotIds?: string[],
   currentUserId?: string,
 ) {
   const lang = useLang();
@@ -65,7 +66,7 @@ export default function useMentionTooltip(
   useEffect(() => {
     const usernameTag = getUsernameTag();
 
-    if (!usernameTag || !(groupChatMembers || topInlineBotIds)) {
+    if (!usernameTag || !(groupChatMembers || topInlineBotIds || topGuestBotIds)) {
       setFilteredUsers(undefined);
       return;
     }
@@ -90,13 +91,14 @@ export default function useMentionTooltip(
       ids: unique([
         ...((getWithInlineBots() && topInlineBotIds) || []),
         ...(memberIds || []),
+        ...(topGuestBotIds || []),
       ]),
       query: filter,
       type: 'user',
     });
 
     setFilteredUsers(Object.values(pickTruthy(usersById, filteredIds)));
-  }, [currentUserId, groupChatMembers, topInlineBotIds, getUsernameTag, getWithInlineBots]);
+  }, [currentUserId, groupChatMembers, topInlineBotIds, topGuestBotIds, getUsernameTag, getWithInlineBots]);
 
   const insertMention = useLastCallback((
     peer: ApiPeer,

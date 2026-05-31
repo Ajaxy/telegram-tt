@@ -21,6 +21,8 @@ export * from './messages';
 
 export * from './users';
 
+export * from './topPeers';
+
 export * from './symbols';
 
 export * from './management';

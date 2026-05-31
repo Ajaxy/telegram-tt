@@ -351,7 +351,25 @@ export interface ApiConfig {
   maxMessageLength: number;
   editTimeLimit: number;
   maxForwardedCount: number;
+  ratingEDecay: number;
 }
+
+export type ApiTopPeerCategory = 'correspondents' | 'botsInline' | 'botsApp' | 'botsGuestChat';
+
+export type ApiTopPeer = {
+  peerId: string;
+  rating: number;
+};
+
+export type ApiTopPeersResult = {
+  type: 'topPeers';
+  category: ApiTopPeerCategory;
+  topPeers: ApiTopPeer[];
+} | {
+  type: 'unchanged';
+} | {
+  type: 'disabled';
+};
 
 export interface ApiPromoData {
   expires: number;
