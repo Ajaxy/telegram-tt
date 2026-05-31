@@ -801,7 +801,11 @@ export function buildApiThreadInfo(
     channelId, replies, maxId = messageId, recentRepliers, comments, readMaxId,
   } = messageReplies;
 
-  const { fromId, channelPost } = messageForwardInfo || {};
+  const {
+    fromId, channelPost, savedFromPeer, savedFromMsgId,
+  } = messageForwardInfo || {};
+  const fromChannelPeer = savedFromPeer || fromId;
+  const fromMessageId = savedFromMsgId || channelPost;
 
   const apiChannelId = channelId ? buildApiPeerId(channelId, 'channel') : undefined;
   if (apiChannelId === DELETED_COMMENTS_CHANNEL_ID) {
@@ -830,8 +834,8 @@ export function buildApiThreadInfo(
     isCommentsInfo: false,
     chatId,
     threadId: messageId,
-    fromChannelId: fromId && channelPost ? getApiChatIdFromMtpPeer(fromId) : undefined,
-    fromMessageId: channelPost,
+    fromChannelId: fromChannelPeer && fromMessageId ? getApiChatIdFromMtpPeer(fromChannelPeer) : undefined,
+    fromMessageId,
   });
 }
 
