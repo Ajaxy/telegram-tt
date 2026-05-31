@@ -11,9 +11,10 @@ export function preparePoints(data, datasets, range, visibilities, bounds, pieTo
 
   const points = values.map((datasetValues, i) => (
     datasetValues.map((value, j) => {
-      let visibleValue = value;
+      const isGap = value == null;
+      let visibleValue = isGap ? 0 : value;
 
-      if (data.isStacked) {
+      if (data.isStacked && !isGap) {
         visibleValue *= visibilities[i];
       }
 
@@ -23,6 +24,7 @@ export function preparePoints(data, datasets, range, visibilities, bounds, pieTo
         visibleValue,
         stackOffset: 0,
         stackValue: visibleValue,
+        gap: isGap,
       };
     })
   ));
@@ -57,17 +59,31 @@ function preparePercentage(points, bounds) {
 }
 
 function prepareStacked(points) {
-  const accum = [];
+  const posAccum = [];
+  const negAccum = [];
 
   points.forEach((datasetPoints) => {
     datasetPoints.forEach((point, j) => {
-      if (accum[j] === undefined) {
-        accum[j] = 0;
+      if (posAccum[j] === undefined) {
+        posAccum[j] = 0;
+        negAccum[j] = 0;
       }
 
-      point.stackOffset = accum[j];
-      accum[j] += point.visibleValue;
-      point.stackValue = accum[j];
+      if (point.gap) {
+        point.stackOffset = posAccum[j];
+        point.stackValue = posAccum[j];
+        return;
+      }
+
+      if (point.visibleValue >= 0) {
+        point.stackOffset = posAccum[j];
+        posAccum[j] += point.visibleValue;
+        point.stackValue = posAccum[j];
+      } else {
+        point.stackOffset = negAccum[j];
+        negAccum[j] += point.visibleValue;
+        point.stackValue = negAccum[j];
+      }
     });
   });
 }

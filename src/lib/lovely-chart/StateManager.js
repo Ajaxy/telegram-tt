@@ -1,10 +1,11 @@
 import { createTransitionManager } from './TransitionManager.js';
-import { throttleWithRaf, getMaxMin, mergeArrays, proxyMerge, sumArrays } from './utils.js';
+import { throttleWithRaf, getMaxMin, mergeArrays, proxyMerge } from './utils.js';
 import {
   AXES_MAX_COLUMN_WIDTH,
   AXES_MAX_ROW_HEIGHT,
   X_AXIS_HEIGHT,
   ANIMATE_PROPS,
+  TRANSITION_DEFAULT_DURATION,
   Y_AXIS_ZERO_BASED_THRESHOLD,
 } from './constants.js';
 import { xStepToScaleLevel, yScaleLevelToStep, yStepToScaleLevel } from './formulas.js';
@@ -55,7 +56,7 @@ export function createStateManager(data, viewportSize, callback) {
 
   function _buildTransitionConfig() {
     const transitionConfig = [];
-    const datasetVisibilities = data.datasets.map(({ key }) => `opacity#${key} 300`);
+    const datasetVisibilities = data.datasets.map(({ key }) => `opacity#${key} ${TRANSITION_DEFAULT_DURATION}`);
 
     mergeArrays([
       ANIMATE_PROPS,
@@ -105,11 +106,11 @@ function calculateState(data, viewportSize, range, filter, focusOn, minimapDelta
     calculateYAxisScale(viewportSize.height, yRanges.yMinViewportSecond, yRanges.yMaxViewportSecond);
 
   const yStep = yScaleLevelToStep(yAxisScale);
-  yRanges.yMinViewport -= yRanges.yMinViewport % yStep;
+  yRanges.yMinViewport = Math.floor(yRanges.yMinViewport / yStep) * yStep;
 
   if (yAxisScaleSecond) {
     const yStepSecond = yScaleLevelToStep(yAxisScaleSecond);
-    yRanges.yMinViewportSecond -= yRanges.yMinViewportSecond % yStepSecond;
+    yRanges.yMinViewportSecond = Math.floor(yRanges.yMinViewportSecond / yStepSecond) * yStepSecond;
   }
 
   const datasetsOpacity = {};
@@ -164,7 +165,9 @@ function calculateYRanges(data, filter, labelFromIndex, labelToIndex, prevState)
 function calculateYRangesForGroup(data, labelFromIndex, labelToIndex, prevState, datasets) {
   const { min: yMinMinimapReal = prevState.yMinMinimap, max: yMaxMinimap = prevState.yMaxMinimap }
     = getMaxMin(mergeArrays(datasets.map(({ yMax, yMin }) => [yMax, yMin])));
-  const yMinMinimap = yMinMinimapReal / yMaxMinimap > Y_AXIS_ZERO_BASED_THRESHOLD ? yMinMinimapReal : 0;
+  const yMinMinimap = yMinMinimapReal < 0
+    ? yMinMinimapReal
+    : (yMinMinimapReal / yMaxMinimap > Y_AXIS_ZERO_BASED_THRESHOLD ? yMinMinimapReal : 0);
 
   let yMinViewport;
   let yMaxViewport;
@@ -178,7 +181,9 @@ function calculateYRangesForGroup(data, labelFromIndex, labelToIndex, prevState,
     const viewportMaxMin = getMaxMin(mergeArrays(viewportValues));
     const yMinViewportReal = viewportMaxMin.min !== undefined ? viewportMaxMin.min : prevState.yMinViewport;
     yMaxViewport = viewportMaxMin.max !== undefined ? viewportMaxMin.max : prevState.yMaxViewport;
-    yMinViewport = yMinViewportReal / yMaxViewport > Y_AXIS_ZERO_BASED_THRESHOLD ? yMinViewportReal : 0;
+    yMinViewport = yMinViewportReal < 0
+      ? yMinViewportReal
+      : (yMinViewportReal / yMaxViewport > Y_AXIS_ZERO_BASED_THRESHOLD ? yMinViewportReal : 0);
   }
 
   return {
@@ -193,14 +198,26 @@ function calculateYRangesStacked(data, filter, labelFromIndex, labelToIndex, pre
   const filteredDatasets = data.datasets.filter((d) => filter[d.key]);
   const filteredValues = filteredDatasets.map(({ values }) => values);
 
-  const sums = filteredValues.length ? sumArrays(filteredValues) : [];
-  const { max: yMaxMinimap = prevState.yMaxMinimap } = getMaxMin(sums);
-  const { max: yMaxViewport = prevState.yMaxViewport } = getMaxMin(sums.slice(labelFromIndex, labelToIndex + 1));
+  const length = filteredValues[0] ? filteredValues[0].length : 0;
+  const posSums = new Array(length).fill(0);
+  const negSums = new Array(length).fill(0);
+  for (let i = 0; i < filteredValues.length; i++) {
+    for (let j = 0; j < length; j++) {
+      const v = filteredValues[i][j];
+      if (v == null) continue;
+      if (v >= 0) posSums[j] += v; else negSums[j] += v;
+    }
+  }
+
+  const { max: yMaxMinimap = prevState.yMaxMinimap } = getMaxMin(posSums);
+  const { min: yMinMinimap = prevState.yMinMinimap } = getMaxMin(negSums);
+  const { max: yMaxViewport = prevState.yMaxViewport } = getMaxMin(posSums.slice(labelFromIndex, labelToIndex + 1));
+  const { min: yMinViewport = prevState.yMinViewport } = getMaxMin(negSums.slice(labelFromIndex, labelToIndex + 1));
 
   return {
-    yMinViewport: 0,
+    yMinViewport,
     yMaxViewport,
-    yMinMinimap: 0,
+    yMinMinimap,
     yMaxMinimap,
   };
 }

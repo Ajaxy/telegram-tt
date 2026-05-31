@@ -167,9 +167,9 @@ function create(container, originalData) {
   }
 
   function _setupGlobalListeners() {
-    document.documentElement.addEventListener('darkmode', () => {
+    new MutationObserver(() => {
       _stateManager.update();
-    });
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
     window.addEventListener('resize', () => {
       if (window.innerWidth !== _windowWidth) {

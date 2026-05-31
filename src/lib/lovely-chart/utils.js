@@ -1,17 +1,15 @@
 // https://jsperf.com/finding-maximum-element-in-an-array
 export function getMaxMin(array) {
   const length = array.length;
-  let max = array[0];
-  let min = array[0];
+  let max;
+  let min;
 
   for (let i = 0; i < length; i++) {
     const value = array[i];
 
-    if (value > max) {
-      max = value;
-    } else if (value < min) {
-      min = value;
-    }
+    if (value == null) continue;
+    if (max === undefined || value > max) max = value;
+    if (min === undefined || value < min) min = value;
   }
 
   return { max, min };

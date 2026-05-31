@@ -1,8 +1,13 @@
-import { GUTTER, AXES_FONT, X_AXIS_HEIGHT, X_AXIS_SHIFT_START, PLOT_TOP_PADDING } from './constants.js';
+import { GUTTER, AXES_FONT_STYLE, X_AXIS_HEIGHT, X_AXIS_SHIFT_START, PLOT_TOP_PADDING } from './constants.js';
 import { humanize } from './format.js';
 import { getCssColor } from './skin.js';
 import { applyXEdgeOpacity, applyYEdgeOpacity, xScaleLevelToStep, yScaleLevelToStep } from './formulas.js';
 import { toPixels } from './Projection.js';
+
+function getAxesFont(context) {
+  const fontFamily = getComputedStyle(context.canvas).fontFamily || 'sans-serif';
+  return `${AXES_FONT_STYLE} ${fontFamily}`;
+}
 
 export function createAxes(context, data, plotSize, colors) {
   function drawXAxis(state, projection) {
@@ -13,7 +18,7 @@ export function createAxes(context, data, plotSize, colors) {
     const step = xScaleLevelToStep(scaleLevel);
     const opacityFactor = 1 - (state.xAxisScale - scaleLevel);
 
-    context.font = AXES_FONT;
+    context.font = getAxesFont(context);
     context.textAlign = 'center';
     context.textBaseline = 'middle';
 
@@ -126,7 +131,7 @@ export function createAxes(context, data, plotSize, colors) {
     const firstVisibleValue = Math.ceil(yMin / step) * step;
     const lastVisibleValue = Math.floor(yMax / step) * step;
 
-    context.font = AXES_FONT;
+    context.font = getAxesFont(context);
     context.textAlign = isSecondary ? 'right' : 'left';
     context.textBaseline = 'bottom';
 
@@ -171,7 +176,7 @@ export function createAxes(context, data, plotSize, colors) {
     const percentValues = [0, 0.25, 0.50, 0.75, 1];
     const [, height] = projection.getSize();
 
-    context.font = AXES_FONT;
+    context.font = getAxesFont(context);
     context.textAlign = 'left';
     context.textBaseline = 'bottom';
     context.lineWidth = 1;
@@ -198,7 +203,7 @@ export function createAxes(context, data, plotSize, colors) {
     const firstVisibleValue = Math.ceil(yMin / step) * step;
     const lastVisibleValue = Math.floor(yMax / step) * step;
 
-    context.font = AXES_FONT;
+    context.font = getAxesFont(context);
     context.textAlign = 'right';
     context.textBaseline = 'bottom';
 

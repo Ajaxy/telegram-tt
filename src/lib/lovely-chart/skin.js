@@ -39,9 +39,9 @@ styleElement.appendChild(document.createTextNode(''));
 document.head.appendChild(styleElement);
 const styleSheet = styleElement.sheet;
 
-document.documentElement.addEventListener('darkmode', () => {
+new MutationObserver(() => {
   skin = detectSkin();
-});
+}).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
 export function createColors(datasetColors) {
   const colors = {};

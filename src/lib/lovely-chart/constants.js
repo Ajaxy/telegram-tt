@@ -1,7 +1,7 @@
 export const DPR = window.devicePixelRatio || 1;
 
 export const DEFAULT_RANGE = { begin: 0.8, end: 1 };
-export const TRANSITION_DEFAULT_DURATION = 300;
+export const TRANSITION_DEFAULT_DURATION = 400;
 export const LONG_PRESS_TIMEOUT = 500;
 
 export const GUTTER = 10;
@@ -17,7 +17,7 @@ export const PIE_MINIMUM_VISIBLE_PERCENT = 0.02;
 export const BALLOON_OFFSET = 20;
 export const MAX_TOOLTIP_ITEMS = 12;
 
-export const AXES_FONT = '300 10px Helvetica, Arial, sans-serif';
+export const AXES_FONT_STYLE = '300 10px';
 export const AXES_MAX_COLUMN_WIDTH = 45;
 export const AXES_MAX_ROW_HEIGHT = 50;
 export const X_AXIS_HEIGHT = 30;

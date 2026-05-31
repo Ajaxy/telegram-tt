@@ -23,10 +23,13 @@ export function createMinimap(container, data, colors, rangeCallback) {
   let _canvasSize;
   let _ruler;
   let _slider;
+  let _limitMask;
 
   let _capturedOffset;
   let _range = {};
   let _state;
+
+  const _limitBegin = data.limitBegin;
 
   const _updateRulerOnRaf = throttleWithRaf(_updateRuler);
 
@@ -69,6 +72,7 @@ export function createMinimap(container, data, colors, rangeCallback) {
 
     _setupCanvas();
     _setupRuler();
+    _setupLimitMask();
 
     container.appendChild(_element);
 
@@ -139,6 +143,23 @@ export function createMinimap(container, data, colors, rangeCallback) {
     _element.appendChild(_ruler);
   }
 
+  function _setupLimitMask() {
+    if (_limitBegin == null) return;
+
+    _limitMask = createElement();
+    _limitMask.className = 'lovely-chart--minimap-limit-mask';
+    _limitMask.style.width = `${_limitBegin * 100}%`;
+    _limitMask.innerHTML =
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+      '<path fill-rule="evenodd" clip-rule="evenodd" d="M16.5265 10.2173V7.54299C16.5265 5.08532 14.4958 3.08585 11.9997 3.08585C9.50365 3.08585 7.47293 5.08532 7.47293 7.54299V10.2173C6.2992 10.2173 5.36524 11.2011 5.42629 12.3733L5.60706 15.844C5.6879 17.3962 5.72833 18.1723 6.00269 18.7852C6.39058 19.6518 7.10506 20.33 7.9906 20.6723C8.61698 20.9144 9.39412 20.9144 10.9484 20.9144H13.051C14.6053 20.9144 15.3825 20.9144 16.0088 20.6723C16.8944 20.33 17.6089 19.6518 17.9967 18.7852C18.2711 18.1723 18.3115 17.3962 18.3924 15.844L18.5731 12.3733C18.6342 11.2011 17.7002 10.2173 16.5265 10.2173ZM11.9997 4.8687C10.5023 4.8687 9.28364 6.06857 9.28364 7.54299V10.2173H14.7158V7.54299C14.7158 6.06857 13.4972 4.8687 11.9997 4.8687Z" fill="currentColor"/>' +
+      '</svg>';
+    if (data.onLimitedRangeClick) {
+      _limitMask.classList.add('lovely-chart--state-interactive');
+      _limitMask.addEventListener('click', data.onLimitedRangeClick);
+    }
+    _element.appendChild(_limitMask);
+  }
+
   function _isStateChanged(newState) {
     if (!_state) {
       return true;
@@ -206,7 +227,8 @@ export function createMinimap(container, data, colors, rangeCallback) {
   }
 
   function _onSliderDrag(moveEvent, captureEvent, { dragOffsetX }) {
-    const minX1 = 0;
+    const limitX = _limitBegin != null ? _limitBegin * _canvasSize.width : 0;
+    const minX1 = limitX;
     const maxX1 = _canvasSize.width - _slider.offsetWidth;
 
     const newX1 = Math.max(minX1, Math.min(_capturedOffset + dragOffsetX - MINIMAP_EAR_WIDTH, maxX1));
@@ -218,7 +240,8 @@ export function createMinimap(container, data, colors, rangeCallback) {
   }
 
   function _onLeftEarDrag(moveEvent, captureEvent, { dragOffsetX }) {
-    const minX1 = 0;
+    const limitX = _limitBegin != null ? _limitBegin * _canvasSize.width : 0;
+    const minX1 = limitX;
     const maxX1 = _slider.offsetLeft + _slider.offsetWidth - MINIMAP_EAR_WIDTH * 2;
 
     const newX1 = Math.min(maxX1, Math.max(minX1, _capturedOffset + dragOffsetX));
@@ -242,6 +265,10 @@ export function createMinimap(container, data, colors, rangeCallback) {
 
     if (_state && _state.minimapDelta && !isExternal) {
       nextRange = _adjustDiscreteRange(nextRange);
+    }
+
+    if (_limitBegin != null && nextRange.begin < _limitBegin) {
+      nextRange.begin = _limitBegin;
     }
 
     if (nextRange.begin === _range.begin && nextRange.end === _range.end) {

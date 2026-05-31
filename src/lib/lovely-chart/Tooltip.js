@@ -219,6 +219,8 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
 
   function _drawCircles(statistics, labelIndex) {
     statistics.forEach(({ value, key, hasOwnYAxis, originalIndex }) => {
+      if (value == null) return;
+
       const pointIndex = labelIndex - _state.labelFromIndex;
       const point = hasOwnYAxis ? _secondaryPoints[pointIndex] : _points[originalIndex][pointIndex];
 
@@ -356,12 +358,7 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
 
     _renderPercentageValue(newDataSet, value, totalValue);
 
-    const totalText = dataSetContainer.querySelector(`[data-total="true"]`);
-    if (totalText) {
-      dataSetContainer.insertBefore(newDataSet, totalText);
-    } else {
-      dataSetContainer.appendChild(newDataSet);
-    }
+    dataSetContainer.appendChild(newDataSet);
   }
 
   function _updateDataSet(currentDataSet, { key, value } = {}, totalValue) {
@@ -419,7 +416,7 @@ export function createTooltip(container, data, plotSize, colors, onZoom, onFocus
 
     const totalValue = statistics.reduce((a, x) => a + x.value, 0);
     const pointerVector = getPointerVector();
-    const filteredStatistics = statistics.filter(({ value }) => value !== 0);
+    const filteredStatistics = statistics.filter(({ value }) => value !== 0 && value != null);
     const sortedStatistics = filteredStatistics.sort((a, b) => b.value - a.value);
     const limitedStatistics = sortedStatistics.slice(0, MAX_TOOLTIP_ITEMS);
     const finalStatistics = data.isPie ? limitedStatistics.filter(({ value }, index) => _isPieSectorSelected(statistics, value, totalValue, index, pointerVector)) : limitedStatistics;

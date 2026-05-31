@@ -41,10 +41,13 @@ export function statsFormatText(labels) {
 }
 
 export function humanize(value, decimals = 1) {
-  if (value >= 1e6) {
-    return keepThreeDigits(value / 1e6, decimals) + 'M';
-  } else if (value >= 1e3) {
-    return keepThreeDigits(value / 1e3, decimals) + 'K';
+  const abs = Math.abs(value);
+  const sign = value < 0 ? '-' : '';
+
+  if (abs >= 1e6) {
+    return sign + keepThreeDigits(abs / 1e6, decimals) + 'M';
+  } else if (abs >= 1e3) {
+    return sign + keepThreeDigits(abs / 1e3, decimals) + 'K';
   }
 
   return value;

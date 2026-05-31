@@ -1,10 +1,8 @@
 import { SPEED_TEST_FAST_FPS, SPEED_TEST_INTERVAL, TRANSITION_DEFAULT_DURATION } from './constants.js';
 
 function transition(t) {
-  // faster
-  // return -t * (t - 2);
-  // easeOut
-  return 1 - Math.pow(1 - t, 1.675);
+  // iOS-style ease-out (no overshoot)
+  return 1 - Math.pow(1 - t, 3);
 }
 
 export function createTransitionManager(onTick) {
