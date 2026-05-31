@@ -337,8 +337,6 @@ export interface ApiAppConfig {
   aiComposeToneExamplesNum?: number;
   aiComposeToneTitleLengthMax?: number;
   aiComposeTonePromptLengthMax?: number;
-  aiComposeToneSavedLimitDefault?: number;
-  aiComposeToneSavedLimitPremium?: number;
 }
 
 export interface ApiConfig {
@@ -464,15 +462,17 @@ export type ApiLimitType =
   | 'recommendedChannels'
   | 'savedDialogsPinned'
   | 'maxReactions'
-  | 'moreAccounts';
+  | 'moreAccounts'
+  | 'aiComposeToneSaved';
 
 export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
   'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs' | 'recommendedChannels' | 'moreAccounts'
-  | 'maxReactions'
+  | 'maxReactions' | 'aiComposeToneSaved'
 )>;
 
 export type ApiLimitTypeForPromo = Exclude<ApiLimitType,
-'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned' | 'maxReactions'
+  'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned' | 'maxReactions'
+  | 'aiComposeToneSaved'
 >;
 
 export type ApiPeerNotifySettings = {

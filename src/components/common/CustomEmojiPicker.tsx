@@ -68,6 +68,7 @@ type OwnProps = {
   isStatusPicker?: boolean;
   isReactionPicker?: boolean;
   isTranslucent?: boolean;
+  noAddButton?: boolean;
   onCustomEmojiSelect: (sticker: ApiSticker) => void;
   onReactionSelect?: (reaction: ApiReactionWithPaid) => void;
   onReactionContext?: (reaction: ApiReactionWithPaid) => void;
@@ -130,6 +131,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   isReactionPicker,
   isStatusPicker,
   isTranslucent,
+  noAddButton,
   isSavedMessages,
   isCurrentUserPremium,
   withDefaultTopicIcons,
@@ -451,6 +453,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
                   isSavedMessages={isSavedMessages}
                   isStatusPicker={isStatusPicker}
                   isReactionPicker={isReactionPicker}
+                  noAddButton={noAddButton}
                   shouldHideHeader={shouldHideHeader}
                   withDefaultTopicIcon={withDefaultTopicIcons && stickerSet.id === RECENT_SYMBOL_SET_ID}
                   withDefaultStatusIcon={isStatusPicker && stickerSet.id === RECENT_SYMBOL_SET_ID}

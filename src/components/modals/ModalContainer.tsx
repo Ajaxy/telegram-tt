@@ -14,6 +14,7 @@ import WebAppsCloseConfirmationModal from '../main/WebAppsCloseConfirmationModal
 import AiMessageEditorModal from '../middle/composer/AiMessageEditorModal/AiMessageEditorModal.async';
 import AboutAdsModal from './aboutAds/AboutAdsModal.async';
 import AgeVerificationModal from './ageVerification/AgeVerificationModal.async';
+import AiTonePreviewModal from './aiTonePreview/AiTonePreviewModal.async';
 import AttachBotInstallModal from './attachBotInstall/AttachBotInstallModal.async';
 import BirthdaySetupModal from './birthday/BirthdaySetupModal.async';
 import BoostModal from './boost/BoostModal.async';
@@ -157,7 +158,8 @@ type ModalKey = keyof Pick<TabState,
   'isQuickChatPickerOpen' |
   'isCocoonModalOpen' |
   'editRankModal' |
-  'rankModal'
+  'rankModal' |
+  'aiTonePreviewModal'
 >;
 type WrappedModalKey = 'pollModal';
 type LegacyModalKey = Exclude<ModalKey, WrappedModalKey>;
@@ -293,6 +295,7 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   isCocoonModalOpen: CocoonModal,
   editRankModal: EditRankModal,
   rankModal: RankModal,
+  aiTonePreviewModal: AiTonePreviewModal,
 };
 const WRAPPED_MODALS: WrappedModalRegistry = {
   pollModal: PollModal,

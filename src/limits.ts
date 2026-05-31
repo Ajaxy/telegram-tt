@@ -34,6 +34,7 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   savedDialogsPinned: [5, 100],
   maxReactions: [1, 3],
   moreAccounts: [3, MULTIACCOUNT_MAX_SLOTS],
+  aiComposeToneSaved: [5, 20],
 };
 
 export const DEFAULT_MAX_MESSAGE_LENGTH = 4096;
@@ -58,6 +59,7 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
     savedDialogsPinned: DEFAULT_LIMITS.savedDialogsPinned,
     moreAccounts: DEFAULT_LIMITS.moreAccounts,
     maxReactions: DEFAULT_LIMITS.maxReactions,
+    aiComposeToneSaved: DEFAULT_LIMITS.aiComposeToneSaved,
   },
   autologinDomains: [
     'instantview.telegram.org',

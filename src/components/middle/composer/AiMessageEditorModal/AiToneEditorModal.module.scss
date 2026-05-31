@@ -1,0 +1,63 @@
+.emojiRow {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 1rem;
+}
+
+.emojiButton {
+  --custom-emoji-size: 3rem;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 5rem;
+  height: 5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+
+  background: var(--color-background);
+  outline: none;
+
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.75;
+  }
+}
+
+.emojiPlaceholderIcon {
+  font-size: 2rem;
+  color: var(--color-text-secondary);
+}
+
+.input {
+  margin: 0.5rem;
+}
+
+.promptInput {
+  margin-top: 1rem;
+}
+
+.promptInput :global(.form-control) {
+  min-height: 5.625rem;
+}
+
+.footer {
+  padding-top: 1rem;
+}
+
+.deleteButton {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  border-radius: 2rem;
+}
+
+.createButton {
+  width: 100%;
+  border-radius: 2rem;
+}

@@ -32,7 +32,9 @@
 .resultArea {
   position: relative;
   overflow: hidden;
+}
 
+.resultAreaAnimated {
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: height 0.1s;
 }

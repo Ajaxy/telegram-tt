@@ -426,6 +426,7 @@ export interface ApiWebPageFull {
   gift?: ApiStarGiftUnique;
   auction?: ApiWebPageAuctionData;
   stickers?: ApiWebPageStickerData;
+  aiComposeToneEmojiId?: string;
   hasLargeMedia?: boolean;
 }
 

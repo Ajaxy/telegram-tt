@@ -77,6 +77,7 @@
   padding: 0 1rem 1rem;
 
   &::before {
+    pointer-events: none;
     content: "";
 
     position: absolute;

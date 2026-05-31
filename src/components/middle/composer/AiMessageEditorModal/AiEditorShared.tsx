@@ -23,6 +23,7 @@ type AiEditorResultAreaProps = {
   isLoading?: boolean;
   transitionKey?: number;
   className?: string;
+  loadingElement?: TeactNode;
   children: TeactNode;
 };
 
@@ -30,6 +31,7 @@ export const AiEditorResultArea = memo(({
   isLoading,
   transitionKey,
   className,
+  loadingElement,
   children,
 }: AiEditorResultAreaProps) => {
   const contentRef = useRef<HTMLDivElement>();
@@ -45,15 +47,16 @@ export const AiEditorResultArea = memo(({
     });
   }, [children, isLoading, transitionKey]);
 
-  const displayHeight = height ?? MIN_HEIGHT;
+  const hasInitialized = height !== undefined;
+  const displayHeight = hasInitialized ? height : (isLoading ? MIN_HEIGHT : undefined);
 
   return (
     <div
-      className={buildClassName(styles.resultArea, className)}
-      style={`height: ${displayHeight}px`}
+      className={buildClassName(styles.resultArea, hasInitialized && styles.resultAreaAnimated, className)}
+      style={displayHeight !== undefined ? `height: ${displayHeight}px` : undefined}
     >
       <div className={buildClassName(styles.loadingContainer, !isLoading && styles.hidden)}>
-        <TextLoadingPlaceholder lines={6} />
+        {loadingElement || <TextLoadingPlaceholder lines={6} />}
       </div>
       <Transition
         name="fade"

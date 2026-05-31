@@ -73,6 +73,10 @@ export { default as ReactionPicker } from '../components/middle/message/reaction
 
 export { default as AiMessageEditorModal }
   from '../components/middle/composer/AiMessageEditorModal/AiMessageEditorModal';
+export { default as AiToneEmojiPickerModal }
+  from '../components/middle/composer/AiMessageEditorModal/AiToneEmojiPickerModal';
+export { default as AiTonePreviewModal }
+  from '../components/modals/aiTonePreview/AiTonePreviewModal';
 
 export { default as AttachmentModal } from '../components/middle/composer/AttachmentModal';
 export { default as PollModal } from '../components/modals/poll/PollModal';

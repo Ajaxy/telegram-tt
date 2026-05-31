@@ -62,6 +62,7 @@ type OwnProps = {
   isChatStickerSet?: boolean;
   isTranslucent?: boolean;
   noContextMenus?: boolean;
+  noAddButton?: boolean;
   forcePlayback?: boolean;
   observeIntersection?: ObserveFn;
   observeIntersectionForPlayingItems: ObserveFn;
@@ -106,6 +107,7 @@ const StickerSet = ({
   isChatStickerSet,
   isTranslucent,
   noContextMenus,
+  noAddButton,
   forcePlayback,
   collectibleStatuses,
   observeIntersection,
@@ -260,7 +262,7 @@ const StickerSet = ({
   const collectibleEmojiIdsSet = useMemo(() => (
     collectibleStatuses ? new Set(collectibleStatuses.map(({ documentId }) => documentId)) : undefined
   ), [collectibleStatuses]);
-  const withAddSetButton = !shouldHideHeader && !isRecent && !isStatusCollectible
+  const withAddSetButton = !noAddButton && !shouldHideHeader && !isRecent && !isStatusCollectible
     && isEmoji && !isPopular && !isChatEmojiSet
     && (!isInstalled || (!isCurrentUserPremium && !isSavedMessages));
   const addSetButtonText = useMemo(() => {

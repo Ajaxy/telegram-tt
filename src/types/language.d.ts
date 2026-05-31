@@ -1533,6 +1533,7 @@ export interface LangPair {
   'ViewButtonStickerset': undefined;
   'ViewButtonEmojiset': undefined;
   'ViewButtonGiftUnique': undefined;
+  'ViewButtonAiStyle': undefined;
   'AuthContinueOnThisLanguage': undefined;
   'Share': undefined;
   'GiftSortByDate': undefined;
@@ -2108,6 +2109,27 @@ export interface LangPair {
   'AiMessageEditorApply': undefined;
   'AiMessageEditorEmojify': undefined;
   'AiMessageEditorTranslation': undefined;
+  'AiToneEditorNewStyle': undefined;
+  'AiToneEditorTitle': undefined;
+  'AiToneEditorNamePlaceholder': undefined;
+  'AiToneEditorPromptPlaceholder': undefined;
+  'AiToneEditorDisplayAuthor': undefined;
+  'AiToneEditorSelectEmoji': undefined;
+  'AiToneCreatedHint': undefined;
+  'AiToneEditStyle': undefined;
+  'AiToneShareStyle': undefined;
+  'AiToneDeleteStyle': undefined;
+  'AiToneDeleteStyleConfirmOwn': undefined;
+  'AiToneDeleteStyleConfirm': undefined;
+  'AiToneEditorEditTitle': undefined;
+  'AiTonePreviewSubtitle': undefined;
+  'AiTonePreviewBefore': undefined;
+  'AiTonePreviewAnotherExample': undefined;
+  'AiTonePreviewAfter': undefined;
+  'AiTonePreviewAddStyle': undefined;
+  'AiTonePreviewRemoveStyle': undefined;
+  'AiTonePreviewStyleAdded': undefined;
+  'AiToneLimitReached': undefined;
   'TextShowMore': undefined;
   'TextShowLess': undefined;
   'AiMessageEditorFrom': undefined;
@@ -3740,6 +3762,22 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'AiMessageEditorDailyLimitReached': {
     'link': V;
+  };
+  'AiToneCreated': {
+    'title': V;
+  };
+  'AiToneLimitReachedPremium': {
+    'limit': V;
+  };
+  'AiTonePreviewUsedBy': {
+    'count': V;
+  };
+  'AiTonePreviewCreatedBy': {
+    'author': V;
+  };
+  'AiTonePreviewUsedByCreatedBy': {
+    'usedBy': V;
+    'createdBy': V;
   };
   'UnofficialSecurityRisk': {
     'peer': V;

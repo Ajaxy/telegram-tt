@@ -1,4 +1,6 @@
 import type {
+  ApiAiComposeTone,
+  ApiAiComposeToneExample,
   ApiAttachBot,
   ApiBirthday,
   ApiBoost,
@@ -692,6 +694,18 @@ export type TabState = {
     fixTab?: AiEditorTabBase & {
       cache?: ApiComposedMessageWithAI;
     };
+  };
+
+  aiToneEditorModal?: {
+    toneToEdit?: ApiAiComposeTone;
+  };
+
+  aiTonePreviewModal?: {
+    slug: string;
+    tone?: ApiAiComposeTone;
+    example?: ApiAiComposeToneExample;
+    isAlreadyAdded?: boolean;
+    hasExampleError?: boolean;
   };
 
   aiMessageEditorPendingResult?: {

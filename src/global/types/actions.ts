@@ -1,4 +1,5 @@
 import type {
+  ApiAiComposeTone,
   ApiAttachBot,
   ApiAttachment,
   ApiBirthday,
@@ -2694,6 +2695,38 @@ export interface ActionPayloads {
     scheduleRepeatPeriod?: number;
   } & WithTabId) | undefined;
   clearAiMessageEditorPendingResult: WithTabId | undefined;
+  openAiToneEditorModal: {
+    toneToEdit?: ApiAiComposeTone;
+  } & WithTabId | undefined;
+  closeAiToneEditorModal: WithTabId | undefined;
+  createAiTone: {
+    title: string;
+    emojiId: string;
+    prompt: string;
+    shouldDisplayAuthor?: boolean;
+  } & WithTabId;
+  updateAiTone: {
+    tone: ApiInputAiComposeTone;
+    title?: string;
+    emojiId?: string;
+    prompt?: string;
+    shouldDisplayAuthor?: boolean;
+  } & WithTabId;
+  deleteAiTone: {
+    tone: ApiInputAiComposeTone;
+  } & WithTabId;
+  openAiTonePreview: {
+    slug: string;
+  } & WithTabId;
+  closeAiTonePreview: WithTabId | undefined;
+  saveAiTone: {
+    tone: ApiInputAiComposeTone;
+    unsave?: boolean;
+  } & WithTabId;
+  loadAiTonePreviewExample: {
+    tone: ApiInputAiComposeTone;
+    num: number;
+  } & WithTabId;
 
   openGiveawayModal: ({
     chatId: string;

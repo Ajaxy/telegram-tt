@@ -8,9 +8,9 @@ import { toChannelId } from './entities/ids';
 import { isUsernameValid } from './entities/username';
 
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
-  'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
-  'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message' | 'premium_offer' | 'premium_multigift' | 'stars_topup'
-  | 'nft' | 'stars' | 'ton' | 'stargift_auction' | 'premium' | 'oauth';
+  'setlanguage' | 'addtheme' | 'addstyle' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' |
+  'msg' | 'msg_url' | 'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message' | 'premium_offer' |
+  'premium_multigift' | 'stars_topup' | 'nft' | 'stars' | 'ton' | 'stargift_auction' | 'premium' | 'oauth';
 
 interface PublicMessageLink {
   type: 'publicMessageLink';

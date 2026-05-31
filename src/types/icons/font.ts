@@ -232,6 +232,7 @@ export type FontIconName =
   | 'redo'
   | 'refund'
   | 'reload'
+  | 'reload-arrows'
   | 'remove'
   | 'remove-quote'
   | 'reopen-topic'

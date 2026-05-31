@@ -1,5 +1,7 @@
 import { memo } from '../../../lib/teact/teact';
 
+import buildClassName from '../../../util/buildClassName';
+
 import Control, {
   ControlDescription,
   ControlLabel,
@@ -7,11 +9,14 @@ import Control, {
 import Interactive from '../layout/Interactive';
 import Checkbox from '../primitives/Checkbox';
 
+import styles from './CheckboxField.module.scss';
+
 type Props = Omit<React.ComponentProps<typeof Checkbox>, 'className' | 'disabled'> & {
   label: string;
   description?: string;
   disabled?: boolean;
   loading?: boolean;
+  isCentered?: boolean;
   className?: string;
   controlClassName?: string;
   labelClassName?: string;
@@ -24,6 +29,7 @@ const CheckboxField = ({
   description,
   disabled,
   loading,
+  isCentered,
   className,
   controlClassName,
   labelClassName,
@@ -38,9 +44,9 @@ const CheckboxField = ({
       ripple={ripple}
       disabled={disabled}
       loading={loading}
-      className={className}
+      className={buildClassName(className, isCentered && styles.centered)}
     >
-      <Control className={controlClassName}>
+      <Control className={buildClassName(controlClassName, isCentered && styles.centeredControl)}>
         <Checkbox {...checkboxProps} />
         <ControlLabel className={labelClassName}>{label}</ControlLabel>
         {description !== undefined ? (

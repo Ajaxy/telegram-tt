@@ -24,6 +24,38 @@
   font-size: 0.875rem;
 }
 
+.tabListWrapper {
+  position: relative;
+  min-height: 4.125rem;
+}
+
+.tabListSkeleton {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+
+  padding: 0.625rem 0;
+
+  opacity: 1;
+  background: var(--color-background);
+
+  transition: opacity 0.2s ease-out;
+}
+
+.tabListSkeletonHidden {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.tabSkeleton {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
 .textLabel,
 .resultLabel {
   font-size: 0.875rem;

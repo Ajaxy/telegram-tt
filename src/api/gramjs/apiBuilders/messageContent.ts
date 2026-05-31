@@ -1004,6 +1004,10 @@ export function buildWebPage(webPage: GramJs.TypeWebPage): ApiWebPage | undefine
       };
     }
 
+    const attributeAiTone = attributes?.find((a): a is GramJs.WebPageAttributeAiComposeTone => (
+      a instanceof GramJs.WebPageAttributeAiComposeTone
+    ));
+
     return {
       mediaType: 'webpage',
       webpageType: 'full',
@@ -1026,6 +1030,7 @@ export function buildWebPage(webPage: GramJs.TypeWebPage): ApiWebPage | undefine
       gift,
       auction,
       stickers,
+      aiComposeToneEmojiId: attributeAiTone?.emojiId.toString(),
     };
   }
 

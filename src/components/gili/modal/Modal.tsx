@@ -43,6 +43,10 @@ export type ModalProps = {
   height?: ModalHeight;
   noBackdrop?: boolean;
   noLightDismiss?: boolean;
+  noScrollable?: boolean;
+  noContentInlinePadding?: boolean;
+  keepMounted?: boolean;
+  stickyFooter?: TeactNode;
   ariaLabel?: string;
   noContainment?: boolean;
   onClose: NoneToVoidFunction;
@@ -114,10 +118,15 @@ const Modal = ({
   height = 'regular',
   noBackdrop,
   noLightDismiss,
+  noScrollable,
+  noContentInlinePadding,
+  keepMounted,
+  stickyFooter,
   ariaLabel,
   noContainment,
   onClose,
 }: ModalProps) => {
+  const [hasEverOpened, setHasEverOpened] = useState(Boolean(isOpen));
   const [shouldRender, setShouldRender] = useState(Boolean(isOpen));
   const [isClosing, setIsClosing] = useState(false);
   const [hasTitle, setHasTitle] = useState(false);
@@ -134,11 +143,14 @@ const Modal = ({
   const frozenProps = useFrozenProps({
     header,
     children,
+    stickyFooter,
     dialogClassName,
     contentClassName,
     width,
     height,
     noBackdrop,
+    noScrollable,
+    noContentInlinePadding,
     ariaLabel,
     noContainment,
   }, !isOpen);
@@ -192,6 +204,12 @@ const Modal = ({
     subtitleId,
     titleId,
   ]);
+
+  useEffect(() => {
+    if (isOpen && !hasEverOpened) {
+      setHasEverOpened(true);
+    }
+  }, [hasEverOpened, isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -322,7 +340,7 @@ const Modal = ({
     handleRequestClose();
   });
 
-  if (!shouldRender) {
+  if (!shouldRender && !(keepMounted && hasEverOpened)) {
     return undefined;
   }
 
@@ -355,7 +373,8 @@ const Modal = ({
             )}
 
             <Surface
-              scrollable
+              scrollable={!frozenProps.noScrollable}
+              noPadding={frozenProps.noContentInlinePadding}
               className={buildClassName(
                 styles.content,
                 shouldShowHeader && styles.withHeader,
@@ -366,6 +385,11 @@ const Modal = ({
                 {frozenProps.children}
               </div>
             </Surface>
+            {Boolean(frozenProps.stickyFooter) && (
+              <div className={styles.stickyFooter}>
+                {frozenProps.stickyFooter}
+              </div>
+            )}
           </div>
         </dialog>
       </ModalContext.Provider>

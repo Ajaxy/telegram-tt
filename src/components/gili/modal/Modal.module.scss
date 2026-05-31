@@ -143,6 +143,11 @@
     background-color: transparent;
   }
 
+  .stickyFooter {
+    position: relative;
+    flex-shrink: 0;
+  }
+
   .withHeader {
     mask-image:
       linear-gradient(

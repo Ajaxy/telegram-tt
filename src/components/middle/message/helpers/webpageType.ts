@@ -44,6 +44,8 @@ export function getWebpageButtonLangKey(type?: string, auctionEndDate?: number):
       const isFinished = auctionEndDate !== undefined && auctionEndDate < getServerTime();
       return isFinished ? 'PollViewResults' : 'GiftAuctionJoin';
     }
+    case 'telegram_aicomposetone':
+      return 'ViewButtonAiStyle';
     default:
       return undefined;
   }

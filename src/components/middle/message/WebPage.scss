@@ -197,6 +197,23 @@
     }
   }
 
+  &--ai-tone-emoji {
+    --custom-emoji-size: 3rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &--ai-tone {
+    max-width: 20rem;
+
+    .WebPage--ai-tone-emoji {
+      width: 3rem;
+      height: 3rem;
+    }
+  }
+
   @media (min-width: 1921px) {
     max-width: none;
 

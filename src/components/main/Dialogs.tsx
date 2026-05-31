@@ -64,6 +64,7 @@ const Dialogs = ({ dialogs, currentMessageList }: StateProps) => {
         onClose={closeModal}
         className="confirm"
         title={lang('ShareYouPhoneNumberTitle')}
+        isNativeDialog
         onCloseAnimationEnd={dismissDialog}
       >
         {lang(
@@ -94,6 +95,7 @@ const Dialogs = ({ dialogs, currentMessageList }: StateProps) => {
         onCloseAnimationEnd={dismissDialog}
         className="error"
         title={title}
+        isNativeDialog
       >
         {renderedText}
         <div className="dialog-buttons mt-2">

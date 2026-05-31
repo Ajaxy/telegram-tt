@@ -6,6 +6,7 @@ import { updateTabState } from '../../reducers/tabs';
 import { selectTabState } from '../../selectors';
 import { selectCurrentMessageList } from '../../selectors/messages';
 import { selectTranslationLanguage } from '../../selectors/settings';
+import { showToneLimitNotification } from '../api/ai';
 
 addActionHandler('openAiMessageEditorModal', (global, actions, payload): ActionReturnType => {
   const {
@@ -185,5 +186,25 @@ addActionHandler('clearAiMessageEditorPendingResult', (global, actions, payload)
 
   return updateTabState(global, {
     aiMessageEditorPendingResult: undefined,
+  }, tabId);
+});
+
+addActionHandler('openAiToneEditorModal', (global, actions, payload): ActionReturnType => {
+  const { toneToEdit, tabId = getCurrentTabId() } = payload || {};
+
+  if (!toneToEdit && showToneLimitNotification(global, actions, tabId)) {
+    return undefined;
+  }
+
+  return updateTabState(global, {
+    aiToneEditorModal: { toneToEdit },
+  }, tabId);
+});
+
+addActionHandler('closeAiToneEditorModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    aiToneEditorModal: undefined,
   }, tabId);
 });
