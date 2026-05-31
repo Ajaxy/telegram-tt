@@ -15,9 +15,9 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
+import Switch from '../../gili/primitives/Switch';
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
-import Switcher from '../../ui/Switcher';
 import PremiumStatusItem from './PremiumStatusItem';
 import PrivacyLockedOption from './PrivacyLockedOption';
 import SettingsAcceptedGift from './SettingsAcceptedGift';
@@ -100,11 +100,10 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
           <Island>
             <ListItem onClick={handleShowGiftIconInChats}>
               <span>{lang('PrivacyDisplayGiftsButton')}</span>
-              <Switcher
+              <Switch
                 id="gift"
                 disabled={!isCurrentUserPremium}
-                label={shouldDisplayGiftsButton ? lang('HideGiftsButton') : lang('DisplayGiftsButton')}
-                checked={shouldDisplayGiftsButton}
+                checked={Boolean(shouldDisplayGiftsButton)}
               />
             </ListItem>
           </Island>

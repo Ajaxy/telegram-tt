@@ -28,10 +28,10 @@ import useManagePermissions from '../hooks/useManagePermissions';
 import PaidMessagePrice from '../../common/paidMessage/PaidMessagePrice';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
+import Switch from '../../gili/primitives/Switch';
 import PermissionCheckboxList from '../../main/PermissionCheckboxList';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem from '../../ui/ListItem';
-import Switcher from '../../ui/Switcher';
 
 type OwnProps = {
   chatId: string;
@@ -251,10 +251,9 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
           <Island>
             <ListItem onClick={handleChargeStarsForMessages}>
               <span>{lang('GroupMessagesChargePrice')}</span>
-              <Switcher
+              <Switch
                 id="charge_for_messages"
-                label={lang('GroupMessagesChargePrice')}
-                checked={isPriceForMessagesOpen}
+                checked={Boolean(isPriceForMessagesOpen)}
               />
             </ListItem>
           </Island>

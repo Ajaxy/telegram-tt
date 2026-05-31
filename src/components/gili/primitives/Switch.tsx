@@ -54,6 +54,7 @@ const Switch = ({
   return (
     <span
       className={buildClassName(
+        'Switch',
         styles.root,
         isDisabled && styles.disabled,
         locked && styles.locked,

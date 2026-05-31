@@ -107,6 +107,7 @@ const MentionTooltip: FC<OwnProps> = ({
             userId={id}
             avatarSize="small"
             withUsername
+            noUserStatus
           />
         </ListItem>
       ))}

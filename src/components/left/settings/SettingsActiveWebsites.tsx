@@ -114,8 +114,10 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
       >
         <Avatar className={styles.avatar} peer={bot} size="tiny" />
         <div className="multiline-item full-size" dir="auto">
-          <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
-          {bot && <FullNameTitle className={styles.title} peer={bot} />}
+          <div className="title title-with-date">
+            {bot && <FullNameTitle className={styles.title} peer={bot} />}
+            <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
+          </div>
           <span className={buildClassName('subtitle', 'black', 'tight', styles.platform)}>
             {session.domain}
             ,

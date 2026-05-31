@@ -11,10 +11,10 @@ import getSessionIcon from './helpers/getSessionIcon';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 
+import Switch from '../../gili/primitives/Switch';
 import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
 import Modal from '../../ui/Modal';
-import Switcher from '../../ui/Switcher';
 
 import styles from './SettingsActiveSession.module.scss';
 
@@ -128,17 +128,15 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
 
       <ListItem onClick={handleSecretChatsStateChange}>
         <span className={styles.actionName}>{lang('SessionPreviewAcceptSecret')}</span>
-        <Switcher
+        <Switch
           id="accept_secrets"
-          label="On"
           checked={renderingSession.areSecretChatsEnabled}
         />
       </ListItem>
       <ListItem onClick={handleCallsStateChange}>
         <span className={styles.actionName}>{lang('SessionPreviewAcceptCalls')}</span>
-        <Switcher
+        <Switch
           id="accept_calls"
-          label="On"
           checked={renderingSession.areCallsEnabled}
         />
       </ListItem>

@@ -9,8 +9,8 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
+import Switch from '../../gili/primitives/Switch';
 import ListItem from '../../ui/ListItem';
-import Switcher from '../../ui/Switcher';
 
 type StateProps = {
   disallowedGifts?: ApiDisallowedGiftsSettings;
@@ -97,40 +97,32 @@ const SettingsAcceptedGift = ({
       <Island>
         <ListItem onClick={handleLimitedEditionChange}>
           <span>{lang('PrivacyGiftLimitedEdition')}</span>
-          <Switcher
+          <Switch
             id="limited_edition"
-            label={disallowedGifts?.shouldDisallowLimitedStarGifts ? lang('PrivacyDisableLimitedEditionStarGifts')
-              : lang('PrivacyEnableLimitedEditionStarGifts')}
             disabled={!isCurrentUserPremium}
             checked={!isCurrentUserPremium ? true : !disallowedGifts?.shouldDisallowLimitedStarGifts}
           />
         </ListItem>
         <ListItem onClick={handleUnlimitedEditionChange}>
           <span>{lang('PrivacyGiftUnlimited')}</span>
-          <Switcher
+          <Switch
             id="unlimited"
-            label={disallowedGifts?.shouldDisallowUnlimitedStarGifts ? lang('PrivacyDisableUnlimitedStarGifts')
-              : lang('PrivacyEnableUnlimitedStarGifts')}
             disabled={!isCurrentUserPremium}
             checked={!isCurrentUserPremium ? true : !disallowedGifts?.shouldDisallowUnlimitedStarGifts}
           />
         </ListItem>
         <ListItem onClick={handleUniqueChange}>
           <span>{lang('PrivacyGiftUnique')}</span>
-          <Switcher
+          <Switch
             id="unique"
-            label={disallowedGifts?.shouldDisallowUniqueStarGifts ? lang('PrivacyDisableUniqueStarGifts')
-              : lang('PrivacyEnableUniqueStarGifts')}
             disabled={!isCurrentUserPremium}
             checked={!isCurrentUserPremium ? true : !disallowedGifts?.shouldDisallowUniqueStarGifts}
           />
         </ListItem>
         <ListItem onClick={handlePremiumSubscriptionChange}>
           <span>{lang('PrivacyGiftPremiumSubscription')}</span>
-          <Switcher
+          <Switch
             id="premium_subscription"
-            label={disallowedGifts?.shouldDisallowPremiumGifts ? lang('PrivacyDisablePremiumGifts')
-              : lang('PrivacyEnablePremiumGifts')}
             disabled={!isCurrentUserPremium}
             checked={!isCurrentUserPremium ? true : !disallowedGifts?.shouldDisallowPremiumGifts}
           />

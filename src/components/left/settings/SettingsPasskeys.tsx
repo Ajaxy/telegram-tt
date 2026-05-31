@@ -112,8 +112,10 @@ const SettingsPasskeys = ({
         )}
       >
         <div className="multiline-item full-size" dir="auto">
-          <span className="date">{formatDate(lang, secondsToDate(date))}</span>
-          <span className="title">{name || lang('SettingsPasskeyFallbackTitle')}</span>
+          <span className="title title-with-date">
+            {name || lang('SettingsPasskeyFallbackTitle')}
+            <span className="date">{formatDate(lang, secondsToDate(date))}</span>
+          </span>
           {Boolean(lastUsageDate) && (
             <span className="subtitle">
               {lang('SettingsPasskeyUsedAt', {

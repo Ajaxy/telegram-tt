@@ -29,13 +29,13 @@ import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Island, { IslandDescription } from '../../gili/layout/Island';
+import Switch from '../../gili/primitives/Switch';
 import AvatarEditable from '../../ui/AvatarEditable';
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
 import ListItem from '../../ui/ListItem';
-import Switcher from '../../ui/Switcher';
 import TextArea from '../../ui/TextArea';
 
 import './Management.scss';
@@ -425,11 +425,9 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
             <>
               <ListItem icon="forums" ripple onClick={handleForumToggle}>
                 <span>{lang('ChannelTopics')}</span>
-                <Switcher
+                <Switch
                   id="group-notifications"
-                  label={lang('ChannelTopics')}
-                  checked={isForumEnabled}
-                  inactive
+                  checked={Boolean(isForumEnabled)}
                 />
               </ListItem>
               <IslandDescription>{lang('ForumToggleDescription')}</IslandDescription>

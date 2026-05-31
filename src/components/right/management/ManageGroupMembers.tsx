@@ -28,12 +28,12 @@ import useOldLang from '../../../hooks/useOldLang';
 import NothingFound from '../../common/NothingFound';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Island, { IslandDescription } from '../../gili/layout/Island';
+import Switch from '../../gili/primitives/Switch';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import InputText from '../../ui/InputText';
 import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
-import Switcher from '../../ui/Switcher';
 import DeleteMemberModal from '../DeleteMemberModal';
 
 type OwnProps = {
@@ -216,7 +216,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
             <Island>
               <ListItem icon="group" ripple onClick={handleToggleParticipantsHidden}>
                 <span>{oldLang('ChannelHideMembers')}</span>
-                <Switcher label={oldLang('ChannelHideMembers')} checked={areParticipantsHidden} />
+                <Switch checked={Boolean(areParticipantsHidden)} />
               </ListItem>
             </Island>
             <IslandDescription>

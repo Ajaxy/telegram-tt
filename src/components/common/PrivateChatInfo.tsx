@@ -59,6 +59,7 @@ type BaseOwnProps = {
   noVerified?: boolean;
   emojiStatusSize?: number;
   noStatusOrTyping?: boolean;
+  noUserStatus?: boolean;
   noRtl?: boolean;
   chatMemberOriginId?: string;
   chatMember?: ApiChatMember;
@@ -109,6 +110,7 @@ const PrivateChatInfo = ({
   withUpdatingStatus,
   emojiStatusSize,
   noStatusOrTyping,
+  noUserStatus,
   noEmojiStatus,
   noFake,
   noVerified,
@@ -231,10 +233,10 @@ const PrivateChatInfo = ({
       return undefined;
     }
 
-    const translatedStatus = getUserStatus(oldLang, user, userStatus);
+    const translatedStatus = noUserStatus ? undefined : getUserStatus(oldLang, user, userStatus);
     const mainUserNameClassName = buildClassName('handle', translatedStatus && 'withStatus');
     return (
-      <span className={buildClassName('status', isUserOnline(user, userStatus, true) && 'online')}>
+      <span className={buildClassName('status', !noUserStatus && isUserOnline(user, userStatus, true) && 'online')}>
         {mainUsername && <span className={mainUserNameClassName}>{mainUsername}</span>}
         {translatedStatus && <span className="user-status" dir="auto">{translatedStatus}</span>}
       </span>

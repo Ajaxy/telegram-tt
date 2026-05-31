@@ -239,8 +239,10 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
         onClick={() => { handleOpenSessionModal(session.hash); }}
       >
         <div className="multiline-item full-size" dir="auto">
-          <span className="date">{formatPastTimeShort(oldLang, session.dateActive * 1000)}</span>
-          <span className="title">{session.deviceModel}</span>
+          <span className="title title-with-date">
+            {session.deviceModel}
+            <span className="date">{formatPastTimeShort(oldLang, session.dateActive * 1000)}</span>
+          </span>
           <span className="subtitle black tight">
             {session.appName}
             {' '}

@@ -164,6 +164,12 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   });
 
   const [isAnimating, startAnimating, stopAnimating] = useFlag();
+  const wasOpenRef = useRef(false);
+  const shouldSkipOpenTransition = isOpen && !wasOpenRef.current;
+
+  useLayoutEffect(() => {
+    wasOpenRef.current = isOpen;
+  }, [isOpen]);
 
   useLayoutEffect(() => {
     const elements = containerRef.current?.querySelectorAll<HTMLElement>(
@@ -437,7 +443,9 @@ const RightColumn: FC<OwnProps & StateProps> = ({
         />
         <Transition
           ref={containerRef}
-          name={resolveTransitionName('layers', animationLevel, !isOpen || shouldSkipHistoryAnimations)}
+          name={resolveTransitionName(
+            'layers', animationLevel, !isOpen || shouldSkipOpenTransition || shouldSkipHistoryAnimations,
+          )}
           renderCount={MAIN_SCREENS_COUNT + MANAGEMENT_SCREENS_COUNT}
           activeKey={isManagement ? MAIN_SCREENS_COUNT + managementScreen : renderingContentKey}
           shouldCleanup

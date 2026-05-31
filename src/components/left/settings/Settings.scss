@@ -3,6 +3,21 @@
 #Settings {
   height: 100%;
 
+  .multiline-item .title-with-date {
+    display: flex;
+    justify-content: space-between;
+
+    .date {
+      flex-shrink: 0;
+
+      margin-inline-start: 1rem;
+
+      font-size: 0.75rem;
+      font-weight: normal;
+      color: var(--color-text-secondary);
+    }
+  }
+
   .chat-list {
     padding-bottom: 0;
 
@@ -228,13 +243,6 @@
       .subtitle.tight {
         line-height: 1rem;
       }
-
-      .date {
-        float: right;
-        margin-left: 1rem;
-        font-size: 0.75rem;
-        color: var(--color-text-secondary);
-      }
     }
 
     &.destructive {
@@ -244,14 +252,6 @@
         .icon {
           color: inherit;
         }
-      }
-    }
-
-    &[dir="rtl"] {
-      .multiline-item .date {
-        float: left;
-        margin-right: 1rem;
-        margin-left: 0;
       }
     }
 
