@@ -2622,12 +2622,17 @@ addActionHandler('loadTopics', async (global, actions, payload): Promise<void> =
   if (!chat) return;
 
   const topicsInfo = selectTopicsInfo(global, chatId);
+  const shouldRefreshFromStart = force || topicsInfo?.isCache;
 
-  if (!force && topicsInfo?.listedTopicIds && topicsInfo.listedTopicIds.length === topicsInfo.totalCount) {
+  if (
+    !shouldRefreshFromStart
+    && topicsInfo?.listedTopicIds
+    && topicsInfo.listedTopicIds.length === topicsInfo.totalCount
+  ) {
     return;
   }
 
-  const offsetTopic = !force ? topicsInfo?.listedTopicIds?.reduce((acc, el) => {
+  const offsetTopic = !shouldRefreshFromStart ? topicsInfo?.listedTopicIds?.reduce((acc, el) => {
     const topicThreadInfo = selectThreadInfo(global, chatId, el);
     const accTopicThreadInfo = selectThreadInfo(global, chatId, acc);
     if (!topicThreadInfo?.lastMessageId) return acc;
@@ -2649,12 +2654,22 @@ addActionHandler('loadTopics', async (global, actions, payload): Promise<void> =
   if (!result) return;
 
   global = getGlobal();
+  const updatedTopicsInfo = selectTopicsInfo(global, chatId);
+  if (updatedTopicsInfo?.isCache) { // Reset local state
+    global = updateTopicsInfo(global, chatId, {
+      topicsById: {},
+      listedTopicIds: [],
+      orderedPinnedTopicIds: undefined,
+    });
+  }
+
   global = addMessages(global, result.messages);
   result.topics.forEach((topic) => {
     global = updateTopicWithState(global, chatId, topic);
   });
   global = updateTopicsInfo(global, chatId, {
     totalCount: result.count,
+    isCache: undefined,
   });
   global = updateListedTopicIds(global, chatId, result.topics.map((topicState) => topicState.topic.id));
   Object.entries(result.draftsById || {}).forEach(([threadId, draft]) => {

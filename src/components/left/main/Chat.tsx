@@ -18,7 +18,7 @@ import type {
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 import { MAIN_THREAD_ID } from '../../../api/types';
-import { StoryViewerOrigin } from '../../../types';
+import { StoryViewerOrigin, type TopicsInfo } from '../../../types';
 
 import { ALL_FOLDER_ID, UNMUTE_TIMESTAMP } from '../../../config';
 import {
@@ -106,7 +106,7 @@ type StateProps = {
   chat?: ApiChat;
   monoforumChannel?: ApiChat;
   lastMessageStory?: ApiTypeStory;
-  listedTopicIds?: number[];
+  topicsInfo?: TopicsInfo;
   isMuted?: boolean;
   user?: ApiUser;
   userStatus?: ApiUserStatus;
@@ -139,7 +139,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   shiftDiff,
   animationType,
   isPinned,
-  listedTopicIds,
+  topicsInfo,
   observeIntersection,
   chat,
   monoforumChannel,
@@ -204,6 +204,7 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const { isForum, isForumAsMessages, isMonoforum } = chat || {};
 
+  const listedTopicIds = topicsInfo?.listedTopicIds;
   const shouldForceNonForumView = chat?.isBotForum && listedTopicIds && !listedTopicIds.length;
 
   useEnsureMessage(isSavedDialog ? currentUserId : chatId, lastMessageId, lastMessage);
@@ -373,10 +374,10 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   // Load the forum topics to display unread count badge
   useEffect(() => {
-    if (isIntersecting && isForum && isSynced && listedTopicIds === undefined) {
+    if (isIntersecting && isForum && isSynced && (!topicsInfo || topicsInfo.isCache)) {
       loadTopics({ chatId });
     }
-  }, [chatId, listedTopicIds, isSynced, isForum, isIntersecting]);
+  }, [chatId, topicsInfo, isSynced, isForum, isIntersecting]);
 
   const isOnline = user && userStatus && isUserOnline(user, userStatus);
   const { hasShownClass: isAvatarOnlineShown } = useShowTransitionDeprecated(isOnline);
@@ -598,7 +599,7 @@ export default memo(withGlobal<OwnProps>(
       lastMessage,
       lastMessageId,
       currentUserId: global.currentUserId!,
-      listedTopicIds: topicsInfo?.listedTopicIds,
+      topicsInfo,
       isSynced: global.isSynced,
       lastMessageStory,
       isAccountFrozen,

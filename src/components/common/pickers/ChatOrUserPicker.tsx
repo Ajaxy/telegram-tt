@@ -17,7 +17,7 @@ import {
   selectMonoforumChannel,
   selectPeer,
   selectTabState,
-  selectTopics,
+  selectTopicsInfo,
   selectUserStatus,
 } from '../../../global/selectors';
 import { selectAnimationLevel } from '../../../global/selectors/sharedState';
@@ -135,15 +135,16 @@ const ChatOrUserPicker = ({
   useInputFocusOnOpen(searchRef, isOpen && activeKey === CHAT_LIST_SLIDE, resetSearch);
   useInputFocusOnOpen(topicSearchRef, isOpen && activeKey === TOPIC_LIST_SLIDE);
 
-  const selectTopicsById = useCallback((global: GlobalState) => {
+  const selectForumTopicsInfo = useCallback((global: GlobalState) => {
     if (!forumId) {
       return undefined;
     }
 
-    return selectTopics(global, forumId);
+    return selectTopicsInfo(global, forumId);
   }, [forumId]);
 
-  const forumTopicsById = useSelector(selectTopicsById);
+  const topicsInfo = useSelector(selectForumTopicsInfo);
+  const forumTopicsById = topicsInfo?.topicsById;
 
   const [topicIds, topics] = useMemo(() => {
     const global = getGlobal();
@@ -194,7 +195,7 @@ const ChatOrUserPicker = ({
       const chatId = viewportIds[index === -1 ? 0 : index];
       const chat = chatsById[chatId];
       if (chat?.isForum) {
-        if (!forumTopicsById) loadTopics({ chatId });
+        if (!topicsInfo || topicsInfo.isCache) loadTopics({ chatId });
         setForumId(chatId);
       } else {
         onSelectChatOrUser(chatId);
@@ -218,7 +219,7 @@ const ChatOrUserPicker = ({
     const chatsById = getGlobal().chats.byId;
     const chat = chatsById?.[chatId];
     if (chat?.isForum) {
-      if (!forumTopicsById) loadTopics({ chatId });
+      if (!topicsInfo || topicsInfo.isCache) loadTopics({ chatId });
       setForumId(chatId);
       resetSearch();
     } else {

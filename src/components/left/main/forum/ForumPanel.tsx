@@ -34,7 +34,6 @@ import { mapTruthyValues, mapValues } from '../../../../util/iteratees';
 
 import useSelector from '../../../../hooks/data/useSelector';
 import useAppLayout from '../../../../hooks/useAppLayout';
-import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../../../hooks/useIntersectionObserver';
@@ -97,13 +96,11 @@ const ForumPanel = ({
   const { isMobile } = useAppLayout();
   const chatId = chat?.id;
 
-  useEffectWithPrevDeps(([prevIsSynced]) => {
-    if (!isSynced) return;
-    const hasJustSynced = prevIsSynced === false;
-    if (chatId && (hasJustSynced || !topicsInfo)) {
-      loadTopics({ chatId, force: hasJustSynced });
-    }
-  }, [isSynced, chatId, topicsInfo]);
+  useEffect(() => {
+    if (!chatId || !isSynced) return;
+    if (topicsInfo && !topicsInfo.isCache) return;
+    loadTopics({ chatId });
+  }, [chatId, topicsInfo, isSynced]);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const lang = useLang();

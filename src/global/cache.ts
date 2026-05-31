@@ -5,7 +5,7 @@ import type {
   ApiAvailableReaction,
   ApiMessage,
 } from '../api/types';
-import type { MessageList, ThreadId } from '../types';
+import type { MessageList, ThreadId, TopicsInfo } from '../types';
 import type { ActionReturnType, GlobalState, SharedState } from './types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../api/types';
 
@@ -649,8 +649,23 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
       all: pickTruthy(global.chats.lastMessageIds.all || {}, idsToSave),
       saved: global.chats.lastMessageIds.saved,
     },
-    topicsInfoById: pickTruthy(global.chats.topicsInfoById, currentChatIds),
+    topicsInfoById: reduceTopicsInfo(global.chats.topicsInfoById, currentChatIds),
   };
+}
+
+function reduceTopicsInfo(
+  topicsInfoById: Record<string, TopicsInfo>, chatIds: string[],
+): GlobalState['chats']['topicsInfoById'] {
+  const topicsInfoToSave = pickTruthy(topicsInfoById, chatIds);
+
+  return Object.entries(topicsInfoToSave).reduce((acc, [chatId, topicsInfo]) => {
+    acc[chatId] = {
+      ...topicsInfo,
+      isCache: true,
+    };
+
+    return acc;
+  }, {} as GlobalState['chats']['topicsInfoById']);
 }
 
 function getTopPeerIds<T extends GlobalState>(global: T) {

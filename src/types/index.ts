@@ -674,6 +674,7 @@ export interface ServiceNotification {
 
 export interface TopicsInfo {
   totalCount: number;
+  isCache?: true;
   topicsById: Record<ThreadId, ApiTopic>;
   listedTopicIds?: number[];
   orderedPinnedTopicIds?: number[];
