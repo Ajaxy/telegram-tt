@@ -1,4 +1,4 @@
-import { useEffect, useState } from '../../../../lib/teact/teact';
+import { useEffect, useRef, useState } from '../../../../lib/teact/teact';
 
 import captureKeyboardListeners from '../../../../util/captureKeyboardListeners';
 import cycleRestrict from '../../../../util/cycleRestrict';
@@ -27,6 +27,7 @@ export function useKeyboardNavigation({
   onClose: NoneToVoidFunction;
 }) {
   const [selectedItemIndex, setSelectedItemIndex] = useState(-1);
+  const prevItemsSignatureRef = useRef<string | undefined>();
 
   const getSelectedIndex = useLastCallback((newIndex: number) => {
     if (!items) {
@@ -39,6 +40,42 @@ export function useKeyboardNavigation({
   const handleArrowKey = useLastCallback((value: number, e: KeyboardEvent) => {
     e.preventDefault();
     setSelectedItemIndex((index) => (getSelectedIndex(index + value)));
+  });
+
+  const handleHorizontalArrowLeft = useLastCallback((e: KeyboardEvent) => {
+    if (!items?.length) {
+      return;
+    }
+
+    e.preventDefault();
+
+    setSelectedItemIndex((index) => {
+      if (index === -1) {
+        onClose();
+        return -1;
+      }
+
+      if (index === 0) {
+        return -1;
+      }
+
+      return index - 1;
+    });
+  });
+
+  const handleHorizontalArrowRight = useLastCallback((e: KeyboardEvent) => {
+    if (!items?.length) {
+      return;
+    }
+
+    e.preventDefault();
+    setSelectedItemIndex((index) => {
+      if (index === -1) {
+        return 0;
+      }
+
+      return cycleRestrict(items.length, index + 1);
+    });
   });
 
   const handleItemSelect = useLastCallback((e: KeyboardEvent) => {
@@ -65,22 +102,49 @@ export function useKeyboardNavigation({
   }, [isActive, shouldRemoveSelectionOnReset]);
 
   const isSelectionOutOfRange = !items || selectedItemIndex > items.length - 1;
+  const itemsSignature = items?.map((item, index) => {
+    if (item && typeof item === 'object' && 'id' in item) {
+      return String((item as { id: unknown }).id);
+    }
+
+    return String(item ?? index);
+  }).join('\x01') || '';
+
   useEffect(() => {
-    if (!shouldSaveSelectionOnUpdateItems || isSelectionOutOfRange) {
+    const hasItemsChanged = prevItemsSignatureRef.current !== undefined
+      && prevItemsSignatureRef.current !== itemsSignature;
+    prevItemsSignatureRef.current = itemsSignature;
+
+    if (
+      (!shouldSaveSelectionOnUpdateItems && hasItemsChanged)
+      || isSelectionOutOfRange
+    ) {
       setSelectedItemIndex(shouldRemoveSelectionOnReset ? -1 : 0);
     }
-  }, [isSelectionOutOfRange, shouldRemoveSelectionOnReset, shouldSaveSelectionOnUpdateItems]);
+  }, [itemsSignature, isSelectionOutOfRange, shouldRemoveSelectionOnReset, shouldSaveSelectionOnUpdateItems]);
 
   useEffect(() => (isActive ? captureKeyboardListeners({
     onEsc: onClose,
-    onUp: noArrowNavigation || isHorizontal ? undefined : (e: KeyboardEvent) => handleArrowKey(-1, e),
-    onDown: noArrowNavigation || isHorizontal ? undefined : (e: KeyboardEvent) => handleArrowKey(1, e),
-    onLeft: noArrowNavigation || !isHorizontal ? undefined : (e: KeyboardEvent) => handleArrowKey(-1, e),
-    onRight: noArrowNavigation || !isHorizontal ? undefined : (e: KeyboardEvent) => handleArrowKey(1, e),
+    onUp: noArrowNavigation
+      ? undefined
+      : (isHorizontal ? handleHorizontalArrowLeft : (e: KeyboardEvent) => handleArrowKey(-1, e)),
+    onDown: noArrowNavigation
+      ? undefined
+      : (isHorizontal ? handleHorizontalArrowRight : (e: KeyboardEvent) => handleArrowKey(1, e)),
+    onLeft: noArrowNavigation || !isHorizontal ? undefined : handleHorizontalArrowLeft,
+    onRight: noArrowNavigation || !isHorizontal ? undefined : handleHorizontalArrowRight,
     onTab: shouldSelectOnTab ? handleItemSelect : undefined,
     onEnter: handleItemSelect,
   }) : undefined), [
-    noArrowNavigation, handleArrowKey, handleItemSelect, isActive, isHorizontal, onClose, shouldSelectOnTab,
+    noArrowNavigation,
+    handleArrowKey,
+    handleHorizontalArrowLeft,
+    handleHorizontalArrowRight,
+    handleItemSelect,
+    isActive,
+    isHorizontal,
+    onClose,
+    shouldSelectOnTab,
   ]);
 
   return selectedItemIndex;

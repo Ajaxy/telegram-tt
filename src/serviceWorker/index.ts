@@ -14,6 +14,7 @@ declare const self: ServiceWorkerGlobalScope;
 
 const RE_NETWORK_FIRST_ASSETS = /\.(wasm|html)$/;
 const RE_CACHE_FIRST_ASSETS = /[\da-f]{20}.*\.(js|css|woff2?|svg|png|jpg|jpeg|tgs|json|wasm)$/;
+const RE_EMOJI_IMAGE_ASSETS = /^\/img-apple-(64|160)\/.+\.png$/;
 const ACTIVATE_TIMEOUT = 3000;
 
 self.addEventListener('install', (e) => {
@@ -76,6 +77,11 @@ self.addEventListener('fetch', (e: FetchEvent) => {
     }
 
     if (pathname.match(RE_CACHE_FIRST_ASSETS)) {
+      e.respondWith(respondWithCache(e));
+      return true;
+    }
+
+    if (pathname.match(RE_EMOJI_IMAGE_ASSETS)) {
       e.respondWith(respondWithCache(e));
       return true;
     }

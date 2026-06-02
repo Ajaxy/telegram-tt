@@ -1,4 +1,4 @@
-import { useEffect, useState } from '../../../../lib/teact/teact';
+import { useEffect, useRef, useState } from '../../../../lib/teact/teact';
 import { getGlobal } from '../../../../global';
 
 import type { ApiSticker } from '../../../../api/types';
@@ -8,7 +8,7 @@ import type { Signal } from '../../../../util/signals';
 import { EDITABLE_INPUT_CSS_SELECTOR, EDITABLE_INPUT_ID } from '../../../../config';
 import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { selectCustomEmojiForEmojis } from '../../../../global/selectors';
-import { uncompressEmoji } from '../../../../util/emoji/emoji';
+import { nativeToUnified, uncompressEmoji } from '../../../../util/emoji/emoji';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import {
   buildCollectionByKey, mapValues, pickTruthy, unique, uniqueByField,
@@ -27,9 +27,7 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 interface Library {
   keywords: string[];
   byKeyword: Record<string, Emoji[]>;
-  names: string[];
-  byName: Record<string, Emoji[]>;
-  maxKeyLength: number;
+  keysByPrefix: Record<string, string[]>;
 }
 
 let emojiDataPromise: Promise<EmojiModule> | undefined;
@@ -38,21 +36,26 @@ let emojiData: EmojiData;
 
 let RE_EMOJI_SEARCH: RegExp;
 let RE_LOWERCASE_TEST: RegExp;
+let RE_EMOJI_WORD_SEARCH: RegExp;
 const EMOJIS_LIMIT = 36;
 const FILTER_MIN_LENGTH = 2;
 
-const THROTTLE = 300;
+const THROTTLE = 250;
+const TOOLTIP_OPEN_DEBOUNCE = 250;
 
 const prepareRecentEmojisMemo = memoized(prepareRecentEmojis);
 const prepareLibraryMemo = memoized(prepareLibrary);
 const searchInLibraryMemo = memoized(searchInLibrary);
+const normalizeEmojiNativeMemo = memoized(normalizeEmojiNative);
 
 try {
   RE_EMOJI_SEARCH = /(^|\s):(?!\s)[-+_:'\s\p{L}\p{N}]*$/gui;
+  RE_EMOJI_WORD_SEARCH = /^(?![:@/])(?!.*[:@/]).+$/u;
   RE_LOWERCASE_TEST = /\p{Ll}/u;
 } catch (e) {
   // Support for older versions of firefox
   RE_EMOJI_SEARCH = /(^|\s):(?!\s)[-+_:'\s\d\wа-яёґєії]*$/gi;
+  RE_EMOJI_WORD_SEARCH = /^(?![:@/])(?!.*[:@/]).+$/;
   RE_LOWERCASE_TEST = /[a-zяёґєії]/;
 }
 
@@ -70,6 +73,10 @@ export default function useEmojiTooltip(
   const [byId, setById] = useState<Record<string, Emoji> | undefined>();
   const [filteredEmojis, setFilteredEmojis] = useState<Emoji[]>(MEMO_EMPTY_ARRAY);
   const [filteredCustomEmojis, setFilteredCustomEmojis] = useState<ApiSticker[]>(MEMO_EMPTY_ARRAY);
+  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
+  const filteredEmojiIdsRef = useRef('');
+  const filteredCustomEmojiIdsRef = useRef('');
+  const openTooltipTimeoutRef = useRef<number | undefined>();
 
   // Initialize data on first render
   useEffect(() => {
@@ -88,7 +95,28 @@ export default function useEmojiTooltip(
 
   const detectEmojiCodeThrottled = useThrottledResolver(() => {
     const html = getHtml();
-    return isEnabled && html.includes(':') ? prepareForRegExp(html).match(RE_EMOJI_SEARCH)?.[0].trim() : undefined;
+    if (!isEnabled || !html) return undefined;
+
+    const preparedHtml = prepareForRegExp(html);
+    const emojiCode = preparedHtml.includes(':') ? preparedHtml.match(RE_EMOJI_SEARCH)?.[0].trim() : undefined;
+
+    if (emojiCode) {
+      return {
+        code: emojiCode,
+        isColonQuery: true,
+      };
+    }
+
+    const plainTextQuery = preparedHtml.replace(/^\s*/, '');
+    const wordCode = plainTextQuery.match(RE_EMOJI_WORD_SEARCH)?.[0];
+    if (wordCode) {
+      return {
+        code: wordCode,
+        isColonQuery: false,
+      };
+    }
+
+    return undefined;
   }, [getHtml, isEnabled], THROTTLE);
 
   const getEmojiCode = useDerivedSignal(
@@ -96,10 +124,17 @@ export default function useEmojiTooltip(
   );
 
   const updateFiltered = useLastCallback((emojis: Emoji[]) => {
-    setFilteredEmojis(emojis);
+    const emojiIds = emojis.length ? emojis.map(({ id }) => id).join('\x01') : '';
+    if (filteredEmojiIdsRef.current !== emojiIds) {
+      filteredEmojiIdsRef.current = emojiIds;
+      setFilteredEmojis(emojis);
+    }
 
     if (emojis === MEMO_EMPTY_ARRAY) {
-      setFilteredCustomEmojis(MEMO_EMPTY_ARRAY);
+      if (filteredCustomEmojiIdsRef.current) {
+        filteredCustomEmojiIdsRef.current = '';
+        setFilteredCustomEmojis(MEMO_EMPTY_ARRAY);
+      }
       return;
     }
 
@@ -108,43 +143,75 @@ export default function useEmojiTooltip(
       selectCustomEmojiForEmojis(getGlobal(), nativeEmojis),
       'id',
     );
-    setFilteredCustomEmojis(customEmojis);
+    const customEmojiIds = customEmojis.length ? customEmojis.map(({ id }) => id).join('\x01') : '';
+    if (filteredCustomEmojiIdsRef.current !== customEmojiIds) {
+      filteredCustomEmojiIdsRef.current = customEmojiIds;
+      setFilteredCustomEmojis(customEmojis);
+    }
   });
 
   const insertEmoji = useLastCallback((emoji: string | ApiSticker, isForce = false) => {
     const html = getHtml();
     if (!html) return;
 
-    const atIndex = html.lastIndexOf(':', isForce ? html.lastIndexOf(':') - 1 : undefined);
+    const emojiCodeData = getEmojiCode();
+    const emojiCode = emojiCodeData?.code;
+    const isColonQuery = emojiCodeData?.isColonQuery;
 
-    if (atIndex !== -1) {
-      const emojiHtml = typeof emoji === 'string'
-        ? renderText(emoji, ['emoji_html'])[0] as string
-        : buildCustomEmojiHtml(emoji);
-      setHtml(`${html.substring(0, atIndex)}${emojiHtml}`);
-
-      const messageInput = inputId === EDITABLE_INPUT_ID
-        ? document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR)!
-        : document.getElementById(inputId) as HTMLDivElement;
-
-      requestNextMutation(() => {
-        focusEditableElement(messageInput, true, true);
-      });
+    if (!emojiCode) {
+      return;
     }
+
+    const emojiHtml = typeof emoji === 'string'
+      ? renderText(emoji, ['emoji_html'])[0] as string
+      : buildCustomEmojiHtml(emoji);
+
+    if (isColonQuery) {
+      const atIndex = html.lastIndexOf(':', isForce ? html.lastIndexOf(':') - 1 : undefined);
+      if (atIndex === -1) {
+        return;
+      }
+
+      setHtml(`${html.substring(0, atIndex)}${emojiHtml}`);
+    } else {
+      const lowerCaseHtml = html.toLowerCase();
+      const lowerCaseQuery = emojiCode.toLowerCase();
+      const searchIndex = lowerCaseHtml.lastIndexOf(lowerCaseQuery);
+
+      if (searchIndex === -1) {
+        return;
+      }
+
+      setHtml(`${html.substring(0, searchIndex)}${emojiHtml}${html.substring(searchIndex + emojiCode.length)}`);
+    }
+
+    const messageInput = inputId === EDITABLE_INPUT_ID
+      ? document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR)!
+      : document.getElementById(inputId) as HTMLDivElement;
+
+    requestNextMutation(() => {
+      focusEditableElement(messageInput, true, true);
+    });
 
     updateFiltered(MEMO_EMPTY_ARRAY);
   });
 
   useEffect(() => {
-    const emojiCode = getEmojiCode();
+    const emojiCodeData = getEmojiCode();
+    const emojiCode = emojiCodeData?.code;
+    const isColonQuery = Boolean(emojiCodeData?.isColonQuery);
     if (!emojiCode || !byId) {
       updateFiltered(MEMO_EMPTY_ARRAY);
       return;
     }
 
-    const newShouldAutoInsert = emojiCode.length > 2 && emojiCode.endsWith(':');
+    const newShouldAutoInsert = Boolean(
+      emojiCodeData?.isColonQuery && emojiCode.length > 2 && emojiCode.endsWith(':'),
+    );
 
-    const filter = emojiCode.substring(1, newShouldAutoInsert ? 1 + emojiCode.length - 2 : undefined);
+    const filter = isColonQuery
+      ? emojiCode.substring(1, newShouldAutoInsert ? 1 + emojiCode.length - 2 : undefined)
+      : emojiCode;
     let matched: Emoji[] = MEMO_EMPTY_ARRAY;
 
     if (!filter) {
@@ -170,8 +237,39 @@ export default function useEmojiTooltip(
 
   useEffect(unmarkManuallyClosed, [unmarkManuallyClosed, getHtml]);
 
+  const html = getHtml();
+  const shouldBeOpen = Boolean(filteredEmojis.length || filteredCustomEmojis.length) && !isManuallyClosed;
+
+  useEffect(() => {
+    if (openTooltipTimeoutRef.current) {
+      clearTimeout(openTooltipTimeoutRef.current);
+      openTooltipTimeoutRef.current = undefined;
+    }
+
+    if (!shouldBeOpen) {
+      setIsTooltipVisible(false);
+      return;
+    }
+
+    if (isTooltipVisible) {
+      return;
+    }
+
+    openTooltipTimeoutRef.current = window.setTimeout(() => {
+      setIsTooltipVisible(true);
+      openTooltipTimeoutRef.current = undefined;
+    }, TOOLTIP_OPEN_DEBOUNCE);
+  }, [html, isTooltipVisible, shouldBeOpen]);
+
+  useEffect(() => () => {
+    if (openTooltipTimeoutRef.current) {
+      clearTimeout(openTooltipTimeoutRef.current);
+      openTooltipTimeoutRef.current = undefined;
+    }
+  }, []);
+
   return {
-    isEmojiTooltipOpen: Boolean(filteredEmojis.length || filteredCustomEmojis.length) && !isManuallyClosed,
+    isEmojiTooltipOpen: isTooltipVisible,
     closeEmojiTooltip: markManuallyClosed,
     filteredEmojis,
     filteredCustomEmojis,
@@ -206,67 +304,113 @@ function prepareLibrary(
   const emojis = Object.values(byId);
 
   const byNative = buildCollectionByKey<Emoji>(emojis, 'native');
+  const byNormalizedNative = emojis.reduce((acc, emoji) => {
+    const normalizedNative = normalizeEmojiNativeMemo(emoji.native);
+    if (!normalizedNative || acc[normalizedNative]) {
+      return acc;
+    }
+
+    acc[normalizedNative] = emoji;
+    return acc;
+  }, {} as Record<string, Emoji>);
+
+  const resolveNatives = (natives: string[]) => {
+    const exactMatches = Object.values(pickTruthy(byNative, natives));
+    if (exactMatches.length === natives.length) {
+      return exactMatches;
+    }
+
+    const normalizedMatches = natives.map((native) => {
+      return byNative[native] || byNormalizedNative[normalizeEmojiNativeMemo(native)];
+    }).filter(Boolean);
+
+    return unique(normalizedMatches);
+  };
+
   const baseEmojisByKeyword = baseEmojiKeywords
     ? mapValues(baseEmojiKeywords, (natives) => {
-      return Object.values(pickTruthy(byNative, natives));
+      return resolveNatives(natives);
     })
     : {};
   const emojisByKeyword = emojiKeywords
     ? mapValues(emojiKeywords, (natives) => {
-      return Object.values(pickTruthy(byNative, natives));
+      return resolveNatives(natives);
     })
     : {};
 
   const byKeyword = { ...baseEmojisByKeyword, ...emojisByKeyword };
-  const keywords = ([] as string[]).concat(Object.keys(baseEmojisByKeyword), Object.keys(emojisByKeyword));
-
-  const byName = emojis.reduce((result, emoji) => {
-    emoji.names.forEach((name) => {
-      if (!result[name]) {
-        result[name] = [];
-      }
-
-      result[name].push(emoji);
-    });
-
-    return result;
-  }, {} as Record<string, Emoji[]>);
-
-  const names = Object.keys(byName);
-  const maxKeyLength = keywords.reduce((max, keyword) => Math.max(max, keyword.length), 0);
+  const keywords = Object.keys(byKeyword);
+  const keysByPrefix = buildPrefixIndex(keywords);
 
   return {
     byKeyword,
     keywords,
-    byName,
-    names,
-    maxKeyLength,
+    keysByPrefix,
   };
 }
 
 function searchInLibrary(library: Library, filter: string, limit: number) {
-  const {
-    byKeyword, keywords, byName, names, maxKeyLength,
-  } = library;
+  const { byKeyword, keysByPrefix } = library;
+  const variants = getNormalizedVariants(filter);
+  const scoredByKey: Record<string, number> = {};
+  variants.forEach((variant) => {
+    const prefixedKeys = keysByPrefix[variant];
+    if (!prefixedKeys?.length) {
+      return;
+    }
 
-  let matched: Emoji[] = [];
+    prefixedKeys.forEach((key) => {
+      const score = key.length - variant.length;
+      const prevScore = scoredByKey[key];
+      if (prevScore === undefined || score < prevScore) {
+        scoredByKey[key] = score;
+      }
+    });
+  });
+  const scoredKeys = Object.keys(scoredByKey).map((key) => ({ key, score: scoredByKey[key] }));
 
-  if (filter.length > maxKeyLength) {
-    return MEMO_EMPTY_ARRAY;
+  if (!scoredKeys.length) return MEMO_EMPTY_ARRAY;
+
+  scoredKeys.sort((a, b) => a.score - b.score || a.key.length - b.key.length);
+  const matched = unique(
+    scoredKeys.flatMap(({ key }) => byKeyword[key] || MEMO_EMPTY_ARRAY),
+  );
+
+  return matched.length ? matched.slice(0, limit) : MEMO_EMPTY_ARRAY;
+}
+
+function getNormalizedVariants(query: string) {
+  const normalized = query.toLowerCase().replace(/_/g, ' ').trim();
+  if (!normalized) {
+    return [] as string[];
   }
 
-  const matchedKeywords = keywords.filter((keyword) => keyword.startsWith(filter)).sort();
-  matched = matched.concat(Object.values(pickTruthy(byKeyword, matchedKeywords)).flat());
+  return [normalized];
+}
 
-  // Also search by names, which is useful for non-English languages
-  const matchedNames = names.filter((name) => name.startsWith(filter));
-  matched = matched.concat(Object.values(pickTruthy(byName, matchedNames)).flat());
-
-  matched = unique(matched);
-
-  if (!matched.length) {
-    return MEMO_EMPTY_ARRAY;
+function normalizeEmojiNative(native: string) {
+  try {
+    // Compare by canonical codepoints while ignoring VS16 variation selectors,
+    // including inside ZWJ sequences (e.g. 🤦‍♀️/🤦‍♂️).
+    return nativeToUnified(native.normalize('NFC').replace(/\uFE0F/g, ''));
+  } catch {
+    return native;
   }
+}
 
-  return matched.slice(0, limit);
+function buildPrefixIndex(keywords: string[]) {
+  const keysByPrefix: Record<string, string[]> = {};
+
+  keywords.forEach((keyword) => {
+    for (let i = 1; i <= keyword.length; i++) {
+      const prefix = keyword.substring(0, i);
+      if (!keysByPrefix[prefix]) {
+        keysByPrefix[prefix] = [keyword];
+      } else {
+        keysByPrefix[prefix].push(keyword);
+      }
+    }
+  });
+
+  return keysByPrefix;
 }
