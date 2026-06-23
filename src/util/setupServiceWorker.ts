@@ -2,7 +2,7 @@ import { getActions } from '../global';
 
 import { DEBUG, DEBUG_MORE, IS_TEST } from '../config';
 // eslint-disable-next-line import-x/default
-import serviceWorkerUrl from '../serviceWorker/index.ts?worker&url';
+import serviceWorkerUrl from '../serviceWorker/service.worker.ts?worker&url';
 import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './browser/windowEnvironment';
 import { formatShareText } from './deeplink';
 import { validateFiles } from './files';

@@ -97,6 +97,7 @@ const MAIN_ENTRY_LABEL = '🏠 Main';
 const ENTRY_ORDER = [
   MAIN_ENTRY_KEY,
   'gramjs-worker',
+  'fasttext-worker',
   'media-worker',
   'shared-state-worker',
   'service-worker',
@@ -227,19 +228,19 @@ function analyzeStats(stats: BundleStats) {
     addFileTypeSize(fileTypes, name, size);
     addManualBundleSize(bundles, name, size);
 
-    if (initialFiles.has(name) || getStableAssetName(name) === 'index.css') {
-      mainSize += size;
+    const workerEntry = getWorkerEntry(name, chunkFiles);
+    if (workerEntry) {
+      const previousSize = entries.get(workerEntry.key)?.size || ZERO_SIZE;
+      entries.set(workerEntry.key, {
+        ...workerEntry,
+        size: previousSize + size,
+      });
       return;
     }
 
-    const workerEntry = getWorkerEntry(name, chunkFiles);
-    if (!workerEntry) return;
-
-    const previousSize = entries.get(workerEntry.key)?.size || ZERO_SIZE;
-    entries.set(workerEntry.key, {
-      ...workerEntry,
-      size: previousSize + size,
-    });
+    if (initialFiles.has(name) || getStableAssetName(name) === 'index.css') {
+      mainSize += size;
+    }
   });
 
   entries.set(MAIN_ENTRY_KEY, {
@@ -429,10 +430,18 @@ function createFileTypeStats({ key, label }: (typeof FILE_TYPES)[number]): FileT
 }
 
 function getWorkerEntry(name: string, chunkFiles: Set<string>) {
+  if (/^service\.worker-[\w-]+\.js$/.test(name)) {
+    return { key: 'service-worker', label: '🛠️ Service worker' };
+  }
+
   if (chunkFiles.has(name) && !isWorkerAssetName(name)) return undefined;
 
   if (/^worker-[\w-]+\.js$/.test(name)) {
     return { key: 'gramjs-worker', label: '⚙️ GramJS worker' };
+  }
+
+  if (/^fasttext\.worker-[\w-]+\.js$/.test(name)) {
+    return { key: 'fasttext-worker', label: '🌐 FastText worker' };
   }
 
   if (/^index\.worker-[\w-]+\.js$/.test(name)) {
@@ -443,15 +452,11 @@ function getWorkerEntry(name: string, chunkFiles: Set<string>) {
     return { key: 'shared-state-worker', label: '🔄 Shared state worker' };
   }
 
-  if (/^index-[\w-]+\.js$/.test(name)) {
-    return { key: 'service-worker', label: '🛠️ Service worker' };
-  }
-
   return undefined;
 }
 
 function isWorkerAssetName(name: string) {
-  return /^(?:worker|index\.worker|sharedState\.worker|index)-[\w-]+\.js$/.test(name);
+  return /^(?:worker|fasttext\.worker|index\.worker|sharedState\.worker)-[\w-]+\.js$/.test(name);
 }
 
 function isIgnoredAsset(name: string) {

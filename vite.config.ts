@@ -3,7 +3,7 @@ import { dirname, resolve } from 'path';
 import { bundleStats } from 'rollup-plugin-bundle-stats';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath } from 'url';
-import { defineConfig, loadEnv, normalizePath, type PluginOption, type UserConfig } from 'vite';
+import { defineConfig, loadEnv, normalizePath, type Plugin, type PluginOption, type UserConfig } from 'vite';
 import { type Target, viteStaticCopy } from 'vite-plugin-static-copy';
 import { watchAndRun } from 'vite-plugin-watch-and-run';
 
@@ -17,6 +17,9 @@ const PRODUCTION_URL = 'https://web.telegram.org/a';
 const { version: APP_VERSION } = packageJson;
 const BUNDLE_STATS_OUT_DIR = 'bundle-stats';
 const DEFAULT_BUNDLE_STATS_BASELINE_FILE = 'baseline.json';
+const BUNDLE_STATS_VISUALIZER_FILE = 'visualizer.html';
+const WORKER_BUNDLE_COLLECTOR_PLUGIN_NAME = 'telegram:collect-worker-report-bundle';
+const BUNDLE_REPORT_PLUGIN_SUFFIX = ':with-workers';
 const DEV_WARMUP_CLIENT_FILES = [
   'index.html',
   'src/**/*.{js,jsx,ts,tsx,css,scss}',
@@ -42,6 +45,20 @@ const STATIC_COPY_TARGETS: Target[] = [
   },
 ];
 
+type BundleReportPlugin = {
+  name: string;
+  generateBundle?: unknown;
+};
+
+type BundleReportHook = (
+  this: unknown,
+  outputOptions: unknown,
+  bundle: ReportOutputBundle,
+  isWrite: boolean,
+) => void | Promise<void>;
+
+type ReportOutputBundle = Record<string, unknown>;
+
 export default defineConfig(({ mode }): UserConfig => {
   const env = loadEnv(mode, process.cwd(), '');
   const {
@@ -65,6 +82,7 @@ export default defineConfig(({ mode }): UserConfig => {
   const isDevelopmentMode = mode === 'development';
   const telegramApiId = env.TELEGRAM_API_ID || '';
   const telegramApiHash = env.TELEGRAM_API_HASH || '';
+  const workerReportBundles: ReportOutputBundle[] = [];
   const plugins: PluginOption[] = [
     buildGitInfoPlugin({
       appEnv,
@@ -96,25 +114,31 @@ export default defineConfig(({ mode }): UserConfig => {
   ];
 
   if (bundleStatsVisualizerValue === '1') {
-    plugins.push(visualizer({
+    plugins.push(createBundleReportPlugin(visualizer((outputOptions) => ({
+      filename: resolve(
+        DIR_NAME,
+        outputOptions.dir,
+        BUNDLE_STATS_OUT_DIR,
+        BUNDLE_STATS_VISUALIZER_FILE,
+      ),
       open: true,
       template: 'treemap',
-    }));
+    })), workerReportBundles));
   }
 
   if (bundleStatsValue === '1') {
-    plugins.push(bundleStats({
+    plugins.push(createBundleReportPlugin(bundleStats({
       html: true,
       json: true,
       compare: Boolean(bundleStatsBaselinePath),
       baseline: !bundleStatsBaselinePath, // For master branch upload
       baselineFilepath: bundleStatsBaselinePath || DEFAULT_BUNDLE_STATS_BASELINE_FILE,
       outDir: BUNDLE_STATS_OUT_DIR,
-    }));
+    }), workerReportBundles));
 
     if (bundleStatsBaselinePath) {
       // Write current PR stats for the compact GitHub comment
-      plugins.push(bundleStats({
+      plugins.push(createBundleReportPlugin(bundleStats({
         html: false,
         json: false,
         compare: false,
@@ -122,9 +146,11 @@ export default defineConfig(({ mode }): UserConfig => {
         baselineFilepath: DEFAULT_BUNDLE_STATS_BASELINE_FILE,
         outDir: BUNDLE_STATS_OUT_DIR,
         silent: true,
-      }));
+      }), workerReportBundles));
     }
   }
+
+  const shouldCollectWorkerReportBundles = bundleStatsVisualizerValue === '1' || bundleStatsValue === '1';
 
   if (appEnv !== 'test' && (!telegramApiId || !telegramApiHash)) {
     throw new Error('Missing required Telegram API credentials');
@@ -196,6 +222,9 @@ export default defineConfig(({ mode }): UserConfig => {
       },
     },
     worker: {
+      plugins: shouldCollectWorkerReportBundles ? () => [
+        createWorkerBundleCollectorPlugin(workerReportBundles),
+      ] : undefined,
       rolldownOptions: {
         output: {
           entryFileNames: '[name]-[hash].js',
@@ -205,6 +234,39 @@ export default defineConfig(({ mode }): UserConfig => {
     plugins,
   };
 });
+
+function createBundleReportPlugin(plugin: BundleReportPlugin, workerReportBundles: ReportOutputBundle[]): Plugin {
+  return {
+    name: `${plugin.name}${BUNDLE_REPORT_PLUGIN_SUFFIX}`,
+    async generateBundle(outputOptions, bundle, isWrite) {
+      const generateBundle = plugin.generateBundle as BundleReportHook | undefined;
+
+      await generateBundle?.call(
+        this,
+        outputOptions,
+        mergeOutputBundles(bundle, workerReportBundles),
+        isWrite,
+      );
+    },
+  };
+}
+
+function createWorkerBundleCollectorPlugin(workerReportBundles: ReportOutputBundle[]): Plugin {
+  return {
+    name: WORKER_BUNDLE_COLLECTOR_PLUGIN_NAME,
+    generateBundle(_outputOptions, bundle) {
+      workerReportBundles.push({ ...bundle });
+    },
+  };
+}
+
+function mergeOutputBundles(bundle: ReportOutputBundle, workerReportBundles: ReportOutputBundle[]): ReportOutputBundle {
+  const result: ReportOutputBundle = {};
+
+  Object.assign(result, bundle, ...workerReportBundles);
+
+  return result;
+}
 
 function setViteEnv(env: Record<string, string>) {
   Object.entries(env).forEach(([key, value]) => {
