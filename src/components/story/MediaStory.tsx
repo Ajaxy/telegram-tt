@@ -27,6 +27,7 @@ import styles from './MediaStory.module.scss';
 
 interface OwnProps {
   story: ApiTypeStory;
+  className?: string;
   isArchive?: boolean;
 }
 
@@ -37,7 +38,7 @@ interface StateProps {
 }
 
 function MediaStory({
-  story, isProtected, isArchive, isPinned, canPin,
+  story, className, isProtected, isArchive, isPinned, canPin,
 }: OwnProps & StateProps) {
   const {
     openStoryViewer,
@@ -122,7 +123,7 @@ function MediaStory({
   return (
     <div
       ref={containerRef}
-      className={buildClassName(styles.root, 'scroll-item')}
+      className={buildClassName(styles.root, 'scroll-item', className)}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
       onContextMenu={handleContextMenu}

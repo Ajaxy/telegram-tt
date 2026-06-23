@@ -16,6 +16,8 @@
     z-index: 2;
     inset: 0;
 
+    border-radius: inherit;
+
     opacity: 0;
     background: rgba(0, 0, 0, 0.16);
     box-shadow: inset 0 0 0 0.125rem var(--color-primary);
@@ -52,4 +54,20 @@
 
     object-fit: cover;
   }
+}
+
+.roundTopStart {
+  border-start-start-radius: var(--border-radius-island);
+}
+
+.roundTopEnd {
+  border-start-end-radius: var(--border-radius-island);
+}
+
+.roundBottomStart {
+  border-end-start-radius: var(--border-radius-island);
+}
+
+.roundBottomEnd {
+  border-end-end-radius: var(--border-radius-island);
 }

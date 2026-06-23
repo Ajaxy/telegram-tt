@@ -35,6 +35,7 @@ import './Media.scss';
 type OwnProps = {
   message: ApiMessage;
   idPrefix?: string;
+  className?: string;
   isProtected?: boolean;
   canAutoPlay?: boolean;
   observeIntersection?: ObserveFn;
@@ -45,6 +46,7 @@ type OwnProps = {
 const Media = ({
   message,
   idPrefix = 'shared-media',
+  className,
   isProtected,
   canAutoPlay,
   observeIntersection,
@@ -91,7 +93,7 @@ const Media = ({
     <div
       ref={ref}
       id={`${idPrefix}${getMessageHtmlId(message.id)}`}
-      className={buildClassName('Media scroll-item', contextMenuAnchor && 'has-menu-open')}
+      className={buildClassName('Media scroll-item', className, contextMenuAnchor && 'has-menu-open')}
       onClick={onClick ? handleClick : undefined}
       onMouseDown={handleBeforeContextMenu}
       onMouseOver={!IS_TOUCH_ENV ? markMouseOver : undefined}
