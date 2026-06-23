@@ -139,19 +139,6 @@ export function getUploadPartSize(fileSize: number) {
   throw new Error('File size too large');
 }
 
-export function getMessageId(message: number | Api.TypeMessage) {
-  if (message === undefined) {
-    return undefined;
-  }
-  if (typeof message === 'number') {
-    return message;
-  }
-  if (message.SUBCLASS_OF_ID === 0x790009e3) { // crc32(b'Message')
-    return message.id;
-  }
-  throw new Error(`Invalid message type: ${message.constructor.name}`);
-}
-
 /**
  * Gets the display name for the given :tl:`User`,
  :tl:`Chat` or :tl:`Channel`. Returns an empty string otherwise

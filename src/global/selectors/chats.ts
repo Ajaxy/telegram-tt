@@ -152,18 +152,6 @@ export function selectChatFolder<T extends GlobalState>(global: T, folderId: num
   return global.chatFolders.byId[folderId];
 }
 
-export function selectTotalChatCount<T extends GlobalState>(global: T, listType: 'active' | 'archived'): number {
-  const { totalCount } = global.chats;
-  const allChatsCount = totalCount.all;
-  const archivedChatsCount = totalCount.archived || 0;
-
-  if (listType === 'archived') {
-    return archivedChatsCount;
-  }
-
-  return allChatsCount ? allChatsCount - archivedChatsCount : 0;
-}
-
 export function selectIsChatPinned<T extends GlobalState>(
   global: T, chatId: string, folderId = ALL_FOLDER_ID,
 ): boolean {

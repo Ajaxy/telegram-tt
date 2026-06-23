@@ -303,12 +303,6 @@ function renderMessagePart({
   return renderText(content, filters, params);
 }
 
-export function insertTextEntities(entities: ApiMessageEntity[], newEntities: ApiMessageEntity[]) {
-  return newEntities.reduce((acc, newEntity) => {
-    return insertTextEntity(acc, newEntity);
-  }, entities);
-}
-
 export function insertTextEntity(entities: ApiMessageEntity[], newEntity: ApiMessageEntity) {
   const resultEntities: ApiMessageEntity[] = [];
 

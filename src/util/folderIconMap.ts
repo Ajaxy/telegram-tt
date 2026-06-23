@@ -14,7 +14,3 @@ export const folderIconMap: Record<string, IconName> = {
 export const emojiToFolderIcon = (emoji: string): IconName | undefined => {
   return folderIconMap[emoji];
 };
-
-export const folderIconToEmoji = (icon: IconName): string | undefined => {
-  return Object.keys(folderIconMap).find((key) => folderIconMap[key] === icon);
-};

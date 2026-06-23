@@ -199,7 +199,6 @@ export const UNMUTE_TIMESTAMP = 0;
 export const ANIMATION_END_DELAY = 100;
 export const ANIMATION_WAVE_MIN_INTERVAL = 200;
 export const MESSAGE_APPEARANCE_DELAY = 10;
-export const PAID_SEND_DELAY = 5000;
 
 export const SCROLL_MIN_DURATION = 300;
 export const SCROLL_MAX_DURATION = 600;
@@ -370,7 +369,6 @@ export const FEEDBACK_URL = 'https://bugs.telegram.org/?tag_ids=41&sort=time';
 export const FAQ_URL = 'https://telegram.org/faq';
 export const PRIVACY_URL = 'https://telegram.org/privacy';
 export const MINI_APP_TOS_URL = 'https://telegram.org/tos/mini-apps';
-export const FRAGMENT_ADS_URL = 'https://fragment.com/ads';
 export const GENERAL_TOPIC_ID = 1;
 export const FRESH_AUTH_PERIOD = 86400; // 1 day
 export const GIVEAWAY_BOOST_PER_PREMIUM = 4;

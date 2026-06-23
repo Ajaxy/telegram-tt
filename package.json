@@ -68,7 +68,6 @@
     "@typescript-eslint/eslint-plugin": "^8.58.0",
     "@typescript-eslint/parser": "^8.58.0",
     "autoprefixer": "^10.4.27",
-    "babel-plugin-transform-import-meta": "^2.3.3",
     "cross-env": "^10.1.0",
     "eslint": "^10.1.0",
     "eslint-import-resolver-typescript": "^4.4.4",
