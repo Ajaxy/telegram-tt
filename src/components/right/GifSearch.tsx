@@ -1,5 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
-import { memo, useCallback, useRef } from '../../lib/teact/teact';
+import { memo, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiChatFullInfo, ApiVideo } from '../../api/types';
@@ -22,14 +21,15 @@ import buildClassName from '../../util/buildClassName';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 import useSchedule from '../../hooks/useSchedule';
 
 import GifButton from '../common/GifButton';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import Loading from '../ui/Loading';
 
-import './GifSearch.scss';
+import styles from './GifSearch.module.scss';
 
 export type OwnProps = {
   onClose: NoneToVoidFunction;
@@ -51,7 +51,7 @@ type StateProps = {
 const PRELOAD_BACKWARDS = 96; // GIF Search bot results are multiplied by 24
 const INTERSECTION_DEBOUNCE = 300;
 
-const GifSearch: FC<OwnProps & StateProps> = ({
+const GifSearch = ({
   isActive,
   query,
   results,
@@ -63,7 +63,7 @@ const GifSearch: FC<OwnProps & StateProps> = ({
   canPostInChat,
   currentMessageList,
   onClose,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     searchMoreGifs,
     sendMessage,
@@ -81,7 +81,7 @@ const GifSearch: FC<OwnProps & StateProps> = ({
   const canSendGifs = canPostInChat
     && getAllowedAttachmentOptions(chat, chatFullInfo, isChatWithBot, isSavedMessages).canSendGifs;
 
-  const handleGifClick = useCallback((gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => {
+  const handleGifClick = useLastCallback((gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => {
     if (canSendGifs) {
       if (!currentMessageList) {
         return;
@@ -105,13 +105,13 @@ const GifSearch: FC<OwnProps & StateProps> = ({
     if (IS_TOUCH_ENV) {
       setGifSearchQuery({ query: undefined });
     }
-  }, [canSendGifs, currentMessageList, requestCalendar]);
+  });
 
-  const handleSearchMoreGifs = useCallback(() => {
+  const handleSearchMoreGifs = useLastCallback(() => {
     searchMoreGifs();
-  }, [searchMoreGifs]);
+  });
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,
@@ -131,7 +131,7 @@ const GifSearch: FC<OwnProps & StateProps> = ({
 
     if (!results.length) {
       return (
-        <p className="helper-text" dir="auto">{lang('NoGIFsFound')}</p>
+        <p className={styles.helperText} dir="auto">{lang('NoGIFsFound')}</p>
       );
     }
 
@@ -139,6 +139,7 @@ const GifSearch: FC<OwnProps & StateProps> = ({
       <GifButton
         key={gif.id}
         gif={gif}
+        className={styles.gifButton}
         observeIntersection={observeIntersection}
         onClick={canSendGifs ? handleGifClick : undefined}
         isSavedMessages={isSavedMessages}
@@ -149,10 +150,10 @@ const GifSearch: FC<OwnProps & StateProps> = ({
   const hasResults = Boolean(query !== undefined && results && results.length);
 
   return (
-    <div className="GifSearch" dir={lang.isRtl ? 'rtl' : undefined}>
+    <div className={styles.root} dir={lang.isRtl ? 'rtl' : undefined}>
       <InfiniteScroll
         ref={containerRef}
-        className={buildClassName('gif-container custom-scroll', hasResults && 'grid')}
+        className={buildClassName(styles.container, 'custom-scroll', hasResults && styles.grid)}
         items={results}
         itemSelector=".GifButton"
         preloadBackwards={PRELOAD_BACKWARDS}

@@ -1,0 +1,36 @@
+.root {
+  height: 100%;
+  padding: 0.25rem;
+}
+
+.container {
+  overflow: auto;
+  height: 100%;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.25rem;
+  align-content: start;
+}
+
+.gifButton {
+  aspect-ratio: 1;
+}
+
+.helperText {
+  margin-top: 2rem;
+  color: var(--color-text-meta);
+  text-align: center;
+}
+
+@supports (display: grid-lanes) {
+  .grid {
+    display: grid-lanes;
+  }
+
+  .gifButton {
+    aspect-ratio: var(--gif-aspect-ratio, 1);
+  }
+}

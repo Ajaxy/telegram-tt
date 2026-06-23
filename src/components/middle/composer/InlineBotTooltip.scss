@@ -48,6 +48,10 @@
       }
     }
 
+    .GifButton {
+      aspect-ratio: 1;
+    }
+
     @media (max-width: 600px) {
       grid-template-columns: repeat(4, 1fr);
     }

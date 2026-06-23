@@ -155,16 +155,6 @@
     color: var(--color-text);
   }
 
-  .picker-disabled {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    height: var(--symbol-menu-height);
-
-    color: var(--color-text-secondary);
-  }
-
   .symbol-close-button {
     position: absolute;
     top: max(0.25rem, env(safe-area-inset-top));

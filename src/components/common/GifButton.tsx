@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import type React from '../../lib/teact/teact';
 import {
   memo, useEffect, useRef, useState,
@@ -27,7 +26,7 @@ import MenuItem from '../ui/MenuItem';
 import OptimizedVideo from '../ui/OptimizedVideo';
 import Spinner from '../ui/Spinner';
 
-import './GifButton.scss';
+import styles from './GifButton.module.scss';
 
 type OwnProps = {
   gif: ApiVideo;
@@ -40,7 +39,7 @@ type OwnProps = {
   onAddCaption?: (gif: ApiVideo) => void;
 };
 
-const GifButton: FC<OwnProps> = ({
+const GifButton = ({
   gif,
   isDisabled,
   className,
@@ -49,7 +48,7 @@ const GifButton: FC<OwnProps> = ({
   onClick,
   onUnsaveClick,
   onAddCaption,
-}) => {
+}: OwnProps) => {
   const ref = useRef<HTMLDivElement>();
 
   const oldLang = useOldLang();
@@ -79,7 +78,7 @@ const GifButton: FC<OwnProps> = ({
 
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => ref.current!.closest('.custom-scroll, .no-scrollbar'));
-  const getMenuElement = useLastCallback(() => ref.current!.querySelector('.gif-context-menu .bubble'));
+  const getMenuElement = useLastCallback(() => ref.current!.querySelector(`.${styles.contextMenu} .bubble`));
   const getLayout = useLastCallback(() => ({ shouldAvoidNegativePosition: true }));
 
   const handleClick = useLastCallback(() => {
@@ -132,26 +131,28 @@ const GifButton: FC<OwnProps> = ({
 
   const fullClassName = buildClassName(
     'GifButton',
-    gif.width && gif.height && gif.width < gif.height ? 'vertical' : 'horizontal',
-    onClick && 'interactive',
+    styles.root,
+    onClick && styles.interactive,
     className,
   );
+  const aspectRatioStyle = gif.width && gif.height ? `--gif-aspect-ratio: ${gif.width} / ${gif.height}` : undefined;
 
   return (
     <div
       ref={ref}
       className={fullClassName}
+      style={aspectRatioStyle}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
       {!IS_TOUCH_ENV && onUnsaveClick && (
         <Button
-          className="gif-unsave-button"
+          className={styles.unsaveButton}
           color="dark"
           pill
           iconName="close"
-          iconClassName="gif-unsave-button-icon"
+          iconClassName={styles.unsaveButtonIcon}
           noFastClick
           onClick={handleUnsaveClick}
         />
@@ -159,14 +160,14 @@ const GifButton: FC<OwnProps> = ({
       {withThumb && (
         <canvas
           ref={thumbRef}
-          className="thumbnail"
+          className={styles.thumbnail}
         />
       )}
       {previewBlobUrl && !isVideoReady && (
         <img
           src={previewBlobUrl}
           alt=""
-          className="preview"
+          className={styles.preview}
           draggable={false}
         />
       )}
@@ -180,12 +181,13 @@ const GifButton: FC<OwnProps> = ({
           disablePictureInPicture
           playsInline
           preload="none"
+          className={styles.video}
 
           {...bufferingHandlers}
         />
       )}
       {shouldRenderSpinner && (
-        <Spinner color={previewBlobUrl || withThumb ? 'white' : 'black'} />
+        <Spinner className={styles.spinner} color={previewBlobUrl || withThumb ? 'white' : 'black'} />
       )}
       {onClick && contextMenuAnchor !== undefined && (
         <Menu
@@ -195,7 +197,7 @@ const GifButton: FC<OwnProps> = ({
           getRootElement={getRootElement}
           getMenuElement={getMenuElement}
           getLayout={getLayout}
-          className="gif-context-menu"
+          className={styles.contextMenu}
           autoClose
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}

@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -10,6 +9,7 @@ import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
@@ -17,7 +17,7 @@ import GifButton from '../../common/GifButton';
 import Loading from '../../ui/Loading';
 import Transition from '../../ui/Transition.tsx';
 
-import './GifPicker.scss';
+import styles from './GifPicker.module.scss';
 
 type OwnProps = {
   className: string;
@@ -34,7 +34,7 @@ type StateProps = {
 
 const INTERSECTION_DEBOUNCE = 300;
 
-const GifPicker: FC<OwnProps & StateProps> = ({
+const GifPicker = ({
   className,
   loadAndPlay,
   canSendGifs,
@@ -42,7 +42,7 @@ const GifPicker: FC<OwnProps & StateProps> = ({
   isSavedMessages,
   onGifSelect,
   onGifAddCaption,
-}) => {
+}: OwnProps & StateProps) => {
   const { loadSavedGifs, saveGif } = getActions();
 
   const containerRef = useRef<HTMLDivElement>();
@@ -63,23 +63,25 @@ const GifPicker: FC<OwnProps & StateProps> = ({
 
   const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
   const isLoading = canSendGifs && (!canRenderContents || !savedGifs);
+  const lang = useLang();
 
   return (
     <Transition
       ref={containerRef}
-      className={buildClassName('GifPicker', className, IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
-      slideClassName="GifPickerGrid"
+      className={buildClassName(styles.root, className, IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
+      slideClassName={styles.grid}
       activeKey={isLoading ? 0 : 1}
       name="fade"
       shouldCleanup
     >
       {!canSendGifs ? (
-        <div className="picker-disabled">Sending GIFs is not allowed in this chat.</div>
+        <div className={styles.pickerDisabled}>{lang('GifPickerBlocked')}</div>
       ) : canRenderContents && savedGifs && savedGifs.length ? (
         savedGifs.map((gif) => (
           <GifButton
             key={gif.id}
             gif={gif}
+            className={styles.gifButton}
             observeIntersection={observeIntersection}
             isDisabled={!loadAndPlay}
             isSavedMessages={isSavedMessages}
@@ -89,9 +91,9 @@ const GifPicker: FC<OwnProps & StateProps> = ({
           />
         ))
       ) : canRenderContents && savedGifs ? (
-        <div className="picker-disabled">No saved GIFs.</div>
+        <div className={styles.pickerDisabled}>{lang('GifPickerEmpty')}</div>
       ) : (
-        <Loading color="yellow" />
+        <Loading className={styles.loading} color="yellow" />
       )}
     </Transition>
   );
