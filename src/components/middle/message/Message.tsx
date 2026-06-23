@@ -733,11 +733,12 @@ const Message = ({
     if (hasSummary && isShowingSummary && !summary) {
       summarizeMessage({
         chatId,
-        id: message.id,
+        id: messageId,
         toLanguageCode: requestedTranslationLanguage,
+        onError: hideSummary,
       });
     }
-  }, [hasSummary, chatId, message.id, requestedTranslationLanguage, isShowingSummary, summary]);
+  }, [hasSummary, chatId, messageId, requestedTranslationLanguage, isShowingSummary, summary, hideSummary]);
 
   const handleEffectClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();

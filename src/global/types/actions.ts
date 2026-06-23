@@ -1589,6 +1589,7 @@ export interface ActionPayloads {
     chatId: string;
     id: number;
     toLanguageCode?: string;
+    onError?: NoneToVoidFunction;
   };
 
   // Reactions

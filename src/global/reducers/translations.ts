@@ -276,8 +276,12 @@ export function updateMessageSummary<T extends GlobalState>(
 }
 
 export function clearMessageSummary<T extends GlobalState>(
-  global: T, chatId: string, messageId: number,
+  global: T, chatId: string, messageId: number, toLanguageCode?: string,
 ) {
+  if (toLanguageCode) {
+    return updateMessageTranslation(global, chatId, messageId, toLanguageCode, { summary: undefined });
+  }
+
   const chatSummaries = global.messages.byChatId[chatId]?.summaryById;
   if (!chatSummaries) return global;
 

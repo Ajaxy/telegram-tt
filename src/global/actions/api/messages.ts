@@ -2955,7 +2955,9 @@ addActionHandler('translateMessages', (global, actions, payload): ActionReturnTy
 });
 
 addActionHandler('summarizeMessage', async (global, actions, payload): Promise<void> => {
-  const { chatId, id, toLanguageCode } = payload;
+  const {
+    chatId, id, toLanguageCode, onError,
+  } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
@@ -2975,9 +2977,9 @@ addActionHandler('summarizeMessage', async (global, actions, payload): Promise<v
   const result = await callApi('fetchMessageSummary', { chat, id, toLanguageCode: languageCode, tone: apiTone });
   if (!result) {
     global = getGlobal();
-    global = updateChatMessage(global, chatId, id, { summaryLanguageCode: undefined });
-    global = clearMessageSummary(global, chatId, id);
+    global = clearMessageSummary(global, chatId, id, toLanguageCode);
     setGlobal(global);
+    onError?.();
     return;
   }
 
