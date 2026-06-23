@@ -1,7 +1,10 @@
+import type Color from 'colorjs.io';
+
 import { animate } from '../../util/animation';
 import {
   IS_ANDROID, IS_IOS, IS_SAFARI,
 } from '../../util/browser/windowEnvironment';
+import { convertSrgbChannel } from '../../util/colors';
 import cycleRestrict from '../../util/cycleRestrict';
 import Deferred from '../../util/Deferred';
 import generateUniqueId from '../../util/generateUniqueId';
@@ -124,7 +127,7 @@ class RLottie {
     private renderId: string,
     private params: Params,
     viewId: string = generateUniqueId(),
-    private customColor?: [number, number, number],
+    private customColor?: Color,
     onLoad?: NoneToVoidFunction | undefined,
     private onEnded?: (isDestroyed?: boolean) => void,
     private onLoop?: () => void,
@@ -385,7 +388,7 @@ class RLottie {
     this.cacheModulo = isLowPriority ? LOW_PRIORITY_CACHE_MODULO : HIGH_PRIORITY_CACHE_MODULO;
   }
 
-  setColor(newColor: [number, number, number] | undefined) {
+  setColor(newColor: Color | undefined) {
     this.customColor = newColor;
   }
 
@@ -399,7 +402,7 @@ class RLottie {
         this.tgsUrl,
         this.imgSize,
         this.params.isLowPriority || false,
-        this.customColor,
+        this.customColor?.to('srgb').coords.map(convertSrgbChannel) as [number, number, number] | undefined,
         this.onRendererInit.bind(this),
       ],
     });

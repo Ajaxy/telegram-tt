@@ -1,6 +1,4 @@
-import type { ChangeEvent } from 'react';
-import type { FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
+import Color from 'colorjs.io';
 import {
   memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -13,9 +11,11 @@ import { selectTheme, selectThemeValues } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { captureEvents } from '../../../util/captureEvents';
 import {
-  getPatternColor, hex2rgb, hsv2rgb, rgb2hex, rgb2hsv,
+  buildColorFromHex,
+  buildHexFromColor,
+  convertSrgbChannel,
+  getPatternColor,
 } from '../../../util/colors';
-import { pick } from '../../../util/iteratees';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -37,29 +37,36 @@ type StateProps = {
 
 interface CanvasRects {
   colorRect: {
-    offsetLeft: number;
+    left: number;
     top: number;
     width: number;
     height: number;
   };
   hueRect: {
-    offsetLeft: number;
+    left: number;
     width: number;
   };
 }
 
-const DEFAULT_HSV = rgb2hsv(hex2rgb('e6ebee'));
+const DEFAULT_BACKGROUND_COLOR = 'e6ebee';
+const RGB_CHANNEL_MAX = 255;
+const HSV_HUE_MAX = 360;
+const COLOR_PERCENT_MAX = 100;
+const RGB_INPUT_MAX_LENGTH = 13;
+const HEX_INPUT_MAX_LENGTH = 6;
+const RGB_COLOR_REGEX = /^(\d{1,3}),\s?(\d{1,3}),\s?(\d{1,3})$/;
+const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 const PREDEFINED_COLORS = [
   '#e6ebee', '#b2cee1', '#008dd0', '#c6e7cb', '#c4e1a6', '#60b16e',
   '#ccd0af', '#a6a997', '#7a7072', '#fdd7af', '#fdb76e', '#dd8851',
 ];
 
-const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
+const SettingsGeneralBackgroundColor = ({
   isActive,
   onReset,
   theme,
   backgroundColor,
-}) => {
+}: OwnProps & StateProps) => {
   const { setThemeSettings } = getActions();
 
   const themeRef = useRef<ThemeKey>();
@@ -69,12 +76,12 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
   const huePickerRef = useRef<HTMLDivElement>();
   const isFirstRunRef = useRef(true);
 
-  const [hsv, setHsv] = useState(() => getInitialHsv(backgroundColor));
+  const [color, setColor] = useState(() => getInitialColor(backgroundColor));
   // Cache for drag handlers
-  const hsvRef = useRef(hsv);
+  const colorRef = useRef(color);
   useEffect(() => {
-    hsvRef.current = hsv;
-  }, [hsv]);
+    colorRef.current = color;
+  }, [color]);
 
   const [isDragging, markIsDragging, unmarkIsDragging] = useFlag();
   const [rgbInput, setRgbInput] = useState('');
@@ -85,27 +92,39 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
 
   // Setup: cache rects, subscribe for drag events
   useEffect(() => {
-    // We use `offsetLeft` instead of `left` to support screen transition
-    const colorRect = {
-      offsetLeft: colorPickerRef.current!.offsetLeft,
-      ...pick(colorPickerRef.current!.getBoundingClientRect(), ['top', 'width', 'height']),
-    };
-    const hueRect = {
-      offsetLeft: huePickerRef.current!.offsetLeft,
-      ...pick(huePickerRef.current!.getBoundingClientRect(), ['width']),
-    };
+    function updateRects() {
+      const colorBounds = colorPickerRef.current!.getBoundingClientRect();
+      const hueBounds = huePickerRef.current!.getBoundingClientRect();
 
-    rectsRef.current = { colorRect, hueRect };
+      rectsRef.current = {
+        colorRect: {
+          left: colorBounds.left + window.scrollX,
+          top: colorBounds.top + window.scrollY,
+          width: colorBounds.width,
+          height: colorBounds.height,
+        },
+        hueRect: {
+          left: hueBounds.left + window.scrollX,
+          width: hueBounds.width,
+        },
+      };
+
+      return rectsRef.current;
+    }
+
+    updateRects();
 
     function handleColorDrag(e: MouseEvent | RealTouchEvent) {
+      const rects = updateRects();
+      const { colorRect } = rects;
       const colorPosition = [
-        Math.min(Math.max(0, e.pageX! - colorRect.offsetLeft), colorRect.width - 1),
-        Math.min(Math.max(0, e.pageY! - colorRect.top + containerRef.current!.scrollTop), colorRect.height - 1),
+        Math.min(Math.max(0, e.pageX! - colorRect.left), colorRect.width - 1),
+        Math.min(Math.max(0, e.pageY! - colorRect.top), colorRect.height - 1),
       ];
 
-      const { huePosition } = hsv2positions(hsvRef.current, rectsRef.current!);
+      const { huePosition } = buildPositionsFromColor(colorRef.current, rects);
 
-      setHsv(positions2hsv({ colorPosition, huePosition }, rectsRef.current!));
+      setColor(buildColorFromPositions({ colorPosition, huePosition }, rects));
       markIsDragging();
 
       return true;
@@ -121,10 +140,11 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
     });
 
     function handleHueDrag(e: MouseEvent | RealTouchEvent) {
-      const { colorPosition } = hsv2positions(hsvRef.current, rectsRef.current!);
-      const huePosition = Math.min(Math.max(0, e.pageX! - hueRect.offsetLeft), hueRect.width - 1);
+      const rects = updateRects();
+      const { colorPosition } = buildPositionsFromColor(colorRef.current, rects);
+      const huePosition = Math.min(Math.max(0, e.pageX! - rects.hueRect.left), rects.hueRect.width - 1);
 
-      setHsv(positions2hsv({ colorPosition, huePosition }, rectsRef.current!));
+      setColor(buildColorFromPositions({ colorPosition, huePosition }, rects));
       markIsDragging();
 
       return true;
@@ -140,30 +160,34 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
     });
   }, [markIsDragging, unmarkIsDragging]);
 
-  const { colorPosition = [0, 0], huePosition = 0 } = rectsRef.current ? hsv2positions(hsv, rectsRef.current) : {};
-  const hex = rgb2hex(hsv2rgb(hsv));
-  const hue = hsv[0];
-  const hueHex = rgb2hex(hsv2rgb([hue, 1, 1]));
+  const { colorPosition = [0, 0], huePosition = 0 } = rectsRef.current
+    ? buildPositionsFromColor(color, rectsRef.current) : {};
+  const hex = buildHexFromColor(color);
+  const [hueCoord] = color.to('hsv').coords;
+  const hue = hueCoord || 0;
+  const hueHex = buildHexFromColor(
+    new Color('hsv', [hue, COLOR_PERCENT_MAX, COLOR_PERCENT_MAX]),
+  );
 
-  // Save value and update inputs when HSL changes
+  // Save value and update inputs when color changes
   useEffect(() => {
-    const rgb = hsv2rgb(hsv);
-    const color = rgb2hex(rgb);
+    const rgb = color.to('srgb').coords.map(convertSrgbChannel);
+    const hexColor = buildHexFromColor(color);
 
     setRgbInput(rgb.join(', '));
-    setHexInput(color);
+    setHexInput(hexColor);
 
     if (!isFirstRunRef.current) {
-      const patternColor = getPatternColor(rgb);
+      const patternColor = getPatternColor(color);
       setThemeSettings({
         theme: themeRef.current!,
         background: undefined,
-        backgroundColor: color,
+        backgroundColor: hexColor,
         patternColor,
       });
     }
     isFirstRunRef.current = false;
-  }, [hsv, setThemeSettings]);
+  }, [color, setThemeSettings]);
 
   // Redraw color picker when hue changes
   useEffect(() => {
@@ -175,29 +199,36 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
     drawHue(huePickerRef.current!.firstChild as HTMLCanvasElement);
   }, []);
 
-  const handleRgbChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const rgbValue = e.currentTarget.value.replace(/[^\d, ]/g, '').slice(0, 13);
+  const handleRgbChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const rgbValue = e.currentTarget.value.replace(/[^\d, ]/g, '').slice(0, RGB_INPUT_MAX_LENGTH);
+    const rgbMatch = rgbValue.match(RGB_COLOR_REGEX);
 
-    if (rgbValue.match(/^\d{1,3},\s?\d{1,3},\s?\d{1,3}$/)) {
-      const rgb = rgbValue.split(',').map((channel) => Number(channel.trim())) as [number, number, number];
-      setHsv(rgb2hsv(rgb));
+    if (rgbMatch) {
+      const red = Number(rgbMatch[1].trim());
+      const green = Number(rgbMatch[2].trim());
+      const blue = Number(rgbMatch[3].trim());
+      setColor(new Color('srgb', [
+        red / RGB_CHANNEL_MAX,
+        green / RGB_CHANNEL_MAX,
+        blue / RGB_CHANNEL_MAX,
+      ]));
     }
 
     e.currentTarget.value = rgbValue;
   }, []);
 
-  const handleHexChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const hexValue = e.currentTarget.value.replace(/[^0-9a-fA-F]/g, '').slice(0, 6);
+  const handleHexChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const hexValue = e.currentTarget.value.replace(/[^0-9a-fA-F]/g, '').slice(0, HEX_INPUT_MAX_LENGTH);
 
-    if (hexValue.match(/^#?[0-9a-fA-F]{6}$/)) {
-      setHsv(rgb2hsv(hex2rgb(hexValue)));
+    if (HEX_COLOR_REGEX.test(hexValue)) {
+      setColor(buildColorFromHex(hexValue));
     }
 
     e.currentTarget.value = hexValue;
   }, []);
 
   const handlePredefinedColorClick = useCallback((e: React.MouseEvent<HTMLInputElement>) => {
-    setHsv(rgb2hsv(hex2rgb(e.currentTarget.dataset.color!)));
+    setColor(buildColorFromHex(e.currentTarget.dataset.color!));
   }, []);
 
   const className = buildClassName(
@@ -233,11 +264,11 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
         </div>
       </Island>
       <div className="predefined-colors">
-        {PREDEFINED_COLORS.map((color) => (
+        {PREDEFINED_COLORS.map((predefinedColor) => (
           <div
-            className={buildClassName('predefined-color', color === hex ? 'active' : undefined)}
-            data-color={color}
-            style={`background-color: ${color};`}
+            className={buildClassName('predefined-color', predefinedColor === hex ? 'active' : undefined)}
+            data-color={predefinedColor}
+            style={`background-color: ${predefinedColor};`}
             onClick={handlePredefinedColorClick}
           />
         ))}
@@ -246,31 +277,32 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
   );
 };
 
-function getInitialHsv(backgroundColor?: string) {
-  return backgroundColor?.startsWith('#')
-    ? rgb2hsv(hex2rgb(backgroundColor))
-    : DEFAULT_HSV;
+function getInitialColor(backgroundColor?: string) {
+  const color = backgroundColor?.startsWith('#') ? backgroundColor : DEFAULT_BACKGROUND_COLOR;
+  return buildColorFromHex(color);
 }
 
-function hsv2positions(hsv: [number, number, number], rects: CanvasRects) {
+function buildPositionsFromColor(color: Color, rects: CanvasRects) {
+  const [hue, saturation, value] = color.to('hsv').coords;
+
   return {
     colorPosition: [
-      Math.round((hsv[1]) * (rects.colorRect.width - 1)),
-      Math.round((1 - hsv[2]) * (rects.colorRect.height - 1)),
+      Math.round((saturation! / COLOR_PERCENT_MAX) * (rects.colorRect.width - 1)),
+      Math.round((1 - value! / COLOR_PERCENT_MAX) * (rects.colorRect.height - 1)),
     ],
-    huePosition: Math.round(hsv[0] * (rects.hueRect.width - 1)),
+    huePosition: Math.round(((hue || 0) / HSV_HUE_MAX) * (rects.hueRect.width - 1)),
   };
 }
 
-function positions2hsv(
+function buildColorFromPositions(
   { colorPosition, huePosition }: { colorPosition: number[]; huePosition: number },
   rects: CanvasRects,
-): [number, number, number] {
-  return [
-    huePosition / (rects.hueRect.width - 1),
-    colorPosition[0] / (rects.colorRect.width - 1),
-    1 - colorPosition[1] / (rects.colorRect.height - 1),
-  ];
+) {
+  return new Color('hsv', [
+    (huePosition / (rects.hueRect.width - 1)) * HSV_HUE_MAX,
+    (colorPosition[0] / (rects.colorRect.width - 1)) * COLOR_PERCENT_MAX,
+    (1 - colorPosition[1] / (rects.colorRect.height - 1)) * COLOR_PERCENT_MAX,
+  ]);
 }
 
 function drawColor(
@@ -279,72 +311,83 @@ function drawColor(
   colorCtxRef: React.RefObject<CanvasRenderingContext2D | undefined>,
   rectsRef: React.RefObject<CanvasRects | undefined>,
 ) {
-  let w: number;
-  let h: number;
-  let ctx: CanvasRenderingContext2D;
+  let width: number;
+  let height: number;
+  let context: CanvasRenderingContext2D;
 
   if (!colorCtxRef.current || !rectsRef.current) {
     // First run
-    w = canvas.offsetWidth;
-    h = canvas.offsetHeight;
-    ctx = canvas.getContext('2d')!;
+    width = canvas.offsetWidth;
+    height = canvas.offsetHeight;
+    context = canvas.getContext('2d')!;
 
-    canvas.width = w;
-    canvas.height = h;
+    canvas.width = width;
+    canvas.height = height;
 
-    colorCtxRef.current = ctx;
+    colorCtxRef.current = context;
   } else {
-    w = rectsRef.current.colorRect.width;
-    h = rectsRef.current.colorRect.height;
-    ctx = colorCtxRef.current;
+    width = rectsRef.current.colorRect.width;
+    height = rectsRef.current.colorRect.height;
+    context = colorCtxRef.current;
   }
 
-  const imgData = ctx!.createImageData(w, h);
-  const pixels = imgData.data;
-  const col = hsv2rgb([hue, 1, 1]);
+  const imageData = context!.createImageData(width, height);
+  const pixels = imageData.data;
+  const [red, green, blue] = new Color('hsv', [hue, COLOR_PERCENT_MAX, COLOR_PERCENT_MAX])
+    .to('srgb')
+    .coords
+    .map(convertSrgbChannel);
 
   let index = 0;
 
-  for (let y = 0; y < h; y++) {
-    const perY = 1 - y / (h - 1);
-    const st = [255 * perY, 255 * perY, 255 * perY];
-    const ed = [col[0] * perY, col[1] * perY, col[2] * perY];
-    for (let x = 0; x < w; x++) {
-      const perX = x / (w - 1);
-      pixels[index++] = st[0] + (ed[0] - st[0]) * perX;
-      pixels[index++] = st[1] + (ed[1] - st[1]) * perX;
-      pixels[index++] = st[2] + (ed[2] - st[2]) * perX;
-      pixels[index++] = 255;
+  for (let row = 0; row < height; row++) {
+    const verticalProgress = 1 - row / (height - 1);
+    const startRed = RGB_CHANNEL_MAX * verticalProgress;
+    const startGreen = RGB_CHANNEL_MAX * verticalProgress;
+    const startBlue = RGB_CHANNEL_MAX * verticalProgress;
+    const endRed = red * verticalProgress;
+    const endGreen = green * verticalProgress;
+    const endBlue = blue * verticalProgress;
+
+    for (let column = 0; column < width; column++) {
+      const horizontalProgress = column / (width - 1);
+      pixels[index++] = startRed + (endRed - startRed) * horizontalProgress;
+      pixels[index++] = startGreen + (endGreen - startGreen) * horizontalProgress;
+      pixels[index++] = startBlue + (endBlue - startBlue) * horizontalProgress;
+      pixels[index++] = RGB_CHANNEL_MAX;
     }
   }
 
-  ctx!.putImageData(imgData, 0, 0);
+  context!.putImageData(imageData, 0, 0);
 }
 
 function drawHue(canvas: HTMLCanvasElement) {
-  const w = canvas.offsetWidth;
-  const h = 1;
-  canvas.width = w;
-  canvas.height = h;
-  const ctx = canvas.getContext('2d')!;
+  const width = canvas.offsetWidth;
+  const height = 1;
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d')!;
 
-  const imgData = ctx.createImageData(w, h);
-  const pixels = imgData.data;
+  const imageData = context.createImageData(width, height);
+  const pixels = imageData.data;
 
   let index = 0;
 
-  for (let x = 0; x < w; x++) {
-    const hue = x / (w - 1);
-    const rgb = hsv2rgb([hue, 1, 1]);
+  for (let column = 0; column < width; column++) {
+    const hue = (column / (width - 1)) * HSV_HUE_MAX;
+    const [red, green, blue] = new Color('hsv', [hue, COLOR_PERCENT_MAX, COLOR_PERCENT_MAX])
+      .to('srgb')
+      .coords
+      .map(convertSrgbChannel);
 
-    pixels[index++] = rgb[0];
-    pixels[index++] = rgb[1];
-    pixels[index++] = rgb[2];
+    pixels[index++] = red;
+    pixels[index++] = green;
+    pixels[index++] = blue;
 
-    pixels[index++] = 255;
+    pixels[index++] = RGB_CHANNEL_MAX;
   }
 
-  ctx.putImageData(imgData, 0, 0);
+  context.putImageData(imageData, 0, 0);
 }
 
 export default memo(withGlobal<OwnProps>(
@@ -356,4 +399,4 @@ export default memo(withGlobal<OwnProps>(
       theme,
     };
   },
-)(SettingsGeneralBackground));
+)(SettingsGeneralBackgroundColor));

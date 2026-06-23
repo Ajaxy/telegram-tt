@@ -1,5 +1,7 @@
 // GPU-Accelerated Particle System Library
 
+import Color from 'colorjs.io';
+
 import generateUniqueId from './generateUniqueId.ts';
 
 import { getIsInBackground } from '../hooks/window/useBackgroundMode.ts';
@@ -75,25 +77,25 @@ interface ParticleSystemManager {
   addSystem: (options: Partial<ParticleConfig>) => NoneToVoidFunction;
 }
 
-type Color = readonly [number, number, number];
 type ColorPair = readonly [Color, Color];
+const TON_COLOR = new Color('#0098EA');
 
 export const PARTICLE_COLORS = {
-  blue: [0, 152 / 255, 234 / 255] as Color,
+  blue: TON_COLOR,
   blueGradient: [
-    [1 / 255, 88 / 255, 175 / 255],
-    [103 / 255, 208 / 255, 255 / 255],
-  ] as ColorPair,
-  purple: [150 / 255, 111 / 255, 254 / 255] as Color,
+    new Color('#0158AF'),
+    new Color('#67D0FF'),
+  ] satisfies ColorPair,
+  purple: new Color('#966FFE'),
   purpleGradient: [
-    [107 / 255, 147 / 255, 255 / 255],
-    [228 / 255, 106 / 255, 206 / 255],
-  ] as ColorPair,
-  gold: [255 / 255, 191 / 255, 10 / 255] as Color,
+    new Color('#6B93FF'),
+    new Color('#E46ACE'),
+  ] satisfies ColorPair,
+  gold: new Color('#FFBF0A'),
   goldGradient: [
-    [253 / 255, 235 / 255, 50 / 255],
-    [215 / 255, 89 / 255, 2 / 255],
-  ] as ColorPair,
+    new Color('#FDEB32'),
+    new Color('#D75902'),
+  ] satisfies ColorPair,
 };
 
 export const PARTICLE_BURST_PARAMS: Partial<ParticleConfig> = {
@@ -112,7 +114,7 @@ const DEFAULT_CONFIG: Required<ParticleConfig> = {
   width: 350,
   height: 230,
   particleCount: 100,
-  color: [0, 152 / 255, 234 / 255], // #0098EA (TON)
+  color: TON_COLOR,
   speed: 18,
   baseSize: 6,
   minSpawnRadius: 35,
@@ -252,9 +254,10 @@ function createParticleSystemManager(canvas: HTMLCanvasElement) {
       baseOpacities[i] = rng.nextBetween(0.3, 0.8);
 
       const particleColor = resolveColor(config.color, rng);
-      colors[i * 3] = particleColor[0];
-      colors[i * 3 + 1] = particleColor[1];
-      colors[i * 3 + 2] = particleColor[2];
+      const [red, green, blue] = particleColor.coords;
+      colors[i * 3] = red || 0;
+      colors[i * 3 + 1] = green || 0;
+      colors[i * 3 + 2] = blue || 0;
     }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, system.buffers.startPosition);
@@ -674,16 +677,16 @@ function getRotations(): Float32Array {
   return rotationsCache;
 }
 
-function resolveColor(colorDefinition: Color | ColorPair, rng: SeededRandom) {
-  if (Array.isArray(colorDefinition[0])) {
-    const [color1, color2] = colorDefinition as ColorPair;
+function resolveColor(colorDefinition: Color | ColorPair, rng: SeededRandom): Color {
+  if (colorDefinition instanceof Color) return colorDefinition;
 
-    return [
-      rng.nextBetween(color1[0], color2[0]),
-      rng.nextBetween(color1[1], color2[1]),
-      rng.nextBetween(color1[2], color2[2]),
-    ] as Color;
-  }
+  const [color1, color2] = colorDefinition;
+  const [red1, green1, blue1] = color1.coords;
+  const [red2, green2, blue2] = color2.coords;
 
-  return colorDefinition as Color;
+  return new Color('srgb', [
+    rng.nextBetween(red1 || 0, red2 || 0),
+    rng.nextBetween(green1 || 0, green2 || 0),
+    rng.nextBetween(blue1 || 0, blue2 || 0),
+  ]);
 }

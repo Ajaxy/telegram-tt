@@ -1,13 +1,14 @@
+import Color from 'colorjs.io';
+
 import type { ThemeKey } from '../types';
 
 import { requestMutation } from '../lib/fasterdom/fasterdom';
 import themeColors from '../styles/themes.json';
 import { animate } from './animation';
-import { hex2rgbaObj, lerpRgbaObj } from './colors.ts';
+import { convertSrgbChannel } from './colors.ts';
 
 let isInitialized = false;
 
-const DECIMAL_PLACES = 3;
 const DURATION_MS = 200;
 const ENABLE_ANIMATION_DELAY_MS = 500;
 const RGB_VARIABLES = new Set([
@@ -26,7 +27,7 @@ const DISABLE_ANIMATION_CSS = `
 
 const colors = (Object.keys(themeColors) as Array<keyof typeof themeColors>).map((property) => ({
   property,
-  colors: [hex2rgbaObj(themeColors[property][0]), hex2rgbaObj(themeColors[property][1])],
+  colors: [new Color(themeColors[property][0]), new Color(themeColors[property][1])],
 }));
 
 const injectCss = (css: string) => {
@@ -91,13 +92,10 @@ function transition(t: number) {
 
 function applyColorAnimationStep(startIndex: number, endIndex: number, interpolationRatio: number = 1) {
   colors.forEach(({ property, colors: propertyColors }) => {
-    const {
-      r, g, b, a,
-    } = lerpRgbaObj(propertyColors[startIndex], propertyColors[endIndex], interpolationRatio);
+    const color = propertyColors[startIndex].mix(propertyColors[endIndex], interpolationRatio, { space: 'srgb' });
+    const [r, g, b] = color.coords.map(convertSrgbChannel);
 
-    const roundedA = a !== undefined ? Math.round((a / 255) * 10 ** DECIMAL_PLACES) / 10 ** DECIMAL_PLACES : undefined;
-
-    document.documentElement.style.setProperty(property, `rgb(${r},${g},${b}${roundedA ? `,${roundedA}` : ''})`);
+    document.documentElement.style.setProperty(property, color.toString({ format: 'rgb' }));
 
     if (RGB_VARIABLES.has(property)) {
       document.documentElement.style.setProperty(`${property}-rgb`, `${r},${g},${b}`);

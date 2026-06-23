@@ -1,3 +1,4 @@
+import Color from 'colorjs.io';
 import type { ElementRef } from '../../lib/teact/teact';
 import {
   getIsHeavyAnimating,
@@ -15,7 +16,6 @@ import { ensureRLottie, getRLottie } from '../../lib/rlottie/RLottie.async';
 import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
-import { hex2rgbaObj } from '../../util/colors.ts';
 import generateUniqueId from '../../util/generateUniqueId';
 
 import useColorFilter from '../../hooks/stickers/useColorFilter';
@@ -106,7 +106,7 @@ const AnimatedSticker = ({
   const playRef = useStateRef(play);
   const playSegmentRef = useStateRef(playSegment);
 
-  const rgbColorRef = useRef<[number, number, number] | undefined>();
+  const colorRef = useRef<Color | undefined>();
 
   const shouldForceOnHeavyAnimation = forceAlways || forceOnHeavyAnimation;
   // Delay initialization until heavy animation ends
@@ -120,10 +120,9 @@ const AnimatedSticker = ({
 
   useSyncEffect(() => {
     if (color && !shouldUseColorFilter) {
-      const { r, g, b } = hex2rgbaObj(color);
-      rgbColorRef.current = [r, g, b];
+      colorRef.current = new Color(color);
     } else {
-      rgbColorRef.current = undefined;
+      colorRef.current = undefined;
     }
   }, [color, shouldUseColorFilter]);
 
@@ -160,7 +159,7 @@ const AnimatedSticker = ({
         coords: sharedCanvasCoords,
       },
       viewId,
-      rgbColorRef.current,
+      colorRef.current,
       onLoad,
       onEnded,
       onLoop,
@@ -192,7 +191,7 @@ const AnimatedSticker = ({
   useSharedIntersectionObserver(sharedCanvas, throttledInit);
 
   useEffect(() => {
-    animation?.setColor(rgbColorRef.current);
+    animation?.setColor(colorRef.current);
   }, [color, animation]);
 
   useEffect(() => {

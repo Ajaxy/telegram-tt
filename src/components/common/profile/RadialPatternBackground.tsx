@@ -1,3 +1,4 @@
+import Color from 'colorjs.io';
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useSignal } from '../../../lib/teact/teact';
 
 import type { ApiSticker } from '../../../api/types';
@@ -6,7 +7,7 @@ import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getStickerMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
-import { adjustHsv, getColorLuma, hex2rgb } from '../../../util/colors.ts';
+import { getColorLuma } from '../../../util/colors.ts';
 import { preloadImage } from '../../../util/files';
 import { REM } from '../helpers/mediaDimensions';
 
@@ -42,6 +43,7 @@ const DEFAULT_CENTER_EMPTINESS = 0.1;
 const DEFAULT_MAX_RADIUS = 0.42;
 const MIN_SIZE = 4 * REM;
 const DARK_LUMA_THRESHOLD = 255 * 0.2;
+const COLOR_PERCENT_MAX = 100;
 
 const DEFAULT_PATTERN_SIZE = 20;
 const DEFAULT_RINGS_COUNT = 3;
@@ -154,8 +156,8 @@ const RadialPatternBackground = ({
       ctx.fillStyle = patternColor;
     } else {
       const baseColor = backgroundColors?.[1] ?? backgroundColors?.[0] ?? '#000000';
-      const isDark = getColorLuma(hex2rgb(baseColor)) < DARK_LUMA_THRESHOLD;
-      ctx.fillStyle = adjustHsv(baseColor, 0.5, isDark ? 0.28 : -0.28);
+      const isDark = getColorLuma(new Color(baseColor)) < DARK_LUMA_THRESHOLD;
+      ctx.fillStyle = buildAdjustedHsvColor(baseColor, 0.5, isDark ? 0.28 : -0.28);
     }
     ctx.globalCompositeOperation = 'source-in';
     ctx.fillRect(0, 0, width, height);
@@ -220,3 +222,16 @@ const RadialPatternBackground = ({
 };
 
 export default memo(RadialPatternBackground);
+
+function buildAdjustedHsvColor(color: string, satDelta: number, valDelta: number) {
+  const parsedColor = new Color(color);
+  const [h, initialS, initialV] = parsedColor.to('hsv').coords;
+  let s = initialS! / COLOR_PERCENT_MAX;
+  let v = initialV! / COLOR_PERCENT_MAX;
+
+  if (s > 0.1 && s < 0.9) s = Math.max(0, Math.min(1, s + satDelta));
+  v = Math.max(0, Math.min(1, v + valDelta));
+
+  return new Color('hsv', [h || 0, s * COLOR_PERCENT_MAX, v * COLOR_PERCENT_MAX], parsedColor.alpha)
+    .toString({ format: 'hex', collapse: false, alpha: true });
+}

@@ -4,7 +4,7 @@ import type { ApiPeer } from '../api/types';
 import { ApiMediaFormat } from '../api/types';
 
 import { getChatAvatarHash } from '../global/helpers';
-import { getAverageColor, rgb2hex } from '../util/colors';
+import { getAverageColor } from '../util/colors';
 import useMedia from './useMedia';
 
 function useAverageColor(peer: ApiPeer, fallbackColor = '#00000000') {
@@ -18,7 +18,7 @@ function useAverageColor(peer: ApiPeer, fallbackColor = '#00000000') {
       }
 
       const averageColor = await getAverageColor(imgBlobUrl);
-      setColor(rgb2hex(averageColor));
+      setColor(averageColor.toString({ format: 'hex', collapse: false, alpha: false }));
     })();
   }, [imgBlobUrl]);
 
