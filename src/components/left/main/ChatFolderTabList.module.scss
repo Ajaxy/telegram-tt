@@ -3,16 +3,11 @@
     --fade-mask-height: 2.625rem;
 
     position: absolute;
-    z-index: 10;
+    z-index: 12;
     top: 0.25rem;
     inset-inline: 0.5rem;
 
     transition: opacity var(--layer-transition);
-  }
-
-  .hidden {
-    pointer-events: none;
-    opacity: 0.25;
   }
 
   .badge {

@@ -19,6 +19,10 @@
 
   @include mixins.with-vt-type('rightColumn');
 
+  .active-vt-profileAvatar & {
+    view-transition-name: none !important;
+  }
+
   .close-button {
     flex-shrink: 0;
   }

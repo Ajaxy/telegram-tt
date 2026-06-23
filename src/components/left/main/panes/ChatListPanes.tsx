@@ -14,7 +14,7 @@ import { REM } from '../../../common/helpers/mediaDimensions';
 import useEffectOnce from '../../../../hooks/useEffectOnce';
 import useShowTransition from '../../../../hooks/useShowTransition';
 import { useSignalEffect } from '../../../../hooks/useSignalEffect';
-import { applyAnimationState, type PaneState } from '../../../middle/hooks/useHeaderPane';
+import { applyAnimationState, PANE_GAP_REM, type PaneState } from '../../../middle/hooks/useHeaderPane';
 
 import FrozenAccountPane from './FrozenAccountPane';
 import GiftAuctionPane from './GiftAuctionPane';
@@ -95,7 +95,9 @@ const ChatListPanes = ({
     ];
 
     const isFirstRender = isFirstRenderRef.current;
-    const totalHeight = stateArray.reduce((acc, state) => acc + state.height, 0);
+    const gapPx = PANE_GAP_REM * REM;
+    const openPaneCount = stateArray.filter((s) => !s.isSpacer && s.height > 0).length;
+    const totalHeight = stateArray.reduce((acc, state) => acc + state.height, 0) + openPaneCount * gapPx;
     const panelsHeight = totalHeight - BOTTOM_MARGIN;
 
     onHeightChange(panelsHeight !== 0 ? totalHeight : 0);

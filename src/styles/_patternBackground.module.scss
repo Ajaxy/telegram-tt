@@ -51,34 +51,7 @@
     filter: blur(12px);
   }
 
-  :global(html.theme-light body:not(.no-page-transitions)) &:not(.customBgImage).withRightColumn::before {
-    @media screen and (min-width: 1276px) {
-      transform: scaleX(0.73) !important;
-    }
-
-    @media screen and (min-width: 1921px) {
-      transform: scaleX(0.8) !important;
-    }
-
-    @media screen and (min-width: 2600px) {
-      transform: scaleX(0.95) !important;
-    }
-  }
-
-  /* stylelint-disable-next-line @stylistic/max-line-length */
-  :global(html.theme-light body:not(.no-page-transitions)) &:not(.customBgImage).withRightColumn.withTransition::before {
-    transition: transform var(--layer-transition);
-  }
-
   &:not(.customBgImage):not(.customBgColor)::after {
     @include mixins.chat-pattern-styles("../assets/pattern.svg");
-  }
-
-  @media screen and (min-width: 1276px) {
-    :global(body:not(.no-page-transitions)) &:not(.customBgImage)::before {
-      transform-origin: left center;
-      transform: scale(1);
-      overflow: hidden;
-    }
   }
 }

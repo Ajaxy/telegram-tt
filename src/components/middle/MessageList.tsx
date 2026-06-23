@@ -108,7 +108,8 @@ type OwnProps = {
   paidMessagesStars?: number;
   isQuickPreview?: boolean;
   onScrollDownToggle?: BooleanToVoidFunction;
-  onNotchToggle?: AnyToVoidFunction;
+  onBottomNotchToggle?: AnyToVoidFunction;
+  onTopNotchToggle?: AnyToVoidFunction;
   onIntersectPinnedMessage?: OnIntersectPinnedMessage;
 };
 
@@ -259,7 +260,8 @@ const MessageList = ({
   isQuickPreview,
   onIntersectPinnedMessage,
   onScrollDownToggle,
-  onNotchToggle,
+  onBottomNotchToggle,
+  onTopNotchToggle,
 }: OwnProps & StateProps) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
@@ -1185,7 +1187,8 @@ const MessageList = ({
         canManageBotForumTopics={canManageBotForumTopics}
         shouldScrollToBottom={shouldScrollToBottom}
         onScrollDownToggle={onScrollDownToggle}
-        onNotchToggle={onNotchToggle}
+        onBottomNotchToggle={onBottomNotchToggle}
+        onTopNotchToggle={onTopNotchToggle}
         onIntersectPinnedMessage={onIntersectPinnedMessage}
       />
     ) : (

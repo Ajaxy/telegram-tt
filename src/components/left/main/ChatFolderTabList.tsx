@@ -13,7 +13,6 @@ import styles from './ChatFolderTabList.module.scss';
 type OwnProps = {
   tabs: readonly TabWithProperties[];
   activeTab: number;
-  isHidden?: boolean;
   className?: string;
   onSwitchTab: (index: number) => void;
 };
@@ -21,7 +20,6 @@ type OwnProps = {
 const ChatFolderTabList = ({
   tabs,
   activeTab,
-  isHidden,
   className,
   onSwitchTab,
 }: OwnProps) => {
@@ -35,7 +33,7 @@ const ChatFolderTabList = ({
   });
 
   return (
-    <div className={buildClassName(styles.root, isHidden && styles.hidden)}>
+    <div className={buildClassName(styles.root)}>
       <TabList
         tabs={tabs}
         activeTab={activeTab}

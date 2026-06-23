@@ -19,16 +19,16 @@ export function animateOpening(isArchived?: boolean) {
   cancelDelayedCallbacks();
 
   const {
-    container, toggler, leftMainHeader, ribbonPeers, toggleAvatars, sidebar,
+    container, toggler, leftMainHeader, ribbonPeers, toggleAvatars,
   } = getHTMLElements(isArchived);
 
   if (!toggler || !toggleAvatars || !ribbonPeers || !container || !leftMainHeader) {
     return;
   }
 
+  const containerRect = container.getBoundingClientRect();
   const { bottom: headerBottom, right: headerRight } = leftMainHeader.getBoundingClientRect();
-  const toTop = headerBottom + RIBBON_OFFSET;
-  const sidebarWidth = sidebar ? sidebar.getBoundingClientRect().width : 0;
+  const toTop = headerBottom + RIBBON_OFFSET - containerRect.top;
 
   // Toggle avatars are in the reverse order
   const lastToggleAvatar = toggleAvatars[0];
@@ -52,16 +52,16 @@ export function animateOpening(isArchived?: boolean) {
     if (!toggleAvatar) return;
 
     let {
-
       top: fromTop,
       left: fromLeft,
       width: fromWidth,
     } = toggleAvatar.getBoundingClientRect();
 
-    fromLeft -= sidebarWidth;
+    fromTop -= containerRect.top;
+    fromLeft -= containerRect.left;
 
     const peerBounds = peer.getBoundingClientRect();
-    const toLeft = peerBounds.left - sidebarWidth;
+    const toLeft = peerBounds.left - containerRect.left;
     const toWidth = peerBounds.width;
 
     if (toLeft > headerRight) {
@@ -166,14 +166,13 @@ export function animateClosing(isArchived?: boolean) {
     toggleAvatars,
     ribbonPeers,
     leftMainHeader,
-    sidebar,
   } = getHTMLElements(isArchived);
 
   if (!toggler || !toggleAvatars || !ribbonPeers || !container || !leftMainHeader) {
     return;
   }
+  const containerRect = container.getBoundingClientRect();
   const { right: headerRight } = leftMainHeader.getBoundingClientRect();
-  const sidebarWidth = sidebar ? sidebar.getBoundingClientRect().width : 0;
   // Toggle avatars are in the reverse order
   const lastToggleAvatar = toggleAvatars[0];
   const firstToggleAvatar = toggleAvatars[toggleAvatars.length - 1];
@@ -197,8 +196,8 @@ export function animateClosing(isArchived?: boolean) {
 
     const peerBounds = peer.getBoundingClientRect();
 
-    const fromTop = peerBounds.top;
-    const fromLeft = peerBounds.left - sidebarWidth;
+    const fromTop = peerBounds.top - containerRect.top;
+    const fromLeft = peerBounds.left - containerRect.left;
     const fromWidth = peerBounds.width;
 
     let {
@@ -207,7 +206,8 @@ export function animateClosing(isArchived?: boolean) {
       top: toTop,
     } = toggleAvatar.getBoundingClientRect();
 
-    toLeft -= sidebarWidth;
+    toTop -= containerRect.top;
+    toLeft -= containerRect.left;
 
     if (fromLeft > headerRight) {
       return;
@@ -311,15 +311,12 @@ function getHTMLElements(isArchived?: boolean) {
   const leftMainHeader = container.querySelector<HTMLElement>('.left-header');
   const ribbonPeers = ribbon?.querySelectorAll<HTMLElement>(`.${ribbonStyles.peer}`);
   const toggleAvatars = toggler?.querySelectorAll<HTMLElement>('.Avatar');
-  const sidebar = document.getElementById('FoldersSidebar');
-
   return {
     container,
     toggler,
     leftMainHeader,
     ribbonPeers,
     toggleAvatars,
-    sidebar,
   };
 }
 

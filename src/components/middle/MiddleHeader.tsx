@@ -4,7 +4,7 @@ import {
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiSticker, ApiTypingStatus,
+  ApiChat, ApiSticker, ApiTypingStatus,
 } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { Signal } from '../../util/signals';
@@ -20,7 +20,6 @@ import {
 } from '../../global/helpers';
 import {
   selectChat,
-  selectChatMessage,
   selectCustomEmoji,
   selectIsChatWithSelf,
   selectIsInSelectMode,
@@ -52,8 +51,6 @@ import UnreadCounter from '../common/UnreadCounter';
 import Button from '../ui/Button';
 import Transition from '../ui/Transition';
 import HeaderActions from './HeaderActions';
-import AudioPlayer from './panes/AudioPlayer';
-import HeaderPinnedMessage from './panes/HeaderPinnedMessage';
 
 import './MiddleHeader.scss';
 
@@ -67,6 +64,7 @@ type OwnProps = {
   messageListType: MessageListType;
   isComments?: boolean;
   isMobile?: boolean;
+  isTopNotchShown?: boolean;
   getCurrentPinnedIndex: Signal<number>;
   getLoadingPinnedId: Signal<number | undefined>;
   onFocusPinnedMessage: (messageId: number) => void;
@@ -79,7 +77,6 @@ type StateProps = {
   isSelectModeActive?: boolean;
   isLeftColumnShown?: boolean;
   isRightColumnShown?: boolean;
-  audioMessage?: ApiMessage;
   messagesCount?: number;
   isChatWithSelf?: boolean;
   shouldSkipHistoryAnimations?: boolean;
@@ -96,10 +93,10 @@ const MiddleHeader = ({
   threadId,
   messageListType,
   isMobile,
+  isTopNotchShown,
   typingStatusByPeerId,
   isSelectModeActive,
   isLeftColumnShown,
-  audioMessage,
   chat,
   messagesCount,
   isComments,
@@ -131,7 +128,7 @@ const MiddleHeader = ({
   const lang = useLang();
 
   const isBackButtonActiveRef = useRef(true);
-  const { isDesktop, isTablet } = useAppLayout();
+  const { isTablet } = useAppLayout();
 
   const { width: windowWidth } = useWindowSize();
 
@@ -224,10 +221,6 @@ const MiddleHeader = ({
   const cleanupExceptionKey = (
     prevTransitionKey !== undefined && prevTransitionKey < currentTransitionKey ? prevTransitionKey : undefined
   );
-
-  const isAudioPlayerActive = Boolean(audioMessage);
-  const isAudioPlayerRendering = isDesktop && isAudioPlayerActive;
-  const isPinnedMessagesFullWidth = isAudioPlayerActive || !isDesktop;
 
   const { connectionStatusText } = useConnectionStatus(
     lang, connectionState, isSyncing || isFetchingDifference, true,
@@ -362,7 +355,11 @@ const MiddleHeader = ({
   }
 
   return (
-    <div className="MiddleHeader" ref={componentRef} data-tauri-drag-region={IS_TAURI && IS_MAC_OS ? true : undefined}>
+    <div
+      className={buildClassName('MiddleHeader', isTopNotchShown && 'with-notch')}
+      ref={componentRef}
+      data-tauri-drag-region={IS_TAURI && IS_MAC_OS ? true : undefined}
+    >
       <Transition
         name={shouldSkipHistoryAnimations ? 'none' : 'slideFade'}
         activeKey={currentTransitionKey}
@@ -371,28 +368,13 @@ const MiddleHeader = ({
       >
         {renderInfo()}
       </Transition>
-      {!isPinnedMessagesFullWidth && (
-        <HeaderPinnedMessage
-          key={chatId}
-          chatId={chatId}
-          threadId={threadId}
-          messageListType={messageListType}
-          onFocusPinnedMessage={onFocusPinnedMessage}
-          getLoadingPinnedId={getLoadingPinnedId}
-          getCurrentPinnedIndex={getCurrentPinnedIndex}
-        />
-      )}
-
       <div className="header-tools">
-        {isAudioPlayerRendering && (
-          <AudioPlayer />
-        )}
         <HeaderActions
           chatId={chatId}
           threadId={threadId}
           messageListType={messageListType}
           isMobile={isMobile}
-          canExpandActions={!isAudioPlayerRendering}
+          canExpandActions
         />
       </div>
     </div>
@@ -404,15 +386,10 @@ export default memo(withGlobal<OwnProps>(
     chatId, threadId, messageListType, isMobile,
   }): Complete<StateProps> => {
     const {
-      isLeftColumnShown, shouldSkipHistoryAnimations, audioPlayer, messageLists,
+      isLeftColumnShown, shouldSkipHistoryAnimations, messageLists,
     } = selectTabState(global);
     const chat = selectChat(global, chatId);
     const peer = selectPeer(global, chatId);
-
-    const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
-    const audioMessage = audioChatId && audioMessageId
-      ? selectChatMessage(global, audioChatId, audioMessageId)
-      : undefined;
 
     const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
 
@@ -438,7 +415,6 @@ export default memo(withGlobal<OwnProps>(
       isLeftColumnShown,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isSelectModeActive: selectIsInSelectMode(global),
-      audioMessage,
       chat,
       messagesCount,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),

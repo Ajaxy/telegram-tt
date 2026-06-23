@@ -1,6 +1,11 @@
 #Main {
+  isolation: isolate;
+  position: relative;
+
   overflow: hidden;
+
   height: 100%;
+
   text-align: left;
 
   &.folders-sidebar-visible {
@@ -22,18 +27,48 @@
   }
 }
 
+.tauri-drag-region {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  left: 0;
+
+  height: 1rem;
+}
+
 .has-call-header {
   --call-header-height: 2rem;
 
-  #LeftColumn, #MiddleColumn, #RightColumn-wrapper {
+  #FoldersSidebar {
+    height: calc(100% - var(--call-header-height) - 2rem);
+    margin-top: calc(var(--call-header-height) + 1rem);
+  }
+
+  #LeftColumn {
+    height: calc(100% - var(--call-header-height) - 2rem);
+    margin-top: calc(var(--call-header-height) + 1rem);
+  }
+
+  #MiddleColumn {
+    height: calc(100% - var(--call-header-height));
+    margin-top: var(--call-header-height);
+  }
+
+  #RightColumn-wrapper {
     height: calc(100% - var(--call-header-height));
     margin-top: var(--call-header-height);
   }
 }
 
+#FoldersSidebar {
+  align-self: stretch;
+}
+
 #LeftColumn {
   --left-column-min-width: 16rem;
   --left-column-max-width: 26.5rem;
+  --slide-background-color: transparent;
 
   position: relative;
 
@@ -42,15 +77,21 @@
   width: 33vw;
   min-width: var(--left-column-min-width);
   max-width: var(--left-column-max-width);
-  height: 100%;
+  height: auto;
+  margin: 1rem;
+  margin-inline-end: 0;
+  border-radius: var(--border-radius-island);
 
   background-color: var(--color-background);
+  box-shadow: var(--shadow-island);
 
   @media (min-width: 926px) {
     --left-column-max-width: 40vw;
 
     .folders-sidebar-visible & {
       --left-column-max-width: calc(40vw - var(--folders-sidebar-width));
+
+      margin-left: 0.5rem;
     }
   }
 
@@ -66,14 +107,13 @@
 
   @media (max-width: 925px) {
     position: fixed;
-    top: 0;
-    left: 0;
-    transform: translate3d(-5rem, 0, 0);
+    top: 1rem;
+    left: 1rem;
+    transform: translate3d(calc(-100% - 1rem), 0, 0);
 
     width: 26.5rem !important;
-    height: calc(var(--vh, 1vh) * 100);
-
-    transition: transform var(--layer-transition);
+    height: calc(var(--vh, 1vh) * 100 - 2rem);
+    margin: 0;
 
     &::after {
       pointer-events: none;
@@ -113,6 +153,10 @@
       }
     }
 
+    #Main.left-column-animating & {
+      transition: transform var(--layer-transition);
+    }
+
     body.no-page-transitions & {
       transition: none;
     }
@@ -133,12 +177,16 @@
   @media (max-width: 600px) {
     --left-column-max-width: calc(100vw - env(safe-area-inset-left));
 
+    top: 0;
     left: env(safe-area-inset-left) !important;
-    transform: translate3d(-20vw, 0, 0);
+    transform: translate3d(-100%, 0, 0);
 
     width: calc(100vw - env(safe-area-inset-left)) !important;
     max-width: none;
     height: calc(var(--vh, 1vh) * 100);
+    border-radius: 0;
+
+    box-shadow: none;
 
     // Fix: when opening the SymbolMenu, the chat list flashes in the background
     body.is-symbol-menu-open &::before {
@@ -176,7 +224,6 @@
 }
 
 #MiddleColumn {
-  border-left: 1px solid var(--color-borders);
 
   #Main.history-animation-disabled & {
     transition: none;
@@ -196,14 +243,12 @@
 
     max-width: none;
 
-    transition: transform var(--layer-transition);
-
-    body.no-page-transitions & {
-      transition: none;
+    #Main.left-column-animating & {
+      transition: transform var(--layer-transition);
     }
 
     #Main.left-column-open & {
-      transform: translate3d(26.5rem, 0, 0);
+      transform: translate3d(calc(33.5rem), 0, 0);
     }
 
     body.no-right-column-animations #Main.right-column-open &,
@@ -227,9 +272,25 @@
 
 @media (max-width: 925px) {
   .folders-sidebar-visible {
+    #FoldersSidebar {
+      position: fixed;
+      transform: translate3d(calc(-100% - 2rem), 0, 0);
+      height: calc(var(--vh, 1vh) * 100 - 2rem);
+      transition: transform var(--layer-transition);
+    }
+
     #LeftColumn {
-      left: var(--folders-sidebar-width) !important;
-      width: 21.5rem !important;
+      left: 1rem !important;
+    }
+
+    &.left-column-open {
+      #FoldersSidebar {
+        transform: translate3d(0, 0, 0);
+      }
+
+      #LeftColumn {
+        left: calc(var(--folders-sidebar-width) + 1.5rem) !important;
+      }
     }
   }
 }

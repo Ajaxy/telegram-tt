@@ -30,10 +30,6 @@
       }
     }
 
-    &--tabs-sidebar-shown .chat-list {
-      padding-top: 0;
-    }
-
     &-content {
       position: relative;
 
@@ -42,6 +38,26 @@
       flex-direction: column;
 
       min-height: 0;
+
+      &::after {
+        content: "";
+
+        position: absolute;
+        z-index: 15;
+        right: 0;
+        left: 0;
+
+        height: 1px;
+
+        opacity: 0;
+        background: var(--color-borders);
+
+        transition: opacity 200ms ease;
+      }
+
+      &.scrolled::after {
+        opacity: 0.6;
+      }
 
       > .Transition {
         overflow: hidden;

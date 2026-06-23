@@ -210,7 +210,6 @@ const LeftMain: FC<OwnProps> = ({
             case LeftColumnContent.ChatList:
               return (
                 <ChatFolders
-                  shouldHideFolderTabs={isForumPanelVisible}
                   foldersDispatch={foldersDispatch}
                   isForumPanelOpen={isForumPanelVisible}
                   isFoldersSidebarShown={isFoldersSidebarShown}

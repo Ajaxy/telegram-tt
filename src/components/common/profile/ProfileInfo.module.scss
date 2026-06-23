@@ -11,11 +11,14 @@
   display: grid;
   place-items: center;
 
-  aspect-ratio: 1 / 1;
+  height: var(--right-column-content-width);
 
   color: var(--color-white);
 
   background-color: var(--profile-info-bg);
+
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: height 0.25s, padding-block 0.25s;
 
   @include mixins.with-vt-type('profileAvatar');
 
@@ -417,7 +420,7 @@
 }
 
 .minimized {
-  aspect-ratio: unset;
+  height: 18rem;
   padding-block: 4.25rem 1rem;
 
   .status, .title, .info {

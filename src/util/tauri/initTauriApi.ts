@@ -2,10 +2,10 @@ import { IS_MAC_OS } from '../browser/windowEnvironment';
 
 export default function initTauriApi() {
   const corePromise = import('@tauri-apps/api/core');
-  async function markTitleBarOverlay(isOverlay: boolean) {
+  async function markTitleBarOverlay(isOverlay: boolean, isMobile?: boolean) {
     if (!IS_MAC_OS) return;
     const core = await corePromise;
-    return core.invoke<void>('mark_title_bar_overlay', { isOverlay });
+    return core.invoke<void>('mark_title_bar_overlay', { isOverlay, isMobile });
   }
 
   async function setNotificationsCount(amount: number, isMuted = false) {

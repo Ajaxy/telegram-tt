@@ -32,7 +32,6 @@ import ChatList from './ChatList';
 
 type OwnProps = {
   foldersDispatch: FolderEditDispatch;
-  shouldHideFolderTabs?: boolean;
   isForumPanelOpen?: boolean;
   isFoldersSidebarShown?: boolean;
 };
@@ -68,7 +67,6 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   shouldSkipHistoryAnimations,
   maxFolders,
   maxChatLists,
-  shouldHideFolderTabs,
   folderInvitesById,
   maxFolderInvites,
   hasArchivedChats,
@@ -87,7 +85,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
-  const { handleScroll, updateScrollState } = useScrolledState();
+  const { isAtBeginning, handleScroll, updateScrollState } = useScrolledState();
 
   useEffect(() => {
     loadChatFolders();
@@ -258,12 +256,16 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       )}
     >
       {shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
-      <div className={buildClassName('ChatFolders-content', shouldRenderFolders && 'with-tabs')}>
+      <div className={buildClassName(
+        'ChatFolders-content',
+        shouldRenderFolders && 'with-tabs',
+        !shouldRenderFolders && !isAtBeginning && 'scrolled',
+      )}
+      >
         {shouldRenderFolders ? (
           <ChatFolderTabList
             tabs={folderTabs}
             activeTab={activeChatFolder}
-            isHidden={shouldHideFolderTabs}
             onSwitchTab={handleSwitchTab}
           />
         ) : shouldRenderPlaceholder ? (

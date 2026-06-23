@@ -85,7 +85,8 @@ interface OwnProps {
   canPost?: boolean;
   shouldScrollToBottom?: boolean;
   onScrollDownToggle?: BooleanToVoidFunction;
-  onNotchToggle?: AnyToVoidFunction;
+  onBottomNotchToggle?: AnyToVoidFunction;
+  onTopNotchToggle?: AnyToVoidFunction;
   onIntersectPinnedMessage?: OnIntersectPinnedMessage;
 }
 
@@ -139,7 +140,8 @@ const MessageListContent = ({
   shouldScrollToBottom,
   canPost,
   onScrollDownToggle,
-  onNotchToggle,
+  onBottomNotchToggle,
+  onTopNotchToggle,
   onIntersectPinnedMessage,
 }: OwnProps) => {
   const { openHistoryCalendar } = getActions();
@@ -182,7 +184,8 @@ const MessageListContent = ({
     isReady,
     isReplacingHistoryRef,
     onScrollDownToggle,
-    onNotchToggle,
+    onBottomNotchToggle,
+    onTopNotchToggle,
   });
 
   const oldLang = useOldLang();

@@ -1,40 +1,28 @@
 .root {
   position: absolute;
   z-index: var(--z-middle-header);
-  top: 3.5rem;
+  top: calc(var(--header-height) + var(--middle-panel-inline-padding) + 0.5rem);
+  right: 0;
   left: 0;
 
-  width: 100%;
-
-  // In case if there are no children, we need to have a shadow
-  &::before {
-    pointer-events: none;
-    content: '';
-
-    position: absolute;
-    z-index: -100; // Hide behind the children
-    top: -2px;
-    right: 0;
-    left: 0;
-
-    height: 2px;
-
-    box-shadow: 0 2px 2px var(--color-light-shadow);
-  }
+  width: calc(100% - var(--middle-panel-inline-padding) * 2);
+  max-width: calc(var(--messages-container-width) - var(--middle-panel-inline-padding) * 2);
+  margin: 0 auto;
 
   &_withRightColumnAnimation {
     /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-    transition: width var(--layer-transition);
-  }
-
-  /* stylelint-disable-next-line plugin/selector-tag-no-without-class */
-  > div:last-child {
-    box-shadow: 0 2px 2px var(--color-light-shadow);
+    transition: transform var(--layer-transition);
   }
 
   @media (min-width: 1276px) {
+    width: calc(100% - var(--right-column-width) - var(--middle-panel-inline-padding) * 2);
     :global(#Main.right-column-open) & {
-      width: calc(100% - var(--right-column-width));
+      transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
     }
+  }
+
+  @media (max-width: 600px) {
+    right: env(safe-area-inset-right);
+    left: env(safe-area-inset-left);
   }
 }

@@ -8,6 +8,14 @@
   min-width: 0;
   height: 100%;
 
+  opacity: 0;
+
+  transition: opacity 0.3s ease;
+
+  &.ui-ready {
+    opacity: 1;
+  }
+
   .messages-layout {
     --slide-transition: 450ms cubic-bezier(0.25, 1, 0.5, 1);
 
@@ -337,7 +345,7 @@
   z-index: var(--z-resize-handle);
   top: 0;
   bottom: 0;
-  left: 0;
+  left: -0.25rem;
 
-  width: 0.25rem;
+  width: 0.5rem;
 }

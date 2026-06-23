@@ -160,7 +160,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
                 className={styles.left}
                 style={leftColumnWidth ? `width: ${leftColumnWidth}px` : undefined}
               />
-              <div className={buildClassName(styles.middle, appStyles.bg)} />
+              <div className={styles.middle} />
               {isRightColumnShown && <div className={styles.right} />}
             </div>
           ) : (page === 'inactive' || page === 'lock') ? (

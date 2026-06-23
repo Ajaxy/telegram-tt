@@ -34,24 +34,15 @@
 }
 
 .mini {
-  @media (min-width: 1276px) {
-    transform: translate3d(0, 0, 0);
-    transition: opacity 0.15s ease, transform var(--layer-transition);
-
-    :global(body.no-right-column-animations) & {
-      transition: opacity 0.15s ease;
-    }
-
-    :global(#Main.right-column-open) & {
-      transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
-    }
-  }
+  transition: opacity 0.15s ease;
 }
 
 .fullWidth {
   @include mixins.middle-header-pane;
 
   height: 3.5rem;
+  padding-right: max(0.25rem, env(safe-area-inset-right));
+  padding-left: max(0.25rem, env(safe-area-inset-left));
 
   .pinnedMessage {
     flex: 1;
@@ -92,8 +83,8 @@
   margin-top: -0.25rem;
   margin-bottom: -0.25rem;
   padding: 0.25rem;
-  padding-left: 0.375rem;
-  border-radius: var(--border-radius-messages-small);
+  padding-left: 0.75rem;
+  border-radius: 1.5rem;
 
   background-color: var(--color-background);
 

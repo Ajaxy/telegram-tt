@@ -65,7 +65,7 @@
 
   opacity: 1;
   background-color: var(--color-background);
-  box-shadow: 0 1px 4px 0 #0000000D;
+  box-shadow: var(--shadow-island);
 
   transition: opacity 0.3s ease;
 

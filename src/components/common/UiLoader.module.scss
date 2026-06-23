@@ -27,8 +27,11 @@
 
 .foldersSidebar {
   width: var(--folders-sidebar-width);
-  height: 100%;
-  background: var(--color-background-sidebar);
+  margin: 1rem 0 1rem 1rem;
+  border-radius: var(--border-radius-island);
+
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(25px);
 }
 
 .left {
@@ -37,17 +40,28 @@
   width: 33vw;
   min-width: 16rem;
   max-width: 26.5rem;
-  height: 100%;
+  margin: 1rem;
+  border-radius: var(--border-radius-island);
 
   background: var(--color-background);
+  box-shadow: var(--shadow-island);
 
   @media (min-width: 926px) {
     max-width: 40vw;
+
+    .foldersSidebarVisible & {
+      max-width: calc(40vw - var(--folders-sidebar-width));
+      margin-left: 0.5rem;
+    }
   }
 
   @media (min-width: 1276px) {
     width: 25vw;
     max-width: 33vw;
+
+    .foldersSidebarVisible & {
+      max-width: calc(33vw - var(--folders-sidebar-width));
+    }
   }
 
   @media (max-width: 1275px) {
@@ -61,23 +75,16 @@
   @media (max-width: 600px) {
     width: 100vw !important;
     max-width: none;
+    height: 100%;
+    margin: 0;
+    border-radius: 0;
+
+    box-shadow: none;
   }
 }
 
 .middle {
-  position: relative;
-  z-index: 1;
-
-  overflow: hidden;
   flex: 3;
-
-  border-left: 1px solid var(--color-borders);
-
-  background-size: cover !important;
-
-  @media (max-width: 1275px) {
-    border-right: none;
-  }
 
   @media (max-width: 600px) {
     display: none;
@@ -87,14 +94,15 @@
 .right {
   position: absolute;
   z-index: 1;
-  top: 0;
-  right: 0;
+  top: 1rem;
+  right: var(--right-column-padding);
+  bottom: 1rem;
 
-  width: var(--right-column-width);
-  height: 100%;
-  border-left: 1px solid var(--color-borders);
+  width: var(--right-column-content-width);
+  border-radius: var(--border-radius-island);
 
-  background: var(--color-background);
+  background: var(--color-background-secondary);
+  box-shadow: var(--shadow-island);
 }
 
 .blank {

@@ -3,7 +3,7 @@ import type { Update } from '@tauri-apps/plugin-updater';
 
 type TauriApi = {
   version: string;
-  markTitleBarOverlay: (isOverlay: boolean) => Promise<void>;
+  markTitleBarOverlay: (isOverlay: boolean, isMobile?: boolean) => Promise<void>;
   setNotificationsCount: (amount: number, isMuted?: boolean) => Promise<void>;
   openNewWindow: (url: string) => Promise<void>;
   relaunch: () => Promise<void>;

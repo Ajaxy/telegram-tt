@@ -11,6 +11,7 @@ import {
 import { setExtraStyles } from '../../../lib/teact/teact-dom';
 
 import { requestForcedReflow, requestNextMutation } from '../../../lib/fasterdom/fasterdom';
+import { REM } from '../../common/helpers/mediaDimensions';
 
 import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -27,6 +28,7 @@ export interface PaneState {
 // Max slide transition duration
 const CLOSE_DURATION = 450;
 const RESIZE_THROTTLE = 100;
+export const PANE_GAP_REM = 0.5;
 
 export default function useHeaderPane<RefType extends HTMLElement = HTMLDivElement>({
   ref: providedRef,
@@ -136,6 +138,7 @@ export function applyAnimationState({
   noTransition?: boolean;
   zIndexIncrease?: boolean;
 }) {
+  const gapPx = PANE_GAP_REM * REM;
   let cumulativeHeight = 0;
   for (let i = 0; i < list.length; i++) {
     const state = list[i];
@@ -169,5 +172,6 @@ export function applyAnimationState({
     }
 
     cumulativeHeight += state.height;
+    if (state.height > 0) cumulativeHeight += gapPx;
   }
 }

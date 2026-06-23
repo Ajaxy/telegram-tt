@@ -1292,7 +1292,6 @@ const Profile = ({
           isSavedDialog={isSavedDialog}
           isOwnProfile={isOwnProfile}
           className={styles.chatExtraBlock}
-          style={createVtnStyle('chatExtraBlock', true)}
         />
       </div>
     );
@@ -1350,7 +1349,6 @@ const Profile = ({
         <>
           <div
             className={buildClassName(styles.sharedMediaTabs, 'shared-media-tabs')}
-            style={createVtnStyle('sharedMediaTabs')}
           >
             <TabList
               activeTab={activeTabIndex}
@@ -1360,7 +1358,6 @@ const Profile = ({
           </div>
           <div
             className={styles.sharedMedia}
-            style={createVtnStyle('sharedMedia')}
           >
             <Transition
               ref={transitionRef}

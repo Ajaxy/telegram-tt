@@ -28,19 +28,26 @@
   pointer-events: auto;
 
   position: absolute;
-  top: 0;
+  top: 1rem;
+  right: 0;
   left: 0;
 
   display: flex;
   align-items: center;
 
-  width: 100%;
-  height: 3.5rem;
-  padding-right: max(0.875rem, env(safe-area-inset-right));
-  padding-left: max(1.5rem, env(safe-area-inset-left));
+  width: calc(100% - var(--middle-panel-inline-padding) * 2);
+  max-width: calc(var(--messages-container-width) - var(--middle-panel-inline-padding) * 2);
+  height: var(--header-height);
+  margin: 0 auto;
+  padding-top: 0.25rem;
+  padding-right: max(0.8125rem, env(safe-area-inset-right));
+  padding-bottom: 0.25rem;
+  padding-left: max(0.5rem, env(safe-area-inset-left));
+  border-radius: 2rem;
 
   opacity: 0;
   background-color: var(--color-background);
+  box-shadow: var(--shadow-island);
 
   transition: opacity 200ms ease-in-out;
 
@@ -52,7 +59,17 @@
     padding-left: var(--window-controls-width);
   }
 
+  @media (min-width: 1276px) {
+    /* stylelint-disable-next-line @stylistic/max-line-length */
+    width: calc(100% - var(--right-column-width) - var(--middle-panel-inline-padding) * 2);
+
+    :global(#Main.right-column-open) & {
+      width: calc(100% - var(--middle-panel-inline-padding) * 2);
+    }
+  }
+
   @media (max-width: 600px) {
+    top: 0.5rem;
     padding-right: max(0.5rem, env(safe-area-inset-right));
     padding-left: max(0.5rem, env(safe-area-inset-left));
   }

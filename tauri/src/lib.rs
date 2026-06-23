@@ -33,9 +33,11 @@ impl Default for AppStateStruct {
 
 pub type AppState = Mutex<AppStateStruct>;
 
-pub const TRAFFIC_LIGHT_POSITION_OVERLAY_LEGACY: LogicalPosition<f64> = LogicalPosition::new(12.0, 26.0);
-pub const TRAFFIC_LIGHT_POSITION_OVERLAY_26: LogicalPosition<f64> = LogicalPosition::new(12.0, 30.0);
-pub const TRAFFIC_LIGHT_POSITION_DEFAULT: LogicalPosition<f64> = LogicalPosition::new(12.0, 12.0);
+pub const TRAFFIC_LIGHT_POSITION_OVERLAY_LEGACY: LogicalPosition<f64> = LogicalPosition::new(30.0, 34.0);
+pub const TRAFFIC_LIGHT_POSITION_OVERLAY_26: LogicalPosition<f64> = LogicalPosition::new(30.0, 38.0);
+pub const TRAFFIC_LIGHT_POSITION_OVERLAY_MOBILE_LEGACY: LogicalPosition<f64> = LogicalPosition::new(20.0, 22.0);
+pub const TRAFFIC_LIGHT_POSITION_OVERLAY_MOBILE_26: LogicalPosition<f64> = LogicalPosition::new(20.0, 26.0);
+pub const TRAFFIC_LIGHT_POSITION_DEFAULT: LogicalPosition<f64> = LogicalPosition::new(30.0, 20.0);
 
 pub static TRAFFIC_LIGHT_POSITION_OVERLAY: LazyLock<LogicalPosition<f64>> = LazyLock::new(|| {
   if let tauri_plugin_os::Version::Semantic(major, _, _) = tauri_plugin_os::version() {
@@ -44,6 +46,15 @@ pub static TRAFFIC_LIGHT_POSITION_OVERLAY: LazyLock<LogicalPosition<f64>> = Lazy
       }
   }
   TRAFFIC_LIGHT_POSITION_OVERLAY_LEGACY
+});
+
+pub static TRAFFIC_LIGHT_POSITION_OVERLAY_MOBILE: LazyLock<LogicalPosition<f64>> = LazyLock::new(|| {
+  if let tauri_plugin_os::Version::Semantic(major, _, _) = tauri_plugin_os::version() {
+      if major >= 26 {
+          return TRAFFIC_LIGHT_POSITION_OVERLAY_MOBILE_26;
+      }
+  }
+  TRAFFIC_LIGHT_POSITION_OVERLAY_MOBILE_LEGACY
 });
 
 pub const WINDOW_WIDTH: f64 = 1088.0;
@@ -135,7 +146,11 @@ pub fn run() {
               state.title.clone()
             };
             let traffic_position = if state.is_overlay {
-              *TRAFFIC_LIGHT_POSITION_OVERLAY
+              if state.is_mobile {
+                *TRAFFIC_LIGHT_POSITION_OVERLAY_MOBILE
+              } else {
+                *TRAFFIC_LIGHT_POSITION_OVERLAY
+              }
             } else {
               TRAFFIC_LIGHT_POSITION_DEFAULT
             };
@@ -191,26 +206,38 @@ pub fn run() {
 
 #[tauri::command]
 #[cfg(target_os = "macos")]
-fn mark_title_bar_overlay(window: tauri::WebviewWindow, is_overlay: bool) {
+fn mark_title_bar_overlay(window: tauri::WebviewWindow, is_overlay: bool, is_mobile: Option<bool>) {
   use crate::mac;
+
+  let mut is_mobile_val = false;
 
   if let Ok(mut states) = WINDOW_STATES.lock() {
     if let Some(state) = states.get_mut(window.label()) {
       state.is_overlay = is_overlay;
+      // Only `Some` updates the stored flag; `None` keeps the previous value
+      if let Some(mobile) = is_mobile {
+        state.is_mobile = mobile;
+      }
+      is_mobile_val = state.is_mobile;
     }
   }
 
   if is_overlay {
+    let position = if is_mobile_val {
+      *TRAFFIC_LIGHT_POSITION_OVERLAY_MOBILE
+    } else {
+      *TRAFFIC_LIGHT_POSITION_OVERLAY
+    };
+
     window
       .set_title_bar_style(tauri::utils::TitleBarStyle::Overlay)
       .unwrap_or_default();
 
     if let Some(base_window) = window.app_handle().get_window(window.label()) {
-      // Empty title keeps original behaviour but triggers the reposition.
       mac::update_window_title(
         base_window.clone(),
         "".to_string(),
-        *TRAFFIC_LIGHT_POSITION_OVERLAY,
+        position,
       );
     }
   } else {
@@ -239,7 +266,7 @@ fn mark_title_bar_overlay(window: tauri::WebviewWindow, is_overlay: bool) {
 #[tauri::command]
 #[cfg(not(target_os = "macos"))]
 #[allow(unused_variables)]
-fn mark_title_bar_overlay(window: tauri::WebviewWindow, is_overlay: bool) {
+fn mark_title_bar_overlay(window: tauri::WebviewWindow, is_overlay: bool, is_mobile: Option<bool>) {
   // noop
 }
 
@@ -346,6 +373,7 @@ pub(crate) fn open_new_window(
     let new_state = WindowState {
       title: DEFAULT_WINDOW_TITLE.to_string(),
       is_overlay: cfg!(target_os = "macos"),
+      is_mobile: false,
     };
     states.insert(window_label.to_string(), new_state);
   }

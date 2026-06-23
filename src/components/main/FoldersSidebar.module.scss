@@ -1,13 +1,37 @@
 .root {
+  position: relative;
+
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
 
   width: var(--folders-sidebar-width);
-  height: 100%;
+  margin: 1rem 0 1rem 1rem;
+  border-radius: var(--border-radius-island);
 
-  background-color: var(--color-background-sidebar);
+  &::before {
+    pointer-events: none;
+    content: '';
+
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  &::after {
+    pointer-events: none;
+    content: '';
+
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+
+    backdrop-filter: blur(25px);
+  }
 
   :global {
     .Menu .bubble {
@@ -58,6 +82,8 @@
 }
 
 .tabs {
+  position: relative;
+
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -67,25 +93,44 @@
 
   font-size: 0.625rem;
   line-height: 0.75rem;
+}
 
-  background-color: var(--color-background-sidebar);
+.pill {
+  pointer-events: none;
+
+  position: absolute;
+  right: 0.25rem;
+  left: 0.25rem;
+  transform: translateY(var(--pill-offset, 0px));
+
+  height: var(--pill-height, 4.5rem);
+  border-radius: 1.25rem;
+
+  background: rgba(255, 255, 255, 0.15);
+
+  transition: transform 300ms ease;
 }
 
 .icon {
   font-size: 1.5rem;
-  color: var(--color-text-secondary);
+  color: white;
 }
 
 .menuButton {
-  width: var(--folders-sidebar-width);
+  --ripple-color: rgba(255, 255, 255, 0.08);
+  --button-active-background-color: rgba(255, 255, 255, 0.07);
+  --button-no-ripple-background-color: rgba(255, 255, 255, 0.07);
+
+  width: calc(var(--folders-sidebar-width) - 0.5rem);
   height: 3.5rem;
-  border-radius: 0;
+  margin: 0.25rem;
+  border-radius: 1.25rem;
 }
 
 .divider {
-  width: 100%;
+  width: calc(100% - 0.5rem);
   height: 1px;
-  background-color: var(--color-interactive-buffered);
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .hideMenuButton {
