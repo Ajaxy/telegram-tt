@@ -81,7 +81,7 @@
     height: var(--base-height);
     margin-left: 0.5rem;
 
-    box-shadow: var(--shadow-island);
+    box-shadow: var(--shadow-footer);
 
     &:not(.danger):not(:hover) {
       color: var(--color-composer-button);
@@ -418,7 +418,7 @@
   border-bottom-right-radius: 0;
 
   background: var(--color-background);
-  box-shadow: var(--shadow-island);
+  box-shadow: var(--shadow-footer);
 
   &.with-story-tweaks {
     border-radius: var(--border-radius-default-small);
