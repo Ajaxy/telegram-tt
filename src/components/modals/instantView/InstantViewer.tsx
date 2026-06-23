@@ -12,6 +12,7 @@ import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import { Breakout } from '../../gili/layout/Surface';
 import RichContent from '../../iv/RichContent';
 import Link from '../../ui/Link';
 import Modal, {
@@ -94,15 +95,17 @@ const InstantViewer = ({
             theme={theme}
           />
         </div>
-        <footer className={styles.footer}>
-          <span className={styles.viewsCounter}>{viewsText}</span>
-          <Link
-            className={styles.reportLink}
-            onClick={handleWrongLayoutClick}
-          >
-            {lang('InstantViewWrongLayout')}
-          </Link>
-        </footer>
+        <Breakout className={styles.footerBreakout}>
+          <footer className={styles.footer}>
+            <span className={styles.viewsCounter}>{viewsText}</span>
+            <Link
+              className={styles.reportLink}
+              onClick={handleWrongLayoutClick}
+            >
+              {lang('InstantViewWrongLayout')}
+            </Link>
+          </footer>
+        </Breakout>
       </article>
     </Modal>
   );

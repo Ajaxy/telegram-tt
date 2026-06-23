@@ -52,7 +52,7 @@ function findStuckDate(container: HTMLElement) {
   const containerTop = container.scrollTop;
 
   const computedStyle = getComputedStyle(container);
-  const headerActionsHeight = parseInt(computedStyle.getPropertyValue('--middle-header-panes-height'), 10);
+  const headerActionsHeight = parseFloat(computedStyle.getPropertyValue('--middle-header-panes-height'));
 
   return Array.from(allElements).find((el) => {
     const { offsetTop, offsetHeight } = el;

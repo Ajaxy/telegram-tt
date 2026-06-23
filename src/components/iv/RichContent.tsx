@@ -168,7 +168,7 @@ const RichContent = ({
 
   const handleOpenMedia = useLastCallback((mediaBlocks: PageMediaBlock[], sourceIds: string[], mediaIndex: number) => {
     openMediaViewer({
-      origin: MediaViewerOrigin.PageBlock,
+      origin: messageId ? MediaViewerOrigin.RichPageBlock : MediaViewerOrigin.IVPageBlock,
       mediaIndex,
       pageMedia: {
         blocks: mediaBlocks,

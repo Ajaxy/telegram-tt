@@ -519,7 +519,7 @@
 
   &.is-in-document-group {
     .message-content.document {
-      --surface-inline-padding: 0.5rem;
+      --surface-breakout-margin: -0.5rem;
 
       padding: 0.25rem 0.5rem !important;
     }

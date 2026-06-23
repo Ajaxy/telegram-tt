@@ -12,13 +12,16 @@
   flex: 1 0 auto;
 }
 
+.footerBreakout {
+  margin-block: 0.5rem -1rem;
+}
+
 .footer {
   display: flex;
   gap: 1rem;
   align-items: center;
   justify-content: space-between;
 
-  margin: 0.5rem -1rem -1rem;
   padding: 0.75rem 1rem;
 
   font-size: 0.875rem;

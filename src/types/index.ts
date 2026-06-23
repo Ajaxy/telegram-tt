@@ -357,7 +357,8 @@ export enum MediaViewerOrigin {
   PreviewMedia,
   SponsoredMessage,
   PollPreview,
-  PageBlock,
+  RichPageBlock,
+  IVPageBlock,
 }
 
 export enum StoryViewerOrigin {

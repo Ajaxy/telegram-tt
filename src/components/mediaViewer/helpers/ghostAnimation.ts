@@ -18,6 +18,7 @@ import {
 } from '../../common/helpers/mediaDimensions';
 
 const ANIMATION_DURATION = 200;
+const MIDDLE_HEADER_PANES_HEIGHT_PROPERTY = '--middle-header-panes-height';
 
 export function animateOpening(
   hasFooter: boolean,
@@ -135,6 +136,7 @@ export function animateClosing(
       MediaViewerOrigin.ScheduledInline,
       MediaViewerOrigin.Album,
       MediaViewerOrigin.ScheduledAlbum,
+      MediaViewerOrigin.RichPageBlock,
     ].includes(origin)
     && !isMessageImageFullyVisible(toImage)
   );
@@ -285,9 +287,13 @@ function isMessageImageFullyVisible(imageEl: HTMLElement) {
   const messageListElement = document.querySelector<HTMLDivElement>('.Transition_slide-active > .MessageList')!;
 
   const { top } = getOffsetToContainer(imageEl, messageListElement);
+  const computedStyle = getComputedStyle(messageListElement);
+  const headerPanesHeight = parseFloat(computedStyle.getPropertyValue(MIDDLE_HEADER_PANES_HEIGHT_PROPERTY)) || 0;
+  const visibleTop = messageListElement.scrollTop + headerPanesHeight;
+  const visibleBottom = messageListElement.scrollTop + messageListElement.offsetHeight;
 
-  return top > messageListElement.scrollTop
-    && top + imageEl.offsetHeight < messageListElement.scrollTop + messageListElement.offsetHeight;
+  return top > visibleTop
+    && top + imageEl.offsetHeight < visibleBottom;
 }
 
 function getTopOffset(hasFooter: boolean) {
@@ -305,7 +311,8 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
   let mediaSelector;
 
   switch (origin) {
-    case MediaViewerOrigin.PageBlock: {
+    case MediaViewerOrigin.RichPageBlock:
+    case MediaViewerOrigin.IVPageBlock: {
       const container = sourceId ? document.getElementById(sourceId) : undefined;
       const pageBlockMediaSelector = 'img.full-media, video.full-media, img.thumbnail:not(.blurred-bg), '
         + 'canvas.thumbnail:not(.blurred-bg), img, video';
@@ -383,9 +390,9 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
     case MediaViewerOrigin.Inline:
     default:
       containerSelector = `.Transition_slide-active > .MessageList #${getMessageHtmlId(message!.id, index)}`;
-      mediaSelector = `${MESSAGE_CONTENT_SELECTOR} img.full-media,`
-        + `${MESSAGE_CONTENT_SELECTOR} video.full-media,`
-        + `${MESSAGE_CONTENT_SELECTOR} img.thumbnail:not(.blurred-bg)`;
+      mediaSelector = `${MESSAGE_CONTENT_SELECTOR} :not(.embedded-thumb) > img.full-media,`
+        + `${MESSAGE_CONTENT_SELECTOR} :not(.embedded-thumb) > video.full-media,`
+        + `${MESSAGE_CONTENT_SELECTOR} :not(.embedded-thumb) > img.thumbnail:not(.blurred-bg)`;
   }
 
   const container = document.querySelector<HTMLElement>(containerSelector)!;
@@ -404,7 +411,6 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
     case MediaViewerOrigin.ScheduledAlbum:
     case MediaViewerOrigin.Inline:
     case MediaViewerOrigin.ScheduledInline:
-    case MediaViewerOrigin.PageBlock:
     case MediaViewerOrigin.StarsTransaction:
     case MediaViewerOrigin.PreviewMedia:
     case MediaViewerOrigin.PollPreview:
@@ -415,6 +421,8 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
     case MediaViewerOrigin.SettingsAvatar:
     case MediaViewerOrigin.ProfileAvatar:
     case MediaViewerOrigin.SearchResult:
+    case MediaViewerOrigin.RichPageBlock:
+    case MediaViewerOrigin.IVPageBlock:
       (ghost.firstChild as HTMLElement).style.objectFit = 'cover';
       break;
 

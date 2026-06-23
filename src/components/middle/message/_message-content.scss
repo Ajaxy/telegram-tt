@@ -482,7 +482,7 @@
   }
 
   &.has-solid-background {
-    --surface-inline-padding: 0.5rem;
+    --surface-breakout-margin: -0.5rem;
 
     padding: 0.3125rem 0.5rem 0.375rem;
   }
@@ -492,7 +492,7 @@
   }
 
   body.is-ios .Message.own &.has-solid-background {
-    --surface-inline-padding: 0.625rem;
+    --surface-breakout-margin: -0.625rem;
 
     padding-left: 0.625rem;
   }
