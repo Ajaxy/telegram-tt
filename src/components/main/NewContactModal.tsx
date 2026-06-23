@@ -195,7 +195,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
           onCheck={setShouldSharePhoneNumber}
           label={oldLang('lng_new_contact_share')}
         />
-        <p className="NewContactModal__help-text NewContactModal__help-text__negative">
+        <p className="NewContactModal__help-text">
           {renderText(oldLang('AddContact.SharedContactExceptionInfo', renderingUser?.firstName))}
         </p>
       </>
