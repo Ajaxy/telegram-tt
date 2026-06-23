@@ -70,6 +70,7 @@ import { debounce, onTickEnd } from '../../util/schedulers';
 import { getServerTime } from '../../util/serverTime';
 import getOffsetToContainer from '../../util/visibility/getOffsetToContainer';
 import { REM } from '../common/helpers/mediaDimensions';
+import getFooterOverlayHeight from './helpers/getFooterOverlayHeight';
 import { groupMessages } from './helpers/groupMessages';
 import { requestMessageListReflow } from './helpers/messageListReflow';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
@@ -861,6 +862,7 @@ const MessageList = ({
     requestMessageListReflow(() => {
       const { scrollTop, scrollHeight, offsetHeight } = container;
       const scrollOffset = scrollOffsetRef.current;
+      const footerOverlay = getFooterOverlayHeight(container);
 
       let bottomOffset = scrollOffset - (prevContainerHeight || offsetHeight);
       const lastItemHeight = wasMessageAdded && lastItemElement ? lastItemElement.offsetHeight : 0;
@@ -896,7 +898,7 @@ const MessageList = ({
             container,
             element: isScrollToBottom ? lastItemElement : firstUnreadElement,
             position: isScrollToBottom ? 'end' : 'start',
-            margin: BOTTOM_FOCUS_MARGIN,
+            margin: BOTTOM_FOCUS_MARGIN + (isScrollToBottom ? footerOverlay : 0),
             forceDuration: noMessageSendingAnimation ? 0 : undefined,
           });
 
@@ -930,6 +932,7 @@ const MessageList = ({
           container,
           element: liveTailElement,
           position: 'end',
+          margin: footerOverlay,
           maxDistance: Number.MAX_SAFE_INTEGER,
           forceDuration: noMessageSendingAnimation ? 0 : undefined,
           shouldReturnMutationFn: true,
@@ -966,6 +969,7 @@ const MessageList = ({
               container,
               element: typingDraftElement,
               position: 'end',
+              margin: footerOverlay,
               maxDistance: Number.MAX_SAFE_INTEGER,
               forceDuration: noMessageSendingAnimation ? 0 : undefined,
               shouldReturnMutationFn: true,
@@ -977,6 +981,7 @@ const MessageList = ({
           container,
           element: typingDraftElement,
           position: 'end',
+          margin: footerOverlay,
           maxDistance: Number.MAX_SAFE_INTEGER,
           forceDuration: noMessageSendingAnimation ? 0 : undefined,
           shouldReturnMutationFn: true,

@@ -755,7 +755,7 @@
 
   .message-action-button-sticky {
     position: sticky;
-    top: calc(0.5rem + var(--middle-header-panes-height));
+    top: calc(0.5rem + var(--message-list-top-inset));
   }
 
   .message-action-buttons {

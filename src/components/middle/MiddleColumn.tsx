@@ -63,6 +63,7 @@ import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { isUserId } from '../../util/entities/ids';
 import { resolveTransitionName } from '../../util/resolveTransitionName';
+import { REM } from '../common/helpers/mediaDimensions';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 
 import useAppLayout from '../../hooks/useAppLayout';
@@ -74,6 +75,7 @@ import useOldLang from '../../hooks/useOldLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { useResize } from '../../hooks/useResize';
+import useResizeObserver from '../../hooks/useResizeObserver';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useWindowSize from '../../hooks/window/useWindowSize';
 import usePinnedMessage from './hooks/usePinnedMessage';
@@ -170,6 +172,7 @@ function isVideo(item: DataTransferItem) {
 }
 
 const LAYER_ANIMATION_DURATION_MS = 450 + ANIMATION_END_DELAY;
+const DEFAULT_FOOTER_HEIGHT = Math.round(4.25 * REM);
 
 function MiddleColumn({
   leftColumnRef,
@@ -294,6 +297,20 @@ function MiddleColumn({
   );
 
   const middleColumnRef = useRef<HTMLDivElement>();
+  const footerRef = useRef<HTMLDivElement>();
+  const [footerHeight, setFooterHeight] = useState(DEFAULT_FOOTER_HEIGHT);
+
+  const updateFooterHeight = useLastCallback(() => {
+    requestMeasure(() => {
+      const footer = footerRef.current;
+      if (!footer || !footer.offsetParent) return;
+      const height = footer.offsetHeight;
+      if (!height) return;
+      setFooterHeight(height);
+    });
+  });
+
+  useResizeObserver(footerRef, updateFooterHeight);
 
   const { isReady, handleSlideTransitionStop } = useIsReady(
     !shouldSkipHistoryAnimations && withInterfaceAnimations,
@@ -494,6 +511,19 @@ function MiddleColumn({
     || (isPinnedMessageList && canUnpin) || canShowOpenChatButton || renderingCanUnblock,
   );
   const withExtraShift = Boolean(isMessagingDisabled || isSelectModeActive);
+  const hasDraftReplyInfo = Boolean(draftReplyInfo);
+
+  const hasFooter = Boolean(
+    renderingCanPost || withMessageListBottomShift || isMessagingDisabled || isSelectModeActive,
+  );
+
+  useEffect(() => {
+    updateFooterHeight();
+  }, [
+    updateFooterHeight, renderingChatId, renderingThreadId, currentTransitionKey, renderingCanPost,
+    isMessagingDisabled, isSelectModeActive, withMessageListBottomShift, hasDraftReplyInfo,
+    footerClassName,
+  ]);
 
   return (
     <div
@@ -507,6 +537,8 @@ function MiddleColumn({
         `--toolbar-unpin-hidden-scale: ${toolbarForUnpinHiddenScale}`,
         `--composer-translate-x: ${composerTranslateX}px`,
         `--toolbar-translate-x: ${toolbarTranslateX}px`,
+        `--middle-column-footer-height: ${footerHeight}px`,
+        `--has-footer: ${hasFooter ? 1 : 0}`,
       )}
       onClick={(isTablet && isLeftColumnShown) ? handleTabletFocus : undefined}
     >
@@ -571,7 +603,7 @@ function MiddleColumn({
                 withDefaultBg={Boolean(!customBackground && !backgroundColor)}
                 onIntersectPinnedMessage={renderingHandleIntersectPinnedMessage}
               />
-              <div className={footerClassName}>
+              <div ref={footerRef} className={footerClassName}>
                 <FloatingActionButtons
                   withScrollDown={renderingIsScrollDownShown}
                   canPost={renderingCanPost}
