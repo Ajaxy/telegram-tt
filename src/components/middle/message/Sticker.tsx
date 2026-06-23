@@ -92,9 +92,7 @@ const Sticker: FC<OwnProps & StateProps> = ({
     }
   });
 
-  const mediaHash = sticker.isPreloadedGlobally ? undefined : (
-    getStickerMediaHash(sticker, isVideo && !IS_WEBM_SUPPORTED ? 'pictogram' : 'inline')
-  );
+  const mediaHash = getStickerMediaHash(sticker, isVideo && !IS_WEBM_SUPPORTED ? 'pictogram' : 'inline');
 
   const canLoad = useIsIntersecting(ref, observeIntersection);
   const canPlay = useIsIntersecting(ref, observeIntersectionForPlaying);

@@ -2,7 +2,7 @@ import type { ApiFormattedText } from '../../api/types';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 export function getStickerHashById(stickerId: string, isPreview?: boolean) {
-  const base = `sticker${stickerId}`;
+  const base = `document${stickerId}`;
   return !isPreview ? base : `${base}?size=m`;
 }
 

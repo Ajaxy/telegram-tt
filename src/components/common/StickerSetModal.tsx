@@ -119,10 +119,6 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     if (!currentMessageList) {
       return;
     }
-    sticker = {
-      ...sticker,
-      isPreloadedGlobally: true,
-    };
 
     if (shouldSchedule || isScheduleRequested) {
       requestCalendar((scheduledAt, scheduleRepeatPeriod) => {

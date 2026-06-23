@@ -81,15 +81,12 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
   }, [connectionState, lastMessageId]);
 
   const handleStickerSelect = useLastCallback(() => {
-    if (!currentMessageList) {
+    if (!currentMessageList || !sticker) {
       return;
     }
 
     sendMessage({
-      sticker: {
-        ...sticker!,
-        isPreloadedGlobally: true,
-      },
+      sticker,
       messageList: currentMessageList,
     });
   });

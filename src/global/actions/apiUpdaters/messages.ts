@@ -679,7 +679,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       const currentMessage = selectChatMessage(global, chatId, localId);
 
-      global = deleteChatMessages(global, chatId, [localId]);
+      global = deleteChatMessages(global, chatId, [localId], { shouldPreserveMedia: true });
 
       // Edge case for "Send When Online"
       if (message.isScheduled) {
@@ -1321,7 +1321,7 @@ export function updateWithLocalMedia(
   // Preserve locally uploaded media.
   if (currentMessage && messageUpdate.content && !isLocalMessageId(id)) {
     const {
-      photo, video, sticker, document,
+      photo, video, document,
     } = getMessageContent(currentMessage);
 
     if (photo && messageUpdate.content.photo) {
@@ -1329,8 +1329,6 @@ export function updateWithLocalMedia(
       messageUpdate.content.photo.thumbnail ??= photo.thumbnail;
     } else if (video && messageUpdate.content.video) {
       messageUpdate.content.video.blobUrl ??= video.blobUrl;
-    } else if (sticker && messageUpdate.content.sticker) {
-      messageUpdate.content.sticker.isPreloadedGlobally ??= sticker.isPreloadedGlobally;
     } else if (document && messageUpdate.content.document) {
       messageUpdate.content.document.previewBlobUrl ??= document.previewBlobUrl;
     }

@@ -1559,11 +1559,6 @@ const Composer = ({
 
     isSilent = isSilent || isSilentPosting;
 
-    sticker = {
-      ...sticker,
-      isPreloadedGlobally: true,
-    };
-
     if (isInScheduledList || isScheduleRequested) {
       forceShowSymbolMenu();
       requestCalendar((scheduledAt, scheduleRepeatPeriod) => {

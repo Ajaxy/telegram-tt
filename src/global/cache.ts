@@ -801,7 +801,7 @@ function omitLocalPaidReactions(message: ApiMessage): ApiMessage {
 
 function omitLocalMedia(message: ApiMessage): ApiMessage {
   const {
-    photo, video, document, sticker,
+    photo, video, document,
   } = message.content;
 
   return {
@@ -820,10 +820,6 @@ function omitLocalMedia(message: ApiMessage): ApiMessage {
       document: document && {
         ...document,
         previewBlobUrl: undefined,
-      },
-      sticker: sticker && {
-        ...sticker,
-        isPreloadedGlobally: undefined,
       },
     },
     previousLocalId: undefined,

@@ -118,7 +118,7 @@ export function getInputCustomEmojiParams(customEmoji?: ApiSticker) {
   const shouldUseStaticFallback = !IS_WEBM_SUPPORTED && customEmoji.isVideo;
   const isUsingSharedCanvas = customEmoji.isLottie || (customEmoji.isVideo && !shouldUseStaticFallback);
   if (isUsingSharedCanvas) {
-    void fetchAndProcess(`sticker${customEmoji.id}`);
+    getCustomEmojiMediaDataForInput(customEmoji.id);
     return [false, blankSrc, generateUniqueId()] as const;
   }
 

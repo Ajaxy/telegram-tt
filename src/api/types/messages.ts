@@ -59,7 +59,6 @@ export interface ApiSticker {
   height?: number;
   thumbnail?: ApiThumbnail;
   previewPhotoSizes?: ApiPhotoSize[];
-  isPreloadedGlobally?: boolean;
   hasEffect?: boolean;
   isFree?: boolean;
   shouldUseTextColor?: boolean;
