@@ -382,7 +382,11 @@ export function mergeIdRanges(ranges: number[][], idsUpdate: number[]): number[]
 
 export function extractMessageText(message: ApiMessage | ApiStory, inChatList = false) {
   const contentText = message.content.text;
-  if (!contentText) return undefined;
+  if (!contentText) {
+    const richMessageText = message.content.richMessage && getRichMessagePreviewText(message.content.richMessage);
+
+    return richMessageText ? { text: richMessageText } : undefined;
+  }
 
   const { text } = contentText;
   let { entities } = contentText;

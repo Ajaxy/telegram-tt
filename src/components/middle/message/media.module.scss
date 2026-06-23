@@ -1,4 +1,7 @@
 .loading {
+  position: absolute;
+  inset: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,6 +15,9 @@
 
 .controlButton {
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 
   display: flex;
   align-items: center;

@@ -1,3 +1,4 @@
+import temmlUrl from 'temml/dist/temml.mjs?url';
 import { memo, useEffect, useRef } from '../../lib/teact/teact';
 
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
@@ -17,7 +18,8 @@ let temmlPromise: Promise<TemmlModule> | undefined;
 function ensureTemml() {
   if (!temmlPromise) {
     temmlPromise = Promise.all([
-      import('temml'),
+      // Vite breaks Temml on build. https://github.com/ronkok/Temml/pull/128
+      import(/* @vite-ignore */ temmlUrl) as Promise<TemmlModule>,
       import('temml/dist/Temml-Local.css'),
     ]).then(([temml]) => temml);
   }

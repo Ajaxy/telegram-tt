@@ -31,7 +31,7 @@ export function animateOpening(
 ) {
   const { mediaEl: fromImage } = getNodes(origin, message, mediaIndex, sourceId);
   if (!fromImage) {
-    return;
+    return false;
   }
 
   const { width: windowWidth } = windowSize.get();
@@ -92,6 +92,8 @@ export function animateOpening(
       }, ANIMATION_DURATION + ANIMATION_END_DELAY);
     });
   });
+
+  return true;
 }
 
 export function animateClosing(

@@ -41,13 +41,8 @@
     background: rgba(0, 0, 0, 0);
   }
 
-  @starting-style {
-    &.open {
-      background: rgba(0, 0, 0, 0);
-    }
-  }
-
-  body.ghost-animating & {
+  body.ghost-animating &,
+  &.opening {
     > .pan-wrapper,
     > button,
     .MediaViewerContent img,
@@ -70,15 +65,6 @@
     > .media-viewer-head,
     > .MediaViewerSlides {
       opacity: 0;
-    }
-  }
-
-  @starting-style {
-    &.open {
-      > .media-viewer-head,
-      > .MediaViewerSlides {
-        opacity: 0;
-      }
     }
   }
 

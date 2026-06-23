@@ -13,6 +13,7 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ThemeKey, ThreadId } from '../../types';
 
 import { selectChatMessage } from '../../global/selectors';
+import buildClassName from '../../util/buildClassName';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -129,7 +130,7 @@ const MessageRichText = ({
       {shouldCollapse && (
         <div className={styles.readMoreWrapper}>
           <Button
-            className={styles.readMoreButton}
+            className={buildClassName(styles.readMoreButton, isOwn && styles.ownReadMoreButton)}
             color="primary"
             isLoading={isLoadingFullMessage}
             pill

@@ -24,3 +24,7 @@
 .readMoreButton {
   pointer-events: auto;
 }
+
+.ownReadMoreButton {
+  --button-background-color: var(--color-text-meta-colored);
+}

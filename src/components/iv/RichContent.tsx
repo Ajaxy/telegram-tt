@@ -31,6 +31,7 @@ import { MediaViewerOrigin, type ThemeKey, type ThreadId } from '../../types';
 
 import { DEBUG, TME_LINK_PREFIX } from '../../config';
 import { getRichTextPlainText, hasRichText } from '../../global/helpers/richMessage';
+import { IS_MAC_OS, IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { formatDateTime } from '../../util/localization/dateFormat';
 import renderText from '../common/helpers/renderText';
@@ -65,6 +66,8 @@ import Slideshow from './Slideshow';
 import Checkbox from '@gili/primitives/Checkbox';
 
 import styles from './RichContent.module.scss';
+
+const SHOULD_HIDE_SCROLLBARS = IS_MAC_OS || IS_TOUCH_ENV;
 
 type OwnProps = {
   blocks: ApiPageBlock[];
@@ -405,7 +408,7 @@ function TableBlock({
   return (
     <div
       ref={ref}
-      className={buildClassName(styles.tableWrapper, 'custom-scroll-x', 'no-scrollbar')}
+      className={buildClassName(styles.tableWrapper, 'custom-scroll-x', SHOULD_HIDE_SCROLLBARS && 'no-scrollbar')}
     >
       {hasRichText(block.title) && renderTextBlock(block.title, styles.tableTitle, renderContext)}
       <table className={buildClassName(styles.table, block.isBordered && styles.bordered)}>
@@ -443,7 +446,9 @@ function MathBlock({ source }: { source: string }) {
   return (
     <div
       ref={ref}
-      className={buildClassName(styles.block, styles.latexBlockWrapper, 'custom-scroll-x', 'no-scrollbar')}
+      className={buildClassName(
+        styles.block, styles.latexBlockWrapper, 'custom-scroll-x', SHOULD_HIDE_SCROLLBARS && 'no-scrollbar',
+      )}
     >
       <Latex source={source} isBlock />
     </div>

@@ -1,7 +1,7 @@
 import type React from '../../lib/teact/teact';
 import {
   beginHeavyAnimation,
-  memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
+  memo, useEffect, useLayoutEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -46,7 +46,6 @@ import {
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import { IS_MAC_OS } from '../../util/browser/windowEnvironment';
-import buildClassName from '../../util/buildClassName';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
 import { isUserId } from '../../util/entities/ids';
 import { MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
@@ -65,6 +64,7 @@ import { exitPictureInPictureIfNeeded, PICTURE_IN_PICTURE_SIGNAL } from '../../h
 import usePrevious from '../../hooks/usePrevious';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
+import useShowTransition from '../../hooks/useShowTransition';
 import { useMediaProps } from './hooks/useMediaProps';
 
 import ReportAvatarModal from '../common/ReportAvatarModal';
@@ -147,6 +147,7 @@ const MediaViewer = ({
   const dialogRef = useRef<HTMLDialogElement>();
   const isOpen = Boolean(avatarOwner || message || standaloneMedia || pageMedia || sponsoredMessage);
   const prevIsOpen = usePreviousDeprecated(isOpen);
+  const prevIsHidden = usePreviousDeprecated(isHidden);
   const { isMobile } = useAppLayout();
 
   const { media, isSingle } = viewableMedia || {};
@@ -248,19 +249,44 @@ const MediaViewer = ({
   const sourceId = currentItem?.type === 'pageBlock'
     ? currentItem.pageMedia.sourceIds[currentItem.mediaIndex] : undefined;
   const prevSourceId = usePrevious(sourceId);
+  const [
+    hasStartedOpeningAnimation,
+    markOpeningAnimationStarted,
+    resetOpeningAnimationStarted,
+  ] = useFlag();
+  const shouldStartOpening = Boolean(
+    isGhostAnimation && isOpen && !isHidden && !prevItem && (!prevIsOpen || prevIsHidden),
+  );
+  const shouldHideOpeningMedia = shouldStartOpening && !hasStartedOpeningAnimation;
 
   useEffectWithPrevDeps(([wasOpen, wasHidden]) => {
-    if (wasOpen === isOpen && wasHidden === isHidden) return;
+    if (wasOpen === isOpen && wasHidden === isHidden) return undefined;
 
-    if (isGhostAnimation && isOpen && !prevItem) {
-      beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
-      animateOpening(hasFooter, origin!, bestImageData!, dimensions!, isVideo, message, mediaIndex, sourceId);
+    if (isGhostAnimation && isOpen && !isHidden && !prevItem) {
+      const animationDuration = ANIMATION_DURATION + ANIMATION_END_DELAY;
+      beginHeavyAnimation(animationDuration);
+      const hasQueuedOpeningAnimation = animateOpening(
+        hasFooter, origin!, bestImageData!, dimensions!, isVideo, message, mediaIndex, sourceId,
+      );
+      if (hasQueuedOpeningAnimation) {
+        requestMutation(() => {
+          markOpeningAnimationStarted();
+        });
+      } else {
+        markOpeningAnimationStarted();
+      }
     }
 
     if (isGhostAnimation && !isOpen && prevItem) {
       beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateClosing(prevOrigin!, prevBestImageData!, prevMessage, prevItem?.mediaIndex, prevSourceId);
     }
+
+    if (!isOpen || isHidden) {
+      resetOpeningAnimationStarted();
+    }
+
+    return undefined;
   }, [
     isOpen, isHidden, bestImageData, dimensions, hasFooter, isGhostAnimation, isVideo, message, origin,
     prevBestImageData, prevItem, prevMessage, prevOrigin, mediaIndex, sourceId, prevSourceId,
@@ -268,37 +294,16 @@ const MediaViewer = ({
 
   const handleClose = useLastCallback(() => closeMediaViewer());
 
-  const [isClosing, setIsClosing] = useState(false);
   const shouldShowDialog = isOpen && !isHidden;
-  const shouldStartClosing = Boolean(prevIsOpen && !isOpen && !isHidden && !shouldSkipHistoryAnimations);
-  const shouldKeepDialogOpen = shouldShowDialog || isClosing || shouldStartClosing;
-  const dialogClassName = buildClassName(
-    shouldKeepDialogOpen && 'shown',
-    !shouldKeepDialogOpen && 'not-shown',
-    shouldShowDialog && 'open',
-    !shouldShowDialog && 'not-open',
-    (isClosing || shouldStartClosing) && 'closing',
-  );
-
-  useEffectWithPrevDeps(([wasOpen]) => {
-    if (wasOpen && !isOpen && !isHidden && !shouldSkipHistoryAnimations) {
-      setIsClosing(true);
-
-      const timeout = window.setTimeout(() => {
-        setIsClosing(false);
-      }, ANIMATION_DURATION + ANIMATION_END_DELAY);
-
-      return () => {
-        clearTimeout(timeout);
-      };
-    }
-
-    if (isOpen || isHidden) {
-      setIsClosing(false);
-    }
-
-    return undefined;
-  }, [isOpen, isHidden, shouldSkipHistoryAnimations]);
+  const { shouldRender: shouldRenderDialog } = useShowTransition<HTMLDialogElement>({
+    isOpen: shouldShowDialog,
+    ref: dialogRef,
+    noCloseTransition: shouldSkipHistoryAnimations || isHidden,
+    closeDuration: ANIMATION_DURATION + ANIMATION_END_DELAY,
+    className: false,
+    withShouldRender: true,
+  });
+  const shouldKeepDialogOpen = shouldRenderDialog && !isHidden;
 
   useLayoutEffect(() => {
     const dialog = dialogRef.current;
@@ -595,7 +600,7 @@ const MediaViewer = ({
     closingContentRef.current = prevContent;
   }
 
-  if (!isOpen && !isClosing && !shouldStartClosing) {
+  if (!isOpen && !shouldRenderDialog) {
     return undefined;
   }
 
@@ -604,7 +609,7 @@ const MediaViewer = ({
       id="MediaViewer"
       ref={dialogRef}
       aria-modal="true"
-      className={dialogClassName}
+      className={shouldHideOpeningMedia ? 'opening' : undefined}
     >
       {isOpen ? content : closingContentRef.current}
     </dialog>
