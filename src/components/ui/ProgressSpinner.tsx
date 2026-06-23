@@ -104,7 +104,7 @@ const ProgressSpinner = ({
       onClick={onClick}
     >
       {!noCross && <Icon name="close" />}
-      <canvas ref={canvasRef} className="ProgressSpinner_canvas" style={`width: ${width}; height: ${width}px;`} />
+      <canvas ref={canvasRef} className="ProgressSpinner_canvas" style={`width: ${width}px; height: ${width}px;`} />
     </div>
   );
 };
