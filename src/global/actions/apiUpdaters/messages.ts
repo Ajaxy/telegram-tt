@@ -9,7 +9,7 @@ import type {
 } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import { ARCHIVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { isUserId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -42,6 +42,7 @@ import {
   setGlobal,
 } from '../../index';
 import {
+  addChatListIds,
   addMessages,
   addViewportId,
   clearMessageSummary,
@@ -365,6 +366,17 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }
       }
 
+      const chatListType = chat?.folderId === ARCHIVED_FOLDER_ID ? 'archived' : 'active';
+      const shouldRestoreChatInList = (
+        !isLocal && !isActionMessage(newMessage) && !chat?.isNotJoined
+        && !selectIsChatListed(global, chatId, chatListType)
+      );
+      if (shouldRestoreChatInList && chat) {
+        if (global.chats.listIds[chatListType]) {
+          global = addChatListIds(global, chatListType, [chatId]);
+        }
+      }
+
       setGlobal(global);
 
       if (shouldBumpGuestBotTopPeer(global, newMessage)) {
@@ -384,7 +396,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
 
       // Reload dialogs if chat is not present in the list
-      if (!isLocal && !chat?.isNotJoined && !selectIsChatListed(global, chatId)) {
+      if (shouldRestoreChatInList) {
         actions.loadTopChats();
       }
 
