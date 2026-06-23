@@ -11,6 +11,7 @@ import {
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
+import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import { waitForAnimationEnd } from '../../../util/cssAnimationEndListeners';
 
 import useContext from '../../../hooks/data/useContext';
@@ -181,6 +182,13 @@ const Modal = ({
     onClose();
   });
 
+  const handleEsc = useLastCallback((event: KeyboardEvent) => {
+    if (noLightDismiss || !isOpen || isClosing) return;
+
+    event.preventDefault();
+    handleRequestClose();
+  });
+
   const registerTitle = useLastCallback((isPresent: boolean) => {
     setHasTitle(isPresent);
   });
@@ -285,6 +293,14 @@ const Modal = ({
       }
     };
   }, [shouldRender]);
+
+  useEffect(() => {
+    if (!shouldRender) {
+      return undefined;
+    }
+
+    return captureKeyboardListeners({ onEsc: handleEsc });
+  }, [handleEsc, shouldRender]);
 
   useEffect(() => {
     if (!shouldRender) {
