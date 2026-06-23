@@ -188,6 +188,7 @@ export function buildGraph(
     tooltipFormatter: data.xTooltipFormatter,
     labels: x.slice(1),
     noCaption: !data.subchart.show,
+    withMinimap: true,
     hasSecondYAxis,
     isStacked: data.stacked && !hasSecondYAxis,
     isPercentage,

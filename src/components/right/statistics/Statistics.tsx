@@ -1,4 +1,3 @@
-import LovelyChart from 'lovely-chart';
 import {
   memo, useEffect, useMemo,
   useRef, useState,
@@ -13,6 +12,7 @@ import type {
   ApiTypeStory,
 } from '../../../api/types';
 
+import ensureLovelyChart from '../../../lib/lovelyChartWithStyles';
 import {
   selectChat,
   selectChatFullInfo,
@@ -33,7 +33,6 @@ import StatisticsOverview from './StatisticsOverview';
 import StatisticsRecentMessage from './StatisticsRecentMessage';
 import StatisticsRecentStory from './StatisticsRecentStory';
 
-import 'lovely-chart/LovelyChart.css';
 import styles from './Statistics.module.scss';
 
 const CHANNEL_GRAPHS_TITLES = {
@@ -130,52 +129,56 @@ const Statistics = ({
   }, [graphs, chatId, statistics, loadStatisticsAsyncGraph]);
 
   useEffect(() => {
-    if (!isReady) {
-      setIsReady(true);
-      return;
-    }
+    (async () => {
+      const LovelyChart = await ensureLovelyChart();
 
-    if (!statistics || !containerRef.current) {
-      return;
-    }
-
-    graphs.forEach((name, index: number) => {
-      const graph = statistics[name as keyof typeof statistics];
-      if (!isGraph(graph)) {
+      if (!isReady) {
+        setIsReady(true);
         return;
       }
 
-      const isAsync = graph.graphType === 'async';
-      const isError = graph.graphType === 'error';
-
-      if (isAsync || loadedChartsRef.current.has(name)) {
+      if (!statistics || !containerRef.current) {
         return;
       }
 
-      if (isError) {
+      graphs.forEach((name, index: number) => {
+        const graph = statistics[name as keyof typeof statistics];
+        if (!isGraph(graph)) {
+          return;
+        }
+
+        const isAsync = graph.graphType === 'async';
+        const isError = graph.graphType === 'error';
+
+        if (isAsync || loadedChartsRef.current.has(name)) {
+          return;
+        }
+
+        if (isError) {
+          loadedChartsRef.current.add(name);
+          errorChartsRef.current.add(name);
+
+          return;
+        }
+
+        const { zoomToken } = graph;
+
+        new LovelyChart(containerRef.current!.children[index] as HTMLElement, {
+          ...graph,
+          title: lang((graphTitles as Record<string, string>)[name]),
+          onZoom: zoomToken
+            ? (x: number) => callApi('fetchStatisticsAsyncGraph', { token: zoomToken, x, dcId })
+            : undefined,
+          zoomOutLabel: zoomToken ? lang('Graph.ZoomOut') : undefined,
+        });
+
         loadedChartsRef.current.add(name);
-        errorChartsRef.current.add(name);
 
-        return;
-      }
-
-      const { zoomToken } = graph;
-
-      new LovelyChart(containerRef.current!.children[index] as HTMLElement, {
-        ...graph,
-        title: lang((graphTitles as Record<string, string>)[name]),
-        onZoom: zoomToken
-          ? (x: number) => callApi('fetchStatisticsAsyncGraph', { token: zoomToken, x, dcId })
-          : undefined,
-        zoomOutLabel: zoomToken ? lang('Graph.ZoomOut') : undefined,
+        containerRef.current!.children[index].classList.remove(styles.hidden);
       });
 
-      loadedChartsRef.current.add(name);
-
-      containerRef.current!.children[index].classList.remove(styles.hidden);
-    });
-
-    forceUpdate();
+      forceUpdate();
+    })();
   }, [
     graphs, graphTitles, isReady, statistics, lang, chatId, loadStatisticsAsyncGraph, dcId, forceUpdate,
   ]);
