@@ -73,6 +73,8 @@ import styles from './PollModal.module.scss';
 const MAX_OPTION_LENGTH = 100;
 const MAX_QUESTION_LENGTH = 255;
 const MAX_SOLUTION_LENGTH = 200;
+const MIN_OPTIONS_COUNT = 1;
+const MIN_QUIZ_OPTIONS_COUNT = 2;
 
 const CLOSE_PERIOD_OPTIONS = [
   HOUR,
@@ -260,9 +262,10 @@ const PollModal = ({
   const canSchedule = Boolean(!paidMessagesStars && !chat?.isMonoforum);
   const isCorrectAnswerInvalid = hasSubmitted && isQuizMode && !correctAnswerPositions.length;
   const isAddAnswersDisabled = isQuizMode || !isPublic;
+  const minOptionsCount = isQuizMode ? MIN_QUIZ_OPTIONS_COUNT : MIN_OPTIONS_COUNT;
   const remainingOptionsCount = Math.max(pollMaxAnswers - filledOptions.length, 0);
   const isSendDisabled = !trimmedQuestion
-    || filledOptions.length < 1
+    || filledOptions.length < minOptionsCount
     || (isQuizMode && !correctAnswerPositions.length);
 
   const hasLimitedDuration = closePeriod !== undefined || closeDate !== undefined;
@@ -432,7 +435,7 @@ const PollModal = ({
     setOptions(normalizedOptions);
     setHasSubmitted(true);
 
-    if (!trimmedQuestion || filledOptions.length < 1) {
+    if (!trimmedQuestion || filledOptions.length < minOptionsCount) {
       return undefined;
     }
 
