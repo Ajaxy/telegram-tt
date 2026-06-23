@@ -19,6 +19,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AboutMonetizationModal from '../../common/AboutMonetizationModal.async';
+import GramIcon from '../../common/icons/GramIcon';
 import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
 import Island, { IslandDescription } from '../../gili/layout/Island';
@@ -142,7 +143,7 @@ const MonetizationStatistics = ({
     return (
       <div className={styles.availableReward}>
         <div className={styles.toncoin}>
-          <Icon className={styles.toncoinIcon} name="toncoin" />
+          <GramIcon className={styles.toncoinIcon} />
           <b className={styles.rewardValue}>
             {integerTonPart}
             {decimalTonPart ? (

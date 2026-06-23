@@ -40,7 +40,7 @@ export function formatCurrency(
   }
 
   if (currency === TON_CURRENCY_CODE) {
-    return formatTonAsIcon(lang, price, { className: options?.iconClassName });
+    return formatTonAsIcon(lang, price, { className: options?.iconClassName, isMono: options?.asFontIcon });
   }
 
   return formatCurrencyAsString(totalPrice, currency, lang.code, options);

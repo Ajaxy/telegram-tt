@@ -54,7 +54,7 @@ export function getTransactionTitle(oldLang: OldLangFn, lang: LangFn, transactio
   if (transaction.isMyGift) return oldLang('StarsGiftSent');
   if (transaction.isGift) {
     if (transaction.amount.currency === TON_CURRENCY_CODE) {
-      return lang('TonGiftReceived');
+      return lang('GramGiftReceived');
     }
     return oldLang('StarsGiftReceived');
   }

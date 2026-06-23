@@ -28,7 +28,7 @@ import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Avatar from '../../../common/Avatar';
-import Icon from '../../../common/icons/Icon';
+import GramIcon from '../../../common/icons/GramIcon';
 import StarIcon from '../../../common/icons/StarIcon';
 import RadialPatternBackground from '../../../common/profile/RadialPatternBackground';
 import PaidMediaThumb from './PaidMediaThumb';
@@ -196,7 +196,7 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
         {NNBSP}
         {amount.currency === STARS_CURRENCY_CODE && <StarIcon type="gold" size="adaptive" />}
         {amount.currency === TON_CURRENCY_CODE && (
-          <Icon name="toncoin" className={buildClassName('in-text-icon', amountColorClass)} />
+          <GramIcon isMono className={buildClassName('in-text-icon', amountColorClass)} />
         )}
       </span>
     </div>

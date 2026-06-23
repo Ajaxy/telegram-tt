@@ -83,7 +83,7 @@ const MessageTextStreamingTest = () => {
       lang('PremiumPreviewReactionsDescription'),
       lang('SuggestedPostAgreementReached'),
       lang('SuggestedPostPublishScheduleYou', { peer: 'Test', date: 'April 15' }),
-      lang('MonetizationInfoTONTitle'),
+      lang('MonetizationInfoGramTitle'),
       lang('PremiumPreviewAdvancedChatManagementDescription'),
       lang('PremiumPreviewAnimatedProfilesDescription'),
       lang('SponsoredMessageInfoDescription1'),

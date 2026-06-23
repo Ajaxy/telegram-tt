@@ -9,6 +9,7 @@ import useLang from '../../hooks/useLang';
 import useOldLang from '../../hooks/useOldLang';
 
 import TableAboutModal from '../modals/common/TableAboutModal';
+import GramIcon from './icons/GramIcon';
 import Icon from './icons/Icon';
 import SafeLink from './SafeLink';
 
@@ -46,11 +47,11 @@ const AboutMonetizationModal: FC<OwnProps> = ({
 
   const monetizationTitle = useMemo(() => {
     return lang(
-      'MonetizationInfoTONTitle',
+      'MonetizationInfoGramTitle',
       undefined,
       {
         withNodes: true,
-        specialReplacement: { '💎': <Icon className={styles.toncoin} name="toncoin" /> },
+        specialReplacement: { '💎': <GramIcon className={styles.toncoin} /> },
       },
     );
   }, [lang]);

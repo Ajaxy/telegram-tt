@@ -29,6 +29,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import CalendarModal from '../../common/CalendarModal';
+import GramIcon from '../../common/icons/GramIcon';
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import InputText from '../../ui/InputText';
@@ -212,8 +213,8 @@ const SuggestMessageModal = ({
               noFastClick
               onClick={() => setSelectedCurrency(TON_CURRENCY_CODE)}
             >
-              <Icon name="toncoin" className={styles.currencyIcon} />
-              {lang('CurrencyTon')}
+              <GramIcon className={styles.currencyIcon} />
+              {lang('CurrencyGram')}
             </Button>
           </div>
           <InputText
@@ -234,7 +235,7 @@ const SuggestMessageModal = ({
               { withNodes: true, withMarkdown: true })
               : isCurrencyStars
                 ? lang('SuggestMessagePriceDescriptionStars')
-                : lang('SuggestMessagePriceDescriptionTon')}
+                : lang('SuggestMessagePriceDescriptionGram')}
           </div>
         </div>
 

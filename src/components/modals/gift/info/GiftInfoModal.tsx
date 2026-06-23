@@ -884,7 +884,7 @@ const GiftInfoModal = ({
           {uniqueGift.resaleTonOnly
             && (
               <div className={styles.descriptionConfirm}>
-                {lang('ConfirmBuyGiftForTonDescription')}
+                {lang('ConfirmBuyGiftForGramDescription')}
               </div>
             )}
           <GiftTransferPreview
@@ -927,13 +927,13 @@ const GiftInfoModal = ({
             <>
               <Checkbox
                 className={styles.checkBox}
-                label={lang('LabelPayInTON')}
+                label={lang('LabelPayInGram')}
                 checked={shouldPayInTon}
                 onCheck={setShouldPayInTon}
               />
 
               <div className={styles.checkBoxDescription}>
-                {lang('DescriptionPayInTON')}
+                {lang('DescriptionPayInGram')}
               </div>
             </>
           )}

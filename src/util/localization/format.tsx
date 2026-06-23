@@ -5,6 +5,7 @@ import { STARS_ICON_PLACEHOLDER, TON_CURRENCY_CODE } from '../../config';
 import { convertTonFromNanos } from '../../util/formatCurrency';
 import buildClassName from '../buildClassName';
 
+import GramIcon from '../../components/common/icons/GramIcon';
 import Icon from '../../components/common/icons/Icon';
 import StarIcon from '../../components/common/icons/StarIcon';
 
@@ -21,7 +22,7 @@ export function formatStarsAsText(lang: LangFn, amount: number) {
 
 export function formatTonAsText(lang: LangFn, amount: number, shouldConvertFromNanos?: boolean) {
   const formattedAmount = shouldConvertFromNanos ? convertTonFromNanos(Number(amount)) : amount;
-  return lang('TonAmountText', { amount: lang.preciseNumber(formattedAmount) }, { pluralValue: formattedAmount });
+  return lang('GramAmountText', { amount: lang.preciseNumber(formattedAmount) }, { pluralValue: formattedAmount });
 }
 
 export function formatTonAsIcon(
@@ -32,15 +33,18 @@ export function formatTonAsIcon(
     containerClassName?: string;
     withWrapper?: boolean;
     shouldConvertFromNanos?: boolean;
+    isMono?: boolean;
   }) {
-  const { className, containerClassName, withWrapper, shouldConvertFromNanos } = options || {};
+  const {
+    className, containerClassName, withWrapper, shouldConvertFromNanos, isMono,
+  } = options || {};
   const formattedAmount = shouldConvertFromNanos ? convertTonFromNanos(Number(amount)) : amount;
-  const icon = <Icon name="toncoin" className={buildClassName('in-text-icon', className)} />;
+  const icon = <GramIcon isMono={isMono} className={buildClassName('in-text-icon', className)} />;
 
   if (containerClassName || withWrapper) {
     return (
       <span className={containerClassName}>
-        {lang('TonAmount', { amount: formattedAmount }, {
+        {lang('GramAmount', { amount: formattedAmount }, {
           withNodes: true,
           specialReplacement: {
             '💎': icon,
@@ -50,7 +54,7 @@ export function formatTonAsIcon(
     );
   }
 
-  return lang('TonAmount', { amount: formattedAmount }, {
+  return lang('GramAmount', { amount: formattedAmount }, {
     withNodes: true,
     specialReplacement: {
       '💎': icon,

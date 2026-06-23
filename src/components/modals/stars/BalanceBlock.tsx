@@ -11,6 +11,7 @@ import { convertCurrencyFromBaseUnit } from '../../../util/formatCurrency';
 import useLang from '../../../hooks/useLang';
 
 import BadgeButton from '../../common/BadgeButton';
+import GramIcon from '../../common/icons/GramIcon';
 import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
 
@@ -56,7 +57,7 @@ const BalanceBlock = ({ balance, className, withAddButton }: OwnProps) => {
   const renderTonAmount = () => {
     return (
       <span>
-        <Icon name="toncoin" />
+        <GramIcon />
         {NNBSP}
         {balance !== undefined ? convertCurrencyFromBaseUnit(balance.amount, balance.currency) : '…'}
       </span>

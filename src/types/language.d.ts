@@ -622,7 +622,7 @@ export interface LangPair {
   'MenuStickers': undefined;
   'MenuAnimations': undefined;
   'MenuStars': undefined;
-  'MenuTon': undefined;
+  'MenuGram': undefined;
   'MenuSendGift': undefined;
   'MenuTelegramFaq': undefined;
   'MenuPrivacyPolicy': undefined;
@@ -1316,7 +1316,7 @@ export interface LangPair {
   'ProfileBirthdayToday': undefined;
   'ProfileMenuSetMainTab': undefined;
   'ProfileItemSubscribers': undefined;
-  'MonetizationInfoTONTitle': undefined;
+  'MonetizationInfoGramTitle': undefined;
   'AriaSearchOlderResult': undefined;
   'AriaSearchNewerResult': undefined;
   'StarsTransactionTOSLinkText': undefined;
@@ -1763,9 +1763,9 @@ export interface LangPair {
   'TitleSuggestedChanges': undefined;
   'SuggestMessageNoPrice': undefined;
   'EnterPriceInStars': undefined;
-  'EnterPriceInTon': undefined;
+  'EnterPriceInGram': undefined;
   'SuggestMessagePriceDescriptionStars': undefined;
-  'SuggestMessagePriceDescriptionTon': undefined;
+  'SuggestMessagePriceDescriptionGram': undefined;
   'SuggestMessageDateTimeHint': undefined;
   'SuggestMessageAnytime': undefined;
   'ButtonOfferFree': undefined;
@@ -1779,7 +1779,7 @@ export interface LangPair {
   'SuggestedPostRejectedNotification': undefined;
   'SuggestedPostAgreementReached': undefined;
   'CurrencyStars': undefined;
-  'CurrencyTon': undefined;
+  'CurrencyGram': undefined;
   'DeclineReasonPlaceholder': undefined;
   'SuggestedPostRejectedYou': undefined;
   'SuggestedPostRejectedWithReasonYou': undefined;
@@ -1810,10 +1810,10 @@ export interface LangPair {
   'PremiumPreviewAiTools': undefined;
   'PremiumPreviewAiToolsDescription': undefined;
   'NativeDownloadFailed': undefined;
-  'DescriptionAboutTon': undefined;
+  'DescriptionAboutGram': undefined;
   'ButtonTopUpViaFragment': undefined;
-  'TonModalHint': undefined;
-  'TonGiftReceived': undefined;
+  'GramModalHint': undefined;
+  'GramGiftReceived': undefined;
   'MediaSpoilerSensitive': undefined;
   'TextSensitiveModal': undefined;
   'ButtonSensitiveView': undefined;
@@ -1826,11 +1826,11 @@ export interface LangPair {
   'GiftRibbonPremium': undefined;
   'PremiumGiftHeader': undefined;
   'PriceInStars': undefined;
-  'PriceInTON': undefined;
-  'OnlyAcceptTON': undefined;
-  'OnlyAcceptTONDescription': undefined;
-  'DescriptionPayInTON': undefined;
-  'LabelPayInTON': undefined;
+  'PriceInGram': undefined;
+  'OnlyAcceptGram': undefined;
+  'OnlyAcceptGramDescription': undefined;
+  'DescriptionPayInGram': undefined;
+  'LabelPayInGram': undefined;
   'PriceChanged': undefined;
   'PayNewPrice': undefined;
   'LinkPreview': undefined;
@@ -1892,7 +1892,7 @@ export interface LangPair {
   'HEX': undefined;
   'RGB': undefined;
   'Text': undefined;
-  'ConfirmBuyGiftForTonDescription': undefined;
+  'ConfirmBuyGiftForGramDescription': undefined;
   'TitleGiftLocked': undefined;
   'QuickPreview': undefined;
   'BotForumContinueThreadButton': undefined;
@@ -3206,7 +3206,7 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ActionGiftPremiumDuration': {
     'duration': V;
   };
-  'TonAmount': {
+  'GramAmount': {
     'amount': V;
   };
   'ActionGiftCostCrypto': {
@@ -4126,7 +4126,7 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   'ActionGiftStarsTitle': {
     'amount': V;
   };
-  'TonAmountText': {
+  'GramAmountText': {
     'amount': V;
   };
   'ActionBoostApplyYou': {

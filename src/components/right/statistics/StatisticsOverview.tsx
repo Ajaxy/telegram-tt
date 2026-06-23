@@ -15,7 +15,7 @@ import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
 import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
+import GramIcon from '../../common/icons/GramIcon';
 
 import styles from './StatisticsOverview.module.scss';
 
@@ -157,7 +157,7 @@ const StatisticsOverview: FC<OwnProps> = ({
     const [integerUsdPart, decimalUsdPart] = (balance * usdRate).toFixed(2).split('.');
     return (
       <div>
-        <Icon className={styles.toncoin} name="toncoin" />
+        <GramIcon className={styles.toncoin} />
         <b className={styles.tableValue}>
           {integerTonPart}
           <span className={styles.decimalPart}>

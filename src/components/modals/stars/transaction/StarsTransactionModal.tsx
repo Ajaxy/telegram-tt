@@ -37,6 +37,7 @@ import usePrevious from '../../../../hooks/usePrevious';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Avatar from '../../../common/Avatar';
+import GramIcon from '../../../common/icons/GramIcon';
 import Icon from '../../../common/icons/Icon';
 import StarIcon from '../../../common/icons/StarIcon';
 import InteractiveSparkles from '../../../common/InteractiveSparkles';
@@ -195,7 +196,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
           {NNBSP}
           {amount.currency === STARS_CURRENCY_CODE && <StarIcon type="gold" size="adaptive" />}
           {amount.currency === 'TON' && (
-            <Icon name="toncoin" className={buildClassName('in-text-icon', amountColorClass)} />
+            <GramIcon isMono className={buildClassName('in-text-icon', amountColorClass)} />
           )}
           {transaction.isRefund && (
             <p className={styles.refunded}>{lang('Refunded')}</p>

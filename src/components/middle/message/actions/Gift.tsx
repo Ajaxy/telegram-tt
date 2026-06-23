@@ -89,7 +89,7 @@ const GiftAction = ({
         <div>
           {message && renderTextWithEntities(message)}
           {!message
-            && (lang(action.type === 'giftTon' ? 'DescriptionAboutTon'
+            && (lang(action.type === 'giftTon' ? 'DescriptionAboutGram'
               : action.type === 'giftPremium'
                 ? 'ActionGiftPremiumText' : 'ActionGiftStarsText'))}
         </div>

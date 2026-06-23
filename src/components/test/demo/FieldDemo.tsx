@@ -308,7 +308,7 @@ const FieldDemo = () => {
           <Interactive asLabel clickable>
             <Control inputEnd>
               <Switch checked={switch1} onChange={setSwitch1} />
-              <ControlLabel>Only Accept TON</ControlLabel>
+              <ControlLabel>Only Accept Gram</ControlLabel>
             </Control>
           </Interactive>
           <Interactive asLabel clickable>

@@ -50,7 +50,7 @@ const SuggestedPostBalanceTooLow = ({
   const peerLink = renderPeerLink(targetPeer?.id, peerTitle || lang('ActionFallbackUser'));
 
   const currency = replyMessage?.suggestedPostInfo?.price?.currency || STARS_CURRENCY_CODE;
-  const currencyName = currency === TON_CURRENCY_CODE ? lang('CurrencyTon') : lang('CurrencyStars');
+  const currencyName = currency === TON_CURRENCY_CODE ? lang('CurrencyGram') : lang('CurrencyStars');
   const buyButtonText = currency === TON_CURRENCY_CODE ? lang('ButtonTopUpViaFragment') : lang('ButtonBuyStars');
 
   return (

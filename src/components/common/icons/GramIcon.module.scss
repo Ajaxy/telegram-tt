@@ -1,0 +1,16 @@
+.root {
+  display: inline-block;
+  flex-shrink: 0;
+
+  width: auto;
+  height: 1em;
+  margin: 0 0.125rem;
+
+  /* Override `.in-text-icon`, whose `vertical-align: bottom` (meant for font glyphs) misaligns the image */
+  vertical-align: -0.15em !important;
+}
+
+.appIcon {
+  margin: 0;
+  border-radius: 0.375rem;
+}
