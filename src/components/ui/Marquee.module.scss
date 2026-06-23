@@ -1,0 +1,119 @@
+@use '../../styles/mixins';
+
+.root {
+  --_marquee-delay: 0.5s;
+  --_marquee-direction: -1;
+  --_marquee-distance: 0;
+  --_marquee-duration: 0ms;
+  --_marquee-edge-size: 1rem;
+  --_marquee-effective-delay: 0ms;
+  --_marquee-gap: 2rem;
+  --_marquee-mask-duration: 250ms;
+  --_marquee-start-mask-position-out: calc(-1 * var(--_marquee-edge-size)) 0;
+  --_marquee-start-mask-size-out: calc(100% + var(--_marquee-edge-size)) 100%;
+
+  overflow: hidden;
+  display: flex;
+
+  max-width: 100%;
+
+  mask-repeat: no-repeat;
+  mask-position: var(--_marquee-start-mask-position-out);
+  mask-size: var(--_marquee-start-mask-size-out);
+}
+
+.root:dir(rtl) {
+  --_marquee-direction: 1;
+  --_marquee-start-mask-position-out: 0 0;
+}
+
+.delayed {
+  --_marquee-effective-delay: var(--_marquee-delay);
+}
+
+.overflowing {
+  @include mixins.gradient-border-horizontal(var(--_marquee-edge-size), var(--_marquee-edge-size));
+}
+
+.root:dir(rtl).overflowing {
+  mask-image:
+    linear-gradient(
+      to left,
+      transparent,
+      black var(--_marquee-edge-size),
+      black calc(100% - var(--_marquee-edge-size)),
+      transparent
+    );
+}
+
+.content {
+  display: inline-block;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.copy {
+  pointer-events: none;
+  margin-inline-start: var(--_marquee-gap);
+}
+
+.animating {
+  animation-name: marqueeStartMaskIn, marqueeStartMaskOut;
+  animation-duration: var(--_marquee-mask-duration), var(--_marquee-mask-duration);
+  animation-timing-function: linear, linear;
+  animation-fill-mode: forwards, forwards;
+  animation-delay:
+    var(--_marquee-effective-delay),
+    calc(var(--_marquee-effective-delay) + var(--_marquee-duration) - var(--_marquee-mask-duration));
+
+  :global(body.no-page-transitions) & {
+    animation: none;
+  }
+}
+
+.animating .content {
+  animation-name: marqueeScroll;
+  animation-duration: var(--_marquee-duration);
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  animation-delay: var(--_marquee-effective-delay);
+
+  :global(body.no-page-transitions) & {
+    animation: none;
+  }
+}
+
+.paused,
+.paused .content {
+  animation-play-state: paused;
+}
+
+@keyframes marqueeStartMaskIn {
+  from {
+    mask-position: var(--_marquee-start-mask-position-out);
+    mask-size: var(--_marquee-start-mask-size-out);
+  }
+
+  to {
+    mask-position: 0 0;
+    mask-size: 100% 100%;
+  }
+}
+
+@keyframes marqueeStartMaskOut {
+  from {
+    mask-position: 0 0;
+    mask-size: 100% 100%;
+  }
+
+  to {
+    mask-position: var(--_marquee-start-mask-position-out);
+    mask-size: var(--_marquee-start-mask-size-out);
+  }
+}
+
+@keyframes marqueeScroll {
+  to {
+    transform: translateX(calc(var(--_marquee-direction) * var(--_marquee-distance)));
+  }
+}

@@ -72,6 +72,7 @@ import styles from './ProfileInfo.module.scss';
 
 type OwnProps = {
   isExpanded?: boolean;
+  isActive?: boolean;
   peerId: string;
   isForSettings?: boolean;
   canPlayVideo: boolean;
@@ -114,6 +115,7 @@ const PATTERN_PLAIN_Y_SHIFT = 5.25 * REM;
 
 const ProfileInfo = ({
   isExpanded,
+  isActive,
   isForSettings,
   canPlayVideo,
   user,
@@ -367,7 +369,7 @@ const ProfileInfo = ({
     );
   }
 
-  function renderPhoto(isActive?: boolean) {
+  function renderPhoto(isPhotoActive?: boolean) {
     const photo = photos.length > 0
       ? photos[currentPhotoIndex]
       : undefined;
@@ -379,9 +381,9 @@ const ProfileInfo = ({
         chat={chat}
         photo={photo}
         theme={theme}
-        canPlayVideo={Boolean(isActive && canPlayVideo)}
-        className={buildClassName(isActive && styles.activeProfilePhoto)}
-        style={isActive ? createVtnStyle('avatar', true) : undefined}
+        canPlayVideo={Boolean(isPhotoActive && canPlayVideo)}
+        className={buildClassName(isPhotoActive && styles.activeProfilePhoto)}
+        style={isPhotoActive ? createVtnStyle('avatar', true) : undefined}
         onClick={handleProfilePhotoClick}
       />
     );
@@ -606,6 +608,8 @@ const ProfileInfo = ({
             onEmojiStatusClick={handleStatusClick}
             noLoopLimit
             canCopyTitle
+            isScrolling
+            isScrollingPaused={!isActive}
           />
         )}
         {renderStatus()}

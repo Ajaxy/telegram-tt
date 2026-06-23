@@ -26,6 +26,7 @@ import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
+import Marquee from '../ui/Marquee';
 import Transition from '../ui/Transition';
 import CustomEmoji from './CustomEmoji';
 import FakeIcon from './FakeIcon';
@@ -39,6 +40,8 @@ type OwnProps = {
   peer: ApiPeer | CustomPeer;
   className?: string;
   style?: string;
+  isScrolling?: boolean;
+  isScrollingPaused?: boolean;
   noVerified?: boolean;
   noFake?: boolean;
   withEmojiStatus?: boolean;
@@ -58,6 +61,8 @@ type OwnProps = {
 const FullNameTitle = ({
   className,
   style,
+  isScrolling,
+  isScrollingPaused,
   peer,
   noVerified,
   noFake,
@@ -122,6 +127,7 @@ const FullNameTitle = ({
     return undefined;
   }, [customPeer, isSavedDialog, isSavedMessages, oldLang, realPeer]);
   const botVerificationIconId = !isSavedMessages && !isSavedDialog ? realPeer?.botVerificationIconId : undefined;
+  const renderedTitle = useMemo(() => specialTitle || renderText(title || ''), [specialTitle, title]);
 
   return (
     <div
@@ -146,7 +152,7 @@ const FullNameTitle = ({
         )}
         onClick={handleTitleClick}
       >
-        {specialTitle || renderText(title || '')}
+        {isScrolling ? <Marquee paused={isScrollingPaused}>{renderedTitle}</Marquee> : renderedTitle}
       </h3>
       {!iconElement && peer && (
         <>

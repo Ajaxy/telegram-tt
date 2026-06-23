@@ -89,6 +89,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         {currentUserId && (
           <ProfileInfo
             peerId={currentUserId}
+            isActive={Boolean(isActive)}
             canPlayVideo={Boolean(isActive)}
             isForSettings
           />

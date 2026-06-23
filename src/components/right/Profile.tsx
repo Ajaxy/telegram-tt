@@ -1282,6 +1282,7 @@ const Profile = ({
       <div className={buildClassName(styles.profileInfo, 'profile-info')}>
         <ProfileInfo
           isExpanded={isProfileExpanded}
+          isActive={isActive}
           peerId={peerId}
           canPlayVideo={isReady}
           isForMonoforum={Boolean(monoforumChannel)}

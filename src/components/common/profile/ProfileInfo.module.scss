@@ -431,7 +431,11 @@
     position: relative;
 
     justify-content: unset;
+    justify-self: stretch;
 
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     min-height: unset;
     margin-top: 1rem;
 
@@ -441,6 +445,8 @@
 
 .title {
   @include mixins.with-vt-type('profileAvatar');
+
+  max-width: 100%;
 }
 
 .pinnedGifts {
