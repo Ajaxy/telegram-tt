@@ -13,7 +13,7 @@
 
   width: calc(100% - var(--middle-panel-inline-padding) * 2);
   max-width: calc(var(--messages-container-width) - var(--middle-panel-inline-padding) * 2);
-  height: var(--header-height);
+  height: var(--middle-header-height);
   margin: var(--middle-panel-inline-padding) auto 0;
   padding-top: 0.25rem;
   padding-right: max(0.8125rem, env(safe-area-inset-right));

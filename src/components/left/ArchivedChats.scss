@@ -45,10 +45,10 @@
 
   .chat-list-wrapper {
     position: relative;
-    height: calc(100% - var(--header-height));
+    height: calc(100% - var(--column-header-height));
 
     &.with-story-ribbon {
-      --extra-height: var(--header-height);
+      --extra-height: var(--column-header-height);
     }
   }
 }

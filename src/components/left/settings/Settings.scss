@@ -27,7 +27,7 @@
   }
 
   .with-notch::before {
-    top: var(--header-height);
+    top: var(--column-header-height);
   }
 
   > .Transition_slide {
@@ -67,7 +67,7 @@
 .settings-content {
   overflow-y: scroll;
 
-  height: calc(100% - var(--header-height));
+  height: calc(100% - var(--column-header-height));
   padding: 1rem;
   padding-top: 0;
 
@@ -341,7 +341,7 @@
 
 .settings-fab-wrapper {
   position: relative;
-  height: calc(100% - var(--header-height));
+  height: calc(100% - var(--column-header-height));
 
   .with-notch::before {
     top: 0 !important;

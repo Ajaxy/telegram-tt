@@ -105,7 +105,7 @@ const MiddleHeaderPanes = ({
     const gapPx = PANE_GAP_REM * REM;
     const openCount = stateArray.filter((s) => s.height > 0).length;
     const panesHeight = stateArray.reduce((acc, state) => acc + state.height, 0);
-    const totalHeight = panesHeight ? panesHeight + openCount * gapPx : 0;
+    const totalHeight = panesHeight ? panesHeight + (openCount - 1) * gapPx : 0;
 
     const middleColumn = document.getElementById('MiddleColumn');
     if (!middleColumn) return;

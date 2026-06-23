@@ -25,7 +25,7 @@
     --slide-background-color: var(--color-background-secondary);
 
     overflow: hidden;
-    height: calc(100% - var(--header-height));
+    height: calc(100% - var(--column-header-height));
   }
 
   .panel-content {

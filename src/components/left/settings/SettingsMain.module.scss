@@ -2,7 +2,7 @@
 
 .root {
   overflow-y: scroll;
-  height: calc(100% - var(--header-height));
+  height: calc(100% - var(--column-header-height));
   background-color: var(--color-background-secondary);
 }
 

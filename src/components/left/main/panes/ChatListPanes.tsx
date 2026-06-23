@@ -97,7 +97,7 @@ const ChatListPanes = ({
     const isFirstRender = isFirstRenderRef.current;
     const gapPx = PANE_GAP_REM * REM;
     const openPaneCount = stateArray.filter((s) => !s.isSpacer && s.height > 0).length;
-    const totalHeight = stateArray.reduce((acc, state) => acc + state.height, 0) + openPaneCount * gapPx;
+    const totalHeight = stateArray.reduce((acc, state) => acc + state.height, 0) + (openPaneCount - 1) * gapPx;
     const panelsHeight = totalHeight - BOTTOM_MARGIN;
 
     onHeightChange(panelsHeight !== 0 ? totalHeight : 0);

@@ -3,7 +3,7 @@
 .MessageList {
   --message-list-top-inset:
     calc(
-      var(--header-height) + var(--middle-panel-inline-padding) + 0.5rem + var(--middle-header-panes-height)
+      var(--middle-header-height) + var(--middle-panel-inline-padding) + 0.5rem + var(--middle-header-panes-height)
     );
   --message-list-top-fade-lift: 1rem;
   --message-list-bottom-fade: 1rem;

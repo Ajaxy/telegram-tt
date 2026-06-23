@@ -122,7 +122,7 @@
   --button-no-ripple-background-color: rgba(255, 255, 255, 0.07);
 
   width: calc(var(--folders-sidebar-width) - 0.5rem);
-  height: 3.5rem;
+  height: var(--column-header-height);
   margin: 0.25rem;
   border-radius: 1.25rem;
 }

@@ -5,7 +5,7 @@
 
   &-inner {
     overflow: hidden;
-    height: calc(100% - var(--header-height));
+    height: calc(100% - var(--column-header-height));
 
     &.step-2 {
       display: flex;
