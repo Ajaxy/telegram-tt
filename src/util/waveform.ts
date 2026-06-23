@@ -32,7 +32,7 @@ export function decodeWaveform(encoded5bit: Uint8Array) {
 
 export function interpolateArray(data: number[], fitCount: number) {
   let peak = 0;
-  const newData = new Array(fitCount);
+  const newData = new Array<number>(fitCount);
   const springFactor = data.length / fitCount;
   const leftFiller = data[0];
   const rightFiller = data[data.length - 1];

@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer';
-
 import type { MockTypes } from './MockTypes';
 
 import { toJSNumber } from '../../../../util/numbers';
@@ -14,7 +12,7 @@ export default function createMockedPhoto(documentId: number, mockData: MockType
 
   const {
     accessHash = 1n,
-    fileReference = Buffer.from([0]),
+    fileReference = new Uint8Array([0]),
     date = MOCK_STARTING_DATE,
     dcId = 2,
     url,

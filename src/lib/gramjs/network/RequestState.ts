@@ -1,5 +1,3 @@
-import type { Buffer } from 'buffer';
-
 import type { Api } from '../tl';
 
 import Deferred from '../../../util/Deferred';
@@ -14,7 +12,7 @@ export default class RequestState<T extends CallableRequest = CallableRequest> {
 
   public request: any;
 
-  public data: Buffer;
+  public data: Uint8Array;
 
   public after: any;
 

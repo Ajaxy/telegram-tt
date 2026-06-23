@@ -1,9 +1,9 @@
-import type { Buffer } from 'buffer';
-
 /**
  * Errors not related to the Telegram API itself
  */
 import type { Api } from '../tl';
+
+import { readInt32LE } from '../../../util/encoding/buffer';
 
 /**
  * Occurs when a read operation was cancelled.
@@ -21,9 +21,9 @@ export class ReadCancelledError extends Error {
 export class TypeNotFoundError extends Error {
   invalidConstructorId: number;
 
-  remaining: Buffer;
+  remaining: Uint8Array;
 
-  constructor(invalidConstructorId: number, remaining: Buffer) {
+  constructor(invalidConstructorId: number, remaining: Uint8Array) {
     super(`Could not find a matching Constructor ID for the TLObject that was supposed to be
         read with ID ${invalidConstructorId}. Most likely, a TLObject was trying to be read when
          it should not be read. Remaining bytes: ${remaining.length}`);
@@ -58,12 +58,12 @@ export class InvalidChecksumError extends Error {
 export class InvalidBufferError extends Error {
   code?: number;
 
-  payload: Buffer;
+  payload: Uint8Array;
 
-  constructor(payload: Buffer) {
+  constructor(payload: Uint8Array) {
     let code;
     if (payload.length === 4) {
-      code = -payload.readInt32LE(0);
+      code = -readInt32LE(payload);
       super(`Invalid response buffer (HTTP code ${code})`);
     } else {
       super(`Invalid response buffer (too short ${payload.toString()})`);

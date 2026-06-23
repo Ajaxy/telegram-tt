@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer';
-
 import type LocalUpdatePremiumFloodWait from '../../../api/gramjs/updates/UpdatePremiumFloodWait';
 import type { UpdatePts } from '../../../api/gramjs/updates/UpdatePts';
 import type { AuthKey } from '../crypto/AuthKey';
@@ -15,6 +13,7 @@ import type { DownloadFileParams, DownloadFileWithDcParams, DownloadMediaParams 
 import type { UploadFileParams } from './uploadFile';
 
 import Deferred from '../../../util/Deferred';
+import { concat } from '../../../util/encoding/buffer';
 import { toJSNumber } from '../../../util/numbers';
 import {
   FloodTestPhoneWaitError,
@@ -780,7 +779,7 @@ class TelegramClient {
      * @param [args[dcId] {number}]
      * @param [args[workers] {number}]
      * @param [args[isPriority] {boolean}]
-     * @returns {Promise<Buffer>}
+     * @returns {Promise<Uint8Array>}
      */
   downloadFile(inputLocation: Api.TypeInputFileLocation, args: DownloadFileWithDcParams) {
     return downloadFile(this, inputLocation, args, this._shouldDebugExportedSenders);
@@ -899,7 +898,7 @@ class TelegramClient {
     return undefined;
   }
 
-  _downloadCachedPhotoSize(size: Api.PhotoCachedSize | Api.PhotoStrippedSize): Buffer {
+  _downloadCachedPhotoSize(size: Api.PhotoCachedSize | Api.PhotoStrippedSize): Uint8Array {
     // No need to download anything, simply write the bytes
     let data;
     if (size instanceof Api.PhotoStrippedSize) {
@@ -1002,7 +1001,7 @@ class TelegramClient {
   async _downloadWebDocument(media: Api.TypeWebDocument) {
     if (media instanceof Api.WebDocumentNoProxy) {
       const arrayBuff = await fetch(media.url).then((res) => res.arrayBuffer());
-      return Buffer.from(arrayBuff);
+      return new Uint8Array(arrayBuff);
     }
 
     try {
@@ -1037,11 +1036,11 @@ class TelegramClient {
           break;
         }
       }
-      return Buffer.concat(buff);
+      return concat(...buff);
     } catch (err: unknown) {
       // the file is no longer saved in telegram's cache.
       if (err instanceof RPCError && err.errorMessage === 'WEBFILE_NOT_AVAILABLE') {
-        return Buffer.alloc(0);
+        return new Uint8Array(0);
       } else {
         throw err;
       }
@@ -1104,10 +1103,10 @@ class TelegramClient {
           }
         }
       }
-      return Buffer.concat(buff);
+      return concat(...buff);
     } catch (err: unknown) {
       if (err instanceof RPCError && err.errorMessage === 'WEBFILE_NOT_AVAILABLE') {
-        return Buffer.alloc(0);
+        return new Uint8Array(0);
       } else {
         throw err;
       }

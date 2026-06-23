@@ -1,6 +1,5 @@
 import { crc32 } from '../Helpers';
-
-import { Buffer } from 'buffer';
+import { bufferFromUtf8, concat, writeInt32LE } from '../../../util/encoding/buffer';
 
 export interface GenerationEntryConfig {
     name: string;
@@ -111,7 +110,7 @@ const fromLine = (line: string, isFunction?: boolean) => {
             }
         }
 
-        currentConfig.constructorId = crc32(Buffer.from(representation, 'utf8'));
+        currentConfig.constructorId = crc32(representation);
     }
     for (const [brace, name, argType] of argsMatch) {
         if (brace === undefined) {
@@ -282,48 +281,46 @@ export function* parseTl(content: string, methods: any[] = [], ignoreIds = CORE_
     }
 }
 
-export function serializeBytes(data: Buffer | string | any) {
-    if (!(data instanceof Buffer)) {
+export function serializeBytes(data: Uint8Array | string | any) {
+    if (!(data instanceof Uint8Array)) {
         if (typeof data === 'string') {
-            data = Buffer.from(data);
+            data = bufferFromUtf8(data);
         } else {
             throw Error(`Bytes or str expected, not ${data.constructor.name}`);
         }
     }
-    const r = [];
+    const r: Uint8Array[] = [];
     let padding;
     if (data.length < 254) {
         padding = (data.length + 1) % 4;
         if (padding !== 0) {
             padding = 4 - padding;
         }
-        r.push(Buffer.from([data.length]));
+        r.push(new Uint8Array([data.length]));
         r.push(data);
     } else {
         padding = data.length % 4;
         if (padding !== 0) {
             padding = 4 - padding;
         }
-        r.push(Buffer.from([254, data.length % 256, (data.length >> 8) % 256, (data.length >> 16) % 256]));
+        r.push(new Uint8Array([254, data.length % 256, (data.length >> 8) % 256, (data.length >> 16) % 256]));
         r.push(data);
     }
-    r.push(Buffer.alloc(padding)
-        .fill(0));
+    r.push(new Uint8Array(padding));
 
-    return Buffer.concat(r);
+    return concat(...r);
 }
 
 export function serializeDate(dt: Date | number) {
     if (!dt) {
-        return Buffer.alloc(4)
-            .fill(0);
+        return new Uint8Array(4);
     }
     if (dt instanceof Date) {
-        dt = Math.floor((Date.now() - dt.getTime()) / 1000);
+        dt = Math.floor(dt.getTime() / 1000);
     }
     if (typeof dt === 'number') {
-        const t = Buffer.alloc(4);
-        t.writeInt32LE(dt, 0);
+        const t = new Uint8Array(4);
+        writeInt32LE(t, dt);
         return t;
     }
     throw Error(`Cannot interpret "${dt}" as a date`);

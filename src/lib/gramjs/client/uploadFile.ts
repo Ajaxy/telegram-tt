@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer';
-
 import type TelegramClient from './TelegramClient';
 
 import { getDcBandwidthManager } from '../../../util/dcBandwithManager';
@@ -105,12 +103,12 @@ export async function uploadFile(
                 fileId,
                 filePart: jMemo,
                 fileTotalParts: partCount,
-                bytes: Buffer.from(partBytes),
+                bytes: new Uint8Array(partBytes),
               })
               : new Api.upload.SaveFilePart({
                 fileId,
                 filePart: jMemo,
-                bytes: Buffer.from(partBytes),
+                bytes: new Uint8Array(partBytes),
               }),
           );
           client.releaseExportedSender(sender);

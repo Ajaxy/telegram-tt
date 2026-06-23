@@ -1,10 +1,12 @@
-import { Buffer } from 'buffer';
 import { gunzipSync, gzipSync } from 'fflate';
 import { CTR } from '../../../lib/gramjs/crypto/CTR';
 import {
   getByteArray, modExp, readBigIntFromBuffer, readBufferFromBigInt, sha1, sha256,
 } from '../../../lib/gramjs/Helpers';
 
+import {
+  bufferFromUtf8, buffersEqual, bufferToUtf8, concat, readUint32BE, writeUint32BE,
+} from '../../../util/encoding/buffer';
 import { isSctpPacket, SctpSignaling } from './sctpSignaling';
 
 type DhConfig = {
@@ -16,7 +18,7 @@ type DhConfig = {
 let currentPhoneCallState: PhoneCallState | undefined;
 
 class PhoneCallState {
-  private authKey?: Buffer;
+  private authKey?: Uint8Array;
 
   private sctp = new SctpSignaling();
 
@@ -60,8 +62,8 @@ class PhoneCallState {
   }
 
   async requestCall({ p, g, random }: DhConfig) {
-    const pBN = readBigIntFromBuffer(Buffer.from(p), false);
-    const randomBN = readBigIntFromBuffer(Buffer.from(random), false);
+    const pBN = readBigIntFromBuffer(Uint8Array.from(p), false);
+    const randomBN = readBigIntFromBuffer(Uint8Array.from(random), false);
 
     const gA = modExp(BigInt(g), randomBN, pBN);
 
@@ -69,13 +71,13 @@ class PhoneCallState {
     this.p = pBN;
     this.random = randomBN;
 
-    const gAHash: Buffer = await sha256(getByteArray(gA));
+    const gAHash = await sha256(getByteArray(gA));
     return Array.from(gAHash);
   }
 
   acceptCall({ p, g, random }: DhConfig) {
-    const pLast = readBigIntFromBuffer(Buffer.from(p), false);
-    const randomLast = readBigIntFromBuffer(Buffer.from(random), false);
+    const pLast = readBigIntFromBuffer(Uint8Array.from(p), false);
+    const randomLast = readBigIntFromBuffer(Uint8Array.from(random), false);
 
     const gB = modExp(BigInt(g), randomLast, pLast);
     this.gB = gB;
@@ -91,16 +93,16 @@ class PhoneCallState {
     }
 
     if (this.isOutgoing) {
-      this.gB = readBigIntFromBuffer(Buffer.from(gAOrB), false);
+      this.gB = readBigIntFromBuffer(Uint8Array.from(gAOrB), false);
     } else {
-      this.gA = readBigIntFromBuffer(Buffer.from(gAOrB), false);
+      this.gA = readBigIntFromBuffer(Uint8Array.from(gAOrB), false);
     }
     const authKey = modExp(
       (!this.isOutgoing ? this.gA : this.gB)!,
       this.random,
       this.p,
     );
-    const fingerprint: Buffer = await sha1(getByteArray(authKey));
+    const fingerprint = await sha1(getByteArray(authKey));
     const keyFingerprint = readBigIntFromBuffer(fingerprint.slice(-8), true, true);
 
     const emojis = await generateEmojiFingerprint(
@@ -117,37 +119,37 @@ class PhoneCallState {
     return { gA: Array.from(getByteArray(this.gA!)), keyFingerprint: keyFingerprint.toString(), emojis };
   }
 
-  private async calcKey(msgKey: Buffer, isClient: boolean) {
+  private async calcKey(msgKey: Uint8Array, isClient: boolean) {
     if (!this.authKey) {
       throw new Error('Auth key unset');
     }
 
     const x = 128 + (this.isOutgoing !== isClient ? 8 : 0);
     const [sha256a, sha256b] = await Promise.all([
-      sha256(Buffer.concat([msgKey, this.authKey.slice(x, x + 36)])),
-      sha256(Buffer.concat([this.authKey.slice(x + 40, x + 76), msgKey])),
+      sha256(concat(msgKey, this.authKey.slice(x, x + 36))),
+      sha256(concat(this.authKey.slice(x + 40, x + 76), msgKey)),
     ]);
 
     return {
-      key: Buffer.concat([sha256a.slice(0, 8), sha256b.slice(8, 24), sha256a.slice(24, 32)]),
-      iv: Buffer.concat([sha256b.slice(0, 4), sha256a.slice(8, 16), sha256b.slice(24, 28)]),
+      key: concat(sha256a.slice(0, 8), sha256b.slice(8, 24), sha256a.slice(24, 32)),
+      iv: concat(sha256b.slice(0, 4), sha256a.slice(8, 16), sha256b.slice(24, 28)),
     };
   }
 
   async encode(data: unknown) {
     if (!this.authKey) return undefined;
 
-    const message = Buffer.from(gzipSync(Buffer.from(JSON.stringify(data))));
-    const packet = Buffer.alloc(4 + message.length);
-    packet.writeUInt32BE(++this.seq, 0);
-    message.copy(packet, 4);
+    const message = gzipSync(bufferFromUtf8(JSON.stringify(data)));
+    const packet = new Uint8Array(4 + message.length);
+    writeUint32BE(packet, ++this.seq);
+    packet.set(message, 4);
 
     const x = 128 + (this.isOutgoing ? 0 : 8);
-    const msgKeyLarge = await sha256(Buffer.concat([this.authKey.slice(88 + x, 88 + x + 32), packet]));
+    const msgKeyLarge = await sha256(concat(this.authKey.slice(88 + x, 88 + x + 32), packet));
     const msgKey = msgKeyLarge.slice(8, 24);
     const { key, iv } = await this.calcKey(msgKey, true);
     const encrypted = new CTR(key, iv).encrypt(packet);
-    const body = Buffer.concat([msgKey, encrypted]);
+    const body = concat(msgKey, encrypted);
 
     return this.shouldUseSctp ? this.sctp.wrapPayload(body) : Array.from(body);
   }
@@ -165,7 +167,7 @@ class PhoneCallState {
       return this.decode(data);
     }
 
-    const incoming = Buffer.from(data);
+    const incoming = Uint8Array.from(data);
     const payloads = isSctpPacket(incoming) ? this.sctp.receive(incoming) : [];
     const bodies = payloads.length ? payloads : [incoming];
     const messages = [];
@@ -183,7 +185,7 @@ class PhoneCallState {
     return messages[0];
   }
 
-  private async decodeBody(body: Buffer): Promise<any> {
+  private async decodeBody(body: Uint8Array): Promise<any> {
     if (body.length < 21) {
       return undefined;
     }
@@ -198,8 +200,8 @@ class PhoneCallState {
     const decrypted = new CTR(key, iv).decrypt(encryptedData);
 
     const x = 128 + (this.isOutgoing ? 8 : 0);
-    const msgKeyLarge = await sha256(Buffer.concat([authKey.slice(88 + x, 88 + x + 32), decrypted]));
-    if (!msgKey.equals(msgKeyLarge.slice(8, 24))) {
+    const msgKeyLarge = await sha256(concat(authKey.slice(88 + x, 88 + x + 32), decrypted));
+    if (!buffersEqual(msgKey, msgKeyLarge.slice(8, 24))) {
       return undefined;
     }
 
@@ -207,16 +209,16 @@ class PhoneCallState {
       return undefined;
     }
 
-    const inboundSeq = decrypted.readUInt32BE(0);
+    const inboundSeq = readUint32BE(decrypted);
     if (!this.shouldAcceptInboundSeq(inboundSeq)) {
       return undefined;
     }
 
     const message = decrypted.slice(4);
     try {
-      const payload = message[0] === 0x1F && message[1] === 0x8B ? Buffer.from(gunzipSync(message)) : message;
+      const payload = message[0] === 0x1F && message[1] === 0x8B ? gunzipSync(message) : message;
       this.markInboundSeq(inboundSeq);
-      return JSON.parse(payload.toString());
+      return JSON.parse(bufferToUtf8(payload));
     } catch {
       return undefined;
     }
@@ -264,7 +266,7 @@ function computeEmojiIndex(bytes: Uint8Array) {
 async function generateEmojiFingerprint(
   authKey: Uint8Array, gA: Uint8Array, emojiData: Uint16Array, emojiOffsets: number[],
 ) {
-  const hash = await sha256(Buffer.concat([new Uint8Array(authKey), new Uint8Array(gA)]));
+  const hash = await sha256(concat(new Uint8Array(authKey), new Uint8Array(gA)));
   const result = [];
   const emojiCount = emojiOffsets.length - 1;
   const kPartSize = 8;

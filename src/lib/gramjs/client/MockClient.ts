@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer';
-
 import type { DownloadFileWithDcParams } from './downloadFile';
 import type { MockTypes } from './mockUtils/MockTypes';
 import type { SizeType } from './TelegramClient';
@@ -78,7 +76,7 @@ class TelegramClient {
         const response = await import(/* @vite-ignore */ `./__data__/${l.url}`).then((module) => fetch(module.default));
         const bytes = await response.arrayBuffer();
         this.mockData.documents[i].size = BigInt(bytes.byteLength);
-        this.mockData.documents[i].bytes = Buffer.from(new Uint8Array(bytes));
+        this.mockData.documents[i].bytes = new Uint8Array(bytes);
       }));
 
       this.callbacks.forEach(({ eventBuilder, callback }) => (callback(
@@ -239,7 +237,7 @@ class TelegramClient {
       return new Api.upload.File({
         type: new Api.storage.FileUnknown(),
         mtime: 0,
-        bytes: Buffer.from(new Uint8Array(this.mockData.documents.find((i) => i.id === fileId)!.bytes)),
+        bytes: new Uint8Array(this.mockData.documents.find((i) => i.id === fileId)!.bytes),
       });
     }
 

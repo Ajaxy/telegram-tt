@@ -1,4 +1,3 @@
-import type { Buffer } from 'buffer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { SizeType, TelegramClient } from '../../../lib/gramjs';
@@ -15,6 +14,7 @@ import {
   MEDIA_CACHE_NAME_AVATARS,
 } from '../../../config';
 import * as cacheApi from '../../../util/cacheApi';
+import { bufferToUtf8 } from '../../../util/encoding/buffer';
 import { toJSNumber } from '../../../util/numbers';
 import { getEntityTypeById } from '../gramjsBuilders';
 import localDb from '../localDb';
@@ -186,20 +186,22 @@ async function download(
 }
 
 function parseMedia(
-  data: Buffer | File, mediaFormat: ApiMediaFormat, mimeType?: string,
+  data: Uint8Array | File, mediaFormat: ApiMediaFormat, mimeType?: string,
 ): ApiParsedMedia | undefined {
   if (data instanceof File) {
     return data;
   }
 
+  const dataBytes = new Uint8Array(data);
+
   switch (mediaFormat) {
     case ApiMediaFormat.BlobUrl:
-      return new Blob([data], { type: mimeType });
+      return new Blob([dataBytes], { type: mimeType });
     case ApiMediaFormat.Text:
-      return data.toString();
+      return bufferToUtf8(dataBytes);
     case ApiMediaFormat.Progressive:
     case ApiMediaFormat.DownloadUrl:
-      return data.buffer;
+      return dataBytes.buffer;
   }
 
   return undefined;

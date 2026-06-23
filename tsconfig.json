@@ -5,7 +5,6 @@
       "@teact": ["./src/lib/teact/teact.ts"],
       "@teact/*": ["./src/lib/teact/*"],
       "@gili/*": ["./src/components/gili/*"],
-      "buffer": ["./src/@types/buffer"],
       "qr-code-styling": ["./src/@types/qr-code-styling"]
     },
     "types": [

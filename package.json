@@ -72,7 +72,6 @@
     "@typescript-eslint/parser": "^8.58.0",
     "autoprefixer": "^10.4.27",
     "babel-plugin-transform-import-meta": "^2.3.3",
-    "buffer": "^6.0.3",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "eslint": "^10.1.0",

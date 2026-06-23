@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer';
-
 /**
  * Executes the authentication process with the Telegram servers.
  * @param sender a connected {MTProtoPlainSender}.
@@ -8,6 +6,7 @@ import { Buffer } from 'buffer';
  */
 import type MTProtoPlainSender from './MTProtoPlainSender';
 
+import { buffersEqual, bufferToHex, concat, copy } from '../../../util/encoding/buffer';
 import { IGE } from '../crypto/IGE';
 import { SERVER_KEYS } from '../crypto/RSA';
 import { SecurityError } from '../errors';
@@ -82,20 +81,20 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
   }
   // Value should be padded to be made 192 exactly
   const padding = generateRandomBytes(192 - pqInnerData.length);
-  const dataWithPadding = Buffer.concat([pqInnerData, padding]);
-  const dataPadReversed = Buffer.from(dataWithPadding).reverse();
+  const dataWithPadding = concat(pqInnerData, padding);
+  const dataPadReversed = copy(dataWithPadding).reverse();
 
   let encryptedData;
   for (let i = 0; i < RETRIES; i++) {
     const tempKey = generateRandomBytes(32);
-    const shaDigestKeyWithData = await sha256(Buffer.concat([tempKey, dataWithPadding]));
-    const dataWithHash = Buffer.concat([dataPadReversed, shaDigestKeyWithData]);
+    const shaDigestKeyWithData = await sha256(concat(tempKey, dataWithPadding));
+    const dataWithHash = concat(dataPadReversed, shaDigestKeyWithData);
 
-    const ige = new IGE(tempKey, Buffer.alloc(32));
+    const ige = new IGE(tempKey, new Uint8Array(32));
     const aesEncrypted = ige.encryptIge(dataWithHash);
     const tempKeyXor = bufferXor(tempKey, await sha256(aesEncrypted));
 
-    const keyAesEncrypted = Buffer.concat([tempKeyXor, aesEncrypted]);
+    const keyAesEncrypted = concat(tempKeyXor, aesEncrypted);
     const keyAesEncryptedInt = readBigIntFromBuffer(keyAesEncrypted, false, false);
     if (keyAesEncryptedInt >= targetKey.n) {
       log.debug('Aes key greater than RSA. retrying');
@@ -173,7 +172,7 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
     throw new Error(`Step 3 answer was ${serverDhInner}`);
   }
   const sha1Answer = await sha1(serverDhInner.getBytes());
-  if (!(hash.equals(sha1Answer))) {
+  if (!buffersEqual(hash, sha1Answer)) {
     throw new SecurityError('Step 3 Invalid hash answer');
   }
 
@@ -185,7 +184,7 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
       'Step 3 Invalid server nonce in encrypted answer',
     );
   }
-  if (serverDhInner.g !== 3 || serverDhInner.dhPrime.toString('hex') !== 'c71caeb9c6b1c9048e6c522f70f13'
+  if (serverDhInner.g !== 3 || bufferToHex(serverDhInner.dhPrime) !== 'c71caeb9c6b1c9048e6c522f70f13'
     + 'f73980d40238e3e21c14934d037563d930f48198a0aa7c14058229493d22530f4dbfa336f6e0ac925139543aed44cce7c3720fd5'
     + '1f69458705ac68cd4fe6b6b13abdc9746512969328454f18faf8c595f642477fe96bb2a941d5bcd1d4ac8cc49880708fa9b378e3'
     + 'c4f3a9060bee67cf9a4a4a695811051907e162753b56b0f6b410dba74d8a84b2a14b3144e0ef1284754fd17ed950d5965b4b9dd4'
@@ -237,12 +236,9 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
     gB: getByteArray(gb, false),
   }).getBytes();
 
-  const clientDdhInnerHashed = Buffer.concat([
-    await sha1(clientDhInner),
-    clientDhInner,
-  ]);
-    // Encryption
+  const clientDdhInnerHashed = concat(await sha1(clientDhInner), clientDhInner);
 
+  // Encryption
   const clientDhEncrypted = ige.encryptIge(clientDdhInnerHashed);
   const dhGen = await sender.send(
     new Api.SetClientDHParams({

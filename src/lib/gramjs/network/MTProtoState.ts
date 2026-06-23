@@ -1,7 +1,6 @@
-import { Buffer } from 'buffer';
-
 import type { AuthKey } from '../crypto/AuthKey';
 
+import { buffersEqual, concat, writeInt32LE } from '../../../util/encoding/buffer';
 import { CTR } from '../crypto/CTR';
 import { IGE } from '../crypto/IGE';
 import { BinaryReader, type BinaryWriter, type Logger } from '../extensions';
@@ -105,29 +104,27 @@ export default class MTProtoState {
 
   /**
    * Calculate the key based on Telegram guidelines, specifying whether it's the client or not
-   * @param authKey
-   * @param msgKey
-   * @param client
-   * @returns {{iv: Buffer, key: Buffer}}
    */
-  async _calcKey(authKey: Buffer, msgKey: Buffer, client: boolean) {
+  async _calcKey(
+    authKey: Uint8Array, msgKey: Uint8Array, client: boolean,
+  ): Promise<{ key: Uint8Array; iv: Uint8Array }> {
     const x = this._isCall
       ? (128 + (this._isOutgoing !== client ? 8 : 0))
       : (client ? 0 : 8);
     const [sha256a, sha256b] = await Promise.all([
-      sha256(Buffer.concat([msgKey, authKey.slice(x, x + 36)])),
-      sha256(Buffer.concat([authKey.slice(x + 40, x + 76), msgKey])),
+      sha256(concat(msgKey, authKey.slice(x, x + 36))),
+      sha256(concat(authKey.slice(x + 40, x + 76), msgKey)),
     ]);
-    const key = Buffer.concat([sha256a.slice(0, 8), sha256b.slice(8, 24), sha256a.slice(24, 32)]);
+    const key = concat(sha256a.slice(0, 8), sha256b.slice(8, 24), sha256a.slice(24, 32));
     if (this._isCall) {
-      const iv = Buffer.concat([sha256b.slice(0, 4), sha256a.slice(8, 16), sha256b.slice(24, 28)]);
+      const iv = concat(sha256b.slice(0, 4), sha256a.slice(8, 16), sha256b.slice(24, 28));
 
       return {
         key,
         iv,
       };
     }
-    const iv = Buffer.concat([sha256b.slice(0, 8), sha256a.slice(8, 24), sha256b.slice(24, 32)]);
+    const iv = concat(sha256b.slice(0, 8), sha256a.slice(8, 24), sha256b.slice(24, 32));
     return {
       key,
       iv,
@@ -143,7 +140,7 @@ export default class MTProtoState {
    * @param afterId
    */
   writeDataAsMessage(
-    buffer: BinaryWriter, data: Buffer, contentRelated: boolean, afterId?: bigint,
+    buffer: BinaryWriter, data: Uint8Array, contentRelated: boolean, afterId?: bigint,
   ): bigint {
     const msgId = this._getNewMsgId();
     const seqNo = this._getSeqNo(contentRelated);
@@ -161,12 +158,12 @@ export default class MTProtoState {
         },
       }).getBytes());
     }
-    const s = Buffer.alloc(4);
-    s.writeInt32LE(seqNo, 0);
-    const b = Buffer.alloc(4);
-    b.writeInt32LE(body.length, 0);
+    const s = new Uint8Array(4);
+    writeInt32LE(s, seqNo);
+    const b = new Uint8Array(4);
+    writeInt32LE(b, body.length);
     const m = toSignedLittleBuffer(msgId, 8);
-    buffer.write(Buffer.concat([m, s, b]));
+    buffer.write(concat(m, s, b));
     buffer.write(body);
     return msgId;
   }
@@ -176,7 +173,7 @@ export default class MTProtoState {
    * following MTProto 2.0 guidelines core.telegram.org/mtproto/description.
    * @param data
    */
-  async encryptMessageData(data: Buffer): Promise<Buffer> {
+  async encryptMessageData(data: Uint8Array): Promise<Uint8Array> {
     if (!this.authKey) {
       throw new Error('Auth key unset');
     }
@@ -195,13 +192,13 @@ export default class MTProtoState {
       const x = 128 + (this._isOutgoing ? 0 : 8);
       const lengthStart = data.length;
 
-      data = Buffer.from(data);
+      data = new Uint8Array(data);
       if (lengthStart % 4 !== 0) {
-        data = Buffer.concat([data, Buffer.from(new Array(4 - (lengthStart % 4)).fill(0x20))]);
+        data = concat(data, new Uint8Array(4 - (lengthStart % 4)).fill(0x20));
       }
 
-      const msgKeyLarge = await sha256(Buffer.concat([authKey
-        .slice(88 + x, 88 + x + 32), Buffer.from(data)]));
+      const msgKeyLarge = await sha256(concat(authKey
+        .slice(88 + x, 88 + x + 32), data));
 
       const msgKey = msgKeyLarge.slice(8, 24);
 
@@ -212,16 +209,16 @@ export default class MTProtoState {
 
       data = new CTR(key, iv).encrypt(data);
       // data = data.slice(0, lengthStart)
-      return Buffer.concat([msgKey, data]);
+      return concat(msgKey, data);
     } else {
       const s = toSignedLittleBuffer(this.salt, 8);
       const i = toSignedLittleBuffer(this.id, 8);
-      data = Buffer.concat([Buffer.concat([s, i]), data]);
+      data = concat(s, i, data);
       const padding = generateRandomBytes(mod(-(data.length + 12), 16) + 12);
       // Being substr(what, offset, length); x = 0 for client
       // "msg_key_large = SHA256(substr(auth_key, 88+x, 32) + pt + padding)"
-      const msgKeyLarge = await sha256(Buffer.concat([authKey
-        .slice(88, 88 + 32), data, padding]));
+      const msgKeyLarge = await sha256(concat(authKey
+        .slice(88, 88 + 32), data, padding));
       // "msg_key = substr (msg_key_large, 8, 16)"
       const msgKey = msgKeyLarge.slice(8, 24);
 
@@ -231,7 +228,7 @@ export default class MTProtoState {
       } = await this._calcKey(authKey, msgKey, true);
 
       const keyId = readBufferFromBigInt(this.authKey.keyId, 8);
-      return Buffer.concat([keyId, msgKey, new IGE(key, iv).encryptIge(Buffer.concat([data, padding]))]);
+      return concat(keyId, msgKey, new IGE(key, iv).encryptIge(concat(data, padding)));
     }
   }
 
@@ -239,7 +236,7 @@ export default class MTProtoState {
    * Inverse of `encrypt_message_data` for incoming server messages.
    * @param body
    */
-  async decryptMessageData(body: Buffer) {
+  async decryptMessageData(body: Uint8Array) {
     if (!this.authKey) {
       throw new Error('Auth key unset');
     }
@@ -277,7 +274,7 @@ export default class MTProtoState {
       body = body.slice(16);
       const lengthStart = body.length;
 
-      body = Buffer.concat([body, Buffer.from(new Array(4 - (lengthStart % 4)).fill(0))]);
+      body = concat(body, new Uint8Array(4 - (lengthStart % 4)));
 
       body = new CTR(key, iv).decrypt(body);
 
@@ -289,12 +286,12 @@ export default class MTProtoState {
     // Sections "checking sha256 hash" and "message length"
 
     const ourKey = this._isCall
-      ? await sha256(Buffer.concat([authKey
-        .slice(88 + x, 88 + x + 32), body]))
-      : await sha256(Buffer.concat([authKey
-        .slice(96, 96 + 32), body]));
+      ? await sha256(concat(authKey
+        .slice(88 + x, 88 + x + 32), body))
+      : await sha256(concat(authKey
+        .slice(96, 96 + 32), body));
 
-    if (!this._isCall && !msgKey.equals(ourKey.slice(8, 24))) {
+    if (!this._isCall && !buffersEqual(msgKey, ourKey.slice(8, 24))) {
       throw new SecurityError('Received msg_key doesn\'t match with expected one');
     }
     const reader = new BinaryReader(body);

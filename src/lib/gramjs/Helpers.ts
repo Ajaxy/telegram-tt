@@ -1,18 +1,23 @@
-import { Buffer } from 'buffer';
-
+import {
+  bufferFromUtf8,
+  concat,
+  readBigUint64BE,
+  readBigUint64LE,
+  writeBigInt64LE,
+} from '../../util/encoding/buffer';
 import { createHash, randomBytes } from './crypto/crypto';
 
-export function readBigIntFromBuffer(buffer: Buffer, little = true, signed = false): bigint {
+const BIG_UINT_64_SIGN = 0x8000000000000000n;
+const BIG_UINT_64_SIZE = 0x10000000000000000n;
+
+export function readBigIntFromBuffer(buffer: Uint8Array, little = true, signed = false): bigint {
   const len = buffer.length;
   if (len === 0) return 0n;
 
   // Hot path for longs
   if (len === 8) {
-    if (signed) {
-      return little ? buffer.readBigInt64LE(0) : buffer.readBigInt64BE(0);
-    } else {
-      return little ? buffer.readBigUInt64LE(0) : buffer.readBigUInt64BE(0);
-    }
+    const value = little ? readBigUint64LE(buffer) : readBigUint64BE(buffer);
+    return signed && value >= BIG_UINT_64_SIGN ? value - BIG_UINT_64_SIZE : value;
   }
 
   // Parse unsigned value
@@ -32,11 +37,11 @@ export function readBigIntFromBuffer(buffer: Buffer, little = true, signed = fal
 }
 
 export function toSignedLittleBuffer(big: bigint, number = 8) {
-  const buffer = Buffer.allocUnsafe(number);
+  const buffer = new Uint8Array(number);
 
-  // Use Buffer method for 8-byte buffers
+  // Use long hot path for 8-byte buffers
   if (number === 8) {
-    buffer.writeBigInt64LE(big);
+    writeBigInt64LE(buffer, big);
     return buffer;
   }
 
@@ -53,7 +58,7 @@ export function readBufferFromBigInt(
   bytesNumber: number,
   little = true,
   signed = false,
-): Buffer {
+): Uint8Array<ArrayBuffer> {
   if (!Number.isInteger(bytesNumber) || bytesNumber <= 0) {
     throw new RangeError('bytesNumber must be a positive integer');
   }
@@ -74,7 +79,7 @@ export function readBufferFromBigInt(
   // Two's complement encode if negative
   let v = signed && value < 0n ? (1n << bits) + value : value;
 
-  const buf = Buffer.allocUnsafe(bytesNumber);
+  const buf = new Uint8Array(bytesNumber);
   if (little) {
     for (let i = 0; i < bytesNumber; i++) {
       buf[i] = Number(v & 0xFFn);
@@ -102,7 +107,7 @@ export function bigIntMod(n: bigint, m: bigint) {
 }
 
 export function generateRandomBytes(count: number) {
-  return Buffer.from(randomBytes(count));
+  return randomBytes(count);
 }
 
 export function generateRandomBigInt(bytes: number = 8) {
@@ -119,12 +124,12 @@ export async function generateKeyDataFromNonce(
   const serverNonce = toSignedLittleBuffer(serverNonceBigInt, 16);
   const newNonce = toSignedLittleBuffer(newNonceBigInt, 32);
   const [hash1, hash2, hash3] = await Promise.all([
-    sha1(Buffer.concat([newNonce, serverNonce])),
-    sha1(Buffer.concat([serverNonce, newNonce])),
-    sha1(Buffer.concat([newNonce, newNonce])),
+    sha1(concat(newNonce, serverNonce)),
+    sha1(concat(serverNonce, newNonce)),
+    sha1(concat(newNonce, newNonce)),
   ]);
-  const keyBuffer = Buffer.concat([hash1, hash2.slice(0, 12)]);
-  const ivBuffer = Buffer.concat([hash2.slice(12, 20), hash3, newNonce.slice(0, 4)]);
+  const keyBuffer = concat(hash1, hash2.slice(0, 12));
+  const ivBuffer = concat(hash2.slice(12, 20), hash3, newNonce.slice(0, 4));
   return {
     key: keyBuffer,
     iv: ivBuffer,
@@ -132,21 +137,22 @@ export async function generateKeyDataFromNonce(
 }
 
 export function convertToLittle(buf: Uint32Array) {
-  const correct = Buffer.allocUnsafe(buf.length * 4);
+  const correct = new Uint8Array(buf.length * 4);
+  const view = new DataView(correct.buffer);
 
   for (let i = 0; i < buf.length; i++) {
-    correct.writeUInt32BE(buf[i], i * 4);
+    view.setUint32(i * 4, buf[i], false);
   }
   return correct;
 }
 
-export function sha1(data: Buffer): Promise<Buffer> {
+export function sha1(data: Uint8Array): Promise<Uint8Array<ArrayBuffer>> {
   const shaSum = createHash('sha1');
   shaSum.update(data);
   return shaSum.digest();
 }
 
-export function sha256(data: Buffer): Promise<Buffer> {
+export function sha256(data: Uint8Array): Promise<Uint8Array<ArrayBuffer>> {
   const shaSum = createHash('sha256');
   shaSum.update(data);
   return shaSum.digest();
@@ -173,7 +179,7 @@ export function modExp(
   return result;
 }
 
-export function getByteArray(integer: bigint, signed = false): Buffer {
+export function getByteArray(integer: bigint, signed = false) {
   if (!signed && integer < 0n) {
     throw new RangeError('Cannot convert negative to unsigned');
   }
@@ -231,12 +237,12 @@ export function sleep(ms: number) {
   });
 }
 
-export function bufferXor(a: Buffer, b: Buffer) {
-  const res = [];
+export function bufferXor(a: Uint8Array, b: Uint8Array) {
+  const res = new Uint8Array(a.length);
   for (let i = 0; i < a.length; i++) {
-    res.push(a[i] ^ b[i]);
+    res[i] = a[i] ^ b[i];
   }
-  return Buffer.from(res);
+  return res;
 }
 
 // Taken from https://stackoverflow.com/questions/18638900/javascript-crc32/18639999#18639999
@@ -253,14 +259,12 @@ export const CRC32_TABLE = (() => {
   return crcTable;
 })();
 
-export function crc32(buf: Buffer | string) {
-  if (!Buffer.isBuffer(buf)) {
-    buf = Buffer.from(buf);
-  }
+export function crc32(buf: Uint8Array | string) {
+  const bytes = typeof buf === 'string' ? bufferFromUtf8(buf) : buf;
   let crc = -1;
 
-  for (let index = 0; index < buf.length; index++) {
-    const byte = buf[index];
+  for (let index = 0; index < bytes.length; index++) {
+    const byte = bytes[index];
     crc = CRC32_TABLE[(crc ^ byte) & 0xff] ^ (crc >>> 8);
   }
   return (crc ^ (-1)) >>> 0;

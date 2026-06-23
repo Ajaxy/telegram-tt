@@ -1,11 +1,10 @@
 import AES from '@cryptography/aes';
-import { Buffer } from 'buffer';
 
 class Counter {
-  public counter: Buffer;
+  public counter: Uint8Array;
 
-  constructor(initialValue: Buffer) {
-    this.counter = Buffer.from(initialValue);
+  constructor(initialValue: Uint8Array) {
+    this.counter = new Uint8Array(initialValue);
   }
 
   increment() {
@@ -23,13 +22,13 @@ class Counter {
 class CTR {
   private _counter: Counter;
 
-  private _carryBlock: Buffer | undefined;
+  private _carryBlock: Uint8Array | undefined;
 
   private _carryOffset: number;
 
   private _aes: AES;
 
-  constructor(key: Buffer, counter: Counter | Buffer) {
+  constructor(key: Uint8Array, counter: Counter | Uint8Array) {
     if (!(counter instanceof Counter)) {
       counter = new Counter(counter);
     }
@@ -42,18 +41,18 @@ class CTR {
     this._aes = new AES(key);
   }
 
-  update(plainText: Buffer) {
+  update(plainText: Uint8Array) {
     return this.encrypt(plainText);
   }
 
-  encrypt(plain: Buffer): Buffer {
+  encrypt(plain: Uint8Array): Uint8Array {
     const aes = this._aes;
     const ctr = this._counter;
 
     const src = plain;
     const n = src.length;
 
-    const dst = Buffer.allocUnsafe(n);
+    const dst = new Uint8Array(n);
 
     let pos = 0;
 
@@ -73,7 +72,7 @@ class CTR {
     }
 
     // Temporary keystream block for this call
-    const keystream = Buffer.allocUnsafe(16);
+    const keystream = new Uint8Array(16);
 
     // 2) Full 16-byte blocks
     while (pos + 16 <= n) {
@@ -108,7 +107,7 @@ class CTR {
 export type CtrImpl = CTR;
 
 // endregion
-export function createDecipheriv(algorithm: string, key: Buffer, iv: Buffer) {
+export function createDecipheriv(algorithm: string, key: Uint8Array, iv: Uint8Array) {
   if (algorithm.includes('ECB')) {
     throw new Error('Not supported');
   } else {
@@ -116,7 +115,7 @@ export function createDecipheriv(algorithm: string, key: Buffer, iv: Buffer) {
   }
 }
 
-export function createCipheriv(algorithm: string, key: Buffer, iv: Buffer) {
+export function createCipheriv(algorithm: string, key: Uint8Array, iv: Uint8Array) {
   if (algorithm.includes('ECB')) {
     throw new Error('Not supported');
   } else {
@@ -143,16 +142,16 @@ class Hash {
 
   async digest() {
     if (this.algorithm === 'sha1') {
-      return Buffer.from(await self.crypto.subtle.digest('SHA-1', this.data));
+      return new Uint8Array(await self.crypto.subtle.digest('SHA-1', this.data));
     } else {
-      return Buffer.from(await self.crypto.subtle.digest('SHA-256', this.data));
+      return new Uint8Array(await self.crypto.subtle.digest('SHA-256', this.data));
     }
   }
 }
 
-export async function pbkdf2(password: Buffer, salt: Buffer, iterations: number) {
+export async function pbkdf2(password: Uint8Array<ArrayBuffer>, salt: Uint8Array<ArrayBuffer>, iterations: number) {
   const passwordKey = await crypto.subtle.importKey('raw', password, { name: 'PBKDF2' }, false, ['deriveBits']);
-  return Buffer.from(await crypto.subtle.deriveBits({
+  return new Uint8Array(await crypto.subtle.deriveBits({
     name: 'PBKDF2',
     hash: 'SHA-512',
     salt,
@@ -164,8 +163,9 @@ export function createHash(algorithm: 'sha1' | 'sha256') {
   return new Hash(algorithm);
 }
 
-function writeU32WordsBE(words: Uint32Array, out: Buffer) {
+function writeU32WordsBE(words: Uint32Array, out: Uint8Array) {
+  const view = new DataView(out.buffer, out.byteOffset, out.byteLength);
   for (let i = 0; i < words.length; i++) {
-    out.writeUInt32BE(words[i], i * 4);
+    view.setUint32(i * 4, words[i], false);
   }
 }

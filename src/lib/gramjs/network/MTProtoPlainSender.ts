@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer';
-
 /**
  *  This module contains the class used to communicate with Telegram's servers
  *  in plain text, when no authorization key has been created yet.
@@ -8,6 +6,7 @@ import type { Logger } from '../extensions';
 import type { Api } from '../tl';
 import type { Connection } from './connection';
 
+import { concat, writeInt32LE } from '../../../util/encoding/buffer';
 import { BinaryReader } from '../extensions';
 
 import { InvalidBufferError } from '../errors/Common';
@@ -41,13 +40,13 @@ export default class MTProtoPlainSender {
     let body = request.getBytes();
     let msgId = this._state._getNewMsgId();
     const m = toSignedLittleBuffer(msgId, 8);
-    const b = Buffer.alloc(4);
-    b.writeInt32LE(body.length, 0);
+    const b = new Uint8Array(4);
+    writeInt32LE(b, body.length);
 
-    const res = Buffer.concat([Buffer.concat([Buffer.alloc(8), m, b]), body]);
+    const res = concat(new Uint8Array(8), m, b, body);
 
     await this._connection.send(res);
-    body = await this._connection.recv();
+    body = new Uint8Array(await this._connection.recv());
     if (body.length < 8) {
       throw new InvalidBufferError(body);
     }

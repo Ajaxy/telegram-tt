@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import { bufferFromBase64, bufferToUtf8 } from './buffer';
 
 export function base64UrlToBase64(base64Url: string): string {
   const base64Encoded = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -7,12 +7,12 @@ export function base64UrlToBase64(base64Url: string): string {
   return base64WithPadding;
 }
 
-export function base64UrlToBuffer(base64Url: string): Buffer {
+export function base64UrlToBuffer(base64Url: string): Uint8Array<ArrayBuffer> {
   const base64 = base64UrlToBase64(base64Url);
-  return Buffer.from(base64, 'base64');
+  return bufferFromBase64(base64);
 }
 
 export function base64UrlToString(base64Url: string): string {
   const buffer = base64UrlToBuffer(base64Url);
-  return buffer.toString('utf-8');
+  return bufferToUtf8(buffer);
 }

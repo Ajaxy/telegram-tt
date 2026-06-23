@@ -1,4 +1,3 @@
-import { Buffer } from 'buffer';
 import { Api as GramJs, errors } from '../../../lib/gramjs';
 
 import type { RegularLangKey } from '../../../types/language';
@@ -25,6 +24,7 @@ const LOG_SUFFIX = {
   'UNEXPECTED UPDATE': '#9C9C9C',
   'UNEXPECTED RESPONSE': '#D1191C',
 };
+const SERIALIZE_BYTES_CHUNK_SIZE = 0x8000;
 
 const ERROR_KEYS: Record<string, RegularLangKey> = {
   PHONE_NUMBER_INVALID: 'ErrorPhoneNumberInvalid',
@@ -68,12 +68,16 @@ export function isChatFolder(
   return filter instanceof GramJs.DialogFilter || filter instanceof GramJs.DialogFilterChatlist;
 }
 
-export function serializeBytes(value: Buffer) {
-  return String.fromCharCode(...value);
+export function serializeBytes(value: Uint8Array) {
+  let result = '';
+  for (let i = 0; i < value.length; i += SERIALIZE_BYTES_CHUNK_SIZE) {
+    result += String.fromCharCode(...value.subarray(i, i + SERIALIZE_BYTES_CHUNK_SIZE));
+  }
+  return result;
 }
 
 export function deserializeBytes(value: string) {
-  return Buffer.from(value, 'binary');
+  return Uint8Array.from(value, (char) => char.charCodeAt(0));
 }
 
 export function log(suffix: keyof typeof LOG_SUFFIX, ...data: any) {

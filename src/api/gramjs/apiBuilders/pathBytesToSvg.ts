@@ -1,16 +1,14 @@
-import type { Buffer } from 'buffer';
-
 const TEMPLATE = '<?xml version="1.0" encoding="utf-8"?><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {{width}} {{height}}" xml:space="preserve"><path fill-opacity="0.1" d="{{path}}" /></svg>';
 const LOOKUP = 'AACAAAAHAAALMAAAQASTAVAAAZaacaaaahaaalmaaaqastava.az0123456789-,';
 
-export function pathBytesToSvg(bytes: Buffer, width: number, height: number) {
+export function pathBytesToSvg(bytes: Uint8Array, width: number, height: number) {
   return TEMPLATE
     .replace('{{path}}', buildSvgPath(bytes))
     .replace('{{width}}', String(width))
     .replace('{{height}}', String(height));
 }
 
-export function buildSvgPath(bytes: Buffer) {
+export function buildSvgPath(bytes: Uint8Array) {
   let path = 'M';
 
   const len = bytes.length;

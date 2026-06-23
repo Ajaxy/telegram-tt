@@ -1,16 +1,17 @@
-import { Buffer } from 'buffer';
-
 import { DEBUG_CALLS } from '../../../config';
+import {
+  buffersEqual, concat, copy, readUint32BE, readUint32LE, writeUint32LE,
+} from '../../../util/encoding/buffer';
 
 type SctpChunk = {
   type: number;
   flags: number;
-  body: Buffer;
+  body: Uint8Array;
 };
 
 type SctpDataChunk = {
   flags: number;
-  body: Buffer;
+  body: Uint8Array;
 };
 
 const SCTP_PORT = 5000;
@@ -56,9 +57,9 @@ export class SctpSignaling {
 
   private isEstablished = false;
 
-  private cookie = Buffer.alloc(0);
+  private cookie = new Uint8Array(0);
 
-  private pendingPayloads: Buffer[] = [];
+  private pendingPayloads: Uint8Array[] = [];
 
   private pendingPackets: number[][] = [];
 
@@ -66,9 +67,9 @@ export class SctpSignaling {
 
   private pendingPeerDataSize = 0;
 
-  private reassembly?: Buffer[];
+  private reassembly?: Uint8Array[];
 
-  wrapPayload(payload: Buffer) {
+  wrapPayload(payload: Uint8Array) {
     if (this.isEstablished && this.peerTag !== undefined) {
       return Array.from(this.createDataPacket(payload));
     }
@@ -118,8 +119,8 @@ export class SctpSignaling {
     return result;
   }
 
-  receive(packet: Buffer) {
-    const payloads: Buffer[] = [];
+  receive(packet: Uint8Array) {
+    const payloads: Uint8Array[] = [];
     if (packet.length < 12) {
       logSctp('packet dropped: too short', {
         length: packet.length,
@@ -130,9 +131,9 @@ export class SctpSignaling {
     if (!hasValidSctpChecksum(packet)) {
       logSctp('packet dropped: invalid CRC32C', {
         length: packet.length,
-        sourcePort: packet.readUInt16BE(0),
-        destinationPort: packet.readUInt16BE(2),
-        verificationTag: packet.readUInt32BE(4),
+        sourcePort: new DataView(packet.buffer, packet.byteOffset, packet.byteLength).getUint16(0, false),
+        destinationPort: new DataView(packet.buffer, packet.byteOffset, packet.byteLength).getUint16(2, false),
+        verificationTag: readUint32BE(packet, 4),
       });
       return payloads;
     }
@@ -142,7 +143,7 @@ export class SctpSignaling {
       if (!this.validateVerificationTag(packet, chunk.type)) {
         logSctp('chunk dropped: invalid verification tag', {
           chunkType: chunk.type,
-          verificationTag: packet.readUInt32BE(4),
+          verificationTag: readUint32BE(packet, 4),
           expectedVerificationTag: chunk.type === SCTP_INIT ? 0 : this.localTag,
         });
         return;
@@ -160,7 +161,7 @@ export class SctpSignaling {
           });
           return;
         }
-        this.pendingPackets.push(Array.from(this.createPacket(SCTP_COOKIE_ACK, 0, Buffer.alloc(0))));
+        this.pendingPackets.push(Array.from(this.createPacket(SCTP_COOKIE_ACK, 0, new Uint8Array(0))));
         this.markEstablished();
       } else if (chunk.type === SCTP_COOKIE_ACK) {
         this.markEstablished();
@@ -189,12 +190,12 @@ export class SctpSignaling {
     return payloads;
   }
 
-  private validateCookieEcho(cookie: Buffer) {
-    return Boolean(this.cookie.length && cookie.length === this.cookie.length && cookie.equals(this.cookie));
+  private validateCookieEcho(cookie: Uint8Array) {
+    return Boolean(this.cookie.length && buffersEqual(cookie, this.cookie));
   }
 
-  private validateVerificationTag(packet: Buffer, chunkType: number) {
-    const verificationTag = packet.readUInt32BE(4);
+  private validateVerificationTag(packet: Uint8Array, chunkType: number) {
+    const verificationTag = readUint32BE(packet, 4);
     if (chunkType === SCTP_INIT) {
       return verificationTag === 0;
     }
@@ -202,7 +203,7 @@ export class SctpSignaling {
     return verificationTag === this.localTag;
   }
 
-  private handleInit(body: Buffer) {
+  private handleInit(body: Uint8Array) {
     if (body.length < 16) {
       logSctp('INIT ignored: body too short', {
         bodyLength: body.length,
@@ -210,15 +211,16 @@ export class SctpSignaling {
       return;
     }
 
-    this.peerTag = body.readUInt32BE(0);
-    this.peerInitialTsn = body.readUInt32BE(12);
+    const bodyView = new DataView(body.buffer, body.byteOffset, body.byteLength);
+    this.peerTag = bodyView.getUint32(0, false);
+    this.peerInitialTsn = bodyView.getUint32(12, false);
     this.peerCumulativeTsn = (this.peerInitialTsn - 1) >>> 0;
     this.initSent = true;
     this.cookie = this.createCookie();
     this.pendingPackets.push(Array.from(this.createInitAckPacket()));
   }
 
-  private handleInitAck(body: Buffer) {
+  private handleInitAck(body: Uint8Array) {
     if (body.length < 16) {
       logSctp('INIT_ACK ignored: body too short', {
         bodyLength: body.length,
@@ -226,8 +228,9 @@ export class SctpSignaling {
       return;
     }
 
-    this.peerTag = body.readUInt32BE(0);
-    this.peerInitialTsn = body.readUInt32BE(12);
+    const bodyView = new DataView(body.buffer, body.byteOffset, body.byteLength);
+    this.peerTag = bodyView.getUint32(0, false);
+    this.peerInitialTsn = bodyView.getUint32(12, false);
     this.peerCumulativeTsn = (this.peerInitialTsn - 1) >>> 0;
 
     const cookie = findSctpParameter(body.slice(16), SCTP_STATE_COOKIE);
@@ -240,7 +243,7 @@ export class SctpSignaling {
     }
   }
 
-  private handleData(flags: number, body: Buffer) {
+  private handleData(flags: number, body: Uint8Array) {
     if (body.length < 12) {
       logSctp('DATA ignored: body too short', {
         bodyLength: body.length,
@@ -248,9 +251,10 @@ export class SctpSignaling {
       return [];
     }
 
-    const tsn = body.readUInt32BE(0);
-    const streamId = body.readUInt16BE(4);
-    const ppid = body.readUInt32BE(8);
+    const bodyView = new DataView(body.buffer, body.byteOffset, body.byteLength);
+    const tsn = bodyView.getUint32(0, false);
+    const streamId = bodyView.getUint16(4, false);
+    const ppid = bodyView.getUint32(8, false);
     if (streamId !== SCTP_STREAM_ID || ppid !== SCTP_BINARY_PPID) {
       logSctp('DATA ignored: unsupported stream or PPID', {
         streamId,
@@ -279,8 +283,8 @@ export class SctpSignaling {
     return this.acceptData(tsn, flags, body);
   }
 
-  private acceptData(tsn: number, flags: number, body: Buffer) {
-    const payloads: Buffer[] = [];
+  private acceptData(tsn: number, flags: number, body: Uint8Array) {
+    const payloads: Uint8Array[] = [];
     let currentTsn = tsn;
     let currentFlags = flags;
     let currentBody = body;
@@ -307,7 +311,7 @@ export class SctpSignaling {
     return payloads;
   }
 
-  private readDataPayload(tsn: number, flags: number, body: Buffer) {
+  private readDataPayload(tsn: number, flags: number, body: Uint8Array) {
     this.markEstablished();
     this.peerCumulativeTsn = tsn;
 
@@ -336,12 +340,12 @@ export class SctpSignaling {
       return undefined;
     }
 
-    const result = Buffer.concat(this.reassembly);
+    const result = concat(...this.reassembly);
     this.reassembly = undefined;
     return result;
   }
 
-  private handleSack(body: Buffer) {
+  private handleSack(body: Uint8Array) {
     if (body.length < 12) {
       logSctp('SACK ignored: body too short', {
         bodyLength: body.length,
@@ -360,7 +364,7 @@ export class SctpSignaling {
     return (this.peerCumulativeTsn + 1) >>> 0;
   }
 
-  private bufferPendingPeerData(tsn: number, flags: number, body: Buffer, expectedTsn: number) {
+  private bufferPendingPeerData(tsn: number, flags: number, body: Uint8Array, expectedTsn: number) {
     if (this.pendingPeerData.has(tsn)) {
       logSctp('DATA ignored: already buffered TSN', {
         tsn,
@@ -447,7 +451,7 @@ export class SctpSignaling {
     this.initSentAt = 0;
     this.initRetryCount = 0;
     this.isEstablished = false;
-    this.cookie = Buffer.alloc(0);
+    this.cookie = new Uint8Array(0);
     this.pendingPayloads = [];
     this.pendingPackets = [];
     this.clearPendingPeerData();
@@ -455,96 +459,105 @@ export class SctpSignaling {
   }
 
   private createInitPacket() {
-    const body = Buffer.alloc(16);
-    body.writeUInt32BE(this.localTag, 0);
-    body.writeUInt32BE(SCTP_RECEIVE_WINDOW, 4);
-    body.writeUInt16BE(0xFFFF, 8);
-    body.writeUInt16BE(0xFFFF, 10);
-    body.writeUInt32BE(this.localTsn, 12);
+    const body = new Uint8Array(16);
+    const bodyView = new DataView(body.buffer);
+    bodyView.setUint32(0, this.localTag, false);
+    bodyView.setUint32(4, SCTP_RECEIVE_WINDOW, false);
+    bodyView.setUint16(8, 0xFFFF, false);
+    bodyView.setUint16(10, 0xFFFF, false);
+    bodyView.setUint32(12, this.localTsn, false);
     return this.createPacket(SCTP_INIT, 0, body, 0);
   }
 
   private createInitAckPacket() {
-    const body = Buffer.alloc(16);
-    body.writeUInt32BE(this.localTag, 0);
-    body.writeUInt32BE(SCTP_RECEIVE_WINDOW, 4);
-    body.writeUInt16BE(0xFFFF, 8);
-    body.writeUInt16BE(0xFFFF, 10);
-    body.writeUInt32BE(this.localTsn, 12);
+    const body = new Uint8Array(16);
+    const bodyView = new DataView(body.buffer);
+    bodyView.setUint32(0, this.localTag, false);
+    bodyView.setUint32(4, SCTP_RECEIVE_WINDOW, false);
+    bodyView.setUint16(8, 0xFFFF, false);
+    bodyView.setUint16(10, 0xFFFF, false);
+    bodyView.setUint32(12, this.localTsn, false);
 
-    return this.createPacket(SCTP_INIT_ACK, 0, Buffer.concat([
+    return this.createPacket(SCTP_INIT_ACK, 0, concat(
       body,
       createSctpParameter(SCTP_STATE_COOKIE, this.cookie),
-    ]));
+    ));
   }
 
-  private createDataPacket(payload: Buffer) {
-    const body = Buffer.alloc(12 + payload.length);
-    body.writeUInt32BE(this.localTsn, 0);
+  private createDataPacket(payload: Uint8Array) {
+    const body = new Uint8Array(12 + payload.length);
+    const bodyView = new DataView(body.buffer);
+    bodyView.setUint32(0, this.localTsn, false);
     this.localTsn = (this.localTsn + 1) >>> 0;
-    body.writeUInt16BE(SCTP_STREAM_ID, 4);
-    body.writeUInt16BE(this.localSsn, 6);
+    bodyView.setUint16(4, SCTP_STREAM_ID, false);
+    bodyView.setUint16(6, this.localSsn, false);
     this.localSsn = (this.localSsn + 1) & 0xFFFF;
-    body.writeUInt32BE(SCTP_BINARY_PPID, 8);
-    payload.copy(body, 12);
+    bodyView.setUint32(8, SCTP_BINARY_PPID, false);
+    body.set(payload, 12);
     return this.createPacket(SCTP_DATA, 0x03, body);
   }
 
   private createSackPacket() {
-    const body = Buffer.alloc(12);
-    body.writeUInt32BE(this.peerCumulativeTsn || 0, 0);
-    body.writeUInt32BE(SCTP_RECEIVE_WINDOW, 4);
-    body.writeUInt16BE(0, 8);
-    body.writeUInt16BE(0, 10);
+    const body = new Uint8Array(12);
+    const bodyView = new DataView(body.buffer);
+    bodyView.setUint32(0, this.peerCumulativeTsn || 0, false);
+    bodyView.setUint32(4, SCTP_RECEIVE_WINDOW, false);
+    bodyView.setUint16(8, 0, false);
+    bodyView.setUint16(10, 0, false);
     return this.createPacket(SCTP_SACK, 0, body);
   }
 
-  private createPacket(type: number, flags: number, body: Buffer, verificationTag = this.peerTag || 0) {
+  private createPacket(type: number, flags: number, body: Uint8Array, verificationTag = this.peerTag || 0) {
     const chunk = createSctpChunk(type, flags, body);
-    const packet = Buffer.alloc(12 + chunk.length);
-    packet.writeUInt16BE(SCTP_PORT, 0);
-    packet.writeUInt16BE(SCTP_PORT, 2);
-    packet.writeUInt32BE(verificationTag, 4);
-    chunk.copy(packet, 12);
-    packet.writeUInt32LE(crc32c(packet), 8);
+    const packet = new Uint8Array(12 + chunk.length);
+    const packetView = new DataView(packet.buffer);
+    packetView.setUint16(0, SCTP_PORT, false);
+    packetView.setUint16(2, SCTP_PORT, false);
+    packetView.setUint32(4, verificationTag, false);
+    packet.set(chunk, 12);
+    packetView.setUint32(8, crc32c(packet), true);
     return packet;
   }
 
   private createCookie() {
-    const cookie = Buffer.alloc(16);
-    cookie.writeUInt32BE(this.localTag, 0);
-    cookie.writeUInt32BE(this.peerTag || 0, 4);
-    cookie.writeUInt32BE(this.localTsn, 8);
-    cookie.writeUInt32BE(this.peerInitialTsn || 0, 12);
+    const cookie = new Uint8Array(16);
+    const cookieView = new DataView(cookie.buffer);
+    cookieView.setUint32(0, this.localTag, false);
+    cookieView.setUint32(4, this.peerTag || 0, false);
+    cookieView.setUint32(8, this.localTsn, false);
+    cookieView.setUint32(12, this.peerInitialTsn || 0, false);
     return cookie;
   }
 }
 
-function createSctpChunk(type: number, flags: number, body: Buffer) {
+function createSctpChunk(type: number, flags: number, body: Uint8Array) {
   const length = 4 + body.length;
   const paddedLength = align4(length);
-  const chunk = Buffer.alloc(paddedLength);
+  const chunk = new Uint8Array(paddedLength);
+  const chunkView = new DataView(chunk.buffer);
   chunk[0] = type;
   chunk[1] = flags;
-  chunk.writeUInt16BE(length, 2);
-  body.copy(chunk, 4);
+  chunkView.setUint16(2, length, false);
+  chunk.set(body, 4);
   return chunk;
 }
 
-function createSctpParameter(type: number, value: Buffer) {
+function createSctpParameter(type: number, value: Uint8Array) {
   const length = 4 + value.length;
-  const parameter = Buffer.alloc(align4(length));
-  parameter.writeUInt16BE(type, 0);
-  parameter.writeUInt16BE(length, 2);
-  value.copy(parameter, 4);
+  const parameter = new Uint8Array(align4(length));
+  const parameterView = new DataView(parameter.buffer);
+  parameterView.setUint16(0, type, false);
+  parameterView.setUint16(2, length, false);
+  parameter.set(value, 4);
   return parameter;
 }
 
-function findSctpParameter(parameters: Buffer, type: number) {
+function findSctpParameter(parameters: Uint8Array, type: number) {
+  const parametersView = new DataView(parameters.buffer, parameters.byteOffset, parameters.byteLength);
   let offset = 0;
   while (offset + 4 <= parameters.length) {
-    const parameterType = parameters.readUInt16BE(offset);
-    const length = parameters.readUInt16BE(offset + 2);
+    const parameterType = parametersView.getUint16(offset, false);
+    const length = parametersView.getUint16(offset + 2, false);
     if (length < 4 || offset + length > parameters.length) {
       return undefined;
     }
@@ -559,13 +572,14 @@ function findSctpParameter(parameters: Buffer, type: number) {
   return undefined;
 }
 
-function parseSctpChunks(packet: Buffer) {
+function parseSctpChunks(packet: Uint8Array) {
   const chunks: SctpChunk[] = [];
+  const packetView = new DataView(packet.buffer, packet.byteOffset, packet.byteLength);
   let offset = 12;
   while (offset + 4 <= packet.length) {
     const type = packet[offset];
     const flags = packet[offset + 1];
-    const length = packet.readUInt16BE(offset + 2);
+    const length = packetView.getUint16(offset + 2, false);
     if (length < 4 || offset + length > packet.length) {
       break;
     }
@@ -581,14 +595,19 @@ function parseSctpChunks(packet: Buffer) {
   return chunks;
 }
 
-export function isSctpPacket(packet: Buffer) {
+export function isSctpPacket(packet: Uint8Array) {
+  if (packet.length < 12) {
+    return false;
+  }
+  const packetView = new DataView(packet.buffer, packet.byteOffset, packet.byteLength);
   return packet.length >= 12
-    && packet.readUInt16BE(0) === SCTP_PORT
-    && packet.readUInt16BE(2) === SCTP_PORT;
+    && packetView.getUint16(0, false) === SCTP_PORT
+    && packetView.getUint16(2, false) === SCTP_PORT;
 }
 
-function hasValidSctpChecksum(packet: Buffer) {
-  return isSctpPacket(packet) && packet.readUInt32LE(8) === crc32c(packet);
+function hasValidSctpChecksum(packet: Uint8Array) {
+  return isSctpPacket(packet)
+    && readUint32LE(packet, 8) === crc32c(packet);
 }
 
 function align4(value: number) {
@@ -622,9 +641,9 @@ function createCrc32cTable() {
   return table;
 }
 
-function crc32c(data: Buffer) {
-  const buffer = Buffer.from(data);
-  buffer.writeUInt32LE(0, 8);
+function crc32c(data: Uint8Array) {
+  const buffer = copy(data);
+  writeUint32LE(buffer, 0, 8);
   let crc = 0xFFFFFFFF;
   for (let i = 0; i < buffer.length; i++) {
     crc = CRC32C_TABLE[(crc ^ buffer[i]) & 0xFF] ^ (crc >>> 8);

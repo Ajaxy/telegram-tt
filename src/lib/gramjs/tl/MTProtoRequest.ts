@@ -1,5 +1,3 @@
-import { Buffer } from 'buffer';
-
 export abstract class MTProtoRequest {
     private sent: boolean;
 
@@ -52,7 +50,7 @@ export abstract class MTProtoRequest {
     // These should be overrode
     abstract onSend(): void;
 
-    abstract onResponse(_buffer: Buffer): void;
+    abstract onResponse(_buffer: Uint8Array): void;
 
     abstract onException(_exception: Error): void;
 }

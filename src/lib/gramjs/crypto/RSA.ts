@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import { concat } from '../../../util/encoding/buffer';
 
 import {
   generateRandomBytes,
@@ -44,9 +44,9 @@ export const SERVER_KEYS = [
 
  * @param fingerprint the fingerprint of the RSA key.
  * @param data the data to be encrypted.
- * @returns {Buffer|*|undefined} the cipher text, or undefined if no key matching this fingerprint is found.
+ * @returns the cipher text, or undefined if no key matching this fingerprint is found.
  */
-export async function encrypt(fingerprint: bigint, data: Buffer) {
+export async function encrypt(fingerprint: bigint, data: Uint8Array): Promise<Uint8Array | undefined> {
   const key = SERVER_KEYS.get(fingerprint);
   if (!key) {
     return undefined;
@@ -55,7 +55,7 @@ export async function encrypt(fingerprint: bigint, data: Buffer) {
   // len(sha1.digest) is always 20, so we're left with 255 - 20 - x padding
   const rand = generateRandomBytes(235 - data.length);
 
-  const toEncrypt = Buffer.concat([await sha1(data), data, rand]);
+  const toEncrypt = concat(await sha1(data), data, rand);
 
   // rsa module rsa.encrypt adds 11 bits for padding which we don't want
   // rsa module uses rsa.transform.bytes2int(to_encrypt), easier way:

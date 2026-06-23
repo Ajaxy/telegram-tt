@@ -1,7 +1,9 @@
 import type { BinaryReader } from '../extensions';
 
 import tlContent from './apiTl';
-import { Buffer } from 'buffer';
+import {
+    bufferFromHex, concat, writeInt32LE, writeUint32LE,
+} from '../../../util/encoding/buffer';
 
 import {
     type GenerationArgConfig, type GenerationEntryConfig, parseTl, serializeBytes, serializeDate,
@@ -14,6 +16,9 @@ import { toSignedLittleBuffer } from '../Helpers';
 const CACHING_SUPPORTED = typeof self !== 'undefined' && self.localStorage !== undefined;
 
 const CACHE_KEY = 'GramJs:apiCache';
+
+const BOOL_TRUE = bufferFromHex('b5757299');
+const BOOL_FALSE = bufferFromHex('379779bc');
 
 type UnsaveVirtualClass = Record<string, any>;
 
@@ -86,8 +91,8 @@ function extractParams(fileContent: string) {
 function argToBytes(x: any, type: string) {
     switch (type) {
         case 'int': {
-            const i = Buffer.alloc(4);
-            i.writeInt32LE(x, 0);
+            const i = new Uint8Array(4);
+            writeInt32LE(i, x);
             return i;
         }
         case 'long':
@@ -97,16 +102,16 @@ function argToBytes(x: any, type: string) {
         case 'int256':
             return toSignedLittleBuffer(x, 32);
         case 'double': {
-            const d = Buffer.alloc(8);
-            d.writeDoubleLE(x, 0);
+            const d = new Uint8Array(8);
+            new DataView(d.buffer).setFloat64(0, x, true);
             return d;
         }
         case 'string':
             return serializeBytes(x);
         case 'Bool':
-            return x ? Buffer.from('b5757299', 'hex') : Buffer.from('379779bc', 'hex');
+            return x ? BOOL_TRUE : BOOL_FALSE;
         case 'true':
-            return Buffer.alloc(0);
+            return new Uint8Array(0);
         case 'bytes':
             return serializeBytes(x);
         case 'date':
@@ -228,9 +233,9 @@ function createClasses(classesType: 'constructor' | 'request', params: Generatio
             getBytes() {
                 // The next is pseudo-code:
                 const idForBytes = this.CONSTRUCTOR_ID;
-                const c = Buffer.alloc(4);
-                c.writeUInt32LE(idForBytes, 0);
-                const buffers = [c];
+                const c = new Uint8Array(4);
+                writeUint32LE(c, idForBytes);
+                const buffers: Uint8Array[] = [c];
                 for (const arg in argsConfig) {
                     if (argsConfig.hasOwnProperty(arg)) {
                         if (argsConfig[arg].isFlag) {
@@ -241,17 +246,17 @@ function createClasses(classesType: 'constructor' | 'request', params: Generatio
                         }
                         if (argsConfig[arg].isVector) {
                             if (argsConfig[arg].useVectorId) {
-                                buffers.push(Buffer.from('15c4b51c', 'hex'));
+                                buffers.push(bufferFromHex('15c4b51c'));
                             }
-                            const l = Buffer.alloc(4);
-                            l.writeInt32LE((this as UnsaveVirtualClass)[arg].length, 0);
-                            buffers.push(l, Buffer.concat((this as UnsaveVirtualClass)[arg].map((x: any) => (
+                            const l = new Uint8Array(4);
+                            writeInt32LE(l, (this as UnsaveVirtualClass)[arg].length);
+                            buffers.push(l, concat(...(this as UnsaveVirtualClass)[arg].map((x: any) => (
                                 argToBytes(x, argsConfig[arg].type)
                             ))));
                         } else if (argsConfig[arg].flagIndicator) {
                             if (!Object.values(argsConfig)
                                 .some((f) => f.isFlag)) {
-                                buffers.push(Buffer.alloc(4));
+                                buffers.push(new Uint8Array(4));
                             } else {
                                 let flagCalculate = 0;
                                 for (const f in argsConfig) {
@@ -264,8 +269,8 @@ function createClasses(classesType: 'constructor' | 'request', params: Generatio
                                         }
                                     }
                                 }
-                                const f = Buffer.alloc(4);
-                                f.writeUInt32LE(flagCalculate, 0);
+                                const f = new Uint8Array(4);
+                                writeUint32LE(f, flagCalculate);
                                 buffers.push(f);
                             }
                         } else {
@@ -282,7 +287,7 @@ function createClasses(classesType: 'constructor' | 'request', params: Generatio
                         }
                     }
                 }
-                return Buffer.concat(buffers);
+                return concat(...buffers);
             }
 
             readResult(reader: BinaryReader) {

@@ -1,5 +1,3 @@
-import type { Buffer } from 'buffer';
-
 import type { Logger } from '../../extensions';
 import type { AbridgedPacketCodec } from './TCPAbridged';
 
@@ -52,9 +50,9 @@ export class Connection {
 
   protected _obfuscation: any;
 
-  _sendArray: AsyncQueue<Buffer>;
+  _sendArray: AsyncQueue<Uint8Array>;
 
-  _recvArray: AsyncQueue<Buffer | undefined>;
+  _recvArray: AsyncQueue<Uint8Array | undefined>;
 
   socket: PromisedWebSockets | HttpStream;
 
@@ -75,8 +73,8 @@ export class Connection {
     this._recvTask = undefined;
     this._codec = undefined;
     this._obfuscation = undefined; // TcpObfuscated and MTProxy
-    this._sendArray = new AsyncQueue<Buffer>();
-    this._recvArray = new AsyncQueue<Buffer>();
+    this._sendArray = new AsyncQueue<Uint8Array>();
+    this._recvArray = new AsyncQueue<Uint8Array | undefined>();
     // this.socket = new PromiseSocket(new Socket())
 
     this.shouldLongPoll = false;
@@ -122,7 +120,7 @@ export class Connection {
     }
   }
 
-  async send(data: Buffer) {
+  async send(data: Uint8Array) {
     if (!this._connected) {
       throw new Error('Not connected');
     }
@@ -181,7 +179,7 @@ export class Connection {
     }
   }
 
-  _send(data: Buffer) {
+  _send(data: Uint8Array) {
     const encodedPacket = this._codec.encodePacket(data);
     this.socket.write(encodedPacket);
   }
@@ -203,7 +201,7 @@ export class ObfuscatedConnection extends Connection {
     await this.socket.write(this._obfuscation.header);
   }
 
-  _send(data: Buffer) {
+  _send(data: Uint8Array) {
     this._obfuscation.write(this._codec.encodePacket(data));
   }
 
@@ -213,13 +211,13 @@ export class ObfuscatedConnection extends Connection {
 }
 
 export class PacketCodec {
-  private _conn: Buffer;
+  private _conn: Connection;
 
-  constructor(connection: Buffer) {
+  constructor(connection: Connection) {
     this._conn = connection;
   }
 
-  encodePacket(data: Buffer) {
+  encodePacket(data: Uint8Array) {
     throw new Error('Not Implemented');
 
     // Override
@@ -243,7 +241,7 @@ export class HttpConnection extends Connection {
     this.href = HttpStream.getURL(this._ip, this._port, this._isTestServer, this._isPremium);
   }
 
-  send(data: Buffer) {
+  send(data: Uint8Array) {
     return this.socket.write(data);
   }
 

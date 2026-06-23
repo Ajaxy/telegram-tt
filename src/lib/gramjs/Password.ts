@@ -1,5 +1,4 @@
-import { Buffer } from 'buffer';
-
+import { bufferFromUtf8, buffersEqual, concat } from '../../util/encoding/buffer';
 import { pbkdf2 } from './crypto/crypto';
 import Api from './tl/api';
 
@@ -15,8 +14,8 @@ import {
 
 const SIZE_FOR_HASH = 256;
 
-function checkPrimeAndGood(primeBytes: Buffer, g: number) {
-  const goodPrime = Buffer.from([
+function checkPrimeAndGood(primeBytes: Uint8Array, g: number) {
+  const goodPrime = new Uint8Array([
     0xC7, 0x1C, 0xAE, 0xB9, 0xC6, 0xB1, 0xC9, 0x04, 0x8E, 0x6C, 0x52, 0x2F, 0x70, 0xF1, 0x3F, 0x73,
     0x98, 0x0D, 0x40, 0x23, 0x8E, 0x3E, 0x21, 0xC1, 0x49, 0x34, 0xD0, 0x37, 0x56, 0x3D, 0x93, 0x0F,
     0x48, 0x19, 0x8A, 0x0A, 0xA7, 0xC1, 0x40, 0x58, 0x22, 0x94, 0x93, 0xD2, 0x25, 0x30, 0xF4, 0xDB,
@@ -34,7 +33,7 @@ function checkPrimeAndGood(primeBytes: Buffer, g: number) {
     0x0D, 0x81, 0x15, 0xF6, 0x35, 0xB1, 0x05, 0xEE, 0x2E, 0x4E, 0x15, 0xD0, 0x4B, 0x24, 0x54, 0xBF,
     0x6F, 0x4F, 0xAD, 0xF0, 0x34, 0xB1, 0x04, 0x03, 0x11, 0x9C, 0xD8, 0xE3, 0xB9, 0x2F, 0xCC, 0x5B,
   ]);
-  if (goodPrime.equals(primeBytes)) {
+  if (buffersEqual(goodPrime, primeBytes)) {
     if ([3, 4, 5, 7].includes(g)) {
       return; // It's good
     }
@@ -47,11 +46,11 @@ function isGoodLarge(number: bigint, p: bigint): boolean {
   return number > 0n && number < p;
 }
 
-function numBytesForHash(number: Buffer): Buffer<ArrayBuffer> {
-  return Buffer.concat([Buffer.alloc(SIZE_FOR_HASH - number.length), number]);
+function numBytesForHash(number: Uint8Array) {
+  return concat(new Uint8Array(SIZE_FOR_HASH - number.length), number);
 }
 
-function bigNumForHash(g: bigint) {
+function bigNumForHash(g: bigint): Uint8Array<ArrayBuffer> {
   return readBufferFromBigInt(g, SIZE_FOR_HASH, false);
 }
 
@@ -69,7 +68,7 @@ function isGoodModExpFirst(modexp: bigint, prime: bigint): boolean {
   );
 }
 
-function xor(a: Buffer, b: Buffer) {
+function xor(a: Uint8Array, b: Uint8Array) {
   const length = Math.min(a.length, b.length);
 
   for (let i = 0; i < length; i++) {
@@ -79,7 +78,7 @@ function xor(a: Buffer, b: Buffer) {
   return a;
 }
 
-function pbkdf2sha512(password: Buffer<ArrayBuffer>, salt: Buffer<ArrayBuffer>, iterations: number): any {
+function pbkdf2sha512(password: Uint8Array<ArrayBuffer>, salt: Uint8Array<ArrayBuffer>, iterations: number): any {
   return pbkdf2(password, salt, iterations);
 }
 
@@ -87,15 +86,15 @@ function pbkdf2sha512(password: Buffer<ArrayBuffer>, salt: Buffer<ArrayBuffer>, 
  *
  * @param algo {constructors.PasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow}
  * @param password
- * @returns {Buffer|*}
+
  */
 async function computeHash(
   algo: Api.PasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow, password: string,
 ) {
-  const hash1 = await sha256(Buffer.concat([algo.salt1, Buffer.from(password, 'utf-8'), algo.salt1]));
-  const hash2 = await sha256(Buffer.concat([algo.salt2, hash1, algo.salt2]));
-  const hash3 = await pbkdf2sha512(hash2, algo.salt1 as Buffer<ArrayBuffer>, 100000);
-  return sha256(Buffer.concat([algo.salt2, hash3, algo.salt2]));
+  const hash1 = await sha256(concat(algo.salt1, bufferFromUtf8(password), algo.salt1));
+  const hash2 = await sha256(concat(algo.salt2, hash1, algo.salt2));
+  const hash3 = await pbkdf2sha512(hash2, algo.salt1, 100000);
+  return sha256(concat(algo.salt2, hash3, algo.salt2));
 }
 
 export async function computeDigest(
@@ -146,7 +145,7 @@ export async function computeCheck(request: Api.account.Password, password: stri
   const gForHash = bigNumForHash(BigInt(g));
   const bForHash = numBytesForHash(srpB);
   const gX = modExp(BigInt(g), x, p);
-  const k = readBigIntFromBuffer(await sha256(Buffer.concat([pForHash, gForHash])), false);
+  const k = readBigIntFromBuffer(await sha256(concat(pForHash, gForHash)), false);
   const kgX = bigIntMod(k * gX, p);
   const generateAndCheckRandom = async () => {
     const randomSize = 256;
@@ -157,7 +156,7 @@ export async function computeCheck(request: Api.account.Password, password: stri
       const A = modExp(BigInt(g), a, p);
       if (isGoodModExpFirst(A, p)) {
         const aForHash = bigNumForHash(A);
-        const u = readBigIntFromBuffer(await sha256(Buffer.concat([aForHash, bForHash])), false);
+        const u = readBigIntFromBuffer(await sha256(concat(aForHash, bForHash)), false);
         if (u > 0n) {
           return { a, aForHash, u };
         }
@@ -180,14 +179,14 @@ export async function computeCheck(request: Api.account.Password, password: stri
     sha256(algo.salt1),
     sha256(algo.salt2),
   ]);
-  const M1 = await sha256(Buffer.concat([
+  const M1 = await sha256(concat(
     xor(pSha, gSha),
     salt1Sha,
     salt2Sha,
     aForHash,
     bForHash,
     K,
-  ]));
+  ));
 
   return new Api.InputCheckPasswordSRP({
     srpId,

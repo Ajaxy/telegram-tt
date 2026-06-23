@@ -1,18 +1,18 @@
-import { Buffer } from 'buffer';
-
 import type { PromisedWebSockets } from '../../extensions';
+
+import { bufferFromHex, concat, readUint32LE } from '../../../../util/encoding/buffer';
 
 import { readBufferFromBigInt } from '../../Helpers';
 import { Connection, PacketCodec } from './Connection';
 
 export class AbridgedPacketCodec extends PacketCodec {
-  static tag = Buffer.from('ef', 'hex');
+  static tag = bufferFromHex('ef');
 
-  static obfuscateTag = Buffer.from('efefefef', 'hex');
+  static obfuscateTag = bufferFromHex('efefefef');
 
-  private tag: Buffer;
+  private tag: Uint8Array;
 
-  obfuscateTag: Buffer;
+  obfuscateTag: Uint8Array;
 
   constructor(props: any) {
     super(props);
@@ -20,25 +20,24 @@ export class AbridgedPacketCodec extends PacketCodec {
     this.obfuscateTag = AbridgedPacketCodec.obfuscateTag;
   }
 
-  encodePacket(data: Buffer) {
+  encodePacket(data: Uint8Array) {
     const length = data.length >> 2;
     let temp;
     if (length < 127) {
-      const b = Buffer.alloc(1);
-      b.writeUInt8(length, 0);
-      temp = b;
+      temp = new Uint8Array([length]);
     } else {
-      temp = Buffer.concat([Buffer.from('7f', 'hex'), readBufferFromBigInt(BigInt(length), 3)]);
+      temp = concat(bufferFromHex('7f'), readBufferFromBigInt(BigInt(length), 3));
     }
-    return Buffer.concat([temp, data]);
+    return concat(temp, data);
   }
 
   async readPacket(reader: PromisedWebSockets) {
     const readData = await reader.read(1);
     let length = readData[0];
     if (length >= 127) {
-      length = Buffer.concat([await reader.read(3), Buffer.alloc(1)])
-        .readInt32LE(0);
+      const lengthBytes = new Uint8Array(4);
+      lengthBytes.set(await reader.read(3));
+      length = readUint32LE(lengthBytes);
     }
 
     return reader.read(length << 2);

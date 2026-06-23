@@ -1,4 +1,3 @@
-import { Buffer } from 'buffer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiAppConfig, ApiLimitType, ApiPremiumSection } from '../../types';
@@ -148,7 +147,7 @@ function buildEmojiSounds(appConfig: GramJsAppConfig) {
       accessHash: BigInt(l.access_hash),
       dcId: 1,
       mimeType: 'audio/ogg',
-      fileReference: Buffer.alloc(0),
+      fileReference: new Uint8Array(0),
       size: 0n,
     } as GramJs.Document);
 

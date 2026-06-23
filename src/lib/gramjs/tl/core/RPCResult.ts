@@ -1,6 +1,3 @@
-import type { Buffer } from 'buffer';
-
-
 import type { BinaryReader } from '../../extensions';
 
 import Api from '../api';
@@ -16,7 +13,7 @@ export default class RPCResult {
 
     private reqMsgId: bigint;
 
-    private body?: Buffer;
+    private body?: Uint8Array;
 
     private error?: Api.RpcError;
 
@@ -24,7 +21,7 @@ export default class RPCResult {
 
     constructor(
         reqMsgId: bigint,
-        body?: Buffer,
+        body?: Uint8Array,
         error?: Api.RpcError,
     ) {
         this.CONSTRUCTOR_ID = 0xf35c6d01;

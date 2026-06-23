@@ -1,5 +1,6 @@
 import { Mutex } from 'async-mutex';
-import { Buffer } from 'buffer';
+
+import { concat } from '../../../util/encoding/buffer';
 
 const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 3000;
@@ -12,7 +13,7 @@ export default class PromisedWebSockets {
 
   private timeout: number;
 
-  private stream: Buffer;
+  private stream: Uint8Array;
 
   private canRead?: boolean | Promise<boolean>;
 
@@ -27,17 +28,17 @@ export default class PromisedWebSockets {
   constructor(disconnectedCallback: () => void) {
     this.client = undefined;
     this.closed = true;
-    this.stream = Buffer.alloc(0);
+    this.stream = new Uint8Array(0);
     this.disconnectedCallback = disconnectedCallback;
     this.timeout = CONNECTION_TIMEOUT;
   }
 
   async readExactly(number: number) {
-    let readData = Buffer.alloc(0);
+    let readData = new Uint8Array(0);
 
     while (true) {
       const thisTime = await this.read(number);
-      readData = Buffer.concat([readData, thisTime]);
+      readData = concat(readData, thisTime);
       number -= thisTime.length;
       if (!number) {
         return readData;
@@ -69,7 +70,7 @@ export default class PromisedWebSockets {
       throw closeError;
     }
     const toReturn = this.stream;
-    this.stream = Buffer.alloc(0);
+    this.stream = new Uint8Array(0);
     this.canRead = new Promise((resolve) => {
       this.resolveRead = resolve;
     });
@@ -86,7 +87,7 @@ export default class PromisedWebSockets {
   }
 
   connect(port: number, ip: string, isTestServer = false, isPremium = false) {
-    this.stream = Buffer.alloc(0);
+    this.stream = new Uint8Array(0);
     this.canRead = new Promise((resolve) => {
       this.resolveRead = resolve;
     });
@@ -156,11 +157,11 @@ export default class PromisedWebSockets {
     });
   }
 
-  write(data: Buffer) {
+  write(data: Uint8Array) {
     if (this.closed) {
       throw closeError;
     }
-    this.client?.send(data);
+    this.client?.send(new Uint8Array(data));
   }
 
   close() {
@@ -173,9 +174,9 @@ export default class PromisedWebSockets {
     this.client.onmessage = async (message) => {
       await this.mutex.runExclusive(async () => {
         const data = message.data instanceof ArrayBuffer
-          ? Buffer.from(message.data)
-          : Buffer.from(await new Response(message.data).arrayBuffer());
-        this.stream = Buffer.concat([this.stream, data]);
+          ? new Uint8Array(message.data)
+          : new Uint8Array(await new Response(message.data).arrayBuffer());
+        this.stream = concat(this.stream, data);
         this.resolveRead?.(true);
       });
     };
