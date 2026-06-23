@@ -107,10 +107,23 @@ export default defineConfig(({ mode }): UserConfig => {
       html: true,
       json: true,
       compare: Boolean(bundleStatsBaselinePath),
-      baseline: true,
+      baseline: !bundleStatsBaselinePath, // For master branch upload
       baselineFilepath: bundleStatsBaselinePath || DEFAULT_BUNDLE_STATS_BASELINE_FILE,
       outDir: BUNDLE_STATS_OUT_DIR,
     }));
+
+    if (bundleStatsBaselinePath) {
+      // Write current PR stats for the compact GitHub comment
+      plugins.push(bundleStats({
+        html: false,
+        json: false,
+        compare: false,
+        baseline: true,
+        baselineFilepath: DEFAULT_BUNDLE_STATS_BASELINE_FILE,
+        outDir: BUNDLE_STATS_OUT_DIR,
+        silent: true,
+      }));
+    }
   }
 
   if (appEnv !== 'test' && (!telegramApiId || !telegramApiHash)) {

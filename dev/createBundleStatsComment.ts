@@ -86,11 +86,14 @@ const DEFAULT_CURRENT_STATS_PATH = 'dist/bundle-stats/baseline.json';
 const DEFAULT_BASELINE_STATS_PATH = 'reference-bundle-stats/baseline.json';
 const DEFAULT_REPORT_URL = '';
 const REGRESSION_WARNING_PERCENT = 1.5;
-const BYTES_PER_KIB = 1024;
-const BYTES_PER_MIB = BYTES_PER_KIB * 1024;
+const BYTES_PER_KB = 1000;
+const BYTES_PER_MB = BYTES_PER_KB * 1000;
 const ZERO_SIZE = 0;
+const DIFF_STATUS_GOOD = '🟢';
+const DIFF_STATUS_WARN = '🔴';
+const DIFF_STATUS_NEUTRAL = '⚪️';
 const MAIN_ENTRY_KEY = 'main';
-const MAIN_ENTRY_LABEL = 'Main';
+const MAIN_ENTRY_LABEL = '🏠 Main';
 const ENTRY_ORDER = [
   MAIN_ENTRY_KEY,
   'gramjs-worker',
@@ -99,18 +102,18 @@ const ENTRY_ORDER = [
   'service-worker',
 ];
 const MANUAL_BUNDLES: BundleDefinition[] = [
-  { key: 'auth', label: 'Auth' },
-  { key: 'main', label: 'Main' },
-  { key: 'extra', label: 'Extra' },
-  { key: 'calls', label: 'Calls' },
-  { key: 'stars', label: 'Stars' },
+  { key: 'auth', label: '🔐 Auth' },
+  { key: 'main', label: '🏠 Main' },
+  { key: 'extra', label: '➕ Extra' },
+  { key: 'calls', label: '📞 Calls' },
+  { key: 'stars', label: '⭐ Stars' },
 ];
 const MANUAL_BUNDLE_ASSET_EXTENSIONS = ['.js', '.css'];
 const FILE_TYPES: FileTypeDefinition[] = [
-  { key: 'js', label: 'JS', extensions: ['.js', '.mjs', '.cjs'] },
-  { key: 'css', label: 'CSS', extensions: ['.css'] },
-  { key: 'wasm', label: 'WASM', extensions: ['.wasm'] },
-  { key: 'other', label: 'Other' },
+  { key: 'js', label: '🟨 JS', extensions: ['.js', '.mjs', '.cjs'] },
+  { key: 'css', label: '🎨 CSS', extensions: ['.css'] },
+  { key: 'wasm', label: '⚙️ WASM', extensions: ['.wasm'] },
+  { key: 'other', label: '📄 Other' },
 ];
 const OTHER_FILE_TYPE = FILE_TYPES[FILE_TYPES.length - 1];
 
@@ -154,17 +157,14 @@ export function createCommentBody({ baselineStatsPath, currentStatsPath, reportU
       `Master baseline stats were not found at \`${baselineStatsPath}\`.`,
       `Current total bundle size: ${formatSize(currentAnalysis.totalSize)}`,
       '',
-      '| File type | Current size |',
-      '| --- | ---: |',
-      ...fileTypeRows.map(renderCurrentSizeTableRow),
+      '**📦 File type**',
+      ...fileTypeRows.map(renderCurrentSizeLine),
       '',
-      '| Entry point | Current size |',
-      '| --- | ---: |',
-      ...entryRows.map(renderCurrentSizeTableRow),
+      '**🚪 Entry point**',
+      ...entryRows.map(renderCurrentSizeLine),
       '',
-      '| Bundle | Current size |',
-      '| --- | ---: |',
-      ...bundleRows.map(renderCurrentSizeTableRow),
+      '**🧩 Bundle**',
+      ...bundleRows.map(renderCurrentSizeLine),
     ];
     return lines.join('\n');
   }
@@ -173,26 +173,17 @@ export function createCommentBody({ baselineStatsPath, currentStatsPath, reportU
   const entryRows = getEntryRows(baselineAnalysis.entries, currentAnalysis.entries);
   const bundleRows = getBundleRows(baselineAnalysis.bundles, currentAnalysis.bundles);
   const fileTypeRows = getFileTypeRows(baselineAnalysis.fileTypes, currentAnalysis.fileTypes);
-  const totalRow = createDiffRow('total bundle', baselineAnalysis.totalSize, currentAnalysis.totalSize);
+  const totalRow = createDiffRow('📊 Total bundle', baselineAnalysis.totalSize, currentAnalysis.totalSize);
 
   const lines = [
     COMMENT_MARKER,
     '**Bundle stats diff with master**',
     '',
-    `Total bundle size: ${totalRow.status} ${totalRow.diffText} (${totalRow.percentText})`,
-    '',
-    '| File type | Master | PR | Diff | Change |',
-    '| --- | ---: | ---: | ---: | ---: |',
-    ...fileTypeRows.map(renderTableRow),
-    '',
-    '| Entry point | Master | PR | Diff | Change |',
-    '| --- | ---: | ---: | ---: | ---: |',
-    ...entryRows.map(renderTableRow),
-    '',
-    '| Bundle | Master | PR | Diff | Change |',
-    '| --- | ---: | ---: | ---: | ---: |',
-    ...bundleRows.map(renderTableRow),
+    renderDiffLine(totalRow),
   ];
+  addDiffSection(lines, '**📦 File type**', fileTypeRows);
+  addDiffSection(lines, '**🚪 Entry point**', entryRows);
+  addDiffSection(lines, '**🧩 Bundle**', bundleRows);
   addReportLine(lines, reportUrl);
   return lines.join('\n');
 }
@@ -270,7 +261,6 @@ function getEntryRows(baselineEntries: Map<string, EntryStats>, currentEntries: 
       const label = currentEntry?.label || baselineEntry?.label || key;
       return createDiffRow(label, baselineEntry?.size, currentEntry?.size);
     })
-    .filter(({ diff, label }) => diff !== ZERO_SIZE || getEntryKey(label) === MAIN_ENTRY_KEY)
     .sort(compareEntryRows);
 }
 
@@ -350,21 +340,33 @@ function compareCurrentEntryRows(a: EntryStats, b: EntryStats) {
 }
 
 function getEntryKey(label: string) {
-  return label.toLowerCase().replaceAll(' ', '-');
+  return label
+    .replace(/^\S+\s+/, '')
+    .toLowerCase()
+    .replaceAll(' ', '-');
 }
 
 function normalizeEntryOrder(index: number) {
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 }
 
-function renderTableRow(row: DiffRow) {
-  const before = formatSize(row.before);
-  const after = formatSize(row.after);
-  return `| ${row.status} ${row.label} | ${before} | ${after} | ${row.diffText} | ${row.percentText} |`;
+function renderDiffLine(row: DiffRow) {
+  return `${row.label} (${formatSize(row.after)}): ${row.status} ${row.diffText} (${row.percentText})`;
 }
 
-function renderCurrentSizeTableRow(row: SizeStats) {
-  return `| ${row.label} | ${formatSize(row.size)} |`;
+function renderCurrentSizeLine(row: SizeStats) {
+  return `${row.label} (${formatSize(row.size)})`;
+}
+
+function addDiffSection(lines: string[], title: string, rows: DiffRow[]) {
+  const changedRows = rows.filter(isChangedDiffRow);
+  if (!changedRows.length) return;
+
+  lines.push('', title, ...changedRows.map(renderDiffLine));
+}
+
+function isChangedDiffRow(row: DiffRow) {
+  return row.diff !== ZERO_SIZE;
 }
 
 function createManualBundleStatsMap(): Map<BundleKey, ManualBundleStats> {
@@ -430,19 +432,19 @@ function getWorkerEntry(name: string, chunkFiles: Set<string>) {
   if (chunkFiles.has(name) && !isWorkerAssetName(name)) return undefined;
 
   if (/^worker-[\w-]+\.js$/.test(name)) {
-    return { key: 'gramjs-worker', label: 'GramJS worker' };
+    return { key: 'gramjs-worker', label: '⚙️ GramJS worker' };
   }
 
   if (/^index\.worker-[\w-]+\.js$/.test(name)) {
-    return { key: 'media-worker', label: 'Media worker' };
+    return { key: 'media-worker', label: '🎞️ Media worker' };
   }
 
   if (/^sharedState\.worker-[\w-]+\.js$/.test(name)) {
-    return { key: 'shared-state-worker', label: 'Shared state worker' };
+    return { key: 'shared-state-worker', label: '🔄 Shared state worker' };
   }
 
   if (/^index-[\w-]+\.js$/.test(name)) {
-    return { key: 'service-worker', label: 'Service worker' };
+    return { key: 'service-worker', label: '🛠️ Service worker' };
   }
 
   return undefined;
@@ -467,24 +469,24 @@ function getStableAssetBaseName(name: string) {
 }
 
 function getDiffStatus(percent: number | undefined, diff: number) {
-  if (diff < ZERO_SIZE) return ':green_circle:';
-  if (percent === undefined && diff > ZERO_SIZE) return ':red_circle:';
-  if (percent !== undefined && percent > REGRESSION_WARNING_PERCENT) return ':red_circle:';
-  return ':white_circle:';
+  if (diff < ZERO_SIZE) return DIFF_STATUS_GOOD;
+  if (percent === undefined && diff > ZERO_SIZE) return DIFF_STATUS_WARN;
+  if (percent !== undefined && percent > REGRESSION_WARNING_PERCENT) return DIFF_STATUS_WARN;
+  return DIFF_STATUS_NEUTRAL;
 }
 
 function formatSize(size: number) {
   const absoluteSize = Math.abs(size);
 
-  if (absoluteSize >= BYTES_PER_MIB) {
-    return `${formatNumber(absoluteSize / BYTES_PER_MIB)} MiB`;
+  if (absoluteSize >= BYTES_PER_MB) {
+    return `${formatNumber(absoluteSize / BYTES_PER_MB)}MB`;
   }
 
-  if (absoluteSize >= BYTES_PER_KIB) {
-    return `${formatNumber(absoluteSize / BYTES_PER_KIB)} KiB`;
+  if (absoluteSize >= BYTES_PER_KB) {
+    return `${formatNumber(absoluteSize / BYTES_PER_KB)}KB`;
   }
 
-  return `${absoluteSize} B`;
+  return `${absoluteSize}B`;
 }
 
 function formatDiff(diff: number) {
@@ -511,7 +513,7 @@ function formatNumber(value: number) {
 
 function addReportLine(lines: string[], reportUrl: string) {
   if (!reportUrl) return;
-  lines.push('', `Detailed comparison report: [workflow artifact](${reportUrl})`);
+  lines.push('', `Detailed comparison report: [open HTML artifact](${reportUrl})`);
 }
 
 async function upsertComment({
