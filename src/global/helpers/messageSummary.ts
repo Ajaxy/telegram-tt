@@ -1,7 +1,7 @@
 import type { TeactNode } from '../../lib/teact/teact';
 
 import type {
-  ApiMediaExtendedPreview, ApiMessage, MediaContent, StatefulMediaContent,
+  ApiFormattedText, ApiMediaExtendedPreview, ApiMessage, MediaContent, StatefulMediaContent,
 } from '../../api/types';
 import { ApiMessageEntityTypes } from '../../api/types';
 
@@ -26,9 +26,10 @@ export function getMessageSummaryText(
   const emoji = !noEmoji && getMessageSummaryEmoji(message);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
   const text = trimText(getMessageTextWithSpoilers(lang, message, statefulContent), truncateLength);
-  const description = getMessageSummaryDescription(lang, message, statefulContent, text, isExtended) as string;
+  const description = getMessageSummaryDescription(lang, message, statefulContent, text, isExtended);
+  const descriptionText = getSummaryDescriptionText(message, statefulContent, description);
 
-  return `${emojiWithSpace}${description}`;
+  return `${emojiWithSpace}${descriptionText}`;
 }
 
 export function getMessageTextWithSpoilers(
@@ -279,4 +280,49 @@ function getMessageAudioCaption(mediaContent: MediaContent) {
 
   return (audio && [audio.title, audio.performer].filter(Boolean)
     .join(' — ')) || (text?.text);
+}
+
+function getSummaryDescriptionText(
+  message: ApiMessage,
+  statefulContent: StatefulMediaContent | undefined,
+  description: TeactNode,
+): string {
+  const { todo } = message.content;
+  const { poll } = statefulContent || {};
+
+  if (todo) {
+    return getFormattedTextWithSpoilers(todo.todo.title);
+  }
+
+  if (poll) {
+    return getFormattedTextWithSpoilers(poll.summary.question);
+  }
+
+  if (Array.isArray(description)) {
+    return description.map((part) => getSummaryDescriptionText(message, statefulContent, part)).join('');
+  }
+
+  return typeof description === 'string' || typeof description === 'number' ? String(description) : '';
+}
+
+function getFormattedTextWithSpoilers(formattedText: ApiFormattedText) {
+  const { text, entities } = formattedText;
+
+  if (!entities?.length) {
+    return text;
+  }
+
+  return entities.reduce((accText, {
+    type,
+    offset,
+    length,
+  }) => {
+    if (type !== ApiMessageEntityTypes.Spoiler) {
+      return accText;
+    }
+
+    const spoiler = generateBrailleSpoiler(length);
+
+    return `${accText.slice(0, offset)}${spoiler}${accText.slice(offset + length)}`;
+  }, text);
 }

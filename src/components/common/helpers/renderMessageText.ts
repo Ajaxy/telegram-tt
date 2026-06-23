@@ -1,6 +1,8 @@
 import { getGlobal } from '../../../global';
 
-import type { ApiMessage, ApiSponsoredMessage } from '../../../api/types';
+import type {
+  ApiFormattedText, ApiMessage, ApiSponsoredMessage, StatefulMediaContent,
+} from '../../../api/types';
 import type { TextPart, ThreadId } from '../../../types';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
@@ -83,10 +85,12 @@ export function renderMessageSummary(
 
   const global = getGlobal();
   const statefulContent = getMessageStatefulContent(global, message);
+  const formattedSummaryText = getFormattedSummaryText(message, statefulContent);
 
-  const hasSpoilers = entities?.some((e) => e.type === ApiMessageEntityTypes.Spoiler);
-  const hasCustomEmoji = entities?.some((e) => e.type === ApiMessageEntityTypes.CustomEmoji);
-  if (!hasSpoilers && !hasCustomEmoji) {
+  const hasSpoilers = entities?.some((entity) => entity.type === ApiMessageEntityTypes.Spoiler);
+  const hasCustomEmoji = entities?.some((entity) => entity.type === ApiMessageEntityTypes.CustomEmoji);
+  const hasFormattedSummaryEntities = Boolean(formattedSummaryText?.entities?.length);
+  if (!hasSpoilers && !hasCustomEmoji && !hasFormattedSummaryEntities) {
     const text = trimText(getMessageSummaryText(lang, message, statefulContent, noEmoji), truncateLength);
 
     if (highlight) {
@@ -99,6 +103,13 @@ export function renderMessageSummary(
   const emoji = !noEmoji && getMessageSummaryEmoji(message);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
 
+  if (formattedSummaryText && hasFormattedSummaryEntities) {
+    return [
+      ...renderText(emojiWithSpace),
+      ...renderFormattedSummaryText(formattedSummaryText, highlight, truncateLength),
+    ].filter(Boolean);
+  }
+
   const text = renderMessageText({
     message, highlight, asPreview: true, truncateLength,
   });
@@ -108,4 +119,35 @@ export function renderMessageSummary(
     ...renderText(emojiWithSpace),
     ...(Array.isArray(description) ? description : [description]),
   ].filter(Boolean);
+}
+
+function getFormattedSummaryText(
+  message: ApiMessage,
+  statefulContent: StatefulMediaContent | undefined,
+): ApiFormattedText | undefined {
+  const { todo } = message.content;
+  const { poll } = statefulContent || {};
+
+  if (todo) {
+    return todo.todo.title;
+  }
+
+  if (poll) {
+    return poll.summary.question;
+  }
+
+  return undefined;
+}
+
+function renderFormattedSummaryText(
+  formattedText: ApiFormattedText,
+  highlight?: string,
+  truncateLength?: number,
+): TextPart[] {
+  return renderTextWithEntities({
+    text: trimText(formattedText.text, truncateLength),
+    entities: formattedText.entities,
+    highlight,
+    asPreview: true,
+  });
 }
