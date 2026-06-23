@@ -1,3 +1,5 @@
+import type { LovelyChartParams } from 'lovely-chart';
+
 import type { ApiChat } from './chats';
 import type { ApiTypePrepaidGiveaway } from './payments';
 import type { ApiTypeCurrencyAmount } from './stars';
@@ -82,34 +84,11 @@ export interface ApiStoryPublicForward {
   reactionsCount?: number;
 }
 
-export interface StatisticsGraph {
+export interface StatisticsGraph extends LovelyChartParams {
   graphType: 'graph';
-  type: string;
   zoomToken?: string;
-  labelFormatter: string;
-  tooltipFormatter: string;
-  labels: Array<string | number>;
-  isStacked: boolean;
-  isPercentage?: boolean;
-  secondaryYAxis?: {
-    label: string;
-    multiplier: number;
-    prefix?: string;
-    suffix?: string;
-  };
-  hideCaption: boolean;
-  hasSecondYAxis: boolean;
-  minimapRange: {
-    begin: number;
-    end: number;
-  };
   labelFromIndex: number;
   labelToIndex: number;
-  datasets: {
-    name: string;
-    color: string;
-    values: number[];
-  };
 }
 
 export interface StatisticsGraphError {

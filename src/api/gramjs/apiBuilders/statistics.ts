@@ -187,7 +187,7 @@ export function buildGraph(
     labelFormatter: data.xTickFormatter,
     tooltipFormatter: data.xTooltipFormatter,
     labels: x.slice(1),
-    hideCaption: !data.subchart.show,
+    noCaption: !data.subchart.show,
     hasSecondYAxis,
     isStacked: data.stacked && !hasSecondYAxis,
     isPercentage,
@@ -229,7 +229,7 @@ function calculateMinimapRange(range: Array<number>, values: Array<number>) {
   const begin = Math.max(0, minIndex / (values.length - 1));
   const end = Math.min(1, maxIndex / (values.length - 1));
 
-  return { minimapRange: { begin, end }, labelFromIndex: minIndex, labelToIndex: maxIndex };
+  return { minimapRange: [begin, end] as [number, number], labelFromIndex: minIndex, labelToIndex: maxIndex };
 }
 
 function buildStatisticsOverview({ current, previous }: GramJs.StatsAbsValueAndPrev): StatisticsOverviewItem {

@@ -1,3 +1,4 @@
+import LovelyChart from 'lovely-chart';
 import {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -27,20 +28,8 @@ import Link from '../../ui/Link';
 import Loading from '../../ui/Loading';
 import StatisticsOverview from './StatisticsOverview';
 
+import 'lovely-chart/LovelyChart.css';
 import styles from './MonetizationStatistics.module.scss';
-
-type ILovelyChart = { create: (el: HTMLElement, params: AnyLiteral) => void };
-let lovelyChartPromise: Promise<ILovelyChart> | undefined;
-let LovelyChart: ILovelyChart;
-
-async function ensureLovelyChart() {
-  if (!lovelyChartPromise) {
-    lovelyChartPromise = import('../../../lib/lovely-chart/LovelyChart') as Promise<ILovelyChart>;
-    LovelyChart = await lovelyChartPromise;
-  }
-
-  return lovelyChartPromise;
-}
 
 const MONETIZATION_GRAPHS_TITLES = {
   topHoursGraph: 'ChannelStats.Graph.ViewsByHours',
@@ -90,59 +79,55 @@ const MonetizationStatistics = ({
   }, [chatId, loadChannelMonetizationStatistics]);
 
   useEffect(() => {
-    (async () => {
-      await ensureLovelyChart();
+    if (!isReady) {
+      setIsReady(true);
+      return;
+    }
 
-      if (!isReady) {
-        setIsReady(true);
+    if (containerRef.current) {
+      Array.from(containerRef.current.children).forEach((child) => {
+        child.innerHTML = '';
+        child.classList.add(styles.hidden);
+      });
+    }
+
+    loadedChartsRef.current.clear();
+    errorChartsRef.current.clear();
+
+    if (!statistics || !containerRef.current) {
+      return;
+    }
+
+    MONETIZATION_GRAPHS.forEach((name, index: number) => {
+      const graph = statistics[name];
+      if (!isGraph(graph)) {
+        return;
+      }
+      const isAsync = graph.graphType === 'async';
+      const isError = graph.graphType === 'error';
+
+      if (isAsync || loadedChartsRef.current.has(name)) {
         return;
       }
 
-      if (containerRef.current) {
-        Array.from(containerRef.current.children).forEach((child) => {
-          child.innerHTML = '';
-          child.classList.add(styles.hidden);
-        });
-      }
-
-      loadedChartsRef.current.clear();
-      errorChartsRef.current.clear();
-
-      if (!statistics || !containerRef.current) {
-        return;
-      }
-
-      MONETIZATION_GRAPHS.forEach((name, index: number) => {
-        const graph = statistics[name];
-        if (!isGraph(graph)) {
-          return;
-        }
-        const isAsync = graph.graphType === 'async';
-        const isError = graph.graphType === 'error';
-
-        if (isAsync || loadedChartsRef.current.has(name)) {
-          return;
-        }
-
-        if (isError) {
-          loadedChartsRef.current.add(name);
-          errorChartsRef.current.add(name);
-
-          return;
-        }
-
-        LovelyChart.create(containerRef.current!.children[index] as HTMLElement, {
-          title: oldLang((MONETIZATION_GRAPHS_TITLES as Record<string, string>)[name]),
-          ...graph,
-        });
-
+      if (isError) {
         loadedChartsRef.current.add(name);
+        errorChartsRef.current.add(name);
 
-        containerRef.current!.children[index].classList.remove(styles.hidden);
+        return;
+      }
+
+      new LovelyChart(containerRef.current!.children[index] as HTMLElement, {
+        ...graph,
+        title: oldLang((MONETIZATION_GRAPHS_TITLES as Record<string, string>)[name]),
       });
 
-      forceUpdate();
-    })();
+      loadedChartsRef.current.add(name);
+
+      containerRef.current!.children[index].classList.remove(styles.hidden);
+    });
+
+    forceUpdate();
   }, [isReady, statistics, oldLang, chatId, dcId, forceUpdate]);
 
   function renderAvailableReward() {
