@@ -223,6 +223,7 @@ export interface ApiChatBannedRights {
   sendDocs?: true;
   sendPlain?: true;
   editRank?: true;
+  sendReactions?: true;
   untilDate?: number;
 }
 

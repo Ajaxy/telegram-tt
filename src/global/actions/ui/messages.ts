@@ -1095,7 +1095,7 @@ function copyTextForMessages(global: GlobalState, chatId: string, messageIds: nu
 
 addActionHandler('openDeleteMessageModal', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, messageIds, isSchedule,
+    chatId, messageIds, isSchedule, reactionContext,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -1105,6 +1105,7 @@ addActionHandler('openDeleteMessageModal', (global, actions, payload): ActionRet
       chatId,
       messageIds,
       isSchedule,
+      reactionContext,
     },
   }, tabId);
   setGlobal(global);

@@ -70,6 +70,17 @@
     align-items: center;
   }
 
+  .reactors-list-trailing {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-inline-start: auto;
+  }
+
   .reactors-list-emoji {
     --custom-emoji-size: 1.5rem;
 
@@ -77,10 +88,36 @@
 
     width: 1.5rem;
     height: 1.5rem;
-    margin-inline-start: auto;
 
     font-size: 1.5rem;
     line-height: 1.5rem;
+
+    transition: opacity 0.15s ease;
+  }
+
+  .reactors-list-delete {
+    pointer-events: none;
+
+    position: absolute;
+    inset: -0.25rem;
+
+    width: 2rem;
+    height: 2rem;
+
+    opacity: 0;
+
+    transition: opacity 0.15s ease;
+  }
+
+  .reactors-list-item-deletable:hover .reactors-list-delete,
+  .reactors-list-item-deletable:focus-within .reactors-list-delete {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .reactors-list-item-deletable:hover .reactors-list-emoji,
+  .reactors-list-item-deletable:focus-within .reactors-list-emoji {
+    opacity: 0;
   }
 
   .status {
@@ -90,5 +127,22 @@
     font-size: 0.875rem !important;
     line-height: 1.25rem;
     color: var(--color-text-secondary);
+  }
+
+  @media (hover: none) {
+    .reactors-list-item-deletable .reactors-list-trailing {
+      gap: 0.5rem;
+      width: auto;
+    }
+
+    .reactors-list-item-deletable .reactors-list-delete {
+      pointer-events: auto;
+      position: static;
+      opacity: 1;
+    }
+
+    .reactors-list-item-deletable .reactors-list-emoji {
+      opacity: 1;
+    }
   }
 }

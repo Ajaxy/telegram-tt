@@ -1779,6 +1779,7 @@ messages.transcribeAudio#269e9a49 peer:InputPeer msg_id:int = messages.Transcrib
 messages.getCustomEmojiDocuments#d9ab0f54 document_id:Vector<long> = Vector<Document>;
 messages.getEmojiStickers#fbfca18f hash:long = messages.AllStickers;
 messages.getFeaturedEmojiStickers#ecf6736 hash:long = messages.FeaturedStickers;
+messages.reportReaction#3f64c076 peer:InputPeer id:int reaction_peer:InputPeer = Bool;
 messages.getTopReactions#bb8125ba limit:int hash:long = messages.Reactions;
 messages.getRecentReactions#39461db2 limit:int hash:long = messages.Reactions;
 messages.clearRecentReactions#9dfeefb4 = Bool;
@@ -1829,6 +1830,8 @@ messages.composeMessageWithAI#daecc589 flags:# proofread:flags.0?true emojify:fl
 messages.addPollAnswer#19bc4b6d peer:InputPeer msg_id:int answer:PollAnswer = Updates;
 messages.getUnreadPollVotes#43286cf2 flags:# peer:InputPeer top_msg_id:flags.0?int offset_id:int add_offset:int limit:int max_id:int min_id:int = messages.Messages;
 messages.readPollVotes#1720b4d8 flags:# peer:InputPeer top_msg_id:flags.0?int = messages.AffectedHistory;
+messages.deleteParticipantReactions#a0b80cf8 peer:InputPeer participant:InputPeer = Bool;
+messages.deleteParticipantReaction#e3b7f82c peer:InputPeer msg_id:int participant:InputPeer = Updates;
 updates.getState#edd4882a = updates.State;
 updates.getDifference#19c2f763 flags:# pts:int pts_limit:flags.1?int pts_total_limit:flags.0?int date:int qts:int qts_limit:flags.2?int = updates.Difference;
 updates.getChannelDifference#3173d78 flags:# force:flags.0?true channel:InputChannel filter:ChannelMessagesFilter pts:int limit:int = updates.ChannelDifference;

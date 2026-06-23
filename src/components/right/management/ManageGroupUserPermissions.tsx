@@ -18,7 +18,7 @@ import useManagePermissions from '../hooks/useManagePermissions';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Island, { IslandTitle } from '../../gili/layout/Island';
-import PermissionCheckboxList from '../../main/PermissionCheckboxList';
+import PermissionCheckboxList, { MEDIA_DROPDOWN_ROW_COUNT } from '../../main/PermissionCheckboxList';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem from '../../ui/ListItem';
@@ -43,7 +43,6 @@ const ITEM_HEIGHT = 48;
 const SHIFT_HEIGHT_MINUS = 1;
 const BEFORE_ITEMS_COUNT = 2;
 const BEFORE_USER_INFO_HEIGHT = 96;
-const ITEMS_COUNT = 9;
 
 const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
   chat,
@@ -131,7 +130,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
   return (
     <div
       className="Management with-shifted-dropdown"
-      style={`--shift-height: ${ITEMS_COUNT * ITEM_HEIGHT - SHIFT_HEIGHT_MINUS}px;`
+      style={`--shift-height: ${MEDIA_DROPDOWN_ROW_COUNT * ITEM_HEIGHT - SHIFT_HEIGHT_MINUS}px;`
         + `--before-shift-height: ${BEFORE_ITEMS_COUNT * ITEM_HEIGHT + BEFORE_USER_INFO_HEIGHT}px;`}
     >
       <div className="custom-scroll">

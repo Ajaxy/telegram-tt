@@ -112,6 +112,11 @@ export type PollVote = {
   date: number;
 };
 
+export type ReactionDeletionContext = {
+  peerId: string;
+  count: number;
+};
+
 export type AiEditorTabBase = {
   isLoading?: boolean;
   result?: ApiComposedMessageWithAI;
@@ -732,6 +737,7 @@ export type TabState = {
     messageIds: number[];
     isSchedule?: boolean;
     onConfirm?: NoneToVoidFunction;
+    reactionContext?: ReactionDeletionContext;
   };
 
   isWebAppsCloseConfirmationModalOpen?: boolean;

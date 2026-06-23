@@ -918,6 +918,13 @@
 "EmptyGroupInfoLine3" = "• Public links such as t.me/title";
 "EmptyGroupInfoLine4" = "• Admins with different rights";
 "Reactions" = "Reactions";
+"DeleteReactionTitle_one" = "Delete {count} Reaction?";
+"DeleteReactionTitle_other" = "Delete {count} Reactions?";
+"DeleteAllMessages" = "Delete all messages";
+"DeleteAllReactions" = "Delete all reactions";
+"DeleteReactionTooltip" = "Delete reaction";
+"ReactionDeleted_one" = "Reaction Deleted";
+"ReactionDeleted_other" = "Reactions Deleted";
 "ChatListMarkAllAsRead" = "Mark All as Read";
 "PaymentCardNumber" = "Card Number";
 "PaymentCheckoutAcceptRecurrent" = "I accept the *Terms of Service* of {bot}.";
@@ -1060,6 +1067,7 @@
 "SendMediaPermissionRoundVideos" = "Video Messages";
 "SendMediaPermissionWebPages" = "Embed Links";
 "SendMediaPermissionPolls" = "Polls";
+"UserRestrictionsSendReactions" = "Send Reactions";
 "UserRestrictionsEmbedLinks" = "Embed Links";
 "UserRestrictionsChangeInfo" = "Change Chat Info";
 "ChannelAddException" = "Add Exception";

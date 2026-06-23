@@ -1242,7 +1242,13 @@ export function selectDefaultReaction<T extends GlobalState>(global: T, chatId: 
     return defaultReaction;
   }
 
-  const chatReactions = selectChatFullInfo(global, chatId)?.enabledReactions;
+  const chat = selectChat(global, chatId);
+  const chatFullInfo = selectChatFullInfo(global, chatId);
+  if (chat && isUserRightBanned(chat, 'sendReactions', chatFullInfo)) {
+    return undefined;
+  }
+
+  const chatReactions = chatFullInfo?.enabledReactions;
   if (!chatReactions || !canSendReaction(defaultReaction, chatReactions)) {
     return undefined;
   }

@@ -67,6 +67,7 @@ import { orderBy } from '../../util/iteratees';
 import { isLocalMessageId } from '../../util/keys/messageKey';
 import resetScroll from '../../util/resetScroll';
 import { debounce, onTickEnd } from '../../util/schedulers';
+import { getServerTime } from '../../util/serverTime';
 import getOffsetToContainer from '../../util/visibility/getOffsetToContainer';
 import { REM } from '../common/helpers/mediaDimensions';
 import { groupMessages } from './helpers/groupMessages';
@@ -155,6 +156,7 @@ type StateProps = {
   isActive?: boolean;
   canManageBotForumTopics?: boolean;
   shouldScrollToBottom?: boolean;
+  reactionPollingPause?: { until: number; chatId: string };
 };
 
 enum Content {
@@ -253,6 +255,7 @@ const MessageList = ({
   canTranslate,
   translationLanguage,
   shouldAutoTranslate,
+  reactionPollingPause,
   isQuickPreview,
   onIntersectPinnedMessage,
   onScrollDownToggle,
@@ -505,6 +508,7 @@ const MessageList = ({
   useInterval(() => {
     if (!messageIds || !messagesById || type === 'scheduled' || isAccountFrozen || !isActive) return;
     if (!isChannelChat && !isGroupChat) return;
+    if (reactionPollingPause?.chatId === chatId && reactionPollingPause.until > getServerTime()) return;
 
     const ids = messageIds.filter((id) => {
       const message = messagesById[id];
@@ -1319,6 +1323,7 @@ export default memo(withGlobal<OwnProps>(
       shouldAutoTranslate,
       canManageBotForumTopics: chat.isBotForum && user?.canManageBotForumTopics,
       shouldScrollToBottom,
+      reactionPollingPause: global.reactionPollingPause,
     };
   },
 )(MessageList));

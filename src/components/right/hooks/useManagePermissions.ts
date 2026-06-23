@@ -15,6 +15,7 @@ const MEDIA_PERMISSIONS: Array<keyof ApiChatBannedRights> = [
   'sendDocs',
   'sendStickers',
   'sendGifs',
+  'sendReactions',
 ];
 const MESSAGE_PERMISSIONS: typeof MEDIA_PERMISSIONS = [...MEDIA_PERMISSIONS, 'sendPlain'];
 

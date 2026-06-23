@@ -8,6 +8,7 @@ import {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiChat, ApiChatMember } from '../../api/types';
+import type { ReactionDeletionContext } from '../../global/types';
 import type { IRadioOption } from '../ui/CheckboxGroup';
 
 import {
@@ -17,7 +18,7 @@ import {
   isChatSuperGroup,
   isSystemBot,
 } from '../../global/helpers';
-import { getPeerTitle } from '../../global/helpers/peers';
+import { getPeerFullTitle, getPeerTitle } from '../../global/helpers/peers';
 import {
   getSendersFromSelectedMessages,
   selectBot,
@@ -25,6 +26,7 @@ import {
   selectChat,
   selectChatFullInfo,
   selectIsChatWithBot,
+  selectPeer,
   selectSenderFromMessage,
   selectTabState,
   selectUser,
@@ -74,7 +76,16 @@ type StateProps = {
   canBanUsers?: boolean;
   isCreator?: boolean;
   linkedChatId?: string;
+  reactionContext?: ReactionDeletionContext;
 };
+
+const DELETE_ALL_VALUE = 'delete_all';
+const DELETE_ALL_MESSAGES_VALUE = 'all_messages';
+const DELETE_ALL_REACTIONS_VALUE = 'all_reactions';
+
+function isPeerIdValue(value: string) {
+  return !Number.isNaN(Number(value));
+}
 
 const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   isOpen,
@@ -94,6 +105,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   canBanUsers,
   linkedChatId,
   onConfirm,
+  reactionContext,
 }) => {
   const {
     closeDeleteMessageModal,
@@ -104,6 +116,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     exitMessageSelectMode,
     updateChatMemberBannedRights,
     deleteParticipantHistory,
+    deleteParticipantReaction,
+    deleteParticipantReactions,
+    reportMessageReaction,
   } = getActions();
 
   const prevIsOpen = usePreviousDeprecated(isOpen);
@@ -116,6 +131,8 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   } = useManagePermissions(chat?.defaultBannedRights);
 
   const [peerIdsToDeleteAll, setPeerIdsToDeleteAll] = useState<string[]>([]);
+  const [shouldDeleteAllMessages, setShouldDeleteAllMessages] = useState(false);
+  const [shouldDeleteAllReactions, setShouldDeleteAllReactions] = useState(false);
   const [peerIdsToBan, setPeerIdsToBan] = useState<string[]>([]);
   const [peerIdsToReportSpam, setPeerIdsToReportSpam] = useState<string[]>([]);
   const [isMediaDropdownOpen, setIsMediaDropdownOpen] = useState(false);
@@ -127,6 +144,10 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
       return MEMO_EMPTY_ARRAY;
     }
     const global = getGlobal();
+    if (reactionContext) {
+      const peer = selectPeer(global, reactionContext.peerId);
+      return peer ? [peer] : MEMO_EMPTY_ARRAY;
+    }
     const senderArray = getSendersFromSelectedMessages(global, chat.id, messageIds);
     return senderArray ? unique(senderArray)
       .filter((peer) => (
@@ -134,7 +155,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         && peer?.id !== linkedChatId
         && peer?.id !== chat?.linkedMonoforumId
       )) : MEMO_EMPTY_ARRAY;
-  }, [chat, isChannel, linkedChatId, messageIds]);
+  }, [chat, isChannel, linkedChatId, messageIds, reactionContext]);
 
   const buildNestedOptionListWithAvatars = useLastCallback(() => {
     return peerList.map((member) => {
@@ -180,12 +201,12 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     return Boolean(peerListToDeleteAll.length || peerListToReportSpam.length || peerListToBan.length);
   }, [peerListToDeleteAll, peerListToReportSpam, peerListToBan]);
 
-  const shouldShowOption = shouldShowAdditionalOptions
-    && !canDeleteForAll && !isSchedule && isSuperGroup;
+  const shouldShowOption = Boolean(reactionContext) || (shouldShowAdditionalOptions
+    && !canDeleteForAll && !isSchedule && isSuperGroup);
 
   const peerNames = useMemo(() => {
     if (!peerList || isSchedule) return {};
-    return buildCollectionByCallback(peerList, (peer) => [peer.id, getPeerTitle(lang, peer)]);
+    return buildCollectionByCallback(peerList, (peer) => [peer.id, getPeerFullTitle(lang, peer)]);
   }, [isSchedule, lang, peerList]);
 
   const ACTION_SPAM_OPTION: IRadioOption[] = useMemo(() => {
@@ -203,20 +224,34 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   }, [messageIds, peerList, oldLang, linkedChatId, chat?.linkedMonoforumId, currentUserId]);
 
   const ACTION_DELETE_OPTION: IRadioOption[] = useMemo(() => {
-    return [
-      {
-        value: messageIds && peerList.length >= 2 ? 'delete_all' : peerList?.[0]?.id,
-        label: messageIds && peerList.length >= 2
-          ? oldLang('DeleteAllFromUsers')
-          : oldLang('DeleteAllFrom', Object.values(peerNames)[0]),
-        nestedOptions: messageIds && peerList.length >= 2 ? [
-          ...buildNestedOptionListWithAvatars().filter((opt) => opt.value !== linkedChatId
+    if (messageIds && peerList.length >= 2) {
+      return [
+        {
+          value: DELETE_ALL_VALUE,
+          label: oldLang('DeleteAllFromUsers'),
+          nestedOptions: buildNestedOptionListWithAvatars().filter((opt) => opt.value !== linkedChatId
             && opt.value !== chat?.linkedMonoforumId
             && opt.value !== currentUserId),
-        ] : undefined,
+        },
+      ];
+    }
+
+    const peer = peerList[0];
+    if (!peer) return MEMO_EMPTY_ARRAY;
+    return [
+      {
+        value: DELETE_ALL_VALUE,
+        label: oldLang('DeleteAllFrom', peerNames[peer.id]),
+        nestedOptions: [
+          { value: DELETE_ALL_MESSAGES_VALUE, label: lang('DeleteAllMessages') },
+          { value: DELETE_ALL_REACTIONS_VALUE, label: lang('DeleteAllReactions') },
+        ],
       },
     ];
-  }, [messageIds, peerList, oldLang, peerNames, linkedChatId, chat?.linkedMonoforumId, currentUserId]);
+  }, [
+    messageIds, peerList, oldLang, peerNames, lang,
+    linkedChatId, chat?.linkedMonoforumId, currentUserId,
+  ]);
 
   const ACTION_BAN_OPTION: IRadioOption[] = useMemo(() => {
     return [
@@ -269,6 +304,28 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     });
   });
 
+  const handleDeleteAllFromPeer = useLastCallback((peerId: string, shouldUseNotificationPluralLang?: boolean) => {
+    if (!chat) return;
+    if (shouldDeleteAllMessages) {
+      deleteParticipantHistory({ peerId, chatId: chat.id });
+    }
+    if (shouldDeleteAllReactions) {
+      deleteParticipantReactions({ chatId: chat.id, peerId, shouldUseNotificationPluralLang });
+    }
+  });
+
+  const selectedDeletionOptions = useMemo(() => {
+    const selection: string[] = [];
+    if (shouldDeleteAllMessages) selection.push(DELETE_ALL_MESSAGES_VALUE);
+    if (shouldDeleteAllReactions) selection.push(DELETE_ALL_REACTIONS_VALUE);
+    return selection;
+  }, [shouldDeleteAllMessages, shouldDeleteAllReactions]);
+
+  const handleDeletionOptionsChange = useLastCallback((selection: string[]) => {
+    setShouldDeleteAllMessages(selection.includes(DELETE_ALL_MESSAGES_VALUE));
+    setShouldDeleteAllReactions(selection.includes(DELETE_ALL_REACTIONS_VALUE));
+  });
+
   const handleDeleteMember = useLastCallback((filteredUserIdList: string[]) => {
     filteredUserIdList.forEach((userId) => {
       deleteChatMember({ chatId: chat!.id, userId });
@@ -289,12 +346,34 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     if (!chat || !messageIds) return;
 
     onConfirm?.();
-    if (isSchedule) {
+    if (reactionContext) {
+      const { peerId, count } = reactionContext;
+      const messageId = messageIds[0];
+
+      if (!shouldDeleteAllReactions) {
+        deleteParticipantReaction({
+          chatId: chat.id, messageId, peerId, notificationPluralValue: count,
+        });
+      }
+      handleDeleteAllFromPeer(peerId, count > 1);
+
+      if (peerIdsToReportSpam.includes(peerId)) {
+        reportMessageReaction({ chatId: chat.id, messageId, peerId });
+      }
+
+      if (peerIdsToBan.includes(peerId)) {
+        if (havePermissionChanged) {
+          handleUpdateChatMemberBannedRights([peerId]);
+        } else {
+          handleDeleteMember([peerId]);
+        }
+      }
+    } else if (isSchedule) {
       deleteScheduledMessages({ messageIds });
     } else if (shouldShowOption) {
       if (peerIdsToReportSpam?.length) {
         const global = getGlobal();
-        const peerIdList = peerIdsToReportSpam.filter((option) => !Number.isNaN(Number(option)));
+        const peerIdList = peerIdsToReportSpam.filter(isPeerIdValue);
         const messageList = messageIds.reduce<Record<string, number[]>>((acc, msgId) => {
           const peer = selectSenderFromMessage(global, chat.id, msgId);
           if (peer && peerIdList.includes(peer.id)) {
@@ -309,21 +388,23 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         handleReportSpam(messageList);
       }
 
-      if (peerIdsToDeleteAll?.length) {
-        const peerIdList = peerIdsToDeleteAll.filter((option) => !Number.isNaN(Number(option)));
-        handleDeleteAllPeerMessages(peerIdList);
+      if (peerList.length >= 2) {
+        if (peerIdsToDeleteAll.length) {
+          handleDeleteAllPeerMessages(peerIdsToDeleteAll.filter(isPeerIdValue));
+        }
+      } else if (peerList[0] && (shouldDeleteAllMessages || shouldDeleteAllReactions)) {
+        handleDeleteAllFromPeer(peerList[0].id, true);
       }
 
-      if (peerIdsToBan?.length && !havePermissionChanged) {
-        const peerIdList = peerIdsToBan.filter((option) => !Number.isNaN(Number(option)));
-        handleDeleteMember(peerIdList);
-        const filteredMessageIdList = filterMessageIdByPeerId(peerIdList, messageIds);
-        handleDeleteMessages(filteredMessageIdList);
-      }
-
-      if (peerIdsToBan?.length && havePermissionChanged) {
-        const peerIdList = peerIdsToBan.filter((option) => !Number.isNaN(Number(option)));
-        handleUpdateChatMemberBannedRights(peerIdList);
+      if (peerIdsToBan?.length) {
+        const peerIdList = peerIdsToBan.filter(isPeerIdValue);
+        if (havePermissionChanged) {
+          handleUpdateChatMemberBannedRights(peerIdList);
+        } else {
+          handleDeleteMember(peerIdList);
+          const filteredMessageIdList = filterMessageIdByPeerId(peerIdList, messageIds);
+          handleDeleteMessages(filteredMessageIdList);
+        }
       }
 
       if (!peerIdsToReportSpam?.length || !peerIdsToDeleteAll?.length || !peerIdsToBan?.length) {
@@ -345,6 +426,8 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     if (!isOpen && prevIsOpen) {
       setPeerIdsToReportSpam([]);
       setPeerIdsToDeleteAll([]);
+      setShouldDeleteAllMessages(false);
+      setShouldDeleteAllReactions(false);
       setPeerIdsToBan([]);
       setShouldDeleteForAll(true);
       setIsMediaDropdownOpen(false);
@@ -366,7 +449,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
           />
         )}
         <h3 className={buildClassName(shouldShowOption ? styles.title : styles.singleTitle)}>
-          {oldLang('Chat.DeleteMessagesConfirmation', messageIds?.length)}
+          {reactionContext
+            ? lang('DeleteReactionTitle', { count: reactionContext.count }, { pluralValue: reactionContext.count })
+            : oldLang('Chat.DeleteMessagesConfirmation', messageIds?.length)}
         </h3>
       </div>
     );
@@ -384,9 +469,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         {peerListToDeleteAll?.length > 0 && (
           <CheckboxGroup
             options={ACTION_DELETE_OPTION}
-            onChange={setPeerIdsToDeleteAll}
-            selected={peerIdsToDeleteAll}
-            nestedCheckbox={messageIds && peerList.length >= 2}
+            onChange={peerList.length >= 2 ? setPeerIdsToDeleteAll : handleDeletionOptionsChange}
+            selected={peerList.length >= 2 ? peerIdsToDeleteAll : selectedDeletionOptions}
+            nestedCheckbox
           />
         )}
         {peerListToBan?.length > 0 && (
@@ -454,7 +539,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
             ) : setIsAdditionalOptionsVisible(false)}
           </>
         )}
-        {(canDeleteForAll || chatBot || !shouldShowOption) && (
+        {!reactionContext && (canDeleteForAll || chatBot || !shouldShowOption) && (
           <>
             <p>
               {messageIds && messageIds.length > 1
@@ -533,6 +618,7 @@ export default memo(withGlobal<OwnProps>(
       isSchedule,
       isCreator,
       onConfirm,
+      reactionContext: deleteMessageModal?.reactionContext,
     };
   },
 )(DeleteMessageModal));

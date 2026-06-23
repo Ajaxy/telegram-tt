@@ -87,16 +87,21 @@ const Checkbox: FC<OwnProps> = ({
 }) => {
   const lang = useLang();
   const labelRef = useRef<HTMLLabelElement>();
+  const inputRef = useRef<HTMLInputElement>();
   const [showNested, setShowNested] = useState(false);
   const renderingPeer = useCurrentOrPrev(peer, true);
 
-  const handleChange = useLastCallback((event: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useLastCallback((
+    event: ChangeEvent<HTMLInputElement>,
+    childNestedOptionList?: IRadioOption[],
+  ) => {
     if (disabled) {
       return;
     }
 
     if (onChange) {
-      onChange(event, nestedOptionList);
+      const isOwnInput = event.target === inputRef.current;
+      onChange(event, isOwnInput ? nestedOptionList : childNestedOptionList);
     }
 
     if (onCheck) {
@@ -143,6 +148,7 @@ const Checkbox: FC<OwnProps> = ({
         ref={labelRef}
       >
         <input
+          ref={inputRef}
           type="checkbox"
           id={id}
           name={name}

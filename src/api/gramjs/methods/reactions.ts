@@ -1,7 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiReaction, ApiSticker,
+  ApiChat, ApiPeer, ApiReaction, ApiSticker,
 } from '../../types';
 
 import { split } from '../../../util/iteratees';
@@ -177,6 +177,47 @@ export function sendPaidReaction({
   }), {
     shouldReturnTrue: true,
     shouldThrow: true,
+  });
+}
+
+export function deleteParticipantReaction({
+  chat, messageId, peer,
+}: {
+  chat: ApiChat; messageId: number; peer: ApiPeer;
+}) {
+  return invokeRequest(new GramJs.messages.DeleteParticipantReaction({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    msgId: messageId,
+    participant: buildInputPeer(peer.id, peer.accessHash),
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export function deleteParticipantReactions({
+  chat, peer,
+}: {
+  chat: ApiChat; peer: ApiPeer;
+}) {
+  return invokeRequest(new GramJs.messages.DeleteParticipantReactions({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    participant: buildInputPeer(peer.id, peer.accessHash),
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export function reportMessageReaction({
+  chat, messageId, reactorPeer,
+}: {
+  chat: ApiChat; messageId: number; reactorPeer: ApiPeer;
+}) {
+  return invokeRequest(new GramJs.messages.ReportReaction({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    id: messageId,
+    reactionPeer: buildInputPeer(reactorPeer.id, reactorPeer.accessHash),
+  }), {
+    shouldReturnTrue: true,
   });
 }
 

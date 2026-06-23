@@ -36,8 +36,10 @@ type StateProps = {
 
 const permissionKeyList: (keyof ApiChatBannedRights)[] = [
   'sendPhotos', 'sendVideos', 'sendStickers',
-  'sendAudios', 'sendDocs', 'sendVoices', 'sendRoundvideos', 'embedLinks', 'sendPolls',
+  'sendAudios', 'sendDocs', 'sendVoices', 'sendRoundvideos', 'embedLinks', 'sendPolls', 'sendReactions',
 ];
+
+export const MEDIA_DROPDOWN_ROW_COUNT = permissionKeyList.length;
 
 const PermissionCheckboxList = ({
   chat,
@@ -218,6 +220,18 @@ const PermissionCheckboxList = ({
               permissionGroup={permissionGroup}
               onChange={handlePermissionChange}
               disabled={getControlIsDisabled && getControlIsDisabled('sendPolls')}
+            />
+          </div>
+
+          <div className={buildClassName('ListItem', withCheckbox && 'with-checkbox')}>
+            <Checkbox
+              name="sendReactions"
+              checked={!permissions.sendReactions}
+              label={lang('UserRestrictionsSendReactions')}
+              blocking
+              permissionGroup={permissionGroup}
+              onChange={handlePermissionChange}
+              disabled={getControlIsDisabled && getControlIsDisabled('sendReactions')}
             />
           </div>
         </div>

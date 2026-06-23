@@ -29,7 +29,7 @@ import PaidMessagePrice from '../../common/paidMessage/PaidMessagePrice';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
 import Switch from '../../gili/primitives/Switch';
-import PermissionCheckboxList from '../../main/PermissionCheckboxList';
+import PermissionCheckboxList, { MEDIA_DROPDOWN_ROW_COUNT } from '../../main/PermissionCheckboxList';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem from '../../ui/ListItem';
 
@@ -54,7 +54,6 @@ type StateProps = {
 
 const ITEM_HEIGHT = 48;
 const BEFORE_ITEMS_COUNT = 2;
-const ITEMS_COUNT = 9;
 
 function getLangKeyForBannedRightKey(key: keyof ApiChatBannedRights) {
   switch (key) {
@@ -226,7 +225,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
   return (
     <div
       className="Management with-shifted-dropdown"
-      style={`--shift-height: ${ITEMS_COUNT * ITEM_HEIGHT}px;`
+      style={`--shift-height: ${MEDIA_DROPDOWN_ROW_COUNT * ITEM_HEIGHT}px;`
         + `--before-shift-height: ${BEFORE_ITEMS_COUNT * ITEM_HEIGHT}px;`}
     >
       <div className="panel-content custom-scroll">

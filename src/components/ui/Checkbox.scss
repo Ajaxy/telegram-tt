@@ -280,7 +280,7 @@
     justify-content: space-between;
 
     margin-block: 0;
-    padding: 0 0 0 4.1875rem;
+    padding: 0 0 0 4rem;
 
     &:hover,
     &:focus-visible {
@@ -355,8 +355,20 @@
 .nested-checkbox-group {
   overflow: hidden;
   max-height: 0;
+  padding-inline-start: 2rem;
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: max-height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.nestedButton {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.875rem;
+  line-height: 1;
+
+  .group-icon {
+    font-size: 0.875rem;
+  }
 }
 
 .nested-checkbox-group-open {

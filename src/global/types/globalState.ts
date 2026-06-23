@@ -111,6 +111,10 @@ export type GlobalState = {
   initialUnreadNotifications?: number;
   shouldShowContextMenuHint?: boolean;
   botFreezeAppealId?: string;
+  reactionPollingPause?: {
+    until: number;
+    chatId: string;
+  };
 
   audioPlayer: {
     volume: number;

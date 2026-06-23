@@ -771,6 +771,9 @@ export interface LangPair {
   'EmptyGroupInfoLine3': undefined;
   'EmptyGroupInfoLine4': undefined;
   'Reactions': undefined;
+  'DeleteAllMessages': undefined;
+  'DeleteAllReactions': undefined;
+  'DeleteReactionTooltip': undefined;
   'ChatListMarkAllAsRead': undefined;
   'PaymentCardNumber': undefined;
   'CheckoutTotalAmount': undefined;
@@ -902,6 +905,7 @@ export interface LangPair {
   'SendMediaPermissionRoundVideos': undefined;
   'SendMediaPermissionWebPages': undefined;
   'SendMediaPermissionPolls': undefined;
+  'UserRestrictionsSendReactions': undefined;
   'UserRestrictionsEmbedLinks': undefined;
   'UserRestrictionsChangeInfo': undefined;
   'ChannelAddException': undefined;
@@ -3790,6 +3794,7 @@ export interface LangPairWithVariables<V = LangVariable> {
 export interface LangPairPlural {
   'DeleteForMeChatHint': undefined;
   'DeleteForEveryoneHint': undefined;
+  'ReactionDeleted': undefined;
   'MediaReplaceInvalidError': undefined;
 }
 
@@ -3895,6 +3900,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'MessageTooltipReplies': {
+    'count': V;
+  };
+  'DeleteReactionTitle': {
     'count': V;
   };
   'Hours': {

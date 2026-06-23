@@ -72,13 +72,17 @@ const CheckboxGroup: FC<OwnProps> = ({
   return (
     <div id={id} className={buildClassName('radio-group', className)}>
       {options.map((option) => {
+        const isParentChecked = option.nestedOptions?.length
+          ? option.nestedOptions.some((nestedOption) => selected?.includes(nestedOption.value))
+          : selected?.indexOf(option.value) !== -1;
+
         return (
           <Checkbox
             label={option.label}
             subLabel={option.subLabel}
             value={option.value}
             peer={option.peer}
-            checked={selected?.indexOf(option.value) !== -1}
+            checked={isParentChecked}
             disabled={option.disabled || disabled}
             isLoading={loadingOptions ? loadingOptions.indexOf(option.value) !== -1 : undefined}
             onChange={handleChange}

@@ -116,7 +116,7 @@ import type {
 import type { WebApp, WebAppModalStateType, WebAppOutboundEvent } from '../../types/webapp';
 import type { DownloadableMedia } from '../helpers';
 import type { SharedState } from './sharedState';
-import type { TabState } from './tabState';
+import type { ReactionDeletionContext, TabState } from './tabState';
 
 export type WithTabId = { tabId?: number };
 
@@ -2802,8 +2802,26 @@ export interface ActionPayloads {
     messageIds: number[];
     isSchedule?: boolean;
     onConfirm?: NoneToVoidFunction;
+    reactionContext?: ReactionDeletionContext;
   } & WithTabId);
   closeDeleteMessageModal: WithTabId | undefined;
+
+  deleteParticipantReaction: {
+    chatId: string;
+    messageId: number;
+    peerId: string;
+    notificationPluralValue?: number;
+  } & WithTabId;
+  deleteParticipantReactions: {
+    chatId: string;
+    peerId: string;
+    shouldUseNotificationPluralLang?: boolean;
+  } & WithTabId;
+  reportMessageReaction: {
+    chatId: string;
+    messageId: number;
+    peerId: string;
+  };
 
   transcribeAudio: {
     chatId: string;

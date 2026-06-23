@@ -1,13 +1,16 @@
 import type { GlobalState } from '../types';
-import { type ApiMessage, type ApiReactionWithPaid } from '../../api/types';
+import {
+  type ApiMessage, type ApiReactions, type ApiReactionWithPaid,
+} from '../../api/types';
 
 import { MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
+import { getServerTime } from '../../util/serverTime';
 import windowSize from '../../util/windowSize';
 import {
   MIN_LEFT_COLUMN_WIDTH,
   SIDE_COLUMN_MAX_WIDTH,
 } from '../../components/middle/helpers/calculateMiddleFooterTransforms';
-import { updateReactionCount } from '../helpers';
+import { getReactionKey, updateReactionCount } from '../helpers';
 import { selectIsChatWithSelf, selectSendAs, selectTabState } from '../selectors';
 import { updateChatMessage } from './messages';
 import { addUnreadCount, removeUnreadCount } from './unreadCounters';
@@ -73,6 +76,65 @@ export function addMessageReaction<T extends GlobalState>(
       recentReactions,
     },
   });
+}
+
+const REACTION_POLLING_PAUSE_SECONDS = 30;
+
+export function pauseReactionPolling<T extends GlobalState>(global: T, chatId: string): T {
+  return {
+    ...global,
+    reactionPollingPause: { until: getServerTime() + REACTION_POLLING_PAUSE_SECONDS, chatId },
+  };
+}
+
+export function removePeerReactions(message: ApiMessage, peerId: string): Partial<ApiMessage> | undefined {
+  const { reactions, reactors } = message;
+
+  const peerEmojiKeys = new Set<string>();
+  reactions?.recentReactions?.forEach((r) => {
+    if (r.peerId === peerId) peerEmojiKeys.add(getReactionKey(r.reaction));
+  });
+  reactors?.reactions.forEach((r) => {
+    if (r.peerId === peerId) peerEmojiKeys.add(getReactionKey(r.reaction));
+  });
+  const wasInTopReactors = Boolean(reactions?.topReactors?.some((r) => r.peerId === peerId));
+  const wasInReactorsList = Boolean(reactors?.reactions.some((r) => r.peerId === peerId));
+
+  if (!peerEmojiKeys.size && !wasInTopReactors && !wasInReactorsList) {
+    return undefined;
+  }
+
+  const update: Partial<ApiMessage> = {};
+
+  if (reactions) {
+    const newRecent = reactions.recentReactions?.filter((r) => r.peerId !== peerId);
+    const newTopReactors = reactions.topReactors?.filter((r) => r.peerId !== peerId);
+    const newResults = reactions.results
+      .map((rc) => (peerEmojiKeys.has(getReactionKey(rc.reaction))
+        ? { ...rc, count: Math.max(0, rc.count - 1) }
+        : rc))
+      .filter((rc) => rc.count > 0);
+
+    let newReactions: ApiReactions | undefined;
+    if (newResults.length) {
+      newReactions = { ...reactions, results: newResults };
+      if (newRecent !== undefined) newReactions.recentReactions = newRecent;
+      if (newTopReactors !== undefined) newReactions.topReactors = newTopReactors;
+    }
+    update.reactions = newReactions;
+  }
+
+  if (reactors && wasInReactorsList) {
+    const newReactorEntries = reactors.reactions.filter((r) => r.peerId !== peerId);
+    const removedReactorCount = reactors.reactions.length - newReactorEntries.length;
+    update.reactors = {
+      ...reactors,
+      reactions: newReactorEntries,
+      count: Math.max(0, reactors.count - removedReactorCount),
+    };
+  }
+
+  return update;
 }
 
 export function addUnreadReactions<T extends GlobalState>({

@@ -2,6 +2,7 @@ import type { ActionReturnType } from '../../types';
 import {
   type ApiError,
   ApiMediaFormat,
+  type ApiMessage,
   type ApiReaction,
   type ApiReactionEmoji,
   MAIN_THREAD_ID,
@@ -10,7 +11,7 @@ import {
 import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
-  buildCollectionByCallback, buildCollectionByKey, omit, partition,
+  buildCollectionByCallback, buildCollectionByKey, omit, omitUndefined, partition,
 } from '../../../util/iteratees';
 import { getMessageKey } from '../../../util/keys/messageKey';
 import * as mediaLoader from '../../../util/mediaLoader';
@@ -21,16 +22,21 @@ import {
   getDocumentMediaHash,
   getReactionKey,
   getUserReactions,
+  isChatAdmin,
   isMessageLocal,
   isSameReaction,
+  isUserRightBanned,
 } from '../../helpers';
 import { addActionHandler, getGlobal, getPromiseActions, setGlobal } from '../../index';
 import {
+  replaceChatMessages,
   updateChatMessage,
   updateUnreadCounters,
 } from '../../reducers';
 import {
   addMessageReaction,
+  pauseReactionPolling,
+  removePeerReactions,
   removeUnreadReactions,
   subtractXForEmojiInteraction,
 } from '../../reducers/reactions';
@@ -38,12 +44,15 @@ import { updateTabState } from '../../reducers/tabs';
 import { updateThreadReadState } from '../../reducers/threads';
 import {
   selectChat,
+  selectChatFullInfo,
   selectChatMessage,
+  selectChatMessages,
   selectDefaultReaction,
   selectIsChatWithSelf,
   selectIsCurrentUserFrozen,
   selectMaxUserReactions,
   selectMessageIdsByGroupId,
+  selectPeer,
   selectPerformanceSettingsValue,
   selectTabState,
 } from '../../selectors';
@@ -201,6 +210,13 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
   let message = selectChatMessage(global, chatId, messageId);
 
   if (!chat || !message) {
+    return;
+  }
+
+  const canSendReactions = isChatAdmin(chat)
+    || !isUserRightBanned(chat, 'sendReactions', selectChatFullInfo(global, chatId));
+
+  if (!canSendReactions) {
     return;
   }
 
@@ -672,6 +688,79 @@ addActionHandler('loadSavedReactionTags', async (global): Promise<void> => {
     },
   };
   setGlobal(global);
+});
+
+addActionHandler('deleteParticipantReaction', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, messageId, peerId, notificationPluralValue, tabId = getCurrentTabId(),
+  } = payload;
+  const chat = selectChat(global, chatId);
+  const peer = selectPeer(global, peerId);
+  if (!chat || !peer) return;
+
+  const result = await callApi('deleteParticipantReaction', { chat, messageId, peer });
+  if (!result) return;
+
+  global = getGlobal();
+  global = pauseReactionPolling(global, chatId);
+  const message = selectChatMessage(global, chatId, messageId);
+  if (message) {
+    const update = removePeerReactions(message, peerId);
+    if (update) {
+      global = updateChatMessage(global, chatId, messageId, update);
+    }
+  }
+  setGlobal(global);
+
+  if (notificationPluralValue !== undefined) {
+    actions.showNotification({
+      message: { key: 'ReactionDeleted', options: { pluralValue: notificationPluralValue } },
+      tabId,
+    });
+  }
+});
+
+addActionHandler('deleteParticipantReactions', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, peerId, shouldUseNotificationPluralLang, tabId = getCurrentTabId(),
+  } = payload;
+  const chat = selectChat(global, chatId);
+  const peer = selectPeer(global, peerId);
+  if (!chat || !peer) return;
+
+  const result = await callApi('deleteParticipantReactions', { chat, peer });
+  if (!result) return;
+
+  global = getGlobal();
+  global = pauseReactionPolling(global, chatId);
+  const byId = selectChatMessages(global, chatId);
+  if (byId) {
+    let newById: Record<number, ApiMessage> | undefined;
+    Object.values(byId).forEach((message) => {
+      const update = removePeerReactions(message, peerId);
+      if (!update) return;
+      if (!newById) newById = { ...byId };
+      newById[message.id] = omitUndefined({ ...message, ...update });
+    });
+    if (newById) {
+      global = replaceChatMessages(global, chatId, newById);
+    }
+  }
+  setGlobal(global);
+
+  actions.showNotification({
+    message: { key: 'ReactionDeleted', options: { pluralValue: shouldUseNotificationPluralLang ? 2 : 1 } },
+    tabId,
+  });
+});
+
+addActionHandler('reportMessageReaction', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId, peerId } = payload;
+  const chat = selectChat(global, chatId);
+  const peer = selectPeer(global, peerId);
+  if (!chat || !peer) return;
+
+  void callApi('reportMessageReaction', { chat, messageId, reactorPeer: peer });
 });
 
 addActionHandler('editSavedReactionTag', async (global, actions, payload): Promise<void> => {
