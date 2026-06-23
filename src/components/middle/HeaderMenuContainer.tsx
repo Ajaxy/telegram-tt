@@ -243,6 +243,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   const isViewGroupInfoShown = usePrevDuringAnimation(
     (!isChatInfoShown && isForum) ? true : undefined, CLOSE_MENU_ANIMATION_DURATION,
   );
+  const viewInfoLangKey = getViewInfoLangKey(isTopic, isBotForum);
 
   const areAllGiftsDisallowed = useMemo(() => {
     if (!disallowedGifts) {
@@ -631,7 +632,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               icon="info"
               onClick={handleViewGroupInfo}
             >
-              {isTopic ? oldLang('lng_context_view_topic') : oldLang('lng_context_view_group')}
+              {lang(viewInfoLangKey)}
             </MenuItem>
           )}
           {canManage && !canEditTopic && (
@@ -871,6 +872,18 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     </Portal>
   );
 };
+
+function getViewInfoLangKey(isTopic: boolean | undefined, isBotForum: boolean | undefined) {
+  if (isTopic) {
+    return 'HeaderMenuViewTopicInfo';
+  }
+
+  if (isBotForum) {
+    return 'HeaderMenuViewProfile';
+  }
+
+  return 'HeaderMenuViewGroupInfo';
+}
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId }): Complete<StateProps> => {

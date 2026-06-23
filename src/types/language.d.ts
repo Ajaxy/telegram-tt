@@ -1884,6 +1884,9 @@ export interface LangPair {
   'TitleGiftLocked': undefined;
   'QuickPreview': undefined;
   'BotForumContinueThreadButton': undefined;
+  'HeaderMenuViewProfile': undefined;
+  'HeaderMenuViewGroupInfo': undefined;
+  'HeaderMenuViewTopicInfo': undefined;
   'BotForumActionNew': undefined;
   'BotForumActionNewDescription': undefined;
   'BotForumTopicTitlePlaceholder': undefined;

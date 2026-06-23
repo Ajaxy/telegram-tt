@@ -2560,6 +2560,9 @@
 "GiftLockedMessage" = "This gift is currently only available to earlier Telegram users. It will unlock for your account in about **{relativeDate}**.";
 "QuickPreview" = "Quick Preview";
 "BotForumContinueThreadButton" = "Continue Last Thread";
+"HeaderMenuViewProfile" = "View profile";
+"HeaderMenuViewGroupInfo" = "View group info";
+"HeaderMenuViewTopicInfo" = "View topic info";
 "BotForumActionNew" = "New Thread";
 "BotForumActionNewDescription" = "Type any message to create a new thread.";
 "BotForumTopicTitlePlaceholder" = "New Thread";
