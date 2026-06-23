@@ -2402,6 +2402,13 @@ export interface LangPairWithVariables<V = LangVariable> {
   'MessageTooltipForwardedDate': {
     'date': V;
   };
+  'MessageMetaEditedAtTime': {
+    'time': V;
+  };
+  'MessageMetaEditedOnDateAtTime': {
+    'date': V;
+    'time': V;
+  };
   'EmptyGroupInfoLine1': {
     'count': V;
   };

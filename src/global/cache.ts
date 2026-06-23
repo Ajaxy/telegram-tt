@@ -376,6 +376,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.appConfig.webAppAllowedProtocols = initialState.appConfig.webAppAllowedProtocols;
   }
 
+  if (cached.appConfig.isMessagePrimaryEditedDateEnabled === undefined) {
+    cached.appConfig.isMessagePrimaryEditedDateEnabled = initialState.appConfig.isMessagePrimaryEditedDateEnabled;
+  }
+
   if (untypedCached.sharedState?.settings?.shouldWarnAboutSvg) {
     cached.sharedState.settings.shouldWarnAboutFiles = true;
     untypedCached.sharedState.settings.shouldWarnAboutSvg = undefined;

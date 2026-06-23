@@ -325,6 +325,7 @@ export interface ApiAppConfig {
   verifyAgeCountry?: string;
   verifyAgeMin?: number;
   typingDraftTtl: number;
+  isMessagePrimaryEditedDateEnabled: boolean;
   contactNoteLimit?: number;
   whitelistedBotIds?: string[];
   arePasskeysAvailable: boolean;

@@ -286,6 +286,12 @@ export function secondsToDate(seconds: number) {
   return new Date(seconds * 1000);
 }
 
+export function isSameLocalDay(leftDate: Date, rightDate: Date) {
+  return leftDate.getDate() === rightDate.getDate()
+    && leftDate.getMonth() === rightDate.getMonth()
+    && leftDate.getFullYear() === rightDate.getFullYear();
+}
+
 export function getCalendarDayDiff(targetDate: Date, anchorDate: Date) {
   return Math.trunc(
     (

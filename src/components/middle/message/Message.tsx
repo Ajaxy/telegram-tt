@@ -296,6 +296,7 @@ type StateProps = {
   threadId?: ThreadId;
   isPinnedList?: boolean;
   isPinned?: boolean;
+  isMessagePrimaryEditedDateEnabled: boolean;
   canAutoLoadMedia?: boolean;
   canAutoPlayMedia?: boolean;
   hasLinkedChat?: boolean;
@@ -433,6 +434,7 @@ const Message = ({
   messageListType,
   isPinnedList,
   isPinned,
+  isMessagePrimaryEditedDateEnabled,
   isDownloading,
   canAutoLoadMedia,
   canAutoPlayMedia,
@@ -1213,6 +1215,7 @@ const Message = ({
         message={message}
         isPinned={isPinned}
         withFullDate={isChatWithSelf && !isOwn}
+        isMessagePrimaryEditedDateEnabled={isMessagePrimaryEditedDateEnabled}
         noReplies={noReplies}
         repliesThreadInfo={repliesThreadInfo}
         outgoingStatus={outgoingStatus}
@@ -2326,6 +2329,7 @@ export default memo(withGlobal<OwnProps>(
       isDownloading,
       isPinnedList: messageListType === 'pinned',
       isPinned,
+      isMessagePrimaryEditedDateEnabled: Boolean(global.appConfig.isMessagePrimaryEditedDateEnabled),
       canAutoLoadMedia: selectCanAutoLoadMedia(global, message),
       canAutoPlayMedia: selectCanAutoPlayMedia(global, message),
       autoLoadFileMaxSizeMb: global.settings.byKey.autoLoadFileMaxSizeMb,

@@ -167,6 +167,7 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
     'translations.telegram.org',
   ],
   typingDraftTtl: 10,
+  isMessagePrimaryEditedDateEnabled: false,
   arePasskeysAvailable: true,
   passkeysMaxCount: 5,
   diceEmojies: [],

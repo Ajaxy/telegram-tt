@@ -1,4 +1,4 @@
-import type { FC, TeactNode } from '../../../lib/teact/teact';
+import type { TeactNode } from '../../../lib/teact/teact';
 import type React from '../../../lib/teact/teact';
 import { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
@@ -6,9 +6,11 @@ import { getActions } from '../../../global';
 import type {
   ApiAvailableReaction, ApiMessage, ApiMessageOutgoingStatus, ApiThreadInfo,
 } from '../../../api/types';
+import type { LangFn } from '../../../util/localization';
 
 import buildClassName from '../../../util/buildClassName';
 import { formatDateTimeToString, formatPastTimeShort, formatTime } from '../../../util/dates/oldDateFormat';
+import { formatDateTime, isSameLocalDay, secondsToDate } from '../../../util/localization/dateFormat';
 import { formatStarsAsIcon } from '../../../util/localization/format';
 import { getRepeatPeriodText } from '../../../util/scheduledMessages';
 import { formatIntegerCompact } from '../../../util/textFormat';
@@ -35,6 +37,7 @@ type OwnProps = {
   isTranslated?: boolean;
   isPinned?: boolean;
   withFullDate?: boolean;
+  isMessagePrimaryEditedDateEnabled: boolean;
   effectEmoji?: string;
   onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   onTranslationClick: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -44,7 +47,7 @@ type OwnProps = {
   paidMessageStars?: number;
 };
 
-const MessageMeta: FC<OwnProps> = ({
+const MessageMeta = ({
   message,
   outgoingStatus,
   signature,
@@ -61,7 +64,8 @@ const MessageMeta: FC<OwnProps> = ({
   onEffectClick,
   onOpenThread,
   paidMessageStars,
-}) => {
+  isMessagePrimaryEditedDateEnabled,
+}: OwnProps) => {
   const { showNotification } = getActions();
 
   const [isActivated, markActivated] = useFlag();
@@ -137,7 +141,13 @@ const MessageMeta: FC<OwnProps> = ({
     return lang('MessageTooltipReplies', { count }, { pluralValue: count });
   }, [lang, repliesThreadInfo]);
 
+  const shouldShowPrimaryEditedDate = Boolean(message.isEdited && isMessagePrimaryEditedDateEnabled);
+
   const date = useMemo(() => {
+    if (shouldShowPrimaryEditedDate) {
+      return formatEditedDate(lang, message.date, message.editDate!, withFullDate, message.isVideoProcessingPending);
+    }
+
     const time = formatTime(oldLang, message.date * 1000);
     const baseDate = !withFullDate
       ? time
@@ -148,7 +158,10 @@ const MessageMeta: FC<OwnProps> = ({
     }
 
     return baseDate;
-  }, [oldLang, message.date, message.forwardInfo?.date, withFullDate, repeatPeriodText, lang]);
+  }, [
+    lang, message.date, message.editDate, message.forwardInfo?.date, message.isVideoProcessingPending, oldLang,
+    repeatPeriodText, shouldShowPrimaryEditedDate, withFullDate,
+  ]);
 
   const fullClassName = buildClassName(
     'MessageMeta',
@@ -211,8 +224,8 @@ const MessageMeta: FC<OwnProps> = ({
             <span className="message-imported" onClick={handleImportedClick}>{lang('MessageMetaImported')}</span>
           </>
         )}
-        {message.isEdited && `${lang('MessageMetaEdited')} `}
-        {message.isVideoProcessingPending && `${lang('MessageMetaApproximate')} `}
+        {message.isEdited && !shouldShowPrimaryEditedDate && `${lang('MessageMetaEdited')} `}
+        {message.isVideoProcessingPending && !shouldShowPrimaryEditedDate && `${lang('MessageMetaApproximate')} `}
         {date}
       </span>
       {outgoingStatus && (
@@ -222,5 +235,27 @@ const MessageMeta: FC<OwnProps> = ({
     </span>
   );
 };
+
+function formatEditedDate(
+  lang: LangFn, messageDate: number, editDate: number, withFullDate?: boolean, isApproximate?: boolean,
+) {
+  const editedDate = secondsToDate(editDate);
+  const originalDate = secondsToDate(messageDate);
+  const formattedTime = formatDateTime(lang, editedDate, { time: 'short' });
+  const time = isApproximate ? `${lang('MessageMetaApproximate')} ${formattedTime}` : formattedTime;
+  const shouldShowDate = withFullDate || !isSameLocalDay(editedDate, originalDate);
+
+  if (!shouldShowDate) {
+    return lang('MessageMetaEditedAtTime', { time });
+  }
+
+  const shouldIncludeYear = editedDate.getFullYear() !== new Date().getFullYear();
+  const date = formatDateTime(lang, editedDate, {
+    date: 'short',
+    includeYear: shouldIncludeYear,
+  });
+
+  return lang('MessageMetaEditedOnDateAtTime', { date, time });
+}
 
 export default memo(MessageMeta);
