@@ -73,9 +73,10 @@ export function updateTopic<T extends GlobalState>(
   const updatedTopic = {
     ...topic,
     ...safeUpdate,
+    notifySettings: safeUpdate.notifySettings || topic?.notifySettings || update.notifySettings,
   } as ApiTopic;
 
-  if (!updatedTopic.id) return global;
+  if (!updatedTopic.id || !updatedTopic.notifySettings) return global;
 
   global = updateTopicsInfo(global, chatId, {
     topicsById: {
