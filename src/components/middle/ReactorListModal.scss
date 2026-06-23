@@ -92,7 +92,7 @@
     font-size: 1.5rem;
     line-height: 1.5rem;
 
-    transition: opacity 0.15s ease;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
   }
 
   .reactors-list-delete {
@@ -106,7 +106,7 @@
 
     opacity: 0;
 
-    transition: opacity 0.15s ease;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
   }
 
   .reactors-list-item-deletable:hover .reactors-list-delete,
