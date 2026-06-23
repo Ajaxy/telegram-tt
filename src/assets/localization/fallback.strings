@@ -18,7 +18,7 @@
 "Typing" = "typing";
 "UserTyping" = "{user} is typing";
 "UserTypingSeveral" = "{users} are typing";
-"UserTypingMany_one" = "{user} and {count} more is typing";
+"UserTypingMany_one" = "{user} and {count} more are typing";
 "UserTypingMany_other" = "{user} and {count} more are typing";
 "SendActionRecordVideo" = "recording a video";
 "UserActionRecordVideo" = "{user} is recording a video";
@@ -192,7 +192,7 @@
 "LoginQRLogin" = "Log in by QR Code";
 "LoginQRTitle" = "Log in to Telegram by QR Code";
 "LoginQRHelp1" = "Open Telegram on your phone";
-"LoginQRHelp2" = "Go to **Settings** > **Devices** > **Link Desktop Device**";
+"LoginQRHelp2" = "Go to **Settings** > **Devices** > **Add Device**";
 "LoginQRHelp3" = "Point your phone at this screen to confirm login";
 "LoginQRCancel" = "Log in by phone number";
 "LoginPasskey" = "Log in with Passkey";
@@ -687,7 +687,7 @@
 "Message" = "Message";
 "RecentStickers" = "Recently Used";
 "PollsChooseQuestion" = "Please enter a question.";
-"PollsChooseAnswers" = "Please enter at least one option.";
+"PollsChooseAnswers" = "Please enter at least two options.";
 "NewPoll" = "New Poll";
 "Create" = "Create";
 "OptionHint" = "Option";
@@ -1417,7 +1417,7 @@
 "SettingsPasscodeStart1" = "When you set up an additional passcode, a lock icon will appear on the chats page.\nTap it to lock and unlock your Telegram Web A.";
 "SettingsPasscodeStart2" = "Note: if you forget your local passcode, you'll need to log out of Telegram Web A and log in again.";
 "CurrentPasswordPlaceholder" = "Current password";
-"ChangeYourProfilePicture" = "Change your profile picture";
+"ChangeYourProfilePicture" = "Change your profile photo";
 "AppInactiveOtherClientTitle" = "Many sessions. So conflict.";
 "AppInactiveOtherClientDescription" = "Please, keep only one version of the app open.\nReload this page to continue using this tab or close it.";
 "AppInactiveAuthTitle" = "Many logins. So conflict.";
@@ -1459,7 +1459,7 @@
 "ComposerPlaceholderBroadcastSilent" = "Silent Broadcast";
 "ComposerPlaceholderTopic" = "Message in {topic}";
 "ComposerPlaceholderTopicGeneral" = "Message in General";
-"ComposerPlaceholderBotTopicGeneral" = "Off-thread message";
+"ComposerPlaceholderBotTopicGeneral" = "Off-topic message";
 "ComposerStoryPlaceholderLocked" = "Replies restricted";
 "ComposerPlaceholderNoText" = "Text not allowed";
 "AriaComposerCancelVoice" = "Cancel voice recording";
@@ -2910,9 +2910,9 @@
 "AiMessageEditorEmojify" = "emojify";
 "AiMessageEditorTranslation" = "Translation";
 "AiToneEditorNewStyle" = "New Style";
-"AiToneEditorTitle" = "Create AI Tone";
+"AiToneEditorTitle" = "Create AI Style";
 "AiToneEditorNamePlaceholder" = "Style Name (for example: Pirate)";
-"AiToneEditorPromptPlaceholder" = "Instructions (for example write in bold, nautical tone, light slang, vivid sea imagery, playful swagger)";
+"AiToneEditorPromptPlaceholder" = "Instructions (for example, \"Write like a swashbuckling pirate. Use arr, ye, matey, and talk about treasure and the sea\")";
 "AiToneEditorDisplayAuthor" = "Add a link to my account";
 "AiToneEditorSelectEmoji" = "Select Emoji";
 "AiToneCreated" = "{title} style created!";
@@ -2932,7 +2932,8 @@
 "AiTonePreviewStyleAdded" = "Style added";
 "AiToneLimitReached" = "You have reached the limit of custom styles.";
 "AiToneLimitReachedPremium" = "You have reached the limit of **{limit}** custom styles.";
-"AiTonePreviewUsedBy" = "Used by {count} people.";
+"AiTonePreviewUsedBy2_one" = "Used by {count} person.";
+"AiTonePreviewUsedBy2_other" = "Used by {count} people.";
 "AiTonePreviewCreatedBy" = "Created by {author}.";
 "AiTonePreviewUsedByCreatedBy" = "{usedBy} {createdBy}";
 "TextShowMore" = "more";

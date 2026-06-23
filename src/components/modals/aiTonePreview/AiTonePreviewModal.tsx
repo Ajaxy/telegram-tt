@@ -121,7 +121,7 @@ const AiTonePreviewModal = ({ modal, author, maxExamples = DEFAULT_MAX_EXAMPLES 
       : undefined;
 
     const usedByText = installsCount
-      ? lang('AiTonePreviewUsedBy', { count: lang.number(installsCount) })
+      ? lang('AiTonePreviewUsedBy2', { count: lang.number(installsCount) }, { pluralValue: installsCount })
       : undefined;
     const createdByText = authorLink
       ? lang('AiTonePreviewCreatedBy', { author: authorLink }, { withNodes: true })

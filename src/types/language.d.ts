@@ -3784,9 +3784,6 @@ export interface LangPairWithVariables<V = LangVariable> {
   'AiToneLimitReachedPremium': {
     'limit': V;
   };
-  'AiTonePreviewUsedBy': {
-    'count': V;
-  };
   'AiTonePreviewCreatedBy': {
     'author': V;
   };
@@ -4291,6 +4288,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'FwdMessagesToChats': {
+    'count': V;
+  };
+  'AiTonePreviewUsedBy2': {
     'count': V;
   };
   'PollModalAddMoreText': {

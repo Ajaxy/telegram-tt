@@ -16,7 +16,7 @@ export default {
   "LoginQRLogin": "Log in by QR Code",
   "LoginQRTitle": "Log in to Telegram by QR Code",
   "LoginQRHelp1": "Open Telegram on your phone",
-  "LoginQRHelp2": "Go to **Settings** > **Devices** > **Link Desktop Device**",
+  "LoginQRHelp2": "Go to **Settings** > **Devices** > **Add Device**",
   "LoginQRHelp3": "Point your phone at this screen to confirm login",
   "LoginQRCancel": "Log in by phone number",
   "LoginPasskey": "Log in with Passkey",
