@@ -33,6 +33,7 @@ import { buildApiMessageEntity, buildApiPhoto } from './common';
 import { omitVirtualClassFields } from './helpers';
 import {
   buildApiDocument,
+  buildApiRichMessage,
   buildApiWebDocument,
   buildAudioFromDocument,
   buildGeoPoint,
@@ -289,6 +290,8 @@ export function buildBotInlineMessage(
       currency: sendMessage.currency,
       amount: toJSNumber(sendMessage.totalAmount),
     };
+  } else if (sendMessage instanceof GramJs.BotInlineMessageRichMessage) {
+    content.richMessage = buildApiRichMessage(sendMessage.richMessage);
   }
 
   return {
