@@ -1445,7 +1445,7 @@ export default memo(withGlobal<OwnProps>(
     const peer = user || chat;
     const peerFullInfo = userFullInfo || chatFullInfo;
 
-    const hasCommonChatsTab = user && !user.isSelf && !isUserBot(user) && !isSavedMessages
+    const hasCommonChatsTab = user && !user.isSelf && !isSavedMessages
       && Boolean(userFullInfo?.commonChatsCount);
     const commonChats = selectUserCommonChats(global, chatId);
 

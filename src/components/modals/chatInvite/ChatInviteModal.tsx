@@ -25,7 +25,7 @@ export type OwnProps = {
 };
 
 const ChatInviteModal = ({ modal }: OwnProps) => {
-  const { acceptChatInvite, closeChatInviteModal, showNotification } = getActions();
+  const { acceptChatInvite, closeChatInviteModal } = getActions();
   const participantsRef = useRef<HTMLDivElement>();
 
   const lang = useOldLang();
@@ -41,14 +41,7 @@ const ChatInviteModal = ({ modal }: OwnProps) => {
   });
 
   const handleAccept = useLastCallback(() => {
-    acceptChatInvite({ hash: hash! });
-
-    if (isRequestNeeded) {
-      showNotification({
-        message: isBroadcast ? lang('RequestToJoinChannelSentDescription') : lang('RequestToJoinGroupSentDescription'),
-      });
-    }
-
+    acceptChatInvite({ hash: hash!, isRequestNeeded, isBroadcast });
     handleClose();
   });
 

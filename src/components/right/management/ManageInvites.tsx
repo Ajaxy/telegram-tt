@@ -182,7 +182,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
 
   const prepareUsageText = (invite: ApiExportedInvite) => {
     const {
-      usage = 0, usageLimit, expireDate, isPermanent, requested, isRevoked,
+      usage = 0, usageLimit, expireDate, isPermanent, requested, isRevoked, isRequestNeeded,
     } = invite;
     let text;
     if (!isRevoked && usageLimit && usage < usageLimit) {
@@ -214,6 +214,10 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
       }
     } else if (isPermanent) {
       text += ` ${BULLET} ${oldLang('Permanent')}`;
+    }
+
+    if (isRequestNeeded) {
+      text += ` ${BULLET} ${lang('InviteLinkApprovalRequired')}`;
     }
 
     return text;

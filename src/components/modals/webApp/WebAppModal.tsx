@@ -223,11 +223,13 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     if (!openedWebApps) return;
     Object.keys(openedWebApps).forEach((key) => {
       const webApp = openedWebApps[key];
-      if (webApp.queryId) {
+
+      const peerId = webApp.isJoinChat ? webApp.peerId : (webApp.peerId || chat?.id);
+      if (webApp.queryId && peerId) {
         prolongWebView({
           botId: webApp.botId,
           queryId: webApp.queryId,
-          peerId: webApp.peerId || chat!.id,
+          peerId,
           replyInfo: webApp.replyInfo,
         });
       }

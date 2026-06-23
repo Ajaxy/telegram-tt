@@ -238,7 +238,6 @@ function MiddleColumn({
     joinChannel,
     sendBotCommand,
     restartBot,
-    showNotification,
     loadFullChat,
     setLeftColumnWidth,
     resetLeftColumnWidth,
@@ -418,12 +417,6 @@ function MiddleColumn({
 
   const handleSubscribeClick = useLastCallback(() => {
     joinChannel({ chatId: chatId! });
-    if (renderingShouldSendJoinRequest) {
-      showNotification({
-        message: isChannel
-          ? oldLang('RequestToJoinChannelSentDescription') : oldLang('RequestToJoinGroupSentDescription'),
-      });
-    }
   });
 
   const handleStartBot = useLastCallback(() => {

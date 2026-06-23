@@ -50,6 +50,7 @@ export interface ApiUser {
   isBotForum?: boolean;
   canManageBotForumTopics?: boolean;
   isGuestChatBot?: boolean;
+  isGuardBot?: boolean;
 }
 
 export interface ApiUserFullInfo {

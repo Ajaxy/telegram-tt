@@ -399,6 +399,7 @@ export enum ManagementProgress {
 export interface ManagementState {
   isActive: boolean;
   nextScreen?: ManagementScreens;
+  selectedChatMemberId?: string;
   checkedUsername?: string;
   isUsernameAvailable?: boolean;
   error?: string;

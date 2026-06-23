@@ -189,6 +189,7 @@ export interface ActionPayloads {
     userId: string;
     adminRights: ApiChatAdminRights;
     rank?: string;
+    processJoinRequests?: boolean;
   } & WithTabId;
   editChatParticipantRank: {
     chatId: string;
@@ -199,7 +200,7 @@ export interface ActionPayloads {
   checkChatInvite: {
     hash: string;
   } & WithTabId;
-  acceptChatInvite: { hash: string } & WithTabId;
+  acceptChatInvite: { hash: string; isRequestNeeded?: boolean; isBroadcast?: boolean } & WithTabId;
   closeChatInviteModal: WithTabId | undefined;
 
   // settings
@@ -1311,7 +1312,10 @@ export interface ActionPayloads {
   toggleJoinRequest: {
     chatId: string;
     isEnabled: boolean;
-  };
+    guardBotId?: string;
+    shouldClearGuardBot?: boolean;
+    shouldApplyToInvites?: boolean;
+  } & WithTabId;
   changeProfileTab: {
     profileTab: ProfileTabType | undefined;
     shouldScrollTo?: boolean;
@@ -2315,6 +2319,14 @@ export interface ActionPayloads {
   } & WithTabId;
   openWebAppTab: {
     webApp?: WebApp;
+  } & WithTabId;
+  openChatInviteWebView: {
+    botId: string;
+    url: string;
+    queryId?: string;
+    peerId?: string;
+    isFullscreen?: boolean;
+    isBroadcast?: boolean;
   } & WithTabId;
   loadPreviewMedias: {
     botId: string;

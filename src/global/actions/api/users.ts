@@ -9,7 +9,6 @@ import { buildCollectionByKey, unique } from '../../../util/iteratees';
 import * as langProvider from '../../../util/oldLangProvider';
 import { throttle } from '../../../util/schedulers';
 import { callApi } from '../../../api/gramjs';
-import { isUserBot } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addUserStatuses,
@@ -142,7 +141,7 @@ addActionHandler('loadCommonChats', async (global, actions, payload): Promise<vo
 
   const user = selectUser(global, userId);
   const commonChats = selectUserCommonChats(global, userId);
-  if (!user || isUserBot(user) || commonChats?.isFullyLoaded) {
+  if (!user || commonChats?.isFullyLoaded) {
     return;
   }
 

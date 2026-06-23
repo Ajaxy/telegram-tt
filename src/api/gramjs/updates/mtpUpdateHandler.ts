@@ -17,7 +17,7 @@ import {
   omit, omitUndefined, pick,
 } from '../../../util/iteratees';
 import { getServerTimeOffset, setServerTimeOffset } from '../../../util/serverTime';
-import { buildApiBotCommand, buildApiBotMenuButton } from '../apiBuilders/bots';
+import { buildApiBotCommand, buildApiBotMenuButton, buildApiJoinChatBotResult } from '../apiBuilders/bots';
 import {
   buildApiGroupCall,
   buildApiGroupCallParticipant,
@@ -1031,6 +1031,13 @@ export function updater(update: Update) {
     sendApiUpdate({
       '@type': 'updateWebViewResultSent',
       queryId: queryId.toString(),
+    });
+  } else if (update instanceof GramJs.UpdateJoinChatWebViewDecision) {
+    sendApiUpdate({
+      '@type': 'updateJoinChatWebViewDecision',
+      peerId: getApiChatIdFromMtpPeer(update.peer),
+      queryId: update.queryId.toString(),
+      result: buildApiJoinChatBotResult(update.result),
     });
   } else if (update instanceof GramJs.UpdateWebPage || update instanceof GramJs.UpdateChannelWebPage) {
     const webPage = buildWebPage(update.webpage);

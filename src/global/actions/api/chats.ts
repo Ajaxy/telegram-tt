@@ -874,7 +874,29 @@ addActionHandler('joinChannel', async (global, actions, payload): Promise<void> 
   }
 
   try {
-    await callApi('joinChannel', { channelId, accessHash });
+    const result = await callApi('joinChannel', { channelId, accessHash });
+
+    if (result?.type === 'webView') {
+      actions.openChatInviteWebView({
+        botId: result.botId,
+        url: result.url,
+        queryId: result.queryId,
+        peerId: chatId,
+        isFullscreen: result.isFullscreen,
+        isBroadcast: isChatChannel(chat),
+        tabId,
+      });
+      return;
+    }
+
+    if (chat.isJoinRequest) {
+      actions.showNotification({
+        message: {
+          key: isChatChannel(chat) ? 'RequestToJoinChannelSentDescription' : 'RequestToJoinGroupSentDescription',
+        },
+        tabId,
+      });
+    }
   } catch (error) {
     if ((error as ApiError).message === 'CHANNELS_TOO_MUCH') {
       actions.openLimitReachedModal({ limit: 'channels', tabId });
@@ -1856,13 +1878,34 @@ addActionHandler('processBoostParameters', async (global, actions, payload): Pro
 });
 
 addActionHandler('acceptChatInvite', async (global, actions, payload): Promise<void> => {
-  const { hash, tabId = getCurrentTabId() } = payload;
+  const {
+    hash, isRequestNeeded, isBroadcast, tabId = getCurrentTabId(),
+  } = payload;
   const result = await callApi('importChatInvite', { hash });
-  if (!result) {
+
+  if (result?.type === 'webView') {
+    actions.openChatInviteWebView({
+      botId: result.botId,
+      url: result.url,
+      queryId: result.queryId,
+      isFullscreen: result.isFullscreen,
+      isBroadcast,
+      tabId,
+    });
     return;
   }
 
-  actions.openChat({ id: result.id, tabId });
+  if (result?.type === 'ok' && result.chat) {
+    actions.openChat({ id: result.chat.id, tabId });
+    return;
+  }
+
+  if (isRequestNeeded) {
+    actions.showNotification({
+      message: { key: isBroadcast ? 'RequestToJoinChannelSentDescription' : 'RequestToJoinGroupSentDescription' },
+      tabId,
+    });
+  }
 });
 
 addActionHandler('openChatByUsername', async (global, actions, payload): Promise<void> => {
@@ -2138,7 +2181,7 @@ addActionHandler('updateChatAdmin', async (global, actions, payload): Promise<vo
   if (selectIsCurrentUserFrozen(global)) return;
 
   const {
-    chatId, userId, adminRights, rank,
+    chatId, userId, adminRights, rank, processJoinRequests,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -2155,15 +2198,47 @@ addActionHandler('updateChatAdmin', async (global, actions, payload): Promise<vo
     chat, user, adminRights, rank,
   });
 
-  const chatAfterUpdate = await callApi('fetchFullChat', chat);
-  if (!chatAfterUpdate?.fullInfo) {
-    return;
+  let isGuardToggleSuccess = false;
+  if (processJoinRequests !== undefined) {
+    global = getGlobal();
+    const guardChat = selectChat(global, chat.id) ?? chat;
+    const guardBot = selectUser(global, userId) ?? user;
+
+    const toggleResult = processJoinRequests
+      ? await callApi('toggleJoinRequest', { chat: guardChat, isEnabled: true, guardBot })
+      : await callApi('toggleJoinRequest', {
+        chat: guardChat, isEnabled: Boolean(guardChat.isJoinRequest), shouldClearGuardBot: true,
+      });
+    isGuardToggleSuccess = Boolean(toggleResult);
   }
 
-  const { adminMembersById } = chatAfterUpdate.fullInfo;
+  const chatAfterUpdate = await callApi('fetchFullChat', chat);
+
+  global = getGlobal();
+
+  if (chatAfterUpdate?.membersCount !== undefined) {
+    global = updateChat(global, chat.id, { membersCount: chatAfterUpdate.membersCount });
+  }
+  if (chatAfterUpdate?.fullInfo) {
+    global = updateChatFullInfo(global, chat.id, { guardBotId: chatAfterUpdate.fullInfo.guardBotId });
+  }
+
   const isDismissed = !Object.keys(adminRights).length;
-  let newAdminMembersById: Record<string, ApiChatMember> | undefined;
+  const adminMembersById = chatAfterUpdate?.fullInfo?.adminMembersById;
   if (adminMembersById) {
+    const currentMembers = selectChatFullInfo(global, chat.id)?.members;
+    const isNewMember = currentMembers && !currentMembers.some((member) => member.userId === userId);
+    if (!isDismissed && isNewMember) {
+      global = addChatMembers(global, chat, [{
+        userId,
+        adminRights,
+        rank,
+        isAdmin: true,
+        promotedByUserId: global.currentUserId,
+      }]);
+    }
+
+    let newAdminMembersById: Record<string, ApiChatMember>;
     if (isDismissed) {
       const { [userId]: remove, ...rest } = adminMembersById;
       newAdminMembersById = rest;
@@ -2177,13 +2252,21 @@ addActionHandler('updateChatAdmin', async (global, actions, payload): Promise<vo
         },
       };
     }
+
+    global = updateChatFullInfo(global, chat.id, { adminMembersById: newAdminMembersById });
   }
 
-  if (newAdminMembersById) {
-    global = getGlobal();
-    global = updateChatFullInfo(global, chat.id, { adminMembersById: newAdminMembersById });
-    setGlobal(global);
+  if (processJoinRequests !== undefined && isGuardToggleSuccess) {
+    global = updateChatFullInfo(global, chat.id, {
+      guardBotId: processJoinRequests ? userId : undefined,
+    });
   }
+
+  if (isDismissed && selectChatFullInfo(global, chat.id)?.guardBotId === userId) {
+    global = updateChatFullInfo(global, chat.id, { guardBotId: undefined });
+  }
+
+  setGlobal(global);
 });
 
 addActionHandler('editChatParticipantRank', async (global, actions, payload): Promise<void> => {
@@ -2551,12 +2634,39 @@ addActionHandler('toggleJoinToSend', async (global, actions, payload): Promise<v
 });
 
 addActionHandler('toggleJoinRequest', async (global, actions, payload): Promise<void> => {
-  const { chatId, isEnabled } = payload;
-  const chat = selectChat(global, chatId);
-  if (!chat) return;
-  if (!isChatSuperGroup(chat) && !isChatChannel(chat)) return;
+  const {
+    chatId, isEnabled, guardBotId, shouldClearGuardBot, shouldApplyToInvites, tabId = getCurrentTabId(),
+  } = payload;
 
-  await callApi('toggleJoinRequest', chat, isEnabled);
+  const chat = await ensureIsSuperGroup(global, actions, chatId, tabId);
+  if (!chat || (!isChatSuperGroup(chat) && !isChatChannel(chat))) return;
+
+  global = getGlobal();
+  const guardBot = guardBotId ? selectUser(global, guardBotId) : undefined;
+  const shouldUpdateGuardBot = Boolean(guardBotId || shouldClearGuardBot);
+  const previousGuardBotId = selectChatFullInfo(global, chat.id)?.guardBotId;
+  const previousIsJoinRequest = selectChat(global, chat.id)?.isJoinRequest;
+
+  global = updateChat(global, chat.id, { isJoinRequest: isEnabled });
+  if (shouldUpdateGuardBot) {
+    global = updateChatFullInfo(global, chat.id, {
+      guardBotId: shouldClearGuardBot ? undefined : guardBotId,
+    });
+  }
+  setGlobal(global);
+
+  const result = await callApi('toggleJoinRequest', {
+    chat, isEnabled, guardBot, shouldClearGuardBot, shouldApplyToInvites,
+  });
+
+  if (!result) {
+    global = getGlobal();
+    global = updateChat(global, chat.id, { isJoinRequest: previousIsJoinRequest });
+    if (shouldUpdateGuardBot) {
+      global = updateChatFullInfo(global, chat.id, { guardBotId: previousGuardBotId });
+    }
+    setGlobal(global);
+  }
 });
 
 addActionHandler('openForumPanel', (global, actions, payload): ActionReturnType => {

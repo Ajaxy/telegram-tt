@@ -519,6 +519,8 @@ export interface LangPair {
   'FilterDeleteAlert': undefined;
   'RequestToJoinChannelSentDescription': undefined;
   'RequestToJoinGroupSentDescription': undefined;
+  'RequestToJoinChannelDeclined': undefined;
+  'RequestToJoinGroupDeclined': undefined;
   'ChannelJoin': undefined;
   'JoinGroup': undefined;
   'MemberRequestsRequestToJoinChannel': undefined;
@@ -928,6 +930,21 @@ export interface LangPair {
   'UserRestrictionsBlock': undefined;
   'ApproveNewMembers': undefined;
   'ApproveNewMembersDescription': undefined;
+  'ApproveNewMembersPublicUnavailable': undefined;
+  'ApproveNewSubscribersPublicUnavailable': undefined;
+  'GuardApproveNewMembers': undefined;
+  'GuardApproveNewChannelSubscribersInfo': undefined;
+  'GuardApproveNewPrivateGroupMembersInfo': undefined;
+  'GuardApproveNewPublicGroupMembersInfo': undefined;
+  'GuardApplyToInvitesTitle': undefined;
+  'GuardApplyToInvitesApply': undefined;
+  'GuardApplyToInvitesDontApply': undefined;
+  'GuardProcessJoinRequests': undefined;
+  'GuardProcessJoinRequestsInfo': undefined;
+  'Enable': undefined;
+  'Disable': undefined;
+  'ReplaceGuardBotTitle': undefined;
+  'InviteLinkApprovalRequired': undefined;
   'LinkNameHint': undefined;
   'LinkNameHelp': undefined;
   'LimitByPeriod': undefined;
@@ -2446,6 +2463,35 @@ export interface LangPairWithVariables<V = LangVariable> {
   'EditAdminTransferGroupOwnershipSuccess': {
     'user': V;
   };
+  'GuardProcessJoinRequestsEnableGroup': {
+    'bot': V;
+  };
+  'GuardProcessJoinRequestsDisableGroup': {
+    'bot': V;
+  };
+  'GuardProcessJoinRequestsEnableChannel': {
+    'bot': V;
+  };
+  'GuardProcessJoinRequestsDisableChannel': {
+    'bot': V;
+  };
+  'ReplaceGuardBotDescription': {
+    'current': V;
+    'new': V;
+  };
+  'ReplaceGuardBotKeep': {
+    'bot': V;
+  };
+  'ReplaceGuardBotUse': {
+    'bot': V;
+  };
+  'GuardManagedBy': {
+    'bot': V;
+  };
+  'GuardManagedByDescription': {
+    'approvalInfo': V;
+    'managedBy': V;
+  };
   'LinkExpiresIn': {
     'time': V;
   };
@@ -3915,6 +3961,18 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'DeleteReactionTitle': {
+    'count': V;
+  };
+  'GuardApplyToInvitesGroup': {
+    'count': V;
+  };
+  'GuardApplyToInvitesChannel': {
+    'count': V;
+  };
+  'GuardDisableInvitesGroup': {
+    'count': V;
+  };
+  'GuardDisableInvitesChannel': {
     'count': V;
   };
   'Hours': {

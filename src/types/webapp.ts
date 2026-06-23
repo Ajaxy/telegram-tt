@@ -10,6 +10,8 @@ export type WebApp = {
   buttonText: string;
   peerId?: string;
   queryId?: string;
+  isJoinChat?: boolean;
+  isJoinChatBroadcast?: boolean;
   slug?: string;
   replyInfo?: ApiInputMessageReplyInfo;
   canSendMessages?: boolean;

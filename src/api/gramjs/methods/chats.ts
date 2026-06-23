@@ -8,6 +8,7 @@ import {
   type ApiChatBannedRights,
   type ApiChatFolder,
   type ApiChatFullInfo,
+  type ApiChatInviteJoinWebView,
   type ApiChatReactions,
   type ApiDraft,
   type ApiGroupCall,
@@ -706,6 +707,7 @@ async function getFullChannelInfo(
     stargiftsAvailable,
     paidMessagesAvailable,
     mainTab,
+    guardBotId,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -806,6 +808,7 @@ async function getFullChannelInfo(
       areStarGiftsAvailable: Boolean(stargiftsAvailable),
       arePaidMessagesAvailable: paidMessagesAvailable,
       mainTab: mainTab && buildApiProfileTab(mainTab),
+      guardBotId: guardBotId ? buildApiPeerId(guardBotId, 'user') : undefined,
     },
     chats,
     userStatusesById: statusesById,
@@ -933,19 +936,22 @@ export async function joinChannel({
   channelId, accessHash,
 }: {
   channelId: string; accessHash: string;
-}) {
+}): Promise<ApiChatInviteJoinWebView | { type: 'ok' } | undefined> {
   const result = await invokeRequest(new GramJs.channels.JoinChannel({
     channel: buildInputChannel(channelId, accessHash),
   }), {
     shouldThrow: true,
   });
 
-  if (!result || result instanceof GramJs.messages.ChatInviteJoinResultWebView) {
-    // TODO: Handle web view result
+  if (!result) {
     return undefined;
   }
 
-  return true;
+  if (result instanceof GramJs.messages.ChatInviteJoinResultWebView) {
+    return buildApiChatInviteWebView(result);
+  }
+
+  return { type: 'ok' };
 }
 
 export function deleteChatUser({
@@ -1717,10 +1723,24 @@ export function toggleJoinToSend(chat: ApiChat, isEnabled: boolean) {
   });
 }
 
-export function toggleJoinRequest(chat: ApiChat, isEnabled: boolean) {
+export function toggleJoinRequest({
+  chat, isEnabled, guardBot, shouldClearGuardBot, shouldApplyToInvites,
+}: {
+  chat: ApiChat;
+  isEnabled: boolean;
+  guardBot?: ApiUser;
+  shouldClearGuardBot?: boolean;
+  shouldApplyToInvites?: boolean;
+}) {
+  const guardBotInput = guardBot
+    ? buildInputUser(guardBot.id, guardBot.accessHash)
+    : (shouldClearGuardBot ? new GramJs.InputUserEmpty() : undefined);
+
   return invokeRequest(new GramJs.channels.ToggleJoinRequest({
     channel: buildInputChannel(chat.id, chat.accessHash),
     enabled: isEnabled,
+    guardBot: guardBotInput,
+    applyToInvites: shouldApplyToInvites || undefined,
   }), {
     shouldReturnTrue: true,
   });
@@ -1756,11 +1776,30 @@ function preparePeers(
   return store;
 }
 
-export async function importChatInvite({ hash }: { hash: string }) {
+function buildApiChatInviteWebView(
+  result: GramJs.messages.ChatInviteJoinResultWebView,
+): ApiChatInviteJoinWebView {
+  const { botId, webview } = result;
+
+  return {
+    type: 'webView',
+    botId: buildApiPeerId(botId, 'user'),
+    url: webview.url,
+    queryId: webview.queryId?.toString(),
+    isFullscreen: Boolean(webview.fullscreen),
+  };
+}
+
+export async function importChatInvite(
+  { hash }: { hash: string },
+): Promise<ApiChatInviteJoinWebView | { type: 'ok'; chat: ApiChat } | undefined> {
   const result = await invokeRequest(new GramJs.messages.ImportChatInvite({ hash }));
-  if (!result || result instanceof GramJs.messages.ChatInviteJoinResultWebView) {
-    // TODO: Handle web view result
+  if (!result) {
     return undefined;
+  }
+
+  if (result instanceof GramJs.messages.ChatInviteJoinResultWebView) {
+    return buildApiChatInviteWebView(result);
   }
 
   const updates = result.updates;
@@ -1768,7 +1807,17 @@ export async function importChatInvite({ hash }: { hash: string }) {
     return undefined;
   }
 
-  return buildApiChatFromPreview(updates.chats[0]);
+  handleGramJsUpdate(updates);
+
+  const chat = buildApiChatFromPreview(updates.chats[0]);
+  if (!chat) {
+    return undefined;
+  }
+
+  return {
+    type: 'ok',
+    chat,
+  };
 }
 
 export function setChatEnabledReactions({

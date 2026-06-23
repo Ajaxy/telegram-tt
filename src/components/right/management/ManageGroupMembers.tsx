@@ -251,6 +251,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
           <NothingFound
             teactOrderKey={0}
             key="nothing-found"
+            className="mt-2"
             text={lang(isChannel ? 'NoSubscribersFound' : 'NoMembersFound')}
           />
         ) : (

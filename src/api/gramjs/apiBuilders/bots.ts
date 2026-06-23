@@ -15,6 +15,7 @@ import type {
   ApiBotMenuButton,
   ApiInlineQueryPeerType,
   ApiInlineResultType,
+  ApiJoinChatBotResult,
   ApiKeyboardButton,
   ApiKeyboardButtonBase,
   ApiKeyboardButtonStyle,
@@ -444,6 +445,23 @@ export function buildApiBotMenuButton(menuButton?: GramJs.TypeBotMenuButton): Ap
   return {
     type: 'commands',
   };
+}
+
+export function buildApiJoinChatBotResult(result: GramJs.TypeJoinChatBotResult): ApiJoinChatBotResult {
+  if (result instanceof GramJs.JoinChatBotResultApproved) {
+    return { type: 'approved' };
+  }
+  if (result instanceof GramJs.JoinChatBotResultDeclined) {
+    return { type: 'declined' };
+  }
+  if (result instanceof GramJs.JoinChatBotResultWebView) {
+    return { type: 'webView', url: result.url };
+  }
+  if (result instanceof GramJs.JoinChatBotResultQueued) {
+    return { type: 'queued' };
+  }
+
+  return undefined!; // Never reached
 }
 
 export function buildApiBotApp(app: GramJs.TypeBotApp): ApiBotApp | undefined {

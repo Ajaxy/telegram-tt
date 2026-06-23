@@ -177,12 +177,6 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
 
   const handleSubscribeClick = useLastCallback(() => {
     joinChannel({ chatId });
-    if (shouldSendJoinRequest) {
-      showNotification({
-        message: isChannel ? oldLang('RequestToJoinChannelSentDescription')
-          : oldLang('RequestToJoinGroupSentDescription'),
-      });
-    }
   });
 
   const handleStartBot = useLastCallback(() => {

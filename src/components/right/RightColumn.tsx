@@ -240,6 +240,8 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           case ManagementScreens.GroupAddAdmins:
           case ManagementScreens.GroupRecentActions:
             setManagementScreen(ManagementScreens.ChatAdministrators);
+            setSelectedChatMemberId(undefined);
+            setIsPromotedByCurrentUser(undefined);
             break;
           case ManagementScreens.EditInvite:
           case ManagementScreens.InviteInfo:

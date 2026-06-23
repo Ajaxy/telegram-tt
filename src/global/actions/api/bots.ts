@@ -671,6 +671,51 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
   }
 });
 
+addActionHandler('openChatInviteWebView', (global, actions, payload): ActionReturnType => {
+  const {
+    botId, url, queryId, peerId, isFullscreen, isBroadcast,
+    tabId = getCurrentTabId(),
+  } = payload;
+
+  if (checkIfOpenOrActivate(global, botId, tabId, url)) return;
+
+  const bot = selectUser(global, botId);
+  if (!bot) return;
+
+  if (!selectIsTrustedBot(global, botId)) {
+    global = updateTabState(global, {
+      botTrustRequest: {
+        botId,
+        type: 'webApp',
+        onConfirm: {
+          action: 'openChatInviteWebView',
+          payload,
+        },
+      },
+    }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  const newActiveApp: WebApp = {
+    url,
+    requestUrl: url,
+    appName: bot.firstName,
+    botId,
+    peerId,
+    queryId,
+    isJoinChat: true,
+    isJoinChatBroadcast: isBroadcast,
+    buttonText: '',
+  };
+  global = addWebAppToOpenList(global, newActiveApp, true, true, tabId);
+  setGlobal(global);
+
+  if (isFullscreen && getIsWebAppsFullscreenSupported()) {
+    actions.changeWebAppModalState({ state: 'fullScreen', tabId });
+  }
+});
+
 addActionHandler('requestAgeVerification', async (global, actions, payload): Promise<void> => {
   const { tabId = getCurrentTabId() } = payload || {};
   const { verifyAgeBotUsername } = global.appConfig;

@@ -6,19 +6,21 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
-import { selectTabState } from '../../../global/selectors';
+import { isChatChannel, isChatPublic } from '../../../global/helpers';
+import { selectChat, selectTabState } from '../../../global/selectors';
 import { formatFullDate, formatTime } from '../../../util/dates/oldDateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import CalendarModal from '../../common/CalendarModal';
 import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
+import SwitchField from '../../gili/templates/SwitchField';
 import Button from '../../ui/Button';
-import Checkbox from '../../ui/Checkbox';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
 import RadioGroup from '../../ui/RadioGroup';
@@ -40,18 +42,23 @@ type OwnProps = {
 
 type StateProps = {
   editingInvite?: ApiExportedInvite;
+  isPublic: boolean;
+  isChannel: boolean;
 };
 
 const ManageInvite: FC<OwnProps & StateProps> = ({
   chatId,
   editingInvite,
+  isPublic,
+  isChannel,
   isActive,
   onClose,
   onScreenSelect,
 }) => {
   const { editExportedChatInvite, exportChatInvite } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const [isCalendarOpened, openCalendar, closeCalendar] = useFlag();
   const [isRequestNeeded, setIsRequestNeeded] = useState(false);
   const [title, setTitle] = useState('');
@@ -60,6 +67,8 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
   const [customUsageLimit, setCustomUsageLimit] = useState<number | undefined>(10);
   const [selectedUsageOption, setSelectedUsageOption] = useState('0');
   const [isSubmitBlocked, setIsSubmitBlocked] = useState(false);
+
+  const effectiveIsRequestNeeded = !isPublic && isRequestNeeded;
 
   useHistoryBack({
     isActive,
@@ -95,8 +104,8 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
     }
   }, [editingInvite]);
 
-  const handleIsRequestChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setIsRequestNeeded(e.target.checked);
+  const handleIsRequestChange = useCallback((isChecked: boolean) => {
+    setIsRequestNeeded(isChecked);
   }, []);
 
   const handleTitleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -137,7 +146,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
         link: editingInvite.link,
         chatId,
         title,
-        isRequestNeeded,
+        isRequestNeeded: effectiveIsRequestNeeded,
         expireDate,
         usageLimit,
       });
@@ -145,7 +154,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
       exportChatInvite({
         chatId,
         title,
-        isRequestNeeded,
+        isRequestNeeded: effectiveIsRequestNeeded,
         expireDate,
         usageLimit,
       });
@@ -153,53 +162,62 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
     onScreenSelect(ManagementScreens.Invites);
   }, [
     chatId, customExpireDate, customUsageLimit, editExportedChatInvite, editingInvite,
-    exportChatInvite, isRequestNeeded, selectedExpireOption, selectedUsageOption, title, onScreenSelect,
+    exportChatInvite, effectiveIsRequestNeeded, selectedExpireOption, selectedUsageOption, title, onScreenSelect,
   ]);
 
   return (
     <div className="Management ManageInvite">
       <div className="panel-content custom-scroll">
-        <Island>
-          <Checkbox
-            label={lang('ApproveNewMembers')}
-            subLabel={lang('ApproveNewMembersDescription')}
-            checked={isRequestNeeded}
-            onChange={handleIsRequestChange}
-          />
-        </Island>
+        {!(isPublic && isChannel) && (
+          <>
+            <Island>
+              <SwitchField
+                checked={effectiveIsRequestNeeded}
+                onChange={handleIsRequestChange}
+                label={oldLang('ApproveNewMembers')}
+                disabled={isPublic}
+              />
+            </Island>
+            <IslandDescription>
+              {isPublic
+                ? lang('ApproveNewMembersPublicUnavailable')
+                : oldLang('ApproveNewMembersDescription')}
+            </IslandDescription>
+          </>
+        )}
         <Island>
           <InputText
             className="link-name"
-            placeholder={lang('LinkNameHint')}
+            placeholder={oldLang('LinkNameHint')}
             value={title}
             onChange={handleTitleChange}
           />
-          <IslandDescription>{lang('LinkNameHelp')}</IslandDescription>
         </Island>
-        <IslandTitle>{lang('LimitByPeriod')}</IslandTitle>
+        <IslandDescription>{oldLang('LinkNameHelp')}</IslandDescription>
+        <IslandTitle>{oldLang('LimitByPeriod')}</IslandTitle>
         <Island>
           <RadioGroup
             name="expireOptions"
             options={[
               {
                 value: 'hour',
-                label: lang('Hours', 1),
+                label: oldLang('Hours', 1),
               },
               {
                 value: 'day',
-                label: lang('Days', 1),
+                label: oldLang('Days', 1),
               },
               {
                 value: 'week',
-                label: lang('Weeks', 1),
+                label: oldLang('Weeks', 1),
               },
               {
                 value: 'unlimited',
-                label: lang('NoLimit'),
+                label: oldLang('NoLimit'),
               },
               {
                 value: 'custom',
-                label: lang('lng_group_invite_expire_custom'),
+                label: oldLang('lng_group_invite_expire_custom'),
               },
             ]}
             onChange={setSelectedExpireOption}
@@ -207,16 +225,16 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
           />
           {selectedExpireOption === 'custom' && (
             <Button className="expire-limit" isText onClick={openCalendar}>
-              {formatFullDate(lang, customExpireDate)}
+              {formatFullDate(oldLang, customExpireDate)}
               {' '}
-              {formatTime(lang, customExpireDate)}
+              {formatTime(oldLang, customExpireDate)}
             </Button>
           )}
-          <IslandDescription>{lang('TimeLimitHelp')}</IslandDescription>
         </Island>
-        {!isRequestNeeded && (
+        <IslandDescription>{oldLang('TimeLimitHelp')}</IslandDescription>
+        {!effectiveIsRequestNeeded && (
           <>
-            <IslandTitle>{lang('LimitNumberOfUses')}</IslandTitle>
+            <IslandTitle>{oldLang('LimitNumberOfUses')}</IslandTitle>
             <Island>
               <RadioGroup
                 name="usageOptions"
@@ -224,11 +242,11 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
                   ...DEFAULT_USAGE_LIMITS.map((n) => ({ value: n.toString(), label: n })),
                   {
                     value: '0',
-                    label: lang('NoLimit'),
+                    label: oldLang('NoLimit'),
                   },
                   {
                     value: 'custom',
-                    label: lang('lng_group_invite_usage_custom'),
+                    label: oldLang('lng_group_invite_usage_custom'),
                   },
                 ]}
                 onChange={setSelectedUsageOption}
@@ -244,15 +262,15 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
                   onChange={handleCustomUsageLimitChange}
                 />
               )}
-              <IslandDescription>{lang('UsesLimitHelp')}</IslandDescription>
             </Island>
+            <IslandDescription>{oldLang('UsesLimitHelp')}</IslandDescription>
           </>
         )}
         <FloatingActionButton
           isShown
           onClick={handleSaveClick}
           disabled={isSubmitBlocked}
-          ariaLabel={editingInvite ? lang('SaveLink') : lang('CreateLink')}
+          ariaLabel={editingInvite ? oldLang('SaveLink') : oldLang('CreateLink')}
           iconName="check"
         />
       </div>
@@ -263,7 +281,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
         onClose={closeCalendar}
         onSubmit={handleExpireDateChange}
         selectedAt={customExpireDate}
-        submitButtonLabel={lang('Save')}
+        submitButtonLabel={oldLang('Save')}
       />
     </div>
   );
@@ -272,9 +290,12 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): Complete<StateProps> => {
     const { editingInvite } = selectTabState(global).management.byChatId[chatId] || {};
+    const chat = selectChat(global, chatId);
 
     return {
       editingInvite,
+      isPublic: Boolean(chat && isChatPublic(chat)),
+      isChannel: Boolean(chat && isChatChannel(chat)),
     };
   },
 )(ManageInvite));

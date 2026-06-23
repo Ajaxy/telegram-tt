@@ -1,0 +1,22 @@
+.root {
+  text-align: center;
+}
+
+.title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+.description {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  text-wrap: balance;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
