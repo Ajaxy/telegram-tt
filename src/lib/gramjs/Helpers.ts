@@ -1,14 +1,33 @@
 import {
+  bufferFromHex,
   bufferFromUtf8,
+  buffersEqual,
   concat,
   readBigUint64BE,
   readBigUint64LE,
   writeBigInt64LE,
 } from '../../util/encoding/buffer';
 import { createHash, randomBytes } from './crypto/crypto';
+import { SecurityError } from './errors';
 
 const BIG_UINT_64_SIGN = 0x8000000000000000n;
 const BIG_UINT_64_SIZE = 0x10000000000000000n;
+export const DH_PRIME_BYTES = 256;
+
+const DH_PRIME_BITS = 2048;
+const DH_PUBLIC_VALUE_SECURITY_BITS = 64;
+const DH_PUBLIC_VALUE_THRESHOLD = 1n << BigInt(DH_PRIME_BITS - DH_PUBLIC_VALUE_SECURITY_BITS);
+const MAX_DH_PRIVATE_EXPONENT_ATTEMPTS = 128;
+const GOOD_DH_PRIME = bufferFromHex(
+  'c71caeb9c6b1c9048e6c522f70f13f73980d40238e3e21c14934d037563d930f'
+  + '48198a0aa7c14058229493d22530f4dbfa336f6e0ac925139543aed44cce7c37'
+  + '20fd51f69458705ac68cd4fe6b6b13abdc9746512969328454f18faf8c595f64'
+  + '2477fe96bb2a941d5bcd1d4ac8cc49880708fa9b378e3c4f3a9060bee67cf9a'
+  + '4a4a695811051907e162753b56b0f6b410dba74d8a84b2a14b3144e0ef1284754'
+  + 'fd17ed950d5965b4b9dd46582db1178d169c6bc465b0d6ff9ca3928fef5b9ae'
+  + '4e418fc15e83ebea0f87fa9ff5eed70050ded2849f47bf959d956850ce929851'
+  + 'f0d8115f635b105ee2e4e15d04b2454bf6f4fadf034b10403119cd8e3b92fcc5b',
+);
 
 export function readBigIntFromBuffer(buffer: Uint8Array, little = true, signed = false): bigint {
   const len = buffer.length;
@@ -116,6 +135,79 @@ export function generateRandomBigInt(bytes: number = 8) {
 
 export function generateRandomInt32() {
   return Number(readBigIntFromBuffer(generateRandomBytes(4), true, true));
+}
+
+export function validateDhParameters(primeBytes: Uint8Array, generator: number) {
+  const prime = readBigIntFromBuffer(primeBytes, false);
+  if (!buffersEqual(primeBytes, GOOD_DH_PRIME) || !isDhGeneratorGood(prime, generator)) {
+    throw new SecurityError('Invalid DH prime or generator');
+  }
+
+  return prime;
+}
+
+export function generateDhPrivateExponent(prime: bigint, serverRandom?: Uint8Array | number[]) {
+  const serverRandomBytes = serverRandom ? Uint8Array.from(serverRandom) : undefined;
+
+  for (let attempt = 0; attempt < MAX_DH_PRIVATE_EXPONENT_ATTEMPTS; attempt++) {
+    const privateExponentBytes = generateRandomBytes(DH_PRIME_BYTES);
+    if (serverRandomBytes) {
+      const mixedLength = Math.min(privateExponentBytes.length, serverRandomBytes.length);
+      for (let i = 0; i < mixedLength; i++) {
+        privateExponentBytes[i] ^= serverRandomBytes[i];
+      }
+    }
+
+    const random = readBigIntFromBuffer(privateExponentBytes, false);
+    if (random > 1n && random < prime - 1n) {
+      return random;
+    }
+  }
+
+  throw new SecurityError('Failed to generate DH private exponent');
+}
+
+export function validateDhPublicValue(value: bigint, prime: bigint, name: string) {
+  if (value <= 1n) {
+    throw new SecurityError(`DH ${name} must be greater than 1`);
+  }
+
+  if (value >= prime - 1n) {
+    throw new SecurityError(`DH ${name} must be less than p - 1`);
+  }
+
+  if (value <= DH_PUBLIC_VALUE_THRESHOLD || value >= prime - DH_PUBLIC_VALUE_THRESHOLD) {
+    throw new SecurityError(`DH ${name} is outside the safe range`);
+  }
+}
+
+function isDhGeneratorGood(prime: bigint, generator: number) {
+  switch (generator) {
+    case 2: {
+      return prime % 8n === 7n;
+    }
+    case 3: {
+      return prime % 3n === 2n;
+    }
+    case 4: {
+      return true;
+    }
+    case 5: {
+      const remainder = prime % 5n;
+      return remainder === 1n || remainder === 4n;
+    }
+    case 6: {
+      const remainder = prime % 24n;
+      return remainder === 19n || remainder === 23n;
+    }
+    case 7: {
+      const remainder = prime % 7n;
+      return remainder === 3n || remainder === 5n || remainder === 6n;
+    }
+    default: {
+      return false;
+    }
+  }
 }
 
 export async function generateKeyDataFromNonce(

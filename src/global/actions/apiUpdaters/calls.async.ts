@@ -152,7 +152,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         (async () => {
           try {
             const activeCallId = call.id;
-            const result = await callApi('confirmPhoneCall', [gB, EMOJI_DATA, EMOJI_OFFSETS]);
+            const result = await callApi('confirmPhoneCall', {
+              gAOrB: gB,
+              emojiData: EMOJI_DATA,
+              emojiOffsets: EMOJI_OFFSETS,
+            });
             if (!result) {
               logPhoneCallDebug('Failed to confirm accepted phone call', {
                 callId: activeCallId,
@@ -229,6 +233,16 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
               await callApi('setPhoneCallSctpEnabled', !customParameters.network_signaling_nosctp);
             }
 
+            if (isOutgoing) {
+              if (!call.keyFingerprint) {
+                throw new Error('Missing phone call key fingerprint');
+              }
+
+              await callApi('verifyPhoneCallKeyFingerprint', {
+                expectedKeyFingerprint: call.keyFingerprint,
+              });
+            }
+
             if (!isOutgoing) {
               await callApi('receivedCall', { call });
               global = getGlobal();
@@ -236,7 +250,24 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
                 return;
               }
 
-              const result = await callApi('confirmPhoneCall', [call.gAOrB!, EMOJI_DATA, EMOJI_OFFSETS]);
+              if (!call.gAHash) {
+                throw new Error('Missing phone call gA hash');
+              }
+
+              if (!call.keyFingerprint) {
+                throw new Error('Missing phone call key fingerprint');
+              }
+
+              const result = await callApi(
+                'confirmPhoneCall',
+                {
+                  gAOrB: call.gAOrB!,
+                  emojiData: EMOJI_DATA,
+                  emojiOffsets: EMOJI_OFFSETS,
+                  gAHash: call.gAHash,
+                  expectedKeyFingerprint: call.keyFingerprint,
+                },
+              );
               if (!result) {
                 logPhoneCallDebug('Failed to confirm phone call', {
                   callId: activeCallId,
@@ -348,7 +379,7 @@ async function processPhoneCallSignalingData(queued: QueuedPhoneCallSignalingDat
 
   let message;
   try {
-    message = await callApi('decodePhoneCallData', [data]);
+    message = await callApi('decodePhoneCallData', { data });
   } catch (err) {
     logPhoneCallDebug('Failed to decode phone call signaling data', {
       error: err instanceof Error ? err.message : String(err),

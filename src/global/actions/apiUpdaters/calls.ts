@@ -90,7 +90,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       const { call } = update;
 
       // Another call (P2P or group) is already active: auto-discard the new incoming call as busy.
-      const isInOtherPhoneCall = Boolean(phoneCall) && call.id !== phoneCall.id;
+      const isInOtherPhoneCall = Boolean(phoneCall?.id) && call.id !== phoneCall.id;
       const isInGroupCall = Boolean(global.groupCalls.activeGroupCallId) && !phoneCall;
       if (isInOtherPhoneCall || isInGroupCall) {
         if (call.state !== 'discarded') {

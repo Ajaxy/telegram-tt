@@ -463,7 +463,7 @@ export default class MTProtoSender {
     if (!this.authKey.getKey()) {
       const plain = new MtProtoPlainSender(connection, this._log);
       this._log.debug('New auth_key attempt ...');
-      const res = await doAuthentication(plain, this._log);
+      const res = await doAuthentication(plain, this._log, connection._dcId, connection._isTestServer);
       this._log.debug('Generated new auth_key successfully');
       await this.authKey.setKey(res.authKey);
 

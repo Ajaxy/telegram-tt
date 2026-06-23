@@ -6,7 +6,7 @@
  */
 import type MTProtoPlainSender from './MTProtoPlainSender';
 
-import { buffersEqual, bufferToHex, concat, copy } from '../../../util/encoding/buffer';
+import { buffersEqual, concat, copy } from '../../../util/encoding/buffer';
 import { IGE } from '../crypto/IGE';
 import { SERVER_KEYS } from '../crypto/RSA';
 import { SecurityError } from '../errors';
@@ -17,6 +17,8 @@ import { AuthKey } from '../crypto/AuthKey';
 import { Factorizator } from '../crypto/Factorizator';
 import {
   bufferXor,
+  DH_PRIME_BYTES,
+  generateDhPrivateExponent,
   generateKeyDataFromNonce,
   generateRandomBytes,
   getByteArray,
@@ -26,11 +28,18 @@ import {
   sha1,
   sha256,
   toSignedLittleBuffer,
+  validateDhParameters,
+  validateDhPublicValue,
 } from '../Helpers';
 
 const RETRIES = 20;
 
-export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
+export async function doAuthentication(
+  sender: MTProtoPlainSender,
+  log: any,
+  dcId: number,
+  isTestServer?: boolean,
+) {
   // Step 1 sending: PQ Request, endianness doesn't matter since it's random
   let bytes = generateRandomBytes(16);
 
@@ -54,13 +63,14 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
 
   bytes = generateRandomBytes(32);
   const newNonce = readBigIntFromBuffer(bytes, true, true);
-  const pqInnerData = new Api.PQInnerData({
+  const pqInnerData = new Api.PQInnerDataDc({
     pq: getByteArray(pq), // unsigned
     p: pBuffer,
     q: qBuffer,
     nonce: resPQ.nonce,
     serverNonce: resPQ.serverNonce,
     newNonce,
+    dc: buildAuthDcId(dcId, isTestServer),
   }).getBytes();
   if (pqInnerData.length > 144) {
     throw new SecurityError('Step 1 invalid nonce from server');
@@ -171,6 +181,10 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
   if (!(serverDhInner instanceof Api.ServerDHInnerData)) {
     throw new Error(`Step 3 answer was ${serverDhInner}`);
   }
+  const paddingLength = plainTextAnswer.length - reader.tellPosition();
+  if (paddingLength < 0 || paddingLength > 15) {
+    throw new SecurityError('Step 3 invalid encrypted answer padding');
+  }
   const sha1Answer = await sha1(serverDhInner.getBytes());
   if (!buffersEqual(hash, sha1Answer)) {
     throw new SecurityError('Step 3 Invalid hash answer');
@@ -184,56 +198,24 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
       'Step 3 Invalid server nonce in encrypted answer',
     );
   }
-  if (serverDhInner.g !== 3 || bufferToHex(serverDhInner.dhPrime) !== 'c71caeb9c6b1c9048e6c522f70f13'
-    + 'f73980d40238e3e21c14934d037563d930f48198a0aa7c14058229493d22530f4dbfa336f6e0ac925139543aed44cce7c3720fd5'
-    + '1f69458705ac68cd4fe6b6b13abdc9746512969328454f18faf8c595f642477fe96bb2a941d5bcd1d4ac8cc49880708fa9b378e3'
-    + 'c4f3a9060bee67cf9a4a4a695811051907e162753b56b0f6b410dba74d8a84b2a14b3144e0ef1284754fd17ed950d5965b4b9dd4'
-    + '6582db1178d169c6bc465b0d6ff9ca3928fef5b9ae4e418fc15e83ebea0f87fa9ff5eed70050ded2849f47bf959d956850ce9298'
-    + '51f0d8115f635b105ee2e4e15d04b2454bf6f4fadf034b10403119cd8e3b92fcc5b') {
-    throw new SecurityError('Step 3 invalid dhPrime or g');
-  }
-
-  const dhPrime = readBigIntFromBuffer(
+  const dhPrime = validateDhParameters(
     serverDhInner.dhPrime,
-    false,
-    false,
+    serverDhInner.g,
   );
   const ga = readBigIntFromBuffer(serverDhInner.gA, false, false);
   const timeOffset = serverDhInner.serverTime - Math.floor(Date.now() / 1000);
-  const b = readBigIntFromBuffer(
-    generateRandomBytes(256),
-    false,
-    false,
-  );
+  const b = generateDhPrivateExponent(dhPrime);
   const gb = modExp(BigInt(serverDhInner.g), b, dhPrime);
   const gab = modExp(ga, b, dhPrime);
-
-  if (ga <= 1n) {
-    throw new SecurityError('Step 3 failed ga > 1 check');
-  }
-
-  if (gb <= 1n) {
-    throw new SecurityError('Step 3 failed gb > 1 check');
-  }
-
-  if (ga >= (dhPrime - 1n)) {
-    throw new SecurityError('Step 3 failed ga < dh_prime - 1 check');
-  }
-
-  const toCheckAgainst = 2n ** (2048n - 64n);
-  if (!(ga > toCheckAgainst && ga < (dhPrime - toCheckAgainst))) {
-    throw new SecurityError('Step 3 failed dh_prime - 2^{2048-64} < ga < 2^{2048-64} check');
-  }
-  if (!(gb > toCheckAgainst && gb < (dhPrime - toCheckAgainst))) {
-    throw new SecurityError('Step 3 failed dh_prime - 2^{2048-64} < gb < 2^{2048-64} check');
-  }
+  validateDhPublicValue(ga, dhPrime, 'g_a');
+  validateDhPublicValue(gb, dhPrime, 'g_b');
 
   // Prepare client DH Inner Data
   const clientDhInner = new Api.ClientDHInnerData({
     nonce: resPQ.nonce,
     serverNonce: resPQ.serverNonce,
     retryId: 0n, // TODO Actual retry ID
-    gB: getByteArray(gb, false),
+    gB: readBufferFromBigInt(gb, DH_PRIME_BYTES, false),
   }).getBytes();
 
   const clientDdhInnerHashed = concat(await sha1(clientDhInner), clientDhInner);
@@ -269,7 +251,7 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
     );
   }
   const authKey = new AuthKey();
-  await authKey.setKey(getByteArray(gab));
+  await authKey.setKey(readBufferFromBigInt(gab, DH_PRIME_BYTES, false));
 
   const nonceNumber = 1 + nonceTypesString.indexOf(dhGen.className);
 
@@ -287,4 +269,8 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
   log.debug('Finished authKey generation step 3');
 
   return { authKey, timeOffset };
+}
+
+function buildAuthDcId(dcId: number, isTestServer?: boolean) {
+  return isTestServer ? dcId + 10000 : dcId;
 }

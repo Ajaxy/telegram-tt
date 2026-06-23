@@ -280,7 +280,7 @@ addActionHandler('connectToActivePhoneCall', async (global, actions): Promise<vo
     shouldUseSctp: !phoneCall.customParameters?.network_signaling_nosctp,
   });
 
-  const gAHash = await callApi('requestPhoneCall', [dhConfig]);
+  const gAHash = await callApi('requestPhoneCall', dhConfig);
 
   const result = await callApi('requestCall', { user, gAHash, isVideo: phoneCall.isVideo });
 
@@ -302,7 +302,7 @@ addActionHandler('acceptCall', async (global): Promise<void> => {
     shouldUseSctp: !phoneCall.customParameters?.network_signaling_nosctp,
   });
 
-  const gB = await callApi('acceptPhoneCall', [dhConfig]);
+  const gB = await callApi('acceptPhoneCall', dhConfig);
   await callApi('acceptCall', { call: phoneCall, gB });
 });
 
@@ -314,7 +314,7 @@ addActionHandler('sendSignalingData', (global, actions, payload): ActionReturnTy
 
   (async () => {
     try {
-      const encodedData = await callApi('encodePhoneCallData', [payload]);
+      const encodedData = await callApi('encodePhoneCallData', { data: payload });
 
       if (!encodedData) {
         return;
