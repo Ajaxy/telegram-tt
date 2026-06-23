@@ -1,5 +1,7 @@
 import { crc32 } from '../Helpers';
 
+import { Buffer } from 'buffer';
+
 export interface GenerationEntryConfig {
     name: string;
     constructorId: number;

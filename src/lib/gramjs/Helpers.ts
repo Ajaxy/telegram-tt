@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import { createHash, randomBytes } from './crypto/crypto';
 
 export function readBigIntFromBuffer(buffer: Buffer, little = true, signed = false): bigint {
@@ -51,7 +53,7 @@ export function readBufferFromBigInt(
   bytesNumber: number,
   little = true,
   signed = false,
-): Buffer<ArrayBuffer> {
+): Buffer {
   if (!Number.isInteger(bytesNumber) || bytesNumber <= 0) {
     throw new RangeError('bytesNumber must be a positive integer');
   }
@@ -138,13 +140,13 @@ export function convertToLittle(buf: Uint32Array) {
   return correct;
 }
 
-export function sha1(data: Buffer): Promise<Buffer<ArrayBuffer>> {
+export function sha1(data: Buffer): Promise<Buffer> {
   const shaSum = createHash('sha1');
   shaSum.update(data);
   return shaSum.digest();
 }
 
-export function sha256(data: Buffer): Promise<Buffer<ArrayBuffer>> {
+export function sha256(data: Buffer): Promise<Buffer> {
   const shaSum = createHash('sha256');
   shaSum.update(data);
   return shaSum.digest();
@@ -171,7 +173,7 @@ export function modExp(
   return result;
 }
 
-export function getByteArray(integer: bigint, signed = false): Buffer<ArrayBuffer> {
+export function getByteArray(integer: bigint, signed = false): Buffer {
   if (!signed && integer < 0n) {
     throw new RangeError('Cannot convert negative to unsigned');
   }

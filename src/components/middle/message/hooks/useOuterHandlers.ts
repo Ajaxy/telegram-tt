@@ -1,4 +1,3 @@
-import type React from '../../../../lib/teact/teact';
 import type { ElementRef } from '../../../../lib/teact/teact';
 import { useEffect, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
@@ -42,7 +41,7 @@ export default function useOuterHandlers(
 
   const [isQuickReactionVisible, markQuickReactionVisible, unmarkQuickReactionVisible] = useFlag();
   const [isSwiped, markSwiped, unmarkSwiped] = useFlag();
-  const doubleTapTimeoutRef = useRef<NodeJS.Timeout>();
+  const doubleTapTimeoutRef = useRef<number>();
 
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     preventMessageInputBlur(e);
@@ -110,7 +109,7 @@ export default function useOuterHandlers(
     if (!IS_TOUCH_ENV) return;
 
     if (doubleTapTimeoutRef.current) {
-      clearInterval(doubleTapTimeoutRef.current);
+      clearTimeout(doubleTapTimeoutRef.current);
       doubleTapTimeoutRef.current = undefined;
       handleDoubleTap();
       return;

@@ -1,7 +1,7 @@
-import { writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 
 import initialKeys from '../src/assets/localization/initialKeys';
-import readFallbackStrings from '../src/util/data/readFallbackStrings';
+import { buildFallbackStrings } from '../src/util/data/readFallbackStrings';
 import { pick } from '../src/util/iteratees';
 
 const HEADER = `/* eslint-disable */
@@ -9,8 +9,9 @@ const HEADER = `/* eslint-disable */
 import type { LangPackStringValue } from '../../api/types';
 import type { LangKey } from '../../types/language';\n`;
 
-async function main() {
-  const data = await readFallbackStrings(true);
+function main() {
+  const fileData = readFileSync('./src/assets/localization/fallback.strings', 'utf8');
+  const data = buildFallbackStrings(fileData);
 
   const selectedKeys = pick(data.langPack.strings, initialKeys);
   const json = JSON.stringify(selectedKeys, undefined, 2);

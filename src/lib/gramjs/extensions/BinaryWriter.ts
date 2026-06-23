@@ -1,15 +1,17 @@
-export default class BinaryWriter {
-  private readonly _buffers: Buffer<ArrayBuffer>[];
+import { Buffer } from 'buffer';
 
-  constructor(stream: Buffer<ArrayBuffer>) {
+export default class BinaryWriter {
+  private readonly _buffers: Buffer[];
+
+  constructor(stream: Buffer) {
     this._buffers = [stream];
   }
 
-  write(buffer: Buffer<ArrayBuffer>) {
+  write(buffer: Buffer) {
     this._buffers.push(buffer);
   }
 
-  getValue(): Buffer<ArrayBuffer> {
+  getValue(): Buffer {
     return Buffer.concat(this._buffers);
   }
 }

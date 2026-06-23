@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 const closeError = new Error('HttpStream was closed');
 const REQUEST_TIMEOUT = 10000;
 
@@ -12,7 +14,7 @@ export default class HttpStream {
 
   private isClosed: boolean;
 
-  private stream: Buffer<ArrayBuffer>[] = [];
+  private stream: Buffer[] = [];
 
   private canRead: Promise<void> = Promise.resolve();
 
@@ -80,7 +82,7 @@ export default class HttpStream {
     this.isClosed = false;
   }
 
-  write(data: Buffer<ArrayBuffer>) {
+  write(data: Buffer) {
     if (this.isClosed || !this.url) {
       this.handleDisconnect();
       throw closeError;

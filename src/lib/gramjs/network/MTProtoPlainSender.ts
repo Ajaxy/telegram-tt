@@ -1,8 +1,9 @@
+import { Buffer } from 'buffer';
+
 /**
  *  This module contains the class used to communicate with Telegram's servers
  *  in plain text, when no authorization key has been created yet.
  */
-
 import type { Logger } from '../extensions';
 import type { Api } from '../tl';
 import type { Connection } from './connection';

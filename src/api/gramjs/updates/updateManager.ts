@@ -27,7 +27,7 @@ type SeqUpdate = (GramJs.Updates | GramJs.UpdatesCombined) & { _isFromDifference
 type PtsUpdate = ((GramJs.TypeUpdate & { pts: number }) | UpdatePts) & { _isFromDifference?: true };
 type ChannelDifferenceReason = 'gapRecovery' | 'shortpoll';
 type ChannelScheduler = {
-  timeout?: ReturnType<typeof setTimeout>;
+  timeout?: number;
   deadline?: number;
   reason?: ChannelDifferenceReason;
   isInFlight: boolean;
@@ -53,7 +53,7 @@ const TERMINAL_CHANNEL_DIFFERENCE_ERRORS = new Set([
 let invoke: typeof invokeRequest;
 let isInited = false;
 
-let seqTimeout: ReturnType<typeof setTimeout> | undefined;
+let seqTimeout: number | undefined;
 const CHANNEL_SCHEDULERS = new Map<string, ChannelScheduler>();
 const OPENED_CHANNEL_IDS = new Set<string>();
 

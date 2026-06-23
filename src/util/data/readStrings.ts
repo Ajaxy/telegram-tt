@@ -1,4 +1,4 @@
-import { DEBUG } from '../../config';
+const IS_DEBUG = import.meta.env?.TG_APP_ENV !== 'production';
 
 export default function readStrings(data: string): Record<string, string> {
   const lines = data.split(/;\r?\n?/);
@@ -53,7 +53,7 @@ function parseLine(line: string) {
 
     return [key, value];
   } catch (e) {
-    if (DEBUG) {
+    if (IS_DEBUG) {
       // eslint-disable-next-line no-console
       console.error('Error parsing line:', line, e);
     }

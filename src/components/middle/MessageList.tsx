@@ -10,6 +10,7 @@ import { LoadMoreDirection, type MessageListType, type ThreadId } from '../../ty
 import {
   ANIMATION_END_DELAY,
   ANONYMOUS_USER_ID,
+  IS_PERF,
   MESSAGE_LIST_SLICE,
   SCROLL_MAX_DURATION,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -758,7 +759,7 @@ const MessageList = ({
   useLayoutEffectWithPrevDeps(([
     prevMessageIds, prevIsViewportNewest, prevCurrentLastMessageOriginalId, prevLiveTailStartOriginalId,
   ]) => {
-    if (process.env.APP_ENV === 'perf') {
+    if (IS_PERF) {
       // eslint-disable-next-line no-console
       console.time('scrollTop');
     }
@@ -1038,7 +1039,7 @@ const MessageList = ({
           });
         }
 
-        if (process.env.APP_ENV === 'perf') {
+        if (IS_PERF) {
           // eslint-disable-next-line no-console
           console.timeEnd('scrollTop');
         }

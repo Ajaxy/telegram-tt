@@ -177,6 +177,7 @@ export default defineConfig(
       '@typescript-eslint/unbound-method': 'off',
       'unused-imports/no-unused-imports': 'error',
       'import-x/namespace': ['error', { allowComputed: true }],
+      'import-x/no-unresolved': ['error', { ignore: ['^virtual:'] }],
       'import-x/no-named-as-default-member': 'off',
       'react-hooks/exhaustive-deps': 'off',
       'react-hooks-static-deps/exhaustive-deps': [
@@ -219,7 +220,7 @@ export default defineConfig(
     },
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        project: ['./tsconfig.json', './tsconfig.script.json'],
         tsconfigRootDir: import.meta.dirname,
       },
       globals: jestPlugin.environments.globals.globals,

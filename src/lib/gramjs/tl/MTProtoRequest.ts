@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 export abstract class MTProtoRequest {
     private sent: boolean;
 

@@ -1,9 +1,9 @@
 import type { TimeFormat } from '../../types';
 import type { LangFn } from './types';
 
-import { FALLBACK_LANG_CODE } from '../../config';
-
 import LimitedMap from '../primitives/LimitedMap';
+
+const FALLBACK_LANG_CODE = 'en';
 
 type DateStyle = 'short' | 'long' | 'numeric' | false;
 type TimeStyle = 'short' | 'long' | false;

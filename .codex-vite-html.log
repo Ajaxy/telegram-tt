@@ -1,0 +1,9 @@
+
+> telegram-t@12.0.29 dev
+> cross-env APP_ENV=development vite --mode development --host 127.0.0.1 --port 1236
+
+[2m2:47:29 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+
+  [32m[1mVITE[22m v8.0.0[39m  [2mready in [0m[1m397[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m1236[22m/[39m

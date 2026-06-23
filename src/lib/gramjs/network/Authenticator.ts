@@ -1,10 +1,11 @@
+import { Buffer } from 'buffer';
+
 /**
  * Executes the authentication process with the Telegram servers.
  * @param sender a connected {MTProtoPlainSender}.
  * @param log
  * @returns {Promise<{authKey: *, timeOffset: *}>}
  */
-
 import type MTProtoPlainSender from './MTProtoPlainSender';
 
 import { IGE } from '../crypto/IGE';

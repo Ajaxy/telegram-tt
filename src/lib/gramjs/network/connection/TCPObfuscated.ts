@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import type { HttpStream, PromisedWebSockets } from '../../extensions';
 
 import { CTR } from '../../crypto/CTR';
@@ -81,7 +83,7 @@ class ObfuscatedIO {
     return this._decrypt.encrypt(data);
   }
 
-  write(data: Buffer<ArrayBuffer>) {
+  write(data: Buffer) {
     this.connection.write(this._encrypt.encrypt(data));
   }
 }

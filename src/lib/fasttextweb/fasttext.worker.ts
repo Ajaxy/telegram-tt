@@ -1,7 +1,7 @@
 import { DEBUG } from '../../config';
 import { createWorkerInterface } from '../../util/createPostMessageInterface';
 import fasttextInitializer from './fasttext-wasm.cjs';
-import fasttextWasmPath from './fasttext-wasm.wasm';
+import fasttextWasmPath from './fasttext-wasm.wasm?url';
 
 type FastTextMethods = {
   makePrediction: (type: 'predict' | 'predict-prob', text: string, k: string, threshold: string) => Promise<string>;
@@ -9,9 +9,8 @@ type FastTextMethods = {
 
 const LABEL_PREFIX = '__label__';
 
-// Since webpack will change the name and potentially the path of the
-// `.wasm` file, we have to provide a `locateFile()` hook to redirect
-// to the appropriate URL.
+// Since the bundler changes the name and path of the `.wasm` file,
+// we have to provide a `locateFile()` hook to redirect to the appropriate URL.
 // More details: https://kripken.github.io/emscripten-site/docs/api_reference/module.html
 let fastTextInstance: FastTextMethods;
 const fastTextPromise = fasttextInitializer({

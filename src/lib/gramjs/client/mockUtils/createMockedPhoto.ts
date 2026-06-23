@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import type { MockTypes } from './MockTypes';
 
 import { toJSNumber } from '../../../../util/numbers';

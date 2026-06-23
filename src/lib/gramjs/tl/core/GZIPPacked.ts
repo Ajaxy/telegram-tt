@@ -4,24 +4,26 @@ import type { BinaryReader } from '../../extensions';
 
 import { serializeBytes } from '..';
 
+import { Buffer } from 'buffer';
+
 export default class GZIPPacked {
   static CONSTRUCTOR_ID = 0x3072cfa1;
 
   static classType = 'constructor';
 
-  data: Buffer<ArrayBuffer>;
+  data: Buffer;
 
   private CONSTRUCTOR_ID: number;
 
   private classType: string;
 
-  constructor(data: Buffer<ArrayBuffer>) {
+  constructor(data: Buffer) {
     this.data = data;
     this.CONSTRUCTOR_ID = 0x3072cfa1;
     this.classType = 'constructor';
   }
 
-  static gzipIfNeeded(contentRelated: boolean, data: Buffer<ArrayBuffer>) {
+  static gzipIfNeeded(contentRelated: boolean, data: Buffer) {
     if (contentRelated && data.length > 512) {
       const gzipped = new GZIPPacked(data).toBytes();
       if (gzipped.length < data.length) {
@@ -31,7 +33,7 @@ export default class GZIPPacked {
     return data;
   }
 
-  static gzip(input: Buffer<ArrayBuffer>) {
+  static gzip(input: Buffer) {
     return Buffer.from(gzipSync(input));
   }
 

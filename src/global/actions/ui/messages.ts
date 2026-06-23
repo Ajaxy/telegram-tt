@@ -19,7 +19,7 @@ import { compact, findLast } from '../../../util/iteratees';
 import { getTranslationFn } from '../../../util/localization';
 import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import { getServerTime } from '../../../util/serverTime';
-import versionNotification from '../../../versionNotification.txt';
+import versionNotification from '../../../versionNotification.txt?raw';
 import {
   getMediaFilename,
   getMediaFormat,

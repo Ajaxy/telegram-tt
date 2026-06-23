@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import { pbkdf2 } from './crypto/crypto';
 import Api from './tl/api';
 

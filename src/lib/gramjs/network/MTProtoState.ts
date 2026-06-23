@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import type { AuthKey } from '../crypto/AuthKey';
 
 import { CTR } from '../crypto/CTR';
@@ -141,7 +143,7 @@ export default class MTProtoState {
    * @param afterId
    */
   writeDataAsMessage(
-    buffer: BinaryWriter, data: Buffer<ArrayBuffer>, contentRelated: boolean, afterId?: bigint,
+    buffer: BinaryWriter, data: Buffer, contentRelated: boolean, afterId?: bigint,
   ): bigint {
     const msgId = this._getNewMsgId();
     const seqNo = this._getSeqNo(contentRelated);
@@ -174,7 +176,7 @@ export default class MTProtoState {
    * following MTProto 2.0 guidelines core.telegram.org/mtproto/description.
    * @param data
    */
-  async encryptMessageData(data: Buffer<ArrayBuffer>): Promise<Buffer<ArrayBuffer>> {
+  async encryptMessageData(data: Buffer): Promise<Buffer> {
     if (!this.authKey) {
       throw new Error('Auth key unset');
     }
@@ -237,7 +239,7 @@ export default class MTProtoState {
    * Inverse of `encrypt_message_data` for incoming server messages.
    * @param body
    */
-  async decryptMessageData(body: Buffer<ArrayBuffer>) {
+  async decryptMessageData(body: Buffer) {
     if (!this.authKey) {
       throw new Error('Auth key unset');
     }

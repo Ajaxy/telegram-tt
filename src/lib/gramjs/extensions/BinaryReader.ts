@@ -1,3 +1,5 @@
+import type { Buffer } from 'buffer';
+
 import { TypeNotFoundError } from '../errors';
 import { coreObjects } from '../tl/core';
 

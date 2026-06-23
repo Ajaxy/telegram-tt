@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import { DEBUG_CALLS } from '../../../config';
 
 type SctpChunk = {

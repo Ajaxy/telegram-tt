@@ -1,7 +1,8 @@
 import AES from '@cryptography/aes';
+import { Buffer } from 'buffer';
 
 class Counter {
-  public counter: Buffer<ArrayBuffer>;
+  public counter: Buffer;
 
   constructor(initialValue: Buffer) {
     this.counter = Buffer.from(initialValue);
@@ -41,7 +42,7 @@ class CTR {
     this._aes = new AES(key);
   }
 
-  update(plainText: Buffer<ArrayBuffer>) {
+  update(plainText: Buffer) {
     return this.encrypt(plainText);
   }
 
@@ -149,7 +150,7 @@ class Hash {
   }
 }
 
-export async function pbkdf2(password: Buffer<ArrayBuffer>, salt: Buffer<ArrayBuffer>, iterations: number) {
+export async function pbkdf2(password: Buffer, salt: Buffer, iterations: number) {
   const passwordKey = await crypto.subtle.importKey('raw', password, { name: 'PBKDF2' }, false, ['deriveBits']);
   return Buffer.from(await crypto.subtle.deriveBits({
     name: 'PBKDF2',

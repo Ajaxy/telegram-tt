@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": [
+      "node",
+      "jest",
+      "vite/client"
+    ],
+    "tsBuildInfoFile": ".cache/.tsconfig.script.tsbuildinfo"
+  },
+  "include": [
+    "tests",
+    "dev",
+    "plugins",
+    "*.config.ts",
+    "*.config.js",
+    ".github/workflows/*.js",
+    "deploy/*.js",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/lib/gramjs/tl/generateModules.ts",
+    "src/lib/gramjs/tl/types-generator"
+  ]
+}

@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer';
 import { Api as GramJs } from '../../lib/gramjs';
 
 import { DEBUG } from '../../config';

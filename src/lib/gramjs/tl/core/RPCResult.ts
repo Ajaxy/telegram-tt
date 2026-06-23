@@ -1,3 +1,5 @@
+import type { Buffer } from 'buffer';
+
 
 import type { BinaryReader } from '../../extensions';
 

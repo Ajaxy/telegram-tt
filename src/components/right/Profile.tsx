@@ -623,7 +623,7 @@ const Profile = ({
   const shouldShowContentPanel = (isGiftsResult && hasGiftsCollections) || (isStoriesResult && hasStoryAlbums);
 
   useEffect(() => {
-    const timers: ReturnType<typeof setTimeout>[] = [];
+    const timers: number[] = [];
     if (hasGiftsCollections) {
       timers.push(setTimeout(markGiftCollectionsShowed, CONTENT_PANEL_SHOW_DELAY));
     } else {

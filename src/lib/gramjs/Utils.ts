@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import type { Entity } from './types';
 
 import { Api } from './tl';
@@ -81,7 +83,7 @@ export function getInputPeer(
  * @param stripped{Buffer}
  * @returns {Buffer}
  */
-export function strippedPhotoToJpg(stripped: Buffer<ArrayBuffer>): Buffer<ArrayBuffer> {
+export function strippedPhotoToJpg(stripped: Buffer): Buffer {
   // Note: Changes here should update _stripped_real_length
   if (stripped.length < 3 || stripped[0] !== 1) {
     return stripped;

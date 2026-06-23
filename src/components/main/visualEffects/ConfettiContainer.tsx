@@ -180,7 +180,7 @@ const ConfettiContainer = ({ confetti }: StateProps) => {
   });
 
   useSyncEffect(([prevConfettiTime]) => {
-    let hideTimeout: ReturnType<typeof setTimeout>;
+    let hideTimeout: number;
     if (prevConfettiTime !== lastConfettiTime) {
       generateConfetti(width || windowSize.width, height || windowSize.height);
       hideTimeout = setTimeout(forceUpdate, CONFETTI_FADEOUT_TIMEOUT);

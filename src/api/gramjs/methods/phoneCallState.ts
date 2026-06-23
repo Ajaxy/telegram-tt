@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer';
 import { gunzipSync, gzipSync } from 'fflate';
 import { CTR } from '../../../lib/gramjs/crypto/CTR';
 import {

@@ -1,6 +1,4 @@
-import { LEGACY_PASSCODE_CACHE_NAME } from '../config';
 import { PASSCODE_IDB_STORE } from './browser/idb';
-import * as cacheApi from './cacheApi';
 
 const IV_LENGTH = 12;
 const SALT = 'harder better faster stronger';
@@ -112,8 +110,7 @@ export function forgetPasscode() {
 
 export function clearEncryptedSession() {
   forgetPasscode();
-  PASSCODE_IDB_STORE.clear();
-  return cacheApi.clear(LEGACY_PASSCODE_CACHE_NAME);
+  return PASSCODE_IDB_STORE.clear();
 }
 
 function sha256(plaintext: string) {
@@ -135,8 +132,7 @@ async function load(key: string) {
     const asArrayBuffer = new Uint8Array(cached).buffer;
     return asArrayBuffer;
   }
-  // Fallback for old data
-  return cacheApi.fetch(LEGACY_PASSCODE_CACHE_NAME, key, cacheApi.Type.ArrayBuffer);
+  return undefined;
 }
 
 async function aesEncrypt(plaintext: string, pwHash: ArrayBuffer) {

@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import type { WrappedError } from '../../../api/gramjs/helpers/misc';
 import type TelegramClient from './TelegramClient';
 

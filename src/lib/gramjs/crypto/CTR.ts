@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import { createCipheriv, createDecipheriv, type CtrImpl } from './crypto';
 
 export class CTR {
@@ -13,11 +15,11 @@ export class CTR {
     this.decipher = createDecipheriv('AES-256-CTR', key, iv);
   }
 
-  encrypt(data: Buffer<ArrayBuffer>) {
+  encrypt(data: Buffer) {
     return Buffer.from(this.cipher.update(data));
   }
 
-  decrypt(data: Buffer<ArrayBuffer>) {
+  decrypt(data: Buffer) {
     return Buffer.from(this.decipher.update(data));
   }
 }

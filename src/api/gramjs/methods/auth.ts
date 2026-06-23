@@ -1,3 +1,4 @@
+import type { Buffer } from 'buffer';
 import { PasskeyLoginRequestedError, UserAlreadyAuthorizedError } from '../../../lib/gramjs/errors';
 
 import type {

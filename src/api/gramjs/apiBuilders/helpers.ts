@@ -1,3 +1,5 @@
+import type { Buffer } from 'buffer';
+
 import type { Api as GramJs } from '../../../lib/gramjs';
 
 type VirtualFields =

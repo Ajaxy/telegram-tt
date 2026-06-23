@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import { BinaryReader } from '../extensions';
 
 import {
@@ -9,15 +11,15 @@ import {
 } from '../Helpers';
 
 export class AuthKey {
-  _key?: Buffer<ArrayBuffer>;
+  _key?: Buffer;
 
-  _hash?: Buffer<ArrayBuffer>;
+  _hash?: Buffer;
 
   private auxHash?: bigint;
 
   keyId?: bigint;
 
-  constructor(value?: Buffer<ArrayBuffer>, hash?: Buffer<ArrayBuffer>) {
+  constructor(value?: Buffer, hash?: Buffer) {
     if (!hash || !value) {
       return;
     }
@@ -29,7 +31,7 @@ export class AuthKey {
     this.keyId = reader.readLong(false);
   }
 
-  async setKey(value?: Buffer<ArrayBuffer> | AuthKey) {
+  async setKey(value?: Buffer | AuthKey) {
     if (!value) {
       this._key = undefined;
       this.auxHash = undefined;

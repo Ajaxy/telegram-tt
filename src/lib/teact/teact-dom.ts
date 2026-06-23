@@ -11,7 +11,7 @@ import type {
   VirtualElementTag,
 } from './teact';
 
-import { DEBUG } from '../../config';
+import { DEBUG, IS_PERF } from '../../config';
 import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
 import {
   captureImmediateEffects,
@@ -77,7 +77,7 @@ function render($element: VirtualElement | undefined, parentEl: HTMLElement) {
 
   $head.children = $renderedChild ? [$renderedChild] : [];
 
-  if (process.env.APP_ENV === 'perf') {
+  if (IS_PERF) {
     DEBUG_virtualTreeSize = 0;
     DEBUG_addToVirtualTreeSize($head);
 

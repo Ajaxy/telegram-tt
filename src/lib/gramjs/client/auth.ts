@@ -1,3 +1,5 @@
+import type { Buffer } from 'buffer';
+
 import type { ApiPasskeyOption } from '../../../api/types';
 import type TelegramClient from './TelegramClient';
 import type { Update } from './TelegramClient';

@@ -55,6 +55,11 @@ const SUPPORTED_LANGUAGES: Record<string, string[]> = {
 
 const THIRD_PARTY_LANGUAGES = ['typelanguage'];
 
+const LANGUAGE_MODULES = import.meta.glob('../../node_modules/highlight.js/lib/languages/*.js') as Record<
+  string,
+  () => Promise<{ default: any }>
+>;
+
 const languagePromises = new Map<string, Promise<any>>();
 const lowlight = createLowlight({});
 
@@ -99,11 +104,10 @@ async function ensureLanguage(language: string) {
 }
 
 function loadFirstPartyLanguage(langCode: string) {
-  // Funky webpack bug https://github.com/webpack/webpack/issues/13865
-  const languagePromise = import(
-    /* webpackChunkName: "Highlight for [request]" */
-    `../../node_modules/highlight.js/lib/languages/${langCode}`
-  );
+  const loadLanguageModule = LANGUAGE_MODULES[`../../node_modules/highlight.js/lib/languages/${langCode}.js`];
+  if (!loadLanguageModule) return undefined;
+
+  const languagePromise = loadLanguageModule();
   languagePromises.set(langCode, languagePromise);
   return languagePromise;
 }

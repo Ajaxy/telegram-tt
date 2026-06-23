@@ -1,3 +1,5 @@
+import type { Buffer } from 'buffer';
+
 import type { GramJsAppConfig } from '../../../../api/gramjs/apiBuilders/appConfig';
 import type { ApiAvailableReaction } from '../../../../api/types';
 import type Api from '../../tl/api';

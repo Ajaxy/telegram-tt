@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { generateRandomInt32 } from '../../../lib/gramjs/Helpers';
 

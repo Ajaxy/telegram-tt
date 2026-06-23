@@ -10,6 +10,7 @@ const ACCESS_THROTTLE = 24 * 60 * 60 * 1000; // 1 day
 const CLEANUP_INTERVAL = 1 * 60 * 60 * 1000; // 1 hour
 
 const CLEARABLE_CACHE_NAMES = [MEDIA_CACHE_NAME, MEDIA_CACHE_NAME_AVATARS, MEDIA_PROGRESSIVE_CACHE_NAME];
+const CACHE_KEY_BASE = `${self.location.origin}/`;
 
 cleanup(CLEARABLE_CACHE_NAMES);
 setInterval(() => {
@@ -47,8 +48,7 @@ export async function fetch(
   }
 
   try {
-    // To avoid the error "Request scheme 'webdocument' is unsupported"
-    const request = new Request(key.replace(/:/g, '_'));
+    const request = buildCacheRequest(key);
     const cache = await cacheApi.open(getCacheName(cacheName));
     const response = await cache.match(request);
     if (!response) {
@@ -111,8 +111,7 @@ export async function save(cacheName: string, key: string, data: AnyLiteral | Bl
     const cacheData = typeof data === 'string' || data instanceof Blob || data instanceof ArrayBuffer
       ? data
       : JSON.stringify(data);
-    // To avoid the error "Request scheme 'webdocument' is unsupported"
-    const request = new Request(key.replace(/:/g, '_'));
+    const request = buildCacheRequest(key);
     const response = new Response(cacheData);
     response.headers.set(LAST_ACCESS_HEADER, Date.now().toString());
     const cache = await cacheApi.open(getCacheName(cacheName));
@@ -133,7 +132,7 @@ export async function remove(cacheName: string, key: string) {
     }
 
     const cache = await cacheApi.open(getCacheName(cacheName));
-    return await cache.delete(key);
+    return await cache.delete(buildCacheRequest(key));
   } catch (err) {
     // eslint-disable-next-line no-console
     console.warn(err);
@@ -183,6 +182,12 @@ export async function cleanup(cacheNames: string[]) {
 
 export function purgeClearableCache() {
   CLEARABLE_CACHE_NAMES.forEach((cacheName) => clear(cacheName));
+}
+
+function buildCacheRequest(key: string) {
+  // To avoid the error "Request scheme 'webdocument' is unsupported"
+  const normalizedKey = key.replace(/:/g, '_');
+  return new Request(new URL(normalizedKey, CACHE_KEY_BASE));
 }
 
 async function updateAccessTime(cache: Cache, request: Request, response: Response) {

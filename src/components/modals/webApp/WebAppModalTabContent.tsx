@@ -956,11 +956,11 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const hideDirection = (isHorizontalLayout
     && (!shouldHideMainButton && !shouldHideSecondaryButton)) ? 'horizontal' : 'vertical';
 
-  const mainButtonChangeTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  const mainButtonFastTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  const secondaryButtonChangeTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  const secondaryButtonFastTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  const appNameDisplayTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const mainButtonChangeTimeoutRef = useRef<number>();
+  const mainButtonFastTimeoutRef = useRef<number>();
+  const secondaryButtonChangeTimeoutRef = useRef<number>();
+  const secondaryButtonFastTimeoutRef = useRef<number>();
+  const appNameDisplayTimeoutRef = useRef<number>();
 
   useEffect(() => {
     if (isFullscreen && isOpen && Boolean(activeWebAppName)) {

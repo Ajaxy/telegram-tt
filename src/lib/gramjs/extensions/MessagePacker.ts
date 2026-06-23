@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import type MTProtoState from '../network/MTProtoState';
 import type RequestState from '../network/RequestState';
 import type Logger from './Logger';

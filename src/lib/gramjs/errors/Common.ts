@@ -1,7 +1,8 @@
+import type { Buffer } from 'buffer';
+
 /**
  * Errors not related to the Telegram API itself
  */
-
 import type { Api } from '../tl';
 
 /**

@@ -1,13 +1,25 @@
 /// <reference types="user-agent-data-types" />
 
-declare const process: NodeJS.Process;
-
 declare module '*.css';
 declare module '*.scss';
 
 declare const APP_VERSION: string;
-declare const APP_REVISION: string;
 declare const CHANGELOG_DATETIME: number | undefined;
+
+declare module 'virtual:git-info' {
+  export const APP_REVISION: string;
+}
+
+interface ImportMetaEnv {
+  readonly TG_APP_ENV: string;
+  readonly TG_APP_MOCKED_CLIENT: string;
+  readonly TG_APP_NAME?: string;
+  readonly TG_APP_TITLE: string;
+  readonly TG_PUBLIC_URL: string;
+  readonly TG_TELEGRAM_API_HASH?: string;
+  readonly TG_TELEGRAM_API_ID?: string;
+  readonly TG_TEST_SESSION?: string;
+}
 
 declare namespace React {
   interface HTMLAttributes {
@@ -95,9 +107,9 @@ declare module '*.svg' {
   const url: string;
   export default url;
 }
-declare module '*.txt' {
-  const url: string;
-  export default url;
+declare module '*.txt?raw' {
+  const content: string;
+  export default content;
 }
 declare module '*.tgs' {
   const url: string;
@@ -107,9 +119,9 @@ declare module '*.wasm' {
   const url: string;
   export default url;
 }
-declare module '*.strings' {
-  const url: string;
-  export default url;
+declare module '*.strings?raw' {
+  const content: string;
+  export default content;
 }
 
 declare module 'opus-recorder' {

@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import type { PromisedWebSockets } from '../../extensions';
 
 import { readBufferFromBigInt } from '../../Helpers';

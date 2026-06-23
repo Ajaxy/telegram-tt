@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import type TelegramClient from './TelegramClient';
 
 import { getDcBandwidthManager } from '../../../util/dcBandwithManager';

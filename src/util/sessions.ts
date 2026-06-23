@@ -6,6 +6,7 @@ import {
   DEBUG, IS_SCREEN_LOCKED_CACHE_KEY,
   SESSION_ACCOUNT_PREFIX,
   SESSION_LEGACY_USER_KEY,
+  TEST_SESSION,
 } from '../config';
 import { ACCOUNT_SLOT, storeAccountData, writeSlotSession } from './multiaccount';
 
@@ -173,7 +174,7 @@ export function updateSessionUserId(currentUserId: string) {
 }
 
 export function importTestSession() {
-  const sessionJson = process.env.TEST_SESSION!;
+  const sessionJson = TEST_SESSION!;
   try {
     const sessionData = JSON.parse(sessionJson) as ApiSessionData & { userId: string };
     storeLegacySession(sessionData, sessionData.userId);

@@ -1,47 +1,27 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    // We don't care about this since Webpack runs Babel after TypeScript
-    "target": "esnext",
-    "lib": [
-      "dom",
-      "webworker",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "allowImportingTsExtensions": true,
-    "noImplicitReturns": true,
-    "module": "preserve",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "@teact",
     "paths": {
       "@teact": ["./src/lib/teact/teact.ts"],
       "@teact/*": ["./src/lib/teact/*"],
-      "@gili/*": ["./src/components/gili/*"]
+      "@gili/*": ["./src/components/gili/*"],
+      "buffer": ["./src/@types/buffer"],
+      "qr-code-styling": ["./src/@types/qr-code-styling"]
     },
     "types": [
       "dom-chromium-ai",
-      "dom-view-transitions"
+      "dom-view-transitions",
+      "vite/client"
     ],
-    "incremental": true,
     "tsBuildInfoFile": ".cache/.tsconfig.tsbuildinfo"
   },
   "include": [
-    "src",
-    "tests",
-    "plugins",
-    "dev",
-    "*.config.ts",
-    "*.config.js",
-    ".github/workflows/*.js",
-    "deploy/*.js"
+    "src"
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/lib/gramjs/tl/generateModules.ts",
+    "src/lib/gramjs/tl/types-generator"
   ]
 }

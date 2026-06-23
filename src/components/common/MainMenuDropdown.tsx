@@ -1,4 +1,5 @@
 import { type FC, memo } from '@teact';
+import { APP_REVISION } from 'virtual:git-info';
 import { getActions } from '../../global';
 
 import { LeftColumnContent, SettingsScreens } from '../../types';

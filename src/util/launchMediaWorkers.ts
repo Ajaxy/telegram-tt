@@ -17,7 +17,7 @@ export default function launchMediaWorkers() {
   if (!instances) {
     instances = new Array(MAX_WORKERS).fill(undefined).map(
       () => {
-        const worker = new Worker(new URL('../lib/mediaWorker/index.worker.ts', import.meta.url));
+        const worker = new Worker(new URL('../lib/mediaWorker/index.worker.ts', import.meta.url), { type: 'module' });
         const connector = createConnector<MediaWorkerApi>(worker, undefined, 'media');
         return { worker, connector };
       },

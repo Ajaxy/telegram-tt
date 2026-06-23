@@ -4,7 +4,7 @@ const CLICK_TIMEOUT = 300;
 
 export default function useMultiClick(amount: number, callback: NoneToVoidFunction) {
   const currentAmountRef = useRef(0);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const timeoutRef = useRef<number>();
   const handleClick = useCallback(() => {
     currentAmountRef.current++;
     if (currentAmountRef.current === amount) {

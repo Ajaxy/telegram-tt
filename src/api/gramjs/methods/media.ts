@@ -1,3 +1,4 @@
+import type { Buffer } from 'buffer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { SizeType, TelegramClient } from '../../../lib/gramjs';
@@ -185,7 +186,7 @@ async function download(
 }
 
 function parseMedia(
-  data: Buffer<ArrayBuffer> | File, mediaFormat: ApiMediaFormat, mimeType?: string,
+  data: Buffer | File, mediaFormat: ApiMediaFormat, mimeType?: string,
 ): ApiParsedMedia | undefined {
   if (data instanceof File) {
     return data;
@@ -204,7 +205,11 @@ function parseMedia(
   return undefined;
 }
 
-function getMimeType(data: Uint8Array, fallbackMimeType = 'image/jpeg') {
+function getMimeType(data: Uint8Array | File, fallbackMimeType = 'image/jpeg') {
+  if (data instanceof File) {
+    return data.type;
+  }
+
   if (data.length < 4) {
     return fallbackMimeType;
   }

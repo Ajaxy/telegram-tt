@@ -1,4 +1,5 @@
 import { IGE as AesIge } from '@cryptography/aes';
+import { Buffer } from 'buffer';
 
 import { convertToLittle, generateRandomBytes } from '../Helpers';
 
@@ -14,7 +15,7 @@ class IGENEW {
      * @param cipherText {Buffer}
      * @returns {Buffer}
      */
-  decryptIge(cipherText: Buffer): Buffer<ArrayBuffer> {
+  decryptIge(cipherText: Buffer): Buffer {
     return convertToLittle(this.ige.decrypt(cipherText));
   }
 
@@ -23,7 +24,7 @@ class IGENEW {
      * @param plainText {Buffer}
      * @returns {Buffer}
      */
-  encryptIge(plainText: Buffer): Buffer<ArrayBuffer> {
+  encryptIge(plainText: Buffer): Buffer {
     const padding = plainText.length % 16;
     if (padding) {
       plainText = Buffer.concat([

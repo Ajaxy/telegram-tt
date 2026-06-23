@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer';
 import { Api as GramJs, errors } from '../../../lib/gramjs';
 
 import type { RegularLangKey } from '../../../types/language';

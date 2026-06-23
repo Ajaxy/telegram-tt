@@ -1,4 +1,5 @@
 import { Mutex } from 'async-mutex';
+import { Buffer } from 'buffer';
 
 const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 3000;
@@ -155,7 +156,7 @@ export default class PromisedWebSockets {
     });
   }
 
-  write(data: Buffer<ArrayBuffer>) {
+  write(data: Buffer) {
     if (this.closed) {
       throw closeError;
     }

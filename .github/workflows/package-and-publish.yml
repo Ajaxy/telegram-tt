@@ -1,5 +1,5 @@
 # Terms:
-# "build" - Compile web project using webpack.
+# "build" - Compile web project using Vite.
 # "package" - Produce a distributive package for a specific platform as a workflow artifact.
 # "publish" - Send a package to corresponding store and GitHub release page.
 # "release" - build + package + publish

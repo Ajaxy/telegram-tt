@@ -1,4 +1,4 @@
-import os from 'os';
+import { Buffer } from 'buffer';
 
 import type LocalUpdatePremiumFloodWait from '../../../api/gramjs/updates/UpdatePremiumFloodWait';
 import type { UpdatePts } from '../../../api/gramjs/updates/UpdatePts';
@@ -80,7 +80,7 @@ type TelegramClientParams = {
   shouldDebugExportedSenders: boolean;
 };
 
-type TimeoutId = ReturnType<typeof setTimeout>;
+type TimeoutId = number;
 
 export type Update = (
     Api.TypeUpdate | Api.TypeUpdates
@@ -261,10 +261,8 @@ class TelegramClient {
         layer: LAYER,
         query: new Api.InitConnection({
           apiId: this.apiId,
-          deviceModel: args.deviceModel || os.type()
-            .toString() || 'Unknown',
-          systemVersion: args.systemVersion || os.release()
-            .toString() || '1.0',
+          deviceModel: args.deviceModel || 'Unknown',
+          systemVersion: args.systemVersion || '1.0',
           appVersion: args.appVersion || '1.0',
           langCode: args.langCode,
           langPack: args.langPack,
@@ -835,7 +833,7 @@ class TelegramClient {
     return this.downloadFile(loc, {
       dcId,
       isPriority: true,
-    }) as Promise<Buffer<ArrayBuffer> | undefined>; // Profile photo cannot be larger than 2GB, right?
+    }); // Profile photo cannot be larger than 2GB, right?
   }
 
   downloadStickerSetThumb(stickerSet: Api.StickerSet) {
@@ -855,7 +853,7 @@ class TelegramClient {
           thumbVersion,
         }),
         { dcId: stickerSet.thumbDcId! },
-      ) as Promise<Buffer<ArrayBuffer> | undefined>; // Sticker thumb cannot be larger than 2GB, right?
+      ); // Sticker thumb cannot be larger than 2GB, right?
     }
 
     return this.invoke(new Api.messages.GetCustomEmojiDocuments({
@@ -875,7 +873,7 @@ class TelegramClient {
       {
         fileSize: toJSNumber(doc.size),
         dcId: doc.dcId,
-      }) as Promise<Buffer<ArrayBuffer> | undefined>; // Sticker thumb cannot be larger than 2GB, right?
+      }); // Sticker thumb cannot be larger than 2GB, right?
     });
   }
 
@@ -901,7 +899,7 @@ class TelegramClient {
     return undefined;
   }
 
-  _downloadCachedPhotoSize(size: Api.PhotoCachedSize | Api.PhotoStrippedSize): Buffer<ArrayBuffer> {
+  _downloadCachedPhotoSize(size: Api.PhotoCachedSize | Api.PhotoStrippedSize): Buffer {
     // No need to download anything, simply write the bytes
     let data;
     if (size instanceof Api.PhotoStrippedSize) {

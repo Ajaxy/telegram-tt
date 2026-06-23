@@ -1,6 +1,8 @@
 import { getActions } from '../global';
 
 import { DEBUG, DEBUG_MORE, IS_TEST } from '../config';
+// eslint-disable-next-line import-x/default
+import serviceWorkerUrl from '../serviceWorker/index.ts?worker&url';
 import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './browser/windowEnvironment';
 import { formatShareText } from './deeplink';
 import { validateFiles } from './files';
@@ -12,6 +14,9 @@ type WorkerAction = {
 };
 
 const IGNORE_WORKER_PATH = '/k/';
+const SERVICE_WORKER_OPTIONS: RegistrationOptions = import.meta.env.DEV
+  ? { scope: './', type: 'module' }
+  : { type: 'module' };
 
 function handleWorkerMessage(e: MessageEvent) {
   const action: WorkerAction = e.data;
@@ -61,7 +66,7 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
         }
       }
 
-      await navigator.serviceWorker.register(new URL('../serviceWorker', import.meta.url));
+      await navigator.serviceWorker.register(serviceWorkerUrl, SERVICE_WORKER_OPTIONS);
 
       if (DEBUG) {
         // eslint-disable-next-line no-console

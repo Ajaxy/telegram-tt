@@ -1,6 +1,8 @@
 import type { BinaryReader } from '../extensions';
 
 import tlContent from './apiTl';
+import { Buffer } from 'buffer';
+
 import {
     type GenerationArgConfig, type GenerationEntryConfig, parseTl, serializeBytes, serializeDate,
 } from './generationHelpers';

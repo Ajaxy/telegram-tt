@@ -55,7 +55,7 @@ const useWebAppFrame = (
   } = getActions();
 
   const isReloadSupportedRef = useRef<boolean>(false);
-  const reloadTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const reloadTimeoutRef = useRef<number>();
   const ignoreEventsRef = useRef<boolean>(false);
   const lastFrameSizeRef = useRef<{ width: number; height: number; isResizing?: boolean }>();
   const windowSize = useWindowSize();

@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import type TelegramClient from './TelegramClient';
 import type { SizeType } from './TelegramClient';
 
@@ -51,7 +53,7 @@ class FileView {
 
   private size?: number;
 
-  private buffer?: Buffer<ArrayBuffer>;
+  private buffer?: Buffer;
 
   private largeFile?: FileSystemFileHandle;
 
@@ -99,7 +101,7 @@ class FileView {
     this.buffer = Buffer.concat([this.buffer!, data]);
   }
 
-  async getData(): Promise<Buffer<ArrayBuffer> | File> {
+  async getData(): Promise<Buffer | File> {
     if (this.type === 'opfs') {
       return this.largeFile!.getFile();
     } else {

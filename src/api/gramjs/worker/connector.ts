@@ -100,6 +100,7 @@ export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
 
     worker = new Worker(new URL('./worker.ts', import.meta.url), {
       name: params.toString(),
+      type: 'module',
     });
     subscribeToWorker(onUpdate);
 

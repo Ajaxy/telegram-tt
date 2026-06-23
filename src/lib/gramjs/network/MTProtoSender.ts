@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import type { TLMessage } from '../tl/core';
 
 import { RPCError, RPCMessageToError } from '../errors';

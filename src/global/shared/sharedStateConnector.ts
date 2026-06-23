@@ -29,7 +29,10 @@ let synced = false;
 let lastSharedState: SharedState = INITIAL_SHARED_STATE;
 
 export function initSharedState(localState: SharedState) {
-  sharedWorker = new SharedWorker(new URL('./sharedState.worker.ts', import.meta.url), { name: APP_NAME });
+  sharedWorker = new SharedWorker(new URL('./sharedState.worker.ts', import.meta.url), {
+    name: APP_NAME,
+    type: 'module',
+  });
 
   sharedWorker.port.addEventListener('message', onMessage);
   sharedWorker.port.start();

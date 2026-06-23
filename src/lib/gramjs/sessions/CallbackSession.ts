@@ -1,3 +1,5 @@
+import { Buffer } from 'buffer';
+
 import type { SessionData } from '../types';
 
 import { AuthKey } from '../crypto/AuthKey';
