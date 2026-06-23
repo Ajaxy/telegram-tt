@@ -26,5 +26,6 @@
 }
 
 .ownReadMoreButton {
-  --button-background-color: var(--color-text-meta-colored);
+  --button-background-color: var(--color-active);
+  --button-active-background-color: var(--color-active-darker);
 }
