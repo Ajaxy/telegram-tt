@@ -1,11 +1,8 @@
 @use "../../styles/mixins";
 
 .MiddleHeader {
-  position: absolute;
+  position: relative;
   z-index: var(--z-middle-header);
-  top: 0;
-  right: 0;
-  left: 0;
 
   display: flex;
   flex-shrink: 0;
@@ -26,6 +23,37 @@
 
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: transform var(--layer-transition);
+
+  &::after {
+    content: "";
+
+    position: absolute;
+    right: -1rem;
+    bottom: -0.5rem;
+    left: -1rem;
+
+    height: 1px;
+
+    opacity: 0;
+    background:
+      linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.4) 2%,
+        rgba(255, 255, 255, 0.4) 98%,
+        rgba(255, 255, 255, 0) 100%
+      );
+
+    transition: opacity 350ms ease;
+
+    html.theme-dark & {
+      background: var(--action-message-bg);
+    }
+  }
+
+  &.with-notch::after {
+    opacity: 0.75;
+  }
 
   body.no-page-transitions & {
     transition: none !important;
@@ -331,6 +359,7 @@
   }
 
   @media (max-width: 600px) {
+    position: relative;
     padding-right: max(0.5rem, env(safe-area-inset-right));
     padding-left: max(0.5rem, env(safe-area-inset-left));
   }

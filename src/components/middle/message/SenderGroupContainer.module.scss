@@ -23,7 +23,15 @@
 
 .senderAvatar {
   position: sticky !important;
-  bottom: calc(var(--middle-column-footer-height) + 0.5rem);
+  bottom: 0.25rem;
+
+  :global(.select-mode-active) & {
+    bottom: 5rem;
+
+    @media (max-width: 600px) {
+      bottom: 3.6875rem;
+    }
+  }
 }
 
 .contextMenu {

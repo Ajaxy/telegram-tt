@@ -1,39 +1,24 @@
 @use "../../styles/mixins";
 
 .MessageList {
-  --message-list-top-inset:
-    calc(
-      var(--middle-header-height) + var(--middle-panel-inline-padding) + 0.5rem + var(--middle-header-panes-height)
-    );
-  --message-list-top-fade-lift: 1rem;
-  --message-list-bottom-fade: 1rem;
-
-  --message-list-bottom-inset: calc(max(var(--middle-column-footer-height), 4.25rem) + var(--message-list-bottom-fade));
-  --message-list-bottom-fade-size: calc(4.25rem * var(--has-footer, 1));
-  --message-list-fade-floor: rgba(0, 0, 0, 0.24);
-
+  container-type: size;
   overflow-x: hidden;
   overflow-y: scroll;
   flex: 1;
 
   width: 100%;
-  margin-top: 0;
-
-  mask-image:
-    linear-gradient(
-      to bottom,
-      var(--message-list-fade-floor) 0,
-      var(--message-list-fade-floor) calc(var(--message-list-top-inset) - var(--message-list-top-fade-lift) - 1.5rem),
-      #000 calc(var(--message-list-top-inset) - var(--message-list-top-fade-lift)),
-      #000 calc(100% - var(--message-list-bottom-fade-size)),
-      var(--message-list-fade-floor) 100%
-    );
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: bottom 150ms ease-out, transform var(--layer-transition);
 
   body.no-page-transitions & {
     transition: none !important;
+  }
+
+  .mask-image-enabled & {
+    mask-image: linear-gradient(to top, transparent 0, #000 0.5rem);
   }
 
   body.keyboard-visible & {
@@ -66,7 +51,7 @@
     max-width: var(--messages-container-width);
     min-height: 100%;
     margin: 0 auto;
-    padding: 1rem 1rem var(--message-list-bottom-inset) 1.125rem;
+    padding: 1rem 1rem 0 1.125rem;
 
     .force-messages-scroll & {
       margin-top: 100vh !important;
@@ -78,7 +63,7 @@
 
     .live-tail {
       overflow-anchor: none;
-      min-height: max(0rem, calc(100dvh - var(--message-list-top-inset) - var(--message-list-bottom-inset)));
+      min-height: max(0rem, calc(100cqh - var(--middle-header-panes-height) - 2.5rem));
 
       .message-list-item {
         animation: live-tail-message-mount 0.2s ease-out;
@@ -102,12 +87,10 @@
   }
 
   .first-message-date-group {
-    padding-top: var(--message-list-top-inset);
+    padding-top: var(--middle-header-panes-height);
   }
 
   &.no-composer {
-    --message-list-bottom-inset: 0px;
-
     margin-bottom: 0;
 
     .last-in-list {
@@ -118,8 +101,6 @@
   &.select-mode-active,
   &.type-pinned,
   &.saved-dialog {
-    --message-list-bottom-inset: 0px;
-
     margin-bottom: 0;
 
     .last-in-list {
@@ -339,7 +320,7 @@
 
   &.scrolled:not(.is-animating) .sticky-date {
     position: sticky;
-    top: calc(0.625rem + var(--message-list-top-inset));
+    top: calc(0.625rem + var(--middle-header-panes-height));
   }
 
   &.is-animating .message-select-control {

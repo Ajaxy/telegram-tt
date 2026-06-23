@@ -10,7 +10,6 @@ import {
 } from '../../../../lib/fasterdom/fasterdom';
 import animateScroll from '../../../../util/animateScroll';
 import { REM } from '../../../common/helpers/mediaDimensions';
-import getFooterOverlayHeight from '../../helpers/getFooterOverlayHeight';
 import { requestAfterMessageListReflow } from '../../helpers/messageListReflow';
 
 // This is used when the viewport was replaced.
@@ -56,13 +55,11 @@ export default function useFocusMessageListElement({
         const maxDistance = focusDirection !== undefined
           ? (isToBottom ? BOTTOM_FOCUS_OFFSET : RELOCATED_FOCUS_OFFSET) : undefined;
 
-        const footerOverlay = scrollPosition === 'end' ? getFooterOverlayHeight(messagesContainer) : 0;
-
         const result = animateScroll({
           container: messagesContainer,
           element: elementRef.current!,
           position: scrollPosition,
-          margin: (isToBottom ? BOTTOM_FOCUS_MARGIN : FOCUS_MARGIN) + footerOverlay,
+          margin: isToBottom ? BOTTOM_FOCUS_MARGIN : FOCUS_MARGIN,
           maxDistance,
           forceDirection: focusDirection,
           forceNormalContainerHeight: isResizingContainer,
