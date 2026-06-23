@@ -85,6 +85,7 @@ const WebLink = ({
         mediaType: 'webpage',
         webpageType: 'full',
         id: '',
+        hash: 0,
         displayUrl: linkUrl,
         siteName: domain.replace(/^www./, ''),
         url: linkUrl.includes('://') ? linkUrl : linkUrl.includes('@') ? `mailto:${linkUrl}` : `http://${linkUrl}`,

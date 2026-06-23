@@ -28,6 +28,10 @@ declare namespace React {
     teactExperimentControlled?: boolean;
   }
 
+  interface LiHTMLAttributes<_T> {
+    type?: string;
+  }
+
   // Teact features
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type, @typescript-eslint/no-wrapper-object-types
   interface CSSProperties extends String {}

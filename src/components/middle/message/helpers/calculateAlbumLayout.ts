@@ -46,6 +46,11 @@ export type IAlbumLayout = {
   containerStyle: ApiDimensions;
 };
 
+const MAX_COMPLEX_LAYOUT_ROW_ITEMS = 3;
+const MAX_COMPLEX_LAYOUT_LAST_ROW_ITEMS = 4;
+const EXTENDED_LAYOUT_EXTRA_ROW_COUNT = 2;
+const MIN_EXTENDED_LAYOUT_ROW_COUNT = 5;
+
 function getRatios(messages: ApiMessage[], isSingleMessage: boolean, isMobile: boolean) {
   const isOutgoing = messages[0].isOutgoing;
   const allMedia = (isSingleMessage
@@ -69,6 +74,24 @@ function getRatios(messages: ApiMessage[], isSingleMessage: boolean, isMobile: b
   );
 }
 
+export function getMediaRatio(
+  media: Parameters<typeof calculateMediaDimensions>[0]['media'],
+  isOwn: boolean,
+  isMobile: boolean,
+  noAvatars?: boolean,
+  isNestedMedia?: boolean,
+) {
+  const dimensions = calculateMediaDimensions({
+    media,
+    isOwn,
+    noAvatars,
+    isMobile,
+    isNestedMedia,
+  });
+
+  return dimensions.width / dimensions.height;
+}
+
 function getProportions(ratios: number[]) {
   return ratios.map((ratio) => (ratio > 1.2 ? 'w' : (ratio < 0.8 ? 'n' : 'q'))).join('');
 }
@@ -79,6 +102,92 @@ function getAverageRatio(ratios: number[]) {
 
 function accumulate(list: number[], initValue: number) {
   return list.reduce((accumulator, item) => accumulator + item, initValue);
+}
+
+function buildBaseLineCounts(count: number, averageRatio: number) {
+  return [
+    [MAX_COMPLEX_LAYOUT_ROW_ITEMS, MAX_COMPLEX_LAYOUT_ROW_ITEMS],
+    [
+      MAX_COMPLEX_LAYOUT_ROW_ITEMS,
+      averageRatio < 0.85 ? MAX_COMPLEX_LAYOUT_LAST_ROW_ITEMS : MAX_COMPLEX_LAYOUT_ROW_ITEMS,
+      MAX_COMPLEX_LAYOUT_ROW_ITEMS,
+    ],
+    [
+      MAX_COMPLEX_LAYOUT_ROW_ITEMS,
+      MAX_COMPLEX_LAYOUT_ROW_ITEMS,
+      MAX_COMPLEX_LAYOUT_ROW_ITEMS,
+      MAX_COMPLEX_LAYOUT_LAST_ROW_ITEMS,
+    ],
+  ].flatMap((maxCounts) => buildLineCounts(count, maxCounts));
+}
+
+function buildExtendedLineCounts(count: number) {
+  const minRowCount = Math.max(
+    MIN_EXTENDED_LAYOUT_ROW_COUNT,
+    Math.ceil((count - MAX_COMPLEX_LAYOUT_LAST_ROW_ITEMS) / MAX_COMPLEX_LAYOUT_ROW_ITEMS) + 1,
+  );
+  const maxRowCount = Math.min(count, minRowCount + EXTENDED_LAYOUT_EXTRA_ROW_COUNT);
+  const lineCounts: number[][] = [];
+
+  for (let rowCount = minRowCount; rowCount <= maxRowCount; rowCount++) {
+    const currentLineCounts = buildExtendedLineCount(count, rowCount);
+    if (currentLineCounts) {
+      lineCounts.push(currentLineCounts);
+    }
+  }
+
+  return lineCounts;
+}
+
+function buildExtendedLineCount(count: number, rowCount: number) {
+  const lineCounts = Array.from({ length: rowCount }, () => 1);
+  const maxCounts = Array.from({ length: rowCount }, () => MAX_COMPLEX_LAYOUT_ROW_ITEMS);
+  maxCounts[rowCount - 1] = MAX_COMPLEX_LAYOUT_LAST_ROW_ITEMS;
+
+  if (count > accumulate(maxCounts, 0)) {
+    return undefined;
+  }
+
+  let remainingCount = count - rowCount;
+  for (let row = rowCount - 1; row >= 0 && remainingCount; row--) {
+    const addedCount = Math.min(remainingCount, maxCounts[row] - lineCounts[row]);
+    lineCounts[row] += addedCount;
+    remainingCount -= addedCount;
+  }
+
+  return lineCounts;
+}
+
+function buildLineCounts(count: number, maxCounts: number[]) {
+  const lineCounts: number[][] = [];
+  collectLineCounts(count, maxCounts, [], lineCounts);
+  return lineCounts;
+}
+
+function collectLineCounts(
+  remainingCount: number,
+  maxCounts: number[],
+  currentLineCounts: number[],
+  result: number[][],
+) {
+  if (!maxCounts.length) {
+    if (!remainingCount) {
+      result.push([...currentLineCounts]);
+    }
+
+    return;
+  }
+
+  const [maxCurrentCount, ...restMaxCounts] = maxCounts;
+  const maxRestCount = accumulate(restMaxCounts, 0);
+  const minCurrentCount = Math.max(1, remainingCount - maxRestCount);
+  const maxAllowedCount = Math.min(maxCurrentCount, remainingCount - restMaxCounts.length);
+
+  for (let currentCount = minCurrentCount; currentCount <= maxAllowedCount; currentCount++) {
+    currentLineCounts.push(currentCount);
+    collectLineCounts(remainingCount - currentCount, restMaxCounts, currentLineCounts, result);
+    currentLineCounts.pop();
+  }
 }
 
 function cropRatios(ratios: number[], averageRatio: number) {
@@ -112,6 +221,23 @@ export function calculateAlbumLayout(
 ): IAlbumLayout {
   const spacing = 2;
   const ratios = getRatios(album.messages, Boolean(album.isPaidMedia), isMobile);
+  return calculateAlbumLayoutByRatios(isOwn, noAvatars, ratios, isMobile, spacing);
+}
+
+export function calculateAlbumLayoutByRatios(
+  isOwn: boolean,
+  noAvatars: boolean,
+  ratios: number[],
+  isMobile: boolean,
+  spacing = 2,
+): IAlbumLayout {
+  if (!ratios.length) {
+    return {
+      layout: [],
+      containerStyle: { width: 0, height: 0 },
+    };
+  }
+
   const proportions = getProportions(ratios);
   const averageRatio = getAverageRatio(ratios);
   const albumCount = ratios.length;
@@ -131,7 +257,9 @@ export function calculateAlbumLayout(
     spacing,
   };
 
-  if (albumCount >= 5 || forceCalc) {
+  if (albumCount === 1) {
+    layout = layoutSingle(params);
+  } else if (albumCount >= 5 || forceCalc) {
     layout = layoutWithComplexLayouter(params);
   } else if (albumCount === 2) {
     layout = layoutTwo(params);
@@ -145,6 +273,24 @@ export function calculateAlbumLayout(
     layout,
     containerStyle: calculateContainerSize(layout),
   };
+}
+
+function layoutSingle({
+  ratios,
+  maxWidth,
+  maxHeight,
+}: ILayoutParams) {
+  const height = Math.round(Math.min(maxWidth / ratios[0], maxHeight));
+
+  return [{
+    dimensions: {
+      x: 0,
+      y: 0,
+      width: maxWidth,
+      height,
+    },
+    sides: AlbumRectPart.Left | AlbumRectPart.Top | AlbumRectPart.Right | AlbumRectPart.Bottom,
+  }];
 }
 
 function layoutWithComplexLayouter({
@@ -181,31 +327,10 @@ function layoutWithComplexLayouter({
     });
   };
 
-  for (let first = 1; first !== count; ++first) {
-    const second = count - first;
-    if (first <= 3 && second <= 3) {
-      pushAttempt([first, second]);
-    }
-  }
+  buildBaseLineCounts(count, averageRatio).forEach(pushAttempt);
 
-  for (let first = 1; first !== count - 1; ++first) {
-    for (let second = 1; second !== count - first; ++second) {
-      const third = count - first - second;
-      if (first <= 3 && second <= (averageRatio < 0.85 ? 4 : 3) && third <= 3) {
-        pushAttempt([first, second, third]);
-      }
-    }
-  }
-
-  for (let first = 1; first !== count - 1; ++first) {
-    for (let second = 1; second !== count - first; ++second) {
-      for (let third = 1; third !== count - first - second; ++third) {
-        const fourth = count - first - second - third;
-        if (first <= 3 && second <= 3 && third <= 3 && fourth <= 4) {
-          pushAttempt([first, second, third, fourth]);
-        }
-      }
-    }
+  if (!attempts.length) {
+    buildExtendedLineCounts(count).forEach(pushAttempt);
   }
 
   let optimalAttempt: IAttempt | undefined;

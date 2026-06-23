@@ -281,7 +281,6 @@ const PollOption = ({
           geo={media.location.geo}
           width={OPTION_MEDIA_SIZE}
           height={OPTION_MEDIA_SIZE}
-          shouldShowPin={false}
           onClick={handleOpenMap}
         />
       );

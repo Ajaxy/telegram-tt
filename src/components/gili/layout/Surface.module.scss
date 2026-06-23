@@ -2,7 +2,9 @@
 
 @layer ui.layout {
   .root {
-    padding-inline: 1rem;
+    --surface-inline-padding: 1rem;
+
+    padding-inline: var(--surface-inline-padding);
     background-color: var(--color-background-secondary);
   }
 
@@ -10,10 +12,16 @@
     scrollbar-gutter: stable;
     overflow-y: auto;
 
-    @include mixins.adapt-padding-to-scrollbar(1rem);
+    @include mixins.adapt-padding-to-scrollbar(var(--surface-inline-padding));
   }
 
   .noPadding {
+    --surface-inline-padding: 0rem;
+
     padding-inline: 0;
+  }
+
+  .breakout {
+    margin-inline: calc(-1 * var(--surface-inline-padding, 0rem));
   }
 }

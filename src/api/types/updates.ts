@@ -30,6 +30,7 @@ import type {
   ApiQuickReply,
   ApiReaction,
   ApiReactions,
+  ApiRichMessage,
   ApiStickerSet,
   ApiThreadInfo,
   ApiWebPage,
@@ -155,8 +156,13 @@ export type ApiUpdateChatTypingDraft = {
   chatId: string;
   id: string;
   threadId?: ThreadId;
+} & ({
   text: ApiFormattedText;
-};
+  richMessage?: undefined;
+} | {
+  richMessage: ApiRichMessage;
+  text?: undefined;
+});
 
 export type ApiUpdateStartEmojiInteraction = {
   '@type': 'updateStartEmojiInteraction';

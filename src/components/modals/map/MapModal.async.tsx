@@ -5,8 +5,8 @@ import { Bundles } from '../../../util/moduleLoader';
 import useModuleLoader from '../../../hooks/useModuleLoader';
 
 const MapModalAsync = (props: OwnProps) => {
-  const { modal } = props;
-  const MapModal = useModuleLoader(Bundles.Extra, 'MapModal', !modal);
+  const { isOpen } = props;
+  const MapModal = useModuleLoader(Bundles.Extra, 'MapModal', !isOpen);
 
   return MapModal ? <MapModal {...props} /> : undefined;
 };

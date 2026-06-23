@@ -11,6 +11,7 @@ import { renderTextWithEntities } from '../../components/common/helpers/renderTe
 import {
   getMessageTextWithFallback, getMessageTranscription,
 } from './messages';
+import { getRichMessagePreviewText } from './richMessage';
 
 const SPOILER_CHARS = ['⠺', '⠵', '⠞', '⠟'];
 export const TRUNCATED_SUMMARY_LENGTH = 200;
@@ -25,9 +26,9 @@ export function getMessageSummaryText(
 ) {
   const emoji = !noEmoji && getMessageSummaryEmoji(message);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
-  const text = trimText(getMessageTextWithSpoilers(lang, message, statefulContent), truncateLength);
+  const text = trimText(getMessageTextWithSpoilers(lang, message, statefulContent, truncateLength), truncateLength);
   const description = getMessageSummaryDescription(lang, message, statefulContent, text, isExtended);
-  const descriptionText = getSummaryDescriptionText(message, statefulContent, description);
+  const descriptionText = getSummaryDescriptionText(message, statefulContent, description, truncateLength);
 
   return `${emojiWithSpace}${descriptionText}`;
 }
@@ -36,16 +37,21 @@ export function getMessageTextWithSpoilers(
   lang: LangFn,
   message: ApiMessage,
   statefulContent: StatefulMediaContent | undefined,
+  truncateLength?: number,
 ) {
   const transcription = getMessageTranscription(message);
 
-  const textWithoutTranscription = getMessageTextWithFallback(lang, statefulContent?.story || message)?.text;
+  const richMessageText = message.content.richMessage
+    ? getRichMessagePreviewText(message.content.richMessage, truncateLength)
+    : undefined;
+  const textWithoutTranscription = richMessageText
+    || getMessageTextWithFallback(lang, statefulContent?.story || message)?.text;
   if (!textWithoutTranscription) {
     return transcription;
   }
 
   const { entities } = message.content.text || {};
-  if (!entities?.length) {
+  if (richMessageText || !entities?.length) {
     return transcription ? `${transcription}\n${textWithoutTranscription}` : textWithoutTranscription;
   }
 
@@ -154,6 +160,7 @@ function getSummaryDescription(
     paidMedia,
     todo,
     dice,
+    richMessage,
   } = mediaContent;
   const { poll } = statefulContent || {};
 
@@ -262,6 +269,10 @@ function getSummaryDescription(
     summary = dice.emoticon;
   }
 
+  if (richMessage) {
+    summary = truncatedText as string;
+  }
+
   return summary || lang('MessageUnsupported');
 }
 
@@ -286,20 +297,23 @@ function getSummaryDescriptionText(
   message: ApiMessage,
   statefulContent: StatefulMediaContent | undefined,
   description: TeactNode,
+  truncateLength: number,
 ): string {
   const { todo } = message.content;
   const { poll } = statefulContent || {};
 
   if (todo) {
-    return getFormattedTextWithSpoilers(todo.todo.title);
+    return trimText(getFormattedTextWithSpoilers(todo.todo.title), truncateLength);
   }
 
   if (poll) {
-    return getFormattedTextWithSpoilers(poll.summary.question);
+    return trimText(getFormattedTextWithSpoilers(poll.summary.question), truncateLength);
   }
 
   if (Array.isArray(description)) {
-    return description.map((part) => getSummaryDescriptionText(message, statefulContent, part)).join('');
+    return description.map((part) => {
+      return getSummaryDescriptionText(message, statefulContent, part, truncateLength);
+    }).join('');
   }
 
   return typeof description === 'string' || typeof description === 'number' ? String(description) : '';

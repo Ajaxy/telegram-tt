@@ -1,10 +1,21 @@
+import type { ApiInstantViewPage } from '../../../../api/types';
 import type { IconName } from '../../../../types/icons';
 import type { RegularLangKey } from '../../../../types/language';
 
 import { getServerTime } from '../../../../util/serverTime';
 
 // https://github.com/telegramdesktop/tdesktop/blob/3da787791f6d227f69b32bf4003bc6071d05e2ac/Telegram/SourceFiles/history/view/history_view_view_button.cpp#L51
-export function getWebpageButtonLangKey(type?: string, auctionEndDate?: number): RegularLangKey | undefined {
+export function getWebpageButtonLangKey(type: string | undefined, {
+  auctionEndDate,
+  cachedPage,
+}: {
+  auctionEndDate?: number;
+  cachedPage?: ApiInstantViewPage;
+}): RegularLangKey | undefined {
+  if (cachedPage) {
+    return 'ViewButtonInstantView';
+  }
+
   switch (type) {
     case 'telegram_channel_request':
     case 'telegram_megagroup_request':
@@ -51,7 +62,15 @@ export function getWebpageButtonLangKey(type?: string, auctionEndDate?: number):
   }
 }
 
-export function getWebpageButtonIcon(type?: string): IconName | undefined {
+export function getWebpageButtonIcon(type: string | undefined, {
+  cachedPage,
+}: {
+  cachedPage?: ApiInstantViewPage;
+}): IconName | undefined {
+  if (cachedPage) {
+    return 'boost';
+  }
+
   if (type === 'telegram_auction') {
     return 'auction-filled';
   }

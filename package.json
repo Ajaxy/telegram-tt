@@ -122,7 +122,8 @@
     "lowlight": "^3.3.0",
     "music-metadata": "^11.12.3",
     "opus-recorder": "github:Ajaxy/opus-recorder#116830a",
-    "qr-code-styling": "^1.9.2"
+    "qr-code-styling": "^1.9.2",
+    "temml": "^0.13.3"
   },
   "browserslist": [
     "baseline widely available"

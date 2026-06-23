@@ -1,0 +1,40 @@
+.dialog {
+  --modal-background-color: var(--color-background);
+}
+
+.article {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.content {
+  flex: 1 0 auto;
+}
+
+.footer {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+
+  margin: 0.5rem -1rem -1rem;
+  padding: 0.75rem 1rem;
+
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+
+  background-color: var(--color-background-secondary);
+}
+
+.viewsCounter {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reportLink {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+}

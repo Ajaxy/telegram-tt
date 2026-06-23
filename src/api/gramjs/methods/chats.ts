@@ -929,17 +929,23 @@ export async function createChannel({
   return { channel, missingUsers };
 }
 
-export function joinChannel({
+export async function joinChannel({
   channelId, accessHash,
 }: {
   channelId: string; accessHash: string;
 }) {
-  return invokeRequest(new GramJs.channels.JoinChannel({
+  const result = await invokeRequest(new GramJs.channels.JoinChannel({
     channel: buildInputChannel(channelId, accessHash),
   }), {
-    shouldReturnTrue: true,
     shouldThrow: true,
   });
+
+  if (!result || result instanceof GramJs.messages.ChatInviteJoinResultWebView) {
+    // TODO: Handle web view result
+    return undefined;
+  }
+
+  return true;
 }
 
 export function deleteChatUser({
@@ -1751,7 +1757,13 @@ function preparePeers(
 }
 
 export async function importChatInvite({ hash }: { hash: string }) {
-  const updates = await invokeRequest(new GramJs.messages.ImportChatInvite({ hash }));
+  const result = await invokeRequest(new GramJs.messages.ImportChatInvite({ hash }));
+  if (!result || result instanceof GramJs.messages.ChatInviteJoinResultWebView) {
+    // TODO: Handle web view result
+    return undefined;
+  }
+
+  const updates = result.updates;
   if (!(updates instanceof GramJs.Updates) || !updates.chats.length) {
     return undefined;
   }

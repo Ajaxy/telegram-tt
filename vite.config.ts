@@ -175,6 +175,9 @@ export default defineConfig(({ mode }): UserConfig => {
     base: './',
     envPrefix: ['VITE_', 'TG_'],
     assetsInclude: ['**/*.tgs'],
+    optimizeDeps: {
+      exclude: ['temml'],
+    },
     define: {
       APP_VERSION: JSON.stringify(APP_VERSION),
       CHANGELOG_DATETIME: JSON.stringify(statSync(CHANGELOG_PATH, { throwIfNoEntry: false })?.mtime.getTime()),

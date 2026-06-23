@@ -15,6 +15,7 @@ import Icon from './icons/Icon';
 import styles from './Blockquote.module.scss';
 
 type OwnProps = {
+  className?: string;
   canBeCollapsible?: boolean;
   isToggleDisabled?: boolean;
   children: TeactNode;
@@ -22,7 +23,12 @@ type OwnProps = {
 
 const MAX_LINES = 4;
 
-const Blockquote = ({ canBeCollapsible, isToggleDisabled, children }: OwnProps) => {
+const Blockquote = ({
+  className,
+  canBeCollapsible,
+  isToggleDisabled,
+  children,
+}: OwnProps) => {
   const ref = useRef<HTMLQuoteElement>();
   const {
     isCollapsed, isCollapsible, setIsCollapsed,
@@ -40,7 +46,7 @@ const Blockquote = ({ canBeCollapsible, isToggleDisabled, children }: OwnProps) 
 
   return (
     <span
-      className={buildClassName(styles.root, isCollapsed && styles.collapsed)}
+      className={buildClassName(styles.root, className, isCollapsed && styles.collapsed)}
       onClick={canExpand ? handleExpand : undefined}
     >
       <blockquote

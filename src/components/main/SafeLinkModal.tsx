@@ -1,48 +1,63 @@
-import type { FC } from '../../lib/teact/teact';
-import { memo, useCallback } from '../../lib/teact/teact';
+import { memo, useMemo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import { ensureProtocol } from '../../util/browser/url';
 import renderText from '../common/helpers/renderText';
 
-import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
-import ConfirmDialog from '../ui/ConfirmDialog';
+import Button from '../ui/Button';
+import Modal, {
+  ModalFooterActions,
+  ModalHeader,
+  ModalTitle,
+} from '@gili/modal/Modal';
 
 export type OwnProps = {
-  url?: string;
+  modal: string;
+  isOpen: boolean;
 };
 
-const SafeLinkModal: FC<OwnProps> = ({ url }) => {
+const SafeLinkModal = ({ modal, isOpen }: OwnProps) => {
   const { toggleSafeLinkModal } = getActions();
 
   const lang = useLang();
 
-  const handleOpen = useCallback(() => {
-    if (!url) {
-      return;
-    }
-
-    window.open(ensureProtocol(url), '_blank', 'noopener noreferrer');
+  const handleOpen = useLastCallback(() => {
+    window.open(ensureProtocol(modal), '_blank', 'noopener noreferrer');
     toggleSafeLinkModal({ url: undefined });
-  }, [toggleSafeLinkModal, url]);
+  });
 
-  const handleDismiss = useCallback(() => {
+  const handleDismiss = useLastCallback(() => {
     toggleSafeLinkModal({ url: undefined });
-  }, [toggleSafeLinkModal]);
+  });
 
-  const renderingUrl = useCurrentOrPrev(url);
+  const header = useMemo(() => (
+    <ModalHeader>
+      <ModalTitle>{lang('OpenUrlTitle')}</ModalTitle>
+    </ModalHeader>
+  ), [lang]);
 
   return (
-    <ConfirmDialog
-      isOpen={Boolean(url)}
+    <Modal
+      isOpen={isOpen}
+      header={header}
+      width="slim"
+      height="auto"
+      ariaLabel={lang('OpenUrlTitle')}
       onClose={handleDismiss}
-      title={lang('OpenUrlTitle')}
-      textParts={renderText(lang('OpenUrlText', { url: renderingUrl }, { withNodes: true, withMarkdown: true }))}
-      confirmLabel={lang('OpenUrlConfirm')}
-      confirmHandler={handleOpen}
-    />
+    >
+      {renderText(lang('OpenUrlText', { url: modal }, { withNodes: true, withMarkdown: true }))}
+      <ModalFooterActions>
+        <Button isText size="smaller" color="primary" fluid onClick={handleDismiss}>
+          {lang('Cancel')}
+        </Button>
+        <Button isText size="smaller" color="primary" fluid autoFocus onClick={handleOpen}>
+          {lang('OpenUrlConfirm')}
+        </Button>
+      </ModalFooterActions>
+    </Modal>
   );
 };
 

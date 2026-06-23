@@ -6,6 +6,7 @@
     --modal-content-block-padding: 1rem;
     --modal-scroll-fade-size: 1rem;
     --modal-border-radius: 1.75rem;
+    --modal-background-color: var(--color-background-secondary);
 
     user-select: none;
 
@@ -124,7 +125,7 @@
     max-height: min(100%, var(--modal-max-height));
     border-radius: var(--modal-border-radius);
 
-    background-color: var(--color-background-secondary);
+    background-color: var(--modal-background-color);
     box-shadow: 0 0.625rem 2rem rgb(0 0 0 / 18%);
   }
 
@@ -149,6 +150,7 @@
   }
 
   .withHeader {
+    scroll-padding-top: calc(var(--modal-header-height) + var(--modal-content-block-padding));
     mask-image:
       linear-gradient(
         to bottom,
@@ -219,6 +221,13 @@
     grid-row: 1 / -1;
     align-items: center;
     justify-self: end;
+  }
+
+  .footerActions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
   }
 
   .closeButton {

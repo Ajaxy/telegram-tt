@@ -258,6 +258,7 @@
     "messages.editChatCreator",
     "messages.getFutureChatCreatorAfterLeave",
     "messages.editChatParticipantRank",
+    "messages.getRichMessage",
     "updates.getState",
     "updates.getDifference",
     "updates.getChannelDifference",

@@ -134,6 +134,7 @@
     --color-warning: #{$color-warning};
 
     --color-yellow: #{$color-yellow};
+    --color-marked: #{rgba($color-yellow, 0.5)};
 
     --color-orange: #{$color-orange};
     --color-light-coral: #{$color-light-coral};

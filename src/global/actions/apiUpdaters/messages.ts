@@ -1146,7 +1146,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateChatTypingDraft': {
-      const { id, chatId, threadId = MAIN_THREAD_ID, text } = update;
+      const { id, chatId, threadId = MAIN_THREAD_ID, text, richMessage } = update;
       const thread = selectThread(global, chatId, threadId);
       if (!thread) return undefined;
 
@@ -1183,6 +1183,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = updateChatMessage(global, chatId, messageId, {
           content: {
             text,
+            richMessage,
           },
           editDate: getServerTime(),
         });
@@ -1200,6 +1201,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         chatId,
         threadId,
         text,
+        richMessage,
       });
 
       actions.apiUpdate({

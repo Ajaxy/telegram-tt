@@ -91,6 +91,7 @@ import type {
   ManagementScreens,
   MediaViewerMedia,
   MediaViewerOrigin,
+  MediaViewerPageMedia,
   MessageList,
   MessageListType,
   MiddleSearchParams,
@@ -304,6 +305,10 @@ export interface ActionPayloads {
   loadWebPagePreview: {
     text: ApiFormattedText;
   } & WithTabId;
+  loadWebPage: {
+    url: string;
+    hash?: number;
+  };
   clearWebPagePreview: WithTabId | undefined;
   loadWallpapers: undefined;
   uploadWallpaper: File;
@@ -558,6 +563,10 @@ export interface ActionPayloads {
     chatId: string;
     messageId: number;
     replyOriginForId?: number;
+  };
+  loadRichMessage: {
+    chatId: string;
+    messageId: number;
   };
   loadMessagesById: {
     chatId: string;
@@ -950,6 +959,10 @@ export interface ActionPayloads {
     messageId?: number;
   } & WithTabId;
   closeChatLanguageModal: WithTabId | undefined;
+  openInstantView: {
+    webPageId: string;
+  } & WithTabId;
+  closeInstantView: WithTabId | undefined;
 
   // poll result
   openPollResults: {
@@ -1846,6 +1859,7 @@ export interface ActionPayloads {
     threadId?: ThreadId;
     messageId?: number;
     standaloneMedia?: MediaViewerMedia[];
+    pageMedia?: MediaViewerPageMedia;
     mediaIndex?: number;
     isAvatarView?: boolean;
     isSponsoredMessage?: boolean;
@@ -2497,6 +2511,8 @@ export interface ActionPayloads {
     url: string;
     shouldSkipModal?: boolean;
     ignoreDeepLinks?: boolean;
+    tryInstant?: boolean;
+    previewId?: string;
     linkContext?: LinkContext;
   } & WithTabId;
   openMapModal: {

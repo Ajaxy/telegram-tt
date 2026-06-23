@@ -116,6 +116,7 @@ export { default as DisableSharingAboutModal } from '../components/modals/disabl
 export { default as EditRankModal } from '../components/modals/rank/EditRankModal';
 export { default as RankModal } from '../components/modals/rank/RankModal';
 export { default as QuickPreviewModal } from '../components/modals/quickPreview/QuickPreviewModal';
+export { default as InstantViewer } from '../components/modals/instantView/InstantViewer';
 export { default as StealthModeModal } from '../components/modals/storyStealthMode/StealthModeModal';
 export { default as LeaveGroupModal } from '../components/modals/leaveGroup/LeaveGroupModal';
 export { default as TwoFaCheckModal } from '../components/modals/twoFaCheck/TwoFaCheckModal';

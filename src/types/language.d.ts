@@ -61,6 +61,8 @@ export interface LangPair {
   'PremiumLimitAccounts': undefined;
   'SendMessage': undefined;
   'MessageUnsupported': undefined;
+  'PageContentUnsupported': undefined;
+  'PageContentEmbed': undefined;
   'ConversationDefaultRestrictedMedia': undefined;
   'AccDescrVoiceMessage': undefined;
   'BotSettings': undefined;
@@ -744,6 +746,9 @@ export interface LangPair {
   'SponsoredPeerBadge': undefined;
   'PremiumStickerTooltip': undefined;
   'ViewAction': undefined;
+  'RichMessageMore': undefined;
+  'RichTextMathPreview': undefined;
+  'RichTextMapPreview': undefined;
   'Loading': undefined;
   'NoMessages': undefined;
   'BotInfoTitle': undefined;
@@ -1537,6 +1542,7 @@ export interface LangPair {
   'ViewButtonStickerset': undefined;
   'ViewButtonEmojiset': undefined;
   'ViewButtonGiftUnique': undefined;
+  'ViewButtonInstantView': undefined;
   'ViewButtonAiStyle': undefined;
   'AuthContinueOnThisLanguage': undefined;
   'Share': undefined;
@@ -1828,6 +1834,8 @@ export interface LangPair {
   'PriceChanged': undefined;
   'PayNewPrice': undefined;
   'LinkPreview': undefined;
+  'InstantView': undefined;
+  'InstantViewWrongLayout': undefined;
   'ContextMoveTextUp': undefined;
   'ContextMoveTextDown': undefined;
   'ContextLinkLargerMedia': undefined;

@@ -161,6 +161,7 @@ import {
   selectUserFullInfo,
   selectUserStatus,
   selectViewportIds,
+  selectWebPage,
 } from '../../selectors';
 import {
   selectDraft,
@@ -347,6 +348,39 @@ addActionHandler('loadMessage', async (global, actions, payload): Promise<void> 
 
   global = getGlobal();
   global = updateChatMessage(global, chat.id, messageId, result.message);
+  setGlobal(global);
+});
+
+addActionHandler('loadRichMessage', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, messageId,
+  } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const result = await callApi('fetchRichMessage', { chat, messageId });
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  const currentMessage = selectChatMessage(global, chat.id, messageId);
+  const partCutoff = currentMessage?.content.richMessage?.partCutoff;
+  const richMessage = result.message.content.richMessage;
+
+  global = updateChatMessage(global, chat.id, messageId, {
+    ...result.message,
+    content: {
+      ...result.message.content,
+      richMessage: richMessage && partCutoff !== undefined ? {
+        ...richMessage,
+        partCutoff,
+      } : richMessage,
+    },
+  });
   setGlobal(global);
 });
 
@@ -1363,6 +1397,17 @@ addActionHandler('loadWebPagePreview', async (global, actions, payload): Promise
   actions.apiUpdate({
     '@type': 'updateWebPage',
     webPage: webPagePreview,
+  });
+});
+
+addActionHandler('loadWebPage', async (global, actions, payload): Promise<void> => {
+  const { url, hash } = payload;
+  const webPage = await callApi('fetchWebPage', { url, hash });
+  if (!webPage) return;
+
+  actions.apiUpdate({
+    '@type': 'updateWebPage',
+    webPage,
   });
 });
 
@@ -2517,9 +2562,9 @@ addActionHandler('readAllPollVotes', (global, actions, payload): ActionReturnTyp
   return global;
 });
 
-addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
+addActionHandler('openUrl', async (global, actions, payload): Promise<void> => {
   const {
-    url, shouldSkipModal, ignoreDeepLinks, linkContext, tabId = getCurrentTabId(),
+    url, shouldSkipModal, ignoreDeepLinks, tryInstant, previewId, linkContext, tabId = getCurrentTabId(),
   } = payload;
   const urlWithProtocol = ensureProtocol(url);
   const parsedUrl = new URL(urlWithProtocol);
@@ -2531,6 +2576,27 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
 
     actions.openTelegramLink({ url, linkContext, tabId });
     return;
+  }
+
+  if (tryInstant) {
+    const localWebPage = previewId ? selectWebPage(global, previewId) : undefined;
+    if (localWebPage?.webpageType === 'full' && localWebPage.cachedPage) {
+      actions.openInstantView({ webPageId: localWebPage.id, tabId });
+      return;
+    }
+
+    const webPage = await callApi('fetchWebPage', { url: urlWithProtocol });
+    if (webPage) {
+      actions.apiUpdate({
+        '@type': 'updateWebPage',
+        webPage,
+      });
+    }
+
+    if (webPage?.webpageType === 'full' && webPage.cachedPage) {
+      actions.openInstantView({ webPageId: webPage.id, tabId });
+      return;
+    }
   }
 
   const { appConfig, config } = global;

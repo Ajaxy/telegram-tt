@@ -18,6 +18,7 @@ import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDepreca
 
 import Icon from '../../common/icons/Icon';
 import MediaAreaOverlay from '../../story/mediaArea/MediaAreaOverlay';
+import MediaBadge from './MediaBadge';
 
 import styles from './BaseStory.module.scss';
 
@@ -105,9 +106,9 @@ function BaseStory({
         </span>
       )}
       {Boolean(video?.duration) && (
-        <div className="message-media-duration">
+        <MediaBadge className="message-media-duration">
           {formatMediaDuration(video.duration)}
-        </div>
+        </MediaBadge>
       )}
       {isProtected && <span className="protector" />}
     </div>

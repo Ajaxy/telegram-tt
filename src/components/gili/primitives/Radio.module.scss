@@ -34,4 +34,9 @@
       outline-offset: 2px;
     }
   }
+
+  .nonInteractive {
+    pointer-events: none;
+    cursor: default;
+  }
 }

@@ -98,7 +98,7 @@ async function download(
     const h = Number(parsedParams.get('h'));
     const zoom = Number(parsedParams.get('zoom'));
     const scale = Number(parsedParams.get('scale'));
-    const accuracyRadiusStr = parsedParams.get('accuracy_radius');
+    const accuracyRadiusStr = parsedParams.get('accuracyRadius');
     const accuracyRadius = accuracyRadiusStr ? Number(accuracyRadiusStr) : undefined;
 
     const data = await client.downloadStaticMap(accessHash, long, lat, w, h, zoom, scale, accuracyRadius);

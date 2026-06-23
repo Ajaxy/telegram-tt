@@ -11,6 +11,11 @@ type OwnProps = React.HTMLAttributes<HTMLDivElement> & {
   children: React.ReactNode;
 };
 
+type BreakoutProps = React.HTMLAttributes<HTMLDivElement> & {
+  ref?: ElementRef<HTMLDivElement>;
+  children: React.ReactNode;
+};
+
 const Surface = ({
   ref,
   scrollable,
@@ -31,6 +36,23 @@ const Surface = ({
         noPadding && styles.noPadding,
         className,
       )}
+      {...otherProps}
+    >
+      {children}
+    </div>
+  );
+};
+
+export const Breakout = ({
+  ref,
+  className,
+  children,
+  ...otherProps
+}: BreakoutProps) => {
+  return (
+    <div
+      ref={ref}
+      className={buildClassName(styles.breakout, className)}
       {...otherProps}
     >
       {children}

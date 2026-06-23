@@ -808,7 +808,6 @@ function renderPollMedia({
         width={locationWidth}
         height={locationHeight}
         zoom={ATTACHED_MAP_ZOOM}
-        shouldShowPin={false}
         onClick={() => onOpenLocation(content.location!)}
       />
     );

@@ -175,6 +175,7 @@ import EmbeddedStory from '../../common/embedded/EmbeddedStory';
 import FakeIcon from '../../common/FakeIcon';
 import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
+import MessageRichText from '../../common/MessageRichText';
 import MessageText from '../../common/MessageText';
 import PeerColorWrapper from '../../common/PeerColorWrapper';
 import RankBadge from '../../common/RankBadge';
@@ -1124,6 +1125,22 @@ const Message = ({
   function renderMessageText(isForAnimation?: boolean) {
     if (!textMessage) return undefined;
 
+    if (textMessage.content.richMessage) {
+      return (
+        <MessageRichText
+          message={textMessage}
+          isOwn={isOwn}
+          noAvatars={noAvatars}
+          canAutoLoadMedia={canAutoLoadMedia}
+          isProtected={isProtected}
+          theme={theme}
+          observeIntersectionForLoading={observeIntersectionForLoading}
+          observeIntersectionForPlaying={observeIntersectionForPlaying}
+          threadId={threadId}
+        />
+      );
+    }
+
     const forcedText = (isShowingSummary && summary?.text)
       || (requestedTranslationLanguage ? currentTranslatedText : undefined);
     return (
@@ -1151,6 +1168,10 @@ const Message = ({
   }
 
   function renderMessageTextAnimation() {
+    if (textMessage?.content.richMessage) {
+      return undefined;
+    }
+
     return (
       <div className="translation-animation">
         <div className="text-loading">

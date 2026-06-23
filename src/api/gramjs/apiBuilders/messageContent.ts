@@ -4,7 +4,6 @@ import type {
   ApiAudio,
   ApiContact,
   ApiDice,
-  ApiDocument,
   ApiFormattedText,
   ApiGame,
   ApiGiveaway,
@@ -21,6 +20,7 @@ import type {
   ApiPoll,
   ApiPollAnswer,
   ApiPollResults,
+  ApiRichMessage,
   ApiStarGiftUnique,
   ApiSticker,
   ApiTodoItem,
@@ -33,19 +33,10 @@ import type {
   ApiWebPageStoryData,
   BoughtPaidMedia,
   MediaContent,
-  StoryboardInfo,
 } from '../../types';
 import type { UniversalMessage } from './messages';
 
-import {
-  STORYBOARD_MAP_MIME,
-  STORYBOARD_MIME,
-  SUPPORTED_PHOTO_CONTENT_TYPES,
-  SUPPORTED_VIDEO_CONTENT_TYPES,
-  VIDEO_WEBM_TYPE,
-} from '../../../config';
 import { addTimestampEntities } from '../../../util/dates/timestamp';
-import { generateWaveform } from '../../../util/generateWaveform';
 import { buildCollectionByKey, pick } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
 import {
@@ -56,14 +47,24 @@ import {
   buildApiFormattedText,
   buildApiMessageEntity,
   buildApiPhoto,
-  buildApiPhotoPreviewSizes,
-  buildApiPhotoSize,
-  buildApiThumbnailFromPath,
   buildApiThumbnailFromStripped,
 } from './common';
 import { buildApiStarGift } from './gifts';
+import {
+  buildApiInstantViewPage,
+  buildApiPageBlock,
+  buildApiPageMediaContext,
+} from './instantView';
+import {
+  buildApiAudioFromDocument,
+  buildApiDocument,
+  buildApiVideoFromDocument,
+  buildApiVoiceFromDocument,
+} from './media';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildStickerFromDocument, processStickerResult } from './symbols';
+
+export { buildApiDocument };
 
 export function buildMessageContent(
   mtpMessage: UniversalMessage | GramJs.UpdateServiceNotification,
@@ -77,9 +78,19 @@ export function buildMessageContent(
     };
   }
 
+  const richMessage = 'richMessage' in mtpMessage && mtpMessage.richMessage
+    ? buildApiRichMessage(mtpMessage.richMessage, 'peerId' in mtpMessage ? mtpMessage : undefined)
+    : undefined;
+  if (richMessage) {
+    content = {
+      ...content,
+      richMessage,
+    };
+  }
+
   const hasUnsupportedMedia = mtpMessage.media instanceof GramJs.MessageMediaUnsupported;
 
-  if (mtpMessage.message && !hasUnsupportedMedia
+  if (!richMessage && mtpMessage.message && !hasUnsupportedMedia
     && !content.sticker && !content.todo && !content.contact && !content.video?.isRound) {
     const text = buildMessageTextContent(mtpMessage.message, mtpMessage.entities);
     const textWithTimestamps = addTimestampEntities(text);
@@ -90,6 +101,27 @@ export function buildMessageContent(
   }
 
   return content;
+}
+
+export function buildApiRichMessage(
+  richMessage: GramJs.RichMessage,
+  context?: MediaRepairContext,
+): ApiRichMessage | undefined {
+  if (!(richMessage instanceof GramJs.RichMessage)) {
+    return undefined;
+  }
+
+  const {
+    blocks, photos, documents, rtl, part,
+  } = richMessage;
+  const pageMediaContext = buildApiPageMediaContext(photos, documents, { message: context });
+
+  return {
+    blocks: blocks.map((block) => buildApiPageBlock(block, pageMediaContext)),
+    isRtl: rtl,
+    isPart: part,
+    partCutoff: part ? blocks.length : undefined,
+  };
 }
 
 export function buildMessageTextContent(
@@ -225,103 +257,11 @@ export function buildVideoFromDocument(document: GramJs.Document, altDocuments?:
   isSpoiler?: boolean;
   timestamp?: number;
 }): ApiVideo | undefined {
-  if (document instanceof GramJs.DocumentEmpty) {
-    return undefined;
-  }
-
-  const altVideos = altDocuments && buildAltVideosFromDocuments(altDocuments);
-
-  const { isSpoiler, timestamp } = params || {};
-
-  const {
-    id, mimeType, thumbs, size, videoThumbs, attributes,
-  } = document;
-
-  if (mimeType === VIDEO_WEBM_TYPE && !(self as any).isWebmSupported) {
-    return undefined;
-  }
-
-  const videoAttr = attributes
-    .find((a): a is GramJs.DocumentAttributeVideo => a instanceof GramJs.DocumentAttributeVideo);
-
-  if (!videoAttr) {
-    return undefined;
-  }
-
-  const gifAttr = attributes
-    .find((a): a is GramJs.DocumentAttributeAnimated => a instanceof GramJs.DocumentAttributeAnimated);
-
-  const hasVideoPreview = videoThumbs?.some((thumb) => thumb instanceof GramJs.VideoSize && thumb.type === 'v');
-  const previewPhotoSizes = thumbs && buildApiPhotoPreviewSizes(thumbs);
-
-  const {
-    duration,
-    w: width,
-    h: height,
-    supportsStreaming = false,
-    roundMessage: isRound = false,
-    nosound,
-  } = videoAttr;
-
-  const waveform = isRound ? generateWaveform(duration) : undefined;
-  const storyboardInfo = altDocuments && buildStoryboardInfoFromDocuments(altDocuments);
-
-  return {
-    mediaType: 'video',
-    id: String(id),
-    mimeType,
-    duration,
-    fileName: getFilenameFromDocument(document, 'video'),
-    width,
-    height,
-    supportsStreaming,
-    isRound,
-    isGif: Boolean(gifAttr),
-    thumbnail: buildApiThumbnailFromStripped(thumbs),
-    size: toJSNumber(size),
-    isSpoiler,
-    timestamp,
-    hasVideoPreview,
-    previewPhotoSizes,
-    waveform,
-    noSound: nosound,
-    altVideos,
-    storyboardInfo,
-  };
+  return buildApiVideoFromDocument(document, altDocuments, params);
 }
 
 export function buildAudioFromDocument(document: GramJs.Document): ApiAudio | undefined {
-  if (document instanceof GramJs.DocumentEmpty) {
-    return undefined;
-  }
-
-  const {
-    id, mimeType, size, attributes,
-  } = document;
-
-  const audioAttributes = attributes
-    .find((a: any): a is GramJs.DocumentAttributeAudio => a instanceof GramJs.DocumentAttributeAudio);
-
-  if (!audioAttributes) {
-    return undefined;
-  }
-
-  const {
-    duration,
-    title,
-    performer,
-  } = audioAttributes;
-
-  return {
-    mediaType: 'audio',
-    id: String(id),
-    mimeType,
-    duration,
-    fileName: getFilenameFromDocument(document, 'audio'),
-    title,
-    performer,
-    size: toJSNumber(size),
-  };
+  return buildApiAudioFromDocument(document, true);
 }
 
 function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
@@ -340,48 +280,6 @@ function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
   );
 }
 
-function buildAltVideosFromDocuments(altDocuments: GramJs.TypeDocument[], params?: {
-  isSpoiler?: boolean;
-}): ApiVideo[] | undefined {
-  const altVideos = altDocuments.filter((d): d is GramJs.Document => (
-    d instanceof GramJs.Document && d.mimeType.startsWith('video')
-  )).map((alt) => buildVideoFromDocument(alt, undefined, params))
-    .filter(Boolean);
-  if (!altVideos.length) {
-    return undefined;
-  }
-
-  return altVideos;
-}
-
-function buildStoryboardInfoFromDocuments(documents: GramJs.TypeDocument[]): StoryboardInfo | undefined {
-  const storyboardMtpFile = documents.find((d): d is GramJs.Document => (
-    d instanceof GramJs.Document && d.mimeType === STORYBOARD_MIME
-  ));
-  const storyboardMapMtpFile = documents.find((d): d is GramJs.Document => (
-    d instanceof GramJs.Document && d.mimeType === STORYBOARD_MAP_MIME
-  ));
-
-  const storyboardFile = storyboardMtpFile && buildApiDocument(storyboardMtpFile);
-  const storyboardMapFile = storyboardMapMtpFile && buildApiDocument(storyboardMapMtpFile);
-
-  const sizeAttribute = storyboardMapMtpFile?.attributes.find((a): a is GramJs.DocumentAttributeImageSize => (
-    a instanceof GramJs.DocumentAttributeImageSize
-  ));
-
-  const frameSize = sizeAttribute && { width: sizeAttribute.w, height: sizeAttribute.h };
-
-  if (!storyboardFile || !storyboardMapFile || !frameSize) {
-    return undefined;
-  }
-
-  return {
-    storyboardFile,
-    storyboardMapFile,
-    frameSize,
-  };
-}
-
 function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
   if (
     !(media instanceof GramJs.MessageMediaDocument)
@@ -391,28 +289,7 @@ function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
     return undefined;
   }
 
-  const audioAttribute = media.document.attributes
-    .find((attr: any): attr is GramJs.DocumentAttributeAudio => (
-      attr instanceof GramJs.DocumentAttributeAudio
-    ));
-
-  if (!audioAttribute || audioAttribute.voice) {
-    return undefined;
-  }
-
-  const thumbnailSizes = media.document.thumbs && media.document.thumbs
-    .filter((thumb): thumb is GramJs.PhotoSize => thumb instanceof GramJs.PhotoSize)
-    .map((thumb) => buildApiPhotoSize(thumb));
-
-  return {
-    mediaType: 'audio',
-    id: String(media.document.id),
-    fileName: getFilenameFromDocument(media.document, 'audio'),
-    thumbnailSizes,
-    size: toJSNumber(media.document.size),
-    ...pick(media.document, ['mimeType']),
-    ...pick(audioAttribute, ['duration', 'performer', 'title']),
-  };
+  return buildApiAudioFromDocument(media.document);
 }
 
 function isExpiredVoiceMessage(media: GramJs.TypeMessageMedia): boolean {
@@ -438,24 +315,7 @@ function buildVoice(media: GramJs.TypeMessageMedia): ApiVoice | undefined {
     return undefined;
   }
 
-  const audioAttribute = media.document.attributes
-    .find((attr: any): attr is GramJs.DocumentAttributeAudio => (
-      attr instanceof GramJs.DocumentAttributeAudio
-    ));
-
-  if (!audioAttribute || !audioAttribute.voice) {
-    return undefined;
-  }
-
-  const { duration, waveform } = audioAttribute;
-
-  return {
-    mediaType: 'voice',
-    id: String(media.document.id),
-    size: toJSNumber(media.document.size),
-    duration,
-    waveform: waveform ? Array.from(waveform) : undefined,
-  };
+  return buildApiVoiceFromDocument(media.document);
 }
 
 function buildDocumentFromMedia(media: GramJs.TypeMessageMedia) {
@@ -464,76 +324,6 @@ function buildDocumentFromMedia(media: GramJs.TypeMessageMedia) {
   }
 
   return buildApiDocument(media.document);
-}
-
-export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | undefined {
-  if (!(document instanceof GramJs.Document)) {
-    return undefined;
-  }
-
-  const {
-    id, size, mimeType, date, thumbs, attributes,
-  } = document;
-
-  const photoSize = thumbs && thumbs.find((s): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize);
-  let thumbnail = thumbs && buildApiThumbnailFromStripped(thumbs);
-  if (!thumbnail && thumbs && photoSize) {
-    const photoPath = thumbs.find((s): s is GramJs.PhotoPathSize => s instanceof GramJs.PhotoPathSize);
-    if (photoPath) {
-      thumbnail = buildApiThumbnailFromPath(photoPath, photoSize);
-    }
-  }
-  const previewPhotoSizes = thumbs && buildApiPhotoPreviewSizes(thumbs);
-
-  let innerMediaType: ApiDocument['innerMediaType'] | undefined;
-  let mediaSize: ApiDocument['mediaSize'] | undefined;
-  if (photoSize) {
-    mediaSize = {
-      width: photoSize.w,
-      height: photoSize.h,
-    };
-
-    if (SUPPORTED_PHOTO_CONTENT_TYPES.has(mimeType)) {
-      innerMediaType = 'photo';
-
-      const imageAttribute = attributes
-        .find((a): a is GramJs.DocumentAttributeImageSize => a instanceof GramJs.DocumentAttributeImageSize);
-
-      if (imageAttribute) {
-        const { w: width, h: height } = imageAttribute;
-        mediaSize = {
-          width,
-          height,
-          fromDocumentAttribute: true,
-        };
-      }
-    } else if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
-      innerMediaType = 'video';
-      const videoAttribute = attributes
-        .find((a: any): a is GramJs.DocumentAttributeVideo => a instanceof GramJs.DocumentAttributeVideo);
-
-      if (videoAttribute) {
-        const { w: width, h: height } = videoAttribute;
-        mediaSize = {
-          width,
-          height,
-        };
-      }
-    }
-  }
-
-  return {
-    mediaType: 'document',
-    id: String(id),
-    size: toJSNumber(size),
-    mimeType,
-    timestamp: date,
-    fileName: getFilenameFromDocument(document),
-    thumbnail,
-    innerMediaType,
-    mediaSize,
-    previewPhotoSizes,
-  };
 }
 
 function buildContact(media: GramJs.TypeMessageMedia): ApiContact | undefined {
@@ -946,17 +736,12 @@ export function buildWebPage(webPage: GramJs.TypeWebPage): ApiWebPage | undefine
 
   if (webPage instanceof GramJs.WebPage) {
     const {
-      id, photo, document, attributes,
+      id, photo, document, attributes, cachedPage,
     } = webPage;
 
-    let video;
-    let audio;
-    if (document instanceof GramJs.Document && document.mimeType.startsWith('video/')) {
-      video = buildVideoFromDocument(document);
-    }
-    if (document instanceof GramJs.Document && document.mimeType.startsWith('audio/')) {
-      audio = buildAudioFromDocument(document);
-    }
+    const video = document instanceof GramJs.Document ? buildVideoFromDocument(document) : undefined;
+    const audio = document instanceof GramJs.Document ? buildAudioFromDocument(document) : undefined;
+
     let story: ApiWebPageStoryData | undefined;
     let gift: ApiStarGiftUnique | undefined;
     let auction: ApiWebPageAuctionData | undefined;
@@ -1020,6 +805,7 @@ export function buildWebPage(webPage: GramJs.TypeWebPage): ApiWebPage | undefine
         'title',
         'description',
         'duration',
+        'hash',
         'hasLargeMedia',
       ]),
       photo: photo instanceof GramJs.Photo ? buildApiPhoto(photo) : undefined,
@@ -1030,6 +816,7 @@ export function buildWebPage(webPage: GramJs.TypeWebPage): ApiWebPage | undefine
       gift,
       auction,
       stickers,
+      cachedPage: cachedPage instanceof GramJs.Page ? buildApiInstantViewPage(cachedPage, webPage) : undefined,
       aiComposeToneEmojiId: attributeAiTone?.emojiId.toString(),
     };
   }
@@ -1064,20 +851,6 @@ function buildPaidMedia(media: GramJs.TypeMessageMedia): ApiPaidMedia | undefine
       ))
       .map((paidMedia) => buildApiMessageExtendedMediaPreview(paidMedia)),
   };
-}
-
-function getFilenameFromDocument(document: GramJs.Document, defaultBase = 'file') {
-  const { mimeType, attributes } = document;
-  const filenameAttribute = attributes
-    .find((a: any): a is GramJs.DocumentAttributeFilename => a instanceof GramJs.DocumentAttributeFilename);
-
-  if (filenameAttribute) {
-    return filenameAttribute.fileName;
-  }
-
-  const extension = mimeType.split('/')[1];
-
-  return `${defaultBase}${String(document.id)}.${extension}`;
 }
 
 export function buildApiMessageExtendedMediaPreview(

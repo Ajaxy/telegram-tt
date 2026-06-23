@@ -20,6 +20,7 @@ type OwnProps = {
   isRound?: boolean;
   indeterminate?: boolean;
   isInvalid?: boolean;
+  nonInteractive?: boolean;
   className?: string;
   onChange?: (checked: boolean) => void;
 };
@@ -32,9 +33,12 @@ const Checkbox = ({
   isRound,
   indeterminate,
   isInvalid,
+  nonInteractive,
   className,
   onChange,
+  onClick,
   id,
+  tabIndex,
   ...restProps
 }: Props) => {
   const control = useControlContext();
@@ -43,13 +47,25 @@ const Checkbox = ({
 
   const resolvedId = id ?? control?.id;
   const isDisabled = disabled || interactive?.isDisabled || interactive?.isLoading;
+  const isNonInteractive = nonInteractive;
 
   useLayoutEffect(() => {
     if (!ref.current) return;
     ref.current.indeterminate = Boolean(indeterminate);
   }, [indeterminate]);
 
+  const handleClick = useLastCallback((e: React.MouseEvent<HTMLInputElement>) => {
+    if (isNonInteractive) {
+      e.preventDefault();
+      return;
+    }
+
+    onClick?.(e);
+  });
+
   const handleChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isNonInteractive) return;
+
     onChange?.(e.currentTarget.checked);
   });
 
@@ -68,8 +84,12 @@ const Checkbox = ({
         control?.inputClassName,
         isInvalid && styles.invalid,
         isRound && styles.round,
+        isNonInteractive && styles.nonInteractive,
         className,
       )}
+      tabIndex={isNonInteractive ? -1 : tabIndex}
+      aria-disabled={isNonInteractive || undefined}
+      onClick={handleClick}
       onChange={handleChange}
     />
   );

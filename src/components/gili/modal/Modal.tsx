@@ -421,6 +421,14 @@ const ModalHeaderAction = ({ className, children }: ModalSlotProps) => {
   );
 };
 
+const ModalFooterActions = ({ className, children }: ModalSlotProps) => {
+  return (
+    <div className={buildClassName(styles.footerActions, className)}>
+      {children}
+    </div>
+  );
+};
+
 const ModalTitle = ({ className, children }: ModalSlotProps) => {
   const modalContext = useModalContext();
 
@@ -495,6 +503,7 @@ export default memo(Modal);
 export {
   ModalHeader,
   ModalHeaderAction,
+  ModalFooterActions,
   ModalTitle,
   ModalSubtitle,
   ModalCloseButton,

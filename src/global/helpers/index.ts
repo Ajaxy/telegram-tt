@@ -8,3 +8,4 @@ export * from './bots';
 export * from './media';
 export * from './symbols';
 export * from './misc';
+export * from './richMessage';

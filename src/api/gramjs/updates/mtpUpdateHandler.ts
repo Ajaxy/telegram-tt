@@ -40,6 +40,7 @@ import { buildApiStarGiftAuctionUserState, buildApiTypeStarGiftAuctionState } fr
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import {
   buildApiMessageExtendedMediaPreview,
+  buildApiRichMessage,
   buildBoughtMediaContent,
   buildMessagePollFromMedia,
   buildPoll,
@@ -712,6 +713,19 @@ export function updater(update: Update) {
         id: update.action.randomId.toString(),
         threadId,
         text: buildApiFormattedText(update.action.text),
+      });
+    } else if (update.action instanceof GramJs.SendMessageRichMessageDraftAction) {
+      const richMessage = buildApiRichMessage(update.action.richMessage);
+      if (!richMessage) {
+        return;
+      }
+
+      sendApiUpdate({
+        '@type': 'updateChatTypingDraft',
+        chatId,
+        id: update.action.randomId.toString(),
+        threadId,
+        richMessage,
       });
     } else {
       sendApiUpdate({

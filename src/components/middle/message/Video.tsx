@@ -32,6 +32,10 @@ import MediaSpoiler from '../../common/MediaSpoiler';
 import SensitiveContentConfirmModal from '../../common/SensitiveContentConfirmModal';
 import OptimizedVideo from '../../ui/OptimizedVideo';
 import ProgressSpinner from '../../ui/ProgressSpinner';
+import MediaBadge from './MediaBadge';
+
+import mediaStyles from './media.module.scss';
+import styles from './Video.module.scss';
 
 export type OwnProps<T> = {
   id?: string;
@@ -268,8 +272,12 @@ const Video = <T,>({
     className,
   );
 
-  const dimensionsStyle = dimensions ? ` width: ${width}px; left: ${dimensions.x}px; top: ${dimensions.y}px;` : '';
-  const style = `height: ${height}px;${dimensionsStyle}`;
+  const dimensionsStyle = dimensions
+    ? `${isNestedMedia ? '' : ` width: ${width}px;`} left: ${dimensions.x}px; top: ${dimensions.y}px;`
+    : '';
+  const style = isNestedMedia
+    ? `width: min(${width}px, 100%); aspect-ratio: ${width} / ${height};${dimensionsStyle}`
+    : `height: ${height}px;${dimensionsStyle}`;
 
   return (
     <div
@@ -313,7 +321,11 @@ const Video = <T,>({
         <canvas ref={thumbRef} className="thumbnail" />
       )}
       {isProtected && <span className="protector" />}
-      <Icon ref={playButtonRef} name="large-play" />
+      <Icon
+        ref={playButtonRef}
+        name="large-play"
+        className={buildClassName(mediaStyles.controlButton, mediaStyles.playButton)}
+      />
       <MediaSpoiler
         isVisible={isSpoilerShown}
         withAnimation
@@ -324,7 +336,7 @@ const Video = <T,>({
         className="media-spoiler"
       />
       {shouldRenderSpinner && (
-        <div ref={spinnerRef} className="media-loading">
+        <div ref={spinnerRef} className={buildClassName('media-loading', mediaStyles.loading)}>
           <ProgressSpinner
             progress={transferProgress}
             onClick={handleClickOnSpinner}
@@ -332,17 +344,17 @@ const Video = <T,>({
         </div>
       )}
       {!isLoadAllowed && !fullMediaData && (
-        <Icon name="download" />
+        <Icon name="download" className={buildClassName(mediaStyles.controlButton, mediaStyles.downloadButton)} />
       )}
       {shouldRenderTransferProgress ? (
-        <span ref={transferProgressRef} className="message-transfer-progress">
+        <MediaBadge key="transfer-progress" ref={transferProgressRef} className="message-transfer-progress">
           {(isUploading || isDownloading) ? `${Math.round(transferProgress * 100)}%` : '...'}
-        </span>
+        </MediaBadge>
       ) : (
-        <div className="message-media-duration">
+        <MediaBadge key="duration" className="message-media-duration">
           {!isPaidPreview && video.isGif ? 'GIF' : formatMediaDuration(Math.max(duration - playProgress, 0))}
-          {isUnsupported && <Icon name="message-failed" className="playback-failed" />}
-        </div>
+          {isUnsupported && <Icon name="message-failed" className={styles.playbackFailed} />}
+        </MediaBadge>
       )}
       {Boolean(lastPlaybackTimestamp) && (
         <div

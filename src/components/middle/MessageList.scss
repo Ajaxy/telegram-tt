@@ -67,6 +67,10 @@
       .message-list-item {
         animation: live-tail-message-mount 0.2s ease-out;
 
+        &.own {
+          transform-origin: bottom right;
+        }
+
         body.no-message-sending-animations & {
           animation: none;
         }

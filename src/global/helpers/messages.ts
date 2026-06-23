@@ -10,7 +10,7 @@ import type {
   ApiTypeStory,
 } from '../../api/types';
 import type {
-  ApiFormattedText, ApiMessagePoll, ApiReplyInfo, ApiWebPage, MediaContainer, StatefulMediaContent,
+  ApiFormattedText, ApiMessagePoll, ApiReplyInfo, ApiRichMessage, ApiWebPage, MediaContainer, StatefulMediaContent,
 } from '../../api/types/messages';
 import type { ThreadId } from '../../types';
 import type { LangFn } from '../../util/localization';
@@ -42,6 +42,7 @@ import {
   selectWebPageFromMessage,
 } from '../selectors';
 import { selectThreadIdFromMessage } from '../selectors/threads';
+import { getRichMessagePreviewText } from './richMessage';
 import { getMainUsername } from './users';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
@@ -162,7 +163,19 @@ export function pickMatchingTypingDraftMessage<T extends ApiMessage>(
 }
 
 export function getMessageTextWithFallback(lang: LangFn, message: MediaContainer) {
-  return hasMessageText(message) ? message.content.text || { text: lang('MessageUnsupported') } : undefined;
+  if (!hasMessageText(message)) {
+    return undefined;
+  }
+
+  if (message.content.text) {
+    return message.content.text;
+  }
+
+  const richMessageText = message.content.richMessage
+    ? getRichMessagePreviewText(message.content.richMessage)
+    : undefined;
+
+  return { text: richMessageText || lang('MessageUnsupported') };
 }
 
 export function getMessageCustomShape(message: ApiMessage): boolean {
@@ -574,11 +587,13 @@ export function createApiMessageFromTypingDraft({
   chatId,
   threadId,
   text,
+  richMessage,
 }: {
   lastMessageId: number;
   chatId: string;
   threadId: ThreadId;
-  text: ApiFormattedText;
+  text?: ApiFormattedText;
+  richMessage?: ApiRichMessage;
 }): ApiMessage {
   const localId = getNextLocalMessageId(lastMessageId);
 
@@ -597,6 +612,7 @@ export function createApiMessageFromTypingDraft({
     date: getServerTime(),
     content: {
       text,
+      richMessage,
     },
     isSilent: true,
     isTypingDraft: true,

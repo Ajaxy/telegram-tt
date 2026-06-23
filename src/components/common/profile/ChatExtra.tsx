@@ -200,6 +200,7 @@ const ChatExtra = ({
         width={width}
         height={height}
         zoom={zoom}
+        shouldShowPin
       />
     );
   }, [businessLocation, width, height, zoom]);

@@ -79,7 +79,8 @@
     opacity: var(--input-disabled-opacity, 0.5);
   }
 
-  .locked {
+  .nonInteractive {
+    pointer-events: none;
     cursor: default;
   }
 

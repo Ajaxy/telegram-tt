@@ -239,7 +239,7 @@ const App = ({
     // Mutation forced to avoid RAF throttling in background
     forceMutation(() => {
       document.body.classList.toggle('in-background', getIsInBackgroundLocal());
-    }, document.body);
+    }, document.body, true);
   }, [getIsInBackgroundLocal]);
 
   return (

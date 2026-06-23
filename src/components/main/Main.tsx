@@ -90,7 +90,6 @@ import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.
 import GiveawayModal from './premium/GiveawayModal.async';
 import PremiumMainModal from './premium/PremiumMainModal.async';
 import StarsGiftingPickerModal from './premium/StarsGiftingPickerModal.async';
-import SafeLinkModal from './SafeLinkModal.async';
 import ConfettiContainer from './visualEffects/ConfettiContainer';
 import SnapEffectContainer from './visualEffects/SnapEffectContainer';
 import WaveContainer from './visualEffects/WaveContainer';
@@ -110,7 +109,6 @@ type StateProps = {
   isMediaViewerOpen: boolean;
   isStoryViewerOpen: boolean;
   isForwardModalOpen: boolean;
-  safeLinkModalUrl?: string;
   isHistoryCalendarOpen: boolean;
   shouldSkipHistoryAnimations?: boolean;
   openedStickerSetShortName?: string;
@@ -164,7 +162,6 @@ const Main = ({
   isStoryViewerOpen,
   isForwardModalOpen,
   activeGroupCallId,
-  safeLinkModalUrl,
   isHistoryCalendarOpen,
   shouldSkipHistoryAnimations,
   limitReached,
@@ -588,7 +585,6 @@ const Main = ({
       <Dialogs />
       <AudioPlayer noUi />
       <ModalContainer />
-      <SafeLinkModal url={safeLinkModalUrl} />
       <HistoryCalendar isOpen={isHistoryCalendarOpen} />
       <StickerSetModal
         isOpen={Boolean(openedStickerSetShortName)}
@@ -644,7 +640,6 @@ export default memo(withGlobal<OwnProps>(
       botTrustRequest,
       requestedAttachBotInChat,
       requestedDraft,
-      safeLinkModalUrl,
       openedStickerSetShortName,
       openedCustomEmojiSetIds,
       shouldSkipHistoryAnimations,
@@ -685,7 +680,6 @@ export default memo(withGlobal<OwnProps>(
       isStoryViewerOpen: selectIsStoryViewerOpen(global),
       isForwardModalOpen: selectIsForwardModalOpen(global),
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
-      safeLinkModalUrl,
       isHistoryCalendarOpen: Boolean(historyCalendarSelectedAt),
       shouldSkipHistoryAnimations,
       openedStickerSetShortName,

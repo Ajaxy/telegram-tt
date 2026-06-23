@@ -1,11 +1,12 @@
 import type {
-  ApiMessage, ApiPeer, ApiPeerPhotos, ApiSponsoredMessage,
+  ApiMessage, ApiPageCaption, ApiPeer, ApiPeerPhotos, ApiSponsoredMessage,
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import type { MediaViewerMedia, MediaViewerOrigin } from '../../../types';
+import type { MediaViewerMedia, MediaViewerOrigin, MediaViewerPageMedia } from '../../../types';
 
 import { getMessageContent, isDocumentPhoto, isDocumentVideo } from '../../../global/helpers';
 import { selectWebPageFromMessage } from '../../../global/selectors';
+import { getPageMediaBlockMedia } from '../../iv/helpers/pageMedia';
 
 export type MediaViewerItem = {
   type: 'message';
@@ -21,6 +22,10 @@ export type MediaViewerItem = {
   media: MediaViewerMedia[];
   mediaIndex: number;
 } | {
+  type: 'pageBlock';
+  pageMedia: MediaViewerPageMedia;
+  mediaIndex: number;
+} | {
   type: 'sponsoredMessage';
   message: ApiSponsoredMessage;
   mediaIndex?: number;
@@ -29,15 +34,17 @@ export type MediaViewerItem = {
 export type ViewableMedia = {
   media: MediaViewerMedia;
   isSingle?: boolean;
+  caption?: ApiPageCaption;
 };
 
 export function getMediaViewerItem({
-  message, avatarOwner, profilePhotos, standaloneMedia, mediaIndex, sponsoredMessage,
+  message, avatarOwner, profilePhotos, standaloneMedia, pageMedia, mediaIndex, sponsoredMessage,
 }: {
   message?: ApiMessage;
   avatarOwner?: ApiPeer;
   profilePhotos?: ApiPeerPhotos;
   standaloneMedia?: MediaViewerMedia[];
+  pageMedia?: MediaViewerPageMedia;
   sponsoredMessage?: ApiSponsoredMessage;
   mediaIndex?: number;
 }): MediaViewerItem | undefined {
@@ -54,6 +61,14 @@ export function getMediaViewerItem({
     return {
       type: 'standalone',
       media: standaloneMedia,
+      mediaIndex: mediaIndex!,
+    };
+  }
+
+  if (pageMedia) {
+    return {
+      type: 'pageBlock',
+      pageMedia,
       mediaIndex: mediaIndex!,
     };
   }
@@ -87,6 +102,19 @@ export default function selectViewableMedia(
     return {
       media,
       isSingle: params.media.length === 1,
+    };
+  }
+
+  if (params.type === 'pageBlock') {
+    const block = params.pageMedia.blocks[params.mediaIndex];
+    if (!block) {
+      return undefined;
+    }
+
+    return {
+      media: getPageMediaBlockMedia(block),
+      isSingle: params.pageMedia.blocks.length === 1,
+      caption: block.caption,
     };
   }
 

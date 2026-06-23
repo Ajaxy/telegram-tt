@@ -34,6 +34,9 @@ import { getAttachmentMediaType, matchLinkInMessageText } from './messages';
 export type MediaWithThumbs = ApiPhoto | ApiVideo | ApiDocument | ApiSticker | ApiMediaExtendedPreview;
 export type DownloadableMedia = ApiPhoto | ApiVideo | ApiDocument | ApiSticker | ApiAudio | ApiVoice | ApiWebDocument;
 
+const MIN_STATIC_MAP_ZOOM = 13;
+const MAX_STATIC_MAP_ZOOM = 20;
+
 export function getMessageContent(message: MediaContainer) {
   return message.content;
 }
@@ -192,9 +195,18 @@ export function buildStaticMapHash(
   const {
     long, lat, accessHash, accuracyRadius,
   } = geo;
+  const staticMapZoom = Math.min(Math.max(zoom, MIN_STATIC_MAP_ZOOM), MAX_STATIC_MAP_ZOOM);
 
-  // eslint-disable-next-line @stylistic/max-len
-  return `staticMap:${accessHash}?lat=${lat}&long=${long}&w=${width}&h=${height}&zoom=${zoom}&scale=${scale}&accuracyRadius=${accuracyRadius}`;
+  const urlParams = new URLSearchParams();
+  urlParams.set('lat', lat.toString());
+  urlParams.set('long', long.toString());
+  urlParams.set('w', width.toString());
+  urlParams.set('h', height.toString());
+  urlParams.set('zoom', staticMapZoom.toString());
+  urlParams.set('scale', scale.toString());
+  if (accuracyRadius) urlParams.set('accuracyRadius', accuracyRadius.toString());
+
+  return `staticMap:${accessHash}?${urlParams.toString()}`;
 }
 
 export function getPhotoMediaHash(photo: ApiPhoto | ApiDocument, target: SizeTarget, isAction?: boolean) {

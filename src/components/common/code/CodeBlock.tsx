@@ -34,7 +34,7 @@ const CodeBlock = ({ text, language, noCopy }: OwnProps) => {
 
   const blockClass = buildClassName(
     'code-block',
-    !isWordWrap && 'no-word-wrap',
+    !isWordWrap && 'no-word-wrap custom-scroll-x no-scrollbar',
   );
 
   return (

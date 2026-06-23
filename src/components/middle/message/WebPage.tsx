@@ -93,7 +93,7 @@ const WebPage = ({
   onAudioPlay,
   onCancelMediaTransfer,
 }: OwnProps) => {
-  const { openUrl, openTelegramLink } = getActions();
+  const { openInstantView, openUrl, openTelegramLink } = getActions();
   const stickersRef = useRef<HTMLDivElement>();
 
   const lang = useLang();
@@ -109,6 +109,7 @@ const WebPage = ({
   const fullWebPage = webPage?.webpageType === 'full' ? webPage : undefined;
 
   const { story: storyData, stickers } = fullWebPage || {};
+  const cachedPage = fullWebPage?.cachedPage;
 
   useEnsureStory(storyData?.peerId, storyData?.id, story);
 
@@ -130,6 +131,15 @@ const WebPage = ({
     openTelegramLink({
       url: webPage.url!,
     });
+  });
+
+  const handleQuickButtonClick = useLastCallback(() => {
+    if (cachedPage) {
+      openInstantView({ webPageId: webPage.id });
+      return;
+    }
+
+    handleOpenTelegramLink();
   });
 
   if (webPage?.webpageType !== 'full') return undefined;
@@ -155,9 +165,11 @@ const WebPage = ({
 
   const resultType = stickers?.isEmoji ? 'telegram_emojiset' : type;
   const auctionEndDate = isAuction && webPage.auction ? webPage.auction.endDate : undefined;
-  const quickButtonLangKey = !isExpiredStory ? getWebpageButtonLangKey(resultType, auctionEndDate) : undefined;
+  const quickButtonLangKey = !isExpiredStory
+    ? getWebpageButtonLangKey(resultType, { auctionEndDate, cachedPage: fullWebPage?.cachedPage })
+    : undefined;
   const quickButtonTitle = quickButtonLangKey && lang(quickButtonLangKey);
-  const quickButtonIcon = getWebpageButtonIcon(resultType);
+  const quickButtonIcon = getWebpageButtonIcon(resultType, { cachedPage: fullWebPage?.cachedPage });
 
   const truncatedDescription = trimText(description, MAX_TEXT_LENGTH);
   const aiToneEmojiId = isAiTone ? webPage.aiComposeToneEmojiId : undefined;
@@ -187,10 +199,11 @@ const WebPage = ({
         size="tiny"
         color="translucent"
         isRectangular
+        inline
         noForcedUpperCase={!isAuction}
-        onClick={handleOpenTelegramLink}
+        onClick={handleQuickButtonClick}
       >
-        {quickButtonIcon && <Icon name={quickButtonIcon} />}
+        {quickButtonIcon && <Icon name={quickButtonIcon} className="in-text-icon" />}
         {quickButtonTitle}
       </Button>
     );

@@ -84,6 +84,7 @@ import type {
   ManagementState,
   MediaViewerMedia,
   MediaViewerOrigin,
+  MediaViewerPageMedia,
   MessageList,
   MessageListType,
   MiddleSearchParams,
@@ -388,6 +389,7 @@ export type TabState = {
     isAvatarView?: boolean;
     isSponsoredMessage?: boolean;
     standaloneMedia?: MediaViewerMedia[];
+    pageMedia?: MediaViewerPageMedia;
     origin?: MediaViewerOrigin;
     volume: number;
     playbackRate: number;
@@ -408,6 +410,9 @@ export type TabState = {
   };
 
   webPagePreviewId?: string;
+  instantViewModal?: {
+    webPageId: string;
+  };
 
   loadingThread?: {
     loadingChatId: string;

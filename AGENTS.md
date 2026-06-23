@@ -24,7 +24,7 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
   - **If file already imports styles**, check where they come from and add new styles there - don't create new style files.
   - Prefer rem units for all measurements. Exceptions are possible, but usually rare. Conversion: `N px = N / 16 rem`.
   - No complex or broad selectors. Prefer basic classes.
-  - Avoid nested selectors and tag-based selectors. Every styled element must have its own class.
+  - Avoid tag-based selectors. Every styled element must have its own class. Nest only when it makes sense, e.g. `.parentModifier .child`
 
 - **Code Style:**
   - Baseline: [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript). Rules below extend/override it.
@@ -34,7 +34,7 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
   - Prefix boolean variables/props with a modal verb:
     - `is*` (isVisible), `has*` (hasChanged), `are*` for plurals (areMessagesLoaded — never `is` for plurals), `should*` (shouldRedirect), `can*` (canComment), `will*` (willChange).
     - Exception: the argument `force`.
-  - **Optional boolean args/props default to `false`.** If you need a prop that *hides* an avatar, name it `noAvatar` rather than passing `hasAvatar={false}`.
+  - **Optional boolean args/props default to `undefined`.** If you need a prop that *hides* an avatar, name it `noAvatar` rather than passing `hasAvatar={false}`.
   - Allowed abbreviations only: `e` (event handler arg), `err` (catch arg), `cb` (callback). Single-letter names allowed in one-line lambdas (`users.map(u => u.name)`). Avoid all others.
   - **Hoist static constants** to the top of the module with `UPPER_SNAKE_CASE`. Never inline magic numbers inside function bodies.
   - Prefer function declarations over function expressions (except arrow functions when you need to bind `this`).

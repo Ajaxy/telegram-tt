@@ -70,6 +70,7 @@ import {
 import { buildApiTopicWithState } from '../apiBuilders/forums';
 import {
   buildMessageMediaContent, buildMessagePollFromMedia, buildMessageTextContent,
+  buildWebPage,
   buildWebPageFromMedia,
 } from '../apiBuilders/messageContent';
 import {
@@ -279,6 +280,42 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
 
   if (mtpMessage instanceof GramJs.MessageEmpty) {
     return MESSAGE_DELETED;
+  }
+
+  processMessageAndUpdateThreadInfo(mtpMessage);
+  const message = buildApiMessage(mtpMessage);
+
+  if (!message) {
+    return undefined;
+  }
+
+  return { message };
+}
+
+export async function fetchRichMessage({ chat, messageId }: { chat: ApiChat; messageId: number }) {
+  const isChannel = getEntityTypeById(chat.id) === 'channel';
+
+  const result = await invokeRequest(
+    new GramJs.messages.GetRichMessage({
+      peer: buildInputPeer(chat.id, chat.accessHash),
+      id: messageId,
+    }),
+    {
+      abortControllerChatId: chat.id,
+    },
+  );
+
+  if (!result || result instanceof GramJs.messages.MessagesNotModified) {
+    return undefined;
+  }
+
+  if (isChannel && 'pts' in result) {
+    updateChannelState(chat.id, result.pts);
+  }
+
+  const mtpMessage = result.messages[0];
+  if (!mtpMessage || mtpMessage instanceof GramJs.MessageEmpty) {
+    return undefined;
   }
 
   processMessageAndUpdateThreadInfo(mtpMessage);
@@ -1863,6 +1900,25 @@ export async function fetchWebPagePreview({
   if (!preview) return undefined;
 
   return buildWebPageFromMedia(preview.media);
+}
+
+export async function fetchWebPage({
+  url,
+  hash = DEFAULT_PRIMITIVES.INT,
+}: {
+  url: string;
+  hash?: number;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetWebPage({
+    url,
+    hash,
+  }), {
+    shouldIgnoreErrors: true,
+  });
+
+  if (!result?.webpage) return undefined;
+
+  return buildWebPage(result.webpage);
 }
 
 export async function sendPollVote({

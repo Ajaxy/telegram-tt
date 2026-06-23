@@ -13,7 +13,7 @@ import { selectTimestampableMedia } from '../../selectors/media';
 addActionHandler('openMediaViewer', (global, actions, payload): ActionReturnType => {
   const {
     chatId, threadId = MAIN_THREAD_ID, messageId, timestamp, mediaIndex, isAvatarView, isSponsoredMessage, origin,
-    withDynamicLoading, standaloneMedia, tabId = getCurrentTabId(),
+    withDynamicLoading, standaloneMedia, pageMedia, tabId = getCurrentTabId(),
   } = payload;
 
   const tabState = selectTabState(global, tabId);
@@ -29,6 +29,7 @@ addActionHandler('openMediaViewer', (global, actions, payload): ActionReturnType
       isSponsoredMessage,
       origin,
       standaloneMedia,
+      pageMedia,
       isHidden: false,
       withDynamicLoading,
       timestamp,

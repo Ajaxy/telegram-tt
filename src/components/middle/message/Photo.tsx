@@ -33,6 +33,9 @@ import Icon from '../../common/icons/Icon';
 import MediaSpoiler from '../../common/MediaSpoiler';
 import SensitiveContentConfirmModal from '../../common/SensitiveContentConfirmModal';
 import ProgressSpinner from '../../ui/ProgressSpinner';
+import MediaBadge from './MediaBadge';
+
+import styles from './media.module.scss';
 
 export type OwnProps<T> = {
   id?: string;
@@ -262,8 +265,8 @@ const Photo = <T,>({
     `top: ${dimensions.y}px`,
   );
   const style = size === 'inline' ? buildStyle(
-    `height: ${height}px`,
-    `min-width: ${width}px`,
+    isNestedMedia ? `width: min(${width}px, 100%)` : `height: ${height}px`,
+    isNestedMedia ? `aspect-ratio: ${width} / ${height}` : `min-width: ${width}px`,
     dimensionsStyle,
   ) : undefined;
 
@@ -293,11 +296,17 @@ const Photo = <T,>({
       )}
       {isProtected && <span className="protector" />}
       {shouldRenderSpinner && !shouldRenderDownloadButton && (
-        <div ref={spinnerRef} className="media-loading">
+        <div ref={spinnerRef} className={buildClassName('media-loading', styles.loading)}>
           <ProgressSpinner progress={transferProgress} onClick={isUploading ? handleClick : undefined} />
         </div>
       )}
-      {shouldRenderDownloadButton && <Icon ref={downloadButtonRef} name="download" />}
+      {shouldRenderDownloadButton && (
+        <Icon
+          ref={downloadButtonRef}
+          name="download"
+          className={buildClassName(styles.controlButton, styles.downloadButton)}
+        />
+      )}
       <MediaSpoiler
         isVisible={isSpoilerShown}
         withAnimation
@@ -308,9 +317,9 @@ const Photo = <T,>({
         isNsfw={isMediaNsfw}
       />
       {shouldRenderTransferProgress && (
-        <span ref={transferProgressRef} className="message-transfer-progress">
+        <MediaBadge ref={transferProgressRef} className="message-transfer-progress">
           {`${Math.round(transferProgress * 100)}%`}
-        </span>
+        </MediaBadge>
       )}
       <SensitiveContentConfirmModal
         isOpen={isNsfwModalOpen}

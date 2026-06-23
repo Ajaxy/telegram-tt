@@ -1,0 +1,47 @@
+.root {
+  padding: 0 0 0 0.875rem;
+  color: var(--color-text);
+}
+
+.header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.avatar {
+  flex: 0 0 auto;
+}
+
+.author {
+  min-width: 0;
+}
+
+.authorName {
+  overflow: hidden;
+
+  font-size: calc(1rem + var(--iv-font-size-adjust));
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.date {
+  margin-top: 0.125rem;
+  font-size: calc(0.875rem + var(--iv-font-size-adjust));
+  color: var(--color-text-meta);
+}
+
+.content {
+  margin-bottom: 0.25rem;
+}
+
+.source {
+  display: block;
+  color: var(--color-primary);
+  text-decoration: none;
+}

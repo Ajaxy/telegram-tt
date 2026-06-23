@@ -1,0 +1,57 @@
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:not(:global(.open)) {
+    transform: scale(0);
+    opacity: 0.5;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+}
+
+.controlButton {
+  position: absolute;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #fff;
+
+  opacity: 0.7;
+
+  transition: opacity 150ms;
+
+  &::before {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 3.375rem;
+    height: 3.375rem;
+    border-radius: 50%;
+
+    background: rgba(black, 0.25);
+  }
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:global(.opacity-transition) {
+    transition: opacity 0.15s ease;
+
+    &:global(.not-open) {
+      opacity: 0;
+    }
+  }
+}
+
+.downloadButton {
+  font-size: 1.5rem;
+}
+
+.playButton {
+  font-size: 2.5rem;
+}

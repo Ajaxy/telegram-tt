@@ -22,10 +22,11 @@ export function selectIsMediaViewerOpen<T extends GlobalState>(
       messageId,
       isAvatarView,
       standaloneMedia,
+      pageMedia,
       isSponsoredMessage,
     },
   } = selectTabState(global, tabId);
-  return Boolean(standaloneMedia || (chatId && (isAvatarView || messageId || isSponsoredMessage)));
+  return Boolean(pageMedia || standaloneMedia || (chatId && (isAvatarView || messageId || isSponsoredMessage)));
 }
 
 export function selectRightColumnContentKey<T extends GlobalState>(

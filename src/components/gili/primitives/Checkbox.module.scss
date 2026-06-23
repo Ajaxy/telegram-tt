@@ -85,6 +85,11 @@
     border-radius: 50%;
   }
 
+  .nonInteractive {
+    pointer-events: none;
+    cursor: default;
+  }
+
   .invalid {
     border-color: var(--color-error);
 

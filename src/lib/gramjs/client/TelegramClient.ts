@@ -94,6 +94,7 @@ const DEFAULT_WEBDOCUMENT_DC_ID = 4;
 const EXPORTED_SENDER_RECONNECT_TIMEOUT = 1000; // 1 sec
 const EXPORTED_SENDER_RELEASE_TIMEOUT = 30000; // 30 sec
 const WEBDOCUMENT_REQUEST_PART_SIZE = 131072; // 128kb
+const STATIC_MAP_REQUEST_PART_SIZE = 524288; // 512kb
 
 const PING_INTERVAL = 3000; // 3 sec
 const PING_TIMEOUT = 5000; // 5 sec
@@ -112,6 +113,10 @@ const PING_DISCONNECT_DELAY = 60000; // 1 min
 // All types, sorted by size
 const sizeTypes = ['u', 'v', 'w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's', 'f', 'i', 'j'] as const;
 export type SizeType = typeof sizeTypes[number];
+const sizeTypeRanks: Record<SizeType, number> = sizeTypes.reduce((acc, sizeType, index) => {
+  acc[sizeType] = index;
+  return acc;
+}, {} as Record<SizeType, number>);
 
 class TelegramClient {
   static DEFAULT_OPTIONS: Partial<TelegramClientParams> = {
@@ -887,15 +892,30 @@ class TelegramClient {
       return maxSize;
     }
 
-    const indexOfSize = sizeTypes.indexOf(sizeType);
-    let size;
-    for (let i = indexOfSize; i < sizeTypes.length; i++) {
-      size = sizes.find((s) => 'type' in s && s.type === sizeTypes[i]);
-      if (size) {
-        return size;
+    const targetRank = sizeTypeRanks[sizeType];
+    let bestMatchingSize: Api.TypePhotoSize | Api.TypeVideoSize | undefined;
+    let bestMatchingRank = Infinity;
+    let largestAvailableSize: Api.TypePhotoSize | Api.TypeVideoSize | undefined;
+    let largestAvailableRank = -1;
+
+    for (const size of sizes) {
+      if (!('type' in size) || !(size.type in sizeTypeRanks)) {
+        continue;
+      }
+
+      const sizeRank = sizeTypeRanks[size.type as SizeType];
+      if (sizeRank >= targetRank && sizeRank < bestMatchingRank) {
+        bestMatchingSize = size;
+        bestMatchingRank = sizeRank;
+      }
+
+      if (sizeRank > largestAvailableRank) {
+        largestAvailableSize = size;
+        largestAvailableRank = sizeRank;
       }
     }
-    return undefined;
+
+    return bestMatchingSize || largestAvailableSize;
   }
 
   _downloadCachedPhotoSize(size: Api.PhotoCachedSize | Api.PhotoStrippedSize): Uint8Array {
@@ -1060,35 +1080,42 @@ class TelegramClient {
     try {
       const buff = [];
       let offset = 0;
+      let size: number | undefined;
 
-      while (true) {
-        try {
-          const downloaded = new Api.upload.GetWebFile({
-            location: new Api.InputWebFileGeoPointLocation({
-              geoPoint: new Api.InputGeoPoint({
-                lat,
-                long,
-                accuracyRadius,
-              }),
-              accessHash,
-              w,
-              h,
-              zoom,
-              scale,
+      while (size === undefined || offset < size) {
+        const downloaded = new Api.upload.GetWebFile({
+          location: new Api.InputWebFileGeoPointLocation({
+            geoPoint: new Api.InputGeoPoint({
+              lat,
+              long,
+              accuracyRadius,
             }),
-            offset,
-            limit: WEBDOCUMENT_REQUEST_PART_SIZE,
-          });
-          const sender = await this._borrowExportedSender(DEFAULT_WEBDOCUMENT_DC_ID);
+            accessHash,
+            w,
+            h,
+            zoom,
+            scale,
+          }),
+          offset,
+          limit: STATIC_MAP_REQUEST_PART_SIZE,
+        });
+
+        let sender: MTProtoSender | undefined;
+        try {
+          sender = await this._borrowExportedSender(
+            this._config?.webfileDcId || DEFAULT_WEBDOCUMENT_DC_ID,
+          );
           if (!sender) {
             throw new Error('Failed to obtain sender');
           }
           const res = (await sender.send(downloaded))!;
           this.releaseExportedSender(sender);
-          offset += WEBDOCUMENT_REQUEST_PART_SIZE;
+          sender = undefined;
+          size = res.size;
+          offset += res.bytes.length;
           if (res.bytes.length) {
             buff.push(res.bytes);
-            if (res.bytes.length < WEBDOCUMENT_REQUEST_PART_SIZE) {
+            if (offset >= size || res.bytes.length < STATIC_MAP_REQUEST_PART_SIZE) {
               break;
             }
           } else {
@@ -1100,6 +1127,12 @@ class TelegramClient {
             console.warn(`getWebFile: sleeping for ${err.seconds}s on flood wait`);
             await sleep(err.seconds * 1000);
             continue;
+          }
+
+          throw err;
+        } finally {
+          if (sender) {
+            this.releaseExportedSender(sender);
           }
         }
       }

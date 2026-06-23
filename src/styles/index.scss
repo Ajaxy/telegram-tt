@@ -206,6 +206,49 @@ body.cursor-ew-resize {
   }
 }
 
+.custom-scroll.with-scrollable-hint,
+.custom-scroll-x.with-scrollable-hint {
+  --scrollable-hint-mask-size: var(--scrollable-hint-size, 2.5rem);
+  --scrollable-hint-top-mask-outset: var(--scrollable-hint-mask-size);
+  --scrollable-hint-bottom-mask-outset: var(--scrollable-hint-mask-size);
+  --scrollable-hint-left-mask-outset: var(--scrollable-hint-mask-size);
+  --scrollable-hint-right-mask-outset: var(--scrollable-hint-mask-size);
+
+  mask-image:
+    linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--scrollable-hint-mask-size),
+      #000 calc(100% - var(--scrollable-hint-mask-size)),
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--scrollable-hint-mask-size),
+      #000 calc(100% - var(--scrollable-hint-mask-size)),
+      transparent 100%
+    );
+  mask-mode: alpha;
+  mask-repeat: no-repeat;
+  mask-position:
+    calc(var(--scrollable-hint-left-mask-outset) * -1) 0,
+    0 calc(var(--scrollable-hint-top-mask-outset) * -1);
+  mask-size:
+    calc(
+      100% + var(--scrollable-hint-left-mask-outset) + var(--scrollable-hint-right-mask-outset)
+    ) 100%,
+    100% calc(
+      100% + var(--scrollable-hint-top-mask-outset) + var(--scrollable-hint-bottom-mask-outset)
+    );
+  mask-composite: intersect;
+
+  transition:
+    scrollbar-color 0.3s ease,
+    mask-size 200ms ease,
+    mask-position 200ms ease;
+}
+
 body:not(.is-ios) {
   .custom-scroll {
     &::-webkit-scrollbar {

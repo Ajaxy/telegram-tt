@@ -10,6 +10,7 @@ import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import VerificationMonetizationModal from '../common/VerificationMonetizationModal.async';
+import SafeLinkModal from '../main/SafeLinkModal.async';
 import WebAppsCloseConfirmationModal from '../main/WebAppsCloseConfirmationModal.async';
 import AiMessageEditorModal from '../middle/composer/AiMessageEditorModal/AiMessageEditorModal.async';
 import AboutAdsModal from './aboutAds/AboutAdsModal.async';
@@ -52,6 +53,7 @@ import GiftUpgradeModal from './gift/upgrade/GiftUpgradeModal.async';
 import GiftInfoValueModal from './gift/value/GiftInfoValueModal.async';
 import GiftWithdrawModal from './gift/withdraw/GiftWithdrawModal.async';
 import GiftCodeModal from './giftcode/GiftCodeModal.async';
+import InstantViewer from './instantView/InstantViewer.async';
 import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
 import LeaveGroupModal from './leaveGroup/LeaveGroupModal.async';
 import LocationAccessModal from './locationAccess/LocationAccessModal.async';
@@ -91,6 +93,7 @@ type ModalKey = keyof Pick<TabState,
   'boostModal' |
   'chatlistModal' |
   'urlAuth' |
+  'safeLinkModalUrl' |
   'mapModal' |
   'oneTimeMediaModal' |
   'inviteViaLinkModal' |
@@ -149,6 +152,7 @@ type ModalKey = keyof Pick<TabState,
   'deleteAccountModal' |
   'isAgeVerificationModalOpen' |
   'profileRatingModal' |
+  'instantViewModal' |
   'quickPreview' |
   'storyStealthModal' |
   'isPasskeyModalOpen' |
@@ -161,7 +165,7 @@ type ModalKey = keyof Pick<TabState,
   'rankModal' |
   'aiTonePreviewModal'
 >;
-type WrappedModalKey = 'pollModal';
+type WrappedModalKey = 'pollModal' | 'mapModal' | 'safeLinkModalUrl';
 type LegacyModalKey = Exclude<ModalKey, WrappedModalKey>;
 
 type ModalStateProps = {
@@ -185,9 +189,11 @@ type Entries<T> = {
   [K in keyof T]: [K, T[K]];
 }[keyof T][];
 
-const POLL_MODAL_CLOSE_DURATION = 200;
+const WRAPPED_MODAL_CLOSE_DURATION = 200;
 const WRAPPED_MODAL_CLOSE_DURATIONS: Record<WrappedModalKey, number> = {
-  pollModal: POLL_MODAL_CLOSE_DURATION,
+  pollModal: WRAPPED_MODAL_CLOSE_DURATION,
+  mapModal: WRAPPED_MODAL_CLOSE_DURATION,
+  safeLinkModalUrl: WRAPPED_MODAL_CLOSE_DURATION,
 };
 
 type WrappedModalBoundaryProps<T> = {
@@ -235,7 +241,6 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   reportModal: ReportModal,
   webApps: WebAppModal,
   collectibleInfoModal: CollectibleInfoModal,
-  mapModal: MapModal,
   starsPayment: StarsPaymentModal,
   starsBalanceModal: StarsBalanceModal,
   starsTransactionModal: StarsTransactionInfoModal,
@@ -285,6 +290,7 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   deleteAccountModal: DeleteAccountModal,
   isAgeVerificationModalOpen: AgeVerificationModal,
   profileRatingModal: ProfileRatingModal,
+  instantViewModal: InstantViewer,
   quickPreview: QuickPreviewModal,
   storyStealthModal: StealthModeModal,
   isPasskeyModalOpen: PasskeyModal,
@@ -299,6 +305,8 @@ const LEGACY_MODALS: LegacyModalRegistry = {
 };
 const WRAPPED_MODALS: WrappedModalRegistry = {
   pollModal: PollModal,
+  mapModal: MapModal,
+  safeLinkModalUrl: SafeLinkModal,
 };
 
 const LEGACY_MODAL_KEYS = Object.keys(LEGACY_MODALS) as LegacyModalKey[];
@@ -308,6 +316,23 @@ const MODAL_KEYS = [...LEGACY_MODAL_KEYS, ...WRAPPED_MODAL_KEYS] as ModalKey[];
 const LEGACY_MODAL_ENTRIES = Object.entries(LEGACY_MODALS) as Entries<LegacyModalRegistry>;
 const WRAPPED_MODAL_ENTRIES = Object.entries(WRAPPED_MODALS) as Entries<WrappedModalRegistry>;
 
+function renderWrappedModal<K extends WrappedModalKey>(
+  key: K,
+  ModalComponent: WrappedModalRegistry[K],
+  modal: TabState[K],
+  shouldAnimateInterface: boolean,
+) {
+  return (
+    <WrappedModalBoundary<TabState[K]>
+      key={key}
+      modal={modal}
+      ModalComponent={ModalComponent}
+      closeDuration={WRAPPED_MODAL_CLOSE_DURATIONS[key]}
+      shouldAnimateInterface={shouldAnimateInterface}
+    />
+  );
+}
+
 const ModalContainer = (modalProps: StateProps) => {
   const { shouldAnimateInterface } = modalProps;
 
@@ -316,16 +341,9 @@ const ModalContainer = (modalProps: StateProps) => {
       // @ts-ignore -- TS does not preserve tuple types in `map` callbacks
       <ModalComponent key={key} modal={modalProps[key]} />
     )),
-    ...WRAPPED_MODAL_ENTRIES.map(([key, ModalComponent]) => (
-      // @ts-ignore -- TS does not preserve tuple types in `map` callbacks
-      <WrappedModalBoundary
-        key={key}
-        modal={modalProps[key]}
-        ModalComponent={ModalComponent}
-        closeDuration={WRAPPED_MODAL_CLOSE_DURATIONS[key]}
-        shouldAnimateInterface={shouldAnimateInterface}
-      />
-    )),
+    ...WRAPPED_MODAL_ENTRIES.map(([key, ModalComponent]) => {
+      return renderWrappedModal(key, ModalComponent, modalProps[key], shouldAnimateInterface);
+    }),
   ];
 };
 

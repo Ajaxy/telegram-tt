@@ -1,0 +1,23 @@
+.root {
+  position: relative;
+
+  overflow: hidden;
+  display: inline-block;
+
+  max-width: 100%;
+
+  vertical-align: text-bottom;
+}
+
+.image {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+}

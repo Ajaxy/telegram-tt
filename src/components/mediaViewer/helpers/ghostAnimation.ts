@@ -27,8 +27,9 @@ export function animateOpening(
   isVideo: boolean,
   message?: ApiMessage,
   mediaIndex?: number,
+  sourceId?: string,
 ) {
-  const { mediaEl: fromImage } = getNodes(origin, message, mediaIndex);
+  const { mediaEl: fromImage } = getNodes(origin, message, mediaIndex, sourceId);
   if (!fromImage) {
     return;
   }
@@ -76,7 +77,7 @@ export function animateOpening(
     });
     applyShape(ghost, origin);
 
-    document.body.appendChild(ghost);
+    getGhostHost().appendChild(ghost);
     document.body.classList.add('ghost-animating');
 
     requestMutation(() => {
@@ -85,9 +86,7 @@ export function animateOpening(
 
       setTimeout(() => {
         requestMutation(() => {
-          if (document.body.contains(ghost)) {
-            document.body.removeChild(ghost);
-          }
+          removeGhost(ghost);
           document.body.classList.remove('ghost-animating');
         });
       }, ANIMATION_DURATION + ANIMATION_END_DELAY);
@@ -96,10 +95,10 @@ export function animateOpening(
 }
 
 export function animateClosing(
-  origin: MediaViewerOrigin, bestImageData: string, message?: ApiMessage, mediaIndex?: number,
+  origin: MediaViewerOrigin, bestImageData: string, message?: ApiMessage, mediaIndex?: number, sourceId?: string,
 ) {
-  const { container, mediaEl: toImage } = getNodes(origin, message, mediaIndex);
-  if (!toImage) {
+  const { container, mediaEl: toImage } = getNodes(origin, message, mediaIndex, sourceId);
+  if (!container || !toImage) {
     return;
   }
 
@@ -183,7 +182,7 @@ export function animateClosing(
 
   requestMutation(() => {
     applyStyles(ghost, styles);
-    if (!existingGhost) document.body.appendChild(ghost);
+    if (!existingGhost) getGhostHost().appendChild(ghost);
     document.body.classList.add('ghost-animating');
 
     requestMutation(() => {
@@ -201,9 +200,7 @@ export function animateClosing(
 
       setTimeout(() => {
         requestMutation(() => {
-          if (document.body.contains(ghost)) {
-            document.body.removeChild(ghost);
-          }
+          removeGhost(ghost);
           document.body.classList.remove('ghost-animating');
         });
       }, ANIMATION_DURATION + ANIMATION_END_DELAY);
@@ -252,6 +249,14 @@ function createGhost(
   return ghost;
 }
 
+function getGhostHost() {
+  return document.getElementById('MediaViewer') || document.body;
+}
+
+function removeGhost(ghost: HTMLDivElement) {
+  ghost.parentElement?.removeChild(ghost);
+}
+
 function uncover(realWidth: number, realHeight: number, top: number, left: number, width: number, height: number) {
   if (realWidth === realHeight) {
     const size = Math.max(width, height) * (realWidth / realHeight);
@@ -293,11 +298,25 @@ function getTopOffset(hasFooter: boolean) {
   return topOffsetRem * REM;
 }
 
-function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: number) {
+function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: number, sourceId?: string) {
   let containerSelector;
   let mediaSelector;
 
   switch (origin) {
+    case MediaViewerOrigin.PageBlock: {
+      const container = sourceId ? document.getElementById(sourceId) : undefined;
+      const pageBlockMediaSelector = 'img.full-media, video.full-media, img.thumbnail:not(.blurred-bg), '
+        + 'canvas.thumbnail:not(.blurred-bg), img, video';
+      const mediaEls = container?.querySelectorAll<HTMLImageElement | HTMLVideoElement | HTMLCanvasElement>(
+        pageBlockMediaSelector,
+      );
+
+      return {
+        container,
+        mediaEl: mediaEls?.[0],
+      };
+    }
+
     case MediaViewerOrigin.Album:
     case MediaViewerOrigin.ScheduledAlbum:
       // eslint-disable-next-line @stylistic/max-len
@@ -383,6 +402,7 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
     case MediaViewerOrigin.ScheduledAlbum:
     case MediaViewerOrigin.Inline:
     case MediaViewerOrigin.ScheduledInline:
+    case MediaViewerOrigin.PageBlock:
     case MediaViewerOrigin.StarsTransaction:
     case MediaViewerOrigin.PreviewMedia:
     case MediaViewerOrigin.PollPreview:

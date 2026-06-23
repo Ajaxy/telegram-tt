@@ -13,16 +13,38 @@
   justify-items: stretch;
 
   width: 100vw;
+  max-width: none;
   height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
 
   color: #fff;
 
   background: rgba(0, 0, 0, 0.9);
 
+  transition: background-color 0.15s ease;
+
+  &::backdrop {
+    background: transparent;
+  }
+
   // Potential perf improvement
   &:not(.shown) {
     transform: scale(0);
     display: block !important;
+  }
+
+  &.not-open,
+  &.closing {
+    background: rgba(0, 0, 0, 0);
+  }
+
+  @starting-style {
+    &.open {
+      background: rgba(0, 0, 0, 0);
+    }
   }
 
   body.ghost-animating & {
@@ -36,10 +58,32 @@
 
   body:not(.no-media-viewer-animations) & {
     transition-duration: 0.3s !important;
+
+    > .media-viewer-head,
+    > .MediaViewerSlides {
+      transition-duration: 0.3s !important;
+    }
+  }
+
+  &.not-open,
+  &.closing {
+    > .media-viewer-head,
+    > .MediaViewerSlides {
+      opacity: 0;
+    }
+  }
+
+  @starting-style {
+    &.open {
+      > .media-viewer-head,
+      > .MediaViewerSlides {
+        opacity: 0;
+      }
+    }
   }
 
   &:not(.open),
-  .closing {
+  &.closing {
     .SenderInfo {
       pointer-events: none;
       transition: none;
@@ -79,6 +123,8 @@
 
     background: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0) 100%);
 
+    transition: opacity 0.15s ease;
+
     & > .Transition {
       width: 100%;
       min-width: 0;
@@ -95,6 +141,10 @@
         margin-right: 1.5rem;
       }
     }
+  }
+
+  .MediaViewerSlides {
+    transition: opacity 0.15s ease;
   }
 
   & > .Transition,

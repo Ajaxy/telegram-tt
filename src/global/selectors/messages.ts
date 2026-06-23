@@ -587,7 +587,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
       canEditMessagesIndefinitely
       || getServerTime() - message.date < (global.config?.editTimeLimit || Infinity)
     ) && !(
-      content.sticker || content.contact || content.pollId || content.action
+      content.sticker || content.contact || content.pollId || content.action || content.richMessage
       || (content.video?.isRound) || content.location || content.invoice || content.giveaway || content.giveawayResults
       || isDocumentSticker || content.dice
     )

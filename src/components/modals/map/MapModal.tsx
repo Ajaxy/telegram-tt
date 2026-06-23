@@ -9,32 +9,31 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Button from '../../ui/Button';
-import Modal from '../../ui/Modal';
+import Modal, {
+  ModalCloseButton,
+  ModalHeader,
+  ModalTitle,
+} from '@gili/modal/Modal';
 
 import styles from './MapModal.module.scss';
 
 export type OwnProps = {
-  modal: TabState['mapModal'];
+  modal: NonNullable<TabState['mapModal']>;
+  isOpen: boolean;
 };
 
-const OpenMapModal = ({ modal }: OwnProps) => {
+const OpenMapModal = ({ modal, isOpen }: OwnProps) => {
   const { closeMapModal } = getActions();
 
-  const { point: geoPoint, zoom } = modal || {};
+  const { point: geoPoint, zoom } = modal;
 
   const lang = useLang();
-
-  const isOpen = Boolean(geoPoint);
 
   const handleClose = useLastCallback(() => {
     closeMapModal();
   });
 
   const [googleUrl, bingUrl, appleUrl, osmUrl] = useMemo(() => {
-    if (!geoPoint) {
-      return [];
-    }
-
     const google = prepareMapUrl('google', geoPoint, zoom);
     const bing = prepareMapUrl('bing', geoPoint, zoom);
     const apple = prepareMapUrl('apple', geoPoint, zoom);
@@ -49,28 +48,37 @@ const OpenMapModal = ({ modal }: OwnProps) => {
   });
 
   const handleGoogleClick = useLastCallback(() => {
-    openUrl(googleUrl!);
+    openUrl(googleUrl);
   });
 
   const handleBingClick = useLastCallback(() => {
-    openUrl(bingUrl!);
+    openUrl(bingUrl);
   });
 
   const handleAppleClick = useLastCallback(() => {
-    openUrl(appleUrl!);
+    openUrl(appleUrl);
   });
 
   const handleOsmClick = useLastCallback(() => {
-    openUrl(osmUrl!);
+    openUrl(osmUrl);
   });
+
+  const header = useMemo(() => (
+    <ModalHeader>
+      <ModalCloseButton />
+      <ModalTitle>{lang('OpenMapWith')}</ModalTitle>
+    </ModalHeader>
+  ), [lang]);
 
   return (
     <Modal
       contentClassName={styles.root}
-      title={lang('OpenMapWith')}
       isOpen={isOpen}
+      header={header}
+      width="slim"
+      height="auto"
+      ariaLabel={lang('OpenMapWith')}
       onClose={handleClose}
-      isSlim
     >
       <div className={styles.buttons}>
         <Button noForcedUpperCase fluid size="smaller" onClick={handleGoogleClick}>

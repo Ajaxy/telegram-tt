@@ -388,13 +388,14 @@ export default memo(withGlobal<OwnProps>(
     const { origin } = tabState.mediaViewer;
 
     const message = item?.type === 'message' ? item.message : undefined;
+    const pageMedia = item?.type === 'pageBlock' ? item.pageMedia : undefined;
     const avatarOwner = item?.type === 'avatar' ? item.avatarOwner : undefined;
     const avatarPhoto = item?.type === 'avatar' && item.profilePhotos.photos[item.mediaIndex];
 
     const chat = selectCurrentChat(global);
     const currentMessageList = selectCurrentMessageList(global);
     const { threadId } = selectCurrentMessageList(global) || {};
-    const isProtected = selectIsMessageProtected(global, message);
+    const isProtected = pageMedia?.isProtected || selectIsMessageProtected(global, message);
     const activeDownloads = selectActiveDownloads(global);
     const isChatProtected = message && selectIsChatProtected(global, message?.chatId);
     const { canDelete: canDeleteMessage } = (threadId

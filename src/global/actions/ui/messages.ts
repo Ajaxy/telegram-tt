@@ -923,6 +923,16 @@ addActionHandler('closeChatLanguageModal', (global, actions, payload): ActionRet
   }, tabId);
 });
 
+addActionHandler('openInstantView', (global, actions, payload): ActionReturnType => {
+  const { webPageId, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    instantViewModal: { webPageId },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeInstantView', 'instantViewModal');
+
 addActionHandler('copySelectedMessages', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);

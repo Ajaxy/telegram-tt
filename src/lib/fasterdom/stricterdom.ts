@@ -56,8 +56,8 @@ export function forceMeasure(cb: () => any) {
 const forcedMutationAllowedFor = new Set<Node>();
 const IGNORE_SUBTREE_ATTR = 'data-stricterdom-ignore';
 
-export function forceMutation(cb: () => any, nodes: Node | Node[]) {
-  if (phase !== 'measure') {
+export function forceMutation(cb: () => any, nodes: Node | Node[], allowAnyPhase?: boolean) {
+  if (!allowAnyPhase && phase !== 'measure') {
     throw new Error('The current phase is \'mutate\'');
   }
 

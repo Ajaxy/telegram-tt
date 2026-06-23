@@ -32,7 +32,7 @@ const CompactMapPreview = ({
   width,
   height,
   zoom = DEFAULT_ZOOM,
-  shouldShowPin = true,
+  shouldShowPin,
   onClick,
 }: OwnProps) => {
   const dpr = useDevicePixelRatio();
