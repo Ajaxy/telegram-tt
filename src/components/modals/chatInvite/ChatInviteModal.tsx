@@ -81,7 +81,7 @@ const ChatInviteModal = ({ modal }: OwnProps) => {
       onClose={handleClose}
       onEnter={handleAccept}
     >
-      {customPeer && <Avatar size="jumbo" photo={photo} peer={customPeer} withVideo />}
+      {customPeer && <Avatar size="giant" photo={photo} peer={customPeer} withVideo />}
       {customPeer && <FullNameTitle className={styles.title} peer={customPeer} />}
       {about && <p className={styles.about}>{about}</p>}
       <p className={styles.participantCount}>

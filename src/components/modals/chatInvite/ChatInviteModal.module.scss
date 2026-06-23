@@ -2,11 +2,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-top: 2rem;
 }
 
 .title {
   max-width: 100%;
-  font-size: 1.5rem;
+  padding-top: 1.125rem;
+  font-size: 1.375rem;
 }
 
 .participantCount {
