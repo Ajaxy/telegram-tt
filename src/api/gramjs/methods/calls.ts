@@ -22,6 +22,12 @@ import { invokeRequest, invokeRequestBeacon } from './client';
 const MAX_SIGNED_INT64 = (1n << 63n) - 1n;
 const UINT64_MOD = 1n << 64n;
 
+type DhConfig = {
+  g: number;
+  p: number[];
+  random: number[];
+};
+
 function buildSignedLong(value: string) {
   const parsed = BigInt(value);
   return parsed > MAX_SIGNED_INT64 ? parsed - UINT64_MOD : parsed;
@@ -250,7 +256,7 @@ export function leaveGroupCallPresentation({
   });
 }
 
-export async function getDhConfig() {
+export async function fetchDhConfig(): Promise<DhConfig | undefined> {
   const dhConfig = await invokeRequest(new GramJs.messages.GetDhConfig({
     version: DEFAULT_PRIMITIVES.INT,
     randomLength: DEFAULT_PRIMITIVES.INT,

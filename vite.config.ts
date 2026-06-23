@@ -1,7 +1,9 @@
 import { readFileSync, statSync } from 'fs';
 import { dirname, resolve } from 'path';
+import { bundleStats } from 'rollup-plugin-bundle-stats';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath } from 'url';
-import { defineConfig, loadEnv, normalizePath, type UserConfig } from 'vite';
+import { defineConfig, loadEnv, normalizePath, type PluginOption, type UserConfig } from 'vite';
 import { type Target, viteStaticCopy } from 'vite-plugin-static-copy';
 import { watchAndRun } from 'vite-plugin-watch-and-run';
 
@@ -13,6 +15,8 @@ const CHANGELOG_PATH = resolve(DIR_NAME, 'src/versionNotification.txt');
 const PRODUCTION_URL = 'https://web.telegram.org/a';
 
 const { version: APP_VERSION } = packageJson;
+const BUNDLE_STATS_OUT_DIR = 'bundle-stats';
+const DEFAULT_BUNDLE_STATS_BASELINE_FILE = 'baseline.json';
 const DEV_WARMUP_CLIENT_FILES = [
   'index.html',
   'src/**/*.{js,jsx,ts,tsx,css,scss}',
@@ -42,6 +46,9 @@ export default defineConfig(({ mode }): UserConfig => {
   const env = loadEnv(mode, process.cwd(), '');
   const {
     HEAD = '',
+    BUNDLE_STATS: bundleStatsValue = '',
+    BUNDLE_STATS_BASELINE_PATH: bundleStatsBaselinePath = '',
+    BUNDLE_STATS_VISUALIZER: bundleStatsVisualizerValue = '',
     HTTPS_CERT_PATH: httpsCertPath = '',
     HTTPS_KEY_PATH: httpsKeyPath = '',
   } = env;
@@ -58,6 +65,53 @@ export default defineConfig(({ mode }): UserConfig => {
   const isDevelopmentMode = mode === 'development';
   const telegramApiId = env.TELEGRAM_API_ID || '';
   const telegramApiHash = env.TELEGRAM_API_HASH || '';
+  const plugins: PluginOption[] = [
+    buildGitInfoPlugin({
+      appEnv,
+      head: HEAD,
+      isDevelopmentMode,
+      rootDir: DIR_NAME,
+    }),
+    viteStaticCopy({ targets: STATIC_COPY_TARGETS }),
+    isDevelopmentMode && watchAndRun([
+      {
+        name: 'lang',
+        watch: buildProjectPath('src/assets/localization/fallback.strings'),
+        watchFile: (filePath) => Promise.resolve(isProjectFile(filePath, 'src/assets/localization/fallback.strings')),
+        run: 'npm run lang:ts',
+      },
+      {
+        name: 'gramjs',
+        watch: buildProjectPath('src/lib/gramjs/tl/static'),
+        watchFile: (filePath) => Promise.resolve(isPathInsideProjectDirectory(filePath, 'src/lib/gramjs/tl/static')),
+        run: 'npm run gramjs:tl',
+      },
+      {
+        name: 'icons',
+        watch: buildProjectPath('src/assets/font-icons'),
+        watchFile: (filePath) => Promise.resolve(isPathInsideProjectDirectory(filePath, 'src/assets/font-icons')),
+        run: 'npm run icons:build',
+      },
+    ]),
+  ];
+
+  if (bundleStatsVisualizerValue === '1') {
+    plugins.push(visualizer({
+      open: true,
+      template: 'treemap',
+    }));
+  }
+
+  if (bundleStatsValue === '1') {
+    plugins.push(bundleStats({
+      html: true,
+      json: true,
+      compare: Boolean(bundleStatsBaselinePath),
+      baseline: true,
+      baselineFilepath: bundleStatsBaselinePath || DEFAULT_BUNDLE_STATS_BASELINE_FILE,
+      outDir: BUNDLE_STATS_OUT_DIR,
+    }));
+  }
 
   if (appEnv !== 'test' && (!telegramApiId || !telegramApiHash)) {
     throw new Error('Missing required Telegram API credentials');
@@ -135,35 +189,7 @@ export default defineConfig(({ mode }): UserConfig => {
         },
       },
     },
-    plugins: [
-      buildGitInfoPlugin({
-        appEnv,
-        head: HEAD,
-        isDevelopmentMode,
-        rootDir: DIR_NAME,
-      }),
-      viteStaticCopy({ targets: STATIC_COPY_TARGETS }),
-      isDevelopmentMode && watchAndRun([
-        {
-          name: 'lang',
-          watch: buildProjectPath('src/assets/localization/fallback.strings'),
-          watchFile: (filePath) => Promise.resolve(isProjectFile(filePath, 'src/assets/localization/fallback.strings')),
-          run: 'npm run lang:ts',
-        },
-        {
-          name: 'gramjs',
-          watch: buildProjectPath('src/lib/gramjs/tl/static'),
-          watchFile: (filePath) => Promise.resolve(isPathInsideProjectDirectory(filePath, 'src/lib/gramjs/tl/static')),
-          run: 'npm run gramjs:tl',
-        },
-        {
-          name: 'icons',
-          watch: buildProjectPath('src/assets/font-icons'),
-          watchFile: (filePath) => Promise.resolve(isPathInsideProjectDirectory(filePath, 'src/assets/font-icons')),
-          run: 'npm run icons:build',
-        },
-      ]),
-    ],
+    plugins,
   };
 });
 

@@ -13,6 +13,8 @@
     "build:staging": "cross-env APP_ENV=staging npm run build:dev",
     "build:mocked": "cross-env APP_ENV=test APP_MOCKED_CLIENT=1 npm run build:dev",
     "build:production": "vite build",
+    "build:stats": "cross-env BUNDLE_STATS=1 vite build",
+    "build:stats:visualizer": "cross-env BUNDLE_STATS_VISUALIZER=1 vite build",
     "web:release:production": "npm i && npm run build:production && git add -A && git commit -a -m '[Build]' --no-verify && git push",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
@@ -37,13 +39,15 @@
   },
   "engines": {
     "node": "^22.6 || ^24",
-    "npm": "^10.8 || ^11"
+    "npm": "^11"
   },
   "lint-staged": {
     "*.{ts,tsx,js}": "eslint --cache --cache-location .cache/.eslintcache --fix",
     "*.{css,scss}": "stylelint --cache --cache-location .cache/.stylelintcache --fix"
   },
   "devDependencies": {
+    "@actions/core": "^3.0.1",
+    "@actions/github": "^9.1.1",
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.2",
     "@babel/preset-react": "^7.28.5",
@@ -94,6 +98,8 @@
     "postcss-load-config": "^6.0.1",
     "postcss-modules": "^6.0.1",
     "react": "^19.2.4",
+    "rollup-plugin-bundle-stats": "^4.22.2",
+    "rollup-plugin-visualizer": "^7.0.1",
     "sass": "^1.98.0",
     "serve": "^14.2.6",
     "stylelint": "^17.6.0",
@@ -133,5 +139,14 @@
   },
   "browserslist": [
     "baseline widely available"
-  ]
+  ],
+  "allowScripts": {
+    "core-js": false,
+    "esbuild@0.27.4": true,
+    "fsevents@2.3.3": true,
+    "fsevents@2.3.2": true,
+    "@parcel/watcher@2.5.6": true,
+    "ttf2woff2@8.0.1": true,
+    "unrs-resolver@1.11.1": true
+  }
 }

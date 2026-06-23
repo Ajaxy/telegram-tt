@@ -271,7 +271,7 @@ addActionHandler('connectToActivePhoneCall', async (global, actions): Promise<vo
 
   if (!user) return;
 
-  const dhConfig = await callApi('getDhConfig');
+  const dhConfig = await callApi('fetchDhConfig');
 
   if (!dhConfig) return;
 
@@ -294,7 +294,7 @@ addActionHandler('acceptCall', async (global): Promise<void> => {
 
   if (!phoneCall) return;
 
-  const dhConfig = await callApi('getDhConfig');
+  const dhConfig = await callApi('fetchDhConfig');
   if (!dhConfig) return;
 
   await callApi('createPhoneCallState', {
