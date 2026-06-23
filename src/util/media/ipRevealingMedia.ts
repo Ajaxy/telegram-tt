@@ -4,7 +4,7 @@ const UNSAFE_MIME_TYPES = new Set(['text/html', 'image/svg+xml']);
 const UNSAFE_MIME_SUBTYPES = new Set(['html', 'svg+xml', 'xhtml+xml', 'xml']);
 const UNSAFE_EXTENSIONS = new Set([
   ...SVG_EXTENSIONS,
-  'htm', 'html', 'svg', 'm4v', 'm3u', 'm3u8', 'xhtml', 'xml',
+  'htm', 'html', 'svg', 'kml', 'kmz', 'm4v', 'm3u', 'm3u8', 'xhtml', 'xml',
 ]);
 
 export function isIpRevealingMedia({ mimeType, extension }: { mimeType?: string; extension: string }) {
