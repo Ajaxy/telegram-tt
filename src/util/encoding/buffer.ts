@@ -53,9 +53,6 @@ export function readUint32BE(buffer: Uint8Array, offset = 0) {
 }
 
 export function writeInt32LE(buffer: Uint8Array, value: number, offset = 0) {
-  if (!Number.isFinite(value) || !Number.isInteger(value) || value < -0x80000000 || value > 0x7FFFFFFF) {
-    throw new RangeError('Value is outside the signed 32-bit integer range');
-  }
   checkBounds(buffer, offset, 4);
 
   buffer[offset] = value & 0xFF;
@@ -65,9 +62,6 @@ export function writeInt32LE(buffer: Uint8Array, value: number, offset = 0) {
 }
 
 export function writeUint32LE(buffer: Uint8Array, value: number, offset = 0) {
-  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0 || value > 0xFFFFFFFF) {
-    throw new RangeError('Value is outside the unsigned 32-bit integer range');
-  }
   checkBounds(buffer, offset, 4);
 
   buffer[offset] = value & 0xFF;
@@ -77,9 +71,6 @@ export function writeUint32LE(buffer: Uint8Array, value: number, offset = 0) {
 }
 
 export function writeUint32BE(buffer: Uint8Array, value: number, offset = 0) {
-  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0 || value > 0xFFFFFFFF) {
-    throw new RangeError('Value is outside the unsigned 32-bit integer range');
-  }
   checkBounds(buffer, offset, 4);
 
   buffer[offset] = value >>> 24;
@@ -121,11 +112,7 @@ export function readBigUint64BE(buffer: Uint8Array, offset = 0) {
 export function writeBigInt64LE(buffer: Uint8Array, value: bigint, offset = 0) {
   checkBounds(buffer, offset, 8);
 
-  if (value < -0x8000000000000000n || value > 0x7FFFFFFFFFFFFFFFn) {
-    throw new RangeError('Value is outside the signed 64-bit integer range');
-  }
-
-  const unsignedValue = value < 0n ? 0x10000000000000000n + value : value;
+  const unsignedValue = BigInt.asUintN(64, value);
   const low = Number(unsignedValue & 0xFFFFFFFFn);
   const high = Number((unsignedValue >> 32n) & 0xFFFFFFFFn);
 

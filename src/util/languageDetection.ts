@@ -37,7 +37,7 @@ async function initLanguageDetection() {
 
   if (!worker) {
     worker = createConnector<FastTextApi>(
-      new Worker(new URL('../lib/fasttextweb/fasttext.worker.ts', import.meta.url)),
+      new Worker(new URL('../lib/fasttextweb/fasttext.worker.ts', import.meta.url), { type: 'module' }),
     );
     initializationDeferred.resolve();
   }

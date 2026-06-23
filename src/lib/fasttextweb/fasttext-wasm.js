@@ -12,9 +12,4 @@ var Module=typeof fasttextmodule!="undefined"?fasttextmodule:{};var readyPromise
 }
 );
 })();
-if (typeof exports === 'object' && typeof module === 'object')
-  module.exports = fasttextmodule;
-else if (typeof define === 'function' && define['amd'])
-  define([], function() { return fasttextmodule; });
-else if (typeof exports === 'object')
-  exports["fasttextmodule"] = fasttextmodule;
+export default fasttextmodule;

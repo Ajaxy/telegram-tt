@@ -366,12 +366,16 @@ export function getGamePreviewVideoHash(game: ApiGame) {
   return undefined;
 }
 
-export function appendProgressiveQueryParameters(media: ApiAudio | ApiVideo | ApiDocument, base: string) {
+export function appendProgressiveQueryParameters(
+  media: Pick<ApiAudio | ApiVideo | ApiDocument, 'mimeType' | 'size'>, base: string,
+) {
   if (IS_PROGRESSIVE_SUPPORTED && IS_SAFARI) {
-    const url = new URL(base, window.location.href);
-    url.searchParams.append('fileSize', media.size.toString());
-    url.searchParams.append('mimeType', media.mimeType);
-    return url.toString();
+    const [path, query = ''] = base.split('?');
+    const params = new URLSearchParams(query);
+    params.append('fileSize', media.size.toString());
+    params.append('mimeType', media.mimeType);
+
+    return `${path}?${params.toString()}`;
   }
 
   return base;
@@ -406,8 +410,8 @@ export function getMediaFormat(
   }
 
   if (isAudio || isVoice) {
-    // Safari
-    if (isVoice && !IS_OPUS_SUPPORTED) {
+    // Safari versions that support Opus are not working with streaming
+    if (isVoice && (IS_SAFARI || !IS_OPUS_SUPPORTED)) {
       return ApiMediaFormat.BlobUrl;
     }
 
