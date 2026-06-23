@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./dos-CXxGkwh_.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/dos" instead of "highlight.js/lib/languages/dos.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=dos.js-gDvk_obt.js.map

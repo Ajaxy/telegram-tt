@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./ruby-DZ3MX-o1.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/ruby" instead of "highlight.js/lib/languages/ruby.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=ruby.js-BHgnZ6Rx.js.map

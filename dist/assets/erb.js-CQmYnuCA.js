@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./erb-CCwzADOm.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/erb" instead of "highlight.js/lib/languages/erb.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=erb.js-CQmYnuCA.js.map

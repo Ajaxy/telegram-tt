@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";var t=e(((e,t)=>{function n(e){return{name:`Dockerfile`,aliases:[`docker`],case_insensitive:!0,keywords:[`from`,`maintainer`,`expose`,`env`,`arg`,`user`,`onbuild`,`stopsignal`],contains:[e.HASH_COMMENT_MODE,e.APOS_STRING_MODE,e.QUOTE_STRING_MODE,e.NUMBER_MODE,{beginKeywords:`run cmd entrypoint volume add copy workdir label healthcheck shell`,starts:{end:/[^\\]$/,subLanguage:`bash`}}],illegal:`</`}}t.exports=n}));export default t();export{t};
+//# sourceMappingURL=dockerfile-CqWPNjdv.js.map

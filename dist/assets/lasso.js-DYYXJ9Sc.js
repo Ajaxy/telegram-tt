@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./lasso-COsz2Ubm.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/lasso" instead of "highlight.js/lib/languages/lasso.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=lasso.js-DYYXJ9Sc.js.map

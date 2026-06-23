@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";var t=e(((e,t)=>{function n(e){return{aliases:[`pycon`],contains:[{className:`meta.prompt`,starts:{end:/ |$/,starts:{end:`$`,subLanguage:`python`}},variants:[{begin:/^>>>(?=[ ]|$)/},{begin:/^\.\.\.(?=[ ]|$)/}]}]}}t.exports=n}));export default t();export{t};
+//# sourceMappingURL=python-repl-C7lUYoOi.js.map

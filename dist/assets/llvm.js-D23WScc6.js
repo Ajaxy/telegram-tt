@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./llvm-Cugx_GDQ.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/llvm" instead of "highlight.js/lib/languages/llvm.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=llvm.js-D23WScc6.js.map

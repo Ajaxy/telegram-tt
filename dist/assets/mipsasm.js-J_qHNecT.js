@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./mipsasm-DpKi8Ad5.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/mipsasm" instead of "highlight.js/lib/languages/mipsasm.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=mipsasm.js-J_qHNecT.js.map

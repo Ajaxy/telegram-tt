@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";var t=e(((e,t)=>{function n(e){return{name:`Julia REPL`,contains:[{className:`meta.prompt`,begin:/^julia>/,relevance:10,starts:{end:/^(?![ ]{6})/,subLanguage:`julia`}}],aliases:[`jldoctest`]}}t.exports=n}));export default t();export{t};
+//# sourceMappingURL=julia-repl-BCvEqP5L.js.map

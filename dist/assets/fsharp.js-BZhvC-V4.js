@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./fsharp-ClFH8zqu.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/fsharp" instead of "highlight.js/lib/languages/fsharp.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=fsharp.js-BZhvC-V4.js.map

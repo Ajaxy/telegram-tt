@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";var t=e(((e,t)=>{function n(e){let t=e.COMMENT(/\(\*/,/\*\)/);return{name:`Extended Backus-Naur Form`,illegal:/\S/,contains:[t,{className:`attribute`,begin:/^[ ]*[a-zA-Z]+([\s_-]+[a-zA-Z]+)*/},{begin:/=/,end:/[.;]/,contains:[t,{className:`meta`,begin:/\?.*\?/},{className:`string`,variants:[e.APOS_STRING_MODE,e.QUOTE_STRING_MODE,{begin:"`",end:"`"}]}]}]}}t.exports=n}));export default t();export{t};
+//# sourceMappingURL=ebnf-C_u7Dm2l.js.map

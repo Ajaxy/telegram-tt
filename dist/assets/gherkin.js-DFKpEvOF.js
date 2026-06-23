@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./gherkin-CkHppE0e.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/gherkin" instead of "highlight.js/lib/languages/gherkin.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=gherkin.js-DFKpEvOF.js.map

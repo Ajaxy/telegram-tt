@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./julia-Cl4aKuPQ.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/julia" instead of "highlight.js/lib/languages/julia.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=julia.js-C7xRF-fg.js.map

@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./irpf90-C3KDl_td.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/irpf90" instead of "highlight.js/lib/languages/irpf90.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=irpf90.js-Das9i7gS.js.map

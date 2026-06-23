@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./inform7-KNWLpv-9.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/inform7" instead of "highlight.js/lib/languages/inform7.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=inform7.js-By0mOSih.js.map

@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./hsp-a8S6ulav.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/hsp" instead of "highlight.js/lib/languages/hsp.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=hsp.js-DP67Qs_M.js.map

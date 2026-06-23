@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./nix-D9aVuAei.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/nix" instead of "highlight.js/lib/languages/nix.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=nix.js-B6_4vplj.js.map

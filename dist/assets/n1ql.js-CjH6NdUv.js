@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./n1ql-I3hWx8ut.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/n1ql" instead of "highlight.js/lib/languages/n1ql.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=n1ql.js-CjH6NdUv.js.map

@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./clojure-B3OSZ_AE.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/clojure" instead of "highlight.js/lib/languages/clojure.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=clojure.js-BfMHF2zR.js.map

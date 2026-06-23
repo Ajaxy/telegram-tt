@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./stylus-CtN4fL1u.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/stylus" instead of "highlight.js/lib/languages/stylus.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=stylus.js-DO0QKQuh.js.map

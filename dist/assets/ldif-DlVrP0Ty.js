@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";var t=e(((e,t)=>{function n(e){return{name:`LDIF`,contains:[{className:`attribute`,match:`^dn(?=:)`,relevance:10},{className:`attribute`,match:`^\\w+(?=:)`},{className:`literal`,match:`^-`},e.HASH_COMMENT_MODE]}}t.exports=n}));export default t();export{t};
+//# sourceMappingURL=ldif-DlVrP0Ty.js.map

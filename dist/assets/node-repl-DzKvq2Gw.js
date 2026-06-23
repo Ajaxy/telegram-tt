@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";var t=e(((e,t)=>{function n(e){return{name:`Node REPL`,contains:[{className:`meta.prompt`,starts:{end:/ |$/,starts:{end:`$`,subLanguage:`javascript`}},variants:[{begin:/^>(?=[ ]|$)/},{begin:/^\.\.\.(?=[ ]|$)/}]}]}}t.exports=n}));export default t();export{t};
+//# sourceMappingURL=node-repl-DzKvq2Gw.js.map

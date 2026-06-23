@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./tcl-CzkXiuOb.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/tcl" instead of "highlight.js/lib/languages/tcl.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=tcl.js-DS8eGZQE.js.map

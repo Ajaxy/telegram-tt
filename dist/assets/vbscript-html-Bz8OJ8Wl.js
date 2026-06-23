@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";var t=e(((e,t)=>{function n(e){return{name:`VBScript in HTML`,subLanguage:`xml`,contains:[{begin:`<%`,end:`%>`,subLanguage:`vbscript`}]}}t.exports=n}));export default t();export{t};
+//# sourceMappingURL=vbscript-html-Bz8OJ8Wl.js.map

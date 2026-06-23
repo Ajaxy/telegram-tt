@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./hy-CGm96K8r.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/hy" instead of "highlight.js/lib/languages/hy.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=hy.js-i6pHr1f5.js.map

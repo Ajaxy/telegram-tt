@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./x86asm-DSiXbHor.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/x86asm" instead of "highlight.js/lib/languages/x86asm.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=x86asm.js-DHACUm8d.js.map

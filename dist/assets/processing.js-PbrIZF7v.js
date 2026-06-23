@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./processing-DNCK-DLP.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/processing" instead of "highlight.js/lib/languages/processing.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=processing.js-PbrIZF7v.js.map

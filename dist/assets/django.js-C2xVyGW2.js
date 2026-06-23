@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./django-MrcdEV-k.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/django" instead of "highlight.js/lib/languages/django.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=django.js-C2xVyGW2.js.map

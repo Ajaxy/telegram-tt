@@ -1,0 +1,2 @@
+import{t as e}from"./rolldown-runtime-QTnfLwEv.js";import{t}from"./fix-YHIxD0aB.js";var n=e(((e,n)=>{function r(){r.warned||(r.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/fix" instead of "highlight.js/lib/languages/fix.js"`))}r(),n.exports=t()}));export default n();
+//# sourceMappingURL=fix.js-S1l9tEfY.js.map
