@@ -122,7 +122,8 @@ export default defineConfig(({ mode }): UserConfig => {
     ]),
   ];
 
-  if (bundleStatsVisualizerValue === '1') {
+  // Плагины bundle-stats включаются только в режиме разработки или при явном включении
+  if (isDevelopmentMode && bundleStatsVisualizerValue === '1') {
     plugins.push(createBundleReportPlugin(visualizer((outputOptions) => ({
       filename: resolve(
         DIR_NAME,
@@ -135,18 +136,17 @@ export default defineConfig(({ mode }): UserConfig => {
     })), workerReportBundles));
   }
 
-  if (bundleStatsValue === '1') {
+  if (isDevelopmentMode && bundleStatsValue === '1') {
     plugins.push(createBundleReportPlugin(bundleStats({
       html: true,
       json: true,
       compare: Boolean(bundleStatsBaselinePath),
-      baseline: !bundleStatsBaselinePath, // For master branch upload
+      baseline: !bundleStatsBaselinePath,
       baselineFilepath: bundleStatsBaselinePath || DEFAULT_BUNDLE_STATS_BASELINE_FILE,
       outDir: BUNDLE_STATS_OUT_DIR,
     }), workerReportBundles));
 
     if (bundleStatsBaselinePath) {
-      // Write current PR stats for the compact GitHub comment
       plugins.push(createBundleReportPlugin(bundleStats({
         html: false,
         json: false,
@@ -159,7 +159,7 @@ export default defineConfig(({ mode }): UserConfig => {
     }
   }
 
-  const shouldCollectWorkerReportBundles = bundleStatsVisualizerValue === '1' || bundleStatsValue === '1';
+  const shouldCollectWorkerReportBundles = (isDevelopmentMode && bundleStatsVisualizerValue === '1') || (isDevelopmentMode && bundleStatsValue === '1');
 
   // Полностью вырезаем проверку-вылет с ошибкой, так как мы жестко зашили валидные ключи
   setViteEnv({
@@ -180,17 +180,23 @@ export default defineConfig(({ mode }): UserConfig => {
   return {
     base: './',
     envPrefix: ['VITE_', 'TG_'],
-    assetsInclude: ['**/*.tgs'],
+    assetsInclude: ['**/*.tgs', '**/*.wasm'],
     optimizeDeps: {
       exclude: ['temml'],
     },
     define: {
       APP_VERSION: JSON.stringify(APP_VERSION),
       CHANGELOG_DATETIME: JSON.stringify(statSync(CHANGELOG_PATH, { throwIfNoEntry: false })?.mtime.getTime()),
+      // Mock Node.js modules for browser environment
+      'process.versions.node': 'undefined',
     },
     resolve: {
       tsconfigPaths: true,
       alias: [
+        // Mock Node.js modules to prevent externalization warnings
+        { find: 'fs', replacement: resolve(DIR_NAME, 'src/lib/mocks/fs.ts') },
+        { find: 'path', replacement: resolve(DIR_NAME, 'src/lib/mocks/path.ts') },
+        { find: 'crypto', replacement: resolve(DIR_NAME, 'src/lib/mocks/crypto.ts') },
         ...(appMockedClient === '1' ? [{
           find: /^(?:\.\/client|(?:\.\.\/)*lib\/gramjs\/client)\/TelegramClient$/,
           replacement: resolve(DIR_NAME, 'src/lib/gramjs/client/MockClient.ts'),
@@ -218,12 +224,29 @@ export default defineConfig(({ mode }): UserConfig => {
     },
     build: {
       sourcemap: true,
+      chunkSizeWarningLimit: 2000,
       assetsInlineLimit: (filePath) => (IMAGE_ASSET_RE.test(filePath) ? false : undefined),
-      rolldownOptions: {
+      rollupOptions: {
         output: {
           manualChunks(id) {
+            // Split vendor chunks for better caching and reduced individual chunk sizes
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom')) {
+                return 'vendor-react';
+              }
+              if (id.includes('emoji') || id.includes('lowlight') || id.includes('temml')) {
+                return 'vendor-ui-libs';
+              }
+              if (id.includes('music-metadata') || id.includes('idb-keyval')) {
+                return 'vendor-utilities';
+              }
+              return 'vendor-common';
+            }
             if (id.includes('/src/components/ui/')) {
               return 'shared-components';
+            }
+            if (id.includes('/src/lib/gramjs/')) {
+              return 'gramjs-lib';
             }
             return undefined;
           },
@@ -234,7 +257,7 @@ export default defineConfig(({ mode }): UserConfig => {
       plugins: shouldCollectWorkerReportBundles ? () => [
         createWorkerBundleCollectorPlugin(workerReportBundles),
       ] : undefined,
-      rolldownOptions: {
+      rollupOptions: {
         output: {
           entryFileNames: '[name]-[hash].js',
         },
