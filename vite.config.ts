@@ -27,6 +27,7 @@ const DEV_WARMUP_CLIENT_FILES = [
   '!src/lib/gramjs/tl/**',
 ];
 const IMAGE_ASSET_RE = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
+
 const STATIC_COPY_TARGETS: Target[] = [
   {
     src: normalizePath(resolve(DIR_NAME, 'node_modules/opus-recorder/dist/decoderWorker.min.wasm')),
@@ -63,12 +64,16 @@ export default defineConfig(({ mode }): UserConfig => {
   const env = loadEnv(mode, process.cwd(), '');
   const {
     HEAD = '',
-    BUNDLE_STATS: bundleStatsValue = '',
     BUNDLE_STATS_BASELINE_PATH: bundleStatsBaselinePath = '',
-    BUNDLE_STATS_VISUALIZER: bundleStatsVisualizerValue = '',
     HTTPS_CERT_PATH: httpsCertPath = '',
     HTTPS_KEY_PATH: httpsKeyPath = '',
   } = env;
+
+  // Принудительно отключаем генерацию тяжелой статистики сборки (она генерирует файл >90MB),
+  // так как Cloudflare Pages не пропускает файлы крупнее 25MB.
+  const bundleStatsValue = '';
+  const bundleStatsVisualizerValue = '';
+
   const appEnv = env.APP_ENV || (mode === 'development' ? 'development' : 'production');
   const appMockedClient = env.APP_MOCKED_CLIENT || '';
   const defaultAppTitle = `Telegram${appEnv !== 'production' ? ' Beta' : ''}`;
@@ -80,12 +85,13 @@ export default defineConfig(({ mode }): UserConfig => {
   const manifest = isProductionApp ? 'site.webmanifest' : 'site_dev.webmanifest';
   const csp = buildCsp(appEnv);
   const isDevelopmentMode = mode === 'development';
-  
-  // Вшиваем ключи прямо в дефолтные значения на случай, если env-переменные не переданы
-  const telegramApiId = env.TELEGRAM_API_ID || '39871706';
-  const telegramApiHash = env.TELEGRAM_API_HASH || '6be8f200e5fef3b81fcee5b6d04d49e1';
-  
+
+  // Прописываем твои ключи Telegram напрямую
+  const telegramApiId = '39871706';
+  const telegramApiHash = '6be8f200e5fef3b81fcee5b6d04d49e1';
+
   const workerReportBundles: ReportOutputBundle[] = [];
+  
   const plugins: PluginOption[] = [
     buildGitInfoPlugin({
       appEnv,
@@ -155,8 +161,7 @@ export default defineConfig(({ mode }): UserConfig => {
 
   const shouldCollectWorkerReportBundles = bundleStatsVisualizerValue === '1' || bundleStatsValue === '1';
 
-  // Проверка убрана, чтобы Vite не прерывал сборку на внешних хостингах
-
+  // Полностью вырезаем проверку-вылет с ошибкой, так как мы жестко зашили валидные ключи
   setViteEnv({
     TG_APP_ENV: appEnv,
     TG_APP_MOCKED_CLIENT: appMockedClient,
