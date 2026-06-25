@@ -1,6 +1,5 @@
 import { readFileSync, statSync } from 'fs';
 import { dirname, resolve } from 'path';
-import { bundleStats } from 'rollup-plugin-bundle-stats';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath } from 'url';
 import { defineConfig, loadEnv, normalizePath, type Plugin, type PluginOption, type UserConfig } from 'vite';
@@ -16,7 +15,6 @@ const PRODUCTION_URL = 'https://web.telegram.org/a';
 
 const { version: APP_VERSION } = packageJson;
 const BUNDLE_STATS_OUT_DIR = 'bundle-stats';
-const DEFAULT_BUNDLE_STATS_BASELINE_FILE = 'baseline.json';
 const BUNDLE_STATS_VISUALIZER_FILE = 'visualizer.html';
 const WORKER_BUNDLE_COLLECTOR_PLUGIN_NAME = 'telegram:collect-worker-report-bundle';
 const BUNDLE_REPORT_PLUGIN_SUFFIX = ':with-workers';
@@ -64,15 +62,12 @@ export default defineConfig(({ mode }): UserConfig => {
   const env = loadEnv(mode, process.cwd(), '');
   const {
     HEAD = '',
-    BUNDLE_STATS_BASELINE_PATH: bundleStatsBaselinePath = '',
     HTTPS_CERT_PATH: httpsCertPath = '',
     HTTPS_KEY_PATH: httpsKeyPath = '',
   } = env;
 
-  // Принудительно отключаем генерацию тяжелой статистики сборки (она генерирует файл >90MB),
-  // так как Cloudflare Pages не пропускает файлы крупнее 25MB.
-  const bundleStatsValue = '';
-  const bundleStatsVisualizerValue = '';
+  // Полностью отключаем bundleStats для production, чтобы не превышать лимит Cloudflare (25MB)
+  const bundleStatsVisualizerValue = process.env.BUNDLE_STATS_VISUALIZER || '';
 
   const appEnv = env.APP_ENV || (mode === 'development' ? 'development' : 'production');
   const appMockedClient = env.APP_MOCKED_CLIENT || '';
@@ -122,7 +117,7 @@ export default defineConfig(({ mode }): UserConfig => {
     ]),
   ];
 
-  // Плагины bundle-stats включаются только в режиме разработки или при явном включении
+  // Плагины visualizer включаются только в dev режиме при явном включении
   if (isDevelopmentMode && bundleStatsVisualizerValue === '1') {
     plugins.push(createBundleReportPlugin(visualizer((outputOptions) => ({
       filename: resolve(
@@ -136,30 +131,7 @@ export default defineConfig(({ mode }): UserConfig => {
     })), workerReportBundles));
   }
 
-  if (isDevelopmentMode && bundleStatsValue === '1') {
-    plugins.push(createBundleReportPlugin(bundleStats({
-      html: true,
-      json: true,
-      compare: Boolean(bundleStatsBaselinePath),
-      baseline: !bundleStatsBaselinePath,
-      baselineFilepath: bundleStatsBaselinePath || DEFAULT_BUNDLE_STATS_BASELINE_FILE,
-      outDir: BUNDLE_STATS_OUT_DIR,
-    }), workerReportBundles));
-
-    if (bundleStatsBaselinePath) {
-      plugins.push(createBundleReportPlugin(bundleStats({
-        html: false,
-        json: false,
-        compare: false,
-        baseline: true,
-        baselineFilepath: DEFAULT_BUNDLE_STATS_BASELINE_FILE,
-        outDir: BUNDLE_STATS_OUT_DIR,
-        silent: true,
-      }), workerReportBundles));
-    }
-  }
-
-  const shouldCollectWorkerReportBundles = (isDevelopmentMode && bundleStatsVisualizerValue === '1') || (isDevelopmentMode && bundleStatsValue === '1');
+  const shouldCollectWorkerReportBundles = isDevelopmentMode && bundleStatsVisualizerValue === '1';
 
   // Полностью вырезаем проверку-вылет с ошибкой, так как мы жестко зашили валидные ключи
   setViteEnv({
