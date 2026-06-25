@@ -128,7 +128,7 @@ export default defineConfig(({ mode }): UserConfig => {
         { find: 'path', replacement: resolve(DIR_NAME, 'src/lib/mocks/path.ts') },
         { find: 'crypto', replacement: resolve(DIR_NAME, 'src/lib/mocks/crypto.ts') },
         ...(appMockedClient === '1' ? [{
-          find: /^(?:\.\/client|(?:\.\.\/)*lib\/gramjs\/client)\/TelegramClient$/,
+          find: /^(?:\.\.\/client|(?:\.\.\/)*lib\/gramjs\/client)\/TelegramClient$/,
           replacement: resolve(DIR_NAME, 'src/lib/gramjs/client/MockClient.ts'),
         }] : []),
       ],
@@ -153,14 +153,14 @@ export default defineConfig(({ mode }): UserConfig => {
       },
     },
     build: {
-      sourcemap: !isProductionApp,
+      sourcemap: false,
       chunkSizeWarningLimit: 2000,
       assetsInlineLimit: (filePath) => (IMAGE_ASSET_RE.test(filePath) ? false : undefined),
       minify: 'terser',
       terserOptions: {
         compress: {
-          drop_console: isProductionApp,
-          drop_debugger: isProductionApp,
+          drop_console: true,
+          drop_debugger: true,
         },
       },
       rollupOptions: {
