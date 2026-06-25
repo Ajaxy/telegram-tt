@@ -34,7 +34,7 @@
     "test": "cross-env APP_ENV=test vitest run --silent",
     "test:playwright": "playwright test",
     "test:record": "playwright codegen localhost:1235",
-    "postinstall": "node -e \"require('fs').rmSync('.cache', { recursive: true, force: true })\"",
+    "postinstall": "node -e \"try { require('fs').rmSync('.eslintcache', { recursive: true, force: true }); require('fs').rmSync('.stylelintcache', { recursive: true, force: true }); } catch(e) {}\"",
     "postversion": "echo $(node -p \"require('./package.json').version\") > public/version.txt && git commit --amend --no-verify --no-edit public/version.txt"
   },
   "engines": {
