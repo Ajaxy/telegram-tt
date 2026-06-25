@@ -1,0 +1,23 @@
+name = "lisyan-gramm"
+pages_build_output_dir = "dist"
+main = "src/index.ts"
+compatibility_date = "2025-06-25"
+
+[site]
+bucket = "dist"
+
+[build]
+command = "npm run build:production"
+watch_paths = ["src/**/*.ts", "src/**/*.tsx", "src/**/*.css", "src/**/*.scss"]
+
+[build.upload]
+format = "service-worker"
+
+[env.production]
+name = "lisyan-gramm-prod"
+routes = [
+  { pattern = "web.telegram.org/a/*", zone_name = "telegram.org" }
+]
+
+[[analytics]]
+enabled = true
