@@ -113,7 +113,7 @@ export default defineConfig(({ mode }): UserConfig => {
     envPrefix: ['VITE_', 'TG_'],
     assetsInclude: ['**/*.tgs', '**/*.wasm'],
     optimizeDeps: {
-      exclude: ['temml'],
+      exclude: ['temml', 'fasttext'],
     },
     define: {
       APP_VERSION: JSON.stringify(APP_VERSION),
@@ -123,6 +123,7 @@ export default defineConfig(({ mode }): UserConfig => {
     resolve: {
       tsconfigPaths: true,
       alias: [
+        // Node.js polyfills для браузера
         { find: 'fs', replacement: resolve(DIR_NAME, 'src/lib/mocks/fs.ts') },
         { find: 'path', replacement: resolve(DIR_NAME, 'src/lib/mocks/path.ts') },
         { find: 'crypto', replacement: resolve(DIR_NAME, 'src/lib/mocks/crypto.ts') },
@@ -155,10 +156,24 @@ export default defineConfig(({ mode }): UserConfig => {
       sourcemap: !isProductionApp,
       chunkSizeWarningLimit: 2000,
       assetsInlineLimit: (filePath) => (IMAGE_ASSET_RE.test(filePath) ? false : undefined),
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: isProductionApp,
+          drop_debugger: isProductionApp,
+        },
+      },
       rollupOptions: {
         output: {
           manualChunks(id) {
+            // Cloudflare Pages лимит: 25MB на файл
+            // Разбиваем всё, что может быть больше 15MB (с запасом на минификацию)
+            
             if (id.includes('node_modules')) {
+              // Тяжелые вендорные библиотеки - отдельные чанки
+              if (id.includes('fasttext')) {
+                return 'vendor-fasttext';
+              }
               if (id.includes('react') || id.includes('react-dom')) {
                 return 'vendor-react';
               }
