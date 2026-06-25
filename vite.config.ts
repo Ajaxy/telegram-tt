@@ -1,6 +1,5 @@
 import { readFileSync, statSync } from 'fs';
 import { dirname, resolve } from 'path';
-import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath } from 'url';
 import { defineConfig, loadEnv, normalizePath, type Plugin, type PluginOption, type UserConfig } from 'vite';
 import { type Target, viteStaticCopy } from 'vite-plugin-static-copy';
@@ -14,10 +13,6 @@ const CHANGELOG_PATH = resolve(DIR_NAME, 'src/versionNotification.txt');
 const PRODUCTION_URL = 'https://web.telegram.org/a';
 
 const { version: APP_VERSION } = packageJson;
-const BUNDLE_STATS_OUT_DIR = 'bundle-stats';
-const BUNDLE_STATS_VISUALIZER_FILE = 'visualizer.html';
-const WORKER_BUNDLE_COLLECTOR_PLUGIN_NAME = 'telegram:collect-worker-report-bundle';
-const BUNDLE_REPORT_PLUGIN_SUFFIX = ':with-workers';
 const DEV_WARMUP_CLIENT_FILES = [
   'index.html',
   'src/**/*.{js,jsx,ts,tsx,css,scss}',
@@ -44,20 +39,6 @@ const STATIC_COPY_TARGETS: Target[] = [
   },
 ];
 
-type BundleReportPlugin = {
-  name: string;
-  generateBundle?: unknown;
-};
-
-type BundleReportHook = (
-  this: unknown,
-  outputOptions: unknown,
-  bundle: ReportOutputBundle,
-  isWrite: boolean,
-) => void | Promise<void>;
-
-type ReportOutputBundle = Record<string, unknown>;
-
 export default defineConfig(({ mode }): UserConfig => {
   const env = loadEnv(mode, process.cwd(), '');
   const {
@@ -65,9 +46,6 @@ export default defineConfig(({ mode }): UserConfig => {
     HTTPS_CERT_PATH: httpsCertPath = '',
     HTTPS_KEY_PATH: httpsKeyPath = '',
   } = env;
-
-  // Полностью отключаем bundleStats для production, чтобы не превышать лимит Cloudflare (25MB)
-  const bundleStatsVisualizerValue = process.env.BUNDLE_STATS_VISUALIZER || '';
 
   const appEnv = env.APP_ENV || (mode === 'development' ? 'development' : 'production');
   const appMockedClient = env.APP_MOCKED_CLIENT || '';
@@ -81,12 +59,10 @@ export default defineConfig(({ mode }): UserConfig => {
   const csp = buildCsp(appEnv);
   const isDevelopmentMode = mode === 'development';
 
-  // Прописываем твои ключи Telegram напрямую
+  // Telegram API ключи
   const telegramApiId = '39871706';
   const telegramApiHash = '6be8f200e5fef3b81fcee5b6d04d49e1';
 
-  const workerReportBundles: ReportOutputBundle[] = [];
-  
   const plugins: PluginOption[] = [
     buildGitInfoPlugin({
       appEnv,
@@ -117,23 +93,6 @@ export default defineConfig(({ mode }): UserConfig => {
     ]),
   ];
 
-  // Плагины visualizer включаются только в dev режиме при явном включении
-  if (isDevelopmentMode && bundleStatsVisualizerValue === '1') {
-    plugins.push(createBundleReportPlugin(visualizer((outputOptions) => ({
-      filename: resolve(
-        DIR_NAME,
-        outputOptions.dir,
-        BUNDLE_STATS_OUT_DIR,
-        BUNDLE_STATS_VISUALIZER_FILE,
-      ),
-      open: true,
-      template: 'treemap',
-    })), workerReportBundles));
-  }
-
-  const shouldCollectWorkerReportBundles = isDevelopmentMode && bundleStatsVisualizerValue === '1';
-
-  // Полностью вырезаем проверку-вылет с ошибкой, так как мы жестко зашили валидные ключи
   setViteEnv({
     TG_APP_ENV: appEnv,
     TG_APP_MOCKED_CLIENT: appMockedClient,
@@ -159,13 +118,11 @@ export default defineConfig(({ mode }): UserConfig => {
     define: {
       APP_VERSION: JSON.stringify(APP_VERSION),
       CHANGELOG_DATETIME: JSON.stringify(statSync(CHANGELOG_PATH, { throwIfNoEntry: false })?.mtime.getTime()),
-      // Mock Node.js modules for browser environment
       'process.versions.node': 'undefined',
     },
     resolve: {
       tsconfigPaths: true,
       alias: [
-        // Mock Node.js modules to prevent externalization warnings
         { find: 'fs', replacement: resolve(DIR_NAME, 'src/lib/mocks/fs.ts') },
         { find: 'path', replacement: resolve(DIR_NAME, 'src/lib/mocks/path.ts') },
         { find: 'crypto', replacement: resolve(DIR_NAME, 'src/lib/mocks/crypto.ts') },
@@ -195,13 +152,12 @@ export default defineConfig(({ mode }): UserConfig => {
       },
     },
     build: {
-      sourcemap: true,
+      sourcemap: !isProductionApp,
       chunkSizeWarningLimit: 2000,
       assetsInlineLimit: (filePath) => (IMAGE_ASSET_RE.test(filePath) ? false : undefined),
       rollupOptions: {
         output: {
           manualChunks(id) {
-            // Split vendor chunks for better caching and reduced individual chunk sizes
             if (id.includes('node_modules')) {
               if (id.includes('react') || id.includes('react-dom')) {
                 return 'vendor-react';
@@ -226,9 +182,6 @@ export default defineConfig(({ mode }): UserConfig => {
       },
     },
     worker: {
-      plugins: shouldCollectWorkerReportBundles ? () => [
-        createWorkerBundleCollectorPlugin(workerReportBundles),
-      ] : undefined,
       rollupOptions: {
         output: {
           entryFileNames: '[name]-[hash].js',
@@ -238,39 +191,6 @@ export default defineConfig(({ mode }): UserConfig => {
     plugins,
   };
 });
-
-function createBundleReportPlugin(plugin: BundleReportPlugin, workerReportBundles: ReportOutputBundle[]): Plugin {
-  return {
-    name: `${plugin.name}${BUNDLE_REPORT_PLUGIN_SUFFIX}`,
-    async generateBundle(outputOptions, bundle, isWrite) {
-      const generateBundle = plugin.generateBundle as BundleReportHook | undefined;
-
-      await generateBundle?.call(
-        this,
-        outputOptions,
-        mergeOutputBundles(bundle, workerReportBundles),
-        isWrite,
-      );
-    },
-  };
-}
-
-function createWorkerBundleCollectorPlugin(workerReportBundles: ReportOutputBundle[]): Plugin {
-  return {
-    name: WORKER_BUNDLE_COLLECTOR_PLUGIN_NAME,
-    generateBundle(_outputOptions, bundle) {
-      workerReportBundles.push({ ...bundle });
-    },
-  };
-}
-
-function mergeOutputBundles(bundle: ReportOutputBundle, workerReportBundles: ReportOutputBundle[]): ReportOutputBundle {
-  const result: ReportOutputBundle = {};
-
-  Object.assign(result, bundle, ...workerReportBundles);
-
-  return result;
-}
 
 function setViteEnv(env: Record<string, string>) {
   Object.entries(env).forEach(([key, value]) => {
