@@ -1,0 +1,28 @@
+name: Check file sizes
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  check-sizes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for large files
+        run: |
+          echo "🔍 Checking for files larger than 25 MiB..."
+          LARGE_FILES=$(find . -type f -size +25M ! -path './.git/*' ! -path './.github/*' 2>/dev/null | head -20)
+          
+          if [ -n "$LARGE_FILES" ]; then
+            echo "❌ ERROR: Found files larger than 25 MiB (Cloudflare Pages limit):"
+            echo "$LARGE_FILES"
+            echo ""
+            echo "Please remove these files or add them to .gitignore"
+            exit 1
+          else
+            echo "✅ All files are within size limits!"
+          fi
