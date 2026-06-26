@@ -1,2 +1,4 @@
-dist/bundle-stats/
-dist/*.json
+bundle-stats/
+build-stats.json
+statoscope-report.html
+**/*.map
