@@ -1,10 +1,10 @@
-# Telegram Web A
+# LisyanGramm (unofficial web client)
 
-This project won the first prize 🥇 at [Telegram Lightweight Client Contest](https://contest.com/javascript-web-3) and now is an official Telegram client available to anyone at [web.telegram.org/a](https://web.telegram.org/a).
+LisyanGramm is an unofficial web client for Telegram. It is not affiliated with or endorsed by Telegram.
 
-According to the original contest rules, it has nearly zero dependencies and is fully based on its own [Teact](https://github.com/Ajaxy/teact) framework (which re-implements React paradigm). It also uses a custom version of [GramJS](https://github.com/gram-js/gramjs) as an MTProto implementation.
+The project is based on its own [Teact](https://github.com/Ajaxy/teact) framework (which re-implements the React paradigm) and uses a custom version of [GramJS](https://github.com/gram-js/gramjs) as an MTProto implementation.
 
-The project incorporates lots of technologically advanced features, modern Web APIs and techniques: WebSockets, Web Workers and WebAssembly, multi-level caching and PWA, voice recording and media streaming, cryptography and raw binary data operations, optimistic and progressive interfaces, complicated CSS/Canvas/SVG animations, reactive data streams, and so much more.
+The project incorporates modern Web APIs and techniques: WebSockets, Web Workers and WebAssembly, multi-level caching and PWA, voice recording and media streaming, cryptography and raw binary data operations, optimistic and progressive interfaces, complicated CSS/Canvas/SVG animations, reactive data streams, and so much more.
 
 Feel free to explore, provide feedback and contribute.
 
@@ -53,4 +53,4 @@ await invoke(new GramJs.help.GetAppConfig())
 * fastblur
 
 ## Bug reports and Suggestions
-If you find an issue with this app, let Telegram know using the [Suggestions Platform](https://bugs.telegram.org/c/4002).
+If you find an issue with this app, use the project issue tracker or contact the maintainer.
