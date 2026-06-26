@@ -1,6 +1,6 @@
-**Telegram Web A Digest**
+**LisyanGramm Release Notes**
 
-Over the past year, many new features and useful optimisations have been added. Here is a brief overview of the developments that have taken place in Web A during those busy months.
+Over the past year, many new features and useful optimisations have been added. Here is a brief overview of the developments that have taken place in LisyanGramm during those busy months.
 
 ✏️ __General__
 • A huge number of design fixes across the app.
@@ -12,18 +12,9 @@ Over the past year, many new features and useful optimisations have been added. 
 • [Global search of public posts](https://telegram.org/blog/post-search-story-albums-and-more#public-post-search).
 • Support for channels with enabled auto-translate has been added.
 
-🎁 __Gifts__
-• Added interactions on hover.
-• Support for [Gift Marketplace](https://telegram.org/blog/gift-marketplace-and-more).
-• Pinned gifts are now displayed in the profile.
-
-📣 __Channels__
-• Accept and send direct messages to channels.
-• [Suggest your posts to be published by your favourite channels](https://telegram.org/blog/checklists-suggested-posts#suggest-posts-in-channels).
-
 👤 __Profile__
 • Full redesign of the profile page.
-• [Explore other people's gift collections and story albums](https://telegram.org/blog/post-search-story-albums-and-more#story-albums).
+• [Explore other people's story albums](https://telegram.org/blog/post-search-story-albums-and-more#story-albums).
 • Keep an eye on all your accounts, just like on mobile and desktop clients, with the multi-account feature.
 
 There are so many other bugfixes and improvements that it would take forever to describe them all! We're continually working on adding new features and improving the user experience.
