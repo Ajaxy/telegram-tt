@@ -1,0 +1,4 @@
+bundle-stats/
+build-stats.json
+statoscope-report.html
+**/*.map

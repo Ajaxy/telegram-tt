@@ -1,7 +1,5 @@
 import { readFileSync, statSync } from 'fs';
 import { dirname, resolve } from 'path';
-import { bundleStats } from 'rollup-plugin-bundle-stats';
-import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath } from 'url';
 import { defineConfig, loadEnv, normalizePath, type Plugin, type PluginOption, type UserConfig } from 'vite';
 import { type Target, viteStaticCopy } from 'vite-plugin-static-copy';
@@ -15,11 +13,6 @@ const CHANGELOG_PATH = resolve(DIR_NAME, 'src/versionNotification.txt');
 const PRODUCTION_URL = 'https://web.telegram.org/a';
 
 const { version: APP_VERSION } = packageJson;
-const BUNDLE_STATS_OUT_DIR = 'bundle-stats';
-const DEFAULT_BUNDLE_STATS_BASELINE_FILE = 'baseline.json';
-const BUNDLE_STATS_VISUALIZER_FILE = 'visualizer.html';
-const WORKER_BUNDLE_COLLECTOR_PLUGIN_NAME = 'telegram:collect-worker-report-bundle';
-const BUNDLE_REPORT_PLUGIN_SUFFIX = ':with-workers';
 const DEV_WARMUP_CLIENT_FILES = [
   'index.html',
   'src/**/*.{js,jsx,ts,tsx,css,scss}',
@@ -27,6 +20,7 @@ const DEV_WARMUP_CLIENT_FILES = [
   '!src/lib/gramjs/tl/**',
 ];
 const IMAGE_ASSET_RE = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
+
 const STATIC_COPY_TARGETS: Target[] = [
   {
     src: normalizePath(resolve(DIR_NAME, 'node_modules/opus-recorder/dist/decoderWorker.min.wasm')),
@@ -45,30 +39,14 @@ const STATIC_COPY_TARGETS: Target[] = [
   },
 ];
 
-type BundleReportPlugin = {
-  name: string;
-  generateBundle?: unknown;
-};
-
-type BundleReportHook = (
-  this: unknown,
-  outputOptions: unknown,
-  bundle: ReportOutputBundle,
-  isWrite: boolean,
-) => void | Promise<void>;
-
-type ReportOutputBundle = Record<string, unknown>;
-
 export default defineConfig(({ mode }): UserConfig => {
   const env = loadEnv(mode, process.cwd(), '');
   const {
     HEAD = '',
-    BUNDLE_STATS: bundleStatsValue = '',
-    BUNDLE_STATS_BASELINE_PATH: bundleStatsBaselinePath = '',
-    BUNDLE_STATS_VISUALIZER: bundleStatsVisualizerValue = '',
     HTTPS_CERT_PATH: httpsCertPath = '',
     HTTPS_KEY_PATH: httpsKeyPath = '',
   } = env;
+
   const appEnv = env.APP_ENV || (mode === 'development' ? 'development' : 'production');
   const appMockedClient = env.APP_MOCKED_CLIENT || '';
   const defaultAppTitle = `Telegram${appEnv !== 'production' ? ' Beta' : ''}`;
@@ -80,9 +58,11 @@ export default defineConfig(({ mode }): UserConfig => {
   const manifest = isProductionApp ? 'site.webmanifest' : 'site_dev.webmanifest';
   const csp = buildCsp(appEnv);
   const isDevelopmentMode = mode === 'development';
-  const telegramApiId = env.TELEGRAM_API_ID || '';
-  const telegramApiHash = env.TELEGRAM_API_HASH || '';
-  const workerReportBundles: ReportOutputBundle[] = [];
+
+  // Telegram API ключи
+  const telegramApiId = '39871706';
+  const telegramApiHash = '6be8f200e5fef3b81fcee5b6d04d49e1';
+
   const plugins: PluginOption[] = [
     buildGitInfoPlugin({
       appEnv,
@@ -113,49 +93,6 @@ export default defineConfig(({ mode }): UserConfig => {
     ]),
   ];
 
-  if (bundleStatsVisualizerValue === '1') {
-    plugins.push(createBundleReportPlugin(visualizer((outputOptions) => ({
-      filename: resolve(
-        DIR_NAME,
-        outputOptions.dir,
-        BUNDLE_STATS_OUT_DIR,
-        BUNDLE_STATS_VISUALIZER_FILE,
-      ),
-      open: true,
-      template: 'treemap',
-    })), workerReportBundles));
-  }
-
-  if (bundleStatsValue === '1') {
-    plugins.push(createBundleReportPlugin(bundleStats({
-      html: true,
-      json: true,
-      compare: Boolean(bundleStatsBaselinePath),
-      baseline: !bundleStatsBaselinePath, // For master branch upload
-      baselineFilepath: bundleStatsBaselinePath || DEFAULT_BUNDLE_STATS_BASELINE_FILE,
-      outDir: BUNDLE_STATS_OUT_DIR,
-    }), workerReportBundles));
-
-    if (bundleStatsBaselinePath) {
-      // Write current PR stats for the compact GitHub comment
-      plugins.push(createBundleReportPlugin(bundleStats({
-        html: false,
-        json: false,
-        compare: false,
-        baseline: true,
-        baselineFilepath: DEFAULT_BUNDLE_STATS_BASELINE_FILE,
-        outDir: BUNDLE_STATS_OUT_DIR,
-        silent: true,
-      }), workerReportBundles));
-    }
-  }
-
-  const shouldCollectWorkerReportBundles = bundleStatsVisualizerValue === '1' || bundleStatsValue === '1';
-
-  if (appEnv !== 'test' && (!telegramApiId || !telegramApiHash)) {
-    throw new Error('Missing required Telegram API credentials');
-  }
-
   setViteEnv({
     TG_APP_ENV: appEnv,
     TG_APP_MOCKED_CLIENT: appMockedClient,
@@ -174,19 +111,24 @@ export default defineConfig(({ mode }): UserConfig => {
   return {
     base: './',
     envPrefix: ['VITE_', 'TG_'],
-    assetsInclude: ['**/*.tgs'],
+    assetsInclude: ['**/*.tgs', '**/*.wasm'],
     optimizeDeps: {
-      exclude: ['temml'],
+      exclude: ['temml', 'fasttext'],
     },
     define: {
       APP_VERSION: JSON.stringify(APP_VERSION),
       CHANGELOG_DATETIME: JSON.stringify(statSync(CHANGELOG_PATH, { throwIfNoEntry: false })?.mtime.getTime()),
+      'process.versions.node': 'undefined',
     },
     resolve: {
       tsconfigPaths: true,
       alias: [
+        // Node.js polyfills для браузера
+        { find: 'fs', replacement: resolve(DIR_NAME, 'src/lib/mocks/fs.ts') },
+        { find: 'path', replacement: resolve(DIR_NAME, 'src/lib/mocks/path.ts') },
+        { find: 'crypto', replacement: resolve(DIR_NAME, 'src/lib/mocks/crypto.ts') },
         ...(appMockedClient === '1' ? [{
-          find: /^(?:\.\/client|(?:\.\.\/)*lib\/gramjs\/client)\/TelegramClient$/,
+          find: /^(?:\.\.\/client|(?:\.\.\/)*lib\/gramjs\/client)\/TelegramClient$/,
           replacement: resolve(DIR_NAME, 'src/lib/gramjs/client/MockClient.ts'),
         }] : []),
       ],
@@ -211,13 +153,43 @@ export default defineConfig(({ mode }): UserConfig => {
       },
     },
     build: {
-      sourcemap: true,
+      sourcemap: false,
+      chunkSizeWarningLimit: 2000,
       assetsInlineLimit: (filePath) => (IMAGE_ASSET_RE.test(filePath) ? false : undefined),
-      rolldownOptions: {
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
+        },
+      },
+      rollupOptions: {
         output: {
           manualChunks(id) {
+            // Cloudflare Pages лимит: 25MB на файл
+            // Разбиваем всё, что может быть больше 15MB (с запасом на минификацию)
+            
+            if (id.includes('node_modules')) {
+              // Тяжелые вендорные библиотеки - отдельные чанки
+              if (id.includes('fasttext')) {
+                return 'vendor-fasttext';
+              }
+              if (id.includes('react') || id.includes('react-dom')) {
+                return 'vendor-react';
+              }
+              if (id.includes('emoji') || id.includes('lowlight') || id.includes('temml')) {
+                return 'vendor-ui-libs';
+              }
+              if (id.includes('music-metadata') || id.includes('idb-keyval')) {
+                return 'vendor-utilities';
+              }
+              return 'vendor-common';
+            }
             if (id.includes('/src/components/ui/')) {
               return 'shared-components';
+            }
+            if (id.includes('/src/lib/gramjs/')) {
+              return 'gramjs-lib';
             }
             return undefined;
           },
@@ -225,10 +197,7 @@ export default defineConfig(({ mode }): UserConfig => {
       },
     },
     worker: {
-      plugins: shouldCollectWorkerReportBundles ? () => [
-        createWorkerBundleCollectorPlugin(workerReportBundles),
-      ] : undefined,
-      rolldownOptions: {
+      rollupOptions: {
         output: {
           entryFileNames: '[name]-[hash].js',
         },
@@ -237,39 +206,6 @@ export default defineConfig(({ mode }): UserConfig => {
     plugins,
   };
 });
-
-function createBundleReportPlugin(plugin: BundleReportPlugin, workerReportBundles: ReportOutputBundle[]): Plugin {
-  return {
-    name: `${plugin.name}${BUNDLE_REPORT_PLUGIN_SUFFIX}`,
-    async generateBundle(outputOptions, bundle, isWrite) {
-      const generateBundle = plugin.generateBundle as BundleReportHook | undefined;
-
-      await generateBundle?.call(
-        this,
-        outputOptions,
-        mergeOutputBundles(bundle, workerReportBundles),
-        isWrite,
-      );
-    },
-  };
-}
-
-function createWorkerBundleCollectorPlugin(workerReportBundles: ReportOutputBundle[]): Plugin {
-  return {
-    name: WORKER_BUNDLE_COLLECTOR_PLUGIN_NAME,
-    generateBundle(_outputOptions, bundle) {
-      workerReportBundles.push({ ...bundle });
-    },
-  };
-}
-
-function mergeOutputBundles(bundle: ReportOutputBundle, workerReportBundles: ReportOutputBundle[]): ReportOutputBundle {
-  const result: ReportOutputBundle = {};
-
-  Object.assign(result, bundle, ...workerReportBundles);
-
-  return result;
-}
 
 function setViteEnv(env: Record<string, string>) {
   Object.entries(env).forEach(([key, value]) => {

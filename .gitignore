@@ -1,4 +1,5 @@
 dist/build-stats.json
+dist/**/*.map
 node_modules
 .cache
 .env

@@ -3,27 +3,31 @@ body {
   align-items: center;
   justify-content: center;
 
-  height: 100vh;
+  min-height: 100vh;
   margin: 0;
 
   font-family: 'Arial', sans-serif;
-  color: #222222;
+  color: #e8eef6;
 
-  background-color: white;
+  background:
+    radial-gradient(circle at top, rgba(85, 140, 255, 0.22), transparent 42%),
+    linear-gradient(180deg, #10131a 0%, #0b0f14 100%);
 
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
-  min-width: 200px;
-  max-width: 330px;
-  padding: 40px 40px 16px 40px;
-  border-radius: 10px;
+  min-width: 240px;
+  max-width: 360px;
+  padding: 40px 40px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
 
   text-align: center;
 
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(18, 24, 33, 0.92);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
 }
 
 .logo-container {
@@ -36,16 +40,16 @@ body {
 }
 
 .logo {
-  width: 90px;
-  height: 90px;
+  width: 96px;
+  height: 96px;
 
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
 }
 
-.telegram-logo {
-  background-image: url('./icon-electron-macos.png');
+.lisyan-logo {
+  background-image: url('./lisyan-logo-dark.png');
 }
 
 .apple-logo {
@@ -54,21 +58,35 @@ body {
 }
 
 .container h1 {
-  margin-bottom: 10px;
+  margin: 0 0 10px;
   font-size: 24px;
+  line-height: 1.2;
+  color: #ffffff;
+}
+
+.notice {
+  margin: 0 auto 18px;
+  padding: 10px 12px;
+  border-radius: 12px;
+
+  font-size: 14px;
+  line-height: 1.35;
+  color: #b8c7db;
+
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .select-model {
   margin-top: 36px;
   margin-bottom: 16px;
-  color: #444444;
+  color: #c0cada;
 }
 
 .info {
   margin-top: 28px;
   margin-bottom: 36px;
   line-height: 1.25rem;
-  color: #444444;
+  color: #c0cada;
 }
 
 .download-container {
@@ -89,42 +107,46 @@ body {
 
 .caption {
   font-size: 14px;
-  color: #777;
+  color: #8a97ab;
 }
 
 .download-btn {
   display: inline-block;
 
   margin: 10px;
-  padding: 8px 20px;
-  border-radius: 5px;
+  padding: 10px 22px;
+  border-radius: 999px;
 
   font-size: 16px;
-  color: #FFF;
+  font-weight: 700;
+  color: #ffffff;
   text-decoration: none;
 
-  background-color: #007BFF;
+  background: linear-gradient(135deg, #5b8cff 0%, #7e5bff 100%);
+  box-shadow: 0 10px 24px rgba(91, 140, 255, 0.3);
 
-  transition: background-color 150ms;
+  transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
 }
 
 .download-btn:hover {
-  background-color: rgba(0, 123, 255, 0.9);
+  opacity: 0.96;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(91, 140, 255, 0.36);
 }
 
 .download-btn.single {
   display: block;
-  margin: 32px 0;
+  margin: 28px 0 18px;
 }
 
 .footer {
   font-size: small;
-  color: #A9A9A9;
+  color: #8a97ab;
 }
 
 .footer a {
   display: inline-block;
-  color: #A9A9A9;
+  color: #8a97ab;
 }
 
 a:hover {
