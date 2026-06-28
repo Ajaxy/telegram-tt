@@ -211,6 +211,8 @@ export interface ApiPoll {
   shouldShuffleAnswers?: true;
   shouldHideResultsUntilClose?: true;
   isCreator?: true;
+  isRestrictedToSubscribers?: true;
+  allowedCountryCodes?: string[];
   question: ApiFormattedText;
   answers: ApiPollAnswer[];
   closePeriod?: number;

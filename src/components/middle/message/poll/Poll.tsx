@@ -9,6 +9,7 @@ import {
 import { getActions, getGlobal, getPromiseActions, withGlobal } from '../../../../global';
 
 import type {
+  ApiChat,
   ApiFormattedText,
   ApiLocation,
   ApiMessagePoll,
@@ -20,12 +21,19 @@ import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 import { type MediaViewerMedia, MediaViewerOrigin, type ThemeKey } from '../../../../types';
 
 import { getMessageHtmlId } from '../../../../global/helpers';
-import { selectPeer } from '../../../../global/selectors';
+import { getPeerTitle } from '../../../../global/helpers/peers';
+import { selectChat, selectPeer } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { buildCollectionByKey, shuffle } from '../../../../util/iteratees';
 import { NEXT_ARROW_REPLACEMENT, PREVIOUS_ARROW_REPLACEMENT } from '../../../../util/localization/format';
 import { getServerTime } from '../../../../util/serverTime';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
+import {
+  canVoteInPollAsSubscriber,
+  canVoteInPollCountry,
+  getPollCountryRestrictionMessage,
+  getPollSubscriberRestrictionMessage,
+} from './helpers';
 
 import useTimeout from '../../../../hooks/schedulers/useTimeout';
 import useLang from '../../../../hooks/useLang';
@@ -59,7 +67,9 @@ type OwnProps = {
 };
 
 type StateProps = {
+  chat?: ApiChat;
   pollMaxAnswers: number;
+  phoneCountryIso2?: string;
 };
 
 const ATTACHED_MAP_WIDTH = 350;
@@ -78,7 +88,9 @@ const Poll = ({
   isInScheduled,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
+  chat,
   pollMaxAnswers,
+  phoneCountryIso2,
 }: OwnProps & StateProps) => {
   const {
     openMapModal,
@@ -87,6 +99,7 @@ const Poll = ({
     requestConfetti,
     sendPollVote,
     loadMessage,
+    showNotification,
   } = getActions();
   const { appendPollAnswer } = getPromiseActions();
   const lang = useLang();
@@ -124,11 +137,30 @@ const Poll = ({
   const selectedOptionsSet = useMemo(() => new Set(selectedOptions), [selectedOptions]);
   const hasResultData = Boolean(results.resultByOption);
   const totalVoters = results.totalVoters || 0;
+  const channelTitle = chat && getPeerTitle(lang, chat);
+  const canVoteAsSubscriber = canVoteInPollAsSubscriber(summary.isRestrictedToSubscribers, chat?.isNotJoined);
+  const canVoteInCountry = canVoteInPollCountry(phoneCountryIso2, summary.allowedCountryCodes);
+  const subscriberRestrictionMessage = useMemo(
+    () => getPollSubscriberRestrictionMessage(channelTitle, summary.isRestrictedToSubscribers),
+    [channelTitle, summary.isRestrictedToSubscribers],
+  );
+  const countryRestrictionMessage = useMemo(
+    () => getPollCountryRestrictionMessage(lang, summary.allowedCountryCodes),
+    [lang, summary.allowedCountryCodes],
+  );
+  const isSubscriberVoteRestricted = canVote && !canVoteAsSubscriber;
+  const isCountryVoteRestricted = canVote && !canVoteInCountry;
+  const canSubmitVote = canVote && canVoteAsSubscriber && canVoteInCountry;
+  const canClickVoteOptions = canVote && !isSendingVote && !isViewingAuthorResults;
+  const canShowRestrictedResults = (isSubscriberVoteRestricted || isCountryVoteRestricted)
+    && hasResultData && !areResultsHiddenForCurrentUser;
   const canToggleAuthorResults = summary.isCreator && canVote && hasResultData && totalVoters > 0;
   const areInlineResultsVisible = hasResultData && (
-    (!canVote && !areResultsHiddenForCurrentUser) || isViewingAuthorResults
+    (!canVote && !areResultsHiddenForCurrentUser) || isViewingAuthorResults || canShowRestrictedResults
   );
-  const canShowResultsPanel = hasChosenAnswer && summary.isPublic && hasResultData && !areResultsHiddenForCurrentUser;
+  const canShowResultsPanel = (
+    hasChosenAnswer || canShowRestrictedResults
+  ) && summary.isPublic && hasResultData && !areResultsHiddenForCurrentUser;
   const canShowExplanation = hasExplanation && hasChosenAnswer;
   const canAppendAnswer = Boolean(
     summary.canAddAnswers && !summary.isClosed && !isInScheduled && answers.length < pollMaxAnswers,
@@ -136,11 +168,11 @@ const Poll = ({
   const trimmedNewAnswerText = newAnswerText.trim().substring(0, MAX_OPTION_LENGTH);
 
   useEffect(() => {
-    if (!canVote) {
+    if (!canVote || !canVoteAsSubscriber || !canVoteInCountry) {
       setSelectedOptions([]);
       setIsSendingVote(false);
     }
-  }, [canVote]);
+  }, [canVote, canVoteAsSubscriber, canVoteInCountry]);
 
   useTimeout(() => {
     setIsSendingVote(false);
@@ -259,8 +291,34 @@ const Poll = ({
     });
   });
 
+  const handleCountryRestrictedVote = useLastCallback(() => {
+    if (!countryRestrictionMessage) {
+      return;
+    }
+
+    showNotification({ message: countryRestrictionMessage });
+  });
+
+  const handleSubscriberRestrictedVote = useLastCallback(() => {
+    if (!subscriberRestrictionMessage) {
+      return;
+    }
+
+    showNotification({ message: subscriberRestrictionMessage });
+  });
+
   const handleSelectOption = useLastCallback((option: string) => {
     if (!canVote || isSendingVote || isViewingAuthorResults) {
+      return;
+    }
+
+    if (!canVoteAsSubscriber) {
+      handleSubscriberRestrictedVote();
+      return;
+    }
+
+    if (!canVoteInCountry) {
+      handleCountryRestrictedVote();
       return;
     }
 
@@ -280,6 +338,16 @@ const Poll = ({
 
   const handleSendVote = useLastCallback(() => {
     if (!canVote || !selectedOptions.length || isSendingVote) {
+      return;
+    }
+
+    if (!canVoteAsSubscriber) {
+      handleSubscriberRestrictedVote();
+      return;
+    }
+
+    if (!canVoteInCountry) {
+      handleCountryRestrictedVote();
       return;
     }
 
@@ -445,7 +513,7 @@ const Poll = ({
       );
     }
 
-    if (canVote && isMultipleChoice && selectedOptions.length) {
+    if (canSubmitVote && isMultipleChoice && selectedOptions.length) {
       return (
         <Button
           className={styles.footerButton}
@@ -500,7 +568,7 @@ const Poll = ({
       );
     }
 
-    if (canVote && isMultipleChoice) {
+    if (canSubmitVote && isMultipleChoice) {
       return (
         <Button
           className={styles.footerButton}
@@ -551,8 +619,8 @@ const Poll = ({
   }, [
     canShowResultsPanel,
     canToggleAuthorResults,
-    canVote,
     canAppendAnswer,
+    canSubmitVote,
     handleAppendAnswer,
     isAppendingAnswer,
     isMultipleChoice,
@@ -655,6 +723,7 @@ const Poll = ({
                 hasResults={areInlineResultsVisible || hasMaskedResults}
                 hasMaskedResults={hasMaskedResults}
                 isSendingVote={isSendingVote}
+                isClickable={canClickVoteOptions}
                 isInScheduled={isInScheduled}
                 isSelected={selectedOptionsSet.has(answer.option)}
                 isMultipleChoice={isMultipleChoice}
@@ -852,7 +921,13 @@ function PollSticker({
 }
 
 function hasPollOptionMedia(answer: ApiPoll['answers'][number]) {
-  return Boolean(answer.media?.photo || answer.media?.video || answer.media?.location || answer.media?.sticker);
+  return Boolean(
+    answer.media?.photo
+    || answer.media?.video
+    || answer.media?.location
+    || answer.media?.sticker
+    || answer.media?.webPage,
+  );
 }
 
 function onPreviewClick(onOpenPreview: (previewIndex: number) => void) {
@@ -862,8 +937,12 @@ function onPreviewClick(onOpenPreview: (previewIndex: number) => void) {
   };
 }
 
-export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
+export default memo(withGlobal<OwnProps>((global, { chatId }): Complete<StateProps> => {
+  const chat = selectChat(global, chatId);
+
   return {
+    chat,
     pollMaxAnswers: global.appConfig.pollMaxAnswers,
+    phoneCountryIso2: global.appConfig.phoneCountryIso2,
   };
 })(Poll));

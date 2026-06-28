@@ -316,6 +316,8 @@ export interface ApiAppConfig {
   tonTopupUrl: string;
   pollMaxAnswers: number;
   pollClosePeriodMax: number;
+  pollCountriesMax: number;
+  phoneCountryIso2?: string;
   todoItemsMax: number;
   todoTitleLengthMax: number;
   todoItemLengthMax: number;

@@ -106,6 +106,7 @@ export type FontIconName =
   | 'favorite-filled'
   | 'file-badge'
   | 'flag'
+  | 'flag-filled'
   | 'flip'
   | 'folder'
   | 'folder-badge'

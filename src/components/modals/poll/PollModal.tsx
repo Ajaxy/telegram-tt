@@ -8,7 +8,7 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiChat, ApiNewPoll } from '../../../api/types';
+import type { ApiChat, ApiCountry, ApiNewPoll } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { MessageList } from '../../../types';
 import type { IconName } from '../../../types/icons';
@@ -29,9 +29,11 @@ import buildClassName from '../../../util/buildClassName';
 import { formatDateTimeToString, formatShortDuration } from '../../../util/dates/oldDateFormat';
 import { DAY, HOUR } from '../../../util/dates/units';
 import { generateUniqueNumberId } from '../../../util/generateUniqueId';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { getServerTime } from '../../../util/serverTime';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useReorderableList from '../../../hooks/useReorderableList';
@@ -39,6 +41,7 @@ import useSchedule from '../../../hooks/useSchedule';
 import usePaidMessageConfirmation from '../../middle/composer/hooks/usePaidMessageConfirmation';
 
 import CalendarModal from '../../common/CalendarModal.async';
+import CountryPickerModal from '../../common/CountryPickerModal.async';
 import Icon from '../../common/icons/Icon';
 import PaymentMessageConfirmDialog from '../../common/PaymentMessageConfirmDialog';
 import CustomSendMenu from '../../middle/composer/CustomSendMenu.async';
@@ -105,6 +108,9 @@ type StateProps = {
   isChannel?: boolean;
   pollMaxAnswers: number;
   pollClosePeriodMax: number;
+  pollCountriesMax: number;
+  phoneCountryIso2?: string;
+  countryList: ApiCountry[];
   paidMessagesStars?: number;
   isPaymentMessageConfirmDialogOpen: boolean;
   starsBalance: number;
@@ -143,6 +149,9 @@ const PollModal = ({
   isChannel,
   pollMaxAnswers,
   pollClosePeriodMax,
+  pollCountriesMax,
+  phoneCountryIso2,
+  countryList,
   paidMessagesStars,
   isPaymentMessageConfirmDialogOpen,
   starsBalance,
@@ -152,6 +161,7 @@ const PollModal = ({
   const {
     closePollModal,
     sendMessage,
+    showNotification,
   } = getActions();
 
   const lang = useLang();
@@ -171,6 +181,8 @@ const PollModal = ({
   const [canAddAnswers, setCanAddAnswers] = useState(true);
   const [canRevote, setCanRevote] = useState(true);
   const [shouldShuffleAnswers, setShouldShuffleAnswers] = useState(false);
+  const [isRestrictedToSubscribers, setIsRestrictedToSubscribers] = useState(false);
+  const [selectedCountryIds, setSelectedCountryIds] = useState<string[] | undefined>();
   const [closePeriod, setClosePeriod] = useState<number | undefined>();
   const [closeDate, setCloseDate] = useState<number | undefined>();
   const [durationAnchorAt, setDurationAnchorAt] = useState(() => getServerTime());
@@ -179,6 +191,7 @@ const PollModal = ({
   const [isCloseDatePickerOpen, setIsCloseDatePickerOpen] = useState(false);
 
   const [requestCalendar, calendar] = useSchedule();
+  const [isCountryPickerModalOpen, openCountryPickerModal, closeCountryPickerModal] = useFlag();
 
   const {
     isContextMenuOpen: isCustomSendMenuOpen,
@@ -208,10 +221,14 @@ const PollModal = ({
   );
 
   useEffect(() => {
-    if (isChannel) {
-      setIsPublic(false);
-      setCanAddAnswers(false);
+    if (!isChannel) {
+      setIsRestrictedToSubscribers(false);
+      setSelectedCountryIds(undefined);
+      return;
     }
+
+    setIsPublic(false);
+    setCanAddAnswers(false);
   }, [isChannel]);
 
   useEffect(() => {
@@ -264,9 +281,12 @@ const PollModal = ({
   const isAddAnswersDisabled = isQuizMode || !isPublic;
   const minOptionsCount = isQuizMode ? MIN_QUIZ_OPTIONS_COUNT : MIN_OPTIONS_COUNT;
   const remainingOptionsCount = Math.max(pollMaxAnswers - filledOptions.length, 0);
+  const hasCountryLimit = selectedCountryIds !== undefined;
+  const selectedCountriesCount = selectedCountryIds?.length || 0;
   const isSendDisabled = !trimmedQuestion
     || filledOptions.length < minOptionsCount
-    || (isQuizMode && !correctAnswerPositions.length);
+    || (isQuizMode && !correctAnswerPositions.length)
+    || (hasCountryLimit && !selectedCountriesCount);
 
   const hasLimitedDuration = closePeriod !== undefined || closeDate !== undefined;
   const closeDateLabel = closeDate !== undefined
@@ -274,6 +294,20 @@ const PollModal = ({
     : closePeriod !== undefined
       ? formatShortDuration(lang, closePeriod)
       : lang('PollSelectCloseDate');
+  const selectedCountriesLabel = useMemo(() => {
+    if (!selectedCountriesCount) {
+      return lang('PollChooseCountry');
+    }
+
+    if (selectedCountriesCount === 1) {
+      const selectedCountryId = selectedCountryIds![0];
+      const country = countryList.find(({ iso2 }) => iso2 === selectedCountryId);
+
+      return country?.defaultName || selectedCountryId;
+    }
+
+    return lang('PollCountriesCount', { count: selectedCountriesCount }, { pluralValue: selectedCountriesCount });
+  }, [countryList, lang, selectedCountriesCount, selectedCountryIds]);
   const maxCloseDateAt = (durationAnchorAt + pollClosePeriodMax) * 1000;
   const closeDatePickerSelectedAt = closeDate !== undefined
     ? closeDate * 1000
@@ -388,6 +422,25 @@ const PollModal = ({
     setIsMultipleAnswers(checked);
   });
 
+  const handleCountryLimitChange = useLastCallback((checked: boolean) => {
+    if (!checked) {
+      setSelectedCountryIds(undefined);
+      return;
+    }
+
+    setSelectedCountryIds(phoneCountryIso2 ? [phoneCountryIso2] : MEMO_EMPTY_ARRAY);
+  });
+
+  const handleCountrySelectionSubmit = useLastCallback((countryIds: string[]) => {
+    setSelectedCountryIds(countryIds);
+  });
+
+  const handleCountrySelectionLimit = useLastCallback((selectionLimit: number) => {
+    showNotification({
+      message: lang('PollCountriesLimit', { count: selectionLimit }, { pluralValue: selectionLimit }),
+    });
+  });
+
   const handleLimitedDurationChange = useLastCallback((checked: boolean) => {
     if (!checked) {
       setClosePeriod(undefined);
@@ -443,6 +496,10 @@ const PollModal = ({
       return undefined;
     }
 
+    if (hasCountryLimit && !selectedCountriesCount) {
+      return undefined;
+    }
+
     const answers = filledOptions.map(({ text }, index) => ({
       text: { text },
       option: String(index),
@@ -462,6 +519,8 @@ const PollModal = ({
         canAddAnswers: !isChannel && isPublic && canAddAnswers ? true : undefined,
         isRevoteDisabled: !canRevote ? true : undefined,
         shouldShuffleAnswers: shouldShuffleAnswers ? true : undefined,
+        isRestrictedToSubscribers: isChannel && isRestrictedToSubscribers ? true : undefined,
+        allowedCountryCodes: isChannel && selectedCountryIds?.length ? selectedCountryIds : undefined,
         shouldHideResultsUntilClose: shouldHideResultsUntilClose ? true : undefined,
         closePeriod,
         closeDate,
@@ -801,6 +860,33 @@ const PollModal = ({
               />
             </>
           ) : undefined}
+          {isChannel && (
+            <>
+              <SettingRow
+                iconName="user-filled"
+                iconBackgroundColor={ICON_COLORS.anonymous}
+                label={lang('PollRestrictToSubscribers')}
+                description={lang('PollRestrictToSubscribersDescription')}
+                checked={isRestrictedToSubscribers}
+                onChange={setIsRestrictedToSubscribers}
+              />
+              <SettingRow
+                iconName="flag-filled"
+                iconBackgroundColor={ICON_COLORS.multiple}
+                label={lang('PollLimitByCountry')}
+                description={lang('PollLimitByCountryDescription')}
+                checked={hasCountryLimit}
+                onChange={handleCountryLimitChange}
+              />
+              {hasCountryLimit ? (
+                <ValueRow
+                  label={lang('PollAllowedCountries')}
+                  value={selectedCountriesLabel}
+                  onClick={openCountryPickerModal}
+                />
+              ) : undefined}
+            </>
+          )}
         </Island>
 
         {isQuizMode && (
@@ -830,6 +916,17 @@ const PollModal = ({
         submitButtonLabel={lang('Save')}
         onClose={handleCloseCloseDatePicker}
         onSubmit={handleCloseDateSave}
+      />
+      <CountryPickerModal
+        isOpen={isCountryPickerModalOpen}
+        onClose={closeCountryPickerModal}
+        countryList={countryList}
+        title={lang('PollAllowedCountries')}
+        initialSelectedCountryIds={selectedCountryIds}
+        selectionLimit={pollCountriesMax}
+        emptySelectionMessage={lang('PollChooseCountry')}
+        onSubmit={handleCountrySelectionSubmit}
+        onSelectionLimit={handleCountrySelectionLimit}
       />
       <PaymentMessageConfirmDialog
         isOpen={isPaymentMessageConfirmDialogOpen}
@@ -929,6 +1026,9 @@ export default memo(withGlobal<OwnProps>(
       isChannel: chat ? isChatChannel(chat) : undefined,
       pollMaxAnswers: global.appConfig.pollMaxAnswers,
       pollClosePeriodMax: global.appConfig.pollClosePeriodMax,
+      pollCountriesMax: global.appConfig.pollCountriesMax,
+      phoneCountryIso2: global.appConfig.phoneCountryIso2,
+      countryList: global.countryList.general,
       paidMessagesStars: selectPeerPaidMessagesStars(global, chatId),
       isPaymentMessageConfirmDialogOpen: tabState.isPaymentMessageConfirmDialogOpen,
       starsBalance: global.stars?.balance.amount || 0,

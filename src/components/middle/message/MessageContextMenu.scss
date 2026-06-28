@@ -83,7 +83,9 @@
     transform: translateX(0.5rem);
   }
 
-  .no-forwards-notice {
+  .no-forwards-notice,
+  .poll-subscriber-restriction-notice,
+  .poll-country-restriction-notice {
     min-width: 12rem;
   }
 }

@@ -1,4 +1,5 @@
-import { memo, useEffect, useMemo, useRef, useState } from '@teact';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from '@teact';
+import { getActions } from '../../../../global';
 
 import type {
   ApiLocation,
@@ -6,12 +7,15 @@ import type {
   ApiPollAnswer,
   ApiPollResult,
 } from '../../../../api/types';
+import type { GlobalState } from '../../../../global/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 
+import { selectWebPage } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { formatPercent } from '../../../../util/textFormat';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
+import useSelector from '../../../../hooks/data/useSelector';
 import useInterval from '../../../../hooks/schedulers/useInterval';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
@@ -19,7 +23,7 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 import AnimatedCounter from '../../../common/AnimatedCounter';
 import AvatarList from '../../../common/AvatarList';
 import CompactMapPreview from '../../../common/CompactMapPreview';
-import CompactMediaPreview from '../../../common/CompactMediaPreview';
+import CompactMediaPreview, { canRenderCompactMediaPreview } from '../../../common/CompactMediaPreview';
 import Icon from '../../../common/icons/Icon';
 import StickerView from '../../../common/StickerView';
 import Spinner from '../../../ui/Spinner';
@@ -39,6 +43,7 @@ type OwnProps = {
   hasResults?: boolean;
   hasMaskedResults?: boolean;
   isSendingVote?: boolean;
+  isClickable?: boolean;
   recentVoters?: ApiPeer[];
   shouldReserveMediaColumn?: boolean;
   mediaPreviewId?: string;
@@ -66,6 +71,7 @@ const PollOption = ({
   hasResults,
   hasMaskedResults,
   isSendingVote,
+  isClickable,
   recentVoters,
   shouldReserveMediaColumn,
   mediaPreviewId,
@@ -77,11 +83,23 @@ const PollOption = ({
   onOpenMedia,
   onOpenLocation,
 }: OwnProps) => {
+  const { openUrl } = getActions();
   const lang = useLang();
   const stickerRef = useRef<HTMLDivElement>();
 
   const media = answer.media;
+  const selectOptionWebPage = useCallback((global: GlobalState) => {
+    if (!answer.media?.webPage?.id) {
+      return undefined;
+    }
+
+    return selectWebPage(global, answer.media.webPage.id);
+  }, [answer.media?.webPage?.id]);
+  const webPage = useSelector(selectOptionWebPage);
+
+  const hasWebPagePreview = webPage?.webpageType === 'full' && canRenderCompactMediaPreview(webPage);
   const shouldReserveMediaEndColumn = Boolean(shouldReserveMediaColumn);
+  const canHandleClick = Boolean(isClickable && !hasResults && !isInScheduled);
   const votersCount = result?.votersCount ?? 0;
 
   const percentage = totalVotersCount
@@ -171,6 +189,21 @@ const PollOption = ({
 
     e.stopPropagation();
     onOpenLocation(media.location);
+  });
+
+  const handleOpenWebPage = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
+    if (!media?.webPage || !webPage?.url) {
+      return;
+    }
+
+    openUrl({
+      url: webPage.url,
+      shouldSkipModal: media.webPage.isSafe,
+      tryInstant: true,
+      previewId: media.webPage.id,
+    });
   });
 
   function renderSelector() {
@@ -301,6 +334,30 @@ const PollOption = ({
       );
     }
 
+    if (media?.webPage) {
+      return (
+        <div
+          className={buildClassName(
+            styles.webPagePreview,
+            !hasWebPagePreview && styles.webPageFallback,
+            webPage?.url && styles.webPageInteractive,
+          )}
+          onClick={handleOpenWebPage}
+        >
+          {hasWebPagePreview && (
+            <CompactMediaPreview
+              media={webPage}
+              className={styles.webPageMedia}
+              size={OPTION_MEDIA_SIZE}
+              observeIntersectionForLoading={observeIntersectionForLoading}
+              observeIntersectionForPlaying={observeIntersectionForPlaying}
+            />
+          )}
+          <Icon name="link" className={styles.webPageIcon} />
+        </div>
+      );
+    }
+
     return undefined;
   }
 
@@ -313,9 +370,9 @@ const PollOption = ({
         hasResults && !hasMaskedResults && styles.hasResults,
         shouldReserveMediaEndColumn && styles.hasMediaColumn,
         hasResults && !hasMaskedResults && isQuiz && !result?.isCorrect && styles.incorrect,
-        !hasResults && !isInScheduled && styles.clickable,
+        canHandleClick && styles.clickable,
       )}
-      onClick={!isInScheduled ? handleClick : undefined}
+      onClick={canHandleClick ? handleClick : undefined}
     >
       <Transition
         name="fade"

@@ -245,7 +245,7 @@ export type ApiUpdateNewScheduledMessage = {
   message: ApiMessage;
   wasDrafted?: boolean;
   poll?: ApiMessagePoll;
-  webPage?: ApiWebPage;
+  webPages?: ApiWebPage[];
 };
 
 export type ApiUpdateNewMessage = {
@@ -256,7 +256,7 @@ export type ApiUpdateNewMessage = {
   shouldForceReply?: boolean;
   wasDrafted?: boolean;
   poll?: ApiMessagePoll;
-  webPage?: ApiWebPage;
+  webPages?: ApiWebPage[];
 };
 
 export type ApiUpdateMessage = {
@@ -264,7 +264,7 @@ export type ApiUpdateMessage = {
   chatId: string;
   id: number;
   poll?: ApiMessagePoll;
-  webPage?: ApiWebPage;
+  webPages?: ApiWebPage[];
   shouldForceReply?: boolean;
   isFromNew?: true;
 } & (
@@ -282,7 +282,7 @@ export type ApiUpdateScheduledMessage = {
   chatId: string;
   id: number;
   poll?: ApiMessagePoll;
-  webPage?: ApiWebPage;
+  webPages?: ApiWebPage[];
   isFromNew?: true;
 } & (
   {
@@ -299,7 +299,7 @@ export type ApiUpdateQuickReplyMessage = {
   id: number;
   message: Partial<ApiMessage>;
   poll?: ApiMessagePoll;
-  webPage?: ApiWebPage;
+  webPages?: ApiWebPage[];
 };
 
 export type ApiUpdateDeleteQuickReplyMessages = {
@@ -343,7 +343,7 @@ export type ApiUpdateScheduledMessageSendSucceeded = {
   localId: number;
   message: ApiMessage;
   poll?: ApiMessagePoll;
-  webPage?: ApiWebPage;
+  webPages?: ApiWebPage[];
 };
 
 export type ApiUpdateMessageSendSucceeded = {
@@ -352,7 +352,7 @@ export type ApiUpdateMessageSendSucceeded = {
   localId: number;
   message: ApiMessage;
   poll?: ApiMessagePoll;
-  webPage?: ApiWebPage;
+  webPages?: ApiWebPage[];
 };
 
 export type ApiUpdateVideoProcessingPending = {
@@ -393,6 +393,7 @@ export type ApiUpdateMessagePoll = {
   '@type': 'updateMessagePoll';
   pollId: string;
   pollUpdate: Partial<ApiMessagePoll>;
+  webPages?: ApiWebPage[];
 };
 
 export type ApiUpdateMessagePollUnread = {

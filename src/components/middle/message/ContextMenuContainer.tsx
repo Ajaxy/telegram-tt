@@ -732,6 +732,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         reactionsLimit={reactionsLimit}
         anchor={anchor}
         targetHref={targetHref}
+        chat={chat}
         canShowReactionsCount={canShowReactionsCount}
         canShowReactionList={canShowReactionList}
         canSendNow={canSendNow}

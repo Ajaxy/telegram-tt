@@ -1,5 +1,6 @@
 import type {
   ApiMediaExtendedPreview, ApiMessage, ApiReactions,
+  ApiWebPage,
   MediaContent,
 } from '../../../api/types';
 import type { ActiveEmojiInteraction, ThreadId } from '../../../types';
@@ -202,11 +203,33 @@ function shouldBumpCorrespondentTopPeer<T extends GlobalState>(global: T, chatId
   return Boolean(user && !user.isSelf && !isUserBot(user) && !isDeletedUser(user));
 }
 
+function addWebPages<T extends GlobalState>(
+  global: T,
+  webPages?: ApiWebPage[],
+) {
+  if (!webPages?.length) {
+    return global;
+  }
+
+  const addedWebPageIds = new Set<string>();
+
+  webPages.forEach((page) => {
+    if (addedWebPageIds.has(page.id)) {
+      return;
+    }
+
+    global = replaceWebPage(global, page.id, page);
+    addedWebPageIds.add(page.id);
+  });
+
+  return global;
+}
+
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'newMessage': {
       const {
-        chatId, id, message, shouldForceReply, wasDrafted, poll, webPage,
+        chatId, id, message, shouldForceReply, wasDrafted, poll, webPages,
       } = update;
       const chat = selectChat(global, chatId);
       const isLocal = isMessageLocal(message);
@@ -319,9 +342,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = updatePoll(global, poll.summary.id, poll);
       }
 
-      if (webPage) {
-        global = replaceWebPage(global, webPage.id, webPage);
-      }
+      global = addWebPages(global, webPages);
 
       if (message.reportDeliveryUntilDate && message.reportDeliveryUntilDate > getServerTime()) {
         actions.reportMessageDelivery({ chatId, messageId: id });
@@ -448,7 +469,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'newScheduledMessage': {
       const {
-        chatId, id, message, poll, webPage,
+        chatId, id, message, poll, webPages,
       } = update;
 
       global = updateWithLocalMedia(global, chatId, id, true, message, true);
@@ -470,9 +491,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = updatePoll(global, poll.summary.id, poll);
       }
 
-      if (webPage) {
-        global = replaceWebPage(global, webPage.id, webPage);
-      }
+      global = addWebPages(global, webPages);
 
       global = updatePeerFullInfo(global, chatId, {
         hasScheduledMessages: true,
@@ -485,7 +504,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateScheduledMessage': {
       const {
-        chatId, id, message, poll, webPage, isFromNew,
+        chatId, id, message, poll, webPages, isFromNew,
       } = update;
 
       const currentMessage = selectScheduledMessage(global, chatId, id);
@@ -497,7 +516,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
             chatId: update.chatId,
             message: update.message as ApiMessage,
             poll: update.poll,
-            webPage: update.webPage,
+            webPages: update.webPages,
           });
         }
         return;
@@ -518,9 +537,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = updatePoll(global, poll.summary.id, poll);
       }
 
-      if (webPage) {
-        global = replaceWebPage(global, webPage.id, webPage);
-      }
+      global = addWebPages(global, webPages);
 
       setGlobal(global);
 
@@ -529,7 +546,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateMessage': {
       const {
-        chatId, id, message, poll, webPage, isFromNew, isFull, shouldForceReply,
+        chatId, id, message, poll, webPages, isFromNew, isFull, shouldForceReply,
       } = update;
 
       const currentMessage = selectChatMessage(global, chatId, id);
@@ -548,9 +565,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = updatePoll(global, poll.summary.id, poll);
       }
 
-      if (webPage) {
-        global = replaceWebPage(global, webPage.id, webPage);
-      }
+      global = addWebPages(global, webPages);
 
       if (!currentMessage) {
         if (isFromNew && isFull) {
@@ -560,7 +575,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
             chatId: update.chatId,
             message: update.message,
             poll: update.poll,
-            webPage: update.webPage,
+            webPages: update.webPages,
             shouldForceReply,
           });
         }
@@ -586,7 +601,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateQuickReplyMessage': {
-      const { id, message, poll, webPage } = update;
+      const {
+        id, message, poll, webPages,
+      } = update;
 
       global = updateQuickReplyMessage(global, id, message);
 
@@ -594,9 +611,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = updatePoll(global, poll.summary.id, poll);
       }
 
-      if (webPage) {
-        global = replaceWebPage(global, webPage.id, webPage);
-      }
+      global = addWebPages(global, webPages);
 
       setGlobal(global);
 
@@ -672,7 +687,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateMessageSendSucceeded': {
       const {
-        chatId, localId, message, poll,
+        chatId, localId, message, poll, webPages,
       } = update;
 
       global = updateListedAndViewportIds(global, message);
@@ -696,6 +711,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (poll) {
         global = updatePoll(global, poll.summary.id, poll);
       }
+
+      global = addWebPages(global, webPages);
 
       global = {
         ...global,
@@ -749,7 +766,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateScheduledMessageSendSucceeded': {
       const {
-        chatId, localId, message, poll,
+        chatId, localId, message, poll, webPages,
       } = update;
       const scheduledIds = selectScheduledIds(global, chatId, MAIN_THREAD_ID) || [];
       global = replaceThreadLocalStateParam(
@@ -777,6 +794,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (poll) {
         global = updatePoll(global, poll.summary.id, poll);
       }
+
+      global = addWebPages(global, webPages);
 
       setGlobal(global);
       if (shouldBumpCorrespondentTopPeer(global, chatId)) {
@@ -966,9 +985,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateMessagePoll': {
-      const { pollId, pollUpdate } = update;
+      const { pollId, pollUpdate, webPages } = update;
 
       global = updatePoll(global, pollId, pollUpdate);
+      global = addWebPages(global, webPages);
 
       setGlobal(global);
       break;

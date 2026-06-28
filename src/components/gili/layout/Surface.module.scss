@@ -2,9 +2,10 @@
   .root {
     --surface-inline-padding: 1rem 1rem;
     --surface-breakout-margin: -1rem -1rem;
+    --color-background: var(--color-background-secondary);
 
     padding-inline: var(--surface-inline-padding);
-    background-color: var(--color-background-secondary);
+    background-color: var(--color-background);
   }
 
   .scrollable {

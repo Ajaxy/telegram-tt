@@ -1,20 +1,27 @@
-import type { FC } from '../../lib/teact/teact';
+import type { TeactNode } from '../../lib/teact/teact';
 import {
-  memo, useMemo, useState,
+  memo, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { ApiCountry } from '../../api/types';
 
-import buildClassName from '../../util/buildClassName';
+import captureKeyboardListeners from '../../util/captureKeyboardListeners';
+import { isoToEmoji } from '../../util/emoji/emoji';
+import renderText from './helpers/renderText';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Button from '../ui/Button';
-import Modal from '../ui/Modal';
 import ItemPicker from './pickers/ItemPicker';
+import Modal, {
+  ModalCloseButton,
+  ModalFooterActions,
+  ModalHeader,
+  ModalTitle,
+} from '@gili/modal/Modal';
 
 import styles from './CountryPickerModal.module.scss';
 
@@ -23,89 +30,137 @@ export type OwnProps = {
   onClose: () => void;
   onSubmit: (value: string[]) => void;
   countryList: ApiCountry[];
+  title: TeactNode;
+  initialSelectedCountryIds?: string[];
   selectionLimit?: number | undefined;
+  emptySelectionMessage?: string;
+  onSelectionLimit?: (selectionLimit: number) => void;
 };
 
-const CountryPickerModal: FC<OwnProps> = ({
+const CountryPickerModal = ({
   isOpen,
   onClose,
   onSubmit,
   countryList,
+  title,
+  initialSelectedCountryIds,
   selectionLimit,
-}) => {
+  emptySelectionMessage,
+  onSelectionLimit,
+}: OwnProps) => {
   const { showNotification } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [selectedCountryIds, setSelectedCountryIds] = useState<string[]>([]);
+  const [filterValue, setFilterValue] = useState('');
   const prevSelectedCountryIds = usePreviousDeprecated(selectedCountryIds);
   const noPickerScrollRestore = prevSelectedCountryIds === selectedCountryIds;
+  const ariaLabel = typeof title === 'string' ? title : undefined;
 
   const displayedIds = useMemo(() => {
     if (!countryList) {
       return [];
     }
 
-    return countryList.filter((country) => !country.isHidden && country.iso2 !== 'FT')
+    const normalizedFilter = filterValue.trim().toLowerCase();
+
+    return countryList.filter((country) => {
+      if (country.isHidden) {
+        return false;
+      }
+
+      if (!normalizedFilter) {
+        return true;
+      }
+
+      return country.defaultName.toLowerCase().includes(normalizedFilter)
+        || country.name?.toLowerCase().includes(normalizedFilter)
+        || country.iso2.toLowerCase().includes(normalizedFilter);
+    })
       .map(({
         iso2, defaultName,
       }) => ({
         value: iso2,
-        label: defaultName,
+        label: renderText(`${isoToEmoji(iso2)} ${defaultName}`),
       }));
-  }, [countryList]);
+  }, [countryList, filterValue]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    setSelectedCountryIds(initialSelectedCountryIds || []);
+    setFilterValue('');
+  }, [initialSelectedCountryIds, isOpen]);
 
   const handleSelectedIdsChange = useLastCallback((newSelectedIds: string[]) => {
-    if (selectionLimit && newSelectedIds.length > selectionLimit) {
-      showNotification({
-        message: lang('BoostingSelectUpToWarningCountries', selectionLimit),
-      });
+    if (selectionLimit !== undefined && newSelectedIds.length > selectionLimit) {
+      onSelectionLimit?.(selectionLimit);
       return;
     }
     setSelectedCountryIds(newSelectedIds);
   });
 
   const handleSubmit = useLastCallback(() => {
+    if (emptySelectionMessage && !selectedCountryIds.length) {
+      showNotification({ message: emptySelectionMessage });
+      return;
+    }
+
     onSubmit(selectedCountryIds);
     onClose();
   });
 
+  const handleEnter = useLastCallback((event: KeyboardEvent) => {
+    event.preventDefault();
+    handleSubmit();
+  });
+
+  const handleEsc = useLastCallback((event: KeyboardEvent) => {
+    event.preventDefault();
+    onClose();
+  });
+
+  useEffect(() => (
+    isOpen ? captureKeyboardListeners({ onEnter: handleEnter, onEsc: handleEsc }) : undefined
+  ), [handleEnter, handleEsc, isOpen]);
+
+  const header = useMemo(() => (
+    <ModalHeader noMask>
+      <ModalCloseButton />
+      <ModalTitle>{title}</ModalTitle>
+    </ModalHeader>
+  ), [title]);
+
   return (
     <Modal
-      className={styles.root}
       isOpen={isOpen}
       onClose={onClose}
-      onEnter={handleSubmit}
-      hasAbsoluteCloseButton
+      header={header}
+      ariaLabel={ariaLabel}
+      width="slim"
     >
-      <div className={styles.container}>
-        <div className={styles.pickerSelector}>
+      <ItemPicker
+        className={styles.picker}
+        items={displayedIds}
+        selectedValues={selectedCountryIds}
+        onSelectedValuesChange={handleSelectedIdsChange}
+        noScrollRestore={noPickerScrollRestore}
+        forceRenderAllItems
+        allowMultiple
+        filterValue={filterValue}
+        isSearchable
+        onFilterChange={setFilterValue}
+        itemInputType="checkbox"
+      />
 
-          <h4 className={styles.pickerTitle}>
-            {lang('BoostingSelectCountry')}
-          </h4>
-        </div>
-      </div>
-
-      <div className={buildClassName(styles.main, 'custom-scroll')}>
-        <ItemPicker
-          className={styles.picker}
-          items={displayedIds}
-          selectedValues={selectedCountryIds}
-          onSelectedValuesChange={handleSelectedIdsChange}
-          noScrollRestore={noPickerScrollRestore}
-          allowMultiple
-          itemInputType="checkbox"
-        />
-      </div>
-
-      <div className={styles.footer}>
-        <Button
-          onClick={handleSubmit}
-        >
-          {lang('SelectCountries.OK')}
+      <ModalFooterActions>
+        <Button onClick={handleSubmit}>
+          {lang('OK')}
         </Button>
-      </div>
+      </ModalFooterActions>
     </Modal>
   );
 };

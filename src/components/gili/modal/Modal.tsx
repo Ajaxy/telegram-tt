@@ -63,6 +63,7 @@ type ModalContextType = {
 };
 
 type ModalSlotProps = {
+  noMask?: boolean;
   className?: string;
   children?: TeactNode;
 };
@@ -413,7 +414,7 @@ const Modal = ({
   );
 };
 
-const ModalHeader = ({ className, children }: ModalSlotProps) => {
+const ModalHeader = ({ noMask, className, children }: ModalSlotProps) => {
   const modalContext = useModalContext();
 
   return (
@@ -421,6 +422,7 @@ const ModalHeader = ({ className, children }: ModalSlotProps) => {
       className={buildClassName(
         styles.header,
         modalContext?.hasSubtitle && styles.headerWithSubtitle,
+        !noMask && styles.scrollMask,
         className,
       )}
     >

@@ -7,7 +7,7 @@ import type {
 
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { buildMessagePollFromMedia, buildWebPageFromMedia } from '../apiBuilders/messageContent';
+import { buildMessagePollFromMedia, buildWebPagesFromMedia } from '../apiBuilders/messageContent';
 import { buildApiThreadInfoFromMessage } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import { addChatToLocalDb, addMessageToLocalDb, addUserToLocalDb } from '../helpers/localDb';
@@ -62,15 +62,15 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
           polls.push(poll);
         }
 
-        const webPage = buildWebPageFromMedia(message.media);
-        if (webPage) {
-          webPages.push(webPage);
+        const mediaWebPages = buildWebPagesFromMedia(message.media);
+        if (mediaWebPages) {
+          webPages.push(...mediaWebPages);
         }
       }
     });
   }
 
-  if (!userById && !chatById && !threadInfos?.length) return;
+  if (!userById && !chatById && !threadInfos?.length && !polls?.length && !webPages?.length) return;
 
   sendImmediateApiUpdate({
     '@type': 'updateEntities',

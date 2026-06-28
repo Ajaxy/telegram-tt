@@ -360,6 +360,32 @@ export function buildMessagePollFromMedia(media: GramJs.TypeMessageMedia): ApiMe
   return buildMessagePoll(media);
 }
 
+export function buildWebPagesFromMedia(media: GramJs.TypeMessageMedia): ApiWebPage[] | undefined {
+  const webPages: ApiWebPage[] = [];
+
+  addWebPageFromMedia(webPages, media);
+
+  if (media instanceof GramJs.MessageMediaPoll) {
+    if (media.attachedMedia) {
+      addWebPageFromMedia(webPages, media.attachedMedia);
+    }
+    addWebPagesFromPoll(webPages, media.poll, media.results);
+  }
+
+  return webPages.length ? webPages : undefined;
+}
+
+export function buildWebPagesFromPoll(
+  poll?: GramJs.Poll,
+  pollResults?: GramJs.PollResults,
+): ApiWebPage[] | undefined {
+  const webPages: ApiWebPage[] = [];
+
+  addWebPagesFromPoll(webPages, poll, pollResults);
+
+  return webPages.length ? webPages : undefined;
+}
+
 function buildTodoFromMedia(media: GramJs.TypeMessageMedia): ApiMediaTodo | undefined {
   if (!(media instanceof GramJs.MessageMediaToDo)) {
     return undefined;
@@ -584,7 +610,7 @@ export function buildPollAnswer(answer: GramJs.TypePollAnswer): ApiPollAnswer | 
 export function buildPoll(poll: GramJs.Poll): ApiPoll {
   const {
     id, closed, publicVoters, multipleChoice, quiz, closePeriod, closeDate, answers, question, creator,
-    hideResultsUntilClose, revotingDisabled, shuffleAnswers, openAnswers, hash,
+    hideResultsUntilClose, revotingDisabled, shuffleAnswers, openAnswers, subscribersOnly, countriesIso2, hash,
   } = poll;
   const apiAnswers = answers.map(buildPollAnswer).filter(Boolean);
 
@@ -600,11 +626,38 @@ export function buildPoll(poll: GramJs.Poll): ApiPoll {
     shouldHideResultsUntilClose: hideResultsUntilClose,
     isRevoteDisabled: revotingDisabled,
     shouldShuffleAnswers: shuffleAnswers,
+    isRestrictedToSubscribers: subscribersOnly,
+    allowedCountryCodes: countriesIso2,
     question: buildApiFormattedText(question),
     answers: apiAnswers,
     hash: hash.toString(),
     canAddAnswers: openAnswers,
   };
+}
+
+function addWebPagesFromPoll(
+  webPages: ApiWebPage[],
+  poll?: GramJs.Poll,
+  pollResults?: GramJs.PollResults,
+) {
+  poll?.answers.forEach((answer) => {
+    if (!(answer instanceof GramJs.PollAnswer) || !answer.media) {
+      return;
+    }
+
+    addWebPageFromMedia(webPages, answer.media);
+  });
+
+  if (pollResults?.solutionMedia) {
+    addWebPageFromMedia(webPages, pollResults.solutionMedia);
+  }
+}
+
+function addWebPageFromMedia(webPages: ApiWebPage[], media: GramJs.TypeMessageMedia) {
+  const webPage = buildWebPageFromMedia(media);
+  if (!webPage) return;
+
+  webPages.push(webPage);
 }
 
 export function buildTodoItem(item: GramJs.TodoItem): ApiTodoItem {

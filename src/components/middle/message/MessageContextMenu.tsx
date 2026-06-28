@@ -24,12 +24,14 @@ import {
   getUserFullName,
   groupStatefulContent,
 } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../util/entities/ids';
 import { disableScrolling } from '../../../util/scrollLock';
 import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 import { getMessageCopyOptions } from './helpers/copyOptions';
+import { getPollCountryRestrictionMessage, getPollSubscriberRestrictionMessage } from './poll/helpers';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
@@ -59,6 +61,7 @@ type OwnProps = {
   anchor: IAnchorPosition;
   targetHref?: string;
   message: ApiMessage;
+  chat?: ApiChat;
   poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
   story?: ApiTypeStory;
@@ -154,6 +157,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   defaultTagReactions,
   isOpen,
   message,
+  chat,
   poll,
   webPage,
   story,
@@ -257,6 +261,22 @@ const MessageContextMenu: FC<OwnProps> = ({
   const isStarGiftUnique = message.content.action?.type === 'starGiftUnique';
   const shouldShowGiftButton = isUserId(message.chatId)
     && canGift && (isPremiumGift || isGiftCode || isStarGift || isStarGiftUnique);
+  const pollCountryRestrictionMessage = useMemo(
+    () => getPollCountryRestrictionMessage(lang, poll?.summary.allowedCountryCodes),
+    [lang, poll?.summary.allowedCountryCodes],
+  );
+  const pollSubscriberRestrictionChannel = chat && getPeerTitle(lang, chat);
+  const pollSubscriberRestrictionMessage = useMemo(
+    () => getPollSubscriberRestrictionMessage(
+      pollSubscriberRestrictionChannel,
+      poll?.summary.isRestrictedToSubscribers,
+    ),
+    [poll?.summary.isRestrictedToSubscribers, pollSubscriberRestrictionChannel],
+  );
+  const hasPollRestrictionMessage = Boolean(pollSubscriberRestrictionMessage) || Boolean(pollCountryRestrictionMessage);
+  const shouldRenderInfoSection = Boolean(
+    canLoadReadDate || shouldRenderShowWhen || isEdited || noForwardsNotice || hasPollRestrictionMessage,
+  );
 
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
   const { isMobile } = useAppLayout();
@@ -575,7 +595,7 @@ const MessageContextMenu: FC<OwnProps> = ({
             </MenuItem>
           </>
         )}
-        {(canLoadReadDate || shouldRenderShowWhen || isEdited || noForwardsNotice) && (
+        {shouldRenderInfoSection && (
           <MenuSeparator size={hasCustomEmoji ? 'thin' : 'thick'} />
         )}
         {(canLoadReadDate || shouldRenderShowWhen) && (
@@ -590,6 +610,16 @@ const MessageContextMenu: FC<OwnProps> = ({
           <LastEditTimeMenuItem
             message={message}
           />
+        )}
+        {pollSubscriberRestrictionMessage && (
+          <MenuItem disabled withWrap className="poll-subscriber-restriction-notice">
+            {lang.with(pollSubscriberRestrictionMessage)}
+          </MenuItem>
+        )}
+        {pollCountryRestrictionMessage && (
+          <MenuItem disabled withWrap className="poll-country-restriction-notice">
+            {lang.with(pollCountryRestrictionMessage)}
+          </MenuItem>
         )}
         {noForwardsNotice && (
           <MenuItem disabled withWrap className="no-forwards-notice">

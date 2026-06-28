@@ -72,6 +72,7 @@ import {
   buildMessageMediaContent, buildMessagePollFromMedia, buildMessageTextContent,
   buildWebPage,
   buildWebPageFromMedia,
+  buildWebPagesFromMedia,
 } from '../apiBuilders/messageContent';
 import {
   buildApiFactCheck,
@@ -2687,7 +2688,7 @@ function handleLocalMessageUpdate(
 
   let newContent: MediaContent | undefined;
   let poll: ApiMessagePoll | undefined;
-  let webPage: ApiWebPage | undefined;
+  let webPages: ApiWebPage[] | undefined;
   if (messageUpdate instanceof GramJs.UpdateShortSentMessage) {
     if (localMessage.content.text && messageUpdate.entities) {
       newContent = {
@@ -2702,7 +2703,7 @@ function handleLocalMessageUpdate(
         }),
       };
       poll = buildMessagePollFromMedia(messageUpdate.media);
-      webPage = buildWebPageFromMedia(messageUpdate.media);
+      webPages = buildWebPagesFromMedia(messageUpdate.media);
     }
 
     const mtpMessage = buildMessageFromUpdate(messageUpdate.id, localMessage.chatId, messageUpdate);
@@ -2743,7 +2744,7 @@ function handleLocalMessageUpdate(
       localId: localMessage.id,
       message: updatedMessage,
       poll,
-      webPage,
+      webPages,
     });
   }
 

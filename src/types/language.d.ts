@@ -613,6 +613,12 @@ export interface LangPair {
   'PollAllowVoteChangesDescription': undefined;
   'PollRandomOrder': undefined;
   'PollRandomOrderDescription': undefined;
+  'PollRestrictToSubscribers': undefined;
+  'PollRestrictToSubscribersDescription': undefined;
+  'PollLimitByCountry': undefined;
+  'PollLimitByCountryDescription': undefined;
+  'PollAllowedCountries': undefined;
+  'PollChooseCountry': undefined;
   'PollLimitedDuration': undefined;
   'PollLimitedDurationDescription': undefined;
   'PollDuration': undefined;
@@ -2379,6 +2385,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   'NoVoiceMessagesAllowed': {
     'user': V;
   };
+  'PollSubscriberRestriction': {
+    'channel': V;
+  };
+  'PollCountryRestriction': {
+    'countries': V;
+  };
   'ErrorFloodTime': {
     'time': V;
   };
@@ -3901,6 +3913,12 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'PreviewSenderSendFile': {
+    'count': V;
+  };
+  'PollCountriesCount': {
+    'count': V;
+  };
+  'PollCountriesLimit': {
     'count': V;
   };
   'ErrorMessageTooLong': {
