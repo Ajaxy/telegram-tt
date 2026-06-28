@@ -100,6 +100,7 @@ addActionHandler('unlockScreen', (global, actions, payload): ActionReturnType =>
   signalPasscodeHash();
 
   beforeTabStates.forEach(({ id: tabId, isMasterTab }) => actions.init({ tabId, isMasterTab }));
+  beforeTabStates.forEach(({ id: tabId }) => actions.setIsUiReady({ uiReadyState: 2, tabId }));
   actions.initApi();
 });
 
