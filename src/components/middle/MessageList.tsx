@@ -792,10 +792,13 @@ const MessageList = ({
       : undefined;
 
     const hasLastMessageChanged = currentLastMessageOriginalId !== prevCurrentLastMessageOriginalId;
+    const firstMessageId = messageIds?.[0];
+    const prevFirstMessageId = prevMessageIds?.[0];
+    const hasLoadedMessageIds = Boolean(messageIds?.length && prevMessageIds?.length);
     const hasViewportShifted = (
-      messageIds?.[0] !== prevMessageIds?.[0] && messageIds?.length === (MESSAGE_LIST_SLICE / 2 + 1)
+      firstMessageId !== prevFirstMessageId && messageIds?.length === (MESSAGE_LIST_SLICE / 2 + 1)
     );
-    const wasMessageAdded = hasLastMessageChanged && !hasViewportShifted;
+    const wasMessageAdded = hasLoadedMessageIds && hasLastMessageChanged && !hasViewportShifted;
     const wasLiveTailCreated = Boolean(
       effectiveLiveTailStartOriginalId !== undefined
       && effectiveLiveTailStartOriginalId !== prevLiveTailStartOriginalId,
