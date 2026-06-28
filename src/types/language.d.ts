@@ -2419,6 +2419,10 @@ export interface LangPairWithVariables<V = LangVariable> {
   'PollResultsTime': {
     'time': V;
   };
+  'PollResultsAnswerTitle': {
+    'answer': V;
+    'percent': V;
+  };
   'TimeIn': {
     'time': V;
   };

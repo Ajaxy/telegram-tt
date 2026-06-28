@@ -880,6 +880,7 @@
 "Vote" = "Vote";
 "VoteCount_one" = "{count} vote";
 "VoteCount_other" = "{count} votes";
+"PollResultsAnswerTitle" = "{answer} - {percent}%";
 "TimeIn" = "in {time}";
 "MessageRecommendedLabel" = "recommended";
 "SponsoredMessageAd" = "Ad";

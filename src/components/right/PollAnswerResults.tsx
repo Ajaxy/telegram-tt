@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import {
-  memo, useCallback, useEffect,
+  memo, useEffect,
   useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
@@ -18,11 +18,14 @@ import { formatMediaDateTime } from '../../util/dates/oldDateFormat';
 import { isUserId } from '../../util/entities/ids';
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import GroupChatInfo from '../common/GroupChatInfo';
 import PrivateChatInfo from '../common/PrivateChatInfo';
+import Island from '../gili/layout/Island';
 import ListItem from '../ui/ListItem';
 import Loading from '../ui/Loading';
 import ShowMoreButton from '../ui/ShowMoreButton';
@@ -64,7 +67,9 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const areVotersLoaded = Boolean(votes);
   const { option, text } = answer;
-  const lang = useOldLang();
+  const percentage = getPercentage(answerVote.votersCount, totalVoters);
+  const lang = useLang();
+  const oldLang = useOldLang();
 
   useEffect(() => {
     // For update when new votes arrive or when the user takes back his vote
@@ -76,21 +81,21 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
     // eslint-disable-next-line
   }, [answerVote.votersCount, areVotersLoaded]);
 
-  const handleViewMoreClick = useCallback(() => {
+  const handleViewMoreClick = useLastCallback(() => {
     setIsLoading(true);
     loadPollOptionResults({
       chat, messageId: message.id, option, offset, limit: VIEW_MORE_LIMIT,
     });
-  }, [chat, loadPollOptionResults, message.id, offset, option]);
+  });
 
   useEffect(() => {
     setIsLoading(false);
   }, [votes]);
 
-  const handleMemberClick = useCallback((id: string) => {
+  const handleMemberClick = useLastCallback((id: string) => {
     openChat({ id });
     closePollResults();
-  }, [closePollResults, openChat]);
+  });
 
   function renderViewMoreButton() {
     const leftVotersCount = answerVote.votersCount - votes!.length;
@@ -107,48 +112,49 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="PollAnswerResults">
-      <div className="poll-voters">
-        {votes
-          ? votes.map(({ peerId, date }) => (
-            <ListItem
-              key={peerId}
-              className="chat-item-clickable"
-              onClick={() => handleMemberClick(peerId)}
-            >
-              {isUserId(peerId) ? (
-                <PrivateChatInfo
-                  avatarSize="tiny"
-                  userId={peerId}
-                  forceShowSelf
-                  noStatusOrTyping
-                />
-              ) : (
-                <GroupChatInfo
-                  avatarSize="tiny"
-                  chatId={peerId}
-                  noStatusOrTyping
-                />
-              )}
-              <span className="vote-date">
-                {formatMediaDateTime(lang, date * 1000, true)}
-              </span>
-            </ListItem>
-          ))
-          : <Loading />}
-        {votes && renderViewMoreButton()}
-      </div>
       <div className="answer-head" dir={lang.isRtl ? 'rtl' : undefined}>
         <span className="answer-title" dir="auto">
-          {renderTextWithEntities({
-            text: text.text,
-            entities: text.entities,
-          })}
+          {lang('PollResultsAnswerTitle', {
+            answer: renderTextWithEntities({ text: text.text, entities: text.entities }),
+            percent: percentage,
+          }, { withNodes: true })}
         </span>
-        <span className="answer-percent" dir={lang.isRtl ? 'auto' : undefined}>
-          {getPercentage(answerVote.votersCount, totalVoters)}
-          %
+        <span className="answer-count">
+          {lang('VoteCount', { count: answerVote.votersCount }, { pluralValue: answerVote.votersCount })}
         </span>
       </div>
+      {answerVote.votersCount > 0 && (
+        <Island className="poll-voters">
+          {votes
+            ? votes.map(({ peerId, date }) => (
+              <ListItem
+                key={peerId}
+                className="chat-item-clickable"
+                onClick={() => handleMemberClick(peerId)}
+              >
+                {isUserId(peerId) ? (
+                  <PrivateChatInfo
+                    avatarSize="tiny"
+                    userId={peerId}
+                    forceShowSelf
+                    noStatusOrTyping
+                  />
+                ) : (
+                  <GroupChatInfo
+                    avatarSize="tiny"
+                    chatId={peerId}
+                    noStatusOrTyping
+                  />
+                )}
+                <span className="vote-date">
+                  {formatMediaDateTime(oldLang, date * 1000, true)}
+                </span>
+              </ListItem>
+            ))
+            : <Loading />}
+          {votes && renderViewMoreButton()}
+        </Island>
+      )}
     </div>
   );
 };

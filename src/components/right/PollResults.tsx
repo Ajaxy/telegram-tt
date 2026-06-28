@@ -11,6 +11,7 @@ import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useOldLang from '../../hooks/useOldLang';
 
+import { IslandOutside } from '../gili/layout/Island';
 import Loading from '../ui/Loading';
 import PollAnswerResults from './PollAnswerResults';
 
@@ -51,14 +52,14 @@ const PollResults = ({
   }
 
   return (
-    <div className="PollResults" dir={lang.isRtl ? 'rtl' : undefined}>
-      <h3 className="poll-question" dir="auto">
-        {renderTextWithEntities({
-          text: summary.question.text,
-          entities: summary.question.entities,
-        })}
-      </h3>
-      <div className="poll-results-list custom-scroll">
+    <div className="PollResults custom-scroll" dir={lang.isRtl ? 'rtl' : undefined}>
+      <IslandOutside className="poll-results-content">
+        <h3 className="poll-question" dir="auto">
+          {renderTextWithEntities({
+            text: summary.question.text,
+            entities: summary.question.entities,
+          })}
+        </h3>
         {summary.answers.map((answer) => (
           <PollAnswerResults
             key={`${poll.summary.id}-${answer.option}`}
@@ -69,7 +70,7 @@ const PollResults = ({
             totalVoters={results.totalVoters!}
           />
         ))}
-      </div>
+      </IslandOutside>
     </div>
   );
 };
