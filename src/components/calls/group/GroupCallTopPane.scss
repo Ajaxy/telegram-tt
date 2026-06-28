@@ -13,10 +13,12 @@
   .info {
     display: flex;
     flex-direction: column;
+    margin-inline-start: 0.5rem;
     line-height: 1rem;
 
     .title {
       font-size: 0.875rem;
+      font-weight: var(--font-weight-medium);
       color: var(--color-text);
     }
 

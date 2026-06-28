@@ -11,10 +11,6 @@
 
   height: auto;
 
-  // Slight variation from mixins.middle-header-pane
-  padding-right: max(1rem, env(safe-area-inset-right));
-  padding-left: max(1rem, env(safe-area-inset-left));
-
   line-height: 1.25;
 
   transition: background-color 0.2s, transform var(--slide-transition);
@@ -29,6 +25,10 @@
   flex-grow: 1;
   gap: 0.5rem;
   align-items: center;
+
+  padding-block: 0.5rem;
+  padding-inline: 0.75rem;
+  border-radius: 1.625rem;
 
   color: var(--color-text);
 }

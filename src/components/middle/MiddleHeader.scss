@@ -84,17 +84,17 @@
       pointer-events: none;
 
       position: absolute;
-      top: -0.25rem;
+      top: 0;
       right: -0.5rem;
 
       min-width: 1.25rem;
-      height: 1.25rem;
+      height: 1rem;
       padding: 0 0.375rem;
       border-radius: 0.625rem;
 
       font-size: 0.75rem;
       font-weight: var(--font-weight-medium);
-      line-height: 1.25rem;
+      line-height: 1rem;
       color: white;
       text-align: center;
 
@@ -235,7 +235,7 @@
     }
   }
 
-  .ChatInfo .Avatar, .topic-header-icon {
+  .ChatInfo .Avatar {
     // TODO For some reason `Audio.scss` is imported a second time when loading calls bundle
     width: 2.5rem !important;
     height: 2.5rem !important;
@@ -243,9 +243,14 @@
   }
 
   .topic-header-icon {
-    --custom-emoji-size: 2.25rem;
+    --custom-emoji-size: 2.125rem;
 
-    font-size: 2.25rem;
+    width: 2.125rem !important;
+    height: 2.125rem !important;
+    margin-right: 0.625rem;
+    margin-left: 0.25rem;
+
+    font-size: 2.125rem;
 
     .emoji-small {
       width: 1.25rem;
