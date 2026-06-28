@@ -79,6 +79,7 @@ import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMessages';
+import usePrevious from '../../hooks/usePrevious';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import { isBackgroundModeActive } from '../../hooks/window/useBackgroundMode';
@@ -1130,6 +1131,9 @@ const MessageList = ({
   ) : (
     Content.Loading
   );
+  const previousActiveKey = usePrevious(activeKey);
+  const shouldSkipContentTransition = previousActiveKey !== undefined
+    && (activeKey === Content.AccountInfo || previousActiveKey === Content.AccountInfo);
 
   function renderContent() {
     return activeKey === Content.Restricted ? (
@@ -1203,7 +1207,7 @@ const MessageList = ({
     <Transition
       ref={containerRef}
       className={className}
-      name="fade"
+      name={shouldSkipContentTransition ? 'none' : 'fade'}
       activeKey={activeKey}
       shouldCleanup
       onScroll={handleScroll}
