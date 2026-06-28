@@ -74,6 +74,7 @@ interface OwnProps {
   isReplacingHistoryRef: { current: boolean };
   type: MessageListType;
   isReady: boolean;
+  isActive?: boolean;
   hasLinkedChat: boolean | undefined;
   isSchedule: boolean;
   shouldRenderAccountInfo?: boolean;
@@ -129,6 +130,7 @@ const MessageListContent = ({
   isReplacingHistoryRef,
   type,
   isReady,
+  isActive,
   hasLinkedChat,
   isSchedule,
   shouldRenderAccountInfo,
@@ -379,6 +381,7 @@ const MessageListContent = ({
             <Message
               key={key}
               message={message}
+              containerRef={containerRef}
               observeIntersectionForBottom={observeIntersectionForReading}
               observeIntersectionForLoading={observeIntersectionForLoading}
               observeIntersectionForPlaying={observeIntersectionForPlaying}
@@ -404,6 +407,7 @@ const MessageListContent = ({
               isQuickPreview={isQuickPreview}
               memoFirstUnreadIdRef={memoFirstUnreadIdRef}
               getIsMessageListReady={getIsReady}
+              isMessageListActive={isActive}
               onMessageUnmount={onMessageUnmount}
             />,
           ]);

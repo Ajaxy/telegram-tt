@@ -1183,6 +1183,7 @@ const MessageList = ({
         threadId={threadId}
         type={type}
         isReady={isReady}
+        isActive={isActive}
         hasLinkedChat={hasLinkedChat}
         isSchedule={messageGroups ? type === 'scheduled' : false}
         shouldRenderAccountInfo={isBot || isNonContact}

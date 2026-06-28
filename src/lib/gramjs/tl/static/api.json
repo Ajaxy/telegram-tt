@@ -243,6 +243,7 @@
     "messages.reportSponsoredMessage",
     "messages.getSponsoredMessages",
     "messages.reportMessagesDelivery",
+    "messages.reportReadMetrics",
     "messages.getPreparedInlineMessage",
     "messages.toggleSuggestedPostApproval",
     "messages.createForumTopic",
