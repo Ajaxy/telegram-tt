@@ -113,14 +113,16 @@ const SINGLE_LINE_ACTIONS = new Set<ApiMessageAction['type']>([
   'pinMessage',
   'chatEditPhoto',
   'chatDeletePhoto',
-  'todoCompletions',
-  'todoAppendTasks',
-  'pollAppendAnswer',
-  'pollDeleteAnswer',
   'unsupported',
 ]);
 const HIDDEN_TEXT_ACTIONS = new Set<ApiMessageAction['type']>(['giftCode', 'prizeStars',
   'suggestProfilePhoto', 'suggestedPostApproval', 'starGiftPurchaseOffer', 'noForwardsRequest']);
+const WITH_LINK_BREAKS_ACTIONS = new Set<ApiMessageAction['type']>([
+  'todoCompletions',
+  'todoAppendTasks',
+  'pollAppendAnswer',
+  'pollDeleteAnswer',
+]);
 
 const ActionMessage = ({
   message,
@@ -179,6 +181,7 @@ const ActionMessage = ({
 
   const isTextHidden = HIDDEN_TEXT_ACTIONS.has(action.type);
   const isSingleLine = SINGLE_LINE_ACTIONS.has(action.type);
+  const withLinkBreaks = WITH_LINK_BREAKS_ACTIONS.has(action.type);
   const isFluidMultiline = IS_FLUID_BACKGROUND_SUPPORTED && !isSingleLine;
   const isClickableText = action.type === 'suggestedPostSuccess';
   const isNarrowMessage = action.type === 'starGiftPurchaseOfferDeclined';
@@ -625,6 +628,7 @@ const ActionMessage = ({
         'message-list-item',
         styles.root,
         isSingleLine && styles.singleLine,
+        withLinkBreaks && styles.withLinkBreaks,
         isFluidMultiline && styles.fluidMultiline,
         fullContent && styles.hasFullContent,
         isFocused && !noFocusHighlight && 'focused',

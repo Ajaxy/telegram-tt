@@ -74,6 +74,10 @@
   white-space: nowrap;
 }
 
+.withLinkBreaks .messageLink {
+  white-space: normal;
+}
+
 .inlineWrapper {
   grid-area: 1 / 1;
   max-width: 100%;
