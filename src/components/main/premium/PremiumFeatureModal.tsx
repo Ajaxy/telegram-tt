@@ -164,6 +164,14 @@ const PremiumFeatureModal: FC<OwnProps> = ({
       : lang('SubscribeToPremium', { price: formatCurrency(lang, perMonthPrice, currency) }, { withNodes: true });
   }, [isPremium, lang, subscriptionOption]);
 
+  const getSlideLeft = useLastCallback((index: number) => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return undefined;
+
+    const slideElement = scrollContainer.children[index] as HTMLElement | undefined;
+    return slideElement?.offsetLeft;
+  });
+
   const handleClick = useLastCallback(() => {
     onClickSubscribe(initialSection);
   });
@@ -208,20 +216,25 @@ const PremiumFeatureModal: FC<OwnProps> = ({
     if (!scrollContainer || (prevInitialSection === initialSection)) return;
 
     const index = filteredSections.indexOf(initialSection);
+    const targetLeft = getSlideLeft(index);
+    if (targetLeft === undefined) return;
+
     setCurrentSlideIndex(index);
     startScrolling();
-    animateHorizontalScroll(scrollContainer, scrollContainer.clientWidth * index, 0)
+    animateHorizontalScroll(scrollContainer, targetLeft, 0)
       .then(stopScrolling);
-  }, [currentSlideIndex, filteredSections, initialSection, prevInitialSection]);
+  }, [filteredSections, getSlideLeft, initialSection, prevInitialSection, startScrolling, stopScrolling]);
 
   const handleSelectSlide = useLastCallback(async (index: number) => {
     const scrollContainer = scrollContainerRef.current;
     if (!scrollContainer) return;
+    const targetLeft = getSlideLeft(index);
+    if (targetLeft === undefined) return;
 
     setCurrentSlideIndex(index);
 
     startScrolling();
-    await animateHorizontalScroll(scrollContainer, scrollContainer.clientWidth * index, 800);
+    await animateHorizontalScroll(scrollContainer, targetLeft, 800);
     stopScrolling();
   });
 
