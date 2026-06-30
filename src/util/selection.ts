@@ -4,6 +4,11 @@ export function insertHtmlInSelection(html: string) {
   const selection = window.getSelection();
 
   if (selection?.getRangeAt && selection.rangeCount) {
+    // Attempt to use execCommand for undo support
+    if (document.execCommand && document.execCommand('insertHTML', false, html)) {
+      return;
+    }
+
     const range = selection.getRangeAt(0);
     range.deleteContents();
 
