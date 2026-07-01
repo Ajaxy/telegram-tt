@@ -33,8 +33,6 @@ export default function useScrollHooks({
   isReady,
   isReplacingHistoryRef,
   onScrollDownToggle,
-  onBottomNotchToggle,
-  onTopNotchToggle,
 }: {
   type: MessageListType;
   containerRef: ElementRef<HTMLDivElement>;
@@ -45,8 +43,6 @@ export default function useScrollHooks({
   isReady: boolean;
   isReplacingHistoryRef: { current: boolean };
   onScrollDownToggle: BooleanToVoidFunction | undefined;
-  onBottomNotchToggle: AnyToVoidFunction | undefined;
-  onTopNotchToggle: AnyToVoidFunction | undefined;
 }) {
   const { loadViewportMessages } = getActions();
 
@@ -63,10 +59,8 @@ export default function useScrollHooks({
   const forwardsTriggerRef = useRef<HTMLDivElement>();
   const fabTriggerRef = useRef<HTMLDivElement>();
 
-  const toggleScrollTools = useLastCallback((scrollDown: boolean, bottomNotch: boolean, topNotch: boolean) => {
+  const toggleScrollTools = useLastCallback((scrollDown: boolean) => {
     onScrollDownToggle?.(scrollDown);
-    onBottomNotchToggle?.(bottomNotch);
-    onTopNotchToggle?.(topNotch);
   });
 
   const toggleScrollToolsDebounced = useDebouncedCallback(
@@ -77,13 +71,13 @@ export default function useScrollHooks({
     if (!isReady) return;
 
     if (!messageIds?.length) {
-      toggleScrollTools(false, false, false);
+      toggleScrollTools(false);
 
       return;
     }
 
     if (!isViewportNewest) {
-      toggleScrollToolsDebounced(true, true, true);
+      toggleScrollToolsDebounced(true);
 
       return;
     }
@@ -97,11 +91,10 @@ export default function useScrollHooks({
     const scrollBottom = Math.round(fabOffsetTop - scrollTop - offsetHeight);
     const isNearBottom = scrollBottom <= FAB_THRESHOLD;
     const isAtBottom = scrollBottom <= NOTCH_THRESHOLD;
-    const isAtTop = scrollTop <= NOTCH_THRESHOLD;
 
     if (scrollHeight === 0) return;
 
-    toggleScrollToolsDebounced(isUnread ? !isAtBottom : !isNearBottom, !isAtBottom, !isAtTop);
+    toggleScrollToolsDebounced(isUnread ? !isAtBottom : !isNearBottom);
   });
 
   const {

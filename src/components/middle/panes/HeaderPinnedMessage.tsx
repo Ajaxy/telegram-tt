@@ -1,5 +1,5 @@
 import type React from '../../../lib/teact/teact';
-import { memo, useEffect } from '../../../lib/teact/teact';
+import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiMessage, ApiPeer } from '../../../api/types';
@@ -30,12 +30,12 @@ import renderKeyboardButtonText from '../composer/helpers/renderKeyboardButtonTe
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useDerivedState from '../../../hooks/useDerivedState';
+import useEffectOnce from '../../../hooks/useEffectOnce';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import { useFastClick } from '../../../hooks/useFastClick';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransition from '../../../hooks/useShowTransition';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
@@ -62,7 +62,7 @@ type OwnProps = {
 
   messageListType: MessageListType;
   className?: string;
-  isFullWidth?: boolean;
+  isReopen?: boolean;
   shouldHide?: boolean;
   getLoadingPinnedId: Signal<number | undefined>;
   getCurrentPinnedIndex: Signal<number>;
@@ -86,12 +86,12 @@ const HeaderPinnedMessage = ({
   getLoadingPinnedId,
   pinnedMessageIds,
   messagesById,
-  isFullWidth,
   topMessageSender,
   getCurrentPinnedIndex,
   className,
   chat,
   isSynced,
+  isReopen,
   shouldHide,
   onPaneStateChange,
   onFocusPinnedMessage,
@@ -128,19 +128,18 @@ const HeaderPinnedMessage = ({
 
   useEnsureMessage(chatId, pinnedMessageId, pinnedMessage);
 
-  const isOpen = Boolean(pinnedMessage) && !shouldHide;
-  const {
-    ref: transitionRef,
-  } = useShowTransition({
-    isOpen,
-    noOpenTransition: true,
-    shouldForceOpen: isFullWidth, // Use pane animation instead
+  // `settled` instantly places the pane at its resting position to avoid a flash on chat reopen.
+  // It must apply only to that initial restore, otherwise a later pin keeps the pane visible at the
+  // resting position for a frame before the entrance animation, causing a jump
+  const isFirstRenderRef = useRef(true);
+  useEffectOnce(() => {
+    isFirstRenderRef.current = false;
   });
+
+  const isOpen = Boolean(pinnedMessage) && !shouldHide;
 
   const { ref, shouldRender } = useHeaderPane({
     isOpen,
-    isDisabled: !isFullWidth,
-    ref: transitionRef,
     onStateChange: onPaneStateChange,
   });
 
@@ -180,13 +179,16 @@ const HeaderPinnedMessage = ({
 
   const { handleClick, handleMouseDown } = useFastClick(handleMessageClick);
 
+  const isSettled = isReopen && isFirstRenderRef.current;
+
   if (!shouldRender || !renderingPinnedMessage) return undefined;
 
   return (
     <div
       ref={ref}
       className={buildClassName(
-        'HeaderPinnedMessageWrapper', styles.root, isFullWidth ? styles.fullWidth : styles.mini, className,
+        'HeaderPinnedMessageWrapper', styles.root, styles.fullWidth,
+        isSettled && styles.settled, className,
       )}
     >
       {(pinnedMessagesCount > 1 || shouldShowLoader) && (

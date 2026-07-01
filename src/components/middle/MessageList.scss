@@ -1,14 +1,21 @@
 @use "../../styles/mixins";
 
 .MessageList {
+  --message-list-top-inset: 0px;
+  --message-list-min-reserve: 4.25rem;
+  --message-list-composer-gap: 0.5rem;
+  --message-list-base-reserve: calc(var(--message-list-min-reserve) + var(--message-list-composer-gap));
+  --message-list-bottom-inset: var(--message-list-base-reserve);
+  --message-list-fade-floor: rgba(0, 0, 0, 0.24);
+  --message-list-top-fade-ramp: 1.5rem;
+  --message-list-bottom-fade: var(--message-list-min-reserve);
+
   container-type: size;
   overflow-x: hidden;
   overflow-y: scroll;
   flex: 1;
 
   width: 100%;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
 
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: bottom 150ms ease-out, transform var(--layer-transition);
@@ -17,8 +24,37 @@
     transition: none !important;
   }
 
-  .mask-image-enabled & {
-    mask-image: linear-gradient(to top, transparent 0, #000 0.5rem);
+  .messages-layout & {
+    --message-list-top-inset:
+      calc(
+        var(--middle-header-height) + var(--middle-panel-inline-padding) + var(--middle-header-panes-height)
+      );
+
+    mask-image:
+      linear-gradient(
+        to bottom,
+        var(--message-list-fade-floor) 0,
+        var(--message-list-fade-floor) calc(var(--message-list-top-inset) - var(--message-list-top-fade-ramp)),
+        color-mix(in srgb, #000 8.6%, var(--message-list-fade-floor))
+          calc(var(--message-list-top-inset) - var(--message-list-top-fade-ramp) * 0.8),
+        color-mix(in srgb, #000 33.4%, var(--message-list-fade-floor))
+          calc(var(--message-list-top-inset) - var(--message-list-top-fade-ramp) * 0.6),
+        color-mix(in srgb, #000 66.6%, var(--message-list-fade-floor))
+          calc(var(--message-list-top-inset) - var(--message-list-top-fade-ramp) * 0.4),
+        color-mix(in srgb, #000 91.4%, var(--message-list-fade-floor))
+          calc(var(--message-list-top-inset) - var(--message-list-top-fade-ramp) * 0.2),
+        #000 var(--message-list-top-inset),
+        #000 calc(100% - var(--message-list-bottom-fade)),
+        color-mix(in srgb, #000 91.4%, var(--message-list-fade-floor))
+          calc(100% - var(--message-list-bottom-fade) * 0.8),
+        color-mix(in srgb, #000 66.6%, var(--message-list-fade-floor))
+          calc(100% - var(--message-list-bottom-fade) * 0.6),
+        color-mix(in srgb, #000 33.4%, var(--message-list-fade-floor))
+          calc(100% - var(--message-list-bottom-fade) * 0.4),
+        color-mix(in srgb, #000 8.6%, var(--message-list-fade-floor))
+          calc(100% - var(--message-list-bottom-fade) * 0.2),
+        var(--message-list-fade-floor) 100%
+      );
   }
 
   body.keyboard-visible & {
@@ -51,7 +87,7 @@
     max-width: var(--messages-container-width);
     min-height: 100%;
     margin: 0 auto;
-    padding: 1rem 1rem 0 1.125rem;
+    padding: 1rem 1rem var(--message-list-bottom-inset) 1.125rem;
 
     .force-messages-scroll & {
       margin-top: 100vh !important;
@@ -63,7 +99,7 @@
 
     .live-tail {
       overflow-anchor: none;
-      min-height: max(0rem, calc(100cqh - var(--middle-header-panes-height) - 2.5rem));
+      min-height: max(0rem, calc(100cqh - var(--message-list-top-inset) - var(--message-list-bottom-inset)));
 
       .message-list-item {
         animation: live-tail-message-mount 0.2s ease-out;
@@ -82,12 +118,12 @@
       width: 100vw;
       // Patch for an issue on Android when rotating device
       margin: 0;
-      padding: 2.75rem 0.5rem 0;
+      padding: 2.75rem 0.5rem var(--message-list-bottom-inset);
     }
   }
 
   .first-message-date-group {
-    padding-top: var(--middle-header-panes-height);
+    padding-top: var(--message-list-top-inset);
   }
 
   &.no-composer {
@@ -101,27 +137,19 @@
   &.select-mode-active,
   &.type-pinned,
   &.saved-dialog {
+    --message-list-bottom-inset: var(--message-list-base-reserve);
+    --message-list-bottom-fade: var(--message-list-base-reserve);
+
     margin-bottom: 0;
 
-    .last-in-list {
-      margin-bottom: 5.125rem;
-
-      &.ActionMessage {
-        padding-bottom: 0.125rem;
-      }
-
-      @media (max-width: 600px) {
-        margin-bottom: 4.25rem;
-      }
+    .last-in-list.ActionMessage {
+      padding-bottom: 0.125rem;
     }
+  }
 
-    &:has(.sponsored-media-preview) {
-      margin-bottom: 5.125rem;
-
-      .last-in-list {
-        margin-bottom: 1rem;
-      }
-    }
+  &.no-footer {
+    --message-list-bottom-inset: 0px;
+    --message-list-bottom-fade: 0px;
   }
 
   .Message,
@@ -320,7 +348,7 @@
 
   &.scrolled:not(.is-animating) .sticky-date {
     position: sticky;
-    top: calc(0.625rem + var(--middle-header-panes-height));
+    top: calc(1rem + var(--message-list-top-inset));
   }
 
   &.is-animating .message-select-control {
@@ -366,14 +394,6 @@
   @media (max-width: 600px) {
     &.with-bottom-shift {
       margin-bottom: 0;
-
-      .last-in-list {
-        margin-bottom: 4.25rem;
-
-        body:not(.keyboard-visible) & {
-          margin-bottom: calc(4.25rem + env(safe-area-inset-bottom));
-        }
-      }
     }
   }
 

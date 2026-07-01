@@ -7,6 +7,8 @@
 
   width: 100%;
   height: 100%;
+  padding-top: var(--message-list-top-inset);
+  padding-bottom: var(--message-list-bottom-inset);
 
   .no-messages-icon {
     margin: 0 auto 1rem;

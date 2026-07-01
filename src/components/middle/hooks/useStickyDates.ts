@@ -5,7 +5,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useRunDebounced from '../../../hooks/useRunDebounced';
 
 const DEBOUNCE = 1000;
-const STICKY_TOP = 10;
 
 export default function useStickyDates() {
   // For some reason we can not synchronously hide a sticky element (from `useLayoutEffect`) when chat opens
@@ -51,12 +50,10 @@ function findStuckDate(container: HTMLElement) {
   const allElements = container.querySelectorAll<HTMLDivElement>('.sticky-date');
   const containerTop = container.scrollTop;
 
-  const computedStyle = getComputedStyle(container);
-  const headerActionsHeight = parseFloat(computedStyle.getPropertyValue('--middle-header-panes-height'));
-
   return Array.from(allElements).find((el) => {
     const { offsetTop, offsetHeight } = el;
     const top = offsetTop - containerTop;
-    return -offsetHeight <= top && top <= headerActionsHeight + STICKY_TOP;
+    const stickyTop = parseFloat(getComputedStyle(el).top) || 0;
+    return -offsetHeight <= top && top <= stickyTop;
   });
 }

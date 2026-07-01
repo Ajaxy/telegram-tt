@@ -241,6 +241,10 @@
     }
   }
 
+  &.full-width-player.settled {
+    transform: translateY(0);
+  }
+
   .playback-rate-menu .bubble {
     min-width: auto;
 

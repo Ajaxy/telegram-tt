@@ -64,7 +64,6 @@ type OwnProps = {
   messageListType: MessageListType;
   isComments?: boolean;
   isMobile?: boolean;
-  isTopNotchShown?: boolean;
   getCurrentPinnedIndex: Signal<number>;
   getLoadingPinnedId: Signal<number | undefined>;
   onFocusPinnedMessage: (messageId: number) => void;
@@ -93,7 +92,6 @@ const MiddleHeader = ({
   threadId,
   messageListType,
   isMobile,
-  isTopNotchShown,
   typingStatusByPeerId,
   isSelectModeActive,
   isLeftColumnShown,
@@ -356,7 +354,7 @@ const MiddleHeader = ({
 
   return (
     <div
-      className={buildClassName('MiddleHeader', isTopNotchShown && 'with-notch')}
+      className="MiddleHeader"
       ref={componentRef}
       data-tauri-drag-region={IS_TAURI && IS_MAC_OS ? true : undefined}
     >

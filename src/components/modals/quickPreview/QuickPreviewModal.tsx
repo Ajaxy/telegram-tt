@@ -111,6 +111,7 @@ const QuickPreviewModal: FC<OwnProps & StateProps> = ({
             threadId={renderingThreadId || MAIN_THREAD_ID}
             type="thread"
             canPost={false}
+            hasFooter={false}
             isReady
             withDefaultBg={Boolean(!customBackground && !backgroundColor)}
             isQuickPreview

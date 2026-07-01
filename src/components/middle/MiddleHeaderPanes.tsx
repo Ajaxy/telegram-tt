@@ -1,4 +1,4 @@
-import { memo, useRef, useSignal } from '@teact';
+import { memo, useLayoutEffect, useRef, useSignal } from '@teact';
 import { setExtraStyles } from '@teact/teact-dom';
 import { withGlobal } from '../../global';
 
@@ -7,7 +7,7 @@ import type { MessageListType, ThreadId } from '../../types';
 import type { Signal } from '../../util/signals';
 import { MAIN_THREAD_ID } from '../../api/types';
 
-import { requestMutation } from '../../lib/fasterdom/fasterdom';
+import { requestForcedReflow, requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
   selectCanAnimateRightColumn,
   selectChat,
@@ -16,6 +16,7 @@ import {
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { REM } from '../common/helpers/mediaDimensions';
+import { BOTTOM_PIN_THRESHOLD, SCROLL_BOTTOM_SENTINEL, TOP_PIN_THRESHOLD } from './helpers/messageListReserves';
 
 import useEffectOnce from '../../hooks/useEffectOnce';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -45,11 +46,17 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   userFullInfo?: ApiUserFullInfo;
-  isMiddleSearchOpen?: boolean;
   withRightColumnAnimation?: boolean;
+  isMiddleSearchOpen?: boolean;
 };
 
 const FALLBACK_PANE_STATE = { height: 0 };
+
+const panesHeightCache = new Map<string, number>();
+
+function getReserveCacheKey(chatId: string, threadId: ThreadId, messageListType: MessageListType) {
+  return `${chatId}_${threadId}_${messageListType}`;
+}
 
 const MiddleHeaderPanes = ({
   className,
@@ -60,8 +67,8 @@ const MiddleHeaderPanes = ({
   userFullInfo,
   getCurrentPinnedIndex,
   getLoadingPinnedId,
-  isMiddleSearchOpen,
   withRightColumnAnimation,
+  isMiddleSearchOpen,
   onFocusPinnedMessage,
 }: OwnProps & StateProps) => {
   const { settings } = userFullInfo || {};
@@ -75,6 +82,19 @@ const MiddleHeaderPanes = ({
   const [getPaidMessageChargeState, setPaidMessageChargeState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
 
   const isFirstRenderRef = useRef(true);
+  const prevPanesHeightRef = useRef(0);
+
+  const cacheKey = getReserveCacheKey(chatId, threadId, messageListType);
+  const isReopen = panesHeightCache.has(cacheKey);
+
+  useLayoutEffect(() => {
+    const middleColumn = document.getElementById('MiddleColumn');
+    if (!middleColumn) return;
+    setExtraStyles(middleColumn, {
+      '--middle-header-panes-height': isMiddleSearchOpen ? '0px' : `${panesHeightCache.get(cacheKey) ?? 0}px`,
+    });
+  }, [isMiddleSearchOpen, cacheKey]);
+
   const {
     shouldRender,
     ref,
@@ -110,11 +130,64 @@ const MiddleHeaderPanes = ({
     const middleColumn = document.getElementById('MiddleColumn');
     if (!middleColumn) return;
 
-    applyAnimationState({ list: stateArray, noTransition: isFirstRender });
+    const prevPanesHeight = prevPanesHeightRef.current;
+    const panesHeightDelta = totalHeight - prevPanesHeight;
+    prevPanesHeightRef.current = totalHeight;
+
+    const shouldWriteReserve = totalHeight > 0 || prevPanesHeight > 0 || isFirstRender;
+    if (shouldWriteReserve) {
+      panesHeightCache.set(cacheKey, totalHeight);
+    }
 
     requestMutation(() => {
-      setExtraStyles(middleColumn, {
-        '--middle-header-panes-height': `${totalHeight}px`,
+      applyAnimationState({ list: stateArray, noTransition: isFirstRender && isReopen });
+    });
+
+    const scrollers = panesHeightDelta
+      ? Array.from(middleColumn.querySelectorAll<HTMLElement>('.MessageList'))
+      : [];
+
+    requestMeasure(() => {
+      const plans = scrollers
+        .filter((scroller) => scroller.offsetParent)
+        .map((scroller) => ({
+          scroller,
+          wasAtBottom: scroller.scrollHeight - scroller.scrollTop - scroller.offsetHeight <= BOTTOM_PIN_THRESHOLD,
+          wasAtTop: scroller.scrollTop <= TOP_PIN_THRESHOLD,
+          prevScrollTop: scroller.scrollTop,
+          bottomDistance: scroller.scrollHeight - scroller.scrollTop,
+        }));
+
+      if (shouldWriteReserve) {
+        requestMutation(() => {
+          setExtraStyles(middleColumn, {
+            '--middle-header-panes-height': `${totalHeight}px`,
+          });
+        });
+      }
+
+      if (!plans.length) return;
+
+      requestForcedReflow(() => {
+        const targets = plans.map(({
+          scroller, wasAtBottom, wasAtTop, prevScrollTop, bottomDistance,
+        }) => {
+          let scrollTop;
+          if (wasAtBottom) {
+            scrollTop = SCROLL_BOTTOM_SENTINEL;
+          } else if (wasAtTop) {
+            scrollTop = prevScrollTop;
+          } else {
+            scrollTop = scroller.scrollHeight - bottomDistance;
+          }
+          return { scroller, scrollTop };
+        });
+
+        return () => {
+          targets.forEach(({ scroller, scrollTop }) => {
+            scroller.scrollTop = scrollTop;
+          });
+        };
       });
     });
   }, [getAudioPlayerState, getGroupCallState, getPinnedState,
@@ -127,6 +200,7 @@ const MiddleHeaderPanes = ({
       ref={ref}
       className={
         buildClassName(
+          'MiddleHeaderPanes',
           styles.root,
           withRightColumnAnimation && styles.root_withRightColumnAnimation,
           className,
@@ -134,7 +208,6 @@ const MiddleHeaderPanes = ({
       }
     >
       <AudioPlayer
-        isFullWidth
         onPaneStateChange={setAudioPlayerState}
       />
       {threadId === MAIN_THREAD_ID && !chat?.isForum && (
@@ -167,7 +240,7 @@ const MiddleHeaderPanes = ({
         getLoadingPinnedId={getLoadingPinnedId}
         getCurrentPinnedIndex={getCurrentPinnedIndex}
         onPaneStateChange={setPinnedState}
-        isFullWidth
+        isReopen={isReopen}
       />
       <BotAdPane
         chatId={chatId}
@@ -185,13 +258,11 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const userFullInfo = selectUserFullInfo(global, chatId);
 
-    const isMiddleSearchOpen = Boolean(selectCurrentMiddleSearch(global));
-
     return {
       chat,
       userFullInfo,
-      isMiddleSearchOpen,
       withRightColumnAnimation: selectCanAnimateRightColumn(global),
+      isMiddleSearchOpen: Boolean(selectCurrentMiddleSearch(global)),
     };
   },
 )(MiddleHeaderPanes));

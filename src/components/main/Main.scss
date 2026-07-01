@@ -17,7 +17,14 @@
   }
 
   @media (max-width: 600px) {
-    height: calc(var(--vh, 1vh) * 100);
+    // iOS reveal-scrolls the document when the keyboard opens; a `--vh`-based height races that scroll and
+    // leaves a bare strip below the wallpaper. Pin `#Main` to the layout viewport so it always covers the
+    // visible area regardless of timing. (Ported from scroll-fixes-after-composer-redesign.)
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
   }
 
   @media (min-width: 926px) {
@@ -178,12 +185,13 @@
     --left-column-max-width: calc(100vw - env(safe-area-inset-left));
 
     top: 0;
+    bottom: 0;
     left: env(safe-area-inset-left) !important;
     transform: translate3d(-100%, 0, 0);
 
     width: calc(100vw - env(safe-area-inset-left)) !important;
     max-width: none;
-    height: calc(var(--vh, 1vh) * 100);
+    height: auto;
     border-radius: 0;
 
     box-shadow: none;
@@ -215,7 +223,7 @@
   }
 
   @media (max-width: 600px) {
-    height: calc(var(--vh, 1vh) * 100 + 1px);
+    height: auto;
   }
 }
 

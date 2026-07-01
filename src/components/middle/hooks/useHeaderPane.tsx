@@ -150,6 +150,8 @@ export function applyAnimationState({
 
     const shiftPx = `${cumulativeHeight}px`;
 
+    const isEntrance = !element.dataset.isPanelOpen && state.isOpen && !noTransition;
+
     const apply = () => {
       setExtraStyles(element, {
         transform: `translateY(${state.isOpen ? shiftPx : `calc(${shiftPx} - 100% - 0.5rem)`})`,
@@ -158,8 +160,7 @@ export function applyAnimationState({
       });
     };
 
-    if (!element.dataset.isPanelOpen && state.isOpen && !noTransition) {
-      // Start animation right above its final position
+    if (isEntrance) {
       setExtraStyles(element, {
         transform: `translateY(calc(${shiftPx} - 100%))`,
         zIndex: String(zIndexIncrease ? i : -i),
@@ -167,7 +168,11 @@ export function applyAnimationState({
       });
       element.dataset.isPanelOpen = 'true';
       requestNextMutation(apply);
+    } else if (state.isOpen) {
+      element.dataset.isPanelOpen = 'true';
+      apply();
     } else {
+      delete element.dataset.isPanelOpen;
       apply();
     }
 

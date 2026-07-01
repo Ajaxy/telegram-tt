@@ -30,7 +30,9 @@
 .chatBackground {
   contain: layout; // Force new stacking context for text blending
 
-  margin: 5rem 0 2rem;
+  // Reserve the floating header/panes space so the card never slides under the chrome,
+  // keeping the original 5rem float when there is more room (e.g. no panes).
+  margin: max(5rem, var(--message-list-top-inset)) 0 2rem;
   padding: 1rem 1.5rem;
 
   color: white;
@@ -39,6 +41,7 @@
 }
 
 .botBackground {
+  margin-top: var(--message-list-top-inset);
   color: var(--color-text);
   background-color: var(--color-background);
 }

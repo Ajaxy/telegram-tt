@@ -32,6 +32,10 @@
       bottom: 3.6875rem;
     }
   }
+
+  @media (min-width: 601px) {
+    bottom: calc(var(--message-list-bottom-inset) + 0.5rem);
+  }
 }
 
 .contextMenu {

@@ -64,8 +64,11 @@ import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { isUserId } from '../../util/entities/ids';
 import { resolveTransitionName } from '../../util/resolveTransitionName';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
+import getHasMiddleFooter from './helpers/getHasMiddleFooter';
+import { syncMessageListBottomReserve } from './helpers/messageListReserves';
 
 import useAppLayout from '../../hooks/useAppLayout';
+import useDebouncedCallback from '../../hooks/useDebouncedCallback';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';
@@ -170,6 +173,7 @@ function isVideo(item: DataTransferItem) {
 }
 
 const LAYER_ANIMATION_DURATION_MS = 450 + ANIMATION_END_DELAY;
+const KEYBOARD_SETTLE_DURATION = 400;
 
 function MiddleColumn({
   leftColumnRef,
@@ -252,8 +256,6 @@ function MiddleColumn({
   const [dropAreaState, setDropAreaState] = useState(DropAreaState.None);
   const [isScrollDownNeeded, setIsScrollDownNeeded] = useState(false);
   const isScrollDownShown = isScrollDownNeeded && (!isMobile || !hasActiveMiddleSearch);
-  const [isBottomNotchShown, setIsBottomNotchShown] = useState<boolean | undefined>();
-  const [isTopNotchShown, setIsTopNotchShown] = useState<boolean | undefined>();
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
 
   const {
@@ -293,6 +295,43 @@ function MiddleColumn({
   );
 
   const middleColumnRef = useRef<HTMLDivElement>();
+  const isViewportAnimatingRef = useRef(false);
+  const getIsKeyboardAnimating = useLastCallback(() => isViewportAnimatingRef.current);
+
+  const syncFooterSlide = useLastCallback((footer: HTMLElement) => {
+    if (!footer.offsetParent) return;
+
+    const scroller = footer.parentElement?.querySelector<HTMLElement>('.MessageList');
+    if (scroller) syncMessageListBottomReserve(scroller, getIsKeyboardAnimating());
+  });
+
+  const updateFooterHeight = useLastCallback(() => {
+    const middleColumn = middleColumnRef.current;
+    if (!middleColumn) return;
+
+    middleColumn.querySelectorAll<HTMLElement>('.middle-column-footer').forEach((footer) => {
+      syncFooterSlide(footer);
+    });
+  });
+
+  const markViewportSettled = useDebouncedCallback(() => {
+    isViewportAnimatingRef.current = false;
+    updateFooterHeight();
+  }, [updateFooterHeight], KEYBOARD_SETTLE_DURATION, true, false);
+
+  useEffect(() => {
+    const middleColumn = middleColumnRef.current;
+    if (!middleColumn) return undefined;
+
+    updateFooterHeight();
+
+    const observer = new ResizeObserver((entries) => {
+      entries.forEach((entry) => syncFooterSlide(entry.target as HTMLElement));
+    });
+    middleColumn.querySelectorAll<HTMLElement>('.middle-column-footer').forEach((footer) => observer.observe(footer));
+
+    return () => observer.disconnect();
+  }, [currentTransitionKey, renderingChatId, renderingThreadId, updateFooterHeight, syncFooterSlide]);
 
   const { isReady, handleSlideTransitionStop } = useIsReady(
     !shouldSkipHistoryAnimations && withInterfaceAnimations,
@@ -317,8 +356,6 @@ function MiddleColumn({
 
   useSyncEffect(() => {
     setDropAreaState(DropAreaState.None);
-    setIsBottomNotchShown(undefined);
-    setIsTopNotchShown(undefined);
   }, [chatId]);
 
   // Fix for mobile virtual keyboard
@@ -333,6 +370,9 @@ function MiddleColumn({
     }
 
     const handleResize = () => {
+      isViewportAnimatingRef.current = true;
+      markViewportSettled();
+
       const isFixNeeded = visualViewport.height !== document.documentElement.clientHeight;
 
       requestMutation(() => {
@@ -353,7 +393,7 @@ function MiddleColumn({
     return () => {
       visualViewport.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [markViewportSettled]);
 
   useEffect(() => {
     if (isPrivate) {
@@ -470,7 +510,6 @@ function MiddleColumn({
   const footerClassName = buildClassName(
     'middle-column-footer',
     !renderingCanPost && 'no-composer',
-    renderingCanPost && isBottomNotchShown && !isSelectModeActive && 'with-notch',
   );
 
   useHistoryBack({
@@ -490,6 +529,28 @@ function MiddleColumn({
     || (isPinnedMessageList && canUnpin) || canShowOpenChatButton || renderingCanUnblock,
   );
   const withExtraShift = Boolean(isMessagingDisabled || isSelectModeActive);
+
+  const hasFooter = getHasMiddleFooter({
+    isMobile,
+    canPost: renderingCanPost,
+    withExtraShift,
+    isPinnedMessageList,
+    canUnpin,
+    canShowOpenChatButton,
+    canSubscribe: renderingCanSubscribe,
+    shouldJoinToSend: renderingShouldJoinToSend,
+    shouldSendJoinRequest: renderingShouldSendJoinRequest,
+    canStartBot: renderingCanStartBot,
+    canRestartBot: renderingCanRestartBot,
+    canUnblock: renderingCanUnblock,
+  });
+
+  useEffect(() => {
+    updateFooterHeight();
+  }, [
+    updateFooterHeight, renderingChatId, renderingThreadId, currentTransitionKey, renderingCanPost,
+    isMessagingDisabled, isSelectModeActive, withMessageListBottomShift, footerClassName,
+  ]);
 
   return (
     <div
@@ -519,7 +580,7 @@ function MiddleColumn({
         <>
           <div className="messages-layout" onDragEnter={renderingCanPost ? handleDragEnter : undefined}>
             <MiddleHeaderPanes
-              key={renderingChatId}
+              key={`${renderingChatId}-${renderingThreadId}-${renderingMessageListType}`}
               chatId={renderingChatId!}
               threadId={renderingThreadId!}
               messageListType={renderingMessageListType!}
@@ -533,7 +594,6 @@ function MiddleColumn({
               messageListType={renderingMessageListType!}
               isComments={isComments}
               isMobile={isMobile}
-              isTopNotchShown={isTopNotchShown}
               getCurrentPinnedIndex={getCurrentPinnedIndex}
               getLoadingPinnedId={getLoadingPinnedId}
               onFocusPinnedMessage={handleFocusPinnedMessage}
@@ -557,9 +617,8 @@ function MiddleColumn({
                 type={renderingMessageListType!}
                 isComments={isComments}
                 canPost={renderingCanPost!}
+                hasFooter={hasFooter}
                 onScrollDownToggle={setIsScrollDownNeeded}
-                onBottomNotchToggle={setIsBottomNotchShown}
-                onTopNotchToggle={setIsTopNotchShown}
                 isReady={isReady}
                 isContactRequirePremium={isContactRequirePremium}
                 paidMessagesStars={paidMessagesStars}

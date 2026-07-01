@@ -22,6 +22,8 @@ export type AnimateScrollArgs = {
   element: HTMLElement;
   position: ScrollTargetPosition;
   margin?: number;
+  topReserve?: number;
+  bottomReserve?: number;
   maxDistance?: number;
   forceDirection?: FocusDirection;
   forceDuration?: number;
@@ -63,6 +65,8 @@ function createMutateFunction(args: AnimateScrollArgs) {
     element,
     position,
     margin = 0,
+    topReserve = 0,
+    bottomReserve = 0,
     maxDistance = SCROLL_MAX_DISTANCE,
     forceDirection,
     forceNormalContainerHeight,
@@ -96,11 +100,13 @@ function createMutateFunction(args: AnimateScrollArgs) {
     // 'nearest' is not supported yet
     case 'nearest':
     case 'center':
-    case 'centerOrTop':
-      scrollTo = elementHeight < targetContainerHeight
-        ? (elementTop + elementHeight / 2 - targetContainerHeight / 2)
+    case 'centerOrTop': {
+      const visibleHeight = Math.max(0, targetContainerHeight - topReserve - bottomReserve);
+      scrollTo = elementHeight < visibleHeight
+        ? (elementTop + elementHeight / 2 - topReserve - visibleHeight / 2)
         : (elementTop - margin);
       break;
+    }
   }
 
   const scrollFrom = calculateScrollFrom(container, scrollTo, maxDistance, forceDirection);

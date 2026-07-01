@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import { useEffect, useMemo } from '../../../lib/teact/teact';
+import { useEffect, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
@@ -29,11 +29,11 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useAudioPlayer from '../../../hooks/useAudioPlayer';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useEffectOnce from '../../../hooks/useEffectOnce';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useMessageMediaMetadata from '../../../hooks/useMessageMediaMetadata';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
 import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
 import Icon from '../../common/icons/Icon';
@@ -48,7 +48,6 @@ import './AudioPlayer.scss';
 type OwnProps = {
   className?: string;
   noUi?: boolean;
-  isFullWidth?: boolean;
   isHidden?: boolean;
   onPaneStateChange?: (state: PaneState) => void;
 };
@@ -77,6 +76,8 @@ const PLAYBACK_RATE_VALUES = Object.keys(PLAYBACK_RATES).sort().map(Number);
 const REGULAR_PLAYBACK_RATE = 1;
 const DEFAULT_FAST_PLAYBACK_RATE = 2;
 
+let wasPlayerPaneShown = false;
+
 const AudioPlayer: FC<OwnProps & StateProps> = ({
   message,
   mediaDuration,
@@ -88,7 +89,6 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   playbackRate,
   isPlaybackRateActive,
   isMuted,
-  isFullWidth,
   timestamp,
   onPaneStateChange,
 }) => {
@@ -143,20 +143,28 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     true,
   );
 
+  const isPane = !noUi;
+
   const isOpen = Boolean(message);
-  const {
-    ref: transitionRef,
-  } = useShowTransition({
-    isOpen,
-    shouldForceOpen: isFullWidth, // Use pane animation instead
-  });
+  const transitionRef = useRef<HTMLDivElement>();
 
   const { ref, shouldRender } = useHeaderPane({
     isOpen,
-    isDisabled: !isFullWidth,
+    isDisabled: !isPane,
     ref: transitionRef,
     onStateChange: onPaneStateChange,
   });
+
+  const isFirstRenderRef = useRef(true);
+  useEffectOnce(() => {
+    isFirstRenderRef.current = false;
+  });
+  const isSettled = isPane && isOpen && wasPlayerPaneShown && isFirstRenderRef.current;
+  useEffect(() => {
+    if (isPane) {
+      wasPlayerPaneShown = isOpen;
+    }
+  }, [isPane, isOpen]);
 
   const {
     isContextMenuOpen,
@@ -280,7 +288,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
 
   return (
     <div
-      className={buildClassName('AudioPlayer', isFullWidth ? 'full-width-player' : 'mini-player', className)}
+      className={buildClassName('AudioPlayer', 'full-width-player', isSettled && 'settled', className)}
       dir={lang.isRtl ? 'rtl' : undefined}
       ref={ref}
     >

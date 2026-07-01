@@ -139,16 +139,21 @@
   transition-behavior: allow-discrete;
 
   .mobile & {
+    // Detached card hanging under the floating search island, like the desktop dropdown.
     position: absolute;
-    top: 3.375rem; // Subpixel rendering can leave 1px gap otherwise
+    top: calc(0.5rem + var(--middle-header-height) + 0.5rem);
     right: 0;
-    bottom: 3.375rem;
+    bottom: auto;
     left: 0;
     transform: none;
 
-    max-height: none;
+    width: calc(100% - var(--middle-panel-inline-padding) * 2);
+    max-width: calc(var(--messages-container-width) - var(--middle-panel-inline-padding) * 2);
+    // Leave a gap above the bottom navigation island (3.5rem island + 0.5rem gap + safe area).
+    max-height: calc(100% - var(--middle-header-height) - 5.5rem - env(safe-area-inset-bottom));
+    margin: 0 auto;
     padding: 0;
-    border-radius: 0;
+    border-radius: 1.375rem;
   }
 
   @starting-style {
@@ -276,39 +281,29 @@
   pointer-events: auto;
 
   position: absolute;
-  bottom: 0;
+  right: 0;
+  bottom: calc(0.5rem + env(safe-area-inset-bottom));
   left: 0;
-  transform: translateY(100%);
+  transform: translateY(calc(100% + 0.5rem + env(safe-area-inset-bottom)));
 
   display: flex;
   align-items: center;
 
-  width: 100%;
+  width: calc(100% - var(--middle-panel-inline-padding) * 2);
+  max-width: calc(var(--messages-container-width) - var(--middle-panel-inline-padding) * 2);
   height: 3.5rem;
-  padding-right: max(0.5rem, env(safe-area-inset-right));
+  margin: 0 auto;
+  padding-right: max(1.25rem, env(safe-area-inset-right));
   padding-left: max(1rem, env(safe-area-inset-left));
+  border-radius: var(--border-radius-messages);
 
   background-color: var(--color-background);
-  box-shadow: 0 -2px 2px var(--color-light-shadow);
+  box-shadow: var(--shadow-island);
 
   transition: transform 200ms ease-in-out;
 
   .active & {
     transform: translateY(0);
-  }
-
-  :global {
-    body:not(.keyboard-visible) & {
-      height: 3.5rem;
-      padding-bottom: 0;
-    }
-
-    @media (max-width: 600px) {
-      body:not(.keyboard-visible) & {
-        height: calc(3.5rem + env(safe-area-inset-bottom));
-        padding-bottom: env(safe-area-inset-bottom);
-      }
-    }
   }
 }
 
