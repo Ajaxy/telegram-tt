@@ -152,6 +152,8 @@ const CountryPickerModal = ({
         allowMultiple
         filterValue={filterValue}
         isSearchable
+        withDefaultPadding
+        withIslands
         onFilterChange={setFilterValue}
         itemInputType="checkbox"
       />

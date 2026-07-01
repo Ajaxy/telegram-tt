@@ -15,6 +15,7 @@ import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Island from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import InputText from '../../ui/InputText';
@@ -64,6 +65,7 @@ type OwnProps = {
   noScrollRestore?: boolean;
   isViewOnly?: boolean;
   withDefaultPadding?: boolean;
+  withIslands?: boolean;
   forceRenderAllItems?: boolean;
   onFilterChange?: (value: string) => void;
   onDisabledClick?: (value: string, isSelected: boolean) => void;
@@ -86,6 +88,7 @@ const ItemPicker = ({
   itemInputType,
   itemClassName,
   withDefaultPadding,
+  withIslands,
   forceRenderAllItems,
   onFilterChange,
   onDisabledClick,
@@ -207,30 +210,49 @@ const ItemPicker = ({
     itemInputType, itemClassName,
   ]);
 
+  function renderSearchInput() {
+    return (
+      <InputText
+        id={searchInputId}
+        ref={inputRef}
+        value={filterValue}
+        onChange={handleFilterChange}
+        placeholder={filterPlaceholder || lang('Search')}
+        noMargin={withIslands}
+      />
+    );
+  }
+
+  function renderListWrapper(content: TeactNode) {
+    return withIslands
+      ? <Island className={styles.islandList}>{content}</Island>
+      : content;
+  }
+
   return (
     <div className={buildClassName(styles.container, className)}>
       {isSearchable && (
-        <div className={buildClassName(styles.header, 'custom-scroll')} dir={lang.isRtl ? 'rtl' : undefined}>
-          <InputText
-            id={searchInputId}
-            ref={inputRef}
-            value={filterValue}
-            onChange={handleFilterChange}
-            placeholder={filterPlaceholder || lang('Search')}
-          />
-        </div>
+        withIslands ? (
+          <Island>{renderSearchInput()}</Island>
+        ) : (
+          <div className={buildClassName(styles.header, 'custom-scroll')} dir={lang.isRtl ? 'rtl' : undefined}>
+            {renderSearchInput()}
+          </div>
+        )
       )}
 
       {viewportValuesList?.length ? (
-        <InfiniteScroll
-          className={buildClassName(styles.pickerList, withDefaultPadding && styles.padded, 'custom-scroll')}
-          items={viewportValuesList}
-          itemSelector={`.${ITEM_CLASS_NAME}`}
-          onLoadMore={getMore}
-          noScrollRestore={noScrollRestore}
-        >
-          {viewportValuesList.map((value) => renderItem(value))}
-        </InfiniteScroll>
+        renderListWrapper(
+          <InfiniteScroll
+            className={buildClassName(styles.pickerList, withDefaultPadding && styles.padded, 'custom-scroll')}
+            items={viewportValuesList}
+            itemSelector={`.${ITEM_CLASS_NAME}`}
+            onLoadMore={getMore}
+            noScrollRestore={noScrollRestore}
+          >
+            {viewportValuesList.map((value) => renderItem(value))}
+          </InfiniteScroll>,
+        )
       ) : !isLoading && viewportValuesList && !viewportValuesList.length ? (
         <p className={styles.noResults}>{notFoundText || lang('SearchEmptyViewTitle')}</p>
       ) : (
