@@ -1,6 +1,5 @@
 import { type MouseEvent as ReactMouseEvent } from 'react';
 import Color from 'colorjs.io';
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect,
   useMemo, useRef,
@@ -53,6 +52,11 @@ type WebAppModalTab = {
   isOpen: boolean;
 };
 
+type MoreMenuButtonProps = {
+  isOpen?: boolean;
+  onTrigger: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
+};
+
 export type OwnProps = {
   modal?: TabState['webApps'];
 };
@@ -73,7 +77,7 @@ const MINIMIZED_STATE_SIZE = { width: 300, height: 40 };
 const DEFAULT_MAXIMIZED_STATE_SIZE = { width: 420, height: 730 };
 const MAXIMIZED_STATE_MINIMUM_SIZE = { width: 300, height: 300 };
 
-const WebAppModal: FC<OwnProps & StateProps> = ({
+const WebAppModal = ({
   modal,
   chat,
   bot,
@@ -81,7 +85,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   theme,
   cachedSize,
   cachedPosition,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     closeActiveWebApp,
     closeWebAppModal,
@@ -133,6 +137,11 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const isMaximizedState = modal?.modalState === 'maximized';
   const isMinimizedState = modal?.modalState === 'minimized';
   const isFullScreen = modal?.modalState === 'fullScreen';
+  const shouldSkipNextMaximizedSizeCacheRef = useRef(false);
+
+  if (isFullScreen) {
+    shouldSkipNextMaximizedSizeCacheRef.current = true;
+  }
 
   const supportMultiTabMode = !isMobile;
   const ref = useRef<HTMLDivElement>();
@@ -196,6 +205,11 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (!isDragging && size && isMaximizedState) {
+      if (shouldSkipNextMaximizedSizeCacheRef.current) {
+        shouldSkipNextMaximizedSizeCacheRef.current = false;
+        return;
+      }
+
       updateMiniAppCachedSize({ size });
     }
   }, [isDragging, isMaximizedState, size]);
@@ -337,9 +351,8 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     });
   });
 
-  const MoreMenuButton:
-  FC<{ onTrigger: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void; isOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger, isOpen: isMenuOpen }) => (
+  const MoreMenuButton = useMemo(() => {
+    return ({ onTrigger, isOpen: isMenuOpen }: MoreMenuButtonProps) => (
       <Button
         className={
           buildClassName(
