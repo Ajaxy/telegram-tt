@@ -69,14 +69,6 @@ export function buildReplyButtons(
       }
 
       if (button instanceof GramJs.KeyboardButtonUrl) {
-        if (button.url.includes('?startgroup=')) {
-          return {
-            ...baseButton,
-            type: 'unsupported',
-            text,
-          };
-        }
-
         return {
           ...baseButton,
           type: 'url',

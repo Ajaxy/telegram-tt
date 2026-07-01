@@ -201,6 +201,7 @@ export interface ApiChatAdminRights {
   pinMessages?: true;
   addAdmins?: true;
   anonymous?: true;
+  other?: true;
   manageCall?: true;
   manageTopics?: true;
   postStories?: true;

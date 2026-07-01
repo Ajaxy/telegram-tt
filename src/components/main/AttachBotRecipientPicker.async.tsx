@@ -5,9 +5,9 @@ import { Bundles } from '../../util/moduleLoader';
 import useModuleLoader from '../../hooks/useModuleLoader';
 
 const AttachBotRecipientPickerAsync = (props: OwnProps) => {
-  const { requestedAttachBotInChat } = props;
+  const { requestedAttachBotInChat, requestedBotStartGroup } = props;
   const AttachBotRecipientPicker = useModuleLoader(
-    Bundles.Extra, 'AttachBotRecipientPicker', !requestedAttachBotInChat,
+    Bundles.Extra, 'AttachBotRecipientPicker', !requestedAttachBotInChat && !requestedBotStartGroup,
   );
 
   return AttachBotRecipientPicker ? <AttachBotRecipientPicker {...props} /> : undefined;

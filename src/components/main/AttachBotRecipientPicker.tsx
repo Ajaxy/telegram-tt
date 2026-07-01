@@ -1,25 +1,32 @@
-import type { FC } from '../../lib/teact/teact';
-import { memo, useCallback, useEffect } from '../../lib/teact/teact';
+import { memo, useEffect } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
+import type { ApiChatType } from '../../api/types';
 import type { TabState } from '../../global/types';
 
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import RecipientPicker from '../common/RecipientPicker';
 
 export type OwnProps = {
   requestedAttachBotInChat?: TabState['requestedAttachBotInChat'];
+  requestedBotStartGroup?: TabState['requestedBotStartGroup'];
 };
 
-const AttachBotRecipientPicker: FC<OwnProps> = ({
+const BOT_GROUP_FILTER: ApiChatType[] = ['chats', 'groups'];
+
+const AttachBotRecipientPicker = ({
   requestedAttachBotInChat,
-}) => {
-  const { cancelAttachBotInChat, callAttachBot } = getActions();
+  requestedBotStartGroup,
+}: OwnProps) => {
+  const {
+    callAttachBot, cancelAttachBotInChat, cancelBotStartGroup, openChat, startBot,
+  } = getActions();
   const lang = useLang();
 
-  const isOpen = Boolean(requestedAttachBotInChat);
+  const isOpen = Boolean(requestedAttachBotInChat || requestedBotStartGroup);
   const [isShown, markIsShown, unmarkIsShown] = useFlag();
   useEffect(() => {
     if (isOpen) {
@@ -27,12 +34,32 @@ const AttachBotRecipientPicker: FC<OwnProps> = ({
     }
   }, [isOpen, markIsShown]);
 
-  const { bot, filter, startParam } = requestedAttachBotInChat || {};
+  const filter = requestedBotStartGroup ? BOT_GROUP_FILTER : requestedAttachBotInChat?.filter;
 
-  const handlePeerRecipient = useCallback((recipientId: string) => {
-    callAttachBot({ bot: bot!, chatId: recipientId, startParam });
+  const handleClose = useLastCallback(() => {
+    if (requestedBotStartGroup) {
+      cancelBotStartGroup();
+      return;
+    }
     cancelAttachBotInChat();
-  }, [bot, callAttachBot, cancelAttachBotInChat, startParam]);
+  });
+
+  const handlePeerRecipient = useLastCallback((recipientId: string) => {
+    if (requestedBotStartGroup) {
+      startBot({
+        botId: requestedBotStartGroup.bot.id,
+        chatId: recipientId,
+        param: requestedBotStartGroup.startParam,
+      });
+      openChat({ id: recipientId });
+      cancelBotStartGroup();
+      return;
+    }
+
+    const { bot, startParam } = requestedAttachBotInChat!;
+    callAttachBot({ bot, chatId: recipientId, startParam });
+    cancelAttachBotInChat();
+  });
 
   if (!isOpen && !isShown) {
     return undefined;
@@ -44,8 +71,9 @@ const AttachBotRecipientPicker: FC<OwnProps> = ({
       title={lang('SelectChat')}
       searchPlaceholder={lang('Search')}
       filter={filter}
+      shouldFilterInviteable={Boolean(requestedBotStartGroup)}
       onSelectRecipient={handlePeerRecipient}
-      onClose={cancelAttachBotInChat}
+      onClose={handleClose}
       onCloseAnimationEnd={unmarkIsShown}
     />
   );

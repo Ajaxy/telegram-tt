@@ -489,10 +489,13 @@ addActionHandler('resetAllInlineBots', (global, actions, payload): ActionReturnT
 });
 
 addActionHandler('startBot', async (global, actions, payload): Promise<void> => {
-  const { botId, param } = payload;
+  const {
+    botId, chatId, param,
+  } = payload;
 
   const bot = selectUser(global, botId);
-  if (!bot) {
+  const chat = chatId ? selectChat(global, chatId) : undefined;
+  if (!bot || (chatId && !chat)) {
     return;
   }
 
@@ -506,8 +509,22 @@ addActionHandler('startBot', async (global, actions, payload): Promise<void> => 
     await callApi('unblockUser', { user: bot });
   }
 
+  if (!chat) {
+    await callApi('startBot', {
+      bot,
+      startParam: param,
+    });
+    return;
+  }
+
+  const missingUsers = await callApi('addBotToChat', chat, bot);
+  if (!missingUsers || missingUsers.length) return;
+
+  if (!param) return;
+
   await callApi('startBot', {
     bot,
+    peer: chat,
     startParam: param,
   });
 });
@@ -1597,7 +1614,7 @@ addActionHandler('startBotFatherConversation', async (global, actions, payload):
   }
 
   if (param) {
-    actions.startBot({ botId: botFatherId, param });
+    actions.startBot({ botId: botFatherId, param, tabId });
   }
 
   actions.openChat({ id: botFatherId, tabId });

@@ -1,5 +1,11 @@
 import { bufferFromBase64, bufferToUtf8 } from './buffer';
 
+const RE_BASE64_URL = /^[A-Za-z0-9_-]+={0,2}$/;
+
+export function isBase64Url(base64Url: string) {
+  return RE_BASE64_URL.test(base64Url);
+}
+
 export function base64UrlToBase64(base64Url: string): string {
   const base64Encoded = base64Url.replace(/-/g, '+').replace(/_/g, '/');
   const padding = base64Url.length % 4 === 0 ? '' : '='.repeat(4 - (base64Url.length % 4));

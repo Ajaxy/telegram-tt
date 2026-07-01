@@ -235,6 +235,7 @@ addActionHandler('requestAttachBotInChat', (global, actions, payload): ActionRet
       filter: supportedFilters,
       startParam,
     },
+    requestedBotStartGroup: undefined,
   }, tabId);
   setGlobal(global);
 });
@@ -243,6 +244,26 @@ addActionHandler('cancelAttachBotInChat', (global, actions, payload): ActionRetu
   const { tabId = getCurrentTabId() } = payload || {};
   return updateTabState(global, {
     requestedAttachBotInChat: undefined,
+  }, tabId);
+});
+
+addActionHandler('requestBotStartGroup', (global, actions, payload): ActionReturnType => {
+  const {
+    bot, startParam, tabId = getCurrentTabId(),
+  } = payload;
+  return updateTabState(global, {
+    requestedAttachBotInChat: undefined,
+    requestedBotStartGroup: {
+      bot,
+      startParam,
+    },
+  }, tabId);
+});
+
+addActionHandler('cancelBotStartGroup', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    requestedBotStartGroup: undefined,
   }, tabId);
 });
 

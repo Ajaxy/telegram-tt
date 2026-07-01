@@ -4,6 +4,7 @@ import { RE_TG_LINK, RE_TME_LINK } from '../config';
 import { IS_BAD_URL_PARSER } from './browser/globalEnvironment';
 import { ensureProtocol } from './browser/url';
 import { parseTimestampDuration } from './dates/timestamp';
+import { isBase64Url } from './encoding/base64';
 import { toChannelId } from './entities/ids';
 import { isUsernameValid } from './entities/username';
 
@@ -62,6 +63,7 @@ interface PublicUsernameOrBotLink {
   type: 'publicUsernameOrBotLink';
   username: string;
   start?: string;
+  startGroup?: string;
   ref?: string;
   startApp?: string;
   mode?: string;
@@ -168,6 +170,7 @@ type OAuthLinkBuilderParams = Omit<BuilderParams<OAuthLink>, 'url'> & {
 };
 
 const ELIGIBLE_HOSTNAMES = new Set(['t.me', 'telegram.me', 'telegram.dog']);
+const MAX_BOT_START_PARAMETER_LENGTH = 64;
 
 export function isDeepLink(link: string): boolean {
   return Boolean(link.match(RE_TME_LINK) || link.match(RE_TG_LINK));
@@ -262,6 +265,7 @@ function parseTgLink(url: URL) {
       return buildPublicUsernameOrBotLink({
         username: queryParams.domain,
         start: queryParams.start,
+        startGroup: queryParams.admin !== undefined ? undefined : queryParams.startgroup,
         text: queryParams.text,
         appName: queryParams.appname,
         startApp: queryParams.startapp,
@@ -373,6 +377,7 @@ function parseHttpLink(url: URL) {
       return buildPublicUsernameOrBotLink({
         username: pathParams[0],
         start: queryParams.start,
+        startGroup: queryParams.admin !== undefined ? undefined : queryParams.startgroup,
         text: queryParams.text,
         startApp: queryParams.startapp,
         mode: queryParams.mode,
@@ -650,6 +655,7 @@ function buildPublicUsernameOrBotLink(
   const {
     username,
     start,
+    startGroup,
     text,
     startApp,
     mode,
@@ -666,10 +672,12 @@ function buildPublicUsernameOrBotLink(
   if (!isUsernameValid(username)) {
     return undefined;
   }
+  const normalizedStartGroup = normalizeBotStartGroup(startGroup);
   return {
     type: 'publicUsernameOrBotLink',
     username,
     start,
+    startGroup: normalizedStartGroup,
     startApp,
     mode,
     appName,
@@ -680,6 +688,14 @@ function buildPublicUsernameOrBotLink(
     ref,
     isDirect: direct === '',
   };
+}
+
+function normalizeBotStartGroup(startGroup?: string) {
+  if (!startGroup || (startGroup.length <= MAX_BOT_START_PARAMETER_LENGTH && isBase64Url(startGroup))) {
+    return startGroup;
+  }
+
+  return '';
 }
 
 function buildPrivateChannelLink(params: BuilderParams<PrivateChannelLink>): BuilderReturnType<PrivateChannelLink> {

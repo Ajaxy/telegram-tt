@@ -1910,7 +1910,7 @@ addActionHandler('acceptChatInvite', async (global, actions, payload): Promise<v
 
 addActionHandler('openChatByUsername', async (global, actions, payload): Promise<void> => {
   const {
-    username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts,
+    username, messageId, commentId, startParam, startGroup, startAttach, attach, threadId, originalParts,
     startApp, shouldStartMainApp, mode, isDirect,
     text, onChatChanged, choose, ref, timestamp, linkContext,
     tabId = getCurrentTabId(),
@@ -1921,6 +1921,16 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
   const isWebApp = webAppName && !Number(webAppName) && !originalParts?.[2];
 
   if (!commentId) {
+    if (startGroup !== undefined) {
+      const botChat = await fetchChatByUsername(global, username);
+      global = getGlobal();
+      const bot = botChat && selectUser(global, botChat.id);
+      if (!bot || !isUserBot(bot)) return;
+
+      actions.requestBotStartGroup({ bot, startParam: startGroup, tabId });
+      return;
+    }
+
     if (startAttach === undefined && messageId && !startParam && !ref
       && chat?.usernames?.some((c) => c.username === username)) {
       actions.focusMessage({
@@ -3958,7 +3968,7 @@ async function openChatWithParams<T extends GlobalState>(
   }
 
   if (startParam && !referrer) {
-    actions.startBot({ botId: chat.id, param: startParam });
+    actions.startBot({ botId: chat.id, param: startParam, tabId });
   }
 
   if (attach) {

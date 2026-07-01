@@ -726,6 +726,7 @@ export interface ActionPayloads {
     messageId?: number;
     commentId?: number;
     startParam?: string;
+    startGroup?: string;
     ref?: string;
     startAttach?: string;
     attach?: string;
@@ -2236,8 +2237,9 @@ export interface ActionPayloads {
   resetAllInlineBots: WithTabId | undefined;
   startBot: {
     botId: string;
+    chatId?: string;
     param?: string;
-  };
+  } & WithTabId;
   restartBot: {
     chatId: string;
   } & WithTabId;
@@ -2362,6 +2364,12 @@ export interface ActionPayloads {
     startParam?: string;
   } & WithTabId;
   cancelAttachBotInChat: WithTabId | undefined;
+
+  requestBotStartGroup: {
+    bot: ApiUser;
+    startParam?: string;
+  } & WithTabId;
+  cancelBotStartGroup: WithTabId | undefined;
 
   sendWebViewData: {
     bot: ApiUser;

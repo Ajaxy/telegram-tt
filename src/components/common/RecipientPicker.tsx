@@ -16,8 +16,8 @@ import {
 } from '../../global/helpers';
 import { filterPeersByQuery } from '../../global/helpers/peers';
 import {
-  filterChatIdsByType, selectCanAnimateInterface, selectChat, selectChatFullInfo, selectIsMonoforumAdmin,
-  selectTopic, selectUser,
+  filterChatIdsByType, selectCanAnimateInterface, selectCanInviteToChat, selectChat, selectChatFullInfo,
+  selectIsMonoforumAdmin, selectTopic, selectUser,
 } from '../../global/selectors';
 import { selectCurrentLimit } from '../../global/selectors/limits';
 import buildClassName from '../../util/buildClassName';
@@ -53,6 +53,7 @@ export type OwnProps = {
   filter?: readonly ApiChatType[];
   isLowStackPriority?: boolean;
   isForwarding?: boolean;
+  shouldFilterInviteable?: boolean;
   isMultiSelect?: boolean;
   withFolders?: boolean;
   footer?: TeactNode;
@@ -92,6 +93,7 @@ const RecipientPicker = ({
   chatFoldersById,
   orderedFolderIds,
   isForwarding,
+  shouldFilterInviteable,
   isMultiSelect,
   maxFolders,
   withFolders,
@@ -225,6 +227,10 @@ const RecipientPicker = ({
         return false;
       }
 
+      if (shouldFilterInviteable) {
+        return selectCanInviteToChat(global, id);
+      }
+
       const chatFullInfo = selectChatFullInfo(global, id);
       // TODO: Handle bulk check with API call
       return !chatFullInfo || getCanPostInChat(chat, undefined, undefined, chatFullInfo);
@@ -257,6 +263,7 @@ const RecipientPicker = ({
     contactIds,
     filter,
     isForwarding,
+    shouldFilterInviteable,
     orderedChatIds,
     shouldRenderFolders,
   ]);

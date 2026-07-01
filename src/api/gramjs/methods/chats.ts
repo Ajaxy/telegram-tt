@@ -1692,9 +1692,37 @@ export async function addChatMembers(chat: ApiChat, users: ApiUser[]) {
         return invitedUsers.missingInvitees.map(buildApiMissingInvitedUser);
       }),
     );
-    if (addChatUsersResult) {
-      return addChatUsersResult.flat().filter(Boolean);
+    return addChatUsersResult.flat().filter(Boolean);
+  } catch (err: unknown) {
+    const apiError = buildApiError(err as Error);
+    sendApiUpdate({
+      '@type': 'error',
+      error: apiError,
+    });
+  }
+  return undefined;
+}
+
+export async function addBotToChat(chat: ApiChat, bot: ApiUser) {
+  try {
+    if (chat.type === 'chatTypeChannel' || chat.type === 'chatTypeSuperGroup') {
+      const invitedUsers = await invokeRequest(new GramJs.channels.InviteToChannel({
+        channel: buildInputChannel(chat.id, chat.accessHash),
+        users: [buildInputUser(bot.id, bot.accessHash)],
+      }));
+      if (!invitedUsers) return undefined;
+      handleGramJsUpdate(invitedUsers.updates);
+      return invitedUsers.missingInvitees.map(buildApiMissingInvitedUser);
     }
+
+    const invitedUsers = await invokeRequest(new GramJs.messages.AddChatUser({
+      chatId: buildInputChat(chat.id),
+      userId: buildInputUser(bot.id, bot.accessHash),
+      fwdLimit: DEFAULT_PRIMITIVES.INT,
+    }));
+    if (!invitedUsers) return undefined;
+    handleGramJsUpdate(invitedUsers.updates);
+    return invitedUsers.missingInvitees.map(buildApiMissingInvitedUser);
   } catch (err: unknown) {
     const apiError = buildApiError(err as Error);
     sendApiUpdate({

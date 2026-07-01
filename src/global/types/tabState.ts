@@ -636,6 +636,10 @@ export type TabState = {
     filter: ApiChatType[];
     startParam?: string;
   };
+  requestedBotStartGroup?: {
+    bot: ApiUser;
+    startParam?: string;
+  };
 
   emojiStatusAccessModal?: {
     bot: ApiUser;

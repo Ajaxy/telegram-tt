@@ -115,19 +115,22 @@ export async function sendInlineBotResult({
 }
 
 export async function startBot({
-  bot, startParam,
+  bot, peer = bot, startParam,
 }: {
   bot: ApiUser;
+  peer?: ApiPeer;
   startParam?: string;
 }) {
   const randomId = generateRandomBigInt();
 
-  await invokeRequest(new GramJs.messages.StartBot({
+  return invokeRequest(new GramJs.messages.StartBot({
     bot: buildInputUser(bot.id, bot.accessHash),
-    peer: buildInputPeer(bot.id, bot.accessHash),
+    peer: buildInputPeer(peer.id, peer.accessHash),
     randomId,
     startParam: startParam ?? DEFAULT_PRIMITIVES.STRING,
-  }));
+  }), {
+    shouldReturnTrue: true,
+  });
 }
 
 export async function requestWebView({
