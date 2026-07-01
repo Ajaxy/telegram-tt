@@ -63,10 +63,17 @@ type ModalContextType = {
 };
 
 type ModalSlotProps = {
-  noMask?: boolean;
   className?: string;
   children?: TeactNode;
 };
+
+type ModalHeaderProps = {
+  noMask?: boolean;
+} & ModalSlotProps;
+
+type ModalTitleProps = {
+  noAutoFocus?: boolean;
+} & ModalSlotProps;
 
 type ModalCloseButtonProps = {
   asAbsolute?: boolean;
@@ -414,7 +421,7 @@ const Modal = ({
   );
 };
 
-const ModalHeader = ({ noMask, className, children }: ModalSlotProps) => {
+const ModalHeader = ({ noMask, className, children }: ModalHeaderProps) => {
   const modalContext = useModalContext();
 
   return (
@@ -447,7 +454,7 @@ const ModalFooterActions = ({ className, children }: ModalSlotProps) => {
   );
 };
 
-const ModalTitle = ({ className, children }: ModalSlotProps) => {
+const ModalTitle = ({ noAutoFocus, className, children }: ModalTitleProps) => {
   const modalContext = useModalContext();
 
   useLayoutEffect(() => {
@@ -463,6 +470,8 @@ const ModalTitle = ({ className, children }: ModalSlotProps) => {
       id={modalContext?.titleId}
       className={buildClassName(styles.title, className)}
       dir="auto"
+      tabIndex={-1}
+      autoFocus={!noAutoFocus}
     >
       {children}
     </div>
