@@ -2634,7 +2634,7 @@ export interface ActionPayloads {
   setPasscode: { passcode: string } & WithTabId;
   clearPasscode: undefined;
   lockScreen: undefined;
-  unlockScreen: { sessionJson: string; globalJson: string };
+  unlockScreen: { sessionJson: string; globalJson: string; sharedStateJson?: string };
   softSignIn: undefined;
   logInvalidUnlockAttempt: undefined;
   resetInvalidUnlockAttempts: undefined;

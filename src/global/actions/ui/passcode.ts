@@ -9,7 +9,9 @@ import {
 } from '../../../util/passcode';
 import { onBeforeUnload } from '../../../util/schedulers';
 import { clearStoredSession, loadStoredSession, storeSession } from '../../../util/sessions';
-import { forceUpdateCache, migrateCache, serializeGlobal } from '../../cache';
+import {
+  forceUpdateCache, migrateCache, serializeGlobal, serializeShared,
+} from '../../cache';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { INITIAL_GLOBAL_STATE } from '../../initialState';
 import { clearPasscodeSettings, updatePasscodeSettings } from '../../reducers';
@@ -38,9 +40,10 @@ addActionHandler('setPasscode', async (global, actions, payload): Promise<void> 
     error: undefined,
     isLoading: false,
   }));
+  const sharedStateJson = serializeShared(global.sharedState);
 
   try {
-    await encryptSession(sessionJson, globalJson);
+    await encryptSession(sessionJson, globalJson, sharedStateJson);
 
     signalPasscodeHash();
     global = getGlobal();
@@ -78,13 +81,16 @@ addActionHandler('clearPasscode', (global): ActionReturnType => {
 
 addActionHandler('unlockScreen', (global, actions, payload): ActionReturnType => {
   const beforeTabStates = Object.values(global.byTabId);
-  const { sessionJson, globalJson } = payload;
+  const { sessionJson, globalJson, sharedStateJson } = payload;
   const session = JSON.parse(sessionJson);
   storeSession(session);
 
   const previousGlobal = global;
   global = JSON.parse(globalJson);
   global.byTabId = previousGlobal.byTabId;
+  // `serializeGlobal` reseeds `sharedState` from `INITIAL_GLOBAL_STATE`, so restore it separately to avoid
+  // resetting theme and other shared settings. Fall back to the live state for sessions locked before it was persisted
+  global.sharedState = sharedStateJson ? JSON.parse(sharedStateJson) : previousGlobal.sharedState;
   migrateCache(global, cloneDeep(INITIAL_GLOBAL_STATE));
 
   global = updatePasscodeSettings(

@@ -32,7 +32,9 @@ import { forceWebsync } from '../../../util/websync';
 import {
   callApi, callApiLocal, initApi, setShouldEnableDebugLog,
 } from '../../../api/gramjs';
-import { removeGlobalFromCache, removeSharedStateFromCache, serializeGlobal } from '../../cache';
+import {
+  removeGlobalFromCache, removeSharedStateFromCache, serializeGlobal, serializeShared,
+} from '../../cache';
 import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
@@ -300,8 +302,9 @@ addActionHandler('deleteDeviceToken', (global): ActionReturnType => {
 addActionHandler('lockScreen', async (global): Promise<void> => {
   const sessionJson = JSON.stringify({ ...loadStoredSession(), userId: global.currentUserId });
   const globalJson = serializeGlobal(global);
+  const sharedStateJson = serializeShared(global.sharedState);
 
-  await encryptSession(sessionJson, globalJson);
+  await encryptSession(sessionJson, globalJson, sharedStateJson);
   forgetPasscode();
   clearStoredSession();
   updateAppBadge(0);

@@ -19,7 +19,7 @@ export async function setupPasscode(passcode: string) {
   currentPasscodeHash = await sha256(passcode);
 }
 
-export async function encryptSession(sessionJson?: string, globalJson?: string) {
+export async function encryptSession(sessionJson?: string, globalJson?: string, sharedStateJson?: string) {
   if (!currentPasscodeHash) {
     // eslint-disable-next-line no-console
     console.error('[api/passcode] Missing current passcode');
@@ -27,19 +27,17 @@ export async function encryptSession(sessionJson?: string, globalJson?: string) 
   }
 
   await Promise.all([
-    (async () => {
-      if (!sessionJson) return;
-
-      const sessionEncrypted = await aesEncrypt(sessionJson, currentPasscodeHash);
-      await store('sessionEncrypted', sessionEncrypted);
-    })(),
-    (async () => {
-      if (!globalJson) return;
-
-      const globalEncrypted = await aesEncrypt(globalJson, currentPasscodeHash);
-      await store('globalEncrypted', globalEncrypted);
-    })(),
+    storeEncrypted('sessionEncrypted', sessionJson),
+    storeEncrypted('globalEncrypted', globalJson),
+    storeEncrypted('sharedStateEncrypted', sharedStateJson),
   ]);
+}
+
+async function storeEncrypted(key: string, json?: string) {
+  if (!json) return;
+
+  const encrypted = await aesEncrypt(json, currentPasscodeHash!);
+  await store(key, encrypted);
 }
 
 export async function decryptSessionByCurrentHash() {
@@ -77,9 +75,10 @@ export async function decryptSessionByCurrentHash() {
 export async function decryptSession(passcode: string) {
   const passcodeHash = await sha256(passcode);
 
-  const [sessionEncrypted, globalEncrypted] = await Promise.all([
+  const [sessionEncrypted, globalEncrypted, sharedStateEncrypted] = await Promise.all([
     load('sessionEncrypted'),
     load('globalEncrypted'),
+    load('sharedStateEncrypted'),
   ]);
 
   if (!sessionEncrypted || !globalEncrypted) {
@@ -89,14 +88,16 @@ export async function decryptSession(passcode: string) {
   }
 
   try {
-    const [sessionJson, globalJson] = await Promise.all([
+    // `sharedStateEncrypted` may be absent for sessions locked before it was persisted
+    const [sessionJson, globalJson, sharedStateJson] = await Promise.all([
       aesDecrypt(sessionEncrypted, passcodeHash),
       aesDecrypt(globalEncrypted, passcodeHash),
+      sharedStateEncrypted ? aesDecrypt(sharedStateEncrypted, passcodeHash) : undefined,
     ]);
 
     currentPasscodeHash = passcodeHash;
 
-    return { sessionJson, globalJson };
+    return { sessionJson, globalJson, sharedStateJson };
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[api/passcode] Error decrypting session', err);

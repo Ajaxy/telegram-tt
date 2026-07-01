@@ -425,7 +425,7 @@ export function forceUpdateCache(noEncrypt = false) {
   if (hasPasscode) {
     if (!isScreenLocked && !noEncrypt) {
       const serializedGlobal = serializeGlobal(global);
-      void encryptSession(undefined, serializedGlobal);
+      void encryptSession(undefined, serializedGlobal, serializeShared(global.sharedState));
     }
 
     cacheIsScreenLocked(global);
@@ -511,6 +511,10 @@ function reduceSharedState(sharedState: SharedState): SharedState {
 
 export function serializeGlobal<T extends GlobalState>(global: T) {
   return JSON.stringify(reduceGlobal(global));
+}
+
+export function serializeShared(sharedState: SharedState) {
+  return JSON.stringify(reduceSharedState(sharedState));
 }
 
 function reduceStickers<T extends GlobalState>(global: T): GlobalState['stickers'] {
