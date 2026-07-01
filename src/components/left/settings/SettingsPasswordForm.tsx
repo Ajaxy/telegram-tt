@@ -69,6 +69,7 @@ const SettingsPasswordForm: FC<OwnProps> = ({
       <Island>
         <div className="settings-input">
           <PasswordForm
+            shouldShowSubmit
             error={validationError || error}
             hint={hint}
             placeholder={placeholder || lang('CurrentPasswordPlaceholder')}

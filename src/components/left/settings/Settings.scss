@@ -79,6 +79,12 @@
     text-transform: uppercase;
   }
 
+  // `.settings-input > :last-child` zeroes `--input-group-margin` on the wrapping `<form>`,
+  // which cascades into the inner input and collapses the gap before the submit button
+  &.password-form .settings-input .input-group {
+    --input-group-margin: 1.125rem;
+  }
+
   &.infinite-scroll {
     overflow-y: hidden;
     display: flex;
