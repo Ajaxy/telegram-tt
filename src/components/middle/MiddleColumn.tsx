@@ -307,10 +307,13 @@ function MiddleColumn({
   useEffect(() => {
     return chatId
       ? captureEscKeyListener(() => {
+        // Let the Right Column (profile, management, etc.) handle Esc first while it is open
+        if (isRightColumnShown) return false;
         openChat({ id: undefined });
+        return undefined;
       })
       : undefined;
-  }, [chatId, openChat]);
+  }, [chatId, openChat, isRightColumnShown]);
 
   useSyncEffect(() => {
     setDropAreaState(DropAreaState.None);
