@@ -41,8 +41,6 @@
   @include mixins.middle-header-pane;
 
   height: 3rem;
-  padding-right: max(0.25rem, env(safe-area-inset-right));
-  padding-left: max(0.25rem, env(safe-area-inset-left));
 
   .pinnedMessage {
     flex: 1;
@@ -85,7 +83,7 @@
   padding: 0.25rem;
   padding-left: 0.75rem;
   padding-block: 0;
-  border-radius: 1.5rem;
+  border-radius: var(--pane-content-radius);
 
   background-color: var(--color-background);
 

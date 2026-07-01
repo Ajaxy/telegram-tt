@@ -110,17 +110,19 @@
 }
 
 @mixin middle-header-pane {
+  --pane-content-radius: calc(var(--border-radius-pane) - 0.25rem);
+
   position: absolute;
   top: 0;
   transform: translateY(-100%);
 
   width: 100%;
   height: 2.875rem;
-  padding-top: 0.5rem;
-  padding-right: max(0.5rem, env(safe-area-inset-right));
-  padding-bottom: 0.5rem;
-  padding-left: max(0.5rem, env(safe-area-inset-left));
-  border-radius: 2rem;
+  padding-top: 0.25rem;
+  padding-right: max(0.25rem, env(safe-area-inset-right));
+  padding-bottom: 0.25rem;
+  padding-left: max(0.25rem, env(safe-area-inset-left));
+  border-radius: var(--border-radius-pane);
 
   background-color: var(--color-background);
   box-shadow: var(--shadow-pane);

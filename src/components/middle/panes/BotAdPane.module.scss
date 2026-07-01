@@ -28,7 +28,7 @@
 
   padding-block: 0.5rem;
   padding-inline: 0.75rem;
-  border-radius: 1.625rem;
+  border-radius: var(--pane-content-radius);
 
   color: var(--color-text);
 }
