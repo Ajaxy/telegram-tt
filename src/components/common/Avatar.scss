@@ -59,8 +59,22 @@
     width: 100%;
     height: 100%;
     border-radius: var(--radius);
+  }
+
+  > .inner::before {
+    content: "";
+
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+
+    border-radius: var(--radius);
 
     background-image: linear-gradient(var(--color-white) -300%, var(--color-user));
+  }
+
+  &.with-media > .inner::before {
+    inset: 1px;
   }
 
   &__media {
@@ -160,7 +174,7 @@
     --color-user: var(--color-deleted-account);
   }
 
-  &.premium-gradient-bg > .inner {
+  &.premium-gradient-bg > .inner::before {
     background-image: var(--premium-gradient);
   }
 
