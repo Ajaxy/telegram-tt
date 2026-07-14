@@ -151,7 +151,7 @@ function handleAction(name: string, payload?: ActionPayload, options?: ActionOpt
         return;
       }
 
-      setUntypedGlobal(result as GlobalState, options);
+      setUntypedGlobal(result, options);
       deferred.resolve();
     });
   });

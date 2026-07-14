@@ -46,7 +46,6 @@ const JoinRequest: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line @eslint-react/purity
   const fixedDate = (date - getServerTime()) * 1000 + Date.now();
 
-  // eslint-disable-next-line @eslint-react/purity
   const dateString = isToday(new Date(fixedDate))
     ? formatTime(lang, fixedDate) : formatHumanDate(lang, fixedDate, true, false, true);
 

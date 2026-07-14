@@ -73,7 +73,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
     void oldSetLanguage(langCode as LangCode, () => {
       unmarkIsLoading();
 
-      setSharedSettingOption({ language: langCode as LangCode });
+      setSharedSettingOption({ language: langCode });
     });
   });
 

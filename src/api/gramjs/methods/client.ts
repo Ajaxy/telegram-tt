@@ -122,7 +122,7 @@ export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoid
       langCode,
       systemLangCode: navigator.language,
       isTestServerRequested,
-    } as any,
+    },
   );
 
   client.addEventHandler(handleGramJsUpdate, gramJsUpdateEventBuilder);

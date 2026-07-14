@@ -1,4 +1,3 @@
-import type React from '../../../lib/teact/teact';
 import { useCallback, useEffect, useState } from '../../../lib/teact/teact';
 
 import type { ApiChatBannedRights } from '../../../api/types';

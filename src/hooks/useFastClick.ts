@@ -1,5 +1,3 @@
-import type React from '../lib/teact/teact';
-
 import { IS_TOUCH_ENV, MouseButton } from '../util/browser/windowEnvironment';
 import useLastCallback from './useLastCallback';
 

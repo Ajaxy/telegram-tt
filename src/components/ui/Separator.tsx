@@ -1,5 +1,3 @@
-import type React from '../../lib/teact/teact';
-
 import buildClassName from '../../util/buildClassName';
 
 import useOldLang from '../../hooks/useOldLang';

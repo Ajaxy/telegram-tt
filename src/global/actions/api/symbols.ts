@@ -7,7 +7,6 @@ import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 import { BIRTHDAY_NUMBERS_SET, RESTRICTED_EMOJI_SET } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { oldTranslate } from '../../../util/oldLangProvider';
 import * as langProvider from '../../../util/oldLangProvider';
 import { pause, throttle } from '../../../util/schedulers';
 import searchWords from '../../../util/searchWords';
@@ -660,7 +659,7 @@ async function loadStickers<T extends GlobalState>(
     if ((error as ApiError).message === 'STICKERSET_INVALID') {
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         actions.showNotification({
-          message: oldTranslate('StickerPack.ErrorNotFound'),
+          message: langProvider.oldTranslate('StickerPack.ErrorNotFound'),
           tabId,
         });
 

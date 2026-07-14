@@ -299,7 +299,7 @@ function getUpdatedChat<T extends GlobalState>(
   const updatedChat: ApiChat = {
     ...chat,
     ...omit(chatUpdate, omitProps),
-  } as ApiChat;
+  };
 
   if (!updatedChat.id || !updatedChat.type) {
     return undefined;

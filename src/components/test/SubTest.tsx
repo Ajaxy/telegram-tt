@@ -1,4 +1,3 @@
-/* eslint-disable @eslint-react/purity */
 import type { FC } from '../../lib/teact/teact';
 import { useState } from '../../lib/teact/teact';
 

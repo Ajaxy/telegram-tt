@@ -907,7 +907,7 @@ addActionHandler('updateDraftSuggestedPostInfo', (global, actions, payload): Act
   const updatedSuggestedPostInfo = {
     ...currentDraft?.suggestedPostInfo,
     ...update,
-  } as ApiInputSuggestedPostInfo;
+  } satisfies ApiInputSuggestedPostInfo;
 
   const newDraft: ApiDraft = {
     ...currentDraft,

@@ -1,4 +1,3 @@
-import type React from '../../../lib/teact/teact';
 import { memo, useState } from '../../../lib/teact/teact';
 
 import useLastCallback from '../../../hooks/useLastCallback';

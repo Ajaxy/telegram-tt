@@ -94,7 +94,7 @@ export default function useColorPicker({ initialColor }: UseColorPickerOptions) 
     const el = hueSliderRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const { x: clientX } = getPointerPosition(e as React.MouseEvent);
+    const { x: clientX } = getPointerPosition(e);
     const x = clamp(clientX - rect.left, 0, rect.width);
     updateFromHsv(x / rect.width, saturation, brightness);
   });
@@ -103,7 +103,7 @@ export default function useColorPicker({ initialColor }: UseColorPickerOptions) 
     const el = satBrightRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const { x: clientX, y: clientY } = getPointerPosition(e as React.MouseEvent);
+    const { x: clientX, y: clientY } = getPointerPosition(e);
     const x = clamp(clientX - rect.left, 0, rect.width);
     const y = clamp(clientY - rect.top, 0, rect.height);
     updateFromHsv(hue, x / rect.width, 1 - y / rect.height);

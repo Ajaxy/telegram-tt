@@ -1024,7 +1024,7 @@ function handleTrack(e: RTCTrackEvent) {
   const { userId, isPresentation } = ssrc;
   const participant = state.participants?.find((p) => p.id === userId);
 
-  const streamType = (e.track.kind === 'video' ? (isPresentation ? 'presentation' : 'video') : 'audio') as StreamType;
+  const streamType = (e.track.kind === 'video' ? (isPresentation ? 'presentation' : 'video') : 'audio');
 
   e.track.onended = () => {
     logGroupCall('remote track ended', {

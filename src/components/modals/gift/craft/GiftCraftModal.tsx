@@ -434,7 +434,7 @@ const GiftCraftModal = ({ modal, craftAttributePermilles }: OwnProps & StateProp
           .translateSelf(...face.translate)
           .rotateSelf(...face.rotate);
       }
-      faceTransformsRef.current = transforms as Record<FaceName, DOMMatrix>;
+      faceTransformsRef.current = transforms;
     }
   }, []);
 

@@ -88,8 +88,8 @@
 
   .after-wrapper {
     position: absolute;
-    bottom: 0;
     inset-inline-end: calc(var(--radius) * -1);
+    bottom: 0;
 
     width: var(--radius);
     height: var(--radius);
@@ -147,8 +147,8 @@
 
   .after-wrapper {
     position: absolute;
-    top: 0;
     inset-inline-end: calc(var(--radius) * -1);
+    top: 0;
 
     width: var(--radius);
     height: var(--radius);

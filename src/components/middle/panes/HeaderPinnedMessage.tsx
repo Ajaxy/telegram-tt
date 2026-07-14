@@ -1,4 +1,3 @@
-import type React from '../../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 

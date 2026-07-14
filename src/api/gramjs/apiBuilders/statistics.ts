@@ -153,7 +153,7 @@ export function buildStoryPublicForwards(
       storyId: story.id,
       viewsCount: (story as GramJs.StoryItem).views?.viewsCount || 0,
       reactionsCount: (story as GramJs.StoryItem).views?.reactionsCount || 0,
-    } as ApiStoryPublicForward;
+    } satisfies ApiStoryPublicForward;
   });
 }
 

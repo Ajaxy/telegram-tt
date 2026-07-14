@@ -138,10 +138,10 @@ function getUpdatedUser(global: GlobalState, userId: string, userUpdate: Partial
     omitProps.push('usernames');
   }
 
-  const updatedUser = {
+  const updatedUser: ApiUser = {
     ...user,
     ...omit(userUpdate, omitProps),
-  } as ApiUser;
+  };
 
   if (!updatedUser.id || !updatedUser.type) {
     return undefined;

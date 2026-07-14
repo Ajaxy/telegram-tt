@@ -1,5 +1,4 @@
 import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import { memo, useRef } from '../../lib/teact/teact';
 
 import { requestMutation } from '../../lib/fasterdom/fasterdom';

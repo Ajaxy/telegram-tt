@@ -102,8 +102,8 @@
       content: map.get(icons.$icons-map, "quote");
 
       position: absolute;
-      top: 0.25rem;
       inset-inline-end: 0.25rem;
+      top: 0.25rem;
 
       font-size: 0.625rem;
       color: var(--accent-color);

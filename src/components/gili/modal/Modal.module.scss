@@ -252,8 +252,8 @@
   .closeButtonAbsolute {
     position: absolute;
     z-index: 2;
-    top: 0.75rem;
     inset-inline-start: 0.75rem;
+    top: 0.75rem;
   }
 
   @keyframes panelOpen {

@@ -286,7 +286,7 @@ const Main = ({
 
   if (DEBUG && !DEBUG_isLogged) {
     DEBUG_isLogged = true;
-    // eslint-disable-next-line no-console, @eslint-react/purity
+    // eslint-disable-next-line no-console
     console.log('>>> RENDER MAIN');
   }
 

@@ -1,5 +1,4 @@
 import type { ElementRef, FC } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
 import { memo, useEffect, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 

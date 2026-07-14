@@ -507,7 +507,7 @@ const MessageInput = ({
 
       focusEditableElement(input, true, true);
 
-      const newEvent = new KeyboardEvent(e.type, e as any);
+      const newEvent = new KeyboardEvent(e.type, e);
       input.dispatchEvent(newEvent);
     };
 

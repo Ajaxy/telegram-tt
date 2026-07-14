@@ -1069,9 +1069,9 @@ blockquote, .blockquote {
     content: "";
 
     position: absolute;
+    inset-inline-start: 0;
     top: 0;
     bottom: 0;
-    inset-inline-start: 0;
 
     width: 3px;
 
@@ -1084,8 +1084,8 @@ blockquote, .blockquote {
     content: map.get(icons.$icons-map, "quote");
 
     position: absolute;
-    top: 0.25rem;
     inset-inline-end: 0.25rem;
+    top: 0.25rem;
 
     font-size: 0.625rem;
     color: var(--accent-color);

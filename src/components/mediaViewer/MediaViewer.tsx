@@ -1,4 +1,3 @@
-import type React from '../../lib/teact/teact';
 import {
   beginHeavyAnimation,
   memo, useEffect, useLayoutEffect, useMemo, useRef,
@@ -51,8 +50,8 @@ import { disableDirectTextInput, enableDirectTextInput } from '../../util/direct
 import { isUserId } from '../../util/entities/ids';
 import { MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
-import { getMediaViewerItem, type MediaViewerItem, type ViewableMedia } from './helpers/getViewableMedia';
 import selectViewableMedia from './helpers/getViewableMedia';
+import { getMediaViewerItem, type MediaViewerItem, type ViewableMedia } from './helpers/getViewableMedia';
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 
 import useAppLayout from '../../hooks/useAppLayout';

@@ -413,9 +413,8 @@ const MiddleSearch = ({
       });
     }
 
-    // eslint-disable-next-line @eslint-react/web-api/no-leaked-event-listener
     window.addEventListener('touchend', focus);
-    // eslint-disable-next-line @eslint-react/web-api/no-leaked-event-listener
+
     window.addEventListener('mouseup', focus);
 
     window.addEventListener('touchstart', removeListeners);

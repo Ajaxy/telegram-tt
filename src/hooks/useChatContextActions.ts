@@ -154,7 +154,7 @@ const useChatContextActions = ({
     } satisfies MenuItemContextAction : undefined;
 
     if (isSavedDialog) {
-      return compact([actionOpenInNewTab, actionQuickPreview, actionPin, actionDelete]) as MenuItemContextAction[];
+      return compact([actionOpenInNewTab, actionQuickPreview, actionPin, actionDelete]);
     }
 
     const actionAddToFolder = canChangeFolder ? {
@@ -178,7 +178,7 @@ const useChatContextActions = ({
     if (isInSearch) {
       return compact([
         actionOpenInNewTab, actionQuickPreview, actionPin, actionAddToFolder, actionMute,
-      ]) as MenuItemContextAction[];
+      ]);
     }
 
     const actionMarkAsRead = (

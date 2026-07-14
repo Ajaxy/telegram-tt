@@ -1,4 +1,3 @@
-/* eslint-disable @eslint-react/purity */
 /* eslint-disable @eslint-react/no-unnecessary-use-prefix */
 import type { ReactElement } from 'react';
 

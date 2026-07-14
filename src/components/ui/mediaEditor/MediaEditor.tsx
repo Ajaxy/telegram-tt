@@ -159,7 +159,7 @@ const MediaEditor = ({
     if (!canvas) return { x: 0, y: 0 };
 
     const rect = canvas.getBoundingClientRect();
-    const { x: clientX, y: clientY } = getPointerPosition(e as React.MouseEvent);
+    const { x: clientX, y: clientY } = getPointerPosition(e);
 
     return {
       x: clientX - rect.left,
@@ -206,7 +206,7 @@ const MediaEditor = ({
     if (!canvas) return { x: 0, y: 0 };
 
     const rect = canvas.getBoundingClientRect();
-    const { x: clientX, y: clientY } = getPointerPosition(e as React.MouseEvent);
+    const { x: clientX, y: clientY } = getPointerPosition(e);
 
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;

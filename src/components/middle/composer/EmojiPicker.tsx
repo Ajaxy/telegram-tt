@@ -151,7 +151,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
       const exec = () => {
         setCategories(emojiData.categories);
 
-        setEmojis(emojiData.emojis as AllEmojis);
+        setEmojis(emojiData.emojis);
       };
 
       if (emojiData) {

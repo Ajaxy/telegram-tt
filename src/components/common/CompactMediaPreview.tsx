@@ -1,4 +1,3 @@
-import type React from '../../lib/teact/teact';
 import { memo, useRef } from '../../lib/teact/teact';
 
 import type {

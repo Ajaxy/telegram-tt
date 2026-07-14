@@ -1,6 +1,5 @@
 import { type MouseEvent as ReactMouseEvent } from 'react';
 import type { ElementRef } from '../../../lib/teact/teact';
-import type React from '../../../lib/teact/teact';
 import {
   memo,
   useCallback,

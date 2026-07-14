@@ -1,5 +1,4 @@
 import type { ElementRef, TeactNode } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import { useRef } from '../../lib/teact/teact';
 
 import type { IconName } from '../../types/icons';

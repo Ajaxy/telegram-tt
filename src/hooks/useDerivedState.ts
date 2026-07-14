@@ -28,7 +28,7 @@ function useDerivedState<T>(resolverOrSignal: Resolver<T> | T, dependencies?: re
   function runCurrentResolver(isSync = false) {
     const currentResolver = resolverRef.current;
     if (isAsync) {
-      (currentResolver as AsyncResolver<T>)((newValue) => {
+      currentResolver((newValue) => {
         if (valueRef.current !== newValue) {
           valueRef.current = newValue;
           forceUpdate();

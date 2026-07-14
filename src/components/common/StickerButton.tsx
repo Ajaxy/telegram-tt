@@ -1,7 +1,6 @@
 import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 import type {
   ElementRef } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';

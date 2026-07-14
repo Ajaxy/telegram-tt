@@ -1,5 +1,4 @@
 import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import {
   memo, useCallback, useRef, useState,
 } from '../../lib/teact/teact';

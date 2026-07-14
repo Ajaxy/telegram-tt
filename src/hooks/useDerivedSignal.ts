@@ -26,7 +26,7 @@ function useDerivedSignal<T>(resolverOrDependency: Resolver<T> | T, dependencies
   function runCurrentResolver() {
     const currentResolver = resolverRef.current;
     if (isAsync) {
-      (currentResolver as AsyncResolver<T>)(setValue);
+      currentResolver(setValue);
     } else {
       setValue((currentResolver as SyncResolver<T>)());
     }
