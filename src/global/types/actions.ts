@@ -2566,6 +2566,11 @@ export interface ActionPayloads {
   } & WithTabId;
   closeCollectibleInfoModal: WithTabId | undefined;
 
+  openQrCodeModal: {
+    peerId: string;
+  } & WithTabId;
+  closeQrCodeModal: WithTabId | undefined;
+
   // Calls
   joinGroupCall: {
     chatId?: string;

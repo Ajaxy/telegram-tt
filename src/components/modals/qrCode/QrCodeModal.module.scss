@@ -1,0 +1,149 @@
+.root {
+  :global(.modal-dialog) {
+    overflow: hidden;
+    width: 22.5rem;
+    max-width: 90vw;
+    border-radius: 1.25rem;
+  }
+
+  :global(.modal-absolute-close-button .animated-close-icon),
+  :global(.modal-absolute-close-button .animated-close-icon::before),
+  :global(.modal-absolute-close-button .animated-close-icon::after) {
+    background-color: white;
+  }
+}
+
+.content {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.wallpaper {
+  position: relative;
+  z-index: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 5rem 1.5rem 1.5rem;
+}
+
+.card {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+  padding: 4.75rem 1.25rem 1.5rem;
+  border-radius: 1.5rem;
+
+  background-color: white;
+}
+
+.avatar {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  box-shadow: 0 0 0 0.25rem white;
+}
+
+.qrOuter {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+}
+
+.qrContainer {
+  transform: scale(0.86);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  aspect-ratio: 1;
+  width: min(16.25rem, 100%);
+
+  opacity: 0;
+
+  transition:
+    transform 0.28s ease,
+    opacity 0.2s ease;
+}
+
+.qrSvg {
+  width: 100%;
+  height: 100%;
+}
+
+.qrContainerReady {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.qrPlane {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  border-radius: 50%;
+
+  background: linear-gradient(135deg, var(--qr-gradient-from), var(--qr-gradient-to));
+
+  transition: opacity 0.15s ease-in;
+}
+
+.qrPlaneHidden {
+  opacity: 0;
+}
+
+.qrLoading {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.qrLoadingHidden {
+  pointer-events: none;
+  transform: scale(0.88);
+  opacity: 0;
+}
+
+.username {
+  margin-top: 0.75rem;
+
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-semibold);
+  color: transparent;
+  word-break: break-all;
+
+  background: linear-gradient(135deg, var(--qr-gradient-from), var(--qr-gradient-to));
+  background-clip: text;
+
+  -webkit-text-fill-color: transparent;
+}
+
+.copyButton {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin-top: 1.5rem;
+}

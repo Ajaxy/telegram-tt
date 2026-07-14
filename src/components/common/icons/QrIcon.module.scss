@@ -1,0 +1,13 @@
+.root {
+  display: inline-block;
+
+  width: 1.5rem;
+  height: 1.5rem;
+
+  background-color: currentColor;
+
+  mask-image: url("../../../assets/icons/qr.svg");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}

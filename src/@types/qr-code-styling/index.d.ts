@@ -1,3 +1,11 @@
+export type QrCodeGradient = {
+  type: 'linear' | 'radial';
+  rotation?: number;
+  colorStops: Array<{ offset: number; color: string }>;
+};
+
+type QrCodeFileExtension = 'png' | 'svg';
+
 type QrCodeStylingOptions = {
   width?: number;
   height?: number;
@@ -7,9 +15,13 @@ type QrCodeStylingOptions = {
   type?: 'svg' | 'canvas';
   dotsOptions?: {
     type?: string;
+    color?: string;
+    gradient?: QrCodeGradient;
   };
   cornersSquareOptions?: {
     type?: string;
+    color?: string;
+    gradient?: QrCodeGradient;
   };
   imageOptions?: {
     imageSize?: number;
@@ -26,4 +38,6 @@ export default class QrCodeStyling {
   update(options: QrCodeStylingOptions): void;
 
   append(container?: HTMLElement): void;
+
+  getRawData(extension?: QrCodeFileExtension): Promise<Blob | undefined>;
 }

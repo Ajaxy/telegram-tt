@@ -65,6 +65,7 @@ import ListItem from '../../ui/ListItem';
 import CompactMapPreview from '../CompactMapPreview';
 import CustomEmoji from '../CustomEmoji';
 import Icon from '../icons/Icon';
+import QrIcon from '../icons/QrIcon';
 import SafeLink from '../SafeLink';
 import BusinessHours from './BusinessHours';
 import UserBirthday from './UserBirthday';
@@ -145,6 +146,7 @@ const ChatExtra = ({
     toggleUserEmojiStatusPermission,
     toggleUserLocationPermission,
     requestNextManagementScreen,
+    openQrCodeModal,
   } = getActions();
 
   const {
@@ -308,6 +310,12 @@ const ChatExtra = ({
     requestNextManagementScreen({ screen: ManagementScreens.ChannelSubscribers });
   });
 
+  const handleOpenQrCode = useLastCallback((e: React.MouseEvent) => {
+    stopEvent(e);
+    if (!peerId) return;
+    openQrCodeModal({ peerId });
+  });
+
   const handleOpenApp = useLastCallback(() => {
     const botId = user?.id;
     if (!botId) {
@@ -375,7 +383,17 @@ const ChatExtra = ({
         multiline
         narrow
         ripple
-
+        rightElement={(
+          <Button
+            round
+            size="smaller"
+            color="translucent"
+            ariaLabel={lang('QrCodeTitle')}
+            onClick={handleOpenQrCode}
+          >
+            <QrIcon />
+          </Button>
+        )}
         onClick={() => {
           handleUsernameClick(mainUsername, isChat);
         }}

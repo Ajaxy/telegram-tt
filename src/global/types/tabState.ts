@@ -887,6 +887,10 @@ export type TabState = {
     collectible: string;
   };
 
+  qrCodeModal?: {
+    peerId: string;
+  };
+
   starsBalanceModal?: {
     originStarsPayment?: TabState['starsPayment'];
     originGift?: StarGiftInfo;

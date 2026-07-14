@@ -65,6 +65,7 @@ import PollModal from './poll/PollModal.async';
 import PreparedMessageModal from './preparedMessage/PreparedMessageModal.async';
 import PriceConfirmModal from './priceConfirm/PriceConfirmModal.async';
 import ProfileRatingModal from './profileRating/ProfileRatingModal.async';
+import QrCodeModal from './qrCode/QrCodeModal.async';
 import QuickChatPickerModal from './quickChatPicker/QuickChatPickerModal.async';
 import QuickPreviewModal from './quickPreview/QuickPreviewModal.async';
 import EditRankModal from './rank/EditRankModal.async';
@@ -151,6 +152,7 @@ type ModalKey = keyof Pick<TabState,
   'deleteAccountModal' |
   'isAgeVerificationModalOpen' |
   'profileRatingModal' |
+  'qrCodeModal' |
   'quickPreview' |
   'storyStealthModal' |
   'isPasskeyModalOpen' |
@@ -288,6 +290,7 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   deleteAccountModal: DeleteAccountModal,
   isAgeVerificationModalOpen: AgeVerificationModal,
   profileRatingModal: ProfileRatingModal,
+  qrCodeModal: QrCodeModal,
   quickPreview: QuickPreviewModal,
   storyStealthModal: StealthModeModal,
   isPasskeyModalOpen: PasskeyModal,

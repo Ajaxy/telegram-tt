@@ -16,6 +16,7 @@ function useAsync<T>(fn: () => Promise<T>, deps: unknown[], defaultValue?: T) {
   const [result, setResult] = useState<T | undefined>(defaultValue);
   useEffect(() => {
     setIsLoading(true);
+    setError(undefined);
     let wasCancelled = false;
     fn().then((res) => {
       if (wasCancelled) return;

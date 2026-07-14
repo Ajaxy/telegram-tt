@@ -54,6 +54,7 @@ export { default as ReactorListModal } from '../components/middle/ReactorListMod
 export { default as EmojiInteractionAnimation } from '../components/middle/EmojiInteractionAnimation';
 export { default as ChatLanguageModal } from '../components/middle/ChatLanguageModal';
 export { default as CollectibleInfoModal } from '../components/modals/collectible/CollectibleInfoModal';
+export { default as QrCodeModal } from '../components/modals/qrCode/QrCodeModal';
 
 export { default as LeftSearch } from '../components/left/search/LeftSearch';
 export { default as Settings } from '../components/left/settings/Settings';

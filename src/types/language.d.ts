@@ -968,6 +968,9 @@ export interface LangPair {
   'SaveLink': undefined;
   'CreateLink': undefined;
   'LinkCopied': undefined;
+  'QrCodeTitle': undefined;
+  'QrCodeCopy': undefined;
+  'QrCodeCopied': undefined;
   'NoOneJoined': undefined;
   'NoOneJoinedYet': undefined;
   'CopyLink': undefined;

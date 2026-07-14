@@ -93,6 +93,7 @@ type OwnProps = {
   onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => void;
   onContextMenu?: (e: React.MouseEvent) => void;
   onMouseMove?: (e: React.MouseEvent) => void;
+  onLoad?: NoneToVoidFunction;
 };
 
 const Avatar = ({
@@ -123,6 +124,7 @@ const Avatar = ({
   onClick,
   onContextMenu,
   onMouseMove,
+  onLoad,
 }: OwnProps) => {
   const { openStoryViewer } = getActions();
 
@@ -232,6 +234,7 @@ const Avatar = ({
           alt={author}
           decoding="async"
           draggable={false}
+          onLoad={onLoad}
         />
         {shouldPlayVideo && (
           <OptimizedVideo

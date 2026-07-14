@@ -1161,6 +1161,9 @@
 "SaveLink" = "Save Link";
 "CreateLink" = "Create Link";
 "LinkCopied" = "Link copied to clipboard.";
+"QrCodeTitle" = "QR Code";
+"QrCodeCopy" = "Copy QR";
+"QrCodeCopied" = "QR code copied to clipboard.";
 "PeopleJoined_one" = "{count} person joined";
 "PeopleJoined_other" = "{count} people joined";
 "NoOneJoined" = "No one joined";

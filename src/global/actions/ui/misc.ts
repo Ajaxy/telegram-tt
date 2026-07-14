@@ -866,6 +866,17 @@ addActionHandler('closeCollectibleInfoModal', (global, actions, payload): Action
   }, tabId);
 });
 
+addActionHandler('openQrCodeModal', (global, actions, payload): ActionReturnType => {
+  const { peerId, tabId = getCurrentTabId() } = payload;
+  return updateTabState(global, {
+    qrCodeModal: {
+      peerId,
+    },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeQrCodeModal', 'qrCodeModal');
+
 addActionHandler('openBirthdaySetupModal', (global, actions, payload): ActionReturnType => {
   const { currentBirthday, tabId = getCurrentTabId() } = payload || {};
   return updateTabState(global, {
