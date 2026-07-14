@@ -883,6 +883,7 @@ addActionHandler('joinChannel', async (global, actions, payload): Promise<void> 
         queryId: result.queryId,
         peerId: chatId,
         isFullscreen: result.isFullscreen,
+        isSameOrigin: result.isSameOrigin,
         isBroadcast: isChatChannel(chat),
         tabId,
       });
@@ -1889,6 +1890,7 @@ addActionHandler('acceptChatInvite', async (global, actions, payload): Promise<v
       url: result.url,
       queryId: result.queryId,
       isFullscreen: result.isFullscreen,
+      isSameOrigin: result.isSameOrigin,
       isBroadcast,
       tabId,
     });

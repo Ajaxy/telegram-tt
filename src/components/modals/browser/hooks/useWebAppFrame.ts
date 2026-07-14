@@ -60,6 +60,8 @@ const useWebAppFrame = (
   const ignoreEventsRef = useRef<boolean>(false);
   const lastFrameSizeRef = useRef<{ width: number; height: number; isResizing?: boolean }>();
   const windowSize = useWindowSize();
+  const isSameOrigin = webApp?.isSameOrigin;
+  const webAppOrigin = isSameOrigin ? getWebAppOrigin(webApp.url) : undefined;
 
   useEffect(() => {
     if (!ref.current || !isOpen) return undefined;
@@ -76,9 +78,9 @@ const useWebAppFrame = (
   }, [onLoad, ref, isOpen]);
 
   const sendEvent = useCallback((event: WebAppOutboundEvent) => {
-    if (!ref.current?.contentWindow) return;
-    ref.current.contentWindow.postMessage(JSON.stringify(event), '*');
-  }, [ref]);
+    if (!ref.current?.contentWindow || (isSameOrigin && !webAppOrigin)) return;
+    ref.current.contentWindow.postMessage(JSON.stringify(event), webAppOrigin || '*');
+  }, [isSameOrigin, ref, webAppOrigin]);
 
   const sendFullScreenChanged = useCallback((value: boolean) => {
     sendEvent({
@@ -174,7 +176,7 @@ const useWebAppFrame = (
       return;
     }
 
-    if (!isMessageFromIframe(event, ref.current)) {
+    if ((isSameOrigin && !webAppOrigin) || !isMessageFromIframe(event, ref.current, webAppOrigin)) {
       return;
     }
 
@@ -383,7 +385,7 @@ const useWebAppFrame = (
       // Ignore other messages
     }
   }, [
-    isSimpleView, sendEvent, onEvent, sendCustomStyle, webApp,
+    isSimpleView, isSameOrigin, sendEvent, onEvent, sendCustomStyle, webApp, webAppOrigin,
     sendTheme, sendViewport, sendSafeArea, onLoad, windowSize.isResizing,
     ref,
   ]);
@@ -430,5 +432,13 @@ const useWebAppFrame = (
     sendEvent, sendFullScreenChanged, reloadFrame, sendViewport, sendSafeArea, sendTheme,
   };
 };
+
+function getWebAppOrigin(url: string) {
+  try {
+    return new URL(url).origin;
+  } catch (err) {
+    return undefined;
+  }
+}
 
 export default useWebAppFrame;

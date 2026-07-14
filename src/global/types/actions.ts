@@ -2330,6 +2330,7 @@ export interface ActionPayloads {
     queryId?: string;
     peerId?: string;
     isFullscreen?: boolean;
+    isSameOrigin?: true;
     isBroadcast?: boolean;
   } & WithTabId;
   loadPreviewMedias: {

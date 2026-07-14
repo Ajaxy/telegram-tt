@@ -593,7 +593,7 @@ addActionHandler('requestSimpleWebView', async (global, actions, payload): Promi
     return;
   }
 
-  const webViewUrl = await callApi('requestSimpleWebView', {
+  const result = await callApi('requestSimpleWebView', {
     url,
     bot,
     theme,
@@ -601,9 +601,11 @@ addActionHandler('requestSimpleWebView', async (global, actions, payload): Promi
     isFromSideMenu,
     isFromSwitchWebView,
   });
-  if (!webViewUrl) {
+  if (!result) {
     return;
   }
+
+  const { url: webViewUrl, isSameOrigin } = result;
 
   global = getGlobal();
   const newActiveApp: WebApp = {
@@ -612,6 +614,7 @@ addActionHandler('requestSimpleWebView', async (global, actions, payload): Promi
     url: webViewUrl,
     botId,
     buttonText,
+    isSameOrigin,
   };
   global = addBrowserTabToOpenList(global, { type: 'webApp', webApp: newActiveApp }, true, true, tabId);
   setGlobal(global);
@@ -668,7 +671,9 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
     return;
   }
 
-  const { url: webViewUrl, queryId, isFullScreen } = result;
+  const {
+    url: webViewUrl, queryId, isFullScreen, isSameOrigin,
+  } = result;
 
   global = getGlobal();
   const newActiveApp: WebApp = {
@@ -678,6 +683,7 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
     botId,
     peerId,
     queryId,
+    isSameOrigin,
     replyInfo,
     buttonText,
   };
@@ -691,7 +697,7 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
 
 addActionHandler('openChatInviteWebView', (global, actions, payload): ActionReturnType => {
   const {
-    botId, url, queryId, peerId, isFullscreen, isBroadcast,
+    botId, url, queryId, peerId, isFullscreen, isSameOrigin, isBroadcast,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -722,6 +728,7 @@ addActionHandler('openChatInviteWebView', (global, actions, payload): ActionRetu
     botId,
     peerId,
     queryId,
+    isSameOrigin,
     isJoinChat: true,
     isJoinChatBroadcast: isBroadcast,
     buttonText: '',
@@ -829,7 +836,9 @@ addActionHandler('requestMainWebView', async (global, actions, payload): Promise
     return;
   }
 
-  const { url: webViewUrl, queryId, isFullscreen } = result;
+  const {
+    url: webViewUrl, queryId, isFullscreen, isSameOrigin,
+  } = result;
 
   global = getGlobal();
   const newActiveApp: WebApp = {
@@ -838,6 +847,7 @@ addActionHandler('requestMainWebView', async (global, actions, payload): Promise
     botId,
     peerId,
     queryId,
+    isSameOrigin,
     buttonText: '',
   };
   global = addBrowserTabToOpenList(global, { type: 'webApp', webApp: newActiveApp }, true, true, tabId);
@@ -973,7 +983,7 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
 
   const peer = selectCurrentChat(global, tabId);
 
-  const { url, isFullscreen } = await callApi('requestAppWebView', {
+  const result = await callApi('requestAppWebView', {
     peer: peer || bot,
     app: botApp,
     startParam: startApp,
@@ -982,7 +992,9 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
     theme,
   });
 
-  if (!url) return;
+  if (!result) return;
+
+  const { url, isFullscreen, isSameOrigin } = result;
 
   global = getGlobal();
 
@@ -993,6 +1005,7 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
     appName: appName && bot.firstName,
     peerId,
     botId,
+    isSameOrigin,
     buttonText: '',
   };
   global = addBrowserTabToOpenList(global, { type: 'webApp', webApp: newActiveApp }, true, true, tabId);

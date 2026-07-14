@@ -8,6 +8,7 @@ export type WebApp = {
   buttonText: string;
   peerId?: string;
   queryId?: string;
+  isSameOrigin?: true;
   isJoinChat?: boolean;
   isJoinChatBroadcast?: boolean;
   slug?: string;

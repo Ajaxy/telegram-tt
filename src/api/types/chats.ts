@@ -29,6 +29,7 @@ export type ApiChatInviteJoinWebView = {
   url: string;
   queryId?: string;
   isFullscreen: boolean;
+  isSameOrigin?: true;
 };
 
 export interface ApiChat {

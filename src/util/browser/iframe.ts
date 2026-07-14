@@ -10,6 +10,10 @@ export const IFRAME_SANDBOX_ATTRIBUTES = [
 export const EMBED_ALLOW_ATTRIBUTES = 'clipboard-write;';
 export const IFRAME_ALLOW_ATTRIBUTES = 'camera; microphone; geolocation; clipboard-write;';
 
-export function isMessageFromIframe(event: MessageEvent, iframe?: HTMLIFrameElement) {
-  return Boolean(iframe?.contentWindow && event.source === iframe.contentWindow);
+export function isMessageFromIframe(event: MessageEvent, iframe?: HTMLIFrameElement, expectedOrigin?: string) {
+  return Boolean(
+    iframe?.contentWindow
+    && event.source === iframe.contentWindow
+    && (expectedOrigin === undefined || event.origin === expectedOrigin),
+  );
 }

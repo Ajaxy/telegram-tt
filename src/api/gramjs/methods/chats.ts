@@ -1815,6 +1815,7 @@ function buildApiChatInviteWebView(
     url: webview.url,
     queryId: webview.queryId?.toString(),
     isFullscreen: Boolean(webview.fullscreen),
+    isSameOrigin: webview.sameOrigin,
   };
 }
 
