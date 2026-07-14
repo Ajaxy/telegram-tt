@@ -332,7 +332,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       noCloseOnBackdrop={!IS_TOUCH_ENV}
       noCompact
       {...(isAttachmentModal ? menuPositionOptions : {
-        positionX: 'left',
+        positionX: isMessageComposer ? 'right' : 'left',
         positionY: 'bottom',
       })}
     >

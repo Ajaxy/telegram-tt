@@ -77,6 +77,7 @@ type OwnProps = {
   threadId: ThreadId;
   messageListType: MessageListType;
   onClear?: NoneToVoidFunction;
+  onIsOpenChange?: (isOpen: boolean) => void;
 };
 
 const CLOSE_DURATION = 350;
@@ -94,6 +95,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
     shouldForceShowEditing,
     message,
     forwardedMessagesCount,
+    onIsOpenChange,
   } = props;
 
   const {
@@ -144,11 +146,17 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
     if (isShowingSuggestedPost) return true;
     return false;
   })();
+  const isOpen = isShown && !isReplyToTopicStart && !isReplyToDiscussion;
+
+  useEffect(() => {
+    onIsOpenChange?.(isOpen);
+    return () => onIsOpenChange?.(false);
+  }, [isOpen, onIsOpenChange]);
 
   const {
     shouldRender, transitionClassNames, isClosing,
   } = useShowTransitionDeprecated(
-    isShown && !isReplyToTopicStart && !isReplyToDiscussion,
+    isOpen,
     undefined,
     !shouldAnimate,
     undefined,

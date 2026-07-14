@@ -2,35 +2,39 @@
   --accent-color: var(--color-primary);
 
   position: relative;
+
+  flex-basis: 100%;
+
+  min-width: 0;
   height: 0;
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: height 150ms ease-out, opacity 150ms ease-out;
+  margin-bottom: 0;
+  /* stylelint-disable plugin/no-low-performance-animation-properties */
+  transition:
+    height var(--composer-embedded-message-duration) ease-out,
+    margin-bottom var(--composer-embedded-message-duration) ease-out,
+    opacity var(--composer-embedded-message-duration) ease-out;
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
 
   &:global(.open) {
-    height: 3.125rem;
+    height: 2.5rem;
+    margin-bottom: var(--composer-embedded-message-gap);
   }
 
   :global {
     body.no-page-transitions & {
-      transition: opacity 150ms ease-out;
+      transition: opacity var(--composer-embedded-message-duration) ease-out;
     }
 
     .select-mode-active + .middle-column-footer & {
       display: none;
-    }
-
-    .ComposerEmbeddedMessage + & {
-      body.no-message-composer-animations & {
-        transition: opacity 150ms ease-out;
-      }
     }
   }
 }
 
 .inner {
   display: flex;
+  gap: var(--composer-row-gap);
   align-items: center;
-  padding-top: 0.5rem;
 }
 
 .contextMenu {
@@ -47,16 +51,13 @@
 
   width: auto !important;
   height: 1.5rem;
-  margin: 0.5625rem 0.6875rem 0.5625rem 0.75rem;
-  padding: 0;
+  margin: 0;
+  padding-block: 0;
+  padding-inline: var(--composer-icon-button-padding);
 
   color: var(--accent-color);
 
   background: none !important;
-
-  @media (max-width: 600px) {
-    margin: 0.5625rem 0.75rem 0.5625rem 0.5rem;
-  }
 }
 
 .left-icon {
@@ -64,17 +65,12 @@
   flex-shrink: 0;
   place-content: center;
 
-  height: 2.625rem;
-  padding: 0.5625rem 0.75rem 0.5625rem 1rem;
+  padding: var(--composer-icon-button-padding);
 
   font-size: 1.5rem;
   color: var(--accent-color);
 
   background: none !important;
-
-  @media (max-width: 600px) {
-    width: 2.875rem;
-  }
 }
 
 .preview {
@@ -82,9 +78,9 @@
   display: flex;
   flex-grow: 1;
 
-  max-width: calc(100% - 3.375rem);
-  padding-block: 0.1875rem;
+  padding-block: 0.125rem;
   padding-inline: 0.5rem 0.375rem;
+  border-radius: var(--composer-embed-radius);
 }
 
 .previewText {

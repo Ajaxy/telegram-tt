@@ -64,7 +64,7 @@ import { isUserId } from '../../util/entities/ids';
 import { resolveTransitionName } from '../../util/resolveTransitionName';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 import getHasMiddleFooter from './helpers/getHasMiddleFooter';
-import { syncMessageListBottomReserve } from './helpers/messageListReserves';
+import { measureFooterContentHeight, syncMessageListBottomReserve } from './helpers/messageListReserves';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useDebouncedCallback from '../../hooks/useDebouncedCallback';
@@ -93,7 +93,7 @@ import EmojiInteractionAnimation from './EmojiInteractionAnimation.async';
 import FloatingActionButtons from './FloatingActionButtons';
 import FrozenAccountPlaceholder from './FrozenAccountPlaceholder';
 import MessageList from './MessageList';
-import MessageSelectToolbar from './MessageSelectToolbar.async';
+import MessageSelectToolbar from './MessageSelectToolbar';
 import MiddleHeader from './MiddleHeader';
 import MiddleHeaderPanes from './MiddleHeaderPanes';
 import PremiumRequiredPlaceholder from './PremiumRequiredPlaceholder';
@@ -299,6 +299,11 @@ function MiddleColumn({
 
   const syncFooterSlide = useLastCallback((footer: HTMLElement) => {
     if (!footer.offsetParent) return;
+
+    const contentHeight = measureFooterContentHeight(footer);
+    requestMutation(() => {
+      footer.style.setProperty('--middle-footer-content-height', `${contentHeight}px`);
+    });
 
     const scroller = footer.parentElement?.querySelector<HTMLElement>('.MessageList');
     if (scroller) syncMessageListBottomReserve(scroller, getIsKeyboardAnimating());
@@ -628,8 +633,6 @@ function MiddleColumn({
               <div className={footerClassName}>
                 <FloatingActionButtons
                   withScrollDown={renderingIsScrollDownShown}
-                  canPost={renderingCanPost}
-                  withExtraShift={withExtraShift}
                 />
                 {renderingCanPost && (
                   <Composer

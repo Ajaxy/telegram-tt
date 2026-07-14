@@ -1,25 +1,23 @@
 import { useEffect, useRef, useState } from '../../../../lib/teact/teact';
+import { getActions } from '../../../../global';
 
-import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import { IS_SAFARI, IS_VOICE_RECORDING_SUPPORTED } from '../../../../util/browser/windowEnvironment';
+import { createCallbackManager } from '../../../../util/callbacks';
 import captureEscKeyListener from '../../../../util/captureEscKeyListener';
 import * as voiceRecording from '../../../../util/voiceRecording';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 
-type ActiveVoiceRecording =
-  { stop: () => Promise<voiceRecording.Result>; pause: NoneToVoidFunction }
-  | undefined;
+type PeakListener = (peak: number) => void;
 
 const useVoiceRecording = () => {
   const recordButtonRef = useRef<HTMLButtonElement>();
-  const [activeVoiceRecording, setActiveVoiceRecording] = useState<ActiveVoiceRecording>();
-  const startRecordTimeRef = useRef<number>();
-  const [currentRecordTime, setCurrentRecordTime] = useState<number | undefined>();
+  const [activeVoiceRecording, setActiveVoiceRecording] = useState<voiceRecording.ActiveRecording | undefined>();
+  const [isRecordingPaused, setIsRecordingPaused] = useState(false);
   const [isViewOnceEnabled, setIsViewOnceEnabled] = useState(false);
+  const peakCallbacks = useRef(createCallbackManager<PeakListener>()).current;
 
   useEffect(() => {
-    // Preloading worker fixes silent first record on iOS
     if (IS_SAFARI && IS_VOICE_RECORDING_SUPPORTED) {
       void voiceRecording.init();
     }
@@ -27,64 +25,53 @@ const useVoiceRecording = () => {
 
   const startRecordingVoice = useLastCallback(async () => {
     try {
-      const { stop, pause } = await voiceRecording.start((tickVolume: number) => {
-        if (recordButtonRef.current) {
-          if (startRecordTimeRef.current && Date.now() % 4 === 0) {
-            requestMutation(() => {
-              if (!recordButtonRef.current) return;
-              recordButtonRef.current.style.boxShadow = `0 0 0 ${(tickVolume || 0) * 50}px rgba(0,0,0,.15)`;
-            });
-          }
-          setCurrentRecordTime(Date.now());
-        }
-      });
-      startRecordTimeRef.current = Date.now();
-      setCurrentRecordTime(Date.now());
+      const recording = await voiceRecording.start(peakCallbacks.runCallbacks);
 
-      setActiveVoiceRecording({ stop, pause });
+      setIsRecordingPaused(false);
+      setActiveVoiceRecording(recording);
     } catch (err) {
+      if (err instanceof DOMException && (err.name === 'NotAllowedError' || err.name === 'NotFoundError')) {
+        getActions().showNotification({ message: { key: 'VoiceRecordMicError' } });
+        return;
+      }
       // eslint-disable-next-line no-console
       console.error(err);
     }
   });
 
-  const pauseRecordingVoice = useLastCallback(() => {
-    if (!activeVoiceRecording) {
-      return undefined;
-    }
-
-    requestMutation(() => {
-      if (recordButtonRef.current) {
-        recordButtonRef.current.style.boxShadow = 'none';
-      }
-    });
+  const pauseRecordingVoice = useLastCallback(async () => {
+    if (!activeVoiceRecording) return;
 
     try {
-      return activeVoiceRecording.pause();
+      await activeVoiceRecording.pause();
+      setIsRecordingPaused(true);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
-      return undefined;
     }
   });
 
-  const stopRecordingVoice = useLastCallback(() => {
+  const resumeRecordingVoice = useLastCallback(() => {
+    if (!activeVoiceRecording) return;
+
+    activeVoiceRecording.resume();
+    setIsRecordingPaused(false);
+  });
+
+  const stopRecordingVoice = useLastCallback((shouldSkipMinTime?: boolean) => {
     if (!activeVoiceRecording) {
       return undefined;
     }
 
     setActiveVoiceRecording(undefined);
-    startRecordTimeRef.current = undefined;
-    setCurrentRecordTime(undefined);
-
-    requestMutation(() => {
-      if (recordButtonRef.current) {
-        recordButtonRef.current.style.boxShadow = 'none';
-      }
-    });
+    setIsRecordingPaused(false);
 
     try {
-      return activeVoiceRecording.stop();
+      return activeVoiceRecording.stop(shouldSkipMinTime).catch((err): undefined => {
+        // eslint-disable-next-line no-console
+        console.error(err);
+        return undefined;
+      });
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
@@ -92,25 +79,35 @@ const useVoiceRecording = () => {
     }
   });
 
-  useEffect(() => {
-    return activeVoiceRecording ? captureEscKeyListener(stopRecordingVoice) : undefined;
-  }, [activeVoiceRecording, stopRecordingVoice]);
+  const cancelRecordingVoice = useLastCallback(() => {
+    void stopRecordingVoice(true);
+  });
 
-  const toogleViewOnceEnabled = useLastCallback(() => {
+  const toggleViewOnceEnabled = useLastCallback(() => {
     setIsViewOnceEnabled(!isViewOnceEnabled);
   });
+
+  const subscribeToRecordingPeaks = useLastCallback((listener: PeakListener) => {
+    return peakCallbacks.addCallback(listener);
+  });
+
+  useEffect(() => {
+    return activeVoiceRecording ? captureEscKeyListener(cancelRecordingVoice) : undefined;
+  }, [activeVoiceRecording, cancelRecordingVoice]);
 
   return {
     startRecordingVoice,
     pauseRecordingVoice,
+    resumeRecordingVoice,
     stopRecordingVoice,
+    cancelRecordingVoice,
+    toggleViewOnceEnabled,
+    subscribeToRecordingPeaks,
     activeVoiceRecording,
-    currentRecordTime,
+    isRecordingPaused,
     recordButtonRef,
-    startRecordTimeRef,
     isViewOnceEnabled,
     setIsViewOnceEnabled,
-    toogleViewOnceEnabled,
   };
 };
 

@@ -71,15 +71,22 @@
     }
 
     > .Button {
-      transform: scale(1);
-      opacity: 1;
-      /* stylelint-disable plugin/no-low-performance-animation-properties */
-      transition:
+      --composer-button-transition:
         border-radius 0.15s,
         opacity var(--select-transition),
         transform var(--select-transition),
         background-color 0.15s,
         color 0.15s;
+
+      transform: scale(1);
+      opacity: 1;
+      transition: var(--composer-button-transition);
+
+      // The paid "Send Stars" pill animates its width (see `main-button.paid` in `Composer.scss`)
+      &.main-button {
+        /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+        transition: var(--composer-button-transition), width 0.25s ease-out;
+      }
 
       body.no-message-composer-animations & {
         transition: none !important;
@@ -121,6 +128,33 @@
     }
   }
 
+  .Composer.is-chat-composer {
+    transform: scaleX(1) translateX(0);
+    transition: transform var(--select-transition), opacity var(--select-transition);
+
+    body.no-message-composer-animations & {
+      transition: none !important;
+    }
+
+    .composer-wrapper {
+      transform: none;
+      transition: none;
+    }
+
+    &:not(.shown) {
+      transform: none;
+      opacity: 0;
+
+      .composer-wrapper {
+        transform: none;
+      }
+
+      > .Button {
+        transform: none;
+      }
+    }
+  }
+
   .messaging-disabled {
     transform: scaleX(1);
     transition: transform var(--select-transition);
@@ -149,8 +183,8 @@
 
     &-inner {
       width: 100%;
-      padding: 1rem;
-      border-radius: var(--border-radius-messages);
+      padding: 0.75rem;
+      border-radius: 2.5rem;
 
       color: var(--color-text-secondary);
       text-align: center;
@@ -161,7 +195,7 @@
   }
 
   .middle-column-footer {
-    --base-height: 3rem;
+    --base-height: var(--composer-height);
 
     position: absolute;
     z-index: var(--z-middle-footer);
@@ -224,17 +258,15 @@
 
 /* Common styles for message list fade-out shadow */
 .Composer,
-.MessageSelectToolbar,
 .messaging-disabled {
-  margin-bottom: 1.25rem;
+  margin-bottom: var(--composer-bottom-gap);
 
   @media (max-width: 600px) {
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--composer-bottom-gap-mobile);
   }
 }
 
 .Composer,
-.MessageSelectToolbar,
 .composer-button,
 .messaging-disabled {
   position: relative;
@@ -243,7 +275,13 @@
   width: 100%;
 }
 
-.MessageSelectToolbar-inner,
+.MessageSelectToolbar-inner {
+  .mask-image-disabled & {
+    border-radius: var(--composer-pill-radius);
+    box-shadow: var(--shadow-footer);
+  }
+}
+
 .composer-button {
   .mask-image-disabled & {
     border-radius: var(--border-radius-messages);
@@ -259,40 +297,47 @@
 
 .middle-column-footer-button-container {
   position: absolute;
+  right: 1rem;
+  left: 1rem;
 
   display: flex;
   justify-content: center;
 
-  width: 100%;
-  padding-bottom: 1.25rem;
+  padding-bottom: var(--composer-bottom-gap);
 
   .unpin-all-button {
-    --button-text-color: var(--color-primary);
-
     .icon-unpin {
       margin-inline-start: -0.4375rem;
       margin-inline-end: 0.75rem;
 
       font-size: 1.5rem;
-      color: var(--color-text-secondary);
+      color: var(--color-text);
 
       transition: color 0.15s;
     }
   }
 
+  .unpin-all-button,
+  .open-chat-button {
+    --button-text-color: var(--color-text);
+    --button-active-text-color: var(--color-text);
+    --button-active-background-color: var(--color-chat-hover);
+  }
+
   .composer-button {
     transform: scaleX(1);
+
     height: var(--base-height);
+    border-radius: var(--composer-pill-radius);
+
+    font-weight: var(--font-weight-semibold);
+
     transition: transform var(--select-transition), background-color 0.15s, color 0.15s;
 
     .select-mode-active + .middle-column-footer & {
       transform: scaleX(var(--unpin-hidden-scale));
       box-shadow: none;
     }
-  }
-
-  .open-chat-button {
-    --button-text-color: var(--color-primary);
   }
 
   .mask-image-disabled &::before {

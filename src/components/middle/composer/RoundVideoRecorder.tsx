@@ -1,17 +1,24 @@
+import type { ElementRef } from '../../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 
 import { MAX_ROUND_VIDEO_RECORDING_DURATION } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
+import safePlay from '../../../util/safePlay';
 
+import Skeleton from '../../ui/placeholder/Skeleton';
 import Portal from '../../ui/Portal';
 
 import styles from './RoundVideoRecorder.module.scss';
 
 type OwnProps = {
-  previewStream: MediaStream;
-  getProgress: () => number;
+  ref?: ElementRef<HTMLDivElement>;
+  previewStream?: MediaStream;
+  isReady?: boolean;
+  isPaused?: boolean;
   isFrozen?: boolean;
+  getProgress: () => number;
+  getPlaybackEl?: () => HTMLVideoElement | undefined;
 };
 
 const SIZE = 240;
@@ -25,21 +32,26 @@ const POSTER_CAPTURE_PROGRESS = MAX_ROUND_VIDEO_RECORDING_DURATION > POSTER_CAPT
   ? (MAX_ROUND_VIDEO_RECORDING_DURATION - POSTER_CAPTURE_LEAD_MS) / MAX_ROUND_VIDEO_RECORDING_DURATION
   : 0.5;
 
-const RoundVideoRecorder = ({ previewStream, getProgress, isFrozen }: OwnProps) => {
+const RoundVideoRecorder = ({
+  ref, previewStream, isReady, isPaused, isFrozen, getProgress, getPlaybackEl,
+}: OwnProps) => {
   const videoRef = useRef<HTMLVideoElement>();
   const posterRef = useRef<HTMLCanvasElement>();
   const circleRef = useRef<SVGCircleElement>();
+  const playbackLayerRef = useRef<HTMLDivElement>();
+  const appendedPlaybackElRef = useRef<HTMLVideoElement>();
   const hasPosterRef = useRef(false);
+  const lastDashOffsetRef = useRef<number>();
 
   useEffect(() => {
     const videoEl = videoRef.current;
-    if (!videoEl) return undefined;
+    if (!videoEl || !previewStream) return undefined;
 
     hasPosterRef.current = false;
     videoEl.srcObject = previewStream;
     videoEl.muted = true;
     videoEl.playsInline = true;
-    void videoEl.play();
+    safePlay(videoEl);
 
     return () => {
       videoEl.pause();
@@ -47,6 +59,17 @@ const RoundVideoRecorder = ({ previewStream, getProgress, isFrozen }: OwnProps) 
       videoEl.srcObject = null;
     };
   }, [previewStream]);
+
+  useEffect(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl || isFrozen) return;
+
+    if (isPaused) {
+      videoEl.pause();
+    } else {
+      safePlay(videoEl);
+    }
+  }, [isPaused, isFrozen]);
 
   useEffect(() => {
     let rafId: number | undefined;
@@ -68,12 +91,28 @@ const RoundVideoRecorder = ({ previewStream, getProgress, isFrozen }: OwnProps) 
         }
       }
 
+      const playbackEl = getPlaybackEl?.();
+      if (playbackEl !== appendedPlaybackElRef.current) {
+        const previousEl = appendedPlaybackElRef.current;
+        appendedPlaybackElRef.current = playbackEl;
+        requestMutation(() => {
+          previousEl?.remove();
+          if (playbackEl && playbackLayerRef.current) {
+            playbackEl.classList.add(styles.playbackVideo);
+            playbackLayerRef.current.appendChild(playbackEl);
+          }
+        });
+      }
+
       const circle = circleRef.current;
       if (circle) {
         const offset = CIRCUMFERENCE * (1 - progress);
-        requestMutation(() => {
-          circle.style.strokeDashoffset = String(offset);
-        });
+        if (offset !== lastDashOffsetRef.current) {
+          lastDashOffsetRef.current = offset;
+          requestMutation(() => {
+            circle.style.strokeDashoffset = String(offset);
+          });
+        }
       }
 
       rafId = requestAnimationFrame(updateProgress);
@@ -83,12 +122,14 @@ const RoundVideoRecorder = ({ previewStream, getProgress, isFrozen }: OwnProps) 
 
     return () => {
       if (rafId !== undefined) cancelAnimationFrame(rafId);
+      appendedPlaybackElRef.current?.remove();
+      appendedPlaybackElRef.current = undefined;
     };
-  }, [getProgress]);
+  }, [getProgress, getPlaybackEl]);
 
   return (
     <Portal>
-      <div className={styles.root}>
+      <div ref={ref} className={buildClassName(styles.root, !isReady && styles.preparing)}>
         <canvas
           ref={posterRef}
           className={buildClassName(styles.video, !isFrozen && styles.hidden)}
@@ -97,6 +138,10 @@ const RoundVideoRecorder = ({ previewStream, getProgress, isFrozen }: OwnProps) 
           ref={videoRef}
           className={buildClassName(styles.video, isFrozen && styles.hidden)}
         />
+        <div ref={playbackLayerRef} className={styles.playbackLayer} />
+        <div className={buildClassName(styles.waitingMask, isReady && styles.waitingMaskHidden)}>
+          <Skeleton variant="round" animation="wave" className={styles.waitingSkeleton} />
+        </div>
         <svg className={styles.progress} viewBox={`0 0 ${SIZE} ${SIZE}`}>
           <circle
             ref={circleRef}

@@ -560,7 +560,7 @@ const MessageInput = ({
   return (
     <div id={id} onClick={shouldSuppressFocus ? onSuppressedFocus : undefined} dir={lang.isRtl ? 'rtl' : undefined}>
       <div
-        className={buildClassName('custom-scroll', SCROLLER_CLASS, isNeedPremium && 'is-need-premium')}
+        className={buildClassName('no-scrollbar', SCROLLER_CLASS, isNeedPremium && 'is-need-premium')}
         onScroll={onScroll}
         onClick={!isAttachmentModalInput && !canSendPlainText ? handleClick : undefined}
       >
@@ -610,7 +610,7 @@ const MessageInput = ({
       </div>
       <div
         ref={scrollerCloneRef}
-        className={buildClassName('custom-scroll',
+        className={buildClassName('no-scrollbar',
           SCROLLER_CLASS,
           'clone',
           isNeedPremium && 'is-need-premium')}

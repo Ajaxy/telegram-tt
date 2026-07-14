@@ -1093,7 +1093,9 @@ async function uploadMedia(message: ApiMessage, attachment: ApiAttachment, onPro
 
     if (voice) {
       const { duration, waveform } = voice;
-      const { data: inputWaveform } = interpolateArray(waveform, INPUT_WAVEFORM_LENGTH);
+      const inputWaveform = waveform.length === INPUT_WAVEFORM_LENGTH
+        ? waveform
+        : interpolateArray(waveform, INPUT_WAVEFORM_LENGTH).data;
       attributes.push(new GramJs.DocumentAttributeAudio({
         voice: true,
         duration,

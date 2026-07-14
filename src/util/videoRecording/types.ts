@@ -7,12 +7,29 @@ export type Result = {
 };
 
 export type ActiveVideoRecording = {
+  previewStream: MediaStream;
   stop: () => Promise<Result>;
   cancel: () => void;
-  previewStream: MediaStream;
+  pause: () => Promise<void>;
+  resume: () => void;
+  whenReady: Promise<void>;
+  getElapsedMs: () => number;
+  getProfilePeaks: () => number[];
+  getPlaybackMedia?: () => Promise<HTMLVideoElement>;
+  getPlaybackEl: () => HTMLVideoElement | undefined;
+  destroyPlayback: () => void;
 };
 
 export type VideoRecorderEngine = {
   finalize: () => Promise<Blob>;
   cancel: () => void;
+  pause: () => void;
+  resume: () => void;
+};
+
+export type SnapshotRecorder = {
+  flushAndPause: () => Promise<void>;
+  resume: () => void;
+  finish: () => void;
+  getBlob: () => Blob;
 };

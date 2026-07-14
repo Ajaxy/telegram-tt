@@ -16,11 +16,8 @@ export default function calculateMiddleFooterTransforms(windowWidth: number, can
     ? REM
     : 2 * REM;
   const messageListWidth = getMessageListWidth(windowWidth);
-  const sendButtonWidth = 3 * REM;
 
-  const composerWidth = canPost
-    ? messageListWidth - sidePadding - sendButtonWidth
-    : messageListWidth - sidePadding;
+  const composerWidth = messageListWidth - sidePadding;
   const toolbarWidth = windowWidth > MOBILE_SCREEN_MAX_WIDTH
     ? Math.min(messageListWidth - sidePadding, MAX_TOOLBAR_WIDTH)
     : messageListWidth - sidePadding;
@@ -30,13 +27,8 @@ export default function calculateMiddleFooterTransforms(windowWidth: number, can
   const unpinHiddenScale = toolbarWidth / UNPIN_BUTTON_WIDTH;
   const toolbarForUnpinHiddenScale = UNPIN_BUTTON_WIDTH / toolbarWidth;
 
-  const composerTranslateX = canPost
-    ? (sendButtonWidth / 2) * toolbarHiddenScale
-    : 0;
-
-  const toolbarTranslateX = canPost
-    ? (sendButtonWidth / 2) * -1 * composerHiddenScale
-    : 0;
+  const composerTranslateX = 0;
+  const toolbarTranslateX = 0;
 
   return {
     composerHiddenScale,

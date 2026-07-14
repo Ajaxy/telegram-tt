@@ -21,13 +21,13 @@ import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
 import useFlag from '../../hooks/useFlag';
+import useFrozenProps from '../../hooks/useFrozenProps';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useCopySelectedMessages from './hooks/useCopySelectedMessages';
 
 import Icon from '../common/icons/Icon';
-import Button from '../ui/Button';
 import Checkbox from '../ui/Checkbox';
 import ConfirmDialog from '../ui/ConfirmDialog';
 
@@ -147,6 +147,16 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 
   const formattedMessagesCount = lang('VoiceOver.Chat.MessagesSelected', renderingSelectedMessagesCount, 'i');
 
+  const rendering = useFrozenProps({
+    selectedMessagesCount,
+    canDeleteMessages,
+    canReportMessages,
+    canDownloadMessages,
+    canForwardMessages,
+    hasProtectedMessage,
+    messageListType,
+  }, !isActive);
+
   const openMessageReport = useLastCallback(() => {
     if (!selectedMessageIds || !chat) return;
     reportMessages({
@@ -187,35 +197,28 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
     <>
       <div className={className}>
         <div className="MessageSelectToolbar-inner">
-          <Button
-            color="translucent"
-            round
-            onClick={handleExitMessageSelectMode}
-            ariaLabel="Exit select mode"
-            iconName="close"
-          />
+          {Boolean(rendering.selectedMessagesCount) && rendering.canDeleteMessages && (
+            renderButton('delete', lang('EditAdminGroupDeleteMessages'), handleDelete, true)
+          )}
           <span className="MessageSelectToolbar-count" title={formattedMessagesCount}>
             {formattedMessagesCount}
           </span>
 
-          {Boolean(selectedMessagesCount) && (
+          {Boolean(rendering.selectedMessagesCount) && (
             <div className="MessageSelectToolbar-actions">
-              {messageListType !== 'scheduled' && canForwardMessages && (
+              {rendering.canReportMessages && (
+                renderButton('flag', lang('Conversation.ReportMessages'), openMessageReport)
+              )}
+              {rendering.canDownloadMessages && !rendering.hasProtectedMessage && (
+                renderButton('download', lang('lng_media_download'), handleMessageDownload)
+              )}
+              {!rendering.hasProtectedMessage && (
+                renderButton('copy', lang('lng_context_copy_selected_items'), handleCopy)
+              )}
+              {rendering.messageListType !== 'scheduled' && rendering.canForwardMessages && (
                 renderButton(
                   'forward', lang('Chat.ForwardActionHeader'), openForwardMenuForSelectedMessages,
                 )
-              )}
-              {canReportMessages && (
-                renderButton('flag', lang('Conversation.ReportMessages'), openMessageReport)
-              )}
-              {canDownloadMessages && !hasProtectedMessage && (
-                renderButton('download', lang('lng_media_download'), handleMessageDownload)
-              )}
-              {!hasProtectedMessage && (
-                renderButton('copy', lang('lng_context_copy_selected_items'), handleCopy)
-              )}
-              {canDeleteMessages && (
-                renderButton('delete', lang('EditAdminGroupDeleteMessages'), handleDelete, true)
               )}
             </div>
           )}

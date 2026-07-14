@@ -1,5 +1,6 @@
 .root {
-  --base-bottom-pos: 5.3125rem;
+  --footer-content-height: var(--middle-footer-content-height, var(--composer-min-bottom-reserve));
+  --base-bottom-pos: calc(var(--footer-content-height) + var(--composer-top-gap));
   --translate-y: 4.5rem;
   --unread-count-button-offset: 3.5rem;
 
@@ -29,10 +30,6 @@
     .unread {
       pointer-events: auto;
     }
-
-    &.no-composer.no-extra-shift {
-      --translate-y: 4rem;
-    }
   }
 
   &.hide-scroll-down {
@@ -46,11 +43,6 @@
 
   @media (max-width: 600px) {
     right: 0.5rem;
-    bottom: 4.5rem;
-
-    :global(body:not(.keyboard-visible)) & {
-      bottom: calc(4.5rem + env(safe-area-inset-bottom));
-    }
   }
 
   @media (max-width: 600px) {

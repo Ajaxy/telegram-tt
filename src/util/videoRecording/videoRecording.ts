@@ -1,7 +1,9 @@
 import type { ActiveVideoRecording, Result, VideoRecorderEngine } from './types';
 
 import { ROUND_VIDEO_RECORDING_SIZE } from '../../config';
-import { recordWithMediaRecorder } from './mediaRecorderEngine';
+import { createTimekeeper } from '../voiceRecording';
+import WaveformAnalyser from '../voiceRecording/waveformAnalyser';
+import { createSnapshotRecorder, recordWithMediaRecorder } from './mediaRecorderEngine';
 
 export type { ActiveVideoRecording, Result } from './types';
 
@@ -16,12 +18,18 @@ const VIDEO_CONSTRAINTS: MediaTrackConstraints = {
 const SAMPLE_SIZE = 16;
 const MIN_VISIBLE_LUMINANCE = 10;
 const MIN_FRAME_CHANGE = 1;
+const EXPOSURE_SETTLE_MAX_DELTA = 1;
+const EXPOSURE_SETTLE_FRAMES = 4;
+const EXPOSURE_SETTLE_TIMEOUT_MS = 1500;
 const VISIBLE_FRAME_TIMEOUT_MS = 1500;
 const CANVAS_RADIUS = ROUND_VIDEO_RECORDING_SIZE / 2;
 const CIRCLE_RADIUS = CANVAS_RADIUS + 1;
 const BACKGROUND_BLUR_PX = 14;
 const BACKGROUND_OVERSCAN = 24;
 const BACKGROUND_DIM_ALPHA = 0.1;
+
+const PEAK_TAP_BUFFER_SIZE = 2048;
+const PLAYBACK_DURATION_TIMEOUT_MS = 2000;
 
 const WATERMARK_TEXT = 'TELEGRAM';
 const WATERMARK_ALPHA = 0.9;
@@ -36,7 +44,10 @@ const WATERMARK_PLANE_SIZE = 28;
 const WATERMARK_PLANE_CENTER_X = ROUND_VIDEO_RECORDING_SIZE * 0.1;
 const WATERMARK_PLANE_CENTER_Y = ROUND_VIDEO_RECORDING_SIZE * 0.9;
 
-export async function start(onTick: (elapsedMs: number) => void): Promise<ActiveVideoRecording> {
+export async function start(
+  onTick: (elapsedMs: number) => void,
+  onPeak: (peak: number) => void,
+): Promise<ActiveVideoRecording> {
   const previewStream = await navigator.mediaDevices.getUserMedia({
     video: VIDEO_CONSTRAINTS,
     audio: true,
@@ -44,7 +55,8 @@ export async function start(onTick: (elapsedMs: number) => void): Promise<Active
 
   let rafId: number | undefined;
   let isStopped = false;
-  let startedAt = 0;
+  let audioContext: AudioContext | undefined;
+  let releaseAudioTap: NoneToVoidFunction | undefined;
 
   const videoEl = document.createElement('video');
   videoEl.srcObject = previewStream;
@@ -62,6 +74,8 @@ export async function start(onTick: (elapsedMs: number) => void): Promise<Active
   const release = () => {
     isStopped = true;
     if (rafId !== undefined) cancelAnimationFrame(rafId);
+    releaseAudioTap?.();
+    void audioContext?.close().catch(() => undefined);
     previewStream.getTracks().forEach((track) => track.stop());
     canvasStream.getTracks().forEach((track) => track.stop());
     videoEl.pause();
@@ -69,16 +83,77 @@ export async function start(onTick: (elapsedMs: number) => void): Promise<Active
     videoEl.srcObject = null;
   };
 
-  try {
+  const analyser = new WaveformAnalyser();
+  analyser.onPeak = onPeak;
+
+  let timekeeper: ReturnType<typeof createTimekeeper> | undefined;
+  let engine: VideoRecorderEngine | undefined;
+  let snapshot: ReturnType<typeof createSnapshotRecorder> | undefined;
+
+  const setupPromise = (async () => {
     await videoEl.play();
     await waitForVisibleFrame(videoEl);
-  } catch (err) {
+    if (isStopped) return;
+
+    timekeeper = createTimekeeper();
+
+    setupAudioTap();
+    startDrawing();
+
+    const canvasVideoTrack = canvasStream.getVideoTracks()[0];
+    const audioTrack = previewStream.getAudioTracks()[0];
+    engine = recordWithMediaRecorder(canvasVideoTrack, audioTrack);
+    snapshot = createSnapshotRecorder(canvasVideoTrack, audioTrack);
+
+    if (isStopped) {
+      snapshot?.finish();
+      engine.cancel();
+    }
+  })();
+  setupPromise.catch(() => {
     release();
-    throw err;
+  });
+
+  function setupAudioTap() {
+    let tapTrack: MediaStreamTrack | undefined;
+    try {
+      const micTrack = previewStream.getAudioTracks()[0];
+      tapTrack = micTrack?.clone();
+      if (!tapTrack) return;
+
+      audioContext = new AudioContext();
+      if (audioContext.state === 'suspended') {
+        void audioContext.resume().catch(() => undefined);
+      }
+      const tapSource = audioContext.createMediaStreamSource(new MediaStream([tapTrack]));
+      const tap = audioContext.createScriptProcessor(PEAK_TAP_BUFFER_SIZE, 1, 1);
+      tap.onaudioprocess = (e) => {
+        if (isStopped || timekeeper?.getIsPaused()) return;
+        analyser.pushSamples(e.inputBuffer.getChannelData(0));
+      };
+      tapSource.connect(tap);
+      tap.connect(audioContext.destination);
+      releaseAudioTap = () => {
+        tap.onaudioprocess = undefined as unknown as typeof tap.onaudioprocess;
+        try {
+          tapSource.disconnect(tap);
+        } catch (err) {
+          // Already disconnected
+        }
+        tap.disconnect();
+        tapTrack!.stop();
+      };
+    } catch (err) {
+      tapTrack?.stop();
+    }
   }
 
   let lastTickSecond = -1;
-  const drawFrame = () => {
+  function startDrawing() {
+    drawFrame();
+  }
+
+  function drawFrame() {
     if (isStopped) return;
 
     const sourceWidth = videoEl.videoWidth;
@@ -88,7 +163,12 @@ export async function start(onTick: (elapsedMs: number) => void): Promise<Active
       const offsetX = (sourceWidth - side) / 2;
       const offsetY = (sourceHeight - side) / 2;
 
+      // The camera frames are recorded MIRRORED, exactly as the selfie preview shows them — so the recipient
+      // sees the same picture the sender saw. The watermark is drawn outside the mirrored transform.
       ctx.clearRect(0, 0, ROUND_VIDEO_RECORDING_SIZE, ROUND_VIDEO_RECORDING_SIZE);
+      ctx.save();
+      ctx.translate(ROUND_VIDEO_RECORDING_SIZE, 0);
+      ctx.scale(-1, 1);
       ctx.filter = `blur(${BACKGROUND_BLUR_PX}px)`;
       ctx.drawImage(
         videoEl, offsetX, offsetY, side, side,
@@ -97,6 +177,7 @@ export async function start(onTick: (elapsedMs: number) => void): Promise<Active
         ROUND_VIDEO_RECORDING_SIZE + 2 * BACKGROUND_OVERSCAN,
       );
       ctx.filter = 'none';
+      ctx.restore();
 
       ctx.fillStyle = `rgba(0, 0, 0, ${BACKGROUND_DIM_ALPHA})`;
       ctx.fillRect(0, 0, ROUND_VIDEO_RECORDING_SIZE, ROUND_VIDEO_RECORDING_SIZE);
@@ -106,36 +187,74 @@ export async function start(onTick: (elapsedMs: number) => void): Promise<Active
       ctx.beginPath();
       ctx.arc(CANVAS_RADIUS, CANVAS_RADIUS, CIRCLE_RADIUS, 0, Math.PI * 2);
       ctx.clip();
+      ctx.translate(ROUND_VIDEO_RECORDING_SIZE, 0);
+      ctx.scale(-1, 1);
       ctx.drawImage(
         videoEl, offsetX, offsetY, side, side, 0, 0, ROUND_VIDEO_RECORDING_SIZE, ROUND_VIDEO_RECORDING_SIZE,
       );
       ctx.restore();
     }
 
-    if (startedAt) {
-      const elapsedMs = Date.now() - startedAt;
-      const second = Math.floor(elapsedMs / 1000);
-      if (second !== lastTickSecond) {
-        lastTickSecond = second;
-        onTick(elapsedMs);
-      }
+    const elapsedMs = timekeeper!.getElapsedMs();
+    const second = Math.floor(elapsedMs / 1000);
+    if (second !== lastTickSecond) {
+      lastTickSecond = second;
+      onTick(elapsedMs);
     }
     rafId = requestAnimationFrame(drawFrame);
-  };
-  drawFrame();
-
-  const canvasVideoTrack = canvasStream.getVideoTracks()[0];
-  const audioTrack = previewStream.getAudioTracks()[0];
-
-  let engine: VideoRecorderEngine;
-  try {
-    engine = recordWithMediaRecorder(canvasVideoTrack, audioTrack);
-  } catch (err) {
-    release();
-    throw err;
   }
 
-  startedAt = Date.now();
+  let playbackVideo: HTMLVideoElement | undefined;
+  let playbackUrl: string | undefined;
+  let playbackPromise: Promise<HTMLVideoElement> | undefined;
+  let playbackGeneration = 0;
+
+  const destroyPlayback = () => {
+    playbackGeneration++;
+    playbackVideo?.pause();
+    playbackVideo?.remove();
+    if (playbackUrl) URL.revokeObjectURL(playbackUrl);
+    playbackVideo = undefined;
+    playbackUrl = undefined;
+    playbackPromise = undefined;
+  };
+
+  const createPlaybackVideo = async () => {
+    const generation = playbackGeneration;
+    const el = document.createElement('video');
+    el.playsInline = true;
+    const url = URL.createObjectURL(snapshot!.getBlob());
+    el.src = url;
+    try {
+      await resolveMediaDuration(el);
+    } catch (err) {
+      URL.revokeObjectURL(url);
+      throw err;
+    }
+    if (generation !== playbackGeneration) {
+      URL.revokeObjectURL(url);
+      throw new Error('Recording playback is stale');
+    }
+    playbackUrl = url;
+    playbackVideo = el;
+    return el;
+  };
+
+  const getPlaybackMedia = () => {
+    if (!playbackPromise) {
+      if (!snapshot) {
+        return Promise.reject(new Error('Recording playback is unavailable'));
+      }
+      const promise = createPlaybackVideo();
+      playbackPromise = promise;
+      promise.catch(() => {
+        if (playbackPromise === promise) {
+          playbackPromise = undefined;
+        }
+      });
+    }
+    return playbackPromise;
+  };
 
   let stopPromise: Promise<Result> | undefined;
 
@@ -147,9 +266,22 @@ export async function start(onTick: (elapsedMs: number) => void): Promise<Active
       }
 
       stopPromise = (async () => {
-        const durationMs = Date.now() - startedAt;
+        try {
+          await setupPromise;
+        } catch (err) {
+          release();
+          throw err;
+        }
+        if (!engine || !timekeeper) {
+          release();
+          throw new Error('Video recording was cancelled before it started');
+        }
+
+        if (!timekeeper.getIsPaused()) timekeeper.pause();
+        const durationMs = timekeeper.getElapsedMs();
         isStopped = true;
         if (rafId !== undefined) cancelAnimationFrame(rafId);
+        snapshot?.finish();
         try {
           const blob = await engine.finalize();
           return {
@@ -169,10 +301,59 @@ export async function start(onTick: (elapsedMs: number) => void): Promise<Active
     cancel: () => {
       if (isStopped || stopPromise) return;
       isStopped = true;
-      engine.cancel();
+      destroyPlayback();
+      snapshot?.finish();
+      engine?.cancel();
       release();
     },
+    pause: async () => {
+      if (isStopped || !timekeeper || timekeeper.getIsPaused()) return;
+      timekeeper.pause();
+      engine?.pause();
+      await snapshot?.flushAndPause();
+    },
+    resume: () => {
+      if (isStopped || !timekeeper?.getIsPaused()) return;
+      destroyPlayback();
+      timekeeper.resume();
+      engine?.resume();
+      snapshot?.resume();
+    },
+    whenReady: setupPromise,
+    getElapsedMs: () => timekeeper?.getElapsedMs() ?? 0,
+    getProfilePeaks: () => analyser.getCurrentPeaks(),
+    get getPlaybackMedia() {
+      return engine ? getPlaybackMedia : undefined;
+    },
+    getPlaybackEl: () => playbackVideo,
+    destroyPlayback,
   };
+}
+
+async function resolveMediaDuration(media: HTMLVideoElement) {
+  await new Promise<void>((resolve, reject) => {
+    media.onloadedmetadata = () => resolve();
+    media.onerror = () => reject(new Error('Failed to load recording snapshot'));
+  });
+
+  if (Number.isFinite(media.duration)) return;
+
+  await new Promise<void>((resolve) => {
+    const timeoutId = setTimeout(() => finish(), PLAYBACK_DURATION_TIMEOUT_MS);
+    function finish() {
+      clearTimeout(timeoutId);
+      media.removeEventListener('durationchange', handleDurationChange);
+      media.currentTime = 0;
+      resolve();
+    }
+    function handleDurationChange() {
+      if (Number.isFinite(media.duration)) {
+        finish();
+      }
+    }
+    media.addEventListener('durationchange', handleDurationChange);
+    media.currentTime = Number.MAX_SAFE_INTEGER;
+  });
 }
 
 async function createWatermarkCanvas() {
@@ -210,7 +391,7 @@ async function createWatermarkCanvas() {
       img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
     });
     ctx.drawImage(img, 0, 0);
-  } catch {
+  } catch (err) {
     // No curved text if the SVG fails to rasterize — the plane glyph alone is enough
   }
 
@@ -224,13 +405,20 @@ async function waitForVisibleFrame(videoEl: HTMLVideoElement) {
   const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
   if (!sampleCtx) return;
 
-  const deadline = Date.now() + VISIBLE_FRAME_TIMEOUT_MS;
+  const liveDeadline = Date.now() + VISIBLE_FRAME_TIMEOUT_MS;
   const sampledValuesCount = SAMPLE_SIZE * SAMPLE_SIZE * 3;
   let previousData: Uint8ClampedArray | undefined;
+  let previousMean: number | undefined;
+  let settleDeadline: number | undefined;
+  let isLive = false;
+  let settledFrames = 0;
 
   await new Promise<void>((resolve) => {
     const check = () => {
-      if (Date.now() >= deadline) {
+      // The warm-up (black frames) and the exposure ramp each get their own budget — a shared one would run
+      // out during the ramp on a cold camera start and bake the brightness pumping into the clip
+      const now = Date.now();
+      if (isLive ? now >= settleDeadline! : now >= liveDeadline) {
         resolve();
         return;
       }
@@ -249,13 +437,27 @@ async function waitForVisibleFrame(videoEl: HTMLVideoElement) {
           }
         }
 
-        const isBrightEnough = sum / sampledValuesCount > MIN_VISIBLE_LUMINANCE;
+        const mean = sum / sampledValuesCount;
+        const isBrightEnough = mean > MIN_VISIBLE_LUMINANCE;
         const hasChanged = previousData && changeSum / sampledValuesCount > MIN_FRAME_CHANGE;
-        if (isBrightEnough || hasChanged) {
-          resolve();
-          return;
+        if (!isLive && (isBrightEnough || hasChanged)) {
+          isLive = true;
+          settleDeadline = Date.now() + EXPOSURE_SETTLE_TIMEOUT_MS;
         }
 
+        if (isLive && previousMean !== undefined) {
+          if (Math.abs(mean - previousMean) < EXPOSURE_SETTLE_MAX_DELTA) {
+            settledFrames++;
+            if (settledFrames >= EXPOSURE_SETTLE_FRAMES) {
+              resolve();
+              return;
+            }
+          } else {
+            settledFrames = 0;
+          }
+        }
+
+        previousMean = mean;
         previousData = data;
       }
 

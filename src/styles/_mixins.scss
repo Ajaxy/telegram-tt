@@ -242,3 +242,21 @@
     }
   }
 }
+
+@mixin composer-pill {
+  padding: var(--composer-pill-padding);
+  border-radius: var(--composer-pill-radius);
+  background: var(--color-background);
+}
+
+@mixin composer-action-button-pill {
+  flex-shrink: 0;
+
+  width: var(--composer-main-button-width);
+  height: var(--composer-main-button-height);
+  border-radius: var(--composer-control-radius);
+
+  color: white;
+
+  background: var(--color-primary);
+}

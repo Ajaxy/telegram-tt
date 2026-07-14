@@ -743,7 +743,9 @@ export function buildUploadingMedia(
     }
     if (attachment.voice) {
       const { duration, waveform } = attachment.voice;
-      const { data: inputWaveform } = interpolateArray(waveform, INPUT_WAVEFORM_LENGTH);
+      const inputWaveform = waveform.length === INPUT_WAVEFORM_LENGTH
+        ? waveform
+        : interpolateArray(waveform, INPUT_WAVEFORM_LENGTH).data;
       return {
         voice: {
           mediaType: 'voice',

@@ -1,16 +1,22 @@
 .ComposerEmbeddedMessage {
   --accent-color: var(--color-primary);
 
-  height: 3.125rem;
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: height 150ms ease-out, opacity 150ms ease-out;
+  max-height: 3.125rem;
+  margin-bottom: var(--composer-embedded-message-gap);
+  /* stylelint-disable plugin/no-low-performance-animation-properties */
+  transition:
+    max-height var(--composer-embedded-message-duration) ease-out,
+    margin-bottom var(--composer-embedded-message-duration) ease-out,
+    opacity var(--composer-embedded-message-duration) ease-out;
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
 
   .select-mode-active + .middle-column-footer & {
     display: none;
   }
 
   &:not(.open) {
-    height: 0 !important;
+    max-height: 0;
+    margin-bottom: 0;
   }
 
   body.no-message-composer-animations & {
@@ -19,8 +25,8 @@
 
   &_inner {
     display: flex;
+    gap: 0.25rem;
     align-items: center;
-    padding-top: 0.5rem;
   }
 
   & .embedded-left-icon {
@@ -30,35 +36,25 @@
     flex-shrink: 0;
     place-content: center;
 
-    height: 2.625rem;
-    padding: 0.5625rem 0.75rem 0.5625rem 1rem;
+    padding: var(--composer-icon-button-padding);
 
     font-size: 1.5rem;
     color: var(--accent-color);
 
     background: none !important;
-
-    @media (max-width: 600px) {
-      width: 2.875rem;
-    }
   }
 
   & .embedded-cancel {
     flex-shrink: 0;
-    align-self: center;
 
     width: auto;
-    height: 1.5rem;
-    margin: 0.5625rem 0.6875rem 0.5625rem 0.75rem;
-    padding: 0;
+    height: auto;
+    padding-block: 0;
+    padding-inline: 0.5rem;
 
     color: var(--accent-color, var(--color-primary));
 
     background: none !important;
-
-    @media (max-width: 600px) {
-      margin: 0.5625rem 0.75rem 0.5625rem 0.5rem;
-    }
   }
 
   .forward-context-menu {

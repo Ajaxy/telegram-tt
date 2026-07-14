@@ -1521,6 +1521,13 @@
 "ComposerStoryPlaceholderLocked" = "Replies restricted";
 "ComposerPlaceholderNoText" = "Text not allowed";
 "AriaComposerCancelVoice" = "Cancel voice recording";
+"VoiceRecordMicError" = "Allow access to your microphone to record voice messages";
+"AriaComposerPauseVoice" = "Pause voice recording";
+"AriaComposerResumeVoice" = "Resume voice recording";
+"AriaComposerPauseVideo" = "Pause video recording";
+"AriaComposerResumeVideo" = "Resume video recording";
+"AriaComposerPlayVoice" = "Play voice recording";
+"AriaComposerPausePlayback" = "Pause playback";
 "PreviewForwardedMessage_one" = "{count} forwarded message";
 "PreviewForwardedMessage_other" = "{count} forwarded messages";
 "PreviewEditMessage" = "Edit message";

@@ -133,6 +133,12 @@
       left: calc(var(--bot-menu-text-width, 0) + 3rem);
     }
   }
+  .is-pointer-env .Composer.is-chat-composer .message-input-wrapper & > .backdrop {
+    right: 0;
+    left: auto;
+    width: var(--composer-main-button-width);
+    height: auto;
+  }
 
   .bubble {
     --offset-y: 3.5rem;

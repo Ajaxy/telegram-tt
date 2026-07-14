@@ -16,8 +16,6 @@ import styles from './FloatingActionButtons.module.scss';
 
 type OwnProps = {
   withScrollDown: boolean;
-  canPost?: boolean;
-  withExtraShift?: boolean;
 };
 
 type StateProps = {
@@ -40,11 +38,9 @@ type UnreadCountButton = {
 
 const FloatingActionButtons = ({
   withScrollDown,
-  canPost,
   messageListType,
   chatId,
   threadId,
-  withExtraShift,
   threadReadState,
   shouldShowCount,
 }: OwnProps & StateProps) => {
@@ -192,8 +188,6 @@ const FloatingActionButtons = ({
     styles.root,
     (withScrollDown || hasUnreadCountButtons) && styles.revealed,
     hasUnreadCountButtons && !withScrollDown && styles.hideScrollDown,
-    !canPost && styles.noComposer,
-    !withExtraShift && styles.noExtraShift,
   );
 
   return (

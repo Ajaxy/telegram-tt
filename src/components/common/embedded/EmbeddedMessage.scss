@@ -243,7 +243,8 @@
   &.inside-input {
     flex-grow: 1;
     margin: 0;
-    border-radius: 0.25rem;
+    padding-block: 0.125rem;
+    border-radius: var(--composer-embed-radius);
 
     .message-text {
       flex-grow: 1;

@@ -39,7 +39,7 @@ const RecordModeMenu = ({
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
     >
-      <MenuItem icon="microphone-alt" onClick={handleSelectVoice}>
+      <MenuItem icon="microphone" onClick={handleSelectVoice}>
         {lang('AttachAudio')}
       </MenuItem>
       <MenuItem icon="round-video" onClick={handleSelectVideo}>

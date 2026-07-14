@@ -23,7 +23,7 @@ export default function useMouseInside(
 
     if (isOpen && !IS_TOUCH_ENV && !isDisabled) {
       closeTimeout = window.setTimeout(() => {
-        if (!isMouseInsideRef.current) {
+        if (!isMouseInsideRef.current && document.hasFocus()) {
           onClose();
         }
       }, menuCloseTimeout * 2);

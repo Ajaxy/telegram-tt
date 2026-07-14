@@ -1,0 +1,151 @@
+.root {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+
+  border-radius: var(--composer-control-radius);
+
+  background: var(--color-background);
+}
+
+.sideButton {
+  flex-shrink: 0;
+  width: var(--composer-main-button-height);
+  height: var(--composer-main-button-height);
+  color: var(--color-text-secondary);
+}
+
+.deleteIcon {
+  color: var(--color-error);
+}
+
+.viewOnceActive {
+  color: var(--color-primary) !important;
+}
+
+.pill {
+  display: flex;
+  flex: 1;
+  gap: 0.625rem;
+  align-items: center;
+
+  min-width: 0;
+  height: var(--composer-main-button-height);
+  padding-inline: 0.5rem 0.75rem;
+  border-radius: var(--composer-control-radius);
+
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.control {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.recordIndicator {
+  font-size: 1.5rem;
+  color: var(--color-error);
+  animation:
+    grow-control 0.2s ease-out,
+    record-indicator-pulse 1s infinite alternate ease-in-out;
+}
+
+@keyframes record-indicator-pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.4;
+  }
+}
+
+@keyframes grow-control {
+  from {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes hide-control {
+  from {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+
+  to {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+}
+
+.playButton {
+  flex-shrink: 0;
+
+  width: 1.5rem !important;
+  height: 1.5rem;
+  padding: 0;
+
+  animation: grow-control 0.2s ease-out;
+
+  :global(.icon) {
+    font-size: 0.875rem;
+  }
+
+  .swapIcon {
+    opacity: 0;
+    animation: none;
+  }
+
+  .swapIconActive {
+    opacity: 1;
+    animation: grow-control 0.2s ease-out;
+  }
+}
+
+.swapIcon {
+  position: absolute;
+  animation: hide-control 0.4s forwards ease-out;
+}
+
+.root:not(.mounted) .swapIcon {
+  animation-duration: 0ms !important;
+}
+
+.swapIconActive {
+  animation: grow-control 0.4s ease-out;
+}
+
+.waveform {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  color: var(--color-primary);
+}
+
+.timer {
+  flex-shrink: 0;
+
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.375rem;
+  color: var(--color-text);
+}

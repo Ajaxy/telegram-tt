@@ -9,6 +9,7 @@ import { EDITABLE_INPUT_CSS_SELECTOR, EDITABLE_INPUT_MODAL_CSS_SELECTOR } from '
 import buildClassName from '../../../util/buildClassName';
 
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Icon from '../../common/icons/Icon';
@@ -92,6 +93,8 @@ const SymbolMenuButton: FC<OwnProps> = ({
   const [isSymbolMenuLoaded, onSymbolMenuLoadingComplete] = useFlag();
   const [contextMenuAnchor, setContextMenuAnchor] = useState<IAnchorPosition | undefined>(undefined);
 
+  const lang = useLang();
+
   const symbolMenuButtonClassName = buildClassName(
     'composer-action-button mobile-symbol-menu-button',
     !isReady && 'not-ready',
@@ -144,31 +147,6 @@ const SymbolMenuButton: FC<OwnProps> = ({
 
   return (
     <>
-      {isMobile ? (
-        <Button
-          className={symbolMenuButtonClassName}
-          round
-          color="translucent"
-          onClick={isSymbolMenuOpen ? closeSymbolMenu : handleSymbolMenuOpen}
-          ariaLabel="Choose emoji, sticker or GIF"
-        >
-          <Icon name="smile" />
-          <Icon name="keyboard" />
-          {isSymbolMenuOpen && !isSymbolMenuLoaded && <Spinner color="gray" />}
-        </Button>
-      ) : (
-        <ResponsiveHoverButton
-          className={buildClassName('composer-action-button symbol-menu-button', isSymbolMenuOpen && 'activated')}
-          round
-          color="translucent"
-          onActivate={handleActivateSymbolMenu}
-          ariaLabel="Choose emoji, sticker or GIF"
-        >
-          <div ref={triggerRef} className="symbol-menu-trigger" />
-          <Icon name="smile" />
-        </ResponsiveHoverButton>
-      )}
-
       <SymbolMenu
         chatId={chatId}
         threadId={threadId}
@@ -197,6 +175,31 @@ const SymbolMenuButton: FC<OwnProps> = ({
         getMenuElement={isAttachmentModal ? getMenuElement : undefined}
         getLayout={isAttachmentModal ? getLayout : undefined}
       />
+
+      {isMobile ? (
+        <Button
+          className={symbolMenuButtonClassName}
+          round
+          color="translucent"
+          onClick={isSymbolMenuOpen ? closeSymbolMenu : handleSymbolMenuOpen}
+          ariaLabel={lang('AriaOpenSymbolMenu')}
+        >
+          <Icon name="smile" />
+          <Icon name="keyboard" />
+          {isSymbolMenuOpen && !isSymbolMenuLoaded && <Spinner color="gray" />}
+        </Button>
+      ) : (
+        <ResponsiveHoverButton
+          className={buildClassName('composer-action-button symbol-menu-button', isSymbolMenuOpen && 'activated')}
+          round
+          color="translucent"
+          onActivate={handleActivateSymbolMenu}
+          ariaLabel={lang('AriaOpenSymbolMenu')}
+        >
+          <div ref={triggerRef} className="symbol-menu-trigger" />
+          <Icon name="smile" />
+        </ResponsiveHoverButton>
+      )}
     </>
   );
 };

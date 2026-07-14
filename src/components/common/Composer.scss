@@ -1,7 +1,7 @@
 @use '../../styles/mixins';
 
 .Composer {
-  --base-height: 3rem;
+  --base-height: var(--composer-height);
 
   align-items: flex-end;
 
@@ -87,29 +87,14 @@
       color: var(--color-composer-button);
     }
 
-    .icon-send,
+    .icon-new-send,
     .icon-schedule,
     .icon-forward,
-    .icon-microphone-alt,
-    .icon-check,
+    .icon-microphone,
+    .icon-check-bold,
     .icon-view-once,
     .icon-one-filled {
       position: absolute;
-    }
-
-    .paidStarsBadgeText {
-      display: inline-flex;
-      align-items: center;
-    }
-
-    &.cancel {
-      position: relative;
-      z-index: 1;
-
-      &:hover,
-      &.active {
-        background: var(--color-primary);
-      }
     }
 
     &.recording {
@@ -136,50 +121,14 @@
       }
     }
 
-    .paidStarsBadgeIcon {
-      margin-inline-start: 0;
-      margin-inline-end: 0.0625rem;
-    }
-
-    .paidStarsBadge {
-      position: absolute;
-      top: -1rem;
-
-      height: auto;
-      margin-top: 0.625rem;
-      padding-block: 0.25rem;
-      padding-inline: 0.375rem;
-
-      font-size: 0.8125rem;
-      font-weight: var(--font-weight-semibold) !important;
-      line-height: 1;
-
-      &.visible {
-        animation: grow-icon 0.4s ease-out;
-      }
-
-      &.hiding {
-        animation: hide-icon 0.4s forwards ease-out;
-      }
-
-      &.hidden {
-        pointer-events: none;
-        opacity: 0;
-      }
-
-      .icon {
-        font-size: 0.875rem;
-      }
-    }
-
     &.send, &.sendOneTime {
-      .icon-send {
+      .icon-new-send {
         animation: grow-icon 0.4s ease-out;
       }
 
-      .icon-microphone-alt,
+      .icon-microphone,
       .icon-forward,
-      .icon-check,
+      .icon-check-bold,
       .icon-schedule {
         animation: hide-icon 0.4s forwards ease-out;
       }
@@ -190,21 +139,21 @@
         animation: grow-icon 0.4s ease-out;
       }
 
-      .icon-microphone-alt,
-      .icon-check,
+      .icon-microphone,
+      .icon-check-bold,
       .icon-forward,
-      .icon-send {
+      .icon-new-send {
         animation: hide-icon 0.4s forwards ease-out;
       }
     }
 
     &.record {
-      .icon-microphone-alt {
+      .icon-microphone {
         animation: grow-icon 0.4s ease-out;
       }
 
-      .icon-send,
-      .icon-check,
+      .icon-new-send,
+      .icon-check-bold,
       .icon-forward,
       .icon-schedule {
         animation: hide-icon 0.4s forwards ease-out;
@@ -217,7 +166,7 @@
     }
 
     &.record.record-video {
-      .icon-microphone-alt {
+      .icon-microphone {
         animation: hide-icon 0.4s forwards ease-out;
       }
 
@@ -228,13 +177,13 @@
     }
 
     &.edit {
-      .icon-check {
+      .icon-check-bold {
         animation: grow-icon 0.4s ease-out;
       }
 
-      .icon-send,
+      .icon-new-send,
       .icon-forward,
-      .icon-microphone-alt,
+      .icon-microphone,
       .icon-schedule {
         animation: hide-icon 0.4s forwards ease-out;
       }
@@ -249,9 +198,9 @@
         animation: grow-icon 0.4s ease-out;
       }
 
-      .icon-send,
-      .icon-check,
-      .icon-microphone-alt,
+      .icon-new-send,
+      .icon-check-bold,
+      .icon-microphone,
       .icon-schedule {
         animation: hide-icon 0.4s forwards ease-out;
       }
@@ -277,13 +226,14 @@
     &.not-ready > .icon {
       animation-duration: 0ms !important;
     }
+  }
 
+  // Legacy (story composer): state icons are accented while the button is idle.
+  // The redesigned chat composer keeps them always white (see `main-button`)
+  &:not(.is-chat-composer) > .Button {
     @media (hover: hover) {
       &:not(:active):not(:focus):not(:hover) {
-        .icon-send,
-        .icon-schedule,
-        .icon-forward,
-        .icon-check {
+        .main-button-state-icon {
           color: var(--color-primary);
         }
       }
@@ -291,10 +241,7 @@
 
     @media (hover: none) {
       &:not(:active):not(:focus) {
-        .icon-send,
-        .icon-schedule,
-        .icon-forward,
-        .icon-check {
+        .main-button-state-icon {
           color: var(--color-primary);
         }
       }
@@ -303,10 +250,10 @@
 
   &:not(.mounted) > .Button,
   body.no-message-composer-animations & > .Button {
-    .icon-send,
-    .icon-microphone-alt,
+    .icon-new-send,
+    .icon-microphone,
+    .icon-check-bold,
     .icon-round-video,
-    .icon-check,
     .icon-schedule {
       animation-duration: 0ms !important;
     }
@@ -468,12 +415,162 @@
   }
 }
 
+.Composer.is-chat-composer {
+  --base-height: var(--composer-main-button-height);
+
+  @include mixins.composer-pill;
+
+  // `ComposerEmbeddedMessage` / `WebPagePreview` are full-width flex children that
+  // wrap into their own row above the input row
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-footer);
+
+  .select-mode-active + .middle-column-footer & {
+    position: relative;
+    padding-right: var(--composer-pill-padding);
+  }
+
+  .composer-wrapper {
+    max-width: calc(100% - var(--composer-main-button-width) - var(--composer-row-gap));
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .ComposerEmbeddedMessage {
+    flex-basis: 100%;
+    min-width: 0;
+  }
+
+  .message-input-wrapper {
+    --action-button-compact-fix: 0;
+
+    gap: var(--composer-row-gap);
+
+    > .Menu {
+      display: contents;
+    }
+
+    .bot-menu {
+      --height: var(--composer-main-button-height);
+      --icon-width: var(--composer-icon-size);
+
+      align-self: center;
+      margin-bottom: 0;
+    }
+
+    .bot-commands {
+      align-self: center;
+
+      width: var(--composer-main-button-height);
+      height: var(--composer-main-button-height);
+
+      color: white !important;
+
+      background: var(--color-primary) !important;
+
+      &.activated {
+        background: var(--color-primary-shade) !important;
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          background: var(--color-primary-shade) !important;
+        }
+      }
+    }
+
+    .composer-action-button,
+    .symbol-menu-button,
+    .AttachMenu--button {
+      .icon {
+        font-size: var(--composer-icon-size);
+      }
+    }
+
+    .ai-composer-button {
+      z-index: 2;
+      top: 0.25rem;
+      right: calc(-1 * (var(--composer-row-gap) + var(--composer-main-button-width) / 2 + 0.875rem));
+    }
+  }
+
+  #message-input-text .form-control {
+    padding-inline: 0;
+  }
+
+  #message-input-text .placeholder-text,
+  #message-input-text .forced-placeholder {
+    left: 0;
+  }
+
+  .composer-wrapper,
+  .message-input-wrapper,
+  .message-input-wrapper > .input-group {
+    min-width: 0;
+  }
+
+  > .Button.main-button {
+    --paid-stars-padding: 0.625rem;
+
+    @include mixins.composer-action-button-pill;
+
+    overflow: hidden;
+    margin-left: var(--composer-row-gap);
+    box-shadow: none;
+
+    .icon {
+      color: white;
+    }
+
+    .icon-new-send {
+      font-size: 1.75rem;
+    }
+
+    &.has-paid-stars .icon-new-send {
+      display: none;
+    }
+
+    // Same approach as `.bot-menu`: explicit width from a measured CSS variable, animated by CSS
+    &.paid {
+      width: calc(var(--paid-stars-width, 0px) + 2 * var(--paid-stars-padding));
+      min-width: var(--composer-main-button-width);
+    }
+
+    .paidStars {
+      display: flex;
+      flex-shrink: 0;
+      gap: 0.125rem;
+      align-items: center;
+
+      font-family: var(--font-family-monospace);
+      font-size: 1rem;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-white);
+
+      .icon {
+        font-size: 1.25rem;
+      }
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--color-primary-shade);
+      }
+    }
+  }
+}
+
 .message-input-wrapper {
   --action-button-size: var(--base-height, 3rem);
   --action-button-compact-fix: -0.75rem;
 
   position: relative;
   display: flex;
+
+  &.is-voice-recording > :not(.voice-record-bar) {
+    visibility: hidden;
+  }
 
   .ai-composer-button {
     position: absolute;
@@ -488,7 +585,7 @@
 
     opacity: 1;
 
-    transition: opacity 150ms ease-out;
+    transition: opacity 150ms ease-out, background-color 150ms ease-out;
   }
 
   .ai-composer-button-hidden {
@@ -532,42 +629,42 @@
     }
 
     &.bot-menu {
+      --height: 2rem;
       --icon-width: 1.25rem;
       --icon-gap: 0.25rem;
-      --padding-sides: 0.5rem;
+      --padding-sides: calc((var(--height) - var(--icon-width)) / 2);
 
       display: inline-flex;
+      align-items: center;
       justify-content: flex-start;
 
-      width: 2rem;
+      width: var(--height);
       max-width: clamp(0px, 12rem, 25vw);
-      height: 2rem;
-      margin: 0 0.5rem 0.5rem;
+      height: var(--height);
       padding: 0 var(--padding-sides);
-      border-radius: 0.5rem;
+      border-radius: calc(var(--height) / 2);
 
       color: white !important;
       text-transform: none;
 
       background: var(--color-primary) !important;
       /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-      transition: 0.25s ease-out width, 0.25s ease-out border-radius;
+      transition: 0.25s ease-out width, 0.15s background-color;
 
       &.open {
-        width: calc(var(--bot-menu-text-width) + var(--padding-sides) * 2 + var(--icon-gap) + var(--icon-width));
-        border-radius: 1rem;
+        width: calc(var(--icon-width) + var(--icon-gap) + var(--bot-menu-text-width) + var(--padding-sides) * 2);
+      }
+
+      @media (hover: hover) {
+        &:hover {
+          background-color: var(--color-primary-shade) !important;
+        }
       }
     }
 
     .bot-menu-icon {
-      transform: translateX(-0.15rem);
       margin-right: var(--icon-gap);
-      font-size: 1.25rem;
-      transition: 0.25s ease-out transform;
-
-      &.open {
-        transform: translateX(0);
-      }
+      font-size: var(--icon-width);
     }
 
     .bot-menu-text {
@@ -610,53 +707,12 @@
     flex-grow: 1;
     margin-bottom: 0;
   }
-
-  .recording-state {
-    position: relative;
-
-    display: inline-block;
-
-    height: var(--base-height);
-    padding: 0 3.125rem 0 1rem;
-
-    font-family: var(--font-family);
-    font-variant-numeric: tabular-nums;
-    line-height: var(--base-height);
-
-    &::after {
-      content: "";
-
-      position: absolute;
-      top: 50%;
-      right: 1.3125rem;
-
-      width: 0.75rem;
-      height: 0.75rem;
-      margin-top: -0.375rem;
-      border-radius: 0.375rem;
-
-      background: var(--color-error);
-
-      animation: recording-blink-like-macos 1.5s infinite;
-    }
-  }
 }
 
 .symbol-menu-trigger {
   position: absolute;
   bottom: 0;
   left: -1rem;
-}
-
-@media (min-width: 600px) {
-  .symbol-menu-button {
-    width: 2rem !important;
-    margin-left: 0.75rem !important;
-
-    .Button + & {
-      margin-left: -0.25rem !important;
-    }
-  }
 }
 
 .input-scroller {
@@ -855,9 +911,35 @@
 
     opacity: 0;
   }
+
+  .input-scroller.clone .form-control {
+    position: static;
+  }
 }
 
 #message-input-text {
+  > .input-scroller {
+    box-sizing: content-box;
+    margin-top: calc(-1 * var(--composer-pill-padding));
+    margin-bottom: calc(-1 * var(--composer-pill-padding));
+    padding-top: var(--composer-pill-padding);
+    padding-bottom: var(--composer-pill-padding);
+
+    &:not(.clone) {
+      /* stylelint-disable plugin/no-low-performance-animation-properties */
+      transition:
+        height var(--composer-input-grow-duration) ease,
+        margin-top var(--composer-embedded-message-duration) ease-out,
+        padding-top var(--composer-embedded-message-duration) ease-out;
+      /* stylelint-enable plugin/no-low-performance-animation-properties */
+    }
+
+    &.clone {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+
   .form-control {
     height: auto;
     margin-bottom: 0;
@@ -870,6 +952,11 @@
     top: calc((var(--base-height, 3rem) - var(--composer-text-size, 1rem) * 1.3125) / 2);
   }
 
+  .Composer.with-embedded & > .input-scroller:not(.clone) {
+    margin-top: calc(-1 * var(--composer-embedded-message-gap));
+    padding-top: var(--composer-embedded-message-gap);
+  }
+
   &:not(:only-child) {
     .form-control {
       padding-right: 0;
@@ -878,13 +965,6 @@
       @media (min-width: 600px) {
         padding-left: 0.5rem;
       }
-    }
-  }
-
-  .ComposerEmbeddedMessage + .message-input-wrapper &,
-  .WebPagePreview + .message-input-wrapper & {
-    .form-control.overflown {
-      margin-top: 0.75rem;
     }
   }
 }
@@ -953,7 +1033,7 @@
   scrollbar-gutter: stable;
 
   position: absolute;
-  bottom: calc(100% + 0.5rem);
+  bottom: calc(100% + var(--composer-top-gap));
   left: 0;
   transform-origin: bottom;
   transform: translateY(1.5rem);
@@ -985,14 +1065,5 @@
 
   .Loading {
     margin: 1rem 0;
-  }
-}
-
-@keyframes recording-blink-like-macos {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0.3;
   }
 }

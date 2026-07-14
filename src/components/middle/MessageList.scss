@@ -2,8 +2,8 @@
 
 .MessageList {
   --message-list-top-inset: 0px;
-  --message-list-min-reserve: 4.25rem;
-  --message-list-composer-gap: 0.5rem;
+  --message-list-min-reserve: var(--composer-min-bottom-reserve);
+  --message-list-composer-gap: var(--composer-top-gap);
   --message-list-base-reserve: calc(var(--message-list-min-reserve) + var(--message-list-composer-gap));
   --message-list-bottom-inset: var(--message-list-base-reserve);
   --message-list-fade-floor: rgba(0, 0, 0, 0.24);
@@ -126,14 +126,6 @@
     padding-top: var(--message-list-top-inset);
   }
 
-  &.no-composer {
-    margin-bottom: 0;
-
-    .last-in-list {
-      margin-bottom: 1rem;
-    }
-  }
-
   &.select-mode-active,
   &.type-pinned,
   &.saved-dialog {
@@ -150,6 +142,10 @@
   &.no-footer {
     --message-list-bottom-inset: 0px;
     --message-list-bottom-fade: 0px;
+
+    .last-in-list {
+      margin-bottom: 1rem;
+    }
   }
 
   .Message,

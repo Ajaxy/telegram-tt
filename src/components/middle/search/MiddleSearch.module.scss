@@ -282,9 +282,9 @@
 
   position: absolute;
   right: 0;
-  bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  bottom: calc(var(--composer-bottom-gap-mobile) + env(safe-area-inset-bottom));
   left: 0;
-  transform: translateY(calc(100% + 0.5rem + env(safe-area-inset-bottom)));
+  transform: translateY(calc(100% + var(--composer-bottom-gap-mobile) + env(safe-area-inset-bottom)));
 
   display: flex;
   align-items: center;

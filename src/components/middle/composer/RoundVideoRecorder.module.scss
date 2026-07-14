@@ -5,7 +5,7 @@
   z-index: var(--z-round-video-recorder);
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, calc(50vh + 100%)) scale(0.25);
 
   overflow: hidden;
 
@@ -15,8 +15,47 @@
 
   background-color: #000;
   box-shadow: 0 0.5rem 2.5rem rgba(0, 0, 0, 0.6);
+
+  transition: transform 350ms ease-in-out, background-color 300ms ease;
+
+  &:global(.open) {
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
+.preparing,
+.waitingMask .waitingSkeleton {
+  background-color: transparent;
+}
+
+.waitingMask {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  opacity: 1;
+  background-image:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.28) 0%,
+      rgba(255, 255, 255, 0.08) 35%,
+      rgba(0, 0, 0, 0.12) 70%,
+      rgba(0, 0, 0, 0.28) 100%
+    );
+  backdrop-filter: blur(1.25rem);
+
+  transition: opacity 300ms ease, visibility 0s 300ms;
+}
+
+.waitingMaskHidden {
+  visibility: hidden;
+  opacity: 0;
+}
+
+// The live preview is mirrored (selfie view) to match the recorded file, which is itself mirrored
 .video {
   transform: scaleX(-1);
   width: 100%;
@@ -24,6 +63,14 @@
   object-fit: cover;
 }
 
+// The recorded file is already mirrored, so the paused playback renders as is
+.playbackVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.playbackLayer,
 .progress {
   position: absolute;
   top: 0;

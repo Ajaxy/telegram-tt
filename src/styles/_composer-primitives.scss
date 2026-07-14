@@ -1,0 +1,45 @@
+@use "mixins";
+
+:root {
+  --composer-pill-radius: 1.5rem;
+  --composer-control-radius: 1.25rem;
+  --composer-height: 3rem;
+  --composer-embed-radius: 0.5rem;
+  --composer-pill-padding: 0.25rem;
+  --composer-row-gap: 0.25rem;
+  --composer-bottom-gap: 1rem;
+  --composer-bottom-gap-mobile: 0.5rem;
+  --composer-top-gap: 0.5rem;
+  // Measured into a lazy JS cache in `messageListReserves.ts` — a live change is not picked up
+  --composer-min-bottom-reserve: calc(var(--composer-height) + var(--composer-bottom-gap));
+  --composer-embedded-message-gap: 0.5rem;
+  --composer-embedded-message-duration: 150ms;
+  --composer-input-grow-duration: 100ms;
+  --composer-icon-button-padding: 0.5rem;
+  --composer-icon-size: 1.5rem;
+  --composer-main-button-width: 2.5rem;
+  --composer-main-button-height: 2.5rem;
+}
+
+.composer-pill {
+  @include mixins.composer-pill;
+}
+
+.composer-action-button-pill {
+  @include mixins.composer-action-button-pill;
+}
+
+.composer-icon-button {
+  flex-shrink: 0;
+  padding: var(--composer-icon-button-padding);
+  background: none;
+
+  .icon {
+    font-size: var(--composer-icon-size);
+  }
+}
+
+.composer-embed-block {
+  border-radius: var(--composer-embed-radius);
+  background-color: var(--accent-background-color);
+}
