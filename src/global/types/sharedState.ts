@@ -15,13 +15,14 @@ export interface SharedSettings {
   languages?: ApiLanguage[];
   performance: PerformanceType;
   messageTextSize: number;
+  instantViewFontSizeAdjust: number;
   animationLevel: AnimationLevel;
   foldersPosition: FoldersPosition;
   // This can be deleted after September 2025, along with the corresponding migration
   wasAnimationLevelSetManually?: boolean;
   messageSendKeyCombo: 'enter' | 'ctrl-enter';
-  miniAppsCachedPosition?: Point;
-  miniAppsCachedSize?: Size;
+  browserCachedPosition?: Point;
+  browserCachedSize?: Size;
   timeFormat: TimeFormat;
   wasTimeFormatSetManually: boolean;
   isConnectionStatusMinimized: boolean;
@@ -31,5 +32,5 @@ export interface SharedSettings {
   shouldCollectDebugLogs?: boolean;
   shouldDebugExportedSenders?: boolean;
   shouldWarnAboutFiles?: boolean;
-  shouldSkipWebAppCloseConfirmation: boolean;
+  shouldSkipBrowserCloseConfirmation: boolean;
 }

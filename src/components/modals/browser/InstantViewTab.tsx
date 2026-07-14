@@ -1,30 +1,32 @@
-import { memo, useEffect, useMemo } from '../../../lib/teact/teact';
+import { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiWebPageFull } from '../../../api/types';
-import type { TabState } from '../../../global/types';
 import type { ThemeKey } from '../../../types';
 
 import { TME_LINK_PREFIX } from '../../../config';
+import { getInstantViewBrowserTabKey } from '../../../global/helpers';
 import { selectFullWebPage, selectTheme } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 
+import useAppLayout from '../../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import { Breakout } from '../../gili/layout/Surface';
+import Surface, { Breakout } from '../../gili/layout/Surface';
 import RichContent from '../../iv/RichContent';
 import Link from '../../ui/Link';
-import Modal, {
-  ModalCloseButton,
-  ModalHeader,
-  ModalTitle,
-} from '@gili/modal/Modal';
 
-import styles from './InstantViewer.module.scss';
+import styles from './InstantViewTab.module.scss';
 
-export type OwnProps = {
-  modal: TabState['instantViewModal'];
+const PREVIEWS_BOT_USERNAME = 'previews';
+const PREVIEWS_START_PARAM_PREFIX = 'webpage';
+
+type OwnProps = {
+  webPageId: string;
+  fontSizeAdjust: number;
+  isActive?: boolean;
 };
 
 type StateProps = {
@@ -32,20 +34,25 @@ type StateProps = {
   theme: ThemeKey;
 };
 
-const InstantViewer = ({
-  modal,
+const InstantViewTab = ({
+  webPageId,
   webPage,
   theme,
+  fontSizeAdjust,
+  isActive,
 }: OwnProps & StateProps) => {
-  const { closeInstantView, loadWebPage, openTelegramLink } = getActions();
+  const {
+    changeBrowserModalState, closeBrowserTab, loadWebPage, openChatByUsername, openTelegramLink,
+  } = getActions();
   const lang = useLang();
+  const { isMobile } = useAppLayout();
 
   const renderingWebPage = useCurrentOrPrev(webPage);
   const page = renderingWebPage?.cachedPage;
-  const isOpen = Boolean(modal && page);
-  const previewBotUrl = renderingWebPage?.id
-    ? `${TME_LINK_PREFIX}previews?start=webpage${renderingWebPage.id}`
+  const previewsStartParam = renderingWebPage?.id
+    ? `${PREVIEWS_START_PARAM_PREFIX}${renderingWebPage.id}`
     : undefined;
+  const instantViewTabKey = getInstantViewBrowserTabKey(webPageId);
 
   useEffect(() => {
     if (!renderingWebPage?.url || !page?.isPart) return;
@@ -53,19 +60,32 @@ const InstantViewer = ({
     loadWebPage({ url: renderingWebPage.url });
   }, [page?.isPart, renderingWebPage?.url]);
 
-  const header = useMemo(() => (
-    <ModalHeader>
-      <ModalCloseButton />
-      <ModalTitle>{lang('InstantView')}</ModalTitle>
-    </ModalHeader>
-  ), [lang]);
+  const closeOrMinimizeInstantView = useLastCallback(() => {
+    if (isMobile) {
+      closeBrowserTab({ key: instantViewTabKey });
+    } else {
+      changeBrowserModalState({ state: 'minimized' });
+    }
+  });
+
+  const handleOpenTelegramLink = useLastCallback((url: string) => {
+    closeOrMinimizeInstantView();
+    openTelegramLink({ url });
+  });
+
+  const handleTelegramChannelClick = useLastCallback((channelUsername: string) => {
+    handleOpenTelegramLink(`${TME_LINK_PREFIX}${channelUsername}`);
+  });
 
   const handleWrongLayoutClick = useLastCallback((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    if (!previewBotUrl) return;
+    if (!previewsStartParam) return;
 
     e.preventDefault();
-    closeInstantView();
-    openTelegramLink({ url: previewBotUrl });
+    closeOrMinimizeInstantView();
+    openChatByUsername({
+      username: PREVIEWS_BOT_USERNAME,
+      startParam: previewsStartParam,
+    });
   });
 
   if (!page) return undefined;
@@ -73,19 +93,12 @@ const InstantViewer = ({
   const viewsText = page.views !== undefined
     ? lang('ChannelStatsViewsCount', { count: lang.number(page.views) }, { pluralValue: page.views })
     : undefined;
+  const hasCover = page.blocks[0]?.type === 'cover';
 
   return (
-    <Modal
-      isOpen={isOpen}
-      header={header}
-      width="regular"
-      height="tall"
-      ariaLabel={lang('InstantView')}
-      dialogClassName={styles.dialog}
-      onClose={closeInstantView}
-    >
+    <Surface scrollable noPadding className={buildClassName(styles.root, !isActive && styles.hidden)}>
       <article key={page.url} className={styles.article}>
-        <div className={styles.content}>
+        <div className={buildClassName(styles.content, hasCover && styles.contentWithCover)}>
           <RichContent
             blocks={page.blocks}
             isRtl={page.isRtl}
@@ -93,6 +106,8 @@ const InstantViewer = ({
             noAvatars
             canAutoLoadMedia
             theme={theme}
+            fontSizeAdjust={fontSizeAdjust}
+            onTelegramChannelClick={handleTelegramChannelClick}
           />
         </div>
         <Breakout className={styles.footerBreakout}>
@@ -107,17 +122,15 @@ const InstantViewer = ({
           </footer>
         </Breakout>
       </article>
-    </Modal>
+    </Surface>
   );
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): Complete<StateProps> => {
-    const webPage = modal?.webPageId ? selectFullWebPage(global, modal.webPageId) : undefined;
-
+  (global, { webPageId }): Complete<StateProps> => {
     return {
-      webPage,
+      webPage: selectFullWebPage(global, webPageId),
       theme: selectTheme(global),
     };
   },
-)(InstantViewer));
+)(InstantViewTab));

@@ -4,7 +4,7 @@ import type { ApiThemeParameters } from '../api/types';
 
 const HEX_COLOR_LENGTH = 7;
 
-const FALLBACK_THEME_PARAMS: ApiThemeParameters = {
+export const FALLBACK_THEME_PARAMS: ApiThemeParameters = {
   bg_color: '#ffffff',
   text_color: '#000000',
   hint_color: '#707579',

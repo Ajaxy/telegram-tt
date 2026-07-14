@@ -2582,7 +2582,7 @@ addActionHandler('openUrl', async (global, actions, payload): Promise<void> => {
   if (tryInstant) {
     const localWebPage = previewId ? selectWebPage(global, previewId) : undefined;
     if (localWebPage?.webpageType === 'full' && localWebPage.cachedPage) {
-      actions.openInstantView({ webPageId: localWebPage.id, tabId });
+      actions.openBrowserTab({ tab: { type: 'instantView', webPageId: localWebPage.id }, tabId });
       return;
     }
 
@@ -2595,7 +2595,7 @@ addActionHandler('openUrl', async (global, actions, payload): Promise<void> => {
     }
 
     if (webPage?.webpageType === 'full' && webPage.cachedPage) {
-      actions.openInstantView({ webPageId: webPage.id, tabId });
+      actions.openBrowserTab({ tab: { type: 'instantView', webPageId: webPage.id }, tabId });
       return;
     }
   }

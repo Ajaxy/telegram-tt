@@ -115,7 +115,8 @@ import type {
   TranslationTone,
   WebPageMediaSize,
 } from '../../types';
-import type { WebApp, WebAppModalStateType, WebAppOutboundEvent } from '../../types/webapp';
+import type { BrowserModalStateType, BrowserTab } from '../../types/browser';
+import type { WebApp, WebAppOutboundEvent } from '../../types/webapp';
 import type { DownloadableMedia } from '../helpers';
 import type { SharedState } from './sharedState';
 import type { ReactionDeletionContext, TabState } from './tabState';
@@ -962,11 +963,6 @@ export interface ActionPayloads {
     messageId?: number;
   } & WithTabId;
   closeChatLanguageModal: WithTabId | undefined;
-  openInstantView: {
-    webPageId: string;
-  } & WithTabId;
-  closeInstantView: WithTabId | undefined;
-
   // poll result
   openPollResults: {
     chatId: string;
@@ -2298,6 +2294,7 @@ export interface ActionPayloads {
     shouldMarkBotTrusted?: boolean;
   } & WithTabId;
   prolongWebView: {
+    key: string;
     botId: string;
     peerId: string;
     queryId: string;
@@ -2324,8 +2321,8 @@ export interface ActionPayloads {
     isFromConfirm?: boolean;
     shouldSkipBotTrustRequest?: boolean;
   } & WithTabId;
-  openWebAppTab: {
-    webApp?: WebApp;
+  openBrowserTab: {
+    tab?: BrowserTab;
   } & WithTabId;
   openChatInviteWebView: {
     botId: string;
@@ -2339,6 +2336,7 @@ export interface ActionPayloads {
     botId: string;
   };
   setWebAppPaymentSlug: {
+    key: string;
     slug?: string;
   } & WithTabId;
 
@@ -2454,10 +2452,9 @@ export interface ActionPayloads {
     chatId: string;
     usernames: string[];
   };
-  closeActiveWebApp: WithTabId | undefined;
   openMoreAppsTab: WithTabId | undefined;
   closeMoreAppsTab: WithTabId | undefined;
-  closeWebApp: {
+  closeBrowserTab: {
     key: string;
     skipClosingConfirmation?: boolean;
   } & WithTabId;
@@ -2465,16 +2462,16 @@ export interface ActionPayloads {
     webAppKey: string;
     event: WebAppOutboundEvent;
   } & WithTabId;
-  closeWebAppModal: ({
+  closeBrowserModal: ({
     shouldSkipConfirmation?: boolean;
   } & WithTabId) | undefined;
-  changeWebAppModalState: {
-    state: WebAppModalStateType;
+  changeBrowserModalState: {
+    state: BrowserModalStateType;
   } & WithTabId;
-  updateMiniAppCachedPosition: {
+  updateBrowserCachedPosition: {
     position: Point;
   };
-  updateMiniAppCachedSize: {
+  updateBrowserCachedSize: {
     size: Size;
   };
   // Misc
@@ -2806,9 +2803,9 @@ export interface ActionPayloads {
   openQuickChatPicker: WithTabId | undefined;
   closeQuickChatPicker: WithTabId | undefined;
 
-  openWebAppsCloseConfirmationModal: WithTabId | undefined;
+  openBrowserCloseConfirmationModal: WithTabId | undefined;
 
-  closeWebAppsCloseConfirmationModal: ({
+  closeBrowserCloseConfirmationModal: ({
     shouldSkipInFuture?: boolean;
   } & WithTabId);
 

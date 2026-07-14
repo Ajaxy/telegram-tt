@@ -16,6 +16,7 @@
 
 .window-state-button,
 .button {
+  flex: none;
   width: 1.75rem !important;
   height: 1.75rem !important;
 }
@@ -25,7 +26,24 @@
 }
 
 .avatars {
+  flex: none;
   margin-left: 0.5rem;
+}
+
+.browserIcon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-left: 0.5rem;
+  border-radius: 50%;
+
+  color: var(--color-white);
+
+  background-color: var(--color-primary);
 }
 
 .state-icon,
@@ -41,6 +59,7 @@
 .title {
   overflow: hidden;
 
+  min-width: 0;
   margin-right: 0.5rem;
   margin-left: 0.5rem;
 

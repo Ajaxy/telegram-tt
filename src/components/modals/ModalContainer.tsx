@@ -10,8 +10,8 @@ import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import VerificationMonetizationModal from '../common/VerificationMonetizationModal.async';
+import BrowserCloseConfirmationModal from '../main/BrowserCloseConfirmationModal.async';
 import SafeLinkModal from '../main/SafeLinkModal.async';
-import WebAppsCloseConfirmationModal from '../main/WebAppsCloseConfirmationModal.async';
 import AiMessageEditorModal from '../middle/composer/AiMessageEditorModal/AiMessageEditorModal.async';
 import AboutAdsModal from './aboutAds/AboutAdsModal.async';
 import AgeVerificationModal from './ageVerification/AgeVerificationModal.async';
@@ -19,6 +19,7 @@ import AiTonePreviewModal from './aiTonePreview/AiTonePreviewModal.async';
 import AttachBotInstallModal from './attachBotInstall/AttachBotInstallModal.async';
 import BirthdaySetupModal from './birthday/BirthdaySetupModal.async';
 import BoostModal from './boost/BoostModal.async';
+import BrowserModal from './browser/BrowserModal.async';
 import ChatInviteModal from './chatInvite/ChatInviteModal.async';
 import ChatlistModal from './chatlist/ChatlistModal.async';
 import CocoonModal from './cocoon/CocoonModal.async';
@@ -53,7 +54,6 @@ import GiftUpgradeModal from './gift/upgrade/GiftUpgradeModal.async';
 import GiftInfoValueModal from './gift/value/GiftInfoValueModal.async';
 import GiftWithdrawModal from './gift/withdraw/GiftWithdrawModal.async';
 import GiftCodeModal from './giftcode/GiftCodeModal.async';
-import InstantViewer from './instantView/InstantViewer.async';
 import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
 import LeaveGroupModal from './leaveGroup/LeaveGroupModal.async';
 import LocationAccessModal from './locationAccess/LocationAccessModal.async';
@@ -84,7 +84,6 @@ import SuggestedStatusModal from './suggestedStatus/SuggestedStatusModal.async';
 import SuggestMessageModal from './suggestMessage/SuggestMessageModal.async';
 import TwoFaCheckModal from './twoFaCheck/TwoFaCheckModal.async';
 import UrlAuthModal from './urlAuth/UrlAuthModal.async';
-import WebAppModal from './webApp/WebAppModal.async';
 
 // `Pick` used only to provide tab completion
 type ModalKey = keyof Pick<TabState,
@@ -108,13 +107,13 @@ type ModalKey = keyof Pick<TabState,
   'pollModal' |
   'suggestMessageModal' |
   'suggestedPostApprovalModal' |
-  'webApps' |
+  'browser' |
   'chatInviteModal' |
   'starsSubscriptionModal' |
   'starsGiftModal' |
   'giftModal' |
   'isGiftRecipientPickerOpen' |
-  'isWebAppsCloseConfirmationModalOpen' |
+  'isBrowserCloseConfirmationModalOpen' |
   'giftInfoModal' |
   'giftInfoValueModal' |
   'lockedGiftModal' |
@@ -152,7 +151,6 @@ type ModalKey = keyof Pick<TabState,
   'deleteAccountModal' |
   'isAgeVerificationModalOpen' |
   'profileRatingModal' |
-  'instantViewModal' |
   'quickPreview' |
   'storyStealthModal' |
   'isPasskeyModalOpen' |
@@ -239,7 +237,7 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   requestedAttachBotInstall: AttachBotInstallModal,
   reportAdModal: ReportAdModal,
   reportModal: ReportModal,
-  webApps: WebAppModal,
+  browser: BrowserModal,
   collectibleInfoModal: CollectibleInfoModal,
   starsPayment: StarsPaymentModal,
   starsBalanceModal: StarsBalanceModal,
@@ -252,7 +250,7 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   starsGiftModal: StarsGiftModal,
   giftModal: PremiumGiftModal,
   isGiftRecipientPickerOpen: GiftRecipientPicker,
-  isWebAppsCloseConfirmationModalOpen: WebAppsCloseConfirmationModal,
+  isBrowserCloseConfirmationModalOpen: BrowserCloseConfirmationModal,
   giftInfoModal: GiftInfoModal,
   giftInfoValueModal: GiftInfoValueModal,
   lockedGiftModal: GiftLockedModal,
@@ -290,7 +288,6 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   deleteAccountModal: DeleteAccountModal,
   isAgeVerificationModalOpen: AgeVerificationModal,
   profileRatingModal: ProfileRatingModal,
-  instantViewModal: InstantViewer,
   quickPreview: QuickPreviewModal,
   storyStealthModal: StealthModeModal,
   isPasskeyModalOpen: PasskeyModal,

@@ -1824,8 +1824,8 @@
 "StarsReactionLinkText" = "Terms of Service";
 "StarsReactionLink" = "https://telegram.org/tos/stars";
 "AriaMiniApp" = "{bot} Mini App";
-"MiniAppsMoreTabs_one" = "{botName} & {count} Other";
-"MiniAppsMoreTabs_other" = "{botName} & {count} Others";
+"BrowserMoreTabs_one" = "{title} & {count} Other";
+"BrowserMoreTabs_other" = "{title} & {count} Others";
 "PrizeCredits2_one" = "Your prize is {count} Star.";
 "PrizeCredits2_other" = "Your prize is {count} Stars.";
 "SentGift" = "Sent Gift";
@@ -1841,8 +1841,8 @@
 "PopularApps" = "Popular Apps";
 "SearchApps" = "Search Apps";
 "Apps" = "Apps";
-"AreYouSureCloseMiniApps" = "Are you sure you want to close all Mini Apps?";
-"CloseMiniApps" = "Close Mini Apps";
+"AreYouSureCloseBrowserTabs" = "Are you sure you want to close all browser tabs?";
+"CloseBrowserTabs" = "Close Browser Tabs";
 "DoNotAskAgain" = "Don't ask again";
 "PaymentInfoDone" = "Proceed to checkout";
 "DeleteMyAccount" = "Delete my account";

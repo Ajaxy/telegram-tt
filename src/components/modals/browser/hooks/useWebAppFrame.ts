@@ -49,7 +49,7 @@ const useWebAppFrame = (
     showNotification,
     setWebAppPaymentSlug,
     openInvoice,
-    closeWebApp,
+    closeBrowserTab,
     openSuggestedStatusModal,
     updateWebApp,
     openUrl,
@@ -189,7 +189,7 @@ const useWebAppFrame = (
       if (eventType === 'web_app_close') {
         if (webApp) {
           const key = getWebAppKey(webApp);
-          closeWebApp({ key, skipClosingConfirmation: true });
+          closeBrowserTab({ key, skipClosingConfirmation: true });
         }
       }
 
@@ -231,7 +231,11 @@ const useWebAppFrame = (
       }
 
       if (eventType === 'web_app_open_invoice') {
+        if (!webApp) return;
+
+        const key = getWebAppKey(webApp);
         setWebAppPaymentSlug({
+          key,
           slug: eventData.slug,
         });
         openInvoice({

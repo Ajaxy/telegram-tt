@@ -23,7 +23,7 @@
 .authorName {
   overflow: hidden;
 
-  font-size: calc(1rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-body);
   font-weight: var(--font-weight-semibold);
   line-height: 1.2;
   text-overflow: ellipsis;
@@ -32,7 +32,7 @@
 
 .date {
   margin-top: 0.125rem;
-  font-size: calc(0.875rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-small);
   color: var(--color-text-meta);
 }
 

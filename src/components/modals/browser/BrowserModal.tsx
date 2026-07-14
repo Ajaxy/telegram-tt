@@ -1,4 +1,3 @@
-import { type MouseEvent as ReactMouseEvent } from 'react';
 import Color from 'colorjs.io';
 import {
   memo, useEffect,
@@ -7,21 +6,29 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiAttachBot, ApiChat, ApiUser } from '../../../api/types';
+import type { ApiAttachBot, ApiChat, ApiUser, ApiWebPageFull } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { Point, Size, ThemeKey } from '../../../types';
-import type { WebApp, WebAppOutboundEvent } from '../../../types/webapp';
+import type { BrowserTab } from '../../../types/browser';
+import type { WebAppOutboundEvent } from '../../../types/webapp';
 
-import { RESIZE_HANDLE_CLASS_NAME } from '../../../config';
+import {
+  INSTANT_VIEW_FONT_SIZE_ADJUST_DEFAULT,
+  INSTANT_VIEW_FONT_SIZE_ADJUST_MAX,
+  INSTANT_VIEW_FONT_SIZE_ADJUST_MIN,
+  INSTANT_VIEW_FONT_SIZE_ADJUST_STEP,
+  RESIZE_HANDLE_CLASS_NAME,
+} from '../../../config';
 import { getWebAppKey } from '../../../global/helpers/bots';
 import {
-  selectCurrentChat, selectTheme, selectUser,
-  selectWebApp,
+  selectCurrentChat, selectFullWebPage, selectTheme, selectUser,
 } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
+import { copyTextToClipboard } from '../../../util/clipboard';
 import { getColorLuma } from '../../../util/colors';
+import { formatPercent } from '../../../util/textFormat';
 import windowSize from '../../../util/windowSize';
 
 import useInterval from '../../../hooks/schedulers/useInterval';
@@ -40,25 +47,28 @@ import DropdownMenu from '../../ui/DropdownMenu';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import Modal from '../../ui/Modal';
-import MinimizedWebAppModal from './MinimizedWebAppModal';
+import InstantViewTab from './InstantViewTab';
+import MinimizedBrowserModal from './MinimizedBrowserModal';
 import MoreAppsTabContent from './MoreAppsTabContent';
-import WebAppModalTabContent from './WebAppModalTabContent';
+import WebAppTab from './WebAppTab';
 
-import styles from './WebAppModal.module.scss';
+import styles from './BrowserModal.module.scss';
 
-type WebAppModalTab = {
+type BrowserModalTab = {
   bot?: ApiUser;
-  webApp: WebApp;
+  browserTab: BrowserTab;
+  webPage?: ApiWebPageFull;
+  key: string;
   isOpen: boolean;
 };
 
 type MoreMenuButtonProps = {
   isOpen?: boolean;
-  onTrigger: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  onTrigger: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 };
 
 export type OwnProps = {
-  modal?: TabState['webApps'];
+  modal?: TabState['browser'];
 };
 
 type StateProps = {
@@ -68,16 +78,19 @@ type StateProps = {
   theme?: ThemeKey;
   cachedSize?: Size;
   cachedPosition?: Point;
+  instantViewFontSizeAdjust: number;
 };
 
 const PROLONG_INTERVAL = 45000; // 45s
 const LUMA_THRESHOLD = 128;
+const IV_FONT_SIZE_ADJUST_PRECISION = 10;
+const IV_FONT_SIZE_ADJUST_TO_PERCENTAGE = 100;
 
 const MINIMIZED_STATE_SIZE = { width: 300, height: 40 };
 const DEFAULT_MAXIMIZED_STATE_SIZE = { width: 420, height: 730 };
 const MAXIMIZED_STATE_MINIMUM_SIZE = { width: 300, height: 300 };
 
-const WebAppModal = ({
+const BrowserModal = ({
   modal,
   chat,
   bot,
@@ -85,20 +98,24 @@ const WebAppModal = ({
   theme,
   cachedSize,
   cachedPosition,
+  instantViewFontSizeAdjust,
 }: OwnProps & StateProps) => {
   const {
-    closeActiveWebApp,
-    closeWebAppModal,
+    closeBrowserTab,
+    closeBrowserModal,
     prolongWebView,
     toggleAttachBot,
     openChat,
-    changeWebAppModalState,
-    openWebAppTab,
+    openUrl,
+    showNotification,
+    setSharedSettingOption,
+    changeBrowserModalState,
+    openBrowserTab,
     updateWebApp,
     openMoreAppsTab,
     closeMoreAppsTab,
-    updateMiniAppCachedPosition,
-    updateMiniAppCachedSize,
+    updateBrowserCachedPosition,
+    updateBrowserCachedSize,
   } = getActions();
 
   const [getMaximizedStateSize, setMaximizedStateSize] = useSignal(cachedSize || DEFAULT_MAXIMIZED_STATE_SIZE);
@@ -114,23 +131,34 @@ const WebAppModal = ({
   }
 
   const {
-    openedWebApps, activeWebAppKey, openedOrderedKeys, sessionKeys, isMoreAppsTabActive,
+    openedTabs, activeTabKey, openedOrderedKeys, sessionKeys, isMoreAppsTabActive,
   } = modal || {};
-  const activeWebApp = activeWebAppKey ? openedWebApps?.[activeWebAppKey] : undefined;
+  const activeBrowserTab = activeTabKey ? openedTabs?.[activeTabKey] : undefined;
+  const activeWebApp = activeBrowserTab?.type === 'webApp' ? activeBrowserTab.webApp : undefined;
+  const instantViewFontSizePercentage = getInstantViewFontSizePercentage(instantViewFontSizeAdjust);
   const {
     isBackButtonVisible, headerColor, backgroundColor, isSettingsButtonVisible,
   } = activeWebApp || {};
 
   const tabs = useMemo(() => {
-    return openedOrderedKeys?.map((key) => {
-      const webApp = openedWebApps![key];
-      return {
-        bot: getGlobal().users.byId[webApp.botId],
-        webApp,
-        isOpen: Boolean(activeWebApp && (key === getWebAppKey(activeWebApp))),
-      };
-    });
-  }, [openedOrderedKeys, openedWebApps, activeWebApp]);
+    return openedOrderedKeys?.reduce<BrowserModalTab[]>((acc, key) => {
+      const browserTab = openedTabs![key];
+      if (!browserTab) return acc;
+      const global = getGlobal();
+      const tabBot = browserTab.type === 'webApp' ? global.users.byId[browserTab.webApp.botId] : undefined;
+      const webPage = browserTab.type === 'instantView' ? selectFullWebPage(global, browserTab.webPageId) : undefined;
+      acc.push({
+        bot: tabBot,
+        browserTab,
+        webPage,
+        key,
+        isOpen: key === activeTabKey,
+      });
+      return acc;
+    }, []);
+  }, [openedOrderedKeys, openedTabs, activeTabKey]);
+  const activeTab = tabs?.find((tab) => tab.isOpen);
+  const activeInstantViewUrl = activeTab?.browserTab.type === 'instantView' ? activeTab.webPage?.url : undefined;
 
   const { isMobile } = useAppLayout();
   const isOpen = modal?.isModalOpen || false;
@@ -176,7 +204,7 @@ const WebAppModal = ({
   }, [supportMultiTabMode, headerElement, containerElement, isFullScreen]);
 
   useEffect(() => {
-    changeWebAppModalState({ state: 'maximized' });
+    changeBrowserModalState({ state: 'maximized' });
   }, [supportMultiTabMode]);
 
   const {
@@ -199,7 +227,7 @@ const WebAppModal = ({
   const y = position?.y;
   useEffect(() => {
     if (!isDragging && x !== undefined && y !== undefined) {
-      updateMiniAppCachedPosition({ position: { x, y } });
+      updateBrowserCachedPosition({ position: { x, y } });
     }
   }, [isDragging, x, y]);
 
@@ -210,7 +238,7 @@ const WebAppModal = ({
         return;
       }
 
-      updateMiniAppCachedSize({ size });
+      updateBrowserCachedSize({ size });
     }
   }, [isDragging, isMaximizedState, size]);
 
@@ -227,28 +255,32 @@ const WebAppModal = ({
 
   const oldLang = useOldLang();
   const lang = useLang();
-  const {
-    queryId,
-  } = activeWebApp || {};
 
-  const openTabsCount = openedWebApps ? Object.values(openedWebApps).length : 0;
+  const openTabsCount = openedTabs ? Object.values(openedTabs).length : 0;
+  const hasWebViewToProlong = useMemo(() => {
+    return openedTabs && Object.values(openedTabs).some((tab) => {
+      return tab.type === 'webApp' && Boolean(tab.webApp.queryId);
+    });
+  }, [openedTabs]);
 
   useInterval(() => {
-    if (!openedWebApps) return;
-    Object.keys(openedWebApps).forEach((key) => {
-      const webApp = openedWebApps[key];
-
+    if (!openedTabs) return;
+    Object.entries(openedTabs).forEach(([key, tab]) => {
+      if (tab.type !== 'webApp') return;
+      const { webApp } = tab;
+      const { queryId: webAppQueryId } = webApp;
       const peerId = webApp.isJoinChat ? webApp.peerId : (webApp.peerId || chat?.id);
-      if (webApp.queryId && peerId) {
-        prolongWebView({
-          botId: webApp.botId,
-          queryId: webApp.queryId,
-          peerId,
-          replyInfo: webApp.replyInfo,
-        });
-      }
+      if (!webAppQueryId || !peerId) return;
+
+      prolongWebView({
+        key,
+        botId: webApp.botId,
+        queryId: webAppQueryId,
+        peerId,
+        replyInfo: webApp.replyInfo,
+      });
     });
-  }, queryId ? PROLONG_INTERVAL : undefined, true);
+  }, hasWebViewToProlong ? PROLONG_INTERVAL : undefined, true);
 
   // eslint-disable-next-line no-null/no-null
   const sendEventCallbackRef = useRef<((event: WebAppOutboundEvent) => void) | null>(null);
@@ -282,11 +314,13 @@ const WebAppModal = ({
   });
 
   const handleRefreshClick = useLastCallback(() => {
-    reloadFrame(activeWebApp!.url);
+    if (!activeWebApp) return;
+
+    reloadFrame(activeWebApp.url);
   });
 
   const handleModalClose = useLastCallback(() => {
-    closeWebAppModal();
+    closeBrowserModal();
   });
 
   const handleCloseMoreAppsTab = useLastCallback(() => {
@@ -294,10 +328,10 @@ const WebAppModal = ({
   });
 
   const handleTabClose = useLastCallback(() => {
-    if (openTabsCount > 1) {
-      closeActiveWebApp();
+    if (openTabsCount > 1 && activeTabKey) {
+      closeBrowserTab({ key: activeTabKey });
     } else {
-      closeWebAppModal();
+      closeBrowserModal();
     }
   });
 
@@ -330,19 +364,47 @@ const WebAppModal = ({
   });
 
   const handleCollapseClick = useLastCallback(() => {
-    changeWebAppModalState({ state: 'minimized' });
+    changeBrowserModalState({ state: 'minimized' });
   });
 
   const handleFullscreenClick = useLastCallback(() => {
-    changeWebAppModalState({ state: 'fullScreen' });
+    changeBrowserModalState({ state: 'fullScreen' });
   });
 
   const handleOpenMoreAppsTabClick = useLastCallback(() => {
     openMoreAppsTab();
   });
 
-  const handleTabClick = useLastCallback((tab: WebAppModalTab) => {
-    openWebAppTab({ webApp: tab.webApp });
+  const handleTabClick = useLastCallback((tab: BrowserModalTab) => {
+    openBrowserTab({ tab: tab.browserTab });
+  });
+
+  const handleDecreaseInstantViewFontSize = useLastCallback(() => {
+    updateInstantViewFontSizeAdjust(-INSTANT_VIEW_FONT_SIZE_ADJUST_STEP);
+  });
+
+  const handleIncreaseInstantViewFontSize = useLastCallback(() => {
+    updateInstantViewFontSizeAdjust(INSTANT_VIEW_FONT_SIZE_ADJUST_STEP);
+  });
+
+  const handleOpenInstantViewUrl = useLastCallback(() => {
+    if (!activeInstantViewUrl) return;
+
+    handleContextMenuClose();
+    openUrl({ url: activeInstantViewUrl, shouldSkipModal: true, ignoreDeepLinks: true });
+  });
+
+  const handleCopyInstantViewUrl = useLastCallback(() => {
+    if (!activeInstantViewUrl) return;
+
+    copyTextToClipboard(activeInstantViewUrl);
+    showNotification({ message: lang('LinkCopied') });
+    handleContextMenuClose();
+  });
+
+  const handleInstantViewTabClose = useLastCallback(() => {
+    handleContextMenuClose();
+    handleTabClose();
   });
 
   const openBotChat = useLastCallback(() => {
@@ -365,13 +427,21 @@ const WebAppModal = ({
         size={supportMultiTabMode ? 'tiny' : 'smaller'}
         color="translucent"
         onClick={onTrigger}
-        ariaLabel="More actions"
+        ariaLabel={lang('AriaMoreButton')}
         iconName="more"
       />
     );
-  }, [isMobile, supportMultiTabMode]);
+  }, [isMobile, lang, supportMultiTabMode]);
 
-  function renderMenuItems() {
+  function updateInstantViewFontSizeAdjust(delta: number) {
+    if (activeBrowserTab?.type !== 'instantView') return;
+
+    setSharedSettingOption({
+      instantViewFontSizeAdjust: getLimitedInstantViewFontSizeAdjust(instantViewFontSizeAdjust + delta),
+    });
+  }
+
+  function renderWebAppMenuItems() {
     return (
       <>
         {chat && bot && chat.id !== bot.id && (
@@ -396,6 +466,54 @@ const WebAppModal = ({
     );
   }
 
+  function renderInstantViewMenuItems() {
+    const isMinimumFontSize = instantViewFontSizeAdjust <= INSTANT_VIEW_FONT_SIZE_ADJUST_MIN;
+    const isMaximumFontSize = instantViewFontSizeAdjust >= INSTANT_VIEW_FONT_SIZE_ADJUST_MAX;
+
+    return (
+      <>
+        <div className={styles.fontSizeRow}>
+          <button
+            type="button"
+            className={styles.fontSizeButton}
+            aria-label={lang('MediaZoomOut')}
+            title={lang('MediaZoomOut')}
+            disabled={isMinimumFontSize}
+            onClick={handleDecreaseInstantViewFontSize}
+          >
+            <Icon name="char" character="A" />
+          </button>
+          <span className={styles.fontSizeValue}>{formatPercent(instantViewFontSizePercentage, 0)}</span>
+          <button
+            type="button"
+            className={buildClassName(styles.fontSizeButton, styles.fontSizeButtonLarge)}
+            aria-label={lang('MediaZoomIn')}
+            title={lang('MediaZoomIn')}
+            disabled={isMaximumFontSize}
+            onClick={handleIncreaseInstantViewFontSize}
+          >
+            <Icon name="char" character="A" />
+          </button>
+        </div>
+        <MenuItem icon="open-in-new-tab" disabled={!activeInstantViewUrl} onClick={handleOpenInstantViewUrl}>
+          {lang('ChatListOpenInNewTab')}
+        </MenuItem>
+        <MenuItem icon="copy" disabled={!activeInstantViewUrl} onClick={handleCopyInstantViewUrl}>
+          {lang('CopyLink')}
+        </MenuItem>
+        <MenuItem icon="close" onClick={handleInstantViewTabClose}>
+          {oldLang('Close')}
+        </MenuItem>
+      </>
+    );
+  }
+
+  function renderMenuItems() {
+    if (activeBrowserTab?.type === 'instantView') return renderInstantViewMenuItems();
+
+    return renderWebAppMenuItems();
+  }
+
   function renderMoreMenu() {
     return (
       <Menu
@@ -409,7 +527,7 @@ const WebAppModal = ({
         getTriggerElement={getTriggerElement}
         getMenuElement={getMenuElement}
         getRootElement={getRootElement}
-        autoClose
+        autoClose={activeBrowserTab?.type !== 'instantView'}
         onClose={handleContextMenuClose}
         onCloseAnimationEnd={handleContextMenuHide}
       >
@@ -445,7 +563,6 @@ const WebAppModal = ({
     const adaptedLuma = theme === 'dark' ? 255 - luma : luma;
     return adaptedLuma > LUMA_THRESHOLD ? 'color-text' : 'color-background';
   }, [headerColor, theme, isMoreAppsTabActive]);
-
   function renderTabCurveBorder(className: string) {
     return (
       <svg
@@ -465,13 +582,15 @@ const WebAppModal = ({
     );
   }
 
-  function renderActiveTab() {
+  function renderActiveTab(key: string) {
+    const isActiveTabWebApp = activeTab?.browserTab.type === 'webApp';
     const style = buildStyle(
       headerTextVar && `--color-header-text: var(--${headerTextVar})`,
       headerColor && `--active-tab-background: ${headerColor}`,
     );
     return (
       <div
+        key={key}
         className={styles.tabButtonWrapper}
         style={style}
       >
@@ -480,13 +599,24 @@ const WebAppModal = ({
           className={styles.tabButton}
         >
           <div className={styles.avatarContainer}>
-            <Avatar
-              size="mini"
-              peer={bot}
-            />
-            <MoreMenuButton onTrigger={handleContextMenu} isOpen={isContextMenuOpen} />
+            {isActiveTabWebApp ? (
+              <>
+                <Avatar
+                  size="mini"
+                  peer={bot}
+                />
+                <MoreMenuButton onTrigger={handleContextMenu} isOpen={isContextMenuOpen} />
+              </>
+            ) : (
+              <>
+                <div className={styles.tabIcon}>
+                  <Icon name="boost" />
+                </div>
+                <MoreMenuButton onTrigger={handleContextMenu} isOpen={isContextMenuOpen} />
+              </>
+            )}
           </div>
-          {attachBot?.shortName ?? bot?.firstName}
+          {getBrowserTabTitle(activeTab, attachBot)}
           <div className={styles.tabRightMask} />
           <Button
             className={styles.tabCloseButton}
@@ -562,9 +692,18 @@ const WebAppModal = ({
       >
         {tabs?.map((tab) => (
           tab.isOpen ? (
-            renderActiveTab()
+            renderActiveTab(tab.key)
+          ) : tab.browserTab.type === 'instantView' ? (
+            <div
+              key={tab.key}
+              className={buildClassName(styles.tabIcon, styles.tabAvatar)}
+              onClick={() => handleTabClick(tab)}
+            >
+              <Icon name="boost" />
+            </div>
           ) : (
             <Avatar
+              key={tab.key}
               className={styles.tabAvatar}
               size="mini"
               peer={tab.bot}
@@ -585,7 +724,7 @@ const WebAppModal = ({
       >
         {!supportMultiTabMode
           ? renderSinglePageModeHeader()
-          : (isMaximizedState ? renderMultiTabHeader() : <MinimizedWebAppModal />)}
+          : (isMaximizedState ? renderMultiTabHeader() : <MinimizedBrowserModal />)}
       </div>
     );
   }
@@ -612,12 +751,12 @@ const WebAppModal = ({
           <div className={backButtonClassName} />
         </Button>
         {renderTabs()}
-        {renderMoreMenu()}
+        {activeBrowserTab && renderMoreMenu()}
 
         <div className={styles.toolBar}>
           {!isMoreAppsTabActive && renderMoreAppsButton()}
 
-          {!isMoreAppsTabActive && (
+          {!isMoreAppsTabActive && activeWebApp && (
             <Button
               className={buildClassName(
                 styles.windowStateButton,
@@ -668,8 +807,8 @@ const WebAppModal = ({
         >
           <div className={backButtonClassName} />
         </Button>
-        <div className="modal-title">{attachBot?.shortName ?? bot?.firstName}</div>
-        {!isMoreAppsTabActive && renderDropdownMoreMenu()}
+        <div className="modal-title">{getBrowserTabTitle(activeTab, attachBot)}</div>
+        {!isMoreAppsTabActive && activeWebApp && renderDropdownMoreMenu()}
       </div>
     );
   }
@@ -702,7 +841,7 @@ const WebAppModal = ({
         isMinimizedState && styles.minimized,
         isFullScreen && styles.fullScreen,
       )}
-      dialogClassName="mini-app-modal-dialog"
+      dialogClassName="browser-modal-dialog"
       dialogStyle={supportMultiTabMode ? draggableStyle : undefined}
       dialogContent={isDraggingEnabled && !isMinimizedState ? renderResizeHandles() : undefined}
       isOpen={isOpen}
@@ -713,20 +852,33 @@ const WebAppModal = ({
       noBackdrop
       noBackdropClose
     >
-      {isFullScreen && renderMoreMenu()}
-      {openedWebApps && sessionKeys?.map((key) => (
-        <WebAppModalTabContent
-          key={key}
-          modal={modal}
-          registerSendEventCallback={registerSendEventCallback}
-          registerReloadFrameCallback={registerReloadFrameCallback}
-          webApp={openedWebApps[key]}
-          isTransforming={isDragging || isResizing}
-          onContextMenuButtonClick={handleContextMenu}
-          isMultiTabSupported={supportMultiTabMode}
-          modalHeight={currentHeight}
-        />
-      ))}
+      {isFullScreen && activeWebApp && renderMoreMenu()}
+      {openedTabs && sessionKeys?.map((key) => {
+        const browserTab = openedTabs[key];
+        if (!browserTab) return undefined;
+
+        return browserTab.type === 'webApp' ? (
+          <WebAppTab
+            key={key}
+            modal={modal}
+            isActive={key === activeTabKey}
+            registerSendEventCallback={registerSendEventCallback}
+            registerReloadFrameCallback={registerReloadFrameCallback}
+            webApp={browserTab.webApp}
+            isTransforming={isDragging || isResizing}
+            onContextMenuButtonClick={handleContextMenu}
+            isMultiTabSupported={supportMultiTabMode}
+            modalHeight={currentHeight}
+          />
+        ) : (
+          <InstantViewTab
+            key={key}
+            webPageId={browserTab.webPageId}
+            fontSizeAdjust={instantViewFontSizeAdjust}
+            isActive={key === activeTabKey}
+          />
+        );
+      })}
       {isMoreAppsTabActive && (<MoreAppsTabContent />)}
     </Modal>
   );
@@ -734,22 +886,50 @@ const WebAppModal = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { modal }): Complete<StateProps> => {
-    const activeWebApp = modal?.activeWebAppKey ? selectWebApp(global, modal.activeWebAppKey) : undefined;
+    const activeBrowserTab = modal?.activeTabKey ? modal.openedTabs[modal.activeTabKey] : undefined;
+    const activeWebApp = activeBrowserTab?.type === 'webApp' ? activeBrowserTab.webApp : undefined;
     const { botId: activeBotId } = activeWebApp || {};
 
     const attachBot = activeBotId ? global.attachMenu.bots[activeBotId] : undefined;
     const bot = activeBotId ? selectUser(global, activeBotId) : undefined;
     const chat = selectCurrentChat(global);
     const theme = selectTheme(global);
-    const { miniAppsCachedPosition, miniAppsCachedSize } = selectSharedSettings(global);
+    const { browserCachedPosition, browserCachedSize, instantViewFontSizeAdjust } = selectSharedSettings(global);
 
     return {
       attachBot,
       bot,
       chat,
       theme,
-      cachedPosition: miniAppsCachedPosition,
-      cachedSize: miniAppsCachedSize,
+      cachedPosition: browserCachedPosition,
+      cachedSize: browserCachedSize,
+      instantViewFontSizeAdjust,
     };
   },
-)(WebAppModal));
+)(BrowserModal));
+
+function getBrowserTabTitle(tab?: BrowserModalTab, attachBot?: ApiAttachBot) {
+  if (!tab) return undefined;
+
+  if (tab.browserTab.type === 'webApp') {
+    return attachBot?.shortName ?? tab.bot?.firstName;
+  }
+
+  return tab.webPage?.title || tab.webPage?.siteName || tab.webPage?.displayUrl;
+}
+
+function getLimitedInstantViewFontSizeAdjust(fontSizeAdjust: number) {
+  return Math.max(
+    INSTANT_VIEW_FONT_SIZE_ADJUST_MIN,
+    Math.min(
+      INSTANT_VIEW_FONT_SIZE_ADJUST_MAX,
+      Math.round(fontSizeAdjust * IV_FONT_SIZE_ADJUST_PRECISION) / IV_FONT_SIZE_ADJUST_PRECISION,
+    ),
+  );
+}
+
+function getInstantViewFontSizePercentage(fontSizeAdjust: number) {
+  return Math.round(
+    (fontSizeAdjust / INSTANT_VIEW_FONT_SIZE_ADJUST_DEFAULT) * IV_FONT_SIZE_ADJUST_TO_PERCENTAGE,
+  );
+}

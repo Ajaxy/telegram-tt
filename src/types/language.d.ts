@@ -1461,8 +1461,8 @@ export interface LangPair {
   'PopularApps': undefined;
   'SearchApps': undefined;
   'Apps': undefined;
-  'AreYouSureCloseMiniApps': undefined;
-  'CloseMiniApps': undefined;
+  'AreYouSureCloseBrowserTabs': undefined;
+  'CloseBrowserTabs': undefined;
   'DoNotAskAgain': undefined;
   'PaymentInfoDone': undefined;
   'DeleteMyAccount': undefined;
@@ -4131,8 +4131,8 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   'StarsAmountText': {
     'amount': V;
   };
-  'MiniAppsMoreTabs': {
-    'botName': V;
+  'BrowserMoreTabs': {
+    'title': V;
     'count': V;
   };
   'PrizeCredits2': {

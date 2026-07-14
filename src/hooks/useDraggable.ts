@@ -10,6 +10,7 @@ import { RESIZE_HANDLE_SELECTOR } from '../config';
 import buildStyle from '../util/buildStyle';
 import { captureEvents } from '../util/captureEvents';
 import getPointerPosition from '../util/events/getPointerPosition';
+import windowSize from '../util/windowSize';
 import useFlag from './useFlag';
 import useLastCallback from './useLastCallback';
 
@@ -43,6 +44,41 @@ const resizeHandleSelectors = Object.keys(resizeHandleSelectorsMap) as ResizeHan
 let resizeTimeout: number | undefined;
 const FULLSCREEN_POSITION = { x: 0, y: 0 };
 
+function getVisibleArea() {
+  return windowSize.get();
+}
+
+function getSizeWithinVisibleArea(size: Size) {
+  const visibleArea = getVisibleArea();
+
+  return {
+    width: Math.min(visibleArea.width, size.width),
+    height: Math.min(visibleArea.height, size.height),
+  };
+}
+
+function getCenteredPositionForSize(size: Size) {
+  const { width, height } = size;
+  const visibleArea = getVisibleArea();
+
+  return {
+    x: (visibleArea.width - width) / 2,
+    y: (visibleArea.height - height) / 2,
+  };
+}
+
+function getPositionInVisibleArea(position: Point, size: Size) {
+  const visibleArea = getVisibleArea();
+  let { x, y } = position;
+
+  if (x < 0) x = 0;
+  if (y < 0) y = 0;
+  if (x + size.width > visibleArea.width) x = visibleArea.width - size.width;
+  if (y + size.height > visibleArea.height) y = visibleArea.height - size.height;
+
+  return { x, y };
+}
+
 export default function useDraggable(
   ref: ElementRef<HTMLElement>,
   dragHandleElementRef: ElementRef<HTMLElement>,
@@ -52,8 +88,12 @@ export default function useDraggable(
   minimumSize: Size = { width: 0, height: 0 },
   cachedPosition?: Point,
 ) {
-  const [elementCurrentPosition, setElementCurrentPosition] = useState<Point | undefined>(cachedPosition);
-  const [elementCurrentSize, setElementCurrentSize] = useState<Size | undefined>(undefined);
+  const initialSize = getSizeWithinVisibleArea(originalSize);
+  const initialPosition = cachedPosition
+    ? getPositionInVisibleArea(cachedPosition, initialSize)
+    : getCenteredPositionForSize(initialSize);
+  const [elementCurrentPosition, setElementCurrentPosition] = useState<Point | undefined>(initialPosition);
+  const [elementCurrentSize, setElementCurrentSize] = useState<Size | undefined>(initialSize);
 
   const [getElementPositionOnStartTransform, setElementPositionOnStartTransform] = useSignal({ x: 0, y: 0 });
   const [getElementSizeOnStartTransform, setElementSizeOnStartTransform] = useSignal({ width: 0, height: 0 });
@@ -65,20 +105,12 @@ export default function useDraggable(
   const element = ref.current;
   const dragHandleElement = dragHandleElementRef.current;
 
-  const [isInitiated, setIsInitiated] = useFlag(false);
   const [wasElementShown, setWasElementShown] = useFlag(false);
   const [isDragging, startDragging, stopDragging] = useFlag(false);
   const [isResizing, startResizing, stopResizing] = useFlag(false);
   const [isWindowsResizing, startWindowResizing, stopWindowResizing] = useFlag(false);
 
   const [hitResizeHandle, setHitResizeHandle] = useState<ResizeHandleType | undefined>(undefined);
-
-  function getVisibleArea() {
-    return {
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
-  }
 
   const updateCurrentPosition = useLastCallback((position: Point) => {
     if (!isFullscreen) setElementCurrentPosition({ x: position.x, y: position.y });
@@ -90,31 +122,12 @@ export default function useDraggable(
 
   const getCenteredPosition = useLastCallback(() => {
     if (!elementCurrentSize) return undefined;
-    const { width, height } = elementCurrentSize;
-
-    const visibleArea = getVisibleArea();
-    const viewportWidth = visibleArea.width;
-    const viewportHeight = visibleArea.height;
-
-    const centeredX = (viewportWidth - width) / 2;
-    const centeredY = (viewportHeight - height) / 2;
-
-    return { x: centeredX, y: centeredY };
+    return getCenteredPositionForSize(elementCurrentSize);
   });
 
   useEffect(() => {
     if (element) setWasElementShown();
   }, [element]);
-
-  useEffect(() => {
-    if (!isInitiated && elementCurrentSize) {
-      const centeredPosition = getCenteredPosition();
-      if (!centeredPosition) return;
-
-      updateCurrentPosition(centeredPosition);
-      setIsInitiated();
-    }
-  }, [elementCurrentSize, isInitiated, element]);
 
   const handleStartDrag = useLastCallback((event: MouseEvent | TouchEvent) => {
     if (event instanceof MouseEvent && event.button !== 0) {
@@ -187,23 +200,7 @@ export default function useDraggable(
   }, [isDragEnabled]);
 
   const ensurePositionInVisibleArea = (x: number, y: number) => {
-    const visibleArea = getVisibleArea();
-
-    const visibleAreaWidth = visibleArea.width;
-    const visibleAreaHeight = visibleArea.height;
-
-    const componentWidth = elementCurrentSize!.width;
-    const componentHeight = elementCurrentSize!.height;
-
-    let newX = x;
-    let newY = y;
-
-    if (newX < 0) newX = 0;
-    if (newY < 0) newY = 0;
-    if (newX + componentWidth > visibleAreaWidth) newX = visibleAreaWidth - componentWidth;
-    if (newY + componentHeight > visibleAreaHeight) newY = visibleAreaHeight - componentHeight;
-
-    return { x: newX, y: newY };
+    return getPositionInVisibleArea({ x, y }, elementCurrentSize!);
   };
 
   const adjustPositionWithinBounds = useLastCallback(() => {
@@ -383,7 +380,7 @@ export default function useDraggable(
 
   const actualPosition = getActualPosition();
 
-  if (!isInitiated || !elementCurrentSize || !actualPosition) {
+  if (!elementCurrentSize || !actualPosition) {
     return {
       isDragging: false,
       style: cursorStyle,

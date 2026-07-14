@@ -2,7 +2,7 @@ import type { ActionReturnType } from '../../types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { applyLangPackDifference, getTranslationFn, requestLangPackDifference } from '../../../util/localization';
-import { isChatChannel } from '../../helpers';
+import { isChatChannel, selectTabBrowserState } from '../../helpers';
 import { getPeerTitle } from '../../helpers/peers';
 import { addActionHandler, setGlobal } from '../../index';
 import {
@@ -154,10 +154,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateWebViewResultSent':
       Object.values(global.byTabId).forEach((tabState) => {
-        Object.entries(tabState.webApps.openedWebApps).forEach(([webAppKey, webApp]) => {
-          if (webApp.queryId === update.queryId) {
+        Object.entries(selectTabBrowserState(tabState).openedTabs).forEach(([tabKey, browserTab]) => {
+          if (browserTab.type === 'webApp' && browserTab.webApp.queryId === update.queryId) {
             actions.resetDraftReplyInfo({ tabId: tabState.id });
-            actions.closeWebApp({ key: webAppKey, tabId: tabState.id });
+            actions.closeBrowserTab({ key: tabKey, skipClosingConfirmation: true, tabId: tabState.id });
           }
         });
       });
@@ -169,21 +169,28 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       Object.values(global.byTabId).forEach((tabState) => {
         const tabId = tabState.id;
-        Object.entries(tabState.webApps.openedWebApps).forEach(([webAppKey, webApp]) => {
+        Object.entries(selectTabBrowserState(tabState).openedTabs).forEach(([webAppKey, browserTab]) => {
+          if (browserTab.type !== 'webApp') return;
+          const { webApp } = browserTab;
           if (webApp.queryId !== queryId) return;
 
           const isChannel = webApp.isJoinChatBroadcast ?? Boolean(chat && isChatChannel(chat));
 
           if (result.type === 'webView') {
             const { botId, peerId: webAppPeerId, isJoinChatBroadcast } = webApp;
-            actions.closeWebApp({ key: webAppKey, skipClosingConfirmation: true, tabId });
+            actions.closeBrowserTab({ key: webAppKey, skipClosingConfirmation: true, tabId });
             actions.openChatInviteWebView({
-              botId, url: result.url, queryId, peerId: webAppPeerId, isBroadcast: isJoinChatBroadcast, tabId,
+              botId,
+              url: result.url,
+              queryId,
+              peerId: webAppPeerId || peerId,
+              isBroadcast: isJoinChatBroadcast ?? isChannel,
+              tabId,
             });
             return;
           }
 
-          actions.closeWebApp({ key: webAppKey, skipClosingConfirmation: true, tabId });
+          actions.closeBrowserTab({ key: webAppKey, skipClosingConfirmation: true, tabId });
 
           if (result.type === 'approved') {
             actions.openChat({ id: peerId, tabId });

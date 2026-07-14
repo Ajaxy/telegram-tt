@@ -77,6 +77,7 @@ type OwnProps = {
   canAutoLoadMedia?: boolean;
   isProtected?: boolean;
   theme: ThemeKey;
+  fontSizeAdjust?: number;
   pageUrl?: string;
   chatId?: string;
   messageId?: number;
@@ -85,6 +86,7 @@ type OwnProps = {
   observeIntersectionForPlaying?: ObserveFn;
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
   sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
+  onTelegramChannelClick?: (channelUsername: string) => void;
 };
 
 type RichTextContext = {
@@ -112,6 +114,7 @@ const RichContent = ({
   canAutoLoadMedia,
   isProtected,
   theme,
+  fontSizeAdjust,
   pageUrl,
   chatId,
   messageId,
@@ -120,6 +123,7 @@ const RichContent = ({
   observeIntersectionForPlaying,
   sharedCanvasRef,
   sharedCanvasHqRef,
+  onTelegramChannelClick,
 }: OwnProps) => {
   const {
     openMapModal, openMediaViewer, openUrl,
@@ -129,6 +133,7 @@ const RichContent = ({
   const containerId = useUniqueId();
   const unsupportedText = lang('PageContentUnsupported');
   const embedTitle = lang('PageContentEmbed');
+  const style = fontSizeAdjust !== undefined ? `--iv-font-size-scale: ${fontSizeAdjust}` : undefined;
 
   const richTextContext: RichTextContext = {
     unsupportedText,
@@ -193,6 +198,7 @@ const RichContent = ({
     observeIntersectionForLoading,
     observeIntersectionForPlaying,
     lang,
+    onTelegramChannelClick,
   };
   function renderTopLevelBlock(block: ApiPageBlock, index: number) {
     const sourceKey = String(index);
@@ -217,15 +223,26 @@ const RichContent = ({
         return renderTextBlock(block.text, styles.subtitle, renderContext);
       case 'kicker':
         return renderTextBlock(block.text, styles.kicker, renderContext);
-      case 'authorDate':
+      case 'authorDate': {
+        const hasAuthor = hasRichText(block.author);
+        const publishedDate = block.publishedDate
+          ? formatDateTime(lang, new Date(block.publishedDate * 1000), { date: 'long', time: 'short' })
+          : undefined;
+
         return (
           <p className={styles.authorDate}>
-            <RichText text={block.author} {...richTextContext} />
-            {block.publishedDate
-              ? ` ${formatDateTime(lang, new Date(block.publishedDate * 1000), { date: 'long' })}`
-              : undefined}
+            {hasAuthor && <RichText text={block.author} {...richTextContext} />}
+            {hasAuthor && publishedDate && (
+              <>
+                {' '}
+                &bull;
+                {' '}
+              </>
+            )}
+            {publishedDate}
           </p>
         );
+      }
       case 'header':
       case 'heading1':
         return renderTextBlock(block.text, styles.heading1, renderContext);
@@ -326,7 +343,13 @@ const RichContent = ({
       case 'slideshow':
         return renderSlideshowBlock(block, renderContext, sourceKey, shouldBreakoutMedia, handleOpenMedia);
       case 'channel':
-        return <ChannelBlock channelUsername={block.channelUsername} title={block.title} />;
+        return (
+          <ChannelBlock
+            channelUsername={block.channelUsername}
+            title={block.title}
+            onTelegramChannelClick={renderContext.onTelegramChannelClick}
+          />
+        );
       case 'embedPost':
         return (
           <EmbedPost
@@ -344,7 +367,7 @@ const RichContent = ({
   }
 
   return (
-    <div id={containerId} className={styles.richContent} dir={isRtl ? 'rtl' : 'auto'}>
+    <div id={containerId} className={styles.richContent} style={style} dir={isRtl ? 'rtl' : 'auto'}>
       {blocks.map(renderTopLevelBlock)}
     </div>
   );
@@ -374,6 +397,7 @@ type RenderBlockContext = {
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   lang: LangFn;
+  onTelegramChannelClick?: (channelUsername: string) => void;
 };
 
 type RenderBlockFn = (block: ApiPageBlock, sourceKey: string) => TeactNode;
@@ -684,7 +708,7 @@ function renderQuoteBlock(
   context: RenderBlockContext,
 ) {
   return (
-    <Blockquote className={styles.block}>
+    <Blockquote className={buildClassName(styles.block, styles.blockquote)}>
       <RichText text={block.text} {...context.richTextContext} />
       {hasRichText(block.caption) && (
         <footer className={styles.quoteCaption}>
@@ -718,7 +742,7 @@ function renderBlockquoteBlocks(
   renderBlock: RenderBlockFn,
 ) {
   return (
-    <Blockquote className={styles.block}>
+    <Blockquote className={buildClassName(styles.block, styles.blockquote)}>
       {block.blocks.map((nestedBlock, index) => renderBlock(nestedBlock, `${sourceKey}-quote-${index}`))}
       {hasRichText(block.caption) && (
         <footer className={styles.quoteCaption}>
@@ -941,18 +965,24 @@ function renderUnsupportedBlock(unsupportedText: string, blockType?: ApiPageBloc
 type ChannelBlockOwnProps = {
   channelUsername: string;
   title: string;
+  onTelegramChannelClick?: (channelUsername: string) => void;
 };
 
 const ChannelBlock = ({
   channelUsername,
   title,
+  onTelegramChannelClick,
 }: ChannelBlockOwnProps) => {
-  const { openTelegramLink, closeInstantView } = getActions();
+  const { openTelegramLink } = getActions();
   const lang = useLang();
   const url = `${TME_LINK_PREFIX}${channelUsername}`;
 
   const handleClick = useLastCallback(() => {
-    closeInstantView();
+    if (onTelegramChannelClick) {
+      onTelegramChannelClick(channelUsername);
+      return;
+    }
+
     openTelegramLink({ url });
   });
 

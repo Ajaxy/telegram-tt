@@ -1,19 +1,44 @@
-.dialog {
-  --modal-background-color: var(--color-background);
+.root {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-background-secondary);
+}
+
+.hidden {
+  display: none;
 }
 
 .article {
+  --surface-inline-padding: 1rem 1rem;
+  --surface-breakout-margin: -1rem -1rem;
+
   display: flex;
   flex-direction: column;
+
+  width: 100%;
+  max-width: calc(100ch + 2rem);
   min-height: 100%;
+  margin-inline: auto;
+  padding-inline: 1rem;
+
+  background-color: var(--color-background);
 }
 
 .content {
   flex: 1 0 auto;
+
+  width: 100%;
+  max-width: 100ch;
+  margin-inline: auto;
+  padding-block-start: 1rem;
+}
+
+.contentWithCover {
+  padding-block-start: 0;
 }
 
 .footerBreakout {
-  margin-block: 0.5rem -1rem;
+  margin-block: 0.5rem 0;
 }
 
 .footer {

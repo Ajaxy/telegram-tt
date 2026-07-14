@@ -1,11 +1,17 @@
 .richContent {
-  --iv-font-size-adjust: 0rem;
+  --iv-font-size-scale: 1;
+  --iv-font-size-body: calc(1.125rem * var(--iv-font-size-scale));
+  --iv-font-size-title: calc(1.5625rem * var(--iv-font-size-scale));
+  --iv-font-size-subtitle: calc(1.375rem * var(--iv-font-size-scale));
+  --iv-font-size-heading2: calc(1.1875rem * var(--iv-font-size-scale));
+  --iv-font-size-compact: calc(1.0625rem * var(--iv-font-size-scale));
+  --iv-font-size-small: calc(1rem * var(--iv-font-size-scale));
 
   user-select: text;
 
   unicode-bidi: plaintext;
 
-  font-size: calc(1rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-body);
   line-height: calc(1em + 0.25rem);
   color: var(--color-text);
 }
@@ -31,19 +37,21 @@
 }
 
 .title {
-  font-size: calc(1.4375rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-title);
   font-weight: var(--font-weight-semibold);
   line-height: 1.2;
 }
 
 .subtitle {
-  font-size: calc(1.25rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-subtitle);
   font-weight: var(--font-weight-semibold);
   line-height: 1.25;
+  color: var(--color-text-secondary);
 }
 
 .kicker {
-  font-size: calc(0.875rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-small);
+  font-weight: var(--font-weight-medium);
 }
 
 .authorDate,
@@ -57,26 +65,34 @@
 
 .authorDate,
 .footer,
-.caption {
-  font-size: calc(0.875rem + var(--iv-font-size-adjust));
+.caption,
+.relatedArticleDescription,
+.relatedArticleMeta,
+.richContent :global(.CodeBlock .code-title),
+.richContent :global(.CodeBlock .code-block) {
+  font-size: var(--iv-font-size-small);
+}
+
+.blockquote {
+  font-size: var(--iv-font-size-compact);
 }
 
 .heading1 {
-  font-size: calc(1.25rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-subtitle);
   font-weight: var(--font-weight-semibold);
   line-height: 1.25;
 }
 
 .heading2,
 .tableTitle {
-  font-size: calc(1.0625rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-heading2);
   font-weight: var(--font-weight-semibold);
   line-height: 1.3;
 }
 
 .heading3,
 .heading4 {
-  font-size: calc(1rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-body);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -143,7 +159,7 @@
 
   min-width: 0;
 
-  font-size: calc(1rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-body);
   font-weight: var(--font-weight-semibold);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -162,7 +178,7 @@
 .list {
   margin: 0 0 0.75rem;
   padding-inline-start: 1.25rem;
-  font-size: calc(1rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-body);
   line-height: calc(1em + 0.25rem);
 }
 
@@ -199,7 +215,7 @@
 
 .pullquote,
 .pullquoteCaption {
-  font-size: calc(0.9375rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-compact);
   line-height: 1.35;
   text-align: center;
   text-wrap: balance;
@@ -222,7 +238,7 @@
 
 .detailsSummary {
   cursor: var(--custom-cursor, pointer);
-  font-size: calc(0.9375rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-compact);
   font-weight: var(--font-weight-medium);
 }
 
@@ -287,7 +303,7 @@
 
 .tableCell {
   padding: 0.375rem;
-  font-size: calc(0.9375rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-compact);
   vertical-align: top;
 }
 
@@ -317,7 +333,7 @@
   padding: 0.5rem 0.75rem;
   border-radius: var(--border-radius-default);
 
-  font-size: calc(0.9375rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-compact);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-meta);
 
@@ -347,13 +363,8 @@
 }
 
 .relatedArticleTitle {
-  font-size: calc(0.9375rem + var(--iv-font-size-adjust));
+  font-size: var(--iv-font-size-compact);
   font-weight: var(--font-weight-semibold);
-}
-
-.relatedArticleDescription,
-.relatedArticleMeta {
-  font-size: calc(0.875rem + var(--iv-font-size-adjust));
 }
 
 .relatedArticlePhoto {
@@ -391,9 +402,13 @@
   background-color: var(--color-primary-opacity);
 }
 
-.inlineCode {
+.richContent .inlineCode {
   font-family: var(--font-family-monospace);
-  font-size: 0.875em;
+  font-size: var(--iv-font-size-small);
+}
+
+.richContent :global(.CodeBlock .hljs) {
+  font-size: inherit;
 }
 
 .subscript,
@@ -445,4 +460,10 @@
   :global(.thumbnail) {
     object-fit: cover;
   }
+}
+
+.title,
+.subtitle,
+.authorDate {
+  margin-bottom: 0.25rem;
 }

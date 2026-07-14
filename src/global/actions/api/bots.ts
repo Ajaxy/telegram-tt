@@ -45,8 +45,8 @@ import {
   updateUserFullInfo,
 } from '../../reducers';
 import {
-  activateWebAppIfOpen,
-  addWebAppToOpenList,
+  activateBrowserTabIfOpen,
+  addBrowserTabToOpenList,
   replaceInlineBotSettings,
   replaceInlineBotsIsLoading,
 } from '../../reducers/bots';
@@ -68,6 +68,7 @@ import {
   selectTabState,
   selectUser,
   selectUserFullInfo,
+  selectWebApp,
 } from '../../selectors';
 import { selectSharedSettings } from '../../selectors/sharedState';
 import { selectDraft } from '../../selectors/threads.ts';
@@ -612,7 +613,7 @@ addActionHandler('requestSimpleWebView', async (global, actions, payload): Promi
     botId,
     buttonText,
   };
-  global = addWebAppToOpenList(global, newActiveApp, true, true, tabId);
+  global = addBrowserTabToOpenList(global, { type: 'webApp', webApp: newActiveApp }, true, true, tabId);
   setGlobal(global);
 });
 
@@ -680,11 +681,11 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
     replyInfo,
     buttonText,
   };
-  global = addWebAppToOpenList(global, newActiveApp, true, true, tabId);
+  global = addBrowserTabToOpenList(global, { type: 'webApp', webApp: newActiveApp }, true, true, tabId);
   setGlobal(global);
 
   if (isFullScreen && getIsWebAppsFullscreenSupported()) {
-    actions.changeWebAppModalState({ state: 'fullScreen', tabId });
+    actions.changeBrowserModalState({ state: 'fullScreen', tabId });
   }
 });
 
@@ -725,11 +726,11 @@ addActionHandler('openChatInviteWebView', (global, actions, payload): ActionRetu
     isJoinChatBroadcast: isBroadcast,
     buttonText: '',
   };
-  global = addWebAppToOpenList(global, newActiveApp, true, true, tabId);
+  global = addBrowserTabToOpenList(global, { type: 'webApp', webApp: newActiveApp }, true, true, tabId);
   setGlobal(global);
 
   if (isFullscreen && getIsWebAppsFullscreenSupported()) {
-    actions.changeWebAppModalState({ state: 'fullScreen', tabId });
+    actions.changeBrowserModalState({ state: 'fullScreen', tabId });
   }
 });
 
@@ -839,12 +840,12 @@ addActionHandler('requestMainWebView', async (global, actions, payload): Promise
     queryId,
     buttonText: '',
   };
-  global = addWebAppToOpenList(global, newActiveApp, true, true, tabId);
+  global = addBrowserTabToOpenList(global, { type: 'webApp', webApp: newActiveApp }, true, true, tabId);
   setGlobal(global);
   actions.bumpTopPeerRating({ category: 'botsApp', peerId: botId });
 
   if (isFullscreen && getIsWebAppsFullscreenSupported()) {
-    actions.changeWebAppModalState({ state: 'fullScreen', tabId });
+    actions.changeBrowserModalState({ state: 'fullScreen', tabId });
   }
 });
 
@@ -876,25 +877,25 @@ addActionHandler('loadPreviewMedias', async (global, actions, payload): Promise<
   }
 });
 
-addActionHandler('openWebAppsCloseConfirmationModal', (global, actions, payload): ActionReturnType => {
+addActionHandler('openBrowserCloseConfirmationModal', (global, actions, payload): ActionReturnType => {
   const {
     tabId = getCurrentTabId(),
   } = payload || {};
 
   return updateTabState(global, {
-    isWebAppsCloseConfirmationModalOpen: true,
+    isBrowserCloseConfirmationModalOpen: true,
   }, tabId);
 });
 
-addActionHandler('closeWebAppsCloseConfirmationModal', (global, actions, payload): ActionReturnType => {
+addActionHandler('closeBrowserCloseConfirmationModal', (global, actions, payload): ActionReturnType => {
   const { shouldSkipInFuture, tabId = getCurrentTabId() } = payload || {};
 
   global = updateSharedSettings(global, {
-    shouldSkipWebAppCloseConfirmation: Boolean(shouldSkipInFuture),
+    shouldSkipBrowserCloseConfirmation: Boolean(shouldSkipInFuture),
   });
 
   return updateTabState(global, {
-    isWebAppsCloseConfirmationModalOpen: undefined,
+    isBrowserCloseConfirmationModalOpen: undefined,
   }, tabId);
 });
 
@@ -994,17 +995,17 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
     botId,
     buttonText: '',
   };
-  global = addWebAppToOpenList(global, newActiveApp, true, true, tabId);
+  global = addBrowserTabToOpenList(global, { type: 'webApp', webApp: newActiveApp }, true, true, tabId);
   setGlobal(global);
 
   if (isFullscreen && getIsWebAppsFullscreenSupported()) {
-    actions.changeWebAppModalState({ state: 'fullScreen', tabId });
+    actions.changeBrowserModalState({ state: 'fullScreen', tabId });
   }
 });
 
 addActionHandler('prolongWebView', async (global, actions, payload): Promise<void> => {
   const {
-    botId, peerId, isSilent, replyInfo, queryId, tabId = getCurrentTabId(),
+    key, botId, peerId, isSilent, replyInfo, queryId, tabId = getCurrentTabId(),
   } = payload;
 
   const bot = selectUser(global, botId);
@@ -1024,7 +1025,7 @@ addActionHandler('prolongWebView', async (global, actions, payload): Promise<voi
   });
 
   if (!result) {
-    actions.closeActiveWebApp({ tabId });
+    actions.closeBrowserTab({ key, skipClosingConfirmation: true, tabId });
   }
 });
 
@@ -1062,11 +1063,9 @@ addActionHandler('toggleAttachBot', async (global, actions, payload): Promise<vo
 export function isWepAppOpened<T extends GlobalState>(
   global: T, webApp: Partial<WebApp>, tabId: number,
 ) {
-  const currentTabState = selectTabState(global, tabId);
-  const openedWebApps = currentTabState.webApps.openedWebApps;
   const key = getWebAppKey(webApp);
   if (!key) return false;
-  return openedWebApps[key];
+  return Boolean(selectWebApp(global, key, tabId));
 }
 
 export function checkIfOpenOrActivate<T extends GlobalState>(
@@ -1076,7 +1075,7 @@ export function checkIfOpenOrActivate<T extends GlobalState>(
   if (isWepAppOpened(global, webAppForCheck, tabId)) {
     const key = getWebAppKey(webAppForCheck);
     if (key) {
-      global = activateWebAppIfOpen(global, key, tabId);
+      global = activateBrowserTabIfOpen(global, key, tabId);
       setGlobal(global);
     }
     return true;

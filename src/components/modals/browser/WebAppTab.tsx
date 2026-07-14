@@ -1,19 +1,19 @@
-import type { FC } from '../../../lib/teact/teact';
-import { memo, useEffect, useMemo, useRef, useState } from '../../../lib/teact/teact';
+import { memo, useEffect, useRef, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiAttachBot, ApiBotAppSettings, ApiUser } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { BotAppPermissions, ThemeKey } from '../../../types';
+import type { BrowserModalStateType } from '../../../types/browser';
 import type {
   PopupOptions,
   WebApp,
   WebAppInboundEvent,
-  WebAppModalStateType,
   WebAppOutboundEvent,
 } from '../../../types/webapp';
 
 import { TME_LINK_PREFIX, VERIFY_AGE_MIN_DEFAULT } from '../../../config';
+import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { convertToApiChatType, getUserFullName } from '../../../global/helpers';
 import { getWebAppKey } from '../../../global/helpers/bots';
 import {
@@ -22,14 +22,13 @@ import {
   selectTheme,
   selectUser,
   selectUserFullInfo,
-  selectWebApp,
 } from '../../../global/selectors';
 import { IFRAME_ALLOW_ATTRIBUTES, IFRAME_SANDBOX_ATTRIBUTES } from '../../../util/browser/iframe';
 import { getGeolocationStatus, IS_GEOLOCATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle.ts';
 import download from '../../../util/download';
-import { extractCurrentThemeParams, validateHexColor } from '../../../util/themeStyle';
+import { extractCurrentThemeParams, FALLBACK_THEME_PARAMS, validateHexColor } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
 import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
@@ -54,7 +53,7 @@ import Modal from '../../ui/Modal';
 import Spinner from '../../ui/Spinner';
 import Transition from '../../ui/Transition';
 
-import styles from './WebAppModalTabContent.module.scss';
+import styles from './WebAppTab.module.scss';
 
 type WebAppButton = {
   isVisible: boolean;
@@ -69,14 +68,15 @@ type WebAppButton = {
 };
 
 export type OwnProps = {
-  modal?: TabState['webApps'];
+  modal?: TabState['browser'];
   webApp?: WebApp;
-  registerSendEventCallback: (callback: (event: WebAppOutboundEvent) => void) => void;
-  registerReloadFrameCallback: (callback: (url: string) => void) => void;
-  onContextMenuButtonClick: (e: React.MouseEvent) => void;
+  isActive?: boolean;
   isTransforming?: boolean;
   isMultiTabSupported?: boolean;
   modalHeight: number;
+  registerSendEventCallback: (callback: (event: WebAppOutboundEvent) => void) => void;
+  registerReloadFrameCallback: (callback: (url: string) => void) => void;
+  onContextMenuButtonClick: (e: React.MouseEvent) => void;
 };
 
 type StateProps = {
@@ -87,7 +87,7 @@ type StateProps = {
   theme?: ThemeKey;
   isPaymentModalOpen?: boolean;
   paymentStatus?: TabState['payment']['status'];
-  modalState?: WebAppModalStateType;
+  modalState?: BrowserModalStateType;
   botAppPermissions?: BotAppPermissions;
   verifyAgeMin?: number;
   verifyAgeBotUsername?: string;
@@ -107,13 +107,14 @@ const DEFAULT_BUTTON_TEXT: Record<string, string> = {
 
 const NBSP = '\u00A0';
 
-const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
+const WebAppTab = ({
   modal,
   webApp,
   bot,
   theme,
   isPaymentModalOpen,
   paymentStatus,
+  isActive,
   isTransforming,
   modalState,
   isMultiTabSupported,
@@ -125,9 +126,9 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   registerSendEventCallback,
   registerReloadFrameCallback,
   onContextMenuButtonClick,
-}) => {
+}: OwnProps & StateProps) => {
   const {
-    closeActiveWebApp,
+    closeBrowserTab,
     sendWebViewData,
     toggleAttachBot,
     openTelegramLink,
@@ -140,8 +141,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     showNotification,
     openEmojiStatusAccessModal,
     openLocationAccessModal,
-    changeWebAppModalState,
-    closeWebAppModal,
+    changeBrowserModalState,
+    closeBrowserModal,
     openPreparedInlineMessageModal,
     updateContentSettings,
   } = getActions();
@@ -169,12 +170,13 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
   const headerButtonCaptionRef = useRef<HTMLDivElement>();
 
+  const isFullscreenOwnerRef = useRef(false);
   const isFullscreen = modalState === 'fullScreen';
   const isMinimizedState = modalState === 'minimized';
 
   const exitFullScreenCallback = useLastCallback(() => {
     setTimeout(() => {
-      changeWebAppModalState({ state: 'maximized' });
+      changeBrowserModalState({ state: 'maximized' });
     }, COLLAPSING_WAIT);
   });
 
@@ -186,8 +188,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
   const [, setFullscreen, exitFullscreen] = useFullscreen(fullscreenElementRef, exitFullScreenCallback);
 
-  const activeWebApp = modal?.activeWebAppKey ? modal.openedWebApps[modal.activeWebAppKey] : undefined;
-  const { appName: activeWebAppName, backgroundColor } = activeWebApp || {};
+  const { appName, backgroundColor } = webApp || {};
   const {
     url, buttonText, isBackButtonVisible,
   } = webApp || {};
@@ -200,9 +201,6 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const isRemoveModalOpen = Boolean(webApp?.isRemoveModalOpen);
 
   const webAppKey = webApp && getWebAppKey(webApp);
-  const activeWebAppKey = activeWebApp && getWebAppKey(activeWebApp);
-
-  const isActive = (activeWebApp && webApp) && activeWebAppKey === webAppKey;
 
   const isAvailable = IS_GEOLOCATION_SUPPORTED;
   const isAccessRequested = botAppPermissions?.geolocation !== undefined;
@@ -213,9 +211,17 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     updateWebApp({ key: webAppKey, update: updatedPartialWebApp });
   });
 
-  const themeParams = useMemo(() => {
-    return extractCurrentThemeParams();
-    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+  const closeCurrentWebApp = useLastCallback(() => {
+    if (!webAppKey) return;
+    closeBrowserTab({ key: webAppKey });
+  });
+
+  const [themeParams, setThemeParams] = useState(FALLBACK_THEME_PARAMS);
+
+  useEffect(() => {
+    requestMeasure(() => {
+      setThemeParams(extractCurrentThemeParams());
+    });
   }, [theme]);
 
   useEffect(() => {
@@ -286,7 +292,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const handleConfirmCloseModal = useLastCallback(() => {
     updateCurrentWebApp({ shouldConfirmClosing: false, isCloseModalOpen: false });
     setTimeout(() => {
-      closeActiveWebApp();
+      closeCurrentWebApp();
     }, ANIMATION_WAIT);
   });
 
@@ -364,13 +370,21 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const setFullscreenCallback = useLastCallback(() => {
     if (!checkIfFullscreen() && isActive) {
       setFullscreen?.();
+      isFullscreenOwnerRef.current = true;
     }
   });
 
   const exitIfFullscreenCallback = useLastCallback(() => {
-    if (checkIfFullscreen() && isActive) {
-      exitFullscreen?.();
+    const isBrowserFullscreen = checkIfFullscreen();
+    if (!isBrowserFullscreen) {
+      isFullscreenOwnerRef.current = false;
+      return;
     }
+
+    if (!isActive && !isFullscreenOwnerRef.current) return;
+
+    exitFullscreen?.();
+    isFullscreenOwnerRef.current = false;
   });
 
   const sendFullScreenChangedCallback = useLastCallback(
@@ -415,7 +429,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
   useSyncEffect(([prevIsPaymentModalOpen]) => {
     if (isPaymentModalOpen === prevIsPaymentModalOpen) return;
-    if (webApp?.slug && !isPaymentModalOpen && paymentStatus) {
+    if (webApp?.slug && webAppKey && !isPaymentModalOpen && paymentStatus) {
       sendEvent({
         eventType: 'invoice_closed',
         eventData: {
@@ -424,18 +438,19 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
         },
       });
       setWebAppPaymentSlug({
+        key: webAppKey,
         slug: undefined,
       });
       resetPaymentStatus();
     }
-  }, [isPaymentModalOpen, paymentStatus, sendEvent, webApp?.slug]);
+  }, [isPaymentModalOpen, paymentStatus, sendEvent, webApp?.slug, webAppKey]);
 
   const handleRemoveAttachBot = useLastCallback(() => {
     toggleAttachBot({
       botId: bot!.id,
       isEnabled: false,
     });
-    closeActiveWebApp();
+    closeCurrentWebApp();
   });
 
   const handleRejectPhone = useLastCallback(() => {
@@ -638,8 +653,10 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     const { eventType, eventData } = event;
 
     if (eventType === 'web_app_request_fullscreen') {
+      if (!isActive) return;
+
       if (getIsWebAppsFullscreenSupported()) {
-        changeWebAppModalState({ state: 'fullScreen' });
+        changeBrowserModalState({ state: 'fullScreen' });
       } else {
         sendEvent({
           eventType: 'fullscreen_failed',
@@ -655,7 +672,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_open_tg_link') {
-      changeWebAppModalState({ state: 'minimized' });
+      changeBrowserModalState({ state: 'minimized' });
 
       const linkUrl = TME_LINK_PREFIX + eventData.path_full;
       openTelegramLink({ url: linkUrl, shouldIgnoreCache: eventData.force_request });
@@ -688,7 +705,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_data_send') {
-      closeActiveWebApp();
+      closeCurrentWebApp();
       sendWebViewData({
         bot: bot!,
         buttonText: buttonText!,
@@ -764,7 +781,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
         isSamePeer,
       });
 
-      closeActiveWebApp();
+      closeCurrentWebApp();
     }
 
     if (eventType === 'web_app_request_phone') {
@@ -955,7 +972,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const appNameDisplayTimeoutRef = useRef<number>();
 
   useEffect(() => {
-    if (isFullscreen && isOpen && Boolean(activeWebAppName)) {
+    if (isFullscreen && isOpen && Boolean(appName)) {
       setShouldShowAppNameInFullscreen(true);
 
       if (appNameDisplayTimeoutRef.current) {
@@ -980,7 +997,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
         clearTimeout(appNameDisplayTimeoutRef.current);
       }
     };
-  }, [isFullscreen, isOpen, activeWebAppName]);
+  }, [isFullscreen, isOpen, appName]);
 
   useEffect(() => {
     if (mainButtonChangeTimeoutRef.current) clearTimeout(mainButtonChangeTimeoutRef.current);
@@ -1045,8 +1062,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     } else {
       exitIfFullscreenCallback();
       sendFullScreenChanged(false);
-      changeWebAppModalState({ state: 'maximized' });
-      closeWebAppModal();
+      changeBrowserModalState({ state: 'maximized' });
+      closeBrowserModal();
     }
   });
 
@@ -1062,7 +1079,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     styles.closeIcon,
     isBackButtonVisible && styles.stateBack,
   );
-  const backButtonCaption = shouldShowAppNameInFullscreen ? activeWebAppName
+  const backButtonCaption = shouldShowAppNameInFullscreen ? appName
     : oldLang(isBackButtonVisible ? 'Back' : 'Close');
 
   const hasHeaderElement = headerButtonCaptionRef?.current;
@@ -1371,20 +1388,20 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): Complete<StateProps> => {
-    const activeWebApp = modal?.activeWebAppKey ? selectWebApp(global, modal.activeWebAppKey) : undefined;
-    const { botId: activeBotId } = activeWebApp || {};
+  (global, { modal, webApp }): Complete<StateProps> => {
+    const { botId } = webApp || {};
     const modalState = modal?.modalState;
     const { verifyAgeMin, verifyAgeBotUsername } = global.appConfig;
 
-    const attachBot = activeBotId ? global.attachMenu.bots[activeBotId] : undefined;
-    const bot = activeBotId ? selectUser(global, activeBotId) : undefined;
-    const userFullInfo = activeBotId ? selectUserFullInfo(global, activeBotId) : undefined;
+    const attachBot = botId ? global.attachMenu.bots[botId] : undefined;
+    const bot = botId ? selectUser(global, botId) : undefined;
+    const userFullInfo = botId ? selectUserFullInfo(global, botId) : undefined;
     const botAppSettings = userFullInfo?.botInfo?.appSettings;
     const currentUser = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
     const theme = selectTheme(global);
-    const { isPaymentModalOpen, status: regularPaymentStatus } = selectTabState(global).payment;
-    const { status: starsPaymentStatus, inputInvoice: starsInputInvoice } = selectTabState(global).starsPayment;
+    const tabState = selectTabState(global);
+    const { isPaymentModalOpen, status: regularPaymentStatus } = tabState.payment;
+    const { status: starsPaymentStatus, inputInvoice: starsInputInvoice } = tabState.starsPayment;
     const botAppPermissions = bot ? selectBotAppPermissions(global, bot.id) : undefined;
 
     const paymentStatus = starsPaymentStatus || regularPaymentStatus;
@@ -1403,4 +1420,4 @@ export default memo(withGlobal<OwnProps>(
       verifyAgeBotUsername,
     };
   },
-)(WebAppModalTabContent));
+)(WebAppTab));

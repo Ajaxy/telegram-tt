@@ -16,13 +16,13 @@ import Checkbox from '../ui/Checkbox';
 import Modal from '../ui/Modal';
 
 export type OwnProps = {
-  modal: TabState['isWebAppsCloseConfirmationModalOpen'];
+  modal: TabState['isBrowserCloseConfirmationModalOpen'];
 };
 
-const WebAppsCloseConfirmationModal = ({
+const BrowserCloseConfirmationModal = ({
   modal,
 }: OwnProps) => {
-  const { closeWebAppsCloseConfirmationModal, closeWebAppModal } = getActions();
+  const { closeBrowserCloseConfirmationModal, closeBrowserModal } = getActions();
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -34,12 +34,12 @@ const WebAppsCloseConfirmationModal = ({
   const containerRef = useRef<HTMLDivElement>();
 
   const onClose = useCallback(() => {
-    closeWebAppsCloseConfirmationModal({ shouldSkipInFuture });
+    closeBrowserCloseConfirmationModal({ shouldSkipInFuture });
   }, [shouldSkipInFuture]);
 
   const confirmHandler = useCallback(() => {
-    closeWebAppModal({ shouldSkipConfirmation: true });
-    closeWebAppsCloseConfirmationModal({ shouldSkipInFuture });
+    closeBrowserModal({ shouldSkipConfirmation: true });
+    closeBrowserCloseConfirmationModal({ shouldSkipInFuture });
   }, [shouldSkipInFuture]);
 
   const handleSelectWithEnter = useCallback((index: number) => {
@@ -51,11 +51,11 @@ const WebAppsCloseConfirmationModal = ({
   return (
     <Modal
       className={buildClassName('confirm')}
-      title={lang('CloseMiniApps')}
+      title={lang('CloseBrowserTabs')}
       isOpen={isOpen}
       onClose={onClose}
     >
-      <p>{lang('AreYouSureCloseMiniApps')}</p>
+      <p>{lang('AreYouSureCloseBrowserTabs')}</p>
       <Checkbox
         className="dialog-checkbox"
         label={lang('DoNotAskAgain')}
@@ -83,4 +83,4 @@ const WebAppsCloseConfirmationModal = ({
   );
 };
 
-export default memo(WebAppsCloseConfirmationModal);
+export default memo(BrowserCloseConfirmationModal);

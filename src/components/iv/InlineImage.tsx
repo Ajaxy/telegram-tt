@@ -4,6 +4,7 @@ import type { ApiDocument } from '../../api/types';
 
 import { getDocumentMediaHash } from '../../global/helpers';
 import buildStyle from '../../util/buildStyle';
+import { REM } from '../common/helpers/mediaDimensions';
 
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
@@ -16,11 +17,15 @@ type OwnProps = {
   height: number;
 };
 
+const INLINE_IMAGE_HEIGHT_EM = 1.125;
+
 const InlineImage = ({
   document,
   width,
   height,
 }: OwnProps) => {
+  const adaptedHeight = height / REM * INLINE_IMAGE_HEIGHT_EM;
+  const adaptedWidth = (width / height) * adaptedHeight;
   const mediaHash = document.id
     ? getDocumentMediaHash(document, 'inline') || getDocumentMediaHash(document, 'full')
     : undefined;
@@ -33,8 +38,8 @@ const InlineImage = ({
     <span
       className={styles.root}
       style={buildStyle(
-        `width: ${width}px`,
-        `height: ${height}px`,
+        `width: ${adaptedWidth}em`,
+        `height: ${adaptedHeight}em`,
       )}
     >
       <img

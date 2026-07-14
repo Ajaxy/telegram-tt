@@ -4,10 +4,11 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiUser } from '../../../api/types';
-import type { WebApp } from '../../../types/webapp';
+import type { ApiUser, ApiWebPageFull } from '../../../api/types';
+import type { BrowserState } from '../../../types/browser';
 
-import { selectActiveWebApp, selectTabState, selectUser } from '../../../global/selectors';
+import { selectTabBrowserState } from '../../../global/helpers/browser';
+import { selectFullWebPage, selectTabState, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { unique } from '../../../util/iteratees';
 
@@ -16,60 +17,66 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 
-import styles from './MinimizedWebAppModal.module.scss';
+import styles from './MinimizedBrowserModal.module.scss';
 
 type StateProps = {
   activeTabBot?: ApiUser;
+  activeWebPage?: ApiWebPageFull;
+  browser: BrowserState;
   isMinimizedState?: boolean;
-  openedWebApps?: Record<string, WebApp>;
 };
 
-const MinimizedWebAppModal = ({
-  activeTabBot, isMinimizedState, openedWebApps,
+const MinimizedBrowserModal = ({
+  activeTabBot, activeWebPage, browser, isMinimizedState,
 }: StateProps) => {
   const {
-    changeWebAppModalState,
-    closeWebAppModal,
+    changeBrowserModalState,
+    closeBrowserModal,
   } = getActions();
 
   const oldLang = useOldLang();
   const lang = useLang();
   const ref = useRef<HTMLDivElement>();
 
-  const openedWebAppsValues = useMemo(() => {
-    return openedWebApps && Object.values(openedWebApps);
-  }, [openedWebApps]);
+  const openedTabsValues = useMemo(() => {
+    return Object.values(browser.openedTabs);
+  }, [browser.openedTabs]);
 
-  const openedTabsCount = openedWebAppsValues?.length;
+  const openedTabsCount = openedTabsValues.length;
 
   const peers = useMemo(() => {
     if (!openedTabsCount) return [];
 
     const global = getGlobal();
     const activeTabBotId = activeTabBot?.id;
-    const openedApps = unique([activeTabBotId, ...openedWebAppsValues.map((app) => app.botId)]);
+    const openedApps = unique([
+      activeTabBotId,
+      ...openedTabsValues.map((tab) => (tab.type === 'webApp' ? tab.webApp.botId : undefined)),
+    ]);
     const bots = openedApps.map((id) => id && selectUser(global, id)).filter(Boolean).slice(0, 3);
     return bots;
-  }, [openedTabsCount, activeTabBot, openedWebAppsValues]);
+  }, [openedTabsCount, activeTabBot, openedTabsValues]);
 
   const handleCloseClick = useLastCallback(() => {
-    closeWebAppModal();
+    closeBrowserModal();
   });
 
   const handleExpandClick = useLastCallback(() => {
-    changeWebAppModalState({ state: 'maximized' });
+    changeBrowserModalState({ state: 'maximized' });
   });
 
   if (!isMinimizedState) return undefined;
 
   function renderTitle() {
-    const activeTabName = peers.length > 0 && peers[0]?.firstName;
+    const activePeerName = activeTabBot?.firstName;
+    const activeTabName = activePeerName || getWebPageTitle(activeWebPage) || lang('InstantView');
     const title = openedTabsCount && activeTabName && openedTabsCount > 1
-      ? lang('MiniAppsMoreTabs',
+      ? lang('BrowserMoreTabs',
         {
-          botName: activeTabName,
+          title: activeTabName,
           count: openedTabsCount - 1,
         },
         {
@@ -101,7 +108,13 @@ const MinimizedWebAppModal = ({
         ariaLabel={oldLang('Close')}
         onClick={handleCloseClick}
       />
-      <AvatarList className={styles.avatars} size="mini" peers={peers} />
+      {peers.length ? (
+        <AvatarList className={styles.avatars} size="mini" peers={peers} />
+      ) : (
+        <div className={styles.browserIcon}>
+          <Icon name="boost" />
+        </div>
+      )}
       {renderTitle()}
       <Button
         className={buildClassName(
@@ -122,17 +135,24 @@ const MinimizedWebAppModal = ({
 export default memo(withGlobal(
   (global): Complete<StateProps> => {
     const tabState = selectTabState(global);
-    const webApps = tabState.webApps;
+    const browser = selectTabBrowserState(tabState);
+    const activeTab = browser.activeTabKey ? browser.openedTabs[browser.activeTabKey] : undefined;
 
-    const { botId } = selectActiveWebApp(global) || {};
-    const { modalState, openedWebApps } = webApps || {};
-    const isMinimizedState = modalState === 'minimized';
+    const botId = activeTab?.type === 'webApp' ? activeTab.webApp.botId : undefined;
+    const activeWebPage = activeTab?.type === 'instantView'
+      ? selectFullWebPage(global, activeTab.webPageId) : undefined;
+    const isMinimizedState = browser.modalState === 'minimized';
     const activeTabBot = botId ? selectUser(global, botId) : undefined;
 
     return {
       activeTabBot,
+      activeWebPage,
+      browser,
       isMinimizedState,
-      openedWebApps,
     };
   },
-)(MinimizedWebAppModal));
+)(MinimizedBrowserModal));
+
+function getWebPageTitle(webPage?: ApiWebPageFull) {
+  return webPage?.title || webPage?.siteName || webPage?.displayUrl;
+}

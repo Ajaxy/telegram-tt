@@ -5,6 +5,7 @@ export * from './messageMedia';
 export * from './middleSearch';
 export * from './reactions';
 export * from './bots';
+export * from './browser';
 export * from './media';
 export * from './symbols';
 export * from './misc';

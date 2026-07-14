@@ -5,6 +5,7 @@ import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
 import { IS_SNAP_EFFECT_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { selectTabBrowserState } from '../helpers/browser';
 import { getMessageVideo, getWebPageVideo } from '../helpers/messageMedia';
 import { selectCurrentManagement } from './management';
 import { selectWebPageFromMessage } from './messages';
@@ -169,16 +170,17 @@ export function selectIsSynced<T extends GlobalState>(global: T) {
 export function selectWebApp<T extends GlobalState>(
   global: T, key: string, ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  return selectTabState(global, tabId).webApps.openedWebApps[key];
+  const tab = selectTabBrowserState(selectTabState(global, tabId)).openedTabs[key];
+  return tab?.type === 'webApp' ? tab.webApp : undefined;
 }
 
 export function selectActiveWebApp<T extends GlobalState>(
   global: T, ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  const activeWebAppKey = selectTabState(global, tabId).webApps.activeWebAppKey;
-  if (!activeWebAppKey) return undefined;
+  const { activeTabKey } = selectTabBrowserState(selectTabState(global, tabId));
+  if (!activeTabKey) return undefined;
 
-  return selectWebApp(global, activeWebAppKey, tabId);
+  return selectWebApp(global, activeTabKey, tabId);
 }
 
 export function selectLeftColumnContentKey<T extends GlobalState>(

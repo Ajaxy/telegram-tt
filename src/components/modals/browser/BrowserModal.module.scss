@@ -248,8 +248,7 @@
 
 .tab-button-wrapper {
   display: flex;
-  margin-right: -0.5rem;
-  margin-left: -0.5rem;
+  margin-inline: -0.75rem;
 }
 
 .tab-button {
@@ -262,8 +261,7 @@
 
   height: 100%;
   padding: 0.5rem;
-  padding-right: 1rem;
-  padding-left: 1rem;
+  padding-inline: 0.5rem;
   border-top-left-radius: var(--border-radius-default);
   border-top-right-radius: var(--border-radius-default);
 
@@ -343,9 +341,74 @@
   color: var(--color-text-secondary);
 }
 
+.tabIcon {
+  cursor: var(--custom-cursor, pointer);
+
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+
+  color: var(--color-white);
+
+  background-color: var(--color-primary);
+}
+
+.tabAvatar {
+  margin-right: 0.5rem;
+}
+
 .web-app-tab-more-menu {
   position: absolute;
   z-index: 1;
+}
+
+.fontSizeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-width: 11.25rem;
+  padding: 0.375rem 0.75rem;
+}
+
+.fontSizeButton {
+  cursor: var(--custom-cursor, pointer);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+
+  font-size: 0.75rem;
+  color: var(--color-text);
+
+  background: none;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.35;
+  }
+}
+
+.fontSizeButtonLarge {
+  font-size: 1.25rem;
+}
+
+.fontSizeValue {
+  min-width: 3.25rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-align: center;
 }
 
 .more-button {

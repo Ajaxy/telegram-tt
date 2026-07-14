@@ -12,11 +12,13 @@ import {
   DEFAULT_RESALE_GIFTS_FILTER_OPTIONS,
   DEFAULT_VOLUME,
   FOLDERS_POSITION_DEFAULT,
+  INSTANT_VIEW_FONT_SIZE_ADJUST_DEFAULT,
   IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX,
   MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX,
 } from '../config';
 import { IS_IOS, IS_MAC_OS } from '../util/browser/windowEnvironment';
 import { DEFAULT_APP_CONFIG } from '../limits';
+import { INITIAL_BROWSER_STATE } from './helpers/browser';
 
 export const INITIAL_PERFORMANCE_STATE_MAX: PerformanceType = {
   messageBlur: true,
@@ -85,11 +87,12 @@ export const INITIAL_SHARED_STATE: SharedState = {
     messageTextSize: IS_IOS
       ? IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX
       : (IS_MAC_OS ? MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX : DEFAULT_MESSAGE_TEXT_SIZE_PX),
+    instantViewFontSizeAdjust: INSTANT_VIEW_FONT_SIZE_ADJUST_DEFAULT,
     animationLevel: ANIMATION_LEVEL_DEFAULT,
     foldersPosition: FOLDERS_POSITION_DEFAULT,
     messageSendKeyCombo: 'enter',
     performance: INITIAL_PERFORMANCE_STATE_MAX,
-    shouldSkipWebAppCloseConfirmation: false,
+    shouldSkipBrowserCloseConfirmation: false,
     language: 'en',
     timeFormat: '24h',
     wasTimeFormatSetManually: false,
@@ -365,14 +368,7 @@ export const INITIAL_TAB_STATE: TabState = {
     byUsername: {},
   },
 
-  webApps: {
-    openedWebApps: {},
-    openedOrderedKeys: [],
-    sessionKeys: [],
-    modalState: 'maximized',
-    isModalOpen: false,
-    isMoreAppsTabActive: false,
-  },
+  browser: INITIAL_BROWSER_STATE,
 
   globalSearch: {},
 
@@ -438,7 +434,7 @@ export const INITIAL_TAB_STATE: TabState = {
 
   isShareMessageModalShown: false,
 
-  isWebAppsCloseConfirmationModalOpen: false,
+  isBrowserCloseConfirmationModalOpen: false,
 
   forwardMessages: {},
 

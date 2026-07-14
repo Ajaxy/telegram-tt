@@ -2,35 +2,32 @@ import type { ApiChatType } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { getWebAppKey } from '../../helpers';
+import { selectTabBrowserState } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { updateSharedSettings } from '../../reducers';
 import {
-  addWebAppToOpenList,
-  clearOpenedWebApps,
-  hasOpenedMoreThanOneWebApps,
-  hasOpenedWebApps,
-  removeActiveWebAppFromOpenList,
-  removeWebAppFromOpenList,
-  replaceIsWebAppModalOpen,
-  replaceWebAppModalState,
+  addBrowserTabToOpenList,
+  clearOpenedBrowserTabs,
+  hasBrowserTabsRequiringCloseConfirmation,
+  hasOpenedBrowserTabs,
+  removeBrowserTabFromOpenList,
+  replaceBrowserModalState,
+  replaceIsBrowserModalOpen,
   updateWebApp,
 } from '../../reducers/bots';
 import { updateTabState } from '../../reducers/tabs';
-import {
-  selectActiveWebApp, selectCurrentMessageList, selectTabState, selectWebApp,
-} from '../../selectors';
+import { selectCurrentMessageList, selectTabState, selectWebApp } from '../../selectors';
 import { selectSharedSettings } from '../../selectors/sharedState';
 
-addActionHandler('openWebAppTab', (global, actions, payload): ActionReturnType => {
+addActionHandler('openBrowserTab', (global, actions, payload): ActionReturnType => {
   const {
-    webApp, tabId = getCurrentTabId(),
+    tab, tabId = getCurrentTabId(),
   } = payload;
 
-  if (!webApp) return;
+  if (!tab) return;
 
   global = getGlobal();
-  global = addWebAppToOpenList(global, webApp, true, true, tabId);
+  global = addBrowserTabToOpenList(global, tab, true, true, tabId);
   setGlobal(global);
 });
 
@@ -41,23 +38,15 @@ addActionHandler('updateWebApp', (global, actions, payload): ActionReturnType =>
   return updateWebApp(global, key, update, tabId);
 });
 
-addActionHandler('closeActiveWebApp', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  global = removeActiveWebAppFromOpenList(global, tabId);
-  if (!hasOpenedWebApps(global, tabId)) return replaceIsWebAppModalOpen(global, false, tabId);
-
-  return global;
-});
-
 addActionHandler('openMoreAppsTab', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
 
   const tabState = selectTabState(global, tabId);
+  const browser = selectTabBrowserState(tabState);
   global = updateTabState(global, {
-    webApps: {
-      ...tabState.webApps,
-      activeWebAppKey: undefined,
+    browser: {
+      ...browser,
+      activeTabKey: undefined,
       isMoreAppsTabActive: true,
     },
   }, tabId);
@@ -69,82 +58,81 @@ addActionHandler('closeMoreAppsTab', (global, actions, payload): ActionReturnTyp
   const { tabId = getCurrentTabId() } = payload || {};
 
   const tabState = selectTabState(global, tabId);
+  const browser = selectTabBrowserState(tabState);
 
-  const openedWebApps = tabState.webApps.openedWebApps;
+  const openedTabs = browser.openedTabs;
 
-  const openedWebAppsKeys = Object.keys(openedWebApps);
-  const openedWebAppsCount = openedWebAppsKeys.length;
+  const openedTabsKeys = browser.openedOrderedKeys.filter((key) => openedTabs[key]);
+  const openedTabsCount = openedTabsKeys.length;
 
   global = updateTabState(global, {
-    webApps: {
-      ...tabState.webApps,
+    browser: {
+      ...browser,
       isMoreAppsTabActive: false,
-      activeWebAppKey: openedWebAppsCount ? openedWebAppsKeys[openedWebAppsCount - 1] : undefined,
-      isModalOpen: openedWebAppsCount > 0,
+      activeTabKey: openedTabsCount ? openedTabsKeys[openedTabsCount - 1] : undefined,
+      isModalOpen: openedTabsCount > 0,
     },
   }, tabId);
 
   return global;
 });
 
-addActionHandler('closeWebApp', (global, actions, payload): ActionReturnType => {
+addActionHandler('closeBrowserTab', (global, actions, payload): ActionReturnType => {
   const { key, skipClosingConfirmation, tabId = getCurrentTabId() } = payload || {};
 
-  global = removeWebAppFromOpenList(global, key, skipClosingConfirmation, tabId);
-  if (!hasOpenedWebApps(global, tabId)) return replaceIsWebAppModalOpen(global, false, tabId);
+  global = removeBrowserTabFromOpenList(global, key, skipClosingConfirmation, tabId);
+  if (!hasOpenedBrowserTabs(global, tabId)) return replaceIsBrowserModalOpen(global, false, tabId);
 
   return global;
 });
 
-addActionHandler('closeWebAppModal', (global, actions, payload): ActionReturnType => {
+addActionHandler('closeBrowserModal', (global, actions, payload): ActionReturnType => {
   const { shouldSkipConfirmation, tabId = getCurrentTabId() } = payload || {};
+  const shouldSkipBrowserConfirmation = Boolean(
+    shouldSkipConfirmation || selectSharedSettings(global).shouldSkipBrowserCloseConfirmation,
+  );
 
-  const shouldShowConfirmation = !shouldSkipConfirmation
-    && !selectSharedSettings(global).shouldSkipWebAppCloseConfirmation && hasOpenedMoreThanOneWebApps(global, tabId);
+  const shouldShowConfirmation = !shouldSkipBrowserConfirmation
+    && hasBrowserTabsRequiringCloseConfirmation(global, tabId);
 
   if (shouldShowConfirmation) {
-    actions.openWebAppsCloseConfirmationModal({ tabId });
+    actions.openBrowserCloseConfirmationModal({ tabId });
     return global;
   }
 
-  global = clearOpenedWebApps(global, tabId);
-  if (!hasOpenedWebApps(global, tabId)) return replaceIsWebAppModalOpen(global, false, tabId);
+  global = clearOpenedBrowserTabs(global, shouldSkipBrowserConfirmation, tabId);
+  if (!hasOpenedBrowserTabs(global, tabId)) return replaceIsBrowserModalOpen(global, false, tabId);
 
   return global;
 });
 
-addActionHandler('changeWebAppModalState', (global, actions, payload): ActionReturnType => {
+addActionHandler('changeBrowserModalState', (global, actions, payload): ActionReturnType => {
   const { state, tabId = getCurrentTabId() } = payload;
 
-  return replaceWebAppModalState(global, state, tabId);
+  return replaceBrowserModalState(global, state, tabId);
 });
 
-addActionHandler('updateMiniAppCachedPosition', (global, actions, payload): ActionReturnType => {
+addActionHandler('updateBrowserCachedPosition', (global, actions, payload): ActionReturnType => {
   const { position } = payload;
 
   global = updateSharedSettings(global, {
-    miniAppsCachedPosition: position,
+    browserCachedPosition: position,
   });
   return global;
 });
 
-addActionHandler('updateMiniAppCachedSize', (global, actions, payload): ActionReturnType => {
+addActionHandler('updateBrowserCachedSize', (global, actions, payload): ActionReturnType => {
   const { size } = payload;
 
   global = updateSharedSettings(global, {
-    miniAppsCachedSize: size,
+    browserCachedSize: size,
   });
 
   return global;
 });
 
 addActionHandler('setWebAppPaymentSlug', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
-  const activeWebApp = selectActiveWebApp(global, tabId);
-  if (!activeWebApp?.url) return undefined;
-
-  const key = getWebAppKey(activeWebApp);
-
+  const { key, tabId = getCurrentTabId() } = payload;
   return updateWebApp(global, key, { slug: payload.slug }, tabId);
 });
 

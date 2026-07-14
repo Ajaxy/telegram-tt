@@ -93,7 +93,7 @@ const WebPage = ({
   onAudioPlay,
   onCancelMediaTransfer,
 }: OwnProps) => {
-  const { openInstantView, openUrl, openTelegramLink } = getActions();
+  const { openBrowserTab, openUrl, openTelegramLink } = getActions();
   const stickersRef = useRef<HTMLDivElement>();
 
   const lang = useLang();
@@ -135,7 +135,7 @@ const WebPage = ({
 
   const handleQuickButtonClick = useLastCallback(() => {
     if (cachedPage) {
-      openInstantView({ webPageId: webPage.id });
+      openBrowserTab({ tab: { type: 'instantView', webPageId: webPage.id } });
       return;
     }
 
