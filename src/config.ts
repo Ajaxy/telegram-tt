@@ -165,6 +165,15 @@ export const SEND_MESSAGE_ACTION_INTERVAL = 3000; // 3s
 export const APP_CONFIG_REFETCH_INTERVAL = 10000 * 1000;
 export const GENERAL_REFETCH_INTERVAL = 60 * 60 * 1000; // 1h
 
+// Round video message recording
+export const ROUND_VIDEO_RECORDING_SIZE = 400; // px, square output
+export const MAX_ROUND_VIDEO_RECORDING_DURATION = 60 * 1000; // ms
+export const MIN_ROUND_VIDEO_RECORDING_TIME = 1000; // ms, recordings shorter than this are discarded
+export const VIDEO_RECORDING_FILENAME = 'video.mp4';
+export const VIDEO_RECORDING_MIME_TYPE = 'video/mp4;codecs=avc1.42E01E,mp4a.40.2';
+export const ROUND_VIDEO_BITRATE = 1_200_000; // bps
+export const ROUND_AUDIO_BITRATE = 64_000; // bps
+
 export const EDITABLE_INPUT_ID = 'editable-message-text';
 export const EDITABLE_INPUT_MODAL_ID = 'editable-message-text-modal';
 export const EDITABLE_STORY_INPUT_ID = 'editable-story-input-text';

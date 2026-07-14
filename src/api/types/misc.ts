@@ -79,6 +79,7 @@ export interface ApiAttachment {
 
   uniqueId?: string;
   ttlSeconds?: number;
+  isRoundVideo?: boolean;
   shouldSendInHighQuality?: boolean;
 
   gif?: ApiVideo;

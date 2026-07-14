@@ -1137,7 +1137,7 @@ export type ApiReportReason = 'spam' | 'violence' | 'pornography' | 'childAbuse'
   | 'copyright' | 'geoIrrelevant' | 'fake' | 'illegalDrugs' | 'personalDetails' | 'other';
 
 export type ApiSendMessageAction = {
-  type: 'cancel' | 'typing' | 'recordAudio' | 'chooseSticker' | 'playingGame';
+  type: 'cancel' | 'typing' | 'recordAudio' | 'recordRound' | 'chooseSticker' | 'playingGame';
 };
 
 export type ApiThemeParameters = {

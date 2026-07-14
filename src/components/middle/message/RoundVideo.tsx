@@ -99,6 +99,7 @@ const RoundVideo: FC<OwnProps> = ({
     !shouldLoad,
     getMediaFormat(video, 'inline'),
   );
+  const fullMediaData = video.blobUrl || mediaData;
 
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
     getVideoMediaHash(video, 'download'),
@@ -152,7 +153,7 @@ const RoundVideo: FC<OwnProps> = ({
     circleRef.current.setAttribute('stroke-dashoffset', strokeDashOffset.toString());
   }, [isActivated, getThrottledProgress]);
 
-  const shouldPlay = Boolean(mediaData && isIntersecting);
+  const shouldPlay = Boolean(fullMediaData && isIntersecting);
 
   const stopPlaying = useLastCallback(() => {
     if (!playerRef.current) {
@@ -201,7 +202,7 @@ const RoundVideo: FC<OwnProps> = ({
       return;
     }
 
-    if (!mediaData) {
+    if (!fullMediaData) {
       setIsLoadAllowed((isAllowed) => !isAllowed);
 
       return;
@@ -273,7 +274,7 @@ const RoundVideo: FC<OwnProps> = ({
       )}
       onClick={handleClick}
     >
-      {mediaData && (
+      {fullMediaData && (
         <div className="video-wrapper">
           {shouldRenderSpoiler && (
             <MediaSpoiler
@@ -287,7 +288,7 @@ const RoundVideo: FC<OwnProps> = ({
           <OptimizedVideo
             canPlay={shouldPlay}
             ref={playerRef}
-            src={mediaData}
+            src={fullMediaData}
             className="full-media"
             width={ROUND_VIDEO_DIMENSIONS_PX}
             height={ROUND_VIDEO_DIMENSIONS_PX}
@@ -333,7 +334,7 @@ const RoundVideo: FC<OwnProps> = ({
         </div>
       )}
       {shouldRenderSpoiler && !shouldRenderSpinner && renderPlayWrapper()}
-      {!mediaData && !isLoadAllowed && (
+      {!fullMediaData && !isLoadAllowed && (
         <Icon name="download" className={buildClassName(styles.controlButton, styles.downloadButton)} />
       )}
       {!isInOneTimeModal && (

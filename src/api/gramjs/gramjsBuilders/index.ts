@@ -687,6 +687,8 @@ export function buildSendMessageAction(action: ApiSendMessageAction) {
       return new GramJs.SendMessageTypingAction();
     case 'recordAudio':
       return new GramJs.SendMessageRecordAudioAction();
+    case 'recordRound':
+      return new GramJs.SendMessageRecordRoundAction();
     case 'chooseSticker':
       return new GramJs.SendMessageChooseStickerAction();
     case 'playingGame':

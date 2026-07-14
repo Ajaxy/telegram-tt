@@ -1034,6 +1034,7 @@ export async function rescheduleMessage({
 async function uploadMedia(message: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress) {
   const {
     filename, blobUrl, mimeType, quick, voice, audio, previewBlobUrl, shouldSendAsFile, shouldSendAsSpoiler, ttlSeconds,
+    isRoundVideo,
   } = attachment;
 
   const patchedOnProgress: ApiOnProgress = (progress) => {
@@ -1075,6 +1076,7 @@ async function uploadMedia(message: ApiMessage, attachment: ApiAttachment, onPro
             w: width,
             h: height,
             supportsStreaming: true,
+            roundMessage: isRoundVideo || undefined,
           }));
         }
       }

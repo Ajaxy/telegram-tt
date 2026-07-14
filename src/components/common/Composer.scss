@@ -108,7 +108,7 @@
 
       &:hover,
       &.active {
-        background: var(--color-chat-hover);
+        background: var(--color-primary);
       }
     }
 
@@ -211,6 +211,22 @@
       }
     }
 
+    .icon-round-video {
+      position: absolute;
+      transform: scale(0);
+    }
+
+    &.record.record-video {
+      .icon-microphone-alt {
+        animation: hide-icon 0.4s forwards ease-out;
+      }
+
+      .icon-round-video {
+        transform: scale(1);
+        animation: grow-icon 0.4s ease-out;
+      }
+    }
+
     &.edit {
       .icon-check {
         animation: grow-icon 0.4s ease-out;
@@ -289,6 +305,7 @@
   body.no-message-composer-animations & > .Button {
     .icon-send,
     .icon-microphone-alt,
+    .icon-round-video,
     .icon-check,
     .icon-schedule {
       animation-duration: 0ms !important;

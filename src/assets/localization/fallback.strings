@@ -97,6 +97,7 @@
 "PageContentEmbed" = "Embedded content";
 "ConversationDefaultRestrictedMedia" = "Sending media isn't allowed in this group.";
 "AccDescrVoiceMessage" = "Record voice message";
+"AccDescrVideoMessage" = "Record video message";
 "BotSettings" = "Settings";
 "Privacy" = "Privacy Settings";
 "BotHelp" = "Help";
@@ -659,6 +660,8 @@
 "MediaviewProfilePhoto" = "Profile Photo";
 "AccActionPlay" = "Play";
 "AttachAudio" = "Voice Message";
+"AttachVideoMessage" = "Video Message";
+"PlayOnceVideoMessageTooltip" = "This video message can only be played once.";
 "NewContactAdd" = "Add contact";
 "NewContactBlock" = "Block user";
 "ReportSpamAndLeave" = "Report spam and leave";
@@ -685,6 +688,9 @@
 "SlowModePlaceholder" = "Next message in {timer}";
 "SlowModeHint" = "Slow Mode is active. You can send your next message in {time}.";
 "NoVoiceMessagesAllowed" = "**{user}** doesn't accept voice messages.";
+"VideoMessagePermissionDenied" = "To record video messages, allow access to your camera and microphone.";
+"VideoMessageRecordError" = "Couldn't record a video message. Please check your camera and try again.";
+"VideoMessagesRestrictedByPrivacy" = "**{user}** doesn't accept video messages.";
 "SendMessageAsTitle" = "Send message as...";
 "Message" = "Message";
 "RecentStickers" = "Recently Used";
