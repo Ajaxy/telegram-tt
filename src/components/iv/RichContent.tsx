@@ -708,7 +708,7 @@ function renderQuoteBlock(
   context: RenderBlockContext,
 ) {
   return (
-    <Blockquote className={buildClassName(styles.block, styles.blockquote)}>
+    <Blockquote className={styles.block} contentClassName={styles.blockquote}>
       <RichText text={block.text} {...context.richTextContext} />
       {hasRichText(block.caption) && (
         <footer className={styles.quoteCaption}>
@@ -742,7 +742,7 @@ function renderBlockquoteBlocks(
   renderBlock: RenderBlockFn,
 ) {
   return (
-    <Blockquote className={buildClassName(styles.block, styles.blockquote)}>
+    <Blockquote className={styles.block} contentClassName={styles.blockquote}>
       {block.blocks.map((nestedBlock, index) => renderBlock(nestedBlock, `${sourceKey}-quote-${index}`))}
       {hasRichText(block.caption) && (
         <footer className={styles.quoteCaption}>

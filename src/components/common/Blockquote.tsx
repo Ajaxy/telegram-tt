@@ -16,6 +16,7 @@ import styles from './Blockquote.module.scss';
 
 type OwnProps = {
   className?: string;
+  contentClassName?: string;
   canBeCollapsible?: boolean;
   isToggleDisabled?: boolean;
   children: TeactNode;
@@ -25,6 +26,7 @@ const MAX_LINES = 4;
 
 const Blockquote = ({
   className,
+  contentClassName,
   canBeCollapsible,
   isToggleDisabled,
   children,
@@ -50,7 +52,7 @@ const Blockquote = ({
       onClick={canExpand ? handleExpand : undefined}
     >
       <blockquote
-        className={styles.blockquote}
+        className={buildClassName(styles.blockquote, contentClassName)}
         ref={ref}
         data-entity-type={ApiMessageEntityTypes.Blockquote}
       >

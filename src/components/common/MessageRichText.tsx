@@ -13,8 +13,10 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ThemeKey, ThreadId } from '../../types';
 
 import { selectChatMessage } from '../../global/selectors';
+import { selectMessageTextSize } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
 
+import useSelector from '../../hooks/data/useSelector';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
@@ -36,6 +38,7 @@ type OwnProps = {
 };
 
 const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
+const RICH_CONTENT_BODY_FONT_SIZE_PX = 18;
 
 const MessageRichText = ({
   message,
@@ -54,6 +57,7 @@ const MessageRichText = ({
   const sharedCanvasHqRef = useRef<HTMLCanvasElement>();
   const [expandedMessageKey, setExpandedMessageKey] = useState<string>();
   const [loadingMessageKey, setLoadingMessageKey] = useState<string>();
+  const messageTextSize = useSelector(selectMessageTextSize);
   const lang = useLang();
 
   const { richMessage } = message.content;
@@ -118,6 +122,7 @@ const MessageRichText = ({
           canAutoLoadMedia={canAutoLoadMedia}
           isProtected={isProtected}
           theme={theme}
+          fontSizeAdjust={messageTextSize / RICH_CONTENT_BODY_FONT_SIZE_PX}
           chatId={message.chatId}
           messageId={message.id}
           threadId={threadId}
