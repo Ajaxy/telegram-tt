@@ -2601,7 +2601,11 @@ addActionHandler('openUrl', async (global, actions, payload): Promise<void> => {
   }
 
   const { appConfig, config } = global;
-  if (config?.autologinToken && appConfig.autologinDomains.includes(parsedUrl.hostname)) {
+  if (
+    parsedUrl.protocol === 'https:'
+    && config?.autologinToken
+    && appConfig.autologinDomains.includes(parsedUrl.hostname)
+  ) {
     parsedUrl.searchParams.set(AUTOLOGIN_TOKEN_KEY, config.autologinToken);
     window.open(parsedUrl.href, '_blank', 'noopener');
     return;
