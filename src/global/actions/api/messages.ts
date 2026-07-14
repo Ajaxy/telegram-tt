@@ -1036,12 +1036,16 @@ async function saveDraft<T extends GlobalState>({
     draft: newDraft,
   });
 
-  if (result && newDraft) {
-    newDraft.isLocal = false;
-  }
+  if (!result || !newDraft) return;
 
   global = getGlobal();
-  global = replaceThreadLocalStateParam(global, chatId, threadId, 'draft', newDraft);
+  if (selectDraft(global, chatId, threadId) !== newDraft) return;
+
+  const savedDraft: ApiDraft = {
+    ...newDraft,
+    isLocal: false,
+  };
+  global = replaceThreadLocalStateParam(global, chatId, threadId, 'draft', savedDraft);
 
   setGlobal(global);
 }

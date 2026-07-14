@@ -201,6 +201,7 @@ async function readCache(initialState: GlobalState): Promise<GlobalState> {
 export function migrateCache(cached: GlobalState, initialState: GlobalState) {
   try {
     unsafeMigrateCache(cached, initialState);
+    clearCachedDraftLocalFlags(cached);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err);
@@ -405,6 +406,17 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (cached.audioPlayer.volume === undefined) {
     cached.audioPlayer.volume = initialState.audioPlayer.volume;
   }
+}
+
+function clearCachedDraftLocalFlags(cached: GlobalState) {
+  Object.values(cached.messages.byChatId).forEach(({ threadsById }) => {
+    Object.values(threadsById).forEach(({ localState }) => {
+      const { draft } = localState;
+      if (!draft) return;
+
+      draft.isLocal = undefined;
+    });
+  });
 }
 
 function updateCache(force?: boolean) {
