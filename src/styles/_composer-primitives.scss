@@ -10,7 +10,6 @@
   --composer-bottom-gap: 1rem;
   --composer-bottom-gap-mobile: 0.5rem;
   --composer-top-gap: 0.5rem;
-  // Measured into a lazy JS cache in `messageListReserves.ts` — a live change is not picked up
   --composer-min-bottom-reserve: calc(var(--composer-height) + var(--composer-bottom-gap));
   --composer-embedded-message-gap: 0.5rem;
   --composer-embedded-message-duration: 150ms;
@@ -19,6 +18,19 @@
   --composer-icon-size: 1.5rem;
   --composer-main-button-width: 2.5rem;
   --composer-main-button-height: 2.5rem;
+
+  @media (max-width: 600px) {
+    --composer-min-bottom-reserve:
+      calc(
+        var(--composer-height) + var(--composer-bottom-gap-mobile) + env(safe-area-inset-bottom, 0px)
+      );
+  }
+}
+
+body.keyboard-visible {
+  @media (max-width: 600px) {
+    --composer-min-bottom-reserve: calc(var(--composer-height) + var(--composer-bottom-gap-mobile));
+  }
 }
 
 .composer-pill {

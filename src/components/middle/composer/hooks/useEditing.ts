@@ -27,7 +27,7 @@ const useEditing = (
   getHtml: Signal<string>,
   setHtml: (html: string) => void,
   editedMessage: ApiMessage | undefined,
-  resetComposer: (shouldPreserveInput?: boolean) => void,
+  resetComposer: (shouldPreserveInput?: boolean, shouldSkipCollapseLatch?: boolean) => void,
   validateTextLength: (text: string) => boolean,
   chatId: string,
   threadId: ThreadId,
@@ -141,7 +141,7 @@ const useEditing = (
   });
 
   const handleEditCancel = useLastCallback(() => {
-    resetComposer();
+    resetComposer(false, true);
     restoreNewDraftAfterEditing();
   });
 
@@ -171,7 +171,7 @@ const useEditing = (
       entities,
     });
 
-    resetComposer();
+    resetComposer(false, true);
     restoreNewDraftAfterEditing();
   });
 

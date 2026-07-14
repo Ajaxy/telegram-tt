@@ -75,6 +75,7 @@
   }
 
   &.with-bottom-snap {
+    scroll-padding-bottom: var(--message-list-bottom-inset);
     scroll-snap-type: y proximity;
   }
 
@@ -99,7 +100,13 @@
 
     .live-tail {
       overflow-anchor: none;
-      min-height: max(0rem, calc(100cqh - var(--message-list-top-inset) - var(--message-list-bottom-inset)));
+      min-height:
+        max(
+          0rem,
+          calc(
+            100cqh - var(--message-list-top-inset) - var(--middle-header-gap) - var(--message-list-bottom-inset)
+          )
+        );
 
       .message-list-item {
         animation: live-tail-message-mount 0.2s ease-out;
@@ -188,6 +195,11 @@
 
     &.is-just-added:not(.own) {
       transform: none;
+    }
+
+    // Grow the just-sent message from its final bottom edge (center origin visibly sinks it)
+    &.is-just-added.own {
+      transform-origin: bottom right;
     }
 
     // Restore stacking context

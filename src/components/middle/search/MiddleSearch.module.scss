@@ -141,7 +141,7 @@
   .mobile & {
     // Detached card hanging under the floating search island, like the desktop dropdown.
     position: absolute;
-    top: calc(0.5rem + var(--middle-header-height) + 0.5rem);
+    top: calc(0.5rem + var(--middle-header-height) + var(--middle-header-gap));
     right: 0;
     bottom: auto;
     left: 0;

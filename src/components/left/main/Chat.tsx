@@ -298,7 +298,7 @@ const Chat: FC<OwnProps & StateProps> = ({
 
     openChat({ id: chatId, noForumTopicPanel, shouldReplaceHistory: true }, { forceOnHeavyAnimation: true });
 
-    if (isSelected && canScrollDown) {
+    if (isSelected && canScrollDown && e.detail <= 1) {
       scrollMessageListToBottom();
     }
   });

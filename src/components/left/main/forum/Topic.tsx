@@ -174,7 +174,7 @@ const Topic = ({
     openThread({ chatId, threadId: topic.id, shouldReplaceHistory: true });
     if (!chat.isBotForum && !chat.isMonoforum) setViewForumAsMessages({ chatId, isEnabled: false });
 
-    if (canScrollDown) {
+    if (canScrollDown && e.detail <= 1) {
       scrollMessageListToBottom();
     }
   });

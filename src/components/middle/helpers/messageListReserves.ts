@@ -1,4 +1,6 @@
-import { forceMutation } from '../../../lib/fasterdom/fasterdom';
+import { forceMutation, requestMeasure } from '../../../lib/fasterdom/fasterdom';
+import { isAnimatingScroll } from '../../../util/animateScroll';
+import buildStyle from '../../../util/buildStyle';
 import { REM } from '../../common/helpers/mediaDimensions';
 
 import senderGroupStyles from '../message/SenderGroupContainer.module.scss';
@@ -7,19 +9,24 @@ const AVATAR_OFFSET = 0.5 * REM;
 const MESSAGE_LIST_COMPOSER_GAP = 0.5 * REM; // Mirrors `--message-list-composer-gap`
 const NO_FOOTER_CLASS = 'no-footer';
 const SELECT_MODE_CLASS = 'select-mode-active';
-const BASE_RESERVE_CLASSES = ['type-pinned', 'saved-dialog'];
-export const BOTTOM_PIN_THRESHOLD = 4;
-export const TOP_PIN_THRESHOLD = 4;
+export const AT_BOTTOM_THRESHOLD = 4;
+export const AT_TOP_THRESHOLD = 4;
 export const SCROLL_BOTTOM_SENTINEL = 1e7;
 
-export function getMessageListBottomReserve(scroller: HTMLElement) {
+const SEND_COLLAPSE_MAX_DURATION = 600;
+const RESERVE_EPSILON = 0.5;
+// Matches the desktop `--composer-min-bottom-reserve`; used only before stylesheets load
+const FALLBACK_MIN_BOTTOM_INSET = 4 * REM;
+
+type SendCollapseLatch = { prevReserve: number; restoreTimer: number };
+
+const sendCollapseLatches = new WeakMap<HTMLElement, SendCollapseLatch>();
+
+function getMessageListBottomReserve(scroller: HTMLElement) {
   if (scroller.classList.contains(SELECT_MODE_CLASS)) {
-    return getMinBottomInset() + MESSAGE_LIST_COMPOSER_GAP;
+    return getSettledBottomReserve();
   }
   if (scroller.classList.contains(NO_FOOTER_CLASS)) return 0;
-  if (BASE_RESERVE_CLASSES.some((cls) => scroller.classList.contains(cls))) {
-    return getMinBottomInset() + MESSAGE_LIST_COMPOSER_GAP;
-  }
   const footer = scroller.parentElement?.querySelector<HTMLElement>(':scope > .middle-column-footer');
   if (!footer) return 0;
   if (getComputedStyle(footer).position !== 'absolute') return 0;
@@ -29,6 +36,44 @@ export function getMessageListBottomReserve(scroller: HTMLElement) {
 export function measureFooterContentHeight(footer: HTMLElement) {
   const buttonContainer = footer.querySelector<HTMLElement>('.middle-column-footer-button-container');
   return Math.max(footer.offsetHeight, buttonContainer?.offsetHeight ?? 0);
+}
+
+// While armed, the reserve stays latched at the settled value for the whole composer collapse
+// after a send — the shrinking pill is then a purely visual overlay over a static list
+export function armSendCollapseReserve(scroller: HTMLElement) {
+  const liveReserve = getMessageListBottomReserve(scroller);
+  if (liveReserve <= getSettledBottomReserve() + RESERVE_EPSILON) return;
+
+  const existing = sendCollapseLatches.get(scroller);
+  if (existing) clearTimeout(existing.restoreTimer);
+
+  const restoreTimer = window.setTimeout(() => {
+    sendCollapseLatches.delete(scroller);
+    if (scroller.isConnected) {
+      requestMeasure(() => {
+        syncMessageListBottomReserve(scroller);
+      });
+    }
+  }, SEND_COLLAPSE_MAX_DURATION);
+
+  sendCollapseLatches.set(scroller, { prevReserve: liveReserve, restoreTimer });
+}
+
+export function isSendCollapsePhaseActive(scroller: HTMLElement) {
+  return sendCollapseLatches.has(scroller);
+}
+
+function disarmSendCollapseReserve(scroller: HTMLElement) {
+  const latch = sendCollapseLatches.get(scroller);
+  if (!latch) return;
+  clearTimeout(latch.restoreTimer);
+  sendCollapseLatches.delete(scroller);
+}
+
+export function getEffectiveMessageListBottomReserve(scroller: HTMLElement) {
+  return isSendCollapsePhaseActive(scroller)
+    ? getSettledBottomReserve()
+    : getMessageListBottomReserve(scroller);
 }
 
 export function getMessageListTopReserve(scroller: HTMLElement) {
@@ -73,11 +118,23 @@ export function applyMessageListBottomInset(scroller: HTMLElement, bottomReserve
 }
 
 export function syncMessageListBottomReserve(
-  scroller: HTMLElement, shouldSkipBottomPin = false, forceBottomPin = false,
+  scroller: HTMLElement, shouldSkipKeepAtBottom = false, forceKeepAtBottom = false,
 ) {
   const bottomReserve = getMessageListBottomReserve(scroller);
-  const isAtBottom = forceBottomPin
-    || scroller.scrollHeight - scroller.scrollTop - scroller.offsetHeight <= BOTTOM_PIN_THRESHOLD;
+  const latch = sendCollapseLatches.get(scroller);
+  if (latch) {
+    const isSettled = bottomReserve <= getSettledBottomReserve() + RESERVE_EPSILON;
+    const isGrowing = bottomReserve > latch.prevReserve + RESERVE_EPSILON;
+    if (isSettled || isGrowing) {
+      disarmSendCollapseReserve(scroller);
+    } else {
+      latch.prevReserve = bottomReserve;
+      return;
+    }
+  }
+  const isAtBottom = forceKeepAtBottom
+    || scroller.scrollHeight - scroller.scrollTop - scroller.offsetHeight <= AT_BOTTOM_THRESHOLD;
+  const canKeepAtBottom = !shouldSkipKeepAtBottom && !isAnimatingScroll(scroller);
 
   const insetTargets: HTMLElement[] = [
     // `applyMessageListBottomInset` writes the reserve/fade vars on the scroller itself, so it must be allowed too.
@@ -88,24 +145,31 @@ export function syncMessageListBottomReserve(
 
   forceMutation(() => {
     applyMessageListBottomInset(scroller, bottomReserve);
-    if (isAtBottom && !shouldSkipBottomPin) {
+    if (isAtBottom && canKeepAtBottom) {
       scroller.scrollTop = SCROLL_BOTTOM_SENTINEL;
     }
   }, insetTargets);
 }
 
-let minBottomInset: number | undefined;
+function getSettledBottomReserve() {
+  return getMinBottomInset() + MESSAGE_LIST_COMPOSER_GAP;
+}
+
+let minBottomInsetProbe: HTMLDivElement | undefined;
 
 // The single source is `--composer-min-bottom-reserve`; its `calc()` cannot be parsed off
-// a custom property, so a probe element evaluates it once
+// a custom property, so a permanently mounted probe element evaluates it. The value is
+// responsive (viewport, safe area, `body.keyboard-visible`), so it is re-read on every call.
 function getMinBottomInset() {
-  if (minBottomInset === undefined) {
-    const probe = document.createElement('div');
-    probe.style.cssText = 'position: absolute; visibility: hidden; height: var(--composer-min-bottom-reserve)';
-    document.body.appendChild(probe);
-    minBottomInset = probe.offsetHeight || 4 * REM;
-    probe.remove();
+  if (!minBottomInsetProbe) {
+    minBottomInsetProbe = document.createElement('div');
+    minBottomInsetProbe.style.cssText = buildStyle(
+      'position: absolute',
+      'visibility: hidden',
+      'height: var(--composer-min-bottom-reserve)',
+    );
+    document.body.appendChild(minBottomInsetProbe);
   }
 
-  return minBottomInset;
+  return minBottomInsetProbe.offsetHeight || FALLBACK_MIN_BOTTOM_INSET;
 }

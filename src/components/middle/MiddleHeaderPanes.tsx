@@ -16,7 +16,7 @@ import {
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { REM } from '../common/helpers/mediaDimensions';
-import { BOTTOM_PIN_THRESHOLD, SCROLL_BOTTOM_SENTINEL, TOP_PIN_THRESHOLD } from './helpers/messageListReserves';
+import { AT_BOTTOM_THRESHOLD, AT_TOP_THRESHOLD, SCROLL_BOTTOM_SENTINEL } from './helpers/messageListReserves';
 
 import useEffectOnce from '../../hooks/useEffectOnce';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -51,6 +51,7 @@ type StateProps = {
 };
 
 const FALLBACK_PANE_STATE = { height: 0 };
+const SCROLL_POSITION_TOLERANCE = 1;
 
 const panesHeightCache = new Map<string, number>();
 
@@ -152,8 +153,8 @@ const MiddleHeaderPanes = ({
         .filter((scroller) => scroller.offsetParent)
         .map((scroller) => ({
           scroller,
-          wasAtBottom: scroller.scrollHeight - scroller.scrollTop - scroller.offsetHeight <= BOTTOM_PIN_THRESHOLD,
-          wasAtTop: scroller.scrollTop <= TOP_PIN_THRESHOLD,
+          wasAtBottom: scroller.scrollHeight - scroller.scrollTop - scroller.offsetHeight <= AT_BOTTOM_THRESHOLD,
+          wasAtTop: scroller.scrollTop <= AT_TOP_THRESHOLD,
           prevScrollTop: scroller.scrollTop,
           bottomDistance: scroller.scrollHeight - scroller.scrollTop,
         }));
@@ -169,7 +170,15 @@ const MiddleHeaderPanes = ({
       if (!plans.length) return;
 
       requestForcedReflow(() => {
-        const targets = plans.map(({
+        const validPlans = plans.filter(({ scroller, prevScrollTop }) => {
+          const currentScrollTop = scroller.scrollTop;
+          return Math.abs(currentScrollTop - prevScrollTop) <= SCROLL_POSITION_TOLERANCE
+            || Math.abs(currentScrollTop - (prevScrollTop + panesHeightDelta)) <= SCROLL_POSITION_TOLERANCE;
+        });
+
+        if (!validPlans.length) return undefined;
+
+        const targets = validPlans.map(({
           scroller, wasAtBottom, wasAtTop, prevScrollTop, bottomDistance,
         }) => {
           let scrollTop;

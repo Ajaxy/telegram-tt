@@ -332,7 +332,9 @@ function MiddleColumn({
     const observer = new ResizeObserver((entries) => {
       entries.forEach((entry) => syncFooterSlide(entry.target as HTMLElement));
     });
-    middleColumn.querySelectorAll<HTMLElement>('.middle-column-footer').forEach((footer) => observer.observe(footer));
+    middleColumn.querySelectorAll<HTMLElement>('.middle-column-footer').forEach((footer) => {
+      observer.observe(footer, { box: 'border-box' });
+    });
 
     return () => observer.disconnect();
   }, [currentTransitionKey, renderingChatId, renderingThreadId, updateFooterHeight, syncFooterSlide]);
@@ -511,11 +513,6 @@ function MiddleColumn({
     [renderingCanPost, windowWidth],
   );
 
-  const footerClassName = buildClassName(
-    'middle-column-footer',
-    !renderingCanPost && 'no-composer',
-  );
-
   useHistoryBack({
     isActive: isSelectModeActive,
     onBack: exitMessageSelectMode,
@@ -548,6 +545,12 @@ function MiddleColumn({
     canRestartBot: renderingCanRestartBot,
     canUnblock: renderingCanUnblock,
   });
+
+  const footerClassName = buildClassName(
+    'middle-column-footer',
+    !renderingCanPost && 'no-composer',
+    !hasFooter && 'no-content',
+  );
 
   useEffect(() => {
     updateFooterHeight();

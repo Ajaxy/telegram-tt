@@ -11,7 +11,11 @@ import {
 import animateScroll from '../../../../util/animateScroll';
 import { REM } from '../../../common/helpers/mediaDimensions';
 import { requestAfterMessageListReflow } from '../../helpers/messageListReflow';
-import { getMessageListBottomReserve, getMessageListTopReserve } from '../../helpers/messageListReserves';
+import {
+  getEffectiveMessageListBottomReserve,
+  getMessageListTopReserve,
+  isSendCollapsePhaseActive,
+} from '../../helpers/messageListReserves';
 
 // This is used when the viewport was replaced.
 const BOTTOM_FOCUS_OFFSET = 500;
@@ -63,7 +67,7 @@ export default function useFocusMessageListElement({
             ? (isToBottom ? BOTTOM_FOCUS_OFFSET : RELOCATED_FOCUS_OFFSET) : undefined);
 
         const topReserve = getMessageListTopReserve(messagesContainer);
-        const bottomReserve = getMessageListBottomReserve(messagesContainer);
+        const bottomReserve = getEffectiveMessageListBottomReserve(messagesContainer);
         const marginReserve = scrollPosition === 'end' ? bottomReserve : topReserve;
 
         const result = animateScroll({
@@ -75,7 +79,7 @@ export default function useFocusMessageListElement({
           bottomReserve,
           maxDistance,
           forceDirection: focusDirection,
-          forceNormalContainerHeight: isResizingContainer,
+          forceNormalContainerHeight: isResizingContainer && !isSendCollapsePhaseActive(messagesContainer),
           shouldReturnMutationFn: true,
         });
 

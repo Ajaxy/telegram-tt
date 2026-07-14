@@ -235,7 +235,13 @@ const EmbeddedMessage = ({
     }
 
     if (!senderTitle && !forwardSendersTitle) {
-      return NBSP;
+      // Keep the sender subtree structure stable while the peer is still loading — replacing
+      // a bare text node with an element subtree later makes WebKit shift `scrollTop`
+      return (
+        <span className="embedded-sender-wrapper">
+          <span className="embedded-sender">{NBSP}</span>
+        </span>
+      );
     }
 
     let icon: IconName | undefined;

@@ -25,6 +25,7 @@ const SLOWDOWN_DURATION = 1500;
 
 let slowdownTimeout: number | undefined;
 let isAnimating = true;
+const ANIMATION_INSTANCE = { isCancelled: false };
 
 function SpeedingDiamond({ className, onMouseMove }: OwnProps) {
   const [speed, setSpeed] = useState(MIN_SPEED);
@@ -51,7 +52,7 @@ function SpeedingDiamond({ className, onMouseMove }: OwnProps) {
         isAnimating = t < 1 && newSpeed > 1;
 
         return isAnimating;
-      }, requestMutation);
+      }, requestMutation, ANIMATION_INSTANCE);
     }, SLOWDOWN_DELAY);
 
     isAnimating = false;
