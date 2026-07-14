@@ -25,6 +25,19 @@ export function buffersEqual(buffer1: Uint8Array, buffer2: Uint8Array): boolean 
   return true;
 }
 
+export function compareBuffersConstantTime(buffer1: Uint8Array, buffer2: Uint8Array): boolean {
+  if (buffer1.length !== buffer2.length) {
+    return false;
+  }
+
+  let difference = 0;
+  for (let byteIndex = 0; byteIndex < buffer1.length; byteIndex++) {
+    difference |= buffer1[byteIndex] ^ buffer2[byteIndex];
+  }
+
+  return difference === 0;
+}
+
 export function readInt32LE(buffer: Uint8Array, offset = 0) {
   checkBounds(buffer, offset, 4);
 

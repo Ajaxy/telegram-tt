@@ -1,6 +1,6 @@
 import type { AuthKey } from '../crypto/AuthKey';
 
-import { buffersEqual, concat, writeInt32LE } from '../../../util/encoding/buffer';
+import { compareBuffersConstantTime, concat, writeInt32LE } from '../../../util/encoding/buffer';
 import { CTR } from '../crypto/CTR';
 import { IGE } from '../crypto/IGE';
 import { BinaryReader, type BinaryWriter, type Logger } from '../extensions';
@@ -291,7 +291,7 @@ export default class MTProtoState {
       : await sha256(concat(authKey
         .slice(96, 96 + 32), body));
 
-    if (!this._isCall && !buffersEqual(msgKey, ourKey.slice(8, 24))) {
+    if (!this._isCall && !compareBuffersConstantTime(msgKey, ourKey.slice(8, 24))) {
       throw new SecurityError('Received msg_key doesn\'t match with expected one');
     }
     const reader = new BinaryReader(body);
