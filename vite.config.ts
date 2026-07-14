@@ -20,11 +20,16 @@ const DEFAULT_BUNDLE_STATS_BASELINE_FILE = 'baseline.json';
 const BUNDLE_STATS_VISUALIZER_FILE = 'visualizer.html';
 const WORKER_BUNDLE_COLLECTOR_PLUGIN_NAME = 'telegram:collect-worker-report-bundle';
 const BUNDLE_REPORT_PLUGIN_SUFFIX = ':with-workers';
-const DEV_WARMUP_CLIENT_FILES = [
-  'index.html',
-  'src/**/*.{js,jsx,ts,tsx,css,scss}',
-  '!src/**/*.d.ts',
-  '!src/lib/gramjs/tl/**',
+const DEV_SERVER_WATCH_IGNORES = [
+  '**/dist/**',
+  '**/tauri/target/**',
+];
+const DEV_BUNDLE_WARMUP_CLIENT_FILES = [
+  'src/bundles/auth.ts',
+  'src/bundles/main.ts',
+  'src/bundles/extra.ts',
+  'src/bundles/calls.ts',
+  'src/bundles/stars.ts',
 ];
 const IMAGE_ASSET_RE = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
 const STATIC_COPY_TARGETS: Target[] = [
@@ -207,7 +212,10 @@ export default defineConfig(({ mode }): UserConfig => {
       },
       https: getHttpsConfig(httpsCertPath, httpsKeyPath),
       warmup: {
-        clientFiles: isDevelopmentMode ? DEV_WARMUP_CLIENT_FILES : [],
+        clientFiles: DEV_BUNDLE_WARMUP_CLIENT_FILES,
+      },
+      watch: {
+        ignored: DEV_SERVER_WATCH_IGNORES,
       },
     },
     build: {
@@ -282,6 +290,7 @@ function buildCsp(appEnv: string) {
   default-src 'self';
   connect-src 'self' wss://*.web.telegram.org blob: http: https: ${appEnv === 'development' ? 'wss: ipc:' : ''};
   script-src 'self' 'wasm-unsafe-eval' https://t.me/_websync_ https://telegram.me/_websync_;
+  worker-src 'self'${appEnv === 'development' ? ' blob:' : ''};
   style-src 'self' 'unsafe-inline';
   font-src 'self' data:;
   img-src 'self' data: blob: https://ss3.4sqi.net/img/categories_v2/;
