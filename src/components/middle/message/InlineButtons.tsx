@@ -3,7 +3,7 @@ import { memo, useMemo } from '../../../lib/teact/teact';
 
 import type { ApiKeyboardButton } from '../../../api/types';
 
-import { RE_TME_LINK, TME_LINK_PREFIX } from '../../../config';
+import { RE_TME_LINK } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import renderKeyboardButtonText from '../composer/helpers/renderKeyboardButtonText';
 
@@ -31,10 +31,11 @@ const InlineButtons = ({ className, inlineButtons, onClick }: OwnProps) => {
     switch (type) {
       case 'url': {
         const { url } = button;
+        const isTelegramLink = RE_TME_LINK.test(url);
 
-        if (url.startsWith(TME_LINK_PREFIX) && url.includes('?startapp')) {
+        if (isTelegramLink && url.includes('?startapp')) {
           return <Icon className={styles.cornerIcon} name="webapp" />;
-        } else if (!RE_TME_LINK.test(url)) {
+        } else if (!isTelegramLink) {
           return <Icon className={styles.cornerIcon} name="arrow-right" />;
         }
 
