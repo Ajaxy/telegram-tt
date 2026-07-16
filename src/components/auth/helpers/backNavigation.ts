@@ -1,4 +1,4 @@
-import { getAccountSlotUrl } from '../../../util/multiaccount';
+import { getAccountSlotUrl, getFirstLoggedInAccountSlot } from '../../../util/multiaccount';
 
 export function navigateBack() {
   const currentUrl = new URL(window.location.href);
@@ -9,6 +9,6 @@ export function navigateBack() {
     return;
   }
 
-  const url = getAccountSlotUrl(1);
+  const url = getAccountSlotUrl(getFirstLoggedInAccountSlot() || 1);
   window.location.href = url;
 }

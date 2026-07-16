@@ -47,6 +47,10 @@ export function getAccountsInfo() {
   return accountInfo;
 }
 
+export function getFirstLoggedInAccountSlot(accounts = getAccountsInfo()) {
+  return Object.keys(accounts).map(Number).sort((a, b) => a - b)[0];
+}
+
 function getAccountInfo(slot: number): AccountInfo | undefined {
   const sessionData = loadSlotSession(slot);
   const {

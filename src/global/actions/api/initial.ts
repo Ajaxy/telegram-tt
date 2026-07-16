@@ -10,7 +10,6 @@ import {
   MEDIA_PROGRESSIVE_CACHE_NAME,
 } from '../../../config';
 import { updateAppBadge } from '../../../util/appBadge';
-import { PASSCODE_IDB_STORE } from '../../../util/browser/idb';
 import { toCredentialRequestOptions } from '../../../util/browser/passkeys';
 import {
   IS_WEBAUTHN_SUPPORTED,
@@ -18,7 +17,9 @@ import {
 } from '../../../util/browser/windowEnvironment';
 import * as cacheApi from '../../../util/cacheApi';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { ACCOUNT_SLOT, getAccountsInfo } from '../../../util/multiaccount';
+import {
+  ACCOUNT_SLOT, getAccountsInfo, getAccountSlotUrl, getFirstLoggedInAccountSlot,
+} from '../../../util/multiaccount';
 import { unsubscribe } from '../../../util/notifications';
 import { clearEncryptedSession, encryptSession, forgetPasscode } from '../../../util/passcode';
 import { parseInitialLocationHash, resetInitialLocationHash, resetLocationHash } from '../../../util/routing';
@@ -44,6 +45,8 @@ import {
 import { updateAuth } from '../../reducers/auth';
 import { selectSharedSettings } from '../../selectors/sharedState';
 import { destroySharedStatePort } from '../../shared/sharedStateConnector';
+
+let resetStoragePromise: Promise<boolean> | undefined;
 
 addActionHandler('initApi', (global, actions): ActionReturnType => {
   const initialLocationHash = parseInitialLocationHash();
@@ -214,6 +217,13 @@ addActionHandler('signOut', async (global, actions, payload): Promise<void> => {
   }
 
   actions.reset();
+  await resetStorage();
+
+  const targetAccountSlot = getFirstLoggedInAccountSlot() || 1;
+  if (targetAccountSlot !== (ACCOUNT_SLOT || 1)) {
+    window.location.replace(getAccountSlotUrl(targetAccountSlot));
+    return;
+  }
 
   if (payload?.forceInitApi) {
     actions.initApi();
@@ -226,24 +236,14 @@ addActionHandler('requestChannelDifference', (global, actions, payload): ActionR
   void callApi('requestChannelDifference', chatId);
 });
 
-addActionHandler('reset', (global, actions): ActionReturnType => {
-  clearStoredSession(ACCOUNT_SLOT);
-  clearEncryptedSession();
-
+addActionHandler('reset', async (global, actions): Promise<void> => {
   void cacheApi.clear(MEDIA_CACHE_NAME);
   void cacheApi.clear(MEDIA_CACHE_NAME_AVATARS);
   void cacheApi.clear(MEDIA_PROGRESSIVE_CACHE_NAME);
   void cacheApi.clear(CUSTOM_BG_CACHE_NAME);
 
-  removeGlobalFromCache();
+  const hasAccounts = await resetStorage();
   destroySharedStatePort();
-
-  // Check if there are any accounts left
-  const accounts = getAccountsInfo();
-  if (!Object.values(accounts).length) {
-    PASSCODE_IDB_STORE.clear();
-    removeSharedStateFromCache();
-  }
 
   const langCachePrefix = LANG_CACHE_NAME.replace(/\d+$/, '');
   const langCacheVersion = Number((LANG_CACHE_NAME.match(/\d+$/) || ['0'])[0]);
@@ -253,11 +253,33 @@ addActionHandler('reset', (global, actions): ActionReturnType => {
 
   updateAppBadge(0);
 
+  if (hasAccounts) {
+    return;
+  }
+
   actions.initShared({ force: true });
   Object.values(global.byTabId).forEach(({ id: otherTabId, isMasterTab }) => {
     actions.init({ tabId: otherTabId, isMasterTab });
   });
 });
+
+function resetStorage() {
+  if (resetStoragePromise) return resetStoragePromise;
+
+  clearStoredSession(ACCOUNT_SLOT);
+  const hasAccounts = Boolean(Object.values(getAccountsInfo()).length);
+  const clearSharedStatePromise = hasAccounts ? Promise.resolve() : removeSharedStateFromCache();
+
+  resetStoragePromise = Promise.all([
+    clearEncryptedSession(),
+    removeGlobalFromCache(),
+    clearSharedStatePromise,
+  ]).then(() => hasAccounts).finally(() => {
+    resetStoragePromise = undefined;
+  });
+
+  return resetStoragePromise;
+}
 
 addActionHandler('disconnect', (): ActionReturnType => {
   void callApiLocal('disconnect');

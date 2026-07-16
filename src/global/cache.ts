@@ -99,8 +99,8 @@ export function initCache() {
 
   const resetCache = () => {
     isRemovingCache = true;
+    localStorage.removeItem(IS_SCREEN_LOCKED_CACHE_KEY);
     removeGlobalFromCache().finally(() => {
-      localStorage.removeItem(IS_SCREEN_LOCKED_CACHE_KEY);
       isRemovingCache = false;
       if (!isCaching) {
         return;
