@@ -47,7 +47,7 @@ export default class NativeVoiceRecorder {
       this.audioContext = new AudioContext({ sampleRate: ENCODER_SAMPLE_RATE });
       this.sourceNode = this.audioContext.createMediaStreamSource(this.stream);
 
-      await this.audioContext.audioWorklet.addModule(new URL('./recorderWorklet.js', import.meta.url));
+      await this.audioContext.audioWorklet.addModule(new URL('./recorderWorklet.js?no-inline', import.meta.url));
 
       this.workletNode = new AudioWorkletNode(this.audioContext, WORKLET_PROCESSOR_NAME, {
         numberOfInputs: 1,
