@@ -948,6 +948,7 @@ export type ApiUpdateLangPack = {
 
 export type ApiUpdateBotCommands = {
   '@type': 'updateBotCommands';
+  peerId: string;
   botId: string;
   commands?: ApiBotCommand[];
 };

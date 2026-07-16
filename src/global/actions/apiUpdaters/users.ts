@@ -3,17 +3,19 @@ import { throttleWithFullyIdle } from '../../../lib/teact/heavyAnimation';
 import type { ApiUserStatus } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
+import { isUserId } from '../../../util/entities/ids';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   deleteContact,
   replaceUserStatuses,
   updateChat,
+  updateChatFullInfo,
   updatePeerStoriesHidden,
   updateUser,
   updateUserFullInfo,
 } from '../../reducers';
 import {
-  selectIsChatWithSelf, selectIsCurrentUserPremium, selectUser, selectUserFullInfo,
+  selectChatFullInfo, selectIsChatWithSelf, selectIsCurrentUserPremium, selectUser, selectUserFullInfo,
 } from '../../selectors';
 
 const updateStatusesOnFullyIdle = throttleWithFullyIdle(flushStatusUpdates);
@@ -110,7 +112,27 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateBotCommands': {
-      const { botId, commands } = update;
+      const { peerId, botId, commands } = update;
+
+      if (!isUserId(peerId)) {
+        const targetChatFullInfo = selectChatFullInfo(global, peerId);
+        if (!targetChatFullInfo?.botCommands) {
+          actions.loadFullChat({ chatId: peerId, force: true });
+          return undefined;
+        }
+
+        const botCommands = targetChatFullInfo.botCommands.filter((command) => command.botId !== botId);
+        if (commands) {
+          botCommands.push(...commands);
+        }
+
+        return updateChatFullInfo(global, peerId, { botCommands });
+      }
+
+      if (peerId !== botId) {
+        return undefined;
+      }
+
       const targetUserFullInfo = selectUserFullInfo(global, botId);
       if (!targetUserFullInfo?.botInfo) {
         return undefined;

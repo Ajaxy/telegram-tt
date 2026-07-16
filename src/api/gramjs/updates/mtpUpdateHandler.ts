@@ -1064,6 +1064,7 @@ export function updater(update: Update) {
     });
   } else if (update instanceof GramJs.UpdateBotCommands) {
     const {
+      peer,
       botId,
       commands,
     } = update;
@@ -1072,6 +1073,7 @@ export function updater(update: Update) {
     const commandsArray = commands.map((command) => buildApiBotCommand(id, command));
     sendApiUpdate({
       '@type': 'updateBotCommands',
+      peerId: getApiChatIdFromMtpPeer(peer),
       botId: id,
       commands: commandsArray.length ? commandsArray : undefined,
     });
