@@ -1,4 +1,4 @@
-import type { ActionReturnType } from '../../types';
+import type { ActionReturnType, ReportSection } from '../../types';
 
 import { DEBUG, MESSAGE_ID_REQUIRED_ERROR } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -503,12 +503,16 @@ addActionHandler('reportStory', async (global, actions, payload): Promise<void> 
   if (result.type === 'selectOption') {
     global = getGlobal();
     const oldSections = selectTabState(global, tabId).reportModal?.sections;
-    const selectedOption = oldSections?.[oldSections.length - 1]?.options?.find((o) => o.option === option);
+    const latestSection = oldSections?.[oldSections.length - 1];
+    const selectedOption = latestSection?.type === 'options'
+      ? latestSection.options.find((item) => item.option === option)
+      : undefined;
     const newSection = {
+      type: 'options',
       title: result.title,
       options: result.options,
       subtitle: selectedOption?.text,
-    };
+    } satisfies ReportSection;
     global = updateTabState(global, {
       reportModal: {
         messageIds: [storyId],
@@ -524,12 +528,16 @@ addActionHandler('reportStory', async (global, actions, payload): Promise<void> 
   if (result.type === 'comment') {
     global = getGlobal();
     const oldSections = selectTabState(global, tabId).reportModal?.sections;
-    const selectedOption = oldSections?.[oldSections.length - 1]?.options?.find((o) => o.option === option);
+    const latestSection = oldSections?.[oldSections.length - 1];
+    const selectedOption = latestSection?.type === 'options'
+      ? latestSection.options.find((item) => item.option === option)
+      : undefined;
     const newSection = {
+      type: 'comment',
       isOptional: result.isOptional,
       option: result.option,
       title: selectedOption?.text,
-    };
+    } satisfies ReportSection;
     global = updateTabState(global, {
       reportModal: {
         messageIds: [storyId],

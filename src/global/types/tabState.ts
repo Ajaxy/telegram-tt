@@ -124,6 +124,33 @@ export type AiEditorTabBase = {
   error?: 'floodPremium' | 'aiError' | 'generic';
 };
 
+type ReportOptionsSection = {
+  type: 'options';
+  title: string;
+  subtitle?: string;
+  options: {
+    text: string;
+    option: string;
+  }[];
+};
+
+type ReportCommentSection = {
+  type: 'comment';
+  title?: string;
+  isOptional?: boolean;
+  option: string;
+};
+
+export type ReportSection = ReportOptionsSection | ReportCommentSection;
+
+type MessageReportContext = {
+  option: string;
+  description: string;
+  title?: string;
+  sections: ReportSection[];
+  isSubmitting?: boolean;
+};
+
 export type TabState = {
   id: number;
   isBlurred?: boolean;
@@ -202,6 +229,7 @@ export type TabState = {
   selectedMessages?: {
     chatId: string;
     messageIds: number[];
+    reportContext?: MessageReportContext;
   };
 
   chatInviteModal?: {
@@ -537,16 +565,7 @@ export type TabState = {
     description: string;
     peerId?: string;
     subject: 'story' | 'message';
-    sections: {
-      title?: string;
-      subtitle?: string;
-      options?: {
-        text: string;
-        option: string;
-      }[];
-      isOptional?: boolean;
-      option?: string;
-    }[];
+    sections: ReportSection[];
   };
 
   activeDownloads: ActiveDownloads;

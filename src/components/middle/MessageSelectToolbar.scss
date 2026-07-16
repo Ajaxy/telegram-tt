@@ -90,6 +90,39 @@
     white-space: nowrap;
   }
 
+  &-reportText {
+    overflow: hidden;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+
+    min-width: 0;
+
+    line-height: 1.25;
+  }
+
+  &-reportTitle,
+  &-reportSubtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-reportTitle {
+    color: var(--color-text);
+  }
+
+  &-reportSubtitle {
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-normal);
+    color: var(--color-text-secondary);
+  }
+
+  &-reportButton.Button {
+    width: auto;
+    padding-inline: 1rem;
+  }
+
   .item {
     --ripple-color: rgba(0, 0, 0, 0.08);
 

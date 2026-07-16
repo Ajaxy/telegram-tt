@@ -332,6 +332,7 @@
 "ReportPeerReport" = "Report";
 "ReportReasonDescription" = "Description";
 "ReportButton" = "Report";
+"ReportChatMessagesRequired" = "Select messages to include in your report.";
 "StickersRemoveFromFavorites" = "Remove from Favorites";
 "StickersAddToFavorites" = "Add to Favorites";
 "ViewPackPreview" = "View Sticker Set";

@@ -12,7 +12,6 @@ import type {
   ApiAttachment,
   ApiChat,
   ApiComposedMessageWithAI,
-  ApiError,
   ApiFormattedText,
   ApiGlobalMessageSearchType,
   ApiInputAiComposeTone,
@@ -1341,12 +1340,10 @@ export async function reportMessages({
 
     return { result: buildApiReportResult(result), error: undefined };
   } catch (err: any) {
-    const errorMessage = (err as ApiError).message;
-
-    if (errorMessage === MESSAGE_ID_REQUIRED_ERROR) {
+    if (err instanceof RPCError && err.errorMessage === MESSAGE_ID_REQUIRED_ERROR) {
       return {
         result: undefined,
-        error: errorMessage,
+        error: err.errorMessage,
       };
     }
 

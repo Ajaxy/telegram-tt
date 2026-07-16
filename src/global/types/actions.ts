@@ -1980,7 +1980,7 @@ export interface ActionPayloads {
   loadCommonChats: {
     userId: string;
   };
-  reportSpam: { chatId: string };
+  reportSpam: { chatId: string } & WithTabId;
   loadFullUser: { userId: string; withPhotos?: boolean };
   openAddContactDialog: { userId?: string } & WithTabId;
   openNewContactDialog: WithTabId | undefined;
