@@ -26,6 +26,23 @@
     transition: none;
   }
 
+  // While landing, the editor is a top-layer popover that fades in above the still-open (opaque)
+  // Media Viewer. Keep the opacity fade for the entrance, but pin the scale — dropping `transform`
+  // from the transition stops it easing to `none`, which would corrupt the canvas measurement.
+  // The size/margin/border/padding overrides cancel the UA popover defaults (`fit-content`, `auto`
+  // margin and a `solid` border with padding) so the editor still fills the screen borderlessly.
+  &.landingGhost {
+    transform: none !important;
+
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    transition: opacity 0.2s ease !important;
+  }
+
   @media (max-width: 600px) {
     flex-direction: column;
   }
@@ -60,6 +77,11 @@
   max-width: 100%;
   min-height: 0;
   max-height: 100%;
+
+  // Kept laid out (so the ghost can measure its target) but not painted until the ghost lands
+  &.hiddenForGhost {
+    opacity: 0;
+  }
 }
 
 .canvas {

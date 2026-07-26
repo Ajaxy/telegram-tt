@@ -33,6 +33,7 @@ addActionHandler('openMediaViewer', (global, actions, payload): ActionReturnType
       isHidden: false,
       withDynamicLoading,
       timestamp,
+      shouldLandInMediaEditor: undefined,
     },
     forwardMessages: {},
     isShareMessageModalShown: false,
@@ -40,7 +41,7 @@ addActionHandler('openMediaViewer', (global, actions, payload): ActionReturnType
 });
 
 addActionHandler('closeMediaViewer', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+  const { shouldLandInMediaEditor, tabId = getCurrentTabId() } = payload || {};
   const {
     volume, isMuted, playbackRate, isHidden,
   } = selectTabState(global, tabId).mediaViewer;
@@ -51,6 +52,7 @@ addActionHandler('closeMediaViewer', (global, actions, payload): ActionReturnTyp
       isMuted,
       isHidden,
       playbackRate,
+      shouldLandInMediaEditor,
     },
   }, tabId);
 });

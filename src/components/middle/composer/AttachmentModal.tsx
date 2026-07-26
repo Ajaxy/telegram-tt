@@ -184,6 +184,9 @@ const AttachmentModal = ({
 
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
   const [editingAttachmentIndex, setEditingAttachmentIndex] = useState<number | undefined>(undefined);
+  // `true` when the modal was opened straight into the editor (from the Media Viewer / reply), so the
+  // attachment only exists to be edited — cancelling the editor should dismiss the whole modal.
+  const wasOpenedAsEditorRef = useRef(false);
   const [shouldShowAiButton, setShouldShowAiButton] = useState(false);
   const html = useDerivedState(() => getHtml(), [getHtml]);
   const editingAttachment = editingAttachmentIndex !== undefined
@@ -192,6 +195,7 @@ const AttachmentModal = ({
   useEffect(() => {
     if (shouldOpenMessageMediaEditor && attachments.length) {
       setEditingAttachmentIndex(0);
+      wasOpenedAsEditorRef.current = true;
       resetMessageMediaEditorRequest();
     }
   }, [shouldOpenMessageMediaEditor, attachments.length]);
@@ -495,10 +499,17 @@ const AttachmentModal = ({
 
   const handleCloseEditor = useLastCallback(() => {
     setEditingAttachmentIndex(undefined);
+    // Exiting the editor without applying: if the modal only existed to host it, close it entirely
+    if (wasOpenedAsEditorRef.current) {
+      wasOpenedAsEditorRef.current = false;
+      onClear();
+    }
   });
 
   const handleSaveEdit = useLastCallback(async (file: File) => {
     if (editingAttachmentIndex === undefined) return;
+
+    wasOpenedAsEditorRef.current = false;
 
     const newAttachment = await buildAttachment(file.name, file, {
       shouldSendAsFile: attachments[editingAttachmentIndex].shouldSendAsFile,
@@ -763,11 +774,13 @@ const AttachmentModal = ({
         isHovered && styles.hovered,
         isMobile && styles.mobile,
         isSymbolMenuOpen && styles.symbolMenuOpen,
+        editingAttachment && styles.editorActive,
         forceDarkTheme && 'component-theme-dark',
       )}
       hasAbsoluteCloseButton={Boolean(renderingAttachments)}
       noBackdropClose
       isLowStackPriority
+      noFreezeOnClose
       onClose={onClear}
     >
       <div
@@ -933,7 +946,7 @@ export default memo(withGlobal<OwnProps>(
 
     const {
       shouldSaveAttachmentsCompression,
-      shouldOpenMessageMediaEditor,
+      messageMediaEditorRequest,
       aiMessageEditorPendingResult,
     } = selectTabState(global);
     const chatFullInfo = selectChatFullInfo(global, chatId);
@@ -956,7 +969,7 @@ export default memo(withGlobal<OwnProps>(
       captionLimit: selectCurrentLimit(global, 'captionLength'),
       attachmentSettings,
       shouldSaveAttachmentsCompression,
-      shouldOpenMessageMediaEditor,
+      shouldOpenMessageMediaEditor: Boolean(messageMediaEditorRequest),
       aiMessageEditorPendingResult,
     };
   },

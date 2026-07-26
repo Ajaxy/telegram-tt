@@ -1,4 +1,7 @@
-import { memo, useEffect, useMemo, useRef, useState } from '@teact';
+import {
+  memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
+} from '@teact';
+import { getActions } from '../../../global';
 
 import type { DrawAction } from './canvasUtils';
 import type { CropAction, CropState } from './hooks/useCropper';
@@ -13,6 +16,7 @@ import getPointerPosition from '../../../util/events/getPointerPosition';
 import { blobToFile, preloadImage } from '../../../util/files';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
 import { REM } from '../../common/helpers/mediaDimensions';
+import { landGhostInMediaEditor, prepareMediaEditorGhost } from '../../mediaViewer/helpers/ghostAnimation';
 import {
   applyCanvasTransform, computeRotationZoom, getEffectiveDimensions, renderActionsToCanvas,
 } from './canvasUtils';
@@ -64,6 +68,12 @@ const TABS = EDITOR_TABS.map((tab) => ({
 }));
 
 const TRANSITION_DURATION = 300;
+const GHOST_LANDING_MAX_WAIT = 1500;
+const MEDIA_VIEWER_SLIDE_SELECTOR = '.MediaViewerSlide--active img, .MediaViewerSlide--active video';
+
+function isOpenedFromMediaViewer() {
+  return Boolean(document.getElementById('MediaViewer')?.querySelector(MEDIA_VIEWER_SLIDE_SELECTOR));
+}
 
 const MediaEditor = ({
   isOpen,
@@ -73,6 +83,8 @@ const MediaEditor = ({
   onClose,
   onSave,
 }: OwnProps) => {
+  const { closeMediaViewer } = getActions();
+
   const lang = useLang();
   const animationLevel = useSelector(selectAnimationLevel);
   const theme = useSelector(selectTheme);
@@ -93,6 +105,8 @@ const MediaEditor = ({
   const originalImageRef = useRef<HTMLImageElement | undefined>(undefined);
 
   const [mode, setMode] = useState<EditorMode>(INITIAL_MODE);
+  const [isAwaitingGhostLanding, setIsAwaitingGhostLanding] = useState(false);
+  const hasStartedLandingRef = useRef(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [snapshotSrc, setSnapshotSrc] = useState<string | undefined>();
   const [snapshotStyle, setSnapshotStyle] = useState('');
@@ -331,9 +345,59 @@ const MediaEditor = ({
       resetDisplaySize();
       setImageDimensions({ width: 0, height: 0 });
       originalImageRef.current = undefined;
+      hasStartedLandingRef.current = false;
+      // Opened from the Media Viewer → morph its media into the canvas and fade in above it
+      setIsAwaitingGhostLanding(isOpenedFromMediaViewer());
     }
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, [isOpen, imageUrl]);
+
+  // While landing, promote the editor to the top layer (a manual popover) so it renders — and fades
+  // in — above the still-open Media Viewer modal, then spawn the ghost so it stacks above the editor.
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root || !isAwaitingGhostLanding) return undefined;
+
+    root.popover = 'manual';
+    if (!root.matches(':popover-open')) {
+      root.showPopover();
+    }
+    prepareMediaEditorGhost();
+
+    return () => {
+      if (root.matches(':popover-open')) {
+        root.hidePopover();
+      }
+      root.removeAttribute('popover');
+    };
+  }, [isAwaitingGhostLanding, rootRef]);
+
+  // Land the Media Viewer ghost onto the freshly rendered canvas, then reveal it.
+  // Gate on `cropperWidth` too: in draw mode the canvas display box is `cropperWidth * displayScale`,
+  // which is only correct once `initCropState` has run — otherwise the ghost lands on a zero-sized box.
+  useEffect(() => {
+    if (!isAwaitingGhostLanding || hasStartedLandingRef.current) return;
+    if (displaySize.width === 0 || canvasSize.width === 0 || cropState.cropperWidth === 0 || !canvasRef.current) return;
+
+    hasStartedLandingRef.current = true;
+    // Fly the ghost into the canvas. Only once it has landed is the editor guaranteed fully opaque,
+    // so close the (now-covered) backdrop viewer and reveal the canvas at that point.
+    landGhostInMediaEditor(canvasRef.current, () => {
+      setIsAwaitingGhostLanding(false);
+      closeMediaViewer({ shouldLandInMediaEditor: true });
+    });
+  }, [isAwaitingGhostLanding, displaySize.width, canvasSize.width, cropState.cropperWidth]);
+
+  // Reveal the canvas and drop the backdrop viewer even if the ghost never lands (e.g. image failed)
+  useEffect(() => {
+    if (!isAwaitingGhostLanding) return undefined;
+
+    const timeout = window.setTimeout(() => {
+      setIsAwaitingGhostLanding(false);
+      closeMediaViewer({ shouldLandInMediaEditor: true });
+    }, GHOST_LANDING_MAX_WAIT);
+    return () => clearTimeout(timeout);
+  }, [isAwaitingGhostLanding]);
 
   // Initialize canvas when image loads
   useEffect(() => {
@@ -693,9 +757,9 @@ const MediaEditor = ({
 
   return (
     <Portal>
-      <div ref={rootRef} className={styles.root}>
+      <div ref={rootRef} className={buildClassName(styles.root, isAwaitingGhostLanding && styles.landingGhost)}>
         <div ref={canvasAreaRef} className={styles.canvasArea}>
-          <div className={styles.canvasContainer}>
+          <div className={buildClassName(styles.canvasContainer, isAwaitingGhostLanding && styles.hiddenForGhost)}>
             <canvas
               ref={canvasRef}
               className={buildClassName(

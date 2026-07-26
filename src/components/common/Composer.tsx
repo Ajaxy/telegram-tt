@@ -333,8 +333,7 @@ type StateProps = {
   isAccountFrozen?: boolean;
   isAppConfigLoaded?: boolean;
   insertingPeerIdMention?: string;
-  replyToMessage?: ApiMessage;
-  shouldOpenMessageMediaEditor?: TabState['shouldOpenMessageMediaEditor'];
+  mediaEditorMessage?: ApiMessage;
 };
 
 enum MainButtonState {
@@ -463,8 +462,7 @@ const Composer = ({
   isAccountFrozen,
   isAppConfigLoaded,
   insertingPeerIdMention,
-  replyToMessage,
-  shouldOpenMessageMediaEditor,
+  mediaEditorMessage,
   onDropHide,
   onFocus,
   onBlur,
@@ -753,9 +751,8 @@ const Composer = ({
 
   const mediaEditRequestRef = useRef<number>();
   useEffect(() => {
-    if (!shouldOpenMessageMediaEditor) return;
-    const targetMessage = editingMessage || replyToMessage;
-    const media = targetMessage && (getMessagePhoto(targetMessage) || getMessageDocumentPhoto(targetMessage));
+    if (!mediaEditorMessage) return;
+    const media = getMessagePhoto(mediaEditorMessage) || getMessageDocumentPhoto(mediaEditorMessage);
     if (!media) return;
     const mediaHash = getMediaHash(media, 'full');
     if (!mediaHash) return;
@@ -767,7 +764,7 @@ const Composer = ({
       const attachment = await buildAttachment(getMediaFilename(media), blob);
       handleSetAttachments([attachment]);
     });
-  }, [editingMessage, replyToMessage, shouldOpenMessageMediaEditor, handleSetAttachments]);
+  }, [mediaEditorMessage, handleSetAttachments]);
 
   const [isBotKeyboardOpen, openBotKeyboard, closeBotKeyboard] = useFlag();
   const [isBotCommandMenuOpen, openBotCommandMenu, closeBotCommandMenu] = useFlag();
@@ -2862,8 +2859,11 @@ export default memo(withGlobal<OwnProps>(
     const { language, shouldCollectDebugLogs } = selectSharedSettings(global);
     const {
       forwardMessages: { messageIds: forwardMessageIds },
-      shouldOpenMessageMediaEditor,
+      messageMediaEditorRequest,
     } = selectTabState(global);
+    const mediaEditorMessage = messageMediaEditorRequest && messageMediaEditorRequest.chatId === chatId
+      ? selectChatMessage(global, chatId, messageMediaEditorRequest.messageId)
+      : undefined;
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
     const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
     const botKeyboardMessageId = messageWithActualBotKeyboard ? messageWithActualBotKeyboard.id : undefined;
@@ -3029,8 +3029,7 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       isAppConfigLoaded,
       insertingPeerIdMention,
-      shouldOpenMessageMediaEditor,
-      replyToMessage,
+      mediaEditorMessage,
     };
   },
 )(Composer));

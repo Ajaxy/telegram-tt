@@ -236,7 +236,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
   const handlePictogramClick = useLastCallback((e: React.MouseEvent): void => {
     e.stopPropagation();
     if ((frozenEditingId || frozenReplyInfo?.type === 'message') && canMediaBeEdited) {
-      requestMessageMediaEditor();
+      requestMessageMediaEditor({ chatId: frozenMessage.chatId, messageId: frozenMessage.id });
       return;
     }
   });

@@ -1873,7 +1873,9 @@ export interface ActionPayloads {
     withDynamicLoading?: boolean;
     timestamp?: number;
   } & WithTabId;
-  closeMediaViewer: WithTabId | undefined;
+  closeMediaViewer: ({
+    shouldLandInMediaEditor?: boolean;
+  } & WithTabId) | undefined;
   updateLastPlaybackTimestamp: {
     chatId: string;
     messageId: number;
@@ -3308,7 +3310,10 @@ export interface ActionPayloads {
   openCocoonModal: WithTabId | undefined;
   closeCocoonModal: WithTabId | undefined;
 
-  requestMessageMediaEditor: WithTabId | undefined;
+  requestMessageMediaEditor: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
   resetMessageMediaEditorRequest: WithTabId | undefined;
 }
 

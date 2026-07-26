@@ -96,6 +96,7 @@ type StateProps = {
   isHidden?: boolean;
   withAnimation?: boolean;
   shouldSkipHistoryAnimations?: boolean;
+  shouldLandInMediaEditor?: boolean;
   withDynamicLoading?: boolean;
   isLoadingMoreMedia?: boolean;
   isSynced?: boolean;
@@ -126,6 +127,7 @@ const MediaViewer = ({
   withAnimation,
   isHidden,
   shouldSkipHistoryAnimations,
+  shouldLandInMediaEditor,
   withDynamicLoading,
   isLoadingMoreMedia,
   isSynced,
@@ -277,7 +279,9 @@ const MediaViewer = ({
       }
     }
 
-    if (isGhostAnimation && !isOpen && prevItem) {
+    // When landing in the Media Editor, the ghost is created on the Edit click and the viewer is
+    // closed by the editor, so there is nothing to animate here
+    if (isGhostAnimation && !isOpen && prevItem && !shouldLandInMediaEditor) {
       beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateClosing(prevOrigin!, prevBestImageData!, prevMessage, prevItem?.mediaIndex, prevSourceId);
     }
@@ -290,6 +294,7 @@ const MediaViewer = ({
   }, [
     isOpen, isHidden, bestImageData, dimensions, hasFooter, isGhostAnimation, isVideo, message, origin,
     prevBestImageData, prevItem, prevMessage, prevOrigin, mediaIndex, sourceId, prevSourceId,
+    shouldLandInMediaEditor,
   ]);
 
   const handleClose = useLastCallback(() => closeMediaViewer());
@@ -305,7 +310,7 @@ const MediaViewer = ({
   const { shouldRender: shouldRenderDialog } = useShowTransition<HTMLDialogElement>({
     isOpen: shouldShowDialog,
     ref: dialogRef,
-    noCloseTransition: shouldSkipHistoryAnimations || isHidden,
+    noCloseTransition: shouldSkipHistoryAnimations || isHidden || shouldLandInMediaEditor,
     closeDuration: ANIMATION_DURATION + ANIMATION_END_DELAY,
     className: false,
     withShouldRender: true,
@@ -642,6 +647,7 @@ export default memo(withGlobal(
       mediaIndex,
       isAvatarView,
       isSponsoredMessage,
+      shouldLandInMediaEditor,
     } = mediaViewer;
     const withAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
@@ -673,6 +679,7 @@ export default memo(withGlobal(
         withAnimation,
         origin,
         shouldSkipHistoryAnimations,
+        shouldLandInMediaEditor,
         isHidden,
         standaloneMedia,
         pageMedia,
@@ -758,6 +765,7 @@ export default memo(withGlobal(
       withAnimation,
       isHidden,
       shouldSkipHistoryAnimations,
+      shouldLandInMediaEditor,
       withDynamicLoading,
       standaloneMedia,
       pageMedia,

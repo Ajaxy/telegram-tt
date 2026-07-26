@@ -238,6 +238,29 @@
   }
 }
 
+// Top-layer host (manual popover) for the ghost that flies into the Media Editor
+.ghost-host {
+  pointer-events: none;
+
+  position: fixed;
+  z-index: calc(var(--z-modal) + 1);
+  inset: 0;
+
+  overflow: visible;
+
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  background: transparent;
+
+  &::backdrop {
+    background: transparent;
+  }
+}
+
 .ghost {
   will-change: transform, opacity;
 
@@ -257,6 +280,11 @@
   &.circle {
     border-radius: 50%;
     transition: transform 0.2s ease, opacity 0.2s ease, border-radius 0.2s ease;
+  }
+
+  &.for-media-editor {
+    position: fixed;
+    border-radius: 0.25rem;
   }
 
   img,

@@ -424,6 +424,7 @@ export type TabState = {
     isMuted: boolean;
     isHidden?: boolean;
     timestamp?: number;
+    shouldLandInMediaEditor?: boolean;
   };
 
   audioPlayer: {
@@ -1132,5 +1133,8 @@ export type TabState = {
     isOwner?: boolean;
     rank?: string;
   };
-  shouldOpenMessageMediaEditor?: boolean;
+  messageMediaEditorRequest?: {
+    chatId: string;
+    messageId: number;
+  };
 };

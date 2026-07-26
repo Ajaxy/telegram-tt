@@ -2,7 +2,7 @@ import type { ApiDimensions, ApiMessage } from '../../../api/types';
 import { MediaViewerOrigin } from '../../../types';
 
 import { ANIMATION_END_DELAY, MESSAGE_CONTENT_SELECTOR } from '../../../config';
-import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getMessageHtmlId } from '../../../global/helpers';
 import { applyStyles } from '../../../util/animation';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
@@ -19,6 +19,9 @@ import {
 
 const ANIMATION_DURATION = 200;
 const MIDDLE_HEADER_PANES_HEIGHT_PROPERTY = '--middle-header-panes-height';
+const EDITOR_LANDING_TIMEOUT = 1500;
+
+let pendingEditorGhost: { ghost: HTMLDivElement; host: HTMLElement; fallbackTimeout: number } | undefined;
 
 export function animateOpening(
   hasFooter: boolean,
@@ -212,6 +215,125 @@ export function animateClosing(
   });
 }
 
+// Builds the flying ghost from the Media Viewer's current media while the viewer is still open, so
+// the viewer can stay visible as an opaque backdrop until the editor is ready. Returns `false` when
+// no source media is on screen, so the caller can close the viewer itself.
+export function prepareMediaEditorGhost(bestImageData?: string) {
+  const mediaViewer = document.getElementById('MediaViewer');
+  const fromImage = mediaViewer?.querySelector<HTMLImageElement>(
+    '.MediaViewerSlide--active img, .MediaViewerSlide--active video',
+  );
+  if (!fromImage) {
+    return false;
+  }
+
+  const {
+    top, left, width, height,
+  } = fromImage.getBoundingClientRect();
+
+  requestMutation(() => {
+    discardPendingEditorGhost();
+
+    // The closing Media Viewer is a modal `<dialog>` in the top layer, so a plain ghost on `body`
+    // would be dimmed by its backdrop. A `manual` popover puts the ghost in the top layer too.
+    const host = document.createElement('div');
+    host.className = 'ghost-host';
+    host.popover = 'manual';
+
+    const ghost = createGhost(bestImageData || fromImage);
+    ghost.classList.add('for-media-editor');
+    applyStyles(ghost, {
+      top: `${top}px`,
+      left: `${left}px`,
+      width: `${width}px`,
+      height: `${height}px`,
+    });
+
+    host.appendChild(ghost);
+    document.body.appendChild(host);
+    host.showPopover();
+    document.body.classList.add('ghost-animating');
+
+    const fallbackTimeout = window.setTimeout(fadeOutPendingEditorGhost, EDITOR_LANDING_TIMEOUT);
+    pendingEditorGhost = { ghost, host, fallbackTimeout };
+  });
+
+  return true;
+}
+
+export function landGhostInMediaEditor(target: HTMLElement, onLand: NoneToVoidFunction) {
+  if (!pendingEditorGhost) {
+    onLand();
+    return;
+  }
+
+  const { ghost, host, fallbackTimeout } = pendingEditorGhost;
+  clearTimeout(fallbackTimeout);
+  pendingEditorGhost = undefined;
+
+  requestMeasure(() => {
+    const {
+      top: toTop, left: toLeft, width: toWidth, height: toHeight,
+    } = target.getBoundingClientRect();
+    const {
+      top: fromTop, left: fromLeft, width: fromWidth, height: fromHeight,
+    } = ghost.getBoundingClientRect();
+
+    const scaleX = fromWidth / toWidth;
+    const scaleY = fromHeight / toHeight;
+
+    requestMutation(() => {
+      // Move the ghost box to the target, but keep it visually at the source via a transform, so
+      // the transition lands on the exact target box (no residual transform / sub-pixel drift)
+      applyStyles(ghost, {
+        transition: 'none',
+        top: `${toTop}px`,
+        left: `${toLeft}px`,
+        width: `${toWidth}px`,
+        height: `${toHeight}px`,
+        transformOrigin: 'top left',
+        transform: `translate3d(${fromLeft - toLeft}px, ${fromTop - toTop}px, 0) scale(${scaleX}, ${scaleY})`,
+      });
+
+      requestMutation(() => {
+        ghost.style.transition = '';
+        ghost.style.transform = '';
+
+        setTimeout(() => {
+          onLand();
+
+          setTimeout(() => {
+            requestMutation(() => removeGhostHost(ghost, host));
+          }, ANIMATION_END_DELAY);
+        }, ANIMATION_DURATION + ANIMATION_END_DELAY);
+      });
+    });
+  });
+}
+
+function fadeOutPendingEditorGhost() {
+  if (!pendingEditorGhost) return;
+
+  const { ghost, host } = pendingEditorGhost;
+  pendingEditorGhost = undefined;
+
+  requestMutation(() => {
+    ghost.style.opacity = '0';
+
+    setTimeout(() => {
+      requestMutation(() => removeGhostHost(ghost, host));
+    }, ANIMATION_DURATION + ANIMATION_END_DELAY);
+  });
+}
+
+function discardPendingEditorGhost() {
+  if (!pendingEditorGhost) return;
+
+  clearTimeout(pendingEditorGhost.fallbackTimeout);
+  removeGhostHost(pendingEditorGhost.ghost, pendingEditorGhost.host);
+  pendingEditorGhost = undefined;
+}
+
 function createGhost(
   source: string | HTMLImageElement | HTMLVideoElement | HTMLCanvasElement,
   origin?: MediaViewerOrigin,
@@ -259,6 +381,12 @@ function getGhostHost() {
 
 function removeGhost(ghost: HTMLDivElement) {
   ghost.parentElement?.removeChild(ghost);
+}
+
+function removeGhostHost(ghost: HTMLDivElement, host: HTMLElement) {
+  removeGhost(ghost);
+  host.remove();
+  document.body.classList.remove('ghost-animating');
 }
 
 function uncover(realWidth: number, realHeight: number, top: number, left: number, width: number, height: number) {
