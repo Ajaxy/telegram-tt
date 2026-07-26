@@ -119,7 +119,7 @@ const FooterActionBar = ({
       return {
         key: 'openSavedChat',
         label: lang('SavedOpenChat'),
-        isPrimary: false,
+        isPrimary: true,
         onClick: handleOpenSavedChat,
       };
     }
@@ -191,7 +191,6 @@ const FooterActionBar = ({
           className={styles.centerButton}
           size="smaller"
           iconName={mainButton.iconName}
-          iconClassName={mainButton.iconName ? styles.unpinIcon : undefined}
           noForcedUpperCase
           onClick={mainButton.onClick}
         >

@@ -55,16 +55,6 @@
       animation: none;
     }
   }
-
-  .unpinIcon {
-    margin-inline-start: -0.4375rem;
-    margin-inline-end: 0.75rem;
-
-    font-size: 1.5rem;
-    color: var(--color-text);
-
-    transition: color 0.15s;
-  }
 }
 
 @keyframes fade-in {
