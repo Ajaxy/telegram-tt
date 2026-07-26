@@ -25,6 +25,7 @@ export default defineConfig(
     quoteProps: 'as-needed',
   }),
   globalIgnores([
+    '.cache/',
     'src/lib/rlottie/**',
     'src/lib/video-preview/polyfill',
     'src/lib/fasttextweb/**',

@@ -401,12 +401,14 @@ const MessageList = ({
     memoFirstUnreadIdRef.current = firstUnreadId;
   }, [firstUnreadId]);
 
+  const canShowSponsoredMessages = Boolean(areAdsEnabled && type === 'thread');
+
   useEffect(() => {
     const canHaveAds = isChannelChat || isBot;
-    if (areAdsEnabled && canHaveAds && isSynced && isReady && isAppConfigLoaded) {
+    if (canShowSponsoredMessages && canHaveAds && isSynced && isReady && isAppConfigLoaded) {
       loadSponsoredMessages({ peerId: chatId });
     }
-  }, [chatId, isSynced, isReady, isChannelChat, isBot, areAdsEnabled, isAppConfigLoaded]);
+  }, [chatId, isSynced, isReady, isChannelChat, isBot, canShowSponsoredMessages, isAppConfigLoaded]);
 
   // Updated only once when messages are loaded (as we want the unread divider to keep its position)
   useSyncEffect(() => {
@@ -1267,7 +1269,7 @@ const MessageList = ({
       />
     ) : activeKey === Content.MessageList ? (
       <MessageListContent
-        canShowAds={areAdsEnabled && isChannelChat}
+        canShowAds={canShowSponsoredMessages && isChannelChat}
         chatId={chatId}
         isComments={isComments}
         isChannelChat={isChannelChat}

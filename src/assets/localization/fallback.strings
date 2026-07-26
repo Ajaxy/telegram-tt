@@ -801,6 +801,7 @@
 "ConversationGreetingText" = "Send a message or tap on the greeting below.";
 "ConversationDeleteManyMessages" = "Delete Messages";
 "AreYouSureDeleteFewMessages" = "Are you sure you want to delete these messages?";
+"SavedOpenChat" = "Open Chat";
 "ProfileJoinChannel" = "Join Channel";
 "ProfileJoinGroup" = "Join Group";
 "ChannelJoinRequest" = "APPLY TO JOIN GROUP";
@@ -811,6 +812,7 @@
 "AddContact" = "Add Contact";
 "Call" = "Call";
 "VideoCall" = "Video Call";
+"ProfileSendAGift" = "Send a Gift";
 "ChatsUnmute" = "Unmute";
 "ChatsMute" = "Mute";
 "StartVoipChat" = "Start Video chat";

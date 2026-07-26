@@ -372,7 +372,6 @@ const MiddleHeader = ({
           threadId={threadId}
           messageListType={messageListType}
           isMobile={isMobile}
-          canExpandActions
         />
       </div>
     </div>

@@ -1,9 +1,8 @@
 .MessageSelectToolbar {
   position: absolute;
   z-index: 20;
-  right: 0.5rem;
+  inset-inline: var(--footer-side-inset);
   bottom: var(--composer-bottom-gap-mobile);
-  left: 0.5rem;
 
   display: flex;
   justify-content: center;
@@ -17,20 +16,13 @@
 
   &::before {
     z-index: -1;
-    right: auto;
-    left: auto;
-
+    inset-inline: auto;
     width: 100%;
     max-width: 100%;
   }
 
   .mask-image-disabled &::before {
-    right: auto !important;
-    left: auto !important;
-  }
-
-  & .MessageSelectToolbar-inner {
-    transform: scaleX(1) translateX(0);
+    inset-inline: auto !important;
   }
 
   body.no-page-transitions & {
@@ -40,23 +32,9 @@
   &:not(.shown) {
     pointer-events: none;
     opacity: 0;
-
-    .shown-inner {
-      transform: scaleX(var(--toolbar-hidden-scale, 1));
-    }
-
-    &.with-composer .MessageSelectToolbar-inner {
-      transform: none;
-    }
-
-    &:not(.with-composer) .MessageSelectToolbar-inner {
-      transform: scaleX(var(--toolbar-unpin-hidden-scale)) translateX(0);
-    }
   }
 
   &-inner {
-    transform: scaleX(1);
-
     display: flex;
     gap: var(--composer-row-gap);
     align-items: center;
@@ -187,8 +165,6 @@
   }
 
   @media (min-width: 601px) {
-    right: 1rem;
     bottom: var(--composer-bottom-gap);
-    left: 1rem;
   }
 }

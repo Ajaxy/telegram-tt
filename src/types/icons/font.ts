@@ -87,6 +87,7 @@ export type FontIconName =
   | 'delete-left'
   | 'delete-user'
   | 'diamond'
+  | 'direct'
   | 'document'
   | 'double-badge'
   | 'down'

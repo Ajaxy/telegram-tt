@@ -104,7 +104,6 @@
       }
 
       .composer-wrapper {
-        transform: scaleX(var(--composer-hidden-scale, 1)) translateX(var(--composer-translate-x, 0));
         border-bottom-right-radius: var(--border-radius-messages);
 
         &::before {
@@ -156,17 +155,7 @@
   }
 
   .messaging-disabled {
-    transform: scaleX(1);
-    transition: transform var(--select-transition);
-
-    .messaging-disabled-inner span {
-      opacity: 1;
-      transition: opacity var(--select-transition);
-
-      body.no-page-transitions & {
-        transition: none !important;
-      }
-    }
+    transition: opacity var(--select-transition);
 
     body.no-page-transitions & {
       transition: none !important;
@@ -174,11 +163,7 @@
 
     &:not(.shown) {
       pointer-events: none;
-      transform: scaleX(var(--composer-hidden-scale, 1));
-
-      .messaging-disabled-inner span {
-        opacity: 0;
-      }
+      opacity: 0;
     }
 
     &-inner {
@@ -196,6 +181,7 @@
 
   .middle-column-footer {
     --base-height: var(--composer-height);
+    --footer-side-inset: 1rem;
 
     position: absolute;
     z-index: var(--z-middle-footer);
@@ -210,7 +196,7 @@
     width: 100%;
     max-width: var(--messages-container-width);
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 0 var(--footer-side-inset);
 
     transition: transform var(--layer-transition);
 
@@ -243,7 +229,7 @@
     }
 
     @media (max-width: 600px) {
-      padding: 0 0.5rem;
+      --footer-side-inset: 0.5rem;
 
       body.is-symbol-menu-open & {
         transform: translate3d(0, calc(-1 * (var(--symbol-menu-height))), 0);
@@ -267,7 +253,6 @@
 }
 
 .Composer,
-.composer-button,
 .messaging-disabled {
   position: relative;
   display: flex;
@@ -282,71 +267,9 @@
   }
 }
 
-.composer-button {
-  .mask-image-disabled & {
-    border-radius: var(--border-radius-messages);
-    box-shadow: var(--shadow-footer);
-  }
-}
-
 .messaging-disabled {
   .mask-image-disabled & {
     border-radius: var(--border-radius-messages);
-  }
-}
-
-.middle-column-footer-button-container {
-  position: absolute;
-  right: 1rem;
-  left: 1rem;
-
-  display: flex;
-  justify-content: center;
-
-  padding-bottom: var(--composer-bottom-gap);
-
-  .unpin-all-button {
-    .icon-unpin {
-      margin-inline-start: -0.4375rem;
-      margin-inline-end: 0.75rem;
-
-      font-size: 1.5rem;
-      color: var(--color-text);
-
-      transition: color 0.15s;
-    }
-  }
-
-  .unpin-all-button,
-  .open-chat-button {
-    --button-text-color: var(--color-text);
-    --button-active-text-color: var(--color-text);
-    --button-active-background-color: var(--color-chat-hover);
-  }
-
-  .composer-button {
-    transform: scaleX(1);
-
-    height: var(--base-height);
-    border-radius: var(--composer-pill-radius);
-
-    font-weight: var(--font-weight-semibold);
-
-    transition: transform var(--select-transition), background-color 0.15s, color 0.15s;
-
-    .select-mode-active + .middle-column-footer & {
-      transform: scaleX(var(--unpin-hidden-scale));
-      box-shadow: none;
-    }
-  }
-
-  .mask-image-disabled &::before {
-    background: unset;
-  }
-
-  @media (max-width: 600px) {
-    margin-left: -0.5rem;
-    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   }
 }
 

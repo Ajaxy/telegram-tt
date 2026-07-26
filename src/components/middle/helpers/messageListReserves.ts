@@ -34,8 +34,8 @@ function getMessageListBottomReserve(scroller: HTMLElement) {
 }
 
 export function measureFooterContentHeight(footer: HTMLElement) {
-  const buttonContainer = footer.querySelector<HTMLElement>('.middle-column-footer-button-container');
-  return Math.max(footer.offsetHeight, buttonContainer?.offsetHeight ?? 0);
+  const actionBar = footer.querySelector<HTMLElement>('[data-footer-action-bar]');
+  return Math.max(footer.offsetHeight, actionBar?.offsetHeight ?? 0);
 }
 
 // While armed, the reserve stays latched at the settled value for the whole composer collapse

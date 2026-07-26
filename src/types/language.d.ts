@@ -693,6 +693,7 @@ export interface LangPair {
   'ConversationGreetingText': undefined;
   'ConversationDeleteManyMessages': undefined;
   'AreYouSureDeleteFewMessages': undefined;
+  'SavedOpenChat': undefined;
   'ProfileJoinChannel': undefined;
   'ProfileJoinGroup': undefined;
   'ChannelJoinRequest': undefined;
@@ -703,6 +704,7 @@ export interface LangPair {
   'AddContact': undefined;
   'Call': undefined;
   'VideoCall': undefined;
+  'ProfileSendAGift': undefined;
   'ChatsUnmute': undefined;
   'ChatsMute': undefined;
   'StartVoipChat': undefined;
