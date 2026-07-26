@@ -17,6 +17,22 @@ import { updateTabState } from '../../reducers/tabs';
 import { replaceTabThreadParam } from '../../reducers/threads';
 import { selectChat, selectCurrentMessageList, selectTabState } from '../../selectors';
 
+addActionHandler('openDeleteMemberModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, peerId, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    deleteMemberModal: { chatId, peerId },
+  }, tabId);
+});
+
+addActionHandler('closeDeleteMemberModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    deleteMemberModal: undefined,
+  }, tabId);
+});
+
 addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionReturnType => {
   const {
     chatId,

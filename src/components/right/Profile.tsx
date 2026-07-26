@@ -40,6 +40,7 @@ import {
 import { getSavedGiftKey } from '../../global/helpers/stars';
 import {
   selectActiveDownloads,
+  selectCanBanUsers,
   selectCanEditRank,
   selectCanUpdateMainTab,
   selectChat,
@@ -122,7 +123,6 @@ import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
 import Spinner from '../ui/Spinner';
 import TabList, { type TabWithProperties } from '../ui/TabList';
 import Transition from '../ui/Transition';
-import DeleteMemberModal from './DeleteMemberModal';
 import StarGiftCollectionList from './gifts/StarGiftCollectionList';
 import StoryAlbumList from './stories/StoryAlbumList';
 
@@ -349,6 +349,7 @@ const Profile = ({
     changeProfileTab,
     setMainProfileTab,
     openEditRankModal,
+    openDeleteMemberModal,
   } = getActions();
 
   const containerRef = useRef<HTMLDivElement>();
@@ -359,7 +360,6 @@ const Profile = ({
   const oldLang = useOldLang();
   const lang = useLang();
 
-  const [deletingUserId, setDeletingUserId] = useState<string | undefined>();
   const [isGiftTransitionEnabled, enableGiftTransition, disableGiftTransition] = useFlag();
 
   const isClosed = !chatInfo.isOpen;
@@ -741,10 +741,6 @@ const Profile = ({
     }];
   });
 
-  const handleDeleteMembersModalClose = useLastCallback(() => {
-    setDeletingUserId(undefined);
-  });
-
   const handleResetGiftsFilter = useLastCallback(() => {
     resetGiftProfileFilter({ peerId: chatId });
   });
@@ -809,7 +805,7 @@ const Profile = ({
         title: oldLang('lng_context_remove_from_group'),
         icon: 'stop',
         handler: () => {
-          setDeletingUserId(memberId);
+          openDeleteMemberModal({ chatId, peerId: memberId });
         },
       });
     }
@@ -1387,13 +1383,6 @@ const Profile = ({
           iconName="add-user-filled"
         />
       )}
-      {canDeleteMembers && (
-        <DeleteMemberModal
-          isOpen={Boolean(deletingUserId)}
-          userId={deletingUserId}
-          onClose={handleDeleteMembersModalClose}
-        />
-      )}
     </Surface>
   );
 };
@@ -1436,7 +1425,7 @@ export default memo(withGlobal<OwnProps>(
     const canAddMembers = hasMembersTab && chat
       && (getHasAdminRight(chat, 'inviteUsers') || (!isChannel && !isUserRightBanned(chat, 'inviteUsers'))
         || chat.isCreator);
-    const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
+    const canDeleteMembers = hasMembersTab && selectCanBanUsers(global, chatId);
     const activeDownloads = selectActiveDownloads(global);
     const { similarChannelIds } = selectSimilarChannelIds(global, chatId) || {};
     const { similarBotsIds } = selectSimilarBotsIds(global, chatId) || {};

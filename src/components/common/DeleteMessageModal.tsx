@@ -328,7 +328,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
 
   const handleDeleteMember = useLastCallback((filteredUserIdList: string[]) => {
     filteredUserIdList.forEach((userId) => {
-      deleteChatMember({ chatId: chat!.id, userId });
+      deleteChatMember({ chatId: chat!.id, peerId: userId });
     });
   });
 
@@ -336,7 +336,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     filteredUserIdList.forEach((userId) => {
       updateChatMemberBannedRights({
         chatId: chat!.id,
-        userId,
+        peerId: userId,
         bannedRights: permissions,
       });
     });

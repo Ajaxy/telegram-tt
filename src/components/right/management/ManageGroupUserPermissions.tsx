@@ -90,7 +90,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
     setIsLoading(true);
     updateChatMemberBannedRights({
       chatId: chat.id,
-      userId: selectedChatMemberId,
+      peerId: selectedChatMemberId,
       bannedRights: permissions,
     });
   }, [chat, selectedChatMemberId, setIsLoading, updateChatMemberBannedRights, permissions]);
@@ -102,7 +102,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
 
     updateChatMemberBannedRights({
       chatId: chat.id,
-      userId: selectedChatMemberId,
+      peerId: selectedChatMemberId,
       bannedRights: {
         viewMessages: true,
       },

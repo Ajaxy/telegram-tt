@@ -1,17 +1,18 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiChatMember, ApiUser } from '../../../api/types';
 
-import { getHasAdminRight, getUserFullName, isChatChannel } from '../../../global/helpers';
-import { selectChat, selectChatFullInfo } from '../../../global/selectors';
+import { getUserFullName, isChatChannel } from '../../../global/helpers';
+import { selectCanBanUsers, selectChat, selectChatFullInfo } from '../../../global/selectors';
+import { isUserId } from '../../../util/entities/ids';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
+import GroupChatInfo from '../../common/GroupChatInfo';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Island, { IslandDescription } from '../../gili/layout/Island';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -32,7 +33,7 @@ type StateProps = {
   isChannel?: boolean;
 };
 
-const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
+const ManageChatRemovedUsers = ({
   chat,
   usersById,
   canDeleteMembers,
@@ -40,7 +41,7 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
   isChannel,
   onClose,
   isActive,
-}) => {
+}: OwnProps & StateProps) => {
   const { updateChatMemberBannedRights } = getActions();
 
   const lang = useOldLang();
@@ -75,7 +76,7 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
       destructive: true,
       handler: () => updateChatMemberBannedRights({
         chatId: chat.id,
-        userId: member.userId,
+        peerId: member.userId,
         bannedRights: {},
       }),
     }];
@@ -94,11 +95,18 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
                 ripple
                 contextActions={getContextActions(member)}
               >
-                <PrivateChatInfo
-                  userId={member.userId}
-                  status={getRemovedBy(member)}
-                  forceShowSelf
-                />
+                {isUserId(member.userId) ? (
+                  <PrivateChatInfo
+                    userId={member.userId}
+                    status={getRemovedBy(member)}
+                    forceShowSelf
+                  />
+                ) : (
+                  <GroupChatInfo
+                    chatId={member.userId}
+                    status={getRemovedBy(member)}
+                  />
+                )}
               </ListItem>
             ))}
           </Island>
@@ -127,7 +135,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     const { byId: usersById } = global.users;
-    const canDeleteMembers = chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
+    const canDeleteMembers = selectCanBanUsers(global, chatId);
 
     return {
       chat,

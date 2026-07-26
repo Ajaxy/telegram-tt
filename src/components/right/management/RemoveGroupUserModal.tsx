@@ -57,7 +57,7 @@ const RemoveGroupUserModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleRemoveUser = useLastCallback((userId: string) => {
-    deleteChatMember({ chatId: chat.id, userId });
+    deleteChatMember({ chatId: chat.id, peerId: userId });
     onClose();
   });
 

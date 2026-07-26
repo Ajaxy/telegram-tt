@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiChatFolder, ApiChatlistExportedInvite,
+  ApiChat, ApiChatFolder, ApiChatFullInfo, ApiChatlistExportedInvite,
   ApiChatMember, ApiDraft, ApiError, ApiMissingInvitedUser,
   ApiTopic,
   LinkContext,
@@ -2126,13 +2126,13 @@ addActionHandler('updateChatDefaultBannedRights', (global, actions, payload): Ac
 
 addActionHandler('updateChatMemberBannedRights', async (global, actions, payload): Promise<void> => {
   const {
-    chatId, userId, bannedRights,
+    chatId, peerId, bannedRights,
     tabId = getCurrentTabId(),
   } = payload;
 
-  const user = selectUser(global, userId);
+  const peer = selectPeer(global, peerId);
 
-  if (!user) {
+  if (!peer) {
     return;
   }
 
@@ -2140,7 +2140,7 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
 
   if (!chat) return;
 
-  const result = await callApi('updateChatMemberBannedRights', { chat, user, bannedRights });
+  const result = await callApi('updateChatMemberBannedRights', { chat, peer, bannedRights });
 
   if (!result) {
     return;
@@ -2158,22 +2158,28 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
   const isBanned = Boolean(bannedRights.viewMessages);
   const isUnblocked = !Object.keys(bannedRights).length;
 
-  global = updateChatFullInfo(global, chat.id, {
-    ...(members && isBanned && {
-      members: members.filter((m) => m.userId !== userId),
-    }),
-    ...(members && !isBanned && {
-      members: members.map((m) => (
-        m.userId === userId
-          ? { ...m, bannedRights }
-          : m
-      )),
-    }),
-    ...(isUnblocked && kickedMembers && {
-      kickedMembers: kickedMembers.filter((m) => m.userId !== userId),
-    }),
-  });
+  const fullInfoUpdate: Partial<ApiChatFullInfo> = {};
+  if (members) {
+    fullInfoUpdate.members = isBanned
+      ? members.filter((m) => m.userId !== peerId)
+      : members.map((m) => (m.userId === peerId ? { ...m, bannedRights } : m));
+  }
   if (isBanned) {
+    const bannedMember: ApiChatMember = {
+      userId: peerId,
+      bannedRights,
+      kickedByUserId: global.currentUserId,
+    };
+    fullInfoUpdate.kickedMembers = [
+      ...(kickedMembers?.filter((m) => m.userId !== peerId) || []),
+      bannedMember,
+    ];
+  } else if (isUnblocked && kickedMembers) {
+    fullInfoUpdate.kickedMembers = kickedMembers.filter((m) => m.userId !== peerId);
+  }
+
+  global = updateChatFullInfo(global, chat.id, fullInfoUpdate);
+  if (isBanned && isUserId(peerId)) {
     global = updateChat(global, chat.id, { membersCount: Math.max(0, (chat.membersCount || 0) - 1) });
   }
 
@@ -2537,18 +2543,17 @@ addActionHandler('addChatMembers', async (global, actions, payload): Promise<voi
 });
 
 addActionHandler('deleteChatMember', async (global, actions, payload): Promise<void> => {
-  const { chatId, userId, tabId = getCurrentTabId() } = payload;
+  const { chatId, peerId, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
-  const user = selectUser(global, userId);
 
-  if (!chat || !user) {
+  if (!chat) {
     return;
   }
 
   if (isChatSuperGroup(chat) || isChatChannel(chat)) {
     actions.updateChatMemberBannedRights({
       chatId,
-      userId,
+      peerId,
       bannedRights: {
         viewMessages: true,
         sendMessages: true,
@@ -2573,6 +2578,12 @@ addActionHandler('deleteChatMember', async (global, actions, payload): Promise<v
       },
       tabId,
     });
+    return;
+  }
+
+  // Basic groups only have user members
+  const user = selectUser(global, peerId);
+  if (!user) {
     return;
   }
 

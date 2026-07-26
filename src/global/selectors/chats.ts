@@ -242,6 +242,13 @@ export function selectCanInviteToChat<T extends GlobalState>(global: T, chatId: 
   ) : (chat.isCreator || getHasAdminRight(chat, 'inviteUsers'))));
 }
 
+export function selectCanBanUsers<T extends GlobalState>(global: T, chatId: string) {
+  const chat = selectChat(global, chatId);
+  if (!chat || chat.isMonoforum) return false;
+
+  return Boolean(chat.isCreator || getHasAdminRight(chat, 'banUsers'));
+}
+
 export function selectCanShareFolder<T extends GlobalState>(global: T, folderId: number) {
   const folder = selectChatFolder(global, folderId);
   if (!folder) return false;

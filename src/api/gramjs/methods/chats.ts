@@ -1416,10 +1416,10 @@ export function updateChatDefaultBannedRights({
 }
 
 export function updateChatMemberBannedRights({
-  chat, user, bannedRights, untilDate,
-}: { chat: ApiChat; user: ApiUser; bannedRights: ApiChatBannedRights; untilDate?: number }) {
+  chat, peer, bannedRights, untilDate,
+}: { chat: ApiChat; peer: ApiPeer; bannedRights: ApiChatBannedRights; untilDate?: number }) {
   const channel = buildInputChannel(chat.id, chat.accessHash);
-  const participant = buildInputPeer(user.id, user.accessHash);
+  const participant = buildInputPeer(peer.id, peer.accessHash);
 
   return invokeRequest(new GramJs.channels.EditBanned({
     channel,

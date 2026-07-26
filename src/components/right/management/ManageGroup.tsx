@@ -17,7 +17,9 @@ import {
   isChatBasicGroup,
   isChatPublic,
 } from '../../../global/helpers';
-import { selectChat, selectChatFullInfo, selectIsChatRestricted, selectTabState } from '../../../global/selectors';
+import {
+  selectCanBanUsers, selectChat, selectChatFullInfo, selectIsChatRestricted, selectTabState,
+} from '../../../global/selectors';
 import { debounce } from '../../../util/schedulers';
 import { formatInteger } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
@@ -497,7 +499,7 @@ export default memo(withGlobal<OwnProps>(
     const { invites } = management.byChatId[chatId] || {};
     const canEditForum = !hasLinkedChannel && (getHasAdminRight(chat, 'changeInfo') || chat.isCreator);
     const canChangeInfo = chat.isCreator || getHasAdminRight(chat, 'changeInfo');
-    const canBanUsers = chat.isCreator || getHasAdminRight(chat, 'banUsers');
+    const canBanUsers = selectCanBanUsers(global, chatId);
     const canInvite = chat.isCreator || getHasAdminRight(chat, 'inviteUsers');
 
     return {

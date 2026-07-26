@@ -993,6 +993,7 @@
 "PaymentShippingSaveInfo" = "You can save your shipping info for future use.";
 "ChannelAddUsers" = "Add users";
 "GroupRemovedRemove" = "Remove User";
+"RemoveMember" = "Remove member";
 "PeerInfoConfirmRemovePeer" = "Remove {user} from the group?";
 "BoxRemove" = "Remove";
 "NoGIFsFound" = "No GIFs found";

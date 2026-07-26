@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import {
-  memo, useMemo, useRef, useState,
+  memo, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -12,7 +12,9 @@ import {
   isChatChannel, isUserBot, isUserRightBanned, sortUserIds,
 } from '../../../global/helpers';
 import { filterPeersByQuery } from '../../../global/helpers/peers';
-import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
+import {
+  selectCanBanUsers, selectChat, selectChatFullInfo, selectTabState,
+} from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
@@ -33,7 +35,6 @@ import InfiniteScroll from '../../ui/InfiniteScroll';
 import InputText from '../../ui/InputText';
 import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
-import DeleteMemberModal from '../DeleteMemberModal';
 
 type OwnProps = {
   chatId: string;
@@ -86,13 +87,12 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   const {
     openChat, setUserSearchQuery, closeManagement,
     toggleParticipantsHidden, setNewChatMembersDialogState, toggleManagement,
+    openDeleteMemberModal,
   } = getActions();
   const oldLang = useOldLang();
   const lang = useLang();
   const inputRef = useRef<HTMLInputElement>();
   const containerRef = useRef<HTMLDivElement>();
-
-  const [deletingUserId, setDeletingUserId] = useState<string | undefined>();
 
   const adminIds = useMemo(() => {
     return noAdmins && adminMembersById ? Object.keys(adminMembersById) : [];
@@ -164,10 +164,6 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
     }
   }, '.ListItem-button', true);
 
-  const handleDeleteMembersModalClose = useLastCallback(() => {
-    setDeletingUserId(undefined);
-  });
-
   const handleToggleParticipantsHidden = useLastCallback(() => {
     toggleParticipantsHidden({ chatId, isEnabled: !areParticipantsHidden });
   });
@@ -187,7 +183,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
       title: oldLang('lng_context_remove_from_group'),
       icon: 'stop',
       handler: () => {
-        setDeletingUserId(memberId);
+        openDeleteMemberModal({ chatId, peerId: memberId });
       },
     }];
   }
@@ -265,13 +261,6 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
           iconName="add-user-filled"
         />
       )}
-      {canDeleteMembers && (
-        <DeleteMemberModal
-          isOpen={Boolean(deletingUserId)}
-          userId={deletingUserId}
-          onClose={handleDeleteMembersModalClose}
-        />
-      )}
     </div>
   );
 };
@@ -285,9 +274,9 @@ export default memo(withGlobal<OwnProps>(
     const { userIds: localContactIds } = global.contactList || {};
     const hiddenMembersMinCount = global.appConfig.hiddenMembersMinCount;
 
-    const canDeleteMembers = chat && (chat.isCreator || getHasAdminRight(chat, 'banUsers'));
+    const canDeleteMembers = selectCanBanUsers(global, chatId);
 
-    const canHideParticipants = canDeleteMembers && !isChatBasicGroup(chat) && chat.membersCount !== undefined
+    const canHideParticipants = canDeleteMembers && chat && !isChatBasicGroup(chat) && chat.membersCount !== undefined
       && hiddenMembersMinCount !== undefined && chat.membersCount >= hiddenMembersMinCount;
 
     const canAddMembers = chat && ((getHasAdminRight(chat, 'inviteUsers')

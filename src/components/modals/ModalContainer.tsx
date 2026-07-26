@@ -25,6 +25,7 @@ import ChatlistModal from './chatlist/ChatlistModal.async';
 import CocoonModal from './cocoon/CocoonModal.async';
 import CollectibleInfoModal from './collectible/CollectibleInfoModal.async';
 import DeleteAccountModal from './deleteAccount/DeleteAccountModal.async';
+import DeleteMemberModal from './deleteMember/DeleteMemberModal.async';
 import DisableSharingAboutModal from './disableSharing/DisableSharingAboutModal.async';
 import EmojiStatusAccessModal from './emojiStatusAccess/EmojiStatusAccessModal.async';
 import FrozenAccountModal from './frozenAccount/FrozenAccountModal.async';
@@ -150,6 +151,7 @@ type ModalKey = keyof Pick<TabState,
   'priceConfirmModal' |
   'isFrozenAccountModalOpen' |
   'deleteAccountModal' |
+  'deleteMemberModal' |
   'isAgeVerificationModalOpen' |
   'profileRatingModal' |
   'qrCodeModal' |
@@ -288,6 +290,7 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   priceConfirmModal: PriceConfirmModal,
   isFrozenAccountModalOpen: FrozenAccountModal,
   deleteAccountModal: DeleteAccountModal,
+  deleteMemberModal: DeleteMemberModal,
   isAgeVerificationModalOpen: AgeVerificationModal,
   profileRatingModal: ProfileRatingModal,
   qrCodeModal: QrCodeModal,

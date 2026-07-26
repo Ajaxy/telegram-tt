@@ -830,6 +830,7 @@ export interface LangPair {
   'PaymentShippingSaveInfo': undefined;
   'ChannelAddUsers': undefined;
   'GroupRemovedRemove': undefined;
+  'RemoveMember': undefined;
   'BoxRemove': undefined;
   'NoGIFsFound': undefined;
   'ChannelAddToChannel': undefined;

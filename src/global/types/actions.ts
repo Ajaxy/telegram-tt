@@ -183,7 +183,7 @@ export interface ActionPayloads {
   };
   updateChatMemberBannedRights: {
     chatId: string;
-    userId: string;
+    peerId: string;
     bannedRights: ApiChatBannedRights;
   } & WithTabId;
   updateChatAdmin: {
@@ -380,7 +380,7 @@ export interface ActionPayloads {
   } & WithTabId;
   deleteChatMember: {
     chatId: string;
-    userId: string;
+    peerId: string;
   } & WithTabId;
   openPreviousChat: WithTabId | undefined;
   editChatFolders: {
@@ -2852,6 +2852,12 @@ export interface ActionPayloads {
     reactionContext?: ReactionDeletionContext;
   } & WithTabId);
   closeDeleteMessageModal: WithTabId | undefined;
+
+  openDeleteMemberModal: ({
+    chatId: string;
+    peerId: string;
+  } & WithTabId);
+  closeDeleteMemberModal: WithTabId | undefined;
 
   deleteParticipantReaction: {
     chatId: string;

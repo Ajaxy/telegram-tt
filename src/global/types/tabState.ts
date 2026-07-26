@@ -758,6 +758,11 @@ export type TabState = {
     reactionContext?: ReactionDeletionContext;
   };
 
+  deleteMemberModal?: {
+    chatId: string;
+    peerId: string;
+  };
+
   isBrowserCloseConfirmationModalOpen?: boolean;
 
   isGiftRecipientPickerOpen?: boolean;
