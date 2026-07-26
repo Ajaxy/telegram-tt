@@ -42,6 +42,8 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
   - **Cache pure function results** — if called more than once in the same scope, store the result in a variable.
   - Prefer checking required parameter before calling a function, avoid making it optional and checking at the beginning of the function.
   - **Comments**: start with a capital letter; single-sentence comments have no trailing period; multi-sentence comments end each sentence with a period; wrap code entities in backticks. Only leave comments for complex logic.
+  - **Docs & Comments as present-tense assertions**: docs and comments are direct assertions about the current behavior. Do not frame them as bug history, change history, or a contrast with a previous state. Git history is the record of what changed; docs and comments explain what **is**.
+    - Contrasting the current design against a *hypothetical alternative* ("piped over stdin rather than argv, so passwords never hit the process table") is fine — that explains current behavior. Contrasting against a *prior state of this codebase* ("this used to be ~250 lines", "no longer embeds copies", "fixes the bug where…") is not.
   - **Dead code**: do not keep unused, "just in case", or speculative library-style utilities. If an object isn't used outside its own module, do not export it.
   - **TypeScript non-null assertion**: when a value is guaranteed to exist at runtime but TS can't infer it, use `!` instead of an `if` guard.
     ```ts
