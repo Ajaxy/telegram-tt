@@ -193,13 +193,8 @@
       transition: none !important;
     }
 
-    &.is-just-added:not(.own) {
+    &.is-just-added {
       transform: none;
-    }
-
-    // Grow the just-sent message from its final bottom edge (center origin visibly sinks it)
-    &.is-just-added.own {
-      transform-origin: bottom right;
     }
 
     // Restore stacking context
