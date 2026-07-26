@@ -14,27 +14,25 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 export default function useAttachmentModal({
   attachments,
   fileSizeLimit,
-  setHtml,
   setAttachments,
   chatId,
+  canAttachFiles,
   canSendAudios,
   canSendVideos,
   canSendPhotos,
   canSendDocuments,
-  insertNextText,
   editedMessage,
   shouldSendInHighQuality,
 }: {
   attachments: ApiAttachment[];
   fileSizeLimit: number;
-  setHtml: (html: string) => void;
   setAttachments: (attachments: ApiAttachment[]) => void;
   chatId: string;
+  canAttachFiles: boolean;
   canSendAudios?: boolean;
   canSendVideos?: boolean;
   canSendPhotos?: boolean;
   canSendDocuments?: boolean;
-  insertNextText: VoidFunction;
   editedMessage: ApiMessage | undefined;
   shouldSendInHighQuality?: boolean;
 }) {
@@ -45,7 +43,6 @@ export default function useAttachmentModal({
 
   const handleClearAttachments = useLastCallback(() => {
     setAttachments(MEMO_EMPTY_ARRAY);
-    insertNextText();
   });
 
   const handleSetAttachments = useLastCallback(
@@ -53,6 +50,10 @@ export default function useAttachmentModal({
       const newAttachments = typeof newValue === 'function' ? newValue(attachments) : newValue;
       if (!newAttachments.length) {
         handleClearAttachments();
+        return;
+      }
+
+      if (!canAttachFiles) {
         return;
       }
 
@@ -86,6 +87,10 @@ export default function useAttachmentModal({
   );
 
   const handleAppendFiles = useLastCallback(async (files: File[], isSpoiler?: boolean) => {
+    if (!canAttachFiles) {
+      return;
+    }
+
     if (editedMessage) {
       if (editedMessage.groupedId && files[0].type === GIF_MIME_TYPE) {
         showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: 1 }) });
@@ -114,6 +119,10 @@ export default function useAttachmentModal({
   });
 
   const handleFileSelect = useLastCallback(async (files: File[]) => {
+    if (!canAttachFiles) {
+      return;
+    }
+
     if (editedMessage) {
       if (editedMessage.groupedId && files[0].type === GIF_MIME_TYPE) {
         showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: 1 }) });
@@ -154,7 +163,6 @@ export default function useAttachmentModal({
   return {
     handleAppendFiles,
     handleFileSelect,
-    onCaptionUpdate: setHtml,
     handleClearAttachments,
     handleSetAttachments,
     shouldForceCompression,

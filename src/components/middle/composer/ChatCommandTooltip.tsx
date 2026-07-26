@@ -7,7 +7,6 @@ import { getActions, getGlobal } from '../../../global';
 import type {
   ApiBotCommand, ApiMessage, ApiQuickReply, ApiUser,
 } from '../../../api/types';
-import type { Signal } from '../../../util/signals';
 
 import { getMainUsername } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
@@ -29,7 +28,7 @@ export type OwnProps = {
   quickReplies?: ApiQuickReply[];
   quickReplyMessages?: Record<number, ApiMessage>;
   self: ApiUser;
-  getHtml: Signal<string>;
+  richText: string;
   onClick: NoneToVoidFunction;
   onClose: NoneToVoidFunction;
 };
@@ -48,7 +47,7 @@ const ChatCommandTooltip: FC<OwnProps> = ({
   quickReplies,
   quickReplyMessages,
   self,
-  getHtml,
+  richText,
   onClick,
   onClose,
 }) => {
@@ -86,7 +85,7 @@ const ChatCommandTooltip: FC<OwnProps> = ({
   }, [quickReplies, quickReplyMessages]);
 
   const handleKeyboardSelect = useLastCallback((item: ApiBotCommand | QuickReplyWithDescription) => {
-    if (!item.command.startsWith(getHtml().slice(1))) {
+    if (!item.command.startsWith(richText.slice(1))) {
       return false;
     }
 

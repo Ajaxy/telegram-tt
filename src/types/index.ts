@@ -16,6 +16,7 @@ import type {
   ApiFakeType,
   ApiFormattedText,
   ApiInputReplyInfo,
+  ApiInputRichMessage,
   ApiInputSuggestedPostInfo,
   ApiLabeledPrice,
   ApiMediaFormat,
@@ -662,8 +663,8 @@ export interface ThreadLocalState {
 
   editingId?: number;
   editingScheduledId?: number;
-  editingDraft?: ApiFormattedText;
-  editingScheduledDraft?: ApiFormattedText;
+  editingDraft?: EditingDraft;
+  editingScheduledDraft?: EditingDraft;
 
   draft?: ApiDraft;
 
@@ -673,6 +674,14 @@ export interface ThreadLocalState {
 
   typingDraftIdByRandomId?: Record<string, number>;
 }
+
+export type EditingDraft = (ApiFormattedText & {
+  richMessage?: never;
+}) | {
+  text?: never;
+  entities?: never;
+  richMessage: ApiInputRichMessage;
+};
 
 export interface Thread {
   localState: ThreadLocalState;
@@ -786,6 +795,7 @@ export type SendMessageParams = {
   lastMessageId?: number;
   text?: string;
   entities?: ApiMessageEntity[];
+  richMessage?: ApiInputRichMessage;
   replyInfo?: ApiInputReplyInfo;
   suggestedPostInfo?: ApiInputSuggestedPostInfo;
   attachment?: ApiAttachment;

@@ -1049,6 +1049,11 @@
   font-size: 0.875rem;
 }
 
+.pullquote, blockquote, .blockquote {
+  font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
+  white-space: pre-wrap;
+}
+
 blockquote, .blockquote {
   position: relative;
 
@@ -1059,9 +1064,6 @@ blockquote, .blockquote {
   margin-block: 0.125rem;
   padding-inline: 0.5rem 1rem;
   border-radius: 0.25rem;
-
-  font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
-  white-space: pre-wrap;
 
   background-color: var(--accent-background-color);
 

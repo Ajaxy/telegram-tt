@@ -34,6 +34,7 @@ type OwnProps = {
   destructive?: boolean;
   ariaLabel?: string;
   footer?: string;
+  hasIconPremiumBadge?: boolean;
 };
 
 const NestedMenuItem = ({
@@ -48,6 +49,7 @@ const NestedMenuItem = ({
   destructive,
   ariaLabel,
   footer,
+  hasIconPremiumBadge,
 }: OwnProps) => {
   const lang = useLang();
 
@@ -191,6 +193,7 @@ const NestedMenuItem = ({
         disabled={disabled}
         destructive={destructive}
         ariaLabel={ariaLabel}
+        hasIconPremiumBadge={hasIconPremiumBadge}
         onClick={handleClick}
       >
         {children}

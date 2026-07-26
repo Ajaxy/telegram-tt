@@ -19,6 +19,7 @@ type Limit =
   | 'dialog_filters_limit'
   | 'dialogs_folder_pinned_limit'
   | 'dialogs_pinned_limit'
+  | 'message_length_limit'
   | 'caption_length_limit'
   | 'channels_limit'
   | 'channels_public_limit'
@@ -133,6 +134,11 @@ export interface GramJsAppConfig extends LimitsConfig {
   message_typing_draft_ttl?: number;
   message_primary_edited_date?: boolean;
   contact_note_length_limit?: number;
+  rich_message_length_limit?: number;
+  rich_message_max_blocks?: number;
+  rich_message_max_depth?: number;
+  rich_message_max_media?: number;
+  rich_message_max_table_cols?: number;
   whitelisted_bots?: string[];
   settings_display_passkeys?: boolean;
   passkeys_account_passkeys_max?: number;
@@ -209,6 +215,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
       dialogFiltersChats: getLimit(appConfig, 'dialog_filters_chats_limit', 'dialogFiltersChats'),
       dialogFilters: getLimit(appConfig, 'dialog_filters_limit', 'dialogFilters'),
       dialogFolderPinned: getLimit(appConfig, 'dialogs_pinned_limit', 'dialogFolderPinned'),
+      messageLength: getLimit(appConfig, 'message_length_limit', 'messageLength'),
       captionLength: getLimit(appConfig, 'caption_length_limit', 'captionLength'),
       channels: getLimit(appConfig, 'channels_limit', 'channels'),
       channelsPublic: getLimit(appConfig, 'channels_public_limit', 'channelsPublic'),
@@ -221,6 +228,12 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
       moreAccounts: DEFAULT_LIMITS.moreAccounts,
       aiComposeToneSaved: getLimit(appConfig, 'aicompose_tone_saved_limit', 'aiComposeToneSaved'),
     },
+    richMessageLengthLimit: appConfig.rich_message_length_limit ?? DEFAULT_APP_CONFIG.richMessageLengthLimit,
+    richMessageMaxBlocks: appConfig.rich_message_max_blocks ?? DEFAULT_APP_CONFIG.richMessageMaxBlocks,
+    richMessageMaxDepth: appConfig.rich_message_max_depth ?? DEFAULT_APP_CONFIG.richMessageMaxDepth,
+    richMessageMaxMedia: appConfig.rich_message_max_media ?? DEFAULT_APP_CONFIG.richMessageMaxMedia,
+    richMessageMaxTableColumns: appConfig.rich_message_max_table_cols
+      ?? DEFAULT_APP_CONFIG.richMessageMaxTableColumns,
     contactNoteLimit: appConfig.contact_note_length_limit,
     hash,
     storyViewersExpirePeriod: appConfig.story_viewers_expire_period,

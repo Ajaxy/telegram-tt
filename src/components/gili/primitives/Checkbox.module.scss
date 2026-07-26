@@ -25,8 +25,8 @@
       transform: scale(0.8);
 
       box-sizing: border-box;
-      width: 0;
-      height: 0;
+      width: 0.375rem;
+      height: 0.625rem;
       border: 0 solid transparent;
       border-radius: 0;
 
@@ -43,8 +43,6 @@
       &::before {
         transform: rotate(45deg) translate(-0.0625rem, -0.03125rem);
 
-        width: 0.375rem;
-        height: 0.625rem;
         border-color: var(--ui-check-color, white);
         border-style: solid;
         border-width: 0 0.125rem 0.125rem 0;

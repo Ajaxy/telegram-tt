@@ -19,6 +19,7 @@ interface StaticPositionOptions {
 
 interface DynamicPositionOptions {
   anchor: IAnchorPosition;
+  positionY?: 'top' | 'bottom';
   getTriggerElement: () => HTMLElement | undefined | null;
   getRootElement: () => HTMLElement | undefined | null;
   getMenuElement: () => HTMLElement | undefined | null;
@@ -120,6 +121,7 @@ function processDynamically(
   bubbleRef: ElementRef<HTMLDivElement>,
   {
     anchor,
+    positionY: requestedPositionY,
     getRootElement,
     getMenuElement,
     getTriggerElement,
@@ -185,6 +187,11 @@ function processDynamically(
     if (y - menuRect.height < rootRect.top + extraTopPadding) {
       y = rootRect.top + rootRect.height;
     }
+  }
+
+  if (requestedPositionY) {
+    positionY = requestedPositionY;
+    y = requestedPositionY === 'top' ? yWithTopShift : anchorY + anchorHeight;
   }
 
   const triggerRect = triggerEl.getBoundingClientRect();

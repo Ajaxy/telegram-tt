@@ -16,10 +16,10 @@ import { buildCustomEmojiHtmlFromEntity } from '../../middle/composer/helpers/cu
 import renderText from './renderText';
 
 import MentionLink from '../../middle/message/MentionLink';
-import Blockquote from '../Blockquote';
 import CodeBlock from '../code/CodeBlock';
 import CustomEmoji from '../CustomEmoji';
 import FormattedDate from '../FormattedDate';
+import Blockquote from '../quote/Blockquote';
 import SafeLink from '../SafeLink';
 import Spoiler from '../spoiler/Spoiler';
 

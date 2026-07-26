@@ -1,9 +1,12 @@
 import type { FC } from '../../../lib/teact/teact';
-import { memo, useEffect, useRef } from '../../../lib/teact/teact';
+import {
+  memo, useEffect, useRef, useState,
+} from '../../../lib/teact/teact';
 import { getGlobal } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
 
+import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 
@@ -19,6 +22,7 @@ import './MentionTooltip.scss';
 
 export type OwnProps = {
   isOpen: boolean;
+  anchorRect?: () => DOMRect | undefined;
   onClose: () => void;
   onInsertUserName: (user: ApiUser, forceFocus?: boolean) => void;
   filteredUsers?: ApiUser[];
@@ -26,11 +30,13 @@ export type OwnProps = {
 
 const MentionTooltip: FC<OwnProps> = ({
   isOpen,
+  anchorRect,
   onClose,
   onInsertUserName,
   filteredUsers,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
+  const [style, setStyle] = useState<string | undefined>();
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
 
   const handleUserSelect = useLastCallback((userId: string, forceFocus = false) => {
@@ -73,15 +79,35 @@ const MentionTooltip: FC<OwnProps> = ({
     }
   }, [filteredUsers, onClose]);
 
+  useEffect(() => {
+    let isCancelled = false;
+
+    requestMeasure(() => {
+      const anchor = anchorRect?.();
+      const container = containerRef.current?.parentElement;
+      const nextStyle = anchor && container ? buildAnchorStyle(anchor, container.getBoundingClientRect()) : undefined;
+
+      requestMutation(() => {
+        if (!isCancelled) {
+          setStyle(nextStyle);
+        }
+      });
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [anchorRect, isOpen, filteredUsers]);
+
   const prevChatMembers = usePreviousDeprecated(
     filteredUsers?.length
       ? filteredUsers
       : undefined,
     shouldRender,
   );
-  const renderedChatMembers = filteredUsers && !filteredUsers.length
-    ? prevChatMembers
-    : filteredUsers;
+  const renderedChatMembers = filteredUsers?.length
+    ? filteredUsers
+    : prevChatMembers;
 
   if (!shouldRender || (renderedChatMembers && !renderedChatMembers.length)) {
     return undefined;
@@ -93,7 +119,7 @@ const MentionTooltip: FC<OwnProps> = ({
   );
 
   return (
-    <div className={className} ref={containerRef}>
+    <div className={className} ref={containerRef} style={style}>
       {renderedChatMembers?.map(({ id }, index) => (
         <ListItem
           key={id}
@@ -115,3 +141,12 @@ const MentionTooltip: FC<OwnProps> = ({
 };
 
 export default memo(MentionTooltip);
+
+function buildAnchorStyle(anchor: DOMRect, container: DOMRect) {
+  return [
+    `left: ${anchor.left - container.left}px;`,
+    `top: ${anchor.top - container.top}px;`,
+    'bottom: auto; width: max-content;',
+    'transform: translateY(calc(-100% - 0.5rem));',
+  ].join(' ');
+}

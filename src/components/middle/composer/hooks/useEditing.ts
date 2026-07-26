@@ -1,17 +1,17 @@
 import { useEffect, useState } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import type { ApiDraft, ApiFormattedText, ApiMessage } from '../../../../api/types';
-import type { MessageListType, ThreadId } from '../../../../types';
-import type { Signal } from '../../../../util/signals';
+import type {
+  ApiDraft, ApiInputRichMessage, ApiMessage,
+} from '../../../../api/types';
+import type { EditingDraft, MessageListType, ThreadId } from '../../../../types';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
 import { EDITABLE_INPUT_CSS_SELECTOR } from '../../../../config';
 import { requestMeasure, requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { hasMessageMedia } from '../../../../global/helpers';
 import focusEditableElement from '../../../../util/focusEditableElement';
-import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
-import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
+import { buildRichMessageFromFormatted, getRichInputAsFormatted } from '../../../ui/textInput/richText';
 
 import { useDebouncedResolver } from '../../../../hooks/useAsyncResolvers';
 import useDerivedSignal from '../../../../hooks/useDerivedSignal';
@@ -24,8 +24,8 @@ const URL_ENTITIES = new Set<string>([ApiMessageEntityTypes.TextUrl, ApiMessageE
 const DEBOUNCE_MS = 300;
 
 const useEditing = (
-  getHtml: Signal<string>,
-  setHtml: (html: string) => void,
+  richMessage: ApiInputRichMessage | undefined,
+  replaceRichMessage: (richMessage?: ApiInputRichMessage) => void,
   editedMessage: ApiMessage | undefined,
   resetComposer: (shouldPreserveInput?: boolean, shouldSkipCollapseLatch?: boolean) => void,
   validateTextLength: (text: string) => boolean,
@@ -33,7 +33,7 @@ const useEditing = (
   threadId: ThreadId,
   type: MessageListType,
   draft?: ApiDraft,
-  editingDraft?: ApiFormattedText,
+  editingDraft?: EditingDraft,
 ): [VoidFunction, VoidFunction, boolean] => {
   const {
     editMessage, setEditingDraft, toggleMessageWebPage, openDeleteMessageModal,
@@ -48,7 +48,7 @@ const useEditing = (
     }
 
     if (replyingToId && prevReplyingToId !== replyingToId) {
-      setHtml('');
+      replaceRichMessage(undefined);
       setShouldForceShowEditing(false);
       return;
     }
@@ -57,10 +57,13 @@ const useEditing = (
       return;
     }
 
-    const text = !prevEditedMessage && editingDraft?.text.length ? editingDraft : editedMessage.content.text;
-    const html = getTextWithEntitiesAsHtml(text);
+    const restoredRichMessage = editingDraft?.richMessage
+      || (editingDraft?.text?.length ? buildRichMessageFromFormatted(editingDraft) : undefined);
+    const nextRichMessage = !prevEditedMessage && restoredRichMessage
+      ? restoredRichMessage
+      : editedMessage.content.richMessage || buildRichMessageFromFormatted(editedMessage.content.text);
 
-    setHtml(html);
+    replaceRichMessage(nextRichMessage);
     setShouldForceShowEditing(true);
 
     requestNextMutation(() => {
@@ -69,7 +72,7 @@ const useEditing = (
         focusEditableElement(messageInput, true);
       }
     });
-  }, [editedMessage, replyingToId, editingDraft, setHtml]);
+  }, [editedMessage, replyingToId, editingDraft, replaceRichMessage]);
 
   useEffect(() => {
     if (!editedMessage) {
@@ -86,28 +89,35 @@ const useEditing = (
     });
   }, [chatId, threadId, editedMessage]);
 
-  useEffect(() => {
-    if (!editedMessage) return undefined;
-    return () => {
-      const edited = parseHtmlAsFormattedText(getHtml());
-      const update = edited.text.length ? edited : undefined;
+  const saveEditingDraft = useLastCallback((
+    scopedChatId: string,
+    scopedThreadId: ThreadId,
+    scopedType: MessageListType,
+  ) => {
+    setEditingDraft({
+      chatId: scopedChatId,
+      threadId: scopedThreadId,
+      type: scopedType,
+      draft: buildEditingDraft(richMessage),
+    });
+  });
 
-      setEditingDraft({
-        chatId, threadId, type, text: update,
-      });
-    };
-  }, [chatId, editedMessage, getHtml, setEditingDraft, threadId, type]);
+  useEffect(() => (
+    editedMessage ? () => saveEditingDraft(chatId, threadId, type) : undefined
+  ), [chatId, editedMessage, threadId, type]);
 
   const detectLinkDebounced = useDebouncedResolver(() => {
     if (!editedMessage) return false;
 
-    const edited = parseHtmlAsFormattedText(getHtml());
+    const edited = richMessage ? getRichInputAsFormatted(richMessage) : undefined;
     return !('webPage' in editedMessage.content)
       && editedMessage.content.text?.entities?.some((entity) => URL_ENTITIES.has(entity.type))
-      && !(edited.entities?.some((entity) => URL_ENTITIES.has(entity.type)));
-  }, [editedMessage, getHtml], DEBOUNCE_MS, true);
+      && !(edited?.entities?.some((entity) => URL_ENTITIES.has(entity.type)));
+  }, [editedMessage, richMessage], DEBOUNCE_MS, true);
 
-  const getShouldResetNoWebPageDebounced = useDerivedSignal(detectLinkDebounced, [detectLinkDebounced, getHtml], true);
+  const getShouldResetNoWebPageDebounced = useDerivedSignal(
+    detectLinkDebounced, [detectLinkDebounced, richMessage], true,
+  );
 
   useEffectWithPrevDeps(([prevEditedMessage]) => {
     if (!editedMessage || prevEditedMessage?.id !== editedMessage.id) {
@@ -121,16 +131,16 @@ const useEditing = (
         noWebPage: false,
       });
     }
-  }, [editedMessage, chatId, getHtml, threadId, getShouldResetNoWebPageDebounced]);
+  }, [editedMessage, chatId, threadId, getShouldResetNoWebPageDebounced]);
 
   const restoreNewDraftAfterEditing = useLastCallback(() => {
     if (!draft) return;
 
     // Run one frame after editing draft reset
     requestMeasure(() => {
-      setHtml(getTextWithEntitiesAsHtml(draft.text));
+      replaceRichMessage(draft.richMessage || buildRichMessageFromFormatted(draft.text));
 
-      // Wait one more frame until new HTML is rendered
+      // Wait one more frame until new editor content is rendered
       requestNextMutation(() => {
         const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
         if (messageInput) {
@@ -142,11 +152,12 @@ const useEditing = (
 
   const handleEditCancel = useLastCallback(() => {
     resetComposer(false, true);
+    setEditingDraft({ chatId, threadId, type, draft: undefined });
     restoreNewDraftAfterEditing();
   });
 
   const handleEditComplete = useLastCallback(() => {
-    const { text, entities } = parseHtmlAsFormattedText(getHtml());
+    const { text, entities } = richMessage ? getRichInputAsFormatted(richMessage) || { text: '' } : { text: '' };
 
     if (!editedMessage) {
       return;
@@ -172,16 +183,15 @@ const useEditing = (
     });
 
     resetComposer(false, true);
+    setEditingDraft({ chatId, threadId, type, draft: undefined });
     restoreNewDraftAfterEditing();
   });
 
   const handleBlur = useLastCallback(() => {
     if (!editedMessage) return;
-    const edited = parseHtmlAsFormattedText(getHtml());
-    const update = edited.text.length ? edited : undefined;
 
     setEditingDraft({
-      chatId, threadId, type, text: update,
+      chatId, threadId, type, draft: buildEditingDraft(richMessage),
     });
   });
 
@@ -190,5 +200,17 @@ const useEditing = (
 
   return [handleEditComplete, handleEditCancel, shouldForceShowEditing];
 };
+
+function buildEditingDraft(richMessage: ApiInputRichMessage | undefined): EditingDraft | undefined {
+  if (!richMessage) return undefined;
+
+  const formattedMessage = getRichInputAsFormatted(richMessage);
+  if (formattedMessage?.text.length) return formattedMessage;
+  if (formattedMessage || !richMessage.blocks.length) return undefined;
+
+  return {
+    richMessage,
+  };
+}
 
 export default useEditing;

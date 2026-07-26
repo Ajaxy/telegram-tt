@@ -89,3 +89,13 @@ export function selectCanUpdateMainTab<T extends GlobalState>(global: T, peerId:
   const chat = selectChat(global, peerId);
   return Boolean(chat && isChatChannel(chat) && getHasAdminRight(chat, 'postMessages'));
 }
+
+// Slow, not to be used in `withGlobal`
+export function selectPeerByUsername<T extends GlobalState>(global: T, username: string): ApiPeer | undefined {
+  const usernameLowered = username.toLowerCase();
+  return Object.values(global.users.byId).find(
+    (user) => user.usernames?.some((c) => c.username.toLowerCase() === usernameLowered),
+  ) || Object.values(global.chats.byId).find(
+    (chat) => chat.usernames?.some((c) => c.username.toLowerCase() === usernameLowered),
+  );
+}

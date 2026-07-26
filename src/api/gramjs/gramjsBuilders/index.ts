@@ -50,6 +50,8 @@ import { pick } from '../../../util/iteratees';
 import { deserializeBytes } from '../helpers/misc';
 import localDb from '../localDb';
 
+export { buildInputRichMessage } from './richContent';
+
 export const DEFAULT_PRIMITIVES = {
   INT: 0,
   BIGINT: 0n,

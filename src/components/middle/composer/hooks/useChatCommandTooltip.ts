@@ -1,7 +1,6 @@
 import { useEffect, useState } from '../../../../lib/teact/teact';
 
 import type { ApiBotCommand, ApiQuickReply } from '../../../../api/types';
-import type { Signal } from '../../../../util/signals';
 
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
 
@@ -15,7 +14,7 @@ const THROTTLE = 300;
 
 export default function useChatCommandTooltip(
   isEnabled: boolean,
-  getHtml: Signal<string>,
+  richText: string,
   botCommands?: ApiBotCommand[] | false,
   chatBotCommands?: ApiBotCommand[],
   quickReplies?: Record<number, ApiQuickReply>,
@@ -25,12 +24,11 @@ export default function useChatCommandTooltip(
   const [isManuallyClosed, markManuallyClosed, unmarkManuallyClosed] = useFlag(false);
 
   const detectCommandThrottled = useThrottledResolver(() => {
-    const html = getHtml();
-    return isEnabled && html.startsWith('/') ? prepareForRegExp(html).match(RE_COMMAND)?.[0].trim() : undefined;
-  }, [getHtml, isEnabled], THROTTLE);
+    return isEnabled && richText.startsWith('/') ? prepareForRegExp(richText).match(RE_COMMAND)?.[0].trim() : undefined;
+  }, [richText, isEnabled], THROTTLE);
 
   const getCommand = useDerivedSignal(
-    detectCommandThrottled, [detectCommandThrottled, getHtml], true,
+    detectCommandThrottled, [detectCommandThrottled, richText], true,
   );
 
   useEffect(() => {
@@ -58,7 +56,7 @@ export default function useChatCommandTooltip(
     );
   }, [getCommand, botCommands, chatBotCommands, quickReplies]);
 
-  useEffect(unmarkManuallyClosed, [unmarkManuallyClosed, getHtml]);
+  useEffect(unmarkManuallyClosed, [unmarkManuallyClosed, richText]);
 
   return {
     isOpen: Boolean((filteredBotCommands?.length || filteredQuickReplies?.length) && !isManuallyClosed),

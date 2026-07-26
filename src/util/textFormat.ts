@@ -9,6 +9,10 @@ export function formatInteger(value: number) {
   return String(value).replace(/\d(?=(\d{3})+$)/g, '$& ');
 }
 
+export function getUtf8Length(value: string) {
+  return Array.from(value).length;
+}
+
 export function formatIntegerCompact(lang: LangFn, views: number) {
   if (views < 1e3) {
     return lang.number(views);

@@ -413,6 +413,8 @@ export interface LangPair {
   'SettingsTimeFormat12': undefined;
   'SettingsTimeFormat24': undefined;
   'SettingsKeyboard': undefined;
+  'SettingsAutomaticTextReplacements': undefined;
+  'SettingsAutomaticTextReplacementsInfo': undefined;
   'SettingsTray': undefined;
   'SettingsOfflineNotificationUnsupported': undefined;
   'TextSize': undefined;
@@ -593,6 +595,7 @@ export interface LangPair {
   'CropperApply': undefined;
   'AttachmentMenuPhotoOrVideo': undefined;
   'AttachDocument': undefined;
+  'AttachmentMenuArticle': undefined;
   'Poll': undefined;
   'VideoMessagePermissionDenied': undefined;
   'VideoMessageRecordError': undefined;
@@ -763,6 +766,8 @@ export interface LangPair {
   'PremiumStickerTooltip': undefined;
   'ViewAction': undefined;
   'RichMessageMore': undefined;
+  'RichTextEditor': undefined;
+  'AriaComposerOpenRichInput': undefined;
   'RichTextMathPreview': undefined;
   'RichTextMapPreview': undefined;
   'Loading': undefined;
@@ -1280,8 +1285,81 @@ export interface LangPair {
   'FormattingMonospaceAria': undefined;
   'FormattingUnderlineAria': undefined;
   'FormattingStrikethroughAria': undefined;
+  'FormattingMarkedAria': undefined;
+  'FormattingSubscriptAria': undefined;
+  'FormattingSuperscriptAria': undefined;
   'FormattingAddDateAria': undefined;
   'FormattingAddLinkAria': undefined;
+  'FormattingClearAria': undefined;
+  'RemoveRichFormattingTitle': undefined;
+  'RemoveRichFormattingText': undefined;
+  'RemoveRichFormatting': undefined;
+  'RichFormattingSubscribe': undefined;
+  'RichEditorBlockMenu': undefined;
+  'RichEditorBlockPlaceholder': undefined;
+  'RichEditorParagraph': undefined;
+  'RichEditorHeading': undefined;
+  'RichEditorFooter': undefined;
+  'RichEditorSubheading': undefined;
+  'RichEditorBlockquote': undefined;
+  'RichEditorPullquote': undefined;
+  'RichEditorPullquotePlaceholder': undefined;
+  'RichEditorQuoteCaptionPlaceholder': undefined;
+  'RichEditorDetails': undefined;
+  'RichEditorCodeBlock': undefined;
+  'RichEditorCodeLanguageAuto': undefined;
+  'RichEditorListMenu': undefined;
+  'RichEditorBulletList': undefined;
+  'RichEditorOrderedList': undefined;
+  'RichEditorChecklist': undefined;
+  'RichEditorListOptions': undefined;
+  'RichEditorListCheckmarks': undefined;
+  'RichEditorListNumberingType': undefined;
+  'RichEditorListNumberingDecimal': undefined;
+  'RichEditorListNumberingLowercaseLetters': undefined;
+  'RichEditorListNumberingUppercaseLetters': undefined;
+  'RichEditorListNumberingLowercaseRoman': undefined;
+  'RichEditorListNumberingUppercaseRoman': undefined;
+  'RichEditorListReverseOrder': undefined;
+  'RichEditorDivider': undefined;
+  'RichEditorTableMenu': undefined;
+  'RichEditorTable': undefined;
+  'RichEditorTableAlign': undefined;
+  'RichEditorTableAlignLeft': undefined;
+  'RichEditorTableAlignCenter': undefined;
+  'RichEditorTableAlignRight': undefined;
+  'RichEditorTableAlignTop': undefined;
+  'RichEditorTableAlignMiddle': undefined;
+  'RichEditorTableAlignBottom': undefined;
+  'RichEditorTableHighlight': undefined;
+  'RichEditorTableRemoveHighlight': undefined;
+  'RichEditorTableMergeCells': undefined;
+  'RichEditorTableSplitCell': undefined;
+  'RichEditorTableInsert': undefined;
+  'RichEditorTableInsertColumnLeft': undefined;
+  'RichEditorTableInsertColumnRight': undefined;
+  'RichEditorTableInsertRowAbove': undefined;
+  'RichEditorTableInsertRowBelow': undefined;
+  'RichEditorTableMove': undefined;
+  'RichEditorTableMoveLeft': undefined;
+  'RichEditorTableMoveRight': undefined;
+  'RichEditorTableMoveUp': undefined;
+  'RichEditorTableMoveDown': undefined;
+  'RichEditorTableDelete': undefined;
+  'RichEditorTableDeleteTable': undefined;
+  'RichEditorTableActionsAria': undefined;
+  'RichEditorTableResizeSelectionAria': undefined;
+  'RichEditorTableSelectRowAria': undefined;
+  'RichEditorTableSelectColumnAria': undefined;
+  'RichEditorTableSelectTableAria': undefined;
+  'RichEditorTableStriped': undefined;
+  'RichEditorTableBorderless': undefined;
+  'AriaComposerCloseRichInput': undefined;
+  'RichEditorEquation': undefined;
+  'RichEditorEquationPrompt': undefined;
+  'RichEditorEquationToBlock': undefined;
+  'RichEditorEquationToInline': undefined;
+  'FormattingLinkUrl': undefined;
   'FormattingEnterUrl': undefined;
   'FormattedDateModalTitle': undefined;
   'FormattedDatePreview': undefined;
@@ -2425,6 +2503,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ErrorUnexpectedMessage': {
     'error': V;
   };
+  'ErrorRichMessageTooDeep': {
+    'count': V;
+  };
+  'ErrorRichMessageTableTooWide': {
+    'count': V;
+  };
   'EditedDate': {
     'date': V;
   };
@@ -2621,6 +2705,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'ComposerPlaceholderTopic': {
     'topic': V;
+  };
+  'RichEditorHeadingLevel': {
+    'level': V;
   };
   'ChannelManagementLinkDiscussion': {
     'group': V;
@@ -3950,6 +4037,12 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   'ErrorMessageTooLong': {
     'count': V;
   };
+  'ErrorRichMessageTooManyBlocks': {
+    'count': V;
+  };
+  'ErrorRichMessageTooManyMedia': {
+    'count': V;
+  };
   'PinnedMessageTitle': {
     'index': V;
   };
@@ -4092,6 +4185,12 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'PreviewForwardedMessage': {
+    'count': V;
+  };
+  'RichEditorTableDeleteRow': {
+    'count': V;
+  };
+  'RichEditorTableDeleteColumn': {
     'count': V;
   };
   'SearchMessagesFound': {

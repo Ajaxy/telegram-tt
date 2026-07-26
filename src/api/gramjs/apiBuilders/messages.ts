@@ -11,6 +11,7 @@ import type {
   ApiFactCheck,
   ApiInputMessageReplyInfo,
   ApiInputReplyInfo,
+  ApiInputRichMessage,
   ApiInputSuggestedPostInfo,
   ApiMediaTodo,
   ApiMessage,
@@ -78,7 +79,12 @@ import {
 } from './common';
 import { type OmitVirtualFields } from './helpers';
 import { buildApiMessageAction } from './messageActions';
-import { buildMessageContent, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
+import {
+  buildApiRichMessage,
+  buildMessageContent,
+  buildMessageMediaContent,
+  buildMessageTextContent,
+} from './messageContent';
 import { buildApiRestrictionReasons } from './misc';
 import { buildApiPeerColor, buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildMessageReactions } from './reactions';
@@ -310,7 +316,7 @@ export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | un
   }
 
   const {
-    message, entities, replyTo, date, effect, suggestedPost,
+    message, entities, replyTo, date, effect, suggestedPost, richMessage,
   } = draft;
 
   const replyInfo = replyTo instanceof GramJs.InputReplyToMessage ? {
@@ -331,7 +337,8 @@ export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | un
   } satisfies ApiInputSuggestedPostInfo : undefined;
 
   return {
-    text: message ? buildMessageTextContent(message, entities) : undefined,
+    text: richMessage ? undefined : message ? buildMessageTextContent(message, entities) : undefined,
+    richMessage: richMessage ? buildApiRichMessage(richMessage) : undefined,
     replyInfo,
     suggestedPostInfo,
     date,
@@ -461,6 +468,7 @@ export function buildLocalMessage({
   lastMessageId,
   text,
   entities,
+  richMessage,
   replyInfo,
   suggestedPostInfo,
   attachment,
@@ -484,6 +492,7 @@ export function buildLocalMessage({
   lastMessageId?: number;
   text?: string;
   entities?: ApiMessageEntity[];
+  richMessage?: ApiInputRichMessage;
   replyInfo?: ApiInputReplyInfo;
   suggestedPostInfo?: ApiInputSuggestedPostInfo;
   attachment?: ApiAttachment;
@@ -527,6 +536,7 @@ export function buildLocalMessage({
     chatId: chat.id,
     content: omitUndefined({
       text: formattedText,
+      richMessage,
       ...media,
       sticker,
       video: gif || media?.video,

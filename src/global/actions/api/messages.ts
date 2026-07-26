@@ -385,6 +385,37 @@ addActionHandler('loadRichMessage', async (global, actions, payload): Promise<vo
   setGlobal(global);
 });
 
+addActionHandler('startEditingMessage', async (global, actions, payload): Promise<void> => {
+  const { messageId, tabId = getCurrentTabId() } = payload;
+  const messageList = selectCurrentMessageList(global, tabId);
+  if (!messageList) {
+    return;
+  }
+
+  const { chatId, threadId, type } = messageList;
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!message) {
+    return;
+  }
+
+  if (message.content.richMessage?.isPart) {
+    await getPromiseActions().loadRichMessage({ chatId, messageId });
+
+    global = getGlobal();
+    const currentMessageList = selectCurrentMessageList(global, tabId);
+    const richMessage = selectChatMessage(global, chatId, messageId)?.content.richMessage;
+    const isSameMessageList = currentMessageList?.chatId === chatId
+      && currentMessageList.threadId === threadId
+      && currentMessageList.type === type;
+
+    if (!isSameMessageList || !richMessage || richMessage.isPart) {
+      return;
+    }
+  }
+
+  actions.setEditingId({ messageId, tabId });
+});
+
 addActionHandler('loadMessagesById', async (global, actions, payload): Promise<void> => {
   const { chatId, messageIds } = payload;
   const chat = selectChat(global, chatId);
@@ -521,7 +552,9 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
     messagePriceInStars,
     isStoryReply,
     dice,
-    text: !dice ? payload.text : undefined,
+    text: !dice && !payload.richMessage ? payload.text : undefined,
+    entities: payload.richMessage ? undefined : payload.entities,
+    richMessage: payload.richMessage,
     isPending: messagePriceInStars ? true : undefined,
     ...suggestedMessage && { isInvertedMedia: suggestedMessage?.isInvertedMedia },
   };
@@ -629,14 +662,15 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
     }
   } else {
     const {
-      text, entities, attachments, replyInfo: replyToForFirstMessage, ...commonParams
+      text, entities, richMessage, attachments, replyInfo: replyToForFirstMessage, ...commonParams
     } = params;
 
-    if (text) {
+    if (text || richMessage) {
       const sendParams = {
         ...commonParams,
         text,
         entities,
+        richMessage,
         replyInfo: replyToForFirstMessage,
         wasDrafted: Boolean(draft),
       };
@@ -705,7 +739,7 @@ addActionHandler('sendDiceInCurrentChat', (global, actions, payload): ActionRetu
 
 addActionHandler('editMessage', (global, actions, payload): ActionReturnType => {
   const {
-    messageList, text, entities, attachments, tabId = getCurrentTabId(),
+    messageList, text, entities, richMessage, attachments, tabId = getCurrentTabId(),
   } = payload;
 
   if (!messageList) {
@@ -739,7 +773,8 @@ addActionHandler('editMessage', (global, actions, payload): ActionReturnType => 
       message,
       attachment: attachments ? attachments[0] : undefined,
       text,
-      entities,
+      entities: richMessage ? undefined : entities,
+      richMessage,
       noWebPage: selectNoWebPage(global, chatId, threadId),
     }, progressCallback);
 
@@ -793,10 +828,10 @@ addActionHandler('cancelUploadMedia', (global, actions, payload): ActionReturnTy
 
 addActionHandler('saveDraft', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, threadId, text,
+    chatId, threadId, text, richMessage,
   } = payload;
   const chat = selectChat(global, chatId);
-  if (!text || !chat) {
+  if ((!text && !richMessage) || !chat) {
     return;
   }
 
@@ -807,7 +842,8 @@ addActionHandler('saveDraft', (global, actions, payload): ActionReturnType => {
   }
 
   const newDraft: ApiDraft = {
-    text,
+    text: richMessage ? undefined : text,
+    richMessage,
     replyInfo: currentDraft?.replyInfo,
     effectId: currentDraft?.effectId,
     suggestedPostInfo: currentDraft?.suggestedPostInfo,
@@ -883,7 +919,7 @@ addActionHandler('resetDraftReplyInfo', (global, actions, payload): ActionReturn
   if (chat?.isMonoforum && !currentDraft?.replyInfo && !currentDraft?.suggestedPostInfo) {
     return; // Monoforum doesn't support drafts outside threads
   }
-  const newDraft: ApiDraft | undefined = !currentDraft?.text ? undefined : {
+  const newDraft: ApiDraft | undefined = !currentDraft?.text && !currentDraft?.richMessage ? undefined : {
     ...currentDraft,
     replyInfo: undefined,
   };
@@ -1776,7 +1812,7 @@ async function executeForwardMessages(global: GlobalState, sendParams: SendMessa
     fromChatId, messageIds, toChatId, withMyScore, noAuthors, noCaptions, toThreadId = MAIN_THREAD_ID,
   } = selectTabState(global, tabId).forwardMessages;
   const { messagePriceInStars, isSilent, scheduledAt, scheduleRepeatPeriod, effectId, attachments } = sendParams;
-  const isForwardOnly = !sendParams.text && !attachments?.length;
+  const isForwardOnly = !sendParams.text && !sendParams.richMessage && !attachments?.length;
   const forwardEffectId = isForwardOnly ? effectId : undefined;
 
   const isCurrentUserPremium = selectIsCurrentUserPremium(global);

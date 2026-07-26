@@ -224,7 +224,7 @@ export default defineConfig(({ mode }): UserConfig => {
       rolldownOptions: {
         output: {
           manualChunks(id) {
-            if (id.includes('/src/components/ui/')) {
+            if (id.includes('/src/components/ui/') && !id.includes('/src/components/ui/textInput/')) {
               return 'shared-components';
             }
             return undefined;

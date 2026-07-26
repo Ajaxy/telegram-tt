@@ -73,6 +73,7 @@ type StateProps = {
 
 type OwnProps = {
   shouldForceShowEditing?: boolean;
+  isHidden?: boolean;
   chatId: string;
   threadId: ThreadId;
   messageListType: MessageListType;
@@ -93,6 +94,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
     editingId,
     suggestedPostInfo,
     shouldForceShowEditing,
+    isHidden,
     message,
     forwardedMessagesCount,
     onIsOpenChange,
@@ -146,7 +148,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
     if (isShowingSuggestedPost) return true;
     return false;
   })();
-  const isOpen = isShown && !isReplyToTopicStart && !isReplyToDiscussion;
+  const isOpen = isShown && !isReplyToTopicStart && !isReplyToDiscussion && !isHidden;
 
   useEffect(() => {
     onIsOpenChange?.(isOpen);
@@ -215,7 +217,9 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
     onClear?.();
   });
 
-  useEffect(() => (isShown ? captureEscKeyListener(clearEmbedded) : undefined), [isShown, clearEmbedded]);
+  useEffect(() => (isShown && !isHidden ? captureEscKeyListener(clearEmbedded) : undefined), [
+    isShown, isHidden, clearEmbedded,
+  ]);
 
   const {
     isContextMenuOpen, contextMenuAnchor, handleContextMenu,

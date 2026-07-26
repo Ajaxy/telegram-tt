@@ -36,6 +36,10 @@
   }
 }
 
+.paragraph {
+  margin-bottom: 0.125rem;
+}
+
 .title {
   font-size: var(--iv-font-size-title);
   font-weight: var(--font-weight-semibold);
@@ -87,7 +91,7 @@
 .tableTitle {
   font-size: var(--iv-font-size-heading2);
   font-weight: var(--font-weight-semibold);
-  line-height: 1.3;
+  text-align: center;
 }
 
 .heading3,
@@ -186,6 +190,10 @@
   margin: 0.125rem 0;
 }
 
+.unorderedListContent {
+  margin-inline-start: -0.25rem;
+}
+
 .orderedList {
   padding-inline-start: 0;
   list-style: none;
@@ -193,7 +201,7 @@
 
 .orderedListItem {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .orderedListMarker {
@@ -207,18 +215,33 @@
   min-width: 0;
 }
 
+.checkboxListItem {
+  display: flex;
+  align-items: flex-start;
+}
+
+.listItemContent {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .checkboxWrapper {
+  --ui-border-color: var(--secondary-color);
+  --ui-accent-color: var(--accent-color);
+
   display: inline-flex;
   margin-inline-end: 0.25rem;
   vertical-align: text-bottom;
+
+  :global(.theme-dark .Message.own) & {
+    --ui-check-color: var(--color-primary);
+  }
 }
 
-.pullquote,
-.pullquoteCaption {
+.pullquote {
+  margin-inline: auto;
   font-size: var(--iv-font-size-compact);
   line-height: 1.35;
-  text-align: center;
-  text-wrap: balance;
 }
 
 .quoteCaption,
@@ -226,6 +249,12 @@
   display: block;
   margin-top: 0.25rem;
   color: var(--color-text-meta);
+}
+
+.pullquoteCaption {
+  font-weight: var(--font-weight-semibold);
+  font-style: normal;
+  color: var(--accent-color);
 }
 
 .details {
@@ -326,6 +355,10 @@
 .tableHeaderCell {
   font-weight: var(--font-weight-normal);
   background: var(--color-code-bg);
+}
+
+.stripedRow {
+  background-color: var(--color-code-bg);
 }
 
 .relatedArticlesTitle {

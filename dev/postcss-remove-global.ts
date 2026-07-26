@@ -15,9 +15,9 @@ function removeGlobalPlugin(): Plugin {
       // :global in rules
       root.walkRules((rule) => {
         // :global as nested selector
-        const globalReg = /:global(\s+)/;
+        const globalReg = /:global(\s+)/g;
         // :global(.selector) as nested selector
-        const globalWithSelectorReg = /:global\(\s*((?:[a-zA-Z0-9.#:[\]_\-\s>+~]+))\s*\)/;
+        const globalWithSelectorReg = /:global\(\s*((?:[a-zA-Z0-9.#:[\]_\-\s>+~]+))\s*\)/g;
         if (rule.selector === ':global') {
           const parent = rule.parent || root;
           parent.append(...rule.nodes);

@@ -28,13 +28,37 @@ import styles from './FormattedDateModal.module.scss';
 
 export type OwnProps = {
   isOpen: boolean;
+  initialDate?: number;
+  initialOptions?: FormattedDateEntityOptions;
   onClose: NoneToVoidFunction;
+  onCloseAnimationEnd?: NoneToVoidFunction;
   onSubmit: (text: ApiFormattedText) => void;
 };
 
+type DateStyle = 'none' | 'short' | 'long';
+type TimeStyle = 'none' | 'short' | 'long';
+type FormattedDateOptionsState = {
+  relative: boolean;
+  dayOfWeek: boolean;
+  dateStyle: DateStyle;
+  timeStyle: TimeStyle;
+};
+
+const DEFAULT_FORMATTED_DATE_OPTIONS: FormattedDateOptionsState = {
+  relative: false,
+  dayOfWeek: false,
+  dateStyle: 'long',
+  timeStyle: 'short',
+};
+const DATE_STYLE_TAB_VALUES: DateStyle[] = ['none', 'short', 'long'];
+const TIME_STYLE_TAB_VALUES: TimeStyle[] = ['none', 'short', 'long'];
+
 const FormattedDateModal = ({
   isOpen,
+  initialDate,
+  initialOptions,
   onClose,
+  onCloseAnimationEnd,
   onSubmit,
 }: OwnProps) => {
   const [isCalendarOpen, openCalendar, closeCalendar] = useFlag();
@@ -51,9 +75,12 @@ const FormattedDateModal = ({
       return;
     }
 
-    setSelectedDateAt(roundDateToMinute(new Date()).getTime());
-    setFormattedDateOptions(DEFAULT_FORMATTED_DATE_OPTIONS);
-  }, [closeCalendar, isOpen]);
+    const selectedAt = initialDate === undefined
+      ? roundDateToMinute(new Date()).getTime()
+      : initialDate * 1000;
+    setSelectedDateAt(selectedAt);
+    setFormattedDateOptions(buildFormattedDateOptionsState(initialOptions));
+  }, [closeCalendar, initialDate, initialOptions, isOpen]);
 
   const unix = useMemo(() => Math.round(selectedDateAt / 1000), [selectedDateAt]);
 
@@ -131,6 +158,7 @@ const FormattedDateModal = ({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
+        onCloseAnimationEnd={onCloseAnimationEnd}
         onEnter={handleSubmit}
         title={lang('FormattedDateModalTitle')}
         dialogClassName={styles.root}
@@ -210,24 +238,6 @@ const FormattedDateModal = ({
 
 export default memo(FormattedDateModal);
 
-type DateStyle = 'none' | 'short' | 'long';
-type TimeStyle = 'none' | 'short' | 'long';
-type FormattedDateOptionsState = {
-  relative: boolean;
-  dayOfWeek: boolean;
-  dateStyle: DateStyle;
-  timeStyle: TimeStyle;
-};
-
-const DEFAULT_FORMATTED_DATE_OPTIONS: FormattedDateOptionsState = {
-  relative: false,
-  dayOfWeek: false,
-  dateStyle: 'long',
-  timeStyle: 'short',
-};
-const DATE_STYLE_TAB_VALUES: DateStyle[] = ['none', 'short', 'long'];
-const TIME_STYLE_TAB_VALUES: TimeStyle[] = ['none', 'short', 'long'];
-
 function roundDateToMinute(date: Date) {
   const nextDate = new Date(date.getTime());
   nextDate.setSeconds(0);
@@ -246,5 +256,20 @@ function buildFormattedDateEntityOptions(options: FormattedDateOptionsState): Fo
     longDate: options.dateStyle === 'long' ? true : undefined,
     shortTime: options.timeStyle === 'short' ? true : undefined,
     longTime: options.timeStyle === 'long' ? true : undefined,
+  };
+}
+
+function buildFormattedDateOptionsState(
+  options?: FormattedDateEntityOptions,
+): FormattedDateOptionsState {
+  if (!options) {
+    return DEFAULT_FORMATTED_DATE_OPTIONS;
+  }
+
+  return {
+    relative: Boolean(options.relative),
+    dayOfWeek: Boolean(options.dayOfWeek),
+    dateStyle: options.shortDate ? 'short' : options.longDate ? 'long' : 'none',
+    timeStyle: options.shortTime ? 'short' : options.longTime ? 'long' : 'none',
   };
 }

@@ -11,6 +11,7 @@ import type {
   ApiSendAsPeerId,
   ApiTypePeerColor,
 } from './peers';
+import type { ApiInputRichMessage } from './richMessage';
 import type {
   ApiUser, ApiUsername,
 } from './users';
@@ -296,6 +297,7 @@ export interface ApiChatLink {
 
 export type ApiDraft = {
   text?: ApiFormattedText;
+  richMessage?: ApiInputRichMessage;
   replyInfo?: ApiInputMessageReplyInfo;
   suggestedPostInfo?: ApiInputSuggestedPostInfo;
   date?: number;

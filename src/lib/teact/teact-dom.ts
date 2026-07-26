@@ -414,7 +414,7 @@ function remount(
   } else {
     if (node) {
       parentEl.replaceChild(node, $current.target!);
-    } else {
+    } else if ($current.target!.parentNode === parentEl) {
       parentEl.removeChild($current.target!);
     }
 

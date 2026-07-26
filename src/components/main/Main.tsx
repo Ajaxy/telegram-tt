@@ -2,7 +2,7 @@ import '../../global/actions/all';
 
 import {
   beginHeavyAnimation,
-  memo, useEffect, useLayoutEffect,
+  memo, onFullyIdle, useEffect, useLayoutEffect,
   useRef, useState,
 } from '../../lib/teact/teact';
 import { addExtraClass } from '../../lib/teact/teact-dom';
@@ -162,6 +162,7 @@ type StateProps = {
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
 const CALL_BUNDLE_LOADING_DELAY_MS = 5000; // 5 sec
+const EDITOR_BUNDLE_LOADING_DELAY_MS = 10000; // 10 sec
 
 let DEBUG_isLogged = false;
 
@@ -296,6 +297,12 @@ const Main = ({
   useTimeout(() => {
     void loadBundle(Bundles.Calls);
   }, CALL_BUNDLE_LOADING_DELAY_MS);
+
+  useTimeout(() => {
+    onFullyIdle(() => {
+      void loadBundle(Bundles.Editor);
+    });
+  }, isSynced ? EDITOR_BUNDLE_LOADING_DELAY_MS : undefined);
 
   const containerRef = useRef<HTMLDivElement>();
   const leftColumnRef = useRef<HTMLDivElement>();

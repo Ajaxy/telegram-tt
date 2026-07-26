@@ -3,7 +3,7 @@ import { memo, useState } from '../../../lib/teact/teact';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { getPrettyCodeLanguageName } from '../../../util/prettyCodeLanguageNames';
+import { getPrettyCodeLanguageName } from '../../../util/codeLanguages';
 
 import useAsync from '../../../hooks/useAsync';
 import useLastCallback from '../../../hooks/useLastCallback';

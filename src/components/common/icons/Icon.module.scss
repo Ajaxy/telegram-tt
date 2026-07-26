@@ -1,0 +1,31 @@
+.hasPremiumBadge {
+  position: relative;
+  overflow: visible;
+
+  &::before {
+    mask-image:
+      url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M12%200L14.82%208.12L23.41%208.29L16.56%2013.48L19.05%2021.71L12%2016.8L4.95%2021.71L7.44%2013.48L.59%208.29L9.18%208.12Z%22/%3E%3C/svg%3E'),
+      linear-gradient(white, white);
+    mask-repeat: no-repeat;
+    mask-position:
+      right -0.25rem bottom -0.125rem,
+      center;
+    mask-size:
+      1.125rem 1.125rem,
+      100% 100%;
+    mask-composite: exclude;
+  }
+
+  &::after {
+    content: '';
+
+    position: absolute;
+    right: -0.125rem;
+    bottom: 0;
+
+    width: 0.875rem;
+    height: 0.875rem;
+
+    background: url('../../../assets/premium/PremiumStarFill.svg') center / contain no-repeat;
+  }
+}

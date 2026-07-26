@@ -6,11 +6,12 @@ import type {
   ApiMessage,
   ApiMessageEntityTextUrl,
   ApiPeer,
+  ApiRichMessage,
   ApiStory,
   ApiTypeStory,
 } from '../../api/types';
 import type {
-  ApiFormattedText, ApiMessagePoll, ApiReplyInfo, ApiRichMessage, ApiWebPage, MediaContainer, StatefulMediaContent,
+  ApiFormattedText, ApiMessagePoll, ApiReplyInfo, ApiWebPage, MediaContainer, StatefulMediaContent,
 } from '../../api/types/messages';
 import type { ThreadId } from '../../types';
 import type { LangFn } from '../../util/localization';

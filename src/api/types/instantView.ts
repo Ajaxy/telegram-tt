@@ -7,6 +7,18 @@ import type {
   ApiVideo,
 } from './messages';
 
+export type ApiRichTextDate = {
+  type: 'date';
+  text: ApiRichText;
+  date: number;
+  relative?: true;
+  shortTime?: true;
+  longTime?: true;
+  shortDate?: true;
+  longDate?: true;
+  dayOfWeek?: true;
+};
+
 export type ApiRichText =
   { type: 'empty' }
   | { type: 'plain'; text: string }
@@ -36,17 +48,7 @@ export type ApiRichText =
   | { type: 'autoPhone'; text: ApiRichText }
   | { type: 'bankCard'; text: ApiRichText }
   | { type: 'mentionName'; text: ApiRichText; userId: string }
-  | {
-    type: 'date';
-    text: ApiRichText;
-    date: number;
-    relative?: true;
-    shortTime?: true;
-    longTime?: true;
-    shortDate?: true;
-    longDate?: true;
-    dayOfWeek?: true;
-  };
+  | ApiRichTextDate;
 
 export interface ApiPageCaption {
   text: ApiRichText;

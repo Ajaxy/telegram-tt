@@ -32,6 +32,7 @@ type OwnProps =
     id?: string;
     className?: string;
     bubbleClassName?: string;
+    ariaLabel?: string;
     ariaLabelledBy?: string;
     autoClose?: boolean;
     footer?: string;
@@ -59,6 +60,7 @@ const Menu = ({
   id,
   className,
   bubbleClassName,
+  ariaLabel,
   ariaLabelledBy,
   children,
   autoClose = false,
@@ -104,7 +106,21 @@ const Menu = ({
     }
   }, [isOpen]);
 
-  const handleKeyDown = useKeyboardListNavigation(bubbleRef, isOpen, autoClose ? onClose : undefined, undefined, true);
+  const navigateWithKeyboard = useKeyboardListNavigation(
+    bubbleRef, isOpen, undefined, '.MenuItem:not(.disabled), [role="menuitemradio"]:not(:disabled)', true,
+  );
+
+  const handleKeyDown = useLastCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    navigateWithKeyboard(e);
+    if (!autoClose || (e.key !== 'Enter' && e.key !== ' ')) {
+      return;
+    }
+
+    const menuItem = e.target instanceof HTMLElement ? e.target.closest('.MenuItem') : undefined;
+    if (menuItem && !menuItem.classList.contains('submenu')) {
+      onClose();
+    }
+  });
 
   const fullExcludedSelector = backdropExcludedSelector
     ? `${backdropExcludedSelector}, .submenu`
@@ -143,8 +159,9 @@ const Menu = ({
         withPortal && 'in-portal',
         className,
       )}
+      aria-label={ariaLabel}
       aria-labelledby={ariaLabelledBy}
-      role={ariaLabelledBy ? 'menu' : undefined}
+      role={ariaLabel || ariaLabelledBy ? 'menu' : undefined}
       onKeyDown={isOpen ? handleKeyDown : undefined}
       onMouseEnter={onMouseEnter}
       onMouseLeave={isOpen ? onMouseLeave : undefined}

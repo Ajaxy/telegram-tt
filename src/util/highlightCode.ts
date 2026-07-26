@@ -3,85 +3,45 @@ import { createLowlight } from 'lowlight';
 import type { TeactNode } from '../lib/teact/teact';
 import Teact from '../lib/teact/teact';
 
-const SUPPORTED_LANGUAGES: Record<string, string[]> = {
-  '1c': ['1с'], // Allow cyrillic
-  ada: [],
-  arduino: ['ino'],
-  arm: [],
-  bash: ['sh'],
-  basic: [],
-  c: ['h'],
-  cpp: ['cc', 'c++', 'h++', 'hpp', 'hh', 'hxx', 'cxx'],
-  csharp: ['cs', 'c#'],
-  css: [],
-  dart: [],
-  dockerfile: ['docker'],
-  erlang: ['erl'],
-  elixir: ['ex', 'exs'],
-  go: ['golang'],
-  handlebars: ['hbs', 'html.hbs', 'html.handlebars', 'htmlbars'],
-  haskell: ['hs'],
-  ini: ['toml'],
-  java: ['jsp'],
-  javascript: ['js', 'jsx', 'mjs', 'cjs', 'mjsx', 'cjsx'],
-  json: [],
-  kotlin: ['kt', 'kts'],
-  lisp: [],
-  lua: [],
-  makefile: ['mk', 'mak', 'make'],
-  markdown: ['md', 'mkdown', 'mkd'],
-  matlab: [],
-  nginx: ['nginxconf'],
-  objectivec: ['mm', 'objc', 'obj-c', 'obj-c++', 'objective-c++'],
-  perl: ['pl', 'pm'],
-  php: [],
-  powershell: ['ps1', 'ps'],
-  python: ['py', 'gyp', 'ipython'],
-  r: [],
-  ruby: ['rb', 'gemspec', 'podspec', 'thor', 'irb'],
-  rust: ['rs'],
-  scheme: [],
-  scss: [],
-  shell: [],
-  smalltalk: ['st'],
-  sql: [],
-  swift: [],
-  twig: ['craftcms'],
-  typelanguage: ['tl'],
-  typescript: ['ts', 'tsx', 'mts', 'cts', 'mtsx', 'ctsx'],
-  xml: ['html', 'xhtml', 'rss', 'atom', 'xjb', 'xsd', 'xsl', 'plist', 'wsf', 'svg'],
-  yaml: [],
-};
+import { createCallbackManager } from './callbacks';
+import { getCodeLanguageName } from './codeLanguages';
 
 const THIRD_PARTY_LANGUAGES = ['typelanguage'];
 
-const LANGUAGE_MODULES = import.meta.glob('../../node_modules/highlight.js/lib/languages/*.js') as Record<
+const LANGUAGE_MODULES = import.meta.glob('../../node_modules/highlight.js/es/languages/*.js') as Record<
   string,
   () => Promise<{ default: any }>
 >;
 
+const {
+  addCallback: subscribeToCodeLanguageLoad,
+  runCallbacks: runLanguageLoadCallbacks,
+} = createCallbackManager<NoneToVoidFunction>();
 const languagePromises = new Map<string, Promise<any>>();
-const lowlight = createLowlight({});
+export const lowlight = createLowlight({});
+export { subscribeToCodeLanguageLoad };
+
+export function requestCodeBlockHighlightRefresh() {
+  runLanguageLoadCallbacks();
+}
 
 export default async function highlightCode(text: string, language: string) {
   const lowLang = language.toLowerCase();
-  const result = await ensureLanguage(lowLang);
+  const langCode = getCodeLanguageName(lowLang);
+  if (!langCode) return undefined;
+
+  const result = await ensureCodeLanguage(langCode);
   if (!result) return undefined;
-  const tree = lowlight.highlight(lowLang, text);
+  const tree = lowlight.highlight(langCode, text);
   return treeToElements(tree);
 }
 
-function getLanguageName(alias: string) {
-  return Object.entries(SUPPORTED_LANGUAGES)
-    .find(([langName, aliases]) => langName === alias || aliases.includes(alias))?.[0];
-}
-
-async function ensureLanguage(language: string) {
+export async function ensureCodeLanguage(language: string) {
   if (lowlight.registered(language)) {
     return true;
   }
 
-  const langCode = getLanguageName(language);
+  const langCode = getCodeLanguageName(language);
   if (!langCode) {
     return false;
   }
@@ -100,11 +60,16 @@ async function ensureLanguage(language: string) {
   if (langCode === '1c') {
     lowlight.registerAlias('1c', '1с'); // Allow cyrillic
   }
+  notifyLanguageLoad();
   return true;
 }
 
+function notifyLanguageLoad() {
+  runLanguageLoadCallbacks();
+}
+
 function loadFirstPartyLanguage(langCode: string) {
-  const loadLanguageModule = LANGUAGE_MODULES[`../../node_modules/highlight.js/lib/languages/${langCode}.js`];
+  const loadLanguageModule = LANGUAGE_MODULES[`../../node_modules/highlight.js/es/languages/${langCode}.js`];
   if (!loadLanguageModule) return undefined;
 
   const languagePromise = loadLanguageModule();

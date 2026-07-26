@@ -17,6 +17,7 @@ type ScrollableHintState = {
 type Options = {
   threshold?: number;
   isDisabled?: boolean;
+  shouldSkipOverflowCheck?: boolean;
 };
 
 const DEFAULT_THRESHOLD = 1;
@@ -30,17 +31,18 @@ export default function useScrollableHint(
   {
     threshold = DEFAULT_THRESHOLD,
     isDisabled = false,
+    shouldSkipOverflowCheck,
   }: Options = {},
 ) {
   const applyScrollableHintThrottled = useThrottledCallback((element: HTMLElement) => {
     requestMeasure(() => {
-      const state = measureScrollableHint(element, threshold);
+      const state = measureScrollableHint(element, threshold, shouldSkipOverflowCheck);
 
       requestMutation(() => {
         applyScrollableHint(element, state);
       });
     });
-  }, [threshold], UPDATE_THROTTLE);
+  }, [shouldSkipOverflowCheck, threshold], UPDATE_THROTTLE);
 
   const updateScrollableHint = useLastCallback((element = containerRef.current) => {
     if (!element || isDisabled) {
@@ -83,12 +85,13 @@ export default function useScrollableHint(
 function measureScrollableHint(
   element: HTMLElement,
   threshold: number,
+  shouldSkipOverflowCheck?: boolean,
 ): ScrollableHintState {
   const style = getComputedStyle(element);
 
   return {
-    ...measureVerticalScrollableHint(element, threshold, style),
-    ...measureHorizontalScrollableHint(element, threshold, style),
+    ...measureVerticalScrollableHint(element, threshold, style, shouldSkipOverflowCheck),
+    ...measureHorizontalScrollableHint(element, threshold, style, shouldSkipOverflowCheck),
   };
 }
 
@@ -96,8 +99,9 @@ function measureVerticalScrollableHint(
   element: HTMLElement,
   threshold: number,
   style: CSSStyleDeclaration,
+  shouldSkipOverflowCheck?: boolean,
 ): Pick<ScrollableHintState, 'canScrollTop' | 'canScrollBottom'> {
-  if (!isScrollableOverflow(style.overflowY)) {
+  if (!shouldSkipOverflowCheck && !isScrollableOverflow(style.overflowY)) {
     return {
       canScrollTop: false,
       canScrollBottom: false,
@@ -122,8 +126,9 @@ function measureHorizontalScrollableHint(
   element: HTMLElement,
   threshold: number,
   style: CSSStyleDeclaration,
+  shouldSkipOverflowCheck?: boolean,
 ): Pick<ScrollableHintState, 'canScrollLeft' | 'canScrollRight'> {
-  if (!isScrollableOverflow(style.overflowX)) {
+  if (!shouldSkipOverflowCheck && !isScrollableOverflow(style.overflowX)) {
     return {
       canScrollLeft: false,
       canScrollRight: false,

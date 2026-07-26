@@ -1,10 +1,12 @@
 import { type FC, memo, useEffect, useMemo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiAttachment, ApiChatMember, ApiMessage, ApiSticker } from '../../../api/types';
+import type {
+  ApiAttachment, ApiChatMember, ApiMessage, ApiSticker,
+} from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
 import type { MessageListType, ThreadId } from '../../../types';
-import type { Signal } from '../../../util/signals';
+import type { RichEditor } from './richEditorTypes';
 
 import {
   BASE_EMOJI_KEYWORD_LANG,
@@ -23,20 +25,17 @@ import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import calcTextLineHeightAndCount from '../../../util/element/calcTextLineHeightAndCount';
 import { validateFiles } from '../../../util/files';
 import { formatStarsAsIcon } from '../../../util/localization/format';
-import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import { removeAllSelections } from '../../../util/selection';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
-import { getTextWithEntitiesAsHtml } from '../../common/helpers/renderTextWithEntities';
+import { buildRichMessageFromFormatted, getRichInputAsFormatted } from '../../ui/textInput/richText';
 import buildAttachment from './helpers/buildAttachment';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
-import { getHtmlTextLength } from './helpers/getHtmlTextLength';
+import { getRichMessageText } from './helpers/richEditorComposer';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useDerivedState from '../../../hooks/useDerivedState';
 import useEffectOnce from '../../../hooks/useEffectOnce';
 import useFlag from '../../../hooks/useFlag';
-import useGetSelectionRange from '../../../hooks/useGetSelectionRange';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
@@ -55,7 +54,7 @@ import CustomEmojiTooltip from './CustomEmojiTooltip.async';
 import CustomSendMenu from './CustomSendMenu.async';
 import EmojiTooltip from './EmojiTooltip.async';
 import MentionTooltip from './MentionTooltip';
-import MessageInput from './MessageInput';
+import MessageInput from './MessageInput.async';
 import SymbolMenuButton from './SymbolMenuButton';
 
 import styles from './AttachmentModal.module.scss';
@@ -63,10 +62,10 @@ import styles from './AttachmentModal.module.scss';
 export type OwnProps = {
   chatId: string;
   threadId: ThreadId;
+  richEditor: RichEditor;
   attachments: ApiAttachment[];
   editingMessage?: ApiMessage;
   messageListType?: MessageListType;
-  getHtml: Signal<string>;
   canShowCustomSendMenu?: boolean;
   isReady: boolean;
   isForMessage?: boolean;
@@ -78,7 +77,6 @@ export type OwnProps = {
   canScheduleUntilOnline?: boolean;
   canSchedule?: boolean;
   paidMessagesStars?: number;
-  onCaptionUpdate: (html: string) => void;
   onSend: (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => void;
   onFileAppend: (files: File[], isSpoiler?: boolean) => void;
   onAttachmentsUpdate: (attachments: ApiAttachment[]) => void;
@@ -88,9 +86,6 @@ export type OwnProps = {
     sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true,
     scheduledAt?: number, scheduleRepeatPeriod?: number,
   ) => void;
-  onCustomEmojiSelect: (emoji: ApiSticker) => void;
-  onRemoveSymbol: VoidFunction;
-  onEmojiSelect: (emoji: string) => void;
   onSendWhenOnline?: NoneToVoidFunction;
 };
 
@@ -102,7 +97,7 @@ type StateProps = {
   baseEmojiKeywords?: Record<string, string[]>;
   emojiKeywords?: Record<string, string[]>;
   shouldSuggestCustomEmoji?: boolean;
-  customEmojiForEmoji?: ApiSticker[];
+  customEmojiForEmoji: GlobalState['customEmojis']['forEmoji'];
   topGuestBotIds?: string[];
   captionLimit: number;
   attachmentSettings: GlobalState['attachmentSettings'];
@@ -113,14 +108,13 @@ type StateProps = {
 
 const ATTACHMENT_MODAL_INPUT_ID = 'caption-input-text';
 const DROP_LEAVE_TIMEOUT_MS = 150;
-const MAX_LEFT_CHARS_TO_SHOW = 100;
 const CLOSE_MENU_ANIMATION_DURATION = 200;
 
 const AttachmentModal = ({
   chatId,
   threadId,
+  richEditor,
   attachments,
-  getHtml,
   editingMessage,
   canShowCustomSendMenu,
   captionLimit,
@@ -148,15 +142,11 @@ const AttachmentModal = ({
   shouldOpenMessageMediaEditor,
   aiMessageEditorPendingResult,
   onAttachmentsUpdate,
-  onCaptionUpdate,
   onSend,
   onFileAppend,
   onClear,
   onSendSilent,
   onSendScheduled,
-  onCustomEmojiSelect,
-  onRemoveSymbol,
-  onEmojiSelect,
   onSendWhenOnline,
 }: OwnProps & StateProps) => {
   const ref = useRef<HTMLDivElement>();
@@ -167,6 +157,7 @@ const AttachmentModal = ({
   } = getActions();
 
   const lang = useLang();
+  const richValue = richEditor.value;
 
   const mainButtonRef = useRef<HTMLButtonElement>();
   const inputRef = useRef<HTMLDivElement>();
@@ -188,7 +179,7 @@ const AttachmentModal = ({
   // attachment only exists to be edited — cancelling the editor should dismiss the whole modal.
   const wasOpenedAsEditorRef = useRef(false);
   const [shouldShowAiButton, setShouldShowAiButton] = useState(false);
-  const html = useDerivedState(() => getHtml(), [getHtml]);
+  const richText = useMemo(() => getRichMessageText(richValue), [richValue]);
   const editingAttachment = editingAttachmentIndex !== undefined
     ? attachments[editingAttachmentIndex] : undefined;
 
@@ -245,19 +236,17 @@ const AttachmentModal = ({
     return [hasOneSpoiler, false];
   }, [renderingAttachments]);
 
-  const getSelectionRange = useGetSelectionRange(`#${EDITABLE_INPUT_MODAL_ID}`);
-
   const {
     isEmojiTooltipOpen,
+    emojiAnchorRect,
     filteredEmojis,
     filteredCustomEmojis,
     insertEmoji,
     closeEmojiTooltip,
   } = useEmojiTooltip(
     Boolean(isReady && (isForCurrentMessageList || !isForMessage) && renderingIsOpen),
-    getHtml,
-    onCaptionUpdate,
-    EDITABLE_INPUT_MODAL_ID,
+    richText,
+    richEditor,
     recentEmojis,
     baseEmojiKeywords,
     emojiKeywords,
@@ -269,29 +258,38 @@ const AttachmentModal = ({
     closeCustomEmojiTooltip,
   } = useCustomEmojiTooltip(
     Boolean(isReady && (isForCurrentMessageList || !isForMessage) && renderingIsOpen && shouldSuggestCustomEmoji),
-    getHtml,
-    onCaptionUpdate,
-    getSelectionRange,
-    inputRef,
+    richText,
+    richEditor,
     customEmojiForEmoji,
   );
 
   const {
     isMentionTooltipOpen,
+    mentionAnchorRect,
     closeMentionTooltip,
     insertMention,
     mentionFilteredUsers,
   } = useMentionTooltip(
     Boolean(isReady && isForCurrentMessageList && renderingIsOpen),
-    getHtml,
-    onCaptionUpdate,
-    getSelectionRange,
-    inputRef,
+    richText,
+    richEditor,
     groupChatMembers,
     undefined,
     topGuestBotIds,
     currentUserId,
   );
+
+  const handleCustomEmojiSelect = useLastCallback((emoji: ApiSticker) => {
+    richEditor.insertContent({ type: 'customEmoji', emoji });
+  });
+
+  const handleRemoveSymbol = useLastCallback(() => {
+    richEditor.deleteCharacterBeforeSelection();
+  });
+
+  const handleEmojiSelect = useLastCallback((emoji: string) => {
+    richEditor.insertContent({ type: 'text', text: emoji });
+  });
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClear) : undefined), [isOpen, onClear]);
 
@@ -328,17 +326,17 @@ const AttachmentModal = ({
   useEffect(() => {
     requestMeasure(() => {
       const input = inputRef.current;
-      if (!html || !input) {
+      if (!richText || !input) {
         setShouldShowAiButton(false);
         return;
       }
       const { totalLines } = calcTextLineHeightAndCount(input, true);
       setShouldShowAiButton(totalLines >= 3);
     });
-  }, [html, isOpen]);
+  }, [richText, isOpen]);
 
   const handleOpenAiEditor = useLastCallback(() => {
-    const { text, entities } = parseHtmlAsFormattedText(getHtml());
+    const { text, entities } = richValue ? getRichInputAsFormatted(richValue) || { text: '' } : { text: '' };
     openAiMessageEditorModal({
       chatId,
       text: { text, entities },
@@ -377,7 +375,7 @@ const AttachmentModal = ({
     const { text, isSilent, scheduledAt, scheduleRepeatPeriod } = aiMessageEditorPendingResult;
 
     if (text) {
-      onCaptionUpdate(getTextWithEntitiesAsHtml(text));
+      richEditor.setValue(buildRichMessageFromFormatted(text));
     }
 
     sendAttachments(isSilent, scheduledAt, scheduleRepeatPeriod);
@@ -570,13 +568,6 @@ const AttachmentModal = ({
       />
     );
   }, [isMobile]);
-
-  const leftChars = useDerivedState(() => {
-    if (!renderingIsOpen) return undefined;
-
-    const leftCharsBeforeLimit = captionLimit - getHtmlTextLength(getHtml());
-    return leftCharsBeforeLimit <= MAX_LEFT_CHARS_TO_SHOW ? leftCharsBeforeLimit : undefined;
-  }, [captionLimit, getHtml, renderingIsOpen]);
 
   const isQuickGallery = isSendingCompressed && hasOnlyMedia;
 
@@ -834,12 +825,14 @@ const AttachmentModal = ({
           />
           <MentionTooltip
             isOpen={isMentionTooltipOpen}
+            anchorRect={mentionAnchorRect}
             filteredUsers={mentionFilteredUsers}
             onInsertUserName={insertMention}
             onClose={closeMentionTooltip}
           />
           <EmojiTooltip
             isOpen={isEmojiTooltipOpen}
+            anchorRect={emojiAnchorRect}
             emojis={filteredEmojis}
             customEmojis={filteredCustomEmojis}
             addRecentEmoji={addRecentEmoji}
@@ -864,9 +857,9 @@ const AttachmentModal = ({
               isSymbolMenuOpen={isSymbolMenuOpen}
               openSymbolMenu={openSymbolMenu}
               closeSymbolMenu={closeSymbolMenu}
-              onCustomEmojiSelect={onCustomEmojiSelect}
-              onRemoveSymbol={onRemoveSymbol}
-              onEmojiSelect={onEmojiSelect}
+              onCustomEmojiSelect={handleCustomEmojiSelect}
+              onRemoveSymbol={handleRemoveSymbol}
+              onEmojiSelect={handleEmojiSelect}
               isAttachmentModal
               canSendPlainText
               className="attachment-modal-symbol-menu with-menu-transitions"
@@ -878,17 +871,14 @@ const AttachmentModal = ({
               id={ATTACHMENT_MODAL_INPUT_ID}
               chatId={chatId}
               threadId={threadId}
+              richEditor={richEditor}
               isAttachmentModalInput
-              customEmojiPrefix="attachment"
-              isReady={isReady}
               isActive={isOpen}
-              getHtml={getHtml}
               editableInputId={EDITABLE_INPUT_MODAL_ID}
               placeholder={lang('AttachmentCaptionPlaceholder')}
-              onUpdate={onCaptionUpdate}
               onSend={handleSendClick}
               canAutoFocus={Boolean(isReady && isForCurrentMessageList && attachments.length)}
-              captionLimit={leftChars}
+              maxLength={captionLimit}
               shouldSuppressFocus={isMobile && isSymbolMenuOpen}
               onSuppressedFocus={closeSymbolMenu}
             />
@@ -965,7 +955,7 @@ export default memo(withGlobal<OwnProps>(
       baseEmojiKeywords: baseEmojiKeywords?.keywords,
       emojiKeywords: emojiKeywords?.keywords,
       shouldSuggestCustomEmoji,
-      customEmojiForEmoji: customEmojis.forEmoji.stickers,
+      customEmojiForEmoji: customEmojis.forEmoji,
       captionLimit: selectCurrentLimit(global, 'captionLength'),
       attachmentSettings,
       shouldSaveAttachmentsCompression,

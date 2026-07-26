@@ -36,7 +36,7 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
     - Exception: the argument `force`.
   - **Optional boolean args/props default to `undefined`.** If you need a prop that *hides* an avatar, name it `noAvatar` rather than passing `hasAvatar={false}`.
   - Allowed abbreviations only: `e` (event handler arg), `err` (catch arg), `cb` (callback). Single-letter names allowed in one-line lambdas (`users.map(u => u.name)`). Avoid all others.
-  - **Hoist static constants** to the top of the module with `UPPER_SNAKE_CASE`. Never inline magic numbers inside function bodies.
+  - **Hoist reused static constants** to the top of the module with `UPPER_SNAKE_CASE`. Never inline magic numbers (except 0 and 1) inside function bodies.
   - Prefer function declarations over function expressions (except arrow functions when you need to bind `this`).
   - Order functions top-down by call hierarchy: high-level at the top, helpers at the bottom.
   - **Cache pure function results** — if called more than once in the same scope, store the result in a variable.
@@ -103,6 +103,9 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
 
 - **Lint errors you can't fix manually:**
   Suggest running `npx eslint --fix <filename>`.
+
+- **Verification**
+  If needed, you can utilize browser to verify behavior. Check if there's already server at `localhost:1234`. If not, run `npm run dev`. Do not perform action that modify account state (sending messages, changing settings) unless directly prompted.
 
 # Telegram Web API Guide
 

@@ -1,8 +1,11 @@
 import type { FC } from '../../../lib/teact/teact';
-import { memo, useRef } from '../../../lib/teact/teact';
+import {
+  memo, useEffect, useRef, useState,
+} from '../../../lib/teact/teact';
 
 import type { ApiSticker } from '../../../api/types';
 
+import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import buildClassName from '../../../util/buildClassName';
 import findInViewport from '../../../util/findInViewport';
@@ -21,6 +24,8 @@ import CustomEmojiButton from './CustomEmojiButton';
 import EmojiButton from './EmojiButton';
 
 import './EmojiTooltip.scss';
+
+type TooltipAnchorRect = Pick<DOMRect, 'top'>;
 
 const VIEWPORT_MARGIN = 8;
 const EMOJI_BUTTON_WIDTH = 44;
@@ -56,6 +61,7 @@ function setItemVisible(index: number, containerRef: Record<string, any>) {
 
 export type OwnProps = {
   isOpen: boolean;
+  anchorRect?: () => TooltipAnchorRect | undefined;
   emojis: Emoji[];
   customEmojis: ApiSticker[];
   onEmojiSelect: (text: string) => void;
@@ -69,6 +75,7 @@ const INTERSECTION_THROTTLE = 200;
 
 const EmojiTooltip: FC<OwnProps> = ({
   isOpen,
+  anchorRect,
   emojis,
   customEmojis,
   onClose,
@@ -78,6 +85,7 @@ const EmojiTooltip: FC<OwnProps> = ({
   addRecentCustomEmoji,
 }) => {
   const containerRef = useRef<HTMLDivElement>();
+  const [style, setStyle] = useState<string | undefined>();
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
   const listEmojis: (Emoji | ApiSticker)[] = usePrevDuringAnimation(
     emojis.length ? [...emojis, ...customEmojis] : undefined, CLOSE_DURATION,
@@ -88,6 +96,26 @@ const EmojiTooltip: FC<OwnProps> = ({
   const {
     observe: observeIntersection,
   } = useIntersectionObserver({ rootRef: containerRef, throttleMs: INTERSECTION_THROTTLE, isDisabled: !isOpen });
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    requestMeasure(() => {
+      const anchor = anchorRect?.();
+      const container = containerRef.current?.parentElement;
+      const nextStyle = anchor && container ? buildAnchorStyle(anchor, container.getBoundingClientRect()) : undefined;
+
+      requestMutation(() => {
+        if (!isCancelled && nextStyle) {
+          setStyle(nextStyle);
+        }
+      });
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [anchorRect, isOpen, emojis, customEmojis]);
 
   const handleSelectEmoji = useLastCallback((emoji: Emoji) => {
     onEmojiSelect(emoji.native);
@@ -143,6 +171,7 @@ const EmojiTooltip: FC<OwnProps> = ({
     <div
       ref={containerRef}
       className={className}
+      style={style}
     >
       {shouldRender && listEmojis ? (
         listEmojis.map((emoji, index) => (
@@ -171,3 +200,11 @@ const EmojiTooltip: FC<OwnProps> = ({
 };
 
 export default memo(EmojiTooltip);
+
+function buildAnchorStyle(anchor: TooltipAnchorRect, container: DOMRect) {
+  return [
+    `top: ${anchor.top - container.top}px;`,
+    'bottom: auto;',
+    'transform: translateY(calc(-100% - 0.5rem));',
+  ].join(' ');
+}

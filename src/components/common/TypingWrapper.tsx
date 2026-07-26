@@ -40,7 +40,7 @@ try {
     inherits: false,
     initialValue: '0%',
   });
-} catch (_) {
+} catch {
   // Ignore duplicate registrations
 }
 

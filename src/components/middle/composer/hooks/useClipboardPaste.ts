@@ -1,4 +1,3 @@
-import type { StateHookSetter } from '../../../../lib/teact/teact';
 import { useEffect } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
@@ -8,29 +7,22 @@ import {
   EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID, EDITABLE_STORY_INPUT_ID,
 } from '../../../../config';
 import { canReplaceMessageMedia, isUploadingFileSticker } from '../../../../global/helpers';
-import { containsCustomEmoji, stripCustomEmoji } from '../../../../global/helpers/symbols';
-import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
 import buildAttachment from '../helpers/buildAttachment';
-import { preparePastedHtml } from '../helpers/cleanHtml';
 import getFilesFromDataTransferItems from '../helpers/getFilesFromDataTransferItems';
 
 import useLang from '../../../../hooks/useLang';
 
-const TYPE_HTML = 'text/html';
-const DOCUMENT_TYPE_WORD = 'urn:schemas-microsoft-com:office:word';
-const NAMESPACE_PREFIX_WORD = 'xmlns:w';
-
 const VALID_TARGET_IDS = new Set([EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID, EDITABLE_STORY_INPUT_ID]);
 const CLOSEST_CONTENT_EDITABLE_SELECTOR = 'div[contenteditable]';
 
+type ClipboardFilePasteTarget = 'attachmentModal' | 'none';
+
 const useClipboardPaste = (
   isActive: boolean,
-  insertTextAndUpdateCursor: (text: ApiFormattedText, inputId?: string) => void,
-  setAttachments: StateHookSetter<ApiAttachment[]>,
-  setNextText: StateHookSetter<ApiFormattedText | undefined>,
+  insertTextAndUpdateCursor: (text: ApiFormattedText) => void,
+  setAttachments: (attachments: ApiAttachment[] | ((current: ApiAttachment[]) => ApiAttachment[])) => void,
   editedMessage: ApiMessage | undefined,
-  shouldStripCustomEmoji?: boolean,
-  onCustomEmojiStripped?: VoidFunction,
+  resolveFilePasteTarget: () => ClipboardFilePasteTarget,
   shouldUpdateAttachmentCompression?: boolean,
   shouldSkipFilePaste?: boolean,
 ) => {
@@ -55,53 +47,36 @@ const useClipboardPaste = (
         return;
       }
 
-      e.preventDefault();
-
       // Some extensions can trigger paste into their panels without focus
       if (document.activeElement !== input) {
         return;
       }
 
-      const pastedText = e.clipboardData.getData('text');
-      const html = e.clipboardData.getData('text/html');
-
-      let pastedFormattedText = html ? parseHtmlAsFormattedText(
-        preparePastedHtml(html), undefined, true,
-      ) : undefined;
-
-      if (pastedFormattedText && containsCustomEmoji(pastedFormattedText) && shouldStripCustomEmoji) {
-        pastedFormattedText = stripCustomEmoji(pastedFormattedText);
-        onCustomEmojiStripped?.();
-      }
-
       const { items } = e.clipboardData;
-      let files: File[] | undefined = [];
-
-      if (items.length > 0) {
-        files = await getFilesFromDataTransferItems(items);
-        if (editedMessage) {
-          files = files?.slice(0, 1);
-        }
-      }
-
-      if (!files?.length && !pastedText) {
+      const hasFiles = Array.from(items).some((item) => item.kind === 'file');
+      if (!hasFiles) {
         return;
       }
 
-      const textToPaste = pastedFormattedText?.entities?.length ? pastedFormattedText : { text: pastedText };
-
-      let isWordDocument = false;
-      try {
-        const parser = new DOMParser();
-        const parsedDocument = parser.parseFromString(html, TYPE_HTML);
-        isWordDocument = parsedDocument.documentElement
-          .getAttribute(NAMESPACE_PREFIX_WORD) === DOCUMENT_TYPE_WORD;
-      } catch (err: any) {
-        // Ignore
+      const filePasteTarget = resolveFilePasteTarget();
+      e.preventDefault();
+      if (filePasteTarget === 'none') {
+        return;
       }
 
+      let files = await getFilesFromDataTransferItems(items);
+      if (editedMessage) {
+        files = files?.slice(0, 1);
+      }
+
+      if (!files?.length) {
+        return;
+      }
+
+      const pastedText = e.clipboardData.getData('text');
+      const textToPaste: ApiFormattedText | undefined = pastedText ? { text: pastedText } : undefined;
       const hasText = textToPaste && textToPaste.text;
-      let shouldSetAttachments = files?.length && !isWordDocument && !shouldSkipFilePaste;
+      let shouldSetAttachments = files?.length && !shouldSkipFilePaste;
 
       const newAttachments = files ? await Promise.all(files.map((file) => buildAttachment(file.name, file))) : [];
       const canReplace = (editedMessage && newAttachments?.length
@@ -140,22 +115,18 @@ const useClipboardPaste = (
       }
 
       if (hasText) {
-        if (shouldSetAttachments) {
-          setNextText(textToPaste);
-        } else {
-          insertTextAndUpdateCursor(textToPaste, input?.id);
-        }
+        insertTextAndUpdateCursor(textToPaste);
       }
     }
 
-    document.addEventListener('paste', handlePaste, false);
+    document.addEventListener('paste', handlePaste, true);
 
     return () => {
-      document.removeEventListener('paste', handlePaste, false);
+      document.removeEventListener('paste', handlePaste, true);
     };
   }, [
-    insertTextAndUpdateCursor, editedMessage, setAttachments, isActive, shouldStripCustomEmoji,
-    onCustomEmojiStripped, setNextText, lang, shouldUpdateAttachmentCompression, shouldSkipFilePaste,
+    insertTextAndUpdateCursor, editedMessage, setAttachments, isActive,
+    lang, resolveFilePasteTarget, shouldUpdateAttachmentCompression, shouldSkipFilePaste,
   ]);
 };
 

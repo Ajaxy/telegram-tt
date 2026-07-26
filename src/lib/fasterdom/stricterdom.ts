@@ -80,9 +80,11 @@ export function suppressStrict(cb: () => any) {
   }
 
   disableStrict();
-  const result = cb();
-  enableStrict();
-  return result;
+  try {
+    return cb();
+  } finally {
+    enableStrict();
+  }
 }
 
 export function setHandler(handler?: ErrorHandler) {
@@ -178,6 +180,10 @@ function setupMutationObserver() {
         }
 
         if (attributeName?.startsWith('data-')) {
+          return;
+        }
+
+        if (attributeName === 'open' && target instanceof HTMLDetailsElement) {
           return;
         }
 

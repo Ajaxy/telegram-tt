@@ -1,6 +1,6 @@
 import type { ElementRef, TeactNode } from '../../lib/teact/teact';
 
-import type { ApiMessageEntityFormattedDate, ApiRichText } from '../../api/types';
+import type { ApiMessageEntityFormattedDate, ApiRichText, ApiRichTextDate } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ThreadId } from '../../types';
 import { ApiMessageEntityTypes } from '../../api/types';
@@ -384,7 +384,7 @@ function openDetailsAncestors(element: HTMLElement) {
   }
 }
 
-function buildDateEntity(text: Extract<ApiRichText, { type: 'date' }>): ApiMessageEntityFormattedDate {
+function buildDateEntity(text: ApiRichTextDate): ApiMessageEntityFormattedDate {
   const renderedText = getRichTextPlainText(text.text);
 
   return {

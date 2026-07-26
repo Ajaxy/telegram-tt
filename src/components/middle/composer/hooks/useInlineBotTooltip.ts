@@ -2,7 +2,6 @@ import { useEffect } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type { InlineBotSettings } from '../../../../types';
-import type { Signal } from '../../../../util/signals';
 
 import memoized from '../../../../util/memoized';
 
@@ -22,12 +21,10 @@ const MEMO_NO_RESULT = {
   usernameLowered: '',
 };
 
-const tempEl = document.createElement('div');
-
 export default function useInlineBotTooltip(
   isEnabled: boolean,
   chatId: string,
-  getHtml: Signal<string>,
+  richText: string,
   inlineBots?: Record<string, false | InlineBotSettings>,
 ) {
   const { queryInlineBot, resetInlineBot, resetAllInlineBots } = getActions();
@@ -35,12 +32,11 @@ export default function useInlineBotTooltip(
   const [isManuallyClosed, markManuallyClosed, unmarkManuallyClosed] = useFlag(false);
 
   const extractBotQueryThrottled = useThrottledResolver(() => {
-    const html = getHtml();
-    return isEnabled && html.startsWith('@') ? parseBotQuery(html) : MEMO_NO_RESULT;
-  }, [getHtml, isEnabled], THROTTLE);
+    return isEnabled && richText.startsWith('@') ? parseBotQuery(richText) : MEMO_NO_RESULT;
+  }, [richText, isEnabled], THROTTLE);
   const {
     username, query, canShowHelp, usernameLowered,
-  } = useDerivedState(extractBotQueryThrottled, [extractBotQueryThrottled, getHtml], true);
+  } = useDerivedState(extractBotQueryThrottled, [extractBotQueryThrottled, richText], true);
 
   useSyncEffect(([prevUsername]) => {
     if (prevUsername) {
@@ -56,7 +52,7 @@ export default function useInlineBotTooltip(
     });
   }, [chatId, query, queryInlineBot, usernameLowered]);
 
-  useEffect(unmarkManuallyClosed, [unmarkManuallyClosed, getHtml]);
+  useEffect(unmarkManuallyClosed, [unmarkManuallyClosed, richText]);
 
   const {
     id: botId,
@@ -104,28 +100,15 @@ const buildQueryStateMemo = memoized((username: string, query: string, canShowHe
   usernameLowered: username.toLowerCase(),
 }));
 
-function parseBotQuery(html: string) {
-  if (!html.startsWith('@')) {
+function parseBotQuery(text: string) {
+  if (!text.startsWith('@')) {
     return MEMO_NO_RESULT;
   }
 
-  const text = getPlainText(html);
   const result = text.match(INLINE_BOT_QUERY_REGEXP);
   if (!result) {
     return MEMO_NO_RESULT;
   }
 
   return buildQueryStateMemo(result[1], result[2], result[2] === '' && !text.match(HAS_NEW_LINE));
-}
-
-function getPlainText(html: string) {
-  tempEl.innerHTML = html.replace(/<br>/g, '\n');
-
-  tempEl.querySelectorAll<HTMLElement>('[alt]').forEach((el) => {
-    if (!el.innerText) {
-      el.innerText = el.getAttribute('alt')!;
-    }
-  });
-
-  return tempEl.innerText;
 }

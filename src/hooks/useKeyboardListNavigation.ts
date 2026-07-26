@@ -46,7 +46,8 @@ const useKeyboardListNavigation = (
     const focusedElement = document.activeElement;
     const elementChildren = Array.from(itemSelector ? element.querySelectorAll(itemSelector) : element.children);
 
-    let newIndex = (focusedElement && elementChildren.indexOf(focusedElement)) || focusedIndex;
+    const activeIndex = focusedElement ? elementChildren.indexOf(focusedElement) : -1;
+    let newIndex = activeIndex >= 0 ? activeIndex : focusedIndex;
 
     if (e.keyCode === 38 && newIndex > 0) {
       newIndex--;

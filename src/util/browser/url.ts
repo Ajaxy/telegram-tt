@@ -3,6 +3,7 @@ import convertPunycode from '../../lib/punycode';
 
 const PROTOCOL_WHITELIST = new Set(['http:', 'https:', 'tg:', 'ton:', 'mailto:', 'tel:']);
 const FALLBACK_PREFIX = 'https://';
+const VALID_URI_ESCAPE_SEQUENCE_PATTERN = /(%[\da-f]{2})/gi;
 
 function normalizeProtocol(protocol: string) {
   return protocol.replace(/:$/, '').trim().toLowerCase();
@@ -20,6 +21,13 @@ export function ensureProtocol(url: string) {
   } catch (err) {
     return `${FALLBACK_PREFIX}${url}`;
   }
+}
+
+export function formatLinkUrl(url: string) {
+  return ensureProtocol(url)
+    .split(VALID_URI_ESCAPE_SEQUENCE_PATTERN)
+    .map((part, index) => index % 2 ? part : encodeURI(part))
+    .join('');
 }
 
 export function getUnicodeUrl(url: string) {

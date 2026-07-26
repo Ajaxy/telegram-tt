@@ -210,6 +210,7 @@ body.cursor-ew-resize {
 .custom-scroll.with-scrollable-hint,
 .custom-scroll-x.with-scrollable-hint {
   --scrollable-hint-mask-size: var(--scrollable-hint-size, 2.5rem);
+  --scrollable-hint-cutoff: 0rem;
   --scrollable-hint-top-mask-outset: var(--scrollable-hint-mask-size);
   --scrollable-hint-bottom-mask-outset: var(--scrollable-hint-mask-size);
   --scrollable-hint-left-mask-outset: var(--scrollable-hint-mask-size);
@@ -219,15 +220,19 @@ body.cursor-ew-resize {
     linear-gradient(
       to right,
       transparent 0,
+      transparent var(--scrollable-hint-cutoff),
       #000 var(--scrollable-hint-mask-size),
       #000 calc(100% - var(--scrollable-hint-mask-size)),
+      transparent calc(100% - var(--scrollable-hint-cutoff)),
       transparent 100%
     ),
     linear-gradient(
       to bottom,
       transparent 0,
+      transparent var(--scrollable-hint-cutoff),
       #000 var(--scrollable-hint-mask-size),
       #000 calc(100% - var(--scrollable-hint-mask-size)),
+      transparent calc(100% - var(--scrollable-hint-cutoff)),
       transparent 100%
     );
   mask-mode: alpha;

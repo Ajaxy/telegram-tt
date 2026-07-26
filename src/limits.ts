@@ -23,6 +23,7 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   dialogFiltersChats: [100, 200],
   dialogFilters: [10, 20],
   dialogFolderPinned: [5, 10],
+  messageLength: [4096, 8192],
   captionLength: [1024, 4096],
   channels: [500, 1000],
   channelsPublic: [10, 20],
@@ -36,7 +37,6 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   aiComposeToneSaved: [5, 20],
 };
 
-export const DEFAULT_MAX_MESSAGE_LENGTH = 4096;
 export const DEFAULT_MAX_NOTE_LENGTH = 128;
 
 export const DEFAULT_APP_CONFIG: ApiAppConfig = {
@@ -48,6 +48,7 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
     dialogFiltersChats: DEFAULT_LIMITS.dialogFiltersChats,
     dialogFilters: DEFAULT_LIMITS.dialogFilters,
     dialogFolderPinned: DEFAULT_LIMITS.dialogFolderPinned,
+    messageLength: DEFAULT_LIMITS.messageLength,
     captionLength: DEFAULT_LIMITS.captionLength,
     channels: DEFAULT_LIMITS.channels,
     channelsPublic: DEFAULT_LIMITS.channelsPublic,
@@ -60,6 +61,11 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
     maxReactions: DEFAULT_LIMITS.maxReactions,
     aiComposeToneSaved: DEFAULT_LIMITS.aiComposeToneSaved,
   },
+  richMessageLengthLimit: 32768,
+  richMessageMaxBlocks: 500,
+  richMessageMaxDepth: 16,
+  richMessageMaxMedia: 50,
+  richMessageMaxTableColumns: 20,
   autologinDomains: [
     'instantview.telegram.org',
     'translations.telegram.org',

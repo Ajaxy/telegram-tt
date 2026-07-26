@@ -4,11 +4,15 @@ import useUniqueId from '../useUniqueId';
 
 const VTN_PROPERTY_NAME = '--_vtn';
 
-CSS.registerProperty?.({
-  name: VTN_PROPERTY_NAME,
-  syntax: '*',
-  inherits: false,
-});
+try {
+  CSS.registerProperty?.({
+    name: VTN_PROPERTY_NAME,
+    syntax: '*',
+    inherits: false,
+  });
+} catch {
+  // Ignore duplicate registrations
+}
 
 export function useVtn(uniqueId?: string) {
   const fallbackId = useUniqueId();

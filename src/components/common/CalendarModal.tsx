@@ -43,6 +43,7 @@ export type OwnProps = {
   secondButtonLabel?: string;
   description?: string;
   onClose: () => void;
+  onCloseAnimationEnd?: NoneToVoidFunction;
   onSubmit: (date: Date, repeatMode?: RepeatedMessageMode) => void;
   onDateChange?: (date: Date) => void;
   onSecondButtonClick?: NoneToVoidFunction;
@@ -79,6 +80,7 @@ const CalendarModal = ({
   isTestServer,
   isCurrentUserPremium,
   onClose,
+  onCloseAnimationEnd,
   onSubmit,
   onDateChange,
   onSecondButtonClick,
@@ -378,6 +380,7 @@ const CalendarModal = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      onCloseAnimationEnd={onCloseAnimationEnd}
       className="CalendarModal"
       onEnter={handleSubmit}
       dialogRef={dialogRef}

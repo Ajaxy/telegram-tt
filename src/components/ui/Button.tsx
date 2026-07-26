@@ -65,6 +65,7 @@ export type OwnProps = {
   iconName?: IconName;
   iconAlignment?: 'top' | 'bottom' | 'start' | 'end';
   iconClassName?: string;
+  iconHasPremiumBadge?: boolean;
   onClick?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onContextMenu?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onMouseDown?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
@@ -121,6 +122,7 @@ const Button = ({
   iconName,
   iconAlignment = 'start',
   iconClassName,
+  iconHasPremiumBadge,
   onClick,
   onContextMenu,
   onMouseDown,
@@ -194,7 +196,7 @@ const Button = ({
 
   const renderIcon = () => {
     if (!iconName) return undefined;
-    return <Icon name={iconName} className={iconClassName} />;
+    return <Icon name={iconName} className={iconClassName} hasPremiumBadge={iconHasPremiumBadge} />;
   };
 
   const renderContent = () => {

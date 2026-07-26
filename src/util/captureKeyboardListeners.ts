@@ -107,6 +107,6 @@ function releaseKeyboardListener(options: CaptureOptions) {
   });
 
   if (!hasActiveHandlers()) {
-    document.removeEventListener('keydown', handleKeyDown, false);
+    document.removeEventListener('keydown', handleKeyDown, true);
   }
 }

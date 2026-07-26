@@ -3,16 +3,18 @@ import { getActions } from '../../../../global';
 
 import type { ApiDraft, ApiMessage } from '../../../../api/types';
 import type { ThreadId } from '../../../../types';
-import type { Signal } from '../../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
 import { DRAFT_DEBOUNCE, EDITABLE_INPUT_CSS_SELECTOR } from '../../../../config';
 import {
   requestMeasure, requestNextMutation,
 } from '../../../../lib/fasterdom/fasterdom';
+import { areDeepEqual } from '../../../../util/areDeepEqual';
 import focusEditableElement from '../../../../util/focusEditableElement';
-import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
-import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
+import {
+  buildRichMessageFromFormatted,
+  getRichInputAsFormatted,
+} from '../../../ui/textInput/richText';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../../../hooks/useLayoutEffectWithPrevDeps';
@@ -35,16 +37,16 @@ const useDraft = ({
   draft,
   chatId,
   threadId,
-  getHtml,
-  setHtml,
+  richMessage,
+  replaceRichMessage,
   editedMessage,
   isDisabled,
 }: {
   draft?: ApiDraft;
   chatId: string;
   threadId: ThreadId;
-  getHtml: Signal<string>;
-  setHtml: (html: string) => void;
+  richMessage?: ApiDraft['richMessage'];
+  replaceRichMessage: (richMessage?: ApiDraft['richMessage']) => void;
   editedMessage?: ApiMessage;
   isDisabled?: boolean;
 }) => {
@@ -53,14 +55,16 @@ const useDraft = ({
   const isTouchedRef = useRef(false);
 
   useEffect(() => {
-    const html = getHtml();
     const isLocalDraft = draft?.isLocal !== undefined;
-    if (getTextWithEntitiesAsHtml(draft?.text) === html && !isLocalDraft) {
+    if (
+      areDeepEqual(getDraftRichMessage(draft), richMessage)
+      && !isLocalDraft
+    ) {
       isTouchedRef.current = false;
     } else {
       isTouchedRef.current = true;
     }
-  }, [draft, getHtml]);
+  }, [draft, richMessage]);
   useEffect(() => {
     isTouchedRef.current = false;
   }, [chatId, threadId]);
@@ -70,14 +74,24 @@ const useDraft = ({
   const updateDraft = useLastCallback((prevState: { chatId?: string; threadId?: ThreadId } = {}) => {
     if (isDisabled || isEditing || !isTouchedRef.current) return;
 
-    const html = getHtml();
+    const currentRichMessage = richMessage?.blocks.length ? richMessage : undefined;
+    const formattedRichMessage = currentRichMessage ? getRichInputAsFormatted(currentRichMessage) : undefined;
 
-    if (html) {
+    if (currentRichMessage && !formattedRichMessage) {
       requestMeasure(() => {
         saveDraft({
           chatId: prevState.chatId ?? chatId,
           threadId: prevState.threadId ?? threadId,
-          text: parseHtmlAsFormattedText(html),
+          text: undefined,
+          richMessage: currentRichMessage,
+        });
+      });
+    } else if (formattedRichMessage?.text) {
+      requestMeasure(() => {
+        saveDraft({
+          chatId: prevState.chatId ?? chatId,
+          threadId: prevState.threadId ?? threadId,
+          text: formattedRichMessage,
         });
       });
     } else {
@@ -103,7 +117,7 @@ const useDraft = ({
     if (chatId === prevChatId && threadId === prevThreadId) {
       if (isTouched && !draft) return; // Prevent reset from other client if we have local edits
       if (!draft && prevDraft) {
-        setHtml('');
+        replaceRichMessage(undefined);
       }
 
       if (isTouched && !shouldUpdateSuggestedPost) return;
@@ -113,7 +127,12 @@ const useDraft = ({
       return;
     }
 
-    setHtml(getTextWithEntitiesAsHtml(draft.text));
+    if (draft.richMessage) {
+      replaceRichMessage(draft.richMessage);
+    } else {
+      replaceRichMessage(buildRichMessageFromFormatted(draft.text));
+    }
+
     if (shouldUpdateSuggestedPost) {
       requestNextMutation(() => {
         const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
@@ -123,13 +142,17 @@ const useDraft = ({
       });
     }
 
+    if (draft.richMessage) {
+      return;
+    }
+
     const customEmojiIds = draft.text?.entities
       ?.map((entity) => entity.type === ApiMessageEntityTypes.CustomEmoji && entity.documentId)
       .filter(Boolean) || [];
     if (customEmojiIds.length) loadCustomEmojis({ ids: customEmojiIds });
-  }, [chatId, threadId, draft, getHtml, setHtml, editedMessage, isDisabled]);
+  }, [chatId, threadId, draft, replaceRichMessage, editedMessage, isDisabled]);
 
-  // Save draft on chat change. Should be layout effect to read correct html on cleanup
+  // Save draft on chat change. Should be layout effect to read correct editor value on cleanup
   useLayoutEffect(() => {
     if (isDisabled) {
       return undefined;
@@ -151,7 +174,7 @@ const useDraft = ({
       return;
     }
 
-    if (!getHtml()) {
+    if (!richMessage?.blocks.length) {
       updateDraft();
 
       return;
@@ -165,10 +188,18 @@ const useDraft = ({
         updateDraft();
       }
     });
-  }, [chatIdRef, getHtml, isDisabled, runDebouncedForSaveDraft, threadIdRef, updateDraft]);
+  }, [chatIdRef, isDisabled, richMessage, runDebouncedForSaveDraft, threadIdRef, updateDraft]);
 
   useBackgroundMode(updateDraft);
   useBeforeUnload(updateDraft);
 };
 
 export default useDraft;
+
+function getDraftRichMessage(draft?: ApiDraft) {
+  if (draft?.richMessage) {
+    return draft.richMessage;
+  }
+
+  return buildRichMessageFromFormatted(draft?.text);
+}

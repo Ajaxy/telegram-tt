@@ -4,13 +4,14 @@ import type {
   ApiBotInlineResult,
   ApiWebDocument,
 } from './bots';
-import type { ApiInstantViewPage, ApiPageBlock } from './instantView';
+import type { ApiInstantViewPage } from './instantView';
 import type { ApiMessageAction } from './messageActions';
 import type { ApiAttachment, ApiPeerNotifySettings, ApiRestrictionReason } from './misc';
 import type {
   ApiLabeledPrice,
 } from './payments';
 import type { ApiTypePeerColor } from './peers';
+import type { ApiRichMessage } from './richMessage';
 import type { ApiStarGiftRegular, ApiStarGiftUnique, ApiTypeCurrencyAmount } from './stars';
 import type {
   ApiMessageStoryData, ApiStory, ApiWebPageStickerData, ApiWebPageStoryData,
@@ -661,13 +662,6 @@ export interface ApiFormattedText {
 
 export interface ApiFormattedTextWithEmojiOnlyCount extends ApiFormattedText {
   emojiOnlyCount?: number;
-}
-
-export interface ApiRichMessage {
-  blocks: ApiPageBlock[];
-  isRtl?: true;
-  isPart?: true;
-  partCutoff?: number;
 }
 
 export type ApiInputAiComposeTone = {

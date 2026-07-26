@@ -1,16 +1,16 @@
 import {
   type TeactNode,
   useRef,
-} from '../../lib/teact/teact';
+} from '../../../lib/teact/teact';
 
-import { ApiMessageEntityTypes } from '../../api/types';
+import { ApiMessageEntityTypes } from '../../../api/types';
 
-import buildClassName from '../../util/buildClassName';
+import buildClassName from '../../../util/buildClassName';
 
-import useCollapsibleLines from '../../hooks/element/useCollapsibleLines';
-import useLastCallback from '../../hooks/useLastCallback';
+import useCollapsibleLines from '../../../hooks/element/useCollapsibleLines';
+import useLastCallback from '../../../hooks/useLastCallback';
 
-import Icon from './icons/Icon';
+import Icon from '../icons/Icon';
 
 import styles from './Blockquote.module.scss';
 

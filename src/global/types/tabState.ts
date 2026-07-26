@@ -157,6 +157,7 @@ export type TabState = {
   isMasterTab: boolean;
   inactiveReason?: 'auth' | 'otherClient';
   shouldPreventComposerAnimation?: boolean;
+  isRichInputExpanded?: boolean;
   inviteHash?: string;
   canInstall?: boolean;
   isStatisticsShown?: boolean;

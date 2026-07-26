@@ -51,6 +51,7 @@ export type ModalProps = {
   ariaLabel?: string;
   noContainment?: boolean;
   onClose: NoneToVoidFunction;
+  onCloseAnimationEnd?: NoneToVoidFunction;
 };
 
 type ModalContextType = {
@@ -69,6 +70,10 @@ type ModalSlotProps = {
 
 type ModalHeaderProps = {
   noMask?: boolean;
+} & ModalSlotProps;
+
+type ModalFooterActionsProps = {
+  isVertical?: boolean;
 } & ModalSlotProps;
 
 type ModalTitleProps = {
@@ -134,6 +139,7 @@ const Modal = ({
   ariaLabel,
   noContainment,
   onClose,
+  onCloseAnimationEnd,
 }: ModalProps) => {
   const [hasEverOpened, setHasEverOpened] = useState(Boolean(isOpen));
   const [shouldRender, setShouldRender] = useState(Boolean(isOpen));
@@ -182,6 +188,7 @@ const Modal = ({
 
     setIsClosing(false);
     setShouldRender(false);
+    onCloseAnimationEnd?.();
   });
 
   const handleRequestClose = useLastCallback(() => {
@@ -446,9 +453,15 @@ const ModalHeaderAction = ({ className, children }: ModalSlotProps) => {
   );
 };
 
-const ModalFooterActions = ({ className, children }: ModalSlotProps) => {
+const ModalFooterActions = ({ isVertical, className, children }: ModalFooterActionsProps) => {
   return (
-    <div className={buildClassName(styles.footerActions, className)}>
+    <div
+      className={buildClassName(
+        styles.footerActions,
+        isVertical && styles.footerActionsVertical,
+        className,
+      )}
+    >
       {children}
     </div>
   );

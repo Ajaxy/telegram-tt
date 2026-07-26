@@ -1,0 +1,147 @@
+@mixin code-highlight-dark-theme {
+  --color-type: #56b6c2;
+  --color-keyword: #c678dd;
+  --color-class: #e06c75;
+  --color-string: #98c379;
+  --color-template: #d19a66;
+  --color-selector: #e06c75;
+  --color-function: #61aeee;
+  --color-comment: #5c6370;
+  --color-section: #e06c75;
+  --color-variable: #d19a66;
+  --color-attribute: #d19a66;
+  --color-link: #d19a66;
+  --color-tag: #e06c75;
+}
+
+@mixin code-highlight-theme($includeOwnTheme: false) {
+  :global(html.theme-light) & {
+    --color-type: #0053d4;
+    --color-keyword: #388e22;
+    --color-class: #3e6c20;
+    --color-string: #9a1111;
+    --color-template: #9a5334;
+    --color-selector: #9a5334;
+    --color-function: #a753b7;
+    --color-comment: #616161;
+    --color-section: #9a1111;
+    --color-variable: #bd63c5;
+    --color-attribute: #276b8f;
+    --color-link: #276b8f;
+    --color-tag: #000000;
+  }
+
+  @if $includeOwnTheme {
+    :global(html.theme-dark) :not(:global(.own)) & {
+      @include code-highlight-dark-theme;
+    }
+
+    :global(html.theme-dark) :global(.own) & {
+      --color-type: #9effff;
+      --color-keyword: #ffe900;
+      --color-class: #b2f5ff;
+      --color-string: #fedcad;
+      --color-template: #ffe900;
+      --color-selector: #b2f5ff;
+      --color-function: #87ff91;
+      --color-comment: #cbcbcb;
+      --color-section: #b2f5ff;
+      --color-variable: #ffe900;
+      --color-attribute: #ffe900;
+      --color-link: #ffe900;
+      --color-tag: #b2f5ff;
+    }
+  }
+
+  @else {
+    :global(html.theme-dark) & {
+      @include code-highlight-dark-theme;
+    }
+  }
+}
+
+@mixin code-highlight-tokens {
+  :global(.hljs-keyword),
+  :global(.hljs-literal),
+  :global(.hljs-symbol),
+  :global(.hljs-name) {
+    color: var(--color-keyword);
+  }
+
+  :global(.hljs-link) {
+    color: var(--color-link);
+    text-decoration: underline;
+  }
+
+  :global(.hljs-built_in),
+  :global(.hljs-type) {
+    color: var(--color-type);
+  }
+
+  :global(.hljs-number),
+  :global(.hljs-class) {
+    color: var(--color-class);
+  }
+
+  :global(.hljs-string),
+  :global(.hljs-meta) :global(.hljs-string) {
+    color: var(--color-string);
+  }
+
+  :global(.hljs-regexp),
+  :global(.hljs-template-tag) {
+    color: var(--color-template);
+  }
+
+  :global(.hljs-subst),
+  :global(.hljs-function),
+  :global(.hljs-title),
+  :global(.hljs-params),
+  :global(.hljs-formula) {
+    color: var(--color-function);
+  }
+
+  :global(.hljs-comment),
+  :global(.hljs-quote) {
+    font-style: italic;
+    color: var(--color-comment);
+  }
+
+  :global(.hljs-meta),
+  :global(.hljs-meta) :global(.hljs-keyword),
+  :global(.hljs-tag),
+  :global(.hljs-doctag) {
+    color: var(--color-tag);
+  }
+
+  :global(.hljs-variable),
+  :global(.hljs-template-variable) {
+    color: var(--color-variable);
+  }
+
+  :global(.hljs-attr),
+  :global(.hljs-attribute) {
+    color: var(--color-attribute);
+  }
+
+  :global(.hljs-section) {
+    color: var(--color-section);
+  }
+
+  :global(.hljs-emphasis) {
+    font-style: italic;
+  }
+
+  :global(.hljs-strong) {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  :global(.hljs-bullet),
+  :global(.hljs-selector-tag),
+  :global(.hljs-selector-id),
+  :global(.hljs-selector-class),
+  :global(.hljs-selector-attr),
+  :global(.hljs-selector-pseudo) {
+    color: var(--color-selector);
+  }
+}

@@ -22,6 +22,7 @@ import type {
   ApiInputInvoice,
   ApiInputInvoiceStarGift,
   ApiInputMessageReplyInfo,
+  ApiInputRichMessage,
   ApiInputSavedStarGift,
   ApiInputSuggestedPostInfo,
   ApiKeyboardButton,
@@ -82,6 +83,7 @@ import type {
   CallSound,
   ChatListType,
   ConfettiParams,
+  EditingDraft,
   ForwardTarget,
   GiftProfileFilterOptions,
   GlobalSearchContent,
@@ -571,6 +573,9 @@ export interface ActionPayloads {
     chatId: string;
     messageId: number;
   };
+  startEditingMessage: {
+    messageId: number;
+  } & WithTabId;
   loadMessagesById: {
     chatId: string;
     messageIds: number[];
@@ -580,6 +585,7 @@ export interface ActionPayloads {
     text: string;
     attachments?: ApiAttachment[];
     entities?: ApiMessageEntity[];
+    richMessage?: ApiInputRichMessage;
   } & WithTabId;
   editTodo: {
     chatId: string;
@@ -767,6 +773,7 @@ export interface ActionPayloads {
     chatId: string;
     threadId: ThreadId;
     text: ApiDraft['text'];
+    richMessage?: ApiDraft['richMessage'];
   };
   clearDraft: {
     chatId: string;
@@ -1454,7 +1461,7 @@ export interface ActionPayloads {
 
   // Messages
   setEditingDraft: {
-    text?: ApiFormattedText;
+    draft?: EditingDraft;
     chatId: string;
     threadId: ThreadId;
     type: MessageListType;
@@ -2051,6 +2058,9 @@ export interface ActionPayloads {
   // Composer
   setShouldPreventComposerAnimation: {
     shouldPreventComposerAnimation: boolean;
+  } & WithTabId;
+  setIsRichInputExpanded: {
+    isRichInputExpanded?: boolean;
   } & WithTabId;
 
   // Replies

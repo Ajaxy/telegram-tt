@@ -30,7 +30,6 @@ import type {
   ApiQuickReply,
   ApiReaction,
   ApiReactions,
-  ApiRichMessage,
   ApiStickerSet,
   ApiThreadInfo,
   ApiWebPage,
@@ -45,6 +44,7 @@ import type {
   ApiSessionData,
 } from './misc';
 import type { ApiEmojiStatusType, ApiPeerSettings } from './peers';
+import type { ApiRichMessage } from './richMessage';
 import type { ApiPrivacyKey, LangPackStringValue, PrivacyVisibility } from './settings';
 import type { ApiStarGiftAuctionUserState, ApiTypeCurrencyAmount, ApiTypeStarGiftAuctionState } from './stars';
 import type { ApiStealthMode, ApiStory, ApiStorySkipped } from './stories';

@@ -16,6 +16,7 @@ import type {
   ApiGlobalMessageSearchType,
   ApiInputAiComposeTone,
   ApiInputReplyInfo,
+  ApiInputRichMessage,
   ApiInputSuggestedPostInfo,
   ApiMessage,
   ApiMessageEntity,
@@ -102,6 +103,7 @@ import {
   buildInputPollFromExisting,
   buildInputReaction,
   buildInputReplyTo,
+  buildInputRichMessage,
   buildInputStory,
   buildInputSuggestedPost,
   buildInputTextWithEntities,
@@ -359,7 +361,8 @@ export function sendMessageLocal(
   params: SendMessageParams,
 ) {
   const {
-    chat, lastMessageId, text, entities, replyInfo, suggestedPostInfo, attachment, sticker, story, gif, poll, todo,
+    chat, lastMessageId, text, entities, richMessage, replyInfo, suggestedPostInfo,
+    attachment, sticker, story, gif, poll, todo,
     contact, scheduledAt, scheduleRepeatPeriod, groupedId, sendAs, wasDrafted, isInvertedMedia, effectId, isPending,
     messagePriceInStars, dice,
   } = params;
@@ -374,6 +377,7 @@ export function sendMessageLocal(
     lastMessageId,
     text,
     entities,
+    richMessage,
     replyInfo,
     suggestedPostInfo,
     attachment,
@@ -412,7 +416,7 @@ export function sendApiMessage(
   onProgress?: ApiOnProgress,
 ) {
   const {
-    chat, text, entities, replyInfo, suggestedPostInfo, suggestedMedia,
+    chat, text, entities, richMessage, replyInfo, suggestedPostInfo, suggestedMedia,
     attachment, sticker, story, gif, poll, todo, contact, dice,
 
     isSilent, scheduledAt, scheduleRepeatPeriod, groupedId, noWebPage, sendAs, shouldUpdateStickerSetOrder,
@@ -573,10 +577,12 @@ export function sendApiMessage(
 
     type SharedArgs = SharedRecord<SendMediaArgs, SendMessageArgs>;
 
+    const inputRichMessage = richMessage && buildInputRichMessage(richMessage);
+
     const args: SharedArgs = {
       clearDraft: true,
-      message: text || DEFAULT_PRIMITIVES.STRING,
-      entities: entities ? entities.map(buildMtpMessageEntity) : undefined,
+      message: richMessage ? DEFAULT_PRIMITIVES.STRING : text || DEFAULT_PRIMITIVES.STRING,
+      entities: richMessage ? undefined : entities ? entities.map(buildMtpMessageEntity) : undefined,
       peer: buildInputPeer(chat.id, chat.accessHash),
       randomId,
       replyTo: replyInfo && buildInputReplyTo(replyInfo),
@@ -605,6 +611,7 @@ export function sendApiMessage(
         update = await invokeRequest(new GramJs.messages.SendMessage({
           ...args,
           noWebpage: noWebPage || undefined,
+          richMessage: inputRichMessage,
         }), {
           shouldThrow: true,
           shouldIgnoreUpdates: true,
@@ -636,6 +643,10 @@ export async function sendMessage(
   params: SendMessageParams,
   onProgress?: ApiOnProgress,
 ) {
+  if (params.richMessage && !canSendRichMessage(params)) {
+    return undefined;
+  }
+
   const localMessage = params.localMessage || await sendMessageLocal(params);
   return localMessage ? sendApiMessage(params, localMessage, onProgress) : undefined;
 }
@@ -819,6 +830,7 @@ export async function editMessage({
   message,
   text,
   entities,
+  richMessage,
   attachment,
   noWebPage,
 }: {
@@ -826,23 +838,27 @@ export async function editMessage({
   message: ApiMessage;
   text: string;
   entities?: ApiMessageEntity[];
+  richMessage?: ApiInputRichMessage;
   attachment?: ApiAttachment;
   noWebPage?: boolean;
 }, onProgress?: ApiOnProgress) {
   const isScheduled = message.date * 1000 > getServerTime() * 1000;
 
   const media = attachment && buildUploadingMedia(attachment);
+  const inputRichMessage = richMessage && buildInputRichMessage(richMessage);
+  if (richMessage && (!inputRichMessage || media)) {
+    return;
+  }
 
   const isInvertedMedia = text && !attachment?.shouldSendAsFile ? message.isInvertedMedia : undefined;
 
   const newContent = {
     ...(media || message.content),
-    ...(text && {
-      text: {
-        text,
-        entities,
-      },
-    }),
+    text: richMessage || !text ? undefined : {
+      text,
+      entities,
+    },
+    richMessage,
   };
 
   const messageUpdate: ApiMessage = {
@@ -868,8 +884,9 @@ export async function editMessage({
     const mtpEntities = entities && entities.map(buildMtpMessageEntity);
 
     await invokeRequest(new GramJs.messages.EditMessage({
-      message: text,
-      entities: mtpEntities,
+      message: richMessage ? undefined : text,
+      entities: richMessage ? undefined : mtpEntities,
+      richMessage: inputRichMessage,
       media: mediaUpdate,
       peer: buildInputPeer(chat.id, chat.accessHash),
       id: message.id,
@@ -903,6 +920,24 @@ export async function editMessage({
       isFull: true,
     });
   }
+}
+
+function canSendRichMessage(params: SendMessageParams) {
+  return Boolean(
+    params.richMessage
+    && buildInputRichMessage(params.richMessage)
+    && !params.attachment
+    && !params.attachments?.length
+    && !params.sticker
+    && !params.story
+    && !params.gif
+    && !params.poll
+    && !params.todo
+    && !params.contact
+    && !params.dice
+    && !(params.suggestedPostInfo && params.suggestedMedia)
+    && !(params.webPageUrl && params.webPageMediaSize),
+  );
 }
 
 export async function editTodo({

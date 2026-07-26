@@ -74,6 +74,7 @@ import {
   buildInputPhoto,
   buildInputProfileTab,
   buildInputReplyTo,
+  buildInputRichMessage,
   buildInputSuggestedPost,
   buildInputUser,
   buildMtpMessageEntity,
@@ -576,10 +577,16 @@ export function saveDraft({
   chat: ApiChat;
   draft?: ApiDraft;
 }) {
+  const richMessage = draft?.richMessage && buildInputRichMessage(draft.richMessage);
+  if (draft?.richMessage && !richMessage) {
+    return Promise.resolve(false);
+  }
+
   return invokeRequest(new GramJs.messages.SaveDraft({
     peer: buildInputPeer(chat.id, chat.accessHash),
-    message: draft?.text?.text || DEFAULT_PRIMITIVES.STRING,
-    entities: draft?.text?.entities?.map(buildMtpMessageEntity),
+    message: draft?.richMessage ? DEFAULT_PRIMITIVES.STRING : draft?.text?.text || DEFAULT_PRIMITIVES.STRING,
+    entities: draft?.richMessage ? undefined : draft?.text?.entities?.map(buildMtpMessageEntity),
+    richMessage,
     replyTo: draft?.replyInfo && buildInputReplyTo(draft.replyInfo),
     suggestedPost: draft?.suggestedPostInfo && buildInputSuggestedPost(draft.suggestedPostInfo),
   }));

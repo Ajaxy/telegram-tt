@@ -12,6 +12,7 @@ import {
   selectCanAnimateRightColumn,
   selectChat,
   selectCurrentMiddleSearch,
+  selectTabState,
   selectUserFullInfo,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -47,7 +48,7 @@ type StateProps = {
   chat?: ApiChat;
   userFullInfo?: ApiUserFullInfo;
   withRightColumnAnimation?: boolean;
-  isMiddleSearchOpen?: boolean;
+  isHidden?: boolean;
 };
 
 const FALLBACK_PANE_STATE = { height: 0 };
@@ -68,8 +69,8 @@ const MiddleHeaderPanes = ({
   userFullInfo,
   getCurrentPinnedIndex,
   getLoadingPinnedId,
+  isHidden,
   withRightColumnAnimation,
-  isMiddleSearchOpen,
   onFocusPinnedMessage,
 }: OwnProps & StateProps) => {
   const { settings } = userFullInfo || {};
@@ -92,15 +93,15 @@ const MiddleHeaderPanes = ({
     const middleColumn = document.getElementById('MiddleColumn');
     if (!middleColumn) return;
     setExtraStyles(middleColumn, {
-      '--middle-header-panes-height': isMiddleSearchOpen ? '0px' : `${panesHeightCache.get(cacheKey) ?? 0}px`,
+      '--middle-header-panes-height': isHidden ? '0px' : `${panesHeightCache.get(cacheKey) ?? 0}px`,
     });
-  }, [isMiddleSearchOpen, cacheKey]);
+  }, [isHidden, cacheKey]);
 
   const {
     shouldRender,
     ref,
   } = useShowTransition({
-    isOpen: !isMiddleSearchOpen,
+    isOpen: !isHidden,
     withShouldRender: true,
     noMountTransition: true,
   });
@@ -266,12 +267,13 @@ export default memo(withGlobal<OwnProps>(
   }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     const userFullInfo = selectUserFullInfo(global, chatId);
+    const shouldHide = Boolean(selectCurrentMiddleSearch(global) || selectTabState(global).isRichInputExpanded);
 
     return {
       chat,
       userFullInfo,
       withRightColumnAnimation: selectCanAnimateRightColumn(global),
-      isMiddleSearchOpen: Boolean(selectCurrentMiddleSearch(global)),
+      isHidden: shouldHide,
     };
   },
 )(MiddleHeaderPanes));

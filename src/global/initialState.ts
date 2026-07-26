@@ -91,6 +91,7 @@ export const INITIAL_SHARED_STATE: SharedState = {
     animationLevel: ANIMATION_LEVEL_DEFAULT,
     foldersPosition: FOLDERS_POSITION_DEFAULT,
     messageSendKeyCombo: 'enter',
+    shouldReplaceTextShortcuts: true,
     performance: INITIAL_PERFORMANCE_STATE_MAX,
     shouldSkipBrowserCloseConfirmation: false,
     language: 'en',

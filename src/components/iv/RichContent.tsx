@@ -48,10 +48,11 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useScrollableHint from '../../hooks/useScrollableHint';
 import useUniqueId from '../../hooks/useUniqueId';
 
-import Blockquote from '../common/Blockquote';
 import CodeBlock from '../common/code/CodeBlock';
 import CompactMapPreview from '../common/CompactMapPreview';
 import CompactMediaPreview from '../common/CompactMediaPreview';
+import Blockquote from '../common/quote/Blockquote';
+import Pullquote from '../common/quote/Pullquote';
 import SafeLink from '../common/SafeLink';
 import { Breakout } from '../gili/layout/Surface';
 import Photo from '../middle/message/Photo';
@@ -442,7 +443,7 @@ function TableBlock({
             const isLastRow = rowIndex === block.rows.length - 1;
 
             return (
-              <tr className={block.isStriped && rowIndex % 2 ? styles.stripedRow : undefined}>
+              <tr className={block.isStriped && rowIndex % 2 === 0 ? styles.stripedRow : undefined}>
                 {row.cells.map((cell, cellIndex) => renderTableCell(
                   cell,
                   renderContext,
@@ -724,14 +725,14 @@ function renderPullquoteBlock(
   context: RenderBlockContext,
 ) {
   return (
-    <aside className={buildClassName(styles.block, styles.pullquote)}>
+    <Pullquote className={buildClassName(styles.block, styles.pullquote)}>
       <RichText text={block.text} {...context.richTextContext} />
       {hasRichText(block.caption) && (
         <footer className={buildClassName(styles.quoteCaption, styles.pullquoteCaption)}>
           <RichText text={block.caption} {...context.richTextContext} />
         </footer>
       )}
-    </aside>
+    </Pullquote>
   );
 }
 
@@ -824,12 +825,9 @@ function renderListItem(
 ) {
   return (
     <li className={styles.listItem}>
-      {renderCheckbox(item.isCheckbox, item.isChecked)}
-      {item.type === 'text' ? (
-        <RichText text={item.text} {...context.richTextContext} />
-      ) : (
-        item.blocks.map((block, index) => renderBlock(block, `${sourceKey}-${index}`))
-      )}
+      <div className={styles.unorderedListContent}>
+        {renderListItemContent(item, context, sourceKey, renderBlock)}
+      </div>
     </li>
   );
 }
@@ -846,12 +844,7 @@ function renderNativeOrderedListItem(
       value={item.value}
       type={item.orderType}
     >
-      {renderCheckbox(item.isCheckbox, item.isChecked)}
-      {item.type === 'text' ? (
-        <RichText text={item.text} {...context.richTextContext} />
-      ) : (
-        item.blocks.map((block, index) => renderBlock(block, `${sourceKey}-${index}`))
-      )}
+      {renderListItemContent(item, context, sourceKey, renderBlock)}
     </li>
   );
 }
@@ -865,15 +858,34 @@ function renderOrderedListItem(
   return (
     <li className={buildClassName(styles.listItem, styles.orderedListItem)}>
       <span className={styles.orderedListMarker}>{`${item.num}.`}</span>
-      <span className={styles.orderedListContent}>
-        {renderCheckbox(item.isCheckbox, item.isChecked)}
-        {item.type === 'text' ? (
-          <RichText text={item.text} {...context.richTextContext} />
-        ) : (
-          item.blocks.map((block, index) => renderBlock(block, `${sourceKey}-${index}`))
-        )}
-      </span>
+      <div className={styles.orderedListContent}>
+        {renderListItemContent(item, context, sourceKey, renderBlock)}
+      </div>
     </li>
+  );
+}
+
+function renderListItemContent(
+  item: ApiPageListItem | ApiPageListOrderedItem,
+  context: RenderBlockContext,
+  sourceKey: string,
+  renderBlock: RenderBlockFn,
+) {
+  const content = item.type === 'text' ? (
+    <RichText text={item.text} {...context.richTextContext} />
+  ) : (
+    item.blocks.map((block, index) => renderBlock(block, `${sourceKey}-${index}`))
+  );
+
+  if (!item.isCheckbox) {
+    return content;
+  }
+
+  return (
+    <div className={styles.checkboxListItem}>
+      {renderCheckbox(item.isChecked)}
+      <div className={styles.listItemContent}>{content}</div>
+    </div>
   );
 }
 
@@ -890,11 +902,7 @@ function getOrderedListType(orderType?: string) {
   }
 }
 
-function renderCheckbox(isCheckbox?: true, isChecked?: true) {
-  if (!isCheckbox) {
-    return undefined;
-  }
-
+function renderCheckbox(isChecked?: true) {
   return (
     <span className={styles.checkboxWrapper}>
       <Checkbox checked={isChecked} nonInteractive />

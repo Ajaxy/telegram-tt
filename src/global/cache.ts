@@ -324,6 +324,7 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
       animationLevel: untypedCached.settings.byKey.animationLevel,
       foldersPosition: FOLDERS_POSITION_DEFAULT,
       messageSendKeyCombo: untypedCached.settings.byKey.messageSendKeyCombo,
+      shouldReplaceTextShortcuts: true,
       messageTextSize: untypedCached.settings.byKey.messageTextSize,
       instantViewFontSizeAdjust: INSTANT_VIEW_FONT_SIZE_ADJUST_DEFAULT,
       performance: untypedCached.settings.performance,
@@ -375,6 +376,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cachedSharedSettings.foldersPosition = FOLDERS_POSITION_DEFAULT;
   }
 
+  if (cachedSharedSettings.shouldReplaceTextShortcuts === undefined) {
+    cachedSharedSettings.shouldReplaceTextShortcuts = true;
+  }
+
   if (!cached.appConfig) {
     cached.appConfig = initialState.appConfig;
   }
@@ -385,6 +390,14 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
 
   if (cached.appConfig.isMessagePrimaryEditedDateEnabled === undefined) {
     cached.appConfig.isMessagePrimaryEditedDateEnabled = initialState.appConfig.isMessagePrimaryEditedDateEnabled;
+  }
+
+  if (cached.appConfig.richMessageLengthLimit === undefined) {
+    cached.appConfig.richMessageLengthLimit = initialState.appConfig.richMessageLengthLimit;
+    cached.appConfig.richMessageMaxBlocks = initialState.appConfig.richMessageMaxBlocks;
+    cached.appConfig.richMessageMaxDepth = initialState.appConfig.richMessageMaxDepth;
+    cached.appConfig.richMessageMaxMedia = initialState.appConfig.richMessageMaxMedia;
+    cached.appConfig.richMessageMaxTableColumns = initialState.appConfig.richMessageMaxTableColumns;
   }
 
   if (untypedCached.sharedState?.settings?.shouldWarnAboutSvg) {

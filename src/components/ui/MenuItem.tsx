@@ -24,6 +24,7 @@ export type MenuItemProps = {
   ariaLabel?: string;
   withWrap?: boolean;
   withPreventDefaultOnMouseDown?: boolean;
+  hasIconPremiumBadge?: boolean;
   clickArg?: number;
   onClick?: (e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>, arg?: number) => void;
   onContextMenu?: (e: React.UIEvent) => void;
@@ -51,6 +52,7 @@ const MenuItem = (props: MenuItemProps) => {
     withWrap,
     rel = 'noopener noreferrer',
     withPreventDefaultOnMouseDown,
+    hasIconPremiumBadge,
     clickArg,
     onClick,
     onContextMenu,
@@ -97,7 +99,11 @@ const MenuItem = (props: MenuItemProps) => {
   const content = (
     <>
       {!customIcon && icon && (
-        <Icon name={isCharIcon ? 'char' : icon} character={isCharIcon ? icon : undefined} />
+        <Icon
+          name={isCharIcon ? 'char' : icon}
+          character={isCharIcon ? icon : undefined}
+          hasPremiumBadge={hasIconPremiumBadge}
+        />
       )}
       {customIcon}
       {children}

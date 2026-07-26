@@ -251,7 +251,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   const {
     openThread,
     updateDraftReplyInfo,
-    setEditingId,
+    startEditingMessage,
     pinMessage,
     openForwardMenu,
     openReplyMenu,
@@ -287,6 +287,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     openTodoListModal,
     showNotification,
     setSettingOption,
+    loadRichMessage,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -320,6 +321,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       loadSeenBy({ chatId: message.chatId, messageId: message.id });
     }
   }, [loadSeenBy, isOpen, message.chatId, message.id, canShowSeenBy]);
+
+  useEffect(() => {
+    if (canEdit && isOpen && message.content.richMessage?.isPart) {
+      loadRichMessage({ chatId: message.chatId, messageId: message.id });
+    }
+  }, [canEdit, isOpen, loadRichMessage, message.chatId, message.content.richMessage?.isPart, message.id]);
 
   useEffect(() => {
     if (canLoadReadDate && isOpen) {
@@ -475,7 +482,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         messageId: message.id,
       });
     } else {
-      setEditingId({ messageId: message.id });
+      startEditingMessage({ messageId: message.id });
     }
     closeMenu();
   });

@@ -40,7 +40,7 @@ const DropdownMenu: FC<OwnProps> = ({
   transformOriginX,
   transformOriginY,
   positionX = 'left',
-  positionY = 'top',
+  positionY,
   footer,
   forceOpen,
   withPortal,

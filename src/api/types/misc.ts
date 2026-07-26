@@ -268,6 +268,11 @@ export interface ApiAppConfig {
   topicsPinnedLimit: number;
   hiddenMembersMinCount: number;
   limits: Record<ApiLimitType, readonly [number, number]>;
+  richMessageLengthLimit: number;
+  richMessageMaxBlocks: number;
+  richMessageMaxDepth: number;
+  richMessageMaxMedia: number;
+  richMessageMaxTableColumns: number;
   canDisplayAutoarchiveSetting?: boolean;
   storyViewersExpirePeriod: number;
   storyChangelogUserId: string;
@@ -457,6 +462,7 @@ export type ApiLimitType =
   | 'dialogFiltersChats'
   | 'dialogFilters'
   | 'dialogFolderPinned'
+  | 'messageLength'
   | 'captionLength'
   | 'channels'
   | 'channelsPublic'
@@ -470,13 +476,14 @@ export type ApiLimitType =
   | 'aiComposeToneSaved';
 
 export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
-  'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs' | 'recommendedChannels' | 'moreAccounts'
+  'messageLength' | 'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs' | 'recommendedChannels'
+  | 'moreAccounts'
   | 'maxReactions' | 'aiComposeToneSaved'
 )>;
 
 export type ApiLimitTypeForPromo = Exclude<ApiLimitType,
-  'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned' | 'maxReactions'
-  | 'aiComposeToneSaved'
+  'uploadMaxFileparts' | 'messageLength' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned'
+  | 'maxReactions' | 'aiComposeToneSaved'
 >;
 
 export type ApiPeerNotifySettings = {

@@ -195,10 +195,12 @@
 
     width: 100%;
     max-width: var(--messages-container-width);
+    height: calc-size(auto, size);
     margin: 0 auto;
     padding: 0 var(--footer-side-inset);
 
-    transition: transform var(--layer-transition);
+    /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+    transition: height var(--layer-transition), transform var(--layer-transition);
 
     body.no-page-transitions & {
       transition: none !important;

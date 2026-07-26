@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback,
 } from '../../../lib/teact/teact';
@@ -18,8 +17,10 @@ import { getSystemTheme } from '../../../util/systemTheme';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Island, { IslandTitle } from '../../gili/layout/Island';
+import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
 import RangeSlider from '../../ui/RangeSlider';
@@ -33,20 +34,22 @@ type StateProps =
   Pick<SharedSettings, (
     'messageTextSize' |
     'messageSendKeyCombo' |
+    'shouldReplaceTextShortcuts' |
     'timeFormat' |
     'theme' |
     'shouldUseSystemTheme'
   )>;
 
-const SettingsGeneral: FC<OwnProps & StateProps> = ({
+const SettingsGeneral = ({
   isActive,
   messageTextSize,
   messageSendKeyCombo,
+  shouldReplaceTextShortcuts,
   timeFormat,
   theme,
   shouldUseSystemTheme,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     setSharedSettingOption, openSettingsScreen,
   } = getActions();
@@ -111,6 +114,10 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
     setSharedSettingOption({ messageSendKeyCombo: newCombo as SharedSettings['messageSendKeyCombo'] });
   }, []);
 
+  const handleTextShortcutReplacementChange = useLastCallback((shouldReplace: boolean) => {
+    setSharedSettingOption({ shouldReplaceTextShortcuts: shouldReplace });
+  });
+
   useHistoryBack({
     isActive,
     onBack: onReset,
@@ -156,19 +163,23 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
         />
       </Island>
 
-      {keyboardSendOptions && (
-        <>
-          <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang('SettingsKeyboard')}</IslandTitle>
-          <Island>
-            <RadioGroup
-              name="keyboard-send-settings"
-              options={keyboardSendOptions}
-              onChange={handleMessageSendComboChange}
-              selected={messageSendKeyCombo}
-            />
-          </Island>
-        </>
-      )}
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang('SettingsKeyboard')}</IslandTitle>
+      <Island>
+        {keyboardSendOptions && (
+          <RadioGroup
+            name="keyboard-send-settings"
+            options={keyboardSendOptions}
+            onChange={handleMessageSendComboChange}
+            selected={messageSendKeyCombo}
+          />
+        )}
+        <Checkbox
+          label={lang('SettingsAutomaticTextReplacements')}
+          subLabel={lang('SettingsAutomaticTextReplacementsInfo')}
+          checked={shouldReplaceTextShortcuts}
+          onCheck={handleTextShortcutReplacementChange}
+        />
+      </Island>
     </div>
   );
 };
@@ -179,12 +190,14 @@ export default memo(withGlobal<OwnProps>(
       theme,
       shouldUseSystemTheme,
       messageSendKeyCombo,
+      shouldReplaceTextShortcuts,
       messageTextSize,
       timeFormat,
     } = selectSharedSettings(global);
 
     return {
       messageSendKeyCombo,
+      shouldReplaceTextShortcuts,
       messageTextSize,
       timeFormat,
       theme,

@@ -21,6 +21,7 @@ export interface SharedSettings {
   // This can be deleted after September 2025, along with the corresponding migration
   wasAnimationLevelSetManually?: boolean;
   messageSendKeyCombo: 'enter' | 'ctrl-enter';
+  shouldReplaceTextShortcuts: boolean;
   browserCachedPosition?: Point;
   browserCachedSize?: Size;
   timeFormat: TimeFormat;

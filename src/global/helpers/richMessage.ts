@@ -1,4 +1,5 @@
 import type {
+  ApiInputRichMessage,
   ApiPageBlock,
   ApiPageBlockBlockquote,
   ApiPageBlockBlockquoteBlocks,
@@ -10,6 +11,7 @@ import type {
   ApiPageBlockPullquote,
   ApiPageBlockSlideshow,
   ApiPageBlockTable,
+  ApiPageCaption,
   ApiPageListItem,
   ApiPageListOrderedItem,
   ApiRichMessage,
@@ -17,10 +19,19 @@ import type {
 } from '../../api/types';
 
 import { getTranslationFn } from '../../util/localization';
+import { getUtf8Length } from '../../util/textFormat';
 
 const PREVIEW_OVERFLOW_LENGTH = 1;
 const BLOCK_TEXT_SEPARATOR = '\n';
 const INLINE_TEXT_SEPARATOR = '';
+
+export interface RichMessageUsage {
+  textLength: number;
+  blockCount: number;
+  maxDepth: number;
+  mediaCount: number;
+  maxTableColumnCount: number;
+}
 
 export function getRichMessagePreviewText(richMessage: ApiRichMessage, maxLength?: number) {
   const parts: string[] = [];
@@ -29,6 +40,20 @@ export function getRichMessagePreviewText(richMessage: ApiRichMessage, maxLength
   appendPageBlocksPreviewText(richMessage.blocks, parts, maxPreviewLength);
 
   return parts.join(INLINE_TEXT_SEPARATOR).trim();
+}
+
+export function getRichMessageUsage(richMessage: ApiInputRichMessage | ApiRichMessage): RichMessageUsage {
+  const usage: RichMessageUsage = {
+    textLength: 0,
+    blockCount: 0,
+    maxDepth: 0,
+    mediaCount: 0,
+    maxTableColumnCount: 0,
+  };
+
+  appendCountedPageBlocksUsage(richMessage.blocks, 0, usage);
+
+  return usage;
 }
 
 export function hasRichText(text: ApiRichText): boolean {
@@ -95,6 +120,152 @@ export function getNestedRichText(text: ApiRichText): ApiRichText {
       return text.text;
     default:
       return { type: 'empty' };
+  }
+}
+
+function appendCountedPageBlocksUsage(blocks: ApiPageBlock[], depth: number, usage: RichMessageUsage) {
+  usage.blockCount += blocks.length;
+  appendPageBlocksUsage(blocks, depth, usage);
+}
+
+function appendPageBlocksUsage(blocks: ApiPageBlock[], depth: number, usage: RichMessageUsage) {
+  blocks.forEach((block) => appendPageBlockUsage(block, depth, usage));
+}
+
+function appendPageBlockUsage(block: ApiPageBlock, depth: number, usage: RichMessageUsage) {
+  usage.maxDepth = Math.max(usage.maxDepth, depth);
+
+  switch (block.type) {
+    case 'title':
+    case 'subtitle':
+    case 'header':
+    case 'subheader':
+    case 'paragraph':
+    case 'preformatted':
+    case 'footer':
+    case 'kicker':
+    case 'heading1':
+    case 'heading2':
+    case 'heading3':
+    case 'heading4':
+    case 'heading5':
+    case 'heading6':
+    case 'thinking':
+      appendRichTextUsage(block.text, depth + 1, usage);
+      break;
+    case 'authorDate':
+      appendRichTextUsage(block.author, depth + 1, usage);
+      break;
+    case 'list':
+    case 'orderedList':
+      usage.blockCount += block.items.length;
+      block.items.forEach((item) => {
+        if (item.type === 'text') {
+          appendRichTextUsage(item.text, depth + 1, usage);
+        } else {
+          appendCountedPageBlocksUsage(item.blocks, depth + 1, usage);
+        }
+      });
+      break;
+    case 'blockquote':
+    case 'pullquote':
+      appendRichTextUsage(block.text, depth + 1, usage);
+      appendRichTextUsage(block.caption, depth + 1, usage);
+      break;
+    case 'blockquoteBlocks':
+      appendRichTextUsage(block.caption, depth + 1, usage);
+      appendCountedPageBlocksUsage(block.blocks, depth + 1, usage);
+      break;
+    case 'photo':
+    case 'video':
+      usage.mediaCount++;
+      appendPageCaptionUsage(block.caption, depth + 1, usage);
+      break;
+    case 'cover':
+      appendPageBlockUsage(block.cover, depth + 1, usage);
+      break;
+    case 'embed':
+      appendPageCaptionUsage(block.caption, depth + 1, usage);
+      break;
+    case 'embedPost':
+      appendPageBlocksUsage(block.blocks, depth + 1, usage);
+      appendPageCaptionUsage(block.caption, depth + 1, usage);
+      break;
+    case 'collage':
+    case 'slideshow':
+      appendPageBlocksUsage(block.items, depth + 1, usage);
+      appendPageCaptionUsage(block.caption, depth + 1, usage);
+      break;
+    case 'audio':
+      usage.mediaCount++;
+      appendPageCaptionUsage(block.caption, depth + 1, usage);
+      break;
+    case 'table':
+      appendPageTableUsage(block, depth, usage);
+      break;
+    case 'details':
+      appendRichTextUsage(block.title, depth + 1, usage);
+      appendCountedPageBlocksUsage(block.blocks, depth + 1, usage);
+      break;
+    case 'relatedArticles':
+      appendRichTextUsage(block.title, depth + 1, usage);
+      break;
+    case 'map':
+      appendPageCaptionUsage(block.caption, depth + 1, usage);
+      break;
+    case 'math':
+      usage.textLength += getUtf8Length(block.source);
+      break;
+    case 'unsupported':
+    case 'divider':
+    case 'anchor':
+    case 'channel':
+      break;
+  }
+}
+
+function appendPageCaptionUsage(caption: ApiPageCaption, depth: number, usage: RichMessageUsage) {
+  appendRichTextUsage(caption.text, depth, usage);
+  appendRichTextUsage(caption.credit, depth, usage);
+}
+
+function appendPageTableUsage(block: ApiPageBlockTable, depth: number, usage: RichMessageUsage) {
+  appendRichTextUsage(block.title, depth + 1, usage);
+  usage.blockCount += block.rows.length;
+
+  block.rows.forEach((row) => {
+    const columnCount = row.cells.reduce((count, cell) => count + (cell.colspan || 1), 0);
+    usage.maxTableColumnCount = Math.max(usage.maxTableColumnCount, columnCount);
+    row.cells.forEach((cell) => {
+      if (cell.text) {
+        appendRichTextUsage(cell.text, depth + 1, usage);
+      }
+    });
+  });
+}
+
+function appendRichTextUsage(text: ApiRichText, depth: number, usage: RichMessageUsage) {
+  usage.maxDepth = Math.max(usage.maxDepth, depth);
+
+  switch (text.type) {
+    case 'empty':
+    case 'image':
+      break;
+    case 'plain':
+      usage.textLength += getUtf8Length(text.text);
+      break;
+    case 'customEmoji':
+      usage.textLength += getUtf8Length(text.alt);
+      break;
+    case 'math':
+      usage.textLength += getUtf8Length(text.source);
+      break;
+    case 'concat':
+      text.texts.forEach((part) => appendRichTextUsage(part, depth + 1, usage));
+      break;
+    default:
+      appendRichTextUsage(getNestedRichText(text), depth + 1, usage);
+      break;
   }
 }
 
