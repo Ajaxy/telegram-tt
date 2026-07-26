@@ -226,6 +226,10 @@ export class RichEditorTooltipsController {
     this.render();
   };
 
+  public hasActiveTooltip() {
+    return Boolean(this.formatterRange || this.suggestions.size);
+  }
+
   public setFormatterDismissalBlocked = (isBlocked: boolean) => {
     this.isFormatterDismissalBlocked = isBlocked;
   };

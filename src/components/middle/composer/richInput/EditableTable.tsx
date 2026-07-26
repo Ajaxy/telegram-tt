@@ -25,6 +25,7 @@ import type {
 
 import { requestMeasure, requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../../util/buildClassName';
+import captureEscKeyListener from '../../../../util/captureEscKeyListener';
 import { TABLE_CELL_HIGHLIGHT_ATTR } from '../../../../util/tiptap/constants';
 import {
   canToggleRichEditorTableHighlight,
@@ -525,19 +526,16 @@ const EditableTable = ({
       pointerSessionRef.current?.removeListeners();
       onCancel?.();
     };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape' && e.key !== 'Esc') {
-        return;
-      }
-
+    const handleEscape = () => {
       pointerSessionRef.current?.removeListeners();
       onCancel?.();
     };
+    const releaseEscKeyListener = captureEscKeyListener(handleEscape);
     const removeListeners = () => {
       window.removeEventListener('pointermove', handleMove);
       window.removeEventListener('pointerup', handleEnd);
       window.removeEventListener('pointercancel', handleCancel);
-      window.removeEventListener('keydown', handleKeyDown);
+      releaseEscKeyListener();
       stopAutoScroll();
       pointerSessionRef.current = undefined;
     };
@@ -546,7 +544,6 @@ const EditableTable = ({
     window.addEventListener('pointermove', handleMove);
     window.addEventListener('pointerup', handleEnd);
     window.addEventListener('pointercancel', handleCancel);
-    window.addEventListener('keydown', handleKeyDown);
   }
 
   function startAutoScroll(point: AutoScrollPoint, callback: (currentPoint: AutoScrollPoint) => void) {

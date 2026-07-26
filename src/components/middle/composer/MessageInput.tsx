@@ -105,7 +105,6 @@ const MAX_ATTACHMENT_MODAL_INPUT_HEIGHT = 160;
 const MAX_MESSAGE_INPUT_HEIGHT = 160;
 const MAX_STORY_MODAL_INPUT_HEIGHT = 128;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
-// Heuristics allowing the user to make a triple click
 const MAX_REMAINING_LENGTH_TO_SHOW = 100;
 const IGNORE_KEYS = [
   'Esc', 'Escape', 'Enter', 'PageUp', 'PageDown', 'Meta', 'Alt', 'Ctrl', 'ArrowDown', 'ArrowUp', 'Control', 'Shift',
@@ -589,11 +588,22 @@ const MessageInput = ({
 
   const handleSendShortcut = useLastCallback((e: KeyboardEvent | React.KeyboardEvent<HTMLDivElement>) => {
     e.preventDefault();
+    e.stopPropagation();
     onSend();
   });
 
+  function handleKeyDownCapture(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (!(e.target instanceof Node) || !inputRef.current?.contains(e.target)) {
+      return;
+    }
+
+    // Capture send shortcuts before ProseMirror handles them as editor commands
+    if (!e.isComposing && isSendShortcut(e)) {
+      handleSendShortcut(e);
+    }
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
-    // https://levelup.gitconnected.com/javascript-events-handlers-keyboard-and-load-events-1b3e46a6b0c3#1960
     const { isComposing } = e;
 
     const isEmpty = richEditor.isEmpty();
@@ -607,9 +617,7 @@ const MessageInput = ({
       }
     }
 
-    if (!isComposing && isSendShortcut(e)) {
-      handleSendShortcut(e);
-    } else if (!isComposing && e.key === 'Escape' && isRichInputExpanded) {
+    if (!isComposing && e.key === 'Escape' && isRichInputExpanded) {
       onRichInputCollapse?.();
     } else if (!isComposing && e.key === 'ArrowUp' && isEmpty && !e.metaKey && !e.ctrlKey && !e.altKey) {
       e.preventDefault();
@@ -792,7 +800,11 @@ const MessageInput = ({
           onScroll={onScroll}
           onClick={isCollapsedRichOnlyPreview ? onRichInputExpand : isMainInputLocked ? handleClick : undefined}
         >
-          <div className={inputScrollerContentClass} data-stricterdom-ignore>
+          <div
+            className={inputScrollerContentClass}
+            data-stricterdom-ignore
+            onKeyDownCapture={handleKeyDownCapture}
+          >
             <div
               ref={inputRef}
               id={editableInputId || EDITABLE_INPUT_ID}

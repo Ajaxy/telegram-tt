@@ -125,6 +125,7 @@ import {
   IS_IOS, IS_VIDEO_RECORDING_SUPPORTED, IS_VOICE_RECORDING_SUPPORTED,
 } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
+import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { formatMediaDuration } from '../../util/dates/oldDateFormat';
 import { processDeepLink } from '../../util/deeplink';
 import { tryParseDeepLink } from '../../util/deepLinkParser';
@@ -211,6 +212,7 @@ import Icon from './icons/Icon';
 import PaymentMessageConfirmDialog from './PaymentMessageConfirmDialog';
 import ReactionAnimatedEmoji from './reactions/ReactionAnimatedEmoji';
 import RemoveFormattingModal from './RemoveFormattingModal';
+import { hasActiveRichEditorTooltip } from './tooltips/extensions/RichEditorTooltips';
 
 import './Composer.scss';
 
@@ -615,6 +617,16 @@ const Composer = ({
 
   const collapseRichInput = useLastCallback(() => {
     setIsRichInputExpanded({ isRichInputExpanded: undefined });
+  });
+
+  const handleRichInputEscape = useLastCallback(() => {
+    const editor = richEditor.editor;
+    if (editor && hasActiveRichEditorTooltip(editor)) {
+      return false;
+    }
+
+    collapseRichInput();
+    return undefined;
   });
 
   const updateRichMessage = useLastCallback((value?: ApiInputRichMessage) => {
@@ -2109,20 +2121,14 @@ const Composer = ({
       collapseRichInput();
     }
 
-    function handleDocumentKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Esc' || e.key === 'Escape') {
-        collapseRichInput();
-      }
-    }
-
+    const releaseEscKeyListener = captureEscKeyListener(handleRichInputEscape);
     document.addEventListener('mousedown', handleDocumentMouseDown);
-    document.addEventListener('keydown', handleDocumentKeyDown);
 
     return () => {
+      releaseEscKeyListener();
       document.removeEventListener('mousedown', handleDocumentMouseDown);
-      document.removeEventListener('keydown', handleDocumentKeyDown);
     };
-  }, [collapseRichInput, isRichInputExpansionActive]);
+  }, [handleRichInputEscape, isRichInputExpansionActive]);
 
   const slowModePlaceholder = (() => {
     if (!slowMode?.nextSendDate || slowMode.nextSendDate < getServerTime()) return undefined;

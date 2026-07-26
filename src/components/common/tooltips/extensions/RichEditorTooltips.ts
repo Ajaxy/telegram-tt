@@ -84,3 +84,12 @@ export function refreshRichEditorTooltips(editor: Editor) {
     refreshFormatter(editor, storage.config, () => storage.controller);
   }
 }
+
+export function hasActiveRichEditorTooltip(editor: Editor) {
+  if (editor.isDestroyed) {
+    return false;
+  }
+
+  const storage = (editor.storage as AnyLiteral).richEditorTooltips as RichEditorTooltipsStorage | undefined;
+  return Boolean(storage?.controller?.hasActiveTooltip());
+}
