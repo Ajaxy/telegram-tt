@@ -1,0 +1,2 @@
+import e from"./ada-E7f0DBTa.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/ada" instead of "highlight.js/lib/languages/ada.js"`))}t();var n=e;export{n as default};
+//# sourceMappingURL=ada.js-F6CMI3vZ.js.map

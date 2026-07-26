@@ -1,0 +1,2 @@
+import e from"./lasso-EA5NXwFA.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/lasso" instead of "highlight.js/lib/languages/lasso.js"`))}t();var n=e;export{n as default};
+//# sourceMappingURL=lasso.js-DQSJRAUU.js.map

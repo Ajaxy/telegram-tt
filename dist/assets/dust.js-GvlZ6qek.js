@@ -1,0 +1,2 @@
+import e from"./dust-BCRbq8jp.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/dust" instead of "highlight.js/lib/languages/dust.js"`))}t();var n=e;export{n as default};
+//# sourceMappingURL=dust.js-GvlZ6qek.js.map
