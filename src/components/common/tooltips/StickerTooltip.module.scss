@@ -1,0 +1,6 @@
+.root {
+  display: grid;
+  grid-auto-rows: auto;
+  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+  place-items: center;
+}

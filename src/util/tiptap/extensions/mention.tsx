@@ -7,9 +7,9 @@ import { getGlobal } from '../../../global';
 import type { ApiPeer } from '../../../api/types';
 import type { TeactNodeViewComponentProps } from '../TeactNodeViewRenderer';
 
+import { TME_LINK_PREFIX } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { selectPeer, selectPeerByUsername, selectUser } from '../../../global/selectors';
-import buildDefinedAttributes from './buildDefinedAttributes';
 
 import Avatar from '../../../components/common/Avatar';
 import NodeViewContent from '../NodeViewContent';
@@ -18,7 +18,6 @@ import TeactNodeViewRenderer from '../TeactNodeViewRenderer';
 import styles from '../styling.module.scss';
 
 const MENTION_AVATAR_SIZE = 16;
-const MENTION_NAME_PARSE_PRIORITY = 100;
 
 export const MentionNode = Node.create({
   name: 'mention',
@@ -49,7 +48,7 @@ export const MentionNode = Node.create({
     return [
       {
         tag: 'a[href^="tg://user?id="]',
-        priority: MENTION_NAME_PARSE_PRIORITY,
+        priority: 101,
         getAttrs: (element) => buildMentionNameAttrs(element),
       },
       { tag: 'span[data-rich-text-type="mention"]' },
@@ -58,13 +57,11 @@ export const MentionNode = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['span', buildDefinedAttributes({
-      class: styles.mention,
-      'data-rich-text-type': 'mention',
-      'data-user-id': HTMLAttributes.userId,
-      'data-username': HTMLAttributes.username,
-      'data-label': HTMLAttributes.label,
-    }), 0];
+    return ['a', {
+      href: HTMLAttributes.userId
+        ? `tg://user?id=${HTMLAttributes.userId}`
+        : `${TME_LINK_PREFIX}${HTMLAttributes.username}`,
+    }, 0];
   },
 
   addNodeView() {

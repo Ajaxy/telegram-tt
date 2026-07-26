@@ -1,0 +1,42 @@
+.root {
+  :global(.ListItem.chat-item-clickable) {
+    margin: 0;
+
+    :global(.info) {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+    }
+
+    :global(.title) {
+      max-width: 70%;
+      margin-inline-end: 0.625rem;
+    }
+
+    :global(.handle) {
+      font-size: 1rem;
+    }
+
+    &[dir="rtl"] {
+      :global(.status) {
+        width: auto;
+      }
+    }
+  }
+
+  :global(.ChatInfo) {
+    :global(.title h3) {
+      line-height: 1.25;
+    }
+
+    :global(.Avatar) {
+      margin-right: 0.7em;
+    }
+
+    :global(.handle) {
+      &::before {
+        content: "@";
+      }
+    }
+  }
+}

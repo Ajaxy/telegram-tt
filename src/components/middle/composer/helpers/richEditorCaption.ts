@@ -1,3 +1,4 @@
+import { mergeAttributes } from '@tiptap/core';
 import type { NodeType } from '@tiptap/pm/model';
 import type { Transaction } from '@tiptap/pm/state';
 import { Plugin } from '@tiptap/pm/state';
@@ -21,6 +22,17 @@ const RichEditorCaptionNode = buildRichEditorTextField({
 
 export const RichEditorCaption = RichEditorCaptionNode.extend<RichEditorCaptionOptions>({
   isolating: true,
+
+  parseHTML() {
+    return [
+      { tag: 'cite' },
+      ...(this.parent?.() || []),
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['cite', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0];
+  },
 
   addOptions() {
     return {

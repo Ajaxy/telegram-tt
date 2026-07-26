@@ -1,4 +1,3 @@
-import type { Editor } from '@tiptap/core';
 import { TextSelection } from '@tiptap/pm/state';
 import type { ElementRef, TeactNode } from '../../../lib/teact/teact';
 import {
@@ -10,9 +9,10 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiFormattedText, ApiInputMessageReplyInfo, ApiInputRichMessage } from '../../../api/types';
 import type { SharedSettings } from '../../../global/types';
 import type {
-  IAnchorPosition, MessageListType, ThreadId,
+  MessageListType, ThreadId,
 } from '../../../types';
 import type { RichEditorDateClickTarget } from '../../../util/tiptap/extensions/date';
+import type { RichEditorTooltipsConfig } from '../../common/tooltips/types';
 import type { RichEditor } from './richEditorTypes';
 
 import { DEBUG, EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID } from '../../../config';
@@ -28,7 +28,6 @@ import {
 import buildClassName from '../../../util/buildClassName';
 import captureKeyboardListeners, { hasActiveHandler } from '../../../util/captureKeyboardListeners';
 import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
-import parseEmojiOnlyString from '../../../util/emoji/parseEmojiOnlyString';
 import focusEditableElement from '../../../util/focusEditableElement';
 import { subscribeToCodeLanguageLoad } from '../../../util/highlightCode';
 import { debounce, fastRaf } from '../../../util/schedulers';
@@ -41,7 +40,6 @@ import {
   removeUnsupportedRichBlocks,
 } from '../../ui/textInput/richText';
 import { SYNC_QUOTE_CAPTIONS_META } from './helpers/richEditorCaption';
-import { isSelectionInsideInput } from './helpers/selection';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
@@ -54,8 +52,8 @@ import { useStateRef } from '../../../hooks/useStateRef';
 import AnimatedCounter from '../../common/AnimatedCounter';
 import CalendarModal from '../../common/CalendarModal.async';
 import Icon from '../../common/icons/Icon';
+import { refreshRichEditorTooltips } from '../../common/tooltips/extensions/RichEditorTooltips';
 import Button from '../../ui/Button';
-import TextFormatter from '../../ui/textInput/TextFormatter';
 import FormattedDateModal from './FormattedDateModal';
 import RichEditorToolbar from './RichEditorToolbar';
 
@@ -64,7 +62,6 @@ const TRANSITION_DURATION_FACTOR = 50;
 const COLLAPSED_RICH_PREVIEW_LINE_COUNT = 3;
 
 const SCROLLER_CLASS = 'input-scroller';
-const INPUT_WRAPPER_CLASS = 'message-input-wrapper';
 const CONTENT_EDITABLE_SELECTOR = 'div[contenteditable]';
 
 export type OwnProps = {
@@ -73,6 +70,7 @@ export type OwnProps = {
   chatId: string;
   threadId: ThreadId;
   richEditor: RichEditor;
+  tooltips?: RichEditorTooltipsConfig;
   isAttachmentModalInput?: boolean;
   isStoryInput?: boolean;
   editableInputId?: string;
@@ -82,10 +80,10 @@ export type OwnProps = {
   noFocusInterception?: boolean;
   canAutoFocus: boolean;
   shouldSuppressFocus?: boolean;
-  shouldSuppressTextFormatter?: boolean;
   canSendPlainText?: boolean;
   isRichInputExpanded?: boolean;
   isNeedPremium?: boolean;
+  isRichOnlyContent?: boolean;
   messageListType?: MessageListType;
   maxLength?: number;
   onRichInputCollapse?: NoneToVoidFunction;
@@ -108,31 +106,17 @@ const MAX_MESSAGE_INPUT_HEIGHT = 160;
 const MAX_STORY_MODAL_INPUT_HEIGHT = 128;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 // Heuristics allowing the user to make a triple click
-const SELECTION_RECALCULATE_DELAY_MS = 260;
-const TEXT_FORMATTER_SAFE_AREA_PX = 140;
 const MAX_REMAINING_LENGTH_TO_SHOW = 100;
 const IGNORE_KEYS = [
   'Esc', 'Escape', 'Enter', 'PageUp', 'PageDown', 'Meta', 'Alt', 'Ctrl', 'ArrowDown', 'ArrowUp', 'Control', 'Shift',
 ];
-
-function clearSelection() {
-  const selection = window.getSelection();
-  if (!selection) {
-    return;
-  }
-
-  if (selection.removeAllRanges) {
-    selection.removeAllRanges();
-  } else if (selection.empty) {
-    selection.empty();
-  }
-}
 
 const MessageInput = ({
   ref,
   id,
   chatId,
   richEditor,
+  tooltips,
   maxLength,
   isAttachmentModalInput,
   isStoryInput,
@@ -145,11 +129,11 @@ const MessageInput = ({
   canAutoFocus,
   noFocusInterception,
   shouldSuppressFocus,
-  shouldSuppressTextFormatter,
   replyInfo,
   isSelectModeActive,
   messageSendKeyCombo,
   isNeedPremium,
+  isRichOnlyContent,
   messageListType,
   onRichInputCollapse,
   onRichInputExpand,
@@ -171,7 +155,6 @@ const MessageInput = ({
     inputRef = ref;
   }
 
-  const selectionTimeoutRef = useRef<number>();
   const cloneRef = useRef<HTMLDivElement>();
   const scrollerCloneRef = useRef<HTMLDivElement>();
   const sharedCanvasRef = useRef<HTMLCanvasElement>();
@@ -184,10 +167,7 @@ const MessageInput = ({
   const onBlurRef = useStateRef(onBlur);
   const onFocusRef = useStateRef(onFocus);
   const isContextMenuOpenRef = useRef(false);
-  const [isTextFormatterOpen, openTextFormatter, closeTextFormatter] = useFlag();
-  const [textFormatterAnchorPosition, setTextFormatterAnchorPosition] = useState<IAnchorPosition>();
-  const [selectedRange, setSelectedRange] = useState<Range>();
-  const [isTextFormatterDisabled, setIsTextFormatterDisabled] = useState<boolean>(false);
+  const isTextFormatterDisabledRef = useRef(IS_ANDROID);
   const [dateEditTarget, setDateEditTarget] = useState<RichEditorDateClickTarget>();
   const [isDateEditorOpen, openDateEditor, closeDateEditor] = useFlag();
   const { isMobile } = useAppLayout();
@@ -212,16 +192,11 @@ const MessageInput = ({
   const placeholderAriaLabel = typeof placeholder === 'string' ? placeholder : undefined;
   const canRenderRichEditor = Boolean(isAttachmentModalInput || canSendPlainText);
   const isMainInput = !isAttachmentModalInput && !isStoryInput;
-  const richValueAsFormatted = useMemo(
-    () => (richValue ? getRichInputAsFormatted(richValue) : undefined),
-    [richValue],
-  );
   const hasUnsupportedRichContent = canRenderRichEditor && Boolean(richValue && hasUnsupportedRichBlocks(richValue));
   const isCollapsedRichOnlyPreview = Boolean(
     isMainInput
     && !isRichInputExpanded
-    && richValue?.blocks.length
-    && !richValueAsFormatted
+    && isRichOnlyContent
     && !hasUnsupportedRichContent,
   );
   const isRichEditorEditable = isRichEditorReady && !isCollapsedRichOnlyPreview;
@@ -229,6 +204,25 @@ const MessageInput = ({
   const registerRichEditorRoot = richEditor.registerRoot;
   const isMainInputLocked = !isAttachmentModalInput && !canSendPlainText;
   const editor = richEditor.editor;
+  const getTooltipContext = useLastCallback(() => ({
+    ...(tooltips?.getContext() || { chatId }),
+    isRichInputExpanded,
+    isFormatterDisabled: isTextFormatterDisabledRef.current,
+    isFormatterContextMenuOpen: isContextMenuOpenRef.current,
+  }));
+  const getIsRootFormatterEnabled = useLastCallback(() => Boolean(
+    tooltips?.formatter?.isEnabled()
+    && isRichEditorEditable
+    && !isCollapsedRichOnlyPreview,
+  ));
+  const rootTooltips = useMemo(() => (tooltips ? {
+    ...tooltips,
+    formatter: tooltips.formatter ? {
+      ...tooltips.formatter,
+      isEnabled: getIsRootFormatterEnabled,
+    } : undefined,
+    getContext: getTooltipContext,
+  } : undefined), [getIsRootFormatterEnabled, getTooltipContext, tooltips]);
   const remainingLength = useMemo(() => {
     if (maxLength === undefined || !richValue) {
       return undefined;
@@ -240,7 +234,6 @@ const MessageInput = ({
     && remainingLength < MAX_REMAINING_LENGTH_TO_SHOW;
 
   const handleDateClick = useLastCallback((target: RichEditorDateClickTarget) => {
-    closeTextFormatter();
     setDateEditTarget(target);
     openDateEditor();
   });
@@ -332,16 +325,6 @@ const MessageInput = ({
     isEmpty: boolean,
     source: HTMLElement,
   ) => {
-    const currentValue = richEditor.getValue();
-    if (
-      isMainInput
-      && !isRichInputExpanded
-      && currentValue
-      && !getRichInputAsFormatted(currentValue)
-    ) {
-      onRichInputExpand?.();
-    }
-
     if (updateRafRef.current) {
       cancelAnimationFrame(updateRafRef.current);
     }
@@ -351,6 +334,19 @@ const MessageInput = ({
       updateInputHeight(isEmpty);
     });
   });
+
+  const wasRichOnlyContentRef = useRef(isRichOnlyContent);
+  useEffect(() => {
+    const shouldExpandRichInput = isMainInput
+      && !isRichInputExpanded
+      && isRichOnlyContent
+      && !wasRichOnlyContentRef.current;
+    wasRichOnlyContentRef.current = isRichOnlyContent;
+
+    if (shouldExpandRichInput) {
+      onRichInputExpand?.();
+    }
+  }, [isMainInput, isRichInputExpanded, isRichOnlyContent, onRichInputExpand]);
 
   const handleEditorReady = useLastCallback((source: HTMLElement) => {
     syncCloneWithSource(source);
@@ -423,6 +419,7 @@ const MessageInput = ({
       quoteCaptionPlaceholder: lang('RichEditorQuoteCaptionPlaceholder'),
       tableTitlePlaceholder: lang('InputTitle'),
       unsupportedPlaceholder: lang('PageContentUnsupported'),
+      tooltips: rootTooltips,
       getIsRichInputExpanded,
       onReady: handleEditorReady,
       onUpdate: handleEditorUpdate,
@@ -436,11 +433,11 @@ const MessageInput = ({
       unregisterRichEditorRoot();
     };
   }, [canRenderRichEditor, getIsRichInputExpanded, handleDateClick, handleEditorReady, handleEditorUpdate,
-    isActive, lang, registerRichEditorRoot, richValueRef,
+    isActive, lang, registerRichEditorRoot, richValueRef, rootTooltips,
     syncCloneWithSource, syncEditorElementAttributes, updateInputHeight]);
 
   useLayoutEffect(() => {
-    if (!editor || !isMainInput || !isActive) {
+    if (!editor || editor.isDestroyed || !isMainInput || !isActive) {
       return;
     }
 
@@ -449,15 +446,12 @@ const MessageInput = ({
       .setMeta('addToHistory', false));
     editor.setEditable(!isCollapsedRichOnlyPreview, false);
     syncEditorElementAttributes(editor.view.dom);
-    if (isCollapsedRichOnlyPreview) {
-      closeTextFormatter();
-    }
-  }, [closeTextFormatter, editor, isActive, isCollapsedRichOnlyPreview, isMainInput, isRichInputExpanded,
+  }, [editor, isActive, isCollapsedRichOnlyPreview, isMainInput, isRichInputExpanded,
     syncEditorElementAttributes]);
 
   const refreshCodeBlockHighlighting = useLastCallback(() => {
     requestMutation(() => {
-      if (!editor) {
+      if (!editor || editor.isDestroyed) {
         return;
       }
 
@@ -502,8 +496,8 @@ const MessageInput = ({
       return;
     }
 
-    if (isRichEditorReady) {
-      syncCloneWithSource(editor?.view.dom);
+    if (isRichEditorReady && editor && !editor.isDestroyed) {
+      syncCloneWithSource(editor.view.dom);
     }
 
     updateInputHeight(isInputEmpty);
@@ -534,16 +528,6 @@ const MessageInput = ({
     focusEditableElement(inputRef.current);
   });
 
-  const handleCloseTextFormatter = useLastCallback(() => {
-    if (editor && !editor.state.selection.empty) {
-      editor.commands.setTextSelection(editor.state.selection.head);
-    }
-
-    closeTextFormatter();
-    setSelectedRange(undefined);
-    clearSelection();
-  });
-
   const handleDebugDoubleClick = useLastCallback(() => {
     if (!DEBUG) {
       return;
@@ -553,82 +537,8 @@ const MessageInput = ({
     console.warn('[MessageInput] Tiptap state:', editor, editor?.getJSON());
   });
 
-  function checkSelection() {
-    // Disable the formatter on iOS devices for now.
-    if (IS_IOS || isCollapsedRichOnlyPreview) {
-      closeTextFormatter();
-      return false;
-    }
-
-    const selection = window.getSelection();
-    if (!selection || !selection.rangeCount || isContextMenuOpenRef.current) {
-      closeTextFormatter();
-      if (IS_ANDROID) {
-        setIsTextFormatterDisabled(false);
-      }
-      return false;
-    }
-
-    const selectionRange = selection.getRangeAt(0);
-    const selectedText = selectionRange.toString().trim();
-    if (
-      shouldSuppressTextFormatter
-      || !hasEditorTextSelection(editor)
-      || !isSelectionInsideInput(selectionRange, editableInputId || EDITABLE_INPUT_ID)
-      || !selectedText
-      || parseEmojiOnlyString(selectedText)
-      || !selectionRange.START_TO_END
-    ) {
-      closeTextFormatter();
-      return false;
-    }
-
-    return true;
-  }
-
-  function processSelection() {
-    if (!checkSelection()) {
-      return;
-    }
-
-    if (isTextFormatterDisabled) {
-      return;
-    }
-
-    const selectionRange = window.getSelection()!.getRangeAt(0);
-    const selectionRect = selectionRange.getBoundingClientRect();
-    const scrollerRect = inputRef.current!.closest<HTMLDivElement>(`.${SCROLLER_CLASS}`)!.getBoundingClientRect();
-
-    let x = (selectionRect.left + selectionRect.width / 2) - scrollerRect.left;
-
-    if (x < TEXT_FORMATTER_SAFE_AREA_PX) {
-      x = TEXT_FORMATTER_SAFE_AREA_PX;
-    } else if (x > scrollerRect.width - TEXT_FORMATTER_SAFE_AREA_PX) {
-      x = scrollerRect.width - TEXT_FORMATTER_SAFE_AREA_PX;
-    }
-
-    setTextFormatterAnchorPosition({
-      x,
-      y: selectionRect.top - scrollerRect.top,
-    });
-
-    setSelectedRange(selectionRange);
-    openTextFormatter();
-  }
-
-  function processSelectionWithTimeout() {
-    if (selectionTimeoutRef.current) {
-      window.clearTimeout(selectionTimeoutRef.current);
-    }
-    // Small delay to allow browser properly recalculate selection
-    selectionTimeoutRef.current = window.setTimeout(processSelection, SELECTION_RECALCULATE_DELAY_MS);
-  }
-
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     if (e.button !== 2) {
-      const listenerEl = e.currentTarget.closest(`.${INPUT_WRAPPER_CLASS}`) || e.target;
-
-      listenerEl.addEventListener('mouseup', processSelectionWithTimeout, { once: true });
       return;
     }
 
@@ -637,6 +547,9 @@ const MessageInput = ({
     }
 
     isContextMenuOpenRef.current = true;
+    if (editor && !editor.isDestroyed) {
+      refreshRichEditorTooltips(editor);
+    }
 
     function handleCloseContextMenu(e2: KeyboardEvent | MouseEvent) {
       if (e2 instanceof KeyboardEvent && e2.key !== 'Esc' && e2.key !== 'Escape') {
@@ -645,6 +558,9 @@ const MessageInput = ({
 
       setTimeout(() => {
         isContextMenuOpenRef.current = false;
+        if (editor && !editor.isDestroyed) {
+          refreshRichEditorTooltips(editor);
+        }
       }, CONTEXT_MENU_CLOSE_DELAY_MS);
 
       window.removeEventListener('keydown', handleCloseContextMenu);
@@ -673,7 +589,6 @@ const MessageInput = ({
 
   const handleSendShortcut = useLastCallback((e: KeyboardEvent | React.KeyboardEvent<HTMLDivElement>) => {
     e.preventDefault();
-    closeTextFormatter();
     onSend();
   });
 
@@ -699,26 +614,21 @@ const MessageInput = ({
     } else if (!isComposing && e.key === 'ArrowUp' && isEmpty && !e.metaKey && !e.ctrlKey && !e.altKey) {
       e.preventDefault();
       editLastMessage();
-    } else {
-      e.target.addEventListener('keyup', processSelectionWithTimeout, { once: true });
     }
   }
 
   function handleAndroidContextMenu(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-    if (!checkSelection()) {
+    if (!editor || editor.isDestroyed || editor.state.selection.empty) {
       return;
     }
 
-    setIsTextFormatterDisabled(!isTextFormatterDisabled);
+    isTextFormatterDisabledRef.current = !isTextFormatterDisabledRef.current;
 
-    if (!isTextFormatterDisabled) {
+    if (!isTextFormatterDisabledRef.current) {
       e.preventDefault();
       e.stopPropagation();
-
-      processSelection();
-    } else {
-      closeTextFormatter();
     }
+    refreshRichEditorTooltips(editor);
   }
 
   function handleClick() {
@@ -882,12 +792,11 @@ const MessageInput = ({
           onScroll={onScroll}
           onClick={isCollapsedRichOnlyPreview ? onRichInputExpand : isMainInputLocked ? handleClick : undefined}
         >
-          <div className={inputScrollerContentClass}>
+          <div className={inputScrollerContentClass} data-stricterdom-ignore>
             <div
               ref={inputRef}
               id={editableInputId || EDITABLE_INPUT_ID}
               className={className}
-              data-stricterdom-ignore
               contentEditable={canRenderRichEditor && isRichEditorEditable}
               role="textbox"
               aria-disabled={canRenderRichEditor && !isRichEditorReady}
@@ -900,7 +809,6 @@ const MessageInput = ({
               onKeyDown={handleKeyDown}
               onMouseDown={handleMouseDown}
               onContextMenu={IS_ANDROID ? handleAndroidContextMenu : undefined}
-              onTouchCancel={IS_ANDROID ? processSelectionWithTimeout : undefined}
               aria-label={placeholderAriaLabel}
               onFocus={!isNeedPremium ? onFocusRef.current : undefined}
               onBlur={!isNeedPremium ? onBlurRef.current : undefined}
@@ -934,7 +842,7 @@ const MessageInput = ({
           'clone',
           isNeedPremium && 'is-need-premium')}
       >
-        <div className={inputScrollerContentClass}>
+        <div className={inputScrollerContentClass} data-stricterdom-ignore>
           <div ref={cloneRef} className={buildClassName(className, 'clone', tiptapStyles.clone)} dir="auto" />
         </div>
       </div>
@@ -948,17 +856,6 @@ const MessageInput = ({
       )}
       {isMainInput && canRenderRichEditor && (
         <RichEditorToolbar editor={editor} isEnabled={isRichInputExpanded} />
-      )}
-      {canRenderRichEditor && (
-        <TextFormatter
-          editor={editor}
-          isOpen={isTextFormatterOpen}
-          isRichInputExpanded={isRichInputExpanded}
-          anchorPosition={textFormatterAnchorPosition}
-          selectedRange={selectedRange}
-          setSelectedRange={setSelectedRange}
-          onClose={handleCloseTextFormatter}
-        />
       )}
       {dateEditTarget?.type === 'date' && (
         <CalendarModal
@@ -1005,15 +902,4 @@ function getRichInputLength(value: ApiInputRichMessage) {
   }
 
   return getRichMessageUsage(value).textLength;
-}
-
-function hasEditorTextSelection(editor?: Editor) {
-  if (!editor || !(editor.state.selection instanceof TextSelection)) {
-    return false;
-  }
-
-  const { doc, selection } = editor.state;
-  const selectedText = doc.textBetween(selection.from, selection.to, '\n', '\n').trim();
-
-  return Boolean(selectedText);
 }

@@ -66,6 +66,11 @@ export function buildRichEditorBlockquote(getIsRichInputExpanded: () => boolean)
       return ['blockquote', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0];
     },
 
+    parseMarkdown(token, helpers) {
+      const parseChildren = helpers.parseBlockChildren || helpers.parseChildren;
+      return helpers.createNode('blockquote', undefined, parseChildren(token.tokens || []));
+    },
+
     addNodeView() {
       return TeactNodeViewRenderer(RichEditorBlockquoteView);
     },

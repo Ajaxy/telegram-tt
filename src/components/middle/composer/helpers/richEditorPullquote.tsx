@@ -56,11 +56,11 @@ export const RichEditorPullquote = TiptapNode.create<RichEditorPullquoteOptions>
   },
 
   parseHTML() {
-    return [{ tag: 'aside[data-pullquote]' }];
+    return [{ tag: 'aside' }];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['aside', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { 'data-pullquote': '' }), 0];
+    return ['aside', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0];
   },
 
   addNodeView() {

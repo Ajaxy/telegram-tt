@@ -318,9 +318,21 @@
 }
 
 .spoiler {
-  padding-inline: 0.125rem;
-  border-radius: 0.25rem;
-  background-color: var(--color-background-secondary);
+  padding: 0 0.125rem;
+  border-radius: 0.5rem;
+
+  text-shadow:
+    -0.125rem -0.125rem 0 var(--color-background),
+    0.125rem -0.125rem 0 var(--color-background),
+    -0.125rem 0.125rem 0 var(--color-background),
+    0.125rem 0.125rem 0 var(--color-background);
+
+  background-image: url("../../assets/spoiler-dots-black.png");
+  background-size: auto min(100%, 1.125rem);
+
+  :global(html.theme-dark) & {
+    background-image: url("../../assets/spoiler-dots-white.png");
+  }
 }
 
 .markedText {

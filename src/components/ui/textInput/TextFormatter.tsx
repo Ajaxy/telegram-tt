@@ -1,22 +1,16 @@
 import type { Editor } from '@tiptap/core';
-import {
-  memo, useEffect, useRef, useState,
-} from '../../../lib/teact/teact';
+import { memo, useEffect, useState } from '../../../lib/teact/teact';
 
-import type { IAnchorPosition } from '../../../types';
+import type { IconName } from '../../../types/icons';
 
 import { formatLinkUrl } from '../../../util/browser/url';
 import buildClassName from '../../../util/buildClassName';
-import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import getKeyFromEvent from '../../../util/getKeyFromEvent';
 import stopEvent from '../../../util/stopEvent';
 import { isRichEditorBlockquoteActive } from './richEditorFormatting';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
-import useVirtualBackdrop from '../../../hooks/useVirtualBackdrop';
 
 import CalendarModal from '../../common/CalendarModal';
 import Button from '../Button';
@@ -24,17 +18,18 @@ import TextFormatterInput from './TextFormatterInput';
 
 import styles from './TextFormatter.module.scss';
 
+type EditorRange = { from: number; to: number };
+
 export type OwnProps = {
-  editor?: Editor;
-  isOpen: boolean;
+  editor: Editor;
+  range: EditorRange;
+  capabilities: 'basic' | 'full';
   isRichInputExpanded?: boolean;
-  anchorPosition?: IAnchorPosition;
-  selectedRange?: Range;
-  setSelectedRange: (range: Range) => void;
-  onClose: () => void;
+  onClose: NoneToVoidFunction;
+  onDismissalChange: (isBlocked: boolean) => void;
 };
 
-interface ISelectedTextFormats {
+interface SelectedTextFormats {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
@@ -47,8 +42,7 @@ interface ISelectedTextFormats {
   blockquote?: boolean;
 }
 
-type SelectedTextFormat = keyof ISelectedTextFormats;
-type EditorRange = { from: number; to: number };
+type SelectedTextFormat = keyof SelectedTextFormats;
 
 const TEXT_FORMAT_KEYS: SelectedTextFormat[] = [
   'bold', 'italic', 'underline', 'strikethrough', 'monospace', 'spoiler', 'marked', 'subscript', 'superscript',
@@ -65,41 +59,26 @@ const MARK_NAME_BY_TEXT_FORMAT: Partial<Record<SelectedTextFormat, string>> = {
   subscript: 'subscript',
   superscript: 'superscript',
 };
+
 const TextFormatter = ({
   editor,
-  isOpen,
+  range,
+  capabilities,
   isRichInputExpanded,
-  anchorPosition,
-  selectedRange,
-  setSelectedRange,
   onClose,
+  onDismissalChange,
 }: OwnProps) => {
-  const containerRef = useRef<HTMLDivElement>();
-  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen);
   const [isLinkControlOpen, openLinkControl, closeLinkControl] = useFlag();
   const [isDatePickerOpen, openDatePicker, closeDatePicker] = useFlag();
   const [linkUrl, setLinkUrl] = useState('');
-  const [selectedTextFormats, setSelectedTextFormats] = useState<ISelectedTextFormats>({});
   const [selectedDateAt, setSelectedDateAt] = useState(() => roundDateToMinute(new Date()).getTime());
 
   const lang = useLang();
-  const selectedLinkHref = editor ? getSelectedLinkHref(editor) : undefined;
-
-  useEffect(() => (
-    isOpen && !isDatePickerOpen ? captureEscKeyListener(onClose) : undefined
-  ), [isDatePickerOpen, isOpen, onClose]);
-  useVirtualBackdrop(
-    isOpen && !isDatePickerOpen,
-    containerRef,
-    onClose,
-    true,
-  );
-
-  useEffect(() => {
-    if (!isOpen) {
-      editor?.commands.setFormatterSelectionHighlight(false);
-    }
-  }, [editor, isOpen]);
+  const {
+    formats: selectedTextFormats,
+    hasFormatting: hasSelectedTextFormatting,
+  } = getSelectedEditorTextState(editor, range, Boolean(isRichInputExpanded));
+  const selectedLinkHref = getSelectedLinkHref(editor, range);
 
   useEffect(() => {
     if (!isLinkControlOpen) {
@@ -108,168 +87,91 @@ const TextFormatter = ({
   }, [isLinkControlOpen]);
 
   useEffect(() => {
-    if (!shouldRender) {
-      closeLinkControl();
-      closeDatePicker();
-      setSelectedTextFormats({});
-    }
-  }, [closeDatePicker, closeLinkControl, shouldRender]);
+    return () => {
+      if (!editor.isDestroyed) {
+        editor.commands.setFormatterSelectionHighlight(false);
+      }
+    };
+  }, [editor]);
 
   useEffect(() => {
-    if (!isOpen || !selectedRange) {
-      return;
-    }
-
-    const editorRange = editor ? getEditorRangeFromDomRange(editor, selectedRange) : undefined;
-    if (editor && editorRange) {
-      setSelectedTextFormats(getSelectedEditorTextFormats(editor, editorRange, Boolean(isRichInputExpanded)));
-      return;
-    }
-
-    setSelectedTextFormats({});
-  }, [editor, isOpen, isRichInputExpanded, selectedRange]);
-
-  const restoreSelection = useLastCallback(() => {
-    if (!selectedRange) {
-      return;
-    }
-
-    const selection = window.getSelection();
-    if (selection) {
-      selection.removeAllRanges();
-      selection.addRange(selectedRange);
-    }
-  });
-
-  const updateSelectedRange = useLastCallback(() => {
-    const selection = window.getSelection();
-    if (selection?.rangeCount) {
-      setSelectedRange(selection.getRangeAt(0));
-    }
-  });
+    onDismissalChange(isDatePickerOpen);
+    return () => onDismissalChange(false);
+  }, [isDatePickerOpen, onDismissalChange]);
 
   const restoreEditorSelection = useLastCallback(() => {
-    if (!editor || !selectedRange) {
-      restoreSelection();
-      return undefined;
-    }
-
-    const editorRange = getEditorRangeFromDomRange(editor, selectedRange);
-    if (!editorRange) {
-      restoreSelection();
-      return undefined;
-    }
-
-    editor.chain().focus().setTextSelection(editorRange).run();
-    return editorRange;
-  });
-
-  const getSelectedText = useLastCallback(() => {
-    if (!selectedRange) {
-      return undefined;
-    }
-
-    const editorRange = editor ? getEditorRangeFromDomRange(editor, selectedRange) : undefined;
-    if (editor && editorRange) {
-      return editor.state.doc.textBetween(editorRange.from, editorRange.to, '\n', '\n');
-    }
-
-    return selectedRange.toString();
-  });
-
-  function getFormatButtonClassName(key: keyof ISelectedTextFormats) {
-    if (selectedTextFormats[key]) {
-      return 'active';
-    }
-
-    if (key === 'strikethrough') {
-      if (Object.keys(selectedTextFormats).some(
-        (format) => format !== key
-          && format !== 'blockquote'
-          && Boolean(selectedTextFormats[format as keyof ISelectedTextFormats]),
-      )) {
-        return 'disabled';
-      }
-    } else if (key !== 'monospace' && key !== 'blockquote'
-      && (selectedTextFormats.monospace || selectedTextFormats.strikethrough)) {
-      return 'disabled';
-    }
-
-    return undefined;
-  }
-
-  const handleToggleEditorMark = useLastCallback((format: SelectedTextFormat) => {
-    const editorRange = restoreEditorSelection();
-    if (!editor || !editorRange) {
+    if (editor.isDestroyed) {
       return false;
     }
 
+    return editor.chain().focus().setTextSelection(range).run();
+  });
+
+  function getFormatButtonClassName(key: SelectedTextFormat) {
+    return selectedTextFormats[key] ? 'active' : undefined;
+  }
+
+  function isFormatButtonDisabled(key: SelectedTextFormat) {
+    if (selectedTextFormats[key]) {
+      return false;
+    }
+    if (key === 'subscript') {
+      return Boolean(selectedTextFormats.superscript);
+    }
+    if (key === 'superscript') {
+      return Boolean(selectedTextFormats.subscript);
+    }
+
+    return key !== 'monospace'
+      && key !== 'blockquote'
+      && Boolean(selectedTextFormats.monospace);
+  }
+
+  const handleToggleEditorMark = useLastCallback((format: SelectedTextFormat) => {
+    if (!restoreEditorSelection()) {
+      return;
+    }
+
     const markName = MARK_NAME_BY_TEXT_FORMAT[format]!;
-    const chain = editor.chain().focus().setTextSelection(editorRange);
+    const chain = editor.chain();
     if (selectedTextFormats[format]) {
       chain.unsetMark(markName).run();
     } else {
       chain.setMark(markName).run();
     }
-
-    updateSelectedRange();
-    setSelectedTextFormats(getSelectedEditorTextFormats(editor, editorRange, Boolean(isRichInputExpanded)));
-    return true;
   });
 
   const handleClearFormatting = useLastCallback(() => {
-    const editorRange = restoreEditorSelection();
-    if (editor && editorRange) {
-      editor.chain().focus().setTextSelection(editorRange).unsetAllMarks({ ignoreClearable: true }).run();
-      updateSelectedRange();
-      setSelectedTextFormats({});
-    }
-  });
-
-  const handleSpoilerText = useLastCallback(() => handleToggleEditorMark('spoiler'));
-  const handleBoldText = useLastCallback(() => handleToggleEditorMark('bold'));
-  const handleItalicText = useLastCallback(() => handleToggleEditorMark('italic'));
-  const handleUnderlineText = useLastCallback(() => handleToggleEditorMark('underline'));
-  const handleStrikethroughText = useLastCallback(() => handleToggleEditorMark('strikethrough'));
-
-  const handleStructuralText = useLastCallback((format: 'blockquote' | 'code') => {
-    const editorRange = restoreEditorSelection();
-    if (!editor || !editorRange) {
+    if (!restoreEditorSelection()) {
       return;
     }
 
-    const chain = editor.chain().focus();
+    editor.chain().unsetAllMarks({ ignoreClearable: true }).run();
+  });
+
+  const handleStructuralText = useLastCallback((format: 'blockquote' | 'code') => {
+    if (!restoreEditorSelection()) {
+      return;
+    }
+
+    const chain = editor.chain();
     if (format === 'code') {
       chain.toggleSelectionCode().run();
     } else {
       chain.toggleSelectionBlockquote().run();
     }
-    updateSelectedRange();
-    setSelectedTextFormats(getSelectedEditorTextFormats(
-      editor,
-      editor.state.selection,
-      Boolean(isRichInputExpanded),
-    ));
   });
 
-  const handleCodeText = useLastCallback(() => handleStructuralText('code'));
-  const handleBlockquoteText = useLastCallback(() => handleStructuralText('blockquote'));
-  const handleMarkedText = useLastCallback(() => handleToggleEditorMark('marked'));
-  const handleSubscriptText = useLastCallback(() => handleToggleEditorMark('subscript'));
-  const handleSuperscriptText = useLastCallback(() => handleToggleEditorMark('superscript'));
-
   const handleOpenLinkControl = useLastCallback(() => {
-    if (!editor) {
-      openLinkControl();
+    if (!restoreEditorSelection()) {
       return;
     }
 
-    const commandChain = editor.chain().focus();
+    const commandChain = editor.chain();
     if (selectedLinkHref !== undefined) {
       commandChain.extendMarkRange('link');
     }
     commandChain.setFormatterSelectionHighlight(true).run();
-    updateSelectedRange();
     if (selectedLinkHref !== undefined) {
       setLinkUrl(selectedLinkHref);
     }
@@ -277,17 +179,18 @@ const TextFormatter = ({
   });
 
   const handleCloseLinkControl = useLastCallback(() => {
-    restoreEditorSelection();
-    editor?.commands.setFormatterSelectionHighlight(false);
+    if (restoreEditorSelection()) {
+      editor.commands.setFormatterSelectionHighlight(false);
+    }
     closeLinkControl();
   });
 
   const handleLinkUrlConfirm = useLastCallback(() => {
-    if (!editor) {
+    if (!restoreEditorSelection()) {
       return;
     }
 
-    const commandChain = editor.chain().focus();
+    const commandChain = editor.chain();
     if (!linkUrl.trim()) {
       commandChain.unsetLink().run();
     } else {
@@ -302,186 +205,125 @@ const TextFormatter = ({
     openDatePicker();
   });
 
-  const handleDateChange = useLastCallback((date: Date) => {
-    setSelectedDateAt(date.getTime());
-  });
-
   const handleFormattedDateConfirm = useLastCallback((date: Date) => {
-    const text = getSelectedText();
-    const editorRange = restoreEditorSelection();
-    if (!text || !selectedRange || !editor || !editorRange) {
+    const text = editor.state.doc.textBetween(range.from, range.to, '\n', '\n');
+    if (!text || !restoreEditorSelection()) {
       return;
     }
 
-    editor.chain().focus().setTextSelection(editorRange).setMark('date', {
+    editor.chain().setMark('date', {
       date: Math.round(date.getTime() / 1000),
     }).run();
     closeDatePicker();
     onClose();
   });
 
-  const handleKeyDown = useLastCallback((e: KeyboardEvent) => {
-    if (isDatePickerOpen) {
-      return;
-    }
-
-    const HANDLERS_BY_KEY: Record<string, AnyToVoidFunction> = {
-      k: handleOpenLinkControl,
-      b: handleBoldText,
-      u: handleUnderlineText,
-      i: handleItalicText,
-      m: handleCodeText,
-      s: handleStrikethroughText,
-      p: handleSpoilerText,
-    };
-
-    const handler = HANDLERS_BY_KEY[getKeyFromEvent(e)];
-
-    if (
-      e.altKey
-      || !(e.ctrlKey || e.metaKey)
-      || !handler
-    ) {
-      return;
-    }
-
-    e.preventDefault();
-    e.stopPropagation();
-    handler();
-  });
-
-  useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-    }
-
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, handleKeyDown]);
-
-  if (!shouldRender) {
-    return undefined;
-  }
-
-  const className = buildClassName(
-    styles.root,
-    transitionClassNames,
-    isLinkControlOpen && styles.linkControlShown,
-  );
-
-  const style = anchorPosition
-    ? `left: ${anchorPosition.x}px; top: ${anchorPosition.y}px;--text-formatter-left: ${anchorPosition.x}px;`
-    : '';
+  const className = buildClassName(styles.root, isLinkControlOpen && styles.linkControlShown);
 
   return (
     <div
-      ref={containerRef}
       className={className}
-      style={style}
       data-text-formatter
-      // Prevents focus loss when clicking on the toolbar
+      role="toolbar"
       onMouseDown={stopEvent}
     >
-      <div className={styles.buttons}>
-        <Button
-          color="translucent"
-          ariaLabel={lang('FormattingSpoilerAria')}
-          className={getFormatButtonClassName('spoiler')}
-          onClick={handleSpoilerText}
-          iconName="eye-crossed"
-        />
-        <div className={styles.divider} />
-        <Button
-          color="translucent"
-          ariaLabel={lang('FormattingBoldAria')}
-          className={getFormatButtonClassName('bold')}
-          onClick={handleBoldText}
-          iconName="bold"
-        />
-        <Button
-          color="translucent"
-          ariaLabel={lang('FormattingItalicAria')}
-          className={getFormatButtonClassName('italic')}
-          onClick={handleItalicText}
-          iconName="italic"
-        />
-        <Button
-          color="translucent"
-          ariaLabel={lang('FormattingUnderlineAria')}
-          className={getFormatButtonClassName('underline')}
-          onClick={handleUnderlineText}
-          iconName="underlined"
-        />
-        <Button
-          color="translucent"
-          ariaLabel={lang('FormattingStrikethroughAria')}
-          className={getFormatButtonClassName('strikethrough')}
-          onClick={handleStrikethroughText}
-          iconName="strikethrough"
-        />
-        <Button
-          color="translucent"
-          ariaLabel={lang('FormattingMonospaceAria')}
-          className={getFormatButtonClassName('monospace')}
-          onClick={handleCodeText}
-          iconName="monospace"
-        />
-        <Button
-          color="translucent"
+      <div className={buildClassName(styles.buttons, 'no-scrollbar')}>
+        <FormatButton
           ariaLabel={lang('RichEditorBlockquote')}
           className={getFormatButtonClassName('blockquote')}
-          onClick={handleBlockquoteText}
           iconName="blockquote"
+          onClick={() => handleStructuralText('blockquote')}
         />
-        <Button
-          color="translucent"
-          ariaLabel={lang('FormattingClearAria')}
-          onClick={handleClearFormatting}
-          iconName="clear-formatting"
+        <FormatButton
+          ariaLabel={lang('FormattingSpoilerAria')}
+          className={getFormatButtonClassName('spoiler')}
+          iconName="spoiler-text"
+          isDisabled={isFormatButtonDisabled('spoiler')}
+          onClick={() => handleToggleEditorMark('spoiler')}
         />
         <div className={styles.divider} />
-        <Button
-          color="translucent"
+        <FormatButton
+          ariaLabel={lang('FormattingBoldAria')}
+          className={getFormatButtonClassName('bold')}
+          iconName="bold"
+          isDisabled={isFormatButtonDisabled('bold')}
+          onClick={() => handleToggleEditorMark('bold')}
+        />
+        <FormatButton
+          ariaLabel={lang('FormattingItalicAria')}
+          className={getFormatButtonClassName('italic')}
+          iconName="italic"
+          isDisabled={isFormatButtonDisabled('italic')}
+          onClick={() => handleToggleEditorMark('italic')}
+        />
+        <FormatButton
+          ariaLabel={lang('FormattingUnderlineAria')}
+          className={getFormatButtonClassName('underline')}
+          iconName="underlined"
+          isDisabled={isFormatButtonDisabled('underline')}
+          onClick={() => handleToggleEditorMark('underline')}
+        />
+        <FormatButton
+          ariaLabel={lang('FormattingStrikethroughAria')}
+          className={getFormatButtonClassName('strikethrough')}
+          iconName="strikethrough"
+          isDisabled={isFormatButtonDisabled('strikethrough')}
+          onClick={() => handleToggleEditorMark('strikethrough')}
+        />
+        <FormatButton
+          ariaLabel={lang('FormattingMonospaceAria')}
+          className={getFormatButtonClassName('monospace')}
+          iconName="monospace"
+          onClick={() => handleStructuralText('code')}
+        />
+        <div className={styles.divider} />
+        <FormatButton
           ariaLabel={lang('FormattingAddDateAria')}
-          onClick={handleOpenDatePicker}
           iconName="calendar"
+          onClick={handleOpenDatePicker}
         />
-        <Button
-          color="translucent"
+        <FormatButton
           ariaLabel={lang(selectedLinkHref !== undefined ? 'EditLink' : 'FormattingAddLinkAria')}
-          onClick={handleOpenLinkControl}
           iconName="link"
+          onClick={handleOpenLinkControl}
         />
-        {isRichInputExpanded && (
+        {capabilities === 'full' && isRichInputExpanded && (
           <>
             <div className={styles.divider} />
-            <Button
-              color="translucent"
+            <FormatButton
               ariaLabel={lang('FormattingMarkedAria')}
               className={buildClassName(styles.markButton, getFormatButtonClassName('marked'))}
-              onClick={handleMarkedText}
               iconName="mark"
-              iconHasPremiumBadge
+              hasPremiumBadge
+              isDisabled={isFormatButtonDisabled('marked')}
+              onClick={() => handleToggleEditorMark('marked')}
             />
-            <Button
-              color="translucent"
+            <FormatButton
               ariaLabel={lang('FormattingSubscriptAria')}
               className={getFormatButtonClassName('subscript')}
-              onClick={handleSubscriptText}
               iconName="subscript"
-              iconHasPremiumBadge
+              hasPremiumBadge
+              isDisabled={isFormatButtonDisabled('subscript')}
+              onClick={() => handleToggleEditorMark('subscript')}
             />
-            <Button
-              color="translucent"
+            <FormatButton
               ariaLabel={lang('FormattingSuperscriptAria')}
               className={getFormatButtonClassName('superscript')}
-              onClick={handleSuperscriptText}
               iconName="superscript"
-              iconHasPremiumBadge
+              hasPremiumBadge
+              isDisabled={isFormatButtonDisabled('superscript')}
+              onClick={() => handleToggleEditorMark('superscript')}
             />
           </>
         )}
+        <div className={styles.divider} />
+        <FormatButton
+          ariaLabel={lang('FormattingClearAria')}
+          iconName="clear-formatting"
+          isDisabled={!hasSelectedTextFormatting}
+          onClick={handleClearFormatting}
+        />
       </div>
-
       <div
         className={buildClassName(styles.linkControl, styles.inputPopup)}
         aria-hidden={!isLinkControlOpen}
@@ -509,7 +351,7 @@ const TextFormatter = ({
         withTimePicker
         submitButtonLabel={lang('Save')}
         onClose={closeDatePicker}
-        onDateChange={handleDateChange}
+        onDateChange={(date) => setSelectedDateAt(date.getTime())}
         onSubmit={handleFormattedDateConfirm}
       />
     </div>
@@ -518,6 +360,34 @@ const TextFormatter = ({
 
 export default memo(TextFormatter);
 
+function FormatButton({
+  ariaLabel,
+  className,
+  iconName,
+  hasPremiumBadge,
+  isDisabled,
+  onClick,
+}: {
+  ariaLabel: string;
+  className?: string;
+  iconName: IconName;
+  hasPremiumBadge?: boolean;
+  isDisabled?: boolean;
+  onClick: NoneToVoidFunction;
+}) {
+  return (
+    <Button
+      color="translucent"
+      ariaLabel={ariaLabel}
+      className={className}
+      iconName={iconName}
+      iconHasPremiumBadge={hasPremiumBadge}
+      disabled={isDisabled}
+      onClick={onClick}
+    />
+  );
+}
+
 function roundDateToMinute(date: Date) {
   const nextDate = new Date(date.getTime());
   nextDate.setSeconds(0);
@@ -525,44 +395,37 @@ function roundDateToMinute(date: Date) {
   return nextDate;
 }
 
-function getEditorRangeFromDomRange(editor: Editor, range: Range) {
-  try {
-    const from = editor.view.posAtDOM(range.startContainer, range.startOffset);
-    const to = editor.view.posAtDOM(range.endContainer, range.endOffset);
-
-    return {
-      from: Math.min(from, to),
-      to: Math.max(from, to),
-    };
-  } catch (err) {
-    return undefined;
-  }
+function getSelectedLinkHref(editor: Editor, range: EditorRange) {
+  const linkMark = editor.schema.marks.link;
+  let href: string | undefined;
+  editor.state.doc.nodesBetween(range.from, range.to, (node) => {
+    const mark = linkMark && linkMark.isInSet(node.marks);
+    if (mark && typeof mark.attrs.href === 'string') {
+      href = mark.attrs.href;
+    }
+  });
+  return href;
 }
 
-function getSelectedLinkHref(editor: Editor) {
-  if (!editor.isActive('link')) {
-    return undefined;
-  }
-
-  const href = editor.getAttributes('link').href;
-  return typeof href === 'string' ? href : undefined;
-}
-
-function getSelectedEditorTextFormats(editor: Editor, range: EditorRange, isRichInputExpanded: boolean) {
-  const selectedFormats: ISelectedTextFormats = {};
+function getSelectedEditorTextState(editor: Editor, range: EditorRange, isRichInputExpanded: boolean) {
+  const selectedFormats: SelectedTextFormats = {};
   const { doc, schema } = editor.state;
+  let hasFormatting = false;
 
   TEXT_FORMAT_KEYS.forEach((format) => {
     const markName = MARK_NAME_BY_TEXT_FORMAT[format];
-    if (markName) {
+    if (markName && schema.marks[markName]) {
       selectedFormats[format] = doc.rangeHasMark(range.from, range.to, schema.marks[markName]);
     }
   });
   doc.nodesBetween(range.from, range.to, (node) => {
+    hasFormatting ||= Boolean(node.marks.length);
     selectedFormats.monospace ||= node.type.name === 'codeBlock';
-    return !selectedFormats.monospace;
   });
   selectedFormats.blockquote = isRichEditorBlockquoteActive(editor, range, isRichInputExpanded);
 
-  return selectedFormats;
+  return {
+    formats: selectedFormats,
+    hasFormatting,
+  };
 }

@@ -399,7 +399,6 @@
         );
 
       .input-scroller {
-        max-height: none;
         margin-inline-start: calc(-1 * var(--rich-editor-inline-start-gap));
         margin-inline-end: calc(-1 * var(--rich-editor-inline-end-gap));
         padding-inline: 0.75rem;
@@ -475,12 +474,12 @@
       z-index: 2;
     }
 
-    > .composer-tooltip {
-      z-index: 3;
-    }
-
     @media (max-width: 600px) {
       --rich-input-footer-offset: calc(0.5rem + var(--composer-bottom-gap-mobile));
+
+      .message-input-wrapper {
+        --action-button-size: 2rem;
+      }
     }
   }
 
@@ -543,9 +542,15 @@
   }
 
   .message-input-wrapper {
-    --action-button-compact-fix: 0;
+    --action-button-compact-fix: 0rem;
 
     gap: var(--composer-row-gap);
+
+    .input-scroller {
+      --_scroller-controls-width: calc(var(--action-button-size) + var(--composer-main-button-width));
+      --_scroller-gaps-width: calc(2 * var(--composer-row-gap) + var(--composer-pill-padding) + 0.25rem);
+      --_scroller-right-gap: calc(var(--_scroller-controls-width) + var(--_scroller-gaps-width));
+    }
 
     > .Menu {
       display: contents;
@@ -616,6 +621,7 @@
 
     @include mixins.composer-action-button-pill;
 
+    z-index: 2;
     overflow: hidden;
     margin-left: var(--composer-row-gap);
     box-shadow: none;
@@ -779,11 +785,13 @@
 
     @media (max-width: 600px) {
       gap: 0;
+      justify-content: space-around;
+      padding-inline: 0;
 
       .Button {
         width: 2rem;
         height: 2rem;
-        font-size: 1.25rem;
+        font-size: var(--composer-icon-size);
       }
     }
   }
@@ -1111,6 +1119,11 @@
       }
     }
   }
+
+  .input-scroller {
+    // `MessageInput` clamps the normal height; an unrestricted maximum preserves the collapse transition
+    max-height: none;
+  }
 }
 
 #story-input-text,
@@ -1162,44 +1175,5 @@
 #story-input-text .placeholder-text {
   &.is-need-premium {
     pointer-events: auto;
-  }
-}
-
-.composer-tooltip {
-  scrollbar-gutter: stable;
-
-  position: absolute;
-  bottom: calc(100% + var(--composer-top-gap));
-  left: 0;
-  transform-origin: bottom;
-  transform: translateY(1.5rem);
-
-  overflow-x: hidden;
-  overflow-y: auto;
-
-  width: 100%;
-  max-height: 15rem;
-  padding: 0.5rem;
-  border-radius: var(--border-radius-messages);
-
-  opacity: 0;
-  background: var(--color-background);
-  box-shadow: 0 1px 2px var(--color-default-shadow);
-
-  transition: opacity var(--layer-transition), transform var(--layer-transition);
-
-  @include mixins.adapt-padding-to-scrollbar(0.5rem);
-
-  &:not(.shown) {
-    display: none;
-  }
-
-  &.open {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  .Loading {
-    margin: 1rem 0;
   }
 }

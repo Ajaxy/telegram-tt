@@ -18,14 +18,6 @@ export function getRichMessageText(value?: ApiInputRichMessage) {
   return value?.blocks.length ? getRichMessagePreviewText(value) : EMPTY_TEXT;
 }
 
-export function getEditorTextBeforeSelection(editor?: Editor) {
-  if (!editor) {
-    return EMPTY_TEXT;
-  }
-
-  return editor.state.doc.textBetween(0, editor.state.selection.from, '\n', '\n');
-}
-
 export function hasEditorCollapsedSelection(editor?: Editor) {
   return Boolean(editor?.state.selection.empty);
 }
@@ -50,29 +42,6 @@ export function insertEditorContent(
   }
 
   editor.chain().focus().insertContent(tiptapContent).run();
-}
-
-export function replaceEditorTextBeforeSelection(
-  editor: Editor | undefined,
-  textToReplace: string,
-  content: RichEditorInsertContent | RichEditorInsertContent[],
-) {
-  if (!editor || !textToReplace) {
-    return;
-  }
-
-  const tiptapContent = buildTiptapContent(content);
-  if (!tiptapContent) {
-    return;
-  }
-
-  const { from } = editor.state.selection;
-  const deleteFrom = Math.max(0, from - textToReplace.length);
-  editor.chain()
-    .focus()
-    .deleteRange({ from: deleteFrom, to: from })
-    .insertContent(tiptapContent)
-    .run();
 }
 
 export function replaceEditorRange(

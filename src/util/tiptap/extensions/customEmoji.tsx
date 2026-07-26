@@ -4,7 +4,6 @@ import type { ElementRef } from '../../../lib/teact/teact';
 import type { TeactNodeViewComponentProps } from '../TeactNodeViewRenderer';
 
 import buildClassName from '../../buildClassName';
-import buildDefinedAttributes from './buildDefinedAttributes';
 
 import CustomEmoji from '../../../components/common/CustomEmoji';
 import TeactNodeViewRenderer from '../TeactNodeViewRenderer';
@@ -67,19 +66,13 @@ export const CustomEmojiNode = Node.create<CustomEmojiNodeOptions>({
   },
 
   renderHTML({ HTMLAttributes }) {
-    const className = buildClassName(
-      typeof HTMLAttributes.className === 'string' && HTMLAttributes.className,
-      styles.emoji,
-      styles.customEmoji,
-    );
+    return ['tg-emoji', {
+      'emoji-id': HTMLAttributes.documentId,
+    }, HTMLAttributes.alt];
+  },
 
-    return ['img', buildDefinedAttributes({
-      class: className,
-      alt: HTMLAttributes.alt,
-      src: HTMLAttributes.src,
-      'data-document-id': HTMLAttributes.documentId,
-      'data-unique-id': HTMLAttributes.uniqueId,
-    })];
+  renderText({ node }) {
+    return node.attrs.alt;
   },
 
   addNodeView() {

@@ -1,6 +1,5 @@
 import {
   Editor,
-  Extension,
   InputRule,
   type JSONContent as TiptapJsonContent,
   mergeAttributes,
@@ -24,17 +23,15 @@ import { splitBlock } from '@tiptap/pm/commands';
 import { redoDepth, undoDepth } from '@tiptap/pm/history';
 import type { Node as ProseMirrorNode, ResolvedPos } from '@tiptap/pm/model';
 import {
-  Plugin, PluginKey, TextSelection, type Transaction,
+  Plugin, TextSelection, type Transaction,
 } from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';
 import StarterKitExtension from '@tiptap/starter-kit';
-import type { SuggestionProps } from '@tiptap/suggestion';
-import { Suggestion } from '@tiptap/suggestion';
 import type { ElementRef } from '../../../../lib/teact/teact';
 
 import type { CustomEmojiNodeOptions } from '../../../../util/tiptap/extensions/customEmoji';
 import type { RichEditorDateClickTarget } from '../../../../util/tiptap/extensions/date';
-import type { RichEditorSuggestion } from '../richEditorTypes';
+import type { RichEditorTooltipsConfig } from '../../../common/tooltips/types';
 
 import { lowlight } from '../../../../util/highlightCode';
 import {
@@ -59,13 +56,16 @@ import setEditorContentWithoutHistory from '../../../../util/tiptap/setEditorCon
 import styles from '../../../../util/tiptap/styling.module.scss';
 import { buildRichEditorFormatting } from '../../../ui/textInput/richEditorFormatting';
 import { buildRichEditorBlockquote } from './richEditorBlockquote';
+import { RichEditorBotApiHtml } from './richEditorBotApiHtml';
 import { RichEditorCaption } from './richEditorCaption';
+import { RichEditorMarkdown } from './richEditorMarkdown';
 import { RichEditorPullquote } from './richEditorPullquote';
 import { buildRichEditorTableExtensions, RichEditorTableTitle } from './richEditorTable';
 import { RichEditorTextReplacements } from './richEditorTextReplacements';
 
 import { requestSharedCanvasCoordsRecalculation } from '../../../../hooks/useCoordsInSharedCanvas';
 
+import { buildRichEditorTooltips } from '../../../common/tooltips/extensions/RichEditorTooltips';
 import EditableCodeBlock from '../richInput/EditableCodeBlock';
 import EditableListItem from '../richInput/EditableListItem';
 
@@ -95,7 +95,7 @@ type CreateRichEditorParams = {
   getIsRichInputExpanded: () => boolean;
   onUpdate: (editor: Editor) => void;
   onDateClick: (target: RichEditorDateClickTarget) => void;
-  onMentionSuggestionChange: (suggestion?: RichEditorSuggestion) => void;
+  tooltips?: RichEditorTooltipsConfig;
 };
 
 type RichEditorPlaceholderParams = Pick<
@@ -113,8 +113,6 @@ const NESTED_LIST_TEXT_OFFSET = 3;
 const ORDERED_LIST_REVERSED_ATTR = 'reversed';
 const DEFAULT_TEXT_BLOCK_NODE_TYPE = 'paragraph';
 const RICH_TEXT_INLINE_CONTENT = 'inline*';
-const MENTION_SUGGESTION_PLUGIN_KEY = 'mentionSuggestion';
-const MENTION_NODE_TYPE = 'mention';
 
 export function __createRichEditor({
   element,
@@ -129,7 +127,7 @@ export function __createRichEditor({
   getIsRichInputExpanded,
   onUpdate,
   onDateClick,
-  onMentionSuggestionChange,
+  tooltips,
 }: CreateRichEditorParams) {
   const richEditor = new Editor({
     element: { mount: element } as unknown as HTMLElement,
@@ -140,7 +138,7 @@ export function __createRichEditor({
       tableTitlePlaceholder,
       unsupportedPlaceholder,
       onDateClick,
-      onMentionSuggestionChange,
+      tooltips,
       getIsRichInputExpanded,
       { sharedCanvasRef, sharedCanvasHqRef },
     ),
@@ -150,11 +148,6 @@ export function __createRichEditor({
     onUpdate: ({ editor }) => {
       onUpdate(editor);
       requestSharedCanvasCoordsRecalculation(sharedCanvasRef, sharedCanvasHqRef);
-    },
-    onSelectionUpdate: ({ editor }) => {
-      if (hasRichEditorSelectionInsideMention(editor)) {
-        onMentionSuggestionChange(undefined);
-      }
     },
     onTransaction: ({ editor }) => {
       resetRichEditorEmptySelection(editor);
@@ -181,11 +174,11 @@ function buildRichEditorExtensions(
   tableTitlePlaceholder: string,
   unsupportedPlaceholder: string,
   onDateClick: (target: RichEditorDateClickTarget) => void,
-  onMentionSuggestionChange: (suggestion?: RichEditorSuggestion) => void,
+  tooltips: RichEditorTooltipsConfig | undefined,
   getIsRichInputExpanded: () => boolean,
   customEmojiOptions: CustomEmojiNodeOptions,
 ) {
-  return [
+  const extensions = [
     StarterKitExtension.configure({
       blockquote: false,
       bulletList: false,
@@ -218,6 +211,7 @@ function buildRichEditorExtensions(
       },
       underline: false,
     }),
+    RichEditorMarkdown,
     buildRichEditorBlockquote(getIsRichInputExpanded).configure({
       HTMLAttributes: {
         class: styles.blockquote,
@@ -246,8 +240,18 @@ function buildRichEditorExtensions(
     }),
     RichEditorTextReplacements,
     buildRichEditorFormatting(getIsRichInputExpanded),
-    buildRichEditorHeading(getIsRichInputExpanded),
-    buildRichEditorHorizontalRule(getIsRichInputExpanded),
+    RichEditorBotApiHtml,
+    HeadingExtension.configure({
+      levels: RICH_HEADING_LEVELS,
+      HTMLAttributes: {
+        class: styles.heading,
+      },
+    }),
+    HorizontalRuleExtension.configure({
+      HTMLAttributes: {
+        class: styles.divider,
+      },
+    }),
     RichEditorFooter.configure({
       HTMLAttributes: {
         class: styles.footer,
@@ -287,9 +291,14 @@ function buildRichEditorExtensions(
     MathBlockNode,
     MathInlineNode,
     UnsupportedNode.configure({ label: unsupportedPlaceholder }),
-    buildMentionSuggestionExtension(onMentionSuggestionChange),
-    ...buildRichComposerExtensions(),
   ];
+
+  if (tooltips) {
+    extensions.push(buildRichEditorTooltips(tooltips));
+  }
+  extensions.push(...buildRichComposerExtensions());
+
+  return extensions;
 }
 
 function buildRichEditorPlaceholder(params: RichEditorPlaceholderParams) {
@@ -387,6 +396,19 @@ function handleRichEditorKeyDown(view: EditorView, event: KeyboardEvent) {
     || $from.parent.type.name !== 'paragraph'
   ) {
     return false;
+  }
+
+  if (view.someProp('handleTextInput', (handler) => (
+    handler(
+      view,
+      $from.pos,
+      $from.pos,
+      '\n',
+      () => view.state.tr.insertText('\n', $from.pos),
+    )
+  ))) {
+    event.preventDefault();
+    return true;
   }
 
   event.preventDefault();
@@ -609,31 +631,6 @@ function buildRichEditorListAttrs(
   };
 }
 
-function buildRichEditorHeading(getIsRichInputExpanded: () => boolean) {
-  return HeadingExtension.extend({
-    addInputRules() {
-      return wrapRichOnlyInputRules(this.parent?.(), getIsRichInputExpanded);
-    },
-  }).configure({
-    levels: RICH_HEADING_LEVELS,
-    HTMLAttributes: {
-      class: styles.heading,
-    },
-  });
-}
-
-function buildRichEditorHorizontalRule(getIsRichInputExpanded: () => boolean) {
-  return HorizontalRuleExtension.extend({
-    addInputRules() {
-      return wrapRichOnlyInputRules(this.parent?.(), getIsRichInputExpanded);
-    },
-  }).configure({
-    HTMLAttributes: {
-      class: styles.divider,
-    },
-  });
-}
-
 const RichEditorFooter = TiptapNode.create({
   name: FOOTER_NODE_NAME,
   group: 'block',
@@ -740,6 +737,13 @@ const RichEditorCodeBlock = CodeBlockLowlightExtension.extend({
 });
 
 const RichEditorUnderline = UnderlineExtension.extend({
+  markdownTokenizer: {
+    name: 'underline',
+    level: 'inline',
+    start: () => -1,
+    tokenize: () => undefined,
+  },
+
   parseHTML() {
     return [
       { tag: 'u' },
@@ -794,7 +798,9 @@ const RichEditorListItem = ListItem.extend({
         default: false,
         keepOnSplit: true,
         parseHTML: (element) => {
-          return element.hasAttribute('data-checkbox') || element.hasAttribute('data-checked');
+          return element.hasAttribute('data-checkbox')
+            || element.hasAttribute('data-checked')
+            || Boolean(element.querySelector(':scope > input[type="checkbox"]'));
         },
         renderHTML: (attributes) => {
           return attributes[LIST_ITEM_CHECKBOX_ATTR] ? { 'data-checkbox': 'true' } : {};
@@ -806,7 +812,9 @@ const RichEditorListItem = ListItem.extend({
         parseHTML: (element) => {
           const checked = element.getAttribute('data-checked');
 
-          return checked === '' || checked === 'true';
+          return checked === ''
+            || checked === 'true'
+            || Boolean(element.querySelector(':scope > input[type="checkbox"][checked]'));
         },
         renderHTML: (attributes) => {
           if (!attributes[LIST_ITEM_CHECKBOX_ATTR]) {
@@ -819,6 +827,20 @@ const RichEditorListItem = ListItem.extend({
     };
   },
 
+  renderHTML({ node }) {
+    if (!node.attrs[LIST_ITEM_CHECKBOX_ATTR]) {
+      return ['li', 0];
+    }
+
+    const element = document.createElement('li');
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.toggleAttribute('checked', Boolean(node.attrs[LIST_ITEM_CHECKED_ATTR]));
+    element.append(input);
+
+    return { dom: element, contentDOM: element };
+  },
+
   addNodeView() {
     return TeactNodeViewRenderer(EditableListItem, {
       as: 'li',
@@ -826,69 +848,6 @@ const RichEditorListItem = ListItem.extend({
     });
   },
 });
-
-function buildMentionSuggestionExtension(
-  onMentionSuggestionChange: (suggestion?: RichEditorSuggestion) => void,
-) {
-  return Extension.create({
-    name: 'mentionSuggestion',
-
-    addProseMirrorPlugins() {
-      return [
-        Suggestion({
-          editor: this.editor,
-          pluginKey: new PluginKey(MENTION_SUGGESTION_PLUGIN_KEY),
-          char: '@',
-          allowedPrefixes: [' ', '\n'],
-          placement: 'top-start',
-          debounce: 300,
-          allow: ({ editor }) => !hasRichEditorSelectionInsideMention(editor),
-          items: () => [],
-          shouldResetDismissed: ({ transaction }) => transaction.docChanged,
-          render: () => ({
-            onStart: (props) => updateMentionSuggestion(props, onMentionSuggestionChange),
-            onUpdate: (props) => updateMentionSuggestion(props, onMentionSuggestionChange),
-            onExit: () => onMentionSuggestionChange(undefined),
-          }),
-        }),
-      ];
-    },
-  });
-}
-
-function hasRichEditorSelectionInsideMention(editor: Editor) {
-  const { $from, $to } = editor.state.selection;
-
-  return hasResolvedPositionParentType($from, MENTION_NODE_TYPE)
-    || hasResolvedPositionParentType($to, MENTION_NODE_TYPE);
-}
-
-function hasResolvedPositionParentType($position: TextSelection['$from'], typeName: string) {
-  for (let depth = $position.depth; depth > 0; depth--) {
-    if ($position.node(depth).type.name === typeName) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function updateMentionSuggestion(
-  props: SuggestionProps,
-  onMentionSuggestionChange: (suggestion?: RichEditorSuggestion) => void,
-) {
-  if (hasRichEditorSelectionInsideMention(props.editor)) {
-    onMentionSuggestionChange(undefined);
-    return;
-  }
-
-  onMentionSuggestionChange({
-    range: props.range,
-    query: props.query,
-    text: props.text,
-    clientRect: props.clientRect ? () => props.clientRect?.() || undefined : undefined,
-  });
-}
 
 function buildRichComposerExtensions() {
   return [

@@ -1,0 +1,67 @@
+.root {
+  .switchPm .title {
+    unicode-bidi: plaintext;
+
+    margin: 0 auto;
+
+    font-weight: var(--font-weight-medium);
+    text-align: initial;
+    text-overflow: ellipsis;
+  }
+
+  &.gallery {
+    scrollbar-gutter: stable both-edges;
+
+    display: grid;
+    grid-auto-flow: dense;
+    grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
+    gap: 1px;
+
+    padding: 0;
+
+    .switchPm {
+      grid-column: 1 / -1;
+
+      :global(.ListItem-button) {
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+    }
+
+    :global(.StickerButton) {
+      width: initial;
+      height: 0;
+      margin: 0;
+      padding-bottom: 100%;
+      border-radius: var(--border-radius-default);
+
+      :global(.AnimatedSticker),
+      :global(img),
+      :global(canvas) {
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        width: 100% !important;
+        height: 100% !important;
+
+        @media (min-width: 600px) {
+          top: 0.25rem;
+          left: 0.25rem;
+          width: calc(100% - 0.5rem) !important;
+          height: calc(100% - 0.5rem) !important;
+        }
+      }
+    }
+
+    :global(.GifButton) {
+      aspect-ratio: 1;
+    }
+  }
+
+  &:not(.gallery) :global(.GifButton) {
+    width: 4rem;
+    height: 4rem;
+    margin: 0.5rem;
+  }
+}

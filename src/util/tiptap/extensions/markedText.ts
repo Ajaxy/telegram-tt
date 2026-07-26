@@ -1,6 +1,9 @@
-import { Mark } from '@tiptap/core';
+import { Mark, markInputRule } from '@tiptap/core';
 
 import styles from '../styling.module.scss';
+
+const INPUT_REGEX = /(?:^|\s)(==(?=\S)(.*?\S)==)$/;
+const TOKEN_REGEX = /^==(?=\S)(.*?\S)==/;
 
 export const MarkedTextMark = Mark.create({
   name: 'marked',
@@ -12,7 +15,36 @@ export const MarkedTextMark = Mark.create({
   renderHTML() {
     return ['mark', {
       class: styles.markedText,
-      'data-rich-text-type': 'marked',
     }, 0];
+  },
+
+  parseMarkdown(token, helpers) {
+    return helpers.applyMark('marked', helpers.parseInline(token.tokens || []));
+  },
+
+  markdownTokenizer: {
+    name: 'marked',
+    level: 'inline',
+    start: (source) => source.indexOf('=='),
+    tokenize: (source, _tokens, lexer) => {
+      const match = TOKEN_REGEX.exec(source);
+      if (!match) {
+        return undefined;
+      }
+
+      return {
+        type: 'marked',
+        raw: match[0],
+        text: match[1],
+        tokens: lexer.inlineTokens(match[1]),
+      };
+    },
+  },
+
+  addInputRules() {
+    return [markInputRule({
+      find: INPUT_REGEX,
+      type: this.type,
+    })];
   },
 });

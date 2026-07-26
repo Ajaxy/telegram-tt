@@ -8,7 +8,6 @@ import { ApiMessageEntityTypes } from '../../../api/types';
 
 import buildClassName from '../../buildClassName';
 import { getFormattedDateFormatString } from '../../dates/formattedDate';
-import buildDefinedAttributes from './buildDefinedAttributes';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 
@@ -64,15 +63,14 @@ export const DateMark = Mark.create<DateExtensionOptions>({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['span', mergeAttributes(
+    return ['tg-time', mergeAttributes(
       {
         class: buildClassName(styles.textEntityLink, styles.editableDate),
         dir: 'auto',
       },
-      buildDefinedAttributes({
-        'data-entity-type': ApiMessageEntityTypes.FormattedDate,
-        'data-unix': String(HTMLAttributes.date),
-      }),
+      {
+        unix: String(HTMLAttributes.date),
+      },
     ), 0];
   },
 
@@ -148,15 +146,14 @@ export const FormattedDateNode = Node.create<DateExtensionOptions>({
   renderHTML({ HTMLAttributes }) {
     const options = buildFormattedDateOptions(HTMLAttributes);
 
-    return ['span', buildDefinedAttributes({
-      class: buildClassName(styles.textEntityLink, styles.editableDate),
-      'data-entity-type': ApiMessageEntityTypes.FormattedDate,
-      'data-unix': String(HTMLAttributes.date),
-      'data-format': getFormattedDateFormatString(options),
-      contenteditable: 'false',
-      draggable: 'false',
-      dir: 'auto',
-    }), HTMLAttributes.label];
+    return ['tg-time', {
+      unix: String(HTMLAttributes.date),
+      format: getFormattedDateFormatString(options),
+    }, HTMLAttributes.label];
+  },
+
+  renderText({ node }) {
+    return node.attrs.label;
   },
 
   addNodeView() {

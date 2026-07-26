@@ -1,8 +1,6 @@
 .root {
-  position: absolute;
-  z-index: 3;
-  transform: translate(-50%, -3.25rem);
-
+  max-width: 100%;
+  height: 3rem;
   padding: 0.5rem 0.375rem;
   border-radius: var(--border-radius-messages);
 
@@ -25,10 +23,6 @@
   :global(.Modal) & {
     max-width: 100%;
   }
-
-  @media (max-width: 600px) {
-    max-width: calc(100vw - var(--text-formatter-left) + 3rem);
-  }
 }
 
 .linkControlShown .linkControl {
@@ -41,6 +35,12 @@
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
+}
+
+.buttons {
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 2rem;
 }
 
 .divider {

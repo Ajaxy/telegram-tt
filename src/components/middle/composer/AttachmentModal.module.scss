@@ -131,15 +131,8 @@
 
   transition: border-color 250ms ease-in-out;
 
-  :global {
-    .form-control {
-      background: var(--color-background);
-    }
-
-    .MentionTooltip {
-      z-index: 1;
-      right: 0 !important;
-    }
+  :global(.form-control) {
+    background: var(--color-background);
   }
 }
 

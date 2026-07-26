@@ -216,7 +216,7 @@ async function buildIcons() {
     startUnicode: iconDefinitions[0]?.codepoint ?? DEFAULT_START_CODEPOINT,
     styleTemplates: STYLE_TEMPLATES_DIR,
     svgicons2svgfont: {
-      fontHeight: 1000,
+      fontHeight: 1024,
       normalize: true,
     },
   });

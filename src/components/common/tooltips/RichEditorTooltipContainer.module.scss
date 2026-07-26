@@ -1,0 +1,55 @@
+:global(.rich-editor-tooltips-host) {
+  z-index: 3;
+}
+
+:global(.rich-editor-tooltips-host.is-suggestion),
+:global(.rich-editor-tooltips-host.is-formatter) {
+  position: absolute;
+  inset-inline: 0.5rem;
+}
+
+.root,
+.emojiStack {
+  pointer-events: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  width: 100%;
+}
+
+.compact {
+  width: calc(100% - 4rem);
+  max-width: 25rem;
+
+  @media (max-width: 600px) {
+    width: calc(100% - 3rem);
+  }
+}
+
+.command {
+  max-width: 26rem;
+}
+
+.formatter {
+  position: relative;
+  left: var(--text-formatter-left, 0);
+  width: max-content;
+  max-width: 100%;
+}
+
+.fade {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.fade.open {
+  pointer-events: auto;
+  opacity: 1;
+
+  @starting-style {
+    opacity: 0;
+  }
+}

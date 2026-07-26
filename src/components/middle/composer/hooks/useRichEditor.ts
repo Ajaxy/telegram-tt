@@ -2,7 +2,7 @@ import type { Editor } from '@tiptap/core';
 import { useEffect, useMemo, useRef, useState } from '../../../../lib/teact/teact';
 
 import type { ApiInputRichMessage } from '../../../../api/types';
-import type { RichEditor, RichEditorRoot, RichEditorSuggestion } from '../richEditorTypes';
+import type { RichEditor, RichEditorRoot } from '../richEditorTypes';
 
 import { Bundles, loadBundle } from '../../../../util/moduleLoader';
 import setEditorContentWithoutHistory from '../../../../util/tiptap/setEditorContentWithoutHistory';
@@ -13,11 +13,9 @@ import {
 } from '../../../ui/textInput/richText';
 import {
   deleteEditorCharacterBeforeSelection,
-  getEditorTextBeforeSelection,
   hasEditorCollapsedSelection,
   insertEditorContent,
   replaceEditorRange,
-  replaceEditorTextBeforeSelection,
 } from '../helpers/richEditorComposer';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
@@ -38,7 +36,6 @@ export default function useRichEditor() {
   const [currentValue, setCurrentValue] = useState(EMPTY_RICH_MESSAGE);
   const [root, setRoot] = useState<RichEditorRoot | undefined>();
   const [isReady, setIsReady] = useState(false);
-  const [mentionSuggestion, setMentionSuggestion] = useState<RichEditorSuggestion | undefined>();
   const canUndo = Boolean(editorRef.current && editorBundleRef.current?.getRichEditorCanUndo(editorRef.current));
   const canRedo = Boolean(editorRef.current && editorBundleRef.current?.getRichEditorCanRedo(editorRef.current));
 
@@ -60,7 +57,6 @@ export default function useRichEditor() {
     if (!root) {
       editorRef.current?.destroy();
       editorRef.current = undefined;
-      setMentionSuggestion(undefined);
       setIsReady(false);
       return undefined;
     }
@@ -84,6 +80,7 @@ export default function useRichEditor() {
         quoteCaptionPlaceholder: currentRoot.quoteCaptionPlaceholder,
         tableTitlePlaceholder: currentRoot.tableTitlePlaceholder,
         unsupportedPlaceholder: currentRoot.unsupportedPlaceholder,
+        tooltips: currentRoot.tooltips,
         getIsRichInputExpanded: currentRoot.getIsRichInputExpanded,
         onUpdate: (updatedEditor) => {
           const richMessage = buildRichMessageFromTiptapJson(updatedEditor.getJSON());
@@ -92,7 +89,6 @@ export default function useRichEditor() {
           currentRoot.onUpdate(isRichEditorEmpty(updatedEditor), updatedEditor.view.dom);
         },
         onDateClick: currentRoot.onDateClick,
-        onMentionSuggestionChange: setMentionSuggestion,
       });
       if (isDestroyed) {
         editor.destroy();
@@ -110,7 +106,6 @@ export default function useRichEditor() {
       isDestroyed = true;
       editorRef.current?.destroy();
       editorRef.current = undefined;
-      setMentionSuggestion(undefined);
       setIsReady(false);
     };
   }, [root]);
@@ -119,7 +114,6 @@ export default function useRichEditor() {
     editor: editorRef.current,
     isReady,
     value: currentValue,
-    mentionSuggestion,
     canUndo,
     canRedo,
     deleteCharacterBeforeSelection: () => deleteEditorCharacterBeforeSelection(editorRef.current),
@@ -133,7 +127,6 @@ export default function useRichEditor() {
 
       return getRichInputAsFormatted(valueToFormat);
     },
-    getTextBeforeSelection: () => getEditorTextBeforeSelection(editorRef.current),
     getValue: () => {
       if (editorRef.current) {
         return buildRichMessageFromTiptapJson(editorRef.current.getJSON());
@@ -162,9 +155,6 @@ export default function useRichEditor() {
         .focus('end')
         .run();
     },
-    replaceTextBeforeSelection: (textToReplace, content) => {
-      replaceEditorTextBeforeSelection(editorRef.current, textToReplace, content);
-    },
     replaceRange: (range, content) => {
       replaceEditorRange(editorRef.current, range, content);
     },
@@ -180,5 +170,5 @@ export default function useRichEditor() {
     undo: () => {
       editorRef.current?.chain().focus().undo().run();
     },
-  }), [canRedo, canUndo, currentValue, isReady, mentionSuggestion, registerRoot]);
+  }), [canRedo, canUndo, currentValue, isReady, registerRoot]);
 }

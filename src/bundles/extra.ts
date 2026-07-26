@@ -83,15 +83,15 @@ export { default as AttachmentModal } from '../components/middle/composer/Attach
 export { default as PollModal } from '../components/modals/poll/PollModal';
 export { default as ToDoListModal } from '../components/middle/composer/ToDoListModal';
 export { default as SymbolMenu } from '../components/middle/composer/SymbolMenu';
-export { default as ChatCommandTooltip } from '../components/middle/composer/ChatCommandTooltip';
+export { default as ChatCommandTooltip } from '../components/common/tooltips/ChatCommandTooltip';
 export { default as BotCommandMenu } from '../components/middle/composer/BotCommandMenu';
-export { default as MentionTooltip } from '../components/middle/composer/MentionTooltip';
-export { default as StickerTooltip } from '../components/middle/composer/StickerTooltip';
-export { default as CustomEmojiTooltip } from '../components/middle/composer/CustomEmojiTooltip';
+export { default as MentionTooltip } from '../components/common/tooltips/MentionTooltip';
+export { default as StickerTooltip } from '../components/common/tooltips/StickerTooltip';
+export { default as CustomEmojiTooltip } from '../components/common/tooltips/CustomEmojiTooltip';
 export { default as CustomSendMenu } from '../components/middle/composer/CustomSendMenu';
 export { default as DropArea } from '../components/middle/composer/DropArea';
-export { default as EmojiTooltip } from '../components/middle/composer/EmojiTooltip';
-export { default as InlineBotTooltip } from '../components/middle/composer/InlineBotTooltip';
+export { default as EmojiTooltip } from '../components/common/tooltips/EmojiTooltip';
+export { default as InlineBotTooltip } from '../components/common/tooltips/InlineBotTooltip';
 export { default as SendAsMenu } from '../components/middle/composer/SendAsMenu';
 
 export { default as StickerSearch } from '../components/right/StickerSearch';

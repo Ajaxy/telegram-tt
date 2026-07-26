@@ -1,6 +1,9 @@
-import { Mark } from '@tiptap/core';
+import { Mark, markInputRule } from '@tiptap/core';
 
 import styles from '../styling.module.scss';
+
+const INPUT_REGEX = /(?:^|\s)(\|\|(?=\S)(.*?\S)\|\|)$/;
+const TOKEN_REGEX = /^\|\|(?=\S)(.*?\S)\|\|/;
 
 export const SpoilerMark = Mark.create({
   name: 'spoiler',
@@ -13,9 +16,38 @@ export const SpoilerMark = Mark.create({
   },
 
   renderHTML() {
-    return ['span', {
+    return ['tg-spoiler', {
       class: styles.spoiler,
-      'data-rich-text-type': 'spoiler',
     }, 0];
+  },
+
+  parseMarkdown(token, helpers) {
+    return helpers.applyMark('spoiler', helpers.parseInline(token.tokens || []));
+  },
+
+  markdownTokenizer: {
+    name: 'spoiler',
+    level: 'inline',
+    start: (source) => source.indexOf('||'),
+    tokenize: (source, _tokens, lexer) => {
+      const match = TOKEN_REGEX.exec(source);
+      if (!match) {
+        return undefined;
+      }
+
+      return {
+        type: 'spoiler',
+        raw: match[0],
+        text: match[1],
+        tokens: lexer.inlineTokens(match[1]),
+      };
+    },
+  },
+
+  addInputRules() {
+    return [markInputRule({
+      find: INPUT_REGEX,
+      type: this.type,
+    })];
   },
 });

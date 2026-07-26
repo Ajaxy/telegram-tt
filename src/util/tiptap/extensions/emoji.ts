@@ -49,6 +49,10 @@ export const EmojiNode = Node.create({
     })];
   },
 
+  renderText({ node }) {
+    return node.attrs.alt;
+  },
+
   addProseMirrorPlugins() {
     return IS_EMOJI_SUPPORTED ? [] : [
       new Plugin({

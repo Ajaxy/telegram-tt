@@ -6,7 +6,6 @@ import type { ApiSendAsPeerId } from '../../../api/types';
 
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
@@ -70,7 +69,7 @@ const SendAsMenu: FC<OwnProps> = ({
   });
 
   useEffect(() => {
-    setTooltipItemVisible('.chat-item-clickable', selectedSendAsIndex, containerRef);
+    containerRef.current?.querySelector<HTMLElement>('.focus')?.scrollIntoView({ block: 'nearest' });
   }, [selectedSendAsIndex]);
 
   useEffect(() => {
@@ -81,6 +80,7 @@ const SendAsMenu: FC<OwnProps> = ({
 
   return (
     <Menu
+      ref={containerRef}
       isOpen={isOpen}
       positionX="left"
       positionY="bottom"

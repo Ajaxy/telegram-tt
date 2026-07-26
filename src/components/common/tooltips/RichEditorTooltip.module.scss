@@ -1,0 +1,17 @@
+@use '../../../styles/mixins';
+
+.root {
+  scrollbar-gutter: stable;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  max-height: 15rem;
+  padding: 0.5rem;
+  border-radius: var(--border-radius-messages);
+
+  background: var(--color-background);
+  box-shadow: 0 0.0625rem 0.125rem var(--color-default-shadow);
+
+  @include mixins.adapt-padding-to-scrollbar(0.5rem);
+}

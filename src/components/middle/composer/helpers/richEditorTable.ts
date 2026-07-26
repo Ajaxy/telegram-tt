@@ -84,27 +84,6 @@ const RichEditorTableWrapper = TiptapNode.create({
     const titleType = this.editor.schema.nodes[TABLE_TITLE_NODE_NAME];
 
     return [new Plugin({
-      props: {
-        transformCopied: (slice, view) => {
-          const { selection } = view.state;
-          if (!isEntireTableSelected(selection)) {
-            return slice;
-          }
-
-          const wrapper = selection.$anchorCell.node(-2);
-          return wrapper.type === wrapperType
-            ? new Slice(Fragment.from(wrapper), 0, 0)
-            : slice;
-        },
-        clipboardTextSerializer: (slice, view) => {
-          if (!isEntireTableSelected(view.state.selection)) {
-            // An empty result defers to Tiptap's general serializer
-            return '';
-          }
-
-          return slice.content.textBetween(0, slice.content.size, '\n\n');
-        },
-      },
       appendTransaction: (transactions, _oldState, newState) => {
         if (!transactions.some((transaction) => transaction.docChanged)) {
           return undefined;
@@ -137,8 +116,14 @@ const RichEditorTable = TableExtension.extend({
   addAttributes() {
     return {
       ...this.parent?.(),
-      isBordered: { default: true },
-      isStriped: { default: false },
+      isBordered: {
+        default: true,
+        parseHTML: (element) => element.hasAttribute('bordered'),
+      },
+      isStriped: {
+        default: false,
+        parseHTML: (element) => element.hasAttribute('striped'),
+      },
     };
   },
 
@@ -332,6 +317,17 @@ function getSelectionTablePos(selection: Selection): number | undefined {
   return undefined;
 }
 
+export function preserveCopiedRichEditorTable(slice: Slice, selection: Selection) {
+  if (!isEntireTableSelected(selection)) {
+    return slice;
+  }
+
+  const wrapper = selection.$anchorCell.node(-2);
+  return wrapper.type.name === TABLE_WRAPPER_NODE_NAME
+    ? new Slice(Fragment.from(wrapper), 0, 0)
+    : slice;
+}
+
 function isEntireTableSelected(selection: Selection): selection is CellSelection {
   return selection instanceof CellSelection
     && selection.isRowSelection()
@@ -354,7 +350,7 @@ function buildVerticalAlignAttribute(): Attribute {
   return {
     default: undefined,
     parseHTML: (element) => {
-      const verticalAlign = element.style.verticalAlign;
+      const verticalAlign = element.style.verticalAlign || element.getAttribute('valign');
       return verticalAlign === 'middle' || verticalAlign === 'bottom' ? verticalAlign : undefined;
     },
     renderHTML: ({ verticalAlign }: { verticalAlign?: RichEditorTableVerticalAlign }) => (

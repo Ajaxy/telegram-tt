@@ -871,7 +871,7 @@ const EditableTable = ({
           </div>
         </div>
         <MenuItem
-          icon="mark"
+          icon="table-fill"
           disabled={!selection || !canToggleRichEditorTableHighlight(editorView.state, selection.tablePos)}
           withPreventDefaultOnMouseDown
           onClick={handleToggleHighlight}
@@ -935,14 +935,14 @@ const EditableTable = ({
                     {lang('RichEditorTableInsertColumnRight')}
                   </MenuItem>
                   <MenuItem
-                    customIcon={<Icon name="table-insert-left" className={styles.rotateClockwise} />}
+                    customIcon={<Icon name="table-insert-above" />}
                     withPreventDefaultOnMouseDown
                     onClick={() => runCommand(addRowBefore)}
                   >
                     {lang('RichEditorTableInsertRowAbove')}
                   </MenuItem>
                   <MenuItem
-                    customIcon={<Icon name="table-insert-right" className={styles.rotateClockwise} />}
+                    customIcon={<Icon name="table-insert-below" />}
                     withPreventDefaultOnMouseDown
                     onClick={() => runCommand(addRowAfter)}
                   >
@@ -995,30 +995,22 @@ const EditableTable = ({
         {(selectionAxis || isTableSelection) && (
           <>
             <MenuSeparator />
-            <NestedMenuItem
-              icon="delete"
+            <MenuItem
+              icon="table-delete"
               destructive
-              submenu={(
-                <MenuItem
-                  icon="delete"
-                  destructive
-                  withPreventDefaultOnMouseDown
-                  onClick={() => runCommand(
-                    isTableSelection ? deleteRichEditorTable : isRowSelection ? deleteRow : deleteColumn,
-                  )}
-                >
-                  {isTableSelection ? lang('RichEditorTableDeleteTable') : lang(
-                    isRowSelection
-                      ? 'RichEditorTableDeleteRow'
-                      : 'RichEditorTableDeleteColumn',
-                    { count: selectionCount },
-                    { pluralValue: selectionCount },
-                  )}
-                </MenuItem>
+              withPreventDefaultOnMouseDown
+              onClick={() => runCommand(
+                isTableSelection ? deleteRichEditorTable : isRowSelection ? deleteRow : deleteColumn,
               )}
             >
-              {lang('RichEditorTableDelete')}
-            </NestedMenuItem>
+              {isTableSelection ? lang('RichEditorTableDeleteTable') : lang(
+                isRowSelection
+                  ? 'RichEditorTableDeleteRow'
+                  : 'RichEditorTableDeleteColumn',
+                { count: selectionCount },
+                { pluralValue: selectionCount },
+              )}
+            </MenuItem>
           </>
         )}
       </Menu>
@@ -1300,7 +1292,7 @@ function getMergeIcon(selection: RichEditorTableSelection): IconName {
 function getSplitIcon(selection: RichEditorTableSelection): IconName {
   const width = selection.rect.right - selection.rect.left;
   const height = selection.rect.bottom - selection.rect.top;
-  return height > width ? 'table-unmerge-vertical' : 'table-unmerge-horizontal';
+  return height > width ? 'table-split-vertical' : 'table-split-horizontal';
 }
 
 function focusEditor(editorView: EditorView) {

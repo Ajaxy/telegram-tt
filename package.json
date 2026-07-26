@@ -125,6 +125,7 @@
     "@tiptap/extension-superscript": "^3.28.0",
     "@tiptap/extension-table": "^3.28.0",
     "@tiptap/extension-underline": "^3.28.0",
+    "@tiptap/markdown": "^3.28.0",
     "@tiptap/pm": "^3.28.0",
     "@tiptap/starter-kit": "^3.28.0",
     "@tiptap/suggestion": "^3.28.0",

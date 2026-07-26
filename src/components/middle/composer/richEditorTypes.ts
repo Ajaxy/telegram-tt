@@ -1,24 +1,19 @@
-import type { Editor } from '@tiptap/core';
+import type { Editor, Range as TiptapRange } from '@tiptap/core';
 import type { ElementRef } from '../../../lib/teact/teact';
 
-import type { ApiFormattedText, ApiInputRichMessage, ApiSticker } from '../../../api/types';
+import type {
+  ApiFormattedText,
+  ApiInputRichMessage,
+  ApiSticker,
+} from '../../../api/types';
 import type { RichEditorDateClickTarget } from '../../../util/tiptap/extensions/date';
+import type { RichEditorTooltipsConfig } from '../../common/tooltips/types';
 
 export type RichEditorInsertContent =
   { type: 'text'; text: string }
   | { type: 'formattedText'; text: ApiFormattedText }
   | { type: 'customEmoji'; emoji: ApiSticker }
   | { type: 'mention'; userId?: string; username?: string; text: string };
-
-export type RichEditorSuggestion = {
-  range: {
-    from: number;
-    to: number;
-  };
-  query: string;
-  text: string;
-  clientRect?: () => DOMRect | undefined;
-};
 
 export type RichEditorRoot = {
   element: HTMLDivElement;
@@ -29,6 +24,7 @@ export type RichEditorRoot = {
   quoteCaptionPlaceholder: string;
   tableTitlePlaceholder: string;
   unsupportedPlaceholder: string;
+  tooltips?: RichEditorTooltipsConfig;
   getIsRichInputExpanded: () => boolean;
   onReady: (source: HTMLElement) => void;
   onUpdate: (isEmpty: boolean, source: HTMLElement) => void;
@@ -39,24 +35,19 @@ export type RichEditor = {
   editor?: Editor;
   isReady: boolean;
   value: ApiInputRichMessage;
-  mentionSuggestion?: RichEditorSuggestion;
   canUndo: boolean;
   canRedo: boolean;
   deleteCharacterBeforeSelection: NoneToVoidFunction;
   focus: NoneToVoidFunction;
   getAsFormatted: () => ApiFormattedText | undefined;
-  getTextBeforeSelection: () => string;
   getValue: () => ApiInputRichMessage;
   hasCollapsedSelection: () => boolean;
   isEmpty: () => boolean;
   insertContent: (content: RichEditorInsertContent | RichEditorInsertContent[], shouldPrepend?: boolean) => void;
   redo: NoneToVoidFunction;
   replaceValue: (value: ApiInputRichMessage) => void;
-  replaceTextBeforeSelection: (
-    textToReplace: string, content: RichEditorInsertContent | RichEditorInsertContent[],
-  ) => void;
   replaceRange: (
-    range: RichEditorSuggestion['range'], content: RichEditorInsertContent | RichEditorInsertContent[],
+    range: TiptapRange, content: RichEditorInsertContent | RichEditorInsertContent[],
   ) => void;
   registerRoot: (root: RichEditorRoot) => NoneToVoidFunction;
   setValue: (value?: ApiInputRichMessage) => void;

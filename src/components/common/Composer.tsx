@@ -40,6 +40,7 @@ import type {
   ThemeKey,
   ThreadId,
 } from '../../types';
+import type { RichEditorTooltipsConfig } from './tooltips/types';
 import { ApiMediaFormat, ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
@@ -59,6 +60,7 @@ import { requestMeasure, requestMutation, requestNextMutation } from '../../lib/
 import {
   canEditMedia,
   getAllowedAttachmentOptions,
+  getMainUsername,
   getMediaFilename,
   getMediaHash,
   getMessageDocumentPhoto,
@@ -142,7 +144,6 @@ import buildAttachment, {
   buildGifAttachment,
   prepareAttachmentsToSend,
 } from '../middle/composer/helpers/buildAttachment';
-import { getRichMessageText } from '../middle/composer/helpers/richEditorComposer';
 import { armSendCollapseReserve } from '../middle/helpers/messageListReserves';
 import {
   buildRichMessageFromFormatted,
@@ -172,18 +173,12 @@ import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useAttachmentModal from '../middle/composer/hooks/useAttachmentModal';
-import useChatCommandTooltip from '../middle/composer/hooks/useChatCommandTooltip';
 import useClipboardPaste from '../middle/composer/hooks/useClipboardPaste';
-import useCustomEmojiTooltip from '../middle/composer/hooks/useCustomEmojiTooltip';
 import useDraft from '../middle/composer/hooks/useDraft';
 import useEditing from '../middle/composer/hooks/useEditing';
-import useEmojiTooltip from '../middle/composer/hooks/useEmojiTooltip';
-import useInlineBotTooltip from '../middle/composer/hooks/useInlineBotTooltip';
 import useLoadLinkPreview from '../middle/composer/hooks/useLoadLinkPreview';
-import useMentionTooltip from '../middle/composer/hooks/useMentionTooltip';
 import usePaidMessageConfirmation from '../middle/composer/hooks/usePaidMessageConfirmation';
 import useRichEditor from '../middle/composer/hooks/useRichEditor';
-import useStickerTooltip from '../middle/composer/hooks/useStickerTooltip';
 import useVideoRecording from '../middle/composer/hooks/useVideoRecording';
 import useVoiceRecording from '../middle/composer/hooks/useVoiceRecording';
 
@@ -192,19 +187,13 @@ import AttachMenu from '../middle/composer/AttachMenu';
 import BotCommandMenu from '../middle/composer/BotCommandMenu.async';
 import BotKeyboardMenu from '../middle/composer/BotKeyboardMenu';
 import BotMenuButton from '../middle/composer/BotMenuButton';
-import ChatCommandTooltip from '../middle/composer/ChatCommandTooltip.async';
 import ComposerEmbeddedMessage from '../middle/composer/ComposerEmbeddedMessage';
-import CustomEmojiTooltip from '../middle/composer/CustomEmojiTooltip.async';
 import CustomSendMenu from '../middle/composer/CustomSendMenu.async';
 import DropArea, { DropAreaState } from '../middle/composer/DropArea.async';
-import EmojiTooltip from '../middle/composer/EmojiTooltip.async';
-import InlineBotTooltip from '../middle/composer/InlineBotTooltip.async';
-import MentionTooltip from '../middle/composer/MentionTooltip.async';
 import MessageInput from '../middle/composer/MessageInput.async';
 import RecordModeMenu, { type RecordMode } from '../middle/composer/RecordModeMenu';
 import RoundVideoRecorder from '../middle/composer/RoundVideoRecorder';
 import SendAsMenu from '../middle/composer/SendAsMenu.async';
-import StickerTooltip from '../middle/composer/StickerTooltip.async';
 import SymbolMenuButton from '../middle/composer/SymbolMenuButton';
 import ToDoListModal from '../middle/composer/ToDoListModal.async';
 import VoiceRecordBar from '../middle/composer/VoiceRecordBar';
@@ -276,8 +265,6 @@ type StateProps = {
   withScheduledButton?: boolean;
   isInScheduledList?: boolean;
   canScheduleUntilOnline?: boolean;
-  stickersForEmoji?: ApiSticker[];
-  customEmojiForEmoji: GlobalState['customEmojis']['forEmoji'];
   currentUserId?: string;
   currentUser?: ApiUser;
   recentEmojis: string[];
@@ -412,8 +399,6 @@ const Composer = ({
   botKeyboardPlaceholder,
   inputPlaceholder,
   withScheduledButton,
-  stickersForEmoji,
-  customEmojiForEmoji,
   topInlineBotIds,
   topGuestBotIds,
   currentUserId,
@@ -527,6 +512,7 @@ const Composer = ({
   const richEditor = useRichEditor();
 
   const inputRef = useRef<HTMLDivElement>();
+  const composerRef = useRef<HTMLDivElement>();
   const counterRef = useRef<HTMLSpanElement>();
 
   const storyReactionRef = useRef<HTMLButtonElement>();
@@ -610,9 +596,18 @@ const Composer = ({
   const hasAttachments = Boolean(attachments.length);
   const richMessage = richEditor.value;
   const richMessageAsFormatted = richMessage ? getRichInputAsFormatted(richMessage) : undefined;
-  const richText = useMemo(() => getRichMessageText(richMessage), [richMessage]);
   const hasInputContent = richEditor.isReady ? !richEditor.isEmpty() : false;
-  const hasRichOnlyContent = Boolean(hasInputContent && !richMessageAsFormatted);
+  const isOverRegularMessageLimit = Boolean(
+    richMessageAsFormatted
+    && getUtf8Length(richMessageAsFormatted.text) > maxMessageLength,
+  );
+  const hasRichOnlyContent = Boolean(
+    hasInputContent
+    && (
+      !richMessageAsFormatted
+      || (isCurrentUserPremium && isOverRegularMessageLimit)
+    ),
+  );
 
   const expandRichInput = useLastCallback(() => {
     setIsRichInputExpanded({ isRichInputExpanded: true });
@@ -889,71 +884,31 @@ const Composer = ({
   }, [hasInputContent, isEditingRef, isForCurrentMessageList, isInStoryViewer, sendMessageAction]);
 
   const isAdmin = chat && isChatAdmin(chat);
+  const [inlineBotHelp, setInlineBotHelp] = useState<string | undefined>();
 
-  const {
-    isEmojiTooltipOpen,
-    emojiAnchorRect,
-    closeEmojiTooltip,
-    filteredEmojis,
-    filteredCustomEmojis,
-    insertEmoji,
-  } = useEmojiTooltip(
-    Boolean(isReady && isOnActiveTab && (isInStoryViewer || isForCurrentMessageList)
-      && shouldSuggestStickers && !hasAttachments),
-    richText,
-    richEditor,
-    recentEmojis,
-    baseEmojiKeywords,
-    emojiKeywords,
-  );
+  const insertMention = useLastCallback((peer: ApiPeer, forceFocus = false) => {
+    const username = getMainUsername(peer);
+    const text = username ? `@${username}` : getPeerTitle(lang, peer);
+    if (!text) {
+      return;
+    }
 
-  const {
-    isCustomEmojiTooltipOpen,
-    closeCustomEmojiTooltip,
-    insertCustomEmoji,
-  } = useCustomEmojiTooltip(
-    Boolean(isReady && isOnActiveTab && (isInStoryViewer || isForCurrentMessageList)
-      && shouldSuggestCustomEmoji && !hasAttachments),
-    richText,
-    richEditor,
-    customEmojiForEmoji,
-  );
-
-  const {
-    isStickerTooltipOpen,
-    closeStickerTooltip,
-  } = useStickerTooltip(
-    Boolean(isReady
-      && isOnActiveTab
-      && (isInStoryViewer || isForCurrentMessageList)
-      && shouldSuggestStickers
-      && canSendStickers
-      && !hasAttachments),
-    richText,
-    stickersForEmoji,
-  );
-
-  const {
-    isMentionTooltipOpen,
-    mentionAnchorRect,
-    closeMentionTooltip,
-    insertMention,
-    mentionFilteredUsers,
-  } = useMentionTooltip(
-    Boolean(isInMessageList && isReady && isForCurrentMessageList && !hasAttachments),
-    richText,
-    richEditor,
-    groupChatMembers,
-    canUseInlineBots ? topInlineBotIds : undefined,
-    topGuestBotIds,
-    currentUserId,
-  );
+    if (forceFocus) {
+      richEditor.focus();
+    }
+    richEditor.insertContent([{
+      type: 'mention',
+      userId: peer.id,
+      username,
+      text,
+    }, { type: 'text', text: ' ' }]);
+  });
 
   useEffect(() => {
     if (!insertingPeerIdMention) return;
     const peer = selectPeer(getGlobal(), insertingPeerIdMention);
     if (peer) {
-      insertMention(peer, true, true);
+      insertMention(peer, true);
     }
     updateInsertingPeerIdMention({ peerId: undefined });
   }, [insertingPeerIdMention, insertMention]);
@@ -977,40 +932,7 @@ const Composer = ({
   }, [aiMessageEditorPendingResult, chatId, clearDraft,
     clearAiMessageEditorPendingResult, saveDraft, threadId, updateRichMessage]);
 
-  const {
-    isOpen: isInlineBotTooltipOpen,
-    botId: inlineBotId,
-    isGallery: isInlineBotTooltipGallery,
-    switchPm: inlineBotSwitchPm,
-    switchWebview: inlineBotSwitchWebview,
-    results: inlineBotResults,
-    closeTooltip: closeInlineBotTooltip,
-    help: inlineBotHelp,
-    loadMore: loadMoreForInlineBot,
-  } = useInlineBotTooltip(
-    Boolean(canUseInlineBots && isInMessageList && isReady && isForCurrentMessageList && !hasAttachments),
-    chatId,
-    richText,
-    inlineBots,
-  );
-
   const hasQuickReplies = Boolean(quickReplies && Object.keys(quickReplies).length);
-
-  const {
-    isOpen: isChatCommandTooltipOpen,
-    close: closeChatCommandTooltip,
-    filteredBotCommands: botTooltipCommands,
-    filteredQuickReplies: quickReplyCommands,
-  } = useChatCommandTooltip(
-    Boolean(isInMessageList
-      && isReady
-      && isForCurrentMessageList
-      && ((botCommands && botCommands?.length) || chatBotCommands?.length || (hasQuickReplies && canSendQuickReplies))),
-    richText,
-    botCommands,
-    chatBotCommands,
-    canSendQuickReplies ? quickReplies : undefined,
-  );
 
   useDraft({
     draft,
@@ -1043,11 +965,6 @@ const Composer = ({
 
     setAttachments(MEMO_EMPTY_ARRAY);
     collapseRichInput();
-
-    closeEmojiTooltip();
-    closeCustomEmojiTooltip();
-    closeStickerTooltip();
-    closeMentionTooltip();
 
     if (isMobile) {
       // @optimization
@@ -1481,8 +1398,10 @@ const Composer = ({
       const richEditorValue = richEditor.getValue();
       const currentRichMessage = richEditorValue.blocks.length ? richEditorValue : undefined;
       const formattedRichMessage = currentRichMessage ? getRichInputAsFormatted(currentRichMessage) : undefined;
-      const { text, entities } = formattedRichMessage || { text: '' };
-      const richMessageToSend = currentRichMessage && !formattedRichMessage ? currentRichMessage : undefined;
+      const richMessageToSend = hasRichOnlyContent ? currentRichMessage : undefined;
+      const { text, entities } = richMessageToSend
+        ? { text: '' }
+        : formattedRichMessage || { text: '' };
 
       if (currentAttachments.length) {
         if (canSendAttachments(currentAttachments)) {
@@ -1862,9 +1781,10 @@ const Composer = ({
   });
 
   const handleInlineBotSelect = useLastCallback((
+    inlineBotId: string,
     inlineResult: ApiBotInlineResult | ApiBotInlineMediaResult, isSilent?: boolean, isScheduleRequested?: boolean,
   ) => {
-    if ((!currentMessageList && !storyId) || !inlineBotId) {
+    if (!currentMessageList && !storyId) {
       return;
     }
 
@@ -1914,6 +1834,96 @@ const Composer = ({
       resetComposer();
     });
   });
+
+  const getTooltipBoundary = useLastCallback(() => composerRef.current);
+  const getRichEditorTooltipContext = useLastCallback(() => ({
+    chatId,
+    threadId,
+    currentUserId,
+    currentUser,
+    groupChatMembers,
+    topInlineBotIds: canUseInlineBots ? topInlineBotIds : undefined,
+    topGuestBotIds,
+    recentEmojiIds: recentEmojis,
+    baseEmojiKeywords,
+    emojiKeywords,
+    inlineBots,
+    botCommands,
+    chatBotCommands,
+    quickReplies: canSendQuickReplies && isCurrentUserPremium ? quickReplies : undefined,
+    quickReplyMessages,
+    isSavedMessages: isChatWithSelf,
+    isCurrentUserPremium,
+    canSendGifs,
+  }));
+  const getIsEmojiTooltipEnabled = useLastCallback(() => Boolean(
+    isReady && isOnActiveTab && (isInStoryViewer || isForCurrentMessageList)
+    && shouldSuggestStickers && !hasAttachments,
+  ));
+  const getIsCustomEmojiTooltipEnabled = useLastCallback(() => Boolean(
+    isReady && isOnActiveTab && (isInStoryViewer || isForCurrentMessageList)
+    && shouldSuggestCustomEmoji && !hasAttachments,
+  ));
+  const getIsStickerTooltipEnabled = useLastCallback(() => Boolean(
+    isReady && isOnActiveTab && (isInStoryViewer || isForCurrentMessageList)
+    && shouldSuggestStickers && canSendStickers && !hasAttachments,
+  ));
+  const getIsMentionTooltipEnabled = useLastCallback(() => Boolean(
+    isInMessageList && isReady && isForCurrentMessageList && !hasAttachments,
+  ));
+  const getIsInlineBotTooltipEnabled = useLastCallback(() => Boolean(
+    canUseInlineBots && isInMessageList && isReady && isForCurrentMessageList && !hasAttachments,
+  ));
+  const getIsCommandTooltipEnabled = useLastCallback(() => Boolean(
+    isInMessageList
+    && isReady
+    && isForCurrentMessageList
+    && (
+      (botCommands && botCommands.length)
+      || chatBotCommands?.length
+      || (hasQuickReplies && canSendQuickReplies && isCurrentUserPremium)
+    ),
+  ));
+  const getIsFormatterEnabled = useLastCallback(() => Boolean(
+    isReady && isOnActiveTab && (isInStoryViewer || isForCurrentMessageList) && !hasAttachments,
+  ));
+  const richEditorTooltips = useMemo<RichEditorTooltipsConfig>(() => ({
+    emoji: {
+      isEnabled: getIsEmojiTooltipEnabled,
+      addRecentEmoji,
+      addRecentCustomEmoji,
+    },
+    customEmoji: {
+      isEnabled: getIsCustomEmojiTooltipEnabled,
+      addRecentCustomEmoji,
+    },
+    sticker: {
+      isEnabled: getIsStickerTooltipEnabled,
+      onSelect: handleStickerSelect,
+    },
+    mention: isInMessageList ? { isEnabled: getIsMentionTooltipEnabled } : undefined,
+    command: isInMessageList ? {
+      isEnabled: getIsCommandTooltipEnabled,
+      onSelect: handleBotCommandSelect,
+    } : undefined,
+    inlineBot: isInMessageList ? {
+      isEnabled: getIsInlineBotTooltipEnabled,
+      onSelect: handleInlineBotSelect,
+      onHelpChange: setInlineBotHelp,
+    } : undefined,
+    formatter: {
+      isEnabled: getIsFormatterEnabled,
+      capabilities: 'full',
+    },
+    getTooltipBoundary,
+    getContext: getRichEditorTooltipContext,
+  }), [
+    addRecentCustomEmoji, addRecentEmoji, getIsCommandTooltipEnabled, getIsCustomEmojiTooltipEnabled,
+    getIsEmojiTooltipEnabled, getIsFormatterEnabled, getIsInlineBotTooltipEnabled,
+    getIsMentionTooltipEnabled, getIsStickerTooltipEnabled, getRichEditorTooltipContext,
+    getTooltipBoundary, handleBotCommandSelect, handleInlineBotSelect, handleStickerSelect,
+    isInMessageList, setInlineBotHelp,
+  ]);
 
   const handleToDoListSend = useLastCallback((todo: ApiNewMediaTodo) => {
     if (!currentMessageList) {
@@ -2066,9 +2076,8 @@ const Composer = ({
     && messageListType === 'thread';
   const isBotMenuButtonOpen = withBotMenuButton && !hasInputContent && !activeRecording;
 
-  const isComposerHasFocus = isBotKeyboardOpen || isSymbolMenuOpen || isEmojiTooltipOpen || isSendAsMenuOpen
-    || isMentionTooltipOpen || isInlineBotTooltipOpen || isBotCommandMenuOpen || isAttachMenuOpen
-    || isStickerTooltipOpen || isChatCommandTooltipOpen || isCustomEmojiTooltipOpen || isBotMenuButtonOpen
+  const isComposerHasFocus = isBotKeyboardOpen || isSymbolMenuOpen || isSendAsMenuOpen
+    || isBotCommandMenuOpen || isAttachMenuOpen || isBotMenuButtonOpen
     || isCustomSendMenuOpen || Boolean(activeRecording) || attachments.length > 0 || isInputHasFocus;
   const isReactionSelectorOpen = isComposerHasFocus && !isReactionPickerOpen && isInStoryViewer && !isAttachMenuOpen
     && !isSymbolMenuOpen;
@@ -2484,7 +2493,7 @@ const Composer = ({
   }, [shouldRenderPaidStars, starsForAllMessages, paidStarsRef, mainButtonRef]);
 
   return (
-    <div className={fullClassName}>
+    <div ref={composerRef} className={fullClassName}>
       {isInMessageList && canAttachMedia && !hasRichOnlyContent && isReady && (
         <DropArea
           isOpen={dropAreaState !== DropAreaState.None}
@@ -2548,25 +2557,6 @@ const Composer = ({
         sendAsPeerIds={sendAsPeerIds}
         isCurrentUserPremium={isCurrentUserPremium}
       />
-      <MentionTooltip
-        isOpen={isMentionTooltipOpen}
-        anchorRect={mentionAnchorRect}
-        filteredUsers={mentionFilteredUsers}
-        onInsertUserName={insertMention}
-        onClose={closeMentionTooltip}
-      />
-      <ChatCommandTooltip
-        isOpen={isChatCommandTooltipOpen}
-        chatId={chatId}
-        withUsername={Boolean(chatBotCommands)}
-        botCommands={botTooltipCommands}
-        quickReplies={quickReplyCommands}
-        richText={richText}
-        self={currentUser!}
-        quickReplyMessages={quickReplyMessages}
-        onClick={handleBotCommandSelect}
-        onClose={closeChatCommandTooltip}
-      />
       {isInMessageList && (
         <>
           <ComposerEmbeddedMessage
@@ -2588,14 +2578,13 @@ const Composer = ({
           )}
         </>
       )}
-      <div className={
-        buildClassName(
+      <div
+        className={buildClassName(
           'composer-wrapper',
           isRichInputExpansionActive && 'rich-input-expanded',
           isInStoryViewer && 'with-story-tweaks',
           isNeedPremium && 'is-need-premium',
-        )
-      }
+        )}
       >
         {isInStoryViewer && !isNeedPremium && (
           <svg className="svg-appendix" width="9" height="20">
@@ -2629,22 +2618,6 @@ const Composer = ({
               />
             </g>
           </svg>
-        )}
-        {isInMessageList && (
-          <InlineBotTooltip
-            isOpen={isInlineBotTooltipOpen}
-            botId={inlineBotId}
-            isGallery={isInlineBotTooltipGallery}
-            inlineBotResults={inlineBotResults}
-            switchPm={inlineBotSwitchPm}
-            switchWebview={inlineBotSwitchWebview}
-            loadMore={loadMoreForInlineBot}
-            isSavedMessages={isChatWithSelf}
-            canSendGifs={canSendGifs}
-            isCurrentUserPremium={isCurrentUserPremium}
-            onSelectResult={handleInlineBotSelect}
-            onClose={closeInlineBotTooltip}
-          />
         )}
         <div
           className={buildClassName(
@@ -2778,6 +2751,7 @@ const Composer = ({
             id={inputId}
             editableInputId={editableInputId}
             richEditor={richEditor}
+            tooltips={richEditorTooltips}
             isStoryInput={isInStoryViewer}
             chatId={chatId}
             canSendPlainText={!isComposerBlocked}
@@ -2789,7 +2763,6 @@ const Composer = ({
             canAutoFocus={isReady && isForCurrentMessageList && !hasAttachments && isInMessageList}
             noFocusInterception={hasAttachments}
             shouldSuppressFocus={isMobile && isSymbolMenuOpen}
-            shouldSuppressTextFormatter={isEmojiTooltipOpen || isMentionTooltipOpen || isInlineBotTooltipOpen}
             onRichInputCollapse={collapseRichInput}
             onRichInputExpand={handleOpenRichInput}
             onSend={onSend}
@@ -2798,11 +2771,12 @@ const Composer = ({
             onBlur={unmarkInputHasFocus}
             isNeedPremium={isNeedPremium}
             messageListType={messageListType}
-            maxLength={hasRichOnlyContent ? richMessageLengthLimit : maxMessageLength}
+            isRichOnlyContent={hasRichOnlyContent}
+            maxLength={isCurrentUserPremium || hasRichOnlyContent ? richMessageLengthLimit : maxMessageLength}
           />
           {isInMessageList && !isRichInputExpansionActive && (
             <>
-              {isInlineBotLoading && Boolean(inlineBotId) && (
+              {isInlineBotLoading && (
                 <Spinner color="gray" />
               )}
               <Transition
@@ -2960,34 +2934,6 @@ const Composer = ({
             />
           )}
         </div>
-        <CustomEmojiTooltip
-          key={`custom-emoji-tooltip-${editableInputId}`}
-          chatId={chatId}
-          isOpen={isCustomEmojiTooltipOpen}
-          onCustomEmojiSelect={insertCustomEmoji}
-          addRecentCustomEmoji={addRecentCustomEmoji}
-          onClose={closeCustomEmojiTooltip}
-        />
-        <StickerTooltip
-          key={`sticker-tooltip-${editableInputId}`}
-          chatId={chatId}
-          threadId={threadId}
-          isOpen={isStickerTooltipOpen}
-          onStickerSelect={handleStickerSelect}
-          onClose={closeStickerTooltip}
-        />
-        <EmojiTooltip
-          key={`emoji-tooltip-${editableInputId}`}
-          isOpen={isEmojiTooltipOpen}
-          anchorRect={emojiAnchorRect}
-          emojis={filteredEmojis}
-          customEmojis={filteredCustomEmojis}
-          addRecentEmoji={addRecentEmoji}
-          addRecentCustomEmoji={addRecentCustomEmoji}
-          onEmojiSelect={insertEmoji}
-          onCustomEmojiSelect={insertEmoji}
-          onClose={closeEmojiTooltip}
-        />
       </div>
       {isInStoryViewer && !activeRecording && (
         <Button
@@ -3242,8 +3188,6 @@ export default memo(withGlobal<OwnProps>(
       forwardedMessagesCount: isForwarding ? forwardMessageIds!.length : undefined,
       todoListModal: tabState.todoListModal,
       aiMessageEditorPendingResult: tabState.aiMessageEditorPendingResult,
-      stickersForEmoji: global.stickers.forEmoji.stickers,
-      customEmojiForEmoji: global.customEmojis.forEmoji,
       chatFullInfo,
       topInlineBotIds: global.topPeerCategories.botsInline?.peerIds,
       topGuestBotIds: global.topPeerCategories.botsGuestChat?.peerIds,

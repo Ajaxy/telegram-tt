@@ -1,4 +1,6 @@
-import { Node as TiptapNode } from '@tiptap/core';
+import {
+  InputRule, Node as TiptapNode, nodeInputRule,
+} from '@tiptap/core';
 import { NodeSelection, Selection } from '@tiptap/pm/state';
 import {
   useEffect, useRef, useState,
@@ -10,7 +12,6 @@ import type { TeactNodeViewComponentProps } from '../TeactNodeViewRenderer';
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../buildClassName';
 import { MATH_BLOCK_NODE_NAME, MATH_INLINE_NODE_NAME } from '../constants';
-import buildDefinedAttributes from './buildDefinedAttributes';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -22,6 +23,13 @@ import TeactNodeViewRenderer from '../TeactNodeViewRenderer';
 
 import textFormatterStyles from '../../../components/ui/textInput/TextFormatter.module.scss';
 import styles from '../styling.module.scss';
+
+const MATH_BLOCK_INPUT_REGEX = /^\$\$(?=\S).*\S\$\$$/;
+const MATH_BLOCK_TOKEN_REGEX = /^\$\$\s*([\s\S]*?)\s*\$\$(?:\n|$)/;
+const MATH_FENCE_TOKEN_REGEX = /^```math[^\S\r\n]*\r?\n([\s\S]*?)\r?\n```(?:\r?\n|$)/;
+const MATH_FENCE_INPUT_REGEX = /^```math[\s\n]$/;
+const MATH_INLINE_INPUT_REGEX = /(?:^|\s)(\$(?!\$)(?=\S)(.*?\S)\$(?!\$))$/;
+const MATH_INLINE_TOKEN_REGEX = /^\$(?!\$)(?=\S)(.*?\S)\$(?!\$)/;
 
 const MathNode = TiptapNode.create({
   name: 'math',
@@ -37,6 +45,10 @@ const MathNode = TiptapNode.create({
     };
   },
 
+  renderText({ node }) {
+    return node.attrs.source;
+  },
+
   addNodeView() {
     const isInline = this.name === MATH_INLINE_NODE_NAME;
 
@@ -50,18 +62,53 @@ const MathNode = TiptapNode.create({
 export const MathBlockNode = MathNode.extend({
   name: MATH_BLOCK_NODE_NAME,
   group: 'block',
+  priority: 101,
 
   parseHTML() {
-    return [{ tag: 'div[data-rich-block-type="math"]' }];
+    return [
+      { tag: 'tg-math-block' },
+      { tag: 'div[data-rich-block-type="math"]' },
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    const source = typeof HTMLAttributes.source === 'string' ? HTMLAttributes.source : '';
+    return ['tg-math-block', HTMLAttributes.source];
+  },
 
-    return ['div', buildDefinedAttributes({
-      'data-rich-block-type': 'math',
-      'data-source': source,
-    }), source];
+  parseMarkdown(token, helpers) {
+    return helpers.createNode(MATH_BLOCK_NODE_NAME, { source: token.text || '' });
+  },
+
+  markdownTokenizer: {
+    name: MATH_BLOCK_NODE_NAME,
+    level: 'block',
+    start: (source) => source.search(/\$\$|```math/),
+    tokenize: (source) => {
+      const match = MATH_BLOCK_TOKEN_REGEX.exec(source) || MATH_FENCE_TOKEN_REGEX.exec(source);
+      if (!match) {
+        return undefined;
+      }
+
+      return {
+        type: MATH_BLOCK_NODE_NAME,
+        raw: match[0],
+        text: match[1],
+      };
+    },
+  },
+
+  addInputRules() {
+    return [
+      nodeInputRule({
+        find: MATH_BLOCK_INPUT_REGEX,
+        type: this.type,
+        getAttributes: (match) => ({ source: match[0].slice(2, -2) }),
+      }),
+      nodeInputRule({
+        find: MATH_FENCE_INPUT_REGEX,
+        type: this.type,
+      }),
+    ];
   },
 });
 
@@ -78,12 +125,42 @@ export const MathInlineNode = MathNode.extend({
   },
 
   renderHTML({ HTMLAttributes }) {
-    const source = typeof HTMLAttributes.source === 'string' ? HTMLAttributes.source : '';
+    return ['tg-math', HTMLAttributes.source];
+  },
 
-    return ['span', buildDefinedAttributes({
-      'data-rich-text-type': 'math',
-      'data-source': source,
-    }), source];
+  parseMarkdown(token, helpers) {
+    return helpers.createNode(MATH_INLINE_NODE_NAME, { source: token.text || '' });
+  },
+
+  markdownTokenizer: {
+    name: MATH_INLINE_NODE_NAME,
+    level: 'inline',
+    start: (source) => source.indexOf('$'),
+    tokenize: (source) => {
+      const match = MATH_INLINE_TOKEN_REGEX.exec(source);
+      if (!match) {
+        return undefined;
+      }
+
+      return {
+        type: MATH_INLINE_NODE_NAME,
+        raw: match[0],
+        text: match[1],
+      };
+    },
+  },
+
+  addInputRules() {
+    return [new InputRule({
+      find: MATH_INLINE_INPUT_REGEX,
+      handler: ({ state, range, match }) => {
+        state.tr.replaceWith(
+          range.to - match[1].length,
+          range.to,
+          this.type.create({ source: match[2] }),
+        );
+      },
+    })];
   },
 });
 
@@ -259,7 +336,7 @@ function EditableMath({
               ariaLabel={lang('RichEditorEquation')}
               isActive
               leadingButtonIconName={canToggleDisplayMode
-                ? (!isInline ? 'table-merge-horizontal' : 'table-unmerge-horizontal')
+                ? (!isInline ? 'table-merge-horizontal' : 'table-split-horizontal')
                 : undefined}
               leadingButtonAriaLabel={canToggleDisplayMode
                 ? lang(isInline ? 'RichEditorEquationToBlock' : 'RichEditorEquationToInline')

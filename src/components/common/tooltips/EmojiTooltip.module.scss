@@ -1,0 +1,11 @@
+.root {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  display: flex;
+  padding: 0;
+
+  :global(.EmojiButton) {
+    flex: 0 0 2.25rem;
+    margin-right: 0;
+  }
+}
