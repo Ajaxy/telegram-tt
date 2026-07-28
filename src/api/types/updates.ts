@@ -662,6 +662,7 @@ export type ApiUpdateServerTimeOffset = {
 export type ApiUpdateGroupCall = {
   '@type': 'updateGroupCall';
   call: ApiGroupCall;
+  chatId?: string;
 };
 
 export type ApiUpdateGroupCallChatId = {
