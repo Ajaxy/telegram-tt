@@ -18,6 +18,7 @@ import {
   getAmplitude,
   IS_ECHO_CANCELLATION_SUPPORTED,
   IS_NOISE_SUPPRESSION_SUPPORTED,
+  stopStream,
   THRESHOLD,
   toTelegramSource,
 } from '../utils';
@@ -411,7 +412,14 @@ async function getUserStream(streamType: StreamType, facing: VideoFacingModeEnum
     } : false,
   });
 
-  if (state && streamType === 'audio') {
+  if (!state) {
+    if (streamType === 'audio') {
+      stopStream(media);
+    }
+    return media;
+  }
+
+  if (streamType === 'audio') {
     state.audioStream = media;
   }
 
@@ -448,13 +456,17 @@ export async function switchCameraInput() {
     return;
   }
 
-  state.facingMode = state.facingMode === 'environment' ? 'user' : 'environment';
+  const newFacingMode = state.facingMode === 'environment' ? 'user' : 'environment';
+  let newStream: MediaStream | undefined;
   try {
-    const newStream = await getUserStream('video', state.facingMode);
+    newStream = await getUserStream('video', newFacingMode);
 
-    await sender.replaceTrack(newStream.getTracks()[0]);
+    await sender.replaceTrack(newStream!.getTracks()[0]);
     state.streams[state.myId].video = newStream;
+    state.facingMode = newFacingMode;
+    stopStream(stream);
   } catch (err) {
+    stopStream(newStream);
     logGroupCall('switch camera failed', {
       error: summarizeError(err),
     });
@@ -504,17 +516,18 @@ export async function toggleStream(streamType: StreamType, value: boolean | unde
 
   value = value === undefined ? !track.enabled : value;
 
-  try {
-    if (value && !track.enabled) {
-      const newStream = await getUserStream(streamType);
-      await sender.replaceTrack(newStream.getTracks()[0]);
+  if (value && !track.enabled) {
+    let newStream: MediaStream | undefined;
+    try {
+      newStream = await getUserStream(streamType);
+      await sender.replaceTrack(newStream!.getTracks()[0]);
       state.streams[state.myId][streamType] = newStream;
       if (streamType === 'video') {
         state.facingMode = 'user';
       } else if (streamType === 'audio') {
         const { audioContext } = state;
         if (!audioContext) return;
-        const source = state.audioSource || audioContext.createMediaStreamSource(newStream);
+        const source = state.audioSource || audioContext.createMediaStreamSource(newStream!);
 
         const analyser = state.audioAnalyser || audioContext.createAnalyser();
         analyser.minDecibels = -100;
@@ -541,7 +554,17 @@ export async function toggleStream(streamType: StreamType, value: boolean | unde
           },
         };
       }
-    } else if (!value && track.enabled) {
+    } catch (e) {
+      if (streamType !== 'audio') {
+        stopStream(newStream);
+      }
+      logGroupCall('enable stream failed', {
+        streamType,
+        error: summarizeError(e),
+      });
+    }
+  } else if (!value && track.enabled) {
+    try {
       const newStream = streamType === 'audio' ? state.silence : state.black;
       if (!newStream) return;
 
@@ -558,16 +581,20 @@ export async function toggleStream(streamType: StreamType, value: boolean | unde
         state.audioSource?.disconnect();
         state.audioAnalyser?.disconnect();
       }
+    } catch (e) {
+      logGroupCall('disable stream failed', {
+        streamType,
+        error: summarizeError(e),
+      });
     }
-    updateGroupCallStreams(state.myId!);
-    if (streamType === 'presentation' && !value) leavePresentation(true);
-  } catch (e) {
-    logGroupCall('toggle stream failed', {
-      streamType,
-      shouldEnable: value,
-      error: summarizeError(e),
-    });
   }
+
+  if (!state) {
+    return;
+  }
+
+  updateGroupCallStreams(state.myId!);
+  if (streamType === 'presentation' && !value) leavePresentation(true);
 }
 
 function updateConnectionState(connectionState: GroupCallConnectionState) {
@@ -594,15 +621,11 @@ export function leaveGroupCall() {
 
   if (state.myId && state.streams?.[state.myId]) {
     Object.values(state.streams[state.myId] || {}).forEach((stream) => {
-      stream?.getTracks().forEach((track) => {
-        track.stop();
-      });
+      stopStream(stream);
     });
   }
 
-  state.audioStream?.getTracks().forEach((track) => {
-    track.stop();
-  });
+  stopStream(state.audioStream);
   leavePresentation(true);
   state.dataChannel?.close();
   state.connection?.close();
@@ -1124,6 +1147,7 @@ function initializeConnection(
   streams: MediaStream[],
   resolve: (payload?: JoinGroupCallPayload) => void,
   isPresentation = false,
+  reject?: (reason?: unknown) => void,
 ) {
   const connection = new RTCPeerConnection();
 
@@ -1154,23 +1178,39 @@ function initializeConnection(
     if (!myId) {
       return;
     }
-    let offer = await connection.createOffer({
-      offerToReceiveVideo: true,
-      offerToReceiveAudio: !isPresentation,
-    });
-    if (isPresentation && offer.sdp) {
-      offer = {
-        ...offer,
-        sdp: mungePresentationOfferSdp(offer.sdp),
-      };
-    }
-    logGroupCall('local offer created', {
-      isPresentation,
-      sdp: offer.sdp ? summarizeSdp(offer.sdp, true) : undefined,
-    });
+    let offer: RTCSessionDescriptionInit;
+    try {
+      offer = await connection.createOffer({
+        offerToReceiveVideo: true,
+        offerToReceiveAudio: !isPresentation,
+      });
+      if (!offer.sdp) {
+        logGroupCall('empty sdp local offer', {
+          isPresentation,
+        });
+        reject?.(new Error('Invalid local offer SDP'));
+        return;
+      }
+      if (isPresentation) {
+        offer = {
+          ...offer,
+          sdp: mungePresentationOfferSdp(offer.sdp),
+        };
+      }
+      logGroupCall('local offer created', {
+        isPresentation,
+        sdp: offer.sdp ? summarizeSdp(offer.sdp, true) : undefined,
+      });
 
-    await connection.setLocalDescription(offer);
-    if (!offer.sdp) {
+      await connection.setLocalDescription(offer);
+    } catch (e) {
+      logGroupCall('local offer failed', {
+        isPresentation,
+        error: summarizeError(e),
+      });
+
+      reject?.(e);
+
       return;
     }
 
@@ -1263,8 +1303,9 @@ export async function startSharingScreen(): Promise<JoinGroupCallPayload | undef
     return undefined;
   }
 
+  let stream: MediaStream | undefined;
   try {
-    const stream: MediaStream | undefined = await getUserStream('presentation');
+    stream = await getUserStream('presentation');
 
     if (!stream) {
       logGroupCall('start sharing screen failed: missing stream');
@@ -1283,8 +1324,8 @@ export async function startSharingScreen(): Promise<JoinGroupCallPayload | undef
       }
     };
 
-    return await new Promise((resolve) => {
-      const { connection, dataChannel } = initializeConnection([stream], resolve, true);
+    return await new Promise((resolve, reject) => {
+      const { connection, dataChannel } = initializeConnection([stream!], resolve, true, reject);
       state = {
         ...state!,
         screenshareConnection: connection,
@@ -1292,9 +1333,14 @@ export async function startSharingScreen(): Promise<JoinGroupCallPayload | undef
       };
     });
   } catch (e) {
+    stopStream(stream);
     logGroupCall('start sharing screen failed', {
       error: summarizeError(e),
     });
+
+    state?.screenshareConnection?.close();
+    state?.screenshareDataChannel?.close();
+
     return undefined;
   }
 }

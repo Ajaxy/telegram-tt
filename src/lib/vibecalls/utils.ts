@@ -66,6 +66,16 @@ export function removeRelatedAddress(candidate: string) {
   return parts.join(' ');
 }
 
+export function stopStream(stream?: MediaStream, except?: MediaStream) {
+  if (!stream || stream === except) {
+    return;
+  }
+
+  stream.getTracks().forEach((track) => {
+    track.stop();
+  });
+}
+
 export const THRESHOLD = 0.1;
 
 export const IS_SCREENSHARE_SUPPORTED = 'getDisplayMedia' in (navigator?.mediaDevices || {});

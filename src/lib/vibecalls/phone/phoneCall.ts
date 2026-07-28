@@ -27,6 +27,7 @@ import {
   IS_ECHO_CANCELLATION_SUPPORTED,
   IS_NOISE_SUPPRESSION_SUPPORTED,
   p2pPayloadTypeToConference,
+  stopStream,
 } from '../utils';
 
 type RemoteMediaState = {
@@ -675,16 +676,6 @@ function buildIceServers(connections: ApiPhoneCallConnection[], isP2p: boolean) 
 function buildIceServerUrl(protocol: 'stun' | 'turn', host: string, port: number) {
   const formattedHost = host.includes(':') && !host.startsWith('[') ? `[${host}]` : host;
   return `${protocol}:${formattedHost}:${port}`;
-}
-
-function stopStream(stream?: MediaStream, except?: MediaStream) {
-  if (!stream || stream === except) {
-    return;
-  }
-
-  stream.getTracks().forEach((track) => {
-    track.stop();
-  });
 }
 
 function attachDataChannel(dataChannel: RTCDataChannel) {
