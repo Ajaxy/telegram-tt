@@ -50,4 +50,17 @@ export const SpoilerMark = Mark.create({
       type: this.type,
     })];
   },
+
+  addKeyboardShortcuts() {
+    return {
+      'Mod-p': () => {
+        if (this.editor.state.selection.empty && !this.editor.isActive(this.name)) {
+          return false;
+        }
+
+        return this.editor.commands.toggleMark(this.name);
+      },
+      'Mod-P': () => this.editor.commands.toggleMark(this.name),
+    };
+  },
 });

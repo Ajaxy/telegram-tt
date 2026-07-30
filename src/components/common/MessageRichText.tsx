@@ -110,7 +110,7 @@ const MessageRichText = ({
   }
 
   return (
-    <div className={styles.root}>
+    <div className={buildClassName(styles.root, isOwn && styles.own)}>
       <div className={shouldCollapse ? styles.collapsedContent : undefined}>
         {withSharedCanvas && <canvas key="shared-canvas" ref={sharedCanvasRef} className="shared-canvas" />}
         {withSharedCanvas && <canvas key="shared-canvas-hq" ref={sharedCanvasHqRef} className="shared-canvas" />}

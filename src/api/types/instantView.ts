@@ -114,6 +114,7 @@ export type ApiPageBlockBlockquote = {
   type: 'blockquote';
   text: ApiRichText;
   caption: ApiRichText;
+  canCollapse?: true;
 };
 
 export type ApiPageBlockPullquote = {
@@ -126,6 +127,7 @@ export type ApiPageBlockBlockquoteBlocks = {
   type: 'blockquoteBlocks';
   blocks: ApiPageBlock[];
   caption: ApiRichText;
+  canCollapse?: true;
 };
 
 export type ApiPageBlockPhoto = {

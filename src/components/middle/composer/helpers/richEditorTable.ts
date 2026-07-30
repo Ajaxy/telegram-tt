@@ -167,7 +167,13 @@ const RichEditorTableCell = TableCellExtension.extend({
   },
 
   parseHTML() {
-    return [{ tag: 'td' }, { tag: 'th' }];
+    const tableCellRules = this.parent!()!;
+    const tableHeaderRules = tableCellRules.map((rule) => ({
+      ...rule,
+      tag: 'th',
+    }));
+
+    return [...tableCellRules, ...tableHeaderRules];
   },
 });
 

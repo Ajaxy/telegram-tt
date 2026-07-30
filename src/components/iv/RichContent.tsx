@@ -135,6 +135,7 @@ const RichContent = ({
   const unsupportedText = lang('PageContentUnsupported');
   const embedTitle = lang('PageContentEmbed');
   const style = fontSizeAdjust !== undefined ? `--iv-font-size-scale: ${fontSizeAdjust}` : undefined;
+  const isMessageContent = messageId !== undefined;
 
   const richTextContext: RichTextContext = {
     unsupportedText,
@@ -210,7 +211,7 @@ const RichContent = ({
     }
 
     return (
-      <Breakout className={styles.mediaBreakout}>
+      <Breakout className={buildClassName(styles.mediaBreakout, isMessageContent && styles.paddedCaption)}>
         {content}
       </Breakout>
     );
@@ -311,7 +312,7 @@ const RichContent = ({
         return renderPullquoteBlock(block, renderContext);
       case 'cover':
         return (
-          <Breakout className={buildClassName(styles.mediaBreakout, styles.cover)}>
+          <Breakout className={buildClassName(styles.mediaBreakout, styles.paddedCaption, styles.cover)}>
             {renderBlock(block.cover, `${sourceKey}-cover`, true)}
           </Breakout>
         );

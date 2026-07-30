@@ -16,11 +16,12 @@ import { ApiMessageEntityTypes } from '../../../api/types';
 
 import { getRichTextPlainText, hasRichText } from '../../../global/helpers/richMessage';
 import {
-  formatFormattedDateText,
+  getDefaultFormattedDateText,
   hasFormattedDateFormat,
 } from '../../../util/dates/formattedDate';
 import { getTranslationFn } from '../../../util/localization';
 import {
+  BLOCKQUOTE_COLLAPSED_ATTR,
   CAPTION_NODE_NAME,
   EMOJI_NODE_NAME,
   FOOTER_NODE_NAME,
@@ -255,6 +256,9 @@ function buildTiptapNodeFromBlock(block: ApiPageBlock): TiptapJsonContent | unde
     case 'blockquote':
       return {
         type: 'blockquote',
+        attrs: {
+          [BLOCKQUOTE_COLLAPSED_ATTR]: block.canCollapse,
+        },
         content: buildTiptapQuoteContent([buildTiptapParagraphNode(block.text)], block.caption),
       };
     case 'blockquoteBlocks':
@@ -522,6 +526,9 @@ function buildTiptapBlockquoteBlocksNode(
 
   return {
     type: 'blockquote',
+    attrs: {
+      [BLOCKQUOTE_COLLAPSED_ATTR]: block.canCollapse,
+    },
     content: buildTiptapQuoteContent(
       content.length ? content : [{ type: 'paragraph' }],
       block.caption,
@@ -703,11 +710,13 @@ function buildFooterBlockFromTiptapNode(node: TiptapJsonContent): ApiPageBlock |
 function buildBlockquoteBlockFromTiptapNode(node: TiptapJsonContent): ApiPageBlock | undefined {
   const blocks = buildBlocksFromTiptapContent(getQuoteBodyContent(node));
   const caption = buildQuoteCaptionFromTiptapNode(node);
+  const canCollapse = getTiptapBooleanAttr(node, BLOCKQUOTE_COLLAPSED_ATTR) ? true : undefined;
   if (isSimpleBlockquoteContent(blocks)) {
     return {
       type: 'blockquote',
       text: buildRichTextFromParagraphBlocks(blocks),
       caption,
+      canCollapse,
     };
   }
 
@@ -715,6 +724,7 @@ function buildBlockquoteBlockFromTiptapNode(node: TiptapJsonContent): ApiPageBlo
     type: 'blockquoteBlocks',
     blocks,
     caption,
+    canCollapse,
   } : undefined;
 }
 
@@ -1059,9 +1069,9 @@ function buildFormattedDateRichTextFromTiptapNode(node: TiptapJsonContent): ApiR
   }
 
   const options = buildFormattedDateOptionsFromTiptapNode(node);
-  const label = formatFormattedDateText(getTranslationFn(), date, options)
-    || getTiptapStringAttr(node, 'label')
-    || DEFAULT_STRING;
+  const label = hasFormattedDateFormat(options)
+    ? getDefaultFormattedDateText(getTranslationFn(), date)
+    : getTiptapStringAttr(node, 'label') || getDefaultFormattedDateText(getTranslationFn(), date);
 
   return {
     type: 'date',
@@ -1199,7 +1209,7 @@ function getBlockAsFormatted(block: ApiPageBlock, isApproximate: boolean): ApiFo
       };
     }
     case 'blockquote':
-      return getBlockquoteAsFormatted(block.text, block.caption, isApproximate);
+      return getBlockquoteAsFormatted(block.text, block.caption, isApproximate, block.canCollapse);
     case 'blockquoteBlocks': {
       if (!block.blocks.length) {
         return undefined;
@@ -1224,6 +1234,7 @@ function getBlockAsFormatted(block: ApiPageBlock, isApproximate: boolean): ApiFo
         type: ApiMessageEntityTypes.Blockquote,
         offset: 0,
         length: withCaption.text.length,
+        canCollapse: block.canCollapse,
       }) : undefined;
     }
     case 'pullquote':
@@ -1254,6 +1265,7 @@ function getBlockquoteAsFormatted(
   text: ApiRichText,
   caption: ApiRichText,
   isApproximate: boolean,
+  canCollapse?: true,
 ): ApiFormattedText | undefined {
   if (!isApproximate && getRichTextPlainText(caption)) {
     return undefined;
@@ -1265,6 +1277,7 @@ function getBlockquoteAsFormatted(
     type: ApiMessageEntityTypes.Blockquote,
     offset: 0,
     length: withCaption.text.length,
+    canCollapse,
   }) : undefined;
 }
 
@@ -1805,10 +1818,12 @@ function buildStructuralBlockFromFormatted(
     type: 'blockquoteBlocks',
     blocks: buildBlocksFromFormattedRange(text, entities, entity.offset, end, preEntities),
     caption: EMPTY_RICH_TEXT,
+    canCollapse: entity.canCollapse ? true : undefined,
   } : {
     type: 'blockquote',
     text: buildRichTextFromFormatted(text, entities, entity.offset, end),
     caption: EMPTY_RICH_TEXT,
+    canCollapse: entity.canCollapse ? true : undefined,
   };
 }
 

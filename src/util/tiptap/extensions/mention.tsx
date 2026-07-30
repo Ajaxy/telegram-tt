@@ -10,6 +10,12 @@ import type { TeactNodeViewComponentProps } from '../TeactNodeViewRenderer';
 import { TME_LINK_PREFIX } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { selectPeer, selectPeerByUsername, selectUser } from '../../../global/selectors';
+import {
+  buildRichMarkdownNodeInputRule,
+  buildRichMarkdownTokenizer,
+  parseRichMarkdownNode,
+  type RichMarkdownLink,
+} from '../richMarkdown';
 
 import Avatar from '../../../components/common/Avatar';
 import NodeViewContent from '../NodeViewContent';
@@ -26,6 +32,14 @@ export const MentionNode = Node.create({
   content: 'text*',
   marks: '',
   selectable: false,
+
+  markdownTokenName: 'mention',
+
+  markdownTokenizer: buildRichMarkdownTokenizer('mention', false, buildMentionMarkdownAttrs, true),
+
+  parseMarkdown(token, helpers) {
+    return parseRichMarkdownNode(token, helpers, false, 'mention', buildMentionMarkdownAttrs, true);
+  },
 
   addAttributes() {
     return {
@@ -82,7 +96,21 @@ export const MentionNode = Node.create({
       Delete: () => deleteMentionCharacter(this.editor, this.name, 'forward'),
     };
   },
+
+  addInputRules() {
+    return [buildRichMarkdownNodeInputRule(this.type, buildMentionMarkdownAttrs, true)];
+  },
 });
+
+export function buildMentionMarkdownAttrs(markdown: RichMarkdownLink) {
+  if (markdown.isImage || !markdown.label.trim()) {
+    return undefined;
+  }
+
+  const attrs = buildMentionNameAttrs(markdown.href);
+
+  return attrs ? { ...attrs, label: markdown.label } : undefined;
+}
 
 function EditableMention({ node, contentDOMElement }: TeactNodeViewComponentProps) {
   const peer = getMentionPeer(node.attrs);
@@ -142,11 +170,7 @@ function getMentionPeer(attrs: AnyLiteral): ApiPeer | undefined {
 }
 
 function buildMentionNameAttrs(element: HTMLElement | string) {
-  if (!(element instanceof HTMLElement)) {
-    return false;
-  }
-
-  const href = element.getAttribute('href');
+  const href = element instanceof HTMLElement ? element.getAttribute('href') : element;
   if (!href) {
     return false;
   }
@@ -164,11 +188,7 @@ function buildMentionNameAttrs(element: HTMLElement | string) {
 
   const userId = url.searchParams.get('id') || undefined;
   const user = userId ? selectUser(getGlobal(), userId) : undefined;
-  if (!user?.accessHash) {
-    return false;
-  }
-
-  return { userId };
+  return user?.accessHash ? { userId } : false;
 }
 
 function moveCursorOutsideMention(editor: Editor, typeName: string, direction: 'backward' | 'forward') {

@@ -181,8 +181,7 @@ const ChatExtra = ({
   } = useCollapsibleLines(
     noteTextRef,
     NOTE_MAX_LINES,
-    undefined,
-    !shouldRenderNote,
+    { isDisabled: !shouldRenderNote },
   );
 
   useEffectWithPrevDeps(([prevPeerId]) => {

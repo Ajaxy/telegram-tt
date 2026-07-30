@@ -33,7 +33,7 @@ const FactCheck = ({ factCheck, isToggleDisabled }: OwnProps) => {
   const cutoutRef = useRef<HTMLDivElement>();
   const {
     isCollapsed, isCollapsible, setIsCollapsed,
-  } = useCollapsibleLines(ref, MAX_LINES, cutoutRef);
+  } = useCollapsibleLines(ref, MAX_LINES, { cutoutRef });
 
   const countryLocalized = useMemo(() => {
     if (!factCheck.countryCode || !lang.code) return undefined;

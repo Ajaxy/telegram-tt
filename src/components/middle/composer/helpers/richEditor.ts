@@ -5,6 +5,7 @@ import {
   mergeAttributes,
   Node as TiptapNode,
 } from '@tiptap/core';
+import CodeExtension from '@tiptap/extension-code';
 import CodeBlockLowlightExtension from '@tiptap/extension-code-block-lowlight';
 import {
   Details as DetailsExtension,
@@ -14,8 +15,10 @@ import {
 } from '@tiptap/extension-details';
 import HeadingExtension from '@tiptap/extension-heading';
 import HorizontalRuleExtension from '@tiptap/extension-horizontal-rule';
+import LinkExtension from '@tiptap/extension-link';
 import { BulletList, ListItem, OrderedList } from '@tiptap/extension-list';
 import PlaceholderExtension from '@tiptap/extension-placeholder';
+import StrikeExtension from '@tiptap/extension-strike';
 import SubscriptExtension from '@tiptap/extension-subscript';
 import SuperscriptExtension from '@tiptap/extension-superscript';
 import UnderlineExtension from '@tiptap/extension-underline';
@@ -52,6 +55,12 @@ import {
   FOOTER_NODE_NAME,
   TABLE_TITLE_NODE_NAME,
 } from '../../../../util/tiptap/constants';
+import {
+  isRichMarkdownWebLink,
+  parseRichMarkdownLink,
+  parseRichMarkdownToken,
+  RE_RICH_MARKDOWN_LINK_INPUT,
+} from '../../../../util/tiptap/richMarkdown';
 import setEditorContentWithoutHistory from '../../../../util/tiptap/setEditorContentWithoutHistory';
 import styles from '../../../../util/tiptap/styling.module.scss';
 import { buildRichEditorFormatting } from '../../../ui/textInput/richEditorFormatting';
@@ -65,7 +74,10 @@ import { RichEditorTextReplacements } from './richEditorTextReplacements';
 
 import { requestSharedCanvasCoordsRecalculation } from '../../../../hooks/useCoordsInSharedCanvas';
 
-import { buildRichEditorTooltips } from '../../../common/tooltips/extensions/RichEditorTooltips';
+import {
+  buildRichEditorTooltips,
+  openRichEditorFormatterControl,
+} from '../../../common/tooltips/extensions/RichEditorTooltips';
 import EditableCodeBlock from '../richInput/EditableCodeBlock';
 import EditableListItem from '../richInput/EditableListItem';
 
@@ -149,9 +161,6 @@ export function __createRichEditor({
       onUpdate(editor);
       requestSharedCanvasCoordsRecalculation(sharedCanvasRef, sharedCanvasHqRef);
     },
-    onTransaction: ({ editor }) => {
-      resetRichEditorEmptySelection(editor);
-    },
   });
 
   setEditorContentWithoutHistory(richEditor, content);
@@ -182,35 +191,39 @@ function buildRichEditorExtensions(
     StarterKitExtension.configure({
       blockquote: false,
       bulletList: false,
-      code: {
-        HTMLAttributes: {
-          class: styles.inlineCode,
-        },
-      },
+      code: false,
       codeBlock: false,
       heading: false,
       horizontalRule: false,
       listItem: false,
-      link: {
-        autolink: false,
-        linkOnPaste: false,
-        openOnClick: false,
-        protocols: ['tg', 'ton'],
-        HTMLAttributes: {
-          class: styles.textEntityLink,
-          dir: 'auto',
-          target: undefined,
-          rel: undefined,
-        },
-      },
+      link: false,
       orderedList: false,
       paragraph: {
         HTMLAttributes: {
           class: styles.paragraph,
         },
       },
+      strike: false,
       underline: false,
     }),
+    RichEditorCode.configure({
+      HTMLAttributes: {
+        class: styles.inlineCode,
+      },
+    }),
+    RichEditorLink.configure({
+      autolink: false,
+      linkOnPaste: false,
+      openOnClick: false,
+      protocols: ['tg', 'ton'],
+      HTMLAttributes: {
+        class: styles.textEntityLink,
+        dir: 'auto',
+        target: undefined,
+        rel: undefined,
+      },
+    }),
+    RichEditorStrike,
     RichEditorMarkdown,
     buildRichEditorBlockquote(getIsRichInputExpanded).configure({
       HTMLAttributes: {
@@ -271,7 +284,7 @@ function buildRichEditorExtensions(
       quoteCaptionPlaceholder,
       tableTitlePlaceholder,
     }),
-    DateMark.configure({ onClick: onDateClick }),
+    RichEditorDate.configure({ onClick: onDateClick }),
     FormattedDateNode.configure({ onClick: onDateClick }),
     SpoilerMark,
     MarkedTextMark,
@@ -413,19 +426,6 @@ function handleRichEditorKeyDown(view: EditorView, event: KeyboardEvent) {
 
   event.preventDefault();
   return splitBlock(view.state, view.dispatch);
-}
-
-function resetRichEditorEmptySelection(editor: Editor) {
-  if (!__isRichEditorEmpty(editor)) {
-    return;
-  }
-
-  const startSelection = TextSelection.atStart(editor.state.doc);
-  if (editor.state.selection.eq(startSelection)) {
-    return;
-  }
-
-  editor.view.dispatch(editor.state.tr.setSelection(startSelection));
 }
 
 export function __isRichEditorEmpty(editor: Editor) {
@@ -733,6 +733,90 @@ const RichEditorCodeBlock = CodeBlockLowlightExtension.extend({
     return TeactNodeViewRenderer(EditableCodeBlock, {
       contentDOMElementTag: 'code',
     });
+  },
+});
+
+const RichEditorCode = CodeExtension.extend({
+  addKeyboardShortcuts() {
+    return {
+      'Mod-m': () => {
+        if (this.editor.state.selection.empty && !this.editor.isActive(this.name)) {
+          return false;
+        }
+
+        return toggleRichEditorCode(this.editor);
+      },
+      'Mod-M': () => toggleRichEditorCode(this.editor),
+    };
+  },
+});
+
+function toggleRichEditorCode(editor: Editor) {
+  return editor.state.selection.empty
+    ? editor.commands.toggleCode()
+    : editor.commands.toggleSelectionCode();
+}
+
+const RichEditorLink = LinkExtension.extend({
+  parseMarkdown(token, helpers) {
+    const markdown = parseRichMarkdownToken(token, false);
+    if (!markdown || !isRichMarkdownWebLink(markdown)) {
+      return helpers.parseInline(token.tokens || []);
+    }
+
+    return helpers.applyMark('link', helpers.parseInline(token.tokens || []), {
+      href: markdown.href,
+    });
+  },
+
+  addInputRules() {
+    return [new InputRule({
+      find: RE_RICH_MARKDOWN_LINK_INPUT,
+      handler: ({ state, range, match }) => {
+        const markdown = parseRichMarkdownLink(match[0]);
+        if (!markdown || !isRichMarkdownWebLink(markdown)) {
+          return;
+        }
+
+        const marks = state.doc.resolve(range.from).marks().filter(({ type }) => type !== this.type);
+        marks.push(this.type.create({ href: markdown.href }));
+        state.tr
+          .replaceWith(range.from, range.to, state.schema.text(markdown.label, marks))
+          .removeStoredMark(this.type)
+          .scrollIntoView();
+      },
+    })];
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      'Mod-k': () => openRichEditorFormatterControl(this.editor, 'link'),
+      'Mod-K': () => openRichEditorFormatterControl(this.editor, 'link'),
+    };
+  },
+});
+
+const RichEditorStrike = StrikeExtension.extend({
+  addKeyboardShortcuts() {
+    return {
+      ...this.parent?.(),
+      'Mod-s': () => {
+        if (this.editor.state.selection.empty && !this.editor.isActive(this.name)) {
+          return false;
+        }
+
+        return this.editor.commands.toggleStrike();
+      },
+    };
+  },
+});
+
+const RichEditorDate = DateMark.extend({
+  addKeyboardShortcuts() {
+    return {
+      'Mod-d': () => openRichEditorFormatterControl(this.editor, 'date'),
+      'Mod-D': () => openRichEditorFormatterControl(this.editor, 'date'),
+    };
   },
 });
 

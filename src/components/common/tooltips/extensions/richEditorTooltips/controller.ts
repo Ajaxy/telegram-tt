@@ -6,6 +6,7 @@ import type {
   OwnProps as RichEditorTooltipContainerProps,
 } from '../../RichEditorTooltipContainer';
 import type {
+  RichEditorFormatterControl,
   RichEditorTooltipItem,
   RichEditorTooltipsConfig,
   RichEditorTooltipSuggestion,
@@ -57,6 +58,10 @@ export class RichEditorTooltipsController {
 
   private formatterRange?: TiptapRange;
 
+  private formatterControlRequest?: {
+    control: RichEditorFormatterControl;
+  };
+
   private selectedIndex = -1;
 
   private isFormatterDismissalBlocked = false;
@@ -95,6 +100,7 @@ export class RichEditorTooltipsController {
     this.clearFade('formatter');
     this.closingFormatterRange = undefined;
     this.formatterRange = undefined;
+    this.formatterControlRequest = undefined;
     this.render();
   }
 
@@ -120,6 +126,7 @@ export class RichEditorTooltipsController {
     if (hasDocChanged && !range) {
       this.clearFade('formatter');
       this.closingFormatterRange = undefined;
+      this.formatterControlRequest = undefined;
       if (this.formatterRange) {
         this.formatterRange = undefined;
         this.render();
@@ -156,6 +163,7 @@ export class RichEditorTooltipsController {
         this.closingFormatterRange = undefined;
       });
     }
+    this.formatterControlRequest = undefined;
     this.formatterRange = range;
     if (range && hadRenderedFormatter) {
       this.positionFormatter();
@@ -210,6 +218,16 @@ export class RichEditorTooltipsController {
     return true;
   }
 
+  public openFormatterControl(control: RichEditorFormatterControl) {
+    if (this.isDestroyed || !this.formatterRange || this.editor.isDestroyed) {
+      return false;
+    }
+
+    this.formatterControlRequest = { control };
+    this.render(true);
+    return true;
+  }
+
   public closeFormatter = () => {
     if (!this.formatterRange || this.editor.isDestroyed) {
       return;
@@ -218,6 +236,7 @@ export class RichEditorTooltipsController {
     const range = this.formatterRange;
     const head = Math.max(range.from, Math.min(this.editor.state.selection.head, range.to));
     this.closingFormatterRange = range;
+    this.formatterControlRequest = undefined;
     this.scheduleFade('formatter', () => {
       this.closingFormatterRange = undefined;
     });
@@ -308,6 +327,7 @@ export class RichEditorTooltipsController {
       formatter: formatterRange && this.config.formatter ? {
         range: formatterRange,
         capabilities: this.config.formatter.capabilities,
+        controlRequest: this.formatterControlRequest,
       } : undefined,
       isOpen: Boolean(surface && this.suggestions.has(surface)),
       isCustomEmojiOpen: this.suggestions.has('customEmoji'),

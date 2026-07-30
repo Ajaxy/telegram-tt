@@ -146,6 +146,7 @@ const RichEditorTooltipContainer = ({
             editor={editor}
             range={formatter.range}
             capabilities={formatter.capabilities}
+            controlRequest={formatter.controlRequest}
             isRichInputExpanded={context.isRichInputExpanded}
             onClose={onCloseFormatter}
             onDismissalChange={onFormatterDismissalChange}

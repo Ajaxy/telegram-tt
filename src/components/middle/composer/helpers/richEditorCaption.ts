@@ -4,6 +4,7 @@ import type { Transaction } from '@tiptap/pm/state';
 import { Plugin } from '@tiptap/pm/state';
 
 import { CAPTION_NODE_NAME } from '../../../../util/tiptap/constants';
+import { RICH_INPUT_MODE_CHANGED_META } from './richEditorMode';
 import { isRichEditorQuoteNode } from './richEditorQuote';
 import buildRichEditorTextField from './richEditorTextField';
 
@@ -13,7 +14,6 @@ type RichEditorCaptionOptions = {
 };
 
 const EMPTY_CAPTION_NODE_SIZE = 2;
-export const SYNC_QUOTE_CAPTIONS_META = 'syncQuoteCaptions';
 
 const RichEditorCaptionNode = buildRichEditorTextField({
   name: CAPTION_NODE_NAME,
@@ -48,7 +48,7 @@ export const RichEditorCaption = RichEditorCaptionNode.extend<RichEditorCaptionO
       new Plugin({
         appendTransaction: (transactions, _oldState, newState) => {
           if (!transactions.some((transaction) => (
-            transaction.docChanged || transaction.getMeta(SYNC_QUOTE_CAPTIONS_META)
+            transaction.docChanged || transaction.getMeta(RICH_INPUT_MODE_CHANGED_META)
           ))) {
             return undefined;
           }

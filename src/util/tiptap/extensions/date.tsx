@@ -1,4 +1,6 @@
-import { getMarkRange, Mark, mergeAttributes, Node } from '@tiptap/core';
+import {
+  getMarkRange, Mark, mergeAttributes, Node,
+} from '@tiptap/core';
 import { Plugin } from '@tiptap/pm/state';
 
 import type { ApiMessageEntityFormattedDate } from '../../../api/types';
@@ -6,8 +8,15 @@ import type { FormattedDateEntityOptions } from '../../dates/formattedDate';
 import type { TeactNodeViewComponentProps } from '../TeactNodeViewRenderer';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
+import { MAX_INT_32 } from '../../../config';
 import buildClassName from '../../buildClassName';
 import { getFormattedDateFormatString } from '../../dates/formattedDate';
+import {
+  buildRichMarkdownNodeInputRule,
+  buildRichMarkdownTokenizer,
+  parseRichMarkdownNode,
+  type RichMarkdownLink,
+} from '../richMarkdown';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 
@@ -37,6 +46,7 @@ type DateExtensionOptions = {
 };
 
 const DATE_ENTITY_SELECTOR = `[data-entity-type="${ApiMessageEntityTypes.FormattedDate}"]`;
+const RE_FORMATTED_DATE_FORMAT = /^(?:r|w?[dD]?[tT]?)$/;
 
 export const DateMark = Mark.create<DateExtensionOptions>({
   name: 'date',
@@ -113,6 +123,18 @@ export const FormattedDateNode = Node.create<DateExtensionOptions>({
   atom: true,
   selectable: false,
 
+  markdownTokenName: 'formattedDate',
+
+  markdownTokenizer: buildRichMarkdownTokenizer('formattedDate', true, buildFormattedDateMarkdownAttrs),
+
+  parseMarkdown(token, helpers) {
+    return parseRichMarkdownNode(token, helpers, true, 'formattedDate', buildFormattedDateMarkdownAttrs);
+  },
+
+  addInputRules() {
+    return [buildRichMarkdownNodeInputRule(this.type, buildFormattedDateMarkdownAttrs)];
+  },
+
   addOptions() {
     return { onClick: undefined };
   },
@@ -165,6 +187,28 @@ export const FormattedDateNode = Node.create<DateExtensionOptions>({
   },
 
 });
+
+export function buildFormattedDateMarkdownAttrs(markdown: RichMarkdownLink) {
+  if (!markdown.isImage || !markdown.label.trim()
+    || markdown.url.protocol !== 'tg:' || markdown.url.host !== 'time') {
+    return undefined;
+  }
+
+  const rawDate = markdown.url.searchParams.get('unix') || undefined;
+  const format = markdown.url.searchParams.get('format') || '';
+  const date = Number(rawDate);
+  if (
+    !rawDate
+    || !Number.isSafeInteger(date)
+    || date <= 0
+    || date > MAX_INT_32
+    || !RE_FORMATTED_DATE_FORMAT.test(format)
+  ) {
+    return undefined;
+  }
+
+  return buildFormattedDateAttrs(date, markdown.label, format);
+}
 
 function FormattedDateView({ node, extension, getPos }: TeactNodeViewComponentProps) {
   const date = parseDate(node.attrs.date);
@@ -223,15 +267,21 @@ function buildFormattedDateNodeAttrs(element: HTMLElement | string) {
     return false;
   }
 
+  return buildFormattedDateAttrs(date, element.textContent || '', format);
+}
+
+function buildFormattedDateAttrs(date: number, label: string, format: string) {
   return {
     date,
-    label: element.textContent || '',
-    relative: format.includes('r') || undefined,
-    dayOfWeek: format.includes('w') || undefined,
-    shortDate: format.includes('d') || undefined,
-    longDate: format.includes('D') || undefined,
-    shortTime: format.includes('t') || undefined,
-    longTime: format.includes('T') || undefined,
+    label,
+    ...buildFormattedDateOptions({
+      relative: format.includes('r'),
+      dayOfWeek: format.includes('w'),
+      shortDate: format.includes('d'),
+      longDate: format.includes('D'),
+      shortTime: format.includes('t'),
+      longTime: format.includes('T'),
+    }),
   };
 }
 

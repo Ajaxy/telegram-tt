@@ -1,5 +1,13 @@
 @use "../../styles/mixins";
 
+.root {
+  --rich-content-meta-color: var(--color-text-meta);
+}
+
+.own {
+  --rich-content-meta-color: var(--color-message-meta-own);
+}
+
 .root,
 .collapsedContent {
   position: relative;

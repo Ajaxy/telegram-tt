@@ -1,5 +1,6 @@
 import type {
   Editor,
+  EditorEvents,
   NodeViewProps,
   NodeViewRenderer,
   NodeViewRendererOptions,
@@ -25,12 +26,14 @@ export type TeactNodeViewRendererOptions = Partial<NodeViewRendererOptions> & {
   as?: string;
   className?: string;
   contentDOMClassName?: string;
+  shouldUpdateOnTransaction?: (event: EditorEvents['transaction']) => boolean;
 };
 
 type TeactNodeViewOptions = NodeViewRendererOptions & {
   as: string;
   className?: string;
   contentDOMClassName?: string;
+  shouldUpdateOnTransaction?: (event: EditorEvents['transaction']) => boolean;
 };
 
 type TeactNodeViewRootProps = {
@@ -92,9 +95,12 @@ class TeactNodeView extends NodeView<TeactNodeViewComponent, Editor, TeactNodeVi
     selectionUpdateHandlers.set(this, handleSelectionUpdate);
     this.editor.on('selectionUpdate', handleSelectionUpdate);
 
-    if (this.options.trackNodeViewPosition) {
-      const handleTransaction = () => {
-        this.updateRenderer();
+    const { shouldUpdateOnTransaction, trackNodeViewPosition } = this.options;
+    if (trackNodeViewPosition || shouldUpdateOnTransaction) {
+      const handleTransaction = (event: EditorEvents['transaction']) => {
+        if (trackNodeViewPosition || shouldUpdateOnTransaction?.(event)) {
+          this.updateRenderer();
+        }
       };
       transactionHandlers.set(this, handleTransaction);
       this.editor.on('transaction', handleTransaction);
@@ -237,6 +243,7 @@ function buildResolvedOptions(options: TeactNodeViewRendererOptions): Partial<Te
     contentDOMElementTag: options.contentDOMElementTag || DEFAULT_CONTENT_DOM_ELEMENT_TAG,
     contentDOMClassName: options.contentDOMClassName,
     selectedOnTextSelection: options.selectedOnTextSelection,
+    shouldUpdateOnTransaction: options.shouldUpdateOnTransaction,
     trackNodeViewPosition: options.trackNodeViewPosition,
   };
 

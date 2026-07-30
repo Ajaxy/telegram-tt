@@ -1,4 +1,5 @@
 export const EMOJI_NODE_NAME = 'emoji';
+export const BLOCKQUOTE_COLLAPSED_ATTR = 'collapsed';
 export const MATH_BLOCK_NODE_NAME = 'mathBlock';
 export const MATH_INLINE_NODE_NAME = 'mathInline';
 export const CAPTION_NODE_NAME = 'richEditorCaption';

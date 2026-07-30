@@ -55,7 +55,7 @@ const DeleteAccountModal = ({
   const options: { value: string; label: string }[] = useMemo(() => {
     return ACCOUNT_TTL_OPTIONS.map((months) => ({
       value: String(months),
-      label: lang('Months', { count: months }, { pluralValue: 1 }),
+      label: lang('Months', { count: months }, { pluralValue: months }),
     }));
   }, [lang]);
 

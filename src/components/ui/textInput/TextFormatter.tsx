@@ -2,6 +2,7 @@ import type { Editor } from '@tiptap/core';
 import { memo, useEffect, useState } from '../../../lib/teact/teact';
 
 import type { IconName } from '../../../types/icons';
+import type { RichEditorFormatterState } from '../../common/tooltips/types';
 
 import { formatLinkUrl } from '../../../util/browser/url';
 import buildClassName from '../../../util/buildClassName';
@@ -24,6 +25,7 @@ export type OwnProps = {
   editor: Editor;
   range: EditorRange;
   capabilities: 'basic' | 'full';
+  controlRequest?: RichEditorFormatterState['controlRequest'];
   isRichInputExpanded?: boolean;
   onClose: NoneToVoidFunction;
   onDismissalChange: (isBlocked: boolean) => void;
@@ -64,6 +66,7 @@ const TextFormatter = ({
   editor,
   range,
   capabilities,
+  controlRequest,
   isRichInputExpanded,
   onClose,
   onDismissalChange,
@@ -217,6 +220,14 @@ const TextFormatter = ({
     closeDatePicker();
     onClose();
   });
+
+  useEffect(() => {
+    if (controlRequest?.control === 'link') {
+      handleOpenLinkControl();
+    } else if (controlRequest?.control === 'date') {
+      handleOpenDatePicker();
+    }
+  }, [controlRequest, handleOpenDatePicker, handleOpenLinkControl]);
 
   const className = buildClassName(styles.root, isLinkControlOpen && styles.linkControlShown);
 

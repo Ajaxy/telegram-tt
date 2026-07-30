@@ -50,9 +50,14 @@ export type RichEditorTooltipItem =
 
 export type RichEditorTooltipSuggestion = SuggestionProps<RichEditorTooltipItem, RichEditorTooltipItem>;
 
+export type RichEditorFormatterControl = 'date' | 'link';
+
 export type RichEditorFormatterState = {
   range: TiptapRange;
   capabilities: 'basic' | 'full';
+  controlRequest?: {
+    control: RichEditorFormatterControl;
+  };
 };
 
 type RichEditorTooltipSurfaceConfig = {

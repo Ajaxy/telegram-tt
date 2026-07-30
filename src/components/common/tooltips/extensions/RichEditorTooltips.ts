@@ -1,7 +1,7 @@
 import { type Editor, Extension } from '@tiptap/core';
 import type { Plugin } from '@tiptap/pm/state';
 
-import type { RichEditorTooltipsConfig } from '../types';
+import type { RichEditorFormatterControl, RichEditorTooltipsConfig } from '../types';
 
 import { buildCommandSuggestion } from './richEditorTooltips/command';
 import { RichEditorTooltipsController } from './richEditorTooltips/controller';
@@ -83,6 +83,15 @@ export function refreshRichEditorTooltips(editor: Editor) {
   if (storage?.config) {
     refreshFormatter(editor, storage.config, () => storage.controller);
   }
+}
+
+export function openRichEditorFormatterControl(editor: Editor, control: RichEditorFormatterControl) {
+  if (editor.isDestroyed) {
+    return false;
+  }
+
+  const storage = (editor.storage as AnyLiteral).richEditorTooltips as RichEditorTooltipsStorage | undefined;
+  return storage?.controller?.openFormatterControl(control) || false;
 }
 
 export function hasActiveRichEditorTooltip(editor: Editor) {

@@ -19,7 +19,11 @@ type OwnProps = {
   contentClassName?: string;
   canBeCollapsible?: boolean;
   isToggleDisabled?: boolean;
+  noInitialCollapse?: boolean;
+  recalculationKey?: unknown;
+  isCollapsed?: boolean;
   children: TeactNode;
+  onCollapseChange?: (isCollapsed: boolean) => void;
 };
 
 const MAX_LINES = 4;
@@ -29,14 +33,25 @@ const Blockquote = ({
   contentClassName,
   canBeCollapsible,
   isToggleDisabled,
+  noInitialCollapse,
+  recalculationKey,
+  isCollapsed: isCollapsedControlled,
   children,
+  onCollapseChange,
 }: OwnProps) => {
   const ref = useRef<HTMLQuoteElement>();
   const {
     isCollapsed, isCollapsible, setIsCollapsed,
-  } = useCollapsibleLines(ref, MAX_LINES, undefined, !canBeCollapsible);
+  } = useCollapsibleLines(ref, MAX_LINES, {
+    isDisabled: !canBeCollapsible,
+    noInitialCollapse,
+    recalculationKey,
+    isCollapsed: isCollapsedControlled,
+    onCollapseChange,
+  });
 
-  const canExpand = !isToggleDisabled && isCollapsed;
+  const shouldCollapse = Boolean(canBeCollapsible && isCollapsed);
+  const canExpand = !isToggleDisabled && shouldCollapse;
 
   const handleExpand = useLastCallback(() => {
     setIsCollapsed(false);
@@ -48,24 +63,26 @@ const Blockquote = ({
 
   return (
     <span
-      className={buildClassName(styles.root, className, isCollapsed && styles.collapsed)}
+      className={buildClassName(styles.root, className, shouldCollapse && styles.collapsed)}
       onClick={canExpand ? handleExpand : undefined}
     >
       <blockquote
         className={buildClassName(styles.blockquote, contentClassName)}
         ref={ref}
         data-entity-type={ApiMessageEntityTypes.Blockquote}
+        contentEditable={shouldCollapse ? false : undefined}
       >
         <div className={styles.gradientContainer}>
           {children}
         </div>
-        {isCollapsible && (
+        {canBeCollapsible && isCollapsible && (
           <div
             className={buildClassName(styles.collapseIcon, !isToggleDisabled && styles.clickable)}
+            contentEditable={false}
             onClick={!isToggleDisabled ? handleToggle : undefined}
             aria-hidden
           >
-            <Icon name={isCollapsed ? 'down' : 'up'} />
+            <Icon name={shouldCollapse ? 'down' : 'up'} />
           </div>
         )}
       </blockquote>

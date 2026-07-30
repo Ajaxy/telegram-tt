@@ -39,7 +39,7 @@ import {
   hasUnsupportedRichBlocks,
   removeUnsupportedRichBlocks,
 } from '../../ui/textInput/richText';
-import { SYNC_QUOTE_CAPTIONS_META } from './helpers/richEditorCaption';
+import { RICH_INPUT_MODE_CHANGED_META } from './helpers/richEditorMode';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
@@ -271,14 +271,23 @@ const MessageInput = ({
     // Defer to avoid animation/layout conflicts during DOM updates
     fastRaf(() => {
       requestForcedReflow(() => {
-        const input = inputRef.current!;
-        const scroller = input.closest<HTMLDivElement>(`.${SCROLLER_CLASS}`)!;
-        const currentHeight = Number(scroller.style.height.replace('px', ''));
-        const clone = scrollerCloneRef.current!;
+        const input = inputRef.current;
+        const clone = scrollerCloneRef.current;
+        if (!input || !clone) {
+          return undefined;
+        }
+
+        const scroller = input.closest<HTMLDivElement>(`.${SCROLLER_CLASS}`);
+        if (!scroller) {
+          return undefined;
+        }
+
+        const currentScroller = scroller;
+        const currentHeight = Number(currentScroller.style.height.replace('px', ''));
         const { scrollHeight } = clone;
         let heightLimit = maxInputHeight;
         if (isCollapsedRichOnlyPreview) {
-          const baseHeight = Number.parseFloat(getComputedStyle(scroller).minHeight);
+          const baseHeight = Number.parseFloat(getComputedStyle(currentScroller).minHeight);
           const lineHeight = Number.parseFloat(getComputedStyle(input).lineHeight);
           heightLimit = baseHeight + lineHeight * (COLLAPSED_RICH_PREVIEW_LINE_COUNT - 1);
         }
@@ -294,9 +303,9 @@ const MessageInput = ({
           const transitionDuration = Math.round(
             TRANSITION_DURATION_FACTOR * Math.log(Math.abs(newHeight - currentHeight)),
           );
-          scroller.style.height = `${newHeight}px`;
-          scroller.style.transitionDuration = `${transitionDuration}ms`;
-          scroller.classList.toggle('overflown', isOverflown);
+          currentScroller.style.height = `${newHeight}px`;
+          currentScroller.style.transitionDuration = `${transitionDuration}ms`;
+          currentScroller.classList.toggle('overflown', isOverflown);
         }
 
         if (willSend) {
@@ -441,7 +450,7 @@ const MessageInput = ({
     }
 
     editor.view.dispatch(editor.state.tr
-      .setMeta(SYNC_QUOTE_CAPTIONS_META, true)
+      .setMeta(RICH_INPUT_MODE_CHANGED_META, true)
       .setMeta('addToHistory', false));
     editor.setEditable(!isCollapsedRichOnlyPreview, false);
     syncEditorElementAttributes(editor.view.dom);

@@ -36,6 +36,12 @@
   }
 }
 
+.paddedCaption {
+  .caption {
+    padding-inline: 0.5rem;
+  }
+}
+
 .paragraph {
   margin-bottom: 0.125rem;
 }
@@ -64,7 +70,7 @@
 .unsupported,
 .relatedArticleDescription,
 .relatedArticleMeta {
-  color: var(--color-text-meta);
+  color: var(--rich-content-meta-color);
 }
 
 .authorDate,
@@ -248,13 +254,12 @@
 .credit {
   display: block;
   margin-top: 0.25rem;
-  color: var(--color-text-meta);
+  color: var(--accent-color);
 }
 
 .pullquoteCaption {
   font-weight: var(--font-weight-semibold);
   font-style: normal;
-  color: var(--accent-color);
 }
 
 .details {
@@ -479,10 +484,6 @@
 
 .cover {
   margin-bottom: 1rem;
-
-  .caption {
-    margin-inline: 0.5rem;
-  }
 
   .mediaBlock {
     max-height: min(20rem, 40vh);
