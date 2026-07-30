@@ -1955,7 +1955,9 @@ export interface ActionPayloads {
     lastName?: string;
     bio?: string;
     username?: string;
+    personalChannelId?: string | false;
   } & WithTabId;
+  loadPersonalChannels: undefined;
   updateBirthday: {
     birthday?: ApiBirthday;
   };

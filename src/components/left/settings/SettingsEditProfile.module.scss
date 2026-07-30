@@ -1,0 +1,11 @@
+.personalChannelItem {
+  cursor: var(--custom-cursor, pointer);
+
+  :global(.Chat) {
+    pointer-events: none;
+  }
+
+  :global(.Avatar) {
+    margin-inline-end: 0.9375rem !important;
+  }
+}

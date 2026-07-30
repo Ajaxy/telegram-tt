@@ -251,6 +251,8 @@ export type GlobalState = {
     notifyExceptionById: Record<string, ApiPeerNotifySettings>;
 
     similarBotsById: Record<string, SimilarBotsInfo>;
+
+    personalChannelIds?: string[];
   };
 
   messages: {

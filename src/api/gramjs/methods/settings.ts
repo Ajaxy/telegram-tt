@@ -4,6 +4,7 @@ import { RPCError } from '../../../lib/gramjs/errors';
 import type { LANG_PACKS } from '../../../config';
 import type {
   ApiBirthday,
+  ApiChat,
   ApiDisallowedGiftsSettings,
   ApiInputPrivacyRules,
   ApiLanguage,
@@ -40,6 +41,7 @@ import {
 } from '../apiBuilders/misc';
 import {
   buildApiPeerColors,
+  buildApiPeerId,
   buildApiPeerNotifySettings,
   buildApiPeerProfileColors,
   getApiChatIdFromMtpPeer,
@@ -113,6 +115,25 @@ export function updateBirthday(birthday?: ApiBirthday) {
       month: birthday.month,
       year: birthday.year,
     }) : undefined,
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export async function fetchAdminedPersonalChannelIds() {
+  const result = await invokeRequest(new GramJs.channels.GetAdminedPublicChannels({
+    forPersonal: true,
+  }));
+  if (!result) return undefined;
+
+  return result.chats.map(({ id }) => buildApiPeerId(id, 'channel'));
+}
+
+export function updatePersonalChannel(channel?: ApiChat) {
+  return invokeRequest(new GramJs.account.UpdatePersonalChannel({
+    channel: channel
+      ? buildInputChannel(channel.id, channel.accessHash)
+      : new GramJs.InputChannelEmpty(),
   }), {
     shouldReturnTrue: true,
   });

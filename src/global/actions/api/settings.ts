@@ -23,7 +23,7 @@ import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, getPromiseActions, setGlobal } from '../../index';
 import {
   addBlockedUser, addNotifyExceptions, deletePeerPhoto,
-  removeBlockedUser, replaceSettings, updateChat,
+  removeBlockedUser, replacePersonalChannelIds, replaceSettings, updateChat,
   updateNotifyDefaults, updateSharedSettings, updateUser, updateUserFullInfo,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
@@ -35,7 +35,7 @@ import { selectSharedSettings } from '../../selectors/sharedState';
 
 addActionHandler('updateProfile', async (global, actions, payload): Promise<void> => {
   const {
-    photo, firstName, lastName, bio: about, username,
+    photo, firstName, lastName, bio: about, username, personalChannelId,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -91,6 +91,23 @@ addActionHandler('updateProfile', async (global, actions, payload): Promise<void
     }
   }
 
+  let isPersonalChannelUpdated = false;
+  if (personalChannelId !== undefined) {
+    global = getGlobal();
+    const personalChannel = personalChannelId ? selectChat(global, personalChannelId)! : undefined;
+    const result = await callApi('updatePersonalChannel', personalChannel);
+    if (result) {
+      global = getGlobal();
+      global = updateUserFullInfo(global, currentUserId, {
+        personalChannelId: personalChannelId || undefined,
+        personalChannelMessageId: undefined,
+      });
+      setGlobal(global);
+
+      isPersonalChannelUpdated = true;
+    }
+  }
+
   global = getGlobal();
   global = updateTabState(global, {
     profileEdit: {
@@ -99,9 +116,18 @@ addActionHandler('updateProfile', async (global, actions, payload): Promise<void
   }, tabId);
   setGlobal(global);
 
-  if (photo) {
-    actions.loadFullUser({ userId: currentUserId, withPhotos: true });
+  if (photo || isPersonalChannelUpdated) {
+    actions.loadFullUser({ userId: currentUserId, withPhotos: photo ? true : undefined });
   }
+});
+
+addActionHandler('loadPersonalChannels', async (global): Promise<void> => {
+  const personalChannelIds = await callApi('fetchAdminedPersonalChannelIds');
+  if (!personalChannelIds) return;
+
+  global = getGlobal();
+  global = replacePersonalChannelIds(global, personalChannelIds);
+  setGlobal(global);
 });
 
 addActionHandler('updateBirthday', async (global, actions, payload): Promise<void> => {

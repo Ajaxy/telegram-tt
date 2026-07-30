@@ -2150,6 +2150,13 @@ export interface LangPair {
   'BirthdayRemove': undefined;
   'BirthdayPrivacySuggestionLink': undefined;
   'SettingsBirthday': undefined;
+  'PersonalChannelLabel': undefined;
+  'PersonalChannelAdd': undefined;
+  'PersonalChannelTitle': undefined;
+  'PersonalChannelDescription': undefined;
+  'PersonalChannelPickerTitle': undefined;
+  'PersonalChannelNoChannels': undefined;
+  'PersonalChannelRemove': undefined;
   'BotReadTextFromClipboardTitle': undefined;
   'BotReadTextFromClipboardConfirm': undefined;
   'ChatInfoForumTopic': undefined;
