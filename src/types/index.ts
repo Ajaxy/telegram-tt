@@ -848,6 +848,7 @@ export type ForwardMessagesParams = {
   withMyScore?: boolean;
   noAuthors?: boolean;
   noCaptions?: boolean;
+  privateForwardName?: string;
   isCurrentUserPremium?: boolean;
   wasDrafted?: boolean;
   lastMessageId?: number;

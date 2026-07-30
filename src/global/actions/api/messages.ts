@@ -1831,6 +1831,7 @@ async function executeForwardMessages(global: GlobalState, sendParams: SendMessa
     return undefined;
   }
 
+  const privateForwardName = selectUserFullInfo(global, fromChat.id)?.privateForwardName;
   const sendAs = selectSendAs(global, toChatId!);
   const draft = selectDraft(global, toChatId!, toThreadId || MAIN_THREAD_ID);
   const lastMessageId = selectChatLastMessageId(global, toChat.id);
@@ -1855,6 +1856,7 @@ async function executeForwardMessages(global: GlobalState, sendParams: SendMessa
         withMyScore,
         noAuthors,
         noCaptions,
+        privateForwardName,
         isCurrentUserPremium,
         wasDrafted: Boolean(draft),
         lastMessageId,
@@ -2917,6 +2919,7 @@ function forwardMessagesToChat({
   noCaptions,
   isCurrentUserPremium,
 }: ForwardToChatOptions) {
+  const privateForwardName = selectUserFullInfo(global, fromChat.id)?.privateForwardName;
   const sendAs = selectSendAs(global, toChat.id);
   const threadInfo = toThreadId !== MAIN_THREAD_ID ? selectThreadInfo(global, toChat.id, toThreadId) : undefined;
   const lastMessageId = toThreadId === MAIN_THREAD_ID
@@ -2956,6 +2959,7 @@ function forwardMessagesToChat({
         withMyScore,
         noAuthors,
         noCaptions,
+        privateForwardName,
         isCurrentUserPremium,
         wasDrafted: false,
         lastMessageId,

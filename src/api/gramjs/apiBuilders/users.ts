@@ -37,7 +37,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount, botVerification,
       botCanManageEmojiStatus, settings, sendPaidMessagesStars, displayGiftsButton, disallowedGifts,
       starsRating, starsMyPendingRating, starsMyPendingRatingDate, mainTab, note,
-      noforwardsMyEnabled, noforwardsPeerEnabled, unofficialSecurityRisk,
+      noforwardsMyEnabled, noforwardsPeerEnabled, unofficialSecurityRisk, privateForwardName,
     },
     users,
   } = mtpUserFull;
@@ -66,6 +66,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     personalChannelId: personalChannelId !== undefined
       ? buildApiPeerId(personalChannelId, 'channel') : undefined,
     personalChannelMessageId: personalChannelMessage,
+    privateForwardName,
     botVerification: botVerification && buildApiBotVerification(botVerification),
     areAdsEnabled: sponsoredEnabled,
     starGiftCount: stargiftsCount,

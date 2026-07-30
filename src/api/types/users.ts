@@ -72,6 +72,7 @@ export interface ApiUserFullInfo {
   birthday?: ApiBirthday;
   personalChannelId?: string;
   personalChannelMessageId?: number;
+  privateForwardName?: string;
   businessLocation?: ApiBusinessLocation;
   businessWorkHours?: ApiBusinessWorkHours;
   businessIntro?: ApiBusinessIntro;

@@ -581,6 +581,7 @@ export function buildLocalForwardedMessage({
   scheduleRepeatPeriod,
   noAuthors,
   noCaptions,
+  privateForwardName,
   isCurrentUserPremium,
   lastMessageId,
   sendAs,
@@ -593,6 +594,7 @@ export function buildLocalForwardedMessage({
   scheduleRepeatPeriod?: number;
   noAuthors?: boolean;
   noCaptions?: boolean;
+  privateForwardName?: string;
   isCurrentUserPremium?: boolean;
   lastMessageId?: number;
   sendAs?: ApiPeer;
@@ -602,16 +604,13 @@ export function buildLocalForwardedMessage({
   const {
     content,
     chatId: fromChatId,
-    id: fromMessageId,
-    senderId,
     groupedId,
     isInAlbum,
     isInvertedMedia,
   } = message;
 
-  const isAudio = content.audio;
   const asIncomingInChatWithSelf = (
-    toChat.id === currentUserId && (fromChatId !== toChat.id || message.forwardInfo) && !isAudio
+    toChat.id === currentUserId && (fromChatId !== toChat.id || message.forwardInfo)
   );
   const shouldHideText = Object.keys(content).length > 1 && content.text && noCaptions;
   const shouldDropCustomEmoji = !isCurrentUserPremium;
@@ -622,6 +621,7 @@ export function buildLocalForwardedMessage({
   const textWithTimestamps = strippedText && addTimestampEntities(strippedText);
   const emojiOnlyCount = getEmojiOnlyCountForMessage(content, groupedId);
   if (emojiOnlyCount && textWithTimestamps) textWithTimestamps.emojiOnlyCount = emojiOnlyCount;
+  const forwardInfo = buildLocalForwardInfo(message, privateForwardName, noAuthors);
 
   const updatedContent = {
     ...content,
@@ -652,22 +652,38 @@ export function buildLocalForwardedMessage({
     replyInfo,
     isInvertedMedia,
     effectId,
+    forwardInfo,
     ...(toThreadId && toChat?.isForum && { isTopicReply: true }),
-
-    // Forward info doesn't get added when user forwards own messages and when forwarding audio
-    ...(message.chatId !== currentUserId && !isAudio && !noAuthors && {
-      forwardInfo: {
-        date: message.forwardInfo?.date || message.date,
-        savedDate: message.date,
-        isChannelPost: false,
-        fromChatId,
-        fromMessageId,
-        fromId: senderId,
-        savedFromPeerId: message.chatId,
-      },
-    }),
-    ...(message.chatId === currentUserId && !noAuthors && { forwardInfo: message.forwardInfo }),
     ...(scheduledAt && { isScheduled: true }),
+  };
+}
+
+function buildLocalForwardInfo(
+  message: ApiMessage,
+  privateForwardName?: string,
+  noAuthors?: boolean,
+): ApiMessageForwardInfo | undefined {
+  if (noAuthors || message.isOutgoing) return undefined;
+  if (message.chatId === currentUserId) return message.forwardInfo;
+
+  const date = message.forwardInfo?.date || message.date;
+  if (privateForwardName !== undefined) {
+    return {
+      date,
+      savedDate: message.date,
+      isChannelPost: false,
+      hiddenUserName: privateForwardName,
+    };
+  }
+
+  return {
+    date,
+    savedDate: message.date,
+    isChannelPost: false,
+    fromChatId: message.chatId,
+    fromMessageId: message.id,
+    fromId: message.senderId,
+    savedFromPeerId: message.chatId,
   };
 }
 
