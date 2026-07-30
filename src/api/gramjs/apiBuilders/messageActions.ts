@@ -10,6 +10,7 @@ import { buildApiStarGift } from './gifts';
 import { buildPollAnswer, buildTodoItem } from './messageContent';
 import { buildApiCurrencyAmount } from './payments';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
+import { buildApiBirthday } from './users';
 
 const UNSUPPORTED_ACTION: ApiMessageAction = {
   mediaType: 'action',
@@ -294,6 +295,13 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       mediaType: 'action',
       type: 'suggestProfilePhoto',
       photo: buildApiPhoto(photo),
+    };
+  }
+  if (action instanceof GramJs.MessageActionSuggestBirthday) {
+    return {
+      mediaType: 'action',
+      type: 'suggestBirthday',
+      birthday: buildApiBirthday(action.birthday),
     };
   }
   if (action instanceof GramJs.MessageActionGiftCode) {

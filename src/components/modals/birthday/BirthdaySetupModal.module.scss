@@ -10,6 +10,8 @@
   flex-direction: column;
   gap: 0.75rem;
   align-items: center;
+
+  max-width: 100%;
 }
 
 .inputs {
@@ -18,6 +20,8 @@
 }
 
 .title {
+  max-width: 100%;
+  margin-bottom: 0;
   font-size: 1.5rem;
 }
 

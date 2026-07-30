@@ -2290,6 +2290,8 @@
 "GiftOfferPriceHigh" = "The price you are offered is **{percent}** higher than the average price for {gift}";
 "ActionSuggestedPhotoYou" = "You suggested this photo for {user}'s Telegram profile.";
 "ActionSuggestedPhoto" = "{user} suggests this photo for your Telegram profile.";
+"ActionSuggestedBirthdayYou" = "You suggested {user} to add a birthday";
+"ActionSuggestedBirthday" = "{user} suggested you add your birthday";
 "ActionSuggestedPhotoButton" = "View Photo";
 "ActionSuggestedVideoTitle" = "Suggested Video";
 "ActionSuggestedVideoText" = "Do you want to use this photo for your profile?";
@@ -2925,6 +2927,10 @@
 "BirthdayRemove" = "Remove from Profile";
 "BirthdayPrivacySuggestion" = "Choose who can see your birthday in {link}";
 "BirthdayPrivacySuggestionLink" = "Settings >";
+"BirthdayTitleForPeer" = "{user}'s Date of Birth";
+"BirthdaySuggest" = "Suggest Date of Birth";
+"BirthdayAddToProfile" = "Add to My Profile";
+"BirthdayHideYear" = "Hide Year";
 "SettingsBirthday" = "Birthday";
 "PersonalChannelLabel" = "Channel";
 "PersonalChannelAdd" = "Add";

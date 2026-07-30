@@ -1,6 +1,7 @@
 import type { ApiGroupCall, ApiPhoneCallDiscardReason } from './calls';
 import type { ApiBotApp, ApiFormattedText, ApiPhoto, ApiPollAnswer, ApiTodoItem } from './messages';
 import type { ApiStarGiftRegular, ApiStarGiftUnique, ApiTypeCurrencyAmount } from './stars';
+import type { ApiBirthday } from './users';
 
 interface ActionMediaType {
   mediaType: 'action';
@@ -165,6 +166,11 @@ export interface ApiMessageActionTopicEdit extends ActionMediaType {
 export interface ApiMessageActionSuggestProfilePhoto extends ActionMediaType {
   type: 'suggestProfilePhoto';
   photo: ApiPhoto;
+}
+
+export interface ApiMessageActionSuggestBirthday extends ActionMediaType {
+  type: 'suggestBirthday';
+  birthday: ApiBirthday;
 }
 
 export interface ApiMessageActionGiftCode extends ActionMediaType {
@@ -393,6 +399,7 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionGroupCall | ApiMessageActionInviteToGroupCall | ApiMessageActionGroupCallScheduled
   | ApiMessageActionChatJoinedByRequest | ApiMessageActionWebViewDataSent | ApiMessageActionGiftPremium
   | ApiMessageActionTopicCreate | ApiMessageActionTopicEdit | ApiMessageActionSuggestProfilePhoto
+  | ApiMessageActionSuggestBirthday
   | ApiMessageActionChannelJoined | ApiMessageActionGiftCode | ApiMessageActionGiveawayLaunch
   | ApiMessageActionGiveawayResults | ApiMessageActionPaymentRefunded | ApiMessageActionGiftStars
   | ApiMessageActionGiftTon | ApiMessageActionPrizeStars | ApiMessageActionStarGift | ApiMessageActionStarGiftUnique

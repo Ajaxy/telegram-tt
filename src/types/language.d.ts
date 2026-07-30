@@ -2149,6 +2149,9 @@ export interface LangPair {
   'BirthdayInputYear': undefined;
   'BirthdayRemove': undefined;
   'BirthdayPrivacySuggestionLink': undefined;
+  'BirthdaySuggest': undefined;
+  'BirthdayAddToProfile': undefined;
+  'BirthdayHideYear': undefined;
   'SettingsBirthday': undefined;
   'PersonalChannelLabel': undefined;
   'PersonalChannelAdd': undefined;
@@ -3326,6 +3329,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ActionSuggestedPhoto': {
     'user': V;
   };
+  'ActionSuggestedBirthdayYou': {
+    'user': V;
+  };
+  'ActionSuggestedBirthday': {
+    'user': V;
+  };
   'ActionTopicCreated': {
     'topic': V;
   };
@@ -3895,6 +3904,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'BirthdayPrivacySuggestion': {
     'link': V;
+  };
+  'BirthdayTitleForPeer': {
+    'user': V;
   };
   'BotReadTextFromClipboardDescription': {
     'bot': V;

@@ -65,6 +65,7 @@ import NoForwardsRequest from './actions/NoForwardsRequest';
 import StarGift from './actions/StarGift';
 import StarGiftPurchaseOffer from './actions/StarGiftPurchaseOffer';
 import StarGiftUnique from './actions/StarGiftUnique';
+import SuggestedBirthday from './actions/SuggestedBirthday';
 import SuggestedPhoto from './actions/SuggestedPhoto';
 import SuggestedPostApproval from './actions/SuggestedPostApproval';
 import SuggestedPostBalanceTooLow from './actions/SuggestedPostBalanceTooLow';
@@ -116,7 +117,7 @@ const SINGLE_LINE_ACTIONS = new Set<ApiMessageAction['type']>([
   'unsupported',
 ]);
 const HIDDEN_TEXT_ACTIONS = new Set<ApiMessageAction['type']>(['giftCode', 'prizeStars',
-  'suggestProfilePhoto', 'suggestedPostApproval', 'starGiftPurchaseOffer', 'noForwardsRequest']);
+  'suggestProfilePhoto', 'suggestBirthday', 'suggestedPostApproval', 'starGiftPurchaseOffer', 'noForwardsRequest']);
 const WITH_LINK_BREAKS_ACTIONS = new Set<ApiMessageAction['type']>([
   'todoCompletions',
   'todoAppendTasks',
@@ -509,6 +510,14 @@ const ActionMessage = ({
             message={message}
             action={action}
             observeIntersection={observeIntersectionForLoading}
+          />
+        );
+
+      case 'suggestBirthday':
+        return (
+          <SuggestedBirthday
+            message={message}
+            action={action}
           />
         );
 

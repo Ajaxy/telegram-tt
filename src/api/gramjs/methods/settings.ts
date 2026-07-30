@@ -48,6 +48,7 @@ import {
 } from '../apiBuilders/peers';
 import {
   buildDisallowedGiftsSettings,
+  buildInputBirthday,
   buildInputChannel,
   buildInputPeer,
   buildInputPhoto,
@@ -110,11 +111,7 @@ export function updateUsername(username: string) {
 
 export function updateBirthday(birthday?: ApiBirthday) {
   return invokeRequest(new GramJs.account.UpdateBirthday({
-    birthday: birthday ? new GramJs.Birthday({
-      day: birthday.day,
-      month: birthday.month,
-      year: birthday.year,
-    }) : undefined,
+    birthday: birthday ? buildInputBirthday(birthday) : undefined,
   }), {
     shouldReturnTrue: true,
   });

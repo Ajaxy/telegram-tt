@@ -1961,8 +1961,14 @@ export interface ActionPayloads {
   updateBirthday: {
     birthday?: ApiBirthday;
   };
+  suggestBirthday: {
+    userId: string;
+    birthday: ApiBirthday;
+  };
   openBirthdaySetupModal: {
     currentBirthday?: ApiBirthday;
+    suggestForUserId?: string;
+    isFromSuggestion?: boolean;
   } & WithTabId;
   closeBirthdaySetupModal: WithTabId | undefined;
   updateBotProfile: {

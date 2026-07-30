@@ -877,10 +877,14 @@ addActionHandler('openQrCodeModal', (global, actions, payload): ActionReturnType
 addTabStateResetterAction('closeQrCodeModal', 'qrCodeModal');
 
 addActionHandler('openBirthdaySetupModal', (global, actions, payload): ActionReturnType => {
-  const { currentBirthday, tabId = getCurrentTabId() } = payload || {};
+  const {
+    currentBirthday, suggestForUserId, isFromSuggestion, tabId = getCurrentTabId(),
+  } = payload || {};
   return updateTabState(global, {
     birthdaySetupModal: {
       currentBirthday,
+      suggestForUserId,
+      isFromSuggestion,
     },
   }, tabId);
 });

@@ -146,6 +146,25 @@
   text-wrap: balance;
 }
 
+.birthdayValues {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.birthdayValue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: var(--font-weight-medium);
+}
+
+.birthdayValueLabel {
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-normal);
+  opacity: 0.75;
+}
+
 .actionButton {
   cursor: var(--custom-cursor, pointer);
 

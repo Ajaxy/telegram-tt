@@ -1,21 +1,26 @@
 import { memo, useMemo, useRef, useState } from '@teact';
-import { getActions } from '../../../global';
+import { getActions, withGlobal } from '../../../global';
 
+import type { ApiUser } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import { SettingsScreens } from '../../../types';
 
+import { getPeerTitle } from '../../../global/helpers/peers';
+import { selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { NEXT_ARROW_REPLACEMENT } from '../../../util/localization/format';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
 import InputText from '../../ui/InputText';
 import Link from '../../ui/Link';
+import Marquee from '../../ui/Marquee';
 import MenuItem from '../../ui/MenuItem';
 import Modal from '../../ui/Modal';
 
@@ -23,6 +28,10 @@ import styles from './BirthdaySetupModal.module.scss';
 
 export type OwnProps = {
   modal: TabState['birthdaySetupModal'];
+};
+
+type StateProps = {
+  suggestForUser?: ApiUser;
 };
 
 const STICKER_SIZE = 120;
@@ -34,16 +43,28 @@ const MIN_YEAR = CURRENT_YEAR - MAX_AGE;
 type MonthIndex = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 const MONTH_INDEXES = Array.from({ length: 12 }, (_, index) => index + 1) as MonthIndex[];
 
-const BirthdaySetupModal = ({ modal }: OwnProps) => {
-  const { closeBirthdaySetupModal, openSettingsScreen, updateBirthday } = getActions();
+const BirthdaySetupModal = ({ modal, suggestForUser }: OwnProps & StateProps) => {
+  const {
+    closeBirthdaySetupModal, openSettingsScreen, updateBirthday, suggestBirthday,
+  } = getActions();
 
-  const { currentBirthday } = modal || {};
+  const { currentBirthday, suggestForUserId, isFromSuggestion } = modal || {};
 
   const dialogRef = useRef<HTMLDivElement>();
 
   const [day, setDay] = useState<number | undefined>(currentBirthday?.day);
   const [month, setMonth] = useState<MonthIndex | undefined>(currentBirthday?.month as MonthIndex | undefined);
   const [year, setYear] = useState<number | undefined>(currentBirthday?.year);
+
+  // The modal stays mounted between opens, so field state is reset on each new open
+  useSyncEffect(([prevModal]) => {
+    if (modal && modal !== prevModal) {
+      const newBirthday = modal.currentBirthday;
+      setDay(newBirthday?.day);
+      setMonth(newBirthday?.month as MonthIndex | undefined);
+      setYear(newBirthday?.year);
+    }
+  }, [modal]);
 
   const lang = useLang();
 
@@ -129,15 +150,23 @@ const BirthdaySetupModal = ({ modal }: OwnProps) => {
     }
   });
 
+  const handleHideYear = useLastCallback(() => {
+    setYear(undefined);
+  });
+
   const handleSubmit = useLastCallback(() => {
     if (!day || !month) return;
-    updateBirthday({
-      birthday: {
-        day,
-        month,
-        year,
-      },
-    });
+    const birthday = {
+      day,
+      month,
+      year,
+    };
+
+    if (suggestForUserId) {
+      suggestBirthday({ userId: suggestForUserId, birthday });
+    } else {
+      updateBirthday({ birthday });
+    }
     closeBirthdaySetupModal();
   });
 
@@ -170,7 +199,13 @@ const BirthdaySetupModal = ({ modal }: OwnProps) => {
           size={STICKER_SIZE}
           className="section-icon"
         />
-        <h3 className={styles.title}>{lang('BirthdaySetupTitle')}</h3>
+        <h3 className={styles.title}>
+          <Marquee>
+            {suggestForUser
+              ? lang('BirthdayTitleForPeer', { user: getPeerTitle(lang, suggestForUser) })
+              : lang('BirthdaySetupTitle')}
+          </Marquee>
+        </h3>
       </div>
       <div className={styles.inputs}>
         <InputText
@@ -205,17 +240,24 @@ const BirthdaySetupModal = ({ modal }: OwnProps) => {
         />
       </div>
       <div className={styles.footer}>
-        <span className={styles.privacySuggestion}>
-          {lang('BirthdayPrivacySuggestion', {
-            link: (
-              <Link isPrimary onClick={handlePrivacyClick}>
-                {lang('BirthdayPrivacySuggestionLink', undefined,
-                  { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
-              </Link>
-            ),
-          }, { withNodes: true })}
-        </span>
-        {currentBirthday && (
+        {!suggestForUserId && (
+          <span className={styles.privacySuggestion}>
+            {lang('BirthdayPrivacySuggestion', {
+              link: (
+                <Link isPrimary onClick={handlePrivacyClick}>
+                  {lang('BirthdayPrivacySuggestionLink', undefined,
+                    { withNodes: true, specialReplacement: NEXT_ARROW_REPLACEMENT })}
+                </Link>
+              ),
+            }, { withNodes: true })}
+          </span>
+        )}
+        {isFromSuggestion && Boolean(year) && (
+          <Button isText onClick={handleHideYear}>
+            {lang('BirthdayHideYear')}
+          </Button>
+        )}
+        {currentBirthday && !suggestForUserId && !isFromSuggestion && (
           <Button isText onClick={handleRemove}>
             {lang('BirthdayRemove')}
           </Button>
@@ -224,7 +266,9 @@ const BirthdaySetupModal = ({ modal }: OwnProps) => {
           disabled={!day || !month}
           onClick={handleSubmit}
         >
-          {lang('Save')}
+          {isFromSuggestion ? lang('BirthdayAddToProfile')
+            : suggestForUserId ? lang('BirthdaySuggest')
+              : lang('Save')}
         </Button>
       </div>
     </Modal>
@@ -243,4 +287,13 @@ const getMaxMonthDay = (month?: number, year?: number) => {
   return 31;
 };
 
-export default memo(BirthdaySetupModal);
+export default memo(withGlobal<OwnProps>(
+  (global, { modal }): Complete<StateProps> => {
+    const { suggestForUserId } = modal || {};
+    const suggestForUser = suggestForUserId ? selectUser(global, suggestForUserId) : undefined;
+
+    return {
+      suggestForUser,
+    };
+  },
+)(BirthdaySetupModal));

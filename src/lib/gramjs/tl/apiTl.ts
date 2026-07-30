@@ -1696,6 +1696,7 @@ account.getPasskeys#ea1f0c52 = account.Passkeys;
 account.deletePasskey#f5b5563f id:string = Bool;
 users.getUsers#d91a548 id:Vector<InputUser> = Vector<User>;
 users.getFullUser#b60f5918 id:InputUser = users.UserFull;
+users.suggestBirthday#fc533372 id:InputUser birthday:Birthday = Updates;
 contacts.getContacts#5dd69e12 hash:long = contacts.Contacts;
 contacts.importContacts#2c800be5 contacts:Vector<InputContact> = contacts.ImportedContacts;
 contacts.deleteContacts#96a0e00 id:Vector<InputUser> = Updates;

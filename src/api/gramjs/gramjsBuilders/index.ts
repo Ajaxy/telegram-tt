@@ -2,6 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { generateRandomBigInt, generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
 
 import type {
+  ApiBirthday,
   ApiBotApp,
   ApiChatAdminRights,
   ApiChatBannedRights,
@@ -565,6 +566,14 @@ export function buildInputPhoto(photo: ApiPhoto) {
     'accessHash',
     'fileReference',
   ]));
+}
+
+export function buildInputBirthday(birthday: ApiBirthday) {
+  return new GramJs.Birthday({
+    day: birthday.day,
+    month: birthday.month,
+    year: birthday.year,
+  });
 }
 
 export function buildInputContact({

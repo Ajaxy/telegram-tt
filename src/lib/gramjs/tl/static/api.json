@@ -77,6 +77,7 @@
     "account.deletePasskey",
     "users.getUsers",
     "users.getFullUser",
+    "users.suggestBirthday",
     "contacts.getContacts",
     "contacts.importContacts",
     "contacts.deleteContacts",

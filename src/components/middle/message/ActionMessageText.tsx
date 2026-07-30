@@ -763,6 +763,15 @@ const ActionMessageText = ({
         return translateWithYou(lang, 'ActionSuggestedPhoto', isOutgoing, { user: actionPeerLink });
       }
 
+      case 'suggestBirthday': {
+        const actionPeer = (isOutgoing ? chat : sender)!;
+        const actionPeerLink = renderPeerLink(
+          actionPeer.id, getPeerTitle(lang, actionPeer) || userFallbackText, asPreview,
+        );
+
+        return translateWithYou(lang, 'ActionSuggestedBirthday', isOutgoing, { user: actionPeerLink });
+      }
+
       case 'webViewDataSent':
         return lang('ActionWebviewDataDone', { text: action.text });
 

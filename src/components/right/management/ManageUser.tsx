@@ -53,6 +53,7 @@ type StateProps = {
   notPersonalPhoto?: ApiPhoto;
   noteText?: string;
   contactNoteLimit: number;
+  hasBirthday?: boolean;
 };
 
 const ERROR_FIRST_NAME_MISSING = 'Please provide first name';
@@ -68,6 +69,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
   notPersonalPhoto,
   noteText,
   contactNoteLimit,
+  hasBirthday,
 }) => {
   const {
     updateContact,
@@ -76,6 +78,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
     closeManagement,
     uploadContactProfilePhoto,
     updateChatMutedState,
+    openBirthdaySetupModal,
   } = getActions();
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
@@ -217,11 +220,16 @@ const ManageUser: FC<OwnProps & StateProps> = ({
     uploadContactProfilePhoto({ userId, file, isSuggest: isSuggestRef.current });
   }, [uploadContactProfilePhoto, userId]);
 
+  const handleSuggestBirthday = useCallback(() => {
+    openBirthdaySetupModal({ suggestForUserId: userId });
+  }, [openBirthdaySetupModal, userId]);
+
   if (!user) {
     return undefined;
   }
 
   const canSetPersonalPhoto = !isUserBot(user) && user.id !== SERVICE_NOTIFICATIONS_USER_ID;
+  const canSuggestBirthday = canSetPersonalPhoto && hasBirthday === false;
   const isLoading = progress === ManagementProgress.InProgress;
   const noteSymbolsLeft = contactNoteLimit - note.length;
 
@@ -307,6 +315,13 @@ const ManageUser: FC<OwnProps & StateProps> = ({
             <IslandDescription dir="auto">{oldLang('UserInfo.CustomPhotoInfo', user.firstName)}</IslandDescription>
           </>
         )}
+        {canSuggestBirthday && (
+          <Island>
+            <ListItem icon="gift" ripple onClick={handleSuggestBirthday}>
+              {lang('BirthdaySuggest')}
+            </ListItem>
+          </Island>
+        )}
         <Island>
           <ListItem icon="delete" ripple destructive onClick={openDeleteDialog}>
             {oldLang('DeleteContact')}
@@ -356,9 +371,10 @@ export default memo(withGlobal<OwnProps>(
     const notPersonalPhoto = userFullInfo?.profilePhoto || userFullInfo?.fallbackPhoto;
     const noteText = userFullInfo?.note?.text;
     const contactNoteLimit = global.appConfig?.contactNoteLimit || DEFAULT_MAX_NOTE_LENGTH;
+    const hasBirthday = userFullInfo && Boolean(userFullInfo.birthday);
 
     return {
-      user, progress, isMuted, personalPhoto, notPersonalPhoto, noteText, contactNoteLimit,
+      user, progress, isMuted, personalPhoto, notPersonalPhoto, noteText, contactNoteLimit, hasBirthday,
     };
   },
 )(ManageUser));

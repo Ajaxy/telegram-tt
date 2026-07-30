@@ -1,7 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiEmojiStatusType, ApiFormattedText, ApiPeer, ApiUser,
+  ApiBirthday, ApiEmojiStatusType, ApiFormattedText, ApiPeer, ApiUser,
 } from '../../types';
 
 import { toJSNumber } from '../../../util/numbers';
@@ -10,6 +10,7 @@ import { buildApiPhoto } from '../apiBuilders/common';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildApiUser, buildApiUserFullInfo, buildApiUserStatuses } from '../apiBuilders/users';
 import {
+  buildInputBirthday,
   buildInputContact,
   buildInputEmojiStatus,
   buildInputPeer,
@@ -212,6 +213,21 @@ export function updateContact({
     phone: phoneNumber,
     addPhonePrivacyException: shouldSharePhoneNumber || undefined,
     note: note ? buildInputTextWithEntities(note) : undefined,
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export function suggestBirthday({
+  user,
+  birthday,
+}: {
+  user: ApiUser;
+  birthday: ApiBirthday;
+}) {
+  return invokeRequest(new GramJs.users.SuggestBirthday({
+    id: buildInputUser(user.id, user.accessHash),
+    birthday: buildInputBirthday(birthday),
   }), {
     shouldReturnTrue: true,
   });

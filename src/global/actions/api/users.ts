@@ -284,6 +284,17 @@ addActionHandler('updateContactNote', async (global, actions, payload): Promise<
   setGlobal(global);
 });
 
+addActionHandler('suggestBirthday', async (global, actions, payload): Promise<void> => {
+  const { userId, birthday } = payload;
+
+  const user = selectUser(global, userId);
+  if (!user) {
+    return;
+  }
+
+  await callApi('suggestBirthday', { user, birthday });
+});
+
 addActionHandler('deleteContact', async (global, actions, payload): Promise<void> => {
   const { userId } = payload;
 

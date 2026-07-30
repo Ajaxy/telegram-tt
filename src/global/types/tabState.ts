@@ -881,6 +881,8 @@ export type TabState = {
 
   birthdaySetupModal?: {
     currentBirthday?: ApiBirthday;
+    suggestForUserId?: string;
+    isFromSuggestion?: boolean;
   };
 
   paidReactionModal?: {
