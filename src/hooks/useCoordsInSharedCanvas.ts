@@ -19,6 +19,8 @@ type SharedCanvasMetrics = {
   parent: HTMLElement;
   left: number;
   top: number;
+  renderedWidth: number;
+  renderedHeight: number;
   width: number;
   height: number;
   sizeFactor: number;
@@ -88,8 +90,8 @@ export default function useCoordsInSharedCanvas(
     }
 
     const { left, top } = getOffsetToContainer(target, metrics.parent);
-    const x = round((left - metrics.left) / metrics.width, 4) || 0;
-    const y = round((top - metrics.top) / metrics.height, 4) || 0;
+    const x = round((left - metrics.left) / metrics.renderedWidth, 4) || 0;
+    const y = round((top - metrics.top) / metrics.renderedHeight, 4) || 0;
     setCoords((currentCoords) => (
       currentCoords?.x === x
       && currentCoords.y === y
@@ -147,12 +149,25 @@ function flushSharedCanvasCoordsRecalculations() {
       return;
     }
 
-    const metrics = measureSharedCanvas(canvas);
-    if (metrics) {
-      requestSharedCanvasSizeUpdate(canvas, metrics);
-      manager.runCallbacks(metrics);
-    }
+    runSharedCanvasCoordsRecalculations(canvas, manager);
   });
+}
+
+function runSharedCanvasCoordsRecalculations(
+  canvas: HTMLCanvasElement,
+  manager: CallbackManager<(metrics: SharedCanvasMetrics) => void>,
+) {
+  const metrics = measureSharedCanvas(canvas);
+  if (!metrics) {
+    return;
+  }
+
+  if (requestSharedCanvasSizeUpdate(canvas, metrics)) {
+    requestMeasure(() => runSharedCanvasCoordsRecalculations(canvas, manager));
+    return;
+  }
+
+  manager.runCallbacks(metrics);
 }
 
 function measureSharedCanvas(canvas?: HTMLCanvasElement): SharedCanvasMetrics | undefined {
@@ -161,19 +176,22 @@ function measureSharedCanvas(canvas?: HTMLCanvasElement): SharedCanvasMetrics | 
   }
 
   const parent = canvas.parentElement;
-  const canvasWidth = canvas.offsetWidth;
+  const renderedWidth = canvas.offsetWidth;
+  const renderedHeight = canvas.offsetHeight;
   const width = parent?.clientWidth;
   const height = parent?.clientHeight;
-  if (!parent || !canvasWidth || !width || !height) {
+  if (!parent || !renderedWidth || !renderedHeight || !width || !height) {
     return undefined;
   }
 
   return {
     parent,
     ...getOffsetToContainer(canvas, parent),
+    renderedWidth,
+    renderedHeight,
     width,
     height,
-    sizeFactor: canvas.width / canvasWidth,
+    sizeFactor: canvas.width / renderedWidth,
   };
 }
 
@@ -184,7 +202,7 @@ function requestSharedCanvasSizeUpdate(
   const cssWidth = `${width}px`;
   const cssHeight = `${height}px`;
   if (canvas.style.width === cssWidth && canvas.style.height === cssHeight) {
-    return;
+    return false;
   }
 
   requestMutation(() => {
@@ -193,4 +211,6 @@ function requestSharedCanvasSizeUpdate(
     canvas.width = Math.round(width * sizeFactor);
     canvas.height = Math.round(height * sizeFactor);
   });
+
+  return true;
 }
