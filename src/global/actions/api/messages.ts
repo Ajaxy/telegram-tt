@@ -105,6 +105,7 @@ import {
   updateQuickReplies,
   updateQuickReplyMessages,
   updateRequestedMessageTranslation,
+  updateScheduledMessage,
   updateScheduledMessages,
   updateSponsoredMessage,
   updateTopicWithState,
@@ -354,7 +355,7 @@ addActionHandler('loadMessage', async (global, actions, payload): Promise<void> 
 
 addActionHandler('loadRichMessage', async (global, actions, payload): Promise<void> => {
   const {
-    chatId, messageId,
+    chatId, messageId, isScheduled,
   } = payload;
 
   const chat = selectChat(global, chatId);
@@ -368,11 +369,13 @@ addActionHandler('loadRichMessage', async (global, actions, payload): Promise<vo
   }
 
   global = getGlobal();
-  const currentMessage = selectChatMessage(global, chat.id, messageId);
+  const currentMessage = isScheduled
+    ? selectScheduledMessage(global, chat.id, messageId)
+    : selectChatMessage(global, chat.id, messageId);
   const partCutoff = currentMessage?.content.richMessage?.partCutoff;
   const richMessage = result.message.content.richMessage;
 
-  global = updateChatMessage(global, chat.id, messageId, {
+  const updatedMessage = {
     ...result.message,
     content: {
       ...result.message.content,
@@ -381,7 +384,10 @@ addActionHandler('loadRichMessage', async (global, actions, payload): Promise<vo
         partCutoff,
       } : richMessage,
     },
-  });
+  };
+  global = isScheduled
+    ? updateScheduledMessage(global, chat.id, messageId, updatedMessage)
+    : updateChatMessage(global, chat.id, messageId, updatedMessage);
   setGlobal(global);
 });
 
@@ -393,17 +399,22 @@ addActionHandler('startEditingMessage', async (global, actions, payload): Promis
   }
 
   const { chatId, threadId, type } = messageList;
-  const message = selectChatMessage(global, chatId, messageId);
+  const isScheduled = type === 'scheduled' || undefined;
+  const message = isScheduled
+    ? selectScheduledMessage(global, chatId, messageId)
+    : selectChatMessage(global, chatId, messageId);
   if (!message) {
     return;
   }
 
   if (message.content.richMessage?.isPart) {
-    await getPromiseActions().loadRichMessage({ chatId, messageId });
+    await getPromiseActions().loadRichMessage({ chatId, messageId, isScheduled });
 
     global = getGlobal();
     const currentMessageList = selectCurrentMessageList(global, tabId);
-    const richMessage = selectChatMessage(global, chatId, messageId)?.content.richMessage;
+    const richMessage = (isScheduled
+      ? selectScheduledMessage(global, chatId, messageId)
+      : selectChatMessage(global, chatId, messageId))?.content.richMessage;
     const isSameMessageList = currentMessageList?.chatId === chatId
       && currentMessageList.threadId === threadId
       && currentMessageList.type === type;

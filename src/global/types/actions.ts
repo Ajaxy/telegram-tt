@@ -572,6 +572,7 @@ export interface ActionPayloads {
   loadRichMessage: {
     chatId: string;
     messageId: number;
+    isScheduled?: boolean;
   };
   startEditingMessage: {
     messageId: number;

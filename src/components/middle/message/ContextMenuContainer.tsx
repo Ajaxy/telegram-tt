@@ -324,9 +324,15 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (canEdit && isOpen && message.content.richMessage?.isPart) {
-      loadRichMessage({ chatId: message.chatId, messageId: message.id });
+      loadRichMessage({
+        chatId: message.chatId,
+        messageId: message.id,
+        isScheduled: messageListType === 'scheduled' || undefined,
+      });
     }
-  }, [canEdit, isOpen, loadRichMessage, message.chatId, message.content.richMessage?.isPart, message.id]);
+  }, [
+    canEdit, isOpen, loadRichMessage, message.chatId, message.content.richMessage?.isPart, message.id, messageListType,
+  ]);
 
   useEffect(() => {
     if (canLoadReadDate && isOpen) {
