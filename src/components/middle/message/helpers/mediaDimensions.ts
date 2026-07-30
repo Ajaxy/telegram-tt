@@ -4,6 +4,7 @@ import {
   calculateExtendedPreviewDimensions,
   calculateInlineImageDimensions,
   calculateVideoDimensions,
+  getAvailableWidth,
   REM,
 } from '../../../common/helpers/mediaDimensions';
 
@@ -58,8 +59,10 @@ export function calculateMediaDimensions({
     stretchFactor = MIN_MEDIA_HEIGHT / height;
   }
 
-  const finalWidth = Math.round(width * stretchFactor);
-  const finalHeight = Math.round(height * stretchFactor);
+  const availableWidth = getAvailableWidth(isOwn, isNestedMedia, noAvatars, isMobile);
+  const finalStretchFactor = Math.min(stretchFactor, availableWidth / width);
+  const finalWidth = Math.round(width * finalStretchFactor);
+  const finalHeight = Math.round(height * finalStretchFactor);
 
   return {
     width: finalWidth,
