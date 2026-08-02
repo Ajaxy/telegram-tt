@@ -38,6 +38,7 @@ type OwnProps = {
   itemAlignment?: 'vertical' | 'horizontal';
   withFadeMask?: boolean;
   fadeMaskClassName?: string;
+  isDisabled?: boolean;
   onSwitchTab: (index: number) => void;
   renderExtra?: (tab: TabWithProperties, index: number) => TeactNode;
 };
@@ -53,6 +54,7 @@ const TabList = ({
   itemAlignment,
   withFadeMask,
   fadeMaskClassName,
+  isDisabled,
   renderExtra,
   onSwitchTab,
 }: OwnProps) => {
@@ -98,6 +100,8 @@ const TabList = ({
   });
 
   const handleKeyDown = useLastCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isDisabled) return;
+
     const isNext = e.key === 'ArrowRight';
     if (!isNext && e.key !== 'ArrowLeft') return;
 
@@ -162,8 +166,9 @@ const TabList = ({
           stretched && styles.stretched,
         )}
         role={noInteractive ? undefined : 'tab'}
-        tabIndex={noInteractive ? undefined : (index === focusableTab ? 0 : -1)}
+        tabIndex={noInteractive ? undefined : (index === focusableTab && !isDisabled ? 0 : -1)}
         aria-selected={noInteractive ? undefined : index === activeTab}
+        aria-disabled={noInteractive ? undefined : isDisabled}
         onClick={() => handleTabClick(index)}
         onContextMenu={hasContextActions ? (e) => handleContextMenu(index, e) : undefined}
       >
