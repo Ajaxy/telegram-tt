@@ -93,6 +93,11 @@
       opacity: 0.85;
     }
 
+    &:focus-visible {
+      outline: 0.125rem solid var(--color-primary);
+      outline-offset: -0.125rem;
+    }
+
     .activeIndicator & {
       color: var(--color-primary);
     }
