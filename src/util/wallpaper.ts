@@ -7,6 +7,11 @@ import { DARK_THEME_BG_COLOR } from '../config';
 import { buildColorFromHex, getPatternColor, int2hex } from './colors';
 
 const DEFAULT_PATTERN_INTENSITY = 50;
+const DEFAULT_LIGHT_ACTION_MESSAGE_BG = '#4A8E3A8C';
+const DEFAULT_DARK_ACTION_MESSAGE_BG = '#48576166';
+// The user slider scales the wallpaper's own intensity: 100 keeps it as is, 0 hides the pattern
+const MAX_PATTERN_INTENSITY_FACTOR = 100;
+export const DEFAULT_PATTERN_INTENSITY_FACTOR = 75;
 const SVG_MIME = 'image/svg+xml';
 const XML_OPEN_BRACKET = 0x3C; // `<`
 
@@ -42,6 +47,7 @@ export const RESET_WALLPAPER_SETTINGS: Partial<IThemeSettings> = {
   isPattern: undefined,
   patternColor: undefined,
   patternIntensity: undefined,
+  patternIntensityFactor: undefined,
 };
 
 // Dark default chat wallpaper rendered through the same gradient engine as any picked wallpaper
@@ -75,6 +81,7 @@ export function buildWallpaperRenderModel(theme: ThemeKey, settings: IThemeSetti
     backgroundRotation,
     patternColor,
     patternIntensity,
+    patternIntensityFactor,
     isPattern,
     isBlurred,
   } = settings;
@@ -87,7 +94,13 @@ export function buildWallpaperRenderModel(theme: ThemeKey, settings: IThemeSetti
   const effectivePatternColor = isDefault ? defaultWallpaper.patternColor : patternColor;
   const effectivePatternIntensity = isDefault ? defaultWallpaper.intensity : patternIntensity;
   const isCustomPattern = Boolean(isPattern) && Boolean(customBackground);
+  // Masked mode is decided by the unscaled sign, so dialing the factor down to 0 keeps the dark
+  // wallpaper masked (fully dimmed) instead of flipping it into a bright unmasked gradient
   const isMaskedPattern = getIsMaskedPattern(isCustomPattern || isDefault, effectivePatternIntensity);
+  const scaledPatternIntensity = effectivePatternIntensity !== undefined
+    ? (effectivePatternIntensity * (patternIntensityFactor ?? DEFAULT_PATTERN_INTENSITY_FACTOR))
+    / MAX_PATTERN_INTENSITY_FACTOR
+    : undefined;
   const rawColors = isDefault ? defaultWallpaper.colors : customColors;
   const colors = isMaskedPattern && rawColors.length === 1 ? [rawColors[0], rawColors[0]] : rawColors;
   const hasGradient = colors.length >= 2;
@@ -97,7 +110,7 @@ export function buildWallpaperRenderModel(theme: ThemeKey, settings: IThemeSetti
     colors,
     backgroundRotation,
     patternColor: effectivePatternColor,
-    patternIntensity: effectivePatternIntensity,
+    patternIntensity: scaledPatternIntensity,
     baseColor: getWallpaperBaseColor(theme, settings),
     isImage,
     isBlurred: Boolean(isBlurred),
@@ -143,10 +156,18 @@ export async function decodeWallpaperPatternBlob(blob: Blob): Promise<Blob> {
   return new Blob([svg.buffer as ArrayBuffer], { type: SVG_MIME });
 }
 
-// Single source of the default service-chip tint, derived from the default wallpapers so
-// wallpaper-aware surfaces and body-level chips render the same color.
+// Returns the tint used by wallpaper-aware surfaces with the built-in wallpaper
 export function getDefaultPatternColor(theme: ThemeKey): string {
   return theme === 'dark' ? DEFAULT_DARK_WALLPAPER.patternColor : DEFAULT_LIGHT_WALLPAPER.patternColor;
+}
+
+// Built-in wallpapers use their stable chip colors; custom wallpapers follow their derived tint
+export function getActionMessageBg(theme: ThemeKey, settings?: IThemeSettings): string | undefined {
+  if (!settings || getIsDefaultWallpaper(settings)) {
+    return theme === 'dark' ? DEFAULT_DARK_ACTION_MESSAGE_BG : DEFAULT_LIGHT_ACTION_MESSAGE_BG;
+  }
+
+  return settings.patternColor;
 }
 
 // Derives the translucent tint used for `--pattern-color` (message/embedded bubbles) and

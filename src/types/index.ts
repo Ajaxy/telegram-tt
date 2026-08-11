@@ -133,6 +133,8 @@ export interface IThemeSettings {
   backgroundRotation?: number;
   patternColor?: string;
   patternIntensity?: number;
+  // User-chosen 0–100 scale applied on top of the wallpaper's own intensity; `undefined` means the default
+  patternIntensityFactor?: number;
   isPattern?: boolean;
   isBlurred?: boolean;
 }

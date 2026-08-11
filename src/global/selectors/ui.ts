@@ -5,6 +5,7 @@ import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
 import { IS_SNAP_EFFECT_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { getActionMessageBg } from '../../util/wallpaper';
 import { selectTabBrowserState } from '../helpers/browser';
 import { getMessageVideo, getWebPageVideo } from '../helpers/messageMedia';
 import { selectCurrentManagement } from './management';
@@ -84,7 +85,7 @@ export function selectThemeValues<T extends GlobalState>(global: T, themeKey: Th
 
 export function selectActionMessageBg<T extends GlobalState>(global: T) {
   const theme = selectTheme(global);
-  return selectThemeValues(global, theme)?.patternColor;
+  return getActionMessageBg(theme, selectThemeValues(global, theme));
 }
 
 export function selectIsForumPanelOpen<T extends GlobalState>(

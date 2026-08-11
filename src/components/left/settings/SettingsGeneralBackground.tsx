@@ -14,7 +14,8 @@ import { validateFiles } from '../../../util/files';
 import { throttle } from '../../../util/schedulers';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import {
-  buildThemeSettingsFromWallpaper, getDefaultPatternColor, getWallpaperColors, getWallpaperKey,
+  buildThemeSettingsFromWallpaper, buildWallpaperRenderModel, DEFAULT_PATTERN_INTENSITY_FACTOR,
+  getDefaultPatternColor, getWallpaperColors, getWallpaperKey,
   isRenderableWallpaper, isWallpaperSelected, RESET_WALLPAPER_SETTINGS,
 } from '../../../util/wallpaper';
 import { removeWallpaperBlobIfUnused } from '../../../util/wallpaperStorage';
@@ -28,6 +29,7 @@ import Island, { IslandTitle } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
+import RangeSlider from '../../ui/RangeSlider';
 import WallpaperTile from './WallpaperTile';
 
 import './SettingsGeneralBackground.scss';
@@ -169,6 +171,10 @@ const SettingsGeneralBackground = ({
     setThemeSettings({ theme: themeRef.current!, isBlurred: e.target.checked });
   });
 
+  const handlePatternIntensityChange = useLastCallback((value: number) => {
+    setThemeSettings({ theme: themeRef.current!, patternIntensityFactor: value });
+  });
+
   const lang = useLang();
   const oldLang = useOldLang();
 
@@ -181,6 +187,9 @@ const SettingsGeneralBackground = ({
   // Blur only applies to a file-backed image (uploaded or server photo), so disable it for colors,
   // gradients and patterns — matching WebK
   const isImageBackground = Boolean(themeSettings?.background) && !themeSettings?.isPattern;
+  // The intensity slider only applies to pattern wallpapers (custom or the built-in default)
+  const isPatternBackground = buildWallpaperRenderModel(theme, themeSettings || {}).isPattern;
+  const patternIntensityFactor = themeSettings?.patternIntensityFactor ?? DEFAULT_PATTERN_INTENSITY_FACTOR;
 
   // Keep the server order (the user's own wallpapers come first), skipping unrenderable
   // patterns and dropping duplicates that appear in both the personal list and the default set
@@ -237,6 +246,13 @@ const SettingsGeneralBackground = ({
           checked={isImageBackground && Boolean(isBlurred)}
           disabled={!isImageBackground}
           onChange={handleWallPaperBlurChange}
+        />
+
+        <RangeSlider
+          label={lang('BackgroundPatternIntensity')}
+          value={patternIntensityFactor}
+          disabled={!isPatternBackground}
+          onChange={handlePatternIntensityChange}
         />
       </Island>
 

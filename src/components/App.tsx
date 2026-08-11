@@ -20,7 +20,7 @@ import { ACCOUNT_SLOT, getAccountSlotUrl, getFirstLoggedInAccountSlot } from '..
 import { hasEncryptedSession } from '../util/passcode';
 import { getInitialLocationHash, parseInitialLocationHash } from '../util/routing';
 import { checkSessionLocked, hasStoredSession } from '../util/sessions';
-import { getDefaultPatternColor, getWallpaperBaseColor } from '../util/wallpaper';
+import { getActionMessageBg, getWallpaperBaseColor } from '../util/wallpaper';
 import { updateSizes } from '../util/windowSize';
 
 import useTauriDrag from '../hooks/tauri/useTauriDrag';
@@ -235,7 +235,7 @@ const App = ({
     // thumbnail), so service chips don't keep the previous wallpaper's tint.
     document.body.style.setProperty(
       '--action-message-bg',
-      actionMessageBg || getDefaultPatternColor(theme),
+      actionMessageBg || getActionMessageBg(theme),
     );
   }, [actionMessageBg, theme]);
 

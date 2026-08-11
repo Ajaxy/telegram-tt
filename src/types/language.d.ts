@@ -429,6 +429,7 @@ export interface LangPair {
   'SetColor': undefined;
   'ThemeResetToDefaults': undefined;
   'BackgroundBlurred': undefined;
+  'BackgroundPatternIntensity': undefined;
   'SettingsInformation': undefined;
   'General': undefined;
   'DataSettings': undefined;

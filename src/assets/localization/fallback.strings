@@ -492,6 +492,7 @@
 "SetColor" = "Set a color";
 "ThemeResetToDefaults" = "Reset to default";
 "BackgroundBlurred" = "Blurred";
+"BackgroundPatternIntensity" = "Pattern Intensity";
 "SettingsInformation" = "Edit profile";
 "General" = "General";
 "DataSettings" = "Data and Storage";
