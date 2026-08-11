@@ -277,7 +277,7 @@ addActionHandler('connectToActivePhoneCall', async (global, actions): Promise<vo
 
   await callApi('createPhoneCallState', {
     isOutgoing: true,
-    shouldUseSctp: !phoneCall.customParameters?.network_signaling_nosctp,
+    shouldUseSctp: phoneCall.customParameters?.shouldUseSctp ?? true,
   });
 
   const gAHash = await callApi('requestPhoneCall', dhConfig);
@@ -299,7 +299,7 @@ addActionHandler('acceptCall', async (global): Promise<void> => {
 
   await callApi('createPhoneCallState', {
     isOutgoing: false,
-    shouldUseSctp: !phoneCall.customParameters?.network_signaling_nosctp,
+    shouldUseSctp: phoneCall.customParameters?.shouldUseSctp ?? true,
   });
 
   const gB = await callApi('acceptPhoneCall', dhConfig);
@@ -335,7 +335,7 @@ addActionHandler('sendSignalingData', (global, actions, payload): ActionReturnTy
   })();
 });
 
-function logPhoneCallDebug(message: string, data: Record<string, unknown>) {
+function logPhoneCallDebug<Data extends object>(message: string, data: Data) {
   if (!DEBUG_CALLS) return;
 
   logDebugMessage('warn', `[PhoneCall] ${message}`, data);

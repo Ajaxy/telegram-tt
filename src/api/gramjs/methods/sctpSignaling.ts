@@ -651,11 +651,11 @@ function crc32c(data: Uint8Array) {
   return (~crc) >>> 0;
 }
 
-function logSctp(message: string, data: Record<string, unknown> = {}) {
+function logSctp<Data extends object>(message: string, data?: Data) {
   if (!DEBUG_CALLS) {
     return;
   }
 
   // eslint-disable-next-line no-console
-  console.debug(`[PhoneCall][SCTP] ${message}`, data);
+  console.debug(`[PhoneCall][SCTP] ${message}`, data || {});
 }

@@ -140,14 +140,16 @@ function updateStreams() {
   });
 }
 
-function logP2p(message: string, data: Record<string, unknown> = {}) {
+function logP2p<Data extends object>(message: string, data?: Data) {
   if (!DEBUG_CALLS) return;
 
-  logDebugMessage('debug', `[PhoneCall][P2P] ${message}`, JSON.stringify(data), data);
+  const debugData = data || {};
+  logDebugMessage('debug', `[PhoneCall][P2P] ${message}`, JSON.stringify(debugData), debugData);
 }
 
-function logP2pWarning(message: string, data: Record<string, unknown> = {}) {
-  logDebugMessage('warn', `[PhoneCall][P2P] ${message}`, JSON.stringify(data), data);
+function logP2pWarning<Data extends object>(message: string, data?: Data) {
+  const debugData = data || {};
+  logDebugMessage('warn', `[PhoneCall][P2P] ${message}`, JSON.stringify(debugData), debugData);
 }
 
 function getUserStream(streamType: StreamType, facing: VideoFacingModeEnum = 'user') {

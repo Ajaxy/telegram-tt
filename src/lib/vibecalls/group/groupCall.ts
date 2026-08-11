@@ -65,10 +65,10 @@ type GroupCallState = {
 
 let state: GroupCallState | undefined;
 
-function logGroupCall(message: string, data: Record<string, unknown> = {}) {
+function logGroupCall<Data extends object>(message: string, data?: Data) {
   if (!DEBUG_CALLS) return;
 
-  logDebugMessage('debug', `[GroupCall] ${message}`, data);
+  logDebugMessage('debug', `[GroupCall] ${message}`, data || {});
 }
 
 function summarizeError(error: unknown) {

@@ -13,13 +13,14 @@ import {
   handleRichEditorQuoteBackspace,
   handleRichEditorQuoteEnter,
   isSelectionInsideRichEditorQuote,
+  type RichEditorQuoteHtmlAttributes,
   unsetRichEditorQuote,
 } from './richEditorQuote';
 
 import Pullquote from '../../../common/quote/Pullquote';
 
 type RichEditorPullquoteOptions = {
-  HTMLAttributes: Record<string, unknown>;
+  HTMLAttributes: RichEditorQuoteHtmlAttributes;
 };
 
 declare module '@tiptap/core' {

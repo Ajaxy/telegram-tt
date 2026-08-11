@@ -34,6 +34,21 @@ export interface FormatMessageListDateOptions {
   anchorDate?: Date;
 }
 
+type AbsoluteDateTimeFormatOptions = Pick<
+  Intl.DateTimeFormatOptions,
+  'weekday' | 'month' | 'day' | 'year' | 'hour' | 'minute' | 'second' | 'hourCycle'
+>;
+
+type DateTimeResultCacheOptions = {
+  date: DateStyle;
+  time: TimeStyle;
+  weekday?: WeekdayStyle;
+  includeYear?: boolean;
+  includeDay?: boolean;
+};
+
+type DateFormatCacheOptions = AbsoluteDateTimeFormatOptions | DateTimeResultCacheOptions;
+
 const RESULT_CACHE_LIMIT = 200;
 const DAY_IN_SECONDS = 24 * 60 * 60;
 
@@ -96,7 +111,7 @@ function formatAbsoluteDateTime(lang: LangFn, date: Date, options: FormatDateTim
     lang.code,
     lang.timeFormat,
     date.getTime(),
-    serializeRecord({
+    serializeDateFormatOptions({
       date: options.date ?? false,
       time: options.time ?? false,
       weekday: options.weekday,
@@ -174,7 +189,7 @@ export function formatCountdownDateTime(
 function buildAbsoluteFormatterOptions(lang: LangFn, options: FormatDateTimeOptions) {
   const dateStyle = options.date ?? false;
   const timeStyle = options.time ?? false;
-  const formatterOptions: Intl.DateTimeFormatOptions = {};
+  const formatterOptions: AbsoluteDateTimeFormatOptions = {};
 
   if (options.weekday) {
     formatterOptions.weekday = options.weekday === true ? 'long' : options.weekday;
@@ -220,8 +235,8 @@ function getRelativePart(targetTime: number, anchorTime: number): RelativePart {
   };
 }
 
-function getDateTimeFormatter(locale: string, timeFormat: TimeFormat, options: Intl.DateTimeFormatOptions) {
-  const key = `dateTime:${locale}:${timeFormat}:${serializeRecord(options)}`;
+function getDateTimeFormatter(locale: string, timeFormat: TimeFormat, options: AbsoluteDateTimeFormatOptions) {
+  const key = `dateTime:${locale}:${timeFormat}:${serializeDateFormatOptions(options)}`;
   const cachedFormatter = dateTimeFormatters.get(key);
   if (cachedFormatter) {
     return cachedFormatter;
@@ -232,7 +247,7 @@ function getDateTimeFormatter(locale: string, timeFormat: TimeFormat, options: I
   return formatter;
 }
 
-function createDateTimeFormatter(locale: string, timeFormat: TimeFormat, options: Intl.DateTimeFormatOptions) {
+function createDateTimeFormatter(locale: string, timeFormat: TimeFormat, options: AbsoluteDateTimeFormatOptions) {
   try {
     return new Intl.DateTimeFormat(locale, {
       ...options,
@@ -301,8 +316,8 @@ export function getCalendarDayDiff(targetDate: Date, anchorDate: Date) {
   );
 }
 
-function serializeRecord(record: object) {
-  return Object.entries(record as Record<string, unknown>)
+function serializeDateFormatOptions(options: DateFormatCacheOptions) {
+  return Object.entries(options)
     .filter(([, value]) => value !== undefined)
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([key, value]) => `${key}=${String(value)}`)

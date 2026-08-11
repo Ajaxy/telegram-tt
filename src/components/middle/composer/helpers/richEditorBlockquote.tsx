@@ -17,6 +17,7 @@ import {
   handleRichEditorQuoteBackspace,
   handleRichEditorQuoteEnter,
   isSelectionInsideRichEditorQuote,
+  type RichEditorQuoteHtmlAttributes,
   unsetRichEditorQuote,
 } from './richEditorQuote';
 
@@ -25,7 +26,7 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 import Blockquote from '../../../common/quote/Blockquote';
 
 type RichEditorBlockquoteOptions = {
-  HTMLAttributes: Record<string, unknown>;
+  HTMLAttributes: RichEditorQuoteHtmlAttributes;
 };
 
 type RichEditorBlockquoteViewProps = TeactNodeViewComponentProps & {

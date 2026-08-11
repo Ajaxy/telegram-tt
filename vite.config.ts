@@ -1,5 +1,6 @@
 import { readFileSync, statSync } from 'fs';
 import { dirname, resolve } from 'path';
+import type { NormalizedOutputOptions, OutputBundle, PluginContext } from 'rolldown';
 import { bundleStats } from 'rollup-plugin-bundle-stats';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath } from 'url';
@@ -56,13 +57,11 @@ type BundleReportPlugin = {
 };
 
 type BundleReportHook = (
-  this: unknown,
-  outputOptions: unknown,
-  bundle: ReportOutputBundle,
+  this: PluginContext,
+  outputOptions: NormalizedOutputOptions,
+  bundle: OutputBundle,
   isWrite: boolean,
 ) => void | Promise<void>;
-
-type ReportOutputBundle = Record<string, unknown>;
 
 export default defineConfig(({ mode }): UserConfig => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -88,7 +87,7 @@ export default defineConfig(({ mode }): UserConfig => {
   const isDevelopmentMode = mode === 'development';
   const telegramApiId = env.TELEGRAM_API_ID || '';
   const telegramApiHash = env.TELEGRAM_API_HASH || '';
-  const workerReportBundles: ReportOutputBundle[] = [];
+  const workerReportBundles: OutputBundle[] = [];
   const plugins: PluginOption[] = [
     buildGitInfoPlugin({
       appEnv,
@@ -237,11 +236,11 @@ export default defineConfig(({ mode }): UserConfig => {
   };
 });
 
-function createBundleReportPlugin(plugin: BundleReportPlugin, workerReportBundles: ReportOutputBundle[]): Plugin {
+function createBundleReportPlugin(plugin: BundleReportPlugin, workerReportBundles: OutputBundle[]): Plugin {
   return {
     name: `${plugin.name}${BUNDLE_REPORT_PLUGIN_SUFFIX}`,
     async generateBundle(outputOptions, bundle, isWrite) {
-      const generateBundle = plugin.generateBundle as BundleReportHook | undefined;
+      const generateBundle = parseBundleReportHook(plugin.generateBundle);
 
       await generateBundle?.call(
         this,
@@ -253,7 +252,7 @@ function createBundleReportPlugin(plugin: BundleReportPlugin, workerReportBundle
   };
 }
 
-function createWorkerBundleCollectorPlugin(workerReportBundles: ReportOutputBundle[]): Plugin {
+function createWorkerBundleCollectorPlugin(workerReportBundles: OutputBundle[]): Plugin {
   return {
     name: WORKER_BUNDLE_COLLECTOR_PLUGIN_NAME,
     generateBundle(_outputOptions, bundle) {
@@ -262,12 +261,24 @@ function createWorkerBundleCollectorPlugin(workerReportBundles: ReportOutputBund
   };
 }
 
-function mergeOutputBundles(bundle: ReportOutputBundle, workerReportBundles: ReportOutputBundle[]): ReportOutputBundle {
-  const result: ReportOutputBundle = {};
+function mergeOutputBundles(bundle: OutputBundle, workerReportBundles: OutputBundle[]): OutputBundle {
+  const result: OutputBundle = {};
 
   Object.assign(result, bundle, ...workerReportBundles);
 
   return result;
+}
+
+function parseBundleReportHook(hook: unknown): BundleReportHook | undefined {
+  if (typeof hook === 'function') {
+    return hook as BundleReportHook;
+  }
+
+  if (!hook || typeof hook !== 'object' || !('handler' in hook) || typeof hook.handler !== 'function') {
+    return undefined;
+  }
+
+  return hook.handler as BundleReportHook;
 }
 
 function setViteEnv(env: Record<string, string>) {

@@ -5,9 +5,11 @@ import type {
   VideoRotation,
   VideoState,
 } from '../../lib/vibecalls';
-import type { PrimitiveRecord } from '../../util/primitives/primitiveRecord';
+export type ApiPhoneCallConfig = {
+  shouldUseSctp: boolean;
+};
 
-export type ApiPhoneCallCustomParameters = PrimitiveRecord;
+export type ApiPhoneCallCustomParameters = ApiPhoneCallConfig;
 
 export interface ApiGroupCall {
   chatId?: string;

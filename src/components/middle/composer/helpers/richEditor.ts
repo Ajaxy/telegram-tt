@@ -90,7 +90,19 @@ export type RichListType = 'bulletList' | 'orderedList';
 export type RichEditorListState = {
   type: RichListType;
   isChecklist: boolean;
-  orderType?: string;
+  orderType?: RichOrderedListType;
+  isReversed: boolean;
+};
+
+type RichEditorOrderedListAttrs = {
+  start: number;
+  orderType?: RichOrderedListType;
+  isReversed: boolean;
+};
+
+type RichEditorOrderedListUpdate = {
+  orderType: RichOrderedListType;
+} | {
   isReversed: boolean;
 };
 
@@ -449,12 +461,13 @@ export function getCurrentRichEditorList(editor: Editor): RichEditorListState | 
 
   const { node } = currentList;
   const isOrdered = node.type.name === 'orderedList';
+  const orderedListAttrs = isOrdered ? parseRichEditorOrderedListAttrs(node) : undefined;
 
   return {
     type: isOrdered ? 'orderedList' : 'bulletList',
     isChecklist: checkIsRichEditorChecklist(node),
-    orderType: isOrdered && typeof node.attrs.type === 'string' ? node.attrs.type : undefined,
-    isReversed: isOrdered && Boolean(node.attrs[ORDERED_LIST_REVERSED_ATTR]),
+    orderType: orderedListAttrs?.orderType,
+    isReversed: orderedListAttrs?.isReversed || false,
   };
 }
 
@@ -508,7 +521,11 @@ export function setCurrentRichEditorListType(editor: Editor, type: RichListType)
     return tr.setNodeMarkup(
       currentList.position,
       listType,
-      buildRichEditorListAttrs(type, checkIsRichEditorChecklist(currentList.node), currentList.node.attrs),
+      buildRichEditorListAttrs(
+        type,
+        checkIsRichEditorChecklist(currentList.node),
+        parseRichEditorOrderedListAttrs(currentList.node),
+      ),
     );
   });
 }
@@ -536,29 +553,31 @@ export function toggleCurrentRichEditorListChecklist(editor: Editor) {
 }
 
 export function setCurrentRichEditorOrderedListType(editor: Editor, orderType: RichOrderedListType) {
-  return updateCurrentRichEditorOrderedList(editor, { type: orderType });
+  return updateCurrentRichEditorOrderedList(editor, { orderType });
 }
 
 export function toggleCurrentRichEditorOrderedListReversed(editor: Editor) {
-  return updateCurrentRichEditorOrderedList(editor, (currentList) => ({
-    [ORDERED_LIST_REVERSED_ATTR]: !currentList.node.attrs[ORDERED_LIST_REVERSED_ATTR],
+  return updateCurrentRichEditorOrderedList(editor, (currentListAttrs) => ({
+    isReversed: !currentListAttrs.isReversed,
   }));
 }
 
 function updateCurrentRichEditorOrderedList(
   editor: Editor,
-  attrs: Record<string, unknown> | ((currentList: RichEditorAncestor) => Record<string, unknown>),
+  update: RichEditorOrderedListUpdate | ((currentAttrs: RichEditorOrderedListAttrs) => RichEditorOrderedListUpdate),
 ) {
   return updateCurrentRichEditorList(editor, (tr, currentList) => {
     if (currentList.node.type.name !== 'orderedList') {
       return undefined;
     }
 
-    const nextAttrs = typeof attrs === 'function' ? attrs(currentList) : attrs;
-    return tr.setNodeMarkup(currentList.position, undefined, {
-      ...currentList.node.attrs,
-      ...nextAttrs,
-    });
+    const currentAttrs = parseRichEditorOrderedListAttrs(currentList.node);
+    const nextAttrs = typeof update === 'function' ? update(currentAttrs) : update;
+    return tr.setNodeMarkup(currentList.position, undefined, buildRichEditorOrderedListAttrs({
+      start: currentAttrs.start,
+      orderType: 'orderType' in nextAttrs ? nextAttrs.orderType : currentAttrs.orderType,
+      isReversed: 'isReversed' in nextAttrs ? nextAttrs.isReversed : currentAttrs.isReversed,
+    }));
   });
 }
 
@@ -618,17 +637,40 @@ function checkIsRichEditorChecklist(list: ProseMirrorNode) {
 function buildRichEditorListAttrs(
   type: RichListType,
   isChecklist: boolean,
-  currentAttrs?: Record<string, unknown>,
+  currentAttrs?: RichEditorOrderedListAttrs,
 ) {
   if (type === 'bulletList') {
     return { [BULLET_LIST_CHECKLIST_ATTR]: isChecklist };
   }
 
+  return buildRichEditorOrderedListAttrs(currentAttrs || {
+    start: 1,
+    orderType: undefined,
+    isReversed: false,
+  });
+}
+
+function buildRichEditorOrderedListAttrs(attrs: RichEditorOrderedListAttrs) {
   return {
-    start: typeof currentAttrs?.start === 'number' ? currentAttrs.start : 1,
-    type: typeof currentAttrs?.type === 'string' ? currentAttrs.type : undefined,
-    [ORDERED_LIST_REVERSED_ATTR]: Boolean(currentAttrs?.[ORDERED_LIST_REVERSED_ATTR]),
+    start: attrs.start,
+    type: attrs.orderType,
+    [ORDERED_LIST_REVERSED_ATTR]: attrs.isReversed,
   };
+}
+
+function parseRichEditorOrderedListAttrs(node: ProseMirrorNode): RichEditorOrderedListAttrs {
+  const start = node.attrs.start;
+  const orderType = node.attrs.type;
+
+  return {
+    start: typeof start === 'number' && Number.isInteger(start) ? start : 1,
+    orderType: isRichOrderedListType(orderType) ? orderType : undefined,
+    isReversed: node.attrs[ORDERED_LIST_REVERSED_ATTR] === true,
+  };
+}
+
+function isRichOrderedListType(value: unknown): value is RichOrderedListType {
+  return typeof value === 'string' && RICH_ORDERED_LIST_TYPES.some((type) => type === value);
 }
 
 const RichEditorFooter = TiptapNode.create({

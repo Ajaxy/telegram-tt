@@ -13,7 +13,7 @@ export type RichMarkdownLink = {
   isImage: boolean;
 };
 
-type BuildRichMarkdownAttrs = (markdown: RichMarkdownLink) => Record<string, unknown> | undefined;
+type BuildRichMarkdownAttrs<Attrs extends object> = (markdown: RichMarkdownLink) => Attrs | undefined;
 
 const RICH_MARKDOWN_LINK_PATTERN = String.raw`(!?)\[((?:\\[\x20-\x7E]|[^\\\]\n])*)\]\(((?:\\[\x20-\x7E]|[^\\)\n])+)\)`;
 export const RE_RICH_MARKDOWN_LINK_INPUT = new RegExp(`${RICH_MARKDOWN_LINK_PATTERN}$`);
@@ -42,12 +42,12 @@ export function parseRichMarkdownToken(token: MarkdownToken, isImage: boolean) {
   return buildRichMarkdownLink(label, href, isImage);
 }
 
-export function parseRichMarkdownNode(
+export function parseRichMarkdownNode<Attrs extends object>(
   token: MarkdownToken,
   helpers: MarkdownParseHelpers,
   isImage: boolean,
   nodeType: string,
-  buildAttrs: BuildRichMarkdownAttrs,
+  buildAttrs: BuildRichMarkdownAttrs<Attrs>,
   hasContent?: boolean,
 ) {
   const markdown = parseRichMarkdownToken(token, isImage);
@@ -62,9 +62,9 @@ export function parseRichMarkdownNode(
     : [];
 }
 
-export function buildRichMarkdownNodeInputRule(
+export function buildRichMarkdownNodeInputRule<Attrs extends object>(
   type: NodeType,
-  buildAttrs: BuildRichMarkdownAttrs,
+  buildAttrs: BuildRichMarkdownAttrs<Attrs>,
   hasContent?: boolean,
 ) {
   return new InputRule({
@@ -82,10 +82,10 @@ export function buildRichMarkdownNodeInputRule(
   });
 }
 
-export function buildRichMarkdownTokenizer(
+export function buildRichMarkdownTokenizer<Attrs extends object>(
   name: string,
   isImage: boolean,
-  buildAttrs: BuildRichMarkdownAttrs,
+  buildAttrs: BuildRichMarkdownAttrs<Attrs>,
   hasContent?: boolean,
 ): MarkdownTokenizer {
   const prefix = isImage ? '![' : '[';

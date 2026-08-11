@@ -7,24 +7,57 @@ import type {
   GroupCallParticipantVideo,
   SsrcGroup,
 } from '../../../lib/vibecalls';
-import type { ApiGroupCall, ApiPhoneCall } from '../../types';
+import type {
+  ApiGroupCall, ApiPhoneCall, ApiPhoneCallConfig, ApiPhoneCallCustomParameters,
+} from '../../types';
 
 import { CALL_PROTOCOL_LIBRARY_VERSIONS } from '../../../config';
-import { sanitizePrimitiveRecord } from '../../../util/primitives/primitiveRecord';
 import { getApiChatIdFromMtpPeer, isMtpPeerUser } from './peers';
 
-function parseCallParameters(data?: GramJs.TypeDataJSON) {
+type ParsedPhoneCallParameters = {
+  shouldDisableSctp?: boolean;
+};
+
+export function buildApiPhoneCallConfig(data: GramJs.TypeDataJSON): ApiPhoneCallConfig | undefined {
+  const parameters = parseCallParameters(data);
+  if (!parameters) {
+    return undefined;
+  }
+
+  return {
+    shouldUseSctp: !parameters.shouldDisableSctp,
+  };
+}
+
+function buildApiPhoneCallCustomParameters(data?: GramJs.TypeDataJSON): ApiPhoneCallCustomParameters | undefined {
+  const parameters = parseCallParameters(data);
+  if (!parameters || parameters.shouldDisableSctp === undefined) {
+    return undefined;
+  }
+
+  return {
+    shouldUseSctp: !parameters.shouldDisableSctp,
+  };
+}
+
+function parseCallParameters(data?: GramJs.TypeDataJSON): ParsedPhoneCallParameters | undefined {
   if (!data?.data) {
     return undefined;
   }
 
   try {
-    const parsed = JSON.parse(data.data);
+    const parsed: unknown = JSON.parse(data.data);
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       return undefined;
     }
 
-    return sanitizePrimitiveRecord(parsed as Record<string, unknown>);
+    const shouldDisableSctp = 'network_signaling_nosctp' in parsed
+      ? parsed.network_signaling_nosctp
+      : undefined;
+
+    return {
+      shouldDisableSctp: typeof shouldDisableSctp === 'boolean' ? shouldDisableSctp : undefined,
+    };
   } catch {
     return undefined;
   }
@@ -164,7 +197,7 @@ export function buildPhoneCall(call: GramJs.TypePhoneCall): ApiPhoneCall {
       startDate,
       isP2pAllowed: Boolean(p2pAllowed),
       connections: connections.map(buildApiCallConnection).filter(Boolean),
-      customParameters: parseCallParameters(customParameters),
+      customParameters: buildApiPhoneCallCustomParameters(customParameters),
     };
   }
 

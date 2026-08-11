@@ -9,7 +9,7 @@ import type {
 import { GROUP_CALL_PARTICIPANTS_LIMIT } from '../../../limits';
 import {
   buildApiGroupCall,
-  buildApiGroupCallParticipant, buildCallProtocol,
+  buildApiGroupCallParticipant, buildApiPhoneCallConfig, buildCallProtocol,
   buildPhoneCall,
 } from '../apiBuilders/calls';
 import {
@@ -411,11 +411,5 @@ export async function fetchCallConfig() {
     return undefined;
   }
 
-  try {
-    const parsed = JSON.parse(result.data);
-    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
-      ? parsed as Record<string, unknown> : undefined;
-  } catch {
-    return undefined;
-  }
+  return buildApiPhoneCallConfig(result);
 }

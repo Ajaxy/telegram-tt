@@ -5,6 +5,7 @@ import type { ApiPageBlockEmbed } from '../../api/types';
 import { EMBED_ALLOW_ATTRIBUTES, IFRAME_SANDBOX_ATTRIBUTES, isMessageFromIframe } from '../../util/browser/iframe';
 import buildStyle from '../../util/buildStyle';
 import { extractInstantViewEmbedUrl } from '../../util/instantViewEmbed';
+import { isLiteralObject } from '../../util/iteratees';
 
 import styles from './RichContent.module.scss';
 
@@ -37,23 +38,21 @@ const EmbedFrame = ({ block, title }: OwnProps) => {
       }
 
       try {
-        const data: unknown = JSON.parse(event.data);
-        if (!isEmbedFrameEvent(data)) {
+        const parsed: unknown = JSON.parse(event.data);
+        const data = parseEmbedFrameEvent(parsed);
+        if (!data) {
           return;
         }
 
         switch (data.eventType) {
           case 'resize_frame': {
-            const nextHeight = data.eventData.height;
-            if (!nextHeight || typeof nextHeight !== 'number') return;
-
-            setFrameHeight(nextHeight);
+            setFrameHeight(data.eventData.height);
             break;
           }
           default:
             break;
         }
-      } catch (err) {
+      } catch {
         // Ignore other messages
       }
     }
@@ -89,10 +88,24 @@ const EmbedFrame = ({ block, title }: OwnProps) => {
 
 export default memo(EmbedFrame);
 
-function isEmbedFrameEvent(data: unknown): data is EmbedFrameEvent {
-  return isRecord(data) && typeof data.eventType === 'string';
-}
+function parseEmbedFrameEvent(data: unknown): EmbedFrameEvent | undefined {
+  if (!isLiteralObject(data)) {
+    return undefined;
+  }
 
-function isRecord(data: unknown): data is Record<string, unknown> {
-  return Boolean(data) && typeof data === 'object';
+  switch (data.eventType) {
+    case 'resize_frame': {
+      const height = data.eventData?.height;
+      if (typeof height !== 'number' || !Number.isFinite(height) || height <= 0) {
+        return undefined;
+      }
+
+      return {
+        eventType: 'resize_frame',
+        eventData: { height },
+      };
+    }
+    default:
+      return undefined;
+  }
 }

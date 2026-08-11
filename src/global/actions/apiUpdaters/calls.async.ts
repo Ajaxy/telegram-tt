@@ -1,4 +1,6 @@
-import type { ApiPhoneCall, ApiPhoneCallCustomParameters } from '../../../api/types';
+import type {
+  ApiPhoneCall, ApiPhoneCallConfig, ApiPhoneCallCustomParameters,
+} from '../../../api/types';
 import type { ApiCallProtocol } from '../../../lib/vibecalls';
 import type { ActionReturnType } from '../../types';
 
@@ -6,7 +8,7 @@ import { CALL_PROTOCOL_LIBRARY_VERSIONS, DEBUG_CALLS } from '../../../config';
 import {
   handleUpdateGroupCallConnection,
   handleUpdateGroupCallParticipants,
-  joinPhoneCall, processSignalingMessage, sanitizePrimitiveRecord,
+  joinPhoneCall, processSignalingMessage,
 } from '../../../lib/vibecalls';
 import { ARE_CALLS_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import { logDebugMessage } from '../../../util/debugConsole';
@@ -22,6 +24,10 @@ import { selectActiveGroupCall, selectGroupCallParticipant, selectPhoneCallUser 
 
 let phoneCallSignalingDataPromise = Promise.resolve();
 let groupCallNegotiationPromise = Promise.resolve();
+
+const DEFAULT_PHONE_CALL_CONFIG: ApiPhoneCallConfig = {
+  shouldUseSctp: true,
+};
 
 type QueuedPhoneCallSignalingData = {
   callId?: string;
@@ -200,21 +206,18 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         (async () => {
           try {
             const activeCallId = call.id;
-            let callConfigResult: Record<string, unknown> | undefined;
+            let callConfig = DEFAULT_PHONE_CALL_CONFIG;
             try {
-              callConfigResult = await callApi('fetchCallConfig');
+              callConfig = await callApi('fetchCallConfig') || DEFAULT_PHONE_CALL_CONFIG;
             } catch (err) {
               logPhoneCallDebug('Failed to fetch phone call config', {
                 error: err instanceof Error ? err.message : String(err),
               });
             }
 
-            const callConfig = sanitizePrimitiveRecord(callConfigResult) || {};
-            const customParameters: ApiPhoneCallCustomParameters = Object.assign(
-              {},
-              callConfig,
-              call.customParameters,
-            );
+            const customParameters: ApiPhoneCallCustomParameters = {
+              shouldUseSctp: call.customParameters?.shouldUseSctp ?? callConfig.shouldUseSctp,
+            };
             call.customParameters = customParameters;
             global = getGlobal();
             if (global.phoneCall?.id === call.id) {
@@ -230,7 +233,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
             global = getGlobal();
             if (global.phoneCall?.id === call.id) {
-              await callApi('setPhoneCallSctpEnabled', !customParameters.network_signaling_nosctp);
+              await callApi('setPhoneCallSctpEnabled', customParameters.shouldUseSctp);
             }
 
             if (isOutgoing) {
@@ -427,7 +430,7 @@ async function processPhoneCallSignalingData(queued: QueuedPhoneCallSignalingDat
   }
 }
 
-function logPhoneCallDebug(message: string, data: Record<string, unknown>) {
+function logPhoneCallDebug<Data extends object>(message: string, data: Data) {
   if (!DEBUG_CALLS) return;
 
   logDebugMessage('warn', `[PhoneCall] ${message}`, data);

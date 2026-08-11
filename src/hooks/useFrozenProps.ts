@@ -1,6 +1,6 @@
 import { useRef } from '../lib/teact/teact';
 
-export default function useFrozenProps<T extends Record<string, unknown>>(
+export default function useFrozenProps<T extends object>(
   props: T,
   shouldFreeze: boolean,
   alwaysFreshKeys?: readonly (keyof T)[],

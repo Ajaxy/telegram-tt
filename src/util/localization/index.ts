@@ -312,7 +312,7 @@ export async function changeLanguage(newLanguage: ApiLanguage) {
 function createTranslationFn(): LangFn {
   const fn: LangFn = ((
     key: LangKey,
-    variables: Record<string, unknown> | undefined,
+    variables: LangFnParameters['variables'],
     options: LangFnOptions | AdvancedLangFnOptions | undefined,
   ) => {
     if (options && areAdvancedLangFnOptions(options)) {

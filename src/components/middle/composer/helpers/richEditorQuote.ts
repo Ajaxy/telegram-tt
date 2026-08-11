@@ -13,6 +13,10 @@ type QuoteContext = {
   bodyEnd: number;
 };
 
+export type RichEditorQuoteHtmlAttributes = {
+  class?: string;
+};
+
 export function isRichEditorQuoteNode(node: ProseMirrorNode) {
   return node.type.name === 'blockquote' || node.type.name === 'pullquote';
 }

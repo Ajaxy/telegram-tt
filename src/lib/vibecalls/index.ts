@@ -9,7 +9,6 @@ export {
 } from './phone/phoneCall';
 export * from './phone/signalingMessages';
 export {
-  IS_SCREENSHARE_SUPPORTED, sanitizePrimitiveRecord, THRESHOLD,
+  IS_SCREENSHARE_SUPPORTED, THRESHOLD,
 } from './utils';
-export type { PrimitiveRecord, PrimitiveRecordValue } from './utils';
 export * from './types';

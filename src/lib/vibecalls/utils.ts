@@ -1,14 +1,6 @@
 import type { P2PPayloadType } from './phone/signalingMessages';
 import type { PayloadType } from './types';
 
-export {
-  sanitizePrimitiveRecord,
-} from '../../util/primitives/primitiveRecord';
-export type {
-  PrimitiveRecord,
-  PrimitiveRecordValue,
-} from '../../util/primitives/primitiveRecord';
-
 /// NOTE: telegram returns sign source, while webrtc uses unsign source internally
 /// unsign => sign
 export function toTelegramSource(source: number) {

@@ -5,11 +5,11 @@ import { Plugin } from '@tiptap/pm/state';
 
 import { CAPTION_NODE_NAME } from '../../../../util/tiptap/constants';
 import { RICH_INPUT_MODE_CHANGED_META } from './richEditorMode';
-import { isRichEditorQuoteNode } from './richEditorQuote';
+import { isRichEditorQuoteNode, type RichEditorQuoteHtmlAttributes } from './richEditorQuote';
 import buildRichEditorTextField from './richEditorTextField';
 
 type RichEditorCaptionOptions = {
-  HTMLAttributes: Record<string, unknown>;
+  HTMLAttributes: RichEditorQuoteHtmlAttributes;
   getIsRichInputExpanded: () => boolean;
 };
 
