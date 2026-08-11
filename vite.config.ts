@@ -22,6 +22,7 @@ const BUNDLE_STATS_VISUALIZER_FILE = 'visualizer.html';
 const WORKER_BUNDLE_COLLECTOR_PLUGIN_NAME = 'telegram:collect-worker-report-bundle';
 const BUNDLE_REPORT_PLUGIN_SUFFIX = ':with-workers';
 const DEV_SERVER_WATCH_IGNORES = [
+  '**/.cache/**',
   '**/dist/**',
   '**/tauri/target/**',
 ];
@@ -33,12 +34,14 @@ const DEV_BUNDLE_WARMUP_CLIENT_FILES = [
   'src/bundles/stars.ts',
 ];
 const IMAGE_ASSET_RE = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
-const STATIC_COPY_TARGETS: Target[] = [
+const WATCHED_STATIC_COPY_TARGETS: Target[] = [
   {
     src: normalizePath(resolve(DIR_NAME, 'node_modules/opus-recorder/dist/decoderWorker.min.wasm')),
     dest: 'assets',
     rename: { stripBase: true },
   },
+];
+const UNWATCHED_STATIC_COPY_TARGETS: Target[] = [
   {
     src: normalizePath(resolve(DIR_NAME, 'node_modules/emoji-data-ios/img-apple-64/**/*')),
     dest: '.',
@@ -95,7 +98,15 @@ export default defineConfig(({ mode }): UserConfig => {
       isDevelopmentMode,
       rootDir: DIR_NAME,
     }),
-    viteStaticCopy({ targets: STATIC_COPY_TARGETS }),
+    viteStaticCopy({ targets: WATCHED_STATIC_COPY_TARGETS }),
+    viteStaticCopy({
+      targets: UNWATCHED_STATIC_COPY_TARGETS,
+      watch: {
+        options: {
+          ignored: '**/*',
+        },
+      },
+    }),
     isDevelopmentMode && watchAndRun([
       {
         name: 'lang',
