@@ -1,7 +1,7 @@
 import { addExtraClass, removeExtraClass } from '../../../lib/teact/teact-dom';
 
 import {
-  forceMutation, requestForcedReflow, requestMeasure,
+  forceMeasure, forceMutation, requestForcedReflow, requestMeasure,
 } from '../../../lib/fasterdom/fasterdom';
 import { isAnimatingScroll } from '../../../util/animateScroll';
 import buildStyle from '../../../util/buildStyle';
@@ -219,18 +219,26 @@ export function updateTopReserveWithScrollCompensation(
         scrollTop = scroller.scrollHeight - bottomDistance;
       }
       const measuredGrowth = scroller.scrollHeight - prevScrollHeight;
-      const shouldRestoreSnap = hadSnap && Math.abs(scrollTop - scroller.scrollTop) <= SCROLL_POSITION_TOLERANCE;
+      const validatedScrollTop = scroller.scrollTop;
+      const shouldRestoreSnap = hadSnap && Math.abs(scrollTop - validatedScrollTop) <= SCROLL_POSITION_TOLERANCE;
       return {
-        scroller, scrollTop, measuredGrowth, shouldRestoreSnap,
+        scroller, scrollTop, validatedScrollTop, measuredGrowth, shouldRestoreSnap,
       };
     });
 
     return () => {
       targets.forEach(({
-        scroller, scrollTop, measuredGrowth, shouldRestoreSnap,
+        scroller, scrollTop, validatedScrollTop, measuredGrowth, shouldRestoreSnap,
       }) => {
-        scroller.scrollTop = scrollTop;
-        if (shouldRestoreSnap) addExtraClass(scroller, BOTTOM_SNAP_CLASS);
+        // All forced-reflow callbacks run before any of their deferred mutations, so another
+        // task's mutation (e.g. the `MessageList` reflow restoring a freshly opened chat's
+        // position) may land between the plan validation above and this write — such a writer
+        // owns the position, and applying the plan over it would clobber a valid restore
+        const liveScrollTop = forceMeasure(() => scroller.scrollTop);
+        if (Math.abs(liveScrollTop - validatedScrollTop) <= SCROLL_POSITION_TOLERANCE) {
+          scroller.scrollTop = scrollTop;
+          if (shouldRestoreSnap) addExtraClass(scroller, BOTTOM_SNAP_CLASS);
+        }
         const pending = (pendingTopGrowthByScroller.get(scroller) || 0) + measuredGrowth;
         if (pending > 0) {
           pendingTopGrowthByScroller.set(scroller, pending);
