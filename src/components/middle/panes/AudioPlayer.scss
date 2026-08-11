@@ -247,6 +247,7 @@
   }
 
   &.island-player {
+    --player-transform-transition: transform var(--layer-transition);
     --player-shift-x: 0px;
     --player-parked-shift: var(--middle-header-player-parked, var(--middle-panel-inline-padding));
 
@@ -265,9 +266,13 @@
     /* stylelint-disable plugin/no-low-performance-animation-properties */
     transition:
       top var(--top-stack-transition),
-      transform var(--top-stack-transition),
+      var(--player-transform-transition),
       opacity var(--top-stack-transition);
     /* stylelint-enable plugin/no-low-performance-animation-properties */
+
+    body.no-right-column-animations & {
+      --player-transform-transition: transform 0s;
+    }
 
     &.island-player-closing {
       opacity: 0;
