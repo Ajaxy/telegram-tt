@@ -235,7 +235,7 @@ const App = ({
     // thumbnail), so service chips don't keep the previous wallpaper's tint.
     document.body.style.setProperty(
       '--action-message-bg',
-      actionMessageBg || getActionMessageBg(theme),
+      actionMessageBg || getActionMessageBg(theme)!,
     );
   }, [actionMessageBg, theme]);
 
