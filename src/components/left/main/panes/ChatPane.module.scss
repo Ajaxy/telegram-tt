@@ -1,15 +1,13 @@
 @use "../../../../styles/mixins";
 
 .pane {
-  @include mixins.chat-list-pane;
+  @include mixins.chat-list-pane-content;
 
   cursor: var(--custom-cursor, pointer);
-  border-radius: var(--border-radius-default);
   line-height: 1.25;
-  background-color: var(--color-background-secondary);
 
   &:hover {
-    opacity: 0.85;
+    background-color: var(--color-chat-hover);
   }
 }
 

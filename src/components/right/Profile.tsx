@@ -25,7 +25,9 @@ import type { RegularLangKey } from '../../types/language';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { AudioOrigin, LoadMoreDirection, MediaViewerOrigin, NewChatMembersProgress } from '../../types';
 
-import { MEMBERS_SLICE, PROFILE_SENSITIVE_AREA, SHARED_MEDIA_SLICE, SLIDE_TRANSITION_DURATION } from '../../config';
+import {
+  MEMBERS_SLICE, PROFILE_SENSITIVE_AREA, SHARED_MEDIA_SLICE, SLIDE_TRANSITION_DURATION,
+} from '../../config';
 import {
   getHasAdminRight,
   getIsDownloading,

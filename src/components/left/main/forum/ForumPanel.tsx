@@ -311,7 +311,7 @@ const ForumPanel = ({
         />
       </div>
 
-      {!isUserId(chat.id) && <GroupCallTopPane chatId={chat.id} />}
+      {!isUserId(chat.id) && <GroupCallTopPane chatId={chat.id} className="standalone-pill" />}
 
       <div className={styles.notch} />
 

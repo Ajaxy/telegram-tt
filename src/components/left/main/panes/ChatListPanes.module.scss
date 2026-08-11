@@ -1,5 +1,46 @@
 .root {
   position: absolute;
   z-index: var(--z-left-header);
+
+  overflow: hidden;
+
   width: 100%;
+  height: 0;
+  border-radius: var(--border-radius-island);
+
+  background-color: var(--color-background);
+  box-shadow: var(--shadow-chat-list-panel);
+
+  /* stylelint-disable plugin/no-low-performance-animation-properties */
+  transition:
+    opacity var(--slide-transition),
+    height var(--island-height-transition, 0s);
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
+
+  > [data-is-panel-open] ~ [data-is-panel-open] {
+    box-shadow: inset 0 1px var(--color-borders);
+  }
+
+  :global(.AudioPlayer.full-width-player) {
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  :global(html.theme-dark) & {
+    box-shadow: inset 0 0 0 1px var(--color-borders);
+  }
+
+  :global(body.no-page-transitions) & {
+    transition: none !important;
+  }
+
+  &Hidden {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  @media (max-width: 600px) {
+    inset-inline: var(--chat-list-inline-inset);
+    width: auto;
+  }
 }

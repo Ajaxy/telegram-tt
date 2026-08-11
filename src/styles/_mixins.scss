@@ -109,7 +109,7 @@
   }
 }
 
-@mixin middle-header-pane {
+@mixin middle-header-pane-content {
   --pane-content-radius: calc(var(--border-radius-pane) - 0.25rem);
 
   position: absolute;
@@ -122,47 +122,37 @@
   padding-right: max(0.25rem, env(safe-area-inset-right));
   padding-bottom: 0.25rem;
   padding-left: max(0.25rem, env(safe-area-inset-left));
-  border-radius: var(--border-radius-pane);
 
+  opacity: 0;
   background-color: var(--color-background);
-  box-shadow: var(--shadow-pane);
 
-  transition: transform var(--slide-transition);
+  transition:
+    transform var(--pane-slide-transition, var(--slide-transition)),
+    opacity var(--pane-slide-transition, var(--slide-transition));
 }
 
-@mixin chat-list-pane {
+@mixin middle-header-pane-island {
+  @include middle-header-pane-content;
+
+  border-radius: var(--border-radius-pane);
+  opacity: 1;
+  box-shadow: var(--shadow-pane);
+}
+
+@mixin chat-list-pane-content {
   position: absolute;
   top: 0;
-  transform: translateY(calc(-100% - 0.5rem)); // Include top margin to hide fully
+  transform: translateY(-100%);
 
   width: 100%;
   padding: 0.5625rem;
-  border-radius: var(--border-radius-island);
 
+  opacity: 0;
   background-color: var(--color-background);
-  box-shadow: var(--shadow-chat-list-panel);
 
-  transition: transform var(--chat-transform-transition);
-
-  // Some panels might unmount without animation, so we provide same background above panel to make it less noticeable
-  &::after {
-    content: "";
-
-    position: absolute;
-    z-index: -1;
-    top: -100%;
-    right: 0;
-    left: 0;
-
-    height: inherit;
-
-    background-color: inherit;
-  }
-
-  :global(html.theme-dark) & {
-    border: 1px solid var(--color-borders);
-    box-shadow: none;
-  }
+  transition:
+    transform var(--pane-slide-transition, var(--slide-transition)),
+    opacity var(--pane-slide-transition, var(--slide-transition));
 }
 
 @mixin side-panel-section {

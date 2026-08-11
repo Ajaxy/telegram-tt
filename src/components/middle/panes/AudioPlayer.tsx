@@ -28,8 +28,7 @@ import useMessageMediaHash from '../../../hooks/media/useMessageMediaHash';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useAudioPlayer from '../../../hooks/useAudioPlayer';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useEffectOnce from '../../../hooks/useEffectOnce';
+import useFrozenProps from '../../../hooks/useFrozenProps';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useMessageMediaMetadata from '../../../hooks/useMessageMediaMetadata';
@@ -48,6 +47,7 @@ import './AudioPlayer.scss';
 type OwnProps = {
   className?: string;
   noUi?: boolean;
+  isCompact?: boolean;
   isHidden?: boolean;
   onPaneStateChange?: (state: PaneState) => void;
 };
@@ -76,13 +76,12 @@ const PLAYBACK_RATE_VALUES = Object.keys(PLAYBACK_RATES).sort().map(Number);
 const REGULAR_PLAYBACK_RATE = 1;
 const DEFAULT_FAST_PLAYBACK_RATE = 2;
 
-let wasPlayerPaneShown = false;
-
 const AudioPlayer: FC<OwnProps & StateProps> = ({
   message,
   mediaDuration,
   className,
   noUi,
+  isCompact,
   sender,
   chat,
   volume,
@@ -103,18 +102,24 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   const lang = useOldLang();
 
   const { isMobile } = useAppLayout();
-  const renderingMessage = useCurrentOrPrev(message);
+
+  const isOpen = Boolean(message);
+  const {
+    message: renderingMessage,
+    sender: renderingSender,
+    chat: renderingChat,
+  } = useFrozenProps({ message, sender, chat }, !isOpen);
 
   const { audio, voice, video } = renderingMessage ? getMessageContent(renderingMessage) : {} satisfies MediaContent;
   const isVoice = Boolean(voice || video);
   const shouldRenderPlaybackButton = isVoice || (audio?.duration || 0) > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION;
-  const senderName = sender ? getPeerTitle(lang, sender) : undefined;
+  const senderName = renderingSender ? getPeerTitle(lang, renderingSender) : undefined;
 
   const playableMedia = voice || video || audio;
   const mediaHash = useMessageMediaHash(renderingMessage, 'inline');
   const mediaFormat = playableMedia && getMediaFormat(playableMedia, 'inline');
   const mediaData = useMedia(mediaHash, false, mediaFormat);
-  const mediaMetadata = useMessageMediaMetadata(renderingMessage, sender, chat);
+  const mediaMetadata = useMessageMediaMetadata(renderingMessage, renderingSender, renderingChat);
 
   const {
     playPause,
@@ -145,7 +150,6 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
 
   const isPane = !noUi;
 
-  const isOpen = Boolean(message);
   const transitionRef = useRef<HTMLDivElement>();
 
   const { ref, shouldRender } = useHeaderPane({
@@ -154,17 +158,6 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     ref: transitionRef,
     onStateChange: onPaneStateChange,
   });
-
-  const isFirstRenderRef = useRef(true);
-  useEffectOnce(() => {
-    isFirstRenderRef.current = false;
-  });
-  const isSettled = isPane && isOpen && wasPlayerPaneShown && isFirstRenderRef.current;
-  useEffect(() => {
-    if (isPane) {
-      wasPlayerPaneShown = isOpen;
-    }
-  }, [isPane, isOpen]);
 
   const {
     isContextMenuOpen,
@@ -286,9 +279,47 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     return undefined;
   }
 
+  if (isCompact) {
+    return (
+      <div
+        className={buildClassName(
+          'AudioPlayer', 'full-width-player', 'compact-player', !isOpen && 'island-player-closing', className,
+        )}
+        dir={lang.isRtl ? 'rtl' : undefined}
+        ref={ref}
+      >
+        <Button
+          round
+          ripple={!isMobile}
+          color="translucent"
+          size="smaller"
+          className={buildClassName('toggle-play', 'player-button', isPlaying ? 'pause' : 'play')}
+          onClick={playPause}
+          ariaLabel={lang(isPlaying ? 'AudioPause' : 'AudioPlay')}
+        >
+          <Icon name="play" />
+          <Icon name="pause" />
+        </Button>
+        <div className="AudioPlayer-content" onClick={handleClick}>
+          {audio ? renderAudio(audio) : renderVoice(lang('AttachAudio'), senderName)}
+          <RippleEffect />
+        </div>
+        <Button
+          round
+          className="player-close"
+          color="translucent"
+          size="smaller"
+          onClick={handleClose}
+          ariaLabel={lang('AudioPlayerClose')}
+          iconName="close"
+        />
+      </div>
+    );
+  }
+
   return (
     <div
-      className={buildClassName('AudioPlayer', 'full-width-player', isSettled && 'settled', className)}
+      className={buildClassName('AudioPlayer', 'full-width-player', !isOpen && 'island-player-closing', className)}
       dir={lang.isRtl ? 'rtl' : undefined}
       ref={ref}
     >

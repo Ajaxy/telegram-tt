@@ -5,7 +5,7 @@ import {
   memo, onFullyIdle, useEffect, useLayoutEffect,
   useRef, useState,
 } from '../../lib/teact/teact';
-import { addExtraClass } from '../../lib/teact/teact-dom';
+import { addExtraClass, setExtraStyles } from '../../lib/teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiChatFolder, ApiLimitTypeWithModal, ApiStarGiftAuctionState, ApiUser } from '../../api/types';
@@ -45,6 +45,8 @@ import { processDeepLink } from '../../util/deeplink';
 import { Bundles, loadBundle } from '../../util/moduleLoader';
 import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
 import updateIcon from '../../util/updateIcon';
+import { REM } from '../common/helpers/mediaDimensions';
+import { updateTopReserveWithScrollCompensation } from '../middle/helpers/messageListReserves';
 
 import useInterval from '../../hooks/schedulers/useInterval';
 import useTimeout from '../../hooks/schedulers/useTimeout';
@@ -60,6 +62,7 @@ import useSyncEffect from '../../hooks/useSyncEffect';
 import useBackgroundMode from '../../hooks/window/useBackgroundMode';
 import useBeforeUnload from '../../hooks/window/useBeforeUnload';
 import { useFullscreenStatus } from '../../hooks/window/useFullscreen';
+import { PANE_GAP_REM, type PaneState } from '../middle/hooks/useHeaderPane';
 
 import ActiveCallHeader from '../calls/ActiveCallHeader.async';
 import GroupCall from '../calls/group/GroupCall.async';
@@ -602,6 +605,28 @@ const Main = ({
     updateIcon(false);
   });
 
+  const playerReserveRef = useRef(0);
+  const handlePlayerPaneStateChange = useLastCallback(({ height }: PaneState) => {
+    const main = containerRef.current;
+    const middleColumn = document.getElementById('MiddleColumn');
+    if (!main || !middleColumn) return;
+    const occupiedHeight = height ? height + PANE_GAP_REM * REM : 0;
+    const heightDelta = occupiedHeight - playerReserveRef.current;
+    if (!heightDelta) return;
+    playerReserveRef.current = occupiedHeight;
+    const parkedShift = occupiedHeight ? '0px' : 'var(--middle-panel-inline-padding)';
+    updateTopReserveWithScrollCompensation(middleColumn, heightDelta, () => {
+      setExtraStyles(main, {
+        '--middle-header-player-height': `${occupiedHeight}px`,
+        '--middle-header-player-parked': parkedShift,
+      });
+      setExtraStyles(middleColumn, {
+        '--middle-header-player-height': `${occupiedHeight}px`,
+        '--middle-header-player-parked': parkedShift,
+      });
+    }, [main]);
+  });
+
   const handleStickerSetModalClose = useLastCallback(() => {
     closeStickerSetModal();
   });
@@ -634,7 +659,11 @@ const Main = ({
       )}
       <FoldersSidebar isMobile={isMobile} isActive={isFoldersSidebarShown} />
       <LeftColumn ref={leftColumnRef} isFoldersSidebarShown={isFoldersSidebarShown} />
-      <MiddleColumn leftColumnRef={leftColumnRef} isMobile={isMobile} />
+      <MiddleColumn
+        leftColumnRef={leftColumnRef}
+        isMobile={isMobile}
+        onPlayerPaneStateChange={handlePlayerPaneStateChange}
+      />
       <RightColumn isMobile={isMobile} />
       <MediaViewer isOpen={isMediaViewerOpen} />
       <StoryViewer isOpen={isStoryViewerOpen} />

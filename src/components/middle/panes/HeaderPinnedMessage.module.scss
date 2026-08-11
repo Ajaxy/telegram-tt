@@ -1,15 +1,16 @@
 @use "../../../styles/mixins";
 
 .root {
+  @include mixins.middle-header-pane-content;
+
   cursor: var(--custom-cursor, default);
 
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
 
+  height: 3rem;
   margin-left: auto;
-
-  background: var(--color-background);
 
   :global {
     .Button {
@@ -31,16 +32,6 @@
   > :global(.Button) {
     flex-shrink: 0;
   }
-}
-
-.fullWidth.settled {
-  transform: translateY(0);
-}
-
-.fullWidth {
-  @include mixins.middle-header-pane;
-
-  height: 3rem;
 
   .pinnedMessage {
     flex: 1;
@@ -86,6 +77,8 @@
   border-radius: var(--pane-content-radius);
 
   background-color: var(--color-background);
+
+  transition: background-color 0.2s;
 
   &:hover:not(.no-hover) {
     background-color: var(--color-interactive-element-hover);

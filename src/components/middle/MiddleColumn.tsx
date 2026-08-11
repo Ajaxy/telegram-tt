@@ -4,6 +4,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiChatBannedRights, ApiInputMessageReplyInfo, ApiTopic } from '../../api/types';
 import type { ActiveEmojiInteraction, AnimationLevel, MessageListType, ThemeKey, ThreadId } from '../../types';
+import type { PaneState } from './hooks/useHeaderPane';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
@@ -95,7 +96,8 @@ import FrozenAccountPlaceholder from './FrozenAccountPlaceholder';
 import MessageList from './MessageList';
 import MessageSelectToolbar from './MessageSelectToolbar';
 import MiddleHeader from './MiddleHeader';
-import MiddleHeaderPanes from './MiddleHeaderPanes';
+import MiddleHeaderPanesIsland from './MiddleHeaderPanesIsland';
+import AudioPlayer from './panes/AudioPlayer';
 import PremiumRequiredPlaceholder from './PremiumRequiredPlaceholder';
 import ReactorListModal from './ReactorListModal.async';
 import MiddleSearch from './search/MiddleSearch.async';
@@ -105,6 +107,7 @@ import './MiddleColumn.scss';
 interface OwnProps {
   leftColumnRef: ElementRef<HTMLDivElement>;
   isMobile?: boolean;
+  onPlayerPaneStateChange: (state: PaneState) => void;
 }
 
 type StateProps = {
@@ -130,6 +133,7 @@ type StateProps = {
   isBackgroundBlurred?: boolean;
   leftColumnWidth?: number;
   hasActiveMiddleSearch?: boolean;
+  isRichInputExpanded?: boolean;
   isSelectModeActive?: boolean;
   isSeenByModalOpen: boolean;
   isPrivacySettingsNoticeModalOpen: boolean;
@@ -185,6 +189,7 @@ function MiddleColumn({
   isComments,
   messageListType,
   isMobile,
+  onPlayerPaneStateChange,
   chat,
   draftReplyInfo,
   isPrivate,
@@ -203,6 +208,7 @@ function MiddleColumn({
   isBackgroundBlurred,
   leftColumnWidth,
   hasActiveMiddleSearch,
+  isRichInputExpanded,
   isSelectModeActive,
   isSeenByModalOpen,
   isPrivacySettingsNoticeModalOpen,
@@ -561,18 +567,14 @@ function MiddleColumn({
         />
       )}
       <div id="middle-column-portals" />
+      <AudioPlayer
+        className="island-player"
+        isHidden={hasActiveMiddleSearch || isRichInputExpanded || (isTablet && isLeftColumnShown)}
+        onPaneStateChange={onPlayerPaneStateChange}
+      />
       {Boolean(renderingChatId && renderingThreadId) && (
         <>
           <div className="messages-layout" onDragEnter={renderingCanPost ? handleDragEnter : undefined}>
-            <MiddleHeaderPanes
-              key={`${renderingChatId}-${renderingThreadId}-${renderingMessageListType}`}
-              chatId={renderingChatId!}
-              threadId={renderingThreadId!}
-              messageListType={renderingMessageListType!}
-              getCurrentPinnedIndex={getCurrentPinnedIndex}
-              getLoadingPinnedId={getLoadingPinnedId}
-              onFocusPinnedMessage={handleFocusPinnedMessage}
-            />
             <MiddleHeader
               chatId={renderingChatId!}
               threadId={renderingThreadId!}
@@ -581,6 +583,15 @@ function MiddleColumn({
               isMobile={isMobile}
               getCurrentPinnedIndex={getCurrentPinnedIndex}
               getLoadingPinnedId={getLoadingPinnedId}
+              onFocusPinnedMessage={handleFocusPinnedMessage}
+            />
+            <MiddleHeaderPanesIsland
+              chatId={renderingChatId!}
+              threadId={renderingThreadId!}
+              messageListType={renderingMessageListType!}
+              getCurrentPinnedIndex={getCurrentPinnedIndex}
+              getLoadingPinnedId={getLoadingPinnedId}
+              isChatClosing={!chatId}
               onFocusPinnedMessage={handleFocusPinnedMessage}
             />
             <Transition
@@ -708,7 +719,7 @@ export default memo(withGlobal<OwnProps>(
       messageLists, isLeftColumnShown, activeEmojiInteractions,
       seenByModal, reactorModal, shouldSkipHistoryAnimations,
       chatLanguageModal, privacySettingsNoticeModal,
-      uiReadyState,
+      uiReadyState, isRichInputExpanded,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
     const { leftColumnWidth } = global;
@@ -723,6 +734,7 @@ export default memo(withGlobal<OwnProps>(
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isBackgroundBlurred,
       hasActiveMiddleSearch: Boolean(selectCurrentMiddleSearch(global)),
+      isRichInputExpanded,
       isSelectModeActive: selectIsInSelectMode(global),
       isSeenByModalOpen: Boolean(seenByModal),
       isPrivacySettingsNoticeModalOpen: Boolean(privacySettingsNoticeModal),

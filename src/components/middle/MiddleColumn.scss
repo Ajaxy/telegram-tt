@@ -17,7 +17,7 @@
   }
 
   .messages-layout {
-    --slide-transition: 450ms cubic-bezier(0.25, 1, 0.5, 1);
+    --slide-transition: var(--top-stack-transition);
 
     position: relative;
 

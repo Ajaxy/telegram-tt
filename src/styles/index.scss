@@ -100,6 +100,10 @@ body.is-tauri {
   --window-controls-width: 5rem;
 }
 
+body.no-page-transitions {
+  --pane-slide-transition: 0s;
+}
+
 body.cursor-grabbing {
   --custom-cursor: grabbing;
 

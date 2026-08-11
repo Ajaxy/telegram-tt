@@ -1,4 +1,8 @@
-import { forceMutation, requestMeasure } from '../../../lib/fasterdom/fasterdom';
+import { addExtraClass, removeExtraClass } from '../../../lib/teact/teact-dom';
+
+import {
+  forceMutation, requestForcedReflow, requestMeasure,
+} from '../../../lib/fasterdom/fasterdom';
 import { isAnimatingScroll } from '../../../util/animateScroll';
 import buildStyle from '../../../util/buildStyle';
 import { REM } from '../../common/helpers/mediaDimensions';
@@ -9,9 +13,11 @@ const AVATAR_OFFSET = 0.5 * REM;
 const MESSAGE_LIST_COMPOSER_GAP = 0.5 * REM; // Mirrors `--message-list-composer-gap`
 const NO_FOOTER_CLASS = 'no-footer';
 const SELECT_MODE_CLASS = 'select-mode-active';
+const BOTTOM_SNAP_CLASS = 'with-bottom-snap';
 export const AT_BOTTOM_THRESHOLD = 4;
 export const AT_TOP_THRESHOLD = 4;
 export const SCROLL_BOTTOM_SENTINEL = 1e7;
+const SCROLL_POSITION_TOLERANCE = 1;
 
 const SEND_COLLAPSE_MAX_DURATION = 600;
 const RESERVE_EPSILON = 0.5;
@@ -21,6 +27,14 @@ const FALLBACK_MIN_BOTTOM_INSET = 4 * REM;
 type SendCollapseLatch = { prevReserve: number; restoreTimer: number };
 
 const sendCollapseLatches = new WeakMap<HTMLElement, SendCollapseLatch>();
+
+const pendingTopGrowthByScroller = new WeakMap<HTMLElement, number>();
+
+export function consumePendingTopGrowth(scroller: HTMLElement) {
+  const value = pendingTopGrowthByScroller.get(scroller) || 0;
+  pendingTopGrowthByScroller.delete(scroller);
+  return value;
+}
 
 function getMessageListBottomReserve(scroller: HTMLElement) {
   if (scroller.classList.contains(SELECT_MODE_CLASS)) {
@@ -76,6 +90,10 @@ export function getEffectiveMessageListBottomReserve(scroller: HTMLElement) {
     : getMessageListBottomReserve(scroller);
 }
 
+export function buildTopStackCacheKey(chatId: string, threadId: number | string, messageListType: string) {
+  return `${chatId}_${threadId}_${messageListType}`;
+}
+
 export function getMessageListTopReserve(scroller: HTMLElement) {
   const middleColumn = scroller.closest<HTMLElement>('#MiddleColumn');
   if (!middleColumn) return 0;
@@ -88,11 +106,11 @@ export function getMessageListTopReserve(scroller: HTMLElement) {
     bottom = header.getBoundingClientRect().bottom - scrollerTop;
   }
 
-  const panesWrapper = middleColumn.querySelector<HTMLElement>('.MiddleHeaderPanes');
+  const panesWrapper = middleColumn.querySelector<HTMLElement>('.MiddleHeaderPanesIsland');
   if (panesWrapper) {
     Array.from(panesWrapper.children).forEach((child) => {
       const paneEl = child as HTMLElement;
-      if (paneEl.offsetParent) {
+      if (paneEl.offsetParent && paneEl.dataset.isPanelOpen) {
         bottom = Math.max(bottom, paneEl.getBoundingClientRect().bottom - scrollerTop);
       }
     });
@@ -149,6 +167,79 @@ export function syncMessageListBottomReserve(
       scroller.scrollTop = SCROLL_BOTTOM_SENTINEL;
     }
   }, insetTargets);
+}
+
+export function updateTopReserveWithScrollCompensation(
+  middleColumn: HTMLElement,
+  heightDelta: number,
+  applyReserveMutation: NoneToVoidFunction,
+  extraMutationTargets?: HTMLElement[],
+) {
+  const scrollers = heightDelta
+    ? Array.from(middleColumn.querySelectorAll<HTMLElement>('.MessageList'))
+    : [];
+
+  requestForcedReflow(() => {
+    const plans = scrollers
+      .filter((scroller) => scroller.offsetParent)
+      .map((scroller) => ({
+        scroller,
+        wasAtBottom: scroller.scrollHeight - scroller.scrollTop - scroller.offsetHeight <= AT_BOTTOM_THRESHOLD,
+        wasAtTop: scroller.scrollTop <= AT_TOP_THRESHOLD,
+        prevScrollTop: scroller.scrollTop,
+        prevScrollHeight: scroller.scrollHeight,
+        bottomDistance: scroller.scrollHeight - scroller.scrollTop,
+        hadSnap: scroller.classList.contains(BOTTOM_SNAP_CLASS),
+      }));
+
+    forceMutation(() => {
+      plans.forEach(({ scroller }) => removeExtraClass(scroller, BOTTOM_SNAP_CLASS));
+      applyReserveMutation();
+    }, [middleColumn, ...scrollers, ...(extraMutationTargets || [])]);
+
+    if (!plans.length) return undefined;
+
+    const validPlans = plans.filter(({ scroller, prevScrollTop }) => {
+      const currentScrollTop = scroller.scrollTop;
+      return Math.abs(currentScrollTop - prevScrollTop) <= SCROLL_POSITION_TOLERANCE
+        || Math.abs(currentScrollTop - (prevScrollTop + heightDelta)) <= SCROLL_POSITION_TOLERANCE;
+    });
+
+    if (!validPlans.length) return undefined;
+
+    const targets = validPlans.map(({
+      scroller, wasAtBottom, wasAtTop, prevScrollTop, prevScrollHeight, bottomDistance, hadSnap,
+    }) => {
+      let scrollTop;
+      if (wasAtBottom) {
+        scrollTop = scroller.scrollHeight - scroller.clientHeight;
+      } else if (wasAtTop) {
+        scrollTop = prevScrollTop;
+      } else {
+        scrollTop = scroller.scrollHeight - bottomDistance;
+      }
+      const measuredGrowth = scroller.scrollHeight - prevScrollHeight;
+      const shouldRestoreSnap = hadSnap && Math.abs(scrollTop - scroller.scrollTop) <= SCROLL_POSITION_TOLERANCE;
+      return {
+        scroller, scrollTop, measuredGrowth, shouldRestoreSnap,
+      };
+    });
+
+    return () => {
+      targets.forEach(({
+        scroller, scrollTop, measuredGrowth, shouldRestoreSnap,
+      }) => {
+        scroller.scrollTop = scrollTop;
+        if (shouldRestoreSnap) addExtraClass(scroller, BOTTOM_SNAP_CLASS);
+        const pending = (pendingTopGrowthByScroller.get(scroller) || 0) + measuredGrowth;
+        if (pending > 0) {
+          pendingTopGrowthByScroller.set(scroller, pending);
+        } else {
+          pendingTopGrowthByScroller.delete(scroller);
+        }
+      });
+    };
+  });
 }
 
 function getSettledBottomReserve() {

@@ -1,7 +1,7 @@
 @use "../../../styles/mixins";
 
 .root {
-  @include mixins.middle-header-pane;
+  @include mixins.middle-header-pane-content;
 
   cursor: var(--custom-cursor, pointer);
 
@@ -12,12 +12,6 @@
   height: auto;
 
   line-height: 1.25;
-
-  transition: background-color 0.2s, transform var(--slide-transition);
-
-  &:hover {
-    background-color: var(--color-background-selected);
-  }
 }
 
 .content {
@@ -31,6 +25,11 @@
   border-radius: var(--pane-content-radius);
 
   color: var(--color-text);
+
+  transition: background-color 0.2s;
+  &:hover {
+    background-color: var(--color-background-selected);
+  }
 }
 
 .info {

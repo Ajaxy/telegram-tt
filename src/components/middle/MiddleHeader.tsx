@@ -216,6 +216,7 @@ const MiddleHeader = ({
   });
 
   const prevTransitionKey = usePreviousDeprecated(currentTransitionKey);
+
   const cleanupExceptionKey = (
     prevTransitionKey !== undefined && prevTransitionKey < currentTransitionKey ? prevTransitionKey : undefined
   );

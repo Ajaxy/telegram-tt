@@ -29,6 +29,7 @@ import { compact } from '../../util/iteratees';
 import { formatMessageListDate } from '../../util/localization/dateFormat';
 import { formatStarsAsText, formatTonAsText } from '../../util/localization/format';
 import { isAlbum, isDocumentGroup } from './helpers/groupMessages';
+import { consumePendingTopGrowth } from './helpers/messageListReserves';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import { renderPeerLink } from './message/helpers/messageActions';
 
@@ -155,7 +156,10 @@ const MessageListContent = ({
     const newHeight = entry.contentRect.height;
     const prevHeight = prevContentHeightRef.current;
     prevContentHeightRef.current = newHeight;
-    if (prevHeight === undefined) return;
+    if (prevHeight === undefined) {
+      consumePendingTopGrowth(entry.target.closest<HTMLElement>('.MessageList')!);
+      return;
+    }
 
     const growth = newHeight - prevHeight;
     if (growth > 0) onContentResize?.(growth);

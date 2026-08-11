@@ -251,7 +251,7 @@ const ChatList = ({
       onLoadMore={getMore}
       onScroll={onScroll}
     >
-      {isAllFolder && <ChatListPanes key="panes" onHeightChange={setPanesHeight} />}
+      {!isSaved && <ChatListPanes key="panes" noBanners={!isAllFolder} onHeightChange={setPanesHeight} />}
       {shouldDisplayArchive && (
         <Archive
           key="archive"

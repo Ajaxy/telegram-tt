@@ -4,7 +4,7 @@
 
     position: absolute;
     z-index: 12;
-    inset-inline: 0.5rem;
+    inset-inline: var(--chat-list-inline-inset);
     top: 0.25rem;
 
     transition: opacity var(--layer-transition);

@@ -1,0 +1,61 @@
+.root {
+  --panes-top-base: calc(var(--middle-header-height) + var(--middle-panel-inline-padding) + var(--middle-header-gap));
+  --island-transform-transition: transform var(--layer-transition);
+
+  position: absolute;
+  z-index: var(--z-middle-header);
+  top: calc(var(--middle-header-player-height, 0px) + var(--panes-top-base));
+  right: 0;
+  left: 0;
+
+  overflow: hidden;
+
+  width: calc(100% - var(--middle-panel-inline-padding) * 2);
+  max-width: calc(var(--messages-container-width) - var(--middle-panel-inline-padding) * 2);
+  height: 0;
+  margin: 0 auto;
+  border-radius: var(--border-radius-pane);
+
+  background-color: var(--color-background);
+  box-shadow: var(--shadow-pane);
+
+  /* stylelint-disable plugin/no-low-performance-animation-properties */
+  transition:
+    var(--island-transform-transition),
+    opacity var(--slide-transition),
+    height var(--island-height-transition, 0s),
+    top var(--top-stack-transition);
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
+
+  > [data-is-panel-open] ~ [data-is-panel-open] {
+    box-shadow: inset 0 1px var(--color-borders);
+  }
+
+  :global(body.no-page-transitions) & {
+    transition: none !important;
+  }
+
+  :global(body.no-right-column-animations) & {
+    --island-transform-transition: transform 0s;
+  }
+
+  &Hidden {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  @media (min-width: 1276px) {
+    width: calc(100% - var(--right-column-width) - var(--middle-panel-inline-padding) * 2);
+    :global(#Main.right-column-open) & {
+      transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
+    }
+  }
+
+  @media (max-width: 600px) {
+    --safe-insets: calc(env(safe-area-inset-left) + env(safe-area-inset-right));
+
+    right: env(safe-area-inset-right);
+    left: env(safe-area-inset-left);
+    width: calc(100% - var(--middle-panel-inline-padding) * 2 - var(--safe-insets));
+  }
+}

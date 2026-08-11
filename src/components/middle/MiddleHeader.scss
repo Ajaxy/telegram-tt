@@ -1,6 +1,8 @@
 @use "../../styles/mixins";
 
 .MiddleHeader {
+  --header-transform-transition: transform var(--layer-transition);
+
   position: absolute;
   z-index: var(--z-middle-header);
   top: 0;
@@ -14,9 +16,9 @@
   width: calc(100% - var(--middle-panel-inline-padding) * 2);
   max-width: calc(var(--messages-container-width) - var(--middle-panel-inline-padding) * 2);
   height: var(--middle-header-height);
-  margin: var(--middle-panel-inline-padding) auto 0;
+  margin: calc(var(--middle-panel-inline-padding) + var(--middle-header-player-height, 0px)) auto 0;
   padding-top: 0.25rem;
-  padding-right: max(0.8125rem, env(safe-area-inset-right));
+  padding-right: max(0.25rem, env(safe-area-inset-right));
   padding-bottom: 0.25rem;
   padding-left: max(0.25rem, env(safe-area-inset-left));
   border-radius: 2rem;
@@ -25,14 +27,14 @@
   box-shadow: var(--shadow-pane);
 
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: transform var(--layer-transition);
+  transition: var(--header-transform-transition), margin-top var(--top-stack-transition);
 
   body.no-page-transitions & {
     transition: none !important;
   }
 
   body.no-right-column-animations & {
-    transition: none !important;
+    --header-transform-transition: transform 0s;
   }
 
   .Transition {

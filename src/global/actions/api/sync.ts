@@ -9,7 +9,7 @@ import { DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID } from '../../
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { init as initFolderManager } from '../../../util/folderManager';
 import {
-  buildCollectionByKey, omitUndefined, pick, unique,
+  buildCollectionByKey, omitUndefined, pick, pickTruthy, unique,
 } from '../../../util/iteratees';
 import { callApi } from '../../../api/gramjs';
 import { getIsSavedDialog } from '../../helpers';
@@ -18,6 +18,7 @@ import {
 } from '../../index';
 import {
   addChatMessagesById,
+  replaceChatMessages,
   safeReplaceViewportIds,
   updateChats,
   updateListedIds,
@@ -186,7 +187,10 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
           wasReset = true;
         }
 
-        global = addChatMessagesById(global, currentChatId, byId);
+        global = replaceChatMessages(global, currentChatId, {
+          ...selectChatMessages(global, currentChatId),
+          ...byId,
+        });
         if (resultDiscussion) {
           global = updateThreadInfo(global, resultDiscussion.threadInfo);
           global = updateThreadReadState(global, currentChatId, activeThreadId, resultDiscussion.threadReadState);
@@ -313,8 +317,15 @@ function preserveCurrentThreads<T extends GlobalState>(global: T) {
       return acc;
     }
 
+    const pinnedMessagesById = pickTruthy(
+      global.messages.byChatId[chatId].byId, currentThread.localState?.pinnedIds || [],
+    );
+
     acc[chatId] = {
-      byId: {},
+      byId: {
+        ...acc[chatId]?.byId,
+        ...pinnedMessagesById,
+      },
       summaryById: {},
       threadsById: {
         ...acc[chatId]?.threadsById,
@@ -346,7 +357,7 @@ function preserveThreads<T extends GlobalState>(global: T) {
       if (threadId !== MAIN_THREAD_ID && !hasLocalComposerState) return;
 
       preservedByChatId[chatId] = {
-        byId: {},
+        byId: { ...preservedByChatId[chatId]?.byId },
         summaryById: {},
         threadsById: {
           ...preservedByChatId[chatId]?.threadsById,

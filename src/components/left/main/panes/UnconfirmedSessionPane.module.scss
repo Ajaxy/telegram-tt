@@ -1,7 +1,7 @@
 @use "../../../../styles/mixins";
 
 .root {
-  @include mixins.chat-list-pane;
+  @include mixins.chat-list-pane-content;
 
   padding: 0.5rem;
   text-align: center;

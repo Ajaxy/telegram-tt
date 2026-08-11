@@ -28,7 +28,7 @@
   pointer-events: auto;
 
   position: absolute;
-  top: 1rem;
+  top: calc(var(--middle-panel-inline-padding) + var(--middle-header-player-height, 0px));
   right: 0;
   left: 0;
 
@@ -49,10 +49,15 @@
   background-color: var(--color-background);
   box-shadow: var(--shadow-island);
 
-  transition: opacity 200ms ease-in-out;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: opacity 200ms ease-in-out, top var(--top-stack-transition);
 
   .active & {
     opacity: 1;
+  }
+
+  :global(body.no-page-transitions) & {
+    transition: none !important;
   }
 
   :global(body.is-tauri.is-macos) & {
@@ -69,7 +74,6 @@
   }
 
   @media (max-width: 600px) {
-    top: 0.5rem;
     padding-right: max(0.5rem, env(safe-area-inset-right));
     padding-left: max(0.5rem, env(safe-area-inset-left));
   }
@@ -141,7 +145,8 @@
   .mobile & {
     // Detached card hanging under the floating search island, like the desktop dropdown.
     position: absolute;
-    top: calc(0.5rem + var(--middle-header-height) + var(--middle-header-gap));
+    /* stylelint-disable-next-line @stylistic/max-line-length */
+    top: calc(var(--middle-panel-inline-padding) + var(--middle-header-player-height, 0px) + var(--middle-header-height) + var(--middle-header-gap));
     right: 0;
     bottom: auto;
     left: 0;

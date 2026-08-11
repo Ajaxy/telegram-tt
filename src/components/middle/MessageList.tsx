@@ -1,4 +1,6 @@
-import { beginHeavyAnimation, memo, useEffect, useMemo, useRef, useState, useUnmountCleanup } from '@teact';
+import {
+  beginHeavyAnimation, memo, useEffect, useLayoutEffect, useMemo, useRef, useState, useUnmountCleanup,
+} from '@teact';
 import { addExtraClass, removeExtraClass } from '@teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -74,6 +76,8 @@ import { groupMessages } from './helpers/groupMessages';
 import { requestMessageListReflow } from './helpers/messageListReflow';
 import {
   applyMessageListBottomInset,
+  buildTopStackCacheKey,
+  consumePendingTopGrowth,
   getEffectiveMessageListBottomReserve,
   getMessageListTopReserve,
   isSendCollapsePhaseActive,
@@ -277,6 +281,11 @@ const MessageList = ({
   } = getActions();
 
   const containerRef = useRef<HTMLDivElement>();
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (container) container.dataset.listKey = buildTopStackCacheKey(chatId, threadId, type);
+  }, [chatId, threadId, type]);
 
   // We update local cached `scrollOffsetRef` when opening chat.
   // Then we update global version every second on scrolling.
@@ -699,6 +708,9 @@ const MessageList = ({
     const container = containerRef.current;
     if (!container || growth <= 0) return;
 
+    const effectiveGrowth = growth - consumePendingTopGrowth(container);
+    if (effectiveGrowth <= 0) return;
+
     if (
       isLiveTailAutoScrollingRef.current
       || (
@@ -722,7 +734,7 @@ const MessageList = ({
     }
 
     const { scrollTop, scrollHeight, offsetHeight } = container;
-    const wasAtBottom = (scrollHeight - scrollTop - offsetHeight) - growth <= BOTTOM_THRESHOLD;
+    const wasAtBottom = (scrollHeight - scrollTop - offsetHeight) - effectiveGrowth <= BOTTOM_THRESHOLD;
     if (!wasAtBottom || !isViewportNewest) return;
 
     forceMutation(() => {

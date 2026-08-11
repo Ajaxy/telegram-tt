@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import { memo } from '../../../lib/teact/teact';
+import { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiBotVerification } from '../../../api/types';
@@ -8,7 +8,7 @@ import {
   selectPeerFullInfo,
 } from '../../../global/selectors';
 
-import useTimeout from '../../../hooks/schedulers/useTimeout';
+import useFrozenProps from '../../../hooks/useFrozenProps';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
@@ -36,31 +36,39 @@ const BotVerificationPane: FC<OwnProps & StateProps> = ({
 }) => {
   const isOpen = Boolean(!wasShown && botVerification);
 
+  const { botVerification: renderingBotVerification } = useFrozenProps({ botVerification }, !isOpen);
+
   const {
     markBotVerificationInfoShown,
   } = getActions();
 
   const { ref, shouldRender } = useHeaderPane({
     isOpen,
+    measureKey: peerId,
+    withResizeObserver: true,
     onStateChange: onPaneStateChange,
   });
 
   const markAsShowed = useLastCallback(() => {
     markBotVerificationInfoShown({ peerId });
   });
-  useTimeout(markAsShowed, !wasShown ? DISPLAY_DURATION_MS : undefined);
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const timer = window.setTimeout(markAsShowed, DISPLAY_DURATION_MS);
+    return () => window.clearTimeout(timer);
+  }, [isOpen, peerId]);
 
-  if (!shouldRender || !botVerification) return undefined;
+  if (!shouldRender || !renderingBotVerification) return undefined;
 
   return (
     <div ref={ref} className={styles.root}>
       <span className={styles.icon}>
         <CustomEmoji
-          documentId={botVerification.iconId}
+          documentId={renderingBotVerification.iconId}
           size={BOT_VERIFICATION_ICON_SIZE}
         />
       </span>
-      {botVerification.description}
+      {renderingBotVerification.description}
     </div>
   );
 };

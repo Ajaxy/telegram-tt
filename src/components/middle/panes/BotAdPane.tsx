@@ -8,7 +8,7 @@ import { selectBot, selectSponsoredMessage } from '../../../global/selectors';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useFrozenProps from '../../../hooks/useFrozenProps';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
@@ -49,11 +49,12 @@ const BotAdPane = ({
 
   const isOpen = Boolean(isBot && sponsoredMessage && messageListType === 'thread');
 
-  const renderingSponsoredMessage = useCurrentOrPrev(sponsoredMessage);
+  const { sponsoredMessage: renderingSponsoredMessage } = useFrozenProps({ sponsoredMessage }, !isOpen);
 
   const { ref, shouldRender } = useHeaderPane({
     isOpen,
     withResizeObserver: true,
+    measureKey: chatId,
     onStateChange: onPaneStateChange,
   });
 
@@ -64,17 +65,17 @@ const BotAdPane = ({
   } = useContextMenuHandlers(ref, !shouldRender, true);
 
   const handleClick = useLastCallback(() => {
-    if (!sponsoredMessage) return;
+    if (!renderingSponsoredMessage) return;
 
-    clickSponsored({ randomId: sponsoredMessage.randomId });
-    openUrl({ url: sponsoredMessage.url, shouldSkipModal: true });
+    clickSponsored({ randomId: renderingSponsoredMessage.randomId });
+    openUrl({ url: renderingSponsoredMessage.url, shouldSkipModal: true });
   });
 
   const handleAboutClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!sponsoredMessage) return;
+    if (!renderingSponsoredMessage) return;
     const {
       randomId, additionalInfo, canReport, sponsorInfo,
-    } = sponsoredMessage;
+    } = renderingSponsoredMessage;
     e.stopPropagation();
     openAboutAdsModal({
       randomId,
@@ -88,7 +89,7 @@ const BotAdPane = ({
     if (shouldRender && renderingSponsoredMessage) {
       viewSponsored({ randomId: renderingSponsoredMessage.randomId });
     }
-  }, [shouldRender, renderingSponsoredMessage, chatId]);
+  }, [shouldRender, renderingSponsoredMessage]);
 
   if (!shouldRender || !renderingSponsoredMessage) {
     return undefined;

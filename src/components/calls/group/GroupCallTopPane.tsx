@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import {
-  memo, useCallback, useMemo,
+  memo, useMemo,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -10,7 +10,8 @@ import { selectChat, selectTabState } from '../../../global/selectors';
 import { selectChatGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
 
-import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useFrozenProps from '../../../hooks/useFrozenProps';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useHeaderPane, { type PaneState } from '../../middle/hooks/useHeaderPane';
 
@@ -45,12 +46,6 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
 
   const lang = useOldLang();
 
-  const handleJoinGroupCall = useCallback(() => {
-    requestMasterAndJoinGroupCall({
-      chatId,
-    });
-  }, [requestMasterAndJoinGroupCall, chatId]);
-
   const participants = groupCall?.participants;
 
   const fetchedParticipants = useMemo(() => {
@@ -68,13 +63,27 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
       .filter(Boolean);
   }, [participants]);
 
-  const renderingParticipantCount = useCurrentOrPrev(groupCall?.participantsCount, true);
-  const renderingFetchedParticipants = useCurrentOrPrev(fetchedParticipants, true);
-
   const isRendering = Boolean(groupCall && isActive);
+
+  const {
+    chatId: renderingChatId,
+    participantsCount: renderingParticipantCount,
+    fetchedParticipants: renderingFetchedParticipants,
+  } = useFrozenProps({
+    chatId,
+    participantsCount: groupCall?.participantsCount,
+    fetchedParticipants,
+  }, !isRendering);
+
+  const handleJoinGroupCall = useLastCallback(() => {
+    requestMasterAndJoinGroupCall({
+      chatId: renderingChatId,
+    });
+  });
 
   const { ref, shouldRender } = useHeaderPane({
     isOpen: isRendering,
+    measureKey: chatId,
     onStateChange: onPaneStateChange,
   });
 
