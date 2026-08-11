@@ -26,7 +26,6 @@ export default defineConfig(
   }),
   globalIgnores([
     '.cache/',
-    'src/lib/rlottie/**',
     'src/lib/video-preview/polyfill',
     'src/lib/fasttextweb/**',
     'src/lib/gramjs/tl/',

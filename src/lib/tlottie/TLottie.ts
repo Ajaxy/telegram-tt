@@ -1,5 +1,7 @@
 import type Color from 'colorjs.io';
 
+import type { EmojiFitzModifier } from '../../util/emoji/skinTone';
+
 import { animate } from '../../util/animation';
 import {
   IS_ANDROID, IS_IOS, IS_SAFARI,
@@ -8,6 +10,7 @@ import { convertSrgbChannel } from '../../util/colors';
 import cycleRestrict from '../../util/cycleRestrict';
 import Deferred from '../../util/Deferred';
 import generateUniqueId from '../../util/generateUniqueId';
+import { handleError } from '../../util/handleError';
 import launchMediaWorkers, { MAX_WORKERS } from '../../util/launchMediaWorkers';
 import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 
@@ -17,6 +20,7 @@ interface Params {
   quality?: number;
   isLowPriority?: boolean;
   coords?: { x: number; y: number };
+  fitzModifier?: EmojiFitzModifier;
 }
 
 const WAITING = Symbol('WAITING');
@@ -32,16 +36,16 @@ const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
 const LOW_PRIORITY_QUALITY_SIZE_THRESHOLD = 24;
 const HIGH_PRIORITY_CACHE_MODULO = IS_SAFARI ? 2 : 4;
 const LOW_PRIORITY_CACHE_MODULO = 0;
-const CANVAS_CLASS = 'rlottie-canvas';
+const CANVAS_CLASS = 'tlottie-canvas';
 
 const workers = launchMediaWorkers().map(({ connector }) => connector);
-const instancesByRenderId = new Map<string, RLottie>();
+const instancesByRenderId = new Map<string, TLottie>();
 
 const PENDING_CANVAS_RESIZES = new WeakMap<HTMLCanvasElement, Promise<void>>();
 
 let lastWorkerIndex = -1;
 
-class RLottie {
+class TLottie {
   // Config
 
   private views = new Map<string, {
@@ -57,8 +61,6 @@ class RLottie {
 
   private imgSize!: number;
 
-  private imageData!: ImageData;
-
   private msPerFrame = 1000 / 60;
 
   private reduceFactor = 1;
@@ -68,6 +70,10 @@ class RLottie {
   private workerIndex!: number;
 
   private frames: Frame[] = [];
+
+  private frameGeneration = 0;
+
+  private dataGeneration = 0;
 
   private framesCount?: number;
 
@@ -97,22 +103,19 @@ class RLottie {
 
   private requestedSeekToEnd = false;
 
-  static init(...args: ConstructorParameters<typeof RLottie>) {
+  static init(...args: ConstructorParameters<typeof TLottie>) {
     const [
       , canvas,
       renderId,
       params,
-      viewId = generateUniqueId(),
-      ,
-      onLoad,
-      ,
-      ,
+      viewId = generateUniqueId(),,
+      onLoad,,,
       onFrame,
     ] = args;
     let instance = instancesByRenderId.get(renderId);
 
     if (!instance) {
-      instance = new RLottie(...args);
+      instance = new TLottie(...args);
       instancesByRenderId.set(renderId, instance);
     } else {
       instance.addView(viewId, canvas, onLoad, onFrame, params?.coords);
@@ -128,7 +131,7 @@ class RLottie {
     private params: Params,
     viewId: string = generateUniqueId(),
     private customColor?: Color,
-    onLoad?: NoneToVoidFunction | undefined,
+    onLoad?: NoneToVoidFunction,
     private onEnded?: (isDestroyed?: boolean) => void,
     private onLoop?: () => void,
     onFrame?: FrameCallback,
@@ -284,7 +287,7 @@ class RLottie {
 
     if (container instanceof HTMLDivElement) {
       if (!(container.parentNode instanceof HTMLElement)) {
-        throw new Error('[RLottie] Container is not mounted');
+        throw new Error('[TLottie] Container is not mounted');
       }
 
       const { size } = this.params;
@@ -293,30 +296,31 @@ class RLottie {
 
       if (!this.imgSize) {
         this.imgSize = imgSize;
-        this.imageData = new ImageData(imgSize, imgSize);
       }
 
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+
+      canvas.classList.add(CANVAS_CLASS);
+
+      canvas.style.width = `${size}px`;
+      canvas.style.height = `${size}px`;
+
+      canvas.width = imgSize;
+      canvas.height = imgSize;
+
+      this.views.set(viewId, {
+        canvas, ctx, onLoad, onFrame,
+      });
+
       requestMutation(() => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d')!;
-
-        canvas.classList.add(CANVAS_CLASS);
-
-        canvas.style.width = `${size}px`;
-        canvas.style.height = `${size}px`;
-
-        canvas.width = imgSize;
-        canvas.height = imgSize;
-
-        container.appendChild(canvas);
-
-        this.views.set(viewId, {
-          canvas, ctx, onLoad, onFrame,
-        });
+        if (this.views.has(viewId)) {
+          container.appendChild(canvas);
+        }
       });
     } else {
       if (!container.isConnected) {
-        throw new Error('[RLottie] Shared canvas is not mounted');
+        throw new Error('[TLottie] Shared canvas is not mounted');
       }
 
       const canvas = container;
@@ -326,7 +330,6 @@ class RLottie {
 
       if (!this.imgSize) {
         this.imgSize = imgSize;
-        this.imageData = new ImageData(imgSize, imgSize);
       }
 
       const [canvasWidth, canvasHeight] = ensureCanvasSize(canvas, sizeFactor);
@@ -340,6 +343,7 @@ class RLottie {
           y: Math.round(coords!.y * canvasHeight),
         },
         onLoad,
+        onFrame,
       });
     }
 
@@ -364,22 +368,23 @@ class RLottie {
   private destroy() {
     this.isDestroyed = true;
     this.pause();
-    this.clearCache();
+    this.clearFrames();
     this.destroyRenderer();
 
     instancesByRenderId.delete(this.renderId);
   }
 
-  private clearCache() {
+  private clearFrames() {
+    this.frameGeneration += 1;
+
     this.frames.forEach((frame) => {
       if (frame && frame !== WAITING) {
         frame.close();
       }
     });
 
-    // Help GC
-    this.imageData = undefined as any;
     this.frames = [];
+    this.prevFrameIndex = -1;
   }
 
   private initConfig() {
@@ -394,28 +399,34 @@ class RLottie {
 
   private initRenderer() {
     this.workerIndex = cycleRestrict(MAX_WORKERS, ++lastWorkerIndex);
+    const { dataGeneration } = this;
 
-    workers[this.workerIndex].request({
-      name: 'rlottie:init',
+    void workers[this.workerIndex].request({
+      name: 'tlottie:init',
       args: [
         this.renderId,
         this.tgsUrl,
         this.imgSize,
         this.params.isLowPriority || false,
         this.customColor?.to('srgb').coords.map(convertSrgbChannel) as [number, number, number] | undefined,
-        this.onRendererInit.bind(this),
+        this.params.fitzModifier,
+        this.onRendererInit.bind(this, dataGeneration),
       ],
-    });
+    }).catch(this.onRendererError.bind(this, dataGeneration));
   }
 
   private destroyRenderer() {
     workers[this.workerIndex].request({
-      name: 'rlottie:destroy',
+      name: 'tlottie:destroy',
       args: [this.renderId],
     });
   }
 
-  private onRendererInit(reduceFactor: number, msPerFrame: number, framesCount: number) {
+  private onRendererInit(dataGeneration: number, reduceFactor: number, msPerFrame: number, framesCount: number) {
+    if (dataGeneration !== this.dataGeneration) {
+      return;
+    }
+
     this.isRendererInited = true;
     this.reduceFactor = reduceFactor;
     this.msPerFrame = msPerFrame;
@@ -426,30 +437,60 @@ class RLottie {
     }
   }
 
-  changeData(tgsUrl: string) {
+  changeData(tgsUrl: string, fitzModifier?: EmojiFitzModifier) {
     this.pause();
+    this.clearFrames();
+    const dataGeneration = ++this.dataGeneration;
+
+    this.framesCount = undefined;
+    this.approxFrameIndex = 0;
+    this.stopFrameIndex = 0;
+    this.direction = 1;
+    this.requestedSeekToEnd = false;
     this.tgsUrl = tgsUrl;
+    this.params.fitzModifier = fitzModifier;
     this.initConfig();
 
-    workers[this.workerIndex].request({
-      name: 'rlottie:changeData',
+    void workers[this.workerIndex].request({
+      name: 'tlottie:changeData',
       args: [
         this.renderId,
         this.tgsUrl,
         this.params.isLowPriority || false,
-        this.onChangeData.bind(this),
+        this.params.fitzModifier,
+        this.onChangeData.bind(this, dataGeneration),
       ],
-    });
+    }).catch(this.onRendererError.bind(this, dataGeneration));
   }
 
-  private onChangeData(reduceFactor: number, msPerFrame: number, framesCount: number) {
+  private onChangeData(dataGeneration: number, reduceFactor: number, msPerFrame: number, framesCount: number) {
+    if (dataGeneration !== this.dataGeneration) {
+      return;
+    }
+
+    this.isRendererInited = true;
     this.reduceFactor = reduceFactor;
     this.msPerFrame = msPerFrame;
     this.framesCount = framesCount;
+    const lastFrameIndex = framesCount - 1;
+    this.approxFrameIndex = Math.min(this.approxFrameIndex, lastFrameIndex);
+    if (this.stopFrameIndex !== undefined) {
+      this.stopFrameIndex = Math.min(this.stopFrameIndex, lastFrameIndex);
+    }
     this.isWaiting = false;
     this.isAnimating = false;
 
     this.doPlay();
+  }
+
+  private onRendererError(dataGeneration: number, err: unknown) {
+    if (dataGeneration !== this.dataGeneration || this.isDestroyed) {
+      return;
+    }
+
+    this.isWaiting = false;
+    this.isAnimating = false;
+    handleError(err instanceof Error ? err : new Error(String(err)));
   }
 
   private doPlay() {
@@ -596,11 +637,12 @@ class RLottie {
   }
 
   private requestFrame(frameIndex: number) {
+    const { frameGeneration } = this;
     this.frames[frameIndex] = WAITING;
 
     workers[this.workerIndex].request({
-      name: 'rlottie:renderFrames',
-      args: [this.renderId, frameIndex, this.onFrameLoad.bind(this)],
+      name: 'tlottie:renderFrames',
+      args: [this.renderId, frameIndex, this.onFrameLoad.bind(this, frameGeneration)],
     });
   }
 
@@ -613,8 +655,9 @@ class RLottie {
     this.frames[prevFrameIndex] = undefined;
   }
 
-  private onFrameLoad(frameIndex: number, imageBitmap: ImageBitmap) {
-    if (this.frames[frameIndex] !== WAITING) {
+  private onFrameLoad(frameGeneration: number, frameIndex: number, imageBitmap: ImageBitmap) {
+    if (frameGeneration !== this.frameGeneration || this.frames[frameIndex] !== WAITING) {
+      imageBitmap.close();
       return;
     }
 
@@ -643,4 +686,4 @@ function ensureCanvasSize(canvas: HTMLCanvasElement, sizeFactor: number) {
   return [expectedWidth, expectedHeight];
 }
 
-export default RLottie;
+export default TLottie;

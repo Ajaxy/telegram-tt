@@ -2,6 +2,7 @@ import type { ApiSticker, ApiStickerSet, ApiStickerSetInfo } from '../../api/typ
 import type { GlobalState, TabArgs } from '../types';
 
 import { RESTRICTED_EMOJI_SET_ID, TON_CURRENCY_CODE } from '../../config';
+import { hasMixedEmojiSkinTones, removeEmojiSkinTone } from '../../util/emoji/skinTone';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { convertCurrencyFromBaseUnit } from '../../util/formatCurrency';
 import { selectTabState } from './tabs';
@@ -138,15 +139,21 @@ function cleanEmoji(emoji: string) {
   return emoji.replace('\ufe0f', '');
 }
 
+function cleanAnimatedEmoji(emoji: string) {
+  return cleanEmoji(hasMixedEmojiSkinTones(emoji) ? emoji : removeEmojiSkinTone(emoji));
+}
+
 export function selectAnimatedEmoji<T extends GlobalState>(global: T, emoji: string) {
   const { animatedEmojis } = global;
   if (!animatedEmojis || !animatedEmojis.stickers) {
     return undefined;
   }
 
-  const cleanedEmoji = cleanEmoji(emoji);
+  const cleanedEmoji = cleanAnimatedEmoji(emoji);
 
-  return animatedEmojis.stickers.find((sticker) => sticker.emoji === emoji || sticker.emoji === cleanedEmoji);
+  return animatedEmojis.stickers.find((sticker) => (
+    sticker.emoji && cleanAnimatedEmoji(sticker.emoji) === cleanedEmoji
+  ));
 }
 
 export function selectRestrictedEmoji<T extends GlobalState>(global: T, emoji: string) {
@@ -170,13 +177,15 @@ export function selectAnimatedEmojiEffect<T extends GlobalState>(global: T, emoj
     return undefined;
   }
 
-  const cleanedEmoji = cleanEmoji(emoji);
+  const cleanedEmoji = cleanAnimatedEmoji(emoji);
 
-  return animatedEmojiEffects.stickers.find((sticker) => sticker.emoji === emoji || sticker.emoji === cleanedEmoji);
+  return animatedEmojiEffects.stickers.find((sticker) => (
+    sticker.emoji && cleanAnimatedEmoji(sticker.emoji) === cleanedEmoji
+  ));
 }
 
 export function selectAnimatedEmojiSound<T extends GlobalState>(global: T, emoji: string) {
-  return global?.appConfig.emojiSounds[cleanEmoji(emoji)];
+  return global?.appConfig.emojiSounds[cleanAnimatedEmoji(emoji)];
 }
 
 export function selectIsAlwaysHighPriorityEmoji<T extends GlobalState>(

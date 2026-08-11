@@ -16,14 +16,14 @@ type OwnProps =
 
 function AnimatedIconFromSticker(props: OwnProps) {
   const {
-    sticker, noLoad, forcePreview, ...otherProps
+    sticker, noLoad, forcePreview, fitzModifier, ...otherProps
   } = props;
 
   const thumbDataUri = sticker?.thumbnail?.dataUri;
   const localMediaHash = sticker && getStickerMediaHash(sticker, 'full');
   const previewBlobUrl = useMedia(
     sticker ? getStickerMediaHash(sticker, 'preview') : undefined,
-    noLoad && !forcePreview,
+    Boolean(fitzModifier || (noLoad && !forcePreview)),
     ApiMediaFormat.BlobUrl,
   );
   const tgsUrl = useMedia(localMediaHash, noLoad);
@@ -31,8 +31,9 @@ function AnimatedIconFromSticker(props: OwnProps) {
   return (
     <AnimatedIconWithPreview
       tgsUrl={tgsUrl}
-      previewUrl={previewBlobUrl}
+      previewUrl={fitzModifier ? undefined : previewBlobUrl}
       thumbDataUri={thumbDataUri}
+      fitzModifier={fitzModifier}
 
       {...otherProps}
     />

@@ -12,6 +12,7 @@ import {
   selectAnimatedEmojiSound,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { getEmojiFitzModifier } from '../../../util/emoji/skinTone';
 import { LIKE_STICKER_ID } from '../../common/helpers/mediaDimensions';
 
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
@@ -41,6 +42,7 @@ interface StateProps {
 const QUALITY = 1;
 
 const AnimatedEmoji: FC<OwnProps & StateProps> = ({
+  emoji,
   isOwn,
   observeIntersection,
   forceLoadPreview,
@@ -56,12 +58,15 @@ const AnimatedEmoji: FC<OwnProps & StateProps> = ({
     size,
     style,
     handleClick,
-  } = useAnimatedEmoji(chatId, messageId, soundId, activeEmojiInteractions, isOwn, effect?.emoji);
+  } = useAnimatedEmoji(chatId, messageId, soundId, activeEmojiInteractions, isOwn, effect ? emoji : undefined);
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
+  const fitzModifier = getEmojiFitzModifier(emoji);
 
   return (
     <AnimatedIconFromSticker
+      key={`${sticker?.id}_${fitzModifier}`}
       sticker={sticker}
+      fitzModifier={fitzModifier}
       size={size}
       quality={QUALITY}
       noLoad={!isIntersecting}

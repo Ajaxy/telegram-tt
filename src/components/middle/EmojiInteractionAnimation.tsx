@@ -12,6 +12,7 @@ import {
 } from '../../global/selectors';
 import { IS_ANDROID } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
+import { getEmojiFitzModifier } from '../../util/emoji/skinTone';
 
 import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -89,6 +90,9 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
 
   const effectHash = effectAnimationId && `sticker${effectAnimationId}`;
   const effectTgsUrl = useMedia(effectHash, !effectAnimationId);
+  const fitzModifier = activeEmojiInteraction.animatedEffect
+    ? getEmojiFitzModifier(activeEmojiInteraction.animatedEffect)
+    : 0;
 
   if (!activeEmojiInteraction.startSize) {
     return undefined;
@@ -107,9 +111,10 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
       style={`--scale: ${scale}; --start-x: ${activeEmojiInteraction.x}px; --start-y: ${activeEmojiInteraction.y}px;`}
     >
       <AnimatedSticker
-        key={`effect_${effectAnimationId}`}
+        key={`effect_${effectAnimationId}_${fitzModifier}`}
         size={EFFECT_SIZE}
         tgsUrl={effectTgsUrl}
+        fitzModifier={fitzModifier}
         play
         quality={IS_ANDROID ? 0.5 : undefined}
         forceAlways
