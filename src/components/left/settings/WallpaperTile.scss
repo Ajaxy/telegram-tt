@@ -42,6 +42,45 @@
 
       object-fit: cover;
     }
+
+    .pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      width: 100%;
+      height: 100%;
+
+      // The wallpaper's own intensity, so the tile previews the same pattern strength as the chat
+      opacity: var(--pattern-intensity, 0.7);
+      // Match the chat background's overlay blend mode
+      background-color: #000;
+      mix-blend-mode: soft-light;
+
+      mask-image: var(--pattern-mask);
+      mask-repeat: repeat;
+      mask-position: center;
+      mask-size: 8.75rem auto;
+    }
+
+    // Masked (dark) patterns render like the chat: a black base with the gradient revealed
+    // through the doodle mask at the wallpaper's own intensity
+    &.masked {
+      background-color: #000;
+
+      .gradient {
+        opacity: 0;
+
+        mask-image: var(--pattern-mask);
+        mask-repeat: repeat;
+        mask-position: center;
+        mask-size: 8.75rem auto;
+      }
+    }
+
+    &.maskReady .gradient {
+      opacity: var(--pattern-intensity, 0.5);
+    }
   }
 
   &.selected {

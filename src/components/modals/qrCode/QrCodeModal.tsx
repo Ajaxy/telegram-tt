@@ -1,18 +1,15 @@
 import {
-  memo, onFullyIdle, useEffect, useLayoutEffect, useRef, useState,
+  memo, onFullyIdle, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiPeer } from '../../../api/types';
 import type { TabState } from '../../../global/types';
-import type { ThemeKey } from '../../../types';
+import type { IThemeSettings, ThemeKey } from '../../../types';
 import type { QrGradientStops } from '../../../util/qrCode/buildStyledQrCode';
-import type { QrPreviewSnapshot } from './generateQrCodeCard';
+import type { QrPreviewSnapshot, QrWallpaperSnapshot } from './generateQrCodeCard';
 
-import {
-  DARK_THEME_BG_COLOR,
-  LIGHT_THEME_BG_COLOR,
-} from '../../../config';
+import { DARK_THEME_BG_COLOR, LIGHT_THEME_BG_COLOR } from '../../../config';
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { getChatAvatarHash } from '../../../global/helpers/chats';
 import { getMainUsername } from '../../../global/helpers/users';
@@ -21,11 +18,12 @@ import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { CLIPBOARD_ITEM_SUPPORTED, copyTextToClipboard } from '../../../util/clipboard';
 import { createStyledQrCode } from '../../../util/qrCode/buildStyledQrCode';
+import { buildWallpaperRenderModel } from '../../../util/wallpaper';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import formatUsername from '../../common/helpers/formatUsername';
 import {
+  buildQrPreviewSnapshot,
   generateQrCodeCard,
-  getQrPreviewSnapshot,
   logQrRenderError,
   QR_CODE_CARD_MIME_TYPE,
 } from './generateQrCodeCard';
@@ -38,11 +36,11 @@ import useLastCallback from '../../../hooks/useLastCallback';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import Avatar from '../../common/Avatar';
+import Wallpaper from '../../common/Wallpaper';
 import Button from '../../ui/Button';
 import Loading from '../../ui/Loading';
 import Modal from '../../ui/Modal';
 
-import backgroundStyles from '../../../styles/_patternBackground.module.scss';
 import styles from './QrCodeModal.module.scss';
 
 export type OwnProps = {
@@ -53,10 +51,7 @@ type StateProps = {
   peer?: ApiPeer;
   username?: string;
   theme: ThemeKey;
-  customBackground?: string;
-  backgroundColor?: string;
-  patternColor?: string;
-  isBackgroundBlurred?: boolean;
+  themeSettings?: IThemeSettings;
 };
 
 const QR_SIZE = 260;
@@ -74,17 +69,15 @@ const QrCodeModal = ({
   peer,
   username,
   theme,
-  customBackground,
-  backgroundColor,
-  patternColor,
-  isBackgroundBlurred,
+  themeSettings,
 }: OwnProps & StateProps) => {
   const { closeQrCodeModal, showNotification } = getActions();
 
   const url = username ? formatUsername(username, true) : undefined;
   const isOpen = Boolean(modal) && Boolean(peer) && Boolean(url);
 
-  const wallpaperRef = useRef<HTMLDivElement>();
+  const avatarRef = useRef<HTMLDivElement>();
+  const usernameRef = useRef<HTMLDivElement>();
   const qrCodeRef = useRef<HTMLDivElement>();
   const previewBlobRef = useRef<Blob>();
   const previewBlobRenderIdRef = useRef(0);
@@ -92,12 +85,17 @@ const QrCodeModal = ({
   const [avatarLoadVersion, setAvatarLoadVersion] = useState(0);
 
   const lang = useLang();
+  const customBackground = themeSettings?.background;
   const customBackgroundValue = useCustomBackground(theme, customBackground);
 
   const gradient = QR_GRADIENT_BY_THEME[theme];
-  const resolvedBackgroundColor = backgroundColor || getDefaultThemeBackgroundColor(theme);
   const shouldWaitForAvatar = Boolean(peer && getChatAvatarHash(peer, 'big'));
   const isCustomBackgroundReady = getIsCustomBackgroundReady(customBackground, customBackgroundValue);
+  const wallpaperSnapshot = useMemo<QrWallpaperSnapshot>(() => ({
+    model: buildWallpaperRenderModel(theme, themeSettings || {}),
+    resourceUrl: getBackgroundResourceUrl(customBackgroundValue),
+    fallbackColor: theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR,
+  }), [customBackgroundValue, theme, themeSettings]);
   const usernameText = username
     ? formatUsername(username).toUpperCase()
     : undefined;
@@ -165,8 +163,7 @@ const QrCodeModal = ({
       return;
     }
 
-    const wallpaper = wallpaperRef.current!;
-    onFullyIdle(() => {
+    function attemptCapture() {
       if (previewBlobRenderIdRef.current !== previewBlobRenderId) {
         return;
       }
@@ -176,19 +173,16 @@ const QrCodeModal = ({
           return;
         }
 
-        const snapshot = getQrPreviewSnapshot(wallpaper);
-        if (!snapshot) {
-          logQrRenderError(new Error('QR_PREVIEW_SNAPSHOT_FAILED'));
-          return;
-        }
-
+        const snapshot = buildQrPreviewSnapshot(
+          wallpaperSnapshot, avatarRef.current, usernameRef.current,
+        );
         if (!getIsPreviewSnapshotReady(snapshot, shouldWaitForAvatar)) {
           return;
         }
 
         generateQrCodeCard({
           snapshot,
-          link: url,
+          link: url!,
           gradient,
         }).then((blob) => {
           if (previewBlobRenderIdRef.current !== previewBlobRenderId) {
@@ -204,7 +198,9 @@ const QrCodeModal = ({
           }
         });
       });
-    });
+    }
+
+    onFullyIdle(attemptCapture);
 
     return () => {
       if (previewBlobRenderIdRef.current === previewBlobRenderId) {
@@ -216,10 +212,7 @@ const QrCodeModal = ({
     url,
     qrCode,
     gradient,
-    backgroundColor,
-    patternColor,
-    isBackgroundBlurred,
-    resolvedBackgroundColor,
+    wallpaperSnapshot,
     isCustomBackgroundReady,
     customBackgroundValue,
     usernameText,
@@ -260,13 +253,6 @@ const QrCodeModal = ({
     setAvatarLoadVersion((version) => version + 1);
   });
 
-  const bgClassName = buildClassName(
-    backgroundStyles.background,
-    customBackground && backgroundStyles.customBgImage,
-    backgroundColor && backgroundStyles.customBgColor,
-    customBackground && isBackgroundBlurred && backgroundStyles.blurred,
-  );
-
   return (
     <Modal
       isOpen={isOpen}
@@ -276,22 +262,24 @@ const QrCodeModal = ({
       className={styles.root}
       contentClassName={styles.content}
     >
-      <div
-        ref={wallpaperRef}
+      <Wallpaper
         className={styles.wallpaper}
+        isStatic
         style={buildStyle(
           `--qr-gradient-from: ${gradient.from}`,
           `--qr-gradient-to: ${gradient.to}`,
-          patternColor && `--pattern-color: ${patternColor}`,
-          `--theme-background-color: ${resolvedBackgroundColor}`,
         )}
       >
-        <div
-          className={bgClassName}
-          style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
-        />
         <div className={styles.card}>
-          {peer && <Avatar peer={peer} size="jumbo" className={styles.avatar} onLoad={handleAvatarLoad} />}
+          {peer && (
+            <Avatar
+              containerRef={avatarRef}
+              peer={peer}
+              size="jumbo"
+              className={styles.avatar}
+              onLoad={handleAvatarLoad}
+            />
+          )}
           <div className={styles.qrOuter}>
             <div
               ref={qrCodeRef}
@@ -311,12 +299,12 @@ const QrCodeModal = ({
               <Loading />
             </div>
           </div>
-          {usernameText && <div className={styles.username}>{usernameText}</div>}
+          {usernameText && <div ref={usernameRef} className={styles.username}>{usernameText}</div>}
         </div>
         <Button className={styles.copyButton} onClick={handleCopyQr}>
           {lang('QrCodeCopy')}
         </Button>
-      </div>
+      </Wallpaper>
     </Modal>
   );
 };
@@ -327,25 +315,16 @@ export default memo(withGlobal<OwnProps>(
     const username = peer ? getMainUsername(peer) : undefined;
 
     const theme = selectTheme(global);
-    const {
-      isBlurred: isBackgroundBlurred, background: customBackground, backgroundColor, patternColor,
-    } = selectThemeValues(global, theme) || {};
+    const themeSettings = selectThemeValues(global, theme);
 
     return {
       peer,
       username,
       theme,
-      customBackground,
-      backgroundColor,
-      patternColor,
-      isBackgroundBlurred,
+      themeSettings,
     };
   },
 )(QrCodeModal));
-
-function getDefaultThemeBackgroundColor(theme: ThemeKey) {
-  return theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR;
-}
 
 function getIsCustomBackgroundReady(customBackground?: string, customBackgroundValue?: string) {
   if (!customBackground || customBackground.startsWith('#')) {
@@ -353,6 +332,10 @@ function getIsCustomBackgroundReady(customBackground?: string, customBackgroundV
   }
 
   return Boolean(customBackgroundValue?.startsWith('url('));
+}
+
+function getBackgroundResourceUrl(value?: string) {
+  return value?.match(/url\(["']?([^"')]+)["']?\)/)?.[1];
 }
 
 function getIsPreviewSnapshotReady(snapshot: QrPreviewSnapshot, shouldWaitForAvatar: boolean) {

@@ -419,6 +419,7 @@ export interface LangPair {
   'SettingsOfflineNotificationUnsupported': undefined;
   'TextSize': undefined;
   'ChatBackground': undefined;
+  'ChatBackgroundColorThemes': undefined;
   'Theme': undefined;
   'AccDescrStickers': undefined;
   'DoubleTapSetting': undefined;

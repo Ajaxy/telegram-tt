@@ -587,11 +587,16 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
       sendAs: params.sendAs,
     });
     if (topic) {
+      threadId = topic;
       params.replyInfo = params.replyInfo?.type === 'message'
         ? { ...params.replyInfo, replyToTopId: topic }
         : { type: 'message', replyToMsgId: topic, replyToTopId: topic };
       getActions().openThread({ chatId: chat.id, threadId: topic });
     }
+  }
+
+  if (!payload.scheduledAt && !isStoryReply) {
+    actions.animateMessageSending({ chatId: chatId!, threadId: threadId!, tabId });
   }
 
   const isSingle = (!payload.attachments || payload.attachments.length <= 1) && !isForwarding;
@@ -1812,9 +1817,15 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
   const {
     isSilent, scheduledAt, scheduleRepeatPeriod, tabId = getCurrentTabId(),
   } = payload;
-  const { toChatId } = selectTabState(global, tabId).forwardMessages;
+  const { toChatId, toThreadId = MAIN_THREAD_ID } = selectTabState(global, tabId).forwardMessages;
   const toChat = toChatId ? selectChat(global, toChatId) : undefined;
   if (!toChat) return;
+
+  // `sendMessage` advances the gradient for forwards-with-comment, which go through it instead
+  if (!scheduledAt) {
+    actions.animateMessageSending({ chatId: toChat.id, threadId: toThreadId, tabId });
+  }
+
   executeForwardMessages(global, { chat: toChat, isSilent, scheduledAt, scheduleRepeatPeriod }, tabId);
 });
 

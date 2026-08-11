@@ -1,24 +1,30 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
-  memo, useCallback, useEffect, useRef,
+  memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiWallpaper } from '../../../api/types';
-import type { ThemeKey } from '../../../types';
+import type { IThemeSettings, ThemeKey } from '../../../types';
 import { SettingsScreens, UPLOADING_WALLPAPER_SLUG } from '../../../types';
 
-import { DARK_THEME_PATTERN_COLOR, DEFAULT_PATTERN_COLOR } from '../../../config';
 import { selectTheme, selectThemeValues } from '../../../global/selectors';
-import { getAverageColor, getPatternColor } from '../../../util/colors';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import { buildHexFromColor, getAverageColor, getPatternColor } from '../../../util/colors';
 import { validateFiles } from '../../../util/files';
 import { throttle } from '../../../util/schedulers';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
+import {
+  buildThemeSettingsFromWallpaper, getDefaultPatternColor, getWallpaperColors, getWallpaperKey,
+  isRenderableWallpaper, isWallpaperSelected, RESET_WALLPAPER_SETTINGS,
+} from '../../../util/wallpaper';
+import { removeWallpaperBlobIfUnused } from '../../../util/wallpaperStorage';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Island from '../../gili/layout/Island';
+import Island, { IslandTitle } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
@@ -32,24 +38,25 @@ type OwnProps = {
 };
 
 type StateProps = {
-  background?: string;
+  themeSettings?: IThemeSettings;
   isBlurred?: boolean;
   loadedWallpapers?: ApiWallpaper[];
   theme: ThemeKey;
 };
 
 const SUPPORTED_TYPES = 'image/jpeg';
+const MIN_CATALOGUE_PATTERN_COLORS = 3;
 
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
-const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
+const SettingsGeneralBackground = ({
   isActive,
   onReset,
-  background,
+  themeSettings,
   isBlurred,
   loadedWallpapers,
   theme,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     loadWallpapers,
     uploadWallpaper,
@@ -58,62 +65,112 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const themeRef = useRef<ThemeKey>();
+  const requestedWallpaperRef = useRef<ApiWallpaper>();
   themeRef.current = theme;
-  // Due to the parent Transition, this component never gets unmounted,
-  // that's why we use throttled API call on every update.
+  // The persistent parent `Transition` requires throttling the API call across updates
   useEffect(() => {
     runThrottled(() => {
       loadWallpapers();
     });
   }, [loadWallpapers]);
 
-  const handleFileSelect = useCallback((e: Event) => {
+  const handleFileSelect = useLastCallback((e: Event) => {
     const { files } = e.target as HTMLInputElement;
 
     const validatedFiles = validateFiles(files);
     if (validatedFiles?.length) {
       uploadWallpaper(validatedFiles[0]);
     }
-  }, [uploadWallpaper]);
+  });
 
-  const handleUploadWallpaper = useCallback(() => {
+  const handleUploadWallpaper = useLastCallback(() => {
+    requestedWallpaperRef.current = undefined;
     openSystemFilesDialog(SUPPORTED_TYPES, handleFileSelect, true);
-  }, [handleFileSelect]);
+  });
 
-  const handleSetColor = useCallback(() => {
+  const handleSetColor = useLastCallback(() => {
+    requestedWallpaperRef.current = undefined;
     openSettingsScreen({ screen: SettingsScreens.GeneralChatBackgroundColor });
-  }, []);
+  });
 
-  const handleResetToDefault = useCallback(() => {
+  const handleResetToDefault = useLastCallback(() => {
+    requestedWallpaperRef.current = undefined;
     setThemeSettings({
       theme,
-      background: undefined,
-      backgroundColor: undefined,
+      ...RESET_WALLPAPER_SETTINGS,
       isBlurred: true,
-      patternColor: theme === 'dark' ? DARK_THEME_PATTERN_COLOR : DEFAULT_PATTERN_COLOR,
+      patternColor: getDefaultPatternColor(theme),
     });
-  }, [setThemeSettings, theme]);
+  });
 
-  const handleWallPaperSelect = useCallback((slug: string) => {
-    setThemeSettings({ theme: themeRef.current!, background: slug });
-    const currentWallpaper = loadedWallpapers && loadedWallpapers.find((wallpaper) => wallpaper.slug === slug);
-    if (currentWallpaper?.document.thumbnail) {
-      getAverageColor(currentWallpaper.document.thumbnail.dataUri)
-        .then((averageColor) => {
-          setThemeSettings({
-            theme: themeRef.current!,
-            backgroundColor: averageColor.toString({ format: 'hex', collapse: false, alpha: false }),
-            patternColor: getPatternColor(averageColor),
-          });
-        });
+  const getActiveWallpaperBackgrounds = useLastCallback(() => {
+    const global = getGlobal();
+    const selectedBackgrounds = Object.values(selectSharedSettings(global).themes)
+      .map((settings) => settings?.background)
+      .filter((background): background is string => Boolean(background));
+    const requestedBackground = requestedWallpaperRef.current?.slug;
+
+    return requestedBackground
+      ? [...selectedBackgrounds, requestedBackground]
+      : selectedBackgrounds;
+  });
+
+  const handleWallPaperSelect = useLastCallback((wallpaper: ApiWallpaper) => {
+    const requestedWallpaper = requestedWallpaperRef.current;
+    if (!requestedWallpaper || getWallpaperKey(requestedWallpaper) !== getWallpaperKey(wallpaper)) {
+      removeWallpaperBlobIfUnused(wallpaper.slug, getActiveWallpaperBackgrounds);
+      return;
     }
-  }, [loadedWallpapers, setThemeSettings]);
+    requestedWallpaperRef.current = undefined;
 
-  const handleWallPaperBlurChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const currentTheme = themeRef.current!;
+
+    // Colors, gradients and patterns carry settings while photo wallpapers derive a thumbnail color
+    if (wallpaper.document && !wallpaper.isPattern) {
+      // Reset every wallpaper field first, so a photo without a thumbnail (its color is derived
+      // asynchronously) doesn't inherit the previous wallpaper's base color, chip tint or pattern intensity
+      setThemeSettings({
+        theme: currentTheme,
+        ...RESET_WALLPAPER_SETTINGS,
+        background: wallpaper.slug,
+        patternColor: getDefaultPatternColor(currentTheme),
+        // The wallpaper's own blur wins when it carries one; otherwise (e.g. uploads — the `blur`
+        // flag is either `true` or absent) the user's current choice stays
+        isBlurred: wallpaper.settings?.isBlurred ?? selectThemeValues(getGlobal(), currentTheme)?.isBlurred,
+      });
+
+      if (wallpaper.document.thumbnail) {
+        getAverageColor(wallpaper.document.thumbnail.dataUri)
+          .then((averageColor) => {
+            // Bail if the user picked a different wallpaper while the average color was computing,
+            // so we don't overwrite the new theme's `backgroundColor`/`patternColor`
+            if (selectThemeValues(getGlobal(), currentTheme)?.background !== wallpaper.slug) return;
+
+            setThemeSettings({
+              theme: currentTheme,
+              backgroundColor: buildHexFromColor(averageColor),
+              patternColor: getPatternColor(averageColor),
+            });
+          })
+          // The wallpaper fields are already reset, so a failed sampling just keeps theme defaults
+          .catch(() => undefined);
+      }
+      return;
+    }
+
+    setThemeSettings({ theme: currentTheme, ...buildThemeSettingsFromWallpaper(wallpaper) });
+  });
+
+  const handleWallpaperRequest = useLastCallback((wallpaper: ApiWallpaper) => {
+    requestedWallpaperRef.current = wallpaper;
+  });
+
+  const handleWallPaperBlurChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setThemeSettings({ theme: themeRef.current!, isBlurred: e.target.checked });
-  }, [setThemeSettings]);
+  });
 
-  const lang = useOldLang();
+  const lang = useLang();
+  const oldLang = useOldLang();
 
   useHistoryBack({
     isActive,
@@ -121,6 +178,35 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
   });
 
   const isUploading = loadedWallpapers?.[0] && loadedWallpapers[0].slug === UPLOADING_WALLPAPER_SLUG;
+  // Blur only applies to a file-backed image (uploaded or server photo), so disable it for colors,
+  // gradients and patterns — matching WebK
+  const isImageBackground = Boolean(themeSettings?.background) && !themeSettings?.isPattern;
+
+  // Keep the server order (the user's own wallpapers come first), skipping unrenderable
+  // patterns and dropping duplicates that appear in both the personal list and the default set
+  const visibleWallpapers = useMemo(() => {
+    if (!loadedWallpapers) return undefined;
+
+    const seenKeys = new Set<string>();
+    return loadedWallpapers.filter((wallpaper) => {
+      const colors = getWallpaperColors(wallpaper.settings);
+
+      // Unflagged (neither `creator` nor `default`) patterns are the auto-installed standard
+      // light/dark backgrounds — our built-in default, applied via "Reset to Defaults", covers
+      // them. A pattern the user installed from the catalogue keeps its flagged twin visible.
+      if (wallpaper.isPattern && !wallpaper.isCreator && !wallpaper.isDefault) return false;
+      // Pale default patterns belong to chat themes rather than the general background picker
+      if (wallpaper.isDefault && wallpaper.isPattern && colors.length < MIN_CATALOGUE_PATTERN_COLORS) {
+        return false;
+      }
+      if (!isRenderableWallpaper(wallpaper)) return false;
+
+      const key = getWallpaperKey(wallpaper);
+      if (seenKeys.has(key)) return false;
+      seenKeys.add(key);
+      return true;
+    });
+  }, [loadedWallpapers]);
 
   return (
     <div className="SettingsGeneralBackground settings-content custom-scroll">
@@ -131,7 +217,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
           disabled={isUploading}
           onClick={handleUploadWallpaper}
         >
-          {lang('UploadImage')}
+          {oldLang('UploadImage')}
         </ListItem>
 
         <ListItem
@@ -139,28 +225,31 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
           className="mb-0"
           onClick={handleSetColor}
         >
-          {lang('SetColor')}
+          {oldLang('SetColor')}
         </ListItem>
 
         <ListItem icon="favorite" onClick={handleResetToDefault}>
-          {lang('ThemeResetToDefaults')}
+          {oldLang('ThemeResetToDefaults')}
         </ListItem>
 
         <Checkbox
-          label={lang('BackgroundBlurred')}
-          checked={Boolean(isBlurred)}
+          label={oldLang('BackgroundBlurred')}
+          checked={isImageBackground && Boolean(isBlurred)}
+          disabled={!isImageBackground}
           onChange={handleWallPaperBlurChange}
         />
       </Island>
 
-      {loadedWallpapers ? (
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang('ChatBackgroundColorThemes')}</IslandTitle>
+
+      {visibleWallpapers ? (
         <div className="settings-wallpapers">
-          {loadedWallpapers.map((wallpaper) => (
+          {visibleWallpapers.map((wallpaper) => (
             <WallpaperTile
-              key={wallpaper.slug}
+              key={getWallpaperKey(wallpaper)}
               wallpaper={wallpaper}
-              theme={theme}
-              isSelected={background === wallpaper.slug}
+              isSelected={isWallpaperSelected(wallpaper, themeSettings)}
+              onRequest={handleWallpaperRequest}
               onClick={handleWallPaperSelect}
             />
           ))}
@@ -175,12 +264,12 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
     const theme = selectTheme(global);
-    const { background, isBlurred } = selectThemeValues(global, theme) || {};
+    const themeSettings = selectThemeValues(global, theme);
     const { loadedWallpapers } = global.settings;
 
     return {
-      background,
-      isBlurred,
+      themeSettings,
+      isBlurred: themeSettings?.isBlurred,
       loadedWallpapers,
       theme,
     };

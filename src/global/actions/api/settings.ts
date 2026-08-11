@@ -263,7 +263,7 @@ addActionHandler('uploadWallpaper', async (global, actions, payload): Promise<vo
   }
 
   const firstWallpaper = global.settings.loadedWallpapers[0];
-  if (!firstWallpaper || firstWallpaper.slug !== UPLOADING_WALLPAPER_SLUG) {
+  if (!firstWallpaper || firstWallpaper.slug !== UPLOADING_WALLPAPER_SLUG || !wallpaper.document) {
     return;
   }
 

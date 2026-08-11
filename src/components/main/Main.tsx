@@ -10,7 +10,6 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiChatFolder, ApiLimitTypeWithModal, ApiStarGiftAuctionState, ApiUser } from '../../api/types';
 import type { TabState } from '../../global/types';
-import type { ThemeKey } from '../../types';
 
 import { BASE_EMOJI_KEYWORD_LANG, DEBUG, FOLDERS_POSITION_LEFT, INACTIVE_MARKER } from '../../config';
 import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
@@ -31,15 +30,12 @@ import {
   selectPerformanceSettingsValue,
   selectTabSelectedGiftAuction,
   selectTabState,
-  selectTheme,
-  selectThemeValues,
   selectUser,
 } from '../../global/selectors';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
 import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import { IS_ANDROID, IS_MAC_OS, IS_WAVE_TRANSFORM_SUPPORTED } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
-import buildStyle from '../../util/buildStyle';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
 import { Bundles, loadBundle } from '../../util/moduleLoader';
@@ -52,7 +48,6 @@ import useInterval from '../../hooks/schedulers/useInterval';
 import useTimeout from '../../hooks/schedulers/useTimeout';
 import useTauriEvent from '../../hooks/tauri/useTauriEvent';
 import useAppLayout from '../../hooks/useAppLayout';
-import useCustomBackground from '../../hooks/useCustomBackground';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -72,6 +67,7 @@ import CustomEmojiSetsModal from '../common/CustomEmojiSetsModal.async';
 import DeleteMessageModal from '../common/DeleteMessageModal.async';
 import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
+import Wallpaper from '../common/Wallpaper';
 import LeftColumn from '../left/LeftColumn';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
 import ReactionPicker from '../middle/message/reactions/ReactionPicker.async';
@@ -156,11 +152,6 @@ type StateProps = {
   isFoldersSidebarShown: boolean;
   diceEmojies?: string[];
   selectedGiftAuction?: ApiStarGiftAuctionState;
-  theme: ThemeKey;
-  customBackground?: string;
-  backgroundColor?: string;
-  patternColor?: string;
-  isBackgroundBlurred?: boolean;
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -217,11 +208,6 @@ const Main = ({
   isFoldersSidebarShown,
   diceEmojies,
   selectedGiftAuction,
-  theme,
-  customBackground,
-  backgroundColor,
-  patternColor,
-  isBackgroundBlurred,
 }: OwnProps & StateProps) => {
   const {
     initMain,
@@ -571,15 +557,8 @@ const Main = ({
     });
   }, [isMiddleColumnOpen, isRightColumnOpen, noRightColumnAnimation, forceUpdate]);
 
-  const customBackgroundValue = useCustomBackground(theme, customBackground);
-
   const bgClassName = buildClassName(
-    backgroundStyles.background,
     !noRightColumnAnimation && backgroundStyles.withTransition,
-    customBackground && backgroundStyles.customBgImage,
-    backgroundColor && backgroundStyles.customBgColor,
-    customBackground && isBackgroundBlurred && backgroundStyles.blurred,
-    isRightColumnOpen && backgroundStyles.withRightColumn,
   );
 
   const className = buildClassName(
@@ -641,19 +620,12 @@ const Main = ({
   usePreventPinchZoomGesture(isMediaViewerOpen || isStoryViewerOpen);
 
   return (
-    <div
-      ref={containerRef}
+    <Wallpaper
+      containerRef={containerRef}
       id="Main"
       className={className}
-      style={buildStyle(
-        patternColor && `--pattern-color: ${patternColor}`,
-        backgroundColor && `--theme-background-color: ${backgroundColor}`,
-      )}
+      bgClassName={bgClassName}
     >
-      <div
-        className={bgClassName}
-        style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
-      />
       {IS_TAURI && IS_MAC_OS && (
         <div className="tauri-drag-region" data-tauri-drag-region />
       )}
@@ -716,7 +688,7 @@ const Main = ({
       <DeleteFolderDialog folder={deleteFolderDialog} />
       <ReactionPicker isOpen={isReactionPickerOpen} />
       <DeleteMessageModal isOpen={isDeleteMessageModalOpen} />
-    </div>
+    </Wallpaper>
   );
 };
 
@@ -761,8 +733,6 @@ export default memo(withGlobal<OwnProps>(
 
     const deleteFolderDialog = deleteFolderDialogModal ? selectChatFolder(global, deleteFolderDialogModal) : undefined;
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
-    const theme = selectTheme(global);
-    const themeValues = selectThemeValues(global, theme);
 
     return {
       currentUserId,
@@ -811,11 +781,6 @@ export default memo(withGlobal<OwnProps>(
       isFoldersSidebarShown: foldersPosition === FOLDERS_POSITION_LEFT && !isMobile && selectAreFoldersPresent(global),
       diceEmojies: global.appConfig?.diceEmojies,
       selectedGiftAuction,
-      theme,
-      customBackground: themeValues?.background,
-      backgroundColor: themeValues?.backgroundColor,
-      patternColor: themeValues?.patternColor,
-      isBackgroundBlurred: themeValues?.isBlurred,
     };
   },
 )(Main));

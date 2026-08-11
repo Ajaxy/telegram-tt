@@ -79,12 +79,12 @@ export function selectTheme<T extends GlobalState>(global: T) {
 }
 
 export function selectThemeValues<T extends GlobalState>(global: T, themeKey: ThemeKey) {
-  return global.settings.themes[themeKey];
+  return selectSharedSettings(global).themes[themeKey];
 }
 
 export function selectActionMessageBg<T extends GlobalState>(global: T) {
   const theme = selectTheme(global);
-  return global.settings.themes[theme]?.patternColor;
+  return selectThemeValues(global, theme)?.patternColor;
 }
 
 export function selectIsForumPanelOpen<T extends GlobalState>(

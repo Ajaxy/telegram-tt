@@ -6,6 +6,12 @@
     border-radius: 1.25rem;
   }
 
+  // A dark scrim keeps the white icon readable over arbitrary wallpapers: 50% black over pure
+  // white still gives the icon ~3.9:1 — above the 3:1 UI-component threshold
+  :global(.modal-absolute-close-button) {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
   :global(.modal-absolute-close-button .animated-close-icon),
   :global(.modal-absolute-close-button .animated-close-icon::before),
   :global(.modal-absolute-close-button .animated-close-icon::after) {

@@ -296,6 +296,7 @@ export interface ActionPayloads {
   };
   loadNotificationExceptions: undefined;
   setThemeSettings: { theme: ThemeKey } & Partial<IThemeSettings>;
+  animateMessageSending: { chatId: string; threadId: ThreadId; tabId: number };
   updateIsOnline: { isOnline: boolean };
 
   loadContentSettings: undefined;

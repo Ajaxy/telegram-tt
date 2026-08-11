@@ -1,10 +1,11 @@
 import type { QrGradientStops } from '../../../util/qrCode/buildStyledQrCode';
+import type { WallpaperRenderModel } from '../../../util/wallpaper';
 
 import jsxToHtml from '../../../util/element/jsxToHtml';
+import { renderStaticGradient } from '../../../util/gradientBackground';
 import { createStyledQrCode } from '../../../util/qrCode/buildStyledQrCode';
 
-import backgroundStyles from '../../../styles/_patternBackground.module.scss';
-import styles from './QrCodeModal.module.scss';
+import defaultPatternUrl from '../../../assets/pattern.svg';
 
 export const QR_CODE_CARD_MIME_TYPE = 'image/png';
 
@@ -31,11 +32,10 @@ const AVATAR_RING_WIDTH = 4;
 const AVATAR_FONT_SIZE_RATIO_FALLBACK = 2;
 const PATTERN_SIZE = 430;
 const USERNAME_MIN_FONT_SIZE = 12;
-const DEFAULT_WALLPAPER_COLOR = '#3390ec';
+const FALLBACK_ACCENT_COLOR = '#3390ec';
 const WHITE_COLOR = '#ffffff';
-const TRANSPARENT_COLOR = 'rgba(0, 0, 0, 0)';
-const DARK_PATTERN_GRADIENT_COLORS = ['#4f5bd5', '#962fbf', '#dd6cb9', '#fec496'];
-const DARK_PATTERN_GRADIENT_ANGLE = 145;
+const WALLPAPER_IMAGE_SCALE = 1.1;
+const WALLPAPER_BLUR_PX = 12;
 const QR_LOGO_PATH = [
   'M80,13c37,0,67,30,67,67s-30,67-67,67s-67-30-67-67S43,13,80,13z',
   'M108.7,51.9h-0.1c-2.5,0-6.4,1.4-24.3,8.8L81.2,62C74,65,61,70.6,42,78.9',
@@ -48,32 +48,21 @@ const QR_LOGO_PATH = [
 ].join(' ');
 
 export type QrPreviewSnapshot = {
-  backgroundColor: string;
-  backgroundImageStyle?: BackgroundImageRenderStyle;
-  patternStyle?: PatternRenderStyle;
+  wallpaper: QrWallpaperSnapshot;
   username?: UsernameSnapshot;
   avatar?: AvatarSnapshot;
+};
+
+export type QrWallpaperSnapshot = {
+  model: WallpaperRenderModel;
+  fallbackColor: string;
+  resourceUrl?: string;
 };
 
 type QrCodeCardParams = {
   link: string;
   gradient: QrGradientStops;
   snapshot: QrPreviewSnapshot;
-};
-
-type BackgroundImageRenderStyle = {
-  backgroundImage: string;
-  display: string;
-  filter: string;
-  transform: string;
-};
-
-type PatternRenderStyle = {
-  backgroundImage: string;
-  maskImage: string;
-  display: string;
-  content: string;
-  opacity: string;
 };
 
 type UsernameSnapshot = {
@@ -103,25 +92,13 @@ type AvatarSnapshot = {
   text?: string;
 };
 
-export function getQrPreviewSnapshot(wallpaper: HTMLElement): QrPreviewSnapshot | undefined {
-  const card = wallpaper.querySelector<HTMLElement>(`.${styles.card}`);
-  if (!card) {
-    return undefined;
-  }
-
-  const background = wallpaper.querySelector<HTMLElement>(`.${backgroundStyles.background}`);
-  const wallpaperStyle = getComputedStyle(wallpaper);
-  const backgroundStyle = background ? getComputedStyle(background) : undefined;
-  const themeBackgroundColor = wallpaperStyle.getPropertyValue('--theme-background-color').trim();
-  const beforeStyle = background ? getComputedStyle(background, '::before') : undefined;
-  const afterStyle = background ? getComputedStyle(background, '::after') : undefined;
-
+export function buildQrPreviewSnapshot(
+  wallpaper: QrWallpaperSnapshot, avatar?: HTMLElement, username?: HTMLElement,
+): QrPreviewSnapshot {
   return {
-    backgroundColor: getCanvasBackgroundColor(themeBackgroundColor, backgroundStyle?.backgroundColor),
-    backgroundImageStyle: beforeStyle ? getBackgroundImageRenderStyle(beforeStyle) : undefined,
-    patternStyle: afterStyle ? getPatternRenderStyle(afterStyle) : undefined,
-    username: getUsernameSnapshot(wallpaper),
-    avatar: getAvatarSnapshot(card),
+    wallpaper,
+    username: getUsernameSnapshot(username),
+    avatar: getAvatarSnapshot(avatar),
   };
 }
 
@@ -154,7 +131,7 @@ async function renderQrCodeCard(
   canvas.height = EXPORT_HEIGHT * EXPORT_SCALE;
   ctx.setTransform(EXPORT_SCALE, 0, 0, EXPORT_SCALE, 0, 0);
 
-  await drawWallpaper(ctx, snapshot, EXPORT_WIDTH, EXPORT_HEIGHT);
+  await drawWallpaper(ctx, snapshot.wallpaper, EXPORT_WIDTH, EXPORT_HEIGHT);
   drawCardLayout(ctx, snapshot.username);
   await drawAvatar(ctx, snapshot.avatar);
   await drawQr(ctx, url, gradient);
@@ -164,27 +141,7 @@ async function renderQrCodeCard(
   return blob;
 }
 
-function getBackgroundImageRenderStyle(style: CSSStyleDeclaration): BackgroundImageRenderStyle {
-  return {
-    backgroundImage: style.backgroundImage,
-    display: style.display,
-    filter: style.filter,
-    transform: style.transform,
-  };
-}
-
-function getPatternRenderStyle(style: CSSStyleDeclaration): PatternRenderStyle {
-  return {
-    backgroundImage: style.backgroundImage,
-    maskImage: style.maskImage,
-    display: style.display,
-    content: style.content,
-    opacity: style.opacity,
-  };
-}
-
-function getUsernameSnapshot(wallpaper: HTMLElement): UsernameSnapshot | undefined {
-  const username = wallpaper.querySelector<HTMLElement>(`.${styles.username}`);
+function getUsernameSnapshot(username?: HTMLElement): UsernameSnapshot | undefined {
   const text = username?.textContent;
   if (!username || !text) return undefined;
 
@@ -203,12 +160,11 @@ function getUsernameSnapshot(wallpaper: HTMLElement): UsernameSnapshot | undefin
   };
 }
 
-function getAvatarSnapshot(card: HTMLElement): AvatarSnapshot | undefined {
-  const avatar = card.querySelector<HTMLElement>('.Avatar');
+function getAvatarSnapshot(avatar?: HTMLElement): AvatarSnapshot | undefined {
   if (!avatar) return undefined;
 
-  const imageEl = avatar.querySelector<HTMLImageElement>('img.avatar-media');
-  const inner = avatar.querySelector<HTMLElement>('.inner');
+  const imageEl = avatar.querySelector<HTMLImageElement>('img');
+  const inner = avatar.firstElementChild as HTMLElement | undefined;
   const backgroundStyle = inner ? getComputedStyle(inner) : getComputedStyle(avatar);
   const textStyle = getComputedStyle(avatar);
   const text = avatar.textContent?.trim();
@@ -228,109 +184,97 @@ function getAvatarSnapshot(card: HTMLElement): AvatarSnapshot | undefined {
 
 async function drawWallpaper(
   ctx: CanvasRenderingContext2D,
-  snapshot: QrPreviewSnapshot,
+  snapshot: QrWallpaperSnapshot,
   width: number,
   height: number,
 ) {
-  ctx.fillStyle = snapshot.backgroundColor;
+  const { model, resourceUrl, fallbackColor } = snapshot;
+  ctx.fillStyle = model.baseColor || fallbackColor;
   ctx.fillRect(0, 0, width, height);
 
-  if (snapshot.backgroundImageStyle) {
-    await drawBackgroundImage(ctx, snapshot.backgroundImageStyle, width, height);
+  if (model.isImage && resourceUrl) {
+    await drawBackgroundImage(ctx, resourceUrl, model.isBlurred, width, height);
   }
 
-  if (snapshot.patternStyle) {
-    await drawPattern(ctx, snapshot.patternStyle, width, height);
+  const gradientCanvas = !model.isImage && model.colors.length >= 2
+    ? createGradientCanvas(model)
+    : undefined;
+  const patternUrl = model.isDefault ? defaultPatternUrl : resourceUrl;
+  const patternOpacity = Math.abs(model.patternIntensity || 0) / 100;
+
+  if (gradientCanvas && !model.isMaskedPattern) {
+    ctx.drawImage(gradientCanvas, 0, 0, width, height);
+  }
+
+  if (model.isPattern && patternUrl) {
+    if (model.isMaskedPattern && gradientCanvas) {
+      await drawMaskedPattern(ctx, patternUrl, gradientCanvas, patternOpacity, width, height);
+    } else {
+      await drawOverlayPattern(ctx, patternUrl, patternOpacity, width, height);
+    }
   }
 }
 
 async function drawBackgroundImage(
   ctx: CanvasRenderingContext2D,
-  style: BackgroundImageRenderStyle,
+  imageUrl: string,
+  isBlurred: boolean,
   width: number,
   height: number,
 ) {
-  const imageUrl = getCssUrl(style.backgroundImage);
-  if (!imageUrl || style.display === 'none') return;
-
   const image = await loadImage(imageUrl).catch(() => undefined);
   if (!image) return;
 
-  drawTransformedImageCover(ctx, image, style, 0, 0, width, height);
-}
-
-function drawTransformedImageCover(
-  ctx: CanvasRenderingContext2D,
-  image: HTMLImageElement,
-  style: BackgroundImageRenderStyle,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-) {
-  const hasFilter = Boolean(style.filter && style.filter !== 'none');
-  const hasTransform = Boolean(style.transform && style.transform !== 'none');
-  if (!hasFilter && !hasTransform) {
-    drawImageCover(ctx, image, x, y, width, height);
-    return;
-  }
-
   ctx.save();
-  applyCssTransform(ctx, style.transform, x, y, width, height);
-  if (hasFilter) {
-    ctx.filter = style.filter;
-  }
-  drawImageCover(ctx, image, x, y, width, height);
+  ctx.translate(width / 2, height / 2);
+  ctx.scale(WALLPAPER_IMAGE_SCALE, WALLPAPER_IMAGE_SCALE);
+  ctx.translate(-width / 2, -height / 2);
+  if (isBlurred) ctx.filter = `blur(${WALLPAPER_BLUR_PX}px)`;
+  drawImageCover(ctx, image, 0, 0, width, height);
   ctx.restore();
 }
 
-async function drawPattern(
+function createGradientCanvas(model: WallpaperRenderModel) {
+  const canvas = document.createElement('canvas');
+  renderStaticGradient(canvas, model.colors, model.backgroundRotation);
+  return canvas;
+}
+
+async function drawMaskedPattern(
   ctx: CanvasRenderingContext2D,
-  style: PatternRenderStyle,
+  patternUrl: string,
+  gradientCanvas: HTMLCanvasElement,
+  opacity: number,
   width: number,
   height: number,
 ) {
-  if (style.display === 'none' || style.content === 'none') return;
+  const maskImage = await loadImage(patternUrl).catch(() => undefined);
+  if (!maskImage) return;
+  const patternCanvas = createMaskedPatternCanvas(maskImage, gradientCanvas, width, height);
+  if (!patternCanvas) return;
 
-  const backgroundImageUrl = getCssUrl(style.backgroundImage);
-  const maskImageUrl = getCssUrl(style.maskImage);
-  if (!backgroundImageUrl && maskImageUrl) {
-    await drawMaskedPatternLayer(ctx, style, maskImageUrl, width, height);
-    return;
-  }
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  ctx.drawImage(patternCanvas, 0, 0, width, height);
+  ctx.restore();
+}
 
-  if (!backgroundImageUrl) {
-    return;
-  }
-
-  const image = await loadImage(backgroundImageUrl).catch(() => undefined);
+async function drawOverlayPattern(
+  ctx: CanvasRenderingContext2D,
+  patternUrl: string,
+  opacity: number,
+  width: number,
+  height: number,
+) {
+  const image = await loadImage(patternUrl).catch(() => undefined);
   if (!image) return;
 
   const patternCanvas = createPatternCanvas(image, width, height);
   if (!patternCanvas) return;
 
   ctx.save();
-  ctx.globalAlpha = getStyleOpacity(style.opacity);
+  ctx.globalAlpha = opacity;
   ctx.globalCompositeOperation = 'soft-light';
-  ctx.drawImage(patternCanvas, 0, 0, width, height);
-  ctx.restore();
-}
-
-async function drawMaskedPatternLayer(
-  ctx: CanvasRenderingContext2D,
-  style: PatternRenderStyle,
-  maskImageUrl: string,
-  width: number,
-  height: number,
-) {
-  const maskImage = await loadImage(maskImageUrl).catch(() => undefined);
-  if (!maskImage) return;
-
-  const patternCanvas = createMaskedPatternCanvas(maskImage, style.backgroundImage, width, height);
-  if (!patternCanvas) return;
-
-  ctx.save();
-  ctx.globalAlpha = getStyleOpacity(style.opacity);
   ctx.drawImage(patternCanvas, 0, 0, width, height);
   ctx.restore();
 }
@@ -352,7 +296,7 @@ function createPatternCanvas(image: HTMLImageElement, width: number, height: num
 
 function createMaskedPatternCanvas(
   image: HTMLImageElement,
-  backgroundImage: string,
+  gradientImage: CanvasImageSource,
   width: number,
   height: number,
 ) {
@@ -365,7 +309,7 @@ function createMaskedPatternCanvas(
   patternCanvas.width = bitmapWidth;
   patternCanvas.height = bitmapHeight;
 
-  fillPatternGradient(patternCtx, backgroundImage, bitmapWidth, bitmapHeight);
+  patternCtx.drawImage(gradientImage, 0, 0, bitmapWidth, bitmapHeight);
 
   patternCtx.globalCompositeOperation = 'destination-in';
   if (!fillScaledPattern(patternCtx, image, bitmapWidth, bitmapHeight)) return undefined;
@@ -380,60 +324,6 @@ function fillScaledPattern(ctx: CanvasRenderingContext2D, image: HTMLImageElemen
   ctx.fillStyle = pattern;
   ctx.fillRect(0, 0, width, height);
   return true;
-}
-
-function fillPatternGradient(ctx: CanvasRenderingContext2D, backgroundImage: string, width: number, height: number) {
-  const colors = getCssColors(backgroundImage);
-  const gradientColors = colors.length ? colors : DARK_PATTERN_GRADIENT_COLORS;
-  const gradient = createPatternGradient(ctx, backgroundImage, width, height);
-  const lastColorIndex = gradientColors.length - 1;
-
-  gradientColors.forEach((color, index) => {
-    gradient.addColorStop(lastColorIndex ? index / lastColorIndex : 0, color);
-  });
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, width, height);
-}
-
-function createPatternGradient(ctx: CanvasRenderingContext2D, backgroundImage: string, width: number, height: number) {
-  const angle = getCssGradientAngle(backgroundImage) ?? DARK_PATTERN_GRADIENT_ANGLE;
-  const radians = angle * (Math.PI / 180);
-  const directionX = Math.sin(radians);
-  const directionY = -Math.cos(radians);
-  const halfLength = (Math.abs(width * directionX) + Math.abs(height * directionY)) / 2;
-  const centerX = width / 2;
-  const centerY = height / 2;
-
-  return ctx.createLinearGradient(
-    centerX - directionX * halfLength,
-    centerY - directionY * halfLength,
-    centerX + directionX * halfLength,
-    centerY + directionY * halfLength,
-  );
-}
-
-function getCssGradientAngle(backgroundImage: string) {
-  const match = backgroundImage.match(/linear-gradient\(\s*(-?\d+(?:\.\d+)?)deg/i);
-  if (!match) return undefined;
-
-  const angle = Number(match[1]);
-  return Number.isFinite(angle) ? angle : undefined;
-}
-
-function getStyleOpacity(opacity: string) {
-  if (!opacity) return 1;
-
-  const value = Number(opacity);
-  return Number.isFinite(value) ? value : 1;
-}
-
-function getCanvasBackgroundColor(themeBackgroundColor: string, backgroundColor?: string) {
-  if (backgroundColor && backgroundColor !== TRANSPARENT_COLOR) {
-    return backgroundColor;
-  }
-
-  return themeBackgroundColor || DEFAULT_WALLPAPER_COLOR;
 }
 
 function createScaledPattern(ctx: CanvasRenderingContext2D, image: HTMLImageElement, patternSize = PATTERN_SIZE) {
@@ -512,7 +402,7 @@ function getUsernameFillStyle(
     return gradient;
   }
 
-  return style.color || DEFAULT_WALLPAPER_COLOR;
+  return style.color || FALLBACK_ACCENT_COLOR;
 }
 
 async function drawAvatar(ctx: CanvasRenderingContext2D, avatar: AvatarSnapshot | undefined) {
@@ -560,7 +450,7 @@ function drawAvatarFallback(ctx: CanvasRenderingContext2D, avatar: AvatarSnapsho
     gradient.addColorStop(1, lastColor);
     ctx.fillStyle = gradient;
   } else {
-    ctx.fillStyle = avatar.backgroundColor || DEFAULT_WALLPAPER_COLOR;
+    ctx.fillStyle = avatar.backgroundColor || FALLBACK_ACCENT_COLOR;
   }
   ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
 
@@ -698,39 +588,6 @@ function drawImageCover(
   ctx.drawImage(image, sourceX, sourceY, cropWidth, cropHeight, x, y, width, height);
 }
 
-function applyCssTransform(
-  ctx: CanvasRenderingContext2D,
-  transform: string,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-) {
-  if (!transform || transform === 'none') return;
-
-  const matrix = parseCssTransformMatrix(transform);
-  if (!matrix) return;
-
-  ctx.translate(x + width / 2, y + height / 2);
-  ctx.transform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
-  ctx.translate(-(x + width / 2), -(y + height / 2));
-}
-
-function parseCssTransformMatrix(transform: string) {
-  const matrixMatch = transform.match(/^matrix\(([^)]+)\)$/);
-  if (matrixMatch) {
-    const values = matrixMatch[1].split(',').map((value) => Number(value.trim()));
-    if (values.length === 6 && values.every(Number.isFinite)) {
-      const [a, b, c, d, e, f] = values;
-      return {
-        a, b, c, d, e, f,
-      };
-    }
-  }
-
-  return undefined;
-}
-
 function addRoundRect(
   ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number,
 ) {
@@ -746,11 +603,6 @@ function addRoundRect(
   ctx.lineTo(x, y + normalizedRadius);
   ctx.quadraticCurveTo(x, y, x + normalizedRadius, y);
   ctx.closePath();
-}
-
-function getCssUrl(value: string) {
-  const match = value.match(/url\(["']?([^"')]+)["']?\)/);
-  return match?.[1];
 }
 
 function getCssColors(value: string) {

@@ -127,7 +127,13 @@ export type PerformanceType = Record<PerformanceTypeKey, boolean>;
 export interface IThemeSettings {
   background?: string;
   backgroundColor?: string;
+  secondBackgroundColor?: string;
+  thirdBackgroundColor?: string;
+  fourthBackgroundColor?: string;
+  backgroundRotation?: number;
   patternColor?: string;
+  patternIntensity?: number;
+  isPattern?: boolean;
   isBlurred?: boolean;
 }
 

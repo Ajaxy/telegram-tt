@@ -19,6 +19,7 @@ import './api/reactions';
 import './api/statistics';
 import './api/stories';
 import './ui/initial';
+import './ui/animations';
 import './ui/chats';
 import './ui/bots';
 import './ui/messages';

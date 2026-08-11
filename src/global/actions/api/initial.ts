@@ -2,7 +2,6 @@ import type { ActionReturnType } from '../../types';
 import { ManagementProgress } from '../../../types';
 
 import {
-  CUSTOM_BG_CACHE_NAME,
   LANG_CACHE_NAME,
   LOCK_SCREEN_ANIMATION_DURATION_MS,
   MEDIA_CACHE_NAME,
@@ -29,6 +28,7 @@ import {
   loadStoredSession,
   storeSession,
 } from '../../../util/sessions';
+import { clearWallpaperBlobs } from '../../../util/wallpaperStorage';
 import { forceWebsync } from '../../../util/websync';
 import {
   callApi, callApiLocal, initApi, setShouldEnableDebugLog,
@@ -240,10 +240,13 @@ addActionHandler('reset', async (global, actions): Promise<void> => {
   void cacheApi.clear(MEDIA_CACHE_NAME);
   void cacheApi.clear(MEDIA_CACHE_NAME_AVATARS);
   void cacheApi.clear(MEDIA_PROGRESSIVE_CACHE_NAME);
-  void cacheApi.clear(CUSTOM_BG_CACHE_NAME);
 
   const hasAccounts = await resetStorage();
   destroySharedStatePort();
+
+  if (!hasAccounts) {
+    void clearWallpaperBlobs();
+  }
 
   const langCachePrefix = LANG_CACHE_NAME.replace(/\d+$/, '');
   const langCacheVersion = Number((LANG_CACHE_NAME.match(/\d+$/) || ['0'])[0]);

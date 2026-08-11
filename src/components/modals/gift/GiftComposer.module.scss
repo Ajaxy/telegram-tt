@@ -68,6 +68,8 @@
 }
 
 .actionMessageView {
+  // Keeps the negative background layer inside the rounded card
+  isolation: isolate;
   position: relative;
 
   overflow: hidden;
@@ -80,17 +82,6 @@
   margin-bottom: 0;
   padding: 0.5rem;
   border-radius: var(--border-radius-default);
-
-  background-color: var(--theme-background-color);
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100% 100%;
-
-  @include mixins.chat-pattern-background("../../../assets/pattern.svg");
-
-  :global(html.theme-light) & {
-    background-image: url('../../../assets/chat-bg-br.png');
-  }
 }
 
 .messageInput, .limited {
@@ -146,86 +137,4 @@
   height: 1rem;
   margin-right: 0.1875rem;
   margin-left: 0.5rem;
-}
-
-.background {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-
-  overflow: hidden;
-
-  background-color: var(--theme-background-color);
-
-  &::before {
-    content: "";
-
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-  }
-
-  :global(html.theme-light) &:not(.customBgImage)::before {
-    background-image: url('../../../assets/chat-bg-br.png');
-  }
-
-  &:not(.customBgImage).customBgColor::before {
-    display: none;
-  }
-
-  &.customBgImage::before {
-    transform: scale(1.1);
-    background-image: var(--custom-background) !important;
-  }
-
-  :global(body:not(.no-page-transitions)) &.withTransition {
-    transition: background-color 0.2s;
-
-    &.customBgImage::before {
-      transition: background-image var(--layer-transition);
-    }
-  }
-
-  &.customBgImage.blurred::before {
-    filter: blur(12px);
-  }
-
-  :global(html.theme-light body:not(.no-page-transitions)) &:not(.customBgImage).withRightColumn::before {
-    @media screen and (min-width: 1276px) {
-      transform: scaleX(0.73) !important;
-    }
-
-    @media screen and (min-width: 1921px) {
-      transform: scaleX(0.8) !important;
-    }
-
-    @media screen and (min-width: 2600px) {
-      transform: scaleX(0.95) !important;
-    }
-  }
-
-  /* stylelint-disable-next-line @stylistic/max-line-length */
-  :global(html.theme-light body:not(.no-page-transitions)) &:not(.customBgImage).withRightColumn.withTransition::before {
-    transition: transform var(--layer-transition);
-  }
-
-  &:not(.customBgImage):not(.customBgColor)::after {
-    @include mixins.chat-pattern-styles("../../../assets/pattern.svg");
-  }
-
-  @media screen and (min-width: 1276px) {
-    :global(body:not(.no-page-transitions)) &:not(.customBgImage)::before {
-      transform-origin: left center;
-      transform: scale(1);
-      overflow: hidden;
-    }
-  }
 }

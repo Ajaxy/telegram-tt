@@ -85,9 +85,27 @@ export interface ApiAttachment {
   gif?: ApiVideo;
 }
 
+export interface ApiWallpaperSettings {
+  backgroundColor?: number;
+  secondBackgroundColor?: number;
+  thirdBackgroundColor?: number;
+  fourthBackgroundColor?: number;
+  intensity?: number;
+  rotation?: number;
+  // Set on chat-theme wallpapers (links the wallpaper to its chat theme)
+  emoticon?: string;
+  isBlurred?: boolean;
+  isMoving?: boolean;
+}
+
 export interface ApiWallpaper {
   slug: string;
-  document: ApiDocument;
+  document?: ApiDocument;
+  isPattern?: boolean;
+  isDark?: boolean;
+  isCreator?: boolean;
+  isDefault?: boolean;
+  settings?: ApiWallpaperSettings;
 }
 
 export interface ApiSession {

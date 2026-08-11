@@ -1,6 +1,6 @@
 import Color from 'colorjs.io';
 import {
-  memo, useCallback, useEffect, useRef, useState,
+  memo, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -16,9 +16,11 @@ import {
   convertSrgbChannel,
   getPatternColor,
 } from '../../../util/colors';
+import { RESET_WALLPAPER_SETTINGS } from '../../../util/wallpaper';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Island from '../../gili/layout/Island';
 import InputText from '../../ui/InputText';
@@ -179,9 +181,10 @@ const SettingsGeneralBackgroundColor = ({
 
     if (!isFirstRunRef.current) {
       const patternColor = getPatternColor(color);
+      // The reset removes gradient and pattern fields so the selected color remains solid
       setThemeSettings({
         theme: themeRef.current!,
-        background: undefined,
+        ...RESET_WALLPAPER_SETTINGS,
         backgroundColor: hexColor,
         patternColor,
       });
@@ -199,7 +202,7 @@ const SettingsGeneralBackgroundColor = ({
     drawHue(huePickerRef.current!.firstChild as HTMLCanvasElement);
   }, []);
 
-  const handleRgbChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRgbChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const rgbValue = e.currentTarget.value.replace(/[^\d, ]/g, '').slice(0, RGB_INPUT_MAX_LENGTH);
     const rgbMatch = rgbValue.match(RGB_COLOR_REGEX);
 
@@ -215,9 +218,9 @@ const SettingsGeneralBackgroundColor = ({
     }
 
     e.currentTarget.value = rgbValue;
-  }, []);
+  });
 
-  const handleHexChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleHexChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const hexValue = e.currentTarget.value.replace(/[^0-9a-fA-F]/g, '').slice(0, HEX_INPUT_MAX_LENGTH);
 
     if (HEX_COLOR_REGEX.test(hexValue)) {
@@ -225,11 +228,11 @@ const SettingsGeneralBackgroundColor = ({
     }
 
     e.currentTarget.value = hexValue;
-  }, []);
+  });
 
-  const handlePredefinedColorClick = useCallback((e: React.MouseEvent<HTMLInputElement>) => {
+  const handlePredefinedColorClick = useLastCallback((e: React.MouseEvent<HTMLInputElement>) => {
     setColor(buildColorFromHex(e.currentTarget.dataset.color!));
-  }, []);
+  });
 
   const className = buildClassName(
     'SettingsGeneralBackgroundColor settings-content custom-scroll',

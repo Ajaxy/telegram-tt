@@ -1,19 +1,19 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
-  memo, useCallback, useEffect, useRef,
+  memo, useEffect, useRef,
   useState,
 } from '../../../lib/teact/teact';
 
 import type { ApiWallpaper } from '../../../api/types';
-import type { ThemeKey } from '../../../types';
 import { UPLOADING_WALLPAPER_SLUG } from '../../../types';
 
-import { CUSTOM_BG_CACHE_NAME } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
-import * as cacheApi from '../../../util/cacheApi';
-import { fetchBlob } from '../../../util/files';
+import buildStyle from '../../../util/buildStyle';
+import { getIsMaskedPattern, getWallpaperColors } from '../../../util/wallpaper';
+import { cacheWallpaperMedia } from '../../../util/wallpaperStorage';
 
 import useCanvasBlur from '../../../hooks/useCanvasBlur';
+import useGradientBackground from '../../../hooks/useGradientBackground';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
@@ -25,22 +25,38 @@ import './WallpaperTile.scss';
 
 type OwnProps = {
   wallpaper: ApiWallpaper;
-  theme: ThemeKey;
   isSelected: boolean;
-  onClick: (slug: string) => void;
+  onRequest: (wallpaper: ApiWallpaper) => void;
+  onClick: (wallpaper: ApiWallpaper) => void;
 };
 
-const WallpaperTile: FC<OwnProps> = ({
+const WallpaperTile = ({
   wallpaper,
-  theme,
   isSelected,
+  onRequest,
   onClick,
-}) => {
-  const { slug, document } = wallpaper;
-  const localMediaHash = `wallpaper${document.id!}`;
-  const localBlobUrl = document.previewBlobUrl;
-  const previewBlobUrl = useMedia(`${localMediaHash}?size=m`);
-  const thumbRef = useCanvasBlur(document.thumbnail?.dataUri, Boolean(previewBlobUrl), true);
+}: OwnProps) => {
+  const {
+    slug, document, isPattern, settings,
+  } = wallpaper;
+  const isColorOnly = !document;
+  const isImage = Boolean(document) && !isPattern;
+
+  const colors = getWallpaperColors(settings);
+  const intensity = settings?.intensity;
+  const isMaskedPattern = getIsMaskedPattern(isPattern, intensity);
+  const gradientColors = isMaskedPattern && colors.length === 1 ? [colors[0], colors[0]] : colors;
+  const hasGradient = gradientColors.length >= 2;
+
+  const gradientCanvasRef = useGradientBackground(
+    hasGradient ? gradientColors : undefined, undefined, true, settings?.rotation,
+  );
+
+  const localMediaHash = document ? `wallpaper${document.id!}` : undefined;
+  const localBlobUrl = document?.previewBlobUrl;
+  const previewBlobUrl = useMedia(localMediaHash && `${localMediaHash}?size=m`);
+  const patternMaskUrl = previewBlobUrl || localBlobUrl;
+  const thumbRef = useCanvasBlur(document?.thumbnail?.dataUri, Boolean(previewBlobUrl), true);
   const { transitionClassNames } = useShowTransitionDeprecated(
     Boolean(previewBlobUrl || localBlobUrl),
     undefined,
@@ -59,17 +75,21 @@ const WallpaperTile: FC<OwnProps> = ({
     wasLoadDisabled,
     'slow',
   );
-  // To prevent triggering of the effect for useCallback
-  const cacheKeyRef = useRef<string>();
-  cacheKeyRef.current = theme;
-
-  const handleSelect = useCallback(() => {
+  const handleSelect = useLastCallback(() => {
     (async () => {
-      const blob = await fetchBlob(fullMedia!);
-      await cacheApi.save(CUSTOM_BG_CACHE_NAME, cacheKeyRef.current!, blob);
-      onClick(slug);
+      try {
+        const isSaved = await cacheWallpaperMedia(wallpaper, fullMedia!);
+        if (!isSaved) return;
+
+        onClick(wallpaper);
+      } catch (err) {
+        // Selecting without a cached blob would render nothing and then reset — better to keep
+        // the current wallpaper
+        // eslint-disable-next-line no-console
+        console.error('[WallpaperTile] Failed to cache wallpaper blob', err);
+      }
     })();
-  }, [fullMedia, onClick, slug]);
+  });
 
   useEffect(() => {
     // If we've clicked on a wallpaper, select it when full media is loaded
@@ -79,14 +99,17 @@ const WallpaperTile: FC<OwnProps> = ({
     }
   }, [fullMedia, handleSelect]);
 
-  const handleClick = useCallback(() => {
-    if (fullMedia) {
+  const handleClick = useLastCallback(() => {
+    onRequest(wallpaper);
+    if (isColorOnly) {
+      onClick(wallpaper);
+    } else if (fullMedia) {
       handleSelect();
     } else {
       isLoadingRef.current = true;
       setIsLoadAllowed((isAllowed) => !isAllowed);
     }
-  }, [fullMedia, handleSelect]);
+  });
 
   const className = buildClassName(
     'WallpaperTile',
@@ -95,17 +118,41 @@ const WallpaperTile: FC<OwnProps> = ({
 
   return (
     <div className={className} onClick={handleClick}>
-      <div className="media-inner">
-        <canvas
-          ref={thumbRef}
-          className="thumbnail"
-        />
-        <img
-          src={previewBlobUrl || localBlobUrl}
-          className={buildClassName('full-media', transitionClassNames)}
-          alt=""
-          draggable={false}
-        />
+      <div
+        className={buildClassName(
+          'media-inner',
+          isMaskedPattern && 'masked',
+          isMaskedPattern && patternMaskUrl && 'maskReady',
+        )}
+        style={buildStyle(
+          !isMaskedPattern && colors.length === 1 && `background: ${colors[0]}`,
+          isMaskedPattern && patternMaskUrl && `--pattern-mask: url(${patternMaskUrl})`,
+          isPattern && intensity !== undefined && `--pattern-intensity: ${Math.abs(intensity) / 100}`,
+        )}
+      >
+        {hasGradient && <canvas ref={gradientCanvasRef} className="gradient" />}
+        {isImage && (
+          <>
+            <canvas
+              ref={thumbRef}
+              className="thumbnail"
+            />
+            {patternMaskUrl && (
+              <img
+                src={patternMaskUrl}
+                className={buildClassName('full-media', transitionClassNames)}
+                alt=""
+                draggable={false}
+              />
+            )}
+          </>
+        )}
+        {isPattern && !isMaskedPattern && patternMaskUrl && (
+          <div
+            className="pattern"
+            style={`--pattern-mask: url(${patternMaskUrl})`}
+          />
+        )}
         {shouldRenderSpinner && (
           <div className={buildClassName('spinner-container', spinnerClassNames)}>
             <ProgressSpinner progress={loadProgress} onClick={handleClick} />

@@ -40,6 +40,7 @@ export function clearGlobalForLockScreen<T extends GlobalState>(global: T, withT
 export function clearSharedStateForLockScreen(sharedState: SharedState): SharedState {
   const {
     theme,
+    themes,
     shouldUseSystemTheme,
     animationLevel,
     language,
@@ -50,6 +51,7 @@ export function clearSharedStateForLockScreen(sharedState: SharedState): SharedS
     settings: {
       ...INITIAL_SHARED_STATE.settings,
       theme,
+      themes,
       shouldUseSystemTheme,
       animationLevel,
       language,

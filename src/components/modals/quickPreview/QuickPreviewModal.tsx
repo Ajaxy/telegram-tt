@@ -1,26 +1,21 @@
-import type { FC } from '@teact';
 import { memo, useEffect } from '@teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { TabState } from '../../../global/types';
-import type { ThemeKey } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { selectTheme, selectThemeValues } from '../../../global/selectors';
-import buildClassName from '../../../util/buildClassName';
-import buildStyle from '../../../util/buildStyle';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useCustomBackground from '../../../hooks/useCustomBackground';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import Wallpaper from '../../common/Wallpaper';
 import MessageList from '../../middle/MessageList';
 import Modal from '../../ui/Modal';
 import QuickPreviewModalHeader from './QuickPreviewModalHeader';
 
-import backgroundStyles from '../../../styles/_patternBackground.module.scss';
 import styles from './QuickPreviewModal.module.scss';
 
 export type OwnProps = {
@@ -28,27 +23,21 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  theme: ThemeKey;
+  // Only used to tell `MessageList` whether the default background is active
   customBackground?: string;
   backgroundColor?: string;
-  patternColor?: string;
-  isBackgroundBlurred?: boolean;
 };
 
-const QuickPreviewModal: FC<OwnProps & StateProps> = ({
+const QuickPreviewModal = ({
   modal,
-  theme,
   customBackground,
   backgroundColor,
-  patternColor,
-  isBackgroundBlurred,
-}) => {
+}: OwnProps & StateProps) => {
   const { closeQuickPreview, openChat, openThread } = getActions();
 
   const chatId = modal?.chatId;
   const threadId = modal?.threadId;
   const isOpen = Boolean(chatId);
-  const customBackgroundValue = useCustomBackground(theme, customBackground);
 
   const handleClose = useLastCallback(() => {
     closeQuickPreview();
@@ -74,13 +63,6 @@ const QuickPreviewModal: FC<OwnProps & StateProps> = ({
 
   const { chatId: renderingChatId, threadId: renderingThreadId } = useCurrentOrPrev(modal, true) || {};
 
-  const bgClassName = buildClassName(
-    backgroundStyles.background,
-    customBackground && backgroundStyles.customBgImage,
-    backgroundColor && backgroundStyles.customBgColor,
-    customBackground && isBackgroundBlurred && backgroundStyles.blurred,
-  );
-
   if (!renderingChatId) {
     return undefined;
   }
@@ -93,18 +75,7 @@ const QuickPreviewModal: FC<OwnProps & StateProps> = ({
       className={styles.root}
       contentClassName={styles.content}
     >
-      <div
-        className={styles.column}
-        style={buildStyle(
-          `--pattern-color: ${patternColor}`,
-          backgroundColor && `--theme-background-color: ${backgroundColor}`,
-        )}
-        onClick={handleContentClick}
-      >
-        <div
-          className={bgClassName}
-          style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
-        />
+      <Wallpaper className={styles.column} isStatic onClick={handleContentClick}>
         <div className={styles.messagesLayout}>
           <MessageList
             chatId={renderingChatId}
@@ -117,22 +88,16 @@ const QuickPreviewModal: FC<OwnProps & StateProps> = ({
             isQuickPreview
           />
         </div>
-      </div>
+      </Wallpaper>
     </Modal>
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, { modal: chatId }): Complete<StateProps> => {
-  const theme = selectTheme(global);
-  const {
-    isBlurred: isBackgroundBlurred, background: customBackground, backgroundColor, patternColor,
-  } = selectThemeValues(global, theme) || {};
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
+  const { background: customBackground, backgroundColor } = selectThemeValues(global, selectTheme(global)) || {};
 
   return {
-    theme,
     customBackground,
     backgroundColor,
-    patternColor,
-    isBackgroundBlurred,
   };
 })(QuickPreviewModal));

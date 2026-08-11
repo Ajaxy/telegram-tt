@@ -398,8 +398,6 @@ export const CALL_PROTOCOL_LIBRARY_VERSIONS = ['13.0.0'];
 
 export const LIGHT_THEME_BG_COLOR = '#99BA92';
 export const DARK_THEME_BG_COLOR = '#000000';
-export const DEFAULT_PATTERN_COLOR = '#4A8E3A8C';
-export const DARK_THEME_PATTERN_COLOR = '#48576166';
 export const PEER_COLOR_BG_OPACITY = '1a';
 export const PEER_COLOR_BG_ACTIVE_OPACITY = '2b';
 export const PEER_COLOR_GRADIENT_STEP = 5; // px

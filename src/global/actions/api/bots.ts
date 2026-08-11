@@ -434,6 +434,11 @@ addActionHandler('sendInlineBotResult', async (global, actions, payload): Promis
     scheduledAt,
     allowPaidStars: starsForOneMessage,
   };
+
+  if (!scheduledAt) {
+    actions.animateMessageSending({ chatId, threadId, tabId });
+  }
+
   if (!starsForOneMessage) {
     actions.sendInlineBotApiResult(params);
     return;

@@ -1,16 +1,11 @@
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../global';
 
-import type { ThemeKey } from '../../types';
-
-import { selectTheme, selectThemeValues } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 
-import useCustomBackground from '../../hooks/useCustomBackground';
+import Wallpaper from './Wallpaper';
 
-import backgroundStyles from '../../styles/_patternBackground.module.scss';
 import styles from './PreviewBlock.module.scss';
 
 type OwnProps = {
@@ -19,19 +14,6 @@ type OwnProps = {
   style?: string;
   contentClassName?: string;
   backgroundClassName?: string;
-  backgroundStyle?: string;
-  backgroundColor?: string;
-  patternColor?: string;
-  customBackground?: string;
-  isBackgroundBlurred?: boolean;
-};
-
-type StateProps = {
-  theme: ThemeKey;
-  themeBackgroundColor?: string;
-  themePatternColor?: string;
-  themeCustomBackground?: string;
-  themeIsBackgroundBlurred?: boolean;
 };
 
 type MessageProps = {
@@ -72,56 +54,22 @@ const PreviewBlockBase = ({
   style,
   contentClassName,
   backgroundClassName,
-  backgroundStyle,
-  backgroundColor,
-  patternColor,
-  customBackground,
-  isBackgroundBlurred,
-  theme,
-  themeBackgroundColor,
-  themePatternColor,
-  themeCustomBackground,
-  themeIsBackgroundBlurred,
-}: OwnProps & StateProps) => {
-  const resolvedBackgroundColor = backgroundColor ?? themeBackgroundColor;
-  const resolvedPatternColor = patternColor ?? themePatternColor;
-  const resolvedCustomBackground = customBackground ?? themeCustomBackground;
-  const resolvedIsBackgroundBlurred = isBackgroundBlurred ?? themeIsBackgroundBlurred;
-  const customBackgroundValue = useCustomBackground(theme, resolvedCustomBackground);
-
-  const backgroundClassNames = buildClassName(
-    styles.background,
-    backgroundStyles.background,
-    resolvedCustomBackground && backgroundStyles.customBgImage,
-    resolvedBackgroundColor && backgroundStyles.customBgColor,
-    resolvedCustomBackground && resolvedIsBackgroundBlurred && backgroundStyles.blurred,
-    backgroundClassName,
-  );
-
+}: OwnProps) => {
   return (
-    <div
+    <Wallpaper
       className={buildClassName(styles.root, className)}
-      style={buildStyle(
-        resolvedPatternColor && `--pattern-color: ${resolvedPatternColor}`,
-        resolvedBackgroundColor && `--theme-background-color: ${resolvedBackgroundColor}`,
-        style,
-      )}
+      style={style}
+      bgClassName={buildClassName(styles.background, backgroundClassName)}
+      isStatic
     >
-      <div
-        className={backgroundClassNames}
-        style={buildStyle(
-          customBackgroundValue && `--custom-background: ${customBackgroundValue}`,
-          backgroundStyle,
-        )}
-      />
       <div className={buildClassName(styles.content, contentClassName)}>
         {children}
       </div>
-    </div>
+    </Wallpaper>
   );
 };
 
-const PreviewBlockMessage: FC<MessageProps> = ({
+const PreviewBlockMessage = ({
   children,
   className,
   style,
@@ -137,7 +85,7 @@ const PreviewBlockMessage: FC<MessageProps> = ({
   time,
   senderColor,
   backgroundColor,
-}) => {
+}: MessageProps) => {
   const hasAvatar = avatar !== undefined;
   const hasSender = sender !== undefined;
   const hasBadge = badge !== undefined;
@@ -205,11 +153,11 @@ const PreviewBlockMessage: FC<MessageProps> = ({
   );
 };
 
-const PreviewBlockMessageTime: FC<MessageTimeProps> = ({
+const PreviewBlockMessageTime = ({
   children,
   className,
   style,
-}) => (
+}: MessageTimeProps) => (
   <span className={buildClassName(styles.time, className)} style={style}>
     {children}
   </span>
@@ -218,23 +166,7 @@ const PreviewBlockMessageTime: FC<MessageTimeProps> = ({
 const PreviewBlockMessageMemo = memo(PreviewBlockMessage) as PreviewBlockMessageComponent;
 PreviewBlockMessageMemo.Time = memo(PreviewBlockMessageTime);
 
-const PreviewBlock = memo(withGlobal<OwnProps>((global) => {
-  const theme = selectTheme(global);
-  const {
-    isBlurred: themeIsBackgroundBlurred,
-    background: themeCustomBackground,
-    backgroundColor: themeBackgroundColor,
-    patternColor: themePatternColor,
-  } = selectThemeValues(global, theme) || {};
-
-  return {
-    theme,
-    themeBackgroundColor,
-    themePatternColor,
-    themeCustomBackground,
-    themeIsBackgroundBlurred,
-  };
-})(PreviewBlockBase)) as PreviewBlockComponent;
+const PreviewBlock = memo(PreviewBlockBase) as PreviewBlockComponent;
 
 PreviewBlock.Message = PreviewBlockMessageMemo;
 

@@ -4,10 +4,8 @@ import { LeftColumnContent, NewChatMembersProgress, SettingsScreens } from '../t
 
 import {
   ANIMATION_LEVEL_DEFAULT,
-  DARK_THEME_PATTERN_COLOR,
   DEFAULT_GIFT_PROFILE_FILTER_OPTIONS,
   DEFAULT_MESSAGE_TEXT_SIZE_PX,
-  DEFAULT_PATTERN_COLOR,
   DEFAULT_PLAYBACK_RATE,
   DEFAULT_RESALE_GIFTS_FILTER_OPTIONS,
   DEFAULT_VOLUME,
@@ -17,6 +15,7 @@ import {
   MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX,
 } from '../config';
 import { IS_IOS, IS_MAC_OS } from '../util/browser/windowEnvironment';
+import { getDefaultPatternColor } from '../util/wallpaper';
 import { DEFAULT_APP_CONFIG } from '../limits';
 import { INITIAL_BROWSER_STATE } from './helpers/browser';
 
@@ -80,9 +79,22 @@ export const INITIAL_PERFORMANCE_STATE_MIN: PerformanceType = {
   textStreaming: false,
 };
 
+export const SHARED_STATE_CACHE_VERSION = 1;
+
 export const INITIAL_SHARED_STATE: SharedState = {
+  cacheVersion: SHARED_STATE_CACHE_VERSION,
   settings: {
     theme: 'light',
+    themes: {
+      light: {
+        isBlurred: true,
+        patternColor: getDefaultPatternColor('light'),
+      },
+      dark: {
+        isBlurred: true,
+        patternColor: getDefaultPatternColor('dark'),
+      },
+    },
     shouldUseSystemTheme: true,
     messageTextSize: IS_IOS
       ? IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX
@@ -106,7 +118,7 @@ export const INITIAL_SHARED_STATE: SharedState = {
 };
 
 export const INITIAL_GLOBAL_STATE: GlobalState = {
-  cacheVersion: 3,
+  cacheVersion: 5,
   isInited: true,
   attachMenu: { bots: {} },
   passcode: {},
@@ -319,16 +331,6 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     },
     privacy: {},
     botVerificationShownPeerIds: [],
-    themes: {
-      light: {
-        isBlurred: true,
-        patternColor: DEFAULT_PATTERN_COLOR,
-      },
-      dark: {
-        isBlurred: true,
-        patternColor: DARK_THEME_PATTERN_COLOR,
-      },
-    },
     accountDaysTtl: 365,
   },
 

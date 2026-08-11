@@ -1,27 +1,17 @@
-@use "../styles/mixins";
-
 .bg {
   height: 100%;
 
+  // Base color only — the chat wallpaper (gradient + pattern) is rendered by the gradient
+  // engine inside `Main`
   background-color: var(--theme-background-color);
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100% 100%;
-
-  @include mixins.chat-pattern-background("../assets/pattern.svg");
-
-  &::before {
-    @media (max-width: 600px) {
-      bottom: auto;
-      height: calc(var(--vh, 1vh) * 100);
-    }
-  }
-
-  :global(html.theme-light) & {
-    background-image: url('../assets/chat-bg-br.png');
-  }
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
   }
+}
+
+// Safari extends the `body` background into its top and bottom browser chrome. Keep those areas
+// aligned with the client UI while `Main` renders the wallpaper with `--theme-background-color`.
+:global(body.is-ios).bg {
+  background-color: var(--color-background);
 }

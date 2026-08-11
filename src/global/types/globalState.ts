@@ -66,14 +66,12 @@ import type {
   ChatListType,
   ChatTranslatedMessages,
   EmojiKeywords,
-  IThemeSettings,
   ServiceNotification,
   SimilarBotsInfo,
   StarGiftCategory,
   StarsSubscriptions,
   StarsTransactionHistory,
   TextSummary,
-  ThemeKey,
   Thread,
   ThreadId,
   TopicsInfo,
@@ -451,7 +449,6 @@ export type GlobalState = {
     lastPremiumBandwithNotificationDate?: number;
     paidReactionPrivacy?: ApiPaidReactionPrivacyType;
     botVerificationShownPeerIds: string[];
-    themes: Partial<Record<ThemeKey, IThemeSettings>>;
     accountDaysTtl: number;
     passkeys?: ApiPasskey[];
   };

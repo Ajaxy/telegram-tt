@@ -37,22 +37,18 @@ export function updateSharedSettings<T extends GlobalState>(
 export function updateThemeSettings<T extends GlobalState>(
   global: T, theme: ThemeKey, newSettings?: Partial<IThemeSettings>,
 ): T {
-  const settings = global.settings;
+  const settings = selectSharedSettings(global);
   const current = settings.themes[theme];
 
-  return {
-    ...global,
-    settings: {
-      ...global.settings,
-      themes: {
-        ...settings.themes,
-        [theme]: {
-          ...current,
-          ...newSettings,
-        },
+  return updateSharedSettings(global, {
+    themes: {
+      ...settings.themes,
+      [theme]: {
+        ...current,
+        ...newSettings,
       },
     },
-  };
+  });
 }
 
 export function addNotifyExceptions<T extends GlobalState>(

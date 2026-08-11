@@ -8,7 +8,9 @@ import type {
   ApiPhoto,
   ApiVideo,
 } from '../api/types';
-import type { MessageList, ThreadId, TopicsInfo } from '../types';
+import type {
+  IThemeSettings, MessageList, ThemeKey, ThreadId, TopicsInfo,
+} from '../types';
 import type { ActionReturnType, GlobalState, SharedState } from './types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../api/types';
 
@@ -37,9 +39,15 @@ import { GLOBAL_STATE_CACHE_KEY } from '../util/multiaccount';
 import { encryptSession } from '../util/passcode';
 import { onBeforeUnload, throttle } from '../util/schedulers';
 import { hasStoredSession } from '../util/sessions';
+import { getSystemTheme } from '../util/systemTheme';
+import { getDefaultPatternColor } from '../util/wallpaper';
+import { migrateLegacyWallpaperBlobs, prefetchWallpaperUrl } from '../util/wallpaperStorage';
+import { selectSharedSettings } from './selectors/sharedState';
 import { selectThreadInfo } from './selectors/threads';
 import { addActionHandler, getGlobal } from './index';
-import { INITIAL_GLOBAL_STATE, INITIAL_PERFORMANCE_STATE_MED } from './initialState';
+import {
+  INITIAL_GLOBAL_STATE, INITIAL_PERFORMANCE_STATE_MED, SHARED_STATE_CACHE_VERSION,
+} from './initialState';
 import { clearGlobalForLockScreen, clearSharedStateForLockScreen } from './reducers';
 import {
   selectChatLastMessageId,
@@ -56,6 +64,10 @@ import { getIsMobile } from '../hooks/useAppLayout';
 
 const UPDATE_THROTTLE = 5000;
 
+// `patternColor` values the cache migration recognizes as defaults and replaces with the
+// wallpaper-derived ones
+const LEGACY_DEFAULT_PATTERN_COLOR = '#4A8E3A8C';
+const LEGACY_DARK_THEME_PATTERN_COLOR = '#48576166';
 const updateCacheThrottled = throttle(() => onFullyIdle(() => updateCache()), UPDATE_THROTTLE, false);
 const updateCacheForced = () => updateCache(true);
 
@@ -131,6 +143,8 @@ export async function loadCache(initialState: GlobalState): Promise<GlobalState 
 
   if (cache.passcode.hasPasscode || hasStoredSession()) {
     setupCaching();
+    // Start resolving the wallpaper early without delaying the initial render
+    void prefetchCurrentWallpaperUrl(cache);
 
     return cache;
   } else {
@@ -168,14 +182,11 @@ async function readCache(initialState: GlobalState): Promise<GlobalState> {
 
   let cached = cachedFromLocalStorage || await loadCachedGlobal();
   const cachedSharedState = await loadCachedSharedState();
-  const sharedState = cachedSharedState || initialState.sharedState;
-
-  if (cached) {
-    cached = {
-      ...cached,
-      sharedState,
-    };
-  }
+  const cachedAccountThemes = (cached as any)?.settings?.themes as (
+    Partial<Record<ThemeKey, IThemeSettings>> | undefined
+  );
+  const cachedSharedThemes = cachedSharedState?.settings?.themes;
+  const shouldMigrateAccountThemes = Boolean(cachedAccountThemes && !cachedSharedThemes);
 
   if (DEBUG) {
     // eslint-disable-next-line no-console
@@ -186,16 +197,70 @@ async function readCache(initialState: GlobalState): Promise<GlobalState> {
     migrateCache(cached, initialState);
   }
 
+  const sharedState = migrateSharedCache(
+    cachedSharedState,
+    cached?.sharedState.settings.themes,
+    initialState.sharedState,
+  );
+
+  if (cached) {
+    cached = {
+      ...cached,
+      sharedState,
+    };
+  }
+
+  if (shouldMigrateAccountThemes) {
+    await migrateLegacyWallpaperBlobs(cachedAccountThemes!);
+  }
+
   const newState: GlobalState = {
     ...initialState,
     ...cached,
     sharedState: {
+      ...initialState.sharedState,
       ...sharedState,
       ...cached?.sharedState, // Allow migration to override shared state
+      settings: {
+        ...initialState.sharedState.settings,
+        ...sharedState.settings,
+        ...cached?.sharedState.settings,
+      },
     },
   };
 
   return newState;
+}
+
+function migrateSharedCache(
+  cached: SharedState | undefined,
+  fallbackThemes: Partial<Record<ThemeKey, IThemeSettings>> | undefined,
+  initialState: SharedState,
+): SharedState {
+  const cacheVersion = cached?.cacheVersion ?? 0;
+  const cachedSettings = cached?.settings;
+  const settings = cachedSettings || initialState.settings;
+  let migrated = cached || initialState;
+
+  if (cacheVersion < SHARED_STATE_CACHE_VERSION) {
+    migrated = {
+      ...migrated,
+      cacheVersion: SHARED_STATE_CACHE_VERSION,
+      settings: {
+        ...settings,
+        themes: cachedSettings?.themes
+          || (fallbackThemes ? cloneThemeSettings(fallbackThemes) : initialState.settings.themes),
+      },
+    };
+  }
+
+  return migrated;
+}
+
+function prefetchCurrentWallpaperUrl(global: GlobalState) {
+  const { theme, themes, shouldUseSystemTheme } = selectSharedSettings(global);
+  const currentTheme = shouldUseSystemTheme ? getSystemTheme() : theme;
+  return prefetchWallpaperUrl(themes[currentTheme]?.background);
 }
 
 export function migrateCache(cached: GlobalState, initialState: GlobalState) {
@@ -291,10 +356,13 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   }
 
   if (!cached.cacheVersion) {
-    cached.cacheVersion = initialState.cacheVersion;
-    // Reset because of the new action message structure
+    // Reset because of the new action message structure (the same reset the version 3 migration
+    // below performs)
     cached.messages = initialState.messages;
     cached.chats.listIds = initialState.chats.listIds;
+    // Treat unversioned caches as version 3, so every later migration still runs — stamping the
+    // current version would skip them all
+    cached.cacheVersion = 3;
   }
 
   if (!cached.messages.playbackByChatId) {
@@ -302,12 +370,12 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   }
 
   if (cached.cacheVersion < 2) {
-    if (untypedCached.settings.themes.dark) {
-      untypedCached.settings.themes.dark.patternColor = (initialState as any).settings.themes.dark!.patternColor;
+    if (untypedCached.settings.themes?.dark) {
+      untypedCached.settings.themes.dark.patternColor = initialState.sharedState.settings.themes.dark!.patternColor;
     }
 
-    if (untypedCached.settings.themes.light) {
-      untypedCached.settings.themes.light.patternColor = (initialState as any).settings.themes.light!.patternColor;
+    if (untypedCached.settings.themes?.light) {
+      untypedCached.settings.themes.light.patternColor = initialState.sharedState.settings.themes.light!.patternColor;
     }
 
     cached.cacheVersion = 2;
@@ -329,6 +397,9 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
       instantViewFontSizeAdjust: INSTANT_VIEW_FONT_SIZE_ADJUST_DEFAULT,
       performance: untypedCached.settings.performance,
       theme: untypedCached.settings.byKey.theme,
+      themes: untypedCached.settings.themes
+        ? cloneThemeSettings(untypedCached.settings.themes)
+        : initialState.sharedState.settings.themes,
       timeFormat: untypedCached.settings.byKey.timeFormat,
       wasTimeFormatSetManually: untypedCached.settings.byKey.wasTimeFormatSetManually,
       shouldUseSystemTheme: untypedCached.settings.byKey.shouldUseSystemTheme,
@@ -344,10 +415,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
       shouldDebugExportedSenders: untypedCached.settings.byKey.shouldDebugExportedSenders,
       shouldWarnAboutFiles: untypedCached.settings.byKey.shouldWarnAboutFiles,
     };
-  }
-
-  if (!cached.settings.themes) {
-    cached.settings.themes = initialState.settings.themes;
   }
 
   if (!cached.messages.webPageById) {
@@ -411,6 +478,30 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.chats.listIds = initialState.chats.listIds;
   }
 
+  if (cached.cacheVersion < 4) {
+    // The default `patternColor` is now derived from the default wallpapers (`getDefaultPatternColor`).
+    // Replace the old constant defaults so chips and wallpaper-aware surfaces agree, but keep any
+    // wallpaper-derived color the user's own selection produced.
+    if (untypedCached.settings.themes?.light?.patternColor === LEGACY_DEFAULT_PATTERN_COLOR) {
+      untypedCached.settings.themes.light.patternColor = getDefaultPatternColor('light');
+    }
+
+    if (untypedCached.settings.themes?.dark?.patternColor === LEGACY_DARK_THEME_PATTERN_COLOR) {
+      untypedCached.settings.themes.dark.patternColor = getDefaultPatternColor('dark');
+    }
+
+    cached.cacheVersion = 4;
+  }
+
+  if (cached.cacheVersion < 5) {
+    // The account cache contains the authoritative themes until this migration moves them to shared state
+    cachedSharedSettings.themes = untypedCached.settings.themes
+      || cachedSharedSettings.themes
+      || initialState.sharedState.settings.themes;
+    delete untypedCached.settings.themes;
+    cached.cacheVersion = 5;
+  }
+
   if (!cached.auth) {
     cached.auth = initialState.auth;
     cached.auth.rememberMe = untypedCached.rememberMe;
@@ -419,6 +510,13 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (cached.audioPlayer.volume === undefined) {
     cached.audioPlayer.volume = initialState.audioPlayer.volume;
   }
+}
+
+function cloneThemeSettings(themes: Partial<Record<ThemeKey, IThemeSettings>>) {
+  return {
+    light: themes.light ? { ...themes.light } : undefined,
+    dark: themes.dark ? { ...themes.dark } : undefined,
+  };
 }
 
 function clearCachedDraftLocalFlags(cached: GlobalState) {
@@ -882,7 +980,7 @@ function omitLocalDocument(document: ApiDocument): ApiDocument {
 
 function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings'] {
   const {
-    byKey, botVerificationShownPeerIds, notifyDefaults, lastPremiumBandwithNotificationDate, themes, accountDaysTtl,
+    byKey, botVerificationShownPeerIds, notifyDefaults, lastPremiumBandwithNotificationDate, accountDaysTtl,
   } = global.settings;
 
   return {
@@ -891,7 +989,6 @@ function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings
     botVerificationShownPeerIds,
     lastPremiumBandwithNotificationDate,
     notifyDefaults,
-    themes,
     accountDaysTtl,
   };
 }

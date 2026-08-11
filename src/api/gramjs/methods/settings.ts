@@ -222,23 +222,14 @@ export async function fetchWallpapers() {
     return undefined;
   }
 
-  const filteredWallpapers = result.wallpapers.filter((wallpaper) => {
-    if (
-      !(wallpaper instanceof GramJs.WallPaper)
-      || !(wallpaper.document instanceof GramJs.Document)
-    ) {
-      return false;
+  result.wallpapers.forEach((wallpaper) => {
+    if (wallpaper instanceof GramJs.WallPaper && wallpaper.document instanceof GramJs.Document) {
+      localDb.documents[String(wallpaper.document.id)] = wallpaper.document;
     }
-
-    return !wallpaper.pattern && wallpaper.document.mimeType !== 'application/x-tgwallpattern';
-  }) as GramJs.WallPaper[];
-
-  filteredWallpapers.forEach((wallpaper) => {
-    localDb.documents[String(wallpaper.document.id)] = wallpaper.document as GramJs.Document;
   });
 
   return {
-    wallpapers: filteredWallpapers.map(buildApiWallpaper).filter(Boolean),
+    wallpapers: result.wallpapers.map(buildApiWallpaper).filter(Boolean),
   };
 }
 

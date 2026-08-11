@@ -5,9 +5,13 @@ import type { GlobalState } from '../global/types';
 import type { ThemeKey } from '../types';
 import type { UiLoaderPage } from './common/UiLoader';
 
-import { DARK_THEME_BG_COLOR, INACTIVE_MARKER, LIGHT_THEME_BG_COLOR, PAGE_TITLE, PAGE_TITLE_TAURI } from '../config';
+import {
+  DARK_THEME_BG_COLOR, INACTIVE_MARKER, LIGHT_THEME_BG_COLOR, PAGE_TITLE, PAGE_TITLE_TAURI,
+} from '../config';
 import { forceMutation } from '../lib/fasterdom/stricterdom.ts';
-import { selectActionMessageBg, selectTabState, selectTheme } from '../global/selectors';
+import {
+  selectActionMessageBg, selectTabState, selectTheme, selectThemeValues,
+} from '../global/selectors';
 import { IS_TAURI } from '../util/browser/globalEnvironment';
 import { IS_INSTALL_PROMPT_SUPPORTED, PLATFORM_ENV } from '../util/browser/windowEnvironment';
 import buildClassName from '../util/buildClassName';
@@ -16,6 +20,7 @@ import { ACCOUNT_SLOT, getAccountSlotUrl, getFirstLoggedInAccountSlot } from '..
 import { hasEncryptedSession } from '../util/passcode';
 import { getInitialLocationHash, parseInitialLocationHash } from '../util/routing';
 import { checkSessionLocked, hasStoredSession } from '../util/sessions';
+import { getDefaultPatternColor, getWallpaperBaseColor } from '../util/wallpaper';
 import { updateSizes } from '../util/windowSize';
 
 import useTauriDrag from '../hooks/tauri/useTauriDrag';
@@ -43,6 +48,7 @@ type StateProps = {
   hasWebAuthTokenFailed?: boolean;
   isTestServer?: boolean;
   theme: ThemeKey;
+  customBackgroundColor?: string;
   actionMessageBg?: string;
 };
 
@@ -65,6 +71,7 @@ const App = ({
   hasWebAuthTokenFailed,
   isTestServer,
   theme,
+  customBackgroundColor,
   actionMessageBg,
 }: StateProps) => {
   const { isMobile } = useAppLayout();
@@ -215,17 +222,22 @@ const App = ({
   }, []);
 
   useLayoutEffect(() => {
+    // Prefer the chosen wallpaper's base color, so the pre-render base matches the
+    // actual wallpaper instead of flashing the built-in default first.
     document.body.style.setProperty(
       '--theme-background-color',
-      theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR,
+      customBackgroundColor || (theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR),
     );
-  }, [theme]);
+  }, [theme, customBackgroundColor]);
 
   useLayoutEffect(() => {
-    if (actionMessageBg) {
-      document.body.style.setProperty('--action-message-bg', actionMessageBg);
-    }
-  }, [actionMessageBg]);
+    // Fall back to the theme default when the tint is unset (e.g. a photo wallpaper without a
+    // thumbnail), so service chips don't keep the previous wallpaper's tint.
+    document.body.style.setProperty(
+      '--action-message-bg',
+      actionMessageBg || getDefaultPatternColor(theme),
+    );
+  }, [actionMessageBg, theme]);
 
   const getIsInBackgroundLocal = getIsInBackground;
   useSignalEffect(() => {
@@ -258,13 +270,17 @@ const App = ({
 export default withGlobal(
   (global): Complete<StateProps> => {
     const { state: authState, hasWebAuthTokenFailed, hasWebAuthTokenPasswordRequired } = global.auth;
+    const theme = selectTheme(global);
+    const themeValues = selectThemeValues(global, theme);
+
     return {
       authState,
       isScreenLocked: global.passcode?.isScreenLocked,
       hasPasscode: global.passcode?.hasPasscode,
       inactiveReason: selectTabState(global).inactiveReason,
       hasWebAuthTokenFailed: hasWebAuthTokenFailed || hasWebAuthTokenPasswordRequired,
-      theme: selectTheme(global),
+      theme,
+      customBackgroundColor: getWallpaperBaseColor(theme, themeValues || {}),
       isTestServer: global.config?.isTestServer,
       actionMessageBg: selectActionMessageBg(global),
     };

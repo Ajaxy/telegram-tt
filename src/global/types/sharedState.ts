@@ -1,9 +1,10 @@
 import type { ApiLanguage } from '../../api/types';
 import type {
-  AnimationLevel, FoldersPosition, PerformanceType, Point, Size, ThemeKey, TimeFormat,
+  AnimationLevel, FoldersPosition, IThemeSettings, PerformanceType, Point, Size, ThemeKey, TimeFormat,
 } from '../../types';
 
 export interface SharedState {
+  cacheVersion: number;
   settings: SharedSettings;
   isInitial?: true;
 }
@@ -11,6 +12,7 @@ export interface SharedState {
 export interface SharedSettings {
   shouldUseSystemTheme: boolean;
   theme: ThemeKey;
+  themes: Partial<Record<ThemeKey, IThemeSettings>>;
   language: string;
   languages?: ApiLanguage[];
   performance: PerformanceType;

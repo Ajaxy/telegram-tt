@@ -4,7 +4,6 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ThemeKey } from '../../../types';
 import type { GiftOption } from './GiftModal';
 import {
   type ApiMessage, type ApiPeer, type ApiStarGiftAuctionState, type ApiStarsAmount, MAIN_THREAD_ID,
@@ -12,21 +11,20 @@ import {
 
 import { getPeerTitle, isApiPeerUser } from '../../../global/helpers/peers';
 import {
-  selectPeer, selectPeerPaidMessagesStars, selectTabState, selectTheme, selectThemeValues, selectUserFullInfo,
+  selectPeer, selectPeerPaidMessagesStars, selectTabState, selectUserFullInfo,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import buildStyle from '../../../util/buildStyle';
 import { formatCountdown } from '../../../util/dates/oldDateFormat';
 import { HOUR } from '../../../util/dates/units';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { formatStarsAsIcon, NEXT_ARROW_REPLACEMENT } from '../../../util/localization/format';
 import { getServerTime } from '../../../util/serverTime';
 
-import useCustomBackground from '../../../hooks/useCustomBackground';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import PremiumProgress from '../../common/PremiumProgress';
+import Wallpaper from '../../common/Wallpaper';
 import ActionMessage from '../../middle/message/ActionMessage';
 import Button from '../../ui/Button';
 import Link from '../../ui/Link';
@@ -45,11 +43,6 @@ export type OwnProps = {
 
 export type StateProps = {
   captionLimit?: number;
-  theme: ThemeKey;
-  isBackgroundBlurred?: boolean;
-  patternColor?: string;
-  customBackground?: string;
-  backgroundColor?: string;
   peer?: ApiPeer;
   currentUserId?: string;
   isPaymentFormLoading?: boolean;
@@ -69,11 +62,6 @@ function GiftComposer({
   peerId,
   peer,
   captionLimit,
-  theme,
-  isBackgroundBlurred,
-  patternColor,
-  backgroundColor,
-  customBackground,
   currentUserId,
   isPaymentFormLoading,
   starBalance,
@@ -93,8 +81,6 @@ function GiftComposer({
   const [shouldHideName, setShouldHideName] = useState<boolean>(false);
   const [shouldPayForUpgrade, setShouldPayForUpgrade] = useState<boolean>(false);
   const [shouldPayByStars, setShouldPayByStars] = useState<boolean>(false);
-
-  const customBackgroundValue = useCustomBackground(theme, customBackground);
 
   useEffect(() => {
     if (shouldDisallowLimitedStarGifts) {
@@ -440,38 +426,18 @@ function GiftComposer({
     );
   }
 
-  const bgClassName = buildClassName(
-    styles.background,
-    styles.withTransition,
-    customBackground && styles.customBgImage,
-    backgroundColor && styles.customBgColor,
-    customBackground && isBackgroundBlurred && styles.blurred,
-  );
-
   if ((!isStarGift && !isPremiumGift) || !localMessage) return;
 
   return (
     <div className={buildClassName(styles.root, 'custom-scroll')}>
-      <div
-        className={buildClassName(styles.actionMessageView, 'MessageList')}
-        // @ts-ignore -- FIXME: Find a way to disable interactions but keep a11y
-        inert
-        style={buildStyle(
-          `--pattern-color: ${patternColor}`,
-          backgroundColor && `--theme-background-color: ${backgroundColor}`,
-        )}
-      >
-        <div
-          className={bgClassName}
-          style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
-        />
+      <Wallpaper className={buildClassName(styles.actionMessageView, 'MessageList')} inert isStatic>
         <ActionMessage
           key={isStarGift ? gift.id : isPremiumGift ? gift.months : undefined}
           message={localMessage}
           threadId={MAIN_THREAD_ID}
           appearanceOrder={0}
         />
-      </div>
+      </Wallpaper>
       {renderOptionsSection()}
       <div className={styles.spacer} />
       {renderFooter()}
@@ -481,16 +447,9 @@ function GiftComposer({
 
 export default memo(withGlobal<OwnProps>(
   (global, { peerId, gift }): Complete<StateProps> => {
-    const theme = selectTheme(global);
     const {
       stars,
     } = global;
-    const {
-      isBlurred: isBackgroundBlurred,
-      patternColor,
-      background: customBackground,
-      backgroundColor,
-    } = selectThemeValues(global, theme) || {};
     const peer = selectPeer(global, peerId);
     const paidMessagesStars = selectPeerPaidMessagesStars(global, peerId);
     const userFullInfo = selectUserFullInfo(global, peerId);
@@ -509,11 +468,6 @@ export default memo(withGlobal<OwnProps>(
     return {
       starBalance: stars?.balance,
       peer,
-      theme,
-      isBackgroundBlurred,
-      patternColor,
-      customBackground,
-      backgroundColor,
       captionLimit: global.appConfig.starGiftMaxMessageLength,
       currentUserId: global.currentUserId,
       isPaymentFormLoading: tabState.isPaymentFormLoading,

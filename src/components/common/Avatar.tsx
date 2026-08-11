@@ -1,5 +1,5 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
-import type { TeactNode } from '../../lib/teact/teact';
+import type { ElementRef, TeactNode } from '../../lib/teact/teact';
 import { memo, useMemo, useRef } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -65,6 +65,7 @@ cn.media = cn('media');
 cn.icon = cn('icon');
 
 type OwnProps = {
+  containerRef?: ElementRef<HTMLDivElement>;
   className?: string;
   style?: string;
   size?: AvatarSize;
@@ -97,6 +98,7 @@ type OwnProps = {
 };
 
 const Avatar = ({
+  containerRef,
   className,
   style,
   size = 'large',
@@ -128,7 +130,6 @@ const Avatar = ({
 }: OwnProps) => {
   const { openStoryViewer } = getActions();
 
-  const ref = useRef<HTMLDivElement>();
   const videoLoopCountRef = useRef(0);
   const isCustomPeer = peer && 'isCustomPeer' in peer;
   const realPeer = peer && !isCustomPeer ? peer : undefined;
@@ -319,7 +320,7 @@ const Avatar = ({
 
   return (
     <div
-      ref={ref}
+      ref={containerRef}
       className={fullClassName}
       id={realPeer?.id && withStory ? getPeerStoryHtmlId(realPeer.id) : undefined}
       data-peer-id={realPeer?.id}
