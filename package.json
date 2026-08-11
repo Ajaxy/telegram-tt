@@ -58,7 +58,7 @@
     "@stylistic/eslint-plugin": "^5.10.0",
     "@stylistic/stylelint-config": "^5.0.0",
     "@stylistic/stylelint-plugin": "^5.2.0",
-    "@tauri-apps/cli": "^2.11.3",
+    "@tauri-apps/cli": "^2.11.4",
     "@testing-library/jest-dom": "^6.9.1",
     "@types/dom-chromium-ai": "^0.0.17",
     "@types/dom-view-transitions": "^1.0.6",

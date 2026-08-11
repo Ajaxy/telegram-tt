@@ -1,7 +1,15 @@
 {
   "identifier": "default",
+  "description": "Permissions available to Telegram app content",
+  "local": true,
   "webviews": ["*"],
   "permissions": [
+    "allow-mark-title-bar-overlay",
+    "allow-set-notifications-count",
+    "allow-set-window-title",
+    "allow-open-new-window-cmd",
+    "allow-save-current-url",
+    "allow-set-menu-translations",
     "core:event:default",
     "core:window:allow-is-fullscreen",
     "core:window:allow-start-dragging",

@@ -321,12 +321,14 @@ fn save_current_url(window: tauri::WebviewWindow) {
 pub(crate) fn open_new_window(
   app: tauri::AppHandle,
   url: String,
-) -> Result<tauri::WebviewWindow, tauri::Error> {
+) -> Result<tauri::WebviewWindow, String> {
+  let base_url = Url::parse(BASE_URL).map_err(|err| format!("Invalid base URL: {err}"))?;
+  let url = resolve_app_url(&url, &base_url).ok_or_else(|| format!("Disallowed app URL: {url}"))?;
   let window_label = Uuid::new_v4().to_string();
   let new_window_builder = tauri::WebviewWindowBuilder::new(
     &app,
     window_label.clone(),
-    tauri::WebviewUrl::App(url.into()),
+    tauri::WebviewUrl::App(url.to_string().into()),
   )
   .additional_browser_args("--autoplay-policy=no-user-gesture-required")
   .fullscreen(false)
@@ -339,6 +341,7 @@ pub(crate) fn open_new_window(
     "window.tauri = {{ version: '{}' }};",
     env!("CARGO_PKG_VERSION")
   ))
+  .on_navigation(move |url| is_allowed_app_url(url, &base_url))
   .on_download(|window, event| {
     match event {
       #[allow(unused_variables)]
@@ -383,7 +386,7 @@ pub(crate) fn open_new_window(
   #[cfg(target_os = "macos")]
   let new_window_builder = new_window_builder.title("");
 
-  let window = new_window_builder.build()?;
+  let window = new_window_builder.build().map_err(|err| err.to_string())?;
 
   #[cfg(target_os = "macos")]
   if let Some(base_window) = app.get_window(&window_label) {
@@ -402,4 +405,14 @@ pub(crate) fn open_new_window(
   }
 
   Ok(window)
+}
+
+fn resolve_app_url(url: &str, base_url: &Url) -> Option<Url> {
+  let url = base_url.join(url).ok()?;
+
+  is_allowed_app_url(&url, base_url).then_some(url)
+}
+
+fn is_allowed_app_url(url: &Url, base_url: &Url) -> bool {
+  matches!(url.scheme(), "http" | "https") && url.origin() == base_url.origin()
 }
