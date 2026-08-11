@@ -170,7 +170,7 @@ export type LangFn = {
   isRtl?: boolean;
   rawCode: string;
   code: string;
-  languageInfo: ApiLanguage;
+  languageInfo?: ApiLanguage;
 };
 
 // Allow basic polyfill

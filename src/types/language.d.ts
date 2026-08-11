@@ -2157,6 +2157,7 @@ export interface LangPair {
   'SettingsBirthday': undefined;
   'PersonalChannelLabel': undefined;
   'PersonalChannelAdd': undefined;
+  'PersonalChannelAddHint': undefined;
   'PersonalChannelTitle': undefined;
   'PersonalChannelDescription': undefined;
   'PersonalChannelPickerTitle': undefined;
@@ -2287,6 +2288,16 @@ export interface LangPair {
   'PollModalSettingsTitle': undefined;
   'PollModalAddNoMore': undefined;
   'PollDurationOther': undefined;
+  'SettingsAccount': undefined;
+  'SettingsAccountDesc': undefined;
+  'SettingsGeneralDesc': undefined;
+  'SettingsNotificationsDesc': undefined;
+  'SettingsPrivacyDesc': undefined;
+  'SettingsDataDesc': undefined;
+  'SettingsFoldersDesc': undefined;
+  'SettingsPerformanceDesc': undefined;
+  'SettingsStickersDesc': undefined;
+  'SettingsSessionsDesc': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -2930,6 +2941,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   'StarsAmount': {
     'amount': V;
   };
+  'StarsAmountIconLast': {
+    'amount': V;
+  };
   'SendPaidReaction': {
     'amount': V;
   };
@@ -3403,6 +3417,9 @@ export interface LangPairWithVariables<V = LangVariable> {
     'duration': V;
   };
   'GramAmount': {
+    'amount': V;
+  };
+  'GramAmountIconLast': {
     'amount': V;
   };
   'ActionGiftCostCrypto': {
@@ -3992,6 +4009,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'UnofficialSecurityRisk': {
     'peer': V;
+  };
+  'SettingsLanguageDesc': {
+    'language': V;
   };
 }
 

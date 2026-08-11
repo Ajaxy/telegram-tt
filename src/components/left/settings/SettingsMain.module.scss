@@ -20,3 +20,12 @@
     margin-inline-end: calc(min(var(--scrollbar-width) - 1rem, 0px));
   }
 }
+
+.balanceStar {
+  font-size: 1.25em;
+  color: var(--color-stars);
+}
+
+.balanceGem.balanceGem {
+  font-size: 1em;
+}

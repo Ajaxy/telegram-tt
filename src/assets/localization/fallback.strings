@@ -1925,6 +1925,7 @@
 "ChatGroups_one" = "{count} group";
 "ChatGroups_other" = "{count} groups";
 "StarsAmount" = "⭐️{amount}";
+"StarsAmountIconLast" = "{amount}⭐️";
 "StarsAmountText_one" = "{amount} Star";
 "StarsAmountText_other" = "{amount} Stars";
 "AllGiftsCategory" = "All gifts";
@@ -2350,6 +2351,7 @@
 "ActionGiftStarsTitle_other" = "{amount} Stars";
 "ActionGiftStarsText" = "Use Stars to unlock content and services on Telegram.";
 "GramAmount" = "💎{amount}";
+"GramAmountIconLast" = "{amount}💎";
 "GramAmountText_one" = "{amount} Gram";
 "GramAmountText_other" = "{amount} Gram";
 "ActionGiftCostCrypto" = "{cryptoPrice} ({price})";
@@ -2936,6 +2938,7 @@
 "SettingsBirthday" = "Birthday";
 "PersonalChannelLabel" = "Channel";
 "PersonalChannelAdd" = "Add";
+"PersonalChannelAddHint" = "Add your channel";
 "PersonalChannelTitle" = "Personal Channel";
 "PersonalChannelDescription" = "Display the channel you manage in your profile.";
 "PersonalChannelPickerTitle" = "Select Channel";
@@ -3124,3 +3127,14 @@
 "PollModalAddMoreText_other" = "You can add {count} more options.";
 "PollModalAddNoMore" = "You have added the maximum number of options.";
 "PollDurationOther" = "Other";
+"SettingsAccount" = "Account";
+"SettingsAccountDesc" = "Username, Bio, Birthday";
+"SettingsGeneralDesc" = "Wallpaper, Theme, Keyboard";
+"SettingsNotificationsDesc" = "Sounds, Calls, Badges";
+"SettingsPrivacyDesc" = "Last Seen, Password, Blocked Users";
+"SettingsDataDesc" = "Media Download, Cache";
+"SettingsFoldersDesc" = "Sort chats into folders";
+"SettingsPerformanceDesc" = "Animations, Transitions, Autoplay";
+"SettingsStickersDesc" = "Stickers, Emoji, Reactions";
+"SettingsLanguageDesc" = "{language}, Translate Messages";
+"SettingsSessionsDesc" = "Sessions, Automatically terminate";

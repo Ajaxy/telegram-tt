@@ -342,7 +342,7 @@ function createTranslationFn(): LangFn {
   fn.number = (value: number) => formatters?.number.format(value) || String(value);
   fn.preciseNumber = (value: number) => formatters?.preciseNumber.format(value) || String(value);
   fn.internalFormatters = formatters!;
-  fn.languageInfo = language!;
+  fn.languageInfo = language;
   return fn;
 }
 

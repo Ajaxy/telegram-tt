@@ -1,29 +1,5 @@
-/* stylelint-disable-next-line @stylistic/max-line-length */
-$icons: "android", "apple", "brave", "chrome", "edge", "firefox", "linux", "opera", "safari", "samsung", "ubuntu", "unknown", "vivaldi", "windows", "xbox";
-
-@mixin device-icon($icon-name) {
-  .icon-device-#{$icon-name} {
-    background-image: url("../../../assets/devices/#{$icon-name}.svg");
-  }
-}
-
 .SettingsActiveSessions {
-  .icon-device {
-    flex: 0 0 2rem;
-
-    width: 2rem;
-    height: 2rem;
-    margin-inline-end: 1.25rem !important;
-
-    background-repeat: no-repeat;
-    background-size: 2rem;
-  }
-
   .icon-stop {
     margin-inline: 0.25rem 1.5rem !important;
-  }
-
-  @each $icon in $icons {
-    @include device-icon($icon);
   }
 }

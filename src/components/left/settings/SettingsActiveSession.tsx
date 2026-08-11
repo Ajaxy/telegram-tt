@@ -4,13 +4,13 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiSession } from '../../../api/types';
 
-import buildClassName from '../../../util/buildClassName';
 import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
-import getSessionIcon from './helpers/getSessionIcon';
+import getSessionIcon, { DEVICE_BACKDROP } from './helpers/getSessionIcon';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 
+import IconBackdrop from '../../gili/primitives/IconBackdrop';
 import Switch from '../../gili/primitives/Switch';
 import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
@@ -75,6 +75,8 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
     );
   }
 
+  const { icon, color } = DEVICE_BACKDROP[getSessionIcon(renderingSession)];
+
   return (
     <Modal
       header={renderHeader()}
@@ -83,10 +85,10 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
       onClose={onClose}
       className={styles.SettingsActiveSession}
     >
-      <div className={buildClassName(
-        styles.iconDevice,
-        renderingSession && styles[`iconDevice__${getSessionIcon(renderingSession)}`],
-      )}
+      <IconBackdrop
+        className={styles.iconDevice}
+        color={color}
+        icon={icon}
       />
       <h3 className={styles.title} dir="auto">{renderingSession?.deviceModel}</h3>
       <div className={styles.date} aria-label={lang('PrivacySettingsLastSeen')}>

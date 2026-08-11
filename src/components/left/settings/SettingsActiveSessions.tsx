@@ -8,7 +8,7 @@ import type { ApiSession } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 
 import { formatPastTimeShort } from '../../../util/dates/oldDateFormat';
-import getSessionIcon from './helpers/getSessionIcon';
+import getSessionIcon, { DEVICE_BACKDROP } from './helpers/getSessionIcon';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -141,13 +141,20 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   });
 
   function renderCurrentSession(session: ApiSession) {
+    const { icon, color } = DEVICE_BACKDROP[getSessionIcon(session)];
+
     return (
       <>
         <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('AuthSessionsCurrentSession')}
         </IslandTitle>
         <Island>
-          <ListItem narrow inactive icon={`device-${getSessionIcon(session)}`} iconClassName="icon-device">
+          <ListItem
+            narrow
+            inactive
+            icon={icon}
+            iconBg={color}
+          >
             <div className="multiline-item full-size" dir="auto">
               <span className="title" dir="auto">{session.deviceModel}</span>
               <span className="subtitle black tight">
@@ -220,6 +227,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
 
   function renderSession(sessionHash: string) {
     const session = byHash[sessionHash];
+    const { icon, color } = DEVICE_BACKDROP[getSessionIcon(session)];
 
     return (
       <ListItem
@@ -234,8 +242,8 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
             handleTerminateSessionClick(session.hash);
           },
         }]}
-        icon={`device-${getSessionIcon(session)}`}
-        iconClassName="icon-device"
+        icon={icon}
+        iconBg={color}
         onClick={() => { handleOpenSessionModal(session.hash); }}
       >
         <div className="multiline-item full-size" dir="auto">

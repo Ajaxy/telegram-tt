@@ -171,7 +171,8 @@ const UserBirthday = ({
   return (
     <div className={styles.root}>
       <ListItem
-        icon="calendar"
+        icon={isInSettings ? 'birthday-filled' : 'calendar'}
+        iconBg={isInSettings ? 'purple' : undefined}
         secondaryIcon={canGiftPremium ? 'gift' : undefined}
         secondaryIconClassName={styles.giftIcon}
         multiline

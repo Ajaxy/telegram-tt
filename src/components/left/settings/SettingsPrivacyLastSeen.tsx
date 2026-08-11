@@ -9,7 +9,6 @@ import renderText from '../../common/helpers/renderText';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import StarIcon from '../../common/icons/StarIcon';
 import Island, { IslandDescription } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
@@ -58,7 +57,8 @@ const SettingsPrivacyLastSeen = ({
       )}
       <Island>
         <ListItem
-          leftElement={<StarIcon className="icon ListItem-main-icon" type="premium" size="big" />}
+          icon="premium-filled"
+          iconBg="premium"
           onClick={handleOpenPremiumModal}
         >
           {isCurrentUserPremium ? lang('PrivacyLastSeenPremiumForPremium') : lang('PrivacyLastSeenPremium')}

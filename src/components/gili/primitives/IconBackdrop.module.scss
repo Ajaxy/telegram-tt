@@ -1,0 +1,71 @@
+@layer ui.layout {
+  .root {
+    isolation: isolate;
+    position: relative;
+
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+
+    width: var(--icon-backdrop-size, 1.875rem);
+    height: var(--icon-backdrop-size, 1.875rem);
+    border-radius: var(--icon-backdrop-radius, 0.625rem);
+
+    background-color: var(--color-icon-backdrop);
+
+    &::after {
+      pointer-events: none;
+      content: "";
+
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+
+      border-radius: inherit;
+
+      background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 100%);
+      mix-blend-mode: plus-lighter;
+    }
+  }
+
+  .icon {
+    font-size: var(--icon-backdrop-icon-size, 1.5rem);
+    color: var(--color-white);
+  }
+
+  .blue {
+    --color-icon-backdrop: #2196f3;
+  }
+
+  .gray {
+    --color-icon-backdrop: #78909c;
+  }
+
+  .green {
+    --color-icon-backdrop: #4caf50;
+  }
+
+  .orange {
+    --color-icon-backdrop: #fb8c00;
+  }
+
+  .pink {
+    --color-icon-backdrop: #e91e63;
+  }
+
+  .purple {
+    --color-icon-backdrop: #7e57c2;
+  }
+
+  /* Telegram Premium keeps the purple accent as its base and paints the brand gradient over it */
+  .premium {
+    --color-icon-backdrop: #7e57c2;
+
+    background-image: linear-gradient(45deg, #6b93ff 0%, #976fff 43.906%, #e46ace 100%);
+  }
+
+  .red {
+    --color-icon-backdrop: #f44336;
+  }
+}

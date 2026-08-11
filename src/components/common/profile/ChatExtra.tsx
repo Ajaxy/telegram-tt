@@ -376,9 +376,13 @@ const ChatExtra = ({
         })
       : undefined;
 
+    const isSettingsUsername = Boolean(isInSettings) && !isChat;
+    const plainIcon = isChat ? 'link' : 'mention';
+
     return (
       <ListItem
-        icon={isChat ? 'link' : 'mention'}
+        icon={isSettingsUsername ? 'mention-filled' : plainIcon}
+        iconBg={isSettingsUsername ? 'blue' : undefined}
         multiline
         narrow
         ripple
@@ -439,7 +443,8 @@ const ChatExtra = ({
       <Island>
         {Boolean(formattedNumber?.length) && (
           <ListItem
-            icon="phone"
+            icon={isInSettings ? 'phone-filled' : 'phone'}
+            iconBg={isInSettings ? 'green' : undefined}
             className={styles.phone}
             multiline
             narrow
@@ -454,7 +459,8 @@ const ChatExtra = ({
         {activeUsernames && renderUsernames(activeUsernames)}
         {description && Boolean(description.length) && (
           <ListItem
-            icon="info"
+            icon={isInSettings ? 'bio-filled' : 'info'}
+            iconBg={isInSettings ? 'gray' : undefined}
             className={styles.description}
             multiline
             narrow

@@ -378,7 +378,8 @@ const SettingsEditProfile = ({
 
         <Island>
           <ListItem
-            icon="gift"
+            icon="birthday-filled"
+            iconBg="purple"
             narrow
             rightElement={formattedBirthday ?
               <span className="settings-birthday-date">{formattedBirthday}</span>
@@ -433,9 +434,6 @@ const SettingsEditProfile = ({
           />
         )}
 
-        <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
-          {lang('PersonalChannelTitle')}
-        </IslandTitle>
         <Island>
           {personalChannel ? (
             <div className={styles.personalChannelItem} onClick={handlePersonalChannelPickerOpen}>
@@ -451,17 +449,15 @@ const SettingsEditProfile = ({
             </div>
           ) : (
             <ListItem
-              icon="channel"
+              icon="megaphone-filled"
+              iconBg="orange"
+              multiline
               narrow
-              rightElement={(
-                <span className="color-primary">
-                  {lang('PersonalChannelAdd')}
-                </span>
-              )}
               disabled={personalChannelIds === undefined}
               onClick={handlePersonalChannelPickerOpen}
             >
-              <span className="flex-grow">{lang('PersonalChannelLabel')}</span>
+              <span className="title">{lang('PersonalChannelTitle')}</span>
+              <span className="subtitle">{lang('PersonalChannelAddHint')}</span>
             </ListItem>
           )}
         </Island>

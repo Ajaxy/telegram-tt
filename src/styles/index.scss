@@ -405,6 +405,11 @@ body:not(.is-ios) {
   vertical-align: bottom;
 }
 
+/* Doubled to outweigh the symmetric margin icon components set on themselves for the leading layout */
+.in-text-icon-last.in-text-icon-last {
+  margin-inline: 0.25rem 0;
+}
+
 .link-arrow-icon {
   font-size: var(--next-arrow-size, 0.5625em);
   font-weight: var(--next-arrow-weight, inherit);

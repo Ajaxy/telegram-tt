@@ -199,7 +199,8 @@ const SettingsPrivacy = ({
     <div className="settings-content custom-scroll">
       <Island>
         <ListItem
-          icon="delete-user"
+          icon="block-filled"
+          iconBg="red"
           narrow
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyBlockedUsers })}
         >
@@ -208,7 +209,8 @@ const SettingsPrivacy = ({
         </ListItem>
         {canSetPasscode && (
           <ListItem
-            icon="lock"
+            icon="lock-filled"
+            iconBg="blue"
             narrow
             onClick={() => openSettingsScreen({
               screen: hasPasscode ? SettingsScreens.PasscodeEnabled : SettingsScreens.PasscodeDisabled,
@@ -223,7 +225,8 @@ const SettingsPrivacy = ({
           </ListItem>
         )}
         <ListItem
-          icon="admin"
+          icon="2fa-filled"
+          iconBg="green"
           narrow
           onClick={() => openSettingsScreen({
             screen: hasPassword ? SettingsScreens.TwoFaEnabled : SettingsScreens.TwoFaDisabled,
@@ -238,7 +241,8 @@ const SettingsPrivacy = ({
         </ListItem>
         {arePasskeysAvailable && (
           <ListItem
-            icon="key"
+            icon="key-filled"
+            iconBg="gray"
             narrow
             onClick={handleOpenPasskeys}
           >
@@ -253,7 +257,8 @@ const SettingsPrivacy = ({
         )}
         {webAuthCount > 0 && (
           <ListItem
-            icon="web"
+            icon="web-filled"
+            iconBg="purple"
             narrow
             onClick={() => openSettingsScreen({ screen: SettingsScreens.ActiveWebsites })}
           >

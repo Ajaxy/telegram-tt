@@ -1,12 +1,3 @@
-/* stylelint-disable-next-line @stylistic/max-line-length */
-$icons: "android", "apple", "brave", "chrome", "edge", "firefox", "linux", "opera", "safari", "samsung", "ubuntu", "unknown", "vivaldi", "windows", "xbox";
-
-@mixin device-icon($icon-name) {
-  .iconDevice__#{$icon-name} {
-    background-image: url("../../../assets/devices/#{$icon-name}.svg");
-  }
-}
-
 .SettingsActiveSession {
   :global(.modal-dialog) {
     max-width: 28rem;
@@ -14,16 +5,11 @@ $icons: "android", "apple", "brave", "chrome", "edge", "firefox", "linux", "oper
 }
 
 .iconDevice {
-  width: 5rem;
-  height: 5rem;
+  --icon-backdrop-size: 5rem;
+  --icon-backdrop-radius: 1.6875rem;
+  --icon-backdrop-icon-size: 4rem;
+
   margin: 0 auto 1rem;
-
-  background-repeat: no-repeat;
-  background-size: 5rem;
-}
-
-@each $icon in $icons {
-  @include device-icon($icon);
 }
 
 .title {

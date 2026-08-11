@@ -34,17 +34,24 @@ export function formatTonAsIcon(
     withWrapper?: boolean;
     shouldConvertFromNanos?: boolean;
     isMono?: boolean;
+    withIconLast?: boolean;
   }) {
   const {
-    className, containerClassName, withWrapper, shouldConvertFromNanos, isMono,
+    className, containerClassName, withWrapper, shouldConvertFromNanos, isMono, withIconLast,
   } = options || {};
   const formattedAmount = shouldConvertFromNanos ? convertTonFromNanos(Number(amount)) : amount;
-  const icon = <GramIcon isMono={isMono} className={buildClassName('in-text-icon', className)} />;
+  const icon = (
+    <GramIcon
+      isMono={isMono}
+      className={buildClassName('in-text-icon', withIconLast && 'in-text-icon-last', className)}
+    />
+  );
+  const key = withIconLast ? 'GramAmountIconLast' : 'GramAmount';
 
   if (containerClassName || withWrapper) {
     return (
       <span className={containerClassName}>
-        {lang('GramAmount', { amount: formattedAmount }, {
+        {lang(key, { amount: formattedAmount }, {
           withNodes: true,
           specialReplacement: {
             '💎': icon,
@@ -54,7 +61,7 @@ export function formatTonAsIcon(
     );
   }
 
-  return lang('GramAmount', { amount: formattedAmount }, {
+  return lang(key, { amount: formattedAmount }, {
     withNodes: true,
     specialReplacement: {
       '💎': icon,
@@ -67,16 +74,19 @@ export function formatStarsAsIcon(lang: LangFn, amount: number | string, options
   className?: string;
   containerClassName?: string;
   withWrapper?: boolean;
+  withIconLast?: boolean;
 }) {
-  const { asFont, className, containerClassName, withWrapper } = options || {};
+  const { asFont, className, containerClassName, withWrapper, withIconLast } = options || {};
+  const iconClassName = buildClassName(withIconLast && 'in-text-icon-last', className);
   const icon = asFont
-    ? <Icon name="star" className={buildClassName('in-text-icon', className)} />
-    : <StarIcon type="gold" className={className} size="adaptive" />;
+    ? <Icon name="star" className={buildClassName('in-text-icon', iconClassName)} />
+    : <StarIcon type="gold" className={iconClassName} size="adaptive" />;
+  const key = withIconLast ? 'StarsAmountIconLast' : 'StarsAmount';
 
   if (containerClassName || withWrapper) {
     return (
       <span className={containerClassName}>
-        {lang('StarsAmount', { amount }, {
+        {lang(key, { amount }, {
           withNodes: true,
           specialReplacement: {
             [STARS_ICON_PLACEHOLDER]: icon,
@@ -86,7 +96,7 @@ export function formatStarsAsIcon(lang: LangFn, amount: number | string, options
     );
   }
 
-  return lang('StarsAmount', { amount }, {
+  return lang(key, { amount }, {
     withNodes: true,
     specialReplacement: {
       [STARS_ICON_PLACEHOLDER]: icon,
