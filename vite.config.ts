@@ -7,7 +7,7 @@ import { defineConfig, loadEnv, normalizePath, type Plugin, type PluginOption, t
 import { type Target, viteStaticCopy } from 'vite-plugin-static-copy';
 import { watchAndRun } from 'vite-plugin-watch-and-run';
 
-import buildGitInfoPlugin from './plugins/gitInfo';
+import buildGitInfoPlugin from './plugins/gitInfo.ts';
 import packageJson from './package.json' with { type: 'json' };
 
 const DIR_NAME = dirname(fileURLToPath(import.meta.url));
@@ -66,6 +66,7 @@ type ReportOutputBundle = Record<string, unknown>;
 
 export default defineConfig(({ mode }): UserConfig => {
   const env = loadEnv(mode, process.cwd(), '');
+  setViteEnv(env);
   const {
     HEAD = '',
     BUNDLE_STATS: bundleStatsValue = '',
@@ -221,16 +222,6 @@ export default defineConfig(({ mode }): UserConfig => {
     build: {
       sourcemap: true,
       assetsInlineLimit: (filePath) => (IMAGE_ASSET_RE.test(filePath) ? false : undefined),
-      rolldownOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('/src/components/ui/') && !id.includes('/src/components/ui/textInput/')) {
-              return 'shared-components';
-            }
-            return undefined;
-          },
-        },
-      },
     },
     worker: {
       plugins: shouldCollectWorkerReportBundles ? () => [

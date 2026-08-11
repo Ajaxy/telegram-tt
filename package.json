@@ -102,10 +102,10 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.62.0",
     "user-agent-data-types": "^0.4.3",
-    "vite": "^8.1.0",
+    "vite": "^8.2.0",
     "vite-plugin-static-copy": "^4.1.1",
     "vite-plugin-watch-and-run": "1.7.5",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "@cryptography/aes": "^0.1.1",
