@@ -15,7 +15,7 @@ import { toSignedLittleBuffer } from '../Helpers';
 // eslint-disable-next-line no-restricted-globals
 const CACHING_SUPPORTED = typeof self !== 'undefined' && self.localStorage !== undefined;
 
-const CACHE_KEY = 'GramJs:apiCache';
+const CACHE_KEY = 'GramJs:apiCache:2';
 
 const BOOL_TRUE = bufferFromHex('b5757299');
 const BOOL_FALSE = bufferFromHex('379779bc');
@@ -121,7 +121,9 @@ function argToBytes(x: any, type: string) {
     }
 }
 
-function getArgFromReader(reader: BinaryReader, arg: GenerationArgConfig): any {
+function getArgFromReader(
+    reader: BinaryReader, arg: GenerationArgConfig, classes: Record<string, any>,
+): any {
     if (arg.isVector) {
         if (arg.useVectorId) {
             reader.readInt();
@@ -130,7 +132,7 @@ function getArgFromReader(reader: BinaryReader, arg: GenerationArgConfig): any {
         const len = reader.readInt();
         arg.isVector = false;
         for (let i = 0; i < len; i++) {
-            temp.push(getArgFromReader(reader, arg));
+            temp.push(getArgFromReader(reader, arg, classes));
         }
         arg.isVector = true;
         return temp;
@@ -159,13 +161,16 @@ function getArgFromReader(reader: BinaryReader, arg: GenerationArgConfig): any {
             case 'date':
                 return reader.tgReadDate();
             default:
-                if (!arg.skipConstructorId) {
-                    return reader.tgReadObject();
-                } else {
-                    throw new Error(`Unknown type ${arg}`);
-                }
+                return arg.isBareType
+                    ? classes[arg.type].fromReader(reader)
+                    : reader.tgReadObject();
         }
     }
+}
+
+function serializeArg(value: any, arg: GenerationArgConfig) {
+    const bytes = argToBytes(value, arg.type);
+    return arg.isBareType && typeof value?.getBytes === 'function' ? bytes.subarray(4) : bytes;
 }
 
 function createClasses(classesType: 'constructor' | 'request', params: GenerationEntryConfig[]) {
@@ -221,9 +226,9 @@ function createClasses(classesType: 'constructor' | 'request', params: Generatio
                                 continue;
                             }
 
-                            args[argName] = flagValue ? getArgFromReader(reader, arg) : undefined;
+                            args[argName] = flagValue ? getArgFromReader(reader, arg, classes) : undefined;
                         } else {
-                            args[argName] = getArgFromReader(reader, arg);
+                            args[argName] = getArgFromReader(reader, arg, classes);
                         }
                     }
                 }
@@ -251,7 +256,7 @@ function createClasses(classesType: 'constructor' | 'request', params: Generatio
                             const l = new Uint8Array(4);
                             writeInt32LE(l, (this as UnsaveVirtualClass)[arg].length);
                             buffers.push(l, concat(...(this as UnsaveVirtualClass)[arg].map((x: any) => (
-                                argToBytes(x, argsConfig[arg].type)
+                                serializeArg(x, argsConfig[arg])
                             ))));
                         } else if (argsConfig[arg].flagIndicator) {
                             if (!Object.values(argsConfig)
@@ -274,16 +279,7 @@ function createClasses(classesType: 'constructor' | 'request', params: Generatio
                                 buffers.push(f);
                             }
                         } else {
-                            buffers.push(argToBytes((this as UnsaveVirtualClass)[arg], argsConfig[arg].type));
-
-                            if ((this as UnsaveVirtualClass)[arg]
-                                && typeof (this as UnsaveVirtualClass)[arg].getBytes === 'function') {
-                                const firstChar = (argsConfig[arg].type.charAt(argsConfig[arg].type.indexOf('.') + 1));
-                                const boxed = firstChar === firstChar.toUpperCase();
-                                if (!boxed) {
-                                    buffers.shift();
-                                }
-                            }
+                            buffers.push(serializeArg((this as UnsaveVirtualClass)[arg], argsConfig[arg]));
                         }
                     }
                 }

@@ -113,9 +113,11 @@ export default class MessagePacker {
       if (state.after) {
         afterId = state.after.msgId;
       }
-      state.msgId = this._state.writeDataAsMessage(
-        buffer, state.data, state.request.classType === 'request', afterId,
+      const { msgId, seqNo } = this._state.writeDataAsMessage(
+        buffer, state.data, state.isContentRelated, afterId,
       );
+      state.msgId = msgId;
+      state.seqNo = seqNo;
       this._log.debug(`Assigned msgId = ${state.msgId.toString()} to ${state.request.className
       || state.request.constructor.name}`);
 
@@ -159,15 +161,19 @@ export default class MessagePacker {
         continue;
       }
 
+      state.containerId = undefined;
+      state.containerSeqNo = undefined;
       size += state.data.length + TLMessage.SIZE_OVERHEAD;
       if (size <= MessageContainer.MAXIMUM_SIZE) {
         let afterId;
         if (state.after) {
           afterId = state.after.msgId;
         }
-        state.msgId = this._state.writeDataAsMessage(
-          buffer, state.data, state.request.classType === 'request', afterId,
+        const { msgId, seqNo } = this._state.writeDataAsMessage(
+          buffer, state.data, state.isContentRelated, afterId,
         );
+        state.msgId = msgId;
+        state.seqNo = seqNo;
         this._log.debug(`Assigned msgId = ${state.msgId.toString()} to ${state.request.className
         || state.request.constructor.name}`);
         batch.push(state);
@@ -193,11 +199,12 @@ export default class MessagePacker {
       writeInt32LE(b, batch.length, 4);
       data = concat(b, buffer.getValue());
       buffer = new BinaryWriter(new Uint8Array(0));
-      const containerId = this._state.writeDataAsMessage(
+      const { msgId: containerId, seqNo: containerSeqNo } = this._state.writeDataAsMessage(
         buffer, data, false,
       );
       for (const s of batch) {
         s.containerId = containerId;
+        s.containerSeqNo = containerSeqNo;
       }
     }
 

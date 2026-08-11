@@ -1,6 +1,11 @@
-import type { BinaryReader } from '../../extensions';
+import { BinaryReader } from '../../extensions';
+import { SecurityError } from '../../errors/Common';
 
 import TLMessage from './TLMessage';
+
+const MAX_INCOMING_MESSAGES = 1024;
+const INNER_MESSAGE_HEADER_LENGTH = 16;
+const TL_ALIGNMENT = 4;
 
 export default class MessageContainer {
     static CONSTRUCTOR_ID = 0x73f1f8dc;
@@ -24,28 +29,58 @@ export default class MessageContainer {
 
     private CONSTRUCTOR_ID: number;
 
-    private messages: any[];
+    messages: TLMessage[];
 
     private classType: string;
 
-    constructor(messages: any[]) {
+    constructor(messages: TLMessage[]) {
         this.CONSTRUCTOR_ID = 0x73f1f8dc;
         this.messages = messages;
         this.classType = 'constructor';
     }
 
-    static fromReader(reader: BinaryReader) {
-        const messages = [];
-        const totalLength = reader.readInt();
-        for (let x = 0; x < totalLength; x++) {
+    static async fromReader(reader: BinaryReader) {
+        return MessageContainer.readFrom(reader);
+    }
+
+    static readFrom(reader: BinaryReader) {
+        const messages: TLMessage[] = [];
+        const messageCount = reader.readInt();
+        const containerLength = reader.getBuffer().length;
+
+        // https://core.telegram.org/mtproto/service_messages#simple-container
+        if (messageCount < 0 || messageCount > MAX_INCOMING_MESSAGES) {
+            throw new SecurityError('Server sent an invalid message container count');
+        }
+
+        for (let index = 0; index < messageCount; index++) {
+            const remainingLength = containerLength - reader.tellPosition();
+            if (remainingLength < INNER_MESSAGE_HEADER_LENGTH) {
+                throw new SecurityError('Server sent a truncated inner message header');
+            }
+
             const msgId = reader.readLong();
             const seqNo = reader.readInt();
-            const length = reader.readInt();
-            const before = reader.tellPosition();
-            const obj = reader.tgReadObject();
-            reader.setPosition(before + length);
-            const tlMessage = new TLMessage(msgId, seqNo, obj);
-            messages.push(tlMessage);
+            const messageBodyLength = reader.readInt();
+            const remainingBodyLength = containerLength - reader.tellPosition();
+            if (messageBodyLength < TL_ALIGNMENT || messageBodyLength % TL_ALIGNMENT !== 0
+                || messageBodyLength > remainingBodyLength) {
+                throw new SecurityError('Server sent an invalid inner message length');
+            }
+
+            const messageReader = reader.createSubReader(messageBodyLength);
+            const constructorId = messageReader.readInt(false);
+            if (constructorId === MessageContainer.CONSTRUCTOR_ID) {
+                throw new SecurityError('Server sent a nested message container');
+            }
+
+            messageReader.setPosition(0);
+            const obj = messageReader.tgReadObject();
+            if (messageReader.tellPosition() !== messageBodyLength) {
+                throw new SecurityError('Server sent trailing inner message body data');
+            }
+
+            messages.push(new TLMessage(msgId, seqNo, obj));
         }
         return new MessageContainer(messages);
     }

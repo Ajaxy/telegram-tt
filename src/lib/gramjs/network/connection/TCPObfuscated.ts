@@ -7,6 +7,17 @@ import { generateRandomBytes } from '../../Helpers';
 import { ObfuscatedConnection } from './Connection';
 import { AbridgedPacketCodec } from './TCPAbridged';
 
+const FORBIDDEN_OBFUSCATED_PREFIXES = [
+  bufferFromHex('48454144'),
+  bufferFromHex('504f5354'),
+  bufferFromHex('47455420'),
+  bufferFromHex('4f505449'),
+  bufferFromHex('16030102'),
+  bufferFromHex('dddddddd'),
+  bufferFromHex('eeeeeeee'),
+];
+const ZERO_INT = new Uint8Array(4);
+
 class ObfuscatedIO {
   header?: Uint8Array = undefined;
 
@@ -26,28 +37,22 @@ class ObfuscatedIO {
   }
 
   initHeader(packetCodec: typeof AbridgedPacketCodec) {
-    // Obfuscated messages secrets cannot start with any of these
-    const keywords = [
-      bufferFromHex('50567247'),
-      bufferFromHex('474554'),
-      bufferFromHex('504f5354'),
-      bufferFromHex('eeeeeeee'),
-    ];
+    // Prevent the random prefix from being detected as another accepted transport
+    // https://core.telegram.org/mtproto/mtproto-transports#transport-obfuscation
     let random;
 
     while (true) {
       random = generateRandomBytes(64);
-      if (random[0] !== 0xef && !(buffersEqual(random.slice(4, 8), new Uint8Array(4)))) {
-        let ok = true;
-        for (const key of keywords) {
-          if (buffersEqual(key, random.slice(0, 4))) {
-            ok = false;
-            break;
-          }
-        }
-        if (ok) {
-          break;
-        }
+      const firstInt = random.slice(0, 4);
+      const hasForbiddenPrefix = FORBIDDEN_OBFUSCATED_PREFIXES.some(
+        (prefix) => buffersEqual(prefix, firstInt),
+      );
+      if (
+        random[0] !== 0xef
+        && !hasForbiddenPrefix
+        && !buffersEqual(random.slice(4, 8), ZERO_INT)
+      ) {
+        break;
       }
     }
 

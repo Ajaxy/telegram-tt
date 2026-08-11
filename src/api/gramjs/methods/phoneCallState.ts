@@ -14,7 +14,7 @@ import {
 } from '../../../lib/gramjs/Helpers';
 
 import {
-  bufferFromUtf8, buffersEqual, bufferToUtf8, compareBuffersConstantTime, concat, readUint32BE, writeUint32BE,
+  bufferFromUtf8, bufferToUtf8, compareBuffersConstantTime, concat, readUint32BE, writeUint32BE,
 } from '../../../util/encoding/buffer';
 import { isSctpPacket, SctpSignaling } from './sctpSignaling';
 
@@ -360,7 +360,7 @@ async function validateGAHash(gA: Uint8Array, expectedHash: number[]) {
   }
 
   const actualHash = await sha256(gA);
-  if (!buffersEqual(actualHash, Uint8Array.from(expectedHash))) {
+  if (!compareBuffersConstantTime(actualHash, Uint8Array.from(expectedHash))) {
     throw new SecurityError('Phone call gA hash mismatch');
   }
 }

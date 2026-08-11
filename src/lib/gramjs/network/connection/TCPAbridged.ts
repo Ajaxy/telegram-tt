@@ -1,9 +1,13 @@
 import type { PromisedWebSockets } from '../../extensions';
 
 import { bufferFromHex, concat, readUint32LE } from '../../../../util/encoding/buffer';
+import { SecurityError } from '../../errors';
 
 import { readBufferFromBigInt } from '../../Helpers';
 import { Connection, PacketCodec } from './Connection';
+
+const TL_ALIGNMENT = 4;
+const MAX_ABRIDGED_PACKET_LENGTH = 0xFFFFFF * TL_ALIGNMENT;
 
 export class AbridgedPacketCodec extends PacketCodec {
   static tag = bufferFromHex('ef');
@@ -21,6 +25,14 @@ export class AbridgedPacketCodec extends PacketCodec {
   }
 
   encodePacket(data: Uint8Array) {
+    if (
+      !data.length
+      || data.length % TL_ALIGNMENT !== 0
+      || data.length > MAX_ABRIDGED_PACKET_LENGTH
+    ) {
+      throw new SecurityError('Invalid abridged packet length');
+    }
+
     const length = data.length >> 2;
     let temp;
     if (length < 127) {
@@ -40,7 +52,14 @@ export class AbridgedPacketCodec extends PacketCodec {
       length = readUint32LE(lengthBytes);
     }
 
-    return reader.read(length << 2);
+    const packetLength = length * TL_ALIGNMENT;
+    // The three-byte word count bounds allocation before the payload is read
+    // https://core.telegram.org/mtproto/mtproto-transports#abridged
+    if (!packetLength || packetLength > MAX_ABRIDGED_PACKET_LENGTH) {
+      throw new SecurityError('Invalid abridged packet length');
+    }
+
+    return reader.read(packetLength);
   }
 }
 

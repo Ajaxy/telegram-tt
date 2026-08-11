@@ -14,7 +14,7 @@ export interface GenerationEntryConfig {
 export interface GenerationArgConfig {
     isVector: boolean;
     isFlag: boolean;
-    skipConstructorId: boolean;
+    isBareType: boolean;
     flagGroup: number;
     flagIndex: number;
     flagIndicator: boolean;
@@ -40,18 +40,8 @@ const CORE_TYPES = new Set([
     0xc4b9f9bb, // error#c4b9f9bb code:int text:string = Error;
     0x56730bcc, // null#56730bcc = Null;
 ]);
-const AUTH_KEY_TYPES = new Set([
-    0x05162463, // resPQ,
-    0x83c95aec, // p_q_inner_data
-    0xa9f55f95, // p_q_inner_data_dc
-    0x3c6a84d4, // p_q_inner_data_temp
-    0x56fddf88, // p_q_inner_data_temp_dc
-    0xd0e8075c, // server_DH_params_ok
-    0xb5890dba, // server_DH_inner_data
-    0x6643b654, // client_DH_inner_data
-    0xd712e4be, // req_DH_params
-    0xf5045f1f, // set_client_DH_params
-    0x3072cfa1, // gzip_packed
+const PRIMITIVE_TYPES = new Set([
+    'int', 'long', 'int128', 'int256', 'double', 'string', 'bytes', 'date', 'true',
 ]);
 
 const findAll = (regex: RegExp, str: string, matches: string[][] = []) => {
@@ -138,7 +128,7 @@ function buildArgConfig(name: string, argType: string) {
     const currentConfig: GenerationArgConfig = {
         isVector: false,
         isFlag: false,
-        skipConstructorId: false,
+        isBareType: false,
         flagGroup: 0,
         flagIndex: -1,
         flagIndicator: true,
@@ -186,7 +176,10 @@ function buildArgConfig(name: string, argType: string) {
             .pop()!
             .charAt(0))
         ) {
-            currentConfig.skipConstructorId = true;
+            currentConfig.isBareType = true;
+            if (!PRIMITIVE_TYPES.has(currentConfig.type)) {
+                currentConfig.type = snakeToCamelCase(currentConfig.type);
+            }
         }
 
         // The name may contain "date" in it, if this is the case and
@@ -259,19 +252,6 @@ export function* parseTl(content: string, methods: any[] = [], ignoreIds = CORE_
             if (!e.toString()
                 .includes('vector#1cb5c415')) {
                 throw e;
-            }
-        }
-    }
-
-    // Once all objects have been parsed, replace the
-    // string type from the arguments with references
-    for (const obj of objAll) {
-        // console.log(obj)
-        if (AUTH_KEY_TYPES.has(obj.constructorId)) {
-            for (const arg in obj.argsConfig) {
-                if (obj.argsConfig[arg].type === 'string') {
-                    obj.argsConfig[arg].type = 'bytes';
-                }
             }
         }
     }

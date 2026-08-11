@@ -13,6 +13,10 @@ import { InvalidBufferError } from '../errors/Common';
 import { toSignedLittleBuffer } from '../Helpers';
 import MTProtoState from './MTProtoState';
 
+const MAX_PLAIN_MESSAGE_BODY_LENGTH = 64 * 1024;
+const PLAIN_MESSAGE_HEADER_LENGTH = 20;
+const TL_ALIGNMENT = 4;
+
 /**
  * MTProto Mobile Protocol plain sender (https://core.telegram.org/mtproto/description#unencrypted-messages)
  */
@@ -47,7 +51,10 @@ export default class MTProtoPlainSender {
 
     await this._connection.send(res);
     body = new Uint8Array(await this._connection.recv());
-    if (body.length < 8) {
+    if (
+      body.length < PLAIN_MESSAGE_HEADER_LENGTH
+      || body.length > PLAIN_MESSAGE_HEADER_LENGTH + MAX_PLAIN_MESSAGE_BODY_LENGTH
+    ) {
       throw new InvalidBufferError(body);
     }
     const reader = new BinaryReader(body);
@@ -66,14 +73,21 @@ export default class MTProtoPlainSender {
          */
 
     const length = reader.readInt();
-    if (length <= 0) {
+    // Plain auth responses must exactly match their declared aligned body
+    // https://core.telegram.org/mtproto/description#unencrypted-messages
+    if (
+      length <= 0
+      || length % TL_ALIGNMENT !== 0
+      || length > MAX_PLAIN_MESSAGE_BODY_LENGTH
+      || body.length !== PLAIN_MESSAGE_HEADER_LENGTH + length
+    ) {
       throw new Error('Bad length');
     }
-    /**
-         * We could read length bytes and use those in a new reader to read
-         * the next TLObject without including the padding, but since the
-         * reader isn't used for anything else after this, it's unnecessary.
-         */
-    return reader.tgReadObject();
+
+    const messageReader = new BinaryReader(reader.read(length));
+    const response = messageReader.tgReadObject();
+    if (messageReader.tellPosition() !== length) throw new Error('Bad length');
+
+    return response;
   }
 }

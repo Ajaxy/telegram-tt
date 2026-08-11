@@ -114,10 +114,10 @@ ${indent}}`.trim();
 
     function renderArg(argName: string, argConfig: GenerationArgConfig) {
         const {
-            isVector, isFlag, skipConstructorId, type,
+            isVector, isFlag, isBareType, type,
         } = argConfig;
 
-        const valueType = renderValueType(type, isVector, !skipConstructorId);
+        const valueType = renderValueType(type, isVector, !isBareType);
 
         return `${isFlagArg(argName) ? '// ' : ''}${argName}${isFlag ? '?' : ''}: ${valueType}`;
     }

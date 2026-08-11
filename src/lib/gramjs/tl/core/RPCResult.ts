@@ -31,7 +31,7 @@ export default class RPCResult {
         this.classType = 'constructor';
     }
 
-    static async fromReader(reader: BinaryReader) {
+    static fromReader(reader: BinaryReader) {
         const msgId = reader.readLong();
         const innerCode = reader.readInt(false);
         if (innerCode === Api.RpcError.CONSTRUCTOR_ID) {
@@ -44,7 +44,7 @@ export default class RPCResult {
         if (innerCode === GZIPPacked.CONSTRUCTOR_ID) {
             return new RPCResult(
                 msgId,
-                (await GZIPPacked.fromReader(reader)).data,
+                GZIPPacked.fromReader(reader).data,
             );
         }
         reader.seek(-4);

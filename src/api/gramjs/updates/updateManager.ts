@@ -1,6 +1,8 @@
 import { Api as GramJs, type Update } from '../../../lib/gramjs';
 import { RPCError } from '../../../lib/gramjs/errors';
-import { UpdateConnectionState, UpdateServerTimeOffset } from '../../../lib/gramjs/network';
+import {
+  UpdateConnectionState, UpdateServerTimeOffset, UpdateSessionGap,
+} from '../../../lib/gramjs/network';
 import type { Entity } from '../../../lib/gramjs/types';
 
 import type { ApiChat } from '../../types';
@@ -88,6 +90,11 @@ export function processUpdate(update: Update, isFromDifference?: boolean, should
 
   if (update instanceof UpdateServerTimeOffset) {
     updater(update);
+    return;
+  }
+
+  if (update instanceof UpdateSessionGap) {
+    if (isInited) scheduleGetDifference();
     return;
   }
 

@@ -82,13 +82,26 @@ export default class BinaryReader {
   /**
      * Read the given amount of bytes, or -1 to read all remaining.
      * @param length {number}
-     * @param checkLength {boolean} whether to check if the length overflows or not.
      */
   read(length = -1) {
+    return this.readBuffer(length, true);
+  }
+
+  /**
+   * Creates a bounded reader over the given amount of bytes without copying them.
+   * @param length {number}
+   */
+  createSubReader(length: number) {
+    return new BinaryReader(this.readBuffer(length, false));
+  }
+
+  private readBuffer(length: number, shouldCopy: boolean) {
     if (length === -1) {
       length = this.stream.length - this.offset;
     }
-    const result = this.stream.slice(this.offset, this.offset + length);
+    const result = shouldCopy
+      ? this.stream.slice(this.offset, this.offset + length)
+      : this.stream.subarray(this.offset, this.offset + length);
     this.offset += length;
     if (result.length !== length) {
       throw Error(
@@ -210,7 +223,9 @@ export default class BinaryReader {
         throw error;
       }
     }
-    return clazz.fromReader(this);
+    return typeof clazz.readFrom === 'function'
+      ? clazz.readFrom(this)
+      : clazz.fromReader(this);
   }
 
   /**

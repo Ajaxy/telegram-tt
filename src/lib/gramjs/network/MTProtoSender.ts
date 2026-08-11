@@ -8,17 +8,22 @@ import { Api } from '../tl';
 import GZIPPacked from '../tl/core/GZIPPacked';
 import RPCResult from '../tl/core/RPCResult';
 import { type Connection, HttpConnection } from './connection';
-import { UpdateConnectionState, UpdateServerTimeOffset } from './updates';
+import { UpdateConnectionState, UpdateServerTimeOffset, UpdateSessionGap } from './updates';
 
 import { type Update } from '../client/TelegramClient';
 import { AuthKey } from '../crypto/AuthKey';
 import {
-  BadMessageError, InvalidBufferError, SecurityError, TypeNotFoundError,
+  BadMessageError, InvalidBufferError, MessageReplayError, SecurityError, TypeNotFoundError,
 } from '../errors/Common';
 import PendingState from '../extensions/PendingState';
 import { jsonStringifyWithBigInt, sleep } from '../Helpers';
 import MessageContainer from '../tl/core/MessageContainer';
 import { doAuthentication } from './Authenticator';
+import {
+  BAD_SERVER_SALT_ERROR_CODE,
+  INVALID_TIME_ERROR_CODES,
+  MAX_FUTURE_SERVER_SALTS,
+} from './MTProtoConstants';
 import MtProtoPlainSender from './MTProtoPlainSender';
 import MTProtoState from './MTProtoState';
 import RequestState, { type CallableRequest } from './RequestState';
@@ -26,6 +31,28 @@ import RequestState, { type CallableRequest } from './RequestState';
 const LONGPOLL_MAX_WAIT = 3000;
 const LONGPOLL_MAX_DELAY = 500;
 const LONGPOLL_WAIT_AFTER = 150;
+const MAX_RECENT_SENT_MESSAGES = 500;
+const RECENT_SENT_MESSAGE_TTL = 300000;
+const BAD_MESSAGE_ERROR_CODES = new Set([16, 17, 18, 19, 20, 32, 33, 34, 35, 64]);
+const MAX_MESSAGE_IDS = 8192;
+const MAX_RECENT_ACKNOWLEDGED_MESSAGES = 500;
+const MESSAGE_STATE_RECEIVED = 4;
+const MESSAGE_STATE_NO_ACK_REQUIRED = 16;
+const MESSAGE_STATE_RECEIVED_ELSEWHERE = 128;
+
+type SentMessage = {
+  msgId: bigint;
+  seqNo: number;
+  sentAt: number;
+  state: RequestState;
+  containerId?: bigint;
+  containerSeqNo?: number;
+};
+
+type SentMessageReference = {
+  message: SentMessage;
+  isContainer: boolean;
+};
 
 interface DefaultOptions {
   logger: Logger;
@@ -124,9 +151,21 @@ export default class MTProtoSender {
 
   private isSendingLongPoll?: boolean;
 
-  private readonly _pendingAck: Set<any>;
+  private readonly _pendingAck: Set<bigint>;
 
   private readonly _lastAcks: any[];
+
+  private readonly _acknowledgedMsgIds: Set<bigint>;
+
+  private readonly _recentSentMessages: Map<bigint, SentMessage>;
+
+  private readonly _sentMessageIdsByState: Map<RequestState, bigint>;
+
+  private readonly _sentMessageIdsByContainer: Map<bigint, Set<bigint>>;
+
+  private _lastSessionFirstMsgId?: bigint;
+
+  private _lastSessionUniqueId?: bigint;
 
   _pendingState: PendingState;
 
@@ -239,6 +278,10 @@ export default class MTProtoSender {
      * is received, but we may still need to resend their state on bad salts.
      */
     this._lastAcks = [];
+    this._acknowledgedMsgIds = new Set();
+    this._recentSentMessages = new Map();
+    this._sentMessageIdsByState = new Map();
+    this._sentMessageIdsByContainer = new Map();
 
     /**
      * Jump table from response ID to method that handles it
@@ -256,8 +299,9 @@ export default class MTProtoSender {
       [Api.NewSessionCreated.CONSTRUCTOR_ID]: this._handleNewSessionCreated.bind(this),
       [Api.MsgsAck.CONSTRUCTOR_ID]: this._handleAck.bind(this),
       [Api.FutureSalts.CONSTRUCTOR_ID]: this._handleFutureSalts.bind(this),
-      [Api.MsgsStateReq.CONSTRUCTOR_ID]: this._handleStateForgotten.bind(this),
-      [Api.MsgResendReq.CONSTRUCTOR_ID]: this._handleStateForgotten.bind(this),
+      [Api.MsgsStateReq.CONSTRUCTOR_ID]: this._handleStateReq.bind(this),
+      [Api.MsgResendReq.CONSTRUCTOR_ID]: this._handleResendReq.bind(this),
+      [Api.MsgsStateInfo.CONSTRUCTOR_ID]: this._handleStateInfo.bind(this),
       [Api.MsgsAllInfo.CONSTRUCTOR_ID]: this._handleMsgAll.bind(this),
     };
   }
@@ -412,14 +456,39 @@ export default class MTProtoSender {
    * @returns {RequestState}
    */
   send<T extends CallableRequest>(request: T, abortSignal?: AbortSignal, isLongPoll = false) {
-    const state = new RequestState<T>(request, abortSignal);
+    const states = this._splitMessageIdRequest(request)
+      .map((splitRequest) => new RequestState(splitRequest, abortSignal));
+    for (let index = 1; index < states.length; index++) {
+      void states[index].promise!.catch(() => undefined);
+    }
     if (!isLongPoll) {
       this.logWithIndex.debug(`Send ${request.className}`);
-      this._sendQueue.append(state);
+      this._sendQueue.extend(states);
     } else {
-      this._sendQueueLongPoll.append(state);
+      this._sendQueueLongPoll.extend(states);
     }
-    return state.promise;
+    return states[0].promise as RequestState<T>['promise'];
+  }
+
+  private _splitMessageIdRequest(request: CallableRequest) {
+    if (!(request instanceof Api.MsgsAck
+      || request instanceof Api.MsgsStateReq
+      || request instanceof Api.MsgResendReq)
+    || request.msgIds.length <= MAX_MESSAGE_IDS) return [request];
+
+    const requests: CallableRequest[] = [];
+    for (let index = 0; index < request.msgIds.length; index += MAX_MESSAGE_IDS) {
+      const msgIds = request.msgIds.slice(index, index + MAX_MESSAGE_IDS);
+      if (request instanceof Api.MsgsAck) {
+        requests.push(new Api.MsgsAck({ msgIds }));
+      } else if (request instanceof Api.MsgsStateReq) {
+        requests.push(new Api.MsgsStateReq({ msgIds }));
+      } else {
+        requests.push(new Api.MsgResendReq({ msgIds }));
+      }
+    }
+
+    return requests;
   }
 
   addStateToQueue(state: RequestState) {
@@ -468,6 +537,7 @@ export default class MTProtoSender {
       await this.authKey.setKey(res.authKey);
 
       this._state.timeOffset = res.timeOffset;
+      this._state.setServerSalt(res.serverSalt);
 
       if (!this._isExported) {
         this._updateCallback?.(new UpdateServerTimeOffset(this._state.timeOffset));
@@ -549,6 +619,8 @@ export default class MTProtoSender {
       const { batch } = res;
       this._log.debug(`Encrypting ${batch.length} message(s) in ${data.length} bytes for sending`);
 
+      for (const state of batch) this._rememberSentMessage(state);
+
       data = await this._state.encryptMessageData(data);
 
       try {
@@ -585,13 +657,18 @@ export default class MTProtoSender {
     while (this._userConnected && !this.isReconnecting) {
       const appendAcks = () => {
         if (this._pendingAck.size) {
-          const ack = new RequestState(new Api.MsgsAck({ msgIds: Array(...this._pendingAck) }));
-          this._sendQueue.append(ack);
-          this._lastAcks.push(ack);
-          if (this._lastAcks.length >= 10) {
-            this._lastAcks.shift();
-          }
+          const msgIds = Array.from(this._pendingAck);
           this._pendingAck.clear();
+
+          // https://core.telegram.org/mtproto/service_messages_about_messages#acknowledgment-of-receipt
+          for (let index = 0; index < msgIds.length; index += MAX_MESSAGE_IDS) {
+            const ack = new RequestState(new Api.MsgsAck({
+              msgIds: msgIds.slice(index, index + MAX_MESSAGE_IDS),
+            }));
+            this._sendQueue.append(ack);
+            this._lastAcks.push(ack);
+            if (this._lastAcks.length >= 10) this._lastAcks.shift();
+          }
         }
       };
 
@@ -629,12 +706,14 @@ export default class MTProtoSender {
 
       for (const state of batch) {
         if (!Array.isArray(state)) {
-          if (state.request.classType === 'request' && state.request.className !== 'HttpWait') {
+          this._rememberSentMessage(state);
+          if (this._shouldTrackPendingState(state)) {
             this._pendingState.set(state.msgId!, state);
           }
         } else {
           for (const s of state) {
-            if (s.request.classType === 'request' && s.request.className !== 'HttpWait') {
+            this._rememberSentMessage(s);
+            if (this._shouldTrackPendingState(s)) {
               this._pendingState.set(s.msgId, s);
             }
           }
@@ -666,6 +745,13 @@ export default class MTProtoSender {
 
       try {
         await connection.send(data);
+        for (const state of batch) {
+          if (Array.isArray(state)) {
+            state.forEach(this._rememberSentAcknowledgments.bind(this));
+          } else {
+            this._rememberSentAcknowledgments(state);
+          }
+        }
       } catch (e: any) {
         this.logWithIndex.debug(`Connection closed while sending data ${e}`);
         this._log.info('Connection closed while sending data');
@@ -723,18 +809,24 @@ export default class MTProtoSender {
 
       try {
         // TODO: Handle `DecryptedDataBlock` in calls like a regular `TLMessage` rather than `Uint8Array`
-        message = (await this._state.decryptMessageData(body)) as TLMessage;
+        message = (await this._state.decryptMessageData(
+          body, this._hasRecentSentMessage.bind(this),
+          this._isFallback,
+        )) as TLMessage;
       } catch (e: any) {
         this.logWithIndex.debug(`Error while receiving items from the network ${e.toString()}`);
-        if (e instanceof TypeNotFoundError) {
+        if (e instanceof MessageReplayError && this._isFallback) {
+          continue;
+        } else if (e instanceof TypeNotFoundError) {
           // Received object which we don't know how to deserialize
           this._log.info(`Type ${e.invalidConstructorId} not found, remaining data ${e.remaining.length} bytes`);
           continue;
         } else if (e instanceof SecurityError) {
-          // A step while decoding had the incorrect data. This message
-          // should not be considered safe and it should be ignored.
-          this._log.warn(`Security error while unpacking a received message: ${e.message}`);
-          continue;
+          // https://core.telegram.org/mtproto/security_guidelines#behavior-in-case-of-mismatch
+          this._log.warn('Invalid encrypted packet');
+          this.reconnect();
+          this._recvLoopHandle = undefined;
+          return;
         } else if (e instanceof InvalidBufferError) {
           // 404 means that the server has "forgotten" our auth key and we need to create a new one.
           if (e.code === 404) {
@@ -761,7 +853,12 @@ export default class MTProtoSender {
         await this._processMessage(message);
       } catch (e: any) {
         // `RPCError` errors except for 'AUTH_KEY_UNREGISTERED' should be handled by the client
-        if (e instanceof RPCError) {
+        if (e instanceof SecurityError) {
+          this._log.warn('Invalid encrypted packet');
+          this.reconnect();
+          this._recvLoopHandle = undefined;
+          return;
+        } else if (e instanceof RPCError) {
           if (e.errorMessage === 'AUTH_KEY_UNREGISTERED'
             || e.errorMessage === 'SESSION_REVOKED'
             || e.errorMessage === 'USER_DEACTIVATED') {
@@ -817,16 +914,17 @@ export default class MTProtoSender {
    * @private
    */
   async _processMessage(message: TLMessage) {
-    if (message.obj.className === 'MsgsAck') return;
     this.logWithIndex.debug(`Process message ${message.obj.className}`);
 
-    this._pendingAck.add(message.msgId);
+    // https://core.telegram.org/mtproto/description#message-sequence-number-msg-seqno
+    if (message.isContentRelated) this._pendingAck.add(message.msgId);
 
     if (this.getConnection()!.shouldLongPoll) {
       this._sendQueue.setReady?.(true);
     }
 
-    message.obj = await message.obj;
+    if (this._state.consumeMessageReplay(message)) return;
+
     let handler = this._handlers[message.obj.CONSTRUCTOR_ID];
     if (!handler) {
       handler = this._handleUpdate.bind(this);
@@ -844,33 +942,138 @@ export default class MTProtoSender {
    */
   _popStates(msgId: bigint) {
     const state = this._pendingState.getAndDelete(msgId);
-    if (state) {
-      return [state];
-    }
+    const states = state ? [state] : [];
 
-    const toPop: bigint[] = [];
-
-    for (const pendingState of this._pendingState.values()) {
-      if (pendingState.containerId === msgId) {
-        toPop.push(pendingState.msgId!);
+    if (!state) {
+      for (const pendingState of this._pendingState.values()) {
+        if (pendingState.containerId === msgId) {
+          states.push(this._pendingState.getAndDelete(pendingState.msgId!)!);
+        }
       }
-    }
-
-    if (toPop.length) {
-      const temp = [];
-      for (const x of toPop) {
-        temp.push(this._pendingState.getAndDelete(x));
-      }
-      return temp;
     }
 
     for (const ack of this._lastAcks) {
-      if (ack.msgId === msgId) {
-        return [ack];
+      if ((ack.msgId === msgId || ack.containerId === msgId) && !states.includes(ack)) {
+        states.push(ack);
       }
     }
 
-    return [];
+    return states;
+  }
+
+  private _hasRecentSentMessage(msgId: bigint, seqNo?: number) {
+    const sentMessage = this._findSentMessage(msgId);
+    return Boolean(sentMessage
+      && (seqNo === undefined || this._getSentMessageSeqNo(sentMessage) === seqNo));
+  }
+
+  private _shouldTrackPendingState(state: RequestState) {
+    return (state.request.classType === 'request' && state.request.className !== 'HttpWait')
+      || state.request instanceof Api.MsgsStateReq;
+  }
+
+  private _rememberSentAcknowledgments(state: RequestState) {
+    let msgIds: bigint[] | undefined;
+    if (state.request instanceof Api.MsgsAck) {
+      msgIds = state.request.msgIds;
+    } else if (state.request instanceof Api.MsgsStateInfo) {
+      msgIds = [state.request.reqMsgId];
+      if (state.acknowledgedMsgIds) msgIds.push(...state.acknowledgedMsgIds);
+    }
+    if (!msgIds) return;
+
+    for (const msgId of msgIds) this._acknowledgedMsgIds.add(msgId);
+    while (this._acknowledgedMsgIds.size > MAX_RECENT_ACKNOWLEDGED_MESSAGES) {
+      this._acknowledgedMsgIds.delete(this._acknowledgedMsgIds.values().next().value!);
+    }
+  }
+
+  private _rememberSentMessage(state: RequestState) {
+    this._forgetSentState(state);
+    const message: SentMessage = {
+      msgId: state.msgId!,
+      seqNo: state.seqNo!,
+      sentAt: Date.now(),
+      state,
+      containerId: state.containerId,
+      containerSeqNo: state.containerSeqNo,
+    };
+    this._recentSentMessages.set(message.msgId, message);
+    this._sentMessageIdsByState.set(state, message.msgId);
+    if (message.containerId !== undefined) {
+      let containerMessageIds = this._sentMessageIdsByContainer.get(message.containerId);
+      if (!containerMessageIds) {
+        containerMessageIds = new Set();
+        this._sentMessageIdsByContainer.set(message.containerId, containerMessageIds);
+      }
+      containerMessageIds.add(message.msgId);
+    }
+
+    if (this._recentSentMessages.size > MAX_RECENT_SENT_MESSAGES) {
+      const oldestMessage = this._recentSentMessages.values().next().value!;
+      if (oldestMessage.containerId !== undefined) {
+        this._forgetSentMessage(oldestMessage.containerId, true);
+      } else {
+        this._deleteSentMessage(oldestMessage.msgId);
+      }
+    }
+  }
+
+  private _findSentMessage(msgId: bigint): SentMessageReference | undefined {
+    this._pruneRecentSentMessages();
+    const message = this._recentSentMessages.get(msgId);
+    if (message) return { message, isContainer: false };
+
+    const sentMessageId = this._sentMessageIdsByContainer.get(msgId)?.values().next().value;
+    const containerMessage = sentMessageId !== undefined
+      ? this._recentSentMessages.get(sentMessageId)
+      : undefined;
+    if (!containerMessage) return undefined;
+
+    return { message: containerMessage, isContainer: true };
+  }
+
+  private _pruneRecentSentMessages() {
+    const expiredBefore = Date.now() - RECENT_SENT_MESSAGE_TTL;
+    for (const [msgId, { sentAt }] of this._recentSentMessages) {
+      if (sentAt < expiredBefore) this._deleteSentMessage(msgId);
+    }
+  }
+
+  private _forgetSentMessage(msgId: bigint, isContainer: boolean) {
+    if (!isContainer) {
+      this._deleteSentMessage(msgId);
+      return;
+    }
+
+    const sentMessageIds = this._sentMessageIdsByContainer.get(msgId);
+    if (!sentMessageIds) return;
+
+    for (const sentMsgId of sentMessageIds) {
+      this._deleteSentMessage(sentMsgId);
+    }
+  }
+
+  private _forgetSentState(state: RequestState) {
+    const msgId = this._sentMessageIdsByState.get(state);
+    if (msgId !== undefined) this._deleteSentMessage(msgId);
+  }
+
+  private _deleteSentMessage(msgId: bigint) {
+    const sentMessage = this._recentSentMessages.get(msgId);
+    if (!sentMessage) return;
+
+    this._recentSentMessages.delete(msgId);
+    if (this._sentMessageIdsByState.get(sentMessage.state) === msgId) {
+      this._sentMessageIdsByState.delete(sentMessage.state);
+    }
+
+    const { containerId } = sentMessage;
+    if (containerId === undefined) return;
+
+    const sentMessageIds = this._sentMessageIdsByContainer.get(containerId);
+    sentMessageIds?.delete(msgId);
+    if (!sentMessageIds?.size) this._sentMessageIdsByContainer.delete(containerId);
   }
 
   /**
@@ -911,9 +1114,10 @@ export default class MTProtoSender {
       return;
     }
 
+    this._forgetSentMessage(result.reqMsgId, false);
+
     if (result.error) {
       const error = RPCMessageToError(result.error, state.request);
-      this._sendQueue.append(new RequestState(new Api.MsgsAck({ msgIds: [state.msgId!] })));
       state.reject?.(error);
       throw error;
     } else {
@@ -952,8 +1156,13 @@ export default class MTProtoSender {
    */
   async _handleGzipPacked(message: TLMessage) {
     this._log.debug('Handling gzipped data');
-    const reader = new BinaryReader(message.obj.data);
-    message.obj = reader.tgReadObject();
+    const { data } = message.obj;
+    const reader = new BinaryReader(data);
+    const obj = reader.tgReadObject();
+    if (obj instanceof MessageContainer || reader.tellPosition() !== data.length) {
+      throw new SecurityError();
+    }
+    message.obj = obj;
     await this._processMessage(message);
   }
 
@@ -979,19 +1188,24 @@ export default class MTProtoSender {
    */
   _handlePong(message: TLMessage) {
     const pong = message.obj;
+    const state = this._pendingState.get(pong.msgId);
+    const isPing = state?.request instanceof Api.Ping
+      || state?.request instanceof Api.PingDelayDisconnect;
 
-    const newTimeOffset = this._state.updateTimeOffset(message.msgId);
+    // https://core.telegram.org/mtproto/service_messages#ping-messages-ping-pong
+    if (!state || !isPing || state.request.pingId !== pong.pingId) return;
+
+    this._pendingState.delete(pong.msgId);
+    this._deleteSentMessage(pong.msgId);
+
+    const { timeOffset: newTimeOffset, isSessionReset } = this._state.updateTimeOffset(message.msgId);
+    if (isSessionReset) this._resetSessionTracking();
     if (!this._isExported) {
       this._updateCallback?.(new UpdateServerTimeOffset(newTimeOffset));
     }
 
     this._log.debug(`Handling pong for message ${pong.msgId}`);
-    const state = this._pendingState.getAndDelete(pong.msgId);
-
-    // Todo Check result
-    if (state) {
-      state.resolve?.(pong);
-    }
+    state.resolve?.(pong);
   }
 
   /**
@@ -1005,9 +1219,16 @@ export default class MTProtoSender {
    */
   _handleBadServerSalt(message: TLMessage) {
     const badSalt = message.obj;
+    const sentMessage = this._findSentMessage(badSalt.badMsgId);
+    if (badSalt.errorCode !== BAD_SERVER_SALT_ERROR_CODE
+      || !sentMessage
+      || this._getSentMessageSeqNo(sentMessage) !== badSalt.badMsgSeqno) return;
+
+    // https://core.telegram.org/mtproto/service_messages_about_messages#notice-of-ignored-error-message
+    this._forgetSentMessage(badSalt.badMsgId, sentMessage.isContainer);
     this._log.debug(`Handling bad salt for message ${badSalt.badMsgId}`);
-    this._state.salt = badSalt.newServerSalt;
     const states = this._popStates(badSalt.badMsgId);
+    this._state.setServerSalt(badSalt.newServerSalt);
     this._sendQueue.extend(states);
     this._log.debug(`${states.length} message(s) will be resent`);
   }
@@ -1023,12 +1244,18 @@ export default class MTProtoSender {
    */
   _handleBadNotification(message: TLMessage) {
     const badMsg = message.obj;
+    const sentMessage = this._findSentMessage(badMsg.badMsgId);
+    if (!sentMessage
+      || !this._isBadNotificationApplicable(badMsg, message.msgId, sentMessage)) return;
+
+    this._forgetSentMessage(badMsg.badMsgId, sentMessage.isContainer);
     const states = this._popStates(badMsg.badMsgId);
     this._log.debug(`Handling bad msg ${jsonStringifyWithBigInt(badMsg)}`);
-    if ([16, 17].includes(badMsg.errorCode)) {
+    if (INVALID_TIME_ERROR_CODES.has(badMsg.errorCode)) {
       // Sent msg_id too low or too high (respectively).
       // Use the current msg_id to determine the right time offset.
-      const newTimeOffset = this._state.updateTimeOffset(message.msgId);
+      const { timeOffset: newTimeOffset, isSessionReset } = this._state.updateTimeOffset(message.msgId);
+      if (isSessionReset) this._resetSessionTracking();
 
       if (!this._isExported) {
         this._updateCallback?.(new UpdateServerTimeOffset(newTimeOffset));
@@ -1044,7 +1271,7 @@ export default class MTProtoSender {
       this._state._sequence -= 16;
     } else {
       for (const state of states) {
-        state.reject(new BadMessageError(state.request, badMsg.errorCode));
+        state.reject?.(new BadMessageError(state.request, badMsg.errorCode));
       }
 
       return;
@@ -1052,6 +1279,28 @@ export default class MTProtoSender {
     // Messages are to be re-sent once we've corrected the issue
     this._sendQueue.extend(states);
     this._log.debug(`${states.length} messages will be resent due to bad msg`);
+  }
+
+  private _isBadNotificationApplicable(
+    badMsg: Api.BadMsgNotification,
+    notificationMsgId: bigint,
+    sentMessage: SentMessageReference,
+  ) {
+    const { errorCode, badMsgId, badMsgSeqno } = badMsg;
+    const sentSeqNo = this._getSentMessageSeqNo(sentMessage);
+    if (!BAD_MESSAGE_ERROR_CODES.has(errorCode) || sentSeqNo !== badMsgSeqno) return false;
+    if (errorCode === 16) return badMsgId < notificationMsgId; // Message ID is too low
+    if (errorCode === 17) return badMsgId > notificationMsgId; // Message ID is too high
+    if (errorCode === 18) return (badMsgId & 3n) !== 0n; // Message ID has invalid low bits
+    if (errorCode === 19 || errorCode === 64) return sentMessage.isContainer; // Duplicate ID or invalid container
+    if (errorCode === 34) return (sentSeqNo & 1) === 1; // Even sequence number expected
+    if (errorCode === 35) return (sentSeqNo & 1) === 0; // Odd sequence number expected
+
+    return true;
+  }
+
+  private _getSentMessageSeqNo({ message, isContainer }: SentMessageReference) {
+    return isContainer ? message.containerSeqNo! : message.seqNo;
   }
 
   /**
@@ -1063,10 +1312,9 @@ export default class MTProtoSender {
    * @private
    */
   _handleDetailedInfo(message: TLMessage) {
-    // TODO https://goo.gl/VvpCC6
-    const msgId = message.obj.answerMsgId;
-    this._log.debug(`Handling detailed info for message ${msgId}`);
-    this._pendingAck.add(msgId);
+    const { answerMsgId } = message.obj;
+    this._pendingAck.add(answerMsgId);
+    this._log.debug(`Handling detailed info for message ${answerMsgId}`);
   }
 
   /**
@@ -1078,10 +1326,9 @@ export default class MTProtoSender {
    * @private
    */
   _handleNewDetailedInfo(message: TLMessage) {
-    // TODO https://goo.gl/VvpCC6
-    const msgId = message.obj.answerMsgId;
-    this._log.debug(`Handling new detailed info for message ${msgId}`);
-    this._pendingAck.add(msgId);
+    const { answerMsgId } = message.obj;
+    this._pendingAck.add(answerMsgId);
+    this._log.debug(`Handling new detailed info for message ${answerMsgId}`);
   }
 
   /**
@@ -1093,9 +1340,16 @@ export default class MTProtoSender {
    * @private
    */
   _handleNewSessionCreated(message: TLMessage) {
-    // TODO https://goo.gl/LMyN7A
+    const { firstMsgId, uniqueId, serverSalt } = message.obj;
     this._log.debug('Handling new session created');
-    this._state.salt = message.obj.serverSalt;
+    this._state.setServerSalt(serverSalt);
+
+    if (firstMsgId === this._lastSessionFirstMsgId && uniqueId === this._lastSessionUniqueId) return;
+    this._lastSessionFirstMsgId = firstMsgId;
+    this._lastSessionUniqueId = uniqueId;
+
+    // https://core.telegram.org/mtproto/service_messages#new-session-creation-notification
+    if (!this._isExported) this._updateCallback?.(new UpdateSessionGap(firstMsgId, uniqueId));
   }
 
   /**
@@ -1113,32 +1367,112 @@ export default class MTProtoSender {
    * @private
    */
   _handleFutureSalts(message: TLMessage) {
-    // TODO save these salts and automatically adjust to the
-    // correct one whenever the salt in use expires.
-    this._log.debug(`Handling future salts for message ${message.msgId.toString()}`);
-    const state = this._pendingState.getAndDelete(message.msgId);
+    const futureSalts = message.obj;
+    const state = this._pendingState.get(futureSalts.reqMsgId);
 
-    if (state) {
-      state.resolve?.(message.obj);
-    }
+    // https://core.telegram.org/mtproto/service_messages#request-for-several-future-salts
+    if (!(state?.request instanceof Api.GetFutureSalts)
+      || state.request.num < 1
+      || state.request.num > MAX_FUTURE_SERVER_SALTS
+      || futureSalts.salts.length > state.request.num
+      || !this._state.setFutureSalts(futureSalts.salts)) return;
+
+    this._pendingState.delete(futureSalts.reqMsgId);
+    this._forgetSentMessage(futureSalts.reqMsgId, false);
+    this._log.debug(`Handling future salts for message ${futureSalts.reqMsgId.toString()}`);
+    state.resolve?.(futureSalts);
   }
 
-  /**
-   * Handles both :tl:`MsgsStateReq` and :tl:`MsgResendReq` by
-   * enqueuing a :tl:`MsgsStateInfo` to be sent at a later point.
-   * @param message
-   * @returns {Promise<void>}
-   * @private
-   */
-  _handleStateForgotten(message: TLMessage) {
-    this._sendQueue.append(
-      new RequestState(
-        new Api.MsgsStateInfo({
-          reqMsgId: message.msgId,
-          info: String.fromCharCode(1).repeat(message.obj.msgIds),
-        }),
-      ),
-    );
+  _handleStateReq(message: TLMessage) {
+    this._sendStateInfo(message.msgId, message.obj.msgIds);
+  }
+
+  _handleResendReq(message: TLMessage) {
+    const states: RequestState[] = [];
+    const knownStates = new Set<RequestState>();
+    let hasUnknownMessages = false;
+
+    for (const msgId of message.obj.msgIds) {
+      if (!this._collectResendStates(msgId, states, knownStates)) {
+        hasUnknownMessages = true;
+      }
+    }
+
+    if (hasUnknownMessages) this._sendStateInfo(message.msgId, message.obj.msgIds);
+
+    // https://core.telegram.org/mtproto/service_messages_about_messages#explicit-request-to-re-send-messages
+    this._resendStates(states);
+  }
+
+  _handleStateInfo(message: TLMessage) {
+    const stateInfo: Api.MsgsStateInfo = message.obj;
+    const state = this._pendingState.get(stateInfo.reqMsgId);
+    const statusCodes = stateInfo.info;
+    if (!(state?.request instanceof Api.MsgsStateReq)
+      || statusCodes.length !== state.request.msgIds.length
+      || statusCodes.some((statusCode) => {
+        const baseStatus = statusCode & 7;
+        return baseStatus < 1 || baseStatus > 4;
+      })) return;
+
+    this._pendingState.delete(stateInfo.reqMsgId);
+    this._forgetSentMessage(stateInfo.reqMsgId, false);
+
+    const states: RequestState[] = [];
+    const knownStates = new Set<RequestState>();
+    statusCodes.forEach((statusCode, index) => {
+      const baseStatus = statusCode & 7;
+      if (baseStatus !== MESSAGE_STATE_RECEIVED
+        && !(statusCode & MESSAGE_STATE_RECEIVED_ELSEWHERE)) {
+        this._collectResendStates(state.request.msgIds[index], states, knownStates);
+      }
+    });
+    // https://core.telegram.org/mtproto/service_messages_about_messages#informational-message-regarding-status-of-messages
+    this._resendStates(states);
+    state.resolve?.();
+  }
+
+  private _sendStateInfo(reqMsgId: bigint, msgIds: bigint[]) {
+    const acknowledgedMsgIds: bigint[] = [];
+    const info = Uint8Array.from(msgIds, (msgId) => {
+      const status = this._state.getIncomingMessageState(
+        msgId, this._acknowledgedMsgIds.has(msgId),
+      );
+      if ((status & 7) === MESSAGE_STATE_RECEIVED && !(status & MESSAGE_STATE_NO_ACK_REQUIRED)) {
+        acknowledgedMsgIds.push(msgId);
+      }
+      return status;
+    });
+    const state = new RequestState(new Api.MsgsStateInfo({ reqMsgId, info }));
+    state.acknowledgedMsgIds = acknowledgedMsgIds;
+    this._sendQueue.append(state);
+  }
+
+  private _collectResendStates(
+    msgId: bigint, states: RequestState[], knownStates: Set<RequestState>,
+  ) {
+    const sentMessage = (msgId & 3n) === 0n ? this._findSentMessage(msgId) : undefined;
+    if (!sentMessage) return false;
+
+    const messages = sentMessage.isContainer
+      ? Array.from(this._sentMessageIdsByContainer.get(msgId) ?? [], (sentMsgId) => (
+        this._recentSentMessages.get(sentMsgId)!
+      ))
+      : [sentMessage.message];
+    for (const { state } of messages) {
+      if (knownStates.has(state)) continue;
+      knownStates.add(state);
+      states.push(state);
+    }
+    return true;
+  }
+
+  private _resendStates(states: RequestState[]) {
+    for (const state of states) {
+      this._pendingState.delete(state.msgId!);
+      this._forgetSentState(state);
+    }
+    this._sendQueue.extend(states);
   }
 
   /**
@@ -1183,6 +1517,14 @@ export default class MTProtoSender {
 
     this._sendQueue.append(undefined);
     this._state.reset();
+    this._pendingAck.clear();
+    this._acknowledgedMsgIds.clear();
+    this._recentSentMessages.clear();
+    this._sentMessageIdsByState.clear();
+    this._sentMessageIdsByContainer.clear();
+    this._lastAcks.length = 0;
+    this._lastSessionFirstMsgId = undefined;
+    this._lastSessionUniqueId = undefined;
 
     // For some reason reusing existing connection caused stuck requests
     // @ts-expect-error -- Hacky way to create new class instance
@@ -1218,5 +1560,17 @@ export default class MTProtoSender {
 
     this._sendQueue.prepend(pendingStates);
     this._pendingState.clear();
+  }
+
+  private _resetSessionTracking() {
+    this.retryPendingStates();
+    this._pendingAck.clear();
+    this._acknowledgedMsgIds.clear();
+    this._recentSentMessages.clear();
+    this._sentMessageIdsByState.clear();
+    this._sentMessageIdsByContainer.clear();
+    this._lastAcks.length = 0;
+    this._lastSessionFirstMsgId = undefined;
+    this._lastSessionUniqueId = undefined;
   }
 }

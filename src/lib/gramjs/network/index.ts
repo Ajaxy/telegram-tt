@@ -1,7 +1,7 @@
 import {
   Connection, ConnectionTCPAbridged, ConnectionTCPObfuscated, HttpConnection,
 } from './connection';
-import { UpdateConnectionState, UpdateServerTimeOffset } from './updates';
+import { UpdateConnectionState, UpdateServerTimeOffset, UpdateSessionGap } from './updates';
 
 import MTProtoPlainSender from './MTProtoPlainSender';
 import MTProtoSender from './MTProtoSender';
@@ -15,4 +15,5 @@ export {
   MTProtoSender,
   UpdateConnectionState,
   UpdateServerTimeOffset,
+  UpdateSessionGap,
 };

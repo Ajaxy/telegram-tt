@@ -435,6 +435,7 @@ namespace Api {
   export type TypeClient_DH_Inner_Data = ClientDHInnerData;
   export type TypeSet_client_DH_params_answer = DhGenOk | DhGenRetry | DhGenFail;
   export type TypeDestroyAuthKeyRes = DestroyAuthKeyOk | DestroyAuthKeyNone | DestroyAuthKeyFail;
+  export type TypeBindAuthKeyInner = BindAuthKeyInner;
   export type TypeMsgsAck = MsgsAck;
   export type TypeBadMsgNotification = BadMsgNotification | BadServerSalt;
   export type TypeMsgsStateReq = MsgsStateReq;
@@ -19879,6 +19880,24 @@ namespace Api {
 
     static fromReader(reader: Reader): DestroyAuthKeyFail;
   }
+  export class BindAuthKeyInner extends VirtualClass<{
+    nonce: long;
+    tempAuthKeyId: long;
+    permAuthKeyId: long;
+    tempSessionId: long;
+    expiresAt: int;
+  }> {
+    nonce: long;
+    tempAuthKeyId: long;
+    permAuthKeyId: long;
+    tempSessionId: long;
+    expiresAt: int;
+    CONSTRUCTOR_ID: 1973679973;
+    SUBCLASS_OF_ID: 789156209;
+    className: 'BindAuthKeyInner';
+
+    static fromReader(reader: Reader): BindAuthKeyInner;
+  }
   export class MsgsAck extends VirtualClass<{
     msgIds: long[];
   }> {
@@ -19931,10 +19950,10 @@ namespace Api {
   }
   export class MsgsStateInfo extends VirtualClass<{
     reqMsgId: long;
-    info: string;
+    info: bytes;
   }> {
     reqMsgId: long;
-    info: string;
+    info: bytes;
     CONSTRUCTOR_ID: 81704317;
     SUBCLASS_OF_ID: 118098532;
     className: 'MsgsStateInfo';
@@ -19943,10 +19962,10 @@ namespace Api {
   }
   export class MsgsAllInfo extends VirtualClass<{
     msgIds: long[];
-    info: string;
+    info: bytes;
   }> {
     msgIds: long[];
-    info: string;
+    info: bytes;
     CONSTRUCTOR_ID: 2361446705;
     SUBCLASS_OF_ID: 4203727700;
     className: 'MsgsAllInfo';
@@ -20050,11 +20069,11 @@ namespace Api {
   export class FutureSalts extends VirtualClass<{
     reqMsgId: long;
     now: int;
-    salts: Api.TypeFutureSalt[];
+    salts: FutureSalt[];
   }> {
     reqMsgId: long;
     now: int;
-    salts: Api.TypeFutureSalt[];
+    salts: FutureSalt[];
     CONSTRUCTOR_ID: 2924480661;
     SUBCLASS_OF_ID: 277935383;
     className: 'FutureSalts';
@@ -24936,11 +24955,6 @@ namespace Api {
     nonce: int128;
   }
   export class ReqPqMulti extends Request<{
-    nonce: int128;
-  }, Api.TypeResPQ> {
-    nonce: int128;
-  }
-  export class ReqPqMultiNew extends Request<{
     nonce: int128;
   }, Api.TypeResPQ> {
     nonce: int128;
@@ -31703,7 +31717,7 @@ namespace Api {
     }
   }
 
-  export type AnyRequest = InvokeAfterMsg | InvokeAfterMsgs | InitConnection | InvokeWithLayer | InvokeWithoutUpdates | InvokeWithMessagesRange | InvokeWithTakeout | InvokeWithBusinessConnection | InvokeWithGooglePlayIntegrity | InvokeWithApnsSecret | InvokeWithReCaptcha | ReqPq | ReqPqMulti | ReqPqMultiNew | ReqDHParams | SetClientDHParams | DestroyAuthKey | RpcDropAnswer | GetFutureSalts | Ping | PingDelayDisconnect | DestroySession
+  export type AnyRequest = InvokeAfterMsg | InvokeAfterMsgs | InitConnection | InvokeWithLayer | InvokeWithoutUpdates | InvokeWithMessagesRange | InvokeWithTakeout | InvokeWithBusinessConnection | InvokeWithGooglePlayIntegrity | InvokeWithApnsSecret | InvokeWithReCaptcha | ReqPq | ReqPqMulti | ReqDHParams | SetClientDHParams | DestroyAuthKey | RpcDropAnswer | GetFutureSalts | Ping | PingDelayDisconnect | DestroySession
     | auth.SendCode | auth.SignUp | auth.SignIn | auth.LogOut | auth.ResetAuthorizations | auth.ExportAuthorization | auth.ImportAuthorization | auth.BindTempAuthKey | auth.ImportBotAuthorization | auth.CheckPassword | auth.RequestPasswordRecovery | auth.RecoverPassword | auth.ResendCode | auth.CancelCode | auth.DropTempAuthKeys | auth.ExportLoginToken | auth.ImportLoginToken | auth.AcceptLoginToken | auth.CheckRecoveryPassword | auth.ImportWebTokenAuthorization | auth.RequestFirebaseSms | auth.ResetLoginEmail | auth.ReportMissingCode | auth.CheckPaidAuth | auth.InitPasskeyLogin | auth.FinishPasskeyLogin
     | account.RegisterDevice | account.UnregisterDevice | account.UpdateNotifySettings | account.GetNotifySettings | account.ResetNotifySettings | account.UpdateProfile | account.UpdateStatus | account.GetWallPapers | account.ReportPeer | account.CheckUsername | account.UpdateUsername | account.GetPrivacy | account.SetPrivacy | account.DeleteAccount | account.GetAccountTTL | account.SetAccountTTL | account.SendChangePhoneCode | account.ChangePhone | account.UpdateDeviceLocked | account.GetAuthorizations | account.ResetAuthorization | account.GetPassword | account.GetPasswordSettings | account.UpdatePasswordSettings | account.SendConfirmPhoneCode | account.ConfirmPhone | account.GetTmpPassword | account.GetWebAuthorizations | account.ResetWebAuthorization | account.ResetWebAuthorizations | account.GetAllSecureValues | account.GetSecureValue | account.SaveSecureValue | account.DeleteSecureValue | account.GetAuthorizationForm | account.AcceptAuthorization | account.SendVerifyPhoneCode | account.VerifyPhone | account.SendVerifyEmailCode | account.VerifyEmail | account.InitTakeoutSession | account.FinishTakeoutSession | account.ConfirmPasswordEmail | account.ResendPasswordEmail | account.CancelPasswordEmail | account.GetContactSignUpNotification | account.SetContactSignUpNotification | account.GetNotifyExceptions | account.GetWallPaper | account.UploadWallPaper | account.SaveWallPaper | account.InstallWallPaper | account.ResetWallPapers | account.GetAutoDownloadSettings | account.SaveAutoDownloadSettings | account.UploadTheme | account.CreateTheme | account.UpdateTheme | account.SaveTheme | account.InstallTheme | account.GetTheme | account.GetThemes | account.SetContentSettings | account.GetContentSettings | account.GetMultiWallPapers | account.GetGlobalPrivacySettings | account.SetGlobalPrivacySettings | account.ReportProfilePhoto | account.ResetPassword | account.DeclinePasswordReset | account.GetChatThemes | account.SetAuthorizationTTL | account.ChangeAuthorizationSettings | account.GetSavedRingtones | account.SaveRingtone | account.UploadRingtone | account.UpdateEmojiStatus | account.GetDefaultEmojiStatuses | account.GetRecentEmojiStatuses | account.ClearRecentEmojiStatuses | account.ReorderUsernames | account.ToggleUsername | account.GetDefaultProfilePhotoEmojis | account.GetDefaultGroupPhotoEmojis | account.GetAutoSaveSettings | account.SaveAutoSaveSettings | account.DeleteAutoSaveExceptions | account.InvalidateSignInCodes | account.UpdateColor | account.GetDefaultBackgroundEmojis | account.GetChannelDefaultEmojiStatuses | account.GetChannelRestrictedStatusEmojis | account.UpdateBusinessWorkHours | account.UpdateBusinessLocation | account.UpdateBusinessGreetingMessage | account.UpdateBusinessAwayMessage | account.UpdateConnectedBot | account.GetConnectedBots | account.GetBotBusinessConnection | account.UpdateBusinessIntro | account.ToggleConnectedBotPaused | account.DisablePeerConnectedBot | account.UpdateBirthday | account.CreateBusinessChatLink | account.EditBusinessChatLink | account.DeleteBusinessChatLink | account.GetBusinessChatLinks | account.ResolveBusinessChatLink | account.UpdatePersonalChannel | account.ToggleSponsoredMessages | account.GetReactionsNotifySettings | account.SetReactionsNotifySettings | account.GetCollectibleEmojiStatuses | account.GetPaidMessagesRevenue | account.ToggleNoPaidMessagesException | account.SetMainProfileTab | account.SaveMusic | account.GetSavedMusicIds | account.GetUniqueGiftChatThemes | account.InitPasskeyRegistration | account.RegisterPasskey | account.GetPasskeys | account.DeletePasskey | account.ConfirmBotConnection | account.GetWebBrowserSettings | account.UpdateWebBrowserSettings | account.ToggleWebBrowserSettingsException | account.DeleteWebBrowserSettingsExceptions
     | users.GetUsers | users.GetFullUser | users.SetSecureValueErrors | users.GetRequirementsToContact | users.GetSavedMusic | users.GetSavedMusicByID | users.SuggestBirthday

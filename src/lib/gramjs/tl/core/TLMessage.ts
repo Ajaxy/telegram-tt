@@ -5,7 +5,7 @@ export default class TLMessage {
 
     msgId: bigint;
 
-    private seqNo: number;
+    seqNo: number;
 
     obj: any;
 
@@ -13,5 +13,9 @@ export default class TLMessage {
         this.msgId = msgId;
         this.seqNo = seqNo;
         this.obj = obj;
+    }
+
+    get isContentRelated() {
+        return (this.seqNo & 1) === 1;
     }
 }

@@ -3,7 +3,8 @@ import type { UpdatePts } from '../../../api/gramjs/updates/UpdatePts';
 import type { AuthKey } from '../crypto/AuthKey';
 import type {
   Connection,
-  UpdateServerTimeOffset } from '../network';
+  UpdateServerTimeOffset,
+  UpdateSessionGap } from '../network';
 import type {
   PasswordResult,
   TmpPasswordResult,
@@ -83,7 +84,8 @@ type TimeoutId = number;
 
 export type Update = (
     Api.TypeUpdate | Api.TypeUpdates
-    | UpdateServerTimeOffset | UpdateConnectionState | UpdatePts | LocalUpdatePremiumFloodWait
+    | UpdateServerTimeOffset | UpdateConnectionState | UpdateSessionGap
+    | UpdatePts | LocalUpdatePremiumFloodWait
 ) & { _entities?: (Api.TypeUser | Api.TypeChat)[] };
 type EventBuilder = {
   build: (update: Update) => Update;

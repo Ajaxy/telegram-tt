@@ -19,3 +19,14 @@ export class UpdateServerTimeOffset {
     this.timeOffset = timeOffset;
   }
 }
+
+export class UpdateSessionGap {
+  firstMsgId: bigint;
+
+  uniqueId: bigint;
+
+  constructor(firstMsgId: bigint, uniqueId: bigint) {
+    this.firstMsgId = firstMsgId;
+    this.uniqueId = uniqueId;
+  }
+}
