@@ -7,7 +7,6 @@ import { isUserId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, unique } from '../../../util/iteratees';
 import * as langProvider from '../../../util/oldLangProvider';
-import { throttle } from '../../../util/schedulers';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
@@ -22,8 +21,6 @@ import {
   updateUserCommonChats,
   updateUserFullInfo,
   updateUsers,
-  updateUserSearch,
-  updateUserSearchFetchingStatus,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -34,14 +31,12 @@ import {
   selectIsCurrentUserPremium,
   selectPeer,
   selectPeerPhotos,
-  selectTabState,
   selectUser,
   selectUserCommonChats,
   selectUserFullInfo,
 } from '../../selectors';
 
 const PROFILE_PHOTOS_FIRST_LOAD_LIMIT = 10;
-const runThrottledForSearch = throttle((cb) => cb(), 500, false);
 
 addActionHandler('loadFullUser', async (global, actions, payload): Promise<void> => {
   const { userId, withPhotos } = payload;
@@ -384,37 +379,6 @@ addActionHandler('loadMoreProfilePhotos', async (global, actions, payload): Prom
   });
 
   setGlobal(global);
-});
-
-addActionHandler('setUserSearchQuery', (global, actions, payload): ActionReturnType => {
-  const { query, tabId = getCurrentTabId() } = payload;
-
-  if (!query) return;
-
-  void runThrottledForSearch(async () => {
-    const result = await callApi('searchChats', { query });
-
-    global = getGlobal();
-    const currentSearchQuery = selectTabState(global, tabId).userSearch.query;
-
-    if (!result || !currentSearchQuery || (query !== currentSearchQuery)) {
-      global = updateUserSearchFetchingStatus(global, false, tabId);
-      setGlobal(global);
-      return;
-    }
-
-    const {
-      accountResultIds, globalResultIds,
-    } = result;
-
-    const localUserIds = accountResultIds.filter(isUserId);
-    const globalUserIds = globalResultIds.filter(isUserId);
-
-    global = updateUserSearchFetchingStatus(global, false, tabId);
-    global = updateUserSearch(global, { localUserIds, globalUserIds }, tabId);
-
-    setGlobal(global);
-  });
 });
 
 addActionHandler('importContact', async (global, actions, payload): Promise<void> => {

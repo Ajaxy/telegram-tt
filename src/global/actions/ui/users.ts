@@ -3,23 +3,9 @@ import type { ActionReturnType } from '../../types';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { addTabStateResetterAction } from '../../helpers/meta';
 import { addActionHandler } from '../../index';
-import { closeNewContactDialog, updateUserSearch } from '../../reducers';
+import { closeNewContactDialog } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import { selectIsCurrentUserFrozen } from '../../selectors';
-
-addActionHandler('setUserSearchQuery', (global, actions, payload): ActionReturnType => {
-  const {
-    query,
-    tabId = getCurrentTabId(),
-  } = payload;
-
-  return updateUserSearch(global, {
-    globalUserIds: undefined,
-    localUserIds: undefined,
-    fetchingStatus: Boolean(query),
-    query,
-  }, tabId);
-});
 
 addActionHandler('openAddContactDialog', (global, actions, payload): ActionReturnType => {
   const { userId, tabId = getCurrentTabId() } = payload;

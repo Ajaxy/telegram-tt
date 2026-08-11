@@ -1995,7 +1995,6 @@ export interface ActionPayloads {
 
   deleteContact: { userId: string };
   loadUser: { userId: string };
-  setUserSearchQuery: { query?: string } & WithTabId;
   loadCommonChats: {
     userId: string;
   };

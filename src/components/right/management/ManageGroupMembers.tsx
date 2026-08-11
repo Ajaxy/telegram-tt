@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import {
-  memo, useMemo, useRef,
+  memo, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -13,7 +13,7 @@ import {
 } from '../../../global/helpers';
 import { filterPeersByQuery } from '../../../global/helpers/peers';
 import {
-  selectCanBanUsers, selectChat, selectChatFullInfo, selectTabState,
+  selectCanBanUsers, selectChat, selectChatFullInfo,
 } from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
@@ -25,6 +25,7 @@ import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation'
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
+import usePeerSearch, { userGlobalSearch } from '../../../hooks/usePeerSearch';
 
 import NothingFound from '../../common/NothingFound';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -52,10 +53,6 @@ type StateProps = {
   adminMembersById?: Record<string, ApiChatMember>;
   isChannel?: boolean;
   localContactIds?: string[];
-  searchQuery?: string;
-  isSearching?: boolean;
-  localUserIds?: string[];
-  globalUserIds?: string[];
   currentUserId?: string;
   canDeleteMembers?: boolean;
   areParticipantsHidden?: boolean;
@@ -71,11 +68,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   userStatusesById,
   isChannel,
   isActive,
-  globalUserIds,
   localContactIds,
-  localUserIds,
-  isSearching,
-  searchQuery,
   currentUserId,
   canDeleteMembers,
   areParticipantsHidden,
@@ -85,7 +78,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   onChatMemberSelect,
 }) => {
   const {
-    openChat, setUserSearchQuery, closeManagement,
+    openChat, closeManagement,
     toggleParticipantsHidden, setNewChatMembersDialogState, toggleManagement,
     openDeleteMemberModal,
   } = getActions();
@@ -93,6 +86,14 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const inputRef = useRef<HTMLInputElement>();
   const containerRef = useRef<HTMLDivElement>();
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const { result: foundIds, currentResultsQuery, isSearching } = usePeerSearch({
+    query: searchQuery,
+    queryFn: userGlobalSearch,
+    isDisabled: !noAdmins,
+  });
+  const relevantFoundIds = currentResultsQuery === searchQuery ? foundIds : undefined;
 
   const adminIds = useMemo(() => {
     return noAdmins && adminMembersById ? Object.keys(adminMembersById) : [];
@@ -127,8 +128,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
     return sortChatIds(
       unique([
         ...listedIds,
-        ...(shouldUseSearchResults ? localUserIds || [] : []),
-        ...(shouldUseSearchResults ? globalUserIds || [] : []),
+        ...(relevantFoundIds || []),
       ]).filter((contactId) => {
         const user = usersById[contactId];
         if (!user) {
@@ -140,7 +140,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
       }),
       true,
     );
-  }, [memberIds, localContactIds, searchQuery, localUserIds, globalUserIds, isChannel, noAdmins, adminIds]);
+  }, [memberIds, localContactIds, searchQuery, relevantFoundIds, isChannel, noAdmins, adminIds]);
 
   const [viewportIds, getMore] = useInfiniteScroll(undefined, displayedIds, Boolean(searchQuery));
 
@@ -155,7 +155,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   });
 
   const handleFilterChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserSearchQuery({ query: e.target.value });
+    setSearchQuery(e.target.value);
   });
 
   const handleKeyDown = useKeyboardListNavigation(containerRef, isActive, (index) => {
@@ -284,13 +284,6 @@ export default memo(withGlobal<OwnProps>(
     || chat.isCreator
     );
 
-    const {
-      query: searchQuery,
-      fetchingStatus,
-      globalUserIds,
-      localUserIds,
-    } = selectTabState(global).userSearch;
-
     return {
       areParticipantsHidden: Boolean(chat && areParticipantsHidden),
       members,
@@ -299,10 +292,6 @@ export default memo(withGlobal<OwnProps>(
       userStatusesById,
       isChannel,
       localContactIds,
-      searchQuery,
-      isSearching: fetchingStatus,
-      globalUserIds,
-      localUserIds,
       canDeleteMembers,
       currentUserId: global.currentUserId,
       canHideParticipants,

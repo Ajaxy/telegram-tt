@@ -375,8 +375,6 @@ export const INITIAL_TAB_STATE: TabState = {
 
   globalSearch: {},
 
-  userSearch: {},
-
   leftColumn: {
     contentKey: LeftColumnContent.ChatList,
     settingsScreen: SettingsScreens.Main,

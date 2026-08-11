@@ -339,13 +339,6 @@ export type TabState = {
     }>>;
   };
 
-  userSearch: {
-    query?: string;
-    fetchingStatus?: boolean;
-    localUserIds?: string[];
-    globalUserIds?: string[];
-  };
-
   activeEmojiInteractions?: ActiveEmojiInteraction[];
   activeReactions: Record<string, ApiReactionWithPaid[]>;
 
