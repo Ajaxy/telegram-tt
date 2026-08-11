@@ -3999,6 +3999,7 @@ export interface LangPairPlural {
   'DeleteForEveryoneHint': undefined;
   'ReactionDeleted': undefined;
   'MediaReplaceInvalidError': undefined;
+  'FwdMessagesToSaved': undefined;
 }
 
 export interface LangPairPluralWithVariables<V = LangVariable> {

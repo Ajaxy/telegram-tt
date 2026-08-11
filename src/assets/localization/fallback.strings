@@ -3063,6 +3063,8 @@
 "MenuAddCaption" = "Add Caption";
 "FwdMessagesToChats_one" = "Message forwarded to {count} chat";
 "FwdMessagesToChats_other" = "Message forwarded to {count} chats";
+"FwdMessagesToSaved_one" = "Message forwarded to **Saved Messages**";
+"FwdMessagesToSaved_other" = "Messages forwarded to **Saved Messages**";
 "MenuCopyDate" = "Copy Date";
 "DateCopiedToast" = "Date copied to clipboard";
 "ReminderSetToast" = "You set up a reminder in **Saved Messages**";
