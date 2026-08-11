@@ -673,7 +673,7 @@ const MessageInput = ({
     if (canAutoFocus) {
       focusInput();
     }
-  }, [chatId, focusInput, replyInfo, canAutoFocus]);
+  }, [chatId, focusInput, replyInfo, canAutoFocus, isRichEditorReady]);
 
   useEffect(() => {
     if (
