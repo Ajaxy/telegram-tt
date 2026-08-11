@@ -11,6 +11,7 @@ import {
   selectIsMessageSelected,
 } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
+import buildStyle from '../../../../util/buildStyle';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 
@@ -60,7 +61,12 @@ export default function withSelectControl(WrappedComponent: FC) {
     return (
       <div
         className={buildClassName('album-item-select-wrapper', isSelected && 'is-selected')}
-        style={dimensions ? `left: ${dimensions.x}px; top: ${dimensions.y}px;` : ''}
+        style={dimensions ? buildStyle(
+          `left: ${dimensions.x}px`,
+          `top: ${dimensions.y}px`,
+          `width: ${dimensions.width}px`,
+          `height: ${dimensions.height}px`,
+        ) : ''}
         onClick={isInSelectMode ? handleMessageSelect : undefined}
       >
         {isInSelectMode && (
