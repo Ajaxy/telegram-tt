@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="64" viewBox="0 0 512 64">
+  <defs>
+    <linearGradient id="xDisplacement" x1="0" y1="0" x2="512" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#608080"/>
+      <stop offset="0.5" stop-color="#808080"/>
+      <stop offset="1" stop-color="#a08080"/>
+    </linearGradient>
+    <linearGradient id="xStrength" x1="0" y1="0" x2="0" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#000000"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <linearGradient id="yDisplacement" x1="0" y1="0" x2="0" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#000000"/>
+      <stop offset="0.125" stop-color="#000008"/>
+      <stop offset="0.25" stop-color="#000012"/>
+      <stop offset="0.375" stop-color="#00001c"/>
+      <stop offset="0.5" stop-color="#00002a"/>
+      <stop offset="0.625" stop-color="#00003a"/>
+      <stop offset="0.75" stop-color="#000054"/>
+      <stop offset="0.875" stop-color="#00007a"/>
+      <stop offset="0.9375" stop-color="#00009a"/>
+      <stop offset="0.96875" stop-color="#0000b5"/>
+      <stop offset="1" stop-color="#0000ff"/>
+    </linearGradient>
+    <mask id="xStrengthMask" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="64">
+      <rect width="512" height="64" fill="url(#xStrength)"/>
+    </mask>
+  </defs>
+  <g style="isolation: isolate">
+    <rect width="512" height="64" fill="#808080"/>
+    <rect width="512" height="64" fill="url(#xDisplacement)" mask="url(#xStrengthMask)"/>
+    <rect width="512" height="64" fill="url(#yDisplacement)" style="mix-blend-mode: screen"/>
+  </g>
+</svg>

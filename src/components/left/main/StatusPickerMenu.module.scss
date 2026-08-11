@@ -1,3 +1,5 @@
+@use "../../../styles/mixins";
+
 .menuContent {
   --offset-y: 3.25rem !important;
   --offset-x: var(--folders-sidebar-width) !important;
@@ -26,4 +28,10 @@
     left: 0.5rem !important;
     width: calc(100vw - 1rem);
   }
+}
+
+.extendedPicker {
+  height: calc(100% + 2rem);
+
+  @include mixins.gradient-border-bottom(calc(2rem + 0.5rem), calc(2rem + 0.0625rem));
 }
