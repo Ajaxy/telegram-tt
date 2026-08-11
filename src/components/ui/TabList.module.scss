@@ -134,7 +134,7 @@
 
       position: absolute;
       z-index: 9;
-      top: 50%;
+      top: var(--fade-mask-top, 50%);
       left: 0;
 
       width: 100%;

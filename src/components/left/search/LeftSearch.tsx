@@ -1,10 +1,8 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo,
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -21,7 +19,7 @@ import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation'
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import SquareTabList from '../../ui/SquareTabList';
+import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import AudioResults from './AudioResults';
 import BotAppResults from './BotAppResults';
@@ -69,7 +67,7 @@ const CHAT_TABS: TabInfo[] = [
   ...TABS.slice(3), // Skip ChatList, ChannelList and BotApps, replaced with All Messages
 ];
 
-const LeftSearch: FC<OwnProps & StateProps> = ({
+const LeftSearch = ({
   searchQuery,
   searchDate,
   isActive,
@@ -77,7 +75,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
   chatId,
   animationLevel,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     setGlobalSearchContent,
     setGlobalSearchDate,
@@ -85,7 +83,6 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const lang = useLang();
-  const [activeTab, setActiveTab] = useState(currentContent);
   const dateSearchQuery = useMemo(() => parseDateString(searchQuery), [searchQuery]);
 
   useEffect(() => {
@@ -102,10 +99,12 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
     }));
   }, [chatId, lang]);
 
+  const activeTab = Math.max(0, tabs.findIndex((tab) => tab.type === currentContent));
+  const activeContent = tabs[activeTab]?.type ?? currentContent;
+
   const handleSwitchTab = useLastCallback((index: number) => {
     const tab = tabs[index];
     setGlobalSearchContent({ content: tab.type });
-    setActiveTab(index);
   });
 
   const handleSearchDateSelect = useLastCallback((value: Date) => {
@@ -122,14 +121,21 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="LeftSearch" ref={containerRef} onKeyDown={handleKeyDown}>
-      <SquareTabList activeTab={activeTab} tabs={tabs} onSwitchTab={handleSwitchTab} />
+      <TabList
+        key={chatId ? 'inChat' : 'global'}
+        className="left-search-tab-list"
+        activeTab={activeTab}
+        tabs={tabs}
+        onSwitchTab={handleSwitchTab}
+        withFadeMask
+      />
       <Transition
         name={resolveTransitionName('slideOptimized', animationLevel, undefined, lang.isRtl)}
         renderCount={tabs.length}
-        activeKey={currentContent}
+        activeKey={activeContent}
       >
         {(() => {
-          switch (currentContent) {
+          switch (activeContent) {
             case GlobalSearchContent.ChatList:
             case GlobalSearchContent.ChannelList:
               if (chatId) {
@@ -144,7 +150,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
               }
               return (
                 <ChatResults
-                  isChannelList={currentContent === GlobalSearchContent.ChannelList}
+                  isChannelList={activeContent === GlobalSearchContent.ChannelList}
                   searchQuery={searchQuery}
                   searchDate={searchDate}
                   dateSearchQuery={dateSearchQuery}

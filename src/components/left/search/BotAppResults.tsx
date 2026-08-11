@@ -17,6 +17,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import NothingFound from '../../common/NothingFound';
+import Island from '../../gili/layout/Island';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Link from '../../ui/Link';
 import Loading from '../../ui/Loading';
@@ -102,7 +103,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
           />
         )}
         {canRenderContents && !searchQuery && Boolean(recentBotIds?.length) && (
-          <div className="search-section">
+          <Island className="search-island search-section">
             <h3 className="section-heading">
               {recentBotIds.length > LESS_LIST_ITEMS_AMOUNT && (
                 <Link className="Link" onClick={handleToggleShowMoreMine}>
@@ -124,10 +125,10 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
                 />
               );
             })}
-          </div>
+          </Island>
         )}
         {canRenderContents && Boolean(filteredFoundIds?.length) && (
-          <div className="search-section">
+          <Island className="search-island search-section">
             <h3 className="section-heading">{lang('SearchAppsPopular')}</h3>
             {filteredFoundIds.map((id) => {
               return (
@@ -138,7 +139,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
                 />
               );
             })}
-          </div>
+          </Island>
         )}
       </InfiniteScroll>
     </Transition>

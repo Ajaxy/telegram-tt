@@ -1,33 +1,62 @@
 @use "../../../styles/mixins";
 
 .LeftSearch {
+  --left-search-inset: 1rem;
+  --fade-mask-top: 0;
+
   overflow: hidden;
   display: flex;
   flex-direction: column;
+
   height: 100%;
+
+  background-color: var(--color-background-secondary);
 
   & > .Transition {
     overflow: hidden;
     flex: 1;
   }
 
-  .SquareTabList {
-    z-index: 1;
+  .left-search-tab-list {
+    margin: 0.5rem var(--left-search-inset) 0;
   }
 
   &--content {
     overflow-y: auto;
     height: 100%;
-    padding-top: 0.5rem;
   }
 
-  &--media {
-    padding-top: 0;
+  .search-content,
+  &--content.custom-scroll,
+  .RecentContacts {
+    scrollbar-gutter: stable;
+    padding-top: 1rem;
+
+    @include mixins.gradient-border-top(1rem);
+  }
+
+  .chat-list {
+    background: transparent;
+  }
+
+  .search-island {
+    overflow: hidden;
+    margin: 0 var(--left-search-inset) 1rem;
+    padding: 0.5rem;
+
+    @include mixins.adapt-margin-to-scrollbar(var(--left-search-inset));
+
+    .ListItem-button {
+      border-radius: 1rem;
+    }
+  }
+
+  .island-recent-contacts {
+    padding: 0;
   }
 
   .documents-list {
     padding-bottom: 1.25rem;
-    padding-left: 0.75rem;
 
     .ListItem {
       padding-inline: 0.5rem;
@@ -106,14 +135,13 @@
   }
 
   .media-list {
+    overflow: hidden;
     display: grid;
     grid-auto-rows: 1fr;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.25rem;
+    gap: 0.0625rem;
 
-    padding: 0.5rem;
-
-    @include mixins.adapt-padding-to-scrollbar(0.5rem);
+    margin-inline-start: var(--scrollbar-width);
   }
 
   .Audio {
@@ -209,8 +237,6 @@
   .search-section {
     padding: 0.5rem;
 
-    @include mixins.adapt-padding-to-scrollbar(0.5rem);
-
     .section-heading {
       margin-bottom: 0.625rem !important;
 
@@ -256,11 +282,10 @@
     align-items: flex-end;
     justify-content: space-between;
 
-    padding-bottom: 0.5rem;
+    padding-block: 0.5rem;
     padding-inline: 0.25rem;
 
     background-color: var(--color-background);
-    box-shadow: inset 0 -1px 0 0 var(--color-borders);
 
     -webkit-overflow-scrolling: touch;
 

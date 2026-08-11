@@ -130,6 +130,7 @@ const LeftSearchResultChat = ({
       className="chat-item-clickable search-result"
       contextActions={contextActions}
       buttonRef={buttonRef}
+      withPortalForMenu
       onClick={handleClick}
       onDragEnter={handleDragEnter}
       onDragLeave={onDragLeave}

@@ -17,6 +17,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import NothingFound from '../../common/NothingFound';
+import Island from '../../gili/layout/Island';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Transition from '../../ui/Transition';
 import ChatMessage from './ChatMessage';
@@ -133,12 +134,12 @@ const PublicPostsResults = ({
               />
             )}
             {Boolean(foundMessages.length) && (
-              <div className="pb-2">
+              <Island className="search-island">
                 <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>
                   {lang('PublicPosts')}
                 </h3>
                 {foundMessages.map(renderFoundMessage)}
-              </div>
+              </Island>
             )}
           </InfiniteScroll>
         </div>

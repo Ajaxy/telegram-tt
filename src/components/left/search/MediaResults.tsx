@@ -11,6 +11,7 @@ import { LoadMoreDirection, MediaViewerOrigin } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
+import { getGridCornerClassName } from '../../../util/gridCorners';
 import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
@@ -24,6 +25,7 @@ import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import Media from '../../common/Media';
 import NothingFound from '../../common/NothingFound';
+import Island from '../../gili/layout/Island';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 import Transition from '../../ui/Transition.tsx';
@@ -105,9 +107,10 @@ const MediaResults: FC<OwnProps & StateProps> = ({
   function renderGallery() {
     return (
       <div className="media-list" dir={oldLang.isRtl ? 'rtl' : undefined}>
-        {foundMessages.map((message) => (
+        {foundMessages.map((message, i) => (
           <Media
             key={`${message.chatId}-${message.id}`}
+            className={getGridCornerClassName(i, foundMessages.length)}
             idPrefix="search-media"
             message={message}
             isProtected={isChatProtected || message.isProtected}
@@ -163,7 +166,14 @@ const MediaResults: FC<OwnProps & StateProps> = ({
           />
         )}
         {isMediaGrid && renderGallery()}
-        {isMessageList && renderSearchResult()}
+        {isMessageList && (
+          <Island className="search-island search-section">
+            <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>
+              {lang('SearchMessages')}
+            </h3>
+            {renderSearchResult()}
+          </Island>
+        )}
       </InfiniteScroll>
     </Transition>
   );

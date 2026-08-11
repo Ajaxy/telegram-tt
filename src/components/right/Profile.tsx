@@ -78,6 +78,7 @@ import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import { isUserId } from '../../util/entities/ids';
+import { getGridCornerClassName } from '../../util/gridCorners';
 import { buildCollectionByKey } from '../../util/iteratees.ts';
 import { resolveTransitionName } from '../../util/resolveTransitionName.ts';
 import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
@@ -245,27 +246,6 @@ const CONTENT_LIST_CLASS: Record<string, string> = {
   similarChannels: styles.similarChannelsList,
   similarBots: styles.similarBotsList,
 };
-
-const GRID_COLUMNS = 3;
-
-function getGridCornerClassName(index: number, total: number) {
-  const lastRowIndex = Math.floor((total - 1) / GRID_COLUMNS);
-  const lastRowCount = total - lastRowIndex * GRID_COLUMNS;
-  const isLastRowFull = lastRowCount === GRID_COLUMNS;
-
-  const isTopStart = index === 0;
-  const isTopEnd = index === Math.min(GRID_COLUMNS - 1, total - 1);
-  const isBottomStart = index === lastRowIndex * GRID_COLUMNS;
-  const isBottomEnd = index === total - 1
-    || (!isLastRowFull && lastRowIndex > 0 && index === lastRowIndex * GRID_COLUMNS - 1);
-
-  return buildClassName(
-    isTopStart && 'roundTopStart',
-    isTopEnd && 'roundTopEnd',
-    isBottomStart && 'roundBottomStart',
-    isBottomEnd && 'roundBottomEnd',
-  );
-}
 
 const Profile = ({
   chatId,

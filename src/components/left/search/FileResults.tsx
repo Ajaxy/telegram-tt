@@ -23,6 +23,7 @@ import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import Document from '../../common/Document';
 import NothingFound from '../../common/NothingFound';
+import Island from '../../gili/layout/Island';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 import Transition from '../../ui/Transition.tsx';
@@ -150,7 +151,11 @@ const FileResults: FC<OwnProps & StateProps> = ({
             description={lang('ChatList.Search.NoResultsDescription')}
           />
         )}
-        {canRenderContents && foundIds && foundIds.length > 0 && renderList()}
+        {canRenderContents && foundIds && foundIds.length > 0 && (
+          <Island className="search-island">
+            {renderList()}
+          </Island>
+        )}
       </InfiniteScroll>
     </Transition>
   );
