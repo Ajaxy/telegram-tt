@@ -259,7 +259,7 @@ export function buildInputPoll(
     correctAnswers,
     attachedMedia: media?.attachedMedia,
     solution,
-    solutionEntities: solution ? inputSolutionEntities : undefined,
+    solutionEntities: solution !== undefined ? inputSolutionEntities : undefined,
     solutionMedia: media?.solutionMedia,
   });
 }
