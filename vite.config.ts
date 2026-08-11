@@ -1,4 +1,4 @@
-import { readFileSync, statSync } from 'fs';
+import { readFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import type { NormalizedOutputOptions, OutputBundle, PluginContext } from 'rolldown';
 import { bundleStats } from 'rollup-plugin-bundle-stats';
@@ -12,7 +12,6 @@ import buildGitInfoPlugin from './plugins/gitInfo.ts';
 import packageJson from './package.json' with { type: 'json' };
 
 const DIR_NAME = dirname(fileURLToPath(import.meta.url));
-const CHANGELOG_PATH = resolve(DIR_NAME, 'src/versionNotification.txt');
 const PRODUCTION_URL = 'https://web.telegram.org/a';
 
 const { version: APP_VERSION } = packageJson;
@@ -196,7 +195,6 @@ export default defineConfig(({ mode }): UserConfig => {
     },
     define: {
       APP_VERSION: JSON.stringify(APP_VERSION),
-      CHANGELOG_DATETIME: JSON.stringify(statSync(CHANGELOG_PATH, { throwIfNoEntry: false })?.mtime.getTime()),
     },
     resolve: {
       tsconfigPaths: true,

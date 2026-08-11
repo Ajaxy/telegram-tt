@@ -1,4 +1,3 @@
-import type { ApiMessage } from '../../../api/types';
 import type {
   ActionReturnType,
   GlobalState,
@@ -17,9 +16,6 @@ import { copyHtmlToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { compact, findLast } from '../../../util/iteratees';
 import { getTranslationFn } from '../../../util/localization';
-import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
-import { getServerTime } from '../../../util/serverTime';
-import versionNotification from '../../../versionNotification.txt?raw';
 import {
   getMediaFilename,
   getMediaFormat,
@@ -72,7 +68,6 @@ import { getIsMobile } from '../../../hooks/useAppLayout';
 const FOCUS_DURATION = 1500;
 const FOCUS_NO_HIGHLIGHT_DURATION = SCROLL_MAX_DURATION + ANIMATION_END_DELAY;
 const POLL_RESULT_OPEN_DELAY_MS = 450;
-const VERSION_NOTIFICATION_DURATION = 1000 * 60 * 60 * 24 * 7; // 7 days
 const SERVICE_NOTIFICATIONS_MAX_AMOUNT = 1e3;
 
 let blurTimeout: number | undefined;
@@ -797,35 +792,8 @@ addActionHandler('openTodoListModal', (global, actions, payload): ActionReturnTy
 
 addTabStateResetterAction('closeTodoListModal', 'todoListModal');
 
-addActionHandler('checkVersionNotification', (global, actions): ActionReturnType => {
-  if (CHANGELOG_DATETIME && Date.now() > CHANGELOG_DATETIME + VERSION_NOTIFICATION_DURATION) {
-    return;
-  }
-
-  const currentVersion = APP_VERSION.split('.').slice(0, 2).join('.');
-  const { serviceNotifications } = global;
-
-  if (serviceNotifications.find(({ version }) => version === currentVersion)) {
-    return;
-  }
-
-  const message: Omit<ApiMessage, 'id'> = {
-    chatId: SERVICE_NOTIFICATIONS_USER_ID,
-    date: getServerTime(),
-    content: {
-      text: parseHtmlAsFormattedText(versionNotification, true),
-    },
-    isOutgoing: false,
-  };
-
-  actions.createServiceNotification({
-    message: message as ApiMessage,
-    version: currentVersion,
-  });
-});
-
 addActionHandler('createServiceNotification', (global, actions, payload): ActionReturnType => {
-  const { message, version } = payload;
+  const { message } = payload;
   const { serviceNotifications } = global;
 
   const maxId = Math.max(
@@ -842,7 +810,6 @@ addActionHandler('createServiceNotification', (global, actions, payload): Action
   const serviceNotification = {
     id,
     message,
-    version,
     isUnread: true,
   };
 

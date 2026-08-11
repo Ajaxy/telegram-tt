@@ -25,7 +25,6 @@ import {
   selectIsMediaViewerOpen,
   selectIsReactionPickerOpen,
   selectIsRightColumnShown,
-  selectIsServiceChatReady,
   selectIsStoryViewerOpen,
   selectPerformanceSettingsValue,
   selectTabSelectedGiftAuction,
@@ -119,7 +118,6 @@ type StateProps = {
   openedStickerSetShortName?: string;
   openedCustomEmojiSetIds?: string[];
   activeGroupCallId?: string;
-  isServiceChatReady?: boolean;
   wasTimeFormatSetManually?: boolean;
   isPhoneCallActive?: boolean;
   addedSetIds?: string[];
@@ -174,7 +172,6 @@ const Main = ({
   limitReached,
   openedStickerSetShortName,
   openedCustomEmojiSetIds,
-  isServiceChatReady,
   withInterfaceAnimations,
   wasTimeFormatSetManually,
   addedSetIds,
@@ -235,7 +232,6 @@ const Main = ({
     ensureTimeFormat,
     closeStickerSetModal,
     closeCustomEmojiSets,
-    checkVersionNotification,
     loadConfig,
     loadAppConfig,
     loadAttachBots,
@@ -423,13 +419,6 @@ const Main = ({
   useEffect(() => {
     loadBotFreezeAppeal();
   }, [isAppConfigLoaded]);
-
-  // Check version when service chat is ready
-  useEffect(() => {
-    if (isServiceChatReady && isMasterTab) {
-      checkVersionNotification();
-    }
-  }, [isServiceChatReady, isMasterTab]);
 
   // Ensure time format
   useEffect(() => {
@@ -747,7 +736,6 @@ export default memo(withGlobal<OwnProps>(
       shouldSkipHistoryAnimations,
       openedStickerSetShortName,
       openedCustomEmojiSetIds,
-      isServiceChatReady: selectIsServiceChatReady(global),
       activeGroupCallId: isMasterTab ? global.groupCalls.activeGroupCallId : undefined,
       withInterfaceAnimations: selectCanAnimateInterface(global),
       wasTimeFormatSetManually,

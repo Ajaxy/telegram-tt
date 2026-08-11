@@ -320,10 +320,8 @@ export interface ActionPayloads {
   uploadWallpaper: File;
   setDeviceToken: { token: string };
   deleteDeviceToken: undefined;
-  checkVersionNotification: undefined;
   createServiceNotification: {
     message: ApiMessage;
-    version?: string;
   };
   saveCloseFriends: {
     userIds: string[];

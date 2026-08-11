@@ -4,7 +4,6 @@ declare module '*.css';
 declare module '*.scss';
 
 declare const APP_VERSION: string;
-declare const CHANGELOG_DATETIME: number | undefined;
 
 declare module 'virtual:git-info' {
   export const APP_REVISION: string;
@@ -110,10 +109,6 @@ declare module '*.webp' {
 declare module '*.svg' {
   const url: string;
   export default url;
-}
-declare module '*.txt?raw' {
-  const content: string;
-  export default content;
 }
 declare module '*.tgs' {
   const url: string;

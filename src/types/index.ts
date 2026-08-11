@@ -700,7 +700,6 @@ export interface Thread {
 export interface ServiceNotification {
   id: number;
   message: ApiMessage;
-  version?: string;
   isUnread?: boolean;
   isDeleted?: boolean;
 }
