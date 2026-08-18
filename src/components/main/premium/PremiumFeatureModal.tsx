@@ -56,6 +56,7 @@ export const PREMIUM_FEATURE_TITLES: Record<ApiPremiumSection, string> = {
   message_privacy: 'PremiumPreviewMessagePrivacy',
   effects: 'Premium.MessageEffects',
   ai_compose: 'PremiumPreviewAiTools',
+  rich_formatting: 'PremiumPreviewRichFormatting',
   todo: 'PremiumPreviewTodo',
   pm_noforwards: 'PremiumPreviewNoForwards',
 };
@@ -80,9 +81,12 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
   message_privacy: 'PremiumPreviewMessagePrivacyDescription',
   effects: 'Premium.MessageEffectsInfo',
   ai_compose: 'PremiumPreviewAiToolsDescription',
+  rich_formatting: 'PremiumPreviewRichFormattingDescription',
   todo: 'PremiumPreviewTodoDescription',
   pm_noforwards: 'PremiumPreviewNoForwardsDescription',
 };
+
+export const NEW_LANG_SECTIONS: ApiPremiumSection[] = ['ai_compose', 'rich_formatting', 'todo', 'pm_noforwards'];
 
 const LIMITS_TITLES: Record<ApiLimitTypeForPromo, string> = {
   channels: 'GroupsAndChannelsLimitTitle',
@@ -311,7 +315,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
           }
 
           const i = promo.videoSections.indexOf(section);
-          const shouldUseNewLang = section === 'todo' || section === 'ai_compose';
+          const shouldUseNewLang = NEW_LANG_SECTIONS.includes(section);
           return (
             <div className={styles.slide}>
               <div className={styles.frame}>

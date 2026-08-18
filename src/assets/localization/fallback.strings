@@ -2661,6 +2661,8 @@
 "PremiumPreviewTodo" = "Checklists";
 "PremiumPreviewAiTools" = "AI Tools";
 "PremiumPreviewAiToolsDescription" = "Transform your messages and entire chats in your preferred style and language.";
+"PremiumPreviewRichFormatting" = "Rich Formatting";
+"PremiumPreviewRichFormattingDescription" = "Format your messages with headings, lists, quotes and other rich blocks.";
 "NativeDownloadFailed" = "Failed to save file to the Downloads folder";
 "DescriptionAboutGram" = "Use Grams to buy gifts and suggest posts to channels.";
 "ButtonTopUpViaFragment" = "Top Up Via Fragment";

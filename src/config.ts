@@ -435,6 +435,7 @@ export const PREMIUM_FEATURE_SECTIONS = [
   'message_privacy',
   'effects',
   'ai_compose',
+  'rich_formatting',
   'todo',
   'pm_noforwards',
 ] as const;

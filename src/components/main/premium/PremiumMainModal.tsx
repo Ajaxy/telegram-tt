@@ -43,7 +43,9 @@ import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 import Transition from '../../ui/Transition';
 import PremiumFeatureItem from './PremiumFeatureItem';
-import PremiumFeatureModal, { PREMIUM_FEATURE_DESCRIPTIONS, PREMIUM_FEATURE_TITLES } from './PremiumFeatureModal';
+import PremiumFeatureModal, {
+  NEW_LANG_SECTIONS, PREMIUM_FEATURE_DESCRIPTIONS, PREMIUM_FEATURE_TITLES,
+} from './PremiumFeatureModal';
 import PremiumSubscriptionOption from './PremiumSubscriptionOption';
 
 import styles from './PremiumMainModal.module.scss';
@@ -60,10 +62,12 @@ import PremiumLimits from '../../../assets/premium/PremiumLimits.svg';
 import PremiumMessagePrivacy from '../../../assets/premium/PremiumMessagePrivacy.svg';
 import PremiumNoforwards from '../../../assets/premium/PremiumNoForwardsPrivacy.svg';
 import PremiumReactions from '../../../assets/premium/PremiumReactions.svg';
+import PremiumRichFormatting from '../../../assets/premium/PremiumRichFormatting.svg';
 import PremiumSpeed from '../../../assets/premium/PremiumSpeed.svg';
 import PremiumStatus from '../../../assets/premium/PremiumStatus.svg';
 import PremiumStickers from '../../../assets/premium/PremiumStickers.svg';
 import PremiumTags from '../../../assets/premium/PremiumTags.svg';
+import PremiumTodo from '../../../assets/premium/PremiumTodo.svg';
 import PremiumTranslate from '../../../assets/premium/PremiumTranslate.svg';
 import PremiumVideo from '../../../assets/premium/PremiumVideo.svg';
 import PremiumVoice from '../../../assets/premium/PremiumVoice.svg';
@@ -91,7 +95,8 @@ const PREMIUM_FEATURE_COLOR_ICONS: Record<ApiPremiumSection, string> = {
   message_privacy: PremiumMessagePrivacy,
   effects: PremiumEffects,
   ai_compose: PremiumAi,
-  todo: PremiumBadge,
+  rich_formatting: PremiumRichFormatting,
+  todo: PremiumTodo,
   pm_noforwards: PremiumNoforwards,
 };
 
@@ -447,7 +452,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             </div>
             <div className={buildClassName(styles.list, isPremium && styles.noButton)}>
               {filteredSections.map((section, index) => {
-                const shouldUseNewLang = section === 'todo' || section === 'pm_noforwards' || section === 'ai_compose';
+                const shouldUseNewLang = NEW_LANG_SECTIONS.includes(section);
                 return (
                   <PremiumFeatureItem
                     key={section}

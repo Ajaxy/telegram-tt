@@ -1955,6 +1955,8 @@ export interface LangPair {
   'PremiumPreviewTodo': undefined;
   'PremiumPreviewAiTools': undefined;
   'PremiumPreviewAiToolsDescription': undefined;
+  'PremiumPreviewRichFormatting': undefined;
+  'PremiumPreviewRichFormattingDescription': undefined;
   'NativeDownloadFailed': undefined;
   'DescriptionAboutGram': undefined;
   'ButtonTopUpViaFragment': undefined;
