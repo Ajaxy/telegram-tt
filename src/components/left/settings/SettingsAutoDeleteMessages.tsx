@@ -1,7 +1,7 @@
 import {
-  memo, useCallback, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getPromiseActions, withGlobal } from '../../../global';
+import { getGlobal, getPromiseActions, withGlobal } from '../../../global';
 
 import type { LangFn } from '../../../util/localization';
 
@@ -63,10 +63,21 @@ const SettingsAutoDeleteMessages = ({
   const { setDefaultHistoryTtl } = getPromiseActions();
 
   const [draftPeriod, setDraftPeriod] = useState<number>();
+  const [customPeriod, setCustomPeriod] = useState<number | undefined>(
+    defaultHistoryTtl !== undefined && !DEFAULT_AUTO_DELETE_PERIODS.includes(defaultHistoryTtl)
+      ? defaultHistoryTtl
+      : undefined,
+  );
 
   const lang = useLang();
 
   const selectedPeriod = draftPeriod ?? defaultHistoryTtl;
+
+  useEffect(() => {
+    if (draftPeriod === undefined || draftPeriod !== defaultHistoryTtl) return;
+
+    setDraftPeriod(undefined);
+  }, [defaultHistoryTtl, draftPeriod]);
 
   useHistoryBack({
     isActive,
@@ -76,9 +87,9 @@ const SettingsAutoDeleteMessages = ({
   const options = useMemo(() => buildPeriodOptions(
     lang,
     DEFAULT_AUTO_DELETE_PERIODS,
-    selectedPeriod,
+    customPeriod,
     lang('SettingsItemPrivacyOff'),
-  ), [lang, selectedPeriod]);
+  ), [customPeriod, lang]);
 
   const customOptions = useMemo(() => buildPeriodOptions(
     lang,
@@ -92,8 +103,8 @@ const SettingsAutoDeleteMessages = ({
 
     await setDefaultHistoryTtl({ period });
 
-    // Roll the optimistic selection back unless a newer choice is already pending
-    setDraftPeriod((current) => (current === period ? undefined : current));
+    const savedPeriod = getGlobal().settings.byKey.defaultHistoryTtl;
+    setDraftPeriod((current) => (current === period && savedPeriod !== period ? undefined : current));
   });
 
   const handlePeriodChange = useLastCallback((value: string) => {
@@ -102,7 +113,13 @@ const SettingsAutoDeleteMessages = ({
 
   const handleCustomPeriodChange = useLastCallback((e: React.SyntheticEvent, period?: number) => {
     e.preventDefault();
-    void savePeriod(period!);
+    const newPeriod = period!;
+
+    if (!DEFAULT_AUTO_DELETE_PERIODS.includes(newPeriod)) {
+      setCustomPeriod(newPeriod);
+    }
+
+    void savePeriod(newPeriod);
   });
 
   const CustomTimeTrigger = useCallback(({ onTrigger, isOpen }: {

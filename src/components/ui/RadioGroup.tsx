@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import type { FC, TeactNode } from '../../lib/teact/teact';
+import type { TeactNode } from '../../lib/teact/teact';
 import { memo, useCallback } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
@@ -33,7 +33,7 @@ type OwnProps = {
   className?: string;
 };
 
-const RadioGroup: FC<OwnProps> = ({
+const RadioGroup = ({
   id,
   name,
   options,
@@ -47,7 +47,7 @@ const RadioGroup: FC<OwnProps> = ({
   withIcon,
   subLabel,
   className,
-}) => {
+}: OwnProps) => {
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const { value } = event.currentTarget;
     onChange(value, event);
@@ -61,6 +61,7 @@ const RadioGroup: FC<OwnProps> = ({
     <div id={id} className={buildClassName('radio-group', className)}>
       {options.map((option) => (
         <Radio
+          key={option.value}
           name={name}
           label={option.label}
           subLabel={subLabel || option.subLabel}
