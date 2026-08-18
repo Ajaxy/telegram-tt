@@ -55,6 +55,7 @@ export interface ApiUser {
 
 export interface ApiUserFullInfo {
   isBlocked?: boolean;
+  ttlPeriod?: number;
   bio?: string;
   commonChatsCount?: number;
   pinnedMessageId?: number;

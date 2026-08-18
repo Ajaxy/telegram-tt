@@ -80,6 +80,7 @@ type OwnProps = {
   withStory?: boolean;
   forPremiumPromo?: boolean;
   withStoryGap?: boolean;
+  storyGapPercent?: number;
   withStorySolid?: boolean;
   storyColors?: string[];
   forceFriendStorySolid?: boolean;
@@ -113,6 +114,7 @@ const Avatar = ({
   withStory,
   forPremiumPromo,
   withStoryGap,
+  storyGapPercent,
   withStorySolid,
   storyColors,
   forceFriendStorySolid,
@@ -342,6 +344,7 @@ const Avatar = ({
           peerId={realPeer.id}
           size={pxSize}
           withExtraGap={withStoryGap}
+          extraGapPercent={storyGapPercent}
           colors={storyColors}
           style={storyCircleStyle}
         />

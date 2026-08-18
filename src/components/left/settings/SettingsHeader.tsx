@@ -95,6 +95,8 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{oldLang('DataSettings')}</h3>;
       case SettingsScreens.Privacy:
         return <h3>{oldLang('PrivacySettings')}</h3>;
+      case SettingsScreens.AutoDeleteMessages:
+        return <h3>{lang('AutoDeleteMessages')}</h3>;
       case SettingsScreens.Language:
         return <h3>{oldLang('Language')}</h3>;
       case SettingsScreens.DoNotTranslate:

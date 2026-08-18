@@ -467,6 +467,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }
       }
 
+      if (!isLocal && message.ttlPeriod) {
+        actions.cleanupExpiredTtlMessages({ chatId, messageIds: [id] });
+      }
+
       break;
     }
 

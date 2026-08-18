@@ -507,6 +507,12 @@ export type ApiUpdatePeerSettings = {
   settings: ApiPeerSettings;
 };
 
+export type ApiUpdatePeerHistoryTtl = {
+  '@type': 'updatePeerHistoryTtl';
+  id: string;
+  ttlPeriod?: number;
+};
+
 export type ApiUpdateUser = {
   '@type': 'updateUser';
   id: string;
@@ -990,7 +996,8 @@ export type ApiUpdate = (
   ApiUpdateDeleteHistory |
   ApiDeleteParticipantHistory | ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateServiceNotification | ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus |
-  ApiUpdateUserFullInfo | ApiUpdateVideoProcessingPending | ApiUpdatePeerSettings | ApiUpdateUserAlreadyAuthorized |
+  ApiUpdateUserFullInfo | ApiUpdateVideoProcessingPending | ApiUpdatePeerSettings | ApiUpdatePeerHistoryTtl
+  | ApiUpdateUserAlreadyAuthorized |
   ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage | ApiUpdateScheduledMessageSendFailed |
   ApiUpdateError | ApiUpdateResetContacts | ApiUpdateStartEmojiInteraction | ApiUpdateThreadReadState |
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet | ApiUpdateStickerSets | ApiUpdateStickerSetsOrder |

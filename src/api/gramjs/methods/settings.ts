@@ -685,6 +685,19 @@ export async function fetchCountryList({ langCode = 'en' }: { langCode?: string 
   return buildApiCountryList(countryList.countries);
 }
 
+export async function fetchDefaultHistoryTtl() {
+  const result = await invokeRequest(new GramJs.messages.GetDefaultHistoryTTL());
+  if (!result) return undefined;
+
+  return result.period;
+}
+
+export function setDefaultHistoryTtl({ period }: { period: number }) {
+  return invokeRequest(new GramJs.messages.SetDefaultHistoryTTL({ period }), {
+    shouldReturnTrue: true,
+  });
+}
+
 export async function fetchGlobalPrivacySettings() {
   const result = await invokeRequest(new GramJs.account.GetGlobalPrivacySettings());
 

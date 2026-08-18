@@ -19,6 +19,7 @@ import SettingsPasscode from './passcode/SettingsPasscode';
 import PrivacyMessages from './PrivacyMessages';
 import SettingsActiveSessions from './SettingsActiveSessions';
 import SettingsActiveWebsites from './SettingsActiveWebsites';
+import SettingsAutoDeleteMessages from './SettingsAutoDeleteMessages';
 import SettingsCustomEmoji from './SettingsCustomEmoji';
 import SettingsDataStorage from './SettingsDataStorage';
 import SettingsDoNotTranslate from './SettingsDoNotTranslate';
@@ -84,6 +85,7 @@ const FOLDERS_SCREENS = [
 ];
 
 const PRIVACY_SCREENS = [
+  SettingsScreens.AutoDeleteMessages,
   SettingsScreens.PrivacyBlockedUsers,
   SettingsScreens.ActiveWebsites,
   SettingsScreens.Passkeys,
@@ -289,6 +291,13 @@ const Settings: FC<OwnProps> = ({
         return (
           <SettingsPrivacy
             isActive={isScreenActive || isPrivacyScreen}
+            onReset={handleReset}
+          />
+        );
+      case SettingsScreens.AutoDeleteMessages:
+        return (
+          <SettingsAutoDeleteMessages
+            isActive={isScreenActive}
             onReset={handleReset}
           />
         );

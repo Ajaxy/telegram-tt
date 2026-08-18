@@ -291,6 +291,7 @@ export function buildApiMessageWithChatId(
     content,
     date: mtpMessage.date,
     senderId: fromId,
+    ttlPeriod: mtpMessage.ttlPeriod,
     viewsCount: mtpMessage.views,
     forwardsCount: mtpMessage.forwards,
     isScheduled,

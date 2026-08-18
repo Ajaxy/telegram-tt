@@ -798,6 +798,25 @@ addActionHandler('loadGlobalPrivacySettings', async (global): Promise<void> => {
   setGlobal(global);
 });
 
+addActionHandler('loadDefaultHistoryTtl', async (global): Promise<void> => {
+  const defaultHistoryTtl = await callApi('fetchDefaultHistoryTtl');
+  if (defaultHistoryTtl === undefined) return;
+
+  global = getGlobal();
+  global = replaceSettings(global, { defaultHistoryTtl });
+  setGlobal(global);
+});
+
+addActionHandler('setDefaultHistoryTtl', async (global, _actions, payload): Promise<void> => {
+  const { period } = payload;
+  const result = await callApi('setDefaultHistoryTtl', { period });
+  if (!result) return;
+
+  global = getGlobal();
+  global = replaceSettings(global, { defaultHistoryTtl: period });
+  setGlobal(global);
+});
+
 addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload): Promise<void> => {
   const shouldArchiveAndMuteNewNonContact = payload.shouldArchiveAndMuteNewNonContact
     ?? Boolean(global.settings.byKey.shouldArchiveAndMuteNewNonContact);

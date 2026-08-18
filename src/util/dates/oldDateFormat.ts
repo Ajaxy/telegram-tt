@@ -87,6 +87,8 @@ export function formatMonthAndYear(lang: OldLangFn | LangFn, date: Date, isShort
   return formatDateToString(date, lang.code, false, isShort ? 'short' : 'long', true);
 }
 
+// Rounds up, so the result is never shorter than the actual time left.
+// A unit count overflowing into the next unit (e.g. 29 days → 5 weeks) falls through to that unit instead.
 export function formatCountdown(
   lang: LangFn,
   secondsLeft: number,
@@ -94,21 +96,28 @@ export function formatCountdown(
   const days = getDays(secondsLeft);
   if (secondsLeft < 0) {
     return 0;
-  } else if (days < 1) {
-    return formatMediaDuration(secondsLeft);
-  } else if (days < 7) {
-    const count = days;
-    return lang('Days', { count }, { pluralValue: count });
-  } else if (days < 30) {
-    const count = Math.floor(days / 7);
-    return lang('Weeks', { count }, { pluralValue: count });
-  } else if (days < 365) {
-    const count = Math.floor(days / 30);
-    return lang('Months', { count }, { pluralValue: count });
-  } else {
-    const count = Math.floor(days / 365);
-    return lang('Years', { count }, { pluralValue: count });
   }
+
+  if (days < 1) {
+    return formatMediaDuration(secondsLeft);
+  }
+
+  if (days < 7) {
+    return lang('Days', { count: days }, { pluralValue: days });
+  }
+
+  const weeks = Math.ceil(days / 7);
+  if (weeks * 7 < 30) {
+    return lang('Weeks', { count: weeks }, { pluralValue: weeks });
+  }
+
+  const months = Math.ceil(days / 30);
+  if (months * 30 < 365) {
+    return lang('Months', { count: months }, { pluralValue: months });
+  }
+
+  const years = Math.ceil(days / 365);
+  return lang('Years', { count: years }, { pluralValue: years });
 }
 
 export function formatCountdownDays(

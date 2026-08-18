@@ -461,7 +461,13 @@ export interface LangPair {
   'FilterEditFolders': undefined;
   'FilterMenuDelete': undefined;
   'FilterShare': undefined;
+  'AutoDeleteMessages': undefined;
+  'AutoDeleteSettingsInfo': undefined;
+  'SetAutoDeleteTimer': undefined;
+  'SetCustomTime': undefined;
   'AutoDeleteConfirm': undefined;
+  'ActionTTLYouDisabled': undefined;
+  'ActionTTLChannelDisabled': undefined;
   'LogOutTitle': undefined;
   'AccDescrGoBack': undefined;
   'SureLogout': undefined;
@@ -2291,6 +2297,13 @@ export interface LangPair {
   'PollModalSettingsTitle': undefined;
   'PollModalAddNoMore': undefined;
   'PollDurationOther': undefined;
+  'AutoDeleteBadgeSeconds': undefined;
+  'AutoDeleteBadgeMinutes': undefined;
+  'AutoDeleteBadgeHours': undefined;
+  'AutoDeleteBadgeDays': undefined;
+  'AutoDeleteBadgeWeeks': undefined;
+  'AutoDeleteBadgeMonths': undefined;
+  'AutoDeleteBadgeYears': undefined;
   'SettingsAccount': undefined;
   'SettingsAccountDesc': undefined;
   'SettingsGeneralDesc': undefined;
@@ -2446,6 +2459,32 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'AutodownloadSizeLimitUpTo': {
     'limit': V;
+  };
+  'AutoDeleteSetInfo': {
+    'time': V;
+  };
+  'AutoDeleteIn': {
+    'time': V;
+  };
+  'AutoDeleteGlobalActionFromYou': {
+    'time': V;
+  };
+  'AutoDeleteGlobalAction': {
+    'from': V;
+    'time': V;
+  };
+  'ActionTTLYouChanged': {
+    'time': V;
+  };
+  'ActionTTLChanged': {
+    'from': V;
+    'time': V;
+  };
+  'ActionTTLDisabled': {
+    'from': V;
+  };
+  'ActionTTLChannelChanged': {
+    'time': V;
   };
   'WebAppAddToAttachmentText': {
     'bot': V;

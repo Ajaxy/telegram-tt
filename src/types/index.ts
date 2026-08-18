@@ -174,6 +174,7 @@ export interface AccountSettings {
   canChangeSensitive?: boolean;
   shouldArchiveAndMuteNewNonContact?: boolean;
   shouldNewNonContactPeersRequirePremium?: boolean;
+  defaultHistoryTtl?: number;
   nonContactPeersPaidStars?: number;
   shouldDisplayGiftsButton?: boolean;
   disallowedGifts?: ApiDisallowedGiftsSettings;
@@ -211,6 +212,7 @@ export enum SettingsScreens {
   GeneralChatBackground,
   GeneralChatBackgroundColor,
   Privacy,
+  AutoDeleteMessages,
   PrivacyPhoneNumber,
   PrivacyAddByPhone,
   PrivacyLastSeen,

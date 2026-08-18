@@ -112,7 +112,9 @@ addActionHandler('initShared', (): ActionReturnType => {
   startWebsync();
 });
 
-addActionHandler('initMain', (global): ActionReturnType => {
+addActionHandler('initMain', (global, actions): ActionReturnType => {
+  actions.cleanupExpiredTtlMessages();
+
   const { hasWebNotifications, hasPushNotifications } = selectSettingsKeys(global);
   if (hasWebNotifications && hasPushNotifications) {
     // Most of the browsers only show the notifications permission prompt after the first user gesture.

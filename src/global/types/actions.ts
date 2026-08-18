@@ -525,6 +525,10 @@ export interface ActionPayloads {
     onLoaded?: NoneToVoidFunction;
     onError?: NoneToVoidFunction;
   } & WithTabId;
+  cleanupExpiredTtlMessages: {
+    chatId?: string;
+    messageIds?: number[];
+  } | undefined;
   sendMessage: Partial<SendMessageParams> & WithTabId;
   sendMessages: {
     sendParams: SendMessageParams[];
@@ -2709,6 +2713,8 @@ export interface ActionPayloads {
     isOnlyInvites?: boolean;
   } & WithTabId;
   closeShareChatFolderModal: undefined | WithTabId;
+  loadDefaultHistoryTtl: undefined;
+  setDefaultHistoryTtl: { period: number };
   loadGlobalPrivacySettings: undefined;
   updateGlobalPrivacySettings: {
     shouldArchiveAndMuteNewNonContact?: boolean;

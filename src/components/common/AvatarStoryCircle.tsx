@@ -18,6 +18,7 @@ interface OwnProps {
   className?: string;
   size: number;
   withExtraGap?: boolean;
+  extraGapPercent?: number;
   colors?: string[];
   style?: string;
 }
@@ -41,9 +42,6 @@ const LARGE_SIZE = 4 * REM;
 
 const GAP_PERCENT_EXTRA = 10;
 const EXTRA_GAP_ANGLE = Math.PI / 4;
-const EXTRA_GAP_SIZE = (GAP_PERCENT_EXTRA / 100) * (2 * Math.PI);
-const EXTRA_GAP_START = EXTRA_GAP_ANGLE - EXTRA_GAP_SIZE / 2;
-const EXTRA_GAP_END = EXTRA_GAP_ANGLE + EXTRA_GAP_SIZE / 2;
 
 function AvatarStoryCircle({
   size,
@@ -52,6 +50,7 @@ function AvatarStoryCircle({
   storyIds,
   lastReadId,
   withExtraGap,
+  extraGapPercent,
   appTheme,
   colors,
   style,
@@ -103,10 +102,14 @@ function AvatarStoryCircle({
       colorStops: colors || (isCloseFriend ? GREEN : BLUE),
       readSegmentsCount: values.read,
       withExtraGap,
+      extraGapPercent,
       readSegmentColor: appTheme === 'dark' ? DARK_GRAY : GRAY,
       dpr,
     });
-  }, [appTheme, isCloseFriend, adaptedSize, values.read, values.total, withExtraGap, dpr, colors, size, strokeWidth]);
+  }, [
+    appTheme, isCloseFriend, adaptedSize, values.read, values.total, withExtraGap, extraGapPercent, dpr, colors,
+    size, strokeWidth,
+  ]);
 
   if (!values.total) {
     return undefined;
@@ -141,6 +144,7 @@ export function drawGradientCircle({
   segmentsCount,
   readSegmentsCount = 0,
   withExtraGap = false,
+  extraGapPercent = GAP_PERCENT_EXTRA,
   readSegmentColor,
   dpr,
 }: {
@@ -151,6 +155,7 @@ export function drawGradientCircle({
   segmentsCount: number;
   readSegmentsCount?: number;
   withExtraGap?: boolean;
+  extraGapPercent?: number;
   readSegmentColor: string;
   dpr: number;
 }) {
@@ -196,6 +201,10 @@ export function drawGradientCircle({
   ctx.lineCap = 'round';
   ctx.clearRect(0, 0, canvasSize, canvasSize);
 
+  const extraGapSize = (extraGapPercent / 100) * (2 * Math.PI);
+  const extraGapStart = EXTRA_GAP_ANGLE - extraGapSize / 2;
+  const extraGapEnd = EXTRA_GAP_ANGLE + extraGapSize / 2;
+
   Array.from({ length: segmentsCount }).forEach((_, i) => {
     const isRead = i < readSegmentsCount;
     let startAngle = i * segmentAngle - Math.PI / 2 + gapSize / 2;
@@ -205,18 +214,18 @@ export function drawGradientCircle({
     ctx.lineWidth = strokeWidth * (isRead ? 0.5 : 1);
 
     if (withExtraGap) {
-      if (startAngle >= EXTRA_GAP_START && endAngle <= EXTRA_GAP_END) { // Segment is inside extra gap
+      if (startAngle >= extraGapStart && endAngle <= extraGapEnd) { // Segment is inside extra gap
         return;
-      } else if (startAngle < EXTRA_GAP_START && endAngle > EXTRA_GAP_END) { // Extra gap is inside segment
+      } else if (startAngle < extraGapStart && endAngle > extraGapEnd) { // Extra gap is inside segment
         ctx.beginPath();
-        ctx.arc(centerCoordinate, centerCoordinate, radius, EXTRA_GAP_END, endAngle);
+        ctx.arc(centerCoordinate, centerCoordinate, radius, extraGapEnd, endAngle);
         ctx.stroke();
 
-        endAngle = EXTRA_GAP_START;
-      } else if (startAngle < EXTRA_GAP_START && endAngle > EXTRA_GAP_START) { // Segment ends in extra gap
-        endAngle = EXTRA_GAP_START;
-      } else if (startAngle < EXTRA_GAP_END && endAngle > EXTRA_GAP_END) { // Segment starts in extra gap
-        startAngle = EXTRA_GAP_END;
+        endAngle = extraGapStart;
+      } else if (startAngle < extraGapStart && endAngle > extraGapStart) { // Segment ends in extra gap
+        endAngle = extraGapStart;
+      } else if (startAngle < extraGapEnd && endAngle > extraGapEnd) { // Segment starts in extra gap
+        startAngle = extraGapEnd;
       }
     }
 

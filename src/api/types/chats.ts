@@ -108,6 +108,7 @@ export interface ApiChat {
   detectedLanguage?: string;
 
   paidMessagesStars?: number;
+  ttlPeriod?: number;
 }
 
 type ApiTypingStatusBase = {
@@ -129,6 +130,7 @@ export type ApiTypingStatus = ApiTypingStatusSimple | ApiTypingStatusWatchingAni
 
 export interface ApiChatFullInfo {
   about?: string;
+  ttlPeriod?: number;
   onlineCount?: number;
   members?: ApiChatMember[];
   kickedMembers?: ApiChatMember[];

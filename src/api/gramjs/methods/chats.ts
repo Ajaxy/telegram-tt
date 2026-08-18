@@ -617,6 +617,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
     translationsDisabled,
     reactionsLimit,
     hasScheduled,
+    ttlPeriod,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -636,6 +637,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
     fullInfo: {
       ...(chatPhoto instanceof GramJs.Photo && { profilePhoto: buildApiPhoto(chatPhoto) }),
       about,
+      ttlPeriod,
       members,
       adminMembersById: adminMembers ? buildCollectionByKey(adminMembers, 'userId') : undefined,
       canViewMembers: true,
@@ -718,6 +720,7 @@ async function getFullChannelInfo(
     paidMessagesAvailable,
     mainTab,
     guardBotId,
+    ttlPeriod,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -777,6 +780,7 @@ async function getFullChannelInfo(
     fullInfo: {
       ...(chatPhoto instanceof GramJs.Photo && { profilePhoto: buildApiPhoto(chatPhoto) }),
       about,
+      ttlPeriod,
       onlineCount,
       inviteLink,
       slowMode: slowmodeSeconds ? {

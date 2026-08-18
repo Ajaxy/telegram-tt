@@ -34,6 +34,7 @@ import {
   selectUserFullInfo,
 } from '../../global/selectors';
 import { ARE_CALLS_SUPPORTED, IS_APP } from '../../util/browser/windowEnvironment';
+import { formatCountdown } from '../../util/dates/oldDateFormat';
 import { isUserId } from '../../util/entities/ids';
 import focusNoScroll from '../../util/focusNoScroll';
 
@@ -78,6 +79,7 @@ interface StateProps {
   canCreateVoiceChat?: boolean;
   channelMonoforumId?: string;
   pendingJoinRequests?: number;
+  historyTtl?: number;
   noAnimation?: boolean;
   canTranslate?: boolean;
   isTranslating?: boolean;
@@ -108,6 +110,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   canCreateVoiceChat,
   channelMonoforumId,
   pendingJoinRequests,
+  historyTtl,
   isRightColumnShown,
   isForForum,
   noAnimation,
@@ -140,6 +143,11 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   const oldLang = useOldLang();
   const lang = useLang();
 
+  const historyTtlText = historyTtl ? formatCountdown(lang, historyTtl) : undefined;
+  const autoDeleteInfoText = historyTtlText
+    ? lang('AutoDeleteSetInfo', { time: historyTtlText })
+    : undefined;
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<IAnchorPosition | undefined>(undefined);
 
@@ -155,6 +163,12 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
 
   const handleHeaderMenuHide = useLastCallback(() => {
     setMenuAnchor(undefined);
+  });
+
+  const handleAutoDeleteInfoClick = useLastCallback(() => {
+    if (!autoDeleteInfoText) return;
+
+    showNotification({ message: autoDeleteInfoText });
   });
 
   const handleTranslateClick = useLastCallback(() => {
@@ -350,6 +364,17 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           </MenuItem>
         </DropdownMenu>
       )}
+      {autoDeleteInfoText && (
+        <Button
+          round
+          ripple={isRightColumnShown}
+          color="translucent"
+          size="smaller"
+          onClick={handleAutoDeleteInfoClick}
+          ariaLabel={autoDeleteInfoText}
+          iconName="timer"
+        />
+      )}
       {!isMobile && (
         <>
           {canSearch && (
@@ -509,6 +534,7 @@ export default memo(withGlobal<OwnProps>(
       canEnterVoiceChat,
       canCreateVoiceChat,
       pendingJoinRequests,
+      historyTtl: isMainThread && !isSavedDialog ? chat.ttlPeriod ?? fullInfo?.ttlPeriod : undefined,
       noAnimation,
       canTranslate,
       isTranslating,

@@ -215,6 +215,7 @@ function LeftColumn({
         case SettingsScreens.PrivacyGroupChats:
         case SettingsScreens.PrivacyVoiceMessages:
         case SettingsScreens.PrivacyMessages:
+        case SettingsScreens.AutoDeleteMessages:
         case SettingsScreens.PrivacyBlockedUsers:
         case SettingsScreens.ActiveWebsites:
         case SettingsScreens.TwoFaDisabled:

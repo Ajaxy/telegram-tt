@@ -11,6 +11,7 @@ import {
   selectIsCurrentUserPremium,
 } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import { formatCountdown } from '../../../util/dates/oldDateFormat';
 import { getClosestEntry } from '../../../util/getClosestEntry';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -47,6 +48,7 @@ type StateProps = {
   needAgeVideoVerification?: boolean;
   privacy: GlobalState['settings']['privacy'];
   accountDaysTtl?: number;
+  defaultHistoryTtl?: number;
   passkeyCount?: number;
   arePasskeysAvailable?: boolean;
 };
@@ -74,6 +76,7 @@ const SettingsPrivacy = ({
   privacy,
   isCurrentUserFrozen,
   accountDaysTtl,
+  defaultHistoryTtl,
   onReset,
 }: OwnProps & StateProps) => {
   const {
@@ -81,6 +84,7 @@ const SettingsPrivacy = ({
     loadPrivacySettings,
     loadBlockedUsers,
     updateContentSettings,
+    loadDefaultHistoryTtl,
     loadGlobalPrivacySettings,
     updateGlobalPrivacySettings,
     loadWebAuthorizations,
@@ -103,6 +107,7 @@ const SettingsPrivacy = ({
 
   useEffect(() => {
     if (isActive && !isCurrentUserFrozen) {
+      loadDefaultHistoryTtl();
       loadGlobalPrivacySettings();
       loadAccountDaysTtl();
     }
@@ -110,6 +115,11 @@ const SettingsPrivacy = ({
 
   const oldLang = useOldLang();
   const lang = useLang();
+  const defaultHistoryTtlText = defaultHistoryTtl === undefined
+    ? lang('Loading')
+    : defaultHistoryTtl === 0
+      ? lang('SettingsItemPrivacyOff')
+      : formatCountdown(lang, defaultHistoryTtl);
 
   useHistoryBack({
     isActive,
@@ -149,6 +159,12 @@ const SettingsPrivacy = ({
     }
 
     openSettingsScreen({ screen: SettingsScreens.Passkeys });
+  });
+
+  const handleOpenAutoDeleteMessages = useLastCallback(() => {
+    if (defaultHistoryTtl === undefined) return;
+
+    openSettingsScreen({ screen: SettingsScreens.AutoDeleteMessages });
   });
 
   const dayOption = useMemo(() => {
@@ -264,6 +280,20 @@ const SettingsPrivacy = ({
           >
             {oldLang('PrivacySettings.WebSessions')}
             <span className="settings-item__current-value">{webAuthCount}</span>
+          </ListItem>
+        )}
+        {!isCurrentUserFrozen && (
+          <ListItem
+            icon="timer-filled"
+            iconBg="orange"
+            narrow
+            disabled={defaultHistoryTtl === undefined}
+            onClick={handleOpenAutoDeleteMessages}
+          >
+            <div className="multiline-item">
+              <span className="title">{lang('AutoDeleteMessages')}</span>
+              <span className="subtitle" dir="auto">{defaultHistoryTtlText}</span>
+            </div>
           </ListItem>
         )}
       </Island>
@@ -490,7 +520,7 @@ export default memo(withGlobal<OwnProps>(
       settings: {
         byKey: {
           hasPassword, isSensitiveEnabled, canChangeSensitive, shouldArchiveAndMuteNewNonContact,
-          shouldNewNonContactPeersRequirePremium, nonContactPeersPaidStars,
+          shouldNewNonContactPeersRequirePremium, nonContactPeersPaidStars, defaultHistoryTtl,
         },
         privacy,
         accountDaysTtl,
@@ -526,6 +556,7 @@ export default memo(withGlobal<OwnProps>(
       canSetPasscode: selectCanSetPasscode(global),
       isCurrentUserFrozen,
       accountDaysTtl,
+      defaultHistoryTtl,
       passkeyCount: passkeys?.length,
       arePasskeysAvailable: appConfig.arePasskeysAvailable,
     };

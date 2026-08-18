@@ -2987,6 +2987,9 @@ function handleLocalMessageUpdate(
       id: messageUpdate.id,
       sendingState: undefined,
       ...('date' in messageUpdate && { date: messageUpdate.date }),
+      ttlPeriod: messageUpdate instanceof GramJs.UpdateShortSentMessage
+        ? messageUpdate.ttlPeriod
+        : localMessage.ttlPeriod,
     };
 
     sendApiUpdate({

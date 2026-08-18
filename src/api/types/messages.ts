@@ -772,6 +772,7 @@ export interface ApiMessage {
   content: MediaContent;
   date: number;
   isOutgoing: boolean;
+  ttlPeriod?: number;
   senderId?: string;
   replyInfo?: ApiReplyInfo;
   suggestedPostInfo?: ApiInputSuggestedPostInfo;

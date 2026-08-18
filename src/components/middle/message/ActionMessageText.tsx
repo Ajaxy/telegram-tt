@@ -30,7 +30,7 @@ import {
 import { selectThreadIdFromMessage } from '../../../global/selectors/threads';
 import { ensureProtocol } from '../../../util/browser/url';
 import {
-  formatDateTimeToString, formatScheduledDateTime, formatShortDuration,
+  formatCountdown, formatDateTimeToString, formatScheduledDateTime, formatShortDuration,
 } from '../../../util/dates/oldDateFormat';
 import { convertTonFromNanos, formatCurrency } from '../../../util/formatCurrency';
 import { formatCurrencyAmountAsText, formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
@@ -785,6 +785,45 @@ const ActionMessageText = ({
 
       case 'historyClear':
         return lang('ActionHistoryCleared');
+
+      case 'setMessagesTtl': {
+        const { period, autoSettingFromId } = action;
+
+        if (period === 0) {
+          if (isChannel) return lang('ActionTTLChannelDisabled');
+
+          return isOutgoing
+            ? lang('ActionTTLYouDisabled')
+            : lang('ActionTTLDisabled', { from: senderLink }, { withNodes: true });
+        }
+
+        const time = formatCountdown(lang, period);
+        if (autoSettingFromId) {
+          if (autoSettingFromId === currentUserId) {
+            return lang('AutoDeleteGlobalActionFromYou', { time });
+          }
+
+          const autoSettingFrom = selectPeer(global, autoSettingFromId);
+          const autoSettingFromTitle = autoSettingFrom && getPeerTitle(lang, autoSettingFrom);
+          const autoSettingFromLink = renderPeerLink(
+            autoSettingFrom?.id,
+            autoSettingFromTitle || userFallbackText,
+            asPreview,
+          );
+
+          return lang(
+            'AutoDeleteGlobalAction',
+            { from: autoSettingFromLink, time },
+            { withNodes: true },
+          );
+        }
+
+        if (isChannel) return lang('ActionTTLChannelChanged', { time });
+
+        return isOutgoing
+          ? lang('ActionTTLYouChanged', { time })
+          : lang('ActionTTLChanged', { from: senderLink, time }, { withNodes: true });
+      }
 
       case 'screenshotTaken':
         return translateWithYou(lang, 'ActionScreenshotTaken', isOutgoing, { from: senderLink });

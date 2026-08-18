@@ -41,6 +41,7 @@ import FoldersShare from '../../../assets/tgs/settings/FoldersShare.tgs';
 import HandStop from '../../../assets/tgs/settings/HandStop.tgs';
 import Lock from '../../../assets/tgs/settings/Lock.tgs';
 import Passkeys from '../../../assets/tgs/settings/Passkeys.tgs';
+import UtyanDisappear from '../../../assets/tgs/settings/UtyanDisappear.tgs';
 import StarReaction from '../../../assets/tgs/stars/StarReaction.tgs';
 import StarReactionEffect from '../../../assets/tgs/stars/StarReactionEffect.tgs';
 import Unlock from '../../../assets/tgs/Unlock.tgs';
@@ -100,6 +101,7 @@ export const LOCAL_TGS_URLS = {
   Search,
   DuckNothingFound,
   Passkeys,
+  UtyanDisappear,
   DuckCake,
   HandStop,
   Writing,

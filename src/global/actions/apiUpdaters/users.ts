@@ -10,12 +10,14 @@ import {
   replaceUserStatuses,
   updateChat,
   updateChatFullInfo,
+  updatePeerFullInfo,
   updatePeerStoriesHidden,
   updateUser,
   updateUserFullInfo,
 } from '../../reducers';
 import {
-  selectChatFullInfo, selectIsChatWithSelf, selectIsCurrentUserPremium, selectUser, selectUserFullInfo,
+  selectChatFullInfo, selectIsChatWithSelf, selectIsCurrentUserPremium, selectPeerFullInfo,
+  selectUser, selectUserFullInfo,
 } from '../../selectors';
 
 const updateStatusesOnFullyIdle = throttleWithFullyIdle(flushStatusUpdates);
@@ -159,6 +161,17 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         settings,
       });
       return global;
+    }
+
+    case 'updatePeerHistoryTtl': {
+      const { id, ttlPeriod } = update;
+
+      global = updateChat(global, id, { ttlPeriod });
+
+      const fullInfo = selectPeerFullInfo(global, id);
+      if (!fullInfo) return global;
+
+      return updatePeerFullInfo(global, id, { ttlPeriod });
     }
   }
 

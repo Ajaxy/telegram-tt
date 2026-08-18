@@ -38,6 +38,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       botCanManageEmojiStatus, settings, sendPaidMessagesStars, displayGiftsButton, disallowedGifts,
       starsRating, starsMyPendingRating, starsMyPendingRatingDate, mainTab, note,
       noforwardsMyEnabled, noforwardsPeerEnabled, unofficialSecurityRisk, privateForwardName,
+      ttlPeriod,
     },
     users,
   } = mtpUserFull;
@@ -46,6 +47,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
 
   return {
     bio: about,
+    ttlPeriod,
     commonChatsCount,
     pinnedMessageId: pinnedMsgId,
     isBlocked: Boolean(blocked),

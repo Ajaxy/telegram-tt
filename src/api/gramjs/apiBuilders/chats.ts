@@ -149,7 +149,7 @@ export function buildApiChatFromDialog(
   peerEntity: GramJs.TypeUser | GramJs.TypeChat,
 ): ApiChat {
   const {
-    peer, folderId, viewForumAsMessages,
+    peer, folderId, viewForumAsMessages, ttlPeriod,
   } = dialog;
 
   return {
@@ -158,6 +158,7 @@ export function buildApiChatFromDialog(
     type: getApiChatTypeFromPeerEntity(peerEntity),
     title: getApiChatTitleFromMtpPeer(peer, peerEntity),
     isForumAsMessages: viewForumAsMessages,
+    ttlPeriod,
     ...buildApiChatFieldsFromPeerEntity(peerEntity),
   };
 }

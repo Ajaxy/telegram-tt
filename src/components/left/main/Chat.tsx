@@ -22,6 +22,7 @@ import { StoryViewerOrigin, type TopicsInfo } from '../../../types';
 
 import { ALL_FOLDER_ID, UNMUTE_TIMESTAMP } from '../../../config';
 import {
+  getPeerColorKey,
   groupStatefulContent,
   isUserOnline,
 } from '../../../global/helpers';
@@ -53,6 +54,7 @@ import {
 import { selectDraft, selectThreadLocalStateParam } from '../../../global/selectors/threads';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
+import { formatCountdown } from '../../../util/dates/oldDateFormat';
 import { isUserId } from '../../../util/entities/ids';
 import { getChatFolderIds } from '../../../util/folderManager';
 import { createLocationHash } from '../../../util/routing';
@@ -63,13 +65,16 @@ import useChatContextActions from '../../../hooks/useChatContextActions';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import { getPeerColorClass } from '../../../hooks/usePeerColor';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useChatListEntry from './hooks/useChatListEntry';
 
 import Avatar from '../../common/Avatar';
 import DeleteChatModal from '../../common/DeleteChatModal';
 import FullNameTitle from '../../common/FullNameTitle';
+import AutoDeleteIcon from '../../common/icons/AutoDeleteIcon';
 import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
 import LastMessageMeta from '../../common/LastMessageMeta';
@@ -131,6 +136,8 @@ type StateProps = {
   chatFoldersById?: Record<number, ApiChatFolder>;
   areTagsEnabled?: boolean;
 };
+
+const AUTO_DELETE_STORY_GAP_PERCENT = 15;
 
 const Chat: FC<OwnProps & StateProps> = ({
   chatId,
@@ -201,6 +208,8 @@ const Chat: FC<OwnProps & StateProps> = ({
   const [shouldRenderDeleteModal, markRenderDeleteModal, unmarkRenderDeleteModal] = useFlag();
   const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
   const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
+
+  const lang = useLang();
 
   const { isForum, isForumAsMessages, isMonoforum } = chat || {};
 
@@ -397,6 +406,15 @@ const Chat: FC<OwnProps & StateProps> = ({
   }
 
   const peer = user || chat;
+  const avatarPeer = isMonoforum ? monoforumChannel : peer;
+  const historyTtlText = chat.ttlPeriod && !isSavedDialog ? formatCountdown(lang, chat.ttlPeriod) : undefined;
+  const autoDeleteInfoText = historyTtlText
+    ? lang('AutoDeleteSetInfo', { time: historyTtlText })
+    : undefined;
+  const shouldShowAutoDeleteBadge = !isAvatarOnlineShown && !chat.subscriptionUntil && Boolean(autoDeleteInfoText);
+  const avatarColorClassName = shouldShowAutoDeleteBadge
+    ? getPeerColorClass(getPeerColorKey(avatarPeer, true)!)
+    : undefined;
 
   const chatClassName = buildClassName(
     'Chat chat-item-clickable',
@@ -425,13 +443,14 @@ const Chat: FC<OwnProps & StateProps> = ({
       <div className={buildClassName('status', 'status-clickable')}>
         <div className="avatar-wrapper">
           <Avatar
-            peer={isMonoforum ? monoforumChannel : peer}
+            peer={avatarPeer}
             isSavedMessages={user?.isSelf}
             isSavedDialog={isSavedDialog}
             size={isPreview ? 'medium' : 'large'}
             asMessageBubble={isMonoforum}
             withStory={!user?.isSelf && !isMonoforum}
-            withStoryGap={isAvatarOnlineShown || Boolean(chat.subscriptionUntil)}
+            withStoryGap={isAvatarOnlineShown || Boolean(chat.subscriptionUntil) || shouldShowAutoDeleteBadge}
+            storyGapPercent={shouldShowAutoDeleteBadge ? AUTO_DELETE_STORY_GAP_PERCENT : undefined}
             storyViewerOrigin={StoryViewerOrigin.ChatList}
             storyViewerMode="single-peer"
           />
@@ -441,6 +460,14 @@ const Chat: FC<OwnProps & StateProps> = ({
             />
             {!isAvatarOnlineShown && Boolean(chat.subscriptionUntil) && (
               <StarIcon type="gold" className="avatar-badge avatar-subscription" size="adaptive" />
+            )}
+            {shouldShowAutoDeleteBadge && (
+              <AutoDeleteIcon
+                period={chat.ttlPeriod!}
+                peer={avatarPeer!}
+                className={buildClassName('avatar-badge', avatarColorClassName)}
+                ariaLabel={autoDeleteInfoText}
+              />
             )}
           </div>
           <ChatBadge
@@ -459,7 +486,7 @@ const Chat: FC<OwnProps & StateProps> = ({
       <div className={buildClassName('info', isTagsMode && 'has-tags')}>
         <div className="info-row">
           <FullNameTitle
-            peer={isMonoforum ? monoforumChannel! : peer}
+            peer={avatarPeer!}
             isMonoforum={isMonoforum}
             monoforumBadgeClassName="monoforum-badge"
             withEmojiStatus

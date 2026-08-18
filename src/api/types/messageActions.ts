@@ -66,6 +66,12 @@ export interface ApiMessageActionHistoryClear extends ActionMediaType {
   type: 'historyClear';
 }
 
+export interface ApiMessageActionSetMessagesTtl extends ActionMediaType {
+  type: 'setMessagesTtl';
+  period: number;
+  autoSettingFromId?: string;
+}
+
 export interface ApiMessageActionGameScore extends ActionMediaType {
   type: 'gameScore';
   gameId: string;
@@ -393,7 +399,8 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionChatEditPhoto | ApiMessageActionChatDeletePhoto | ApiMessageActionChatAddUser
   | ApiMessageActionChatDeleteUser | ApiMessageActionChatJoinedByLink | ApiMessageActionChannelCreate
   | ApiMessageActionChatMigrateTo | ApiMessageActionChannelMigrateFrom | ApiMessageActionPinMessage
-  | ApiMessageActionHistoryClear | ApiMessageActionGameScore | ApiMessageActionPaymentSent | ApiMessageActionPhoneCall
+  | ApiMessageActionHistoryClear | ApiMessageActionSetMessagesTtl
+  | ApiMessageActionGameScore | ApiMessageActionPaymentSent | ApiMessageActionPhoneCall
   | ApiMessageActionScreenshotTaken | ApiMessageActionCustomAction | ApiMessageActionBotAllowed
   | ApiMessageActionBoostApply | ApiMessageActionContactSignUp | ApiMessageActionExpiredContent
   | ApiMessageActionGroupCall | ApiMessageActionInviteToGroupCall | ApiMessageActionGroupCallScheduled

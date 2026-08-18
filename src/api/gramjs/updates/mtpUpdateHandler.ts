@@ -904,6 +904,13 @@ export function updater(update: Update) {
       id: peerId,
       settings: apiSettings,
     });
+  } else if (update instanceof GramJs.UpdatePeerHistoryTTL) {
+    const { peer, ttlPeriod } = update;
+    sendApiUpdate({
+      '@type': 'updatePeerHistoryTtl',
+      id: getApiChatIdFromMtpPeer(peer),
+      ttlPeriod,
+    });
   } else if (update instanceof GramJs.UpdateNotifySettings) {
     const {
       notifySettings,

@@ -138,6 +138,7 @@ import {
   selectChatFullInfo,
   selectChatLastMessageId,
   selectChatMessage,
+  selectChatMessages,
   selectCurrentChat,
   selectCurrentMessageList,
   selectCurrentViewedStory,
@@ -207,7 +208,14 @@ type SendEphemeralMessagesParams = {
 
 const AUTOLOGIN_TOKEN_KEY = 'autologin_token';
 
+const SECOND_IN_MS = 1000;
+// `setTimeout` overflows on delays over ~25 days, so long TTLs are awaited in day-long hops
+const TTL_CLEANUP_MAX_DELAY = 24 * 60 * 60 * SECOND_IN_MS;
+const TTL_CLEANUP_DELAY_BUFFER = SECOND_IN_MS;
+
 const uploadProgressCallbacks = new Map<MessageKey, ApiOnProgress>();
+
+const ttlCleanupTimersByChatId = new Map<string, { timer: number; expiresAt: number }>();
 
 const runDebouncedForMarkRead = debounce((cb) => cb(), 500, false);
 
@@ -324,6 +332,19 @@ addActionHandler('loadViewportMessages', (global, actions, payload): ActionRetur
   }
 
   setGlobal(global, { forceOnHeavyAnimation: shouldForceRender });
+});
+
+addActionHandler('cleanupExpiredTtlMessages', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageIds } = payload || {};
+
+  if (chatId) {
+    cleanupExpiredMessagesForChat(actions, chatId, messageIds);
+    return;
+  }
+
+  Object.keys(global.messages.byChatId).forEach((id) => {
+    cleanupExpiredMessagesForChat(actions, id);
+  });
 });
 
 async function loadWithBudget<T extends GlobalState>(
@@ -2086,6 +2107,71 @@ async function executeForwardMessages(global: GlobalState, sendParams: SendMessa
   return localMessages;
 }
 
+function cleanupExpiredMessagesForChat(actions: RequiredGlobalActions, chatId: string, messageIds?: number[]) {
+  const global = getGlobal();
+  const byId = selectChatMessages(global, chatId);
+  if (!byId) return;
+
+  const serverTime = getServerTime();
+  const messages = messageIds
+    ? messageIds.map((id) => byId[id]).filter(Boolean)
+    : Object.values(byId);
+
+  const expiredIds: number[] = [];
+  let closestExpiresAt: number | undefined;
+
+  messages.forEach((message) => {
+    if (!message.ttlPeriod) return;
+
+    const expiresAt = message.date + message.ttlPeriod;
+    if (expiresAt <= serverTime) {
+      expiredIds.push(message.id);
+    } else if (!closestExpiresAt || expiresAt < closestExpiresAt) {
+      closestExpiresAt = expiresAt;
+    }
+  });
+
+  if (expiredIds.length) {
+    deleteMessages(global, chatId, expiredIds, actions);
+  }
+
+  const current = ttlCleanupTimersByChatId.get(chatId);
+
+  if (messageIds) {
+    // Incremental pass: only tighten the timer, the scheduled full pass covers the rest
+    if (closestExpiresAt && (!current || closestExpiresAt < current.expiresAt)) {
+      scheduleTtlCleanup(actions, chatId, closestExpiresAt, serverTime);
+    }
+    return;
+  }
+
+  if (current) {
+    clearTimeout(current.timer);
+    ttlCleanupTimersByChatId.delete(chatId);
+  }
+
+  if (closestExpiresAt === undefined) return;
+
+  scheduleTtlCleanup(actions, chatId, closestExpiresAt, serverTime);
+}
+
+function scheduleTtlCleanup(actions: RequiredGlobalActions, chatId: string, expiresAt: number, serverTime: number) {
+  const current = ttlCleanupTimersByChatId.get(chatId);
+  if (current) {
+    clearTimeout(current.timer);
+  }
+
+  const delay = Math.min(
+    (expiresAt - serverTime) * SECOND_IN_MS + TTL_CLEANUP_DELAY_BUFFER,
+    TTL_CLEANUP_MAX_DELAY,
+  );
+  const timer = window.setTimeout(() => {
+    ttlCleanupTimersByChatId.delete(chatId);
+    actions.cleanupExpiredTtlMessages({ chatId });
+  }, delay);
+  ttlCleanupTimersByChatId.set(chatId, { timer, expiresAt });
+}
+
 async function loadViewportMessages<T extends GlobalState>(
   global: T,
   chat: ApiChat,
@@ -2208,6 +2294,8 @@ async function loadViewportMessages<T extends GlobalState>(
 
   setGlobal(global);
   onLoaded?.();
+
+  getActions().cleanupExpiredTtlMessages({ chatId, messageIds: ids });
 }
 
 function findClosestIndex(sourceIds: number[], offsetId: number) {

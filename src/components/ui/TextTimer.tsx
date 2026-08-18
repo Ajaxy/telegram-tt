@@ -1,5 +1,6 @@
 import { useEffect } from '../../lib/teact/teact';
 
+import { formatCountdown } from '../../util/dates/oldDateFormat';
 import { formatClockDuration, formatCountdownDateTime, secondsToDate } from '../../util/localization/dateFormat';
 import { getServerTime } from '../../util/serverTime';
 
@@ -13,13 +14,14 @@ import AnimatedCounter from '../common/AnimatedCounter';
 type OwnProps = {
   className?: string;
   endsAt: number;
-  mode?: 'clock' | 'countdown';
+  mode?: 'clock' | 'countdown' | 'rounded';
   shouldShowZeroOnEnd?: boolean;
   onEnd?: NoneToVoidFunction;
 };
 
 const DAY_IN_SECONDS = 24 * 60 * 60;
 const UPDATE_FREQUENCY = 500; // Sometimes second gets skipped if using 1000
+const SECOND_IN_MS = 1000;
 
 const TextTimer = ({
   className,
@@ -35,11 +37,17 @@ const TextTimer = ({
   const isActive = serverTime < endsAt;
   const timeLeft = Math.max(0, endsAt - serverTime);
   const shouldUseClock = mode === 'clock' || timeLeft < DAY_IN_SECONDS;
-  const switchToClockDelay = isActive && mode === 'countdown' && !shouldUseClock
-    ? ((timeLeft - DAY_IN_SECONDS) * 1000) + UPDATE_FREQUENCY
+  const switchToClockDelay = isActive && mode !== 'clock' && !shouldUseClock
+    ? ((timeLeft - DAY_IN_SECONDS) * SECOND_IN_MS) + UPDATE_FREQUENCY
     : undefined;
+  const nextUpdateDelay = mode === 'rounded' && switchToClockDelay !== undefined
+    ? Math.min(
+      switchToClockDelay,
+      (((timeLeft % DAY_IN_SECONDS) || DAY_IN_SECONDS) * SECOND_IN_MS) + UPDATE_FREQUENCY,
+    )
+    : switchToClockDelay;
 
-  useTimeout(forceUpdate, switchToClockDelay);
+  useTimeout(forceUpdate, nextUpdateDelay);
   useInterval(forceUpdate, isActive && shouldUseClock ? UPDATE_FREQUENCY : undefined);
 
   useEffect(() => {
@@ -49,6 +57,10 @@ const TextTimer = ({
   }, [isActive, onEnd]);
 
   if (!isActive && !shouldShowZeroOnEnd) return undefined;
+
+  if (mode === 'rounded' && !shouldUseClock) {
+    return <span className={className}>{formatCountdown(lang, timeLeft)}</span>;
+  }
 
   if (mode === 'countdown' && !shouldUseClock) {
     return (

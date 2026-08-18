@@ -19,6 +19,10 @@
   }
 }
 
+.timer {
+  margin-inline-start: 0.25rem;
+}
+
 .get {
   pointer-events: all;
   cursor: var(--custom-cursor, pointer);
