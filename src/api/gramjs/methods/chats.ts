@@ -123,6 +123,7 @@ type ChatListData = {
   nextOffsetId?: number;
   nextOffsetPeerId?: string;
   nextOffsetDate?: number;
+  isFullyLoaded?: true;
 };
 
 export async function fetchChats({
@@ -184,6 +185,37 @@ export async function fetchChats({
   const lastMessageByChatId: Record<string, number> = {};
 
   dialogs.forEach((dialog) => {
+    if (dialog instanceof GramJs.DialogCommunity) {
+      // Communities live in the active list only
+      if (archived) {
+        return;
+      }
+
+      const communityEntity = peersByKey[`chat${dialog.communityId.toString()}`];
+      const community = communityEntity && buildApiChatFromPreview(communityEntity);
+      if (!community) {
+        return;
+      }
+
+      community.isListed = true;
+      chats.push(community);
+
+      const communityNotifySettings = buildApiPeerNotifySettings(dialog.notifySettings);
+      if (Object.values(omitUndefined(communityNotifySettings)).length) {
+        notifyExceptionById[community.id] = communityNotifySettings;
+
+        if (communityNotifySettings.mutedUntil) {
+          scheduleMutedChatUpdate(community.id, communityNotifySettings.mutedUntil, sendApiUpdate);
+        }
+      }
+
+      if (withPinned && dialog.pinned) {
+        orderedPinnedIds.push(community.id);
+      }
+
+      return;
+    }
+
     if (
       !(dialog instanceof GramJs.Dialog)
       // This request can return dialogs not belonging to specified folder
@@ -253,12 +285,14 @@ export async function fetchChats({
     totalChatCount = chatIds.length;
   }
 
-  const lastDialog = chats[chats.length - 1];
-  const lastMessageId = lastMessageByChatId[lastDialog?.id];
-  const nextOffsetId = lastMessageId;
-  const nextOffsetPeerId = lastDialog?.id;
+  // Pinned and community dialogs cannot serve as offsets for the unpinned page
+  const lastDialog = result.dialogs.slice().reverse().find(
+    (dialog): dialog is GramJs.Dialog => dialog instanceof GramJs.Dialog && Boolean(dialog.topMessage),
+  );
+  const nextOffsetId = lastDialog?.topMessage;
+  const nextOffsetPeerId = lastDialog ? getApiChatIdFromMtpPeer(lastDialog.peer) : undefined;
   const nextOffsetDate = messages.reverse()
-    .find((message) => message.chatId === lastDialog?.id && message.id === lastMessageId)?.date;
+    .find((message) => message.chatId === nextOffsetPeerId && message.id === nextOffsetId)?.date;
 
   return {
     chatIds,
@@ -274,6 +308,7 @@ export async function fetchChats({
     nextOffsetId,
     nextOffsetPeerId,
     nextOffsetDate,
+    isFullyLoaded: nextOffsetDate === undefined ? true : undefined,
     threadReadStatesById,
     threadInfos,
   };
@@ -846,10 +881,12 @@ export function updateChatNotifySettings({
 }: {
   chat: ApiChat; settings: Partial<ApiPeerNotifySettings>;
 }) {
+  const notifyPeer = chat.type === 'chatTypeCommunity'
+    ? new GramJs.InputNotifyCommunity({ community: buildInputChannel(chat.id, chat.accessHash) })
+    : new GramJs.InputNotifyPeer({ peer: buildInputPeer(chat.id, chat.accessHash) });
+
   invokeRequest(new GramJs.account.UpdateNotifySettings({
-    peer: new GramJs.InputNotifyPeer({
-      peer: buildInputPeer(chat.id, chat.accessHash),
-    }),
+    peer: notifyPeer,
     settings: new GramJs.InputPeerNotifySettings({
       muteUntil: settings.mutedUntil,
       showPreviews: settings.shouldShowPreviews,
@@ -1161,10 +1198,12 @@ export async function toggleChatPinned({
 }) {
   const { id, accessHash } = chat;
 
+  const dialogPeer = chat.type === 'chatTypeCommunity'
+    ? new GramJs.InputDialogPeerCommunity({ community: buildInputChannel(id, accessHash) })
+    : new GramJs.InputDialogPeer({ peer: buildInputPeer(id, accessHash) });
+
   const isActionSuccessful = await invokeRequest(new GramJs.messages.ToggleDialogPin({
-    peer: new GramJs.InputDialogPeer({
-      peer: buildInputPeer(id, accessHash),
-    }),
+    peer: dialogPeer,
     pinned: shouldBePinned || undefined,
   }));
 
@@ -1259,11 +1298,10 @@ export async function fetchPinnedDialogs({
 
   return {
     dialogIds: dialogs.map((dialog) => {
-      if (dialog instanceof GramJs.DialogCommunity) {
-        return buildApiPeerId(dialog.communityId, 'channel');
-      }
-      return getApiChatIdFromMtpPeer(dialog.peer);
-    }),
+      if (dialog instanceof GramJs.Dialog) return getApiChatIdFromMtpPeer(dialog.peer);
+      if (dialog instanceof GramJs.DialogCommunity) return buildApiPeerId(dialog.communityId, 'channel');
+      return undefined;
+    }).filter(Boolean),
     messages: messages.map((message) => buildApiMessage(message)).filter(Boolean),
     chats: chats.map((chat) => buildApiChatFromPreview(chat)).filter(Boolean),
     users: users.map((user) => buildApiUser(user)).filter(Boolean),

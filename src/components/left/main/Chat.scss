@@ -116,6 +116,20 @@
     }
   }
 
+  // The community avatar draws a stack of chats reaching past its left edge, which
+  // `.ListItem-button` would clip. Let it through and move the clipping onto the
+  // ripple itself, so the ripple stays inside the rounded button as before.
+  &.community {
+    .ListItem-button {
+      overflow: visible;
+    }
+
+    .ripple-container {
+      overflow: hidden;
+      border-radius: var(--border-radius-default);
+    }
+  }
+
   &.chat-item-with-tags {
     .ListItem-button {
       align-items: flex-start;
@@ -142,6 +156,33 @@
 
     position: relative;
     flex-shrink: 0;
+  }
+
+  .avatar-community-chevron {
+    cursor: var(--custom-cursor, pointer);
+
+    position: absolute;
+    z-index: var(--z-badge);
+    right: 0.375rem;
+    bottom: -0.125rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+
+    color: var(--color-text-secondary);
+
+    background-color: var(--color-background-compact-menu);
+    backdrop-filter: blur(0.625rem);
+    box-shadow: 0 0 0.125rem rgb(0 0 0 / 15%), 0 0 0.625rem rgb(0 0 0 / 10%);
+
+    .icon {
+      font-size: 0.875rem;
+    }
   }
 
   .avatar-badge-wrapper {
@@ -238,6 +279,11 @@
         body.is-ios & {
           color: var(--color-text);
         }
+      }
+
+      .community-member-unread {
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text);
       }
 
       .draft {
@@ -408,6 +454,10 @@
 
       .general-forum-icon {
         color: var(--color-white) !important;
+      }
+
+      .avatar-community-chevron {
+        color: var(--color-primary);
       }
 
       .monoforum-badge {

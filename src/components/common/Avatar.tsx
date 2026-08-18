@@ -20,6 +20,7 @@ import {
   getVideoProfilePhotoMediaHash,
   getWebDocumentHash,
   isAnonymousForwardsChat,
+  isChatCommunity,
   isChatWithRepliesBot,
   isDeletedUser,
 } from '../../global/helpers';
@@ -141,6 +142,7 @@ const Avatar = ({
   const isReplies = realPeer && isChatWithRepliesBot(realPeer.id);
   const isAnonymousForwards = realPeer && isAnonymousForwardsChat(realPeer.id);
   const isForum = chat?.isForum;
+  const isCommunity = Boolean(chat && isChatCommunity(chat));
 
   const peerColorKey = getPeerColorKey(peer, true);
   const peerColorClass = peerColorKey !== undefined ? getPeerColorClass(peerColorKey) : undefined;
@@ -269,6 +271,7 @@ const Avatar = ({
   }
 
   const isRoundedRect = (isCustomPeer && peer.isAvatarSquare)
+    || isCommunity
     || (isForum && !((withStory || withStorySolid) && realPeer?.hasStories));
   const isPremiumGradient = isCustomPeer && peer.withPremiumGradient;
   const customColor = isCustomPeer && peer.customPeerAvatarColor;
@@ -285,6 +288,7 @@ const Avatar = ({
     isReplies && 'replies-bot-account',
     isPremiumGradient && 'premium-gradient-bg',
     isRoundedRect && 'forum',
+    isCommunity && 'community',
     asMessageBubble && 'message-bubble',
     (photo || webPhoto) && 'force-fit',
     ((withStory && realPeer?.hasStories) || forPremiumPromo) && 'with-story-circle',

@@ -229,6 +229,19 @@ const ActionMessageText = ({
         return lang('ActionMigratedFrom', { chat: originalChatLink }, { withNodes: true });
       }
 
+      case 'changeCommunity': {
+        const { communityId } = action;
+        if (!communityId) {
+          return lang('ActionRemovedFromCommunity', { from: senderLink }, { withNodes: true });
+        }
+
+        const community = selectChat(global, communityId);
+        const communityLink = renderPeerLink(
+          communityId, community ? getPeerTitle(lang, community)! : chatFallbackText, asPreview,
+        );
+        return lang('ActionAddedToCommunity', { from: senderLink, community: communityLink }, { withNodes: true });
+      }
+
       case 'topicCreate': {
         const { title, iconColor, iconEmojiId } = action;
 

@@ -43,7 +43,7 @@ export async function fetchTopPeers({
 
   result.users.forEach(addUserToLocalDb);
   result.chats.forEach((chat) => {
-    if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel) {
+    if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel || chat instanceof GramJs.Community) {
       addChatToLocalDb(chat);
     }
   });

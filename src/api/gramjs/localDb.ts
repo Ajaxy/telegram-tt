@@ -28,7 +28,7 @@ export type RepairInfo = {
 
 export interface LocalDb {
   // Used for loading avatars and media through in-memory Gram JS instances.
-  chats: Record<string, GramJs.Chat | GramJs.Channel>;
+  chats: Record<string, GramJs.Chat | GramJs.Channel | GramJs.Community | GramJs.CommunityForbidden>;
   users: Record<string, GramJs.User>;
   documents: Record<string, GramJs.Document & RepairInfo>;
   stickerSets: Record<string, GramJs.StickerSet>;

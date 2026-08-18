@@ -58,6 +58,11 @@ export interface ApiMessageActionChannelMigrateFrom extends ActionMediaType {
   chatId: string;
 }
 
+export interface ApiMessageActionChangeCommunity extends ActionMediaType {
+  type: 'changeCommunity';
+  communityId?: string;
+}
+
 export interface ApiMessageActionPinMessage extends ActionMediaType {
   type: 'pinMessage';
 }
@@ -415,4 +420,5 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionTodoAppendTasks | ApiMessageActionPollAppendAnswer | ApiMessageActionPollDeleteAnswer
   | ApiMessageActionStarGiftPurchaseOffer
   | ApiMessageActionStarGiftPurchaseOfferDeclined | ApiMessageActionNewCreatorPending
-  | ApiMessageActionChangeCreator | ApiMessageActionNoForwardsToggle | ApiMessageActionNoForwardsRequest;
+  | ApiMessageActionChangeCreator | ApiMessageActionNoForwardsToggle | ApiMessageActionNoForwardsRequest
+  | ApiMessageActionChangeCommunity;

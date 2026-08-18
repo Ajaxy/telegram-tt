@@ -104,6 +104,7 @@ import useTransitionFixes from './hooks/useTransitionFixes';
 
 import AnimatedIconWithPreview from '../common/AnimatedIconWithPreview';
 import Audio from '../common/Audio';
+import Avatar from '../common/Avatar';
 import Document from '../common/Document';
 import SavedGift from '../common/gift/SavedGift';
 import GroupChatInfo from '../common/GroupChatInfo';
@@ -143,6 +144,8 @@ type OwnProps = {
 
 type StateProps = {
   monoforumChannel?: ApiChat;
+  linkedCommunity?: ApiChat;
+  linkedCommunityChatsCount?: number;
   theme: ThemeKey;
   isChannel?: boolean;
   isBot?: boolean;
@@ -255,6 +258,8 @@ const Profile = ({
   profileState,
   theme,
   monoforumChannel,
+  linkedCommunity,
+  linkedCommunityChatsCount,
   isChannel,
   isBot,
   currentUserId,
@@ -332,6 +337,8 @@ const Profile = ({
     setMainProfileTab,
     openEditRankModal,
     openDeleteMemberModal,
+    loadFullCommunity,
+    openCommunityPanel,
   } = getActions();
 
   const containerRef = useRef<HTMLDivElement>();
@@ -489,6 +496,17 @@ const Profile = ({
       loadBotRecommendations({ userId: chatId });
     }
   }, [chatId, isBot, similarBots, isSynced]);
+
+  useEffect(() => {
+    if (isActive && linkedCommunity && linkedCommunityChatsCount === undefined) {
+      loadFullCommunity({ communityId: linkedCommunity.id });
+    }
+  }, [isActive, linkedCommunity, linkedCommunityChatsCount]);
+
+  const handleOpenLinkedCommunity = useLastCallback(() => {
+    if (!linkedCommunity) return;
+    openCommunityPanel({ communityId: linkedCommunity.id });
+  });
 
   useEffect(() => {
     resetSelectedStoryAlbum();
@@ -1256,6 +1274,12 @@ const Profile = ({
   })();
 
   function renderProfileInfo(peerId: string, isReady: boolean) {
+    const linkedCommunityStatus = linkedCommunityChatsCount !== undefined
+      ? lang('CommunityWithChats', {
+        count: linkedCommunityChatsCount,
+      }, { pluralValue: linkedCommunityChatsCount })
+      : undefined;
+
     return (
       <div className={buildClassName(styles.profileInfo, 'profile-info')}>
         <ProfileInfo
@@ -1266,6 +1290,28 @@ const Profile = ({
           isForMonoforum={Boolean(monoforumChannel)}
           onExpand={handleExpandProfile}
         />
+        {linkedCommunity && (
+          <Island className={styles.linkedCommunityIsland}>
+            <ListItem
+              leftElement={(
+                <Avatar
+                  className={styles.linkedCommunityAvatar}
+                  peer={linkedCommunity}
+                  size="medium"
+                />
+              )}
+              multiline
+              narrow
+              ripple
+              onClick={handleOpenLinkedCommunity}
+            >
+              <span className="title" dir="auto">{renderText(linkedCommunity.title)}</span>
+              {linkedCommunityStatus && (
+                <span className="subtitle" dir="auto">{linkedCommunityStatus}</span>
+              )}
+            </ListItem>
+          </Island>
+        )}
         <ChatExtra
           chatOrUserId={profileId}
           isSavedDialog={isSavedDialog}
@@ -1442,6 +1488,11 @@ export default memo(withGlobal<OwnProps>(
     const giftCollections = global.starGiftCollections?.byPeerId?.[chatId];
 
     const monoforumChannel = selectMonoforumChannel(global, chatId);
+    const linkedCommunityId = chat?.linkedCommunityId;
+    const linkedCommunity = linkedCommunityId ? selectChat(global, linkedCommunityId) : undefined;
+    const linkedCommunityChatsCount = linkedCommunityId
+      ? selectChatFullInfo(global, linkedCommunityId)?.linkedPeers?.length
+      : undefined;
     const isRestricted = chat && selectIsChatRestricted(global, chat.id);
     const hasAvatar = Boolean(peer?.avatarPhotoId);
 
@@ -1496,6 +1547,8 @@ export default memo(withGlobal<OwnProps>(
       adminMembersById: hasMembersTab ? adminMembersById : undefined,
       commonChatIds: commonChats?.ids,
       monoforumChannel,
+      linkedCommunity,
+      linkedCommunityChatsCount,
       hasAvatar,
       peerFullInfo,
       canUpdateMainTab: selectCanUpdateMainTab(global, chatId),

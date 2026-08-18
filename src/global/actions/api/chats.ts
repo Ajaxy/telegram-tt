@@ -12,6 +12,7 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import {
   ChatCreationProgress,
   type ChatListType,
+  LeftColumnContent,
   ManagementProgress,
   NewChatMembersProgress,
   SettingsScreens,
@@ -38,7 +39,7 @@ import { formatShareText, processDeepLink } from '../../../util/deeplink';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import { isUserId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { getOrderedIds } from '../../../util/folderManager';
+import { getOrderedIds, getPinnedChatsCount } from '../../../util/folderManager';
 import {
   buildCollectionByKey, omit, unique,
 } from '../../../util/iteratees';
@@ -52,6 +53,7 @@ import {
   isChatArchived,
   isChatBasicGroup,
   isChatChannel,
+  isChatCommunity,
   isChatMonoforum,
   isChatSuperGroup,
   isUserBot,
@@ -170,7 +172,13 @@ addActionHandler('preloadTopChatMessages', async (global, actions): Promise<void
       .filter(Boolean);
 
     const folderAllOrderedIds = getOrderedIds(ALL_FOLDER_ID);
-    const nextChatId = folderAllOrderedIds?.find((id) => !currentChatIds.includes(id) && !preloadedChatIds.has(id));
+    const nextChatId = folderAllOrderedIds?.find((id) => {
+      if (currentChatIds.includes(id) || preloadedChatIds.has(id)) return false;
+
+      // A community has no message history to preload
+      const nextChat = selectChat(global, id);
+      return !nextChat || !isChatCommunity(nextChat);
+    });
     if (!nextChatId) {
       return;
     }
@@ -220,6 +228,13 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     id, type, noForumTopicPanel, shouldReplaceHistory, shouldReplaceLast,
     tabId = getCurrentTabId(),
   } = payload;
+
+  // A community has no message view: open its left-column panel instead of a chat
+  const targetChat = id ? selectChat(global, id) : undefined;
+  if (targetChat && isChatCommunity(targetChat)) {
+    actions.openCommunityPanel({ communityId: id!, tabId });
+    return;
+  }
 
   actions.processOpenChatOrThread({
     chatId: id,
@@ -1220,8 +1235,8 @@ addActionHandler('toggleChatPinned', (global, actions, payload): ActionReturnTyp
     const listType = selectChatListType(global, id);
     const isPinned = selectIsChatPinned(global, id, listType === 'archived' ? ARCHIVED_FOLDER_ID : undefined);
 
-    const ids = global.chats.orderedPinnedIds[listType === 'archived' ? 'archived' : 'active'];
-    if ((ids?.length || 0) >= limit && !isPinned) {
+    const resolvedFolderId = listType === 'archived' ? ARCHIVED_FOLDER_ID : ALL_FOLDER_ID;
+    if (getPinnedChatsCount(resolvedFolderId) >= limit && !isPinned) {
       actions.openLimitReachedModal({
         limit: 'dialogFolderPinned',
         tabId,
@@ -2701,6 +2716,29 @@ addActionHandler('closeForumPanel', (global, actions, payload): ActionReturnType
   }, tabId);
 });
 
+addActionHandler('openCommunityPanel', (global, actions, payload): ActionReturnType => {
+  const { communityId, tabId = getCurrentTabId() } = payload;
+  const { leftColumn } = selectTabState(global, tabId);
+
+  actions.loadFullCommunity({ communityId });
+
+  return updateTabState(global, {
+    leftColumn: {
+      ...leftColumn,
+      contentKey: LeftColumnContent.ChatList,
+    },
+    communityPanelId: communityId,
+    forumPanelChatId: undefined,
+  }, tabId);
+});
+
+addActionHandler('closeCommunityPanel', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    communityPanelId: undefined,
+  }, tabId);
+});
+
 addActionHandler('processAttachBotParameters', async (global, actions, payload): Promise<void> => {
   const {
     username, filter, startParam, tabId = getCurrentTabId(),
@@ -3408,6 +3446,87 @@ addActionHandler('toggleChannelRecommendations', (global, actions, payload): Act
   setGlobal(global);
 });
 
+addActionHandler('loadCommunities', async (global): Promise<void> => {
+  const result = await callApi('fetchJoinedCommunities');
+
+  if (!result) {
+    return;
+  }
+
+  const communityIds = result.communities.map((community) => community.id);
+
+  global = getGlobal();
+  // Not `addChats`: an already known community must still receive a fresh `isCollapsedInDialogs`
+  global = updateChats(global, buildCollectionByKey(result.communities, 'id'));
+  // Communities are candidates for the active list; `folderManager` shows a community
+  // only while it is collapsed, and its member chats only while it is expanded.
+  global = addChatListIds(global, 'active', communityIds);
+  setGlobal(global);
+});
+
+addActionHandler('loadFullCommunity', async (global, actions, payload): Promise<void> => {
+  const { communityId } = payload;
+  const community = selectChat(global, communityId);
+
+  if (!community) {
+    return;
+  }
+
+  const result = await callApi('fetchCommunityFullInfo', { community });
+
+  if (!result) {
+    return;
+  }
+
+  const { fullInfo, chats } = result;
+  const linkedPeerIds = new Set(fullInfo.linkedPeers?.map((peer) => peer.peerId));
+  const joinedChatIds = chats
+    .filter((chat) => linkedPeerIds.has(chat.id) && !chat.isNotJoined)
+    .map((chat) => chat.id);
+
+  global = getGlobal();
+  global = updateChats(global, buildCollectionByKey(chats, 'id'));
+  global = replaceChatFullInfo(global, communityId, fullInfo);
+  // Joined member chats become candidates for the active list and appear when the community is expanded
+  global = addChatListIds(global, 'active', joinedChatIds);
+  setGlobal(global);
+
+  // View-only peers are missing from the dialog list, so their last message has to be
+  // requested for the previews to render. Joined peers are delivered with the dialogs,
+  // and request-to-join peers have no accessible history at all.
+  const viewOnlyPeerIds = new Set(
+    fullInfo.linkedPeers?.filter((peer) => peer.canViewHistory).map((peer) => peer.peerId),
+  );
+  const viewOnlyPeers = chats.filter((chat) => viewOnlyPeerIds.has(chat.id) && chat.isNotJoined);
+  void callApi('fetchCommunityPeerDialogs', { peers: viewOnlyPeers });
+});
+
+addActionHandler('toggleCommunityCollapsed', async (global, actions, payload): Promise<void> => {
+  const { communityId } = payload;
+  const community = selectChat(global, communityId);
+
+  if (!community) {
+    return;
+  }
+
+  const isCollapsed = !community.isCollapsedInDialogs;
+
+  // Optimistic update drives the dialog list locally; the request syncs the server
+  global = updateChat(global, communityId, { isCollapsedInDialogs: isCollapsed });
+  setGlobal(global);
+
+  const result = await callApi('toggleCommunityCollapsedInDialogs', { community, isCollapsed });
+
+  if (!result) {
+    global = getGlobal();
+    // Roll back unless another toggle has changed the state while the request was in flight
+    if (selectChat(global, communityId)?.isCollapsedInDialogs === isCollapsed) {
+      global = updateChat(global, communityId, { isCollapsedInDialogs: !isCollapsed });
+      setGlobal(global);
+    }
+  }
+});
+
 addActionHandler('updatePaidMessagesPrice', async (global, actions, payload): Promise<void> => {
   const { chatId, paidMessagesStars, tabId = getCurrentTabId() } = payload;
   const chat = chatId ? selectChat(global, chatId) : undefined;
@@ -3642,7 +3761,10 @@ async function loadChats(
     });
   }
 
-  if ((chatIds.length === 0 || chatIds.length === result.totalChatCount) && !global.chats.isFullyLoaded[listType]) {
+  if (
+    (result.isFullyLoaded || chatIds.length === 0 || chatIds.length === result.totalChatCount)
+    && !global.chats.isFullyLoaded[listType]
+  ) {
     global = {
       ...global,
       chats: {

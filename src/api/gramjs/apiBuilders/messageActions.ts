@@ -99,6 +99,14 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       chatId: buildApiPeerId(chatId, 'chat'),
     };
   }
+  if (action instanceof GramJs.MessageActionChangeCommunity) {
+    const { communityId } = action;
+    return {
+      mediaType: 'action',
+      type: 'changeCommunity',
+      communityId: communityId !== undefined ? buildApiPeerId(communityId, 'channel') : undefined,
+    };
+  }
   if (action instanceof GramJs.MessageActionPinMessage) {
     return {
       mediaType: 'action',

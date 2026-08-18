@@ -14,7 +14,9 @@ import { addChatToLocalDb, addMessageToLocalDb, addUserToLocalDb } from '../help
 import { sendImmediateApiUpdate } from './apiUpdateEmitter';
 
 const TYPE_USER = new Set(['User', 'UserEmpty']);
-const TYPE_CHAT = new Set(['ChatEmpty', 'Chat', 'ChatForbidden', 'Channel', 'ChannelForbidden']);
+const TYPE_CHAT = new Set([
+  'ChatEmpty', 'Chat', 'ChatForbidden', 'Channel', 'ChannelForbidden', 'Community', 'CommunityForbidden',
+]);
 const TYPE_MESSAGE = new Set(['Message', 'MessageEmpty', 'MessageService']);
 
 export function processAndUpdateEntities(response?: GramJs.AnyRequest['__response']) {
@@ -39,7 +41,7 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
 
   if ('chats' in response && Array.isArray(response.chats) && TYPE_CHAT.has(response.chats[0]?.className)) {
     const chats = response.chats.map((chat: GramJs.TypeChat) => {
-      if ((chat instanceof GramJs.Chat || chat instanceof GramJs.Channel)) {
+      if (chat instanceof GramJs.Chat || chat instanceof GramJs.Channel || chat instanceof GramJs.Community) {
         addChatToLocalDb(chat);
       }
       return buildApiChatFromPreview(chat);

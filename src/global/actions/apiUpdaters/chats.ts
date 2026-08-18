@@ -114,13 +114,21 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         if (changedFields.some((key) => INVALIDATE_FULL_CHAT_FIELDS.has(key))) {
           actions.invalidateFullInfo({ peerId: update.id });
         }
+
+        if ('linkedCommunityId' in chatUpdate && localChat.linkedCommunityId !== chatUpdate.linkedCommunityId) {
+          if (localChat.linkedCommunityId) {
+            actions.loadFullCommunity({ communityId: localChat.linkedCommunityId });
+          }
+          if (chatUpdate.linkedCommunityId) {
+            actions.loadFullCommunity({ communityId: chatUpdate.linkedCommunityId });
+          }
+        }
       }
 
       return undefined;
     }
 
     case 'updateChatJoin': {
-      const listType = selectChatListType(global, update.id);
       const chat = selectChat(global, update.id);
 
       global = updateChat(global, update.id, { isNotJoined: false, isForbidden: false });
@@ -133,10 +141,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       actions.loadFullChat({ chatId: update.id, force: true });
 
-      if (!listType) {
+      if (!chat) {
         return undefined;
       }
 
+      const listType = chat.folderId === ARCHIVED_FOLDER_ID ? 'archived' : 'active';
       global = getGlobal();
       global = addChatListIds(global, listType, [update.id]);
       setGlobal(global);

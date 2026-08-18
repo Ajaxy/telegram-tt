@@ -65,6 +65,17 @@ export function getInputPeer(
       accessHash: entity.accessHash,
     });
   }
+  // Communities are addressed through the channel input peer
+  if (entity instanceof Api.Community || entity instanceof Api.CommunityForbidden) {
+    if (entity.accessHash !== undefined || !checkHash) {
+      return new Api.InputPeerChannel({
+        channelId: entity.id,
+        accessHash: entity.accessHash!,
+      });
+    } else {
+      throw new TypeError('Community without accessHash or min info cannot be input');
+    }
+  }
 
   if (entity instanceof Api.UserEmpty) {
     return new Api.InputPeerEmpty();

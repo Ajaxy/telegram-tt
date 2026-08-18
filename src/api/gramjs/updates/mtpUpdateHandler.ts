@@ -252,8 +252,9 @@ export function updater(update: Update) {
         const photo = buildChatPhotoForLocalDb(action.photo);
 
         const localDbChatId = resolveMessageApiChatId(update.message)!;
-        if (localDb.chats[localDbChatId]) {
-          localDb.chats[localDbChatId].photo = photo;
+        const localDbChat = localDb.chats[localDbChatId];
+        if (localDbChat && !(localDbChat instanceof GramJs.CommunityForbidden)) {
+          localDbChat.photo = photo;
         }
         addPhotoToLocalDb(action.photo);
 
@@ -264,13 +265,24 @@ export function updater(update: Update) {
         });
       } else if (action instanceof GramJs.MessageActionChatDeletePhoto) {
         const localDbChatId = resolveMessageApiChatId(update.message)!;
-        if (localDb.chats[localDbChatId]) {
-          localDb.chats[localDbChatId].photo = new GramJs.ChatPhotoEmpty();
+        const localDbChat = localDb.chats[localDbChatId];
+        if (localDbChat && !(localDbChat instanceof GramJs.CommunityForbidden)) {
+          localDbChat.photo = new GramJs.ChatPhotoEmpty();
         }
 
         sendApiUpdate({
           '@type': 'updateDeleteProfilePhoto',
           peerId: message.chatId,
+        });
+      } else if (action instanceof GramJs.MessageActionChangeCommunity) {
+        sendApiUpdate({
+          '@type': 'updateChat',
+          id: message.chatId,
+          chat: {
+            linkedCommunityId: action.communityId !== undefined
+              ? buildApiPeerId(action.communityId, 'channel')
+              : undefined,
+          },
         });
       } else if (action instanceof GramJs.MessageActionChatDeleteUser) {
         if (update._entities && update._entities.some((e): e is GramJs.User => (
@@ -614,17 +626,15 @@ export function updater(update: Update) {
     });
   } else if (
     update instanceof GramJs.UpdateDialogPinned
-    && update.peer instanceof GramJs.DialogPeer
+    && isChatDialogPeer(update.peer)
   ) {
     sendApiUpdate({
       '@type': 'updateChatPinned',
-      id: getApiChatIdFromMtpPeer(update.peer.peer),
+      id: getApiChatIdFromDialogPeer(update.peer),
       isPinned: update.pinned || false,
     });
   } else if (update instanceof GramJs.UpdatePinnedDialogs) {
-    const ids = update.order?.filter(
-      (dp): dp is GramJs.DialogPeer => dp instanceof GramJs.DialogPeer)
-      .map((dp) => getApiChatIdFromMtpPeer(dp.peer));
+    const ids = update.order?.filter(isChatDialogPeer).map(getApiChatIdFromDialogPeer);
 
     sendApiUpdate({
       '@type': 'updatePinnedChatIds',
@@ -919,8 +929,10 @@ export function updater(update: Update) {
     const className = notifyPeer.className;
     const settings = buildApiPeerNotifySettings(notifySettings);
 
-    if (notifyPeer instanceof GramJs.NotifyPeer) {
-      const peerId = getApiChatIdFromMtpPeer(notifyPeer.peer);
+    if (notifyPeer instanceof GramJs.NotifyPeer || notifyPeer instanceof GramJs.NotifyCommunity) {
+      const peerId = notifyPeer instanceof GramJs.NotifyCommunity
+        ? buildApiPeerId(notifyPeer.communityId, 'channel')
+        : getApiChatIdFromMtpPeer(notifyPeer.peer);
       if (settings.mutedUntil) {
         scheduleMutedChatUpdate(peerId, settings.mutedUntil, sendApiUpdate);
       }
@@ -1260,4 +1272,16 @@ export function updater(update: Update) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
     log('UNEXPECTED UPDATE', params);
   }
+}
+
+function isChatDialogPeer(
+  dialogPeer: GramJs.TypeDialogPeer,
+): dialogPeer is GramJs.DialogPeer | GramJs.DialogPeerCommunity {
+  return dialogPeer instanceof GramJs.DialogPeer || dialogPeer instanceof GramJs.DialogPeerCommunity;
+}
+
+function getApiChatIdFromDialogPeer(dialogPeer: GramJs.DialogPeer | GramJs.DialogPeerCommunity) {
+  return dialogPeer instanceof GramJs.DialogPeerCommunity
+    ? buildApiPeerId(dialogPeer.communityId, 'channel')
+    : getApiChatIdFromMtpPeer(dialogPeer.peer);
 }

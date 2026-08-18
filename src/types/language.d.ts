@@ -1796,6 +1796,16 @@ export interface LangPair {
   'ActionGiveawayResultTitle': undefined;
   'ActionGiftPremiumText': undefined;
   'ActionGiftStarsText': undefined;
+  'CommunityOpenPanel': undefined;
+  'CommunityShowAsOneChat': undefined;
+  'CommunityShowAsOneChatHint': undefined;
+  'CommunityChatsYouAreIn': undefined;
+  'CommunityChatsYouCanView': undefined;
+  'CommunityChatsYouCanJoin': undefined;
+  'CommunitySearchChats': undefined;
+  'CommunityNoChatsFound': undefined;
+  'CommunityJoinChatConfirm': undefined;
+  'CommunityChatNotAccessible': undefined;
   'ActionHistoryCleared': undefined;
   'Refunded': undefined;
   'UniqueStatusBenefitsDescription': undefined;
@@ -2179,6 +2189,7 @@ export interface LangPair {
   'ChatTypePrivate': undefined;
   'ChatTypeGroup': undefined;
   'ChatTypeChannel': undefined;
+  'ChatTypeCommunity': undefined;
   'ChatTypeFallback': undefined;
   'ChatInfoNoMessages': undefined;
   'AttachmentMenuSendAsMedia': undefined;
@@ -3481,6 +3492,13 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ActionMigratedTo': {
     'chat': V;
   };
+  'ActionAddedToCommunity': {
+    'from': V;
+    'community': V;
+  };
+  'ActionRemovedFromCommunity': {
+    'from': V;
+  };
   'UniqueStatusWearTitle': {
     'gift': V;
   };
@@ -4429,6 +4447,12 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   };
   'ActionBoostApply': {
     'from': V;
+    'count': V;
+  };
+  'CommunityChatsCount': {
+    'count': V;
+  };
+  'CommunityWithChats': {
     'count': V;
   };
   'ConfirmationModalPaymentForMessage': {

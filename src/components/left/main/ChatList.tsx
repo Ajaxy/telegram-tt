@@ -83,6 +83,7 @@ const ChatList = ({
     openChat,
     openNextChat,
     closeForumPanel,
+    closeCommunityPanel,
     toggleStoryRibbon,
     openLeftColumnContent,
   } = getActions();
@@ -170,6 +171,7 @@ const ChatList = ({
   const handleArchivedClick = useLastCallback(() => {
     openLeftColumnContent({ contentKey: LeftColumnContent.Archived });
     closeForumPanel();
+    closeCommunityPanel();
   });
 
   const handleShowStoryRibbon = useLastCallback(() => {

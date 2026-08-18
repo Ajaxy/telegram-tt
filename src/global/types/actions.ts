@@ -1202,6 +1202,13 @@ export interface ActionPayloads {
   toggleChannelRecommendations: {
     chatId: string;
   };
+  loadCommunities: undefined;
+  loadFullCommunity: {
+    communityId: string;
+  };
+  toggleCommunityCollapsed: {
+    communityId: string;
+  };
   updateChatMutedState: {
     chatId: string;
     mutedUntil: number;
@@ -1339,6 +1346,10 @@ export interface ActionPayloads {
     chatId: string;
   } & WithTabId;
   closeForumPanel: WithTabId | undefined;
+  openCommunityPanel: {
+    communityId: string;
+  } & WithTabId;
+  closeCommunityPanel: WithTabId | undefined;
 
   toggleParticipantsHidden: {
     chatId: string;

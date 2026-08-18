@@ -109,7 +109,7 @@ async function download(
   }
 
   let entity: (
-    GramJs.User | GramJs.Chat | GramJs.Channel | GramJs.Photo |
+    GramJs.User | GramJs.Chat | GramJs.Channel | GramJs.Community | GramJs.CommunityForbidden | GramJs.Photo |
     GramJs.Message | GramJs.MessageService |
     GramJs.Document | GramJs.StickerSet | GramJs.TypeWebDocument | undefined
   );

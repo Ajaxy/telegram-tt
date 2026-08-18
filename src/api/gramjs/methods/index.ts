@@ -51,4 +51,6 @@ export * from './stars';
 
 export * from './forum';
 
+export * from './communities';
+
 export * from './misc';

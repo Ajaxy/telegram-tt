@@ -30,7 +30,9 @@ const LeftSideMenuDropdown = ({
   shouldHideSearch,
   className,
 }: OwnProps) => {
-  const { openLeftColumnContent, closeForumPanel, openSettingsScreen } = getActions();
+  const {
+    openLeftColumnContent, closeForumPanel, closeCommunityPanel, openSettingsScreen,
+  } = getActions();
   const [isBotMenuOpen, markBotMenuOpen, unmarkBotMenuOpen] = useFlag();
   const lang = useLang();
 
@@ -53,6 +55,7 @@ const LeftSideMenuDropdown = ({
   const handleSelectArchived = useLastCallback(() => {
     openLeftColumnContent({ contentKey: LeftColumnContent.Archived });
     closeForumPanel();
+    closeCommunityPanel();
   });
 
   return (

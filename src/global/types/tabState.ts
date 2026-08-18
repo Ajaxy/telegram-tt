@@ -214,6 +214,7 @@ export type TabState = {
   activeChatFolder: number;
   tabThreads: Record<string, Record<ThreadId, TabThread>>;
   forumPanelChatId?: string;
+  communityPanelId?: string;
 
   focusedMessage?: {
     chatId?: string;

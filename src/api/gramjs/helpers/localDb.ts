@@ -182,7 +182,9 @@ export function addWebPageRepairInfo<T extends GramJs.TypeDocument | GramJs.Type
   return repairableMedia;
 }
 
-export function addChatToLocalDb(chat: GramJs.Chat | GramJs.Channel) {
+export function addChatToLocalDb(
+  chat: GramJs.Chat | GramJs.Channel | GramJs.Community,
+) {
   const id = buildApiPeerId(chat.id, chat instanceof GramJs.Chat ? 'chat' : 'channel');
   const storedChat = localDb.chats[id];
 

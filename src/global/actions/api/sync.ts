@@ -71,7 +71,7 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
   }, RELEASE_STATUS_TIMEOUT);
 
   const {
-    loadAllChats, preloadTopChatMessages,
+    loadAllChats, preloadTopChatMessages, loadCommunities,
   } = actions;
 
   initFolderManager();
@@ -80,6 +80,8 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
     listType: 'active',
     whenFirstBatchDone: async () => {
       await loadAndReplaceMessages(global, actions);
+
+      loadCommunities();
 
       global = getGlobal();
       global = {

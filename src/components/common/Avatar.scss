@@ -156,6 +156,47 @@
     --radius: var(--border-radius-forum-avatar);
   }
 
+  // A community is drawn as a stack of chats, with geometry taken from the design:
+  // two progressively smaller layers, each rotated further to the left and outlined
+  // with the surrounding background. The avatar keeps its regular size so it stays
+  // aligned with neighbouring rows, and the layers extend past its left edge — the
+  // containers that would clip them opt out via `.Chat.community`. `.inner` sits at
+  // a higher `z-index`, so both layers stay behind the avatar itself.
+  &.community {
+    &::before,
+    &::after {
+      content: '';
+
+      position: absolute;
+      top: 50%;
+      left: 50%;
+
+      box-sizing: border-box;
+      border: max(1px, calc(var(--_size) * 0.029)) solid var(--color-background);
+
+      background-color: var(--color-borders);
+    }
+
+    // Farthest layer
+    &::before {
+      transform: translate(-50%, -50%) translate(-38.2%, 2.3%) rotate(-20deg);
+
+      width: 74.8%;
+      height: 74.8%;
+      border-radius: 22.7%;
+
+      opacity: 0.45;
+    }
+
+    // Nearest layer
+    &::after {
+      transform: translate(-50%, -50%) translate(-17.5%, -0.7%) rotate(-10deg);
+      width: 86.4%;
+      height: 86.4%;
+      border-radius: 24.2%;
+    }
+  }
+
   &.hidden-user {
     --color-user: var(--color-deleted-account);
   }

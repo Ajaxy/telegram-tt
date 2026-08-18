@@ -54,6 +54,19 @@ export function getShouldIgnoreNotificationMute(
   return true;
 }
 
+export function mergeNotifySettings(
+  baseSettings?: ApiPeerNotifySettings,
+  overrideSettings?: ApiPeerNotifySettings,
+): ApiPeerNotifySettings | undefined {
+  if (!baseSettings) return overrideSettings;
+  if (!overrideSettings) return baseSettings;
+
+  return {
+    ...baseSettings,
+    ...omitUndefined(overrideSettings),
+  };
+}
+
 export function getChatNotifySettings(
   chat: ApiChat,
   notifyDefaults?: Record<ApiNotifyPeerType, ApiPeerNotifySettings>,

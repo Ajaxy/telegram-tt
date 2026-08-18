@@ -37,12 +37,15 @@
   }
 }
 
-.chatExtraBlock {
+.chatExtraBlock,
+.linkedCommunityIsland {
   margin: 1rem;
   margin-bottom: 0;
 
   @include mixins.adapt-margin-to-scrollbar(1rem);
+}
 
+.chatExtraBlock {
   :global(.narrow) {
     margin-bottom: 0;
   }
@@ -53,6 +56,11 @@
       margin-left: 0;
     }
   }
+}
+
+.linkedCommunityAvatar {
+  flex-shrink: 0;
+  margin-inline-end: 0.5rem;
 }
 
 .sharedMediaTabs {

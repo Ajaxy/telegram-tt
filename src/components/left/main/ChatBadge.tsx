@@ -37,6 +37,8 @@ type OwnProps = {
   shouldShowOnlyMostImportant?: boolean;
   hasMiniApp?: boolean;
   forceHidden?: boolean | Signal<boolean>;
+  // Overrides the chat's own read state, e.g. with a community's aggregated count
+  forceUnreadCount?: number;
   isSelected?: boolean;
   isOnAvatar?: boolean;
   transitionClassName?: string;
@@ -51,6 +53,7 @@ const ChatBadge = ({
   shouldShowOnlyMostImportant,
   wasTopicOpened,
   forceHidden,
+  forceUnreadCount,
   isSavedDialog,
   hasMiniApp,
   isSelected,
@@ -117,7 +120,7 @@ const ChatBadge = ({
     return allTopicIds.length ? [...new Set(allTopicIds)] : [];
   }, [isForum, topicsWithUnreadIds, topicsWithUnreadPollVotesIds, topicsWithUnreadReactionsIds]);
 
-  const unreadCount = isForum ? topicsWithUnreadIds?.length : stateUnreadCount;
+  const unreadCount = forceUnreadCount ?? (isForum ? topicsWithUnreadIds?.length : stateUnreadCount);
   const unreadMentionsCount = isForum ? topicsWithUnreadMentionsIds?.length : stateUnreadMentionsCount;
   const unreadPollVotesCount = isForum ? topicsWithUnreadPollVotesIds?.length : stateUnreadPollVotesCount;
   const unreadReactionsCount = isForum ? topicsWithUnreadReactionsIds?.length : stateUnreadReactionsCount;

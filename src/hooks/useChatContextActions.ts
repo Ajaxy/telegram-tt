@@ -5,8 +5,11 @@ import type { MenuItemContextAction } from '../components/ui/ListItem';
 import type { GlobalState } from '../global/types';
 import { type ApiChat, type ApiUser, MAIN_THREAD_ID } from '../api/types';
 
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
-import { getCanDeleteChat, isChatArchived, isChatChannel, isChatGroup } from '../global/helpers';
+import { ARCHIVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../config';
+import {
+  getCanDeleteChat, isChatArchived, isChatChannel, isChatCommunity, isChatGroup,
+} from '../global/helpers';
+import { selectChat, selectIsChatPinned } from '../global/selectors';
 import { selectThreadReadState } from '../global/selectors/threads';
 import { IS_TAURI } from '../util/browser/globalEnvironment';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/browser/windowEnvironment';
@@ -25,6 +28,7 @@ const useChatContextActions = ({
   isSavedDialog,
   currentUserId,
   isPreview,
+  isInCommunityPanel,
   topicIds,
   handleDelete,
   handleMute,
@@ -41,6 +45,7 @@ const useChatContextActions = ({
   isSavedDialog?: boolean;
   currentUserId?: string;
   isPreview?: boolean;
+  isInCommunityPanel?: boolean;
   topicIds?: number[];
   handleDelete?: NoneToVoidFunction;
   handleMute?: NoneToVoidFunction;
@@ -76,6 +81,18 @@ const useChatContextActions = ({
     return selectThreadReadState(global, chat.id, MAIN_THREAD_ID);
   }, [chat?.id]);
   const chatReadState = useSelector(chatReadStateSelector);
+
+  const isLinkedCommunityCollapsedSelector = useCallback((global: GlobalState) => {
+    const communityId = chat?.linkedCommunityId;
+    return Boolean(communityId && selectChat(global, communityId)?.isCollapsedInDialogs);
+  }, [chat?.linkedCommunityId]);
+  const isLinkedCommunityCollapsed = useSelector(isLinkedCommunityCollapsedSelector);
+
+  const isResolvedPinnedSelector = useCallback((global: GlobalState) => {
+    if (isPinned !== undefined || !isInCommunityPanel || !chat) return isPinned;
+    return selectIsChatPinned(global, chat.id, isChatArchived(chat) ? ARCHIVED_FOLDER_ID : undefined);
+  }, [chat, isInCommunityPanel, isPinned]);
+  const isResolvedPinned = useSelector(isResolvedPinnedSelector);
 
   const deleteTitle = useMemo(() => {
     if (!chat) return undefined;
@@ -134,7 +151,7 @@ const useChatContextActions = ({
       }
     };
 
-    const actionPin: MenuItemContextAction = isPinned
+    const actionPin: MenuItemContextAction = isResolvedPinned
       ? {
         title: lang('ChatListUnpinFromTop'),
         icon: 'unpin',
@@ -175,6 +192,11 @@ const useChatContextActions = ({
         handler: handleMute,
       };
 
+    // A community has no message history, so most chat actions do not apply
+    if (isChatCommunity(chat)) {
+      return compact([actionPin, actionMute]);
+    }
+
     if (isInSearch) {
       return compact([
         actionOpenInNewTab, actionQuickPreview, actionPin, actionAddToFolder, actionMute,
@@ -196,6 +218,11 @@ const useChatContextActions = ({
       } satisfies MenuItemContextAction
       : undefined;
 
+    // A view-only community chat has history but no dialog-list placement to manage
+    if (isInCommunityPanel && chat.isNotJoined) {
+      return compact([actionOpenInNewTab, actionQuickPreview]);
+    }
+
     const actionArchive: MenuItemContextAction = isChatArchived(chat)
       ? { title: lang('Unarchive'), icon: 'unarchive', handler: () => toggleChatArchived({ id: chat.id }) }
       : { title: lang('Archive'), icon: 'archive', handler: () => toggleChatArchived({ id: chat.id }) };
@@ -206,23 +233,25 @@ const useChatContextActions = ({
       : undefined;
 
     const isInFolder = folderId !== undefined;
+    const canManageListPlacement = !(isInCommunityPanel && isLinkedCommunityCollapsed);
 
     return compact<MenuItemContextAction>([
       actionOpenInNewTab,
       actionQuickPreview,
-      actionAddToFolder,
+      canManageListPlacement && actionAddToFolder,
       actionMarkAsRead,
       actionMarkAsUnread,
-      actionPin,
+      canManageListPlacement && actionPin,
       !isSelf && actionMute,
-      !isSelf && !isServiceNotifications && !isInFolder && actionArchive,
+      !isSelf && !isServiceNotifications && !isInFolder && canManageListPlacement && actionArchive,
       actionReport,
       actionDelete,
     ]);
   }, [
-    chat, isPreview, lang, isSavedDialog, isPinned, deleteTitle, handleDelete, canChangeFolder,
+    chat, isPreview, lang, isSavedDialog, isResolvedPinned, deleteTitle, handleDelete, canChangeFolder,
     handleChatFolderChange, isMuted, handleUnmute, handleMute, isInSearch, chatReadState, topicsReadStates,
-    handleReport, user, folderId, isSelf, isServiceNotifications, currentUserId,
+    handleReport, user, folderId, isSelf, isServiceNotifications, currentUserId, isInCommunityPanel,
+    isLinkedCommunityCollapsed,
   ]);
 
   return preparedActions;

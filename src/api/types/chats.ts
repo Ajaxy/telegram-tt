@@ -63,6 +63,8 @@ export interface ApiChat {
   isBotForum?: boolean;
   withForumTabs?: boolean;
   linkedMonoforumId?: string;
+  linkedCommunityId?: string;
+  isCollapsedInDialogs?: boolean;
   areChannelMessagesAllowed?: boolean;
   boostLevel?: number;
   botVerificationIconId?: string;
@@ -128,6 +130,13 @@ type ApiTypingStatusWatchingAnimations = ApiTypingStatusBase & {
 
 export type ApiTypingStatus = ApiTypingStatusSimple | ApiTypingStatusWatchingAnimations;
 
+export interface ApiCommunityLinkedPeer {
+  peerId: string;
+  canViewHistory?: boolean;
+  // `false` means the peer is hidden and cannot be joined without an invite
+  isVisible?: boolean;
+}
+
 export interface ApiChatFullInfo {
   about?: string;
   ttlPeriod?: number;
@@ -179,6 +188,12 @@ export interface ApiChatFullInfo {
   botVerification?: ApiBotVerification;
   mainTab?: ApiProfileTab;
   guardBotId?: string;
+
+  // Community
+  linkedPeers?: ApiCommunityLinkedPeer[];
+  adminsCount?: number;
+  kickedCount?: number;
+  peerLinkRequestsCount?: number;
 }
 
 export interface ApiChatMember {

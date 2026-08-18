@@ -61,6 +61,7 @@ function buildApiChatFieldsFromPeerEntity(
 ): PeerEntityApiChatFields {
   const user = peerEntity instanceof GramJs.User ? peerEntity : undefined;
   const channel = peerEntity instanceof GramJs.Channel ? peerEntity : undefined;
+  const community = peerEntity instanceof GramJs.Community ? peerEntity : undefined;
 
   const userOrChannel = user || channel;
 
@@ -93,6 +94,7 @@ function buildApiChatFieldsFromPeerEntity(
   const profileColor = userOrChannel?.profileColor ? buildApiPeerColor(userOrChannel.profileColor) : undefined;
   const emojiStatus = userOrChannel?.emojiStatus ? buildApiEmojiStatus(userOrChannel.emojiStatus) : undefined;
   const paidMessagesStars = userOrChannel?.sendPaidMessagesStars;
+  const linkedCommunityId = userOrChannel?.linkedCommunityId;
   const isVerified = userOrChannel?.verified;
   const isForum = channel?.forum || user?.botForumView;
 
@@ -124,6 +126,9 @@ function buildApiChatFieldsFromPeerEntity(
     isMonoforum: channel?.monoforum,
     linkedMonoforumId: channel?.linkedMonoforumId !== undefined
       ? buildApiPeerId(channel.linkedMonoforumId, 'channel') : undefined,
+    linkedCommunityId: linkedCommunityId !== undefined
+      ? buildApiPeerId(linkedCommunityId, 'channel') : undefined,
+    isCollapsedInDialogs: community?.collapsedInDialogs,
     areChannelMessagesAllowed: channel?.broadcastMessagesAllowed,
     areStoriesHidden,
     maxStoryId,
@@ -182,7 +187,10 @@ function buildApiChatPermissions(peerEntity: GramJs.TypeUser | GramJs.TypeChat):
   currentUserBannedRights?: ApiChatBannedRights;
   defaultBannedRights?: ApiChatBannedRights;
 } {
-  if (!(peerEntity instanceof GramJs.Chat || peerEntity instanceof GramJs.Channel)) {
+  if (!(
+    peerEntity instanceof GramJs.Chat || peerEntity instanceof GramJs.Channel
+    || peerEntity instanceof GramJs.Community
+  )) {
     return {};
   }
 
@@ -209,7 +217,7 @@ function buildApiChatRestrictions(peerEntity: Entity): {
     };
   }
 
-  if (peerEntity instanceof GramJs.ChannelForbidden) {
+  if (peerEntity instanceof GramJs.ChannelForbidden || peerEntity instanceof GramJs.CommunityForbidden) {
     return {
       isRestricted: true,
     };
@@ -246,7 +254,7 @@ function buildApiChatRestrictions(peerEntity: Entity): {
     });
   }
 
-  if (peerEntity instanceof GramJs.Channel) {
+  if (peerEntity instanceof GramJs.Channel || peerEntity instanceof GramJs.Community) {
     Object.assign(restrictions, {
       // `left` is weirdly set to `true` on all channels never joined before
       isNotJoined: peerEntity.left,
@@ -310,7 +318,10 @@ export function getApiChatTypeFromPeerEntity(peerEntity: GramJs.TypeChat | GramJ
     || peerEntity instanceof GramJs.ChatEmpty
   ) {
     return 'chatTypeBasicGroup';
-  } else if (peerEntity instanceof GramJs.Community || peerEntity instanceof GramJs.CommunityForbidden) {
+  } else if (
+    peerEntity instanceof GramJs.Community
+    || peerEntity instanceof GramJs.CommunityForbidden
+  ) {
     return 'chatTypeCommunity';
   } else {
     return peerEntity.megagroup ? 'chatTypeSuperGroup' : 'chatTypeChannel';

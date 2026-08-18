@@ -51,6 +51,10 @@ export function isChatChannel(chat: ApiChat) {
   return chat.type === 'chatTypeChannel';
 }
 
+export function isChatCommunity(chat: ApiChat) {
+  return chat.type === 'chatTypeCommunity';
+}
+
 export function isChatMonoforum(chat: ApiChat) {
   return chat.isMonoforum;
 }
@@ -80,6 +84,8 @@ export function getChatTypeLangKey(chat: ApiChat): RegularLangKey {
       return 'ChatTypeGroup';
     case 'chatTypeChannel':
       return 'ChatTypeChannel';
+    case 'chatTypeCommunity':
+      return 'ChatTypeCommunity';
     default:
       return 'ChatTypeFallback';
   }

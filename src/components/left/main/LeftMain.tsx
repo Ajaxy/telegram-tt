@@ -9,10 +9,12 @@ import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReduc
 import { LeftColumnContent } from '../../../types';
 
 import { DEBUG } from '../../../config';
+import { selectCommunityPanelId } from '../../../global/selectors';
 import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 
+import useSelector from '../../../hooks/data/useSelector';
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useForumPanelRender from '../../../hooks/useForumPanelRender';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -24,6 +26,7 @@ import Transition from '../../ui/Transition';
 import NewChatButton from '../NewChatButton';
 import LeftSearch from '../search/LeftSearch.async';
 import ChatFolders from './ChatFolders';
+import CommunityPanel from './community/CommunityPanel';
 import ContactList from './ContactList.async';
 import ForumPanel from './forum/ForumPanel';
 import LeftMainHeader from './LeftMainHeader';
@@ -80,6 +83,15 @@ const LeftMain: FC<OwnProps> = ({
   } = useForumPanelRender(isForumPanelOpen);
   const isForumPanelRendered = isForumPanelOpen && content === LeftColumnContent.ChatList;
   const isForumPanelVisible = isForumPanelRendered && isAnimationStarted;
+
+  const communityPanelId = useSelector((global) => selectCommunityPanelId(global));
+  const isCommunityPanelOpen = Boolean(communityPanelId);
+  const {
+    shouldRenderForumPanel: shouldRenderCommunityPanel,
+    handleForumPanelAnimationEnd: handleCommunityPanelAnimationEnd,
+    handleForumPanelAnimationStart: handleCommunityPanelAnimationStart,
+  } = useForumPanelRender(isCommunityPanelOpen);
+  const isCommunityPanelRendered = isCommunityPanelOpen && content === LeftColumnContent.ChatList;
 
   const {
     shouldRender: shouldRenderUpdateButton,
@@ -241,6 +253,14 @@ const LeftMain: FC<OwnProps> = ({
         >
           {lang('lng_update_telegram')}
         </Button>
+      )}
+      {shouldRenderCommunityPanel && (
+        <CommunityPanel
+          isOpen={isCommunityPanelOpen}
+          isHidden={!isCommunityPanelRendered}
+          onOpenAnimationStart={handleCommunityPanelAnimationStart}
+          onCloseAnimationEnd={handleCommunityPanelAnimationEnd}
+        />
       )}
       {shouldRenderForumPanel && (
         <ForumPanel
