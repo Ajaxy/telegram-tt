@@ -74,7 +74,7 @@ jobs:
 
           echo "Checking if release already exists for tag: $TAG_NAME"
 
-          RESPONSE=$(curl -s -H "Authorization: token $GH_TOKEN" \
+          RESPONSE=$(curl -sS -H "Authorization: token $GH_TOKEN" \
             "https://api.github.com/repos/$PUBLISH_REPO/releases/tags/$TAG_NAME")
 
           if echo "$RESPONSE" | jq -e '.tag_name' > /dev/null; then
@@ -86,20 +86,24 @@ jobs:
               echo "📝 Draft release exists for version $PACKAGE_VERSION, will continue"
               echo "should-skip=false" >> $GITHUB_OUTPUT
             fi
-          else
+          elif echo "$RESPONSE" | jq -e '.message == "Not Found"' > /dev/null; then
             echo "🆕 No release found for version $PACKAGE_VERSION, will create new release"
             echo "should-skip=false" >> $GITHUB_OUTPUT
+          else
+            echo "Error: Failed to retrieve release $TAG_NAME. Response was: $RESPONSE"
+            exit 1
           fi
 
   create-release:
     runs-on: ubuntu-latest
     needs: [get-version, check-version]
-    if: needs.get-version.outputs.should-publish != '' && needs.check-version.outputs.should-skip != 'true'
+    if: needs.check-version.outputs.should-skip != 'true'
     outputs:
       releaseId: ${{ steps.create-release.outputs.releaseId }}
     steps:
       - name: Create draft release
         id: create-release
+        if: needs.get-version.outputs.should-publish != ''
         env:
           PACKAGE_VERSION: ${{ needs.get-version.outputs.package-version }}
           TAG_NAME: ${{ needs.get-version.outputs.tag-name }}
@@ -107,22 +111,17 @@ jobs:
         run: |
           echo "Creating draft release for tag: $TAG_NAME"
           echo "Repository: $PUBLISH_REPO"
-          RESPONSE=$(curl -X POST \
+          RESPONSE=$(curl --fail-with-body --silent --show-error -X POST \
             -H "Authorization: token $GH_TOKEN" \
             -d '{"tag_name": "'"$TAG_NAME"'", "name": "'"$RELEASE_NAME"'", "draft": true}' \
             "https://api.github.com/repos/$PUBLISH_REPO/releases")
-          RELEASE_ID=$(echo "$RESPONSE" | jq -r '.id')
+          RELEASE_ID=$(echo "$RESPONSE" | jq -er '.id')
           echo "Extracted Release ID: $RELEASE_ID"
-          if [ "$RELEASE_ID" = "null" ]; then
-            echo "Error: Failed to create release. Response was: $RESPONSE"
-            exit 1
-          fi
           echo "releaseId=$RELEASE_ID" >> $GITHUB_OUTPUT
 
   package-tauri:
     name: Build, package and publish Tauri
     needs: [get-version, check-version, create-release]
-    if: ${{ always() && needs.check-version.outputs.should-skip != 'true' }}
     permissions:
       contents: write
     strategy:
