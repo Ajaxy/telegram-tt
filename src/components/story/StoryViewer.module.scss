@@ -398,7 +398,7 @@
 .sender {
   position: absolute;
   z-index: 2;
-  top: 1.25rem;
+  top: 0.875rem;
   right: 0.5rem;
   left: 1rem;
 
@@ -409,12 +409,16 @@
 }
 
 .senderInfoTransition {
-  position: absolute;
+  flex: 1;
+  min-width: 0;
+  /* Slides are detached from the flow while animating, so the height has to be explicit */
+  height: 2.5rem;
 }
 
 .senderInfo {
   display: flex;
   align-items: center;
+  height: 100%;
 }
 
 .senderMeta {
@@ -485,6 +489,7 @@
 
 .actions {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   margin-inline-start: auto;
 
