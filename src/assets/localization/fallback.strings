@@ -106,6 +106,9 @@
 "ProfileCopyPhone" = "Copy Phone Number";
 "ContextCopySelected" = "Copy Selected Text";
 "ContextCopyText" = "Copy Text";
+"CopyAsText" = "Copy as text";
+"CopyAsHtml" = "Copy as HTML";
+"CopyAsMarkdown" = "Copy as Markdown";
 "ContextArchiveCollapse" = "Collapse";
 "ContextArchiveExpand" = "Expand";
 "ContextArchiveToMenu" = "Move to Main Menu";

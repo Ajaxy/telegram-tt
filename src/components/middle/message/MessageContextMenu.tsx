@@ -21,7 +21,7 @@ import type {
 import type {
   IAnchorPosition, MessageListType, ThreadId, TranslationTone,
 } from '../../../types';
-import type { MessageCopyRequest } from '../../../types/messageCopy';
+import type { ClipboardTextFormat, MessageCopyRequest } from '../../../types/messageCopy';
 
 import {
   getUserFullName,
@@ -65,6 +65,7 @@ type OwnProps = {
   isOpen: boolean;
   anchor: IAnchorPosition;
   targetHref?: string;
+  isAltKeyPressed?: boolean;
   message: ApiMessage;
   threadId: ThreadId;
   messageListType: MessageListType;
@@ -132,7 +133,7 @@ type OwnProps = {
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
   onCopyLink?: NoneToVoidFunction;
-  onCopyMessages?: (request: MessageCopyRequest) => void;
+  onCopyMessages?: (request: MessageCopyRequest, textFormat?: ClipboardTextFormat) => void;
   onCopyNumber?: NoneToVoidFunction;
   onDownload?: NoneToVoidFunction;
   onSaveGif?: NoneToVoidFunction;
@@ -177,6 +178,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   reactionsLimit,
   anchor,
   targetHref,
+  isAltKeyPressed,
   canSendNow,
   canReschedule,
   canBuyPremium,
@@ -520,14 +522,30 @@ const MessageContextMenu: FC<OwnProps> = ({
           <MenuItem icon="web" onClick={onSelectLanguage}>{oldLang('lng_settings_change_lang')}</MenuItem>
         )}
         {copyOptions.map((option) => (
-          <MenuItem
-            key={option.label}
-            icon={option.icon}
-            onClick={option.handler}
-            withPreventDefaultOnMouseDown
-          >
-            {oldLang(option.label)}
-          </MenuItem>
+          isAltKeyPressed && option.canCopyWithFormat ? (
+            <NestedMenuItem
+              key={option.label}
+              icon={option.icon}
+              submenu={(
+                <>
+                  <MenuItem onClick={() => option.handler('plainText')}>{lang('CopyAsText')}</MenuItem>
+                  <MenuItem onClick={() => option.handler('html')}>{lang('CopyAsHtml')}</MenuItem>
+                  <MenuItem onClick={() => option.handler('markdown')}>{lang('CopyAsMarkdown')}</MenuItem>
+                </>
+              )}
+            >
+              {lang('Copy')}
+            </NestedMenuItem>
+          ) : (
+            <MenuItem
+              key={option.label}
+              icon={option.icon}
+              onClick={() => option.handler()}
+              withPreventDefaultOnMouseDown
+            >
+              {oldLang(option.label)}
+            </MenuItem>
+          )
         ))}
         {canPin && <MenuItem icon="pin" onClick={onPin}>{oldLang('DialogPin')}</MenuItem>}
         {canUnpin && <MenuItem icon="unpin" onClick={onUnpin}>{oldLang('DialogUnpin')}</MenuItem>}

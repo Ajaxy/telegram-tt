@@ -132,10 +132,20 @@ function extendBotApiMarkdownHtmlExtension(
     case 'pullquote':
     case 'details':
     case FOOTER_NODE_NAME:
-    case TABLE_WRAPPER_NODE_NAME:
       return extension.extend({
         renderMarkdown(node) {
           return serializeBotApiHtmlNode(node, schema, serializer);
+        },
+      });
+    case TABLE_WRAPPER_NODE_NAME:
+      return extension.extend({
+        renderMarkdown(node, helpers) {
+          const [title, table] = node.content || [];
+          if (!table) return '';
+
+          const titleMarkdown = title ? helpers.renderChildren(title).trim() : '';
+          const tableMarkdown = helpers.renderChildren([table]);
+          return titleMarkdown ? `${titleMarkdown}\n${tableMarkdown}` : tableMarkdown;
         },
       });
     default:

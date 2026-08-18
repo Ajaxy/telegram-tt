@@ -25,7 +25,7 @@ import type {
   ThreadId,
   TranslationTone,
 } from '../../../types';
-import type { MessageCopyRequest } from '../../../types/messageCopy';
+import type { ClipboardTextFormat, MessageCopyRequest } from '../../../types/messageCopy';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { PREVIEW_AVATAR_COUNT } from '../../../config';
@@ -101,6 +101,7 @@ export type OwnProps = {
   album?: IAlbum;
   anchor: IAnchorPosition;
   targetHref?: string;
+  isAltKeyPressed?: boolean;
   messageListType: MessageListType;
   threadId: ThreadId;
   noReplies?: boolean;
@@ -192,6 +193,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   story,
   anchor,
   targetHref,
+  isAltKeyPressed,
   noOptions,
   canSendNow,
   hasFullInfo,
@@ -618,8 +620,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     openReactorListModal({ chatId: message.chatId, messageId: message.id });
   });
 
-  const handleCopyMessages = useLastCallback((request: MessageCopyRequest) => {
-    copyMessagesByIds({ request, shouldNotify: true });
+  const handleCopyMessages = useLastCallback((request: MessageCopyRequest, textFormat?: ClipboardTextFormat) => {
+    copyMessagesByIds({ request, shouldNotify: true, textFormat });
     closeMenu();
   });
 
@@ -766,6 +768,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         reactionsLimit={reactionsLimit}
         anchor={anchor}
         targetHref={targetHref}
+        isAltKeyPressed={isAltKeyPressed}
         chat={chat}
         canShowReactionsCount={canShowReactionsCount}
         canShowReactionList={canShowReactionList}

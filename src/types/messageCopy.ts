@@ -6,6 +6,8 @@ export type ClipboardTextContent = {
   markdown: string;
 };
 
+export type ClipboardTextFormat = keyof ClipboardTextContent;
+
 type MessageCopyContext = {
   chatId: string;
   threadId: ThreadId;

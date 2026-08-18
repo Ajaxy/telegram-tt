@@ -1,7 +1,7 @@
 import type { ApiMessage, StatefulMediaContent } from '../../../../api/types';
 import type { MessageListType, ThreadId } from '../../../../types';
 import type { IconName } from '../../../../types/icons';
-import type { MessageCopyRequest } from '../../../../types/messageCopy';
+import type { ClipboardTextFormat, MessageCopyRequest } from '../../../../types/messageCopy';
 import { ApiMediaFormat } from '../../../../api/types';
 
 import {
@@ -25,7 +25,8 @@ import { captureMessageCopyRequest } from './getSelectionAsFormattedText';
 type ICopyOptions = {
   label: string;
   icon: IconName;
-  handler: () => void;
+  canCopyWithFormat?: boolean;
+  handler: (textFormat?: ClipboardTextFormat) => void;
 }[];
 
 export function getMessageCopyOptions(
@@ -37,7 +38,7 @@ export function getMessageCopyOptions(
   canCopy?: boolean,
   afterEffect?: () => void,
   onCopyLink?: () => void,
-  onCopyMessages?: (request: MessageCopyRequest) => void,
+  onCopyMessages?: (request: MessageCopyRequest, textFormat?: ClipboardTextFormat) => void,
   onCopyNumber?: () => void,
 ): ICopyOptions {
   const { webPage } = statefulContent || {};
@@ -86,7 +87,8 @@ export function getMessageCopyOptions(
     options.push({
       label: getCopyLabel(hasSelection),
       icon: 'copy',
-      handler: () => {
+      canCopyWithFormat: !hasSelection,
+      handler: (textFormat) => {
         if (!onCopyMessages) return;
 
         const selectionRequest = hasSelection
@@ -95,7 +97,7 @@ export function getMessageCopyOptions(
         if (selectionRequest && (
           selectionRequest.type === 'messages' || selectionRequest.messageId === message.id
         )) {
-          onCopyMessages(selectionRequest);
+          onCopyMessages(selectionRequest, textFormat);
           return;
         }
 
@@ -105,7 +107,7 @@ export function getMessageCopyOptions(
           threadId,
           messageListType,
           messageIds: [message.id],
-        });
+        }, textFormat);
       },
     });
   }

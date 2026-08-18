@@ -74,6 +74,9 @@ export interface LangPair {
   'ProfileCopyPhone': undefined;
   'ContextCopySelected': undefined;
   'ContextCopyText': undefined;
+  'CopyAsText': undefined;
+  'CopyAsHtml': undefined;
+  'CopyAsMarkdown': undefined;
   'ContextArchiveCollapse': undefined;
   'ContextArchiveExpand': undefined;
   'ContextArchiveToMenu': undefined;

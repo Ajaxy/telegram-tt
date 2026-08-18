@@ -1,4 +1,4 @@
-import type { MessageCopyRequest } from '../../../types/messageCopy';
+import type { ClipboardTextFormat, MessageCopyRequest } from '../../../types/messageCopy';
 import type {
   ActionReturnType,
 } from '../../types';
@@ -1056,11 +1056,11 @@ addActionHandler('closeSuggestedPostApprovalModal', (global, actions, payload): 
 });
 
 function copyTextForMessages(
-  payload: { request: MessageCopyRequest; shouldNotify?: boolean },
+  payload: { request: MessageCopyRequest; shouldNotify?: boolean; textFormat?: ClipboardTextFormat },
   tabId: number,
 ) {
   const { showNotification } = getActions();
-  const { request, shouldNotify } = payload;
+  const { request, shouldNotify, textFormat } = payload;
   const messageList = {
     chatId: request.chatId,
     threadId: request.threadId,
@@ -1077,6 +1077,7 @@ function copyTextForMessages(
     contentPromise,
     shouldNotify ? () => showNotification({ message: { key: 'TextCopied' }, tabId }) : undefined,
     shouldNotify ? () => showNotification({ message: { key: 'GeneralError' }, tabId }) : undefined,
+    textFormat,
   );
 }
 

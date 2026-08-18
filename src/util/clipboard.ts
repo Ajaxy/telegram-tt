@@ -1,4 +1,4 @@
-import type { ClipboardTextContent } from '../types/messageCopy';
+import type { ClipboardTextContent, ClipboardTextFormat } from '../types/messageCopy';
 
 import { DEBUG } from '../config';
 
@@ -53,6 +53,7 @@ export async function copyTextToClipboardFromPromise(
   getContentPromise: Promise<string | ClipboardTextContent | undefined>,
   onSuccess?: NoneToVoidFunction,
   onFailure?: NoneToVoidFunction,
+  textFormat?: ClipboardTextFormat,
 ) {
   const contentPromise = getContentPromise.then((content) => {
     if (!content) throw new Error('EMPTY_CLIPBOARD_CONTENT');
@@ -63,12 +64,17 @@ export async function copyTextToClipboardFromPromise(
   try {
     if (!CLIPBOARD_ITEM_SUPPORTED || !navigator.clipboard.write) throw new Error('CLIPBOARD_ITEM_UNSUPPORTED');
 
-    const canWriteMarkdown = !ClipboardItem.supports || ClipboardItem.supports('text/markdown');
-    await navigator.clipboard.write([buildTextClipboardItem(contentPromise, canWriteMarkdown)]);
+    if (textFormat) {
+      const plainTextPromise = contentPromise.then((content) => content[textFormat]);
+      await navigator.clipboard.write([buildPlainTextClipboardItem(plainTextPromise)]);
+    } else {
+      const canWriteMarkdown = !ClipboardItem.supports || ClipboardItem.supports('text/markdown');
+      await navigator.clipboard.write([buildTextClipboardItem(contentPromise, canWriteMarkdown)]);
+    }
   } catch {
     try {
       const content = await contentPromise;
-      if (CLIPBOARD_ITEM_SUPPORTED) {
+      if (!textFormat && CLIPBOARD_ITEM_SUPPORTED) {
         try {
           await navigator.clipboard.write([buildTextClipboardItem(content)]);
           onSuccess?.();
@@ -77,7 +83,7 @@ export async function copyTextToClipboardFromPromise(
           // Fall through to the synchronous plain-text fallback
         }
       }
-      if (!copyTextToClipboard(content.plainText)) {
+      if (!copyTextToClipboard(textFormat ? content[textFormat] : content.plainText)) {
         throw new Error('CLIPBOARD_WRITE_FAILED');
       }
     } catch {
@@ -87,6 +93,12 @@ export async function copyTextToClipboardFromPromise(
   }
 
   onSuccess?.();
+}
+
+function buildPlainTextClipboardItem(content: string | Promise<string>) {
+  return new ClipboardItem({
+    'text/plain': buildPlainTextClipboardBlob(content),
+  });
 }
 
 function buildTextClipboardItem(
@@ -113,6 +125,12 @@ function buildClipboardBlob(
   const value = content[key];
   if (!content.plainText) throw new Error('EMPTY_CLIPBOARD_CONTENT');
   return new Blob([value], { type });
+}
+
+function buildPlainTextClipboardBlob(content: string | Promise<string>): Blob | Promise<Blob> {
+  if (content instanceof Promise) return content.then(buildPlainTextClipboardBlob);
+  if (!content) throw new Error('EMPTY_CLIPBOARD_CONTENT');
+  return new Blob([content], { type: 'text/plain' });
 }
 
 async function copyBlobToClipboard(pngBlob: Blob | null) {

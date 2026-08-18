@@ -39,6 +39,7 @@ const useContextMenuHandlers = (
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuAnchor, setContextMenuAnchor] = useState<IAnchorPosition | undefined>(undefined);
   const [contextMenuTarget, setContextMenuTarget] = useState<HTMLElement | undefined>(undefined);
+  const [isContextMenuAltKeyPressed, setIsContextMenuAltKeyPressed] = useState(false);
 
   const handleBeforeContextMenu = useLastCallback((e: React.MouseEvent) => {
     if (!isMenuDisabled && e.button === 2) {
@@ -63,6 +64,7 @@ const useContextMenuHandlers = (
       return;
     }
 
+    setIsContextMenuAltKeyPressed(e.altKey);
     setIsContextMenuOpen(true);
     setContextMenuAnchor({ x: e.clientX, y: e.clientY });
     setContextMenuTarget(e.target as HTMLElement);
@@ -138,6 +140,7 @@ const useContextMenuHandlers = (
         });
       }
 
+      setIsContextMenuAltKeyPressed(false);
       setIsContextMenuOpen(true);
       setContextMenuAnchor({ x: clientX, y: clientY });
     };
@@ -174,6 +177,7 @@ const useContextMenuHandlers = (
     isContextMenuOpen,
     contextMenuAnchor,
     contextMenuTarget,
+    isContextMenuAltKeyPressed,
     handleBeforeContextMenu,
     handleContextMenu,
     handleContextMenuClose,

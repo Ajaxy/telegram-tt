@@ -535,6 +535,7 @@ const Message = ({
     isContextMenuOpen,
     contextMenuAnchor,
     contextMenuTarget,
+    isContextMenuAltKeyPressed,
     handleBeforeContextMenu,
     handleContextMenu: onContextMenu,
     handleContextMenuClose,
@@ -2082,6 +2083,7 @@ const Message = ({
           isOpen={isContextMenuOpen}
           anchor={contextMenuAnchor}
           targetHref={contextMenuTarget?.matches('a[href]') ? (contextMenuTarget as HTMLAnchorElement).href : undefined}
+          isAltKeyPressed={isContextMenuAltKeyPressed}
           message={message}
           album={album}
           messageListType={messageListType}

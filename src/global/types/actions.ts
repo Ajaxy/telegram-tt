@@ -119,7 +119,7 @@ import type {
   WebPageMediaSize,
 } from '../../types';
 import type { BrowserModalStateType, BrowserTab } from '../../types/browser';
-import type { MessageCopyRequest } from '../../types/messageCopy';
+import type { ClipboardTextFormat, MessageCopyRequest } from '../../types/messageCopy';
 import type { WebApp, WebAppOutboundEvent } from '../../types/webapp';
 import type { DownloadableMedia } from '../helpers';
 import type { SharedState } from './sharedState';
@@ -943,6 +943,7 @@ export interface ActionPayloads {
   copyMessagesByIds: {
     request: MessageCopyRequest;
     shouldNotify?: boolean;
+    textFormat?: ClipboardTextFormat;
   } & WithTabId;
   openSeenByModal: {
     chatId: string;
