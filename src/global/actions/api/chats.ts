@@ -865,7 +865,8 @@ addActionHandler('joinChannel', async (global, actions, payload): Promise<void> 
   }
 
   try {
-    const result = await callApi('joinChannel', { channelId, accessHash });
+    const theme = extractCurrentThemeParams();
+    const result = await callApi('joinChannel', { channelId, accessHash, theme });
 
     if (result?.type === 'webView') {
       actions.openChatInviteWebView({
@@ -1873,7 +1874,8 @@ addActionHandler('acceptChatInvite', async (global, actions, payload): Promise<v
   const {
     hash, isRequestNeeded, isBroadcast, tabId = getCurrentTabId(),
   } = payload;
-  const result = await callApi('importChatInvite', { hash });
+  const theme = extractCurrentThemeParams();
+  const result = await callApi('importChatInvite', { hash, theme });
 
   if (result?.type === 'webView') {
     actions.openChatInviteWebView({

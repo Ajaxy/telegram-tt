@@ -18,6 +18,7 @@ import {
   type ApiPeerNotifySettings,
   type ApiPhoto,
   type ApiProfileTab,
+  type ApiThemeParameters,
   type ApiThreadInfo,
   type ApiUser,
   type ApiUserStatus,
@@ -30,6 +31,7 @@ import {
   DEBUG,
   MEMBERS_LOAD_SLICE,
   SERVICE_NOTIFICATIONS_USER_ID,
+  WEB_APP_PLATFORM,
 } from '../../../config';
 import { buildCollectionByKey, omitUndefined } from '../../../util/iteratees';
 import { GLOBAL_SEARCH_CONTACTS_LIMIT } from '../../../limits';
@@ -76,6 +78,7 @@ import {
   buildInputReplyTo,
   buildInputRichMessage,
   buildInputSuggestedPost,
+  buildInputThemeParams,
   buildInputUser,
   buildMtpMessageEntity,
   DEFAULT_PRIMITIVES,
@@ -940,9 +943,9 @@ export async function createChannel({
 }
 
 export async function joinChannel({
-  channelId, accessHash,
+  channelId, accessHash, theme,
 }: {
-  channelId: string; accessHash: string;
+  channelId: string; accessHash: string; theme?: ApiThemeParameters;
 }): Promise<ApiChatInviteJoinWebView | { type: 'ok' } | undefined> {
   const result = await invokeRequest(new GramJs.channels.JoinChannel({
     channel: buildInputChannel(channelId, accessHash),
@@ -955,7 +958,7 @@ export async function joinChannel({
   }
 
   if (result instanceof GramJs.messages.ChatInviteJoinResultWebView) {
-    return buildApiChatInviteWebView(result);
+    return requestChatJoinWebView(result, theme);
   }
 
   return { type: 'ok' };
@@ -1251,7 +1254,12 @@ export async function fetchPinnedDialogs({
   const { dialogs, messages, chats, users } = result;
 
   return {
-    dialogIds: dialogs.map((dialog) => getApiChatIdFromMtpPeer(dialog.peer)),
+    dialogIds: dialogs.map((dialog) => {
+      if (dialog instanceof GramJs.DialogCommunity) {
+        return buildApiPeerId(dialog.communityId, 'channel');
+      }
+      return getApiChatIdFromMtpPeer(dialog.peer);
+    }),
     messages: messages.map((message) => buildApiMessage(message)).filter(Boolean),
     chats: chats.map((chat) => buildApiChatFromPreview(chat)).filter(Boolean),
     users: users.map((user) => buildApiUser(user)).filter(Boolean),
@@ -1811,23 +1819,8 @@ function preparePeers(
   return store;
 }
 
-function buildApiChatInviteWebView(
-  result: GramJs.messages.ChatInviteJoinResultWebView,
-): ApiChatInviteJoinWebView {
-  const { botId, webview } = result;
-
-  return {
-    type: 'webView',
-    botId: buildApiPeerId(botId, 'user'),
-    url: webview.url,
-    queryId: webview.queryId?.toString(),
-    isFullscreen: Boolean(webview.fullscreen),
-    isSameOrigin: webview.sameOrigin,
-  };
-}
-
 export async function importChatInvite(
-  { hash }: { hash: string },
+  { hash, theme }: { hash: string; theme?: ApiThemeParameters },
 ): Promise<ApiChatInviteJoinWebView | { type: 'ok'; chat: ApiChat } | undefined> {
   const result = await invokeRequest(new GramJs.messages.ImportChatInvite({ hash }));
   if (!result) {
@@ -1835,7 +1828,7 @@ export async function importChatInvite(
   }
 
   if (result instanceof GramJs.messages.ChatInviteJoinResultWebView) {
-    return buildApiChatInviteWebView(result);
+    return requestChatJoinWebView(result, theme);
   }
 
   const updates = result.updates;
@@ -1853,6 +1846,29 @@ export async function importChatInvite(
   return {
     type: 'ok',
     chat,
+  };
+}
+
+async function requestChatJoinWebView(
+  result: GramJs.messages.ChatInviteJoinResultWebView,
+  theme?: ApiThemeParameters,
+): Promise<ApiChatInviteJoinWebView | undefined> {
+  const webView = await invokeRequest(new GramJs.messages.RequestChatJoinWebView({
+    queryId: result.queryId,
+    themeParams: theme ? buildInputThemeParams(theme) : undefined,
+    platform: WEB_APP_PLATFORM,
+  }));
+  if (!(webView instanceof GramJs.WebViewResultUrl)) {
+    return undefined;
+  }
+
+  return {
+    type: 'webView',
+    botId: buildApiPeerId(result.botId, 'user'),
+    url: webView.url,
+    queryId: (webView.queryId ?? result.queryId).toString(),
+    isFullscreen: Boolean(webView.fullscreen),
+    isSameOrigin: webView.sameOrigin,
   };
 }
 

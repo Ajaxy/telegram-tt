@@ -216,6 +216,7 @@
     "messages.requestWebView",
     "messages.prolongWebView",
     "messages.requestSimpleWebView",
+    "messages.requestChatJoinWebView",
     "messages.sendWebViewResultMessage",
     "messages.sendWebViewData",
     "messages.transcribeAudio",

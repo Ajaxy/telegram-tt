@@ -299,7 +299,7 @@ export function buildApiChatFromPreview(
   };
 }
 
-export function getApiChatTypeFromPeerEntity(peerEntity: GramJs.TypeChat | GramJs.TypeUser) {
+export function getApiChatTypeFromPeerEntity(peerEntity: GramJs.TypeChat | GramJs.TypeUser): ApiChat['type'] {
   if (peerEntity instanceof GramJs.User || peerEntity instanceof GramJs.UserEmpty) {
     return 'chatTypePrivate';
   } else if (
@@ -308,6 +308,8 @@ export function getApiChatTypeFromPeerEntity(peerEntity: GramJs.TypeChat | GramJ
     || peerEntity instanceof GramJs.ChatEmpty
   ) {
     return 'chatTypeBasicGroup';
+  } else if (peerEntity instanceof GramJs.Community || peerEntity instanceof GramJs.CommunityForbidden) {
+    return 'chatTypeCommunity';
   } else {
     return peerEntity.megagroup ? 'chatTypeSuperGroup' : 'chatTypeChannel';
   }

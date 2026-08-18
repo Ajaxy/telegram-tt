@@ -19,7 +19,7 @@ import type {
 type ApiChatType = (
   'chatTypePrivate' | 'chatTypeSecret' |
   'chatTypeBasicGroup' | 'chatTypeSuperGroup' |
-  'chatTypeChannel'
+  'chatTypeChannel' | 'chatTypeCommunity'
 );
 
 export type ApiPeer = ApiChat | ApiUser;
