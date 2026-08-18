@@ -264,11 +264,11 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
 
   if (!chat) {
     if (selectIsChatWithSelf(global, id)) {
-      void callApi('fetchChat', { type: 'self' });
+      void callApi('fetchChat', { type: 'self', shouldRequestUpdate: true });
     } else {
       const user = selectUser(global, id);
       if (user) {
-        void callApi('fetchChat', { type: 'user', user });
+        void callApi('fetchChat', { type: 'user', user, shouldRequestUpdate: true });
       }
     }
   } else if (isChatOnlySummary && !chat.isMin) {

@@ -486,9 +486,9 @@ export async function searchChats({ query }: { query: string }) {
 }
 
 export async function fetchChat({
-  type, user,
+  type, user, shouldRequestUpdate,
 }: {
-  type: 'user' | 'self' | 'support'; user?: ApiUser;
+  type: 'user' | 'self' | 'support'; user?: ApiUser; shouldRequestUpdate?: boolean;
 }) {
   let mtpUser: GramJs.TypeUser | undefined;
 
@@ -517,6 +517,10 @@ export async function fetchChat({
   const chat = buildApiChatFromPreview(mtpUser!, type === 'support');
   if (!chat) {
     return undefined;
+  }
+
+  if (shouldRequestUpdate) {
+    await requestChatUpdate({ chat });
   }
 
   sendApiUpdate({
