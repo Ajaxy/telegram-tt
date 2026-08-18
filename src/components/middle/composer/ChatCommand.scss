@@ -14,6 +14,11 @@
     }
   }
 
+  .ephemeral-icon {
+    margin-inline-start: 0.25rem;
+    color: var(--color-text-secondary);
+  }
+
   &.with-avatar {
     .multiline-item {
       display: flex;

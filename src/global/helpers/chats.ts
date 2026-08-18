@@ -199,6 +199,7 @@ export function getAllowedAttachmentOptions(
   isStoryReply = false,
   paidMessagesStars?: number,
   isInScheduledList = false,
+  isEphemeral = false,
 ): IAllowedAttachmentOptions {
   if (!chat || (paidMessagesStars && isInScheduledList)) {
     return {
@@ -222,10 +223,10 @@ export function getAllowedAttachmentOptions(
 
   return {
     canAttachMedia: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendMedia', chatFullInfo),
-    canAttachPolls: !isStoryReply && !chat.isMonoforum
+    canAttachPolls: !isEphemeral && !isStoryReply && !chat.isMonoforum
       && (isAdmin || !isUserRightBanned(chat, 'sendPolls', chatFullInfo))
       && (!isUserId(chat.id) || isChatWithBot || isSavedMessages),
-    canAttachToDoLists: !isStoryReply && !chat.isMonoforum && !isChatChannel(chat),
+    canAttachToDoLists: !isEphemeral && !isStoryReply && !chat.isMonoforum && !isChatChannel(chat),
     canSendStickers: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendStickers', chatFullInfo),
     canSendGifs: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendGifs', chatFullInfo),
     canAttachEmbedLinks: !isStoryReply && (isAdmin || !isUserRightBanned(chat, 'embedLinks', chatFullInfo)),

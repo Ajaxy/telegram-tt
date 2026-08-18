@@ -5,9 +5,11 @@ import type { ApiUser } from '../../../api/types';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Avatar from '../../common/Avatar';
+import Icon from '../../common/icons/Icon';
 import ListItem from '../../ui/ListItem';
 
 import './ChatCommand.scss';
@@ -18,6 +20,7 @@ type OwnProps<T = undefined> = {
   peer?: ApiUser;
   withAvatar?: boolean;
   focus?: boolean;
+  isEphemeral?: true;
   clickArg: T;
   onClick: (arg: T) => void;
 };
@@ -28,9 +31,12 @@ const ChatCommand = <T,>({
   command,
   description,
   peer,
+  isEphemeral,
   clickArg,
   onClick,
 }: OwnProps<T>) => {
+  const lang = useLang();
+
   const handleClick = useLastCallback(() => {
     onClick(clickArg);
   });
@@ -50,6 +56,9 @@ const ChatCommand = <T,>({
         <span className="title">
           /
           {command}
+          {isEphemeral && (
+            <Icon name="eye" className="ephemeral-icon in-text-icon" ariaLabel={lang('EphemeralOnlyVisible')} />
+          )}
         </span>
         <span className="subtitle">{renderText(description)}</span>
       </div>

@@ -529,6 +529,14 @@ const MessageContextMenu: FC<OwnProps> = ({
         {canSelect && <MenuItem icon="select" onClick={onSelect}>{oldLang('Common.Select')}</MenuItem>}
         {canReport && <MenuItem icon="flag" onClick={onReport}>{oldLang('lng_context_report_msg')}</MenuItem>}
         {canDelete && <MenuItem destructive icon="delete" onClick={onDelete}>{oldLang('Delete')}</MenuItem>}
+        {message.isEphemeral && (
+          <>
+            <MenuSeparator size="thick" />
+            <MenuItem disabled withWrap>
+              {lang('EphemeralContextMenuNotice')}
+            </MenuItem>
+          </>
+        )}
         {hasCustomEmoji && (
           <>
             <MenuSeparator size="thick" />

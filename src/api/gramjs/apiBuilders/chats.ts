@@ -31,6 +31,7 @@ import { toJSNumber } from '../../../util/numbers';
 import { getServerTime } from '../../../util/serverTime';
 import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
+import { buildApiBotCommand } from './bots';
 import {
   buildApiFormattedText, buildApiPhoto, buildApiUsernames,
 } from './common';
@@ -504,10 +505,7 @@ export function buildApiChatBotCommands(botInfos: GramJs.BotInfo[]) {
     const botId = buildApiPeerId(botInfo.userId!, 'user');
 
     if (botInfo.commands) {
-      botCommands = botCommands.concat(botInfo.commands.map((mtpCommand) => ({
-        botId,
-        ...omitVirtualClassFields(mtpCommand),
-      })));
+      botCommands = botCommands.concat(botInfo.commands.map((command) => buildApiBotCommand(botId, command)));
     }
 
     return botCommands;

@@ -15,6 +15,7 @@ import type {
 
 import { WEB_APP_PLATFORM } from '../../../config';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { getMtpEphemeralMessageId } from '../../../util/keys/messageKey';
 import {
   buildApiAttachBot,
   buildApiBotInlineMediaResult,
@@ -54,6 +55,20 @@ export async function answerCallbackButton({
     msgId: messageId,
     data: data ? deserializeBytes(data) : undefined,
     game: isGame || undefined,
+  }));
+
+  return result ? omitVirtualClassFields(result) : undefined;
+}
+
+export async function answerEphemeralCallbackButton({
+  chat, messageId, data,
+}: {
+  chat: ApiChat; messageId: number; data?: string;
+}) {
+  const result = await invokeRequest(new GramJs.ephemeral.GetCallbackAnswer({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    id: getMtpEphemeralMessageId(messageId),
+    data: data ? deserializeBytes(data) : undefined,
   }));
 
   return result ? omitVirtualClassFields(result) : undefined;

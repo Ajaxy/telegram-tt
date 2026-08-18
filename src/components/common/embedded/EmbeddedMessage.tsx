@@ -61,7 +61,7 @@ type OwnProps = {
   pictogramActionIcon?: IconName;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
-  onClick: ((e: React.MouseEvent) => void);
+  onClick?: ((e: React.MouseEvent) => void);
   onPictogramClick?: ((e: React.MouseEvent) => void);
 };
 

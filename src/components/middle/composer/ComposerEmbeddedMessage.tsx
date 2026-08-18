@@ -4,7 +4,7 @@ import {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiInputMessageReplyInfo, ApiInputSuggestedPostInfo, ApiMessage, ApiPeer,
+  ApiChat, ApiInputDraftReplyInfo, ApiInputSuggestedPostInfo, ApiMessage, ApiPeer,
 } from '../../../api/types';
 import type { MessageListType, ThemeKey, ThreadId } from '../../../types/index';
 
@@ -14,6 +14,7 @@ import {
   selectChat,
   selectChatMessage,
   selectEditingMessage,
+  selectEphemeralMessage,
   selectForwardedSender,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
@@ -47,7 +48,7 @@ import MenuSeparator from '../../ui/MenuSeparator';
 import './ComposerEmbeddedMessage.scss';
 
 type StateProps = {
-  replyInfo?: ApiInputMessageReplyInfo;
+  replyInfo?: ApiInputDraftReplyInfo;
   suggestedPostInfo?: ApiInputSuggestedPostInfo;
   editingId?: number;
   message?: ApiMessage;
@@ -144,6 +145,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
   const isShown = (() => {
     if (isInChangingRecipientMode) return false;
     if (message && (replyInfo || editingId)) return true;
+    if (replyInfo?.type === 'ephemeral') return true;
     if (forwardSenders && isForwarding) return true;
     if (isShowingSuggestedPost) return true;
     return false;
@@ -192,7 +194,8 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
 
   const isForwardingRendering = Boolean(frozenForwardedMessagesCount);
   const isShowingReplyRendering = Boolean(frozenReplyInfo) && !frozenShouldForceShowEditing;
-  const isReplyWithQuoteRendering = Boolean(frozenReplyInfo?.quoteText);
+  const frozenReplyQuoteText = frozenReplyInfo?.type === 'message' ? frozenReplyInfo.quoteText : undefined;
+  const isReplyWithQuoteRendering = Boolean(frozenReplyQuoteText);
   const isShowingSuggestedPostRendering = Boolean(frozenSuggestedPostInfo) && !frozenShouldForceShowEditing;
 
   const canMediaBeEdited = frozenMessage && canEditMediaInEditor(frozenMessage) && !isMobile;
@@ -312,9 +315,11 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
     return undefined;
   }, [frozenEditingId, isForwardingRendering, isShowingReplyRendering, isShowingSuggestedPostRendering]);
 
-  const customText = frozenForwardedMessagesCount && frozenForwardedMessagesCount > 1
-    ? oldLang('ForwardedMessageCount', frozenForwardedMessagesCount)
-    : undefined;
+  const customText = !frozenMessage && frozenReplyInfo?.type === 'ephemeral'
+    ? lang('EphemeralReplyUnavailable')
+    : frozenForwardedMessagesCount && frozenForwardedMessagesCount > 1
+      ? oldLang('ForwardedMessageCount', frozenForwardedMessagesCount)
+      : undefined;
 
   const strippedMessage = useMemo(() => {
     if (!frozenMessage || !isForwardingRendering || !frozenMessage.content.text
@@ -350,7 +355,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
           onKeyDown={handleIconKeyDown}
         >
           {renderingLeftIcon && <Icon name={renderingLeftIcon} />}
-          {Boolean(frozenReplyInfo?.quoteText) && (
+          {Boolean(frozenReplyQuoteText) && (
             <Icon name="quote" className="quote-reply" />
           )}
         </div>
@@ -506,7 +511,7 @@ export default memo(withGlobal<OwnProps>(
     const draft = selectDraft(global, chatId, threadId);
     const replyInfo = draft?.replyInfo;
     const suggestedPostInfo = draft?.suggestedPostInfo;
-    const replyToPeerId = replyInfo?.replyToPeerId;
+    const replyToPeerId = replyInfo?.type === 'message' ? replyInfo.replyToPeerId : undefined;
     const senderChat = replyToPeerId ? selectChat(global, replyToPeerId) : undefined;
 
     let message: ApiMessage | undefined;
@@ -515,7 +520,9 @@ export default memo(withGlobal<OwnProps>(
     } else if (isForwarding && forwardMessageIds!.length === 1) {
       message = forwardedMessages?.[0];
     } else if (replyInfo && !shouldForceShowEditing) {
-      message = selectChatMessage(global, replyInfo.replyToPeerId || chatId, replyInfo.replyToMsgId);
+      message = replyInfo.type === 'ephemeral'
+        ? selectEphemeralMessage(global, chatId, replyInfo.replyToMsgId)
+        : selectChatMessage(global, replyInfo.replyToPeerId || chatId, replyInfo.replyToMsgId);
     }
 
     let sender: ApiPeer | undefined;
@@ -541,7 +548,8 @@ export default memo(withGlobal<OwnProps>(
         sender = selectForwardedSender(global, message);
       }
 
-      if (!sender && (!forwardInfo?.hiddenUserName || Boolean(replyInfo.quoteText))) {
+      const quoteText = replyInfo.type === 'message' ? replyInfo.quoteText : undefined;
+      if (!sender && (!forwardInfo?.hiddenUserName || Boolean(quoteText))) {
         sender = selectSender(global, message);
       }
     }
@@ -553,10 +561,11 @@ export default memo(withGlobal<OwnProps>(
       forward?.content.text && Object.keys(forward.content).length > 1
     ));
 
-    const isContextMenuDisabled = isForwarding && forwardMessageIds!.length === 1
-      && Boolean(message?.content.storyData);
+    const isContextMenuDisabled = replyInfo?.type === 'ephemeral'
+      || (isForwarding && forwardMessageIds!.length === 1 && Boolean(message?.content.storyData));
 
-    const isReplyToDiscussion = replyInfo?.replyToMsgId === threadId && !replyInfo.replyToPeerId;
+    const isReplyToDiscussion = replyInfo?.type !== 'ephemeral'
+      && replyInfo?.replyToMsgId === threadId && !replyToPeerId;
 
     const isMediaNsfw = message && selectIsMediaNsfw(global, message);
 

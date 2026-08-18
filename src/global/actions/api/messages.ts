@@ -4,14 +4,20 @@ import type {
   ApiChatType,
   ApiDraft,
   ApiError,
+  ApiInputDraftReplyInfo,
   ApiInputMessageReplyInfo,
+  ApiInputReplyInfo,
+  ApiInputRichMessage,
   ApiInputStoryReplyInfo,
   ApiInputSuggestedPostInfo,
   ApiMessage,
+  ApiMessageEntity,
   ApiMessageReadMetric,
   ApiOnProgress,
+  ApiSticker,
   ApiStory,
   ApiUser,
+  ApiVideo,
   MediaContent,
 } from '../../../api/types';
 import type {
@@ -70,10 +76,13 @@ import {
   isChatChannel,
   isChatSuperGroup,
   isDeletedUser,
+  isEphemeralSendSupported,
   isMessageLocal,
   isServiceNotificationMessage,
   isUserBot,
   isUserRightBanned,
+  resolveEphemeralCommand,
+  runForFocusedTabs,
   splitMessagesForForwarding,
 } from '../../helpers';
 import { isChatAdmin } from '../../helpers/chats';
@@ -81,6 +90,7 @@ import { isApiPeerChat, isApiPeerUser } from '../../helpers/peers';
 import {
   addActionHandler, getActions, getGlobal, getPromiseActions, setGlobal,
 } from '../../index';
+import { scheduleEphemeralExpiration } from '../../intervals';
 import {
   addChatMessagesById,
   clearMessageSummary,
@@ -96,6 +106,7 @@ import {
   updateChat,
   updateChatFullInfo,
   updateChatMessage,
+  updateEphemeralMessage,
   updateGlobalSearch,
   updateListedIds,
   updateMessageSummary,
@@ -132,6 +143,7 @@ import {
   selectCurrentViewedStory,
   selectCustomEmoji,
   selectEditingMessage,
+  selectEphemeralMessage,
   selectFirstMessageId,
   selectFirstUnreadId,
   selectFocusedMessageId,
@@ -176,7 +188,23 @@ import {
   selectThreadLocalStateParam,
   selectThreadReadState,
 } from '../../selectors/threads';
-import { deleteMessages, updateWithLocalMedia } from '../apiUpdaters/messages';
+import {
+  deleteEphemeralMessagesWithAnimation, deleteMessages, updateWithLocalMedia,
+} from '../apiUpdaters/messages';
+
+type SendEphemeralMessagesParams = {
+  chat: ApiChat;
+  receiver: ApiUser;
+  text?: string;
+  entities?: ApiMessageEntity[];
+  richMessage?: ApiInputRichMessage;
+  replyInfo?: ApiInputReplyInfo;
+  attachments?: ApiAttachment[];
+  sticker?: ApiSticker;
+  gif?: ApiVideo;
+  topMsgId?: number;
+};
+
 const AUTOLOGIN_TOKEN_KEY = 'autologin_token';
 
 const uploadProgressCallbacks = new Map<MessageKey, ApiOnProgress>();
@@ -480,6 +508,59 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
   const draftReplyInfo = !isForwarding && !isStoryReply ? draft?.replyInfo : undefined;
   const draftSuggestedPostInfo = !isForwarding && !isStoryReply
     ? draft?.suggestedPostInfo : undefined;
+
+  const ephemeralCommand = draftReplyInfo?.type !== 'ephemeral' && payload.text
+    ? resolveEphemeralCommand(global, { chat, commandText: payload.text }) : undefined;
+  if (ephemeralCommand && !payload.scheduledAt) {
+    if (!isEphemeralSendSupported(payload)) return;
+
+    const receiver = selectUser(global, ephemeralCommand.botId);
+    if (!receiver) return;
+
+    const replyInfo = draftReplyInfo
+      ? selectMessageReplyInfo(global, chatId!, threadId!, draftReplyInfo)
+      : undefined;
+    void sendEphemeralMessages(global, {
+      chat,
+      receiver,
+      text: payload.text,
+      entities: payload.entities,
+      richMessage: payload.richMessage,
+      replyInfo,
+      attachments: payload.attachments || (payload.attachment ? [payload.attachment] : undefined),
+      sticker: payload.sticker,
+      gif: payload.gif,
+      topMsgId: threadId !== MAIN_THREAD_ID ? Number(threadId) : undefined,
+    });
+    actions.resetDraftReplyInfo({ tabId });
+    actions.clearWebPagePreview({ tabId });
+    return;
+  }
+
+  if (draftReplyInfo?.type === 'ephemeral') {
+    if (!isEphemeralSendSupported(payload)) return;
+
+    const replyMessage = selectEphemeralMessage(global, chatId!, draftReplyInfo.replyToMsgId);
+    const receiver = replyMessage?.ephemeralBotId
+      ? selectUser(global, replyMessage.ephemeralBotId) : undefined;
+    if (!replyMessage || !receiver) return;
+
+    void sendEphemeralMessages(global, {
+      chat,
+      receiver,
+      text: payload.text,
+      entities: payload.entities,
+      richMessage: payload.richMessage,
+      replyInfo: draftReplyInfo,
+      attachments: payload.attachments || (payload.attachment ? [payload.attachment] : undefined),
+      sticker: payload.sticker,
+      gif: payload.gif,
+      topMsgId: replyMessage.ephemeralTopMsgId,
+    });
+    actions.resetDraftReplyInfo({ tabId });
+    actions.clearWebPagePreview({ tabId });
+    return;
+  }
 
   const storyReplyInfo = isStoryReply ? {
     type: 'story',
@@ -825,13 +906,16 @@ addActionHandler('editTodo', (global, actions, payload): ActionReturnType => {
 addActionHandler('cancelUploadMedia', (global, actions, payload): ActionReturnType => {
   const { chatId, messageId } = payload;
 
-  const message = selectChatMessage(global, chatId, messageId);
+  const message = selectChatMessage(global, chatId, messageId)
+    || selectEphemeralMessage(global, chatId, messageId);
   if (!message) return;
 
-  const progressCallback = message && uploadProgressCallbacks.get(getMessageKey(message));
-  if (progressCallback) {
-    cancelApiProgress(progressCallback);
+  if (message.isEphemeral) {
+    actions.deleteEphemeralMessage({ chatId, messageId });
+    return;
   }
+
+  cancelMessageUpload(message);
 
   if (isMessageLocal(message)) {
     actions.apiUpdate({
@@ -888,7 +972,11 @@ addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
     } : undefined;
 
   saveDraft({
-    global, chatId, threadId, draft: newDraft, isLocalOnly,
+    global,
+    chatId,
+    threadId,
+    draft: newDraft,
+    isLocalOnly: isLocalOnly || currentReplyInfo?.type === 'ephemeral',
   });
 });
 
@@ -903,13 +991,22 @@ addActionHandler('updateDraftReplyInfo', (global, actions, payload): ActionRetur
 
   const currentDraft = selectDraft(global, chatId, threadId);
 
-  const updatedReplyInfo = {
-    type: 'message',
-    ...currentDraft?.replyInfo,
-    ...update,
-  } as ApiInputMessageReplyInfo;
+  let updatedReplyInfo: ApiInputDraftReplyInfo;
+  if (update.type === 'ephemeral') {
+    updatedReplyInfo = update;
+  } else {
+    const currentReplyInfo = currentDraft?.replyInfo?.type === 'message'
+      ? currentDraft.replyInfo : undefined;
+    const replyToMsgId = update.replyToMsgId || currentReplyInfo?.replyToMsgId;
+    if (!replyToMsgId) return;
 
-  if (!updatedReplyInfo.replyToMsgId) return;
+    updatedReplyInfo = {
+      type: 'message',
+      ...currentReplyInfo,
+      ...update,
+      replyToMsgId,
+    };
+  }
 
   const newDraft: ApiDraft = {
     ...currentDraft,
@@ -941,7 +1038,11 @@ addActionHandler('resetDraftReplyInfo', (global, actions, payload): ActionReturn
   };
 
   saveDraft({
-    global, chatId, threadId, draft: newDraft, isLocalOnly: Boolean(newDraft),
+    global,
+    chatId,
+    threadId,
+    draft: newDraft,
+    isLocalOnly: Boolean(newDraft) || currentDraft?.replyInfo?.type === 'ephemeral',
   });
 });
 
@@ -1081,7 +1182,7 @@ async function saveDraft<T extends GlobalState>({
 
   setGlobal(global);
 
-  if (isLocalOnly) return;
+  if (isLocalOnly || draft?.replyInfo?.type === 'ephemeral') return;
 
   const result = await callApi('saveDraft', {
     chat,
@@ -1168,6 +1269,49 @@ addActionHandler('deleteMessages', (global, actions, payload): ActionReturnType 
   const editingId = selectEditingId(global, chatId, threadId);
   if (editingId && messageIds.includes(editingId)) {
     actions.setEditingId({ messageId: undefined, tabId });
+  }
+});
+
+addActionHandler('deleteEphemeralMessage', async (global, actions, payload): Promise<void> => {
+  const { chatId, messageId } = payload;
+  const message = selectEphemeralMessage(global, chatId, messageId);
+  if (!message) return;
+
+  const isLocal = isLocalMessageId(message.id);
+  const shouldDeleteOnServer = !isLocal && message.isOutgoing;
+  const chat = shouldDeleteOnServer ? selectChat(global, chatId) : undefined;
+  const receiver = shouldDeleteOnServer && message.ephemeralBotId
+    ? selectUser(global, message.ephemeralBotId) : undefined;
+  if (shouldDeleteOnServer && (!chat || !receiver)) {
+    runForFocusedTabs(global, (tabId) => {
+      actions.showNotification({ message: { key: 'ErrorUnspecified' }, tabId });
+    });
+    return;
+  }
+
+  cancelMessageUpload(message);
+  deleteEphemeralMessagesWithAnimation(global, chatId, [message.id]);
+
+  if (!shouldDeleteOnServer) return;
+
+  try {
+    const result = await callApi('deleteEphemeralMessage', {
+      chat: chat!,
+      receiver: receiver!,
+      messageId: message.id,
+    });
+    if (!result) throw new Error();
+  } catch {
+    global = getGlobal();
+    global = updateEphemeralMessage(global, {
+      ...message,
+      isDeleting: undefined,
+    });
+    setGlobal(global);
+    scheduleEphemeralExpiration(global);
+    runForFocusedTabs(global, (tabId) => {
+      actions.showNotification({ message: { key: 'ErrorUnspecified' }, tabId });
+    });
   }
 });
 
@@ -1299,9 +1443,21 @@ addActionHandler('reportMessages', async (global, actions, payload): Promise<voi
 
   let response;
   try {
-    response = await callApi('reportMessages', {
-      peer: chat, messageIds, description, option,
-    });
+    const ephemeralMessage = messageIds.length === 1
+      ? selectEphemeralMessage(global, chatId, messageIds[0]) : undefined;
+    if (ephemeralMessage) {
+      const result = await callApi('reportEphemeralMessage', {
+        chat,
+        messageId: ephemeralMessage.id,
+        description,
+        option,
+      });
+      response = result ? { result, error: undefined } : undefined;
+    } else {
+      response = await callApi('reportMessages', {
+        peer: chat, messageIds, description, option,
+      });
+    }
   } catch (err) {
     actions.closeReportModal({ tabId });
     if (reportContext) actions.exitMessageSelectMode({ tabId });
@@ -2154,8 +2310,66 @@ async function sendMessage<T extends GlobalState>(global: T, params: SendMessage
     await rafPromise();
   }
 
+  await sendWithUploadProgress(global, Boolean(params.attachment), (progressCallback) => (
+    callApi('sendMessage', params, progressCallback)
+  ));
+}
+
+export async function sendEphemeralMessages<T extends GlobalState>(
+  global: T,
+  {
+    chat,
+    receiver,
+    text,
+    entities,
+    richMessage,
+    replyInfo,
+    attachments,
+    sticker,
+    gif,
+    topMsgId,
+  }: SendEphemeralMessagesParams,
+) {
+  if (sticker || gif || !attachments?.length) {
+    await callApi('sendEphemeralMessage', {
+      chat,
+      receiver,
+      text,
+      entities,
+      richMessage,
+      replyInfo,
+      sticker,
+      gif,
+      topMsgId,
+    });
+    return;
+  }
+
+  for (const [attachmentIndex, attachment] of attachments.entries()) {
+    const isFirst = attachmentIndex === 0;
+    const result = await sendWithUploadProgress(global, true, (progressCallback) => (
+      callApi('sendEphemeralMessage', {
+        chat,
+        receiver,
+        text: isFirst ? text : undefined,
+        entities: isFirst ? entities : undefined,
+        richMessage: isFirst ? richMessage : undefined,
+        replyInfo,
+        attachment,
+        topMsgId,
+      }, progressCallback)
+    ));
+    if (!result) return;
+  }
+}
+
+async function sendWithUploadProgress<T extends GlobalState, TResult>(
+  global: T,
+  hasAttachment: boolean,
+  send: (progressCallback?: ApiOnProgress) => Promise<TResult>,
+) {
   let currentMessageKey: MessageKey | undefined;
-  const progressCallback = params.attachment ? (progress: number, messageKey: MessageKey) => {
+  const progressCallback: ApiOnProgress | undefined = hasAttachment ? (progress, messageKey: MessageKey) => {
     if (!uploadProgressCallbacks.has(messageKey)) {
       currentMessageKey = messageKey;
       uploadProgressCallbacks.set(messageKey, progressCallback!);
@@ -2165,14 +2379,24 @@ async function sendMessage<T extends GlobalState>(global: T, params: SendMessage
     global = updateUploadByMessageKey(global, messageKey, progress);
     setGlobal(global);
   } : undefined;
-  await callApi('sendMessage', params, progressCallback);
-  if (progressCallback && currentMessageKey) {
-    global = getGlobal();
-    global = updateUploadByMessageKey(global, currentMessageKey, undefined);
-    setGlobal(global);
 
-    uploadProgressCallbacks.delete(currentMessageKey);
+  try {
+    const result = await send(progressCallback);
+    return result;
+  } finally {
+    if (progressCallback && currentMessageKey) {
+      global = getGlobal();
+      global = updateUploadByMessageKey(global, currentMessageKey, undefined);
+      setGlobal(global);
+
+      uploadProgressCallbacks.delete(currentMessageKey);
+    }
   }
+}
+
+function cancelMessageUpload(message: ApiMessage) {
+  const progressCallback = uploadProgressCallbacks.get(getMessageKey(message));
+  if (progressCallback) cancelApiProgress(progressCallback);
 }
 
 async function sendMessagesWithNotification<T extends GlobalState>(
@@ -2830,6 +3054,7 @@ addActionHandler('openChatOrTopicWithReplyInDraft', (global, actions, payload): 
   const currentReplyInfo = replyingInfo.messageId
     ? newReplyInfo : selectDraft(global, currentChatId, currentThreadId)?.replyInfo;
   if (!currentReplyInfo) return;
+  if (currentReplyInfo.type === 'ephemeral') return;
 
   if (!selectReplyCanBeSentToChat(global, toChatId, currentChatId, currentReplyInfo)) {
     actions.showNotification({ message: oldTranslate('Chat.SendNotAllowedText'), tabId });

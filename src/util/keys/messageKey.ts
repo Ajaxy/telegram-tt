@@ -2,6 +2,16 @@ import type { ApiMessage, ApiSponsoredMessage } from '../../api/types';
 
 export type MessageKey = `msg${string}-${number}`;
 
+const MAX_EPHEMERAL_MESSAGE_ID = Number.MAX_SAFE_INTEGER;
+
+export function getEphemeralMessageId(id: number) {
+  return MAX_EPHEMERAL_MESSAGE_ID - (id >>> 0);
+}
+
+export function getMtpEphemeralMessageId(id: number) {
+  return (MAX_EPHEMERAL_MESSAGE_ID - id) | 0;
+}
+
 export function getMessageKey(message: ApiMessage | ApiSponsoredMessage): MessageKey {
   const {
     chatId,

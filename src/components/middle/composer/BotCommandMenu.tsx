@@ -29,9 +29,10 @@ const BotCommandMenu: FC<OwnProps> = ({
 
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, isMobile);
 
-  const handleClick = useLastCallback((command: string) => {
+  const handleClick = useLastCallback((command: ApiBotCommand) => {
     sendBotCommand({
-      command: `/${command}`,
+      command: `/${command.command}`,
+      botId: command.botId,
     });
     onClose();
   });
@@ -54,7 +55,8 @@ const BotCommandMenu: FC<OwnProps> = ({
           key={botCommand.command}
           command={botCommand.command}
           description={botCommand.description}
-          clickArg={botCommand.command}
+          isEphemeral={botCommand.isEphemeral}
+          clickArg={botCommand}
           onClick={handleClick}
         />
       ))}

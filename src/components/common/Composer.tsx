@@ -90,6 +90,7 @@ import {
   selectCurrentMessageList,
   selectCustomEmoji,
   selectEditingMessage,
+  selectEphemeralMessage,
   selectIsChatWithSelf,
   selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
@@ -548,16 +549,22 @@ const Composer = ({
   const { emojiSet, members: groupChatMembers, botCommands: chatBotCommands } = chatFullInfo || {};
   const chatEmojiSetId = emojiSet?.id;
 
-  const canSchedule = !paidMessagesStars && !isMonoforum;
+  const isEphemeralReply = draft?.replyInfo?.type === 'ephemeral';
+  const canSchedule = !paidMessagesStars && !isMonoforum && !isEphemeralReply;
 
   const isSentStoryReactionHeart = sentStoryReaction && isSameReaction(sentStoryReaction, HEART_REACTION);
 
   const customEmojiNotificationNumberRef = useRef(0);
 
   const [requestCalendar, calendar] = useSchedule(
-    isInMessageList && canScheduleUntilOnline,
+    isInMessageList && canSchedule && canScheduleUntilOnline,
     cancelForceShowSymbolMenu,
   );
+  const requestMessageSchedule = useLastCallback((callback: Parameters<typeof requestCalendar>[0]) => {
+    if (isEphemeralReply) return;
+
+    requestCalendar(callback);
+  });
 
   useTimeout(() => {
     setIsMounted(true);
@@ -714,8 +721,12 @@ const Composer = ({
       isInStoryViewer,
       paidMessagesStars,
       isInScheduledList,
+      isEphemeralReply,
     ),
-    [chat, chatFullInfo, isChatWithBot, isChatWithSelf, isInStoryViewer, paidMessagesStars, isInScheduledList],
+    [
+      chat, chatFullInfo, isChatWithBot, isChatWithSelf, isInStoryViewer, paidMessagesStars, isInScheduledList,
+      isEphemeralReply,
+    ],
   );
   const canUseInlineBots = !chat || isChatAdmin(chat) || !isUserRightBanned(chat, 'sendInline', chatFullInfo);
 
@@ -1269,6 +1280,18 @@ const Composer = ({
     return true;
   });
 
+  const validateEphemeralReply = useLastCallback(() => {
+    if (
+      draft?.replyInfo?.type === 'ephemeral'
+      && !selectEphemeralMessage(getGlobal(), chatId, draft.replyInfo.replyToMsgId)
+    ) {
+      showNotification({ message: { key: 'EphemeralReplyUnavailable' } });
+      return false;
+    }
+
+    return true;
+  });
+
   const canSendAttachments = (attachmentsToSend: ApiAttachment[]): boolean => {
     if (!currentMessageList && !storyId) {
       return false;
@@ -1308,6 +1331,8 @@ const Composer = ({
     scheduleRepeatPeriod?: number;
     isInvertedMedia?: true;
   }) => {
+    if (!validateEphemeralReply()) return;
+
     if (!currentMessageList && !storyId) {
       return;
     }
@@ -1524,6 +1549,8 @@ const Composer = ({
     scheduledAt?: number,
     scheduleRepeatPeriod?: number,
   ) => {
+    if (!validateEphemeralReply()) return;
+
     if (!currentMessageList && !storyId) {
       return;
     }
@@ -1630,6 +1657,8 @@ const Composer = ({
     messageList: MessageList,
     effectId?: string,
   ) => {
+    if (!validateEphemeralReply() || isEphemeralReply) return;
+
     if (args && 'queryId' in args) {
       const { id, queryId, isSilent } = args;
       sendInlineBotResult({
@@ -1664,11 +1693,11 @@ const Composer = ({
 
   useEffectWithPrevDeps(([prevContentToBeScheduled]) => {
     if (currentMessageList && contentToBeScheduled && contentToBeScheduled !== prevContentToBeScheduled) {
-      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+      requestMessageSchedule((scheduledAt, scheduleRepeatPeriod) => {
         handleMessageSchedule(contentToBeScheduled, scheduledAt, scheduleRepeatPeriod, currentMessageList, undefined);
       });
     }
-  }, [contentToBeScheduled, currentMessageList, handleMessageSchedule, requestCalendar]);
+  }, [contentToBeScheduled, currentMessageList, handleMessageSchedule, requestMessageSchedule]);
 
   useEffect(() => {
     if (requestedDraft) {
@@ -1710,6 +1739,8 @@ const Composer = ({
   });
 
   const handleGifSelect = useLastCallback((gif: ApiVideo, isSilent?: boolean, isScheduleRequested?: boolean) => {
+    if (!validateEphemeralReply() || (isEphemeralReply && isScheduleRequested)) return;
+
     if (!currentMessageList && !storyId) {
       return;
     }
@@ -1718,7 +1749,7 @@ const Composer = ({
 
     if (isInScheduledList || isScheduleRequested) {
       forceShowSymbolMenu();
-      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+      requestMessageSchedule((scheduledAt, scheduleRepeatPeriod) => {
         cancelForceShowSymbolMenu();
         handleActionWithPaymentConfirmation(
           handleMessageSchedule,
@@ -1753,6 +1784,8 @@ const Composer = ({
     shouldPreserveInput = false,
     canUpdateStickerSetsOrder?: boolean,
   ) => {
+    if (!validateEphemeralReply() || (isEphemeralReply && isScheduleRequested)) return;
+
     if (!currentMessageList && !storyId) {
       return;
     }
@@ -1761,7 +1794,7 @@ const Composer = ({
 
     if (isInScheduledList || isScheduleRequested) {
       forceShowSymbolMenu();
-      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+      requestMessageSchedule((scheduledAt, scheduleRepeatPeriod) => {
         cancelForceShowSymbolMenu();
         handleActionWithPaymentConfirmation(
           handleMessageSchedule,
@@ -1796,6 +1829,8 @@ const Composer = ({
     inlineBotId: string,
     inlineResult: ApiBotInlineResult | ApiBotInlineMediaResult, isSilent?: boolean, isScheduleRequested?: boolean,
   ) => {
+    if (!validateEphemeralReply() || isEphemeralReply) return;
+
     if (!currentMessageList && !storyId) {
       return;
     }
@@ -1803,7 +1838,7 @@ const Composer = ({
     isSilent = isSilent || isSilentPosting;
 
     if (isInScheduledList || isScheduleRequested) {
-      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+      requestMessageSchedule((scheduledAt, scheduleRepeatPeriod) => {
         handleActionWithPaymentConfirmation(
           handleMessageSchedule,
           {
@@ -1865,6 +1900,7 @@ const Composer = ({
     quickReplies: canSendQuickReplies && isCurrentUserPremium ? quickReplies : undefined,
     quickReplyMessages,
     isSavedMessages: isChatWithSelf,
+    isInScheduledList,
     isCurrentUserPremium,
     canSendGifs,
   }));
@@ -1938,12 +1974,14 @@ const Composer = ({
   ]);
 
   const handleToDoListSend = useLastCallback((todo: ApiNewMediaTodo) => {
+    if (!validateEphemeralReply()) return;
+
     if (!currentMessageList) {
       return;
     }
 
     if (isInScheduledList) {
-      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+      requestMessageSchedule((scheduledAt, scheduleRepeatPeriod) => {
         handleActionWithPaymentConfirmation(
           handleMessageSchedule,
           { todo },
@@ -1962,7 +2000,7 @@ const Composer = ({
 
   const sendSilent = useLastCallback((additionalArgs?: ScheduledMessageArgs) => {
     if (isInScheduledList) {
-      requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+      requestMessageSchedule((scheduledAt, scheduleRepeatPeriod) => {
         handleMessageSchedule(
           { ...additionalArgs, isSilent: true },
           scheduledAt,
@@ -2267,7 +2305,7 @@ const Composer = ({
         if (!currentMessageList) {
           return;
         }
-        requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+        requestMessageSchedule((scheduledAt, scheduleRepeatPeriod) => {
           handleMessageSchedule({}, scheduledAt, scheduleRepeatPeriod, currentMessageList, effect?.id);
         });
         break;
@@ -2369,7 +2407,7 @@ const Composer = ({
       return;
     }
 
-    requestCalendar((scheduledAt, scheduleRepeatPeriod) => {
+    requestMessageSchedule((scheduledAt, scheduleRepeatPeriod) => {
       handleMessageSchedule({}, scheduledAt, scheduleRepeatPeriod, currentMessageList!, undefined);
     });
   });
@@ -2411,7 +2449,7 @@ const Composer = ({
           undefined,
         );
       } else {
-        requestCalendar((calendarScheduledAt, calendarRepeatPeriod) => {
+        requestMessageSchedule((calendarScheduledAt, calendarRepeatPeriod) => {
           handleActionWithPaymentConfirmation(
             handleMessageSchedule,
             { sendCompressed, sendGrouped, isInvertedMedia },
@@ -2547,7 +2585,7 @@ const Composer = ({
         onAttachmentsUpdate={handleSetAttachments}
         editingMessage={editingMessage}
         onSendWhenOnline={sendWhenOnline}
-        canScheduleUntilOnline={canScheduleUntilOnline && !isViewOnceEnabled}
+        canScheduleUntilOnline={canSchedule && canScheduleUntilOnline && !isViewOnceEnabled}
         paidMessagesStars={paidMessagesStars}
       />
       <ToDoListModal
@@ -3017,7 +3055,7 @@ const Composer = ({
         <CustomSendMenu
           isOpen={isCustomSendMenuOpen}
           canSchedule={canSchedule && isInMessageList && !isViewOnceEnabled}
-          canScheduleUntilOnline={canScheduleUntilOnline && !isViewOnceEnabled}
+          canScheduleUntilOnline={canSchedule && canScheduleUntilOnline && !isViewOnceEnabled}
           onSendSilent={!isChatWithSelf ? handleSendSilent : undefined}
           onSendSchedule={!isInScheduledList ? handleSendScheduled : undefined}
           onSendWhenOnline={handleSendWhenOnline}
@@ -3099,7 +3137,10 @@ export default memo(withGlobal<OwnProps>(
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
     const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
     const botKeyboardMessageId = messageWithActualBotKeyboard ? messageWithActualBotKeyboard.id : undefined;
-    const keyboardMessage = botKeyboardMessageId ? selectChatMessage(global, chatId, botKeyboardMessageId) : undefined;
+    const keyboardMessage = botKeyboardMessageId
+      ? selectChatMessage(global, chatId, botKeyboardMessageId)
+      || selectEphemeralMessage(global, chatId, botKeyboardMessageId)
+      : undefined;
     const { currentUserId } = global;
     const currentUser = selectUser(global, currentUserId!)!;
     const defaultSendAsId = chatFullInfo ? chatFullInfo?.sendAsId || currentUserId : undefined;

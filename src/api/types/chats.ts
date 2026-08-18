@@ -1,6 +1,6 @@
 import type { ApiBotCommand } from './bots';
 import type {
-  ApiChatReactions, ApiFormattedText, ApiInputMessageReplyInfo, ApiInputSuggestedPostInfo, ApiPhoto, ApiStickerSet,
+  ApiChatReactions, ApiFormattedText, ApiInputDraftReplyInfo, ApiInputSuggestedPostInfo, ApiPhoto, ApiStickerSet,
 } from './messages';
 import type { ApiChatInviteImporter, ApiRestrictionReason } from './misc';
 import type {
@@ -298,7 +298,7 @@ export interface ApiChatLink {
 export type ApiDraft = {
   text?: ApiFormattedText;
   richMessage?: ApiInputRichMessage;
-  replyInfo?: ApiInputMessageReplyInfo;
+  replyInfo?: ApiInputDraftReplyInfo;
   suggestedPostInfo?: ApiInputSuggestedPostInfo;
   date?: number;
   effectId?: string;

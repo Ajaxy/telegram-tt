@@ -42,6 +42,7 @@ import { replaceTabThreadParam, replaceThreadLocalStateParam, updateThreadReadSt
 import {
   selectAllowedMessageActionsSlow,
   selectCanForwardMessage,
+  selectCanForwardMessages,
   selectChat,
   selectChatLastMessageId,
   selectChatMessage,
@@ -49,6 +50,7 @@ import {
   selectChatScheduledMessages,
   selectCurrentChat,
   selectCurrentMessageList,
+  selectEphemeralMessage,
   selectForwardedMessageIdsByGroupId,
   selectIsRightColumnShown,
   selectIsViewportNewest,
@@ -154,6 +156,8 @@ addActionHandler('replyToNextMessage', (global, actions, payload): ActionReturnT
   }
 
   const replyInfo = selectDraft(global, chatId, threadId)?.replyInfo;
+  if (replyInfo?.type === 'ephemeral') return;
+
   const isLatest = selectIsViewportNewest(global, chatId, threadId, tabId);
 
   let messageId: number | undefined;
@@ -561,10 +565,13 @@ addActionHandler('openForwardMenu', (global, actions, payload): ActionReturnType
   if (groupedId) {
     groupedMessageIds = selectMessageIdsByGroupId(global, fromChatId, groupedId);
   }
+  const resolvedMessageIds = groupedMessageIds || messageIds;
+  if (resolvedMessageIds && !selectCanForwardMessages(global, fromChatId, resolvedMessageIds)) return;
+
   return updateTabState(global, {
     forwardMessages: {
       fromChatId,
-      messageIds: groupedMessageIds || messageIds,
+      messageIds: resolvedMessageIds,
       storyId,
       withMyScore,
     },
@@ -764,6 +771,8 @@ addActionHandler('openPollModal', (global, actions, payload): ActionReturnType =
     isQuiz,
     tabId = getCurrentTabId(),
   } = payload;
+  const replyInfo = selectDraft(global, chatId, threadId ?? MAIN_THREAD_ID)?.replyInfo;
+  if (replyInfo?.type === 'ephemeral') return;
 
   return updateTabState(global, {
     pollModal: {
@@ -780,6 +789,11 @@ addActionHandler('openTodoListModal', (global, actions, payload): ActionReturnTy
   const {
     chatId, messageId, forNewTask, tabId = getCurrentTabId(),
   } = payload;
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  if (!messageId && currentMessageList?.chatId === chatId) {
+    const replyInfo = selectDraft(global, chatId, currentMessageList.threadId)?.replyInfo;
+    if (replyInfo?.type === 'ephemeral') return;
+  }
 
   return updateTabState(global, {
     todoListModal: {
@@ -1046,7 +1060,7 @@ function copyTextForMessages(global: GlobalState, chatId: string, messageIds: nu
   if (!chat || !chatMessages || !threadId) return;
 
   const messages = messageIds
-    .map((id) => chatMessages[id])
+    .map((id) => chatMessages[id] || selectEphemeralMessage(global, chatId, id))
     .filter((message) => selectAllowedMessageActionsSlow(global, message, threadId).canCopy)
     .sort((message1, message2) => message1.id - message2.id);
 

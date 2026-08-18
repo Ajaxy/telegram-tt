@@ -48,6 +48,7 @@ import {
 import { CHANNEL_ID_BASE, DEFAULT_STATUS_ICON_ID, STARS_CURRENCY_CODE } from '../../../config';
 import { writeUint32LE } from '../../../util/encoding/buffer';
 import { pick } from '../../../util/iteratees';
+import { getMtpEphemeralMessageId } from '../../../util/keys/messageKey';
 import { deserializeBytes } from '../helpers/misc';
 import localDb from '../localDb';
 
@@ -1036,6 +1037,12 @@ export function buildInputReplyTo(replyInfo: ApiInputReplyInfo) {
     return new GramJs.InputReplyToStory({
       peer: buildInputPeerFromLocalDb(replyInfo.peerId)!,
       storyId: replyInfo.storyId,
+    });
+  }
+
+  if (replyInfo.type === 'ephemeral') {
+    return new GramJs.InputReplyToEphemeralMessage({
+      id: getMtpEphemeralMessageId(replyInfo.replyToMsgId),
     });
   }
 

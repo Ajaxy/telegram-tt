@@ -462,5 +462,9 @@
     "aicompose.deleteTone",
     "aicompose.getTone",
     "aicompose.getTones",
-    "aicompose.getToneExample"
+    "aicompose.getToneExample",
+    "ephemeral.sendMessage",
+    "ephemeral.deleteMessage",
+    "ephemeral.reportMessage",
+    "ephemeral.getCallbackAnswer"
 ]

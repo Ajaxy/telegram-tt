@@ -18,6 +18,7 @@ import {
   ALL_FOLDER_ID, ANIMATION_LEVEL_DEFAULT,
   ARCHIVED_FOLDER_ID,
   DEBUG,
+  EPHEMERAL_MESSAGE_TTL_SECONDS,
   FOLDERS_POSITION_DEFAULT,
   GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT,
   GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
@@ -38,6 +39,7 @@ import {
 import { GLOBAL_STATE_CACHE_KEY } from '../util/multiaccount';
 import { encryptSession } from '../util/passcode';
 import { onBeforeUnload, throttle } from '../util/schedulers';
+import { getServerTime } from '../util/serverTime';
 import { hasStoredSession } from '../util/sessions';
 import { getSystemTheme } from '../util/systemTheme';
 import { getDefaultPatternColor } from '../util/wallpaper';
@@ -266,6 +268,7 @@ function prefetchCurrentWallpaperUrl(global: GlobalState) {
 export function migrateCache(cached: GlobalState, initialState: GlobalState) {
   try {
     unsafeMigrateCache(cached, initialState);
+    pruneExpiredEphemeralMessages(cached);
     clearCachedDraftLocalFlags(cached);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -273,8 +276,23 @@ export function migrateCache(cached: GlobalState, initialState: GlobalState) {
   }
 }
 
+function pruneExpiredEphemeralMessages(cached: GlobalState) {
+  const serverTime = getServerTime();
+  Object.values(cached.messages.byChatId).forEach(({ ephemeralById }) => {
+    Object.values(ephemeralById).forEach((message) => {
+      if (message.date + EPHEMERAL_MESSAGE_TTL_SECONDS <= serverTime) {
+        delete ephemeralById[message.id];
+      }
+    });
+  });
+}
+
 function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   const untypedCached = cached as any;
+  Object.values(cached.messages.byChatId).forEach((messageStore) => {
+    messageStore.ephemeralById ||= {};
+  });
+
   // Pre-fill settings with defaults
   cached.settings.byKey = {
     ...initialState.settings.byKey,
@@ -815,6 +833,7 @@ function getTopPeerIds<T extends GlobalState>(global: T) {
 function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages'] {
   const { currentUserId } = global;
   const byChatId: GlobalState['messages']['byChatId'] = {};
+  const serverTime = getServerTime();
   const currentChatIds = compact(
     Object.values(global.byTabId)
       .map(({ id: tabId }) => selectCurrentMessageList(global, tabId)),
@@ -829,6 +848,9 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     ...forumPanelChatIds,
     ...getOrderedIds(ALL_FOLDER_ID) || [],
     ...getOrderedIds(ARCHIVED_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT) || [],
+    ...Object.entries(global.messages.byChatId)
+      .filter(([, { ephemeralById }]) => Object.keys(ephemeralById).length)
+      .map(([chatId]) => chatId),
   ]);
 
   const openedChatThreadIds = Object.values(global.byTabId).reduce((acc, { id: tabId }) => {
@@ -880,6 +902,7 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
         localState: {
           ...thread.localState,
           listedIds: thread.localState?.lastViewportIds,
+          draft: thread.localState?.draft,
           typingStatusByPeerId: undefined,
         },
       };
@@ -903,9 +926,26 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
 
       return acc;
     }, {} as Record<number, ApiMessage>);
+    const ephemeralById = Object.values(current.ephemeralById).reduce((acc, message) => {
+      if (
+        message.sendingState
+        || message.date + EPHEMERAL_MESSAGE_TTL_SECONDS <= serverTime
+      ) {
+        return acc;
+      }
+
+      acc[message.id] = omitLocalMedia(message);
+
+      if (message.content.webPage) {
+        webPageIdsToSave.push(message.content.webPage.id);
+      }
+
+      return acc;
+    }, {} as Record<number, ApiMessage>);
 
     byChatId[chatId] = {
       byId: cleanedById,
+      ephemeralById,
       threadsById,
       summaryById: {},
     };

@@ -259,6 +259,25 @@ export type ApiUpdateNewMessage = {
   webPages?: ApiWebPage[];
 };
 
+export type ApiUpdateNewEphemeralMessage = {
+  '@type': 'newEphemeralMessage';
+  message: ApiMessage;
+  shouldForceReply?: boolean;
+  webPages?: ApiWebPage[];
+};
+
+export type ApiUpdateEphemeralMessage = {
+  '@type': 'updateEphemeralMessage';
+  message: ApiMessage;
+  webPages?: ApiWebPage[];
+};
+
+export type ApiUpdateDeleteEphemeralMessages = {
+  '@type': 'deleteEphemeralMessages';
+  chatId: string;
+  messageIds: number[];
+};
+
 export type ApiUpdateMessage = {
   '@type': 'updateMessage';
   chatId: string;
@@ -965,7 +984,8 @@ export type ApiUpdate = (
   ApiUpdateChatMembers | ApiUpdateChatParticipantRank | ApiUpdateChatJoin | ApiUpdateChatLeave
   | ApiUpdateChatPinned | ApiUpdatePinnedMessageIds |
   ApiUpdateChatListType | ApiUpdateChatFolder | ApiUpdateChatFoldersOrder | ApiUpdateRecommendedChatFolders |
-  ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateThreadInfo | ApiUpdateCommonBoxMessages | ApiUpdatePasskeyOption |
+  ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateNewEphemeralMessage | ApiUpdateEphemeralMessage
+  | ApiUpdateDeleteEphemeralMessages | ApiUpdateThreadInfo | ApiUpdateCommonBoxMessages | ApiUpdatePasskeyOption |
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollUnread | ApiUpdateMessagePollVote |
   ApiUpdateDeleteHistory |
   ApiDeleteParticipantHistory | ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |

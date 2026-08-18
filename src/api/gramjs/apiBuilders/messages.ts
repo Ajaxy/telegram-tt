@@ -53,6 +53,7 @@ import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnl
 import { addTimestampEntities } from '../../../util/dates/timestamp';
 import { generateWaveform } from '../../../util/generateWaveform';
 import { omitUndefined } from '../../../util/iteratees';
+import { getEphemeralMessageId } from '../../../util/keys/messageKey';
 import { toJSNumber } from '../../../util/numbers';
 import { getServerTime } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
@@ -155,6 +156,33 @@ export function buildApiMessage(mtpMessage: GramJs.TypeMessage): ApiMessage | un
   }
 
   return buildApiMessageWithChatId(chatId, mtpMessage);
+}
+
+export function buildApiEphemeralMessage(mtpMessage: GramJs.EphemeralMessage): ApiMessage {
+  const chatId = getApiChatIdFromMtpPeer(mtpMessage.peerId);
+  const fromId = getApiChatIdFromMtpPeer(mtpMessage.fromId);
+  const receiverId = buildApiPeerId(mtpMessage.receiverId, 'user');
+  const message = buildApiMessageWithChatId(chatId, {
+    id: getEphemeralMessageId(mtpMessage.id),
+    date: mtpMessage.date,
+    peerId: mtpMessage.peerId,
+    fromId: mtpMessage.fromId,
+    out: mtpMessage.out,
+    message: mtpMessage.message,
+    entities: mtpMessage.entities,
+    media: mtpMessage.media,
+    replyMarkup: mtpMessage.replyMarkup,
+    replyTo: mtpMessage.replyTo,
+  });
+
+  return {
+    ...message,
+    content: message.content.pollId ? {} : message.content,
+    ephemeralBotId: mtpMessage.out ? receiverId : fromId,
+    ephemeralTopMsgId: mtpMessage.topMsgId,
+    isEphemeral: true,
+    isForwardingAllowed: false,
+  };
 }
 
 export function buildApiMessageFromShort(mtpMessage: GramJs.UpdateShortMessage): ApiMessage {
@@ -400,7 +428,15 @@ function buildApiReplyInfo(
       quoteText,
       quoteEntities,
       quoteOffset,
+      replyToEphemeral,
     } = replyHeader;
+
+    if (replyToEphemeral) {
+      return {
+        type: 'ephemeral',
+        replyToMsgId: getEphemeralMessageId(replyToMsgId!),
+      };
+    }
 
     return {
       type: 'message',
@@ -693,6 +729,13 @@ function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiRep
       type: 'story',
       peerId: inputInfo.peerId,
       storyId: inputInfo.storyId,
+    };
+  }
+
+  if (inputInfo.type === 'ephemeral') {
+    return {
+      type: 'ephemeral',
+      replyToMsgId: inputInfo.replyToMsgId,
     };
   }
 

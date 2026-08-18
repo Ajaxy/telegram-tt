@@ -45,7 +45,10 @@ export function buildCommandSuggestion(
         const suffix = context.chatBotCommands && username ? `@${username}` : '';
         const commandText = `/${command.command}${suffix}`;
         replaceEditorRange(currentEditor, range, { type: 'text', text: commandText });
-        sendBotCommand({ command: commandText });
+        sendBotCommand({
+          command: commandText,
+          botId: command.botId,
+        });
       }
       config.command?.onSelect();
     },
@@ -70,6 +73,9 @@ function filterCommands(config: RichEditorTooltipsConfig, query: string) {
       (quickReply) => !query || quickReply.shortcut.startsWith(query),
     )
     : [];
-  const filteredCommands = commands?.filter((command) => !query || command.command.startsWith(query)) || [];
+  const filteredCommands = commands?.filter((command) => (
+    (!context.isInScheduledList || !command.isEphemeral)
+    && (!query || command.command.startsWith(query))
+  )) || [];
   return [...quickReplies, ...filteredCommands];
 }

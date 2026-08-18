@@ -353,6 +353,7 @@ export type MediaViewerPageMedia = {
 
 export enum MediaViewerOrigin {
   Inline,
+  Ephemeral,
   ScheduledInline,
   SharedMedia,
   ProfileAvatar,

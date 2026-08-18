@@ -21,6 +21,17 @@
       z-index: var(--z-header-menu);
     }
   }
+
+  .ephemeral-command-label {
+    display: inline-flex;
+    gap: 0.375rem;
+    align-items: center;
+  }
+
+  .ephemeral-command-label .ephemeral-command-icon {
+    margin: 0;
+    font-size: 0.875rem;
+  }
 }
 
 .translation-tone-menu .bubble {

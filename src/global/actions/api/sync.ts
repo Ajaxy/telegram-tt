@@ -326,6 +326,7 @@ function preserveCurrentThreads<T extends GlobalState>(global: T) {
         ...acc[chatId]?.byId,
         ...pinnedMessagesById,
       },
+      ephemeralById: global.messages.byChatId[chatId]?.ephemeralById || {},
       summaryById: {},
       threadsById: {
         ...acc[chatId]?.threadsById,
@@ -358,6 +359,7 @@ function preserveThreads<T extends GlobalState>(global: T) {
 
       preservedByChatId[chatId] = {
         byId: { ...preservedByChatId[chatId]?.byId },
+        ephemeralById: messages.ephemeralById,
         summaryById: {},
         threadsById: {
           ...preservedByChatId[chatId]?.threadsById,

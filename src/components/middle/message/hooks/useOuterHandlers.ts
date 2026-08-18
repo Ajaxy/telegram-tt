@@ -36,6 +36,7 @@ export default function useOuterHandlers(
   quickReactionRef: ElementRef<HTMLDivElement>,
   shouldHandleMouseLeave: boolean,
   getIsMessageListReady?: Signal<boolean>,
+  isEphemeral?: boolean,
 ) {
   const { updateDraftReplyInfo, sendDefaultReaction } = getActions();
 
@@ -70,6 +71,7 @@ export default function useOuterHandlers(
 
   function handleSendQuickReaction(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     e.stopPropagation();
+    if (isEphemeral) return;
     sendDefaultReaction({
       chatId,
       messageId,
@@ -94,6 +96,7 @@ export default function useOuterHandlers(
   }
 
   function handleDoubleTap() {
+    if (isEphemeral) return;
     sendDefaultReaction({
       chatId,
       messageId,
@@ -137,8 +140,19 @@ export default function useOuterHandlers(
   function handleContainerDoubleClick() {
     if (IS_TOUCH_ENV || !canReply) return;
 
+    if (isEphemeral) {
+      updateDraftReplyInfo({
+        type: 'ephemeral',
+        replyToMsgId: messageId,
+      });
+      return;
+    }
+
     updateDraftReplyInfo({
-      replyToMsgId: messageId, replyToPeerId: undefined, quoteText: undefined, quoteOffset: undefined,
+      replyToMsgId: messageId,
+      replyToPeerId: undefined,
+      quoteText: undefined,
+      quoteOffset: undefined,
     });
   }
 
@@ -173,7 +187,14 @@ export default function useOuterHandlers(
           return;
         }
 
-        updateDraftReplyInfo({ replyToMsgId: messageId });
+        if (isEphemeral) {
+          updateDraftReplyInfo({
+            type: 'ephemeral',
+            replyToMsgId: messageId,
+          });
+        } else {
+          updateDraftReplyInfo({ replyToMsgId: messageId });
+        }
 
         setTimeout(unmarkSwiped, Math.max(0, SWIPE_ANIMATION_DURATION - (Date.now() - startedAt)));
         startedAt = undefined;
@@ -181,7 +202,7 @@ export default function useOuterHandlers(
     });
   }, [
     containerRef, isInSelectMode, messageId, markSwiped, unmarkSwiped, canReply, isContextMenuShown,
-    getIsMessageListReady,
+    getIsMessageListReady, isEphemeral,
   ]);
 
   function handleMouseLeave(e: React.MouseEvent<HTMLDivElement>) {

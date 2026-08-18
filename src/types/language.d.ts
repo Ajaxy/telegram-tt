@@ -691,6 +691,9 @@ export interface LangPair {
   'ErrorPasskeyUnknown': undefined;
   'ErrorUrlExpired': undefined;
   'ErrorUnspecified': undefined;
+  'EphemeralOnlyVisible': undefined;
+  'EphemeralContextMenuNotice': undefined;
+  'EphemeralReplyUnavailable': undefined;
   'NoStickers': undefined;
   'ClearRecentEmoji': undefined;
   'Save': undefined;
@@ -2531,6 +2534,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'ErrorRichMessageTableTooWide': {
     'count': V;
+  };
+  'EphemeralOnlyVisibleToBot': {
+    'bot': V;
   };
   'EditedDate': {
     'date': V;

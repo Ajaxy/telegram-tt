@@ -115,7 +115,7 @@ export function updateMessageStore<T extends GlobalState>(
   global: T, chatId: string, update: Partial<MessageStoreSections>,
 ): T {
   const current = global.messages.byChatId[chatId]
-    || { byId: {}, threadsById: {}, summaryById: {} };
+    || { byId: {}, ephemeralById: {}, threadsById: {}, summaryById: {} };
 
   return {
     ...global,
@@ -130,6 +130,30 @@ export function updateMessageStore<T extends GlobalState>(
       },
     },
   };
+}
+
+export function updateEphemeralMessage<T extends GlobalState>(
+  global: T, message: ApiMessage,
+): T {
+  const ephemeralById = global.messages.byChatId[message.chatId]?.ephemeralById || {};
+
+  return updateMessageStore(global, message.chatId, {
+    ephemeralById: {
+      ...ephemeralById,
+      [message.id]: message,
+    },
+  });
+}
+
+export function deleteEphemeralMessages<T extends GlobalState>(
+  global: T, chatId: string, messageIds: number[],
+): T {
+  const ephemeralById = global.messages.byChatId[chatId]?.ephemeralById;
+  if (!ephemeralById || !messageIds.some((id) => ephemeralById[id])) return global;
+
+  return updateMessageStore(global, chatId, {
+    ephemeralById: omit(ephemeralById, messageIds),
+  });
 }
 
 export function addMessages<T extends GlobalState>(

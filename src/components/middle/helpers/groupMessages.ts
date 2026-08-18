@@ -123,6 +123,8 @@ export function groupMessages(
         nextMessage.id === firstUnreadId
         || (splitBeforeMessageId !== undefined && getMessageOriginalId(nextMessage) === splitBeforeMessageId)
         || message.senderId !== nextMessage.senderId
+        || message.isEphemeral !== nextMessage.isEphemeral
+        || message.ephemeralBotId !== nextMessage.ephemeralBotId
         || message.guestChatViaId !== nextMessage.guestChatViaId
         || (!withUsers && message.paidMessageStars)
         || (nextMessage.suggestedPostInfo)

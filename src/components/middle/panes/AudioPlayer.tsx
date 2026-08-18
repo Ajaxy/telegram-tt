@@ -6,6 +6,7 @@ import type {
   ApiAudio, ApiChat, ApiMessage, ApiPeer,
   MediaContent,
 } from '../../../api/types';
+import type { ThreadId } from '../../../types';
 import type { IconName } from '../../../types/icons';
 
 import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../../../config';
@@ -15,7 +16,7 @@ import {
 } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import {
-  selectChat, selectChatMessage, selectSender, selectTabState,
+  selectChat, selectChatMessage, selectEphemeralMessage, selectSender, selectTabState,
 } from '../../../global/selectors';
 import { selectMessageMediaDuration } from '../../../global/selectors/media';
 import { makeTrackId } from '../../../util/audioPlayer';
@@ -62,6 +63,7 @@ type StateProps = {
   isPlaybackRateActive?: boolean;
   isMuted: boolean;
   timestamp?: number;
+  threadId?: ThreadId;
 };
 
 const PLAYBACK_RATES: Record<number, number> = {
@@ -89,6 +91,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   isPlaybackRateActive,
   isMuted,
   timestamp,
+  threadId,
   onPaneStateChange,
 }) => {
   const {
@@ -179,7 +182,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
 
   const handleClick = useLastCallback(() => {
     const { chatId, id } = renderingMessage!;
-    focusMessage({ chatId, messageId: id });
+    focusMessage({ chatId, threadId, messageId: id });
   });
 
   const handleClose = useLastCallback(() => {
@@ -460,8 +463,10 @@ function renderPlaybackRateMenuItem(
 export default withGlobal<OwnProps>(
   (global, { isHidden }): Complete<StateProps> => {
     const { audioPlayer } = selectTabState(global);
-    const { chatId, messageId } = audioPlayer;
-    const message = !isHidden && chatId && messageId ? selectChatMessage(global, chatId, messageId) : undefined;
+    const { chatId, messageId, threadId } = audioPlayer;
+    const message = !isHidden && chatId && messageId
+      ? selectChatMessage(global, chatId, messageId) || selectEphemeralMessage(global, chatId, messageId)
+      : undefined;
 
     const sender = message && selectSender(global, message);
     const chat = message && selectChat(global, message.chatId);
@@ -481,6 +486,7 @@ export default withGlobal<OwnProps>(
       isPlaybackRateActive,
       isMuted,
       timestamp,
+      threadId,
       mediaDuration,
     };
   },

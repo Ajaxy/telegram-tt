@@ -2,6 +2,7 @@ import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getMessageKey } from '../../../util/keys/messageKey';
+import { runForAllTabs } from '../../helpers';
 import { addActionHandler } from '../../index';
 import { updateChatMessage } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
@@ -122,13 +123,13 @@ addActionHandler('resetLocalPaidReactions', (global, actions, payload): ActionRe
     return reaction;
   }).filter(Boolean);
 
-  Object.values(global.byTabId)
-    .forEach(({ id: tabId }) => {
-      actions.dismissNotification({
-        localId: getMessageKey(message),
-        tabId,
-      });
+  const messageKey = getMessageKey(message);
+  runForAllTabs(global, (tabId) => {
+    actions.dismissNotification({
+      localId: messageKey,
+      tabId,
     });
+  });
 
   return updateChatMessage(global, chatId, messageId, {
     reactions: {

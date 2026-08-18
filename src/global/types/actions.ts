@@ -19,6 +19,7 @@ import type {
   ApiGeoPoint,
   ApiGlobalMessageSearchType,
   ApiInputAiComposeTone,
+  ApiInputEphemeralReplyInfo,
   ApiInputInvoice,
   ApiInputInvoiceStarGift,
   ApiInputMessageReplyInfo,
@@ -551,6 +552,10 @@ export interface ActionPayloads {
     shouldDeleteForAll?: boolean;
     messageList?: MessageList;
   } & WithTabId;
+  deleteEphemeralMessage: {
+    chatId: string;
+    messageId: number;
+  };
   resetLocalPaidMessages: WithTabId | undefined;
   deleteParticipantHistory: {
     peerId: string;
@@ -1091,7 +1096,7 @@ export interface ActionPayloads {
   } & WithTabId;
   scrollMessageListToBottom: WithTabId | undefined;
 
-  updateDraftReplyInfo: Partial<ApiInputMessageReplyInfo> & WithTabId;
+  updateDraftReplyInfo: (Partial<ApiInputMessageReplyInfo> | ApiInputEphemeralReplyInfo) & WithTabId;
   resetDraftReplyInfo: WithTabId | undefined;
   updateDraftSuggestedPostInfo: Partial<ApiInputSuggestedPostInfo> & WithTabId;
   resetDraftSuggestedPostInfo: WithTabId | undefined;
@@ -2204,6 +2209,7 @@ export interface ActionPayloads {
   sendBotCommand: {
     command: string;
     chatId?: string;
+    botId?: string;
   } & WithTabId;
   loadTopPeers: {
     category: ApiTopPeerCategory;

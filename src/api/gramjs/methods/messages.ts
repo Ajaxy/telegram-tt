@@ -30,10 +30,12 @@ import type {
   ApiReaction,
   ApiSearchPostsFlood,
   ApiSendMessageAction,
+  ApiSticker,
   ApiTodoItem,
   ApiTopicWithState,
   ApiUser,
   ApiUserStatus,
+  ApiVideo,
   ApiWebPage,
   MediaContent,
 } from '../../types';
@@ -55,7 +57,7 @@ import {
 } from '../../../config';
 import { fetchFile } from '../../../util/files';
 import { compact, split } from '../../../util/iteratees';
-import { getMessageKey } from '../../../util/keys/messageKey';
+import { getMessageKey, getMtpEphemeralMessageId } from '../../../util/keys/messageKey';
 import { getServerTime } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
 import { API_GENERAL_ID_LIMIT, PINNED_MESSAGES_LIMIT } from '../../../limits';
@@ -76,6 +78,7 @@ import {
   buildWebPagesFromMedia,
 } from '../apiBuilders/messageContent';
 import {
+  buildApiEphemeralMessage,
   buildApiFactCheck,
   buildApiMessage,
   buildApiQuickReply,
@@ -649,6 +652,188 @@ export async function sendMessage(
 
   const localMessage = params.localMessage || await sendMessageLocal(params);
   return localMessage ? sendApiMessage(params, localMessage, onProgress) : undefined;
+}
+
+export async function sendEphemeralMessage({
+  chat,
+  receiver,
+  text,
+  entities,
+  richMessage,
+  replyInfo,
+  attachment,
+  sticker,
+  gif,
+  topMsgId,
+}: {
+  chat: ApiChat;
+  receiver: ApiUser;
+  text?: string;
+  entities?: ApiMessageEntity[];
+  richMessage?: ApiInputRichMessage;
+  replyInfo?: ApiInputReplyInfo;
+  attachment?: ApiAttachment;
+  sticker?: ApiSticker;
+  gif?: ApiVideo;
+  topMsgId?: number;
+}, onProgress?: ApiOnProgress) {
+  const randomId = generateRandomBigInt();
+  const { message: baseLocalMessage } = buildLocalMessage({
+    chat,
+    text,
+    entities,
+    richMessage,
+    replyInfo,
+    attachment,
+    sticker,
+    gif,
+    isPending: true,
+  });
+  const localMessage: ApiMessage = {
+    ...baseLocalMessage,
+    ephemeralBotId: receiver.id,
+    ephemeralRandomId: randomId.toString(),
+    ephemeralTopMsgId: topMsgId,
+    isEphemeral: true,
+    isForwardingAllowed: false,
+  };
+  sendApiUpdate({
+    '@type': 'newEphemeralMessage',
+    message: localMessage,
+  });
+  if (attachment) onProgress!(0, getMessageKey(localMessage));
+
+  const requestReplyInfo: ApiInputReplyInfo | undefined = replyInfo || (topMsgId ? {
+    type: 'message',
+    replyToMsgId: topMsgId,
+    replyToTopId: topMsgId,
+  } : undefined);
+
+  try {
+    let media: GramJs.TypeInputMedia | undefined;
+    if (sticker) {
+      media = buildInputMediaDocument(sticker);
+    } else if (gif) {
+      media = buildInputMediaDocument(gif, gif.isSpoiler || undefined);
+    } else if (attachment) {
+      media = await uploadMedia(localMessage, attachment, onProgress!);
+    }
+    if (onProgress?.isCanceled) return undefined;
+
+    if ((attachment || sticker || gif) && !media) {
+      markEphemeralMessageAsFailed(localMessage);
+      return undefined;
+    }
+
+    const result = await invokeRequest(new GramJs.ephemeral.SendMessage({
+      peer: buildInputPeer(chat.id, chat.accessHash),
+      receiverId: buildInputUser(receiver.id, receiver.accessHash),
+      message: richMessage ? DEFAULT_PRIMITIVES.STRING : text || DEFAULT_PRIMITIVES.STRING,
+      entities: richMessage ? undefined : entities?.map(buildMtpMessageEntity),
+      media,
+      richMessage: richMessage ? buildInputRichMessage(richMessage) : undefined,
+      randomId,
+      replyTo: requestReplyInfo && buildInputReplyTo(requestReplyInfo),
+    }), {
+      shouldThrow: true,
+      shouldIgnoreUpdates: true,
+    });
+
+    if (!result) {
+      markEphemeralMessageAsFailed(localMessage);
+      return undefined;
+    }
+
+    const updates = result instanceof GramJs.UpdateShort
+      ? [result.update]
+      : 'updates' in result ? result.updates : undefined;
+    if (!updates) {
+      markEphemeralMessageAsFailed(localMessage);
+      return undefined;
+    }
+
+    const messageUpdate = updates.find(
+      (update): update is GramJs.UpdateNewEphemeralMessage => (
+        update instanceof GramJs.UpdateNewEphemeralMessage && Boolean(update.message.out)
+      ),
+    );
+    if (!messageUpdate) {
+      handleGramJsUpdate(result);
+      markEphemeralMessageAsFailed(localMessage);
+      return undefined;
+    }
+
+    if ('updates' in result) {
+      result.updates = result.updates.filter((update) => update !== messageUpdate);
+    }
+    const message = {
+      ...buildApiEphemeralMessage(messageUpdate.message),
+      previousLocalId: localMessage.id,
+    };
+    const ephemeralMedia = messageUpdate.message.media;
+    const webPages = ephemeralMedia ? buildWebPagesFromMedia(ephemeralMedia) : undefined;
+    sendApiUpdate({
+      '@type': 'newEphemeralMessage',
+      message,
+      webPages,
+    });
+    if ('updates' in result) {
+      handleGramJsUpdate(result);
+    }
+    return message;
+  } catch {
+    if (onProgress?.isCanceled) return undefined;
+
+    markEphemeralMessageAsFailed(localMessage);
+    return undefined;
+  }
+}
+
+function markEphemeralMessageAsFailed(message: ApiMessage) {
+  sendApiUpdate({
+    '@type': 'updateEphemeralMessage',
+    message: {
+      ...message,
+      sendingState: 'messageSendingStateFailed',
+    },
+  });
+}
+
+export async function deleteEphemeralMessage({
+  chat,
+  receiver,
+  messageId,
+}: {
+  chat: ApiChat;
+  receiver: ApiUser;
+  messageId: number;
+}) {
+  return invokeRequest(new GramJs.ephemeral.DeleteMessage({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    receiverId: buildInputUser(receiver.id, receiver.accessHash),
+    id: getMtpEphemeralMessageId(messageId),
+  }), { shouldThrow: true });
+}
+
+export async function reportEphemeralMessage({
+  chat,
+  messageId,
+  option,
+  description,
+}: {
+  chat: ApiChat;
+  messageId: number;
+  option: string;
+  description: string;
+}) {
+  const result = await invokeRequest(new GramJs.ephemeral.ReportMessage({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    id: getMtpEphemeralMessageId(messageId),
+    option: deserializeBytes(option),
+    message: description,
+  }), { shouldThrow: true });
+
+  return result ? buildApiReportResult(result) : undefined;
 }
 
 const groupedUploads: Record<string, {

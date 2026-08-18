@@ -281,6 +281,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     loadOutboxReadDate,
     copyMessageLink,
     openDeleteMessageModal,
+    deleteEphemeralMessage,
     addLocalPaidReaction,
     openPaidReactionModal,
     reportMessages,
@@ -314,7 +315,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   );
 
   // `undefined` indicates that emoji are present and loading
-  const hasCustomEmoji = customEmojiSetsInfo === undefined || Boolean(customEmojiSetsInfo.length);
+  const hasCustomEmoji = !message.isEphemeral
+    && (customEmojiSetsInfo === undefined || Boolean(customEmojiSetsInfo.length));
 
   useEffect(() => {
     if (canShowSeenBy && isOpen) {
@@ -439,6 +441,14 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   const handleDelete = useLastCallback(() => {
     setIsMenuOpen(false);
     closeMenu();
+    if (message.isEphemeral) {
+      deleteEphemeralMessage({
+        chatId: message.chatId,
+        messageId: message.id,
+      });
+      return;
+    }
+
     const messageIds = album?.messages
       ? album.messages.map(({ id }) => id)
       : [message.id];
@@ -455,8 +465,17 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleReply = useLastCallback(() => {
-    const quoteText = selectionQuoteOffset !== UNQUOTABLE_OFFSET && selectionRange
+    const quoteText = !message.isEphemeral && selectionQuoteOffset !== UNQUOTABLE_OFFSET && selectionRange
       ? getSelectionAsFormattedText(selectionRange) : undefined;
+    if (message.isEphemeral) {
+      updateDraftReplyInfo({
+        type: 'ephemeral',
+        replyToMsgId: message.id,
+      });
+      closeMenu();
+      return;
+    }
+
     if (!canReplyInChat) {
       openReplyMenu({
         fromChatId: message.chatId, messageId: message.id, quoteText, quoteOffset: selectionQuoteOffset,
@@ -981,58 +1000,58 @@ export default memo(withGlobal<OwnProps>(
       availableReactions,
       topReactions,
       defaultTagReactions: defaultTags,
-      noOptions,
-      canReport,
+      noOptions: message.isEphemeral ? false : noOptions,
+      canReport: message.isEphemeral ? !message.isOutgoing : canReport,
       canSendNow: isScheduled,
       canReschedule: isScheduled,
-      canReply: !isPinned && !isScheduled && canReplyGlobally,
-      canPin: !isScheduled && canPin,
-      canUnpin: !isScheduled && canUnpin,
-      canDelete,
-      canEdit: !isPinned && canEdit,
-      canAppendTodoList,
-      canForward: !isScheduled && canForward,
-      canFaveSticker: !isScheduled && canFaveSticker,
-      canUnfaveSticker: !isScheduled && canUnfaveSticker,
+      canReply: message.isEphemeral ? !message.isOutgoing : !isPinned && !isScheduled && canReplyGlobally,
+      canPin: !message.isEphemeral && !isScheduled && canPin,
+      canUnpin: !message.isEphemeral && !isScheduled && canUnpin,
+      canDelete: message.isEphemeral || canDelete,
+      canEdit: !message.isEphemeral && !isPinned && canEdit,
+      canAppendTodoList: !message.isEphemeral && canAppendTodoList,
+      canForward: !message.isEphemeral && !isScheduled && canForward,
+      canFaveSticker: !message.isEphemeral && !isScheduled && canFaveSticker,
+      canUnfaveSticker: !message.isEphemeral && !isScheduled && canUnfaveSticker,
       canCopy: (canCopyNumber || (!isProtected && canCopy)),
-      canCopyLink: !isScheduled && canCopyLink,
-      canSelect,
+      canCopyLink: !message.isEphemeral && !isScheduled && canCopyLink,
+      canSelect: !message.isEphemeral && canSelect,
       canDownload: !isProtected && canDownload,
       canSaveGif: !isProtected && canSaveGif,
-      canRevote,
-      canClosePoll: !isScheduled && canClosePoll,
+      canRevote: !message.isEphemeral && canRevote,
+      canClosePoll: !message.isEphemeral && !isScheduled && canClosePoll,
       activeDownloads,
-      canShowSeenBy,
-      canLoadReadDate,
-      shouldRenderShowWhen,
-      enabledReactions: chat?.isForbidden ? undefined : chatFullInfo?.enabledReactions,
+      canShowSeenBy: !message.isEphemeral && canShowSeenBy,
+      canLoadReadDate: !message.isEphemeral && canLoadReadDate,
+      shouldRenderShowWhen: !message.isEphemeral && shouldRenderShowWhen,
+      enabledReactions: message.isEphemeral || chat?.isForbidden ? undefined : chatFullInfo?.enabledReactions,
       reactionsLimit,
       isPrivate,
       isCurrentUserPremium,
       hasFullInfo: Boolean(chatFullInfo),
-      canShowReactionsCount,
-      canShowReactionList: !isLocal && !isAction && !isScheduled && !hasTtl
+      canShowReactionsCount: !message.isEphemeral && canShowReactionsCount,
+      canShowReactionList: !message.isEphemeral && !isLocal && !isAction && !isScheduled && !hasTtl
         && !(chat && !isPrivate && !isChatAdmin(chat) && isUserRightBanned(chat, 'sendReactions', chatFullInfo)),
-      canBuyPremium: !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),
-      customEmojiSetsInfo,
-      customEmojiSets,
+      canBuyPremium: !message.isEphemeral && !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),
+      customEmojiSetsInfo: message.isEphemeral ? undefined : customEmojiSetsInfo,
+      customEmojiSets: message.isEphemeral ? undefined : customEmojiSets,
       canScheduleUntilOnline: selectCanScheduleUntilOnline(global, message.chatId),
-      canTranslate,
-      canShowOriginal: hasTranslation && !isChatTranslated,
-      canSelectLanguage: hasTranslation && !isChatTranslated,
+      canTranslate: !message.isEphemeral && canTranslate,
+      canShowOriginal: !message.isEphemeral && hasTranslation && !isChatTranslated,
+      canSelectLanguage: !message.isEphemeral && hasTranslation && !isChatTranslated,
       isMessageTranslated: hasTranslation,
       currentTranslationTone,
       translationRequestLanguage,
-      canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
-      isReactionPickerOpen: selectIsReactionPickerOpen(global),
+      canPlayAnimatedEmojis: !message.isEphemeral && selectCanPlayAnimatedEmojis(global),
+      isReactionPickerOpen: !message.isEphemeral && selectIsReactionPickerOpen(global),
       isInSavedMessages,
       isChannel,
       canReplyInChat,
-      isWithPaidReaction: chatFullInfo?.isPaidReactionAvailable,
+      isWithPaidReaction: !message.isEphemeral && chatFullInfo?.isPaidReactionAvailable,
       poll,
       story,
       userFullName,
-      canGift,
+      canGift: !message.isEphemeral && canGift,
       savedDialogId,
       webPage,
       noForwardsMyEnabled: userFullInfo?.noForwardsMyEnabled,

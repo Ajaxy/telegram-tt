@@ -33,6 +33,7 @@ import {
   selectChatScheduledMessages,
   selectCurrentChatMediaSearch,
   selectCurrentSharedMediaSearch,
+  selectEphemeralMessage,
   selectIsChatWithSelf,
   selectListedIds,
   selectOutlyingListByMessageId,
@@ -153,6 +154,12 @@ const MediaViewer = ({
   const { isMobile } = useAppLayout();
 
   const { media, isSingle } = viewableMedia || {};
+
+  useEffect(() => {
+    if (origin === MediaViewerOrigin.Ephemeral && !currentItem) {
+      closeMediaViewer();
+    }
+  }, [closeMediaViewer, currentItem, origin]);
 
   /* Animation */
   const animationKeyRef = useRef<number>();
@@ -370,6 +377,7 @@ const MediaViewer = ({
 
     handleClose();
 
+    if (origin === MediaViewerOrigin.Ephemeral) return;
     if (!chatId || !messageId) return;
 
     if (isMobile) {
@@ -418,7 +426,7 @@ const MediaViewer = ({
   });
 
   const getNextItem = useLastCallback((from: MediaViewerItem, direction: number): MediaViewerItem | undefined => {
-    if (direction === 0 || isSingle) return undefined;
+    if (direction === 0 || isSingle || origin === MediaViewerOrigin.Ephemeral) return undefined;
 
     if (from.type === 'standalone') {
       const { media: fromMedia, mediaIndex: fromMediaIndex } = from;
@@ -700,7 +708,9 @@ export default memo(withGlobal(
 
     let message: ApiMessage | undefined;
     if (chatId && messageId) {
-      if (origin && [MediaViewerOrigin.ScheduledAlbum, MediaViewerOrigin.ScheduledInline].includes(origin)) {
+      if (origin === MediaViewerOrigin.Ephemeral) {
+        message = selectEphemeralMessage(global, chatId, messageId);
+      } else if (origin && [MediaViewerOrigin.ScheduledAlbum, MediaViewerOrigin.ScheduledInline].includes(origin)) {
         message = selectScheduledMessage(global, chatId, messageId);
       } else {
         message = selectChatMessage(global, chatId, messageId);
@@ -721,7 +731,7 @@ export default memo(withGlobal(
 
     let chatMessages: Record<number, ApiMessage> | undefined;
 
-    if (chatId) {
+    if (chatId && origin !== MediaViewerOrigin.Ephemeral) {
       if (origin && [MediaViewerOrigin.ScheduledAlbum, MediaViewerOrigin.ScheduledInline].includes(origin)) {
         chatMessages = selectChatScheduledMessages(global, chatId);
       } else {

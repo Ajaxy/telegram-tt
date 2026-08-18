@@ -460,7 +460,7 @@ export interface ApiMessageWebPage {
   mediaSize?: WebPageMediaSize;
 }
 
-export type ApiReplyInfo = ApiMessageReplyInfo | ApiStoryReplyInfo;
+export type ApiReplyInfo = ApiMessageReplyInfo | ApiEphemeralReplyInfo | ApiStoryReplyInfo;
 
 export interface ApiMessageReplyInfo {
   type: 'message';
@@ -473,6 +473,11 @@ export interface ApiMessageReplyInfo {
   isQuote?: true;
   quoteText?: ApiFormattedText;
   quoteOffset?: number;
+}
+
+export interface ApiEphemeralReplyInfo {
+  type: 'ephemeral';
+  replyToMsgId: number;
 }
 
 export interface ApiStoryReplyInfo {
@@ -489,6 +494,11 @@ export interface ApiInputMessageReplyInfo {
   monoforumPeerId?: string;
   quoteText?: ApiFormattedText;
   quoteOffset?: number;
+}
+
+export interface ApiInputEphemeralReplyInfo {
+  type: 'ephemeral';
+  replyToMsgId: number;
 }
 
 export interface ApiSuggestedPost {
@@ -511,7 +521,8 @@ export interface ApiInputSuggestedPostInfo {
   isRejected?: true;
 }
 
-export type ApiInputReplyInfo = ApiInputMessageReplyInfo | ApiInputStoryReplyInfo;
+export type ApiInputDraftReplyInfo = ApiInputMessageReplyInfo | ApiInputEphemeralReplyInfo;
+export type ApiInputReplyInfo = ApiInputDraftReplyInfo | ApiInputStoryReplyInfo;
 
 export interface ApiMessageForwardInfo {
   date: number;
@@ -753,6 +764,10 @@ export type BoughtPaidMedia = Pick<MediaContent, 'photo' | 'video'>;
 
 export interface ApiMessage {
   id: number;
+  ephemeralBotId?: string;
+  ephemeralRandomId?: string;
+  ephemeralTopMsgId?: number;
+  isEphemeral?: true;
   chatId: string;
   content: MediaContent;
   date: number;

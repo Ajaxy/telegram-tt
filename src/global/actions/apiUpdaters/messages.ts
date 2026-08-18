@@ -42,6 +42,7 @@ import {
   getGlobal,
   setGlobal,
 } from '../../index';
+import { scheduleEphemeralExpiration } from '../../intervals';
 import {
   addChatListIds,
   addMessages,
@@ -50,6 +51,7 @@ import {
   clearMessageTranslation,
   deleteChatMessages,
   deleteChatScheduledMessages,
+  deleteEphemeralMessages,
   deletePeerPhoto,
   deleteQuickReply,
   deleteQuickReplyMessages,
@@ -59,6 +61,7 @@ import {
   updateChatLastMessageId,
   updateChatMediaLoadingState,
   updateChatMessage,
+  updateEphemeralMessage,
   updateListedIds,
   updateMessageTranslations,
   updatePeerFullInfo,
@@ -89,6 +92,7 @@ import {
   selectChatScheduledMessages,
   selectCommonBoxChatId,
   selectCurrentMessageList,
+  selectEphemeralMessage,
   selectFirstUnreadId,
   selectIsChatListed,
   selectIsChatWithSelf,
@@ -227,6 +231,41 @@ function addWebPages<T extends GlobalState>(
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
+    case 'newEphemeralMessage':
+    case 'updateEphemeralMessage': {
+      const { message, webPages } = update;
+      if (message.previousLocalId !== undefined) {
+        global = deleteEphemeralMessages(global, message.chatId, [message.previousLocalId]);
+      }
+      global = addWebPages(global, webPages);
+      global = updateEphemeralMessage(global, message);
+      setGlobal(global);
+      scheduleEphemeralExpiration(global);
+
+      if (update['@type'] === 'newEphemeralMessage' && update.shouldForceReply) {
+        Object.values(global.byTabId).forEach(({ id: tabId }) => {
+          if (!isEphemeralMessageInCurrentThread(global, tabId, message)) return;
+
+          setTimeout(() => {
+            global = getGlobal();
+            if (!isEphemeralMessageInCurrentThread(global, tabId, message)) return;
+
+            actions.updateDraftReplyInfo({
+              type: 'ephemeral',
+              replyToMsgId: message.id,
+              tabId,
+            });
+          }, ANIMATION_DELAY);
+        });
+      }
+      break;
+    }
+
+    case 'deleteEphemeralMessages': {
+      deleteEphemeralMessagesWithAnimation(global, update.chatId, update.messageIds);
+      break;
+    }
+
     case 'newMessage': {
       const {
         chatId, id, message, shouldForceReply, wasDrafted, poll, webPages,
@@ -1641,6 +1680,52 @@ export function deleteMessages<T extends GlobalState>(
   unique(chatIdsToUpdate).forEach((id) => {
     actions.requestChatUpdate({ chatId: id });
   });
+}
+
+export function deleteEphemeralMessagesWithAnimation<T extends GlobalState>(
+  global: T, chatId: string, ids: number[],
+) {
+  const messages = ids
+    .map((id) => selectEphemeralMessage(global, chatId, id))
+    .filter(Boolean);
+  if (!messages.length) return;
+
+  messages.forEach((message) => {
+    global = updateEphemeralMessage(global, {
+      ...message,
+      isDeleting: true,
+    });
+  });
+  setGlobal(global);
+
+  const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
+  setTimeout(() => {
+    global = getGlobal();
+    const stillDeletingIds = messages
+      .map(({ id }) => id)
+      .filter((id) => selectEphemeralMessage(global, chatId, id)?.isDeleting);
+    global = deleteEphemeralMessages(global, chatId, stillDeletingIds);
+    setGlobal(global);
+    scheduleEphemeralExpiration(global);
+  }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
+}
+
+function isEphemeralMessageInCurrentThread<T extends GlobalState>(
+  global: T,
+  tabId: number,
+  message: ApiMessage,
+) {
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  if (!currentMessageList
+    || currentMessageList.chatId !== message.chatId
+    || currentMessageList.type !== 'thread') {
+    return false;
+  }
+
+  const currentThreadId = Number(currentMessageList.threadId);
+  return currentThreadId === MAIN_THREAD_ID
+    ? message.ephemeralTopMsgId === undefined
+    : message.ephemeralTopMsgId === currentThreadId;
 }
 
 function deleteScheduledMessages<T extends GlobalState>(

@@ -16,6 +16,7 @@ import { DEBUG, GENERAL_TOPIC_ID } from '../../../config';
 import {
   omit, omitUndefined, pick,
 } from '../../../util/iteratees';
+import { getEphemeralMessageId } from '../../../util/keys/messageKey';
 import { getServerTimeOffset, setServerTimeOffset } from '../../../util/serverTime';
 import { buildApiBotCommand, buildApiBotMenuButton, buildApiJoinChatBotResult } from '../apiBuilders/bots';
 import {
@@ -50,6 +51,7 @@ import {
   buildWebPagesFromPoll,
 } from '../apiBuilders/messageContent';
 import {
+  buildApiEphemeralMessage,
   buildApiMessage,
   buildApiMessageFromNotification,
   buildApiMessageFromShort,
@@ -130,6 +132,37 @@ export function updater(update: Update) {
       connectionState,
     });
 
+    // Ephemeral messages
+  } else if (
+    update instanceof GramJs.UpdateNewEphemeralMessage
+    || update instanceof GramJs.UpdateEditEphemeralMessage
+  ) {
+    const ephemeralMessage = update.message;
+    const { media, replyMarkup } = ephemeralMessage;
+    const message = buildApiEphemeralMessage(ephemeralMessage);
+    const webPages = media ? buildWebPagesFromMedia(media) : undefined;
+    if (update instanceof GramJs.UpdateNewEphemeralMessage) {
+      const shouldForceReply = replyMarkup instanceof GramJs.ReplyKeyboardForceReply
+        && !replyMarkup.selective;
+      sendApiUpdate({
+        '@type': 'newEphemeralMessage',
+        message,
+        webPages,
+        shouldForceReply,
+      });
+    } else {
+      sendApiUpdate({
+        '@type': 'updateEphemeralMessage',
+        message,
+        webPages,
+      });
+    }
+  } else if (update instanceof GramJs.UpdateDeleteEphemeralMessages) {
+    sendApiUpdate({
+      '@type': 'deleteEphemeralMessages',
+      chatId: getApiChatIdFromMtpPeer(update.peer),
+      messageIds: update.ids.map(getEphemeralMessageId),
+    });
     // Messages
   } else if (
     update instanceof GramJs.UpdateNewMessage

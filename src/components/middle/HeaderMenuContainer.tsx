@@ -56,6 +56,7 @@ import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import DeleteChatModal from '../common/DeleteChatModal';
+import Icon from '../common/icons/Icon';
 import MuteChatModal from '../left/MuteChatModal.async';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
@@ -512,12 +513,16 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   useEffect(disableScrolling, []);
 
   const botButtons = useMemo(() => {
-    const commandButtons = botCommands?.map(({ command }) => {
+    const commandButtons = botCommands?.map((botCommand) => {
+      const { command } = botCommand;
       const cmd = BOT_BUTTONS[command];
       if (!cmd) return undefined;
 
       const handleClick = () => {
-        sendBotCommand({ command: `/${command}` });
+        sendBotCommand({
+          command: `/${command}`,
+          botId: botCommand.botId,
+        });
         closeMenu();
       };
 
@@ -528,7 +533,16 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
 
           onClick={handleClick}
         >
-          {oldLang(cmd.label)}
+          <span className="ephemeral-command-label">
+            {oldLang(cmd.label)}
+            {botCommand.isEphemeral && (
+              <Icon
+                name="eye-outline"
+                className="ephemeral-command-icon"
+                ariaLabel={lang('EphemeralOnlyVisible')}
+              />
+            )}
+          </span>
         </MenuItem>
       );
     });
@@ -553,7 +567,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     );
 
     return [...commandButtons || [], privacyButton].filter(Boolean);
-  }, [botCommands, oldLang, botPrivacyPolicyUrl, isBot]);
+  }, [botCommands, oldLang, lang, botPrivacyPolicyUrl, isBot]);
 
   const deleteTitle = useMemo(() => {
     if (!chat) return undefined;

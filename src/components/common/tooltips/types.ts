@@ -31,6 +31,7 @@ export type RichEditorTooltipContext = {
   quickReplies?: Record<number, ApiQuickReply>;
   quickReplyMessages?: Record<number, ApiMessage>;
   isSavedMessages?: boolean;
+  isInScheduledList?: boolean;
   isCurrentUserPremium?: boolean;
   canSendGifs?: boolean;
   isRichInputExpanded?: boolean;

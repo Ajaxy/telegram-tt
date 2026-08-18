@@ -455,6 +455,15 @@
     padding: 0.125rem 0;
   }
 
+  .ephemeral-header {
+    user-select: none;
+
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    align-self: flex-start;
+  }
+
   .message-subheader .forward-custom-shape-subheader {
     @include subheader-styles();
     /* stylelint-disable-next-line no-duplicate-selectors */

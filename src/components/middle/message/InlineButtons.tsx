@@ -4,6 +4,7 @@ import { memo, useMemo } from '../../../lib/teact/teact';
 import type { ApiKeyboardButton } from '../../../api/types';
 
 import { RE_TME_LINK } from '../../../config';
+import { isKeyboardButtonUnsupportedForEphemeral } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import renderKeyboardButtonText from '../composer/helpers/renderKeyboardButtonText';
 
@@ -18,12 +19,13 @@ import styles from './InlineButtons.module.scss';
 type OwnProps = {
   className?: string;
   inlineButtons: ApiKeyboardButton[][];
+  isEphemeral?: boolean;
   onClick: (payload: ApiKeyboardButton) => void;
 };
 
 const ICON_SIZE = 16;
 
-const InlineButtons = ({ className, inlineButtons, onClick }: OwnProps) => {
+const InlineButtons = ({ className, inlineButtons, isEphemeral, onClick }: OwnProps) => {
   const lang = useLang();
 
   const renderIcon = (button: ApiKeyboardButton) => {
@@ -97,7 +99,9 @@ const InlineButtons = ({ className, inlineButtons, onClick }: OwnProps) => {
               size="tiny"
               ripple
               noForcedUpperCase
-              disabled={button.type === 'unsupported' || (button.type === 'suggestedMessage' && button.disabled)}
+              disabled={button.type === 'unsupported'
+                || (isEphemeral && isKeyboardButtonUnsupportedForEphemeral(button))
+                || (button.type === 'suggestedMessage' && button.disabled)}
               onClick={() => onClick(button)}
             >
               {renderIcon(button)}

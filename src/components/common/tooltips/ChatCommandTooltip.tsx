@@ -92,6 +92,7 @@ const ChatCommandTooltip = ({ isOpen, ...props }: OwnProps) => {
             key={`${command.botId}_${command.command}`}
             command={command.command}
             description={command.description}
+            isEphemeral={command.isEphemeral}
             // No need for expensive global updates on users and chats, so we avoid them
             peer={getGlobal().users.byId[command.botId]}
             withAvatar

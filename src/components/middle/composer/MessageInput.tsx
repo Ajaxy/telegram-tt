@@ -6,7 +6,7 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiFormattedText, ApiInputMessageReplyInfo, ApiInputRichMessage } from '../../../api/types';
+import type { ApiFormattedText, ApiInputDraftReplyInfo, ApiInputRichMessage } from '../../../api/types';
 import type { SharedSettings } from '../../../global/types';
 import type {
   MessageListType, ThreadId,
@@ -96,7 +96,7 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  replyInfo?: ApiInputMessageReplyInfo;
+  replyInfo?: ApiInputDraftReplyInfo;
   isSelectModeActive?: boolean;
   messageSendKeyCombo?: SharedSettings['messageSendKeyCombo'];
 };

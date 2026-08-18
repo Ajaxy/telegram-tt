@@ -65,6 +65,7 @@ export interface ApiBotCommand {
   botId: string;
   command: string;
   description: string;
+  isEphemeral?: true;
 }
 
 type ApiBotMenuButtonCommands = {

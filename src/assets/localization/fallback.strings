@@ -805,6 +805,10 @@
 "ErrorRichMessageTableTooWide" = "A table in the message has too many columns. The maximum is {count}.";
 "ErrorUrlExpired" = "This link has expired";
 "ErrorUnspecified" = "Error";
+"EphemeralOnlyVisible" = "Only visible to you";
+"EphemeralOnlyVisibleToBot" = "Only visible to {bot}";
+"EphemeralContextMenuNotice" = "Only you see this message. It will disappear after you log in again.";
+"EphemeralReplyUnavailable" = "Message is no longer available";
 "NoStickers" = "No stickers yet";
 "ClearRecentEmoji" = "Clear recent emoji?";
 "Save" = "Save";
