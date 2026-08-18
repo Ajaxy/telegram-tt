@@ -535,11 +535,12 @@ const ChatExtra = ({
           </ListItem>
         )}
         {businessWorkHours && (
-          <BusinessHours businessHours={businessWorkHours} />
+          <BusinessHours businessHours={businessWorkHours} isInSettings={isInSettings} />
         )}
         {businessLocation && (
           <ListItem
-            icon="location"
+            icon={isInSettings ? 'location-filled' : 'location'}
+            iconBg={isInSettings ? 'red' : undefined}
             ripple
             multiline
             narrow
