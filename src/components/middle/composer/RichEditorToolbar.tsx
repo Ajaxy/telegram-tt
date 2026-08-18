@@ -518,7 +518,7 @@ const RichEditorToolbar = ({ editor, isEnabled }: OwnProps) => {
         <Button
           color="translucent"
           iconName="formula"
-          ariaLabel={lang('RichEditorEquation')}
+          ariaLabel={lang('RichEditorFormula')}
           iconHasPremiumBadge
           disabled={!availability.canInsertEquation}
           onClick={handleInsertEquation}

@@ -333,7 +333,7 @@ function EditableMath({
         {hasSource ? (
           <Latex source={source} isBlock={isInline ? undefined : true} />
         ) : (
-          <span className={styles.mathPlaceholder}>{lang('RichEditorEquationPrompt')}</span>
+          <span className={styles.mathPlaceholder}>{lang('RichEditorFormulaPrompt')}</span>
         )}
       </span>
       {isEditorOpen && editorAnchor && (
@@ -347,14 +347,14 @@ function EditableMath({
           >
             <TextFormatterInput
               value={source}
-              placeholder={lang('RichEditorEquationPrompt')}
-              ariaLabel={lang('RichEditorEquation')}
+              placeholder={lang('RichEditorFormulaPrompt')}
+              ariaLabel={lang('RichEditorFormula')}
               isActive
               leadingButtonIconName={canToggleDisplayMode
                 ? (!isInline ? 'table-merge-horizontal' : 'table-split-horizontal')
                 : undefined}
               leadingButtonAriaLabel={canToggleDisplayMode
-                ? lang(isInline ? 'RichEditorEquationToBlock' : 'RichEditorEquationToInline')
+                ? lang(isInline ? 'RichEditorFormulaToBlock' : 'RichEditorFormulaToInline')
                 : undefined}
               shouldSpellCheck={false}
               dir="ltr"

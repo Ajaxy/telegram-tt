@@ -1369,10 +1369,10 @@ export interface LangPair {
   'RichEditorTableStriped': undefined;
   'RichEditorTableBorderless': undefined;
   'AriaComposerCloseRichInput': undefined;
-  'RichEditorEquation': undefined;
-  'RichEditorEquationPrompt': undefined;
-  'RichEditorEquationToBlock': undefined;
-  'RichEditorEquationToInline': undefined;
+  'RichEditorFormula': undefined;
+  'RichEditorFormulaPrompt': undefined;
+  'RichEditorFormulaToBlock': undefined;
+  'RichEditorFormulaToInline': undefined;
   'FormattingLinkUrl': undefined;
   'FormattingEnterUrl': undefined;
   'FormattedDateModalTitle': undefined;
@@ -1401,6 +1401,8 @@ export interface LangPair {
   'NoSubscribersFound': undefined;
   'GroupManagementBanUserConfirm': undefined;
   'NoLinksFound': undefined;
+  'JoinRequestAcceptAll': undefined;
+  'JoinRequestDismissAll': undefined;
   'JoinRequestAcceptAllTitle': undefined;
   'JoinRequestAcceptAllDescription': undefined;
   'JoinRequestRejectAllTitle': undefined;

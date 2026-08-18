@@ -1156,7 +1156,7 @@
 "GuardApproveNewMembers" = "Approve new members";
 "GuardApproveNewChannelSubscribersInfo" = "An admin must approve users who want to join the channel.";
 "GuardApproveNewPrivateGroupMembersInfo" = "An admin must approve users who want to join the group.";
-"GuardApproveNewPublicGroupMembersInfo" = "An admin must approve anyone who wants to send a message in the group.";
+"GuardApproveNewPublicGroupMembersInfo" = "An admin must approve users who want to send messages in the group.";
 "GuardApplyToInvitesTitle" = "Apply to existing invite links?";
 "GuardApplyToInvitesApply" = "Apply";
 "GuardApplyToInvitesDontApply" = "Don't Apply";
@@ -1660,10 +1660,10 @@
 "RichEditorTableStriped" = "Striped rows";
 "RichEditorTableBorderless" = "Borderless";
 "AriaComposerCloseRichInput" = "Collapse editor";
-"RichEditorEquation" = "Equation";
-"RichEditorEquationPrompt" = "Enter equation...";
-"RichEditorEquationToBlock" = "Convert to block equation";
-"RichEditorEquationToInline" = "Convert to inline equation";
+"RichEditorFormula" = "Equation";
+"RichEditorFormulaPrompt" = "Enter equation...";
+"RichEditorFormulaToBlock" = "Convert to block equation";
+"RichEditorFormulaToInline" = "Convert to inline equation";
 "FormattingLinkUrl" = "URL";
 "FormattingEnterUrl" = "Enter URL...";
 "FormattedDateModalTitle" = "Format Date";
@@ -1695,6 +1695,8 @@
 "NoSubscribersFound" = "No subscribers found";
 "GroupManagementBanUserConfirm" = "Are you sure you want to ban and remove this user from the group?";
 "NoLinksFound" = "No links found";
+"JoinRequestAcceptAll" = "Accept all";
+"JoinRequestDismissAll" = "Dismiss all";
 "JoinRequestAcceptAllTitle" = "Accept all requests?";
 "JoinRequestAcceptAllDescription" = "Are you sure you want to accept all requests?";
 "JoinRequestRejectAllTitle" = "Reject all requests?";
@@ -2660,7 +2662,7 @@
 "PremiumPreviewAiTools" = "AI Tools";
 "PremiumPreviewAiToolsDescription" = "Transform your messages and entire chats in your preferred style and language.";
 "NativeDownloadFailed" = "Failed to save file to the Downloads folder";
-"DescriptionAboutGram" = "Offer Gram to submit post suggestions to channels on Telegram.";
+"DescriptionAboutGram" = "Use Grams to buy gifts and suggest posts to channels.";
 "ButtonTopUpViaFragment" = "Top Up Via Fragment";
 "GramModalHint" = "You can top up your Gram using Fragment.";
 "GramGiftReceived" = "Gram Top-Up";
