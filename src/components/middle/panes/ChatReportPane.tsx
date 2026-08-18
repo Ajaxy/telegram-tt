@@ -53,7 +53,6 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
     openAddContactDialog,
     blockUser,
     reportSpam,
-    deleteChat,
     leaveChannel,
     deleteChatUser,
     deleteHistory,
@@ -97,7 +96,7 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
       reportSpam({ chatId: renderingChatId });
     }
     if (shouldDeleteChat) {
-      deleteChat({ chatId: renderingChatId });
+      deleteHistory({ chatId: renderingChatId, shouldDeleteForAll: false });
     }
   });
 
