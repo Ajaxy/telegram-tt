@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { useEffect, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -42,6 +41,7 @@ import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
 import RangeSlider from '../../ui/RangeSlider';
 import RippleEffect from '../../ui/RippleEffect';
+import ShowTransition from '../../ui/ShowTransition';
 
 import './AudioPlayer.scss';
 
@@ -62,6 +62,8 @@ type StateProps = {
   playbackRate: number;
   isPlaybackRateActive?: boolean;
   isMuted: boolean;
+  savedMusicById?: Record<string, true>;
+  isSavedMusicLoading?: boolean;
   timestamp?: number;
   threadId?: ThreadId;
 };
@@ -78,7 +80,7 @@ const PLAYBACK_RATE_VALUES = Object.keys(PLAYBACK_RATES).sort().map(Number);
 const REGULAR_PLAYBACK_RATE = 1;
 const DEFAULT_FAST_PLAYBACK_RATE = 2;
 
-const AudioPlayer: FC<OwnProps & StateProps> = ({
+const AudioPlayer = ({
   message,
   mediaDuration,
   className,
@@ -90,14 +92,18 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   playbackRate,
   isPlaybackRateActive,
   isMuted,
+  savedMusicById,
+  isSavedMusicLoading,
   timestamp,
   threadId,
   onPaneStateChange,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     setAudioPlayerVolume,
     setAudioPlayerPlaybackRate,
     setAudioPlayerMuted,
+    loadSavedMusicIds,
+    toggleMusicInProfile,
     focusMessage,
     closeAudioPlayer,
   } = getActions();
@@ -114,7 +120,9 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   } = useFrozenProps({ message, sender, chat }, !isOpen);
 
   const { audio, voice, video } = renderingMessage ? getMessageContent(renderingMessage) : {} satisfies MediaContent;
+  const isLocalMessage = Boolean(message && isMessageLocal(message));
   const isVoice = Boolean(voice || video);
+  const isMusicSaved = Boolean(audio && savedMusicById?.[audio.id]);
   const shouldRenderPlaybackButton = isVoice || (audio?.duration || 0) > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION;
   const senderName = renderingSender ? getPeerTitle(lang, renderingSender) : undefined;
 
@@ -147,7 +155,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     true,
     undefined,
     undefined,
-    message && isMessageLocal(message),
+    isLocalMessage,
     true,
   );
 
@@ -167,6 +175,12 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(transitionRef, !shouldRender);
+
+  useEffect(() => {
+    if (isOpen && audio && !savedMusicById && !isSavedMusicLoading) {
+      loadSavedMusicIds();
+    }
+  }, [isOpen, audio, savedMusicById, isSavedMusicLoading, loadSavedMusicIds]);
 
   useEffect(() => {
     if (timestamp) {
@@ -195,6 +209,10 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     closeAudioPlayer();
     clearMediaSession();
     stop();
+  });
+
+  const handleToggleMusicInProfile = useLastCallback(() => {
+    toggleMusicInProfile({ audio: audio! });
   });
 
   const handleVolumeChange = useLastCallback((value: number) => {
@@ -330,6 +348,32 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         {audio ? renderAudio(audio) : renderVoice(lang('AttachAudio'), senderName)}
         <RippleEffect />
       </div>
+
+      <ShowTransition
+        isOpen={Boolean(audio && !isLocalMessage && savedMusicById)}
+        className="profile-music-button-wrapper"
+        shouldAnimateFirstRender
+      >
+        <Button
+          round
+          ripple={!isMobile}
+          color="translucent"
+          size="smaller"
+          className="player-button"
+          disabled={isSavedMusicLoading}
+          onClick={handleToggleMusicInProfile}
+          ariaLabel={lang(isMusicSaved ? 'AudioRemoveFromProfile' : 'AudioAddToProfile')}
+        >
+          <Icon
+            name="add-music"
+            className={buildClassName('profile-music-state-icon', isMusicSaved && 'hidden')}
+          />
+          <Icon
+            name="remove-music"
+            className={buildClassName('profile-music-state-icon', !isMusicSaved && 'hidden')}
+          />
+        </Button>
+      </ShowTransition>
 
       <Button
         round
@@ -485,6 +529,8 @@ export default withGlobal<OwnProps>(
       playbackRate,
       isPlaybackRateActive,
       isMuted,
+      savedMusicById: global.users.savedMusicById,
+      isSavedMusicLoading: global.users.isSavedMusicLoading,
       timestamp,
       threadId,
       mediaDuration,

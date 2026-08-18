@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
@@ -33,6 +32,7 @@ import {
   areReactionsEmpty,
   getCanPostInChat,
   getIsDownloading,
+  getMessageAudio,
   getMessageVideo,
   getUserFullName,
   hasMessageTtl,
@@ -172,12 +172,14 @@ type StateProps = {
   savedDialogId?: string;
   noForwardsMyEnabled?: boolean;
   noForwardsPeerEnabled?: boolean;
+  savedMusicById?: Record<string, true>;
+  isSavedMusicLoading?: boolean;
 };
 
 const selection = window.getSelection();
 const UNQUOTABLE_OFFSET = -1;
 
-const ContextMenuContainer: FC<OwnProps & StateProps> = ({
+const ContextMenuContainer = ({
   threadId,
   availableReactions,
   topReactions,
@@ -247,9 +249,11 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   savedDialogId,
   noForwardsMyEnabled,
   noForwardsPeerEnabled,
+  savedMusicById,
+  isSavedMusicLoading,
   onClose,
   onCloseAnimationEnd,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     openThread,
     updateDraftReplyInfo,
@@ -291,6 +295,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     showNotification,
     setSettingOption,
     loadRichMessage,
+    loadSavedMusicIds,
+    toggleMusicInProfile,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -319,6 +325,17 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   // `undefined` indicates that emoji are present and loading
   const hasCustomEmoji = !message.isEphemeral
     && (customEmojiSetsInfo === undefined || Boolean(customEmojiSetsInfo.length));
+  const audio = getMessageAudio(message);
+  const isLocalMessage = isMessageLocal(message);
+  const canManageMusicInProfile = Boolean(audio && !isLocalMessage);
+  const isMusicProfileStatusLoaded = Boolean(savedMusicById);
+  const isMusicSaved = Boolean(audio && savedMusicById?.[audio.id]);
+
+  useEffect(() => {
+    if (isOpen && audio && !isLocalMessage && !savedMusicById && !isSavedMusicLoading) {
+      loadSavedMusicIds();
+    }
+  }, [audio, isLocalMessage, isOpen, isSavedMusicLoading, loadSavedMusicIds, savedMusicById]);
 
   useEffect(() => {
     if (canShowSeenBy && isOpen) {
@@ -661,6 +678,11 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   });
 
+  const handleToggleMusicInProfile = useLastCallback(() => {
+    toggleMusicInProfile({ audio: audio! });
+    closeMenu();
+  });
+
   const handleToggleReaction = useLastCallback((reaction: ApiReaction) => {
     if (isInSavedMessages && !isCurrentUserPremium) {
       openPremiumModal({
@@ -791,6 +813,10 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canSelect={canSelect}
         canDownload={canDownload}
         canSaveGif={canSaveGif}
+        canManageMusicInProfile={canManageMusicInProfile}
+        isMusicProfileStatusLoaded={isMusicProfileStatusLoaded}
+        isMusicProfileActionLoading={isSavedMusicLoading}
+        isMusicSaved={isMusicSaved}
         canRevote={canRevote}
         canClosePoll={canClosePoll}
         canShowSeenBy={canShowSeenBy}
@@ -830,6 +856,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onCopyNumber={handleCopyNumber}
         onDownload={handleDownloadClick}
         onSaveGif={handleSaveGif}
+        onToggleMusicInProfile={handleToggleMusicInProfile}
         onCancelVote={handleCancelVote}
         onClosePoll={openClosePollDialog}
         onShowSeenBy={handleOpenSeenByModal}
@@ -1058,6 +1085,8 @@ export default memo(withGlobal<OwnProps>(
       webPage,
       noForwardsMyEnabled: userFullInfo?.noForwardsMyEnabled,
       noForwardsPeerEnabled: userFullInfo?.noForwardsPeerEnabled,
+      savedMusicById: global.users.savedMusicById,
+      isSavedMusicLoading: global.users.isSavedMusicLoading,
     };
   },
 )(ContextMenuContainer));

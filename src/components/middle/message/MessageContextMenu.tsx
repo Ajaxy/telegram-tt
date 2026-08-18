@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
@@ -50,6 +49,7 @@ import MenuItem from '../../ui/MenuItem';
 import MenuSeparator from '../../ui/MenuSeparator';
 import NestedMenuItem from '../../ui/NestedMenuItem';
 import Skeleton from '../../ui/placeholder/Skeleton';
+import Transition from '../../ui/Transition';
 import AutoDeleteTimeMenuItem from './AutoDeleteTimeMenuItem';
 import LastEditTimeMenuItem from './LastEditTimeMenuItem';
 import ReactionSelector from './reactions/ReactionSelector';
@@ -104,6 +104,10 @@ type OwnProps = {
   isCurrentUserPremium?: boolean;
   canDownload?: boolean;
   canSaveGif?: boolean;
+  canManageMusicInProfile?: boolean;
+  isMusicProfileStatusLoaded?: boolean;
+  isMusicProfileActionLoading?: boolean;
+  isMusicSaved?: boolean;
   canRevote?: boolean;
   canClosePoll?: boolean;
   isDownloading?: boolean;
@@ -137,6 +141,7 @@ type OwnProps = {
   onCopyNumber?: NoneToVoidFunction;
   onDownload?: NoneToVoidFunction;
   onSaveGif?: NoneToVoidFunction;
+  onToggleMusicInProfile?: NoneToVoidFunction;
   onCancelVote?: NoneToVoidFunction;
   onClosePoll?: NoneToVoidFunction;
   onShowSeenBy?: NoneToVoidFunction;
@@ -158,7 +163,7 @@ const SCROLLBAR_WIDTH = 10;
 const REACTION_SELECTOR_WIDTH_REM = 19.25;
 const ANIMATION_DURATION = 200;
 
-const MessageContextMenu: FC<OwnProps> = ({
+const MessageContextMenu = ({
   isReactionPickerOpen,
   availableReactions,
   topReactions,
@@ -199,6 +204,10 @@ const MessageContextMenu: FC<OwnProps> = ({
   canSelect,
   canDownload,
   canSaveGif,
+  canManageMusicInProfile,
+  isMusicProfileStatusLoaded,
+  isMusicProfileActionLoading,
+  isMusicSaved,
   canRevote,
   canClosePoll,
   canTranslate,
@@ -237,6 +246,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onCopyNumber,
   onDownload,
   onSaveGif,
+  onToggleMusicInProfile,
   onCancelVote,
   onClosePoll,
   onShowSeenBy,
@@ -253,7 +263,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   userFullName,
   canGift,
   noForwardsNotice,
-}) => {
+}: OwnProps) => {
   const {
     showNotification, openStickerSet, openCustomEmojiSets, loadStickers, openGiftModal,
   } = getActions();
@@ -550,6 +560,28 @@ const MessageContextMenu: FC<OwnProps> = ({
         {canPin && <MenuItem icon="pin" onClick={onPin}>{oldLang('DialogPin')}</MenuItem>}
         {canUnpin && <MenuItem icon="unpin" onClick={onUnpin}>{oldLang('DialogUnpin')}</MenuItem>}
         {canSaveGif && <MenuItem icon="gifs" onClick={onSaveGif}>{oldLang('lng_context_save_gif')}</MenuItem>}
+        {canManageMusicInProfile && (
+          <Transition
+            activeKey={!isMusicProfileStatusLoaded ? 0 : (isMusicSaved ? 2 : 1)}
+            name="fade"
+            className="profile-music-menu-item-transition"
+            shouldCleanup
+          >
+            {!isMusicProfileStatusLoaded ? (
+              <MenuItem customIcon={<span className="profile-music-menu-icon-placeholder" />} disabled>
+                <Skeleton className="profile-music-menu-label-placeholder" animation="wave" />
+              </MenuItem>
+            ) : (
+              <MenuItem
+                icon={isMusicSaved ? 'remove-music' : 'add-music'}
+                disabled={isMusicProfileActionLoading}
+                onClick={onToggleMusicInProfile}
+              >
+                {lang(isMusicSaved ? 'AudioRemoveFromProfile' : 'AudioAddToProfile')}
+              </MenuItem>
+            )}
+          </Transition>
+        )}
         {canRevote && <MenuItem icon="revote" onClick={onCancelVote}>{oldLang('lng_polls_retract')}</MenuItem>}
         {canClosePoll && <MenuItem icon="stop" onClick={onClosePoll}>{oldLang('lng_polls_stop')}</MenuItem>}
         {canDownload && (

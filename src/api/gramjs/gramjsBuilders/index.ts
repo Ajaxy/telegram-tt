@@ -2,6 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { generateRandomBigInt, generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
 
 import type {
+  ApiAudio,
   ApiBirthday,
   ApiBotApp,
   ApiChatAdminRights,
@@ -192,7 +193,7 @@ export function buildInputStickerSetShortName(shortName: string) {
   });
 }
 
-export function buildInputDocument(media: ApiSticker | ApiVideo | ApiDocument) {
+export function buildInputDocument(media: ApiAudio | ApiSticker | ApiVideo | ApiDocument) {
   if (!media.id) {
     return undefined;
   }

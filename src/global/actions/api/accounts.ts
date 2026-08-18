@@ -1,8 +1,62 @@
+import type { GlobalState } from '../../types';
+
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { selectChat } from '../../selectors';
+
+addActionHandler('loadSavedMusicIds', async (global): Promise<void> => {
+  if (global.users.savedMusicById || global.users.isSavedMusicLoading) return;
+
+  global = updateSavedMusicState(global, undefined, true);
+  setGlobal(global);
+
+  const savedMusicIds = await callApi('fetchSavedMusicIds');
+  const savedMusicById: Record<string, true> = {};
+  savedMusicIds?.forEach((id) => {
+    savedMusicById[id] = true;
+  });
+
+  global = getGlobal();
+  global = updateSavedMusicState(global, savedMusicById, false);
+  setGlobal(global);
+});
+
+addActionHandler('toggleMusicInProfile', async (global, actions, payload): Promise<void> => {
+  const { audio, tabId = getCurrentTabId() } = payload;
+  const { savedMusicById } = global.users;
+  if (!savedMusicById || global.users.isSavedMusicLoading) return;
+
+  const shouldRemove = Boolean(savedMusicById[audio.id]);
+
+  global = updateSavedMusicState(global, savedMusicById, true);
+  setGlobal(global);
+
+  const result = await callApi('saveMusic', { audio, shouldRemove: shouldRemove || undefined });
+
+  global = getGlobal();
+  if (!result) {
+    global = updateSavedMusicState(global, global.users.savedMusicById, false);
+    setGlobal(global);
+    actions.showNotification({ message: { key: 'GeneralError' }, tabId });
+    return;
+  }
+
+  const updatedSavedMusicById = { ...global.users.savedMusicById };
+  if (shouldRemove) {
+    delete updatedSavedMusicById[audio.id];
+  } else {
+    updatedSavedMusicById[audio.id] = true;
+  }
+
+  global = updateSavedMusicState(global, updatedSavedMusicById, false);
+  setGlobal(global);
+  actions.showNotification({
+    message: { key: shouldRemove ? 'AudioSaveToMyProfileUnsaved' : 'AudioSaveToMyProfileSaved' },
+    tabId,
+  });
+});
 
 addActionHandler('reportPeer', async (global, actions, payload): Promise<void> => {
   const {
@@ -277,3 +331,18 @@ addActionHandler('setAccountTTL', async (global, actions, payload): Promise<void
   setGlobal(global);
   actions.closeDeleteAccountModal({ tabId });
 });
+
+function updateSavedMusicState<T extends GlobalState>(
+  global: T,
+  savedMusicById: Record<string, true> | undefined,
+  isSavedMusicLoading: boolean,
+): T {
+  return {
+    ...global,
+    users: {
+      ...global.users,
+      savedMusicById,
+      isSavedMusicLoading,
+    },
+  };
+}

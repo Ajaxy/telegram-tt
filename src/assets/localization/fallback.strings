@@ -1529,6 +1529,10 @@
 "AudioPlayerPrevious" = "Previous track";
 "AudioPlayerNext" = "Next track";
 "AudioPlayerClose" = "Close";
+"AudioAddToProfile" = "Add to Profile";
+"AudioRemoveFromProfile" = "Remove from Profile";
+"AudioSaveToMyProfileSaved" = "Audio added to your profile.";
+"AudioSaveToMyProfileUnsaved" = "Audio removed from your profile.";
 "DeleteForMeDescription" = "This will delete them just for you, not for other participants in the chat";
 "DeleteForEveryoneDescription" = "This will delete them for everyone in this chat";
 "AriaSearchInChat" = "Search in chat";

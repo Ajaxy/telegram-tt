@@ -71,6 +71,8 @@
     "account.getAccountTTL",
     "account.setAccountTTL",
     "account.setMainProfileTab",
+    "account.saveMusic",
+    "account.getSavedMusicIds",
     "account.initPasskeyRegistration",
     "account.registerPasskey",
     "account.getPasskeys",

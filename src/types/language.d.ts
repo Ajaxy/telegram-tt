@@ -1248,6 +1248,10 @@ export interface LangPair {
   'AudioPlayerPrevious': undefined;
   'AudioPlayerNext': undefined;
   'AudioPlayerClose': undefined;
+  'AudioAddToProfile': undefined;
+  'AudioRemoveFromProfile': undefined;
+  'AudioSaveToMyProfileSaved': undefined;
+  'AudioSaveToMyProfileUnsaved': undefined;
   'DeleteForMeDescription': undefined;
   'DeleteForEveryoneDescription': undefined;
   'AriaSearchInChat': undefined;

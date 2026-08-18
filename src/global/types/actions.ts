@@ -2,6 +2,7 @@ import type {
   ApiAiComposeTone,
   ApiAttachBot,
   ApiAttachment,
+  ApiAudio,
   ApiBirthday,
   ApiChat,
   ApiChatAdminRights,
@@ -1953,6 +1954,8 @@ export interface ActionPayloads {
   setAudioPlayerOrigin: {
     origin: AudioOrigin;
   } & WithTabId;
+  loadSavedMusicIds: undefined;
+  toggleMusicInProfile: { audio: ApiAudio } & WithTabId;
 
   // Downloads
   downloadSelectedMessages: WithTabId | undefined;

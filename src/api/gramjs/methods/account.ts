@@ -1,11 +1,12 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiPeer, ApiPhoto, ApiProfileTab, ApiReportReason,
+  ApiAudio, ApiPeer, ApiPhoto, ApiProfileTab, ApiReportReason,
 } from '../../types';
 
 import { buildApiChatLink } from '../apiBuilders/misc';
 import {
+  buildInputDocument,
   buildInputPeer,
   buildInputPhoto,
   buildInputProfileTab,
@@ -134,6 +135,29 @@ export function setAccountTTL({ days }: { days: number }) {
 export function setAccountMainProfileTab({ tab }: { tab: ApiProfileTab }) {
   return invokeRequest(new GramJs.account.SetMainProfileTab({
     tab: buildInputProfileTab(tab),
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export async function fetchSavedMusicIds() {
+  const result = await invokeRequest(new GramJs.account.GetSavedMusicIds({
+    hash: DEFAULT_PRIMITIVES.BIGINT,
+  }));
+  if (!(result instanceof GramJs.account.SavedMusicIds)) {
+    return undefined;
+  }
+
+  return result.ids.map(String);
+}
+
+export function saveMusic({ audio, shouldRemove }: { audio: ApiAudio; shouldRemove?: boolean }) {
+  const id = buildInputDocument(audio);
+  if (!id) return undefined;
+
+  return invokeRequest(new GramJs.account.SaveMusic({
+    id,
+    unsave: shouldRemove || undefined,
   }), {
     shouldReturnTrue: true,
   });
