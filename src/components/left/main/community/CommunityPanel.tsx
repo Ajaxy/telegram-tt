@@ -30,6 +30,7 @@ import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
+import useScrollNotch from '../../../../hooks/useScrollNotch';
 import useSyncEffect from '../../../../hooks/useSyncEffect';
 
 import Avatar from '../../../common/Avatar';
@@ -43,7 +44,7 @@ import ListItem from '../../../ui/ListItem';
 import Loading from '../../../ui/Loading';
 import SearchInput from '../../../ui/SearchInput';
 import Switcher from '../../../ui/Switcher';
-import Transition from '../../../ui/Transition';
+import Transition, { ACTIVE_SLIDE_CLASS_NAME, TO_SLIDE_CLASS_NAME } from '../../../ui/Transition';
 import Chat from '../Chat';
 
 import styles from './CommunityPanel.module.scss';
@@ -71,6 +72,10 @@ type RequestablePeerEntry = {
 };
 
 const COMMUNITY_CHATS_SLICE = 20;
+const CONTENT_SCROLL_SELECTOR = [
+  `.${styles.contentTransition} > .${ACTIVE_SLIDE_CLASS_NAME} .${styles.content}`,
+  `.${styles.contentTransition} > .${TO_SLIDE_CLASS_NAME} .${styles.content}`,
+].join(',');
 
 type StateProps = {
   community?: ApiChat;
@@ -143,6 +148,13 @@ const CommunityPanel = ({
   const [isSearchOpen, openSearch, closeSearch] = useFlag();
   const [searchQuery, setSearchQuery] = useState('');
 
+  useScrollNotch({
+    containerRef: ref,
+    selector: CONTENT_SCROLL_SELECTOR,
+    shouldHideTopNotch: true,
+    onScrolled: setIsScrolled,
+  }, [isSearchOpen]);
+
   // The panel can switch to another community without closing
   useSyncEffect(([prevCommunityId]) => {
     if (prevCommunityId !== undefined && prevCommunityId !== community?.id) {
@@ -196,11 +208,22 @@ const CommunityPanel = ({
     closeCommunityPanel();
   });
 
+  const handleTransitionEnd = useLastCallback((e: React.TransitionEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget || e.propertyName !== 'transform') return;
+    onCloseAnimationEnd?.();
+  });
+
   const handleResetSearch = useLastCallback(() => {
     setSearchQuery('');
   });
 
+  const handleOpenSearch = useLastCallback(() => {
+    setIsScrolled(false);
+    openSearch();
+  });
+
   const handleCloseSearch = useLastCallback(() => {
+    setIsScrolled(false);
     closeSearch();
     setSearchQuery('');
   });
@@ -363,7 +386,7 @@ const CommunityPanel = ({
         lang.isRtl && styles.rtl,
         !withInterfaceAnimations && styles.noAnimation,
       )}
-      onTransitionEnd={!isOpen ? onCloseAnimationEnd : undefined}
+      onTransitionEnd={!isOpen ? handleTransitionEnd : undefined}
     >
       <div className={buildClassName('left-header', styles.header)}>
         <Transition
@@ -385,7 +408,7 @@ const CommunityPanel = ({
               <SearchInput
                 className={styles.headerSearchInput}
                 value={searchQuery}
-                focused
+                autoFocusSearch
                 placeholder={lang('CommunitySearchChats')}
                 onChange={setSearchQuery}
                 onReset={handleResetSearch}
@@ -414,7 +437,7 @@ const CommunityPanel = ({
                 round
                 size="smaller"
                 color="translucent"
-                onClick={openSearch}
+                onClick={handleOpenSearch}
                 ariaLabel={lang('Search')}
                 iconName="search"
               />
@@ -423,50 +446,56 @@ const CommunityPanel = ({
         </Transition>
       </div>
 
-      <Surface noPadding className={styles.surface}>
-        <InfiniteScroll
-          className={buildClassName('custom-scroll', styles.content)}
-          items={viewportIds}
-          preloadBackwards={COMMUNITY_CHATS_SLICE}
-          // Children are grouped into sections rather than a flat keyed list
-          noFastList
-          onLoadMore={getMore}
-          onScroll={(e) => setIsScrolled(e.currentTarget.scrollTop > 0)}
-          beforeChildren={!isSearchOpen ? (
-            <Island className={styles.island}>
-              <ListItem ripple onClick={handleToggleCollapsed}>
-                <span className={styles.toggleTitle}>{lang('CommunityShowAsOneChat')}</span>
-                <Switcher
-                  label={lang('CommunityShowAsOneChat')}
-                  checked={Boolean(community.isCollapsedInDialogs)}
-                  inactive
-                />
-              </ListItem>
-              <IslandDescription className={styles.toggleHint}>
-                {lang('CommunityShowAsOneChatHint')}
-              </IslandDescription>
-            </Island>
-          ) : undefined}
-        >
-          {!fullInfo ? (
-            <Island className={buildClassName(styles.island, styles.loadingIsland)}>
-              <Loading />
-            </Island>
-          ) : (
-            <>
-              {renderSection('CommunityChatsYouAreIn', viewportSections.joined)}
-              {renderSection('CommunityChatsYouCanView', viewportSections.viewable)}
-              {renderRequestableSection(viewportSections.requestable)}
+      <Transition
+        className={styles.contentTransition}
+        name="slideFade"
+        activeKey={isSearchOpen ? 1 : 0}
+        shouldCleanup
+      >
+        <Surface noPadding className={styles.surface}>
+          <InfiniteScroll
+            className={buildClassName('custom-scroll', styles.content)}
+            items={viewportIds}
+            preloadBackwards={COMMUNITY_CHATS_SLICE}
+            // Children are grouped into sections rather than a flat keyed list
+            noFastList
+            onLoadMore={getMore}
+            beforeChildren={!isSearchOpen ? (
+              <Island className={styles.island}>
+                <ListItem ripple onClick={handleToggleCollapsed}>
+                  <span className={styles.toggleTitle}>{lang('CommunityShowAsOneChat')}</span>
+                  <Switcher
+                    label={lang('CommunityShowAsOneChat')}
+                    checked={Boolean(community.isCollapsedInDialogs)}
+                    inactive
+                  />
+                </ListItem>
+                <IslandDescription className={styles.toggleHint}>
+                  {lang('CommunityShowAsOneChatHint')}
+                </IslandDescription>
+              </Island>
+            ) : undefined}
+          >
+            {!fullInfo ? (
+              <Island className={buildClassName(styles.island, styles.loadingIsland)}>
+                <Loading />
+              </Island>
+            ) : (
+              <>
+                {renderSection('CommunityChatsYouAreIn', viewportSections.joined)}
+                {renderSection('CommunityChatsYouCanView', viewportSections.viewable)}
+                {renderRequestableSection(viewportSections.requestable)}
 
-              {!hasResults && (
-                <Island className={buildClassName(styles.island, styles.emptyIsland)}>
-                  <p className={styles.empty}>{lang('CommunityNoChatsFound')}</p>
-                </Island>
-              )}
-            </>
-          )}
-        </InfiniteScroll>
-      </Surface>
+                {!hasResults && (
+                  <Island className={buildClassName(styles.island, styles.emptyIsland)}>
+                    <p className={styles.empty}>{lang('CommunityNoChatsFound')}</p>
+                  </Island>
+                )}
+              </>
+            )}
+          </InfiniteScroll>
+        </Surface>
+      </Transition>
 
       <ConfirmDialog
         isOpen={Boolean(joinCandidate)}

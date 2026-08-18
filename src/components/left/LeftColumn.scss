@@ -1,56 +1,58 @@
-#NewChat {
-  height: 100%;
-}
-
-.left-header {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-
-  height: var(--column-header-height);
-  padding: 0.5rem 0.8125rem 0.5rem 0.8125rem;
-
-  background-color: var(--color-background);
-
-  transition: background-color 150ms;
-
-  &.secondary {
-    background-color: var(--color-background-secondary);
+@layer ui.leftcolumn {
+  #NewChat {
+    height: 100%;
   }
 
-  h3 {
-    user-select: none;
+  .left-header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
 
-    overflow: hidden;
+    height: var(--column-header-height);
+    padding: 0.5rem 0.8125rem 0.5rem 0.8125rem;
 
-    margin-right: auto;
-    margin-bottom: 0;
-    margin-left: 1.375rem;
+    background-color: var(--color-background);
 
-    font-size: 1.25rem;
-    font-weight: var(--font-weight-medium);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+    transition: background-color 150ms;
 
-  .SearchInput {
-    margin-left: 0.625rem;
-  }
-
-  .Button.smaller {
-    width: 2.5rem;
-    height: 2.5rem;
-
-    + .DropdownMenu {
-      margin-left: 0.25rem;
+    &.secondary {
+      background-color: var(--color-background-secondary);
     }
-  }
 
-  body.is-tauri.is-macos #Main:not(.is-fullscreen):not(.folders-sidebar-visible) &:not(#TopicListHeader) {
-    padding-left: var(--window-controls-width);
-  }
+    h3 {
+      user-select: none;
 
-  @media (max-width: 600px) {
-    padding: 0.5rem;
+      overflow: hidden;
+
+      margin-right: auto;
+      margin-bottom: 0;
+      margin-left: 1.375rem;
+
+      font-size: 1.25rem;
+      font-weight: var(--font-weight-medium);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .SearchInput {
+      margin-left: 0.625rem;
+    }
+
+    .Button.smaller {
+      width: 2.5rem;
+      height: 2.5rem;
+
+      + .DropdownMenu {
+        margin-left: 0.25rem;
+      }
+    }
+
+    body.is-tauri.is-macos #Main:not(.is-fullscreen):not(.folders-sidebar-visible) &:not(#TopicListHeader) {
+      padding-left: var(--window-controls-width);
+    }
+
+    @media (max-width: 600px) {
+      padding: 0.5rem;
+    }
   }
 }

@@ -8,6 +8,7 @@
   left: 0;
   transform: translate3d(100%, 0, 0);
 
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 
@@ -28,7 +29,7 @@
 
 .header {
   flex-shrink: 0;
-  background-color: var(--color-background);
+  background-color: var(--color-background-secondary);
 }
 
 .headerTransition {
@@ -83,10 +84,14 @@
   white-space: nowrap;
 }
 
-.surface {
+.contentTransition {
   overflow: hidden;
   flex: 1;
   min-height: 0;
+}
+
+.surface {
+  height: 100%;
 }
 
 .content {
@@ -163,5 +168,6 @@
 }
 
 .scrolled .header {
-  box-shadow: 0 0.0625rem 0 0 var(--color-borders);
+  background-color: var(--color-background);
+  box-shadow: inset 0 -0.0625rem 0 var(--color-borders);
 }
