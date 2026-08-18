@@ -495,17 +495,13 @@ function renderVideoBlock(
       <Video
         id={sourceId}
         video={getPageMediaBlockMedia(block)}
-        isOwn={context.isOwn}
-        noAvatars={context.noAvatars}
         canAutoLoad={context.canAutoLoadMedia}
         canAutoPlay={block.isAutoplay && context.canAutoLoadMedia}
         isProtected={context.isProtected}
         observeIntersectionForLoading={context.observeIntersectionForLoading}
         observeIntersectionForPlaying={context.observeIntersectionForPlaying}
-        isNestedMedia
         className={buildClassName(
           styles.mediaBlock,
-          shouldBreakoutMedia && styles.fullWidthMediaBlock,
           shouldBreakoutMedia && styles.noBorderRadius,
         )}
         onClick={() => onOpenMedia([block], [sourceId], 0)}
@@ -534,16 +530,12 @@ function renderPhotoBlock(
       <Photo
         id={sourceId}
         photo={getPageMediaBlockMedia(block)}
-        isOwn={context.isOwn}
-        noAvatars={context.noAvatars}
         canAutoLoad={context.canAutoLoadMedia}
         isProtected={context.isProtected}
         theme={context.theme}
         observeIntersection={context.observeIntersectionForLoading}
-        isNestedMedia
         className={buildClassName(
           styles.mediaBlock,
-          shouldBreakoutMedia && styles.fullWidthMediaBlock,
           shouldBreakoutMedia && styles.noBorderRadius,
         )}
         onClick={() => {
@@ -576,8 +568,6 @@ function renderSlideshowBlock(
       <Slideshow
         items={items}
         sourceIds={sourceIds}
-        isOwn={context.isOwn}
-        noAvatars={context.noAvatars}
         canAutoLoadMedia={context.canAutoLoadMedia}
         isProtected={context.isProtected}
         theme={context.theme}
@@ -611,8 +601,6 @@ function renderCollageBlock(
       <Collage
         items={items}
         sourceIds={sourceIds}
-        isOwn={context.isOwn}
-        noAvatars={context.noAvatars}
         canAutoLoadMedia={context.canAutoLoadMedia}
         isProtected={context.isProtected}
         theme={context.theme}
@@ -795,6 +783,7 @@ function renderMapBlock(
         height={block.height || MAP_FALLBACK_HEIGHT}
         zoom={block.zoom}
         shouldShowPin
+        isFullWidth
         onClick={() => onOpenMap(geo, block.zoom)}
       />
       {renderCaption(block.caption, context)}

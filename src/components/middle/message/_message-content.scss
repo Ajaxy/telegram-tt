@@ -718,19 +718,25 @@
     width: auto !important;
   }
 
-  &.force-sender-name .media-inner,
-  &.force-sender-name .Album,
-  &.text .media-inner,
-  &.is-via-bot .media-inner,
-  &.has-subheader .media-inner,
-  &.has-subheader .Album,
-  &.is-forwarded .media-inner,
-  &.is-forwarded .Album {
-    margin-right: -0.5rem;
-    margin-left: -0.5rem;
+  &.force-sender-name,
+  &.text,
+  &.is-via-bot,
+  &.has-subheader,
+  &.is-forwarded {
+    --message-media-breakout-left: 0.5rem;
+    --message-media-breakout-right: 0.5rem;
+
+    > .content-inner {
+      > .media-inner,
+      > .Album {
+        max-width: calc(100% + var(--message-media-breakout-left) + var(--message-media-breakout-right));
+        margin-right: calc(var(--message-media-breakout-right) * -1);
+        margin-left: calc(var(--message-media-breakout-left) * -1);
+      }
+    }
 
     body.is-ios .Message.own & {
-      margin-left: -0.625rem;
+      --message-media-breakout-left: 0.625rem;
     }
   }
 
@@ -772,6 +778,25 @@
 
   &:not(.text) .RoundVideo {
     margin-bottom: 0;
+  }
+}
+
+.has-adaptive-width {
+  // Media fills the width established by intrinsic siblings such as one-line titles
+  > .content-inner > .media-inner {
+    width:
+      calc(
+        100% + var(--message-media-breakout-left, 0rem) + var(--message-media-breakout-right, 0rem)
+      );
+  }
+
+  // Wrapping content follows the resolved media or title width without widening the message
+  > .content-inner > .text-content,
+  > .WebPage-text,
+  > .Reactions,
+  & ~ .Reactions.is-outside {
+    width: 0;
+    min-width: 100%;
   }
 }
 

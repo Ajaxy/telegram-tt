@@ -1,10 +1,13 @@
 .root {
+  --media-max-height: 27rem;
+
   position: relative;
 
   overflow: hidden;
 
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--slideshow-aspect-ratio);
   width: 100%;
+  max-height: var(--media-max-height);
   border-radius: 0.5rem;
 
   background-color: #000;

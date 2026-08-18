@@ -2,13 +2,9 @@
 // https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/ui/grouped_layout.cpp
 // https://github.com/overtake/TelegramSwift/blob/master/Telegram-Mac/GroupedLayout.swift#L83
 
-import type { ApiDimensions, ApiMessage } from '../../../../api/types';
-import type { IAlbum } from '../../../../types';
+import type { ApiDimensions } from '../../../../api/types';
 
-import { getMessageContent } from '../../../../global/helpers';
 import { clamp } from '../../../../util/math';
-import { getAvailableWidth } from '../../../common/helpers/mediaDimensions';
-import { calculateMediaDimensions } from './mediaDimensions';
 
 export const AlbumRectPart = {
   None: 0,
@@ -22,7 +18,7 @@ type IAttempt = {
   lineCounts: number[];
   heights: number[];
 };
-export type IMediaDimensions = {
+type IMediaDimensions = {
   width: number;
   height: number;
   x: number;
@@ -30,6 +26,10 @@ export type IMediaDimensions = {
 };
 type IMediaLayout = {
   dimensions: IMediaDimensions;
+  sides: number;
+};
+export type IAlbumLayoutItem = {
+  rect: IMediaDimensions;
   sides: number;
 };
 type ILayoutParams = {
@@ -42,55 +42,16 @@ type ILayoutParams = {
   spacing: number;
 };
 export type IAlbumLayout = {
-  layout: IMediaLayout[];
-  containerStyle: ApiDimensions;
+  items: IAlbumLayoutItem[];
+  aspectRatio: number;
 };
 
 const MAX_COMPLEX_LAYOUT_ROW_ITEMS = 3;
 const MAX_COMPLEX_LAYOUT_LAST_ROW_ITEMS = 4;
 const EXTENDED_LAYOUT_EXTRA_ROW_COUNT = 2;
 const MIN_EXTENDED_LAYOUT_ROW_COUNT = 5;
-
-function getRatios(messages: ApiMessage[], isSingleMessage: boolean, isMobile: boolean) {
-  const isOutgoing = messages[0].isOutgoing;
-  const allMedia = (isSingleMessage
-    ? messages[0].content.paidMedia!.extendedMedia.map((media) => (
-      'mediaType' in media ? media : (media.photo || media.video)
-    ))
-    : messages.map((message) => (
-      getMessageContent(message).photo || getMessageContent(message).video
-    ))
-  ).filter(Boolean);
-  return allMedia.map(
-    (media) => {
-      const dimensions = calculateMediaDimensions({
-        media,
-        isOwn: isOutgoing,
-        isMobile,
-      }) as ApiDimensions;
-
-      return dimensions.width / dimensions.height;
-    },
-  );
-}
-
-export function getMediaRatio(
-  media: Parameters<typeof calculateMediaDimensions>[0]['media'],
-  isOwn: boolean,
-  isMobile: boolean,
-  noAvatars?: boolean,
-  isNestedMedia?: boolean,
-) {
-  const dimensions = calculateMediaDimensions({
-    media,
-    isOwn,
-    noAvatars,
-    isMobile,
-    isNestedMedia,
-  });
-
-  return dimensions.width / dimensions.height;
-}
+const INTERNAL_LAYOUT_WIDTH = 464;
+const MIN_ITEM_WIDTH = 100;
 
 function getProportions(ratios: number[]) {
   return ratios.map((ratio) => (ratio > 1.2 ? 'w' : (ratio < 0.8 ? 'n' : 'q'))).join('');
@@ -213,28 +174,11 @@ function calculateContainerSize(layout: IMediaLayout[]) {
   return styles;
 }
 
-export function calculateAlbumLayout(
-  isOwn: boolean,
-  noAvatars: boolean,
-  album: IAlbum,
-  isMobile: boolean,
-): IAlbumLayout {
-  const spacing = 2;
-  const ratios = getRatios(album.messages, Boolean(album.isPaidMedia), isMobile);
-  return calculateAlbumLayoutByRatios(isOwn, noAvatars, ratios, isMobile, spacing);
-}
-
-export function calculateAlbumLayoutByRatios(
-  isOwn: boolean,
-  noAvatars: boolean,
-  ratios: number[],
-  isMobile: boolean,
-  spacing = 2,
-): IAlbumLayout {
+export function calculateAlbumLayout(ratios: number[]): IAlbumLayout {
   if (!ratios.length) {
     return {
-      layout: [],
-      containerStyle: { width: 0, height: 0 },
+      items: [],
+      aspectRatio: 1,
     };
   }
 
@@ -242,7 +186,7 @@ export function calculateAlbumLayoutByRatios(
   const averageRatio = getAverageRatio(ratios);
   const albumCount = ratios.length;
   const forceCalc = ratios.some((ratio) => ratio > 2);
-  const maxWidth = getAvailableWidth(isOwn, false, noAvatars, isMobile);
+  const maxWidth = INTERNAL_LAYOUT_WIDTH;
   const maxHeight = maxWidth;
 
   let layout;
@@ -252,9 +196,9 @@ export function calculateAlbumLayoutByRatios(
     proportions,
     averageRatio,
     maxWidth,
-    minWidth: 100,
+    minWidth: MIN_ITEM_WIDTH,
     maxHeight,
-    spacing,
+    spacing: 0,
   };
 
   if (albumCount === 1) {
@@ -269,9 +213,19 @@ export function calculateAlbumLayoutByRatios(
     layout = layoutFour(params);
   }
 
+  const containerSize = calculateContainerSize(layout);
+
   return {
-    layout,
-    containerStyle: calculateContainerSize(layout),
+    items: layout.map(({ dimensions, sides }) => ({
+      rect: {
+        x: dimensions.x / containerSize.width,
+        y: dimensions.y / containerSize.height,
+        width: dimensions.width / containerSize.width,
+        height: dimensions.height / containerSize.height,
+      },
+      sides,
+    })),
+    aspectRatio: containerSize.width / containerSize.height,
   };
 }
 

@@ -4,19 +4,16 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiMediaExtendedPreview, ApiPhoto } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ThemeKey } from '../../../types';
-import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import {
-  getMediaFormat, getMediaThumbUri, getMediaTransferState, getPhotoMediaHash,
+  getMediaDimensions, getMediaFormat, getMediaThumbUri, getMediaTransferState, getPhotoMediaHash,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
-import { calculateMediaDimensions, MIN_MEDIA_HEIGHT } from './helpers/mediaDimensions';
 
-import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -39,19 +36,14 @@ import styles from './media.module.scss';
 export type OwnProps<T> = {
   id?: string;
   photo: ApiPhoto | ApiMediaExtendedPreview;
-  isNestedMedia?: boolean;
-  messageText?: string;
   isOwn?: boolean;
-  noAvatars?: boolean;
   canAutoLoad?: boolean;
   isInSelectMode?: boolean;
   isSelected?: boolean;
   uploadProgress?: number;
-  forcedWidth?: number;
   size?: 'inline' | 'pictogram';
+  layout?: 'intrinsic' | 'fill';
   shouldAffectAppendix?: boolean;
-  dimensions?: IMediaDimensions & { isSmall?: boolean };
-  asForwarded?: boolean;
   nonInteractive?: boolean;
   isDownloading?: boolean;
   isProtected?: boolean;
@@ -71,23 +63,18 @@ type StateProps = {
 const Photo = <T,>({
   id,
   photo,
-  messageText,
   isOwn,
-  noAvatars,
   canAutoLoad,
   isInSelectMode,
   isSelected,
   uploadProgress,
-  forcedWidth,
   size = 'inline',
-  dimensions,
-  asForwarded,
+  layout = 'intrinsic',
   nonInteractive,
   shouldAffectAppendix,
   isDownloading,
   isProtected,
   theme,
-  isNestedMedia,
   clickArg,
   className,
   isMediaNsfw,
@@ -98,12 +85,12 @@ const Photo = <T,>({
 }: OwnProps<T> & StateProps) => {
   const ref = useRef<HTMLDivElement>();
   const isPaidPreview = photo.mediaType === 'extendedMediaPreview';
+  const { width, height } = getMediaDimensions(photo);
 
   const localBlobUrl = !isPaidPreview ? photo.blobUrl : undefined;
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
-  const { isMobile } = useAppLayout();
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = isLoadAllowed && isIntersecting && !isPaidPreview;
   const {
@@ -117,7 +104,7 @@ const Photo = <T,>({
     withShouldRender: true,
   });
 
-  const withBlurredBackground = Boolean(forcedWidth);
+  const withBlurredBackground = layout !== 'fill' && size === 'inline';
   const [withThumb] = useState(!fullMediaData);
   const noThumb = Boolean(fullMediaData);
   const thumbRef = useBlurredMediaThumbRef(photo, noThumb);
@@ -240,33 +227,19 @@ const Photo = <T,>({
     }
   }, [shouldAffectAppendix, fullMediaData, isOwn, isInSelectMode, isSelected, theme]);
 
-  const { width, height, isSmall } = dimensions || calculateMediaDimensions({
-    media: photo,
-    isOwn,
-    asForwarded,
-    noAvatars,
-    isMobile,
-    messageText,
-    isNestedMedia,
-  });
-
   const componentClassName = buildClassName(
     'media-inner',
+    styles.frame,
+    styles[layout],
+    size === 'pictogram' && styles.pictogram,
     !isUploading && !nonInteractive && 'interactive',
-    isSmall && 'small-image',
     (width === height || size === 'pictogram') && 'square-image',
-    height < MIN_MEDIA_HEIGHT && 'fix-min-height',
     className,
   );
 
-  const dimensionsStyle = dimensions && buildStyle(
-    `left: ${dimensions.x}px`,
-    `top: ${dimensions.y}px`,
-  );
   const style = size === 'inline' ? buildStyle(
-    isNestedMedia ? `width: min(${width}px, 100%)` : `height: ${height}px`,
-    isNestedMedia ? `aspect-ratio: ${width} / ${height}` : `min-width: ${width}px`,
-    dimensionsStyle,
+    `--media-width: ${width}px`,
+    `--media-aspect-ratio: ${width / height}`,
   ) : undefined;
 
   return (
@@ -284,9 +257,8 @@ const Photo = <T,>({
         <img
           ref={fullMediaRef}
           src={fullMediaData || prevMediaData}
-          className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
+          className="full-media"
           alt=""
-          style={forcedWidth ? `width: ${forcedWidth}px` : undefined}
           draggable={!isProtected}
         />
       )}

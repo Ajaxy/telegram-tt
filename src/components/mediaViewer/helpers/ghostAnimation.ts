@@ -50,7 +50,7 @@ export function animateOpening(
 
   let {
     top: fromTop, left: fromLeft, width: fromWidth, height: fromHeight,
-  } = fromImage.getBoundingClientRect();
+  } = getRenderedMediaRect(fromImage, dimensions);
 
   if ([
     MediaViewerOrigin.SharedMedia,
@@ -101,7 +101,8 @@ export function animateOpening(
 }
 
 export function animateClosing(
-  origin: MediaViewerOrigin, bestImageData: string, message?: ApiMessage, mediaIndex?: number, sourceId?: string,
+  origin: MediaViewerOrigin, bestImageData: string, dimensions: ApiDimensions,
+  message?: ApiMessage, mediaIndex?: number, sourceId?: string,
 ) {
   const { container, mediaEl: toImage } = getNodes(origin, message, mediaIndex, sourceId);
   if (!container || !toImage) {
@@ -120,7 +121,7 @@ export function animateClosing(
   } = fromImage.getBoundingClientRect();
   const {
     top: targetTop, left: toLeft, width: toWidth, height: toHeight,
-  } = toImage.getBoundingClientRect();
+  } = getRenderedMediaRect(toImage, dimensions);
 
   let toTop = targetTop;
   if (!isElementInViewport(container)) {
@@ -411,6 +412,38 @@ function uncover(realWidth: number, realHeight: number, top: number, left: numbe
   };
 }
 
+function getRenderedMediaRect(mediaEl: HTMLElement, dimensions: ApiDimensions) {
+  const rect = mediaEl.getBoundingClientRect();
+  if (getComputedStyle(mediaEl).objectFit !== 'contain') {
+    return rect;
+  }
+
+  const { width, height } = calculateContainedDimensions(
+    rect.width, rect.height, dimensions.width, dimensions.height,
+  );
+
+  return {
+    top: rect.top + (rect.height - height) / 2,
+    left: rect.left + (rect.width - width) / 2,
+    width,
+    height,
+  };
+}
+
+function calculateContainedDimensions(
+  availableWidth: number,
+  availableHeight: number,
+  mediaWidth: number,
+  mediaHeight: number,
+): ApiDimensions {
+  const scale = Math.min(availableWidth / mediaWidth, availableHeight / mediaHeight);
+
+  return {
+    width: mediaWidth * scale,
+    height: mediaHeight * scale,
+  };
+}
+
 function isMessageImageFullyVisible(imageEl: HTMLElement) {
   const messageListElement = document.querySelector<HTMLDivElement>('.Transition_slide-active > .MessageList')!;
 
@@ -545,15 +578,6 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
       ghost.classList.add('rounded-corners');
       break;
 
-    case MediaViewerOrigin.SharedMedia:
-    case MediaViewerOrigin.SettingsAvatar:
-    case MediaViewerOrigin.ProfileAvatar:
-    case MediaViewerOrigin.SearchResult:
-    case MediaViewerOrigin.RichPageBlock:
-    case MediaViewerOrigin.IVPageBlock:
-      (ghost.firstChild as HTMLElement).style.objectFit = 'cover';
-      break;
-
     case MediaViewerOrigin.MiddleHeaderAvatar:
     case MediaViewerOrigin.SuggestedAvatar:
     case MediaViewerOrigin.ChannelAvatar:
@@ -563,6 +587,5 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
 }
 
 function clearShape(ghost: HTMLDivElement) {
-  (ghost.firstChild as HTMLElement).style.objectFit = 'default';
   ghost.classList.remove('rounded-corners', 'circle');
 }

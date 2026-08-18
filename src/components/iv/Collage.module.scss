@@ -3,13 +3,11 @@
 
   overflow: hidden;
 
+  aspect-ratio: var(--album-aspect-ratio);
+  width: var(--max-width, 100%);
   max-width: 100%;
   margin: 0 auto;
   border-radius: 0.5rem;
-}
-
-.item {
-  position: absolute;
 }
 
 .media {

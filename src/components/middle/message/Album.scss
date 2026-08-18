@@ -1,10 +1,15 @@
 .Album {
   position: relative;
+
   overflow: hidden;
+
+  aspect-ratio: var(--album-aspect-ratio);
+  width: var(--max-width);
+  max-width: 100%;
   margin: auto;
 
   .message-content:not(.is-forwarded).media.text & {
-    margin: -0.3125rem -0.5rem 0.3125rem;
+    margin-block: -0.3125rem 0.3125rem;
   }
 
   .message-content:not(.is-inverted-media).has-subheader.media.text & {
@@ -13,12 +18,17 @@
 
   &,
   .message-content.media.text & {
-    > .album-item-select-wrapper .media-inner {
+    .album-item-select-wrapper .media-inner {
       margin: 0 !important;
     }
   }
 
-  > .album-item-select-wrapper .media-inner {
+  .album-item-select-wrapper {
+    width: 100%;
+    height: 100%;
+  }
+
+  .album-item-select-wrapper .media-inner {
     &,
     & img,
     & video {

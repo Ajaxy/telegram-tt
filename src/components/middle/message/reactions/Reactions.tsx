@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import { memo, useEffect, useMemo } from '../../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../../global';
 
@@ -30,7 +29,6 @@ type OwnProps = {
   message: ApiMessage;
   threadId?: ThreadId;
   isOutside?: boolean;
-  maxWidth?: number;
   metaChildren?: React.ReactNode;
   tags?: Record<ApiReactionKey, ApiSavedReactionTag>;
   isCurrentUserPremium?: boolean;
@@ -42,18 +40,17 @@ type OwnProps = {
 const MAX_RECENT_AVATARS = 3;
 const PAID_SEND_DELAY = 5000;
 
-const Reactions: FC<OwnProps> = ({
+const Reactions = ({
   message,
   threadId,
   isOutside,
-  maxWidth,
   metaChildren,
   observeIntersection,
   noRecentReactors,
   isCurrentUserPremium,
   tags,
   isAccountFrozen,
-}) => {
+}: OwnProps) => {
   const {
     toggleReaction,
     addLocalPaidReaction,
@@ -201,7 +198,6 @@ const Reactions: FC<OwnProps> = ({
         isOutside && 'is-outside',
         withServiceReactions && 'is-service',
       )}
-      style={maxWidth ? `max-width: ${maxWidth}px` : undefined}
       dir={lang.isRtl ? 'rtl' : 'ltr'}
     >
       {props.map(({

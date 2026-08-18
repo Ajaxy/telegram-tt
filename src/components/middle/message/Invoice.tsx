@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useRef } from '../../../lib/teact/teact';
 
 import type { ApiMessage } from '../../../api/types';
@@ -6,7 +5,8 @@ import type { ThemeKey } from '../../../types';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { getMessageInvoice, getWebDocumentHash } from '../../../global/helpers';
+import { getMediaDimensions, getMessageInvoice, getWebDocumentHash } from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
@@ -16,11 +16,11 @@ import useLang from '../../../hooks/useLang';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
-import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import Skeleton from '../../ui/placeholder/Skeleton';
 
 import './Invoice.scss';
+import mediaStyles from './media.module.scss';
 
 type OwnProps = {
   message: ApiMessage;
@@ -28,17 +28,15 @@ type OwnProps = {
   isInSelectMode?: boolean;
   isSelected?: boolean;
   theme: ThemeKey;
-  forcedWidth?: number;
 };
 
-const Invoice: FC<OwnProps> = ({
+const Invoice = ({
   message,
   shouldAffectAppendix,
   isInSelectMode,
   isSelected,
   theme,
-  forcedWidth,
-}) => {
+}: OwnProps) => {
   const ref = useRef<HTMLDivElement>();
 
   const oldLang = useOldLang();
@@ -55,8 +53,7 @@ const Invoice: FC<OwnProps> = ({
   } = invoice!;
 
   const photoUrl = useMedia(getWebDocumentHash(photo));
-  const withBlurredBackground = Boolean(forcedWidth);
-  const blurredBackgroundRef = useBlurredMediaThumbRef(photoUrl, !withBlurredBackground);
+  const mediaDimensions = photo ? getMediaDimensions(photo) : undefined;
   const messageId = message.id;
 
   useLayoutEffectWithPrevDeps(([prevShouldAffectAppendix]) => {
@@ -78,12 +75,9 @@ const Invoice: FC<OwnProps> = ({
     }
   }, [shouldAffectAppendix, photoUrl, isInSelectMode, isSelected, theme, messageId]);
 
-  const width = forcedWidth || photo?.dimensions?.width;
-
-  const style = buildStyle(
-    photo?.dimensions && `width: ${width}px`,
-    photo?.dimensions && `aspect-ratio: ${photo.dimensions.width} / ${photo.dimensions.height}`,
-    Boolean(!photo?.dimensions && forcedWidth) && `width: ${forcedWidth}px`,
+  const mediaStyle = mediaDimensions && buildStyle(
+    `--media-width: ${mediaDimensions.width}px`,
+    `--media-aspect-ratio: ${mediaDimensions.width / mediaDimensions.height}`,
   );
 
   return (
@@ -99,23 +93,24 @@ const Invoice: FC<OwnProps> = ({
       )}
       <div className={`description ${photo ? 'has-image' : ''}`}>
         {Boolean(photo) && (
-          <div className="invoice-image-container">
-            {withBlurredBackground && <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />}
+          <div
+            className={buildClassName(
+              'invoice-image-container', mediaStyles.frame,
+            )}
+            style={mediaStyle}
+          >
             {photoUrl && (
               <img
-                className="invoice-image"
+                className="invoice-image full-media"
                 src={photoUrl}
                 alt=""
-                style={style}
                 crossOrigin="anonymous"
                 draggable={false}
               />
             )}
             {!photoUrl && photo && (
               <Skeleton
-                width={width}
-                height={photo.dimensions?.height}
-                forceAspectRatio
+                className="invoice-image-placeholder"
                 animation="pulse"
               />
             )}

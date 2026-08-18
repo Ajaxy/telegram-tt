@@ -282,19 +282,17 @@
 }
 
 .mediaBlock {
+  --media-max-height: 27rem;
+
   --border-top-left-radius: 0.5rem;
   --border-top-right-radius: 0.5rem;
   --border-bottom-right-radius: 0.5rem;
   --border-bottom-left-radius: 0.5rem;
 
   overflow: hidden;
-  min-width: 0 !important;
+  min-width: 100% !important;
   max-width: 100%;
   border-radius: 0.5rem;
-}
-
-.fullWidthMediaBlock {
-  width: 100% !important;
 }
 
 .mapPreview {
@@ -486,13 +484,12 @@
   margin-bottom: 1rem;
 
   .mediaBlock {
-    max-height: min(20rem, 40vh);
-  }
+    --media-max-height: min(20rem, 40vh);
 
-  :global(.media-inner .full-media),
-  :global(.full-media),
-  :global(.thumbnail) {
-    object-fit: cover;
+    > :global(.full-media),
+    > :global(.thumbnail) {
+      object-fit: cover;
+    }
   }
 }
 

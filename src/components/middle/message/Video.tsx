@@ -3,19 +3,16 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiMediaExtendedPreview, ApiVideo } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 
 import {
-  getMediaFormat, getMediaThumbUri, getMediaTransferState, getVideoMediaHash,
+  getMediaDimensions, getMediaFormat, getMediaThumbUri, getMediaTransferState, getVideoMediaHash,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import buildStyle from '../../../util/buildStyle';
 import { formatMediaDuration } from '../../../util/dates/oldDateFormat';
 import * as mediaLoader from '../../../util/mediaLoader';
-import { calculateExtendedPreviewDimensions, calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
-import { MIN_MEDIA_HEIGHT } from './helpers/mediaDimensions';
 
 import useUnsupportedMedia from '../../../hooks/media/useUnsupportedMedia';
-import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -40,15 +37,10 @@ export type OwnProps<T> = {
   id?: string;
   video: ApiVideo | ApiMediaExtendedPreview;
   lastPlaybackTimestamp?: number;
-  isOwn?: boolean;
-  isNestedMedia?: boolean;
-  noAvatars?: boolean;
   canAutoLoad?: boolean;
   canAutoPlay?: boolean;
   uploadProgress?: number;
-  forcedWidth?: number;
-  dimensions?: IMediaDimensions;
-  asForwarded?: boolean;
+  layout?: 'intrinsic' | 'fill';
   isDownloading?: boolean;
   isProtected?: boolean;
   className?: string;
@@ -67,15 +59,10 @@ type StateProps = {
 const Video = <T,>({
   id,
   video,
-  isOwn,
-  isNestedMedia,
-  noAvatars,
   canAutoLoad,
   canAutoPlay,
   uploadProgress,
-  forcedWidth,
-  dimensions,
-  asForwarded,
+  layout = 'intrinsic',
   isDownloading,
   isProtected,
   className,
@@ -95,6 +82,7 @@ const Video = <T,>({
   const [shouldAlwaysShowNsfw, setShouldAlwaysShowNsfw] = useState(false);
 
   const isPaidPreview = video.mediaType === 'extendedMediaPreview';
+  const { width, height } = getMediaDimensions(video);
 
   const localBlobUrl = !isPaidPreview ? video.blobUrl : undefined;
 
@@ -128,7 +116,6 @@ const Video = <T,>({
     wasIntersectedRef.current = true;
   }
 
-  const { isMobile } = useAppLayout();
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = Boolean(isLoadAllowed && isIntersectingForLoading && !isPaidPreview);
   const [isPlayAllowed, setIsPlayAllowed] = useState(Boolean(canAutoPlay && !isSpoilerShown));
@@ -145,7 +132,7 @@ const Video = <T,>({
 
   const thumbDataUri = getMediaThumbUri(video);
   const hasThumb = Boolean(thumbDataUri);
-  const withBlurredBackground = Boolean(forcedWidth);
+  const withBlurredBackground = layout !== 'fill';
 
   const isInline = fullMediaData && wasIntersectedRef.current;
 
@@ -208,14 +195,6 @@ const Video = <T,>({
   const duration = (Number.isFinite(videoRef.current?.duration) && !isUnsupported
     ? videoRef.current?.duration : video.duration) || 0;
 
-  const {
-    width, height,
-  } = dimensions || (
-    isPaidPreview
-      ? calculateExtendedPreviewDimensions(video, Boolean(isOwn), asForwarded, isNestedMedia, noAvatars, isMobile)
-      : calculateVideoDimensions(video, Boolean(isOwn), asForwarded, isNestedMedia, noAvatars, isMobile)
-  );
-
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>, isFromSpinner?: boolean) => {
     if (isUploading) {
       onCancelUpload?.(clickArg!);
@@ -266,17 +245,16 @@ const Video = <T,>({
 
   const componentClassName = buildClassName(
     'media-inner dark',
+    mediaStyles.frame,
+    mediaStyles[layout],
     !isUploading && 'interactive',
-    height < MIN_MEDIA_HEIGHT && 'fix-min-height',
     className,
   );
 
-  const dimensionsStyle = dimensions
-    ? `${isNestedMedia ? '' : ` width: ${width}px;`} left: ${dimensions.x}px; top: ${dimensions.y}px;`
-    : '';
-  const style = isNestedMedia
-    ? `width: min(${width}px, 100%); aspect-ratio: ${width} / ${height};${dimensionsStyle}`
-    : `height: ${height}px;${dimensionsStyle}`;
+  const style = buildStyle(
+    `--media-width: ${width}px`,
+    `--media-aspect-ratio: ${width / height}`,
+  );
 
   return (
     <div
@@ -293,7 +271,7 @@ const Video = <T,>({
         <OptimizedVideo
           ref={videoRef}
           src={fullMediaData}
-          className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
+          className="full-media"
           canPlay={isPlayAllowed && isIntersectingForPlaying && !isUnsupported}
           defaultMuted
           muted
@@ -303,16 +281,14 @@ const Video = <T,>({
           draggable={!isProtected}
           onTimeUpdate={handleTimeUpdate}
           onReady={markPlayerReady}
-          style={forcedWidth ? `width: ${forcedWidth}px` : undefined}
         />
       )}
       {previewBlobUrl && (
         <img
           ref={previewRef}
           src={previewBlobUrl}
-          className={buildClassName('thumbnail', withBlurredBackground && 'with-blurred-bg')}
+          className="thumbnail"
           alt=""
-          style={forcedWidth ? `width: ${forcedWidth}px;` : undefined}
           draggable={!isProtected}
         />
       )}

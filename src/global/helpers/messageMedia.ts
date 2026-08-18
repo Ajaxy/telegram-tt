@@ -36,6 +36,7 @@ export type DownloadableMedia = ApiPhoto | ApiVideo | ApiDocument | ApiSticker |
 
 const MIN_STATIC_MAP_ZOOM = 13;
 const MAX_STATIC_MAP_ZOOM = 20;
+const FALLBACK_MEDIA_DIMENSIONS: ApiDimensions = { width: 100, height: 100 };
 
 export function getMessageContent(message: MediaContainer) {
   return message.content;
@@ -455,6 +456,43 @@ export function getPhotoFullDimensions(photo: Pick<ApiPhoto, 'sizes' | 'thumbnai
     || photo.sizes.find((size) => size.type === 'y')
     || getPhotoInlineDimensions(photo)
   );
+}
+
+export function getMediaDimensions(
+  media: ApiPhoto | ApiVideo | ApiMediaExtendedPreview | ApiWebDocument,
+): ApiDimensions & { isFallback?: true } {
+  let dimensions: ApiDimensions | undefined;
+
+  if (media.mediaType === 'photo') {
+    dimensions = media.sizes.reduce<ApiDimensions | undefined>((largest, size) => {
+      if (!areMediaDimensionsValid(size)) return largest;
+      if (!largest || size.width * size.height > largest.width * largest.height) return size;
+      return largest;
+    }, undefined) || media.thumbnail;
+  } else if (media.mediaType === 'webDocument') {
+    dimensions = media.dimensions;
+  } else {
+    dimensions = areMediaDimensionsValid(media)
+      ? { width: media.width, height: media.height }
+      : media.thumbnail;
+  }
+
+  if (dimensions && areMediaDimensionsValid(dimensions)) {
+    return dimensions;
+  }
+
+  return {
+    ...FALLBACK_MEDIA_DIMENSIONS,
+    isFallback: true,
+  };
+}
+
+function areMediaDimensionsValid(
+  dimensions: { width?: number; height?: number },
+): dimensions is ApiDimensions {
+  const { width, height } = dimensions;
+  return typeof width === 'number' && typeof height === 'number'
+    && Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0;
 }
 
 export function getPhotoInlineDimensions(photo: Pick<ApiPhoto, 'sizes' | 'thumbnail'>): ApiDimensions | undefined {

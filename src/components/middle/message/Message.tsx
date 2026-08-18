@@ -139,13 +139,11 @@ import { parseTranslationCacheKey } from '../../../util/keys/translationKey';
 import { getServerTime } from '../../../util/serverTime';
 import stopEvent from '../../../util/stopEvent';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
-import { calculateDimensionsForMessageMedia, getStickerDimensions, REM } from '../../common/helpers/mediaDimensions';
+import { getStickerDimensions, REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
 import { buildContentClassName } from './helpers/buildContentClassName';
-import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
 import getSingularPaidMedia from './helpers/getSingularPaidMedia';
-import { calculateMediaDimensions, getMinMediaWidth, getMinMediaWidthWithText } from './helpers/mediaDimensions';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
@@ -368,8 +366,8 @@ type QuickReactionPosition =
 
 const NBSP = '\u00A0';
 const QUICK_REACTION_SIZE = 1.75 * REM;
-const EXTRA_SPACE_FOR_REACTIONS = 2.25 * REM;
 const MAX_REASON_LENGTH = 200;
+const MIN_MESSAGE_LENGTH_FOR_WIDE_MEDIA = 40;
 
 const Message = ({
   message,
@@ -933,7 +931,11 @@ const Message = ({
     theme,
   });
 
-  const contentClassName = buildContentClassName(message, album, {
+  const hasWideMedia = Boolean(
+    (photo || video || isAlbum || invoice?.extendedMedia || invoice?.photo)
+    && ((text?.text.length || 0) > MIN_MESSAGE_LENGTH_FOR_WIDE_MEDIA || isMediaWithCommentButton),
+  );
+  const contentClassName = buildClassName(buildContentClassName(message, album, {
     poll,
     webPage,
     hasSubheader,
@@ -951,7 +953,7 @@ const Message = ({
     withVoiceTranscription,
     peerColorClass,
     hasOutsideReactions,
-  });
+  }), hasWideMedia && 'with-wide-media');
 
   const withAppendix = contentClassName.includes('has-appendix');
   const emojiSize = getCustomEmojiSize(text?.emojiOnlyCount);
@@ -1077,80 +1079,22 @@ const Message = ({
     message.wasTypingDraft,
   ]);
 
-  const albumLayout = useMemo(() => {
-    return isAlbum
-      ? calculateAlbumLayout(isOwn, Boolean(noAvatars), album, isMobile)
-      : undefined;
-  }, [isAlbum, isOwn, noAvatars, album, isMobile]);
-
   const extraPadding = asForwarded && !isCustomShape ? 28 : 0;
 
   const sizeCalculations = useMemo(() => {
-    let calculatedWidth;
-    let contentWidth: number | undefined;
     let style = '';
-    let reactionsMaxWidth;
 
-    if (!isAlbum && (photo || video || invoice?.extendedMedia)) {
-      let width: number | undefined;
-      if (photo || video) {
-        const media = (photo || video);
-        if (media && !isRoundVideo) {
-          width = calculateMediaDimensions({
-            media,
-            isOwn,
-            asForwarded,
-            noAvatars,
-            isMobile,
-          }).width;
-        }
-      } else if (invoice?.extendedMedia && (
-        invoice.extendedMedia.width && invoice.extendedMedia.height
-      )) {
-        const { width: previewWidth, height: previewHeight } = invoice.extendedMedia;
-        width = calculateDimensionsForMessageMedia({
-          width: previewWidth,
-          height: previewHeight,
-          fromOwnMessage: isOwn,
-          asForwarded,
-          noAvatars,
-          isMobile,
-        }).width;
-      }
-
-      if (width) {
-        if (width < getMinMediaWidthWithText(isMobile)) {
-          contentWidth = width;
-        }
-        calculatedWidth = Math.max(getMinMediaWidth(text?.text, isMobile, isMediaWithCommentButton), width);
-      }
-    } else if (albumLayout) {
-      const minWidth = getMinMediaWidth(text?.text, isMobile, isMediaWithCommentButton);
-      calculatedWidth = Math.max(minWidth, albumLayout.containerStyle.width);
-    }
-
-    if (calculatedWidth) {
-      style = `width: ${calculatedWidth}px`;
-      reactionsMaxWidth = calculatedWidth + EXTRA_SPACE_FOR_REACTIONS;
-    } else if (sticker && !hasSubheader) {
+    if (sticker && !hasSubheader) {
       const { width } = getStickerDimensions(sticker, isMobile);
       style = `width: ${width + extraPadding}px`;
-      reactionsMaxWidth = width + EXTRA_SPACE_FOR_REACTIONS;
     }
 
-    return {
-      contentWidth, style, reactionsMaxWidth,
-    };
+    return style;
   }, [
-    albumLayout, asForwarded, extraPadding, hasSubheader, invoice?.extendedMedia, isAlbum, isMediaWithCommentButton,
-    isMobile, isOwn, noAvatars, photo, sticker, text?.text, video, isRoundVideo,
+    extraPadding, hasSubheader, isMobile, sticker,
   ]);
 
-  const {
-    contentWidth, style: sizeStyles, reactionsMaxWidth,
-  } = sizeCalculations;
-
-  const contentStyle = buildStyle(peerColorStyle, sizeStyles);
+  const contentStyle = buildStyle(peerColorStyle, sizeCalculations);
 
   const handleTypingAnimationEnd = useLastCallback(() => {
     if (!isTypingDraft || !previousLocalId) {
@@ -1591,7 +1535,6 @@ const Message = ({
             isInSelectMode={isInSelectMode}
             isSelected={isSelected}
             theme={theme}
-            forcedWidth={contentWidth}
           />
         )}
         {location && (
@@ -1665,7 +1608,6 @@ const Message = ({
         noAvatars={noAvatars}
         canAutoLoad={canAutoLoadMedia}
         canAutoPlay={canAutoPlayMedia}
-        asForwarded={asForwarded}
         isDownloading={isDownloading}
         isProtected={isProtected}
         theme={theme}
@@ -1689,7 +1631,6 @@ const Message = ({
         {isAlbum && observeIntersectionForLoading && (
           <Album
             album={album}
-            albumLayout={albumLayout!}
             observeIntersection={observeIntersectionForLoading}
             isOwn={isOwn}
             isProtected={isProtected}
@@ -1699,20 +1640,16 @@ const Message = ({
         )}
         {!isAlbum && photo && (
           <Photo
-            messageText={text?.text}
             photo={photo}
             isOwn={isOwn}
             observeIntersection={observeIntersectionForLoading}
-            noAvatars={noAvatars}
             canAutoLoad={canAutoLoadMedia}
             uploadProgress={uploadProgress}
             shouldAffectAppendix={hasCustomAppendix}
             isDownloading={isDownloading}
             isProtected={isProtected}
-            asForwarded={asForwarded}
             theme={theme}
             isMediaNsfw={isMediaNsfw}
-            forcedWidth={contentWidth}
             onClick={handlePhotoMediaClick}
             onCancelUpload={handleCancelUpload}
           />
@@ -1720,17 +1657,13 @@ const Message = ({
         {!isAlbum && video && !isRoundVideo && (
           <Video
             video={video}
-            isOwn={isOwn}
             observeIntersectionForLoading={observeIntersectionForLoading}
             observeIntersectionForPlaying={observeIntersectionForPlaying}
-            forcedWidth={contentWidth}
-            noAvatars={noAvatars}
             canAutoLoad={canAutoLoadMedia}
             canAutoPlay={canAutoPlayMedia}
             uploadProgress={uploadProgress}
             isDownloading={isDownloading}
             isProtected={isProtected}
-            asForwarded={asForwarded}
             isMediaNsfw={isMediaNsfw}
             lastPlaybackTimestamp={lastPlaybackTimestamp}
             onClick={handleVideoMediaClick}
@@ -1845,6 +1778,22 @@ const Message = ({
     const guestFromSenderTitle = guestFromSender ? getPeerTitle(oldLang, guestFromSender) : undefined;
 
     const shouldRenderForwardAvatar = asForwarded && senderPeer;
+    const adminTitle = (!shouldSkipRenderAdminTitle && !signature) ? (forwardInfo?.isLinkedChannelPost ? (
+      <span className="admin-title" dir="auto">{oldLang('DiscussChannel')}</span>
+    ) : message.postAuthorTitle && isGroup && !asForwarded ? (
+      <span className="admin-title" dir="auto">{message.postAuthorTitle}</span>
+    ) : (senderChatMember || fromRank) && !asForwarded ? (
+      <RankBadge
+        chatId={chatId}
+        userId={(senderChatMember?.userId || sender?.id)!}
+        isAdmin={senderChatMember?.isAdmin}
+        isOwner={senderChatMember?.isOwner}
+        rank={senderChatMember?.rank || fromRank}
+        className="admin-title-badge"
+        isClickable
+      />
+    ) : undefined) : undefined;
+
     return (
       <div className="message-title" dir="ltr">
         {(senderTitle || asForwarded) ? (
@@ -1910,23 +1859,9 @@ const Message = ({
           </span>
         )}
         <div className="title-spacer" />
-        {((!shouldSkipRenderAdminTitle && !signature) || canShowSenderBoosts) && (
+        {(adminTitle || canShowSenderBoosts) && (
           <span className="message-title-meta">
-            {(!shouldSkipRenderAdminTitle && !signature) ? (forwardInfo?.isLinkedChannelPost ? (
-              <span className="admin-title" dir="auto">{oldLang('DiscussChannel')}</span>
-            ) : message.postAuthorTitle && isGroup && !asForwarded ? (
-              <span className="admin-title" dir="auto">{message.postAuthorTitle}</span>
-            ) : (senderChatMember || fromRank) && !asForwarded ? (
-              <RankBadge
-                chatId={chatId}
-                userId={(senderChatMember?.userId || sender?.id)!}
-                isAdmin={senderChatMember?.isAdmin}
-                isOwner={senderChatMember?.isOwner}
-                rank={senderChatMember?.rank || fromRank}
-                className="admin-title-badge"
-                isClickable
-              />
-            ) : undefined) : undefined}
+            {adminTitle}
             {canShowSenderBoosts && (
               <span className="sender-boosts" aria-hidden>
                 <Icon name={senderBoosts > 1 ? 'boosts' : 'boost'} />
@@ -2135,7 +2070,6 @@ const Message = ({
             threadId={threadId}
             isOutside
             isCurrentUserPremium={isPremium}
-            maxWidth={reactionsMaxWidth}
             observeIntersection={observeIntersectionForPlaying}
             noRecentReactors={isChannel}
             tags={tags}

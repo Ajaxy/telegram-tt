@@ -1,11 +1,11 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 
-import { getMessageInvoice } from '../../../global/helpers';
+import { getMediaDimensions, getMessageInvoice } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import buildStyle from '../../../util/buildStyle';
 import { formatMediaDuration } from '../../../util/dates/oldDateFormat';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
 
@@ -17,6 +17,7 @@ import Icon from '../../common/icons/Icon';
 import MediaSpoiler from '../../common/MediaSpoiler';
 
 import styles from './InvoiceMediaPreview.module.scss';
+import mediaStyles from './media.module.scss';
 
 type OwnProps = {
   message: ApiMessage;
@@ -25,10 +26,10 @@ type OwnProps = {
 
 const POLLING_INTERVAL = 30000;
 
-const InvoiceMediaPreview: FC<OwnProps> = ({
+const InvoiceMediaPreview = ({
   message,
   isConnected,
-}) => {
+}: OwnProps) => {
   const { openInvoice, loadExtendedMedia } = getActions();
   const lang = useOldLang();
   const invoice = getMessageInvoice(message);
@@ -47,9 +48,8 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
     extendedMedia,
   } = invoice!;
 
-  const {
-    width, height, thumbnail, duration,
-  } = extendedMedia!;
+  const { thumbnail, duration } = extendedMedia!;
+  const { width, height } = getMediaDimensions(extendedMedia!);
 
   const handleClick = useLastCallback(() => {
     openInvoice({
@@ -62,7 +62,11 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
 
   return (
     <div
-      className={buildClassName(styles.root, 'media-inner')}
+      className={buildClassName(styles.root, mediaStyles.frame, mediaStyles.intrinsic, 'media-inner')}
+      style={buildStyle(
+        `--media-width: ${width}px`,
+        `--media-aspect-ratio: ${width} / ${height}`,
+      )}
       onClick={handleClick}
     >
       <MediaSpoiler

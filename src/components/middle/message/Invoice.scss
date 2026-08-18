@@ -23,11 +23,12 @@
       }
 
       .invoice-image {
-        position: relative;
+        position: absolute;
+        inset: 0;
 
         width: 100%;
         max-width: 100%;
-        max-height: 30rem;
+        height: 100%;
         border-bottom-right-radius: var(--border-bottom-right-radius);
         border-bottom-left-radius: var(--border-bottom-left-radius);
 
@@ -66,9 +67,18 @@
 
   .invoice-image-container {
     position: relative;
+
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .invoice-image-placeholder {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
   }
 
   .thumbnail {

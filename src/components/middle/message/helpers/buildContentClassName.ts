@@ -114,7 +114,7 @@ export function buildContentClassName(
     }
   }
   if (isMedia && !withVoiceTranscription) {
-    classNames.push('media');
+    classNames.push('media', 'has-adaptive-width');
   } else if (video) {
     classNames.push('video');
   } else if (audio) {
@@ -128,15 +128,13 @@ export function buildContentClassName(
     classNames.push('document');
   } else if (contact) {
     classNames.push('contact');
-  } else if (poll) {
-    classNames.push('poll');
   } else if (giveaway || giveawayResults) {
     classNames.push('giveaway');
   } else if (webPage?.webpageType === 'full') {
     classNames.push('web-page');
 
     if (webPage.photo || webPage.video) {
-      classNames.push('media');
+      classNames.push('media', 'has-adaptive-width');
     }
 
     if (webPage.document) {
@@ -150,6 +148,10 @@ export function buildContentClassName(
     if (webPage.auction) {
       classNames.push('auction');
     }
+  }
+
+  if (poll) {
+    classNames.push('poll');
   }
 
   if (invoice && !invoice.extendedMedia) {

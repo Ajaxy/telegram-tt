@@ -13,6 +13,11 @@
   cursor: var(--custom-cursor, pointer);
 }
 
+.fullWidth {
+  aspect-ratio: var(--map-aspect-ratio);
+  width: 100%;
+}
+
 .map,
 .skeleton {
   width: 100%;

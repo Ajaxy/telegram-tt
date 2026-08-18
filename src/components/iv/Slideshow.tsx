@@ -1,5 +1,5 @@
 import type { TeactNode } from '../../lib/teact/teact';
-import { useRef, useState } from '../../lib/teact/teact';
+import { useMemo, useRef, useState } from '../../lib/teact/teact';
 
 import type {
   ApiPageBlockPhoto,
@@ -10,7 +10,9 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ThemeKey } from '../../types';
 
 import { requestMeasure } from '../../lib/fasterdom/fasterdom';
+import { getMediaDimensions } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
 import { getPageMediaBlockId, getPageMediaBlockMedia } from './helpers/pageMedia';
 
 import useLang from '../../hooks/useLang';
@@ -26,8 +28,6 @@ type SlideshowItem = ApiPageBlockPhoto | ApiPageBlockVideo;
 
 type OwnProps = {
   items: SlideshowItem[];
-  isOwn?: boolean;
-  noAvatars?: boolean;
   canAutoLoadMedia?: boolean;
   isProtected?: boolean;
   theme: ThemeKey;
@@ -41,8 +41,6 @@ type OwnProps = {
 
 const Slideshow = ({
   items,
-  isOwn,
-  noAvatars,
   canAutoLoadMedia,
   isProtected,
   theme,
@@ -59,6 +57,16 @@ const Slideshow = ({
   const lang = useLang();
   const hasMultipleSlides = items.length > 1;
   const clampedIndex = Math.max(0, Math.min(activeIndex, items.length - 1));
+  const aspectRatio = useMemo(() => {
+    const ratios = items.map((item) => {
+      const dimensions = getMediaDimensions(getPageMediaBlockMedia(item));
+      return dimensions.isFallback ? undefined : dimensions.width / dimensions.height;
+    }).filter((ratio): ratio is number => ratio !== undefined);
+
+    return ratios.length
+      ? ratios.reduce((total, ratio) => total + ratio, 0) / ratios.length
+      : 16 / 9;
+  }, [items]);
 
   useScrollableHint(scrollerRef, { isDisabled: !hasMultipleSlides });
 
@@ -104,7 +112,10 @@ const Slideshow = ({
 
   return (
     <>
-      <div className={buildClassName(styles.root, className)}>
+      <div
+        className={buildClassName(styles.root, className)}
+        style={buildStyle(`--slideshow-aspect-ratio: ${aspectRatio}`)}
+      >
         <div
           ref={scrollerRef}
           className={buildClassName(styles.scroller, 'no-scrollbar')}
@@ -116,8 +127,6 @@ const Slideshow = ({
               {renderSlideshowItem(item, {
                 index,
                 sourceId: sourceIds[index],
-                isOwn,
-                noAvatars,
                 canAutoLoadMedia,
                 isProtected,
                 theme,
@@ -170,9 +179,7 @@ const Slideshow = ({
 };
 
 type RenderItemContext = Pick<OwnProps,
-  'isOwn'
-  | 'noAvatars'
-  | 'canAutoLoadMedia'
+  'canAutoLoadMedia'
   | 'isProtected'
   | 'theme'
   | 'observeIntersectionForLoading'
@@ -192,12 +199,11 @@ function renderSlideshowItem(item: SlideshowItem, context: SlideshowItemContext)
         <Photo
           id={context.sourceId}
           photo={getPageMediaBlockMedia(item)}
-          isOwn={context.isOwn}
-          noAvatars={context.noAvatars}
           canAutoLoad={context.canAutoLoadMedia}
           isProtected={context.isProtected}
           theme={context.theme}
           observeIntersection={context.observeIntersectionForLoading}
+          layout="fill"
           className={styles.media}
           onClick={() => context.onMediaClick(context.index)}
         />
@@ -207,13 +213,12 @@ function renderSlideshowItem(item: SlideshowItem, context: SlideshowItemContext)
         <Video
           id={context.sourceId}
           video={getPageMediaBlockMedia(item)}
-          isOwn={context.isOwn}
-          noAvatars={context.noAvatars}
           canAutoLoad={context.canAutoLoadMedia}
           canAutoPlay={item.isAutoplay && context.canAutoLoadMedia}
           isProtected={context.isProtected}
           observeIntersectionForLoading={context.observeIntersectionForLoading}
           observeIntersectionForPlaying={context.observeIntersectionForPlaying}
+          layout="fill"
           className={styles.media}
           onClick={() => context.onMediaClick(context.index)}
         />

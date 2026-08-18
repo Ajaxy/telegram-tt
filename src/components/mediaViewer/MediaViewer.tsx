@@ -268,7 +268,7 @@ const MediaViewer = ({
   );
   const shouldHideOpeningMedia = shouldStartOpening && !hasStartedOpeningAnimation;
 
-  useEffectWithPrevDeps(([wasOpen, wasHidden]) => {
+  useEffectWithPrevDeps(([wasOpen, wasHidden, prevDimensions]) => {
     if (wasOpen === isOpen && wasHidden === isHidden) return undefined;
 
     if (isGhostAnimation && isOpen && !isHidden && !prevItem) {
@@ -288,9 +288,11 @@ const MediaViewer = ({
 
     // When landing in the Media Editor, the ghost is created on the Edit click and the viewer is
     // closed by the editor, so there is nothing to animate here
-    if (isGhostAnimation && !isOpen && prevItem && !shouldLandInMediaEditor) {
+    if (isGhostAnimation && !isOpen && prevItem && prevDimensions && !shouldLandInMediaEditor) {
       beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
-      animateClosing(prevOrigin!, prevBestImageData!, prevMessage, prevItem?.mediaIndex, prevSourceId);
+      animateClosing(
+        prevOrigin!, prevBestImageData!, prevDimensions, prevMessage, prevItem?.mediaIndex, prevSourceId,
+      );
     }
 
     if (!isOpen || isHidden) {
@@ -299,7 +301,7 @@ const MediaViewer = ({
 
     return undefined;
   }, [
-    isOpen, isHidden, bestImageData, dimensions, hasFooter, isGhostAnimation, isVideo, message, origin,
+    isOpen, isHidden, dimensions, bestImageData, hasFooter, isGhostAnimation, isVideo, message, origin,
     prevBestImageData, prevItem, prevMessage, prevOrigin, mediaIndex, sourceId, prevSourceId,
     shouldLandInMediaEditor,
   ]);

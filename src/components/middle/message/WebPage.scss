@@ -155,6 +155,7 @@
         min-height: 0;
         margin-bottom: 0 !important;
 
+        canvas,
         img {
           width: 100%;
           height: 100%;
@@ -216,11 +217,5 @@
 
   @media (min-width: 1921px) {
     max-width: none;
-
-    .thumbnail,
-    .full-media {
-      width: 100% !important;
-      height: auto !important;
-    }
   }
 }

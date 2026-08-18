@@ -21,10 +21,12 @@ type OwnProps = {
   height: number;
   zoom?: number;
   shouldShowPin?: boolean;
+  isFullWidth?: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 };
 
 const DEFAULT_ZOOM = 15;
+const FULL_WIDTH_MAP_REQUEST_WIDTH = 480;
 
 const CompactMapPreview = ({
   className,
@@ -33,16 +35,22 @@ const CompactMapPreview = ({
   height,
   zoom = DEFAULT_ZOOM,
   shouldShowPin,
+  isFullWidth,
   onClick,
 }: OwnProps) => {
   const dpr = useDevicePixelRatio();
-  const mediaHash = buildStaticMapHash(geo, width, height, zoom, dpr);
+  const requestWidth = isFullWidth ? FULL_WIDTH_MAP_REQUEST_WIDTH : width;
+  const requestHeight = isFullWidth ? Math.round(height * requestWidth / width) : height;
+  const mediaHash = buildStaticMapHash(geo, requestWidth, requestHeight, zoom, dpr);
   const mapBlobUrl = useMedia(mediaHash);
+  const style = isFullWidth
+    ? `--map-aspect-ratio: ${width / height}`
+    : `width: ${width}px; height: ${height}px;`;
 
   return (
     <div
-      className={buildClassName(styles.root, onClick && styles.interactive, className)}
-      style={`width: ${width}px; height: ${height}px;`}
+      className={buildClassName(styles.root, isFullWidth && styles.fullWidth, onClick && styles.interactive, className)}
+      style={style}
       onClick={onClick}
     >
       {mapBlobUrl ? (
@@ -53,7 +61,12 @@ const CompactMapPreview = ({
           draggable={false}
         />
       ) : (
-        <Skeleton className={styles.skeleton} width={width} height={height} animation="wave" />
+        <Skeleton
+          className={styles.skeleton}
+          width={isFullWidth ? undefined : width}
+          height={isFullWidth ? undefined : height}
+          animation="wave"
+        />
       )}
       {shouldShowPin && <img src={mapPin} alt="" className={styles.pin} draggable={false} />}
     </div>

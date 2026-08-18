@@ -447,7 +447,6 @@ const Poll = ({
     theme,
     previewIndex: explanationPreviewIndex,
     previewId: explanationPreviewIndex !== undefined ? getPollPreviewId(messageId, explanationPreviewIndex) : undefined,
-    isNestedMedia: true,
     observeIntersectionForLoading,
     observeIntersectionForPlaying,
     onOpenLocation: handleOpenLocation,
@@ -810,7 +809,6 @@ function renderPollMedia({
   onOpenPreview,
   locationWidth = ATTACHED_MAP_WIDTH,
   locationHeight = ATTACHED_MAP_HEIGHT,
-  isNestedMedia,
 }: {
   content: MediaContent;
   theme: ThemeKey;
@@ -823,7 +821,6 @@ function renderPollMedia({
   onOpenPreview: (previewIndex: number) => void;
   locationWidth?: number;
   locationHeight?: number;
-  isNestedMedia?: boolean;
 }) {
   if (content.photo) {
     return (
@@ -832,7 +829,6 @@ function renderPollMedia({
         photo={content.photo}
         theme={theme}
         className={className}
-        isNestedMedia={isNestedMedia}
         canAutoLoad
         observeIntersection={observeIntersectionForLoading}
         clickArg={previewIndex}
@@ -847,7 +843,6 @@ function renderPollMedia({
         id={previewId}
         video={content.video}
         className={className}
-        isNestedMedia={isNestedMedia}
         canAutoLoad
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}
@@ -877,6 +872,7 @@ function renderPollMedia({
         width={locationWidth}
         height={locationHeight}
         zoom={ATTACHED_MAP_ZOOM}
+        isFullWidth
         onClick={() => onOpenLocation(content.location!)}
       />
     );

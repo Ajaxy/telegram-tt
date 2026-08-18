@@ -1,6 +1,6 @@
-import type { ElementRef, FC } from '../../../lib/teact/teact';
+import type { ElementRef } from '../../../lib/teact/teact';
 import {
-  memo, useEffect, useMemo, useRef,
+  memo, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -22,9 +22,7 @@ import { IS_ANDROID } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { preventMessageInputBlur } from '../helpers/preventMessageInputBlur';
-import { calculateMediaDimensions, getMinMediaWidth, getMinMediaWidthWithText } from './helpers/mediaDimensions';
 
-import useAppLayout from '../../../hooks/useAppLayout';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import { type ObserveFn, useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -57,8 +55,9 @@ type StateProps = {
 };
 
 const INTERSECTION_DEBOUNCE_MS = 200;
+const MIN_MESSAGE_LENGTH_FOR_WIDE_MEDIA = 40;
 
-const SponsoredMessage: FC<OwnProps & StateProps> = ({
+const SponsoredMessage = ({
   chatId,
   message,
   containerRef,
@@ -68,7 +67,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   isDownloading,
   canAutoLoadMedia,
   canAutoPlayMedia,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     viewSponsored,
     openUrl,
@@ -83,7 +82,6 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   const ref = useRef<HTMLDivElement>();
   const shouldObserve = Boolean(message);
 
-  const { isMobile } = useAppLayout();
   const {
     observe: observeIntersection,
   } = useIntersectionObserver({
@@ -149,48 +147,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
     });
   });
 
-  const extraPadding = 0;
-
-  const sizeCalculations = useMemo(() => {
-    let calculatedWidth;
-    let contentWidth: number | undefined;
-    const noMediaCorners = false;
-    let style = '';
-
-    if (photo || video) {
-      let width: number | undefined;
-      if (photo) {
-        width = calculateMediaDimensions({
-          media: photo,
-          isMobile,
-        }).width;
-      } else if (video) {
-        width = calculateMediaDimensions({
-          media: video,
-          isMobile,
-        }).width;
-      }
-
-      if (width) {
-        if (width < getMinMediaWidthWithText(isMobile)) {
-          contentWidth = width;
-        }
-        calculatedWidth = Math.max(getMinMediaWidth(text?.text, isMobile), width);
-      }
-    }
-
-    if (calculatedWidth) {
-      style = `width: ${calculatedWidth + extraPadding}px`;
-    }
-
-    return {
-      contentWidth, noMediaCorners, style,
-    };
-  }, [photo, video, isMobile, text?.text]);
-
-  const {
-    contentWidth, style,
-  } = sizeCalculations;
+  const hasWideMedia = hasMedia && (text?.text.length || 0) > MIN_MESSAGE_LENGTH_FOR_WIDE_MEDIA;
 
   if (!message || !message.content) {
     return undefined;
@@ -236,9 +193,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
           canAutoLoad={canAutoLoadMedia}
           isDownloading={isDownloading}
           observeIntersection={observeIntersectionForLoading}
-          noAvatars
           onClick={handleClick}
-          forcedWidth={contentWidth}
         />
       );
     }
@@ -248,12 +203,10 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
           video={video}
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
-          noAvatars
           canAutoLoad={canAutoLoadMedia}
           canAutoPlay={canAutoPlayMedia}
           isDownloading={isDownloading}
           onClick={isGif ? handleClick : handleOpenMedia}
-          forcedWidth={contentWidth}
         />
       );
     }
@@ -268,9 +221,11 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
       className="SponsoredMessage Message open sponsored-media-preview"
     >
       <div
-        className="message-content media has-shadow has-solid-background has-appendix"
+        className={buildClassName(
+          'message-content media has-adaptive-width has-shadow has-solid-background has-appendix',
+          hasWideMedia && 'with-wide-media',
+        )}
         dir="auto"
-        style={style}
         onMouseDown={handleMouseDown}
         onContextMenu={handleContextMenu}
       >

@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -40,8 +39,8 @@ const TIMER_RADIUS = 12;
 const TIMER_CIRCUMFERENCE = TIMER_RADIUS * 2 * Math.PI;
 const MOVE_THRESHOLD = 0.0001; // ~11m
 const DEFAULT_MAP_CONFIG = {
-  width: 400,
-  height: 300,
+  width: 480,
+  height: 360,
   zoom: 16,
 };
 
@@ -53,10 +52,10 @@ type OwnProps = {
   theme: ThemeKey;
 };
 
-const Location: FC<OwnProps> = ({
+const Location = ({
   message,
   peer,
-}) => {
+}: OwnProps) => {
   const { openMapModal } = getActions();
   const ref = useRef<HTMLDivElement>();
   const countdownRef = useRef<HTMLDivElement>();
@@ -184,14 +183,13 @@ const Location: FC<OwnProps> = ({
   }
 
   function renderMap() {
-    if (!mapBlobUrl) return <Skeleton width={width} height={height} animation="pulse" />;
+    if (!mapBlobUrl) return <Skeleton animation="pulse" />;
     return (
       <img
         className="full-media map"
         src={mapBlobUrl}
         alt="Location on a map"
         draggable={false}
-        style={`width: ${DEFAULT_MAP_CONFIG.width}px; height: ${DEFAULT_MAP_CONFIG.height}px;`}
       />
     );
   }

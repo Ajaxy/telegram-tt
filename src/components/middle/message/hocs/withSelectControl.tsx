@@ -11,7 +11,6 @@ import {
   selectIsMessageSelected,
 } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
-import buildStyle from '../../../../util/buildStyle';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 
@@ -33,7 +32,6 @@ export default function withSelectControl(WrappedComponent: FC) {
     const {
       isInSelectMode,
       isSelected,
-      dimensions,
       clickArg,
     } = props;
     const { toggleMessageSelection } = getActions();
@@ -44,16 +42,11 @@ export default function withSelectControl(WrappedComponent: FC) {
     });
 
     const newProps = useMemo(() => {
-      const { dimensions: dims, onClick } = props;
+      const { onClick } = props;
       return {
         ...props,
         isInSelectMode,
         isSelected,
-        dimensions: {
-          ...dims,
-          x: 0,
-          y: 0,
-        },
         onClick: isInSelectMode ? undefined : onClick,
       };
     }, [props, isInSelectMode, isSelected]);
@@ -61,12 +54,6 @@ export default function withSelectControl(WrappedComponent: FC) {
     return (
       <div
         className={buildClassName('album-item-select-wrapper', isSelected && 'is-selected')}
-        style={dimensions ? buildStyle(
-          `left: ${dimensions.x}px`,
-          `top: ${dimensions.y}px`,
-          `width: ${dimensions.width}px`,
-          `height: ${dimensions.height}px`,
-        ) : ''}
         onClick={isInSelectMode ? handleMessageSelect : undefined}
       >
         {isInSelectMode && (

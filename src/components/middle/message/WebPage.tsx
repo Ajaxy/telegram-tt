@@ -49,7 +49,6 @@ type OwnProps = {
   noAvatars?: boolean;
   canAutoLoad?: boolean;
   canAutoPlay?: boolean;
-  asForwarded?: boolean;
   isDownloading?: boolean;
   isProtected?: boolean;
   isConnected?: boolean;
@@ -75,7 +74,6 @@ const WebPage = ({
   noAvatars,
   canAutoLoad,
   canAutoPlay,
-  asForwarded,
   isDownloading = false,
   isProtected,
   isConnected,
@@ -178,7 +176,8 @@ const WebPage = ({
   if (isArticle && webPage?.photo && !webPage.video && !webPage.document) {
     isSquarePhoto = getIsSmallPhoto(webPage, mediaSize);
   }
-  const isMediaInteractive = (photo || video) && onMediaClick && !isSquarePhoto;
+  const hasWideMedia = Boolean((photo || video) && !isSquarePhoto);
+  const isMediaInteractive = hasWideMedia && Boolean(onMediaClick);
 
   const className = buildClassName(
     'WebPage',
@@ -218,6 +217,8 @@ const WebPage = ({
     >
       <div className={buildClassName(
         'WebPage--content',
+        hasWideMedia && 'has-adaptive-width',
+        hasWideMedia && 'with-wide-media',
         isStory && 'is-story',
         (isGift || isAuction) && 'is-gift',
       )}
@@ -264,13 +265,9 @@ const WebPage = ({
         {photo && !isGift && !isAuction && !video && (
           <Photo
             photo={photo}
-            isOwn={message?.isOutgoing}
-            isNestedMedia
             observeIntersection={observeIntersectionForLoading}
-            noAvatars={noAvatars}
             canAutoLoad={canAutoLoad}
             size={isSquarePhoto ? 'pictogram' : 'inline'}
-            asForwarded={asForwarded}
             nonInteractive={!isMediaInteractive}
             isDownloading={isDownloading}
             isProtected={isProtected}
@@ -282,13 +279,9 @@ const WebPage = ({
         {video && (
           <Video
             video={video}
-            isOwn={message?.isOutgoing}
-            isNestedMedia
             observeIntersectionForLoading={observeIntersectionForLoading}
-            noAvatars={noAvatars}
             canAutoLoad={canAutoLoad}
             canAutoPlay={canAutoPlay}
-            asForwarded={asForwarded}
             isDownloading={isDownloading}
             isProtected={isProtected}
             lastPlaybackTimestamp={lastPlaybackTimestamp || linkTimestamp}
