@@ -9,6 +9,7 @@ import { getMessageSummaryDescription, getMessageSummaryEmoji } from './messageS
 export function renderMessageSummaryHtml(
   lang: LangFn,
   message: ApiMessage,
+  isExtended = false,
 ) {
   const global = getGlobal();
   const emoji = getMessageSummaryEmoji(message);
@@ -17,7 +18,7 @@ export function renderMessageSummaryHtml(
 
   const statefulContent = getMessageStatefulContent(global, message);
 
-  const description = getMessageSummaryDescription(lang, message, statefulContent, text, true) as string;
+  const description = getMessageSummaryDescription(lang, message, statefulContent, text, isExtended) as string;
 
   return `${emojiWithSpace}${description}`;
 }

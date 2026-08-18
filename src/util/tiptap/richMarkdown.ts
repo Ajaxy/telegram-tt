@@ -118,6 +118,20 @@ export function isRichMarkdownWebLink(markdown: RichMarkdownLink) {
     && (markdown.url.protocol === 'http:' || markdown.url.protocol === 'https:');
 }
 
+export function escapeRichMarkdownLabel(value: string | number | undefined) {
+  return String(value ?? '')
+    .replaceAll('\\', '\\\\')
+    .replaceAll('[', '\\[')
+    .replaceAll(']', '\\]');
+}
+
+export function escapeRichMarkdownHtml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+}
+
 function buildRichMarkdownLink(label: string, href: string, isImage: boolean): RichMarkdownLink | undefined {
   try {
     return {

@@ -25,6 +25,7 @@ import type {
   ThreadId,
   TranslationTone,
 } from '../../../types';
+import type { MessageCopyRequest } from '../../../types/messageCopy';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { PREVIEW_AVATAR_COUNT } from '../../../config';
@@ -54,7 +55,6 @@ import {
   selectCanTranslateMessage,
   selectChat,
   selectChatFullInfo,
-  selectCurrentMessageList,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
   selectIsMessageProtected,
@@ -102,6 +102,7 @@ export type OwnProps = {
   anchor: IAnchorPosition;
   targetHref?: string;
   messageListType: MessageListType;
+  threadId: ThreadId;
   noReplies?: boolean;
   detectedLanguage?: string;
   repliesThreadInfo?: ApiThreadInfo;
@@ -111,7 +112,6 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  threadId?: ThreadId;
   poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
   story?: ApiTypeStory;
@@ -618,8 +618,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     openReactorListModal({ chatId: message.chatId, messageId: message.id });
   });
 
-  const handleCopyMessages = useLastCallback((messageIds: number[]) => {
-    copyMessagesByIds({ messageIds });
+  const handleCopyMessages = useLastCallback((request: MessageCopyRequest) => {
+    copyMessagesByIds({ request, shouldNotify: true });
     closeMenu();
   });
 
@@ -756,6 +756,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         defaultTagReactions={defaultTagReactions}
         isWithPaidReaction={isWithPaidReaction}
         message={message}
+        threadId={threadId}
+        messageListType={messageListType}
         isPrivate={isPrivate}
         isCurrentUserPremium={isCurrentUserPremium}
         canBuyPremium={canBuyPremium}
@@ -860,9 +862,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message, messageListType, detectedLanguage }): Complete<StateProps> => {
-    const { threadId } = selectCurrentMessageList(global) || {};
-
+  (global, { message, messageListType, detectedLanguage, threadId }): Complete<StateProps> => {
     const { defaultTags, topReactions, availableReactions } = global.reactions;
 
     const activeDownloads = selectActiveDownloads(global);
@@ -995,7 +995,6 @@ export default memo(withGlobal<OwnProps>(
       && message.content.todo?.todo.items?.length < todoItemsMax;
 
     return {
-      threadId,
       chat,
       availableReactions,
       topReactions,

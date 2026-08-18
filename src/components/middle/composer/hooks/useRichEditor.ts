@@ -75,11 +75,6 @@ export default function useRichEditor() {
         sharedCanvasRef: currentRoot.sharedCanvasRef,
         sharedCanvasHqRef: currentRoot.sharedCanvasHqRef,
         content: buildTiptapJsonFromRichMessage(valueRef.current),
-        blockPlaceholder: currentRoot.blockPlaceholder,
-        pullquotePlaceholder: currentRoot.pullquotePlaceholder,
-        quoteCaptionPlaceholder: currentRoot.quoteCaptionPlaceholder,
-        tableTitlePlaceholder: currentRoot.tableTitlePlaceholder,
-        unsupportedPlaceholder: currentRoot.unsupportedPlaceholder,
         tooltips: currentRoot.tooltips,
         getIsRichInputExpanded: currentRoot.getIsRichInputExpanded,
         onUpdate: (updatedEditor) => {

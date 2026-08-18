@@ -22,16 +22,22 @@ const RichEditorCaptionNode = buildRichEditorTextField({
 
 export const RichEditorCaption = RichEditorCaptionNode.extend<RichEditorCaptionOptions>({
   isolating: true,
+  priority: 110,
 
   parseHTML() {
     return [
       { tag: 'cite' },
+      { tag: 'footer[data-rich-block-type="quoteCaption"]' },
       ...(this.parent?.() || []),
     ];
   },
 
   renderHTML({ HTMLAttributes }) {
     return ['cite', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0];
+  },
+
+  renderMarkdown(node, helpers) {
+    return helpers.renderChildren(node);
   },
 
   addOptions() {

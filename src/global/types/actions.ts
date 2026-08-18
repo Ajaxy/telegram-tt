@@ -119,6 +119,7 @@ import type {
   WebPageMediaSize,
 } from '../../types';
 import type { BrowserModalStateType, BrowserTab } from '../../types/browser';
+import type { MessageCopyRequest } from '../../types/messageCopy';
 import type { WebApp, WebAppOutboundEvent } from '../../types/webapp';
 import type { DownloadableMedia } from '../helpers';
 import type { SharedState } from './sharedState';
@@ -938,9 +939,10 @@ export interface ActionPayloads {
   };
   resetLeftColumnWidth: undefined;
 
-  copySelectedMessages: WithTabId | undefined;
+  copySelectedMessages: ({ shouldNotify?: boolean } & WithTabId) | undefined;
   copyMessagesByIds: {
-    messageIds?: number[];
+    request: MessageCopyRequest;
+    shouldNotify?: boolean;
   } & WithTabId;
   openSeenByModal: {
     chatId: string;

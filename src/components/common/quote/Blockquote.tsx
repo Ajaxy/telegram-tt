@@ -72,7 +72,7 @@ const Blockquote = ({
         data-entity-type={ApiMessageEntityTypes.Blockquote}
         contentEditable={shouldCollapse ? false : undefined}
       >
-        <div className={styles.gradientContainer}>
+        <div className={styles.gradientContainer} data-rich-copy-wrapper>
           {children}
         </div>
         {canBeCollapsible && isCollapsible && (

@@ -7,6 +7,7 @@ import buildClassName from '../../buildClassName';
 import {
   buildRichMarkdownNodeInputRule,
   buildRichMarkdownTokenizer,
+  escapeRichMarkdownLabel,
   parseRichMarkdownNode,
   type RichMarkdownLink,
 } from '../richMarkdown';
@@ -82,7 +83,7 @@ export const CustomEmojiNode = Node.create<CustomEmojiNodeOptions>({
 
   parseHTML() {
     return [
-      { tag: 'img[data-document-id]' },
+      { tag: '[data-document-id]' },
       { tag: 'tg-emoji[emoji-id]' },
     ];
   },
@@ -95,6 +96,10 @@ export const CustomEmojiNode = Node.create<CustomEmojiNodeOptions>({
 
   renderText({ node }) {
     return node.attrs.alt;
+  },
+
+  renderMarkdown(node) {
+    return `![${escapeRichMarkdownLabel(node.attrs?.alt)}](tg://emoji?id=${node.attrs?.documentId})`;
   },
 
   addNodeView() {

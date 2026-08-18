@@ -2085,6 +2085,7 @@ const Message = ({
           message={message}
           album={album}
           messageListType={messageListType}
+          threadId={threadId}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
           repliesThreadInfo={repliesThreadInfo}

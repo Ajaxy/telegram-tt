@@ -4,6 +4,7 @@ import {
   type JSONContent as TiptapJsonContent,
   mergeAttributes,
   Node as TiptapNode,
+  renderNestedMarkdownContent,
 } from '@tiptap/core';
 import CodeExtension from '@tiptap/extension-code';
 import CodeBlockLowlightExtension from '@tiptap/extension-code-block-lowlight';
@@ -37,6 +38,7 @@ import type { RichEditorDateClickTarget } from '../../../../util/tiptap/extensio
 import type { RichEditorTooltipsConfig } from '../../../common/tooltips/types';
 
 import { lowlight } from '../../../../util/highlightCode';
+import { addLocalizationCallback, getTranslationFn } from '../../../../util/localization';
 import {
   CustomEmojiNode,
   DateMark,
@@ -69,7 +71,11 @@ import { RichEditorBotApiHtml } from './richEditorBotApiHtml';
 import { RichEditorCaption } from './richEditorCaption';
 import { RichEditorMarkdown } from './richEditorMarkdown';
 import { RichEditorPullquote } from './richEditorPullquote';
-import { buildRichEditorTableExtensions, RichEditorTableTitle } from './richEditorTable';
+import {
+  buildRichEditorTableExtensions,
+  RichEditorTableControlsExtension,
+  RichEditorTableTitle,
+} from './richEditorTable';
 import { RichEditorTextReplacements } from './richEditorTextReplacements';
 
 import { requestSharedCanvasCoordsRecalculation } from '../../../../hooks/useCoordsInSharedCanvas';
@@ -111,21 +117,11 @@ type CreateRichEditorParams = {
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
   sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   content: TiptapJsonContent;
-  blockPlaceholder: string;
-  pullquotePlaceholder: string;
-  quoteCaptionPlaceholder: string;
-  tableTitlePlaceholder: string;
-  unsupportedPlaceholder: string;
   getIsRichInputExpanded: () => boolean;
   onUpdate: (editor: Editor) => void;
   onDateClick: (target: RichEditorDateClickTarget) => void;
   tooltips?: RichEditorTooltipsConfig;
 };
-
-type RichEditorPlaceholderParams = Pick<
-  CreateRichEditorParams,
-  'blockPlaceholder' | 'pullquotePlaceholder' | 'quoteCaptionPlaceholder' | 'tableTitlePlaceholder'
->;
 
 const CODE_BLOCK_TAB_SIZE = 2;
 const TOP_LEVEL_PARAGRAPH_DEPTH = 1;
@@ -137,17 +133,16 @@ const NESTED_LIST_TEXT_OFFSET = 3;
 const ORDERED_LIST_REVERSED_ATTR = 'reversed';
 const DEFAULT_TEXT_BLOCK_NODE_TYPE = 'paragraph';
 const RICH_TEXT_INLINE_CONTENT = 'inline*';
+const REFRESH_LANG = 'refreshLang';
+const renderListItemMarkdown = ListItem.config.renderMarkdown!;
+const getFalse = () => false;
+const EMPTY_CUSTOM_EMOJI_OPTIONS: CustomEmojiNodeOptions = {};
 
 export function __createRichEditor({
   element,
   sharedCanvasRef,
   sharedCanvasHqRef,
   content,
-  blockPlaceholder,
-  pullquotePlaceholder,
-  quoteCaptionPlaceholder,
-  tableTitlePlaceholder,
-  unsupportedPlaceholder,
   getIsRichInputExpanded,
   onUpdate,
   onDateClick,
@@ -156,11 +151,6 @@ export function __createRichEditor({
   const richEditor = new Editor({
     element: { mount: element } as unknown as HTMLElement,
     extensions: buildRichEditorExtensions(
-      blockPlaceholder,
-      pullquotePlaceholder,
-      quoteCaptionPlaceholder,
-      tableTitlePlaceholder,
-      unsupportedPlaceholder,
       onDateClick,
       tooltips,
       getIsRichInputExpanded,
@@ -188,18 +178,60 @@ export function __getRichEditorCanRedo(editor: Editor) {
   return Boolean(redoDepth(editor.state));
 }
 
+export function __buildRichEditorSchemaExtensions() {
+  return buildRichEditorSchemaExtensions(getFalse, EMPTY_CUSTOM_EMOJI_OPTIONS);
+}
+
 function buildRichEditorExtensions(
-  blockPlaceholder: string,
-  pullquotePlaceholder: string,
-  quoteCaptionPlaceholder: string,
-  tableTitlePlaceholder: string,
-  unsupportedPlaceholder: string,
   onDateClick: (target: RichEditorDateClickTarget) => void,
   tooltips: RichEditorTooltipsConfig | undefined,
   getIsRichInputExpanded: () => boolean,
   customEmojiOptions: CustomEmojiNodeOptions,
 ) {
   const extensions = [
+    ...buildRichEditorSchemaExtensions(getIsRichInputExpanded, customEmojiOptions, onDateClick),
+    RichEditorMarkdown,
+    RichEditorTextReplacements,
+    buildRichEditorFormatting(getIsRichInputExpanded),
+    RichEditorBotApiHtml,
+    buildRichEditorPlaceholder(),
+    RichEditorTableControlsExtension,
+  ];
+
+  if (tooltips) extensions.push(buildRichEditorTooltips(tooltips));
+  return extensions;
+}
+
+function buildRichComposerSchemaExtensions() {
+  return [
+    DetailsExtension.configure({
+      persist: true,
+      openClassName: styles.detailsOpen,
+      HTMLAttributes: {
+        class: styles.details,
+      },
+      renderToggleButton: handleRenderDetailsToggleButton,
+    }),
+    RichEditorDetailsSummary.configure({
+      HTMLAttributes: {
+        class: styles.detailsSummary,
+      },
+    }),
+    RichEditorDetailsContent.configure({
+      HTMLAttributes: {
+        class: styles.detailsContent,
+      },
+    }),
+    ...buildRichEditorTableExtensions(),
+  ];
+}
+
+function buildRichEditorSchemaExtensions(
+  getIsRichInputExpanded: () => boolean,
+  customEmojiOptions: CustomEmojiNodeOptions,
+  onDateClick?: (target: RichEditorDateClickTarget) => void,
+) {
+  return [
     StarterKitExtension.configure({
       blockquote: false,
       bulletList: false,
@@ -236,7 +268,6 @@ function buildRichEditorExtensions(
       },
     }),
     RichEditorStrike,
-    RichEditorMarkdown,
     buildRichEditorBlockquote(getIsRichInputExpanded).configure({
       HTMLAttributes: {
         class: styles.blockquote,
@@ -263,10 +294,7 @@ function buildRichEditorExtensions(
       enableTabIndentation: true,
       tabSize: CODE_BLOCK_TAB_SIZE,
     }),
-    RichEditorTextReplacements,
-    buildRichEditorFormatting(getIsRichInputExpanded),
-    RichEditorBotApiHtml,
-    HeadingExtension.configure({
+    RichEditorHeading.configure({
       levels: RICH_HEADING_LEVELS,
       HTMLAttributes: {
         class: styles.heading,
@@ -290,22 +318,16 @@ function buildRichEditorExtensions(
       },
     }),
     RichEditorUnderline,
-    buildRichEditorPlaceholder({
-      blockPlaceholder,
-      pullquotePlaceholder,
-      quoteCaptionPlaceholder,
-      tableTitlePlaceholder,
-    }),
     RichEditorDate.configure({ onClick: onDateClick }),
     FormattedDateNode.configure({ onClick: onDateClick }),
     SpoilerMark,
     MarkedTextMark,
-    SubscriptExtension.configure({
+    RichEditorSubscript.configure({
       HTMLAttributes: {
         class: styles.subscript,
       },
     }),
-    SuperscriptExtension.configure({
+    RichEditorSuperscript.configure({
       HTMLAttributes: {
         class: styles.superscript,
       },
@@ -315,24 +337,19 @@ function buildRichEditorExtensions(
     MentionNode,
     MathBlockNode,
     MathInlineNode,
-    UnsupportedNode.configure({ label: unsupportedPlaceholder }),
+    UnsupportedNode,
+    ...buildRichComposerSchemaExtensions(),
   ];
-
-  if (tooltips) {
-    extensions.push(buildRichEditorTooltips(tooltips));
-  }
-  extensions.push(...buildRichComposerExtensions());
-
-  return extensions;
 }
 
-function buildRichEditorPlaceholder(params: RichEditorPlaceholderParams) {
+function buildRichEditorPlaceholder() {
   // The placeholder state field owns the document used to calculate callback positions
   let currentDoc: ProseMirrorNode;
   return PlaceholderExtension.extend({
     addProseMirrorPlugins() {
       const [plugin] = this.parent!();
       const stateField = plugin.spec.state!;
+      let currentConfig: Parameters<typeof stateField.init>[0];
 
       return [
         new Plugin({
@@ -341,13 +358,24 @@ function buildRichEditorPlaceholder(params: RichEditorPlaceholderParams) {
             ...stateField,
             init(config, state) {
               currentDoc = state.doc;
+              currentConfig = config;
               return stateField.init.call(plugin, config, state);
             },
             apply(transaction, value, oldState, newState) {
               currentDoc = newState.doc;
+              if (transaction.getMeta(REFRESH_LANG)) {
+                return stateField.init.call(plugin, currentConfig, newState);
+              }
               return stateField.apply.call(plugin, transaction, value, oldState, newState);
             },
           },
+        }),
+        new Plugin({
+          view: (view) => ({
+            destroy: addLocalizationCallback(() => {
+              view.dispatch(view.state.tr.setMeta(REFRESH_LANG, true));
+            }),
+          }),
         }),
       ];
     },
@@ -357,7 +385,7 @@ function buildRichEditorPlaceholder(params: RichEditorPlaceholderParams) {
     },
     includeChildren: true,
     placeholder: ({ node, pos }) => {
-      return getRichEditorPlaceholder(node, currentDoc.resolve(pos).parent, params);
+      return getRichEditorPlaceholder(node, currentDoc.resolve(pos).parent);
     },
     showOnlyCurrent: false,
     showOnlyWhenEditable: false,
@@ -387,26 +415,23 @@ function getRichEditorEmptyNodeClass(node: ProseMirrorNode, parent: ProseMirrorN
 function getRichEditorPlaceholder(
   node: ProseMirrorNode,
   parent: ProseMirrorNode,
-  {
-    blockPlaceholder,
-    pullquotePlaceholder,
-    quoteCaptionPlaceholder,
-    tableTitlePlaceholder,
-  }: RichEditorPlaceholderParams,
 ) {
+  const lang = getTranslationFn();
   if (node.type.name === TABLE_TITLE_NODE_NAME) {
-    return tableTitlePlaceholder;
+    return lang('InputTitle');
   }
 
   if (node.type.name === CAPTION_NODE_NAME) {
-    return quoteCaptionPlaceholder;
+    return lang('RichEditorQuoteCaptionPlaceholder');
   }
 
   if (node.type.name !== 'paragraph') {
-    return blockPlaceholder;
+    return lang('RichEditorBlockPlaceholder');
   }
 
-  return parent.type.name === 'pullquote' ? pullquotePlaceholder : blockPlaceholder;
+  return lang(parent.type.name === 'pullquote'
+    ? 'RichEditorPullquotePlaceholder'
+    : 'RichEditorBlockPlaceholder');
 }
 
 function handleRichEditorKeyDown(view: EditorView, event: KeyboardEvent) {
@@ -686,7 +711,10 @@ const RichEditorFooter = TiptapNode.create({
   },
 
   parseHTML() {
-    return [{ tag: 'footer' }];
+    return [
+      { tag: 'footer' },
+      { tag: 'p[data-rich-block-type="footer"]' },
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
@@ -862,6 +890,24 @@ const RichEditorDate = DateMark.extend({
   },
 });
 
+const RichEditorHeading = HeadingExtension.extend({
+  priority: 110,
+
+  parseHTML() {
+    return [
+      ...(this.parent?.() || []),
+      ...RICH_HEADING_LEVELS.map((level) => ({
+        tag: `p[data-rich-block-type="heading${level}"]`,
+        attrs: { level },
+      })),
+      { tag: 'p[data-rich-block-type="header"]', attrs: { level: 1 } },
+      { tag: 'p[data-rich-block-type="title"]', attrs: { level: 1 } },
+      { tag: 'p[data-rich-block-type="subheader"]', attrs: { level: 2 } },
+      { tag: 'p[data-rich-block-type="subtitle"]', attrs: { level: 2 } },
+    ];
+  },
+});
+
 const RichEditorUnderline = UnderlineExtension.extend({
   markdownTokenizer: {
     name: 'underline',
@@ -880,6 +926,22 @@ const RichEditorUnderline = UnderlineExtension.extend({
         getAttrs: (style) => (style.includes('underline') ? {} : false),
       },
     ];
+  },
+
+  renderMarkdown(node, helpers) {
+    return `<u>${helpers.renderChildren(node)}</u>`;
+  },
+});
+
+const RichEditorSubscript = SubscriptExtension.extend({
+  renderMarkdown(node, helpers) {
+    return `<sub>${helpers.renderChildren(node)}</sub>`;
+  },
+});
+
+const RichEditorSuperscript = SuperscriptExtension.extend({
+  renderMarkdown(node, helpers) {
+    return `<sup>${helpers.renderChildren(node)}</sup>`;
   },
 });
 
@@ -967,6 +1029,19 @@ const RichEditorListItem = ListItem.extend({
     return { dom: element, contentDOM: element };
   },
 
+  renderMarkdown(node, helpers, context) {
+    if (!node.attrs?.[LIST_ITEM_CHECKBOX_ATTR]) {
+      return renderListItemMarkdown(node, helpers, context);
+    }
+
+    return renderNestedMarkdownContent(
+      node,
+      helpers,
+      `- [${node.attrs[LIST_ITEM_CHECKED_ATTR] ? 'x' : ' '}] `,
+      context,
+    );
+  },
+
   addNodeView() {
     return TeactNodeViewRenderer(EditableListItem, {
       as: 'li',
@@ -975,32 +1050,25 @@ const RichEditorListItem = ListItem.extend({
   },
 });
 
-function buildRichComposerExtensions() {
-  return [
-    DetailsExtension.configure({
-      persist: true,
-      openClassName: styles.detailsOpen,
-      HTMLAttributes: {
-        class: styles.details,
-      },
-      renderToggleButton: handleRenderDetailsToggleButton,
-    }),
-    RichEditorDetailsSummary.configure({
-      HTMLAttributes: {
-        class: styles.detailsSummary,
-      },
-    }),
-    DetailsContentExtension.configure({
-      HTMLAttributes: {
-        class: styles.detailsContent,
-      },
-    }),
-    ...buildRichEditorTableExtensions(),
-  ];
-}
-
 const RichEditorDetailsSummary = DetailsSummaryExtension.extend({
   content: RICH_TEXT_INLINE_CONTENT,
+
+  renderMarkdown(node, helpers) {
+    return helpers.renderChildren(node);
+  },
+});
+
+const RichEditorDetailsContent = DetailsContentExtension.extend({
+  parseHTML() {
+    return [
+      { tag: '[data-rich-block-type="detailsContent"]' },
+      ...(this.parent?.() || []),
+    ];
+  },
+
+  renderMarkdown(node, helpers) {
+    return helpers.renderChildren(node.content || [], '\n\n');
+  },
 });
 
 function handleRenderDetailsToggleButton({ element, isOpen }: DetailsRenderToggleButtonOptions) {

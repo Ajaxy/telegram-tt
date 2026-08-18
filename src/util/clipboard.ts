@@ -1,3 +1,5 @@
+import type { ClipboardTextContent } from '../types/messageCopy';
+
 import { DEBUG } from '../config';
 
 export const CLIPBOARD_ITEM_SUPPORTED = window.navigator.clipboard && window.ClipboardItem;
@@ -7,16 +9,17 @@ textCopyEl.setAttribute('readonly', '');
 textCopyEl.tabIndex = -1;
 textCopyEl.className = 'visually-hidden';
 
-export const copyTextToClipboard = (str: string): void => {
+export const copyTextToClipboard = (str: string): boolean => {
   textCopyEl.value = str;
   document.body.appendChild(textCopyEl);
   const selection = document.getSelection();
+  let isCopied = false;
 
   if (selection) {
     // Store previous selection
     const rangeToRestore = selection.rangeCount > 0 && selection.getRangeAt(0);
     textCopyEl.select();
-    document.execCommand('copy');
+    isCopied = document.execCommand('copy');
     // Restore the original selection
     if (rangeToRestore) {
       selection.removeAllRanges();
@@ -25,20 +28,7 @@ export const copyTextToClipboard = (str: string): void => {
   }
 
   document.body.removeChild(textCopyEl);
-};
-
-export const copyHtmlToClipboard = (html: string, text: string): void => {
-  if (!window.navigator.clipboard?.write) {
-    copyTextToClipboard(text);
-    return;
-  }
-
-  window.navigator.clipboard.write([
-    new ClipboardItem({
-      'text/plain': new Blob([text], { type: 'text/plain' }),
-      'text/html': new Blob([html], { type: 'text/html' }),
-    }),
-  ]);
+  return isCopied;
 };
 
 export const copyImageToClipboard = (imageUrl?: string) => {
@@ -59,50 +49,71 @@ export const copyImageToClipboard = (imageUrl?: string) => {
   imageEl.src = imageUrl;
 };
 
-export const copyTextToClipboardFromPromise = async (
-  getTextPromise: Promise<string | undefined>,
-  onSuccess: NoneToVoidFunction,
-  onFailure: NoneToVoidFunction,
-) => {
-  const copyTextToClipboardFallback = async () => {
-    try {
-      const text = await getTextPromise;
-      if (text) {
-        copyTextToClipboard(text);
-      } else {
-        onFailure();
-      }
-      return Boolean(text);
-    } catch {
-      onFailure();
-      return false;
-    }
-  };
-  if (!CLIPBOARD_ITEM_SUPPORTED || !navigator.clipboard.write) {
-    if (await copyTextToClipboardFallback()) onSuccess();
-    return;
-  }
+export async function copyTextToClipboardFromPromise(
+  getContentPromise: Promise<string | ClipboardTextContent | undefined>,
+  onSuccess?: NoneToVoidFunction,
+  onFailure?: NoneToVoidFunction,
+) {
+  const contentPromise = getContentPromise.then((content) => {
+    if (!content) throw new Error('EMPTY_CLIPBOARD_CONTENT');
+    return typeof content === 'string'
+      ? { plainText: content, html: content, markdown: content }
+      : content;
+  });
   try {
-    let hasGetDataError = false;
-    const rejectGetDataError = () => Promise.reject(new Error('GET_DATA_ERROR'));
+    if (!CLIPBOARD_ITEM_SUPPORTED || !navigator.clipboard.write) throw new Error('CLIPBOARD_ITEM_UNSUPPORTED');
 
-    const clipboardTextItem = new ClipboardItem({
-      'text/plain': getTextPromise.then((text) => text || rejectGetDataError()).catch(() => {
-        hasGetDataError = true;
-        return '';
-      }),
-    });
-    await navigator.clipboard.write([clipboardTextItem]);
-    if (hasGetDataError) {
-      onFailure();
+    const canWriteMarkdown = !ClipboardItem.supports || ClipboardItem.supports('text/markdown');
+    await navigator.clipboard.write([buildTextClipboardItem(contentPromise, canWriteMarkdown)]);
+  } catch {
+    try {
+      const content = await contentPromise;
+      if (CLIPBOARD_ITEM_SUPPORTED) {
+        try {
+          await navigator.clipboard.write([buildTextClipboardItem(content)]);
+          onSuccess?.();
+          return;
+        } catch {
+          // Fall through to the synchronous plain-text fallback
+        }
+      }
+      if (!copyTextToClipboard(content.plainText)) {
+        throw new Error('CLIPBOARD_WRITE_FAILED');
+      }
+    } catch {
+      onFailure?.();
       return;
     }
-  } catch {
-    // Promises in ClipboardItem aren't supported in older Chrome versions
-    if (!await copyTextToClipboardFallback()) return;
   }
-  onSuccess();
-};
+
+  onSuccess?.();
+}
+
+function buildTextClipboardItem(
+  content: ClipboardTextContent | Promise<ClipboardTextContent>,
+  withMarkdown = false,
+) {
+  const data: Record<string, Blob | Promise<Blob>> = {
+    'text/plain': buildClipboardBlob(content, 'plainText', 'text/plain'),
+    'text/html': buildClipboardBlob(content, 'html', 'text/html'),
+  };
+  if (withMarkdown) {
+    data['text/markdown'] = buildClipboardBlob(content, 'markdown', 'text/markdown');
+  }
+
+  return new ClipboardItem(data);
+}
+
+function buildClipboardBlob(
+  content: ClipboardTextContent | Promise<ClipboardTextContent>,
+  key: keyof ClipboardTextContent,
+  type: string,
+): Blob | Promise<Blob> {
+  if (content instanceof Promise) return content.then((value) => buildClipboardBlob(value, key, type));
+  const value = content[key];
+  if (!content.plainText) throw new Error('EMPTY_CLIPBOARD_CONTENT');
+  return new Blob([value], { type });
+}
 
 async function copyBlobToClipboard(pngBlob: Blob | null) {
   if (!pngBlob || !CLIPBOARD_ITEM_SUPPORTED) {

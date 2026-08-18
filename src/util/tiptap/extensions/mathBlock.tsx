@@ -12,6 +12,7 @@ import type { TeactNodeViewComponentProps } from '../TeactNodeViewRenderer';
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../buildClassName';
 import { MATH_BLOCK_NODE_NAME, MATH_INLINE_NODE_NAME } from '../constants';
+import { escapeRichMarkdownHtml } from '../richMarkdown';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -75,6 +76,13 @@ export const MathBlockNode = MathNode.extend({
     return ['tg-math-block', HTMLAttributes.source];
   },
 
+  renderMarkdown(node) {
+    const source = String(node.attrs?.source || '');
+    return source.includes('$$')
+      ? `<tg-math-block>${escapeRichMarkdownHtml(source)}</tg-math-block>`
+      : `$$${source}$$`;
+  },
+
   parseMarkdown(token, helpers) {
     return helpers.createNode(MATH_BLOCK_NODE_NAME, { source: token.text || '' });
   },
@@ -126,6 +134,13 @@ export const MathInlineNode = MathNode.extend({
 
   renderHTML({ HTMLAttributes }) {
     return ['tg-math', HTMLAttributes.source];
+  },
+
+  renderMarkdown(node) {
+    const source = String(node.attrs?.source || '');
+    return source.includes('$') || source.includes('\n')
+      ? `<tg-math>${escapeRichMarkdownHtml(source)}</tg-math>`
+      : `$${source}$`;
   },
 
   parseMarkdown(token, helpers) {

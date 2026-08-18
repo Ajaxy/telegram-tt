@@ -1,5 +1,7 @@
 import { Mark, markInputRule } from '@tiptap/core';
 
+import { ApiMessageEntityTypes } from '../../../api/types';
+
 import styles from '../styling.module.scss';
 
 const INPUT_REGEX = /(?:^|\s)(\|\|(?=\S)(.*?\S)\|\|)$/;
@@ -12,6 +14,7 @@ export const SpoilerMark = Mark.create({
     return [
       { tag: 'tg-spoiler' },
       { tag: 'span[data-rich-text-type="spoiler"]' },
+      { tag: `span[data-entity-type="${ApiMessageEntityTypes.Spoiler}"]` },
     ];
   },
 
@@ -23,6 +26,10 @@ export const SpoilerMark = Mark.create({
 
   parseMarkdown(token, helpers) {
     return helpers.applyMark('spoiler', helpers.parseInline(token.tokens || []));
+  },
+
+  renderMarkdown(node, helpers) {
+    return `||${helpers.renderChildren(node)}||`;
   },
 
   markdownTokenizer: {

@@ -18,7 +18,10 @@ import type {
   ApiUser,
   ApiWebPage,
 } from '../../../api/types';
-import type { IAnchorPosition, TranslationTone } from '../../../types';
+import type {
+  IAnchorPosition, MessageListType, ThreadId, TranslationTone,
+} from '../../../types';
+import type { MessageCopyRequest } from '../../../types/messageCopy';
 
 import {
   getUserFullName,
@@ -63,6 +66,8 @@ type OwnProps = {
   anchor: IAnchorPosition;
   targetHref?: string;
   message: ApiMessage;
+  threadId: ThreadId;
+  messageListType: MessageListType;
   chat?: ApiChat;
   poll?: ApiMessagePoll;
   webPage?: ApiWebPage;
@@ -127,7 +132,7 @@ type OwnProps = {
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
   onCopyLink?: NoneToVoidFunction;
-  onCopyMessages?: (messageIds: number[]) => void;
+  onCopyMessages?: (request: MessageCopyRequest) => void;
   onCopyNumber?: NoneToVoidFunction;
   onDownload?: NoneToVoidFunction;
   onSaveGif?: NoneToVoidFunction;
@@ -159,6 +164,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   defaultTagReactions,
   isOpen,
   message,
+  threadId,
+  messageListType,
   chat,
   poll,
   webPage,
@@ -336,6 +343,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   const copyOptions = getMessageCopyOptions(
     message,
     groupStatefulContent({ poll, webPage, story }),
+    threadId,
+    messageListType,
     targetHref,
     canCopy,
     handleAfterCopy,

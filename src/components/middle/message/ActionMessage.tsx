@@ -709,6 +709,7 @@ const ActionMessage = ({
           anchor={contextMenuAnchor}
           message={message}
           messageListType="thread"
+          threadId={threadId}
           className={styles.contextContainer}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}

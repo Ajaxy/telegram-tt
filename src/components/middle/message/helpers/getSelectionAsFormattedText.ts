@@ -1,9 +1,17 @@
 import type { ApiFormattedText } from '../../../../api/types';
+import type { MessageListType, ThreadId } from '../../../../types';
+import type { MessageCopyRequest } from '../../../../types/messageCopy';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
+import getMessageIdsForSelectedText from '../../../../util/getMessageIdsForSelectedText';
 import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
 
-const div = document.createElement('div');
+const selectionContainer = document.createElement('div');
+const SEMANTIC_COPY_TAGS = new Set([
+  'A', 'ASIDE', 'BLOCKQUOTE', 'CITE', 'CODE', 'DEL', 'DETAILS', 'EM', 'FOOTER',
+  'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'INS', 'LI', 'MARK', 'OL', 'P', 'PRE',
+  'STRONG', 'SUB', 'SUMMARY', 'SUP', 'TABLE', 'TBODY', 'TD', 'TH', 'THEAD', 'TR', 'UL',
+]);
 const ALLOWED_QUOTE_ENTITIES = new Set([
   ApiMessageEntityTypes.Bold,
   ApiMessageEntityTypes.Italic,
@@ -14,21 +22,55 @@ const ALLOWED_QUOTE_ENTITIES = new Set([
 ]);
 
 export function getSelectionAsFormattedText(range: Range) {
-  const html = getSelectionAsHtml(range);
+  const html = getSelectionAsHtml(range).replace(/<br\s*\/?>/gi, '\n');
   const formattedText = parseHtmlAsFormattedText(html, false, true);
 
   return stripEntitiesForQuote(formattedText);
 }
 
-function getSelectionAsHtml(range: Range) {
-  const clonedSelection = range.cloneContents();
-  div.appendChild(clonedSelection);
+export function captureMessageCopyRequest(
+  chatId: string,
+  threadId: ThreadId,
+  messageListType: MessageListType,
+): MessageCopyRequest | undefined {
+  const selection = window.getSelection();
+  if (!selection?.rangeCount || selection.isCollapsed) return undefined;
 
-  const html = wrapHtmlWithMarkupTags(range, div.innerHTML);
-  div.innerHTML = '';
+  const range = selection.getRangeAt(0);
+  const startMessageId = getNodeMessageId(range.startContainer);
+  const endMessageId = getNodeMessageId(range.endContainer);
+  if (!startMessageId || !endMessageId) return undefined;
+
+  if (startMessageId === endMessageId) {
+    return {
+      type: 'selection',
+      chatId,
+      threadId,
+      messageListType,
+      messageId: startMessageId,
+      html: getSelectionAsHtml(range),
+    };
+  }
+
+  const messageIds = getMessageIdsForSelectedText(range);
+  return messageIds?.length ? {
+    type: 'messages',
+    chatId,
+    threadId,
+    messageListType,
+    messageIds,
+    withSenderHeaders: true,
+  } : undefined;
+}
+
+export function getSelectionAsHtml(range: Range) {
+  const clonedSelection = range.cloneContents();
+  selectionContainer.appendChild(clonedSelection);
+
+  const html = wrapHtmlWithSemanticAncestors(range, selectionContainer.innerHTML);
+  selectionContainer.innerHTML = '';
 
   return html
-    .replace(/<br\s*\/?>/gi, '\n')
     .replace(/&nbsp;/gi, ' ') // Convert nbsp's to spaces
     .replace(/\u00a0/gi, ' ');
 }
@@ -40,18 +82,38 @@ function stripEntitiesForQuote(text: ApiFormattedText): ApiFormattedText {
   return { ...text, entities: entities.length ? entities : undefined };
 }
 
-function wrapHtmlWithMarkupTags(range: Range, html: string) {
+function getNodeMessageId(node: Node) {
+  const element = node.nodeType === Node.ELEMENT_NODE ? node as HTMLElement : node.parentElement;
+  const messageElement = element?.closest<HTMLElement>('.Message[data-message-id]');
+  const rawMessageId = messageElement?.dataset.messageId;
+  return rawMessageId !== undefined ? Number(rawMessageId) : undefined;
+}
+
+function wrapHtmlWithSemanticAncestors(range: Range, html: string) {
   const container = range.commonAncestorContainer;
-  if (container.nodeType === Node.ELEMENT_NODE && (container as Element).classList.contains('text-content')) {
-    return html;
-  }
-  let currentElement = range.commonAncestorContainer.parentElement;
-  while (currentElement && !currentElement.classList.contains('text-content')) {
-    const tag = currentElement.tagName.toLowerCase();
-    const entityType = currentElement.dataset.entityType;
-    html = `<${tag} ${entityType ? `data-entity-type="${entityType}"` : ''}>${html}</${tag}>`;
+  let currentElement = container.nodeType === Node.ELEMENT_NODE
+    ? container as HTMLElement
+    : container.parentElement;
+  while (
+    currentElement
+    && !currentElement.classList.contains('text-content')
+    && !currentElement.classList.contains('Message')
+    && !currentElement.hasAttribute('data-rich-copy-root')
+  ) {
+    if (isSemanticCopyElement(currentElement)) {
+      const wrapper = currentElement.cloneNode(false) as HTMLElement;
+      wrapper.innerHTML = html;
+      html = wrapper.outerHTML;
+    }
     currentElement = currentElement.parentElement;
   }
 
   return html;
+}
+
+function isSemanticCopyElement(element: HTMLElement) {
+  return SEMANTIC_COPY_TAGS.has(element.tagName)
+    || element.hasAttribute('data-entity-type')
+    || element.hasAttribute('data-rich-block-type')
+    || element.hasAttribute('data-rich-text-type');
 }

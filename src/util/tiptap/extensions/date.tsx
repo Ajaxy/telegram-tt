@@ -14,6 +14,7 @@ import { getFormattedDateFormatString } from '../../dates/formattedDate';
 import {
   buildRichMarkdownNodeInputRule,
   buildRichMarkdownTokenizer,
+  escapeRichMarkdownLabel,
   parseRichMarkdownNode,
   type RichMarkdownLink,
 } from '../richMarkdown';
@@ -82,6 +83,11 @@ export const DateMark = Mark.create<DateExtensionOptions>({
         unix: String(HTMLAttributes.date),
       },
     ), 0];
+  },
+
+  renderMarkdown(node, helpers) {
+    const label = escapeRichMarkdownLabel(helpers.renderChildren(node));
+    return `![${label}](tg://time?unix=${node.attrs?.date})`;
   },
 
   addProseMirrorPlugins() {
@@ -176,6 +182,11 @@ export const FormattedDateNode = Node.create<DateExtensionOptions>({
 
   renderText({ node }) {
     return node.attrs.label;
+  },
+
+  renderMarkdown(node) {
+    const format = getFormattedDateFormatString(node.attrs || {});
+    return `![${escapeRichMarkdownLabel(node.attrs?.label)}](tg://time?unix=${node.attrs?.date}&format=${format})`;
   },
 
   addNodeView() {

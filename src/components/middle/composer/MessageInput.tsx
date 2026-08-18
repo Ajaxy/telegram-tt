@@ -423,11 +423,6 @@ const MessageInput = ({
       element: input,
       sharedCanvasRef,
       sharedCanvasHqRef,
-      blockPlaceholder: lang('RichEditorBlockPlaceholder'),
-      pullquotePlaceholder: lang('RichEditorPullquotePlaceholder'),
-      quoteCaptionPlaceholder: lang('RichEditorQuoteCaptionPlaceholder'),
-      tableTitlePlaceholder: lang('InputTitle'),
-      unsupportedPlaceholder: lang('PageContentUnsupported'),
       tooltips: rootTooltips,
       getIsRichInputExpanded,
       onReady: handleEditorReady,
@@ -442,7 +437,7 @@ const MessageInput = ({
       unregisterRichEditorRoot();
     };
   }, [canRenderRichEditor, getIsRichInputExpanded, handleDateClick, handleEditorReady, handleEditorUpdate,
-    isActive, lang, registerRichEditorRoot, richValueRef, rootTooltips,
+    isActive, registerRichEditorRoot, richValueRef, rootTooltips,
     syncCloneWithSource, syncEditorElementAttributes, updateInputHeight]);
 
   useLayoutEffect(() => {

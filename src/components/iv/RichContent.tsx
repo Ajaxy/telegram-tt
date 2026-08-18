@@ -220,9 +220,9 @@ const RichContent = ({
   function renderBlock(block: ApiPageBlock, sourceKey: string, shouldBreakoutMedia = false): TeactNode {
     switch (block.type) {
       case 'title':
-        return renderTextBlock(block.text, styles.title, renderContext);
+        return renderTextBlock(block.text, styles.title, renderContext, block.type);
       case 'subtitle':
-        return renderTextBlock(block.text, styles.subtitle, renderContext);
+        return renderTextBlock(block.text, styles.subtitle, renderContext, block.type);
       case 'kicker':
         return renderTextBlock(block.text, styles.kicker, renderContext);
       case 'authorDate': {
@@ -247,20 +247,20 @@ const RichContent = ({
       }
       case 'header':
       case 'heading1':
-        return renderTextBlock(block.text, styles.heading1, renderContext);
+        return renderTextBlock(block.text, styles.heading1, renderContext, block.type);
       case 'subheader':
       case 'heading2':
-        return renderTextBlock(block.text, styles.heading2, renderContext);
+        return renderTextBlock(block.text, styles.heading2, renderContext, block.type);
       case 'heading3':
-        return renderTextBlock(block.text, styles.heading3, renderContext);
+        return renderTextBlock(block.text, styles.heading3, renderContext, block.type);
       case 'heading4':
       case 'heading5':
       case 'heading6':
-        return renderTextBlock(block.text, styles.heading4, renderContext);
+        return renderTextBlock(block.text, styles.heading4, renderContext, block.type);
       case 'paragraph':
         return renderTextBlock(block.text, styles.paragraph, renderContext);
       case 'footer':
-        return renderTextBlock(block.text, styles.footer, renderContext);
+        return renderTextBlock(block.text, styles.footer, renderContext, block.type);
       case 'preformatted':
         return (
           <CodeBlock
@@ -369,7 +369,13 @@ const RichContent = ({
   }
 
   return (
-    <div id={containerId} className={styles.richContent} style={style} dir={isRtl ? 'rtl' : 'auto'}>
+    <div
+      id={containerId}
+      className={styles.richContent}
+      style={style}
+      dir={isRtl ? 'rtl' : 'auto'}
+      data-rich-copy-root
+    >
       {blocks.map(renderTopLevelBlock)}
     </div>
   );
@@ -434,10 +440,17 @@ function TableBlock({
   return (
     <div
       ref={ref}
+      data-rich-block-type="table"
       className={buildClassName(styles.tableWrapper, 'custom-scroll-x', SHOULD_HIDE_SCROLLBARS && 'no-scrollbar')}
     >
-      {hasRichText(block.title) && renderTextBlock(block.title, styles.tableTitle, renderContext)}
-      <table className={buildClassName(styles.table, block.isBordered && styles.bordered)}>
+      {hasRichText(block.title) && renderTextBlock(
+        block.title, styles.tableTitle, renderContext, 'tableTitle',
+      )}
+      <table
+        className={buildClassName(styles.table, block.isBordered && styles.bordered)}
+        data-bordered={String(Boolean(block.isBordered))}
+        data-striped={String(Boolean(block.isStriped))}
+      >
         <tbody>
           {block.rows.map((row, rowIndex) => {
             const isFirstRow = rowIndex === 0;
@@ -472,6 +485,8 @@ function MathBlock({ source }: { source: string }) {
   return (
     <div
       ref={ref}
+      data-rich-block-type="math"
+      data-source={source}
       className={buildClassName(
         styles.block, styles.latexBlockWrapper, 'custom-scroll-x', SHOULD_HIDE_SCROLLBARS && 'no-scrollbar',
       )}
@@ -681,13 +696,14 @@ function renderTextBlock(
   text: ApiRichText,
   className: string,
   context: RenderBlockContext,
+  blockType?: ApiPageBlock['type'] | 'tableTitle',
 ) {
   if (!hasRichText(text)) {
     return undefined;
   }
 
   return (
-    <p className={buildClassName(styles.block, className)}>
+    <p className={buildClassName(styles.block, className)} data-rich-block-type={blockType}>
       <RichText text={text} {...context.richTextContext} />
     </p>
   );
@@ -701,7 +717,7 @@ function renderQuoteBlock(
     <Blockquote className={styles.block} contentClassName={styles.blockquote}>
       <RichText text={block.text} {...context.richTextContext} />
       {hasRichText(block.caption) && (
-        <footer className={styles.quoteCaption}>
+        <footer className={styles.quoteCaption} data-rich-block-type="quoteCaption">
           <RichText text={block.caption} {...context.richTextContext} />
         </footer>
       )}
@@ -717,7 +733,10 @@ function renderPullquoteBlock(
     <Pullquote className={buildClassName(styles.block, styles.pullquote)}>
       <RichText text={block.text} {...context.richTextContext} />
       {hasRichText(block.caption) && (
-        <footer className={buildClassName(styles.quoteCaption, styles.pullquoteCaption)}>
+        <footer
+          className={buildClassName(styles.quoteCaption, styles.pullquoteCaption)}
+          data-rich-block-type="quoteCaption"
+        >
           <RichText text={block.caption} {...context.richTextContext} />
         </footer>
       )}
@@ -735,7 +754,7 @@ function renderBlockquoteBlocks(
     <Blockquote className={styles.block} contentClassName={styles.blockquote}>
       {block.blocks.map((nestedBlock, index) => renderBlock(nestedBlock, `${sourceKey}-quote-${index}`))}
       {hasRichText(block.caption) && (
-        <footer className={styles.quoteCaption}>
+        <footer className={styles.quoteCaption} data-rich-block-type="quoteCaption">
           <RichText text={block.caption} {...context.richTextContext} />
         </footer>
       )}
@@ -754,7 +773,7 @@ function renderDetailsBlock(
       <summary className={styles.detailsSummary}>
         <RichText text={block.title} {...context.richTextContext} />
       </summary>
-      <div className={styles.detailsContent}>
+      <div className={styles.detailsContent} data-rich-block-type="detailsContent">
         {block.blocks.map((nestedBlock, index) => (
           renderBlock(nestedBlock, `${sourceKey}-details-${index}`)
         ))}
@@ -814,8 +833,12 @@ function renderListItem(
   renderBlock: RenderBlockFn,
 ) {
   return (
-    <li className={styles.listItem}>
-      <div className={styles.unorderedListContent}>
+    <li
+      className={styles.listItem}
+      data-checkbox={item.isCheckbox ? 'true' : undefined}
+      data-checked={item.isChecked ? 'true' : undefined}
+    >
+      <div className={styles.unorderedListContent} data-rich-copy-wrapper>
         {renderListItemContent(item, context, sourceKey, renderBlock)}
       </div>
     </li>
@@ -831,6 +854,8 @@ function renderNativeOrderedListItem(
   return (
     <li
       className={styles.listItem}
+      data-checkbox={item.isCheckbox ? 'true' : undefined}
+      data-checked={item.isChecked ? 'true' : undefined}
       value={item.value}
       type={item.orderType}
     >
@@ -846,9 +871,13 @@ function renderOrderedListItem(
   renderBlock: RenderBlockFn,
 ) {
   return (
-    <li className={buildClassName(styles.listItem, styles.orderedListItem)}>
-      <span className={styles.orderedListMarker}>{`${item.num}.`}</span>
-      <div className={styles.orderedListContent}>
+    <li
+      className={buildClassName(styles.listItem, styles.orderedListItem)}
+      data-checkbox={item.isCheckbox ? 'true' : undefined}
+      data-checked={item.isChecked ? 'true' : undefined}
+    >
+      <span className={styles.orderedListMarker} data-rich-copy-ignore>{`${item.num}.`}</span>
+      <div className={styles.orderedListContent} data-rich-copy-wrapper>
         {renderListItemContent(item, context, sourceKey, renderBlock)}
       </div>
     </li>
@@ -872,9 +901,9 @@ function renderListItemContent(
   }
 
   return (
-    <div className={styles.checkboxListItem}>
-      {renderCheckbox(item.isChecked)}
-      <div className={styles.listItemContent}>{content}</div>
+    <div className={styles.checkboxListItem} data-rich-copy-wrapper>
+      <span data-rich-copy-ignore>{renderCheckbox(item.isChecked)}</span>
+      <div className={styles.listItemContent} data-rich-copy-wrapper>{content}</div>
     </div>
   );
 }
@@ -940,10 +969,10 @@ function renderCaption(caption: ApiPageCaption, context: RenderBlockContext) {
   }
 
   return (
-    <figcaption className={styles.caption}>
+    <figcaption className={styles.caption} data-rich-block-type="mediaCaption">
       {hasText && <RichText text={caption.text} {...context.richTextContext} />}
       {hasCredit && (
-        <span className={styles.credit}>
+        <span className={styles.credit} data-rich-block-type="mediaCredit">
           <RichText text={caption.credit} {...context.richTextContext} />
         </span>
       )}
@@ -953,7 +982,7 @@ function renderCaption(caption: ApiPageCaption, context: RenderBlockContext) {
 
 function renderUnsupportedBlock(unsupportedText: string, blockType?: ApiPageBlock['type']) {
   return (
-    <p className={styles.unsupported}>
+    <p className={styles.unsupported} data-rich-copy-ignore>
       {unsupportedText}
       {DEBUG && blockType && `: ${blockType}`}
     </p>

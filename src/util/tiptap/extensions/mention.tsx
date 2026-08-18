@@ -13,6 +13,7 @@ import { selectPeer, selectPeerByUsername, selectUser } from '../../../global/se
 import {
   buildRichMarkdownNodeInputRule,
   buildRichMarkdownTokenizer,
+  escapeRichMarkdownLabel,
   parseRichMarkdownNode,
   type RichMarkdownLink,
 } from '../richMarkdown';
@@ -76,6 +77,15 @@ export const MentionNode = Node.create({
         ? `tg://user?id=${HTMLAttributes.userId}`
         : `${TME_LINK_PREFIX}${HTMLAttributes.username}`,
     }, 0];
+  },
+
+  renderMarkdown(node, helpers) {
+    const label = escapeRichMarkdownLabel(helpers.renderChildren(node));
+    if (node.attrs?.userId) {
+      return `[${label}](tg://user?id=${node.attrs.userId})`;
+    }
+
+    return node.attrs?.username ? `[${label}](${TME_LINK_PREFIX}${node.attrs.username})` : label;
   },
 
   addNodeView() {

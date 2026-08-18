@@ -1,22 +1,34 @@
-import { useMemo } from '../lib/teact/teact';
+import { useEffect } from '../lib/teact/teact';
 
-import getMessageIdsForSelectedText from '../util/getMessageIdsForSelectedText';
-import { useHotkeys } from './useHotkeys';
+import type { MessageListType, ThreadId } from '../types';
+import type { MessageCopyRequest } from '../types/messageCopy';
+
+import { captureMessageCopyRequest } from '../components/middle/message/helpers/getSelectionAsFormattedText';
 import useLastCallback from './useLastCallback';
 
-const useNativeCopySelectedMessages = (copyMessagesByIds: ({ messageIds }: { messageIds?: number[] }) => void) => {
-  const handleCopy = useLastCallback((e: KeyboardEvent) => {
-    const messageIds = getMessageIdsForSelectedText();
+const useNativeCopySelectedMessages = (
+  isActive: boolean | undefined,
+  chatId: string,
+  threadId: ThreadId,
+  messageListType: MessageListType,
+  copyMessagesByIds: (payload: { request: MessageCopyRequest }) => void,
+) => {
+  const handleCopy = useLastCallback((e: ClipboardEvent) => {
+    if (!window.ClipboardItem || !navigator.clipboard?.write) return;
 
-    if (messageIds && messageIds.length > 1) {
-      e.preventDefault();
-      copyMessagesByIds({ messageIds });
-    }
+    const request = captureMessageCopyRequest(chatId, threadId, messageListType);
+    if (!request) return;
+
+    e.preventDefault();
+    copyMessagesByIds({ request });
   });
 
-  useHotkeys(useMemo(() => ({
-    'Mod+C': handleCopy,
-  }), []));
+  useEffect(() => {
+    if (!isActive) return undefined;
+
+    document.addEventListener('copy', handleCopy);
+    return () => document.removeEventListener('copy', handleCopy);
+  }, [handleCopy, isActive]);
 };
 
 export default useNativeCopySelectedMessages;

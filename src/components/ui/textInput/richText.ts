@@ -5,6 +5,7 @@ import type {
   ApiInputRichMessage,
   ApiMessageEntity,
   ApiPageBlock,
+  ApiPageCaption,
   ApiPageListItem,
   ApiPageListOrderedItem,
   ApiPageTableCell,
@@ -20,6 +21,7 @@ import {
   hasFormattedDateFormat,
 } from '../../../util/dates/formattedDate';
 import { getTranslationFn } from '../../../util/localization';
+import { formatDateTime } from '../../../util/localization/dateFormat';
 import {
   BLOCKQUOTE_COLLAPSED_ATTR,
   CAPTION_NODE_NAME,
@@ -57,8 +59,12 @@ type OrderedListBlock = Extract<ApiPageBlock, { type: 'orderedList' }>;
 type RichInputFormatOptions = {
   isApproximate?: boolean;
 };
+type RichMessageToTiptapOptions = {
+  isForCopy?: boolean;
+};
 
 const BLOCK_SEPARATOR = '\n';
+const AUTHOR_DATE_SEPARATOR = ' \u00B7 ';
 const TABLE_CELL_SEPARATOR = ' ';
 const LIST_ITEM_INDENT = '  ';
 const BULLET_LIST_PREFIX = '- ';
@@ -81,6 +87,7 @@ const DETAILS_OPEN_ATTR = 'open';
 const TABLE_BORDERED_ATTR = 'isBordered';
 const TABLE_STRIPED_ATTR = 'isStriped';
 const TRAILING_ENTITY_WHITESPACE_RE = /\s/u;
+const MILLISECONDS_PER_SECOND = 1000;
 // Keep these values aligned with TDLib's `MessageEntity::get_type_priority`
 // https://github.com/tdlib/td/blob/master/td/telegram/MessageEntity.cpp
 const ENTITY_PRIORITY_BY_TYPE: Partial<Record<ApiMessageEntityTypes, number>> = {
@@ -147,23 +154,17 @@ export function buildRichMessageFromTiptapJson(doc: TiptapJsonContent): ApiInput
   return { blocks: buildBlocksFromTiptapContent(doc.content) };
 }
 
-export function buildTiptapJsonFromRichMessage(value?: ApiInputRichMessage): TiptapJsonContent {
+export function buildTiptapJsonFromRichMessage(
+  value?: ApiInputRichMessage,
+  options?: RichMessageToTiptapOptions,
+): TiptapJsonContent {
   const content = value?.blocks
-    .flatMap(buildTiptapNodesFromBlock);
+    .flatMap((block) => buildTiptapNodesFromBlock(block, options));
 
   return {
     type: 'doc',
     content: content?.length ? content : [{ type: 'paragraph' }],
   };
-}
-
-function buildTiptapNodesFromBlock(block: ApiPageBlock): TiptapJsonContent[] {
-  if (block.type === 'paragraph') {
-    return buildTiptapParagraphNodes(block.text);
-  }
-
-  const node = buildTiptapNodeFromBlock(block);
-  return node ? [node] : [];
 }
 
 export function buildRichMessageFromFormatted(value?: ApiFormattedText): ApiInputRichMessage {
@@ -227,73 +228,156 @@ function buildBlockFromTiptapNode(node: TiptapJsonContent): ApiPageBlock | undef
   }
 }
 
-function buildTiptapNodeFromBlock(block: ApiPageBlock): TiptapJsonContent | undefined {
+function buildTiptapNodesFromBlock(
+  block: ApiPageBlock,
+  options?: RichMessageToTiptapOptions,
+): TiptapJsonContent[] {
   switch (block.type) {
     case 'paragraph':
-      return {
-        type: 'paragraph',
-        content: buildTiptapInlineContentFromRichText(block.text),
-      };
+      return buildTiptapParagraphNodes(block.text);
+    case 'title':
     case 'header':
     case 'heading1':
-      return buildTiptapHeadingNode(block.text, 1);
+      return [buildTiptapHeadingNode(block.text, 1)];
+    case 'subtitle':
     case 'subheader':
     case 'heading2':
-      return buildTiptapHeadingNode(block.text, 2);
+      return [buildTiptapHeadingNode(block.text, 2)];
     case 'heading3':
-      return buildTiptapHeadingNode(block.text, 3);
+      return [buildTiptapHeadingNode(block.text, 3)];
     case 'heading4':
-      return buildTiptapHeadingNode(block.text, 4);
+      return [buildTiptapHeadingNode(block.text, 4)];
     case 'heading5':
-      return buildTiptapHeadingNode(block.text, 5);
+      return [buildTiptapHeadingNode(block.text, 5)];
     case 'heading6':
-      return buildTiptapHeadingNode(block.text, 6);
+      return [buildTiptapHeadingNode(block.text, 6)];
+    case 'kicker':
+    case 'thinking':
+      return buildTiptapParagraphNodes(block.text);
+    case 'authorDate':
+      return buildTiptapParagraphNodes(buildAuthorDateRichText(block));
     case 'footer':
-      return {
+      return [{
         type: FOOTER_NODE_NAME,
         content: buildTiptapInlineContentFromRichText(block.text),
-      };
+      }];
     case 'blockquote':
-      return {
+      return [{
         type: 'blockquote',
         attrs: {
           [BLOCKQUOTE_COLLAPSED_ATTR]: block.canCollapse,
         },
         content: buildTiptapQuoteContent([buildTiptapParagraphNode(block.text)], block.caption),
-      };
+      }];
     case 'blockquoteBlocks':
-      return buildTiptapBlockquoteBlocksNode(block);
+      return [buildTiptapBlockquoteBlocksNode(block, options)];
     case 'pullquote':
-      return {
+      return [{
         type: 'pullquote',
         content: buildTiptapQuoteContent(buildTiptapParagraphNodes(block.text), block.caption),
-      };
+      }];
     case 'preformatted':
-      return {
+      return [{
         type: 'codeBlock',
         attrs: { language: block.language || undefined },
         content: buildTiptapCodeBlockContent(getRichTextPlainText(block.text)),
-      };
+      }];
     case 'divider':
-      return { type: 'horizontalRule' };
+      return [{ type: 'horizontalRule' }];
     case 'list':
-      return buildTiptapListNode(block.items, 'bulletList');
+      return buildOptionalTiptapNode(buildTiptapListNode(block.items, 'bulletList', options));
     case 'orderedList':
-      return buildTiptapListNode(block.items, 'orderedList', block);
+      return buildOptionalTiptapNode(buildTiptapListNode(block.items, 'orderedList', options, block));
     case 'table':
-      return buildTiptapTableWrapperNode(block);
+      return buildOptionalTiptapNode(buildTiptapTableWrapperNode(block));
     case 'details':
-      return buildTiptapDetailsNode(block);
+      return [buildTiptapDetailsNode(block, options)];
     case 'math':
-      return {
+      return [{
         type: MATH_BLOCK_NODE_NAME,
         attrs: { source: block.source },
-      };
+      }];
+    case 'anchor':
     case 'unsupported':
-      return { type: UNSUPPORTED_NODE_NAME };
+      return options?.isForCopy ? [] : [{ type: UNSUPPORTED_NODE_NAME }];
     default:
-      return { type: UNSUPPORTED_NODE_NAME };
+      // TODO: Add Tiptap media nodes for lossless message copy and editor paste
+      return options?.isForCopy
+        ? buildTiptapMediaFallbackNodes(block, options)
+        : [{ type: UNSUPPORTED_NODE_NAME }];
   }
+}
+
+function buildOptionalTiptapNode(node: TiptapJsonContent | undefined) {
+  return node ? [node] : [];
+}
+
+function buildTiptapMediaFallbackNodes(
+  block: ApiPageBlock,
+  options: RichMessageToTiptapOptions,
+): TiptapJsonContent[] {
+  switch (block.type) {
+    case 'photo':
+    case 'video':
+    case 'audio':
+    case 'embed':
+    case 'map':
+      return buildTiptapCaptionNodes(block.caption);
+    case 'cover':
+      return buildTiptapNodesFromBlock(block.cover, options);
+    case 'embedPost':
+      return [
+        ...(block.author ? buildTiptapParagraphNodes(buildPlainRichText(block.author)) : []),
+        ...block.blocks.flatMap((nestedBlock) => buildTiptapNodesFromBlock(nestedBlock, options)),
+        ...buildTiptapCaptionNodes(block.caption),
+      ];
+    case 'collage':
+    case 'slideshow':
+      return [
+        ...block.items.flatMap((item) => buildTiptapNodesFromBlock(item, options)),
+        ...buildTiptapCaptionNodes(block.caption),
+      ];
+    case 'relatedArticles':
+      return [
+        ...(hasRichText(block.title) ? [buildTiptapHeadingNode(block.title, 3)] : []),
+        ...block.articles.flatMap((article) => {
+          const text = [article.title || article.url, article.description, article.author].filter(Boolean).join('\n');
+          return text ? buildTiptapParagraphNodes(buildPlainRichText(text)) : [];
+        }),
+      ];
+    case 'channel':
+      return block.title ? buildTiptapParagraphNodes(buildPlainRichText(block.title)) : [];
+    default:
+      return [];
+  }
+}
+
+function buildTiptapCaptionNodes(caption: ApiPageCaption): TiptapJsonContent[] {
+  return [
+    ...(hasRichText(caption.text) ? buildTiptapParagraphNodes(caption.text) : []),
+    ...(hasRichText(caption.credit) ? [{
+      type: FOOTER_NODE_NAME,
+      content: buildTiptapInlineContentFromRichText(caption.credit),
+    }] : []),
+  ];
+}
+
+function buildAuthorDateRichText(block: Extract<ApiPageBlock, { type: 'authorDate' }>): ApiRichText {
+  const texts: ApiRichText[] = [];
+  if (hasRichText(block.author)) texts.push(block.author);
+  if (block.publishedDate) {
+    if (texts.length) texts.push(buildPlainRichText(AUTHOR_DATE_SEPARATOR));
+    texts.push(buildPlainRichText(formatDateTime(
+      getTranslationFn(),
+      new Date(block.publishedDate * MILLISECONDS_PER_SECOND),
+      { date: 'long', time: 'short' },
+    )));
+  }
+  return buildConcatRichText(texts);
+}
+
+function buildPlainRichText(text: string): ApiRichText {
+  return text ? { type: 'plain', text } : EMPTY_RICH_TEXT;
 }
 
 function buildTiptapHeadingNode(text: ApiRichText, level: number): TiptapJsonContent {
@@ -398,6 +482,7 @@ function buildTiptapTableWrapperNode(
 function buildTiptapListNode(
   items: ApiPageListItem[] | ApiPageListOrderedItem[],
   type: 'bulletList' | 'orderedList',
+  options?: RichMessageToTiptapOptions,
   orderedList?: OrderedListBlock,
 ): TiptapJsonContent | undefined {
   const content = items.map((item) => ({
@@ -406,7 +491,7 @@ function buildTiptapListNode(
       [LIST_ITEM_CHECKBOX_ATTR]: true,
       [LIST_ITEM_CHECKED_ATTR]: Boolean(item.isChecked),
     } : undefined,
-    content: buildTiptapListItemContent(item),
+    content: buildTiptapListItemContent(item, options),
   })).filter((item) => item.content.length);
 
   return content.length ? {
@@ -416,14 +501,16 @@ function buildTiptapListNode(
   } : undefined;
 }
 
-function buildTiptapListItemContent(item: ApiPageListItem | ApiPageListOrderedItem): TiptapJsonContent[] {
+function buildTiptapListItemContent(
+  item: ApiPageListItem | ApiPageListOrderedItem,
+  options?: RichMessageToTiptapOptions,
+): TiptapJsonContent[] {
   if (item.type === 'text') {
     return [buildTiptapParagraphNode(item.text)];
   }
 
   const content = item.blocks
-    .map(buildTiptapNodeFromBlock)
-    .filter((node): node is TiptapJsonContent => Boolean(node));
+    .flatMap((block) => buildTiptapNodesFromBlock(block, options));
   if (!content.length) {
     return [];
   }
@@ -497,10 +584,12 @@ function buildTiptapTableCellVerticalAlign(cell: ApiPageTableCell) {
   return cell.verticalAlignBottom ? 'bottom' : undefined;
 }
 
-function buildTiptapDetailsNode(block: Extract<ApiPageBlock, { type: 'details' }>): TiptapJsonContent {
+function buildTiptapDetailsNode(
+  block: Extract<ApiPageBlock, { type: 'details' }>,
+  options?: RichMessageToTiptapOptions,
+): TiptapJsonContent {
   const content = block.blocks
-    .map(buildTiptapNodeFromBlock)
-    .filter((node): node is TiptapJsonContent => Boolean(node));
+    .flatMap((nestedBlock) => buildTiptapNodesFromBlock(nestedBlock, options));
 
   return {
     type: 'details',
@@ -519,10 +608,10 @@ function buildTiptapDetailsNode(block: Extract<ApiPageBlock, { type: 'details' }
 
 function buildTiptapBlockquoteBlocksNode(
   block: Extract<ApiPageBlock, { type: 'blockquoteBlocks' }>,
+  options?: RichMessageToTiptapOptions,
 ): TiptapJsonContent {
   const content = block.blocks
-    .map(buildTiptapNodeFromBlock)
-    .filter((node): node is TiptapJsonContent => Boolean(node));
+    .flatMap((nestedBlock) => buildTiptapNodesFromBlock(nestedBlock, options));
 
   return {
     type: 'blockquote',
@@ -566,6 +655,16 @@ function buildTiptapInlineContentFromRichText(text: ApiRichText, marks: TiptapMa
       return buildTiptapInlineContentFromRichText(text.text, [...marks, {
         type: 'link',
         attrs: { href: text.url },
+      }]);
+    case 'email':
+      return buildTiptapInlineContentFromRichText(text.text, [...marks, {
+        type: 'link',
+        attrs: { href: `mailto:${text.email}` },
+      }]);
+    case 'phone':
+      return buildTiptapInlineContentFromRichText(text.text, [...marks, {
+        type: 'link',
+        attrs: { href: `tel:${text.phone}` },
       }]);
     case 'mention':
       return buildTiptapMentionNodes(text);

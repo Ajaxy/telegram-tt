@@ -80,7 +80,6 @@ const MessageSelectToolbar = ({
     openForwardMenuForSelectedMessages,
     downloadSelectedMessages,
     copySelectedMessages,
-    showNotification,
     reportMessages,
     openDeleteMessageModal,
     setSharedSettingOption,
@@ -120,10 +119,7 @@ const MessageSelectToolbar = ({
   ]);
 
   const handleCopy = useLastCallback(() => {
-    copySelectedMessages();
-    showNotification({
-      message: oldLang('Share.Link.Copied'),
-    });
+    copySelectedMessages({ shouldNotify: true });
     exitMessageSelectMode();
   });
 

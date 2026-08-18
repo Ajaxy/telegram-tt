@@ -22,6 +22,10 @@ export const MarkedTextMark = Mark.create({
     return helpers.applyMark('marked', helpers.parseInline(token.tokens || []));
   },
 
+  renderMarkdown(node, helpers) {
+    return `==${helpers.renderChildren(node)}==`;
+  },
+
   markdownTokenizer: {
     name: 'marked',
     level: 'inline',

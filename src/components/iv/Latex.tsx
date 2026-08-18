@@ -66,6 +66,8 @@ function Latex({ source, isBlock }: OwnProps) {
     <span
       ref={ref}
       className={buildClassName(styles.latex, isBlock && styles.latexBlock)}
+      data-rich-text-type={isBlock ? undefined : 'math'}
+      data-source={source}
     />
   );
 }

@@ -2,13 +2,12 @@ import { MESSAGE_CONTENT_CLASS_NAME } from '../config';
 
 const ELEMENT_NODE = 1;
 
-export default function getMessageIdsForSelectedText() {
-  const selection = window.getSelection();
-  const selectedFragments = selection?.rangeCount ? selection.getRangeAt(0).cloneContents() : undefined;
+export default function getMessageIdsForSelectedText(range: Range) {
+  const selectedFragments = range.cloneContents();
 
-  const shouldIncludeLastMessage = selection?.focusNode && selection.focusOffset > 0
-    && hasParentWithClassName(selection.focusNode, MESSAGE_CONTENT_CLASS_NAME);
-  if (!selectedFragments || selectedFragments.childElementCount === 0) {
+  const shouldIncludeLastMessage = range.endOffset > 0
+    && hasParentWithClassName(range.endContainer, MESSAGE_CONTENT_CLASS_NAME);
+  if (selectedFragments.childElementCount === 0) {
     return undefined;
   }
 

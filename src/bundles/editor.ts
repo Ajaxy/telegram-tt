@@ -5,3 +5,4 @@ export {
   __getRichEditorCanUndo as getRichEditorCanUndo,
   __isRichEditorEmpty as isRichEditorEmpty,
 } from '../components/middle/composer/helpers/richEditor';
+export { buildMessageCopyContent } from '../components/middle/message/helpers/messageCopy';

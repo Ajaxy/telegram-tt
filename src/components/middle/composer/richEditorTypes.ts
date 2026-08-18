@@ -19,11 +19,6 @@ export type RichEditorRoot = {
   element: HTMLDivElement;
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
   sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
-  blockPlaceholder: string;
-  pullquotePlaceholder: string;
-  quoteCaptionPlaceholder: string;
-  tableTitlePlaceholder: string;
-  unsupportedPlaceholder: string;
   tooltips?: RichEditorTooltipsConfig;
   getIsRichInputExpanded: () => boolean;
   onReady: (source: HTMLElement) => void;

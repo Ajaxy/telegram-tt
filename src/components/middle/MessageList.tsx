@@ -484,7 +484,7 @@ const MessageList = ({
     requestChatTranslation({ chatId, toLanguageCode: translationLanguage });
   }, [shouldAutoTranslate, canTranslate, translationLanguage, chatId]);
 
-  useNativeCopySelectedMessages(copyMessagesByIds);
+  useNativeCopySelectedMessages(isActive, chatId, threadId, type, copyMessagesByIds);
 
   const messageGroups = useMemo(() => {
     if (!renderMessageIds?.length || !renderMessagesById) {

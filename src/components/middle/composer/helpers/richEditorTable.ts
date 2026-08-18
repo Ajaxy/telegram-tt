@@ -36,9 +36,25 @@ const TABLE_CONTROLS_PLUGIN_KEY = new PluginKey('richEditorTableControls');
 
 const tableViewsByEditorView = new WeakMap<EditorView, Set<RichEditorTableView>>();
 
-export const RichEditorTableTitle = buildRichEditorTextField({
+const RichEditorTableTitleNode = buildRichEditorTextField({
   name: TABLE_TITLE_NODE_NAME,
   dataAttribute: 'data-rich-editor-table-title',
+});
+
+export const RichEditorTableTitle = RichEditorTableTitleNode.extend({
+  priority: 110,
+
+  parseHTML() {
+    return [
+      { tag: '[data-rich-block-type="tableTitle"]' },
+      { tag: 'caption' },
+      ...(this.parent?.() || []),
+    ];
+  },
+
+  renderMarkdown(node, helpers) {
+    return helpers.renderChildren(node);
+  },
 });
 
 export function buildRichEditorTableExtensions() {
@@ -57,7 +73,6 @@ export function buildRichEditorTableExtensions() {
         class: buildClassName(tiptapStyles.tableCell, styles.tableCell),
       },
     }),
-    RichEditorTableControlsExtension,
   ];
 }
 
@@ -68,7 +83,10 @@ const RichEditorTableWrapper = TiptapNode.create({
   isolating: true,
 
   parseHTML() {
-    return [{ tag: `div[${RICH_EDITOR_TABLE_DATA_ATTRIBUTE}]` }];
+    return [
+      { tag: `div[${RICH_EDITOR_TABLE_DATA_ATTRIBUTE}]` },
+      { tag: '[data-rich-block-type="table"]' },
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
@@ -177,7 +195,7 @@ const RichEditorTableCell = TableCellExtension.extend({
   },
 });
 
-const RichEditorTableControlsExtension = Extension.create({
+export const RichEditorTableControlsExtension = Extension.create({
   name: 'richEditorTableControls',
 
   addProseMirrorPlugins() {
