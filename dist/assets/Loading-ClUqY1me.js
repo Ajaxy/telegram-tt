@@ -1,2 +1,0 @@
-import{S as e,_ as t,u as n}from"./teact-CUUQAb7N.js";import{np as r,nu as i,o as a}from"./InputText-CnVXgAD5.js";function o(n,r,i){let[a,o]=e(!1),[s,c]=e(),[l,u]=e(i);return t(()=>{o(!0),c(void 0);let e=!1;return n().then(t=>{e||(o(!1),u(t))},t=>{e||(o(!1),c(t))}),()=>{e=!0}},r),{isLoading:a,error:s,result:l}}var s=n(({color:e=`blue`,backgroundColor:t,className:n,onClick:o})=>r(`div`,{className:i(`Loading`,o&&`interactive`,n),onClick:o,children:r(a,{color:e,backgroundColor:t})}));export{o as n,s as t};
-//# sourceMappingURL=Loading-ClUqY1me.js.map
