@@ -731,7 +731,7 @@ const Composer = ({
   const canUseInlineBots = !chat || isChatAdmin(chat) || !isUserRightBanned(chat, 'sendInline', chatFullInfo);
 
   const isNeedPremium = isContactRequirePremium && isInStoryViewer;
-  const isSendTextBlocked = isNeedPremium || !canSendPlainText;
+  const isSendTextBlocked = isNeedPremium || (Boolean(chat) && !canSendPlainText);
 
   const messagesCount = useDerivedState(() => {
     if (hasAttachments) return attachments.length;
@@ -1141,8 +1141,13 @@ const Composer = ({
     customEmojiNotificationNumberRef.current = Number(!notificationNumber);
   });
 
+  const isStoryReactionPickerOpen = isInStoryViewer && Boolean(isReactionPickerOpen);
+  const isComposerEngaged = isInputHasFocus || isSymbolMenuOpen || isSymbolMenuForced || isBotKeyboardOpen
+    || isSendAsMenuOpen || isStoryReactionPickerOpen || Boolean(activeRecording) || attachments.length > 0;
+  const isComposerActive = isComposerEngaged || isAttachMenuOpen;
+
   const mainButtonState = useDerivedState(() => {
-    if (!isInputHasFocus && onForward && !(hasInputContent && !hasAttachments)) {
+    if (!isComposerEngaged && onForward && !(hasInputContent && !hasAttachments)) {
       return MainButtonState.Forward;
     }
 
@@ -1162,7 +1167,7 @@ const Composer = ({
 
     return MainButtonState.Send;
   }, [
-    activeVoiceRecording, activeVideoRecording, editingMessage, hasAttachments, isForwarding, isInputHasFocus,
+    activeVoiceRecording, activeVideoRecording, editingMessage, hasAttachments, isForwarding, isComposerEngaged,
     onForward, shouldForceShowEditing, isInScheduledList, hasInputContent, isRichInputExpansionActive,
   ]);
   const canShowCustomSendMenu = !isInScheduledList;
@@ -2126,11 +2131,10 @@ const Composer = ({
     && messageListType === 'thread';
   const isBotMenuButtonOpen = withBotMenuButton && !hasInputContent && !activeRecording;
 
-  const isComposerHasFocus = isBotKeyboardOpen || isSymbolMenuOpen || isSendAsMenuOpen
-    || isBotCommandMenuOpen || isAttachMenuOpen || isBotMenuButtonOpen
-    || isCustomSendMenuOpen || Boolean(activeRecording) || attachments.length > 0 || isInputHasFocus;
+  const isComposerHasFocus = isComposerActive
+    || isBotCommandMenuOpen || isBotMenuButtonOpen || isCustomSendMenuOpen;
   const isReactionSelectorOpen = isComposerHasFocus && !isReactionPickerOpen && isInStoryViewer && !isAttachMenuOpen
-    && !isSymbolMenuOpen;
+    && !isSymbolMenuOpen && !activeRecording && !hasInputContent;
 
   useEffect(() => {
     if (!isRichInputExpansionActive) {
@@ -2340,6 +2344,8 @@ const Composer = ({
   const fullClassName = buildClassName(
     'Composer',
     isInMessageList && 'is-chat-composer',
+    isInStoryViewer && 'is-story-composer',
+    isInStoryViewer && isComposerEngaged && 'is-story-composer-focused',
     !isSelectModeActive && 'shown',
     isHoverDisabled && 'hover-disabled',
     isMounted && 'mounted',
@@ -2384,6 +2390,10 @@ const Composer = ({
   });
 
   const handleReactionPickerOpen = useLastCallback((position: IAnchorPosition) => {
+    if (isMobile) {
+      document.querySelector<HTMLDivElement>(editableInputCssSelector)?.blur();
+    }
+
     openStoryReactionPicker({
       peerId: chatId,
       storyId: storyId!,
@@ -2626,43 +2636,8 @@ const Composer = ({
         className={buildClassName(
           'composer-wrapper',
           isRichInputExpansionActive && 'rich-input-expanded',
-          isInStoryViewer && 'with-story-tweaks',
-          isNeedPremium && 'is-need-premium',
         )}
       >
-        {isInStoryViewer && !isNeedPremium && (
-          <svg className="svg-appendix" width="9" height="20">
-            <defs>
-              <filter
-                x="-50%"
-                y="-14.7%"
-                width="200%"
-                height="141.2%"
-                filterUnits="objectBoundingBox"
-                id="composerAppendix"
-              >
-                <feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1" />
-                <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1" />
-                <feColorMatrix
-                  values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0"
-                  in="shadowBlurOuter1"
-                />
-              </filter>
-            </defs>
-            <g fill="none" fill-rule="evenodd">
-              <path
-                d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z"
-                fill="#000"
-                filter="url(#composerAppendix)"
-              />
-              <path
-                d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z"
-                fill="#FFF"
-                className="corner"
-              />
-            </g>
-          </svg>
-        )}
         <div
           className={buildClassName(
             'message-input-wrapper',
@@ -2962,6 +2937,33 @@ const Composer = ({
               forceDarkTheme={isInStoryViewer}
             />
           )}
+          {isInStoryViewer && !activeRecording && (
+            <Button
+              round
+              className="composer-action-button story-reaction-button"
+              color="translucent"
+              onClick={handleLikeStory}
+              onContextMenu={handleStoryPickerContextMenu}
+              onMouseDown={handleBeforeStoryPickerContextMenu}
+              ariaLabel={oldLang('AccDescrLike')}
+              ref={storyReactionRef}
+            >
+              {sentStoryReaction && (
+                <ReactionAnimatedEmoji
+                  key={getReactionKey(sentStoryReaction)}
+                  containerId={getStoryKey(chatId, storyId!)}
+                  reaction={sentStoryReaction}
+                  withEffectOnly={isSentStoryReactionHeart}
+                />
+              )}
+              {(!sentStoryReaction || isSentStoryReactionHeart) && (
+                <Icon
+                  name={isSentStoryReactionHeart ? 'heart' : 'heart-outline'}
+                  className={buildClassName(isSentStoryReactionHeart && 'story-reaction-heart')}
+                />
+              )}
+            </Button>
+          )}
           {isMobile && isInMessageList && Boolean(botKeyboardMessageId) && (
             <BotKeyboardMenu
               messageId={botKeyboardMessageId}
@@ -2979,34 +2981,10 @@ const Composer = ({
           )}
         </div>
       </div>
-      {isInStoryViewer && !activeRecording && (
-        <Button
-          round
-          className="story-reaction-button"
-          color="secondary"
-          onClick={handleLikeStory}
-          onContextMenu={handleStoryPickerContextMenu}
-          onMouseDown={handleBeforeStoryPickerContextMenu}
-          ariaLabel={oldLang('AccDescrLike')}
-          ref={storyReactionRef}
-        >
-          {sentStoryReaction && (
-            <ReactionAnimatedEmoji
-              key={getReactionKey(sentStoryReaction)}
-              containerId={getStoryKey(chatId, storyId!)}
-              reaction={sentStoryReaction}
-              withEffectOnly={isSentStoryReactionHeart}
-            />
-          )}
-          {(!sentStoryReaction || isSentStoryReactionHeart) && (
-            <Icon name="heart" className={buildClassName(isSentStoryReactionHeart && 'story-reaction-heart')} />
-          )}
-        </Button>
-      )}
       <Button
         ref={mainButtonRef}
         round
-        color="secondary"
+        color={isInStoryViewer ? 'translucent' : 'secondary'}
         className={buildClassName(
           mainButtonState,
           'main-button',
@@ -3024,7 +3002,7 @@ const Composer = ({
         onContextMenu={mainButtonContextMenuHandler}
       >
         <Icon name="new-send" className="main-button-state-icon" />
-        <Icon name="microphone" />
+        <Icon name={isInStoryViewer ? 'microphone-outline' : 'microphone'} className="main-button-microphone" />
         <Icon name="round-video" />
         {onForward && <Icon name="forward" className="main-button-state-icon" />}
         {isInMessageList && <Icon name="schedule" className="main-button-state-icon" />}

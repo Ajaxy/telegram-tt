@@ -61,12 +61,19 @@
 
   transform-origin: 70% 100% !important;
 
+  &:global(.bubble) {
+    --offset-y: calc(100% - 4.0625rem);
+  }
+
   :global(.StickerButton.custom-emoji), :global(.sticker-set-cover) {
     color: #fff;
   }
 
   @media (max-width: 600px) {
     &:global(.bubble) {
+      --offset-y: calc(var(--composer-min-bottom-reserve) + var(--composer-top-gap));
+
+      position: fixed;
       transform-origin: 30% 100% !important;
     }
   }

@@ -12,12 +12,14 @@ import styles from './AiToneEmojiPickerModal.module.scss';
 
 export type OwnProps = {
   isOpen: boolean;
+  className?: string;
   onEmojiSelect: (emojiId: string) => void;
   onClose: NoneToVoidFunction;
 };
 
 const AiToneEmojiPickerModal = ({
   isOpen,
+  className,
   onEmojiSelect,
   onClose,
 }: OwnProps) => {
@@ -41,6 +43,7 @@ const AiToneEmojiPickerModal = ({
       header={renderHeader}
       ariaLabel={lang('AiToneEditorSelectEmoji')}
       width="slim"
+      dialogClassName={className}
       noScrollable
       noContentInlinePadding
       keepMounted

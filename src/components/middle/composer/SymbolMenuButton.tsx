@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import { memo, useRef, useState } from '../../../lib/teact/teact';
+import { memo, useEffect, useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiSticker, ApiVideo } from '../../../api/types';
@@ -11,6 +11,7 @@ import buildClassName from '../../../util/buildClassName';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useMouseInside from '../../../hooks/useMouseInside';
 
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
@@ -95,6 +96,17 @@ const SymbolMenuButton: FC<OwnProps> = ({
 
   const lang = useLang();
 
+  const isMenuOpen = isSymbolMenuOpen || Boolean(isSymbolMenuForced);
+  const [handleMouseEnter, handleMouseLeave, markMouseInside] = useMouseInside(
+    isMenuOpen, closeSymbolMenu, undefined, isMobile,
+  );
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      markMouseInside();
+    }
+  }, [isMenuOpen, markMouseInside]);
+
   const symbolMenuButtonClassName = buildClassName(
     'composer-action-button mobile-symbol-menu-button',
     !isReady && 'not-ready',
@@ -174,6 +186,8 @@ const SymbolMenuButton: FC<OwnProps> = ({
         getRootElement={isAttachmentModal ? getRootElement : undefined}
         getMenuElement={isAttachmentModal ? getMenuElement : undefined}
         getLayout={isAttachmentModal ? getLayout : undefined}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       />
 
       {isMobile ? (
@@ -195,6 +209,8 @@ const SymbolMenuButton: FC<OwnProps> = ({
           color="translucent"
           onActivate={handleActivateSymbolMenu}
           ariaLabel={lang('AriaOpenSymbolMenu')}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={isMenuOpen ? handleMouseLeave : undefined}
         >
           <div ref={triggerRef} className="symbol-menu-trigger" />
           <Icon name="smile" />

@@ -18,7 +18,6 @@ import { resolveTransitionName } from '../../../util/resolveTransitionName';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMouseInside from '../../../hooks/useMouseInside';
 import useOldLang from '../../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
@@ -64,6 +63,8 @@ export type OwnProps = {
   className?: string;
   isAttachmentModal?: boolean;
   canSendPlainText?: boolean;
+  onMouseEnter?: NoneToVoidFunction;
+  onMouseLeave?: NoneToVoidFunction;
 }
 & MenuPositionOptions;
 
@@ -100,6 +101,8 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   isLeftColumnShown,
   isBackgroundTranslucent,
   animationLevel,
+  onMouseEnter,
+  onMouseLeave,
   ...menuPositionOptions
 }) => {
   const [activeTab, setActiveTab] = useState<SymbolMenuTabs>(SymbolMenuTabs.Emoji);
@@ -107,7 +110,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   const [recentCustomEmojis, setRecentCustomEmojis] = useState<string[]>([]);
   const { isMobile } = useAppLayout();
 
-  const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, isMobile);
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, onClose, false, false);
 
   const lang = useOldLang();
@@ -320,6 +322,10 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     );
   }
 
+  const positionOptions: MenuPositionOptions = isAttachmentModal
+    ? menuPositionOptions
+    : { positionX: 'right', positionY: 'bottom' };
+
   return (
     <Menu
       isOpen={isOpen}
@@ -327,14 +333,11 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       withPortal={isAttachmentModal}
       className={buildClassName('SymbolMenu', className)}
       onCloseAnimationEnd={onClose}
-      onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
-      onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
+      onMouseEnter={!IS_TOUCH_ENV ? onMouseEnter : undefined}
+      onMouseLeave={!IS_TOUCH_ENV ? onMouseLeave : undefined}
       noCloseOnBackdrop={!IS_TOUCH_ENV}
       noCompact
-      {...(isAttachmentModal ? menuPositionOptions : {
-        positionX: isMessageComposer ? 'right' : 'left',
-        positionY: 'bottom',
-      })}
+      {...positionOptions}
     >
       {content}
     </Menu>

@@ -670,22 +670,31 @@
 .composer {
   --color-background: #212121;
   --color-placeholders: #707478;
-  --color-composer-button: #707478;
+  --color-composer-button: var(--color-white);
+  --story-composer-inset: 0;
+  --story-composer-focused-inset: -4rem;
 
   position: absolute;
   z-index: 3;
+  right: 0;
   bottom: 0;
   left: 0;
 
-  height: 3rem;
-  margin-bottom: 0;
+  min-height: 3rem;
+  margin: 0 var(--story-composer-inset);
 
-  transition: transform var(--layer-transition), opacity 0.15s ease;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: transform var(--layer-transition), opacity 0.15s ease, margin 200ms ease-out;
+
+  &:global(.is-story-composer-focused) {
+    --story-composer-inset: var(--story-composer-focused-inset);
+  }
 
   &:global(.Composer) {
+    width: auto;
+
     @media (max-width: 600px) {
-      margin-bottom: env(safe-area-inset-bottom);
-      padding: 0 0.5rem 0.5rem;
+      margin-bottom: calc(0.5rem + env(safe-area-inset-bottom));
     }
   }
 
@@ -718,6 +727,19 @@
 
   :global(.is-symbol-menu-open) & {
     transform: translate3d(0, calc(-1 * (var(--symbol-menu-height))), 0);
+  }
+
+  :global(body.no-message-composer-animations) & {
+    transition: none;
+  }
+
+  @media (max-width: 925px) {
+    --story-composer-focused-inset: 0;
+  }
+
+  @media (max-width: 600px) {
+    --story-composer-inset: 0.5rem;
+    --story-composer-focused-inset: 0.5rem;
   }
 }
 

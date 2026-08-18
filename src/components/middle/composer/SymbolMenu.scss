@@ -133,7 +133,8 @@
       left: calc(var(--bot-menu-text-width, 0) + 3rem);
     }
   }
-  .is-pointer-env .Composer.is-chat-composer .message-input-wrapper & > .backdrop {
+  .is-pointer-env .Composer.is-chat-composer .message-input-wrapper & > .backdrop,
+  .is-pointer-env .Composer.is-story-composer .message-input-wrapper & > .backdrop {
     right: 0;
     left: auto;
     width: var(--composer-main-button-width);
@@ -206,7 +207,6 @@
 
     &-external {
       margin-right: 0.5rem;
-      color: var(--color-text);
       text-align: start;
     }
   }

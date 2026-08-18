@@ -3,7 +3,7 @@ import { getActions, withGlobal } from '../../../../global';
 
 import type { ApiAiComposeTone } from '../../../../api/types';
 
-import { selectTabState } from '../../../../global/selectors';
+import { selectIsStoryViewerOpen, selectTabState } from '../../../../global/selectors';
 import { getInputTone } from '../../../../util/aiComposeTones';
 import buildClassName from '../../../../util/buildClassName';
 
@@ -36,6 +36,7 @@ type StateProps = {
   toneToEdit?: ApiAiComposeTone;
   titleMaxLength?: number;
   promptMaxLength?: number;
+  isStoryViewerOpen?: boolean;
 };
 
 const AiToneEditorModal = ({
@@ -43,6 +44,7 @@ const AiToneEditorModal = ({
   toneToEdit,
   titleMaxLength = DEFAULT_TITLE_MAX_LENGTH,
   promptMaxLength = DEFAULT_PROMPT_MAX_LENGTH,
+  isStoryViewerOpen,
 }: OwnProps & StateProps) => {
   const {
     closeAiToneEditorModal,
@@ -130,6 +132,7 @@ const AiToneEditorModal = ({
   });
 
   const modalTitle = lang(isEditMode ? 'AiToneEditorEditTitle' : 'AiToneEditorTitle');
+  const storyThemeClassName = isStoryViewerOpen ? 'component-theme-dark' : undefined;
 
   const renderHeader = useMemo(() => (
     <ModalHeader>
@@ -146,6 +149,7 @@ const AiToneEditorModal = ({
         header={renderHeader}
         ariaLabel={modalTitle}
         width="slim"
+        dialogClassName={storyThemeClassName}
       >
         <div className={styles.emojiRow}>
           <button
@@ -215,6 +219,7 @@ const AiToneEditorModal = ({
 
       <AiToneEmojiPickerModal
         isOpen={isEmojiPickerOpen}
+        className={storyThemeClassName}
         onEmojiSelect={handleEmojiSelect}
         onClose={closeEmojiPicker}
       />
@@ -238,6 +243,7 @@ export default memo(withGlobal<OwnProps>(
       toneToEdit: selectTabState(global).aiToneEditorModal?.toneToEdit,
       titleMaxLength: global.appConfig.aiComposeToneTitleLengthMax,
       promptMaxLength: global.appConfig.aiComposeTonePromptLengthMax,
+      isStoryViewerOpen: selectIsStoryViewerOpen(global),
     };
   },
 )(AiToneEditorModal));

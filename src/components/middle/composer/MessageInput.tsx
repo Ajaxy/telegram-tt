@@ -292,20 +292,21 @@ const MessageInput = ({
           heightLimit = baseHeight + lineHeight * (COLLAPSED_RICH_PREVIEW_LINE_COUNT - 1);
         }
         const newHeight = Math.min(scrollHeight, heightLimit);
-
-        if (newHeight === currentHeight) {
-          return undefined;
-        }
-
         const isOverflown = scrollHeight > heightLimit;
+        const isHeightChanged = newHeight !== currentHeight;
 
         function exec() {
+          currentScroller.classList.toggle('overflown', isOverflown);
+
+          if (!isHeightChanged) {
+            return;
+          }
+
           const transitionDuration = Math.round(
             TRANSITION_DURATION_FACTOR * Math.log(Math.abs(newHeight - currentHeight)),
           );
           currentScroller.style.height = `${newHeight}px`;
           currentScroller.style.transitionDuration = `${transitionDuration}ms`;
-          currentScroller.classList.toggle('overflown', isOverflown);
         }
 
         if (willSend) {

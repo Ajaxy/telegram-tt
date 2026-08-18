@@ -18,10 +18,6 @@
       }
     }
 
-    .svg-appendix {
-      opacity: 0;
-    }
-
     @media (max-width: 600px) {
       bottom: env(safe-area-inset-bottom);
       padding-right: 1rem;
@@ -90,7 +86,7 @@
     .icon-new-send,
     .icon-schedule,
     .icon-forward,
-    .icon-microphone,
+    .main-button-microphone,
     .icon-check-bold,
     .icon-view-once,
     .icon-one-filled {
@@ -103,30 +99,12 @@
       transition: box-shadow 0.1s;
     }
 
-    &.story-reaction-button {
-      --custom-emoji-size: 1.5rem;
-
-      overflow: visible !important;
-
-      &:hover {
-        background-color: var(--color-background) !important;
-      }
-
-      .icon-heart {
-        transition: color 0.2s ease-out;
-      }
-
-      .story-reaction-heart {
-        color: var(--color-heart) !important;
-      }
-    }
-
     &.send, &.sendOneTime {
       .icon-new-send {
         animation: grow-icon 0.4s ease-out;
       }
 
-      .icon-microphone,
+      .main-button-microphone,
       .icon-forward,
       .icon-check-bold,
       .icon-schedule {
@@ -139,7 +117,7 @@
         animation: grow-icon 0.4s ease-out;
       }
 
-      .icon-microphone,
+      .main-button-microphone,
       .icon-check-bold,
       .icon-forward,
       .icon-new-send {
@@ -148,7 +126,7 @@
     }
 
     &.record {
-      .icon-microphone {
+      .main-button-microphone {
         animation: grow-icon 0.4s ease-out;
       }
 
@@ -166,7 +144,7 @@
     }
 
     &.record.record-video {
-      .icon-microphone {
+      .main-button-microphone {
         animation: hide-icon 0.4s forwards ease-out;
       }
 
@@ -183,24 +161,20 @@
 
       .icon-new-send,
       .icon-forward,
-      .icon-microphone,
+      .main-button-microphone,
       .icon-schedule {
         animation: hide-icon 0.4s forwards ease-out;
       }
     }
 
     &.forward {
-      --color-primary: #212121;
-
       .icon-forward {
-        --color-primary: #707478;
-
         animation: grow-icon 0.4s ease-out;
       }
 
       .icon-new-send,
       .icon-check-bold,
-      .icon-microphone,
+      .main-button-microphone,
       .icon-schedule {
         animation: hide-icon 0.4s forwards ease-out;
       }
@@ -228,30 +202,10 @@
     }
   }
 
-  // Legacy (story composer): state icons are accented while the button is idle.
-  // The redesigned chat composer keeps them always white (see `main-button`)
-  &:not(.is-chat-composer) > .Button {
-    @media (hover: hover) {
-      &:not(:active):not(:focus):not(:hover) {
-        .main-button-state-icon {
-          color: var(--color-primary);
-        }
-      }
-    }
-
-    @media (hover: none) {
-      &:not(:active):not(:focus) {
-        .main-button-state-icon {
-          color: var(--color-primary);
-        }
-      }
-    }
-  }
-
   &:not(.mounted) > .Button,
   body.no-message-composer-animations & > .Button {
     .icon-new-send,
-    .icon-microphone,
+    .main-button-microphone,
     .icon-check-bold,
     .icon-round-video,
     .icon-schedule {
@@ -292,10 +246,6 @@
 
     .ReactionSelector__hint {
       color: #fff;
-    }
-
-    @media (max-width: 600px) {
-      top: -4.25rem;
     }
   }
 
@@ -483,32 +433,6 @@
     }
   }
 
-  &.with-story-tweaks {
-    border-radius: var(--border-radius-default-small);
-    border-bottom-right-radius: 0;
-    box-shadow: none;
-    &.is-need-premium {
-      border-bottom-right-radius: var(--border-radius-default-small);
-    }
-  }
-
-  .svg-appendix {
-    position: absolute;
-    right: -0.5rem;
-    bottom: -0.1875rem;
-
-    width: 0.5625rem;
-    height: 1.25rem;
-
-    font-size: 1rem !important;
-
-    transition: opacity 200ms;
-
-    .corner {
-      fill: var(--color-background);
-    }
-  }
-
   @media (max-width: 600px) {
     max-width: calc(100% - 3.375rem);
   }
@@ -664,6 +588,108 @@
       &:hover {
         background-color: var(--color-primary-shade);
       }
+    }
+  }
+}
+
+.Composer.is-story-composer {
+  --base-height: var(--composer-main-button-height);
+
+  @include mixins.composer-pill;
+
+  .composer-wrapper {
+    max-width: calc(100% - var(--composer-main-button-width) - var(--composer-row-gap));
+    background: none;
+    box-shadow: none;
+  }
+
+  .composer-wrapper,
+  .message-input-wrapper,
+  #story-input-text {
+    min-width: 0;
+  }
+
+  .message-input-wrapper {
+    --action-button-compact-fix: 0rem;
+
+    flex-grow: 1;
+    gap: var(--composer-row-gap);
+
+    .input-scroller {
+      --_scroller-controls-width: calc(var(--action-button-size) + var(--composer-main-button-width));
+      --_scroller-gaps-width: calc(2 * var(--composer-row-gap) + var(--composer-pill-padding));
+      --_scroller-right-gap: calc(var(--_scroller-controls-width) + var(--_scroller-gaps-width));
+
+      @include mixins.adapt-padding-to-scrollbar(var(--_scroller-right-gap), var(--composer-row-gap));
+    }
+
+    > .Menu {
+      display: contents;
+    }
+  }
+
+  #story-input-text {
+    .form-control {
+      padding-inline: var(--composer-row-gap);
+    }
+
+    .placeholder-text {
+      left: var(--composer-row-gap);
+    }
+  }
+
+  .story-reaction-button {
+    --custom-emoji-size: 1.5rem;
+
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    overflow: visible;
+
+    .icon-heart {
+      transition: color 0.2s ease-out;
+    }
+
+    .story-reaction-heart {
+      color: var(--color-heart);
+    }
+  }
+
+  .story-reaction-button,
+  .symbol-menu-button,
+  .mobile-symbol-menu-button {
+    transition: opacity 150ms ease-out, transform 150ms ease-out, visibility 150ms;
+
+    body.no-message-composer-animations & {
+      transition: none;
+    }
+  }
+
+  &:not(.is-story-composer-focused) {
+    .symbol-menu-button,
+    .mobile-symbol-menu-button {
+      transform: scale(0.75);
+      visibility: hidden;
+      opacity: 0;
+    }
+  }
+
+  &.is-story-composer-focused .story-reaction-button {
+    transform: scale(0.75);
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  > .Button.main-button {
+    // The input scroller spans the whole pill and `.composer-wrapper` is stacked above the flow,
+    // so the button has to outrank it to stay clickable
+    z-index: 2;
+    margin-left: var(--composer-row-gap);
+    border-radius: var(--composer-control-radius);
+    box-shadow: none;
+
+    .icon-new-send {
+      font-size: 1.625rem;
     }
   }
 }
@@ -1128,25 +1154,12 @@
 
 #story-input-text,
 #caption-input-text {
-  --margin-for-scrollbar: 2rem;
   .input-scroller {
     min-height: var(--base-height, 3rem);
     max-height: 10rem;
-    margin-right: calc((var(--margin-for-scrollbar) + 1rem) * -1);
-
-    &.is-need-premium {
-      margin-right: 0.5rem;
-    }
 
     &:has(.form-control:focus) {
       border-color: var(--color-primary);
-    }
-  }
-
-  .input-scroller-content {
-    margin-right: calc(var(--margin-for-scrollbar) + 0.5rem);
-    &.is-need-premium {
-      margin-right: 0;
     }
   }
 
@@ -1169,6 +1182,18 @@
     &.active {
       background: var(--color-chat-hover);
     }
+  }
+}
+
+#caption-input-text {
+  --margin-for-scrollbar: 2rem;
+
+  .input-scroller {
+    margin-right: calc((var(--margin-for-scrollbar) + 1rem) * -1);
+  }
+
+  .input-scroller-content {
+    margin-right: calc(var(--margin-for-scrollbar) + 0.5rem);
   }
 }
 

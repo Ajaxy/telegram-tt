@@ -4,8 +4,9 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiUser } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
-import { selectUser } from '../../../global/selectors';
+import { selectIsStoryViewerOpen, selectUser } from '../../../global/selectors';
 import { getInputTone } from '../../../util/aiComposeTones';
+import buildClassName from '../../../util/buildClassName';
 import calcTextLineHeightAndCount from '../../../util/element/calcTextLineHeightAndCount';
 import formatUsername from '../../common/helpers/formatUsername';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
@@ -35,9 +36,12 @@ export type OwnProps = {
 type StateProps = {
   author?: ApiUser;
   maxExamples?: number;
+  isStoryViewerOpen?: boolean;
 };
 
-const AiTonePreviewModal = ({ modal, author, maxExamples = DEFAULT_MAX_EXAMPLES }: OwnProps & StateProps) => {
+const AiTonePreviewModal = ({
+  modal, author, maxExamples = DEFAULT_MAX_EXAMPLES, isStoryViewerOpen,
+}: OwnProps & StateProps) => {
   const {
     closeAiTonePreview,
     saveAiTone,
@@ -217,7 +221,7 @@ const AiTonePreviewModal = ({ modal, author, maxExamples = DEFAULT_MAX_EXAMPLES 
       onClose={handleClose}
       header={renderHeader}
       stickyFooter={renderFooter}
-      dialogClassName={styles.modal}
+      dialogClassName={buildClassName(styles.modal, isStoryViewerOpen && 'component-theme-dark')}
       width="slim"
       height="regular"
     >
@@ -272,6 +276,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       author: authorId ? selectUser(global, authorId) : undefined,
       maxExamples: global.appConfig.aiComposeToneExamplesNum,
+      isStoryViewerOpen: selectIsStoryViewerOpen(global),
     };
   },
 )(AiTonePreviewModal));
