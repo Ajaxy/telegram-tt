@@ -114,7 +114,11 @@ export function buildContentClassName(
     }
   }
   if (isMedia && !withVoiceTranscription) {
-    classNames.push('media', 'has-adaptive-width');
+    classNames.push('media');
+    // Custom-shape media (round video) has fixed dimensions and must not stretch to the message width
+    if (!isCustomShape) {
+      classNames.push('has-adaptive-width');
+    }
   } else if (video) {
     classNames.push('video');
   } else if (audio) {
