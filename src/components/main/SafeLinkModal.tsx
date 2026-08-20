@@ -14,6 +14,8 @@ import Modal, {
   ModalTitle,
 } from '@gili/modal/Modal';
 
+import styles from './SafeLinkModal.module.scss';
+
 export type OwnProps = {
   modal: string;
   isOpen: boolean;
@@ -48,7 +50,9 @@ const SafeLinkModal = ({ modal, isOpen }: OwnProps) => {
       ariaLabel={lang('OpenUrlTitle')}
       onClose={handleDismiss}
     >
-      {renderText(lang('OpenUrlText', { url: modal }, { withNodes: true, withMarkdown: true }))}
+      {renderText(lang('OpenUrlText', {
+        url: <span className={styles.url}>{modal}</span>,
+      }, { withNodes: true, withMarkdown: true }))}
       <ModalFooterActions>
         <Button isText size="smaller" color="primary" fluid onClick={handleDismiss}>
           {lang('Cancel')}
