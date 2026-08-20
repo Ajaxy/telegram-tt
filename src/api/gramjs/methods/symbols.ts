@@ -4,11 +4,14 @@ import type {
   ApiSticker, ApiStickerSetInfo, ApiVideo,
 } from '../../types';
 
-import { DEFAULT_GIF_SEARCH_BOT_USERNAME, RECENT_STATUS_LIMIT, RECENT_STICKERS_LIMIT } from '../../../config';
+import {
+  DEFAULT_GIF_SEARCH_BOT_USERNAME, GLOBAL_STICKER_SEARCH_LIMIT, RECENT_STATUS_LIMIT, RECENT_STICKERS_LIMIT,
+} from '../../../config';
+import { compact } from '../../../util/iteratees';
 import { buildVideoFromDocument } from '../apiBuilders/messageContent';
 import { buildApiEmojiStatus } from '../apiBuilders/peers';
 import {
-  buildStickerSet, buildStickerSetCovered, processStickerPackResult, processStickerResult,
+  buildApiEmojiGroup, buildStickerSet, buildStickerSetCovered, processStickerPackResult, processStickerResult,
 } from '../apiBuilders/symbols';
 import {
   buildInputDocument,
@@ -100,6 +103,10 @@ export async function fetchFeaturedStickers({ hash }: { hash?: string }) {
   if (!result || result instanceof GramJs.messages.FeaturedStickersNotModified) {
     return undefined;
   }
+
+  result.sets.forEach(({ set }) => {
+    localDb.stickerSets[String(set.id)] = set;
+  });
 
   return {
     hash: String(result.hash),
@@ -373,9 +380,71 @@ export async function searchStickers({ query, hash }: { query: string; hash?: st
     return undefined;
   }
 
+  result.sets.forEach(({ set }) => {
+    localDb.stickerSets[String(set.id)] = set;
+  });
+
   return {
     hash: String(result.hash),
     sets: result.sets.map(buildStickerSetCovered),
+  };
+}
+
+export async function searchEmojiStickerSets({ query }: { query: string }) {
+  const result = await invokeRequest(new GramJs.messages.SearchEmojiStickerSets({
+    q: query,
+    hash: DEFAULT_PRIMITIVES.BIGINT,
+  }));
+
+  if (!result || result instanceof GramJs.messages.FoundStickerSetsNotModified) {
+    return undefined;
+  }
+
+  result.sets.forEach(({ set }) => {
+    localDb.stickerSets[String(set.id)] = set;
+  });
+
+  return {
+    hash: String(result.hash),
+    sets: result.sets.map(buildStickerSetCovered),
+  };
+}
+
+export async function searchStickersGlobal({
+  query, emoticon = DEFAULT_PRIMITIVES.STRING, langCode, offset = DEFAULT_PRIMITIVES.INT, isEmoji,
+}: {
+  query: string; emoticon?: string; langCode: string; offset?: number; isEmoji?: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.messages.SearchStickers({
+    emojis: isEmoji || undefined,
+    q: query,
+    emoticon,
+    langCode: [langCode],
+    offset,
+    limit: GLOBAL_STICKER_SEARCH_LIMIT,
+    hash: DEFAULT_PRIMITIVES.BIGINT,
+  }));
+
+  if (!result || result instanceof GramJs.messages.FoundStickersNotModified) {
+    return undefined;
+  }
+
+  return {
+    stickers: processStickerResult(result.stickers),
+    nextOffset: result.nextOffset,
+  };
+}
+
+export async function fetchEmojiStickerGroups({ hash = DEFAULT_PRIMITIVES.INT }: { hash?: number }) {
+  const result = await invokeRequest(new GramJs.messages.GetEmojiStickerGroups({ hash }));
+
+  if (!result || result instanceof GramJs.messages.EmojiGroupsNotModified) {
+    return undefined;
+  }
+
+  return {
+    hash: result.hash,
+    groups: compact(result.groups.map(buildApiEmojiGroup)),
   };
 }
 
@@ -523,6 +592,34 @@ export async function fetchEmojiKeywords({
 
       return acc;
     }, {} as Record<string, string[]>),
+  };
+}
+
+export async function fetchEmojiGroups({ hash = DEFAULT_PRIMITIVES.INT }: { hash?: number }) {
+  const result = await invokeRequest(new GramJs.messages.GetEmojiGroups({ hash }));
+
+  if (!result || result instanceof GramJs.messages.EmojiGroupsNotModified) {
+    return undefined;
+  }
+
+  return {
+    hash: result.hash,
+    groups: compact(result.groups.map(buildApiEmojiGroup)),
+  };
+}
+
+export async function searchCustomEmojiByEmoticons({ emoticons }: { emoticons: string[] }) {
+  const result = await invokeRequest(new GramJs.messages.SearchCustomEmoji({
+    emoticon: emoticons.join(''),
+    hash: DEFAULT_PRIMITIVES.BIGINT,
+  }));
+
+  if (!result || result instanceof GramJs.EmojiListNotModified) {
+    return undefined;
+  }
+
+  return {
+    documentIds: result.documentId.map(String),
   };
 }
 

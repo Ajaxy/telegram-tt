@@ -1,0 +1,44 @@
+.header {
+  cursor: var(--custom-cursor, pointer);
+
+  display: flex;
+  align-items: center;
+
+  margin-bottom: 0.25rem;
+  padding-inline: 0.25rem;
+
+  transition: opacity 0.15s ease-in-out;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.chevron {
+  margin-left: 0.25rem;
+  font-size: 1.0625rem;
+  color: var(--color-text-secondary);
+  transition: transform 0.25s ease-in-out;
+}
+
+.chevronCollapsed {
+  transform: rotate(-180deg);
+}
+
+.content {
+  overflow: hidden;
+
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: height 0.25s ease-in-out, opacity 0.25s ease-in-out;
+}
+
+.contentCollapsed {
+  opacity: 0;
+}

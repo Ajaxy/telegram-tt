@@ -35,8 +35,11 @@ type OwnProps = {
   sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   withTranslucentThumb?: boolean;
   shouldPreloadPreview?: boolean;
+  skipPreview?: boolean;
+  noPlaceholder?: boolean;
   forceOnHeavyAnimation?: boolean;
   forceAlways?: boolean;
+  forceTextColor?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   onClick?: NoneToVoidFunction;
@@ -69,8 +72,11 @@ const CustomEmoji = ({
   sharedCanvasHqRef,
   withTranslucentThumb,
   shouldPreloadPreview,
+  skipPreview,
+  noPlaceholder,
   forceAlways,
   forceOnHeavyAnimation,
+  forceTextColor,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   onClick,
@@ -88,7 +94,7 @@ const CustomEmoji = ({
   const loopCountRef = useRef(0);
   const [shouldPlay, setShouldPlay] = useState(true);
 
-  const hasCustomColor = customEmoji?.shouldUseTextColor;
+  const hasCustomColor = forceTextColor || customEmoji?.shouldUseTextColor;
   const customColor = useDynamicColorListener(containerRef, undefined, !hasCustomColor);
 
   const handleVideoEnded = useLastCallback((e) => {
@@ -144,7 +150,7 @@ const CustomEmoji = ({
         />
       )}
       {!customEmoji ? (
-        <div className={buildClassName(styles.placeholder)} draggable={false} />
+        !noPlaceholder && <div className={buildClassName(styles.placeholder)} draggable={false} />
       ) : (
         <StickerView
           containerRef={containerRef}
@@ -157,7 +163,8 @@ const CustomEmoji = ({
           fullMediaClassName={styles.media}
           shouldLoop={!shouldNotLoop}
           loopLimit={loopLimit}
-          shouldPreloadPreview={shouldPreloadPreview || noPlay || !canPlay}
+          skipPreview={skipPreview}
+          shouldPreloadPreview={!skipPreview && (shouldPreloadPreview || noPlay || !canPlay)}
           forceOnHeavyAnimation={forceOnHeavyAnimation}
           forceAlways={forceAlways}
           observeIntersectionForLoading={observeIntersectionForLoading}

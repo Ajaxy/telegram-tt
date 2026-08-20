@@ -39,10 +39,22 @@
     align-self: center;
     justify-self: center;
 
+    width: calc(100% - 0.375rem);
+    height: calc(100% - 0.375rem);
     padding: 0;
+    border-radius: 50%;
 
+    font-size: 0.75rem;
     font-weight: var(--font-weight-medium);
-    vertical-align: bottom;
+    color: var(--color-text-secondary);
+
+    background-color: var(--color-chat-hover);
+
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: rgba(var(--color-text-secondary-rgb), 0.16);
+    }
   }
 
   .sticker-locked, .sticker-premium {

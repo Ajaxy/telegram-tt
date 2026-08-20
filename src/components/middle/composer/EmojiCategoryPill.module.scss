@@ -1,0 +1,55 @@
+.root {
+  overflow: hidden;
+  flex-shrink: 0;
+
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 1.25rem;
+
+  background-color: transparent;
+
+  /* stylelint-disable plugin/no-low-performance-animation-properties */
+  transition:
+    width var(--select-transition),
+    height var(--select-transition),
+    background-color var(--select-transition);
+  /* stylelint-enable plugin/no-low-performance-animation-properties */
+}
+
+.expanded {
+  width: 10rem;
+  height: 1.875rem;
+  background-color: var(--color-chat-hover);
+}
+
+.strip {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
+  display: flex;
+  align-items: center;
+
+  width: 10rem;
+  height: 100%;
+}
+
+.root:not(.expanded) .strip {
+  pointer-events: none;
+}
+
+.root:not(.expanded) .firstCategory {
+  pointer-events: auto;
+}
+
+.categoryButton {
+  flex-shrink: 0;
+  transition: transform var(--select-transition);
+
+  :global(.icon) {
+    font-size: 1.5rem;
+  }
+}
+
+.expanded .categoryButton {
+  transform: scale(0.8);
+}

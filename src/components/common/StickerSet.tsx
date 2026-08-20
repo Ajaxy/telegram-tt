@@ -143,7 +143,7 @@ const StickerSet = ({
   const [itemsPerRow, setItemsPerRow] = useState(() => getItemsPerRowFallback(windowWidth));
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection ?? observeIntersectionForShowingItems);
-  const transitionClassNames = useMediaTransitionDeprecated(isIntersecting);
+  const transitionClassNames = useMediaTransitionDeprecated(isIntersecting || isNearActive);
 
   // `isNearActive` is set in advance during animation, but it is not reliable for short sets
   const shouldRender = isNearActive || isIntersecting;

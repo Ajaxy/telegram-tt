@@ -331,8 +331,6 @@ export enum RightColumnContent {
   BoostStatistics,
   MessageStatistics,
   StoryStatistics,
-  StickerSearch,
-  GifSearch,
   PollResults,
   AddingMembers,
   CreateTopic,

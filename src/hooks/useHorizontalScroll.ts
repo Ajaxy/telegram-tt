@@ -5,6 +5,7 @@ const useHorizontalScroll = (
   containerRef: ElementRef<HTMLDivElement>,
   isDisabled?: boolean,
   shouldPreventDefault = false,
+  shouldStopPropagation = false,
 ) => {
   useEffect(() => {
     if (isDisabled) {
@@ -18,6 +19,7 @@ const useHorizontalScroll = (
       if (!e.deltaX) {
         container.scrollLeft += e.deltaY / 4;
         if (shouldPreventDefault) e.preventDefault();
+        if (shouldStopPropagation && container.scrollWidth > container.clientWidth) e.stopPropagation();
       }
     }
 
@@ -26,7 +28,7 @@ const useHorizontalScroll = (
     return () => {
       container.removeEventListener('wheel', handleScroll);
     };
-  }, [containerRef, isDisabled, shouldPreventDefault]);
+  }, [containerRef, isDisabled, shouldPreventDefault, shouldStopPropagation]);
 };
 
 export default useHorizontalScroll;

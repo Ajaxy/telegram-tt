@@ -81,11 +81,6 @@
         margin: 0 0.75rem;
       }
 
-      &.symbol-search-button {
-        position: absolute;
-        left: 0.25rem;
-      }
-
       &.symbol-delete-button {
         position: absolute;
         right: 0.25rem;
@@ -148,14 +143,11 @@
 
     width: calc(var(--symbol-menu-width) + var(--scrollbar-width));
     padding: 0;
-    border-radius: 1.25rem;
+    border-radius: 1.625rem;
+
+    background-color: var(--color-background);
 
     transition-duration: 200ms !important;
-
-    body:not(.no-menu-blur) & {
-      background: var(--color-background-compact-menu);
-      backdrop-filter: blur(25px);
-    }
   }
 
   .StickerButton.custom-emoji, .sticker-set-cover {
@@ -213,6 +205,8 @@
 
   &-name {
     overflow: hidden;
+
+    font-weight: var(--font-weight-medium);
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;

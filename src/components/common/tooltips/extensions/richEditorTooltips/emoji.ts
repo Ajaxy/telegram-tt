@@ -14,9 +14,8 @@ import type {
 
 import { selectCustomEmojiForEmojis } from '../../../../../global/selectors';
 import { uncompressEmoji } from '../../../../../util/emoji/emoji';
-import {
-  buildCollectionByKey, mapValues, pickTruthy, unique, uniqueByField,
-} from '../../../../../util/iteratees';
+import { prepareEmojiLibraryMemo, searchEmojiLibraryMemo } from '../../../../../util/emoji/emojiSearch';
+import { pickTruthy, uniqueByField } from '../../../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../../../util/memo';
 import memoized from '../../../../../util/memoized';
 import { replaceEditorRange } from '../../../../middle/composer/helpers/richEditorComposer';
@@ -33,22 +32,12 @@ import {
 const EMOJI_LIMIT = 36;
 const EMOJI_FILTER_MIN_LENGTH = 2;
 
-type EmojiLibrary = {
-  keywords: string[];
-  byKeyword: Record<string, Emoji[]>;
-  names: string[];
-  byName: Record<string, Emoji[]>;
-  maxKeyLength: number;
-};
-
 let emojiDataPromise: Promise<EmojiModule> | undefined;
 let emojiData: EmojiData;
 const RE_EMOJI_SEARCH = /(^|\s):(?!\s)[-+_:'\s\p{L}\p{N}]*$/ui;
 const RE_LOWERCASE_TEST = /\p{Ll}/u;
 
 const prepareRecentEmojisMemo = memoized(prepareRecentEmojis);
-const prepareEmojiLibraryMemo = memoized(prepareEmojiLibrary);
-const searchEmojiLibraryMemo = memoized(searchEmojiLibrary);
 
 export function buildEmojiSuggestion(
   editor: Editor,
@@ -166,50 +155,4 @@ function prepareRecentEmojis(byId: Record<string, Emoji>, recentEmojiIds: string
   return recentEmojiIds.length
     ? Object.values(pickTruthy(byId, recentEmojiIds)).slice(0, limit)
     : MEMO_EMPTY_ARRAY;
-}
-
-function prepareEmojiLibrary(
-  byId: Record<string, Emoji>,
-  baseEmojiKeywords?: Record<string, string[]>,
-  emojiKeywords?: Record<string, string[]>,
-): EmojiLibrary {
-  const emojis = Object.values(byId);
-  const byNative = buildCollectionByKey<Emoji>(emojis, 'native');
-  const baseEmojisByKeyword = baseEmojiKeywords
-    ? mapValues(baseEmojiKeywords, (natives) => Object.values(pickTruthy(byNative, natives)))
-    : {};
-  const emojisByKeyword = emojiKeywords
-    ? mapValues(emojiKeywords, (natives) => Object.values(pickTruthy(byNative, natives)))
-    : {};
-  const byKeyword = { ...baseEmojisByKeyword, ...emojisByKeyword };
-  const keywords = [...Object.keys(baseEmojisByKeyword), ...Object.keys(emojisByKeyword)];
-  const byName = emojis.reduce((result, emoji) => {
-    emoji.names.forEach((name) => {
-      (result[name] ||= []).push(emoji);
-    });
-    return result;
-  }, {} as Record<string, Emoji[]>);
-  const names = Object.keys(byName);
-
-  return {
-    byKeyword,
-    keywords,
-    byName,
-    names,
-    maxKeyLength: keywords.reduce((max, keyword) => Math.max(max, keyword.length), 0),
-  };
-}
-
-function searchEmojiLibrary(library: EmojiLibrary, filter: string, limit: number) {
-  if (filter.length > library.maxKeyLength) {
-    return MEMO_EMPTY_ARRAY;
-  }
-
-  const matchedKeywords = library.keywords.filter((keyword) => keyword.startsWith(filter)).sort();
-  const matchedNames = library.names.filter((name) => name.startsWith(filter));
-  const matched = unique([
-    ...Object.values(pickTruthy(library.byKeyword, matchedKeywords)).flat(),
-    ...Object.values(pickTruthy(library.byName, matchedNames)).flat(),
-  ]);
-  return matched.length ? matched.slice(0, limit) : MEMO_EMPTY_ARRAY;
 }

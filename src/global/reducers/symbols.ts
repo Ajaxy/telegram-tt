@@ -1,29 +1,12 @@
-import type { ApiSticker, ApiStickerSet, ApiVideo } from '../../api/types';
-import type { GlobalState, TabArgs } from '../types';
+import type { ApiSticker, ApiStickerSet } from '../../api/types';
+import type { GlobalState } from '../types';
 
-import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { buildCollectionByKey, unique } from '../../util/iteratees';
-import { selectCustomEmojiForEmoji, selectStickersForEmoji, selectTabState } from '../selectors';
-import { updateTabState } from './tabs';
-
-export function updateStickerSearch<T extends GlobalState>(
-  global: T,
-  hash: string,
-  resultIds?: string[],
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-): T {
-  return updateTabState(global, {
-    stickerSearch: {
-      ...selectTabState(global, tabId).stickerSearch,
-      hash,
-      resultIds,
-    },
-  }, tabId);
-}
+import { selectCustomEmojiForEmoji, selectStickersForEmoji } from '../selectors';
 
 export function updateStickerSets<T extends GlobalState>(
   global: T,
-  category: 'added' | 'featured' | 'search',
+  category: 'added' | 'featured',
   hash: string,
   sets: ApiStickerSet[],
 ): T {
@@ -40,19 +23,6 @@ export function updateStickerSets<T extends GlobalState>(
   });
 
   const regularSetIds = sets.map((set) => set.id);
-
-  if (category === 'search') {
-    return {
-      ...global,
-      stickers: {
-        ...global.stickers,
-        setsById: {
-          ...global.stickers.setsById,
-          ...buildCollectionByKey(updatedSets, 'id'),
-        },
-      },
-    };
-  }
 
   return {
     ...global,
@@ -166,32 +136,6 @@ export function updateStickerSet<T extends GlobalState>(
       },
     },
   };
-}
-
-export function updateGifSearch<T extends GlobalState>(
-  global: T, isNew: boolean, results: ApiVideo[], nextOffset?: string,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-): T {
-  const { results: currentResults } = selectTabState(global, tabId).gifSearch;
-
-  let newResults!: ApiVideo[];
-  if (isNew || !currentResults) {
-    newResults = results;
-  } else {
-    const currentIds = new Set(currentResults.map((gif) => gif.id));
-    newResults = [
-      ...currentResults,
-      ...results.filter((gif) => !currentIds.has(gif.id)),
-    ];
-  }
-
-  return updateTabState(global, {
-    gifSearch: {
-      ...selectTabState(global, tabId).gifSearch,
-      offset: nextOffset,
-      results: newResults,
-    },
-  }, tabId);
 }
 
 export function replaceAnimatedEmojis<T extends GlobalState>(global: T, stickerSet: ApiStickerSet): T {

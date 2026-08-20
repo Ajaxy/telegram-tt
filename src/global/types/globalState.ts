@@ -12,6 +12,7 @@ import type {
   ApiConfig,
   ApiCountry,
   ApiCountryCode,
+  ApiEmojiGroup,
   ApiEmojiStatusType,
   ApiGroupCall,
   ApiMessage,
@@ -374,6 +375,8 @@ export type GlobalState = {
     featured: {
       hash?: string;
       setIds?: string[];
+      isPremium?: boolean;
+      hiddenSetId?: string;
     };
     forEmoji: {
       emoji?: string;
@@ -415,6 +418,13 @@ export type GlobalState = {
   premiumGifts?: ApiStickerSet;
   tonGifts?: ApiStickerSet;
   emojiKeywords: Record<string, EmojiKeywords | undefined>;
+
+  emojiGroups: {
+    hash?: number;
+    groups?: ApiEmojiGroup[];
+    stickerHash?: number;
+    stickerGroups?: ApiEmojiGroup[];
+  };
 
   collectibleEmojiStatuses?: {
     statuses: ApiEmojiStatusType[];

@@ -526,3 +526,9 @@ export interface ApiPasskey {
   softwareEmojiId?: string;
   lastUsageDate?: number;
 }
+
+export type ApiEmojiGroup = {
+  title: string;
+  iconEmojiId: string;
+  emoticons: string[];
+};

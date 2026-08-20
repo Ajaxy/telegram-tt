@@ -10,7 +10,6 @@ import { getStickerMediaHash } from '../../../global/helpers';
 import { selectIsAlwaysHighPriorityEmoji } from '../../../global/selectors';
 import { IS_WEBM_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { getFirstLetters } from '../../../util/textFormat';
 
 import useColorFilter from '../../../hooks/stickers/useColorFilter';
 import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorListener';
@@ -60,24 +59,26 @@ const StickerSetCover: FC<OwnProps> = ({
 
   const shouldFallbackToSticker = !hasThumbnail
     || (hasVideoThumb && !IS_WEBM_SUPPORTED && !hasAnimatedThumb && !hasStaticThumb);
-  const firstStickerHash = shouldFallbackToSticker && stickerSet.stickers?.[0]
-    && getStickerMediaHash(stickerSet.stickers[0], 'preview');
-  const firstStickerMediaData = useMedia(firstStickerHash, !isIntersecting);
+  const fallbackSticker = shouldFallbackToSticker ? stickerSet.stickers?.[0] : undefined;
 
-  const mediaHash = ((hasThumbnail && !firstStickerHash) || hasAnimatedThumb) && `stickerSet${stickerSet.id}`;
+  const mediaHash = ((hasThumbnail && !fallbackSticker) || hasAnimatedThumb) && `stickerSet${stickerSet.id}`;
   const mediaData = useMedia(mediaHash, !isIntersecting);
-  const isReady = thumbCustomEmojiId || mediaData || firstStickerMediaData;
+  const fallbackStickerHash = fallbackSticker && getStickerMediaHash(fallbackSticker, 'preview');
+  const fallbackStickerMediaData = useMedia(fallbackStickerHash, !isIntersecting);
+
+  const isReady = thumbCustomEmojiId || mediaData || fallbackStickerMediaData;
+  const thumbDataUri = stickerSet.thumbnail?.dataUri || fallbackSticker?.thumbnail?.dataUri;
   const transitionClassNames = useMediaTransitionDeprecated(isReady);
 
   const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
 
   useEffect(() => {
-    if (isIntersecting && !stickerSet.stickers?.length) {
+    if (isIntersecting && shouldFallbackToSticker && !stickerSet.stickers?.length) {
       loadStickers({
         stickerSetInfo: stickerSet,
       });
     }
-  }, [isIntersecting, loadStickers, stickerSet]);
+  }, [isIntersecting, shouldFallbackToSticker, loadStickers, stickerSet]);
 
   return (
     <div
@@ -116,16 +117,21 @@ const StickerSetCover: FC<OwnProps> = ({
           />
         ) : (
           <img
-            src={mediaData || firstStickerMediaData}
+            src={mediaData || fallbackStickerMediaData}
             style={colorFilter}
             className={buildClassName(styles.image, transitionClassNames)}
             alt=""
             draggable={false}
           />
         )
-      ) : (
-        getFirstLetters(stickerSet.title, 2)
-      )}
+      ) : thumbDataUri ? (
+        <img
+          src={thumbDataUri}
+          className={styles.image}
+          alt=""
+          draggable={false}
+        />
+      ) : undefined}
     </div>
   );
 };

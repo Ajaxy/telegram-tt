@@ -316,6 +316,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.chats.lastMessageIds = initialState.chats.lastMessageIds;
   }
 
+  if (!cached.emojiGroups) {
+    cached.emojiGroups = initialState.emojiGroups;
+  }
+
   // Clear old color storage to optimize cache size
   if (untypedCached?.appConfig.peerColors) {
     untypedCached.appConfig.peerColors = undefined;
@@ -604,6 +608,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
       'topPeerCategories',
       'recentEmojis',
       'recentCustomEmojis',
+      'emojiGroups',
       'push',
       'serviceNotifications',
       'attachmentSettings',
@@ -669,11 +674,14 @@ export function serializeShared(sharedState: SharedState) {
 }
 
 function reduceStickers<T extends GlobalState>(global: T): GlobalState['stickers'] {
-  const { diceSetIdByEmoji, setsById } = global.stickers;
+  const { diceSetIdByEmoji, setsById, featured } = global.stickers;
   return {
     ...INITIAL_GLOBAL_STATE.stickers,
     diceSetIdByEmoji,
     setsById: pickTruthy(setsById, Object.values(diceSetIdByEmoji || {})),
+    featured: {
+      hiddenSetId: featured.hiddenSetId,
+    },
   };
 }
 

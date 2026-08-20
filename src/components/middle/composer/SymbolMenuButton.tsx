@@ -83,8 +83,6 @@ const SymbolMenuButton: FC<OwnProps> = ({
   closeSendAsMenu,
 }) => {
   const {
-    setStickerSearchQuery,
-    setGifSearchQuery,
     addRecentEmoji,
     addRecentCustomEmoji,
   } = getActions();
@@ -123,16 +121,6 @@ const SymbolMenuButton: FC<OwnProps> = ({
     if (!triggerEl) return;
     const { x, y } = triggerEl.getBoundingClientRect();
     setContextMenuAnchor({ x, y });
-  });
-
-  const handleSearchOpen = useLastCallback((type: 'stickers' | 'gifs') => {
-    if (type === 'stickers') {
-      setStickerSearchQuery({ query: '' });
-      setGifSearchQuery({ query: undefined });
-    } else {
-      setGifSearchQuery({ query: '' });
-      setStickerSearchQuery({ query: undefined });
-    }
   });
 
   const handleSymbolMenuOpen = useLastCallback(() => {
@@ -175,7 +163,6 @@ const SymbolMenuButton: FC<OwnProps> = ({
         onGifSelect={onGifSelect}
         onGifAddCaption={onGifAddCaption}
         onRemoveSymbol={onRemoveSymbol}
-        onSearchOpen={handleSearchOpen}
         addRecentEmoji={addRecentEmoji}
         addRecentCustomEmoji={addRecentCustomEmoji}
         isAttachmentModal={isAttachmentModal}

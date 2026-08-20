@@ -1,12 +1,77 @@
 .root {
   --emoji-size: 2.25rem;
+  --custom-emoji-picker-header-height: 3rem;
 
+  overflow: hidden;
   height: 100%;
   max-height: calc(100 * var(--vh));
 
   :global(.symbol-set-container) {
     --symbol-set-gap-size: 0.625rem;
   }
+}
+
+.inner {
+  transform: translateY(0);
+
+  display: flex;
+  flex-direction: column;
+
+  height: calc(100% + var(--custom-emoji-picker-header-height));
+
+  transition: transform var(--select-transition);
+}
+
+.statusPickerInner {
+  height: 100%;
+
+  &.searchActive {
+    height: calc(100% + var(--custom-emoji-picker-header-height));
+  }
+}
+
+.pickerHeader {
+  flex-shrink: 0;
+}
+
+.search {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.headerItems .coverIcon:global(.StickerButton) {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.searchActive {
+  transform: translateY(calc(-1 * var(--custom-emoji-picker-header-height)));
+
+  .headerItems {
+    pointer-events: none;
+  }
+}
+
+.headerItems {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.listWithSearch {
+  scrollbar-gutter: stable;
+
+  overflow-x: hidden;
+  flex-grow: 1;
+
+  height: auto !important;
+  min-height: 0;
+  padding-bottom: calc(0.5rem + var(--custom-emoji-picker-header-height));
+}
+
+.contentTransition {
+  height: auto;
+  min-height: calc(100% - 3.375rem);
 }
 
 .activated {

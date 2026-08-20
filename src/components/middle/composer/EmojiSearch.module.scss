@@ -1,0 +1,160 @@
+.root {
+  position: relative;
+
+  overflow: hidden;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+
+  height: 2.375rem;
+  margin-block: 0.75rem;
+  padding-inline-start: 0.75rem;
+  border-radius: 1.1875rem;
+
+  background-color: #00000010;
+
+  :global(.theme-dark) & {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.iconContainer {
+  position: relative;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.leadingIcon {
+  position: absolute;
+  inset: 0;
+
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+
+  opacity: 1;
+
+  transition: opacity var(--select-transition);
+}
+
+.backIcon {
+  cursor: var(--custom-cursor, pointer);
+}
+
+.spinner {
+  --spinner-size: 1.5rem;
+
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  transition: opacity var(--select-transition);
+}
+
+.iconHidden {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.input {
+  flex-grow: 1;
+
+  height: 100%;
+  padding: 0 0.75rem 0 0.5rem;
+  border: none;
+  border-radius: inherit;
+
+  font-size: 1rem;
+  color: var(--color-text);
+
+  background: transparent;
+  outline: none;
+  caret-color: var(--color-primary);
+
+  &::placeholder {
+    color: var(--color-placeholders);
+  }
+}
+
+.clearButton {
+  flex-shrink: 0;
+  margin-inline-end: 0.3125rem;
+  transition: opacity var(--select-transition);
+}
+
+.chips {
+  position: absolute;
+  z-index: 1;
+  inset-block: 0;
+  inset-inline-start: 3rem;
+  inset-inline-end: 0;
+
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+
+  opacity: 1;
+
+  transition: opacity var(--select-transition);
+}
+
+.chipsMaskStart {
+  mask-image: linear-gradient(to right, transparent 0, #000 0.75rem);
+}
+
+.chipsRtl.chipsMaskStart {
+  mask-image: linear-gradient(to left, transparent 0, #000 0.75rem);
+}
+
+.chipsHidden {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.inputSurface {
+  cursor: text;
+
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+
+  min-width: 8rem;
+  height: 100%;
+  padding-inline-end: 0.5rem;
+
+  font-size: 1rem;
+  color: var(--color-placeholders);
+  white-space: nowrap;
+}
+
+.chip {
+  --custom-emoji-size: 1.625rem;
+
+  cursor: var(--custom-cursor, pointer);
+
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+
+  color: var(--color-text);
+
+  opacity: 0.3;
+
+  transition: opacity var(--select-transition), background-color var(--select-transition);
+
+  &:hover {
+    opacity: 0.5;
+    background-color: rgba(var(--color-text-secondary-rgb), 0.08);
+  }
+}
+
+.chipActive {
+  opacity: 0.8;
+  background-color: rgba(var(--color-text-secondary-rgb), 0.12);
+}

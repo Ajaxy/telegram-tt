@@ -1,0 +1,83 @@
+.root {
+  padding-bottom: var(--inline-set-bottom-padding, 1.25rem);
+}
+
+.header {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  overflow: hidden;
+
+  margin: 0;
+  padding-inline-start: 0.25rem;
+
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  color: rgba(var(--color-text-secondary-rgb), 0.75);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grid {
+  display: grid;
+  grid-auto-rows: var(--inline-set-item-size, 4.5rem);
+  grid-template-columns: repeat(auto-fill, var(--inline-set-item-size, 4.5rem));
+  row-gap: 0.25rem;
+  column-gap: 0.25rem;
+  justify-content: space-between;
+
+  > :global(.StickerButton.custom-emoji) {
+    margin: 0;
+  }
+}
+
+.toggleButton {
+  --button-background-color: rgb(var(--color-primary-shade-rgb));
+  --button-text-color: var(--color-white);
+  --button-active-background-color: rgba(var(--color-primary-shade-rgb), 0.85);
+  --button-active-text-color: var(--color-white);
+
+  position: absolute;
+  z-index: 3;
+  bottom: var(--inline-set-toggle-bottom, 0.75rem);
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: max-content;
+
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: width 0.25s ease-out, background-color 0.25s ease-out;
+
+  &:global(.danger) {
+    --button-background-color: var(--color-error);
+    --button-text-color: var(--color-white);
+    --button-active-background-color: var(--color-error-shade);
+    --button-active-text-color: var(--color-white);
+  }
+}
+
+.toggleMeasure {
+  pointer-events: none;
+  position: absolute;
+  white-space: nowrap;
+  visibility: hidden;
+}
+
+.toggleTransition {
+  overflow: hidden;
+}
+
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
+  white-space: nowrap;
+}

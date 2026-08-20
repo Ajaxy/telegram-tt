@@ -86,6 +86,7 @@ export interface ApiStickerSet {
   hasStaticThumb?: boolean;
   hasAnimatedThumb?: boolean;
   hasVideoThumb?: boolean;
+  thumbnail?: ApiThumbnail;
   thumbCustomEmojiId?: string;
   count: number;
   stickers?: ApiSticker[];

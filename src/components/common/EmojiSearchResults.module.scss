@@ -1,0 +1,29 @@
+.grid {
+  padding-top: 0.25rem;
+}
+
+.noResults {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 3rem 0;
+
+  color: var(--color-text-secondary);
+}
+
+.customCell {
+  --custom-emoji-size: 2.25rem;
+
+  cursor: var(--custom-cursor, pointer);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 0.5rem;
+
+  &:hover {
+    background-color: var(--color-interactive-element-hover);
+  }
+}

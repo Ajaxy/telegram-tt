@@ -29,6 +29,7 @@ export type AnimateScrollArgs = {
   forceDuration?: number;
   forceNormalContainerHeight?: boolean;
   shouldReturnMutationFn?: boolean;
+  noHeavyAnimation?: boolean;
 };
 
 let isAnimating = false;
@@ -82,6 +83,7 @@ function createMutateFunction(args: AnimateScrollArgs) {
     maxDistance = SCROLL_MAX_DISTANCE,
     forceDirection,
     forceNormalContainerHeight,
+    noHeavyAnimation,
   } = args;
 
   let forceDuration = args.forceDuration;
@@ -183,7 +185,7 @@ function createMutateFunction(args: AnimateScrollArgs) {
     });
 
     const prevOnHeavyAnimationEnd = onHeavyAnimationEnd;
-    onHeavyAnimationEnd = beginHeavyAnimation(undefined, true);
+    onHeavyAnimationEnd = noHeavyAnimation ? undefined : beginHeavyAnimation(undefined, true);
     prevOnHeavyAnimationEnd?.();
 
     animateSingle(() => {

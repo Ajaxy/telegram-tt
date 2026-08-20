@@ -167,18 +167,6 @@ export type TabState = {
   shouldInit: boolean;
   shouldSkipHistoryAnimations?: boolean;
 
-  gifSearch: {
-    query?: string;
-    offset?: string;
-    results?: ApiVideo[];
-  };
-
-  stickerSearch: {
-    query?: string;
-    hash?: string;
-    resultIds?: string[];
-  };
-
   shouldCloseRightColumn?: boolean;
   chatInfo: {
     isOpen: boolean;

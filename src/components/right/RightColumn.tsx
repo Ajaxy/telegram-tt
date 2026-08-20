@@ -32,7 +32,6 @@ import Transition from '../ui/Transition';
 import AddChatMembers from './AddChatMembers';
 import CreateTopic from './CreateTopic.async';
 import EditTopic from './EditTopic.async';
-import GifSearch from './GifSearch.async';
 import Management from './management/Management.async';
 import PollResults from './PollResults.async';
 import Profile from './Profile';
@@ -42,7 +41,6 @@ import MessageStatistics from './statistics/MessageStatistics.async';
 import MonetizationStatistics from './statistics/MonetizationStatistics';
 import Statistics from './statistics/Statistics.async';
 import StoryStatistics from './statistics/StoryStatistics.async';
-import StickerSearch from './StickerSearch.async';
 
 import './RightColumn.scss';
 
@@ -68,13 +66,6 @@ type StateProps = {
 const MAIN_SCREENS_COUNT = Object.keys(RightColumnContent).length / 2;
 const MANAGEMENT_SCREENS_COUNT = Object.keys(ManagementScreens).length / 2;
 
-function blurSearchInput() {
-  const searchInput = document.querySelector('.RightHeader .SearchInput input') as HTMLInputElement;
-  if (searchInput) {
-    searchInput.blur();
-  }
-}
-
 const RightColumn: FC<OwnProps & StateProps> = ({
   contentKey,
   chatId,
@@ -93,8 +84,6 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const {
     toggleChatInfo,
     toggleManagement,
-    setStickerSearchQuery,
-    setGifSearchQuery,
     closePollResults,
     addChatMembers,
     setNewChatMembersDialogState,
@@ -131,8 +120,6 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const isStoryStatistics = contentKey === RightColumnContent.StoryStatistics;
   const isBoostStatistics = contentKey === RightColumnContent.BoostStatistics;
   const isMonetizationStatistics = contentKey === RightColumnContent.MonetizationStatistics;
-  const isStickerSearch = contentKey === RightColumnContent.StickerSearch;
-  const isGifSearch = contentKey === RightColumnContent.GifSearch;
   const isPollResults = contentKey === RightColumnContent.PollResults;
   const isAddingChatMembers = contentKey === RightColumnContent.AddingMembers;
   const isCreatingTopic = contentKey === RightColumnContent.CreateTopic;
@@ -268,15 +255,6 @@ const RightColumn: FC<OwnProps & StateProps> = ({
       case RightColumnContent.MonetizationStatistics:
         closeMonetizationStatistics();
         break;
-      case RightColumnContent.StickerSearch:
-        blurSearchInput();
-        setStickerSearchQuery({ query: undefined });
-        break;
-      case RightColumnContent.GifSearch: {
-        blurSearchInput();
-        setGifSearchQuery({ query: undefined });
-        break;
-      }
       case RightColumnContent.PollResults:
         closePollResults();
         break;
@@ -396,10 +374,6 @@ const RightColumn: FC<OwnProps & StateProps> = ({
         return <MessageStatistics chatId={chatId!} isActive={isOpen && isActive} />;
       case RightColumnContent.StoryStatistics:
         return <StoryStatistics chatId={chatId!} isActive={isOpen && isActive} />;
-      case RightColumnContent.StickerSearch:
-        return <StickerSearch onClose={close} isActive={isOpen && isActive} />;
-      case RightColumnContent.GifSearch:
-        return <GifSearch onClose={close} isActive={isOpen && isActive} />;
       case RightColumnContent.PollResults:
         return <PollResults onClose={close} isActive={isOpen && isActive} />;
       case RightColumnContent.CreateTopic:
@@ -432,8 +406,6 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           isMonetizationStatistics={isMonetizationStatistics}
           isMessageStatistics={isMessageStatistics}
           isStoryStatistics={isStoryStatistics}
-          isStickerSearch={isStickerSearch}
-          isGifSearch={isGifSearch}
           isPollResults={isPollResults}
           isCreatingTopic={isCreatingTopic}
           isEditingTopic={isEditingTopic}

@@ -25,7 +25,6 @@ import './ui/bots';
 import './ui/messages';
 import './ui/globalSearch';
 import './ui/middleSearch';
-import './ui/stickerSearch';
 import './ui/account';
 import './ui/aiMessageEditor';
 import './ui/users';

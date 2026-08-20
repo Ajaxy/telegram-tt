@@ -165,17 +165,16 @@ export interface ActionPayloads {
   loginWithPasskey: undefined;
 
   // stickers & GIFs
-  setStickerSearchQuery: { query?: string } & WithTabId;
   saveGif: {
     gif: ApiVideo;
     shouldUnsave?: boolean;
   } & WithTabId;
-  setGifSearchQuery: { query?: string } & WithTabId;
-  searchMoreGifs: WithTabId | undefined;
   faveSticker: { sticker: ApiSticker } & WithTabId;
   unfaveSticker: { sticker: ApiSticker };
   toggleStickerSet: { stickerSetId: string };
   loadEmojiKeywords: { language: string };
+  loadEmojiSearchGroups: undefined;
+  loadEmojiStickerGroups: undefined;
 
   // groups
   togglePreHistoryHidden: {
@@ -2178,6 +2177,7 @@ export interface ActionPayloads {
   loadRecentStickers: undefined;
   loadFavoriteStickers: undefined;
   loadFeaturedStickers: undefined;
+  hideTrendingStickers: undefined;
   loadDiceStickers: undefined;
 
   reorderStickerSets: {

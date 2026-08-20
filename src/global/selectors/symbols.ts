@@ -1,11 +1,9 @@
 import type { ApiSticker, ApiStickerSet, ApiStickerSetInfo } from '../../api/types';
-import type { GlobalState, TabArgs } from '../types';
+import type { GlobalState } from '../types';
 
 import { RESTRICTED_EMOJI_SET_ID, TON_CURRENCY_CODE } from '../../config';
 import { hasMixedEmojiSkinTones, removeEmojiSkinTone } from '../../util/emoji/skinTone';
-import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { convertCurrencyFromBaseUnit } from '../../util/formatCurrency';
-import { selectTabState } from './tabs';
 import { selectIsCurrentUserPremium } from './users';
 
 // Duration in days
@@ -41,20 +39,6 @@ const TON_EMOTICON: Record<number, string> = {
 export function selectIsStickerFavorite<T extends GlobalState>(global: T, sticker: ApiSticker) {
   const { stickers } = global.stickers.favorite;
   return stickers && stickers.some(({ id }) => id === sticker.id);
-}
-
-export function selectCurrentStickerSearch<T extends GlobalState>(
-  global: T,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  return selectTabState(global, tabId).stickerSearch;
-}
-
-export function selectCurrentGifSearch<T extends GlobalState>(
-  global: T,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  return selectTabState(global, tabId).gifSearch;
 }
 
 export function selectStickerSet<T extends GlobalState>(global: T, id: string | ApiStickerSetInfo) {

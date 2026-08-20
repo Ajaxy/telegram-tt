@@ -2,14 +2,13 @@ import type {
   ApiError, ApiSticker, ApiStickerSet, ApiStickerSetInfo,
 } from '../../../api/types';
 import type { RequiredGlobalActions } from '../../index';
-import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
+import type { ActionReturnType, GlobalState } from '../../types';
 
 import { BIRTHDAY_NUMBERS_SET, RESTRICTED_EMOJI_SET } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import * as langProvider from '../../../util/oldLangProvider';
 import { pause, throttle } from '../../../util/schedulers';
-import searchWords from '../../../util/searchWords';
 import { callApi } from '../../../api/gramjs';
 import {
   addActionHandler,
@@ -20,9 +19,7 @@ import {
   replaceAnimatedEmojis,
   updateCustomEmojiForEmoji,
   updateCustomEmojiSets,
-  updateGifSearch,
   updateRecentStatusCustomEmojis,
-  updateStickerSearch,
   updateStickerSet,
   updateStickerSets,
   updateStickersForEmoji,
@@ -35,8 +32,9 @@ import { selectCurrentLimit, selectPremiumLimit } from '../../selectors/limits';
 
 const ADDED_SETS_THROTTLE = 200;
 const ADDED_SETS_THROTTLE_CHUNK = 10;
+const SEARCH_THROTTLE = 500;
 
-const searchThrottled = throttle((cb) => cb(), 500, false);
+const searchThrottled = throttle((cb) => cb(), SEARCH_THROTTLE, false);
 
 addActionHandler('loadStickerSets', async (global, actions): Promise<void> => {
   const [addedStickers, addedCustomEmojis] = await Promise.all([
@@ -195,7 +193,36 @@ addActionHandler('loadFeaturedStickers', async (global): Promise<void> => {
     featuredStickers.hash,
     featuredStickers.sets,
   );
+  global = {
+    ...global,
+    stickers: {
+      ...global.stickers,
+      featured: {
+        ...global.stickers.featured,
+        setIds: featuredStickers.sets.map(({ id }) => id),
+        isPremium: featuredStickers.isPremium,
+      },
+    },
+  };
   setGlobal(global);
+});
+
+addActionHandler('hideTrendingStickers', (global): ActionReturnType => {
+  const { setIds } = global.stickers.featured;
+  if (!setIds?.length) {
+    return undefined;
+  }
+
+  return {
+    ...global,
+    stickers: {
+      ...global.stickers,
+      featured: {
+        ...global.stickers.featured,
+        hiddenSetId: setIds[0],
+      },
+    },
+  };
 });
 
 addActionHandler('loadDiceStickers', async (global): Promise<void> => {
@@ -626,6 +653,52 @@ addActionHandler('loadEmojiKeywords', async (global, actions, payload): Promise<
   setGlobal(global);
 });
 
+addActionHandler('loadEmojiSearchGroups', async (global, actions): Promise<void> => {
+  const result = await callApi('fetchEmojiGroups', { hash: global.emojiGroups.hash });
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = {
+    ...global,
+    emojiGroups: {
+      ...global.emojiGroups,
+      hash: result.hash,
+      groups: result.groups,
+    },
+  };
+  setGlobal(global);
+
+  const iconIds = result.groups.map(({ iconEmojiId }) => iconEmojiId);
+  if (iconIds.length) {
+    actions.loadCustomEmojis({ ids: iconIds });
+  }
+});
+
+addActionHandler('loadEmojiStickerGroups', async (global, actions): Promise<void> => {
+  const result = await callApi('fetchEmojiStickerGroups', { hash: global.emojiGroups.stickerHash });
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = {
+    ...global,
+    emojiGroups: {
+      ...global.emojiGroups,
+      stickerHash: result.hash,
+      stickerGroups: result.groups,
+    },
+  };
+  setGlobal(global);
+
+  const iconIds = result.groups.map(({ iconEmojiId }) => iconEmojiId);
+  if (iconIds.length) {
+    actions.loadCustomEmojis({ ids: iconIds });
+  }
+});
+
 async function loadRecentStickers<T extends GlobalState>(global: T, hash?: string) {
   const recentStickers = await callApi('fetchRecentStickers', { hash });
   if (!recentStickers) {
@@ -692,68 +765,6 @@ async function loadStickers<T extends GlobalState>(
 
   setGlobal(global);
 }
-
-addActionHandler('setStickerSearchQuery', (global, actions, payload): ActionReturnType => {
-  const { query, tabId = getCurrentTabId() } = payload;
-
-  if (query) {
-    void searchThrottled(async () => {
-      const result = await callApi('searchStickers', { query });
-      if (!result) {
-        return;
-      }
-
-      global = getGlobal();
-      const { setsById, added } = global.stickers;
-
-      const resultIds = result.sets.map(({ id }) => id);
-
-      if (added.setIds) {
-        added.setIds.forEach((id) => {
-          if (!resultIds.includes(id)) {
-            const { title } = setsById[id] || {};
-            if (title && searchWords(title, query)) {
-              resultIds.unshift(id);
-            }
-          }
-        });
-      }
-
-      global = updateStickerSets(
-        global,
-        'search',
-        result.hash,
-        result.sets,
-      );
-
-      global = updateStickerSearch(global, result.hash, resultIds, tabId);
-      setGlobal(global);
-    });
-  }
-});
-
-addActionHandler('setGifSearchQuery', (global, actions, payload): ActionReturnType => {
-  const { query, tabId = getCurrentTabId() } = payload;
-
-  if (typeof query === 'string') {
-    void searchThrottled(() => {
-      global = getGlobal();
-      searchGifs(global, query, global.config?.gifSearchUsername, undefined, tabId);
-    });
-  }
-});
-
-addActionHandler('searchMoreGifs', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const { query, offset } = selectTabState(global, tabId).gifSearch;
-
-  if (typeof query === 'string') {
-    void searchThrottled(() => {
-      global = getGlobal();
-      searchGifs(global, query, global.config?.gifSearchUsername, offset, tabId);
-    });
-  }
-});
 
 addActionHandler('loadStickersForEmoji', (global, actions, payload): ActionReturnType => {
   const { emoji } = payload;
@@ -869,15 +880,3 @@ addActionHandler('loadRecentEmojiStatuses', async (global): Promise<void> => {
   global = updateRecentStatusCustomEmojis(global, result.hash, result.emojiStatuses!);
   setGlobal(global);
 });
-
-async function searchGifs<T extends GlobalState>(global: T, query: string, botUsername?: string, offset?: string,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>) {
-  const result = await callApi('searchGifs', { query, offset, username: botUsername });
-  if (!result) {
-    return;
-  }
-
-  global = getGlobal();
-  global = updateGifSearch(global, !offset, result.gifs, result.nextOffset, tabId);
-  setGlobal(global);
-}

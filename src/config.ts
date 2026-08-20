@@ -253,6 +253,7 @@ export const STICKER_SIZE_INLINE_BOT_RESULT = 100;
 export const STICKER_SIZE_JOIN_REQUESTS = 140;
 export const STICKER_SIZE_INVITES = 140;
 export const RECENT_STICKERS_LIMIT = 20;
+export const GLOBAL_STICKER_SEARCH_LIMIT = 100;
 export const RECENT_STATUS_LIMIT = 20;
 export const EMOJI_STATUS_LOOP_LIMIT = 2;
 export const EMOJI_SIZES = 7;

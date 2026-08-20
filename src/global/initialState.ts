@@ -281,6 +281,8 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
 
   emojiKeywords: {},
 
+  emojiGroups: {},
+
   gifs: {
     saved: {},
   },
@@ -359,9 +361,6 @@ export const INITIAL_TAB_STATE: TabState = {
   newChatMembersProgress: NewChatMembersProgress.Closed,
   uiReadyState: 0,
   shouldInit: true,
-
-  gifSearch: {},
-  stickerSearch: {},
 
   messageLists: [],
   activeChatFolder: 0,

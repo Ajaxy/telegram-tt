@@ -3,8 +3,37 @@
 .root {
   --color-primary: var(--color-text);
   --emoji-size: 4.5rem;
+  --sticker-picker-header-height: 3rem;
+  --inline-set-bottom-padding: 3.25rem;
 
+  overflow: hidden;
   height: 100%;
+}
+
+.inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.withSearch {
+  --inline-set-toggle-bottom: calc(0.75rem + var(--sticker-picker-header-height));
+
+  transform: translateY(0);
+  height: calc(100% + var(--sticker-picker-header-height));
+  transition: transform var(--select-transition);
+}
+
+.searchActive {
+  --inline-set-toggle-bottom: 0.75rem;
+  --inline-set-bottom-padding: 0.25rem;
+
+  transform: translateY(calc(-1 * var(--sticker-picker-header-height)));
+
+  .header {
+    pointer-events: none;
+  }
 }
 
 .main {
@@ -20,8 +49,14 @@
 
   @include mixins.adapt-padding-to-scrollbar(0.25rem);
 
-  &.hasHeader {
-    height: calc(100% - 3rem);
+  &.mainWithSearch {
+    scrollbar-gutter: stable;
+
+    flex-grow: 1;
+
+    height: auto;
+    min-height: 0;
+    padding-bottom: var(--sticker-picker-header-height);
   }
 
   &_customEmoji {
@@ -41,8 +76,9 @@
 
   overflow-x: auto;
   overflow-y: hidden;
+  flex-shrink: 0;
 
-  height: 3rem;
+  height: var(--sticker-picker-header-height, 3rem);
   padding: 0 0.375rem;
 
   white-space: nowrap;
@@ -82,7 +118,7 @@
   }
 }
 
-.stickerCover {
+.header .stickerCover {
   display: inline-grid;
   grid-template-areas: "cover";
   align-items: center;
@@ -96,18 +132,6 @@
 
   vertical-align: middle;
 
-  &:global(.StickerButton) {
-    background-size: 1.875rem;
-
-    :global(.sticker-media),
-    :global(.AnimatedSticker) {
-      position: static;
-      grid-area: cover;
-      width: 1.875rem;
-      height: 1.875rem;
-    }
-  }
-
   &.activated {
     color: var(--color-text-lighter);
     background-color: var(--color-interactive-element-hover);
@@ -116,6 +140,113 @@
       --color-text-lighter: var(--color-text);
     }
   }
+}
+
+.header .stickerCoverSticker {
+  background-size: 1.875rem;
+
+  :global(.sticker-media),
+  :global(.AnimatedSticker) {
+    position: static;
+    grid-area: cover;
+    width: 1.875rem;
+    height: 1.875rem;
+  }
+}
+
+.search {
+  margin: 0.25rem 0.5rem 0.75rem;
+}
+
+.contentTransition {
+  position: relative;
+  height: auto;
+  min-height: calc(100% - 3.5rem);
+
+  > :global(.Transition_slide) {
+    height: auto;
+    background-color: var(--color-background);
+  }
+}
+
+.foundPacks {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
+  display: flex;
+  gap: 0.375rem;
+  align-items: flex-start;
+
+  margin-bottom: 0.5rem;
+}
+
+.foundPack {
+  display: flex !important;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 0.25rem;
+  align-items: center;
+
+  width: 4.5rem !important;
+  height: auto !important;
+  padding: 0.375rem 0.125rem !important;
+  border-radius: 0.75rem !important;
+}
+
+.foundPackCover:global(.StickerButton) {
+  width: 3rem;
+  height: 3rem;
+}
+
+.foundPackTitle {
+  overflow: hidden;
+
+  max-width: 100%;
+
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resultSection {
+  margin-bottom: 0.5rem;
+}
+
+.trendingClose {
+  flex-shrink: 0;
+}
+
+.trendingPack {
+  flex-shrink: 0;
+
+  width: 2.125rem !important;
+  height: 2.125rem !important;
+  padding: 0.3125rem !important;
+  border-radius: var(--border-radius-messages-small) !important;
+}
+
+.trendingPackCover:global(.StickerButton) {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.resultSectionTitle {
+  margin: 0 0 0.25rem;
+  padding-inline-start: 0.25rem;
+
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.resultGrid {
+  display: grid;
+  grid-auto-rows: var(--emoji-size, 4.5rem);
+  grid-template-columns: repeat(auto-fill, var(--emoji-size, 4.5rem));
+  row-gap: 0.25rem;
+  column-gap: var(--symbol-set-gap-size, 0.25rem);
+  justify-content: space-between;
 }
 
 .pickerDisabled {

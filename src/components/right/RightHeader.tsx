@@ -19,8 +19,6 @@ import {
   selectCanUseGiftProfileFilter,
   selectChat,
   selectChatFullInfo,
-  selectCurrentGifSearch,
-  selectCurrentStickerSearch,
   selectIsChatWithSelf,
   selectTabState,
   selectTopic,
@@ -44,7 +42,6 @@ import ConfirmDialog from '../ui/ConfirmDialog';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import MenuSeparator from '../ui/MenuSeparator';
-import SearchInput from '../ui/SearchInput';
 import Transition from '../ui/Transition';
 
 import './RightHeader.scss';
@@ -60,8 +57,6 @@ type OwnProps = {
   isMessageStatistics?: boolean;
   isMonetizationStatistics?: boolean;
   isStoryStatistics?: boolean;
-  isStickerSearch?: boolean;
-  isGifSearch?: boolean;
   isPollResults?: boolean;
   isCreatingTopic?: boolean;
   isEditingTopic?: boolean;
@@ -80,8 +75,6 @@ type StateProps = {
   isChannel?: boolean;
   userId?: string;
   isSelf?: boolean;
-  stickerSearchQuery?: string;
-  gifSearchQuery?: string;
   isEditingInvite?: boolean;
   currentInviteInfo?: ApiExportedInvite;
   shouldSkipHistoryAnimations?: boolean;
@@ -126,8 +119,6 @@ enum HeaderContent {
   ManageGroupNewAdminRights,
   ManageGroupMembers,
   ManageGroupAddAdmins,
-  StickerSearch,
-  GifSearch,
   PollResults,
   AddingMembers,
   ManageInvites,
@@ -152,8 +143,6 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isStoryStatistics,
   isMonetizationStatistics,
   isBoostStatistics,
-  isStickerSearch,
-  isGifSearch,
   isPollResults,
   isCreatingTopic,
   isEditingTopic,
@@ -166,8 +155,6 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isSelf,
   canManage,
   isChannel,
-  stickerSearchQuery,
-  gifSearchQuery,
   isEditingInvite,
   canViewStatistics,
   currentInviteInfo,
@@ -185,8 +172,6 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   onScreenSelect,
 }) => {
   const {
-    setStickerSearchQuery,
-    setGifSearchQuery,
     toggleManagement,
     openAddContactDialog,
     toggleStatistics,
@@ -221,14 +206,6 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     deleteExportedChatInvite({ chatId: chatId!, link: currentInviteInfo!.link });
     onScreenSelect(ManagementScreens.Invites);
     closeDeleteDialog();
-  });
-
-  const handleStickerSearchQueryChange = useLastCallback((query: string) => {
-    setStickerSearchQuery({ query });
-  });
-
-  const handleGifSearchQueryChange = useLastCallback((query: string) => {
-    setGifSearchQuery({ query });
   });
 
   const handleAddContact = useLastCallback(() => {
@@ -284,10 +261,6 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     ) : -1 // Never reached
   ) : isPollResults ? (
     HeaderContent.PollResults
-  ) : isStickerSearch ? (
-    HeaderContent.StickerSearch
-  ) : isGifSearch ? (
-    HeaderContent.GifSearch
   ) : isAddingChatMembers ? (
     HeaderContent.AddingMembers
   ) : isManagement ? (
@@ -492,24 +465,6 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         return <h3 className="title">{isChannel ? oldLang('SubscribeRequests') : oldLang('MemberRequests')}</h3>;
       case HeaderContent.ManageGroupAddAdmins:
         return <h3 className="title">{oldLang('Channel.Management.AddModerator')}</h3>;
-      case HeaderContent.StickerSearch:
-        return (
-          <SearchInput
-            value={stickerSearchQuery}
-            placeholder={oldLang('SearchStickersHint')}
-            autoFocusSearch
-            onChange={handleStickerSearchQueryChange}
-          />
-        );
-      case HeaderContent.GifSearch:
-        return (
-          <SearchInput
-            value={gifSearchQuery}
-            placeholder={oldLang('SearchGifsTitle')}
-            autoFocusSearch
-            onChange={handleGifSearchQueryChange}
-          />
-        );
       case HeaderContent.Statistics:
         return <h3 className="title">{oldLang(isChannel ? 'ChannelStats.Title' : 'GroupStats.Title')}</h3>;
       case HeaderContent.MessageStatistics:
@@ -733,8 +688,6 @@ export default withGlobal<OwnProps>(
     chatId, isProfile, isManagement, threadId,
   }): Complete<StateProps> => {
     const tabState = selectTabState(global);
-    const { query: stickerSearchQuery } = selectCurrentStickerSearch(global) || {};
-    const { query: gifSearchQuery } = selectCurrentGifSearch(global) || {};
     const chat = chatId ? selectChat(global, chatId) : undefined;
     const user = isProfile && chatId && isUserId(chatId) ? selectUser(global, chatId) : undefined;
     const isChannel = chat && isChatChannel(chat);
@@ -770,8 +723,6 @@ export default withGlobal<OwnProps>(
       canEditTopic,
       userId: user?.id,
       isSelf: user?.isSelf,
-      stickerSearchQuery,
-      gifSearchQuery,
       isEditingInvite,
       currentInviteInfo,
       isSavedMessages,

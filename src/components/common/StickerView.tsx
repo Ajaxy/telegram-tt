@@ -120,9 +120,12 @@ const StickerView = ({
   }
 
   const cachedPreview = mediaLoader.getFromMemory(previewMediaHash);
-  const isReadyToMountFullMedia = useMountAfterHeavyAnimation(hasIntersectedForPlayingRef.current);
+  const isMountedAfterHeavyAnimation = useMountAfterHeavyAnimation(hasIntersectedForPlayingRef.current);
+  const isReadyToMountFullMedia = forceOnHeavyAnimation
+    ? hasIntersectedForPlayingRef.current
+    : isMountedAfterHeavyAnimation;
   const shouldForcePreview = !skipPreview && (isUnsupportedVideo || (isStatic ? isSmall : noPlay));
-  const shouldLoadPreview = !skipPreview && !customColor && !cachedPreview
+  const shouldLoadPreview = !skipPreview && (!customColor || shouldForcePreview) && !cachedPreview
     && (!isReadyToMountFullMedia || shouldForcePreview);
   const previewMediaData = useMedia(previewMediaHash, !shouldLoadPreview);
   const withPreview = !skipPreview && (shouldLoadPreview || cachedPreview);

@@ -1262,6 +1262,13 @@
 "NewLink" = "New Link";
 "InviteLink" = "Invite Link";
 "SearchStickersHint" = "Search sticker sets";
+"SearchStickers" = "Search Stickers";
+"StickerSearchResult" = "Search Result";
+"StickerSearchGlobalResult" = "Global Search Result";
+"NoStickersFound" = "No stickers found";
+"TrendingStickers" = "Trending Stickers";
+"TrendingPremiumStickers" = "Trending Premium Stickers";
+"AccDescrCloseTrendingStickers" = "Close trending stickers";
 "SearchGifsTitle" = "Search GIFs";
 "ChannelStatsTitle" = "Channel Statistics";
 "GroupStatsTitle" = "Group Statistics";
@@ -1376,6 +1383,12 @@
 "StickerPackRemoveStickerCount_other" = "Remove {count} stickers";
 "StickerPackAddStickerCount_one" = "Add {count} sticker";
 "StickerPackAddStickerCount_other" = "Add {count} stickers";
+"PremiumUnlockEmoji" = "Subscribe to Telegram Premium to unlock premium emoji.";
+"PremiumUnlockStickers" = "Subscribe to Telegram Premium to unlock premium stickers.";
+"StickerPackRemoveEmojiCount_one" = "Remove {count} emoji";
+"StickerPackRemoveEmojiCount_other" = "Remove {count} emoji";
+"StickerPackAddEmojiCount_one" = "Add {count} emoji";
+"StickerPackAddEmojiCount_other" = "Add {count} emoji";
 "ChatListFilterErrorEmpty" = "Please add some chats or chat types to the folder.";
 "ChatListFilterErrorTitleEmpty" = "Please enter title for this folder.";
 "FilterMuted" = "Muted";
@@ -1411,6 +1424,8 @@
 "Emoji6" = "Objects";
 "Emoji7" = "Symbols";
 "Emoji8" = "Flags";
+"SearchEmoji" = "Search Emoji";
+"NoEmojiFound" = "No emoji found";
 "GroupInfoDeleteAndExit" = "Delete and Leave";
 "HidAccount" = "The account was hidden by the user";
 "ChatOutgoingContextMixedReactionCount" = "{count}/{total} reacted";

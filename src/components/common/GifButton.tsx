@@ -17,6 +17,7 @@ import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
+import useMediaTransition from '../../hooks/useMediaTransition';
 import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
@@ -31,6 +32,7 @@ type OwnProps = {
   gif: ApiVideo;
   observeIntersection: ObserveFn;
   isDisabled?: boolean;
+  noSpinner?: boolean;
   className?: string;
   isSavedMessages?: boolean;
   onClick?: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
@@ -41,6 +43,7 @@ type OwnProps = {
 const GifButton = ({
   gif,
   isDisabled,
+  noSpinner,
   className,
   observeIntersection,
   isSavedMessages,
@@ -66,8 +69,10 @@ const GifButton = ({
 
   const shouldRenderVideo = Boolean(loadAndPlay && videoData);
   const { isBuffered, bufferingHandlers } = useBuffering(true);
-  const shouldRenderSpinner = loadAndPlay && !isBuffered;
+  const shouldRenderSpinner = !noSpinner && loadAndPlay && !isBuffered;
   const isVideoReady = loadAndPlay && isBuffered;
+
+  const { ref: videoRef } = useMediaTransition<HTMLVideoElement>({ hasMediaData: isVideoReady });
 
   const {
     isContextMenuOpen, contextMenuAnchor,
@@ -162,7 +167,7 @@ const GifButton = ({
           className={styles.thumbnail}
         />
       )}
-      {previewBlobUrl && !isVideoReady && (
+      {previewBlobUrl && (
         <img
           src={previewBlobUrl}
           alt=""
@@ -172,6 +177,7 @@ const GifButton = ({
       )}
       {shouldRenderVideo && (
         <OptimizedVideo
+          ref={videoRef}
           canPlay
           src={videoData}
           autoPlay

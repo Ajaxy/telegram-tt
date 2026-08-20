@@ -3,7 +3,6 @@
 .menuContent {
   --offset-y: 3.25rem !important;
   --offset-x: var(--folders-sidebar-width) !important;
-  --color-text: var(--color-primary);
   --border-radius-default: 1.25rem;
 
   left: 0.5rem;
@@ -19,7 +18,7 @@
     backdrop-filter: blur(25px);
   }
 
-  :global(.sticker-set-cover), :global(.custom-emoji) {
+  :global(.StickerButton.custom-emoji), :global(.sticker-set-cover) {
     color: var(--color-primary);
   }
 

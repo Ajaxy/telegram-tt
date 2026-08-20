@@ -58,6 +58,7 @@ export type OwnProps = {
   withSparkleEffect?: boolean;
   noSparkleAnimation?: boolean;
   noPreventDefault?: boolean;
+  noClickTransitionReset?: boolean;
   noForcedUpperCase?: boolean;
   shouldStopPropagation?: boolean;
   style?: string;
@@ -115,6 +116,7 @@ const Button = ({
   isRtl,
   isRectangular,
   noPreventDefault,
+  noClickTransitionReset,
   shouldStopPropagation,
   noForcedUpperCase,
   style,
@@ -175,6 +177,8 @@ const Button = ({
     }
 
     if (shouldStopPropagation) e.stopPropagation();
+
+    if (noClickTransitionReset) return;
 
     setIsClicked(true);
     setTimeout(() => {

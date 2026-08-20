@@ -1044,6 +1044,13 @@ export interface LangPair {
   'NewLink': undefined;
   'InviteLink': undefined;
   'SearchStickersHint': undefined;
+  'SearchStickers': undefined;
+  'StickerSearchResult': undefined;
+  'StickerSearchGlobalResult': undefined;
+  'NoStickersFound': undefined;
+  'TrendingStickers': undefined;
+  'TrendingPremiumStickers': undefined;
+  'AccDescrCloseTrendingStickers': undefined;
   'SearchGifsTitle': undefined;
   'ChannelStatsTitle': undefined;
   'GroupStatsTitle': undefined;
@@ -1127,6 +1134,8 @@ export interface LangPair {
   'MessageRepeatPeriodMonthly': undefined;
   'MessageRepeatPeriodYearly': undefined;
   'MessageScheduledRepeatPremium': undefined;
+  'PremiumUnlockEmoji': undefined;
+  'PremiumUnlockStickers': undefined;
   'ChatListFilterErrorEmpty': undefined;
   'ChatListFilterErrorTitleEmpty': undefined;
   'FilterMuted': undefined;
@@ -1155,6 +1164,8 @@ export interface LangPair {
   'Emoji6': undefined;
   'Emoji7': undefined;
   'Emoji8': undefined;
+  'SearchEmoji': undefined;
+  'NoEmojiFound': undefined;
   'GroupInfoDeleteAndExit': undefined;
   'HidAccount': undefined;
   'ConversationViewBot': undefined;
@@ -4273,6 +4284,12 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'StickerPackAddStickerCount': {
+    'count': V;
+  };
+  'StickerPackRemoveEmojiCount': {
+    'count': V;
+  };
+  'StickerPackAddEmojiCount': {
     'count': V;
   };
   'ScheduleRepeatEveryMinutes': {
