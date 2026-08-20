@@ -442,6 +442,7 @@ export type ProfileTabType =
   | 'audio'
   | 'voice'
   | 'gif'
+  | 'playlist'
   | 'stories'
   | 'storiesArchive'
   | 'similarChannels'

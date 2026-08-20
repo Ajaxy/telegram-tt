@@ -96,6 +96,7 @@ export const MESSAGE_SEARCH_SLICE = 42;
 export const GLOBAL_SEARCH_SLICE = 20;
 export const GLOBAL_TOPIC_SEARCH_SLICE = 5;
 export const MEMBERS_SLICE = 30;
+export const SAVED_MUSIC_SLICE = 30;
 export const MEMBERS_LOAD_SLICE = 200;
 export const PROFILE_SENSITIVE_AREA = 500;
 export const TOPIC_LIST_SENSITIVE_AREA = 600;

@@ -155,6 +155,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     fullInfoById: {},
     previewMediaByBotId: {},
     commonChatsById: {},
+    savedMusicByPeerId: {},
     botAppPermissionsById: {},
   },
 

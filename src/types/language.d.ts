@@ -1650,6 +1650,8 @@ export interface LangPair {
   'ProfileTabStories': undefined;
   'ProfileTabStoriesArchive': undefined;
   'ProfileTabGifts': undefined;
+  'ProfileTabPlaylist': undefined;
+  'ProfilePlaylistEmpty': undefined;
   'ProfileTabSubscribers': undefined;
   'ProfileTabMembers': undefined;
   'ProfileTabBotPreview': undefined;

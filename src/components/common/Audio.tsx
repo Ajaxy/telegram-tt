@@ -566,7 +566,7 @@ function getSeeklineSpikeAmounts(isMobile?: boolean, withAvatar?: boolean) {
   };
 }
 
-function renderAudio(
+export function renderAudio(
   lang: LangFn,
   oldLang: OldLangFn,
   audio: ApiAudio,

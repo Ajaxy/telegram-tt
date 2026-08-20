@@ -7,6 +7,7 @@ import type {
 import { toJSNumber } from '../../../util/numbers';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
+import { buildApiAudioFromDocument } from '../apiBuilders/media';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildApiUser, buildApiUserFullInfo, buildApiUserStatuses } from '../apiBuilders/users';
 import {
@@ -20,7 +21,7 @@ import {
   DEFAULT_PRIMITIVES,
   getEntityTypeById,
 } from '../gramjsBuilders';
-import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
+import { addDocumentToLocalDb, addPhotoToLocalDb, addSavedMusicRepairInfo, addUserToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';
@@ -108,6 +109,30 @@ export async function fetchCommonChats({ user, maxId }: { user: ApiUser; maxId?:
   const count = 'count' in result ? result.count : chatIds.length;
 
   return { chatIds, count };
+}
+
+export async function fetchSavedMusic({ user, offset, limit }: {
+  user: ApiUser;
+  offset: number;
+  limit: number;
+}) {
+  const result = await invokeRequest(new GramJs.users.GetSavedMusic({
+    id: buildInputUser(user.id, user.accessHash),
+    offset,
+    limit,
+    hash: DEFAULT_PRIMITIVES.BIGINT,
+  }));
+
+  if (!(result instanceof GramJs.users.SavedMusic)) {
+    return undefined;
+  }
+
+  const audios = result.documents.map((document) => {
+    addDocumentToLocalDb(addSavedMusicRepairInfo(document, user.id));
+    return document instanceof GramJs.Document ? buildApiAudioFromDocument(document) : undefined;
+  }).filter(Boolean);
+
+  return { audios, count: result.count };
 }
 
 export async function fetchPaidMessagesStarsAmount(user: ApiUser) {

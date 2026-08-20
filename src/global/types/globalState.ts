@@ -53,6 +53,7 @@ import type {
   ApiUser,
   ApiUserCommonChats,
   ApiUserFullInfo,
+  ApiUserSavedMusic,
   ApiUserStatus,
   ApiVideo,
   ApiWallpaper,
@@ -196,6 +197,7 @@ export type GlobalState = {
     statusesById: Record<string, ApiUserStatus>;
     savedMusicById?: Record<string, true>;
     isSavedMusicLoading?: boolean;
+    savedMusicByPeerId: Record<string, ApiUserSavedMusic>;
     // Obtained from GetFullUser / UserFullInfo
     fullInfoById: Record<string, ApiUserFullInfo>;
     previewMediaByBotId: Record<string, ApiBotPreviewMedia[]>;

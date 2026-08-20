@@ -1,7 +1,7 @@
 import type { API_CHAT_TYPES } from '../../config';
 import type { ApiBotInfo } from './bots';
 import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from './business';
-import type { ApiDocument, ApiFormattedText, ApiPhoto } from './messages';
+import type { ApiAudio, ApiDocument, ApiFormattedText, ApiPhoto } from './messages';
 import type {
   ApiBotVerification,
   ApiEmojiStatusType,
@@ -88,6 +88,7 @@ export interface ApiUserFullInfo {
   paidMessagesStars?: number;
   settings?: ApiPeerSettings;
   mainTab?: ApiProfileTab;
+  savedMusic?: ApiAudio;
   note?: ApiFormattedText;
   noForwardsMyEnabled?: boolean;
   noForwardsPeerEnabled?: boolean;
@@ -110,6 +111,13 @@ export interface ApiUserStatus {
 export interface ApiUserCommonChats {
   ids: string[];
   maxId?: string;
+  isFullyLoaded: boolean;
+}
+
+export interface ApiUserSavedMusic {
+  byId: Record<string, ApiAudio>;
+  ids: string[];
+  count: number;
   isFullyLoaded: boolean;
 }
 

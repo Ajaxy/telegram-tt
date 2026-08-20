@@ -170,6 +170,15 @@ export function buildInputPeerFromLocalDb(chatOrUserId: string): GramJs.TypeInpu
   return buildInputPeer(chatOrUserId, String(accessHash));
 }
 
+export function buildInputUserFromLocalDb(userId: string): GramJs.TypeInputUser | undefined {
+  const accessHash = localDb.users[userId]?.accessHash;
+  if (!accessHash) {
+    return undefined;
+  }
+
+  return buildInputUser(userId, String(accessHash));
+}
+
 export function buildInputChannelFromLocalDb(channelId: string): GramJs.TypeInputChannel | undefined {
   const channel = localDb.chats[channelId];
 

@@ -2,7 +2,7 @@ import type { ApiUser } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { ManagementProgress } from '../../../types';
 
-import { BOT_VERIFICATION_PEERS_LIMIT } from '../../../config';
+import { BOT_VERIFICATION_PEERS_LIMIT, SAVED_MUSIC_SLICE } from '../../../config';
 import { isUserId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, unique } from '../../../util/iteratees';
@@ -21,6 +21,7 @@ import {
   updateUserCommonChats,
   updateUserFullInfo,
   updateUsers,
+  updateUserSavedMusic,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -34,6 +35,7 @@ import {
   selectUser,
   selectUserCommonChats,
   selectUserFullInfo,
+  selectUserSavedMusic,
 } from '../../selectors';
 
 const PROFILE_PHOTOS_FIRST_LOAD_LIMIT = 10;
@@ -157,6 +159,40 @@ addActionHandler('loadCommonChats', async (global, actions, payload): Promise<vo
     maxId: chatIds.length ? chatIds[chatIds.length - 1] : undefined,
     ids,
     isFullyLoaded: ids.length >= count,
+  });
+
+  setGlobal(global);
+});
+
+addActionHandler('loadSavedMusic', async (global, actions, payload): Promise<void> => {
+  const { userId } = payload;
+
+  const user = selectUser(global, userId);
+  const savedMusic = selectUserSavedMusic(global, userId);
+  if (!user || savedMusic?.isFullyLoaded) {
+    return;
+  }
+
+  const result = await callApi('fetchSavedMusic', {
+    user,
+    offset: savedMusic?.ids.length || 0,
+    limit: SAVED_MUSIC_SLICE,
+  });
+  if (!result) {
+    return;
+  }
+
+  const { audios, count } = result;
+
+  const prevIds = savedMusic?.ids || [];
+  const ids = unique(prevIds.concat(audios.map(({ id }) => id)));
+
+  global = getGlobal();
+  global = updateUserSavedMusic(global, userId, {
+    byId: { ...savedMusic?.byId, ...buildCollectionByKey(audios, 'id') },
+    ids,
+    count,
+    isFullyLoaded: ids.length === prevIds.length || ids.length >= count,
   });
 
   setGlobal(global);

@@ -166,6 +166,19 @@ export function addMessageRepairInfo<T extends GramJs.TypeDocument | GramJs.Type
   return repairableMedia;
 }
 
+export function addSavedMusicRepairInfo<T extends GramJs.TypeDocument>(
+  media: T, peerId: string,
+): T & RepairInfo {
+  if (!(media instanceof GramJs.Document)) return media;
+
+  const repairableMedia = media as T & RepairInfo;
+  repairableMedia.localRepairInfo = {
+    type: 'savedMusic',
+    peerId,
+  };
+  return repairableMedia;
+}
+
 export function addWebPageRepairInfo<T extends GramJs.TypeDocument | GramJs.TypeWebDocument | GramJs.TypePhoto>(
   media: T, webPage?: GramJs.TypeWebPage,
 ): T & RepairInfo {

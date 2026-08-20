@@ -1,6 +1,6 @@
 import type {
   ApiUser, ApiUserCommonChats,
-  ApiUserFullInfo, ApiUserStatus,
+  ApiUserFullInfo, ApiUserSavedMusic, ApiUserStatus,
 } from '../../api/types';
 import type { BotAppPermissions } from '../../types';
 import type { GlobalState } from '../types';
@@ -23,6 +23,12 @@ export function selectUserCommonChats<T extends GlobalState>(
   global: T, userId: string,
 ): ApiUserCommonChats | undefined {
   return global.users.commonChatsById[userId];
+}
+
+export function selectUserSavedMusic<T extends GlobalState>(
+  global: T, userId: string,
+): ApiUserSavedMusic | undefined {
+  return global.users.savedMusicByPeerId[userId];
 }
 
 export function selectIsUserBlocked<T extends GlobalState>(global: T, userId: string) {

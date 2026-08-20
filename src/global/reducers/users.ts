@@ -5,6 +5,7 @@ import type {
   ApiUser,
   ApiUserCommonChats,
   ApiUserFullInfo,
+  ApiUserSavedMusic,
   ApiUserStatus,
 } from '../../api/types';
 import type { BotAppPermissions } from '../../types';
@@ -235,6 +236,21 @@ export function updateUserCommonChats<T extends GlobalState>(
       commonChatsById: {
         ...global.users.commonChatsById,
         [userId]: commonChats,
+      },
+    },
+  };
+}
+
+export function updateUserSavedMusic<T extends GlobalState>(
+  global: T, userId: string, savedMusic: ApiUserSavedMusic,
+): T {
+  return {
+    ...global,
+    users: {
+      ...global.users,
+      savedMusicByPeerId: {
+        ...global.users.savedMusicByPeerId,
+        [userId]: savedMusic,
       },
     },
   };

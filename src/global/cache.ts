@@ -351,6 +351,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.users.commonChatsById) {
     cached.users.commonChatsById = initialState.users.commonChatsById;
   }
+  if (!cached.users.savedMusicByPeerId) {
+    cached.users.savedMusicByPeerId = initialState.users.savedMusicByPeerId;
+  }
+
   if (!cached.users.botAppPermissionsById) {
     cached.users.botAppPermissionsById = initialState.users.botAppPermissionsById;
   }

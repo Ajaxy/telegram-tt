@@ -33,10 +33,13 @@ import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
 import {
   buildInputChannelFromLocalDb,
   buildInputPeerFromLocalDb,
+  buildInputUserFromLocalDb,
   DEFAULT_PRIMITIVES,
   getEntityTypeById,
 } from '../gramjsBuilders';
 import {
+  addDocumentToLocalDb,
+  addSavedMusicRepairInfo,
   addStoryToLocalDb, addUserToLocalDb,
   addWebPageMediaToLocalDb,
 } from '../helpers/localDb';
@@ -550,9 +553,39 @@ export async function repairFileReference({
       const result = await repairWebPageMedia(localRepairInfo.url);
       return result;
     }
+
+    if (localRepairInfo.type === 'savedMusic') {
+      const result = await repairSavedMusicMedia(localRepairInfo.peerId, entityId);
+      return result;
+    }
   }
 
   return false;
+}
+
+async function repairSavedMusicMedia(peerId: string, documentId: string) {
+  const id = buildInputUserFromLocalDb(peerId);
+  const document = localDb.documents[documentId];
+  if (!id || !document) return false;
+
+  const result = await invokeRequest(new GramJs.users.GetSavedMusicByID({
+    id,
+    documents: [new GramJs.InputDocument({
+      id: document.id,
+      accessHash: document.accessHash,
+      fileReference: document.fileReference,
+    })],
+  }), {
+    shouldIgnoreErrors: true,
+  });
+
+  if (!(result instanceof GramJs.users.SavedMusic)) return false;
+
+  result.documents.forEach((doc) => {
+    addDocumentToLocalDb(addSavedMusicRepairInfo(doc, peerId));
+  });
+
+  return true;
 }
 
 async function repairMessageMedia(peerId: string, messageId: number) {

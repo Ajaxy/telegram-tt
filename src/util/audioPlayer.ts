@@ -1,6 +1,6 @@
 import { getActions, getGlobal } from '../global';
 
-import type { ApiMessage } from '../api/types';
+import type { ApiAudio, ApiMessage } from '../api/types';
 import type { MessageKey } from './keys/messageKey';
 import { AudioOrigin, GlobalSearchContent } from '../types';
 
@@ -11,21 +11,26 @@ import { isSafariPatchInProgress, patchSafariProgressiveAudio } from './patchSaf
 import safePlay from './safePlay';
 
 type Handler = (eventName: string, e: Event) => void;
-export type TrackId = `${MessageKey}-${number}`;
+// Saved music lives on a profile rather than in a chat, so it has no message to key a track on
+export type TrackId = `${MessageKey}-${number}` | `${typeof SAVED_MUSIC_PREFIX}${string}`;
 
 export interface Track {
   audio: HTMLAudioElement;
   proxy: HTMLAudioElement;
-  type: 'voice' | 'audio' | 'oneTimeVoice';
+  type: 'voice' | 'audio' | 'oneTimeVoice' | 'savedMusic';
   handlers: Handler[];
   onForcePlay?: NoneToVoidFunction;
   onTrackChange?: NoneToVoidFunction;
 }
 
+const SAVED_MUSIC_PREFIX = 'savedMusic-';
+
 const tracks = new Map<TrackId, Track>();
 
 let voiceQueue: TrackId[] = [];
 let musicQueue: TrackId[] = [];
+// Kept in mount order, which matches the order tracks are listed on the profile
+let savedMusicQueue: TrackId[] = [];
 
 let currentTrackId: TrackId | undefined;
 
@@ -99,6 +104,10 @@ function playNext(trackId: TrackId, isReverseOrder?: boolean) {
   }
 
   if (!tracks.has(nextTrackId)) {
+    if (isSavedMusicTrackId(nextTrackId)) {
+      return;
+    }
+
     // A bit hacky way to continue playlist when switching chat
     getActions().openAudioPlayer(parseMessageKey(splitTrackId(nextTrackId).messageKey));
 
@@ -267,6 +276,7 @@ function getTrackQueue(track: Track) {
   switch (track.type) {
     case 'audio': return musicQueue;
     case 'voice': return voiceQueue;
+    case 'savedMusic': return savedMusicQueue;
     default: return undefined;
   }
 }
@@ -281,6 +291,10 @@ function addTrackToQueue(track: Track, trackId: TrackId) {
     voiceQueue.push(trackId);
     voiceQueue.sort(trackIdComparator);
   }
+
+  if (track.type === 'savedMusic' && !savedMusicQueue.includes(trackId)) {
+    savedMusicQueue.push(trackId);
+  }
 }
 
 function removeFromQueue(track: Track, trackId: TrackId) {
@@ -292,9 +306,14 @@ function removeFromQueue(track: Track, trackId: TrackId) {
   if (track.type === 'voice') {
     voiceQueue = voiceQueue.filter(trackIdFilter);
   }
+
+  if (track.type === 'savedMusic') {
+    savedMusicQueue = savedMusicQueue.filter(trackIdFilter);
+  }
 }
 
 function cleanUpQueue(type: Track['type'], trackId: TrackId) {
+  if (type === 'savedMusic') return;
   if (selectTabState(getGlobal()).globalSearch.currentContent === GlobalSearchContent.Music) return;
   const { chatId } = parseMessageKey(splitTrackId(trackId).messageKey);
   const openedChatId = selectCurrentMessageList(getGlobal())?.chatId;
@@ -316,7 +335,7 @@ function findNextInQueue(currentId: TrackId, origin = AudioOrigin.Inline, isReve
   const queue = getTrackQueue(track);
   if (!queue) return undefined;
 
-  if (origin === AudioOrigin.Search) {
+  if (track.type === 'savedMusic' || origin === AudioOrigin.Search) {
     const index = queue.indexOf(currentId);
     if (index < 0) return undefined;
     const direction = isReverseOrder ? -1 : 1;
@@ -330,6 +349,14 @@ function findNextInQueue(currentId: TrackId, origin = AudioOrigin.Inline, isReve
   let direction = origin === AudioOrigin.Inline ? -1 : 1;
   if (isReverseOrder) direction *= -1;
   return chatAudio[index + direction];
+}
+
+export function makeSavedMusicTrackId(audio: ApiAudio): TrackId {
+  return `${SAVED_MUSIC_PREFIX}${audio.id}`;
+}
+
+function isSavedMusicTrackId(trackId: TrackId) {
+  return trackId.startsWith(SAVED_MUSIC_PREFIX);
 }
 
 export function makeTrackId(message: ApiMessage): TrackId | undefined {

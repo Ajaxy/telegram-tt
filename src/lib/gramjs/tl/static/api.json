@@ -79,6 +79,8 @@
     "account.deletePasskey",
     "users.getUsers",
     "users.getFullUser",
+    "users.getSavedMusic",
+    "users.getSavedMusicByID",
     "users.suggestBirthday",
     "contacts.getContacts",
     "contacts.importContacts",

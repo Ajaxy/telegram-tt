@@ -2076,6 +2076,8 @@
 "ProfileTabStories" = "Posts";
 "ProfileTabStoriesArchive" = "Story Archive";
 "ProfileTabGifts" = "Gifts";
+"ProfileTabPlaylist" = "Playlist";
+"ProfilePlaylistEmpty" = "No music added yet";
 "ProfileTabSubscribers" = "Subscribers";
 "ProfileTabMembers" = "Members";
 "ProfileTabBotPreview" = "Preview";

@@ -11,6 +11,7 @@ import type {
 } from '../../types';
 
 import { toJSNumber } from '../../../util/numbers';
+import { addDocumentToLocalDb, addSavedMusicRepairInfo } from '../helpers/localDb';
 import { buildApiBotInfo } from './bots';
 import { buildApiBusinessIntro, buildApiBusinessLocation, buildApiBusinessWorkHours } from './business';
 import {
@@ -18,6 +19,7 @@ import {
 } from './common';
 import { buildApiDisallowedGiftsSettings } from './gifts';
 import { omitVirtualClassFields } from './helpers';
+import { buildApiAudioFromDocument } from './media';
 import {
   buildApiBotVerification,
   buildApiEmojiStatus,
@@ -36,7 +38,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
       birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount, botVerification,
       botCanManageEmojiStatus, settings, sendPaidMessagesStars, displayGiftsButton, disallowedGifts,
-      starsRating, starsMyPendingRating, starsMyPendingRatingDate, mainTab, note,
+      starsRating, starsMyPendingRating, starsMyPendingRatingDate, mainTab, savedMusic, note,
       noforwardsMyEnabled, noforwardsPeerEnabled, unofficialSecurityRisk, privateForwardName,
       ttlPeriod,
     },
@@ -80,6 +82,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     paidMessagesStars: toJSNumber(sendPaidMessagesStars),
     settings: buildApiPeerSettings(settings),
     mainTab: mainTab && buildApiProfileTab(mainTab),
+    savedMusic: savedMusic && buildApiSavedMusic(savedMusic, userId),
     note: note && buildApiFormattedText(note),
     noForwardsMyEnabled: noforwardsMyEnabled,
     noForwardsPeerEnabled: noforwardsPeerEnabled,
@@ -221,4 +224,14 @@ export function buildApiStarsRating(starsRating: GramJs.StarsRating): ApiStarsRa
     stars: toJSNumber(starsRating.stars),
     nextLevelStars: toJSNumber(starsRating.nextLevelStars),
   };
+}
+
+function buildApiSavedMusic(document: GramJs.TypeDocument, peerId: string) {
+  if (!(document instanceof GramJs.Document)) {
+    return undefined;
+  }
+
+  addDocumentToLocalDb(addSavedMusicRepairInfo(document, peerId));
+
+  return buildApiAudioFromDocument(document);
 }

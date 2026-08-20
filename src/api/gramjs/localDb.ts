@@ -22,8 +22,13 @@ export type WebPageRepairInfo = {
   url: string;
 };
 
+export type SavedMusicRepairInfo = {
+  type: 'savedMusic';
+  peerId: string;
+};
+
 export type RepairInfo = {
-  localRepairInfo?: StoryRepairInfo | MessageRepairInfo | WebPageRepairInfo;
+  localRepairInfo?: StoryRepairInfo | MessageRepairInfo | WebPageRepairInfo | SavedMusicRepairInfo;
 };
 
 export interface LocalDb {
