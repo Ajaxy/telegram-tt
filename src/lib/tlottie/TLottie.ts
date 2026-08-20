@@ -412,7 +412,11 @@ class TLottie {
         this.params.fitzModifier,
         this.onRendererInit.bind(this, dataGeneration),
       ],
-    }).catch(this.onRendererError.bind(this, dataGeneration));
+    }).then((isSuccess) => {
+      if (!isSuccess) {
+        this.onRendererUnavailable(dataGeneration);
+      }
+    }, this.onRendererError.bind(this, dataGeneration));
   }
 
   private destroyRenderer() {
@@ -443,6 +447,7 @@ class TLottie {
     const dataGeneration = ++this.dataGeneration;
 
     this.framesCount = undefined;
+    this.isRendererInited = false;
     this.approxFrameIndex = 0;
     this.stopFrameIndex = 0;
     this.direction = 1;
@@ -460,7 +465,11 @@ class TLottie {
         this.params.fitzModifier,
         this.onChangeData.bind(this, dataGeneration),
       ],
-    }).catch(this.onRendererError.bind(this, dataGeneration));
+    }).then((isSuccess) => {
+      if (!isSuccess) {
+        this.onRendererUnavailable(dataGeneration);
+      }
+    }, this.onRendererError.bind(this, dataGeneration));
   }
 
   private onChangeData(dataGeneration: number, reduceFactor: number, msPerFrame: number, framesCount: number) {
@@ -483,14 +492,27 @@ class TLottie {
     this.doPlay();
   }
 
-  private onRendererError(dataGeneration: number, err: unknown) {
+  private onRendererError(dataGeneration: number, err: Error) {
     if (dataGeneration !== this.dataGeneration || this.isDestroyed) {
       return;
     }
 
+    this.markRendererUnavailable();
+    handleError(err);
+  }
+
+  private onRendererUnavailable(dataGeneration: number) {
+    if (dataGeneration !== this.dataGeneration || this.isDestroyed) {
+      return;
+    }
+
+    this.markRendererUnavailable();
+  }
+
+  private markRendererUnavailable() {
+    this.isRendererInited = false;
     this.isWaiting = false;
     this.isAnimating = false;
-    handleError(err instanceof Error ? err : new Error(String(err)));
   }
 
   private doPlay() {

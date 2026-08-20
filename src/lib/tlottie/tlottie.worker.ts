@@ -56,7 +56,7 @@ const renderers = new Map<string, {
   imageData: ImageData;
   customColor?: [number, number, number];
 }>();
-const rendererOperations = new Map<string, Promise<void>>();
+const rendererOperations = new Map<string, Promise<unknown>>();
 
 async function init(
   key: string,
@@ -74,7 +74,7 @@ async function init(
   const animationData = await fetchAnimationData(tgsUrl);
   const instance = createInstance(animationData, fitzModifier);
   if (!instance) {
-    throw new Error('[TLottie] Failed to create renderer');
+    return false;
   }
 
   const imageData = new ImageData(imgSize, imgSize);
@@ -86,6 +86,7 @@ async function init(
   });
 
   onInit(reduceFactor, msPerFrame, reducedFramesCount);
+  return true;
 }
 
 async function changeData(
@@ -102,7 +103,7 @@ async function changeData(
   const animationData = await fetchAnimationData(tgsUrl);
   const instance = createInstance(animationData, fitzModifier);
   if (!instance) {
-    throw new Error('[TLottie] Failed to create renderer');
+    return false;
   }
 
   const renderer = renderers.get(key);
@@ -118,6 +119,7 @@ async function changeData(
   renderer.reduceFactor = reduceFactor;
 
   onInit(reduceFactor, msPerFrame, reducedFramesCount);
+  return true;
 }
 
 async function fetchAnimationData(tgsUrl: string) {
@@ -146,12 +148,14 @@ function createInstance(animationData: Uint8Array, fitzModifier?: EmojiFitzModif
     return undefined;
   }
 
-  // Heap views must be re-derived after every exported call: memory growth detaches buffers
-  new Uint8Array(tlottie!.memory.buffer).set(animationData, jsonPtr);
-  const instance = tlottie!.tlottie_new_with_options(jsonPtr, length, fitzModifier || 0, 0, 0);
-  tlottie!.tlottie_free(jsonPtr, length);
-
-  return instance || undefined;
+  try {
+    // Heap views must be re-derived after every exported call: memory growth detaches buffers
+    new Uint8Array(tlottie!.memory.buffer).set(animationData, jsonPtr);
+    const instance = tlottie!.tlottie_new_with_options(jsonPtr, length, fitzModifier || 0, 0, 0);
+    return instance || undefined;
+  } finally {
+    tlottie!.tlottie_free(jsonPtr, length);
+  }
 }
 
 function calcParams(instance: number, isLowPriority: boolean) {
@@ -208,7 +212,7 @@ function destroy(key: string) {
   renderers.delete(key);
 }
 
-function enqueueRendererOperation(key: string, operation: () => void | Promise<void>) {
+function enqueueRendererOperation<Result>(key: string, operation: () => Result | Promise<Result>) {
   const previousOperation = rendererOperations.get(key) || Promise.resolve();
   const operationPromise = previousOperation.catch(() => undefined).then(operation);
   rendererOperations.set(key, operationPromise);
@@ -221,7 +225,7 @@ function enqueueRendererOperation(key: string, operation: () => void | Promise<v
   return operationPromise;
 }
 
-function clearRendererOperation(key: string, operation: Promise<void>) {
+function clearRendererOperation(key: string, operation: Promise<unknown>) {
   if (rendererOperations.get(key) === operation) {
     rendererOperations.delete(key);
   }

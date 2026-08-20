@@ -196,7 +196,7 @@ class ConnectorClass<T extends InputRequestTypes> {
         const requestState = requestStates.get(payload.messageId);
         if (requestState) {
           if (payload.error) {
-            requestState.reject(payload.error);
+            requestState.reject(new Error(payload.error.message));
           } else {
             requestState.resolve(payload.response);
           }
