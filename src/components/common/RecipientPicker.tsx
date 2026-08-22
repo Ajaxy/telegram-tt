@@ -56,6 +56,7 @@ export type OwnProps = {
   className?: string;
   filter?: readonly ApiChatType[];
   isLowStackPriority?: boolean;
+  isNativeDialog?: boolean;
   isForwarding?: boolean;
   shouldFilterInviteable?: boolean;
   isMultiSelect?: boolean;
@@ -96,6 +97,7 @@ const RecipientPicker = ({
   className,
   searchPlaceholder,
   isLowStackPriority,
+  isNativeDialog,
   chatFoldersById,
   orderedFolderIds,
   isForwarding,
@@ -414,6 +416,7 @@ const RecipientPicker = ({
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
       isLowStackPriority={isLowStackPriority}
+      isNativeDialog={isNativeDialog}
     />
   );
 };

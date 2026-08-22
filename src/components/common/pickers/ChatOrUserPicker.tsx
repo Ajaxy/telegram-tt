@@ -61,6 +61,7 @@ export type OwnProps = {
   search: string;
   className?: string;
   isLowStackPriority?: boolean;
+  isNativeDialog?: boolean;
   listActiveKey?: number;
   subheader?: TeactNode;
   renderSearchRow?: (props: SearchRowRenderProps) => TeactNode;
@@ -102,6 +103,7 @@ const ChatOrUserPicker = ({
   searchPlaceholder,
   className,
   isLowStackPriority,
+  isNativeDialog,
   subheader,
   renderSearchRow,
   footer,
@@ -469,6 +471,7 @@ const ChatOrUserPicker = ({
       headerClassName="modal-header-condensed-wide"
       className={buildClassName('ChatOrUserPicker', className)}
       isLowStackPriority={isLowStackPriority}
+      isNativeDialog={isNativeDialog}
       onClose={handleModalClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
