@@ -288,7 +288,7 @@
     --player-shift-x: 0px;
     --player-parked-shift: var(--middle-header-player-parked, var(--middle-panel-inline-padding));
 
-    z-index: var(--z-middle-header);
+    z-index: calc(var(--z-middle-header) + 1);
     top: calc(var(--middle-header-player-height, 0px) - 3.5rem - var(--player-parked-shift));
     right: 0;
     left: 0;
