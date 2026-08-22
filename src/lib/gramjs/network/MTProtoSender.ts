@@ -133,6 +133,8 @@ export default class MTProtoSender {
 
   private _isFallback: boolean;
 
+  private _shouldUseFallbackOnReconnect: boolean;
+
   private readonly _authKeyCallback: any;
 
   public _updateCallback: (
@@ -223,6 +225,7 @@ export default class MTProtoSender {
     this._isExported = Boolean(args.isExported);
     this._onConnectionBreak = args.onConnectionBreak;
     this._isFallback = false;
+    this._shouldUseFallbackOnReconnect = false;
     this._getShouldDebugExportedSenders = args.getShouldDebugExportedSenders;
 
     /**
@@ -333,9 +336,15 @@ export default class MTProtoSender {
    * @param connection
    * @param [force]
    * @param fallbackConnection
+   * @param shouldUseFallback
    * @returns {Promise<boolean>}
    */
-  async connect(connection: Connection, force: boolean, fallbackConnection?: Connection) {
+  async connect(
+    connection: Connection,
+    force: boolean,
+    fallbackConnection?: Connection,
+    shouldUseFallback?: boolean,
+  ) {
     this.userDisconnected = false;
 
     if (this._userConnected && !force) {
@@ -343,7 +352,8 @@ export default class MTProtoSender {
       return false;
     }
     this.isConnecting = true;
-    this._isFallback = this._shouldForceHttpTransport && this._shouldAllowHttpTransport;
+    this._isFallback = Boolean((this._shouldForceHttpTransport || shouldUseFallback)
+      && this._shouldAllowHttpTransport);
     this._connection = connection;
     this._fallbackConnection = fallbackConnection;
 
@@ -373,7 +383,7 @@ export default class MTProtoSender {
     }
     this.isConnecting = false;
 
-    if (this._isFallback && !this._shouldForceHttpTransport) {
+    if (this._isFallback && !this._shouldForceHttpTransport && !shouldUseFallback) {
       void this.tryReconnectToMain();
     }
 
@@ -681,6 +691,16 @@ export default class MTProtoSender {
       // more messages to be added to the send queue.
       await this._sendQueue.wait();
 
+      // If we've had new ACKs appended while waiting for messages to send, add them to queue
+      appendAcks();
+
+      const hasQueuedMessages = this._sendQueue.values().some(Boolean);
+      if (!hasQueuedMessages) {
+        // Consume explicit empty queue markers before waiting again
+        this._sendQueue.get();
+        continue;
+      }
+
       if (this._isFallback) {
         // We don't long-poll on main loop, instead we have a separate loop for that
         this.send(new Api.HttpWait({
@@ -689,9 +709,6 @@ export default class MTProtoSender {
           maxWait: 0,
         }));
       }
-
-      // If we've had new ACKs appended while waiting for messages to send, add them to queue
-      appendAcks();
 
       const res = this._sendQueue.get();
 
@@ -823,8 +840,7 @@ export default class MTProtoSender {
           continue;
         } else if (e instanceof SecurityError) {
           // https://core.telegram.org/mtproto/security_guidelines#behavior-in-case-of-mismatch
-          this._log.warn('Invalid encrypted packet');
-          this.reconnect();
+          this.handleSecurityError();
           this._recvLoopHandle = undefined;
           return;
         } else if (e instanceof InvalidBufferError) {
@@ -854,8 +870,7 @@ export default class MTProtoSender {
       } catch (e: any) {
         // `RPCError` errors except for 'AUTH_KEY_UNREGISTERED' should be handled by the client
         if (e instanceof SecurityError) {
-          this._log.warn('Invalid encrypted packet');
-          this.reconnect();
+          this.handleSecurityError();
           this._recvLoopHandle = undefined;
           return;
         } else if (e instanceof RPCError) {
@@ -1487,6 +1502,14 @@ export default class MTProtoSender {
   _handleMsgAll(message: TLMessage) {
   }
 
+  private handleSecurityError() {
+    this._log.warn('Invalid encrypted packet');
+    if (!this._isFallback && this._shouldAllowHttpTransport) {
+      this._shouldUseFallbackOnReconnect = true;
+    }
+    this.reconnect();
+  }
+
   reconnect() {
     if (this._userConnected && !this.isReconnecting) {
       this.isReconnecting = true;
@@ -1504,6 +1527,14 @@ export default class MTProtoSender {
   }
 
   async _reconnect() {
+    if (this.userDisconnected) {
+      this.isReconnecting = false;
+      this._shouldUseFallbackOnReconnect = false;
+      return;
+    }
+
+    const shouldUseFallback = this._shouldUseFallbackOnReconnect;
+    this._shouldUseFallbackOnReconnect = false;
     const currentConnection = this._connection!;
     const currentFallbackConnection = this._fallbackConnection;
     this._log.debug('Closing current connection...');
@@ -1545,7 +1576,7 @@ export default class MTProtoSender {
       isTestServer: currentConnection._isTestServer,
       isPremium: currentConnection._isPremium,
     });
-    await this.connect(newConnection, true, newFallbackConnection);
+    await this.connect(newConnection, true, newFallbackConnection, shouldUseFallback);
 
     this.isReconnecting = false;
 
