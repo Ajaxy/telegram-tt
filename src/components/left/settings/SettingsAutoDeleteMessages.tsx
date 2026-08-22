@@ -3,13 +3,12 @@ import {
 } from '../../../lib/teact/teact';
 import { getGlobal, getPromiseActions, withGlobal } from '../../../global';
 
-import type { LangFn } from '../../../util/localization';
-
-import { formatCountdown } from '../../../util/dates/oldDateFormat';
-import {
-  DAY, MONTH, WEEK, YEAR,
-} from '../../../util/dates/units';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
+import {
+  buildAutoDeletePeriodOptions,
+  CUSTOM_AUTO_DELETE_PERIODS,
+  DEFAULT_AUTO_DELETE_PERIODS,
+} from '../../common/helpers/autoDeletePeriods';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
@@ -33,26 +32,6 @@ type StateProps = {
   defaultHistoryTtl?: number;
 };
 
-const DEFAULT_AUTO_DELETE_PERIODS = [0, DAY, WEEK, MONTH];
-const CUSTOM_AUTO_DELETE_PERIODS = [
-  0,
-  DAY,
-  2 * DAY,
-  3 * DAY,
-  4 * DAY,
-  5 * DAY,
-  6 * DAY,
-  WEEK,
-  2 * WEEK,
-  3 * WEEK,
-  MONTH,
-  2 * MONTH,
-  3 * MONTH,
-  4 * MONTH,
-  5 * MONTH,
-  6 * MONTH,
-  YEAR,
-];
 const TOP_STICKER_SIZE = 120;
 
 const SettingsAutoDeleteMessages = ({
@@ -84,14 +63,14 @@ const SettingsAutoDeleteMessages = ({
     onBack: onReset,
   });
 
-  const options = useMemo(() => buildPeriodOptions(
+  const options = useMemo(() => buildAutoDeletePeriodOptions(
     lang,
     DEFAULT_AUTO_DELETE_PERIODS,
     customPeriod,
     lang('SettingsItemPrivacyOff'),
   ), [customPeriod, lang]);
 
-  const customOptions = useMemo(() => buildPeriodOptions(
+  const customOptions = useMemo(() => buildAutoDeletePeriodOptions(
     lang,
     CUSTOM_AUTO_DELETE_PERIODS,
     selectedPeriod,
@@ -187,29 +166,6 @@ const SettingsAutoDeleteMessages = ({
     </div>
   );
 };
-
-function buildPeriodOptions(
-  lang: LangFn,
-  predefinedPeriods: number[],
-  currentPeriod: number | undefined,
-  disabledLabel: string,
-) {
-  const periods = [...predefinedPeriods];
-
-  if (currentPeriod !== undefined && !periods.includes(currentPeriod)) {
-    const insertionIndex = periods.findIndex((period) => period > currentPeriod);
-    if (insertionIndex === -1) {
-      periods.push(currentPeriod);
-    } else {
-      periods.splice(insertionIndex, 0, currentPeriod);
-    }
-  }
-
-  return periods.map((period) => ({
-    label: period === 0 ? disabledLabel : formatCountdown(lang, period),
-    value: String(period),
-  }));
-}
 
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {

@@ -200,6 +200,7 @@
     "messages.getExtendedMedia",
     "messages.setDefaultHistoryTTL",
     "messages.getDefaultHistoryTTL",
+    "messages.setHistoryTTL",
     "messages.getBotApp",
     "messages.requestAppWebView",
     "messages.togglePeerTranslations",

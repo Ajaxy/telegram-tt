@@ -1100,6 +1100,10 @@ export type TabState = {
     nextOwnerId?: string;
   };
 
+  autoDeleteTimerModal?: {
+    chatId: string;
+  };
+
   isTwoFaCheckModalOpen?: true;
 
   isWaitingForStarGiftUpgrade?: true;

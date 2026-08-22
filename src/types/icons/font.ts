@@ -35,6 +35,8 @@ export type FontIconName =
   | 'auction-filled'
   | 'auction-next-round'
   | 'author-hidden'
+  | 'auto-delete-clock'
+  | 'auto-delete-empty'
   | 'avatar-archived-chats'
   | 'avatar-deleted-account'
   | 'avatar-saved-messages'

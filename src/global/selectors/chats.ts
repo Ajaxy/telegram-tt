@@ -40,6 +40,10 @@ export function selectPeerFullInfo<T extends GlobalState>(global: T, peerId: str
   return selectChatFullInfo(global, peerId);
 }
 
+export function selectChatHistoryTtl<T extends GlobalState>(global: T, chatId: string) {
+  return selectChat(global, chatId)?.ttlPeriod ?? selectPeerFullInfo(global, chatId)?.ttlPeriod;
+}
+
 export function selectChatListLoadingParameters<T extends GlobalState>(
   global: T, listType: ChatListType,
 ) {

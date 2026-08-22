@@ -1,0 +1,19 @@
+.root {
+  display: inline-grid;
+  place-content: center;
+
+  &::before {
+    grid-area: 1 / 1;
+  }
+}
+
+.label {
+  grid-area: 1 / 1;
+  align-self: center;
+  justify-self: center;
+
+  font-family: var(--font-family-condensed);
+  font-size: 0.5em;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+}

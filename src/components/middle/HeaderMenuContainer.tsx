@@ -29,9 +29,11 @@ import {
   selectBot,
   selectCanGift,
   selectCanManage,
+  selectCanManageAutoDelete,
   selectCanTranslateChat,
   selectChat,
   selectChatFullInfo,
+  selectChatHistoryTtl,
   selectCurrentMessageList,
   selectIsChatRestricted,
   selectIsChatWithSelf,
@@ -46,6 +48,7 @@ import {
 } from '../../global/selectors';
 import { isUserId } from '../../util/entities/ids';
 import { disableScrolling } from '../../util/scrollLock';
+import { buildAutoDeletePeriodOptions, DEFAULT_AUTO_DELETE_PERIODS } from '../common/helpers/autoDeletePeriods';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
@@ -56,11 +59,13 @@ import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import DeleteChatModal from '../common/DeleteChatModal';
+import AutoDeleteOutlinedIcon from '../common/icons/AutoDeleteOutlinedIcon';
 import Icon from '../common/icons/Icon';
 import MuteChatModal from '../left/MuteChatModal.async';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 import MenuSeparator from '../ui/MenuSeparator';
+import NestedMenuItem from '../ui/NestedMenuItem';
 import Portal from '../ui/Portal';
 
 import './HeaderMenuContainer.scss';
@@ -133,6 +138,8 @@ type StateProps = {
   isAccountFrozen?: boolean;
   noForwardsMyEnabled?: boolean;
   noForwardsPeerEnabled?: boolean;
+  canManageAutoDelete?: boolean;
+  historyTtl?: number;
 };
 
 const CLOSE_MENU_ANIMATION_DURATION = 200;
@@ -184,6 +191,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   isAccountFrozen,
   noForwardsMyEnabled,
   noForwardsPeerEnabled,
+  canManageAutoDelete,
+  historyTtl,
   channelMonoforumId,
   onJoinRequestsClick,
   onSearchClick,
@@ -222,6 +231,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     showNotification,
     toggleNoForwards,
     openDisableSharingAboutModal,
+    setChatHistoryTtl,
+    openAutoDeleteTimerModal,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -505,12 +516,36 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   });
 
+  const handleAutoDeletePeriodSelect = useLastCallback((e: React.SyntheticEvent, period?: number) => {
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else if (period !== (historyTtl ?? 0)) {
+      setChatHistoryTtl({ chatId, period: period! });
+    }
+    closeMenu();
+  });
+
+  const handleSetCustomAutoDeleteTime = useLastCallback(() => {
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      openAutoDeleteTimerModal({ chatId });
+    }
+    closeMenu();
+  });
+
   const handleSendChannelMessage = useLastCallback(() => {
     openChat({ id: channelMonoforumId });
     closeMenu();
   });
 
   useEffect(disableScrolling, []);
+
+  const autoDeleteOptions = useMemo(() => {
+    if (!canManageAutoDelete) return undefined;
+
+    return buildAutoDeletePeriodOptions(lang, DEFAULT_AUTO_DELETE_PERIODS, historyTtl, lang('AutoDeleteNever'));
+  }, [canManageAutoDelete, historyTtl, lang]);
 
   const botButtons = useMemo(() => {
     const commandButtons = botCommands?.map((botCommand) => {
@@ -735,6 +770,36 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               </MenuItem>
             )
           )}
+          {autoDeleteOptions && (
+            <NestedMenuItem
+              customIcon={<AutoDeleteOutlinedIcon period={historyTtl ?? 0} />}
+              submenu={(
+                <>
+                  {autoDeleteOptions.map(({ label, value }) => {
+                    const period = Number(value);
+                    return (
+                      <MenuItem
+                        key={value}
+                        icon={period === (historyTtl ?? 0) ? 'check' : 'placeholder'}
+                        clickArg={period}
+                        onClick={handleAutoDeletePeriodSelect}
+                      >
+                        {label}
+                      </MenuItem>
+                    );
+                  })}
+                  <MenuItem
+                    icon="tools"
+                    onClick={handleSetCustomAutoDeleteTime}
+                  >
+                    {lang('SetCustomTime')}
+                  </MenuItem>
+                </>
+              )}
+            >
+              {lang('AutoDeletePopupTitle')}
+            </NestedMenuItem>
+          )}
           {(canEnterVoiceChat || canCreateVoiceChat) && (
             <MenuItem
               icon="voice-chat"
@@ -913,6 +978,7 @@ export default memo(withGlobal<OwnProps>(
     const savedDialog = isSavedDialog ? selectChat(global, String(threadId)) : undefined;
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
     const chatInfo = selectTabState(global).chatInfo;
+    const canManageAutoDelete = isMainThread && !isSavedDialog && selectCanManageAutoDelete(global, chatId);
 
     return {
       chat,
@@ -943,6 +1009,8 @@ export default memo(withGlobal<OwnProps>(
       isAccountFrozen,
       noForwardsMyEnabled: userFullInfo?.noForwardsMyEnabled,
       noForwardsPeerEnabled: userFullInfo?.noForwardsPeerEnabled,
+      canManageAutoDelete,
+      historyTtl: canManageAutoDelete ? selectChatHistoryTtl(global, chatId) : undefined,
     };
   },
 )(HeaderMenuContainer));

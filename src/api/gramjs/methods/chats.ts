@@ -1945,6 +1945,19 @@ export function toggleIsProtected({
   });
 }
 
+export function setHistoryTtl({
+  peer, period,
+}: { peer: ApiPeer; period: number }) {
+  const { id, accessHash } = peer;
+
+  return invokeRequest(new GramJs.messages.SetHistoryTTL({
+    peer: buildInputPeer(id, accessHash),
+    period,
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
 export function toggleParticipantsHidden({
   chat, isEnabled,
 }: { chat: ApiChat; isEnabled: boolean }) {

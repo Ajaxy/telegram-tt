@@ -81,10 +81,12 @@ import { getRichMessageUsage } from '../../global/helpers/richMessage';
 import { containsCustomEmoji, stripCustomEmoji } from '../../global/helpers/symbols';
 import {
   selectBot,
+  selectCanManageAutoDelete,
   selectCanPlayAnimatedEmojis,
   selectCanScheduleUntilOnline,
   selectChat,
   selectChatFullInfo,
+  selectChatHistoryTtl,
   selectChatMessage,
   selectChatType,
   selectCurrentMessageList,
@@ -127,7 +129,7 @@ import {
 } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { formatMediaDuration } from '../../util/dates/oldDateFormat';
+import { formatCountdown, formatMediaDuration } from '../../util/dates/oldDateFormat';
 import { processDeepLink } from '../../util/deeplink';
 import { tryParseDeepLink } from '../../util/deepLinkParser';
 import calcTextLineHeightAndCount from '../../util/element/calcTextLineHeightAndCount';
@@ -209,6 +211,7 @@ import TextTimer from '../ui/TextTimer';
 import Transition from '../ui/Transition';
 import AnimatedCounter from './AnimatedCounter';
 import Avatar from './Avatar';
+import AutoDeleteOutlinedIcon from './icons/AutoDeleteOutlinedIcon';
 import Icon from './icons/Icon';
 import PaymentMessageConfirmDialog from './PaymentMessageConfirmDialog';
 import ReactionAnimatedEmoji from './reactions/ReactionAnimatedEmoji';
@@ -266,6 +269,7 @@ type StateProps = {
   botKeyboardMessageId?: number;
   botKeyboardPlaceholder?: string;
   withScheduledButton?: boolean;
+  autoDeletePeriod?: number;
   isInScheduledList?: boolean;
   canScheduleUntilOnline?: boolean;
   currentUserId?: string;
@@ -402,6 +406,7 @@ const Composer = ({
   botKeyboardPlaceholder,
   inputPlaceholder,
   withScheduledButton,
+  autoDeletePeriod,
   topInlineBotIds,
   topGuestBotIds,
   currentUserId,
@@ -493,6 +498,7 @@ const Composer = ({
     showAllowedMessageTypesNotification,
     openStoryReactionPicker,
     openGiftModal,
+    openAutoDeleteTimerModal,
     closeReactionPicker,
     sendStoryReaction,
     editMessage,
@@ -2062,6 +2068,10 @@ const Composer = ({
   const handleGiftClick = useLastCallback(() => {
     openGiftModal({ forUserId: chatId });
   });
+
+  const handleAutoDeleteClick = useLastCallback(() => {
+    openAutoDeleteTimerModal({ chatId });
+  });
   const handleSuggestPostClick = useLastCallback(() => {
     updateDraftSuggestedPostInfo({
       price: { currency: STARS_CURRENCY_CODE, amount: 0, nanos: 0 },
@@ -2837,6 +2847,18 @@ const Composer = ({
                         iconName="scheduled"
                       />
                     )}
+                    {Boolean(autoDeletePeriod) && (
+                      <Button
+                        round
+                        faded
+                        className="composer-action-button"
+                        color="translucent"
+                        onClick={handleAutoDeleteClick}
+                        ariaLabel={lang('AutoDeleteSetInfo', { time: formatCountdown(lang, autoDeletePeriod) })}
+                      >
+                        <AutoDeleteOutlinedIcon period={autoDeletePeriod} />
+                      </Button>
+                    )}
                     {shouldShowGiftButton && (
                       <Button
                         round
@@ -3184,6 +3206,10 @@ export default memo(withGlobal<OwnProps>(
 
     const webPagePreview = tabState.webPagePreviewId ? selectWebPage(global, tabState.webPagePreviewId) : undefined;
 
+    const canManageAutoDelete = type === 'messageList' && messageListType === 'thread' && threadId === MAIN_THREAD_ID
+      && selectCanManageAutoDelete(global, chatId);
+    const autoDeletePeriod = canManageAutoDelete ? selectChatHistoryTtl(global, chatId) : undefined;
+
     return {
       availableReactions: global.reactions.availableReactions,
       topReactions: type === 'story' ? global.reactions.topReactions : undefined,
@@ -3204,6 +3230,7 @@ export default memo(withGlobal<OwnProps>(
         messageListType === 'thread'
         && (userFullInfo || chatFullInfo)?.hasScheduledMessages
       ),
+      autoDeletePeriod: autoDeletePeriod || undefined,
       isInScheduledList,
       botKeyboardMessageId,
       botKeyboardPlaceholder: keyboardMessage?.keyboardPlaceholder,

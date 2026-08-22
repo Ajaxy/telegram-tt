@@ -17,6 +17,7 @@ import AboutAdsModal from './aboutAds/AboutAdsModal.async';
 import AgeVerificationModal from './ageVerification/AgeVerificationModal.async';
 import AiTonePreviewModal from './aiTonePreview/AiTonePreviewModal.async';
 import AttachBotInstallModal from './attachBotInstall/AttachBotInstallModal.async';
+import AutoDeleteTimerModal from './autoDeleteTimer/AutoDeleteTimerModal.async';
 import BirthdaySetupModal from './birthday/BirthdaySetupModal.async';
 import BoostModal from './boost/BoostModal.async';
 import BrowserModal from './browser/BrowserModal.async';
@@ -165,9 +166,10 @@ type ModalKey = keyof Pick<TabState,
   'isCocoonModalOpen' |
   'editRankModal' |
   'rankModal' |
-  'aiTonePreviewModal'
+  'aiTonePreviewModal' |
+  'autoDeleteTimerModal'
 >;
-type WrappedModalKey = 'pollModal' | 'mapModal' | 'safeLinkModalUrl';
+type WrappedModalKey = 'pollModal' | 'mapModal' | 'safeLinkModalUrl' | 'autoDeleteTimerModal';
 type LegacyModalKey = Exclude<ModalKey, WrappedModalKey>;
 
 type ModalStateProps = {
@@ -196,6 +198,7 @@ const WRAPPED_MODAL_CLOSE_DURATIONS: Record<WrappedModalKey, number> = {
   pollModal: WRAPPED_MODAL_CLOSE_DURATION,
   mapModal: WRAPPED_MODAL_CLOSE_DURATION,
   safeLinkModalUrl: WRAPPED_MODAL_CLOSE_DURATION,
+  autoDeleteTimerModal: WRAPPED_MODAL_CLOSE_DURATION,
 };
 
 type WrappedModalBoundaryProps<T> = {
@@ -310,6 +313,7 @@ const WRAPPED_MODALS: WrappedModalRegistry = {
   pollModal: PollModal,
   mapModal: MapModal,
   safeLinkModalUrl: SafeLinkModal,
+  autoDeleteTimerModal: AutoDeleteTimerModal,
 };
 
 const LEGACY_MODAL_KEYS = Object.keys(LEGACY_MODALS) as LegacyModalKey[];

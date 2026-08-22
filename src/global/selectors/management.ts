@@ -1,11 +1,14 @@
+import type { ApiChat } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
 
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   getCanAddContact,
+  getHasAdminRight,
   isAnonymousForwardsChat,
-  isChatAdmin, isChatGroup, isUserBot,
+  isChatAdmin, isChatGroup, isDeletedUser, isSystemBot, isUserBot, isUserRightBanned,
 } from '../helpers';
 import { selectChat, selectIsChatRestricted, selectIsChatWithSelf } from './chats';
 import { selectCurrentMessageList } from './messages';
@@ -89,4 +92,37 @@ export function selectCanManage<T extends GlobalState>(
     && (isUserId(chat.id) || ((isChatAdmin(chat) || chat.isCreator) && !chat.isNotJoined))
     && !isBot,
   );
+}
+
+export function selectCanManageAutoDelete<T extends GlobalState>(
+  global: T,
+  chatId: string,
+) {
+  const chat = selectChat(global, chatId);
+  if (!chat || selectIsChatRestricted(global, chatId) || chat.isMonoforum) return false;
+
+  if (
+    selectIsChatWithSelf(global, chatId)
+    || isSystemBot(chatId)
+    || isAnonymousForwardsChat(chatId)
+    || chatId === SERVICE_NOTIFICATIONS_USER_ID
+  ) {
+    return false;
+  }
+
+  if (isUserId(chatId)) {
+    const user = selectUser(global, chatId);
+    return Boolean(user && !user.isSupport && !isDeletedUser(user));
+  }
+
+  return getCanChangeChatInfo(chat);
+}
+
+function getCanChangeChatInfo(chat: ApiChat) {
+  if (chat.isCreator) return true;
+  if (chat.isForbidden || chat.isNotJoined) return false;
+  if (chat.adminRights) return getHasAdminRight(chat, 'changeInfo');
+
+  // Regular members can be granted the right only in groups
+  return isChatGroup(chat) && !isUserRightBanned(chat, 'changeInfo');
 }

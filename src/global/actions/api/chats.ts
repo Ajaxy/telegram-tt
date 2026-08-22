@@ -2620,6 +2620,15 @@ addActionHandler('toggleIsProtected', (global, actions, payload): ActionReturnTy
   void callApi('toggleIsProtected', { chat, isProtected });
 });
 
+addActionHandler('setChatHistoryTtl', (global, actions, payload): ActionReturnType => {
+  const { chatId, period } = payload;
+  const peer = selectPeer(global, chatId);
+  if (!peer) return;
+
+  // The server responds with `updatePeerHistoryTtl`, which is applied by the updater
+  void callApi('setHistoryTtl', { peer, period });
+});
+
 addActionHandler('setChatEnabledReactions', async (global, actions, payload): Promise<void> => {
   const {
     chatId, enabledReactions, reactionsLimit,

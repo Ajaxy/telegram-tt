@@ -1828,6 +1828,7 @@ messages.editExportedChatInvite#bdca2f75 flags:# revoked:flags.2?true peer:Input
 messages.deleteRevokedExportedChatInvites#56987bd5 peer:InputPeer admin_id:InputUser = Bool;
 messages.deleteExportedChatInvite#d464a42b peer:InputPeer link:string = Bool;
 messages.getChatInviteImporters#df04dd4e flags:# requested:flags.0?true subscription_expired:flags.3?true peer:InputPeer link:flags.1?string q:flags.2?string offset_date:int offset_user:InputUser limit:int = messages.ChatInviteImporters;
+messages.setHistoryTTL#b80e5fe4 peer:InputPeer period:int = Updates;
 messages.getMessageReadParticipants#31c1c44f peer:InputPeer msg_id:int = Vector<ReadParticipantDate>;
 messages.hideChatJoinRequest#7fe7e815 flags:# approved:flags.0?true peer:InputPeer user_id:InputUser = Updates;
 messages.hideAllChatJoinRequests#e085f4ea flags:# approved:flags.0?true peer:InputPeer link:flags.1?string = Updates;

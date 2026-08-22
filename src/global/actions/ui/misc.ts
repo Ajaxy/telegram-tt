@@ -981,6 +981,16 @@ addActionHandler('openLeaveGroupModal', (global, actions, payload): ActionReturn
 
 addTabStateResetterAction('closeLeaveGroupModal', 'leaveGroupModal');
 
+addActionHandler('openAutoDeleteTimerModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    autoDeleteTimerModal: { chatId },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeAutoDeleteTimerModal', 'autoDeleteTimerModal');
+
 addActionHandler('openTwoFaCheckModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
 

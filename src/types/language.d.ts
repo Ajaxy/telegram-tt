@@ -468,6 +468,9 @@ export interface LangPair {
   'AutoDeleteSettingsInfo': undefined;
   'SetAutoDeleteTimer': undefined;
   'SetCustomTime': undefined;
+  'AutoDeletePopupTitle': undefined;
+  'AutoDeletePopupDescription': undefined;
+  'AutoDeleteNever': undefined;
   'AutoDeleteConfirm': undefined;
   'ActionTTLYouDisabled': undefined;
   'ActionTTLChannelDisabled': undefined;

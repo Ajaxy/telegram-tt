@@ -395,6 +395,10 @@ export interface ActionPayloads {
     chatId: string;
     isProtected: boolean;
   };
+  setChatHistoryTtl: {
+    chatId: string;
+    period: number;
+  };
   preloadTopChatMessages: undefined;
   loadAllChats: {
     listType: ChatListType;
@@ -2839,6 +2843,11 @@ export interface ActionPayloads {
     nextOwnerId?: string;
   } & WithTabId;
   closeLeaveGroupModal: WithTabId | undefined;
+
+  openAutoDeleteTimerModal: {
+    chatId: string;
+  } & WithTabId;
+  closeAutoDeleteTimerModal: WithTabId | undefined;
 
   openTwoFaCheckModal: WithTabId | undefined;
   closeTwoFaCheckModal: WithTabId | undefined;

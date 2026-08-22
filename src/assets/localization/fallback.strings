@@ -531,6 +531,9 @@
 "AutoDeleteSettingsInfo" = "Automatically delete messages for everyone after a period of time in all new chats you start.";
 "SetAutoDeleteTimer" = "Set Auto-Delete";
 "SetCustomTime" = "Set Custom Time";
+"AutoDeletePopupTitle" = "Auto-Delete";
+"AutoDeletePopupDescription" = "Automatically delete messages sent in this chat after a certain period of time.";
+"AutoDeleteNever" = "Never";
 "AutoDeleteConfirm" = "Confirm";
 "AutoDeleteSetInfo" = "Messages in this chat are automatically deleted {time} after they are sent.";
 "AutoDeleteIn" = "Auto-deletes in {time}";

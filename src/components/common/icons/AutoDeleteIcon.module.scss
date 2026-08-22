@@ -12,26 +12,7 @@
   background-color: var(--accent-color, var(--color-icon-secondary));
 }
 
-.layer {
-  display: block;
-  grid-area: 1 / 1;
-
-  width: 1.125rem;
-  height: 1.125rem;
-
-  filter: invert(1);
-}
-
-.label {
-  z-index: 1;
-
-  grid-area: 1 / 1;
-  align-self: center;
-  justify-self: center;
-
-  font-family: var(--font-family-condensed);
-  font-size: 0.5625rem;
-  font-weight: var(--font-weight-semibold);
-  line-height: 1;
+.glyph {
+  font-size: 1.125rem;
   color: var(--color-white);
 }
