@@ -1,11 +1,10 @@
+import type { Editor } from '@tiptap/core';
 import type { Command } from '@tiptap/pm/state';
 import {
   addColumnAfter,
   addColumnBefore,
   addRowAfter,
   addRowBefore,
-  deleteColumn,
-  deleteRow,
   mergeCells,
   splitCell,
   TableMap,
@@ -29,7 +28,6 @@ import captureEscKeyListener from '../../../../util/captureEscKeyListener';
 import { TABLE_CELL_HIGHLIGHT_ATTR } from '../../../../util/tiptap/constants';
 import {
   canToggleRichEditorTableHighlight,
-  deleteRichEditorTable,
   getRichEditorTableCellAttr,
   getRichEditorTableMoveTargets,
   getRichEditorTableSelection,
@@ -55,8 +53,11 @@ import NestedMenuItem from '../../../ui/NestedMenuItem';
 
 import styles from './EditableTable.module.scss';
 
+type EditableTableCommands = Pick<Editor['commands'], 'deleteColumn' | 'deleteRow' | 'deleteTable'>;
+
 export type EditableTableProps = {
   editorView: EditorView;
+  editorCommands: EditableTableCommands;
   rootElement: HTMLDivElement;
   tableElement: HTMLTableElement;
   colgroupElement: HTMLTableColElement;
@@ -147,6 +148,7 @@ const ALIGNMENT_OPTION_GROUPS: AlignmentOption[][] = [
 
 const EditableTable = ({
   editorView,
+  editorCommands,
   rootElement,
   tableElement,
   colgroupElement,
@@ -669,6 +671,18 @@ const EditableTable = ({
     focusEditor(editorView);
   });
 
+  const handleDelete = useLastCallback(() => {
+    isKeyboardMenuRef.current = false;
+    if (layout.selection?.kind === 'table') {
+      editorCommands.deleteTable();
+    } else if (layout.selection?.kind === 'row') {
+      editorCommands.deleteRow();
+    } else if (layout.selection?.kind === 'column') {
+      editorCommands.deleteColumn();
+    }
+    focusEditor(editorView);
+  });
+
   const getTriggerElement = useLastCallback(() => gripRef.current);
   const getRootElement = useLastCallback(() => document.body);
   const getMenuElement = useLastCallback(() => menuRef.current);
@@ -996,9 +1010,7 @@ const EditableTable = ({
               icon="table-delete"
               destructive
               withPreventDefaultOnMouseDown
-              onClick={() => runCommand(
-                isTableSelection ? deleteRichEditorTable : isRowSelection ? deleteRow : deleteColumn,
-              )}
+              onClick={handleDelete}
             >
               {isTableSelection ? lang('RichEditorTableDeleteTable') : lang(
                 isRowSelection

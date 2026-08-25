@@ -60,9 +60,7 @@ export const RichEditorTableTitle = RichEditorTableTitleNode.extend({
 export function buildRichEditorTableExtensions() {
   return [
     RichEditorTableWrapper,
-    RichEditorTable.configure({
-      View: RichEditorTableView,
-    }),
+    RichEditorTable,
     RichEditorTableRow.configure({
       HTMLAttributes: {
         class: styles.tableRow,
@@ -131,6 +129,22 @@ const RichEditorTableWrapper = TiptapNode.create({
 });
 
 const RichEditorTable = TableExtension.extend({
+  addNodeView() {
+    const editorCommands: EditableTableProps['editorCommands'] = {
+      deleteColumn: () => this.editor.commands.deleteColumn(),
+      deleteRow: () => this.editor.commands.deleteRow(),
+      deleteTable: () => this.editor.commands.deleteTable(),
+    };
+
+    return ({ node, view, HTMLAttributes }) => new RichEditorTableView(
+      node,
+      this.options.cellMinWidth,
+      view,
+      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes),
+      editorCommands,
+    );
+  },
+
   addAttributes() {
     return {
       ...this.parent?.(),
@@ -225,6 +239,8 @@ export const RichEditorTableControlsExtension = Extension.create({
 class RichEditorTableView extends TableView {
   private editorView: EditorView;
 
+  private editorCommands: EditableTableProps['editorCommands'];
+
   private renderer: TeactRenderer<EditableTableProps>;
 
   private renderVersion = 0;
@@ -237,11 +253,13 @@ class RichEditorTableView extends TableView {
     node: ProseMirrorNode,
     cellMinWidth: number,
     editorView: EditorView,
-    HTMLAttributes?: AnyLiteral,
+    HTMLAttributes: AnyLiteral | undefined,
+    editorCommands: EditableTableProps['editorCommands'],
   ) {
     super(node, cellMinWidth, editorView, HTMLAttributes);
 
     this.editorView = editorView;
+    this.editorCommands = editorCommands;
     this.dom.className = styles.root;
     this.updateTableClassName(node);
 
@@ -319,6 +337,7 @@ class RichEditorTableView extends TableView {
       colgroupElement: this.colgroup,
       contentElement,
       renderVersion: this.renderVersion,
+      editorCommands: this.editorCommands,
     };
   }
 
