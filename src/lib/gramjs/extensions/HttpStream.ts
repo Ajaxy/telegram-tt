@@ -3,6 +3,17 @@ import { concat } from '../../../util/encoding/buffer';
 const closeError = new Error('HttpStream was closed');
 const REQUEST_TIMEOUT = 10000;
 
+class HttpStreamError extends Error {
+  readonly status: number;
+
+  constructor(response: Response) {
+    const statusText = response.statusText ? ` ${response.statusText}` : '';
+    super(`HttpStream request failed: ${response.status}${statusText}`);
+    this.name = 'HttpStreamError';
+    this.status = response.status;
+  }
+}
+
 AbortSignal.timeout ??= function timeout(ms) {
   const ctrl = new AbortController();
   setTimeout(() => ctrl.abort(), ms);
@@ -20,7 +31,7 @@ export default class HttpStream {
 
   private resolveRead: VoidFunction | undefined;
 
-  private rejectRead: VoidFunction | undefined;
+  private rejectRead: ((reason?: unknown) => void) | undefined;
 
   private disconnectedCallback: VoidFunction | undefined;
 
@@ -72,19 +83,22 @@ export default class HttpStream {
     });
     this.url = HttpStream.getURL(ip, port, isTestServer, isPremium);
 
-    await fetch(this.url, {
+    const response = await fetch(this.url, {
       method: 'POST',
       body: new Uint8Array(0),
       mode: 'cors',
       signal: AbortSignal.timeout(REQUEST_TIMEOUT),
     });
+    if (response.status !== 200) {
+      throw new HttpStreamError(response);
+    }
 
     this.isClosed = false;
   }
 
   write(data: Uint8Array) {
     if (this.isClosed || !this.url) {
-      this.handleDisconnect();
+      this.handleDisconnect(closeError);
       throw closeError;
     }
 
@@ -95,11 +109,11 @@ export default class HttpStream {
       signal: AbortSignal.timeout(REQUEST_TIMEOUT),
     }).then(async (response) => {
       if (this.isClosed) {
-        this.handleDisconnect();
+        this.handleDisconnect(closeError);
         return;
       }
       if (response.status !== 200) {
-        throw closeError;
+        throw new HttpStreamError(response);
       }
 
       const arrayBuffer = await response.arrayBuffer();
@@ -107,19 +121,19 @@ export default class HttpStream {
       this.stream = this.stream.concat(new Uint8Array(arrayBuffer));
       if (this.resolveRead && !this.isClosed) this.resolveRead();
     }).catch((err) => {
-      this.handleDisconnect();
+      this.handleDisconnect(err);
       throw err;
     });
   }
 
-  handleDisconnect() {
+  handleDisconnect(err: unknown) {
     this.disconnectedCallback?.();
-    if (this.rejectRead) this.rejectRead();
+    if (this.rejectRead) this.rejectRead(err);
   }
 
   close() {
     this.isClosed = true;
-    this.handleDisconnect();
+    this.handleDisconnect(closeError);
     this.disconnectedCallback = undefined;
   }
 }

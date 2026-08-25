@@ -39,6 +39,8 @@ const MAX_RECENT_ACKNOWLEDGED_MESSAGES = 500;
 const MESSAGE_STATE_RECEIVED = 4;
 const MESSAGE_STATE_NO_ACK_REQUIRED = 16;
 const MESSAGE_STATE_RECEIVED_ELSEWHERE = 128;
+const MAIN_CONNECTION_RETRY_DELAY_MULTIPLIERS = [1, 3, 6, 30, 60];
+const MAX_MAIN_CONNECTION_RETRY_DELAY = 600000;
 
 type SentMessage = {
   msgId: bigint;
@@ -356,6 +358,8 @@ export default class MTProtoSender {
       && this._shouldAllowHttpTransport);
     this._connection = connection;
     this._fallbackConnection = fallbackConnection;
+    let hasConnected = false;
+    let connectionError: unknown;
 
     for (let attempt = 0; attempt < this._retries + this._retriesToFallback; attempt++) {
       try {
@@ -370,8 +374,10 @@ export default class MTProtoSender {
         if (!this._isExported) {
           this._updateCallback?.(new UpdateConnectionState(UpdateConnectionState.connected));
         }
+        hasConnected = true;
         break;
       } catch (err) {
+        connectionError = err;
         if (!this._isExported && attempt === 0) {
           this._updateCallback?.(new UpdateConnectionState(UpdateConnectionState.disconnected));
         }
@@ -382,8 +388,11 @@ export default class MTProtoSender {
       }
     }
     this.isConnecting = false;
+    if (!hasConnected) {
+      throw connectionError instanceof Error ? connectionError : new Error('Connection failed');
+    }
 
-    if (this._isFallback && !this._shouldForceHttpTransport && !shouldUseFallback) {
+    if (this._isFallback && !this._shouldForceHttpTransport) {
       void this.tryReconnectToMain();
     }
 
@@ -391,31 +400,56 @@ export default class MTProtoSender {
   }
 
   async tryReconnectToMain() {
-    if (!this.isConnecting && this._isFallback && !this._isReconnectingToMain && !this.isReconnecting
-      && !this._shouldForceHttpTransport && !this._isExported) {
-      this._log.debug('Trying to reconnect to main connection');
-      this._isReconnectingToMain = true;
-      try {
-        await this._connection!.connect();
-        this._log.info('Reconnected to main connection');
-        this.logWithIndex.warn('Reconnected to main connection');
-        this.isReconnecting = true;
-        if (this._fallbackConnection) this._disconnect(this._fallbackConnection);
-        await this.connect(this._connection!, true, this._fallbackConnection);
-        this.isReconnecting = false;
-        this._isReconnectingToMain = false;
-      } catch (e) {
-        this.isReconnecting = false;
-        this._isReconnectingToMain = false;
-        this._log.error(
-          `Failed to reconnect to main connection, retrying in ${this._retryMainConnectionDelay}ms`,
+    if (this._isReconnectingToMain || !this.canRetryMainConnection()) return;
+
+    this._isReconnectingToMain = true;
+    let attempt = 0;
+
+    try {
+      while (this.canRetryMainConnection()) {
+        const delayMultiplier = MAIN_CONNECTION_RETRY_DELAY_MULTIPLIERS[
+          Math.min(attempt, MAIN_CONNECTION_RETRY_DELAY_MULTIPLIERS.length - 1)
+        ];
+        const retryDelay = Math.min(
+          this._retryMainConnectionDelay * delayMultiplier,
+          MAX_MAIN_CONNECTION_RETRY_DELAY,
         );
-        await sleep(this._retryMainConnectionDelay);
-        void this.tryReconnectToMain();
+        this._log.debug(`Trying to reconnect to main connection in ${retryDelay}ms`);
+        await sleep(retryDelay);
+
+        if (!this.canRetryMainConnection()) return;
+
+        try {
+          await this._connection!.connect();
+          this.isReconnecting = true;
+          if (this._fallbackConnection) this._disconnect(this._fallbackConnection);
+          await this.connect(this._connection!, true, this._fallbackConnection);
+          this.isReconnecting = false;
+
+          if (this._isFallback) {
+            this._log.error('Failed to reconnect to main connection');
+            attempt++;
+            continue;
+          }
+
+          this._log.info('Reconnected to main connection');
+          this.logWithIndex.warn('Reconnected to main connection');
+          return;
+        } catch {
+          this.isReconnecting = false;
+          this._isFallback = true;
+          this._log.error('Failed to reconnect to main connection');
+          attempt++;
+        }
       }
-    } else {
-      await sleep(this._retryMainConnectionDelay);
+    } finally {
+      this._isReconnectingToMain = false;
     }
+  }
+
+  private canRetryMainConnection() {
+    return !this.userDisconnected && !this.isConnecting && this._isFallback && !this.isReconnecting
+      && !this._shouldForceHttpTransport && !this._isExported;
   }
 
   isConnected() {
@@ -1576,9 +1610,13 @@ export default class MTProtoSender {
       isTestServer: currentConnection._isTestServer,
       isPremium: currentConnection._isPremium,
     });
-    await this.connect(newConnection, true, newFallbackConnection, shouldUseFallback);
-
-    this.isReconnecting = false;
+    try {
+      await this.connect(newConnection, true, newFallbackConnection, shouldUseFallback);
+    } catch {
+      return;
+    } finally {
+      this.isReconnecting = false;
+    }
 
     if (this._autoReconnectCallback) {
       await this._autoReconnectCallback();
