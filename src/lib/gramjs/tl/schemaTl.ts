@@ -53,5 +53,6 @@ tlsBlockDomain = TlsBlock;
 tlsBlockGrease seed:int = TlsBlock;
 tlsBlockScope entries:Vector<TlsBlock> = TlsBlock;
 ---functions---
+get_future_salts#b921bd04 num:int = FutureSalts;
 ping#7abe77ec ping_id:long = Pong;
 ping_delay_disconnect#f3427b8c ping_id:long disconnect_delay:int = Pong;`;

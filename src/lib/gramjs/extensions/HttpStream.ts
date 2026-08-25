@@ -1,9 +1,9 @@
 import { concat } from '../../../util/encoding/buffer';
 
 const closeError = new Error('HttpStream was closed');
-const REQUEST_TIMEOUT = 10000;
+const REQUEST_TIMEOUT = 30000;
 
-class HttpStreamError extends Error {
+export class HttpStreamError extends Error {
   readonly status: number;
 
   constructor(response: Response) {
@@ -14,16 +14,12 @@ class HttpStreamError extends Error {
   }
 }
 
-AbortSignal.timeout ??= function timeout(ms) {
-  const ctrl = new AbortController();
-  setTimeout(() => ctrl.abort(), ms);
-  return ctrl.signal;
-};
-
 export default class HttpStream {
   private url: string | undefined;
 
   private isClosed: boolean;
+
+  private abortController?: AbortController;
 
   private stream: Uint8Array[] = [];
 
@@ -62,6 +58,7 @@ export default class HttpStream {
         this.resolveRead = resolve;
         this.rejectRead = reject;
       });
+      void this.canRead.catch(() => undefined);
     }
 
     return data;
@@ -75,39 +72,37 @@ export default class HttpStream {
     }
   }
 
-  async connect(port: number, ip: string, isTestServer = false, isPremium = false) {
+  connect(port: number, ip: string, isTestServer = false, isPremium = false) {
+    this.abortController?.abort();
+    this.abortController = new AbortController();
     this.stream = [];
     this.canRead = new Promise((resolve, reject) => {
       this.resolveRead = resolve;
       this.rejectRead = reject;
     });
+    void this.canRead.catch(() => undefined);
     this.url = HttpStream.getURL(ip, port, isTestServer, isPremium);
-
-    const response = await fetch(this.url, {
-      method: 'POST',
-      body: new Uint8Array(0),
-      mode: 'cors',
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT),
-    });
-    if (response.status !== 200) {
-      throw new HttpStreamError(response);
-    }
-
     this.isClosed = false;
+
+    return Promise.resolve();
   }
 
   write(data: Uint8Array) {
-    if (this.isClosed || !this.url) {
+    if (this.isClosed || !this.url || !this.abortController) {
       this.handleDisconnect(closeError);
       throw closeError;
     }
+
+    const abortController = this.abortController;
+    const requestTimeout = setTimeout(() => abortController.abort(), REQUEST_TIMEOUT);
 
     return fetch(this.url, {
       method: 'POST',
       body: new Uint8Array(data),
       mode: 'cors',
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT),
+      signal: abortController.signal,
     }).then(async (response) => {
+      if (this.abortController !== abortController) throw closeError;
       if (this.isClosed) {
         this.handleDisconnect(closeError);
         return;
@@ -117,22 +112,31 @@ export default class HttpStream {
       }
 
       const arrayBuffer = await response.arrayBuffer();
+      if (this.abortController !== abortController) throw closeError;
+      if (!arrayBuffer.byteLength) {
+        throw new Error('HttpStream received an empty response');
+      }
 
       this.stream = this.stream.concat(new Uint8Array(arrayBuffer));
       if (this.resolveRead && !this.isClosed) this.resolveRead();
     }).catch((err) => {
-      this.handleDisconnect(err);
+      if (this.abortController === abortController) this.handleDisconnect(err);
       throw err;
+    }).finally(() => {
+      clearTimeout(requestTimeout);
     });
   }
 
   handleDisconnect(err: unknown) {
+    this.abortController?.abort();
     this.disconnectedCallback?.();
     if (this.rejectRead) this.rejectRead(err);
   }
 
   close() {
     this.isClosed = true;
+    this.abortController?.abort();
+    this.abortController = undefined;
     this.handleDisconnect(closeError);
     this.disconnectedCallback = undefined;
   }

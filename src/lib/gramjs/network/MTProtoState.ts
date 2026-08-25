@@ -7,7 +7,6 @@ import { BinaryReader, type BinaryWriter, type Logger } from '../extensions';
 import { Api } from '../tl';
 import { TLMessage } from '../tl/core';
 import GZIPPacked from '../tl/core/GZIPPacked';
-import RPCResult from '../tl/core/RPCResult';
 
 import { InvalidBufferError, MessageReplayError, SecurityError } from '../errors/Common';
 import {
@@ -36,7 +35,6 @@ const MIN_ENCRYPTED_MESSAGE_PADDING = 12;
 const MAX_ENCRYPTED_MESSAGE_PADDING = 1024;
 const TL_ALIGNMENT = 4;
 const SERVER_MSG_ID_PARITY = 1n;
-const SERVER_SALT_VALIDITY_PERIOD = 1800;
 const SERVER_SALT_GRACE_PERIOD = 1800;
 const MAX_STORED_SERVER_SALTS = MAX_FUTURE_SERVER_SALTS + 1;
 const MAX_MESSAGE_IDS = 8192;
@@ -62,7 +60,7 @@ type CanSkipTimeValidation = (referencedMsgId: bigint, referencedMsgSeqNo?: numb
 type ServerSalt = {
   salt: bigint;
   validSince: number;
-  validUntil: number;
+  validUntil?: number;
 };
 
 type RemoteMessage = {
@@ -76,6 +74,8 @@ export default class MTProtoState {
   private _log: any;
 
   timeOffset: number;
+
+  private hasSynchronizedServerTime = false;
 
   private currentServerSalt?: bigint;
 
@@ -152,6 +152,17 @@ export default class MTProtoState {
     this.remoteMessages.clear();
   }
 
+  resetForNewAuthKey() {
+    this.hasSynchronizedServerTime = false;
+    this.currentServerSalt = undefined;
+    this.serverSalts = [];
+    this.reset();
+  }
+
+  getServerTime() {
+    return Math.floor(Date.now() / 1000) + this.timeOffset;
+  }
+
   getIncomingMessageState(msgId: bigint, isAcknowledged: boolean) {
     if ((msgId & 1n) !== SERVER_MSG_ID_PARITY) return MESSAGE_STATE_UNKNOWN;
 
@@ -171,18 +182,18 @@ export default class MTProtoState {
     return MESSAGE_STATE_NOT_RECEIVED;
   }
 
-  setServerSalt(salt: bigint) {
+  setServerSalt(salt: bigint, shouldResetFutureSalts?: boolean) {
     const serverTime = this.getServerTime();
     const previousSalt = this.currentServerSalt;
-    const knownSalt = this.serverSalts.find((serverSalt) => (
+    const knownSalt = !shouldResetFutureSalts && this.serverSalts.find((serverSalt) => (
       serverSalt.salt === salt
       && serverSalt.validSince <= serverTime
-      && serverTime < serverSalt.validUntil + SERVER_SALT_GRACE_PERIOD
+      && (serverSalt.validUntil === undefined || serverTime < serverSalt.validUntil)
     ));
     if (previousSalt === salt && knownSalt) return;
 
-    const retainedSalts = this.serverSalts.filter((serverSalt) => (
-      serverSalt.validUntil + SERVER_SALT_GRACE_PERIOD > serverTime
+    const retainedSalts = shouldResetFutureSalts ? [] : this.serverSalts.filter((serverSalt) => (
+      (serverSalt.validUntil === undefined || serverSalt.validUntil > serverTime)
       && serverSalt.salt !== salt
       && serverSalt.salt !== previousSalt
     ));
@@ -192,18 +203,17 @@ export default class MTProtoState {
       ));
       retainedSalts.push({
         salt: previousSalt,
-        validSince: previousEntry?.validSince ?? serverTime - SERVER_SALT_VALIDITY_PERIOD,
-        validUntil: Math.min(previousEntry?.validUntil ?? serverTime, serverTime),
+        validSince: previousEntry?.validSince ?? serverTime,
+        validUntil: previousEntry?.validUntil ?? serverTime + SERVER_SALT_GRACE_PERIOD,
       });
     }
 
     this.currentServerSalt = salt;
     this.serverSalts = [
       ...retainedSalts,
-      knownSalt && knownSalt.validUntil > serverTime ? knownSalt : {
+      knownSalt && (knownSalt.validUntil === undefined || knownSalt.validUntil > serverTime) ? knownSalt : {
         salt,
         validSince: serverTime,
-        validUntil: serverTime + SERVER_SALT_VALIDITY_PERIOD,
       },
     ]
       .sort((firstSalt, secondSalt) => firstSalt.validSince - secondSalt.validSince)
@@ -224,9 +234,8 @@ export default class MTProtoState {
       .map(({ salt, validSince, validUntil }) => ({ salt, validSince, validUntil }))
       .sort((firstSalt, secondSalt) => firstSalt.validSince - secondSalt.validSince);
     const retainedSalts = this.serverSalts.filter(({ salt, validUntil }) => (
-      validUntil + SERVER_SALT_GRACE_PERIOD > serverTime
+      (validUntil === undefined || validUntil > serverTime)
       && !futureSalts.some(({ salt: futureSalt }) => futureSalt === salt)
-      && (validUntil <= serverTime || salt === this.currentServerSalt)
     ));
     this.serverSalts = [...retainedSalts, ...futureSalts]
       .sort((firstSalt, secondSalt) => firstSalt.validSince - secondSalt.validSince)
@@ -398,9 +407,7 @@ export default class MTProtoState {
       throw new InvalidBufferError(body);
     }
     if (!this._isCall && body.length === 4) {
-      const invalidBufferError = new InvalidBufferError(body);
-      if (invalidBufferError.code === 404) throw invalidBufferError;
-      throw new SecurityError();
+      throw new InvalidBufferError(body);
     }
     if (!this._isCall && (body.length < ENCRYPTED_MESSAGE_EXTERNAL_HEADER_LENGTH
       || (body.length - ENCRYPTED_MESSAGE_EXTERNAL_HEADER_LENGTH) % 16 !== 0)) {
@@ -464,7 +471,6 @@ export default class MTProtoState {
     } else {
       const serverSalt = reader.readLong();
       const serverId = reader.readLong();
-      const hasInvalidServerSalt = !this.isServerSaltValid(serverSalt, receivedAt);
       hasInvalidEncryptedPacket = serverId !== this.id || hasInvalidEncryptedPacket;
 
       const remoteMsgId = reader.readLong();
@@ -489,14 +495,10 @@ export default class MTProtoState {
         throw new SecurityError();
       }
       const message = new TLMessage(remoteMsgId, remoteSequence, obj);
-      if (hasInvalidServerSalt
-        && !this.canAcceptServerSalt(message, serverSalt, canSkipTimeValidation)) {
-        throw new SecurityError();
-      }
       this.validateIncomingMessages(
         message, receivedAt, canSkipTimeValidation, canSkipInnerReplays,
       );
-      if (this.currentServerSalt === undefined || hasInvalidServerSalt) {
+      if (this.currentServerSalt === undefined) {
         this.setServerSalt(serverSalt);
       }
 
@@ -516,6 +518,18 @@ export default class MTProtoState {
     const canSkipContainerReplays = canSkipInnerReplays && message.obj instanceof MessageContainer;
 
     const retainedFloor = this.remoteMsgIds[0];
+    if (this._lastMsgId !== 0n) {
+      if ((message.msgId & 1n) !== SERVER_MSG_ID_PARITY) {
+        throw new SecurityError();
+      }
+      if (this.remoteMessages.has(message.msgId)
+        || (retainedFloor !== undefined && message.msgId < retainedFloor)) {
+        throw new MessageReplayError();
+      }
+
+      this.synchronizeServerTime(message.msgId, receivedAt);
+    }
+
     let previousIncomingMsgId: bigint | undefined;
     let areIncomingMessagesOrdered = true;
     let newMessageCount = 0;
@@ -721,6 +735,14 @@ export default class MTProtoState {
       || timeDelta < -MAX_INCOMING_MESSAGE_FUTURE_OFFSET;
   }
 
+  private synchronizeServerTime(msgId: bigint, receivedAt: number) {
+    const timeOffset = Number(msgId >> 32n) - receivedAt;
+    if (this.hasSynchronizedServerTime && timeOffset <= this.timeOffset) return;
+
+    this.timeOffset = timeOffset;
+    this.hasSynchronizedServerTime = true;
+  }
+
   private canSkipMessageTimeValidation(
     message: TLMessage,
     canSkipTimeValidation?: CanSkipTimeValidation,
@@ -753,19 +775,20 @@ export default class MTProtoState {
   private selectServerSalt(serverTime: number) {
     for (let i = this.serverSalts.length - 1; i >= 0; i--) {
       const serverSalt = this.serverSalts[i];
-      if (serverSalt.validSince <= serverTime && serverTime < serverSalt.validUntil) {
+      if (serverSalt.validSince <= serverTime
+        && (serverSalt.validUntil === undefined || serverTime < serverSalt.validUntil)) {
         const previousSalt = this.currentServerSalt;
         if (previousSalt !== undefined && previousSalt !== serverSalt.salt) {
           const previousEntry = this.serverSalts.find(({ salt }) => salt === previousSalt);
           this.serverSalts = [
             ...this.serverSalts.filter(({ salt, validUntil }) => (
-              validUntil + SERVER_SALT_GRACE_PERIOD > serverTime
+              (validUntil === undefined || validUntil > serverTime)
               && salt !== previousSalt
             )),
             {
               salt: previousSalt,
-              validSince: previousEntry?.validSince ?? serverTime - SERVER_SALT_VALIDITY_PERIOD,
-              validUntil: Math.min(previousEntry?.validUntil ?? serverTime, serverTime),
+              validSince: previousEntry?.validSince ?? serverTime,
+              validUntil: previousEntry?.validUntil ?? serverTime + SERVER_SALT_GRACE_PERIOD,
             },
           ]
             .sort((firstSalt, secondSalt) => firstSalt.validSince - secondSalt.validSince)
@@ -775,49 +798,6 @@ export default class MTProtoState {
         return;
       }
     }
-  }
-
-  private isServerSaltValid(salt: bigint, receivedAt: number) {
-    if (this.currentServerSalt === undefined) return true;
-
-    const serverTime = receivedAt + this.timeOffset;
-    // https://core.telegram.org/mtproto/description#server-salt
-    return this.serverSalts.some((serverSalt) => (
-      serverSalt.salt === salt
-      && serverSalt.validSince <= serverTime
-      && serverTime < serverSalt.validUntil + SERVER_SALT_GRACE_PERIOD
-    ));
-  }
-
-  private canAcceptServerSalt(
-    message: TLMessage,
-    serverSalt: bigint,
-    canSkipTimeValidation?: CanSkipTimeValidation,
-  ) {
-    const messages = message.obj instanceof MessageContainer ? message.obj.messages : [message];
-
-    return messages.some((candidateMessage) => {
-      const { obj } = candidateMessage;
-      if (obj.CONSTRUCTOR_ID === Api.NewSessionCreated.CONSTRUCTOR_ID) {
-        return obj.serverSalt === serverSalt;
-      }
-
-      if (obj.CONSTRUCTOR_ID === Api.BadServerSalt.CONSTRUCTOR_ID) {
-        return obj.errorCode === BAD_SERVER_SALT_ERROR_CODE
-          && obj.newServerSalt === serverSalt
-          && canSkipTimeValidation?.(obj.badMsgId, obj.badMsgSeqno);
-      }
-
-      // https://core.telegram.org/mtproto/service_messages_about_messages#notice-of-ignored-error-message
-      return obj.CONSTRUCTOR_ID === RPCResult.CONSTRUCTOR_ID
-        && candidateMessage.isContentRelated
-        && (candidateMessage.msgId & 3n) === 1n
-        && canSkipTimeValidation?.(obj.reqMsgId);
-    });
-  }
-
-  private getServerTime() {
-    return Math.floor(Date.now() / 1000) + this.timeOffset;
   }
 
   /**
@@ -848,6 +828,7 @@ export default class MTProtoState {
     const now = Math.floor(Date.now() / 1000);
     const correct = Number(correctMsgId >> 32n);
     this.timeOffset = correct - now;
+    this.hasSynchronizedServerTime = true;
 
     if (this.timeOffset !== old) {
       const nextMsgId = this._lastMsgId + MESSAGE_ID_ALIGNMENT;

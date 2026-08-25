@@ -4,6 +4,7 @@
     "req_DH_params",
     "set_client_DH_params",
     "destroy_auth_key",
+    "get_future_salts",
     "ping",
     "ping_delay_disconnect"
 ]
