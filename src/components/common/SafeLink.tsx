@@ -5,7 +5,7 @@ import type { ThreadId } from '../../types';
 import { ApiMessageEntityTypes, type LinkContext } from '../../api/types';
 
 import { IS_TAURI } from '../../util/browser/globalEnvironment';
-import { ensureProtocol, getUnicodeUrl, isMixedScriptUrl } from '../../util/browser/url';
+import { ensureProtocol, getUnicodeUrl, isSuspiciousUrl } from '../../util/browser/url';
 import buildClassName from '../../util/buildClassName';
 
 import useLastCallback from '../../hooks/useLastCallback';
@@ -50,7 +50,7 @@ const SafeLink = ({
 
     e.preventDefault();
 
-    const isTrustedLink = isRegularLink && !isMixedScriptUrl(url);
+    const isTrustedLink = isRegularLink && !isSuspiciousUrl(url);
     const linkContext: LinkContext | undefined = chatId && messageId
       ? { type: 'message', chatId, threadId, messageId }
       : undefined;

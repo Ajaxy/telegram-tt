@@ -5,7 +5,7 @@ You are an expert in TypeScript, JavaScript, HTML, SCSS and Teact with deep expe
 - **Be concise.** Only change code directly related to the current task; leave unrelated parts untouched.
 - **Reuse** existing types, functions and components. Search before creating a new one.
 - **No new libraries.** Use existing dependencies only. If a task truly can't be done without a new library, stop and explain why.
-- **Do not** write tests.
+- **Only** write tests when directly prompted to do so.
 
 - **SCSS modules:**
   - Name classes in camelCase.
