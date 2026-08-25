@@ -7,16 +7,29 @@ const [getControlsVisible, setControlsVisibleSignal] = createSignal(false);
 const [getIsLocked, setIsLocked] = createSignal(false);
 
 let playerElement: HTMLElement | undefined;
+let controlsElement: HTMLElement | undefined;
 let getMousePosition: (() => { x: number; y: number } | undefined) | undefined;
+
+function isPositionInsideElement(position: { x: number; y: number }, element: HTMLElement) {
+  const bounds = element.getBoundingClientRect();
+  return position.x >= bounds.left && position.x <= bounds.right
+    && position.y >= bounds.top && position.y <= bounds.bottom;
+}
+
+export function isMouseInsideControls() {
+  if (IS_TOUCH_ENV) return false;
+  if (!controlsElement || !getMousePosition) return false;
+  const position = getMousePosition();
+  if (!position) return false;
+  return isPositionInsideElement(position, controlsElement);
+}
 
 function isMouseInsidePlayer() {
   if (IS_TOUCH_ENV) return true;
   if (!playerElement || !getMousePosition) return false;
-  const pos = getMousePosition();
-  if (!pos) return true;
-  const bounds = playerElement.getBoundingClientRect();
-  return pos.x >= bounds.left && pos.x <= bounds.right
-    && pos.y >= bounds.top && pos.y <= bounds.bottom;
+  const position = getMousePosition();
+  if (!position) return true;
+  return isPositionInsideElement(position, playerElement) || isMouseInsideControls();
 }
 
 const setControlsVisible = (value: boolean, noPositionCheck?: boolean) => {
@@ -25,11 +38,15 @@ const setControlsVisible = (value: boolean, noPositionCheck?: boolean) => {
 };
 
 export function registerPlayerElement(
-  el: HTMLElement | undefined,
+  element: HTMLElement | undefined,
   mousePositionGetter?: () => { x: number; y: number } | undefined,
 ) {
-  playerElement = el;
+  playerElement = element;
   getMousePosition = mousePositionGetter;
+}
+
+export function registerControlsElement(element: HTMLElement | undefined) {
+  controlsElement = element;
 }
 
 export default function useControlsSignal() {

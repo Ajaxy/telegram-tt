@@ -20,7 +20,7 @@ import useDerivedState from '../../hooks/useDerivedState';
 import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import useControlsSignal from './hooks/useControlsSignal';
+import useControlsSignal, { isMouseInsideControls, registerControlsElement } from './hooks/useControlsSignal';
 
 import AnimatedFileSize from '../common/AnimatedFileSize';
 import Button from '../ui/Button';
@@ -100,6 +100,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
   const currentTime = useDerivedState(() => Math.trunc(getCurrentTime()), [getCurrentTime]);
   const [getIsSeeking, setIsSeeking] = useSignal(false);
 
+  const rootRef = useRef<HTMLDivElement>();
   const closeTimeoutRef = useRef<number | undefined>();
 
   const { isMobile } = useAppLayout();
@@ -107,14 +108,27 @@ const VideoPlayerControls: FC<OwnProps> = ({
   const isVisible = useDerivedState(getIsVisible);
 
   useEffect(() => {
+    registerControlsElement(rootRef.current);
+    return () => registerControlsElement(undefined);
+  }, []);
+
+  useEffect(() => {
     if (!IS_TOUCH_ENV && !isForceMobileVersion) return undefined;
     if (!isVisible || !isPlaying || isPlaybackMenuOpen || getIsSeeking()) {
       if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
       return undefined;
     }
-    closeTimeoutRef.current = window.setTimeout(() => {
-      setVisibility(false);
-    }, HIDE_CONTROLS_TIMEOUT_MS);
+    const scheduleHide = () => {
+      closeTimeoutRef.current = window.setTimeout(() => {
+        // Keep controls while the mouse is over them
+        if (isMouseInsideControls()) {
+          scheduleHide();
+          return;
+        }
+        setVisibility(false);
+      }, HIDE_CONTROLS_TIMEOUT_MS);
+    };
+    scheduleHide();
     return () => {
       if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
     };
@@ -159,6 +173,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
 
   return (
     <div
+      ref={rootRef}
       className={buildClassName('VideoPlayerControls', isForceMobileVersion && 'mobile', isVisible && 'active')}
       onClick={stopEvent}
     >

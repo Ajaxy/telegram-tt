@@ -21,7 +21,7 @@ import usePictureInPicture from '../../hooks/usePictureInPicture';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useFullscreen from '../../hooks/window/useFullscreen';
-import useControlsSignal, { registerPlayerElement } from './hooks/useControlsSignal';
+import useControlsSignal, { isMouseInsideControls, registerPlayerElement } from './hooks/useControlsSignal';
 import useVideoWaitingSignal from './hooks/useVideoWaitingSignal';
 
 import Button from '../ui/Button';
@@ -119,12 +119,18 @@ const VideoPlayer: FC<OwnProps> = ({
       lastMousePositionRef.current = getPointerPosition(e);
     };
 
+    const clearMousePosition = () => {
+      lastMousePositionRef.current = undefined;
+    };
+
     window.addEventListener('mousemove', updateMousePosition);
     window.addEventListener('touchmove', updateMousePosition);
+    document.documentElement.addEventListener('mouseleave', clearMousePosition);
 
     return () => {
       window.removeEventListener('mousemove', updateMousePosition);
       window.removeEventListener('touchmove', updateMousePosition);
+      document.documentElement.removeEventListener('mouseleave', clearMousePosition);
     };
   }, []);
 
@@ -136,11 +142,10 @@ const VideoPlayer: FC<OwnProps> = ({
   const checkMousePositionAndToggleControls = useLastCallback((clientX: number, clientY: number) => {
     const bounds = videoRef.current?.getBoundingClientRect();
     if (!bounds) return;
-    if (clientX <= bounds.left || clientX >= bounds.right
-      || clientY <= bounds.top || clientY >= bounds.bottom) {
-      if (!getIsSeeking()) {
-        toggleControls(false);
-      }
+    const isOutsideVideo = clientX <= bounds.left || clientX >= bounds.right
+      || clientY <= bounds.top || clientY >= bounds.bottom;
+    if (isOutsideVideo && !getIsSeeking() && !isMouseInsideControls()) {
+      toggleControls(false);
     }
   });
 
