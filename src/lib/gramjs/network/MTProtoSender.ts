@@ -13,7 +13,7 @@ import { UpdateConnectionState, UpdateServerTimeOffset, UpdateSessionGap } from 
 import { type Update } from '../client/TelegramClient';
 import { AuthKey } from '../crypto/AuthKey';
 import {
-  BadMessageError, InvalidBufferError, MessageReplayError, SecurityError, TypeNotFoundError,
+  BadMessageError, InvalidBufferError, SecurityError, TypeNotFoundError,
 } from '../errors/Common';
 import { HttpStreamError } from '../extensions/HttpStream';
 import PendingState from '../extensions/PendingState';
@@ -686,7 +686,7 @@ export default class MTProtoSender {
   private async decryptMessageData(body: Uint8Array) {
     const previousTimeOffset = this._state.timeOffset;
     const message = await this._state.decryptMessageData(
-      body, this._hasRecentSentMessage.bind(this), this._isFallback,
+      body, this._hasRecentSentMessage.bind(this),
     ) as TLMessage;
 
     if (!this._isExported && this._state.timeOffset !== previousTimeOffset) {
@@ -985,9 +985,7 @@ export default class MTProtoSender {
         message = await this.decryptMessageData(body);
       } catch (e: any) {
         this.logWithIndex.debug(`Error while receiving items from the network ${e.toString()}`);
-        if (e instanceof MessageReplayError) {
-          continue;
-        } else if (e instanceof TypeNotFoundError) {
+        if (e instanceof TypeNotFoundError) {
           // Received object which we don't know how to deserialize
           this._log.info(`Type ${e.invalidConstructorId} not found, remaining data ${e.remaining.length} bytes`);
           continue;

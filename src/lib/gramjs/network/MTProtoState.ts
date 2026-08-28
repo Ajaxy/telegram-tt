@@ -8,7 +8,7 @@ import { Api } from '../tl';
 import { TLMessage } from '../tl/core';
 import GZIPPacked from '../tl/core/GZIPPacked';
 
-import { InvalidBufferError, MessageReplayError, SecurityError } from '../errors/Common';
+import { InvalidBufferError, SecurityError } from '../errors/Common';
 import {
   generateRandomBytes,
   generateRandomLong,
@@ -395,7 +395,6 @@ export default class MTProtoState {
   async decryptMessageData(
     body: Uint8Array,
     canSkipTimeValidation?: CanSkipTimeValidation,
-    canSkipInnerReplays?: boolean,
   ) {
     const receivedAt = Math.floor(Date.now() / 1000);
 
@@ -496,7 +495,7 @@ export default class MTProtoState {
       }
       const message = new TLMessage(remoteMsgId, remoteSequence, obj);
       this.validateIncomingMessages(
-        message, receivedAt, canSkipTimeValidation, canSkipInnerReplays,
+        message, receivedAt, canSkipTimeValidation,
       );
       if (this.currentServerSalt === undefined) {
         this.setServerSalt(serverSalt);
@@ -510,21 +509,22 @@ export default class MTProtoState {
     message: TLMessage,
     receivedAt: number,
     canSkipTimeValidation?: CanSkipTimeValidation,
-    canSkipInnerReplays?: boolean,
   ) {
     const incomingMessages: TLMessage[] = [];
     this.collectIncomingMessages(message, incomingMessages);
     const canSkipPacketTimeValidation = this.canSkipMessageTimeValidation(message, canSkipTimeValidation);
-    const canSkipContainerReplays = canSkipInnerReplays && message.obj instanceof MessageContainer;
 
     const retainedFloor = this.remoteMsgIds[0];
     if (this._lastMsgId !== 0n) {
       if ((message.msgId & 1n) !== SERVER_MSG_ID_PARITY) {
         throw new SecurityError();
       }
-      if (this.remoteMessages.has(message.msgId)
-        || (retainedFloor !== undefined && message.msgId < retainedFloor)) {
-        throw new MessageReplayError();
+      if (this.remoteMessages.has(message.msgId)) {
+        this.replayedMessages.add(message);
+        return;
+      }
+      if (retainedFloor !== undefined && message.msgId < retainedFloor) {
+        throw new SecurityError('Server message is older than retained history');
       }
 
       this.synchronizeServerTime(message.msgId, receivedAt);
@@ -541,16 +541,12 @@ export default class MTProtoState {
       if ((msgId & 1n) !== SERVER_MSG_ID_PARITY) {
         throw new SecurityError();
       }
-      const isReplay = this.remoteMessages.has(msgId)
-        || (retainedFloor !== undefined && msgId < retainedFloor);
-      if (isReplay) {
-        if (canSkipContainerReplays && incomingMessage !== message) {
-          // HTTP may resend acknowledged messages alongside new container messages
-          // https://core.telegram.org/mtproto/service_messages#simple-container
-          this.replayedMessages.add(incomingMessage);
-          continue;
-        }
-        throw new MessageReplayError();
+      if (this.remoteMessages.has(msgId)) {
+        this.replayedMessages.add(incomingMessage);
+        continue;
+      }
+      if (retainedFloor !== undefined && msgId < retainedFloor) {
+        throw new SecurityError('Server message is older than retained history');
       }
       if (seqNo < 0) {
         throw new SecurityError();

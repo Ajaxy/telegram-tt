@@ -8,7 +8,7 @@ import { BinaryReader } from './extensions';
 
 import { AuthKey } from './crypto/AuthKey';
 import { Factorizator } from './crypto/Factorizator';
-import { MessageReplayError, SecurityError } from './errors/Common';
+import { SecurityError } from './errors/Common';
 import {
   readBufferFromBigInt,
   sha256,
@@ -278,12 +278,47 @@ describe('TDLib-derived MTProto security checks', () => {
       }
     });
 
-    it('should reject a replayed packet', async () => {
+    it('should mark a replayed packet for re-acknowledgment', async () => {
       const { authKey, authKeyBytes, state } = await createState();
       const packet = await buildEncryptedPacket(state, authKey, authKeyBytes);
       await state.decryptMessageData(packet);
 
-      await expect(state.decryptMessageData(packet)).rejects.toThrow(MessageReplayError);
+      const replayedMessage = await state.decryptMessageData(packet);
+      expect(state.consumeMessageReplay(replayedMessage)).toBe(true);
+    });
+
+    it('should skip a replayed inner message without discarding new container messages', async () => {
+      const { authKey, authKeyBytes, state } = await createState();
+      const timestamp = Math.floor(Date.now() / 1000);
+      const replayedMsgId = buildMessageId(timestamp);
+      const freshMsgId = buildMessageId(timestamp, 5n);
+      const containerMsgId = buildMessageId(timestamp, 9n);
+      const replayedPacket = await buildEncryptedPacket(state, authKey, authKeyBytes, {
+        msgId: replayedMsgId,
+      });
+      await state.decryptMessageData(replayedPacket);
+
+      const containerBody = concat(
+        encodeUint32(MessageContainer.CONSTRUCTOR_ID),
+        encodeInt32(2),
+        buildInnerMessage(TRUE_BODY, TRUE_BODY.length, replayedMsgId, 1),
+        buildInnerMessage(TRUE_BODY, TRUE_BODY.length, freshMsgId, 3),
+      );
+      const container = await state.decryptMessageData(
+        await buildEncryptedPacket(state, authKey, authKeyBytes, {
+          body: containerBody,
+          msgId: containerMsgId,
+          seqNo: 4,
+          paddingLength: 16,
+        }),
+      );
+
+      expect(container.obj).toBeInstanceOf(MessageContainer);
+      if (!(container.obj instanceof MessageContainer)) throw new Error('Expected a message container');
+
+      const [replayedMessage, freshMessage] = container.obj.messages;
+      expect(state.consumeMessageReplay(replayedMessage)).toBe(true);
+      expect(state.consumeMessageReplay(freshMessage)).toBe(false);
     });
   });
 });
@@ -345,10 +380,15 @@ function buildContainerReader(innerMessage: Uint8Array) {
   return new BinaryReader(concat(encodeInt32(1), innerMessage));
 }
 
-function buildInnerMessage(body: Uint8Array, declaredBodyLength = body.length) {
+function buildInnerMessage(
+  body: Uint8Array,
+  declaredBodyLength = body.length,
+  msgId = buildMessageId(Math.floor(Date.now() / 1000)),
+  seqNo = 1,
+) {
   return concat(
-    toSignedLittleBuffer(buildMessageId(Math.floor(Date.now() / 1000)), 8),
-    encodeInt32(1),
+    toSignedLittleBuffer(msgId, 8),
+    encodeInt32(seqNo),
     encodeInt32(declaredBodyLength),
     body,
   );

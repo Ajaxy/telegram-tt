@@ -85,8 +85,6 @@ export class SecurityError extends Error {
   }
 }
 
-export class MessageReplayError extends SecurityError {}
-
 /**
  * Occurs when there's a hash mismatch between the decrypted CDN file
  * and its expected hash.
