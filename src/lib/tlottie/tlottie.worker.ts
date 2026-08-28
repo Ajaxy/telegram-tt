@@ -2,7 +2,8 @@ import type { EmojiFitzModifier } from '../../util/emoji/skinTone';
 import type { CancellableCallback } from '../../util/PostMessageConnector';
 
 import { createWorkerInterface } from '../../util/createPostMessageInterface';
-import wasmUrl from './tlottie.wasm?url';
+import simdWasmUrl from './tlottie.wasm?url';
+import noSimdWasmUrl from './tlottie-no-simd.wasm?url';
 
 // Raw wasm ABI from https://github.com/dkaraush/tlottie (`src/bindings/wasm.rs`)
 interface TLottieExports {
@@ -30,6 +31,13 @@ interface TLottieExports {
 const HIGH_PRIORITY_MAX_FPS = 60;
 const LOW_PRIORITY_MAX_FPS = 30;
 const RGBA_BYTES_PER_PIXEL = 4;
+// This module uses `i8x16.splat` and `i8x16.popcnt` to detect SIMD support
+const SIMD_TEST = new Uint8Array([
+  0x00, 0x61, 0x73, 0x6D, 0x01, 0x00, 0x00, 0x00,
+  0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7B, 0x03,
+  0x02, 0x01, 0x00, 0x0A, 0x0A, 0x01, 0x08, 0x00,
+  0x41, 0x00, 0xFD, 0x0F, 0xFD, 0x62, 0x0B,
+]);
 
 let tlottie: TLottieExports | undefined;
 const tlottiePromise = loadTLottie().then((wasmExports) => {
@@ -37,6 +45,7 @@ const tlottiePromise = loadTLottie().then((wasmExports) => {
 });
 
 async function loadTLottie(): Promise<TLottieExports> {
+  const wasmUrl = WebAssembly.validate(SIMD_TEST) ? simdWasmUrl : noSimdWasmUrl;
   let result: WebAssembly.WebAssemblyInstantiatedSource;
   try {
     result = await WebAssembly.instantiateStreaming(fetch(wasmUrl), {});
