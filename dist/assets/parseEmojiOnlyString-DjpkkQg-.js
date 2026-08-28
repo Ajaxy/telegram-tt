@@ -1,0 +1,3 @@
+import{ao as e,qa as t}from"./InputText-DwjdkcHa.js";var n=100,r=800;function i(e){let i=t(e).split(`
+`),o=i.join(``);if(o.length>r)return!1;let s=a(o);if(!s||s>n)return!1;let c=i.length;for(let e of i){let t=a(e);if(t===!1)return!1;t>c&&(c=t)}return c}function a(t){let n=t.matchAll(e),r=0,i=0;for(let e of n){if(e.index!==i)return!1;r++,i=e.index+e[0].length}return i===t.length&&r}export{i as t};
+//# sourceMappingURL=parseEmojiOnlyString-DjpkkQg-.js.map

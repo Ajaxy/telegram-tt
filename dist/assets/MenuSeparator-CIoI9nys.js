@@ -1,2 +1,0 @@
-import{cu as e,dp as t}from"./InputText-cBUaCYBB.js";var n={root:`_40aWbFdG`,thin:`_1yj96yuC`,thick:`_5EdrUuc8`},r=({className:r,size:i=`thin`})=>t(`div`,{className:e(n.root,n[i],r)});export{r as t};
-//# sourceMappingURL=MenuSeparator-CIoI9nys.js.map

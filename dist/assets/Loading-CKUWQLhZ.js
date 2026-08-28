@@ -1,0 +1,2 @@
+import{u as e}from"./teact-CWCKIlB_.js";import{gp as t,o as n,pu as r}from"./InputText-DwjdkcHa.js";var i=e(({color:e=`blue`,backgroundColor:i,className:a,onClick:o})=>t(`div`,{className:r(`Loading`,o&&`interactive`,a),onClick:o,children:t(n,{color:e,backgroundColor:i})}));export{i as t};
+//# sourceMappingURL=Loading-CKUWQLhZ.js.map
