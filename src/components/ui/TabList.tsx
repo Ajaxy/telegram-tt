@@ -8,6 +8,7 @@ import type { TabWithProperties } from './SquareTabList';
 export type { TabWithProperties };
 
 import buildClassName from '../../util/buildClassName';
+import focusNoScroll from '../../util/focusNoScroll';
 import renderText from '../common/helpers/renderText';
 
 import useFlag from '../../hooks/useFlag';
@@ -37,6 +38,7 @@ type OwnProps = {
   itemAlignment?: 'vertical' | 'horizontal';
   withFadeMask?: boolean;
   fadeMaskClassName?: string;
+  isDisabled?: boolean;
   onSwitchTab: (index: number) => void;
   renderExtra?: (tab: TabWithProperties, index: number) => TeactNode;
 };
@@ -52,6 +54,7 @@ const TabList = ({
   itemAlignment,
   withFadeMask,
   fadeMaskClassName,
+  isDisabled,
   renderExtra,
   onSwitchTab,
 }: OwnProps) => {
@@ -89,8 +92,32 @@ const TabList = ({
 
   useScrollToActiveTab(containerRef, activeTab);
 
+  // A tab list holds a single tab stop, which falls back to the first tab while `activeTab` points outside the list
+  const focusableTab = activeTab >= 0 && activeTab < tabs.length ? activeTab : 0;
+
   const handleTabClick = useLastCallback((index: number) => {
     onSwitchTab(index);
+  });
+
+  const handleKeyDown = useLastCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isDisabled) return;
+
+    const isNext = e.key === 'ArrowRight';
+    if (!isNext && e.key !== 'ArrowLeft') return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    e.preventDefault();
+
+    // Focus leads activation, so the focused tab is the reliable starting point while `activeTab` catches up
+    const tabElements = Array.from(container.children);
+    const focusedIndex = tabElements.indexOf(e.target as Element);
+    const currentIndex = focusedIndex >= 0 && focusedIndex < tabs.length ? focusedIndex : focusableTab;
+    const newIndex = (currentIndex + (isNext ? 1 : -1) + tabs.length) % tabs.length;
+
+    onSwitchTab(newIndex);
+    focusNoScroll(tabElements[newIndex] as HTMLElement | undefined);
   });
 
   const handleContextMenu = useLastCallback((index: number, e: React.MouseEvent) => {
@@ -123,7 +150,8 @@ const TabList = ({
 
   const hasContextActions = tabs.some((tab) => tab.contextActions?.length);
 
-  const renderTab = (tab: TabWithProperties, index: number) => {
+  // The active indicator renders a mirrored copy of every tab, so those copies stay out of the accessibility tree
+  const renderTab = (tab: TabWithProperties, index: number, noInteractive?: boolean) => {
     const customEmojiId = tab.customEmojiDocumentId
       || (typeof tab.emoticon === 'object' ? tab.emoticon.documentId : undefined);
     const stringEmoticon = typeof tab.emoticon === 'string' ? tab.emoticon : undefined;
@@ -137,6 +165,10 @@ const TabList = ({
           itemAlignment === 'vertical' && styles.vertical,
           stretched && styles.stretched,
         )}
+        role={noInteractive ? undefined : 'tab'}
+        tabIndex={noInteractive ? undefined : (index === focusableTab && !isDisabled ? 0 : -1)}
+        aria-selected={noInteractive ? undefined : index === activeTab}
+        aria-disabled={noInteractive ? undefined : isDisabled}
         onClick={() => handleTabClick(index)}
         onContextMenu={hasContextActions ? (e) => handleContextMenu(index, e) : undefined}
       >
@@ -162,6 +194,7 @@ const TabList = ({
   const tabListElement = (
     <div
       ref={containerRef}
+      role="tablist"
       className={buildClassName(
         'TabList',
         styles.container,
@@ -171,8 +204,9 @@ const TabList = ({
         className,
         clipPath && styles.ready,
       )}
+      onKeyDown={handleKeyDown}
     >
-      {tabs.map(renderTab)}
+      {tabs.map((tab, index) => renderTab(tab, index))}
 
       <div
         ref={clipPathContainerRef}
@@ -183,7 +217,7 @@ const TabList = ({
         style={clipPath ? `clip-path: ${clipPath}` : undefined}
         aria-hidden
       >
-        {tabs.map(renderTab)}
+        {tabs.map((tab, index) => renderTab(tab, index, true))}
       </div>
     </div>
   );

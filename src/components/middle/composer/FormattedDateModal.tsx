@@ -190,6 +190,7 @@ const FormattedDateModal = ({
               className={buildClassName(styles.tabList, areOtherDateOptionsDisabled && styles.tabListDisabled)}
               tabs={formatTabs}
               activeTab={activeDateTab}
+              isDisabled={areOtherDateOptionsDisabled}
               onSwitchTab={handleDateStyleChange}
             />
           </div>
@@ -200,6 +201,7 @@ const FormattedDateModal = ({
               className={buildClassName(styles.tabList, areOtherDateOptionsDisabled && styles.tabListDisabled)}
               tabs={formatTabs}
               activeTab={activeTimeTab}
+              isDisabled={areOtherDateOptionsDisabled}
               onSwitchTab={handleTimeStyleChange}
             />
           </div>
