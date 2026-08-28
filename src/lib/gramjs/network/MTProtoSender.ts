@@ -670,11 +670,7 @@ export default class MTProtoSender {
       this._longPollLoopHandle = this._longPollLoop();
     }
 
-    if (this._isExported) {
-      this.scheduleFutureServerSaltRefresh(SERVER_SALT_REQUEST_RETRY_DELAY);
-    } else {
-      this.requestFutureServerSalts();
-    }
+    this.scheduleFutureServerSaltRefresh(SERVER_SALT_REQUEST_RETRY_DELAY);
 
     // _disconnected only completes after manual disconnection
     // or errors after which the sender cannot continue such

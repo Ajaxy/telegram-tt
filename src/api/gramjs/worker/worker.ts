@@ -20,7 +20,7 @@ const ORIGINAL_FUNCTIONS = DEBUG_LEVELS.reduce((acc, level) => {
 function enableDebugLog() {
   DEBUG_LEVELS.forEach((level) => {
     console[level] = (...args: any[]) => {
-      postMessage({
+      sendToOrigin({
         type: 'debugLog',
         level,
         args: JSON.parse(JSON.stringify(args, (key, value) => (typeof value === 'bigint'
