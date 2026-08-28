@@ -204,10 +204,6 @@ const CommunityPanel = ({
     };
   }, [viewportIds, filteredPeers]);
 
-  const handleClose = useLastCallback(() => {
-    closeCommunityPanel();
-  });
-
   const handleTransitionEnd = useLastCallback((e: React.TransitionEvent<HTMLDivElement>) => {
     if (e.target !== e.currentTarget || e.propertyName !== 'transform') return;
     onCloseAnimationEnd?.();
@@ -228,13 +224,13 @@ const CommunityPanel = ({
     setSearchQuery('');
   });
 
-  const handleBack = useLastCallback(() => {
+  const navigateBack = useLastCallback(() => {
     if (isSearchOpen) {
       handleCloseSearch();
       return;
     }
 
-    handleClose();
+    closeCommunityPanel();
   });
 
   const [joinCandidateId, setJoinCandidateId] = useState<string | undefined>();
@@ -276,10 +272,10 @@ const CommunityPanel = ({
 
   useHistoryBack({
     isActive: isVisible,
-    onBack: handleBack,
+    onBack: navigateBack,
   });
 
-  useEffect(() => (isVisible ? captureEscKeyListener(handleBack) : undefined), [handleBack, isVisible]);
+  useEffect(() => (isVisible ? captureEscKeyListener(navigateBack) : undefined), [isVisible, navigateBack]);
 
   // With animations disabled `transitionend` never fires, so unmount explicitly
   useEffect(() => {
@@ -310,14 +306,14 @@ const CommunityPanel = ({
       onSwipe: (e, direction) => {
         const closeDirection = lang.isRtl ? SwipeDirection.Left : SwipeDirection.Right;
         if (direction === closeDirection) {
-          handleBack();
+          navigateBack();
           return true;
         }
 
         return false;
       },
     });
-  }, [handleBack, lang.isRtl]);
+  }, [lang.isRtl, navigateBack]);
 
   function renderPeers(peers: CommunityPeerEntry[]) {
     return peers.map((peer) => (
@@ -401,7 +397,8 @@ const CommunityPanel = ({
                 round
                 size="smaller"
                 color="translucent"
-                onClick={handleBack}
+                onClick={navigateBack}
+                onFileHoverOpen={navigateBack}
                 ariaLabel={lang('Back')}
                 iconName="arrow-left"
               />
@@ -420,7 +417,8 @@ const CommunityPanel = ({
                 round
                 size="smaller"
                 color="translucent"
-                onClick={handleBack}
+                onClick={navigateBack}
+                onFileHoverOpen={navigateBack}
                 ariaLabel={lang('Close')}
                 iconName="arrow-left"
               />

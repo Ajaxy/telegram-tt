@@ -114,10 +114,16 @@ const FoldersSidebar = ({
     });
   }, [activeChatFolder, folderTabs]);
 
-  const handleSwitchTab = useLastCallback((index: number) => {
+  const openFolder = useLastCallback((index: number) => {
     openLeftColumnContent({ contentKey: LeftColumnContent.ChatList });
     openSettingsScreen({ screen: undefined });
-    setActiveChatFolder({ activeChatFolder: index }, { forceOnHeavyAnimation: true });
+    if (activeChatFolder !== index) {
+      setActiveChatFolder({ activeChatFolder: index }, { forceOnHeavyAnimation: true });
+    }
+  });
+
+  const handleSwitchTab = useLastCallback((index: number) => {
+    openFolder(index);
     if (activeChatFolder === index) {
       scrollChatListToTop();
     }
@@ -182,6 +188,7 @@ const FoldersSidebar = ({
             badgeCount={tab.badgeCount}
             isBadgeActive={tab.isBadgeActive}
             onClick={handleSwitchTab}
+            onFileHoverOpen={openFolder}
             clickArg={i}
             contextActions={tab.contextActions}
             contextRootElementSelector="#FoldersSidebar"

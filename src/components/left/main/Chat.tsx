@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -112,8 +111,6 @@ type OwnProps = {
   isInCommunityPanel?: boolean;
   isFoldersSidebarShown?: boolean;
   observeIntersection?: ObserveFn;
-  onDragEnter?: (chatId: string) => void;
-  onDragLeave?: NoneToVoidFunction;
   onReorderAnimationEnd?: NoneToVoidFunction;
 };
 
@@ -151,7 +148,7 @@ type StateProps = {
 
 const AUTO_DELETE_STORY_GAP_PERCENT = 15;
 
-const Chat: FC<OwnProps & StateProps> = ({
+const Chat = ({
   chatId,
   folderId,
   orderDiff,
@@ -197,10 +194,8 @@ const Chat: FC<OwnProps & StateProps> = ({
   noCommunityChevron,
   isInCommunityPanel,
   isFoldersSidebarShown,
-  onDragEnter,
-  onDragLeave,
   onReorderAnimationEnd,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     openChat,
     openSavedDialog,
@@ -293,18 +288,10 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const getIsForumPanelClosed = useSelectorSignal(selectIsForumPanelClosed);
 
-  const handleClick = useLastCallback((e: React.MouseEvent) => {
-    if (e.altKey && !isSavedDialog && !isForum && !isPreview && !isCommunity) {
-      e.preventDefault();
-      openQuickPreview({ id: chatId });
-      return;
-    }
-
+  const openChatEntry = useLastCallback(() => {
     if (!isPreview && isCommunity) {
-      // The row is a link to a chat view, which a community does not have
-      e.preventDefault();
       openCommunityPanel({ communityId: chatId });
-      return;
+      return false;
     }
 
     const noForumTopicPanel = (isMobile && isForumAsMessages) || shouldForceNonForumView;
@@ -318,7 +305,7 @@ const Chat: FC<OwnProps & StateProps> = ({
         chatId,
         messageId: previewMessageId!,
       });
-      return;
+      return false;
     }
 
     if (isSavedDialog) {
@@ -327,33 +314,43 @@ const Chat: FC<OwnProps & StateProps> = ({
       if (isMobile) {
         toggleChatInfo({ force: false });
       }
-      return;
+      return false;
     }
 
     if (isForum) {
       if (isForumPanelOpen) {
         closeForumPanel(undefined, { forceOnHeavyAnimation: true });
 
-        return;
+        return false;
       } else {
         if (!noForumTopicPanel) {
           openForumPanel({ chatId }, { forceOnHeavyAnimation: true });
         }
 
-        if (!isForumAsMessages && !shouldForceNonForumView) return;
+        if (!isForumAsMessages && !shouldForceNonForumView) return false;
       }
     }
 
     openChat({ id: chatId, noForumTopicPanel, shouldReplaceHistory: true }, { forceOnHeavyAnimation: true });
 
-    if (isSelected && canScrollDown && e.detail <= 1) {
-      scrollMessageListToBottom();
-    }
+    return true;
   });
 
-  const handleDragEnter = useLastCallback((e) => {
-    e.preventDefault();
-    onDragEnter?.(chatId);
+  const handleClick = useLastCallback((e: React.MouseEvent) => {
+    if (e.altKey && !isSavedDialog && !isForum && !isPreview && !isCommunity) {
+      e.preventDefault();
+      openQuickPreview({ id: chatId });
+      return;
+    }
+
+    if (!isPreview && isCommunity) {
+      // The row is a link to a chat view, which a community does not have
+      e.preventDefault();
+    }
+
+    if (openChatEntry() && isSelected && canScrollDown && e.detail <= 1) {
+      scrollMessageListToBottom();
+    }
   });
 
   const handleDelete = useLastCallback(() => {
@@ -483,8 +480,7 @@ const Chat: FC<OwnProps & StateProps> = ({
       contextActions={contextActions}
       withPortalForMenu
       onClick={handleClick}
-      onDragEnter={handleDragEnter}
-      onDragLeave={onDragLeave}
+      onFileHoverOpen={openChatEntry}
     >
       <div className={buildClassName('status', 'status-clickable')}>
         <div className="avatar-wrapper">

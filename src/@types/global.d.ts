@@ -25,6 +25,7 @@ declare namespace React {
     // Optimization for DOM nodes prepends and inserts
     teactFastList?: boolean;
     teactExperimentControlled?: boolean;
+    onFileHoverOpen?: (e: Event) => void;
   }
 
   interface LiHTMLAttributes<_T> {

@@ -33,6 +33,10 @@ const AllMessagesTopic = ({
 
   const lang = useLang();
 
+  const openTopicThread = useLastCallback(() => {
+    openThread({ chatId, threadId: MAIN_THREAD_ID, shouldReplaceHistory: true });
+  });
+
   const handleOpenTopic = useLastCallback((e: React.MouseEvent) => {
     if (e.altKey) {
       e.preventDefault();
@@ -40,7 +44,7 @@ const AllMessagesTopic = ({
       return;
     }
 
-    openThread({ chatId, threadId: MAIN_THREAD_ID, shouldReplaceHistory: true });
+    openTopicThread();
   });
 
   return (
@@ -52,6 +56,7 @@ const AllMessagesTopic = ({
         'chat-item-clickable',
       )}
       onClick={handleOpenTopic}
+      onFileHoverOpen={openTopicThread}
       style={style}
       href={IS_OPEN_IN_NEW_TAB_SUPPORTED ? `#${createLocationHash(chatId, 'thread', MAIN_THREAD_ID)}` : undefined}
     >

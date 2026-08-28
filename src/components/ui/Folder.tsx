@@ -9,6 +9,7 @@ import buildClassName from '../../util/buildClassName';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useFastClick } from '../../hooks/useFastClick';
+import { useFileHoverOpenHandler } from '../../hooks/useFileHoverOpen';
 import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 
@@ -32,6 +33,7 @@ type OwnProps = {
   icon?: string | ApiMessageEntityCustomEmoji;
   clickArg?: number;
   onClick?: (arg: number) => void;
+  onFileHoverOpen?: (arg: number) => void;
 };
 
 const Folder = ({
@@ -46,6 +48,7 @@ const Folder = ({
   icon,
   clickArg,
   onClick,
+  onFileHoverOpen,
 }: OwnProps) => {
   const folderRef = useRef<HTMLDivElement>();
   const [isHovering, markHovering, unmarkHovering] = useFlag();
@@ -66,6 +69,9 @@ const Folder = ({
 
     onClick?.(clickArg!);
   });
+  const handleFileHoverOpen = useFileHoverOpenHandler(
+    onFileHoverOpen ? () => onFileHoverOpen(clickArg!) : undefined,
+  );
 
   const getTriggerElement = useLastCallback(() => folderRef.current);
   const getRootElement = useLastCallback(
@@ -84,6 +90,8 @@ const Folder = ({
       onContextMenu={handleContextMenu}
       onMouseEnter={markHovering}
       onMouseLeave={unmarkHovering}
+      data-file-hover-open={onFileHoverOpen ? true : undefined}
+      onFileHoverOpen={onFileHoverOpen ? handleFileHoverOpen : undefined}
       ref={folderRef}
     >
       <div className={styles.icon}>

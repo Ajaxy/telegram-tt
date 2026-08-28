@@ -1189,6 +1189,7 @@ const Profile = ({
               className="chat-item-clickable contact-list-item scroll-item small-icon"
 
               onClick={() => handleMemberClick(id)}
+              onFileHoverOpen={() => handleMemberClick(id)}
               contextActions={getMemberContextAction(id)}
               withPortalForMenu
             >

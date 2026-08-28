@@ -1,5 +1,4 @@
-import type { FC } from '../../../lib/teact/teact';
-import { memo, useCallback } from '../../../lib/teact/teact';
+import { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiTopic } from '../../../api/types';
@@ -8,6 +7,7 @@ import { selectTopic } from '../../../global/selectors';
 import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
 import TopicIcon from '../../common/TopicIcon';
@@ -25,24 +25,27 @@ type StateProps = {
 
 const TOPIC_ICON_SIZE = 2 * REM;
 
-const LeftSearchResultTopic: FC<OwnProps & StateProps> = ({
+const LeftSearchResultTopic = ({
   chatId,
   topicId,
   topic,
   onClick,
-}) => {
+}: OwnProps & StateProps) => {
   const { openQuickPreview } = getActions();
 
-  const handleClick = useCallback((e: React.MouseEvent) => {
+  const handleClick = useLastCallback((e: React.MouseEvent) => {
     if (e.altKey) {
       e.preventDefault();
       openQuickPreview({ id: chatId, threadId: topicId });
       return;
     }
     onClick(topicId);
-  }, [chatId, topicId, onClick, openQuickPreview]);
+  });
 
   const buttonRef = useSelectWithEnter(() => onClick(topicId));
+  const handleFileHoverOpen = useLastCallback(() => {
+    onClick(topicId);
+  });
 
   if (!topic) {
     return undefined;
@@ -52,6 +55,7 @@ const LeftSearchResultTopic: FC<OwnProps & StateProps> = ({
     <ListItem
       className="chat-item-clickable search-result"
       onClick={handleClick}
+      onFileHoverOpen={handleFileHoverOpen}
       buttonClassName="topic-item"
       buttonRef={buttonRef}
     >

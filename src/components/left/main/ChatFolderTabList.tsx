@@ -15,6 +15,7 @@ type OwnProps = {
   activeTab: number;
   className?: string;
   onSwitchTab: (index: number) => void;
+  onFileHoverOpen: (index: number) => void;
 };
 
 const ChatFolderTabList = ({
@@ -22,6 +23,7 @@ const ChatFolderTabList = ({
   activeTab,
   className,
   onSwitchTab,
+  onFileHoverOpen,
 }: OwnProps) => {
   const renderExtra = useLastCallback((tab: TabWithProperties) => {
     if (!tab.badgeCount) return undefined;
@@ -41,6 +43,7 @@ const ChatFolderTabList = ({
         renderExtra={renderExtra}
         className={buildClassName(styles.tabList, className)}
         onSwitchTab={onSwitchTab}
+        onFileHoverOpen={onFileHoverOpen}
       />
     </div>
   );

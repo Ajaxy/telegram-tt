@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef } from '../../../lib/teact/teact';
+import { memo, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type { GlobalState } from '../../../global/types';
@@ -35,7 +35,6 @@ type OwnProps = {
   isFoldersSidebarShown?: boolean;
   offsetTop?: number;
   animationType: ChatAnimationTypes;
-  onDragEnter?: NoneToVoidFunction;
   onClick?: NoneToVoidFunction;
 };
 
@@ -54,7 +53,6 @@ const Archive = ({
   isFoldersSidebarShown,
   offsetTop,
   animationType,
-  onDragEnter,
   onClick,
 }: OwnProps) => {
   const { updateArchiveSettings } = getActions();
@@ -149,11 +147,6 @@ const Archive = ({
     return compact([actionMinimize, actionExpand, actionHide]);
   }, [archiveSettings.isMinimized, lang, updateArchiveSettings]);
 
-  const handleDragEnter = useCallback((e) => {
-    e.preventDefault();
-    onDragEnter?.();
-  }, [onDragEnter]);
-
   function renderCollapsed() {
     return (
       <div className={buildClassName(styles.info, 'info')}>
@@ -203,7 +196,7 @@ const Archive = ({
     <ListItem
       ref={ref}
       onClick={onClick}
-      onDragEnter={handleDragEnter}
+      onFileHoverOpen={onClick}
       className={buildClassName(
         styles.root,
         archiveSettings.isMinimized && styles.minimized,

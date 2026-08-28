@@ -10,6 +10,7 @@ export type { TabWithProperties };
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 
+import { handleFileHoverOpenEvent } from '../../hooks/useFileHoverOpen';
 import useFlag from '../../hooks/useFlag';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -39,6 +40,7 @@ type OwnProps = {
   fadeMaskClassName?: string;
   onSwitchTab: (index: number) => void;
   renderExtra?: (tab: TabWithProperties, index: number) => TeactNode;
+  onFileHoverOpen?: (index: number) => void;
 };
 
 const TabList = ({
@@ -54,6 +56,7 @@ const TabList = ({
   fadeMaskClassName,
   renderExtra,
   onSwitchTab,
+  onFileHoverOpen,
 }: OwnProps) => {
   const containerRef = useRef<HTMLDivElement>();
   const clipPathContainerRef = useRef<HTMLDivElement>();
@@ -91,6 +94,10 @@ const TabList = ({
 
   const handleTabClick = useLastCallback((index: number) => {
     onSwitchTab(index);
+  });
+
+  const handleFileHoverOpen = useLastCallback((index: number, e: Event) => {
+    handleFileHoverOpenEvent(e, () => onFileHoverOpen!(index));
   });
 
   const handleContextMenu = useLastCallback((index: number, e: React.MouseEvent) => {
@@ -138,6 +145,8 @@ const TabList = ({
           stretched && styles.stretched,
         )}
         onClick={() => handleTabClick(index)}
+        data-file-hover-open={onFileHoverOpen ? true : undefined}
+        onFileHoverOpen={onFileHoverOpen ? (e) => handleFileHoverOpen(index, e) : undefined}
         onContextMenu={hasContextActions ? (e) => handleContextMenu(index, e) : undefined}
       >
         {stringEmoticon && <span className={styles.tabEmoji}>{stringEmoticon}</span>}

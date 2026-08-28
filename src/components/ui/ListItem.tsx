@@ -10,6 +10,7 @@ import renderText from '../common/helpers/renderText';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useFastClick } from '../../hooks/useFastClick';
+import { useFileHoverOpenHandler } from '../../hooks/useFileHoverOpen';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -76,8 +77,7 @@ interface OwnProps {
   onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onContextMenu?: (e: React.MouseEvent<HTMLElement>) => void;
   onSecondaryIconClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onDragEnter?: (e: React.DragEvent<HTMLDivElement>) => void;
-  onDragLeave?: NoneToVoidFunction;
+  onFileHoverOpen?: NoneToVoidFunction;
 }
 
 const ListItem = ({
@@ -116,8 +116,7 @@ const ListItem = ({
   onMouseDown,
   onContextMenu,
   onSecondaryIconClick,
-  onDragEnter,
-  onDragLeave,
+  onFileHoverOpen,
 }: OwnProps) => {
   let containerRef = useRef<HTMLDivElement>();
   if (ref) {
@@ -125,6 +124,7 @@ const ListItem = ({
   }
   const menuRef = useRef<HTMLDivElement>();
   const [isTouched, markIsTouched, unmarkIsTouched] = useFlag();
+  const handleFileHoverOpen = useFileHoverOpenHandler(onFileHoverOpen);
 
   const {
     isContextMenuOpen, contextMenuAnchor,
@@ -230,8 +230,8 @@ const ListItem = ({
       dir={lang.isRtl ? 'rtl' : undefined}
       style={style}
       onMouseDown={onMouseDown}
-      onDragEnter={onDragEnter}
-      onDragLeave={onDragLeave}
+      data-file-hover-open={onFileHoverOpen ? true : undefined}
+      onFileHoverOpen={onFileHoverOpen ? handleFileHoverOpen : undefined}
     >
       <ButtonElementTag
         className={buildClassName('ListItem-button', isTouched && 'active', buttonClassName)}

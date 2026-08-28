@@ -105,6 +105,7 @@ const ArchivedChats = ({
           size="smaller"
           color="translucent"
           onClick={onReset}
+          onFileHoverOpen={onReset}
           ariaLabel="Return to chat list"
           className={buildClassName(
             lang.isRtl && 'rtl',

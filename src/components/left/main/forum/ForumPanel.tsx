@@ -109,7 +109,7 @@ const ForumPanel = ({
   const [isScrolled, setIsScrolled] = useState(false);
   const lang = useLang();
 
-  const handleClose = useLastCallback(() => {
+  const closeForum = useLastCallback(() => {
     closeForumPanel();
   });
 
@@ -182,10 +182,10 @@ const ForumPanel = ({
 
   useHistoryBack({
     isActive: isVisible,
-    onBack: handleClose,
+    onBack: closeForum,
   });
 
-  useEffect(() => (isVisible ? captureEscKeyListener(handleClose) : undefined), [handleClose, isVisible]);
+  useEffect(() => (isVisible ? captureEscKeyListener(closeForum) : undefined), [closeForum, isVisible]);
 
   useEffect(() => {
     if (prevIsVisible !== isVisible) {
@@ -280,7 +280,8 @@ const ForumPanel = ({
           round
           size="smaller"
           color="translucent"
-          onClick={handleClose}
+          onClick={closeForum}
+          onFileHoverOpen={closeForum}
           ariaLabel={lang('Close')}
           iconName="close"
         />

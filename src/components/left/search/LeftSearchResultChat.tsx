@@ -14,7 +14,6 @@ import {
   selectTopicsInfo,
   selectUser,
 } from '../../../global/selectors';
-import { onDragEnter, onDragLeave } from '../../../util/dragNDropHandlers.ts';
 import { isUserId } from '../../../util/entities/ids';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 
@@ -113,12 +112,8 @@ const LeftSearchResultChat = ({
     });
   });
 
-  const handleDragEnter = useLastCallback((e) => {
-    e.preventDefault();
-
-    onDragEnter(() => {
-      onClick(chatId);
-    }, true);
+  const handleFileHoverOpen = useLastCallback(() => {
+    onClick(chatId);
   });
 
   const buttonRef = useSelectWithEnter(() => {
@@ -132,8 +127,7 @@ const LeftSearchResultChat = ({
       buttonRef={buttonRef}
       withPortalForMenu
       onClick={handleClick}
-      onDragEnter={handleDragEnter}
-      onDragLeave={onDragLeave}
+      onFileHoverOpen={handleFileHoverOpen}
     >
       {isUserId(chatId) ? (
         <PrivateChatInfo

@@ -8,6 +8,7 @@ import { IS_TOUCH_ENV, MouseButton } from '../../util/browser/windowEnvironment'
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 
+import { useFileHoverOpenHandler } from '../../hooks/useFileHoverOpen';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
@@ -75,6 +76,7 @@ export type OwnProps = {
   onMouseLeave?: NoneToVoidFunction;
   onFocus?: NoneToVoidFunction;
   onTransitionEnd?: NoneToVoidFunction;
+  onFileHoverOpen?: NoneToVoidFunction;
 };
 
 // Longest animation duration;
@@ -133,6 +135,7 @@ const Button = ({
   onMouseLeave,
   onFocus,
   onTransitionEnd,
+  onFileHoverOpen,
 }: OwnProps) => {
   let elementRef = useRef<HTMLButtonElement | HTMLAnchorElement>();
   if (ref) {
@@ -142,6 +145,7 @@ const Button = ({
   const lang = useOldLang();
 
   const [isClicked, setIsClicked] = useState(false);
+  const handleFileHoverOpen = useFileHoverOpenHandler(onFileHoverOpen);
 
   const isNotInteractive = disabled || nonInteractive;
 
@@ -257,6 +261,8 @@ const Button = ({
         aria-controls={ariaControls}
         style={style}
         onTransitionEnd={onTransitionEnd}
+        data-file-hover-open={onFileHoverOpen ? true : undefined}
+        onFileHoverOpen={onFileHoverOpen ? handleFileHoverOpen : undefined}
         target="_blank"
         rel="noreferrer"
       >
@@ -279,6 +285,8 @@ const Button = ({
       onMouseLeave={onMouseLeave && !isNotInteractive ? onMouseLeave : undefined}
       onTransitionEnd={onTransitionEnd}
       onFocus={onFocus && !isNotInteractive ? onFocus : undefined}
+      data-file-hover-open={onFileHoverOpen ? true : undefined}
+      onFileHoverOpen={onFileHoverOpen ? handleFileHoverOpen : undefined}
       disabled={disabled && !allowDisabledClick}
       autoFocus={autoFocus}
       aria-label={ariaLabel}

@@ -116,6 +116,16 @@ body.cursor-ew-resize {
   cursor: ew-resize !important;
 }
 
+[data-file-hover-open-active] {
+  animation: file-hover-open-opacity 250ms ease-in-out 250ms 2 alternate;
+}
+
+@keyframes file-hover-open-opacity {
+  to {
+    opacity: 0.65;
+  }
+}
+
 #root,
 .full-height {
   height: 100%;
