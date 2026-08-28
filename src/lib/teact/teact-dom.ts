@@ -723,11 +723,11 @@ function processControlled(tag: string, props: AnyLiteral) {
   } = props;
 
   props.onChange = undefined;
-  props.onInput = (e: ChangeEvent<HTMLInputElement>) => {
+  props.onInput = (e: ChangeEvent<HTMLInputElement> & InputEvent) => {
     onInput?.(e);
     onChange?.(e);
 
-    if (value !== undefined && value !== e.currentTarget.value) {
+    if (!e.isComposing && value !== undefined && value !== e.currentTarget.value) {
       const { selectionStart, selectionEnd } = e.currentTarget;
       const isCaretAtEnd = selectionStart === selectionEnd && selectionEnd === e.currentTarget.value.length;
 
