@@ -81,7 +81,7 @@ function buildApiChatFieldsFromPeerEntity(
   const creationDate = 'date' in peerEntity ? peerEntity.date : undefined;
   const membersCount = 'participantsCount' in peerEntity ? peerEntity.participantsCount : undefined;
   const isProtected = 'noforwards' in peerEntity && peerEntity.noforwards;
-  const isCreator = 'creator' in peerEntity && peerEntity.creator;
+  const isOwner = 'creator' in peerEntity && peerEntity.creator;
 
   // User and channel shared fields
   const isScam = userOrChannel?.scam;
@@ -115,7 +115,7 @@ function buildApiChatFieldsFromPeerEntity(
     ...(membersCount !== undefined && { membersCount }),
     isProtected,
     isSupport: isSupport || undefined,
-    isCreator,
+    isOwner,
     fakeType: isScam ? 'scam' : (isFake ? 'fake' : undefined),
     color,
     profileColor,

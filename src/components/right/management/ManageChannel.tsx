@@ -189,7 +189,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   });
 
   const handleDeleteChannel = useLastCallback(() => {
-    if (chat.isCreator) {
+    if (chat.isOwner) {
       deleteChannel({ chatId: chat.id });
     } else {
       leaveChannel({ chatId: chat.id });
@@ -252,7 +252,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
               noReplaceNewlines
             />
           </div>
-          {chat.isCreator && (
+          {chat.isOwner && (
             <ListItem icon="lock" multiline onClick={handleClickEditType}>
               <span className="title">{lang('ChannelType')}</span>
               <span className="subtitle">{isChannelPublic ? lang('TypePublic') : lang('TypePrivate')}</span>
@@ -347,7 +347,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
         </Island>
         <Island>
           <ListItem icon="delete" ripple destructive onClick={openDeleteDialog}>
-            {chat.isCreator ? lang('ChannelDelete') : lang('LeaveChannel')}
+            {chat.isOwner ? lang('ChannelDelete') : lang('LeaveChannel')}
           </ListItem>
         </Island>
       </div>
@@ -362,8 +362,8 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
         onClose={closeDeleteDialog}
-        text={chat.isCreator ? lang('ChannelDeleteAlert') : lang('ChannelLeaveAlert')}
-        confirmLabel={chat.isCreator ? lang('ChannelDelete') : lang('LeaveChannel')}
+        text={chat.isOwner ? lang('ChannelDeleteAlert') : lang('ChannelLeaveAlert')}
+        confirmLabel={chat.isOwner ? lang('ChannelDelete') : lang('LeaveChannel')}
         confirmHandler={handleDeleteChannel}
         confirmIsDestructive
       />

@@ -303,7 +303,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   const handleDeleteGroup = useLastCallback(() => {
     if (isBasicGroup) {
       deleteChat({ chatId: chat.id });
-    } else if (!chat.isCreator) {
+    } else if (!chat.isOwner) {
       leaveChannel({ chatId: chat.id });
     } else {
       deleteChannel({ chatId: chat.id });
@@ -350,7 +350,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
               noReplaceNewlines
             />
           </div>
-          {chat.isCreator && (
+          {chat.isOwner && (
             <ListItem icon="lock" multiline onClick={handleClickEditType}>
               <span className="title">{lang('GroupType')}</span>
               <span className="subtitle">{isPublicGroup ? lang('TypePublic') : lang('TypePrivate')}</span>
@@ -475,12 +475,12 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
         isOpen={isDeleteDialogOpen}
         onClose={closeDeleteDialog}
         textParts={renderText(
-          isBasicGroup || !chat.isCreator
+          isBasicGroup || !chat.isOwner
             ? lang('AreYouSureDeleteAndExit')
             : lang('AreYouSureDeleteThisChatWithGroup', chat.title),
           ['br', 'simple_markdown'],
         )}
-        confirmLabel={isBasicGroup || !chat.isCreator ? lang('DeleteMega') : lang('DeleteGroupForAll')}
+        confirmLabel={isBasicGroup || !chat.isOwner ? lang('DeleteMega') : lang('DeleteGroupForAll')}
         confirmHandler={handleDeleteGroup}
         confirmIsDestructive
       />
@@ -497,10 +497,10 @@ export default memo(withGlobal<OwnProps>(
     const hasLinkedChannel = Boolean(chatFullInfo?.linkedChatId);
     const isBasicGroup = isChatBasicGroup(chat);
     const { invites } = management.byChatId[chatId] || {};
-    const canEditForum = !hasLinkedChannel && (getHasAdminRight(chat, 'changeInfo') || chat.isCreator);
-    const canChangeInfo = chat.isCreator || getHasAdminRight(chat, 'changeInfo');
+    const canEditForum = !hasLinkedChannel && getHasAdminRight(chat, 'changeInfo');
+    const canChangeInfo = getHasAdminRight(chat, 'changeInfo');
     const canBanUsers = selectCanBanUsers(global, chatId);
-    const canInvite = chat.isCreator || getHasAdminRight(chat, 'inviteUsers');
+    const canInvite = getHasAdminRight(chat, 'inviteUsers');
 
     return {
       chat,

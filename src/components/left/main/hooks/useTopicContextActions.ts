@@ -52,7 +52,7 @@ export default function useTopicContextActions({
     } = getActions();
 
     const canToggleClosed = getCanManageTopic(chat, topic) && !chat.isBotForum;
-    const canTogglePinned = chat.isCreator || getHasAdminRight(chat, 'manageTopics');
+    const canTogglePinned = getHasAdminRight(chat, 'manageTopics');
 
     const actionOpenInNewTab = IS_OPEN_IN_NEW_TAB_SUPPORTED && {
       title: IS_TAURI ? lang('ChatListOpenInNewWindow') : lang('ChatListOpenInNewTab'),

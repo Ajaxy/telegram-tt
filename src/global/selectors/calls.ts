@@ -1,6 +1,6 @@
 import type { GlobalState } from '../types';
 
-import { getMainUsername, isChatBasicGroup } from '../helpers';
+import { getHasAdminRight, getMainUsername } from '../helpers';
 import { selectChat, selectChatFullInfo } from './chats';
 import { selectUser } from './users';
 
@@ -29,7 +29,7 @@ export function selectIsAdminInActiveGroupCall<T extends GlobalState>(global: T)
   const chat = selectChat(global, chatId);
   if (!chat) return false;
 
-  return (isChatBasicGroup(chat) && chat.isCreator) || Boolean(chat.adminRights?.manageCall);
+  return getHasAdminRight(chat, 'manageCall');
 }
 
 export function selectActiveGroupCall<T extends GlobalState>(global: T) {

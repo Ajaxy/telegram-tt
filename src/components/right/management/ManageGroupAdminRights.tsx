@@ -9,7 +9,7 @@ import type {
 import { ManagementScreens } from '../../../types';
 
 import {
-  getUserFullName, isChatBasicGroup, isChatChannel, isChatPublic, isUserBot,
+  getHasAdminRight, getUserFullName, isChatBasicGroup, isChatChannel, isChatPublic, isUserBot,
 } from '../../../global/helpers';
 import {
   selectCanEditRank, selectChat, selectChatFullInfo, selectUser,
@@ -137,6 +137,8 @@ const ManageGroupAdminRights = ({
     return selectedAdminMember;
   }, [selectedAdminMember, defaultRights, isNewAdmin, lang, selectedUserId, chat]);
 
+  const isOwner = Boolean(selectedChatMember?.isOwner);
+
   useEffect(() => {
     if (hasFullInfo && selectedUserId && !selectedChatMember) {
       onScreenSelect(ManagementScreens.ChatAdministrators);
@@ -148,7 +150,7 @@ const ManageGroupAdminRights = ({
     setRank((selectedChatMember?.rank || '').slice(0, CUSTOM_TITLE_MAX_LENGTH));
     setIsTouched(Boolean(isNewAdmin));
     setIsLoading(false);
-  }, [defaultRights, isNewAdmin, selectedChatMember]);
+  }, [isNewAdmin, selectedChatMember]);
 
   useEffect(() => {
     setIsGuardBotEnabled(!isNewAdmin && guardBotId === selectedUserId);
@@ -225,23 +227,20 @@ const ManageGroupAdminRights = ({
   });
 
   const getControlIsDisabled = useLastCallback((key: keyof ApiChatAdminRights) => {
+    if (isFormFullyDisabled) {
+      return true;
+    }
+
     if (isAddingGuardBot && GUARD_BOT_LOCKED_ADMIN_RIGHTS.includes(key)) {
       return true;
     }
 
-    if (isChatBasicGroup(chat)) {
-      return false;
-    }
-
-    if (isFormFullyDisabled || !chat.adminRights) {
+    // Only supergroup owners can adjust their anonymity
+    if (isOwner && (key !== 'anonymous' || isChatBasicGroup(chat))) {
       return true;
     }
 
-    if (chat.isCreator) {
-      return false;
-    }
-
-    return !chat.adminRights[key];
+    return !getHasAdminRight(chat, key);
   });
 
   const memberStatus = useMemo(() => {
@@ -313,11 +312,12 @@ const ManageGroupAdminRights = ({
 
   const selectedUser = selectedUserId ? usersById[selectedUserId] : undefined;
   const canTransferOwnership = Boolean(
-    chat.isCreator && selectedUser && !isUserBot(selectedUser) && selectedUserId !== currentUserId,
+    chat.isOwner && selectedUser && !isUserBot(selectedUser) && selectedUserId !== currentUserId,
   );
   const canManageGuardBot = Boolean(selectedUser?.isGuardBot && !(isChannel && isChatPublic(chat)));
   const canDismissAdmin = currentUserId !== selectedUserId && !isFormFullyDisabled && !isNewAdmin;
   const shouldRenderAdminActions = !isChannel || canDismissAdmin;
+  const selectedAdminRights = { adminRights: permissions, isOwner };
 
   if (!selectedChatMember) {
     return undefined;
@@ -343,7 +343,7 @@ const ManageGroupAdminRights = ({
           <div className="ListItem">
             <Checkbox
               name="changeInfo"
-              checked={Boolean(permissions.changeInfo)}
+              checked={getHasAdminRight(selectedAdminRights, 'changeInfo')}
               label={lang(isChannel ? 'EditAdminChangeChannelInfo' : 'EditAdminChangeGroupInfo')}
               blocking
               disabled={getControlIsDisabled('changeInfo')}
@@ -354,7 +354,7 @@ const ManageGroupAdminRights = ({
             <div className="ListItem">
               <Checkbox
                 name="postMessages"
-                checked={Boolean(permissions.postMessages)}
+                checked={getHasAdminRight(selectedAdminRights, 'postMessages')}
                 label={lang('EditAdminPostMessages')}
                 blocking
                 disabled={getControlIsDisabled('postMessages')}
@@ -366,7 +366,7 @@ const ManageGroupAdminRights = ({
             <div className="ListItem">
               <Checkbox
                 name="editMessages"
-                checked={Boolean(permissions.editMessages)}
+                checked={getHasAdminRight(selectedAdminRights, 'editMessages')}
                 label={lang('EditAdminEditMessages')}
                 blocking
                 disabled={getControlIsDisabled('editMessages')}
@@ -377,7 +377,7 @@ const ManageGroupAdminRights = ({
           <div className="ListItem">
             <Checkbox
               name="deleteMessages"
-              checked={Boolean(permissions.deleteMessages)}
+              checked={getHasAdminRight(selectedAdminRights, 'deleteMessages')}
               label={lang(isChannel ? 'EditAdminDeleteMessages' : 'EditAdminGroupDeleteMessages')}
               blocking
               disabled={getControlIsDisabled('deleteMessages')}
@@ -387,7 +387,7 @@ const ManageGroupAdminRights = ({
           <div className="ListItem">
             <Checkbox
               name="postStories"
-              checked={Boolean(permissions.postStories)}
+              checked={getHasAdminRight(selectedAdminRights, 'postStories')}
               label={lang('EditAdminPostStories')}
               blocking
               disabled={getControlIsDisabled('postStories')}
@@ -397,7 +397,7 @@ const ManageGroupAdminRights = ({
           <div className="ListItem">
             <Checkbox
               name="editStories"
-              checked={Boolean(permissions.editStories)}
+              checked={getHasAdminRight(selectedAdminRights, 'editStories')}
               label={lang('EditAdminEditStories')}
               blocking
               disabled={getControlIsDisabled('editStories')}
@@ -407,7 +407,7 @@ const ManageGroupAdminRights = ({
           <div className="ListItem">
             <Checkbox
               name="deleteStories"
-              checked={Boolean(permissions.deleteStories)}
+              checked={getHasAdminRight(selectedAdminRights, 'deleteStories')}
               label={lang('EditAdminDeleteStories')}
               blocking
               disabled={getControlIsDisabled('deleteStories')}
@@ -418,7 +418,7 @@ const ManageGroupAdminRights = ({
             <div className="ListItem">
               <Checkbox
                 name="manageDirectMessages"
-                checked={Boolean(permissions.manageDirectMessages)}
+                checked={getHasAdminRight(selectedAdminRights, 'manageDirectMessages')}
                 label={lang('EditAdminManageDirect')}
                 blocking
                 disabled={getControlIsDisabled('manageDirectMessages')}
@@ -429,7 +429,7 @@ const ManageGroupAdminRights = ({
           <div className="ListItem">
             <Checkbox
               name="banUsers"
-              checked={Boolean(permissions.banUsers)}
+              checked={getHasAdminRight(selectedAdminRights, 'banUsers')}
               label={lang('EditAdminBanUsers')}
               blocking
               disabled={getControlIsDisabled('banUsers')}
@@ -439,7 +439,7 @@ const ManageGroupAdminRights = ({
           <div className="ListItem">
             <Checkbox
               name="inviteUsers"
-              checked={Boolean(permissions.inviteUsers)}
+              checked={getHasAdminRight(selectedAdminRights, 'inviteUsers')}
               label={lang('EditAdminAddUsers')}
               blocking
               disabled={getControlIsDisabled('inviteUsers')}
@@ -448,8 +448,8 @@ const ManageGroupAdminRights = ({
           </div>
           <div className="ListItem">
             <Checkbox
-              name="editRank"
-              checked={Boolean(permissions.manageRanks)}
+              name="manageRanks"
+              checked={getHasAdminRight(selectedAdminRights, 'manageRanks')}
               label={lang('EditAdminEditRank')}
               blocking
               disabled={getControlIsDisabled('manageRanks')}
@@ -460,7 +460,7 @@ const ManageGroupAdminRights = ({
             <div className="ListItem">
               <Checkbox
                 name="pinMessages"
-                checked={Boolean(permissions.pinMessages)}
+                checked={getHasAdminRight(selectedAdminRights, 'pinMessages')}
                 label={lang('EditAdminPinMessages')}
                 blocking
                 disabled={getControlIsDisabled('pinMessages')}
@@ -471,7 +471,7 @@ const ManageGroupAdminRights = ({
           <div className="ListItem">
             <Checkbox
               name="manageCall"
-              checked={Boolean(permissions.manageCall)}
+              checked={getHasAdminRight(selectedAdminRights, 'manageCall')}
               label={lang('StartVoipChatPermission')}
               blocking
               disabled={getControlIsDisabled('manageCall')}
@@ -481,7 +481,7 @@ const ManageGroupAdminRights = ({
           <div className="ListItem">
             <Checkbox
               name="addAdmins"
-              checked={Boolean(permissions.addAdmins)}
+              checked={getHasAdminRight(selectedAdminRights, 'addAdmins')}
               label={lang('EditAdminAddAdmins')}
               blocking
               disabled={getControlIsDisabled('addAdmins')}
@@ -492,7 +492,7 @@ const ManageGroupAdminRights = ({
             <div className="ListItem">
               <Checkbox
                 name="manageTopics"
-                checked={Boolean(permissions.manageTopics)}
+                checked={getHasAdminRight(selectedAdminRights, 'manageTopics')}
                 label={lang('EditAdminManageTopics')}
                 blocking
                 disabled={getControlIsDisabled('manageTopics')}
@@ -504,7 +504,7 @@ const ManageGroupAdminRights = ({
             <div className="ListItem">
               <Checkbox
                 name="anonymous"
-                checked={Boolean(permissions.anonymous)}
+                checked={getHasAdminRight(selectedAdminRights, 'anonymous')}
                 label={lang('EditAdminSendAnonymously')}
                 blocking
                 disabled={getControlIsDisabled('anonymous')}
@@ -628,21 +628,12 @@ const ManageGroupAdminRights = ({
   );
 };
 
-// A non-creator admin can only grant the rights they hold themselves; seed the guard bot defaults
-// with the intersection so the save isn't rejected for rights the current admin can't assign.
+// A non-owner admin can only grant the rights they hold themselves; seed the guard bot defaults
+// with the intersection so the save isn't rejected for rights the current admin can't assign
 function getGrantableGuardBotRights(chat: ApiChat): ApiChatAdminRights {
-  if (chat.isCreator || isChatBasicGroup(chat)) {
-    return GUARD_BOT_DEFAULT_ADMIN_RIGHTS;
-  }
-
-  const grantable = chat.adminRights;
-  if (!grantable) {
-    return {};
-  }
-
   const result: ApiChatAdminRights = {};
   (Object.keys(GUARD_BOT_DEFAULT_ADMIN_RIGHTS) as (keyof ApiChatAdminRights)[]).forEach((key) => {
-    if (grantable[key]) {
+    if (getHasAdminRight(chat, key)) {
       result[key] = true;
     }
   });
@@ -663,7 +654,7 @@ export default memo(withGlobal<OwnProps>(
     const fullInfo = selectChatFullInfo(global, chatId);
     const { byId: usersById } = global.users;
     const { currentUserId } = global;
-    const isFormFullyDisabled = !(chat.isCreator || isPromotedByCurrentUser);
+    const isFormFullyDisabled = !(chat.isOwner || isPromotedByCurrentUser);
     const adminMembersById = fullInfo?.adminMembersById;
 
     const selectedAdminMember = selectedUserId ? adminMembersById?.[selectedUserId] : undefined;

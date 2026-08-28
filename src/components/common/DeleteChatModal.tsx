@@ -95,16 +95,16 @@ const DeleteChatModal = ({
     } else if (isPrivateChat) {
       deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
     } else if (isBasicGroup) {
-      if (chat.isCreator) {
+      if (chat.isOwner) {
         deleteHistory({ chatId: chat.id, shouldDeleteForAll: true });
         deleteChat({ chatId: chat.id });
       } else {
         deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
         deleteChatUser({ chatId: chat.id, userId: currentUserId! });
       }
-    } else if ((isChannel || isSuperGroup) && !chat.isCreator) {
+    } else if ((isChannel || isSuperGroup) && !chat.isOwner) {
       leaveChannel({ chatId: chat.id });
-    } else if ((isChannel || isSuperGroup) && chat.isCreator) {
+    } else if ((isChannel || isSuperGroup) && chat.isOwner) {
       deleteChannel({ chatId: chat.id });
     }
     onClose();
@@ -114,7 +114,7 @@ const DeleteChatModal = ({
     if (isChannel || isSuperGroup) {
       leaveChannel({ chatId: chat.id });
       onClose();
-    } else if (isBasicGroup && chat.isCreator) {
+    } else if (isBasicGroup && chat.isOwner) {
       leaveBasicGroup({ chatId: chat.id });
       onClose();
     } else {
@@ -140,11 +140,11 @@ const DeleteChatModal = ({
       return isChatWithSelf ? 'ClearHistoryMyNotesTitle' : 'ClearHistoryTitleSingle2';
     }
 
-    if (isChannel && !chat.isCreator) {
+    if (isChannel && !chat.isOwner) {
       return 'LeaveChannel';
     }
 
-    if (isChannel && chat.isCreator) {
+    if (isChannel && chat.isOwner) {
       return 'ChannelDelete';
     }
 
@@ -166,7 +166,7 @@ const DeleteChatModal = ({
         </p>
       );
     }
-    if (isChannel && chat.isCreator) {
+    if (isChannel && chat.isOwner) {
       return (
         <p>
           {renderText(oldLang('ChatList.DeleteAndLeaveGroupConfirmation', chatTitle), ['simple_markdown', 'emoji'])}
@@ -174,7 +174,7 @@ const DeleteChatModal = ({
       );
     }
 
-    if ((isChannel && !chat.isCreator) || isBasicGroup || isSuperGroup) {
+    if ((isChannel && !chat.isOwner) || isBasicGroup || isSuperGroup) {
       return <p>{renderText(oldLang('ChannelLeaveAlertWithName', chatTitle), ['simple_markdown', 'emoji'])}</p>;
     }
 
@@ -186,10 +186,10 @@ const DeleteChatModal = ({
       return 'Delete';
     }
 
-    if (isChannel && !chat.isCreator) {
+    if (isChannel && !chat.isOwner) {
       return 'LeaveChannel';
     }
-    if (isChannel && chat.isCreator) {
+    if (isChannel && chat.isOwner) {
       return 'Chat.Input.Delete';
     }
 
@@ -220,7 +220,7 @@ const DeleteChatModal = ({
             {contactName ? renderText(oldLang('ChatList.DeleteForEveryone', contactName)) : oldLang('DeleteForAll')}
           </Button>
         )}
-        {!isPrivateChat && chat.isCreator && !isSavedDialog && (
+        {!isPrivateChat && chat.isOwner && !isSavedDialog && (
           <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteChat}>
             {oldLang('DeleteForAll')}
           </Button>

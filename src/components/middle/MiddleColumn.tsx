@@ -799,7 +799,7 @@ export default memo(withGlobal<OwnProps>(
 
     const canUnpin = chat && (
       isPrivate || (
-        chat?.isCreator || (!isChannel && !isUserRightBanned(chat, 'pinMessages'))
+        (!isChannel && !isUserRightBanned(chat, 'pinMessages'))
         || getHasAdminRight(chat, 'pinMessages')
       )
     );

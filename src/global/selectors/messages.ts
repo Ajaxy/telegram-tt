@@ -487,7 +487,6 @@ export function selectCanDeleteTopic<T extends GlobalState>(global: T, chatId: s
   if (topicId === GENERAL_TOPIC_ID) return false;
 
   return chat.isBotForum
-    || chat.isCreator
     || getHasAdminRight(chat, 'deleteMessages')
     || (chat.isForum
       && selectCanDeleteOwnerTopic(global, chat.id, topicId));
@@ -572,7 +571,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
 
   // https://github.com/telegramdesktop/tdesktop/blob/6627de646022af1394134974477109cd1439e1bb/Telegram/SourceFiles/data/data_peer_values.cpp#L367C2-L372C3
   const canPinMessage = (() => {
-    if (isPrivate || chat.isCreator) return true;
+    if (isPrivate) return true;
 
     if (isChannel) {
       return getHasAdminRight(chat, 'editMessages');
@@ -583,11 +582,12 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
 
     if (isSuperGroup) {
       const hasUsernameOrGeo = chat.hasUsername || chat.hasGeo;
-      return (hasPinMessageRight || !hasUsernameOrGeo) && !isPinMessageRightBanned;
+      return hasPinMessageRight || (!hasUsernameOrGeo && !isPinMessageRightBanned);
     }
 
     if (isBasicGroup) {
-      return !chat.isForbidden && !chat.isNotJoined && hasPinMessageRight && !isPinMessageRightBanned;
+      return !chat.isForbidden && !chat.isNotJoined
+        && (hasPinMessageRight || !isPinMessageRightBanned);
     }
 
     return hasPinMessageRight;
@@ -599,7 +599,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
     if (isPrivate) return isChatWithSelf;
     if (isBasicGroup) return false;
     if (isSuperGroup) return canPinMessage;
-    if (isChannel) return chat.isCreator || getHasAdminRight(chat, 'editMessages');
+    if (isChannel) return getHasAdminRight(chat, 'editMessages');
     return false;
   })();
 
@@ -634,13 +634,12 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   }
 
   const canNotDeleteBoostMessage = isBoostMessage && isOwn
-    && !chat.isCreator && !getHasAdminRight(chat, 'deleteMessages');
+    && !getHasAdminRight(chat, 'deleteMessages');
 
   const canDelete = (!isLocal || isFailed) && !isServiceNotification && !canNotDeleteBoostMessage && (
     isPrivate
     || isOwn
     || isBasicGroup
-    || chat.isCreator
     || getHasAdminRight(chat, 'deleteMessages')
   );
 
@@ -649,11 +648,11 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const canDeleteForAll = canDelete && !chat.isForbidden && (
     (isPrivate && !isChatWithSelf && !isBotChat && !content.dice)
     || (isBasicGroup && (
-      isOwn || getHasAdminRight(chat, 'deleteMessages') || chat.isCreator
+      isOwn || getHasAdminRight(chat, 'deleteMessages')
     ))
   );
 
-  const hasMessageEditRight = isOwn || (isChannel && (chat.isCreator || getHasAdminRight(chat, 'editMessages')));
+  const hasMessageEditRight = isOwn || (isChannel && getHasAdminRight(chat, 'editMessages'));
 
   const canEdit = !isLocal && !isAction && isMessageEditable && hasMessageEditRight;
 

@@ -281,7 +281,6 @@ export default memo(withGlobal<OwnProps>(
 
     const canAddMembers = chat && ((getHasAdminRight(chat, 'inviteUsers')
       || (!isChannel && !isUserRightBanned(chat, 'inviteUsers')))
-    || chat.isCreator
     );
 
     return {

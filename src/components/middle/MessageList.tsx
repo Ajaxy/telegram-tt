@@ -133,7 +133,7 @@ type StateProps = {
   isChatWithSelf?: boolean;
   isSystemBotChat?: boolean;
   isAnonymousForwards?: boolean;
-  isCreator?: boolean;
+  isOwner?: boolean;
   isChannelWithAvatars?: boolean;
   isBot?: boolean;
   isNonContact?: boolean;
@@ -242,7 +242,7 @@ const MessageList = ({
   isChatWithSelf,
   isSystemBotChat,
   isAnonymousForwards,
-  isCreator,
+  isOwner,
   isBot,
   isNonContact,
   nameChangeDate,
@@ -1278,7 +1278,7 @@ const MessageList = ({
       || (lastMessage?.content?.action?.type === 'contactSignUp')
     );
 
-  const isGroupChatJustCreated = isGroupChat && isCreator
+  const isGroupChatJustCreated = isGroupChat && isOwner
     && messageIds?.length === 1 && messagesById?.[messageIds[0]]?.content.action?.type === 'chatCreate';
   const isEmptyTopic = messageIds?.length === 1
     && messagesById?.[messageIds[0]]?.content.action?.type === 'topicCreate';
@@ -1493,7 +1493,7 @@ export default memo(withGlobal<OwnProps>(
       isChatMonoforum: isChatMonoforum(chat),
       isGroupChat: isChatGroup(chat),
       isChannelWithAvatars: chat.areProfilesShown,
-      isCreator: chat.isCreator,
+      isOwner: chat.isOwner,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       isSystemBotChat: isSystemBot(chatId),
       isAnonymousForwards: isAnonymousForwardsChat(chatId),

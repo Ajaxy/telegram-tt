@@ -14,7 +14,7 @@ import {
   getHasAdminRight,
   getIsSavedDialog,
   isAnonymousForwardsChat,
-  isChatBasicGroup, isChatChannel, isChatSuperGroup,
+  isChatChannel, isChatSuperGroup,
 } from '../../global/helpers';
 import {
   selectBot,
@@ -503,7 +503,7 @@ export default memo(withGlobal<OwnProps>(
     const canLeave = isSavedDialog || (isMainThread && !canSubscribe);
     const canEnterVoiceChat = ARE_CALLS_SUPPORTED && isMainThread && chat.isCallActive;
     const canCreateVoiceChat = ARE_CALLS_SUPPORTED && isMainThread && !chat.isCallActive
-      && (chat.adminRights?.manageCall || (chat.isCreator && isChatBasicGroup(chat))) && !chat.isMonoforum;
+      && getHasAdminRight(chat, 'manageCall') && !chat.isMonoforum;
     const canViewStatistics = isMainThread && chatFullInfo?.canViewStatistics;
     const canViewMonetization = isMainThread && chatFullInfo?.canViewMonetization;
     const canViewBoosts = isMainThread && !chat.isMonoforum

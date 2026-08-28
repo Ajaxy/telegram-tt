@@ -967,7 +967,7 @@ export default memo(withGlobal<OwnProps>(
     const topic = selectTopic(global, chatId, threadId);
     // Disable manual creation for bot forums
     const canCreateTopic = chat.isForum && !chat.isBotForum && (
-      chat.isCreator || !isUserRightBanned(chat, 'manageTopics') || getHasAdminRight(chat, 'manageTopics')
+      !isUserRightBanned(chat, 'manageTopics') || getHasAdminRight(chat, 'manageTopics')
     );
     const canEditTopic = topic && getCanManageTopic(chat, topic);
     const canManage = selectCanManage(global, chatId);

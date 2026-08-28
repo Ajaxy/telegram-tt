@@ -956,7 +956,7 @@ async function checkFutureCreatorAndOpenModal(
   shouldSkipOwnershipCheck: boolean | undefined,
   tabId: number,
 ): Promise<boolean> {
-  if (shouldSkipOwnershipCheck || !chat.isCreator) {
+  if (shouldSkipOwnershipCheck || !chat.isOwner) {
     return false;
   }
 

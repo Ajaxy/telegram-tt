@@ -8,7 +8,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiChat } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
-import { getUserFullName } from '../../../global/helpers';
+import { getHasAdminRight, getUserFullName } from '../../../global/helpers';
 import { selectChat, selectUser } from '../../../global/selectors';
 import { partition } from '../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -73,7 +73,7 @@ const InviteViaLinkModal = ({
 
   const canSendInviteLink = useMemo(() => {
     if (!chat) return undefined;
-    return Boolean(chat?.isCreator || chat?.adminRights?.inviteUsers);
+    return getHasAdminRight(chat, 'inviteUsers');
   }, [chat]);
 
   const inviteSectionText = useMemo(() => {

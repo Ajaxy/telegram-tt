@@ -528,6 +528,16 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.cacheVersion = 5;
   }
 
+  if (cached.cacheVersion < 6) {
+    Object.values(untypedCached.chats.byId).forEach((chat: any) => {
+      if ('isCreator' in chat) {
+        chat.isOwner = chat.isCreator;
+        delete chat.isCreator;
+      }
+    });
+    cached.cacheVersion = 6;
+  }
+
   if (!cached.auth) {
     cached.auth = initialState.auth;
     cached.auth.rememberMe = untypedCached.rememberMe;

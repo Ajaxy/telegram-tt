@@ -41,7 +41,7 @@ type StateProps = {
   chatId: string;
   dcId?: number;
   statistics?: ApiChannelMonetizationStatistics;
-  isCreator?: boolean;
+  isOwner?: boolean;
   isChannelRevenueWithdrawalEnabled?: boolean;
   hasPassword?: boolean;
 };
@@ -50,7 +50,7 @@ const MonetizationStatistics = ({
   chatId,
   dcId,
   statistics,
-  isCreator,
+  isOwner,
   isChannelRevenueWithdrawalEnabled,
   hasPassword,
 }: StateProps) => {
@@ -68,7 +68,7 @@ const MonetizationStatistics = ({
   const [isConfirmPasswordDialogOpen, openConfirmPasswordDialogOpen, closeConfirmPasswordDialogOpen] = useFlag();
   const availableBalance = statistics?.balances?.availableBalance;
   const isWithdrawalEnabled = statistics?.balances?.isWithdrawalEnabled;
-  const canWithdraw = isCreator && isChannelRevenueWithdrawalEnabled && Boolean(availableBalance)
+  const canWithdraw = isOwner && isChannelRevenueWithdrawalEnabled && Boolean(availableBalance)
     && isWithdrawalEnabled;
 
   useEffect(() => {
@@ -290,7 +290,7 @@ export default memo(withGlobal(
     const chatId = monetizationStatistics && monetizationStatistics.chatId;
     const chat = chatId ? selectChat(global, chatId) : undefined;
     const dcId = selectChatFullInfo(global, chatId!)?.statisticsDcId;
-    const isCreator = Boolean(chat?.isCreator);
+    const isOwner = Boolean(chat?.isOwner);
 
     const statistics = tabState.statistics.monetization;
 
@@ -300,7 +300,7 @@ export default memo(withGlobal(
       chatId: chatId!,
       dcId,
       statistics,
-      isCreator,
+      isOwner,
       isChannelRevenueWithdrawalEnabled,
       hasPassword,
     };

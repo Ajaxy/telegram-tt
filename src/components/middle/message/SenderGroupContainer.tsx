@@ -297,7 +297,7 @@ export default memo(withGlobal<OwnProps>(
     const fullInfo = selectChatFullInfo(global, chatId);
     const canBanUsers = selectCanBanUsers(global, chatId);
     const isSenderAdmin = Boolean(sender && fullInfo?.adminMembersById?.[sender.id]);
-    const canBanTarget = chat?.isCreator || (Boolean(fullInfo?.adminMembersById) && !isSenderAdmin);
+    const canBanTarget = chat?.isOwner || (Boolean(fullInfo?.adminMembersById) && !isSenderAdmin);
     const isSenderRemovable = Boolean(sender && sender.id !== chatId
       && sender.id !== fullInfo?.linkedChatId && sender.id !== chat?.linkedMonoforumId);
     const canRemoveSender = Boolean(sender && sender.id !== global.currentUserId &&

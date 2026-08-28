@@ -55,7 +55,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
   const areSignaturesEnabled = Boolean(chat?.areSignaturesShown);
   const areProfilesEnabled = Boolean(chat?.areProfilesShown);
 
-  const canAddNewAdmins = Boolean(chat?.isCreator || (chat && getHasAdminRight(chat, 'addAdmins')));
+  const canAddNewAdmins = Boolean(chat && getHasAdminRight(chat, 'addAdmins'));
   const canToggleSignatures = isChannel && getHasAdminRight(chat!, 'postMessages');
 
   const adminMembers = useMemo(() => {

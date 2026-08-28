@@ -352,7 +352,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = chatId ? selectChat(global, chatId) : undefined;
     const canDeleteReactions = Boolean(
       chat && isChatSuperGroup(chat) && !chat.isMonoforum
-      && (chat.isCreator || getHasAdminRight(chat, 'deleteMessages')),
+      && getHasAdminRight(chat, 'deleteMessages'),
     );
 
     return {

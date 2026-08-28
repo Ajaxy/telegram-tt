@@ -74,7 +74,7 @@ type StateProps = {
   isSchedule?: boolean;
   onConfirm?: NoneToVoidFunction;
   canBanUsers?: boolean;
-  isCreator?: boolean;
+  isOwner?: boolean;
   linkedChatId?: string;
   reactionContext?: ReactionDeletionContext;
 };
@@ -95,7 +95,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   isSchedule,
   currentUserId,
   messageIds,
-  isCreator,
+  isOwner,
   canDeleteForAll,
   contactName,
   willDeleteForCurrentUserOnly,
@@ -193,9 +193,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
 
     return peerList.filter((peer) => {
       const isAdmin = adminMembersById?.[peer.id];
-      return isCreator || !isAdmin;
+      return isOwner || !isAdmin;
     });
-  }, [peerList, isCreator, currentUserId, canBanUsers, adminMembersById]);
+  }, [peerList, isOwner, currentUserId, canBanUsers, adminMembersById]);
 
   const shouldShowAdditionalOptions = useMemo(() => {
     return Boolean(peerListToDeleteAll.length || peerListToReportSpam.length || peerListToBan.length);
@@ -596,7 +596,7 @@ export default memo(withGlobal<OwnProps>(
     const chatBot = Boolean(chat && !isSystemBot(chat.id) && selectBot(global, chat.id));
     const adminMembersById = chatFullInfo?.adminMembersById;
     const canBanUsers = chat && getHasAdminRight(chat, 'banUsers') && !chat.isMonoforum; // TODO: Ban in channel in case of monoforum
-    const isCreator = chat?.isCreator;
+    const isOwner = chat?.isOwner;
     const isChatWithBot = chatId ? selectIsChatWithBot(global, chatId) : undefined;
     const willDeleteForCurrentUserOnly = (chat && isChatBasicGroup(chat) && !canDeleteForAll) || isChatWithBot;
     const willDeleteForAll = chat && (isChatSuperGroup(chat) || isChannel);
@@ -616,7 +616,7 @@ export default memo(withGlobal<OwnProps>(
       canBanUsers,
       linkedChatId,
       isSchedule,
-      isCreator,
+      isOwner,
       onConfirm,
       reactionContext: deleteMessageModal?.reactionContext,
     };

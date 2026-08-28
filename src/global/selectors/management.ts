@@ -88,8 +88,7 @@ export function selectCanManage<T extends GlobalState>(
     && chat
     && !selectIsChatWithSelf(global, chat.id)
     && !isAnonymousForwardsChat(chat.id)
-    // chat.isCreator is for Basic Groups
-    && (isUserId(chat.id) || ((isChatAdmin(chat) || chat.isCreator) && !chat.isNotJoined))
+    && (isUserId(chat.id) || (isChatAdmin(chat) && !chat.isNotJoined))
     && !isBot,
   );
 }
@@ -119,7 +118,7 @@ export function selectCanManageAutoDelete<T extends GlobalState>(
 }
 
 function getCanChangeChatInfo(chat: ApiChat) {
-  if (chat.isCreator) return true;
+  if (chat.isOwner) return true;
   if (chat.isForbidden || chat.isNotJoined) return false;
   if (chat.adminRights) return getHasAdminRight(chat, 'changeInfo');
 

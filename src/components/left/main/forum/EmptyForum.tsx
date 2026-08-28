@@ -69,7 +69,7 @@ const EmptyForum = ({
 
 export default memo(withGlobal<OwnProps>((global, { chatId }): Complete<StateProps> => {
   const chat = selectChat(global, chatId);
-  const canManageTopics = chat && (chat.isCreator || getHasAdminRight(chat, 'manageTopics'));
+  const canManageTopics = chat && getHasAdminRight(chat, 'manageTopics');
 
   return {
     animatedEmoji: selectAnimatedEmoji(global, '🐣'),
