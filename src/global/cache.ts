@@ -15,7 +15,7 @@ import type { ActionReturnType, GlobalState, SharedState } from './types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../api/types';
 
 import {
-  ALL_FOLDER_ID, ANIMATION_LEVEL_DEFAULT,
+  ALL_FOLDER_ID,
   ARCHIVED_FOLDER_ID,
   DEBUG,
   EPHEMERAL_MESSAGE_TTL_SECONDS,
@@ -48,7 +48,7 @@ import { selectSharedSettings } from './selectors/sharedState';
 import { selectThreadInfo } from './selectors/threads';
 import { addActionHandler, getGlobal } from './index';
 import {
-  INITIAL_GLOBAL_STATE, INITIAL_PERFORMANCE_STATE_MED, SHARED_STATE_CACHE_VERSION,
+  INITIAL_GLOBAL_STATE, SHARED_STATE_CACHE_VERSION,
 } from './initialState';
 import { clearGlobalForLockScreen, clearSharedStateForLockScreen } from './reducers';
 import {
@@ -299,162 +299,21 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     ...cached.settings.byKey,
   };
 
-  cached.chatFolders = {
-    ...initialState.chatFolders,
-    ...cached.chatFolders,
-  };
-
-  if (!cached.chats.similarChannelsById) {
-    cached.chats.similarChannelsById = initialState.chats.similarChannelsById;
-  }
-
-  if (!cached.chats.similarBotsById) {
-    cached.chats.similarBotsById = initialState.chats.similarBotsById;
-  }
-
-  if (!cached.chats.lastMessageIds) {
-    cached.chats.lastMessageIds = initialState.chats.lastMessageIds;
-  }
-
   if (!cached.emojiGroups) {
     cached.emojiGroups = initialState.emojiGroups;
   }
 
-  // Clear old color storage to optimize cache size
-  if (untypedCached?.appConfig.peerColors) {
-    untypedCached.appConfig.peerColors = undefined;
-    untypedCached.appConfig.darkPeerColors = undefined;
-  }
-
-  if (!cached.fileUploads.byMessageKey) {
-    cached.fileUploads.byMessageKey = {};
-  }
-
-  if (!cached.reactions) {
-    cached.reactions = initialState.reactions;
-  }
-
-  if (!cached.quickReplies) {
-    cached.quickReplies = initialState.quickReplies;
-  }
-
-  if (!cached.users.previewMediaByBotId) {
-    cached.users.previewMediaByBotId = initialState.users.previewMediaByBotId;
-  }
-  if (!cached.chats.loadingParameters) {
-    cached.chats.loadingParameters = initialState.chats.loadingParameters;
-  }
   if (!cached.topPeerCategories) {
     cached.topPeerCategories = initialState.topPeerCategories;
   }
 
-  if (!cached.reactions.defaultTags?.[0]?.type) {
-    cached.reactions = initialState.reactions;
-  }
-
-  if (!cached.users.commonChatsById) {
-    cached.users.commonChatsById = initialState.users.commonChatsById;
-  }
   if (!cached.users.savedMusicByPeerId) {
     cached.users.savedMusicByPeerId = initialState.users.savedMusicByPeerId;
-  }
-
-  if (!cached.users.botAppPermissionsById) {
-    cached.users.botAppPermissionsById = initialState.users.botAppPermissionsById;
-  }
-  if (!cached.chats.topicsInfoById) {
-    cached.chats.topicsInfoById = initialState.chats.topicsInfoById;
-  }
-
-  if (!cached.messages.pollById) {
-    cached.messages.pollById = initialState.messages.pollById;
-  }
-  if (!cached.settings.botVerificationShownPeerIds) {
-    cached.settings.botVerificationShownPeerIds = initialState.settings.botVerificationShownPeerIds;
-  }
-
-  if (!cached.peers) {
-    cached.peers = initialState.peers;
-  }
-
-  if (!cached.settings.accountDaysTtl) {
-    cached.settings.accountDaysTtl = initialState.settings.accountDaysTtl;
-  }
-
-  if (!cached.cacheVersion) {
-    // Reset because of the new action message structure (the same reset the version 3 migration
-    // below performs)
-    cached.messages = initialState.messages;
-    cached.chats.listIds = initialState.chats.listIds;
-    // Treat unversioned caches as version 3, so every later migration still runs — stamping the
-    // current version would skip them all
-    cached.cacheVersion = 3;
-  }
-
-  if (!cached.messages.playbackByChatId) {
-    cached.messages.playbackByChatId = initialState.messages.playbackByChatId;
-  }
-
-  if (cached.cacheVersion < 2) {
-    if (untypedCached.settings.themes?.dark) {
-      untypedCached.settings.themes.dark.patternColor = initialState.sharedState.settings.themes.dark!.patternColor;
-    }
-
-    if (untypedCached.settings.themes?.light) {
-      untypedCached.settings.themes.light.patternColor = initialState.sharedState.settings.themes.light!.patternColor;
-    }
-
-    cached.cacheVersion = 2;
-  }
-
-  if (!cached.chats.notifyExceptionById) {
-    cached.chats.notifyExceptionById = initialState.chats.notifyExceptionById;
-  }
-
-  if (!cached.sharedState) {
-    cached.sharedState = initialState.sharedState;
-    cached.sharedState.settings = {
-      canDisplayChatInTitle: untypedCached.settings.byKey.canDisplayChatInTitle,
-      animationLevel: untypedCached.settings.byKey.animationLevel,
-      foldersPosition: FOLDERS_POSITION_DEFAULT,
-      messageSendKeyCombo: untypedCached.settings.byKey.messageSendKeyCombo,
-      shouldReplaceTextShortcuts: true,
-      messageTextSize: untypedCached.settings.byKey.messageTextSize,
-      instantViewFontSizeAdjust: INSTANT_VIEW_FONT_SIZE_ADJUST_DEFAULT,
-      performance: untypedCached.settings.performance,
-      theme: untypedCached.settings.byKey.theme,
-      themes: untypedCached.settings.themes
-        ? cloneThemeSettings(untypedCached.settings.themes)
-        : initialState.sharedState.settings.themes,
-      timeFormat: untypedCached.settings.byKey.timeFormat,
-      wasTimeFormatSetManually: untypedCached.settings.byKey.wasTimeFormatSetManually,
-      shouldUseSystemTheme: untypedCached.settings.byKey.shouldUseSystemTheme,
-      isConnectionStatusMinimized: untypedCached.settings.byKey.isConnectionStatusMinimized,
-      shouldForceHttpTransport: untypedCached.settings.byKey.shouldForceHttpTransport,
-      language: untypedCached.settings.byKey.language,
-      languages: untypedCached.settings.languages,
-      shouldSkipBrowserCloseConfirmation: Boolean(untypedCached.settings.byKey.shouldSkipBrowserCloseConfirmation),
-      browserCachedPosition: untypedCached.settings.browserCachedPosition,
-      browserCachedSize: untypedCached.settings.browserCachedSize,
-      shouldAllowHttpTransport: untypedCached.settings.byKey.shouldAllowHttpTransport,
-      shouldCollectDebugLogs: untypedCached.settings.byKey.shouldCollectDebugLogs,
-      shouldDebugExportedSenders: untypedCached.settings.byKey.shouldDebugExportedSenders,
-      shouldWarnAboutFiles: untypedCached.settings.byKey.shouldWarnAboutFiles,
-    };
-  }
-
-  if (!cached.messages.webPageById) {
-    cached.messages.webPageById = initialState.messages.webPageById;
   }
 
   const cachedSharedSettings = cached.sharedState.settings;
   if (cachedSharedSettings.instantViewFontSizeAdjust === undefined) {
     cachedSharedSettings.instantViewFontSizeAdjust = INSTANT_VIEW_FONT_SIZE_ADJUST_DEFAULT;
-  }
-
-  if (!cachedSharedSettings.wasAnimationLevelSetManually) {
-    cachedSharedSettings.animationLevel = ANIMATION_LEVEL_DEFAULT;
-    cachedSharedSettings.performance = INITIAL_PERFORMANCE_STATE_MED;
   }
 
   if (cachedSharedSettings.performance.messageBlur === undefined) {
@@ -473,10 +332,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cachedSharedSettings.shouldReplaceTextShortcuts = true;
   }
 
-  if (!cached.appConfig) {
-    cached.appConfig = initialState.appConfig;
-  }
-
   if (cached.appConfig.webAppAllowedProtocols === undefined) {
     cached.appConfig.webAppAllowedProtocols = initialState.appConfig.webAppAllowedProtocols;
   }
@@ -491,11 +346,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.appConfig.richMessageMaxDepth = initialState.appConfig.richMessageMaxDepth;
     cached.appConfig.richMessageMaxMedia = initialState.appConfig.richMessageMaxMedia;
     cached.appConfig.richMessageMaxTableColumns = initialState.appConfig.richMessageMaxTableColumns;
-  }
-
-  if (untypedCached.sharedState?.settings?.shouldWarnAboutSvg) {
-    cached.sharedState.settings.shouldWarnAboutFiles = true;
-    untypedCached.sharedState.settings.shouldWarnAboutSvg = undefined;
   }
 
   if (cached.cacheVersion < 3) {
@@ -540,7 +390,11 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
 
   if (!cached.auth) {
     cached.auth = initialState.auth;
-    cached.auth.rememberMe = untypedCached.rememberMe;
+    cached.auth.rememberMe = untypedCached.authRememberMe;
+  }
+
+  if (cached.auth.rememberMe === undefined) {
+    cached.auth.rememberMe = initialState.auth.rememberMe;
   }
 
   if (cached.audioPlayer.volume === undefined) {
