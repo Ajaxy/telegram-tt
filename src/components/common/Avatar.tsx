@@ -291,6 +291,7 @@ const Avatar = ({
     isCommunity && 'community',
     asMessageBubble && 'message-bubble',
     (photo || webPhoto) && 'force-fit',
+    (!specialIcon && hasBlobUrl) && 'with-media',
     ((withStory && realPeer?.hasStories) || forPremiumPromo) && 'with-story-circle',
     withStorySolid && realPeer?.hasStories && 'with-story-solid',
     withStorySolid && forceFriendStorySolid && 'close-friend',
