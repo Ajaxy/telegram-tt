@@ -650,7 +650,10 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const canNotDeleteBoostMessage = isBoostMessage && isOwn
     && !getHasAdminRight(chat, 'deleteMessages');
 
-  const canDelete = (!isLocal || isFailed) && !isServiceNotification && !canNotDeleteBoostMessage && (
+  const canNotDeleteChannelCreateMessage = content.action?.type === 'channelCreate';
+
+  const canDelete = (!isLocal || isFailed) && !isServiceNotification
+    && !canNotDeleteBoostMessage && !canNotDeleteChannelCreateMessage && (
     isPrivate
     || isOwn
     || isBasicGroup
