@@ -10,6 +10,11 @@
   background: var(--color-background);
 
   > .Transition {
+    // Always establish a stacking context so chat-list content stays below the floating
+    // New Chat button. Without this, on initial load (transition skipped, no leftover
+    // transform) the list content leaks into the parent stacking context and can render
+    // over the button — most visible in RTL, where the button sits on the left edge.
+    isolation: isolate;
     overflow: hidden;
     flex: 1;
   }
