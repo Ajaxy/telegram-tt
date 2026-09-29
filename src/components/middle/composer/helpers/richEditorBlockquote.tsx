@@ -11,7 +11,6 @@ import {
   BLOCKQUOTE_COLLAPSED_ATTR,
   CAPTION_NODE_NAME,
 } from '../../../../util/tiptap/constants';
-import { RICH_INPUT_MODE_CHANGED_META } from './richEditorMode';
 import {
   handleRichEditorQuoteArrow,
   handleRichEditorQuoteBackspace,
@@ -29,10 +28,6 @@ type RichEditorBlockquoteOptions = {
   HTMLAttributes: RichEditorQuoteHtmlAttributes;
 };
 
-type RichEditorBlockquoteViewProps = TeactNodeViewComponentProps & {
-  isRichInputExpanded: boolean;
-};
-
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     blockQuote: {
@@ -47,12 +42,16 @@ const BLOCKQUOTE_INPUT_REGEX = /^\s*>\s$/;
 
 function RichEditorBlockquoteView({
   HTMLAttributes,
-  isRichInputExpanded,
   node,
   updateAttributes,
-}: RichEditorBlockquoteViewProps) {
+}: TeactNodeViewComponentProps) {
   const className = typeof HTMLAttributes.class === 'string' ? HTMLAttributes.class : undefined;
+  let canCollapse = true;
+  node.forEach((child) => {
+    if (child.type.name !== 'paragraph' && child.type.name !== CAPTION_NODE_NAME) canCollapse = false;
+  });
   const isCollapsed = Boolean(node.attrs[BLOCKQUOTE_COLLAPSED_ATTR]);
+  const hasEmptyCaption = node.lastChild?.type.name === CAPTION_NODE_NAME && !node.lastChild.content.size;
 
   const handleCollapseChange = useLastCallback((isNextCollapsed: boolean) => {
     updateAttributes({ [BLOCKQUOTE_COLLAPSED_ATTR]: isNextCollapsed });
@@ -61,9 +60,10 @@ function RichEditorBlockquoteView({
   return (
     <Blockquote
       className={className}
-      canBeCollapsible={!isRichInputExpanded}
+      canBeCollapsible={canCollapse}
       noInitialCollapse={!isCollapsed}
       recalculationKey={node}
+      ignoredLines={hasEmptyCaption ? 1 : undefined}
       isCollapsed={isCollapsed}
       onCollapseChange={handleCollapseChange}
     >
@@ -73,15 +73,6 @@ function RichEditorBlockquoteView({
 }
 
 export function buildRichEditorBlockquote(getIsRichInputExpanded: () => boolean) {
-  function renderRichEditorBlockquoteView(props: TeactNodeViewComponentProps) {
-    return (
-      <RichEditorBlockquoteView
-        {...props}
-        isRichInputExpanded={getIsRichInputExpanded()}
-      />
-    );
-  }
-
   return TiptapNode.create<RichEditorBlockquoteOptions>({
     name: 'blockquote',
     group: 'block',
@@ -97,7 +88,7 @@ export function buildRichEditorBlockquote(getIsRichInputExpanded: () => boolean)
       return {
         [BLOCKQUOTE_COLLAPSED_ATTR]: {
           default: false,
-          parseHTML: (element) => element.hasAttribute('data-collapsed'),
+          parseHTML: (element) => element.hasAttribute('data-collapsed') || element.hasAttribute('expandable'),
           renderHTML: (attributes) => attributes[BLOCKQUOTE_COLLAPSED_ATTR]
             ? { 'data-collapsed': 'true' }
             : {},
@@ -128,11 +119,7 @@ export function buildRichEditorBlockquote(getIsRichInputExpanded: () => boolean)
     },
 
     addNodeView() {
-      return TeactNodeViewRenderer(renderRichEditorBlockquoteView, {
-        shouldUpdateOnTransaction: ({ transaction }) => (
-          Boolean(transaction.getMeta(RICH_INPUT_MODE_CHANGED_META))
-        ),
-      });
+      return TeactNodeViewRenderer(RichEditorBlockquoteView);
     },
 
     addCommands() {

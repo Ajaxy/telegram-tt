@@ -796,14 +796,15 @@ addActionHandler('openGiftInfoModalFromMessage', async (global, actions, payload
     return { type: 'user', messageId };
   })();
 
-  const fromId = action.fromId || (message.isOutgoing ? global.currentUserId! : message.chatId);
+  const fallbackFromId = message.isOutgoing ? global.currentUserId! : message.chatId;
+  const fromId = action.fromId || (action.isNameHidden ? undefined : fallbackFromId);
 
   const gift: ApiSavedStarGift = {
     date: message.date,
     gift: action.gift,
-    message: starGift?.message,
+    message: action.message,
     starsToConvert: starGift?.starsToConvert,
-    isNameHidden: starGift?.isNameHidden,
+    isNameHidden: action.isNameHidden,
     isUnsaved: !action.isSaved,
     fromId,
     messageId: message.id,

@@ -98,6 +98,7 @@ const DETAILS_CONTENT_NODE_TYPE = 'detailsContent';
 const DETAILS_OPEN_ATTR = 'open';
 const TABLE_BORDERED_ATTR = 'isBordered';
 const TABLE_STRIPED_ATTR = 'isStriped';
+const TABLE_COMPACT_ATTR = 'isCompact';
 const TRAILING_ENTITY_WHITESPACE_RE = /\s/u;
 const MILLISECONDS_PER_SECOND = 1000;
 // Keep these values aligned with TDLib's `MessageEntity::get_type_priority`
@@ -341,6 +342,7 @@ function buildTiptapMediaFallbackNodes(
     case 'photo':
     case 'video':
     case 'audio':
+    case 'document':
     case 'embed':
     case 'map':
       return buildTiptapCaptionNodes(block.caption);
@@ -586,6 +588,7 @@ function buildTiptapTableNode(
     attrs: {
       [TABLE_BORDERED_ATTR]: Boolean(block.isBordered),
       [TABLE_STRIPED_ATTR]: Boolean(block.isStriped),
+      [TABLE_COMPACT_ATTR]: Boolean(block.isCompact),
     },
     content,
   } : undefined;
@@ -638,9 +641,6 @@ function buildTiptapBlockquoteBlocksNode(
 
   return {
     type: 'blockquote',
-    attrs: {
-      [BLOCKQUOTE_COLLAPSED_ATTR]: block.canCollapse,
-    },
     content: buildTiptapQuoteContent(
       content.length ? content : [{ type: 'paragraph' }],
       block.caption,
@@ -851,7 +851,6 @@ function buildBlockquoteBlockFromTiptapNode(node: TiptapJsonContent): ApiPageBlo
     type: 'blockquoteBlocks',
     blocks,
     caption,
-    canCollapse,
   } : undefined;
 }
 
@@ -1028,6 +1027,7 @@ function buildTableBlockFromTiptapNode(node: TiptapJsonContent): ApiPageBlock | 
     rows,
     isBordered: getTiptapBooleanAttr(tableNode!, TABLE_BORDERED_ATTR) ? true : undefined,
     isStriped: getTiptapBooleanAttr(tableNode!, TABLE_STRIPED_ATTR) ? true : undefined,
+    isCompact: getTiptapBooleanAttr(tableNode!, TABLE_COMPACT_ATTR) ? true : undefined,
   } : undefined;
 }
 
@@ -1375,7 +1375,6 @@ function getBlockAsFormatted(block: ApiPageBlock, isApproximate: boolean): ApiFo
         type: ApiMessageEntityTypes.Blockquote,
         offset: 0,
         length: withCaption.text.length,
-        canCollapse: block.canCollapse,
       }) : undefined;
     }
     case 'pullquote':
@@ -1966,7 +1965,6 @@ function buildStructuralBlockFromFormatted(
     type: 'blockquoteBlocks',
     blocks: buildBlocksFromFormattedRange(text, entities, entity.offset, end, preEntities),
     caption: EMPTY_RICH_TEXT,
-    canCollapse: entity.canCollapse ? true : undefined,
   } : {
     type: 'blockquote',
     text: buildRichTextFromFormatted(text, entities, entity.offset, end),

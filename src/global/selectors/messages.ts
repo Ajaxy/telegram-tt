@@ -127,6 +127,18 @@ export function selectChatMessages<T extends GlobalState>(global: T, chatId: str
   return global.messages.byChatId[chatId]?.byId;
 }
 
+export function selectStoppableTypingDraftId<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
+  const drafts = selectThreadLocalStateParam(global, chatId, threadId, 'typingDraftIdByRandomId');
+  if (!drafts) return undefined;
+
+  for (const [randomId, messageId] of Object.entries(drafts)) {
+    const message = selectChatMessage(global, chatId, messageId);
+    if (message?.isTypingDraft && message.typingDraft?.canStop) return randomId;
+  }
+
+  return undefined;
+}
+
 export function selectChatEphemeralMessages<T extends GlobalState>(global: T, chatId: string) {
   return global.messages.byChatId[chatId]?.ephemeralById;
 }

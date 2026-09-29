@@ -19,7 +19,7 @@ import {
 type RichEditorTableSelectionKind = 'cell' | 'row' | 'column' | 'table';
 export type RichEditorTableMoveAxis = 'row' | 'column';
 type RichEditorTableCellAttrName = 'align' | 'verticalAlign';
-export type RichEditorTableBooleanAttrName = 'isBordered' | 'isStriped';
+export type RichEditorTableBooleanAttrName = 'isBordered' | 'isStriped' | 'isCompact';
 
 type RichEditorTableRect = Pick<Rect, 'left' | 'right' | 'top' | 'bottom'>;
 

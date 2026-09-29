@@ -259,6 +259,7 @@ function buildTable(
   const element = document.createElement('table');
   element.toggleAttribute('bordered', node.attrs.isBordered !== false);
   element.toggleAttribute('striped', Boolean(node.attrs.isStriped));
+  element.toggleAttribute('compact', Boolean(node.attrs.isCompact));
 
   if (title?.content.size) {
     const caption = element.appendChild(document.createElement('caption'));
@@ -408,6 +409,7 @@ function normalizeRenderedTable(table: HTMLTableElement) {
   }
   table.toggleAttribute('bordered', table.dataset.bordered === 'true');
   table.toggleAttribute('striped', table.dataset.striped === 'true');
+  table.toggleAttribute('compact', table.dataset.compact === 'true');
   wrapper?.replaceWith(table);
 }
 

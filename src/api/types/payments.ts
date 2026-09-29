@@ -370,6 +370,8 @@ export type ApiInputInvoiceStarGiftResale = {
   slug: string;
   peerId: string;
   currency: typeof TON_CURRENCY_CODE | typeof STARS_CURRENCY_CODE;
+  shouldShowName?: true;
+  message?: ApiFormattedText;
 };
 
 export type ApiInputInvoiceStarsGiveaway = {
@@ -481,6 +483,8 @@ export type ApiRequestInputInvoiceStarGiftResale = {
   slug: string;
   peer: ApiPeer;
   currency: typeof TON_CURRENCY_CODE | typeof STARS_CURRENCY_CODE;
+  shouldShowName?: true;
+  message?: ApiFormattedText;
 };
 
 export type ApiRequestInputInvoiceChatInviteSubscription = {

@@ -42,6 +42,11 @@ export interface ApiMessageActionChatJoinedByLink extends ActionMediaType {
   inviterId: string;
 }
 
+export interface ApiMessageActionChatJoinedViaCommunity extends ActionMediaType {
+  type: 'chatJoinedViaCommunity';
+  communityId: string;
+}
+
 export interface ApiMessageActionChannelCreate extends ActionMediaType {
   type: 'channelCreate';
   title: string;
@@ -276,6 +281,8 @@ export interface ApiMessageActionStarGift extends ActionMediaType {
 
 export interface ApiMessageActionStarGiftUnique extends ActionMediaType {
   type: 'starGiftUnique';
+  isNameHidden?: true;
+  message?: ApiFormattedText;
   isUpgrade?: true;
   isTransferred?: true;
   isSaved?: true;
@@ -409,7 +416,8 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionScreenshotTaken | ApiMessageActionCustomAction | ApiMessageActionBotAllowed
   | ApiMessageActionBoostApply | ApiMessageActionContactSignUp | ApiMessageActionExpiredContent
   | ApiMessageActionGroupCall | ApiMessageActionInviteToGroupCall | ApiMessageActionGroupCallScheduled
-  | ApiMessageActionChatJoinedByRequest | ApiMessageActionWebViewDataSent | ApiMessageActionGiftPremium
+  | ApiMessageActionChatJoinedByRequest | ApiMessageActionChatJoinedViaCommunity
+  | ApiMessageActionWebViewDataSent | ApiMessageActionGiftPremium
   | ApiMessageActionTopicCreate | ApiMessageActionTopicEdit | ApiMessageActionSuggestProfilePhoto
   | ApiMessageActionSuggestBirthday
   | ApiMessageActionChannelJoined | ApiMessageActionGiftCode | ApiMessageActionGiveawayLaunch

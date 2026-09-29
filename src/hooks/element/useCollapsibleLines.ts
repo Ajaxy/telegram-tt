@@ -4,7 +4,7 @@ import {
   useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
-import { requestForcedReflow, requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
+import { requestForcedReflow, requestMeasure } from '../../lib/fasterdom/fasterdom';
 import calcTextLineHeightAndCount from '../../util/element/calcTextLineHeightAndCount';
 import useDebouncedCallback from '../useDebouncedCallback';
 import useLastCallback from '../useLastCallback';
@@ -17,6 +17,7 @@ type UseCollapsibleLinesOptions<C extends HTMLElement> = {
   isDisabled?: boolean;
   noInitialCollapse?: boolean;
   recalculationKey?: unknown;
+  ignoredLines?: number;
   isCollapsed?: boolean;
   onCollapseChange?: (isCollapsed: boolean) => void;
 };
@@ -29,6 +30,7 @@ export default function useCollapsibleLines<T extends HTMLElement, C extends HTM
     isDisabled,
     noInitialCollapse,
     recalculationKey,
+    ignoredLines,
     isCollapsed: isCollapsedControlled,
     onCollapseChange,
   }: UseCollapsibleLinesOptions<C> = {},
@@ -39,7 +41,7 @@ export default function useCollapsibleLines<T extends HTMLElement, C extends HTM
   const shouldInitiallyCollapse = isCollapsedControlled ?? !noInitialCollapse;
   const [isCollapsible, setIsCollapsible] = useState(!isDisabled && shouldInitiallyCollapse);
   const [isCollapsedUncontrolled, setIsCollapsedUncontrolled] = useState(isCollapsible);
-  const isCollapsed = isCollapsedControlled ?? isCollapsedUncontrolled;
+  const isCollapsed = isCollapsible && (isCollapsedControlled ?? isCollapsedUncontrolled);
   const shouldKeepExpandedHeightAuto = recalculationKey !== undefined;
 
   const setIsCollapsed = useLastCallback<StateHookSetter<boolean>>((newValue) => {
@@ -58,15 +60,13 @@ export default function useCollapsibleLines<T extends HTMLElement, C extends HTM
 
     if (!element || isFirstRenderRef.current) return;
 
-    requestMutation(() => {
-      if (isDisabled) {
-        element.style.maxHeight = '';
-        return;
-      }
+    if (isDisabled) {
+      element.style.maxHeight = '';
+      return;
+    }
 
-      element.style.maxHeight = isCollapsed ? `${cutoutHeightRef.current}px` :
-        shouldUseStyleInExpand ? `${fullHeightRef.current}px` : ``;
-    });
+    element.style.maxHeight = isCollapsed ? `${cutoutHeightRef.current}px` :
+      shouldUseStyleInExpand ? `${fullHeightRef.current}px` : ``;
   }, [cutoutRef, isCollapsed, isDisabled, ref, shouldKeepExpandedHeightAuto]);
 
   const recalculateTextLines = useLastCallback(() => {
@@ -77,12 +77,12 @@ export default function useCollapsibleLines<T extends HTMLElement, C extends HTM
 
     const { lineHeight, totalLines } = calcTextLineHeightAndCount(element);
     fullHeightRef.current = element.scrollHeight;
-    if (totalLines > maxLinesBeforeCollapse) {
+    if (totalLines - (ignoredLines || 0) > maxLinesBeforeCollapse) {
       cutoutHeightRef.current = lineHeight * maxLinesBeforeCollapse;
       setIsCollapsible(true);
     } else {
       setIsCollapsible(false);
-      setIsCollapsed(false);
+      setIsCollapsedUncontrolled(false);
     }
   });
 
@@ -126,7 +126,7 @@ export default function useCollapsibleLines<T extends HTMLElement, C extends HTM
       debouncedRecalcTextLines();
     } else {
       setIsCollapsible(false);
-      setIsCollapsed(false);
+      setIsCollapsedUncontrolled(false);
     }
   }, [debouncedRecalcTextLines, isDisabled, windowWidth]);
 

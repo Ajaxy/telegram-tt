@@ -24,7 +24,7 @@ import {
 } from '../helpers/localDb';
 import { buildApiInlineButtonAction } from './buttons';
 import { buildApiPhoto } from './common';
-import { type ApiPageDocument, buildApiPageDocument } from './media';
+import { type ApiPageDocument, buildApiDocument, buildApiPageDocument } from './media';
 import { buildGeoPoint } from './messageContent';
 import { buildApiPeerId } from './peers';
 
@@ -35,7 +35,7 @@ type PageRepairContext = {
 
 type PageMediaContext = {
   photosById: Record<string, ApiPhoto>;
-  documentsById: Record<string, ApiPageDocument>;
+  documentsById: Record<string, GramJs.Document>;
 };
 
 export function buildApiInstantViewPage(page: GramJs.Page, webPage: GramJs.WebPage): ApiInstantViewPage {
@@ -67,7 +67,7 @@ export function buildApiPageMediaContext(
 
   return {
     photosById: buildApiPagePhotosById(photos, context),
-    documentsById: buildApiPageDocumentsById(documents, context),
+    documentsById: buildPageDocumentsById(documents, context),
   };
 }
 
@@ -86,16 +86,15 @@ function buildApiPagePhotosById(
   }, {});
 }
 
-function buildApiPageDocumentsById(
+function buildPageDocumentsById(
   documents: GramJs.TypeDocument[],
   context?: PageRepairContext,
-): Record<string, ApiPageDocument> {
+): PageMediaContext['documentsById'] {
   documents.forEach((document) => addPageDocumentToLocalDb(document, context));
 
-  return documents.reduce<Record<string, ApiPageDocument>>((acc, document) => {
-    const apiDocument = buildApiPageDocument(document);
-    if (document instanceof GramJs.Document && apiDocument) {
-      acc[String(document.id)] = apiDocument;
+  return documents.reduce<PageMediaContext['documentsById']>((acc, document) => {
+    if (document instanceof GramJs.Document) {
+      acc[String(document.id)] = document;
     }
 
     return acc;
@@ -328,6 +327,7 @@ export function buildApiPageBlock(block: GramJs.TypePageBlock, context: PageMedi
       type: 'blockquote',
       text: buildApiRichText(block.text, context),
       caption: buildApiRichText(block.caption, context),
+      canCollapse: block.collapsed,
     };
   }
 
@@ -451,6 +451,19 @@ export function buildApiPageBlock(block: GramJs.TypePageBlock, context: PageMedi
     };
   }
 
+  if (block instanceof GramJs.PageBlockDocument) {
+    const document = context.documentsById[block.documentId.toString()];
+    if (!document) {
+      return { type: 'unsupported' };
+    }
+
+    return {
+      type: 'document',
+      document: buildApiDocument(document)!,
+      caption: buildApiPageCaption(block.caption, context),
+    };
+  }
+
   if (block instanceof GramJs.PageBlockAudio) {
     const audio = getPageDocument(context, block.audioId);
     if (audio?.mediaType !== 'audio') {
@@ -471,6 +484,7 @@ export function buildApiPageBlock(block: GramJs.TypePageBlock, context: PageMedi
       rows: block.rows.map((row) => buildApiPageTableRow(row, context)),
       isBordered: block.bordered,
       isStriped: block.striped,
+      isCompact: block.compact,
     };
   }
 
@@ -648,7 +662,8 @@ function getPagePhoto(context: PageMediaContext, id: bigint): ApiPhoto | undefin
 }
 
 function getPageDocument(context: PageMediaContext, id: bigint): ApiPageDocument | undefined {
-  return context.documentsById[id.toString()];
+  const document = context.documentsById[id.toString()];
+  return document && buildApiPageDocument(document);
 }
 
 function addPagePhotoToLocalDb(photo: GramJs.TypePhoto, context?: PageRepairContext) {

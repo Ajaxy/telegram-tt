@@ -66,6 +66,13 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       userId: buildApiPeerId(userId, 'user'),
     };
   }
+  if (action instanceof GramJs.MessageActionChatJoinedViaCommunity) {
+    return {
+      mediaType: 'action',
+      type: 'chatJoinedViaCommunity',
+      communityId: buildApiPeerId(action.communityId, 'channel'),
+    };
+  }
   if (action instanceof GramJs.MessageActionChatJoinedByLink) {
     const { inviterId } = action;
     return {
@@ -452,7 +459,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
   if (action instanceof GramJs.MessageActionStarGiftUnique) {
     const {
       upgrade, transferred, saved, refunded, gift, canExportAt, transferStars, fromId, peer, savedId,
-      resaleAmount, prepaidUpgrade, dropOriginalDetailsStars, fromOffer, canCraftAt,
+      resaleAmount, prepaidUpgrade, dropOriginalDetailsStars, fromOffer, canCraftAt, nameHidden, message,
     } = action;
 
     const starGift = buildApiStarGift(gift);
@@ -461,6 +468,8 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
     return {
       mediaType: 'action',
       type: 'starGiftUnique',
+      isNameHidden: nameHidden,
+      message: message && buildApiFormattedText(message),
       isUpgrade: upgrade,
       isTransferred: transferred,
       isSaved: saved,

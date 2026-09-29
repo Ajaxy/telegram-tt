@@ -42,6 +42,7 @@ interface OwnProps {
   canBeEmpty?: boolean;
   maxTimestamp?: number;
   shouldAnimateTyping?: boolean;
+  noInitialTypingAnimation?: boolean;
   canAnimateTextStreaming?: boolean;
   onTypingAnimationEnd?: NoneToVoidFunction;
 }
@@ -70,6 +71,7 @@ function MessageText({
   maxTimestamp,
   threadId,
   shouldAnimateTyping,
+  noInitialTypingAnimation,
   canAnimateTextStreaming,
   onTypingAnimationEnd,
 }: OwnProps) {
@@ -163,6 +165,7 @@ function MessageText({
             formattedText={textToRender}
             renderText={renderText}
             shouldAnimateMask={canAnimateTextStreaming}
+            noInitialAnimation={noInitialTypingAnimation}
             shouldRenderPlaceholder={shouldRenderTypingPlaceholder}
             onCompleted={onTypingAnimationEnd}
             completionKey={messageOrStory.id}

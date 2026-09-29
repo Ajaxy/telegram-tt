@@ -2452,6 +2452,9 @@
 "ActionMigratedFrom" = "Migrated from {chat}";
 "ActionMigratedTo" = "Migrated to {chat}";
 "ActionAddedToCommunity" = "{from} added this chat to {community}";
+"ActionJoinedViaCommunity" = "{from} joined via {community} community";
+"RichEditorTableCompact" = "Compact Table";
+"BotDraftStop" = "Stop";
 "ActionRemovedFromCommunity" = "{from} removed this chat from the community";
 "CommunityOpenPanel" = "Show community chats";
 "CommunityShowAsOneChat" = "Show as One Chat";

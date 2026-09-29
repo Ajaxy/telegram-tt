@@ -156,6 +156,10 @@ const RichEditorTable = TableExtension.extend({
         default: false,
         parseHTML: (element) => element.hasAttribute('striped'),
       },
+      isCompact: {
+        default: false,
+        parseHTML: (element) => element.hasAttribute('compact'),
+      },
     };
   },
 
@@ -346,6 +350,7 @@ class RichEditorTableView extends TableView {
       styles.table,
       node.attrs.isBordered === false && styles.borderlessTable,
       node.attrs.isStriped && styles.stripedTable,
+      node.attrs.isCompact && styles.compactTable,
     );
   }
 }

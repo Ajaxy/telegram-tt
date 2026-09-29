@@ -21,6 +21,7 @@ type OwnProps = {
   isToggleDisabled?: boolean;
   noInitialCollapse?: boolean;
   recalculationKey?: unknown;
+  ignoredLines?: number;
   isCollapsed?: boolean;
   children: TeactNode;
   onCollapseChange?: (isCollapsed: boolean) => void;
@@ -35,6 +36,7 @@ const Blockquote = ({
   isToggleDisabled,
   noInitialCollapse,
   recalculationKey,
+  ignoredLines,
   isCollapsed: isCollapsedControlled,
   children,
   onCollapseChange,
@@ -46,11 +48,13 @@ const Blockquote = ({
     isDisabled: !canBeCollapsible,
     noInitialCollapse,
     recalculationKey,
+    ignoredLines,
     isCollapsed: isCollapsedControlled,
     onCollapseChange,
   });
 
   const shouldCollapse = Boolean(canBeCollapsible && isCollapsed);
+  const hasCollapseIcon = canBeCollapsible && isCollapsible;
   const canExpand = !isToggleDisabled && shouldCollapse;
 
   const handleExpand = useLastCallback(() => {
@@ -67,15 +71,16 @@ const Blockquote = ({
       onClick={canExpand ? handleExpand : undefined}
     >
       <blockquote
-        className={buildClassName(styles.blockquote, contentClassName)}
+        className={buildClassName(styles.blockquote, contentClassName, hasCollapseIcon && styles.withCollapseIcon)}
         ref={ref}
         data-entity-type={ApiMessageEntityTypes.Blockquote}
+        data-collapsed={shouldCollapse || undefined}
         contentEditable={shouldCollapse ? false : undefined}
       >
         <div className={styles.gradientContainer} data-rich-copy-wrapper>
           {children}
         </div>
-        {canBeCollapsible && isCollapsible && (
+        {hasCollapseIcon && (
           <div
             className={buildClassName(styles.collapseIcon, !isToggleDisabled && styles.clickable)}
             contentEditable={false}

@@ -711,6 +711,8 @@ export function buildInputReportReason(reason: ApiReportReason): GramJs.TypeRepo
 
 export function buildSendMessageAction(action: ApiSendMessageAction) {
   switch (action.type) {
+    case 'stopDraft':
+      return new GramJs.SendMessageStopDraftAction({ randomId: BigInt(action.randomId) });
     case 'cancel':
       return new GramJs.SendMessageCancelAction();
     case 'typing':
@@ -869,6 +871,8 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
         toId: buildInputPeer(peer.id, peer.accessHash),
         slug,
         ton: invoice.currency === 'TON' || undefined,
+        showName: invoice.shouldShowName,
+        message: invoice.message && buildInputTextWithEntities(invoice.message),
       });
     }
 

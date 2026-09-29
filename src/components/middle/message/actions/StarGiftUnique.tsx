@@ -16,6 +16,7 @@ import buildClassName from '../../../../util/buildClassName';
 import buildStyle from '../../../../util/buildStyle';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';
 import { REM } from '../../../common/helpers/mediaDimensions.ts';
+import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 import { renderPeerLink } from '../helpers/messageActions';
 
 import useFlag from '../../../../hooks/useFlag.ts';
@@ -144,6 +145,11 @@ const StarGiftAction = ({
           {lang('GiftUnique', { title: action.gift.title, number: action.gift.number })}
         </div>
         <MiniTable data={tableData} style={`color: ${backdrop.textColor}`} valueClassName={styles.uniqueValue} />
+        {action.message && (
+          <div className={styles.subtitle} style={`color: ${backdrop.textColor}`}>
+            {renderTextWithEntities(action.message)}
+          </div>
+        )}
       </div>
       <div
         className={styles.actionButton}

@@ -837,6 +837,11 @@ export interface ApiMessage {
   fromRank?: string;
 
   isTypingDraft?: boolean; // Local field
+  typingDraft?: {
+    canStop?: true;
+    shouldKeepOnStop?: true;
+  }; // Local field
+  shouldSkipTypingAnimation?: true; // Local field
   wasTypingDraft?: boolean; // Local field
 }
 
@@ -1078,6 +1083,9 @@ export type ApiReportReason = 'spam' | 'violence' | 'pornography' | 'childAbuse'
 
 export type ApiSendMessageAction = {
   type: 'cancel' | 'typing' | 'recordAudio' | 'recordRound' | 'chooseSticker' | 'playingGame';
+} | {
+  type: 'stopDraft';
+  randomId: string;
 };
 
 export type ApiThemeParameters = {

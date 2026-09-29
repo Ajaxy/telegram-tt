@@ -147,7 +147,6 @@ export type ApiPageBlockBlockquoteBlocks = {
   type: 'blockquoteBlocks';
   blocks: ApiPageBlock[];
   caption: ApiRichText;
-  canCollapse?: true;
 };
 
 export type ApiPageBlockPhoto = {
@@ -231,6 +230,7 @@ export type ApiPageBlockTable = {
   rows: ApiPageTableRow[];
   isBordered?: true;
   isStriped?: true;
+  isCompact?: true;
 };
 
 export type ApiPageBlockOrderedList = {
@@ -266,6 +266,7 @@ export type ApiPageBlock =
   | ApiPageBlockSlideshow
   | { type: 'channel'; channelUsername: string; title: string }
   | { type: 'audio'; audio: ApiAudio; caption: ApiPageCaption }
+  | { type: 'document'; document: ApiDocument; caption: ApiPageCaption }
   | { type: 'kicker'; text: ApiRichText }
   | ApiPageBlockTable
   | ApiPageBlockOrderedList

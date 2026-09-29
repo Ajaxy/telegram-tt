@@ -36,6 +36,8 @@ export function getRequestInputInvoice<T extends GlobalState>(
       slug,
       peer,
       currency: inputInvoice.currency,
+      message: inputInvoice.message,
+      shouldShowName: inputInvoice.shouldShowName,
     };
   }
 

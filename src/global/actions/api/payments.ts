@@ -173,7 +173,7 @@ addActionHandler('sendStarGift', (global, actions, payload): ActionReturnType =>
 
 addActionHandler('buyStarGift', (global, actions, payload): ActionReturnType => {
   const {
-    slug, peerId, price, tabId = getCurrentTabId(),
+    slug, peerId, price, message, shouldShowName, tabId = getCurrentTabId(),
   } = payload;
 
   const inputInvoice: ApiInputInvoiceStarGiftResale = {
@@ -181,6 +181,8 @@ addActionHandler('buyStarGift', (global, actions, payload): ActionReturnType => 
     slug,
     peerId,
     currency: price.currency,
+    message,
+    shouldShowName,
   };
 
   payInputStarInvoice(global, inputInvoice, price.amount, tabId);

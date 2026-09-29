@@ -28,6 +28,10 @@
   width: 100%;
 }
 
+.compactTable .tableCell {
+  padding: 0.1875rem;
+}
+
 .stripedTable .tableRow:nth-child(odd) {
   background-color: var(--color-code-bg);
 }

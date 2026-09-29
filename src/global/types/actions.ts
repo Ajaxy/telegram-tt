@@ -730,6 +730,11 @@ export interface ActionPayloads {
     chatId: string;
     threadId: ThreadId;
   };
+  stopTypingDraft: {
+    chatId: string;
+    threadId: ThreadId;
+    randomId: string;
+  } & WithTabId;
   reportChannelSpam: {
     chatId: string;
     participantId: string;
@@ -3008,6 +3013,8 @@ export interface ActionPayloads {
     peerId: string;
     slug: string;
     price: ApiTypeCurrencyAmount;
+    shouldShowName?: true;
+    message?: ApiFormattedText;
   } & WithTabId;
   sendPremiumGiftByStars: {
     userId: string;

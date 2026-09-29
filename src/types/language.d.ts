@@ -1861,6 +1861,8 @@ export interface LangPair {
   'ActionGiveawayResultTitle': undefined;
   'ActionGiftPremiumText': undefined;
   'ActionGiftStarsText': undefined;
+  'RichEditorTableCompact': undefined;
+  'BotDraftStop': undefined;
   'CommunityOpenPanel': undefined;
   'CommunityShowAsOneChat': undefined;
   'CommunityShowAsOneChatHint': undefined;
@@ -3599,6 +3601,10 @@ export interface LangPairWithVariables<V = LangVariable> {
     'chat': V;
   };
   'ActionAddedToCommunity': {
+    'from': V;
+    'community': V;
+  };
+  'ActionJoinedViaCommunity': {
     'from': V;
     'community': V;
   };

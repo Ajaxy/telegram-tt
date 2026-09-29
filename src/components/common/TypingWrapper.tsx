@@ -19,6 +19,7 @@ import styles from './TypingWrapper.module.scss';
 type OwnProps = {
   formattedText: ApiFormattedText;
   shouldAnimateMask?: boolean;
+  noInitialAnimation?: boolean;
   shouldRenderPlaceholder: boolean;
   completionKey: number;
   renderText: (text: ApiFormattedText) => TeactNode;
@@ -53,24 +54,26 @@ function getRunningProgress(animation: Animation | undefined, baseProgress: numb
 const TypingWrapper = ({
   formattedText,
   shouldAnimateMask,
+  noInitialAnimation,
   shouldRenderPlaceholder,
   completionKey,
   renderText,
   onCompleted,
 }: OwnProps) => {
   const fullText = formattedText.text;
+  const initialRevealedLength = noInitialAnimation ? fullText.length : 0;
 
   const ref = useRef<HTMLSpanElement>();
   const animationRef = useRef<Animation>();
-  const progressRef = useRef(fullText ? 0 : 100);
-  const prevRevealedRef = useRef(0);
+  const progressRef = useRef(noInitialAnimation || !fullText ? 100 : 0);
+  const prevRevealedRef = useRef(initialRevealedLength);
   const fullTextRef = useRef('');
 
-  const [revealedLength, setRevealedLength] = useState(0);
-  const revealedLengthRef = useRef(0);
+  const [revealedLength, setRevealedLength] = useState(initialRevealedLength);
+  const revealedLengthRef = useRef(initialRevealedLength);
   const chunkTimerRef = useRef<number>();
   const completedKeyRef = useRef<string>();
-  const prevFullTextRef = useRef('');
+  const prevFullTextRef = useRef(noInitialAnimation ? fullText : '');
 
   fullTextRef.current = fullText;
 
@@ -165,7 +168,10 @@ const TypingWrapper = ({
 
     const revealed = revealedLength;
     const prevRevealed = prevRevealedRef.current;
-    if (revealed === prevRevealed) return;
+    if (revealed === prevRevealed) {
+      if (progressRef.current === 100) element.style.setProperty(PROGRESS_CSS_PROPERTY, '100%');
+      return;
+    }
 
     prevRevealedRef.current = revealed;
 

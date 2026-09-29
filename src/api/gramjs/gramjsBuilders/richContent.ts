@@ -82,7 +82,7 @@ function buildMtpPageBlock(block: ApiPageBlock): GramJs.TypePageBlock | undefine
     case 'divider':
       return new GramJs.PageBlockDivider();
     case 'blockquote':
-      return buildQuotePageBlock(block.text, block.caption, false);
+      return buildQuotePageBlock(block.text, block.caption, false, block.canCollapse);
     case 'blockquoteBlocks':
       return buildBlockquoteBlocksPageBlock(block.blocks, block.caption);
     case 'pullquote':
@@ -96,7 +96,7 @@ function buildMtpPageBlock(block: ApiPageBlock): GramJs.TypePageBlock | undefine
     case 'details':
       return buildDetailsPageBlock(block.title, block.blocks, block.isOpen);
     case 'table':
-      return buildTablePageBlock(block.title, block.rows, block.isBordered, block.isStriped);
+      return buildTablePageBlock(block.title, block.rows, block.isBordered, block.isStriped, block.isCompact);
     default:
       return undefined;
   }
@@ -147,6 +147,7 @@ function buildQuotePageBlock(
   text: ApiRichText,
   caption: ApiRichText,
   isPullquote: boolean,
+  canCollapse?: true,
 ): GramJs.TypePageBlock | undefined {
   const mtpText = buildMtpRichText(text);
   const mtpCaption = buildMtpRichText(caption);
@@ -157,7 +158,7 @@ function buildQuotePageBlock(
 
   return isPullquote
     ? new GramJs.PageBlockPullquote({ text: mtpText, caption: mtpCaption })
-    : new GramJs.PageBlockBlockquote({ text: mtpText, caption: mtpCaption });
+    : new GramJs.PageBlockBlockquote({ text: mtpText, caption: mtpCaption, collapsed: canCollapse });
 }
 
 function buildBlockquoteBlocksPageBlock(
@@ -326,6 +327,7 @@ function buildTablePageBlock(
   rows: ApiPageTableRow[],
   isBordered?: true,
   isStriped?: true,
+  isCompact?: true,
 ): GramJs.TypePageBlock | undefined {
   const mtpTitle = buildMtpRichText(title);
   const mtpRows = rows.map(buildMtpPageTableRow);
@@ -338,6 +340,7 @@ function buildTablePageBlock(
     rows: mtpRows as GramJs.TypePageTableRow[],
     bordered: isBordered,
     striped: isStriped,
+    compact: isCompact,
   });
 }
 

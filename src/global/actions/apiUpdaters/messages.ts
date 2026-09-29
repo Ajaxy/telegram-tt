@@ -163,6 +163,7 @@ function removeTypingDraftEntries<T extends GlobalState>(
   chatId: string,
   threadId: ThreadId,
   typingDraftEntries: TypingDraftEntry[],
+  shouldSkipAnimation?: boolean,
 ) {
   if (!typingDraftEntries.length) {
     return global;
@@ -191,7 +192,9 @@ function removeTypingDraftEntries<T extends GlobalState>(
   );
 
   if (messageIdsToDelete.length) {
-    global = deleteChatMessages(global, chatId, messageIdsToDelete);
+    global = shouldSkipAnimation
+      ? deleteChatMessages(global, chatId, messageIdsToDelete)
+      : deleteChatMessagesWithAnimation(global, chatId, messageIdsToDelete);
   }
 
   return global;
@@ -314,7 +317,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       global = updateListedAndViewportIds(global, nextMessage);
 
       if (hasTypingDraftsInThread && matchedTypingDraftEntry) {
-        global = removeTypingDraftEntries(global, chatId, threadId, [matchedTypingDraftEntry]);
+        global = removeTypingDraftEntries(global, chatId, threadId, [matchedTypingDraftEntry], true);
       }
 
       const newMessage = selectChatMessage(global, chatId, id)!;
@@ -408,7 +411,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (shouldClearTypingDraftsAfterRender) {
         onTickEnd(() => {
           global = getGlobal();
-          global = removeTypingDraftEntries(global, chatId, threadId, typingDraftEntries);
+          global = removeTypingDraftEntries(global, chatId, threadId, typingDraftEntries, true);
           setGlobal(global);
         });
       }
@@ -1254,11 +1257,27 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       break;
     }
 
+    case 'updateChatTypingDraftStopped': {
+      const { id, chatId, threadId = MAIN_THREAD_ID } = update;
+      const entries = getTypingDraftEntries(global, chatId, threadId);
+      const entry = entries.find(({ randomId }) => randomId === id);
+      if (!entry) return undefined;
+
+      if (entry.message.typingDraft?.shouldKeepOnStop) {
+        return updateChatMessage(global, chatId, entry.message.id, {
+          typingDraft: { ...entry.message.typingDraft, canStop: undefined },
+        });
+      }
+
+      return removeTypingDraftEntries(global, chatId, threadId, [entry]);
+    }
     case 'updateChatTypingDraft': {
-      const { id, chatId, threadId = MAIN_THREAD_ID, text, richMessage } = update;
+      const { id, chatId, threadId = MAIN_THREAD_ID, text, richMessage, canStop, shouldKeepOnStop } = update;
       const thread = selectThread(global, chatId, threadId);
       if (!thread) return undefined;
 
+      const replacedDrafts = getTypingDraftEntries(global, chatId, threadId).filter(({ randomId }) => randomId !== id);
+      global = removeTypingDraftEntries(global, chatId, threadId, replacedDrafts);
       let typingDraftStore = selectThreadLocalStateParam(global, chatId, threadId, 'typingDraftIdByRandomId');
       const messageId = typingDraftStore?.[id];
 
@@ -1278,11 +1297,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
             // Already deleted or replaced with a new message
             if (!currentMessage || getServerTime() - currentMessage.editDate! < global.appConfig.typingDraftTtl) return;
 
-            const newTypingDraftIds = omit(currentTypingDraftStore, [id]);
-            global = replaceThreadLocalStateParam(
-              global, chatId, threadId, 'typingDraftIdByRandomId', newTypingDraftIds,
-            );
-            global = deleteChatMessages(global, chatId, [currentMessageId]);
+            global = removeTypingDraftEntries(global, chatId, threadId, [{ randomId: id, message: currentMessage }]);
             setGlobal(global);
           }
         }, global.appConfig.typingDraftTtl * 1000);
@@ -1295,6 +1310,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
             richMessage,
           },
           editDate: getServerTime(),
+          typingDraft: { canStop, shouldKeepOnStop },
+          shouldSkipTypingAnimation: undefined,
         });
         rescheduleDraftRemoval();
         return global;
@@ -1312,6 +1329,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         text,
         richMessage,
       });
+      newMessage.typingDraft = { canStop, shouldKeepOnStop };
+      newMessage.shouldSkipTypingAnimation = replacedDrafts.length ? true : undefined;
 
       actions.apiUpdate({
         '@type': 'newMessage',
@@ -1616,11 +1635,9 @@ export function deleteMessages<T extends GlobalState>(
     const threadIdsToUpdate = new Set<ThreadId>();
     threadIdsToUpdate.add(MAIN_THREAD_ID);
 
-    ids.forEach((id) => {
-      global = updateChatMessage(global, chatId, id, {
-        isDeleting: true,
-      });
+    global = deleteChatMessagesWithAnimation(global, chatId, ids);
 
+    ids.forEach((id) => {
       if (selectTopic(global, chatId, id)) {
         global = deleteTopic(global, chatId, id);
       }
@@ -1687,16 +1704,6 @@ export function deleteMessages<T extends GlobalState>(
 
     setGlobal(global);
 
-    const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
-
-    setTimeout(() => {
-      global = getGlobal();
-      // Prevent local deletion of sent messages in case of desync
-      const stillDeletedIds = ids.filter((id) => selectChatMessage(global, chatId, id)?.isDeleting);
-      global = deleteChatMessages(global, chatId, stillDeletedIds);
-      setGlobal(global);
-    }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
-
     return;
   }
 
@@ -1709,9 +1716,7 @@ export function deleteMessages<T extends GlobalState>(
     if (commonBoxChatId) {
       chatIdsToUpdate.push(commonBoxChatId);
 
-      global = updateChatMessage(global, commonBoxChatId, id, {
-        isDeleting: true,
-      });
+      global = deleteChatMessagesWithAnimation(global, commonBoxChatId, [id]);
 
       const newLastMessage = findLastMessage(global, commonBoxChatId);
       if (newLastMessage) {
@@ -1748,14 +1753,6 @@ export function deleteMessages<T extends GlobalState>(
           global = removeTrackFromShuffle(global, buildSearchResultKey(commonBoxChatId, id), tabId);
         }
       });
-
-      const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
-
-      setTimeout(() => {
-        global = getGlobal();
-        global = deleteChatMessages(global, commonBoxChatId, [id]);
-        setGlobal(global);
-      }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
     }
   });
 
@@ -1764,6 +1761,23 @@ export function deleteMessages<T extends GlobalState>(
   unique(chatIdsToUpdate).forEach((id) => {
     actions.requestChatUpdate({ chatId: id });
   });
+}
+
+function deleteChatMessagesWithAnimation<T extends GlobalState>(global: T, chatId: string, ids: number[]) {
+  ids.forEach((id) => {
+    global = updateChatMessage(global, chatId, id, { isDeleting: true });
+  });
+
+  const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
+  setTimeout(() => {
+    global = getGlobal();
+    // Prevent local deletion of sent messages in case of desync
+    const stillDeletedIds = ids.filter((id) => selectChatMessage(global, chatId, id)?.isDeleting);
+    global = deleteChatMessages(global, chatId, stillDeletedIds);
+    setGlobal(global);
+  }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
+
+  return global;
 }
 
 export function deleteEphemeralMessagesWithAnimation<T extends GlobalState>(

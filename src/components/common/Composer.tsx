@@ -110,6 +110,7 @@ import {
   selectPerformanceSettingsValue,
   selectRequestedDraft,
   selectRequestedDraftFiles,
+  selectStoppableTypingDraftId,
   selectTabState,
   selectTheme,
   selectTopicFromMessage,
@@ -245,6 +246,7 @@ type OwnProps = {
 };
 
 type StateProps = {
+  stoppableTypingDraftId?: string;
   isOnActiveTab: boolean;
   recordMode: RecordMode;
   editingMessage?: ApiMessage;
@@ -343,6 +345,7 @@ type StateProps = {
 };
 
 enum MainButtonState {
+  Stop = 'stop',
   Send = 'send',
   Record = 'record',
   Edit = 'edit',
@@ -380,6 +383,7 @@ const Composer = ({
   isInScheduledList,
   canScheduleUntilOnline,
   isReady,
+  stoppableTypingDraftId,
   isMobile,
   editingMessage,
   chatId,
@@ -487,6 +491,7 @@ const Composer = ({
 }: OwnProps & StateProps) => {
   const {
     sendMessage,
+    stopTypingDraft,
     clearDraft,
     saveDraft,
     showDialog,
@@ -912,13 +917,13 @@ const Composer = ({
     };
   }, [chatId, threadId, discardRecordingVideo]);
 
-  const isEditingRef = useStateRef(Boolean(editingMessage));
-  useEffect(() => {
-    if (!isForCurrentMessageList || isInStoryViewer) return;
-    if (hasInputContent && !isEditingRef.current) {
+  const canSendTyping = isForCurrentMessageList && !isInStoryViewer
+    && !isRichInputExpansionActive && !hasRichOnlyContent && hasInputContent && !editingMessage;
+  useEffectWithPrevDeps(([prevRichMessage]) => {
+    if (canSendTyping && richMessage !== prevRichMessage) {
       sendMessageAction({ type: 'typing' });
     }
-  }, [hasInputContent, isEditingRef, isForCurrentMessageList, isInStoryViewer, sendMessageAction]);
+  }, [richMessage, canSendTyping, sendMessageAction]);
 
   const isAdmin = chat && isChatAdmin(chat);
   const [inlineBotHelp, setInlineBotHelp] = useState<string | undefined>();
@@ -1169,6 +1174,11 @@ const Composer = ({
       return MainButtonState.Edit;
     }
 
+    if (isInMessageList && stoppableTypingDraftId && !editingMessage && !isInScheduledList && !isForwarding
+      && !activeVoiceRecording && !activeVideoRecording) {
+      return MainButtonState.Stop;
+    }
+
     if ((IS_VOICE_RECORDING_SUPPORTED || IS_VIDEO_RECORDING_SUPPORTED)
       && !activeVoiceRecording && !activeVideoRecording && !isForwarding && !isRichInputExpansionActive
       && !(hasInputContent && !hasAttachments)) {
@@ -1183,6 +1193,7 @@ const Composer = ({
   }, [
     activeVoiceRecording, activeVideoRecording, editingMessage, hasAttachments, isForwarding, isComposerEngaged,
     onForward, shouldForceShowEditing, isInScheduledList, hasInputContent, isRichInputExpansionActive,
+    isInMessageList, stoppableTypingDraftId,
   ]);
   const canShowCustomSendMenu = !isInScheduledList;
 
@@ -2318,6 +2329,9 @@ const Composer = ({
 
   const mainButtonHandler = useLastCallback(() => {
     switch (mainButtonState) {
+      case MainButtonState.Stop:
+        stopTypingDraft({ chatId, threadId, randomId: stoppableTypingDraftId! });
+        break;
       case MainButtonState.Forward:
         onForward?.();
         break;
@@ -3072,13 +3086,17 @@ const Composer = ({
         disabled={areRecordingsNotAllowed}
         allowDisabledClick
         noFastClick
-        ariaLabel={oldLang(sendButtonAriaLabel)}
+        ariaLabel={mainButtonState === MainButtonState.Stop ? lang('BotDraftStop') : oldLang(sendButtonAriaLabel)}
         onClick={mainButtonHandler}
         onContextMenu={mainButtonContextMenuHandler}
       >
         <Icon name="new-send" className="main-button-state-icon" />
-        <Icon name={isInStoryViewer ? 'microphone-outline' : 'microphone'} className="main-button-microphone" />
-        <Icon name="round-video" />
+        {isInMessageList && <Icon name="stop-square" className="main-button-state-icon" />}
+        <Icon
+          name={isInStoryViewer ? 'microphone-outline' : 'microphone'}
+          className="main-button-state-icon main-button-microphone"
+        />
+        <Icon name="round-video" className="main-button-state-icon" />
         {onForward && <Icon name="forward" className="main-button-state-icon" />}
         {isInMessageList && <Icon name="schedule" className="main-button-state-icon" />}
         {isInMessageList && <Icon name="check" className="main-button-state-icon" />}
@@ -3360,6 +3378,7 @@ export default memo(withGlobal<OwnProps>(
       isAppConfigLoaded,
       insertingPeerIdMention,
       isRichInputExpanded: tabState.isRichInputExpanded,
+      stoppableTypingDraftId: selectStoppableTypingDraftId(global, chatId, threadId),
       mediaEditorMessage,
     };
   },

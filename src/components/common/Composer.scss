@@ -83,14 +83,14 @@
       color: var(--color-composer-button);
     }
 
-    .icon-new-send,
-    .icon-schedule,
-    .icon-forward,
-    .main-button-microphone,
-    .icon-check,
     .icon-view-once,
     .icon-one-filled {
       position: absolute;
+    }
+
+    .main-button-state-icon {
+      position: absolute;
+      animation: hide-icon 0.4s forwards ease-out;
     }
 
     &.recording {
@@ -99,85 +99,15 @@
       transition: box-shadow 0.1s;
     }
 
-    &.send, &.sendOneTime {
-      .icon-new-send {
-        animation: grow-icon 0.4s ease-out;
-      }
-
-      .main-button-microphone,
-      .icon-forward,
-      .icon-check,
-      .icon-schedule {
-        animation: hide-icon 0.4s forwards ease-out;
-      }
-    }
-
-    &.schedule {
-      .icon-schedule {
-        animation: grow-icon 0.4s ease-out;
-      }
-
-      .main-button-microphone,
-      .icon-check,
-      .icon-forward,
-      .icon-new-send {
-        animation: hide-icon 0.4s forwards ease-out;
-      }
-    }
-
-    &.record {
-      .main-button-microphone {
-        animation: grow-icon 0.4s ease-out;
-      }
-
-      .icon-new-send,
-      .icon-check,
-      .icon-forward,
-      .icon-schedule {
-        animation: hide-icon 0.4s forwards ease-out;
-      }
-    }
-
-    .icon-round-video {
-      position: absolute;
-      transform: scale(0);
-    }
-
-    &.record.record-video {
-      .main-button-microphone {
-        animation: hide-icon 0.4s forwards ease-out;
-      }
-
-      .icon-round-video {
-        transform: scale(1);
-        animation: grow-icon 0.4s ease-out;
-      }
-    }
-
-    &.edit {
-      .icon-check {
-        animation: grow-icon 0.4s ease-out;
-      }
-
-      .icon-new-send,
-      .icon-forward,
-      .main-button-microphone,
-      .icon-schedule {
-        animation: hide-icon 0.4s forwards ease-out;
-      }
-    }
-
-    &.forward {
-      .icon-forward {
-        animation: grow-icon 0.4s ease-out;
-      }
-
-      .icon-new-send,
-      .icon-check,
-      .main-button-microphone,
-      .icon-schedule {
-        animation: hide-icon 0.4s forwards ease-out;
-      }
+    &.send .icon-new-send,
+    &.sendOneTime .icon-new-send,
+    &.schedule .icon-schedule,
+    &.record:not(.record-video) .main-button-microphone,
+    &.record.record-video .icon-round-video,
+    &.edit .icon-check,
+    &.forward .icon-forward,
+    &.stop .icon-stop-square {
+      animation: grow-icon 0.4s ease-out;
     }
 
     &.view-once {
@@ -204,11 +134,7 @@
 
   &:not(.mounted) > .Button,
   body.no-message-composer-animations & > .Button {
-    .icon-new-send,
-    .main-button-microphone,
-    .icon-check,
-    .icon-round-video,
-    .icon-schedule {
+    .main-button-state-icon {
       animation-duration: 0ms !important;
     }
   }

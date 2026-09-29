@@ -37,6 +37,7 @@ import {
 import { DEBUG, TME_LINK_PREFIX } from '../../config';
 import { getPageBlocksAudios } from '../../global/helpers/buildPageAudioById';
 import { getRichTextPlainText, hasRichText } from '../../global/helpers/richMessage';
+import { selectSharedSettings } from '../../global/selectors/sharedState';
 import { IS_MAC_OS, IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { formatDateTime } from '../../util/localization/dateFormat';
@@ -49,6 +50,7 @@ import {
   type PageMediaBlock,
 } from './helpers/pageMedia';
 
+import useSelector from '../../hooks/data/useSelector';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useScrollableHint from '../../hooks/useScrollableHint';
@@ -57,6 +59,7 @@ import useUniqueId from '../../hooks/useUniqueId';
 import CodeBlock from '../common/code/CodeBlock';
 import CompactMapPreview from '../common/CompactMapPreview';
 import CompactMediaPreview from '../common/CompactMediaPreview';
+import Document from '../common/Document';
 import PlayableAudio from '../common/PlayableAudio';
 import Blockquote from '../common/quote/Blockquote';
 import Pullquote from '../common/quote/Pullquote';
@@ -144,6 +147,7 @@ const RichContent = ({
   } = getActions();
 
   const lang = useLang();
+  const { shouldWarnAboutFiles } = useSelector(selectSharedSettings);
   const containerId = useUniqueId();
   const unsupportedText = lang('PageContentUnsupported');
   const embedTitle = lang('PageContentEmbed');
@@ -414,6 +418,20 @@ const RichContent = ({
             renderBlock={renderBlock}
           />
         );
+      case 'document':
+        return (
+          <figure className={styles.figure}>
+            <div data-rich-copy-ignore>
+              <Document
+                document={block.document}
+                noDownload={isProtected}
+                observeIntersection={observeIntersectionForLoading}
+                shouldWarnAboutFiles={shouldWarnAboutFiles}
+              />
+            </div>
+            {renderCaption(block.caption, renderContext)}
+          </figure>
+        );
       case 'audio': {
         const item = audioItemsById.get(block.audio.id);
         if (!item) return renderUnsupportedBlock(unsupportedText, block.type);
@@ -517,9 +535,10 @@ function TableBlock({
         block.title, styles.tableTitle, renderContext, 'tableTitle',
       )}
       <table
-        className={buildClassName(styles.table, block.isBordered && styles.bordered)}
+        className={buildClassName(styles.table, block.isBordered && styles.bordered, block.isCompact && styles.compact)}
         data-bordered={String(Boolean(block.isBordered))}
         data-striped={String(Boolean(block.isStriped))}
+        data-compact={String(Boolean(block.isCompact))}
       >
         <tbody>
           {block.rows.map((row, rowIndex) => {
@@ -784,7 +803,7 @@ function renderQuoteBlock(
   context: RenderBlockContext,
 ) {
   return (
-    <Blockquote className={styles.block} contentClassName={styles.blockquote}>
+    <Blockquote className={styles.block} contentClassName={styles.blockquote} canBeCollapsible={block.canCollapse}>
       <RichText text={block.text} {...context.richTextContext} />
       {hasRichText(block.caption) && (
         <footer className={styles.quoteCaption} data-rich-block-type="quoteCaption">

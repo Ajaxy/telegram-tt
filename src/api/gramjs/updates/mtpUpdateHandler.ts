@@ -733,15 +733,17 @@ export function updater(update: Update) {
   } else if (
     update instanceof GramJs.UpdateUserTyping
     || update instanceof GramJs.UpdateChatUserTyping
+    || update instanceof GramJs.UpdateChannelUserTyping
   ) {
     const chatId = update instanceof GramJs.UpdateUserTyping
       ? buildApiPeerId(update.userId, 'user')
-      : buildApiPeerId(update.chatId, 'chat');
+      : update instanceof GramJs.UpdateChannelUserTyping
+        ? buildApiPeerId(update.channelId, 'channel') : buildApiPeerId(update.chatId, 'chat');
     const peerId = update instanceof GramJs.UpdateUserTyping
       ? buildApiPeerId(update.userId, 'user')
       : getApiChatIdFromMtpPeer(update.fromId);
 
-    const threadId = update instanceof GramJs.UpdateUserTyping ? update.topMsgId : undefined;
+    const threadId = !(update instanceof GramJs.UpdateChatUserTyping) ? update.topMsgId : undefined;
 
     if (update.action instanceof GramJs.SendMessageEmojiInteraction) {
       sendApiUpdate({
@@ -758,6 +760,8 @@ export function updater(update: Update) {
         id: update.action.randomId.toString(),
         threadId,
         text: buildApiFormattedText(update.action.text),
+        canStop: update.action.canStop,
+        shouldKeepOnStop: update.action.keepOnStop,
       });
     } else if (update.action instanceof GramJs.SendMessageRichMessageDraftAction) {
       const richMessage = buildApiRichMessage(update.action.richMessage);
@@ -771,6 +775,15 @@ export function updater(update: Update) {
         id: update.action.randomId.toString(),
         threadId,
         richMessage,
+        canStop: update.action.canStop,
+        shouldKeepOnStop: update.action.keepOnStop,
+      });
+    } else if (update.action instanceof GramJs.SendMessageStopDraftAction) {
+      sendApiUpdate({
+        '@type': 'updateChatTypingDraftStopped',
+        chatId,
+        id: update.action.randomId.toString(),
+        threadId,
       });
     } else {
       sendApiUpdate({
@@ -781,17 +794,6 @@ export function updater(update: Update) {
         typingStatus: buildChatTypingStatus(update),
       });
     }
-  } else if (update instanceof GramJs.UpdateChannelUserTyping) {
-    const id = buildApiPeerId(update.channelId, 'channel');
-    const peerId = getApiChatIdFromMtpPeer(update.fromId);
-
-    sendApiUpdate({
-      '@type': 'updateChatTypingStatus',
-      id,
-      peerId,
-      threadId: update.topMsgId,
-      typingStatus: buildChatTypingStatus(update),
-    });
   } else if (update instanceof GramJs.UpdateChannel) {
     const { _entities } = update;
     if (!_entities) {

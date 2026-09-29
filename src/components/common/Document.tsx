@@ -40,6 +40,7 @@ type OwnProps = {
   sender?: string;
   autoLoadFileMaxSizeMb?: number;
   isDownloading?: boolean;
+  noDownload?: boolean;
   shouldWarnAboutFiles?: boolean;
   id?: string;
   onCancelUpload?: NoneToVoidFunction;
@@ -70,6 +71,7 @@ const Document = ({
   isSelectable,
   shouldWarnAboutFiles,
   isDownloading,
+  noDownload,
   message,
   id,
   onCancelUpload,
@@ -144,6 +146,7 @@ const Document = ({
   }, [withMediaViewer, message]);
 
   const handleDownload = useLastCallback(() => {
+    if (noDownload) return;
     downloadMedia({ media: document, originMessage: message });
   });
 
@@ -212,7 +215,7 @@ const Document = ({
       isSelected={isSelected}
       actionIcon={withMediaViewer ? (isDocumentVideo(document) ? 'play' : 'eye') : 'download'}
       contextActions={contextActions}
-      onClick={handleClick}
+      onClick={!noDownload || withMediaViewer ? handleClick : undefined}
       onDateClick={onDateClick ? handleDateClick : undefined}
     >
       <ConfirmDialog

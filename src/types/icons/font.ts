@@ -335,6 +335,7 @@ export type FontIconName =
   | 'stickers'
   | 'stop'
   | 'stop-raising-hand'
+  | 'stop-square'
   | 'story-caption'
   | 'story-expired'
   | 'story-priority'

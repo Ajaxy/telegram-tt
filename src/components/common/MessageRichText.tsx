@@ -253,6 +253,7 @@ function sumPageBlockMatchingRichText(block: ApiPageBlock, predicate: (text: Api
     case 'video':
     case 'map':
     case 'audio':
+    case 'document':
     case 'embed':
       return sumPageCaptionMatchingRichText(block.caption, predicate);
     case 'cover':
@@ -321,6 +322,7 @@ function hasPageBlockMatchingRichText(
     case 'video':
     case 'map':
     case 'audio':
+    case 'document':
     case 'embed':
       return hasPageCaptionMatchingRichText(block.caption, predicate);
     case 'cover':

@@ -172,6 +172,7 @@ import {
   selectReplyCanBeSentToChat,
   selectScheduledMessage,
   selectSendAs,
+  selectStoppableTypingDraftId,
   selectTabState,
   selectTranslationLanguage,
   selectUser,
@@ -1606,6 +1607,16 @@ addActionHandler('reportMessages', async (global, actions, payload): Promise<voi
     }, tabId);
     setGlobal(global);
   }
+});
+
+addActionHandler('stopTypingDraft', async (global, actions, payload): Promise<void> => {
+  const { chatId, threadId, randomId } = payload;
+  const draftId = selectStoppableTypingDraftId(global, chatId, threadId);
+  const peer = selectPeer(global, chatId);
+  if (!peer || draftId !== randomId) return;
+
+  actions.apiUpdate({ '@type': 'updateChatTypingDraftStopped', chatId, threadId, id: randomId });
+  await callApi('sendMessageAction', { peer, threadId, action: { type: 'stopDraft', randomId } });
 });
 
 addActionHandler('sendMessageAction', async (global, actions, payload): Promise<void> => {

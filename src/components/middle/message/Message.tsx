@@ -557,7 +557,7 @@ const Message = ({
     }
   }, [isContextMenuOpen, disableContextMenuHint]);
 
-  const noAppearanceAnimation = appearanceOrder <= 0;
+  const noAppearanceAnimation = appearanceOrder <= 0 || message.shouldSkipTypingAnimation;
   const [isShown, markShown] = useFlag(noAppearanceAnimation);
   useEffect(() => {
     if (noAppearanceAnimation) {
@@ -571,7 +571,7 @@ const Message = ({
   useShowTransition({
     ref,
     isOpen: isShown || isJustAdded,
-    noMountTransition: noAppearanceAnimation && !isJustAdded,
+    noMountTransition: message.shouldSkipTypingAnimation || (noAppearanceAnimation && !isJustAdded),
     className: false,
   });
 
@@ -1148,6 +1148,7 @@ const Message = ({
         maxTimestamp={maxTimestamp}
         threadId={threadId}
         shouldAnimateTyping={isTypingDraft}
+        noInitialTypingAnimation={message.shouldSkipTypingAnimation}
         canAnimateTextStreaming={canAnimateTextStreaming}
         onTypingAnimationEnd={handleTypingAnimationEnd}
       />

@@ -340,6 +340,10 @@
   vertical-align: top;
 }
 
+.compact .tableCell {
+  padding: 0.1875rem;
+}
+
 .tableCellTopLeft {
   border-top-left-radius: var(--border-radius-default);
 }

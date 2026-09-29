@@ -174,6 +174,14 @@ const ActionMessageText = ({
         );
       }
 
+      case 'chatJoinedViaCommunity': {
+        const community = selectChat(global, action.communityId);
+        const communityLink = renderPeerLink(
+          action.communityId, community ? getPeerTitle(lang, community)! : chatFallbackText, asPreview,
+        );
+        return lang('ActionJoinedViaCommunity', { from: senderLink, community: communityLink }, { withNodes: true });
+      }
+
       case 'chatJoinedByLink':
         return lang('ActionUserJoinedByLink', { from: senderLink }, { withNodes: true });
 
