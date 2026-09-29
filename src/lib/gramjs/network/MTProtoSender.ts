@@ -441,11 +441,30 @@ export default class MTProtoSender {
 
         if (!this.canRetryMainConnection()) return;
 
+        const connection = this._connection!;
         try {
-          await this._connection!.connect();
+          await connection.connect();
+          if (!this.canRetryMainConnection() || connection !== this._connection) {
+            connection.disconnect();
+            return;
+          }
+
           this.isReconnecting = true;
           if (this._fallbackConnection) this._disconnect(this._fallbackConnection);
-          await this.connect(this._connection!, true, this._fallbackConnection);
+          // Finish the HTTP loops before starting loops on the main connection
+          this._sendQueue.append(undefined);
+          this._sendQueueLongPoll.append(undefined);
+          await Promise.all([this._sendLoopHandle, this._recvLoopHandle, this._longPollLoopHandle]);
+          if (connection !== this._connection) {
+            connection.disconnect();
+            return;
+          }
+          if (this.userDisconnected) {
+            connection.disconnect();
+            this.isReconnecting = false;
+            return;
+          }
+          await this.connect(connection, true, this._fallbackConnection);
           this.isReconnecting = false;
 
           if (this._isFallback) {
@@ -767,10 +786,7 @@ export default class MTProtoSender {
 
       const res = this._sendQueueLongPoll.get();
 
-      if (this.isReconnecting || !this._isFallback) {
-        this._longPollLoopHandle = undefined;
-        return;
-      }
+      if (!this._userConnected || this.isReconnecting || !this._isFallback) break;
 
       if (!res) {
         continue;
@@ -786,15 +802,13 @@ export default class MTProtoSender {
       try {
         await this._fallbackConnection?.send(data);
       } catch (e: any) {
-        this._log.info('Connection closed while sending data');
-        // eslint-disable-next-line no-console
-        console.error(e);
-        this._longPollLoopHandle = undefined;
-        this.isSendingLongPoll = false;
-        if (!this.userDisconnected) {
+        if (!this.userDisconnected && !this.isReconnecting) {
+          this._log.info('Connection closed while sending data');
+          // eslint-disable-next-line no-console
+          console.error(e);
           this.handleConnectionError(e);
         }
-        return;
+        break;
       }
 
       this.isSendingLongPoll = false;
@@ -802,6 +816,7 @@ export default class MTProtoSender {
     }
 
     this._longPollLoopHandle = undefined;
+    this.isSendingLongPoll = false;
   }
 
   /**
@@ -840,6 +855,7 @@ export default class MTProtoSender {
       // This means that while it's not empty we can wait for
       // more messages to be added to the send queue.
       await this._sendQueue.wait();
+      if (!this._userConnected || this.isReconnecting) break;
 
       // If we've had new ACKs appended while waiting for messages to send, add them to queue
       appendAcks();
@@ -920,12 +936,12 @@ export default class MTProtoSender {
           }
         }
       } catch (e: any) {
-        this.logWithIndex.debug(`Connection closed while sending data ${e}`);
-        this._log.info('Connection closed while sending data');
-        // eslint-disable-next-line no-console
-        console.error(e);
         this._sendLoopHandle = undefined;
-        if (!this.userDisconnected) {
+        if (!this.userDisconnected && !this.isReconnecting) {
+          this.logWithIndex.debug(`Connection closed while sending data ${e}`);
+          this._log.info('Connection closed while sending data');
+          // eslint-disable-next-line no-console
+          console.error(e);
           this.handleConnectionError(e);
         }
         return;
@@ -962,9 +978,7 @@ export default class MTProtoSender {
       try {
         body = await this.getConnection()!.recv();
       } catch (e: any) {
-        // this._log.info('Connection closed while receiving data');
-        /** when the server disconnects us we want to reconnect */
-        if (!this.userDisconnected) {
+        if (!this.userDisconnected && !this.isReconnecting) {
           this._log.warn('Connection closed while receiving data');
           // eslint-disable-next-line no-console
           console.error(e);
@@ -973,6 +987,8 @@ export default class MTProtoSender {
         this._recvLoopHandle = undefined;
         return;
       }
+
+      if (!this._userConnected || this.isReconnecting) break;
 
       if (body.length === TRANSPORT_CODE_LENGTH && body.every((byte) => byte === 0)) {
         void this.checkLongPoll();

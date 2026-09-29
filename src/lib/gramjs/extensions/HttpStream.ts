@@ -50,7 +50,11 @@ export default class HttpStream {
   }
 
   async read() {
-    await this.canRead;
+    const abortController = this.abortController;
+    while (!this.isClosed && this.abortController === abortController && !this.stream.length) {
+      await this.canRead;
+    }
+    if (this.isClosed || this.abortController !== abortController) throw closeError;
 
     const data = this.stream.shift()!;
     if (this.stream.length === 0) {
@@ -73,6 +77,7 @@ export default class HttpStream {
   }
 
   connect(port: number, ip: string, isTestServer = false, isPremium = false) {
+    this.rejectRead?.(closeError);
     this.abortController?.abort();
     this.abortController = new AbortController();
     this.stream = [];
@@ -89,7 +94,6 @@ export default class HttpStream {
 
   write(data: Uint8Array) {
     if (this.isClosed || !this.url || !this.abortController) {
-      this.handleDisconnect(closeError);
       throw closeError;
     }
 
@@ -103,10 +107,6 @@ export default class HttpStream {
       signal: abortController.signal,
     }).then(async (response) => {
       if (this.abortController !== abortController) throw closeError;
-      if (this.isClosed) {
-        this.handleDisconnect(closeError);
-        return;
-      }
       if (response.status !== 200) {
         throw new HttpStreamError(response);
       }
@@ -117,8 +117,8 @@ export default class HttpStream {
         throw new Error('HttpStream received an empty response');
       }
 
-      this.stream = this.stream.concat(new Uint8Array(arrayBuffer));
-      if (this.resolveRead && !this.isClosed) this.resolveRead();
+      this.stream.push(new Uint8Array(arrayBuffer));
+      this.resolveRead?.();
     }).catch((err) => {
       if (this.abortController === abortController) this.handleDisconnect(err);
       throw err;
@@ -128,16 +128,16 @@ export default class HttpStream {
   }
 
   handleDisconnect(err: unknown) {
+    if (this.isClosed) return;
+
+    this.isClosed = true;
+    this.rejectRead?.(err);
     this.abortController?.abort();
+    this.abortController = undefined;
     this.disconnectedCallback?.();
-    if (this.rejectRead) this.rejectRead(err);
   }
 
   close() {
-    this.isClosed = true;
-    this.abortController?.abort();
-    this.abortController = undefined;
     this.handleDisconnect(closeError);
-    this.disconnectedCallback = undefined;
   }
 }
