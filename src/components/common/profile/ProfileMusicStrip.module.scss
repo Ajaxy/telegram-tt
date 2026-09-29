@@ -19,6 +19,7 @@
 
 .strip {
   pointer-events: auto;
+  cursor: var(--custom-cursor, pointer);
 
   display: flex;
   align-items: center;
@@ -36,10 +37,6 @@
   backdrop-filter: blur(10px);
 
   transition: color 0.15s, background-color 0.15s;
-}
-
-.interactive {
-  cursor: var(--custom-cursor, pointer);
 
   &:hover {
     background-color: color-mix(in srgb, var(--color-background) 70%, transparent);

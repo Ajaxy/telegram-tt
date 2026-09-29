@@ -622,7 +622,6 @@ const ProfileInfo = ({
         <ProfileMusicStrip
           audio={savedMusic}
           peerId={peerId}
-          isStatic={isForSettings}
           className={isExpanded ? styles.musicOverlay : undefined}
           style={createVtnStyle('music', true)}
         />

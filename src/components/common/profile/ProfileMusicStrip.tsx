@@ -24,7 +24,6 @@ import styles from './ProfileMusicStrip.module.scss';
 type OwnProps = {
   audio: ApiAudio;
   peerId: string;
-  isStatic?: boolean;
   className?: string;
   style?: string;
 };
@@ -32,7 +31,7 @@ type OwnProps = {
 const SAVED_MUSIC_CAPABILITIES = getPlaybackCapabilities('savedMusic');
 
 const ProfileMusicStrip = ({
-  audio, peerId, isStatic, className, style,
+  audio, peerId, className, style,
 }: OwnProps) => {
   const { openAudioPlayer, openAudioPlaylistModal } = getActions();
 
@@ -93,11 +92,11 @@ const ProfileMusicStrip = ({
   return (
     <div className={buildClassName(styles.root, className)} style={style}>
       <div
-        className={buildClassName(styles.strip, !isStatic && styles.interactive)}
-        role={!isStatic ? 'button' : undefined}
-        tabIndex={!isStatic ? 0 : undefined}
-        onClick={!isStatic ? handleClick : undefined}
-        onKeyDown={!isStatic ? handleKeyDown : undefined}
+        className={styles.strip}
+        role="button"
+        tabIndex={0}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
       >
         <Icon name="music-note" className={styles.icon} />
         {audio.performer && (
@@ -105,7 +104,7 @@ const ProfileMusicStrip = ({
         )}
         {audio.performer && <span className={styles.separator}>-</span>}
         <span className={styles.title}>{title}</span>
-        {!isStatic && <Icon name="next" className={styles.icon} />}
+        <Icon name="next" className={styles.icon} />
       </div>
     </div>
   );
