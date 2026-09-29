@@ -23,7 +23,7 @@ import {
   selectUser,
   selectUserFullInfo,
 } from '../../../global/selectors';
-import { IFRAME_ALLOW_ATTRIBUTES, IFRAME_SANDBOX_ATTRIBUTES } from '../../../util/browser/iframe';
+import { IFRAME_ALLOW_ATTRIBUTES, WEB_APP_SANDBOX_ATTRIBUTES } from '../../../util/browser/iframe';
 import { getGeolocationStatus, IS_GEOLOCATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle.ts';
@@ -1242,7 +1242,7 @@ const WebAppTab = ({
         style={frameStyle}
         src={url}
         title={lang('AriaMiniApp', { bot: bot?.firstName })}
-        sandbox={IFRAME_SANDBOX_ATTRIBUTES}
+        sandbox={WEB_APP_SANDBOX_ATTRIBUTES}
         allow={IFRAME_ALLOW_ATTRIBUTES}
         allowFullScreen
         ref={frameRef}
