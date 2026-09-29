@@ -3,6 +3,12 @@ import {
 } from '../../config';
 import { IS_TAURI } from './globalEnvironment';
 
+const MIN_CHROMIUM_TUCK_VERSION = 149;
+const CHROMIUM_VERSION = Number(
+  navigator.userAgentData?.brands.find((data) => data.brand === 'Chromium')?.version
+  ?? navigator.userAgent.match(/Chrom(?:e|ium)\/(\d+)/)?.[1],
+);
+
 export function getPlatform() {
   const { userAgent, platform } = window.navigator;
 
@@ -89,7 +95,10 @@ export const ARE_CALLS_SUPPORTED = !IS_FIREFOX;
 export const IS_WAVE_TRANSFORM_SUPPORTED = !IS_MOBILE
   && !IS_FIREFOX // https://bugzilla.mozilla.org/show_bug.cgi?id=1961378
   && !IS_SAFARI; // https://bugs.webkit.org/show_bug.cgi?id=245510
-export const IS_TUCK_SUPPORTED = !IS_MOBILE && !IS_SAFARI;
+export const IS_TUCK_SUPPORTED = !IS_MOBILE && !IS_SAFARI
+  // Older Chromium resolves primitive percentages against the definition's viewport
+  // https://crbug.com/473562220
+  && (!IS_CHROMIUM || CHROMIUM_VERSION >= MIN_CHROMIUM_TUCK_VERSION);
 export const IS_SVG_CALC_SUPPORTED = checkSvgFilterCalcSupport();
 export const IS_SNAP_EFFECT_SUPPORTED = !IS_MOBILE
   && !IS_FIREFOX // https://bugzilla.mozilla.org/show_bug.cgi?id=1896504
