@@ -52,6 +52,7 @@ import { IS_IOS } from '../../../util/browser/windowEnvironment';
 import { copyTextToClipboardFromPromise } from '../../../util/clipboard';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import generateUniqueId from '../../../util/generateUniqueId';
 import {
   areSortedArraysIntersecting,
   buildCollectionByKey,
@@ -3580,12 +3581,13 @@ addActionHandler('showOriginalMessage', (global, actions, payload): ActionReturn
 
 addActionHandler('markMessagesTranslationPending', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, messageIds, toLanguageCode = selectLanguageCode(global), tone,
+    chatId, messageIds, requestId, toLanguageCode = selectLanguageCode(global), tone,
   } = payload;
 
   messageIds.forEach((id) => {
     global = updateMessageTranslation(global, chatId, id, toLanguageCode, {
       isPending: true,
+      requestId,
     }, tone);
   });
 
@@ -3600,14 +3602,31 @@ addActionHandler('translateMessages', (global, actions, payload): ActionReturnTy
   const chat = selectChat(global, chatId);
   if (!chat) return undefined;
 
-  actions.markMessagesTranslationPending({ chatId, messageIds, toLanguageCode, tone });
+  const requestId = generateUniqueId();
+  actions.markMessagesTranslationPending({ chatId, messageIds, requestId, toLanguageCode, tone });
 
-  callApi('translateText', {
-    chat,
-    messageIds,
-    toLanguageCode,
-    tone,
-  });
+  const [richMessageIds, textMessageIds] = partition(
+    messageIds, (id) => Boolean(selectChatMessage(global, chatId, id)?.content.richMessage),
+  );
+
+  if (textMessageIds.length) {
+    callApi('translateText', {
+      chat,
+      messageIds: textMessageIds,
+      requestId,
+      toLanguageCode,
+      tone,
+    });
+  }
+  if (richMessageIds.length) {
+    callApi('translateRichMessage', {
+      chat,
+      messageIds: richMessageIds,
+      requestId,
+      toLanguageCode,
+      tone,
+    });
+  }
 
   return global;
 });

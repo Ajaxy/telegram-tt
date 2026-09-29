@@ -222,6 +222,7 @@
     "messages.getAvailableEffects",
     "messages.setDefaultReaction",
     "messages.translateText",
+    "messages.translateRichMessage",
     "messages.composeMessageWithAI",
     "messages.composeRichMessageWithAI",
     "messages.getAttachMenuBots",

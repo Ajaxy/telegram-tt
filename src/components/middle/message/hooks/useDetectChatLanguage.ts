@@ -4,6 +4,7 @@ import { getActions } from '../../../../global';
 import type { ApiMessage } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
 
+import { isMessageTranslatable } from '../../../../global/helpers/messages';
 import LimitedMap from '../../../../util/primitives/LimitedMap';
 import { throttle } from '../../../../util/schedulers';
 
@@ -29,7 +30,7 @@ export default function useDetectChatLanguage(
   useEffect(() => {
     if (isDisabled || (getIsReady && !getIsReady())) return;
 
-    const isTranslatable = Boolean(message.content.text?.text.length);
+    const isTranslatable = isMessageTranslatable(message, true);
     processMessageMetadata({
       chatId: message.chatId,
       id: message.id,

@@ -1934,6 +1934,7 @@ messages.readPollVotes#1720b4d8 flags:# peer:InputPeer top_msg_id:flags.0?int = 
 messages.deleteParticipantReactions#a0b80cf8 peer:InputPeer participant:InputPeer = Bool;
 messages.deleteParticipantReaction#e3b7f82c peer:InputPeer msg_id:int participant:InputPeer = Updates;
 messages.getRichMessage#501569cf peer:InputPeer id:int = messages.Messages;
+messages.translateRichMessage#1a542004 flags:# peer:flags.0?InputPeer id:flags.0?Vector<int> text:flags.1?Vector<InputRichMessage> to_lang:string tone:flags.2?string = messages.TranslatedRichMessage;
 messages.composeRichMessageWithAI#8d7ae6af flags:# proofread:flags.0?true emojify:flags.3?true text:flags.4?InputRichMessage translate_to_lang:flags.1?string tone:flags.2?InputAiComposeTone = messages.ComposedRichMessageWithAI;
 messages.requestChatJoinWebView#ba9ee679 flags:# query_id:long theme_params:flags.0?DataJSON platform:string = WebViewResult;
 updates.getState#edd4882a = updates.State;

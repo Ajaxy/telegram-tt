@@ -1007,7 +1007,7 @@ export default memo(withGlobal<OwnProps>(
     const messageTranslation = translationCacheKey
       ? selectMessageTranslations(global, message.chatId, translationCacheKey)[message.id]
       : undefined;
-    const hasTranslation = Boolean(messageTranslation?.text);
+    const hasTranslation = Boolean(messageTranslation?.text || messageTranslation?.richMessage);
     const canTranslate = !hasTranslation && selectCanTranslateMessage(global, message, detectedLanguage);
     const isChatTranslated = chatTranslationLanguage;
 

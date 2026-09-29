@@ -313,6 +313,7 @@ function appendPageBlockPreviewText(block: ApiPageBlock, parts: string[], maxLen
       return appendPageTablePreviewText(block, parts, maxLength);
     case 'photo':
     case 'video':
+    case 'audio':
       return appendPageCaptionPreviewText(block.caption, parts, maxLength);
     case 'math':
       return appendBlockText(parts, getMathPreviewText(), maxLength);
@@ -331,7 +332,6 @@ function appendPageBlockPreviewText(block: ApiPageBlock, parts: string[], maxLen
     case 'divider':
     case 'anchor':
     case 'channel':
-    case 'audio':
     case 'relatedArticles':
       return maxLength;
   }

@@ -836,15 +836,20 @@ export type ApiUpdateViewForumAsMessages = {
 
 export type ApiUpdateMessageTranslations = {
   '@type': 'updateMessageTranslations';
+  requestId: string;
   chatId: string;
   messageIds: number[];
-  translations: ApiFormattedText[];
+  translations: {
+    text?: ApiFormattedText;
+    richMessage?: ApiRichMessage;
+  }[];
   toLanguageCode: string;
   tone?: TranslationTone;
 };
 
 export type ApiUpdateFailedMessageTranslations = {
   '@type': 'failedMessageTranslations';
+  requestId: string;
   chatId: string;
   messageIds: number[];
   toLanguageCode: string;

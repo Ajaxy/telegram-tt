@@ -46,7 +46,7 @@ import {
   selectWebPageFromMessage,
 } from '../selectors';
 import { selectThreadIdFromMessage } from '../selectors/threads';
-import { getRichMessagePreviewText } from './richMessage';
+import { getRichMessagePreviewText, getRichMessageUsage } from './richMessage';
 import { getMainUsername } from './users';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
@@ -340,13 +340,17 @@ export function isGeoLiveExpired(message: ApiMessage) {
 }
 
 export function isMessageTranslatable(message: ApiMessage, allowOutgoing?: boolean) {
-  const { text, game } = message.content;
+  const { text, game, richMessage } = message.content;
 
   const isLocal = isMessageLocal(message);
   const isServiceNotification = isServiceNotificationMessage(message);
   const isAction = isActionMessage(message);
 
-  return Boolean(text?.text.length && !text.emojiOnlyCount && !game && (allowOutgoing || !message.isOutgoing)
+  const hasTranslatableContent = Boolean(
+    (richMessage && getRichMessageUsage(richMessage).textLength) || (text?.text.length && !text.emojiOnlyCount),
+  );
+
+  return Boolean(hasTranslatableContent && !game && (allowOutgoing || !message.isOutgoing)
     && !isLocal && !isServiceNotification && !isAction && !message.isScheduled && !message.isEphemeral);
 }
 

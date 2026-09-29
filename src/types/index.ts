@@ -31,6 +31,7 @@ import type {
   ApiPhoto,
   ApiReaction,
   ApiReactionWithPaid,
+  ApiRichMessage,
   ApiStarGiftAttributeIdBackdrop,
   ApiStarGiftAttributeIdPattern,
   ApiStarGiftRegular,
@@ -760,7 +761,9 @@ export interface TopicsInfo {
 
 export type TranslatedMessage = {
   isPending?: boolean;
+  requestId?: string;
   text?: ApiFormattedText;
+  richMessage?: ApiRichMessage;
   summary?: TextSummary;
 };
 

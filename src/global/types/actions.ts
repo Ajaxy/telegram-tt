@@ -1640,6 +1640,7 @@ export interface ActionPayloads {
   markMessagesTranslationPending: {
     chatId: string;
     messageIds: number[];
+    requestId?: string;
     toLanguageCode?: string;
     tone?: TranslationTone;
   };

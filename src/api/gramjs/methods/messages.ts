@@ -150,6 +150,7 @@ type TranslateTextParams = ({
 } | {
   chat: ApiChat;
   messageIds: number[];
+  requestId: string;
 }) & {
   toLanguageCode: string;
   tone?: TranslationTone;
@@ -2912,6 +2913,7 @@ export async function translateText(params: TranslateTextParams) {
     if (isMessageTranslation) {
       sendApiUpdate({
         '@type': 'failedMessageTranslations',
+        requestId: params.requestId,
         chatId: params.chat.id,
         messageIds: params.messageIds,
         toLanguageCode: params.toLanguageCode,
@@ -2926,15 +2928,61 @@ export async function translateText(params: TranslateTextParams) {
   if (isMessageTranslation) {
     sendApiUpdate({
       '@type': 'updateMessageTranslations',
+      requestId: params.requestId,
       chatId: params.chat.id,
       messageIds: params.messageIds,
-      translations: formattedText,
+      translations: formattedText.map((text) => ({ text })),
       toLanguageCode: params.toLanguageCode,
       tone,
     });
   }
 
   return formattedText;
+}
+
+export async function translateRichMessage({
+  chat, messageIds, requestId, toLanguageCode, tone,
+}: {
+  chat: ApiChat;
+  messageIds: number[];
+  requestId: string;
+  toLanguageCode: string;
+  tone?: TranslationTone;
+}) {
+  const result = await invokeRequest(new GramJs.messages.TranslateRichMessage({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    id: messageIds,
+    toLang: toLanguageCode,
+    tone: tone === 'neutral' ? undefined : tone,
+  }));
+
+  if (!result) {
+    sendApiUpdate({
+      '@type': 'failedMessageTranslations',
+      requestId,
+      chatId: chat.id,
+      messageIds,
+      toLanguageCode,
+      tone,
+    });
+    return undefined;
+  }
+
+  const peerId = buildPeer(chat.id);
+  const translations = result.result.map((richMessage, index) => ({
+    richMessage: buildApiRichMessage(richMessage, { peerId, id: messageIds[index] }),
+  }));
+  sendApiUpdate({
+    '@type': 'updateMessageTranslations',
+    requestId,
+    chatId: chat.id,
+    messageIds,
+    translations,
+    toLanguageCode,
+    tone,
+  });
+
+  return translations;
 }
 
 export async function fetchMessageSummary({

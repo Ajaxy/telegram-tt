@@ -49,6 +49,7 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import { EMOJI_STATUS_LOOP_LIMIT, MESSAGE_APPEARANCE_DELAY } from '../../../config';
 import {
   areReactionsEmpty,
+  extractMessageText,
   getAllowedAttachmentOptions,
   getCanReplyToEphemeralMessage,
   getIsDownloading,
@@ -876,8 +877,9 @@ const Message = ({
     }
   }, [dice, memoFirstUnreadIdRef, messageId, isLocal]);
 
+  const textForLanguageDetection = useMemo(() => textMessage && extractMessageText(textMessage)?.text, [textMessage]);
   const detectedLanguage = useTextLanguage(
-    text?.text,
+    textForLanguageDetection,
     !(areTranslationsEnabled && shouldDetectChatLanguage) || isTypingDraft,
     getIsMessageListReady,
   );
@@ -891,13 +893,14 @@ const Message = ({
   const translationLanguageForHook = parsedManualTranslation?.languageCode || requestedChatTranslationLanguage;
   const translationToneForHook = parsedManualTranslation?.tone || requestedTranslationTone;
 
-  const { isPending: isTranslationPending, translatedText } = useMessageTranslation(
+  const { isPending: isTranslationPending, translatedText, translatedRichMessage } = useMessageTranslation(
     chatTranslations, chatId, shouldTranslate ? messageId : undefined, translationLanguageForHook,
     translationToneForHook,
   );
   const isSummaryPending = Boolean(summary?.isPending);
   const isNewTextPending = isTranslationPending || isSummaryPending;
   const previousTranslatedText = usePreviousDeprecated(translatedText, Boolean(shouldTranslate));
+  const previousTranslatedRichMessage = usePreviousDeprecated(translatedRichMessage, Boolean(shouldTranslate));
 
   useEffectWithPrevDeps(([prevIsShowingSummary]) => {
     if (summary?.text || (prevIsShowingSummary && !isShowingSummary)) {
@@ -906,6 +909,8 @@ const Message = ({
   }, [isShowingSummary, summary?.text]);
 
   const currentTranslatedText = shouldTranslate ? translatedText || previousTranslatedText : undefined;
+  const currentTranslatedRichMessage = shouldTranslate
+    ? translatedRichMessage || (isTranslationPending !== false ? previousTranslatedRichMessage : undefined) : undefined;
 
   const phoneCall = action?.type === 'phoneCall' ? action : undefined;
 
@@ -1115,6 +1120,7 @@ const Message = ({
       return (
         <MessageRichText
           message={textMessage}
+          forcedRichMessage={requestedTranslationLanguage ? currentTranslatedRichMessage : undefined}
           isOwn={isOwn}
           noAvatars={noAvatars}
           canAutoLoadMedia={canAutoLoadMedia}
@@ -1211,7 +1217,7 @@ const Message = ({
           withQuickReactionButton && quickReactionPosition === 'in-meta' ? renderQuickReactionButton : undefined
         }
         availableReactions={availableReactions}
-        isTranslated={Boolean(requestedTranslationLanguage ? currentTranslatedText : undefined)}
+        isTranslated={Boolean(requestedTranslationLanguage && (currentTranslatedText || currentTranslatedRichMessage))}
         effectEmoji={effect?.emoticon}
         onClick={handleMetaClick}
         onEffectClick={handleEffectClick}

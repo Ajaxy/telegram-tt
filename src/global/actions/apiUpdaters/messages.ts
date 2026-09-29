@@ -652,7 +652,16 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         return;
       }
 
-      if (message.content?.text?.text !== currentMessage?.content?.text?.text) {
+      const hasRichMessageEdit = (message.content?.richMessage || currentMessage.content.richMessage)
+        && message.editDate !== undefined
+        && message.editDate !== currentMessage.editDate;
+      const hasContentChanged = message.content && (
+        message.content.text?.text !== currentMessage.content.text?.text
+        || !areDeepEqual(message.content.richMessage?.blocks, currentMessage.content.richMessage?.blocks)
+        || message.content.richMessage?.isRtl !== currentMessage.content.richMessage?.isRtl
+      );
+
+      if (hasRichMessageEdit || hasContentChanged) {
         global = clearMessageTranslation(global, chatId, id);
         global = clearMessageSummary(global, chatId, id);
       }
@@ -1239,19 +1248,19 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateMessageTranslations': {
       const {
-        chatId, messageIds, toLanguageCode, translations, tone,
+        chatId, messageIds, toLanguageCode, translations, requestId, tone,
       } = update;
 
-      global = updateMessageTranslations(global, chatId, messageIds, toLanguageCode, translations, tone);
+      global = updateMessageTranslations(global, chatId, messageIds, toLanguageCode, translations, requestId, tone);
 
       setGlobal(global);
       break;
     }
 
     case 'failedMessageTranslations': {
-      const { chatId, messageIds, toLanguageCode, tone } = update;
+      const { chatId, messageIds, toLanguageCode, requestId, tone } = update;
 
-      global = updateMessageTranslations(global, chatId, messageIds, toLanguageCode, [], tone);
+      global = updateMessageTranslations(global, chatId, messageIds, toLanguageCode, [], requestId, tone);
 
       setGlobal(global);
       break;

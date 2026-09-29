@@ -7,6 +7,7 @@ import type {
   ApiPageCaption,
   ApiPageListItem,
   ApiPageListOrderedItem,
+  ApiRichMessage,
   ApiRichText,
 } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
@@ -27,6 +28,7 @@ import styles from './MessageRichText.module.scss';
 
 type OwnProps = {
   message: ApiMessage;
+  forcedRichMessage?: ApiRichMessage;
   threadId?: ThreadId;
   isOwn?: boolean;
   noAvatars?: boolean;
@@ -43,6 +45,7 @@ const RICH_CONTENT_BODY_FONT_SIZE_PX = 18;
 
 const MessageRichText = ({
   message,
+  forcedRichMessage,
   threadId,
   isOwn,
   noAvatars,
@@ -62,11 +65,11 @@ const MessageRichText = ({
   const messageTextSize = useSelector(selectMessageTextSize);
   const lang = useLang();
 
-  const { richMessage } = message.content;
+  const richMessage = forcedRichMessage || message.content.richMessage;
   const messageKey = `${message.chatId}-${message.id}`;
   const cutoff = richMessage?.partCutoff;
   const hasCutoff = cutoff !== undefined;
-  const isExpanded = expandedMessageKey === messageKey;
+  const isExpanded = expandedMessageKey === messageKey && !richMessage?.isPart;
   const isLoadingFullMessage = loadingMessageKey === messageKey;
   const shouldCollapse = !isExpanded && Boolean(richMessage?.isPart || hasCutoff);
   const shouldSliceBlocks = shouldCollapse && hasCutoff;

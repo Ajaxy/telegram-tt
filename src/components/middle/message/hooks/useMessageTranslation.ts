@@ -21,26 +21,28 @@ export default function useMessageTranslation(
   const messageTranslation = cacheKey && messageId
     ? chatTranslations?.byLangCode[cacheKey]?.[messageId] : undefined;
 
-  const { isPending, text } = messageTranslation || {};
+  const { isPending, text, richMessage } = messageTranslation || {};
 
   useEffect(() => {
     if (!chatId || !messageId || !cacheKey || !requestedLanguageCode) return;
 
-    if (!text && isPending === undefined) {
+    if (!text && !richMessage && isPending === undefined) {
       addPendingTranslation(chatId, messageId, requestedLanguageCode, tone);
     }
-  }, [chatId, text, isPending, messageId, cacheKey, requestedLanguageCode, tone]);
+  }, [chatId, text, richMessage, isPending, messageId, cacheKey, requestedLanguageCode, tone]);
 
   if (!chatId || !messageId) {
     return {
       isPending: false,
       translatedText: undefined,
+      translatedRichMessage: undefined,
     };
   }
 
   return {
     isPending,
     translatedText: text,
+    translatedRichMessage: richMessage,
   };
 }
 

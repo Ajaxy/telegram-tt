@@ -31,7 +31,7 @@ import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { getMessageKey, isLocalMessageId } from '../../util/keys/messageKey';
-import { parseTranslationCacheKey } from '../../util/keys/translationKey';
+import { getTranslationCacheKey, parseTranslationCacheKey } from '../../util/keys/translationKey';
 import { isIpRevealingMedia } from '../../util/media/ipRevealingMedia';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { getServerTime } from '../../util/serverTime';
@@ -79,6 +79,7 @@ import {
   selectIsChatWithBot,
   selectIsChatWithSelf,
   selectRequestedChatTranslationLanguage,
+  selectRequestedChatTranslationTone,
 } from './chats';
 import { selectCurrentLimit } from './limits';
 import { selectMessageDownloadableMedia } from './media';
@@ -1467,6 +1468,21 @@ export function selectMessageTranslations<T extends GlobalState>(
   global: T, chatId: string, cacheKey: string,
 ) {
   return selectChatTranslations(global, chatId)?.byLangCode[cacheKey] || {};
+}
+
+export function selectMessageCopyContent<T extends GlobalState>(
+  global: T, message: ApiMessage, ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  if (message.isEphemeral) return message.content;
+
+  const chatLanguage = selectRequestedChatTranslationLanguage(global, message.chatId, tabId);
+  const messageLanguage = selectRequestedMessageTranslationLanguage(global, message.chatId, message.id, tabId);
+  const cacheKey = chatLanguage
+    ? getTranslationCacheKey(chatLanguage, selectRequestedChatTranslationTone(global, message.chatId, tabId))
+    : messageLanguage;
+
+  const translation = cacheKey ? selectMessageTranslations(global, message.chatId, cacheKey)[message.id] : undefined;
+  return translation?.text || translation?.richMessage ? translation : message.content;
 }
 
 export function selectRequestedMessageTranslationLanguage<T extends GlobalState>(

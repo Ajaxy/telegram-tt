@@ -160,20 +160,11 @@ export function subscribeToMultitabBroadcastChannel() {
   subscribeToTokenDied((token) => {
     if (token === getCurrentTabId()) {
       unsubcribeFromMultitabBroadcastChannel();
-      const global = getGlobal();
-      const newGlobal = {
-        ...global,
-        byTabId: omit(global.byTabId, [token]),
-      };
-
-      const diff = deepDiff(global, newGlobal);
-
-      if (typeof diff !== 'symbol') {
-        channel.postMessage({
-          type: 'globalDiffUpdate',
-          diff,
-        });
-      }
+      // A targeted deletion preserves tabs that this tab has not received yet
+      channel.postMessage({
+        type: 'globalDiffUpdate',
+        diff: { byTabId: { [token]: { __delete: true } } },
+      });
       return;
     }
     let global = getGlobal();
