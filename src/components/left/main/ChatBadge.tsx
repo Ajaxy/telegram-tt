@@ -208,7 +208,7 @@ const ChatBadge = ({
 
     const pinnedElement = isPinned && (
       <div className={buildClassName(baseClassName, styles.pinned)}>
-        <Icon name="pin" />
+        <Icon name="pin-filled" />
       </div>
     );
 
