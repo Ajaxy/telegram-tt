@@ -378,6 +378,8 @@ const SENDING_ANIMATION_DURATION = 350;
 const MOUNT_ANIMATION_DURATION = 430;
 const PAID_STARS_CLOSE_DURATION = 300;
 const APPROXIMATE_RICH_INPUT_FORMAT_OPTIONS = { isApproximate: true };
+const MIN_COMPOSER_LINES = 3;
+
 const Composer = ({
   type,
   isOnActiveTab,
@@ -496,7 +498,6 @@ const Composer = ({
     sendMessage,
     stopTypingDraft,
     clearDraft,
-    saveDraft,
     showDialog,
     openTodoListModal,
     closeTodoListModal,
@@ -529,6 +530,7 @@ const Composer = ({
     setIsRichInputExpanded,
     setSettingOption,
     openPremiumModal,
+    openAiMessageEditorModal,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -712,17 +714,21 @@ const Composer = ({
     return undefined;
   });
 
-  const updateRichMessage = useLastCallback((value?: ApiInputRichMessage) => {
+  const updateRichMessage = useLastCallback((value?: ApiInputRichMessage, shouldKeepHistory?: boolean) => {
     if (value && !isCurrentUserPremium && !isChatWithSelf) {
       const formattedValue = getRichInputAsFormatted(value);
       if (formattedValue && containsCustomEmoji(formattedValue)) {
         showCustomEmojiPremiumNotification();
-        richEditor.setValue(buildRichMessageFromFormatted(stripCustomEmoji(formattedValue)));
-        return;
+        value = buildRichMessageFromFormatted(stripCustomEmoji(formattedValue));
       }
     }
 
-    richEditor.setValue(value);
+    if (value && shouldKeepHistory) {
+      richEditor.replaceValue(value);
+    } else {
+      richEditor.setValue(value);
+    }
+    return value;
   });
 
   const checkCanSendRichContent = useLastCallback(() => {
@@ -998,24 +1004,25 @@ const Composer = ({
     updateInsertingPeerIdMention({ peerId: undefined });
   }, [insertingPeerIdMention, insertMention]);
 
+  const aiMessageToSendRef = useRef<ApiInputRichMessage>();
   useEffect(() => {
-    if (!aiMessageEditorPendingResult) return;
+    if (!isInMessageList || !aiMessageEditorPendingResult) return;
 
-    const { text, shouldClear, shouldSendWithAttachments } = aiMessageEditorPendingResult;
+    const {
+      content, shouldSendWithAttachments, shouldSend,
+      chatId: resultChatId, threadId: resultThreadId,
+    } = aiMessageEditorPendingResult;
 
     if (shouldSendWithAttachments) return;
+    if (resultChatId !== chatId || resultThreadId !== threadId) return;
 
-    if (shouldClear) {
-      updateRichMessage(undefined);
-      clearDraft({ chatId, threadId, isLocalOnly: true });
-    } else if (text) {
-      updateRichMessage(buildRichMessageFromFormatted(text));
-      saveDraft({ chatId, threadId, text });
-    }
+    aiMessageToSendRef.current = updateRichMessage(
+      content.type === 'rich' ? content.richMessage : buildRichMessageFromFormatted(content.text), true,
+    );
 
-    clearAiMessageEditorPendingResult();
-  }, [aiMessageEditorPendingResult, chatId, clearDraft,
-    clearAiMessageEditorPendingResult, saveDraft, threadId, updateRichMessage]);
+    if (!shouldSend) clearAiMessageEditorPendingResult();
+  }, [isInMessageList, aiMessageEditorPendingResult, chatId,
+    clearAiMessageEditorPendingResult, threadId, updateRichMessage]);
 
   const hasQuickReplies = Boolean(quickReplies && Object.keys(quickReplies).length);
 
@@ -1517,6 +1524,7 @@ const Composer = ({
       isSilent = false,
       scheduledAt?: number,
       scheduleRepeatPeriod?: number,
+      shouldSkipWebPagePreview?: boolean,
     ) => {
       const richEditorValue = richEditor.getValue();
       const currentRichMessage = richEditorValue.blocks.length ? richEditorValue : undefined;
@@ -1595,7 +1603,8 @@ const Composer = ({
       if (text || isForwarding) {
         if (!checkSlowMode()) return;
 
-        const isInvertedMedia = hasWebPagePreview ? attachmentSettings.isInvertedMedia : undefined;
+        const shouldUseWebPagePreview = hasWebPagePreview && !shouldSkipWebPagePreview;
+        const isInvertedMedia = shouldUseWebPagePreview ? attachmentSettings.isInvertedMedia : undefined;
 
         if (areEffectsSupported) saveEffectInDraft({ chatId, threadId, effectId: undefined });
 
@@ -1609,8 +1618,8 @@ const Composer = ({
           shouldUpdateStickerSetOrder,
           isInvertedMedia,
           effectId,
-          webPageMediaSize: attachmentSettings.webPageMediaSize,
-          webPageUrl: hasWebPagePreview ? webPagePreview.url : undefined,
+          webPageMediaSize: shouldSkipWebPagePreview ? undefined : attachmentSettings.webPageMediaSize,
+          webPageUrl: shouldUseWebPagePreview ? webPagePreview.url : undefined,
         });
       }
 
@@ -1634,6 +1643,7 @@ const Composer = ({
     isSilent = false,
     scheduledAt?: number,
     scheduleRepeatPeriod?: number,
+    shouldSkipWebPagePreview?: boolean,
   ) => {
     if (!validateEphemeralReply()) return;
 
@@ -1675,19 +1685,51 @@ const Composer = ({
       }
     }
 
-    handleSendCore(currentAttachments, isSilent, scheduledAt, scheduleRepeatPeriod);
+    handleSendCore(currentAttachments, isSilent, scheduledAt, scheduleRepeatPeriod, shouldSkipWebPagePreview);
   });
 
   const handleSendWithConfirmation = useLastCallback((
     isSilent = false,
     scheduledAt?: number,
     scheduleRepeatPeriod?: number,
+    shouldSkipWebPagePreview?: boolean,
   ) => {
     if (!checkCanSendRichContent()) {
       return;
     }
 
-    handleActionWithPaymentConfirmation(handleSend, isSilent, scheduledAt, scheduleRepeatPeriod);
+    handleActionWithPaymentConfirmation(
+      handleSend, isSilent, scheduledAt, scheduleRepeatPeriod, shouldSkipWebPagePreview,
+    );
+  });
+
+  useEffect(() => {
+    if (!isInMessageList || !aiMessageEditorPendingResult?.shouldSend
+      || richMessage !== aiMessageToSendRef.current
+      || aiMessageEditorPendingResult.chatId !== chatId
+      || aiMessageEditorPendingResult.threadId !== threadId) return;
+
+    const { isSilent, scheduledAt, scheduleRepeatPeriod } = aiMessageEditorPendingResult;
+    clearAiMessageEditorPendingResult();
+    if (!editingMessage && !isComposerBlocked) {
+      handleSendWithConfirmation(isSilent, scheduledAt, scheduleRepeatPeriod, true);
+    }
+  }, [isInMessageList, aiMessageEditorPendingResult, richMessage, chatId, threadId, editingMessage, isComposerBlocked,
+    clearAiMessageEditorPendingResult, handleSendWithConfirmation]);
+
+  const handleOpenAiEditor = useLastCallback(() => {
+    if (!isInMessageList || hasRichMediaBlocking) return;
+
+    const value = richEditor.isEmpty() ? { blocks: [] } : richEditor.getValue();
+    const formattedText = getRichInputAsFormatted(value);
+    const shouldUseRichApi = isRichInputExpansionActive || hasRichOnlyContent;
+    openAiMessageEditorModal({
+      chatId,
+      threadId,
+      isEditing: Boolean(editingMessage),
+      content: shouldUseRichApi ? { type: 'rich', richMessage: value }
+        : { type: 'text', text: formattedText! },
+    });
   });
 
   const handleTodoListCreate = useLastCallback(() => {
@@ -2245,13 +2287,13 @@ const Composer = ({
         return;
       }
       const { totalLines } = calcTextLineHeightAndCount(input, true);
-      setShouldShowRichInputButton(totalLines >= 3);
+      setShouldShowRichInputButton(totalLines >= MIN_COMPOSER_LINES);
     });
   });
 
   useEffect(() => {
     updateShouldShowRichInputButton();
-  }, [richMessage, hasAttachments, hasInputContent]);
+  }, [richMessage, hasAttachments, hasInputContent, windowWidth]);
   useResizeObserver(inputRef, updateShouldShowRichInputButton, hasAttachments);
 
   const withBotMenuButton = isChatWithBot && botMenuButton?.type === 'webApp' && !editingMessage
@@ -2638,6 +2680,8 @@ const Composer = ({
     && !isComposerBlocked && !isEditingMedia;
   const canCloseRichInput = Boolean(isRichInputExpansionActive && !isComposerBlocked);
   const canToggleRichInput = canOpenRichInput || canCloseRichInput;
+  const shouldShowAiButton = (isRichInputExpansionActive || (shouldShowRichInputButton && hasInputContent))
+    && !isInStoryViewer && !hasAttachments && !isComposerBlocked && !activeRecording && !hasRichMediaBlocking;
   const {
     ref: voiceRecordBarRef, shouldRender: shouldRenderVoiceRecordBar,
   } = useShowTransition<HTMLDivElement>({
@@ -2909,6 +2953,20 @@ const Composer = ({
             disabled={isRichInputExpansionActive && hasRichMediaBlocking}
             onClick={isRichInputExpansionActive ? collapseRichInput : handleOpenRichInput}
           />
+          <Button
+            round
+            faded
+            size="smaller"
+            className={buildClassName(
+              'ai-composer-button',
+              (!shouldShowAiButton || isRichInputExpansionActive) && 'ai-composer-button-hidden',
+            )}
+            color="translucent"
+            ariaLabel={lang('AiMessageEditor')}
+            iconName="ai"
+            tabIndex={shouldShowAiButton && !isRichInputExpansionActive ? 0 : -1}
+            onClick={handleOpenAiEditor}
+          />
           <MessageInput
             ref={inputRef}
             id={inputId}
@@ -2928,6 +2986,7 @@ const Composer = ({
             shouldSuppressFocus={isMobile && isSymbolMenuOpen}
             onRichInputCollapse={collapseRichInput}
             onRichInputExpand={handleOpenRichInput}
+            onOpenAiEditor={shouldShowAiButton ? handleOpenAiEditor : undefined}
             onSend={onSend}
             onSuppressedFocus={closeSymbolMenu}
             onMediaEdit={handleRichMediaEdit}

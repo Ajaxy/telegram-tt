@@ -18,6 +18,7 @@ export function getToneCacheKey(tone: ApiInputAiComposeTone): string {
     case 'default': return `d:${tone.tone}`;
     case 'id': return `i:${tone.id}:${tone.accessHash}`;
     case 'slug': return `s:${tone.slug}`;
+    case 'singleUse': return `p:${tone.customPrompt}`;
   }
 }
 

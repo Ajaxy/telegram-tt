@@ -1,7 +1,8 @@
 import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { addActionHandler, getActions } from '../../index';
+import { hasAiEditorContent } from '../../helpers/aiMessageEditor';
+import { addActionHandler } from '../../index';
 import { updateTabState } from '../../reducers/tabs';
 import { selectTabState } from '../../selectors';
 import { selectCurrentMessageList } from '../../selectors/messages';
@@ -10,18 +11,24 @@ import { showToneLimitNotification } from '../api/ai';
 
 addActionHandler('openAiMessageEditorModal', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, text, initialTab = 'style', isFromAttachment,
+    chatId, threadId, content, initialTab = 'style', isFromAttachment, isEditing,
     tabId = getCurrentTabId(),
   } = payload;
 
   const defaultTranslationLanguage = selectTranslationLanguage(global);
+  const hasSource = hasAiEditorContent(content);
 
   return updateTabState(global, {
     aiMessageEditorModal: {
       chatId,
-      text,
-      activeTab: initialTab,
+      threadId,
+      content,
+      activeTab: hasSource ? initialTab : 'style',
       isFromAttachment,
+      isEditing,
+      styleTab: {
+        selectedTone: !hasSource ? { type: 'singleUse', customPrompt: '' } : undefined,
+      },
       translateTab: {
         selectedLanguage: defaultTranslationLanguage,
       },
@@ -71,6 +78,8 @@ addActionHandler('setAiMessageEditorTranslateOptions', (global, actions, payload
         selectedLanguage: selectedLanguage !== undefined ? selectedLanguage : translateTab.selectedLanguage,
         selectedTone: hasSelectedTone ? payload.selectedTone : translateTab.selectedTone,
         shouldEmojify: shouldEmojify !== undefined ? shouldEmojify : translateTab.shouldEmojify,
+        requestId: undefined,
+        isLoading: false,
         result: clearResult ? undefined : translateTab.result,
         error: clearResult ? undefined : translateTab.error,
       },
@@ -80,7 +89,7 @@ addActionHandler('setAiMessageEditorTranslateOptions', (global, actions, payload
 
 addActionHandler('setAiMessageEditorStyleOptions', (global, actions, payload): ActionReturnType => {
   const {
-    shouldEmojify, clearResult,
+    shouldEmojify, customPrompt, clearResult,
     tabId = getCurrentTabId(),
   } = payload;
   const hasSelectedTone = 'selectedTone' in payload;
@@ -96,9 +105,12 @@ addActionHandler('setAiMessageEditorStyleOptions', (global, actions, payload): A
       styleTab: {
         ...styleTab,
         selectedTone: hasSelectedTone ? payload.selectedTone : styleTab.selectedTone,
+        customPrompt: customPrompt !== undefined ? customPrompt : styleTab.customPrompt,
         shouldEmojify: shouldEmojify !== undefined ? shouldEmojify : styleTab.shouldEmojify,
+        requestId: undefined,
+        isLoading: false,
         result: clearResult ? undefined : styleTab.result,
-        error: clearResult ? undefined : styleTab.error,
+        error: clearResult && styleTab.error !== 'floodPremium' ? undefined : styleTab.error,
       },
     },
   }, tabId);
@@ -114,12 +126,15 @@ addActionHandler('applyAiMessageEditorResult', (global, actions, payload): Actio
   const tabState = activeTab === 'translate' ? aiMessageEditorModal.translateTab
     : activeTab === 'style' ? aiMessageEditorModal.styleTab : aiMessageEditorModal.fixTab;
 
-  const textToApply = tabState?.result?.resultText || aiMessageEditorModal.text;
+  const content = tabState?.result || aiMessageEditorModal.content;
+  if (tabState?.isLoading || tabState?.error || !hasAiEditorContent(content)) return undefined;
 
   return updateTabState(global, {
     aiMessageEditorModal: undefined,
     aiMessageEditorPendingResult: {
-      text: textToApply,
+      content,
+      chatId: aiMessageEditorModal.chatId,
+      threadId: aiMessageEditorModal.threadId,
     },
   }, tabId);
 });
@@ -134,49 +149,33 @@ addActionHandler('sendAiMessageEditorResult', (global, actions, payload): Action
   if (!aiMessageEditorModal) return undefined;
 
   const { activeTab, isFromAttachment } = aiMessageEditorModal;
+  if (activeTab === 'style' && aiMessageEditorModal.styleTab?.selectedTone?.type === 'singleUse'
+    && !aiMessageEditorModal.styleTab.result) return undefined;
   const tabState = activeTab === 'translate' ? aiMessageEditorModal.translateTab
     : activeTab === 'style' ? aiMessageEditorModal.styleTab : aiMessageEditorModal.fixTab;
 
-  const textToSend = tabState?.result?.resultText || aiMessageEditorModal.text;
+  const content = tabState?.result || aiMessageEditorModal.content;
+  if (tabState?.isLoading || tabState?.error || !hasAiEditorContent(content)) return undefined;
 
-  if (isFromAttachment) {
-    return updateTabState(global, {
-      aiMessageEditorModal: undefined,
-      aiMessageEditorPendingResult: {
-        text: textToSend,
-        shouldSendWithAttachments: true,
-        isSilent,
-        scheduledAt,
-        scheduleRepeatPeriod,
-      },
-    }, tabId);
+  if (aiMessageEditorModal.isEditing) return undefined;
+
+  if (!isFromAttachment) {
+    const currentMessageList = selectCurrentMessageList(global, tabId);
+    if (!currentMessageList || currentMessageList.chatId !== aiMessageEditorModal.chatId
+      || currentMessageList.threadId !== aiMessageEditorModal.threadId) return undefined;
   }
-
-  const currentMessageList = selectCurrentMessageList(global, tabId);
-  if (!currentMessageList) return undefined;
-
-  const { chatId, threadId } = currentMessageList;
-
-  const messageList = scheduledAt
-    ? { ...currentMessageList, type: 'scheduled' as const }
-    : currentMessageList;
-
-  getActions().sendMessage({
-    messageList,
-    text: textToSend.text,
-    entities: textToSend.entities,
-    isSilent,
-    scheduledAt,
-    scheduleRepeatPeriod,
-    tabId,
-  });
-
-  getActions().clearDraft({ chatId, threadId, isLocalOnly: true });
 
   return updateTabState(global, {
     aiMessageEditorModal: undefined,
     aiMessageEditorPendingResult: {
-      shouldClear: true,
+      content,
+      chatId: aiMessageEditorModal.chatId,
+      threadId: aiMessageEditorModal.threadId,
+      shouldSend: isFromAttachment ? undefined : true,
+      shouldSendWithAttachments: isFromAttachment,
+      isSilent,
+      scheduledAt,
+      scheduleRepeatPeriod,
     },
   }, tabId);
 });

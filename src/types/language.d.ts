@@ -193,6 +193,7 @@ export interface LangPair {
   'VoipGroupEndChat': undefined;
   'VoipGroupEnd': undefined;
   'Cancel': undefined;
+  'Retry': undefined;
   'ThisIsYou': undefined;
   'VoipGroupMutedForMe': undefined;
   'WantsToSpeak': undefined;
@@ -2341,6 +2342,10 @@ export interface LangPair {
   'NoForwardsRequestReject': undefined;
   'NoForwardsRequestAccept': undefined;
   'AiMessageEditor': undefined;
+  'AiEditorPrompt': undefined;
+  'AiEditorRewritePlaceholder': undefined;
+  'AiEditorGeneratePlaceholder': undefined;
+  'AiEditorGenerate': undefined;
   'AiMessageEditorTranslate': undefined;
   'AiMessageEditorStyle': undefined;
   'AiMessageEditorFix': undefined;

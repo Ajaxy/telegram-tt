@@ -5,6 +5,11 @@
   margin-bottom: 0.5rem;
 }
 
+.preview {
+  overflow-x: auto;
+  min-width: 0;
+}
+
 .label {
   font-size: 0.875rem;
   font-weight: var(--font-weight-semibold);

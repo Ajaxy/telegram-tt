@@ -223,6 +223,7 @@
     "messages.setDefaultReaction",
     "messages.translateText",
     "messages.composeMessageWithAI",
+    "messages.composeRichMessageWithAI",
     "messages.getAttachMenuBots",
     "messages.getAttachMenuBot",
     "messages.toggleBotInAttachMenu",

@@ -1,20 +1,17 @@
 import { memo, useEffect, useMemo, useRef } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
-import type { ApiChat } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 import type { AnimationLevel } from '../../../../types';
 import type { IconName } from '../../../../types/icons';
 
 import { SCHEDULED_WHEN_ONLINE } from '../../../../config';
-import { getPeerTitle } from '../../../../global/helpers/peers';
+import { hasAiEditorContent } from '../../../../global/helpers/aiMessageEditor';
 import {
   selectCanScheduleUntilOnline,
-  selectChat,
   selectIsChatWithSelf,
   selectIsStoryViewerOpen,
   selectPeerPaidMessagesStars,
-  selectTabState,
 } from '../../../../global/selectors';
 import { selectCurrentMessageList } from '../../../../global/selectors/messages';
 import { selectAnimationLevel } from '../../../../global/selectors/sharedState';
@@ -27,11 +24,9 @@ import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useSchedule from '../../../../hooks/useSchedule';
-import usePaidMessageConfirmation from '../hooks/usePaidMessageConfirmation';
 
 import AnimatedCounter from '../../../common/AnimatedCounter';
 import Icon from '../../../common/icons/Icon';
-import PaymentMessageConfirmDialog from '../../../common/PaymentMessageConfirmDialog';
 import Button from '../../../ui/Button';
 import Modal from '../../../ui/Modal';
 import TabList from '../../../ui/TabList';
@@ -53,15 +48,10 @@ type StateProps = {
   isChatWithSelf?: boolean;
   canScheduleUntilOnline?: boolean;
   isInScheduledList?: boolean;
-  chat?: ApiChat;
   paidMessagesStars?: number;
-  paymentMessageConfirmDialogKey?: string;
-  starsBalance: number;
-  isStarsBalanceModalOpen?: boolean;
   isStoryViewerOpen?: boolean;
 };
 
-const PAYMENT_DIALOG_KEY = 'aiMessageEditor';
 const INDEX_TO_TAB_ID = ['translate', 'style', 'fix'] as const;
 
 const TAB_TRANSLATE = 0;
@@ -79,11 +69,7 @@ const AiMessageEditorModal = ({
   isChatWithSelf,
   canScheduleUntilOnline,
   isInScheduledList,
-  chat,
   paidMessagesStars,
-  paymentMessageConfirmDialogKey,
-  starsBalance,
-  isStarsBalanceModalOpen,
   isStoryViewerOpen,
 }: OwnProps & StateProps) => {
   const {
@@ -111,16 +97,6 @@ const AiMessageEditorModal = ({
   const starsForMessage = paidMessagesStars || 0;
   const shouldRenderPaidBadge = Boolean(paidMessagesStars);
 
-  const {
-    closeConfirmDialog: closeConfirmModalPayForMessage,
-    handleWithConfirmation: handleActionWithPaymentConfirmation,
-    dialogHandler: confirmModalPayForMessageHandler,
-    shouldAutoApprove: shouldPaidMessageAutoApprove,
-    setAutoApprove: setShouldPaidMessageAutoApprove,
-  } = usePaidMessageConfirmation(
-    PAYMENT_DIALOG_KEY, starsForMessage, Boolean(isStarsBalanceModalOpen), starsBalance, true,
-  );
-
   useEffect(() => {
     if (!isCustomSendMenuOpen) {
       handleContextMenuHide();
@@ -133,7 +109,8 @@ const AiMessageEditorModal = ({
 
   const {
     activeTab,
-    text,
+    isEditing,
+    content,
     translateTab,
     styleTab,
     fixTab,
@@ -143,20 +120,25 @@ const AiMessageEditorModal = ({
     : activeTab === 'style' ? styleTab : fixTab;
   const isLoading = currentTabState?.isLoading;
   const error = currentTabState?.error;
+  const hasSource = Boolean(content && hasAiEditorContent(content));
+  const hasContent = currentTabState?.result ? hasAiEditorContent(currentTabState.result) : hasSource;
+  const shouldGenerate = activeTab === 'style' && styleTab?.selectedTone?.type === 'singleUse'
+    && !styleTab.result && !styleTab.error;
 
-  const tabs = useMemo((): { icon: IconName; title: string }[] => [
-    { icon: 'language', title: lang('AiMessageEditorTranslate') },
+  const tabs = useMemo((): { icon: IconName; title: string; isBlocked?: boolean }[] => [
+    { icon: 'language', title: lang('AiMessageEditorTranslate'), isBlocked: !hasSource },
     { icon: 'ai-edit', title: lang('AiMessageEditorStyle') },
-    { icon: 'ai-fix', title: lang('AiMessageEditorFix') },
-  ], [lang]);
+    { icon: 'ai-fix', title: lang('AiMessageEditorFix'), isBlocked: !hasSource },
+  ], [lang, hasSource]);
 
   const activeTabIndex = TAB_ID_TO_INDEX[activeTab || 'style'] ?? TAB_STYLE;
 
   const handleTabChange = useLastCallback((index: number) => {
     const tab = INDEX_TO_TAB_ID[index];
+    if (!hasSource && tab !== 'style') return;
     setAiMessageEditorTab({ tab });
 
-    if (!text?.text) return;
+    if (!hasSource) return;
 
     switch (tab) {
       case 'translate':
@@ -167,7 +149,7 @@ const AiMessageEditorModal = ({
         });
         break;
       case 'style':
-        if (styleTab?.selectedTone) {
+        if (styleTab?.selectedTone && styleTab.selectedTone.type !== 'singleUse') {
           composeWithAiMessageEditor({
             tone: styleTab.selectedTone,
             isEmojify: styleTab?.shouldEmojify,
@@ -184,14 +166,13 @@ const AiMessageEditorModal = ({
     applyAiMessageEditorResult();
   });
 
-  const handleOpenCocoonModal = useLastCallback(() => {
-    openCocoonModal();
+  const handleGenerate = useLastCallback(() => {
+    if (!styleTab?.customPrompt?.trim() || isLoading) return;
+    composeWithAiMessageEditor({ tone: styleTab.selectedTone, isEmojify: styleTab.shouldEmojify });
   });
 
-  const handleSendAction = useLastCallback((
-    isSilent?: boolean, scheduledAt?: number, scheduleRepeatPeriod?: number,
-  ) => {
-    sendAiMessageEditorResult({ isSilent, scheduledAt, scheduleRepeatPeriod });
+  const handleOpenCocoonModal = useLastCallback(() => {
+    openCocoonModal();
   });
 
   const handleSend = useLastCallback(() => {
@@ -200,12 +181,12 @@ const AiMessageEditorModal = ({
         sendAiMessageEditorResult({ scheduledAt, scheduleRepeatPeriod });
       });
     } else {
-      handleActionWithPaymentConfirmation(handleSendAction);
+      sendAiMessageEditorResult();
     }
   });
 
   const handleSendSilent = useLastCallback(() => {
-    handleActionWithPaymentConfirmation(handleSendAction, true);
+    sendAiMessageEditorResult({ isSilent: true });
   });
 
   const handleSendSchedule = useLastCallback(() => {
@@ -224,7 +205,7 @@ const AiMessageEditorModal = ({
         return (
           <div className={styles.tabContent}>
             <AiTextTranslateEditor
-              text={text}
+              content={content}
               selectedLanguage={translateTab?.selectedLanguage}
               selectedTone={translateTab?.selectedTone}
               shouldEmojify={translateTab?.shouldEmojify}
@@ -239,13 +220,15 @@ const AiMessageEditorModal = ({
         return (
           <div className={styles.tabContent}>
             <AiTextStyleEditor
-              text={text}
+              content={content}
+              customPrompt={styleTab?.customPrompt}
               selectedTone={styleTab?.selectedTone}
               shouldEmojify={styleTab?.shouldEmojify}
               isLoading={styleTab?.isLoading}
               result={styleTab?.result}
               error={styleTab?.error}
               isPremium={isPremium}
+              onGenerate={handleGenerate}
             />
           </div>
         );
@@ -253,7 +236,7 @@ const AiMessageEditorModal = ({
         return (
           <div className={styles.tabContent}>
             <AiTextFixEditor
-              text={text}
+              content={content}
               isLoading={fixTab?.isLoading}
               result={fixTab?.result}
               error={fixTab?.error}
@@ -315,40 +298,42 @@ const AiMessageEditorModal = ({
       <div className={styles.footer}>
         <Button
           className={styles.applyButton}
-          disabled={isLoading || Boolean(error)}
-          onClick={handleApply}
+          disabled={isLoading || (shouldGenerate ? !styleTab?.customPrompt?.trim() : Boolean(error) || !hasContent)}
+          onClick={shouldGenerate ? handleGenerate : handleApply}
         >
-          {lang('AiMessageEditorApply')}
+          {lang(shouldGenerate ? 'AiEditorGenerate' : 'AiMessageEditorApply')}
         </Button>
-        <Button
-          ref={mainButtonRef}
-          className={styles.sendButton}
-          round
-          color="primary"
-          disabled={isLoading || Boolean(error)}
-          ariaLabel={lang('Send')}
-          onClick={handleSend}
-          onContextMenu={!isInScheduledList && !paidMessagesStars ? handleContextMenu : undefined}
-          iconName="new-send"
-        >
+        {!isEditing && (
           <Button
-            className={buildClassName(
-              styles.paidStarsBadge,
-              !shouldRenderPaidBadge && styles.hidden,
-            )}
-            nonInteractive
-            size="tiny"
-            color="stars"
-            pill
-            fluid
+            ref={mainButtonRef}
+            className={styles.sendButton}
+            round
+            color="primary"
+            disabled={shouldGenerate || isLoading || Boolean(error) || !hasContent}
+            ariaLabel={lang('Send')}
+            onClick={handleSend}
+            onContextMenu={!isInScheduledList && !paidMessagesStars ? handleContextMenu : undefined}
+            iconName="new-send"
           >
-            <div className={styles.paidStarsBadgeText}>
-              <Icon name="star" />
-              <AnimatedCounter text={lang.number(starsForMessage)} />
-            </div>
+            <Button
+              className={buildClassName(
+                styles.paidStarsBadge,
+                !shouldRenderPaidBadge && styles.hidden,
+              )}
+              nonInteractive
+              size="tiny"
+              color="stars"
+              pill
+              fluid
+            >
+              <div className={styles.paidStarsBadgeText}>
+                <Icon name="star" />
+                <AnimatedCounter text={lang.number(starsForMessage)} />
+              </div>
+            </Button>
           </Button>
-        </Button>
-        {isOpen && !isInScheduledList && (
+        )}
+        {isOpen && !isEditing && !isInScheduledList && (
           <CustomSendMenu
             isOpen={isCustomSendMenuOpen}
             canSchedule
@@ -363,16 +348,6 @@ const AiMessageEditorModal = ({
         )}
       </div>
       {calendar}
-      <PaymentMessageConfirmDialog
-        isOpen={paymentMessageConfirmDialogKey === PAYMENT_DIALOG_KEY}
-        onClose={closeConfirmModalPayForMessage}
-        userName={chat ? getPeerTitle(lang, chat) : undefined}
-        messagePriceInStars={paidMessagesStars || 0}
-        messagesCount={1}
-        shouldAutoApprove={shouldPaidMessageAutoApprove}
-        setAutoApprove={setShouldPaidMessageAutoApprove}
-        confirmHandler={confirmModalPayForMessageHandler}
-      />
     </Modal>
   );
 };
@@ -381,11 +356,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { modal }): Complete<StateProps> => {
     const chatId = modal?.chatId;
     const currentMessageList = selectCurrentMessageList(global);
-    const tabState = selectTabState(global);
-    const chat = chatId ? selectChat(global, chatId) : undefined;
     const paidMessagesStars = chatId ? selectPeerPaidMessagesStars(global, chatId) : undefined;
-    const starsBalance = global.stars?.balance.amount || 0;
-    const isStarsBalanceModalOpen = Boolean(tabState.starsBalanceModal);
 
     return {
       animationLevel: selectAnimationLevel(global),
@@ -395,11 +366,7 @@ export default memo(withGlobal<OwnProps>(
         ? selectCanScheduleUntilOnline(global, currentMessageList.chatId)
         : undefined,
       isInScheduledList: currentMessageList?.type === 'scheduled',
-      chat,
       paidMessagesStars,
-      paymentMessageConfirmDialogKey: tabState.paymentMessageConfirmDialogKey,
-      starsBalance,
-      isStarsBalanceModalOpen,
       isStoryViewerOpen: selectIsStoryViewerOpen(global),
     };
   },

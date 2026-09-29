@@ -243,9 +243,9 @@
 .emoji {
   pointer-events: none;
 
-  width: 1.25rem;
-  height: 1.25rem;
-  margin: 0 0.0625rem -0.3125rem;
+  width: var(--emoji-size);
+  height: var(--emoji-size);
+  margin: 0 0.0625rem -0.3125em;
 
   vertical-align: 0;
 }
@@ -263,7 +263,7 @@
   color: transparent;
 
   background: no-repeat;
-  background-size: 1.25rem;
+  background-size: var(--emoji-size);
 
   &::selection {
     color: transparent;

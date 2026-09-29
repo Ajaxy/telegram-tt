@@ -687,6 +687,9 @@ export type ApiInputAiComposeTone = {
 } | {
   type: 'slug';
   slug: string;
+} | {
+  type: 'singleUse';
+  customPrompt: string;
 };
 
 export interface ApiAiComposeToneExample {

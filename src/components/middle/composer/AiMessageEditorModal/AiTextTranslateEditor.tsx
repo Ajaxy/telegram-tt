@@ -2,15 +2,15 @@ import { memo, useMemo, useRef, useState } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
 import type {
-  ApiAiComposeToneType, ApiComposedMessageWithAI, ApiFormattedText, ApiInputAiComposeTone,
+  ApiAiComposeToneType, ApiInputAiComposeTone,
 } from '../../../../api/types';
+import type { AiEditorContent, AiEditorResult } from '../../../../global/types';
 import type { IAnchorPosition } from '../../../../types';
 
 import { SUPPORTED_TRANSLATION_LANGUAGES } from '../../../../config';
 import { compareAiTones, getInputTone } from '../../../../util/aiComposeTones';
 import buildClassName from '../../../../util/buildClassName';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
-import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
@@ -18,23 +18,24 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 import useTextLanguage from '../../../../hooks/useTextLanguage';
 
 import CheckboxField from '../../../gili/templates/CheckboxField';
-import ExpandableText from '../../../ui/ExpandableText';
 import Menu from '../../../ui/Menu';
 import MenuItem from '../../../ui/MenuItem';
 import TranslationToneSelector from '../../message/TranslationToneSelector';
-import { AiEditorCopyButton, AiEditorErrorMessage, AiEditorResultArea } from './AiEditorShared';
+import {
+  AiEditorCopyButton, AiEditorErrorMessage, AiEditorPreview, AiEditorResultArea, getAiEditorText,
+} from './AiEditorShared';
 
 import sharedStyles from './AiEditorShared.module.scss';
 import modalStyles from './AiMessageEditorModal.module.scss';
 import styles from './AiTextTranslateEditor.module.scss';
 
 type OwnProps = {
-  text?: ApiFormattedText;
+  content?: AiEditorContent;
   selectedLanguage?: string;
   selectedTone?: ApiInputAiComposeTone;
   shouldEmojify?: boolean;
   isLoading?: boolean;
-  result?: ApiComposedMessageWithAI;
+  result?: AiEditorResult;
   error?: 'floodPremium' | 'aiError' | 'generic';
   isPremium?: boolean;
 };
@@ -44,7 +45,7 @@ type StateProps = {
 };
 
 const AiTextTranslateEditor = ({
-  text,
+  content,
   selectedLanguage,
   selectedTone,
   shouldEmojify,
@@ -66,7 +67,8 @@ const AiTextTranslateEditor = ({
 
   const triggerRef = useRef<HTMLSpanElement>();
 
-  const detectedLanguage = useTextLanguage(text?.text);
+  const originalText = useMemo(() => content ? getAiEditorText(content) : undefined, [content]);
+  const detectedLanguage = useTextLanguage(originalText);
   const hasError = Boolean(error);
 
   const currentLanguageCode = lang.code;
@@ -137,8 +139,6 @@ const AiTextTranslateEditor = ({
     }
   });
 
-  const displayResult = result?.resultText;
-
   const languageIndex = SUPPORTED_TRANSLATION_LANGUAGES.indexOf(selectedLanguage || '');
   const toneIndex = tones.findIndex(
     (entry) => compareAiTones(selectedTone, getInputTone(entry)),
@@ -154,10 +154,7 @@ const AiTextTranslateEditor = ({
       return <AiEditorErrorMessage error={error} isPremium={isPremium} />;
     }
 
-    return displayResult && renderTextWithEntities({
-      text: displayResult.text,
-      entities: displayResult.entities,
-    });
+    return <AiEditorPreview content={result} />;
   }
 
   return (
@@ -171,7 +168,7 @@ const AiTextTranslateEditor = ({
             {detectedLanguageName}
           </span>
         </div>
-        <ExpandableText text={text?.text} />
+        <AiEditorPreview content={content} />
       </div>
 
       <div className={sharedStyles.separator} />
@@ -232,8 +229,8 @@ const AiTextTranslateEditor = ({
         {renderResultText()}
       </AiEditorResultArea>
       <AiEditorCopyButton
-        textToCopy={result?.resultText?.text || text?.text}
-        isHidden={isLoading || hasError || !displayResult?.text}
+        content={result}
+        isHidden={isLoading || hasError}
       />
     </div>
   );

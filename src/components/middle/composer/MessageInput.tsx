@@ -90,6 +90,7 @@ export type OwnProps = {
   maxLength?: number;
   onRichInputCollapse?: NoneToVoidFunction;
   onRichInputExpand?: NoneToVoidFunction;
+  onOpenAiEditor?: NoneToVoidFunction;
   onSuppressedFocus?: () => void;
   onMediaEdit?: RichEditorMediaEditHandler;
   onMediaFiles?: RichEditorMediaFilesHandler;
@@ -140,6 +141,7 @@ const MessageInput = ({
   messageListType,
   onRichInputCollapse,
   onRichInputExpand,
+  onOpenAiEditor,
   onSuppressedFocus,
   onMediaEdit,
   onMediaFiles,
@@ -890,7 +892,7 @@ const MessageInput = ({
         </div>
       )}
       {isMainInput && canRenderRichEditor && (
-        <RichEditorToolbar editor={editor} isEnabled={isRichInputExpanded} />
+        <RichEditorToolbar editor={editor} isEnabled={isRichInputExpanded} onOpenAiEditor={onOpenAiEditor} />
       )}
       {dateEditTarget?.type === 'date' && (
         <CalendarModal

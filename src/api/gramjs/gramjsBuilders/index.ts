@@ -1004,6 +1004,8 @@ export function buildInputAiComposeTone(tone: ApiInputAiComposeTone): GramJs.Typ
       return new GramJs.InputAiComposeToneID({ id: BigInt(tone.id), accessHash: BigInt(tone.accessHash) });
     case 'slug':
       return new GramJs.InputAiComposeToneSlug({ slug: tone.slug });
+    case 'singleUse':
+      return new GramJs.InputAiComposeToneSingleUse({ customPrompt: tone.customPrompt });
   }
 }
 

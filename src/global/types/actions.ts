@@ -129,7 +129,7 @@ import type { WebApp, WebAppOutboundEvent } from '../../types/webapp';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { DownloadableMedia } from '../helpers';
 import type { SharedState } from './sharedState';
-import type { ReactionDeletionContext, TabState } from './tabState';
+import type { AiEditorContent, ReactionDeletionContext, TabState } from './tabState';
 
 export type WithTabId = { tabId?: number };
 
@@ -2802,9 +2802,11 @@ export interface ActionPayloads {
 
   openAiMessageEditorModal: {
     chatId: string;
-    text: ApiFormattedText;
+    threadId: ThreadId;
+    content: AiEditorContent;
     initialTab?: 'translate' | 'style' | 'fix';
     isFromAttachment?: boolean;
+    isEditing?: boolean;
   } & WithTabId;
   closeAiMessageEditorModal: WithTabId | undefined;
   setAiMessageEditorTab: {
@@ -2818,6 +2820,7 @@ export interface ActionPayloads {
   } & WithTabId;
   setAiMessageEditorStyleOptions: {
     selectedTone?: ApiInputAiComposeTone;
+    customPrompt?: string;
     shouldEmojify?: boolean;
     clearResult?: boolean;
   } & WithTabId;

@@ -1,9 +1,10 @@
 import type { ApiInputAiComposeTone } from '../../../api/types';
-import type { ActionReturnType, GlobalState } from '../../types';
+import type { ActionReturnType, AiEditorResult, GlobalState } from '../../types';
 
 import { compareAiTones, getToneCacheKey } from '../../../util/aiComposeTones';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { callApi } from '../../../api/gramjs';
+import { hasAiEditorContent } from '../../helpers/aiMessageEditor';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { updateTabState } from '../../reducers/tabs';
 import { selectTabState } from '../../selectors';
@@ -48,6 +49,8 @@ function buildTranslateCacheKey(
   return `${lang || ''}_${tone ? getToneCacheKey(tone) : ''}_${emojify ? '1' : '0'}`;
 }
 
+let nextComposeRequestId = 0;
+
 addActionHandler('composeWithAiMessageEditor', async (global, actions, payload): Promise<void> => {
   const {
     shouldProofread, isEmojify, translateToLang, tone,
@@ -56,114 +59,65 @@ addActionHandler('composeWithAiMessageEditor', async (global, actions, payload):
 
   let modal = selectTabState(global, tabId).aiMessageEditorModal;
   if (!modal) return;
+  const hasSource = hasAiEditorContent(modal.content);
+  if (!hasSource && (shouldProofread || translateToLang || tone?.type !== 'singleUse')) return;
+  if (tone?.type === 'singleUse' && !tone.customPrompt.trim()) return;
 
-  let cachedResult;
-  let tabKey: 'translateTab' | 'styleTab' | 'fixTab';
+  const tabKey = shouldProofread ? 'fixTab' : translateToLang ? 'translateTab' : 'styleTab';
+  if (modal[tabKey]?.isLoading && tone?.type !== 'singleUse') return;
+  const cacheKey = translateToLang
+    ? buildTranslateCacheKey(translateToLang, tone, isEmojify) : buildStyleCacheKey(tone, isEmojify);
+  const cachedResult = shouldProofread ? modal.fixTab?.cache
+    : tabKey === 'translateTab' ? modal.translateTab?.cache?.[cacheKey] : modal.styleTab?.cache?.[cacheKey];
+  const requestId = ++nextComposeRequestId;
+  const shouldUseCache = Boolean(cachedResult && tone?.type !== 'singleUse');
 
-  if (shouldProofread) {
-    tabKey = 'fixTab';
-    cachedResult = modal.fixTab?.cache;
-  } else if (translateToLang) {
-    tabKey = 'translateTab';
-    const cacheKey = buildTranslateCacheKey(translateToLang, tone, isEmojify);
-    cachedResult = modal.translateTab?.cache?.[cacheKey];
-  } else {
-    tabKey = 'styleTab';
-    const cacheKey = buildStyleCacheKey(tone, isEmojify);
-    cachedResult = modal.styleTab?.cache?.[cacheKey];
-  }
-
-  if (cachedResult) {
-    global = getGlobal();
-    modal = selectTabState(global, tabId).aiMessageEditorModal;
-    if (!modal) return;
-    global = updateTabState(global, {
-      aiMessageEditorModal: {
-        ...modal,
-        [tabKey]: { ...modal[tabKey], result: cachedResult, error: undefined, isLoading: false },
-      },
-    }, tabId);
-    setGlobal(global);
-    return;
-  }
-
-  global = getGlobal();
-  modal = selectTabState(global, tabId).aiMessageEditorModal;
-  if (!modal) return;
   global = updateTabState(global, {
     aiMessageEditorModal: {
       ...modal,
-      [tabKey]: { ...modal[tabKey], isLoading: true },
+      [tabKey]: {
+        ...modal[tabKey],
+        requestId,
+        result: shouldUseCache ? cachedResult : undefined,
+        error: undefined,
+        isLoading: !shouldUseCache,
+      },
     },
   }, tabId);
   setGlobal(global);
+  if (shouldUseCache) return;
 
-  const response = await callApi('composeMessageWithAI', {
-    text: modal.text,
-    shouldProofread,
-    isEmojify,
-    translateToLang,
-    tone,
-  });
+  const options = { shouldProofread, isEmojify, translateToLang, tone };
+  let response: { result?: AiEditorResult; error?: 'floodPremium' | 'aiError' | 'generic' } | undefined;
+  if (modal.content.type === 'rich') {
+    const richResponse = await callApi('composeRichMessageWithAI', {
+      ...options,
+      text: hasSource ? modal.content.richMessage : undefined,
+    });
+    const richMessage = richResponse?.result;
+    response = {
+      result: richMessage ? { type: 'rich', richMessage } : undefined,
+      error: richResponse?.error,
+    };
+  } else {
+    const textResponse = await callApi('composeMessageWithAI', { ...options, text: modal.content.text });
+    response = {
+      result: textResponse?.result ? {
+        type: 'text', text: textResponse.result.resultText, diffText: textResponse.result.diffText,
+      } : undefined,
+      error: textResponse?.error,
+    };
+  }
 
   global = getGlobal();
   modal = selectTabState(global, tabId).aiMessageEditorModal;
-  if (!modal) return;
+  if (!modal || modal[tabKey]?.requestId !== requestId) return;
 
-  if (response?.error) {
-    global = updateTabState(global, {
-      aiMessageEditorModal: {
-        ...modal,
-        [tabKey]: { ...modal[tabKey], result: undefined, isLoading: false, error: response.error },
-      },
-    }, tabId);
-    setGlobal(global);
-    return;
-  }
-
+  const currentTabState = modal[tabKey];
   const result = response?.result;
-  const currentTabState = modal[tabKey] || {};
-
-  let isOutdatedResult = false;
-  if (translateToLang) {
-    const { selectedLanguage, selectedTone, shouldEmojify } = modal.translateTab || {};
-    isOutdatedResult = selectedLanguage !== translateToLang
-      || !compareAiTones(selectedTone, tone)
-      || Boolean(shouldEmojify) !== Boolean(isEmojify);
-  } else if (!shouldProofread) {
-    const { selectedTone, shouldEmojify } = modal.styleTab || {};
-    isOutdatedResult = !compareAiTones(selectedTone, tone)
-      || Boolean(shouldEmojify) !== Boolean(isEmojify);
-  }
-
-  let updatedCache;
-  if (result) {
-    if (shouldProofread) {
-      updatedCache = result;
-    } else if (translateToLang) {
-      const cacheKey = buildTranslateCacheKey(translateToLang, tone, isEmojify);
-      updatedCache = { ...currentTabState.cache, [cacheKey]: result };
-    } else {
-      const cacheKey = buildStyleCacheKey(tone, isEmojify);
-      updatedCache = { ...currentTabState.cache, [cacheKey]: result };
-    }
-  }
-
-  if (isOutdatedResult) {
-    global = updateTabState(global, {
-      aiMessageEditorModal: {
-        ...modal,
-        [tabKey]: {
-          ...currentTabState,
-          isLoading: false,
-          cache: updatedCache !== undefined ? updatedCache : currentTabState.cache,
-        },
-      },
-    }, tabId);
-    setGlobal(global);
-    return;
-  }
-
+  const cache = result && tone?.type !== 'singleUse'
+    ? shouldProofread ? result : { ...currentTabState.cache, [cacheKey]: result }
+    : currentTabState.cache;
   global = updateTabState(global, {
     aiMessageEditorModal: {
       ...modal,
@@ -171,8 +125,8 @@ addActionHandler('composeWithAiMessageEditor', async (global, actions, payload):
         ...currentTabState,
         isLoading: false,
         result,
-        error: undefined,
-        cache: updatedCache !== undefined ? updatedCache : currentTabState.cache,
+        error: result ? undefined : response?.error || 'generic',
+        cache,
       },
     },
   }, tabId);

@@ -225,6 +225,7 @@
 "VoipGroupEndChat" = "End video chat";
 "VoipGroupEnd" = "End";
 "Cancel" = "Cancel";
+"Retry" = "Retry";
 "ThisIsYou" = "this is you";
 "VoipGroupMutedForMe" = "muted for you";
 "WantsToSpeak" = "wants to speak";
@@ -3192,6 +3193,10 @@
 "NoForwardsRequestReject" = "Reject";
 "NoForwardsRequestAccept" = "Accept";
 "AiMessageEditor" = "AI Editor";
+"AiEditorPrompt" = "Prompt";
+"AiEditorRewritePlaceholder" = "Describe how to rewrite the text…";
+"AiEditorGeneratePlaceholder" = "Generate text, formulas, or tables…";
+"AiEditorGenerate" = "Generate";
 "AiMessageEditorTranslate" = "Translate";
 "AiMessageEditorStyle" = "Style";
 "AiMessageEditorFix" = "Fix";

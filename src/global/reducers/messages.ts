@@ -78,7 +78,7 @@ export function updateCurrentMessageList<T extends GlobalState>(
   shouldReplaceLast?: boolean,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
-  const { messageLists } = selectTabState(global, tabId);
+  const { messageLists, aiMessageEditorModal, aiMessageEditorPendingResult } = selectTabState(global, tabId);
   let newMessageLists: MessageList[];
   if (shouldReplaceHistory || (IS_TEST && !IS_MOCKED_CLIENT)) {
     newMessageLists = chatId ? [{ chatId, threadId, type }] : [];
@@ -103,8 +103,15 @@ export function updateCurrentMessageList<T extends GlobalState>(
     newMessageLists = messageLists.slice(0, -1);
   }
 
+  const previousList = messageLists[messageLists.length - 1];
+  const nextList = newMessageLists[newMessageLists.length - 1];
+  const hasChanged = previousList?.chatId !== nextList?.chatId || previousList?.threadId !== nextList?.threadId
+    || previousList?.type !== nextList?.type;
+
   return updateTabState(global, {
     messageLists: newMessageLists,
+    aiMessageEditorModal: hasChanged ? undefined : aiMessageEditorModal,
+    aiMessageEditorPendingResult: hasChanged ? undefined : aiMessageEditorPendingResult,
   }, tabId);
 }
 

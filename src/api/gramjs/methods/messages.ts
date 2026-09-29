@@ -29,6 +29,7 @@ import type {
   ApiOnProgress,
   ApiPeer,
   ApiReaction,
+  ApiRichMessage,
   ApiSearchPostsFlood,
   ApiSendMessageAction,
   ApiSticker,
@@ -78,6 +79,7 @@ import {
 import { buildApiTopicWithState } from '../apiBuilders/forums';
 import { buildApiDocument } from '../apiBuilders/media';
 import {
+  buildApiRichMessage,
   buildMessageMediaContent,
   buildMessagePollFromMedia,
   buildMessageTextContent,
@@ -3214,6 +3216,45 @@ export async function composeMessageWithAI({
       if (err.errorMessage === 'AICOMPOSE_ERROR_OCCURED') {
         return { error: 'aiError' };
       }
+    }
+    return { error: 'generic' };
+  }
+}
+
+export async function composeRichMessageWithAI({
+  text,
+  shouldProofread,
+  isEmojify,
+  translateToLang,
+  tone,
+}: {
+  text?: ApiInputRichMessage;
+  shouldProofread?: boolean;
+  isEmojify?: boolean;
+  translateToLang?: string;
+  tone?: ApiInputAiComposeTone;
+}): Promise<{ result?: ApiRichMessage; error?: 'floodPremium' | 'aiError' | 'generic' } | undefined> {
+  const inputText = text && buildInputRichMessage(text);
+  if (text && !inputText) return { error: 'generic' };
+
+  try {
+    const result = await invokeRequest(new GramJs.messages.ComposeRichMessageWithAI({
+      text: inputText,
+      proofread: shouldProofread || undefined,
+      emojify: isEmojify || undefined,
+      translateToLang,
+      tone: tone ? buildInputAiComposeTone(tone) : undefined,
+    }), { shouldThrow: true });
+
+    if (!result) return undefined;
+    const richMessage = buildApiRichMessage(result.result);
+    if (!richMessage) return { error: 'generic' };
+
+    return { result: richMessage };
+  } catch (err) {
+    if (err instanceof RPCError) {
+      if (err.errorMessage === 'AICOMPOSE_FLOOD_PREMIUM') return { error: 'floodPremium' };
+      if (err.errorMessage === 'AICOMPOSE_ERROR_OCCURED') return { error: 'aiError' };
     }
     return { error: 'generic' };
   }

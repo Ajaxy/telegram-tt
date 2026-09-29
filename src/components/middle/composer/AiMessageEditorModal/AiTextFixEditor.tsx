@@ -1,28 +1,27 @@
 import { memo } from '../../../../lib/teact/teact';
 
-import type { ApiComposedMessageWithAI, ApiFormattedText } from '../../../../api/types';
-
-import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
+import type { AiEditorContent, AiEditorResult } from '../../../../global/types';
 
 import useLang from '../../../../hooks/useLang';
 
-import ExpandableText from '../../../ui/ExpandableText';
-import { AiEditorCopyButton, AiEditorErrorMessage, AiEditorResultArea } from './AiEditorShared';
+import {
+  AiEditorCopyButton, AiEditorErrorMessage, AiEditorPreview, AiEditorResultArea,
+} from './AiEditorShared';
 
 import sharedStyles from './AiEditorShared.module.scss';
 import modalStyles from './AiMessageEditorModal.module.scss';
 import styles from './AiTextFixEditor.module.scss';
 
 type OwnProps = {
-  text?: ApiFormattedText;
+  content?: AiEditorContent;
   isLoading?: boolean;
-  result?: ApiComposedMessageWithAI;
+  result?: AiEditorResult;
   error?: 'floodPremium' | 'aiError' | 'generic';
   isPremium?: boolean;
 };
 
 const AiTextFixEditor = ({
-  text,
+  content,
   isLoading,
   result,
   error,
@@ -31,14 +30,13 @@ const AiTextFixEditor = ({
   const lang = useLang();
 
   const hasError = Boolean(error);
-  const displayResult = result?.diffText || result?.resultText;
 
   function renderResultText() {
     if (hasError) {
       return <AiEditorErrorMessage error={error} isPremium={isPremium} />;
     }
 
-    return displayResult && renderDiffText(displayResult);
+    return <AiEditorPreview content={result} shouldShowDiff />;
   }
 
   return (
@@ -49,7 +47,7 @@ const AiTextFixEditor = ({
             {lang('AiMessageEditorOriginal')}
           </span>
         </div>
-        <ExpandableText text={text?.text} />
+        <AiEditorPreview content={content} />
       </div>
 
       <div className={sharedStyles.separator} />
@@ -61,20 +59,11 @@ const AiTextFixEditor = ({
         {renderResultText()}
       </AiEditorResultArea>
       <AiEditorCopyButton
-        textToCopy={result?.resultText?.text || text?.text}
-        isHidden={isLoading || hasError || !displayResult?.text}
+        content={result}
+        isHidden={isLoading || hasError}
       />
     </div>
   );
 };
-
-function renderDiffText(formattedText: ApiFormattedText) {
-  const { text, entities } = formattedText;
-
-  return renderTextWithEntities({
-    text,
-    entities,
-  });
-}
 
 export default memo(AiTextFixEditor);

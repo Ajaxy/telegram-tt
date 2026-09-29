@@ -332,21 +332,24 @@ const AttachmentModal = ({
   useEffect(() => {
     requestMeasure(() => {
       const input = inputRef.current;
-      if (!richText || !input) {
+      if (!isForMessage || !richText || !input) {
         setShouldShowAiButton(false);
         return;
       }
       const { totalLines } = calcTextLineHeightAndCount(input, true);
       setShouldShowAiButton(totalLines >= 3);
     });
-  }, [richText, isOpen]);
+  }, [isForMessage, richText, isOpen]);
 
   const handleOpenAiEditor = useLastCallback(() => {
+    if (!isForMessage) return;
     const { text, entities } = richValue ? getRichInputAsFormatted(richValue) || { text: '' } : { text: '' };
     openAiMessageEditorModal({
       chatId,
-      text: { text, entities },
+      threadId,
+      content: { type: 'text', text: { text, entities } },
       isFromAttachment: true,
+      isEditing: Boolean(editingMessage),
     });
   });
 
@@ -376,12 +379,14 @@ const AttachmentModal = ({
   });
 
   const handleSendWithAiResult = useLastCallback(() => {
-    if (!aiMessageEditorPendingResult?.shouldSendWithAttachments || !isOpen) return;
+    if (!isForMessage || !aiMessageEditorPendingResult?.shouldSendWithAttachments
+      || !isOpen || hasPreparingAttachments) return;
+    if (aiMessageEditorPendingResult.chatId !== chatId || aiMessageEditorPendingResult.threadId !== threadId) return;
 
-    const { text, isSilent, scheduledAt, scheduleRepeatPeriod } = aiMessageEditorPendingResult;
+    const { content, isSilent, scheduledAt, scheduleRepeatPeriod } = aiMessageEditorPendingResult;
 
-    if (text) {
-      richEditor.setValue(buildRichMessageFromFormatted(text));
+    if (content.type === 'text') {
+      richEditor.setValue(buildRichMessageFromFormatted(content.text));
     }
 
     sendAttachments(isSilent, scheduledAt, scheduleRepeatPeriod);
@@ -390,7 +395,7 @@ const AttachmentModal = ({
 
   useEffect(() => {
     handleSendWithAiResult();
-  }, [aiMessageEditorPendingResult, handleSendWithAiResult]);
+  }, [aiMessageEditorPendingResult, hasPreparingAttachments, handleSendWithAiResult]);
 
   const handleSendSilent = useLastCallback(() => {
     sendAttachments(true);

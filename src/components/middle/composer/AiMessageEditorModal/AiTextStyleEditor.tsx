@@ -2,27 +2,30 @@ import { memo, useMemo, useState } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
 import type {
-  ApiAiComposeToneType, ApiComposedMessageWithAI, ApiFormattedText, ApiInputAiComposeTone,
+  ApiAiComposeToneType, ApiInputAiComposeTone,
 } from '../../../../api/types';
+import type { AiEditorContent, AiEditorResult } from '../../../../global/types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';
 import type { TabWithProperties } from '../../../ui/TabList';
 
 import { TME_LINK_PREFIX } from '../../../../config';
+import { hasAiEditorContent } from '../../../../global/helpers/aiMessageEditor';
 import { selectTabState } from '../../../../global/selectors';
 import { compareAiTones, getInputTone } from '../../../../util/aiComposeTones';
 import buildClassName from '../../../../util/buildClassName';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
-import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 
 import CheckboxField from '../../../gili/templates/CheckboxField';
 import ConfirmDialog from '../../../ui/ConfirmDialog';
-import Skeleton from '../../../ui/placeholder/Skeleton';
+import InputText from '../../../ui/InputText';
 import TabList from '../../../ui/TabList';
 import Transition from '../../../ui/Transition';
-import { AiEditorCopyButton, AiEditorErrorMessage, AiEditorResultArea } from './AiEditorShared';
+import {
+  AiEditorCopyButton, AiEditorErrorMessage, AiEditorPreview, AiEditorResultArea,
+} from './AiEditorShared';
 import AiToneEditorModal from './AiToneEditorModal';
 
 import sharedStyles from './AiEditorShared.module.scss';
@@ -30,13 +33,15 @@ import modalStyles from './AiMessageEditorModal.module.scss';
 import styles from './AiTextStyleEditor.module.scss';
 
 type OwnProps = {
-  text?: ApiFormattedText;
+  content?: AiEditorContent;
+  customPrompt?: string;
   selectedTone?: ApiInputAiComposeTone;
   shouldEmojify?: boolean;
   isLoading?: boolean;
-  result?: ApiComposedMessageWithAI;
+  result?: AiEditorResult;
   error?: 'floodPremium' | 'aiError' | 'generic';
   isPremium?: boolean;
+  onGenerate: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -45,7 +50,8 @@ type StateProps = {
 };
 
 const AiTextStyleEditor = ({
-  text,
+  content,
+  customPrompt,
   selectedTone,
   shouldEmojify,
   isLoading,
@@ -54,6 +60,7 @@ const AiTextStyleEditor = ({
   isPremium,
   tones,
   isAiToneEditorOpen,
+  onGenerate,
 }: OwnProps & StateProps) => {
   const {
     setAiMessageEditorStyleOptions,
@@ -79,7 +86,8 @@ const AiTextStyleEditor = ({
     setToneToDelete(undefined);
   });
 
-  const hasResult = Boolean(result?.resultText);
+  const hasSource = Boolean(content && hasAiEditorContent(content));
+  const isPromptSelected = selectedTone?.type === 'singleUse';
   const hasRequest = Boolean(selectedTone) || shouldEmojify;
   const shouldShowError = Boolean(error) && hasRequest;
 
@@ -122,59 +130,85 @@ const AiTextStyleEditor = ({
   });
 
   const styleTabs = useMemo((): TabWithProperties[] => {
-    const tabs: TabWithProperties[] = tones.map((entry) => ({
+    const tabs: TabWithProperties[] = [{ icon: 'ai', title: lang('AiEditorPrompt') }, ...tones.map((entry) => ({
       customEmojiDocumentId: entry.emojiId,
       title: entry.title,
+      isBlocked: !hasSource,
       contextActions: buildContextActions(entry),
-    }));
+    }))];
 
     if (tones.length) {
       tabs.push({ icon: 'add', title: lang('AiToneEditorNewStyle') });
     }
 
     return tabs;
-  }, [tones, lang, buildContextActions]);
+  }, [tones, lang, buildContextActions, hasSource]);
 
-  const activeStyleIndex = tones.findIndex(
-    (entry) => compareAiTones(selectedTone, getInputTone(entry)),
-  );
+  const toneIndex = tones.findIndex((entry) => compareAiTones(selectedTone, getInputTone(entry)));
+  const activeStyleIndex = isPromptSelected ? 0 : toneIndex >= 0 ? toneIndex + 1 : -1;
 
   const handleStyleSelect = useLastCallback((index: number) => {
-    if (index === tones.length) {
+    if (index === 0) {
+      if (isPromptSelected) return;
+      setAiMessageEditorStyleOptions({
+        selectedTone: { type: 'singleUse', customPrompt: customPrompt || '' }, clearResult: true,
+      });
+      return;
+    }
+    if (index === tones.length + 1) {
       openAiToneEditorModal();
       return;
     }
-    const tone = getInputTone(tones[index]);
+    if (!hasSource) return;
+    const tone = getInputTone(tones[index - 1]);
     setAiMessageEditorStyleOptions({ selectedTone: tone });
     composeWithAiMessageEditor({ tone, isEmojify: shouldEmojify });
   });
 
   const handleEmojifyChange = useLastCallback((newEmojify: boolean) => {
-    if (!selectedTone && !newEmojify) {
+    if (isPromptSelected || !hasSource || (!selectedTone && !newEmojify)) {
       setAiMessageEditorStyleOptions({ shouldEmojify: newEmojify, clearResult: true });
-    } else {
-      setAiMessageEditorStyleOptions({ shouldEmojify: newEmojify });
-      composeWithAiMessageEditor({ tone: selectedTone, isEmojify: newEmojify });
+      return;
     }
+    setAiMessageEditorStyleOptions({ shouldEmojify: newEmojify });
+    composeWithAiMessageEditor({ tone: selectedTone, isEmojify: newEmojify });
   });
 
-  const displayText = hasResult ? result?.resultText : text;
+  const handlePromptChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const prompt = e.target.value;
+    setAiMessageEditorStyleOptions({
+      customPrompt: prompt,
+      selectedTone: { type: 'singleUse', customPrompt: prompt },
+      clearResult: true,
+    });
+  });
+
+  const handlePromptKeyDown = useLastCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter' || e.isComposing || e.repeat || result || error) return;
+    e.preventDefault();
+    onGenerate();
+  });
+
+  const displayContent = result || content;
   const showResultLabel = hasRequest || isLoading;
   const displayLabel = showResultLabel ? lang('AiMessageEditorResult') : lang('AiMessageEditorOriginal');
 
-  const transitionKey = (activeStyleIndex >= 0 ? activeStyleIndex : 0) + (shouldEmojify ? tones.length : 0);
+  const transitionKey = (activeStyleIndex >= 0 ? activeStyleIndex : 0) + (shouldEmojify ? styleTabs.length : 0);
 
   function renderPreviewText() {
     if (shouldShowError) {
-      return <AiEditorErrorMessage error={error} isPremium={isPremium} />;
+      return (
+        <AiEditorErrorMessage
+          error={error}
+          isPremium={isPremium}
+          onRetry={isPromptSelected && !isLoading ? onGenerate : undefined}
+        />
+      );
     }
 
     return (
       <div className={styles.previewText}>
-        {displayText?.text && renderTextWithEntities({
-          text: displayText.text,
-          entities: displayText.entities,
-        })}
+        <AiEditorPreview content={displayContent} />
       </div>
     );
   }
@@ -182,27 +216,31 @@ const AiTextStyleEditor = ({
   return (
     <div className={buildClassName(modalStyles.editorBlock, styles.styleBlock)}>
       <div className={styles.tabListWrapper}>
-        {styleTabs.length > 0 && (
-          <TabList
-            tabs={styleTabs}
-            activeTab={activeStyleIndex}
-            onSwitchTab={handleStyleSelect}
-            className={styles.tabList}
-            tabClassName={styles.tab}
-            indicatorClassName={styles.tabListIndicator}
-            itemAlignment="vertical"
-          />
-        )}
-        <div className={buildClassName(styles.tabListSkeleton, styleTabs.length && styles.tabListSkeletonHidden)}>
-          <Skeleton className={styles.tabSkeleton} variant="round" animation="wave" />
-          <Skeleton className={styles.tabSkeleton} variant="round" animation="wave" />
-          <Skeleton className={styles.tabSkeleton} variant="round" animation="wave" />
-          <Skeleton className={styles.tabSkeleton} variant="round" animation="wave" />
-          <Skeleton className={styles.tabSkeleton} variant="round" animation="wave" />
-        </div>
+        <TabList
+          tabs={styleTabs}
+          activeTab={activeStyleIndex}
+          onSwitchTab={handleStyleSelect}
+          className={styles.tabList}
+          tabClassName={styles.tab}
+          indicatorClassName={styles.tabListIndicator}
+          itemAlignment="vertical"
+        />
       </div>
 
       <div className={sharedStyles.separator} />
+
+      {isPromptSelected && (
+        <div className={styles.promptRow}>
+          <InputText
+            value={customPrompt}
+            title={lang('AiEditorPrompt')}
+            placeholder={lang(hasSource ? 'AiEditorRewritePlaceholder' : 'AiEditorGeneratePlaceholder')}
+            onChange={handlePromptChange}
+            onKeyDown={handlePromptKeyDown}
+            noMargin
+          />
+        </div>
+      )}
 
       <div className={sharedStyles.optionsRow}>
         <Transition
@@ -228,8 +266,8 @@ const AiTextStyleEditor = ({
         {renderPreviewText()}
       </AiEditorResultArea>
       <AiEditorCopyButton
-        textToCopy={displayText?.text}
-        isHidden={isLoading || shouldShowError || !displayText?.text}
+        content={displayContent}
+        isHidden={isLoading || shouldShowError}
       />
       <AiToneEditorModal isOpen={Boolean(isAiToneEditorOpen)} />
       <ConfirmDialog

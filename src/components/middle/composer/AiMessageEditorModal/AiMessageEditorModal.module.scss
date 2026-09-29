@@ -1,3 +1,5 @@
+@use '../../../../styles/mixins';
+
 .modal {
   max-width: 26rem;
 }
@@ -48,12 +50,16 @@
 }
 
 .tabContent {
+  scrollbar-gutter: stable;
+
   overflow: auto;
   flex-grow: 1;
 
   min-height: 0;
   padding: 1rem;
   padding-top: 3.125rem;
+
+  @include mixins.adapt-padding-to-scrollbar(1rem);
 }
 
 .editorBlock {
