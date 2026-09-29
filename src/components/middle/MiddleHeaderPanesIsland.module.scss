@@ -3,7 +3,7 @@
   --island-transform-transition: transform var(--layer-transition);
 
   position: absolute;
-  z-index: var(--z-middle-header);
+  z-index: var(--z-middle-header-panes);
   top: calc(var(--middle-header-player-height, 0px) + var(--panes-top-base));
   right: 0;
   left: 0;
