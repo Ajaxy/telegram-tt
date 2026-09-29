@@ -27,6 +27,7 @@ import styles from './AiEditorShared.module.scss';
 
 const MIN_HEIGHT = 100;
 const HEIGHT_PADDING = 4;
+const LOADING_LINES = 6;
 
 export function getAiEditorText(content: AiEditorContent) {
   if (content.type === 'text') return content.text.text;
@@ -73,7 +74,7 @@ export const AiEditorResultArea = memo(({
   const [height, setHeight] = useState<number | undefined>(undefined);
 
   const hasInitialized = height !== undefined;
-  const displayHeight = hasInitialized ? height : (isLoading ? MIN_HEIGHT : undefined);
+  const displayHeight = isLoading ? Math.max(height ?? 0, MIN_HEIGHT) : height;
 
   return (
     <div
@@ -81,7 +82,7 @@ export const AiEditorResultArea = memo(({
       style={displayHeight !== undefined ? `height: ${displayHeight}px` : undefined}
     >
       <div className={buildClassName(styles.loadingContainer, !isLoading && styles.hidden)}>
-        {loadingElement || <TextLoadingPlaceholder lines={6} />}
+        {loadingElement || <TextLoadingPlaceholder lines={LOADING_LINES} />}
       </div>
       <Transition
         name="fade"

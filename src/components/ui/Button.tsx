@@ -210,7 +210,7 @@ const Button = ({
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div>
+        <div className="loading-content">
           <span dir={isRtl ? 'auto' : undefined}>{lang('Cache.ClearProgress')}</span>
           <Spinner color={isText ? 'blue' : 'white'} />
         </div>

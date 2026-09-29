@@ -367,15 +367,20 @@
 
     &.loading {
       pointer-events: none;
-      position: relative;
+
+      .loading-content {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        justify-content: center;
+
+        min-width: 0;
+      }
 
       .Spinner {
         --spinner-size: 1.8125rem;
 
-        position: absolute;
-        top: 50%;
-        right: 0.875rem;
-        transform: translateY(-50%);
+        flex-shrink: 0;
       }
     }
 

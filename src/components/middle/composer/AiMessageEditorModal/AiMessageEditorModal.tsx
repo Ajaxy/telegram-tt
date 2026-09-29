@@ -125,11 +125,11 @@ const AiMessageEditorModal = ({
   const shouldGenerate = activeTab === 'style' && styleTab?.selectedTone?.type === 'singleUse'
     && !styleTab.result && !styleTab.error;
 
-  const tabs = useMemo((): { icon: IconName; title: string; isBlocked?: boolean }[] => [
-    { icon: 'language', title: lang('AiMessageEditorTranslate'), isBlocked: !hasSource },
+  const tabs = useMemo((): { icon: IconName; title: string }[] => [
+    { icon: 'language', title: lang('AiMessageEditorTranslate') },
     { icon: 'ai-edit', title: lang('AiMessageEditorStyle') },
-    { icon: 'ai-fix', title: lang('AiMessageEditorFix'), isBlocked: !hasSource },
-  ], [lang, hasSource]);
+    { icon: 'ai-fix', title: lang('AiMessageEditorFix') },
+  ], [lang]);
 
   const activeTabIndex = TAB_ID_TO_INDEX[activeTab || 'style'] ?? TAB_STYLE;
 
@@ -255,7 +255,9 @@ const AiMessageEditorModal = ({
       title={lang('AiMessageEditor')}
       hasCloseButton
       onClose={closeAiMessageEditorModal}
-      className={buildClassName(styles.modal, isStoryViewerOpen && 'component-theme-dark')}
+      className={buildClassName(
+        styles.modal, !hasSource && styles.promptOnly, isStoryViewerOpen && 'component-theme-dark',
+      )}
       headerClassName="modal-header-condensed-wide"
       dialogClassName={styles.modalDialog}
       contentClassName={styles.modalContent}
@@ -272,17 +274,19 @@ const AiMessageEditorModal = ({
       )}
       isSlim
     >
-      <TabList
-        tabs={tabs}
-        activeTab={activeTabIndex}
-        withFadeMask
-        fadeMaskClassName={styles.fadeMask}
-        className={styles.tabList}
-        tabClassName={styles.tab}
-        stretched
-        itemAlignment="vertical"
-        onSwitchTab={handleTabChange}
-      />
+      {hasSource && (
+        <TabList
+          tabs={tabs}
+          activeTab={activeTabIndex}
+          withFadeMask
+          fadeMaskClassName={styles.fadeMask}
+          className={styles.tabList}
+          tabClassName={styles.tab}
+          stretched
+          itemAlignment="vertical"
+          onSwitchTab={handleTabChange}
+        />
+      )}
 
       <div className={styles.transitionWrapper}>
         <Transition
@@ -298,6 +302,7 @@ const AiMessageEditorModal = ({
       <div className={styles.footer}>
         <Button
           className={styles.applyButton}
+          isShiny={isLoading}
           disabled={isLoading || (shouldGenerate ? !styleTab?.customPrompt?.trim() : Boolean(error) || !hasContent)}
           onClick={shouldGenerate ? handleGenerate : handleApply}
         >

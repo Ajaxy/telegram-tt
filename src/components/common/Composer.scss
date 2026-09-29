@@ -422,18 +422,13 @@
       --height: var(--composer-main-button-height);
       --icon-width: var(--composer-icon-size);
 
-      align-self: center;
       margin-bottom: 0;
     }
 
     .bot-commands {
-      align-self: center;
-
       width: var(--composer-main-button-height);
       height: var(--composer-main-button-height);
-
       color: white !important;
-
       background: var(--color-primary) !important;
 
       &.activated {

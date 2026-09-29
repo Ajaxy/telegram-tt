@@ -133,7 +133,6 @@ const AiTextStyleEditor = ({
     const tabs: TabWithProperties[] = [{ icon: 'ai', title: lang('AiEditorPrompt') }, ...tones.map((entry) => ({
       customEmojiDocumentId: entry.emojiId,
       title: entry.title,
-      isBlocked: !hasSource,
       contextActions: buildContextActions(entry),
     }))];
 
@@ -142,7 +141,7 @@ const AiTextStyleEditor = ({
     }
 
     return tabs;
-  }, [tones, lang, buildContextActions, hasSource]);
+  }, [tones, lang, buildContextActions]);
 
   const toneIndex = tones.findIndex((entry) => compareAiTones(selectedTone, getInputTone(entry)));
   const activeStyleIndex = isPromptSelected ? 0 : toneIndex >= 0 ? toneIndex + 1 : -1;
@@ -214,20 +213,23 @@ const AiTextStyleEditor = ({
   }
 
   return (
-    <div className={buildClassName(modalStyles.editorBlock, styles.styleBlock)}>
-      <div className={styles.tabListWrapper}>
-        <TabList
-          tabs={styleTabs}
-          activeTab={activeStyleIndex}
-          onSwitchTab={handleStyleSelect}
-          className={styles.tabList}
-          tabClassName={styles.tab}
-          indicatorClassName={styles.tabListIndicator}
-          itemAlignment="vertical"
-        />
-      </div>
-
-      <div className={sharedStyles.separator} />
+    <div className={buildClassName(modalStyles.editorBlock, hasSource && styles.styleBlock)}>
+      {hasSource && (
+        <>
+          <div className={styles.tabListWrapper}>
+            <TabList
+              tabs={styleTabs}
+              activeTab={activeStyleIndex}
+              onSwitchTab={handleStyleSelect}
+              className={styles.tabList}
+              tabClassName={styles.tab}
+              indicatorClassName={styles.tabListIndicator}
+              itemAlignment="vertical"
+            />
+          </div>
+          <div className={sharedStyles.separator} />
+        </>
+      )}
 
       {isPromptSelected && (
         <div className={styles.promptRow}>
