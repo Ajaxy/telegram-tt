@@ -1,5 +1,3 @@
-@use "../../../styles/mixins";
-
 .root {
   display: flex;
   flex-direction: column;
@@ -18,9 +16,9 @@
   font-weight: var(--font-weight-medium);
   line-height: 1.25;
 
-  @include mixins.action-message-bg($isModule: true);
+  background-color: var(--action-message-bg);
 
-  transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms, opacity 150ms;
+  transition: background-color 150ms, color 150ms, filter 150ms, opacity 150ms;
 
   &::before {
     content: '';

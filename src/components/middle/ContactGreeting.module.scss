@@ -1,5 +1,3 @@
-@use "../../styles/mixins";
-
 .root {
   display: flex;
   flex-direction: column;
@@ -25,7 +23,7 @@
 
     color: #fff;
 
-    @include mixins.action-message-bg($isModule: true);
+    background-color: var(--action-message-bg);
   }
 
   .explainer {
@@ -37,7 +35,7 @@
     color: #fff;
     text-wrap: balance;
 
-    @include mixins.action-message-bg($isModule: true);
+    background-color: var(--action-message-bg);
   }
 
   .title {

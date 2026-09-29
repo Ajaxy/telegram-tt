@@ -2,7 +2,7 @@ import type { GlobalState } from '../global/types';
 
 import { DEBUG, IS_MOCKED_CLIENT, IS_SCREEN_LOCKED_CACHE_KEY } from '../config';
 import {
-  loadCache, loadCachedSharedState, migrateCache, removeAllGlobalCaches, setupCaching,
+  loadCache, loadCachedSharedState, migrateCache, migrateSharedCache, removeAllGlobalCaches, setupCaching,
 } from '../global/cache';
 import {
   getGlobal, setGlobal,
@@ -56,12 +56,13 @@ export async function initGlobal(force: boolean = false, prevGlobal?: GlobalStat
   if (!cache) { // Try loading shared state separately
     const storedSharedState = await loadCachedSharedState();
     if (storedSharedState) {
+      const sharedState = migrateSharedCache(storedSharedState, undefined, global.sharedState);
       global.sharedState = {
         ...global.sharedState,
-        ...storedSharedState,
+        ...sharedState,
         settings: {
           ...global.sharedState.settings,
-          ...storedSharedState.settings,
+          ...sharedState.settings,
         },
       };
     }

@@ -4,11 +4,12 @@ import type { ApiWallpaper, ApiWallpaperSettings } from '../api/types';
 import type { IThemeSettings, ThemeKey } from '../types';
 
 import { DARK_THEME_BG_COLOR } from '../config';
-import { buildColorFromHex, getPatternColor, int2hex } from './colors';
+import { buildColorFromHex, buildDenseTint, getPatternColor, int2hex } from './colors';
 
 const DEFAULT_PATTERN_INTENSITY = 50;
 const DEFAULT_LIGHT_ACTION_MESSAGE_BG = '#4A8E3A8C';
 const DEFAULT_DARK_ACTION_MESSAGE_BG = '#48576166';
+const ACTION_MESSAGE_BG_ALPHA = 0.85;
 // The user slider scales the wallpaper's own intensity: 100 keeps it as is, 0 hides the pattern
 const MAX_PATTERN_INTENSITY_FACTOR = 100;
 export const DEFAULT_PATTERN_INTENSITY_FACTOR = 75;
@@ -161,18 +162,20 @@ export function getDefaultPatternColor(theme: ThemeKey): string {
   return theme === 'dark' ? DEFAULT_DARK_WALLPAPER.patternColor : DEFAULT_LIGHT_WALLPAPER.patternColor;
 }
 
-// Built-in wallpapers use their stable chip colors; custom wallpapers follow their derived tint
+// Built-in wallpapers use their stable chip colors; custom wallpapers follow their derived tint.
+// The tint is densified against the wallpaper's average color to hide the doodles beneath the chips.
 export function getActionMessageBg(theme: ThemeKey, settings?: IThemeSettings): string | undefined {
-  if (!settings || getIsDefaultWallpaper(settings)) {
-    return theme === 'dark' ? DEFAULT_DARK_ACTION_MESSAGE_BG : DEFAULT_LIGHT_ACTION_MESSAGE_BG;
-  }
+  const model = buildWallpaperRenderModel(theme, settings || {});
+  const defaultTint = theme === 'dark' ? DEFAULT_DARK_ACTION_MESSAGE_BG : DEFAULT_LIGHT_ACTION_MESSAGE_BG;
+  const tint = model.isDefault ? defaultTint : model.patternColor;
+  if (!tint) return undefined;
 
-  return settings.patternColor;
+  const backdropColors = model.isMaskedPattern ? [model.baseColor!] : model.colors;
+  return buildDenseTint(tint, backdropColors, ACTION_MESSAGE_BG_ALPHA);
 }
 
 // Derives the translucent tint used for `--pattern-color` (message/embedded bubbles) and
-// `--action-message-bg` (service-message chips). The alpha is kept: those chips must stay
-// see-through over the wallpaper. The background doodle overlay controls its own opacity/blend.
+// `--action-message-bg` (service-message chips). The background doodle overlay controls its own opacity/blend.
 export function getWallpaperPatternColor(baseColorHex: string): string {
   return getPatternColor(buildColorFromHex(baseColorHex));
 }

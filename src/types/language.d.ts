@@ -674,7 +674,6 @@ export interface LangPair {
   'SettingsPerformanceComposer': undefined;
   'SettingsPerformanceContextAnimation': undefined;
   'SettingsPerformanceContextBlur': undefined;
-  'SettingsPerformanceMessageBlur': undefined;
   'SettingsPerformanceRightColumn': undefined;
   'SettingsPerformanceThanos': undefined;
   'SettingsPerformanceTextStreaming': undefined;

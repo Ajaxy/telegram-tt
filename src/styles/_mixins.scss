@@ -180,24 +180,6 @@
   }
 }
 
-@mixin action-message-bg($isModule: false, $noBackground: false) {
-  @if not $noBackground {
-    background-color: var(--action-message-bg);
-  }
-
-  @if $isModule {
-    :global(body.with-message-blur) & {
-      backdrop-filter: blur(4px);
-    }
-  }
-
-  @else {
-    body.with-message-blur & {
-      backdrop-filter: blur(4px);
-    }
-  }
-}
-
 @mixin composer-pill {
   padding: var(--composer-pill-padding);
   border-radius: var(--composer-pill-radius);

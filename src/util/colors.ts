@@ -57,6 +57,19 @@ export function getPatternColor(color: Color) {
     .toString({ format: 'hex', collapse: false, alpha: true });
 }
 
+// Raises the alpha of a translucent tint, keeping its composite over the average backdrop color unchanged
+export function buildDenseTint(tintHex: string, backdropHexColors: string[], alpha: number) {
+  const tint = buildColorFromHex(tintHex);
+  if (tint.alpha >= alpha) return tintHex;
+
+  const backdrop = backdropHexColors.map(buildColorFromHex)
+    .reduce((average, color, i) => average.mix(color, 1 / (i + 1), { space: 'srgb' }), tint);
+  const denseTint = backdrop.mix(tint, tint.alpha / alpha, { space: 'srgb' });
+  denseTint.alpha = alpha;
+
+  return denseTint.toString({ format: 'hex', collapse: false, alpha: true });
+}
+
 export function int2cssRgba(color: number): string {
   const alpha = (color >> 24) & 0xff;
   const red = (color >> 16) & 0xff;

@@ -1,5 +1,3 @@
-@use "../../styles/mixins";
-
 @property --message-list-mask-panes-height {
   inherits: false;
   initial-value: 0px;
@@ -258,7 +256,7 @@
     .Message,
     .ActionMessage {
       &::before {
-        @include mixins.action-message-bg;
+        background-color: var(--action-message-bg);
       }
 
       &.focused,
@@ -300,10 +298,12 @@
     > span {
       position: relative;
       z-index: 0;
+
       border-radius: var(--border-radius-messages);
+
       color: white;
 
-      @include mixins.action-message-bg;
+      background-color: var(--action-message-bg);
 
       body.is-ios &,
       body.is-macos & {

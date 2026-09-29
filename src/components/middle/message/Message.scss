@@ -1,5 +1,4 @@
 @use "message-content";
-@use "../../../styles/mixins";
 
 // General styles
 .Message {
@@ -764,8 +763,7 @@
     border-radius: 1.125rem;
 
     opacity: 0;
-
-    @include mixins.action-message-bg;
+    background-color: var(--action-message-bg);
 
     transition: opacity 150ms;
 

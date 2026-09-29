@@ -10,7 +10,7 @@ import type {
   ApiVideo,
 } from '../api/types';
 import type {
-  IThemeSettings, MessageList, ThemeKey, ThreadId, TopicsInfo,
+  IThemeSettings, MessageList, PerformanceType, ThemeKey, ThreadId, TopicsInfo,
 } from '../types';
 import type { ActionReturnType, GlobalState, SharedState } from './types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../api/types';
@@ -253,7 +253,7 @@ async function readCache(initialState: GlobalState): Promise<GlobalState> {
   return newState;
 }
 
-function migrateSharedCache(
+export function migrateSharedCache(
   cached: SharedState | undefined,
   fallbackThemes: Partial<Record<ThemeKey, IThemeSettings>> | undefined,
   initialState: SharedState,
@@ -264,11 +264,14 @@ function migrateSharedCache(
   let migrated = cached || initialState;
 
   if (cacheVersion < SHARED_STATE_CACHE_VERSION) {
+    const { messageBlur, ...performance } = settings.performance as PerformanceType & { messageBlur?: boolean };
+
     migrated = {
       ...migrated,
       cacheVersion: SHARED_STATE_CACHE_VERSION,
       settings: {
         ...settings,
+        performance,
         themes: cachedSettings?.themes
           || (fallbackThemes ? cloneThemeSettings(fallbackThemes) : initialState.settings.themes),
       },
@@ -340,10 +343,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   const cachedSharedSettings = cached.sharedState.settings;
   if (cachedSharedSettings.instantViewFontSizeAdjust === undefined) {
     cachedSharedSettings.instantViewFontSizeAdjust = INSTANT_VIEW_FONT_SIZE_ADJUST_DEFAULT;
-  }
-
-  if (cachedSharedSettings.performance.messageBlur === undefined) {
-    cachedSharedSettings.performance.messageBlur = false;
   }
 
   if (cachedSharedSettings.performance.textStreaming === undefined) {

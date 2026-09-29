@@ -784,7 +784,6 @@
 "SettingsPerformanceComposer" = "Message Composer Animations";
 "SettingsPerformanceContextAnimation" = "Context Menu Animation";
 "SettingsPerformanceContextBlur" = "Context Menu Blur";
-"SettingsPerformanceMessageBlur" = "Message Blur";
 "SettingsPerformanceRightColumn" = "Right Column Animation";
 "SettingsPerformanceThanos" = "Dust-effect deletion";
 "SettingsPerformanceTextStreaming" = "Text Streaming";

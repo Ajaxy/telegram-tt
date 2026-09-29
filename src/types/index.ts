@@ -120,7 +120,7 @@ export type AnimationLevel = 0 | 1 | 2;
 export type FoldersPosition = 'top' | 'left';
 export type PerformanceTypeKey = (
   'pageTransitions' | 'messageSendingAnimations' | 'mediaViewerAnimations'
-  | 'messageComposerAnimations' | 'contextMenuAnimations' | 'contextMenuBlur' | 'messageBlur'
+  | 'messageComposerAnimations' | 'contextMenuAnimations' | 'contextMenuBlur'
   | 'rightColumnAnimations' | 'animatedEmoji' | 'loopAnimatedStickers' | 'reactionEffects' | 'stickerEffects'
   | 'autoplayGifs' | 'autoplayVideos' | 'storyRibbonAnimations' | 'snapEffect' | 'textStreaming'
 );

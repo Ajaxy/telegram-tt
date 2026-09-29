@@ -20,7 +20,6 @@ import { DEFAULT_APP_CONFIG } from '../limits';
 import { INITIAL_BROWSER_STATE } from './helpers/browser';
 
 export const INITIAL_PERFORMANCE_STATE_MAX: PerformanceType = {
-  messageBlur: true,
   animatedEmoji: true,
   autoplayGifs: true,
   autoplayVideos: true,
@@ -40,7 +39,6 @@ export const INITIAL_PERFORMANCE_STATE_MAX: PerformanceType = {
 };
 
 export const INITIAL_PERFORMANCE_STATE_MED: PerformanceType = {
-  messageBlur: false,
   animatedEmoji: true,
   autoplayGifs: true,
   autoplayVideos: true,
@@ -60,7 +58,6 @@ export const INITIAL_PERFORMANCE_STATE_MED: PerformanceType = {
 };
 
 export const INITIAL_PERFORMANCE_STATE_MIN: PerformanceType = {
-  messageBlur: false,
   animatedEmoji: false,
   autoplayGifs: false,
   autoplayVideos: false,
@@ -79,7 +76,7 @@ export const INITIAL_PERFORMANCE_STATE_MIN: PerformanceType = {
   textStreaming: false,
 };
 
-export const SHARED_STATE_CACHE_VERSION = 1;
+export const SHARED_STATE_CACHE_VERSION = 2;
 
 export const INITIAL_SHARED_STATE: SharedState = {
   cacheVersion: SHARED_STATE_CACHE_VERSION,

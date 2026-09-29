@@ -8,7 +8,7 @@
 
   &.clickable {
     cursor: var(--custom-cursor, pointer);
-    transition: background-color 150ms, backdrop-filter 150ms, filter 150ms, opacity 150ms;
+    transition: background-color 150ms, filter 150ms, opacity 150ms;
 
     &:hover {
       opacity: 0.85;

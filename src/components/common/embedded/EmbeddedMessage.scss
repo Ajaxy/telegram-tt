@@ -1,5 +1,4 @@
 @use "sass:map";
-@use "../../../styles/mixins";
 @use "../../../styles/icons";
 
 .EmbeddedMessage {
@@ -83,10 +82,10 @@
 
     max-width: 15rem;
     margin: 0;
+
     color: white !important;
 
-    @include mixins.action-message-bg;
-
+    background-color: var(--action-message-bg);
     box-shadow: 0 1px 2px var(--color-default-shadow);
 
     &:dir(rtl) {
