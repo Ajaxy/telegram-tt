@@ -1,4 +1,3 @@
-import Color from 'colorjs.io';
 import type { ElementRef } from '../../lib/teact/teact';
 import {
   getIsHeavyAnimating,
@@ -12,6 +11,7 @@ import {
 import type TLottieInstance from '../../lib/tlottie/TLottie';
 import type { EmojiFitzModifier } from '../../util/emoji/skinTone';
 
+import { buildColor, type Color } from '../../lib/color';
 import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { ensureTLottie, getTLottie } from '../../lib/tlottie/TLottie.async';
 import { IS_TAURI } from '../../util/browser/globalEnvironment';
@@ -124,7 +124,7 @@ const AnimatedSticker = ({
 
   useSyncEffect(() => {
     if (color && !shouldUseColorFilter) {
-      colorRef.current = new Color(color);
+      colorRef.current = buildColor(color);
     } else {
       colorRef.current = undefined;
     }

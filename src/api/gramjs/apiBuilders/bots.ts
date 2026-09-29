@@ -24,7 +24,7 @@ import type {
   MediaContent,
 } from '../../types';
 
-import { int2hex } from '../../../util/colors';
+import int2hex from '../../../util/int2hex';
 import { pick } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
 import { addDocumentToLocalDb } from '../helpers/localDb';

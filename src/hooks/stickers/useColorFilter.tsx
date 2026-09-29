@@ -1,7 +1,7 @@
-import Color from 'colorjs.io';
 import { useEffect } from '../../lib/teact/teact';
 
 import { SVG_NAMESPACE } from '../../config';
+import { buildColor, convertColor } from '../../lib/color';
 import { addSvgDefinition, removeSvgDefinition } from '../../util/svgController';
 
 const SVG_MAP = new Map<string, SvgColorFilter>();
@@ -14,7 +14,7 @@ class SvgColorFilter {
   constructor(public color: string) {
     this.filterId = `color-filter-${color.slice(1)}`;
 
-    const [r, g, b] = new Color(color).to('srgb').coords;
+    const [r, g, b] = convertColor(buildColor(color), 'srgb').coords;
     addSvgDefinition(
       <filter color-interpolation-filters="sRGB" xmlns={SVG_NAMESPACE}>
         <feColorMatrix

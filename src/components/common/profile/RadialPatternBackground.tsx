@@ -1,8 +1,8 @@
-import Color from 'colorjs.io';
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useSignal } from '../../../lib/teact/teact';
 
 import type { ApiSticker } from '../../../api/types';
 
+import { buildColor, convertColor, serializeColor } from '../../../lib/color';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getStickerMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
@@ -225,20 +225,23 @@ const RadialPatternBackground = ({
 export default memo(RadialPatternBackground);
 
 function getPerceivedLuma(color: string) {
-  const [r, g, b] = new Color(color).to('srgb').coords;
+  const [r, g, b] = convertColor(buildColor(color), 'srgb').coords;
   const [rc, gc, bc] = LUMA_COEFFICIENTS;
   return rc * (r! * RGB_CHANNEL_MAX) + gc * (g! * RGB_CHANNEL_MAX) + bc * (b! * RGB_CHANNEL_MAX);
 }
 
 function buildAdjustedHsvColor(color: string, satDelta: number, valDelta: number) {
-  const parsedColor = new Color(color);
-  const [h, initialS, initialV] = parsedColor.to('hsv').coords;
+  const parsedColor = buildColor(color);
+  const [h, initialS, initialV] = convertColor(parsedColor, 'hsv').coords;
   let s = initialS! / COLOR_PERCENT_MAX;
   let v = initialV! / COLOR_PERCENT_MAX;
 
   if (s > 0.1 && s < 0.9) s = Math.max(0, Math.min(1, s + satDelta));
   v = Math.max(0, Math.min(1, v + valDelta));
 
-  return new Color('hsv', [h || 0, s * COLOR_PERCENT_MAX, v * COLOR_PERCENT_MAX], parsedColor.alpha)
-    .toString({ format: 'hex', collapse: false, alpha: true });
+  return serializeColor({
+    space: 'hsv',
+    coords: [h || 0, s * COLOR_PERCENT_MAX, v * COLOR_PERCENT_MAX],
+    alpha: parsedColor.alpha,
+  }, { format: 'hex', collapse: false, alpha: true });
 }

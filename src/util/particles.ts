@@ -1,7 +1,6 @@
 // GPU-Accelerated Particle System Library
 
-import Color from 'colorjs.io';
-
+import { buildColor, type Color } from '../lib/color';
 import generateUniqueId from './generateUniqueId.ts';
 
 import { getIsInBackground } from '../hooks/window/useBackgroundMode.ts';
@@ -78,23 +77,23 @@ interface ParticleSystemManager {
 }
 
 type ColorPair = readonly [Color, Color];
-const TON_COLOR = new Color('#0098EA');
+const TON_COLOR = buildColor('#0098EA');
 
 export const PARTICLE_COLORS = {
   blue: TON_COLOR,
   blueGradient: [
-    new Color('#0158AF'),
-    new Color('#67D0FF'),
+    buildColor('#0158AF'),
+    buildColor('#67D0FF'),
   ] satisfies ColorPair,
-  purple: new Color('#966FFE'),
+  purple: buildColor('#966FFE'),
   purpleGradient: [
-    new Color('#6B93FF'),
-    new Color('#E46ACE'),
+    buildColor('#6B93FF'),
+    buildColor('#E46ACE'),
   ] satisfies ColorPair,
-  gold: new Color('#FFBF0A'),
+  gold: buildColor('#FFBF0A'),
   goldGradient: [
-    new Color('#FDEB32'),
-    new Color('#D75902'),
+    buildColor('#FDEB32'),
+    buildColor('#D75902'),
   ] satisfies ColorPair,
 };
 
@@ -678,15 +677,18 @@ function getRotations(): Float32Array {
 }
 
 function resolveColor(colorDefinition: Color | ColorPair, rng: SeededRandom): Color {
-  if (colorDefinition instanceof Color) return colorDefinition;
+  if ('coords' in colorDefinition) return colorDefinition;
 
   const [color1, color2] = colorDefinition;
   const [red1, green1, blue1] = color1.coords;
   const [red2, green2, blue2] = color2.coords;
 
-  return new Color('srgb', [
-    rng.nextBetween(red1 || 0, red2 || 0),
-    rng.nextBetween(green1 || 0, green2 || 0),
-    rng.nextBetween(blue1 || 0, blue2 || 0),
-  ]);
+  return buildColor({
+    space: 'srgb',
+    coords: [
+      rng.nextBetween(red1 || 0, red2 || 0),
+      rng.nextBetween(green1 || 0, green2 || 0),
+      rng.nextBetween(blue1 || 0, blue2 || 0),
+    ],
+  });
 }

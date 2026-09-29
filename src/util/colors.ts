@@ -1,5 +1,4 @@
-import Color from 'colorjs.io';
-
+import { buildColor, type Color, convertColor, getLuminance, mixColors, serializeColor } from '../lib/color';
 import { preloadImage } from './files';
 
 const LUMA_THRESHOLD = 128;
@@ -27,7 +26,7 @@ export async function getAverageColor(url: string): Promise<Color> {
 }
 
 export function getColorLuma(color: Color) {
-  return color.luminance * RGB_CHANNEL_MAX;
+  return getLuminance(color) * RGB_CHANNEL_MAX;
 }
 
 export function convertSrgbChannel(channel: number | null) {
@@ -35,16 +34,16 @@ export function convertSrgbChannel(channel: number | null) {
 }
 
 export function buildColorFromHex(hex: string) {
-  return new Color(hex.startsWith('#') ? hex : `#${hex}`);
+  return buildColor(hex.startsWith('#') ? hex : `#${hex}`);
 }
 
 export function buildHexFromColor(color: Color) {
-  return color.toString({ format: 'hex', collapse: false, alpha: false });
+  return serializeColor(color, { format: 'hex', collapse: false, alpha: false });
 }
 
 // Function was adapted from https://github.com/telegramdesktop/tdesktop/blob/35ff621b5b52f7e3553fb0f990ea13ade7101b8e/Telegram/SourceFiles/data/data_wall_paper.cpp#L518
 export function getPatternColor(color: Color) {
-  const [h, initialS, initialV] = color.to('hsv').coords;
+  const [h, initialS, initialV] = convertColor(color, 'hsv').coords;
   let s = initialS! / COLOR_PERCENT_MAX;
   let v = initialV! / COLOR_PERCENT_MAX;
 
@@ -53,21 +52,24 @@ export function getPatternColor(color: Color) {
     ? Math.max(0, v * 0.65)
     : Math.max(0, Math.min(1, 1 - v * 0.65));
 
-  return new Color('hsv', [h || 0, s * COLOR_PERCENT_MAX, v * COLOR_PERCENT_MAX], 102 / RGB_CHANNEL_MAX)
-    .toString({ format: 'hex', collapse: false, alpha: true });
+  return serializeColor({
+    space: 'hsv',
+    coords: [h || 0, s * COLOR_PERCENT_MAX, v * COLOR_PERCENT_MAX],
+    alpha: 102 / RGB_CHANNEL_MAX,
+  }, { format: 'hex', collapse: false, alpha: true });
 }
 
 // Raises the alpha of a translucent tint, keeping its composite over the average backdrop color unchanged
 export function buildDenseTint(tintHex: string, backdropHexColors: string[], alpha: number) {
   const tint = buildColorFromHex(tintHex);
-  if (tint.alpha >= alpha) return tintHex;
+  if (tint.alpha! >= alpha) return tintHex;
 
   const backdrop = backdropHexColors.map(buildColorFromHex)
-    .reduce((average, color, i) => average.mix(color, 1 / (i + 1), { space: 'srgb' }), tint);
-  const denseTint = backdrop.mix(tint, tint.alpha / alpha, { space: 'srgb' });
+    .reduce((average, color, i) => mixColors(average, color, 1 / (i + 1), { space: 'srgb' }), tint);
+  const denseTint = mixColors(backdrop, tint, tint.alpha! / alpha, { space: 'srgb' });
   denseTint.alpha = alpha;
 
-  return denseTint.toString({ format: 'hex', collapse: false, alpha: true });
+  return serializeColor(denseTint, { format: 'hex', collapse: false, alpha: true });
 }
 
 export function int2cssRgba(color: number): string {
@@ -80,19 +82,18 @@ export function int2cssRgba(color: number): string {
   return `rgba(${red}, ${green}, ${blue}, ${alphaFloat})`;
 }
 
-export function int2hex(color: number): string {
-  return `#${color.toString(16).padStart(6, '0')}`;
-}
-
 export function getTextColor(color: number): string {
   const r = (color >> 16) & 0xff;
   const g = (color >> 8) & 0xff;
   const b = color & 0xff;
-  const colorInstance = new Color('srgb', [
-    r / RGB_CHANNEL_MAX,
-    g / RGB_CHANNEL_MAX,
-    b / RGB_CHANNEL_MAX,
-  ]);
+  const colorInstance = buildColor({
+    space: 'srgb',
+    coords: [
+      r / RGB_CHANNEL_MAX,
+      g / RGB_CHANNEL_MAX,
+      b / RGB_CHANNEL_MAX,
+    ],
+  });
   const luma = getColorLuma(colorInstance);
   return luma > LUMA_THRESHOLD ? 'black' : 'white';
 }
@@ -139,13 +140,16 @@ function buildAverageColor(imageData: ImageData) {
 
   if (!count) return buildFallbackColor();
 
-  return new Color(colorSpace, [
-    rgb[0] / count,
-    rgb[1] / count,
-    rgb[2] / count,
-  ]);
+  return buildColor({
+    space: colorSpace,
+    coords: [
+      rgb[0] / count,
+      rgb[1] / count,
+      rgb[2] / count,
+    ],
+  });
 }
 
 function buildFallbackColor() {
-  return new Color('srgb', [0, 0, 0]);
+  return buildColor({ space: 'srgb', coords: [0, 0, 0] });
 }

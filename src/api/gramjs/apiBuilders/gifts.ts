@@ -20,7 +20,7 @@ import type {
   ApiTypeStarGiftAuctionState,
 } from '../../types';
 
-import { int2hex } from '../../../util/colors';
+import int2hex from '../../../util/int2hex';
 import { toJSNumber } from '../../../util/numbers';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiFormattedText } from './common';

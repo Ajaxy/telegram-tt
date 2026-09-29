@@ -1,4 +1,3 @@
-import Color from 'colorjs.io';
 import {
   memo, useEffect,
   useMemo, useRef,
@@ -19,6 +18,7 @@ import {
   INSTANT_VIEW_FONT_SIZE_ADJUST_STEP,
   RESIZE_HANDLE_CLASS_NAME,
 } from '../../../config';
+import { buildColor } from '../../../lib/color';
 import { getWebAppKey } from '../../../global/helpers/bots';
 import {
   selectCurrentChat, selectFullWebPage, selectTheme, selectUser,
@@ -559,7 +559,7 @@ const BrowserModal = ({
   const headerTextVar = useMemo(() => {
     if (isMoreAppsTabActive) return 'color-text';
     if (!headerColor) return undefined;
-    const luma = getColorLuma(new Color(headerColor));
+    const luma = getColorLuma(buildColor(headerColor));
     const adaptedLuma = theme === 'dark' ? 255 - luma : luma;
     return adaptedLuma > LUMA_THRESHOLD ? 'color-text' : 'color-background';
   }, [headerColor, theme, isMoreAppsTabActive]);

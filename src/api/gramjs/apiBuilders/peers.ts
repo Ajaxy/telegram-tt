@@ -11,7 +11,7 @@ import type {
 } from '../../types';
 
 import { CHANNEL_ID_BASE } from '../../../config';
-import { int2hex } from '../../../util/colors';
+import int2hex from '../../../util/int2hex';
 import { buildCollectionByCallback } from '../../../util/iteratees';
 
 type TypePeerOrInput = GramJs.TypePeer | GramJs.TypeInputPeer | GramJs.TypeInputUser | GramJs.TypeInputChannel;

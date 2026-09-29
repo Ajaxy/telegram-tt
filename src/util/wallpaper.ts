@@ -4,7 +4,8 @@ import type { ApiWallpaper, ApiWallpaperSettings } from '../api/types';
 import type { IThemeSettings, ThemeKey } from '../types';
 
 import { DARK_THEME_BG_COLOR } from '../config';
-import { buildColorFromHex, buildDenseTint, getPatternColor, int2hex } from './colors';
+import { buildColorFromHex, buildDenseTint, getPatternColor } from './colors';
+import int2hex from './int2hex';
 
 const DEFAULT_PATTERN_INTENSITY = 50;
 const DEFAULT_LIGHT_ACTION_MESSAGE_BG = '#4A8E3A8C';

@@ -1,7 +1,6 @@
-import Color from 'colorjs.io';
-
 import type { ThemeKey } from '../types';
 
+import { buildColor, mixColors, serializeColor } from '../lib/color';
 import { requestMutation } from '../lib/fasterdom/fasterdom';
 import themeColors from '../styles/themes.json';
 import { animate } from './animation';
@@ -27,7 +26,7 @@ const DISABLE_ANIMATION_CSS = `
 
 const colors = (Object.keys(themeColors) as Array<keyof typeof themeColors>).map((property) => ({
   property,
-  colors: [new Color(themeColors[property][0]), new Color(themeColors[property][1])],
+  colors: [buildColor(themeColors[property][0]), buildColor(themeColors[property][1])],
 }));
 
 const injectCss = (css: string) => {
@@ -92,10 +91,12 @@ function transition(t: number) {
 
 function applyColorAnimationStep(startIndex: number, endIndex: number, interpolationRatio: number = 1) {
   colors.forEach(({ property, colors: propertyColors }) => {
-    const color = propertyColors[startIndex].mix(propertyColors[endIndex], interpolationRatio, { space: 'srgb' });
+    const color = mixColors(propertyColors[startIndex], propertyColors[endIndex], interpolationRatio, {
+      space: 'srgb',
+    });
     const [r, g, b] = color.coords.map(convertSrgbChannel);
 
-    document.documentElement.style.setProperty(property, color.toString({ format: 'rgb' }));
+    document.documentElement.style.setProperty(property, serializeColor(color, { format: 'rgb' }));
 
     if (RGB_VARIABLES.has(property)) {
       document.documentElement.style.setProperty(`${property}-rgb`, `${r},${g},${b}`);

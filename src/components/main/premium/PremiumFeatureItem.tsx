@@ -1,8 +1,8 @@
-import Color from 'colorjs.io';
 import { memo } from '../../../lib/teact/teact';
 
 import type { IconName } from '../../../types/icons';
 
+import { buildColor, mixColors } from '../../../lib/color';
 import { convertSrgbChannel } from '../../../util/colors.ts';
 import renderText from '../../common/helpers/renderText';
 
@@ -31,7 +31,7 @@ type OwnProps<T> = {
 const COLORS = [
   '#F2862D', '#EB7B4D', '#E46D72', '#DD6091', '#CC5FBA', '#B464E7',
   '#9873FF', '#768DFF', '#55A5FC', '#52B0C9', '#4FBC93', '#4CC663',
-].map((color) => new Color(color));
+].map((color) => buildColor(color));
 
 const PremiumFeatureItem = <T,>({
   icon,
@@ -46,7 +46,7 @@ const PremiumFeatureItem = <T,>({
   const newIndex = (index / count) * COLORS.length;
   const colorA = COLORS[Math.floor(newIndex)];
   const colorB = COLORS[Math.ceil(newIndex)] ?? colorA;
-  const [r, g, b] = colorA.mix(colorB, 0.5, { space: 'srgb' }).coords.map(convertSrgbChannel);
+  const [r, g, b] = mixColors(colorA, colorB, 0.5, { space: 'srgb' }).coords.map(convertSrgbChannel);
 
   const handleClick = useLastCallback(() => {
     onClick?.(section);

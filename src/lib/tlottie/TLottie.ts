@@ -1,5 +1,3 @@
-import type Color from 'colorjs.io';
-
 import type { EmojiFitzModifier } from '../../util/emoji/skinTone';
 
 import { animate } from '../../util/animation';
@@ -12,6 +10,7 @@ import Deferred from '../../util/Deferred';
 import generateUniqueId from '../../util/generateUniqueId';
 import { handleError } from '../../util/handleError';
 import launchMediaWorkers, { MAX_WORKERS } from '../../util/launchMediaWorkers';
+import { type Color, convertColor } from '../color';
 import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 
 interface Params {
@@ -408,7 +407,9 @@ class TLottie {
         this.tgsUrl,
         this.imgSize,
         this.params.isLowPriority || false,
-        this.customColor?.to('srgb').coords.map(convertSrgbChannel) as [number, number, number] | undefined,
+        this.customColor
+          ? convertColor(this.customColor, 'srgb').coords.map(convertSrgbChannel) as [number, number, number]
+          : undefined,
         this.params.fitzModifier,
         this.onRendererInit.bind(this, dataGeneration),
       ],

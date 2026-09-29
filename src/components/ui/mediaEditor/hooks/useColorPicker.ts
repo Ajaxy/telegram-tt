@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from '@teact';
-import Color from 'colorjs.io';
 
+import { buildColor, type Color, convertColor } from '../../../../lib/color';
 import {
   buildColorFromHex,
   buildHexFromColor,
@@ -48,11 +48,11 @@ export default function useColorPicker({ initialColor }: UseColorPickerOptions) 
   const { color, hexInputValue, rgbInputValue } = pickerState;
   const selectedColor = buildHexFromColor(color).toUpperCase();
   const pickerColor = selectedColor;
-  const [hueCoord, saturationCoord, brightnessCoord] = color.to('hsv').coords;
+  const [hueCoord, saturationCoord, brightnessCoord] = convertColor(color, 'hsv').coords;
   const hue = (hueCoord || 0) / HSV_HUE_MAX;
   const saturation = saturationCoord! / COLOR_PERCENT_MAX;
   const brightness = brightnessCoord! / COLOR_PERCENT_MAX;
-  const rgbColorValue = color.to('srgb').coords.map(convertSrgbChannel).join(', ');
+  const rgbColorValue = convertColor(color, 'srgb').coords.map(convertSrgbChannel).join(', ');
 
   const updateColor = useLastCallback((newColor: Color, state?: Partial<PickerInputState>) => {
     setPickerState({
@@ -71,11 +71,14 @@ export default function useColorPicker({ initialColor }: UseColorPickerOptions) 
   }, [isColorPickerOpen]);
 
   const updateFromHsv = useLastCallback((h: number, s: number, v: number) => {
-    updateColor(new Color('hsv', [
-      h * HSV_HUE_MAX,
-      s * COLOR_PERCENT_MAX,
-      v * COLOR_PERCENT_MAX,
-    ]));
+    updateColor(buildColor({
+      space: 'hsv',
+      coords: [
+        h * HSV_HUE_MAX,
+        s * COLOR_PERCENT_MAX,
+        v * COLOR_PERCENT_MAX,
+      ],
+    }));
   });
 
   const setupColorDrag = useLastCallback((
@@ -136,11 +139,14 @@ export default function useColorPicker({ initialColor }: UseColorPickerOptions) 
       const b = parseInt(parts[2], 10);
 
       if (![r, g, b].some((channel) => Number.isNaN(channel) || channel < 0 || channel > RGB_CHANNEL_MAX)) {
-        updateColor(new Color('srgb', [
-          r / RGB_CHANNEL_MAX,
-          g / RGB_CHANNEL_MAX,
-          b / RGB_CHANNEL_MAX,
-        ]), { rgbInputValue: value });
+        updateColor(buildColor({
+          space: 'srgb',
+          coords: [
+            r / RGB_CHANNEL_MAX,
+            g / RGB_CHANNEL_MAX,
+            b / RGB_CHANNEL_MAX,
+          ],
+        }), { rgbInputValue: value });
         return;
       }
     }
@@ -201,6 +207,6 @@ function buildPickerState(color: Color): PickerState {
   return {
     color,
     hexInputValue: buildHexFromColor(color).toUpperCase(),
-    rgbInputValue: color.to('srgb').coords.map(convertSrgbChannel).join(', '),
+    rgbInputValue: convertColor(color, 'srgb').coords.map(convertSrgbChannel).join(', '),
   };
 }
