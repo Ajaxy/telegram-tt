@@ -33,6 +33,12 @@ addActionHandler('loadSavedMusicIds', async (global): Promise<void> => {
   setGlobal(global);
 });
 
+addActionHandler('reportMusicListen', async (global, actions, payload): Promise<void> => {
+  const { audio, listenedDuration, isPageUnload } = payload;
+
+  await callApi('reportMusicListen', { audio, listenedDuration, isPageUnload });
+});
+
 addActionHandler('toggleMusicInProfile', async (global, actions, payload): Promise<void> => {
   const { audio, tabId = getCurrentTabId() } = payload;
   const { savedMusicById } = global.users;

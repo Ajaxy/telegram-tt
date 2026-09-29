@@ -58,6 +58,7 @@ import useFrozenProps from '../../../hooks/useFrozenProps';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
+import useMusicListenReporting from '../../../hooks/useMusicListenReporting';
 import useTrackMediaMetadata from '../../../hooks/useTrackMediaMetadata';
 import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
@@ -250,6 +251,7 @@ const AudioPlayer = ({
     toggleMuted,
     setPlaybackRate,
     setCurrentTime,
+    audioElement,
   } = useAudioPlayback({
     trackKey: currentTrackKey,
     mediaType: isVoice ? 'voice' : 'audio',
@@ -260,6 +262,9 @@ const AudioPlayer = ({
     shouldPlay: true,
     noProgressUpdates: true,
   });
+
+  const listenedAudio = noUi && media?.mediaType === 'audio' && !isLocalMessage ? media : undefined;
+  useMusicListenReporting(listenedAudio, audioElement);
 
   const isPane = !noUi;
 

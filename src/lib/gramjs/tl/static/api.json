@@ -259,6 +259,7 @@
     "messages.reportSponsoredMessage",
     "messages.getSponsoredMessages",
     "messages.reportMessagesDelivery",
+    "messages.reportMusicListen",
     "messages.reportReadMetrics",
     "messages.getPreparedInlineMessage",
     "messages.toggleSuggestedPostApproval",

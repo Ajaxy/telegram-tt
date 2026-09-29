@@ -1981,6 +1981,7 @@ export interface ActionPayloads {
   loadShufflePlaylist: WithTabId | undefined;
   loadSavedMusicIds: undefined;
   toggleMusicInProfile: { audio: ApiAudio } & WithTabId;
+  reportMusicListen: { audio: ApiAudio; listenedDuration: number; isPageUnload?: boolean };
   reorderSavedMusic: { audioId: string; afterAudioId?: string } & WithTabId;
 
   // Downloads
