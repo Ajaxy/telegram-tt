@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -41,7 +40,7 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
 };
 
-const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
+const SettingsPrivacyVisibility = ({
   screen,
   isActive,
   primaryPrivacy,
@@ -53,7 +52,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
   onReset,
   shouldDisplayGiftsButton,
   isCurrentUserPremium,
-}) => {
+}: OwnProps & StateProps) => {
   const { updateGlobalPrivacySettings, showNotification } = getActions();
 
   const lang = useLang();
@@ -207,6 +206,8 @@ function PrivacySubsection({
     switch (screen) {
       case SettingsScreens.PrivacyGifts:
         return lang('PrivacyGiftsInfo');
+      case SettingsScreens.PrivacySavedMusic:
+        return lang('PrivacyMusicInfo');
       case SettingsScreens.PrivacyLastSeen:
         return oldLang('CustomHelp');
       case SettingsScreens.PrivacyAddByPhone: {
@@ -235,6 +236,8 @@ function PrivacySubsection({
         return oldLang('PrivacyBirthdayTitle');
       case SettingsScreens.PrivacyGifts:
         return lang('PrivacyGiftsTitle');
+      case SettingsScreens.PrivacySavedMusic:
+        return lang('PrivacyMusicTitle');
       case SettingsScreens.PrivacyForwarding:
         return oldLang('PrivacyForwardsTitle');
       case SettingsScreens.PrivacyVoiceMessages:
@@ -307,6 +310,8 @@ function PrivacySubsection({
         return SettingsScreens.PrivacyBirthdayAllowedContacts;
       case SettingsScreens.PrivacyGifts:
         return SettingsScreens.PrivacyGiftsAllowedContacts;
+      case SettingsScreens.PrivacySavedMusic:
+        return SettingsScreens.PrivacySavedMusicAllowedContacts;
       case SettingsScreens.PrivacyForwarding:
         return SettingsScreens.PrivacyForwardingAllowedContacts;
       case SettingsScreens.PrivacyPhoneCall:
@@ -334,6 +339,8 @@ function PrivacySubsection({
         return SettingsScreens.PrivacyBirthdayDeniedContacts;
       case SettingsScreens.PrivacyGifts:
         return SettingsScreens.PrivacyGiftsDeniedContacts;
+      case SettingsScreens.PrivacySavedMusic:
+        return SettingsScreens.PrivacySavedMusicDeniedContacts;
       case SettingsScreens.PrivacyForwarding:
         return SettingsScreens.PrivacyForwardingDeniedContacts;
       case SettingsScreens.PrivacyPhoneCall:
@@ -444,6 +451,10 @@ export default memo(withGlobal<OwnProps>(
 
       case SettingsScreens.PrivacyGifts:
         primaryPrivacy = privacy.gifts;
+        break;
+
+      case SettingsScreens.PrivacySavedMusic:
+        primaryPrivacy = privacy.savedMusic;
         break;
 
       case SettingsScreens.PrivacyPhoneP2P:

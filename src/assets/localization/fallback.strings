@@ -2059,6 +2059,9 @@
 "PrivacyGifts" = "Gifts";
 "PrivacyGiftsTitle" = "Who can display gifts on my profile?";
 "PrivacyGiftsInfo" = "Choose whether gifts from specific senders need your approval before they're visible to others on your profile.";
+"PrivacyMusic" = "Saved Music";
+"PrivacyMusicTitle" = "Who can see my saved music in profile?";
+"PrivacyMusicInfo" = "You can restrict who can see your saved music with granular precision.";
 "PrivacyAcceptedGiftTitle" = "Accepted gift types";
 "PrivacyAcceptedGiftInfo" = "Choose the types of gifts that you allow others to send you.";
 "PrivacyValueBots" = "Mini Apps";

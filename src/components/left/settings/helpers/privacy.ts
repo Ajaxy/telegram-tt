@@ -27,6 +27,10 @@ export function getPrivacyKey(screen: SettingsScreens): ApiPrivacyKey | undefine
     case SettingsScreens.PrivacyGiftsAllowedContacts:
     case SettingsScreens.PrivacyGiftsDeniedContacts:
       return 'gifts';
+    case SettingsScreens.PrivacySavedMusic:
+    case SettingsScreens.PrivacySavedMusicAllowedContacts:
+    case SettingsScreens.PrivacySavedMusicDeniedContacts:
+      return 'savedMusic';
     case SettingsScreens.PrivacyForwarding:
     case SettingsScreens.PrivacyForwardingAllowedContacts:
     case SettingsScreens.PrivacyForwardingDeniedContacts:

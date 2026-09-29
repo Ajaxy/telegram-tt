@@ -455,6 +455,7 @@ addActionHandler('loadPrivacySettings', async (global, actions, payload): Promis
     callApi('fetchPrivacySettings', 'birthday'),
     callApi('fetchPrivacySettings', 'gifts'),
     callApi('fetchPrivacySettings', 'noPaidMessages'),
+    callApi('fetchPrivacySettings', 'savedMusic'),
   ]);
 
   if (result.some((e) => e === undefined)) {
@@ -475,6 +476,7 @@ addActionHandler('loadPrivacySettings', async (global, actions, payload): Promis
     birthdaySettings,
     giftsSettings,
     noPaidMessagesSettings,
+    savedMusicSettings,
   ] = result as {
     rules: ApiPrivacySettings;
   }[];
@@ -499,6 +501,7 @@ addActionHandler('loadPrivacySettings', async (global, actions, payload): Promis
         birthday: birthdaySettings.rules,
         gifts: giftsSettings.rules,
         noPaidMessages: noPaidMessagesSettings.rules,
+        savedMusic: savedMusicSettings.rules,
       },
     },
   };

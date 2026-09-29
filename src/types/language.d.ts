@@ -1648,6 +1648,9 @@ export interface LangPair {
   'PrivacyGifts': undefined;
   'PrivacyGiftsTitle': undefined;
   'PrivacyGiftsInfo': undefined;
+  'PrivacyMusic': undefined;
+  'PrivacyMusicTitle': undefined;
+  'PrivacyMusicInfo': undefined;
   'PrivacyAcceptedGiftTitle': undefined;
   'PrivacyAcceptedGiftInfo': undefined;
   'PrivacyValueBots': undefined;

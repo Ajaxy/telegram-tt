@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
@@ -23,12 +22,12 @@ type OwnProps = {
   onReset: () => void;
 };
 
-const SettingsHeader: FC<OwnProps> = ({
+const SettingsHeader = ({
   currentScreen,
   editedFolderId,
   hasProfileBackground,
   onReset,
-}) => {
+}: OwnProps) => {
   const {
     signOut,
     openDeleteChatFolderModal,
@@ -61,8 +60,8 @@ const SettingsHeader: FC<OwnProps> = ({
     signOut({ forceInitApi: true });
   }, [closeSignOutConfirmation, signOut]);
 
-  const SettingsMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger, isOpen }) => (
+  const SettingsMenuButton = useMemo(() => {
+    return ({ onTrigger, isOpen }: { onTrigger: () => void; isOpen?: boolean }) => (
       <Button
         round
         ripple={!isMobile}
@@ -123,6 +122,8 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{oldLang('PrivacyBirthday')}</h3>;
       case SettingsScreens.PrivacyGifts:
         return <h3>{lang('PrivacyGifts')}</h3>;
+      case SettingsScreens.PrivacySavedMusic:
+        return <h3>{lang('PrivacyMusic')}</h3>;
       case SettingsScreens.PrivacyForwarding:
         return <h3>{oldLang('PrivacyForwards')}</h3>;
       case SettingsScreens.PrivacyVoiceMessages:
@@ -138,12 +139,14 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
       case SettingsScreens.PrivacyBioAllowedContacts:
       case SettingsScreens.PrivacyGroupChatsAllowedContacts:
+      case SettingsScreens.PrivacySavedMusicAllowedContacts:
         return <h3>{oldLang('AlwaysShareWith')}</h3>;
 
       case SettingsScreens.PrivacyLastSeenDeniedContacts:
       case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
       case SettingsScreens.PrivacyBioDeniedContacts:
       case SettingsScreens.PrivacyGroupChatsDeniedContacts:
+      case SettingsScreens.PrivacySavedMusicDeniedContacts:
         return <h3>{oldLang('NeverShareWith')}</h3>;
 
       case SettingsScreens.PrivacyPhoneNumberAllowedContacts:

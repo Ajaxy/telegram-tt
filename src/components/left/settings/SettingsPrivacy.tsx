@@ -375,6 +375,18 @@ const SettingsPrivacy = ({
         <ListItem
           narrow
           className="no-icon"
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacySavedMusic })}
+        >
+          <div className="multiline-item">
+            <span className="title">{lang('PrivacyMusic')}</span>
+            <span className="subtitle" dir="auto">
+              {getVisibilityValue(privacy.savedMusic)}
+            </span>
+          </div>
+        </ListItem>
+        <ListItem
+          narrow
+          className="no-icon"
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PrivacyForwarding })}
         >
           <div className="multiline-item">

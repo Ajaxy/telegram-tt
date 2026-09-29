@@ -678,6 +678,9 @@ export function buildInputPrivacyKey(privacyKey: ApiPrivacyKey) {
 
     case 'noPaidMessages':
       return new GramJs.InputPrivacyKeyNoPaidMessages();
+
+    case 'savedMusic':
+      return new GramJs.InputPrivacyKeySavedMusic();
   }
 
   return undefined;
