@@ -1,6 +1,6 @@
 import { getActions } from '../../../../global';
 
-import type { ApiMessage, ApiPeer, ApiStory, ApiTopic, ApiWebPage } from '../../../../api/types';
+import type { ApiMessage, ApiPeer, ApiStory, ApiWebPage } from '../../../../api/types';
 import type { OldLangFn } from '../../../../hooks/useOldLang';
 import type { IAlbum, ThreadId } from '../../../../types';
 import { MAIN_THREAD_ID } from '../../../../api/types';
@@ -26,7 +26,6 @@ export default function useInnerHandlers({
   senderPeer,
   botSender,
   guestFromSender,
-  messageTopic,
   isTranslatingChat,
   story,
   isReplyPrivate,
@@ -48,7 +47,6 @@ export default function useInnerHandlers({
   senderPeer?: ApiPeer;
   botSender?: ApiPeer;
   guestFromSender?: ApiPeer;
-  messageTopic?: ApiTopic;
   isTranslatingChat?: boolean;
   story?: ApiStory;
   isReplyPrivate?: boolean;
@@ -288,15 +286,6 @@ export default function useInnerHandlers({
     });
   });
 
-  const handleTopicChipClick = useLastCallback(() => {
-    if (!messageTopic) return;
-    focusMessage({
-      chatId: replyToPeerId || chatId,
-      threadId: messageTopic.id,
-      messageId,
-    });
-  });
-
   const handleStoryClick = useLastCallback(() => {
     if (!story) return;
     openStoryViewer({
@@ -327,7 +316,6 @@ export default function useInnerHandlers({
     handleFocus,
     handleFocusForwarded,
     handleDocumentGroupSelectAll: selectWithGroupedId,
-    handleTopicChipClick,
     handleStoryClick,
   };
 }

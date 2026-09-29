@@ -5,7 +5,7 @@ import { type ApiMessage, MAIN_THREAD_ID } from '../../api/types';
 import { ANONYMOUS_USER_ID, GENERAL_TOPIC_ID } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { isChatBasicGroup, isChatSuperGroup } from '../helpers';
-import { getMessageReplyInfo } from '../helpers/replies';
+import { getMessageForumTopicId, getMessageReplyInfo } from '../helpers/replies';
 import { selectChat } from './chats';
 import { selectTabState } from './tabs';
 
@@ -158,7 +158,7 @@ export function selectThreadIdFromMessage<T extends GlobalState>(global: T, mess
 
   const chat = selectChat(global, message.chatId);
   const { content } = message;
-  const { replyToMsgId, replyToTopId, isForumTopic } = getMessageReplyInfo(message) || {};
+  const { replyToMsgId, replyToTopId } = getMessageReplyInfo(message) || {};
   if (content.action?.type === 'topicCreate') {
     return message.id;
   }
@@ -171,6 +171,5 @@ export function selectThreadIdFromMessage<T extends GlobalState>(global: T, mess
     }
     return MAIN_THREAD_ID;
   }
-  if (!isForumTopic) return GENERAL_TOPIC_ID;
-  return replyToTopId || replyToMsgId || GENERAL_TOPIC_ID;
+  return getMessageForumTopicId(message);
 }

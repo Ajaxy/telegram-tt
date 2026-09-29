@@ -4,7 +4,9 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiMessage,
   ApiPeer,
+  ApiTopic,
 } from '../../../api/types';
+import type { ThreadId } from '../../../types';
 
 import {
   getMessageIsSpoiler,
@@ -12,12 +14,20 @@ import {
   getMessageSticker,
   getMessageVideo,
 } from '../../../global/helpers';
-import { isApiPeerUser } from '../../../global/helpers/peers';
-import { selectPeer } from '../../../global/selectors';
+import { getMessageSenderName, isApiPeerUser } from '../../../global/helpers/peers';
+import {
+  selectChat,
+  selectPeer,
+  selectSender,
+  selectTopic,
+} from '../../../global/selectors';
+import { selectThreadIdFromMessage } from '../../../global/selectors/threads';
 import buildClassName from '../../../util/buildClassName';
 import { formatPastTimeShort } from '../../../util/dates/oldDateFormat';
 import { type LangFn } from '../../../util/localization';
+import { REM } from '../../common/helpers/mediaDimensions';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
+import renderText from '../../common/helpers/renderText';
 
 import useMessageMediaHash from '../../../hooks/media/useMessageMediaHash';
 import useThumbnail from '../../../hooks/media/useThumbnail';
@@ -31,6 +41,7 @@ import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
 import Icon from '../../common/icons/Icon';
+import TopicIcon from '../../common/TopicIcon';
 import Link from '../../ui/Link';
 import ListItem from '../../ui/ListItem';
 
@@ -40,17 +51,26 @@ type OwnProps = {
   searchQuery?: string;
   message: ApiMessage;
   chatId: string;
+  withTopic?: boolean;
 };
 
 type StateProps = {
   peer?: ApiPeer;
+  sender?: ApiPeer;
+  topic?: ApiTopic;
+  threadId?: ThreadId;
 };
+
+const TOPIC_ICON_SIZE = 2.5 * REM;
 
 const ChatMessage = ({
   message,
   searchQuery,
   chatId,
   peer,
+  sender,
+  topic,
+  threadId,
 }: OwnProps & StateProps) => {
   const { focusMessage } = getActions();
 
@@ -62,7 +82,9 @@ const ChatMessage = ({
   const isRoundVideo = Boolean(getMessageRoundVideo(message));
 
   const handleClick = useLastCallback(() => {
-    focusMessage({ chatId, messageId: message.id, shouldReplaceHistory: true });
+    focusMessage({
+      chatId, messageId: message.id, threadId, shouldReplaceHistory: true,
+    });
   });
 
   const lang = useLang();
@@ -75,6 +97,7 @@ const ChatMessage = ({
   }
 
   const user = isApiPeerUser(peer) ? peer : undefined;
+  const senderName = topic && sender ? getMessageSenderName(lang, chatId, sender) : undefined;
 
   return (
     <ListItem
@@ -83,17 +106,33 @@ const ChatMessage = ({
       onClick={handleClick}
       buttonRef={buttonRef}
     >
-      <Avatar
-        peer={peer}
-        isSavedMessages={user?.isSelf}
-      />
+      {topic ? (
+        <div className="topic-icon-wrapper">
+          <TopicIcon
+            size={TOPIC_ICON_SIZE}
+            topic={topic}
+            className="topic-icon"
+          />
+        </div>
+      ) : (
+        <Avatar
+          peer={peer}
+          isSavedMessages={user?.isSelf}
+        />
+      )}
       <div className="info">
         <div className="info-row">
-          <FullNameTitle
-            peer={peer}
-            withEmojiStatus
-            isSavedMessages={user?.isSelf}
-          />
+          {topic ? (
+            <div className="title topic-title">
+              <h3 dir="auto" className="fullName">{renderText(topic.title)}</h3>
+            </div>
+          ) : (
+            <FullNameTitle
+              peer={peer}
+              withEmojiStatus
+              isSavedMessages={user?.isSelf}
+            />
+          )}
           <div className="message-date">
             <Link className="date">
               {formatPastTimeShort(oldLang, message.date * 1000)}
@@ -103,6 +142,7 @@ const ChatMessage = ({
         </div>
         <div className="subtitle">
           <div className="message" dir="auto">
+            {senderName && <span className="sender-name">{renderText(senderName)}</span>}
             {renderSummary(lang, message, mediaBlobUrl || mediaThumbnail, searchQuery, isRoundVideo)}
           </div>
         </div>
@@ -137,11 +177,20 @@ function renderSummary(
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): Complete<StateProps> => {
+  (global, { chatId, message, withTopic }): Complete<StateProps> => {
     const peer = selectPeer(global, chatId);
+    const chat = selectChat(global, chatId);
+
+    const isForumTopicMode = Boolean(withTopic && chat?.isForum && !chat.isBotForum);
+    const threadId = isForumTopicMode ? selectThreadIdFromMessage(global, message) : undefined;
+    const topic = threadId !== undefined ? selectTopic(global, chatId, threadId) : undefined;
+    const sender = topic ? selectSender(global, message) : undefined;
 
     return {
       peer,
+      sender,
+      topic,
+      threadId,
     };
   },
 )(ChatMessage));

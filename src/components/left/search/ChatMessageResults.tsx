@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -40,7 +39,7 @@ type StateProps = {
 
 const runThrottled = throttle((cb) => cb(), 500, true);
 
-const ChatMessageResults: FC<OwnProps & StateProps> = ({
+const ChatMessageResults = ({
   searchQuery,
   dateSearchQuery,
   foundIds,
@@ -51,7 +50,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
   searchChatId,
   onSearchDateSelect,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const { searchMessagesGlobal, openThread } = getActions();
 
   const lang = useLang();
@@ -108,6 +107,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
         chatId={message.chatId}
         message={message}
         searchQuery={searchQuery}
+        withTopic
       />
     );
   }

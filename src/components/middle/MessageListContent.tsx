@@ -22,6 +22,7 @@ import {
   isServiceNotificationMessage,
 } from '../../global/helpers';
 import { getPeerTitle } from '../../global/helpers/peers';
+import { getMessageForumTopicId } from '../../global/helpers/replies';
 import { selectChatMessage, selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatHumanDate, formatScheduledDateTime } from '../../util/dates/oldDateFormat';
@@ -49,6 +50,7 @@ import ActionMessage from './message/ActionMessage';
 import Message from './message/Message';
 import SenderGroupContainer from './message/SenderGroupContainer';
 import SponsoredMessage from './message/SponsoredMessage';
+import TopicSeparator from './message/TopicSeparator';
 import MessageListAccountInfo from './MessageListAccountInfo';
 import MessageListBottomMarker from './MessageListBottomMarker';
 
@@ -68,6 +70,7 @@ interface OwnProps {
   isChannelChat: boolean | undefined;
   isChatMonoforum?: boolean;
   canManageBotForumTopics?: boolean;
+  withTopicSeparators?: boolean;
   isEmptyThread?: boolean;
   isComments?: boolean;
   noAvatars: boolean;
@@ -98,6 +101,22 @@ interface OwnProps {
 
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
+type TopicSection = {
+  target: TeactNode[];
+  topicId: number;
+  key: string;
+  children: TeactNode[];
+};
+
+function getSenderGroupFirstMessage(senderGroup: (ApiMessage | IAlbum | IDocumentGroup)[]) {
+  const firstItem = senderGroup[0];
+  return isAlbum(firstItem)
+    ? firstItem.mainMessage
+    : isDocumentGroup(firstItem)
+      ? firstItem.messages[0]
+      : firstItem;
+}
+
 function senderGroupContainsOriginalId(
   senderGroup: (ApiMessage | IAlbum | IDocumentGroup)[],
   originalId: number,
@@ -127,6 +146,7 @@ const MessageListContent = ({
   isChannelChat,
   isChatMonoforum,
   canManageBotForumTopics,
+  withTopicSeparators,
   noAvatars,
   containerRef,
   anchorIdRef,
@@ -508,12 +528,7 @@ const MessageListContent = ({
 
       const isOwn = isOwnMessage(lastMessage);
 
-      const firstItem = senderGroup[0];
-      const firstMessage = isAlbum(firstItem)
-        ? firstItem.mainMessage
-        : isDocumentGroup(firstItem)
-          ? firstItem.messages[0]
-          : firstItem;
+      const firstMessage = getSenderGroupFirstMessage(senderGroup);
       const firstMessageId = getMessageOriginalId(firstMessage);
 
       const isThreadTopMessage = lastMessage.id === threadId
@@ -571,6 +586,15 @@ const MessageListContent = ({
     );
   }
 
+  function renderTopicGroup({ topicId, key, children }: TopicSection) {
+    return (
+      <div className="topic-group" key={key} teactFastList>
+        <TopicSeparator key="topic-separator" chatId={chatId} topicId={topicId} />
+        {children}
+      </div>
+    );
+  }
+
   function renderDateGroup(
     dateGroup: MessageDateGroup,
     children: TeactNode[],
@@ -601,6 +625,8 @@ const MessageListContent = ({
     const senderGroups = calculateSenderGroups(dateGroup, dateGroupIndex, dateGroupsArray);
     const beforeTailChildren: TeactNode[] = [];
     const liveTailChildren: TeactNode[] = [];
+    const topicSections: TopicSection[] = [];
+    const sectionCountByTopicId = new Map<number, number>();
 
     if (isRenderingLiveTail) {
       liveTailChildren.push(renderDateHeader(dateGroup));
@@ -623,7 +649,29 @@ const MessageListContent = ({
       }
 
       const target = isRenderingLiveTail ? liveTailChildren : beforeTailChildren;
-      target.push(...senderGroupElements);
+      if (!withTopicSeparators) {
+        target.push(...senderGroupElements);
+        return;
+      }
+
+      const topicId = getMessageForumTopicId(getSenderGroupFirstMessage(dateGroup.senderGroups[senderGroupIndex]));
+      const lastSection = topicSections[topicSections.length - 1];
+      if (lastSection && lastSection.target === target && lastSection.topicId === topicId) {
+        lastSection.children.push(...senderGroupElements);
+      } else {
+        const sectionIndex = sectionCountByTopicId.get(topicId) || 0;
+        sectionCountByTopicId.set(topicId, sectionIndex + 1);
+        topicSections.push({
+          target,
+          topicId,
+          key: `topic-${topicId}-${sectionIndex}`,
+          children: [...senderGroupElements],
+        });
+      }
+    });
+
+    topicSections.forEach((section) => {
+      section.target.push(renderTopicGroup(section));
     });
 
     const shouldAddFirstClass = !shouldRenderAccountInfo

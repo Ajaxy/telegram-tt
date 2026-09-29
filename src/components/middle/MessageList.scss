@@ -19,6 +19,7 @@
   --message-list-fade-floor: rgba(0, 0, 0, 0.24);
   --message-list-top-fade-ramp: 1.5rem;
   --message-list-bottom-fade: var(--message-list-min-reserve);
+  --sticky-topic-top: calc(2.875rem + var(--message-list-top-inset));
 
   container-type: size;
   overflow-x: hidden;
@@ -374,6 +375,123 @@
     top: calc(1rem + var(--message-list-top-inset));
   }
 
+  .topic-group {
+    padding-top: 0.25rem;
+    background:
+      repeating-linear-gradient(to right, var(--action-message-bg) 0 0.25rem, transparent 0.25rem 0.5rem)
+      0 0.9375rem / 100% 0.125rem no-repeat;
+    view-timeline: --topic-group block;
+    view-timeline-inset: calc(var(--sticky-topic-top) + 0.5rem) auto;
+  }
+
+  .sticky-topic {
+    pointer-events: none;
+    user-select: none;
+
+    z-index: calc(var(--z-sticky-date) - 1);
+
+    display: flex;
+    justify-content: center;
+
+    margin-bottom: 0.5rem;
+
+    font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.25;
+
+    opacity: 1;
+
+    transition: opacity 0.3s ease;
+
+    body:not(.is-scrolling-messages) &.stuck {
+      opacity: 0;
+
+      .topic-pill {
+        pointer-events: none;
+      }
+    }
+
+    body.no-page-transitions & {
+      transition: none;
+    }
+
+    .topic-pill {
+      --custom-emoji-size: 1.25rem;
+
+      pointer-events: auto;
+      cursor: var(--custom-cursor, pointer);
+
+      position: relative;
+      z-index: 0;
+
+      display: inline-flex;
+      gap: 0.25rem;
+      align-items: center;
+
+      max-width: 80%;
+      height: 1.5rem;
+      padding: 0 0.375rem 0 0.25rem;
+      border: none;
+      border-radius: var(--border-radius-messages);
+
+      font: inherit;
+      color: white;
+
+      background-color: var(--action-message-bg);
+
+      transition: opacity 0.15s;
+
+      &:hover {
+        opacity: 0.85;
+      }
+
+      &:focus:not(:focus-visible) {
+        outline: none;
+      }
+    }
+
+    .topic-pill-icon {
+      flex-shrink: 0;
+      width: 1.25rem;
+      height: 1.25rem;
+      font-size: 1.25rem;
+
+      .topic-icon-letter {
+        font-family: inherit;
+        font-size: 0.75rem;
+      }
+    }
+
+    .topic-pill-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      &:first-child {
+        margin-inline-start: 0.25rem;
+      }
+    }
+
+    .topic-pill-chevron {
+      flex-shrink: 0;
+      margin-inline-start: 0.125rem;
+      font-size: 0.625rem;
+      opacity: 0.75;
+    }
+  }
+
+  &.scrolled:not(.is-animating) .sticky-topic {
+    position: sticky;
+    top: var(--sticky-topic-top);
+
+    animation-name: sticky-topic-collapse;
+    animation-duration: auto;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+    animation-timeline: --topic-group;
+    animation-range: exit calc(100% - 1.5rem) exit 100%;
+  }
+
   &.is-animating .message-select-control {
     display: none !important;
   }
@@ -475,4 +593,11 @@
 @keyframes live-tail-message-mount {
   from { transform: translateY(2rem); }
   to { transform: translateY(0); }
+}
+
+@keyframes sticky-topic-collapse {
+  to {
+    transform: scale(0.5);
+    filter: opacity(0);
+  }
 }

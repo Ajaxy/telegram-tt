@@ -12,7 +12,7 @@
       flex-grow: 1;
     }
 
-    h3 {
+    .fullName {
       width: auto;
       font-size: 1rem;
     }
@@ -84,6 +84,37 @@
   .info-row {
     display: flex;
     justify-content: space-between;
+  }
+
+  .topic-icon-wrapper {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+
+    width: 3.375rem;
+    height: 3.375rem;
+    margin-inline-end: 0.5rem;
+
+    .topic-icon {
+      --custom-emoji-size: 2.5rem;
+
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 2.5rem !important;
+    }
+  }
+
+  .topic-title {
+    overflow: hidden;
+    min-width: 0;
+
+    .fullName {
+      overflow: hidden;
+      margin-bottom: 0;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   &[dir="rtl"] {

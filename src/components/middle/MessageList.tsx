@@ -158,6 +158,7 @@ type StateProps = {
   isServiceNotificationsChat?: boolean;
   isEmptyThread?: boolean;
   isForum?: boolean;
+  withTopicSeparators?: boolean;
   currentUserId: string;
   isAccountFrozen?: boolean;
   areAdsEnabled?: boolean;
@@ -231,6 +232,7 @@ const MessageList = ({
   type,
   isChatLoaded,
   isForum,
+  withTopicSeparators,
   isChannelChat,
   isGroupChat,
   isChannelWithAvatars,
@@ -563,11 +565,12 @@ const MessageList = ({
         isChatWithSelf,
         withUsers,
         effectiveLiveTailStartOriginalId,
+        withTopicSeparators,
       )
       : undefined;
   }, [withUsers,
     renderMessageIds, renderMessagesById, type,
-    isForum,
+    isForum, withTopicSeparators,
     threadId, isChatWithSelf, channelJoinInfo, effectiveLiveTailStartOriginalId]);
 
   const currentLastMessageId = renderMessageIds?.[renderMessageIds.length - 1];
@@ -1397,6 +1400,7 @@ const MessageList = ({
         isQuickPreview={isQuickPreview}
         canPost={canPost}
         canManageBotForumTopics={canManageBotForumTopics}
+        withTopicSeparators={withTopicSeparators}
         shouldScrollToBottom={shouldScrollToBottom}
         onScrollDownToggle={onScrollDownToggle}
         onContentResize={handleContentResize}
@@ -1526,6 +1530,7 @@ export default memo(withGlobal<OwnProps>(
       noMessageSendingAnimation: !selectPerformanceSettingsValue(global, 'messageSendingAnimations'),
       isServiceNotificationsChat: chatId === SERVICE_NOTIFICATIONS_USER_ID,
       isForum: chat.isForum,
+      withTopicSeparators: chat.isForum && !chat.isBotForum && threadId === MAIN_THREAD_ID,
       isEmptyThread,
       currentUserId,
       isChatProtected: selectIsChatProtected(global, chatId),

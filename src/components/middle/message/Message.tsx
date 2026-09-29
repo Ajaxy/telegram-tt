@@ -185,7 +185,6 @@ import PeerColorWrapper from '../../common/PeerColorWrapper';
 import RankBadge from '../../common/RankBadge';
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import Sparkles from '../../common/Sparkles';
-import TopicChip from '../../common/TopicChip';
 import { animateSnap } from '../../main/visualEffects/SnapEffectContainer';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -321,7 +320,6 @@ type StateProps = {
   isPremium: boolean;
   senderChatMember?: ApiChatMember;
   messageTopic?: ApiTopic;
-  hasTopicChip?: boolean;
   chatTranslations?: ChatTranslatedMessages;
   areTranslationsEnabled?: boolean;
   shouldDetectChatLanguage?: boolean;
@@ -454,7 +452,6 @@ const Message = ({
   memoFirstUnreadIdRef,
   senderChatMember,
   messageTopic,
-  hasTopicChip,
   chatTranslations,
   areTranslationsEnabled,
   shouldDetectChatLanguage,
@@ -661,7 +658,7 @@ const Message = ({
 
   const hasForwardedCustomShape = asForwarded && isCustomShape;
   const hasSubheader = message.isEphemeral
-    || hasTopicChip || hasMessageReply || hasStoryReply || hasForwardedCustomShape
+    || hasMessageReply || hasStoryReply || hasForwardedCustomShape
     || Boolean(isShowingSummary && summary?.text);
 
   const selectMessage = useLastCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
@@ -736,7 +733,6 @@ const Message = ({
     handleFocus,
     handleFocusForwarded,
     handleDocumentGroupSelectAll,
-    handleTopicChipClick,
     handleStoryClick,
   } = useInnerHandlers({
     lang: oldLang,
@@ -753,7 +749,6 @@ const Message = ({
     senderPeer,
     botSender,
     guestFromSender,
-    messageTopic,
     isTranslatingChat: Boolean(requestedChatTranslationLanguage),
     story: replyStory && 'content' in replyStory ? replyStory : undefined,
     isReplyPrivate,
@@ -1287,13 +1282,6 @@ const Message = ({
                 </span>
               </BadgeButton>
             )}
-            {hasTopicChip && (
-              <TopicChip
-                topic={messageTopic}
-                onClick={handleTopicChipClick}
-                className="message-topic"
-              />
-            )}
             {hasForwardedCustomShape && (
               <div className="forward-custom-shape-subheader">
                 <div className="message-title">
@@ -1701,7 +1689,7 @@ const Message = ({
   function shouldRenderSenderName() {
     const media = photo || video || location || paidMedia;
     return !(isCustomShape && !hasViaSender) && (
-      (withSenderName && (!media || hasTopicChip)) || asForwarded || viaBotId
+      (withSenderName && !media) || asForwarded || viaBotId
       || (guestChatViaId && isFirstInGroup) || forceSenderName
     ) && !isInDocumentGroupNotFirst && !(hasMessageReply && isCustomShape);
   }
@@ -2139,7 +2127,7 @@ export default memo(withGlobal<OwnProps>(
     } = selectTabState(global);
     const {
       message, album, documentGroup, withSenderName, withAvatar, threadId, messageListType,
-      isLastInDocumentGroup, isFirstInGroup, shouldIgnoreSendFocus,
+      isLastInDocumentGroup, shouldIgnoreSendFocus,
     } = ownProps;
     const {
       id, chatId, viaBotId, guestChatViaId, isOutgoing, forwardInfo, transcriptionId, isPinned,
@@ -2254,7 +2242,6 @@ export default memo(withGlobal<OwnProps>(
     const hasUnreadReaction = readState?.unreadReactions?.includes(message.id);
     const hasUnreadPollVote = readState?.unreadPollVotes?.includes(message.id);
 
-    const hasTopicChip = threadId === MAIN_THREAD_ID && chat?.isForum && !chat.isBotForum && isFirstInGroup;
     const messageTopic = selectTopicFromMessage(global, message);
 
     const chatTranslations = selectChatTranslations(global, chatId);
@@ -2364,7 +2351,6 @@ export default memo(withGlobal<OwnProps>(
       isPremium,
       senderChatMember,
       messageTopic,
-      hasTopicChip,
       chatTranslations,
       areTranslationsEnabled,
       shouldDetectChatLanguage: selectShouldDetectChatLanguage(global, chatId),
