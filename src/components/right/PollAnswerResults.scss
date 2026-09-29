@@ -35,18 +35,9 @@
   }
 
   .chat-item-clickable {
-    .ChatInfo .Avatar.size-tiny {
-      margin-right: 1.75rem;
-    }
-
-    &[dir="rtl"] {
-      .ChatInfo .Avatar.size-tiny {
-        margin-right: 0;
-        margin-left: 1.75rem;
-      }
-    }
-
     .vote-date {
+      flex-shrink: 0;
+      padding-inline-start: 0.5rem;
       font-size: 0.875rem;
       color: var(--color-text-secondary);
     }

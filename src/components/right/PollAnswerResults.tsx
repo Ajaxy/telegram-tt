@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useEffect,
   useState,
@@ -12,15 +11,17 @@ import type {
   ApiPollResult,
 } from '../../api/types';
 import type { PollVote } from '../../global/types/tabState';
+import type { LangFn } from '../../util/localization';
 
 import { selectTabState } from '../../global/selectors';
-import { formatMediaDateTime } from '../../util/dates/oldDateFormat';
 import { isUserId } from '../../util/entities/ids';
+import {
+  formatDateTime, getCalendarDayDiff, isSameLocalDay, secondsToDate,
+} from '../../util/localization/dateFormat';
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import GroupChatInfo from '../common/GroupChatInfo';
@@ -47,8 +48,9 @@ type StateProps = {
 
 const INITIAL_LIMIT = 4;
 const VIEW_MORE_LIMIT = 50;
+const WEEKDAY_RANGE_DAYS = 7;
 
-const PollAnswerResults: FC<OwnProps & StateProps> = ({
+const PollAnswerResults = ({
   chat,
   message,
   answer,
@@ -56,7 +58,7 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
   totalVoters,
   votes,
   offset,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     loadPollOptionResults,
     openChat,
@@ -69,7 +71,6 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
   const { option, text } = answer;
   const percentage = getPercentage(answerVote.votersCount, totalVoters);
   const lang = useLang();
-  const oldLang = useOldLang();
 
   useEffect(() => {
     // For update when new votes arrive or when the user takes back his vote
@@ -146,8 +147,11 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
                     noStatusOrTyping
                   />
                 )}
-                <span className="vote-date">
-                  {formatMediaDateTime(oldLang, date * 1000, true)}
+                <span
+                  className="vote-date"
+                  title={formatDateTime(lang, secondsToDate(date), { date: 'long', time: 'short' })}
+                >
+                  {formatVoteDate(lang, date)}
                 </span>
               </ListItem>
             ))
@@ -161,6 +165,25 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
 
 function getPercentage(value: number, total: number) {
   return total > 0 ? ((value / total) * 100).toFixed() : 0;
+}
+
+function formatVoteDate(lang: LangFn, date: number) {
+  const voteDate = secondsToDate(date);
+  const now = new Date();
+
+  if (isSameLocalDay(voteDate, now)) {
+    return formatDateTime(lang, voteDate, { time: 'short' });
+  }
+
+  if (Math.abs(getCalendarDayDiff(voteDate, now)) < WEEKDAY_RANGE_DAYS) {
+    return formatDateTime(lang, voteDate, { weekday: 'short', time: 'short' });
+  }
+
+  return formatDateTime(lang, voteDate, {
+    date: 'numeric',
+    time: 'short',
+    includeYear: voteDate.getFullYear() !== now.getFullYear(),
+  });
 }
 
 export default memo(withGlobal<OwnProps>(
