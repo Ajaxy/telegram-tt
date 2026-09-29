@@ -64,7 +64,9 @@
 
     width: fit-content;
 
-    background-color: var(--color-primary-opacity);
+    // An opaque base prevents the original labels from showing through the highlighted copies
+    background-color: var(--color-background);
+    background-image: linear-gradient(var(--color-primary-opacity), var(--color-primary-opacity));
 
     transition: clip-path var(--slide-transition);
 
