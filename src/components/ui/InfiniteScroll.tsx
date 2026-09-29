@@ -1,5 +1,4 @@
-import type { UIEvent } from 'react';
-import type { ElementRef, FC } from '../../lib/teact/teact';
+import type { ElementRef } from '../../lib/teact/teact';
 import {
   useEffect, useLayoutEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
@@ -32,7 +31,7 @@ export type OwnProps = {
   scrollContainerClosest?: string;
   children: React.ReactNode;
   onLoadMore?: ({ direction }: { direction: LoadMoreDirection; noScroll?: boolean }) => void;
-  onScroll?: (e: UIEvent<HTMLDivElement>) => void;
+  onScroll?: (e: React.UIEvent<HTMLDivElement>) => void;
   onWheel?: (e: React.WheelEvent<HTMLDivElement>) => void;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
@@ -42,7 +41,7 @@ const DEFAULT_LIST_SELECTOR = '.ListItem';
 const DEFAULT_PRELOAD_BACKWARDS = 20;
 const DEFAULT_SENSITIVE_AREA = 800;
 
-const InfiniteScroll: FC<OwnProps> = ({
+const InfiniteScroll = ({
   ref,
   style,
   className,
@@ -128,6 +127,11 @@ const InfiniteScroll: FC<OwnProps> = ({
 
       state.listItemElements = container.querySelectorAll<HTMLDivElement>(itemSelector);
 
+      if (scrollContainerClosest && !container.getBoundingClientRect().width) {
+        state.currentAnchor = undefined;
+        return undefined;
+      }
+
       let newScrollTop: number;
 
       if (state.currentAnchor && Array.from(state.listItemElements).includes(state.currentAnchor)) {
@@ -162,12 +166,18 @@ const InfiniteScroll: FC<OwnProps> = ({
     scrollContainerClosest,
   ]);
 
-  const handleScroll = useLastCallback((e: UIEvent<HTMLDivElement>) => {
+  const handleScroll = useLastCallback((e: React.UIEvent<HTMLDivElement>) => {
     if (loadMoreForwards && loadMoreBackwards) {
       const {
         isScrollTopJustUpdated, currentAnchor, currentAnchorTop,
       } = stateRef.current;
       const listItemElements = stateRef.current.listItemElements!;
+
+      if (scrollContainerClosest && !containerRef.current!.getBoundingClientRect().width) {
+        stateRef.current.currentAnchor = undefined;
+        stateRef.current.isScrollTopJustUpdated = false;
+        return;
+      }
 
       if (isScrollTopJustUpdated) {
         stateRef.current.isScrollTopJustUpdated = false;
@@ -179,10 +189,12 @@ const InfiniteScroll: FC<OwnProps> = ({
         ? containerRef.current!.closest<HTMLDivElement>(scrollContainerClosest)!
         : containerRef.current!;
       const { scrollTop, scrollHeight, offsetHeight } = scrollContainer;
-      const top = listLength ? listItemElements[0].offsetTop : 0;
+      const firstItem = listItemElements[0];
+      const lastItem = listItemElements[listLength - 1];
+      const top = firstItem ? getOffsetTopInContainer(firstItem, scrollContainer, Boolean(scrollContainerClosest)) : 0;
       const isNearTop = scrollTop <= top + sensitiveArea;
-      const bottom = listLength
-        ? listItemElements[listLength - 1].offsetTop + listItemElements[listLength - 1].offsetHeight
+      const bottom = lastItem
+        ? getOffsetTopInContainer(lastItem, scrollContainer, Boolean(scrollContainerClosest)) + lastItem.offsetHeight
         : scrollHeight;
       const isNearBottom = bottom - (scrollTop + offsetHeight) <= sensitiveArea;
       let isUpdated = false;
@@ -252,7 +264,7 @@ const InfiniteScroll: FC<OwnProps> = ({
       : containerRef.current!;
     if (!scrollContainer) return undefined;
 
-    const handleNativeScroll = (e: Event) => handleScroll(e as unknown as UIEvent<HTMLDivElement>);
+    const handleNativeScroll = (e: Event) => handleScroll(e as unknown as React.UIEvent<HTMLDivElement>);
 
     scrollContainer.addEventListener('scroll', handleNativeScroll);
 
@@ -283,5 +295,13 @@ const InfiniteScroll: FC<OwnProps> = ({
     </div>
   );
 };
+
+function getOffsetTopInContainer(element: HTMLElement, scrollContainer: HTMLElement, isNestedList: boolean) {
+  if (!isNestedList) {
+    return element.offsetTop;
+  }
+
+  return element.getBoundingClientRect().top - scrollContainer.getBoundingClientRect().top + scrollContainer.scrollTop;
+}
 
 export default InfiniteScroll;

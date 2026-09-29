@@ -26,7 +26,7 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import { LoadMoreDirection, MediaViewerOrigin, NewChatMembersProgress } from '../../types';
 
 import {
-  MEMBERS_SLICE, PROFILE_SENSITIVE_AREA, SHARED_MEDIA_SLICE, SLIDE_TRANSITION_DURATION,
+  MEMBERS_SLICE, PROFILE_POLLS_SLICE, PROFILE_SENSITIVE_AREA, SHARED_MEDIA_SLICE, SLIDE_TRANSITION_DURATION,
 } from '../../config';
 import {
   getHasAdminRight,
@@ -238,6 +238,10 @@ const NON_ISLAND_TABS = new Set<ProfileTabType>([
 ]);
 const MESSAGE_BASED_TABS = new Set<ProfileTabType>([
   'media', 'gif', 'documents', 'links', 'audio', 'voice', 'polls',
+]);
+const VIRTUALIZED_TABS = new Set<ProfileTabType>([
+  'media', 'gif', 'documents', 'links', 'audio',
+  'voice', 'polls', 'members', 'commonChats', 'stories', 'storiesArchive',
 ]);
 
 const CONTENT_LIST_CLASS: Record<string, string> = {
@@ -609,6 +613,11 @@ const Profile = ({
     }
   }, [gifts, startViewTransition, isGiftTransitionEnabled]);
 
+  const [scrollToTopKey, setScrollToTopKey] = useState(0);
+  const handleScrollToTop = useLastCallback(() => {
+    setScrollToTopKey(scrollToTopKey + 1);
+  });
+
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds({
     loadMoreMembers: handleLoadMoreMembers,
     searchMessages: searchSharedMediaMessages,
@@ -632,9 +641,11 @@ const Profile = ({
     archiveStoryIds,
     similarChannels,
     similarBots,
+    scrollToTopKey,
   });
 
   const shouldWrapInIsland = !NON_ISLAND_TABS.has(resultType);
+  const isVirtualized = VIRTUALIZED_TABS.has(resultType);
 
   useEffect(() => {
     if (getMore && !viewportIds && isSynced) {
@@ -702,6 +713,7 @@ const Profile = ({
     allowAutoScrollToTabs,
     onProfileStateChange,
     handleStopAutoScrollToTabs,
+    onScrollToTop: handleScrollToTop,
   });
 
   useTransitionFixes(containerRef);
@@ -874,25 +886,35 @@ const Profile = ({
   }
 
   const shouldWrapInInfiniteScroll = shouldWrapInIsland && resultType !== 'dialogs';
+  const shouldUseTransitionForContent = resultType === 'stories' || resultType === 'gifts';
+
+  function wrapInInfiniteScroll(content: TeactNode) {
+    const listClass = CONTENT_LIST_CLASS[resultType];
+    const itemSelector = shouldUseTransitionForContent
+      ? `.${listClass} > .Transition_slide-active .${listClass} > .scroll-item`
+      : `.${listClass} > .scroll-item`;
+
+    return (
+      <InfiniteScroll
+        items={canRenderContent ? viewportIds : undefined}
+        itemSelector={itemSelector}
+        preloadBackwards={canRenderContent ? getPreloadSlice(resultType) : 0}
+        sensitiveArea={PROFILE_SENSITIVE_AREA}
+        scrollContainerClosest=".Profile"
+        noScrollRestore={!isVirtualized}
+        noScrollRestoreOnTop
+        noFastList
+        onLoadMore={getMore}
+      >
+        {content}
+      </InfiniteScroll>
+    );
+  }
 
   function wrapInIsland(content: TeactNode, className?: string) {
     if (!shouldWrapInIsland) return content;
 
-    const inner = shouldWrapInInfiniteScroll ? (
-      <InfiniteScroll
-        items={canRenderContent ? viewportIds : undefined}
-        itemSelector={`.${CONTENT_LIST_CLASS[resultType]} > .scroll-item`}
-        preloadBackwards={canRenderContent
-          ? (resultType === 'members' ? MEMBERS_SLICE : SHARED_MEDIA_SLICE) : 0}
-        onLoadMore={getMore}
-        scrollContainerClosest=".Profile"
-        sensitiveArea={PROFILE_SENSITIVE_AREA}
-        noScrollRestore
-        noFastList
-      >
-        {content}
-      </InfiniteScroll>
-    ) : content;
+    const inner = shouldWrapInInfiniteScroll ? wrapInInfiniteScroll(content) : content;
 
     return (
       <div className={styles.sharedMediaIslandContainer}>
@@ -931,18 +953,7 @@ const Profile = ({
     return (
       <div className={styles.sharedMediaIslandContainer}>
         {renderCategories()}
-        <InfiniteScroll
-          itemSelector={`.${CONTENT_LIST_CLASS[resultType]} > .scroll-item`}
-          items={canRenderContent ? viewportIds : undefined}
-          sensitiveArea={PROFILE_SENSITIVE_AREA}
-          preloadBackwards={canRenderContent ? SHARED_MEDIA_SLICE : 0}
-          scrollContainerClosest=".Profile"
-          noScrollRestore
-          onLoadMore={getMore}
-          noFastList
-        >
-          {renderSpinnerOrContent(noContent, noSpinner)}
-        </InfiniteScroll>
+        {wrapInInfiniteScroll(renderSpinnerOrContent(noContent, noSpinner))}
       </div>
     );
   }
@@ -1060,6 +1071,7 @@ const Profile = ({
           noTransition && styles.noTransition,
         )}
         dir={lang.isRtl && (resultType === 'media' || resultType === 'gif') ? 'rtl' : undefined}
+        teactFastList
       >
         {resultType === 'media' || resultType === 'gif' ? (
           (viewportIds as number[]).filter((id) => Boolean(messagesById[id])).map((id, i, ids) => (
@@ -1296,7 +1308,6 @@ const Profile = ({
     return wrapInIsland(contentEl);
   }
 
-  const shouldUseTransitionForContent = resultType === 'stories' || resultType === 'gifts';
   const contentTransitionKey = (() => {
     if (resultType === 'stories') {
       return selectedStoryAlbumId === 'all' ? 0 : selectedStoryAlbumId;
@@ -1446,6 +1457,17 @@ const Profile = ({
     </Surface>
   );
 };
+
+function getPreloadSlice(resultType: ProfileTabType) {
+  switch (resultType) {
+    case 'members':
+      return MEMBERS_SLICE;
+    case 'polls':
+      return PROFILE_POLLS_SLICE;
+    default:
+      return SHARED_MEDIA_SLICE;
+  }
+}
 
 export default memo(withGlobal<OwnProps>(
   (global, {

@@ -5,7 +5,9 @@ import type {
 } from '../../../api/types';
 import type { ProfileTabType, SharedMediaType, ThreadId } from '../../../types';
 
-import { MEMBERS_SLICE, MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
+import {
+  MEMBERS_SLICE, MESSAGE_SEARCH_SLICE, PROFILE_POLLS_SLICE, SHARED_MEDIA_SLICE,
+} from '../../../config';
 import { getMessageContentIds, sortUserIds } from '../../../global/helpers';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
@@ -37,6 +39,7 @@ export default function useProfileViewportIds({
   archiveStoryIds,
   similarChannels,
   similarBots,
+  scrollToTopKey,
 }: {
   loadMoreMembers: AnyToVoidFunction;
   loadCommonChats: AnyToVoidFunction;
@@ -60,9 +63,14 @@ export default function useProfileViewportIds({
   archiveStoryIds?: number[];
   similarChannels?: string[];
   similarBots?: string[];
+  scrollToTopKey: number;
 }) {
   const resultType = mediaSearchType && SHARED_MEDIA_TYPES.includes(tabType as SharedMediaType)
     ? mediaSearchType : tabType;
+
+  const handledScrollToTopKeyRef = useRef(scrollToTopKey);
+  const shouldResetToTop = handledScrollToTopKeyRef.current !== scrollToTopKey;
+  handledScrollToTopKeyRef.current = scrollToTopKey;
 
   const memberIds = useMemo(() => {
     if (!groupChatMembers || !usersById || !userStatusesById) {
@@ -84,40 +92,40 @@ export default function useProfileViewportIds({
     return sortChatIds(commonChatIds, true);
   }, [chatsById, commonChatIds]);
 
-  const [memberViewportIds, getMoreMembers, noProfileInfoForMembers] = useInfiniteScrollForLoadableItems(
-    loadMoreMembers, memberIds,
+  const [memberViewportIds, getMoreMembers] = useInfiniteScrollForLoadableItems(
+    shouldResetToTop, loadMoreMembers, memberIds,
   );
 
-  const [mediaViewportIds, getMoreMedia, noProfileInfoForMedia] = useInfiniteScrollForSharedMedia(
-    'media', resultType, searchMessages, chatMessages, foundIds, threadId,
+  const [mediaViewportIds, getMoreMedia] = useInfiniteScrollForSharedMedia(
+    'media', shouldResetToTop, resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
-  const [gifViewportIds, getMoreGifs, noProfileInfoForGifs] = useInfiniteScrollForSharedMedia(
-    'gif', resultType, searchMessages, chatMessages, foundIds, threadId,
+  const [gifViewportIds, getMoreGifs] = useInfiniteScrollForSharedMedia(
+    'gif', shouldResetToTop, resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
-  const [documentViewportIds, getMoreDocuments, noProfileInfoForDocuments] = useInfiniteScrollForSharedMedia(
-    'documents', resultType, searchMessages, chatMessages, foundIds, threadId,
+  const [documentViewportIds, getMoreDocuments] = useInfiniteScrollForSharedMedia(
+    'documents', shouldResetToTop, resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
-  const [linkViewportIds, getMoreLinks, noProfileInfoForLinks] = useInfiniteScrollForSharedMedia(
-    'links', resultType, searchMessages, chatMessages, foundIds, threadId,
+  const [linkViewportIds, getMoreLinks] = useInfiniteScrollForSharedMedia(
+    'links', shouldResetToTop, resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
-  const [audioViewportIds, getMoreAudio, noProfileInfoForAudio] = useInfiniteScrollForSharedMedia(
-    'audio', resultType, searchMessages, chatMessages, foundIds, threadId,
+  const [audioViewportIds, getMoreAudio] = useInfiniteScrollForSharedMedia(
+    'audio', shouldResetToTop, resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
-  const [voiceViewportIds, getMoreVoices, noProfileInfoForVoices] = useInfiniteScrollForSharedMedia(
-    'voice', resultType, searchMessages, chatMessages, foundIds, threadId,
+  const [voiceViewportIds, getMoreVoices] = useInfiniteScrollForSharedMedia(
+    'voice', shouldResetToTop, resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
-  const [pollViewportIds, getMorePolls, noProfileInfoForPolls] = useInfiniteScrollForSharedMedia(
-    'polls', resultType, searchMessages, chatMessages, foundIds, threadId,
+  const [pollViewportIds, getMorePolls] = useInfiniteScrollForSharedMedia(
+    'polls', shouldResetToTop, resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
-  const [commonChatViewportIds, getMoreCommonChats, noProfileInfoForCommonChats] = useInfiniteScrollForLoadableItems(
-    loadCommonChats, chatIds,
+  const [commonChatViewportIds, getMoreCommonChats] = useInfiniteScrollForLoadableItems(
+    shouldResetToTop, loadCommonChats, chatIds,
   );
 
   const sortedStoryIds = useMemo(() => {
@@ -132,77 +140,61 @@ export default function useProfileViewportIds({
     });
   }, [storyIds, pinnedStoryIds]);
 
-  const [storyViewportIds, getMoreStories, noProfileInfoForStories] = useInfiniteScrollForLoadableItems(
-    loadStories, sortedStoryIds,
+  const [storyViewportIds, getMoreStories] = useInfiniteScrollForLoadableItems(
+    shouldResetToTop, loadStories, sortedStoryIds,
   );
 
-  const [
-    archiveStoryViewportIds,
-    getMoreStoriesArchive,
-    noProfileInfoForStoriesArchive,
-  ] = useInfiniteScrollForLoadableItems(
-    loadStoriesArchive, archiveStoryIds,
+  const [archiveStoryViewportIds, getMoreStoriesArchive] = useInfiniteScrollForLoadableItems(
+    shouldResetToTop, loadStoriesArchive, archiveStoryIds,
   );
 
   let viewportIds: number[] | string[] | undefined;
   let getMore: AnyToVoidFunction | undefined;
-  let noProfileInfo = false;
 
   switch (resultType) {
     case 'members':
       viewportIds = memberViewportIds;
       getMore = getMoreMembers;
-      noProfileInfo = noProfileInfoForMembers;
       break;
     case 'commonChats':
       viewportIds = commonChatViewportIds;
       getMore = getMoreCommonChats;
-      noProfileInfo = noProfileInfoForCommonChats;
       break;
     case 'media':
       viewportIds = mediaViewportIds;
       getMore = getMoreMedia;
-      noProfileInfo = noProfileInfoForMedia;
       break;
     case 'gif':
       viewportIds = gifViewportIds;
       getMore = getMoreGifs;
-      noProfileInfo = noProfileInfoForGifs;
       break;
     case 'documents':
       viewportIds = documentViewportIds;
       getMore = getMoreDocuments;
-      noProfileInfo = noProfileInfoForDocuments;
       break;
     case 'links':
       viewportIds = linkViewportIds;
       getMore = getMoreLinks;
-      noProfileInfo = noProfileInfoForLinks;
       break;
     case 'audio':
       viewportIds = audioViewportIds;
       getMore = getMoreAudio;
-      noProfileInfo = noProfileInfoForAudio;
       break;
     case 'voice':
       viewportIds = voiceViewportIds;
       getMore = getMoreVoices;
-      noProfileInfo = noProfileInfoForVoices;
       break;
     case 'polls':
       viewportIds = pollViewportIds;
       getMore = getMorePolls;
-      noProfileInfo = noProfileInfoForPolls;
       break;
     case 'stories':
       viewportIds = storyViewportIds;
       getMore = getMoreStories;
-      noProfileInfo = noProfileInfoForStories;
       break;
     case 'storiesArchive':
       viewportIds = archiveStoryViewportIds;
       getMore = getMoreStoriesArchive;
-      noProfileInfo = noProfileInfoForStoriesArchive;
       break;
     case 'similarChannels':
       viewportIds = similarChannels;
@@ -214,32 +206,30 @@ export default function useProfileViewportIds({
       viewportIds = giftIds;
       getMore = loadMoreGifts;
       break;
-    case 'dialogs':
-      noProfileInfo = true;
-      break;
   }
+
+  const noProfileInfo = resultType === 'dialogs';
 
   return [resultType, viewportIds, getMore, noProfileInfo] as const;
 }
 
 function useInfiniteScrollForLoadableItems<ListId extends string | number>(
+  shouldResetToTop: boolean,
   handleLoadMore?: AnyToVoidFunction,
   itemIds?: ListId[],
 ) {
-  const [viewportIds, getMore] = useInfiniteScroll(
+  return useInfiniteScroll(
     handleLoadMore,
     itemIds,
     undefined,
-    itemIds?.length || MEMBERS_SLICE,
+    MEMBERS_SLICE,
+    shouldResetToTop ? itemIds?.[0] : undefined,
   );
-
-  const isOnTop = !viewportIds || !itemIds || viewportIds[0] === itemIds[0];
-
-  return [viewportIds, getMore, !isOnTop] as const;
 }
 
 function useInfiniteScrollForSharedMedia(
   forSharedMediaType: SharedMediaType,
+  shouldResetToTop: boolean,
   currentResultType?: ProfileTabType,
   handleLoadMore?: AnyToVoidFunction,
   chatMessages?: Record<number, ApiMessage>,
@@ -262,19 +252,22 @@ function useInfiniteScrollForSharedMedia(
     }
   }, [chatMessages, foundIds, currentResultType, forSharedMediaType]);
 
-  const msgLen = messageIdsRef.current?.length ?? 0;
-  const listSlice = forSharedMediaType === 'media'
-    ? Math.max(SHARED_MEDIA_SLICE, msgLen)
-    : Math.max(MESSAGE_SEARCH_SLICE, msgLen);
-
-  const [viewportIds, getMore] = useInfiniteScroll(
+  return useInfiniteScroll(
     handleLoadMore,
     messageIdsRef.current,
     undefined,
-    listSlice,
+    getListSlice(forSharedMediaType),
+    shouldResetToTop ? messageIdsRef.current?.[0] : undefined,
   );
+}
 
-  const isOnTop = !viewportIds || !messageIdsRef.current || viewportIds[0] === messageIdsRef.current[0];
-
-  return [viewportIds, getMore, !isOnTop] as const;
+function getListSlice(type: SharedMediaType) {
+  switch (type) {
+    case 'polls':
+      return PROFILE_POLLS_SLICE;
+    case 'media':
+      return SHARED_MEDIA_SLICE;
+    default:
+      return MESSAGE_SEARCH_SLICE;
+  }
 }

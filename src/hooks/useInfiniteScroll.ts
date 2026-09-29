@@ -59,8 +59,12 @@ const useInfiniteScroll = <ListId extends string | number>(
     const defaultOffsetId = shouldAnchorToInitial
       ? initialOffsetId
       : currentMiddleId && listIds.includes(currentMiddleId) ? currentMiddleId : listIds[0];
-    const { offsetId = defaultOffsetId, direction = LoadMoreDirection.Forwards } = requestParamsRef.current || {};
-    const { newViewportIds, newIsOnTop, fromOffset } = getViewportSlice(listIds, direction, listSlice, offsetId);
+    const { offsetId = defaultOffsetId, direction = LoadMoreDirection.Forwards } = shouldAnchorToInitial
+      ? {} : requestParamsRef.current || {};
+    const currentSlice = viewportIds && direction === LoadMoreDirection.Forwards && offsetId === listIds[0]
+      ? Math.max(listSlice, viewportIds.length)
+      : listSlice;
+    const { newViewportIds, newIsOnTop, fromOffset } = getViewportSlice(listIds, direction, currentSlice, offsetId);
 
     requestParamsRef.current = {};
 

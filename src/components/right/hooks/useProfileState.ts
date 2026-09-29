@@ -3,6 +3,7 @@ import { useEffect } from '../../../lib/teact/teact';
 
 import { ProfileState, type ProfileTabType } from '../../../types';
 
+import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import animateScroll from '../../../util/animateScroll';
 import { throttle } from '../../../util/schedulers';
 
@@ -30,6 +31,7 @@ export default function useProfileState({
   forceScrollProfileTab = false,
   allowAutoScrollToTabs = false,
   handleStopAutoScrollToTabs,
+  onScrollToTop,
 }: {
   containerRef: ElementRef<HTMLDivElement>;
   tabType: ProfileTabType;
@@ -39,6 +41,7 @@ export default function useProfileState({
   allowAutoScrollToTabs?: boolean;
   onProfileStateChange: (state: ProfileState) => void;
   handleStopAutoScrollToTabs: NoneToVoidFunction;
+  onScrollToTop: NoneToVoidFunction;
 }) {
   // Scroll to tabs if needed
   useEffectWithPrevDeps(([prevTabType]) => {
@@ -82,18 +85,21 @@ export default function useProfileState({
     }
 
     isScrollingProgrammatically = true;
+    onScrollToTop();
 
-    animateScroll({
-      container,
-      element: container.firstElementChild as HTMLElement,
-      position: 'start',
-      maxDistance: container.offsetHeight * 2,
+    requestMeasure(() => {
+      animateScroll({
+        container,
+        element: container.firstElementChild as HTMLElement,
+        position: 'start',
+        maxDistance: container.offsetHeight * 2,
+      });
     });
 
     setTimeout(() => {
       isScrollingProgrammatically = false;
     }, PROGRAMMATIC_SCROLL_TIMEOUT_MS);
-  }, [profileState, containerRef, hasProfileInfo]);
+  }, [profileState, containerRef, hasProfileInfo, onScrollToTop]);
 
   const determineProfileState = useLastCallback(() => {
     const container = containerRef.current;

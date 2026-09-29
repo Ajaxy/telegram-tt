@@ -193,29 +193,28 @@ const Document = ({
   });
 
   return (
-    <>
-      <File
-        ref={ref}
-        id={id}
-        name={fileName}
-        extension={extension}
-        size={size}
-        timestamp={datetime}
-        previewMedia={previewMedia}
-        observeIntersection={observeIntersection}
-        previewSize={fileSize}
-        isTransferring={isTransferring}
-        isUploading={isUploading}
-        transferProgress={transferProgress}
-        className={className}
-        sender={sender}
-        isSelectable={isSelectable}
-        isSelected={isSelected}
-        actionIcon={withMediaViewer ? (isDocumentVideo(document) ? 'play' : 'eye') : 'download'}
-        contextActions={contextActions}
-        onClick={handleClick}
-        onDateClick={onDateClick ? handleDateClick : undefined}
-      />
+    <File
+      ref={ref}
+      id={id}
+      name={fileName}
+      extension={extension}
+      size={size}
+      timestamp={datetime}
+      previewMedia={previewMedia}
+      observeIntersection={observeIntersection}
+      previewSize={fileSize}
+      isTransferring={isTransferring}
+      isUploading={isUploading}
+      transferProgress={transferProgress}
+      className={className}
+      sender={sender}
+      isSelectable={isSelectable}
+      isSelected={isSelected}
+      actionIcon={withMediaViewer ? (isDocumentVideo(document) ? 'play' : 'eye') : 'download'}
+      contextActions={contextActions}
+      onClick={handleClick}
+      onDateClick={onDateClick ? handleDateClick : undefined}
+    >
       <ConfirmDialog
         isOpen={isFileIpDialogOpen}
         onClose={closeFileIpDialog}
@@ -229,7 +228,7 @@ const Document = ({
           onCheck={setShouldNotWarnAboutFiles}
         />
       </ConfirmDialog>
-    </>
+    </File>
   );
 };
 
