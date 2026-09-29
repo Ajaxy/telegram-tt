@@ -55,8 +55,9 @@ import {
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
+import buildUploadingMedia from '../../../util/buildUploadingMedia';
 import { fetchFile } from '../../../util/files';
-import { compact, split } from '../../../util/iteratees';
+import { compact, omit, split } from '../../../util/iteratees';
 import { getMessageKey, getMtpEphemeralMessageId } from '../../../util/keys/messageKey';
 import { getServerTime } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
@@ -74,6 +75,7 @@ import {
   buildApiFormattedText,
 } from '../apiBuilders/common';
 import { buildApiTopicWithState } from '../apiBuilders/forums';
+import { buildApiDocument } from '../apiBuilders/media';
 import {
   buildMessageMediaContent,
   buildMessagePollFromMedia,
@@ -95,7 +97,6 @@ import {
   buildLocalForwardedMessage,
   buildLocalMessage,
   buildPreparedInlineMessage,
-  buildUploadingMedia,
   incrementLocalMessageCounter,
 } from '../apiBuilders/messages';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
@@ -1061,9 +1062,10 @@ export async function editMessage({
   }
 
   const isInvertedMedia = text && !attachment?.shouldSendAsFile ? message.isInvertedMedia : undefined;
+  const baseContent = richMessage ? omit(message.content, ['webPage']) : message.content;
 
   const newContent = {
-    ...(media || message.content),
+    ...(media || baseContent),
     text: richMessage || !text ? undefined : {
       text,
       entities,
@@ -1276,12 +1278,37 @@ export async function rescheduleMessage({
   }));
 }
 
-async function uploadMedia(message: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress) {
-  const {
-    filename, blobUrl, mimeType, quick, voice, audio, previewBlobUrl, shouldSendAsFile, shouldSendAsSpoiler, ttlSeconds,
-    isRoundVideo,
-  } = attachment;
+export async function uploadRichMedia({
+  chat,
+  attachment,
+}: {
+  chat: ApiChat;
+  attachment: ApiAttachment;
+}, onProgress: ApiOnProgress) {
+  const uploadedMedia = await uploadAttachment({
+    ...attachment,
+    shouldSendAsSpoiler: undefined,
+  }, onProgress);
+  if (onProgress.isCanceled) {
+    return undefined;
+  }
 
+  const messageMedia = await invokeRequest(new GramJs.messages.UploadMedia({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    media: uploadedMedia,
+  }), { shouldThrow: true });
+  if (!messageMedia) {
+    return undefined;
+  }
+
+  const content = buildMessageMediaContent(messageMedia);
+  if (attachment.shouldSendAsFile && messageMedia instanceof GramJs.MessageMediaDocument && messageMedia.document) {
+    return buildApiDocument(messageMedia.document);
+  }
+  return content?.photo || content?.video || content?.audio || content?.document;
+}
+
+async function uploadMedia(message: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress) {
   const patchedOnProgress: ApiOnProgress = (progress) => {
     if (onProgress.isCanceled) {
       patchedOnProgress.isCanceled = true;
@@ -1289,6 +1316,15 @@ async function uploadMedia(message: ApiMessage, attachment: ApiAttachment, onPro
       onProgress(progress, getMessageKey(message));
     }
   };
+
+  return uploadAttachment(attachment, patchedOnProgress);
+}
+
+async function uploadAttachment(attachment: ApiAttachment, onProgress: ApiOnProgress) {
+  const {
+    filename, blobUrl, mimeType, quick, voice, audio, previewBlobUrl, shouldSendAsFile, shouldSendAsSpoiler, ttlSeconds,
+    isRoundVideo,
+  } = attachment;
 
   const fetchAndUpload = async (url: string, progressCallback?: (progress: number) => void) => {
     const file = await fetchFile(url, filename);
@@ -1299,7 +1335,7 @@ async function uploadMedia(message: ApiMessage, attachment: ApiAttachment, onPro
   const shouldUploadThumb = audio || isVideo || shouldSendAsFile;
 
   const [inputFile, thumb] = await Promise.all(compact([
-    fetchAndUpload(blobUrl, patchedOnProgress),
+    fetchAndUpload(blobUrl, onProgress),
     shouldUploadThumb && previewBlobUrl && fetchAndUpload(previewBlobUrl),
   ]));
 

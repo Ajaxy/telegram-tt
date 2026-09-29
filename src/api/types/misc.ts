@@ -64,6 +64,10 @@ export interface ApiAttachment {
     height: number;
     duration?: number;
   };
+  sourceDimensions?: {
+    width: number;
+    height: number;
+  };
   voice?: {
     duration: number;
     waveform: number[];
@@ -74,6 +78,8 @@ export interface ApiAttachment {
     performer?: string;
   };
   previewBlobUrl?: string;
+
+  isPreparing?: true;
 
   shouldSendAsFile?: true;
   shouldSendAsSpoiler?: true;

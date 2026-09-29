@@ -4,6 +4,7 @@ import type {
   ApiInlineButtonAction,
   ApiInputRichMessage,
   ApiPageBlock,
+  ApiPageCaption,
   ApiPageListItem,
   ApiPageListOrderedItem,
   ApiPageTableCell,
@@ -16,6 +17,7 @@ import type {
 import { MAX_BUTTONS_PER_ROW, normalizeButtonText } from '../../../global/helpers/buttons';
 import { hasRichText } from '../../../util/richText';
 import { buildInputUserFromLocalDb } from './index';
+import { buildInputDocument, buildInputPhoto } from './media';
 
 const DEFAULT_STRING = '';
 const TEXT_BLOCK_TYPES = new Set<ApiPageBlock['type']>([
@@ -38,7 +40,8 @@ const TEXT_BLOCK_TYPES = new Set<ApiPageBlock['type']>([
 
 export function buildInputRichMessage(value: ApiInputRichMessage): GramJs.InputRichMessage | undefined {
   const blocks = buildMtpPageBlocks(value.blocks);
-  if (!blocks.length || blocks.some((block) => !block)) {
+  const media = buildRichMessageMedia(value.blocks);
+  if (!blocks.length || blocks.some((block) => !block) || !media) {
     return undefined;
   }
 
@@ -46,6 +49,8 @@ export function buildInputRichMessage(value: ApiInputRichMessage): GramJs.InputR
     rtl: value.isRtl,
     noautolink: value.shouldDisableAutoLink,
     blocks: blocks as GramJs.TypePageBlock[],
+    photos: media.photos.length ? media.photos : undefined,
+    documents: media.documents.length ? media.documents : undefined,
   });
 }
 
@@ -87,6 +92,25 @@ function buildMtpPageBlock(block: ApiPageBlock): GramJs.TypePageBlock | undefine
       return buildBlockquoteBlocksPageBlock(block.blocks, block.caption);
     case 'pullquote':
       return buildQuotePageBlock(block.text, block.caption, true);
+    case 'photo':
+      return buildPhotoPageBlock(block);
+    case 'video':
+      return buildVideoPageBlock(block);
+    case 'audio': {
+      const caption = buildMtpPageCaption(block.caption);
+      return caption ? new GramJs.PageBlockAudio({
+        audioId: BigInt(block.audio.id), caption,
+      }) : undefined;
+    }
+    case 'document': {
+      const caption = buildMtpPageCaption(block.caption);
+      return caption && block.document.id ? new GramJs.PageBlockDocument({
+        documentId: BigInt(block.document.id), caption,
+      }) : undefined;
+    }
+    case 'collage':
+    case 'slideshow':
+      return buildMediaGroupPageBlock(block);
     case 'math':
       return new GramJs.PageBlockMath({ source: block.source });
     case 'list':
@@ -99,6 +123,121 @@ function buildMtpPageBlock(block: ApiPageBlock): GramJs.TypePageBlock | undefine
       return buildTablePageBlock(block.title, block.rows, block.isBordered, block.isStriped, block.isCompact);
     default:
       return undefined;
+  }
+}
+
+function buildPhotoPageBlock(block: Extract<ApiPageBlock, { type: 'photo' }>) {
+  const caption = buildMtpPageCaption(block.caption);
+  if (!caption) {
+    return undefined;
+  }
+
+  return new GramJs.PageBlockPhoto({
+    spoiler: block.isSpoiler,
+    photoId: BigInt(block.photo.id),
+    caption,
+    url: block.url,
+    webpageId: block.webPageId ? BigInt(block.webPageId) : undefined,
+  });
+}
+
+function buildVideoPageBlock(block: Extract<ApiPageBlock, { type: 'video' }>) {
+  const caption = buildMtpPageCaption(block.caption);
+  if (!caption) {
+    return undefined;
+  }
+
+  return new GramJs.PageBlockVideo({
+    autoplay: block.isAutoplay,
+    loop: block.isLoop,
+    spoiler: block.isSpoiler,
+    videoId: BigInt(block.video.id),
+    caption,
+  });
+}
+
+function buildMediaGroupPageBlock(block: Extract<ApiPageBlock, { type: 'collage' | 'slideshow' }>) {
+  const items = block.items.map(buildMtpPageBlock);
+  const caption = buildMtpPageCaption(block.caption);
+  if (!items.length || items.some((item) => !item) || !caption) {
+    return undefined;
+  }
+
+  const params = {
+    items: items as GramJs.TypePageBlock[],
+    caption,
+  };
+  return block.type === 'collage'
+    ? new GramJs.PageBlockCollage(params)
+    : new GramJs.PageBlockSlideshow(params);
+}
+
+function buildMtpPageCaption(caption: ApiPageCaption) {
+  const text = buildMtpRichText(caption.text);
+  const credit = buildMtpRichText(caption.credit);
+  return text && credit ? new GramJs.PageCaption({ text, credit }) : undefined;
+}
+
+function buildRichMessageMedia(blocks: ApiPageBlock[]) {
+  const photosById = new Map<string, GramJs.InputPhoto>();
+  const documentsById = new Map<string, GramJs.InputDocument>();
+  let isValid = true;
+
+  blocks.forEach((block) => visitPageBlock(block, (mediaBlock) => {
+    if (mediaBlock.type === 'photo') {
+      const id = mediaBlock.photo.id;
+      const photo = buildInputPhoto(mediaBlock.photo);
+      if (!photo) {
+        isValid = false;
+        return;
+      }
+
+      photosById.set(id, photo);
+      return;
+    }
+
+    const media = mediaBlock.type === 'document' ? mediaBlock.document
+      : mediaBlock.type === 'audio' ? mediaBlock.audio : mediaBlock.video;
+    const document = buildInputDocument(media);
+    if (!document) {
+      isValid = false;
+      return;
+    }
+
+    documentsById.set(media.id!, document);
+  }));
+
+  return isValid ? {
+    photos: Array.from(photosById.values()),
+    documents: Array.from(documentsById.values()),
+  } : undefined;
+}
+
+function visitPageBlock(
+  block: ApiPageBlock,
+  callback: (block: Extract<ApiPageBlock, { type: 'photo' | 'video' | 'audio' | 'document' }>) => void,
+) {
+  switch (block.type) {
+    case 'photo':
+    case 'video':
+    case 'audio':
+    case 'document':
+      callback(block);
+      break;
+    case 'collage':
+    case 'slideshow':
+      block.items.forEach((item) => visitPageBlock(item, callback));
+      break;
+    case 'blockquoteBlocks':
+    case 'details':
+      block.blocks.forEach((item) => visitPageBlock(item, callback));
+      break;
+    case 'list':
+    case 'orderedList':
+      block.items.forEach((item) => {
+        if (item.type === 'blocks') item.blocks.forEach((child) => visitPageBlock(child, callback));
+      });
+      break;
   }
 }
 

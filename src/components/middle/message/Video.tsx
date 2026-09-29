@@ -41,6 +41,7 @@ export type OwnProps<T> = {
   canAutoPlay?: boolean;
   uploadProgress?: number;
   layout?: 'intrinsic' | 'fill';
+  noSpoilerReveal?: boolean;
   isDownloading?: boolean;
   isProtected?: boolean;
   className?: string;
@@ -63,6 +64,7 @@ const Video = <T,>({
   canAutoPlay,
   uploadProgress,
   layout = 'intrinsic',
+  noSpoilerReveal,
   isDownloading,
   isProtected,
   className,
@@ -201,6 +203,11 @@ const Video = <T,>({
       return;
     }
 
+    if (isSpoilerShown && noSpoilerReveal) {
+      onClick?.(clickArg!, e);
+      return;
+    }
+
     if (!isPaidPreview && isDownloading) {
       cancelMediaDownload({ media: video });
       return;
@@ -303,7 +310,7 @@ const Video = <T,>({
       />
       <MediaSpoiler
         isVisible={isSpoilerShown}
-        withAnimation
+        withAnimation={noSpoilerReveal ? undefined : true}
         thumbDataUri={thumbDataUri}
         isNsfw={isMediaNsfw}
         width={width}

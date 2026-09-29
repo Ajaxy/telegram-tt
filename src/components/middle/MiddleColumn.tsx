@@ -439,6 +439,11 @@ function MiddleColumn({
   }), resetLeftColumnWidth, leftColumnWidth, '--left-column-width');
 
   const handleDragEnter = useLastCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (isRichInputExpanded) {
+      setDropAreaState(DropAreaState.None);
+      return;
+    }
+
     const { items } = e.dataTransfer || {};
     // In Safari, the e.dataTransfer.items list may be empty during dragenter/dragover events,
     // preventing the ability to determine file types in advance. More details: https://bugs.webkit.org/show_bug.cgi?id=223517
@@ -625,6 +630,7 @@ function MiddleColumn({
               <div className={footerClassName}>
                 <FloatingActionButtons
                   withScrollDown={renderingIsScrollDownShown}
+                  isHidden={isRichInputExpanded}
                 />
                 {renderingCanPost && !hasFooterActionBar && (
                   <Composer

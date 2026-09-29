@@ -1,5 +1,6 @@
 import {
   Editor,
+  Extension,
   InputRule,
   type JSONContent as TiptapJsonContent,
   mergeAttributes,
@@ -24,19 +25,22 @@ import SubscriptExtension from '@tiptap/extension-subscript';
 import SuperscriptExtension from '@tiptap/extension-superscript';
 import UnderlineExtension from '@tiptap/extension-underline';
 import { splitBlock } from '@tiptap/pm/commands';
-import { redoDepth, undoDepth } from '@tiptap/pm/history';
+import { isHistoryTransaction, redoDepth, undoDepth } from '@tiptap/pm/history';
 import type { Node as ProseMirrorNode, ResolvedPos } from '@tiptap/pm/model';
 import {
   Plugin, TextSelection, type Transaction,
 } from '@tiptap/pm/state';
-import type { EditorView } from '@tiptap/pm/view';
+import type { DecorationSet, EditorView } from '@tiptap/pm/view';
 import StarterKitExtension from '@tiptap/starter-kit';
 import type { ElementRef } from '../../../../lib/teact/teact';
 
 import type { CustomEmojiNodeOptions } from '../../../../util/tiptap/extensions/customEmoji';
 import type { RichEditorDateClickTarget } from '../../../../util/tiptap/extensions/date';
+import type { RichEditorMediaItem } from '../../../../util/tiptap/richMedia';
 import type { RichEditorTooltipsConfig } from '../../../common/tooltips/types';
+import type { RichEditorMediaEditHandler, RichEditorMediaFilesHandler } from '../richEditorTypes';
 
+import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import { lowlight } from '../../../../util/highlightCode';
 import { addLocalizationCallback, getTranslationFn } from '../../../../util/localization';
 import {
@@ -55,6 +59,7 @@ import {
 import {
   CAPTION_NODE_NAME,
   FOOTER_NODE_NAME,
+  MEDIA_NODE_NAME,
   TABLE_TITLE_NODE_NAME,
 } from '../../../../util/tiptap/constants';
 import {
@@ -63,6 +68,7 @@ import {
   parseRichMarkdownToken,
   RE_RICH_MARKDOWN_LINK_INPUT,
 } from '../../../../util/tiptap/richMarkdown';
+import { getRichEditorMediaAttrs, getRichMediaUpload } from '../../../../util/tiptap/richMedia';
 import setEditorContentWithoutHistory from '../../../../util/tiptap/setEditorContentWithoutHistory';
 import styles from '../../../../util/tiptap/styling.module.scss';
 import { buildRichEditorFormatting } from '../../../ui/textInput/richEditorFormatting';
@@ -86,6 +92,7 @@ import {
 } from '../../../common/tooltips/extensions/RichEditorTooltips';
 import EditableCodeBlock from '../richInput/EditableCodeBlock';
 import EditableListItem from '../richInput/EditableListItem';
+import { buildRichEditorMedia } from '../richInput/EditableMedia';
 
 export const RICH_HEADING_LEVELS: [1, 2, 3, 4, 5, 6] = [1, 2, 3, 4, 5, 6];
 export type RichHeadingLevel = typeof RICH_HEADING_LEVELS[number];
@@ -118,8 +125,11 @@ type CreateRichEditorParams = {
   sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   content: TiptapJsonContent;
   getIsRichInputExpanded: () => boolean;
+  getCanInsertMedia: (type: RichEditorMediaItem['type']) => boolean;
   onUpdate: (editor: Editor) => void;
   onDateClick: (target: RichEditorDateClickTarget) => void;
+  onMediaEdit: RichEditorMediaEditHandler;
+  onMediaFiles: RichEditorMediaFilesHandler;
   tooltips?: RichEditorTooltipsConfig;
 };
 
@@ -141,7 +151,46 @@ const RICH_TEXT_INLINE_CONTENT = 'inline*';
 const REFRESH_LANG = 'refreshLang';
 const renderListItemMarkdown = ListItem.config.renderMarkdown!;
 const getFalse = () => false;
+const ignoreMediaEdit = () => undefined;
+const ignoreMediaFiles = () => undefined;
 const EMPTY_CUSTOM_EMOJI_OPTIONS: CustomEmojiNodeOptions = {};
+const mediaDropPositionByView = new WeakMap<EditorView, number>();
+const mediaDropIndicatorByView = new WeakMap<EditorView, HTMLElement>();
+
+// Undo/redo drops unrecoverable media and its captions, with cleanup included in the same history event
+const RichEditorHistory = Extension.create({
+  name: 'richEditorHistory',
+
+  addProseMirrorPlugins() {
+    return [new Plugin({
+      appendTransaction(transactions, oldState, newState) {
+        if (!transactions.some(isHistoryTransaction)) return undefined;
+
+        const transaction = newState.tr;
+        newState.doc.descendants((node, position) => {
+          if (node.type.name !== MEDIA_NODE_NAME) return undefined;
+
+          const attrs = getRichEditorMediaAttrs(node.toJSON());
+          const items = attrs?.items.filter((item) => {
+            const media = item.media || getRichMediaUpload(item.uploadId)?.preview;
+            return media?.mediaType === item.type;
+          });
+          if (items?.length && items.length === attrs!.items.length) return false;
+
+          const from = transaction.mapping.map(position);
+          if (items?.length) {
+            transaction.setNodeMarkup(from, undefined, { ...attrs, items });
+          } else {
+            transaction.deleteRange(from, from + node.nodeSize);
+          }
+          return false;
+        });
+
+        return transaction.docChanged ? transaction : undefined;
+      },
+    })];
+  },
+});
 
 export function __createRichEditor({
   element,
@@ -149,8 +198,11 @@ export function __createRichEditor({
   sharedCanvasHqRef,
   content,
   getIsRichInputExpanded,
+  getCanInsertMedia,
   onUpdate,
   onDateClick,
+  onMediaEdit,
+  onMediaFiles,
   tooltips,
 }: CreateRichEditorParams) {
   const richEditor = new Editor({
@@ -159,20 +211,62 @@ export function __createRichEditor({
       onDateClick,
       tooltips,
       getIsRichInputExpanded,
+      onMediaEdit,
+      onMediaFiles,
       { sharedCanvasRef, sharedCanvasHqRef },
     ),
     editorProps: {
       handleKeyDown: handleRichEditorKeyDown,
+      handleDrop: (view, event) => handleRichEditorDrop(
+        view, event, getIsRichInputExpanded, onMediaFiles,
+      ),
+      handleDOMEvents: {
+        dragover: (view, event) => handleRichEditorDragOver(view, event, getIsRichInputExpanded),
+        dragleave: handleRichEditorDragLeave,
+      },
     },
     onUpdate: ({ editor }) => {
       onUpdate(editor);
       requestSharedCanvasCoordsRecalculation(sharedCanvasRef, sharedCanvasHqRef);
     },
+    onDestroy: () => removeRichEditorDropIndicator(richEditor.view),
   });
+
+  // Saved content and existing media remain editable; paste and history cannot add restricted media
+  richEditor.registerPlugin(new Plugin({
+    filterTransaction(transaction, state) {
+      if (!transaction.docChanged || transaction.getMeta('preventUpdate')
+        || (getCanInsertMedia('photo') && getCanInsertMedia('video')
+          && getCanInsertMedia('document') && getCanInsertMedia('audio'))) return true;
+
+      const previousCounts = getRestrictedMediaCounts(state.doc, getCanInsertMedia);
+      const nextCounts = getRestrictedMediaCounts(transaction.doc, getCanInsertMedia);
+      return [...nextCounts].every(([id, count]) => count <= (previousCounts.get(id) || 0));
+    },
+  }));
 
   setEditorContentWithoutHistory(richEditor, content);
 
   return richEditor;
+}
+
+function getRestrictedMediaCounts(
+  doc: ProseMirrorNode,
+  getCanInsertMedia: CreateRichEditorParams['getCanInsertMedia'],
+) {
+  const counts = new Map<string, number>();
+  doc.descendants((node) => {
+    if (node.type.name !== MEDIA_NODE_NAME) return;
+
+    const attrs = getRichEditorMediaAttrs(node.toJSON());
+    attrs?.items.forEach((item) => {
+      if (getCanInsertMedia(item.type)) return;
+
+      const id = `${item.type}-${item.media?.id || item.uploadId}`;
+      counts.set(id, (counts.get(id) || 0) + 1);
+    });
+  });
+  return counts;
 }
 
 export function __getRichEditorCanUndo(editor: Editor) {
@@ -184,18 +278,25 @@ export function __getRichEditorCanRedo(editor: Editor) {
 }
 
 export function __buildRichEditorSchemaExtensions() {
-  return buildRichEditorSchemaExtensions(getFalse, EMPTY_CUSTOM_EMOJI_OPTIONS);
+  return buildRichEditorSchemaExtensions(
+    getFalse, EMPTY_CUSTOM_EMOJI_OPTIONS, ignoreMediaEdit, ignoreMediaFiles,
+  );
 }
 
 function buildRichEditorExtensions(
   onDateClick: (target: RichEditorDateClickTarget) => void,
   tooltips: RichEditorTooltipsConfig | undefined,
   getIsRichInputExpanded: () => boolean,
+  onMediaEdit: RichEditorMediaEditHandler,
+  onMediaFiles: RichEditorMediaFilesHandler,
   customEmojiOptions: CustomEmojiNodeOptions,
 ) {
   const extensions = [
-    ...buildRichEditorSchemaExtensions(getIsRichInputExpanded, customEmojiOptions, onDateClick),
+    ...buildRichEditorSchemaExtensions(
+      getIsRichInputExpanded, customEmojiOptions, onMediaEdit, onMediaFiles, onDateClick,
+    ),
     RichEditorMarkdown,
+    RichEditorHistory,
     RichEditorTextReplacements,
     buildRichEditorFormatting(getIsRichInputExpanded),
     RichEditorBotApiHtml,
@@ -244,6 +345,8 @@ function buildRichComposerSchemaExtensions() {
 function buildRichEditorSchemaExtensions(
   getIsRichInputExpanded: () => boolean,
   customEmojiOptions: CustomEmojiNodeOptions,
+  onMediaEdit: RichEditorMediaEditHandler,
+  onMediaFiles: RichEditorMediaFilesHandler,
   onDateClick?: (target: RichEditorDateClickTarget) => void,
 ) {
   return [
@@ -353,6 +456,7 @@ function buildRichEditorSchemaExtensions(
     MathBlockNode,
     MathInlineNode,
     UnsupportedNode,
+    buildRichEditorMedia(onMediaEdit, onMediaFiles),
     ...buildRichComposerSchemaExtensions(),
   ];
 }
@@ -374,14 +478,17 @@ function buildRichEditorPlaceholder() {
             init(config, state) {
               currentDoc = state.doc;
               currentConfig = config;
-              return stateField.init.call(plugin, config, state);
+              const decorations = stateField.init.call(plugin, config, state);
+              return filterRichEditorPlaceholderDecorations(state.doc, decorations);
             },
             apply(transaction, value, oldState, newState) {
               currentDoc = newState.doc;
               if (transaction.getMeta(REFRESH_LANG)) {
-                return stateField.init.call(plugin, currentConfig, newState);
+                const decorations = stateField.init.call(plugin, currentConfig, newState);
+                return filterRichEditorPlaceholderDecorations(newState.doc, decorations);
               }
-              return stateField.apply.call(plugin, transaction, value, oldState, newState);
+              const decorations = stateField.apply.call(plugin, transaction, value, oldState, newState);
+              return filterRichEditorPlaceholderDecorations(newState.doc, decorations);
             },
           },
         }),
@@ -405,6 +512,13 @@ function buildRichEditorPlaceholder() {
     showOnlyCurrent: false,
     showOnlyWhenEditable: false,
   });
+}
+
+function filterRichEditorPlaceholderDecorations(doc: ProseMirrorNode, decorations: DecorationSet) {
+  const mediaDecorations = decorations.find().filter(({ from }) => (
+    doc.nodeAt(from)?.type.name === MEDIA_NODE_NAME
+  ));
+  return mediaDecorations.length ? decorations.remove(mediaDecorations) : decorations;
 }
 
 function getRichEditorEmptyNodeClass(node: ProseMirrorNode, parent: ProseMirrorNode) {
@@ -478,6 +592,100 @@ function handleRichEditorKeyDown(view: EditorView, event: KeyboardEvent) {
 
   event.preventDefault();
   return splitBlock(view.state, view.dispatch);
+}
+
+function handleRichEditorDrop(
+  view: EditorView,
+  event: DragEvent,
+  getIsRichInputExpanded: () => boolean,
+  onMediaFiles: RichEditorMediaFilesHandler,
+) {
+  const files = Array.from(event.dataTransfer?.files || []);
+  if (!getIsRichInputExpanded() || !files.length) {
+    return false;
+  }
+
+  const dropPosition = getRichEditorBlockDropPosition(view, event)
+    ?? mediaDropPositionByView.get(view)
+    ?? view.state.selection.from;
+  removeRichEditorDropIndicator(view);
+  onMediaFiles(files, dropPosition, false);
+  event.preventDefault();
+  return true;
+}
+
+function handleRichEditorDragOver(
+  view: EditorView,
+  event: DragEvent,
+  getIsRichInputExpanded: () => boolean,
+) {
+  if (!getIsRichInputExpanded() || !event.dataTransfer?.types.includes('Files')) {
+    removeRichEditorDropIndicator(view);
+    return false;
+  }
+
+  const position = getRichEditorBlockDropPosition(view, event);
+  if (position === undefined) return false;
+
+  const editorRect = view.dom.getBoundingClientRect();
+  const coordinates = view.coordsAtPos(position);
+  mediaDropPositionByView.set(view, position);
+  event.preventDefault();
+  requestMutation(() => {
+    let indicator = mediaDropIndicatorByView.get(view);
+    if (!indicator) {
+      indicator = document.createElement('div');
+      indicator.className = styles.mediaDropIndicator;
+      document.body.append(indicator);
+      mediaDropIndicatorByView.set(view, indicator);
+    }
+    indicator.style.left = `${editorRect.left}px`;
+    indicator.style.top = `${coordinates.top}px`;
+    indicator.style.width = `${editorRect.width}px`;
+  });
+  return true;
+}
+
+function handleRichEditorDragLeave(view: EditorView, event: DragEvent) {
+  const nextTarget = event.relatedTarget;
+  if (nextTarget instanceof Node && view.dom.contains(nextTarget)) {
+    return false;
+  }
+
+  removeRichEditorDropIndicator(view);
+  return false;
+}
+
+function getRichEditorBlockDropPosition(view: EditorView, event: DragEvent) {
+  const lastBlock = view.dom.lastElementChild;
+  if (lastBlock && event.clientY >= lastBlock.getBoundingClientRect().bottom) {
+    return view.state.doc.content.size;
+  }
+
+  const rawPosition = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos;
+  if (rawPosition === undefined) return undefined;
+
+  const resolvedPosition = view.state.doc.resolve(rawPosition);
+  if (!resolvedPosition.depth) return rawPosition;
+
+  const blockPosition = resolvedPosition.before(1);
+  const block = resolvedPosition.node(1);
+  const blockElement = view.nodeDOM(blockPosition);
+  if (!(blockElement instanceof HTMLElement)) return blockPosition;
+
+  const blockRect = blockElement.getBoundingClientRect();
+  return event.clientY > blockRect.top + blockRect.height / 2
+    ? blockPosition + block.nodeSize
+    : blockPosition;
+}
+
+function removeRichEditorDropIndicator(view: EditorView) {
+  mediaDropPositionByView.delete(view);
+  const indicator = mediaDropIndicatorByView.get(view);
+  if (!indicator) return;
+
+  mediaDropIndicatorByView.delete(view);
+  requestMutation(() => indicator.remove());
 }
 
 export function __isRichEditorEmpty(editor: Editor) {

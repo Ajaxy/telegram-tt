@@ -58,13 +58,14 @@ export type OwnProps = {
   shouldCollectDebugLogs?: boolean;
   theme: ThemeKey;
   canEditMedia?: boolean;
+  isRichInputExpanded?: boolean;
   editingMessage?: ApiMessage;
   messageListType: MessageListType;
   paidMessagesStars?: number;
   canInsertDate?: boolean;
   canExpandRichInput?: boolean;
   menuPositionX: 'left' | 'right';
-  onFileSelect: (files: File[]) => void;
+  onFileSelect: (files: File[], shouldSendAsFile?: boolean) => void;
   onDateInsert: (text: ApiFormattedText) => void;
   onTodoListCreate: NoneToVoidFunction;
   onRichInputExpand: NoneToVoidFunction;
@@ -90,6 +91,7 @@ const AttachMenu = ({
   theme,
   shouldCollectDebugLogs,
   canEditMedia,
+  isRichInputExpanded,
   editingMessage,
   messageListType,
   paidMessagesStars,
@@ -145,12 +147,12 @@ const AttachMenu = ({
     }
   });
 
-  const handleFileSelect = useLastCallback((e: Event) => {
+  const handleFileSelect = useLastCallback((e: Event, shouldSendAsFile?: boolean) => {
     const { files } = e.target as HTMLInputElement;
     const validatedFiles = validateFiles(files);
 
     if (validatedFiles?.length) {
-      onFileSelect(validatedFiles);
+      onFileSelect(validatedFiles, shouldSendAsFile);
     }
   });
 
@@ -169,7 +171,7 @@ const AttachMenu = ({
     openSystemFilesDialog(!canSendDocuments && canSendAudios
       ? Array.from(SUPPORTED_AUDIO_CONTENT_TYPES).join(',') : (
         '*'
-      ), (e) => handleFileSelect(e));
+      ), (e) => handleFileSelect(e, true));
   });
 
   const handleSendLogs = useLastCallback(() => {
@@ -212,7 +214,7 @@ const AttachMenu = ({
       {isButtonVisible && (
         <>
           {
-            editingMessage && canEditMedia ? (
+            editingMessage && canEditMedia && !isRichInputExpanded ? (
               <ResponsiveHoverButton
                 id="replace-menu-button"
                 className={buildClassName('AttachMenu--button composer-action-button', isAttachMenuOpen && 'activated')}
@@ -228,7 +230,7 @@ const AttachMenu = ({
             ) : (
               <ResponsiveHoverButton
                 id="attach-menu-button"
-                disabled={Boolean(editingMessage)}
+                disabled={Boolean(editingMessage && (!isRichInputExpanded || canEditMedia))}
                 className={buildClassName('AttachMenu--button composer-action-button', isAttachMenuOpen && 'activated')}
                 round
                 color="translucent"
@@ -269,7 +271,7 @@ const AttachMenu = ({
             {canAttachMedia && canAttachFiles && (
               <>
                 {canSendVideoOrPhoto && !isFile && (
-                  <MenuItem icon="photo" onClick={handleQuickSelect}>
+                  <MenuItem icon="media" onClick={handleQuickSelect}>
                     {oldLang(canSendVideoAndPhoto ? 'AttachmentMenu.PhotoOrVideo'
                       : (canSendPhotos ? 'InputAttach.Popover.Photo' : 'InputAttach.Popover.Video'))}
                   </MenuItem>

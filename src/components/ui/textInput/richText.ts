@@ -33,6 +33,7 @@ import {
   FOOTER_NODE_NAME,
   MATH_BLOCK_NODE_NAME,
   MATH_INLINE_NODE_NAME,
+  MEDIA_NODE_NAME,
   TABLE_CELL_HIGHLIGHT_ATTR,
   TABLE_TITLE_NODE_NAME,
   TABLE_WRAPPER_NODE_NAME,
@@ -46,6 +47,14 @@ import {
   getButtonRowAlign,
   RICH_BUTTON_NODE_NAME,
 } from '../../../util/tiptap/extensions/richButton';
+import {
+  buildRichMediaItemBlock,
+  EMPTY_RICH_MEDIA_CAPTION,
+  getRichEditorMediaAttrs,
+  registerRichMedia,
+  type RichEditorMediaAttrs,
+  type RichEditorMediaItem,
+} from '../../../util/tiptap/richMedia';
 
 type InlineEntityType =
   ApiMessageEntityTypes.Bold
@@ -239,6 +248,8 @@ function buildBlockFromTiptapNode(node: TiptapJsonContent): ApiPageBlock | undef
         type: 'math',
         source: getTiptapStringAttr(node, 'source') || DEFAULT_STRING,
       };
+    case MEDIA_NODE_NAME:
+      return buildMediaBlockFromTiptapNode(node);
     case UNSUPPORTED_NODE_NAME:
       return { type: 'unsupported' };
     default:
@@ -319,15 +330,112 @@ function buildTiptapNodesFromBlock(
         type: MATH_BLOCK_NODE_NAME,
         attrs: { source: block.source },
       }];
+    case 'photo':
+    case 'video':
+    case 'audio':
+    case 'document':
+    case 'collage':
+    case 'slideshow':
+      return buildOptionalTiptapNode(buildTiptapMediaNode(block));
     case 'anchor':
     case 'unsupported':
       return options?.isForCopy ? [] : [{ type: UNSUPPORTED_NODE_NAME }];
     default:
-      // TODO: Add Tiptap media nodes for lossless message copy and editor paste
       return options?.isForCopy
         ? buildTiptapMediaFallbackNodes(block, options)
         : [{ type: UNSUPPORTED_NODE_NAME }];
   }
+}
+
+function buildMediaBlockFromTiptapNode(node: TiptapJsonContent): ApiPageBlock | undefined {
+  const attrs = getRichEditorMediaAttrs(node);
+  if (!attrs) {
+    return undefined;
+  }
+
+  const items = attrs.items.flatMap((item) => {
+    const block = buildRichMediaItemBlock(item);
+    return block ? [block] : [];
+  });
+  const caption: ApiPageCaption = {
+    text: buildRichTextFromTiptapContent(node.content),
+    credit: attrs.credit,
+  };
+  if (!items.length) {
+    return hasRichText(caption.text) ? { type: 'paragraph', text: caption.text } : undefined;
+  }
+
+  if (items.length === 1 && attrs.kind !== 'collage' && attrs.kind !== 'slideshow') {
+    return { ...items[0], caption };
+  }
+
+  return {
+    type: attrs.kind === 'slideshow' ? 'slideshow' : 'collage',
+    items,
+    caption,
+  };
+}
+
+function buildTiptapMediaNode(
+  block: Extract<ApiPageBlock, { type: 'photo' | 'video' | 'audio' | 'document' | 'collage' | 'slideshow' }>,
+): TiptapJsonContent | undefined {
+  const items = buildRichEditorMediaItems(block);
+  if (!items?.length) {
+    return undefined;
+  }
+
+  const caption = block.caption;
+  const attrs: RichEditorMediaAttrs = {
+    kind: block.type,
+    items,
+    credit: caption.credit,
+  };
+  return {
+    type: MEDIA_NODE_NAME,
+    attrs,
+    content: buildTiptapInlineContentFromRichText(caption.text),
+  };
+}
+
+function buildRichEditorMediaItems(
+  block: Extract<ApiPageBlock, { type: 'photo' | 'video' | 'audio' | 'document' | 'collage' | 'slideshow' }>,
+): RichEditorMediaItem[] | undefined {
+  const isGroup = block.type === 'collage' || block.type === 'slideshow';
+  const items = (isGroup ? block.items : [block]).map((item): RichEditorMediaItem | undefined => {
+    if (!isGroup && item.type === 'audio') {
+      registerRichMedia(item.audio);
+      return { type: 'audio', media: item.audio, caption: EMPTY_RICH_MEDIA_CAPTION };
+    }
+    if (!isGroup && item.type === 'document') {
+      registerRichMedia(item.document);
+      return { type: 'document', media: item.document, caption: EMPTY_RICH_MEDIA_CAPTION };
+    }
+    if (item.type === 'photo') {
+      registerRichMedia(item.photo);
+      return {
+        type: 'photo',
+        media: item.photo,
+        caption: isGroup ? item.caption : EMPTY_RICH_MEDIA_CAPTION,
+        isSpoiler: item.isSpoiler,
+        url: item.url,
+        webPageId: item.webPageId,
+      };
+    }
+    if (item.type === 'video') {
+      registerRichMedia(item.video);
+      return {
+        type: 'video',
+        media: item.video,
+        caption: isGroup ? item.caption : EMPTY_RICH_MEDIA_CAPTION,
+        isSpoiler: item.isSpoiler,
+        isAutoplay: item.isAutoplay,
+        isLoop: item.isLoop,
+      };
+    }
+    return undefined;
+  });
+
+  return items.every((item): item is RichEditorMediaItem => Boolean(item)) ? items : undefined;
 }
 
 function buildOptionalTiptapNode(node: TiptapJsonContent | undefined) {
@@ -1290,6 +1398,9 @@ function hasUnsupportedRichBlock(block: ApiPageBlock): boolean {
     case 'blockquoteBlocks':
     case 'details':
       return block.blocks.some(hasUnsupportedRichBlock);
+    case 'collage':
+    case 'slideshow':
+      return block.items.some(hasUnsupportedRichBlock);
     case 'list':
       return block.items.some((item) => item.type === 'blocks' && item.blocks.some(hasUnsupportedRichBlock));
     case 'orderedList':
@@ -1302,6 +1413,10 @@ function hasUnsupportedRichBlock(block: ApiPageBlock): boolean {
     case 'divider':
     case 'blockquote':
     case 'pullquote':
+    case 'photo':
+    case 'video':
+    case 'audio':
+    case 'document':
     case 'table':
     case 'heading1':
     case 'heading2':
@@ -1396,9 +1511,26 @@ function getBlockAsFormatted(block: ApiPageBlock, isApproximate: boolean): ApiFo
         length: block.source.length,
         language: LATEX_CODE_LANGUAGE,
       }) : undefined;
+    case 'photo':
+    case 'video':
+    case 'audio':
+    case 'document':
+    case 'collage':
+    case 'slideshow':
+      return isApproximate ? getMediaCaptionAsFormatted(block.caption) : undefined;
     default:
       return undefined;
   }
+}
+
+function getMediaCaptionAsFormatted(caption: ApiPageCaption) {
+  const text = getRichTextAsFormatted(caption.text, true);
+  const credit = getRichTextAsFormatted(caption.credit, true);
+  if (!text || !credit) {
+    return undefined;
+  }
+
+  return credit.text ? appendFormattedSections(text, credit) : text;
 }
 
 function getBlockquoteAsFormatted(

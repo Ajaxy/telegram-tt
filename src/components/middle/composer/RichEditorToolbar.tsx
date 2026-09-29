@@ -129,7 +129,7 @@ const RichEditorToolbar = ({ editor, isEnabled }: OwnProps) => {
   const lang = useLang();
 
   useEffect(() => {
-    if (!editor || !isEnabled) {
+    if (!editor || editor.isDestroyed || !isEnabled) {
       setAvailability(EMPTY_TOOLBAR_AVAILABILITY);
       return undefined;
     }
@@ -553,6 +553,10 @@ const RichEditorToolbar = ({ editor, isEnabled }: OwnProps) => {
 export default memo(RichEditorToolbar);
 
 function buildToolbarAvailability(editor: Editor): RichEditorToolbarAvailability {
+  if (editor.isDestroyed) {
+    return EMPTY_TOOLBAR_AVAILABILITY;
+  }
+
   const commandChecks = editor.can();
   const canUseBlockOptions = checkCanUseBlockOptions(editor);
   const canToggleHeadingByLevel: Record<RichHeadingLevel, boolean> = {

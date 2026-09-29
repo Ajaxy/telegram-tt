@@ -67,6 +67,7 @@ import {
   getMessagePhoto,
   getReactionKey,
   getStoryKey,
+  hasMessageMedia,
   isChatAdmin,
   isChatChannel,
   isChatPublic,
@@ -148,6 +149,7 @@ import windowSize from '../../util/windowSize';
 import applyIosAutoCapitalizationFix from '../middle/composer/helpers/applyIosAutoCapitalizationFix';
 import buildAttachment, {
   buildGifAttachment,
+  prepareAttachment,
   prepareAttachmentsToSend,
 } from '../middle/composer/helpers/buildAttachment';
 import { parseCheckList } from '../middle/composer/helpers/parseCheckList';
@@ -186,6 +188,7 @@ import useEditing from '../middle/composer/hooks/useEditing';
 import useLoadLinkPreview from '../middle/composer/hooks/useLoadLinkPreview';
 import usePaidMessageConfirmation from '../middle/composer/hooks/usePaidMessageConfirmation';
 import useRichEditor from '../middle/composer/hooks/useRichEditor';
+import useRichMedia from '../middle/composer/hooks/useRichMedia';
 import useVideoRecording from '../middle/composer/hooks/useVideoRecording';
 import useVoiceRecording from '../middle/composer/hooks/useVoiceRecording';
 
@@ -208,6 +211,7 @@ import WebPagePreview from '../middle/composer/WebPagePreview';
 import MessageEffect from '../middle/message/MessageEffect';
 import ReactionSelector from '../middle/message/reactions/ReactionSelector';
 import Button from '../ui/Button';
+import MediaEditor from '../ui/mediaEditor/MediaEditor.async';
 import ResponsiveHoverButton from '../ui/ResponsiveHoverButton';
 import Spinner from '../ui/Spinner';
 import TextTimer from '../ui/TextTimer';
@@ -374,7 +378,6 @@ const SENDING_ANIMATION_DURATION = 350;
 const MOUNT_ANIMATION_DURATION = 430;
 const PAID_STARS_CLOSE_DURATION = 300;
 const APPROXIMATE_RICH_INPUT_FORMAT_OPTIONS = { isApproximate: true };
-
 const Composer = ({
   type,
   isOnActiveTab,
@@ -530,7 +533,7 @@ const Composer = ({
 
   const oldLang = useOldLang();
   const lang = useLang();
-  const richEditor = useRichEditor();
+  const isEditingMedia = Boolean(editingMessage && hasMessageMedia(editingMessage));
 
   const inputRef = useRef<HTMLDivElement>();
   const composerRef = useRef<HTMLDivElement>();
@@ -561,7 +564,7 @@ const Composer = ({
   ] = useFlag();
   const shouldFocusAfterFormattingRemovalRef = useRef(false);
 
-  const canMediaBeReplaced = editingMessage && canEditMedia(editingMessage);
+  const canMediaBeReplaced = isEditingMedia && canEditMedia(editingMessage!);
 
   const isMonoforum = chat?.isMonoforum;
   const { emojiSet, members: groupChatMembers, botCommands: chatBotCommands } = chatFullInfo || {};
@@ -569,6 +572,31 @@ const Composer = ({
 
   const isEphemeralReply = draft?.replyInfo?.type === 'ephemeral';
   const canSchedule = !paidMessagesStars && !isMonoforum && !isEphemeralReply;
+
+  const {
+    canSendStickers, canSendGifs, canAttachMedia, canAttachPolls, canAttachEmbedLinks, canAttachToDoLists,
+    canSendVoices, canSendRoundVideos, canSendPlainText, canSendAudios, canSendVideos, canSendPhotos, canSendDocuments,
+  } = useMemo(
+    () => getAllowedAttachmentOptions(
+      chat,
+      chatFullInfo,
+      isChatWithBot,
+      isChatWithSelf,
+      isInStoryViewer,
+      paidMessagesStars,
+      isInScheduledList,
+      isEphemeralReply,
+    ),
+    [
+      chat, chatFullInfo, isChatWithBot, isChatWithSelf, isInStoryViewer, paidMessagesStars, isInScheduledList,
+      isEphemeralReply,
+    ],
+  );
+
+  const richEditor = useRichEditor(
+    canSendPhotos && !isEditingMedia, canSendVideos && !isEditingMedia, canSendDocuments && !isEditingMedia,
+    canSendAudios && !isEditingMedia,
+  );
 
   const isSentStoryReactionHeart = sentStoryReaction && isSameReaction(sentStoryReaction, HEART_REACTION);
 
@@ -620,7 +648,29 @@ const Composer = ({
   }, [chatId, sendAsPeerIds]);
 
   const [attachments, setAttachments] = useState<ApiAttachment[]>([]);
+  const {
+    handleFiles: handleRichMediaFiles,
+    handleEditMedia: handleRichMediaEdit,
+    handleCloseMediaEditor: handleCloseRichMediaEditor,
+    handleSaveMediaEdit: handleSaveRichMediaEdit,
+    editingAttachment: editingRichMediaAttachment,
+    hasBlockingMedia: hasRichMediaBlocking,
+  } = useRichMedia({
+    richEditor,
+    chat,
+    chatId,
+    threadId,
+    fileSizeLimit,
+    canSendPhotos: canSendPhotos && !isEditingMedia,
+    canSendVideos: canSendVideos && !isEditingMedia,
+    canSendDocuments: canSendDocuments && !isEditingMedia,
+    canSendAudios: canSendAudios && !isEditingMedia,
+    shouldSendInHighQuality: attachmentSettings.shouldSendInHighQuality,
+  });
   const hasAttachments = Boolean(attachments.length);
+  const handleRichMediaSelect = useLastCallback((files: File[], shouldSendAsFile?: boolean) => {
+    handleRichMediaFiles(files, undefined, undefined, shouldSendAsFile);
+  });
   const richMessage = richEditor.value;
   const richMessageAsFormatted = richMessage ? getRichInputAsFormatted(richMessage) : undefined;
   const hasInputContent = richEditor.isReady ? !richEditor.isEmpty() : false;
@@ -641,8 +691,16 @@ const Composer = ({
   });
 
   const collapseRichInput = useLastCallback(() => {
+    if (hasRichMediaBlocking) return;
+
     setIsRichInputExpanded({ isRichInputExpanded: undefined });
   });
+
+  useEffect(() => {
+    if (isEditingMedia && isRichInputExpansionActive) {
+      collapseRichInput();
+    }
+  }, [isEditingMedia, collapseRichInput, isRichInputExpansionActive]);
 
   const handleRichInputEscape = useLastCallback(() => {
     const editor = richEditor.editor;
@@ -668,6 +726,10 @@ const Composer = ({
   });
 
   const checkCanSendRichContent = useLastCallback(() => {
+    if (hasRichMediaBlocking) {
+      return false;
+    }
+
     if (!isInMessageList || isCurrentUserPremium) {
       return true;
     }
@@ -727,25 +789,6 @@ const Composer = ({
     }
   }, [attachments]);
 
-  const {
-    canSendStickers, canSendGifs, canAttachMedia, canAttachPolls, canAttachEmbedLinks, canAttachToDoLists,
-    canSendVoices, canSendRoundVideos, canSendPlainText, canSendAudios, canSendVideos, canSendPhotos, canSendDocuments,
-  } = useMemo(
-    () => getAllowedAttachmentOptions(
-      chat,
-      chatFullInfo,
-      isChatWithBot,
-      isChatWithSelf,
-      isInStoryViewer,
-      paidMessagesStars,
-      isInScheduledList,
-      isEphemeralReply,
-    ),
-    [
-      chat, chatFullInfo, isChatWithBot, isChatWithSelf, isInStoryViewer, paidMessagesStars, isInScheduledList,
-      isEphemeralReply,
-    ],
-  );
   const canUseInlineBots = !chat || isChatAdmin(chat) || !isUserRightBanned(chat, 'sendInline', chatFullInfo);
 
   const isNeedPremium = isContactRequirePremium && isInStoryViewer;
@@ -984,6 +1027,7 @@ const Composer = ({
     replaceRichMessage: updateRichMessage,
     editedMessage: editingMessage,
     isDisabled: isInStoryViewer || Boolean(requestedDraft) || (!hasSuggestedPost && isMonoforum),
+    hasUnresolvedMedia: hasRichMediaBlocking,
   });
 
   useLoadLinkPreview({
@@ -1249,6 +1293,10 @@ const Composer = ({
   const hasGifFromPicker = attachments.some((a) => a.gif);
 
   const resolveFilePasteTarget = useLastCallback(() => {
+    if (isRichInputExpansionActive) {
+      return 'richMedia';
+    }
+
     const currentRichMessage = richEditor.getValue();
     const hasUnrepresentableRichContent = Boolean(
       currentRichMessage.blocks.length && !getRichInputAsFormatted(currentRichMessage),
@@ -1256,6 +1304,7 @@ const Composer = ({
 
     return hasUnrepresentableRichContent ? 'none' : 'attachmentModal';
   });
+  const getRichMediaPastePosition = useLastCallback(() => richEditor.editor?.state.selection.from);
 
   useClipboardPaste(
     isForCurrentMessageList || isInStoryViewer,
@@ -1265,9 +1314,13 @@ const Composer = ({
     resolveFilePasteTarget,
     !attachments.length,
     hasGifFromPicker,
+    handleRichMediaFiles,
+    getRichMediaPastePosition,
   );
 
   const handleEmbeddedClear = useLastCallback(() => {
+    if (hasRichMediaBlocking) return;
+
     if (editingMessage) {
       handleEditCancel();
     }
@@ -1324,6 +1377,9 @@ const Composer = ({
 
   const canSendAttachments = (attachmentsToSend: ApiAttachment[]): boolean => {
     if (!currentMessageList && !storyId) {
+      return false;
+    }
+    if (attachmentsToSend.some(({ isPreparing }) => isPreparing)) {
       return false;
     }
 
@@ -1607,7 +1663,7 @@ const Composer = ({
       const ttlSeconds = isViewOnceEnabled ? ONE_TIME_MEDIA_TTL_SECONDS : undefined;
       if (record && record.durationMs >= MIN_ROUND_VIDEO_RECORDING_TIME) {
         const { blob, duration } = record;
-        currentAttachments = [await buildAttachment(
+        currentAttachments = [await prepareAttachment(await buildAttachment(
           VIDEO_RECORDING_FILENAME,
           blob,
           {
@@ -1615,7 +1671,7 @@ const Composer = ({
             ttlSeconds,
             quick: { width: ROUND_VIDEO_RECORDING_SIZE, height: ROUND_VIDEO_RECORDING_SIZE, duration },
           },
-        )];
+        ))];
       }
     }
 
@@ -1658,7 +1714,7 @@ const Composer = ({
   });
 
   const handleOpenRichInput = useLastCallback(() => {
-    if (!isInMessageList) {
+    if (!isInMessageList || isEditingMedia) {
       return;
     }
 
@@ -2208,7 +2264,7 @@ const Composer = ({
     && !isSymbolMenuOpen && !activeRecording && !hasInputContent;
 
   useEffect(() => {
-    if (!isRichInputExpansionActive) {
+    if (!isRichInputExpansionActive || editingRichMediaAttachment) {
       return undefined;
     }
 
@@ -2241,7 +2297,7 @@ const Composer = ({
       releaseEscKeyListener();
       document.removeEventListener('mousedown', handleDocumentMouseDown);
     };
-  }, [handleRichInputEscape, isRichInputExpansionActive]);
+  }, [editingRichMediaAttachment, handleRichInputEscape, isRichInputExpansionActive]);
 
   const slowModePlaceholder = (() => {
     if (!slowMode?.nextSendDate || slowMode.nextSendDate < getServerTime()) return undefined;
@@ -2577,8 +2633,9 @@ const Composer = ({
 
   const effectEmoji = areEffectsSupported && effect?.emoticon;
 
+  const canExpandRichInput = isInMessageList && !isRichInputExpansionActive && !isEditingMedia;
   const canOpenRichInput = shouldShowRichInputButton && isInMessageList && !hasAttachments && !isRichInputExpanded
-    && !isComposerBlocked;
+    && !isComposerBlocked && !isEditingMedia;
   const canCloseRichInput = Boolean(isRichInputExpansionActive && !isComposerBlocked);
   const canToggleRichInput = canOpenRichInput || canCloseRichInput;
   const {
@@ -2622,13 +2679,13 @@ const Composer = ({
 
   return (
     <div ref={composerRef} className={fullClassName}>
-      {isInMessageList && canAttachMedia && !hasRichOnlyContent && isReady && (
+      {isInMessageList && canAttachMedia && !hasRichOnlyContent && isReady && !isRichInputExpansionActive && (
         <DropArea
           isOpen={dropAreaState !== DropAreaState.None}
           withQuick={dropAreaState === DropAreaState.QuickFile || prevDropAreaState === DropAreaState.QuickFile}
+          editingMessage={editingMessage}
           onHide={onDropHide!}
           onFileSelect={handleFileSelect}
-          editingMessage={editingMessage}
         />
       )}
       {shouldRenderReactionSelector && !isNeedPremium && (
@@ -2671,6 +2728,14 @@ const Composer = ({
         onSendWhenOnline={sendWhenOnline}
         canScheduleUntilOnline={canSchedule && canScheduleUntilOnline && !isViewOnceEnabled}
         paidMessagesStars={paidMessagesStars}
+      />
+      <MediaEditor
+        isOpen={Boolean(editingRichMediaAttachment)}
+        imageUrl={editingRichMediaAttachment?.blobUrl}
+        mimeType={editingRichMediaAttachment?.mimeType}
+        filename={editingRichMediaAttachment?.filename}
+        onClose={handleCloseRichMediaEditor}
+        onSave={handleSaveRichMediaEdit}
       />
       {isForCurrentMessageList && (
         <ToDoListModal
@@ -2772,9 +2837,10 @@ const Composer = ({
               threadId={threadId}
               editingMessage={editingMessage}
               canEditMedia={canMediaBeReplaced}
+              isRichInputExpanded={isRichInputExpansionActive}
               isButtonVisible={!activeRecording}
               canAttachMedia={canAttachMedia}
-              canAttachFiles={!hasRichOnlyContent}
+              canAttachFiles={isRichInputExpansionActive || !hasRichOnlyContent}
               canAttachPolls={canAttachPolls}
               canAttachToDoLists={canAttachToDoLists}
               canSendPhotos={canSendPhotos}
@@ -2782,7 +2848,7 @@ const Composer = ({
               canSendDocuments={canSendDocuments}
               canSendAudios={canSendAudios}
               canInsertDate={!isComposerBlocked}
-              onFileSelect={handleFileSelect}
+              onFileSelect={isRichInputExpansionActive ? handleRichMediaSelect : handleFileSelect}
               onDateInsert={handleFormattedDateInsert}
               onTodoListCreate={handleTodoListCreate}
               isScheduled={isInScheduledList}
@@ -2794,7 +2860,7 @@ const Composer = ({
               onMenuClose={onAttachMenuClose}
               messageListType={messageListType}
               paidMessagesStars={paidMessagesStars}
-              canExpandRichInput={isInMessageList && !isRichInputExpansionActive}
+              canExpandRichInput={canExpandRichInput}
               menuPositionX={isInMessageList ? 'left' : 'right'}
               onRichInputExpand={handleOpenRichInput}
             />
@@ -2840,6 +2906,7 @@ const Composer = ({
             ariaLabel={lang(isRichInputExpansionActive ? 'AriaComposerCloseRichInput' : 'AriaComposerOpenRichInput')}
             iconName={isRichInputExpansionActive ? 'collapse' : 'expand'}
             tabIndex={canToggleRichInput ? 0 : -1}
+            disabled={isRichInputExpansionActive && hasRichMediaBlocking}
             onClick={isRichInputExpansionActive ? collapseRichInput : handleOpenRichInput}
           />
           <MessageInput
@@ -2863,6 +2930,8 @@ const Composer = ({
             onRichInputExpand={handleOpenRichInput}
             onSend={onSend}
             onSuppressedFocus={closeSymbolMenu}
+            onMediaEdit={handleRichMediaEdit}
+            onMediaFiles={handleRichMediaFiles}
             onFocus={markInputHasFocus}
             onBlur={unmarkInputHasFocus}
             isNeedPremium={isNeedPremium}
@@ -3083,7 +3152,7 @@ const Composer = ({
           Boolean(paidMessagesStars) && 'has-paid-stars',
           isPaidSend && 'paid',
         )}
-        disabled={areRecordingsNotAllowed}
+        disabled={areRecordingsNotAllowed || hasRichMediaBlocking}
         allowDisabledClick
         noFastClick
         ariaLabel={mainButtonState === MainButtonState.Stop ? lang('BotDraftStop') : oldLang(sendButtonAriaLabel)}

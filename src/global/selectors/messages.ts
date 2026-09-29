@@ -114,6 +114,22 @@ export function selectCurrentMessageList<T extends GlobalState>(
   return undefined;
 }
 
+export function selectCanOpenMessageList<T extends GlobalState>(
+  global: T,
+  chatId: string | undefined,
+  threadId: ThreadId | undefined,
+  type: MessageListType = 'thread',
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  if (!selectTabState(global, tabId).richMediaUploadBlockingCount) return true;
+
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  return Boolean(currentMessageList
+    && currentMessageList.chatId === chatId
+    && currentMessageList.threadId === threadId
+    && currentMessageList.type === type);
+}
+
 export function selectCurrentChat<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>

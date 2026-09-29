@@ -41,6 +41,7 @@ const useDraft = ({
   replaceRichMessage,
   editedMessage,
   isDisabled,
+  hasUnresolvedMedia,
 }: {
   draft?: ApiDraft;
   chatId: string;
@@ -49,6 +50,7 @@ const useDraft = ({
   replaceRichMessage: (richMessage?: ApiDraft['richMessage']) => void;
   editedMessage?: ApiMessage;
   isDisabled?: boolean;
+  hasUnresolvedMedia?: boolean;
 }) => {
   const { saveDraft, clearDraft, loadCustomEmojis } = getActions();
 
@@ -56,14 +58,15 @@ const useDraft = ({
 
   useEffect(() => {
     if (
-      areDeepEqual(getDraftRichMessage(draft), richMessage)
+      !hasUnresolvedMedia
+      && areDeepEqual(getDraftRichMessage(draft), richMessage)
       && !draft?.isLocal
     ) {
       isTouchedRef.current = false;
     } else {
       isTouchedRef.current = true;
     }
-  }, [draft, richMessage]);
+  }, [draft, hasUnresolvedMedia, richMessage]);
   useEffect(() => {
     isTouchedRef.current = false;
   }, [chatId, threadId]);
@@ -114,6 +117,8 @@ const useDraft = ({
     const shouldUpdateSuggestedPost = draft?.suggestedPostInfo && !prevDraft?.suggestedPostInfo;
 
     if (chatId === prevChatId && threadId === prevThreadId) {
+      // Saved drafts omit unfinished media, so restoring them would discard local uploads
+      if (hasUnresolvedMedia) return;
       if (isTouched && !draft) return; // Prevent reset from other client if we have local edits
       if (!draft && prevDraft) {
         replaceRichMessage(undefined);
@@ -149,7 +154,7 @@ const useDraft = ({
       ?.map((entity) => entity.type === ApiMessageEntityTypes.CustomEmoji && entity.documentId)
       .filter(Boolean) || [];
     if (customEmojiIds.length) loadCustomEmojis({ ids: customEmojiIds });
-  }, [chatId, threadId, draft, replaceRichMessage, editedMessage, isDisabled]);
+  }, [chatId, threadId, draft, replaceRichMessage, editedMessage, isDisabled, hasUnresolvedMedia]);
 
   // Save draft on chat change. Should be layout effect to read correct editor value on cleanup
   useLayoutEffect(() => {
@@ -187,7 +192,9 @@ const useDraft = ({
         updateDraft();
       }
     });
-  }, [chatIdRef, isDisabled, richMessage, runDebouncedForSaveDraft, threadIdRef, updateDraft]);
+  }, [
+    chatIdRef, isDisabled, richMessage, runDebouncedForSaveDraft, threadIdRef, updateDraft,
+  ]);
 
   useBackgroundMode(updateDraft);
   useBeforeUnload(updateDraft);

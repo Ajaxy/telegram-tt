@@ -25,7 +25,6 @@ import type {
   ApiNewMediaTodo,
   ApiNewPoll,
   ApiPhoneCall,
-  ApiPhoto,
   ApiPremiumGiftCodeOption,
   ApiPrivacyKey,
   ApiProfileTab,
@@ -48,12 +47,13 @@ import {
 
 import { CHANNEL_ID_BASE, DEFAULT_STATUS_ICON_ID, STARS_CURRENCY_CODE } from '../../../config';
 import { writeUint32LE } from '../../../util/encoding/buffer';
-import { pick } from '../../../util/iteratees';
 import { getMtpEphemeralMessageId } from '../../../util/keys/messageKey';
 import { deserializeBytes } from '../helpers/misc';
 import localDb from '../localDb';
+import { buildInputDocument, buildInputPhoto } from './media';
 
 export { buildInputRichMessage } from './richContent';
+export { buildInputDocument, buildInputPhoto } from './media';
 
 export const DEFAULT_PRIMITIVES = {
   INT: 0,
@@ -200,24 +200,6 @@ export function buildInputStickerSetShortName(shortName: string) {
   return new GramJs.InputStickerSetShortName({
     shortName,
   });
-}
-
-export function buildInputDocument(media: ApiAudio | ApiSticker | ApiVideo | ApiDocument) {
-  if (!media.id) {
-    return undefined;
-  }
-
-  const document = localDb.documents[media.id];
-
-  if (!document) {
-    return undefined;
-  }
-
-  return new GramJs.InputDocument(pick(document, [
-    'id',
-    'accessHash',
-    'fileReference',
-  ]));
 }
 
 export function buildInputMediaDocument(media: ApiAudio | ApiSticker | ApiVideo | ApiDocument, spoiler?: true) {
@@ -571,20 +553,6 @@ export function buildChatPhotoForLocalDb(photo: GramJs.TypePhoto) {
     dcId,
     photoId,
   });
-}
-
-export function buildInputPhoto(photo: ApiPhoto) {
-  const localPhoto = localDb.photos[photo?.id];
-
-  if (!localPhoto) {
-    return undefined;
-  }
-
-  return new GramJs.InputPhoto(pick(localPhoto, [
-    'id',
-    'accessHash',
-    'fileReference',
-  ]));
 }
 
 export function buildInputBirthday(birthday: ApiBirthday) {

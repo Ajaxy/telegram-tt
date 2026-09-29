@@ -1,6 +1,23 @@
 import { getAverageColor, getColorLuma } from './colors';
+import cycleRestrict from './cycleRestrict';
+import { MAX_WORKERS, requestMediaWorker } from './launchMediaWorkers';
 
 const LUMA_THRESHOLD = 240;
+let lastResizeWorkerIndex = -1;
+
+export async function resizeImageInBackground(
+  blob: Blob, width: number, height: number, outputType: string = 'image/png',
+) {
+  try {
+    const { blob: resizedBlob } = await requestMediaWorker({
+      name: 'offscreen-canvas:resizeImage',
+      args: [blob, width, height, outputType],
+    }, cycleRestrict(MAX_WORKERS, ++lastResizeWorkerIndex));
+    return URL.createObjectURL(resizedBlob);
+  } catch {
+    return resizeImage(blob, width, height, outputType);
+  }
+}
 
 export function scaleImage(image: string | Blob, ratio: number, outputType: string = 'image/png'): Promise<string> {
   const url = image instanceof Blob ? URL.createObjectURL(image) : image;

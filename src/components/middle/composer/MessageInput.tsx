@@ -13,7 +13,9 @@ import type {
 } from '../../../types';
 import type { RichEditorDateClickTarget } from '../../../util/tiptap/extensions/date';
 import type { RichEditorTooltipsConfig } from '../../common/tooltips/types';
-import type { RichEditor } from './richEditorTypes';
+import type {
+  RichEditor, RichEditorMediaEditHandler, RichEditorMediaFilesHandler,
+} from './richEditorTypes';
 
 import { DEBUG, EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID } from '../../../config';
 import { requestForcedReflow, requestMutation } from '../../../lib/fasterdom/fasterdom';
@@ -89,6 +91,8 @@ export type OwnProps = {
   onRichInputCollapse?: NoneToVoidFunction;
   onRichInputExpand?: NoneToVoidFunction;
   onSuppressedFocus?: () => void;
+  onMediaEdit?: RichEditorMediaEditHandler;
+  onMediaFiles?: RichEditorMediaFilesHandler;
   onSend: () => void;
   onScroll?: (event: React.UIEvent<HTMLElement>) => void;
   onFocus?: NoneToVoidFunction;
@@ -137,6 +141,8 @@ const MessageInput = ({
   onRichInputCollapse,
   onRichInputExpand,
   onSuppressedFocus,
+  onMediaEdit,
+  onMediaFiles,
   onSend,
   onScroll,
   onFocus,
@@ -363,6 +369,12 @@ const MessageInput = ({
   });
 
   const getIsRichInputExpanded = useLastCallback(() => Boolean(isMainInput && isRichInputExpanded));
+  const handleMediaEdit = useLastCallback<RichEditorMediaEditHandler>((uploadId) => {
+    onMediaEdit?.(uploadId);
+  });
+  const handleMediaFiles = useLastCallback<RichEditorMediaFilesHandler>((files, position, shouldAppend) => {
+    onMediaFiles?.(files, position, shouldAppend);
+  });
 
   const syncEditorElementAttributes = useLastCallback((input: HTMLElement) => {
     input.id = editableInputId || EDITABLE_INPUT_ID;
@@ -372,6 +384,7 @@ const MessageInput = ({
     input.setAttribute('dir', 'auto');
     input.setAttribute('tabindex', isCollapsedRichOnlyPreview ? '-1' : '0');
     input.setAttribute('contenteditable', isRichEditorEditable ? 'true' : 'false');
+    input.toggleAttribute('data-dropzone', Boolean(isMainInput && isRichInputExpanded));
     if (isCollapsedRichOnlyPreview) {
       input.setAttribute('aria-readonly', 'true');
     } else {
@@ -428,6 +441,8 @@ const MessageInput = ({
       onReady: handleEditorReady,
       onUpdate: handleEditorUpdate,
       onDateClick: handleDateClick,
+      onMediaEdit: handleMediaEdit,
+      onMediaFiles: handleMediaFiles,
     });
 
     return () => {
@@ -436,9 +451,12 @@ const MessageInput = ({
       }
       unregisterRichEditorRoot();
     };
-  }, [canRenderRichEditor, getIsRichInputExpanded, handleDateClick, handleEditorReady, handleEditorUpdate,
+  }, [
+    canRenderRichEditor, getIsRichInputExpanded, handleDateClick, handleEditorReady,
+    handleEditorUpdate, handleMediaEdit, handleMediaFiles,
     isActive, registerRichEditorRoot, richValueRef, rootTooltips,
-    syncCloneWithSource, syncEditorElementAttributes, updateInputHeight]);
+    syncCloneWithSource, syncEditorElementAttributes, updateInputHeight,
+  ]);
 
   useLayoutEffect(() => {
     if (!editor || editor.isDestroyed || !isMainInput || !isActive) {

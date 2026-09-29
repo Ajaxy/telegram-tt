@@ -161,6 +161,7 @@ export type TabState = {
   inactiveReason?: 'auth' | 'otherClient';
   shouldPreventComposerAnimation?: boolean;
   isRichInputExpanded?: boolean;
+  richMediaUploadBlockingCount?: number;
   inviteHash?: string;
   canInstall?: boolean;
   isStatisticsShown?: boolean;

@@ -46,18 +46,14 @@ import {
   LOCAL_MESSAGES_LIMIT,
   SERVICE_NOTIFICATIONS_USER_ID,
   SPONSORED_MESSAGE_CACHE_MS,
-  SUPPORTED_AUDIO_CONTENT_TYPES,
-  SUPPORTED_PHOTO_CONTENT_TYPES,
-  SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
+import buildUploadingMedia from '../../../util/buildUploadingMedia';
 import { addTimestampEntities } from '../../../util/dates/timestamp';
-import { generateWaveform } from '../../../util/generateWaveform';
 import { omitUndefined } from '../../../util/iteratees';
 import { getEphemeralMessageId } from '../../../util/keys/messageKey';
 import { toJSNumber } from '../../../util/numbers';
 import { getServerTime } from '../../../util/serverTime';
-import { interpolateArray } from '../../../util/waveform';
 import {
   buildApiCurrencyAmount,
 } from '../apiBuilders/payments';
@@ -91,8 +87,6 @@ import { buildApiRestrictionReasons } from './misc';
 import { buildApiPeerColor, buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildMessageReactions } from './reactions';
 
-const LOCAL_MEDIA_UPLOADING_TEMP_ID = 'temp';
-const INPUT_WAVEFORM_LENGTH = 63;
 const MIN_SCHEDULED_PERIOD = 10;
 
 let localMessageCounter = 0;
@@ -758,108 +752,6 @@ function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiRep
     quoteOffset: inputInfo.quoteOffset,
     isForumTopic: isForum && inputInfo.replyToTopId ? true : undefined,
     ...(Boolean(inputInfo.quoteText) && { isQuote: true }),
-  };
-}
-
-export function buildUploadingMedia(
-  attachment: ApiAttachment,
-): MediaContent {
-  if (attachment.gif) {
-    return { video: attachment.gif };
-  }
-
-  const {
-    filename: fileName,
-    blobUrl,
-    previewBlobUrl,
-    mimeType,
-    size,
-    audio,
-    shouldSendAsFile,
-    shouldSendAsSpoiler,
-    ttlSeconds,
-    isRoundVideo,
-  } = attachment;
-
-  if (!shouldSendAsFile) {
-    if (attachment.quick) {
-      // TODO Handle GIF as video, but support playback in <video>
-      if (SUPPORTED_PHOTO_CONTENT_TYPES.has(mimeType)) {
-        const { width, height } = attachment.quick;
-        return {
-          photo: {
-            mediaType: 'photo',
-            id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
-            sizes: [],
-            thumbnail: { width, height, dataUri: previewBlobUrl || blobUrl },
-            blobUrl,
-            date: Math.round(Date.now() / 1000),
-            isSpoiler: shouldSendAsSpoiler,
-          },
-        };
-      }
-      if (isRoundVideo || SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
-        const { width, height, duration } = attachment.quick;
-        return {
-          video: {
-            mediaType: 'video',
-            id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
-            mimeType,
-            duration: duration || 0,
-            fileName,
-            width,
-            height,
-            blobUrl,
-            ...(previewBlobUrl && { thumbnail: { width, height, dataUri: previewBlobUrl } }),
-            size,
-            isSpoiler: shouldSendAsSpoiler,
-            isRound: isRoundVideo,
-            waveform: isRoundVideo ? generateWaveform(duration || 0) : undefined,
-          },
-          ttlSeconds,
-        };
-      }
-    }
-    if (attachment.voice) {
-      const { duration, waveform } = attachment.voice;
-      const inputWaveform = waveform.length === INPUT_WAVEFORM_LENGTH
-        ? waveform
-        : interpolateArray(waveform, INPUT_WAVEFORM_LENGTH).data;
-      return {
-        voice: {
-          mediaType: 'voice',
-          id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
-          duration,
-          waveform: inputWaveform,
-          size,
-        },
-        ttlSeconds,
-      };
-    }
-    if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) {
-      const { duration, performer, title } = audio || {};
-      return {
-        audio: {
-          mediaType: 'audio',
-          id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
-          mimeType,
-          fileName,
-          size,
-          duration: duration || 0,
-          title,
-          performer,
-        },
-      };
-    }
-  }
-  return {
-    document: {
-      mediaType: 'document',
-      mimeType,
-      fileName,
-      size,
-      ...(previewBlobUrl && { previewBlobUrl }),
-    },
   };
 }
 

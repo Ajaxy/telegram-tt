@@ -241,6 +241,18 @@ export type ApiPageBlockOrderedList = {
   isReversed?: true;
 };
 
+export type ApiPageBlockDocument = {
+  type: 'document';
+  document: ApiDocument;
+  caption: ApiPageCaption;
+};
+
+export type ApiPageBlockAudio = {
+  type: 'audio';
+  audio: ApiAudio;
+  caption: ApiPageCaption;
+};
+
 export type ApiPageBlock =
   { type: 'unsupported' }
   | { type: 'title'; text: ApiRichText }
@@ -265,8 +277,8 @@ export type ApiPageBlock =
   | ApiPageBlockCollage
   | ApiPageBlockSlideshow
   | { type: 'channel'; channelUsername: string; title: string }
-  | { type: 'audio'; audio: ApiAudio; caption: ApiPageCaption }
-  | { type: 'document'; document: ApiDocument; caption: ApiPageCaption }
+  | ApiPageBlockAudio
+  | ApiPageBlockDocument
   | { type: 'kicker'; text: ApiRichText }
   | ApiPageBlockTable
   | ApiPageBlockOrderedList

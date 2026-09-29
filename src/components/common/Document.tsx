@@ -215,7 +215,7 @@ const Document = ({
       isSelected={isSelected}
       actionIcon={withMediaViewer ? (isDocumentVideo(document) ? 'play' : 'eye') : 'download'}
       contextActions={contextActions}
-      onClick={!noDownload || withMediaViewer ? handleClick : undefined}
+      onClick={!noDownload || withMediaViewer || (isUploading && onCancelUpload) ? handleClick : undefined}
       onDateClick={onDateClick ? handleDateClick : undefined}
     >
       <ConfirmDialog

@@ -338,7 +338,7 @@
         }
 
         .form-control {
-          min-height: calc(100% - var(--rich-editor-header-height));
+          min-height: calc(var(--rich-editor-scroller-height) - var(--rich-editor-header-height));
         }
 
         .placeholder-text {

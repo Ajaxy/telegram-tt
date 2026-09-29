@@ -795,8 +795,7 @@
   > .WebPage-text,
   > .Reactions,
   & ~ .Reactions.is-outside {
-    width: 0;
-    min-width: 100%;
+    contain: inline-size;
   }
 }
 

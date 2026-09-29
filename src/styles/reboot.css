@@ -29,7 +29,7 @@
     display: block;
   }
 
-  body, blockquote {
+  body, figure, blockquote {
     margin: 0;
   }
 
@@ -86,10 +86,6 @@
   dd {
     margin-bottom: 0.5rem;
     margin-left: 0;
-  }
-
-  figure {
-    margin: 0 0 1rem;
   }
 
   dfn {

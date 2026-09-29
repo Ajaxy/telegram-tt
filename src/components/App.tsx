@@ -113,7 +113,7 @@ const App = ({
     const handleDrag = (e: DragEvent) => {
       e.preventDefault();
       if (!e.dataTransfer) return;
-      if (!(e.target as HTMLElement).dataset.dropzone) {
+      if (!(e.target instanceof Element && e.target.closest('[data-dropzone]'))) {
         const isFileHoverOpen = hasFiles(e.dataTransfer)
           && e.target instanceof Element
           && Boolean(e.target.closest(FILE_HOVER_OPEN_SELECTOR));

@@ -4,6 +4,7 @@ import { getActions } from '../../../global';
 import type { ApiMessage } from '../../../api/types';
 
 import { canReplaceMessageMedia } from '../../../global/helpers';
+import { revokeAttachmentUrls } from '../../../util/attachments';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import buildAttachment from './helpers/buildAttachment';
@@ -22,7 +23,7 @@ import './DropArea.scss';
 export type OwnProps = {
   isOpen: boolean;
   withQuick?: boolean;
-  editingMessage?: ApiMessage | undefined;
+  editingMessage?: ApiMessage;
   onHide: NoneToVoidFunction;
   onFileSelect: (files: File[]) => void;
 };
@@ -38,11 +39,11 @@ const DROP_LEAVE_TIMEOUT_MS = 150;
 const DropArea = ({
   isOpen, withQuick, editingMessage, onHide, onFileSelect,
 }: OwnProps) => {
-  const lang = useLang();
   const { showNotification, updateAttachmentSettings } = getActions();
   const hideTimeoutRef = useRef<number>();
   const prevWithQuick = usePreviousDeprecated(withQuick);
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen);
+  const lang = useLang();
 
   useEffect(() => (isOpen ? captureEscKeyListener(onHide) : undefined), [isOpen, onHide]);
 
@@ -59,21 +60,7 @@ const DropArea = ({
       }
     }
 
-    if (editingMessage) {
-      if (files.length > 1) {
-        showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: files.length }) });
-        return;
-      }
-
-      if (files.length === 1) {
-        const newAttachment = await buildAttachment(files[0].name, files[0]);
-        const canReplace = editingMessage && newAttachment && canReplaceMessageMedia(editingMessage, newAttachment);
-        if (!canReplace) {
-          showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: files.length }) });
-          return;
-        }
-      }
-    }
+    if (!await validateReplacement(files)) return;
 
     onHide();
     updateAttachmentSettings({ shouldCompress: withQuick ? false : undefined });
@@ -85,26 +72,31 @@ const DropArea = ({
 
     if (dt.files && dt.files.length > 0) {
       const files = Array.from(dt.files);
-      if (editingMessage) {
-        if (files.length > 1) {
-          showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: files.length }) });
-          return;
-        }
-        if (files.length === 1) {
-          const newAttachment = await buildAttachment(files[0].name, files[0]);
-          const canReplace = editingMessage && newAttachment && canReplaceMessageMedia(editingMessage, newAttachment);
-          if (!canReplace) {
-            showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: files.length }) });
-            return;
-          }
-        }
-      }
+      if (!await validateReplacement(files)) return;
 
       onHide();
       updateAttachmentSettings({ shouldCompress: true });
       onFileSelect(files);
     }
   });
+
+  async function validateReplacement(files: File[]) {
+    if (!editingMessage) return true;
+
+    if (files.length !== 1) {
+      showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: files.length }) });
+      return false;
+    }
+
+    const attachment = await buildAttachment(files[0].name, files[0]);
+    const canReplace = canReplaceMessageMedia(editingMessage, attachment);
+    revokeAttachmentUrls(attachment);
+    if (!canReplace) {
+      showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: files.length }) });
+    }
+
+    return canReplace;
+  }
 
   const handleDragLeave = useLastCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.stopPropagation();

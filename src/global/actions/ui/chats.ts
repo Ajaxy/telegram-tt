@@ -15,7 +15,9 @@ import {
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import { replaceTabThreadParam } from '../../reducers/threads';
-import { selectChat, selectCurrentMessageList, selectTabState } from '../../selectors';
+import {
+  selectCanOpenMessageList, selectChat, selectCurrentMessageList, selectTabState,
+} from '../../selectors';
 
 addActionHandler('openDeleteMemberModal', (global, actions, payload): ActionReturnType => {
   const { chatId, peerId, tabId = getCurrentTabId() } = payload;
@@ -47,6 +49,7 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
   const currentMessageList = selectCurrentMessageList(global, tabId);
 
   const tabState = selectTabState(global, tabId);
+  if (!selectCanOpenMessageList(global, chatId, threadId, type, tabId)) return;
   if (tabState.premiumModal?.promo && tabState.premiumModal?.isOpen) {
     global = updateTabState(global, {
       premiumModal: {
@@ -122,12 +125,17 @@ addActionHandler('openChatInNewTab', (global, actions, payload): ActionReturnTyp
 
 addActionHandler('openPreviousChat', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
+  if (selectTabState(global, tabId).richMediaUploadBlockingCount) {
+    return;
+  }
+
   actions.updatePageTitle({ tabId });
   return updateCurrentMessageList(global, undefined, undefined, undefined, undefined, undefined, tabId);
 });
 
 addActionHandler('openChatWithInfo', (global, actions, payload): ActionReturnType => {
   const { profileTab, forceScrollProfileTab, isOwnProfile, tabId = getCurrentTabId(), ...rest } = payload;
+  if (!selectCanOpenMessageList(global, rest.id, MAIN_THREAD_ID, rest.type, tabId)) return;
 
   const currentMessageList = selectCurrentMessageList(global, tabId);
   const isSameMessageList = currentMessageList?.chatId === rest.id
@@ -141,6 +149,7 @@ addActionHandler('openChatWithInfo', (global, actions, payload): ActionReturnTyp
 
 addActionHandler('openThreadWithInfo', (global, actions, payload): ActionReturnType => {
   const { profileTab, forceScrollProfileTab, isOwnProfile, tabId = getCurrentTabId(), ...rest } = payload;
+  if (!selectCanOpenMessageList(global, rest.chatId, rest.threadId, rest.type, tabId)) return;
 
   const currentMessageList = selectCurrentMessageList(global, tabId);
   const isSameMessageList = currentMessageList?.chatId === rest.chatId
@@ -194,6 +203,7 @@ addActionHandler('openChatWithDraft', (global, actions, payload): ActionReturnTy
   const {
     chatId, text, threadId = MAIN_THREAD_ID, files, filter, tabId = getCurrentTabId(),
   } = payload;
+  if (selectTabState(global, tabId).richMediaUploadBlockingCount) return;
 
   if (chatId) {
     actions.openThread({ chatId, threadId, tabId });

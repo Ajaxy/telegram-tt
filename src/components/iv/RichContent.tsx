@@ -41,6 +41,11 @@ import { selectSharedSettings } from '../../global/selectors/sharedState';
 import { IS_MAC_OS, IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { formatDateTime } from '../../util/localization/dateFormat';
+import {
+  EMPTY_RICH_MEDIA_CAPTION,
+  getRichMediaRef,
+  registerRichMedia,
+} from '../../util/tiptap/richMedia';
 import renderText from '../common/helpers/renderText';
 import {
   getPageMediaBlockMedia,
@@ -420,7 +425,7 @@ const RichContent = ({
         );
       case 'document':
         return (
-          <figure className={styles.figure}>
+          <figure className={styles.figure} data-tg-rich-media={buildRichMediaCopyData(block)}>
             <div data-rich-copy-ignore>
               <Document
                 document={block.document}
@@ -436,7 +441,7 @@ const RichContent = ({
         const item = audioItemsById.get(block.audio.id);
         if (!item) return renderUnsupportedBlock(unsupportedText, block.type);
         return (
-          <figure className={styles.figure}>
+          <figure className={styles.figure} data-tg-rich-media={buildRichMediaCopyData(block)}>
             <div data-rich-copy-ignore>
               <PlayableAudio
                 audio={block.audio}
@@ -595,7 +600,7 @@ function renderVideoBlock(
   const sourceId = getPageMediaSourceId(context.richTextContext.containerId, sourceKey, block);
 
   return (
-    <figure className={styles.figure}>
+    <figure className={styles.figure} data-tg-rich-media={buildRichMediaCopyData(block)}>
       <Video
         id={sourceId}
         video={getPageMediaBlockMedia(block)}
@@ -630,7 +635,7 @@ function renderPhotoBlock(
   const sourceId = getPageMediaSourceId(context.richTextContext.containerId, sourceKey, block);
 
   return (
-    <figure className={styles.figure}>
+    <figure className={styles.figure} data-tg-rich-media={buildRichMediaCopyData(block)}>
       <Photo
         id={sourceId}
         photo={getPageMediaBlockMedia(block)}
@@ -668,7 +673,7 @@ function renderSlideshowBlock(
   const sourceIds = getPageMediaSourceIds(context.richTextContext.containerId, sourceKey, items);
 
   return (
-    <figure className={styles.figure}>
+    <figure className={styles.figure} data-tg-rich-media={buildRichMediaCopyData(block)}>
       <Slideshow
         items={items}
         sourceIds={sourceIds}
@@ -681,7 +686,7 @@ function renderSlideshowBlock(
         onMediaClick={(index) => onOpenMedia(items, sourceIds, index)}
         renderCaption={(caption) => renderCaption(caption, context)}
       />
-      {renderCaption(block.caption, context)}
+      {renderCaption(block.caption, context, true)}
     </figure>
   );
 }
@@ -701,7 +706,7 @@ function renderCollageBlock(
   const sourceIds = getPageMediaSourceIds(context.richTextContext.containerId, sourceKey, items);
 
   return (
-    <figure className={styles.figure}>
+    <figure className={styles.figure} data-tg-rich-media={buildRichMediaCopyData(block)}>
       <Collage
         items={items}
         sourceIds={sourceIds}
@@ -1050,7 +1055,7 @@ function renderTableCell(
   );
 }
 
-function renderCaption(caption: ApiPageCaption, context: RenderBlockContext) {
+function renderCaption(caption: ApiPageCaption, context: RenderBlockContext, isSharedCaption?: boolean) {
   const hasText = hasRichText(caption.text);
   const hasCredit = hasRichText(caption.credit);
   if (!hasText && !hasCredit) {
@@ -1058,7 +1063,11 @@ function renderCaption(caption: ApiPageCaption, context: RenderBlockContext) {
   }
 
   return (
-    <figcaption className={styles.caption} data-rich-block-type="mediaCaption">
+    <figcaption
+      className={styles.caption}
+      data-rich-block-type="mediaCaption"
+      data-rich-media-block-caption={isSharedCaption}
+    >
       {hasText && <RichText text={caption.text} {...context.richTextContext} />}
       {hasCredit && (
         <span className={styles.credit} data-rich-block-type="mediaCredit">
@@ -1067,6 +1076,35 @@ function renderCaption(caption: ApiPageCaption, context: RenderBlockContext) {
       )}
     </figcaption>
   );
+}
+
+function buildRichMediaCopyData(
+  block: Extract<ApiPageBlock, { type: 'photo' | 'video' | 'audio' | 'document' | 'collage' | 'slideshow' }>,
+) {
+  const isGroup = block.type === 'collage' || block.type === 'slideshow';
+  const mediaBlocks = isGroup
+    ? getPageMediaBlocks(block.items)
+    : [block];
+  const items = mediaBlocks.map((item) => {
+    const media = item.type === 'document' ? item.document
+      : item.type === 'audio' ? item.audio : getPageMediaBlockMedia(item);
+    registerRichMedia(media);
+    return {
+      type: item.type,
+      ref: getRichMediaRef(item.type, media.id!),
+      caption: isGroup ? item.caption : EMPTY_RICH_MEDIA_CAPTION,
+      isSpoiler: item.type === 'photo' || item.type === 'video' ? item.isSpoiler : undefined,
+      url: item.type === 'photo' ? item.url : undefined,
+      webPageId: item.type === 'photo' ? item.webPageId : undefined,
+      isAutoplay: item.type === 'video' ? item.isAutoplay : undefined,
+      isLoop: item.type === 'video' ? item.isLoop : undefined,
+    };
+  });
+  return JSON.stringify({
+    kind: block.type,
+    items,
+    credit: block.caption.credit,
+  });
 }
 
 function renderUnsupportedBlock(unsupportedText: string, blockType?: ApiPageBlock['type']) {

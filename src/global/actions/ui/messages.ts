@@ -85,6 +85,10 @@ addActionHandler('setScrollOffset', (global, actions, payload): ActionReturnType
 
 addActionHandler('setEditingId', (global, actions, payload): ActionReturnType => {
   const { messageId, tabId = getCurrentTabId() } = payload;
+  if (messageId !== undefined && selectTabState(global, tabId).richMediaUploadBlockingCount) {
+    return;
+  }
+
   const currentMessageList = selectCurrentMessageList(global, tabId);
   if (!currentMessageList) {
     return undefined;
@@ -568,6 +572,15 @@ addActionHandler('setIsRichInputExpanded', (global, actions, payload): ActionRet
   const { isRichInputExpanded, tabId = getCurrentTabId() } = payload;
   return updateTabState(global, {
     isRichInputExpanded,
+  }, tabId);
+});
+
+addActionHandler('changeRichMediaUploadBlocking', (global, actions, payload): ActionReturnType => {
+  const { delta, tabId = getCurrentTabId() } = payload;
+  const currentCount = selectTabState(global, tabId).richMediaUploadBlockingCount || 0;
+  const nextCount = Math.max(currentCount + delta, 0);
+  return updateTabState(global, {
+    richMediaUploadBlockingCount: nextCount || undefined,
   }, tabId);
 });
 

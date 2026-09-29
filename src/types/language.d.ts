@@ -2400,6 +2400,10 @@ export interface LangPair {
   'SettingsPerformanceDesc': undefined;
   'SettingsStickersDesc': undefined;
   'SettingsSessionsDesc': undefined;
+  'RichMediaCollage': undefined;
+  'RichMediaSlideshow': undefined;
+  'RichMediaRetry': undefined;
+  'RichMediaUploadFailed': undefined;
   'WebLoginInvalid': undefined;
   'RichButtons': undefined;
   'RichButtonInline': undefined;
@@ -4733,6 +4737,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'PollModalAddMoreText': {
+    'count': V;
+  };
+  'RichMediaSkippedFiles': {
     'count': V;
   };
 }

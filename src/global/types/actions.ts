@@ -2127,6 +2127,9 @@ export interface ActionPayloads {
   setIsRichInputExpanded: {
     isRichInputExpanded?: boolean;
   } & WithTabId;
+  changeRichMediaUploadBlocking: {
+    delta: 1 | -1;
+  } & WithTabId;
 
   // Replies
   openReplyMenu: {

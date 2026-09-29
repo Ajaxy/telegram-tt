@@ -24,6 +24,8 @@
   .media-loading {
     pointer-events: none;
     position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
 
     &.interactive {
       pointer-events: auto;
@@ -425,18 +427,6 @@
     .performer,
     .date {
       line-height: 1.0625rem;
-    }
-
-    .media-loading {
-      top: 0.1875rem;
-      left: 0.1875rem;
-    }
-
-    &[dir="rtl"] {
-      .media-loading {
-        right: 0;
-        left: auto !important;
-      }
     }
   }
 

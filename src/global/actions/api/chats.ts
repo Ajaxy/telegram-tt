@@ -112,6 +112,7 @@ import {
   updateThreadReadState,
 } from '../../reducers/threads';
 import {
+  selectCanOpenMessageList,
   selectChat,
   selectChatByUsername,
   selectChatFolder,
@@ -237,6 +238,8 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     return;
   }
 
+  if (!selectCanOpenMessageList(global, id, MAIN_THREAD_ID, type, tabId)) return;
+
   actions.processOpenChatOrThread({
     chatId: id,
     type,
@@ -316,6 +319,8 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
     tabId = getCurrentTabId(),
   } = payload;
   let { chatId } = payload;
+  if (!selectCanOpenMessageList(global, chatId, payload.threadId, type, tabId)) return;
+
   let threadId: ThreadId | undefined;
   let loadingChatId: string;
   let loadingThreadId: ThreadId;

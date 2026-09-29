@@ -44,7 +44,7 @@ import RotationSlider from './RotationSlider';
 
 import styles from './MediaEditor.module.scss';
 
-type OwnProps = {
+export type OwnProps = {
   isOpen: boolean;
   imageUrl?: string;
   mimeType?: string;

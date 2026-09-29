@@ -1,3 +1,4 @@
+import type { TeactNode } from '../../lib/teact/teact';
 import { useMemo } from '../../lib/teact/teact';
 
 import type {
@@ -27,11 +28,15 @@ type OwnProps = {
   items: CollageItem[];
   canAutoLoadMedia?: boolean;
   isProtected?: boolean;
+  noSpoilerReveal?: boolean;
   theme: ThemeKey;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   sourceIds: string[];
   className?: string;
+  getUploadProgress?: (item: CollageItem, index: number) => number | undefined;
+  renderOverlay?: (item: CollageItem, index: number) => TeactNode;
+  onCancelUpload?: (index: number) => void;
   onMediaClick: (index: number) => void;
 };
 
@@ -39,11 +44,15 @@ const Collage = ({
   items,
   canAutoLoadMedia,
   isProtected,
+  noSpoilerReveal,
   theme,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   sourceIds,
   className,
+  getUploadProgress,
+  renderOverlay,
+  onCancelUpload,
   onMediaClick,
 }: OwnProps) => {
   const albumLayout = useMemo(() => {
@@ -74,34 +83,43 @@ const Collage = ({
             key={`${getPageMediaBlockId(item)}-${index}`}
             item={layoutItem}
           >
-            {item.type === 'photo' ? (
-              <Photo
-                id={sourceIds[index]}
-                photo={getPageMediaBlockMedia(item)}
-                canAutoLoad={canAutoLoadMedia}
-                isProtected={isProtected}
-                theme={theme}
-                observeIntersection={observeIntersectionForLoading}
-                layout="fill"
-                className={styles.media}
-                clickArg={index}
-                onClick={handleMediaClick}
-              />
-            ) : (
-              <Video
-                id={sourceIds[index]}
-                video={getPageMediaBlockMedia(item)}
-                canAutoLoad={canAutoLoadMedia}
-                canAutoPlay={item.isAutoplay && canAutoLoadMedia}
-                isProtected={isProtected}
-                observeIntersectionForLoading={observeIntersectionForLoading}
-                observeIntersectionForPlaying={observeIntersectionForPlaying}
-                layout="fill"
-                className={styles.media}
-                clickArg={index}
-                onClick={handleMediaClick}
-              />
-            )}
+            <>
+              {item.type === 'photo' ? (
+                <Photo
+                  id={sourceIds[index]}
+                  photo={getPageMediaBlockMedia(item)}
+                  canAutoLoad={canAutoLoadMedia}
+                  isProtected={isProtected}
+                  noSpoilerReveal={noSpoilerReveal}
+                  theme={theme}
+                  observeIntersection={observeIntersectionForLoading}
+                  uploadProgress={getUploadProgress?.(item, index)}
+                  layout="fill"
+                  className={styles.media}
+                  clickArg={index}
+                  onClick={handleMediaClick}
+                  onCancelUpload={onCancelUpload}
+                />
+              ) : (
+                <Video
+                  id={sourceIds[index]}
+                  video={getPageMediaBlockMedia(item)}
+                  canAutoLoad={canAutoLoadMedia}
+                  canAutoPlay={item.isAutoplay && canAutoLoadMedia}
+                  isProtected={isProtected}
+                  noSpoilerReveal={noSpoilerReveal}
+                  observeIntersectionForLoading={observeIntersectionForLoading}
+                  observeIntersectionForPlaying={observeIntersectionForPlaying}
+                  uploadProgress={getUploadProgress?.(item, index)}
+                  layout="fill"
+                  className={styles.media}
+                  clickArg={index}
+                  onClick={handleMediaClick}
+                  onCancelUpload={onCancelUpload}
+                />
+              )}
+              {renderOverlay?.(item, index)}
+            </>
           </AlbumItem>
         );
       })}

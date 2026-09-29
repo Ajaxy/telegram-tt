@@ -5,6 +5,7 @@ import { useTeactNodeViewContext } from './TeactNodeViewContext';
 type OwnProps = {
   as?: 'div' | 'pre' | 'span';
   className?: string;
+  placeholder?: string;
   contentEditable?: boolean;
   children?: TeactNode;
 };
@@ -14,6 +15,7 @@ const DEFAULT_ELEMENT_TAG = 'div';
 const NodeViewContent = ({
   as = DEFAULT_ELEMENT_TAG,
   className,
+  placeholder,
   contentEditable,
   children,
 }: OwnProps) => {
@@ -34,6 +36,7 @@ const NodeViewContent = ({
       contentEditable={contentEditable}
       ref={handleElementRef}
       data-node-view-content=""
+      data-placeholder={placeholder}
     >
       {children}
     </Element>

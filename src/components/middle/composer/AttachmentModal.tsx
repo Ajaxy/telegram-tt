@@ -202,6 +202,7 @@ const AttachmentModal = ({
 
   const isOpen = Boolean(attachments.length);
   const renderingIsOpen = Boolean(renderingAttachments?.length);
+  const hasPreparingAttachments = attachments.some(({ isPreparing }) => isPreparing);
   const [isHovered, markHovered, unmarkHovered] = useFlag();
 
   const timerRef = useRef<number | undefined>();
@@ -324,7 +325,9 @@ const AttachmentModal = ({
     handleContextMenu,
     handleContextMenuClose,
     handleContextMenuHide,
-  } = useContextMenuHandlers(mainButtonRef, !canShowCustomSendMenu || !isOpen);
+  } = useContextMenuHandlers(
+    mainButtonRef, !canShowCustomSendMenu || !isOpen || hasPreparingAttachments,
+  );
 
   useEffect(() => {
     requestMeasure(() => {
@@ -350,7 +353,7 @@ const AttachmentModal = ({
   const sendAttachments = useLastCallback((
     isSilent?: boolean, scheduledAt?: number | true, scheduleRepeatPeriod?: number,
   ) => {
-    if (!isOpen) return;
+    if (!isOpen || hasPreparingAttachments) return;
 
     const shouldSendScheduled = (shouldSchedule || scheduledAt) && isForMessage && !editingMessage;
     if (shouldSendScheduled) {
@@ -706,7 +709,7 @@ const AttachmentModal = ({
                       </MenuItem>
                     ) : (
 
-                      <MenuItem icon="photo" onClick={handleToggleShouldCompress}>
+                      <MenuItem icon="media" onClick={handleToggleShouldCompress}>
                         {lang(isMultiple ? 'AttachmentMenuSendAllAsMedia' : 'AttachmentMenuSendAsMedia')}
                       </MenuItem>
                     ))
@@ -871,6 +874,7 @@ const AttachmentModal = ({
                 className={styles.send}
                 size="smaller"
                 inline
+                disabled={hasPreparingAttachments}
                 onClick={handleSendClick}
                 onContextMenu={canShowCustomSendMenu ? handleContextMenu : undefined}
                 iconName={!editingMessage && !shouldSchedule && !paidMessagesStars ? 'new-send' : undefined}

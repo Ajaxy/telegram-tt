@@ -372,6 +372,18 @@
   vertical-align: bottom;
 }
 
+.mediaDropIndicator {
+  pointer-events: none;
+
+  position: fixed;
+  z-index: var(--z-drop-area);
+
+  height: 0.1875rem;
+  border-radius: 0.125rem;
+
+  background: var(--color-primary);
+}
+
 .richButtonNode {
   display: inline-block;
   min-width: 0;

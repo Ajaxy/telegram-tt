@@ -42,7 +42,7 @@ function CropPanel({ currentRatio, onRatioChange }: OwnProps) {
       return <Icon name="fullscreen" className="ListItem-main-icon" />;
     }
     if (value === 'original') {
-      return <Icon name="photo" className="ListItem-main-icon" />;
+      return <Icon name="media" className="ListItem-main-icon" />;
     }
     return <Icon name={RATIO_ICONS[value]!} className="ListItem-main-icon" />;
   };

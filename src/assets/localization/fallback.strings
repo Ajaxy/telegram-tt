@@ -3262,6 +3262,12 @@
 "SettingsStickersDesc" = "Stickers, Emoji, Reactions";
 "SettingsLanguageDesc" = "{language}, Translate Messages";
 "SettingsSessionsDesc" = "Sessions, Automatically terminate";
+"RichMediaCollage" = "Collage";
+"RichMediaSlideshow" = "Slideshow";
+"RichMediaRetry" = "Retry upload";
+"RichMediaUploadFailed" = "Upload failed";
+"RichMediaSkippedFiles_one" = "Skipped {count} file.";
+"RichMediaSkippedFiles_other" = "Skipped {count} files.";
 "WebLoginInvalid" = "This login link is invalid or has expired. Open a fresh link or log in normally.";
 "RichButtons" = "Buttons";
 "RichButtonInline" = "Inline Button";

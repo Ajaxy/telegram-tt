@@ -27,7 +27,7 @@ type EntryStats = SizeStats & {
   key: string;
 };
 
-type BundleKey = 'auth' | 'main' | 'extra' | 'calls' | 'stars';
+type BundleKey = 'auth' | 'main' | 'extra' | 'calls' | 'stars' | 'editor';
 
 type BundleDefinition = {
   key: BundleKey;
@@ -108,6 +108,7 @@ const MANUAL_BUNDLES: BundleDefinition[] = [
   { key: 'extra', label: '➕ Extra' },
   { key: 'calls', label: '📞 Calls' },
   { key: 'stars', label: '⭐ Stars' },
+  { key: 'editor', label: '📝 Editor' },
 ];
 const MANUAL_BUNDLE_ASSET_EXTENSIONS = ['.js', '.css'];
 const FILE_TYPES: FileTypeDefinition[] = [

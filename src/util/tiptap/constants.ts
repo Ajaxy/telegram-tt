@@ -2,6 +2,7 @@ export const EMOJI_NODE_NAME = 'emoji';
 export const BLOCKQUOTE_COLLAPSED_ATTR = 'collapsed';
 export const MATH_BLOCK_NODE_NAME = 'mathBlock';
 export const MATH_INLINE_NODE_NAME = 'mathInline';
+export const MEDIA_NODE_NAME = 'richEditorMedia';
 export const CAPTION_NODE_NAME = 'richEditorCaption';
 export const FOOTER_NODE_NAME = 'richEditorFooter';
 export const TABLE_WRAPPER_NODE_NAME = 'richEditorTableWrapper';

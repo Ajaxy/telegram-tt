@@ -2,11 +2,13 @@ import { useEffect } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type { ApiAttachment, ApiFormattedText, ApiMessage } from '../../../../api/types';
+import type { RichEditorMediaFilesHandler } from '../richEditorTypes';
 
 import {
   EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID, EDITABLE_STORY_INPUT_ID,
 } from '../../../../config';
 import { canReplaceMessageMedia, isUploadingFileSticker } from '../../../../global/helpers';
+import { revokeAttachmentUrls } from '../../../../util/attachments';
 import buildAttachment from '../helpers/buildAttachment';
 import getFilesFromDataTransferItems from '../helpers/getFilesFromDataTransferItems';
 
@@ -15,7 +17,7 @@ import useLang from '../../../../hooks/useLang';
 const VALID_TARGET_IDS = new Set([EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID, EDITABLE_STORY_INPUT_ID]);
 const CLOSEST_CONTENT_EDITABLE_SELECTOR = 'div[contenteditable]';
 
-type ClipboardFilePasteTarget = 'attachmentModal' | 'none';
+type ClipboardFilePasteTarget = 'attachmentModal' | 'richMedia' | 'none';
 
 const useClipboardPaste = (
   isActive: boolean,
@@ -25,6 +27,8 @@ const useClipboardPaste = (
   resolveFilePasteTarget: () => ClipboardFilePasteTarget,
   shouldUpdateAttachmentCompression?: boolean,
   shouldSkipFilePaste?: boolean,
+  onRichMediaFiles?: RichEditorMediaFilesHandler,
+  getRichMediaPosition?: () => number | undefined,
 ) => {
   const {
     showNotification,
@@ -59,18 +63,24 @@ const useClipboardPaste = (
       }
 
       const filePasteTarget = resolveFilePasteTarget();
+      const richMediaPosition = filePasteTarget === 'richMedia' ? getRichMediaPosition?.() : undefined;
       e.preventDefault();
       if (filePasteTarget === 'none') {
         return;
       }
 
       let files = await getFilesFromDataTransferItems(items);
-      if (editedMessage) {
-        files = files?.slice(0, 1);
-      }
-
       if (!files?.length) {
         return;
+      }
+
+      if (filePasteTarget === 'richMedia') {
+        onRichMediaFiles?.(files, richMediaPosition);
+        return;
+      }
+
+      if (editedMessage) {
+        files = files.slice(0, 1);
       }
 
       const pastedText = e.clipboardData.getData('text');
@@ -85,6 +95,7 @@ const useClipboardPaste = (
       const isInAlbum = editedMessage && editedMessage?.groupedId;
 
       if (editedMessage && newAttachments?.length > 1) {
+        newAttachments.forEach((attachment) => revokeAttachmentUrls(attachment));
         showNotification({
           message: lang('MediaReplaceInvalidError', undefined, { pluralValue: newAttachments.length }),
         });
@@ -92,6 +103,7 @@ const useClipboardPaste = (
       }
 
       if (editedMessage && isUploadingDocumentSticker) {
+        newAttachments.forEach((attachment) => revokeAttachmentUrls(attachment));
         showNotification({ message: lang('MediaReplaceInvalidError', undefined, { pluralValue: 1 }) });
         return;
       }
@@ -99,6 +111,7 @@ const useClipboardPaste = (
       if (isInAlbum) {
         shouldSetAttachments = canReplace;
         if (!shouldSetAttachments) {
+          newAttachments.forEach((attachment) => revokeAttachmentUrls(attachment));
           showNotification({
             message: lang('MediaReplaceInvalidError', undefined, { pluralValue: newAttachments.length }),
           });
@@ -112,6 +125,8 @@ const useClipboardPaste = (
           applyDefaultAttachmentsCompression();
         }
         setAttachments(editedMessage ? newAttachments : (attachments) => attachments.concat(newAttachments));
+      } else {
+        newAttachments.forEach((attachment) => revokeAttachmentUrls(attachment));
       }
 
       if (hasText) {
@@ -127,6 +142,7 @@ const useClipboardPaste = (
   }, [
     insertTextAndUpdateCursor, editedMessage, setAttachments, isActive,
     lang, resolveFilePasteTarget, shouldUpdateAttachmentCompression, shouldSkipFilePaste,
+    onRichMediaFiles, getRichMediaPosition,
   ]);
 };
 
