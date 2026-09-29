@@ -1079,7 +1079,7 @@ export interface ActionPayloads {
     screen?: ManagementScreens;
   } & WithTabId) | undefined;
   closeManagement: WithTabId | undefined;
-  checkPublicLink: { username: string } & WithTabId;
+  checkPublicLink: { chatId: string; username: string } & WithTabId;
   updatePublicLink: { username: string; shouldDisableUsernames?: boolean } & WithTabId;
   updatePrivateLink: WithTabId | undefined;
   resetManagementError: { chatId: string } & WithTabId;

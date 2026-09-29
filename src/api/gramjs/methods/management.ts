@@ -1,36 +1,45 @@
 import { Api as GramJs } from '../../../lib/gramjs';
+import { RPCError } from '../../../lib/gramjs/errors';
 
 import type {
-  ApiChat, ApiError, ApiPeer, ApiUser, ApiUsername,
+  ApiChat, ApiPeer, ApiUser, ApiUsername,
 } from '../../types';
 
 import { ACCEPTABLE_USERNAME_ERRORS } from '../../../config';
 import { buildApiExportedInvite, buildChatInviteImporter } from '../apiBuilders/chats';
 import { buildInputChannel, buildInputPeer, buildInputUser } from '../gramjsBuilders';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
-import { invokeRequest } from './client';
+import { dispatchErrorUpdate, invokeRequest } from './client';
 
-export async function checkChatUsername({ username }: { username: string }) {
+const PUBLIC_LINKS_LIMIT_ERROR = 'CHANNELS_ADMIN_PUBLIC_TOO_MUCH';
+
+export async function checkChatUsername({ chat, username }: { chat: ApiChat; username: string }) {
+  const request = new GramJs.channels.CheckUsername({
+    // Basic groups are migrated to supergroups only when the username is saved
+    channel: chat.type === 'chatTypeBasicGroup'
+      ? new GramJs.InputChannelEmpty()
+      : buildInputChannel(chat.id, chat.accessHash),
+    username,
+  });
+
   try {
-    const result = await invokeRequest(new GramJs.channels.CheckUsername({
-      channel: new GramJs.InputChannelEmpty(),
-      username,
-    }), {
-      shouldThrow: true,
-    });
+    const result = await invokeRequest(request, { shouldThrow: true });
 
     return { result, error: undefined };
-  } catch (error) {
-    const errorMessage = (error as ApiError).message;
+  } catch (err: unknown) {
+    if (err instanceof RPCError) {
+      // An `undefined` result means that the public links limit is reached
+      if (err.errorMessage === PUBLIC_LINKS_LIMIT_ERROR) {
+        return { result: undefined, error: undefined };
+      }
 
-    if (ACCEPTABLE_USERNAME_ERRORS.has(errorMessage)) {
-      return {
-        result: false,
-        error: errorMessage,
-      };
+      if (ACCEPTABLE_USERNAME_ERRORS.has(err.errorMessage)) {
+        return { result: false, error: err.errorMessage };
+      }
     }
 
-    throw error;
+    dispatchErrorUpdate(err as Error, request);
+    return undefined;
   }
 }
 
