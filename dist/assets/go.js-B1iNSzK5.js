@@ -1,2 +1,0 @@
-import e from"./go-B-PCS5zA.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/go" instead of "highlight.js/lib/languages/go.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=go.js-B1iNSzK5.js.map

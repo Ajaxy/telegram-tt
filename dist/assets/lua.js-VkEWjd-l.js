@@ -1,2 +1,0 @@
-import e from"./lua-aZNm1DXx.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/lua" instead of "highlight.js/lib/languages/lua.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=lua.js-VkEWjd-l.js.map

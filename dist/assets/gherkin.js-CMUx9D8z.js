@@ -1,2 +1,0 @@
-import e from"./gherkin-C5TQXDMb.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/gherkin" instead of "highlight.js/lib/languages/gherkin.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=gherkin.js-CMUx9D8z.js.map

@@ -1,2 +1,0 @@
-import e from"./diff-CJb8JxGC.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/diff" instead of "highlight.js/lib/languages/diff.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=diff.js-D85EOcfe.js.map

@@ -1,2 +1,0 @@
-import e from"./cmake-YlzcZYWN.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/cmake" instead of "highlight.js/lib/languages/cmake.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=cmake.js-BSsJyHbF.js.map

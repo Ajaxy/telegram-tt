@@ -1,0 +1,2 @@
+import e from"./ruby-BGpZ3p4_.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/ruby" instead of "highlight.js/lib/languages/ruby.js"`))}t();var n=e;export{n as default};
+//# sourceMappingURL=ruby.js-BaDEr2_q.js.map

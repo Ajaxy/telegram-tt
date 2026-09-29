@@ -1,2 +1,0 @@
-import e from"./nsis-531-IPPG.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/nsis" instead of "highlight.js/lib/languages/nsis.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=nsis.js-CIVQoZHb.js.map

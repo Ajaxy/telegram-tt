@@ -1,2 +1,0 @@
-import e from"./less-Bznsyq3n.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/less" instead of "highlight.js/lib/languages/less.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=less.js-DkKrpSP0.js.map

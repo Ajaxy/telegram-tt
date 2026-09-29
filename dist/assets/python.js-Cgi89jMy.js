@@ -1,2 +1,0 @@
-import e from"./python-DwhXSSGr.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/python" instead of "highlight.js/lib/languages/python.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=python.js-Cgi89jMy.js.map

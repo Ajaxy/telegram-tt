@@ -1,2 +1,0 @@
-import e from"./shell-nSe0mzJm.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/shell" instead of "highlight.js/lib/languages/shell.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=shell.js-C5PqMP_v.js.map

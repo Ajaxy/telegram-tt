@@ -1,0 +1,2 @@
+import e from"./shell-DAt6KQKc.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/shell" instead of "highlight.js/lib/languages/shell.js"`))}t();var n=e;export{n as default};
+//# sourceMappingURL=shell.js-Dynd7Xk2.js.map

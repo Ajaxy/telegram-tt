@@ -1,0 +1,2 @@
+import e from"./1c-73lFXAp6.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/1c" instead of "highlight.js/lib/languages/1c.js"`))}t();var n=e;export{n as default};
+//# sourceMappingURL=1c.js-Bg4tTgY5.js.map

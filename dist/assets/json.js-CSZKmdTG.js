@@ -1,0 +1,2 @@
+import e from"./json-PmyKWHmm.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/json" instead of "highlight.js/lib/languages/json.js"`))}t();var n=e;export{n as default};
+//# sourceMappingURL=json.js-CSZKmdTG.js.map

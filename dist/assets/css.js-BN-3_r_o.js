@@ -1,2 +1,0 @@
-import e from"./css-D5l_8KUR.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/css" instead of "highlight.js/lib/languages/css.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=css.js-BN-3_r_o.js.map

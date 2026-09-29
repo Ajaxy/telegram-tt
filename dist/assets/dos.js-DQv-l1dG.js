@@ -1,2 +1,0 @@
-import e from"./dos-26Y1-4rB.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/dos" instead of "highlight.js/lib/languages/dos.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=dos.js-DQv-l1dG.js.map

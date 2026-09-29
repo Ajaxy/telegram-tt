@@ -1,2 +1,0 @@
-import e from"./yaml-1XF8XcZB.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/yaml" instead of "highlight.js/lib/languages/yaml.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=yaml.js-DsfiHSi-.js.map

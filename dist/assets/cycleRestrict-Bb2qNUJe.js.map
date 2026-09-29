@@ -1,1 +1,0 @@
-{"version":3,"file":"cycleRestrict-Bb2qNUJe.js","names":[],"sources":["../../src/util/cycleRestrict.ts"],"sourcesContent":["export default function cycleRestrict(length: number, index: number) {\n  return index - Math.floor(index / length) * length;\n}\n"],"mappings":"AAAA,SAAwB,EAAc,EAAgB,EAAe,CACnE,OAAO,EAAQ,KAAK,MAAM,EAAQ,CAAM,EAAI,CAC9C"}

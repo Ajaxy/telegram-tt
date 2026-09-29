@@ -1,2 +1,0 @@
-import e from"./d-CXbCUJLK.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/d" instead of "highlight.js/lib/languages/d.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=d.js-Dhgte9nD.js.map

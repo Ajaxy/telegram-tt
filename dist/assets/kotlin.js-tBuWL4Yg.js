@@ -1,2 +1,0 @@
-import e from"./kotlin-D_ESCULk.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/kotlin" instead of "highlight.js/lib/languages/kotlin.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=kotlin.js-tBuWL4Yg.js.map
