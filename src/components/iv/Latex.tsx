@@ -1,8 +1,8 @@
-import temmlUrl from 'temml/dist/temml.mjs?url';
 import { memo, useEffect, useRef } from '../../lib/teact/teact';
 
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import buildClassName from '../../util/buildClassName';
+import renderLatex from '../../util/renderLatex';
 
 import styles from './RichContent.module.scss';
 
@@ -11,54 +11,36 @@ type OwnProps = {
   isBlock?: boolean;
 };
 
-type TemmlModule = typeof import('temml');
-
-let temmlPromise: Promise<TemmlModule> | undefined;
-
-function ensureTemml() {
-  if (!temmlPromise) {
-    temmlPromise = Promise.all([
-      // Vite breaks Temml on build. https://github.com/ronkok/Temml/pull/128
-      import(/* @vite-ignore */ temmlUrl) as Promise<TemmlModule>,
-      import('temml/dist/Temml-Local.css'),
-    ]).then(([temml]) => temml);
-  }
-
-  return temmlPromise;
-}
-
 function Latex({ source, isBlock }: OwnProps) {
   const ref = useRef<HTMLSpanElement>();
 
   useEffect(() => {
-    let isCancelled = false;
+    const controller = new AbortController();
 
-    void ensureTemml().then(({ default: temml }) => {
+    void Promise.all([
+      renderLatex(source, isBlock, controller.signal),
+      import('temml/dist/Temml-Local.css'),
+    ]).then(([markup]) => {
       requestMutation(() => {
-        if (isCancelled) return;
+        if (controller.signal.aborted) return;
 
         const element = ref.current!;
-        element.textContent = '';
-
-        try {
-          temml.render(source, element, {
-            displayMode: isBlock,
-            throwOnError: true,
-          });
-        } catch {
+        if (markup === undefined) {
           element.textContent = source;
+        } else {
+          element.innerHTML = markup;
         }
       });
     }, () => {
       requestMutation(() => {
-        if (isCancelled) return;
+        if (controller.signal.aborted) return;
 
         ref.current!.textContent = source;
       });
     });
 
     return () => {
-      isCancelled = true;
+      controller.abort();
     };
   }, [isBlock, source]);
 

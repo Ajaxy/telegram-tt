@@ -142,7 +142,7 @@
     "music-metadata": "^11.13.0",
     "opus-recorder": "github:Ajaxy/opus-recorder#116830a94120baad5ac60ac060c2ecd032b6107b",
     "qr-code-styling": "^1.9.2",
-    "temml": "^0.13.3"
+    "temml": "^0.13.5"
   },
   "browserslist": [
     "baseline widely available"
