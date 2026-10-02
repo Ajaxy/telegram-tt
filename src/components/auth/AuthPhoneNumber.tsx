@@ -30,6 +30,10 @@ import CountryCodeInput from './CountryCodeInput';
 
 import monkeyPath from '../../assets/monkey.svg';
 
+type OwnProps = {
+  onGoToSessionString: NoneToVoidFunction;
+};
+
 type StateProps = {
   auth: GlobalState['auth'];
   connectionState: GlobalState['connectionState'];
@@ -48,7 +52,8 @@ const AuthPhoneNumber = ({
   phoneCodeList,
   language,
   isTestServer,
-}: StateProps) => {
+  onGoToSessionString,
+}: OwnProps & StateProps) => {
   const {
     setAuthPhoneNumber,
     setAuthRememberMe,
@@ -234,6 +239,14 @@ const AuthPhoneNumber = ({
     goToAuthQrCode();
   });
 
+  const handleGoToAuthSessionString = useLastCallback(() => {
+    if (errorKey) {
+      clearAuthErrorKey();
+    }
+
+    onGoToSessionString();
+  });
+
   const handleLoginWithPasskey = useLastCallback(() => {
     loginWithPasskey();
   });
@@ -304,6 +317,16 @@ const AuthPhoneNumber = ({
               {lang('LoginQRLogin')}
             </Button>
           )}
+          {isAuthReady && (
+            <Button
+              className="auth-button"
+              isText
+              ripple
+              onClick={handleGoToAuthSessionString}
+            >
+              {lang('LoginSessionString')}
+            </Button>
+          )}
           {passkeyOption && (
             <Button className="auth-button" isText onClick={handleLoginWithPasskey}>
               {lang('LoginPasskey')}
@@ -325,7 +348,7 @@ const AuthPhoneNumber = ({
   );
 };
 
-export default memo(withGlobal(
+export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
     const {
       sharedState: { settings: { language } },

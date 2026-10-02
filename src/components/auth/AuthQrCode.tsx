@@ -27,6 +27,10 @@ import AnimatedIcon from '../common/AnimatedIcon';
 import Button from '../ui/Button';
 import Loading from '../ui/Loading';
 
+type OwnProps = {
+  onGoToSessionString: NoneToVoidFunction;
+};
+
 type StateProps = {
   auth: GlobalState['auth'];
   connectionState: GlobalState['connectionState'];
@@ -43,7 +47,8 @@ const AuthCode = ({
   connectionState,
   auth,
   language,
-}: StateProps) => {
+  onGoToSessionString,
+}: OwnProps & StateProps) => {
   const {
     returnToAuthPhoneNumber,
     setSharedSettingOption,
@@ -125,6 +130,10 @@ const AuthCode = ({
     returnToAuthPhoneNumber();
   });
 
+  const handleGoToSessionString = useLastCallback(() => {
+    onGoToSessionString();
+  });
+
   const handleLoginWithPasskey = useLastCallback(() => {
     loginWithPasskey();
   });
@@ -176,6 +185,11 @@ const AuthCode = ({
             {lang('LoginQRCancel')}
           </Button>
         )}
+        {isAuthReady && (
+          <Button className="auth-button" isText onClick={handleGoToSessionString}>
+            {lang('LoginSessionString')}
+          </Button>
+        )}
         {passkeyOption && (
           <Button className="auth-button" isText onClick={handleLoginWithPasskey}>
             {lang('LoginPasskey')}
@@ -191,7 +205,7 @@ const AuthCode = ({
   );
 };
 
-export default memo(withGlobal(
+export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
     const {
       connectionState, auth,

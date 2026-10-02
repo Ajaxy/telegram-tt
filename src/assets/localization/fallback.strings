@@ -200,6 +200,11 @@
 "LoginQRHelp3" = "Point your phone at this screen to confirm login";
 "LoginQRCancel" = "Log in by phone number";
 "LoginPasskey" = "Log in with Passkey";
+"LoginSessionString" = "Log in with Session String";
+"LoginSessionStringTitle" = "Log in to Telegram by Session String";
+"LoginSessionStringDescription" = "Paste a GramJS session string to sign in without a login code.";
+"LoginSessionStringPlaceholder" = "Session string";
+"LoginSessionStringSubmit" = "Import Session";
 "YourName" = "Your Name";
 "LoginRegisterDesc" = "Enter your name and add a profile photo.";
 "LoginRegisterFirstNamePlaceholder" = "First Name";
@@ -801,6 +806,7 @@
 "ErrorSendRestrictedStickersAll" = "Sorry, sending stickers is not allowed in this group";
 "ErrorPhoneNumberInvalid" = "Invalid phone number, please try again";
 "ErrorCodeInvalid" = "Invalid code, please try again";
+"ErrorSessionStringInvalid" = "This session string is invalid";
 "ErrorEmailCodeInvalid" = "Invalid code, please try again";
 "ErrorIncorrectPassword" = "Invalid password, please try again";
 "ErrorPasswordFlood" = "Too many attempts, please try again later";

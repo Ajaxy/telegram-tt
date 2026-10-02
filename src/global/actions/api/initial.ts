@@ -17,6 +17,7 @@ import {
 } from '../../../util/browser/windowEnvironment';
 import * as cacheApi from '../../../util/cacheApi';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { parseGramJsSessionString } from '../../../util/gramjsSessionString';
 import {
   ACCOUNT_SLOT, getAccountsInfo, getAccountSlotUrl, getFirstLoggedInAccountSlot,
 } from '../../../util/multiaccount';
@@ -203,6 +204,32 @@ addActionHandler('signUp', (global, actions, payload): ActionReturnType => {
     isLoading: true,
     errorKey: undefined,
   });
+});
+
+addActionHandler('importAuthSessionString', async (global, actions, payload): Promise<void> => {
+  const { sessionString } = payload;
+
+  const sessionData = parseGramJsSessionString(sessionString);
+
+  if (!sessionData) {
+    global = updateAuth(global, {
+      errorKey: { key: 'ErrorSessionStringInvalid' },
+      isLoading: false,
+    });
+    setGlobal(global);
+    return;
+  }
+
+  global = updateAuth(global, {
+    isLoading: true,
+    errorKey: undefined,
+  });
+  setGlobal(global);
+
+  await storeSession(sessionData);
+
+  // The app is restarted to connect with the imported authorization key
+  window.location.reload();
 });
 
 addActionHandler('returnToAuthPhoneNumber', (global): ActionReturnType => {
