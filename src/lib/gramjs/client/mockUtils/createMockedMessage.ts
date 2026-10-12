@@ -22,7 +22,8 @@ export default function createMockedMessage(chatId: string, id: number, mockData
     reactions,
     replies,
     replyTo = createMockedReplyTo(chatId, id, mockData),
-    entities = [new Api.MessageEntityMention({ offset: 0, length: 5 })],
+    entities = [{ type: 'mention', offset: 0, length: 5 }],
+    fromUserId,
     ...rest
   } = omit(msg, ['replyToMsgId', 'replyToTopId', 'replyToForumTopic']);
 
@@ -32,8 +33,13 @@ export default function createMockedMessage(chatId: string, id: number, mockData
     peerId: createMockedTypePeer(chatId, mockData),
     date,
     message,
-    entities,
+    entities: entities.map(({ type, offset, length }) => (
+      type === 'url'
+        ? new Api.MessageEntityUrl({ offset, length })
+        : new Api.MessageEntityMention({ offset, length })
+    )),
     replyTo,
+    ...(fromUserId ? { fromId: new Api.PeerUser({ userId: BigInt(fromUserId) }) } : undefined),
     ...(media ? { media: createMockedMessageMedia(media, mockData) } : undefined),
     ...(reactions ? { reactions: createMockedMessageReactions(chatId, id, mockData) } : undefined),
     ...(replies ? { replies: createMockedReplies(chatId, id, mockData) } : undefined),

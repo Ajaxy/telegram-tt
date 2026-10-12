@@ -11,6 +11,7 @@ export default function createMockedUser(id: string, mockData: MockTypes): Api.U
     firstName = 'John',
     lastName = 'Doe',
     accessHash = 1n,
+    status = user.self ? undefined : new Api.UserStatusRecently({}),
     ...rest
   } = user;
 
@@ -20,5 +21,6 @@ export default function createMockedUser(id: string, mockData: MockTypes): Api.U
     firstName,
     lastName,
     accessHash,
+    status,
   });
 }

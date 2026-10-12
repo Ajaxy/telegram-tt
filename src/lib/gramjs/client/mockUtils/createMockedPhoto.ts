@@ -17,6 +17,8 @@ export default function createMockedPhoto(documentId: number, mockData: MockType
     dcId = 2,
     url,
     size,
+    width = 100,
+    height = 100,
     ...rest
   } = document;
 
@@ -29,14 +31,14 @@ export default function createMockedPhoto(documentId: number, mockData: MockType
     sizes: [
       new Api.PhotoSize({
         type: 'm',
-        w: 100,
-        h: 100,
+        w: width,
+        h: height,
         size: toJSNumber(size),
       }),
       new Api.PhotoSize({
         type: 'x',
-        w: 100,
-        h: 100,
+        w: width,
+        h: height,
         size: toJSNumber(size),
       }),
     ],

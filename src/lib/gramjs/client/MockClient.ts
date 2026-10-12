@@ -24,6 +24,7 @@ import { downloadFile } from './downloadFile';
 import MockSender from './MockSender';
 
 const sizeTypes: SizeType[] = ['u', 'v', 'w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's', 'f'];
+const DEFAULT_PEER_COLORS = [0xD45246, 0xF68136, 0x6C61DF, 0x46BA43, 0x5CAFFA, 0x408ACF, 0xD95574];
 
 class TelegramClient {
   private invokeMiddleware?: <A, R>(mockClient: TelegramClient, request: Api.Request<A, R>)
@@ -85,6 +86,16 @@ class TelegramClient {
     }).catch(() => this.loadScenario());
   }
 
+  setIsPremium() {}
+
+  setForceHttpTransport() {}
+
+  setAllowHttpTransport() {}
+
+  disconnect() {}
+
+  destroy() {}
+
   fireUpdate(update: Api.TypeUpdate) {
     this.callbacks.forEach(({ eventBuilder, callback }) => (callback(eventBuilder.build(update))));
   }
@@ -97,12 +108,13 @@ class TelegramClient {
     return this.mockData.dialogs[type].map((dialog) => createMockedDialog(dialog.id, this.mockData));
   }
 
-  start({
+  async start({
     mockScenario,
   }: {
     mockScenario: string;
-  }) {
-    return this.loadScenario(mockScenario);
+  }, onConnected?: NoneToVoidFunction) {
+    await this.loadScenario(mockScenario);
+    onConnected?.();
   }
 
   async invoke<A, R>(request: Api.Request<A, R>) {
@@ -196,16 +208,17 @@ class TelegramClient {
     }
 
     if (request instanceof Api.users.GetFullUser) {
+      const userId = request.id instanceof Api.InputUser ? request.id.userId.toString() : '1';
       return new Api.users.UserFull({
         fullUser: new Api.UserFull({
           about: 'lol',
           settings: new Api.PeerSettings({}),
           notifySettings: new Api.PeerNotifySettings({}),
-          id: 1n,
+          id: BigInt(userId),
           commonChatsCount: 0,
         }),
         chats: [],
-        users: [],
+        users: [this.getUser(userId)],
       });
     }
 
@@ -218,15 +231,99 @@ class TelegramClient {
       });
     }
 
+    if (request instanceof Api.langpack.GetLangPack || request instanceof Api.langpack.GetDifference) {
+      return new Api.LangPackDifference({
+        langCode: 'en',
+        fromVersion: 0,
+        version: 1,
+        strings: Object.entries(this.mockData.langPack || {}).map(([key, value]) => (
+          new Api.LangPackString({ key, value })
+        )),
+      });
+    }
+
+    if (request instanceof Api.langpack.GetLanguages) {
+      return [];
+    }
+
+    if (request instanceof Api.updates.GetState) {
+      return new Api.updates.State({
+        pts: 1, qts: 0, date: Math.floor(Date.now() / 1000), seq: 1, unreadCount: 0,
+      });
+    }
+
+    if (request instanceof Api.updates.GetDifference) {
+      return new Api.updates.DifferenceEmpty({ date: Math.floor(Date.now() / 1000), seq: 1 });
+    }
+
+    if (request instanceof Api.help.GetPeerColors) {
+      return new Api.help.PeerColors({
+        hash: 1,
+        colors: DEFAULT_PEER_COLORS.map((color, colorId) => new Api.help.PeerColorOption({
+          colorId,
+          colors: new Api.help.PeerColorSet({ colors: [color] }),
+        })),
+      });
+    }
+
+    if (request instanceof Api.help.GetPeerProfileColors) {
+      return new Api.help.PeerColors({ hash: 1, colors: [] });
+    }
+
     if (request instanceof Api.messages.GetHistory) {
       const peerId = getIdFromInputPeer(request.peer);
       if (!peerId) return undefined;
 
-      return new Api.messages.Messages({
-        messages: this.getMessagesFrom(peerId),
+      // Emulate server pagination: newest first, `offsetId` excludes itself, `addOffset` shifts the window
+      const all = this.getMessagesFrom(peerId).sort((a, b) => b.id - a.id);
+      const { offsetId, addOffset = 0, limit } = request;
+      const start = Math.max(0, (offsetId ? all.findIndex((m) => m.id < offsetId) : 0) + addOffset);
+      const safeStart = offsetId && start === -1 + addOffset ? all.length : start;
+      const slice = limit ? all.slice(safeStart, safeStart + limit) : all;
+
+      return new Api.messages.MessagesSlice({
+        count: all.length,
+        messages: slice,
         chats: [],
         users: [],
         topics: [],
+      });
+    }
+
+    if (request instanceof Api.messages.GetSearchResultsCalendar) {
+      const peerId = getIdFromInputPeer(request.peer);
+      if (!peerId) return undefined;
+
+      const isPhotoFilter = request.filter instanceof Api.InputMessagesFilterPhotoVideo;
+      const all = this.getMessagesFrom(peerId)
+        .filter((m) => m instanceof Api.Message && (!isPhotoFilter || m.media instanceof Api.MessageMediaPhoto))
+        .sort((a, b) => b.id - a.id);
+
+      const periodsByDay = new Map<number, Api.SearchResultsCalendarPeriod>();
+      all.forEach((m) => {
+        const day = new Date(m.date * 1000);
+        day.setHours(0, 0, 0, 0);
+        const key = Math.floor(day.getTime() / 1000);
+        const period = periodsByDay.get(key);
+        if (period) {
+          period.count++;
+          period.minMsgId = Math.min(period.minMsgId, m.id);
+          period.maxMsgId = Math.max(period.maxMsgId, m.id);
+        } else {
+          periodsByDay.set(key, new Api.SearchResultsCalendarPeriod({
+            date: key, minMsgId: m.id, maxMsgId: m.id, count: 1,
+          }));
+        }
+      });
+
+      return new Api.messages.SearchResultsCalendar({
+        count: all.length,
+        minDate: all.length ? all[all.length - 1].date : 0,
+        minMsgId: all.length ? all[all.length - 1].id : 0,
+        periods: Array.from(periodsByDay.values()),
+        messages: isPhotoFilter ? all : [],
+        chats: [],
+        users: [],
       });
     }
 
@@ -286,7 +383,7 @@ class TelegramClient {
   }
 
   public getSender() {
-    return new MockSender(this);
+    return Promise.resolve(new MockSender(this));
   }
 
   downloadFile(inputLocation: any, args: DownloadFileWithDcParams) {
@@ -424,7 +521,8 @@ class TelegramClient {
   public releaseExportedSender() {}
 
   private getMessagesFrom(chatId: string) {
-    return this.mockData.messages[chatId].map((message) => createMockedMessage(chatId, message.id, this.mockData));
+    const messages = this.mockData.messages[chatId] || [];
+    return messages.map((message) => createMockedMessage(chatId, message.id, this.mockData));
   }
 
   private getAllMessages() {
