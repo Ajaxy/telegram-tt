@@ -893,9 +893,8 @@ export interface ActionPayloads {
   sendCredentialsInfo: {
     credentials: ApiCredentials;
   } & WithTabId;
-  setSmartGlocalCardInfo: {
-    type: string;
-    token: string;
+  setPaymentWebFormCredentials: {
+    credentials: AnyLiteral;
   } & WithTabId;
   clearPaymentError: WithTabId | undefined;
   clearReceipt: WithTabId | undefined;

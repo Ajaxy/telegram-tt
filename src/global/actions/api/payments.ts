@@ -10,7 +10,7 @@ import type {
 } from '../../types';
 import { PaymentStep } from '../../../types';
 
-import { DEBUG_PAYMENT_SMART_GLOCAL, STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
+import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import * as langProvider from '../../../util/oldLangProvider';
 import { getStripeError } from '../../../util/payments/stripe';
@@ -43,13 +43,12 @@ import {
   selectChat,
   selectChatFullInfo,
   selectIsCurrentUserFrozen,
+  selectPaymentCredentialsData,
   selectPaymentInputInvoice,
   selectPaymentRequestId,
   selectProviderPublicToken,
   selectProviderPublishableKey,
-  selectSmartGlocalCredentials,
   selectStarsPayment,
-  selectStripeCredentials,
   selectTabState,
 } from '../../selectors';
 
@@ -281,7 +280,7 @@ addActionHandler('sendPaymentForm', async (global, actions, payload): Promise<vo
     return;
   }
 
-  const { nativeProvider, formId } = form;
+  const { formId } = form;
 
   const requestInputInvoice = getRequestInputInvoice(global, inputInvoice);
   if (!requestInputInvoice) {
@@ -293,8 +292,7 @@ addActionHandler('sendPaymentForm', async (global, actions, payload): Promise<vo
 
   const credentials = {
     save: saveCredentials,
-    data: nativeProvider === 'stripe'
-      ? selectStripeCredentials(global, tabId) : selectSmartGlocalCredentials(global, tabId),
+    data: selectPaymentCredentialsData(global, tabId),
   };
   const result = await callApi('sendPaymentForm', {
     inputInvoice: requestInputInvoice,
@@ -448,16 +446,17 @@ async function sendSmartGlocalCredentials<T extends GlobalState>(
     },
   };
 
-  const tokenizeUrl = selectTabState(global, tabId).payment.form?.nativeParams.tokenizeUrl;
+  const { invoice, nativeParams } = selectTabState(global, tabId).payment.form!;
+  const { tokenizeUrl } = nativeParams;
 
   let url;
-  if (DEBUG_PAYMENT_SMART_GLOCAL) {
+  if (invoice.isTest) {
     url = 'https://tgb-playground.smart-glocal.com/cds/v1/tokenize/card';
   } else {
     url = 'https://tgb.smart-glocal.com/cds/v1/tokenize/card';
   }
 
-  if (tokenizeUrl && isValidSmartGlocalTokenizeUrl(tokenizeUrl)) {
+  if (typeof tokenizeUrl === 'string' && isValidSmartGlocalTokenizeUrl(tokenizeUrl)) {
     url = tokenizeUrl;
   }
 
@@ -498,12 +497,9 @@ async function sendSmartGlocalCredentials<T extends GlobalState>(
   setGlobal(global);
 }
 
-addActionHandler('setSmartGlocalCardInfo', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId(), type, token } = payload;
-  return setSmartGlocalCardInfo(global, {
-    type,
-    token,
-  }, tabId);
+addActionHandler('setPaymentWebFormCredentials', (global, actions, payload): ActionReturnType => {
+  const { credentials, tabId = getCurrentTabId() } = payload;
+  return updatePayment(global, { webFormCredentials: credentials }, tabId);
 });
 
 addActionHandler('setPaymentStep', (global, actions, payload): ActionReturnType => {

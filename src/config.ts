@@ -42,8 +42,6 @@ export const TELEGRAM_API_ID = Number(import.meta.env.TG_TELEGRAM_API_ID);
 export const TELEGRAM_API_HASH = import.meta.env.TG_TELEGRAM_API_HASH;
 export const TEST_SESSION = import.meta.env.TG_TEST_SESSION;
 
-export const DEBUG_PAYMENT_SMART_GLOCAL = false;
-
 export const SESSION_LEGACY_USER_KEY = 'user_auth';
 export const SESSION_ACCOUNT_PREFIX = 'account';
 

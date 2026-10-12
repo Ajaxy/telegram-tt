@@ -43,7 +43,6 @@ import './PaymentModal.scss';
 
 const DEFAULT_PROVIDER = 'stripe';
 const DONATE_PROVIDER = 'smartglocal';
-const DONATE_PROVIDER_URL = 'https://payment.smart-glocal.com';
 const SUPPORTED_PROVIDERS = new Set([DEFAULT_PROVIDER, DONATE_PROVIDER]);
 
 export type OwnProps = {
@@ -109,7 +108,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
     sendCredentialsInfo,
     clearPaymentError,
     validatePaymentPassword,
-    setSmartGlocalCardInfo,
+    setPaymentWebFormCredentials,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -155,12 +154,16 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
       step === PaymentStep.Checkout
       && step === prevStep
       && requestId !== prevRequestId
+      && !isPaymentFormUrl
       && !paymentState.savedCredentialId
       && !paymentState.cardNumber
     ) {
       setStep(PaymentStep.PaymentInfo);
     }
-  }, [paymentState.cardNumber, paymentState.savedCredentialId, prevRequestId, prevStep, requestId, setStep, step]);
+  }, [
+    paymentState.cardNumber, paymentState.savedCredentialId, prevRequestId, prevStep, requestId, setStep, step,
+    isPaymentFormUrl,
+  ]);
 
   useEffect(() => {
     if (error?.field) {
@@ -268,11 +271,15 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
     });
   }, [sendPaymentForm, paymentState]);
 
-  const handlePaymentFormSubmit = useCallback((eventData: PaymentFormSubmitEvent['eventData']) => {
+  const handlePaymentFormSubmit = useLastCallback((eventData: PaymentFormSubmitEvent['eventData']) => {
     const { credentials } = eventData;
-    setSmartGlocalCardInfo(credentials);
-    sendForm();
-  }, [sendForm]);
+    setPaymentWebFormCredentials({ credentials });
+    sendPaymentForm({
+      shippingOptionId: paymentState.shipping,
+      saveCredentials: paymentState.saveCredentials,
+      tipAmount: paymentState.tipAmount,
+    });
+  });
 
   function renderModalContent(currentStep: PaymentStep, isActive?: boolean) {
     switch (currentStep) {
@@ -409,15 +416,30 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
         break;
 
       case PaymentStep.Checkout: {
-        if (isPaymentFormUrl) {
-          setIsLoading(true);
-          setStep(PaymentStep.ConfirmPayment);
-          return;
-        }
-
         if (form?.savedInfo && !requestId && !paymentState.shipping) {
           setIsLoading(true);
           validateRequest();
+          return;
+        }
+
+        const { phone, email, fullName } = paymentState;
+        const shouldFillRequestedData = (invoice?.isEmailRequested && !email)
+          || (invoice?.isPhoneRequested && !phone)
+          || (invoice?.isNameRequested && !fullName);
+
+        if (isPaymentFormUrl) {
+          if ((invoice?.isShippingAddressRequested && !requestId) || shouldFillRequestedData) {
+            setStep(PaymentStep.ShippingInfo);
+            return;
+          }
+
+          if (invoice?.isShippingAddressRequested && !paymentState.shipping && shippingOptions?.length) {
+            setStep(PaymentStep.Shipping);
+            return;
+          }
+
+          setIsLoading(true);
+          setStep(PaymentStep.ConfirmPayment);
           return;
         }
 
@@ -439,11 +461,6 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
           setStep(PaymentStep.PaymentInfo);
           return;
         }
-
-        const { phone, email, fullName } = paymentState;
-        const shouldFillRequestedData = (invoice?.isEmailRequested && !email)
-          || (invoice?.isPhoneRequested && !phone)
-          || (invoice?.isNameRequested && !fullName);
 
         if ((invoice?.isShippingAddressRequested && !requestId) || shouldFillRequestedData) {
           setStep(PaymentStep.ShippingInfo);
@@ -622,19 +639,17 @@ export default memo(withGlobal<OwnProps>(
       smartGlocalCredentials,
       temporaryPassword,
       isExtendedMedia,
-      url,
     } = selectTabState(global).payment;
 
-    const { invoice, nativeParams, nativeProvider } = form || {};
+    const {
+      invoice, nativeParams, nativeProvider, url,
+    } = form || {};
     const countryList = global.countryList.general;
 
-    let providerName = form?.nativeProvider;
-    if (!providerName && url) {
-      providerName = url.startsWith(DONATE_PROVIDER_URL) ? DONATE_PROVIDER : undefined;
-    }
-
     const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId) : undefined;
-    const isProviderError = Boolean(invoice && (!providerName || !SUPPORTED_PROVIDERS.has(providerName)));
+    const isNativeProvider = Boolean(nativeProvider && SUPPORTED_PROVIDERS.has(nativeProvider));
+    const isPaymentFormUrl = Boolean(!isNativeProvider && url);
+    const isProviderError = Boolean(invoice && !isNativeProvider && !isPaymentFormUrl);
     const { needCardholderName, needCountry, needZip } = (nativeParams || {});
     const bot = form?.botId ? selectUser(global, form.botId) : undefined;
     const botName = getUserFullName(bot);
@@ -643,7 +658,7 @@ export default memo(withGlobal<OwnProps>(
       step,
       chat,
       shippingOptions,
-      nativeProvider: providerName,
+      nativeProvider,
       isProviderError,
       form,
       invoice,
@@ -652,7 +667,7 @@ export default memo(withGlobal<OwnProps>(
       needZip,
       error,
       confirmPaymentUrl: confirmPaymentUrl ?? url,
-      isPaymentFormUrl: Boolean(!nativeProvider && url),
+      isPaymentFormUrl,
       countryList,
       requestId,
       hasShippingOptions: Boolean(shippingOptions?.length),

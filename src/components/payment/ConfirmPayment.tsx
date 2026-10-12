@@ -18,10 +18,7 @@ export type OwnProps = {
 export interface PaymentFormSubmitEvent {
   eventType: 'payment_form_submit';
   eventData: {
-    credentials: {
-      token: string;
-      type: string;
-    };
+    credentials: AnyLiteral;
     title: string;
   };
 }
@@ -63,9 +60,6 @@ const ConfirmPayment = ({
           if (onPaymentFormSubmit) {
             onPaymentFormSubmit(eventData);
           }
-          break;
-        default:
-          onClose();
           break;
       }
     } catch (err) {

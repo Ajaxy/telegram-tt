@@ -524,6 +524,7 @@ export type TabState = {
       type: string;
       token: string;
     };
+    webFormCredentials?: AnyLiteral;
     receipt?: ApiReceiptRegular;
     error?: {
       field?: string;
@@ -537,7 +538,6 @@ export type TabState = {
       value: string;
       validUntil: number;
     };
-    url?: string;
     botId?: string;
   };
   starsPayment: {
