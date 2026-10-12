@@ -487,7 +487,10 @@ class TelegramClient {
     Object.values(this._exportedSenderPromises)
       .forEach((promises) => {
         Object.values(promises).forEach((promise) => {
-          void promise?.then((sender) => sender?.disconnect()).catch(() => undefined);
+          void promise?.then((sender) => {
+            sender?.disconnect();
+            sender?.destroy();
+          }).catch(() => undefined);
         });
       });
 
@@ -557,25 +560,7 @@ class TelegramClient {
     delete this._exportedSenderRefCounter[dcId][index];
     const sender = await senderPromise?.catch(() => undefined);
     sender?.disconnect();
-  }
-
-  async _cleanupExportedSenders(dcId: number) {
-    const promises = Object.values(this._exportedSenderPromises[dcId]);
-    if (!promises.length) {
-      return;
-    }
-
-    if (this.session.dcId !== dcId) {
-      this.session.setAuthKey(undefined, dcId);
-    }
-
-    this._exportedSenderPromises[dcId] = {};
-    this._exportedSenderRefCounter[dcId] = {};
-
-    await Promise.all(promises.map(async (promise) => {
-      const sender = await promise?.catch(() => undefined);
-      sender?.disconnect();
-    }));
+    sender?.destroy();
   }
 
   async _connectSender(sender: MTProtoSender, dcId: number, index?: number, isPremium = false) {
@@ -692,6 +677,9 @@ class TelegramClient {
   }
 
   releaseExportedSender(sender: MTProtoSender) {
+    // Discarded senders no longer own references in the pool
+    if (sender.userDisconnected) return;
+
     const dcId = sender._dcId;
     const index = sender._senderIndex;
 
@@ -707,6 +695,7 @@ class TelegramClient {
         // eslint-disable-next-line no-console
         if (this._shouldDebugExportedSenders) console.log(`[CC] [idx=${index} dcId=${dcId}] 🚪 Release`);
         sender.disconnect();
+        sender.destroy();
         this._exportedSenderReleaseTimeouts[dcId][index] = undefined;
         this._exportedSenderPromises[dcId][index] = undefined;
       }, EXPORTED_SENDER_RELEASE_TIMEOUT);
@@ -715,7 +704,10 @@ class TelegramClient {
 
   async _borrowExportedSender(
     dcId: number, shouldReconnect?: boolean, existingSender?: MTProtoSender, index?: number, isPremium?: boolean,
+    abortSignal?: AbortSignal,
   ): Promise<MTProtoSender> {
+    if (abortSignal?.aborted) throw new Error('Request aborted');
+
     const i = index || 0;
 
     let shouldAnnounceLayer = false;
@@ -740,23 +732,42 @@ class TelegramClient {
       );
     }
 
+    const senderPromise = this._exportedSenderPromises[dcId][i];
+    const handleAbort = () => {
+      // Another attempt may already have replaced this connection
+      if (this._exportedSenderPromises[dcId]?.[i] !== senderPromise) return;
+      void this._cleanupExportedSender(dcId, i);
+    };
+    abortSignal?.addEventListener('abort', handleAbort, { once: true });
+
     let sender;
     try {
-      sender = await this._exportedSenderPromises[dcId][i];
+      sender = await senderPromise;
+      if (abortSignal?.aborted) throw new Error('Request aborted');
+
+      // A retired connection must not acquire references in its replacement's pool entry
+      if (this._exportedSenderPromises[dcId]?.[i] !== senderPromise) {
+        return this._borrowExportedSender(dcId, false, undefined, i, isPremium, abortSignal);
+      }
 
       if (!sender?.isConnected()) {
         if (sender?.isConnecting) {
           await sleep(EXPORTED_SENDER_RECONNECT_TIMEOUT);
-          return this._borrowExportedSender(dcId, false, sender, i, isPremium);
+          return this._borrowExportedSender(dcId, false, undefined, i, isPremium, abortSignal);
         } else {
-          return this._borrowExportedSender(dcId, true, sender, i, isPremium);
+          return this._borrowExportedSender(dcId, true, sender, i, isPremium, abortSignal);
         }
       }
     } catch (err) {
+      if (abortSignal?.aborted) throw err;
+
       // eslint-disable-next-line no-console
       console.error(err);
 
-      return this._borrowExportedSender(dcId, true, undefined, i, isPremium);
+      const shouldReplace = this._exportedSenderPromises[dcId]?.[i] === senderPromise;
+      return this._borrowExportedSender(dcId, shouldReplace, undefined, i, isPremium, abortSignal);
+    } finally {
+      abortSignal?.removeEventListener('abort', handleAbort);
     }
 
     this._exportedSenderRefCounter[dcId][i] += 1;
@@ -797,9 +808,9 @@ class TelegramClient {
     });
   }
 
-  getSender(dcId: number, index?: number, isPremium?: boolean) {
+  getSender(dcId: number, index?: number, isPremium?: boolean, abortSignal?: AbortSignal) {
     return dcId
-      ? this._borrowExportedSender(dcId, undefined, undefined, index, isPremium)
+      ? this._borrowExportedSender(dcId, undefined, undefined, index, isPremium, abortSignal)
       : Promise.resolve(this._sender!);
   }
 

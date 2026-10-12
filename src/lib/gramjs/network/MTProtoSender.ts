@@ -510,7 +510,17 @@ export default class MTProtoSender {
   }
 
   destroy() {
+    const error = new Error('Sender was disconnected');
+    for (const state of [
+      ...this._sendQueue._pendingStates,
+      ...this._sendQueueLongPoll._pendingStates,
+      ...this._pendingState.values(),
+    ]) {
+      state.reject?.(error);
+    }
     this._sendQueue.clear();
+    this._sendQueueLongPoll.clear();
+    this._pendingState.clear();
   }
 
   /**

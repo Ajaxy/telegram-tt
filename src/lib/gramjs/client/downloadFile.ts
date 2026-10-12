@@ -1,3 +1,4 @@
+import type MTProtoSender from '../network/MTProtoSender';
 import type TelegramClient from './TelegramClient';
 import type { SizeType } from './TelegramClient';
 
@@ -42,8 +43,9 @@ const DEFAULT_CHUNK_SIZE = 64; // kb
 const ONE_MB = 1024 * 1024;
 const DISCONNECT_SLEEP = 1000;
 
-// when the sender requests hangs for 60 second we will reimport
+// Reconnect stalled download requests after one minute
 const SENDER_TIMEOUT = 60 * 1000;
+const DOWNLOAD_TIMEOUT_ERROR = 'DOWNLOAD_TIMEOUT';
 // Telegram may have server issues so we try several times
 const SENDER_RETRIES = 5;
 
@@ -115,31 +117,6 @@ export async function downloadFile(
   fileParams: DownloadFileWithDcParams,
   shouldDebugExportedSenders?: boolean,
 ) {
-  const { dcId } = fileParams;
-  for (let i = 0; i < SENDER_RETRIES; i++) {
-    try {
-      return await downloadFile2(client, inputLocation, fileParams, shouldDebugExportedSenders);
-    } catch (err: unknown) {
-      if (err instanceof RPCError && (
-        err.errorMessage.startsWith('SESSION_REVOKED')
-        || err.errorMessage.startsWith('CONNECTION_NOT_INITED')
-      ) && i < SENDER_RETRIES - 1) {
-        await client._cleanupExportedSenders(dcId);
-      } else {
-        throw err;
-      }
-    }
-  }
-
-  return undefined;
-}
-
-async function downloadFile2(
-  client: TelegramClient,
-  inputLocation: Api.TypeInputFileLocation,
-  fileParams: DownloadFileWithDcParams,
-  shouldDebugExportedSenders?: boolean,
-) {
   let {
     partSizeKb, end = 0,
   } = fileParams;
@@ -180,6 +157,10 @@ async function downloadFile2(
 
   const fileView = new FileView(rangeSize);
   const promises: Promise<any>[] = [];
+  const abortController = new AbortController();
+  const { signal } = abortController;
+  const canceled = new Deferred<never>();
+  void canceled.promise.catch(() => undefined);
   let offset = start;
   // Used for files with unknown size and for manual cancellations
   let hasEnded = false;
@@ -222,102 +203,137 @@ async function downloadFile2(
     };
 
     // Check again after waiting for capacity
-    if (progressCallback?.isCanceled) {
+    if (hasEnded || progressCallback?.isCanceled) {
       dcManager.releaseWorker(senderIndex, limit);
       deferred?.resolve();
       break;
     }
 
-    promises.push((async (offsetMemo: number, limitMemo: number, senderIndexMemo: number) => {
-      while (true) {
-        let sender;
-        try {
-          let isDone = false;
-          if (shouldDebugExportedSenders) {
-            setTimeout(() => {
-              if (isDone) return;
-              logWithSenderIndex(`❗️️ getSender took too long ${offsetMemo}`);
-            }, 8000);
-          }
-          sender = await client.getSender(dcId, senderIndexMemo, isPremium);
-          isDone = true;
+    const promise = (async (offsetMemo: number, limitMemo: number, senderIndexMemo: number) => {
+      try {
+        let failedAttempts = 0;
+        while (true) {
+          let sender: MTProtoSender | undefined;
+          let timeoutId: ReturnType<typeof setTimeout> | undefined;
+          const requestAbortController = new AbortController();
+          try {
+            let isDone = false;
+            if (shouldDebugExportedSenders) {
+              setTimeout(() => {
+                if (isDone) return;
+                logWithSenderIndex(`❗️️ getSender took too long ${offsetMemo}`);
+              }, 8000);
+            }
+            sender = await Promise.race([
+              client.getSender(dcId, senderIndexMemo, isPremium, signal).then((acquiredSender) => {
+                if (signal.aborted) {
+                  client.releaseExportedSender(acquiredSender);
+                  throw signal.reason;
+                }
+                return acquiredSender;
+              }),
+              canceled.promise,
+            ]);
+            isDone = true;
 
-          let isDone2 = false;
-          if (shouldDebugExportedSenders) {
-            setTimeout(() => {
-              if (isDone2) return;
-              logWithSenderIndex(`❗️️ sender.send took too long ${offsetMemo}`);
-            }, 6000);
-          }
-          // sometimes a session is revoked and will cause this to hang.
-          const result = (await Promise.race([
-            sender.send(new Api.upload.GetFile({
-              location: inputLocation,
-              offset: BigInt(offsetMemo),
-              limit: limitMemo,
-              precise: isPrecise || undefined,
-            })),
-            sleep(SENDER_TIMEOUT).then(() => {
-              // If we're on the main DC we just cancel the download and let the user retry later
-              if (dcId === client.session.dcId) {
-                logWithSenderIndex(`Download timed out ${offsetMemo}`);
-                return Promise.reject(new Error('USER_CANCELED'));
-              } else {
-                logWithSenderIndex(`Download timed out [not main] ${offsetMemo}`);
-                return Promise.reject(new Error('SESSION_REVOKED'));
+            let isDone2 = false;
+            if (shouldDebugExportedSenders) {
+              setTimeout(() => {
+                if (isDone2) return;
+                logWithSenderIndex(`❗️️ sender.send took too long ${offsetMemo}`);
+              }, 6000);
+            }
+            // A stalled sender may never resolve the download request
+            const result = (await Promise.race([
+              sender.send(new Api.upload.GetFile({
+                location: inputLocation,
+                offset: BigInt(offsetMemo),
+                limit: limitMemo,
+                precise: isPrecise || undefined,
+              }), requestAbortController.signal),
+              canceled.promise,
+              new Promise<never>((resolve, reject) => {
+                timeoutId = setTimeout(() => {
+                  logWithSenderIndex(`Download timed out ${offsetMemo}`);
+                  // Main-DC timeouts cancel the download so the user can retry later
+                  reject(new Error(dcId === client.session.dcId ? 'USER_CANCELED' : DOWNLOAD_TIMEOUT_ERROR));
+                }, SENDER_TIMEOUT);
+              }),
+            ]))!;
+            if (signal.aborted) return;
+
+            if (result instanceof Api.upload.FileCdnRedirect) {
+              throw new Error('CDN download not supported');
+            }
+
+            isDone2 = true;
+            if (progressCallback) {
+              if (progressCallback.isCanceled) {
+                throw new Error('USER_CANCELED');
               }
-            }),
-          ]))!;
-          client.releaseExportedSender(sender);
 
-          if (result instanceof Api.upload.FileCdnRedirect) {
-            throw new Error('CDN download not supported');
-          }
-
-          isDone2 = true;
-          if (progressCallback) {
-            if (progressCallback.isCanceled) {
-              throw new Error('USER_CANCELED');
+              progress += (1 / partsCount);
+              logWithSenderIndex(`⬇️️ ${progress * 100}%`);
+              progressCallback(progress);
             }
 
-            progress += (1 / partsCount);
-            logWithSenderIndex(`⬇️️ ${progress * 100}%`);
-            progressCallback(progress);
-          }
-
-          if (!end && (result.bytes.length < limitMemo)) {
-            hasEnded = true;
-          }
-
-          dcManager.releaseWorker(senderIndexMemo, limitMemo);
-          if (deferred) deferred.resolve();
-
-          fileView.write(result.bytes, offsetMemo - start);
-
-          return;
-        } catch (err) {
-          if (sender && !sender.isConnected()) {
-            await sleep(DISCONNECT_SLEEP);
-            continue;
-          } else if (err instanceof FloodWaitError) {
-            if (err instanceof FloodPremiumWaitError && !isPremiumFloodWaitSent) {
-              sender?._updateCallback(new LocalUpdatePremiumFloodWait(false));
-              isPremiumFloodWaitSent = true;
+            if (!end && (result.bytes.length < limitMemo)) {
+              hasEnded = true;
             }
-            await sleep(err.seconds * 1000);
-            continue;
+
+            fileView.write(result.bytes, offsetMemo - start);
+
+            return;
+          } catch (err) {
+            if (signal.aborted) throw err;
+            if (err instanceof FloodWaitError) {
+              if (err instanceof FloodPremiumWaitError && !isPremiumFloodWaitSent) {
+                sender?._updateCallback(new LocalUpdatePremiumFloodWait(false));
+                isPremiumFloodWaitSent = true;
+              }
+              await Promise.race([sleep(err.seconds * 1000), canceled.promise]);
+              continue;
+            }
+
+            const isDownloadTimeout = err instanceof Error && err.message === DOWNLOAD_TIMEOUT_ERROR;
+            const isRetryableRpcError = err instanceof RPCError && (
+              err.errorMessage.startsWith('SESSION_REVOKED')
+              || err.errorMessage.startsWith('CONNECTION_NOT_INITED')
+            );
+            if (isDownloadTimeout || isRetryableRpcError || (sender && !sender.isConnected())) {
+              if (isDownloadTimeout) {
+                requestAbortController.abort();
+                sender!.reconnect();
+              } else if (isRetryableRpcError && sender && !sender.userDisconnected) {
+                sender.disconnect();
+                await client._cleanupExportedSender(dcId, senderIndexMemo);
+              }
+              failedAttempts += 1;
+              if (failedAttempts >= SENDER_RETRIES) throw err;
+              await Promise.race([sleep(DISCONNECT_SLEEP), canceled.promise]);
+              continue;
+            }
+
+            logWithSenderIndex(`Ended not gracefully ${offsetMemo}`);
+            throw err;
+          } finally {
+            clearTimeout(timeoutId);
+            requestAbortController.abort();
+            if (sender) client.releaseExportedSender(sender);
           }
-
-          logWithSenderIndex(`Ended not gracefully ${offsetMemo}`);
-          dcManager.releaseWorker(senderIndexMemo, limitMemo);
-          if (deferred) deferred.resolve();
-
-          hasEnded = true;
-          if (sender) client.releaseExportedSender(sender);
-          throw err;
         }
+      } finally {
+        dcManager.releaseWorker(senderIndexMemo, limitMemo);
+        deferred?.resolve();
       }
-    })(offset, limit, senderIndex));
+    })(offset, limit, senderIndex);
+    // Stop the remaining parts only when the download cannot recover
+    void promise.catch((err: unknown) => {
+      hasEnded = true;
+      abortController.abort(err);
+      canceled.reject(err);
+    });
+    promises.push(promise);
 
     offset += limit;
 
@@ -325,6 +341,7 @@ async function downloadFile2(
       break;
     }
   }
-  await Promise.all(promises);
+  await Promise.allSettled(promises);
+  if (signal.aborted) throw signal.reason;
   return fileView.getData();
 }
