@@ -1,0 +1,65 @@
+.dialog {
+  --music-picker-title-height: 3.5rem;
+  --music-picker-search-height: 3.25rem;
+}
+
+.content {
+  --modal-header-height: calc(var(--music-picker-title-height) + var(--music-picker-search-height));
+
+  height: var(--modal-max-height);
+}
+
+.search {
+  box-sizing: border-box;
+  height: var(--music-picker-search-height);
+  padding: 0 0.75rem 0.75rem;
+}
+
+.island {
+  padding: 0.375rem 0.75rem;
+
+  :global(.Audio .media-loading) {
+    top: 0;
+    left: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.filesIsland {
+  margin-bottom: 1rem;
+}
+
+.filesButton {
+  color: var(--color-primary);
+}
+
+.row {
+  cursor: pointer;
+  padding: 0.375rem 0;
+}
+
+.showMore {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.empty {
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5rem;
+}
+
+.emptyDescription {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-text-secondary);
+}

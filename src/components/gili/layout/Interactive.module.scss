@@ -11,7 +11,9 @@
     padding: 0.5rem 0.75rem;
     border-radius: var(--border-radius-default);
 
-    transition: opacity 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      opacity 0.15s ease;
   }
 
   .clickable {

@@ -2129,6 +2129,8 @@ export interface ActionPayloads {
   setIsRichInputExpanded: {
     isRichInputExpanded?: boolean;
   } & WithTabId;
+  requestRichInputMedia: NonNullable<TabState['requestedRichInputMedia']> & WithTabId;
+  resetRichInputMediaRequest: WithTabId | undefined;
   changeRichMediaUploadBlocking: {
     delta: 1 | -1;
   } & WithTabId;
@@ -2573,6 +2575,17 @@ export interface ActionPayloads {
     isQuiz?: boolean;
   } & WithTabId;
   closePollModal: WithTabId | undefined;
+  openMusicPicker: {
+    chatId: string;
+    threadId?: ThreadId;
+    messageListType: MessageListType;
+    shouldInsertToRichInput?: boolean;
+  } & WithTabId;
+  closeMusicPicker: WithTabId | undefined;
+  loadMusicPickerShared: WithTabId | undefined;
+  loadMusicPickerGlobal: {
+    query: string;
+  } & WithTabId;
   openTodoListModal: {
     chatId: string;
     messageId?: number;

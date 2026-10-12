@@ -17,3 +17,4 @@ export * from './peers';
 export * from './polls';
 export * from './topics';
 export * from './gifts';
+export * from './musicPicker';

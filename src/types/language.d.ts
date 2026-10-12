@@ -612,6 +612,7 @@ export interface LangPair {
   'AttachmentMenuPhotoOrVideo': undefined;
   'AttachDocument': undefined;
   'AttachmentMenuArticle': undefined;
+  'AttachmentSelectFromFiles': undefined;
   'Poll': undefined;
   'VideoMessagePermissionDenied': undefined;
   'VideoMessageRecordError': undefined;
@@ -1098,6 +1099,14 @@ export interface LangPair {
   'AttachVideo': undefined;
   'AttachSticker': undefined;
   'AttachMusic': undefined;
+  'SearchMusic': undefined;
+  'AudioSearchProfile': undefined;
+  'AudioSearchChats': undefined;
+  'AudioSearchGlobal': undefined;
+  'ShowMore': undefined;
+  'NoAudioFiles': undefined;
+  'NoAudioFilesInfo': undefined;
+  'NoAudioFound': undefined;
   'AttachContact': undefined;
   'AttachStory': undefined;
   'AttachLocation': undefined;
@@ -2832,6 +2841,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'NewDiscussionChatTitle': {
     'name': V;
+  };
+  'NoAudioFoundInfo2': {
+    'query': V;
   };
   'AttachInvoice': {
     'description': V;

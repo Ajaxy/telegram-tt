@@ -39,6 +39,7 @@ import {
 } from '../gramjsBuilders';
 import {
   addDocumentToLocalDb,
+  addInlineBotRepairInfo,
   addSavedMusicRepairInfo,
   addStoryToLocalDb, addUserToLocalDb,
   addWebPageMediaToLocalDb,
@@ -47,7 +48,7 @@ import {
   buildApiError,
   isResponseUpdate, log,
 } from '../helpers/misc';
-import localDb, { clearLocalDb, type RepairInfo } from '../localDb';
+import localDb, { clearLocalDb, type InlineBotRepairInfo, type RepairInfo } from '../localDb';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { processAndUpdateEntities, processMessageAndUpdateThreadInfo } from '../updates/entityProcessor';
 import {
@@ -559,6 +560,11 @@ export async function repairFileReference({
       const result = await repairSavedMusicMedia(localRepairInfo.peerId, entityId);
       return result;
     }
+
+    if (localRepairInfo.type === 'inlineBot') {
+      const result = await repairInlineBotMedia(localRepairInfo, entityId);
+      return result;
+    }
   }
 
   return false;
@@ -587,6 +593,32 @@ async function repairSavedMusicMedia(peerId: string, documentId: string) {
   });
 
   return true;
+}
+
+async function repairInlineBotMedia(repairInfo: InlineBotRepairInfo, documentId: string) {
+  const bot = buildInputUserFromLocalDb(repairInfo.botId);
+  const peer = buildInputPeerFromLocalDb(repairInfo.peerId);
+  if (!bot || !peer) return false;
+
+  const result = await invokeRequest(new GramJs.messages.GetInlineBotResults({
+    bot,
+    peer,
+    query: repairInfo.query,
+    offset: repairInfo.offset ?? DEFAULT_PRIMITIVES.STRING,
+  }), {
+    shouldIgnoreErrors: true,
+  });
+  if (!result) return false;
+
+  let isRepaired = false;
+  result.results.forEach((item) => {
+    if (!(item instanceof GramJs.BotInlineMediaResult) || !(item.document instanceof GramJs.Document)) return;
+
+    addDocumentToLocalDb(addInlineBotRepairInfo(item.document, repairInfo));
+    if (String(item.document.id) === documentId) isRepaired = true;
+  });
+
+  return isRepaired;
 }
 
 async function repairMessageMedia(peerId: string, messageId: number) {

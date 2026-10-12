@@ -287,6 +287,10 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     saved: {},
   },
 
+  musicSearch: {
+    audiosById: {},
+  },
+
   topPeerCategories: {},
 
   activeSessions: {

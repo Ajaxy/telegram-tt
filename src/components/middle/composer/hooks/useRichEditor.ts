@@ -227,6 +227,10 @@ function insertRichEditorMedia(
 ) {
   if (!editor || !items.length) return false;
 
+  items.forEach(({ media }) => {
+    if (media) registerRichMedia(media);
+  });
+
   if (shouldAppend && items.every((item) => item.type === 'photo' || item.type === 'video')) {
     const currentNode = editor.state.doc.nodeAt(position);
     const currentAttrs = currentNode && getRichEditorMediaAttrs(currentNode.toJSON());

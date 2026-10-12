@@ -12,6 +12,7 @@ import type {
   ApiUrlAuthResult,
   ApiUser,
 } from '../../types';
+import type { InlineBotRepairInfo } from '../localDb';
 
 import { WEB_APP_PLATFORM } from '../../../config';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -38,6 +39,7 @@ import {
 } from '../gramjsBuilders';
 import {
   addDocumentToLocalDb,
+  addInlineBotRepairInfo,
   addPhotoToLocalDb,
   addWebDocumentToLocalDb,
 } from '../helpers/localDb';
@@ -96,7 +98,13 @@ export async function fetchInlineBotResults({
     nextOffset: getInlineBotResultsNextOffset(bot.usernames![0].username, result.nextOffset),
     switchPm: buildBotSwitchPm(result.switchPm),
     switchWebview: buildBotSwitchWebview(result.switchWebview),
-    results: processInlineBotResult(String(result.queryId), result.results),
+    results: processInlineBotResult(String(result.queryId), result.results, {
+      type: 'inlineBot',
+      botId: bot.id,
+      peerId: chat.id,
+      query,
+      offset,
+    }),
     cacheTime: result.cacheTime,
   };
 }
@@ -594,11 +602,13 @@ export function toggleUserEmojiStatusPermission({ bot, isEnabled }: { bot: ApiUs
   });
 }
 
-function processInlineBotResult(queryId: string, results: GramJs.TypeBotInlineResult[]) {
+function processInlineBotResult(
+  queryId: string, results: GramJs.TypeBotInlineResult[], repairInfo: InlineBotRepairInfo,
+) {
   return results.map((result) => {
     if (result instanceof GramJs.BotInlineMediaResult) {
       if (result.document instanceof GramJs.Document) {
-        addDocumentToLocalDb(result.document);
+        addDocumentToLocalDb(addInlineBotRepairInfo(result.document, repairInfo));
       }
 
       if (result.photo instanceof GramJs.Photo) {

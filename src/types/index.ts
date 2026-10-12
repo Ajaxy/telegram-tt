@@ -398,7 +398,7 @@ export type PlaybackSource =
   | { type: 'richMessage'; chatId: string; threadId: ThreadId; messageId: number }
   | { type: 'single' };
 
-export type PlaybackContextType = 'message' | 'savedMusic' | 'instantView';
+export type PlaybackContextType = 'message' | 'savedMusic' | 'instantView' | 'musicSearch';
 
 export type PlaybackMedia = ApiAudio | ApiVoice | ApiVideo;
 
@@ -406,7 +406,8 @@ export type PlaybackItemRef =
   // `documentId` targets an audio block inside a rich message
   | { type: 'message'; chatId: string; threadId: ThreadId; messageId: number; documentId?: string }
   | { type: 'savedMusic'; peerId: string; audioId: string }
-  | { type: 'instantView'; webPageId: string; documentId: string };
+  | { type: 'instantView'; webPageId: string; documentId: string }
+  | { type: 'musicSearch'; audioId: string };
 
 export type PlaybackCapabilities = {
   canSeek: boolean;

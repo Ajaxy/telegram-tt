@@ -44,6 +44,21 @@
     }
   }
 
+  &.island {
+    border-color: transparent;
+    background-color: var(--color-background);
+    box-shadow: var(--shadow-island);
+
+    &.has-focus {
+      border-color: transparent;
+    }
+
+    .theme-dark & {
+      border-color: var(--color-borders);
+      box-shadow: none;
+    }
+  }
+
   input {
     height: 2.5rem;
     margin-bottom: 0;

@@ -575,6 +575,15 @@ addActionHandler('setIsRichInputExpanded', (global, actions, payload): ActionRet
   }, tabId);
 });
 
+addActionHandler('requestRichInputMedia', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId(), ...request } = payload;
+  return updateTabState(global, {
+    requestedRichInputMedia: request,
+  }, tabId);
+});
+
+addTabStateResetterAction('resetRichInputMediaRequest', 'requestedRichInputMedia');
+
 addActionHandler('changeRichMediaUploadBlocking', (global, actions, payload): ActionReturnType => {
   const { delta, tabId = getCurrentTabId() } = payload;
   const currentCount = selectTabState(global, tabId).richMediaUploadBlockingCount || 0;

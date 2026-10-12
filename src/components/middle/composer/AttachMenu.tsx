@@ -107,6 +107,7 @@ const AttachMenu = ({
 }: OwnProps) => {
   const {
     openPollModal,
+    openMusicPicker,
     updateAttachmentSettings,
   } = getActions();
   const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
@@ -200,6 +201,13 @@ const AttachMenu = ({
     openDateModal();
   });
 
+  const handleMusicSelect = useLastCallback(() => {
+    closeAttachMenu();
+    openMusicPicker({
+      chatId, threadId, messageListType, shouldInsertToRichInput: isRichInputExpanded,
+    });
+  });
+
   const handlePollCreate = useLastCallback(() => {
     closeAttachMenu();
     openPollModal({ chatId, threadId, messageListType });
@@ -282,6 +290,9 @@ const AttachMenu = ({
                       {oldLang(!canSendDocuments && canSendAudios ? 'InputAttach.Popover.Music' : 'AttachDocument')}
                     </MenuItem>
                   )}
+                {canSendAudios && !editingMessage && (
+                  <MenuItem icon="music" onClick={handleMusicSelect}>{lang('AttachMusic')}</MenuItem>
+                )}
                 {canSendDocuments && shouldCollectDebugLogs && (
                   <MenuItem icon="bug" onClick={handleSendLogs}>
                     {oldLang('DebugSendLogs')}

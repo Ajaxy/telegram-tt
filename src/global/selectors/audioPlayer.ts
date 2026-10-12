@@ -9,7 +9,7 @@ import { LoadMoreDirection } from '../../types';
 
 import { MEDIA_PRELOAD_OFFSET } from '../../config';
 import {
-  makeInstantViewTrackKey, makeMessageTrackKey, makeSavedMusicTrackKey,
+  makeInstantViewTrackKey, makeMessageTrackKey, makeMusicSearchTrackKey, makeSavedMusicTrackKey,
 } from '../../util/audioPlayback/mediaPool';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { buildSearchResultKey, isSearchResultKey, parseSearchResultKey } from '../../util/keys/searchResultKey';
@@ -18,6 +18,7 @@ import {
   selectChatMessage, selectChatMessageOrEphemeral, selectFullWebPage, selectWebPageFromMessage,
 } from './messages';
 import { selectChatMediaSearch } from './middleSearch';
+import { selectMusicSearchAudio } from './musicPicker';
 import { selectTabState } from './tabs';
 import { selectUserFullInfo, selectUserSavedMusic } from './users';
 
@@ -55,6 +56,8 @@ export function selectPlaybackMedia<T extends GlobalState>(global: T, itemRef?: 
       return selectSavedMusicAudio(global, itemRef.peerId, itemRef.audioId);
     case 'instantView':
       return selectInstantViewAudio(global, itemRef.webPageId, itemRef.documentId);
+    case 'musicSearch':
+      return selectMusicSearchAudio(global, itemRef.audioId);
     default:
       return undefined;
   }
@@ -104,6 +107,8 @@ export function makeTrackKeyFromItem(itemRef: PlaybackItemRef): TrackKey {
       return makeSavedMusicTrackKey(itemRef.peerId, itemRef.audioId);
     case 'instantView':
       return makeInstantViewTrackKey(itemRef.webPageId, itemRef.documentId);
+    case 'musicSearch':
+      return makeMusicSearchTrackKey(itemRef.audioId);
   }
 }
 
@@ -116,7 +121,7 @@ export function getPlaybackCapabilities(
   contextType: PlaybackContextType, options?: { isViewOnce?: boolean; isSingle?: boolean },
 ): PlaybackCapabilities {
   if (options?.isViewOnce) return VIEW_ONCE_CAPABILITIES;
-  if (contextType === 'instantView' || options?.isSingle) return SINGLE_CAPABILITIES;
+  if (contextType === 'instantView' || contextType === 'musicSearch' || options?.isSingle) return SINGLE_CAPABILITIES;
   return MESSAGE_CAPABILITIES;
 }
 

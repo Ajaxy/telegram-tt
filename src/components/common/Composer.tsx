@@ -145,6 +145,7 @@ import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { getServerTime } from '../../util/serverTime';
 import stopEvent from '../../util/stopEvent';
 import { getUtf8Length } from '../../util/textFormat';
+import { EMPTY_RICH_MEDIA_CAPTION } from '../../util/tiptap/richMedia';
 import windowSize from '../../util/windowSize';
 import applyIosAutoCapitalizationFix from '../middle/composer/helpers/applyIosAutoCapitalizationFix';
 import buildAttachment, {
@@ -299,6 +300,7 @@ type StateProps = {
   editingDraft?: EditingDraft;
   requestedDraft?: ApiFormattedText;
   requestedDraftFiles?: File[];
+  requestedRichInputMedia?: TabState['requestedRichInputMedia'];
   attachBots: GlobalState['attachMenu']['bots'];
   attachMenuPeerType?: ApiAttachMenuPeerType;
   theme: ThemeKey;
@@ -442,6 +444,7 @@ const Composer = ({
   editingDraft,
   requestedDraft,
   requestedDraftFiles,
+  requestedRichInputMedia,
   botMenuButton,
   attachBots,
   attachMenuPeerType,
@@ -508,6 +511,7 @@ const Composer = ({
     sendInlineBotResult,
     loadSendAs,
     resetOpenChatWithDraft,
+    resetRichInputMediaRequest,
     callAttachBot,
     addRecentCustomEmoji,
     showNotification,
@@ -1853,6 +1857,36 @@ const Composer = ({
       resetOpenChatWithDraft();
     }
   }, [handleFileSelect, requestedDraftFiles, resetOpenChatWithDraft]);
+
+  const applyRichInputMediaRequest = useLastCallback((request: NonNullable<TabState['requestedRichInputMedia']>) => {
+    if (
+      request.chatId !== chatId
+      || request.threadId !== threadId
+      || request.messageListType !== messageListType
+    ) return;
+    if (!isRichInputExpansionActive || !richEditor.editor) return;
+
+    if (request.files) {
+      handleRichMediaSelect(request.files);
+      return;
+    }
+    if (!request.audio) return;
+
+    const isInserted = richEditor.insertMedia(
+      [{ type: 'audio', media: request.audio, caption: EMPTY_RICH_MEDIA_CAPTION }],
+      richEditor.editor.state.selection.from,
+    );
+    if (!isInserted) {
+      showNotification({ message: lang('RichMediaSkippedFiles', { count: 1 }, { pluralValue: 1 }) });
+    }
+  });
+
+  useEffect(() => {
+    if (!requestedRichInputMedia) return;
+
+    resetRichInputMediaRequest();
+    applyRichInputMediaRequest(requestedRichInputMedia);
+  }, [applyRichInputMediaRequest, requestedRichInputMedia, resetRichInputMediaRequest]);
 
   useEffect(() => {
     if (requestedDraftFiles?.length) {
@@ -3459,6 +3493,7 @@ export default memo(withGlobal<OwnProps>(
       editingDraft,
       requestedDraft,
       requestedDraftFiles,
+      requestedRichInputMedia: type === 'messageList' ? tabState.requestedRichInputMedia : undefined,
       attachBots: global.attachMenu.bots,
       attachMenuPeerType: selectChatType(global, chatId),
       theme: selectTheme(global),

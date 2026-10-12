@@ -2,6 +2,7 @@ import type {
   ApiAiComposeToneType,
   ApiAppConfig,
   ApiAttachBot,
+  ApiAudio,
   ApiAvailableEffect,
   ApiAvailableReaction,
   ApiBotPreviewMedia,
@@ -443,6 +444,10 @@ export type GlobalState = {
       hash?: string;
       gifs?: ApiVideo[];
     };
+  };
+
+  musicSearch: {
+    audiosById: Record<string, ApiAudio>;
   };
 
   topPeerCategories: Partial<Record<ApiTopPeerCategory, {

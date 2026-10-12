@@ -40,6 +40,7 @@ type OwnProps = {
   hasDownButton?: boolean;
   teactExperimentControlled?: boolean;
   withBackIcon?: boolean;
+  variant?: 'island';
   onChange: (value: string) => void;
   onStartBackspace?: NoneToVoidFunction;
   onReset?: NoneToVoidFunction;
@@ -72,6 +73,7 @@ const SearchInput: FC<OwnProps> = ({
   hasDownButton,
   teactExperimentControlled,
   withBackIcon,
+  variant,
   onChange,
   onStartBackspace,
   onReset,
@@ -156,7 +158,7 @@ const SearchInput: FC<OwnProps> = ({
 
   return (
     <div
-      className={buildClassName('SearchInput', className, isInputFocused && 'has-focus')}
+      className={buildClassName('SearchInput', className, variant, isInputFocused && 'has-focus')}
       onClick={onClick}
       dir={lang.isRtl ? 'rtl' : undefined}
     >

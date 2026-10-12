@@ -2,6 +2,7 @@ import type {
   ApiAiComposeTone,
   ApiAiComposeToneExample,
   ApiAttachBot,
+  ApiAudio,
   ApiBirthday,
   ApiBoost,
   ApiBoostsStatus,
@@ -170,6 +171,27 @@ type MessageReportContext = {
   title?: string;
   sections: ReportSection[];
   isSubmitting?: boolean;
+};
+
+export type MusicPickerSharedResults = {
+  generation: number;
+  ids: SearchResultKey[];
+  loadedCount?: number;
+  nextOffsetRate?: number;
+  nextOffsetId?: number;
+  nextOffsetPeerId?: string;
+  totalCount?: number;
+  isLoading?: boolean;
+  isFullyLoaded?: boolean;
+};
+
+export type MusicPickerGlobalResults = {
+  query: string;
+  generation: number;
+  ids: string[];
+  nextOffset?: string;
+  isLoading?: boolean;
+  isFullyLoaded?: boolean;
 };
 
 export type TabState = {
@@ -610,11 +632,28 @@ export type TabState = {
     filter?: ApiChatType[];
   };
 
+  requestedRichInputMedia?: {
+    chatId: string;
+    threadId: ThreadId;
+    messageListType: MessageListType;
+    audio?: ApiAudio;
+    files?: File[];
+  };
+
   pollModal?: {
     chatId: string;
     threadId?: ThreadId;
     messageListType: MessageListType;
     isQuiz?: boolean;
+  };
+
+  musicPicker?: {
+    chatId: string;
+    threadId: ThreadId;
+    messageListType: MessageListType;
+    shouldInsertToRichInput?: boolean;
+    shared?: MusicPickerSharedResults;
+    global?: MusicPickerGlobalResults;
   };
 
   todoListModal?: {

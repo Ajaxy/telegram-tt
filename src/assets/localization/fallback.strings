@@ -712,6 +712,7 @@
 "AttachmentMenuPhotoOrVideo" = "Photo or Video";
 "AttachDocument" = "File";
 "AttachmentMenuArticle" = "Article";
+"AttachmentSelectFromFiles" = "Select from Files";
 "Poll" = "Poll";
 "SlowModePlaceholder" = "Next message in {timer}";
 "SlowModeHint" = "Slow Mode is active. You can send your next message in {time}.";
@@ -1329,6 +1330,15 @@
 "AttachVideo" = "Video";
 "AttachSticker" = "Sticker";
 "AttachMusic" = "Music";
+"SearchMusic" = "Search music";
+"AudioSearchProfile" = "Profile Music";
+"AudioSearchChats" = "Shared Music";
+"AudioSearchGlobal" = "Global Search";
+"ShowMore" = "Show more";
+"NoAudioFiles" = "No audio files";
+"NoAudioFilesInfo" = "Your music library is empty.";
+"NoAudioFound" = "No results found";
+"NoAudioFoundInfo2" = "There are no matches with **{query}**.";
 "AttachContact" = "Contact";
 "AttachStory" = "Story";
 "AttachInvoice" = "Invoice: {description}";

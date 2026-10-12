@@ -355,6 +355,7 @@ export interface ApiAppConfig {
   ignoreRestrictionReasons?: string[];
   needAgeVideoVerification?: boolean;
   verifyAgeBotUsername?: string;
+  musicSearchUsername?: string;
   verifyAgeCountry?: string;
   verifyAgeMin?: number;
   typingDraftTtl: number;

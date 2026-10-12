@@ -1,5 +1,5 @@
 import type {
-  ApiDimensions, ApiDocument,
+  ApiAudio, ApiDimensions, ApiDocument,
   ApiPhoto, ApiReplyKeyboard,
   ApiSticker, ApiThumbnail,
   ApiVideo, MediaContainer,
@@ -47,6 +47,7 @@ export interface ApiBotInlineMediaResult {
   document?: ApiDocument;
   photo?: ApiPhoto;
   gif?: ApiVideo;
+  audio?: ApiAudio;
   thumbnail?: ApiThumbnail;
   sendMessage: ApiBotInlineMessage;
 }

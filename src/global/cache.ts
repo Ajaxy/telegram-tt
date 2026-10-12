@@ -340,6 +340,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.users.savedMusicByPeerId = initialState.users.savedMusicByPeerId;
   }
 
+  if (!cached.musicSearch) {
+    cached.musicSearch = initialState.musicSearch;
+  }
+
   const cachedSharedSettings = cached.sharedState.settings;
   if (cachedSharedSettings.instantViewFontSizeAdjust === undefined) {
     cachedSharedSettings.instantViewFontSizeAdjust = INSTANT_VIEW_FONT_SIZE_ADJUST_DEFAULT;

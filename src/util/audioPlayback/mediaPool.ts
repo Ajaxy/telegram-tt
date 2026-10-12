@@ -2,6 +2,7 @@ export type TrackKey =
   | `msg:${string}:${number}`
   | `msg:${string}:${number}:${string}`
   | `savedMusic:${string}:${string}`
+  | `musicSearch:${string}`
   | `iv:${string}:${string}`
   | `draft:${string}`;
 
@@ -115,6 +116,10 @@ export function makeMessageTrackKey(chatId: string, messageId: number, documentI
 
 export function makeSavedMusicTrackKey(peerId: string, audioId: string): TrackKey {
   return `savedMusic:${peerId}:${audioId}`;
+}
+
+export function makeMusicSearchTrackKey(audioId: string): TrackKey {
+  return `musicSearch:${audioId}`;
 }
 
 export function makeInstantViewTrackKey(webPageId: string, documentId: string): TrackKey {
