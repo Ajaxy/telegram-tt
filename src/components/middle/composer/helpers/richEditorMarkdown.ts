@@ -8,12 +8,13 @@ import { buildMentionMarkdownAttrs } from '../../../../util/tiptap/extensions/me
 import {
   isRichMarkdownWebLink,
   parseRichMarkdownLink,
+  RE_RICH_MARKDOWN_INLINE_MATH,
   RE_RICH_MARKDOWN_LINKS,
 } from '../../../../util/tiptap/richMarkdown';
 import { parseRichMediaRef } from '../../../../util/tiptap/richMedia';
 
 const RE_RICH_MARKDOWN_BLOCK = /^(?:#{1,6}\s|>\s?|```|\$\$|---\s*$)/m;
-const RE_RICH_MARKDOWN_INLINE = /(?:\*\*|__|~~|==|\|\|)[^\n]+|`[^`\n]+`|\*[^*\n]+\*|_[^_\n]+_|\$[^$\n]+\$/;
+const RE_RICH_MARKDOWN_INLINE = /(?:\*\*|__|~~|==|\|\|)[^\n]+|`[^`\n]+`|\*[^*\n]+\*|_[^_\n]+_/;
 const RE_MARKDOWN_FOOTNOTE = /\[\^[^\]\n]+\](?::[^\n]*)?/g;
 const RE_HTML_TAG = /<\/?[a-z][^>\n]*>/gi;
 const RE_RICH_MEDIA_HTML = /<(?:figure|tg-collage|tg-slideshow|tg-document|img|video|audio)\b/i;
@@ -39,6 +40,7 @@ export const RichEditorMarkdown = Markdown.extend({
             || (
               !RE_RICH_MARKDOWN_BLOCK.test(markdown)
               && !RE_RICH_MARKDOWN_INLINE.test(markdown)
+              && !RE_RICH_MARKDOWN_INLINE_MATH.test(markdown)
               && markdown.search(RE_RICH_MARKDOWN_LINKS) < 0
               && !RE_RICH_MEDIA_HTML.test(markdown)
             )

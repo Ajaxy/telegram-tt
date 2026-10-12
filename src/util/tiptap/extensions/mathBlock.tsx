@@ -12,7 +12,7 @@ import type { TeactNodeViewComponentProps } from '../TeactNodeViewRenderer';
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../buildClassName';
 import { MATH_BLOCK_NODE_NAME, MATH_INLINE_NODE_NAME } from '../constants';
-import { escapeRichMarkdownHtml } from '../richMarkdown';
+import { escapeRichMarkdownHtml, RE_RICH_MARKDOWN_INLINE_MATH } from '../richMarkdown';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -29,8 +29,8 @@ const MATH_BLOCK_INPUT_REGEX = /^\$\$(?=\S).*\S\$\$$/;
 const MATH_BLOCK_TOKEN_REGEX = /^\$\$\s*([\s\S]*?)\s*\$\$(?:\n|$)/;
 const MATH_FENCE_TOKEN_REGEX = /^```math[^\S\r\n]*\r?\n([\s\S]*?)\r?\n```(?:\r?\n|$)/;
 const MATH_FENCE_INPUT_REGEX = /^```math[\s\n]$/;
-const MATH_INLINE_INPUT_REGEX = /(?:^|\s)(\$(?!\$)(?=\S)(.*?\S)\$(?!\$))$/;
-const MATH_INLINE_TOKEN_REGEX = /^\$(?!\$)(?=\S)(.*?\S)\$(?!\$)/;
+const MATH_INLINE_INPUT_REGEX = new RegExp(`${RE_RICH_MARKDOWN_INLINE_MATH.source}$`);
+const MATH_INLINE_TOKEN_REGEX = new RegExp(`^${RE_RICH_MARKDOWN_INLINE_MATH.source}`);
 
 const MathNode = TiptapNode.create({
   name: 'math',
@@ -90,7 +90,7 @@ export const MathBlockNode = MathNode.extend({
   markdownTokenizer: {
     name: MATH_BLOCK_NODE_NAME,
     level: 'block',
-    start: (source) => source.search(/\$\$|```math/),
+    start: (source) => source.search(/^(?:\$\$|```math)/m),
     tokenize: (source) => {
       const match = MATH_BLOCK_TOKEN_REGEX.exec(source) || MATH_FENCE_TOKEN_REGEX.exec(source);
       if (!match) {
@@ -169,11 +169,7 @@ export const MathInlineNode = MathNode.extend({
     return [new InputRule({
       find: MATH_INLINE_INPUT_REGEX,
       handler: ({ state, range, match }) => {
-        state.tr.replaceWith(
-          range.to - match[1].length,
-          range.to,
-          this.type.create({ source: match[2] }),
-        );
+        state.tr.replaceWith(range.from, range.to, this.type.create({ source: match[1] }));
       },
     })];
   },
