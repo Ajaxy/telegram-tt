@@ -269,7 +269,65 @@ export async function cleanup(cacheNames: string[]) {
 }
 
 export function purgeClearableCache() {
-  CLEARABLE_CACHE_NAMES.forEach((cacheName) => clear(cacheName));
+  return Promise.all(CLEARABLE_CACHE_NAMES.map((cacheName) => clear(cacheName)));
+}
+
+export type CacheEntryInfo = {
+  cacheName: string;
+  key: string;
+  contentType: string;
+  size: number;
+};
+
+export async function listClearableCacheEntries(
+  onEntry: (entry: CacheEntryInfo) => void,
+) {
+  if (!cacheApi) return;
+
+  for (const cacheName of CLEARABLE_CACHE_NAMES) {
+    const cache = await cacheApi.open(getCacheName(cacheName));
+    const keys = await cache.keys();
+
+    for (const request of keys) {
+      await yieldToMain();
+      const response = await cache.match(request);
+      if (!response) continue;
+
+      const blob = await response.blob();
+      onEntry({
+        cacheName,
+        key: request.url.replace(CACHE_KEY_BASE, ''),
+        contentType: blob.type || response.headers.get('Content-Type') || '',
+        size: blob.size,
+      });
+    }
+  }
+}
+
+export async function removeClearableCacheEntries(shouldRemove: (entry: CacheEntryInfo) => boolean) {
+  if (!cacheApi) return;
+
+  for (const cacheName of CLEARABLE_CACHE_NAMES) {
+    const cache = await cacheApi.open(getCacheName(cacheName));
+    const keys = await cache.keys();
+
+    for (const request of keys) {
+      await yieldToMain();
+      const response = await cache.match(request);
+      if (!response) continue;
+
+      const blob = await response.blob();
+      const entry = {
+        cacheName,
+        key: request.url.replace(CACHE_KEY_BASE, ''),
+        contentType: blob.type || response.headers.get('Content-Type') || '',
+        size: blob.size,
+      };
+      if (shouldRemove(entry)) {
+        await cache.delete(request);
+      }
+    }
+  }
 }
 
 export async function purgePasscodeCaches() {

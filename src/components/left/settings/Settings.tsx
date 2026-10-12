@@ -39,6 +39,7 @@ import SettingsPrivacyVisibility from './SettingsPrivacyVisibility';
 import SettingsPrivacyVisibilityExceptionList from './SettingsPrivacyVisibilityExceptionList';
 import SettingsQuickReaction from './SettingsQuickReaction';
 import SettingsStickers from './SettingsStickers';
+import SettingsStorageUsage from './SettingsStorageUsage';
 import SettingsTwoFa from './twoFa/SettingsTwoFa';
 
 import './Settings.scss';
@@ -291,6 +292,10 @@ const Settings = ({
       case SettingsScreens.DataStorage:
         return (
           <SettingsDataStorage isActive={isScreenActive} onReset={handleReset} />
+        );
+      case SettingsScreens.StorageUsage:
+        return (
+          <SettingsStorageUsage isActive={isScreenActive} onReset={handleReset} />
         );
       case SettingsScreens.Privacy:
         return (

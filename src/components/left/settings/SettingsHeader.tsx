@@ -136,6 +136,8 @@ const SettingsHeader = ({
         return <h3>{oldLang('Notifications')}</h3>;
       case SettingsScreens.DataStorage:
         return <h3>{oldLang('DataSettings')}</h3>;
+      case SettingsScreens.StorageUsage:
+        return <h3>{lang('StorageUsageTitle')}</h3>;
       case SettingsScreens.Privacy:
         return <h3>{oldLang('PrivacySettings')}</h3>;
       case SettingsScreens.AutoDeleteMessages:
