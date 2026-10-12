@@ -4,8 +4,10 @@ import { getActions } from '../../../../global';
 
 import type { AiEditorContent, AiEditorResult } from '../../../../global/types';
 
+import { RICH_CONTENT_BODY_FONT_SIZE_PX } from '../../../../config';
 import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 import { selectTheme } from '../../../../global/selectors';
+import { selectMessageTextSize } from '../../../../global/selectors/sharedState';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboardFromPromise } from '../../../../util/clipboard';
 import { serializeMessageCopyTiptapJson } from '../../../../util/tiptap/messageCopy';
@@ -41,6 +43,7 @@ export const AiEditorPreview = memo(({ content, shouldShowDiff }: {
   shouldShowDiff?: boolean;
 }) => {
   const theme = useSelector(selectTheme);
+  const messageTextSize = useSelector(selectMessageTextSize);
 
   return (
     <div className={styles.preview}>
@@ -49,6 +52,7 @@ export const AiEditorPreview = memo(({ content, shouldShowDiff }: {
           blocks={content.richMessage.blocks}
           isRtl={content.richMessage.isRtl}
           theme={theme}
+          fontSizeAdjust={messageTextSize / RICH_CONTENT_BODY_FONT_SIZE_PX}
           noPlaylist
         />
       ) : content && renderTextWithEntities(shouldShowDiff && content.diffText ? content.diffText : content.text)}

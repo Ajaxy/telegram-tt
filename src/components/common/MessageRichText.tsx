@@ -13,6 +13,7 @@ import type {
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ThemeKey, ThreadId } from '../../types';
 
+import { RICH_CONTENT_BODY_FONT_SIZE_PX } from '../../config';
 import { selectChatMessage } from '../../global/selectors';
 import { selectMessageTextSize } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
@@ -41,7 +42,6 @@ type OwnProps = {
 };
 
 const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
-const RICH_CONTENT_BODY_FONT_SIZE_PX = 18;
 
 const MessageRichText = ({
   message,
