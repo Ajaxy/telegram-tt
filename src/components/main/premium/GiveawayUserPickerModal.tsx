@@ -108,13 +108,13 @@ const GiveawayUserPickerModal = ({
       onClose={onClose}
       title={lang('BoostingAwardSpecificUsers')}
       hasCloseButton
-      shouldAdaptToSearch
       withFixedHeight
       confirmButtonText={lang('Save')}
       onConfirm={handleModalConfirm}
       onEnter={handleModalConfirm}
     >
       <PeerPicker
+        withIslands
         itemIds={displayedMemberIds}
         selectedIds={selectedIds}
         filterValue={searchQuery}

@@ -84,12 +84,12 @@ const StarsGiftingPickerModal: FC<OwnProps & StateProps> = ({
       onClose={closeStarsGiftingPickerModal}
       title={oldLang('GiftStarsTitle')}
       hasCloseButton
-      shouldAdaptToSearch
       withFixedHeight
       confirmButtonText={oldLang('Continue')}
       onEnter={closeStarsGiftingPickerModal}
     >
       <PeerPicker
+        withIslands
         className={styles.picker}
         itemIds={displayedUserIds}
         filterValue={searchQuery}

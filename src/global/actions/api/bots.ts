@@ -172,6 +172,21 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       break;
     }
 
+    case 'requestPeer': {
+      const { buttonId, maxQuantity, peerType } = button.action;
+      const botId = message.senderId || chatId;
+      actions.openRequestPeerModal({
+        botId,
+        chatId,
+        messageId: message.id,
+        buttonId,
+        maxQuantity,
+        peerType,
+        tabId,
+      });
+      break;
+    }
+
     case 'requestPhone': {
       const user = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
       if (!user) {
@@ -1729,4 +1744,26 @@ addActionHandler('loadBotFreezeAppeal', async (global): Promise<void> => {
     botFreezeAppealId: chat?.id,
   };
   setGlobal(global);
+});
+
+addActionHandler('sendBotRequestedPeer', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, messageId, buttonId, requestedPeerIds,
+  } = payload;
+
+  const chat = selectChat(global, chatId);
+
+  const requestedPeers = requestedPeerIds
+    .map((peerId) => selectPeer(global, peerId))
+    .filter(Boolean);
+  if (!chat || requestedPeers.length !== requestedPeerIds.length) {
+    return;
+  }
+
+  await callApi('sendBotRequestedPeer', {
+    chat,
+    messageId,
+    buttonId,
+    requestedPeers,
+  });
 });

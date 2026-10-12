@@ -183,7 +183,7 @@ const ItemPicker = ({
         return <Radio checked={isChecked} disabled={isLocked} isLoading={isItemLoading} onlyInput />;
       }
       if (itemInputType === 'checkbox') {
-        return <Checkbox checked={isChecked} disabled={isLocked} isLoading={isItemLoading} onlyInput />;
+        return <Checkbox checked={isChecked} disabled={isLocked} isLoading={isItemLoading} onlyInput isRound />;
       }
       return undefined;
     }

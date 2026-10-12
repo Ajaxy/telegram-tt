@@ -19,11 +19,10 @@ import {
 } from '../../global/helpers';
 import { filterPeersByQuery } from '../../global/helpers/peers';
 import {
-  filterChatIdsByType, selectCanAnimateInterface, selectCanInviteToChat, selectChat, selectChatFullInfo,
+  filterChatIdsByType, selectCanInviteToChat, selectChat, selectChatFullInfo,
   selectIsMonoforumAdmin, selectTopic, selectUser,
 } from '../../global/selectors';
 import { selectCurrentLimit } from '../../global/selectors/limits';
-import buildClassName from '../../util/buildClassName';
 import { unique } from '../../util/iteratees';
 import {
   areChatSelectionKeysEqual,
@@ -39,13 +38,12 @@ import { useFolderManagerForOrderedIds } from '../../hooks/useFolderManager';
 import useFolderTabs from '../../hooks/useFolderTabs';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import { useStateRef } from '../../hooks/useStateRef';
 
 import Island from '../gili/layout/Island';
 import TabList from '../ui/TabList';
 import ListTopPeers from './ListTopPeers';
-import PeerChip from './PeerChip';
 import ChatOrUserPicker, { type SearchRowRenderProps } from './pickers/ChatOrUserPicker';
+import PickerSearchField, { type PickerSearchChip } from './pickers/PickerSearchField';
 
 import styles from './RecipientPicker.module.scss';
 
@@ -124,11 +122,6 @@ const RecipientPicker = ({
 
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<ChatSelectionKey[]>([]);
-  const [removingIds, setRemovingIds] = useState<ChatSelectionKey[]>([]);
-  const [appearingIds, setAppearingIds] = useState<ChatSelectionKey[]>([]);
-  const selectedIdsRef = useStateRef(selectedIds);
-  const removingIdsRef = useStateRef(removingIds);
-  const appearingIdsRef = useStateRef(appearingIds);
 
   const [activeFolderIndex, setActiveFolderIndex] = useState(0);
   const { displayedFolders, folderTabs } = useFolderTabs({
@@ -158,37 +151,20 @@ const RecipientPicker = ({
     setActiveFolderIndex(index);
   });
 
-  const updateSelectedIds = useLastCallback((newIds: ChatSelectionKey[], newlyAddedKey?: ChatSelectionKey) => {
+  const updateSelectedIds = useLastCallback((newIds: ChatSelectionKey[]) => {
     setSelectedIds(newIds);
     onSelectedIdsChange?.(newIds);
-
-    if (newlyAddedKey && selectCanAnimateInterface(getGlobal())) {
-      setAppearingIds([...appearingIdsRef.current, newlyAddedKey]);
-      setTimeout(() => {
-        setAppearingIds(appearingIdsRef.current.filter((key) => !areChatSelectionKeysEqual(key, newlyAddedKey)));
-      }, 200);
-    }
   });
 
   const handleRemoveSelected = useLastCallback((selectionKey: ChatSelectionKey) => {
-    if (includesChatSelectionKey(removingIdsRef.current, selectionKey)) return;
+    updateSelectedIds(selectedIds.filter((key) => !areChatSelectionKeysEqual(key, selectionKey)));
+  });
 
-    const canAnimate = selectCanAnimateInterface(getGlobal());
-    if (!canAnimate) {
-      const newIds = selectedIdsRef.current.filter((key) => !areChatSelectionKeysEqual(key, selectionKey));
-      setSelectedIds(newIds);
-      onSelectedIdsChange?.(newIds);
-      return;
+  const handleChipClick = useLastCallback((keyHash: string) => {
+    const selectionKey = selectedIds.find((key) => getChatSelectionKeyHash(key) === keyHash);
+    if (selectionKey) {
+      handleRemoveSelected(selectionKey);
     }
-
-    setRemovingIds([...removingIdsRef.current, selectionKey]);
-
-    setTimeout(() => {
-      setRemovingIds(removingIdsRef.current.filter((key) => !areChatSelectionKeysEqual(key, selectionKey)));
-      const newIds = selectedIdsRef.current.filter((key) => !areChatSelectionKeysEqual(key, selectionKey));
-      setSelectedIds(newIds);
-      onSelectedIdsChange?.(newIds);
-    }, 300);
   });
 
   const handleToggleSelection = useLastCallback((peerId: string, threadId?: ThreadId) => {
@@ -197,7 +173,7 @@ const RecipientPicker = ({
     if (includesChatSelectionKey(selectedIds, selectionKey)) {
       handleRemoveSelected(selectionKey);
     } else {
-      updateSelectedIds([...selectedIds, selectionKey], selectionKey);
+      updateSelectedIds([...selectedIds, selectionKey]);
     }
   });
 
@@ -284,74 +260,29 @@ const RecipientPicker = ({
     return `${topic.title} • ${chatTitle}`;
   });
 
+  const searchChips = useMemo(() => {
+    if (!hasSelectedChips) return undefined;
+    return selectedIds.map((selectionKey): PickerSearchChip => ({
+      key: getChatSelectionKeyHash(selectionKey),
+      peerId: selectionKey.peerId,
+      title: getChipTitle(selectionKey),
+      canClose: true,
+    }));
+  }, [hasSelectedChips, selectedIds]);
+
   const renderSearchRow = useCallback((props: SearchRowRenderProps) => {
-    if (!hasSelectedChips) {
-      return (
-        <div className="search-input-wrapper">
-          <i className="icon icon-search" />
-          <input
-            ref={props.inputRef}
-            className="search-input"
-            type="text"
-            dir="auto"
-            placeholder={props.placeholder}
-            value={props.value}
-            onChange={props.onChange}
-            onKeyDown={props.onKeyDown}
-          />
-        </div>
-      );
-    }
-
     return (
-      <div className="search-row-with-chips">
-        <div className="chips-and-search-scroll no-scrollbar">
-          {selectedIds.map((selectionKey) => {
-            const { peerId } = selectionKey;
-            const chipTitle = getChipTitle(selectionKey);
-            const isAppearing = includesChatSelectionKey(appearingIds, selectionKey);
-            const isRemoving = includesChatSelectionKey(removingIds, selectionKey);
-            const keyHash = getChatSelectionKeyHash(selectionKey);
-
-            return (
-              <div
-                key={keyHash}
-                className={buildClassName(
-                  'picker-chip-wrapper',
-                  isAppearing && 'picker-chip-appear',
-                  isRemoving && 'picker-chip-disappear',
-                )}
-              >
-                <PeerChip
-                  peerId={peerId}
-                  title={chipTitle}
-                  size="small"
-                  canClose
-                  className="picker-chip"
-                  itemClassName="picker-chip-name"
-                  clickArg={selectionKey}
-                  onClick={handleRemoveSelected}
-                />
-              </div>
-            );
-          })}
-          <div className="inline-search">
-            <i className="icon icon-search" />
-            <input
-              ref={props.inputRef}
-              className="search-input"
-              type="text"
-              dir="auto"
-              placeholder={props.placeholder}
-              value={props.value}
-              onChange={props.onChange}
-              onKeyDown={props.onKeyDown}
-            />
-          </div>
-        </div>
-      </div>
+      <PickerSearchField
+        inputRef={props.inputRef}
+        value={props.value}
+        placeholder={props.placeholder}
+        chips={searchChips}
+        onChange={props.onChange}
+        onKeyDown={props.onKeyDown}
+        onChipClick={handleChipClick}
+      />
     );
-  }, [hasSelectedChips, selectedIds, appearingIds, removingIds]);
+  }, [searchChips]);
 
   const selectedPeerIds = useMemo(() => selectedIds.map((key) => key.peerId), [selectedIds]);
 

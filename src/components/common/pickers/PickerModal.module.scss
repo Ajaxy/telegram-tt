@@ -7,23 +7,24 @@
   height: 90vh;
 }
 
-.withSearch {
-  .content {
-    padding: 0;
-  }
-
-  .header {
-    margin-bottom: -0.75rem; // Pull search closer to the header
-  }
-}
-
-.header {
-  padding: 0.25rem !important;
-}
-
 .buttonWrapper {
   position: relative;
-  padding-top: 0.25rem;
-  padding-bottom: 1rem;
-  padding-inline: 1rem;
+  padding-top: 0.75rem;
+}
+
+.islands {
+  :global(.modal-dialog) {
+    border-radius: 2.5rem;
+    background-color: var(--color-background-secondary);
+  }
+
+  .content {
+    padding: 0 1rem 1rem;
+  }
+}
+
+.confirmButton {
+  width: 100%;
+  height: 3rem;
+  border-radius: var(--border-radius-island);
 }

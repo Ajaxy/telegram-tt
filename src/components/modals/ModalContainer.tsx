@@ -76,6 +76,7 @@ import EditRankModal from './rank/EditRankModal.async';
 import RankModal from './rank/RankModal.async';
 import ReportAdModal from './reportAd/ReportAdModal.async';
 import ReportModal from './reportModal/ReportModal.async';
+import RequestPeerModal from './requestPeer/RequestPeerModal.async';
 import SharePreparedMessageModal from './sharePreparedMessage/SharePreparedMessageModal.async';
 import ChatRefundModal from './stars/chatRefund/ChatRefundModal.async';
 import StarsGiftModal from './stars/gift/StarsGiftModal.async';
@@ -145,6 +146,7 @@ type ModalKey = keyof Pick<TabState,
   'giftWithdrawModal' |
   'preparedMessageModal' |
   'sharePreparedMessageModal' |
+  'requestPeerModal' |
   'giftStatusInfoModal' |
   'giftTransferModal' |
   'giftTransferConfirmModal' |
@@ -289,6 +291,7 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   giftStatusInfoModal: GiftStatusInfoModal,
   preparedMessageModal: PreparedMessageModal,
   sharePreparedMessageModal: SharePreparedMessageModal,
+  requestPeerModal: RequestPeerModal,
   giftTransferModal: GiftTransferModal,
   giftTransferConfirmModal: GiftTransferConfirmModal,
   giftDescriptionRemoveModal: GiftDescriptionRemoveModal,

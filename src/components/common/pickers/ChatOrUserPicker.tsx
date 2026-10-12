@@ -49,6 +49,7 @@ import FullNameTitle from '../FullNameTitle';
 import Icon from '../icons/Icon';
 import TopicIcon from '../TopicIcon';
 import PickerItem from './PickerItem';
+import PickerSearchField from './PickerSearchField';
 
 import './ChatOrUserPicker.scss';
 
@@ -90,7 +91,7 @@ export type SearchRowRenderProps = {
   inputRef: ElementRef<HTMLInputElement>;
   value: string;
   placeholder: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (value: string) => void;
   onKeyDown?: React.KeyboardEventHandler<HTMLInputElement>;
 };
 
@@ -190,12 +191,12 @@ const ChatOrUserPicker = ({
     setTopicSearch('');
   });
 
-  const handleSearchChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onSearchChange(e.currentTarget.value);
+  const handleSearchChange = useLastCallback((value: string) => {
+    onSearchChange(value);
   });
 
-  const handleTopicSearchChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setTopicSearch(e.currentTarget.value);
+  const handleTopicSearchChange = useLastCallback((value: string) => {
+    setTopicSearch(value);
   });
 
   const handleChatSelect = useLastCallback((index) => {
@@ -333,19 +334,14 @@ const ChatOrUserPicker = ({
             onChange: handleTopicSearchChange,
             onKeyDown: handleTopicKeyDown,
           }) : (
-            <div className="search-input-wrapper">
-              <i className="icon icon-search" />
-              <input
-                ref={topicSearchRef}
-                className="search-input"
-                type="text"
-                dir="auto"
-                placeholder={searchPlaceholder}
-                value={topicSearch}
-                onChange={handleTopicSearchChange}
-                onKeyDown={handleTopicKeyDown}
-              />
-            </div>
+            <PickerSearchField
+              className="picker-topics-search"
+              inputRef={topicSearchRef}
+              value={topicSearch}
+              placeholder={searchPlaceholder}
+              onChange={handleTopicSearchChange}
+              onKeyDown={handleTopicKeyDown}
+            />
           )}
         </div>
         {topicIds?.length ? (
@@ -418,19 +414,13 @@ const ChatOrUserPicker = ({
             onChange: handleSearchChange,
             onKeyDown: chatKeyDownHandler,
           }) : (
-            <div className="search-input-wrapper">
-              <i className="icon icon-search" />
-              <input
-                ref={searchRef}
-                className="search-input"
-                type="text"
-                dir="auto"
-                placeholder={searchPlaceholder}
-                value={search}
-                onChange={handleSearchChange}
-                onKeyDown={chatKeyDownHandler}
-              />
-            </div>
+            <PickerSearchField
+              inputRef={searchRef}
+              value={search}
+              placeholder={searchPlaceholder}
+              onChange={handleSearchChange}
+              onKeyDown={chatKeyDownHandler}
+            />
           )}
           {subheader}
         </div>

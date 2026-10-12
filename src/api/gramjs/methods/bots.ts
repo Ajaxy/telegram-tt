@@ -156,6 +156,26 @@ export async function startBot({
   });
 }
 
+export function sendBotRequestedPeer({
+  chat, messageId, buttonId, requestedPeers,
+}: {
+  chat: ApiChat;
+  messageId: number;
+  buttonId: number;
+  requestedPeers: ApiPeer[];
+}) {
+  return invokeRequest(new GramJs.messages.SendBotRequestedPeer({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    msgId: messageId,
+    buttonId,
+    requestedPeers: requestedPeers.map((requestedPeer) => (
+      buildInputPeer(requestedPeer.id, requestedPeer.accessHash)
+    )),
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
 export async function requestWebView({
   isSilent,
   peer,

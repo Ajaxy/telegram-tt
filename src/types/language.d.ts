@@ -227,6 +227,18 @@ export interface LangPair {
   'CallRateLabel': undefined;
   'CallRateComment': undefined;
   'Send': undefined;
+  'RequestPeerRequirements': undefined;
+  'RequestPeerReqPremium': undefined;
+  'RequestPeerReqNoPremium': undefined;
+  'RequestPeerReqPublicChannel': undefined;
+  'RequestPeerReqPrivateChannel': undefined;
+  'RequestPeerReqPublicGroup': undefined;
+  'RequestPeerReqPrivateGroup': undefined;
+  'RequestPeerReqForum': undefined;
+  'RequestPeerReqNoForum': undefined;
+  'RequestPeerReqOwnerChannel': undefined;
+  'RequestPeerReqOwnerGroup': undefined;
+  'RequestPeerReqBotMember': undefined;
   'SponsoredMessageInfo': undefined;
   'SponsoredMessageInfoDescription1': undefined;
   'SponsoredMessageInfoDescription2': undefined;
@@ -919,6 +931,7 @@ export interface LangPair {
   'EditAdminWhatCanDo': undefined;
   'EditAdminChangeChannelInfo': undefined;
   'EditAdminChangeGroupInfo': undefined;
+  'EditAdminManageLinkedChannels': undefined;
   'EditAdminManageWelcomeMessages': undefined;
   'EditAdminPostMessages': undefined;
   'EditAdminEditMessages': undefined;
@@ -2565,6 +2578,26 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'CallEmojiKeyTooltip': {
     'user': V;
+  };
+  'ActionRequestedPeer': {
+    'peer': V;
+    'bot': V;
+  };
+  'RequestPeerConfirm': {
+    'peer': V;
+    'bot': V;
+  };
+  'RequestPeerConfirmAddBot': {
+    'bot': V;
+    'peer': V;
+  };
+  'RequestPeerConfirmBotRights': {
+    'bot': V;
+    'peer': V;
+    'rights': V;
+  };
+  'RequestPeerReqAdminRights': {
+    'rights': V;
   };
   'ConversationScheduleMessageSendToday': {
     'time': V;
@@ -4215,6 +4248,10 @@ export interface LangPairWithVariables<V = LangVariable> {
 }
 
 export interface LangPairPlural {
+  'RequestPeerChooseUser': undefined;
+  'RequestPeerChooseBot': undefined;
+  'RequestPeerChooseGroup': undefined;
+  'RequestPeerChooseChannel': undefined;
   'DeleteForMeChatHint': undefined;
   'DeleteForEveryoneHint': undefined;
   'ReactionDeleted': undefined;
@@ -4228,6 +4265,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'Participants': {
+    'count': V;
+  };
+  'RequestPeerSelectLimit': {
     'count': V;
   };
   'OnlineCount': {

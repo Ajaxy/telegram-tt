@@ -259,12 +259,12 @@ const LeaveGroupModal = ({
         isOpen={isPickerOpen}
         title={pickerTitle}
         hasCloseButton
-        shouldAdaptToSearch
         withFixedHeight
         onClose={handleClosePicker}
       >
         {sections ? (
           <PeerPicker
+            withIslands
             sections={sections}
             filterValue={search}
             filterPlaceholder={lang('Search')}
@@ -278,6 +278,7 @@ const LeaveGroupModal = ({
           />
         ) : (
           <PeerPicker
+            withIslands
             itemIds={filteredIds}
             filterValue={search}
             filterPlaceholder={lang('Search')}

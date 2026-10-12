@@ -40,6 +40,7 @@ import type {
   ApiPreparedInlineMessage,
   ApiReactionWithPaid,
   ApiReceiptRegular,
+  ApiRequestPeerType,
   ApiSavedGifts,
   ApiSavedStarGift,
   ApiSearchPostsFlood,
@@ -667,6 +668,15 @@ export type TabState = {
     message: ApiPreparedInlineMessage;
     webAppKey: string;
     botId: string;
+  };
+
+  requestPeerModal?: {
+    botId: string;
+    chatId: string;
+    messageId: number;
+    buttonId: number;
+    maxQuantity: number;
+    peerType: ApiRequestPeerType;
   };
 
   sharePreparedMessageModal?: {

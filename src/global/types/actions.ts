@@ -48,6 +48,7 @@ import type {
   ApiReaction,
   ApiReactionWithPaid,
   ApiReportReason,
+  ApiRequestPeerType,
   ApiSavedStarGift,
   ApiSendMessageAction,
   ApiSessionData,
@@ -2568,6 +2569,21 @@ export interface ActionPayloads {
   refreshLangPackFromCache: {
     langCode: string;
   };
+  openRequestPeerModal: {
+    botId: string;
+    chatId: string;
+    messageId: number;
+    buttonId: number;
+    maxQuantity: number;
+    peerType: ApiRequestPeerType;
+  } & WithTabId;
+  closeRequestPeerModal: WithTabId | undefined;
+  sendBotRequestedPeer: {
+    chatId: string;
+    messageId: number;
+    buttonId: number;
+    requestedPeerIds: string[];
+  } & WithTabId;
   openPollModal: {
     chatId: string;
     threadId?: ThreadId;

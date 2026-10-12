@@ -32,14 +32,9 @@
   }
 }
 
-.islandHeader {
-  overflow-y: auto;
-  display: flex;
-  flex-flow: row wrap;
+.islandSearch {
   flex-shrink: 0;
-
-  max-height: 16.5rem;
-  padding-bottom: 0;
+  margin-bottom: 0.75rem;
 }
 
 .pickerCategoryTitle {

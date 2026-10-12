@@ -408,6 +408,18 @@ const ActionMessageText = ({
         return translateWithYou(lang, 'ActionKickUser', isOutgoing, { from: senderLink, user: userLink });
       }
 
+      case 'requestedPeer': {
+        const { peerIds } = action;
+        const peerLinks = peerIds.map((peerId) => {
+          const peer = selectPeer(global, peerId);
+          return renderPeerLink(peerId, (peer && getPeerTitle(lang, peer)) || userFallbackText, asPreview);
+        });
+        return lang('ActionRequestedPeer', {
+          peer: conjuctionWithNodes(lang, peerLinks),
+          bot: chatLink,
+        }, { withNodes: true });
+      }
+
       case 'botAllowed': {
         const {
           app, domain, isAttachMenu, isFromRequest,

@@ -122,4 +122,5 @@ export { default as StealthModeModal } from '../components/modals/storyStealthMo
 export { default as LeaveGroupModal } from '../components/modals/leaveGroup/LeaveGroupModal';
 export { default as TwoFaCheckModal } from '../components/modals/twoFaCheck/TwoFaCheckModal';
 export { default as QuickChatPickerModal } from '../components/modals/quickChatPicker/QuickChatPickerModal';
+export { default as RequestPeerModal } from '../components/modals/requestPeer/RequestPeerModal';
 export { default as CocoonModal } from '../components/modals/cocoon/CocoonModal';

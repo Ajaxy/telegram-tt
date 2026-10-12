@@ -482,6 +482,7 @@
     "communities.getJoinedCommunities",
     "communities.toggleCommunityCollapsedInDialogs",
     "messages.requestChatJoinWebView",
+    "messages.sendBotRequestedPeer",
     "ephemeral.sendMessage",
     "ephemeral.deleteMessage",
     "ephemeral.reportMessage",

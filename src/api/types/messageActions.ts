@@ -123,6 +123,11 @@ export interface ApiMessageActionBotAllowed extends ActionMediaType {
   app?: ApiBotApp;
 }
 
+export interface ApiMessageActionRequestedPeer extends ActionMediaType {
+  type: 'requestedPeer';
+  peerIds: string[];
+}
+
 export interface ApiMessageActionContactSignUp extends ActionMediaType {
   type: 'contactSignUp';
 }
@@ -415,6 +420,7 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionGameScore | ApiMessageActionPaymentSent | ApiMessageActionPhoneCall
   | ApiMessageActionScreenshotTaken | ApiMessageActionCustomAction | ApiMessageActionBotAllowed
   | ApiMessageActionBoostApply | ApiMessageActionContactSignUp | ApiMessageActionExpiredContent
+  | ApiMessageActionRequestedPeer
   | ApiMessageActionGroupCall | ApiMessageActionInviteToGroupCall | ApiMessageActionGroupCallScheduled
   | ApiMessageActionChatJoinedByRequest | ApiMessageActionChatJoinedViaCommunity
   | ApiMessageActionWebViewDataSent | ApiMessageActionGiftPremium

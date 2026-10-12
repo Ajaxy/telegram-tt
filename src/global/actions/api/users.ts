@@ -159,9 +159,9 @@ addActionHandler('loadCommonChats', async (global, actions, payload): Promise<vo
 
   global = getGlobal();
   global = updateUserCommonChats(global, user.id, {
-    maxId: chatIds.length ? chatIds[chatIds.length - 1] : undefined,
+    maxId: chatIds.length ? chatIds[chatIds.length - 1] : commonChats?.maxId,
     ids,
-    isFullyLoaded: ids.length >= count,
+    isFullyLoaded: ids.length >= count || !chatIds.length,
   });
 
   setGlobal(global);

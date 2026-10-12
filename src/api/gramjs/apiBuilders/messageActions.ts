@@ -200,6 +200,13 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       app: app && buildApiBotApp(app),
     };
   }
+  if (action instanceof GramJs.MessageActionRequestedPeer) {
+    return {
+      mediaType: 'action',
+      type: 'requestedPeer',
+      peerIds: action.peers.map(getApiChatIdFromMtpPeer),
+    };
+  }
   if (action instanceof GramJs.MessageActionBoostApply) {
     const { boosts } = action;
     return {

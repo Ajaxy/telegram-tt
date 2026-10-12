@@ -229,6 +229,7 @@ export interface ApiChatAdminRights {
   deleteStories?: true;
   manageDirectMessages?: true;
   manageRanks?: true;
+  manageLinkedPeers?: true;
   manageWelcomeMessages?: true;
 }
 

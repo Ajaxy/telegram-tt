@@ -304,3 +304,28 @@ addActionHandler('closeLocationAccessModal', (global, actions, payload): ActionR
     locationAccessModal: undefined,
   }, tabId);
 });
+
+addActionHandler('openRequestPeerModal', (global, actions, payload): ActionReturnType => {
+  const {
+    botId, chatId, messageId, buttonId, maxQuantity, peerType, tabId = getCurrentTabId(),
+  } = payload;
+
+  return updateTabState(global, {
+    requestPeerModal: {
+      botId,
+      chatId,
+      messageId,
+      buttonId,
+      maxQuantity,
+      peerType,
+    },
+  }, tabId);
+});
+
+addActionHandler('closeRequestPeerModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    requestPeerModal: undefined,
+  }, tabId);
+});

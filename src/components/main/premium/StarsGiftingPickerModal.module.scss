@@ -2,14 +2,6 @@
   z-index: calc(var(--z-modal-low-priority) + 1);
 }
 
-.root :global(.modal-content) {
-  padding: 0;
-}
-
-.root :global(.modal-dialog) {
-  max-width: 55vh;
-}
-
 .root :global(.modal-dialog),
 .root :global(.modal-content),
 .transition {

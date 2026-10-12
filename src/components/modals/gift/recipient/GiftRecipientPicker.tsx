@@ -59,10 +59,10 @@ const GiftRecipientPicker = ({
       onClose={closeGiftRecipientPicker}
       title={oldLang('GiftTelegramPremiumOrStarsTitle')}
       hasCloseButton
-      shouldAdaptToSearch
       withFixedHeight
     >
       <PeerPicker
+        withIslands
         className={styles.picker}
         itemIds={displayedUserIds}
         filterValue={searchQuery}

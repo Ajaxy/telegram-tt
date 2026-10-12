@@ -110,13 +110,13 @@ const GiveawayChannelPickerModal = ({
       onClose={onClose}
       title={lang('RequestPeer.ChooseChannelTitle')}
       hasCloseButton
-      shouldAdaptToSearch
       withFixedHeight
       confirmButtonText={lang('Save')}
       onConfirm={handleModalConfirm}
       onEnter={handleModalConfirm}
     >
       <PeerPicker
+        withIslands
         itemIds={displayedChannelIds}
         selectedIds={selectedIds}
         filterValue={searchQuery}

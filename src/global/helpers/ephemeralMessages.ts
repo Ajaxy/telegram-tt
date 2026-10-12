@@ -10,6 +10,7 @@ import { getMainUsername } from './users';
 const UNSUPPORTED_EPHEMERAL_BUTTON_TYPES = new Set<ApiKeyboardButton['action']['type']>([
   'buy',
   'game',
+  'requestPeer',
   'requestPhone',
   'requestPoll',
   'urlAuth',
