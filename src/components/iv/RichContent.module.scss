@@ -322,16 +322,16 @@
 }
 
 .bordered .tableCell {
-  border-top: 0.0625rem solid var(--color-borders);
-  border-left: 0.0625rem solid var(--color-borders);
+  border-top: 0.0625rem solid var(--rich-content-table-border-color, var(--color-borders));
+  border-left: 0.0625rem solid var(--rich-content-table-border-color, var(--color-borders));
 }
 
 .bordered .tableCellLastRow {
-  border-bottom: 0.0625rem solid var(--color-borders);
+  border-bottom: 0.0625rem solid var(--rich-content-table-border-color, var(--color-borders));
 }
 
 .bordered .tableCellLastColumn {
-  border-right: 0.0625rem solid var(--color-borders);
+  border-right: 0.0625rem solid var(--rich-content-table-border-color, var(--color-borders));
 }
 
 .tableCell {
@@ -341,7 +341,7 @@
 }
 
 .compact .tableCell {
-  padding: 0.1875rem;
+  padding: 0.3125rem;
 }
 
 .tableCellTopLeft {
@@ -588,7 +588,7 @@
 }
 
 .buttonLabel {
-  overflow: hidden;
+  overflow: clip;
   display: block;
 
   padding-inline: 0.5rem;
@@ -617,7 +617,7 @@
 
   display: inline-block;
   padding: 0 0.375rem;
-  vertical-align: middle;
+  vertical-align: baseline;
 
   .buttonLabel {
     padding: 0;

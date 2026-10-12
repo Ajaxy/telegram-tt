@@ -6,6 +6,7 @@
 
 .own {
   --rich-content-meta-color: var(--color-message-meta-own);
+  --rich-content-table-border-color: color-mix(in srgb, var(--color-accent-own) 30%, transparent);
 }
 
 .root,

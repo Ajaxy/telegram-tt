@@ -75,7 +75,10 @@ const RichButton = ({
         isLink && styles.linkButton,
       )}
       disabled={isDisabled}
-      data-rich-button={JSON.stringify({ action: button.action, style: button.style })}
+      data-rich-button={JSON.stringify({
+        action: button.action.type === 'callback' ? { type: 'disabled' } : button.action,
+        style: button.style,
+      })}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
     >

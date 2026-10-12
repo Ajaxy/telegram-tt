@@ -388,7 +388,7 @@
   display: inline-block;
   min-width: 0;
   max-width: 100%;
-  vertical-align: middle;
+  vertical-align: baseline;
 }
 
 .richButton {
@@ -450,7 +450,7 @@
 }
 
 .richButtonLabel {
-  overflow: hidden;
+  overflow: clip;
   display: block;
   text-overflow: ellipsis;
   white-space: nowrap;
