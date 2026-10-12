@@ -121,7 +121,7 @@ export default function useReorderableList<T extends ReorderableId>({
       return;
     }
 
-    const bounds = getVerticalBounds(itemIdsRef.current, rowElementsRef.current);
+    const bounds = getVerticalBounds(itemIdsRef.current, rowElementsRef.current, scrollContainerRef.current);
     const nextTop = y - dragState.offsetY;
     const clampedTop = bounds
       ? clamp(nextTop, bounds.top, Math.max(bounds.top, bounds.bottom - dragState.height))
@@ -479,8 +479,12 @@ function getTargetIndex<T extends ReorderableId>(
   return itemIds.length;
 }
 
-function getVerticalBounds<T extends ReorderableId>(itemIds: T[], rowElements: Map<T, HTMLElement>) {
-  return itemIds.reduce<{ top: number; bottom: number } | undefined>((bounds, id) => {
+function getVerticalBounds<T extends ReorderableId>(
+  itemIds: T[],
+  rowElements: Map<T, HTMLElement>,
+  scrollContainer?: HTMLElement,
+) {
+  const rowBounds = itemIds.reduce<{ top: number; bottom: number } | undefined>((bounds, id) => {
     const element = rowElements.get(id);
     if (!element) {
       return bounds;
@@ -496,6 +500,27 @@ function getVerticalBounds<T extends ReorderableId>(itemIds: T[], rowElements: M
       bottom: Math.max(bounds.bottom, bottom),
     };
   }, undefined);
+
+  if (!rowBounds || !scrollContainer) {
+    return rowBounds;
+  }
+
+  const visibleBounds = getVisibleBounds(scrollContainer);
+
+  return {
+    top: Math.max(rowBounds.top, visibleBounds.top),
+    bottom: Math.min(rowBounds.bottom, visibleBounds.bottom),
+  };
+}
+
+function getVisibleBounds(scrollContainer: HTMLElement) {
+  const { top, bottom } = scrollContainer.getBoundingClientRect();
+  const { paddingTop, paddingBottom } = getComputedStyle(scrollContainer);
+
+  return {
+    top: top + parseFloat(paddingTop),
+    bottom: bottom - parseFloat(paddingBottom),
+  };
 }
 
 function findScrollableContainer(element: HTMLElement) {

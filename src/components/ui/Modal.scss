@@ -91,6 +91,7 @@
     }
 
     .modal-dialog {
+      isolation: isolate;
       position: relative;
       transform: translate3d(0, -1rem, 0);
 
