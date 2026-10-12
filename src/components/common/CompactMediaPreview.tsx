@@ -59,8 +59,8 @@ export function canRenderCompactMediaPreview(
   const previewUrl = getPreviewUrl(photo, document, media?.video, attachment);
   const video = media?.video || attachment?.gif;
   const shouldRenderPreviewAsVideo = shouldUseVideoPreview(video, previewUrl);
-  const previewVideoUrl = shouldRenderPreviewAsVideo
-    ? (media?.video?.blobUrl || attachment?.blobUrl)
+  const previewVideoUrl = !previewUrl
+    ? video?.blobUrl || (shouldRenderPreviewAsVideo ? attachment?.blobUrl : undefined)
     : undefined;
   const previewHash = getPreviewHash(photo, document, video, shouldRenderPreviewAsVideo);
 
@@ -105,8 +105,8 @@ const CompactMediaPreview = ({
 
   const previewHash = getPreviewHash(photo, document, video, shouldRenderPreviewAsVideo);
 
-  const previewVideoUrl = shouldRenderPreviewAsVideo
-    ? (media?.video?.blobUrl || attachment?.blobUrl)
+  const previewVideoUrl = !previewUrl
+    ? video?.blobUrl || (shouldRenderPreviewAsVideo ? attachment?.blobUrl : undefined)
     : undefined;
   const thumbDataUri = getThumbDataUri(photo, document, media?.video, attachment);
 

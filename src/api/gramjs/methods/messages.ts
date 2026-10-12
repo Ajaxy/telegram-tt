@@ -528,7 +528,8 @@ export function sendApiMessage(
           console.warn(err);
         }
 
-        await mediaQueue;
+        cancelSendingStatusTimeout();
+        if (!onProgress?.isCanceled) markMessageAsFailed(localMessage, err as Error);
 
         return;
       }
@@ -557,7 +558,8 @@ export function sendApiMessage(
           console.warn(err);
         }
 
-        await mediaQueue;
+        cancelSendingStatusTimeout();
+        if (!onProgress?.isCanceled) markMessageAsFailed(localMessage, err as Error);
 
         return;
       }
@@ -655,16 +657,20 @@ export function sendApiMessage(
         sendApiUpdate({ '@type': 'updateRequestUserUpdate', id: chat.id });
       }
 
-      sendApiUpdate({
-        '@type': localMessage.isScheduled ? 'updateScheduledMessageSendFailed' : 'updateMessageSendFailed',
-        chatId: chat.id,
-        localId: localMessage.id,
-        error: error.errorMessage,
-      });
+      markMessageAsFailed(localMessage, error);
     }
   })();
 
   return messagePromise;
+}
+
+function markMessageAsFailed(message: ApiMessage, error: Error) {
+  sendApiUpdate({
+    '@type': message.isScheduled ? 'updateScheduledMessageSendFailed' : 'updateMessageSendFailed',
+    chatId: message.chatId,
+    localId: message.id,
+    error: buildApiError(error).message,
+  });
 }
 
 export async function sendMessage(

@@ -235,11 +235,10 @@ export function getPhotoMediaHash(photo: ApiPhoto | ApiDocument, target: SizeTar
   switch (target) {
     case 'micro':
     case 'pictogram':
-      return `${base}?size=${isAction ? 'a' : 'm'}`;
+      return !hasMediaLocalBlobUrl(photo) ? `${base}?size=${isAction ? 'a' : 'm'}` : undefined;
     case 'inline':
-      return !hasMediaLocalBlobUrl(photo) ? `${base}?size=${isAction ? 'b' : 'x'}` : undefined;
     case 'preview':
-      return `${base}?size=${isAction ? 'b' : 'x'}`;
+      return !hasMediaLocalBlobUrl(photo) ? `${base}?size=${isAction ? 'b' : 'x'}` : undefined;
     case 'download':
       return !isVideo ? base : getVideoProfilePhotoMediaHash(photo);
     case 'full':
@@ -263,11 +262,11 @@ export function getVideoMediaHash(video: ApiVideo | ApiDocument, target: SizeTar
   switch (target) {
     case 'micro':
     case 'pictogram':
-      return `${base}?size=m`;
+      return !hasMediaLocalBlobUrl(video) ? `${base}?size=m` : undefined;
     case 'inline':
       return !hasMediaLocalBlobUrl(video) ? appendProgressiveQueryParameters(video, base) : undefined;
     case 'preview':
-      return `${base}?size=x`;
+      return !hasMediaLocalBlobUrl(video) ? `${base}?size=x` : undefined;
     case 'download':
       return `${base}?download`;
     case 'full':
