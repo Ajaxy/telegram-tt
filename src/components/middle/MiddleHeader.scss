@@ -215,6 +215,10 @@
     margin-right: 0.625rem;
   }
 
+  .ChatInfo .Avatar.forum {
+    --border-radius-forum-avatar: 40%;
+  }
+
   .topic-header-icon {
     --custom-emoji-size: 2.125rem;
 

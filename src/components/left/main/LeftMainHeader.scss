@@ -176,6 +176,14 @@
       left: auto;
     }
   }
+
+  .left-search-picker-item:has(.Avatar.forum) {
+    --border-radius-forum-avatar: 40%;
+
+    border-radius: var(--border-radius-forum-avatar);
+
+    corner-shape: squircle;
+  }
 }
 
 #LeftMainHeader,

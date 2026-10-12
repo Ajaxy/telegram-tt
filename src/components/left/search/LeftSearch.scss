@@ -194,6 +194,8 @@
       display: flex;
       align-items: center;
 
+      padding-inline-start: 1rem;
+
       font-size: 1rem;
       font-weight: var(--font-weight-medium);
       line-height: 1.6875rem;
@@ -203,7 +205,7 @@
 
         width: 2rem;
         height: 2rem;
-        margin-inline-end: 0.25rem !important;
+        margin-inline-end: 0.75rem !important;
         font-size: 2rem !important;
       }
 
