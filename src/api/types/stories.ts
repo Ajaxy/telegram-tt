@@ -1,4 +1,5 @@
 import type {
+  ApiAudio,
   ApiDocument,
   ApiGeoPoint,
   ApiMessage,
@@ -32,6 +33,7 @@ export interface ApiStory {
   mediaAreas?: ApiMediaArea[];
   forwardInfo?: ApiStoryForwardInfo;
   fromId?: string;
+  music?: ApiAudio;
 }
 
 export interface ApiStoryViews {

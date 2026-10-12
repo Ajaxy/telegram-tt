@@ -2185,6 +2185,7 @@ export interface ActionPayloads {
   } & WithTabId;
   forwardAudio: { toChatId: string; toThreadId?: ThreadId; confirmedStars?: number } & WithTabId;
   clearAudioPendingSend: WithTabId | undefined;
+  sendAudioToSavedMessages: { audio: ApiAudio } & WithTabId;
 
   // GIFs
   loadSavedGifs: undefined;

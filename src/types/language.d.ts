@@ -1300,6 +1300,7 @@ export interface LangPair {
   'AudioPlayerClose': undefined;
   'AudioAddToProfile': undefined;
   'AudioRemoveFromProfile': undefined;
+  'AudioAddToSaved': undefined;
   'AudioOpenPlaylist': undefined;
   'AudioRepeatOff': undefined;
   'AudioRepeatList': undefined;

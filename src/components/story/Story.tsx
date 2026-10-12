@@ -70,6 +70,7 @@ import Transition from '../ui/Transition';
 import MediaAreaOverlay from './mediaArea/MediaAreaOverlay';
 import StoryCaption from './StoryCaption';
 import StoryFooter from './StoryFooter';
+import StoryMusic from './StoryMusic';
 import StoryProgress from './StoryProgress';
 
 import styles from './StoryViewer.module.scss';
@@ -196,6 +197,7 @@ function Story({
   const isChannelStory = isChatStory && isChatChannel(peer as ApiChat);
   const isOut = isLoadedStory && story.isOut;
   const isUnsupportedStory = isLoadedStory && Object.keys(story.content).length === 0;
+  const music = isLoadedStory ? story.music : undefined;
 
   const canPinToProfile = useCurrentOrPrev(
     isOut ? !story.isInProfile : undefined,
@@ -903,7 +905,17 @@ function Story({
           isExpanded={isCaptionExpanded}
           onExpand={expandCaption}
           onFold={foldCaption}
-          className={captionAppearanceAnimationClassNames}
+          className={buildClassName(captionAppearanceAnimationClassNames, music && styles.captionWithMusic)}
+        />
+      )}
+      {music && (
+        <StoryMusic
+          key={`music-${storyId}-${peerId}`}
+          audio={music}
+          isProtected={isLoadedStory && story.noForwards}
+          className={appearanceAnimationClassNames}
+          onMenuOpen={handleDropdownMenuOpen}
+          onMenuClose={handleDropdownMenuClose}
         />
       )}
       {shouldRenderComposer && (

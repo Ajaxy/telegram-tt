@@ -3553,6 +3553,24 @@ addActionHandler('forwardAudio', async (global, actions, payload): Promise<void>
   setGlobal(global);
 });
 
+addActionHandler('sendAudioToSavedMessages', (global, actions, payload): ActionReturnType => {
+  const { audio, tabId = getCurrentTabId() } = payload;
+
+  const chat = selectChat(global, global.currentUserId!);
+  if (!chat) return;
+
+  void sendMessage(global, {
+    chat,
+    audio,
+    lastMessageId: selectChatLastMessageId(global, chat.id),
+  });
+
+  actions.showNotification({
+    message: { key: 'AudioForwardedToSaved', options: { withNodes: true, withMarkdown: true } },
+    tabId,
+  });
+});
+
 addActionHandler('requestMessageTranslation', (global, actions, payload): ActionReturnType => {
   const {
     chatId, id, toLanguageCode = selectTranslationLanguage(global), tone, tabId = getCurrentTabId(),

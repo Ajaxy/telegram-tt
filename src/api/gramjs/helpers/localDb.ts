@@ -115,6 +115,10 @@ export function addStoryToLocalDb(story: GramJs.TypeStoryItem, peerId: string) {
       }
     }
   }
+
+  if (story.music instanceof GramJs.Document) {
+    addDocumentToLocalDb(addStoryRepairInfo(story.music, peerId, story));
+  }
 }
 
 export function addPhotoToLocalDb(photo: GramJs.TypePhoto) {
