@@ -2729,6 +2729,34 @@ export interface LangPair {
   'RichButtonCenter': undefined;
   'RichButtonRight': undefined;
   'RichEditorButtonCopyText': undefined;
+  'ChatInsights': undefined;
+  'ChatInsightsYou': undefined;
+  'ChatInsightsWhoTalks': undefined;
+  'ChatInsightsWhen': undefined;
+  'ChatInsightsBusiestHour': undefined;
+  'ChatInsightsBusiestDay': undefined;
+  'ChatInsightsNightOwl': undefined;
+  'ChatInsightsMedia': undefined;
+  'ChatInsightsPhotos': undefined;
+  'ChatInsightsVideos': undefined;
+  'ChatInsightsVoices': undefined;
+  'ChatInsightsVideoMessages': undefined;
+  'ChatInsightsStickers': undefined;
+  'ChatInsightsGifs': undefined;
+  'ChatInsightsLinks': undefined;
+  'ChatInsightsFiles': undefined;
+  'ChatInsightsPolls': undefined;
+  'ChatInsightsTopEmoji': undefined;
+  'ChatInsightsStreak': undefined;
+  'ChatInsightsFastestReplier': undefined;
+  'ChatInsightsTopMessage': undefined;
+  'ChatInsightsSummary': undefined;
+  'ChatInsightsSummaryMessages': undefined;
+  'ChatInsightsSummaryDays': undefined;
+  'ChatInsightsSummaryShare': undefined;
+  'ChatInsightsSummaryEmoji': undefined;
+  'ChatInsightsSummaryStreak': undefined;
+  'ChatInsightsShare': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -4625,6 +4653,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   'WalletConnectFee': {
     'amount': V;
   };
+  'ChatInsightsReplyTime': {
+    'time': V;
+  };
+  'ChatInsightsSummaryReplier': {
+    'name': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -4637,6 +4671,7 @@ export interface LangPairPlural {
   'ReactionDeleted': undefined;
   'MediaReplaceInvalidError': undefined;
   'FwdMessagesToSaved': undefined;
+  'ChatInsightsStreakDays': undefined;
 }
 
 export interface LangPairPluralWithVariables<V = LangVariable> {
@@ -5188,6 +5223,24 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'RichMediaSkippedFiles': {
+    'count': V;
+  };
+  'ChatInsightsLoading': {
+    'count': V;
+  };
+  'ChatInsightsMessagesSince': {
+    'date': V;
+  };
+  'ChatInsightsActiveDays': {
+    'count': V;
+  };
+  'ChatInsightsCharacters': {
+    'count': V;
+  };
+  'ChatInsightsReactions': {
+    'count': V;
+  };
+  'ChatInsightsPartial': {
     'count': V;
   };
 }

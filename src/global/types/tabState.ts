@@ -121,6 +121,7 @@ import type {
   ThreadId,
 } from '../../types';
 import type { BrowserState } from '../../types/browser';
+import type { ChatInsights } from '../../types/chatInsights';
 import type { SearchResultKey } from '../../util/keys/searchResultKey';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { ProfileCollectionKey } from '../selectors/payments';
@@ -1304,6 +1305,14 @@ export type TabState = {
 
   autoDeleteTimerModal?: {
     chatId: string;
+  };
+
+  chatInsightsModal?: {
+    chatId: string;
+    isLoading: boolean;
+    scannedCount: number;
+    totalCount?: number;
+    insights?: ChatInsights;
   };
 
   isTwoFaCheckModalOpen?: true;
