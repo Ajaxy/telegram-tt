@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from '../../../lib/teact/teact';
+import { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
@@ -34,13 +34,10 @@ export enum DropAreaState {
   QuickFile = 'quick_file',
 }
 
-const DROP_LEAVE_TIMEOUT_MS = 150;
-
 const DropArea = ({
   isOpen, withQuick, editingMessage, onHide, onFileSelect,
 }: OwnProps) => {
   const { showNotification, updateAttachmentSettings } = getActions();
-  const hideTimeoutRef = useRef<number>();
   const prevWithQuick = usePreviousDeprecated(withQuick);
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen);
   const lang = useLang();
@@ -98,29 +95,6 @@ const DropArea = ({
     return canReplace;
   }
 
-  const handleDragLeave = useLastCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-
-    const { target: fromTarget, relatedTarget: toTarget } = e;
-
-    // Esc button pressed during drag event
-    if (
-      (fromTarget as HTMLDivElement).matches('.DropTarget, .DropArea') && (
-        !toTarget || !(toTarget as HTMLDivElement).matches('.DropTarget, .DropArea')
-      )
-    ) {
-      hideTimeoutRef.current = window.setTimeout(() => {
-        onHide();
-      }, DROP_LEAVE_TIMEOUT_MS);
-    }
-  });
-
-  const handleDragOver = () => {
-    if (hideTimeoutRef.current) {
-      window.clearTimeout(hideTimeoutRef.current);
-    }
-  };
-
   if (!shouldRender) {
     return undefined;
   }
@@ -134,13 +108,7 @@ const DropArea = ({
 
   return (
     <Portal containerSelector="#middle-column-portals">
-      <div
-        className={className}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onDrop={onHide}
-        onClick={onHide}
-      >
+      <div className={className} onClick={onHide}>
         <DropTarget onFileSelect={handleFilesDrop} isGeneric={!shouldRenderQuick} />
         {shouldRenderQuick && <DropTarget onFileSelect={handleQuickFilesDrop} isQuick />}
       </div>

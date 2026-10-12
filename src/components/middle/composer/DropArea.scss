@@ -1,4 +1,6 @@
 .DropArea {
+  pointer-events: none;
+
   position: absolute;
   z-index: var(--z-drop-area);
   top: 0;
@@ -9,7 +11,7 @@
   flex-direction: column;
 
   height: 100vh;
-  padding: calc(80px + var(--call-header-height, 0rem)) 20px 20px;
+  padding: calc(80px + var(--call-header-height, 0rem) + var(--middle-header-player-height, 0px)) 20px 20px;
 
   #Main.right-column-open & {
     max-width: calc(100% - var(--right-column-width));

@@ -181,6 +181,7 @@ function isVideo(item: DataTransferItem) {
 
 const LAYER_ANIMATION_DURATION_MS = 450 + ANIMATION_END_DELAY;
 const KEYBOARD_SETTLE_DURATION = 400;
+const DROP_AREA_HIDE_TIMEOUT_MS = 150;
 
 function MiddleColumn({
   leftColumnRef,
@@ -307,6 +308,7 @@ function MiddleColumn({
   );
 
   const middleColumnRef = useRef<HTMLDivElement>();
+  const dropAreaHideTimeoutRef = useRef<number>();
   const isViewportAnimatingRef = useRef(false);
   const getIsKeyboardAnimating = useLastCallback(() => isViewportAnimatingRef.current);
 
@@ -439,6 +441,8 @@ function MiddleColumn({
   }), resetLeftColumnWidth, leftColumnWidth, '--left-column-width');
 
   const handleDragEnter = useLastCallback((e: React.DragEvent<HTMLDivElement>) => {
+    window.clearTimeout(dropAreaHideTimeoutRef.current);
+
     if (isRichInputExpanded) {
       setDropAreaState(DropAreaState.None);
       return;
@@ -458,6 +462,18 @@ function MiddleColumn({
 
   const handleHideDropArea = useLastCallback(() => {
     setDropAreaState(DropAreaState.None);
+  });
+
+  const handleDragLeave = useLastCallback((e: React.DragEvent<HTMLDivElement>) => {
+    const { relatedTarget } = e;
+    if (relatedTarget instanceof Node && middleColumnRef.current!.contains(relatedTarget)) return;
+
+    window.clearTimeout(dropAreaHideTimeoutRef.current);
+    dropAreaHideTimeoutRef.current = window.setTimeout(handleHideDropArea, DROP_AREA_HIDE_TIMEOUT_MS);
+  });
+
+  const handleDragOver = useLastCallback(() => {
+    window.clearTimeout(dropAreaHideTimeoutRef.current);
   });
 
   const handleOpenUnpinModal = useLastCallback(() => {
@@ -562,6 +578,9 @@ function MiddleColumn({
       id="MiddleColumn"
       className={className}
       onClick={(isTablet && isLeftColumnShown) ? handleTabletFocus : undefined}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleHideDropArea}
     >
       {isDesktop && (
         <div
