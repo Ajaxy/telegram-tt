@@ -1,5 +1,4 @@
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { compact } from '../../../util/iteratees';
 
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -25,7 +24,10 @@ export default function useStickyDates() {
     }
 
     runDebounced(() => {
-      const stuckElements = compact(STICKY_SELECTORS.map((selector) => findStuckElement(container, selector)));
+      // A hidden list has no layout, so every element would match
+      const stuckElements = container.offsetParent
+        ? STICKY_SELECTORS.flatMap((selector) => findStuckElements(container, selector))
+        : [];
 
       requestMutation(() => {
         container.querySelectorAll('.stuck').forEach((el) => {
@@ -47,14 +49,14 @@ export default function useStickyDates() {
   };
 }
 
-function findStuckElement(container: HTMLElement, selector: string) {
+function findStuckElements(container: HTMLElement, selector: string) {
   const allElements = container.querySelectorAll<HTMLDivElement>(selector);
-  const containerTop = container.scrollTop;
+  const containerTop = container.getBoundingClientRect().top;
 
-  return Array.from(allElements).find((el) => {
-    const { offsetTop, offsetHeight } = el;
-    const top = offsetTop - containerTop;
+  return Array.from(allElements).filter((el) => {
+    const { top: elementTop, height } = el.getBoundingClientRect();
+    const top = elementTop - containerTop;
     const stickyTop = parseFloat(getComputedStyle(el).top) || 0;
-    return -offsetHeight <= top && top <= stickyTop;
+    return -height <= top && top <= stickyTop;
   });
 }

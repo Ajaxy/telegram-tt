@@ -257,8 +257,15 @@ const ActionMessageText = ({
 
         const topicLinkContent = (
           <>
-            {iconEmojiId ? <CustomEmoji documentId={iconEmojiId} isSelectable />
-              : <TopicDefaultIcon topicId={topicId} title={title} iconColor={iconColor} />}
+            {iconEmojiId ? <CustomEmoji documentId={iconEmojiId} className={styles.topicIcon} isSelectable />
+              : (
+                <TopicDefaultIcon
+                  className={styles.topicIcon}
+                  topicId={topicId}
+                  title={title}
+                  iconColor={iconColor}
+                />
+              )}
             {NBSP}
             {renderText(title)}
           </>
@@ -277,9 +284,10 @@ const ActionMessageText = ({
         const topicLinkContent = (
           <>
             {iconEmojiId && iconEmojiId !== DEFAULT_TOPIC_ICON_ID
-              ? <CustomEmoji documentId={iconEmojiId} isSelectable />
+              ? <CustomEmoji documentId={iconEmojiId} className={styles.topicIcon} isSelectable />
               : (
                 <TopicDefaultIcon
+                  className={styles.topicIcon}
                   topicId={topicId}
                   title={title || currentTopic?.title || lang('ActionTopicPlaceholder')}
                   iconColor={currentTopic?.iconColor}
@@ -341,7 +349,7 @@ const ActionMessageText = ({
             {
               from: senderLink,
               link: topicPlaceholderLink,
-              emoji: <CustomEmoji documentId={iconEmojiId} loopLimit={2} />,
+              emoji: <CustomEmoji documentId={iconEmojiId} className={styles.topicIcon} loopLimit={2} />,
             },
             { withNodes: true },
           );

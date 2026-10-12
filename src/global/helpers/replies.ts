@@ -15,6 +15,10 @@ export function getMessageForumTopicId(message: ApiMessage): number {
   return replyToTopId || replyToMsgId || GENERAL_TOPIC_ID;
 }
 
+export function isMessageInForumTopic(message: ApiMessage) {
+  return message.content.action?.type === 'topicCreate' || Boolean(getMessageReplyInfo(message)?.isForumTopic);
+}
+
 export function getMessageReplyInfo(message: ApiMessage): ApiMessageReplyInfo | undefined {
   const { replyInfo } = message;
   if (!replyInfo || replyInfo.type !== 'message') return undefined;

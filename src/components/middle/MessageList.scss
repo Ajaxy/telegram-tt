@@ -19,7 +19,8 @@
   --message-list-fade-floor: rgba(0, 0, 0, 0.24);
   --message-list-top-fade-ramp: 1.5rem;
   --message-list-bottom-fade: var(--message-list-min-reserve);
-  --sticky-topic-top: calc(2.875rem + var(--message-list-top-inset));
+  --sticky-date-height: calc(1.25 * (var(--message-text-size, 1rem) - 0.0625rem) + 0.375rem);
+  --sticky-topic-top: calc(1.3125rem + var(--sticky-date-height) + var(--message-list-top-inset));
 
   container-type: size;
   overflow-x: hidden;
@@ -35,6 +36,11 @@
     --message-list-mask-panes-height var(--middle-header-panes-transition, 0s),
     --message-list-mask-player-height var(--mask-glide-transition);
   /* stylelint-enable plugin/no-low-performance-animation-properties */
+
+  body.is-ios &,
+  body.is-macos & {
+    --sticky-date-height: calc(var(--message-text-size, 1rem) + 0.46875rem);
+  }
 
   body.no-page-transitions & {
     transition: none !important;
@@ -376,19 +382,19 @@
   }
 
   .topic-group {
+    display: flow-root;
     padding-top: 0.25rem;
     background:
       repeating-linear-gradient(to right, var(--action-message-bg) 0 0.25rem, transparent 0.25rem 0.5rem)
       0 0.9375rem / 100% 0.125rem no-repeat;
-    view-timeline: --topic-group block;
-    view-timeline-inset: calc(var(--sticky-topic-top) + 0.5rem) auto;
   }
 
   .sticky-topic {
     pointer-events: none;
     user-select: none;
 
-    z-index: calc(var(--z-sticky-date) - 1);
+    z-index: calc(var(--z-sticky-date) + 1);
+    transform-origin: top;
 
     display: flex;
     justify-content: center;
@@ -482,13 +488,68 @@
   &.scrolled:not(.is-animating) .sticky-topic {
     position: sticky;
     top: var(--sticky-topic-top);
+  }
 
-    animation-name: sticky-topic-collapse;
-    animation-duration: auto;
-    animation-timing-function: linear;
-    animation-fill-mode: forwards;
-    animation-timeline: --topic-group;
-    animation-range: exit calc(100% - 1.5rem) exit 100%;
+  @supports (animation-timeline: view()) {
+    .topic-group {
+      --topic-separator-height: 2rem; // The pill with its bottom margin
+      --topic-next-gap: 0rem;
+      --topic-collapse-distance: 1.5625rem; // The pill plus its gap to the date, minus the next group padding
+
+      view-timeline: --topic-group block;
+      view-timeline-inset: var(--sticky-topic-top) auto;
+    }
+
+    .topic-group-before-date {
+      --topic-next-gap: calc(var(--sticky-date-height) + 2rem); // The date with its margins
+
+      @media (max-width: 600px) {
+        --topic-next-gap: calc(var(--sticky-date-height) + 1.25rem);
+      }
+    }
+
+    // The next group continues the topic, so its pill replaces this one in place
+    .topic-group-before-continuation {
+      --topic-collapse-distance: 0rem;
+    }
+
+    .topic-group-continuation {
+      --topic-separator-height: 0rem;
+
+      padding-top: 0;
+      background: none;
+
+      .sticky-topic {
+        height: 0;
+        margin-bottom: 0;
+      }
+
+      .topic-pill {
+        visibility: hidden;
+      }
+    }
+
+    // Hold the pill in place while the group bottom pushes it, and collapse it as the next pill approaches
+    &.scrolled:not(.is-animating) .sticky-topic {
+      animation-name: sticky-topic-hold, sticky-topic-collapse;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+      animation-timeline: --topic-group;
+      animation-range-start:
+        exit-crossing calc(100% - var(--topic-separator-height)),
+        exit-crossing calc(100% + var(--topic-next-gap) - var(--topic-collapse-distance));
+      animation-range-end: exit-crossing calc(100% + var(--topic-next-gap));
+      animation-composition: replace, add;
+    }
+
+    &.scrolled:not(.is-animating) .topic-group-continuation .topic-pill {
+      animation-name: sticky-topic-reveal;
+      animation-duration: auto;
+      animation-fill-mode: forwards;
+      animation-timeline: --topic-group;
+      animation-range: exit-crossing 0% exit-crossing 0%;
+    }
   }
 
   &.is-animating .message-select-control {
@@ -594,9 +655,21 @@
   to { transform: translateY(0); }
 }
 
+@keyframes sticky-topic-hold {
+  to {
+    transform: translateY(calc(var(--topic-separator-height) + var(--topic-next-gap)));
+  }
+}
+
 @keyframes sticky-topic-collapse {
   to {
-    transform: scale(0.5);
+    transform: scale(0);
     filter: opacity(0);
+  }
+}
+
+@keyframes sticky-topic-reveal {
+  to {
+    visibility: visible;
   }
 }

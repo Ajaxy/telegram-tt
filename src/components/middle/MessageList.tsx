@@ -159,6 +159,7 @@ type StateProps = {
   isEmptyThread?: boolean;
   isForum?: boolean;
   withTopicSeparators?: boolean;
+  isBotForum?: boolean;
   currentUserId: string;
   isAccountFrozen?: boolean;
   areAdsEnabled?: boolean;
@@ -233,6 +234,7 @@ const MessageList = ({
   isChatLoaded,
   isForum,
   withTopicSeparators,
+  isBotForum,
   isChannelChat,
   isGroupChat,
   isChannelWithAvatars,
@@ -1401,6 +1403,7 @@ const MessageList = ({
         canPost={canPost}
         canManageBotForumTopics={canManageBotForumTopics}
         withTopicSeparators={withTopicSeparators}
+        isBotForum={isBotForum}
         shouldScrollToBottom={shouldScrollToBottom}
         onScrollDownToggle={onScrollDownToggle}
         onContentResize={handleContentResize}
@@ -1530,7 +1533,8 @@ export default memo(withGlobal<OwnProps>(
       noMessageSendingAnimation: !selectPerformanceSettingsValue(global, 'messageSendingAnimations'),
       isServiceNotificationsChat: chatId === SERVICE_NOTIFICATIONS_USER_ID,
       isForum: chat.isForum,
-      withTopicSeparators: chat.isForum && !chat.isBotForum && threadId === MAIN_THREAD_ID,
+      withTopicSeparators: chat.isForum && threadId === MAIN_THREAD_ID,
+      isBotForum: chat.isBotForum,
       isEmptyThread,
       currentUserId,
       isChatProtected: selectIsChatProtected(global, chatId),

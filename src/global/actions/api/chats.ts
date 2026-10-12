@@ -2864,27 +2864,39 @@ addActionHandler('loadTopics', async (global, actions, payload): Promise<void> =
   setGlobal(global);
 });
 
+const topicLoads = new Map<string, Promise<boolean>>();
+
 addActionHandler('loadTopicById', async (global, actions, payload): Promise<void> => {
   const { chatId, topicId } = payload;
 
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
-  const result = await callApi('fetchTopicById', { chat, topicId });
-
-  if (!result) {
-    if ('tabId' in payload && payload.shouldCloseChatOnError) {
-      const { tabId = getCurrentTabId() } = payload;
-      actions.openChat({ id: undefined, tabId });
-    }
-    return;
+  const loadKey = `${chatId}-${topicId}`;
+  let load = topicLoads.get(loadKey);
+  if (!load) {
+    load = fetchAndStoreTopic(chat, topicId).finally(() => topicLoads.delete(loadKey));
+    topicLoads.set(loadKey, load);
   }
 
-  global = getGlobal();
-  global = addMessages(global, result.messages);
-  global = updateTopicWithState(global, chatId, result.topic);
-  setGlobal(global);
+  const isLoaded = await load;
+  if (!isLoaded && 'tabId' in payload && payload.shouldCloseChatOnError) {
+    const { tabId = getCurrentTabId() } = payload;
+    actions.openChat({ id: undefined, tabId });
+  }
 });
+
+async function fetchAndStoreTopic(chat: ApiChat, topicId: number) {
+  const result = await callApi('fetchTopicById', { chat, topicId });
+  if (!result) return false;
+
+  let global = getGlobal();
+  global = addMessages(global, result.messages);
+  global = updateTopicWithState(global, chat.id, result.topic);
+  setGlobal(global);
+
+  return true;
+}
 
 addActionHandler('toggleForum', async (global, actions, payload): Promise<void> => {
   const { chatId, isEnabled, tabId = getCurrentTabId() } = payload;

@@ -22,7 +22,7 @@ import {
   isServiceNotificationMessage,
 } from '../../global/helpers';
 import { getPeerTitle } from '../../global/helpers/peers';
-import { getMessageForumTopicId } from '../../global/helpers/replies';
+import { getMessageForumTopicId, isMessageInForumTopic } from '../../global/helpers/replies';
 import { selectChatMessage, selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatHumanDate, formatScheduledDateTime } from '../../util/dates/oldDateFormat';
@@ -71,6 +71,7 @@ interface OwnProps {
   isChatMonoforum?: boolean;
   canManageBotForumTopics?: boolean;
   withTopicSeparators?: boolean;
+  isBotForum?: boolean;
   isEmptyThread?: boolean;
   isComments?: boolean;
   noAvatars: boolean;
@@ -105,8 +106,15 @@ type TopicSection = {
   target: TeactNode[];
   topicId: number;
   key: string;
+  isContinuation: boolean;
+  isBeforeDate?: boolean;
+  isBeforeContinuation?: boolean;
   children: TeactNode[];
 };
+
+function getSectionTopicId(message: ApiMessage, currentTopicId: number | undefined, isBotForum?: boolean) {
+  return isBotForum && !isMessageInForumTopic(message) ? currentTopicId : getMessageForumTopicId(message);
+}
 
 function getSenderGroupFirstMessage(senderGroup: (ApiMessage | IAlbum | IDocumentGroup)[]) {
   const firstItem = senderGroup[0];
@@ -147,6 +155,7 @@ const MessageListContent = ({
   isChatMonoforum,
   canManageBotForumTopics,
   withTopicSeparators,
+  isBotForum,
   noAvatars,
   containerRef,
   anchorIdRef,
@@ -586,9 +595,20 @@ const MessageListContent = ({
     );
   }
 
-  function renderTopicGroup({ topicId, key, children }: TopicSection) {
+  function renderTopicGroup({
+    topicId, key, isContinuation, isBeforeDate, isBeforeContinuation, children,
+  }: TopicSection) {
     return (
-      <div className="topic-group" key={key} teactFastList>
+      <div
+        className={buildClassName(
+          'topic-group',
+          isContinuation && 'topic-group-continuation',
+          isBeforeDate && 'topic-group-before-date',
+          isBeforeContinuation && 'topic-group-before-continuation',
+        )}
+        key={key}
+        teactFastList
+      >
         <TopicSeparator key="topic-separator" chatId={chatId} topicId={topicId} />
         {children}
       </div>
@@ -614,6 +634,7 @@ const MessageListContent = ({
   }
 
   let isRenderingLiveTail = false;
+  let currentTopicId: number | undefined;
   const dateGroups: TeactNode[] = [];
   const liveTailDateGroups: TeactNode[] = [];
 
@@ -654,21 +675,46 @@ const MessageListContent = ({
         return;
       }
 
-      const topicId = getMessageForumTopicId(getSenderGroupFirstMessage(dateGroup.senderGroups[senderGroupIndex]));
+      const prevTopicId = currentTopicId;
+      const topicId = getSectionTopicId(
+        getSenderGroupFirstMessage(dateGroup.senderGroups[senderGroupIndex]), currentTopicId, isBotForum,
+      );
+      currentTopicId = topicId;
+      if (topicId === undefined) {
+        target.push(...senderGroupElements);
+        return;
+      }
+
       const lastSection = topicSections[topicSections.length - 1];
       if (lastSection && lastSection.target === target && lastSection.topicId === topicId) {
         lastSection.children.push(...senderGroupElements);
       } else {
         const sectionIndex = sectionCountByTopicId.get(topicId) || 0;
         sectionCountByTopicId.set(topicId, sectionIndex + 1);
+        const isContinuation = topicId === prevTopicId;
+        if (lastSection) {
+          lastSection.isBeforeContinuation = isContinuation;
+        }
+
         topicSections.push({
           target,
           topicId,
           key: `topic-${topicId}-${sectionIndex}`,
+          isContinuation,
           children: [...senderGroupElements],
         });
       }
     });
+
+    const lastSection = topicSections[topicSections.length - 1];
+    const nextDateGroup = dateGroupsArray[dateGroupIndex + 1];
+    if (lastSection && nextDateGroup) {
+      const nextTopicId = getSectionTopicId(
+        getSenderGroupFirstMessage(nextDateGroup.senderGroups[0]), currentTopicId, isBotForum,
+      );
+      lastSection.isBeforeDate = true;
+      lastSection.isBeforeContinuation = nextTopicId === lastSection.topicId;
+    }
 
     topicSections.forEach((section) => {
       section.target.push(renderTopicGroup(section));
